@@ -1,5 +1,5 @@
 """ART-1 Claire's animation set (hand-keyed as targets, solved by posekit). Times match the kit: the "tm_" tables in scripts/match/kmoves_care.gd and
-content/archetypes/rimewright.json. Personality: sincere, shy, gentle. She is a figure skater: she never walks, she glides; long quiet edges, a soft knee, arms carried, the head a little down
+content/archetypes/rimewright.json. Personality: elegant, playful, a cold edge. She is a figure skater: she never walks, she glides; long quiet edges, a soft knee, arms carried, the head a little down
 and glancing up. Every flourish is grace, never display: modest lines, the legs low, nothing aimed at the body. The spear is carried upright like a staff, both hands on it for the big pushes.
 Run: blender -b --python tools/art1/claire_clips.py -- <claire.blend> <out.glb> [clip,clip]"""
 import sys, os, math
@@ -52,43 +52,133 @@ def C(name, dur, keys, loop=False, base=READY):
 END = dict(READY)
 
 
-def idle(u):
-    """A quiet edge: the weight sways a hair between the blades, one glance up and down again, a blink."""
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
-    p = dict(READY)
-    p["pel"] = (0.012 + 0.012 * a, 0.004 * b, -0.024 - 0.006 * math.sin(u * 4 * math.pi))
-    p["prt"] = (0.02, 0.1 + 0.03 * a, -0.02 + 0.02 * a)
-    p["tor"] = (0.03 + 0.012 * b, -0.06 - 0.02 * a, 0.03 - 0.015 * a)
-    gl = math.exp(-((u - 0.56) / 0.1) ** 2)
-    p["hed"] = (0.02 - 0.05 * gl, 0.06 + 0.12 * gl, 0.0)
-    g = READY["G"]
-    p["G"] = (g[0], g[1] + 0.004 * b, g[2] + 0.005 * a)
-    p["LP"] = (-0.29 + 0.006 * a, 0.10 + 0.006 * b, 0.99 + 0.006 * a)
-    p["lid"] = 1.0 if 0.30 < u < 0.33 or 0.74 < u < 0.765 else 0.04
-    p["smile"] = 0.5 + 0.2 * gl
-    p["brow"] = -0.45 - 0.2 * gl
-    p["skirtz"] = 0.1 * a
+# ---- the idle and the stance (docs/art/IDLE_AUDIT.md, Neve). Both are 6 s loops on one pair of FEET, so the 0.5 s
+# hand-off never slides a blade. Every curve is whole cycles of the loop or a beat that starts and ends inside it, so
+# the seam closes. The pelvis leads; the torso, head and hands trail it by LAG seconds.
+STAND_T = 6.0
+LAG = {"tor": 0.12, "hed": 0.24, "hand": 0.36}      # s behind the pelvis
+SWAY_T = 3.0                                        # s per edge-sway: two a loop
+BREATH = 0.025                                      # x_breath's scale on a full breath (IDLE_AUDIT: 1 to 3 %)
+BREATHS = 2                                         # a loop, 3 s each
+BREATH_C = (0.0, 0.0, 1.30)                         # m, the rib cage's centre (hips at 0.86, shoulders at 1.34)
+BREATH_R = (0.19, 0.15, 0.16)                       # m, its half sizes: the skin outside moves with hips alone
+BREATH_CORE = 0.5                                   # of the half sizes: fully on x_breath inside this
+# her rest: the weight on the left blade with a soft knee, the right toe pick tucked behind on the ice, the spear
+# laid across her shoulders behind the hood with the right hand draped over it at the shoulder and the left resting on
+# the shaft; the free hip dropped, the torso and head countering it
+FEET = {"FL": (-0.05, 0.02, A_Z), "FLy": 0.22, "FLp": 0.0, "FR": (0.04, -0.17, A_Z + 0.03), "FRy": -0.55, "FRp": -0.35}
+REST = dict(READY, **FEET, pel=(-0.035, 0.0, -0.045), prt=(0.01, 0.0, 0.05), tor=(0.02, 0.0, -0.06),
+            hed=(0.0, 0.0, 0.02), G=(0.21, -0.06, 1.44), BE=spr(-70, 12, (0.45, -0.3, -0.84)),
+            LP=(-0.26, -0.21, 1.37), LH=(0.4, 0.0, 0.0), fing=0.3, brow=-0.1, lid=0.12, smile=0.55, smirk=0.0)
+# the ready: the same feet, the spear lowered across her to a low diagonal, the right hand forward, the left on the
+# shaft at her hip, a heavy lid and a smirk at one corner
+GUARD = dict(REST, G=(0.15, 0.22, 1.0), BE=spr(-48, 21, (0.55, -0.6, -0.55)), Lw=1.0, hed=(0.02, -0.06, 0.02),
+             brow=0.2, lid=0.25, smile=0.5, smirk=0.7)
+TWIRL_G = (0.12, 0.34, 1.20)                        # the right hand at her chest for the twirl
+TWIRL_AXIS = Vector((0.3, -0.88, -0.37)).normalized()   # fist toward elbow: the spear spins round the forearm
+
+
+def sm01(x):
+    """0 below 0, 1 above 1, a smoothstep between."""
+    x = min(1.0, max(0.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def hill(t, a, b, k=1.0):
+    """0 outside a..b seconds, a smooth hill inside; k > 1 rises slowly and falls fast (a tap)."""
+    return math.sin(math.pi * ((t - a) / (b - a)) ** k) ** 2 if a < t < b else 0.0
+
+
+def shift(ph):
+    """One weight shift a cycle, 0..1: over in 35 % with a hair of overshoot, a hold, back, a hold."""
+    ph %= 1.0
+    if ph < 0.5:
+        return sm01(ph / 0.35) + 0.08 * hill(ph, 0.3, 0.5)
+    return 1 - sm01((ph - 0.5) / 0.35) - 0.08 * hill(ph, 0.8, 1.0)
+
+
+def breath(u, lag=0.0):
+    """BREATHS a loop, 0..1: a 40 % inhale and a longer exhale, flat at both ends of each."""
+    ph = (u - lag / STAND_T) * BREATHS % 1.0
+    return sm01(ph / 0.4) if ph < 0.4 else 1 - sm01((ph - 0.4) / 0.6)
+
+
+def turned(p, th, piv):
+    """The pose p turned th rad (+ left) about the vertical through piv (x, y): every world target and the blade."""
+    c, s = math.cos(th), math.sin(th)
+
+    def rz(v):
+        x, y = v[0] - piv[0], v[1] - piv[1]
+        return (piv[0] + x * c - y * s, piv[1] + x * s + y * c, v[2])
+    q = dict(p, prt=(p["prt"][0], p["prt"][1] + th, p["prt"][2]))
+    for k in ("pel", "G", "LP", "FL", "FR"):
+        q[k] = rz(p[k]) if k != "pel" else rz((p[k][0], p[k][1], 0.0))[:2] + (p[k][2],)
+    q["FLy"], q["FRy"] = p["FLy"] + th, p["FRy"] + th
+    q["BE"] = tuple((d[0] * c - d[1] * s, d[0] * s + d[1] * c, d[2]) for d in p["BE"])
+    return q
+
+
+def life(p, u, amp=1.0):
+    """The edge-sway with its overlap, the breath and a blink, shared by both clips; amp scales the sway."""
+    t = u * STAND_T
+    w = {k: amp * (2 * shift((t - LAG.get(k, 0.0)) / SWAY_T) - 1) for k in ("pel", "tor", "hed", "hand")}
+    b, bt, bh = breath(u), breath(u, LAG["tor"]), breath(u, LAG["hed"])
+    p["pel"] = (p["pel"][0] + 0.02 * w["pel"], p["pel"][1] + 0.005 * w["pel"], p["pel"][2] - 0.004 * abs(w["pel"]))
+    p["prt"] = (p["prt"][0], p["prt"][1] + 0.03 * w["pel"], p["prt"][2] + 0.02 * w["pel"])
+    p["tor"] = (p["tor"][0] - 0.012 * bt, p["tor"][1] - 0.04 * w["tor"], p["tor"][2] - 0.05 * w["tor"])
+    p["hed"] = (p["hed"][0] + 0.01 * bh, p["hed"][1] + 0.03 * w["hed"], p["hed"][2] + 0.03 * w["hed"])
+    for k in ("G", "LP"):
+        v = p[k]
+        p[k] = (v[0] + 0.012 * w["hand"], v[1] + 0.004 * w["hand"], v[2] + 0.004 * bt)
+    p["skirtz"] = 0.15 * w["hand"]
+    p["breath"] = b
+    p["lid"] = max(p["lid"], hill(t, 1.45, 1.75), hill(t, 5.0, 5.25))
     return p
 
 
+def idle(u):
+    """A skater's rest on the left blade, the spear across her shoulders, swaying on the edge. Once a loop the right
+    toe pick taps the ice twice while she glances down at it, then she turns one full spin on the blade back to rest."""
+    t = u * STAND_T
+    spin = hill(t, 3.55, 5.15)                                  # gathered over the blade for the spin
+    p = life(dict(REST), u, 1.0 - spin)
+    p["hed"] = (p["hed"][0], p["hed"][1] + 0.08 * math.sin(u * 2 * math.pi), p["hed"][2])
+    # the taps: the tucked blade lifts and its pick comes down twice; the pelvis dips with each
+    tap = hill(t, 2.85, 3.1, 1.6) + hill(t, 3.15, 3.4, 1.6)
+    look = hill(t, 2.7, 3.7)
+    fr = p["FR"]
+    p["FR"] = (fr[0], fr[1], fr[2] + 0.05 * tap + 0.08 * spin)
+    p["FRp"] = p["FRp"] - 0.2 * tap
+    p["pel"] = (p["pel"][0] + (FEET["FL"][0] - p["pel"][0]) * spin, p["pel"][1] + (FEET["FL"][1] - p["pel"][1]) * spin,
+                p["pel"][2] - 0.01 * tap - 0.01 * spin)
+    p["hed"] = (p["hed"][0] + 0.22 * look, p["hed"][1] - 0.18 * look, p["hed"][2])
+    p["smile"] = p["smile"] + 0.25 * look
+    # the spin: one turn on the left blade, the right foot tucked to its ankle, a small overshoot on the stop
+    th = 2 * math.pi * sm01((t - 3.9) / 0.9) - 0.08 * hill(t, 4.75, 5.05) + 0.03 * hill(t, 5.05, 5.35)
+    p["FR"] = (fr[0] + (FEET["FL"][0] + 0.06 - fr[0]) * spin, fr[1] + (FEET["FL"][1] + 0.08 - fr[1]) * spin, p["FR"][2])
+    p["skirtz"] = p["skirtz"] + 0.5 * spin
+    return turned(p, th, FEET["FL"][:2])
+
+
 def stance(u):
-    """Item 52: poised on one skate, the free blade drawn softly behind with its toe to the ice, the spear upright, her left hand gathered shyly to the clasp."""
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
-    p = dict(READY)
-    p["pel"] = (0.03 + 0.005 * a, 0.0, -0.03)
-    p["prt"] = (0.03, -0.14, -0.03)
-    p["tor"] = (0.0 + 0.012 * a, 0.18, 0.05)
-    p["hed"] = (0.03 + 0.015 * b, 0.1, 0.05)
-    p["FR"], p["FL"] = (0.07, 0.05, A_Z), (-0.11, -0.2, A_Z + 0.035)
-    p["FRy"], p["FLy"] = -0.2, 0.55
-    p["FLp"] = -0.3
-    p["G"] = (0.30, 0.12 + 0.004 * a, 1.04 + 0.006 * b)
-    p["BE"] = spr(0, 86, (-0.4, -0.9, 0))
-    p["LP"] = (-0.04, 0.20, 1.27 + 0.006 * a)
-    p["LH"] = (-0.9, 0.0, 0.5)
-    p["fing"] = 0.45
-    p["lid"] = 1.0 if 0.52 < u < 0.55 else 0.06
-    p["smile"], p["brow"] = 0.65, -0.6
+    """The same feet, the spear at a low ready across her, a cool smirk. Once a loop it lifts to her chest, twirls one
+    full turn round her forearm while the free arm opens for balance, and lowers back to the ready."""
+    t = u * STAND_T
+    p = life(dict(GUARD), u)
+    lift = sm01((t - 1.2) / 0.5) * (1 - sm01((t - 2.9) / 0.6))
+    th = 2 * math.pi * sm01((t - 1.7) / 1.1)
+    p["Lw"] = 1 - sm01((t - 1.0) / 0.4) * (1 - sm01((t - 3.2) / 0.5))
+    p["G"] = lerp(p["G"], TWIRL_G, lift)
+    ready = Vector(GUARD["BE"][0])
+    flat = (ready - TWIRL_AXIS * ready.dot(TWIRL_AXIS)).normalized()
+    blade = Quaternion(TWIRL_AXIS, th) @ ready.lerp(flat, lift).normalized()
+    back = Vector(GUARD["BE"][1]).lerp(TWIRL_AXIS, lift).normalized()
+    p["BE"] = (tuple(blade), tuple(back))
+    p["LP"] = (-0.42, -0.08, 1.18)
+    p["LH"] = (0.0, 0.0, 0.3)
+    p["hed"] = (p["hed"][0] - 0.06 * lift, p["hed"][1] - 0.1 * lift, p["hed"][2])
+    p["pel"] = (p["pel"][0], p["pel"][1], p["pel"][2] - 0.012 * lift)
+    p["skirtz"] = p["skirtz"] + 0.2 * lift
     return p
 
 
@@ -166,27 +256,27 @@ def crouch_set():
 
 
 def clips():
-    out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
+    out = [FnClip("idle", STAND_T, idle), FnClip("stance", STAND_T, stance)]
     out += crouch_set()
-    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 1.0)):
+    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 0.34)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stroke * (0.8 if tag in "lr" else 1.0), lift)))
 
-    # LMB (tm_dart_*: 0.03 cock, 0.07 flick, 0.16): the spear's tip dips and flicks a dart off it; then the left hand's turn, a little wrist flick off the palm, like tossing snow
+    # LMB (tm_dart_*: the flick at 0, on the kit's throw, then the settle to 0.16): the spear's tip flicks a dart off it; then the left hand's turn, a little wrist flick off the palm, like tossing snow
     f0 = {"G": (0.2, 0.22, 1.13), "BE": spr(0, 38, (-0.2, -0.55, -0.8)), "tor": (0.04, -0.14, 0.03), "hed": (0.04, 0.14, 0.0), "brow": 0.1, "lid": 0.12}
     f1 = dict(f0, G=(0.17, 0.33, 1.15), BE=spr(0, 16, (-0.15, -0.5, -0.85)), tor=(0.08, 0.1, 0.0), hed=(0.0, -0.08, 0), smile=0.3)
-    out.append(C("dart_r", 0.16, [(0.0, END), (0.03, f0, "out"), (0.07, f1, "out"), (0.16, dict(f0, G=(0.21, 0.24, 1.1), BE=spr(1, 50, (-0.25, -0.75, -0.6))))]))
+    out.append(C("dart_r", 0.16, [(0.0, f1), (0.16, dict(f0, G=(0.21, 0.24, 1.1), BE=spr(1, 50, (-0.25, -0.75, -0.6))))]))
     l0 = {"LP": (-0.2, 0.14, 1.2), "LH": (0.8, 0, 0.0), "fing": 0.35, "tor": (0.04, 0.16, -0.03), "hed": (0.04, -0.12, 0.0), "brow": 0.05}
     l1 = dict(l0, LP=(-0.14, 0.42, 1.2), LH=(-0.55, 0, 0), fing=0.0, tor=(0.09, -0.14, 0), hed=(0.0, 0.1, 0.0))
-    out.append(C("dart_l", 0.16, [(0.0, END), (0.03, l0, "out"), (0.07, l1, "out"), (0.16, dict(l0, LP=(-0.22, 0.2, 1.1), LH=(0.3, 0, 0)))]))
-    # the large darts: both hands on the shaft, drawn back to the hip and swept forward, the whole body following through
+    out.append(C("dart_l", 0.16, [(0.0, l1), (0.16, dict(l0, LP=(-0.22, 0.2, 1.1), LH=(0.3, 0, 0)))]))
+    # the large darts (tm_dart_heavy: the sling at 0, 0.18): both hands on the shaft swept forward, the whole body following through
     h0 = {"G": (0.2, 0.2, 1.0), "BE": spr(10, 30, (-0.1, -0.6, -0.8)), "Lw": 1.0, "tor": (0.02, -0.34, 0.0), "prt": (0.06, -0.14, 0.0), "pel": (0, -0.03, -0.05), "brow": 0.2}
     h1 = dict(h0, G=(0.1, 0.48, 1.12), BE=spr(-1, 8, (0.1, -0.5, -0.85)), tor=(0.14, 0.24, 0), prt=(0.1, 0.1, 0), pel=(0, 0.06, -0.06), smile=0.2)
-    out.append(C("dart_heavy", 0.18, [(0.0, END), (0.04, h0, "out"), (0.08, h1, "out"), (0.18, dict(h1, G=(0.14, 0.38, 1.08), BE=spr(2, 22, (0.0, -0.55, -0.83))))]))
-    # LMB while skating (tm_beam): both hands level the spear straight ahead along the line, the head steady behind it
+    out.append(C("dart_heavy", 0.18, [(0.0, h1), (0.18, dict(h1, G=(0.14, 0.38, 1.08), BE=spr(2, 22, (0.0, -0.55, -0.83))))]))
+    # LMB while skating (tm_beam: the thrust at 0, 0.22): both hands level the spear straight ahead along the line, the head steady behind it
     b0 = {"G": (0.2, 0.2, 1.06), "BE": spr(1, 3, (-0.1, -0.5, -0.86)), "Lw": 1.0, "tor": (0.14, 0.0, 0.0), "hed": (-0.06, 0.0, 0), "brow": 0.3, "lid": 0.1}
     b1 = dict(b0, G=(0.19, 0.28, 1.07))
-    out.append(C("beam", 0.22, [(0.0, b0), (0.04, dict(b0, G=(0.2, 0.16, 1.06)), "out"), (0.08, b1, "out"), (0.14, dict(b1, G=(0.195, 0.25, 1.065))), (0.22, b0)]))
+    out.append(C("beam", 0.22, [(0.0, b1), (0.09, dict(b1, G=(0.195, 0.25, 1.065))), (0.22, b0)]))
 
     # RMB held (tm_spear_aim, 0.12): the spear drawn level between her hands at her chest, weight on the back blade, the head down and looking along it; a slow breath while it's held
     ai = dict(AIM_G, G=(0.055, 0.36, 1.13), tor=(0.03, 0.06, 0.0), prt=(-0.04, 0.04, 0), pel=(0, -0.035, -0.05), hed=(0.06, -0.02, 0), FR=(0.095, -0.08, A_Z), FL=(-0.08, 0.14, A_Z), FRy=-0.3, FLy=0.1, brow=0.15, lid=0.2, smile=0.25, skirt=-0.1)
@@ -195,14 +285,14 @@ def clips():
     lo = dict(ai, G=(0.055, 0.30, 1.1), pel=(0, -0.06, -0.075))
     pu = dict(AIM_G, G=(0.055, 0.62, 1.15), BE=spr(0, 1, (0.1, -0.5, -0.86)), prt=(0.26, 0.0, 0), tor=(0.16, 0.0, 0), hed=(-0.3, 0, 0), pel=(0, 0.14, -0.1), FR=(0.1, -0.3, A_Z), FL=(-0.08, 0.24, A_Z), FRy=-0.45, FLy=0.05, skirt=0.5, brow=0.2, lid=0.08, smile=0.3)
     out.append(C("spear", 0.55, [(0.0, ai), (0.05, lo, "out"), (0.1, pu, "out"), (0.28, dict(pu, pel=(0, 0.11, -0.09), G=(0.055, 0.57, 1.14), skirt=0.2)), (0.55, END)]))
-    # E (tm_wall: 0.1-0.2 the tell, 0.27 out, 0.42 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
+    # E (tm_wall: 0.08-0.14 the tell, 0.2 out with the eruption, 0.37 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
     wl0 = {"pel": (0, -0.02, -0.11), "prt": (0.12, 0.1, 0), "tor": (0.14, 0, 0), "hed": (0.02, 0, 0), "G": (0.24, 0.26, 1.18), "BE": spr(0, 86, (-0.3, -0.9, -0.2)), "LP": (-0.24, 0.0, 0.96), "LH": (0.3, 0, 0), "fing": 0.5, "brow": 0.2, "FR": (0.12, 0.1, A_Z), "FL": (-0.1, -0.06, A_Z), "skirt": -0.15}
     wl1 = dict(wl0, pel=(0, 0.09, -0.15), prt=(0.28, -0.05, 0), tor=(0.12, 0.05, 0), hed=(-0.28, 0, 0), G=(0.24, 0.4, 0.95), LP=(-0.2, 0.58, 1.02), LH=(-1.1, 0, 0), fing=0.0, FR=(0.12, 0.2, A_Z), FL=(-0.1, -0.22, A_Z), skirt=0.5, smile=0.3, lid=0.1)
-    out.append(C("wall", 0.7, [(0.0, END), (0.1, wl0), (0.2, dict(wl0, pel=(0, -0.03, -0.13))), (0.27, wl1, "out"), (0.42, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
-    # E again (tm_freeze: 0.07 knee up, 0.13 stamp, 0.42): the toe pick tapped into the ice, a small closing of the left hand
+    out.append(C("wall", 0.7, [(0.0, END), (0.08, wl0), (0.14, dict(wl0, pel=(0, -0.03, -0.13))), (0.2, wl1, "out"), (0.37, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
+    # E again (tm_freeze: the stamp at 0, on the freeze, 0.42): the toe pick tapped into the ice, a small closing of the left hand
     fz0 = {"pel": (0, 0, 0.0), "tor": (-0.03, 0.05, 0), "FL": (-0.08, 0.1, A_Z + 0.13), "FLp": 0.5, "LP": (-0.2, 0.2, 1.16), "LH": (-0.2, 0, 0), "fing": 0.3, "smile": 0.3}
     fz1 = dict(fz0, pel=(0, 0.03, -0.09), tor=(0.12, 0, 0), hed=(0.2, 0, 0), FL=(-0.09, 0.2, A_Z - 0.01), FLp=0.0, LP=(-0.2, 0.16, 0.98), fing=1.0, skirt=0.3)
-    out.append(C("freeze", 0.42, [(0.0, END), (0.07, fz0, "out"), (0.13, fz1, "out"), (0.42, END)]))
+    out.append(C("freeze", 0.42, [(0.0, fz1), (0.42, END)]))
 
     # Shift, the Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
     sg0 = {"pel": (0, -0.04, -0.12), "prt": (0.3, 0, 0), "tor": (0.16, -0.1, 0), "hed": (-0.26, 0, 0), "FR": (0.1, -0.26, A_Z), "FL": (-0.08, 0.14, A_Z), "FRy": -0.75, "FLy": 0.05, "LP": (-0.36, 0.0, 1.0), "LH": (0.3, 0, 0), "skirt": -0.3, "smile": 0.7, "lid": 0.1}
@@ -231,8 +321,8 @@ def clips():
     # passive (tm_shatter, 0.45): the spear's butt taps the ice once: a soft full stop
     sh0 = {"G": (0.27, 0.16, 1.12), "tor": (-0.03, 0, 0), "hed": (-0.04, 0.05, 0), "lid": 0.1, "smile": 0.4}
     out.append(C("shatter", 0.45, [(0.0, END), (0.06, sh0), (0.13, dict(sh0, G=(0.27, 0.16, 0.96), tor=(0.06, 0, 0), hed=(0.14, 0, 0)), "out"), (0.24, dict(sh0, G=(0.27, 0.16, 0.98), tor=(0.04, 0, 0), hed=(0.1, 0, 0))), (0.45, END)]))
-    # the detonation (tm_clench, 0.34): the left hand closes, a small gesture to her chest
-    out.append(C("clench", 0.34, [(0.0, END), (0.05, {"LP": (-0.2, 0.2, 1.12), "LH": (-0.2, 0, 0), "fing": 0.1}), (0.1, {"LP": (-0.14, 0.2, 1.16), "LH": (-0.3, 0, 0.2), "fing": 1.0, "tor": (0.05, 0, 0), "brow": 0.25}, "out"), (0.34, END)]))
+    # the detonation (tm_clench: closed at 0, on the burst, 0.34): the left hand closes, a small gesture to her chest
+    out.append(C("clench", 0.34, [(0.0, {"LP": (-0.14, 0.2, 1.16), "LH": (-0.3, 0, 0.2), "fing": 1.0, "tor": (0.05, 0, 0), "brow": 0.25}), (0.34, END)]))
 
     # X, Rimelock (tm_rime, 0.2): she folds in, both hands to the spear before her heart, eyes closing: a statue at prayer, not a crouch
     still = dict(PRAY, pel=(0.0, 0.0, -0.04), prt=(0.04, 0, 0), tor=(0.05, 0, 0), hed=(0.26, 0, 0), LP=(-0.1, 0.2, 1.2), fing=1.0, lid=0.95, brow=-0.35, smile=0.3,
@@ -276,8 +366,21 @@ def clips():
           "FL": (-0.16, 0.3, A_Z - 0.05), "FR": (0.03, 0.34, A_Z - 0.05), "FLy": 1.2, "FRy": 1.0, "FLp": -0.3, "FRp": -0.3, "brow": -0.9, "lid": 0.6, "smile": -0.3, "skirt": 0.0}
     d2 = dict(dn, tor=(0.27, 0.05, 0.12), pel=(-0.03, -0.1, -0.615), hed=(0.3, 0, 0.1))
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.1, 0.05, 0.05), hed=(-0.1, 0, 0), lid=0.3, brow=-0.5, G=(0.33, 0.3, 0.72))),
-                                 (0.95, {"pel": (0, -0.05, -0.34), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.26, 0, 0), "FL": (-0.1, -0.18, A_Z), "FR": (0.12, 0.26, A_Z), "FLy": 0.3, "FRy": 0, "FLp": 0.0, "FRp": 0.0, "G": (0.3, 0.36, 0.86), "LP": (-0.3, 0.2, 0.84), "lid": 0.25, "smile": 0.2}), (1.6, END)]))
+    # revive: down on one knee beside a friend, the spear planted upright as a brace, her free hand pressing their chest in two soft pushes, her head bowed close
+    kn = {"pel": (0.0, 0.06, -0.36), "prt": (0.22, 0.08, 0.0), "tor": (0.26, 0.04, 0.04), "hed": (0.2, 0.0, 0.0), "G": (0.3, 0.2, 0.72), "BE": spr(2, 84, (-0.35, -0.9, -0.1)), "LP": (-0.2, 0.3, 0.66), "LH": (-0.9, 0, 0.0), "fing": 0.4,
+          "FL": (-0.12, 0.2, A_Z), "FR": (0.1, -0.2, A_Z + 0.02), "FLy": 0.3, "FRy": -0.3, "FRp": 1.1, "brow": -0.3, "lid": 0.1, "smile": 0.1}
+    pr = dict(kn, pel=(0.0, 0.07, -0.39), tor=(0.32, 0.04, 0.04), hed=(0.26, 0.0, 0.0), LP=(-0.2, 0.3, 0.57))
+    out.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (one cycle = Life.R stomp_cycle 0.7 s, the foot lands at 0.7 of it): not a tantrum; the spear is planted and leaned on, the skate comes up behind her, hangs, and comes down firmly through the ice
+    sp0 = dict(READY, pel=(0.0, 0.0, -0.06), prt=(0.06, 0.1, -0.02), tor=(0.06, -0.06, 0.03), hed=(0.05, 0.06, 0.0), G=(0.3, 0.2, 0.96), LP=(-0.3, 0.12, 0.96), brow=-0.7, smile=0.0, lid=0.04)
+    sp1 = dict(sp0, pel=(-0.02, -0.01, -0.07), tor=(-0.06, -0.06, 0.03), FR=(0.095, 0.08, A_Z + 0.1), FRp=-0.4, G=(0.32, 0.18, 1.04), LP=(-0.32, 0.12, 1.04))
+    sp2 = dict(sp1, pel=(-0.02, 0.0, -0.02), FR=(0.1, 0.18, A_Z + 0.22), FRp=-0.5, hed=(-0.08, 0.06, 0.0), G=(0.32, 0.16, 1.1), LP=(-0.32, 0.12, 1.1))
+    sp3 = dict(sp0, pel=(0.0, 0.03, -0.12), prt=(0.22, 0.1, -0.02), tor=(0.22, -0.06, 0.03), hed=(0.2, 0.06, 0.0), FR=(0.1, 0.12, A_Z), FRp=0.0, G=(0.3, 0.24, 0.84), LP=(-0.3, 0.2, 0.84), brow=-0.9, skirt=0.2)
+    out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(0.0, 0.02, -0.08), tor=(0.15, -0.06, 0.03)), "out"), (0.7, sp0)], loop=True))
+    # drink (Hunter.DRINK_TIME 1.1 s): the free hand lifts the flask while the spear stays in the other; a small tilt of the head, eyes closed, one slow swallow, a quiet breath out
+    dr1 = dict(END, LP=(-0.14, 0.16, 1.24), LH=(-1.5, 0, 0.0), fing=0.9, hed=(-0.02, 0.06, 0.0), tor=(0.0, -0.06, 0.03))
+    dr2 = dict(dr1, hed=(-0.3, 0.06, 0.0), tor=(-0.08, -0.06, 0.03), lid=0.95, brow=-0.1, smile=0.3, LP=(-0.13, 0.15, 1.3))
+    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.34, 0.06, 0.0))), (0.9, dict(dr1, hed=(0.08, 0.06, 0.0), lid=0.3, smile=0.6), "out"), (1.1, END)]))
     # death: the spear slips, she folds softly to her knees and over onto her side, hands drawn in
     dd0 = {"pel": (0, -0.02, -0.08), "prt": (-0.08, 0, 0), "tor": (-0.16, 0, 0), "hed": (-0.1, 0.1, 0), "lid": 0.4, "brow": -1.0, "smile": -0.4, "LP": (-0.16, 0.18, 1.24), "LH": (-0.8, 0, 0.3), "G": (0.3, 0.2, 0.9)}
     dd1 = {"pel": (0, 0.0, -0.46), "prt": (0.25, 0, 0.12), "tor": (0.3, 0, 0.12), "hed": (0.3, 0.1, 0.1), "G": (0.36, 0.34, 0.42), "BE": spr(30, 30, (-0.3, -0.9, 0.0)), "LP": (-0.2, 0.18, 0.74), "FL": (-0.12, -0.2, A_Z - 0.04), "FR": (0.12, -0.14, A_Z - 0.04), "FLp": 0.8, "FRp": 0.8, "lid": 0.7, "skirt": 0.2}
@@ -378,19 +481,57 @@ def extras(P):
         # brow: - lifts its inner end (worried, gentle), + lowers it (focus)
         out["brow." + side] = (Quaternion((0, 1, 0), -s * 0.2 * b), Vector((0, 0, -0.005 * b)))
         out["lid." + side] = (Quaternion((1, 0, 0), -0.82 * max(0.0, min(1.0, l))), None)
-        out["mouth." + side] = (None, Vector((s * 0.0016 * (sm - 0.5), 0, 0.0034 * (sm - 0.5))))
+        lift = sm - 0.5 + (P.get("smirk", 0.0) * 0.5 if side == "R" else 0.0)    # the smirk lifts her right corner only
+        out["mouth." + side] = (None, Vector((s * 0.0016 * lift, 0, 0.0034 * lift)))
     f = max(P.get("fing", 0.1), P.get("Lw", 0.0))
     out["fingers.L"] = (Quaternion((1, 0, 0), -1.0 * f), None)
     out["thumb.L"] = (Quaternion((1, 0, 0), -0.45 * f), None)
     q = Quaternion((1, 0, 0), 0.32 * P.get("skirt", 0.0)) @ Quaternion((0, 0, 1), 0.2 * P.get("skirtz", 0.0))
     out["skirt"] = (q, None)
+    k = 1.0 + BREATH * P.get("breath", 0.0)
+    out["x_breath"] = (None, None, Vector((k, k, k)))
     return out
+
+
+def add_breath(arm):
+    """The leaf bone x_breath under hips at the bottom of the rib cage, and the rib cage's skin moved onto it from hips
+    (an ellipsoid round the chest, full inside BREATH_CORE, nothing at its rim), so a scale on it swells the chest."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head, eb.tail = (0, 0, 1.30), (0, 0, 1.50)
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for body in bpy.data.objects:
+        if body.type != "MESH" or body.name in ("Src", "Low") or "hips" not in body.vertex_groups:
+            continue
+        hips, xb = body.vertex_groups["hips"], body.vertex_groups.new(name="x_breath")
+        to_arm = arm.matrix_world.inverted() @ body.matrix_world
+        n = 0
+        for v in body.data.vertices:
+            w = next((g.weight for g in v.groups if g.group == hips.index), 0.0)
+            p = to_arm @ v.co
+            r = math.sqrt(sum(((p[i] - BREATH_C[i]) / BREATH_R[i]) ** 2 for i in range(3)))
+            k = min(1.0, max(0.0, (1.0 - r) / (1.0 - BREATH_CORE)))
+            k = w * k * k * (3 - 2 * k)
+            if k > 1e-3:
+                hips.add([v.index], w - k, "REPLACE")
+                xb.add([v.index], k, "REPLACE")
+                n += 1
+        print("x_breath", body.name, n, "verts")
 
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
+    for img in bpy.data.images:             # the atlas is kept by a path from the build dir; find it from any cwd
+        if img.filepath and not img.packed_file and not os.path.exists(bpy.path.abspath(img.filepath)):
+            img.filepath = os.path.join(os.path.dirname(os.path.abspath(a[0])), os.path.basename(img.filepath))
+            img.reload()
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    add_breath(arm)                                 # before the solver: edit mode rebuilds the bones it keeps
     b_, e_ = K.spear_frame()
     rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": K.HIPS_Z, "hilt_l": K.HILT_L,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.012, 0.0, K.HAND_Z - 0.044)}}

@@ -3,8 +3,9 @@ extends RefCounted
 ## quiet ground edge. Checks, in a real match: the structure exists (mast, crystal, banner, four lamps, no
 ## particle emitters and no charging column anywhere on it); neutral = unlit crystal and lamps, banner low
 ## and grey; capturing = crystal and lamps fill with the charge, banner raised in the holder's team colour;
-## owned/open = everything lit; the yard ring and charge ring are hidden unless you stand in the yard or
-## it is contested; and the minimap glyph draws without error for each state. Never touches the save.
+## owned/open = everything lit; the charge ring is hidden unless you stand in the yard or it is contested
+## (the yard's edge itself is always there, see ExitSignal and --exit-signal-check); and the minimap
+## glyph draws without error for each state. Never touches the save.
 
 var bad := 0
 var main: Node
@@ -81,10 +82,10 @@ func run(main_node: Node) -> void:
 	var crystal := "Mast/Crystal/" + n.get_node("Mast/Crystal").get_child(0).name
 	ok(o["state"] == "idle" and _glow(n, crystal) == 0.0 and _lamps_lit(n) == 0, "neutral: crystal and lamps dark")
 	ok(is_equal_approx(banner.position.y, OutpostLook.BANNER_LOW), "neutral: banner low (%.2f m)" % banner.position.y)
-	ok(not _vis(n, "Zone") and not _vis(n, "Charge"), "neutral, nobody near: no ground ring")
+	ok(_vis(n, "Zone") and not _vis(n, "Charge"), "neutral, nobody near: the faint yard edge, no charge ring")
 	pins[P] = inside
 	_step(m, 0.2, pins)
-	ok(_vis(n, "Zone") and not _vis(n, "Charge"), "standing in the yard: the quiet edge shows, no charge ring yet")
+	ok(_vis(n, "Zone") and not _vis(n, "Charge"), "standing in the yard: no charge ring yet")
 	# ---------------------------------------------------------------- capturing
 	m.exits._start(o, P)
 	_step(m, 6.0, pins)
@@ -92,20 +93,20 @@ func run(main_node: Node) -> void:
 	ok(o["state"] == "charging" and float(o["prog"]) > 0.05, "capturing: charge %d%%" % int(float(o["prog"]) * 100.0))
 	var want_glow: float = OutpostLook.CRYSTAL_GLOW * float(o["prog"])
 	ok(absf(g1 - want_glow) < 0.05, "the crystal glow follows the charge (%.2f)" % g1)
-	var team_col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	var team_col: Color = SideColor.ally()      # (the holder is the player: the squad colour)
 	var cloth_col: Color = _param(n, "Mast/Banner/Cloth", "albedo")
 	var raised := is_equal_approx(banner.position.y, OutpostLook.BANNER_HIGH)
 	ok(raised and cloth_col.is_equal_approx(team_col), "banner raised in the holder's team colour")
-	ok(_vis(n, "Zone") and _vis(n, "Charge"), "inside the yard: edge and charge ring show")
+	ok(_vis(n, "Zone") and _vis(n, "Charge"), "inside the yard: the charge ring shows")
 	o["prog"] = 0.6
 	_step(m, 0.1, pins)
 	ok(_lamps_lit(n) == 2, "at 60%%: %d of 4 lamps lit" % _lamps_lit(n))
 	pins[P] = away
 	_step(m, 0.2, pins)
-	ok(not _vis(n, "Zone") and not _vis(n, "Charge"), "you walk off, nobody contests: the ring is hidden again")
+	ok(not _vis(n, "Charge"), "you walk off, nobody contests: the charge ring is hidden again")
 	pins[R] = inside
 	_step(m, 0.2, pins)
-	ok(bool(o["contested"]) and _vis(n, "Zone"), "a rival in the yard: contested, the edge shows from afar")
+	ok(bool(o["contested"]) and _vis(n, "Charge"), "a rival in the yard: contested, the charge ring shows from afar")
 	pins[R] = away + Vector3(5, 0, 5)
 	_step(m, 0.2, pins)
 	# ---------------------------------------------------------------- owned / open
@@ -119,11 +120,11 @@ func run(main_node: Node) -> void:
 	var holder := Control.new()
 	main.add_child(holder)
 	holder.draw.connect(func():
-		for lit in [0.0, 0.5, 1.0]:
-			OutpostGlyph.draw(holder, Vector2(20, 20), 1.0, ExitModels.UPLINK, team_col, lit))
+		for st in ["idle", "charging", "open"]:
+			ExitMark.glyph(holder, Vector2(20, 20), 9.0, {"state": st, "prog": 0.5, "t": 5.0}, 0.0))
 	holder.queue_redraw()
 	await main.get_tree().process_frame
-	ok(true, "the minimap glyph draws neutral, charging and lit")
+	ok(true, "the map glyph draws closed, opening and open")
 	holder.queue_free()
 	m.over = true
 	m.queue_free()

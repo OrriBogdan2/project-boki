@@ -1,7 +1,7 @@
 class_name IncubatorView
 extends RefCounted
 ## The Nesting Nook's Incubator tab: every cradle with its Rare Egg and how warm it is, what's left
-## (expeditions or minutes), what's warming them (an Ember kin, Ember Coals), the cradles you can
+## (minutes of play), what's warming them (an Ember kin, Ember Coals), the cradles you can
 ## still buy, and the eggs on the shelf waiting for one. Built inside the home screen's Nook panel
 ## (home.gd _open_nook), in the game's menu style.
 
@@ -11,11 +11,11 @@ const CARD_W := 222.0
 static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callable) -> void:
 	Incubator.ensure()
 	var q := Incubator.shelf()
-	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches after %d expeditions or about %d minutes warm." % [Incubator.TRIPS, int(Incubator.HEAT_NEED / 60.0)])
+	UI.subtitle(v, "Rare Eggs from boss lairs warm here side by side. Each hatches a first-form Boki, with good stats, after about %d minutes of play, in the garden or in matches." % int(Incubator.need() / 60.0))
 	var coals := int(Save.d["items"].get("coals", 0))
 	UI.head_extra(v).add_child(UI.chip("dash", "%d Ember Coals" % coals, Color("ff9a4a"), "Stoke them into the brazier: every egg warms faster for %d minutes. The market stall sells them." % int(Incubator.COAL_SECS / 60.0)))
 	if Incubator.count() == 0 and Incubator.slots() == Incubator.SLOTS:
-		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch into a rare Boki. It has %d cradles to start with." % Incubator.SLOTS))
+		v.add_child(UI.empty_state("egg", "No Rare Eggs yet", "Beat a boss in its lair and carry its egg home: it comes to the Incubator to hatch a baby Boki: always the first form of its line. It has %d cradles to start with." % Incubator.SLOTS))
 		return
 	# what's warming them
 	var warm := _warmer(home)
@@ -31,7 +31,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		var w := Incubator.stoke()
 		if w != "": home._toast(w)
 		else:
-			Sfx.play("unlock"); Save.save_game()
+			Sfx.play("garden_egg"); Save.save_game()
 			if home.hinc: home.fx.burst(home.INCUB_AT + Vector3(0, 1.0, -0.45), Color("ff9a3a"), 22, 2.6)
 		reopen.call(), 0, "dash")
 	st.disabled = coals <= 0 or not Incubator.any_warming()
@@ -45,7 +45,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		else: line += " You don't have one out on the farm."
 		v.add_child(UI.para(line, 12, UI.MUTED))
 	# the cradles
-	v.add_child(UI.section("Cradles  ·  %d/%d" % [Incubator.eggs().size(), Incubator.slots()], UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section("Cradles  ·  %d/%d" % [Incubator.eggs().size(), Incubator.slots()]))
 	var grid := GridContainer.new(); grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
@@ -53,7 +53,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		grid.add_child(_slot_card(Incubator.in_slot(i), hatch))
 	var cost := Incubator.slot_cost()
 	if cost >= 0:
-		var lc := UI.card(Color(0.1, 0.11, 0.15, 0.7), 12, 12)
+		var lc := UI.card(Color(UI.NIGHT_HI, 0.7), 12, 12)
 		lc.custom_minimum_size = Vector2(CARD_W, 0)
 		var lv := UI.vbox(6); lv.alignment = BoxContainer.ALIGNMENT_CENTER
 		lc.add_child(lv)
@@ -75,7 +75,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		lv.add_child(bb)
 		grid.add_child(lc)
 	# the shelf
-	v.add_child(UI.section("Waiting on the shelf  ·  %d" % q.size(), UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section("Waiting on the shelf  ·  %d" % q.size()))
 	if q.is_empty():
 		v.add_child(UI.para("Nothing waiting. Eggs beyond your cradles wait here and go in as soon as one is free.", UI.T_SMALL, UI.MUTED))
 	var flow := HFlowContainer.new()
@@ -126,7 +126,7 @@ static func _slot_card(e: Dictionary, hatch: Callable) -> Control:
 	var nm := UI.label(Incubator.egg_name(e), UI.T_SMALL, Color("ffe08a"), UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tv.add_child(nm)
-	tv.add_child(UI.label("%d%%  ·  %d/%d trips" % [int(Incubator.progress(e) * 100.0), mini(Incubator.trips(e), Incubator.TRIPS), Incubator.TRIPS], 12, UI.MUTED))
+	tv.add_child(UI.label("%d%% warm" % int(Incubator.progress(e) * 100.0), 12, UI.MUTED))
 	top.add_child(tv)
 	cv.add_child(top)
 	if rd:

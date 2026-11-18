@@ -5,7 +5,7 @@ extends RefCounted
 ## full range in the aim direction. Also the membership tests that match the AimKit telegraph shapes, so
 ## a kit's hit test and its drawing agree.
 ##
-## Per shot: a kit sets `h.shot_aim` before the shot leaves (Hunter._emit_shot takes it once, like
+## Per shot: a kit sets `h.shot_aim` before the shot leaves (HunterAttack.emit_shot takes it once, like
 ## shot_range_k). Per weapon: content/weapons/<id>.json "aim": "cursor" | "max". With neither, a weapon
 ## with "boom" (a lobbed round) lands at the cursor and every other weapon flies its full range.
 
@@ -19,7 +19,7 @@ static func mode_of(h: Hunter) -> String:
 		return h.shot_aim
 	return String(h.wpn.get("aim", CURSOR if h.wpn.has("boom") else MAX))
 
-## The mode for the shot leaving now: takes the per-shot override (Hunter._emit_shot).
+## The mode for the shot leaving now: takes the per-shot override (HunterAttack.emit_shot).
 static func take(h: Hunter) -> String:
 	var md := mode_of(h)
 	h.shot_aim = ""
@@ -43,6 +43,11 @@ static func point(h: Hunter, max_range: float, mode := CURSOR, min_d := MIN_D) -
 	var d := h.aim_dir()
 	var r := dist(h, max_range, mode, min_d)
 	return ground(h.m, Vector3(h.pos.x + d.x * r, h.pos.y, h.pos.z + d.y * r))
+
+## Where a ground-placed zone, nuke or lob lands: exactly at the cursor, clamped to range. The source puts
+## these where you point, so unlike a shot there is no minimum travel.
+static func place(h: Hunter, max_range: float) -> Vector3:
+	return point(h, max_range, CURSOR, 0.0)
 
 ## p with y moved onto the ground under it (unchanged over the abyss or off the map).
 static func ground(m: Node, p: Vector3) -> Vector3:

@@ -15,7 +15,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import grimble_sculpt as G
 import crouchkit
-from posekit import Clip, FnClip, Solver, ang_dir as D, at, eul, frame_of
+import skin_relax
+from posekit import Clip, FnClip, Loop, Solver, add_breath, ang_dir as D, at, eul, frame_of, BREATH_AXES
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = G.joints(os.path.join(REPO, "art/wardens/src/dredge_rig.json"))
@@ -102,6 +103,9 @@ class GSolver(Solver):
              "ball": Vector((0, 0.05 - float(self.BA.y), PELVIS - float(self.BA.z))) * P["bl"], "gun": Vector(P["gl"]) * P["gw"],
              "hoard": Vector(P["hl"])}
         S = {"hoard": P["hs"], "ball": P["bs"]}
+        if "x_breath" in self.b:                 # keyed in every clip, so none leaves the rib cage swollen
+            br = P.get("breath", 0.0)
+            S["x_breath"] = tuple(1 + ax * br for ax in BREATH_AXES)
         return Q, root_at, L, S
 
 
@@ -135,39 +139,123 @@ def bake(arm, clip, sv):
             pbs[b].location = sv.R0[b].inverted() @ d
             pbs[b].keyframe_insert("location", frame=f)
         for b, s in S.items():
-            pbs[b].scale = (s, s, s)
+            pbs[b].scale = s if isinstance(s, tuple) else (s, s, s)
             pbs[b].keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act
 
 
-# ---- idle and stance
-def idle(u):
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
+# ---- idle and stance (docs/art/IDLE_AUDIT.md, 12): both stand on READY's feet. The weight moves from foot to foot and
+# the overlap runs down the body (LAG); the rib cage breathes on x_breath; the signature plays once a loop. Every curve is
+# a posekit Loop shape or a closed keyed arc, so both seams close.
+IDLE, STANCE = Loop(5.0), Loop(6.0)                 # s per loop
+LAG = {"pel": 0.0, "tor": 0.1, "hed": 0.2, "hand": 0.27, "hoard": 0.4}   # s each part trails the weight (0 to 12 frames)
+SWAY = 0.045                 # m the pelvis and the hanging hands slide over the standing foot
+BREATH = 0.02                # x_breath's swell at the top of a breath (2 %)
+BREATH_C, BREATH_R = (0.0, 0.08, 1.05), (0.25, 0.2, 0.2)   # m: the rib cage's centre and half sizes in the rest mesh
+BREATH_CORE = 0.55           # the share of those sizes that is fully on x_breath, fading to nothing at the rim
+
+
+def rib_cage(p):
+    """x_breath's weight of a hips-skinned point: 1 inside BREATH_CORE of the rib cage ellipsoid, fading to 0 at its rim."""
+    r = math.sqrt(sum(((p[i] - BREATH_C[i]) / BREATH_R[i]) ** 2 for i in range(3)))
+    k = min(1.0, max(0.0, (1.0 - r) / (1.0 - BREATH_CORE)))
+    return k * k * (3 - 2 * k)
+
+
+def add(p, k, d):
+    p[k] = tuple(x + y for x, y in zip(p[k], d)) if isinstance(p[k], tuple) else p[k] + d
+
+
+def stand(lw):
+    """READY with the weight lw[part] per part (+1 on the left foot, -1 on the right): the pelvis slides over the standing
+    foot and dips through the shift, its free hip drops (that knee softens), the chest counters, the head stays level,
+    the hanging hands follow (the eye moves 3 cm each way), and the hoard's top hangs back while he moves, then swings home."""
     p = dict(READY)
-    p["pel"] = (0.006 * b, -0.015, -0.075 - 0.011 * a)
-    p["tor"] = (0.26 + 0.022 * a, 0.06 + 0.012 * b, 0.02)
-    p["hed"] = (-0.38 - 0.022 * a, -0.06 + 0.08 * math.sin(u * 4 * math.pi + 0.7), 0.05 + 0.03 * b)
-    g = READY["G"]
-    p["G"] = (g[0], g[1] + 0.006 * b, g[2] - 0.012 * a)
-    l = READY["LP"]
-    p["LP"] = (l[0] - 0.004 * a, l[1], l[2] - 0.012 * a)
-    p["hd"] = (0.016 * a, 0.014 * b, 0.0)
-    p["fing"] = 0.45 + 0.16 * max(0, math.sin(u * 6 * math.pi))         # the fingers drum
-    p["look"] = 0.10 * math.sin(u * 4 * math.pi)
-    p["lid"] = 1.0 if 0.60 < u < 0.625 else 0.0                          # one quick blink
-    p["jaw"] = 0.06 * (1 + math.sin(u * 8 * math.pi))
+    wp, wt, wh, wa = lw["pel"], lw["tor"], lw["hed"], lw["hand"]
+    add(p, "pel", (-SWAY * wp, 0.0, -0.014 * (1 - wp * wp)))
+    add(p, "prt", (0.0, 0.05 * wp, 0.03 * wp))
+    add(p, "tor", (0.0, -0.03 * wt, 0.03 * wt))
+    add(p, "hed", (0.0, 0.0, 0.01 * wh))
+    add(p, "G", (-0.7 * SWAY * wa, 0.0, 0.0))
+    add(p, "LP", (-0.7 * SWAY * wa, 0.0, 0.0))
+    p["hd"] = (0.0, 0.0, 0.16 * (wt - lw["hoard"]))
     return p
 
 
+def breathe(L, t, p):
+    """Two breaths a loop: the rib cage swells, the chest lifts the arms a little, the head counters."""
+    b = L.wave(t, 2)
+    p["breath"] = BREATH * (0.5 + 0.5 * b)
+    add(p, "tor", (-0.012 * b, 0.0, 0.0))
+    add(p, "hed", (0.010 * b, 0.0, 0.0))
+    add(p, "G", (0.0, 0.0, 0.004 * b))
+    add(p, "LP", (0.0, 0.0, 0.004 * b))
+
+
+def idle_weight(t):
+    """On the left foot; over onto the hook side at 1.6 s and back at 3.9 s, each past the mark and settling."""
+    L = IDLE
+    return 1 - 2 * L.hold(t, 1.6, 2.4, 3.9, 4.6) - 0.12 * L.settle(t, 2.25, 0.7) + 0.12 * L.settle(t, 4.45, 0.7)
+
+
+def idle(u):
+    """5 s of a greedy sway from foot to foot, the hoard swinging a beat behind and the scrap fist's fingers rubbing.
+    Once a loop, standing on the hook side, he taps the hook on his leg three times and eyes it with a grin."""
+    L, t = IDLE, u * IDLE.T
+    p = stand({k: idle_weight(t - lag) for k, lag in LAG.items()})
+    add(p, "hd", (0.0, 0.0, 0.05 * (L.settle(t, 2.65, 0.9) - L.settle(t, 4.85, 0.9))))
+    near = L.hold(t, 2.5, 2.75, 3.45, 3.8)                            # the hook swung in to the leg
+    knock = sum(L.hill(t, a, a + 0.18) for a in (2.78, 3.0, 3.22))
+    add(p, "G", (-0.22 * near - 0.03 * knock, -0.25 * near, -0.15 * near))   # its tip on the outer thigh
+    p["BE"] = be(-30 - 60 * near - 10 * knock, -30 - 20 * near, FLAT)
+    add(p, "hed", (0.06 * near, -0.10 * near, 0.04 * near))
+    p["look"] = -0.15 * near
+    p["brow"] = 0.2 + 0.4 * near
+    p["jaw"] = 0.1 + 0.15 * near + 0.08 * knock
+    p["lid"] = 0.25 - 0.15 * near + 0.75 * max(L.hill(t, 0.9, 1.05), L.hill(t, 4.7, 4.85))
+    p["fing"] = 0.45 + 0.12 * (L.hill(t, 0.25, 0.55) + L.hill(t, 0.6, 0.9))
+    breathe(L, t, p)
+    return p
+
+
+ARC0 = {"LP": (0.0, 0.0, 0.0), "tor": (0.0, 0.0, 0.0), "hed": (0.0, 0.0, 0.0), "Lh": READY["Lh"], "fing": READY["fing"],
+        "lid": 0.25, "brow": 0.2, "jaw": 0.1, "look": 0.0}
+DIG = {"LP": (0.20, -0.25, 0.56), "Lh": (-0.7, 0.0, 0.0), "fing": 0.1, "tor": (0.0, 0.14, 0.0), "hed": (-0.06, 0.18, 0.0), "look": 0.2}
+LOUPE = {"LP": (0.35, 0.35, 0.45), "Lh": (0.0, 0.0, 0.0), "fing": 0.95, "tor": (0.04, -0.1, 0.0), "hed": (-0.05, 0.35, 0.1),
+         "lid": 0.55, "brow": -0.5, "jaw": 0.05, "look": 0.0}
+BITE = {"LP": (0.20, 0.20, 0.40), "Lh": (1.25, 0.0, 0.0), "fing": 0.95, "tor": (0.04, -0.05, 0.0), "hed": (0.12, 0.0, 0.0),
+        "lid": 0.35, "brow": 0.3, "jaw": 0.0}
+POCKET = {"LP": (0.06, -0.15, 0.08), "Lh": (0.6, 0.0, 0.0), "fing": 0.9, "tor": (0.0, 0.06, 0.0), "hed": (0.06, 0.08, 0.0),
+          "lid": -0.15, "brow": 0.9, "jaw": 0.35, "look": 0.15}
+COIN = Clip("coin", STANCE.T, [
+    (0.0, {}), (0.45, {}),
+    (1.15, DIG), (1.35, dict(DIG, fing=0.95), "out"), (1.5, dict(DIG, LP=(0.20, -0.22, 0.50), fing=0.95)),   # dug out of the hoard
+    (2.15, LOUPE), (2.6, dict(LOUPE, Lh=(0.0, 0.0, 0.5)), "lin"), (3.05, dict(LOUPE, Lh=(0.0, 0.0, -0.3), hed=(-0.02, 0.38, 0.16))),
+    (3.35, dict(LOUPE, Lh=(0.0, 0.0, 0.0))),                                                                  # turned in the loupe
+    (3.65, dict(BITE, jaw=0.85)), (3.75, BITE, "out"), (3.9, dict(BITE, hed=(0.18, 0.0, 0.0), jaw=0.05)), # bitten
+    (4.2, dict(LOUPE, LP=(0.30, 0.30, 0.42), Lh=(0.3, 0.0, 0.0), hed=(0.0, 0.2, 0.05), lid=-0.15, brow=0.9, jaw=0.45)),                                 # still good
+    (4.75, POCKET), (4.95, dict(POCKET, LP=(0.06, -0.15, 0.04), fing=0.3), "out"), (5.1, dict(POCKET, fing=0.3)),  # pocketed, a pat
+    (5.25, dict(POCKET, LP=(0.06, -0.15, 0.04), fing=0.3), "out"), (5.6, dict(ARC0, jaw=0.25)), (6.0, ARC0)], ARC0)
+
+
+def stance_weight(t):
+    """On the left foot; toward the middle while he looks the coin over, back to the left as he pockets it."""
+    L = STANCE
+    return 1 - 0.7 * L.hold(t, 1.4, 2.2, 4.3, 5.0) + 0.1 * L.settle(t, 4.85, 0.7)
+
+
 def stance(u):
-    """Signature: the fist brought up to the monocle, appraising a coin in it, the hook hanging slack; a twitch of a grin."""
-    a = math.sin(u * 2 * math.pi)
-    p = dict(READY)
-    p.update({"pel": (0.02, 0.0, -0.075 - 0.008 * a), "prt": (0.12, 0.20, 0.02), "tor": (0.26, 0.12, 0.05), "hed": (-0.40, -0.22, -0.16),
-              "LP": (-0.19, 0.40, 1.24 - 0.008 * a), "Lh": (2.4, 0.1, 0.4), "fing": 0.74, "G": (0.42, 0.14, 0.60), "BE": be(-30, -60, FLAT),
-              "brow": 0.45, "lid": 0.0, "jaw": 0.25 + 0.2 * max(0, math.sin(u * 4 * math.pi)), "look": -0.12,
-              "FL": (-0.17, 0.16, A_Z), "FR": (0.20, -0.13, A_Z), "hd": (0.012 * a, 0.0, 0.0)})
+    """6 s on the idle's feet, the signature: he digs a coin out of the hoard, turns it in front of the loupe with a
+    squint, bites it, grins, pockets it and pats the pocket. The hook hangs; the hoard swings after each move."""
+    L, t = STANCE, u * STANCE.T
+    p = stand({k: stance_weight(t - lag) for k, lag in LAG.items()})
+    a = COIN.sample(t)
+    for k in ("LP", "tor", "hed"):
+        add(p, k, a[k])
+    p.update({k: a[k] for k in ("Lh", "fing", "lid", "brow", "jaw", "look")})
+    add(p, "hd", (0.06 * L.settle(t, 1.45, 0.8), 0.0, -0.05 * L.settle(t, 1.45, 0.8)))   # the dig shakes the pile
+    breathe(L, t, p)
     return p
 
 
@@ -241,8 +329,8 @@ def crouch_set():
 
 def clips():
     o = []
-    o.append(FnClip("idle", 3.0, idle))
-    o.append(FnClip("stance", 4.0, stance))
+    o.append(FnClip("idle", IDLE.T, idle))
+    o.append(FnClip("stance", STANCE.T, stance))
     o += crouch_set()
     for nm, k, T in (("walk", 0.45, 1.0), ("run", 1.0, 0.62)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
@@ -325,7 +413,21 @@ def clips():
     o.append(C("stun", 1.2, [(0.0, s1), (0.6, s2), (1.2, s1)]))
     fl = {"pel": (0, 0.1, -0.46), "prt": (0.95, 0.1, 0.1), "tor": (0.30, 0.2, 0.0), "hed": (-0.75, 0.3, 0.1), "LP": (-0.34, 0.52, 0.19), "G": (0.34, 0.30, 0.20), "BE": be(-20, -8, FLAT), "fing": 0.5, "FL": (-0.20, -0.14, 0.10), "FR": (0.22, -0.38, 0.10), "FLp": 0.8, "FRp": 0.9, "brow": -1, "lid": 0.6, "jaw": 0.6, "hd": (0.1, 0.05, 0.0)}
     o.append(C("downed", 2.4, [(0.0, fl), (1.2, dict(fl, LP=(-0.34, 0.58, 0.19), pel=(0, 0.12, -0.45), jaw=0.3)), (2.4, fl)]))
-    o.append(C("revive", 1.6, [(0.0, fl), (0.5, dict(fl, tor=(0.5, 0.1, 0.1), hed=(-0.3, 0, 0), lid=0.2, brow=0.6)), (1.1, dict(END, pel=(0, 0.02, -0.26), prt=(0.45, 0, 0), jaw=0.5)), (1.6, END)]))
+    # revive: on his knees beside the fallen, long arms over them, the scrap fist pumping their chest and the hook held clear; the grin stays, he is helping (and checking their pockets)
+    kn = {"pel": (0.0, 0.14, -0.36), "prt": (0.55, 0.05, 0.0), "tor": (0.34, 0.1, 0.0), "hed": (-0.62, 0.0, 0.0), "LP": (-0.2, 0.46, 0.32), "G": (0.42, 0.34, 0.45), "BE": be(-10, -40, FLAT), "fing": 0.8,
+          "FL": (-0.2, 0.28, A_Z), "FR": (0.2, -0.28, A_Z + 0.04), "FLy": 0.3, "FRy": -0.4, "FRp": 1.1, "brow": 0.5, "lid": 0.0, "jaw": 0.4, "hd": (0.0, 0.0, 0.0)}
+    pr = dict(kn, pel=(0.0, 0.16, -0.39), tor=(0.42, 0.1, 0.0), LP=(-0.2, 0.46, 0.22), hed=(-0.7, 0.0, 0.0), jaw=0.6)
+    o.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (stomp_cycle 0.7 s, the foot lands at 0.7 of it): the hook flung back for balance, the scrap fist cocked high, one long leg up, and all of him comes down with it
+    sp0 = dict(READY, pel=(-0.03, 0.0, -0.12), prt=(0.25, 0.0, 0.0), tor=(0.3, 0.0, 0.0), G=(0.5, 0.15, 0.55), LP=(-0.46, 0.2, 0.62), FL=(-0.2, 0.1, A_Z), FR=(0.2, -0.1, A_Z), brow=-0.7, jaw=0.7, lid=-0.2)
+    sp1 = dict(sp0, pel=(-0.07, -0.03, -0.14), prt=(0.1, 0.0, 0.0), tor=(0.0, 0.0, 0.0), FR=(0.2, -0.05, A_Z + 0.12), FRp=-0.5, G=(0.56, -0.02, 0.7), LP=(-0.5, 0.12, 0.82))
+    sp2 = dict(sp1, pel=(-0.07, 0.0, -0.06), FR=(0.2, 0.16, A_Z + 0.34), FRp=-0.7, hed=(-0.6, 0.0, 0.0), G=(0.6, -0.1, 0.9), LP=(-0.52, 0.08, 1.0), jaw=0.9)
+    sp3 = dict(sp0, pel=(-0.03, 0.04, -0.27), prt=(0.7, 0.0, 0.0), tor=(0.4, 0.0, 0.0), FR=(0.2, 0.16, A_Z), FRp=0.0, hed=(-0.7, 0.0, 0.0), G=(0.48, 0.2, 0.5), LP=(-0.3, 0.42, 0.34), jaw=1.0, hd=(0.2, 0.0, 0.0))
+    o.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.03, -0.2), prt=(0.5, 0.0, 0.0), tor=(0.34, 0.0, 0.0)), "out"), (0.7, sp0)], loop=True))
+    # drink (DRINK_TIME 1.1 s): the scrap fist hoists the flask up, the head tips right back, the throat works, a wet gasp and a wipe of the mouth
+    dr1 = {"LP": (-0.12, 0.34, 0.86), "tor": (0.2, 0.06, 0.02), "hed": (-0.5, -0.06, 0.05), "fing": 0.9, "brow": 0.5, "jaw": 0.3}
+    dr2 = dict(dr1, LP=(-0.1, 0.28, 0.98), hed=(-0.98, -0.06, 0.05), tor=(0.12, 0.06, 0.02), jaw=0.9, lid=0.6, brow=-0.3)
+    o.append(C("drink", 1.1, [(0.0, KEYS_END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-1.04, -0.06, 0.05), jaw=0.5)), (0.92, dict(dr1, jaw=1.0, brow=0.8, lid=-0.1), "out"), (1.1, KEYS_END)]))
     # death: he reels back, the pile takes him over, he lies on it, one last grin
     d1 = {"pel": (0, -0.08, -0.10), "prt": (-0.22, 0, 0), "tor": (-0.34, 0, 0), "hed": (0.2, 0.0, 0.0), "lid": 0.2, "brow": -1, "jaw": 1.0, "LP": (-0.46, 0.05, 0.92), "G": (0.5, 0.05, 0.92), "BE": be(-90, 10, FLAT), "fing": 0.1, "hd": (-0.3, 0, 0)}
     d2 = {"pel": (0, -0.30, -0.42), "prt": (-1.22, 0, 0.05), "tor": (-0.02, 0.1, 0), "hed": (0.36, 0.5, 0.2), "lid": 1.0, "brow": -1, "jaw": 0.55, "LP": (-0.62, 0.06, 0.20), "G": (0.62, -0.02, 0.16), "BE": be(-60, -2, FLAT), "fing": 0.05, "FL": (-0.22, 0.26, 0.14), "FR": (0.20, 0.36, 0.20), "FLp": -0.6, "FRp": -0.8, "hd": (0.14, 0.06, 0.08)}
@@ -348,6 +450,7 @@ if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    add_breath(arm, (BREATH_C[0], BREATH_C[1], BREATH_C[2] - BREATH_R[2]), rib_cage)
     sv = GSolver(arm)
     bpy.context.scene.render.fps = FPS       # (the exporter times keys by the scene: at its default 24 fps every clip ran 25% long)
     bpy.context.view_layer.objects.active = arm
@@ -361,6 +464,8 @@ if __name__ == "__main__":
         done.append((c.name, round(c.dur, 3)))
     bpy.ops.object.mode_set(mode="OBJECT")
     print("clips", len(done), done)
+    if not wanted:
+        skin_relax.relax(arm)       # no edge may stretch past 1.3x its rest length in any clip (tools/stretch_check.gd)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(a[1])[0] + "_anim.blend")
     bpy.ops.object.select_all(action="DESELECT")
     for o in bpy.data.objects:

@@ -1,4 +1,11 @@
 # Sound sets
 
-One file per sound group (`<arch>.json` for a Hunter, `boki.json`, `ui.json`), checked by `--sfx-set-check`.
+One file per sound group (`<arch>.json` for a Hunter, `boki.json`, `ui.json`, `combat.json` for shared combat sounds), checked by `--sfx-set-check`.
 Format and rules: docs/AUDIO.md.
+`garden.json` is the four garden minigames (scripts/home/garden_sfx.gd) and the home chimes (home_chimes.gd).
+`bowl.json` is the Mixing Bowl (scripts/home/bowl_sfx.gd): plops, a stir loop, tiered chimes, a Boki tasting and a fizzle.
+`egg.json` is an egg nearing its hatch (scripts/home/egg_sfx.gd).
+`glint.json` is Glint Fishing (scripts/home/glint_sfx.gd).
+`quest.json` is the quest seats' own cues (scripts/match/quest_sfx.gd); `heart.json` the Heartspark and the Ways Out calls.
+`training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
+`blight_mobs.json` is the Blight mobs' wind-up voices (`v_bl_*`, played by `Mob._begin_attack`).

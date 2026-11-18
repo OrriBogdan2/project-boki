@@ -39,7 +39,7 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 		var c := _clips(P)
 		seen[c.cur] = true
 		if c.up_w > 0.5:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.cur_u] = true
 		top = maxf(top, _flare(P))
 	return top
 
@@ -65,7 +65,8 @@ func run(main: Node) -> void:
 		_run(m, P, 54, seen)
 	ok(seen.has("lmb_l") and seen.has("lmb_r"), "the finger bolts play lmb_l and lmb_r")
 	# item 139: nothing but the model is drawn (the old wrist coil and forearm rings read as a gun); the bolts leave the
-	# fingertip of the hand that fires, left then right
+	# fingertip of the hand that fires, left then right (0.25 m: her body size went 1.098 -> 1.235 with the hunter-heights
+	# pass, so the same hand sits 12-22 % further out; was 0.2 m)
 	var strays: Array = []
 	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
 		var n := String(P.model.get_path_to(mi))
@@ -99,7 +100,7 @@ func run(main: Node) -> void:
 		else:
 			worst = 99.0
 	ok(sides == ["L", "R", "L", "R"] or sides == ["R", "L", "R", "L"], "the bolts alternate hands: %s" % str(sides))
-	ok(worst < 0.2, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
+	ok(worst < 0.25, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
 	var calm := _flare(P)
 	P.grounded = true          # (in the air the rod goes on the press, with no hold)
 	P.gliding = false

@@ -1,20 +1,49 @@
-# Hem (archer; shown as Ravyl): import note, ART-1 rebuild for Ravel v2 (2026-11-07)
+# Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
-`hem.glb`: one Meshy multi-view scan of `ravel_v2_turnaround.jpg` (brief: briefs/art-refs/ravel_v2/ on ext/agent-briefs) plus scripted parts, on the
-shared armature, the ids and file names kept. Raw files in ~/meshy/ravel_v2 (never in git). 14.4k triangles with the bow, one 2048 atlas (`hem_atlas.jpg`,
-the pieces on flat cells at its right edge) and a 512x256 RGBA card atlas (`hem_cards.png`). No normal map. Slots: skin, hair, cloth (corset), leather (skirt, belt, boots, bow), metal, card.
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+`~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb` (the body6 pick, CURRENT_OVERRIDES 11-12) on main's hem.glb rig (no keep parts, so the earlier swap's mesh is dropped whole); bow, arrow and anchor_nock unchanged. Was appeal3 body b below. 13.9k tris (body 13.0k), 2048 atlas + 2048, 51 clips (pet/give/cheer gain sampled channels, same timing).
+Spec `art/wardens/src/hem_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
 
-Scripted (tools/art1/hem_pieces.py): the closed bow hand, the bow (1.6 m), the two back needles (1.21 m, 0.67 of her height, as on the sheet) lashed in an X,
-severed strings, thread spools and pins on the belt, bun pins, the arrow, and her eyelids (`eyelids`: a shell per eye on `lid.R`/`lid.L`, pivot 13 mm under
-the painted eye, that comes out over it when a clip turns the bone down; open it hides in the face but for its dark lash rim). Cards (hem_finish.py): the frayed
-thread hem, on the skirt chains, and the smoke at her hair's ends (dark root to grey-violet).
+`hem.glb`: the owner's pick (11-10), Lace v95 r2 appeal3 `cand_b.glb` (the slimmer body; its face is the appeal3 face, one mesh), swapped
+onto Hem's own skeleton, 48 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/hem_v95.json`.
+Raw files in ~/meshy/v95/lace/r2/appeal3 (never in git); the spec reads `lace_v95_b_body.glb`, which is `cand_b.glb` without its
+`lace_bow` node (cut from the glTF JSON, the buffer untouched): the game's bow and arrow (`bow_mesh`, `arrow_mesh`, on `bow*`/`arrow`)
+stay as they were, with their weights.
 
-    ~/meshy/ravel_v2/build.sh source    # source (hem_source.py: scan -> rig rest pose, heel flattened, Low), finish (hem_finish.py), clips (hem_clips.py)
-    INSTALL=1 ~/meshy/ravel_v2/build.sh # copies stage/c/hem_out.glb here
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/hem_v95.json WORK art/wardens/hem/hem.glb
 
-48 clips, the same set as before, keyed in hem_clips.py (poses lifted with her hips). Rig: `legs` 2.05, `neck` -0.05 in content/archetypes/archer.json; regenerate with
-`godot --headless -- --warden-rig-json --warden=archer`. The eyes stay the scan's paint; the lids are modelled, so blinks read.
+Body: 13k triangles (head 2.6k), one 2048 atlas embedded (Godot extracts it to `hem_atlas_1.jpg`; `hem_atlas.jpg` is the bow's).
+Slots by colour and box (first match wins): metal (the back needles), hair, skin, cloth (red corset), leather (dark skirt, boots).
+Weights: bone heat from the spec's joints; the back needles ride `hips`, the head box `head`, the left shoulder mask `pauldron.L`.
 
-Proportions against the sheet: the head is fitted at 1:1 (hem_source.py `HEAD_K`; pass 2 had 1.06). Her belt sits about 8 cm under the sheet's because the
-shared rig's shoulders do too (shoulder to belt matches, 0.40 m); lifting it would shorten the corset, so it stays with the rig. Skin under the shoulder mask
-is plain porcelain (the scan painted its own mask there, class 0.9 in `class_bake`).
+Lost from the scripted build (tools/art1/hem_pieces.py, hem_finish.py: that build is replaced, not merged):
+the modelled eyelids (blinks no longer show; `lid`/`brow` bones move nothing), the lit strings on her right hand (no glow slot),
+the thread and smoke cards, and the closed bow hand (her hands are the master's, open; the bow sits in the left hand as before).
+`cape`, `skirt` and the spring chains carry no weight, so the skirt follows the legs. tools/warden_glb_check.gd no longer
+asks for the lids and strings.
+
+Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/archer.json.
+
+Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
+through the chest; the bow passes through her open left hand.
+
+**walk_f / run_f (anim pilot, 11-11):** rebuilt on the v2 rig (the clips carry over to the appeal3 body by bone name, `tools/art1/glb_add_clips.py`, same rig) by retargeting Meshy animation-library actions (her pilot2 Meshy
+rig task), loops rebuilt, sole planted at loco speed. Blind Fable 5.2 judge (pilot1 rubric): walk 4.17 vs 3.67 current,
+run 4.17 vs 3.67. Licence: Meshy API output on the paid plan, commercial use allowed under Meshy's terms. Idle unchanged
+(owned by the pilot4 idle job).
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `roll` (Spirit Walk) re-keyed to her felt roll, 3.0 m in 0.386 s
+(roll_t 0.27 at tuning.json dash_speed 0.7): 0.52 s, the turn on the dash curve, low and crouched at 0.386 s where the walk
+takes over (PinSpirit.roll_time). Baked on this glb through `tools/art1/clip_blend.py ... pinch=fing_a2.R` (a control bake
+of `roll` and `flick` matched this glb's exactly) and copied on with `glb_add_clips.py ... roll`; `flick` unchanged.
+On the v95 swap (body6 pick, above) the `roll` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... roll`.
+
+walk and run b, l, r, fl, fr, bl, br (2026-11-11, ext/anim-dirloops-lace-kael): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/hem/hem.glb OUT.glb 1.18 3.72`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`.
+The speeds are the forward loops' `loco.foot_mps`, not the loco speeds: walk_f/run_f are the old clips and stay, so
+the ring keeps `stride`/`foot_mps` and the game's rate and stride lift every direction to loco speed the way they lift
+forward. The blind Fable judge kept the old walk_r, run_l (tie or loss), so those are
+the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+Idle and stance rework (11-09, ported 11-17): `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`; the old glb's `x_breath` track has no bone here and is dropped (docs/art/IDLE_AUDIT.md).

@@ -61,6 +61,14 @@ container) does the whole release from a feature branch:
 (`../build/linux/ProjectBoki.x86_64`). ship.sh passes its own output paths. The web build is for
 prototyping only (`tools/build_web.sh` wraps it with `tools/shell.html`).
 
+## Pull request checks
+
+`.github/workflows/pr-checks.yml` runs on every pull request to `main` (and on pushes to `main`, to keep its
+`.godot` cache warm): headless Godot import with no `SCRIPT ERROR`, `--check` with 0 failures,
+`python3 tools/gen_wiki.py --check`, the matchmaker unit tests and `tools/check.sh` (health `--strict` plus the
+lint ratchet), aimed at under 10 minutes (job timeout 20). The required status check on `main` is `pr-checks`. The long
+per-flag `-check` suite still runs on the build servers.
+
 ## Releases for playtesters
 
 `.github/workflows/release.yml` builds the game (Windows, macOS, Linux) and the launcher (Windows,

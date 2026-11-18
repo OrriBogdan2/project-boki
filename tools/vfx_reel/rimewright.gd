@@ -3,7 +3,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## through its landing and detonation, the Rink Wall frozen, and Rimelock to its crash.
 
 func parts() -> Array:
-	return ["lmb", "dash", "rmb", "e", "r"]
+	return ["lmb", "hold", "dash", "rmb", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(6.0)

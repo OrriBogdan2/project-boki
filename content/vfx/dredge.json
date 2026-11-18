@@ -1,0 +1,7 @@
+{
+	"palette": {"main": "d89040", "hot": "fff0b0", "char": "5a3410"},
+	"anchors": {},
+	"moves": {
+		"anchor_fist": {"fx": [{"p": "fist", "fwd": "r", "fwd_x": 0.55, "size": 2.4, "pitch": -30, "drop": 3.6, "life": 0.68, "fall": 0.56, "cut": 0.56, "c": "main", "c2": "hot", "c3": "char"}]}
+	}
+}

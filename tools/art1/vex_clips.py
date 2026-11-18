@@ -9,9 +9,11 @@ import numpy as np
 from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
+from posekit import Clip, FnClip, Solver, add_breath, bake, ang_dir as D, at, eul, FPS, frame_of, BREATH_AXES
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
+import gardenkit
+import actionkit
 
 A_Z = 0.16
 SP = 0.0
@@ -44,45 +46,185 @@ def C(name, dur, keys, loop=False, base=READY):
     return Clip(name, dur, keys, base, loop)
 
 
-def idle(u):
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
-    p = dict(READY)
-    p["pel"] = (0.012 + 0.008 * b, 0.0, -0.04 - 0.006 * a)
-    p["tor"] = (0.03 + 0.02 * a, -0.1, -0.03 + 0.008 * b)
-    p["hed"] = (-0.02 - 0.016 * a, 0.1 + 0.04 * math.sin(u * 4 * math.pi), 0.03)
-    p["BE"] = aim(-7 + 0.8 * b, -68 + 1.2 * a)
-    p["LP"] = (-0.21, 0.07, 1.02 - 0.006 * a)
-    p["lid"] = 1.0 if 0.40 < u < 0.43 or 0.8 < u < 0.83 else 0.12
+# ---- standing (docs/art/IDLE_AUDIT.md, Vex). A pro on watch: her weight on the left leg, the right knee soft, the pelvis
+# dropped to the right and the chest leaning a degree left against the cannon's pull. Both loops stand on FEET, so the
+# hand-off never slides, and every curve is made of whole cycles of its loop, so the seam closes.
+IDLE_T, STANCE_T = 5.0, 6.0                    # s, the two loops
+FEET = {"FL": (-0.12, 0.06, A_Z), "FR": (0.17, -0.06, A_Z), "FLy": 0.12, "FRy": -0.38, "FRk": 0.15}
+HEEL = 9.0                                     # deg: the free right heel's lift while her weight is on the left
+BALL = (0.11, 0.16)                            # m: the ball of the foot ahead of and below the ankle
+LAG = {"pel": 0.0, "tor": 0.1, "hed": 0.2, "hand": 0.3}   # s behind the weight shift: the pelvis leads, the rest follows
+BREATH = 0.02                                  # x_breath's swell at the top of a breath (2 %)
+BREATH_C, BREATH_R = (0.0, 0.01, 1.3), (0.24, 0.16, 0.16)   # m: the rib cage's centre and half sizes (hips 0.97, shoulders 1.43)
+BREATH_CORE = 0.55                             # the share of those sizes that is fully on x_breath, fading to nothing at the rim
+
+
+def rib_cage(p):
+    """x_breath's weight of a hips-skinned point: 1 inside BREATH_CORE of the rib cage ellipsoid, fading to 0 at its rim."""
+    r = math.sqrt(sum(((p[i] - BREATH_C[i]) / BREATH_R[i]) ** 2 for i in range(3)))
+    k = min(1.0, max(0.0, (1.0 - r) / (1.0 - BREATH_CORE)))
+    return k * k * (3 - 2 * k)
+
+
+EYE = (0.34, 0.3)                              # m: her eyes above and behind the coin hand, for the head's track of the coin
+COIN_TURNS = 4                                 # whole turns per flip, so the coin lands as it left
+
+
+class Loop:
+    """Shapes on a loop of T seconds. Each is periodic in T, so a curve made of them closes its seam."""
+
+    def __init__(self, T):
+        self.T = T
+
+    def ramp(self, t, a, b):
+        """0 before a, eased up to 1 by b."""
+        u = min(1.0, max(0.0, (t % self.T - a) / (b - a)))
+        return u * u * (3 - 2 * u)
+
+    def hold(self, t, a, b, c, d):
+        """Eased up from a to b, held, eased back down from c to d."""
+        return self.ramp(t, a, b) - self.ramp(t, c, d)
+
+    def hill(self, t, a, b):
+        """0 outside a..b, one smooth hill inside it."""
+        u = (t % self.T - a) / (b - a)
+        return math.sin(math.pi * u) ** 2 if 0.0 < u < 1.0 else 0.0
+
+    def settle(self, t, a, dur):
+        """The swing past a move that lands at a: out quickly, then dying away by a + dur."""
+        u = (t % self.T - a) / dur
+        return math.sin(math.pi * u) * (1 - u) if 0.0 < u < 1.0 else 0.0
+
+    def wave(self, t, k, ph=0.0):
+        return math.sin(2 * math.pi * k * t / self.T + ph)
+
+
+def stand(w, lag_w, lean):
+    """The contrapposto by weight w (+1 on the left leg, -1 on the right) per part (lag_w: its lagged w): the pelvis
+    over the standing leg with its hip up, the chest countering it plus `lean` (rad, + to her right), the head
+    nearly level, the left hand on her hip riding it."""
+    p = dict(READY, **FEET)
+    wp, wt, wh = lag_w["pel"], lag_w["tor"], lag_w["hed"]
+    p["pel"] = (0.004 - 0.03 * wp, 0.0, -0.022 - 0.014 * (1 - wp * wp))
+    p["prt"] = (0.0, 0.08, 0.09 * wp)
+    p["tor"] = (0.03, -0.1, -0.09 * wt + lean)
+    p["hed"] = (-0.03, 0.1, 0.035 + 0.02 * wh)
+    lift_heel(p, HEEL * min(1.0, max(0.0, (wp - 0.2) / 0.8)))
+    wa = lag_w["hand"]
+    p["LP"] = (-0.215 - 0.03 * (wa - 1), 0.07, 1.02 + 0.018 * (wa - 1) - 0.014 * (1 - wa * wa))
     return p
 
 
+def lift_heel(p, deg):
+    """The right heel up off the ground, the foot rolled onto its ball: the ankle rises and comes forward."""
+    a = math.radians(deg)
+    fwd, up = BALL[0] * (1 - math.cos(a)) + BALL[1] * math.sin(a), BALL[0] * math.sin(a) - BALL[1] * (1 - math.cos(a))
+    d = Quaternion((0, 0, 1), p["FRy"]) @ Vector((0, fwd, up))
+    p["FR"] = tuple(x + y for x, y in zip(p["FR"], d))
+    p["FRp"] = -a
+
+
+def lagged(L, weight, t):
+    return {k: weight(t - lag) for k, lag in LAG.items()}
+
+
+def breathe(L, t, p, k):
+    """k breaths a loop: the rib cage swells on x_breath, the shoulders and strut lift, the head counters."""
+    b = L.wave(t, k)
+    p["breath"] = BREATH * (0.5 + 0.5 * b)
+    add(p, "tor", (-0.008 * b, 0.0, 0.0))
+    add(p, "hed", (0.006 * b, 0.0, 0.0))
+    add(p, "LP", (0.0, 0.0, 0.003 * b))
+    p["UA"] = (p["UA"][0], p["UA"][1] + 0.8 * b)
+
+
+def add(p, k, d):
+    v = p[k]
+    p[k] = v + d if isinstance(v, float) else tuple(x + y for x, y in zip(v, d))
+
+
+IDLE = Loop(IDLE_T)
+
+
+def idle_weight(t):
+    """On the left leg; over toward the cannon side as she turns to look out that way, back, each with a settle."""
+    L = IDLE
+    return 1 - 1.6 * L.hold(t, 0.9, 1.7, 3.0, 3.8) - 0.12 * L.settle(t, 1.55, 0.7) + 0.12 * L.settle(t, 3.65, 0.8)
+
+
+def idle(u):
+    """5 s on watch, the signature once a loop: a slow scan of the horizon over the cannon, the head leading and the
+    chest and pelvis turning after it, a hold that keeps drifting further, and back with a settle."""
+    L, t = IDLE, u * IDLE_T
+    lw = lagged(L, idle_weight, t)
+    p = stand(idle_weight(t), lw, -0.02)
+    scan = {k: L.hold(t - lag, 0.8, 1.6, 2.9, 3.7) for k, lag in (("hed", 0.0), ("tor", 0.15), ("pel", 0.3), ("hand", 0.4))}
+    drift = L.hill(t, 1.5, 3.0)
+    back = L.settle(t, 3.55, 0.7)
+    add(p, "hed", (-0.05 * scan["hed"], -0.55 * scan["hed"] - 0.12 * drift + 0.05 * back, -0.02 * scan["hed"]))
+    add(p, "tor", (0.0, -0.16 * scan["tor"] + 0.02 * back, 0.0))
+    add(p, "prt", (0.0, -0.06 * scan["pel"], 0.0))
+    # the cannon hangs from the shoulder: it trails the body's shift and turn, then swings home
+    trail = lw["hand"] - lw["pel"]
+    p["BE"] = aim(-7 + 7 * trail - 8 * scan["hand"], -68 - 1.5 * L.settle(t, 1.75, 0.7) - 1.5 * L.settle(t, 3.9, 0.8))
+    p["lid"] = 0.12 + 0.13 * scan["hed"] + 0.88 * max(L.hill(t, 0.72, 0.86), L.hill(t, 2.95, 3.09))
+    p["brow"] = 0.15 + 0.25 * scan["hed"]
+    breathe(L, t, p, 2)
+    return p
+
+
+STANCE = Loop(STANCE_T)
+CHEST = ((-0.25, 0.2, 1.28), (-2.5, 0.2, 0.0))    # the coin hand at her chest, palm up: LP (m), LQ (rad)
+POCKET = ((-0.2, 0.1, 0.95), (0.25, 0.0, 0.0))    # the coin hand down in her hip pocket
+FLIPS = ((0.5, 0.5, 0.3), (1.8, 0.55, 0.37))      # (thumbed at s, in the air s, height m): the height a fall of that long
+POCKET_IN, POCKET_OUT = (2.9, 3.5), (4.8, 5.5)    # s: down into the pocket, back out to the chest
+
+
+def stance_weight(t):
+    """On the left leg; toward the middle while the hand is in the pocket."""
+    L = STANCE
+    return 1 - 0.7 * L.hold(t, 3.0, 3.7, 4.9, 5.6) - 0.08 * L.settle(t, 3.55, 0.7) + 0.08 * L.settle(t, 5.45, 0.55)
+
+
 def stance(u):
-    """The signature: weight on the left leg, the cannon let hang, the coin thumbed up and caught, a smirk at it."""
-    p = dict(READY)
-    a = math.sin(u * 2 * math.pi)
-    p["pel"] = (-0.02, 0.0, -0.05 - 0.005 * a)
-    p["prt"] = (0.0, -0.1, -0.09)
-    p["tor"] = (0.02, 0.16, 0.06 + 0.01 * a)
-    p["FL"], p["FR"] = (-0.1, 0.03, A_Z), (0.2, 0.09, A_Z)
-    p["FLy"], p["FRy"] = 0.1, -0.5
-    p["LP"] = (-0.255, 0.21, 1.3)
-    p["LQ"] = (-2.5, 0.2, 0.0)
-    p["fing"] = 0.55
-    # the flip: two per loop
-    f = (u * 2) % 1.0
-    air = 0.0
-    if f < 0.46:
-        k = f / 0.46
-        air = 4 * k * (1 - k)
-    p["CN"] = 0.26 * air
-    p["CF"] = air * 15 if f < 0.46 else 0.0
-    catch = 1.0 if 0.46 < f < 0.6 else 0.0
-    p["LP"] = (-0.255, 0.21, 1.3 - 0.018 * catch + 0.012 * (1 - min(1.0, f / 0.05)))
-    t = math.atan2(0.26 * air, 0.5)
-    p["hed"] = (t * -1.0 - 0.02, 0.5, 0.06)
-    p["lid"] = 0.2
-    p["brow"] = -0.3
-    p["BE"] = aim(-10, -72)
+    """6 s, the signature kept: the coin thumbed up and caught twice, the head following it up and nodding through each
+    catch, the hand dipping with it; a look at how it landed, a smirk, then it goes in the pocket and comes back out."""
+    L, t = STANCE, u * STANCE_T
+    lw = lagged(L, stance_weight, t)
+    p = stand(stance_weight(t), lw, -0.02)
+    down = L.hold(t, POCKET_IN[0], POCKET_IN[1], POCKET_OUT[0], POCKET_OUT[1])
+    lp = tuple(c + (k - c) * down for c, k in zip(CHEST[0], POCKET[0]))
+    p["LP"] = (lp[0] - 0.04 * math.sin(math.pi * down), lp[1], lp[2] + p["LP"][2] - READY["LP"][2])
+    p["LQ"] = tuple(c + (k - c) * down for c, k in zip(CHEST[1], POCKET[1]))
+    p["fing"] = 0.55 + 0.25 * L.hill(t, POCKET_IN[1] - 0.25, POCKET_IN[1] + 0.2) - 0.2 * L.ramp(t, POCKET_IN[1], POCKET_IN[1] + 0.3) \
+        + 0.2 * L.ramp(t, POCKET_OUT[0], POCKET_OUT[0] + 0.3)
+    p["CS"] = 1.0 - L.hold(t, POCKET_IN[1] - 0.06, POCKET_IN[1], POCKET_OUT[0] + 0.05, POCKET_OUT[0] + 0.11)
+    look = 1.0 - down
+    add(p, "tor", (0.0, 0.22 * look, 0.0))
+    add(p, "hed", (0.0, 0.05 * look, 0.0))
+    p["CN"], p["CF"], gaze = 0.0, 0.0, 0.0
+    for tf, air, h in FLIPS:
+        tc = tf + air
+        k = (t - tf) / air
+        if 0.0 < k < 1.0:
+            p["CN"], p["CF"] = 4 * h * k * (1 - k), 2 * math.pi * COIN_TURNS * k
+        # the head takes part of the eyes' track of the coin, a beat behind, and nods through the catch
+        kh = (t - tf - 0.06) / air
+        if 0.0 < kh < 1.0:
+            gaze = 0.4 * (math.atan2(4 * h * kh * (1 - kh) - EYE[0], EYE[1]) - math.atan2(-EYE[0], EYE[1]))
+        add(p, "LP", (0.0, 0.0, -0.015 * L.hill(t, tf - 0.18, tf) + 0.02 * L.hill(t, tf - 0.02, tf + 0.14)
+                      - 0.035 * L.settle(t, tc, 0.45)))
+        add(p, "tor", (0.025 * L.settle(t, tc + 0.05, 0.5), 0.0, 0.0))
+        add(p, "pel", (0.0, 0.0, -0.006 * L.settle(t, tc + 0.1, 0.5)))
+        add(p, "hed", (0.06 * L.settle(t, tc + 0.03, 0.5), 0.0, 0.0))
+        p["fing"] += 0.25 * L.hill(t, tc - 0.04, tc + 0.3)
+    glance = L.hold(t, 2.45, 2.75, 2.95, 3.25)
+    add(p, "hed", (0.12 * look - gaze + 0.1 * glance, 0.0, 0.03 * glance))
+    trail = lw["hand"] - lw["pel"]
+    p["BE"] = aim(-10 + 7 * trail, -72 - 1.2 * L.settle(t, 3.6, 0.7))
+    p["lid"] = 0.2 + 0.8 * max(L.hill(t, 2.82, 2.96), L.hill(t, 5.1, 5.24))
+    p["brow"] = -0.3 * look - 0.25 * glance + 0.15 * down
+    breathe(L, t, p, 2)
     return p
 
 
@@ -154,9 +296,38 @@ def crouch_set():
     return crouchkit.quick(C, READY, KNEEL, PROWL, hands=("LP",), scan=0.26, dip_t=0.2)
 
 
+# ---- the garden (DECISIONS 2026-11-09): bored and cocky. The cannon rests on her knee through the pet and the snack; her one brass hand does the work, palm down for the head,
+# palm up for the snack, a chin-up smirk at the Boki; the cheer is the one time she gives it everything (cannon up, hop).
+PET_A = dict(KNEEL, pel=(0.02, 0.1, -0.44), prt=(0.2, 0.24, 0.03), tor=(0.3, -0.22, -0.03), hed=(-0.34, 0.18, 0.08), LP=(0.0, 0.86, 0.56), LQ=(1.3, 1.3, 0.0), fing=0.1, brow=0.35)
+GIVE = dict(KNEEL, pel=(0.02, 0.08, -0.4), prt=(0.14, 0.2, 0.03), tor=(0.2, -0.2, -0.03), hed=(-0.3, 0.14, 0.08), LP=(-0.04, 0.82, 0.38), LQ=(1.4, -1.4, 0.0), fing=0.0, brow=0.55)
+DIP = dict(READY, pel=(0.0, 0.0, -0.2), prt=(0.24, 0.0, 0.0), tor=(0.2, 0.0, 0.0), hed=(-0.3, 0.0, 0.0), LP=(-0.28, 0.16, 0.8), LQ=(0.6, 0.0, 0.0), fing=0.9,
+           FL=(-0.15, 0.13, A_Z), FR=(0.17, -0.12, A_Z), BE=aim(-6, -30), UA=(-18, -60))
+SPRING = dict(READY, pel=(0.0, 0.0, 0.06), prt=(-0.1, 0.0, 0.0), tor=(-0.1, 0.0, 0.0), hed=(-0.2, 0.0, 0.0), LP=(-0.3, 0.1, 1.7), LQ=(-3.0, 0.0, 0.0), fing=0.9,
+          FL=(-0.12, 0.08, A_Z + 0.09), FR=(0.14, -0.1, A_Z + 0.1), FLp=-0.5, FRp=-0.5, BE=aim(-4, 66), UA=(-10, 38), brow=0.7, lid=0.3)
+
+
+def garden_set():
+    P = {"kneel": KNEEL, "pet_a": PET_A, "pet_b": dict(PET_A, LP=(0.0, 0.7, 0.58), tor=(0.26, -0.22, -0.03)),
+         "give": GIVE, "give_in": dict(GIVE, LP=(-0.04, 0.72, 0.36), prt=(0.1, 0.2, 0.03)),
+         "dip": DIP, "up": SPRING, "peak": dict(SPRING, pel=(0.0, 0.0, 0.08), LP=(-0.3, 0.1, 1.76), BE=aim(-4, 70)),
+         "pump": dict(SPRING, pel=(0.0, 0.0, 0.0), FL=(-0.12, 0.08, A_Z), FR=(0.14, -0.1, A_Z), FLp=0.0, FRp=0.0, LP=(-0.3, 0.1, 1.6), BE=aim(-4, 62), hed=(-0.28, 0.1, 0.05))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.08, "snap": 0.4})
+
+# ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
+ACT = {
+    "stomp": {"top": {"LP": (-0.42, 0.04, 1.14), "BE": aim(-8, -50)}, "hit": {"LP": (-0.3, 0.1, 0.84), "BE": aim(-6, -42)}},
+    "drink": {"sip": {"LQ": (-1.3, 0.0, 0.0), "BE": aim(-6, -62)}},
+    "revive": {"kneel": {"LP": (-0.12, 0.5, 0.4), "LQ": (0.9, 0.0, 0.0), "BE": aim(-34, -34), "UA": (-30, -50)}},
+}
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("LP",), (-0.045, 0.17, 1.64), ACT)
+
+
 def clips():
-    out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
+    out = [FnClip("idle", IDLE_T, idle), FnClip("stance", STANCE_T, stance)]
     out += crouch_set()
+    out += garden_set()
+    out += action_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))
@@ -177,16 +348,18 @@ def clips():
     kick = dict(base, BE=aim(0, 4.5), UA=(-18, -44), tor=(0.08, -0.14, 0.0), GS=spin * 0.3)
     out.append(C("lmb", 0.55, [(0.0, base), (0.025, kick, "out"), (0.09, dict(base, GS=spin * 0.75)), (0.12, dict(base, GS=spin)), (0.3, dict(base, GS=spin * 3.2)), (0.55, dict(READY, GS=spin * 4), "smooth")]))
 
-    # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home
+    # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home by 0.3 (item 112)
     r0 = dict(BRACE, BE=aim(0, 7), UA=(-20, -36), LN=1.0, LP=(-0.24, 0.24, 1.08), LQ=(0.5, 0, 0), brow=0.6, lid=0.25, FL=(-0.14, 0.24, A_Z))
     r1 = dict(r0, BE=aim(0, 19), UA=(-14, -24), tor=(-0.06, -0.14, 0.0), hed=(-0.1, 0.12, 0.0), pel=(0.0, -0.05, -0.12))
-    out.append(C("rmb", 0.5, [(0.0, r0), (0.05, r1, "out"), (0.13, dict(r1, BE=aim(0, 14))), (0.32, dict(r0, BE=aim(0, 4), LN=0.9)), (0.5, dict(READY, LN=0.0))]))
+    out.append(C("rmb", 0.3, [(0.0, r0), (0.05, r1, "out"), (0.1, dict(r1, BE=aim(0, 14))), (0.2, dict(r0, BE=aim(0, 4), LN=0.9)), (0.3, dict(READY, LN=0.0))]))
 
     # ---- Slipstep: her slide. On the legs' own heading (runtime: legs_heading) she drops feet first, the lead leg out, the back knee folded under, the left hand trailing on the ground; the torso
-    # stays up and the cannon stays on the aim
+    # stays up and the cannon stays on the aim. A held slide loops 0.3667-0.5 (sl_a, sl_b, sl_a: GunslingerKit.SLIDE_LOOP_*), the stand-up from 0.62
     sl = dict(ON_AIM, pel=(0.0, -0.12, -0.52), prt=(-0.42, 0.0, 0.0), tor=(0.3, 0.0, 0.0), hed=(0.2, 0.0, 0.0), FR=(0.1, 0.62, A_Z + 0.02), FL=(-0.16, 0.08, A_Z + 0.02), FRp=0.5, FLp=0.9, FRy=0.0, FLy=0.5,
               LP=(-0.36, -0.28, 0.2), LQ=(-0.3, 0, 0), brow=0.3, lid=0.1, fing=0.0)
-    out.append(C("dash", 0.85, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.45, dict(sl, pel=(0.0, -0.12, -0.5))), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
+    sl_a = dict(sl, pel=(0.0, -0.12, -0.5))
+    sl_b = dict(sl_a, pel=(0.0, -0.12, -0.46), tor=(0.25, 0.0, 0.0), hed=(0.16, 0.0, 0.0), FR=(0.1, 0.68, A_Z + 0.02), FL=(-0.16, 0.14, A_Z + 0.02), LP=(-0.36, -0.3, 0.17))
+    out.append(C("dash", 26 / FPS, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.3667, sl_a), (0.4333, sl_b), (0.5, sl_a), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
     # the air tap's barrel roll, the cannon held on the aim through it
     t0 = dict(ON_AIM, prt=(0.0, 0.0, 0.0), FL=(-0.1, 0.0, A_Z + 0.35), FR=(0.12, 0.05, A_Z + 0.42), FLp=-0.8, FRp=-0.8, LP=(-0.18, 0.1, 1.2), pel=(0, 0, 0.1))
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))
@@ -200,7 +373,7 @@ def clips():
     # ---- Cinderfall: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
     x0 = dict(BRACE, BE=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)
     x1 = dict(x0, pel=(0, -0.05, -0.17), BE=aim(0, 66), tor=(0.0, -0.12, -0.08))
-    out.append(C("x", 0.6, [(0.0, READY), (0.1, x0, "out"), (0.14, x1, "out"), (0.3, x0), (0.6, READY)]))
+    out.append(C("x", 0.6, [(0.0, READY), (0.06, READY), (0.14, x0, "out"), (0.18, x1, "out"), (0.3, x0), (0.6, READY)]))
 
     # ---- a knock: the cannon kicked up to rest on her shoulder, chin up, a grin
     k0 = dict(READY, BE=aim(6, 58), UA=(-6, -6), tor=(-0.08, 0.16, 0.05), hed=(-0.26, -0.14, 0.05), brow=-0.5, lid=0.2, LP=(-0.26, 0.05, 1.0))
@@ -217,7 +390,6 @@ def clips():
     dn = {"pel": (0, -0.08, -0.72), "prt": (-0.32, 0.3, 0.42), "tor": (0.2, 0, 0.0), "hed": (0.24, 0, 0.1), "FL": (-0.28, 0.42, A_Z - 0.03), "FR": (0.1, 0.5, A_Z - 0.03), "FLy": 0.6, "FRy": 0.2, "FLp": 0.5, "FRp": 0.4,
           "BE": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.3, 0, 0), hed=(0.38, 0, 0.1))), (2.4, dn)], loop=True))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), BE=aim(-16, -42))), (1.6, READY)]))
     dead = {"pel": (0, -0.1, -0.86), "prt": (-1.35, 0.1, 0.1), "tor": (0.1, 0.1, -0.1), "hed": (-0.1, 0.4, 0.3), "FL": (-0.2, 0.6, A_Z - 0.04), "FR": (0.16, 0.68, A_Z - 0.04), "FLy": 0.4, "FRy": -0.4, "FLp": 0.6, "FRp": 0.6,
             "BE": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
     out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, BE=aim(-20, -30)), "out"),
@@ -283,7 +455,11 @@ def extras_for(arm):
         out["thumb.L"] = (Quaternion(thumb_ax, 0.5 * f), None)
         out["launcher"] = (Quaternion(lax, -math.radians(178) * P.get("LN", 0.0)), None)
         out["gatling"] = (Quaternion(gax, P.get("GS", 0.0)), None)
-        out["coin"] = (Quaternion(cfl, P.get("CF", 0.0)), cup * (-P.get("CN", 0.0)))
+        cs = P.get("CS", 1.0)
+        out["coin"] = (Quaternion(cfl, P.get("CF", 0.0)), cup * (-P.get("CN", 0.0)), Vector((cs, cs, cs)))
+        if "x_breath" in arm.data.bones:
+            br = P.get("breath", 0.0)
+            out["x_breath"] = (None, None, Vector(1.0 + ax * br for ax in BREATH_AXES))
         return out
     return extras
 
@@ -291,10 +467,16 @@ def extras_for(arm):
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
-    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    for im in bpy.data.images:  # the atlas paths were saved relative to the stage root, not the blend: find them beside it
+        side = os.path.join(os.path.dirname(a[0]), os.path.basename(im.filepath))
+        if im.filepath and not os.path.exists(bpy.path.abspath(im.filepath)) and os.path.exists(side):
+            im.filepath = side
+            im.reload()
+    arm =next(o for o in bpy.data.objects if o.type == "ARMATURE")
     rig = {"grip_rest": tuple(VC.J("hand.R")), "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": VC.J("hips")[2], "hilt_l": 0.08,
            "lhand": {"k": (0, 1, 0), "o": (-1, 0, 0), "palm": tuple(VA.WR + np.array([0, 0, -0.05]))}}
     bpy.context.scene.render.fps = FPS
+    add_breath(arm, (BREATH_C[0], BREATH_C[1], BREATH_C[2] - BREATH_R[2]), rib_cage)
     sol = VexSolver(arm, rig)
     sol.cannon_rest = frame_of((0, 0, -1), (0, 1, 0))
     ex = extras_for(arm)
@@ -313,6 +495,6 @@ if __name__ == "__main__":
             o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=a[1], export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE", export_tangents=True,
+                              export_image_format="AUTO", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE", export_tangents=True,
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
     print("exported", os.path.getsize(a[1]))

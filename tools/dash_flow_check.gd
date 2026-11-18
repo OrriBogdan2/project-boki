@@ -6,7 +6,9 @@ extends RefCounted
 ## Item 51 (docs/decisions/0015-combo-flow.md): every slot against a ground dash, an air dash and a jump, cast
 ## mid-jump (jump rows), the move pressed in its recovery (into_dash / into_jump rows: acts within 0.1 s unless
 ## the row is an exception), and a hold carried through the move and let go there (hold rows). Every exception
-## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist).
+## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist). Landings
+## (_landings): a dash, a jump and every slot pressed as he lands from a hop, a fall, a glide or a dive is never lost
+## and, from the first step on the ground, acts as soon as it does standing.
 ## It walks DashFlow.SLOTS for every hero, so rows added later are covered. --dash-flow-check=<id>,<id> runs only
 ## those heroes. Never touches the save.
 
@@ -14,9 +16,11 @@ const QUIET_MAX := 900          # steps: the last trial's ability (an ult, a zon
 const DASH_WAIT := 40           # steps: a dash with a wind-up shows up within this
 const WATCH := 120              # steps after the press that we watch for the ability
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
+const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Hearth Call): a squad of 2
+const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
-## the press goes mid-dash; Zedran and Bjorn dash AS the attack (no slash or swing inside it:
+## the press goes mid-dash; Kael and Albert dash AS the attack (no slash or swing inside it:
 ## buffer), and their ult plants them, as Cinder's flight takes over (cancel).
 const SOURCE_ROWS := [
 	["archer", "ground", "lmb", "fire"], ["archer", "air", "lmb", "fire"],
@@ -28,10 +32,14 @@ const SOURCE_ROWS := [
 	["juggernaut", "ground", "x", "cancel"], ["bulwark", "ground", "x", "cancel"], ["ashwick", "ground", "x", "cancel"],
 ]
 
+## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
+## and one the source can't settle ("Not determinable: <why>") runs the default.
+const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
 var hunter: Hunter
+var ally: Hunter                # the idle teammate of a NEEDS_ALLY hero, else null
 var wait_s := 0.0               # how long after the dash's end a buffered press went off
 
 func ok(cond: bool, what: String) -> void:
@@ -68,6 +76,7 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		if rows:
 			_slot(m, hero, slot)
 		_combos(m, hero, slot)
+		_landings(m, hero, slot)
 		m.queue_free()
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
@@ -112,13 +121,12 @@ func _match(main: Node, hero: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else 1, "tier": 0, "length": 1e9,
+		"seed": 77, "no_drop": true,
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})
 	m.set_process(false)
-	for mob in m.mobs:
-		mob.queue_free()
-	m.mobs.clear()
+	_clear_mobs(m)
 	hunter = m.player
 	var world: World = m.world
 	var cx := int(floor(hunter.pos.x))
@@ -141,13 +149,23 @@ func _match(main: Node, hero: String) -> Match:
 	hunter.unlock_all()
 	hunter.lvl = 10
 	hunter.gear[0] = {"id": GLOVE, "rar": 1}
+	ally = null
 	for other in m.hunters:
-		if other != hunter:
-			other.ctrl = "idle"
+		if other == hunter:
+			continue
+		other.ctrl = "idle"
+		if other.team == hunter.team:
+			ally = other
+		else:
 			other.teleport(hunter.pos + Vector3(60, 0, 60))
 	set_meta("home", hunter.pos)
 	_steps(m, 20)
 	return m
+
+func _clear_mobs(m: Match) -> void:
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
 
 func _steps(m: Match, n: int) -> void:
 	for i in n:
@@ -158,7 +176,9 @@ func _steps(m: Match, n: int) -> void:
 func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
-		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running()
+		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
+		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
+				or _last_shot() >= 0 or k.commit_left() > 0.0      # (a move's committed recovery: Vex's E and X)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -167,6 +187,7 @@ func _ready_up(m: Match) -> void:
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
 		m.verbs._break_wall(wall)          # (the last trial's rocks and barriers would block this one's)
+	_clear_mobs(m)          # (mobs keep spawning: one in the dash lane stops a ram like Ashwick's on it)
 	hunter.teleport(get_meta("home"))
 	hunter.vel = Vector3.ZERO
 	hunter.hp = hunter.max_hp
@@ -178,11 +199,14 @@ func _ready_up(m: Match) -> void:
 	hunter.dashes = hunter.max_dashes()
 	hunter.ex_cd = 0.0
 	hunter.fire_cd = 0.0
-	hunter.reload_t = 0.0
 	hunter.ammo = maxi(hunter.ammo, int(hunter.wpn.get("mag", 0)))
 	hunter.inp["move"] = Vector2.ZERO
 	hunter.inp["fire"] = false
 	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
+	if ally:
+		ally.teleport(hunter.pos + ALLY_AT)
+		ally.hp = ally.max_hp
+		hunter.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
 	_steps(m, 2)
 
 ## Control: the slot goes off when pressed without a dash, on the ground or up in the air (some need ground in
@@ -258,6 +282,7 @@ func _snap() -> Dictionary:
 		"cd": k.cd.duplicate(), "ch": k.ch_rmb, "rmb_down": k.rmb_down, "e_t": k.e_t, "used": hunter.used.duplicate(),
 		"gear": float(hunter.gear_cd[0]), "fire_cd": hunter.fire_cd, "swing": hunter.swing_t, "draw": hunter.draw_t,
 		"mel": hunter.mel_hold, "ammo": hunter.ammo, "cast": cast_n.duplicate(), "shots": _last_shot(),
+		"wind": k.rmb_winding(),
 	}
 
 ## The id of the newest shot of the hunter's still in flight (a kit's own LMB, like darts, keeps no fire_cd).
@@ -280,7 +305,8 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 					or int(now["ammo"]) < int(b["ammo"]) or more.call("cast", "primary")
 		"rmb":
 			return more.call("used", "utility") or more.call("cd", "rmb") or more.call("cast", "secondary") \
-					or float(now["ch"]) < float(b["ch"]) or (bool(now["rmb_down"]) and not bool(b["rmb_down"]))
+					or float(now["ch"]) < float(b["ch"]) or (bool(now["rmb_down"]) and not bool(b["rmb_down"])) \
+					or (bool(now["wind"]) and not bool(b["wind"]))      # (a wind-up that throws by itself)
 		"e":
 			return more.call("used", "k1") or more.call("cd", "e") or up.call("e_t") or more.call("cast", "kin")
 		"x":
@@ -288,6 +314,89 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 		"q":
 			return up.call("gear")
 	return false
+
+# ------------------------------------------------------------------ a landing never holds a press
+## [m/s down at touchdown, under the glider]: a plain jump's hop, a terrace fall, a glide's end, a glide dive's
+## (it still lands ~25 m/s after the canopy's catch).
+const LAND_WAYS := {"hop": [6.8, false], "fall": [12.0, false], "glide": [2.5, true], "dive": [25.0, true]}
+## Steps run before the press: 0 the touchdown step (the press is read before the feet land: it may act as its air
+## version, but it is never lost), 1 the first step on the ground, 7 0.1 s into the absorb (the land clip owns the
+## body 0.2-0.4 s standing); from the ground on, it acts as soon as it does standing.
+const LAND_AT := {0: "on the touchdown step of", 1: "on the first step after", 7: "in the absorb of"}
+const LAND_WATCH := 30          # steps a press has to act in
+## Landing rows open at this merge ("<hero>:<press>:<way>:<steps in>" -> what); each fix removes its entry.
+const LAND_OPEN := {
+	"rimewright:lmb:fall:7": "never goes off 0.1 s into a fall's absorb (docs/DEBT.md)",
+}
+
+## A dash and a jump (in the first slot's match) and the slot, pressed as he lands and in the absorb after it, act:
+## a landing's absorb is the model's alone, never the keys'.
+func _landings(m: Match, hero: String, slot: String) -> void:
+	var presses: Array = ["dash", "jump", slot] if slot == DashFlow.SLOTS[0] else [slot]
+	for what: String in presses:
+		var stand := _act_steps(m, what, "", 0)
+		if stand < 0:
+			skipped += 1
+			print("DASHFLOW skip %s %s landings: it doesn't go off from a standstill here either" % [hero, what])
+			continue
+		for way: String in LAND_WAYS:
+			for after: int in LAND_AT:
+				var got := _act_steps(m, what, way, after)
+				var in_time := after == 0 or got <= stand
+				var row := "%s %s pressed %s a %s landing: acts in %d steps (standing %d)" % [
+						hero, what, LAND_AT[after], way, got, stand]
+				var open_key := "%s:%s:%s:%d" % [hero, what, way, after]
+				if LAND_OPEN.has(open_key) and not (got >= 0 and in_time):
+					print("DASHFLOW open %s: %s" % [row, LAND_OPEN[open_key]])
+				else:
+					ok(got >= 0 and in_time, row)
+
+## Steps from the press until it acts (-1: not within LAND_WATCH): standing (way ""), or landing from `way`, pressed
+## `after` steps into the landing (LAND_AT). Every key is let go after.
+func _act_steps(m: Match, what: String, way: String, after: int) -> int:
+	if what == "rmb":
+		hunter.set_arch(hunter.arch)       # (a fresh kit: Pip's last rmb would still hold the next trial's press)
+	_ready_up(m)
+	for i in QUIET_MAX:
+		if not AirLimits.glide_locked(hunter):
+			break
+		m.step(Match.DT)       # (the last trial's move still in its keys: a released Smash winds up 0.6 s)
+	if way != "":
+		var v: Array = LAND_WAYS[way]
+		hunter.pos.y += 0.01
+		hunter.grounded = false
+		hunter.gliding = v[1]
+		hunter.vel = Vector3(0, -float(v[0]), 0)
+		_steps(m, after)
+	var before := _snap()
+	match what:
+		"dash":
+			hunter.inp["move"] = Vector2(0, -1)
+			hunter.inp["dash"] = true
+		"jump":
+			hunter.inp["jump"] = true
+		_:
+			_press(what)
+	var got := -1
+	for i in LAND_WATCH:
+		m.step(Match.DT)
+		hunter.inp["fire"] = false
+		if _acted(what, before):
+			got = i + 1
+			break
+	hunter.inp["dash"] = false
+	hunter.inp["jump"] = false
+	if DashFlow.KEY_OF.has(what):
+		hunter.inp[DashFlow.KEY_OF[what]] = false      # (held, the next trial's press would not be a new one)
+	return got
+
+func _acted(what: String, before: Dictionary) -> bool:
+	match what:
+		"dash":
+			return hunter.ak.in_dash() or hunter.roll_t > 0.0
+		"jump":
+			return hunter.vel.y > 0.5 and not hunter.grounded
+	return _went_off(before, what)
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
 const ACT_S := 0.1              # s: owner rule, a jump or Shift out of an ability's recovery acts within this
@@ -314,12 +423,26 @@ func _combos(m: Match, hero: String, slot: String) -> void:
 		var row := _mode(hero, "into", slot, move)
 		var right := (out == "act") == (row in INTO_ACTS) and (row != "lock" or out == "lost")
 		_judge(right, out, "%s %s -> %s out of it: %s (row: %s)" % [hero, slot, move, out, row])
+	if slot != "q" and hero != "gil":
+		for in_air in [false, true]:
+			_space_sweep(m, hero, slot, in_air)
 	if not HOLD_KEYS.has(slot) or not _is_hold(m, slot):
 		return
 	for move in DashFlow.MOVES:
 		var kept := _hold(m, slot, move)
 		var hrow := _mode(hero, "hold", slot, move)
 		_judge(kept == hrow, kept, "%s hold %s through %s: %s (row: %s)" % [hero, slot, move, kept, hrow])
+		if hero in SOURCED_HOLDS:
+			_sourced_hold(hero, slot, move)
+
+## A hold row of a SOURCED_HOLDS hero names its source; one the source leaves open stays at the default.
+func _sourced_hold(hero: String, slot: String, move: String) -> void:
+	var row := DashFlow.hold_row_of(hero, slot, move)
+	var source := String(row["source"])
+	var unsettled := source.begins_with("Not determinable:")
+	var how: String = "not determinable, keep" if unsettled else row["mode"]
+	ok(source != "" and (not unsettled or row["mode"] == DashFlow.COMBINE["hold"]),
+			"%s hold %s through %s: sourced (%s)" % [hero, slot, move, how])
 
 ## A trial that couldn't be set up here ("n/a ...") is skipped, not judged.
 func _judge(right: bool, got: String, what: String) -> void:
@@ -418,15 +541,22 @@ func _moved(b: Dictionary, move: String) -> bool:
 	var started := (hunter.ak.in_dash() and not bool(b["dashing"])) or hunter.roll_t > float(b["roll"]) + 0.01
 	return spent or started
 
-## Control: held past the kit's threshold then let go on the ground, does `slot` go off on the release?
+## Control: held past the kit's threshold then let go on the ground, does `slot` go off on the release? A slot
+## that also goes off with the key still down is a tap with a wind-up (Grimble's hook coil), not a hold.
 func _is_hold(m: Match, slot: String) -> bool:
-	return _hold(m, slot, "") == "keep"
+	if _hold(m, slot, "") != "keep":
+		return false
+	var by_itself := _hold(m, slot, "", false) == "keep"
+	_hold_key(slot, false)
+	_steps(m, 1)
+	return not by_itself
 
 ## `slot` held, the move made with it still held (moving forward), then let go: right after a dash, or
 ## JUMP_RELEASE into a jump. "keep" (it went off on the release, and in the air kept KEEP_SPEED of the speed),
 ## "keep, stops" (went off but stopped the hunter), "cancel" (nothing came out), or "n/a" (it never started
 ## or went off by itself before the release).
-func _hold(m: Match, slot: String, move: String) -> String:
+## `let_go` false keeps the key down instead (the control: what goes off without a release).
+func _hold(m: Match, slot: String, move: String, let_go := true) -> String:
 	_fresh(m)
 	hunter.inp["move"] = Vector2(0, -1)
 	_hold_key(slot, true)
@@ -446,7 +576,7 @@ func _hold(m: Match, slot: String, move: String) -> String:
 	# aim ahead again: the move carried the hunter past the first aim point, and a release that steps toward the aim
 	# (a punch) would then throw them backward, which W's counter-steer brakes (Loco.air_step), not a "stop"
 	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
-	_hold_key(slot, false)
+	_hold_key(slot, not let_go)
 	for i in 12:
 		m.step(Match.DT)
 		if _released(before, _snap(), slot):
@@ -505,3 +635,88 @@ func _released(b: Dictionary, now: Dictionary, slot: String) -> bool:
 
 func _more(b: Dictionary, now: Dictionary, dict: String, key: String) -> bool:
 	return float(now[dict].get(key, 0)) > float(b[dict].get(key, 0)) + 0.0001
+
+# ------------------------------------------------------------------ Space in a recovery (docs/MOVEMENT_FEEL.md)
+const LOCK_MAX_S := 3.0         # s: the longest window after a cast searched for a Space lock (an ult's hold)
+const AIR_LIFT := 20.0          # m: still falling at the end of a long recovery (about 2 s of fall)
+const NOW_STEPS := 2            # steps: a press read this soon acted at once (read, then the first moved step)
+const SPACE_FRACS := [0.25, 0.5, 0.75]
+
+## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
+## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
+## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
+## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
+	var where := "air" if in_air else "ground"
+	var first := _space_at(m, slot, in_air, 0)
+	if first.begins_with("n/a"):
+		skipped += 1
+		print("DASHFLOW skip %s %s %s Space: %s" % [hero, slot, where, first])
+		return
+	var lock := 0 if first == "now" else _lock_steps(m, slot, in_air)
+	var locked: bool = String(DashFlow.into_row_of(hero, slot, "jump")["mode"]) == "lock"
+	var cells := []
+	var right := true
+	for frac in SPACE_FRACS:
+		var at := int(round(absi(lock) * frac))
+		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
+		cells.append(got)
+		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		if not locked and in_buffer and got == "never":
+			right = false
+	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]
+	ok(right, "%s %s %s Space: %s, at 25/50/75%%: %s%s" % [hero, slot, where, span, ", ".join(cells),
+			" (row: lock)" if locked else ""])
+
+## The first step after the cast at which a Space press acts at once (the lock's end), by halving; the search
+## assumes a press later in the recovery is never less free. Minus the steps searched when none acted at once
+## (within LOCK_MAX_S, or in the air before the fall from AIR_LIFT lands).
+func _lock_steps(m: Match, slot: String, in_air: bool) -> int:
+	var lo := 0
+	var hi := int(LOCK_MAX_S / Match.DT)
+	var at_hi := _space_at(m, slot, in_air, hi)
+	while at_hi.begins_with("n/a") and hi > 1:
+		hi /= 2
+		at_hi = _space_at(m, slot, in_air, hi)
+	if at_hi != "now":
+		return -hi
+	while hi - lo > 1:
+		var mid := (lo + hi) / 2
+		if _space_at(m, slot, in_air, mid) == "now":
+			hi = mid
+		else:
+			lo = mid
+	return hi
+
+## `slot` cast (standing, or falling from AIR_LIFT), then Space pressed `at` steps after it went off: "now"
+## (acted within NOW_STEPS), "end %.2fs" (acted that long after the press), "never", or "n/a ...".
+func _space_at(m: Match, slot: String, in_air: bool, at: int) -> String:
+	_fresh(m)
+	if in_air:
+		hunter.pos += Vector3(0, AIR_LIFT, 0)
+		hunter.grounded = false
+	var before := _snap()
+	_press(slot)
+	var went := false
+	for i in 30:
+		m.step(Match.DT)
+		hunter.inp["fire"] = false
+		if _went_off(before, slot):
+			went = true
+			break
+	if not went:
+		return "n/a: it doesn't go off here"
+	_steps(m, at)
+	if in_air and hunter.grounded:
+		return "n/a: landed first"
+	var y0 := hunter.pos.y
+	hunter.inp["jump"] = true
+	hunter.inp["glide"] = in_air
+	var got := "never"
+	for i in WATCH:
+		m.step(Match.DT)
+		if (in_air and hunter.gliding) or (hunter.vel.y > 0.5 and hunter.pos.y > y0 + 0.01):
+			got = "now" if i < NOW_STEPS else "end %.2fs" % (float(i + 1) * Match.DT)
+			break
+	hunter.inp["glide"] = false
+	return got

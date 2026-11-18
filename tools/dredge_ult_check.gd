@@ -3,13 +3,17 @@ extends RefCounted
 ## the 1.1s charge behind a growing fan everyone sees (a slow walk, the fan turning with the aim), two waves 0.6s
 ## apart of six slugs each (shots through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer
 ## further out, bond once per cast and only on a land, the stun that stops it, the other buttons locked while
-## it runs, no back bonus, the merge drop, the cooldown, the reel combo and the burst cap.
+## it runs, no back bonus, the merge drop, the cooldown, the reel combo and the burst cap; clarity: the fan in his
+## gold at AimKit's low fill, and no look over the bodies in it bigger than the scattergun's muzzle flash.
 
 const BURST := preload("res://tools/ult_burst.gd")
 const FACE_AWAY := PI / 2.0         # a target east of Grimble facing this way shows him its back
 
 var ak = null
 var ok_fn: Callable
+var widest_flash := 0.0             # m: the largest look DredgeBlast put up while its waves went (clarity)
+var sweeps := 0                     # crescents drawn across the fan (clarity: none)
+var plain_slugs := 0                # slugs still drawn as Match's plain sphere under their volley look (clarity: none)
 
 func _init(arch_check, ok_cb: Callable) -> void:
 	ak = arch_check
@@ -18,6 +22,18 @@ func _init(arch_check, ok_cb: Callable) -> void:
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
 
+## Clarity, each step of the waves: what LDFx is showing round him.
+func _scan_looks(K: DredgeKit) -> void:
+	for e: Dictionary in K.fx.live:
+		var kind := String(e["kind"])
+		if kind.begins_with("cres"):
+			sweeps += 1
+		if kind == "sunburst_bb":
+			widest_flash = maxf(widest_flash, (e["s0"] as Vector3).x)
+	for s: Dictionary in K.m.shots:
+		if s["by"] == K.h and (s["x"] as Dictionary).has("kx") and s["node"] != null:
+			plain_slugs += 1
+
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
 func _owed(P: Hunter) -> float:
 	var c: Dictionary = P.get_meta("bond_cast", {})
@@ -25,6 +41,7 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _charge_and_waves()
+	await _props()
 	await _guards()
 	await _burst()
 
@@ -75,6 +92,12 @@ func _charge_and_waves() -> void:
 		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
 		"len %.1f -> %.1f" % [len_a, len_b]
 	)
+	var fan_col: Color = fan.get("col", Color.BLACK)
+	ok(
+		"ult clarity: the fan is his gold at AimKit's own fill (the bodies in it stay readable)",
+		fan_col.is_equal_approx(AimKit.hero_col(P)) and float(fan.get("alpha", 9.0)) <= 1.0,
+		"col %s alpha %.2f" % [fan_col.to_html(false), float(fan.get("alpha", 9.0))]
+	)
 	var charge_k := P.flat_dist(p0) / 0.6 / maxf(0.01, run_v)
 	ok(
 		"ult: he walks slowly through the charge (about 30% of his speed)",
@@ -82,9 +105,12 @@ func _charge_and_waves() -> void:
 	)
 	# the cursor swings round to the south: the fan turns with it, and the waves go that way
 	ak.aim_at(P, P.pos + Vector3(0, 0, 4.0))
-	ak.step(m, 0.25, func(): P.inp["move"] = Vector2(0, 1))
+	var walk_scan := func():
+		P.inp["move"] = Vector2(0, 1)
+		_scan_looks(K)
+	ak.step(m, 0.25, walk_scan)
 	var p1 := P.pos
-	ak.step(m, 0.4, func(): P.inp["move"] = Vector2(0, 1))
+	ak.step(m, 0.4, walk_scan)
 	var fire_k := P.flat_dist(p1) / 0.4 / maxf(0.01, run_v)
 	var fdir: Vector2 = B.blast.get("dir", Vector2.ZERO)
 	ok(
@@ -94,7 +120,13 @@ func _charge_and_waves() -> void:
 	)
 	P.inp["move"] = Vector2.ZERO
 	ak.aim_at(P, P.pos + Vector3(4, 0, 0))
-	ak.step(m, 0.65)
+	ak.step(m, 0.65, _scan_looks.bind(K))
+	ok(
+		"ult clarity: no sweep over the fan, no plain sphere under a slug, a fist flash no bigger than the gun's",
+		B.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
+			and widest_flash <= DredgeBlast.MUZZLE_FLASH + 0.01,
+		"sweeps %d, plain slugs %d, widest flash %.2f m" % [sweeps, plain_slugs, widest_flash]
+	)
 	ok(
 		"ult: one press, two waves of six slugs through spawn_shot",
 		B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(),
@@ -155,7 +187,33 @@ func _charge_and_waves() -> void:
 	await _reel_combo(m, P, T, home)
 	await ak.done(m)
 
-## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.
+## The Broadside's slugs are Explosive (source): they break a crate and a pot and light a keg in the fan.
+func _props() -> void:
+	var r: Array = ak.setup("dredge", 1.6, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	P.lvl = 6
+	T.teleport(home + Vector3(-6.0, 0, -5.0))
+	T2.teleport(home + Vector3(-6.0, 0, 5.0))
+	var spots := {"crate": Vector3(3, 0, -1.2), "pot": Vector3(3, 0, 1.2), "keg": Vector3(4, 0, 0)}
+	var props := {}
+	for kind_s in spots:
+		var at: Vector3 = home + spots[kind_s]
+		at.y = m.world.ground_at(at.x, at.z)
+		m._add_break(kind_s, at)
+		props[kind_s] = m.breaks[-1]
+	_cast(P, home + Vector3(4, 0, 0))
+	ak.step(m, 2.2)
+	ok(
+		"ult props: the slugs break a crate and a pot and light a keg (Explosive)",
+		props["crate"]["dead"] and props["pot"]["dead"] and (props["keg"].has("fuse_t") or props["keg"]["dead"])
+	)
+	await ak.done(m)
+
+## Deep Reach, the foe hauled to your feet stunned, then the Broadside: every slug lands.
 func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var K: DredgeKit = P.ak
 	ak.fresh(T)

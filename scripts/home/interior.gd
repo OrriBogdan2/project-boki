@@ -2,7 +2,6 @@ extends Node3D
 ## Inside a building: walk around, hang out with the kin who live there, and decorate. Furniture
 ## sits on a tile grid; press B (or the Decorate button) to place, turn, move and put things away.
 
-const SPEED := 4.2
 const TILE := 1.0
 
 var room := "house"
@@ -17,6 +16,7 @@ var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
 var pface := PI
+var verbs := HomeVerbs.new()      # your garden moves (home_verbs.gd)
 var walk_ph := 0.0
 var decor: Array = []           # [{id, x, z, r}], the live list in the save (or a copy when visiting)
 var nodes: Array = []           # one Node3D per decor entry
@@ -36,7 +36,7 @@ var why := ""                   # why a piece can't go where it was tried
 var blocker := -1               # index of the piece in the way
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	R = Data.ROOMS.get(room, Data.ROOMS["house"])
 	W = int(R["w"]); D = int(R["d"])
 	_build_env()
@@ -212,7 +212,7 @@ func _blocked(x: float, z: float) -> bool:
 
 # ------------------------------------------------------------------ kin
 func _spawn_kin() -> void:
-	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else KinBox.farm())    # kin in the Kin Burrow stay asleep there
+	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else GardenZones.out_here())    # Burrow and other zones' Boki stay put
 	var active: String = (visit.get("active", "") if not visit.is_empty() else Save.d.get("active", ""))
 	var here: Array = []
 	for rec in roster:
@@ -273,8 +273,8 @@ func _move_player(d: float) -> void:
 	if panel_open == "" and not Overlay.is_open():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
-	var hv := Vector2(pvel.x, pvel.z)
-	hv += (mv * SPEED - hv) * (1.0 - exp(-14.0 * d))
+	var arch := String(Save.d.get("arch", ""))      # indoors walks as the farm and a match do
+	var hv := HunterMove.walk(Vector2(pvel.x, pvel.z), mv * HunterMove.speed(arch), HunterMove.accel(arch), 1.0, d)
 	var nx := ppos.x + hv.x * d
 	if not _blocked(nx, ppos.z): ppos.x = nx
 	var nz := ppos.z + hv.y * d
@@ -285,7 +285,8 @@ func _move_player(d: float) -> void:
 		pface = lerp_angle(pface, atan2(-hv.x, -hv.y), minf(1.0, d * 14.0))
 	player.rotation.y = pface
 	if not player.has_meta("anim"): player.set_meta("anim", HunterAnim.new(player))
-	(player.get_meta("anim") as HunterAnim).update(d, {"vel": pvel, "face": pface, "fired": 99.0, "holster": true})
+	var ps := {"vel": pvel, "face": pface, "fired": 99.0, "holster": true}
+	(player.get_meta("anim") as HunterAnim).update(d, ps.merged(verbs.step(d)))
 
 func _find_interact() -> void:
 	var best := {}; var bd := 1.3
@@ -311,24 +312,13 @@ func _use(it: Dictionary) -> void:
 		"journal": _open_journal()
 		"gramophone": _open_music()
 
-## Petting indoors counts just like outside: joy, likes, the memory and the first-day list.
+## Petting indoors counts just like outside: its personality's beat, joy, trust, likes and the memory.
 func _pet_kin(k: Dictionary) -> void:
-	var rec: Dictionary = k["rec"]
-	Sfx.play("kin_happy", null, -4.0)
-	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
-	k["t"] = 1.2; k["goal"] = k["pos"]
-	if not visit.is_empty():
-		return
-	var loves_pet: bool = rec.get("likes", {}).get("play", "") == "pet"
-	var now_s := Time.get_ticks_msec() / 1000.0
-	if now_s >= float(k.get("pet_ok", 0.0)):
-		k["pet_ok"] = now_s + 20.0
-		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
-	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
-	if int(rec.get("pet_m", -1)) != int(Save.d["matches"]):
-		rec["pet_m"] = int(Save.d["matches"])
-		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
-	Save.save_game()
+	HomeVerbs.come_in(k, ppos)      # it steps into your hands' reach first
+	PetReact.pet(self, k, visit.is_empty())
+	if visit.is_empty():
+		Save.save_game()
+	pface = atan2(-(k["pos"].x - ppos.x), -(k["pos"].z - ppos.z))      # turn to it
 
 func _leave() -> void:
 	if decorating: dec.toggle()

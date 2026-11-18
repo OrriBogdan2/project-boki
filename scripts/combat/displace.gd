@@ -16,7 +16,8 @@ extends RefCounted
 ##   ["disp", "vy",   nid, vy]                           a spike: falling at least this fast
 ##   ["disp", "tow",  nid, by_nid, params]               a tow starts (params: see tow())
 ##   ["disp", "stop", nid]                               the caster's game ended it
-##   ["disp", "end",  nid, why]                          the owner's game ended it: arrived | walled | time | gone
+##   ["disp", "end",  nid, why]                          the owner's game ended it: arrived | walled | time |
+##                                                       gone | knocked (a newer knock took over: knocked())
 ##   ["disp", "yank", nid, x, y, z, dur, hop]            Verbs.yank on a body another game owns
 
 const CLIFF := 1.2           # m: a rise past which a hauled body is lifted onto the ground ahead instead of walking up
@@ -24,6 +25,7 @@ const MAX_T := 5.0           # s: the longest tow another game may ask for
 const MAX_SPD := 40.0        # m/s: the fastest
 const ARRIVE := 0.05         # m: a tow toward an anchor has arrived this close to its gap
 const MIRROR_GRACE := 0.4    # s a mirror waits past its time for the owner's "end" (the reply's trip)
+const KNOCK_MIN := 2.5       # m/s (after mass and resist): a shove this fast is a knock (it takes over); slower nudges
 
 ## What a hit's options carry beyond the fixed hit fields (Match.net_send_hit), so a knock on a body another
 ## game owns lands the same there: its wall-slam stun, steer, weight, diminishing returns, burn time, slow
@@ -53,10 +55,37 @@ func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
 
-## Spiked down: it falls at least `vy` (a negative speed) fast.
-func spike(e: Ent, vy: float) -> void:
+# ------------------------------------------------------------------ a knock on a body already moving
+## A knock on a body already flying from one (another knock, a reel, a slide, a push): the newer one takes
+## over. Its speed replaces the old flight (no adding, no immunity window), it ends a tow on that body, and the
+## wall stun is the newer knock's: the wall-slam lockout re-arms and an older knock's longer stun is dropped.
+## A tow starting on a knocked body takes over the same way (tow()). Source (docs/decisions/0022): SUPERVIVE's
+## data has only Knockback / KnockbackResist multipliers (1.0) and no immunity, and every wall stun belongs to
+## the ability that threw you into the wall.
+
+## The flat velocity after a shove of `s` m/s along `dir`: a knock sets it; a nudge only tops it up along `dir`.
+static func knock_speed(hv: Vector2, dir: Vector2, s: float) -> Vector2:
+	if s >= KNOCK_MIN:
+		return dir * s
+	var along := hv.dot(dir)
+	return hv + dir * (maxf(along, s) - along)
+
+## A knock just landed on `h` on its own game (Hunter.impulse).
+func knocked(h: Hunter) -> void:
+	var rec := towing(h)
+	if not rec.is_empty() and not rec["mirror"]:
+		_finish(rec, "knocked")
+	h.wslam_t = 0.0
+	if h.wallstun_at < m.time:
+		h.wallstun = 0.0
+
+## Spiked down: it falls at least `vy` (a negative speed) fast; a glider slammed hard enough is spiked
+## out of the air (GlideSpike.slam, on the game that owns the body) and `by` gets the credit here.
+func spike(e: Ent, vy: float, by: Ent) -> void:
+	if GlideSpike.spikes(e, vy):
+		GlideSpike.credit(by)
 	if not e.remote:
-		e.vel.y = minf(e.vel.y, vy)
+		GlideSpike.slam(e, vy)
 	else:
 		_send(["vy", e.nid, m._r(vy)])
 
@@ -81,10 +110,17 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
 		"mirror": e.remote, "hauled": 0}
 	tows.append(rec)
+	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
-	elif p.get("unroll", false) and e is Hunter:
-		(e as Hunter).roll_t = 0.0
+	elif e is Hunter:
+		var h := e as Hunter
+		if p.get("unroll", false):
+			h.roll_t = 0.0
+		if h.knock_t > 0.0:
+			h.knock_t = 0.0             # the tow takes over a knock's flight
+			h.vel.x = 0.0
+			h.vel.z = 0.0
 	return rec
 
 func towing(e: Ent) -> Dictionary:
@@ -152,8 +188,8 @@ func _step(rec: Dictionary, e: Ent, dt: float) -> String:
 func _toward(e: Ent, dir: Vector2, step: float) -> String:
 	var nx := e.pos.x + dir.x * step
 	var nz := e.pos.z + dir.y * step
-	var bx: float = m.world.occupy(nx, e.pos.z, e.r, e.pos.y, false)
-	var bz: float = m.world.occupy(e.pos.x, nz, e.r, e.pos.y, false)
+	var bx: float = m.world.occupy(nx, e.pos.z, e.hull_r(), e.pos.y, false)
+	var bz: float = m.world.occupy(e.pos.x, nz, e.hull_r(), e.pos.y, false)
 	if bx == 0.0: e.pos.x = nx
 	if bz == 0.0: e.pos.z = nz
 	return "walled" if bx != 0.0 and bz != 0.0 else ""
@@ -166,7 +202,9 @@ func _reel(rec: Dictionary, e: Ent, to: Vector2, dist: float, gap: float, dt: fl
 		e.stun_t = maxf(e.stun_t, float(p["stun"]))
 	var want := to / dist * float(p["spd"])
 	var sw := float(p.get("swing", 0.0))
-	var v: Vector2 = (rec["v"] as Vector2).lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 else want
+	var v: Vector2 = rec["v"]
+	# full speed from the grab (the source's reel has no wind-up); after that it eases onto each new heading
+	v = v.lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 and v != Vector2.ZERO else want
 	rec["v"] = v
 	var left := minf(v.length() * dt, dist - gap)
 	var dir := v.normalized() if v.length() > 0.01 else to / dist
@@ -185,7 +223,7 @@ func _drag(rec: Dictionary, fe: Ent, dir: Vector2, dist: float) -> float:
 		var nx := fe.pos.x + dir.x * s
 		var nz := fe.pos.z + dir.y * s
 		var gy: float = W.ground_at(nx, nz)
-		if not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0:
+		if not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.hull_r(), fe.pos.y) > 0.0:
 			break
 		var face: float = W.ground_at(nx + dir.x * fe.r, nz + dir.y * fe.r)
 		# a body already falling into the abyss isn't saved
@@ -193,7 +231,7 @@ func _drag(rec: Dictionary, fe: Ent, dir: Vector2, dist: float) -> float:
 		if standing and face > World.VOID + 1.0 and face - fe.pos.y > CLIFF:
 			fe.pos.y = face + 0.5          # hauled up a cliff face
 			fe.vel.y = maxf(fe.vel.y, 5.0)
-		if W.occupy(nx, nz, fe.r, fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
+		if W.occupy(nx, nz, fe.hull_r(), fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
 			# a rock or a prop in the way: haul the body up and over it to the first clear spot beyond
 			var k := _over(fe, dir, W, s)
 			if k <= 0.0:
@@ -217,7 +255,7 @@ func _over(fe: Ent, dir: Vector2, W: World, from: float) -> float:
 		var qy: float = W.ground_at(qx, qz)
 		if qy - fe.pos.y > CLIFF:
 			return 0.0
-		if W.occupy(qx, qz, fe.r, maxf(fe.pos.y, qy), false) == 0.0:
+		if W.occupy(qx, qz, fe.hull_r(), maxf(fe.pos.y, qy), false) == 0.0:
 			fe.pos = Vector3(qx, maxf(fe.pos.y, qy) + 0.5, qz)
 			fe.vel.y = maxf(fe.vel.y, 5.0)
 			return k
@@ -308,7 +346,7 @@ func net_in(x: Array) -> void:
 	match kind:
 		"tp": if x.size() >= 6: body.teleport(Vector3(x[3], x[4], x[5]))
 		"kb": if x.size() >= 6: body.impulse(Vector2(x[3], x[4]), float(x[5]))
-		"vy": if x.size() >= 4: body.vel.y = minf(body.vel.y, float(x[3]))
+		"vy": if x.size() >= 4: GlideSpike.slam(body, float(x[3]))
 		"yank": if x.size() >= 8: m.verbs.yank(body, Vector3(x[3], x[4], x[5]), float(x[6]), float(x[7]))
 		"stop":
 			var rs := towing(body)

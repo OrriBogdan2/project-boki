@@ -1,0 +1,706 @@
+{
+ "_doc": "One entry per game cue to re-source. cue = the audio/<cue>.wav name the game loads (takes <cue>_1.. are extra variants); mode = oneshot (events) or loop (steady stretch); trim_max = longest clip kept (s); src_max = longest source event considered (s); pos = [regex, weight] on the library path (lowercase), a soft prior; neg = excluded paths; fit = measured clip shape the sound should have: feature -> [zero_below, full_from, full_to, zero_above, weight] (features in sfxclip.features); why = what a good one is. tester = its candidates also go to the in-game Sound tester; picks = how many candidates (letters A-H) to keep, default 4.",
+ "slots": [
+  {
+   "id": "ghost_shot",
+   "label": "Vex: basic attack (rifle shot)",
+   "cue": "vn_rifle",
+   "mode": "oneshot",
+   "trim_max": 0.45,
+   "src_max": 3.5,
+   "pos": [
+    [
+     "single.?shot|shot single|shot_single",
+     4
+    ],
+    [
+     "assault|rifle|blaster|laser|plasma|future weapons|sci-?fi weapon",
+     3
+    ],
+    [
+     "shot|fire|shoot",
+     1
+    ]
+   ],
+   "neg": "reload|cock|impact|hit|burst|auto|tail|distant|[0-9]+m_|shell|foley|handling|eject|insert|bullet.?by|ricochet|whiz",
+   "fit": {
+    "len": [
+     0.05,
+     0.1,
+     0.35,
+     0.6,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     6,
+     16,
+     2
+    ],
+    "centroid": [
+     500,
+     1000,
+     4500,
+     7500,
+     2
+    ],
+    "low": [
+     0.02,
+     0.1,
+     0.6,
+     0.9,
+     1.5
+    ],
+    "decay_ms": [
+     0,
+     30,
+     260,
+     500,
+     1
+    ]
+   },
+   "why": "a short, hard crack that can repeat fast without smearing",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "ghost_reload",
+   "label": "Vex: reload",
+   "cue": "reload",
+   "mode": "oneshot",
+   "trim_max": 0.8,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "reload",
+     5
+    ],
+    [
+     "cock|chamber|bolt|slide|mag|clip|insert|click|load",
+     3
+    ],
+    [
+     "gun|rifle|weapon|blaster|future",
+     1
+    ]
+   ],
+   "neg": "ambien|voice|soldier|cover|shotgun.?shell|footstep|impact|bio",
+   "fit": {
+    "len": [
+     0.15,
+     0.3,
+     0.8,
+     1.3,
+     2
+    ],
+    "centroid": [
+     1500,
+     2500,
+     6500,
+     10000,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     10,
+     25,
+     1.5
+    ],
+    "flat": [
+     0,
+     0.01,
+     0.5,
+     0.9,
+     0.5
+    ]
+   },
+   "why": "a mechanical ratchet and clack, not a shot",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "dash_ground",
+   "label": "Dash on the ground (foot scuff or slide, then a short whoosh)",
+   "cue": "dash_ground",
+   "mode": "oneshot",
+   "trim_max": 0.4,
+   "src_max": 2.5,
+   "pos": [
+    [
+     "scuff|slide|skid|drag|scrape|shuffle|sprint|dash|lunge",
+     3
+    ],
+    [
+     "whoosh|swoosh|swish|swipe|woosh",
+     2
+    ],
+    [
+     "foot|shoe|boot|cloth|gravel|dirt|dust",
+     1
+    ]
+   ],
+   "neg": "ambien|vocal|voice|trailer|cinematic|riser|rise|fall|impact|bullet|jet|car|bomb|explos|metal|sword|camera|battery|click|purse|choke|electronic|beep",
+   "fit": {
+    "len": [
+     0.12,
+     0.2,
+     0.4,
+     0.7,
+     2
+    ],
+    "centroid": [
+     500,
+     1200,
+     4500,
+     8000,
+     2
+    ],
+    "flat": [
+     0.03,
+     0.1,
+     1,
+     1.1,
+     1
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     80,
+     200,
+     1.5
+    ]
+   },
+   "why": "a short foot scuff or slide with a whoosh over it: loudest at the start, some low body",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "dash_air",
+   "label": "Dash in the air (wind whoosh, no ground)",
+   "cue": "dash_air",
+   "mode": "oneshot",
+   "trim_max": 0.4,
+   "src_max": 2.5,
+   "pos": [
+    [
+     "wind|air|whoosh|swoosh|swish|flyby|pass|gust",
+     3
+    ],
+    [
+     "fast|quick|short|airy|soft",
+     1
+    ]
+   ],
+   "neg": "footstep|step|scuff|slide|skid|drag|ambien|vocal|voice|trailer|cinematic|riser|rise|impact|hit|bullet|jet|car|bomb|explos|metal|sword|gravel|electronic|beep|chatter|buzz|ghost|female|male|zip|creature|monster|magic",
+   "fit": {
+    "len": [
+     0.15,
+     0.25,
+     0.5,
+     0.9,
+     2
+    ],
+    "centroid": [
+     1000,
+     2000,
+     6000,
+     9500,
+     2
+    ],
+    "flat": [
+     0.05,
+     0.2,
+     1,
+     1.1,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     10,
+     160,
+     320,
+     1
+    ]
+   },
+   "why": "a soft airy rush of wind, no thud or scrape, swelling and gone",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "glide_start",
+   "label": "Glide: start (cloth snap)",
+   "cue": "glider_snap",
+   "mode": "oneshot",
+   "trim_max": 0.55,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "flap|snap|unfold|open|cloth|wing|sail|flag|fabric|parachute",
+     4
+    ],
+    [
+     "whoosh|swoosh|air|wind",
+     2
+    ],
+    [
+     "short|quick",
+     1
+    ]
+   ],
+   "neg": "footstep|ambien|vocal|voice|trailer|riser|bullet|jet|car|engine|bird|flies|insect|fly |punch|combat|gore|battery|pill|bottle|camera|zip|compartment|aspirin",
+   "fit": {
+    "len": [
+     0.15,
+     0.25,
+     0.6,
+     1.0,
+     2
+    ],
+    "centroid": [
+     600,
+     1200,
+     5000,
+     8000,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     40,
+     120,
+     1.5
+    ],
+    "flat": [
+     0.02,
+     0.08,
+     1,
+     1.1,
+     1
+    ]
+   },
+   "why": "a cloth or sail snap that opens into a little air",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "glide_loop",
+   "label": "Glide: loop (steady wind)",
+   "cue": "glider_wind",
+   "mode": "loop",
+   "trim_max": 1.8,
+   "src_max": 12.0,
+   "pos": [
+    [
+     "wind|air|whoosh|swoosh|swish|flyby|pass|riser|noise|rush|transition",
+     3
+    ],
+    [
+     "loop|steady|sustain|hum|drone|texture",
+     2
+    ]
+   ],
+   "neg": "voice|vocal|footstep|impact|hit|gun|explosion|laugh|scream|music|melod",
+   "fit": {
+    "env_cv": [
+     -1,
+     0,
+     0.045,
+     0.12,
+     3
+    ],
+    "centroid": [
+     250,
+     500,
+     3000,
+     6000,
+     2
+    ],
+    "flat": [
+     0.02,
+     0.08,
+     1,
+     1.1,
+     2
+    ],
+    "rise": [
+     0.5,
+     0.8,
+     1.3,
+     2,
+     1.5
+    ]
+   },
+   "why": "a steady air bed with no beat or pitch movement, joined seamlessly",
+   "tester": true,
+   "picks": 6
+  },
+  {
+   "id": "take_damage",
+   "label": "Hit taken (hurt grunt)",
+   "cue": "hurt",
+   "mode": "oneshot",
+   "trim_max": 0.5,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "hurt|pain|grunt|oof|hit.?react|damage",
+     4
+    ],
+    [
+     "vocal|fighter|male|female|human",
+     2
+    ],
+    [
+     "punch|impact",
+     1
+    ]
+   ],
+   "neg": "monster|creature|growl|roar|dragon|troll|zombie|scream|death|die|dying|laugh|pony|footstep|dog|cat|ambien",
+   "fit": {
+    "len": [
+     0.1,
+     0.2,
+     0.5,
+     0.9,
+     2
+    ],
+    "centroid": [
+     350,
+     600,
+     2600,
+     4500,
+     2
+    ],
+    "flat": [
+     -1,
+     0,
+     0.12,
+     0.4,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     50,
+     120,
+     1
+    ]
+   },
+   "why": "a short wordless grunt of pain, no scream or words"
+  },
+  {
+   "id": "hit_confirm",
+   "label": "Hit dealt",
+   "cue": "hit",
+   "mode": "oneshot",
+   "trim_max": 0.3,
+   "src_max": 2.0,
+   "pos": [
+    [
+     "hit|impact|punch|thud|smack",
+     3
+    ],
+    [
+     "flesh|body|bullet.?impact|slap|combat",
+     3
+    ],
+    [
+     "small|short|light|tight",
+     1
+    ]
+   ],
+   "neg": "whoosh|swing|vocal|voice|ambien|cinematic|trailer|explosion|metal.?hit|glass|car|ball|golf|tennis|door|stick|hand ?guns|pistol|gun|gore|wet|8.?bit|combo|dirt",
+   "fit": {
+    "len": [
+     0.04,
+     0.08,
+     0.28,
+     0.5,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     5,
+     14,
+     2
+    ],
+    "centroid": [
+     400,
+     900,
+     3500,
+     6000,
+     2
+    ],
+    "low": [
+     0.05,
+     0.15,
+     0.65,
+     0.9,
+     1.5
+    ]
+   },
+   "why": "a tight dull thud that reads as a landed hit"
+  },
+  {
+   "id": "knockout",
+   "label": "Knockout (big confirm hit)",
+   "cue": "knock_confirm",
+   "mode": "oneshot",
+   "trim_max": 1.0,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "impact|boom|slam|hit",
+     3
+    ],
+    [
+     "baxter|impactus|cinematic|heavy|big|deep|sub|final|knock|ko\\b|sting",
+     3
+    ],
+    [
+     "bodyfall|body fall",
+     1
+    ]
+   ],
+   "neg": "ambien|loop|vocal|voice|trailer|riser|whoosh|knocking|door|bottle|glass|car |scrape|gun|pistol|bullet|magic",
+   "fit": {
+    "len": [
+     0.35,
+     0.6,
+     1.1,
+     1.8,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     10,
+     25,
+     2
+    ],
+    "low": [
+     0.1,
+     0.25,
+     0.75,
+     0.95,
+     2
+    ],
+    "centroid": [
+     250,
+     500,
+     3000,
+     6000,
+     1.5
+    ]
+   },
+   "why": "a heavy hit with a short tail that cuts through a fight"
+  },
+  {
+   "id": "scan_capture",
+   "label": "Scan / capture pop",
+   "cue": "scan_pop",
+   "mode": "oneshot",
+   "trim_max": 1.1,
+   "src_max": 3.0,
+   "pos": [
+    [
+     "scan|beep|ping|chime|pop|bleep|blip|interface|sci-?fi|computer|confirm|select|bell",
+     3
+    ],
+    [
+     "magic|sparkle|twinkle|shimmer|reward|collect|pickup",
+     2
+    ]
+   ],
+   "neg": "voice|vocal|footstep|gun|explosion|impact|hit|door|laugh|scream|ambien|engine|whoosh|swoosh|baby|babies|kids|crying|purse|servo|drill|bulbul|boiling|spill|metal",
+   "fit": {
+    "len": [
+     0.25,
+     0.45,
+     1.1,
+     1.8,
+     2
+    ],
+    "centroid": [
+     1500,
+     2500,
+     6500,
+     10000,
+     2
+    ],
+    "flat": [
+     -1,
+     0,
+     0.15,
+     0.4,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     12,
+     30,
+     1
+    ]
+   },
+   "why": "a bright tonal blip that pops and rings out"
+  },
+  {
+   "id": "extract",
+   "label": "Extract (success sting)",
+   "cue": "extract_ok",
+   "mode": "oneshot",
+   "trim_max": 3.0,
+   "src_max": 6.0,
+   "pos": [
+    [
+     "success|win|victory|complete|completed|reward|achievement|fanfare|positive|upgrade|sting|chime|harp|bell|ascend|rise",
+     3
+    ],
+    [
+     "sci-?fi|interface|game|ui|cartoon",
+     1
+    ]
+   ],
+   "neg": "voice|vocal|footstep|gun|explosion|impact|door|laugh|scream|ambien|engine|fail|lose|sad|horror|dark|drone|baby|babies|kids|crying|purse|servo|drill|bulbul|eerie|glitch|corrupt|notification",
+   "fit": {
+    "len": [
+     0.9,
+     1.5,
+     2.8,
+     4,
+     2
+    ],
+    "flat": [
+     -1,
+     0,
+     0.2,
+     0.5,
+     2
+    ],
+    "centroid": [
+     800,
+     1500,
+     5500,
+     9000,
+     2
+    ],
+    "rise": [
+     0.6,
+     1.0,
+     3,
+     5,
+     1.5
+    ]
+   },
+   "why": "a clean rising sting that lands and fades, tonal"
+  },
+  {
+   "id": "ui_click",
+   "label": "UI click",
+   "cue": "click",
+   "mode": "oneshot",
+   "trim_max": 0.2,
+   "src_max": 1.5,
+   "pos": [
+    [
+     "click|tap|press|button|select|confirm",
+     4
+    ],
+    [
+     "ui|interface|menu|hud",
+     2
+    ],
+    [
+     "short|soft|tight",
+     1
+    ]
+   ],
+   "neg": "camera|shutter|barista|grinder|coffee|stick|hockey|mechanical|keyboard|typewriter|triple|double|multi|knob|switch.?off|lighter",
+   "fit": {
+    "len": [
+     0.02,
+     0.04,
+     0.16,
+     0.35,
+     2
+    ],
+    "attack_ms": [
+     -1,
+     0,
+     3,
+     8,
+     2
+    ],
+    "centroid": [
+     1200,
+     2200,
+     6500,
+     10000,
+     2
+    ],
+    "decay_ms": [
+     0,
+     5,
+     90,
+     200,
+     1.5
+    ]
+   },
+   "why": "a tiny dry tick, nothing to ring"
+  },
+  {
+   "id": "level_up",
+   "label": "Level up",
+   "cue": "level_up",
+   "mode": "oneshot",
+   "trim_max": 2.2,
+   "src_max": 6.0,
+   "pos": [
+    [
+     "level|level.?up|upgrade|achievement|reward|success|positive|power.?up|ascend|rise|chime|harp|sparkle|bell|win|fanfare",
+     3
+    ],
+    [
+     "sci-?fi|interface|game|ui|cartoon",
+     1
+    ]
+   ],
+   "neg": "voice|vocal|footstep|gun|explosion|impact|door|laugh|scream|ambien|engine|fail|lose|sad|horror|dark|drone|baby|babies|kids|crying|purse|servo|drill|bulbul",
+   "fit": {
+    "len": [
+     0.6,
+     1.0,
+     2.0,
+     3.0,
+     2
+    ],
+    "flat": [
+     -1,
+     0,
+     0.2,
+     0.5,
+     2
+    ],
+    "centroid": [
+     1200,
+     2000,
+     6000,
+     9500,
+     2
+    ],
+    "rise": [
+     0.8,
+     1.2,
+     3.5,
+     6,
+     2
+    ]
+   },
+   "why": "a short upward chime flourish, tonal, with a sparkle top"
+  }
+ ]
+}

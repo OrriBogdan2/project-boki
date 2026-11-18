@@ -2,20 +2,21 @@ class_name Loco
 extends RefCounted
 ## ONE movement model for the farm avatar (Home) and every match hunter (Hunter, the Training Area too): ground,
 ## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0022). Numbers
-## come from content/rules/tuning.json, re-read live while the F7 readout is open (FsmReadout).
+## come from content/rules/tuning.json, re-read live while the movement readout is open (MoveReadout).
 
-enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED, STUNNED}
-const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked", "Stunned"]
+enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED}
+const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked"]
 ## Where each state may go. Gliding is entered only from the air or a dash (never the ground: no hold-to-glide
-## off a jump), and entering a dash folds the glider (exit hook): never both at once.
+## off a jump), and entering a dash folds the glider (exit hook): never both at once. Mantling is the ledge rise
+## (and a jump pad's mantle). Any state may dash (a kit's rush or a pull moves a knocked hunter too); a stun is
+## a status, not a state: it stops your keys, and the glider's guard (HunterLoco) asks it.
 const TABLE := {
-	S.GROUNDED: [S.AIRBORNE, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.AIRBORNE: [S.GROUNDED, S.GLIDING, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.GLIDING: [S.AIRBORNE, S.GROUNDED, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.DASHING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.MANTLING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.KNOCKED, S.STUNNED],
-	S.KNOCKED: [S.GROUNDED, S.AIRBORNE, S.STUNNED],
-	S.STUNNED: [S.GROUNDED, S.AIRBORNE, S.KNOCKED],
+	S.GROUNDED: [S.AIRBORNE, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.AIRBORNE: [S.GROUNDED, S.GLIDING, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.GLIDING: [S.AIRBORNE, S.GROUNDED, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.DASHING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.MANTLING, S.KNOCKED],
+	S.MANTLING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.DASHING, S.KNOCKED],
+	S.KNOCKED: [S.GROUNDED, S.AIRBORNE, S.DASHING, S.MANTLING],
 }
 const PATH := "res://content/rules/tuning.json"
 
@@ -25,7 +26,6 @@ static var air_counter := 0.0
 static var air_side := 0.0
 static var air_drag := 0.0
 static var air_idle_drag := 0.0
-static var glide_accel := 0.0
 static var glide_turn := 0.0
 static var glide_turn_fast := 0.0
 static var glide_brake := 0.0
@@ -35,8 +35,11 @@ static var glide_drag_steer := 0.0
 static var glide_coast := 0.0
 static var glide_catch := 0.0
 static var glide_max := 0.0
+static var glide_swoop := 0.0
+static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
+static var dash_glide_ease := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -55,7 +58,6 @@ static func load_tuning() -> bool:
 	air_drag = a["drag"]
 	air_idle_drag = a["idle_drag"]
 	var g: Dictionary = T["glide"]
-	glide_accel = g["accel"]
 	glide_turn = g["turn"]
 	glide_turn_fast = g["turn_fast"]
 	glide_brake = g["brake"]
@@ -65,8 +67,11 @@ static func load_tuning() -> bool:
 	glide_coast = g["coast"]
 	glide_catch = g["catch"]
 	glide_max = g["max"]
+	glide_swoop = g["swoop"]
+	glide_swoop_fade = g["swoop_fade"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
+	dash_glide_ease = T["dash_glide"]["ease_t"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
@@ -74,30 +79,29 @@ static func poll() -> void:
 	if FileAccess.get_modified_time(PATH) != _mtime:
 		load_tuning()
 
-## A fresh locomotion state machine for one mover; the local player's is labelled "loco" (Fsm.live, the F7 readout).
-static func machine(label := "") -> Fsm:
-	return Fsm.new(NAMES, TABLE, S.GROUNDED, label)
+## A fresh locomotion state machine for one mover.
+static func machine() -> Fsm:
+	return Fsm.new(NAMES, TABLE, S.GROUNDED)
 
 ## The most speed this hunter carries from Shift into a glide before carry_drag bites (m/s).
 static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
 
-## A dash's speed share at `u` (0..1 through it) for this hunter, and how much longer it runs (speed scale
-## and ease from tuning.json dash_ease; flat 1.0 for a hunter not listed). The ease averages 1 over the dash.
-static func dash_k(arch: String, u: float) -> float:
-	var e: Dictionary = T["dash_ease"].get(arch, {})
-	if e.is_empty():
-		return 1.0
-	return float(e["speed"]) * (1.0 - float(e["ease"]) * cos(TAU * u))
+## Seconds after an air dash ends that a fresh glide press still counts as a press in the dash (DashGlide).
+static func dash_glide_grace(arch: String) -> float:
+	var g: Dictionary = T["dash_glide"]["grace"]
+	return float(g.get(arch, g["default"]))
 
-static func dash_time_k(arch: String) -> float:
-	return 1.0 / float(T["dash_ease"].get(arch, {}).get("speed", 1.0))
+## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
+## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).
+static func dash_speed(arch: String) -> float:
+	return float(T["dash_speed"].get(arch, 1.0))
 
-## A dash's velocity with `left` of its `total` s to go: `v` (its direction x its flat speed) through the hunter's
-## ease. The farm avatar and a match hunter both dash through this, so a Shift feels the same everywhere.
-static func dash_hv(v: Vector2, arch: String, left: float, total: float) -> Vector2:
-	return v * dash_k(arch, 1.0 - left / maxf(total, left))
+## A dash's velocity: `v` (its direction x its speed) at the hunter's dash_speed. The farm avatar and a match
+## hunter both dash through this, so a Shift feels the same everywhere.
+static func dash_hv(v: Vector2, arch: String) -> Vector2:
+	return v * dash_speed(arch)
 
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.
@@ -140,6 +144,11 @@ static func air_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vecto
 	across = across.move_toward(Vector2.ZERO, a * air_side)
 	return (wd * along + across).limit_length(maxf(s, cap))
 
+## Vertical speed the step the glider opens: falling at least HunterMove.glide_start_vy ([game data]
+## GlideStartFallSpeedMin), so a rising jump is cut and an open never adds speed.
+static func glide_start(vy: float) -> float:
+	return minf(vy, -HunterMove.glide_start_vy)
+
 ## One glide step. `wish` = keys x cruise speed `gs`; `carry` = the most this hunter carries from Shift. Speed
 ## above cruise bleeds back within ~1.5 s (glide_drag; glide_drag_steer while steering), faster above `carry`;
 ## at or under cruise the glider pulls toward where you steer; a let-go coasts. Turns in wider arcs when fast.
@@ -155,7 +164,7 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	if ws < 0.05:
 		return hv if s > gs else hv.move_toward(Vector2.ZERO, glide_coast * dt)
 	if s <= gs + 0.05:
-		return hv.move_toward(wish, glide_accel * dt)
+		return hv.move_toward(wish, HunterMove.glide_accel * dt)
 	var d := hv / s
 	var ang := d.angle_to(wish / ws)
 	if absf(ang) > deg_to_rad(glide_brake_deg):
@@ -165,7 +174,7 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	return d.rotated(clampf(ang, -rate * dt, rate * dt)) * s
 
 # ---------------------------------------------------------------- the movement readout's numbers
-## The local mover writes these each step (no allocation); FsmReadout shows them.
+## The local mover writes these each step (no allocation); MoveReadout shows them.
 static var r_hs := 0.0           # horizontal speed, m/s
 static var r_vs := 0.0           # vertical speed, m/s
 static var r_cap := 0.0          # the speed the current state steers up to (run speed, glide cruise), m/s

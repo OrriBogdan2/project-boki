@@ -12,10 +12,16 @@ extends RefCounted
 ##   6. The fling: a jump in the window near the top flings you higher and further than a jump before
 ##      it or no jump at all.
 ##   5. Sheer cliffs (authored maps) never catch you.
+##   7. A dash into a rim (the four starters, ground and air, rims 0.6, 1.0, 1.5, 2.0 m): within reach you come
+##      over the top without stopping dead at the face; beyond it you never do (docs/MOVEMENT_FEEL.md).
+##   8. A glider flying into a rim 0.5, 1.0 and 1.8m above it, at full and overheated speed, for Lace, Kael,
+##      Vex and Albert: in reach it hands over to the ledge rise (GLIDING to MANTLING, the glider folded and
+##      left shut) and comes over the top; out of reach the glider stays open (docs/MOVEMENT_FEEL.md).
 ## Counts fixed simulation steps; never touches the save. Prints "MCHECK ok|FAIL ..." lines and
 ## "MCHECK DONE, failures: N".
 
 const DT := Match.DT
+const RIM_GAP := 0.1      # m from the rim face: source air control (decision 0020) steers little
 var bad := 0
 var m: Match
 var w: World
@@ -53,6 +59,8 @@ func run(main: Node) -> void:
 	_steering(walls)
 	_fling(walls)
 	_sheer()
+	_dash_rims()
+	_glide_rims()
 	print("MCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -81,18 +89,24 @@ func _rims() -> void:
 					var open_below := true
 					for dd in [1.1, 1.6, 2.2, 2.8, 3.4]:
 						if not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4) or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4): open_below = false
+					# (and a real rim: flat ground for 4 m behind it, not a ledge under a higher terrace, where
+					# the float rightly carries you up onto the terrace; the 2x Hollow Crown has such ledges)
+					for dd in [1.0, 2.0, 3.0, 4.0]:
+						var back := w.ground_at(g.x - d.x * dd, g.z - d.y * dd)
+						if absf(back - w.ground_at(g.x, g.z)) > 0.3: open_below = false
 					if w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) and not w.is_void(g.x, g.z) and k % 12 == trial and rim_ok and open_below:
 						at = g; dir = d; break
 				if at != Vector3.INF: break
 			if at == Vector3.INF: continue
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
-			# hanging in the air just off the edge, 2.5m below the lip, pushing back toward the island
+			# hanging in the air against the face, 2.5m below the lip, pushing back toward the island
 			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
-			_reset(Vector3(edge_x + dir.x * (h.r + 0.6), top - 2.5, edge_z + dir.y * (h.r + 0.6)), Vector3(0, -2.0, 0))
+			var gap := h.r + RIM_GAP
+			_reset(Vector3(edge_x + dir.x * gap, top - 2.5, edge_z + dir.y * gap), Vector3(0, -2.0, 0))
 			h.downed = downed_case
 			h.last_gy = top
 			var t := 0.0; var floated := false; var landed := false; var t_m := 0.0
@@ -340,3 +354,224 @@ func _sheer() -> void:
 					print("MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top" % [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y])
 				break
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])
+
+# ---------------------------------------------------------------- 7. a dash into a rim
+const DASH_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
+const DASH_RIMS := [0.6, 1.0, 1.5, 2.0]     # m the lip sits above your feet when you press Shift
+const RIM_TOP_LV := 3                       # terraces: the rim's top above the floor (air rows hang below it)
+const RIM_TRIAL_S := 2.5                    # s: a dash that hasn't topped out by then never will
+const STALL_MAX := 0.1                      # s stood still at a face you do climb: "always responsive"
+
+## Each starter dashes straight at a rim, keys held into it, from the ground and from the air. One row per
+## case: what happened (mantle, step up, stop, slide, bounce), the time from the press to standing on top,
+## the time stood still at the face, the time lost against the same press with no rim in the way, and the
+## speed you leave the face with. Ground rims come in whole terraces (0.8 m): a ground row builds the
+## terrace nearest its height. Lace's Shift with charges is the Spirit Walk (it climbs faces by design), so
+## her rows are her travel dash, the flick.
+func _dash_rims() -> void:
+	var wl: Dictionary = _carve_walls(1)[0]
+	var n: Vector2 = wl["n"]
+	var face: Vector2 = (wl["at"] as Vector2) + n * (h.r + 0.02)
+	var floor_lv := int(round(float(wl["low"]) / World.LEVEL))
+	for id in DASH_HEROES:
+		h.reclass(Arch.weight(id), id)
+		_rim_level(face, floor_lv)
+		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)     # (a class swap's first Shift is lost: throw one)
+		var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(h) else 0.0)
+		for rim in DASH_RIMS:
+			var lv := maxi(1, int(round(rim / World.LEVEL)))
+			var built := lv * World.LEVEL
+			# the ground keeps its walking rule: a single terrace steps you up, a higher face needs a jump
+			_dash_rim_row(id, "ground", rim, built, floor_lv, lv, face, n, built <= World.LEVEL + 0.05)
+			var top := float(wl["low"]) + RIM_TOP_LV * World.LEVEL
+			_dash_rim_row(id, "air", rim, top - rim, floor_lv, RIM_TOP_LV, face, n, float(rim) <= reach)
+
+## The carved block's 5x5 tiles behind `face` (all the flat ground _carve_walls checked) set to terrace `lv`.
+func _rim_level(face: Vector2, lv: int) -> void:
+	for dz in range(-2, 3):
+		for dx in range(0, 5):
+			w.level[w.idx(int(round(face.x)) + dx, int(floor(face.y)) + dz)] = lv
+
+## One trial: Shift toward the face from feet height `y0` (the floor when `where` is "ground"), keys held.
+## Returns the step-by-step distance travelled along `n`, and what it met.
+func _dash_trial(id: String, grounded: bool, y0: float, face: Vector2, n: Vector2, top: float) -> Dictionary:
+	var at: Vector2 = face - n * (h.r + 1.2)
+	_reset(Vector3(at.x, y0, at.y), Vector3.ZERO, grounded)
+	for i in 20:
+		m.step(DT)     # the kit settles (its last move's timers)
+		if not grounded:
+			h.pos.y = y0     # held in the air
+			h.vel = Vector3.ZERO
+	h.dashes = 0.0 if id == "archer" else 2.0     # Lace out of charges: the flick, her travel dash
+	h.ex_cd = 0.0
+	h.air_dashed = false
+	h.inp["move"] = n
+	h.inp["dash"] = true
+	var t := 0.0
+	var out := {"t_top": -1.0, "stall": 0.0, "mantled": false, "back": 0.0, "slid": 0.0, "path": []}
+	var touched := false
+	var x0 := Vector2(h.pos.x, h.pos.z)
+	while t < RIM_TRIAL_S:
+		m.step(DT)
+		t += DT
+		h.inp["dash"] = false
+		var hv := Vector2(h.vel.x, h.vel.z)
+		var here := Vector2(h.pos.x, h.pos.z)
+		(out["path"] as Array).append((here - x0).dot(n))
+		var gap := (face - here).dot(n)     # m from your centre to the face
+		var at_face := gap <= h.r + 0.3
+		touched = touched or at_face
+		out["mantled"] = out["mantled"] or h.mantling()
+		if touched: out["back"] = maxf(out["back"], gap - h.r)
+		out["slid"] = maxf(out["slid"], absf((here - x0).dot(Vector2(-n.y, n.x))))
+		if at_face and hv.length() < 0.3 and h.pos.y < top - 0.1: out["stall"] += DT
+		if top > y0 + 0.1 and gap < -h.r and h.pos.y >= top - 0.05:     # over the rim, at its height or above
+			out["t_top"] = t
+			out["v_top"] = hv.length()
+			break
+	return out
+
+## One row: the dash at the rim, then the same press with the rim gone (the time the rim cost you).
+func _dash_rim_row(id: String, where: String, rim: float, y0: float, floor_lv: int, top_lv: int, face: Vector2,
+		n: Vector2, want_top: bool) -> void:
+	var grounded := where == "ground"
+	var feet := float(floor_lv) * World.LEVEL if grounded else y0
+	var top := float(floor_lv + top_lv) * World.LEVEL
+	_rim_level(face, floor_lv + top_lv)
+	var r := _dash_trial(id, grounded, feet, face, n, top)
+	var lost := -1.0
+	if r["t_top"] >= 0.0:
+		_rim_level(face, floor_lv)
+		var flat: Array = _dash_trial(id, grounded, feet, face, n, feet)["path"]
+		var d_top: float = (r["path"] as Array)[-1]
+		for i in flat.size():
+			if flat[i] >= d_top:
+				lost = maxf(0.0, r["t_top"] - (i + 1) * DT)     # (a step up's push can beat flat ground)
+				break
+	var what := "stop"
+	if r["t_top"] >= 0.0: what = "mantle" if r["mantled"] else "step"
+	elif r["back"] > 0.3: what = "bounce"
+	elif r["slid"] > 0.5: what = "slide"
+	var good: bool = (r["t_top"] >= 0.0) == want_top and (not want_top or r["stall"] <= STALL_MAX)
+	var top_s: String = ("%.2fs" % r["t_top"]) if r["t_top"] >= 0.0 else "never"
+	var lost_s: String = ("%.2fs" % lost) if lost >= 0.0 else "-"
+	var note := "" if want_top else "  (beyond reach: no climb wanted)"
+	ok(good, "dash-rim %-10s %-6s %.1fm (built %.1f): %-6s top %5s lost %5s stall %.2fs off-top %4.1fm/s%s"
+			% [id, where, rim, top - feet, what, top_s, lost_s, r["stall"], float(r.get("v_top", 0.0)), note])
+
+# ---------------------------------------------------------------- 8. a glider meets a rim
+const GLIDE_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
+const GLIDE_RISES := [0.5, 1.0, 1.8]     # m: the rim this far above the glider as it comes in reach of the face
+const GLIDE_RIM_S := 1.5                 # s: one approach
+
+## A glider flying head-on into a terrace face, keys pushing in, at full glide speed and overheated (half
+## speed). Each row: "mantle" (over the top), "bump" (thrown back), "slide" (along the face) or "fall" (sank
+## away), the first state the glider handed over to, and whether it is open after. A rim in reach
+## (Hunter.MANTLE_REACH, more for the tall climbers) is a mantle out of GLIDING straight into MANTLING, the glider
+## folded and not reopened by the held key, on at least the source's mini-mantle speed; out of reach the glider
+## stays open and sinks down the face.
+func _glide_rims() -> void:
+	var cut := _carve_tall()
+	if cut.is_empty():
+		ok(false, "glide rims: no flat ground to carve a terrace on")
+		return
+	for arch in GLIDE_HEROES:
+		h.reclass(Arch.weight(arch), arch)     # (set_arch alone keeps the class and falls back to its default hero)
+		ok(h.arch == arch, "glide rims: the hunter is %s (is %s)" % [arch, h.arch])
+		var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(h) else 0.0)
+		for rise in GLIDE_RISES:
+			for slow in [false, true]:
+				# (the glider sinks on the way in: a first run finds how far, the second starts that much higher)
+				var row := _glide_rim(cut, rise, slow, 0.0)
+				row = _glide_rim(cut, rise, slow, float(row["at"]) - rise)
+				var what := "glide-rim %-10s rim %.1fm %s: %s" % [arch, rise, "slow" if slow else "full", row]
+				if rise < reach:
+					ok(row["out"] == "mantle" and row["into"] == "Mantling" and not row["open"]
+						and float(row["vout"]) >= HunterMove.mantle_launch_min, what)
+				else:
+					ok(row["out"] == "fall" and row["into"] == "" and row["open"], what)
+
+## Raises a 3x5 block 6 terraces (4.8 m) over flat ground; returns its face (x), centre (z) and top.
+func _carve_tall() -> Dictionary:
+	for k in 3000:
+		var g := w.random_ground()
+		var x0 := int(floor(g.x))
+		var z0 := int(floor(g.z))
+		var lv := int(w.level[w.idx(x0, z0)])
+		if not _flat_around(x0, z0, lv):
+			continue
+		for dz in range(-2, 3):
+			for dx in range(1, 4):
+				w.level[w.idx(x0 + dx, z0 + dz)] = lv + 6
+		return {"x": x0 + 1.0, "z": z0 + 0.5, "top": (lv + 6) * World.LEVEL}
+	return {}
+
+## Plain ground at level `lv` all round (x0, z0): no stairs, walls or sheer cliffs to fly into.
+func _flat_around(x0: int, z0: int, lv: int) -> bool:
+	for dz in range(-4, 5):
+		for dx in range(-6, 6):
+			if not w.inb(x0 + dx, z0 + dz):
+				return false
+			var i := w.idx(x0 + dx, z0 + dz)
+			if w.kind[i] != World.T_GROUND or int(w.level[i]) != lv:
+				return false
+			if w.stairs.has(i) or w.walls.has(i) or w.sheer.has(i):
+				return false
+	return true
+
+## One approach, the glider opened by a press as a player's keys do (glide_press_only), `sink` metres higher.
+func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictionary:
+	var face := float(cut["x"])
+	var top := float(cut["top"])
+	var gs := Hunter.GLIDE_SPEED * (0.5 if slow else 1.0)
+	_reset(Vector3(face - h.r - 1.0, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
+	h.last_gy = top - 4.8
+	h.glide_fuel = 0.0 if slow else 1.0
+	m.step(DT)     # (glide let go a step, so the press below is a fresh one)
+	h.inp["glide"] = true
+	h.inp["glide_btn"] = true
+	h.inp["glide_press_only"] = true
+	var row := {"out": "bump", "at": 0.0, "vin": 0.0, "vout": 0.0, "into": "", "open": true, "t": 0.0}
+	var touch := -1.0
+	var t := 0.0
+	var y_touch := 0.0
+	var landed := -1.0
+	while t < GLIDE_RIM_S:
+		h.inp["move"] = Vector2(1, 0)
+		var hv := Vector2(h.vel.x, h.vel.z).length()
+		var was := h.loco.state_name()
+		m.step(DT)
+		t += DT
+		# in reach of the face (Hunter._try_ledge_grab)
+		if touch < 0.0 and (face - h.pos.x < h.r + 0.45 or h.mantling()):
+			touch = t
+			row["at"] = snappedf(top - h.pos.y, 0.01)
+			row["vin"] = snappedf(hv, 0.1)
+			y_touch = h.pos.y
+		if touch >= 0.0 and row["into"] == "" and was == "Gliding" and h.loco.state_name() != was:
+			row["into"] = h.loco.state_name()
+		if landed >= 0.0:
+			# over the top: on until it lands (or a moment), to see the held key never reopens the glider
+			row["open"] = row["open"] or h.gliding
+			if h.grounded or t - landed > 0.4: break
+			continue
+		if h.pos.x > face + 0.3 and h.pos.y >= top - 0.15 and h.lfloat.is_empty():
+			row["out"] = "mantle"
+			row["vout"] = snappedf(Vector2(h.vel.x, h.vel.z).length(), 0.1)
+			row["t"] = snappedf(t - touch, 0.01)
+			row["open"] = h.gliding
+			landed = t
+		elif absf(h.pos.z - float(cut["z"])) > 0.5:
+			row["out"] = "slide"
+			break
+		elif h.grounded or (touch >= 0.0 and h.pos.y < y_touch - 1.0):
+			row["out"] = "fall"
+			break
+		elif touch >= 0.0 and face - h.pos.x > h.r + 0.7:     # (thrown back off the face)
+			break
+	if landed < 0.0:
+		row["open"] = h.gliding
+	h.inp["glide"] = false
+	h.inp["glide_btn"] = false
+	h.inp["glide_press_only"] = false
+	return row

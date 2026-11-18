@@ -17,6 +17,7 @@ The variant the game plays is the "reset_cue" setting (Settings > Gameplay > Res
   c : a soft "whoomp" (a sine rising 130 to 210 Hz over 90 ms with a puff of low-passed noise) under a
       high crystalline ping (5.2 kHz with a 6.9 kHz partial) and a second quieter ping at 6.3 kHz.
 """
+import argparse
 import math, os, wave
 import numpy as np
 from scipy.signal import butter, sosfilt
@@ -131,8 +132,13 @@ def variant_c():
     return mix(whoomp * 1.1, at(ping1, 0.03) * 0.55, at(ping2, 0.1) * 0.3, at(shimmer([4400.0, 5700.0], 0.35, 11.0, 0.5, 0.12), 0.1) * 0.15)
 
 
-if __name__ == '__main__':
+def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     save('reset_a', variant_a(), -20)
     save('reset_b', variant_b(), -20)
     save('reset_c', variant_c(), -20)
     print('reset cues written')
+
+
+if __name__ == '__main__':
+    main()

@@ -2,9 +2,12 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she is put back where she
-## last stood clear. While she is inside something her own screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
+## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
+## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
+## in a ledge she is set on top of it. While she walks her own screen takes a wash of her colour, darker while she
+## is inside something, her whole body is darkened (PinFx wash) on every game, and a small portal everyone sees
+## opens where she goes into something and where she comes out.
 
 var k: ArcherKit
 var h: Hunter
@@ -19,6 +22,7 @@ var orbs: Array = []           # spirit orbs left where she walked into somethin
 var granted: Array = []        # others the orbs gave a Spirit Walk to: [hunter, seconds left]
 const ORB_T := 4.0             # s an orb stays
 const ORB_R := 0.9             # m touch radius
+const FADE_T := 0.3            # s: her shell and her screen's wash fade out over the walk's last FADE_T
 
 func _init(kit: ArcherKit) -> void:
 	k = kit
@@ -27,12 +31,21 @@ func _init(kit: ArcherKit) -> void:
 func active() -> bool:
 	return t > 0.0
 
+## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
+## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
+func phasing() -> bool:
+	if h.spirit_t > 0.0:
+		return true
+	var dd := k.dash_def()
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
+
 func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
-	var roll := float(dd.get("roll", 3.5))
-	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"})
+	var roll := float(dd["roll"])
+	var rt := float(dd["roll_t"])
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll", "curved": true})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
@@ -60,7 +73,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
@@ -72,7 +85,7 @@ func inside_boost() -> float:
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
 func _drop_orb(at: Vector3) -> void:
-	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.GREEN))
+	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.THREAD))
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
@@ -94,7 +107,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
@@ -104,21 +117,30 @@ func tick_orbs(dt: float) -> void:
 		else:
 			x.spirit_t = float(g[1])
 
-func blocked_here() -> bool:
+## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
+## she is set on top of it instead (end).
+func blocked_here(terrain := true) -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z):
+	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
-	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
+	var reach := h.hull_r() * 0.6
+	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, reach, h.pos.y) > 0.0
 
 func tick(dt: float) -> void:
 	if t <= 0.0:
 		return
+	if t <= dt:
+		end("time")             # before t reaches 0: end() skips a walk that is already over (natural expiry)
+		return
 	t -= dt
-	h.spirit_t = maxf(t, 0.0)
+	h.spirit_t = t
 	var was_in := inside
 	inside = blocked_here()
 	if inside and not was_in:
 		_drop_orb(entry)
+		_portal(entry, h.pos)
+	elif was_in and not inside:
+		_portal(h.pos, entry)
 	# footage 655.55-655.65: the roll goes straight into the crouched walk, no landing beat, so the walk's pose
 	# takes over the moment the travel ends (roll_t) and the roll clip's standing tail (0.24-0.36) never shows
 	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= float(k.dash_def().get("roll_t", 0.24)):
@@ -127,10 +149,9 @@ func tick(dt: float) -> void:
 		passed += 1
 	else:
 		entry = h.pos
-	k.fx.tint_to(1.0 if inside else 0.0)
-	k.fx.aura_on(clampf(t / 0.3, 0.0, 1.0))
-	if t <= 0.0:
-		end("time")
+	var fade := clampf(t / FADE_T, 0.0, 1.0)
+	k.fx.tint_to((1.0 if inside else PinFx.TINT_WALK) * fade)
+	k.fx.aura_on(fade)
 
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
@@ -140,8 +161,15 @@ func end(why: String) -> void:
 	h.spirit_t = 0.0
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
-	if blocked_here():
+	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
+	if top > h.pos.y + World.STEP and not blocked_here(false):
+		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.vel.y = 0.0
+		h.grounded = true
+		_portal(h.pos, entry)
+	if blocked_here(false):
 		snap_backs += 1
+		_portal(entry, h.pos)
 		h.teleport(entry)
 		h.vel = Vector3.ZERO
 		k.vfx("spirit_snap", entry)
@@ -149,3 +177,9 @@ func end(why: String) -> void:
 		k.vfx("spirit_end")
 	if k.anim_id in ["pin_roll", "pin_walk"]:
 		k.anim_id = ""
+
+## The portal where she goes into something or comes out of it: at `at` on the clear side, stood a little off the
+## face (the data's "fwd") on the line from `behind`, a point on the far side of the face.
+func _portal(at: Vector3, behind: Vector3) -> void:
+	var out := Vector2(at.x - behind.x, at.z - behind.z)
+	k.vfx("spirit_portal", at, out.normalized() if out.length() > 0.01 else h.aim_dir())

@@ -11,10 +11,13 @@ Decimating that mesh with its UVs kept (r2) smears the texture across the crumbs
     the real surface; the head's islands scaled `head_uv` times (more texels on the face); packed.
  4. Bake the dense mesh's base colour onto them (Cycles, selected to active, as emission: no light baked
     in), each island's edge extended `margin_px` into the gaps.
- 5. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
+ 5. With `normal` {size, cage, ray} (px, m, m): the dense mesh's sculpt as a tangent-space normal map on the same
+    UVs (normal.png beside the atlas; wrong hits flattened). It rides the UVs through the fit's posing, so the
+    low mesh should already be the shipped count (`tris` <= the fit's max_tris: no second decimation).
+ 6. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
     fit_warden.py's `body_glb`.
 The spec (art/wardens/src/<name>_bake.json): high, out, tris, head {centre, r}, head_tris, head_uv, uv_smooth,
-uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts.
+uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts, normal.
 """
 import json
 import math
@@ -25,6 +28,11 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "art1"))
+import warden_kit as WK  # noqa: E402
+from paintkit import clean_normal  # noqa: E402
 
 
 def log(*a):
@@ -44,28 +52,46 @@ def import_dense(path):
     for m in meshes:
         m.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
+    rest = [o for o in new if o.type != "MESH"]     # (the joined meshes are freed by the join itself)
     if len(meshes) > 1:
         bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    for o in new:
-        if o.name in bpy.data.objects and o is not ob:
-            bpy.data.objects.remove(o)
+    for o in rest:
+        bpy.data.objects.remove(o)
     ob.name = "High"
     return ob
 
 
-def base_image(ob):
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
-    return bsdf.inputs["Base Color"].links[0].from_node.image
+def base_image(ob, socket="Base Color"):
+    """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
+    any mix or factor nodes the glTF importer put between, or None."""
+    return mat_image(ob.data.materials[0], socket)
+
+
+def mat_image(m, socket="Base Color"):
+    """base_image for one material."""
+    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    todo = [l.from_node for l in bsdf.inputs[socket].links]
+    while todo:
+        n = todo.pop(0)
+        if n.type == "TEX_IMAGE":
+            return n.image
+        todo += [l.from_node for i in n.inputs for l in i.links]
+    return None
 
 
 def tris(ob):
     return sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
 
-def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
-    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits.
+SEAM_WEIGHT = 0.05  # keep_uv: a UV-seam vertex's collapse weight (1 = free; 0 holds it, and then 60k is out of reach)
+
+
+def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False):
+    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated
+    (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it;
+    the UV-seam vertices collapse last (`_seam_weights`): the collapse drags a seam's UVs and tears cheeks and hair).
     With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
     then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
     and the monocle and the strands over the face come out jagged)."""
@@ -78,19 +104,28 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
     _drop_small_parts(bm, floater_verts)
     bm.to_mesh(me)
     bm.free()
-    me.materials.clear()
-    while me.uv_layers:
+    while me.uv_layers and not keep_uv:
         me.uv_layers.remove(me.uv_layers[0])
+    if not keep_uv:
+        me.materials.clear()
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
+    seam = _seam_weights(me) if keep_uv else 1.0
     if not head or head_tris <= 0:
-        _decimate(low, n_tris / max(tris(low), 1), None)
+        group = None
+        if keep_uv:
+            group = "seam"
+            g = low.vertex_groups.new(name=group)
+            for i, w in enumerate(seam):
+                g.add([i], float(w), "REPLACE")
+        _decimate(low, n_tris / max(tris(low), 1), group)
+        low.vertex_groups.clear()
     else:
         c, r = Vector(head["centre"]), float(head["r"])
         co = np.array([v.co[:] for v in me.vertices])
         inside = np.clip((r * 1.03 - np.linalg.norm(co - np.array(c), axis=1)) / (r * 0.06), 0.0, 1.0)
-        for name, w in (("body", 1.0 - inside), ("head", inside)):
+        for name, w in (("body", (1.0 - inside) * seam), ("head", inside * seam)):
             g = low.vertex_groups.new(name=name)
             for i in np.nonzero(w > 0.0)[0]:
                 g.add([int(i)], float(w[i]), "REPLACE")
@@ -99,8 +134,57 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
         _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
         _decimate(low, n_tris / tris(low), "head")
         low.vertex_groups.clear()
+    _unfold(low)
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
+
+
+def _seam_weights(me):
+    """Per vertex: SEAM_WEIGHT where its corners' UVs differ (a UV seam; the weld left one vertex there), else 1.
+    (Decimate's `delimit` = UV is for the planar mode only: in a collapse it changes nothing.)"""
+    n = len(me.loops)
+    uv = np.empty(n * 2, np.float32)
+    me.uv_layers[0].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    vi = np.empty(n, np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    lo = np.full((len(me.vertices), 2), 9e9, np.float32)
+    hi = np.full((len(me.vertices), 2), -9e9, np.float32)
+    np.minimum.at(lo, vi, uv)
+    np.maximum.at(hi, vi, uv)
+    seam = ((hi - lo) > 1e-6).any(axis=1)
+    log("seams: %d of %d verts weighted %.2f" % (seam.sum(), len(seam), SEAM_WEIGHT))
+    return np.where(seam, SEAM_WEIGHT, 1.0)
+
+
+def _unfold(ob, passes=24):
+    """The collapse leaves a few triangles flipped back over their neighbours (Motley's 60k body: 27, four of them
+    10-17 cm slivers at the collar that read as stray shards floating off him). Each one whose neighbours mostly
+    face the other way (2 of 3 below -0.5) has its corners moved to the mean of their neighbours, until none is
+    left. Only positions move: no vertex, face or UV changes, so no holes or loose bits."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+
+    def flipped():
+        bm.normal_update()
+        out = []
+        for f in bm.faces:
+            ns = [g for e in f.edges for g in e.link_faces if g is not f]
+            if ns and sum(1 for g in ns if f.normal.dot(g.normal) < -0.5) >= min(2, len(ns)):
+                out.append(f)
+        return out
+
+    bad = flipped()
+    first = len(bad)
+    for _ in range(passes):
+        if not bad:
+            break
+        vs = {v for f in bad for v in f.verts}
+        bmesh.ops.smooth_vert(bm, verts=list(vs), factor=1.0, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        bad = flipped()
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("unfold: %d flipped triangles -> %d" % (first, len(bad)))
 
 
 def _decimate(ob, ratio, group):
@@ -284,15 +368,21 @@ def _islands(bm, lay):
     return out
 
 
-def bake_colour(high, low, size, cage, ray, margin_px):
-    """The dense mesh's base colour (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
-    src = base_image(high)
+def bake_colour(high, low, size, cage, ray, margin_px, src=None):
+    """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
+    own = src is None       # the base colour: each material its own image (a Meshy part joined in, Meeko's wings)
+    src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src)
-        tex.interpolation = "Cubic"
+        img = (mat_image(m) or src) if own else src
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == img), None)
         em = nt.nodes.new("ShaderNodeEmission")
-        nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        if tex:
+            tex.interpolation = "Cubic"
+            nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        else:       # a flat-colour part (Claire's sheer skirt): its base colour, opaque
+            bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+            em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
         out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
         nt.links.new(em.outputs[0], out.inputs["Surface"])
     img = bpy.data.images.new("baked", size, size, alpha=False)
@@ -316,6 +406,22 @@ def bake_colour(high, low, size, cage, ray, margin_px):
                         margin=margin_px, margin_type="EXTEND", use_clear=True)
     log("baked %dx%d" % (size, size))
     return img
+
+
+def bake_normal(high, low, nspec, path):
+    """The dense mesh's sculpt onto the low mesh's UVs: normal.png beside the .glb (lossless: a JPEG's blocks read as
+    dents under the toon ramp)."""
+    size = int(nspec.get("size", 2048))
+    px = np.ones((size, size, 4), np.float32)
+    px[..., :3] = WK.bake_normal(low, [high], size, float(nspec.get("cage", 0.005)), float(nspec.get("ray", 0.012)))
+    wrong = clean_normal(px[..., :3])
+    img = bpy.data.images.new("normal", size, size)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels.foreach_set(px.ravel())
+    img.filepath_raw = os.path.join(os.path.dirname(path), "normal.png")
+    img.file_format = "PNG"
+    img.save()
+    log("normal baked %dx%d, wrong hits flattened %.4f" % (size, size, wrong))
 
 
 def export(low, img, path):
@@ -347,9 +453,12 @@ def main():
            float(spec.get("uv_angle", 66.0)), int(spec.get("uv_smooth", 30)))
     img = bake_colour(high, low, int(spec.get("tex", 4096)), float(spec.get("cage", 0.008)),
                             float(spec.get("ray", 0.03)), int(spec.get("margin_px", 16)))
+    if spec.get("normal"):
+        bake_normal(high, low, spec["normal"], os.path.expanduser(spec["out"]))
     export(low, img, os.path.expanduser(spec["out"]))
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))
 
 
-main()
+if __name__ == "__main__":
+    main()

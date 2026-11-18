@@ -102,6 +102,41 @@ class FnClip:
         return self.fn(t / self.dur)
 
 
+class Loop:
+    """Shapes on a loop of T seconds, each periodic in T (a shape may run past the end and wraps to the start), so a
+    curve made of them closes its seam."""
+
+    def __init__(self, T):
+        self.T = T
+
+    def since(self, t, a):
+        return (t - a) % self.T
+
+    def hold(self, t, a, b, c, d):
+        """Eased up from a to b, held, eased back down from c to d (d - a < T)."""
+        x = self.since(t, a)
+        return smooth(x / (b - a)) - smooth((x - (c - a)) / (d - c))
+
+    def hill(self, t, a, b):
+        """0 outside a..b, one smooth hill inside it."""
+        u = self.since(t, a) / (b - a)
+        return math.sin(math.pi * u) ** 2 if u < 1.0 else 0.0
+
+    def settle(self, t, a, dur):
+        """The swing past a move that lands at a: out quickly, then dying away by a + dur."""
+        u = self.since(t, a) / dur
+        return math.sin(math.pi * u) * (1 - u) if u < 1.0 else 0.0
+
+    def wave(self, t, k, ph=0.0):
+        """k whole cycles a loop."""
+        return math.sin(2 * math.pi * k * t / self.T + ph)
+
+
+def smooth(u):
+    u = min(1.0, max(0.0, u))
+    return u * u * (3 - 2 * u)
+
+
 class Solver:
     def __init__(self, arm, rig):
         """rig: {"grip_rest": point, "blade_rest", "edge_rest", "lhand": {...}, "pelvis": z}"""
@@ -187,7 +222,8 @@ class Solver:
         on_W = hilt - q_on @ (Vector(lr["palm"]) - H0["hand.L"])
         w = P.get("Lw", 0.0)
         Wl = free_W.lerp(on_W, w)
-        q_free = q_hips.slerp(q_hips, 0.0)
+        # "LF" (fingers, palm normal) turns a free left hand; without it the hand rides the chest. Rest: fingers down, palm in (+x)
+        q_free = frame_of(*P["LF"]) @ frame_of((0, 0, -1), (1, 0, 0)).inverted() if "LF" in P else q_hips
         q_lh = q_free.slerp(q_on, w)
         Sl = D_hips(H0["upper_arm.L"])
         quL, qfL, _ = self.arm_ik("L", Sl, Wl, Vector((-0.65, -0.55, -0.45)), q_hips)
@@ -197,7 +233,8 @@ class Solver:
             Hp = D_root(H0["thigh." + side])
             A = Vector(P[key])
             yaw = P.get(key + "y", 0.0)
-            pole = Quaternion((0, 0, 1), yaw) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
+            # (key + "k": where the knee points, when not along the foot: a free knee turned in)
+            pole = Quaternion((0, 0, 1), P.get(key + "k", yaw)) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
             qt, qs = self.leg_ik(side, Hp, A, pole, q_root)
             Q["thigh." + side], Q["shin." + side] = qt, qs
             Q["foot." + side] = Quaternion((0, 0, 1), yaw) @ Quaternion((1, 0, 0), P.get(key + "p", 0.0)) \
@@ -236,8 +273,39 @@ def two_bone(a, c, l1, l2, pole):
     return a + u * x + p * h, c
 
 
+BREATH_AXES = (0.4, 1.0, 0.6)  # x_breath's swell per model axis (side, forward, up) for one unit of breath
+
+
+def add_breath(arm, head, weight):
+    """The rib cage's leaf bone x_breath under hips (IDLE_AUDIT "No chest"): a bone at head pointing +Y (its axes the model's, so
+    BREATH_AXES read in model space), and the hips-skinned vertices moved onto it by weight(model point) (0..1, 1 where the chest
+    swells whole). Run before the Solver; a rig that has one is left alone."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head = Vector(head)
+    eb.tail = Vector(head) + Vector((0, 0.15, 0))
+    eb.roll = 0.0
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for o in bpy.data.objects:
+        if o.type != "MESH" or "hips" not in o.vertex_groups:
+            continue
+        hips = o.vertex_groups["hips"]
+        vg = o.vertex_groups.new(name="x_breath")
+        for v in o.data.vertices:
+            g = next((g for g in v.groups if g.group == hips.index), None)
+            w = weight(o.matrix_world @ v.co) * g.weight if g else 0.0
+            if w > 0.001:
+                hips.add([v.index], g.weight - w, "REPLACE")
+                vg.add([v.index], w, "REPLACE")
+
+
 def bake(arm, clip, solver, extras):
-    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc)}."""
+    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc[, scale])}:
+    a scale (x_breath, the idle's breath) is the optional third item; a bone the rig lacks is skipped."""
     act = bpy.data.actions.new(clip.name)
     act.use_fake_user = True
     arm.animation_data_create()
@@ -246,9 +314,7 @@ def bake(arm, clip, solver, extras):
     pbs = arm.pose.bones
     names = [b for b in ("root", "hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R",
                          "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R") if b in pbs]
-    R0, Par = solver.R0, {}
-    for b in names + list(extras({}).keys() if False else []):
-        pass
+    R0 = solver.R0
     for f in range(n):
         t = clip.dur * f / (n - 1)
         P = clip.sample(t)
@@ -264,7 +330,10 @@ def bake(arm, clip, solver, extras):
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
         pbs["root"].keyframe_insert("location", frame=f)
-        for b, (q, l) in extras(P).items():
+        for b, v in extras(P).items():
+            if b not in pbs:
+                continue
+            q, l = v[0], v[1]
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
@@ -273,5 +342,8 @@ def bake(arm, clip, solver, extras):
             if l is not None:
                 pb.location = l
                 pb.keyframe_insert("location", frame=f)
+            if len(v) > 2 and v[2] is not None:
+                pb.scale = v[2]
+                pb.keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act

@@ -4,6 +4,7 @@ import math
 import boki_clips
 import lunowl
 from boki_clips import add, s, seq
+from boki_gait import hind_legs, planted
 from lunowl import SIDES, TAIL_PTS, antenna_pts, on_wing, streamer_pts, v3
 
 LOOK_UP = 0.22     # its face is already a flat disc to the front: a little tilt up is enough for the high cameras
@@ -109,7 +110,7 @@ def idle(t):
     add(p, "neck", ry=turn * 0.6)
     look(p)
     add(p, "head", rx=br * 0.02, ry=turn * 0.4, rz=tilt)
-    shuffle = seq(t, [(0, 0), (0.86, 0), (0.9, 1), (0.95, -0.4), (1, 0)])
+    shuffle = seq(t, [(0, 0), (0.8, 0), (0.84, 1), (0.89, -0.4), (0.94, 0), (1, 0)])   # settled by the loop's end
     wings(p, br * 0.02 + shuffle * 0.18, hind=shuffle * 0.1)
     streamers(p, t * 2, 0.04, droop=shuffle * -0.1)
     tufts(p, 0.03 + tilt * 0.2, tilt * 0.15)
@@ -140,12 +141,11 @@ def walk(t):
 
 
 def run(t):
-    """A skittering flit: a kick off the ground, a glide on two quick beats with the legs tucked, a light touch-down."""
+    """A skittering flit: a kick off the ground, a low glide on two quick beats, a light touch-down."""
     p = {}
     air = seq(t, [(0, 0), (0.12, 0), (0.5, 1), (0.86, 0), (1, 0)])
     land = seq(t, [(0, 1), (0.1, 0), (0.88, 0), (1, 1)])
-    p["root_at"] = (0, 0.11 * air - 0.012 * land, 0)
-    p["root_sc"] = (1 + 0.06 * land, 1 - 0.08 * land + 0.04 * air, 1 + 0.04 * land)
+    p["root_at"] = (0, 0.033 * air - 0.004 * land, 0)
     add(p, "hips", rx=-0.32 - 0.06 * land)
     add(p, "neck", rx=0.12)
     look(p, 1.4 + 0.2 * land)
@@ -153,9 +153,6 @@ def run(t):
     streamers(p, t * 2, 0.06, droop=-0.7)
     tufts(p, 0.35, 0.05)
     feelers(p, t * 2, 0.1, 0.4)
-    k = seq(t, [(0, 0), (0.14, 0), (0.24, 1), (0.74, 1), (0.88, 0), (1, 0)])
-    for sd, _ in SIDES:
-        legs(p, sd, -0.5 * k + 0.25 * land, 1.0 * k)
     add(p, "tail1", rx=-0.15 * air)
     return p
 
@@ -332,8 +329,11 @@ def ability(t):
     return p
 
 
-CLIPS = {"idle": (3.2, True, idle), "walk": (0.56, True, walk), "run": (0.5, True, run), "hop": (1.0, True, hop),
-         "pet": (2.4, True, pet), "carry": (0.6, True, carry), "tend": (1.3, True, tend),
-         "attack": (0.8, False, attack), "ability": (1.3, False, ability), "sleep": (3.6, True, sleep),
-         "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
+CLIPS = {
+    "idle": (3.2, True, idle),
+    "walk": (0.56, True, planted(walk, BONES, hind_legs(0.0, 0.5), duty=0.4, reach=0.15, lift=0.045, drop=0.02)),
+    "run": (1.0, True, planted(run, BONES, hind_legs(0.9, 0.9), duty=0.12, reach=0.18, lift=0.12, drop=0.05)),
+    "hop": (1.0, True, hop), "pet": (2.4, True, pet), "carry": (0.6, True, carry), "tend": (1.3, True, tend),
+    "attack": (0.8, False, attack), "ability": (1.3, False, ability), "sleep": (3.6, True, sleep),
+    "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
 HIDE_AT = {"prop_berry": (0, 0.2, 0.36)}

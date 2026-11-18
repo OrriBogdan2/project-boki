@@ -56,17 +56,22 @@ func _numbers() -> void:
 	var lace := _glide(Vector2(17, 0), Vector2(1, 0), Loco.glide_carry("archer"), 0.5).length()
 	var dflt := _glide(Vector2(17, 0), Vector2(1, 0), carry, 0.5).length()
 	ok(lace < dflt, "item 9: Lace carries less from Shift into the glide (%.2f vs %.2f after 0.5s)" % [lace, dflt])
+	# Lace's dash: the source's Myth curve (dash_feel.json, footage) at tuning.json's dash_speed. It eases in from
+	# a standing start, peaks well under the source's 1.86x, and still covers the kit's distance.
+	var feel: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
+	var curve: Array = feel["archer"]["curve"]
+	var ks := Loco.dash_speed("archer")
+	var n := int(round(0.3 / ks / DT))
 	var peak := 0.0
-	var start := 99.0
 	var dist := 0.0
-	var tk := Loco.dash_time_k("archer")
-	for i in int(round(0.3 * tk / DT)):
-		var k := Loco.dash_k("archer", (i + 0.5) / (0.3 * tk / DT))
+	for i in n:
+		var k := ks * HunterMove.dash_k(curve, (i + 0.5) / n)
 		peak = maxf(peak, k)
-		start = minf(start, k)
 		dist += k * DT
-	ok(peak < 1.0 and start < 0.6 and absf(dist - 0.3) < 0.01,
-		"item 9: Lace's dash peaks lower (%.2f of before), eases in/out (%.2f), keeps its distance" % [peak, start])
+	var start := ks * HunterMove.dash_k(curve, 0.0)
+	ok(peak < 1.86 * 0.75 and start < 0.6 and absf(dist - 0.3) < 0.01,
+		"item 9: Lace's dash peaks under the source (%.2f of its mean), eases in (%.2f), keeps its distance (%.3f)" \
+		% [peak, start, dist / 0.3])
 
 ## A hunter `up` metres over a ground spot, moving `v`, keys off.
 func _air_at(up: float, v: Vector3) -> void:
@@ -121,6 +126,14 @@ func _match_items() -> void:
 	h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
 	m.step(Match.DT)
 	ok(h.roll_t > 0.0 and not h.gliding and h.loco.is_in(Loco.S.DASHING), "FSM: a dash from a glide folds the glider")
+	h.knock_t = 0.2
+	m.step(Match.DT)
+	var under := h.loco.is_in(Loco.S.DASHING) and not h.loco.can(Loco.S.GLIDING)
+	while h.roll_t > 0.0:
+		m.step(Match.DT)
+	m.step(Match.DT)
+	ok(under and h.loco.is_in(Loco.S.KNOCKED) and h.knock_t > 0.0 and not h.loco.can(Loco.S.GLIDING),
+		"FSM owns it: a knock mid-dash waits under the dash, then KNOCKED (%s)" % " ".join(h.loco.history))
 	_air_at(8.0, Vector3(-4, 0, 0))
 	h.inp["move"] = Vector2(1, 0)
 	var t := 0.0
@@ -128,22 +141,6 @@ func _match_items() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
-
-## A ground tile with LANE m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
-const LANE := 26
-func _open_lane() -> Vector3:
-	for z in range(4, w.h - 4):
-		for x in range(4, w.w - LANE - 4):
-			var lv := w.level[w.idx(x, z)]
-			var clear := true
-			for i in LANE:
-				var j := w.idx(x + i, z)
-				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
-				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
-				if not clear: break
-			if clear:
-				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
-	return Vector3.INF
 
 ## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
 ## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
@@ -219,6 +216,47 @@ func _every_shift() -> void:
 				% [arch, r[0], r[1], later])
 	h.reclass(cls0, "")
 
+## Owner 11-09 (Sable): every Hunter's reach holding W from a standing start on the open lane to the landing:
+## "jump > Shift" (Shift 0.2 s into the jump) and "Shift > jump" (the jump-out 0.1 s into a ground Shift).
+## Sable's jump > Shift stays within SABLE_REACH_K of the rest of the cast's median (it was 1.8x).
+const SABLE_REACH_K := 1.5
+func _jump_shift_reach() -> void:
+	var at := _open_lane()
+	var cls0 := h.cls
+	var lines := []
+	var others := []
+	var sable := 0.0
+	for arch in Arch.ORDER:
+		h.reclass(Arch.weight(arch), arch)
+		var row := [arch]
+		for order in [[0, 12], [6, 0]]:
+			_reset(at, Vector3.ZERO)
+			for i in 30: m.step(Match.DT)
+			h.dashes = h.max_dashes()
+			h.ex_cd = 0.0
+			h.inp["move"] = Vector2(1, 0)
+			h.inp["aim"] = h.pos + Vector3(8, 0.9, 0)
+			var from := h.pos
+			for i in 150:
+				h.inp["jump"] = i == order[0]
+				h.inp["dash"] = i == order[1]
+				m.step(Match.DT)
+				if i > 20 and h.grounded:
+					break
+			row.append(h.pos.x - from.x)
+		lines.append("%s %.1f/%.1f" % row)
+		if arch == "thief":
+			sable = row[1]
+		else:
+			others.append(row[1])
+	h.inp["move"] = Vector2.ZERO
+	h.reclass(cls0, "")
+	print("ACHECK note reach m (jump > Shift / Shift > jump): %s" % ", ".join(lines))
+	others.sort()
+	var median: float = others[others.size() / 2]
+	ok(sable <= median * SABLE_REACH_K, "Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m"
+		% [sable, SABLE_REACH_K, median])
+
 ## The same keys in the air at home and in a match (a fresh save's hero both places): vx every 0.1s holding D
 ## from a 3 m/s backward drift, and the step a fresh glide press opens the glider.
 func _parity(main: Node) -> void:
@@ -235,6 +273,8 @@ func _parity(main: Node) -> void:
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	while hm.building:      # (built under a still-covered fade, the farm comes in slices)
+		await main.get_tree().process_frame
 	hm.set_process(false)
 	hm.ppos = Vector3(hm.ppos.x, 0, hm.ppos.z)
 	hm.py = hm._ground_h(hm.ppos.x, hm.ppos.z) + 6.0
@@ -325,6 +365,7 @@ func run(main: Node) -> void:
 	_match_items()
 	_chain()
 	await _parity(main)
+	_jump_shift_reach()      # after the parity: it re-classes the hunter through every Hunter
 	m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()

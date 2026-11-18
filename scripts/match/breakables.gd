@@ -3,9 +3,13 @@ extends RefCounted
 ## Pots, crates, barrels and powder kegs (content/rules/breakables.json). Any single hit breaks one:
 ## a shot, a melee swing, an ability, a Boki strike, a blast or a dash through it. A powder keg is lit
 ## by its hit instead: a short fuse with a hiss, a flashing body, a swelling glow and a ground ring
-## showing its blast, then it blows and lights any keg in reach. The look is in BreakFx.
+## showing its blast, then it blows and lights any keg in reach. The look is in BreakFx; the sounds are
+## their own (content/sfx/breakables.json): one per material in takes, and the keg's fuse and blast.
 
 const RULES_PATH := "res://content/rules/breakables.json"
+const BREAK_DB := -4.0           # dB: a smash sits a little under a weapon's hit (its sound is at impact level)
+const FUSE_DB := -6.0            # dB: a lit fuse's hiss, a warning under the fight
+const KEG_BLAST_DB := -5.0       # dB: a keg blowing, as loud in the mix as the shared blasts
 const HITSTOP := 0.04            # seconds the game freezes when the player breaks something
 const BLINK_HZ := 12.0           # how fast a lit keg flashes
 const SQUASH_T := 0.07           # seconds a broken prop takes to pop flat
@@ -13,6 +17,7 @@ const SAFE_MARGIN := 1.2         # metres outside a lit keg's blast a bot still 
 const CHAIN_SLACK := 0.4         # metres past the blast radius that still light a neighbour
 const BLAST_SPEED := 1.6         # debris power per metre of blast radius
 const SCORCH_SCALE := 0.9        # scorch radius as a share of the blast radius
+const HIT_R := 0.36              # metres from a prop's centre a shot or swing has to pass to hit it
 
 static var _rules: Dictionary = {}
 
@@ -65,8 +70,17 @@ func hit(b: Dictionary, by: Ent, chain := false) -> void:
 	lit.append(b)
 	_pop(b["node"])
 	_m.fx.flash(b["pos"] + Vector3(0, 0.5, 0), Color("fff0c0"), 0.5, 0.08)
-	_m.sfx("fuse_hiss", b["pos"], -2.0, 1.0)
-	_m.sfx("break_metal", b["pos"], -10.0, 1.6)
+	# the hiss lasts the full fuse, so a shorter chain fuse plays it faster to end on the blast
+	_m.sfx(String(ex["fuse_sound"]), b["pos"], FUSE_DB, float(ex["fuse"]) / float(b["fuse"]))
+
+## The live props within `reach` (flat) of `p`: what one shot can touch this step. A shot walked its
+## path in 0.25 m hops against every prop on the map, and the 2x map doubled them.
+static func near(breaks: Array, p: Vector3, reach: float) -> Array:
+	var out: Array = []
+	for b in breaks:
+		if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < reach:
+			out.append(b)
+	return out
 
 ## Runs the fuses of lit kegs.
 func tick(dt: float) -> void:
@@ -99,19 +113,20 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	var kind_s: String = b["kind"]
 	var sp := spec(kind_s)
 	_pop(b["node"], true)
-	_show_break(at, String(sp["material"]), int(sp["chunks"]))
+	show_break(at, String(sp["material"]), int(sp["chunks"]))
 	if not from_net:
 		KeyBonus.on_break(_m, at, kind_s)
 	_drop_loot(at, sp["loot"], by, from_net)
 	if sp.has("explosive"):
 		_explode(at, sp["explosive"], by, from_net)
 
-## Lights every unbroken prop a blast at `c` reaches.
-func _chain(c: Vector3, radius: float, by: Ent) -> void:
+## Hits every unbroken prop a blast at `c` reaches (Explosive hits: a keg's blast, Ostra's Empowered
+## Nightwell ticks). `chain`: the blast is a keg's, so kegs it lights burn the short chain fuse.
+func hit_around(c: Vector3, radius: float, by: Ent, chain := false) -> void:
 	for b in _m.breaks:
 		var reach := Vector2(b["pos"].x - c.x, b["pos"].z - c.z).length() < radius + CHAIN_SLACK
 		if not b["dead"] and reach and absf(b["pos"].y - c.y) < 2.0:
-			hit(b, by, true)
+			hit(b, by, chain)
 
 func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	var radius := float(ex["radius"])
@@ -123,12 +138,12 @@ func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	_m.fx.flash(c, Color("ffd9a0"), radius * 0.6, 0.12)
 	_fx.shatter(c, "metal", int(spec("keg")["chunks"]), radius * BLAST_SPEED / 2.6)
 	_fx.scorch(at, radius * SCORCH_SCALE)
-	_m.sfx("boom", c, 2.0, 0.85)
+	_m.sfx(String(ex["blast_sound"]), c, KEG_BLAST_DB)
 	_hitstop(by, HITSTOP * 1.5)
 	if from_net:
 		return
 	_hurt_around(c, ex, by)
-	_chain(c, radius, by)
+	hit_around(c, radius, by, true)
 
 func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 	var radius := float(ex["radius"])
@@ -152,13 +167,14 @@ func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 		var info := {"src": "boom", "kb": dir * float(ex["knockback"]) * f, "lift": float(ex["lift"]) * f}
 		e.hurt(float(ex["damage"]) * f, credit, info)
 
-func _show_break(at: Vector3, mat_name: String, chunks: int) -> void:
+## Debris, dust, a flash and the material's sound where something breaks (props here; LairBreach's cracks).
+func show_break(at: Vector3, mat_name: String, chunks: int) -> void:
 	var drules: Dictionary = rules()["debris"][mat_name]
 	var mid := at + Vector3(0, 0.35, 0)
 	_fx.shatter(mid, mat_name, chunks)
 	_m.fx.dust(at, 8)
 	_m.fx.flash(mid, Color("fff0d0"), 0.45, 0.07)
-	_m.sfx(String(drules["sound"]), at, -2.0, float(drules["pitch"]))
+	_m.sfx(String(drules["sound"]), at, BREAK_DB, float(drules["pitch"]))
 
 func _drop_loot(at: Vector3, loot: Dictionary, by: Ent, from_net: bool) -> void:
 	if loot.is_empty():
@@ -166,8 +182,8 @@ func _drop_loot(at: Vector3, loot: Dictionary, by: Ent, from_net: bool) -> void:
 	var up := at + Vector3(0, 0.5, 0)
 	var scale_by := float(_m.T["loot"])
 	var gems: Array = loot["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		_m.drop("gem", up, maxi(1, int(round(float(loot["gem_base"]) * scale_by))))
+	var each := maxi(1, int(round(float(loot["gem_base"]) * scale_by)))
+	DropMerge.gems(_m, up, randi_range(int(gems[0]), int(gems[1])), each)
 	if loot.has("seed") and randf() < float(loot["seed"]):
 		_m.drop("seed", up, 1, Data.pick_seed())
 	if loot.has("tonic") and randf() < float(loot["tonic"]):

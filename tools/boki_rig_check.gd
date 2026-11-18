@@ -1,23 +1,49 @@
 extends RefCounted
 ## --boki-rig-check: a rigged Boki (BokiRig, art/kin/<id>/<id>.glb) has its clips and faces, picks them from
-## the same metas KinPuppet reads,
-## wears each Boki's own colours and marks, stays inside its budgets.
+## the same metas KinPuppet reads, floats and swims or paddles in water deeper than half its height ("kwater"),
+## wears each Boki's own colours and marks, stays inside its budgets. A flier has its hover, glide and flare and
+## plays them in the air (BokiFly), and on Kitewind Ridge it stays up (tools/boki_rig_fly.gd).
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
-	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
-	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird"]
+const Fly := preload("res://tools/boki_rig_fly.gd")
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew", "zephyrak", "pebbit", "cairnback",
+	"wisplet", "gloamshell", "selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren",
+	"lodestick", "marchleaf", "mossgrade", "nettlynx", "thrumbird", "gibbelle", "caecilith",
+	"goliathite", "hoarheron", "floenatee", "casquebill", "duskapi", "glaciyak", "heatherhorn",
+	"kilnbadger", "limpetor", "moonloris", "moundvark", "murmurling", "nacrolin", "opalisk",
+	"orchisloth", "scaldamus", "sentrikat", "spatewader", "squalltross", "threadwyrm", "tuatrune",
+	"velvorm", "nimbostrich", "lilybara", "umbrathere"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
+	"stonehop", "spin", "strut", "pose", "bow", "crouch", "burst", "sulk"]
+const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
+const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
+const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
+## A Meshy body (docs/art/kin/MESHY_BOKI_RECIPE.md): 16k of body, the face, the props and the grown parts.
+const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
-const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636}
+const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrade": MESHY_TRIS, "thrumbird": MESHY_TRIS,
+	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS, "goliathite": MESHY_TRIS,
+	"hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS, "cindle": MESHY_TRIS, "puddlet": MESHY_TRIS,
+	"burrlet":         MESHY_TRIS, "pebbit": MESHY_TRIS, "zapple": MESHY_TRIS, "glomwort": MESHY_TRIS,
+	"selenfin": MESHY_TRIS, "casquebill": MESHY_TRIS, "caecilith": MESHY_TRIS, "duskapi": MESHY_TRIS,
+	"glaciyak": MESHY_TRIS, "glintmole":         MESHY_TRIS, "gloamshell": MESHY_TRIS,
+	"heatherhorn": MESHY_TRIS, "hivara": MESHY_TRIS, "kilnbadger":         MESHY_TRIS,
+	"limpetor": MESHY_TRIS, "lodestick": MESHY_TRIS, "moonloris": MESHY_TRIS, "moundvark": MESHY_TRIS,
+	"murmurling": MESHY_TRIS, "nacrolin": MESHY_TRIS, "nettlynx": MESHY_TRIS, "opalisk": MESHY_TRIS,
+	"orchisloth":         MESHY_TRIS, "scaldamus": MESHY_TRIS, "sentrikat": MESHY_TRIS,
+	"spatewader": MESHY_TRIS, "squalltross":         MESHY_TRIS, "threadwyrm": MESHY_TRIS,
+	"tuatrune": MESHY_TRIS, "velvorm": MESHY_TRIS, "wisplet": MESHY_TRIS, "zephyrak": MESHY_TRIS,
+	"nimbostrich": MESHY_TRIS}
 const MAX_BONES := 64
+const DEEP := 1.0              # m of water for the swim rows
+const SHALLOW := 0.1           # m: a puddle it stands in
+const FEET_CLEAR := 0.1        # m its lowest bone keeps off the bed when it floats
 
 var bad := 0
 
@@ -31,6 +57,7 @@ func run(main: Node) -> void:
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)
+	await Fly.new().run(main, self)
 	print("BOKIRIG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -42,7 +69,9 @@ func _species(main: Node) -> void:
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	_contents(rig)
+	_feel(k, rig)
 	await _states(main, k, rig)
+	await _stepping(main, rig)
 	await _own_look(main)
 	k.queue_free()
 
@@ -50,8 +79,12 @@ func _contents(rig: BokiRig) -> void:
 	for c in CLIPS:
 		var a := rig.player.get_animation(c)
 		ok(a != null and a.length > 0.1, "clip %s" % c)
-	for c in BokiRig.LOOPED:
+	for c in BokiRig.LOOPED + ["swim", "paddle"]:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+	_game_clips(rig)
+	_flight_clips(rig)
+	for c in ["swim", "paddle"]:
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -64,6 +97,123 @@ func _contents(rig: BokiRig) -> void:
 	_lods(rig)
 	var skel := rig.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	ok(skel.get_bone_count() <= MAX_BONES, "%d bones, budget %d" % [skel.get_bone_count(), MAX_BONES])
+
+## Tumble's, Echo Steps' and the Dash's clips last as long as their beat data says, play once, and never show the
+## bind pose.
+func _game_clips(rig: BokiRig) -> void:
+	var impact := float(BaseTumble.rules()["impact_s"])
+	var hop := float(EchoSteps.rules()["hop_s"])
+	for c in GAME_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := impact
+		if c == "stonehop": want = hop
+		elif c not in ["rush", "brace", "dodge"]: want = RaceBeats.clip_s(c)
+		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
+		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for c in BokiHomePoses.SHOW_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := ShowRing.BOW_S if c == "bow" else ShowRing.POSE_S
+		var walk_s := rig.player.get_animation("walk").length
+		if c == "strut":
+			ok(a.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(a.length, walk_s), "strut loops over the walk")
+		else:
+			var once := a.loop_mode == Animation.LOOP_NONE
+			ok(is_equal_approx(a.length, want) and once, "%s plays once for %.1f s" % [c, want])
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for m in BaseTumble.rules()["moves"].values():
+		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
+
+## How a rig moves (docs/PERF_PLAN_1111.md): only through BokiRig.advance, skeleton modifiers included, so a rig
+## that isn't stepped is not re-posed. Off GL over Metal it steps every frame; at RigPace.EVERY it moves every
+## few frames with the time it held back, so the clip keeps up.
+func _stepping(main: Node, rig: BokiRig) -> void:
+	var manual_mods := rig.skeleton().modifier_callback_mode_process == Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	ok(manual_mods, "the skeleton's modifiers (BokiDna) move only when the rig is stepped")
+	ok(rig.pace.every == 1 or RigPace.dear(), "the rig steps every frame here")
+	rig.manual = false
+	rig.set_process(false)       # stepped by hand below, one call per drawn frame
+	rig.set_clip("idle", 0.0)
+	rig.seek(0.0)
+	rig.pace.every = RigPace.EVERY
+	var frames := RigPace.EVERY * 2
+	var moved := 0
+	for i in frames:
+		await main.get_tree().process_frame
+		var before := rig.player.current_animation_position
+		rig._process(0.01)
+		if rig.player.current_animation_position != before:
+			moved += 1
+	ok(moved == 2, "every %d frames, the clip moved on %d of %d" % [RigPace.EVERY, moved, frames])
+	var clip_s := rig.player.current_animation_position + rig.pace.held      # (plus what waits for its next step)
+	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
+	rig.pace.every = 1
+	rig.set_process(true)
+
+## A flier's hover and glide loop and its flare plays once over boki_fly.json flare_s; a walker gets none of them.
+func _flight_clips(rig: BokiRig) -> void:
+	if not BokiFly.flier(kin_id):
+		ok(not rig.player.has_animation("hover"), "a walker has no flight clips")
+		return
+	for c in ["hover", "glide"]:
+		var a := rig.player.get_animation(c)
+		ok(a != null and a.loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	var flare := rig.player.get_animation("flare")
+	var flare_s := float(BokiFly.rules()["flare_s"])
+	ok(flare != null and flare.loop_mode == Animation.LOOP_NONE and is_equal_approx(flare.length, flare_s),
+		"flare plays once over %.2f s" % flare_s)
+	ok(not _t_pose(rig, "flare"), "flare has no T-pose frame")
+
+## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
+func _t_pose(rig: BokiRig, clip: String) -> bool:
+	var skel := rig.skeleton()
+	rig.manual = true
+	rig.set_clip(clip, 0.0)
+	var length := rig.player.get_animation(clip).length
+	var worst := 99.0
+	for f in T_FRAMES + 1:
+		rig.seek(length * float(f) / float(T_FRAMES))
+		var far := 0.0
+		for b in skel.get_bone_count():
+			var q := skel.get_bone_pose_rotation(b)
+			far = maxf(far, q.angle_to(skel.get_bone_rest(b).basis.get_rotation_quaternion()))
+		worst = minf(worst, far)
+	print("BOKIRIG %s %s closest frame to bind pose: %.3f rad" % [kin_id, clip, worst])
+	rig.manual = false
+	rig.set_clip("idle", 0.0)
+	return worst < T_POSE
+
+## LandLean on the rigged body: a leap's landing flattens it, it leans into a run start and back as it stops, and a
+## gait's small bob or a teleport does neither. Stepped by hand, a frame at a time, the way _process does.
+func _feel(k: Node3D, rig: BokiRig) -> void:
+	var dt := 1.0 / 60.0
+	var from := k.global_position
+	var run := func(vel: Vector3, frames: int) -> void:
+		for i in frames:
+			k.global_position += vel * dt
+			rig._keep_flex(dt)
+	run.call(Vector3.ZERO, 5)
+	run.call(Vector3(0, -1.2, 0), 10)
+	run.call(Vector3.ZERO, 1)
+	ok(rig.flex.scale.y > 0.999, "a gait's bob (1.2 m/s down) lands without a squash")
+	run.call(Vector3(0, -8.0, 0), 10)
+	run.call(Vector3.ZERO, 1)
+	ok(rig.flex.scale.y < 1.0 - BokiRig.LAND_SQUASH * 0.6, "a leap's landing flattens it (%.3f)" % rig.flex.scale.y)
+	run.call(Vector3.ZERO, 60)
+	ok(is_equal_approx(rig.flex.scale.y, 1.0), "and it stands back up (%.3f)" % rig.flex.scale.y)
+	run.call(Vector3(0, 0, -6.0), 8)
+	ok(rig.flex.rotation.x < -0.05, "it leans forward into a run start (%.3f rad)" % rig.flex.rotation.x)
+	run.call(Vector3(0, 0, -6.0), 60)
+	run.call(Vector3.ZERO, 8)
+	ok(rig.flex.rotation.x > 0.05, "and back as it stops (%.3f rad)" % rig.flex.rotation.x)
+	run.call(Vector3.ZERO, 120)
+	k.global_position = from + Vector3(40, -20, 0)
+	run.call(Vector3.ZERO, 1)
+	ok(absf(rig.flex.rotation.x) < 0.001 and is_equal_approx(rig.flex.scale.y, 1.0),
+			"a teleport is not a lean or a landing")
+	k.global_position = from
+	run.call(Vector3.ZERO, 120)
 
 ## The coat has generated LODs (the art budget), the face stays whole (BokiRig.FACE_LOD_BIAS).
 func _lods(rig: BokiRig) -> void:
@@ -84,7 +234,12 @@ func _clip_for(rig: BokiRig, key: String, value: Variant) -> String:
 
 func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "starts idle")
-	ok(_clip_for(rig, "kstate", "sleep") == "sleep", "kstate sleep sleeps")
+	ok(_clip_for(rig, "kstate", "sleep") == "settle", "kstate sleep settles down first")
+	rig._shot_left = 0.0
+	ok(_clip_for(rig, "kstate", "sleep") == "nap", "then naps")
+	rig._asleep = false
+	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS + BokiHomePoses.SHOW_CLIPS:
+		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
@@ -100,16 +255,34 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
 	rig._speed = 0.0
+	rig._track_speed(0.016)
+	k.global_position += Vector3(6, 0, 0)
+	k.set_meta("tp", int(k.get_meta("tp", 0)) + 1)      # (Kin.teleport: a burst, a re-bloom, a blink)
+	rig._track_speed(0.016)
+	ok(rig._speed < BokiRig.WALK_SPEED, "a teleport is not speed (%.2f m/s)" % rig._speed)
+	k.global_position += Vector3(0.5, 0, 0)
+	rig._track_speed(0.016)
+	ok(rig._speed >= BokiRig.WALK_SPEED, "a real step still is (%.2f m/s)" % rig._speed)
+	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
 	ok(rig.clip == "ability", "a cast pulse plays the ability")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	if BokiFly.flier(kin_id):
+		_air(k, rig)
+	_in_water(k, rig)
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
+	var sad := rig.face.find_blend_shape_by_name("sad")
+	var w := rig.face.get_blend_shape_value(sad)
+	for i in 40:
+		rig._face_step(0.05)
+	var held := rig.face.get_blend_shape_value(sad)
+	var goal := float(rig._want.get("sad", 0.0))
+	ok(held == goal, "a held expression lands on its goal, so it stops being written: %.4f" % held)
 	k.remove_meta("face")
-	var w := rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("sad"))
 	ok(w > 0.9, "the face meta sets the expression: sad %.2f" % w)
 	k.set_meta("pose", "growl")
 	rig._face_step(1.0)
@@ -123,6 +296,39 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	w = rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("closed"))
 	ok(w > 0.99, "asleep the eyes are shut")
 
+## In DEEP water it floats off the bed, SWIM_LINE of its height under, and swims (a Water type) or paddles; one
+## that hovers stays over the water. In a puddle it stands on the bed; with no water said this frame it is dry again.
+func _in_water(k: Node3D, rig: BokiRig) -> void:
+	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
+	var want := "swim" if BokiRig.swimmer(kin_id) else "paddle"
+	k.set_meta("kwater", DEEP)
+	rig._process(0.016)
+	rig.player.seek(0.2, true)
+	var feet := _lowest_bone(rig) - k.global_position.y
+	var lift := rig.model.position.y * rig.flex.global_basis.y.length()
+	if hovers:
+		ok(rig.clip == "idle" and is_equal_approx(lift, DEEP), "hovers over %.1f m of water: %s" % [DEEP, rig.clip])
+	else:
+		ok(rig.clip == want, "in %.1f m of water it plays %s: %s" % [DEEP, want, rig.clip])
+		ok(is_equal_approx(lift, DEEP - rig._afloat()), "afloat with half its height under: %.2f m up" % lift)
+	ok(feet > FEET_CLEAR, "its feet are off the bed: %.2f m" % feet)
+	k.set_meta("kwater", SHALLOW)
+	rig._process(0.016)
+	if not hovers:
+		ok(rig.clip == "idle" and is_zero_approx(rig.model.position.y), "in a puddle it stands on the bed")
+	rig._process(0.016)
+	ok(rig.clip == "idle" and is_zero_approx(rig.model.position.y), "with no water this frame it is dry again")
+
+## The lowest point of its pose (m, world): every bone but the props and the grown parts.
+func _lowest_bone(rig: BokiRig) -> float:
+	var skel := rig.skeleton()
+	var low := INF
+	for b in skel.get_bone_count():
+		var bone := skel.get_bone_name(b)
+		if not bone.begins_with("prop_") and not bone.begins_with("part_"):
+			low = minf(low, (skel.global_transform * skel.get_bone_global_pose(b)).origin.y)
+	return low
+
 ## Home's work poses rock Body and hold their item over its head; while it works the rig owns both.
 func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	var body := k.get_node("Body") as Node3D
@@ -133,12 +339,12 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	k.set_meta("kwork", "carry")
 	rig._pick_clip(0.016)
 	body.rotation.z = 0.16
-	rig._keep_flex()
+	rig._keep_flex(0.016)
 	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
 	var carry_at: Vector3 = BokiRig.FRAME[kin_id]["carry"]
 	ok(held.position.is_equal_approx(carry_at), "carrying, the load sits where it holds it, not over its head")
 	body.position.y = 0.3
-	rig._keep_flex()
+	rig._keep_flex(0.016)
 	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
 	ok(hovers == (rig._shadow != null), "a Boki that hovers has a ground shadow, one on legs has none")
 	if rig._shadow:
@@ -185,3 +391,32 @@ func _own_look(main: Node) -> void:
 		ok(k.find_child(nm, true, false) != null, "%s is on the model" % nm)
 	ok(iris.b > iris.g * 0.8, "its own eye colour: %s" % iris.to_html())
 	k.queue_free()
+
+## In the air (BokiFly's metas) a flier hovers standing and glides moving, its shadow stays on the ground under it;
+## coming down it flares, then stands; going up again cuts the flare short.
+func _air(k: Node3D, rig: BokiRig) -> void:
+	k.set_meta("aloft", true)
+	k.set_meta("lift", 1.0)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "hover", "aloft and still it hovers")
+	rig._speed = 2.4
+	rig._pick_clip(0.016)
+	ok(rig.clip == "glide", "aloft and moving it glides")
+	rig._keep_flex(0.016)
+	var gap := rig._shadow.global_position.y - (k.global_position.y - 1.0) if rig._shadow else -1.0
+	ok(is_equal_approx(gap, BokiRig.SHADOW_LIFT), "1 m up, its shadow lies on the ground under it")
+	k.set_meta("aloft", false)
+	rig._speed = 0.0
+	rig._pick_clip(0.016)
+	ok(rig.clip == "flare", "coming down it flares")
+	k.set_meta("aloft", true)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "hover", "up again before the flare is done, it hovers")
+	k.set_meta("aloft", false)
+	rig._pick_clip(0.016)
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
+	ok(rig.clip == "idle", "after the flare it stands")
+	k.remove_meta("aloft")
+	k.remove_meta("lift")
+	rig._keep_flex(0.016)

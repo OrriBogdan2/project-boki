@@ -6,10 +6,14 @@ extends RefCounted
 ##      you hop, and the glider never opens from it.
 ##      Facing a wall with no keys, ten hops in a row, each with its scuff, and never a glider; a standing
 ##      jump at a one-terrace ledge mantles onto it.
+##   1b. Tall climb: Lace's plain jump facing the four-terrace wall climbs it, Vex's doesn't; both still
+##      walk off its top.
 ##   2. Wall bounce: an angled hit with speed reflects and keeps most of the speed; head-on it doesn't.
 ##   3. Ledges: a glide release against a two-terrace ledge, and falling past one, put you on top;
 ##      keys along or away from the wall never do.
 ##   4. Abyss lift: opening the glider deep under a lip climbs higher and hangs longer at the top.
+##   5. One case per Hunter (wallmove_hunters_check.gd): kick and bounce from a run, a jump, the dash and
+##      each ability's recovery, tapped and held.
 ## Counts fixed simulation steps; never touches the save. Prints "WCHECK ok|FAIL ..." lines and
 ## "WCHECK DONE, failures: N".
 
@@ -28,6 +32,23 @@ func ok(cond: bool, msg: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	_start(main)
+	var w4: Dictionary = _carve(4, 1)[0]
+	var w5 := _carve(5, 2)
+	_kick(w4, w5[0], w5[1])
+	_tall(w4)
+	_dance(w5[1])
+	_stand_mantle(_carve(1, 1)[0])
+	_bounce(w4)
+	_ledges(_carve(2, 2)[0])
+	_lift()
+	_guards(_carve(2, 1)[0], w5[0])
+	_hunters(main)
+	print("WCHECK DONE, failures: ", bad)
+	main.get_tree().quit()
+
+## A two-team match with one local hunter (h) alone on the map: no mobs, no Boki, everyone else far away.
+func _start(main: Node) -> void:
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
@@ -50,17 +71,12 @@ func run(main: Node) -> void:
 	h.kin = null
 	h.kin2 = null
 	w = m.world
-	var w4: Dictionary = _carve(4, 1)[0]
-	var w5 := _carve(5, 2)
-	_kick(w4, w5[0], w5[1])
-	_dance(w5[1])
-	_stand_mantle(_carve(1, 1)[0])
-	_bounce(w4)
-	_ledges(_carve(2, 2)[0])
-	_lift()
-	_guards(_carve(2, 1)[0], w5[0])
-	print("WCHECK DONE, failures: ", bad)
-	main.get_tree().quit()
+
+## 5. Every Hunter: kick and bounce from a run, a jump, the dash and each ability's recovery (own file).
+func _hunters(main: Node) -> void:
+	load("res://tools/wallmove_hunters_check.gd").new().run(main, func(a: String, blocked: Array) -> void:
+		var what := "" if blocked.is_empty() else ": " + ", ".join(blocked)
+		ok(blocked.is_empty(), "%s: wall kick and bounce, nothing blocked%s" % [a, what]))
 
 func _reset(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	h.out = false
@@ -130,8 +146,8 @@ func _carve(ups: int, count: int) -> Array:
 
 # ---------------------------------------------------------------- 1. wall kick
 ## Jump at the wall pushing in; with `kick`, press jump again on the way down (spammed: it must fire once).
-## Returns {peak, top, kicks}.
-func _attempt(wl: Dictionary, kick: bool, spam := true) -> Dictionary:
+## `mash` presses every step instead of waiting to fall. Returns {peak, top, kicks}.
+func _attempt(wl: Dictionary, kick: bool, spam := true, mash := false) -> Dictionary:
 	var n: Vector2 = wl["n"]
 	var at: Vector2 = (wl["at"] as Vector2) - n * 1.0
 	_reset(Vector3(at.x, wl["low"], at.y), true)
@@ -144,7 +160,7 @@ func _attempt(wl: Dictionary, kick: bool, spam := true) -> Dictionary:
 	for i in 150:
 		h.inp["move"] = n
 		var falling := not h.grounded and h.vel.y <= 0.5 and h.lfloat.is_empty()
-		var press := kick and i > 6 and falling and (spam or presses == 0)
+		var press := kick and i > 6 and (falling or mash) and (spam or presses == 0)
 		presses += 1 if press else 0
 		h.inp["jump"] = i == 6 or press
 		m.step(DT)
@@ -174,6 +190,60 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	var again := _attempt(w5b, true, false)
 	var same := absf(again["peak"] - kicked["peak"]) < 0.15
 	ok(again["kicks"] == 1 and same, "the next jump kicks the same: %.2fm" % again["peak"])
+	_diminish(w5, danced)
+
+## Chained kicks keep less each time (content/rules/wall_kick.json), and the ground resets the chain.
+## `danced` is the timed run (a press each fall). A press every step must not climb past it: a climb never
+## stacks on an earlier climb's rise (decision 0100; on 11-17 main the same mash peaked at 4.98m).
+func _diminish(wl: Dictionary, danced: Dictionary) -> void:
+	var curve := WallMoves._curve
+	var mashed := _attempt(wl, true, true, true)
+	ok(curve == [1.0, 0.6, 0.3], "the curve is 100%%, 60%%, 30%% (%s)" % [curve])
+	ok(mashed["kicks"] >= 3 and not mashed["top"] and mashed["peak"] < danced["peak"] + 0.2,
+		"mashed kicks on a 5-terrace wall (4.0m) stay sheer: peak %.2fm (timed %.2fm), %d kicks" % [
+			mashed["peak"], danced["peak"], mashed["kicks"]])
+	_attempt(wl, true)
+	ok(h.wall_moves.chain > 1, "a dance builds a chain (%d)" % h.wall_moves.chain)
+	for i in 120:
+		h.inp["jump"] = false
+		m.step(DT)
+	ok(h.grounded and h.wall_moves.chain == 0, "touching the ground resets the chain")
+	ok(is_equal_approx(h.wall_moves.kick_share(), 1.0), "the next kick is at 100% again")
+
+# ---------------------------------------------------------------- 1b. tall climb
+## Lace's passive ([game data] bCanWallJump, climb_tall in hunter_move.json): a plain jump facing a
+## four-terrace wall climbs it, no kick; Vex's doesn't. Walking off that wall's top still drops either
+## of them to the ground below, keys turned back into the face on the way down included.
+func _tall(w4: Dictionary) -> void:
+	var cls0 := h.cls
+	var arch0 := h.arch
+	for a: String in ["archer", "gunslinger"]:
+		h.reclass(Arch.weight(a), a)
+		var hero := "Lace" if a == "archer" else "Vex"
+		var tall := a == "archer"
+		var r := _attempt(w4, false)
+		ok(r["top"] == tall and r["kicks"] == 0, "%s: a jump facing a 4-terrace wall %s (peak %.2fm, no kick)" % [
+			hero, "climbs it" if tall else "doesn't climb it", r["peak"]])
+		for back in [false, true]:
+			var y := _walk_off(w4, back)
+			ok(y < 0.1, "%s walks off the 4-terrace top%s and lands below (%.2fm)" % [
+				hero, ", turning back into the face," if back else "", y])
+	h.reclass(cls0, arch0)
+
+## Walks off the wall's top (back: keys turn into the face once airborne). Returns the landing height
+## over the low ground (the top's height if she never left it or was lifted back up).
+func _walk_off(wl: Dictionary, back: bool) -> float:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = (wl["at"] as Vector2) + n * 0.8
+	_reset(Vector3(at.x, wl["top"], at.y), true)
+	var air := 0.0
+	for i in 150:
+		air = air + DT if not h.grounded else 0.0
+		h.inp["move"] = n if back and air > 0.15 else -n
+		m.step(DT)
+		if h.grounded and i > 10 and h.pos.y < float(wl["top"]) - 0.5:
+			break
+	return h.pos.y - float(wl["low"])
 
 ## Facing the wall, no keys: Space on every fall for DANCE_S. Ten hops, ten scuffs, the glider never opens.
 func _dance(wl: Dictionary) -> void:

@@ -4,6 +4,8 @@ extends RefCounted
 ## level pips, the chips on a kin's card, and the Job Board panel (priorities per element, who's
 ## doing what, pinning a kin to a job or keeping it to rest).
 
+const UNSET_COLOR := Color("e8a05a")      # the dropdown reads as something still to choose while no job is set
+
 static var tab := "Jobs"
 
 ## An element's round icon: its colour, with a little glyph (flame, drop, sprout, bolt...).
@@ -131,7 +133,7 @@ static func icons(rec: Dictionary, px := 12.0, most := 3) -> Control:
 # ------------------------------------------------------------------ the kin's card
 ## The Work section on a kin's card: its elements, what it's doing, and its job settings.
 static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen: Callable) -> void:
-	parent.add_child(UI.section("Work elements", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Work elements"))
 	parent.add_child(chips(rec, 22.0))
 	var k: Dictionary = h._kin_entry(rec) if h.has_method("_kin_entry") else {}
 	var doing := ""
@@ -141,8 +143,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	if rec.get("overworked", false): line = "Overworked: let it rest"
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
-	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	FitLabel.shrink(dl)
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(dl)
 	row.add_child(pin_menu(h, rec, reopen))
@@ -152,10 +153,10 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 static func job_label(el: String) -> String:
 	return "%s jobs only" % Work.name_of(el)
 
-## Whatever it's best at / Rest only / <Element> jobs only: one dropdown.
+## Not set (it takes whatever it's best at) / Rest only / <Element> jobs only: one dropdown.
 static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton:
 	var opt := OptionButton.new()
-	opt.add_item("Whatever it's best at"); opt.set_item_metadata(0, "")
+	opt.add_item("Not set"); opt.set_item_metadata(0, "")
 	opt.add_item("Rest only"); opt.set_item_metadata(1, "rest")
 	var sel := 1 if rec.get("work_rest", false) else 0
 	for it in Work.list(rec):
@@ -163,14 +164,16 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		opt.set_item_metadata(opt.item_count - 1, String(it[0]))
 		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
 	opt.select(sel)
+	if sel == 0:
+		opt.add_theme_color_override("font_color", UNSET_COLOR)
 	opt.custom_minimum_size.x = 170
-	opt.add_theme_font_size_override("font_size", 13)
+	opt.add_theme_font_size_override("font_size", UI.fs(13))
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
-		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		_drop(h, rec)
+		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"
@@ -267,7 +270,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 					if k.has("job") and String(k["job"]["el"]) == el and pi == 0: h.hw.drop(k)
 			Sfx.play("click")
 			open(h), 0)
-		b.add_theme_font_size_override("font_size", 12)
+		b.add_theme_font_size_override("font_size", UI.fs(12))
 		b.custom_minimum_size = Vector2(52, 26)
 		# a compact segmented control: the chosen one filled, the rest faint
 		var on := cur == i
@@ -295,7 +298,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	nv.custom_minimum_size.x = 150
 	var nl := UI.label(String(rec["name"]), UI.T_BODY, Shiny.body(rec).lerp(UI.INK, 0.5), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nl.clip_text = true
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(nl)
 	nv.add_child(UI.label("%s · Lv %d" % [Data.KIN[rec["species"]]["name"], int(rec["level"])], 12, UI.MUTED))
 	r.add_child(nv)
@@ -309,7 +312,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	var el := String(w["el"])
 	var dl := UI.label(String(w["text"]), 13, Work.col_of(el).lerp(UI.INK, 0.4) if el != "" else UI.MUTED, UI.semi if el != "" else null)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dv.add_child(dl)
 	var mood := ""
 	if rec.get("overworked", false): mood = "Overworked: needs a rest"

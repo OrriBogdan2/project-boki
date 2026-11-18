@@ -8,6 +8,7 @@ Coordinates: the rig JSON is Godot model space (+Y up, facing -Z); here Blender'
 import json
 
 import bpy
+import numpy as np
 from mathutils import Matrix, Vector
 
 SLOTS = ["skin", "hair", "cloth", "leather", "metal", "eyes", "team", "glow", "ice"]
@@ -114,3 +115,46 @@ def export(path, objs, image_format="AUTO", colors=False):
                               export_materials="EXPORT", export_image_format=image_format,
                               export_jpeg_quality=92, export_extras=False,
                               export_vertex_color="ACTIVE" if colors else "MATERIAL")
+
+
+def bake_normal(ob, sources, size, cage, ray, samples=16):
+    """A tangent-space normal map of the dense `sources` (the Meshy scans, posed like ob) on ob's active UVs:
+    (size, size, 3) floats in 0..1, rows bottom first like Blender's pixels. The sources bake as bare geometry
+    (their 8k maps never load: the box is shared, and Meshy's own normal map reads as plastic under the toon
+    ramp). cage, ray: metres, the cage's extrusion and the ray's reach (the detail pilot: 0.005, 0.012)."""
+    img = bpy.data.images.new("bake_normal", size, size)
+    img.colorspace_settings.name = "Non-Color"
+    added = []
+    for mt in ob.data.materials:
+        nd = mt.node_tree.nodes.new("ShaderNodeTexImage")
+        nd.image = img
+        mt.node_tree.nodes.active = nd
+        added.append((mt, nd))
+    kept = [list(s.data.materials) for s in sources]
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.device = "CPU"
+    sc.cycles.samples = samples
+    bk = sc.render.bake
+    bk.use_selected_to_active, bk.cage_extrusion, bk.max_ray_distance, bk.normal_space = True, cage, ray, "TANGENT"
+    hidden = [(o, o.hide_render) for o in [ob] + list(sources)]
+    bpy.ops.object.select_all(action="DESELECT")
+    for s in sources:
+        s.data.materials.clear()
+        s.hide_render = False
+        s.select_set(True)
+    ob.hide_render = False
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
+    bk.use_selected_to_active = False
+    out = np.array(img.pixels[:], dtype=np.float32).reshape(size, size, 4)[..., :3].copy()
+    for s, mats in zip(sources, kept):
+        for m in mats:
+            s.data.materials.append(m)
+    for o, h in hidden:
+        o.hide_render = h
+    for mt, nd in added:
+        mt.node_tree.nodes.remove(nd)
+    bpy.data.images.remove(img)
+    return out

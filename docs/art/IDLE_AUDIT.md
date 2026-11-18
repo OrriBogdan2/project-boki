@@ -25,13 +25,13 @@ No source hero's pose or attitude is copied.
 
 | # | Hunter | Main problem |
 |---|---|---|
-| 1 | Kael the Unbroken (`juggernaut`) | No clips at all: a procedural mannequin frozen in an A-stance |
+| 1 | Kael the Unbroken (`juggernaut`) | Reworked 2026-11-08 (ext/idle-juggernaut): was a frozen procedural mannequin |
 | 2 | Mossy the Barnacle Knight (`bulwark`) | Loop pop; 1.6 s stance; a shield wall hides the warm giant; the shield snaps up in 0.5 s |
 | 3 | Tenzo the Stone Seer (`dolm`) | 0.8 s stance: a 2.5 Hz hip jitter; the feet slide in the hand-off |
 | 4 | Cinder the Ashen Kiss (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
-| 7 | Meeko the Dawnfox (`tender`) | Idle and stance built on the lantern that DECISIONS dropped |
+| 7 | Meeko the Dawnfox (`tender`) | Done Nov 17 (ext/idle-tender-rebased-port): weight shift, strap hug, no lantern pose |
 | 8 | Neve the Snowglide (`rimewright`) | Toy-soldier pike stance, feet together; no skater weight |
 | 9 | Sable the Silver Thief (`thief`) | Square, locked knees; the stance only raises the pistol |
 | 10 | Vex the Hired Gun (`gunslinger`) | Locked knees and a dead pelvis, but the coin flip is a real signature |
@@ -61,12 +61,16 @@ No source hero's pose or attitude is copied.
    The specs below follow the newer source; a text task should bring the archetype files in line.
 6. **No fidget.** No Hunter has a signature beat. Each spec below bakes one into a longer loop (6 to 9 s), because
    WardenClips has no random fidget layer. Adding that layer later would let the loops shrink back.
+   - Now a layer: `WardenBreak` (scripts/heroes/warden_break.gd, data content/rules/idle_breaks.json). After 6 s standing
+     calm (no input, no shot, ability or hit for 6 s) the player's Hunter plays one 2 to 3 s break from that Hunter's
+     personality line, then returns to idle and waits 12 s. Any key, button, move or hit cancels it in under 0.1 s.
+     Only at home, in the Training Area and in a match. `--idle-break-check` asserts it; `--idle-break-shots` films it.
 
 ## Per Hunter
 
 Each target applies **quality** parity only. The attitude comes from the line quoted for that Hunter.
 
-### 1. Kael the Unbroken (`juggernaut`, art `kael`): procedural, frozen
+### 1. Kael the Unbroken (`juggernaut`, art `kael`): reworked 2026-11-08
 
 - **Source:** LORE_MASKS, which wins per DECISIONS: "grim, cold, never cocky"; kael_clips.py: "enormous, grim,
   economical". The archetype line "a proud champion... fights like the crowd is watching" is stale.
@@ -87,6 +91,14 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Nothing showy: stillness is his attitude.
 - **Work:** bake kael_clips.py (idle :39, stance :53) to the spec into the v2 .glb, and add
   `content/rules/warden_anim/kael.json` (loco idle/stance, `stance_after` 4.0) so WardenClips takes over.
+- **Done (2026-11-08, ext/idle-juggernaut):** kael_clips.py idle and stance rewritten to the spec on one planted base
+  (PLANT): weight on the back leg with soft knees, a 1.3 s weight shift that overshoots and settles, pelvis, chest, head
+  and hands offset 3 to 5 frames (LAG_*), two breaths per idle loop and three per stance loop on `x_breath` (3 %, a new
+  leaf under hips skinned to the rib cage by kael_retarget.py), the neck roll plus grip resettle once per idle loop and
+  the shoulder dip once per stance loop. Every curve is a whole number of cycles, so the seams measure 0.0x the limit.
+  The sword point sits 0.8 cm under the ground at the idle's first frame (kael_retarget.py prints it).
+  Strips: docs/art/gen/wardens/kael_idle_before.png and kael_idle_after.png (idle_front, stance_front f000 and f012,
+  live hand-off); stance_after 4.0 s.
 
 ### 2. Mossy the Barnacle Knight (`bulwark`, art `breaker`)
 
@@ -135,6 +147,15 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     figure-8.
   - Breath in the shoulders; no bounce faster than 1 Hz.
 - **Seam / length:** remove `dolm:stance` from `STAND_OPEN`.
+- **Done (ext/idle-dolm):**
+  - tarek_clips.py bakes both as 6 s loops on one set of feet (`FEET`). The weight shift, soft knees and right
+    heel lift are lagged by pelvis, torso, head and hands (`LAG`). The toe-tap fidget lands at 3.2 s,
+    and the hop answers it at 4.1 s.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage.
+  - The stones orbit in code (`Orbits`, warden_glb.gd), so the hop rides on a chin lift and a fist hop. Alternative, not
+    done: a clip event that bumps the orbit.
+  - Shots: before and after f000 and f012 match on the body. In live f012 to f013 the feet stay planted. tarek_clipcheck
+    finds no arm deeper than 2 cm in the chest. `LOOSE` and `STANCE`, used by the kit clips, are unchanged.
 
 ### 4. Cinder the Ashen Kiss (`ashwick`, art `cinder`)
 
@@ -155,6 +176,23 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     unhurried shift of hip to hip.
 - **Note:** her model still carries the removed flamethrower. Author the hands empty now (the stuck arm is wrong either
   way), and the rework lands cleanly when the v2 model replaces it.
+- **Done (ext/idle-ashwick, 2026-11-08):** tools/art1/cinder_clips.py `idle`/`stance`, 6 s each, rebaked into cinder.glb.
+  - Idle: weight in her left hip, pelvis rolled and dropped (soft knees), the chest countering 4 frames behind and the
+    head 8 behind, the hands 10 behind the chest. The left hand rests at the collarbone. The right lies palm up at her hip
+    and rolls the flame (3 wrist rolls a loop). At u 0.40-0.72 the left hand opens in front of her chest and turns to
+    her, she tips her head to it and smiles, then the hand settles back with an overshoot and the hips resettle.
+  - Stance: on the idle's feet (the right heel settles as the weight comes over), both palms up at hip height, one
+    held shift left-right-left, the head scanning behind it.
+  - Breath: a new leaf `x_breath` under hips (scale, 2 breaths a loop, a quicker in-breath), skinned to the rib cage by
+    a smooth share of the hips weight; `extra_bones` in warden_anim/cinder.json.
+  - Every curve is whole cycles of the loop or a bump that is zero at the seam: `--clip-check` seam 0.0x the limit.
+  - Left open: the tail's sweep (its spring chain hangs off `root`, so it follows the hips but can't be keyed). The
+    magma cracks' brightening is now PipStars.pulse (v2 model). The v2 body (empty hands, no fins) is rebased in
+    (ext/idle-ashwick-rebased): both hands are placed by free turns (`RH`/`LH` palm normal + fingers, read by
+    cinder_clips.py `CastSolver`) instead of the old gun fist; the hair flicker/toss (`fin`) is gone with the fins.
+    Frames on the v2 body: [idle f008](idle/cinder_after_v2_idle_f008.png), [stance f003](idle/cinder_after_v2_stance_f003.png).
+  - Strips (front, f000 to f012 every 1 s, idle then stance): [before](idle/cinder_before.png),
+    [after](idle/cinder_after.png).
 
 ### 5. Sparkle the Storm Chaser (`mage`, art `ryzz`)
 
@@ -172,6 +210,19 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - The same feet. Finger guns at nobody, a head tilt, then she drops into a lean on the staff. The bubble grows and
     pops on a beat, not at the loop end.
+- **Done (ext/idle-mage):** tools/art1/ryzz_clips.py `idle` / `stance` (`stand`, `shift`, `bounce`, `snap`, `bubble`).
+  - No staff: the model carries a rack of four rods on her back (the audit's "staff" was the rack's silhouette), so the
+    staff swing became the rack: it rattles (`fan`) after each weight shift and its tips flare (`lit`) on the snap. The
+    stance lean is into her right hip with the right hand on it.
+  - Idle 5 s: the weight goes to the left foot at 2.0 s and back at 4.0 s (a shift with an anticipation and an
+    overshoot, soft knees through it), the chest 3 frames, the head 5 and the hands 6 behind the pelvis; a toe bounce
+    on a 1 Hz beat that rests on beats 3 and 5; two breaths on the new `x_breath` bone (2.5 %, skinned to the rib
+    cage by `posekit.add_breath`). Fidget: the finger snap with a spark at 1.0 to 1.7 s, the bubble from 2.8 s, pops at
+    3.7 s, back in her cheek by 4.2 s.
+  - Stance 6 s: both finger guns up at 0 to 0.5 s with a double tap at 0.84 and 1.2 s, a head tilt and a wink, down
+    at 1.8 s into the hip lean (to 2.5 s, held, released at 5.2 to 5.8 s); the bubble pops on the 4th beat (4.0 s).
+    The idle's feet, the bounce under the lean at 60 %.
+  - Before and after strips: jobq `20261108-102502-32621` (shots_before) / `20261108-111456-30639` (shots_after).
 
 ### 6. Motley the Void Jester (`ostra`, art `ostra`)
 
@@ -191,6 +242,21 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - The same spring height, sinking lower into the box. He shuffles cards hand to hand in an arc.
 - **Seam:** remove both `ostra:*` entries from `STAND_OPEN`.
+- **Done (ext/idle-ostra-port):** tools/art1/ostra_clips.py `settle_on_spring`, `idle_add`, `stance_add` (curves by `loop_curve`,
+  a periodic Catmull-Rom, so every one closes on the seam in value and slope).
+  - Idle 5 s: two bobs (compress, hang, overshoot, settle). The box leads by 2 frames, the hips ride it, the chest 3 and
+    the head 5 frames behind, the hands 7 and 8. With no legs, the weight shift is the hips swaying side to side over
+    the spring. One breath per bob on a new `x_breath` bone (3 %, `posekit.add_breath`; the keys are in the script, but the v95 glb has no
+    such bone, so its track is dropped when the clips go on it: no breath yet).
+  - Hands low and loose; the right hand's fingers drum after each bob settles. The ripple's phase is the pose key `wph`,
+    rounded to whole turns of a loop: that was the 11 to 16 deg finger pop.
+  - Fidget at 2.55 to 3.8 s: the head rolls 43 deg, past natural, then snaps back with the grin pulled wide and the
+    jaw open (idle_front f007).
+  - Stance 6 s: the same spring, slower (one bob per 3 s), 6 cm lower into the box. The hands meet in an arc
+    and the card fan closes and opens between them, once per bob.
+  - Seams 0.0x the limit (`--clip-check`). Ported onto the v95 glb with `glb_add_clips.py ... idle,stance --drop-missing`
+    (the old build's clips; 38 of 39 idle tracks map). Old build's run: before jobq `20261107-200001-02555`, after:
+    `20261108-102654-11251`.
 
 ### 7. Meeko the Dawnfox (`tender`, art `pip`)
 
@@ -209,6 +275,10 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The same feet. She hugs her satchel strap and rises onto her toes to look ahead.
 - **Note:** the model swap waits for her final master sheet (DECISIONS). The rework edits only the clips on the
   current model and hides the lantern by keying it out of view. If companion bones exist by then, leave them unkeyed.
+- **Done (ext/idle-tender-rebased-port):** tools/art1/pip_clips.py `CALM`/`STAND`.
+  - Idle 5.0 s: weight shifts foot to foot on soft knees, the head and shoulders trailing the hips (`LAG`). Ear flick and a held glance over her shoulder (the tail curls in), then a deep breath and she squares up. Paws at her chest.
+  - Stance 6.0 s: the idle's feet. She hugs her satchel strap, rises onto her toes to look ahead, settles, sighs.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 138 of 141 tracks: the 3 `x_breath` tracks are dropped, the v95 rig has no such bone, and the 3 lantern scale keys are left out because the lantern is gone from the v95 model). The 9 spring joints the v95 rig moved (cape, tail) are held at rest; the runtime springs move them.
 
 ### 8. Neve the Snowglide (`rimewright`, art `claire`)
 
@@ -225,6 +295,25 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: a small toe-pick tap that leaves frost, then a half spin on one blade back to rest.
 - **Target stance (6 s):**
   - The same feet. The spear twirls once and lowers to a ready angle, with a cool smirk.
+- **Done (ext/idle-rimewright):**
+  - claire_clips.py bakes both as 6 s loops on one set of feet (`FEET`: the weight on the left blade, the right toe
+    pick tucked behind). `life()` is the shared edge-sway (two shifts a loop with an overshoot and a hold), lagged by
+    pelvis, torso, head and hands (`LAG`), plus the breath and a blink. The pelvis sits over the left blade with a
+    soft knee; the free hip drops and the torso and head counter it.
+  - Idle: the spear lies across her shoulders behind the hood, the right hand draped over it, the left resting on the
+    shaft. At 2.9 s the toe pick taps twice while she glances down at it; at 3.9 s she turns one full spin on the left
+    blade (`turned()` rotates every world target about it) with an overshoot settle. A full turn, not the half of the
+    spec, so the loop closes facing front; the frost is a VFX hook the clips do not carry.
+  - Stance: the same feet, the spear at a low ready across her, a smirk at the right corner (`smirk` in extras). At
+    1.2 s it lifts to her chest and twirls one full turn round the forearm (`TWIRL_AXIS`) while the left arm opens for
+    balance, then lowers and the left hand re-catches the hilt.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage (289 verts), keyed as a 2.5 % scale,
+    two breaths a loop. posekit.bake takes the scale as an optional third item.
+  - Shots (`--idle-shots --wardens=rimewright --frames=12`): before, jobq 20261108-103813-06781 (a `git archive` of
+    the base commit, since the tree already had the new rules); after, 20261108-111745-02791. Idle and stance f000
+    against f012 differ by a mean of 2.0 to 2.4 per channel, the before's own seam being 1.7; a mid-loop control
+    frame is 11. The live hand-off f012 to f013 keeps the feet planted. The bake resolves the atlas from the blend's
+    own folder (the first bake from the tree's cwd exported the model white).
 
 ### 9. Sable the Silver Thief (`thief`, art `sable`)
 
@@ -237,6 +326,16 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she spins the pistol back into its holster grip, a sleight of hand.
 - **Target stance (6 s):**
   - The same feet, a crouch lower. Her free hand rolls a coin or trinket across the knuckles, then it vanishes.
+- **Done (ext/p18-port-1118, port of ext/idle-thief):**
+  - sable_clips.py bakes a 5 s idle and a 6 s stance on one set of feet (`FEET`): the weight rides the right leg with
+    the left on its toe, then shifts across and back. Pelvis, chest, head and hands lag it (`LAG`); the knees stay soft.
+    The head snaps left at 0.55 s and holds; every curve runs whole cycles of its loop (`--clip-check` seam 0.0x the limit).
+  - The stance keeps the raised right pistol, a crouch lower on the idle's feet; the left hand turns its pistol over at
+    the thigh three times, tucks it behind her hip (2.5 to 4.7 s) and brings it back. No coin prop, no finger bones.
+  - Ported onto the v95 glb with `glb_add_clips.py ... idle,stance --drop-missing`. The v95 mesh has the pistols fused to
+    the hands and no `x_breath` / `x_twirl` bones, so those two tracks are dropped: no chest breath, and the right
+    pistol does not spin (the hand still flicks up and dips for the catch). Alternative, not done: re-skin the right
+    pistol's islands onto a leaf bone under hand.R (the old build's `x_twirl`) and re-run sable_clips.py.
 
 ### 10. Vex the Hired Gun (`gunslinger`, art `vex`)
 
@@ -251,6 +350,20 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - Keep the coin flip and add a follow-through: the head follows the coin, there is a small catch dip, and she pockets
     it.
+- **Done (ext/idle-gunslinger-rebased-port):**
+  - vex_clips.py bakes the idle (5 s) and the stance (6 s) on one set of feet (`FEET`). The left leg stands nearly
+    straight (13 to 16 deg). The right knee is soft (33 to 37 deg) and turned in (the pose key `FRk`), with the heel
+    9 deg up.
+  - The weight shift is lagged across pelvis, torso, head and hand (`LAG`). The cannon's weight leans the torso
+    against it.
+  - Idle: a scan of the horizon runs from 0.8 to 3.7 s (head first, then torso, pelvis and the cannon). Two blinks.
+  - Stance: two flips, with the head following the coin at 0.4 of the gaze. Each catch dips the hand, chest, pelvis
+    and head in turn. At 2.9 s she pockets the coin (its scale is 0 while it is in the pocket), the hand rests on the
+    hip, and the coin comes back out at 4.8 s.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 105 of 108 tracks): the v95 rig has no `x_breath` bone, so the breath is not in the game build (the script still adds it when it bakes a blend).
+  - The script now finds the atlas and normal map next to the blend. Their paths were saved relative to the stage
+    root, so an export from any other directory had no textures.
+  - Alternative, not done: catching the coin on the back of the hand.
 
 ### 11. Lace the Red Stitch (`archer`, art `hem`)
 
@@ -266,6 +379,33 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she draws a red thread taut between two fingers and lets it go.
 - **Target stance (6 s):**
   - The same feet. The bow comes up loosely across the body and an arrow is nocked, not drawn.
+- **Done (ext/idle-archer):**
+  - hem_clips.py bakes the idle and the stance at 6 s on the READY feet; `_stand` is what both share: the weight goes
+    onto the front-left foot and back once a loop (6.5 cm across, 4.5 cm forward) with the pelvis leading and the chest,
+    head and hands 3, 6 and 9 frames behind (`LAG`), a pelvis dip at the middle of the shift (soft knees) and the free
+    knee turned in (`FLk`/`FRk`).
+  - Idle: holds, then one head turn of 29 deg from 2.4 to 2.9 s that the shoulders follow 4 frames later, back from
+    4.8 s. Fidget at 3.1 to 4.8 s: still looking away, she lifts the bow a hand's width, takes its string between two
+    fingers, pulls it taut (the draw target `dr` at 0.07) and lets it go; the hand returns to the hip. Two blinks.
+  - Stance: the bow up loosely across her (`NOCKED`), an arrow on the string, not drawn, brows down. A slower weight
+    shift, a 25 deg head scan the shoulders and then the bow follow, and at 3.4 to 4.3 s she takes up the string a
+    little and lets it settle.
+  - Breathing: a new leaf bone, `x_breath` under hips (posekit `add_breath`, 291 verts of the rib cage), 2 % with two
+    breaths per loop; the chest pitch, the head and the bow hand breathe with it a few frames apart.
+  - Every curve is a `_beat` (out, hold, back) or a whole number of sine periods, and lags wrap through `_at`, so the
+    seam closes: clip-check reads 0.0x the limit on both loops.
+  - Shots (jobq out): before 20261108-112239-02892 (a worktree at the base commit: the first before job,
+    20261108-105004-15029, was claimed after the new .glb was in the tree), after 20261108-110549-06393.
+    - idle_front: f000 and f012 match; f005 to f006 hold the head turn; f008 has the bow lifted and the hand on the
+      string, f009 the hand coming back to the hip.
+    - stance_front: the bow across her with the arrow nocked from f000; f005 to f007 the head scan the bow follows.
+    - live: the feet stay planted through f019; the idle hands the stance over between f012 and f013 with no pop.
+  - Alternative, not done: a thread between the fingers as its own mesh. The string of the bow is the thread.
+  - Ported onto the v95 model (ext/idle-archer-rebased-port): `glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`
+    (not `--hold-moved-rest`: that held her hips and legs at rest, the feet sank 5 cm and the weight shift was lost).
+    The v95 rig has no `x_breath` bone, so its track is dropped; the chest breath is the chest pitch only. `hem_clips.py`
+    still adds the bone on the next re-bake from a blend (posekit `add_breath`). The feet slide about 2 cm over the shift
+    (the v95 legs are longer than the keys were made for); a re-bake from the v95 blend would plant them.
 
 ### 12. Grimble the Scrap King (`dredge`, art `dredge`)
 
@@ -279,6 +419,11 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The hook taps his leg.
 - **Target stance (6 s):**
   - The same feet. He pulls a coin, squints at it through the loupe, bites it, and pockets it.
+- **Done (ext/idle-dredge-rebased-port):** tools/art1/grimble_clips.py `idle` and `stance` on READY's feet.
+  - Idle: the weight goes from foot to foot, with the chest, head, hands and hoard trailing it by 0.1 to 0.4 s. Once a loop he taps the hook on his thigh three times with a grin.
+  - Stance: he digs into the hoard over his left shoulder, holds the coin up and turns his loupe to it, bites it, grins, then pockets it at his hip with a pat.
+  - Ported onto the v95 glb with glb_add_clips (idle and stance only; 135 of 138 tracks): the v95 rig has no `x_breath` bone, so the breath is not in the game build (the script still adds it when it bakes a blend).
+  - The scrap hand is rigid on `hand.L` (its fingers have no skin), so the claw tips hold the "coin", and the hand is kept beside the face rather than in front of the snout. Alternative: a coin prop.
 
 ## The check
 
@@ -288,8 +433,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance` and
-`dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
+`STAND_OPEN` lists what is still open: `bulwark:stance` (`bulwark:idle` closed by ext/anim-pilot-four). Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
 ## Verifying a rework
@@ -298,3 +442,5 @@ so each rework must delete its own entries.
    `jobq submit --needs gpu --tree <tree> --out shots -- --idle-shots --wardens=<id> --frames=12 --shots-dir=shots`.
 2. Compare idle and stance, front and side, f000 against f012 (the seam), and the `live/` hand-off.
 3. Run `--clip-check`.
+
+Not applied on main (11-16 merge): the Sparkle idle/stance rework was baked into the old v2 ryzz.glb; main carries the judged `idle` from ext/anim-pilot-four on the v95 glb, and main's ryzz.glb and ryzz.json are kept (no `x_breath` bone). Only the tools (`ryzz_clips.py`, `posekit.py add_breath`) landed; re-run them on the current glb to use the rework.

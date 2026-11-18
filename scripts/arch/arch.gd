@@ -7,7 +7,8 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Kael, Cinder, Meeko, Tenzo, Lace, Grimble, Neve, Motley, Mossy, Sparkle, Sable
+const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"]   # canonical Hunter order (display and unlock order everywhere): Lace, Kael, Vex, Albert, then Neve, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Motley, Gil
+const HIT_H_DEFAULT := 1.5  # m, hurtbox height of a hunter with no archetype body (the old shared band)
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -23,6 +24,15 @@ static func body(id: String) -> Dictionary:
 ## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
 static func hit_r(id: String, cdat: Dictionary) -> float:
 	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+
+## The height of a hunter's hurtbox, feet to the top of the head (m): the body's hit_h, else a medium hunter's.
+static func hit_h(id: String) -> float:
+	return float(body(id).get("hit_h", HIT_H_DEFAULT))
+
+## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
+static func apply_body(h: Hunter) -> void:
+	h.r = hit_r(h.arch, h.cdat)
+	h.body_r = float(body(h.arch).get("body_r", -1.0))
 
 static func ids() -> Array:
 	var out: Array = []
@@ -73,11 +83,15 @@ static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
 ## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
-## never shifts the match's (seeded maps, loot and tests stay as they were).
-static func pick_for(cls: String, key: String) -> String:
+## never shifts the match's (seeded maps, loot and tests stay as they were). One already in `taken`
+## (its squad's) is skipped while the class has another.
+static func pick_for(cls: String, key: String, taken := []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	return pick(cls, r)
+	var pool := of_class(cls).filter(func(a): return not taken.has(a))
+	if pool.is_empty():
+		return pick(cls, r)
+	return String(pool[r.randi_range(0, pool.size() - 1)])
 
 ## A random archetype of a class (bots).
 static func pick(cls: String, rng: RandomNumberGenerator) -> String:
