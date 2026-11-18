@@ -2,7 +2,7 @@ extends RefCounted
 ## --cloth-shots --warden=<id> --shots-dir=<dir> [--scene=idle|run|dash|lmb] [--cam=game|orbit|side|back]
 ## [--fps=30] [--size=540] [--mp4] [--dash=pin_roll] [--lmb=arc_loose]: a Warden MOVING through the world (position advanced each frame, so a
 ## cloth chain feels the motion) in the game's renderer: <dir>/<scene>_<cam>/f000.png... (ffmpeg makes the MP4).
-## --bench[=<n>] [--secs=<s>]: n copies (default 8) running, cloth simulated vs switched off in turns in one process;
+## --bench[=<n>] [--secs=<s>] [--far]: n copies (default 8) running, cloth simulated vs switched off in turns in one process;
 ## mean process time (needs a real GPU for the frame time; compare a tree with the cloth bones against one without).
 ## Scenes: idle (3 s standing); run (0.5 s stand, then 4.6 m/s); dash (run, then the dash kit move, run on);
 ## lmb (run, an LMB kit move mid-way).
@@ -202,6 +202,9 @@ func _bench(id: String, n: int, secs: float) -> void:
 			cl.sim.modification_processed.connect(Clock.stop)
 	shots.cam.fov = 40.0
 	shots.cam.position = Vector3(0, 5.0, 7.0)
+	if OS.get_cmdline_user_args().has("--far"):      # the game camera's distance: the LOD switches the sim off
+		shots.cam.position = Vector3(0, 23.0 * sin(deg_to_rad(66.0)), 23.0 * cos(deg_to_rad(66.0)))
+		shots.cam.fov = 32.0
 	shots.cam.look_at(Vector3(0, 0.8, 0))
 	for k in 60:
 		await tree.process_frame
