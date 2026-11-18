@@ -61,3 +61,13 @@ forward. The blind Fable judge kept the old walk_b, walk_r, run_l (tie or loss),
 the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops/JUDGE.md).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+**One sword (2026-11-17):** the e1 master carries its own swords as the materials `sword` and `sword.001` (two of them:
+the body it was built on already had one), names the spec's `drop_mats` did not list, so the 11-17 port joined both
+into the body mesh (10.4k triangles painted by `v95c`, weighted by bone heat over hand.R, shin.R, thigh.R and hips)
+beside the game's skinned sword: three swords. `python3 tools/art1/glb_drop_mats.py kael.glb kael.glb '*-v95c'` took
+them out (every other part, clip and image byte-identical; `kael_v95c.jpg` gone), and `own.drop_mats` now names
+`sword` and `sword.001`, so the next `v95_to_game.py Kael` drops them itself. The game's skinned sword is the one sword.
+Alternative not taken: the master's HD sword skinned to hand.R in place of the game's (anchors and blade FX follow the game's sword).
+
+**Restore branch (2026-11-17, ext/hunter-glb-restore-1117):** the restored e1 mesh (ca32bd97252) carried the same master swords (2440 triangles on the `*-v95c` materials, blade-shaped slabs at x 0.26..0.37). `glb_drop_mats.py kael.glb kael.glb '*-v95c'` took them out, so the restored picked Kael has one sword (the game's skinned one), like main's. Every other part, skin and the 54 clips are unchanged.
