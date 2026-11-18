@@ -142,6 +142,7 @@ func run(main: Node) -> void:
 	ok(absf(float(level[1]) - heat_s) <= Match.DT * 2.0, heat_txt % [level[1], heat_s])
 	_spike_kinds()
 	_burn_hint(e)
+	_heat_values()
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
@@ -239,3 +240,12 @@ func _spike_kinds() -> void:
 	ok(o.stun_t >= GlideSpike.land_stun - Match.DT * 1.5, "it lands stunned (%.2fs left)" % o.stun_t)
 	ok(hp0 - o.hp >= GlideSpike.land_dmg - 0.01, "...and takes the landing damage (%.1f)" % (hp0 - o.hp))
 	o.inp["glide"] = false
+
+## Each glider heat number in content/rules/hunter_move.json (tags in its heat_doc) against the decided value:
+## glide_heat_s is 9 s by the owner ("lasts too long" at the footage's ~14 s).
+func _heat_values() -> void:
+	var rows := [["glide_heat_s", HunterMove.glide_heat_s, 9.0], ["lift_heat", HunterMove.lift_heat, 4.0],
+		["lift_tap_heat", HunterMove.lift_tap_heat, 1.0], ["overheat_burn", HunterMove.overheat_burn, 0.035],
+		["overheat_speed", HunterMove.overheat_speed, 0.5], ["overheat_lift", HunterMove.overheat_lift, 0.5]]
+	for r in rows:
+		ok(is_equal_approx(float(r[1]), float(r[2])), "%s = %s (%s)" % r)
