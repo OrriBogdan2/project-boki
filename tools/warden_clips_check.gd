@@ -317,6 +317,7 @@ func _porthole(m: Node3D, md: WardenMood) -> void:
 		[{"kmove": "bul_guard"}, true, "his guard glares"],
 		[{"fired": 4.5, "cast": 9.0, "hit_t": 9.0}, false, "4 s after the fight he smiles again"],
 		[{"emote": "x"}, false, "an emote smiles"],
+		[{"fired": float(load("res://scripts/match/hunter.gd").new().idle_fire)}, false, "a fresh spawn smiles (idle_fire starts expired)"],
 	]
 	for row in rows:
 		m.set_meta(WardenClips.STATE, row[0])
