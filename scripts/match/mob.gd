@@ -523,7 +523,8 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()
 	var moving := spd > 0.3
-	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
+	if moving:
+		anim += spd * delta * TAU / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(mkind), 2.0))
 	var body: Node3D = model.get_node("Body")
 	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
