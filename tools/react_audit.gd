@@ -19,7 +19,10 @@ const WEIGHT := {"light": [0.14, 0.30], "medium": [0.18, 0.38], "heavy": [0.24, 
 ## The bone that holds the weapon, where it is not skinned straight into the hand mesh.
 const WEAPON := {"bulwark": "x_weapon", "archer": "bow", "dredge": "hook", "mage": "rod.0", "gunslinger": "gatling"}
 const ELBOW_STRAIGHT := 0.35     # rad: the forearm runs on with the upper arm
-const OPEN := {}             # "id:test": why it still fails (docs/art/REACT_AUDIT.md)
+## "id:test": why it still fails (docs/art/REACT_AUDIT.md).
+const OPEN := {
+	"archer:hit_b weight": "Lace's back hit ends off her idle (scaled 1.8x, still settles at 0.42 s): re-key it",
+}
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -47,6 +50,9 @@ func _react(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:      # (a Hunter with no keyed clips: the rig's poses drive it)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var st: Dictionary = clips.d["states"]
 	var hd: Dictionary = st["hit"]

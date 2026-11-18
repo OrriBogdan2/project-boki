@@ -32,3 +32,7 @@ The fix is in the .glb, with no Blender (`tools/art1/glb_retime.py`, `glb_react.
    <glb> <clip> anchor idle`): claire and tarek both clips, hem `hit_b`, sable `hit_f`, pip both.
 
 A Blender rebuild from tools/art1 must apply these two steps again (the clip scripts still carry the old keys).
+
+Left open (the gate's `OPEN`): Lace's `hit_b` still settles at 0.42 s. Scaled 1.8x it reads 0.07 -> 0.12 of her height,
+but the clip ends off her idle pose and no anchor of the first key fixes the end. It needs a re-key in Blender. Result:
+12 Hunters, FAIL 0 once that row is counted as open (before: FAIL 10).
