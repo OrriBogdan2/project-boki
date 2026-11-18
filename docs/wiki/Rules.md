@@ -1079,7 +1079,7 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 | toast | New blueprints: talk to Hob |
 | lines | {"first": "Name's Hob. I draw up what you can build. Start with a house, a patch, a pot and a pen, and I'll have more when the farm has grown.", "nothing": "Nothing new yet. Grow the farm: harvest, hatch, scan, and make it out of an expedition.", "level_2": "You've got a crew now. Let's give them something to swing at.", "level_3": "Real work needs a real bench.", "level_4": "Pens, kilns, a proper hospital. Now we're talking.", "level_5": "Cold store. Mind the draught.", "level_6": "Nothing left that I haven't drawn. Keep building.", "first_run": "First run done. Take this blueprint: a Challenge House. Six wood and four stone, then it's yours.", "first_extract": "You came back alive. Take this blueprint.", "first_boss": "Bring me a trophy and I'll carve it in stone.", "scan3": "Three Boki scanned? Then you'll want somewhere to put them."} |
 | menu_hint_empty | Hob has nothing new for you yet. |
-| talk | {"call": "Hey! Over here!", "call_offer": "Got a minute?", "call_every_s": 9.0, "intro": [{"text": "There you are! I'm Hob Brackenridge. I build things.", "pose": "wave"}, {"text": "This is your farm now. A bit bare, but we'll fix that."}, {"text": "That's the market stall. Sell what you grow, buy seeds.", "show": "stall"}, {"text": "First you need a house. That spot over there will do nicely.", "show": "house"}, {"text": "A house needs wood. Here, take an axe and chop a tree.", "show": "tree"}], "offer": [{"text": "By the way... I see you found a {mask} Relic."}, {"text": "Could I interest you in another?"}], "offer_title": "Pick one. It's yours to keep.", "starter_title": "Choose your first Relic.", "offer_take": "Take {name}", "offer_later": "Not now", "offer_wait": "No rush. I'll hold on to them.", "offer_taken": "Good choice. Go on, put it on.", "roles": {"archer": "Shoots from high ground", "gunslinger": "Fires while sliding", "juggernaut": "Up close, hits hard", "tender": "Keeps your squad alive", "ashwick": "Burns an area"}, "signature": {"tender": "e"}, "build_menu": "Open the build menu", "bye": "Bye", "shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks there (CamLook) and stays until you click on."} |
+| talk | {"call": "Hey! Over here!", "call_offer": "Got a minute?", "call_every_s": 9.0, "intro": [{"text": "There you are! I'm Hob Brackenridge. I build things.", "pose": "wave"}, {"text": "This is your farm now. A bit bare, but we'll fix that."}, {"text": "That's the market stall. Sell what you grow, buy seeds.", "show": "stall"}, {"text": "First you need a house. That spot over there will do nicely.", "show": "house"}, {"text": "A house needs wood. Here, take an axe and chop a tree.", "show": "tree"}], "offer": [{"text": "By the way... I see you found a {mask} Relic."}, {"text": "Could I interest you in another?"}], "offer_title": "Pick one. It's yours to keep.", "starter_title": "Choose your first Relic.", "offer_ask": "Take {name}?", "offer_yes": "Yes, take {name}", "offer_back": "Back", "offer_later": "Not now", "offer_wait": "No rush. I'll hold on to them.", "offer_taken": "Good choice. Go on, put it on.", "roles": {"archer": "Shoots from high ground", "gunslinger": "Fires while sliding", "juggernaut": "Up close, hits hard", "tender": "Keeps your squad alive", "ashwick": "Burns an area"}, "signature": {"tender": "e"}, "build_menu": "Open the build menu", "bye": "Bye", "shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks there (CamLook) and stays until you click on."} |
 
 ## farm_tutorial (`content/rules/farm_tutorial.json`)
 
@@ -1903,13 +1903,13 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 
 ## mask_moment (`content/rules/mask_moment.json`)
 
-Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, the fallen Hunter on a grey panel of their painted art (their face, then their pose held with a whisper), the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 2.3x its first cut, the panel about 5 s (owner 11-11: too fast to read; 'like 5 s, not 1 s'). MaskBeat holds the whisper and the name for at least its reading time (3 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
+Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, the fallen Hunter on grey panels of their painted art (three memories: their past, their fall, the legend, the last held with a whisper; a Hunter without them shows their face, then their pose), the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 2.3x its first cut, the panels 4-6 s in all (owner 11-11: too fast to read; 'like 5 s, not 1 s'; owner 11-17: they went by in 1-2 s because the farm's first Relic ran the short cut and a click cut it short: now the first Mask anywhere is the full cut and clicks never skip the memories until one has been seen). MaskBeat holds the whisper and the name for at least its reading time (3 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
 
 | Setting | Value |
 |---|---|
-| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 0.6, "memory_s": [1.4, 3.6], "reveal_s": 3.4, "push_in": 0.7} |
-| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [3.4], "reveal_s": 3.4, "push_in": 0.6} |
-| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art): the face first, the pose (the splash) last, held with the whisper. reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
+| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 0.6, "memory_s": [1.6, 1.8, 2.0], "reveal_s": 3.4, "push_in": 0.7} |
+| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [1.4, 2.0], "reveal_s": 3.4, "push_in": 0.6} |
+| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted memories, or their face and then their splash: the same total shared out when the count differs), the last held with the whisper. reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
 | music_duck_db | -30 |
 | heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
 | punch_fov | 5 |
@@ -2223,6 +2223,17 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 | Setting | Value |
 |---|---|
 | immune | ["gnd"] |
+
+## summon_station (`content/rules/summon_station.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Training Grounds' Boki summon pad (scripts/match/summon_station.gd), on the Boki island. at: map tiles; r: metres, how close you stand to be on it. species: the practice Bokis the pad's interact key cycles; each has its own window and cooldown from boki_summon.json (short and strong, middle, long and supportive). |
+| at | [24.4, 56.5] |
+| r | 1.6 |
+| species | ["kestrike", "cindowary", "moonloris"] |
 
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
