@@ -115,11 +115,11 @@ func _snacks() -> void:
 	var grow := float(SnackPatch.rules()["grow_secs"])
 	for s in _seasons():
 		var d := Save.fresh()
-		var e := {"id": SnackPatch.ID, "x": 0, "z": 0, "t": 0.0}
+		var e := {"id": SnackPatch.ID, "x": 0, "z": 0, SnackPatch.RIPE_KEY: 0.0}
 		d["layout"] = HomeLayout.fresh()
 		d["layout"]["deco"] = [e]
 		var t := _week_of(s["zone"]) * WEEK + 3600.0
-		e["t"] = t - grow
+		e[SnackPatch.RIPE_KEY] = t - grow
 		var got := SnackPatch.harvest(d, t)
 		var others := true
 		for o in _seasons():
