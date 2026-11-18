@@ -10146,3 +10146,4 @@ READY ext/vex-ult-move-1117 9d76558670 (SUPERSEDES READY 7e4493b08b; fast-forwar
 READY ext/vision-cone-1117 f9b0205e2b (vision: grey fog outside sight, no blue; 120 deg cone; sheet in job 20261118-005505-a4)
 READY ext/rig-ship-1117 618517a080 (Tenzo: the owner 11-15 age-down pick in game, Meshy weights, height_3d 1.13; PR #284)
 READY ext/merge-lane-vfx1-1117 73cf1188f5 (bulk-rebase: origin/main merged in mechanically, was 44d387c0db; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/grimble-lmb-line-1118 e6c6b63751 (Grimble LMB: one aim line, 7 slugs in a 6 deg group, no bloom)
