@@ -66,10 +66,14 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	for id in STARTERS:
 		ok(id in BokiRig.CONTACT, "%s has its attack contact in BokiRig.CONTACT" % id)
-	for id in Check.SPECIES_LIST:
+	var ids: Array = Check.SPECIES_LIST
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--boki="):
+			ids = Array(a.substr(7).split(",", false))
+	for id in ids:
 		await _species(main, id)
 	var cover := Cover.new()
-	for id in Check.SPECIES_LIST:
+	for id in ids:
 		await cover.species(main, id)
 	bad += cover.bad
 	print("BOKIGAIT DONE, failures: %d" % bad)
@@ -104,12 +108,12 @@ func _species(main: Node, id: String) -> void:
 	var feetless: bool = measured.min() < FEETLESS
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
-		ok(BokiRig.STRIDE[id] == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		ok(BokiRig.STRIDE.get(id, GLIDE_STRIDE) == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
 		k.queue_free()
 		return
 	for i in 2:
-		var near: bool = absf(measured[i] - BokiRig.STRIDE[id][i]) <= STRIDE_TOL * measured[i]
-		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], BokiRig.STRIDE[id][i]])
+		var near: bool = absf(measured[i] - BokiRig.STRIDE.get(id, GLIDE_STRIDE)[i]) <= STRIDE_TOL * measured[i]
+		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], BokiRig.STRIDE.get(id, GLIDE_STRIDE)[i]])
 	var speeds: Array = HOME_SPEEDS + [match_speed(id)]
 	var row: Array = []
 	for grown in SIZES:

@@ -128,7 +128,7 @@ func _moves(rig: BokiRig, clip: String) -> bool:
 func _flinches(k: Node3D, rig: BokiRig) -> bool:
 	KinFlinch.hit(k, Vector3(0, 0, 1), 0.3, 1.0)
 	rig._flinch.update(rig.root, 0.05)
-	rig._keep_flex()
+	rig._keep_flex(0.016)
 	return rig.flex.rotation.length() > 0.001 or not rig.flex.scale.is_equal_approx(Vector3.ONE)
 
 ## The table line, once per state (a row asserts the same clip for every species).
