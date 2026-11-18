@@ -120,6 +120,11 @@ func _hero(id: String) -> void:
 			if foe == null:
 				foe = h
 	await _frames(30)
+	if clip_on:  # wheel all the way in, as a player would, so the clips show the feet
+		for i in 20:
+			_key(-MOUSE_BUTTON_WHEEL_UP, true)
+			_key(-MOUSE_BUTTON_WHEEL_UP, false)
+		await _frames(30)
 	_find_feats()
 	park = w.free_spot_near(_flat() + Vector3(0, 0, 14))
 	_bind_model()
