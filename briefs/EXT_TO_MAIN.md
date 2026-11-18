@@ -10202,3 +10202,4 @@ READY ext/hunter-picks-1118 2597e494d9e6e317fd4b337dd15b19c6e12d5043 (owner pick
 READY ext/vex-quill-ammo-1117 63f628638f (Vex quill rifle: drum drains even in god/mod mode, under half a drum hits for half, HUD red under half; --quill-mag-check; PR via gh-outbox)
 READY ext/grimble-e-combo-1117 ced1dff981 (Grimble E no hop; RMB->E sure stun 10/10; video /home/boki/cj/20261118-135715-a6/video/grimble_rmb_e.mp4)
 READY ext/vfx-utility-read-port d895074d4b (bulk-rebase: origin/main merged in mechanically, was b32aed7bc7; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/hud-portraits-1118 ad1e42c3c9a (7 hunters 3-mood HUD portraits; sheet /home/boki/meshy/hud-portraits-1118/compare_hud.jpg)
