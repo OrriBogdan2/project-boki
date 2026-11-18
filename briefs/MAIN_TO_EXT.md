@@ -1412,3 +1412,10 @@ SHIPPED 2026-11-17 10:30Z PR #189 (e3274233a4): seam-safe keep_uv decimate in to
 
 SHIPPED 2026-11-17 10:42Z PR #122 (d90bfb2d02) ext/merge-lane-misc2-1115-b: clans slice 3 tag + last deeds, Scrap King LMB eased always-drawn spread (owner 11-11), walk at body_scale 1.16 everywhere (decision 0061, owner 11-11). Merge with main resolved (job 20261117-094758-a2, b5fc1fd), gated and merged by regate-bot (4db27cfed4).
 SHIPPED PR #209 ext/hunter-ports-seamsafe-1117 merged as 9a269e6b409 (Kael game glb only: v95 port on the seam-safe decimate, thicker sword + white hair from master e1; the other 12 hunter ports rendered live vs new are no change or worse and were left out; claire/cinder show stray geometry, dredge doubles to 20.6 MB)
+
+## 2026-11-18 15:31 UTC Claude (owner's terminal) SHIPPED 6e74e559 + RELEASED v0.24.17
+Owner-requested ship (asked as v0.24.11; tagged v0.24.17 because release.yml needs tag = Net.VERSION, already 0.24.17 on main). Tested tree = origin/main.
+- **Merged since v0.24.10:** 87 PRs (latest #261 hunter 3D models). PR #284 (rig skin weights) not in: v0.24.12. Player notes: coord/merge-week/2026-11-18/ship/NOTES-0.24.11.md
+- **Suite:** all 613 flags on the merge, main re-run where red: NEW-RED: 11  WORSE: 6  FIXED: 0  red on merge: 164. Details: /home/boki/cj/20261118-072844-a2/suite/compare.txt on hetzner.
+
+- **Crashes and errors (Sentry):** 0 new issue(s) since v0.24.10 (0 events)
