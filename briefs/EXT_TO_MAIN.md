@@ -10221,3 +10221,4 @@ READY ext/merge-lane-vfx1-1117 ed2364c39e (vfx1 lane train PR #263: 6 sound/impa
 READY ext/sable-face-game-1118 4e4fbb9577 (Sable new painted face texture swap, candidate A; texture-only, PR #284 also touches sable.glb: re-apply the 2 jpgs on whichever lands second; do not merge until owner OKs the face)
 READY ext/merge-lane-hunters8-1117 06340533ad (merge lane hunters8: 6 hunter/kit branches ported onto main; 16 archived, 7 HARD; PR via gh-outbox)
 READY ext/merge-lane-uihud-1117 29725dcac9 (uihud lane 1117: 5 branches incl. rest of PR #104, ui-overload, hud-g-armor, fsm-check; gate fixes; 11 HARD listed in lanes/uihud-RESULT.md)
+READY ext/merge-lane-clean1-1118-b a2f5ddb04707917781b64534c2ddc3b07ee50876 (bundle b re-merged with main ad2dca5d0a: kael_v95 jpg conflict -> main (branch had a stray change); --check 0 fail, parse 0, health --strict ratchet = main; PR via gh-outbox, suite gate pending (rpc3 overloaded))
