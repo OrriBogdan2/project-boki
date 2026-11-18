@@ -40,7 +40,7 @@ const KIT_FILES := {
 	"mage": ["mage_"],
 	"ostra": ["ostra_"],
 	"rimewright": ["rimewright_"],
-	"tender": ["tender_"],
+	"tender": ["tender_", "care_look"],
 	"thief": ["thief_"]
 }
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -595,6 +595,13 @@ func _meeko_field() -> void:
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
 		"Meeko's root field: the burst's ring lands on the burst radius"
 	)
+	var hit: Array = d["moves"]["ember_hit"]["fx"]
+	ok(
+		hit.any(func(l): return l["p"] == "chunk") and hit.any(func(l): return l["p"] == "ember"),
+		"Meeko's Ember Cast hit: a leaf chunk-and-spark burst"
+	)
+	var call: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(call.size() == 1 and call[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
 
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
