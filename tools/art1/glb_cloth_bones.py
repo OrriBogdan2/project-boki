@@ -10,12 +10,14 @@ Spec (art/wardens/src/<art>_cloth.json), one entry per cloth group in "groups":
   parent      bone the chains hang from (hips)
   materials   material names that count as cloth
   from_bones  only vertices mostly skinned to these bones are cloth (the thighs: the skirt rides the legs now)
+  extra_bones {material: [bones]} more bones that count for one material (cloth strands hanging over the shins)
   y           [low, high] vertical range (glTF Y up, metres at class-neutral size) the cloth hangs over
   center      [x, z] of the vertical axis the sectors fan around
   sectors     chains around it (sector 0 faces the front, -Z; they run toward +X, the wearer's right)
   levels      the joints' heights, top first (the first is rigid; the last skinned one carries everything below it)
   tip         height of the unskinned tip joint
   blend       share of a sector's width the angle blend covers (1 = linear between neighbours)
+  outer       metres from the leg axis (x = +-leg_x) beyond which a thigh-skinned vertex of ANY material counts as cloth
   tag         bone tag (cloth_<tag><sector>_<i>)
 Needs numpy."""
 import json
@@ -80,10 +82,13 @@ def build(j, b, spec):
         # which vertices are cloth
         picks = []
         for k, (pr, pos, jn, wt, joff, woff, mat) in enumerate(pr_data):
-            if mat not in g["materials"]:
-                continue
             dom = jn[np.arange(len(jn)), wt.argmax(1)]
-            ok = np.array([jname[int(d)] in g["from_bones"] for d in dom])
+            bones = g["from_bones"] + g.get("extra_bones", {}).get(mat, [])
+            ok = np.array([jname[int(d)] in bones for d in dom])
+            if mat not in g["materials"]:
+                # (a strand the colour slots put in another material: far outside the legs, so not a leg)
+                leg_x, out = g.get("leg_x", 0.09), g.get("outer", 0)
+                ok &= (out > 0) & (np.hypot(np.abs(pos[:, 0]) - leg_x, pos[:, 2] - cz) > out)
             ok &= (pos[:, 1] >= g["y"][0]) & (pos[:, 1] <= g["y"][1])
             picks.append((k, np.where(ok)[0]))
         allp = np.concatenate([pr_data[k][1][ix] for k, ix in picks])

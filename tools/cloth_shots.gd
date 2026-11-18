@@ -39,6 +39,8 @@ func run(main: Node) -> void:
 			fps = float(a.substr(6))
 		if a.begins_with("--size="):
 			size = int(a.substr(7))
+		if a == "--jpg":
+			jpg = true
 		if a == "--bench":
 			bench = 8
 		if a.begins_with("--bench="):
@@ -112,7 +114,7 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 		model.position.z -= speed / fps
 		sync.call("_process", 1.0 / fps)
 		_camera(model, cam_kind, t / length)
-		await shots._grab(dir.path_join("f%03d.png" % i))
+		await _grab(dir.path_join("f%03d.%s" % [i, "jpg" if jpg else "png"]))
 	model.queue_free()
 	if OS.get_cmdline_user_args().has("--mp4"):      # (the frames become <dir>.mp4 and go: a GPU host keeps no PNGs)
 		var rc := OS.execute("ffmpeg", ["-y", "-loglevel", "error", "-framerate", str(int(fps)), "-i",
@@ -123,6 +125,16 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 			DirAccess.remove_absolute(dir)
 		else:
 			print("CLOTH_SHOTS_FFMPEG_FAILED ", rc)
+
+var jpg := false      # --jpg: JPEG frames (a GPU host has no ffmpeg: encode them where it is)
+
+func _grab(path: String) -> void:
+	await RenderingServer.frame_post_draw
+	var img := tree.root.get_texture().get_image()
+	if jpg:
+		img.save_jpg(path, 0.93)
+	else:
+		img.save_png(path)
 
 func _spawn(id: String) -> Node3D:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -167,14 +179,17 @@ func _bench(id: String, n: int, secs: float) -> void:
 	for k in 60:
 		await tree.process_frame
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	var t0 := Time.get_ticks_usec()
-	var frames := 0
-	var proc := 0.0
-	while float(Time.get_ticks_usec() - t0) / 1e6 < secs:
-		await tree.process_frame
-		frames += 1
-		proc += Performance.get_monitor(Performance.TIME_PROCESS)
-		for m in models:      # (they run in place: the circle's heading changes, the speed stays)
-			(m as Node3D).rotation.y += 0.02
-	var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / frames
-	print("CLOTH_BENCH n=%d frames=%d frame_ms=%.3f process_ms=%.3f" % [n, frames, ms, proc * 1000.0 / frames])
+	# the same process, back to back: the chains simulated, then the modifier switched off (the skin and everything
+	# else stays), twice over
+	for phase in ["cloth on", "cloth off", "cloth on", "cloth off"]:
+		for m in models:
+			var cl := ((m as Node3D).get_node("Warden/Sync") as WardenSync).cloth
+			if cl:
+				cl.sim.active = phase == "cloth on"
+		var t0 := Time.get_ticks_usec()
+		var frames := 0
+		while float(Time.get_ticks_usec() - t0) / 1e6 < secs:
+			await tree.process_frame
+			frames += 1
+		print("CLOTH_BENCH %s n=%d frames=%d frame_ms=%.3f" % [phase, n, frames,
+				float(Time.get_ticks_usec() - t0) / 1000.0 / frames])
