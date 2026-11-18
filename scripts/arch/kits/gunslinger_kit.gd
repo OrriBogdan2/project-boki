@@ -61,15 +61,15 @@ var needle_dir := Vector2.ZERO  # tests: the line the last Longneedle fired alon
 var wall_slams := 0
 var last_dash_kind := ""
 var last_shot := 0
-var flicks := 0  # tests: coins flicked from her hand
-var last_flick := Vector3.ZERO  # tests: where the last one left
+var flicks := 0                # tests: coins flicked from her hand
+var last_flick := Vector3.ZERO # tests: where the last one left
 var last_beam := Vector3.ZERO  # tests: where the last beam was drawn from
-var refill_part := 0.0  # rounds the resting drum has part-refilled
-var dry := false  # the drum ran dry: no round until it is full again
-var round_at := -9.0  # match time of her last rifle round (the firing brackets)
-var ult: GunslingerUlt  # Cinderfall, her ultimate on X
-var commit_end := 0.0  # match time her committed recovery ends (E after the beam, X from the tap)
-
+var refill_part := 0.0         # rounds the resting drum has part-refilled
+var dry := false               # the drum ran dry: no round until it is full again
+var round_at := -9.0           # match time of her last rifle round (the firing brackets)
+var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
+var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -179,15 +179,20 @@ func teardown() -> void:
 func move_k() -> float:
 	if commit_left() > 0.0:
 		return 0.0
-	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	var k := 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	return k * GunslingerUlt.WINDUP_MOVE if x_wind_left() > 0.0 else k
 
 
 ## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
 func fire_ok() -> bool:
 	return not dry and commit_left() <= 0.0
 
+## The ult's wind-up left (s): she walks slowed; the rifle, jump, Shift and abilities all still go (a held LMB
+## string goes on through the tap, the cancel rows' "both").
+func x_wind_left() -> float:
+	return maxf(0.0, x_wind_end - float(m.time))
 
-## The source's recoveries (E_RECOVER, GunslingerUlt.COMMIT): she stands, and no ability, jump or Shift goes.
+## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
 ## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
 func commit_left() -> float:
 	return maxf(0.0, commit_end - float(m.time))
