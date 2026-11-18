@@ -10161,3 +10161,4 @@ READY ext/stuck-integ-b771bcef 5d761349b1 (supersedes: ext/mc-20261117-1720 ext/
 READY ext/admin-testzone-1118 7f0d5b9826 (admin lock via dev key + owner Test Zone; --test-zone-check 20/20)
 READY ext/mobs-ingame-1118 bc246ce320 (6 mob A models in game + sentinel; brute rig-weight re-skin fixes gauntlet stretch; --mob-pose-shots tool)
 READY ext/mobs-ingame-1118 54728ae88a (same as bc246ce320 + the tool's .uid file)
+READY ext/boki-more-ingame-1118 33828a6f7f (40 more Boki in game: 39 evolved forms + Rampartoad body, 89 species with data, 88 with a model; stacked on ext/boki-dex-port-1117)
