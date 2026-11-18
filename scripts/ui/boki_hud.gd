@@ -96,7 +96,7 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 		return
 	H.c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.5))
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
-	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
+	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 10, Color(H.INK, 0.8), H.big)
 
 ## The summon timer round the Boki box (KinSummon) while Boki ride as wisps. Out: a ring in its glow colour
 ## drains with the seconds left. Resting: a grey ring refills, with the seconds. Ready: a soft pulse and the
@@ -220,7 +220,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 10, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return x + 42.0
