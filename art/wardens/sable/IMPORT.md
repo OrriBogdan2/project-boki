@@ -85,3 +85,6 @@ Merge of main's v95 cand_B swap (2026-11-13): `sable.glb` = main's model and cli
 run_f, the owner-fix idle and stance), plus the branch's walk_b, run_b/l/r and the eight diagonals by `glb_add_clips.py`
 (same 57 joints, rest pose equal; main's walk_f/run_f keep the branch loop's length and hips track, legs within a few
 degrees, so the ring stays in step). Alternative not taken: the branch's whole ring incl. its older walk_f/run_f.
+
+## Face paint pass (2026-11-18, ext/sable-face-game-1118)
+Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from the owner-picked 2D target (smd_3: both eyes open, solid dark moth eyes, winged liner, beauty mark under her right eye, plum lips). Mesh, UVs, skin weights and all 59 clips are byte-equal to main (accessor data checked). Eyeballs are kept from the live paint; no wink. Source: `~/meshy/sable-face3d-r2-1118/` (candidate A, `tools/project3.py`, 4096 jpg q88). Overlap: PR #284 also touches `sable.glb`; whichever lands second must re-apply the two jpgs (and the embedded `v95`/`v95b` images) onto the other's glb.
