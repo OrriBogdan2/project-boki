@@ -15,6 +15,17 @@ sheet, not the manatee-and-icebox line in content/kin_v2. Its face sits on the s
 row's `face` keys (`mouth_y`, `mouth_z` in scan space now override the fitted mouth), and its FRAME marks were set by
 hand off the scan's profile: a sitting seal is no blob, so the fitted ones floated off its back.
 
+**Source rule (11-17, owner): the body is the Bokidex model, never a fresh Meshy run.** The Bokidex 3D is the approved look
+(the 11-15 re-gens of Vespyx, Prismander, Mycroll, Gravadillo and Echolop drifted from it: "are these boki for sure the
+right 3d models? because on bokidex there is a better vespyx"). `python3 tools/boki/auto_port.py <id>=<dex glb>` takes the
+dex's own glb (`data.json` `dex/glb/<dex name>.glb` -> hashed file; Draco-packed, 25k triangles; the kin id's dex name is in
+`dex.aliases`), puts it in `~/meshy/boki/<id>/dex/` (`boki_prep.py`; `boki_scan.run_dir` reads that before `run1`),
+starts the FRAME row from the species' first row and fits the bounds. A Meshy `create` (below) is only for a species the Bokidex
+has no 3D for. After a port, look at it against the dex glb: `--boki-rig-shots --sheet=<ids> --dex-dir=<dir of plain glbs>`
+writes `sheet_N.png` (the game model) and `dex_sheet_N.png` (the dex glb at the same height, camera and light).
+What still needs a hand read after the auto fit: a tail or ear the proxy bones do not follow (`limbs`, FRAME `tail_tip`)
+and the eye (`eye_c`, `eye_r`).
+
 11-15: the four starters and Echolop on their own rigs (legs swing): Vespyx (`cindle`), Prismander (`puddlet`),
 Mycroll (`burrlet`), Gravadillo (`pebbit`), Echolop (`zapple`). Each is the best of 4 Meshy runs from the live dex art
 (two from the hero alone, one from the turnaround views, one from the hero plus the turnaround views); the sheets and
