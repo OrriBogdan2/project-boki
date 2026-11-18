@@ -180,7 +180,7 @@ const CHECKS := {
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
-	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],      # the Boki summon pad
+	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -459,7 +459,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
-	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null],      # ability sounds on the strike
+	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null], # ability sounds on the strike
 	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],  # Pip's clips in a real match
@@ -512,7 +512,7 @@ const CHECKS := {
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],  # --shots-dir=<dir>
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
-	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # rigged Boki in the .pck
+	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],      # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
@@ -635,7 +635,7 @@ const CHECKS := {
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
-	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],      # real match, wild Boki models
+	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null], # real match, wild Boki models
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--grimble-line-shots": ["res://tools/grimble_line_shots.gd", "grimble_line_shots", null],
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
@@ -907,8 +907,8 @@ const CHECKS := {
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
 	"--egg-rules-check": ["res://tools/egg_rules_check.gd", "egg_rules_check", null],
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
-	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],      # the tint and warning build with depth
-	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],      # film a slow drop to death (GPU)
+	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],
+	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null], # film a slow drop (GPU)
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
