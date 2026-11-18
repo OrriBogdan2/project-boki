@@ -2,7 +2,8 @@ extends RefCounted
 ## --summon-end-sfx-check: the end of a Boki summon is heard (KinSummon.warn, render). The soft two-note warning
 ## plays once, WARN_S (2 s) before the window ends and not before; the shrink back into the wisp starts when
 ## the window runs out; a summon sent back early or knocked down never warns (a
-## knock-down keeps its own "killed" cue) and a knock-down mid-warning drops the second note. Prints PASS/FAIL.
+## knock-down keeps its own "killed" cue) and a knock-down mid-warning drops the second note; the summon coming
+## back plays the ready tick. Prints PASS/FAIL.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -47,6 +48,7 @@ func run(main: Node) -> void:
 	s = k.summon
 	_window()
 	_early_and_knocked()
+	_ready_cue()
 	m.queue_free()
 	print("SUMMONEND %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -111,3 +113,22 @@ func _early_and_knocked() -> void:
 		_step()
 	k.hurt(k.max_hp * 5.0, null)
 	ok(k.wisp and s.left <= 0.0, "knocked down just after the warning: nothing is out when the second note falls due")
+
+
+## The summon coming back (its cooldown ends on a resting wisp) cues the quiet ready tick once, for your own Boki.
+func _ready_cue() -> void:
+	for i in int(KinSummon.SHRINK_S / DT) + 5:
+		_step()
+	s.cd = 0.5
+	var before := int(Sfx.last_played.get("ab_ready", -1000))
+	for i in 20:
+		_step()
+	ok(s.cd > 0.0, "the summon is still resting after 20 steps")
+	while s.cd > 0.0:
+		_step()
+	if not Sfx.streams.is_empty():
+		ok(int(Sfx.last_played.get("ab_ready", -1000)) > before, "the ready tick plays when the cooldown ends")
+	var again := int(Sfx.last_played.get("ab_ready", -1000))
+	for i in 30:
+		_step()
+	ok(int(Sfx.last_played.get("ab_ready", -1000)) == again, "...and once")

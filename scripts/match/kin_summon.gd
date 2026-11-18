@@ -185,7 +185,10 @@ static func show_reveal(m: Match, at: Vector3, team: int) -> void:
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
+	var resting := cd > 0.0
 	cd = maxf(0.0, cd - dt)
+	if resting and cd <= 0.0 and k.wisp and k.owner_h == k.m.player:
+		_ready_cue()
 	grow = maxf(0.0, grow - dt)
 	fly = maxf(0.0, fly - dt)
 	var o := k.owner_h
@@ -229,6 +232,12 @@ func _back(cool: float) -> void:
 	KinWisp.set_wisp(k, true)
 	k.stow()
 	k.scale = Vector3.ONE
+
+
+## The summon is back: your wisp brightens (BokiWispLook.dim) with a little sparkle and the quiet ready tick plays.
+func _ready_cue() -> void:
+	k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), k.sp.get("glow", k.sp["color"]), 8, 1.5)
+	k.m.sfx("ab_ready", null, -4.0, 1.0)
 
 
 ## The end warning: two soft rising notes of the species' own voice. The owner hears them in the ear, everyone
