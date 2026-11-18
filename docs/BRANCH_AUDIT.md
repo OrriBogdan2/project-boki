@@ -69,7 +69,7 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/main-leftover-firstlook` | 2026-11-06 | 1 | 1 | scripts/ui | WIP firstlook (saved before the coordinator handoff; unchecked) |
 | `ext/main-leftover-integ78` | 2026-11-06 | 1 | 1 | tools/airdash_glide_check.gd.uid | uid |
 | `ext/main-leftover-teammate` | 2026-11-06 | 1 | 1 | scripts/match | WIP teammate (saved before the coordinator handoff; unchecked) |
-| `ext/salvage-1107-174501` | 2026-11-07 | 170 | 471 | art/kin, content/kin_v2, tools/boki | Merge candidate report 20261107-1230 |
+| `ext/salvage-1107-174501` | 2026-11-07 | 170 | 471 | art/kin, content/kin, tools/boki | Merge candidate report 20261107-1230 |
 | `ext/hero-heights` | 2026-11-08 | 1 | 1 | scripts/heroes | Albert's blade stays in his hand with Mossy still 20% narrower: square the blade bone unde |
 | `ext/pause-menu-1108` | 2026-11-08 | 1 | 1 | scripts/ui | Esc menu: one numbered column (1-5), Save and quit to menu, Quit game |
 | `ext/pause-menu-1108-b` | 2026-11-08 | 1 | 1 | scripts/ui | Esc menu: one numbered column (1-5), Save and quit to menu, Quit game |
@@ -203,7 +203,7 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/vfx-cinder-strips` | 2026-11-08 | 4 | 14 | shots/vfx-cinder, docs/HERO_VFX.md, docs/VFX_QUALITY.md | Cinder VFX before/after strips (jobq vfxc-before-ashwick-2 / vfxc-after-ashwick-2; not for |
 | `ext/drop-solo-after` | 2026-11-08 | 1 | 7 | docs/wiki, scripts/match, scripts/ui | Drop: separate / drop solo only after the team drop is made |
 | `ext/airdash-anims-1108` | 2026-11-08 | 1 | 19 | content/rules, scripts/core, docs/art | Air dash vs ground dash looks: Vex's air roll with lime fire, ground/air clip pick for eve |
-| `ext/roster-109` | 2026-11-08 | 3 | 139 | content/kin_v2, scripts/kin, docs/boki | Docs: ROSTER.md, grammar rows, wiki regen, debt note for the stubs |
+| `ext/roster-109` | 2026-11-08 | 3 | 139 | content/kin, scripts/kin, docs/boki | Docs: ROSTER.md, grammar rows, wiki regen, debt note for the stubs |
 | `ext/no-natural-death-1108` | 2026-11-08 | 2 | 9 | scripts/core, answer.md, content/rules | answer.md: suite-fast note |
 | `ext/vex-greenfire-1108` | 2026-11-08 | 6 | 36 | scripts/arch, docs/wiki, art/wardens | Vex green fire (owner 11-08 items 12-16): hit-only Coin Blast, distance-scaled Palm Lance  |
 | `ext/boki-burrlet-v2` | 2026-11-08 | 1 | 9 | art/kin, tools/boki | Mycroll (burrlet) to the owner's turnaround: bell caps with round spots, mint not cyan, so |
@@ -215,7 +215,7 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/boki-cindowary-v2` | 2026-11-09 | 1 | 15 | art/kin, tools/boki, docs/art | Boki 3D: Bellowary (cindowary) from the owner's sheet, Meshy body on the Boki rig |
 | `ext/boki3d-tuatrune` | 2026-11-09 | 2 | 16 | art/kin, tools/boki, docs/art | Lockatara: coat graded greener, nearer the sheet's olive |
 | `ext/boki3d-scaldamus` | 2026-11-09 | 4 | 16 | art/kin, tools/boki, docs/art | Chuggamus: hide between, lighter: the sheet's mauve grey in game light |
-| `ext/boki-gibbelle-v2` | 2026-11-09 | 2 | 16 | art/kin, tools/boki, content/kin_v2 | Gongibbon (gibbelle): 3D Boki from the owner's sheet (Meshy body, shared four-limb rig, kn |
+| `ext/boki-gibbelle-v2` | 2026-11-09 | 2 | 16 | art/kin, tools/boki, content/kin | Gongibbon (gibbelle): 3D Boki from the owner's sheet (Meshy body, shared four-limb rig, kn |
 | `ext/farm-tut-tools-cam` | 2026-11-09 | 4 | 15 | scripts/home, content/rules, docs/decisions | Hob talk: drift to a "show" only when it is off screen, and slowly |
 | `ext/farm-tut-tools-cam-rebased` | 2026-11-09 | 4 | 15 | scripts/home, content/rules, docs/decisions | Hob talk: drift to a "show" only when it is off screen, and slowly |
 | `ext/boki3d-lilybara` | 2026-11-09 | 2 | 15 | art/kin, tools/boki, docs/art | Boki 3D: Soakybara coat chroma tamed for the toon look (in-engine it read orange-red, the  |
@@ -247,7 +247,7 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/tender-gait` | 2026-11-09 | 3 | 3 | content/rules, docs/art, tools/anim_shots.gd | anim_shots: wrap a long header comment (style ratchet) |
 | `ext/cinder-sable-polish-rebased` | 2026-11-09 | 3 | 7 | art/wardens, tools/art1, content/rules | Merge remote-tracking branch 'origin/main' into ext/cinder-sable-polish-rebased |
 | `ext/rimewright-skate` | 2026-11-09 | 4 | 7 | docs/art, tools/art1, art/wardens | Rimewright: keyed push-and-glide skate gait (walk 2.0 s, run 1.5 s); arms counter-swing +0 |
-| `ext/game-rules-nov8` | 2026-11-09 | 5 | 154 | content/kin_v2, docs/wiki, scripts/core | Nov 8 game rules: training-branch finals, Ink use, every boss drops an Ink, sex_forms look |
+| `ext/game-rules-nov8` | 2026-11-09 | 5 | 154 | content/kin, docs/wiki, scripts/core | Nov 8 game rules: training-branch finals, Ink use, every boss drops an Ink, sex_forms look |
 | `ext/release-integ-0243-rebased-rebased` | 2026-11-09 | 1558 | 2089 | briefs/art-refs, briefs/shots, briefs/unmasked | Merge remote-tracking branch 'origin/main' into ext/release-integ-0243-rebased-rebased |
 | `ext/no-rolling-rebased` | 2026-11-09 | 3 | 27 | scripts/match, scripts/ui, docs/GAMEDEV_CHECKLIST.md | Style baseline: re-sync after merging main (only tightened) |
 | `ext/meeko-rmb-motion-rebased-rebased` | 2026-11-09 | 1561 | 2094 | briefs/art-refs, briefs/shots, briefs/unmasked | Merge remote-tracking branch 'origin/main' into ext/meeko-rmb-motion-rebased-rebased |
@@ -257,8 +257,8 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/anim-idle-walk-gap` | 2026-11-09 | 2 | 16 | docs/art, content/rules, scripts/heroes | Style: wrap the long lines the blend_rate change and the audit tools touched |
 | `ext/vex-dash-parity-rebased` | 2026-11-09 | 13 | 45 | content/archetypes, scripts/arch, scripts/match | Style: wrap two long lines from the vfx-gunslinger merge |
 | `ext/ostra-gait` | 2026-11-09 | 2 | 8 | art/wardens, docs/art, tools/art1 | Ostra: walk/run as bounds of the box; orb/snap held-arm pose, no T-pose |
-| `ext/types-standard-names` | 2026-11-09 | 2 | 83 | content/kin_v2, content/abilities_v2, content/merges_v2 | KIN_GRAMMAR example uses the poison type id |
-| `ext/types-standard-names-rebased` | 2026-11-09 | 2 | 83 | content/kin_v2, content/abilities_v2, content/merges_v2 | KIN_GRAMMAR example uses the poison type id |
+| `ext/types-standard-names` | 2026-11-09 | 2 | 83 | content/kin, content/abilities_v2, content/merges_v2 | KIN_GRAMMAR example uses the poison type id |
+| `ext/types-standard-names-rebased` | 2026-11-09 | 2 | 83 | content/kin, content/abilities_v2, content/merges_v2 | KIN_GRAMMAR example uses the poison type id |
 
 ## Recent unmerged branches, kept for review (1959)
 
