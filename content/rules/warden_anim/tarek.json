@@ -154,5 +154,6 @@
 		"jaw",
 		"lip.L",
 		"lip.R"
-	]
+	],
+	"beats": {"win": {"clip": "emote_toss"}, "lose": {"clip": "downed"}}
 }

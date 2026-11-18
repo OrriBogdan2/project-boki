@@ -34,5 +34,6 @@
 	"cc": {"pull": 0.24, "tug_hz": 1.6, "twist": 0.1, "bow": 0.2},
 	"procedural": ["ledge", "mantle", "base"],
 	"recoil": {"deg": 2.0, "settle": 0.07},
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
 }

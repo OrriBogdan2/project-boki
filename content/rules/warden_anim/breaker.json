@@ -226,5 +226,6 @@
 		"in": "crouch_in",
 		"out": "crouch_out",
 		"speed": 1.65
-	}
+	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
 }

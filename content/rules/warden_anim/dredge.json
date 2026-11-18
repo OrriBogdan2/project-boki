@@ -201,5 +201,6 @@
 		"eye",
 		"hoard",
 		"gun"
-	]
+	],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
 }
