@@ -10,6 +10,7 @@ const CHECKS := {
 	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],  # each ability verb at a dummy rival
 	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],  # KIN_GRAMMAR 2
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
+	"--hud-vitals-shots": ["res://tools/hud_vitals_shots.gd", "hud_vitals_shots", null],      # GPU
 	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
 	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
 	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
@@ -62,12 +63,6 @@ const CHECKS := {
 	"--hud-groups-check": ["res://tools/hud_groups_check.gd", "hud_groups_check", null],      # HUD groups, four moments
 	"--loot-feed-check": ["res://tools/loot_feed_check.gd", "loot_feed_check", null],      # loot feed rows
 	"--hud-groups-shots": ["res://tools/hud_groups_shots.gd", "hud_groups_shots", null],      # GPU, --shots-dir=
-	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
-	"--hud-vitals-shots": ["res://tools/hud_vitals_shots.gd", "hud_vitals_shots", null],      # GPU
-	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
-	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
-	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
-	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
 	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
