@@ -132,6 +132,8 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
+	msgs.keep_off = KnockFeed.rects()      # a wide card slides aside of the kill feed's rows (right edge)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over

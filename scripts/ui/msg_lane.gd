@@ -26,6 +26,7 @@ const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
+var keep_off: Array[Rect2] = [] ## other HUD blocks a card slides aside of the same way (the kill feed's rows, KnockFeed)
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
@@ -177,6 +178,8 @@ func _layout(delta: float) -> void:
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
+		for r: Rect2 in keep_off:
+			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
 		box.position = Vector2(x, y)
 		above = y + box.size.y
 		want += box.size.y + GAP
