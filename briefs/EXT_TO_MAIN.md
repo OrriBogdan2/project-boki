@@ -10230,3 +10230,4 @@ READY ext/gil-face-r4-1118 0435758ce8 (Gil face r4: E in game (blind judges 7/8 
 READY ext/fusion-off-1118 658e9a457f5 (Fusion (X) is switched off for now; everything else plays the same. fusion_enabled flag default false in content/rules/merge_forms.json, decision 0101, --fusion-off-check)
 READY ext/r2a-tenzo-neve-grimble-1118 84458f8b273d120d58f17bdbdaa1939b3d5455c5 (r2 A 3D models of Tenzo, Neve, Grimble in game: Neve iris texture swap, Grimble A rigged to the live skeleton, Tenzo A re-ported; sheets in ~/cj/20261118-144726-a2/sheet_{tenzo,neve,grimble}.jpg)
 READY ext/idle-ostra-port d37ae63b3c3b4a385735276fe1e6123e4d0cf0fa (Motley x_breath bone on v95 glb: idle/stance breathe; glb_add_bone.py)
+READY ext/ui-stolen-wisps-port b46f1d02a6 (stolen wisp HUD rows + teammate count badge on current main; port of ext/ui-stolen-wisps; 6 HUD/steal checks pass; PR via gh-outbox/new-pr.md)
