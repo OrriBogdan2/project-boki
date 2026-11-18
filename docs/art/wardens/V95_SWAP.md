@@ -248,3 +248,12 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Rebake, 2026-11-18 (ext/rig-ship-1117): spec `own.rebake`, for a master whose atlas is a patchwork of tiny islands
+Tenzo's pick (1.07M tris, 8k paint) has an atlas of thousands of small islands. `keep_uv`'s 60k collapse carries those
+UVs along, so many triangles span several islands and draw as black and orange specks (torso, sarong, arms), and the
+skin read orange. With `"rebake": true` (v95_swap.py `rebake_paint`) the low mesh is decimated without the UVs, unwrapped
+(bake_warden `unwrap`) and the master's base colour (4096) and emission (2048) are baked on as "v95" / "v95b"; weights,
+rig, clips and names are unchanged. Other picked masters with the same kind of atlas need the same key. GPU shots of a
+Hunter: `--clip-shots --yaw=0` (front: a negative `--dist`); a yaw other than 0 without a state twists the root bone, so the
+thighs turn against the hips and a sarong tears at the waist in the shot only.
