@@ -27,6 +27,13 @@
 	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "stomp": "stomp", "drink": "drink", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"carry_stow": ["bow"],
+	"cancels": [
+		["arc_draw", 0.6, ""],
+		["arc_heavy_wind", 0.5, ""],
+		["pin_walk", 0.5, ""],
+		["glide", 0.4, "arc_heavy_wind"],
+		["glide", 0.4, "arc_hail"]
+	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_wag"},
 	"cc": {"pull": 0.18, "tug_hz": 1.2, "twist": 0.08, "bow": 0.38},
 	"heart_hand": "R",
