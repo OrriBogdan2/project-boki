@@ -56,4 +56,5 @@ func tick(dt: float) -> void:
 	elif GardenZones.here != "":
 		Sfx.play_music(zone_track(GardenZones.here, night), float(GardenZones.rules()["music_fade_s"]))
 	else:
-		Sfx.play_music(Soundtrack.track("base", island_track(h.world.island_id(h.ppos.x, h.ppos.z), night)), ISLAND_FADE_S)
+		var track: String = island_track(h.world.island_id(h.ppos.x, h.ppos.z), night)
+		Sfx.play_music(Soundtrack.track("base", track), ISLAND_FADE_S)

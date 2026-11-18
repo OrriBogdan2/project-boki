@@ -145,7 +145,8 @@ func _music_travel(m: Node, bb: Node) -> void:
 	bb.games.append(game)
 	var duck_db := float(GardenZones.rules()["music_duck_db"])
 	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0).timeout
-	ok(Sfx.mix._duck_fx.volume_db <= duck_db + 0.5, "a garden game ducks the music (%.1f dB)" % Sfx.mix._duck_fx.volume_db)
+	var duck_now: float = Sfx.mix._duck_fx.volume_db
+	ok(duck_now <= duck_db + 0.5, "a garden game ducks the music (%.1f dB)" % duck_now)
 	bb.games.erase(game)
 	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0 + 1.5).timeout
 	ok(Sfx.mix._duck_fx.volume_db > -0.5, "the music comes back once it ends (%.1f dB)" % Sfx.mix._duck_fx.volume_db)

@@ -221,6 +221,10 @@ func label() -> String:
 func flying() -> bool:
 	return run != null
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
 	if ks.is_empty():
