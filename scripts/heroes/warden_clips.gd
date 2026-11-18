@@ -619,11 +619,12 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	if mv.has("fit"):
 		tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
 	tt *= float(mv.get("scale", 1.0))
-	# (with a "time" map the clip ends at its last kit point; `left`: s of the kit's clock to the clip's end)
-	var left := float(mv["time"][-1][0]) - kt if mv.has("time") else length - tt
 	# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
 	if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
 		tt = minf(tt, length - 0.001)
+	# (with a "time" map the clip ends at its last kit point; `left`: s of the kit's clock to the clip's end;
+	# taken after the lead clamp, or a lead clip would drop back to the legs during its held last frame)
+	var left := float(mv["time"][-1][0]) - kt if mv.has("time") else length - tt
 	if mv.has("hold_from") and root.has_meta(PHASE):
 		var start := float(mv["hold_from"])
 		tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
