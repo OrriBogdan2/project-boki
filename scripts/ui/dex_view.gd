@@ -32,6 +32,7 @@ const TYPES := {
 	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
 	"storm": {"name": "Storm", "col": Color("5f7fb8")},
 }
+const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)       # a Boki you haven't met, drawn as a dark shape
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
@@ -144,7 +145,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if not is_caught:
-			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not caught: a dark silhouette
+			pv.modulate = SILHOUETTE      # seen, not caught: a dark silhouette
 		holder.add_child(pv)
 		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()

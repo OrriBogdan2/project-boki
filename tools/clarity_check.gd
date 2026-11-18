@@ -278,6 +278,9 @@ func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 ## Slowed, then rooted, then stunned on top: the line puts stun first and root before Slow, each bar
 ## starts full and shrinks with time, and the line is empty once it's over.
 func _cc_self(m: Match, P: Hunter) -> void:
+	P.stun_t = 0.0      # (the plate section above can leave you slowed)
+	P.root_t = 0.0
+	P.slow_t = 0.0
 	ok(SelfCcLine.entries(P).is_empty(), "you're free: no CC line")
 	P.slow_t = 3.0
 	P.root_t = 2.0
@@ -289,7 +292,7 @@ func _cc_self(m: Match, P: Hunter) -> void:
 	var e: Array = SelfCcLine.entries(P)
 	var shrunk: bool = e.size() == 3 and float(e[0][3]) > 0.4 and float(e[0][3]) < 0.6
 	ok(full > 0.99 and shrunk, "the stun bar starts full and shrinks (%.2f after 0.5 s of 1 s)" % [e[0][3]])
-	ok(_same(e[0][1], _icon(P, "concussion")[0][1]), "the line uses the plate's stun colour")
+	ok(_same(e[0][1], _icon(P, "status_stunned")[0][1]), "the line uses the plate's stun colour")
 	P.stun_t = 0.0
 	P.root_t = 0.0
 	P.slow_t = 0.0
