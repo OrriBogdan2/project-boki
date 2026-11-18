@@ -7,24 +7,27 @@ extends RefCounted
 ## Existing clips and the contract bones are untouched: the chains are extra leaves nothing animates.
 
 const PREFIX := "cloth_"
-const STIFFNESS := 0.6     # pull back toward the rest shape (per chain, SpringBoneSimulator3D units)
-const DRAG := 0.2          # the velocity it loses
-const GRAVITY := 5.0        # m/s2 toward straight down
+const STIFFNESS := 3.0     # pull back toward the rest shape (holds the painted hem splay; per chain)
+const DRAG := 0.5          # the velocity it loses (a run trails the skirt at ~45 deg, not flat)
+const GRAVITY := 3.0        # m/s2 toward straight down
 const RADIUS := 0.05        # m: a joint's own size against the spheres
 const MAX_STEP := 1.0 / 30.0
-## [bone, offset along the bone from its head (rest: the bone points down, so -Y; m), radius (m)]: bodies cloth
-## must not enter. glTF metres at class-neutral size: a thigh is 0.47 m, a shin 0.48 m.
-const SPHERES := [
-	["thigh.L", Vector3(0, -0.06, 0), 0.13], ["thigh.L", Vector3(0, -0.22, 0), 0.115], ["thigh.L", Vector3(0, -0.38, 0), 0.10],
-	["thigh.R", Vector3(0, -0.06, 0), 0.13], ["thigh.R", Vector3(0, -0.22, 0), 0.115], ["thigh.R", Vector3(0, -0.38, 0), 0.10],
-	["shin.L", Vector3(0, -0.08, 0), 0.09], ["shin.L", Vector3(0, -0.26, 0), 0.085], ["shin.L", Vector3(0, -0.42, 0), 0.08],
-	["shin.R", Vector3(0, -0.08, 0), 0.09], ["shin.R", Vector3(0, -0.26, 0), 0.085], ["shin.R", Vector3(0, -0.42, 0), 0.08],
-	["foot.L", Vector3(0, 0, -0.08), 0.10], ["foot.R", Vector3(0, 0, -0.08), 0.10],
+## Beyond this camera distance (m) the chains ride the hips rigidly and cost nothing: at the game camera (~23 m, a
+## ~60 px figure) the swing does not show, so 8 hunters in a match pay nothing; close cameras (menus, orbits) get it.
+const LOD_M := 12.0
+## [bone, centre offset from its head (rest: the bone points down, so -Y; m), radius (m), capsule height (m, 0 = a
+## sphere)]: bodies cloth must not enter. glTF metres at class-neutral size: a thigh is 0.47 m, a shin 0.48 m.
+## Capsules along the bones (one per leg segment, not three spheres: the sim tests every joint against every shape).
+const SHAPES := [
+	["thigh.L", Vector3(0, -0.21, 0), 0.12, 0.62], ["thigh.R", Vector3(0, -0.21, 0), 0.12, 0.62],
+	["shin.L", Vector3(0, -0.25, 0), 0.085, 0.62], ["shin.R", Vector3(0, -0.25, 0), 0.085, 0.62],
+	["foot.L", Vector3(0, 0, -0.08), 0.10, 0.0], ["foot.R", Vector3(0, 0, -0.08), 0.10, 0.0],
 ]
 
 var skel: Skeleton3D
 var sim: SpringBoneSimulator3D
 var chains := 0
+var enabled := true      # false: the chains ride the hips rigidly at any distance (shots and the bench compare)
 
 ## The cloth of a skeleton, or null when it has no cloth_ bones.
 static func make(skeleton: Skeleton3D) -> WardenCloth:
@@ -66,20 +69,40 @@ func _build(roots: Array) -> void:
 		sim.set_drag(i, DRAG)
 		sim.set_gravity(i, GRAVITY)
 		sim.set_enable_all_child_collisions(i, true)
-	for sp in SPHERES:
-		var bi := skel.find_bone(String(sp[0]))
-		if bi < 0:
+	for sh in SHAPES:
+		if skel.find_bone(String(sh[0])) < 0:
 			continue
-		var col := SpringBoneCollisionSphere3D.new()
-		col.bone_name = String(sp[0])
-		col.position_offset = sp[1]
-		col.radius = float(sp[2])
+		var col: SpringBoneCollision3D
+		if float(sh[3]) > 0.0:
+			var cap := SpringBoneCollisionCapsule3D.new()
+			cap.radius = float(sh[2])
+			cap.height = float(sh[3])
+			col = cap
+		else:
+			var sp := SpringBoneCollisionSphere3D.new()
+			sp.radius = float(sh[2])
+			col = sp
+		col.bone_name = String(sh[0])
+		col.position_offset = sh[1]
 		sim.add_child(col)
+
+## Sets every chain's spring (tuning shots).
+func tune(stiffness: float, gravity: float, drag: float) -> void:
+	for i in chains:
+		sim.set_stiffness(i, stiffness)
+		sim.set_gravity(i, gravity)
+		sim.set_drag(i, drag)
 
 ## Runs the chains one step (called by WardenSync after it has posed the bones).
 func step(dt: float) -> void:
 	if not skel.is_inside_tree():
 		return
+	var cam := skel.get_viewport().get_camera_3d()
+	var near := enabled and (cam == null or cam.global_position.distance_to(skel.global_position) < LOD_M)
+	if near != sim.active:
+		sim.active = near
+		if near:
+			sim.reset()      # (from the rest shape, not the swing it had when it went far)
 	var n := clampi(ceili(dt / MAX_STEP), 1, 4)
 	for i in n:
 		skel.advance(dt / n)
