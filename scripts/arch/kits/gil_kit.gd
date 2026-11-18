@@ -7,6 +7,22 @@ extends ArchKit
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
+const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const TELE_LW := 0.1                 # m, their rim
+const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
+const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
+const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
+const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
+const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
+const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
+const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
+const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
+## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
+## line for other games).
+const LINE_FX_DT := 0.06
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one press throws)
+
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
@@ -24,9 +40,6 @@ var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, s
 var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
-var aim_t := 0.0
-const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
-const TELE_LW := 0.1                 # m, their rim
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 var lmb_t := -1.0                  # s the Tide Lunge has been charging (-1: not)
 var lmb_was := false
@@ -79,8 +92,6 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 # ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
-const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
-const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
 
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
 ## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
@@ -212,23 +223,13 @@ func fire_rmb(c: Dictionary) -> void:
 		at = ground(h.pos)
 		ft = 0.25
 	else:
-		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
+		at = AimMode.place(h, float(rd["range"]))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
 	var hand := HeroVfx.of(m).anchor_pos(h, "hand_l")
 	flying.append({"at": at, "from": hand, "t": ft, "left": ft, "v": v, "id": _tele_id()})
 	play("gil_throw")
 	vfx("throw", h.pos)
-
-func rmb_hold_tick(t: float) -> void:
-	# held past the tap: the landing circle follows the cursor, 50% further
-	if t < float(rmb_def().get("hold", 0.25)):
-		return
-	if m.time >= aim_t:
-		aim_t = m.time + 0.1
-		var rd := rmb_def()
-		var vd := vial_def(next_vial())
-		m.fx.ring(AimMode.place(h, float(rd["range"]) * float(rd["hold_range"])), float(vd["radius"]), col_of(vd), 0.12)
 
 func _shatter(it: Dictionary) -> void:
 	var v := String(it["v"])
@@ -275,13 +276,6 @@ func _shatter_look(v: String, at: Vector3, r: float) -> void:
 		"fire": vfx("shatter_fire", at, dir, {"r": r})
 		_: vfx("shatter_zeep", at, dir, {"r": r})
 
-const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
-const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
-const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
-const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
-const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
-const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
-const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
 
 ## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
 ## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
@@ -490,9 +484,6 @@ func _tick_lines(list: Array, dt: float) -> void:
 		if float(s["left"]) <= 0.0:
 			list.erase(s)
 
-## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
-## line for other games).
-const LINE_FX_DT := 0.06
 func _line_look(s: Dictionary, at: Vector3, dt: float) -> void:
 	s["fx_t"] = float(s["fx_t"]) - dt
 	if float(s["fx_t"]) > 0.0:
@@ -529,6 +520,25 @@ func _start_wave() -> bool:
 	play("gil_surf")
 	vfx("wave", h.pos, dir, {"len": length, "w": float(xd["width"])})
 	return true
+
+## R again while he surfs: he leaps off the crest early (owner 11-17). The wave and the untargetable time end at
+## once; the dash hands over to a run with a small hop, and he lands with the usual shield (and its sound).
+func ult_recast() -> bool:
+	if wave.is_empty():
+		return false
+	_end_wave()
+	h.roll_t = minf(h.roll_t, 0.001)       # the dash's own hand-over to the run, no dead frames
+	h.inv_t = minf(h.inv_t, 0.1)
+	if h.grounded:
+		h.vel.y = maxf(h.vel.y, 5.0)
+		h.grounded = false
+	anim_id = ""
+	return true
+
+func _end_wave() -> void:
+	wave = {}
+	untarget_t = 0.0
+	_land_wave()
 
 func _land_wave() -> void:
 	var xd := x_def()
@@ -584,9 +594,7 @@ func _tick(dt: float) -> void:
 		_tick_lines(one, dt)
 		untarget_t -= dt
 		if one.is_empty() or untarget_t <= 0.0:
-			wave = {}
-			untarget_t = 0.0
-			_land_wave()
+			_end_wave()
 	# the next potion glows in his hand
 	glow_t -= dt
 	if glow_t <= 0.0 and not h.unseen and h.visible and not h.out:
@@ -610,7 +618,6 @@ func _end_stale_hold() -> void:
 		anim_id = ""
 
 # ------------------------------------------------------------------ bots
-const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
 
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
