@@ -1,5 +1,11 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
+## 2026-11-18: r2 A eyes (ext/r2a-tenzo-neve-grimble-1118)
+The owner approved the 11-18 r2 A models ("all are good", fixes later). Neve's A (~/meshy/ta-fix-3d-1118/Neve/A.glb,
+ANSWER_r2_bodies.md) is the live mesh with an iris edit only, so nothing was re-ported: A's base-colour image replaces the
+`v95` image inside claire.glb (tools/art1/glb_image_swap.py). Mesh, rig, skin weights, clips, anchors and the other images
+are the same bytes as before (59,864 tris, 39 joints, 61 clips).
+
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
 byte-identical down to the fur collar, tools/meshy/head_graft.py). It replaces the arms fix below: that fix was made for the
