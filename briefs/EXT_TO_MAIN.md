@@ -10151,3 +10151,4 @@ READY ext/merge-lane-hunters2-1117 f39b251e4c542a5c91d554266a1ab50e0348686f (re-
 READY ext/boki-dex-port-1117 9a4ba02dd186312f2ed8307ab875edb74f751d47 (12 Boki ported to their Bokidex glb: cindle cairnback puddlet rimeshrew kestrike glintmole zapple burrlet glomwort pebbit selenfin threadwyrm; port pipeline now sources the dex glb)
 READY ext/rig-ship-1117 4ac78ea908c9faf216468cbefd1393e381147ce3 (Tenzo: pick's paint rebaked onto the 60k mesh, no specks/holes on GPU; skin albedo 0.8)
 READY ext/merge-lane-wiki-regen-1117 41186217f5 (wiki regen: Rules.md summon_station table, gen_wiki --check 1->0, docs only)
+READY ext/vision-cone-1117 6d95e38f33f6271ff5fb55d85c722d0518c177ee (PR #264: hudref demo faces the row so the 120 deg cone keeps rival plates; --hudref-check 0 fails)
