@@ -142,8 +142,8 @@ static func last_act_s(ss: Array, from: int) -> float:
 ## Rising edges of the dash (roll) state in [a, b).
 static func dash_starts(ss: Array, a: int, b: int) -> int:
 	var n := 0
-	for i in range(maxi(1, a), mini(b, ss.size())):
-		if ss[i]["dash"] and not ss[i - 1]["dash"]:
+	for i in range(maxi(0, a), mini(b, ss.size())):
+		if ss[i]["dash"] and (i == 0 or not ss[i - 1]["dash"]):
 			n += 1
 	return n
 

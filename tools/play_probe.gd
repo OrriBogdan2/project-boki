@@ -134,12 +134,15 @@ func _bind_model() -> void:
 	skel = null
 	clips = null
 	var sks: Array = me.model.find_children("*", "Skeleton3D", true, false) if me.model else []
-	if not sks.is_empty():
-		skel = sks[0]
-		for i in skel.get_bone_count():
-			var n := skel.get_bone_name(i).to_lower()
+	for sk: Skeleton3D in sks:  # the body's skeleton: the one with feet (a mane or cape has its own), else the first
+		var found: Array = []
+		for i in sk.get_bone_count():
+			var n := sk.get_bone_name(i).to_lower()
 			if "foot" in n or "ankle" in n:
-				feet.append(i)
+				found.append(i)
+		if skel == null or (feet.is_empty() and not found.is_empty()):
+			skel = sk
+			feet = found
 	var sync := me.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync if me.model else null
 	clips = sync.clips if sync else null
 
@@ -822,14 +825,7 @@ func _push(name: String, extra: int) -> void:
 		await _tap(extra)
 	await _frames(80)
 	var a := ss.size() - 40
-	var inside := 0
-	for s in ss:
-		inside += int(
-			(
-				w.is_block((s["p"] as Vector3).x, (s["p"] as Vector3).z)
-				and not w.is_stand_block((s["p"] as Vector3).x, (s["p"] as Vector3).z)
-			)
-		)
+	var inside := _in_wall()
 	var jit := Judge.jitter(ss, a, ss.size(), Vector2(d))
 	_key(key, false)
 	var back_key: int = KEY_OF[-d]
@@ -839,13 +835,19 @@ func _push(name: String, extra: int) -> void:
 	_key(back_key, false)
 	await _frames(10)
 	var meas := {
-		"inside_f": inside,
+		"inside_f": inside.x,
+		"inside_up_m": inside.y,
 		"jitter_m": jit,
 		"away_m": Judge.flat_dist(ss, away, away + 40),
 		"launch_mps": _max_vy(0, away)
 	}
-	if inside > 0:
-		judge.flag(hero, sc, "through_wall", "%d frames with the body inside a wall tile" % inside)
+	if inside.x > 0:
+		judge.flag(
+			hero,
+			sc,
+			"through_wall",
+			"%d frames with the body over a wall tile, up to %.1f m above the floor" % [inside.x, inside.y]
+		)
 	if jit > Judge.JITTER_M:
 		judge.flag(hero, sc, "wall_jitter", "pushed back %.2f m in one frame while holding into the wall" % jit)
 	if float(meas["away_m"]) < 1.0:
@@ -853,6 +855,19 @@ func _push(name: String, extra: int) -> void:
 	if float(meas["launch_mps"]) > 5.0:
 		judge.flag(hero, sc, "launch", "thrown up at %.1f m/s at the wall" % float(meas["launch_mps"]))
 	_end(sc, meas)
+
+
+## Frames this scenario the body stood over a wall's tile, and the most it was above the floor there (m): about 0
+## is inside the wall, about World.BLOCK_H is on its top.
+func _in_wall() -> Vector2:
+	var n := 0
+	var up := 0.0
+	for s in ss:
+		var p: Vector3 = s["p"]
+		if w.is_block(p.x, p.z) and not w.is_stand_block(p.x, p.z):
+			n += 1
+			up = maxf(up, p.y - w.level[w.idx(int(floor(p.x)), int(floor(p.z)))] * World.LEVEL)
+	return Vector2(n, up)
 
 
 func _max_vy(a: int, b: int) -> float:
@@ -989,17 +1004,10 @@ func _knock() -> void:
 		await _begin(feats["wall"]["at"], Vector2(d))
 		m.displace.knock(me, Vector2(d) * KNOCK.length(), 1.0)
 		await _frames(80)
-		var inside := 0
-		for s in ss:
-			inside += int(
-				(
-					w.is_block((s["p"] as Vector3).x, (s["p"] as Vector3).z)
-					and not w.is_stand_block((s["p"] as Vector3).x, (s["p"] as Vector3).z)
-				)
-			)
-		_end("knock_wall", {"inside_f": inside, "end_mps": Judge.hspeed(ss[-1])})
-		if inside > 0:
-			judge.flag(hero, "knock_wall", "through_wall", "shoved into a wall: %d frames inside it" % inside)
+		var inside := _in_wall()
+		_end("knock_wall", {"inside_f": inside.x, "inside_up_m": inside.y, "end_mps": Judge.hspeed(ss[-1])})
+		if inside.x > 0:
+			judge.flag(hero, "knock_wall", "through_wall", "shoved into a wall: %d frames over its tile" % inside.x)
 
 
 ## Short walks from seeded spots in each direction: held keys that go nowhere with no wall ahead = stuck.

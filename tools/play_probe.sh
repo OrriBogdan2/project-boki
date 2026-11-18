@@ -17,7 +17,8 @@ cd "$(dirname "$0")/.."
 xdg=$(mktemp -d /tmp/xdg.probe.XXXXXX)
 export PROBE_SHA=$(git rev-parse --short HEAD) LP_NUM_THREADS=2
 [ -d .godot ] || timeout 900 godot --headless --import >/dev/null 2>&1
-XDG_DATA_HOME=$xdg setsid timeout 7000 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy --fixed-fps 60 \
+XDG_DATA_HOME=$xdg setsid timeout 7000 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy \
+  --fixed-fps 60 \
   --path . -- "--play-probe$heroes" "--play-probe-out=$out" $clips > "$out/godot.log" 2>&1 &
 pid=$!
 echo $pid > "$out/probe.pid"
