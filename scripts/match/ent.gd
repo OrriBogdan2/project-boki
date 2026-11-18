@@ -160,7 +160,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	last_hit_by = by
 	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+	# a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+	if not opts.get("tick", false):
 		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -183,7 +184,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0)))
+		burn_dps = maxf(burn_dps, float(opts["burn"]))
+		burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
