@@ -10242,3 +10242,4 @@ READY ext/stuck-integ-f3c93892 aac5bd01778 (triage only, no merge possible; supe
 READY ext/hunter-picks-1118 8b24c69e7e (Breaker spawns happy: idle_fire starts expired; clips spawn row ok; suite-fast 615 vs main: NEW-RED 0 after reruns of all 47 flagged, 3 leftovers flaky; PR #316)
 READY ext/merge-lane-hunters1-1117 3dafab2683 (merge lane hunters1: results-stage win/lose beats, 1 of 25; 24 HARD; main 10a659bdee merged)
 READY ext/sable-face-game-1118 3bbc4408cb (Sable face r4: cheek streak/under-eye blue softened, texture-only, keeps lip fix)
+READY ext/merge-lane-hunters8-1117 326bd432af (merge lane hunters8: 6 hunter/kit branches ported, main merged clean; PR via gh-outbox; 20 archived, 6 HARD)
