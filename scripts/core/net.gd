@@ -5,47 +5,52 @@ extends Node
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
 
-const VERSION := "0.24.17"       # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.24.4: online deaths drop a deathbox: the "box", "brev", "back" and "lost" events; lobby pick turns: the "loaded" topic, "pick" carries "final"; the 2x Hollow Crown (a 305 m map every peer builds from its JSON, its winding sky train) and 30-hunter expeditions, 0.24.5: Limited Ways Out: the "ht" event carries the Heart state enum, early/final squads, ring progress, rush and "take"; the exit list (and its "xc" index) is outposts only, no "key" pickups or rift keys; "xc" "seat" mirrors the quest seats, 0.24.6: the "zone" "trade" and "tradego" events (Motley's Trade landing sigil on every game), 0.24.7: the "xp" event, a kill's XP for a remote Hunter, 0.24.7: the "cone" fx carries its hunter, length, width and seconds (Vex's stuck Burr Charge cone on every game)), 0.24.6: the "bat" event: a lair boss's attack, start time, phase, asleep and enraged, sent on change; a remote lair boss is a Boss), 0.24.6: the squad rocket drop: the "rkt" event replaces "dsep", 0.24.8: every body's snapshot carries its stun/root/slow bits (StatusLooks.net_bits: hunter flags 25-27, the last field of a Boki's and a monster's), 0.24.8: the "tele" event carries AimKit's "all" telegraphs, decision 0061, 0.24.8: the "sbrk" event, 0.24.9: "sping" carries the followed enemy's nid, 0.24.10: the "kst" event carries its caster and the Ignite, Chill, Static and Mark stacks, 0.24.11: the "hex" event is gone with the Hex status, 0.24.13: the "hcast" event (HostileCue, a rival's E or R in another game) and "snd" (SfxCast), 0.24.14: hunter flag bit 128 (reloading) is gone with the reload, 0.24.15: the kit move's "-" is a cleared move and a play bumps its re-time count, so a restart reaches the copy (main's 0.24.10), 0.24.16: the kin snapshot carries the Boki wisp flag and its summon window, shrink and cooldown seconds (KinNet); a stolen wisp's loose seconds, carrier and used summon; kcmd "wgrab", "wsum" and "wkill" (KinSteal, KinSummon), 0.24.17: the hunter flags carry the glide dive (bit 28) and the held far look (bit 29); UltGlow.READY_BIT moved to bit 30, off the glide dive)
+const VERSION := "0.24.17"  # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.24.4: online deaths drop a deathbox: the "box", "brev", "back" and "lost" events; lobby pick turns: the "loaded" topic, "pick" carries "final"; the 2x Hollow Crown (a 305 m map every peer builds from its JSON, its winding sky train) and 30-hunter expeditions, 0.24.5: Limited Ways Out: the "ht" event carries the Heart state enum, early/final squads, ring progress, rush and "take"; the exit list (and its "xc" index) is outposts only, no "key" pickups or rift keys; "xc" "seat" mirrors the quest seats, 0.24.6: the "zone" "trade" and "tradego" events (Motley's Trade landing sigil on every game), 0.24.7: the "xp" event, a kill's XP for a remote Hunter, 0.24.7: the "cone" fx carries its hunter, length, width and seconds (Vex's stuck Burr Charge cone on every game)), 0.24.6: the "bat" event: a lair boss's attack, start time, phase, asleep and enraged, sent on change; a remote lair boss is a Boss), 0.24.6: the squad rocket drop: the "rkt" event replaces "dsep", 0.24.8: every body's snapshot carries its stun/root/slow bits (StatusLooks.net_bits: hunter flags 25-27, the last field of a Boki's and a monster's), 0.24.8: the "tele" event carries AimKit's "all" telegraphs, decision 0061, 0.24.8: the "sbrk" event, 0.24.9: "sping" carries the followed enemy's nid, 0.24.10: the "kst" event carries its caster and the Ignite, Chill, Static and Mark stacks, 0.24.11: the "hex" event is gone with the Hex status, 0.24.13: the "hcast" event (HostileCue, a rival's E or R in another game) and "snd" (SfxCast), 0.24.14: hunter flag bit 128 (reloading) is gone with the reload, 0.24.15: the kit move's "-" is a cleared move and a play bumps its re-time count, so a restart reaches the copy (main's 0.24.10), 0.24.16: the kin snapshot carries the Boki wisp flag and its summon window, shrink and cooldown seconds (KinNet); a stolen wisp's loose seconds, carrier and used summon; kcmd "wgrab", "wsum" and "wkill" (KinSteal, KinSummon), 0.24.17: the hunter flags carry the glide dive (bit 28) and the held far look (bit 29); UltGlow.READY_BIT moved to bit 30, off the glide dive)
 
-const SEND_EVERY := 0.1          # s between the snapshots of what this game owns
-const EARLY_GAP := 0.03          # s: the soonest a snapshot may follow the last one
-const EARLY_DV := 8.0            # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
-const SEND_DUE := 0.001      # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
+const SEND_EVERY := 0.1  # s between the snapshots of what this game owns
+const EARLY_GAP := 0.03  # s: the soonest a snapshot may follow the last one
+const EARLY_DV := 8.0  # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
+const SEND_DUE := 0.001  # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
 
 signal peers_changed
 signal message(topic: String, data, from: String)
 
-var mode := ""                # "" offline, "room" or "tabs"
+var mode := ""  # "" offline, "room" or "tabs"
 var me := ""
-var peers := {}               # peer id -> presence dict
+var peers := {}  # peer id -> presence dict
 var my_presence := {}
 var in_match := false
 var host := ""
 var match_name := ""
-var m: Node = null            # the Match while online
+var m: Node = null  # the Match while online
 var out_hits: Array = []
 var out_events: Array = []
-var sent_vel := Vector3.ZERO     # your velocity in the last snapshot
-var sent_move_at := -9.0         # the start time of your kit move in the last snapshot
+var sent_vel := Vector3.ZERO  # your velocity in the last snapshot
+var sent_move_at := -9.0  # the start time of your kit move in the last snapshot
 var send_t := 0.0
+var _kin_form := 0  # my Boki's wisp/shrink form last frame (kin_form_changed)
 var host_send_t := 0.0
-var seen := {}                # nid -> last time we heard about it
+var seen := {}  # nid -> last time we heard about it
 var _msg_cb = null
 var _peers_cb = null
 var started := false
-var enet: NetEnet = null      # desktop connection to the relay
-var server_addr := ""         # "host:port" of the relay (desktop)
-var token := ""               # Discord access token from the launcher
-var deny_reason := ""         # why the server refused us, for the lobby to show
+var enet: NetEnet = null  # desktop connection to the relay
+var server_addr := ""  # "host:port" of the relay (desktop)
+var token := ""  # Discord access token from the launcher
+var deny_reason := ""  # why the server refused us, for the lobby to show
 var mm: NetMatchmaker = null  # matchmaker HTTP (--matchmaker=host:port, else the --server= host on 8080)
-var party: Party = null       # queueing alone or with friends through the matchmaker
+var party: Party = null  # queueing alone or with friends through the matchmaker
+
 
 func _ready() -> void:
 	var matchmaker_arg := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--server="): server_addr = a.substr(9)
-		if a.begins_with("--matchmaker="): matchmaker_arg = a.substr(13)
-		if a.begins_with("--token="): token = a.substr(8)
+		if a.begins_with("--server="):
+			server_addr = a.substr(9)
+		if a.begins_with("--matchmaker="):
+			matchmaker_arg = a.substr(13)
+		if a.begins_with("--token="):
+			token = a.substr(8)
 	if server_addr == "":
 		server_addr = OS.get_environment("BOKI_SERVER")
 	mm = NetMatchmaker.new()
@@ -55,15 +60,19 @@ func _ready() -> void:
 	party.mm = mm
 	add_child(party)
 
+
 ## Online play is possible here: the browser room, or a relay server on desktop.
 func available() -> bool:
 	return Bridge.net_available() or native_available()
 
+
 func native_available() -> bool:
 	return not OS.has_feature("web") and server_addr != ""
 
+
 func online() -> bool:
 	return in_match and mode != ""
+
 
 func start() -> void:
 	if started:
@@ -81,6 +90,7 @@ func start() -> void:
 	mode = "room" if Bridge.js.hasRoom() else "tabs"
 	me = str(Bridge.js.whoami())
 
+
 func set_presence(d: Dictionary) -> void:
 	my_presence = d
 	if enet:
@@ -88,11 +98,13 @@ func set_presence(d: Dictionary) -> void:
 	elif Bridge.js:
 		Bridge.js.presence(JSON.stringify(d))
 
+
 func lobby_emit(topic: String, d) -> void:
 	if enet:
 		enet.send({"k": "emit", "t": topic, "d": d})
 	elif Bridge.js:
 		Bridge.js.emit(topic, JSON.stringify(d))
+
 
 # ------------------------------------------------------------------ desktop relay
 func _start_native() -> void:
@@ -111,11 +123,14 @@ func _start_native() -> void:
 		return
 	# say hello once the line is up
 	for i in 100:
-		if enet == null: return
-		if enet.connected: break
+		if enet == null:
+			return
+		if enet.connected:
+			break
 		await get_tree().create_timer(0.1).timeout
 	if enet and enet.connected:
 		enet.send({"k": "hello", "ver": VERSION, "tok": token, "name": Save.d.get("name", "Hunter")})
+
 
 func _on_enet(d: Dictionary) -> void:
 	match String(d.get("k", "")):
@@ -133,6 +148,7 @@ func _on_enet(d: Dictionary) -> void:
 		"msg":
 			_on_js_msg([JSON.stringify(d)])
 
+
 func _on_enet_closed(why: String) -> void:
 	if deny_reason == "":
 		deny_reason = why
@@ -146,6 +162,7 @@ func _on_enet_closed(why: String) -> void:
 		m.net_lost()
 	peers_changed.emit()
 
+
 func _on_js_peers(args) -> void:
 	var parsed = JSON.parse_string(str(args[0]))
 	if typeof(parsed) != TYPE_DICTIONARY:
@@ -155,6 +172,7 @@ func _on_js_peers(args) -> void:
 	for p in parsed.get("peers", []):
 		peers[str(p["id"])] = p["p"]
 	peers_changed.emit()
+
 
 func _on_js_msg(args) -> void:
 	var parsed = JSON.parse_string(str(args[0]))
@@ -169,17 +187,21 @@ func _on_js_msg(args) -> void:
 		return
 	message.emit(topic, data, from)
 
+
 # ------------------------------------------------------------------ match
 func begin_match(name: String, host_peer: String, match_node: Node) -> void:
 	match_name = name
 	host = host_peer
 	m = match_node
 	in_match = true
-	out_hits.clear(); out_events.clear(); seen.clear()
+	out_hits.clear()
+	out_events.clear()
+	seen.clear()
 	if enet:
 		enet.send({"k": "join", "room": name})
 	elif Bridge.js:
 		Bridge.js.joinMatch(name)
+
 
 func end_match() -> void:
 	flush()
@@ -190,8 +212,10 @@ func end_match() -> void:
 	elif Bridge.js:
 		Bridge.js.leaveMatch()
 
+
 func is_host() -> bool:
 	return me == host
+
 
 func owner_of(nid: String) -> String:
 	# player-owned ids look like "P<peer>" and "P<peer>k"; everything else belongs to the host
@@ -199,20 +223,25 @@ func owner_of(nid: String) -> String:
 		return nid.substr(1).trim_suffix("k")
 	return host
 
+
 func owns(nid: String) -> bool:
 	return owner_of(nid) == me
+
 
 func hit(target_nid: String, d: Array) -> void:
 	out_hits.append([target_nid] + d)
 
+
 func event(e: Array) -> void:
 	out_events.append(e)
+
 
 func _emit(topic: String, d) -> void:
 	if enet:
 		enet.send({"k": "memit", "t": topic, "d": d}, topic == "st")
 	elif Bridge.js:
 		Bridge.js.matchEmit(topic, JSON.stringify(d))
+
 
 func flush() -> void:
 	if out_hits.size() > 0:
@@ -221,6 +250,7 @@ func flush() -> void:
 	if out_events.size() > 0:
 		_chunks("ev", out_events)
 		out_events = []
+
 
 ## Splits a list into messages under the 4KB limit. A header, if given, starts every message.
 func _chunks(topic: String, items: Array, header = null) -> void:
@@ -232,9 +262,11 @@ func _chunks(topic: String, items: Array, header = null) -> void:
 			_emit(topic, cur)
 			cur = [] if header == null else [header]
 			size = 40
-		cur.append(it); size += s
+		cur.append(it)
+		size += s
 	if cur.size() > (0 if header == null else 1):
 		_emit(topic, cur)
+
 
 ## A dash or a kit move that began since the last snapshot goes out now, not up to SEND_EVERY later
 ## (at most one early snapshot per EARLY_GAP).
@@ -242,14 +274,26 @@ func _cast_or_dash_started() -> bool:
 	var p: Hunter = m.player
 	if p == null or send_t > SEND_EVERY - EARLY_GAP:
 		return false
-	return (p.vel - sent_vel).length() > EARLY_DV or (p.ak != null and p.ak.anim_at != sent_move_at)
+	return (
+		(p.vel - sent_vel).length() > EARLY_DV or (p.ak != null and p.ak.anim_at != sent_move_at) or kin_form_changed()
+	)
+
+
+## My Boki just bloomed, shrank or fell back into its wisp: its snapshot goes out now, not on the next beat.
+func kin_form_changed() -> bool:
+	var k: Kin = m.player.kin if m.player else null
+	var form: int = (int(k.wisp) + 2 * int(k.summon.shrink > 0.0)) if k and k.summon else 0
+	var changed: bool = form != _kin_form
+	_kin_form = form
+	return changed
+
 
 func tick(dt: float) -> void:
 	if not online() or m == null:
 		return
 	send_t -= dt
 	host_send_t -= dt
-	flush()        # hits and events leave this frame, not with the next snapshot
+	flush()  # hits and events leave this frame, not with the next snapshot
 	if send_t <= SEND_DUE or _cast_or_dash_started():
 		send_t = SEND_EVERY
 		var mine: Array = m.net_snapshot(true)

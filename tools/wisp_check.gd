@@ -35,6 +35,7 @@ func run(main_node: Node) -> void:
 	_boki_wisps()
 	_summon_data()
 	_summon()
+	_net_form()
 	_merge_from_wisp()
 	_ability_from_wisp()
 	m.queue_free()
@@ -740,3 +741,21 @@ func _ability_from_wisp() -> void:
 				not cast and k.runner.is_ready("k1") and rode and KinCommand.c_deny_text(p) != "",
 				"E from the wisp [%s]: a moving ability waits for the summon (%s)" % [id, KinCommand.c_deny_text(p)]
 			)
+
+
+## My Boki blooming or shrinking sends its snapshot at once (Net.kin_form_changed), a steady form does not.
+func _net_form() -> void:
+	var p: Hunter = m.player
+	var s: KinSummon = p.kin.summon
+	Net.m = m
+	if not p.kin.wisp:
+		s.end()
+		_kin_frames(p.kin, 1.0)
+	s.cd = 0.0
+	Net.kin_form_changed()
+	ok(not Net.kin_form_changed(), "net: a steady wisp form sends no early snapshot")
+	KinSummon.press(p)
+	ok(Net.kin_form_changed() and not Net.kin_form_changed(), "net: the bloom sends its snapshot at once, once")
+	s.end()
+	ok(Net.kin_form_changed(), "net: the shrink back sends one at once too")
+	Net.m = null
