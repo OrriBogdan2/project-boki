@@ -68,6 +68,8 @@ const CHECKS := {
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge rule and shader
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # GPU, --shots-dir=<dir>
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
+	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
+	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
@@ -362,6 +364,7 @@ const CHECKS := {
 	# a tap inside a hit-stop goes when it ends
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
 	"--mantle-press-check": ["res://tools/mantle_press_check.gd", "mantle_press_check", null],
+	"--cast-lock-buffer-check": ["res://tools/cast_lock_buffer_check.gd", "cast_lock_buffer_check", null],
 	"--cd-indicator-check": ["res://tools/cd_indicator_check.gd", "cd_indicator_check", null],      # HUD slot vs timers
 	"--cd-gate-check": ["res://tools/cd_gate_check.gd", "cd_gate_check", null],      # no cast on cooldown
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
@@ -838,8 +841,6 @@ const CHECKS := {
 	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
-	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
-	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex

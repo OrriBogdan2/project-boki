@@ -1,10 +1,10 @@
 extends RefCounted
 ## --last-hit-colour-check: a monster's death flashes in the colour of the side that got the kill.
-##   1. a kill by you, your squad-mate or a rival makes one flash: your squad's colour or the rival colour
-##      (SideColor.ally() / foe()), never the monster's own
+##   1. a kill by you, your Boki's owner's squad-mate or a rival makes one flash: your squad's colour or the
+##      rival colour of the picked Colour vision palette (SideColor), never the monster's own
 ##   2. a lair boss's death (Juice.boss_dead) flashes the same way, once
 ##   3. a death with no Hunter behind it (a fall, the Blight) keeps the monster's own colour
-## Never touches the save.
+## Runs with a temporary XDG_DATA_HOME (it writes user://settings.cfg). Never touches the save.
 
 var bad := 0
 var last_mob: Mob
@@ -34,18 +34,20 @@ func run(main: Node) -> void:
 			mate = h
 		elif h.team != me.team:
 			foe = h
-	for boss in [false, true]:
-		var tag := "[boss] " if boss else ""
-		var by_you := _kill(m, me.pos, me, boss)
-		var by_mate := _kill(m, me.pos, mate, boss)
-		var by_foe := _kill(m, me.pos, foe, boss)
-		ok(tag + "your kill: one squad-colour flash", by_you.size() == 1 and _same(by_you[0], SideColor.ally()))
-		var mate_ok := by_mate.size() == 1 and _same(by_mate[0], SideColor.ally())
-		ok(tag + "your mate's kill: one squad-colour flash", mate_ok)
-		ok(tag + "a rival's kill: one rival-colour flash", by_foe.size() == 1 and _same(by_foe[0], SideColor.foe()))
-		var apart := by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0])
-		ok(tag + "the two sides differ", apart)
-		ok(tag + "the dissolving body glows in the rival colour", _body_glow(last_mob, SideColor.foe()))
+	for id in SideColor.ORDER:
+		Settings.v[SideColor.KEY] = id
+		var p: Dictionary = SideColor.PALETTES[id]
+		for boss in [false, true]:
+			var tag := "[%s%s] " % [id, " boss" if boss else ""]
+			var by_you := _kill(m, me.pos, me, boss)
+			var by_mate := _kill(m, me.pos, mate, boss)
+			var by_foe := _kill(m, me.pos, foe, boss)
+			ok(tag + "your kill: one squad-colour flash", by_you.size() == 1 and _same(by_you[0], p["ally"]))
+			ok(tag + "your mate's kill: one squad-colour flash", by_mate.size() == 1 and _same(by_mate[0], p["ally"]))
+			ok(tag + "a rival's kill: one rival-colour flash", by_foe.size() == 1 and _same(by_foe[0], p["foe"]))
+			var apart := by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0])
+			ok(tag + "the two sides differ", apart)
+			ok(tag + "the dissolving body glows in the rival colour", _body_glow(last_mob, p["foe"]))
 	var own := _kill(m, me.pos, null, false)
 	var plain := own.size() == 1 and not _same(own[0], SideColor.ally()) and not _same(own[0], SideColor.foe())
 	ok("no Hunter behind it: one flash in the monster's own colour", plain)

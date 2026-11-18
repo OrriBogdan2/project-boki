@@ -969,7 +969,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
-const DASH_BUFFER := 0.18
 const DASH_KEEP := 0.5        # s: a press inside a dash this short waits for its end (a longer lock drops it)
 
 func do_dash() -> void:
@@ -984,7 +983,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
+		dash_buf = Loco.press_buffer + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
 		return
 	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1570,6 +1569,7 @@ func sim(dt: float) -> void:
 	inp["kin_ab"] = false
 	for k in PRESS_KEYS:
 		inp[k] = false
+	FireTap.stepped(self)
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)

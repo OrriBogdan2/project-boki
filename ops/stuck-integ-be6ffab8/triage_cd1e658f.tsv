@@ -1,0 +1,698 @@
+branch	class	detail
+ext/aim-height	INFLIGHT	carried by open PR(s) #95
+ext/airdash-anims-1108	PORT	3 commits ahead, 9 code/data files conflict: content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json content/rules/warden_anim/pip.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json
+ext/albert-size-boop	INFLIGHT	own open PR #32
+ext/albert-size-boop-rebased	PORT	2 commits ahead, 3 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md tools/archer_bulwark_combo_check.gd
+ext/anim-arm-kael	INFLIGHT	carried by open PR(s) #135,95
+ext/anim-boki-cast-rebased	PORT	3 commits ahead, 3 code/data files conflict: scripts/match/boki_rig.gd scripts/match/kin.gd tools/boki_rig_check.gd
+ext/anim-boki-hit-faint	PORT	2 commits ahead, 4 code/data files conflict: scripts/match/boki_rig.gd scripts/match/kin.gd scripts/match/kin_puppet.gd tools/boki_flinch_shots.gd
+ext/anim-boki-idle	INFLIGHT	carried by open PR(s) #143
+ext/anim-boki-react-three	PORT	62 commits ahead, 130 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/caecilith/caecilith.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb
+ext/anim-boki-slide-starters	PORT	1 commits ahead, 6 code/data files conflict: art/kin/cindle/cindle.glb art/kin/wisplet/wisplet.glb scripts/match/boki_rig.gd tools/boki_anim_audit.gd tools/boki/lunowl_anim.py tools/boki/vespyx_anim.py
+ext/anim-boki-state-cover	PORT	1 commits ahead, 4 code/data files conflict: scripts/match/boki_rig.gd scripts/match/kin.gd tools/boki_anim_audit.gd tools/boki_state_cover.gd
+ext/anim-boki-stop-turn	PORT	1 commits ahead, 2 code/data files conflict: scripts/match/boki_rig.gd tools/boki_anim_audit.gd
+ext/anim-bul-guard-remote	PORT	5 commits ahead, 9 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/bulwark_kit.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/kmoves_pin.gd scripts/match/match.gd
+ext/anim-cancel-blend	PORT	2 commits ahead, 11 code/data files conflict: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json scripts/heroes/warden_clips.gd scripts/heroes/warden_glb.gd
+ext/anim-clip-checks-data	PORT	1 commits ahead, 2 code/data files conflict: tools/clip_check.gd tools/warden_clips_check.gd
+ext/anim-clip-checks-data-w0246	PORT	82 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-dash-clips-motley-grimble	PORT	6 commits ahead, 7 code/data files conflict: art/wardens/dredge/dredge.glb art/wardens/ostra/ostra.glb content/rules/warden_anim/dredge.json content/rules/warden_anim/ostra.json tools/art1/glb_add_clips.py tools/art1/ostra_clips.py
+ext/anim-dash-travel	INFLIGHT	carried by open PR(s) #135
+ext/anim-dir-all-1112	PORT	17 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-dirloops-lace-kael	MERGED	PR #164 (this attempt, conflicts resolved by hand or merge policy)
+ext/anim-dirloops-pelvis	PORT	3 commits ahead, 3 code/data files conflict: art/wardens/tarek/IMPORT.md art/wardens/tarek/tarek.glb art/wardens/vex/vex.glb
+ext/anim-downed	PORT	2 commits ahead, 6 code/data files conflict: content/rules/wisp_looks.json scripts/heroes/warden_clips.gd scripts/match/hunter.gd scripts/match/hunter_wisp.gd tools/wisp_check.gd tools/wisp_shots.gd
+ext/anim-elim-beat-wisp	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/anim-empty-garden	PORT	2 commits ahead, 14 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb content/rules/warden_stance.json scripts/home/base_race.gd
+ext/anim-fusion-remote	PORT	86 commits ahead, 83 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-gait-speed	PORT	2 commits ahead, 12 code/data files conflict: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json
+ext/anim-gil-clips	PORT	main gil.json is a clipless stub (gil.glb carries no clips); re-bake the 7 cast clips on the current gil glb
+ext/anim-gil-grabbag	PORT	1 commits ahead, 4 code/data files conflict: content/archetypes/gil.json content/rules/warden_anim/gil.json tools/clip_check.gd tools/gil_combo_check.gd
+ext/anim-grimble-hook-prop	PORT	87 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-guardian-stance	PORT	7 commits ahead, 50 code/data files conflict: content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/anim-hazard-moves	PORT	139 commits ahead, 117 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/anim-hymotion	MERGED	PR #164 (previous attempt)
+ext/anim-idle-walk-gap-rebased	INFLIGHT	carried by open PR(s) #135
+ext/anim-key-pose-read	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/anim-land-beat	PORT	88 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-loco-dir-albert	PORT	21 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-loco-dir-grimble-sparkle	PORT	19 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-loco-dir-kael-crouch	PORT	18 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-loco-dir-last	PORT	31 commits ahead, 37 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-loco-snap-startstop	PORT	37 commits ahead, 36 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-loco-starts	PORT	23 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-mantle-3	INFLIGHT	carried by open PR(s) #115
+ext/anim-meeko-crouch-stride	PORT	1 commits ahead, 3 code/data files conflict: art/wardens/pip/pip.glb content/rules/warden_anim/pip.json tools/art1/pip_clips.py
+ext/anim-meeko-stride	PORT	20 commits ahead, 35 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md
+ext/anim-meeko-tiptoe	PORT	2 commits ahead, 5 code/data files conflict: art/wardens/pip/IMPORT.md art/wardens/pip/pip.glb content/rules/warden_anim/pip.json tools/art1/pip_clips.py tools/crouch_check.gd
+ext/anim-race-beats	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/anim-react-2-rebased	PORT	5 commits ahead, 113 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb
+ext/anim-react-settle-neve-tenzo	PORT	2 commits ahead, 6 code/data files conflict: art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb art/wardens/tarek/tarek.glb tools/art1/glb_react.py
+ext/anim-release-sync-meeko-motley	PORT	89 commits ahead, 85 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-remote-stomp	PORT	10 commits ahead, 6 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/life.gd scripts/match/match.gd tools/remote_anim_check.gd tools/stomp_check.gd.uid
+ext/anim-result-poses	INFLIGHT	carried by open PR(s) #135
+ext/anim-results-stage-beats	PORT	89 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-revive-12	PORT	3 commits ahead, 14 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/ostra/ostra.glb
+ext/anim-rocket-ride	PORT	11 commits ahead, 20 code/data files conflict: content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/hem.json content/rules/warden_anim/ostra.json content/rules/warden_anim/pip.json content/rules/warden_anim/ryzz.json
+ext/anim-skin-relax-b	PORT	3 commits ahead, 9 code/data files conflict: art/wardens/claire/claire.glb art/wardens/claire/IMPORT.md art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb art/wardens/pip/pip.glb art/wardens/tarek/IMPORT.md
+ext/anim-skin-relax-slice	PORT	3 commits ahead, 5 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb tools/stretch_check.gd
+ext/anim-sparkle-sky-hold	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/anim-stomp-batch-a	PORT	15 commits ahead, 23 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/ryzz/ryzz.glb
+ext/anim-stomp-batch-b	PORT	13 commits ahead, 25 code/data files conflict: art/wardens/dredge/dredge.glb art/wardens/gil/gil.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/ostra/ostra.glb art/wardens/pip/pip.glb
+ext/anim-stomp-drink-1	INFLIGHT	carried by open PR(s) #135,115
+ext/anim-stomp-drink-2	INFLIGHT	carried by open PR(s) #135,115
+ext/anim-stomp-drink-3	INFLIGHT	carried by open PR(s) #135,115
+ext/anim-stomp-per-hunter	INFLIGHT	carried by open PR(s) #100
+ext/anim-stop-on-stride	PORT	93 commits ahead, 88 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-stop-start	PORT	3 commits ahead, 10 code/data files conflict: content/rules/warden_anim/cinder.json content/rules/warden_anim/dredge.json content/rules/warden_anim/kael.json content/rules/warden_anim/ryzz.json content/rules/warden_anim/vex.json scripts/heroes/warden_clips.gd
+ext/anim-strafe-back	PORT	4 commits ahead, 20 code/data files conflict: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json
+ext/anim-stretch-starters	PORT	4 commits ahead, 8 code/data files conflict: art/wardens/hem/hem.glb art/wardens/hem/IMPORT.md art/wardens/kael/IMPORT.md art/wardens/kael/kael.glb art/wardens/vex/IMPORT.md art/wardens/vex/vex.glb
+ext/anim-summon-clips	PORT	7 commits ahead, 6 code/data files conflict: scripts/match/boki_rig.gd scripts/match/kin.gd scripts/match/kin_puppet.gd scripts/match/kin_summon.gd tools/boki_rig_check.gd tools/wisp_check.gd
+ext/anim-swim-reds	PORT	141 commits ahead, 118 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/anim-tenzo-boulder-sync	PORT	85 commits ahead, 87 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-timing-gunslinger	PORT	20 commits ahead, 47 code/data files conflict: art/wardens/vex/vex.glb content/archetypes/bulwark.json content/archetypes/gunslinger.json content/archetypes/thief.json content/dash_flow/gunslinger.json content/maps/hollowcrown.json
+ext/anim-timing-vex-port	PORT	82 commits ahead, 85 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/anim-utility-poses-2	PORT	8 commits ahead, 6 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/match/match.gd scripts/match/utility_use.gd tools/box_revive_check.gd tools/make_hollowcrown.py
+ext/anim-w0246-blender-rows	PORT	92 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/art1-kael-2	PORT	24 commits ahead, 21 code/data files conflict: art/wardens/kael/IMPORT.md art/wardens/kael/kael_atlas.jpg art/wardens/kael/kael.glb art/wardens/src/kael_rig.json content/archetypes/juggernaut.json content/rules/warden_anim/kael.json
+ext/barrier-block-parity	PORT	2 commits ahead, 5 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/archer_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/combat/verbs.gd tools/breah_combo_check.gd
+ext/belt-move-port	PORT	127 commits ahead, 106 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/blight-nests	PORT	1 commits ahead, 5 code/data files conflict: scripts/core/net.gd scripts/match/blight.gd scripts/match/blight_nests.gd.uid tools/blight_nest_check.gd tools/blight_nest_check.gd.uid
+ext/body6-picks-apply	PORT	5 commits ahead, 22 code/data files conflict: art/wardens/cinder/cinder_atlas.jpg art/wardens/cinder/cinder_emit.jpg art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/hem/hem_atlas_1.jpg art/wardens/hem/hem.glb
+ext/boki-downed-port	PORT	1 commits ahead, 3 code/data files conflict: scripts/match/boki_rig.gd scripts/match/kin.gd scripts/match/kin_puppet.gd
+ext/boki-downed-pose-rebased	INFLIGHT	carried by open PR(s) #100
+ext/boki-gait	INFLIGHT	carried by open PR(s) #143
+ext/boki-key-c-main	INFLIGHT	carried by open PR(s) #143
+ext/bot-hazard-route	PORT	138 commits ahead, 108 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/bot-kael-1111	PORT	8 commits ahead, 9 code/data files conflict: content/archetypes/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd scripts/kin/kin_exec.gd
+ext/bot-kit-lands	MERGED	PR #164 (this attempt, conflicts resolved by hand or merge policy)
+ext/bot-kit-use	INFLIGHT	carried by open PR(s) #95
+ext/bots-human-1111-feel	PORT	5 commits ahead, 9 code/data files conflict: scripts/match/bot_belt.gd scripts/match/bot.gd scripts/match/bot_retreat.gd scripts/match/bot_retreat.gd.uid scripts/match/bot_squad.gd scripts/match/bot_squad.gd.uid
+ext/bot-stomp-1111	INFLIGHT	carried by open PR(s) #100
+ext/cancel-blend-port	PORT	88 commits ahead, 83 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/carry-out-slot	PORT	4 commits ahead, 10 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/core/settings.gd scripts/home/home.gd scripts/match/hunter.gd scripts/match/hunter_net.gd
+ext/carry-two-1111	INFLIGHT	carried by open PR(s) #100
+ext/carry-two-in	PORT	4 commits ahead, 7 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/core/settings.gd scripts/home/home.gd scripts/match/hunter.gd scripts/match/match.gd
+ext/cc-stacking-rule	INFLIGHT	carried by open PR(s) #100
+ext/char-creator-v2-1111	PORT	4 commits ahead, 6 code/data files conflict: scripts/match/shrouds.gd scripts/match/unmasked.gd scripts/ui/hatch.gd tools/empty_shots.gd tools/gameplay_media.gd tools/unmasked_check.gd
+ext/cinder-flue-clips	PORT	2 commits ahead, 3 code/data files conflict: shaders/hero_vfx.gdshader tools/ashwick_combo_check.gd tools/ashwick_ult_check.gd
+ext/cinder-sable-polish-rebased	PORT	2 commits ahead, 4 code/data files conflict: art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable.glb content/rules/warden_look.json tools/art1/sable_paint.py
+ext/clans-slice-3-tag	INFLIGHT	carried by open PR(s) #122
+ext/clans-weekly-board	INFLIGHT	carried by open PR(s) #123,120
+ext/clarity-1112	PORT	5 commits ahead, 15 code/data files conflict: scripts/main.gd scripts/match/biome_run.gd scripts/match/blight_dir.gd scripts/match/boss.gd scripts/match/exits.gd scripts/match/heart.gd
+ext/combat-blight-endgame	PORT	6 commits ahead, 6 code/data files conflict: scripts/match/blight_dir.gd scripts/match/bot.gd scripts/match/bot_ways.gd scripts/match/heart.gd scripts/ui/heart_hud.gd tools/ways_out_map_ui_check.gd
+ext/combat-bots-downed	PORT	40 commits ahead, 66 code/data files conflict: content/archetypes/juggernaut.json content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json
+ext/combat-daze-status	INFLIGHT	carried by open PR(s) #143
+ext/combat-grimble-ult-clarity	PORT	7 commits ahead, 3 code/data files conflict: scripts/match/ent.gd tools/hero_vfx_reel.gd tools/vv_shots.gd
+ext/combat-hazard-ward-stack	PORT	129 commits ahead, 107 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/combat-mage-rod-dmg	INFLIGHT	carried by open PR(s) #113
+ext/combat-mob-boss-fsm	PORT	4 commits ahead, 4 code/data files conflict: scripts/match/blight.gd scripts/match/boss.gd scripts/match/lairs.gd scripts/match/mob.gd
+ext/combat-mob-camp-root	PORT	1 commits ahead, 13 code/data files conflict: content/archetypes/juggernaut.json scripts/arch/hero_zones.gd scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/dredge_kit.gd scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/ostra_kit.gd
+ext/combat-motley-swept	PORT	2 commits ahead, 12 code/data files conflict: content/archetypes/juggernaut.json scripts/arch/hero_zones.gd scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/dredge_kit.gd scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/ostra_kit.gd
+ext/combat-neve-lmb-torn	INFLIGHT	carried by open PR(s) #143
+ext/combat-ostra-seed-burn	PORT	1 commits ahead, 131 code/data files conflict: content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gil.json content/archetypes/gunslinger.json
+ext/combat-sable-lmb-hits	PORT	14 commits ahead, 28 code/data files conflict: content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/tender.json content/archetypes/thief.json
+ext/combat-steal-boss-bonus	PORT	16 commits ahead, 22 code/data files conflict: content/maps/hollowcrown.json scripts/arch/kit_status.gd scripts/core/net.gd scripts/main.gd scripts/match/boss.gd scripts/match/drop_feel.gd
+ext/combat-steal-window-tell	INFLIGHT	carried by open PR(s) #143
+ext/combat-summon-share	PORT	33 commits ahead, 28 code/data files conflict: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_nrm.jpg art/wardens/sable/sable_atlas.jpg content/rules/boki_summon.json content/sfx/boki.json scripts/core/net.gd
+ext/combat-ttk-five	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/combat-ttk-parity-1112	PORT	1 commits ahead, 2 code/data files conflict: content/archetypes/juggernaut.json content/archetypes/ostra.json
+ext/combat-vex-cone-net	PORT	4 commits ahead, 4 code/data files conflict: scripts/arch/kits/gunslinger_kit.gd scripts/core/net.gd scripts/match/match.gd tools/remote_anim_check.gd
+ext/combat-w0246-bot-reds	PORT	5 commits ahead, 16 code/data files conflict: content/archetypes/juggernaut.json scripts/arch/hero_zones.gd scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/dredge_kit.gd scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/ostra_kit.gd
+ext/combat-w0246-support-reds	PORT	87 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/combat-zone-stage-dmg	PORT	2 commits ahead, 8 code/data files conflict: scripts/match/bot.gd scripts/match/bot_route.gd scripts/match/match.gd scripts/match/shrink_zone.gd scripts/ui/full_map.gd scripts/ui/hud.gd
+ext/cooldown-gate-1111	PORT	37 commits ahead, 37 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/arch_kit.gd scripts/arch/kits/care_look.gd
+ext/creator-empty-marks	INFLIGHT	carried by open PR(s) #123,120
+ext/creator-sex-distinct-shots	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/cursor-confine	PORT	1 commits ahead, 6 code/data files conflict: scripts/core/settings.gd scripts/home/home.gd scripts/ui/hatch.gd scripts/ui/overlay.gd scripts/ui/prologue.gd scripts/ui/title.gd
+ext/dash-momentum-1111	PORT	5 commits ahead, 4 code/data files conflict: content/archetypes/ashwick.json scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/thief_kit.gd scripts/match/hunter.gd
+ext/dash-no-rings-reel	PORT	87 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/docs-decision-numbers	PORT	1 commits ahead, 6 code/data files conflict: content/rules/class_unlock.json content/rules/garden_zones.json scripts/arch/dash_flow.gd scripts/home/farm_water.gd scripts/match/match.gd tools/health.py
+ext/docs-kit-parity-names	MERGED	PR #164 (this attempt, conflicts resolved by hand or merge policy)
+ext/dredge-auto-rebased	PORT	4 commits ahead, 9 code/data files conflict: content/archetypes/dredge.json content/weapons/shotgun.json scripts/arch/kits/dredge_gun.gd scripts/arch/kits/dredge_kit.gd scripts/arch/kits/ld_fx.gd scripts/match/hunter.gd
+ext/early-camps-0244	PORT	34 commits ahead, 24 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/early-camps-bots	PORT	14 commits ahead, 17 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/bot.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/early-camps-bots-a3	PORT	15 commits ahead, 20 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/bot.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/early-camps-bots-c	PORT	37 commits ahead, 25 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/bot.gd scripts/match/drop_feel.gd
+ext/early-camps-map-ui	PORT	28 commits ahead, 24 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/early-drop-height	PORT	9 commits ahead, 14 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd scripts/match/drop_squad.gd scripts/match/glider_sfx.gd
+ext/early-guarded-boki	PORT	13 commits ahead, 17 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd scripts/match/drop_squad.gd
+ext/early-hard-landing	PORT	15 commits ahead, 18 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd scripts/match/drop_reticle.gd
+ext/early-steal-window	PORT	15 commits ahead, 20 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/boss.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/early-wisp-refund	PORT	44 commits ahead, 38 code/data files conflict: content/maps/hollowcrown.json content/rules/boki_summon.json content/sfx/boki.json scripts/core/game.gd scripts/core/net.gd scripts/kin/boki_wisp_look.gd
+ext/egg-hover-1111	INFLIGHT	carried by open PR(s) #104
+ext/egg-picker-preview	INFLIGHT	carried by open PR(s) #104,95
+ext/extra-kin-v2-dedupe	PORT	1 commits ahead, 54 code/data files conflict: content/kin/kilnbadger.json content/kin_v2/basaltoad.json content/kin_v2/burrlet.json content/kin_v2/caecilith.json content/kin_v2/cairnback.json content/kin_v2/casquebill.json
+ext/farm-boki-xp-curve	PORT	6 commits ahead, 60 code/data files conflict: content/kin_v2/basaltoad.json content/kin_v2/caecilith.json content/kin_v2/cairnback.json content/kin_v2/casquebill.json content/kin_v2/cindowary.json content/kin_v2/duskapi.json
+ext/farm-build-polish-1111	PORT	37 commits ahead, 36 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/farm-carry-arrival	PORT	4 commits ahead, 8 code/data files conflict: scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/settings.gd scripts/home/home.gd scripts/match/hunter.gd scripts/match/loot_full.gd
+ext/farm-carry-boki	PORT	2 commits ahead, 4 code/data files conflict: scripts/home/home.gd scripts/match/boki_rig.gd scripts/match/hunter_anim.gd scripts/match/kin_puppet.gd
+ext/farm-carry-trail-0245	PORT	1 commits ahead, 3 code/data files conflict: scripts/home/home_carry.gd scripts/home/home.gd tools/carry_boki_check.gd
+ext/farm-feed-bowl	PORT	1 commits ahead, 3 code/data files conflict: scripts/core/evo.gd scripts/home/farm_unlocks.gd scripts/home/home.gd
+ext/farm-feed-bowl-port	PORT	61 commits ahead, 121 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/farm-games-picker-base	PORT	1 commits ahead, 4 code/data files conflict: content/rules/garden_zones.json scripts/home/home.gd scripts/home/minigame_hub.gd tools/minigame_hub_check.gd
+ext/farm-garden-default	PORT	3 commits ahead, 8 code/data files conflict: content/rules/base_race.json scripts/home/base_race.gd scripts/home/snack_patch.gd tools/garden_save_check.gd tools/lean_check.gd tools/perf_bench.gd
+ext/farm-greet-home	INFLIGHT	carried by open PR(s) #96
+ext/farm-hatch-name	INFLIGHT	carried by open PR(s) #104
+ext/farm-hazard-counter-card	INFLIGHT	carried by open PR(s) #143
+ext/farm-incubator-verify	INFLIGHT	carried by open PR(s) #124
+ext/farm-mood-icons-rebased	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/farm-new-toy	PORT	3 commits ahead, 6 code/data files conflict: content/rules/toys.json scripts/core/care.gd scripts/home/base_life.gd scripts/home/home_build.gd tools/garden_day_check.gd tools/garden_items_check.gd
+ext/farm-pet-personality	INFLIGHT	carried by open PR(s) #143,124
+ext/farm-respec	INFLIGHT	carried by open PR(s) #96
+ext/farm-sick-recover	INFLIGHT	carried by open PR(s) #124
+ext/farm-sick-recover-port	PORT	61 commits ahead, 127 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/farm-site-paused	INFLIGHT	carried by open PR(s) #124
+ext/farm-soul-echo	PORT	95 commits ahead, 126 code/data files conflict: art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/farm-toys-joy-tune	INFLIGHT	carried by open PR(s) #143,124
+ext/farm-transfer-transport	INFLIGHT	carried by open PR(s) #143,124
+ext/farm-unmasked-feet	PORT	3 commits ahead, 3 code/data files conflict: content/rules/warden_stance.json scripts/match/empty_gait.gd tools/unmasked_check.gd
+ext/farm-w0246-flakes	PORT	64 commits ahead, 128 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/feel-aim-raw	INFLIGHT	carried by open PR(s) #95
+ext/feel-aim-steady	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/feel-air-casts	INFLIGHT	carried by open PR(s) #95
+ext/feel-brake-cast	INFLIGHT	carried by open PR(s) #95
+ext/feel-buffers-leftovers	PORT	6 commits ahead, 7 code/data files conflict: content/rules/tuning.json scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd scripts/arch/kits/juggernaut_kit.gd scripts/core/locomotion.gd scripts/match/hunter.gd
+ext/feel-buffers-tuning	PORT	4 commits ahead, 6 code/data files conflict: content/rules/tuning.json scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd scripts/core/locomotion.gd scripts/match/hunter.gd tools/move_feel_check.gd
+ext/feel-cam-mode	PORT	87 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-cast-into-cast-slice	PATCHES_IN_MAIN	every commit is in main as a patch (cherry-pick equivalent)
+ext/feel-cast-lock-buffer	PORT	2 commits ahead, 1 code/data files conflict: scripts/arch/kits/juggernaut_chain.gd
+ext/feel-chain-sweep-1111	PORT	5 commits ahead, 5 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/match/bot.gd scripts/match/terrain_hazards.gd tools/make_hollowcrown.py
+ext/feel-cinder-dash-curve	INFLIGHT	carried by open PR(s) #95
+ext/feel-cinder-poof-cancel	PORT	86 commits ahead, 92 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-dash-jump-keep	INFLIGHT	carried by open PR(s) #113
+ext/feel-dash-off-ledge-rebased	INFLIGHT	carried by open PR(s) #137
+ext/feel-dash-wall-slide-rebased	PORT	8 commits ahead, 264 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/feel-dive-net	INFLIGHT	carried by open PR(s) #95
+ext/feel-fire-slow-sable	INFLIGHT	carried by open PR(s) #137
+ext/feel-first-cast-warm-rebased	INFLIGHT	carried by open PR(s) #137
+ext/feel-gil-sweeps	PORT	1 commits ahead, 7 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/match/match.gd tools/cast_lock_buffer_check.gd tools/gen_wiki.py tools/low_fps_input_check.gd
+ext/feel-glide-sink-heat	INFLIGHT	carried by open PR(s) #95
+ext/feel-glide-state	PORT	86 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-golden-determinism	INFLIGHT	carried by open PR(s) #143,103
+ext/feel-haste-stack	PORT	2 commits ahead, 7 code/data files conflict: content/rules/hunter_move.json scripts/arch/arch_kit.gd scripts/heroes/warden_gait.gd scripts/match/hunter.gd scripts/match/hunter_move.gd tools/archer_bulwark_combo_check.gd
+ext/feel-hit-marker	INFLIGHT	carried by open PR(s) #113
+ext/feel-home-fixed-step	PORT	7 commits ahead, 4 code/data files conflict: content/rules/hunter_move.json scripts/match/hunter_move.gd tools/crouch_check.gd tools/move_feel_check.gd
+ext/feel-home-mantle-shared	PORT	3 commits ahead, 7 code/data files conflict: content/rules/tuning.json scripts/core/locomotion.gd scripts/home/home.gd scripts/match/hunter.gd scripts/match/hunter_move.gd scripts/match/mantle_carry.gd
+ext/feel-hurt-dir-wash	INFLIGHT	carried by open PR(s) #104,95
+ext/feel-jump-forgive	INFLIGHT	carried by open PR(s) #95
+ext/feel-lace-tall-climb-rebased	INFLIGHT	carried by open PR(s) #95
+ext/feel-landing-recovery	PORT	89 commits ahead, 98 code/data files conflict: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/archetypes/thief.json content/dash_flow/archer.json
+ext/feel-mantle-timing	INFLIGHT	carried by open PR(s) #95
+ext/feel-mini-mantle	INFLIGHT	carried by open PR(s) #143,103
+ext/feel-one-tuning-home	PORT	3 commits ahead, 17 code/data files conflict: content/rules/hunter_move.json content/rules/tuning.json scripts/arch/arch_kit.gd scripts/arch/kits/breah_slam.gd scripts/core/locomotion.gd scripts/home/home.gd
+ext/feel-online-kitefall	PORT	2 commits ahead, 4 code/data files conflict: scripts/arch/kits/mage_ult.gd scripts/core/net.gd scripts/match/match.gd scripts/match/net_smooth.gd
+ext/feel-ranges-on-screen	PORT	1 commits ahead, 4 code/data files conflict: scripts/match/cam.gd scripts/ui/hunter_viewer.gd scripts/ui/results.gd tools/cam_framing_check.gd
+ext/feel-remote-move-clear	PORT	1 commits ahead, 3 code/data files conflict: scripts/arch/arch_kit.gd scripts/core/net.gd tools/remote_anim_check.gd
+ext/feel-reversal-2	PORT	84 commits ahead, 92 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-scout-cam	INFLIGHT	carried by open PR(s) #95
+ext/feel-sparkle-wirerun-glide	PORT	87 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-stop-slide	INFLIGHT	carried by open PR(s) #143,103
+ext/feel-summon-on-g	PORT	4 commits ahead, 12 code/data files conflict: scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/net.gd scripts/core/settings.gd scripts/match/kin_follow.gd scripts/match/kin.gd
+ext/feel-tenzo-hop-glide	PORT	88 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-trigger-edge	INFLIGHT	carried by open PR(s) #135
+ext/feel-ui-focus	PORT	1 commits ahead, 8 code/data files conflict: scripts/home/hob_talk.gd scripts/home/home.gd scripts/main.gd scripts/match/match.gd scripts/social/town.gd scripts/ui/hud.gd
+ext/feel-unsourced-dash-scale	INFLIGHT	carried by open PR(s) #137
+ext/feel-vex-e-recovery	PORT	3 commits ahead, 6 code/data files conflict: content/archetypes/gunslinger.json content/dash_flow/gunslinger.json scripts/arch/kits/gunslinger_kit.gd tools/dash_flow_check.gd tools/hero_combo_check.gd tools/vex_anim_time_check.gd
+ext/feel-w0246-camera	PORT	84 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-w0246-combo-reds	PORT	88 commits ahead, 96 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-w0246-frame-reds	PORT	98 commits ahead, 96 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-w0246-glide-reds	PORT	91 commits ahead, 95 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-w0246-knock-reds	PORT	89 commits ahead, 92 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/feel-yaw-lock-12-rebased	INFLIGHT	carried by open PR(s) #137
+ext/fight-hitch	INFLIGHT	carried by open PR(s) #137
+ext/fix-ghost-shot-sfx-1113	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/fix-strafe-cadence-1115	MERGED	PR #164 (previous attempt)
+ext/fold-anim-boki-1112	PORT	14 commits ahead, 12 code/data files conflict: art/kin/cindle/cindle.glb scripts/home/relay_beats.gd scripts/match/boki_home_clips.gd scripts/match/boki_home_poses.gd scripts/match/boki_rig.gd scripts/match/kin.gd
+ext/fold-anim-time-1112	PORT	15 commits ahead, 13 code/data files conflict: content/archetypes/dolm.json content/rules/warden_anim/breaker.json content/rules/warden_anim/kael.json content/rules/warden_anim/ryzz.json content/rules/warden_anim/tarek.json scripts/arch/kits/gunslinger_kit.gd
+ext/fold-tut-first-1112	INFLIGHT	carried by open PR(s) #123
+ext/fps-feel	PORT	main rewrote dash exit (dash_rest) and face turn (rotate_toward); re-port fps-independence on top
+ext/fsm-m1	PORT	4 commits ahead, 2 code/data files conflict: scripts/feel/feel_config.gd scripts/match/hunter.gd
+ext/fusion-states-fix	PORT	4 commits ahead, 6 code/data files conflict: scripts/kin/merge_kit.gd scripts/match/merge_moves.gd scripts/match/merge_xform.gd tools/fusion_states_check.gd tools/fusion_strips.gd tools/remote_anim_check.gd
+ext/gait-speed-port	PORT	4 commits ahead, 14 code/data files conflict: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json content/rules/warden_anim/pip.json content/rules/warden_anim/ryzz.json
+ext/garden-balance-apply	PATCHES_IN_MAIN	every commit is in main as a patch (cherry-pick equivalent)
+ext/garden-bramble-dupes	PORT	1 commits ahead, 5 code/data files conflict: content/rules/farm_tutorial.json scripts/home/build_entries.gd scripts/home/home.gd scripts/home/home_stall.gd scripts/home/hub_layout.gd
+ext/garden-care-prompt	PORT	137 commits ahead, 117 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/garden-cinderstep	PORT	2 commits ahead, 11 code/data files conflict: content/rules/garden_zones.json scripts/core/data.gd scripts/home/base_shove.gd scripts/home/build_entries.gd scripts/home/home.gd scripts/home/home_layout.gd
+ext/garden-cinderstep-zone-rebased	PORT	3 commits ahead, 15 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb scripts/core/care.gd scripts/core/evo.gd
+ext/garden-deflake	PORT	63 commits ahead, 127 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/garden-fresh-hour	PORT	12 commits ahead, 37 code/data files conflict: content/rules/evo_paths.json content/rules/garden_items.json content/rules/garden_prizes.json content/rules/garden_seasons.json content/sfx/boki_voices.json scripts/core/data.gd
+ext/garden-horizon	PORT	6 commits ahead, 12 code/data files conflict: content/rules/garden_zones.json content/rules/market.json scripts/core/econ.gd scripts/core/loot.gd scripts/home/garden_zones.gd scripts/home/hub_horizon.gd
+ext/garden-hub-move	PORT	1 commits ahead, 10 code/data files conflict: content/rules/garden_zones.json scripts/core/kinbox.gd scripts/home/base_life.gd scripts/home/garden_zones.gd scripts/home/garden_zones.gd.uid scripts/home/home_carry.gd
+ext/garden-hub-theme	PORT	3 commits ahead, 9 code/data files conflict: content/rules/snack_patch.json scripts/home/base_demo.gd scripts/home/base_volley.gd scripts/home/home_layout.gd scripts/home/snack_patch.gd tools/garden_nav_check.gd
+ext/garden-integrated-rebased	PORT	8 commits ahead, 47 code/data files conflict: content/archetypes/juggernaut.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/garden-items-form	PORT	59 commits ahead, 125 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/garden-nap-spots	INFLIGHT	carried by open PR(s) #124
+ext/garden-nav-sweep-rebased	PORT	1 commits ahead, 16 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb scripts/core/care.gd scripts/core/evo.gd
+ext/garden-play-0246	PORT	61 commits ahead, 44 code/data files conflict: content/maps/arena.json content/rules/base_race.json content/rules/evo_paths.json content/rules/garden_items.json content/rules/garden_prizes.json content/rules/garden_seasons.json
+ext/garden-race-ghost	INFLIGHT	carried by open PR(s) #96
+ext/garden-ridge-rebased	PORT	2 commits ahead, 110 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/class_unlock.json
+ext/garden-sick-recover	PORT	62 commits ahead, 122 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/garden-soak-zones	INFLIGHT	carried by open PR(s) #96
+ext/garden-voice-ambience-rebased	PORT	4 commits ahead, 292 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg audio/bk_caecilith_alert_1.wav audio/bk_caecilith_alert.wav audio/bk_caecilith_happy_1.wav
+ext/garden-zone-cinderstep	PORT	3 commits ahead, 11 code/data files conflict: content/rules/garden_zones.json content/rules/snack_patch.json scripts/home/garden_zones.gd scripts/home/home.gd scripts/home/home_layout.gd scripts/home/home_stall.gd
+ext/gil-train-1112	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/glider-heat-parity	PORT	3 commits ahead, 4 code/data files conflict: content/rules/hunter_move.json scripts/match/hunter.gd scripts/match/hunter_move.gd tools/glider_heat_check.gd
+ext/grimble-fist-vfx-rebased	PORT	4 commits ahead, 7 code/data files conflict: content/vfx/dredge.json scripts/arch/kits/dredge_gun.gd scripts/arch/kits/dredge_kit.gd scripts/match/hero_vfx.gd shaders/hero_vfx.gdshader tools/dredge_combo_check.gd
+ext/grimble-hook-arm-v2-rebased	INFLIGHT	carried by open PR(s) #143
+ext/grimble-nose-1109	INFLIGHT	carried by open PR(s) #143
+ext/grimble-parity-verify	PORT	1 commits ahead, 2 code/data files conflict: content/archetypes/dredge.json tools/dredge_combo_check.gd
+ext/grimble-stretch-v2-rebased	PORT	2 commits ahead, 4 code/data files conflict: art/wardens/dredge/dredge.glb tools/art1/grimble_clips.py tools/art1/skin_relax.py tools/stretch_check.gd
+ext/hatch-mask-polish-1111	PORT	3 commits ahead, 7 code/data files conflict: content/rules/boki_lines.json scripts/core/boki_lines.gd scripts/core/save.gd scripts/ui/boki_moves.gd scripts/ui/hatch.gd scripts/ui/kin_reveal.gd
+ext/hero-portraits-a-1114	INFLIGHT	own open PR #74
+ext/herovfx-mode-clash	PORT	61 commits ahead, 181 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/hires-splash-rotation	PORT	129 commits ahead, 118 code/data files conflict: art/portraits/archer_splash.jpg art/portraits/ashwick_splash.jpg art/portraits/bulwark_splash.jpg art/portraits/dolm_splash.jpg art/portraits/dredge_splash.jpg art/portraits/gunslinger_splash.jpg
+ext/hit-spark-targets	INFLIGHT	carried by open PR(s) #143,133,95
+ext/hitstop-parity	PORT	8 commits ahead, 12 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd scripts/arch/feel.gd scripts/arch/oomph.gd scripts/heroes/warden_clips.gd scripts/heroes/warden_glb.gd
+ext/hud-g-armor-1111	PORT	2 commits ahead, 4 code/data files conflict: scripts/ui/hud.gd scripts/ui/hud_plate.gd scripts/ui/hud_vitals.gd tools/hudref_check.gd
+ext/hud-ref-copy-2	PORT	2 commits ahead, 8 code/data files conflict: scripts/ui/armor_hud.gd scripts/ui/gear_panel.gd scripts/ui/grip_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_style.gd
+ext/hunter-first-hints	PORT	1 commits ahead, 17 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/hunter-loco-polish-1115	INFLIGHT	carried by open PR(s) #134
+ext/hunter-regen-meshy	PORT	4 commits ahead, 4 code/data files conflict: art/wardens/vex/IMPORT.md art/wardens/vex/vex_atlas.jpg art/wardens/vex/vex.glb tools/warden_glb_check.gd
+ext/hunter-revamp-af	PORT	7 commits ahead, 18 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/breaker_scan_albedo_key.jpg art/wardens/breaker/breaker_scan_normal.jpg art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder_atlas.jpg art/wardens/cinder/cinder_emit.jpg
+ext/hunter-revamp-go	PORT	5 commits ahead, 12 code/data files conflict: art/wardens/hem/hem_atlas.jpg art/wardens/hem/hem.glb art/wardens/hem/IMPORT.md art/wardens/kael/IMPORT.md art/wardens/kael/kael_atlas.jpg art/wardens/kael/kael_emit.jpg
+ext/hunters3d-0246	PORT	20 commits ahead, 31 code/data files conflict: art/wardens/cinder/cinder_atlas.jpg art/wardens/cinder/cinder_emit.jpg art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/dredge/dredge.glb art/wardens/hem/hem_atlas_1.jpg
+ext/hushwood-port	PORT	63 commits ahead, 120 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/idle-archer-rebased	PORT	2 commits ahead, 4 code/data files conflict: art/wardens/hem/hem.glb art/wardens/hem/IMPORT.md tools/art1/hem_clips.py tools/art1/posekit.py
+ext/idle-bulwark-rebased	PORT	binary breaker.glb conflict + 377-line warden_glb.gd conflict; redo on v95 breaker
+ext/idle-dredge-rebased	PORT	1 commits ahead, 3 code/data files conflict: art/wardens/dredge/dredge.glb tools/art1/grimble_clips.py tools/art1/posekit.py
+ext/idle-gunslinger-rebased	PORT	binary vex.glb conflict; idle pose must be redone on the v95 vex glb
+ext/idle-mage-rebased	MERGED	PR #164 (previous attempt)
+ext/idle-ostra	PORT	1 commits ahead, 4 code/data files conflict: art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb tools/art1/ostra_clips.py tools/clip_check.gd
+ext/idle-tender-rebased	PORT	1 commits ahead, 5 code/data files conflict: art/wardens/pip/pip.glb content/rules/warden_anim/pip.json scripts/heroes/warden_glb.gd tools/art1/posekit.py tools/pip_live_check.gd
+ext/idle-thief-rebased	PORT	1 commits ahead, 3 code/data files conflict: art/wardens/sable/sable.glb content/rules/warden_anim/sable.json tools/art1/posekit.py
+ext/impact-castlock-port	PORT	92 commits ahead, 92 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/impact-strike-port	PORT	90 commits ahead, 99 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/integ-1113-A1	PORT	33 commits ahead, 24 code/data files conflict: content/rules/camera.json content/rules/tips.json scripts/core/game.gd scripts/core/net.gd scripts/core/settings.gd scripts/home/base_tumble.gd
+ext/integ-1113-D2	PORT	53 commits ahead, 57 code/data files conflict: content/archetypes/gil.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/rimewright.json content/archetypes/tender.json content/sfx/README.md
+ext/integ-1113-D3	PORT	56 commits ahead, 54 code/data files conflict: content/archetypes/gil.json content/sfx/README.md content/vfx/gil.json README.md scripts/arch/hero_zones.gd scripts/arch/kits/gil_kit.gd
+ext/integ-ways-out-0245	PORT	32 commits ahead, 26 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/kael-black-red	PORT	3 commits ahead, 4 code/data files conflict: content/archetypes/juggernaut.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_chain.gd tools/hero_vfx_check.gd
+ext/kael-cancels-1111	PORT	11 commits ahead, 10 code/data files conflict: content/archetypes/juggernaut.json content/dash_flow/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd
+ext/kael-chainlunge-cleanup	PORT	9 commits ahead, 10 code/data files conflict: art/wardens/kael/kael.glb content/archetypes/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd
+ext/kael-drop-down	PORT	12 commits ahead, 8 code/data files conflict: content/archetypes/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd scripts/kin/kin_exec.gd
+ext/kael-lunge-length-rebased-rebased	PORT	9 commits ahead, 49 code/data files conflict: content/archetypes/juggernaut.json content/rules/class_unlock.json content/rules/dash_feel.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json
+ext/kael-owner-1111	PORT	7 commits ahead, 8 code/data files conflict: content/archetypes/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd scripts/kin/kin_exec.gd
+ext/kael-rmb-dash-turn	PORT	1 commits ahead, 3 code/data files conflict: content/archetypes/juggernaut.json scripts/arch/kits/juggernaut_kit.gd tools/zedran_feel_check.gd
+ext/kael-rmb-line-1111	PORT	2 commits ahead, 5 code/data files conflict: content/archetypes/juggernaut.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd tools/dancer_jug_check.gd
+ext/kael-rmb-unlock-rebased	PORT	1 commits ahead, 4 code/data files conflict: content/archetypes/juggernaut.json content/rules/tutorial.json scripts/arch/kits/juggernaut_kit.gd scripts/match/boki_rig.gd
+ext/kael-tap-ult-port	PORT	3 commits ahead, 132 code/data files conflict: content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gil.json content/archetypes/gunslinger.json
+ext/kin-type-trail	PORT	6 commits ahead, 3 code/data files conflict: scripts/kin/parts.gd scripts/match/capture.gd scripts/match/kin.gd
+ext/knock-moment	PORT	6 commits ahead, 3 code/data files conflict: scripts/match/juice.gd scripts/match/match.gd tools/kill_reset_check.gd
+ext/lace-playtest-1108	INFLIGHT	carried by open PR(s) #143,103
+ext/landing-recovery	PORT	2 commits ahead, 5 code/data files conflict: content/rules/hunter_move.json scripts/match/hunter.gd scripts/match/hunter_move.gd scripts/match/match.gd tools/move_feel_check.gd
+ext/levelup-clear-1111	INFLIGHT	carried by open PR(s) #104
+ext/main-checks-registry-b	PORT	2 commits ahead, 6 code/data files conflict: scripts/main.gd tools/drop_plan_check.gd tools/grammar_runtime_check.gd tools/health.py tools/home_build_check.gd tools/truce_check.gd
+ext/mantle-look-one-home	PORT	1 commits ahead, 3 code/data files conflict: content/rules/mantle_look.json scripts/match/mantle_look.gd tools/mantle_look_check.gd
+ext/mantle-port-a	INFLIGHT	own open PR #135
+ext/mantle-port-b	PORT	90 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/match-cam-wide-1112	PORT	17 commits ahead, 20 code/data files conflict: content/archetypes/mage.json content/archetypes/rimewright.json content/archetypes/tender.json content/archetypes/thief.json content/rules/camera.json scripts/arch/kits/mage_kit.gd
+ext/mc-integ-1112d	PORT	50 commits ahead, 86 code/data files conflict: art/kin/cindle/cindle.glb art/kin/wisplet/wisplet.glb art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb
+ext/meeko-loops-rebake	PORT	86 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/meeko-rmb-verify-rebased-rebased	PORT	2 commits ahead, 13 code/data files conflict: art/wardens/pip/IMPORT.md art/wardens/pip/pip.glb content/archetypes/tender.json content/dash_flow/tender.json content/rules/tuning.json content/rules/warden_anim/pip.json
+ext/meeko-root-rebased	PORT	31 commits ahead, 119 code/data files conflict: art/wardens/vex/vex.glb audio/pin_ult_nock.wav content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/gunslinger.json content/archetypes/tender.json
+ext/menus-more	PORT	6 commits ahead, 4 code/data files conflict: scripts/home/home.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/title_check.gd
+ext/merge-anim-1111-clips	MERGED	PR #164 (previous attempt)
+ext/merge-batch-15-1113	INFLIGHT	own open PR #62
+ext/merge-batch-19-1113	PORT	36 commits ahead, 141 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/merge-batch-20-1113	PORT	71 commits ahead, 55 code/data files conflict: content/archetypes/bulwark.json content/archetypes/juggernaut.json content/archetypes/mage.json content/archetypes/rimewright.json content/archetypes/tender.json content/archetypes/thief.json
+ext/merge-batch-24-1113	PORT	55 commits ahead, 20 code/data files conflict: content/archetypes/gil.json scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/heroes/warden_clips.gd scripts/kin/merge_kit.gd scripts/main.gd
+ext/merge-batch-25-1113	PORT	19 commits ahead, 17 code/data files conflict: content/archetypes/gil.json content/rules/class_unlock.json scripts/arch/arch_kit.gd scripts/arch/kits/gil_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/match/glide_lift.gd
+ext/merge-batch-6-1113	PORT	60 commits ahead, 43 code/data files conflict: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/archetypes/ostra.json content/archetypes/thief.json
+ext/merge-lane-anim-1115	INFLIGHT	own open PR #114
+ext/merge-lane-anim-1115-b	INFLIGHT	own open PR #115
+ext/merge-lane-anim-hard-1115	INFLIGHT	own open PR #121
+ext/merge-lane-anim-hard2-1115	INFLIGHT	own open PR #126
+ext/merge-lane-d2art-1114-b	INFLIGHT	own open PR #103
+ext/merge-lane-feelcombat-1115	INFLIGHT	own open PR #113
+ext/merge-lane-garden1-1114	INFLIGHT	own open PR #96
+ext/merge-lane-hunters2-1114-b	INFLIGHT	own open PR #100
+ext/merge-lane-hunters3-1114	INFLIGHT	own open PR #84
+ext/merge-lane-hunters4-1114	INFLIGHT	own open PR #95
+ext/merge-lane-hunters5-1114-b	INFLIGHT	own open PR #101
+ext/merge-lane-hunters8-1114	PATCHES_IN_MAIN	camera source_scale A/B (CAMERA_AB.md, camera_ab_shots.gd) is on main; PR #87 closed
+ext/merge-lane-misc2-1115	INFLIGHT	own open PR #119
+ext/merge-lane-misc2-1115-b	INFLIGHT	own open PR #122
+ext/merge-lane-misc3-1115	INFLIGHT	own open PR #120
+ext/merge-lane-misc3-1115-b	INFLIGHT	own open PR #123
+ext/merge-lane-uihud-1114	PORT	40 commits ahead, 4 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/ui/full_map.gd scripts/ui/hud.gd
+ext/merge-lane-uihud-1114-b	INFLIGHT	own open PR #104
+ext/merge-lane-vfx1-1114	INFLIGHT	own open PR #85
+ext/merge-lane-vfx3-1114-b	INFLIGHT	own open PR #106
+ext/merge-lane-vfxsfx1-1115	INFLIGHT	own open PR #116
+ext/merge-lane-vfxsfx2-1115	INFLIGHT	own open PR #111
+ext/misc-ready-integ	PORT	3 commits ahead, 13 code/data files conflict: art/portraits/archer.jpg art/portraits/dolm.jpg art/portraits/dredge.jpg art/portraits/juggernaut.jpg art/portraits/mage.jpg art/portraits/rimewright.jpg
+ext/modes-solos-1111	PORT	4 commits ahead, 8 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/heart.gd scripts/ui/lobby.gd scripts/ui/prematch_view.gd
+ext/momentum-1111	PORT	6 commits ahead, 5 code/data files conflict: content/archetypes/gil.json content/rules/hunter_move.json scripts/match/hunter.gd tools/gil_combo_check.gd tools/parity_reel.gd
+ext/move-feel-1111	PORT	8 commits ahead, 7 code/data files conflict: scripts/heroes/warden_clips.gd scripts/match/boki_rig.gd scripts/match/cam.gd scripts/match/hunter_anim.gd scripts/match/hunter.gd scripts/match/mantle_carry.gd
+ext/move-rule-guard-0246	PORT	85 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/move-speed-1111	INFLIGHT	carried by open PR(s) #122
+ext/neve-cancels-1111	PORT	3 commits ahead, 5 code/data files conflict: content/archetypes/rimewright.json scripts/arch/kits/care_look.gd scripts/arch/kits/rimewright_kit.gd tools/care_combo_check.gd tools/rimewright_anim_check.gd
+ext/no-dash-bursts-audit-rebased-rebased	PORT	5 commits ahead, 106 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/class_unlock.json
+ext/no-hardcoded-keys	INFLIGHT	carried by open PR(s) #143
+ext/no-natural-death-1108	PORT	2 commits ahead, 3 code/data files conflict: answer.md scripts/core/care.gd scripts/main.gd
+ext/no-reload-path	INFLIGHT	carried by open PR(s) #128
+ext/no-squad-hint-1111	INFLIGHT	carried by open PR(s) #123,120
+ext/online-dash-sweep	PORT	85 commits ahead, 62 code/data files conflict: content/archetypes/archer.json content/archetypes/dredge.json content/dash_flow/archer.json content/dash_flow/ashwick.json content/dash_flow/bulwark.json content/dash_flow/dolm.json
+ext/ostra-gait-rebased	PORT	2 commits ahead, 7 code/data files conflict: art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb docs/art/anim_audit/ostra.jpg tools/anim_audit.gd tools/anim_shots.gd tools/art1/ostra_clips.py
+ext/overlay-typed-calls	INFLIGHT	carried by open PR(s) #123,120
+ext/parity-albert-blow-stun	PORT	2 commits ahead, 7 code/data files conflict: content/archetypes/bulwark.json content/rules/warden_anim/breaker.json content/vfx/bulwark.json scripts/arch/kits/bulwark_kit.gd scripts/match/kmoves_pin.gd tools/archer_bulwark_combo_check.gd
+ext/parity-bulwark-guardcut	PORT	1 commits ahead, 9 code/data files conflict: content/archetypes/bulwark.json content/vfx/bulwark.json scripts/arch/kits/bjorn_fx.gd scripts/arch/kits/bulwark_kit.gd scripts/match/arena_demo.gd scripts/ui/hud.gd
+ext/parity-kael-clips	PORT	1 commits ahead, 8 code/data files conflict: art/wardens/kael/IMPORT.md art/wardens/kael/kael.glb content/rules/warden_anim/kael.json content/rules/warden_look.json scripts/heroes/warden_clips.gd scripts/heroes/warden_glb.gd
+ext/parity-neve-dart-burst	PORT	1 commits ahead, 6 code/data files conflict: content/archetypes/rimewright.json content/weapons/hoar_fan.json docs/parity_reel/README.md scripts/arch/kits/rimewright_kit.gd tools/care_combo_check.gd tools/rimewright_anim_check.gd
+ext/parity-pin-kael-drop	INFLIGHT	carried by open PR(s) #143
+ext/parity-rider-sweep-0246	PORT	101 commits ahead, 126 code/data files conflict: art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/parity-sable-cartwheel-curve	PORT	86 commits ahead, 93 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/parity-sable-e-range	INFLIGHT	carried by open PR(s) #143
+ext/parity-snowglide-rebased-rebased	PORT	1 commits ahead, 9 code/data files conflict: content/archetypes/archer.json content/archetypes/tender.json scripts/arch/kits/pin_spirit.gd scripts/arch/kits/tender_kit.gd scripts/core/settings.gd scripts/heroes/warden_clips.gd
+ext/parity-stranded-0246	PORT	100 commits ahead, 125 code/data files conflict: art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/parity-verify-0245-slice	PORT	33 commits ahead, 26 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/particle-budget	PORT	5 commits ahead, 6 code/data files conflict: scripts/core/settings.gd scripts/heroes/warden_glb.gd scripts/match/wisp_look.gd scripts/match/world.gd scripts/perf/particle_count.gd tools/perf_bench.gd
+ext/perf-owner-hw-rebased	PORT	57 commits ahead, 21 code/data files conflict: content/rules/tuning.json scripts/combat/kin_tactics.gd scripts/core/settings.gd scripts/match/boki_rig.gd scripts/match/bot.gd scripts/match/exits.gd
+ext/perf-train-0245-rebased	PORT	45 commits ahead, 21 code/data files conflict: content/rules/tuning.json scripts/combat/kin_tactics.gd scripts/core/settings.gd scripts/match/boki_rig.gd scripts/match/bot.gd scripts/match/exits.gd
+ext/physics-unify-1111	PORT	3 commits ahead, 3 code/data files conflict: content/rules/hunter_move.json scripts/match/hunter.gd scripts/match/match.gd
+ext/pick-relic-1111	PORT	34 commits ahead, 36 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/polish-panel-close	INFLIGHT	carried by open PR(s) #104
+ext/portraits-unified	PORT	1 commits ahead, 14 code/data files conflict: art/portraits/archer.jpg art/portraits/ashwick.jpg art/portraits/bulwark.jpg art/portraits/dolm.jpg art/portraits/dredge.jpg art/portraits/gunslinger.jpg
+ext/predictable-camps-1111	PORT	6 commits ahead, 12 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/match/lairs.gd scripts/match/match.gd scripts/match/world.gd scripts/ui/full_map.gd
+ext/prematch-safe-720	PORT	2 commits ahead, 3 code/data files conflict: scripts/ui/prematch_view.gd tools/prematch_check.gd tools/prematch_shots.gd
+ext/react-2-port	PORT	83 commits ahead, 83 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/recast-buffer-expired	PORT	1 commits ahead, 5 code/data files conflict: content/rules/tuning.json scripts/arch/arch_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/mage_kit.gd scripts/arch/kits/rimewright_kit.gd
+ext/recast-hud-cue	INFLIGHT	carried by open PR(s) #95
+ext/recast-marker-a	INFLIGHT	carried by open PR(s) #95
+ext/release-integ-0243-rebased-rebased	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/release-integ-0244-a4alt	PORT	6 commits ahead, 5 code/data files conflict: tools/clip_check.gd tools/crouch_check.gd tools/dash_flow_check.gd tools/dredge_combo_check.gd tools/new_player_flow_check.gd
+ext/remote-smooth-reds	PORT	2 commits ahead, 2 code/data files conflict: scripts/match/net_smooth.gd tools/remote_smooth_check.gd
+ext/reset-cue-rebased	PORT	3 commits ahead, 14 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md content/vfx/juggernaut.json scripts/arch/kits/archer_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/gunslinger_kit.gd
+ext/rimewright-skate-rebased	PORT	4 commits ahead, 4 code/data files conflict: art/wardens/claire/claire.glb tools/anim_audit.gd tools/anim_shots.gd tools/art1/glb_add_clips.py
+ext/sable-appeal4	PORT	13 commits ahead, 8 code/data files conflict: art/wardens/sable/IMPORT.md art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable.glb art/wardens/src/sable_v95.json content/rules/warden_anim/sable.json scripts/heroes/warden_glb.gd
+ext/sable-bola-instant-rebased	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/sable-marks-resets	INFLIGHT	carried by open PR(s) #95
+ext/scrapking-lmb-1111-clips	INFLIGHT	carried by open PR(s) #122
+ext/scrapking-lmb-clips	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/select-loading-1111	PORT	4 commits ahead, 5 code/data files conflict: scripts/ui/kit_card.gd scripts/ui/loading.gd scripts/ui/prematch_view.gd tools/prematch_check.gd tools/prematch_shots.gd
+ext/series-boki-1112	INFLIGHT	carried by open PR(s) #143
+ext/sfx-ability-ready	PORT	60 commits ahead, 181 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/sfx-beat-resync	PORT	84 commits ahead, 84 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/sfx-biome-beds	INFLIGHT	carried by open PR(s) #62
+ext/sfx-boki-ability-impacts	INFLIGHT	carried by open PR(s) #62
+ext/sfx-boki-state-cues	PORT	119 commits ahead, 282 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb art/kin/glomwort/glomwort.glb
+ext/sfx-boki-state-cues-wisp	PORT	58 commits ahead, 98 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/sfx-boki-steps	INFLIGHT	carried by open PR(s) #143,62
+ext/sfx-boki-types	INFLIGHT	carried by open PR(s) #143,133
+ext/sfx-boki-voices-3	PORT	60 commits ahead, 92 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/sfx-boki-wire	INFLIGHT	carried by open PR(s) #143,133,95
+ext/sfx-boon-cue	PORT	14 commits ahead, 21 code/data files conflict: content/maps/hollowcrown.json scripts/arch/kit_status.gd scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/sfx-camp-idle	PORT	14 commits ahead, 19 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/core/sfx.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/sfx-carry-cues	PORT	5 commits ahead, 13 code/data files conflict: content/sfx/README.md scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/settings.gd scripts/core/sfx.gd scripts/home/home.gd
+ext/sfx-coverage-world	INFLIGHT	carried by open PR(s) #62
+ext/sfx-creator-clans	PORT	10 commits ahead, 10 code/data files conflict: content/sfx/ui.json scripts/core/save.gd scripts/core/social.gd scripts/home/home.gd scripts/social/town.gd scripts/ui/hatch.gd
+ext/sfx-dash-per-hunter-rebased	INFLIGHT	carried by open PR(s) #143
+ext/sfx-downed-muffle	INFLIGHT	carried by open PR(s) #143,133,62
+ext/sfx-extract-cues	PORT	1 commits ahead, 3 code/data files conflict: scripts/main.gd scripts/match/exits.gd tools/sfx_set_check.gd
+ext/sfx-falloff-wide-cam	INFLIGHT	carried by open PR(s) #62
+ext/sfx-garden-games-3	PORT	5 commits ahead, 21 code/data files conflict: content/rules/garden_items.json content/rules/garden_prizes.json content/rules/garden_xp.json content/sfx/garden.json scripts/home/base_race.gd scripts/home/base_relay.gd
+ext/sfx-garden-zone-music	INFLIGHT	carried by open PR(s) #62
+ext/sfx-hatch	INFLIGHT	carried by open PR(s) #116
+ext/sfx-heartspark	PORT	1 commits ahead, 5 code/data files conflict: content/sfx/heart.json scripts/match/heart.gd scripts/match/heart_sfx.gd tools/gen_sfx_heart.py tools/heart_check.gd
+ext/sfx-held-fire-cadence	INFLIGHT	carried by open PR(s) #143,93,62
+ext/sfx-hunter-barks	INFLIGHT	carried by open PR(s) #143,93,62
+ext/sfx-hunter-foley	PORT	6 commits ahead, 7 code/data files conflict: scripts/core/hero_sfx.gd scripts/core/sfx.gd scripts/match/hunter.gd scripts/match/juice.gd tools/make_hollowcrown.py tools/match_audio_check.gd
+ext/sfx-hunter-wisp-hum	PORT	1 commits ahead, 8 code/data files conflict: audio/wisp_hum_end.wav audio/wisp_hum.wav content/rules/wisp_hum.json scripts/core/sfx.gd scripts/match/hunter_wisp.gd scripts/match/wisp_hum.gd
+ext/sfx-incoming-hit-dir	PORT	7 commits ahead, 7 code/data files conflict: scripts/core/sfx.gd scripts/core/sfx_voices.gd scripts/core/sfx_voices.gd.uid scripts/match/juice.gd scripts/match/match.gd scripts/match/music_dir.gd
+ext/sfx-interrupt-cut	PORT	2 commits ahead, 8 code/data files conflict: content/sfx/ui.json scripts/arch/kits/bjorn_ult.gd scripts/arch/kits/dolm_kit.gd scripts/arch/kits/dredge_kit.gd scripts/arch/kits/mage_kit.gd scripts/core/sfx.gd
+ext/sfx-kit-placeholders-2	INFLIGHT	carried by open PR(s) #62
+ext/sfx-legendary-presence	INFLIGHT	carried by open PR(s) #143,133,116
+ext/sfx-listener-hunter	PORT	1 commits ahead, 2 code/data files conflict: scripts/core/sfx.gd scripts/home/home.gd
+ext/sfx-loudness-0245	INFLIGHT	carried by open PR(s) #143,93
+ext/sfx-low-hp	INFLIGHT	carried by open PR(s) #143,133
+ext/sfx-low-hp-filter-rebased	PORT	3 commits ahead, 8 code/data files conflict: scripts/core/settings.gd scripts/core/sfx.gd scripts/match/music_dir.gd scripts/ui/hud.gd scripts/ui/low_hp_cue.gd scripts/ui/overlay.gd
+ext/sfx-match-shop	PORT	131 commits ahead, 110 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/sfx-mix-pass	INFLIGHT	carried by open PR(s) #143,62
+ext/sfx-mob-alert-rebased	INFLIGHT	carried by open PR(s) #95
+ext/sfx-mob-attacks	INFLIGHT	carried by open PR(s) #62
+ext/sfx-neve-skate	PORT	3 commits ahead, 6 code/data files conflict: content/archetypes/rimewright.json scripts/arch/kits/care_look.gd scripts/arch/kits/rimewright_kit.gd scripts/match/hunter.gd tools/care_combo_check.gd tools/rimewright_anim_check.gd
+ext/sfx-pick-taken	PORT	2 commits ahead, 8 code/data files conflict: scripts/home/hob_offer.gd scripts/home/home_classes.gd scripts/match/hunter.gd scripts/ui/hatch.gd scripts/ui/ui.gd tools/hatch_check.gd
+ext/sfx-rank-pick	INFLIGHT	carried by open PR(s) #143,93,62
+ext/sfx-ready-cues-summon	PORT	3 commits ahead, 7 code/data files conflict: content/sfx/ui.json scripts/core/game.gd scripts/core/net.gd scripts/ui/boki_hud.gd tools/gen_sfx_ui.py tools/perf_bench.gd
+ext/sfx-reverb-zones	INFLIGHT	carried by open PR(s) #143,133
+ext/sfx-sable-ring-loop	INFLIGHT	carried by open PR(s) #143,93
+ext/sfx-silence-audit	INFLIGHT	carried by open PR(s) #143
+ext/sfx-solos-quiet	PORT	7 commits ahead, 13 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/exits.gd scripts/match/heart.gd scripts/match/match.gd
+ext/sfx-steals	PORT	20 commits ahead, 22 code/data files conflict: audio/steal_lost.wav audio/steal_won.wav content/maps/hollowcrown.json scripts/core/net.gd scripts/core/sfx_kits.gd scripts/main.gd
+ext/sfx-steps-dirloops	PORT	6 commits ahead, 20 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb art/wardens/hem/hem.glb
+ext/sfx-step-surfaces-2x	INFLIGHT	carried by open PR(s) #143,93,62
+ext/sfx-stomp-1111	PORT	7 commits ahead, 8 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/hunter_wisp.gd scripts/match/life.gd scripts/match/match.gd
+ext/sfx-stomp-break	PORT	11 commits ahead, 8 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/hunter_wisp.gd scripts/match/life.gd scripts/match/match.gd
+ext/sfx-strike-resync	PORT	148 commits ahead, 255 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/sfx-summon-end	PORT	33 commits ahead, 23 code/data files conflict: content/rules/boki_summon.json content/sfx/boki.json scripts/core/game.gd scripts/core/net.gd scripts/kin/boki_wisp_look.gd scripts/match/bot_kin.gd
+ext/sfx-swim-ice-moves	PORT	143 commits ahead, 118 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/sfx-terrain-hazards	PORT	135 commits ahead, 109 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/sfx-utilities-2	PORT	11 commits ahead, 13 code/data files conflict: content/maps/hollowcrown.json scripts/arch/kits/ashwick_jet.gd scripts/combat/effects.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/match.gd
+ext/sfx-voice-cap	INFLIGHT	carried by open PR(s) #62
+ext/sfx-water	PORT	10 commits ahead, 9 code/data files conflict: scripts/core/hero_sfx.gd scripts/core/sfx.gd scripts/home/home_water.gd scripts/match/hunter.gd scripts/match/juice.gd scripts/match/kin.gd
+ext/sfx-wisp-proc	PORT	36 commits ahead, 36 code/data files conflict: audio/bk_caecilith_alert_1.wav audio/bk_caecilith_alert.wav audio/bk_caecilith_happy_1.wav audio/bk_caecilith_happy.wav audio/bk_caecilith_hurt_1.wav audio/bk_caecilith_hurt.wav
+ext/sfx-wisps	INFLIGHT	carried by open PR(s) #95
+ext/side-cue-telegraphs	INFLIGHT	carried by open PR(s) #143,133
+ext/skin-relax-four	PORT	3 commits ahead, 3 code/data files conflict: art/wardens/claire/claire.glb art/wardens/tarek/tarek.glb tools/stretch_check.gd
+ext/skin-relax-slice	PORT	4 commits ahead, 5 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb tools/stretch_check.gd
+ext/slam-follow-through	PORT	4 commits ahead, 5 code/data files conflict: content/rules/warden_anim/breaker.json content/rules/warden_anim/dredge.json content/rules/warden_anim/kael.json scripts/heroes/warden_clips.gd tools/clip_check.gd
+ext/soul-link-t4-rebased	PORT	38 commits ahead, 60 code/data files conflict: content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/spike-on-glidespike	PORT	60 commits ahead, 48 code/data files conflict: content/archetypes/dolm.json content/archetypes/dredge.json content/maps/arena.json content/rules/base_race.json content/rules/evo_paths.json content/rules/garden_items.json
+ext/spike-slam-rebased	PORT	32 commits ahead, 119 code/data files conflict: art/wardens/vex/vex.glb audio/pin_ult_nock.wav content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json
+ext/split-exits	PORT	1 commits ahead, 1 code/data files conflict: scripts/match/exits.gd
+ext/split-home-system	INFLIGHT	carried by open PR(s) #123,120
+ext/split-hunter	PORT	1 commits ahead, 6 code/data files conflict: scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/gil_kit.gd scripts/arch/kits/pin_draw.gd scripts/main.gd scripts/match/hunter.gd tools/venator_parity_check.gd
+ext/split-lairs	PORT	1 commits ahead, 1 code/data files conflict: scripts/match/lairs.gd
+ext/split-models-rebased	PORT	2 commits ahead, 105 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/class_unlock.json
+ext/split-rimewright-spear	PORT	1 commits ahead, 1 code/data files conflict: scripts/arch/kits/rimewright_kit.gd
+ext/split-ui	PORT	1 commits ahead, 36 code/data files conflict: scripts/home/farm_guide.gd scripts/home/hob_offer.gd scripts/home/home_black_market.gd scripts/home/home_classes.gd scripts/home/home_econ.gd scripts/home/home.gd
+ext/step-sounds-unified-rebased	PORT	6 commits ahead, 263 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/stretch-reds	PORT	4 commits ahead, 12 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/ostra/ostra.glb
+ext/stuck-integ-09e533a4	PORT	6 commits ahead, 11 code/data files conflict: content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json content/rules/warden_anim/pip.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json
+ext/stuck-integ-11014837	PORT	151 commits ahead, 160 code/data files conflict: art/wardens/sable/sable.glb art/wardens/tarek/IMPORT.md art/wardens/tarek/tarek.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/dolm.json
+ext/stuck-integ-42241ff1	PORT	141 commits ahead, 188 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/dolm.json
+ext/stuck-integ-5b12f708	INFLIGHT	carried by open PR(s) #143
+ext/stuck-integ-606e9a98	PORT	main deleted tools/receiver_cue_check.gd (622a26fed8, batch 26); re-home the receiver cue check
+ext/stuck-integ-7fc43430	INFLIGHT	carried by open PR(s) #143
+ext/stuck-integ-86b7d6eb	PORT	116 commits ahead, 177 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg art/wardens/tarek/IMPORT.md content/archetypes/archer.json content/archetypes/ashwick.json
+ext/stuck-integ-a6af81f7	PORT	63 commits ahead, 93 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/ryzz/ryzz.glb
+ext/stuck-integ-aeb8eb0f	PORT	28 commits ahead, 10 code/data files conflict: scripts/arch/kits/rimewright_kit.gd scripts/arch/kits/tender_kit.gd scripts/core/data.gd scripts/match/boss_models.gd scripts/match/hunter.gd scripts/ui/hud.gd
+ext/stuck-integ-b6204ee2	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/stuck-integ-b7a5717c	PORT	30 commits ahead, 114 code/data files conflict: art/wardens/vex/vex.glb audio/pin_ult_nock.wav content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/gunslinger.json content/archetypes/thief.json
+ext/stuck-integ-c2a69297	PORT	85 commits ahead, 103 code/data files conflict: art/portraits/thief.jpg art/portraits/thief_splash.jpg art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/IMPORT.md art/wardens/hem/hem.glb
+ext/stuck-integ-d2f36c16	PORT	30 commits ahead, 71 code/data files conflict: content/archetypes/juggernaut.json content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json
+ext/stuck-integ-d4379965	PORT	16 commits ahead, 113 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/dolm.json content/archetypes/dredge.json
+ext/stuck-integ-e2561d23	PORT	2 commits ahead, 17 code/data files conflict: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_nrm.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json
+ext/stuck-integ-f60f9dd7	PORT	30 commits ahead, 21 code/data files conflict: content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json content/rules/warden_anim/pip.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json
+ext/stuck-integ-f6bd2b7c	PORT	7 commits ahead, 15 code/data files conflict: content/archetypes/gunslinger.json content/rules/kit_parity.json scripts/arch/kits/bulwark_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/ui/map_detail.gd shaders/hero_vfx.gdshader
+ext/summon-clips-port	PORT	85 commits ahead, 83 code/data files conflict: answer.md art/wardens/breaker/breaker.glb art/wardens/breaker/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/claire/claire.glb
+ext/summon-kill-credit-port	PORT	96 commits ahead, 125 code/data files conflict: art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/summon-kill-credit-rebased	PORT	19 commits ahead, 109 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/boki_summon.json
+ext/summon-pve-rules-rebased	PORT	5 commits ahead, 12 code/data files conflict: content/rules/boki_summon.json scripts/core/game.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/kin_command.gd scripts/match/kin_follow.gd
+ext/supervive-impact	PORT	7 commits ahead, 12 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd scripts/arch/feel.gd scripts/arch/oomph.gd scripts/heroes/warden_clips.gd scripts/heroes/warden_glb.gd
+ext/sv-private-1112	PORT	10 commits ahead, 10 code/data files conflict: answer.md content/archetypes/dredge.json content/dash_flow/archer.json content/dash_flow/mage.json content/rules/camera.json content/rules/dash_feel.json
+ext/tarek-appeal	INFLIGHT	carried by open PR(s) #143
+ext/telegraph-drawn-hit-port	PORT	61 commits ahead, 106 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/tenzo-cone-grow	INFLIGHT	carried by open PR(s) #95
+ext/tenzo-playtest-1108	INFLIGHT	carried by open PR(s) #143,103
+ext/tenzo-ridge-bursts	PORT	12 commits ahead, 5 code/data files conflict: scripts/arch/kits/breah_slam.gd scripts/arch/kits/breah_spine.gd scripts/arch/kits/dolm_kit.gd tools/breah_combo_check.gd tools/breah_shots.gd
+ext/training-merge-1111	PORT	2 commits ahead, 8 code/data files conflict: scripts/home/home.gd scripts/main.gd scripts/match/arena.gd scripts/match/match.gd scripts/match/practice.gd scripts/ui/hud.gd
+ext/training-time-trial	PORT	4 commits ahead, 6 code/data files conflict: content/maps/arena.json scripts/core/save.gd scripts/match/arena.gd scripts/match/grounds.gd tools/grounds_check.gd tools/grounds_shots.gd
+ext/train-rank-controls	INFLIGHT	carried by open PR(s) #95
+ext/ttk-five-cast-share	PORT	1 commits ahead, 6 code/data files conflict: content/archetypes/archer.json content/archetypes/dredge.json content/archetypes/tender.json content/rules/kit_parity.json tools/archer_bulwark_combo_check.gd tools/ttk_check.gd
+ext/ttk-kael	PORT	1 commits ahead, 2 code/data files conflict: content/archetypes/juggernaut.json tools/dancer_jug_check.gd
+ext/tut-air-rings	PORT	2 commits ahead, 5 code/data files conflict: content/maps/hollowcrown.json scripts/match/air_rings.gd scripts/match/bot.gd tools/air_rings_check.gd tools/make_hollowcrown.py
+ext/tut-beat-retry	PORT	1 commits ahead, 5 code/data files conflict: content/rules/tutorial.json scripts/match/match.gd scripts/match/tutorial.gd tools/tutorial_retry_check.gd tools/tutorial_retry_check.gd.uid
+ext/tut-beat-retry-port	PORT	31 commits ahead, 36 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/tut-belt-hint-rebased	PORT	4 commits ahead, 64 code/data files conflict: art/wardens/vex/vex_atlas.jpg art/wardens/vex/vex.glb content/archetypes/bulwark.json content/archetypes/dredge.json content/archetypes/gunslinger.json content/archetypes/ostra.json
+ext/tut-context-tips-rebased	INFLIGHT	carried by open PR(s) #143
+ext/tut-creator-first	PORT	2 commits ahead, 1 code/data files conflict: scripts/ui/hatch.gd
+ext/tut-crouch-hint	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-dive-hint	PORT	1 commits ahead, 4 code/data files conflict: content/rules/hints.json scripts/match/glide_dive.gd scripts/match/match_hints.gd tools/first_hints_check.gd
+ext/tut-dodge-dummy-rebased	PORT	6 commits ahead, 15 code/data files conflict: content/maps/training.json content/rules/farm_builder.json content/rules/tutorial.json scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/mage_ult.gd scripts/home/hob_offer.gd
+ext/tut-drop-old-farm-steps	PORT	1 commits ahead, 12 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json scripts/home/farm_crop_guide.gd scripts/home/farm_guide.gd scripts/home/farm_task_guide.gd scripts/home/farm_tutorial.gd
+ext/tut-duel-hint-port	PORT	30 commits ahead, 37 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/dredge_kit.gd
+ext/tut-duel-ring-rebased	PORT	12 commits ahead, 15 code/data files conflict: export_presets.cfg scripts/core/net.gd scripts/core/settings.gd scripts/home/home.gd scripts/match/duel_ring.gd scripts/match/duel_ring.gd.uid
+ext/tut-event-hints-rebased	PORT	5 commits ahead, 8 code/data files conflict: content/rules/hints.json scripts/core/first_time_hint.gd scripts/core/net.gd scripts/match/match.gd scripts/match/match_hints.gd scripts/ui/hud.gd
+ext/tut-farm-old-steps-cut	PORT	1 commits ahead, 12 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json scripts/home/farm_crop_guide.gd scripts/home/farm_guide.gd scripts/home/farm_hob.gd scripts/home/farm_task_guide.gd
+ext/tut-first15-reshoot	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-first-camp	PORT	12 commits ahead, 19 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd
+ext/tut-first-capture	MERGED	PR #164 (this attempt, conflicts resolved by hand or merge policy)
+ext/tut-first-evolve	PORT	2 commits ahead, 2 code/data files conflict: scripts/core/evo.gd scripts/home/home.gd
+ext/tut-first-fuse	PORT	9 commits ahead, 49 code/data files conflict: content/archetypes/juggernaut.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/first_match_guide.json content/rules/tutorial.json
+ext/tut-first-games	PORT	8 commits ahead, 47 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/tut-first-games-port	PORT	62 commits ahead, 45 code/data files conflict: content/maps/arena.json content/rules/base_race.json content/rules/evo_paths.json content/rules/garden_items.json content/rules/garden_prizes.json content/rules/garden_seasons.json
+ext/tut-first-heartspark-rebased	PORT	6 commits ahead, 38 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/juggernaut_chain.gd
+ext/tut-first-hour-order	PORT	3 commits ahead, 5 code/data files conflict: content/rules/farm_tutorial.json scripts/home/home.gd scripts/ui/hatch.gd tools/class_unlock_check.gd tools/empty_shots.gd
+ext/tut-first-knock-tip	MERGED	PR #164 (previous attempt)
+ext/tut-first-proc	PORT	38 commits ahead, 61 code/data files conflict: content/rules/boki_summon.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json content/sfx/boki.json
+ext/tut-first-race-rebased	INFLIGHT	carried by open PR(s) #143
+ext/tut-first-recast	PORT	1 commits ahead, 4 code/data files conflict: content/rules/tips.json scripts/ui/hud.gd scripts/ui/loading.gd tools/tips_check.gd
+ext/tut-first-shop	PORT	131 commits ahead, 108 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/tut-first-tumble	INFLIGHT	carried by open PR(s) #143
+ext/tut-first-utility	PORT	7 commits ahead, 16 code/data files conflict: art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_nrm.jpg art/wardens/sable/sable_atlas.jpg content/maps/hollowcrown.json content/rules/hints.json scripts/core/first_time_hint.gd
+ext/tut-first-visitor	INFLIGHT	carried by open PR(s) #143
+ext/tut-first-wayseed	PORT	1 commits ahead, 3 code/data files conflict: content/rules/garden_zones.json scripts/home/hub_hints.gd scripts/match/pack.gd
+ext/tut-fresh-run	PORT	1 commits ahead, 3 code/data files conflict: content/rules/farm_tutorial.json tools/new_player_flow_check.gd tools/tutorial_hud_check.gd
+ext/tut-garden-first-day-rebased	PORT	1 commits ahead, 16 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb scripts/core/care.gd scripts/core/evo.gd
+ext/tut-garden-no-gather	PORT	1 commits ahead, 13 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json scripts/home/farm_crop_guide.gd scripts/home/farm_guide.gd scripts/home/farm_task_guide.gd scripts/home/farm_tutorial.gd
+ext/tut-glide-double-press	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-hatch-beat	INFLIGHT	carried by open PR(s) #143
+ext/tut-hazard-hint	PORT	2 commits ahead, 2 code/data files conflict: content/maps/hollowcrown.json tools/make_hollowcrown.py
+ext/tut-hints-blight-camp-box	PORT	3 commits ahead, 262 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/tut-hot-zone-line	PORT	1 commits ahead, 4 code/data files conflict: content/rules/hot_zone.json scripts/match/hot_zone.gd scripts/ui/full_map.gd tools/hot_zone_check.gd
+ext/tut-hud-pointers	PORT	3 commits ahead, 11 code/data files conflict: scripts/ui/armor_hud.gd scripts/ui/gear_panel.gd scripts/ui/grip_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_style.gd
+ext/tut-hud-term-hints	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-keycap-audit	PORT	1 commits ahead, 9 code/data files conflict: content/archetypes/juggernaut.json content/archetypes/thief.json content/rules/farm_tutorial.json scripts/home/farm_tutorial.gd scripts/match/boki_chatter.gd scripts/match/match.gd
+ext/tut-last-hit-xp	PORT	2 commits ahead, 3 code/data files conflict: scripts/core/net.gd scripts/match/mob.gd tools/xp_share_check.gd
+ext/tut-lead-swap-hint	PORT	11 commits ahead, 5 code/data files conflict: scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/settings.gd scripts/match/match.gd scripts/ui/hud.gd
+ext/tut-live-keys	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-no-ripe-timer-1111	PORT	31 commits ahead, 33 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/tutorial-banner-1111	PORT	31 commits ahead, 36 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json content/sfx/ui.json scripts/arch/kits/care_look.gd
+ext/tutorial-beats-5-6-rebased-rebased	PORT	16 commits ahead, 25 code/data files conflict: content/rules/farm_tutorial.json content/rules/tuning.json content/rules/tutorial.json scripts/core/care.gd scripts/core/save.gd scripts/home/farm_spotlight.gd
+ext/tut-recast-hint	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-retry-port	PORT	32 commits ahead, 35 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/tut-revive-hint	PORT	1 commits ahead, 5 code/data files conflict: content/rules/hints.json scripts/core/first_time_hint.gd scripts/match/match_hints.gd scripts/ui/downed_marks.gd tools/first_hints_check.gd
+ext/tut-rocket-hint	PORT	1 commits ahead, 3 code/data files conflict: scripts/match/drop_squad.gd scripts/match/match.gd tools/drop_rocket_check.gd
+ext/tut-seat-grace-hint	PORT	12 commits ahead, 69 code/data files conflict: art/wardens/vex/vex_atlas.jpg art/wardens/vex/vex.glb briefs/specs/LIMITED_WAY_OUTS.md content/archetypes/bulwark.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/tut-solo-words	PORT	11 commits ahead, 27 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/data.gd scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/net.gd
+ext/tut-start-here-rebased-rebased	PORT	5 commits ahead, 3 code/data files conflict: scripts/ui/hunter_picker.gd tools/prematch_check.gd tools/prematch_shots.gd
+ext/tut-station-goals-rebased	PORT	4 commits ahead, 14 code/data files conflict: content/rules/farm_builder.json content/rules/tutorial.json scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/mage_ult.gd scripts/home/hob_offer.gd scripts/home/home.gd
+ext/tut-stomp-hints	PORT	17 commits ahead, 32 code/data files conflict: content/maps/hollowcrown.json content/rules/first_match_guide.json scripts/core/data.gd scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/net.gd
+ext/tut-summon-killed	PORT	4 commits ahead, 13 code/data files conflict: content/rules/boki_summon.json scripts/core/game.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/kin_command.gd scripts/match/kin_follow.gd
+ext/tut-summon-pad	PORT	87 commits ahead, 126 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/tut-summon-station	PORT	5 commits ahead, 5 code/data files conflict: content/maps/training.json scripts/match/arena.gd scripts/match/duel.gd scripts/ui/overlay.gd tools/arena_check.gd
+ext/tut-wall-kick-hint	PORT	1 commits ahead, 4 code/data files conflict: content/rules/hints.json scripts/core/first_time_hint.gd scripts/match/match_hints.gd tools/first_hints_check.gd
+ext/tut-ways-out	PORT	3 commits ahead, 5 code/data files conflict: content/rules/hints.json scripts/core/first_time_hint.gd scripts/match/match_hints.gd tools/first_time_hint_check.gd tools/first_time_hint_check.gd.uid
+ext/tut-wide-cam	PORT	6 commits ahead, 2 code/data files conflict: scripts/match/tutorial.gd tools/tutorial_hud_check.gd
+ext/tut-wisp-beats	PORT	6 commits ahead, 16 code/data files conflict: content/rules/boki_summon.json content/rules/tutorial.json scripts/core/game.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/kin_command.gd
+ext/tut-words-page-rebased	INFLIGHT	carried by open PR(s) #143,91
+ext/tut-xp-share	PORT	2 commits ahead, 4 code/data files conflict: scripts/core/net.gd scripts/core/save.gd scripts/match/match.gd scripts/match/xp_hints.gd
+ext/tut-zoom-hint	PORT	3 commits ahead, 6 code/data files conflict: scripts/match/cam.gd scripts/match/cam_wheel.gd scripts/match/match.gd scripts/ui/results.gd tools/cam_framing_check.gd tools/wheel_zoom_check.gd
+ext/ui-ability-text-one	PORT	1 commits ahead, 18 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/ui-aspect-sweep	PORT	125 commits ahead, 108 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-audio-buses	PORT	1 commits ahead, 3 code/data files conflict: scripts/core/settings.gd scripts/core/sfx.gd tools/uipolish_check.gd
+ext/ui-boki-box-carry	PORT	136 commits ahead, 106 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-boki-box-hazard	PORT	7 commits ahead, 5 code/data files conflict: scripts/core/game.gd scripts/core/key_migrate.gd scripts/core/settings.gd scripts/match/terrain_hazards.gd scripts/ui/hud.gd
+ext/ui-boki-next-form	PORT	5 commits ahead, 59 code/data files conflict: content/kin_v2/basaltoad.json content/kin_v2/caecilith.json content/kin_v2/cairnback.json content/kin_v2/casquebill.json content/kin_v2/cindowary.json content/kin_v2/duskapi.json
+ext/ui-bonus-column	PORT	3 commits ahead, 9 code/data files conflict: scripts/ui/armor_hud.gd scripts/ui/gear_panel.gd scripts/ui/grip_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_style.gd
+ext/ui-declutter-1111	PORT	2 commits ahead, 22 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/gil_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/arch/kits/mage_kit.gd
+ext/ui-expedition-first	PORT	2 commits ahead, 2 code/data files conflict: scripts/home/home.gd scripts/home/hunter_pick_row.gd
+ext/ui-extract-widget	INFLIGHT	carried by open PR(s) #95
+ext/ui-first15-leftovers	PORT	2 commits ahead, 4 code/data files conflict: scripts/core/save.gd scripts/ui/hatch.gd scripts/ui/hud_vitals.gd tools/level_hud_check.gd
+ext/ui-font-wght-tag	PORT	3 commits ahead, 3 code/data files conflict: scripts/ui/squad_frames.gd scripts/ui/title.gd tools/uipolish_check.gd
+ext/ui-gear-reveal	INFLIGHT	carried by open PR(s) #95
+ext/ui-glossary-pass	INFLIGHT	carried by open PR(s) #104
+ext/ui-hudref-verify	PORT	5 commits ahead, 8 code/data files conflict: scripts/ui/armor_hud.gd scripts/ui/gear_panel.gd scripts/ui/grip_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_style.gd
+ext/ui-hud-reveal-1110	PORT	4 commits ahead, 12 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/core/settings.gd scripts/match/kin_follow.gd scripts/match/kin.gd scripts/match/kin_summon.gd
+ext/ui-hud-scale	PORT	3 commits ahead, 9 code/data files conflict: scripts/core/settings.gd scripts/ui/heart_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_vitals.gd scripts/ui/overlay.gd
+ext/ui-interact-port	PORT	130 commits ahead, 117 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-inventory-pass	INFLIGHT	carried by open PR(s) #104
+ext/ui-knock-feed	INFLIGHT	carried by open PR(s) #104
+ext/ui-level-gap	PORT	16 commits ahead, 17 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/main.gd scripts/match/drop_feel.gd scripts/match/drop_launch.gd scripts/match/drop_squad.gd
+ext/ui-loading-bar-steady	PORT	59 commits ahead, 99 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/ui-loot-compare	PORT	129 commits ahead, 106 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-mode-cards	PORT	9 commits ahead, 8 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/heart.gd scripts/ui/lobby.gd scripts/ui/prematch_view.gd
+ext/ui-next-form-port	PORT	129 commits ahead, 55 code/data files conflict: content/kin_v2/caecilith.json content/kin_v2/duskapi.json content/kin_v2/gloamshell.json content/kin_v2/umbrathere.json content/rules/merge_forms.json scripts/arch/arch_kit.gd
+ext/ui-overhead-ref	PORT	5 commits ahead, 10 code/data files conflict: scripts/ui/armor_hud.gd scripts/ui/gear_panel.gd scripts/ui/grip_hud.gd scripts/ui/hud.gd scripts/ui/hud_panels.gd scripts/ui/hud_plate.gd
+ext/ui-plate-status-row	PORT	4 commits ahead, 13 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/arch/kits/mage_kit.gd scripts/arch/kits/rimewright_kit.gd
+ext/ui-portal-boki-card	PORT	3 commits ahead, 8 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/home/home.gd scripts/match/kin_follow.gd scripts/match/kin.gd scripts/ui/prematch_view.gd
+ext/ui-pro-1111	PORT	15 commits ahead, 14 code/data files conflict: scripts/combat/ability_fx.gd scripts/home/home_classes.gd scripts/match/first_match_guide.gd scripts/match/fx.gd scripts/ui/heart_hud.gd scripts/ui/hud.gd
+ext/ui-ride-pick	PORT	3 commits ahead, 8 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/home/home.gd scripts/match/kin_follow.gd scripts/match/kin.gd scripts/ui/prematch_view.gd
+ext/ui-safe-area-one	PORT	3 commits ahead, 7 code/data files conflict: scripts/ui/alive_counter.gd scripts/ui/hud.gd scripts/ui/prematch_view.gd scripts/ui/ways_out_hud.gd tools/hudref_check.gd tools/prematch_check.gd
+ext/ui-self-cc-timer	INFLIGHT	carried by open PR(s) #104
+ext/ui-settings-trim	PORT	8 commits ahead, 4 code/data files conflict: scripts/home/home.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/title_check.gd
+ext/ui-simplify-1111	PORT	7 commits ahead, 15 code/data files conflict: scripts/combat/ability_fx.gd scripts/home/home_black_market.gd scripts/home/home_classes.gd scripts/home/home_econ.gd scripts/home/home.gd scripts/match/fx.gd
+ext/ui-solos-hud	PORT	10 commits ahead, 20 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/exits.gd scripts/match/heart.gd scripts/match/life.gd
+ext/ui-squad-killer	PORT	1 commits ahead, 2 code/data files conflict: scripts/ui/downed_marks.gd scripts/ui/squad_frames.gd
+ext/ui-stale-text-pass	INFLIGHT	carried by open PR(s) #104
+ext/ui-start-here-port	MERGED	PR #164 (previous attempt)
+ext/ui-stolen-wisps	PORT	5 commits ahead, 11 code/data files conflict: content/rules/boki_summon.json scripts/core/net.gd scripts/match/hunter.gd scripts/match/kin_command.gd scripts/match/kin.gd scripts/match/kin_net.gd
+ext/ui-stomp-picker	PORT	5 commits ahead, 7 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/life.gd scripts/match/match.gd tools/stomp_check.gd
+ext/ui-stomp-ring	PORT	9 commits ahead, 10 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/life.gd scripts/match/match.gd scripts/ui/downed_marks.gd
+ext/ui-stomp-state	PORT	5 commits ahead, 9 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/life.gd scripts/match/match.gd scripts/ui/hud.gd
+ext/ui-summon-card	PORT	16 commits ahead, 109 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/boki_summon.json
+ext/ui-tab-board-stats	INFLIGHT	carried by open PR(s) #104
+ext/ui-tab-scoreboard	INFLIGHT	carried by open PR(s) #104
+ext/ui-text-chat-rebased	PORT	3 commits ahead, 13 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/core/settings.gd scripts/match/kin_follow.gd scripts/match/kin.gd scripts/match/kin_summon.gd
+ext/ui-tooltip-from-data	PORT	2 commits ahead, 20 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gil.json
+ext/ui-trios-only-text	PORT	2 commits ahead, 5 code/data files conflict: scripts/home/home.gd scripts/main.gd scripts/match/match.gd scripts/match/wide_layout.gd scripts/ui/hud.gd
+ext/ui-void-masks-v3	PORT	4 commits ahead, 4 code/data files conflict: scripts/ui/hud_style.gd scripts/ui/kin_reveal.gd scripts/ui/ui_theme.gd scripts/ui/ui_torn.gd
+ext/ui-w0246-boki-reds	PORT	125 commits ahead, 106 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-w0246-layout-reds	PORT	128 commits ahead, 107 code/data files conflict: content/archetypes/dolm.json content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/boki_summon.json content/rules/first_match_guide.json content/rules/tuning.json
+ext/ui-waystone-keys	INFLIGHT	carried by open PR(s) #96
+ext/ui-zone-next	PORT	9 commits ahead, 10 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/heart.gd scripts/ui/heart_hud.gd scripts/ui/lobby.gd
+ext/ult-ranks-rebased-rebased	PORT	5 commits ahead, 263 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json
+ext/utility-parity-0246	PORT	78 commits ahead, 109 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/util-tonic-lamp-rebased	PORT	11 commits ahead, 23 code/data files conflict: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd scripts/combat/effects.gd scripts/combat/verbs.gd
+ext/verify-solos-pacing	PORT	8 commits ahead, 8 code/data files conflict: content/maps/hollowcrown.json scripts/core/data.gd scripts/home/home.gd scripts/match/heart.gd scripts/ui/lobby.gd scripts/ui/prematch_view.gd
+ext/verify-stomp-break-sweep	PORT	8 commits ahead, 8 code/data files conflict: scripts/core/net.gd scripts/main.gd scripts/match/hunter_anim.gd scripts/match/life.gd scripts/match/match.gd tools/dash_flow_check.gd
+ext/verify-ttk-0246	PORT	85 commits ahead, 93 code/data files conflict: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/dash_flow/archer.json content/dash_flow/ashwick.json
+ext/verify-tut-starters-0246	PORT	32 commits ahead, 35 code/data files conflict: content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tips.json content/rules/tutorial.json scripts/arch/kits/care_look.gd scripts/arch/kits/gunslinger_kit.gd
+ext/verify-w0246-audio	PORT	64 commits ahead, 182 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/vex-body7-1111	PORT	1 commits ahead, 4 code/data files conflict: art/wardens/src/vex_v95.json art/wardens/vex/IMPORT.md art/wardens/vex/vex_atlas.jpg art/wardens/vex/vex.glb
+ext/vex-dash-charge-port	PORT	86 commits ahead, 95 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/vex-greenfire-1108	PORT	2 commits ahead, 3 code/data files conflict: content/archetypes/gunslinger.json scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/gunslinger_ult.gd
+ext/vex-yawlock-1109-2248	INFLIGHT	carried by open PR(s) #137
+ext/vfx-air-rings-read	PORT	9 commits ahead, 2 code/data files conflict: scripts/match/air_rings.gd tools/air_rings_check.gd
+ext/vfx-albert-ivory-arcs	INFLIGHT	carried by open PR(s) #143
+ext/vfx-albert-slab	INFLIGHT	carried by open PR(s) #143,106
+ext/vfx-archer-strips	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/vfx-armour-break	INFLIGHT	carried by open PR(s) #143,133,106
+ext/vfx-carry-wisps	PORT	62 commits ahead, 102 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/vfx-cinder-ignite-orb	PORT	2 commits ahead, 4 code/data files conflict: content/archetypes/ashwick.json scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/ld_fx.gd tools/ashwick_combo_check.gd
+ext/vfx-colour-audit	PORT	3 commits ahead, 22 code/data files conflict: content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/tender.json content/archetypes/thief.json
+ext/vfx-dash-no-rings	PORT	84 commits ahead, 92 code/data files conflict: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json
+ext/vfx-dolm-shots	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/vfx-dredge	INFLIGHT	carried by open PR(s) #143,133
+ext/vfx-fusion-event	INFLIGHT	carried by open PR(s) #143,133,95
+ext/vfx-gil-colour	PORT	2 commits ahead, 7 code/data files conflict: content/archetypes/gil.json content/vfx/gil.json scripts/arch/kits/gil_kit.gd scripts/match/hunter.gd tools/gil_kit_check.gd tools/hero_vfx_check.gd
+ext/vfx-grimble-data	PORT	74 commits ahead, 181 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/vfx-grimble-fist-port	PORT	74 commits ahead, 181 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/vfx-ground-ring-hitbox	INFLIGHT	carried by open PR(s) #133
+ext/vfx-gunslinger-strips	MERGED	PR #164 (previous attempt)
+ext/vfx-kael-hold-arc	PORT	12 commits ahead, 9 code/data files conflict: content/archetypes/juggernaut.json content/rules/kit_parity.json content/rules/warden_anim/kael.json content/vfx/juggernaut.json scripts/arch/kits/juggernaut_kit.gd scripts/kin/kin_exec.gd
+ext/vfx-kael-kit	PORT	3 commits ahead, 3 code/data files conflict: content/vfx/juggernaut.json scripts/arch/kits/juggernaut_drop.gd scripts/arch/kits/juggernaut_kit.gd
+ext/vfx-kael-smash-lane-on-slam-lane	INFLIGHT	carried by open PR(s) #143
+ext/vfx-lace-spirit-walk-on-lace	INFLIGHT	carried by open PR(s) #133
+ext/vfx-last-hit-colour	PORT	8 commits ahead, 3 code/data files conflict: scripts/core/settings.gd scripts/match/juice.gd scripts/ui/hud.gd
+ext/vfx-lowpreset-read	PORT	10 commits ahead, 13 code/data files conflict: content/vfx/archer.json content/vfx/ashwick.json content/vfx/juggernaut.json content/vfx/rimewright.json scripts/core/settings.gd scripts/heroes/warden_glb.gd
+ext/vfx-mage-strips	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/vfx-meeko-hit-hearth	PORT	8 commits ahead, 24 code/data files conflict: content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/tender.json content/archetypes/thief.json
+ext/vfx-meeko-kindle	PORT	2 commits ahead, 3 code/data files conflict: scripts/match/match.gd tools/care_combo_check.gd tools/vfx_reel/tender.gd
+ext/vfx-meeko-kindle-numbers	PORT	4 commits ahead, 5 code/data files conflict: scripts/arch/arch_kit.gd scripts/arch/kits/tender_kit.gd scripts/match/fx.gd scripts/match/match.gd tools/care_combo_check.gd
+ext/vfx-meeko-palette	PORT	5 commits ahead, 25 code/data files conflict: content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/tender.json content/archetypes/thief.json
+ext/vfx-meeko-weight-rebased-rebased	PORT	36 commits ahead, 118 code/data files conflict: art/wardens/vex/vex.glb audio/pin_ult_nock.wav content/archetypes/archer.json content/archetypes/bulwark.json content/archetypes/gunslinger.json content/archetypes/thief.json
+ext/vfx-mob-telegraphs	PORT	main deleted docs/MOB_TELLS.md and tools/mob_tell_check.gd (a592adeb38); re-home the telegraph check
+ext/vfx-motley-data	INFLIGHT	carried by open PR(s) #143
+ext/vfx-motley-kit	PORT	2 commits ahead, 6 code/data files conflict: content/vfx/ostra.json content/weapons/tether_lantern.json scripts/arch/hero_zones.gd scripts/arch/kits/kit_looks.gd scripts/arch/kits/ostra_kit.gd tools/ostra_combo_check.gd
+ext/vfx-motley-port	PORT	98 commits ahead, 128 code/data files conflict: art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip.glb content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json
+ext/vfx-neve-rimelock-area	INFLIGHT	carried by open PR(s) #143
+ext/vfx-origin-v2-rebased	PORT	18 commits ahead, 33 code/data files conflict: content/archetypes/thief.json content/vfx/dolm.json content/vfx/dredge.json content/vfx/rimewright.json content/weapons/shotgun.json scripts/arch/arch_kit.gd
+ext/vfx-pass	PORT	15 commits ahead, 29 code/data files conflict: content/archetypes/thief.json content/vfx/dolm.json content/vfx/dredge.json content/vfx/rimewright.json content/weapons/shotgun.json scripts/arch/kits/bjorn_fx.gd
+ext/vfx-pass-triage	PORT	10 commits ahead, 26 code/data files conflict: content/archetypes/gunslinger.json content/archetypes/ostra.json content/vfx/dolm.json content/vfx/gunslinger.json content/vfx/ostra.json content/weapons/quill_rifle.json
+ext/vfx-quality-motley	PORT	2 commits ahead, 5 code/data files conflict: content/vfx/ostra.json content/weapons/tether_lantern.json scripts/arch/kits/kit_looks.gd scripts/arch/kits/ostra_kit.gd tools/ostra_combo_check.gd
+ext/vfx-spitter-tell	PORT	5 commits ahead, 133 code/data files conflict: content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gil.json content/archetypes/gunslinger.json
+ext/vfx-stolen-wisps-rebased	PORT	1 commits ahead, 4 code/data files conflict: scripts/core/game.gd scripts/core/net.gd scripts/ui/title.gd tools/perf_bench.gd
+ext/vfx-stomp	PORT	12 commits ahead, 12 code/data files conflict: content/rules/wisp_looks.json scripts/core/net.gd scripts/main.gd scripts/match/fx.gd scripts/match/hunter_anim.gd scripts/match/hunter.gd
+ext/vfx-strips-tender	PROOF	orphan proof-shot/clips branch, no merge base (not for merge)
+ext/vfx-summon-ring	PORT	37 commits ahead, 23 code/data files conflict: content/rules/boki_summon.json content/sfx/boki.json scripts/core/game.gd scripts/core/net.gd scripts/kin/boki_wisp_look.gd scripts/match/bot_kin.gd
+ext/vfx-telegraph-timing-rebased	PORT	19 commits ahead, 115 code/data files conflict: art/wardens/breaker/IMPORT.md art/wardens/ryzz/ryzz_atlas.jpg art/wardens/sable/sable_atlas.jpg content/archetypes/archer.json content/archetypes/dolm.json content/archetypes/dredge.json
+ext/vfx-tenzo-data	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/vfx-tenzo-punch-hold	PORT	64 commits ahead, 184 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/vfx-utilities-2	PORT	9 commits ahead, 7 code/data files conflict: content/maps/hollowcrown.json scripts/core/net.gd scripts/match/hero_vfx.gd scripts/match/match.gd scripts/match/utility_use.gd tools/box_revive_check.gd
+ext/vfx-utility-read	PORT	10 commits ahead, 17 code/data files conflict: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd scripts/combat/effects.gd scripts/core/net.gd
+ext/vfx-vex-kit	PORT	7 commits ahead, 20 code/data files conflict: art/wardens/vex/vex.glb content/archetypes/gunslinger.json content/dash_flow/gunslinger.json content/rules/tuning.json content/vfx/gunslinger.json scripts/arch/kits/gunslinger_kit.gd
+ext/vfx-vex-precast-slab	INFLIGHT	carried by open PR(s) #133
+ext/vfx-vex-tracer	PORT	3 commits ahead, 5 code/data files conflict: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/vv_fx.gd shaders/vv_fx.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+ext/vfx-vex-tracer-0246	PORT	61 commits ahead, 185 code/data files conflict: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb audio/bk_caecilith_alert_1.wav
+ext/vfx-vex-tracer-strips	PORT	4 commits ahead, 5 code/data files conflict: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/vv_fx.gd shaders/vv_fx.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+ext/w0246-misc	PORT	57 commits ahead, 98 code/data files conflict: art/kin/burrlet/burrlet.glb art/kin/cairnback/cairnback_cairnback_atlas.webp art/kin/cairnback/cairnback.glb art/kin/cindle/cindle.glb art/kin/glintmole/glintmole.glb art/kin/gloamshell/gloamshell.glb
+ext/wisp-gpu-ab-rebased	PORT	40 commits ahead, 60 code/data files conflict: content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/wisp-look-1112	NOOP	no non-merge commits outside HEAD (merge-only bundle)
+ext/wisp-merge-from-wisp-rebased	PORT	9 commits ahead, 50 code/data files conflict: content/archetypes/juggernaut.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/wisp-passive-stack-rebased	PORT	18 commits ahead, 110 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/maps/arena.json content/rules/boki_summon.json
+ext/wisp-summon-key-c	PORT	15 commits ahead, 44 code/data files conflict: content/gear/gust_fan.json content/gear/hover.json content/gear/rocket.json content/gear/skyhook.json content/rules/boki_summon.json content/rules/farm_tutorial.json
+ext/wisp-summon-leash-rebased	PORT	17 commits ahead, 50 code/data files conflict: content/archetypes/juggernaut.json content/rules/boki_summon.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json
+ext/wisp-summon-net-rebased	PORT	12 commits ahead, 48 code/data files conflict: content/archetypes/juggernaut.json content/rules/class_unlock.json content/rules/farm_builder.json content/rules/farm_tutorial.json content/rules/tutorial.json content/rules/warden_anim/cinder.json
+ext/women-body-1111	PORT	2 commits ahead, 15 code/data files conflict: art/wardens/cinder/cinder.glb art/wardens/cinder/IMPORT.md art/wardens/hem/hem_atlas_1.jpg art/wardens/hem/hem.glb art/wardens/hem/IMPORT.md art/wardens/sable/IMPORT.md
