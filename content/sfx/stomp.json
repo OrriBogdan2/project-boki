@@ -1,0 +1,7 @@
+{
+ "group": "stomp",
+ "name": "Stomp",
+ "script": "tools/gen_sfx_stomp.py",
+ "sounds": {"stomp_crack": "impact", "stomp_relief": "cast"},
+ "reach": {"stomp_crack": 30}
+}
