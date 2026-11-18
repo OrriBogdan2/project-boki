@@ -70,7 +70,7 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 150)      # shrinks on a short window; the list below never leaves it
+	lt.custom_minimum_size = Vector2(500, 90 if Overlay.admin_allowed() else 150)      # shrinks on a short window (and gives its room to the owner's Test Zone row); the list below never leaves it
 	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
@@ -87,6 +87,8 @@ func _build_ui() -> void:
 	var items: Array = []
 	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if Overlay.admin_allowed():
+		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
