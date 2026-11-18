@@ -140,7 +140,8 @@ static func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 		var off := clips.act_w <= 0.001 and clips.up_w <= 0.001
 		return off and (st == "" or clips.glide_w >= 0.999 and clips.air_w >= 0.999)
 	var mv: Dictionary = dd.get("kmoves", {}).get(st, {})
-	if float(mv.get("cut", 1e9)) <= SOURCE_FRAME:
+	# (a move shorter than one source frame, cut or clip, is over and fading back before the window closes)
+	if float(mv.get("cut", 1e9)) <= SOURCE_FRAME or (mv.has("clip") and clips.move_len(mv) <= SOURCE_FRAME):
 		return true
 	var clips_of: Array = [_clip_of(dd, st), mv.get("alt", "")]
 	var on_up: bool = clips.up_w >= 0.999 and absf(clips.xf_u - clips.chan_u) < 0.001 and clips.cur_u in clips_of
