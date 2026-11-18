@@ -22,6 +22,7 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var flash_tint := Color.WHITE   # the hit flash's colour (a kit sets it with the hit; white again once the flash ends)
 var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
@@ -386,11 +387,11 @@ const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
-## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
-## else the DoT tint (DotLook).
+## Tints the body: the hit flash (white or flash_tint; the shell's cyan while shell_t runs), else the wash
+## (Spirit Walk), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
-	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
+	var fc := SHELL_FLASH if shell_t > 0.0 else flash_tint
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col
@@ -423,3 +424,5 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))
+	if flash_t <= 0.0:
+		flash_tint = Color.WHITE
