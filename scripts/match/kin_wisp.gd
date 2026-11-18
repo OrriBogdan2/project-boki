@@ -15,8 +15,8 @@ const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow e
 
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
-## setting. The tutorial follows it too: with wisps on it teaches the wisp steps instead of the walking
-## Boki's orders (TutorialWisp).
+## setting. In the tutorial the setting rules too: with wisps its steps teach the wisp, summon, pack and steal
+## (TutorialWisp, TutorialSummon), without them the walking Boki's orders.
 static func mode(m: Node) -> bool:
 	var o = m.get("opts")
 	if not o is Dictionary:

@@ -11,7 +11,9 @@ const MISS_RATE := 0.3  # share of 0.5 s aim windows that land MISS_OFF to the s
 const MISS_OFF := 3.0  # m a missed aim is off the target
 const MISS_WINDOW := 0.5  # s one aim roll holds
 
-const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]  # the action inputs
+const KEYS := [  # the action inputs
+	"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"
+]
 
 static var human := false
 static var reading_t := 0.0  # s of reading and reacting still to go before the next input
@@ -26,6 +28,7 @@ static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0  # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
+static var recalled_once := false  # the summon step: the first window is called back early, as a hasty player would
 
 
 static func drive(m: Match) -> void:
@@ -111,7 +114,7 @@ static func drive(m: Match) -> void:
 				else:
 					goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0  # (a tap per item: one press, one pickup)
-		"sec", "shoot", "gkey", "summon", "kin", "hook", "ult":
+		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			_fight(m, tu, goto)
 		"steal":
 			var at := tu.goal("steal")
@@ -205,11 +208,9 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 				KinCommand.tap(p)  # a tap sends it when it is beside you, a tap calls it back when it is out
 				_acted = true
 			p.inp["fire"] = tu.flag and fire_key(m)
-		"summon":
-			var s: KinSummon = p.kin.summon if p.kin else null
-			if s and not s.out() and s.cd <= 0.0 and tu.t > 1.0:
-				KinSummon.press(p)  # (as the Summon key does; again each time its ring fills)
-			p.inp["fire"] = tu.wb.seen_out and fire_key(m)
+		"summon", "pack":
+			_summon(m, tu)
+			p.inp["fire"] = fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 			p.inp["fire"] = tu.flag and fire_key(m)
@@ -221,6 +222,15 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 			p.inp["fire"] = tu.flag and fire_key(m)
 			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
+## The Summon key: out of the wisp whenever it is ready (the first window, once, is called back early).
+static func _summon(m: Match, tu: Tutorial) -> void:
+	var s: KinSummon = m.player.kin.summon
+	if s.left > 0.0 and not recalled_once and tu.id() == "summon" and tu.sm.phase == TutorialSummon.OUT \
+			and s.left < s.dur - 1.0:
+		recalled_once = true
+		KinSummon.press(m.player)
+	elif not s.out() and s.cd <= 0.0:
+		KinSummon.press(m.player)
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.

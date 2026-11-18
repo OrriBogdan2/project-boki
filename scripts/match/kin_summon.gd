@@ -40,6 +40,8 @@ func _init(kin: Kin) -> void:
 	var t := times(kin.ks)
 	dur = t.x
 	cd_base = t.y
+	if kin.m.get("tut") != null:
+		cd_base *= float(Content.rules("tutorial")["summon_cd_mult"])  # (a quicker rest to learn it by)
 
 
 static func rules() -> Dictionary:
