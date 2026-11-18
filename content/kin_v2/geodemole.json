@@ -1,0 +1,117 @@
+{
+	"grammar": 1,
+	"id": "geodemole",
+	"name": "Geodemole",
+	"animals": [
+		"Mole",
+		"Split geode"
+	],
+	"theme": "stone",
+	"flavor": "Geodemole has grown heavy enough to sit up on its haunches, and the geode on its back has split along the top with amethyst pushing out of the crack. Crystal plates are creeping down its forearms. It still sorts the stones it digs up by colour, as it did when small.",
+	"colors": {
+		"belly": "#fce4cc",
+		"body": "#543c54",
+		"glow": "#cd6bff"
+	},
+	"look": {
+		"ears": "horn",
+		"body": "round",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 6,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.59,
+		"curiosity": 0.63,
+		"loyalty": 0.62,
+		"temper": 0.43
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Sorter Sense",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "puffcap_mines",
+	"auto": "echolocate",
+	"merge": "thornwake",
+	"evolution": {
+		"root": "Geod",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "mumbly, fussy, proud",
+		"syllables": [
+			"Geod",
+			"emole"
+		]
+	},
+	"egg": {
+		"name": "Geodemole Egg",
+		"temper": "Shy",
+		"desc": "Something shy is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

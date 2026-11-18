@@ -1,0 +1,20 @@
+{
+	"id": "vaultara",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/vaultara.json.",
+	"work": {
+		"haul": 3,
+		"stone": 2,
+		"timber": 1
+	},
+	"shiny": {
+		"belly": "#546284",
+		"color": "#466c60",
+		"glow": "#82d1ff"
+	},
+	"size": {
+		"cm": 60,
+		"kg": 20.0,
+		"fit": 1.46,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

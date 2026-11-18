@@ -1,0 +1,116 @@
+{
+	"grammar": 1,
+	"id": "glassolotl",
+	"name": "Glassolotl",
+	"animals": [
+		"Axolotl",
+		"Blown glass"
+	],
+	"theme": "prism",
+	"flavor": "Glass-bodied axolotl, prism gills.",
+	"colors": {
+		"belly": "#ffffff",
+		"body": "#fccccc",
+		"glow": "#ff90c7"
+	},
+	"look": {
+		"ears": "none",
+		"body": "prismander",
+		"tail": "none",
+		"feet": "none",
+		"aura": "prism"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 7,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.47,
+		"curiosity": 0.58,
+		"loyalty": 0.93,
+		"temper": 0.2
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Glass Glow",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 3
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Glas",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form",
+					"puddlet_wide_prism"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "gentle, fussy, polite",
+		"syllables": [
+			"Glas",
+			"solotl"
+		]
+	},
+	"egg": {
+		"name": "Glassolotl Egg",
+		"temper": "Gentle",
+		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

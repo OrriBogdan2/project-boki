@@ -1,0 +1,20 @@
+{
+	"id": "selenwhale",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/selenwhale.json.",
+	"work": {
+		"craft": 1,
+		"frost": 3,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#fce1a3",
+		"color": "#e4cc94",
+		"glow": "#ffb489"
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.47,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

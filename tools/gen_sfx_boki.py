@@ -452,6 +452,46 @@ SPECIES_VOICE = {
     'threadwyrm': ('uh', (1, 1.12, 0.84)),    # a soft call that winds up and coils back
     'tuatrune': ('oh', (1, 1.33, 1.33)),      # a solid step up a fourth, held like a lock clicking shut
     'velvorm': ('eh', (1, 0.79, 0.94)),       # a gurgle dipping down a pipe
+    # 11-18: the evolved forms
+    'sporcupine': ('eh', (1, 1.18, 1.19)),  # grown burrlet: its parent's call, a little lower in the middle
+    'vespox': ('eh', (1, 1.41, 1.26)),      # grown cindle: its parent's call, a little lower in the middle
+    'glassolotl': ('uh', (1, 1.18, 1.59)),  # grown puddlet: its parent's call, a little lower in the middle
+    'lanceron': ('ah', (1, 1.33, 1.49)),    # grown hoarheron: its parent's call, a little lower in the middle
+    'seamwyrm': ('mm', (1, 0.79, 1.19)),    # grown caecilith: its parent's call, a little lower in the middle
+    'geodemole': ('ee', (1, 1.05, 1.59)),   # grown glintmole: its parent's call, a little lower in the middle
+    'embrook': ('ee', (1, 1.25, 1.77)),     # grown kindlewren: its parent's call, a little lower in the middle
+    'geysirbara': ('oh', (1, 1.0, 1.0)),    # grown lilybara: its parent's call, a little lower in the middle
+    'dreadnoyak': ('oh', (1, 0.84, 1.12)),  # grown glaciyak: its parent's call, a little lower in the middle
+    'glaciatee': ('oh', (1, 1.05, 1.06)),   # grown floenatee: its parent's call, a little lower in the middle
+    'thunderstrich': ('ah', (1, 1.41, 1.41)), # grown nimbostrich: its parent's call, a little lower in the middle
+    'cisternmander': ('eh', (1, 0.79, 1.34)), # grown spatewader: its parent's call, a little lower in the middle
+    'forgebrock': ('ah', (1, 0.84, 1.26)),  # grown kilnbadger: its parent's call, a little lower in the middle
+    'tidalisk': ('eh', (1, 1.25, 1.89)),    # grown opalisk: its parent's call, a little lower in the middle
+    'arcestrel': ('ee', (1, 1.67, 1.42)),   # grown kestrike: its parent's call, a little lower in the middle
+    'shinobant': ('eh', (1, 1.05, 1.34)),   # grown marchleaf: its parent's call, a little lower in the middle
+    'scythant': ('eh', (1, 1.05, 1.34)),    # grown marchleaf: its parent's call, a little lower in the middle
+    'thistlynx': ('ah', (1, 1.33, 1.19)),   # grown nettlynx: its parent's call, a little lower in the middle
+    'lyrewing': ('eh', (1, 1.12, 1.26)),    # grown thrumbird: its parent's call, a little lower in the middle
+    'eclipsowl': ('ee', (1, 1.41, 1.89)),   # grown wisplet: its parent's call, a little lower in the middle
+    'howlop': ('ah', (1, 1.25, 1.06)),      # grown zapple: its parent's call, a little lower in the middle
+    'gongrowl': ('ee', (1, 1.41, 1.34)),    # grown gibbelle: its parent's call, a little lower in the middle
+    'vaultara': ('oh', (1, 1.25, 1.41)),    # grown tuatrune: its parent's call, a little lower in the middle
+    'gravitank': ('oh', (1, 0.94, 0.94)),   # grown pebbit: its parent's call, a little lower in the middle
+    'anchorhorn': ('ah', (1, 1.25, 0.8)),   # grown casquebill: its parent's call, a little lower in the middle
+    'gloamspire': ('uh', (1, 0.85, 1.13)),  # grown gloamshell: its parent's call, a little lower in the middle
+    'glomworth': ('uh', (1, 1.12, 1.49)),   # grown glomwort: its parent's call, a little lower in the middle
+    'effigoon': ('uh', (1, 1.0, 1.19)),     # grown goliathite: its parent's call, a little lower in the middle
+    'crofthollow': ('eh', (1, 1.0, 0.94)),  # grown heatherhorn: its parent's call, a little lower in the middle
+    'citadoad': ('mm', (1, 0.94, 1.12)),    # grown limpetor: its parent's call, a little lower in the middle
+    'lodestaff': ('ah', (1, 0.88, 1.19)),   # grown lodestick: its parent's call, a little lower in the middle
+    'lanternlong': ('oh', (1, 1.18, 1.78)), # grown moonloris: its parent's call, a little lower in the middle
+    'mossbastion': ('mm', (1, 0.84, 1.06)), # grown mossgrade: its parent's call, a little lower in the middle
+    'murmuron': ('mm', (1, 1.05, 1.26)),    # grown murmurling: its parent's call, a little lower in the middle
+    'strobolin': ('ee', (1, 1.88, 1.59)),   # grown nacrolin: its parent's call, a little lower in the middle
+    'rimefang': ('ee', (1, 1.58, 1.59)),    # grown rimeshrew: its parent's call, a little lower in the middle
+    'selenwhale': ('oh', (1, 1.05, 1.41)),  # grown selenfin: its parent's call, a little lower in the middle
+    'barostorm': ('eh', (1, 1.33, 1.78)),   # grown sentrikat: its parent's call, a little lower in the middle
+    'pipeworth': ('eh', (1, 0.74, 1.0)),    # grown velvorm: its parent's call, a little lower in the middle
 }
 
 

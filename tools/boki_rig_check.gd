@@ -13,7 +13,12 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"goliathite", "hoarheron", "floenatee", "casquebill", "duskapi", "glaciyak", "heatherhorn",
 	"kilnbadger", "limpetor", "moonloris", "moundvark", "murmurling", "nacrolin", "opalisk",
 	"orchisloth", "scaldamus", "sentrikat", "spatewader", "squalltross", "threadwyrm", "tuatrune",
-	"velvorm", "nimbostrich", "lilybara", "umbrathere"]
+	"velvorm", "nimbostrich", "lilybara", "umbrathere",
+	"basaltoad", "sporcupine", "vespox", "glassolotl", "lanceron", "seamwyrm", "geodemole", "embrook", "geysirbara",
+	"dreadnoyak", "glaciatee", "thunderstrich", "cisternmander", "forgebrock", "tidalisk", "arcestrel", "shinobant",
+	"scythant", "thistlynx", "lyrewing", "eclipsowl", "howlop", "gongrowl", "vaultara", "gravitank", "anchorhorn",
+	"gloamspire", "glomworth", "effigoon", "crofthollow", "citadoad", "lodestaff", "lanternlong", "mossbastion",
+	"murmuron", "strobolin", "rimefang", "selenwhale", "barostorm", "pipeworth"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
@@ -39,7 +44,17 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"orchisloth":         MESHY_TRIS, "scaldamus": MESHY_TRIS, "sentrikat": MESHY_TRIS,
 	"spatewader": MESHY_TRIS, "squalltross":         MESHY_TRIS, "threadwyrm": MESHY_TRIS,
 	"tuatrune": MESHY_TRIS, "velvorm": MESHY_TRIS, "wisplet": MESHY_TRIS, "zephyrak": MESHY_TRIS,
-	"nimbostrich": MESHY_TRIS, "rimeshrew": MESHY_TRIS}
+	"nimbostrich": MESHY_TRIS, "rimeshrew": MESHY_TRIS,
+	"basaltoad": MESHY_TRIS, "sporcupine": MESHY_TRIS, "vespox": MESHY_TRIS, "glassolotl": MESHY_TRIS,
+	"lanceron": MESHY_TRIS, "seamwyrm": MESHY_TRIS, "geodemole": MESHY_TRIS, "embrook": MESHY_TRIS,
+	"geysirbara": MESHY_TRIS, "dreadnoyak": MESHY_TRIS, "glaciatee": MESHY_TRIS, "thunderstrich": MESHY_TRIS,
+	"cisternmander": MESHY_TRIS, "forgebrock": MESHY_TRIS, "tidalisk": MESHY_TRIS, "arcestrel": MESHY_TRIS,
+	"shinobant": MESHY_TRIS, "scythant": MESHY_TRIS, "thistlynx": MESHY_TRIS, "lyrewing": MESHY_TRIS,
+	"eclipsowl": MESHY_TRIS, "howlop": MESHY_TRIS, "gongrowl": MESHY_TRIS, "vaultara": MESHY_TRIS,
+	"gravitank": MESHY_TRIS, "anchorhorn": MESHY_TRIS, "gloamspire": MESHY_TRIS, "glomworth": MESHY_TRIS,
+	"effigoon": MESHY_TRIS, "crofthollow": MESHY_TRIS, "citadoad": MESHY_TRIS, "lodestaff": MESHY_TRIS,
+	"lanternlong": MESHY_TRIS, "mossbastion": MESHY_TRIS, "murmuron": MESHY_TRIS, "strobolin": MESHY_TRIS,
+	"rimefang": MESHY_TRIS, "selenwhale": MESHY_TRIS, "barostorm": MESHY_TRIS, "pipeworth": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in

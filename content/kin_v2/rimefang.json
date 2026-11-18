@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "rimefang",
+	"name": "Rimefang",
+	"animals": [
+		"Wolf",
+		"Hoarfrost"
+	],
+	"theme": "frost",
+	"flavor": "Evolution of Rimeshrew.",
+	"colors": {
+		"belly": "#ffffff",
+		"body": "#e4fcfc",
+		"glow": "#90c7ff"
+	},
+	"look": {
+		"ears": "fin",
+		"body": "round",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "wind"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 3,
+		"kin_hp": 8,
+		"kin_speed": 7,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.67,
+		"curiosity": 0.72,
+		"loyalty": 0.58,
+		"temper": 0.51
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Frost Fang",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "hive_swarm",
+	"auto": "storm_arc",
+	"merge": "hive_crown",
+	"evolution": {
+		"root": "Rim",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "calm, hungry, gruff",
+		"syllables": [
+			"Rim",
+			"efang"
+		]
+	},
+	"egg": {
+		"name": "Rimefang Egg",
+		"temper": "Frantic",
+		"desc": "Something frantic is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

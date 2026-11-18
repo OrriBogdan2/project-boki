@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "eclipsowl",
+	"name": "Eclipsowl",
+	"animals": [
+		"Owl",
+		"Eclipse"
+	],
+	"theme": "lunar",
+	"flavor": "Great owl, eclipse-ring facial disc, moth cloak wings.",
+	"colors": {
+		"belly": "#543c6c",
+		"body": "#543c54",
+		"glow": "#c387ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "lunowl",
+		"tail": "none",
+		"feet": "none",
+		"aura": "moondust"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 7,
+		"kin_speed": 9,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.49,
+		"curiosity": 0.8,
+		"loyalty": 0.48,
+		"temper": 0.48
+	},
+	"ai": {
+		"aggression": 0.4,
+		"loyalty": 0.6,
+		"caution": 0.7,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Umbrastep",
+		"passives": [
+			{
+				"stat": "glide",
+				"amount": 0.2
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "moon_mark",
+	"auto": "updraft",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Ec",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form",
+					"wisplet_long_throw"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "grave, teasing, dramatic",
+		"syllables": [
+			"Ec",
+			"lipsowl"
+		]
+	},
+	"egg": {
+		"name": "Eclipsowl Egg",
+		"temper": "Airy",
+		"desc": "Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here.",
+		"play": "Slippery and full of tricks."
+	}
+}

@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "strobolin",
+	"name": "Strobolin",
+	"animals": [
+		"Pangolin",
+		"Disco ball"
+	],
+	"theme": "prism",
+	"flavor": "The grand final form: a tall pangolin in mirror-plate armour with a huge crystal crest and two long tails, each carrying a mirror ball.",
+	"colors": {
+		"belly": "#cccccc",
+		"body": "#9c9c9c",
+		"glow": "#ff90c7"
+	},
+	"look": {
+		"ears": "fin",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "prism"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 4,
+		"kin_hp": 11,
+		"kin_speed": 4,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.65,
+		"curiosity": 0.44,
+		"loyalty": 0.7,
+		"temper": 0.31
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Mirror Armour",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.2
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Strob",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "grand, polite, shy",
+		"syllables": [
+			"Strob",
+			"olin"
+		]
+	},
+	"egg": {
+		"name": "Strobolin Egg",
+		"temper": "Timid",
+		"desc": "Something timid is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

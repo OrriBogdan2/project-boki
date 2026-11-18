@@ -1,0 +1,125 @@
+{
+	"grammar": 1,
+	"id": "glaciatee",
+	"name": "Glaciatee",
+	"animals": [
+		"Walrus",
+		"Aurora crown"
+	],
+	"theme": "frost",
+	"flavor": "Huge manatee, walk-in ice-vault body.",
+	"colors": {
+		"belly": "#e4fcfc",
+		"body": "#9cb4cc",
+		"glow": "#8effb4"
+	},
+	"look": {
+		"ears": "none",
+		"body": "boulder",
+		"tail": "fish",
+		"feet": "none",
+		"aura": "bubbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
+		"gait": {
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 10,
+		"kin_speed": 3,
+		"owner_shield": 2,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.45,
+		"curiosity": 0.54,
+		"loyalty": 0.77,
+		"temper": 0.24
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Glacier Saddle",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.85,
+			"jump": 0.8,
+			"turn": 0.6
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Glac",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "kind, deep, hummy",
+		"syllables": [
+			"Glac",
+			"iatee"
+		]
+	},
+	"egg": {
+		"name": "Glaciatee Egg",
+		"temper": "Kind",
+		"desc": "Something kind is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

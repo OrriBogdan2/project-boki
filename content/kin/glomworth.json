@@ -1,0 +1,20 @@
+{
+	"id": "glomworth",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/glomworth.json.",
+	"work": {
+		"bloom": 3,
+		"mend": 2,
+		"ranch": 1
+	},
+	"shiny": {
+		"belly": "#53b6fc",
+		"color": "#9c5469",
+		"glow": "#59baff"
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.1,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}
