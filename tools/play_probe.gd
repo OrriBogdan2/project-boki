@@ -57,11 +57,12 @@ func run(host: Node) -> void:
 	main = host
 	Save.no_write = true
 	Save.d = Save.fresh()
-	clip_on = "--play-probe-clips" in OS.get_cmdline_user_args()
+	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()  # (jobq passes them before or after "--")
+	clip_on = "--play-probe-clips" in args
 	RenderingServer.render_loop_enabled = clip_on  # no drawing unless clips are saved
 	main.get_tree().root.size = CLIP_SIZE if clip_on else Vector2i(1280, 720)
 	var heroes: Array = []
-	for a in OS.get_cmdline_user_args():
+	for a in args:
 		var s := String(a)
 		if s.begins_with("--play-probe="):
 			heroes = Array(s.get_slice("=", 1).split(","))
@@ -347,7 +348,7 @@ func _save_clip(sc: String) -> void:
 	DirAccess.make_dir_recursive_absolute(tmp)
 	var keep := shots.slice(maxi(0, shots.size() - 180))  # the last 6 s at most
 	for i in keep.size():
-		(keep[i] as Image).save_png(tmp.path_join("f%04d.png" % i))
+		(keep[i] as Image).save_jpg(tmp.path_join("f%04d.jpg" % i), 0.85)
 	var mp4 := tmp + ".mp4"
 	var args := [
 		"-v",
@@ -356,7 +357,7 @@ func _save_clip(sc: String) -> void:
 		"-framerate",
 		"30",
 		"-i",
-		tmp.path_join("f%04d.png"),
+		tmp.path_join("f%04d.jpg"),
 		"-pix_fmt",
 		"yuv420p",
 		"-c:v",
@@ -366,7 +367,7 @@ func _save_clip(sc: String) -> void:
 		mp4
 	]
 	if OS.execute("ffmpeg", args) != 0:
-		clip_paths["%s_%s" % [hero, sc]] = "clips/%s_%s/ (png frames: no ffmpeg here)" % [hero, sc]
+		clip_paths["%s_%s" % [hero, sc]] = "clips/%s_%s/ (jpg frames: no ffmpeg here)" % [hero, sc]
 		return
 	clip_paths["%s_%s" % [hero, sc]] = "clips/%s_%s.mp4" % [hero, sc]
 	for f in DirAccess.get_files_at(tmp):
