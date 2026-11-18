@@ -74,3 +74,10 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+## 11-18 (ext/rig-ship-1117): the owner's 11-15 age-down pick in game
+tarek.glb is `~/meshy/v95/tarek/r2/hunter3d1115/A.glb` (CURRENT_OVERRIDES, early 20s face and body, ONE cobalt-slate stone arm, teal runes
+from its emission map, black trousers), built with `python3 tools/art1/v95_to_game.py tarek --weights meshy` (spec `art/wardens/src/tarek_v95.json`:
+joints read off the pick's v95_grid renders, `emit`, own paint, Meshy's skin weights). Texture diff vs the pick: base colour 0.57, emission 0.06
+(out of 255; the 11-13 c01arm body was 39.9). Skeleton, node and clip names are the game glb's. The game's eye stones, shards and rings stay.
+warden_model_check `height_3d` for dolm re-measured to 1.13 (the pick's dreads stand over the head). `--stretch-check --wardens=dolm` worst 11.56 (crouch_f; 14.3 on the first rig build, 7.0 on main's old body).
