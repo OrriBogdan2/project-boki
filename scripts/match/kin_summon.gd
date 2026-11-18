@@ -13,6 +13,8 @@ extends RefCounted
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
+## The hint on the first own summon killed in a save (Save.d["tutorial"] "summon_killed"); %s is the Summon key.
+const KILLED_HINT := "Your Boki is a wisp again; summon it once the cooldown ends (%s)"
 const BURST_S := 0.3  # s: the bloom from wisp to full size
 const SHRINK_S := 0.35  # s: the shrink back into the wisp
 const BURST_FROM := 0.3  # its size at the start of the bloom and the end of the shrink (x its own)
@@ -126,6 +128,8 @@ func killed(by: Ent) -> bool:
 	rival_t = -1e9
 	k.m.fx.burst(at + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
 	KinCommand.say(o, "%s was killed and went back to a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+	if o == k.m.player and k.m.hud and Settings.get_v("tips") and k.m.tip_once("summon_killed"):
+		k.m.hud.tip(KILLED_HINT % Settings.key_cap("summon"))
 	_back(cd_base * (float(rules()["killed_cd_mult"]) if foe else 1.0))
 	if KinSteal.stolen(k):
 		KinSteal.break_loose(k, at)  # a thief's stolen summon: loose again where it fell
