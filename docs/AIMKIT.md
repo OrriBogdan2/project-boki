@@ -106,6 +106,8 @@ AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 Nothing in the game uses it now (Lace's draw was the V until owner item 55b).
 ```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
+# Grimble Buckshot: one aim line (a merged V) to the slug range
+AimKit.vee(h, "spread", {"len": 6.3, "k": 1.0, "follow": true})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
 (0..1 along the line, -1 for none).
@@ -114,8 +116,6 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 ```gdscript
 # Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
-# Grimble Buckshot: just the two edge lines
-AimKit.cone(h, "spread", {"len": 6.3, "deg": 10.0 + h.wbloom, "edges": true, "follow": true, "ease": 35.0})
 ```
 Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`, `ease` (1/s, 0 = off: the drawn width
 glides toward `deg` each drawn frame, exponentially, so a changing spread never steps or snaps).
