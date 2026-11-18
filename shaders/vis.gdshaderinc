@@ -1,7 +1,7 @@
 // Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
 // (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
-// what your team can see is darkened and turned a cool grey-blue, so the lit space reads at a glance;
-// the cone's sides are a soft fade, not a line. Set from Match; the numbers
+// what your team can see is greyed out like fog (desaturated, dimmer, a light veil; no tint), so the lit space
+// reads at a glance; the cone's sides are a soft fade, not a line. Set from Match; the numbers
 // are measured from the owner's reference in docs/specs/VISION_LOOK.md.
 global uniform float vis_on;
 global uniform vec3 vis_focus;
@@ -21,7 +21,7 @@ global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fa
 global uniform vec3 vis_reveal1;
 global uniform vec3 vis_reveal2;
 
-const float VIS_COS = 0.087;           // cos of half the wedge: 170 degrees wide (Match.VIEW_COS, the same rule)
+const float VIS_COS = 0.5;             // cos of half the cone: 120 degrees wide (Match.VIEW_COS, the same rule)
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
 const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
 const float VIS_SOFT = 1.6;            // m: the lit cone fades out over this much inside its sides (a soft edge, no line)
@@ -77,14 +77,16 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: darker and a cool blue (75% toward a blue with little red, then x vis_dark), but the
-// ground, walls and grass still read. Tuned on GPU shots (docs/specs/VISION_LOOK.md): a greyer blue
-// turns purple on warm ground, a deeper one goes near black. Inside: a touch brighter, so the lit space pops. What's hidden
-// stays hidden either way: rival hunters and Boki out of sight aren't drawn at all
-// (Match._update_vision), this only shades the world.
+// Outside sight: grey fog. The ground is pulled to its own luma (no hue, so no blue), a light neutral veil lifts
+// the darks, VIS_COOL takes out the cast the lighting and grade add, then it is dimmed by vis_dark; the terrain,
+// walls and grass still read. Inside: a touch brighter, so the lit space pops. What's hidden stays hidden either
+// way: rival hunters and Boki out of sight aren't drawn at all (Match._update_vision), this only shades the world.
+const float VIS_GREY = 1.0;            // share of the colour pulled to grey outside sight (all of it: every ground ends up one grey)
+const float VIS_VEIL = 0.14;           // share of a mid-grey fog laid over it
+const vec3 VIS_COOL = vec3(0.7, 1.0, 0.95);   // cancels the sun's warmth and the grade's saturation: grey shows as grey (GPU, clear)
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 blue = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.2, 0.75, 1.3) + vec3(0.0, 0.01, 0.04);
-	vec3 dark = mix(c, blue, 0.75) * vis_dark;
+	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11)));
+	vec3 dark = mix(mix(c, grey, VIS_GREY), vec3(0.5), VIS_VEIL) * VIS_COOL * vis_dark;
 	return mix(c * 1.05, dark, fog);
 }

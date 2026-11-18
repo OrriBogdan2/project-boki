@@ -31,8 +31,8 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
 ## 2. Ours on main [ours]
 
 - **Yes, we hide Hunters.** `Match.sees()` (match.gd ~2917) is the one rule: a team shares sight; each member sees
-  everything inside a 2.0 m circle (1.0 m crouched), plus a forward wedge (dot > 0.087, 170 degrees; was 106 until
-  2026-11-12, see VISION_LOOK.md) out to
+  everything inside a 2.0 m circle (1.0 m crouched), plus a forward cone (dot > 0.5, 120 degrees; 106 until
+  2026-11-12, 170 until 2026-11-18, see VISION_LOOK.md) out to
   `VIEW_RANGE` 24 m (14 m crouched), x1.25 while crouching, x gear `sight`, x raid `sight_k`.
   Holding Look ahead (`scout`, C) adds x1.25 inside a 30 degree cone along the aim (`ScoutLook`, docs/specs/LOOK_AHEAD.md).
   Needs `world.los()`: rocks and higher ground block it; dynamic sight-blocking walls too.
@@ -44,7 +44,7 @@ facts below come from the written play notes in `sv/briefs/kits.md`.
   captor of a Boki (match.gd:2839). `muzzle_t` (firing) also gives you away. Replicated as flag 4096 (match.gd:5559).
 - **Output:** `_update_vision()` runs every 0.05 s and sets `Hunter.unseen` for the local player's view only; unseen
   hunters are not drawn, get no plate, nameplate, cast tells, or map dot (hud.gd, full_map.gd:506 "the map is no wallhack").
-  A shader dims ground outside your wedge to a cool grey-blue with a soft-faded cone edge, no outline (`vis_*` globals,
+  A shader greys the ground outside your cone like fog (desaturated, dimmer, no blue) with a soft-faded cone edge, no outline (`vis_*` globals,
   up to 3 allies; look and measurements in VISION_LOOK.md). A seen rival who is crouched or in grass/smoke shows no
   plate (`HudPlate.hidden`). A seen, revealed rival is lit in her own soft 2.0 m circle (`RevealLight`, up to 3,
   fading over the reveal's last 0.3 s; VISION_LOOK.md "Revealed rival").

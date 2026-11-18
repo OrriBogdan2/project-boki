@@ -8,11 +8,11 @@ extends RefCounted
 const SPAWN_WAIT := 30   # frames before placing anyone (the match puts you on the map)
 const SETTLE := 45        # frames before the first one kept (the match fades in, the camera settles)
 const STAND := 60         # frames standing still
-const SWEEP := 90         # frames turning the aim 100 degrees and back
+const SWEEP := 90         # frames turning the aim 140 degrees and back
 const CROUCH := 75        # frames crouched (the camera eases out)
 const REVEAL := 45        # frames the rival behind you shoots, then as long again after she stops
 const SCOUT := 40         # frames holding the far look (the lookout), after the reveal
-const SWEEP_DEG := 100.0
+const SWEEP_DEG := 140.0
 const AIM_M := 6.0        # m: where your aim (and the reticle) sits ahead of you
 ## Rivals round you: [degrees off your aim, metres, crouched]
 const RIVALS := [[40.0, 5.0, false], [-35.0, 5.0, true], [165.0, 7.0, false]]
