@@ -279,6 +279,8 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
   **Bursts beat holding (owner 11-17 playtest):** a round fired with under half the drum left (`low_mag_at` 0.5)
   hits for half (`low_mag_dmg` 0.5), replacing the old 10-round `sustain` rule, so a burst of up to half a drum
   and a pause keeps full damage. The HUD's count and ring turn red under half. Assert: `--quill-mag-check`.
+  Why the owner saw it never drop: mod mode turns on admin god mode, which topped the drum up every frame (as did
+  the practice arena's Cooldowns off); both now leave a self-refilling drum (`refill_after`) alone.
   The firing brackets are a firing tell only; our rifle's spread doesn't bloom, so they don't move.
 - Dazed is our Rattled status (slow plus the damage window); it now applies to the training dummy too.
 - Fever follows the kit data: a flat +6% omnivamp for 3.5s from any ability hit (no stacks). The footage build only had the knock reset.

@@ -1,7 +1,7 @@
 extends RefCounted
 ## --quill-mag-check: Vex's quill rifle drum (content/weapons/quill_rifle.json). Holding fire drains the drum a round
 ## a shot; rounds fired with under `low_mag_at` of a drum left hit for `low_mag_dmg` of full; a rested drum refills,
-## so a burst and a pause keeps full damage. Never touches the save.
+## so a burst and a pause keeps full damage, and admin god mode no longer tops it up. Never touches the save.
 
 const DT := 1.0 / 60.0
 var A
@@ -38,6 +38,13 @@ func run(main: Node) -> void:
 	ok(burst.all(func(s: Array) -> bool: return is_equal_approx(s[1], full)),
 			"a 0.5 s burst (%d rounds) stays at full damage" % burst.size())
 	ok(_fire(m, P, 0.3, false).is_empty(), "trigger up: nothing fires")
+	_fire(m, P, wait, false)
+	var god_was: bool = Game.god
+	Game.god = true      # mod mode turns god mode on for the owner: it used to top the drum up every frame
+	var god_run := _fire(m, P, 1.0)
+	Game.god = god_was
+	ok(god_run.size() >= 8 and P.ammo < mag - 6,
+			"god mode (owner's mod mode), hold 1 s: the drum still falls to %d of %d" % [P.ammo, mag])
 	print("QUILLMAG_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
