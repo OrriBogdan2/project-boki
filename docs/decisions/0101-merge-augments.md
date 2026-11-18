@@ -30,5 +30,5 @@
 - **Net:** `Net.VERSION` 0.14.0 to 0.15.0. The kin snapshot carries the rest seconds; casts that need a tell in another game use the existing `mcast` event.
 
 ## Consequences
-- New: `scripts/kin/merge_augment.gd`, `docs/decisions/0004-merge-augments.md`. Rewritten: `tools/merge_form_check.gd`, `merge_kit.gd` (ultimate only). Deleted: `merge_holds.gd`. Wiring only in hunter.gd, kin.gd, kin_follow.gd, kin_command.gd, arch kits' `KinMerge.active` guards (now `transforming`), hud.gd, boki_hud.gd, bot.gd.
+- New: `scripts/kin/merge_augment.gd`, `docs/decisions/0101-merge-augments.md`. Rewritten: `tools/merge_form_check.gd`, `merge_kit.gd` (ultimate only). Deleted: `merge_holds.gd`. Wiring only in hunter.gd, kin.gd, kin_follow.gd, kin_command.gd, arch kits' `KinMerge.active` guards (now `transforming`), hud.gd, boki_hud.gd, bot.gd.
 - Debt: the six other Boki have fallback augments (the type rider on LMB, the type dash trail, no RMB/E add-ons) and a basic burst ultimate until their form files land.

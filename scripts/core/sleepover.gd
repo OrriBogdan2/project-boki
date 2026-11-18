@@ -1,6 +1,6 @@
 class_name Sleepover
 extends RefCounted
-## A Boki spends a day at a friend's garden (docs/decisions/0022-sleepovers.md). It leaves the roster for
+## A Boki spends a day at a friend's garden (docs/decisions/0127-sleepovers.md). It leaves the roster for
 ## Save.d["sleepovers"]; a day later it comes home with a memory line, a trait nudge toward the friend's lead
 ## Boki, a seed from their patch and, for a "trade_to" species, its next form. The friend's side is only their
 ## existing profile snapshot (Social.clean_island), so no Net message is involved.

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --terrain-hazard-check: the Hollow Crown's terrain hazard areas (TerrainHazards,
-## content/rules/terrain_hazards.json, docs/decisions/0060-terrain-hazards.md). One real match (seed 5);
+## content/rules/terrain_hazards.json, docs/decisions/0139-terrain-hazards.md). One real match (seed 5);
 ## for each hazard kind the player stands in its first area twice, with a Boki that doesn't counter it
 ## (Vespyx, venom) and with one that does, and the check asserts:
 ##   lava        burns (hp drops, burn on)              / ember: no burn, no damage

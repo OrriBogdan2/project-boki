@@ -1,6 +1,6 @@
 class_name TerrainHazards
 extends RefCounted
-## Terrain hazard areas on an authored map (docs/decisions/0060-terrain-hazards.md): lava fields, deep
+## Terrain hazard areas on an authored map (docs/decisions/0139-terrain-hazards.md): lava fields, deep
 ## water, ice sheets, static flats and bramble, each an outline in the map's islands[].hazard_areas.
 ## What the ground does and which Boki walks it safely is content/rules/terrain_hazards.json.
 ##

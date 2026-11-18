@@ -1,5 +1,5 @@
 extends RefCounted
-## An ult's cast lock and the press made at its end (docs/heroes/ults.md, docs/decisions/0022-cc-exit-buffer.md):
+## An ult's cast lock and the press made at its end (docs/heroes/ults.md, docs/decisions/0118-cc-exit-buffer.md):
 ## a Shift, LMB or jump pressed PRESS_S before the lock ends goes off on the first free step, as in the source.
 ## Used by the hero ult checks (Albert, Kael, Motley, Sparkle). A press is timed in steps from the last step that
 ## forbade it (or from the press, with no lock): 1 is the next step. Kael's LMB, say, goes on its release, a step on.

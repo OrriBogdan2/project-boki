@@ -554,7 +554,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 		K.lmb_t = -1.0
 		K.mace = {}          # (a hold let go under its tap throws the hammer)
 	# a mantle ends the hold within one frame; the button still down starts a fresh one once he is off the lip
-	# (LMB is a held input, docs/decisions/0022-held-fire-resume.md)
+	# (LMB is a held input, docs/decisions/0117-held-fire-resume.md)
 	reset.call()
 	step(m, 0.6, aim)
 	ok("bjorn hold: the swing is charging", K.lmb_t > 0.4, "lmb_t %.2f" % K.lmb_t)

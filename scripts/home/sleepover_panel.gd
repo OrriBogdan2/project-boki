@@ -1,6 +1,6 @@
 class_name SleepoverPanel
 extends RefCounted
-## The "send a Boki for a sleepover" rows of the visit panel (docs/decisions/0022-sleepovers.md).
+## The "send a Boki for a sleepover" rows of the visit panel (docs/decisions/0127-sleepovers.md).
 
 
 ## Adds one button per Boki that can go. done(text) is called after one is sent.

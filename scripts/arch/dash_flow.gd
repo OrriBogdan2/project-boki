@@ -8,7 +8,7 @@ extends RefCounted
 ## A press during a mantle (the ledge rise) goes by the one table every hero shares, content/rules/mantle_press.json:
 ## "fire" goes mid-climb, "buffer" (the default) waits for the top.
 ## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
+## step the CC allows it (docs/decisions/0118-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
 
 const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits

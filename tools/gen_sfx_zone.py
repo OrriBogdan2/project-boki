@@ -1,4 +1,4 @@
-"""The closing zone's sounds (docs/decisions/0060-shrinking-zone.md; scripts/match/zone_sfx.gd). Run from tools/.
+"""The closing zone's sounds (docs/decisions/0138-shrinking-zone.md; scripts/match/zone_sfx.gd). Run from tools/.
 
 The zone's wall is a cold blue band of light, so its sounds are electric and glassy: a tonal buzz, never the
 Blight tide's dark noise rumble (gen_sfx_tide.py), and never a clock tick (the Ways Out countdown is the only
