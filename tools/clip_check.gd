@@ -72,8 +72,6 @@ const JL_HEAVY_OPEN := {
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
-	"ostra:idle": "x_fing seams 11-13 deg",
-	"ostra:stance": "x_fing seams 12-16 deg",
 }
 
 var bad := 0
