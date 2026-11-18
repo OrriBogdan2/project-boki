@@ -186,12 +186,20 @@ func _starter_card(hx) -> Control:
 			return c
 	return null
 
+## Takes a Relic off a pick the way a player does: clicks its card, then "Yes, take <name>" on the question.
+func _take(root: Node, card: Control, id: String) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	card.gui_input.emit(click)
+	await tree.process_frame
+	await _press(root, "Yes, take " + HeroTitle.base_name(id))
+
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
-	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	_press(hx, "Take " + HeroTitle.base_name(starter))
+	await _take(hx, _starter_card(hx), starter)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -309,9 +317,9 @@ func _second_relic(home) -> void:
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
 	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
-	ok(offer.ids.size() == want and offer.take_button != null, "%d to choose from, with a Take button" % want)
+	ok(offer.ids.size() == want, "%d to choose from" % want)
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _take(chat.box, offer.cards[0], pick)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
@@ -329,8 +337,49 @@ func _first_expedition(home) -> void:
 	m.set_process(false)
 	var worn := Arch.of_save()
 	ok(m.player.ak != null and m.player.ak.id == worn, "you play as the Relic you chose (%s)" % worn)
+	_begin("first expedition: first knock")
+	_knock_tip(m)
 	_begin("first expedition: play")
 	await _ways_out(m)
+
+## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
+func _knock_tip(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var mob: Mob = m.mobs[0]
+	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
+	m.on_damage(P, mob, 30.0, {})
+	m.on_damage(P, rival, 20.0, {})
+	m.on_damage(P, mob, 50.0, {})
+	var want: String = KnockTip.card("monster")
+	m.knock(P, mob, {})
+	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
+	var texts: Array = lane.map(func(e): return e["text"])
+	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
+	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
+	P.downed = false
+	m.on_damage(P, rival, 90.0, {})
+	m.knock(P, rival, {})
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
+	P.downed = false
+	P.hp = P.max_hp
+	var k := KnockTip.for_match(m, m.guide)
+	k.note(rival, 40.0, {})
+	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
+	k.note(null, 80.0, {"src": "wall"})
+	var dash_tip := KnockTip.card("blight").contains(Settings.key_cap("dash"))
+	ok(k.top() == "blight" and dash_tip, "the Blight gives the dash tip")
+	Save.d["tutorial"]["knock_tip"] = 2
+	ok(KnockTip.for_match(m, m.guide) == null, "after two cards there is never a third")
+	Save.d["tutorial"]["knock_tip"] = 1
+	Settings.set_v("tips", false, false)
+	var quiet := KnockTip.for_match(m, m.guide)
+	quiet.m = m
+	quiet.on_knock()
+	ok(not quiet.shown and int(Save.d["tutorial"]["knock_tip"]) == 1, "with tips off there is no card")
+	Settings.set_v("tips", true, false)
+	ok(KnockTip.for_match(m, null) == null, "a match outside the first two gets none")
 
 ## The stick direction from the hunter to a spot on the ground.
 func _toward(p: Hunter, at: Vector3) -> Vector2:
@@ -424,7 +473,6 @@ func _portal_relic(home) -> void:
 	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
-	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _take(home.panel_host, cards[2], "gunslinger")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

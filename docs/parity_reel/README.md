@@ -62,7 +62,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - **Glide dive** (hold Ctrl under the glider) has the source's numbers, but the key is ours.
 - **Dash to LMB/RMB flow rows** marked `[?]` have no source; they run as the kit's default.
 
-## Grimble the Scrap King (`dredge`, source Kingpin)
+## Grimble the Scrap King (`dredge`, source ref-dredge)
 [dredge.mp4](dredge.mp4)
 
 Still differs:
@@ -82,7 +82,7 @@ Seen in the reel: the slugs hang as violet dots at the stop line like the footag
 drags (HOOKED); the cone telegraph and slam read; the Broadside's fan is a flat-edged amber wedge where the
 footage's is a pale rounded fan [F]; the hero is smaller in frame than the source's view.
 
-## Neve the Snowglide (`rimewright`, source Celeste)
+## Neve the Snowglide (`rimewright`, source ref-rimewright)
 [rimewright.mp4](rimewright.mp4)
 
 Still differs:
@@ -92,8 +92,8 @@ Still differs:
 - Skate: 10.5 m/s, the footage mean; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
-  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
-  stacking slow ramp is ours.
+  40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone
+  slows a flat 35% (no number in the source); its periodic Shatter stacks are not built.
 - Darts now match the source burst: a hold is one even stream of plain darts, the let-go ends it on the three
   large ones, then a 0.5 s pause ([D] + [F], `ext/combat-neve-dart-burst`; the reel predates it). Skating beams
   keep 2x damage (wiki, footage 1.6x) and home late like the darts (owner).
@@ -103,7 +103,7 @@ Seen in the reel: the spear's burst ring and the wall's tall pale-blue slab matc
 dash leaves an ice slab behind instead of the footage's streaking crystal ribbon; Rimelock is one big cyan disc
 with a swirl, the footage's a smaller frost bud with the zone ring [F].
 
-## Sparkle the Storm Chaser (`mage`, source Joule)
+## Sparkle the Storm Chaser (`mage`, source ref-mage)
 [mage.mp4](mage.mp4)
 
 Still differs:
@@ -119,7 +119,7 @@ Still differs:
 Seen in the reel: the Storm Rod's pink burst reads like the footage's spear impact; Kitefall is a wide pink
 storm field over the arena, where the footage zooms out to a dark ring with a gold marker at the cursor [F].
 
-## Mossy the Barnacle Knight (`bulwark`, source Oath)
+## Mossy the Barnacle Knight (`bulwark`, source ref-bulwark)
 [bulwark.mp4](bulwark.mp4)
 
 Still differs:
@@ -138,7 +138,7 @@ Faultline telegraph is an amber rectangle with rubble where the footage's is a c
 [F]; the 360 Smash's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
 damage number, as in the footage (it was an orange swirl inside the radius).
 
-## Sable the Silver Thief (`thief`, source Shiv)
+## Sable the Silver Thief (`thief`, source ref-thief)
 [thief.mp4](thief.mp4)
 
 Still differs:
@@ -153,7 +153,7 @@ Still differs:
 Seen in the reel: the Vault flip reads like the footage; the Encore is a wide pale-violet disc where the footage's
 is a thin cyan ring [F].
 
-## Motley the Void Jester (`ostra`, source Void)
+## Motley the Void Jester (`ostra`, source ref-ostra)
 [ostra.mp4](ostra.mp4)
 
 Still differs:
@@ -197,12 +197,12 @@ it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Mot
 shown. The rest of the "Seen in the reel" lines match the new renders.
 
 **KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
-  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot
+  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Heavy Shot
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
   and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
-  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Red Thread only), and her Heavy Shot wall
   payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
   stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
@@ -259,7 +259,7 @@ Still differs:
   (card text to fix).
 - Shift: a 3.0 m / 0.27 s roll, then Spirit Walk through rocks, trees and barriers; raised walls and ledge faces
   are still on unmerged `ext/lace-phasewalk-verify` (gap 8). `ext/lace-1111` makes the roll 3.375 m.
-- Passive: Hawk Sense 22 m only; the source's tall-ledge climb is not built.
+- Passive: Red Thread 22 m only; the source's tall-ledge climb is not built.
 - Her kit colours on main are violet/magenta; the owner's 11-11 crimson (d41e2e) is on `ext/lace-1111`.
 - 8 of her 17 dash flow rows are unsourced `[?]`.
 

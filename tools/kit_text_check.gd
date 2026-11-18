@@ -19,7 +19,7 @@ const RANK_KEYS := {"sec": "rmb", "kin": "e", "dash": "dash"}
 const NUM := "(\\d+(?:\\.\\d+)?)"
 const KEYS := {
 	"cooldown": "^(cooldown|cd|recharge|rank_cut)",
-	"range": "(^|_)(range|reach|radius|dist|rmin|rmax|width|wall|gap|len|core|push|leash|travel|travel_min)$|_(r|w)$",
+	"range": "(^|_)(range|reach|radius|dist|rmin|rmax|width|wall|gap|len|core|push|leash|travel|travel_min)$|_(r|w|h)$",
 	"duration": "(^|_)(t|time|tell|window|every|tick|delay|linger|stun|hold|full|nock|recover|duration|rate"
 		+ "|wind|windup|rise|grounded|drag_max|fuse|dur|grow|root|daze|recast)$|_(t|time|for)$",
 	"damage": "(^|_)(dmg|dps|damage)(_|$)",

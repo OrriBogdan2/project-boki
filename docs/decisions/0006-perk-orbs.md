@@ -1,4 +1,4 @@
-# 0006: Perks as orbs on the ground, and a fixed weapon path on level-ups
+# 0006: Perks as orbs on the ground (the level-up weapon path was retired)
 
 - **Status:** accepted (owner design, 09:45 ET "ext/equal FINAL SPEC", part B of the split described in 0005)
 - **Date:** 2026-11-02
@@ -19,7 +19,7 @@ Perks were chosen from a "Pick a perk: 1/2/3" prompt after a chest, shrine, boss
 - **Old kit passives** field_kit, magpie, satchel, spyglass and tinker_roll are perks now with the same numbers (the kit gear files stay until agent A removes them from gear). Magpie's gem bonus used to be a stat nothing read; `PerkOrbs.gem_mult` makes it work, with Scavenger.
 - **Net.** `odrop` (id, perk, fan, x, y, z) when orbs spawn and `otake` (id, taker) when one is taken; the other game spawns or removes it and records the fan. Two games taking the same orb in the same instant both get it (same as ground pickups). Net 0.14.0 to 0.15.2 (the split gives A 0.15.1, B 0.15.2, C 0.15.3; the main session reconciles).
 - **Bots** walk to the orb they want most within 16 m (`PerkOrbs.bot_goal`, goal kind "orb", before chests), never take two from one fan, and skip perks they have maxed.
-- **Level-ups.** Skill points and ability ranks are unchanged. On every even level a hero's signature weapon takes the next step of its path (`WeaponPath`, `content/rules/weapon_path.json`: five WeaponUps steps for each hero in `Arch.ORDER`). A step an orb already maxed becomes the next open plain upgrade. A line in the message lane (`Hud.level_up`, `MsgLane`) names the level and what improved. Brands and extra stacks are only in the orb pool.
+- **Level-ups.** Skill points and ability ranks are unchanged. *(Retired 2026-11-09, ext/level-growth-parity: the even-level weapon path (`WeaponPath`, `weapon_path.json`) is gone, per the 2026-11-05 decision "no random weapon stat bonuses on level-up". A level now gives one skill point, a gold wash, the badge pop and the quiet `LevelGrowth` health and ability power the source also gives; weapon upgrades come only from orbs and tunings.)* The lane line (`Hud.level_up`, `MsgLane`) names the level and the skill point.
 
 ## Consequences
 - Removed: `offer_perks`, `choose_perk`, `perk_offer`, `perk_queue`, the 1-3 perk keys and the prompt cards. Keys 1, 2 and 3 are free for the utility belt.
@@ -57,19 +57,19 @@ The random part the owner remembers is most likely its powers, which are a separ
 Questions for the owner: build 1 and 2? Is 3 wanted? Should bots get the same growth? (Yes, if it's fair.)
 
 **Sources:**
-- Level page, SUPERVIVE Wiki: https://supervive.wiki.gg/wiki/Level
-- Leveling Rework + Big Balance Patch: https://supervive.wiki.gg/wiki/Leveling_Rework_%2B_Big_Balance_Patch
-- List of Hunter Base Stats: https://supervive.wiki.gg/wiki/List_of_Hunter_Base_Stats
-- Glossary (Powers, Relic Shops): https://supervive.wiki.gg/wiki/Glossary
+- Level page, the reference Wiki: reference notes
+- Leveling Rework + Big Balance Patch: reference notes
+- List of Hunter Base Stats: reference notes
+- Glossary (Powers, Relic Shops): reference notes
 - Players on per-level gains ("~6% base hp increase and +10 ability power per level"): https://steamcommunity.com/app/1283700/discussions/0/603021563739010834/
 - Steam announcements (rank-4 upgrades, level 15 caps): https://steamcommunity.com/app/1283700/announcements/
-- Powers by rarity, area-specific: https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction
+- Powers by rarity, area-specific: https://dignitas.gg/articles/how-to-thrive-in-the reference-a-general-introduction
 
 ## Weapon tier-up (shards)
 Research only, nothing built. The owner corrected the memory above: the random choice was on weapon tier-ups, not level-ups.
 
 **What the original did:**
-- **Name.** The random fourth option is a **Warped evolution** ("Warped equipment"). It arrived in the Season Zero update ("Beebo's Warped Tour").
+- **Name.** The random fourth option is a **Warped evolution** ("Warped equipment"). It arrived in the Season Zero update ("ref-hunter's Warped Tour").
 - **Currency.** Equipment, including the weapon slot, is upgraded with gold or with shards ("Power Shards" or "Upgrade Shards"; the wiki uses both names for one page).
   - Shards are loot from hunter deaths. One guide also says they come from killing creeps.
   - The wiki says a shard can "fully upgrade a piece of Equipment without having to visit a shop and spend gold".
@@ -93,8 +93,7 @@ Research only, nothing built. The owner corrected the memory above: the random c
 
 **Does it fit us?** Partly. Our power in a match already grows on three tracks:
 - perk orbs (random, found)
-- the fixed weapon path on even levels
-- quiet level growth
+- quiet level growth (the even-level weapon path was retired)
 
 Gloves are deliberately flat: the owner asked that they never rank up with skill points (11:40 ET). A shard tier-up would be a fourth track, and on gloves it would change that rule. It wouldn't use skill points, but gloves would grow in the match.
 
@@ -121,11 +120,11 @@ Cons:
 Not built. The owner and the main session decide.
 
 **Sources (tier-up):**
-- Weapons, SUPERVIVE Wiki (Common and Rare evolutions, the Warped fourth option and its odds): https://supervive.wiki.gg/wiki/Weapons and https://supervive.wiki.gg/wiki/Weapon
-- Season Zero Arc 1 "Beebo's Warped Tour" patch (Warped as the 4th Blue choice, ALT + 1-4 upgrades anywhere): https://supervive.wiki.gg/wiki/Season_Zero_Arc_1_Beebos_Warped_Tour
-- PCGamesN on the Season Zero update (why Warped exists, the odds): https://www.pcgamesn.com/supervive/season-zero-launch
-- Power Shard, SUPERVIVE Wiki (loot from player deaths, upgrade without a shop): https://supervive.wiki.gg/wiki/Power_Shard
-- Items, SUPERVIVE Wiki (duplicates and power shards upgrade equipment): https://supervive.wiki.gg/wiki/Items
-- Equipment, SUPERVIVE Wiki (gold prices by rarity): https://supervive.wiki.gg/wiki/Equipment
-- GameLeap equipment list (Upgrade Shards from creeps and hunters, three evolutions per weapon): https://www.gameleap.com/articles/all-supervive-equipment-in-the-open-beta
-- Dignitas intro (a Blue-tier evolution gives a passive of your choosing; shards from killed players): https://dignitas.gg/articles/how-to-thrive-in-supervive-a-general-introduction
+- Weapons, the reference Wiki (Common and Rare evolutions, the Warped fourth option and its odds): reference notes and reference notes
+- Season Zero Arc 1 "ref-hunter's Warped Tour" patch (Warped as the 4th Blue choice, ALT + 1-4 upgrades anywhere): reference notes
+- PCGamesN on the Season Zero update (why Warped exists, the odds): https://www.pcgamesn.com/the reference/season-zero-launch
+- Power Shard, the reference Wiki (loot from player deaths, upgrade without a shop): reference notes
+- Items, the reference Wiki (duplicates and power shards upgrade equipment): reference notes
+- Equipment, the reference Wiki (gold prices by rarity): reference notes
+- GameLeap equipment list (Upgrade Shards from creeps and hunters, three evolutions per weapon): https://www.gameleap.com/articles/all-the reference-equipment-in-the-open-beta
+- Dignitas intro (a Blue-tier evolution gives a passive of your choosing; shards from killed players): https://dignitas.gg/articles/how-to-thrive-in-the reference-a-general-introduction

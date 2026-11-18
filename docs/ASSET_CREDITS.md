@@ -17,7 +17,7 @@ http://creativecommons.org/publicdomain/zero/1.0/ ... This content is free to us
 educational and commercial projects. Support me by crediting Kay Lousberg, www.kaylousberg.com
 (this is not mandatory)".
 
-No assets from SUPERVIVE or any other commercial game are used.
+No assets from the reference or any other commercial game are used.
 
 ## What's vendored
 

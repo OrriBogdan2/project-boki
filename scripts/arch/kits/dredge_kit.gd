@@ -5,9 +5,9 @@ extends ArchKit
 ##
 ## - Passive, Salvage: knocks and assists stack (+2.5% health each, 10 at most); being downed costs
 ##   one. Hits on a hunter's back deal 50% more. A knock heals.
-## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
-##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
-##   shot. At dash rank 3 pellet hits trim the barge recharge.
+## - LMB: the scattergun (the weapon's own firing): seven slugs in one tight group that stop and hang at
+##   6.3m; one aim line on the ground follows the cursor; the body rocks back on each shot.
+##   At dash rank 3 pellet hits trim the barge recharge.
 ## - RMB, Deep Reach: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
@@ -18,7 +18,7 @@ extends ArchKit
 ##   adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
 ##   Just after it the barge turns badly.
 ## - Dash, Barge: a monster's low lunge the way you move, clawing the ground and hauling himself along; it
-##   touches nobody. A pounce in the air, further. Rank 3: it resets the gun's bloom.
+##   touches nobody. A pounce in the air, further.
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
@@ -42,7 +42,6 @@ const GHOST_THICK := 0.45              # m: the arm's silhouette where it runs t
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
-const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
@@ -67,8 +66,6 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
-var shot_at := -9.0
-var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
 var armor_shreds := 0           # (tests) hits that shredded armor
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
@@ -148,10 +145,11 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg
 
-## A slug from a zero-bloom volley wears the foe's armor faster (the source: +66% damage to armor). Our armor is
-## a worn-down damage cut, so the bonus is extra wear on it; health damage is unchanged. Never breaks it itself.
+## A slug wears the foe's armor faster (the source: +66% damage to armor when fired without spread; every
+## volley is tight now). Our armor is a worn-down damage cut, so the bonus is extra wear on it; health damage is
+## unchanged. Never breaks it itself.
 func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
-	if not (t is Hunter) or tight_pg == "" or String(o.get("pg", "")) != tight_pg:
+	if not (t is Hunter) or not o.has("pg"):
 		return
 	var ht := t as Hunter
 	if ht.armor <= 0.0:
@@ -167,9 +165,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	if rank("dash") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
-
-## A third barge charge: he chains several short, fast shoves in a row.
-func extra_dashes() -> float: return 1.0
 
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
@@ -233,37 +228,24 @@ func _drop_holds() -> void:
 	broadside.drop()
 
 ## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
-## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
+## streaks that hang as violet dots where they stop). One aim line lies on the ground from his body out to the
+## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
-		shot_at = m.time
 		volleys += 1
-		# the first shot after the bloom folded back leaves exactly one shot's worth of it
-		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
-		tight_pg = "%s_%d" % [h.nid, h.shot_n] if tight else ""
 		_dress_volley()
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	if m.time - shot_at < IDLE_T or bool(h.inp.get("fire", false)):
-		AimKit.cone(
-			h, "spread",
-			{
-				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
-				"col": Color("fff0f6"), "alpha": 0.8
-			}
-		)
-	else:
-		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
+	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff0f6"), "alpha": 0.8, "follow": true})
 
 func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
-	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
+	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
 	if not tells_visible():
@@ -278,7 +260,7 @@ func _dress_volley() -> void:
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
 		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.26))
+			if expired: fx.dot(at, SLUG_REST, 0.18))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
@@ -663,7 +645,7 @@ func _tick_dive(dt: float) -> void:
 	if h.gliding:
 		# the glider wins: opening it ends the smash (no landing hit) and he glides on, never dragged down
 		dive = {}
-		h.vel.y = maxf(h.vel.y, -Hunter.GLIDE_SINK)       # a normal glide from here, none of the smash's speed
+		h.vel.y = maxf(h.vel.y, -HunterMove.glide_sink)       # a normal glide from here, none of the smash's speed
 		AimKit.hide(h, "e_land")
 		play("")
 		return
@@ -747,15 +729,13 @@ func on_dash(use_ex: bool) -> bool:
 	else:
 		if not spend_dash(false):
 			return true
-		var shove := {"invuln": 0.06, "trail": "", "dir": dir}        # Brute Dash hits nobody (data, footage)
+		var shove := {"invuln": 0.06, "trail": "", "dir": dir, "curved": true}  # hits nobody; Kingpin's fitted curve
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
 		if not _move_runs(): _roll_ball()
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
-	if rank("dash") >= 3:
-		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
 	_clawed_turf(dir)
 	barge_t = h.roll_t
 	stop_t = h.roll_t + 0.02

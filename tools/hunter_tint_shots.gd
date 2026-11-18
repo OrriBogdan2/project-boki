@@ -1,5 +1,5 @@
 extends RefCounted
-## --hunter-tint-shots --shots-dir=<dir> [--size=1920x1080]: every Hunter's colour as the game shows it, against
+## --hunter-tint-shots --shots-dir=<dir> [--size=1920x1080] [--lit-only]: every Hunter's colour as the game shows it, against
 ## its .glb as authored (the 11-11 "hunters read red" report). Writes at the window size:
 ## neutral.png (each .glb's own glTF materials, white key, grey ambient: the model as a glTF viewer shows it),
 ## select.png (the Hunters screen's turntable stage, HunterViewer, one per Hunter) and match.png / match_close.png
@@ -20,6 +20,7 @@ var dir := ""
 func run(main_node: Node) -> void:
 	main = main_node
 	var px := Vector2i(1920, 1080)
+	var lit_only := "--lit-only" in OS.get_cmdline_user_args()  # (only lit.png and the TINT lines: a grade pass)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
@@ -36,9 +37,10 @@ func run(main_node: Node) -> void:
 		await fade.reveal(0.01)
 	for id in Arch.ORDER:
 		WardenGlb.neutral_rest(id)
-	await _neutral()
-	await _select()
-	await _match()
+	if not lit_only:
+		await _neutral()
+		await _select()
+	await _match(lit_only)
 	print("HUNTER-TINT-SHOTS done ", dir)
 	main.get_tree().quit()
 
@@ -123,7 +125,7 @@ func _select() -> void:
 
 
 ## One of each Hunter in a real match (its world, light and post), at the match camera and closer.
-func _match() -> void:
+func _match(lit_only := false) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
@@ -143,11 +145,12 @@ func _match() -> void:
 		h.global_position = Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 	for h in m.hunters:
 		h.visible = false
-	m.cam.snap(c + Vector3(0, 0, 4.0))
-	await _grab("match.png")
-	m.cam.dist_mul = 0.45
-	m.cam.snap(c + Vector3(0, 0, 4.0))
-	await _grab("match_close.png")
+	if not lit_only:
+		m.cam.snap(c + Vector3(0, 0, 4.0))
+		await _grab("match.png")
+		m.cam.dist_mul = 0.45
+		m.cam.snap(c + Vector3(0, 0, 4.0))
+		await _grab("match_close.png")
 	await _lit(m, c)
 
 
