@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "barostorm",
+	"name": "Barostorm",
+	"animals": [
+		"Meerkat",
+		"Storm barometer"
+	],
+	"theme": "storm",
+	"flavor": "Barostorm, art-lane design.",
+	"colors": {
+		"belly": "#fce4b4",
+		"body": "#b4b4cc",
+		"glow": "#ffdb93"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "sparks"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 9,
+		"kin_speed": 4,
+		"owner_shield": 2,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.51,
+		"curiosity": 0.58,
+		"loyalty": 0.88,
+		"temper": 0.21
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Storm Watch",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "echolocate",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Bar",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "alert, bossy, booming",
+		"syllables": [
+			"Bar",
+			"ostorm"
+		]
+	},
+	"egg": {
+		"name": "Barostorm Egg",
+		"temper": "Alert",
+		"desc": "Something alert is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

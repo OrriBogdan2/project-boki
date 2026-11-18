@@ -1,0 +1,20 @@
+{
+	"id": "lanternlong",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lanternlong.json.",
+	"work": {
+		"craft": 1,
+		"frost": 3,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#a3dbfc",
+		"color": "#3cedfc",
+		"glow": "#4af1ff"
+	},
+	"size": {
+		"cm": 54,
+		"kg": 16.2,
+		"fit": 1.31,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

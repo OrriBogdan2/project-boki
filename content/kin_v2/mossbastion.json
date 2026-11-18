@@ -1,0 +1,115 @@
+{
+	"grammar": 1,
+	"id": "mossbastion",
+	"name": "Mosstodon",
+	"animals": [
+		"Tardigrade",
+		"Moss hill"
+	],
+	"theme": "bloom",
+	"flavor": "Evolution of Mossgrade.",
+	"colors": {
+		"belly": "#a5c387",
+		"body": "#6c8454",
+		"glow": "#cdff6b"
+	},
+	"look": {
+		"ears": "none",
+		"body": "cloud",
+		"tail": "none",
+		"feet": "none",
+		"aura": "leaves"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 7,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.42,
+		"curiosity": 0.62,
+		"loyalty": 0.89,
+		"temper": 0.08
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Moss Hill",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.8
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Moss",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "slow, sleepy, unbothered",
+		"syllables": [
+			"Moss",
+			"todon"
+		]
+	},
+	"egg": {
+		"name": "Mosstodon Egg",
+		"temper": "Unbothered",
+		"desc": "Something unbothered is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

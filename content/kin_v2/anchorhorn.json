@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "anchorhorn",
+	"name": "Harpwhal",
+	"animals": [
+		"Narwhal",
+		"Harpoon"
+	],
+	"theme": "gravity",
+	"flavor": "Harpwhal, art-lane design.",
+	"colors": {
+		"belly": "#9c543c",
+		"body": "#3c5454",
+		"glow": "#ff8861"
+	},
+	"look": {
+		"ears": "horn",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 6,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.42,
+		"curiosity": 0.57,
+		"loyalty": 0.77,
+		"temper": 0.35
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Harpoon Head",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		},
+		"passives": [
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "pull",
+				"strength": 8
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "echolocate",
+	"merge": "titan",
+	"evolution": {
+		"root": "Harp",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "dignified, stern, formal",
+		"syllables": [
+			"Harp",
+			"whal"
+		]
+	},
+	"egg": {
+		"name": "Harpwhal Egg",
+		"temper": "Dignified",
+		"desc": "Something dignified is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

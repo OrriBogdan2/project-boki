@@ -4,7 +4,7 @@ class_name Unique
 ##
 ##   size     a bell curve (z-score, sd SIZE_SD of height); the tails are tagged XS and XL. Giant and
 ##            Tiny (Mutations) are the rarer extreme tier on top. Shown as cm / kg from the species'
-##            base size (content/kin/<id>.json "size": {cm, kg}).
+##            base size (content/kin/<id>.json "size": {cm, kg; fit scales the model to that height}).
 ##   girth    stocky or slender (weight, and a touch of width on the model)
 ##   head, limb, tail, ear   proportions, each a scalar about 1 (at most +-PROP_MAX)
 ##   hue, sat, val           a small shift of the species palette
@@ -84,7 +84,7 @@ const BIRTH_SHAPES := [["star", 1], ["heart", 1], ["crescent", 1], ["diamond", 1
 const BIRTH_PLACES := [["left cheek", 1], ["right cheek", 1], ["brow", 1], ["left flank", 1], ["right flank", 1],
 	["back", 1], ["chest", 1]]
 ## A species with no "size" in content/kin/<id>.json.
-const DEFAULT_SIZE := {"cm": 30.0, "kg": 3.0}
+const DEFAULT_SIZE := {"cm": 30.0, "kg": 3.0, "fit": 1.0}
 
 ## Normalized matches: size stops changing health, speed and the hitbox (looks stay).
 static var normalize := false
@@ -235,7 +235,8 @@ static func base_size(species: String) -> Dictionary:
 	var s = j.get("size", null)
 	var out := DEFAULT_SIZE.duplicate()
 	if typeof(s) == TYPE_DICTIONARY:
-		out = {"cm": float(s.get("cm", DEFAULT_SIZE["cm"])), "kg": float(s.get("kg", DEFAULT_SIZE["kg"]))}
+		out = {"cm": float(s.get("cm", DEFAULT_SIZE["cm"])), "kg": float(s.get("kg", DEFAULT_SIZE["kg"])),
+			"fit": float(s.get("fit", DEFAULT_SIZE["fit"]))}
 	_sizes[species] = out
 	return out
 
@@ -415,8 +416,9 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	root.set_meta("quirk", String(d.get("quirk", "")))
 	root.set_meta("girth", float(d.get("girth", 1.0)))
 	root.set_meta("voice", float(d.get("voice", 1.0)))
-	# size: the bell-curve roll (Giant and Tiny scale on top in Mutations.dress)
-	var hk := height_k(rec)
+	# size: the species' model fit (its rig frame to its height in the world) and the bell-curve roll (Giant and Tiny
+	# scale on top in Mutations.dress)
+	var hk := height_k(rec) * float(base_size(String(rec.get("species", "")))["fit"])
 	if absf(hk - 1.0) > 0.001:
 		var es := float(root.get_meta("evo_scale", 1.0)) * hk
 		root.set_meta("evo_scale", es)
