@@ -10152,3 +10152,4 @@ READY ext/boki-dex-port-1117 9a4ba02dd186312f2ed8307ab875edb74f751d47 (12 Boki p
 READY ext/rig-ship-1117 4ac78ea908c9faf216468cbefd1393e381147ce3 (Tenzo: pick's paint rebaked onto the 60k mesh, no specks/holes on GPU; skin albedo 0.8)
 READY ext/merge-lane-wiki-regen-1117 41186217f5 (wiki regen: Rules.md summon_station table, gen_wiki --check 1->0, docs only)
 READY ext/vision-cone-1117 6d95e38f33f6271ff5fb55d85c722d0518c177ee (PR #264: hudref demo faces the row so the 120 deg cone keeps rival plates; --hudref-check 0 fails)
+READY ext/merge-lane-hunters3-1117 b1e816cadd7 (lane hunters3: tutorial E-step miss refund port of cooldown-gate-1111 dfc15de + lace gate fix; --tut-aim-check 0 fail, tutorial-fight-check NEW-RED 0)
