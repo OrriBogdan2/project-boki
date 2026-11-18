@@ -10204,3 +10204,4 @@ READY ext/grimble-e-combo-1117 ced1dff981 (Grimble E no hop; RMB->E sure stun 10
 READY ext/vfx-utility-read-port d895074d4b (bulk-rebase: origin/main merged in mechanically, was b32aed7bc7; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/hud-portraits-1118 ad1e42c3c9a (7 hunters 3-mood HUD portraits; sheet /home/boki/meshy/hud-portraits-1118/compare_hud.jpg)
 READY ext/hunter-picks-1118 19a0bc242b6 (note: Breaker now spawns happy; idle_fire starts at 99, clips check covers it)
+READY ext/hud-portraits-1118 02d667635eb (all 13 hunters 3-mood HUD portraits: +Kael, Vex, Cinder, Lace, Meeko; Gil excited/hurt with live neutral; Malgrave has no archetype, skipped; sheet /home/boki/meshy/hud-portraits-1118/compare_hud_add8.jpg)
