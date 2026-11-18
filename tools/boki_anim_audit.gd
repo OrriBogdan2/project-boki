@@ -16,7 +16,8 @@ const Cover := preload("res://tools/boki_state_cover.gd")
 const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
 ## Paws the audit cannot read a stride off (no foot ever plants in the clip, so the measured stride is noise): their
-## BokiRig.STRIDE is the old hand-set one and the stride match is skipped. Fix: re-key with boki_gait.planted (docs/DEBT.md).
+## BokiRig.STRIDE is the old hand-set one and the stride match is skipped. Fix: re-key with boki_gait.planted
+## (docs/DEBT.md).
 const STRIDE_DEBT := ["marchleaf", "lodestick"]
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
