@@ -64,6 +64,9 @@ const T := {
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] a let-go brakes the same under a cast"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	"vault_exit_run":          ["~", [0.95, 1.05], "x", "[footage] Sable's Cartwheel runs down into her hasted run"],
+	"vault_slow_frames":       ["<=", 0.0, "frames", "[footage] past the peak, no step under the hasted run (no dip)"],
+	"vault_shot_gap_frames":   ["<=", 0.0, "frames", "[footage 0193] she throws as the flip ends (mid-flip too)"],
 	# Grimble's Barge chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
 	# that arrives with almost no skid and turns back to the aim within ~0.1 s (briefs/hero-ref/dredge.md 296-306)
 	"barge_chain_shoves":      ["~", [3.0, 3.0], "", "[owner 11-03] three charges, a Shift tap inside each shove"],
