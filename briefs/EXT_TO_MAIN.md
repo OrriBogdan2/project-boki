@@ -10207,3 +10207,4 @@ READY ext/hunter-picks-1118 19a0bc242b6 (note: Breaker now spawns happy; idle_fi
 READY ext/hud-portraits-1118 02d667635eb (all 13 hunters 3-mood HUD portraits: +Kael, Vex, Cinder, Lace, Meeko; Gil excited/hurt with live neutral; Malgrave has no archetype, skipped; sheet /home/boki/meshy/hud-portraits-1118/compare_hud_add8.jpg)
 READY ext/p11-port-1118 d6ad20bd8ea9e2cb6019fb42be8ac3177dd55f46 (merged main; --ostra-combo-check fixed 277/0: footed control now rebuilt + clip rig stepped)
 READY ext/merge-lane-clean1-1118 04398eca89 (lane clean1 bundle a: 11 branches, NEW-RED 0, export OK)
+READY ext/merge-lane-clean1-1118-b 9833d33c9f (lane clean1 bundle b: a + vex-single-dash, boki-models-everywhere, vfx1; NEW-RED 0, export OK)
