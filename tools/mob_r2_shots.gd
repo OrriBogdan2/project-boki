@@ -26,9 +26,11 @@ func run(mn: Node) -> void:
 			main.get_tree().root.size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	print("MOBR2 renderer ", RenderingServer.get_video_adapter_name())
-	for v in variants:
-		_use(v)
-		await _studio(String(v[0]), String(v[1]))
+	if not OS.get_cmdline_user_args().has("--match-only"):
+		for v in variants:
+			_use(v)
+			await _studio(String(v[0]), String(v[1]))
+	print("MOBR2 window ", main.get_viewport().get_visible_rect().size, " ", DisplayServer.window_get_size())
 	await _in_match()
 	print("MOBR2 DONE")
 	main.get_tree().quit()
