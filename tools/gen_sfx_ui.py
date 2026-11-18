@@ -8,7 +8,7 @@ ultimate back = a low fifth and one bell over it (UltReadyCue).
 Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
 equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
 take = a rustle and a short rising pair (quieter and duller than pickup). Ranks (RankSfx): a point
-ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that fifth with a soft bloom. A broken cast = a snap and a flat sag.
+ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that fifth with a soft bloom.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
@@ -322,14 +322,6 @@ def inv_take(i):
                            at(0.5 * pluck(NOTE['G5'] * j, 0.14, 0.035, 0.5), 0.07)), 0.3), 3200)
 
 
-def broken(i):
-    """A cast broken under you (a stun in a wind-up): a dry snap and a short pluck that sags flat, over in 0.2 s."""
-    snap = bpf(noise(0.018), 2600, 5200) * env(N(0.018), 0.0008, 0.005)
-    sag = S.sweep(NOTE['E5'], NOTE['E5'] * 0.82, 0.16) * env(N(0.16), 0.002, 0.045)
-    thud = 0.35 * pluck(NOTE['C4'], 0.12, 0.03, 0.2)
-    return finish(room(mix(0.8 * snap, at(0.55 * sag, 0.012), thud), 0.25), 4200)
-
-
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -370,7 +362,6 @@ def main():
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
     S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
-    S.save_cat('cast_broken', broken(0), 'ui')
 
 
 if __name__ == '__main__':

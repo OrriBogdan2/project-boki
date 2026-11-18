@@ -374,7 +374,7 @@ func on_dash(use_ex: bool) -> bool:
 	reset_dash_boost = false
 	play("mage_dash")
 	vfx("dash")                    # a bolt slams down onto her: the charging tell
-	KitWindup.play(self, "dash", "vv_surge_charge", -3.0)
+	m.sfx("vv_surge_charge", h.pos, -3.0)
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -414,7 +414,6 @@ func _tick_wire(dt: float) -> void:
 	var t := float(wire["t"])
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
-		KitWindup.broken(self, "dash")
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO

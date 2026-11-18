@@ -732,7 +732,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	throw_t = PUSH_T
 	play("tm_spear")
-	KitWindup.play(self, "rmb", "rime_spear_aim", -4.0, 0.8)
+	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
 
 
 ## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
@@ -741,7 +741,6 @@ func _tick_throw(dt: float) -> void:
 		return
 	if busy() or not rime.is_empty():
 		_drop_throw()
-		if busy(): KitWindup.broken(self, "rmb")
 		return
 	throw_t -= dt
 	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)

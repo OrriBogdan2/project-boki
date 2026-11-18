@@ -46,7 +46,6 @@ const GRUMPY := 30.0       # joy need below which a Boki naps alone
 const SPOT_AT := 0.5       # m: close enough to its nap spot to lie down
 const SPOT_SNAP := 3.0     # m a nap spot may move to the nearest open ground (a farm island is the save's own)
 const BESIDE := 0.8        # m: the least gap between a spot and the place beside it
-const NAP_DB := -10.0     # dB: the sleepy breath as it lies down, as quiet as the farm's own naps
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
@@ -451,7 +450,6 @@ func _lie_down(k: Dictionary) -> void:
 	k["z_t"] = 0.5
 	k["goal"] = k["pos"]
 	k["t"] = float(k["nap_t"])
-	HomeVoice.say(k["rec"], "boki_sleep", k["pos"], NAP_DB)
 
 ## A retired mentor: calm and slow, always near the Soul Shrine (anywhere on the farm if none is marked out).
 func _mentor(k: Dictionary) -> void:

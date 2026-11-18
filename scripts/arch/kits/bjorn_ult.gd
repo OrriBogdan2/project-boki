@@ -110,7 +110,7 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	leap = h.grounded
 	k.play("bul_ult_wind")
-	KitWindup.play(k, "x", "bjorn_ult_wind", -3.0 if h.is_local() else -7.0)
+	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
 	return true
 
 func cell_len() -> float:
@@ -224,7 +224,6 @@ func _interrupt() -> void:
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
-	KitWindup.broken(k, "x")
 	_hide_lane()
 
 ## A merge drops the wind-up with no slam; a fissure already running finishes (it's a cast).
