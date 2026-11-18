@@ -8,7 +8,8 @@ extends RefCounted
 ## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
-const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
+## cindle at 2, not 1: a Sunsap's 40 XP would level a Lv 1 one (18 x L^1.5) and add a journal line
+const SPECS := [["cindle", 2, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
 
 var bad := 0
 var main: Node
@@ -111,6 +112,8 @@ func _tokens_and_stay() -> void:
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
 	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	if not Evo.has_art(Evo.next_for(rec, "level")):
+		rec["level"] += posmod(2 - int(rec["level"]), 4)      # no form art yet: the next part level (Evo.on_level)
 	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
 			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")

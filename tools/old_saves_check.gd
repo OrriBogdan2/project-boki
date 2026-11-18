@@ -82,9 +82,14 @@ func _boki_part(t: String, d: Dictionary, old: Dictionary) -> void:
 		if rec.is_empty():
 			ok(false, t + who + " is missing")
 			continue
+		# save v21 rescales XP to the new curve (same share of the level), at the level the earlier steps left
+		var xp_was := {"roster": [was.duplicate(true)]}
+		xp_was["roster"][0]["level"] = rec["level"]      # (a level over the cap is clamped first)
+		Evo.migrate_xp(xp_was)
+		var xp_want := int(xp_was["roster"][0]["xp"])
 		ok(rec["species"] == was["species"] and rec["name"] == was["name"] and rec["dna"] == was["dna"]
-			and is_equal_approx(float(rec["trust"]), float(was["trust"])) and int(rec["xp"]) == int(was["xp"]),
-			t + who + ": species, name, inborn rolls, trust and xp are kept")
+			and is_equal_approx(float(rec["trust"]), float(was["trust"])) and int(rec["xp"]) == xp_want,
+			t + who + ": species, name, inborn rolls, trust and xp (its share of the level) are kept")
 		var want := mini(int(was["level"]), Evo.cap())
 		ok(int(rec["level"]) == want, t + who + ": level %d (was %d, cap %d)" % [rec["level"], was["level"], Evo.cap()])
 		ok(rec.get("zone") == GardenZones.start() and rec.get("bonds") is Dictionary and rec.has("was"),

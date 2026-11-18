@@ -41,6 +41,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	seed(11)
 	Save.d = Save.fresh()
+	FarmUnlocks.rules()["base_mode"] = false      # the model's care pace is the farm's (base Boki cheer up at toys)
 	var grown := _raising_min()      # the pace model's own conditions, before the base is built
 	FarmUnlocks.rules()["base_mode"] = true
 	await _start()
