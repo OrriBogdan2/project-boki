@@ -36,7 +36,7 @@ func run(mn: Node) -> void:
 ## Points MobGlb's scene cache for the kind at the variant's glb (live: the shipped one).
 func _use(v: Array) -> void:
 	var kind := String(v[0])
-	var path: String = String(v[2]) if v.size() > 2 and String(v[2]) != "" else MobGlb.PATH % [kind, kind]
+	var path: String = "res://" + String(v[2]) if v.size() > 2 and String(v[2]) != "" else MobGlb.PATH % [kind, kind]
 	MobGlb._scenes[kind] = load(path)
 
 func _frames(n: int) -> void:
@@ -148,7 +148,7 @@ func _in_match() -> void:
 		var kind := String(v[0])
 		var mb := m.spawn_mob(kind, P.pos + Vector3(2.5, 0, 0))
 		await _frames(120)
-		print("MOBR2 at ", mb.pos, " player ", P.pos, " vis ", mb.is_visible_in_tree(), " model ", mb.model.is_visible_in_tree())
+		print("MOBR2 at ", mb.pos, " player ", P.pos, " vis ", mb.visible, " dead ", mb.dead, " hp ", mb.hp, " parentvis ", m.is_visible_in_tree(), " time ", m.time)
 		var img := main.get_viewport().get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
 		var c := Vector2i(m.cam.unproject_position(mb.pos + Vector3(0, 0.8, 0)))
