@@ -101,8 +101,10 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
 		if d >= 28.0 or o.get("heavy", false) or o.get("payoff", false):
 			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
-	elif target == p and armor:
-		m.sfx("armor_hit", null, -12.0, 0.85)
+	elif target == p:
+		IncomingHitSfx.hit(m, by, d, o)      # from where it came, so you know which way to turn
+		if armor:
+			m.sfx("armor_hit", null, -12.0, 0.85)
 	elif target != p and credit != p:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
