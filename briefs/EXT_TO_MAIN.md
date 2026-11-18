@@ -10176,3 +10176,4 @@ READY ext/tenzo-eyestones-1118 0a5675a246855a628e4671e708a467eba1bf68ca (superse
 READY ext/sparkle-dollA-game-1118 8de24530d15ecdbf174e7739dd3cb4459f8e94f7 (Sparkle doll A: new face + smaller bust in game)
 READY ext/play-probe-1118 fc4dafb9ce (play probe: automated player for all 13 Hunters via real InputEvents, PR #297; 4 FLAGs on main)
 READY ext/lmb-stuck-1118 895b5c0906d3 (LMB release: focus-out lets go of held keys, map closes on landing, release-mid-hitstop/stun/dash/pause regression; bots beside a standing you step about instead of freezing 14.5 s; PR #288)
+READY ext/anim-select-poses-v95 184695fa9b (lobby stage: Sparkle and Motley lock-in windows no longer open on arms-spread / empty box; lockin-shots tool fixed; 13-Hunter before/after sheet)
