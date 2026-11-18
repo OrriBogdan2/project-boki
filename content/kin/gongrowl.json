@@ -1,0 +1,19 @@
+{
+	"id": "gongrowl",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gongrowl.json.",
+	"work": {
+		"craft": 1,
+		"forage": 2,
+		"spark": 3
+	},
+	"shiny": {
+		"belly": "#558476",
+		"color": "#544b36",
+		"glow": "#78faff"
+	},
+	"size": {
+		"cm": 75,
+		"kg": 33.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

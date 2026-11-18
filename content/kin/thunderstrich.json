@@ -1,0 +1,19 @@
+{
+	"id": "thunderstrich",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/thunderstrich.json.",
+	"work": {
+		"haul": 1,
+		"spark": 3,
+		"tide": 2
+	},
+	"shiny": {
+		"belly": "#659c8b",
+		"color": "#466c60",
+		"glow": "#78ffd6"
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

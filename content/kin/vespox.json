@@ -1,0 +1,19 @@
+{
+	"id": "vespox",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/vespox.json.",
+	"work": {
+		"ember": 3,
+		"forage": 1,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#9acc84",
+		"color": "#549c56",
+		"glow": "#78ff7d"
+	},
+	"size": {
+		"cm": 52,
+		"kg": 13.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

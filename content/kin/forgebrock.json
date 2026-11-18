@@ -1,0 +1,19 @@
+{
+	"id": "forgebrock",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/forgebrock.json.",
+	"work": {
+		"craft": 2,
+		"ember": 3,
+		"forage": 1
+	},
+	"shiny": {
+		"belly": "#87e6ff",
+		"color": "#54dfe4",
+		"glow": "#3ce2ff"
+	},
+	"size": {
+		"cm": 60,
+		"kg": 20.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

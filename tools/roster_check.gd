@@ -5,7 +5,7 @@ extends RefCounted
 ## loosened; the ride code reads mount speed as a plain multiplier, so no minimum speed is needed).
 ## Never touches the save.
 
-const TARGET_TOTAL := 50
+const TARGET_TOTAL := 89  # the 50 roster species and the 39 evolved forms that got data and a model 11-18
 
 var bad := 0
 

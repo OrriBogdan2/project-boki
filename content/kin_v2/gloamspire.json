@@ -1,0 +1,118 @@
+{
+	"grammar": 1,
+	"id": "gloamspire",
+	"name": "Duskspire",
+	"animals": [
+		"Garden snail",
+		"Dark crystal spire"
+	],
+	"theme": "dark",
+	"flavor": "Evolution of Duskargot.",
+	"colors": {
+		"belly": "#c3a5e1",
+		"body": "#846c9c",
+		"glow": "#c790ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "cloud",
+		"tail": "none",
+		"feet": "none",
+		"aura": "none"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 6,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.55,
+		"curiosity": 0.54,
+		"loyalty": 0.6,
+		"temper": 0.3
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Spire Trail",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "mark",
+				"mode": "reveal",
+				"duration": 3
+			}
+		]
+	},
+	"active": "puffcap_mines",
+	"auto": "thorn_patch",
+	"merge": "thornwake",
+	"evolution": {
+		"root": "Dusk",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "slow, smug, whispery",
+		"syllables": [
+			"Dusk",
+			"spire"
+		]
+	},
+	"egg": {
+		"name": "Duskspire Egg",
+		"temper": "Private",
+		"desc": "Something private is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

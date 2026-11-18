@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "embrook",
+	"name": "Embrook",
+	"animals": [
+		"Rook",
+		"Hearth fire"
+	],
+	"theme": "ember",
+	"flavor": "Rook with a coal-bed back and cinder wings.",
+	"colors": {
+		"belly": "#fc843c",
+		"body": "#543c54",
+		"glow": "#ff923c"
+	},
+	"look": {
+		"ears": "flame",
+		"body": "drop",
+		"tail": "flame",
+		"feet": "none",
+		"aura": "embers"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 3,
+		"kin_hp": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.7,
+		"curiosity": 0.68,
+		"loyalty": 0.45,
+		"temper": 0.52
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Hearth Kindling",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"amount": 8,
+				"over": 3
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "flare_dash",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Em",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "cheeky, quick, crackly",
+		"syllables": [
+			"Em",
+			"brook"
+		]
+	},
+	"egg": {
+		"name": "Embrook Egg",
+		"temper": "Cheeky",
+		"desc": "Something cheeky is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}
