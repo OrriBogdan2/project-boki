@@ -15,13 +15,14 @@ const MAX_STEP := 1.0 / 30.0
 ## Beyond this camera distance (m) the chains ride the hips rigidly and cost nothing: at the game camera (~23 m, a
 ## ~60 px figure) the swing does not show, so 8 hunters in a match pay nothing; close cameras (menus, orbits) get it.
 const LOD_M := 12.0
-## [bone, centre offset from its head (rest: the bone points down, so -Y; m), radius (m), capsule height (m, 0 = a
-## sphere)]: bodies cloth must not enter. glTF metres at class-neutral size: a thigh is 0.47 m, a shin 0.48 m.
-## Capsules along the bones (one per leg segment, not three spheres: the sim tests every joint against every shape).
+## [bone, centre offset from its head (m, bone space: the leg bones point down their +Y, the foot's +Y to the toes),
+## radius (m), capsule height (m, incl. the caps; 0 = a sphere)]: bodies cloth must not enter. glTF metres at
+## class-neutral size: the thigh runs 1.03 -> 0.56 m, the shin 0.56 -> 0.08 m. One capsule per leg segment (the sim
+## tests every joint against every shape). The cloth spec's "legs" clear radii keep the chains' rest joints outside.
 const SHAPES := [
-	["thigh.L", Vector3(0, -0.21, 0), 0.12, 0.62], ["thigh.R", Vector3(0, -0.21, 0), 0.12, 0.62],
-	["shin.L", Vector3(0, -0.25, 0), 0.085, 0.62], ["shin.R", Vector3(0, -0.25, 0), 0.085, 0.62],
-	["foot.L", Vector3(0, 0, -0.08), 0.10, 0.0], ["foot.R", Vector3(0, 0, -0.08), 0.10, 0.0],
+	["thigh.L", Vector3(0, 0.25, 0), 0.11, 0.46], ["thigh.R", Vector3(0, 0.25, 0), 0.11, 0.46],
+	["shin.L", Vector3(0, 0.24, 0), 0.075, 0.48], ["shin.R", Vector3(0, 0.24, 0), 0.075, 0.48],
+	["foot.L", Vector3(0, 0.06, 0), 0.09, 0.0], ["foot.R", Vector3(0, 0.06, 0), 0.09, 0.0],
 ]
 
 var skel: Skeleton3D
