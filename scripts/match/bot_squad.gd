@@ -12,6 +12,8 @@ const FAR_M := 28.0            # metres from the nearest squadmate where a bot w
 const NEAR_M := 10.0           # ...and how close it comes before it goes back to its own errands
 const BASE_M := 55.0           # metres: further off than this, base to the squadmate instead of walking
 const GUARD_M := 6.0           # metres from a busy lead where a squadmate with nothing to do waits
+const GUARD_WAIT := Vector2(1.5, 3.5)  # s it stands on one spot beside the lead before it steps to another
+const GUARD_WALK := 3.0        # s to get to that spot before it picks another
 const CALM_S := 4.0            # seconds since the last hit before a bot stands still to base
 const ASSIST_BASE := 18.0      # metres from which the least skilled bot notices a squadmate's fight
 const ASSIST_SKILL := 22.0     # ...more per point of skill (an expert: about 38 m)
@@ -179,8 +181,8 @@ static func lead(m, h: Hunter) -> Hunter:
 
 ## Where a bot with nothing to do roams: where its lead is roaming to, else to the lead, or INF for
 ## the lead itself, which picks its own way. Next to a lead that is busy (looting, holding a spot, a
-## player standing) it waits on one spot: walking onto the lead, it was pushed back off every step
-## and turned on the spot for half a minute.
+## player standing) it waits beside it, a few seconds on each spot 2.5-4.5 m out (never onto the
+## lead: pushed back off every step, it turned on the spot for half a minute).
 static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 	var ld := lead(m, h)
 	if ld == null or not on(m):
@@ -192,9 +194,22 @@ static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 	if h.flat_dist(ld) > GUARD_M:
 		a.erase("guard")
 		return ld.pos
-	if not a.has("guard"):
-		a["guard"] = h.pos
-	return a["guard"]
+	# a spot beside the lead, a few seconds there, then another one: holding the spot it walked up to, a
+	# squadmate stood frozen for 14 s at a time beside a player who stopped (the map out, say)
+	var g: Vector3 = a.get("guard", Vector3.INF)
+	if g != Vector3.INF and h.flat_dist(g) < 1.2 and not a.has("guard_in"):
+		a["guard_in"] = true
+		a["guard_t"] = m.time + randf_range(GUARD_WAIT.x, GUARD_WAIT.y)
+	if g == Vector3.INF or ld.flat_dist(g) > GUARD_M or m.time > float(a.get("guard_t", 0.0)):
+		for i in 4:      # (a step away from where it stands, or it never moves)
+			var ang := randf() * TAU
+			g = m.world.free_spot_near(ld.pos + Vector3(cos(ang), 0.0, sin(ang)) * randf_range(2.5, 4.5), [], 1.0, 0.45, 3.0)
+			if h.flat_dist(g) >= 2.0:
+				break
+		a["guard"] = g
+		a["guard_t"] = m.time + GUARD_WALK      # (a spot it can't get to: another one)
+		a.erase("guard_in")
+	return g
 
 ## Drifted off from the squad with nothing pressing: the squadmate to head back to (and base to
 ## them when they are islands away and it is calm), or INF. Holds until the bot is close again.
