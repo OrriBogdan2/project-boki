@@ -82,7 +82,7 @@
 			"fade": 0.3,
 			"fade_out": 0.4,
 			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
-			"blend_out": 0.2
+			"blend_out": 0.45
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
@@ -105,7 +105,7 @@
 			"fade_out": 0.4,
 			"fade": 0.05,
 			"time": [[0, 0], [0.13, 0.07], [0.5, 0.5]],
-			"blend_out": 0.15
+			"blend_out": 0.3
 		},
 		"jug_dash": {
 			"clip": "dash",

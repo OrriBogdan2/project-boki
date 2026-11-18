@@ -58,7 +58,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 	var top_at := ""
 	for row in rows:
 		var what := "%s %s@%.2f>%s" % [id, row[0], row[1], row[2] if row[2] != "" else "legs"]
-		var r := await _run(m, sync, clips, dd, [["", LEAD], [row[0], row[1]], [row[2], 2.0 * SETTLE]])
+		var win := _window(dd, String(row[0]), String(row[2]))
+		var r := await _run(m, sync, clips, dd, [["", LEAD], [row[0], row[1]], [row[2], 2.0 * win]], win)
 		worst.append([r[0], what])
 		if float(r[0]) > top:
 			top = float(r[0])
@@ -67,8 +68,17 @@ func _hero(id: String, dd: Dictionary) -> void:
 			late.append(what)
 	ok(top <= limit, "%s: %d cancels hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
 			% [id, rows.size(), top, top_at, limit])
-	ok(late.is_empty(), "%s: every cancel's blend is done within %.1f s of the cut (late: %s)" % [id, SETTLE, str(late)])
+	ok(late.is_empty(), "%s: every cancel's blend is done in a footage frame (%.1f s) or its own fade (late: %s)"
+			% [id, SETTLE, str(late)])
 	m.free()
+
+## How long the blend into `to` may take: a frame of the footage, or the data's own fade (into a move) or fade_out
+## (back to the legs off `from`) when a move keys it longer.
+static func _window(dd: Dictionary, from: String, to: String) -> float:
+	var moves: Dictionary = dd.get("kmoves", {})
+	var fade: float = float(moves.get(to, {}).get("fade", WardenClips.FADE)) if to != "" \
+			else float(moves.get(from, {}).get("fade_out", WardenClips.FADE_LOCO))
+	return maxf(SETTLE, fade + DT)
 
 ## The clip a state shows: "" for the legs, the glider and the stun's clip.
 static func clip_of(dd: Dictionary, st: String) -> String:
@@ -94,14 +104,16 @@ static func settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 	if st == "" or st == "glide":
 		var off := clips.act_w <= 0.001 and clips.up_w <= 0.001
 		return off and (st == "" or clips.glide_w >= 0.999 and clips.air_w >= 0.999)
-	var upper: bool = dd.get("kmoves", {}).get(st, {}).get("upper", false) != false
+	var up: Variant = dd.get("kmoves", {}).get(st, {}).get("upper", false)
+	var upper := up is String or bool(up)
 	var w := clips.up_w if upper else clips.act_w
 	var xf := clips.xf_u if upper else clips.xf
 	return w >= 0.999 and absf(xf - float(clips.chan_u if upper else clips.chan)) < 0.001
 
 ## A sequence [[state, s], ...] fed frame by frame as the game does: [worst pop m, settled]. Pops count from the second
-## step on (the cut itself; the first move's own start is the flow's business).
-func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array) -> Array:
+## step on (the cut itself; the first move's own start is the flow's business). Settled: the last step owns the body
+## `win` s after it begins.
+func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array, win: float) -> Array:
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	for st in seq:
 		var clip := clip_of(dd, String(st[0]))
@@ -136,7 +148,7 @@ func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array)
 			await holder.get_tree().process_frame
 			t += DT
 			i += 1
-			if k == seq.size() - 1 and absf(t - SETTLE) < DT / 2.0:
+			if k == seq.size() - 1 and absf(t - win) < DT / 2.0:
 				done = done and settled(clips, dd, String(st[0]))
 			var p := hand.global_position
 			var over := 0.0
