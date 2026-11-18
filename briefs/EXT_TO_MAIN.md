@@ -10182,3 +10182,4 @@ READY ext/merge-lane-misc-1117 a572099bd6 (bulk-rebase: origin/main merged in me
 READY ext/stuck-integ-b771bcef acce3452a7 (bulk-rebase: origin/main merged in mechanically, was d36237c981; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hunter-heights 3b42a223426aa6a7368b47c042e903c0faba6393 (12 hunters' body.size re-fit to heights.json head tops, visual only; PR via gh-outbox)
 READY ext/anim-cancel-blend-port e9e99488b1 (bulk-rebase: origin/main merged in mechanically, was 7a0d78315e; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/tenzo-eyestones-1118 9b647407290daed55e4ddae4b7b90ca4f2e1fdf6 (tenzo portrait arm cobalt: sheet + finals in /home/boki/meshy/tenzo-arm-cobalt-1118)
