@@ -49,6 +49,10 @@ Hero live in `tools/art1/` (Kael is the pilot).
   move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
   so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
   `--foot-slide-check`). No key: the clip plays as keyed.
+  `plants` {clip: {"L": [s], "R": [s]}}: when each walk and run loop puts a foot down (s into the clip at rate 1); the
+  footsteps (`WardenSteps`) sound on them, from the loop nearest the ring's blend position, feet alternating through a
+  blend. `--step-sync-check` reads them off the clips (`--plants-json=<file>` writes them) and fails when a loop is
+  re-baked without them: re-read them whenever a loop changes. No key: the Hero's steps follow the procedural stride.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
   Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
