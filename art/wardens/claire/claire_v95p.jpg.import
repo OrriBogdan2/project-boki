@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ban3wv0dvlm7v"
-path.s3tc="res://.godot/imported/kael_v95c.jpg-9c9c9548bc68955a0d235e0cfde14b39.s3tc.ctex"
-path.etc2="res://.godot/imported/kael_v95c.jpg-9c9c9548bc68955a0d235e0cfde14b39.etc2.ctex"
+uid="uid://dx6wmsuyhg8if"
+path.s3tc="res://.godot/imported/claire_v95p.jpg-ff93c782dd14a04dd225dcff96e4b8c4.s3tc.ctex"
+path.etc2="res://.godot/imported/claire_v95p.jpg-ff93c782dd14a04dd225dcff96e4b8c4.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "0904be71c93df1802371ee2ecc2e0051"
+"md5": "0035263266ad162ca658be02002e06cb"
 }
 
 [deps]
 
-source_file="res://art/wardens/kael/kael_v95c.jpg"
-dest_files=["res://.godot/imported/kael_v95c.jpg-9c9c9548bc68955a0d235e0cfde14b39.s3tc.ctex", "res://.godot/imported/kael_v95c.jpg-9c9c9548bc68955a0d235e0cfde14b39.etc2.ctex"]
+source_file="res://art/wardens/claire/claire_v95p.jpg"
+dest_files=["res://.godot/imported/claire_v95p.jpg-ff93c782dd14a04dd225dcff96e4b8c4.s3tc.ctex", "res://.godot/imported/claire_v95p.jpg-ff93c782dd14a04dd225dcff96e4b8c4.etc2.ctex"]
 
 [params]
 
