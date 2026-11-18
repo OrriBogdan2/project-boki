@@ -44,6 +44,7 @@ lobby; in the pre-match lobby `loaded`, `pick` `{arch, final}` and `chat`), `joi
 | `st` | Every owner, every 0.1 s; the host's world every 0.15 s | Snapshots of owned entities, with the match time as a header. Unreliable channel. |
 | `hit` | Anyone who hits something they don't own | `[target nid, damage, knockback x, z, lift, crit, ...]`, applied by the owner |
 | `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `knock`, `out`, `catch` / `caught`, `chest`, and more |
+| `chat` | Anyone | Squad text chat `{t}` (Enter types, Esc closes). Everyone in the room gets it; SquadChat keeps it only from a teammate you haven't muted. |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 

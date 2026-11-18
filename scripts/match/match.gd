@@ -468,6 +468,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))

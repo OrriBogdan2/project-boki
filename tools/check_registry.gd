@@ -638,6 +638,7 @@ const CHECKS := {
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
+	"--squad-chat-check": ["res://tools/squad_chat_check.gd", "squad_chat_check", null],      # in-match squad chat
 	# the loading screen: splash, tip, bar
 	"--loading-check": ["res://tools/loading_check.gd", "loading_check", null],
 	"--hud-safe-shots": ["res://tools/hud_safe_shots.gd", "hud_safe_shots", null],      # GPU, --size= --shots-dir=
