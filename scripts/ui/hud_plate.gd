@@ -8,7 +8,7 @@ extends RefCounted
 ## same chip tracker feeds the mob and boss bars and the squad list (chip_of).
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
 ##   name / status word ............ sp.y - 7
-##   frame (health + armour) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
+##   frame (armour + health) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
 ##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
 
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
@@ -174,9 +174,10 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var ch := chip_of(h, frac, dt)
 	var fl := flash_of(h)
 	HudStyle.plate_frame(c, frame, Color(role, 0.55), fl)
-	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
+	var ar := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_AR_H))      # armour above health
+	var hr := Rect2(Vector2(x0, ar.end.y + 1.0), Vector2(w, HudStyle.PLATE_HP_H))
 	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
-	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
+	var has_ar := _armor(c, h, ar, s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(viewer, h))
 	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
@@ -227,10 +228,11 @@ func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var ch := chip_of(p, frac, dt)
 	var fl := flash_of(p)
 	HudStyle.plate_frame(c, frame, Color(SideColor.you(), 0.5), fl)
-	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
+	var ar := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_AR_H))      # armour above health
+	var hr := Rect2(Vector2(x0, ar.end.y + 1.0), Vector2(w, HudStyle.PLATE_HP_H))
 	var fill := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
-	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
+	var has_ar := _armor(c, p, ar, s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
