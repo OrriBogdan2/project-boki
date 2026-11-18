@@ -500,6 +500,7 @@ func _courses() -> void:
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.
 func _zone_tracks() -> void:
+	var was := FarmUnlocks.base_mode()
 	FarmUnlocks.rules()["base_mode"] = true
 	for z in GardenZones.ids():
 		if not ZoneLayout.built(z) or z == GardenZones.start():
@@ -522,7 +523,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = was      # back to the shipped value for _on_base
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}

@@ -141,7 +141,8 @@ func _home_slot() -> void:
 	var k := Save.new_kin("zapple", "Pip")
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
-	Save.d["tutorial"] = {"home": true, "day1_done": true}
+	# the garden (base_mode) shows the slot from the first dash on
+	Save.d["tutorial"] = {"home": true, "day1_done": true, HomeDashSlot.USED_KEY: true}
 	Econ.ensure()
 	var home = await main._hb_home()
 	ok(not ("dash_pips" in home), "the farm's own overhead dash pips are gone")

@@ -261,7 +261,9 @@ func _tutorial_match():
 func _farm_tutorial(home) -> void:
 	_begin("farm tutorial")
 	home._close_panel()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "the farm tutorial starts by calling you to Hob")
+	var first := String(FarmTutorial.steps()[0]["id"])      # "hob" on the old farm, "meet" on the garden base
+	ok(FarmTutorial.active() and FarmTutorial.current() == first,
+			"the farm tutorial starts at its first step (%s)" % first)
 	ok(is_instance_valid(home.guide.hint_box), "its first prompt is on screen")
 	var gems := int(Save.d["gems"])
 	var steps := 0
@@ -278,7 +280,8 @@ func _farm_tutorial(home) -> void:
 		await _farm_step(home, cur)
 		_do_step(cur)
 	ok(bool(FarmTutorial.state()["done"]) and not FarmTutorial.state()["skipped"], "every step can be done in turn")
-	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "the axe and the pickaxe were handed over")
+	ok(FarmTutorial.base() or (HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")),
+			"the axe and the pickaxe were handed over (the garden base has no tools)")
 	ok(int(Save.d["gems"]) >= gems + int(FarmTutorial.option("end_gems")), "the reward at the end is paid")
 	home.guide._poll()
 	ok(not is_instance_valid(home.guide.hint_box), "and the prompts are gone")
@@ -460,8 +463,10 @@ func _skip_paths() -> void:
 	ok(buttons == (1 if skippable else 0), "its Skip button follows the 'skippable' option (%s)" % skippable)
 	var gems := int(Save.d["gems"])
 	home.guide.skip()
-	ok(not FarmTutorial.active() and FarmSites.is_site(FarmHob.house_entry()), "skipping leaves the house to build")
-	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "and the axe and the pickaxe")
+	ok(not FarmTutorial.active() and (FarmTutorial.base() or FarmSites.is_site(FarmHob.house_entry())),
+			"skipping ends it (and leaves the house to build on the old farm)")
+	ok(FarmTutorial.base() or (HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")),
+			"and the axe and the pickaxe")
 	ok(int(Save.d["gems"]) >= gems, "nothing was taken")
 	await _portal_relic(home)
 	_end()
