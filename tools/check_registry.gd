@@ -65,6 +65,8 @@ const CHECKS := {
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
 	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
+	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge rule and shader
+	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # GPU, --shots-dir=<dir>
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
@@ -329,6 +331,7 @@ const CHECKS := {
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],  # hold poses need the key
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
+	"--play-probe": ["res://tools/play_probe.gd", "play_probe", null],  # automated player: physics and controls
 	"--duel-sim": ["res://tools/duel_sim.gd", "duel_sim", null],      # 12x12 bot duels (docs/BALANCE_1111.md)
 	"--boss-focus-check": ["res://tools/boss_focus_check.gd", "boss_focus_check", null],      # decision 0061
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
