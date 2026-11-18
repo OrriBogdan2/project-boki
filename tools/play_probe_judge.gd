@@ -10,7 +10,9 @@ const SKATE_RATIO := 0.6  # planted foot speed / body speed above this while run
 const LATE_S := 0.8  # s after the release: activity past this is the ability still going
 const LATE_EVENTS := 2  # activity events past LATE_S that count as "keeps going"
 const REST_EPS := 0.004  # rad: a skeleton this close to its rest pose is standing in the T-pose
-const CAM_JERK_M := 0.03  # m: the camera's one-frame change of step during a steady run
+## m: the camera's one-frame change of step during a steady run; at the usual zoom 1080p shows 1.5 cm a pixel, so
+## this is a 4 px jolt
+const CAM_JERK_M := 0.06
 const BODY_SMOOTH_M := 0.005  # m: the body's own one-frame change of step under this is smooth
 const JITTER_M := 0.04  # m: back-and-forth along the push direction while pressed into a wall
 ## FLAG kind -> [impact 1-10, what a player would say]
@@ -40,12 +42,26 @@ const KINDS := {
 	"ledge_stop": [3, "a small step up stops me dead"],
 }
 
+## "hero scenario kind" -> why it is the design, not a bug (the Hunter's card or rules say so): reported as a NOTE.
+const DESIGN := {
+	"rimewright r_tap no_control": "R seals Neve in ice, rooted, for 3.3 s (her card's x)",
+	"rimewright r_hold no_control": "R seals Neve in ice, rooted, for 3.3 s (her card's x)",
+	"tender r_tap tap_none": "Meeko's R needs a target to call (TenderKit.call_target); alone it is refused",
+	"tender r_hold tap_none": "Meeko's R needs a target to call (TenderKit.call_target); alone it is refused",
+}
+
 var rows: Array = []  # {hero, sc, kind, impact, words, detail}
+var notes: Array = []  # findings DESIGN explains: "hero sc kind: detail (why)"
 var data := {}  # hero -> scenario -> measurements
 
 
 ## A finding on `hero`'s `sc`.
 func flag(hero: String, sc: String, kind: String, detail: String) -> void:
+	var why: String = DESIGN.get("%s %s %s" % [hero, sc, kind], "")
+	if why != "":
+		notes.append("%s %s %s: %s (%s)" % [hero, sc, kind, detail, why])
+		print("PROBE NOTE %-10s %-18s %-13s %s (%s)" % [hero, sc, kind, detail, why])
+		return
 	var k: Array = KINDS[kind]
 	rows.append({"hero": hero, "sc": sc, "kind": kind, "impact": int(k[0]), "words": String(k[1]), "detail": detail})
 	print("PROBE FLAG %-10s %-18s %-13s %s" % [hero, sc, kind, detail])
@@ -247,7 +263,7 @@ static func jitter(ss: Array, a: int, b: int, dir: Vector2) -> float:
 func write(dir: String, cmd: String, heroes: Array, clips: Dictionary, meta: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var f := FileAccess.open(dir.path_join("play_probe.json"), FileAccess.WRITE)
-	f.store_string(JSON.stringify({"meta": meta, "flags": rows, "measure": data}, "\t"))
+	f.store_string(JSON.stringify({"meta": meta, "flags": rows, "notes": notes, "measure": data}, "\t"))
 	f.close()
 	var by := rows.duplicate()
 	by.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return int(x["impact"]) > int(y["impact"]))
@@ -275,6 +291,11 @@ func write(dir: String, cmd: String, heroes: Array, clips: Dictionary, meta: Dic
 				% [r["impact"], r["hero"], r["sc"], r["words"], r["detail"], clips.get(key, "")]
 			)
 		)
+	out.append("")
+	out.append("## By design (DESIGN in tools/play_probe_judge.gd)")
+	out.append("")
+	for n in notes:
+		out.append("- " + String(n))
 	out.append("")
 	out.append("## Measurements per hero")
 	for hero in heroes:
