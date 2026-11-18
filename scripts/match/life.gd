@@ -8,6 +8,7 @@ class_name Life
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
+const NET_GRACE := 2.0     # s past stomp_time a copy of another game's stomp waits for its "done" before it is dropped
 const STOMP_ROOT := 0.12   # s: the stomper's own hold on its feet, topped up every frame; a root above it is CC
 
 const R := {
@@ -147,20 +148,49 @@ static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
 ## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
 ## lives), and if the wisp drifts away (off a ledge, say) your stomps miss and it gets away.
+## Online the stomper's game decides and sends ["stomp", stomper, wisp, "go" | why]; the other games
+## play the stomp (the pose, the thumps, the crack on a break) and the wisp's own game executes it on "done".
 static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	if o == m.player and m.hud:
 		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
+	if not h.remote:
+		m.net_event(["stomp", h.nid, o.nid, "go"])
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
 		return
+	var o: Hunter = h.stomp["o"]
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
+	if not h.remote:
+		m.net_event(["stomp", h.nid, o.nid if o else "", why])
 	if why == "broken":
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
+		_cracked(m, h, o)
+
+## A broken stomp is heard: a crack at the stomper for everyone in reach, and a relief chime for the
+## saved wisp's squad wherever they are (docs/AUDIO.md "Stomp sounds").
+static func _cracked(m: Match, h: Hunter, o: Hunter) -> void:
+	m.sfx("stomp_crack", h.pos)
+	if o and m.player and o.team == m.player.team:
+		m.sfx("stomp_relief")
+
+## ["stomp", stomper, wisp, "go" | why] from the stomper's game. On "done" the wisp's own game executes it.
+static func net_stomp(m: Match, x: Array) -> void:
+	var h := m.ents_by_id.get(String(x[1]), null) as Hunter
+	var o := m.ents_by_id.get(String(x[2]), null) as Hunter
+	if h == null or not h.remote:
+		return
+	if String(x[3]) == "go":
+		if o and o.downed and not o.out:
+			start_stomp(m, h, o)
+		return
+	var done := String(x[3]) == "done" and not h.stomp.is_empty()
+	end_stomp(m, h, String(x[3]))
+	if done and o and not o.remote and o.downed and not o.out:
+		m.eliminate(o, h, "executed")
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
 ## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
@@ -177,7 +207,10 @@ static func cc_break(m: Match, h: Hunter) -> String:
 
 static func tick_stomps(m: Match, dt: float) -> void:
 	for h in m.hunters:
-		if h.stomp.is_empty() or h.remote:
+		if h.stomp.is_empty():
+			continue
+		if h.remote:
+			_tick_copy(m, h, dt)
 			continue
 		var o: Hunter = h.stomp["o"]
 		var why := cc_break(m, h)
@@ -191,21 +224,13 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		h.root_t = maxf(h.root_t, STOMP_ROOT)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
-		var t0 := float(h.stomp["t"])
-		var t1 := t0 + dt
-		h.stomp["t"] = t1
-		var cyc: float = R["stomp_cycle"]
-		var hit_at := cyc * 0.7
 		var near: bool = h.flat_dist(o) <= float(R["revive_radius"]) + 0.5 and absf(h.pos.y - o.pos.y) < 1.6
-		if fmod(t0, cyc) < hit_at and fmod(t1, cyc) >= hit_at:
-			# a foot comes down
+		if _advance(m, h, dt):
 			h.stomp["hits"] = int(h.stomp["hits"]) + 1
-			m.fx.dust(h.pos, 10)
-			m.sfx("thump", h.pos, -2.0, 0.85)
 			if near:
 				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
 				o.down_hp -= Data.MATCH["down_hp"] * 0.12
-		if t1 >= float(R["stomp_time"]):
+		if float(h.stomp["t"]) >= float(R["stomp_time"]):
 			if near:
 				end_stomp(m, h, "done")
 				m.eliminate(o, h, "executed")
@@ -213,6 +238,26 @@ static func tick_stomps(m: Match, dt: float) -> void:
 				m.sfx("crit", o.pos, -2.0, 0.7)
 			else:
 				end_stomp(m, h, "missed")
+
+## The copy of a stomper in another game: the pose and thumps run on its own clock; its game says how it ends
+## (end_stomp from net_stomp), and a stomp that outlasts its time by NET_GRACE is dropped.
+static func _tick_copy(m: Match, h: Hunter, dt: float) -> void:
+	_advance(m, h, dt)
+	if float(h.stomp["t"]) > float(R["stomp_time"]) + NET_GRACE:
+		end_stomp(m, h, "gone")
+
+## Runs the stomp's clock by dt; true on the frame a foot comes down (dust and a thump play here).
+static func _advance(m: Match, h: Hunter, dt: float) -> bool:
+	var t0 := float(h.stomp["t"])
+	var t1 := t0 + dt
+	h.stomp["t"] = t1
+	var cyc: float = R["stomp_cycle"]
+	var hit_at := cyc * 0.7
+	if fmod(t0, cyc) >= hit_at or fmod(t1, cyc) < hit_at:
+		return false
+	m.fx.dust(h.pos, 10)
+	m.sfx("thump", h.pos, -2.0, 0.85)
+	return true
 
 # ------------------------------------------------------------------ deathboxes
 ## Where a box goes: where you fell, or the last solid ground before the abyss.
