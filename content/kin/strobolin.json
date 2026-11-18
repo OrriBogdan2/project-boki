@@ -12,8 +12,9 @@
 		"glow": "#90ffa6"
 	},
 	"size": {
-		"cm": 85,
-		"kg": 49.0,
-		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+		"cm": 107,
+		"kg": 70.0,
+		"fit": 1.71,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

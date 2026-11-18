@@ -14,6 +14,7 @@
 	"size": {
 		"cm": 52,
 		"kg": 13.5,
-		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+		"fit": 1.52,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }
