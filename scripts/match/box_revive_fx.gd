@@ -115,7 +115,8 @@ static func ray_tick(m: Match, b: Dictionary, prog: float) -> void:
 	var pulse := 0.5 + 0.5 * sin(m.time * (5.0 + prog * 7.0))
 	var col: MeshInstance3D = (n as Node3D).get_node("Col")
 	var ring: MeshInstance3D = (n as Node3D).get_node("Ring")
-	(col.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse))
+	var col_color := Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse)
+	(col.material_override as ShaderMaterial).set_shader_parameter("color", col_color)
 	col.scale = Vector3(1.0 + 0.15 * pulse, 0.6 + 0.4 * prog, 1.0 + 0.15 * pulse)
 	col.position.y = 3.5 * col.scale.y
 	var rs := 1.0 - 0.55 * prog
