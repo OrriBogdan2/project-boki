@@ -115,6 +115,7 @@ func fused() -> void:
 		cd = cd_base
 		cd_full = cd_base
 
+
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
 	left = 0.0

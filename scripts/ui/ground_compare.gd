@@ -8,6 +8,7 @@ extends RefCounted
 const FS := 13
 const LINE := 18.0
 
+
 ## The lines for interact target `it` (a "weapon" pickup), or [] when there is nothing to compare.
 static func lines(p: Hunter, it: Dictionary) -> Array:
 	if String(it.get("kind", "")) != "weapon" or not it.has("wp") or not it["wp"].has("gear"):
@@ -25,11 +26,13 @@ static func lines(p: Hunter, it: Dictionary) -> Array:
 		out.append(["Same numbers as what you wear", HudStyle.MUTED])
 	return out
 
+
 ## One changed number in plain words: "+12 max HP  (better)" in green, or red and "worse".
 static func _change_line(text: String, better: bool) -> Array:
 	if better:
 		return ["%s  (better)" % text, InvText.GOOD]
 	return ["%s  (worse)" % text, InvText.BAD]
+
 
 ## Draws the card with its bottom edge at `bottom`, centred on `mid`.
 static func draw(c: CanvasItem, mid: float, bottom: float, p: Hunter, it: Dictionary) -> void:

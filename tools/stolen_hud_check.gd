@@ -13,22 +13,34 @@ var bad := 0
 var n := 0
 var dir := ""
 
+
 func ok(cond: bool, what: String) -> void:
 	print("STOLENHUD %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	Game.god = false      # (god mode would stand the downed thief straight back up)
+	Game.god = false  # (god mode would stand the downed thief straight back up)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 78,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -43,6 +55,7 @@ func run(main_node: Node) -> void:
 	print("STOLENHUD %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _frames(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -51,6 +64,7 @@ func _frames(secs: float) -> void:
 			h.render(DT, 1.0)
 		t += DT
 
+
 func _steal(thief: Hunter, victim: Hunter) -> Kin:
 	var k: Kin = victim.kin
 	m.knock(victim, thief, {})
@@ -58,10 +72,12 @@ func _steal(thief: Hunter, victim: Hunter) -> Kin:
 	ok(KinSteal.grab(k, thief), "%s's wisp is grabbed by %s" % [k.rec.get("name", "Boki"), thief.pname])
 	return k
 
+
 func _drawn() -> void:
 	m.hud.visible = true
 	await m.hud.panels.draw
 	await m.hud.panels.draw
+
 
 func _rows() -> void:
 	var p: Hunter = m.player
@@ -78,10 +94,14 @@ func _rows() -> void:
 	var want := "no carry bonus"
 	if not k1.ks.carry_passives.is_empty():
 		want = KinText.passives(k1.ks.carry_passives, share)
-	ok(row.get("passive", "") == want and row.get("name", "") == String(k1.rec.get("name", "Boki")),
-		"...its name and its carry passive at %d%% (%s)" % [int(share * 100.0), str(row.get("passive"))])
-	ok(row.get("state", "") == "ready" and TeamBoki.stolen_shown.is_empty(),
-		"...its one summon ready; no teammate badge for your own")
+	ok(
+		row.get("passive", "") == want and row.get("name", "") == String(k1.rec.get("name", "Boki")),
+		"...its name and its carry passive at %d%% (%s)" % [int(share * 100.0), str(row.get("passive"))]
+	)
+	ok(
+		row.get("state", "") == "ready" and TeamBoki.stolen_shown.is_empty(),
+		"...its one summon ready; no teammate badge for your own"
+	)
 	p.kin.summon.cd = 40.0
 	ok(KinSummon.press(p), "the stolen wisp is summoned")
 	_frames(0.5)
@@ -94,14 +114,18 @@ func _rows() -> void:
 	var k2 := _steal(p, foes[1])
 	k2.summon.cd = 0.0
 	await _drawn()
-	ok(BokiHud.stolen_shown.size() == 2 and BokiHud.stolen_shown[1]["state"] == "ready",
-		"a second wisp: two rows, the new one ready")
+	ok(
+		BokiHud.stolen_shown.size() == 2 and BokiHud.stolen_shown[1]["state"] == "ready",
+		"a second wisp: two rows, the new one ready"
+	)
 	await _shot("two")
 	var k3 := _steal(mate, foes[2])
 	ok(KinSteal.count(mate) == 1 and KinSteal.stolen(k3), "a teammate carries a wisp")
 	await _drawn()
-	ok(TeamBoki.stolen_shown.get(mate.nid, 0) == 1,
-		"...their squad row shows the count 1 (%s)" % str(TeamBoki.stolen_shown))
+	ok(
+		TeamBoki.stolen_shown.get(mate.nid, 0) == 1,
+		"...their squad row shows the count 1 (%s)" % str(TeamBoki.stolen_shown)
+	)
 	await _shot("mate")
 	for f in foes:
 		if f.downed:
@@ -109,6 +133,7 @@ func _rows() -> void:
 	m.knock(p, null, {})
 	_frames(0.1)
 	ok(p.downed and BokiHud.stolen_rows(p).is_empty(), "the thief goes down: both wisps are loose, the rows go")
+
 
 ## The HUD as it is (real renderer only).
 func _shot(what: String) -> void:
