@@ -11,6 +11,18 @@ const ClipShots := preload("res://tools/clip_shots.gd")
 const RUN := 4.6
 const DASH := 5.8
 
+## --bench: the sim runs in the skeleton's deferred update, not inside advance, so a modifier placed just before it
+## stamps the start and the sim's modification_processed adds the span (its own CPU time, every hunter summed).
+class Clock extends SkeletonModifier3D:
+	static var usec := 0
+	static var t0 := 0
+
+	func _process_modification_with_delta(_delta: float) -> void:
+		t0 = Time.get_ticks_usec()
+
+	static func stop() -> void:
+		usec += Time.get_ticks_usec() - t0
+
 var tree: SceneTree
 var shots := ClipShots.new()
 var fps := 30.0
@@ -82,7 +94,11 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	if OS.get_cmdline_user_args().has("--no-sim") and (sync as WardenSync).cloth:
-		(sync as WardenSync).cloth.sim.active = false      # (the chains ride the hips rigidly: what the sim adds)
+		(sync as WardenSync).cloth.enabled = false      # (the chains ride the hips rigidly: what the sim adds)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--tune=") and (sync as WardenSync).cloth:      # stiffness,gravity,drag (tuning runs)
+			var t := a.substr(7).split_floats(",")
+			(sync as WardenSync).cloth.tune(t[0], t[1], t[2])
 	DirAccess.make_dir_recursive_absolute(dir)
 	var state := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
 	model.set_meta(WardenClips.STATE, state)
@@ -175,6 +191,15 @@ func _bench(id: String, n: int, secs: float) -> void:
 			ring.visible = false
 		m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -RUN), "face": 0.0, "grounded": true})
 		models.append(m)
+	for k in 2:
+		await tree.process_frame
+	for m in models:
+		var cl := ((m as Node3D).get_node("Warden/Sync") as WardenSync).cloth
+		if cl:
+			var clock := Clock.new()
+			cl.skel.add_child(clock)
+			cl.skel.move_child(clock, cl.sim.get_index())
+			cl.sim.modification_processed.connect(Clock.stop)
 	shots.cam.fov = 40.0
 	shots.cam.position = Vector3(0, 5.0, 7.0)
 	shots.cam.look_at(Vector3(0, 0.8, 0))
@@ -187,13 +212,15 @@ func _bench(id: String, n: int, secs: float) -> void:
 	Engine.max_fps = 0
 	var sums := {"cloth on": 0.0, "cloth off": 0.0}
 	var runs := {"cloth on": 0, "cloth off": 0}
+	var steps := {"cloth on": 0.0, "cloth off": 0.0}
 	for r in 6:
 		for phase in ["cloth on", "cloth off"]:
 			for m in models:
 				var cl := ((m as Node3D).get_node("Warden/Sync") as WardenSync).cloth
 				if cl:
-					cl.sim.active = phase == "cloth on"
+					cl.enabled = phase == "cloth on"
 			var t0 := Time.get_ticks_usec()
+			Clock.usec = 0
 			var frames := 0
 			while float(Time.get_ticks_usec() - t0) / 1e6 < secs:
 				await tree.process_frame
@@ -201,6 +228,11 @@ func _bench(id: String, n: int, secs: float) -> void:
 			var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / frames
 			sums[phase] += ms
 			runs[phase] += 1
-			print("CLOTH_BENCH %s n=%d frames=%d frame_ms=%.3f" % [phase, n, frames, ms])
+			var step_ms := Clock.usec / 1000.0 / frames      # the chains' own CPU time per frame, all n
+			steps[phase] += step_ms
+			print("CLOTH_BENCH %s n=%d frames=%d frame_ms=%.3f step_ms=%.4f" % [phase, n, frames, ms, step_ms])
 	print("CLOTH_BENCH_MEAN n=%d on=%.3f off=%.3f extra_ms=%.3f" % [n, sums["cloth on"] / runs["cloth on"],
 			sums["cloth off"] / runs["cloth off"], (sums["cloth on"] - sums["cloth off"]) / runs["cloth on"]])
+	print("CLOTH_STEP_MEAN n=%d on=%.4f off=%.4f extra_ms=%.4f (CPU, the SpringBoneSimulator3D work only)" % [n,
+			steps["cloth on"] / runs["cloth on"], steps["cloth off"] / runs["cloth off"],
+			(steps["cloth on"] - steps["cloth off"]) / runs["cloth on"]])
