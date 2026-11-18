@@ -593,6 +593,7 @@ const CHECKS := {
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	"--expedition-tips-check": ["res://tools/expedition_tips_check.gd", "expedition_tips_check", null],
 	# fight beats per starter
+	"--tut-aim-check": ["res://tools/tut_aim_check.gd", "tut_aim_check", null],  # the E step: a miss refunds
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--result-card-check": ["res://tools/result_card_check.gd", "result_card_check", null],     # the garden games' card
 	"--pause-menu-check": ["res://tools/pause_menu_check.gd", "pause_menu_check", null],     # 4 buttons, all reachable
