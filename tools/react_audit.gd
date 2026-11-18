@@ -1,7 +1,7 @@
 extends "res://tools/anim_audit.gd"
 ## --react-audit [--wardens=a,b] [--json=<file>]: how every Hunter takes a hit (docs/art/REACT_AUDIT.md). No renderer.
 ## Per Hunter it poses the real model through Warden/Sync and reads the bones:
-##  - the hit flinch, front and back, as the game hands it off (hit_t in the state, the upper-body blend): how far the
+##  - the hit flinch, front and back, as the game hands it off (hit_t in the state, a stagger: the hit clip on the body): how far the
 ##    body has moved 0.1 s after the hit, the peak, when it peaks and when it has settled back to a quarter of it;
 ##  - the stun loop's seam and how much it moves; the knockback: the fall loop's seam and the landing's squash;
 ##  - through all of them: the weapon bone stays on its hand, no arm stands out in a T-pose.
@@ -139,11 +139,12 @@ func _begin() -> void:
 func _t_share() -> float:
 	return float(t_frames) / maxi(frames, 1)
 
-## A hit while he stands, as the game plays it: hit_t runs 0 to dur. hit_dir is hunter.gd's, from the attacker to him:
+## A stagger (hit_k at Oomph.HEAVY_FLINCH: the hit clip plays; a chip hit is only WardenFlinch's lean) while he stands, as
+## the game plays it: hit_t runs 0 to dur. hit_dir is hunter.gd's, from the attacker to him:
 ## at face 0 he looks down -Z, so (0, 1) is a hit from the front and (0, -1) one from behind.
 func _hit(m: Node3D, sync: Node, sk: Skeleton3D, hit_dir: Vector2, dur: float, hgt: float) -> Dictionary:
 	_begin()
-	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "hit_k": Oomph.HEAVY_FLINCH}
 	m.set_meta(WardenClips.STATE, s)
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
