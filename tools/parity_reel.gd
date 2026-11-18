@@ -8,8 +8,10 @@ extends "res://tools/hero_vfx_reel.gd"
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
 ## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
 ## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
-## then one past it, from the ground or a jump's top).
-## rmb_e is Grimble's Deep Reach into the Anchor. Never writes the save.
+## then one past it, from the ground or a jump's top; r_run: R pressed while running at the far dummy), "run" (run
+## at the dummy, then circle it), "death" (the knocked-down beat) and "backfaces" (every surface flat, red where it
+## shows its back). --reel-close swaps the match camera for a close orbit round the Hunter (CLOSE_FILL of the frame
+## high, no HUD). rmb_e is Grimble's Deep Reach into the Anchor. Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -24,6 +26,9 @@ const RIPOSTE_TD := 3.0                 # m to the dummy in Kael's R part (insid
 const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in the 0.65 s guard after the 0.2 s press
 const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
 const CLOAK_TD := 3.6                   # m to the dummy in Cinder's E part: inside her 4.5 m pull
+const CLOSE_FILL := 0.7                 # --reel-close: the Hunter's share of the frame height
+const CLOSE_PITCH := 45.0               # degrees the close camera sits above level (the match tips a Hunter 20)
+const CLOSE_ORBIT := 0.6                # rad/s the close camera turns round the Hunter
 const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
 const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
 
@@ -31,6 +36,8 @@ var lit := {}                           # key cap -> s left lit
 var caps := {}                          # key cap -> its Label
 var title: Label
 var steps := 0
+var close := false                      # --reel-close
+var close_h := 0.0                      # m: the Hunter's height, read once
 var r_down := false                     # R was pressed this step (it goes through HunterKeys, not inp)
 
 func parts() -> Array:
@@ -48,10 +55,15 @@ func run(main_node: Node) -> void:
 			who = arg.substr(12)
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
+		if arg == "--reel-close":
+			close = true
 	hero_name = who
 	Save.d["tutorial"][KitDrill.SAVE_KEY] = true     # no kit drill card under the title (Save.no_write is on)
 	await _setup()
 	_build_keys()
+	if close:
+		for layer in main.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
 	frame_dir = dir.path_join("frames")
 	DirAccess.make_dir_recursive_absolute(frame_dir)
 	P.lvl = 6
@@ -113,7 +125,29 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 			each.call(t)
 		if not caps.is_empty():
 			_keys_update()
-	await super._go(secs, keyed, marks, lead)
+		if close:
+			_close_cam()
+	await super._go(secs, keyed, marks, 0.0 if close else lead)
+
+## The close camera for this step: orbiting the Hunter's middle, far enough back for the Hunter to fill CLOSE_FILL.
+func _close_cam() -> void:
+	if close_h == 0.0:
+		var top := -INF
+		var low := INF
+		for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).skin == null:
+				continue
+			var box := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+			top = maxf(top, box.end.y)
+			low = minf(low, box.position.y)
+		close_h = top - P.pos.y
+		print("REEL_CLOSE height %.2f m (mesh %.2f to %.2f over the feet)" % [close_h, low - P.pos.y, close_h])
+	var cam := m.cam
+	cam.pitch = deg_to_rad(CLOSE_PITCH)
+	cam.rise = close_h * 0.5
+	cam.cast_k = 0.0
+	cam.dist = close_h / CLOSE_FILL * 0.5 / tan(deg_to_rad(cam.fov) * 0.5)
+	Record.orbit_yaw = steps * DT * CLOSE_ORBIT
 
 func _save_frame() -> void:
 	steps += 1
@@ -145,6 +179,18 @@ func _p_rmb() -> void:
 	await _seg("RMB, then again", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _in(t, 0.2) or _in(t, 2.0)
 		P.inp["sec_hold"] = _in(t, 0.2, 0.7) or _in(t, 2.0, 0.7))
+
+## Run at the dummy, then circle it facing it: every run clip, forward, strafing and backing.
+func _p_run() -> void:
+	await _seg("Run at the dummy, then circle it", 5.0, func(t: float) -> void:
+		P.inp["move"] = Vector2(1, 0) if t < 1.6 else Vector2.from_angle((t - 1.6) * 2.0)
+		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0), 9.0)
+
+## Knocked down: the beat plays out and the body fades.
+func _p_death() -> void:
+	await _seg("Knocked down", 3.0, func(t: float) -> void:
+		if _at(t, 0.3):
+			m.knock(P, T, {}))
 
 ## Standing still, no keys: what the Hunter carries at rest.
 func _p_idle() -> void:
@@ -214,6 +260,22 @@ func _p_r() -> void:
 		await _r_hearth_call()
 		return
 	await _seg("R, then the recast", 6.0, _r_presses)
+
+## R pressed mid-run toward the far dummy, the keys held on (Vex: the ult must not stop her).
+## Prints REEL_RRUN with the metres covered in the 0.5 s after the press.
+func _p_r_run() -> void:
+	P.ak.cd["x"] = 0.0
+	var rec := {}
+	var run := func(t: float) -> void:
+		P.inp["move"] = _toward_far(t)
+		if _at(t, 0.7):
+			r_down = true
+			HunterKeys.ult_pressed(P)
+			rec["at"] = P.pos
+		if rec.has("at") and not rec.has("m") and t >= 1.2:
+			rec["m"] = Vector2(P.pos.x - rec["at"].x, P.pos.z - rec["at"].z).length()
+	await _travel("Run, then R on the move", 3.2, run)
+	print("REEL_RRUN %s moved %.2f m in the 0.5 s after the R press" % [who, rec.get("m", -1.0)])
 
 func _r_presses(t: float) -> void:
 	if _at(t, 0.2) or _at(t, 2.6):
@@ -347,3 +409,17 @@ func _p_dash_lmb() -> void:
 			P.inp["move"] = Vector2(0, 1) if t < 0.3 else Vector2.ZERO
 			P.inp["dash"] = _in(t, 0.2)
 			P.inp["fire"] = _in(t, 0.25 + late, 2.2), 6.0)
+
+## Every surface drawn flat: green where it faces the camera, red where it shows its back (the toon outline draws those
+## black). The check for tools/art1/glb_backface_fix.py.
+func _p_backfaces() -> void:
+	var sh := Shader.new()
+	sh.code = "shader_type spatial; render_mode unshaded, cull_disabled; " \
+		+ "void fragment() { ALBEDO = FRONT_FACING ? vec3(0.2, 0.8, 0.2) : vec3(1.0, 0.0, 0.0); }"
+	var mt := ShaderMaterial.new()
+	mt.shader = sh
+	for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var inst := mi as MeshInstance3D
+		for s in inst.mesh.get_surface_count():
+			inst.set_surface_override_material(s, mt)
+	await _seg("Front green, back red", 2.0, func(_t: float) -> void: pass)
