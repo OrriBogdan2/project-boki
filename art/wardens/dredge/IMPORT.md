@@ -70,3 +70,15 @@ the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, dark
 stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
 UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
 resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.
+
+**r2 A model (11-18, ext/r2a-tenzo-neve-grimble-1118):** the owner approved the 11-18 r2 A models ("all are good", fixes
+later). Grimble's A (`~/meshy/ta-fix-3d-1118/Grimble/A.glb`, 62,112 tris, one material, not rigged) is a new mesh, so it was
+ported onto this glb's skeleton, clips and anchors (45 joints, 45 clips, all kept) with no visible model edit:
+`python3 tools/art1/v95_to_game.py Grimble --master ~/meshy/ta-fix-3d-1118/Grimble/A.glb --work DIR --no-import` (spec
+`art/wardens/src/grimble_v95.json`: nothing decimated), then `glb_backface_fix.py IN OUT 0.999 29973` (the detach caps of
+this port start at triangle 29973 of the skin primitive) and `glb_relax.py` (108 triangles ripped). Result: 64,836 tris
+(caps included), 10.2 MB (was 12.1). A has one paint image, so `dredge_v95b.jpg` and `dredge_v95c.jpg` are gone. On A the
+blunderbuss sits in its belt holster and rides on `hips`; `weapon_muzzle` and `anchor_gun_root` stay on the iron fist.
+`--stretch-check --wardens=dredge`: worst 8.52 -> 7.63 (ledge), idle 3.17 -> 3.09, run_f 6.34 -> 7.45, walk_f 4.48 -> 4.96.
+Known: black slivers at the right calf and foot (the live model has the same kind), a goo puddle by the right foot comes
+with A, the lens has no pupil. `tools/warden_model_check.gd` `height_3d` 1.50 -> 1.58 (A's hoard stands higher).
