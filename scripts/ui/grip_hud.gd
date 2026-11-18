@@ -134,16 +134,9 @@ static func tip(p: Hunter, i: int) -> Array:
 	var gd: Dictionary = Gear.ALL[gid]
 	var rn := String(Data.RARITY[clampi(int(g.get("rar", 0)), 0, Data.RARITY.size() - 1)]["name"])
 	out.append([gd["name"], gd["col"]])
-	out.append(
-		[
-			(
-				"%s %s glove  ·  %s"
-				% [rn, "active" if Gear.active(gid) else "passive", key if Gear.active(gid) else "always on"]
-			),
-			HudStyle.MUTED,
-			12
-		]
-	)
+	var state_word := "active" if Gear.active(gid) else "passive"
+	var when := key if Gear.active(gid) else "always on"
+	out.append(["%s %s glove  ·  %s" % [rn, state_word, when], HudStyle.MUTED, 12])
 	out.append([Gear.desc_of(gid, int(g.get("rar", 1))), HudStyle.INK, 14])
 	out.append([Gear.stat_text(gid, int(g.get("rar", 1))), HudStyle.MUTED, 13])
 	return out
