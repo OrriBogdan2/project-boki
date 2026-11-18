@@ -452,6 +452,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
+	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null],      # ability sounds on the strike
 	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],  # Pip's clips in a real match
@@ -602,6 +603,7 @@ const CHECKS := {
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--result-card-check": ["res://tools/result_card_check.gd", "result_card_check", null],     # the garden games' card
 	"--pause-menu-check": ["res://tools/pause_menu_check.gd", "pause_menu_check", null],     # 4 buttons, all reachable
+	"--test-zone-check": ["res://tools/test_zone_check.gd", "test_zone_check", null],  # admin lock + Test Zone
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],  # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],  # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
