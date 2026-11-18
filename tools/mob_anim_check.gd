@@ -35,6 +35,8 @@ func run(main: Node) -> void:
 		if o != m.player: o.ctrl = "idle"
 	for k in KINDS:
 		_windup(m, k)
+	for k in KINDS:
+		_gait(m, k)
 	_perf(m)
 	m.queue_free()
 	print("MOBANIM DONE, failures: %d" % bad)
@@ -102,6 +104,33 @@ func _windup(m: Match, k: String) -> void:
 	ok(absf(lasted - wind) <= DT * 1.5, "%s: wind-up lasts the telegraph, %.3f s of %.3f s" % [k, lasted, wind])
 	var off_by := "%s: pivots sit on the key at wind-up end (off %.1f%% of travel)" % [k, tracked * 100.0]
 	ok(rig != null and tracked < 0.05, off_by)
+
+## The legs follow the ground: a walking monster's gait advances one stride per STRIDE_M walked whatever its
+## speed, stands still when it stops, and a hit shows on the body without leaving the walk.
+func _gait(m: Match, k: String) -> void:
+	var P: Hunter = m.player
+	var mb := m.spawn_mob(k, P.pos + Vector3(6.0, 0, 0))
+	mb.tgt = null
+	mb.st = "idle"
+	var spd := maxf(float(Data.MOBS[k].get("speed", 3.0)), 1.0)
+	mb.vel = Vector3(spd, 0, 0)
+	mb.anim = 0.0
+	for i in 30:
+		mb.render(DT, 1.0)
+	var strides := mb.anim / TAU
+	var want := spd * 30.0 * DT / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(k), 2.0))
+	ok(absf(strides - want) < 0.001, "%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want])
+	var before := mb.anim
+	mb.vel = Vector3.ZERO
+	for i in 10:
+		mb.render(DT, 1.0)
+	ok(is_equal_approx(mb.anim, before), "%s: the gait stands still when the monster stops" % k)
+	mb.vel = Vector3(spd, 0, 0)
+	mb.hurt(1.0, P)
+	mb.render(DT, 1.0)
+	ok(MobAnim.state_of(mb) != MobAnim.DEATH and MobAnim.state_of(mb) <= MobAnim.RUN, "%s: a hit keeps the walk under the hit-react" % k)
+	mb.dead = true
+	mb.visible = false
 
 ## How far the first wind-up track's pivot is from where its key says it should be, as a share of that track's travel.
 func _follow(mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
