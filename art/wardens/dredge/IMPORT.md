@@ -75,7 +75,7 @@ resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips 
 later). Grimble's A (`~/meshy/ta-fix-3d-1118/Grimble/A.glb`, 62,112 tris, one material, not rigged) is a new mesh, so it was
 ported onto this glb's skeleton, clips and anchors (45 joints, 45 clips, all kept) with no visible model edit:
 `python3 tools/art1/v95_to_game.py Grimble --master ~/meshy/ta-fix-3d-1118/Grimble/A.glb --work DIR --no-import` (spec
-`art/wardens/src/grimble_v95.json`: nothing decimated), then `glb_backface_fix.py IN OUT 0.999 29973` (the detach caps of
+`art/wardens/src/grimble_v95.json`: nothing decimated), then `glb_backface_fix.py IN OUT 3 29973` (the detach caps of
 this port start at triangle 29973 of the skin primitive) and `glb_relax.py` (108 triangles ripped). Result: 64,836 tris
 (caps included), 10.2 MB (was 12.1). A has one paint image, so `dredge_v95b.jpg` and `dredge_v95c.jpg` are gone. On A the
 blunderbuss sits in its belt holster and rides on `hips`; `weapon_muzzle` and `anchor_gun_root` stay on the iron fist.
