@@ -203,8 +203,8 @@ func _draw() -> void:
 
 ## Your squad's portraits and names across the top: who you are dropping with.
 func _squad_row(p: Vector2, a: float) -> void:
-	if party.is_empty():
-		return
+	if party.size() < 2:
+		return      # (solos: nobody to drop with)
 	var px := 72.0
 	var gap := 22.0
 	var x := p.x - (party.size() * px + (party.size() - 1) * gap) * 0.5

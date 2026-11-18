@@ -1117,7 +1117,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# C and G (the Merge sits on the right: GripHud)
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
-	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
+	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1166,7 +1166,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
+	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
@@ -1447,7 +1447,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	var lead: Hunter = dr.leader(p.team) if dr else null
 	var i_lead := lead == p
 	var waits: bool = dr != null and dr.waits(p)
-	var squad := m.hunters.filter(func(x): return x.team == p.team).size() > 1
+	var squad := Life.has_mates(m, p)
 	var rr := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 92), Vector2(w, 122 if squad else 92))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 14)
 	if dr and dr.planning:
@@ -1700,9 +1700,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
+	var who := "You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you." % [int(ceil(left)), "A teammate or your Boki" if Life.has_mates(m, p) else "Your Boki"]
 	if p.kin and p.kin.state == "downed":
-		who = "You're a wisp: %ds left, and your Boki is down. Only a teammate standing on you can bring you back." % int(ceil(left))
+		who = "You're a wisp: %ds left, and your Boki is down. %s" % [int(ceil(left)), "Only a teammate standing on you can bring you back." if Life.has_mates(m, p) else "Nobody can bring you back."]
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
@@ -1736,9 +1736,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
-	if not b.is_empty() and Life.soul_here(m, b):
+	if not b.is_empty() and Life.soul_here(m, b) and Life.has_mates(m, p):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
-	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	if Life.has_mates(m, p): lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))

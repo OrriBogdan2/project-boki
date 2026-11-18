@@ -175,7 +175,8 @@ func draw(sz: Vector2) -> void:
 		hud._ctext(Vector2(sz.x * 0.5, 64), hint, 15, INK)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
-		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
+		var hint := "Click to ping  ·  right click takes your ping down  ·  " if Life.has_mates(m, m.player) else ""
+		hud._ctext(Vector2(sz.x * 0.5, 66), "%swheel zooms  ·  %s closes" % [hint, Settings.key_cap("map")], 13, MUTED)
 	# the map itself: the painted map (MapPaint), framed
 	hud._rounded(rect.grow(9.0), Color(0, 0, 0, 0.45), 10)
 	c.draw_rect(rect, SEA)
@@ -617,7 +618,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)
 		y += 22.0
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
-	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
+	var who := "your squad sees" if Life.has_mates(m, m.player) else "you scout"
+	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once %s them." % who, 11, MUTED)
 	# exits, under the spawns
 	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
@@ -645,6 +647,8 @@ func _side(c: Control, sz: Vector2) -> void:
 	if wv < 150.0:
 		return
 	var x0 := rect.position.x - 22.0 - wv
+	if not Life.has_mates(m, p):
+		return          # solos: no squad panel, no ping or lead keys (the drop prompt has your jump key)
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))

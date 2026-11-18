@@ -25,6 +25,8 @@ static func time_s() -> float:
 static func place(m: Match) -> void:
 	if m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
+	if int(m.opts.get("squad", 1)) <= 1:
+		return          # solos: a beacon only brings back a dead squadmate, so none stand (no map or minimap pin)
 	var isl: Array = []
 	for i in m.world.islands.size():
 		isl.append(i)

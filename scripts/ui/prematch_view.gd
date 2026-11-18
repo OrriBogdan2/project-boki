@@ -187,14 +187,14 @@ func _tick_label() -> void:
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
 		var teach := pm.teach_line()
-		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
+		note_label.text = teach if teach != "" else "Pick a Hunter." + ("" if pm.squad.size() == 1 else " No two on a squad can be the same one.")
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
+		if mine and pm.squad.size() > 1 and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
 			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 

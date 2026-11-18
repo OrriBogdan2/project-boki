@@ -394,10 +394,14 @@ func _tab_controls(v: VBoxContainer) -> void:
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
 	var shown := {}
+	var psc = Game.main.screen_node() if Game.main else null
+	var solo: bool = psc is Match and (psc as Match).player != null and not Life.has_mates(psc, (psc as Match).player)
+	for an in (["base", "ping", "pass_lead", "separate"] + MateLook.ACTIONS if solo else []):
+		shown[an] = true      # solos: the keys that need a squadmate are not listed (they stay bound for trios)
 	for g in groups:
-		_group(v, String(g[0]))
+		_group(v, "Map" if solo and g[0] == "Squad and map" else String(g[0]))
 		for an in g[1]:
-			if not named.has(an):
+			if not named.has(an) or shown.has(an):
 				continue
 			shown[an] = true
 			_bind_row(v, an, named[an])
