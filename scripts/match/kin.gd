@@ -30,6 +30,8 @@ var atk_cd := 0.0
 var lunge_t := 0.0
 var strike_t := 0.0               # s until the bite under way lands (0: none)
 var strike_at: Ent = null         # who it lands on
+var cast_t := 0.0                 # s until a wound-up cast lets go (BokiSwing.CAST_WIND), 0: none
+var cast_do := Callable()         # what lets go then
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
@@ -399,7 +401,7 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 ## Boki never moves you (DECISIONS 2026-11-06). A from:owner ability always works on its hunter.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
-	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
+	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot) or cast_do.is_valid():
 		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
@@ -439,6 +441,8 @@ func effective(slot: String) -> AbilitySpec:
 	var rank := owner_h.ability_level("kin") if owner_h else 1
 	return KinLib.effective(runner.def_of(slot), slot, ks, rec, rank, KinMerge.patch(owner_h, slot) if owner_h else {})
 
+## Starts a cast and pays for it. A rigged Boki casting for itself plays its cast clip first and lets go on the
+## clip's release frame; knocked out of the fight in the wind-up, the skill is lost.
 func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array = []) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
@@ -447,6 +451,17 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	runner.spend(slot, rank)
 	if def.bond_cost > 0.0 and owner_h:
 		owner_h.ult = maxf(0.0, owner_h.ult - def.bond_cost)
+	if model:
+		model.set_meta("pulse", Time.get_ticks_msec())
+	if caster == self and state == "active" and BokiRig.has(species):
+		cast_t = BokiSwing.CAST_WIND
+		cast_do = _release.bind(slot, p, auto, caster, pw, chain)
+	else:
+		_release(slot, p, auto, caster, pw, chain)
+
+func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
+	var def := runner.def_of(slot)
+	var rank := owner_h.ability_level("kin") if owner_h else 1
 	var dd := Vector2(p.x - pos.x, p.z - pos.z)
 	if dd.length() > 0.1 and caster == self:
 		face = atan2(-dd.x, -dd.y)
@@ -455,8 +470,6 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	CombatBus.ability_used.emit(caster, def.id, slot)
 	if not unseen:
 		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
-	if model:
-		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
 	m.sfx(KinLib.cue_of(String(sp.get("type", ""))), pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
@@ -474,7 +487,7 @@ func fire_trigger(type: String, ev := {}) -> bool:
 			continue
 		if (ev.get("chain", []) as Array).has(def.id):
 			continue          # no ability triggers itself
-		if not slot_open(slot) or not runner.is_ready(slot):
+		if not slot_open(slot) or not runner.is_ready(slot) or cast_do.is_valid():
 			continue
 		match type:
 			"on_hit":
@@ -631,6 +644,13 @@ func sim(dt: float) -> void:
 		strike_t -= dt
 		if strike_t <= 0.0:
 			_land_strike()
+	if cast_do.is_valid():
+		cast_t -= dt
+		if cast_t <= 0.0:
+			var let_go := cast_do
+			cast_do = Callable()
+			if ready_to_fight():
+				let_go.call()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
