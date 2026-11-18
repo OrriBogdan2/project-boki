@@ -10,13 +10,18 @@ const XP_PER_HP := 0.35  # XP per point of the monster's health (what its damage
 const BOSS_XP := 260.0  # a lair boss's XP
 
 
+## The XP killing `mb` pays (each squadmate in reach gets this much).
+static func xp_of(mb: Mob) -> float:
+	return BOSS_XP if mb is Boss else mb.max_hp * XP_PER_HP
+
+
 ## Pays the last hit's squad for `mb`; a kill with no Hunter behind it pays nobody. Online, the host
 ## pays its own and bot Hunters here and tells each remote Hunter's machine with an "xp" event.
 static func pay(m: Match, mb: Mob, credit: Ent) -> void:
 	var killer: Hunter = credit.owner_h if credit is Kin else credit as Hunter
 	if killer == null:
 		return
-	var xp := BOSS_XP if mb is Boss else mb.max_hp * XP_PER_HP
+	var xp := xp_of(mb)
 	for h in m.hunters:
 		if h.team != killer.team or h.out or h.extracted:
 			continue

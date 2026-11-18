@@ -23,6 +23,7 @@ const CHECKS := {
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
 	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],      # docs/decisions/0100
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
