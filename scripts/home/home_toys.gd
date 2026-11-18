@@ -33,7 +33,8 @@ func toys() -> Array:
 			out.append({"u": int(e["u"]), "id": String(e["id"]), "pos": HomeLayout.deco_center(e)})
 	return out
 
-## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy); true
+## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy, pet while it
+## is being scratched); true
 ## when this Boki has a rig, which poses its own body.
 func _act(k: Dictionary, n: Node3D) -> bool:
 	var act := ""
@@ -43,6 +44,8 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 		act = "munch"
 	elif play is Dictionary and play["phase"] == "play":
 		act = String(rules()["toys"].get(String(_toy(int(play["u"])).get("id", "")), {}).get("clip", ""))
+	elif float(k.get("hold_t", 0.0)) > 0.0 and float(k.get("joy_t", 0.0)) > 0.0:
+		act = "pet"          # (a pat: PetReact holds it still and gives it joy)
 	if act != "" or n.has_meta("kact_home"):
 		n.set_meta("kact", act)
 		if act != "":
