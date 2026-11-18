@@ -31,5 +31,17 @@
 	"cc": {"pull": 0.22, "tug_hz": 2.0, "twist": 0.18, "bow": 0.2},
 	"procedural": ["base"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "index.L", "index2.L", "curl.L", "curl2.L", "thumb.L", "index.R", "index2.R", "curl.R", "curl2.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "gum", "rod.0", "rod.1", "rod.2", "rod.3", "rodlit.0", "rodlit.1", "rodlit.2", "rodlit.3"],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["mage_dash", 0.4, "stun"],
+		["mage_dash", 0.4, "mage_dash_go"],
+		["mage_x_air", 0.5, "mage_x_dive"],
+		["mage_x", 0.2, "mage_x_air"],
+		["mage_rmb_hold", 0.3, "mage_lmb_l"],
+		["mage_rmb_hold", 0.3, "mage_rmb"],
+		["mage_rmb_hold", 0.3, "mage_e"],
+		["mage_dash", 0.4, "mage_lmb_r"],
+		["glide", 0.4, "mage_e"],
+		["mage_x_dive", 0.2, "mage_x_land"]
+	]
 }

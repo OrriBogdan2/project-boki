@@ -34,5 +34,18 @@
 	"procedural": ["base"],
 	"recoil": {"deg": 3.0, "settle": 0.09},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["thf_bola", 0.2, "stun"],
+		["thf_bola", 0.2, "thf_lmb_r"],
+		["thf_bola", 0.2, "thf_knife"],
+		["thf_bola", 0.2, "thf_encore"],
+		["thf_bola", 0.2, ""],
+		["thf_encore_dance", 0.8, ""],
+		["thf_encore_dance", 0.8, "thf_vault_r"],
+		["thf_encore_dance", 0.8, "thf_lmb_l"],
+		["thf_knife", 0.3, "thf_arrive"],
+		["thf_lmb_r", 0.1, "thf_lmb_l"],
+		["thf_vault_f", 0.2, "thf_encore"]
+	]
 }

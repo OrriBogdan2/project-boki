@@ -35,5 +35,15 @@
 	"procedural": ["ledge", "mantle", "base"],
 	"recoil": {"deg": 2.0, "settle": 0.07},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["gunslinger_lmb", 0.1, "gunslinger_lmb"],
+		["gunslinger_lmb", 0.12, "gunslinger_rmb"],
+		["gunslinger_e", 0.3, "gunslinger_dash"],
+		["gunslinger_e", 0.3, "gunslinger_lmb"],
+		["gunslinger_e", 0.3, "glide"],
+		["glide", 0.4, "gunslinger_rmb"],
+		["glide", 0.4, "gunslinger_e"],
+		["gunslinger_lmb", 0.12, "stun"]
+	]
 }

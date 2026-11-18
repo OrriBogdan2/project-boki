@@ -35,5 +35,15 @@
 	"cc": {"pull": 0.16, "tug_hz": 1.1, "twist": 0.1, "bow": 0.3},
 	"procedural": ["ledge", "mantle", "base"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "x_breath"],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["as_lance", 0.6, "lw_jet"],
+		["lw_jet", 0.6, "lw_land"],
+		["lw_jet", 0.6, "lw_jump"],
+		["as_aim", 0.4, ""],
+		["as_lance", 0.6, ""],
+		["glide", 0.4, "as_shot"],
+		["glide", 0.4, "lw_jet"],
+		["as_leap", 0.2, "lw_jet"]
+	]
 }
