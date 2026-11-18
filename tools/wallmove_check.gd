@@ -146,8 +146,8 @@ func _carve(ups: int, count: int) -> Array:
 
 # ---------------------------------------------------------------- 1. wall kick
 ## Jump at the wall pushing in; with `kick`, press jump again on the way down (spammed: it must fire once).
-## Returns {peak, top, kicks}.
-func _attempt(wl: Dictionary, kick: bool, spam := true) -> Dictionary:
+## `mash` presses every step instead of waiting to fall. Returns {peak, top, kicks}.
+func _attempt(wl: Dictionary, kick: bool, spam := true, mash := false) -> Dictionary:
 	var n: Vector2 = wl["n"]
 	var at: Vector2 = (wl["at"] as Vector2) - n * 1.0
 	_reset(Vector3(at.x, wl["low"], at.y), true)
@@ -160,7 +160,7 @@ func _attempt(wl: Dictionary, kick: bool, spam := true) -> Dictionary:
 	for i in 150:
 		h.inp["move"] = n
 		var falling := not h.grounded and h.vel.y <= 0.5 and h.lfloat.is_empty()
-		var press := kick and i > 6 and falling and (spam or presses == 0)
+		var press := kick and i > 6 and (falling or mash) and (spam or presses == 0)
 		presses += 1 if press else 0
 		h.inp["jump"] = i == 6 or press
 		m.step(DT)
@@ -190,6 +190,27 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	var again := _attempt(w5b, true, false)
 	var same := absf(again["peak"] - kicked["peak"]) < 0.15
 	ok(again["kicks"] == 1 and same, "the next jump kicks the same: %.2fm" % again["peak"])
+	_diminish(w5, danced)
+
+## Chained kicks keep less each time (content/rules/wall_kick.json), and the ground resets the chain.
+## `danced` is the spammed run on the curve; the same run on a flat curve is what it was before.
+func _diminish(wl: Dictionary, danced: Dictionary) -> void:
+	var curve := WallMoves._curve
+	WallMoves._curve = [1.0]
+	var flat := _attempt(wl, true, true, true)
+	WallMoves._curve = curve
+	var mashed := _attempt(wl, true, true, true)
+	ok(curve == [1.0, 0.6, 0.3], "the curve is 100%%, 60%%, 30%% (%s)" % [curve])
+	ok(flat["peak"] - mashed["peak"] > 0.3 and mashed["kicks"] >= 3,
+		"mashed kicks on a 5-terrace wall peak at %.2fm on the curve, %.2fm at 100%% (timed: %.2fm), %d kicks" % [
+			mashed["peak"], flat["peak"], danced["peak"], mashed["kicks"]])
+	_attempt(wl, true)
+	ok(h.wall_moves.chain > 1, "a dance builds a chain (%d)" % h.wall_moves.chain)
+	for i in 120:
+		h.inp["jump"] = false
+		m.step(DT)
+	ok(h.grounded and h.wall_moves.chain == 0, "touching the ground resets the chain")
+	ok(is_equal_approx(h.wall_moves.kick_share(), 1.0), "the next kick is at 100% again")
 
 # ---------------------------------------------------------------- 1b. tall climb
 ## Lace's passive ([game data] bCanWallJump, climb_tall in hunter_move.json): a plain jump facing a
