@@ -10240,3 +10240,4 @@ READY ext/merge-lane-hunters1-1117 93734259ce (SUPERSEDES a632803444: same 1-bra
 READY ext/vfx-utility-read-port f1a3c94e46 (in-match shops + source utilities port of ext/vfx-utility-read; main a57bb425cf merged clean; shops/equal/utility x3/belt/box-revive/inventory/loot-feed pass, keys 118/119 same as main; PR file in gh-outbox)
 READY ext/stuck-integ-f3c93892 aac5bd01778 (triage only, no merge possible; supersedes: the 708-name skipped list, incl. stuck-integ-8a30c285 rows + 23 new names; port backlog ui-self-cc-timer, ui-knock-feed, egg-hover-1111)
 READY ext/hunter-picks-1118 8b24c69e7e (Breaker spawns happy: idle_fire starts expired; clips spawn row ok; suite-fast 615 vs main: NEW-RED 0 after reruns of all 47 flagged, 3 leftovers flaky; PR #316)
+READY ext/merge-lane-hunters1-1117 3dafab2683 (merge lane hunters1: results-stage win/lose beats, 1 of 25; 24 HARD; main 10a659bdee merged)
