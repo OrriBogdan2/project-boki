@@ -18,6 +18,9 @@ Spec (art/wardens/src/<art>_cloth.json), one entry per cloth group in "groups":
   tip         height of the unskinned tip joint
   blend       share of a sector's width the angle blend covers (1 = linear between neighbours)
   outer       metres from the leg axis (x = +-leg_x) beyond which a thigh-skinned vertex of ANY material counts as cloth
+  loose       {"max_verts": n, "rad": m, "below": y}: a small welded piece (a strand tip the colour slots put in another
+              material) of ANY material, mostly skinned to from_bones, centred more than rad m from the leg axis and
+              below y, counts as cloth whole (else it stays on the thigh while the skirt swings away: a stray bit)
   tag         bone tag (cloth_<tag><sector>_<i>)
 Needs numpy."""
 import json
@@ -89,6 +92,9 @@ def build(j, b, spec):
                 # (a strand the colour slots put in another material: far outside the legs, so not a leg)
                 leg_x, out = g.get("leg_x", 0.09), g.get("outer", 0)
                 ok &= (out > 0) & (np.hypot(np.abs(pos[:, 0]) - leg_x, pos[:, 2] - cz) > out)
+            lo = g.get("loose")
+            if lo and mat not in g["materials"]:
+                ok |= loose_pieces(j, b, pr, pos, dom, [jname.index(n) for n in g["from_bones"]], lo, g.get("leg_x", 0.09), cz)
             ok &= (pos[:, 1] >= g["y"][0]) & (pos[:, 1] <= g["y"][1])
             picks.append((k, np.where(ok)[0]))
         allp = np.concatenate([pr_data[k][1][ix] for k, ix in picks])
@@ -188,6 +194,39 @@ def build(j, b, spec):
                               "count": len(ibm_all), "type": "MAT4"}
     j["buffers"][0]["byteLength"] = len(b) + (-len(b) % 4)
     return report
+
+
+def pieces(j, b, pr, pos):
+    """Welded connected pieces of a primitive: a piece id per vertex (vertices at the same position are one)."""
+    idx, _ = acc_data(j, b, pr["indices"])
+    _, inv = np.unique(np.round(pos, 5), axis=0, return_inverse=True)
+    inv = inv.ravel()
+    par = np.arange(inv.max() + 1)
+
+    def find(x):
+        while par[x] != x:
+            par[x] = par[par[x]]
+            x = par[x]
+        return x
+    for a, c, d in inv[idx.reshape(-1, 3)]:
+        r = find(a)
+        par[find(c)] = r
+        par[find(d)] = r
+    return np.array([find(i) for i in inv])
+
+
+def loose_pieces(j, b, pr, pos, dom, bones, lo, leg_x, cz):
+    pid = pieces(j, b, pr, pos)
+    ok = np.zeros(len(pos), bool)
+    for p in np.unique(pid):
+        vs = np.where(pid == p)[0]
+        if len(vs) > lo["max_verts"] or np.isin(dom[vs], bones).mean() < 0.5:
+            continue
+        c = pos[vs].mean(0)
+        if c[1] < lo["below"] and math.hypot(abs(c[0]) - leg_x, c[2] - cz) > lo["rad"]:
+            ok[vs] = True
+    return ok
+
 
 
 def _t(p):
