@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "scythant",
+	"name": "Scythant",
+	"theme": "swarm",
+	"type2": "bloom",
+	"flavor": "Soldier ant, leaf-blade mandibles.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "marchleaf",
+		"stage": 2,
+		"from": "marchleaf"
+	}
+}

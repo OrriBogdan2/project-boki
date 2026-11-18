@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "pyrraven",
+	"name": "Pyrraven",
+	"theme": "ember",
+	"type2": "tempest",
+	"flavor": "Huge raven with smouldering coal-bed wings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kindlewren",
+		"stage": 3,
+		"from": "embrook"
+	}
+}

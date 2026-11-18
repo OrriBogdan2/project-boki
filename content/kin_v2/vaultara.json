@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "vaultara",
+	"name": "Vaultara",
+	"theme": "titan",
+	"type2": "gravity",
+	"flavor": "Huge tuatara with a vault-door shell.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "latchling",
+		"stage": 3,
+		"from": "tuatrune"
+	}
+}

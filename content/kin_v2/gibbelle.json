@@ -113,5 +113,10 @@
 		"temper": "Joyful",
 		"desc": "Something joyful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "gibbelle",
+		"stage": 1
 	}
 }

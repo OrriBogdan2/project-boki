@@ -114,5 +114,10 @@
 		"temper": "Curious",
 		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
 		"play": "Roots foes in place with spore clouds. Notices everything, wanders off sometimes."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "burrlet",
+		"stage": 1
 	}
 }
