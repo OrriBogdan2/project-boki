@@ -10178,3 +10178,5 @@ READY ext/play-probe-1118 fc4dafb9ce (play probe: automated player for all 13 Hu
 READY ext/lmb-stuck-1118 895b5c0906d3 (LMB release: focus-out lets go of held keys, map closes on landing, release-mid-hitstop/stun/dash/pause regression; bots beside a standing you step about instead of freezing 14.5 s; PR #288)
 READY ext/anim-select-poses-v95 184695fa9b (lobby stage: Sparkle and Motley lock-in windows no longer open on arms-spread / empty box; lockin-shots tool fixed; 13-Hunter before/after sheet)
 READY ext/merge-lane-clean2-1118 cf6ec3715b (merge lane clean2 train c: anim-cancel-blend-port re-tuned for Neve re-port, stacked on train -a; 13 anim flags NEW-RED 0, export 872 MB)
+READY ext/merge-lane-misc-1117 a572099bd6 (bulk-rebase: origin/main merged in mechanically, was 731eaac6b5; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-b771bcef acce3452a7 (bulk-rebase: origin/main merged in mechanically, was d36237c981; union 1 gen 0 files; the branch's own READY checks still apply)
