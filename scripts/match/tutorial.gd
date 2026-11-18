@@ -32,6 +32,8 @@ const KEYS := {
 	"kin": "signature",
 	"sec": "secondary",
 	"gkey": "throw",
+	"summon": "summon",
+	"pack": "summon",
 	"hook": "gear1",
 	"ult": "ultimate",
 	"uplink": "interact",
@@ -45,7 +47,8 @@ const STOP_AFTER := {
 	"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "wallkick": "crouch", "glove": "yard"
 }
 const GAP_STEPS := ["dash", "exdash", "glide"]  # leave from the glowing pad on one island, land on the next
-const FOE_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]  # the marker is the camp's nearest monster
+## The steps whose marker is the camp's nearest monster.
+const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
 const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
 const KIT_KEY := {
@@ -107,6 +110,7 @@ var hits := 0  # your weapon hits on a monster this step
 var seen := {}  # what this run has used: sec, fire, dash, kick, boki, kin, glove, ult (the checks)
 var camps: TutorialCamps
 var aim: TutorialAim  # the E step: a miss gives the cooldown back
+var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var _course: Dictionary = {}
@@ -121,6 +125,7 @@ func _init(match_node: Match) -> void:
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
 	aim = TutorialAim.new()
+	sm = TutorialSummon.new(self)
 
 
 # ------------------------------------------------------------------ the course
@@ -191,7 +196,12 @@ func id() -> String:
 
 ## Whether this hunter's kit has the thing a step teaches.
 func applies(sid: String) -> bool:
-	return sid != "gkey" or m.player.kin != null
+	match sid:
+		"gkey":
+			return m.player.kin != null and not sm.active()
+		"summon", "pack":
+			return sm.active()
+	return true
 
 
 ## Called by Match every step.
@@ -351,7 +361,7 @@ func retry() -> void:
 ## The one line a retry of this beat shows.
 func retry_tip() -> String:
 	var tips: Dictionary = Content.rules("tutorial")["retry"]
-	return _fill(String(tips.get(id(), tips["default"])))
+	return fill(String(tips.get(id(), tips["default"])))
 
 
 ## Back at the last stop, with this beat's camp there (shoot finishes the sec step's camp; the other camp
@@ -386,6 +396,7 @@ func _enter() -> void:
 	held = false
 	hits = 0
 	used0 = p.used.duplicate()
+	sm.begin()
 	kicks0 = int(p.stats.get("wall_kicks", 0))
 	if p.kin:
 		throws0 = p.kin.st_throws
@@ -393,7 +404,7 @@ func _enter() -> void:
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
 	match sid:
-		"sec", "gkey", "kin", "hook", "ult":
+		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
 			camps.spawn(sid)
 		"glove":
 			if ground_item().is_empty():  # (a retry finds the glove still lying there)
@@ -496,6 +507,10 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or k == null or k.st_throws > throws0 or k.state == "downed"
 			seen["boki"] = seen.get("boki", false) or flag
 			return _camp_done(sid)
+		"summon":
+			return sm.summon_done(dt)
+		"pack":
+			return sm.pack_done()
 		"kin":
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
 			flag = aim.hit
@@ -593,7 +608,7 @@ func goal(sid: String) -> Vector3:
 		"glove":
 			var wp := ground_item()
 			return wp["pos"] if not wp.is_empty() else stop("pickup")
-		"sec", "shoot", "gkey", "kin", "hook", "ult":
+		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
@@ -707,15 +722,18 @@ func _words() -> void:
 		line = String(alt["shoot_" + shoot_kind])
 	elif sid == "sec" and rmb_has_hold():
 		line = String(alt["sec_hold"])
-	text = _fill(line)
+	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
+		line = String(alt[sm.alt_key(sid)])
+	text = fill(line)
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
 	if sid == "sec" and rmb_has_hold():
 		need = 2
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
-	var was := detail
-	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
+	if sid == "summon":
+		detail_key = sm.detail_key()
+	detail = fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
@@ -739,7 +757,7 @@ func progress_text() -> String:
 
 
 ## The player's own keys, Boki name and this step's ability (its name, %A, and its kit line, %L) in a line.
-func _fill(txt: String) -> String:
+func fill(txt: String) -> String:
 	var p := m.player
 	var key := String(KIT_KEY.get(id(), ""))
 	var an := "your ability"
@@ -752,6 +770,9 @@ func _fill(txt: String) -> String:
 	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	txt = txt.replace("%Q", Settings.key_cap("gear1")).replace("%L", kit_line(key))
+	txt = txt.replace("%M", Settings.key_cap("summon"))
+	if p.kin and p.kin.summon:
+		txt = txt.replace("%D", str(roundi(p.kin.summon.dur))).replace("%B", str(roundi(p.kin.summon.cd_base)))
 	return txt.replace("%A", an).replace("%s", kname)
 
 
