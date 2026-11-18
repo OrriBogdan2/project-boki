@@ -1,5 +1,15 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
+can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
+dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
+(~/meshy/grimble-puddle-1117/out/nopuddle.glb, scripts in w/): Meshy's faces deleted, nothing new modelled. Every goo-coloured face
+(paint saturation > 0.45) under 4.5 cm on the arm side goes, and so does what is then cut off from the body. The goo strands now
+end 4.5 cm above the floor in small pointed drip caps, and the crescent's base is filled flat. The foot.R box (and `hook`'s
+matching except box) shrank to the foot: x >= 0.09, y <= 0.04. The strand tips and the crescent's base in front of the toes are
+on `hook` now. Ported with `v95_to_game.py Grimble --master <that glb>`; 62.8k tris. Stretch: worst 12.64 -> 10.06 (ledge);
+throw 10.28 -> 4.86, reel 10.31 -> 6.49, idle 5.43 -> 3.12, mean over 52 clips 7.20 -> 5.02.
+
 **Gun in hand (2026-11-17, ext/grimble-gun-hand):** the master is the owner's 11-17 pick (CURRENT_OVERRIDES: weapons-fix-1116b/Grimble/hand/grip1117/final/cand.glb,
 "grimble a seems fine"): the same body with the blunderbuss off the belt and in the iron fist, its own node. The swap
 spec puts it rigid on `hand.L` (a region box round it), weapon_muzzle and anchor_gun_root sit on its muzzle and stock on
@@ -54,3 +64,9 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
 
 **Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".
+
+**board1117 A colours (11-18, ext/hunter-picks-tcg-1117):** owner 11-17 "grimble your call", coordinator call A (masked grade of
+the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, darker pack/belt/loincloth, gun bell iron grey and
+stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
+UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
+resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.

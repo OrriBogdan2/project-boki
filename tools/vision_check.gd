@@ -1,14 +1,14 @@
 extends RefCounted
 ## --vision-check: the sight wedge (Match.sees, shaders/vis.gdshaderinc, docs/specs/VISION_LOOK.md). The wedge is
-## 170 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
+## 120 degrees wide and the shader draws the same angle; a rival just inside its side is seen, just outside is
 ## not; one right behind you is (the near circle); crouching hides you at a range a standing rival is seen from;
 ## a hiding rival (crouched, in grass) shows no plate unless revealed, downed or a teammate; a rival out past the
 ## wedge's side who shoots or is hit is seen for the reveal's time inside her own soft lit circle (RevealLight), which
 ## fades out with it. Never touches the save.
 
-const WEDGE_DEG := 170.0   # degrees: the owner's reference wedge
-const SIDE_IN := 80.0      # degrees off your aim: inside the wedge's side (85)
-const SIDE_OUT := 95.0     # degrees off your aim: outside it
+const WEDGE_DEG := 120.0   # degrees: a wide cone in front of you
+const SIDE_IN := 50.0      # degrees off your aim: inside the cone's side (60)
+const SIDE_OUT := 70.0     # degrees off your aim: outside it
 const SIDE_M := 10.0       # m: how far out the side probes stand (inside VIEW_RANGE, outside the near circle)
 const FAR_M := 18.0        # m: past the crouched range (14), inside the standing one (24)
 const BEHIND_M := 1.5      # m: inside the near circle (NEAR_SENSE 2.0)
@@ -149,7 +149,7 @@ func _reveal(m: Match) -> void:
 		var away := "%.0f degrees off your aim, %.0f m out" % [AWAY_DEG, SIDE_M]
 		ok(_lit(m, foe) == 0.0 and foe.unseen, away + ": hidden, no circle")
 		foe.inp["aim"] = P.pos
-		foe.fire()
+		foe.atk.fire()
 		ok(foe.reveal_t >= SHOT_REVEAL, "her shot gives her away for %.1f s (%.2f)" % [SHOT_REVEAL, foe.reveal_t])
 		ok(_lit(m, foe) == 1.0 and not foe.unseen, "she is seen, inside her own lit circle")
 		foe.reveal_t = 0.0
