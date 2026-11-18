@@ -611,15 +611,24 @@ class Gate:
         """Mid-run guard: stop when most paired runs are red on both trees, or most merge runs are red at all."""
         with self.lock:
             both = [f for f in self.res["merge"] if f in self.res["main"] and not self.res["main"][f].get("cached")]
-            red = [f for f in both if self.red_both(f)]
+            # 11-16: a check killed by the timeout (rc 124/137) says nothing about the tree, only that the box is loaded
+            # (rpc4 load 90 on 32 cores: 19/24 "red on both" were all 300 s timeouts). Count real reds only.
+            def to(r):
+                return r.get("rc") in (124, 137)
+
+            red = [f for f in both if self.red_both(f) and not to(self.res["main"][f]) and not to(self.res["merge"][f])]
             mg = list(self.res["merge"].values())
-            mred = sum(1 for r in mg if r["verdict"] == "red")
+            mred = sum(1 for r in mg if r["verdict"] == "red" and not to(r))
+            ntimeout = sum(1 for r in mg if to(r))
         n, lo, frac = len(both), self.a.massred_min, self.a.massred_frac
         if self.a.main_lazy:  # main only runs after a merge red, so pairs are mostly red: count against all merge runs
             n = len(mg)
         if self.abort.is_set():
             return
-        if n >= lo and len(red) / n >= frac:
+        if len(mg) >= lo and ntimeout / len(mg) >= frac:
+            self.env_broken(f"HOST-OVERLOADED: {ntimeout}/{len(mg)} merge-tree checks hit the {self.a.timeout} s timeout "
+                            f"(load {os.getloadavg()[0]:.0f} on {os.cpu_count()} cores): retry when the box is quiet, not a tree problem")
+        elif n >= lo and len(red) / n >= frac:
             self.env_broken(f"mass red: {len(red)}/{n} flags red on BOTH trees")
         elif len(mg) >= lo and mred / len(mg) >= frac:
             self.env_broken(f"mass red: {mred}/{len(mg)} merge-tree flags red (env or the merge itself is broken)")

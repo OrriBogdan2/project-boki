@@ -466,7 +466,6 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			m.sfx("shield", p, -4.0, 1.9)
 			m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
-		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
 	return ""
 
@@ -527,6 +526,7 @@ func tick(dt: float) -> void:
 		var touch: Dictionary = w["touch"]
 		if not touch.is_empty():
 			for f in m.foes_of(int(w["team"])):
+				if not f.hittable(): continue
 				var c2 := Geometry2D.get_closest_point_to_segment(Vector2(f.pos.x, f.pos.z), w["a"], w["b"])
 				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and absf(f.pos.y - float(w["y"])) < 2.0:
 					var key: String = str(f.get_instance_id())

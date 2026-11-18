@@ -7,8 +7,8 @@
 	"weight": "light",
 	"color": "#d41e2e",
 	"body": {
-		"size": 1.01,
-		"hit_r": 0.392,
+		"size": 1.054,
+		"hit_r": 0.408, "hit_h": 1.85, "body_r": 0.392,
 		"head": 0.72,
 		"legs": 2.35,
 		"neck": -0.05
@@ -20,7 +20,7 @@
 	"signature": "longbow",
 	"resource": {
 		"id": "hawk",
-		"name": "Hawk Sense",
+		"name": "Red Thread",
 		"max": 1,
 		"kind": "none",
 		"col": "#d8ffb0",
@@ -28,8 +28,8 @@
 		"sense_r": 22.0
 	},
 	"passive": {
-		"name": "Hawk Sense",
-		"desc": "Rivals under half health are seen through cover within 22m."
+		"name": "Red Thread",
+		"desc": "Rivals under half health are seen through cover within 22m. A jump while facing a wall up to twice your height climbs it, no extra key."
 	},
 	"dash": {
 		"id": "spirit_walk",

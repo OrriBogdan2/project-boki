@@ -3,7 +3,8 @@ extends RefCounted
 ## view), materials, bones and triangles; lists the models over the surface budget. Then each Hunter as the game
 ## builds it (toon materials, equal surfaces joined by WardenMerge): the surfaces and ink passes it really draws.
 
-const DRAW_BUDGET := 4          # surfaces per model; every one is a draw call per view and shadow cascade
+const DRAW_BUDGET := 4  # surfaces per model; every one is a draw call per view and shadow cascade
+
 
 func run(main: Node) -> void:
 	var paths: Array[String] = []
@@ -22,9 +23,20 @@ func run(main: Node) -> void:
 		total += st.surfaces
 		if st.surfaces > DRAW_BUDGET:
 			over += 1
-		print("MODELDRAWS %s meshes %d surfaces %d materials %d bones %d tris %d%s" % [
-			p.trim_prefix("res://art/"), st.meshes, st.surfaces, st.materials.size(), st.bones, st.tris,
-			"  OVER" if st.surfaces > DRAW_BUDGET else ""])
+		print(
+			(
+				"MODELDRAWS %s meshes %d surfaces %d materials %d bones %d tris %d%s"
+				% [
+					p.trim_prefix("res://art/"),
+					st.meshes,
+					st.surfaces,
+					st.materials.size(),
+					st.bones,
+					st.tris,
+					"  OVER" if st.surfaces > DRAW_BUDGET else ""
+				]
+			)
+		)
 	var built := 0
 	for a in Arch.ids():
 		if WardenGlb.has_model(a):
@@ -43,6 +55,7 @@ func run(main: Node) -> void:
 	print("MODELDRAWS DONE models %d surfaces %d over budget (%d) %d" % [paths.size(), total, DRAW_BUDGET, over])
 	main.get_tree().quit()
 
+
 func _count(n: Node) -> Dictionary:
 	var st := {"meshes": 0, "surfaces": 0, "materials": {}, "bones": 0, "tris": 0}
 	var todo: Array[Node] = [n]
@@ -60,6 +73,7 @@ func _count(n: Node) -> Dictionary:
 				var m := mi.get_active_material(s)
 				st.materials[m if m else s] = true
 	return st
+
 
 func _tris(mesh: Mesh, s: int) -> int:
 	var a := mesh.surface_get_arrays(s)

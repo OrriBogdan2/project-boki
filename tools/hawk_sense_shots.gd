@@ -1,5 +1,5 @@
 extends RefCounted
-## --hawk-sense-shots: review screenshots of Lace's Hawk Sense (HawkSense) in a live match (xvfb with a
+## --hawk-sense-shots: review screenshots of Lace's Red Thread (HawkSense) in a live match (xvfb with a
 ## renderer), into --shots-dir=<dir>. A rival stands just behind a boulder (the map's rock mesh, solid in the
 ## map data), seen from Lace's camera 5 m to the south: at full health they are hidden; under the health line
 ## they are revealed and their outline in Lace's colour shows through the rock. Each as the full frame and a

@@ -377,7 +377,8 @@ var _now := {}                 # blend shape name -> weight
 var _want := {}
 var _face_name := "neutral"
 var _flex_y := 0.0
-var _pos_prev := Vector3.ZERO
+var _pos_prev := Vector3.INF      # (INF: not measured yet)
+var _tp := 0                  # the Kin's last teleport count seen (Kin.teleport)
 var _speed := 0.0
 var _land := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
@@ -396,6 +397,7 @@ var _look_t := 1.0
 var _look := Vector2.ZERO
 var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
+var _idle := BokiIdle.new()    # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
@@ -482,7 +484,6 @@ func _ready() -> void:
 	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
-	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_nap = KinNap.new(species)
 	if not _ear_bones.has(species):
@@ -493,6 +494,8 @@ func _ready() -> void:
 	_skel = skeleton()
 	for g in PLANT_GAITS:
 		_plants[g] = BokiPlant.of(species, model, _skel, g)
+	BokiIdle.build(player, skeleton(), species)
+	_idle.rest(_rng)
 	set_clip("idle")
 
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
@@ -584,6 +587,11 @@ func _keep_flex(dt: float) -> void:
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
+	var tp := int(root.get_meta("tp", 0))
+	if _pos_prev == Vector3.INF or tp != _tp:
+		_tp = tp          # put somewhere (burst, re-bloom, blink, swap): not a run, so the speed stays as it was
+		_pos_prev = gp
+		return
 	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt      # rising or sinking is no stride
 	_pos_prev = gp
 	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
@@ -616,6 +624,10 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	if want in GAITS and feel.has("clip"):
 		want = feel["clip"]
+	if want == "idle":
+		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
+	else:
+		_idle.rest(_rng)
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want in NAP_CLIPS:

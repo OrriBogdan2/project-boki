@@ -11,6 +11,7 @@ const KEEP_APART := ["eyes", "glow", "card", "void", "flame"]
 ## (mesh id + grouping) -> the joined mesh, so one spawn pays the buffer read and the join, the rest reuse it.
 static var _joined := {}
 
+
 static func merge_equal(glb: Node) -> void:
 	for node in glb.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
@@ -28,10 +29,12 @@ static func merge_equal(glb: Node) -> void:
 		for gi in mats.size():
 			mi.set_surface_override_material(gi, mats[gi])
 
+
 ## The ink copies of a Hunter's model (`model` the Hunter's root), whose material ShieldLook swaps for the rim.
 static func inks(model: Node) -> Array:
 	var glb := model.get_node_or_null("Warden")
 	return glb.get_meta("inks", []) if glb else []
+
 
 static func join_inks(glb: Node) -> void:
 	var made: Array = []
@@ -50,7 +53,7 @@ static func join_inks(glb: Node) -> void:
 			if not _joined.has(key):
 				_joined[key] = _join(mesh, [g])
 			var shell := MeshInstance3D.new()
-			shell.name = String(mi.name) + "_ink"       # (so a far_hide name pattern takes it with its body)
+			shell.name = String(mi.name) + "_ink"  # (so a far_hide name pattern takes it with its body)
 			shell.mesh = _joined[key]
 			shell.skin = mi.skin
 			shell.material_override = ink
@@ -60,6 +63,7 @@ static func join_inks(glb: Node) -> void:
 			shell.skeleton = shell.get_path_to(mi.get_node(mi.skeleton))
 			made.append(shell)
 	glb.set_meta("inks", made)
+
 
 ## Surface indices grouped by the shared ink shell they wear (a glow piece's own halo shell is never shared).
 static func _ink_groups(mi: MeshInstance3D) -> Array:
@@ -84,6 +88,7 @@ static func _ink_groups(mi: MeshInstance3D) -> Array:
 			out[home].append(si)
 	return out
 
+
 ## Surface indices grouped by equal material, in first-seen order.
 static func _groups(mi: MeshInstance3D) -> Array:
 	var out: Array = []
@@ -103,10 +108,14 @@ static func _groups(mi: MeshInstance3D) -> Array:
 			out[home].append(si)
 	return out
 
+
 static func _compatible(mesh: Mesh, a: int, b: int) -> bool:
-	return mesh.surface_get_format(a) == mesh.surface_get_format(b) \
-			and mesh.surface_get_primitive_type(a) == mesh.surface_get_primitive_type(b) \
-			and mesh.surface_get_primitive_type(a) == Mesh.PRIMITIVE_TRIANGLES
+	return (
+		mesh.surface_get_format(a) == mesh.surface_get_format(b)
+		and mesh.surface_get_primitive_type(a) == mesh.surface_get_primitive_type(b)
+		and mesh.surface_get_primitive_type(a) == Mesh.PRIMITIVE_TRIANGLES
+	)
+
 
 ## Same shader, every uniform equal, and the same next pass (the ink shell) on both.
 static func _same(a: Material, b: Material) -> bool:
@@ -119,8 +128,10 @@ static func _same(a: Material, b: Material) -> bool:
 	for u in sa.shader.get_shader_uniform_list():
 		if sa.get_shader_parameter(u.name) != sb.get_shader_parameter(u.name):
 			return false
-	return (sa.next_pass == null) == (sb.next_pass == null) \
-			and (sa.next_pass == null or _same(sa.next_pass, sb.next_pass))
+	return (
+		(sa.next_pass == null) == (sb.next_pass == null) and (sa.next_pass == null or _same(sa.next_pass, sb.next_pass))
+	)
+
 
 static func _join(mesh: ArrayMesh, groups: Array) -> ArrayMesh:
 	var out := ArrayMesh.new()
@@ -140,5 +151,5 @@ static func _join(mesh: ArrayMesh, groups: Array) -> ArrayMesh:
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, fmt)
 		var at := out.get_surface_count() - 1
 		out.surface_set_name(at, mesh.surface_get_name(g[0]))
-		out.surface_set_material(at, mesh.surface_get_material(g[0]))      # (WardenMood reads the slot off it)
+		out.surface_set_material(at, mesh.surface_get_material(g[0]))  # (WardenMood reads the slot off it)
 	return out
