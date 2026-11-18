@@ -189,6 +189,15 @@
 		"emote": "happy",
 		"hit": "angry",
 		"hit_t": 1.2,
+		"combat": "angry",
+		"combat_t": 4.0,
+		"tex_faces": {
+			"eyes-v95": {
+				"angry": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"determined": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"sad": "res://art/wardens/breaker/breaker_v95_angry.jpg"
+			}
+		},
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [
