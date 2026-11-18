@@ -228,7 +228,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	_settle(m, P, home, 0.5)
 
 ## R: the barrel comes up over 0.1 s and the shot leaves on its kick key (0.14 s), not at the press: the source's
-## raise, then fire. She is never held (owner 11-17): walking through it the legs walk under the raised rifle (an
+## raise, then fire. She is never held: walking through it the legs walk under the raised rifle (an
 ## upper-body clip), slowed to GunslingerUlt.WINDUP_MOVE in the 0.25 s wind-up and at full speed after; a jump in
 ## the wind-up goes at once.
 func _nuke(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
@@ -251,7 +251,7 @@ func _nuke(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and float(r["out"]) > 0.6 and float(r["out"]) < 0.6 + _back(P, "gunslinger_x"),
 			"hit %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]])
 	var run := P.base_speed
-	C.ok("Vex timing R: walking through the wind-up the legs walk, slowed but never stopped (owner 11-17)",
+	C.ok("Vex timing R: walking through the wind-up the legs walk, slowed but never stopped",
 			_legs_walk(walk) and float(walk.get("speed", 0.0)) < run * 0.8,
 			_walk_line("at 0.2", walk) + " (run %.1f)" % run)
 	C.ok("Vex timing R: after the 0.25 s wind-up she runs at full speed",

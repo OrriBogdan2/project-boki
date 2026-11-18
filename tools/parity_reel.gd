@@ -8,10 +8,10 @@ extends "res://tools/hero_vfx_reel.gd"
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
 ## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
 ## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
-## then one past it, from the ground or a jump's top; r_run: R pressed while running at the far dummy), "run" (run at the
-## dummy, then circle it), "death" (the knocked-down beat) and "backfaces" (every surface flat, red where it shows its
-## back). --reel-close swaps the match camera for a close orbit round the Hunter (CLOSE_FILL of the frame high, no HUD).
-## Never writes the save.
+## then one past it, from the ground or a jump's top; r_run: R pressed while running at the far dummy), "run" (run
+## at the dummy, then circle it), "death" (the knocked-down beat) and "backfaces" (every surface flat, red where it
+## shows its back). --reel-close swaps the match camera for a close orbit round the Hunter (CLOSE_FILL of the frame
+## high, no HUD). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -254,7 +254,7 @@ func _p_r() -> void:
 		return
 	await _seg("R, then the recast", 6.0, _r_presses)
 
-## R pressed mid-run toward the far dummy, the keys held on (owner 11-17, Vex: the ult must not stop her).
+## R pressed mid-run toward the far dummy, the keys held on (Vex: the ult must not stop her).
 ## Prints REEL_RRUN with the metres covered in the 0.5 s after the press.
 func _p_r_run() -> void:
 	P.ak.cd["x"] = 0.0
