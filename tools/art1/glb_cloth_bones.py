@@ -21,6 +21,10 @@ Spec (art/wardens/src/<art>_cloth.json), one entry per cloth group in "groups":
   loose       {"max_verts": n, "rad": m, "below": y}: a small welded piece (a strand tip the colour slots put in another
               material) of ANY material, mostly skinned to from_bones, centred more than rad m from the leg axis and
               below y, counts as cloth whole (else it stays on the thigh while the skirt swings away: a stray bit)
+  legs        {"x": leg axis |x|, "z": its z, "clear": [[y, r], ...]}: a joint below the top one whose rest point is
+              closer than r (the first entry whose y it is above) to a leg's vertical axis is pushed out to r, so no
+              chain starts inside the game's leg capsules (a joint inside one is shoved out sideways: the panel
+              vanishes behind the leg)
   tag         bone tag (cloth_<tag><sector>_<i>)
 Needs numpy."""
 import json
@@ -114,7 +118,11 @@ def build(j, b, spec):
                     a = math.radians(s * width)
                     r = 0.18
                     jp[s, li] = [cx + r * math.sin(a), y, cz - r * math.cos(a)]
-        # a sector's chain hangs without crossing: keep the top joint on the belt line
+        legs = g.get("legs")
+        if legs:
+            for s in range(ns):
+                for li in range(1, nl):
+                    jp[s, li] = clear_legs(jp[s, li], legs, s * width)
         tags = []
         base = len(nodes)
         for s in range(ns):
@@ -122,7 +130,7 @@ def build(j, b, spec):
             prev_pos = par_pos
             prev_node = parent_node
             for li in range(nl + 1):
-                p = jp[s, li] if li < nl else np.array([jp[s, nl - 1, 0] * 1.0, g["tip"], jp[s, nl - 1, 2]])
+                p = jp[s, li] if li < nl else np.array([jp[s, nl - 1, 0], g["tip"], jp[s, nl - 1, 2]])
                 local = (p - prev_pos).tolist()
                 nodes.append({"name": "%s_%d" % (tag, li), "translation": [float(x) for x in local]})
                 idx = len(nodes) - 1
@@ -194,6 +202,21 @@ def build(j, b, spec):
                               "count": len(ibm_all), "type": "MAT4"}
     j["buffers"][0]["byteLength"] = len(b) + (-len(b) % 4)
     return report
+
+
+def clear_legs(p, legs, ang):
+    """p pushed out (in XZ) to the clear radius of the nearer leg axis; straight out along the sector when on it."""
+    r = next(rr for y, rr in legs["clear"] if p[1] >= y)
+    ax = np.array([math.copysign(legs["x"], p[0] if abs(p[0]) > 1e-6 else math.sin(math.radians(ang))), legs["z"]])
+    d = np.array([p[0], p[2]]) - ax
+    n = np.linalg.norm(d)
+    if n >= r:
+        return p
+    if n < 1e-3:
+        d = np.array([math.sin(math.radians(ang)), -math.cos(math.radians(ang))])
+        n = 1.0
+    q = ax + d / n * r
+    return np.array([q[0], p[1], q[1]])
 
 
 def pieces(j, b, pr, pos):
