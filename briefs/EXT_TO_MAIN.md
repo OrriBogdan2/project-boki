@@ -10199,3 +10199,4 @@ READY ext/mc-timeouts-1118 5402569aaa (merge-candidate: per-suite log, 30 min wa
 READY ext/wallkick-diminish 74701d007c (wall kick diminishing 100/60/30% + climbs never stack; mashed peak on 5-terrace wall: main 4.98m, curve-only 4.26m, now 1.81m; timed 2.28m unchanged)
 READY ext/hud-portraits-1118 feeb365c44 (7 hunters' neutral/excited/hurt HUD portraits + hurt/excited mood slots; sheet /home/boki/meshy/hud-portraits-1118/compare_hud.jpg on w2; Kael + pass C to follow on same branch)
 READY ext/hunter-picks-1118 2597e494d9e6e317fd4b337dd15b19c6e12d5043 (owner picks 11-18: Cinder bust r12 + Albert happy face default, angry face kept for fights via WardenMood tex_faces)
+READY ext/vex-quill-ammo-1117 63f628638f (Vex quill rifle: drum drains even in god/mod mode, under half a drum hits for half, HUD red under half; --quill-mag-check; PR via gh-outbox)
