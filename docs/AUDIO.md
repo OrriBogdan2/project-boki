@@ -341,7 +341,7 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).
 - **Success chime** by the Boki's rarity (`Capture.rarity_tier`, rules `pop_sounds`): `scan_pop` common, `scan_pop_fine` mutated, `scan_pop_rare` shimmer or a rare species. The music ducks (`duck_s`, `duck_db`) for a catch within hearing.
 - **`scan_fail`**: a scan cancelled by Space, a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
-- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m (half of hear_range).
+- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 15 m (half of hear range).
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
 - A monster's notice cue (`MobNotice`, `scripts/match/mob_notice.gd`): when an idle monster turns to chase (it saw a Hunter or was hit) its kind's `v_<kind>` voice plays from it, pitched as a short alert (small kinds high, heavy kinds low). A camp waking is one cue: a monster stays quiet while a camp-mate (camp spots within 5 m) is awake or cued in the last 3 s of match time. Clients cue from the synced idle -> chase change. Checked in `--mob-notice-check`.
 - **Rarity stings** (`scripts/match/rarity_sting.gd`, `rarity_rare` / `rarity_very_rare`): a rare species (`Data.is_rare`) or a shimmer gets a short bell sting, 6 / 4 dB under full scale, so under the scan chime. Played when it comes into sight within 30 m in a match (`MusicDir` looks twice a second; once per Boki per match, the best of those new that look), when you claim it (`Capture._pop`, your own scans) and when it hatches (`EggHatch._pop`). While the fight stem is loud (`MusicDir.heat` 0.5 and up) a sight sting waits, and so does a claim sting (dropped). `--sfx-set-check` section 11.
@@ -438,3 +438,24 @@ The grounds (opts `training`: the practice island, the Arena and the duel room) 
 - **Swim and footing** (`scripts/match/hazard_move_sfx.gd`): the HunterSwim crawl's clip events play `splash` going into deep water and coming out, and `swim` on every arm stroke; `hazard_catch` ticks when ice footing comes back. `HunterSwim.tick` finds the events, `Hunter.render` plays them; other players are 6 dB quieter and every cue goes through the listener range.
 - **`hazard_warded`**: a soft two-note shimmer the first time your Boki keeps each kind of ground off you in a match (it replaced the stock `shield` chime on every step in).
 - `--terrain-hazard-check` asserts each cue, the range, the swim sounds, the single gasp before drowning, the warded cue once, and the beds (nearest ground, louder nearer, at most 2).
+
+
+## Falloff (`Sfx.NEAR/SPREAD/FAR/hear_range`)
+All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The SUPERVIVE view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
+- NEAR 3.5 -> 5.5 m, SPREAD 5 -> 8 m, FAR 9 -> 19 m (muffling now starts just past the side edge), hear_range 22 -> 30 m (the edge fade still starts at 0.7 of it). `scan_call` reach 11 -> 15 m (stays half of hear range).
+- Unchanged: a sound's own `reach` (ult cues 60 m), the scan hum's 26 m, hidden rivals' footsteps (`Juice.footstep` still skips rivals past 14 m and unseen ones; `Sfx.step` volumes as before).
+
+| distance (m) | before (3.5/5/9/22) | after (5.5/8/19/30) |
+|---|---|---|
+| 5 | -2.3 dB, clear | 0.0 dB, clear |
+| 10 | -7.2 dB, muffled | -3.9 dB, clear |
+| 11.75 (old screen edge) | -8.5 dB, muffled | -5.0 dB, clear |
+| 15 | -10.4 dB, muffled | -6.8 dB, clear |
+| 18.5 (new screen edge) | -17.3 dB, muffled | -8.4 dB, clear |
+| 22 | -73 dB, muffled | -10.0 dB, muffled |
+| 25 | silent | -15.4 dB, muffled |
+| 28.5 (10 m off screen) | silent | -34.4 dB, muffled |
+| 30 | silent | -72.2 dB, muffled |
+| 31 | silent | silent |
+
+`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.
