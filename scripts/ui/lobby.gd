@@ -9,7 +9,7 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
-var mode := "ffa"
+var mode := "trios"           # Data.MODES, or "heart_raid"
 var mode_btns := {}
 var duel := false
 var line_key := "lobby"      # the presence key that puts you in this list: "lobby", or "duel" on the duel line
@@ -48,15 +48,14 @@ func _ready() -> void:
 	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	track.add_child(modes)
-	var kinds := [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"],
-		["heart_raid", "Heart Raid (prototype)"]]
+	var kinds := Data.MODES.map(func(k): return [k, String(k).capitalize()]) + [["heart_raid", "Heart Raid (prototype)"]]
 	for m in kinds:
 		var key: String = m[0]
 		var b := UI.button(m[1], func(): _pick_mode(key))
 		mode_btns[key] = b
 		modes.add_child(b)
 	v.add_child(track)
-	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads (Heart Raid: one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+	v.add_child(UI.para("Empty spots are filled with bots: %d hunters in trios, %d in solos (Heart Raid: one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front." % [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS]))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
@@ -163,7 +162,8 @@ func _refresh() -> void:
 func _start() -> void:
 	if Net.mode == "":
 		return
-	var squad: int = {"ffa": 1, "duo": 2, "trio": 3, "heart_raid": 4}[mode]
+	var mo := Data.mode_opts(mode)      # (heart_raid: trios' numbers; the squad of 4 and teams 1 are set below)
+	var squad: int = 4 if mode == "heart_raid" else int(mo["squad"])
 	var ids: Array = []
 	for id in Net.peers:
 		var p: Dictionary = Net.peers[id]
@@ -182,10 +182,10 @@ func _start() -> void:
 		if id == Net.me:
 			p = Net.my_presence
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "tag": ClanInfo.clean_tag(p.get("tag")), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
-	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
+	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(mo["teams"]))
 	if mode == "heart_raid":
 		teams = 1
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, Data.MATCH_PLAYERS), "squad": squad, "tier": int(opts.get("tier", 0))}
+	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, int(mo["total"])), "squad": squad, "tier": int(opts.get("tier", 0))}
 	d["heart_raid"] = mode == "heart_raid"
 	d["raid_diff"] = HeartRaidPick.difficulty
 	Net.lobby_emit("start", d)
