@@ -80,6 +80,8 @@ extends RefCounted
 ##      without taking a slot, and a need falling to urgent sulks once
 ##  21. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
 ##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
+##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
+##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -162,6 +164,7 @@ func run(main: Node) -> void:
 	_low_hp()
 	_voices()
 	_carry()
+	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
