@@ -125,7 +125,6 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 		main.get_viewport().get_texture().get_image().save_png(file)
 
 func _hud() -> void:
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES      # the whole HUD: a new save gets it staged (HudReveal)
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
