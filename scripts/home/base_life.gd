@@ -5,7 +5,8 @@ extends RefCounted
 ## feeding bowl, or a snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
 ## another Boki, stares at a rival, comes to look at a newcomer, a toy you just placed (the most curious
-## one plays at it first, and each looker keeps the day in its memory) or to eat from your hand (BaseHandFeed). A retired mentor (Mentor) only strolls slowly
+## one plays at it first, and each looker keeps the day in its memory) or to eat from your hand (BaseHandFeed).
+## A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
@@ -582,11 +583,12 @@ static func _trait(k: Dictionary, key: String) -> float:
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
 
-## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
-## news with ComeLook).
+## The farm's own drivers have this Boki (it was called, is held or led, works, bathes, is indoors, leaping or looking
+## at news with ComeLook).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) or k.has("look") \
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.has("led") or k.get("nap_go", false) \
+		or k.has("look") \
 		or float(k.get("hold_t", 0.0)) > 0.0
 
 ## Free to roam: its machine is in Roam and none of the farm's drivers has it (a flier stays up: BokiFly).
