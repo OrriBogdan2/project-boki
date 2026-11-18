@@ -38,7 +38,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
-var dex_dir := ""    # --dex-dir=<dir> with --sheet: also <out>/dex_sheet_N.png, <dir>/<id>.glb at the game model's height
+var dex_dir := ""    # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
 
 func run(m: Node) -> void:
 	main = m
