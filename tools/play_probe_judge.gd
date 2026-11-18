@@ -11,6 +11,7 @@ const LATE_S := 0.8  # s after the release: activity past this is the ability st
 const LATE_EVENTS := 2  # activity events past LATE_S that count as "keeps going"
 const REST_EPS := 0.004  # rad: a skeleton this close to its rest pose is standing in the T-pose
 const CAM_JERK_M := 0.03  # m: the camera's one-frame change of step during a steady run
+const BODY_SMOOTH_M := 0.005  # m: the body's own one-frame change of step under this is smooth
 const JITTER_M := 0.04  # m: back-and-forth along the push direction while pressed into a wall
 ## FLAG kind -> [impact 1-10, what a player would say]
 const KINDS := {
@@ -195,7 +196,9 @@ func common(hero: String, sc: String, ss: Array, meas: Dictionary) -> void:
 			skate.append(s["foot"] / sp)
 		if i >= 1 and i + 1 < ss.size() and _run_step(ss[i - 1], s) and _run_step(s, ss[i + 1]):
 			var c: Vector3 = ss[i + 1]["cam"] - 2.0 * (s["cam"] as Vector3) + ss[i - 1]["cam"]
-			jerk = maxf(jerk, c.length())
+			var b: Vector3 = ss[i + 1]["p"] - 2.0 * (s["p"] as Vector3) + ss[i - 1]["p"]
+			if b.length() < BODY_SMOOTH_M:  # (a shove that moved the body itself is not the camera's jolt)
+				jerk = maxf(jerk, c.length())
 		if s["g"] and sp < 0.05 and s["lp"] > 0.5:
 			in_place += 1
 		if not s["scr"]:

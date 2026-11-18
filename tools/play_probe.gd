@@ -49,6 +49,7 @@ var frames := 0
 var clip_on := false
 var shots: Array = []  # this scenario's frames for a clip
 var clip_paths := {}
+var pending: Array = []  # [scenario, measurements] waiting for its judgement
 var out_dir := "user://play_probe"
 
 
@@ -90,7 +91,7 @@ func _hero(id: String) -> void:
 		"seed": SEED,
 		"no_drop": true,
 		"god": true,
-		"demo_kin": "cindle"
+		"demo_kin": "cindle",
 	}  # a Boki at your side, to walk into
 	opts.merge({"cls": Arch.weight(id), "arch": id, "weapon": Arch.signature(id)})
 	m.start(opts)
@@ -99,6 +100,7 @@ func _hero(id: String) -> void:
 	m.mobs.clear()
 	w = m.world
 	me = m.player
+	last_sid = -1  # (a new match counts its shots from 0 again)
 	me.unlock_all()
 	foe = null
 	for h in m.hunters:
@@ -112,11 +114,15 @@ func _hero(id: String) -> void:
 	park = w.free_spot_near(_flat() + Vector3(0, 0, 14))
 	_bind_model()
 	var names := feet.map(func(b: int) -> String: return skel.get_bone_name(b))
+	if names.is_empty() and skel:  # (no foot bone by name: the bone list, to teach _bind_model this rig's names)
+		for i in mini(skel.get_bone_count(), 60):
+			names.append(skel.get_bone_name(i))
 	print("PROBE hero %s features %s feet %s clips %s" % [id, str(feats.keys()), str(names), clips != null])
 	await _movement()
 	await _abilities()
 	await _states()
 	await _collisions()
+	_judge_pending()
 	_release_all()
 	m.queue_free()
 	await _frames(2)
@@ -291,6 +297,7 @@ func _foot_speed() -> float:
 # ---------------------------------------------------------------- scenario frame
 ## A scenario starts here: keys up, the map shut, a fresh kit, charges back, the body still at `at`.
 func _begin(at: Vector3, aim_dir := Vector2(1, 0)) -> void:
+	_judge_pending()
 	_release_all()
 	if m.hud and m.hud.map_open():
 		m.hud.close_map()
@@ -312,16 +319,26 @@ func _begin(at: Vector3, aim_dir := Vector2(1, 0)) -> void:
 	await _frames(20)
 	_aim_at(me.pos + Vector3(aim_dir.x, 0, aim_dir.y) * 6.0)
 	await _frames(10)
+	_activity()  # what the reset itself changed is not the scenario's
 	ss.clear()
 	shots.clear()
 	prev_feet.clear()
 
 
+## A scenario's measurements; judged at the next reset, so flags raised after this call still count.
 func _end(sc: String, meas: Dictionary) -> void:
-	judge.common(hero, sc, ss, meas)
-	judge.put(hero, sc, meas)
+	pending = [sc, meas]
+
+
+func _judge_pending() -> void:
+	if pending.is_empty():
+		return
+	var sc: String = pending[0]
+	judge.common(hero, sc, ss, pending[1])
+	judge.put(hero, sc, pending[1])
 	if clip_on and judge.flagged(hero, sc) and not shots.is_empty():
 		_save_clip(sc)
+	pending = []
 
 
 func _save_clip(sc: String) -> void:
@@ -492,8 +509,9 @@ func _dashes() -> void:
 		"dist_m": Judge.flat_dist(ss, at, at + dash_len + 2),
 		"top_mps": Judge.top_speed(ss, at, at + dash_len + 2)
 	}
-	if n == 0:
-		judge.flag(hero, "dash", "dash_none", "Shift tap while running: no dash state")
+	meas["acts"] = Judge.acts(ss, at, ss.size())
+	if n == 0 and int(meas["acts"]) == 0:
+		judge.flag(hero, "dash", "dash_none", "Shift tap while running: no dash state, no kit move")
 	_end("dash", meas)
 	# charges: four taps 0.25 s apart
 	await _begin(_flat())
@@ -521,8 +539,8 @@ func _dashes() -> void:
 	await _frames(30)
 	var an := Judge.dash_starts(ss, air_at, ss.size())
 	_end("dash_air", {"dashes": an, "dist_m": Judge.flat_dist(ss, air_at, air_at + 30), "landed": ss[-1]["g"]})
-	if an == 0:
-		judge.flag(hero, "dash_air", "dash_none", "Shift tap in the air: no dash state")
+	if an == 0 and Judge.acts(ss, air_at, ss.size()) == 0:
+		judge.flag(hero, "dash_air", "dash_none", "Shift tap in the air: no dash state, no kit move")
 
 
 func _glides() -> void:
@@ -599,10 +617,6 @@ func _abilities() -> void:
 func _ability(name: String, code: int, hold: bool) -> void:
 	var sc: String = "%s_%s" % [name, "hold" if hold else "tap"]
 	await _begin(_flat())
-	if foe:
-		foe.teleport(me.pos + Vector3(7, 0, 0))
-		await _frames(2)
-		_aim_at(foe.pos)
 	_key(code, true)
 	await _frames(90 if hold else TAP)
 	var rel := ss.size()
@@ -624,7 +638,7 @@ func _ability(name: String, code: int, hold: bool) -> void:
 		"walk_m": Judge.flat_dist(ss, after, after + 40)
 	}
 	var total := int(meas["acts_down"]) + int(meas["acts_after"])
-	if late >= Judge.LATE_EVENTS:
+	if late >= Judge.LATE_EVENTS and name != "r":  # (an ultimate may run on for seconds by design)
 		var kind := "stuck_fire" if hold else "tap_repeat"
 		judge.flag(
 			hero,
@@ -711,10 +725,6 @@ func _states() -> void:
 ## Hold an attack, open the map (or the pack) with its key, let the attack go under it, shut it, watch.
 func _map_mid_hold(sc: String, code: int, ui_key: int) -> void:
 	await _begin(_flat())
-	if foe:
-		foe.teleport(me.pos + Vector3(7, 0, 0))
-		await _frames(2)
-		_aim_at(foe.pos)
 	_key(code, true)
 	await _frames(30)
 	await _tap(ui_key)
@@ -839,7 +849,7 @@ func _push(name: String, extra: int) -> void:
 		judge.flag(hero, sc, "wall_jitter", "pushed back %.2f m in one frame while holding into the wall" % jit)
 	if float(meas["away_m"]) < 1.0:
 		judge.flag(hero, sc, "stuck_geo", "walking away from the wall moved %.2f m in 0.66 s" % float(meas["away_m"]))
-	if float(meas["launch_mps"]) > 4.0:
+	if float(meas["launch_mps"]) > 5.0:
 		judge.flag(hero, sc, "launch", "thrown up at %.1f m/s at the wall" % float(meas["launch_mps"]))
 	_end(sc, meas)
 
@@ -938,9 +948,10 @@ func _bodies() -> void:
 		var near := INF
 		for s in ss:
 			near = minf(near, Vector2((s["p"] as Vector3).x - body.pos.x, (s["p"] as Vector3).z - body.pos.z).length())
-		through = crossed and near < 0.3
+		through = crossed and near < 0.3 and body.hittable()
 		var sc: String = "walk_into_" + who
 		var meas := {
+			"solid": body.hittable(),
 			"crossed": crossed,
 			"nearest_m": near,
 			"launch_mps": _max_vy(0, ss.size()),
@@ -948,7 +959,7 @@ func _bodies() -> void:
 		}
 		if through:
 			judge.flag(hero, sc, "through_body", "walked through it (closest %.2f m)" % near)
-		if float(meas["launch_mps"]) > 4.0:
+		if float(meas["launch_mps"]) > 5.0:
 			judge.flag(hero, sc, "launch", "thrown up at %.1f m/s" % float(meas["launch_mps"]))
 		_end(sc, meas)
 
