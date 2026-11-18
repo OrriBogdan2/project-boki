@@ -83,4 +83,5 @@ static func render(k: Kin) -> bool:
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
+	KinWispProc.watch(k)
 	return true

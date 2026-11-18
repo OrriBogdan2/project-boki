@@ -26,3 +26,8 @@ Alternative noted: keep the kin's ability/merge castable from the wisp; left for
 - `scripts/match/kin_wisp.gd` (new), a few lines in kin.gd, kin_follow.gd, kin_net.gd, settings, overlay.
 - Net.VERSION 0.24.14: the kin snapshot gains index 24, 1 when it rides as a wisp; other games swap the model.
 - `--summon-check` covers it; `--perf-bench --bench-hunters=30 [--boki-wisps]` measures it.
+
+- Proc cue (`KinWispProc`): the carry passive acting on its hunter (heal, shield soak, damage on a shot, run boost) gives
+  one quiet chirp from the wisp, and your Boki's first cue names the passive once (`Match._tips`, tip key `proc`, in the
+  existing tips dict so no save migration). Only the sound and the tip; the visual flash of the old ext/vfx-wisp-proc
+  branch is not ported. `--wisp-proc-check` covers it.
