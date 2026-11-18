@@ -65,6 +65,8 @@ const CHECKS := {
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
 	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
+	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge rule and shader
+	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # GPU, --shots-dir=<dir>
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
