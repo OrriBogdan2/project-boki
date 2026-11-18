@@ -602,7 +602,7 @@ func _tick_mace(dt: float) -> void:
 				mace["st"] = "fly"
 				fx.in_hand(false)
 				HeroVfx.of(m).trail(h, "throw", fx.hammer)
-				m.sfx("bjorn_throw", h.pos, -2.0)  # on the release, the clip's strike
+				m.sfx("bjorn_throw", h.pos, -2.0)      # on the release, the clip's strike
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
