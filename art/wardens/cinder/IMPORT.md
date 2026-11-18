@@ -109,3 +109,10 @@ owner-picked sheet: glowing amber eyes, clean lips, deeper bust). Master: `~/mes
 `python3 tools/art1/v95_to_game.py Cinder --master <A_notail.glb>` (new `--master` flag) with `art/wardens/src/cinder_v95.json`
 (joints re-read from `v95_grid.py` renders of A). Result: 60,711 tris, same rig, clips, spring tail and jets. Judges disagree:
 the promote judge scored A 53 vs A2 71, the source job's judge 83 vs 65; the owner picked A by eye.
+
+**board1117 A2 colours (11-18, ext/hunter-picks-tcg-1117):** owner 11-17 "cinder your call" on the 3D board, coordinator call A
+(board1117 g13: crown hair maroon, lower flame ramp on the hair, thin orange crack emission, skin graded toward the ref).
+A2 is a texture-only grade of the depth1117 master (same mesh, UVs and images 1-3, 5-6), so it goes on top of the live
+bust A chest without a re-port: master `~/meshy/v95/Cinder/board1117/A2_bust_m20.glb` = bust_m20's mesh + A2's three changed
+images. In this glb only `v95`, `v95c` and `v95d` changed (`tools/art1/glb_image_swap.py`), each = game image + resize(A2) -
+resize(bust_m20) at the game size (JPEG q92); mesh, rig, clips, tail and jets byte-equal.
