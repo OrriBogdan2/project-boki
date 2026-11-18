@@ -10141,3 +10141,4 @@ READY ext/rig-ship-1117 be298fdf40bc8e785be43d4299ea1c3611c2a87a (Rig: better sk
 READY ext/hunter-screen-name f26d5cb4a7 (PR #24 re-merged with origin/main ef7c8160c9, clean; kit_card shows hunter name big, title subtitle)
 READY ext/grimble-ingame-fix-1117 6f00297e5e (Grimble right shin+foot rebuilt from mirrored left: no more torn leg in every move; GPU before/after MP4s in meshy/grimble-puddle-1117/vid)
 READY ext/mob-sentinel-a-1118 a1a51c2bea (Mob Sentinel A g3 swapped in game; mob-glb/anim checks 0 fails; shots in meshy/mob-sentinel-1117/game_in)
+READY ext/grimble-lmb-line-1118 23282bb8a4 (Grimble LMB: one aim line, all 7 slugs in a tight 6 deg group, no bloom; stills in gens/grimble-lmb-line-1118; PR request in job gh-outbox)
