@@ -224,7 +224,7 @@ func _art_gate() -> void:
 	_line("hivara", {"level": 8, "into": [{"id": "wisplet"}]})
 	var nm := String(Data.KIN["wisplet"]["name"])
 	ok(Evo.level_note(waits) == "Evolves into %s at level 8" % nm, "art gate: with the art it names the form and level")
-	ok(Evo.level_form(_kin("pebbit", 3)).is_empty() == not Evo.rules()["lines"].has("pebbit"),
+	ok(Evo.level_form(_kin("pebbit", 3)).is_empty() == (not Evo.rules()["lines"].has("pebbit")),
 		"art gate: a species with no level line has no level form")
 
 ## The cap: levels stop at 100, and generated kin too.
