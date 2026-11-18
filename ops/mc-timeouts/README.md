@@ -14,7 +14,7 @@ Files: patched masters (`merge-candidate.sh`, `suite-fast.sh`) and `diff -u` pat
    one per line or space separated) plus the normal pods; the idle ones are passed to suite-fast as SUITE_PODS (suite-pod shards).
    None idle: the log says "ran on the server alone (P=6)". The pod probe is now a function `probe_pods`.
 3. **Cap (c)** `MC_MAX_SECS` (14400 = 4 h) from T0, minus `MC_TAIL_RESERVE` (900 s) for release/report; the suite gets the rest (min 600 s).
-   suite-fast runs under `setsid` and a watchdog TERMs its group by the pid the script saved (KILL after 90 s). The log gets
+   suite-fast runs under `setsid` and a watchdog TERMs its group by the pid the script saved (KILL after 90 s), plus every descendant pid of that saved pid: GNU `timeout` (wraps each godot) calls setpgid, so a group TERM alone left timeout+xvfb+godot running up to 20 min and holding the log pipe open (rpc8 test: hang without, NO-ORPHANS with). The log gets
    `TIMEOUT: ...`, the report headline is `SUITE STOPPED ... TIMEOUT: ...` (existing SUITE-INCOMPLETE path). gpu-perf-report is also
    stopped at cap + 15 min.
 

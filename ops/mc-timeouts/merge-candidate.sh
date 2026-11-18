@@ -316,7 +316,10 @@ SUITE_PODS="$PODS" SUITE_PTR=$PTR CHECK_MAP=$S/check_map.json SUITE_PRIORITY=$PR
 ( SD=$(( $(date +%s) + SBUD )); while kill -0 $SFPID 2>/dev/null; do
     if [ $(date +%s) -ge $SD ]; then
       echo "$(date -u +%FT%TZ) TIMEOUT: merge-candidate passed its $(( ${MC_MAX_SECS:-14400} / 60 )) min cap ($(( ($(date +%s) - T0) / 60 )) min in); stopping suite-fast (pid $SFPID): $(ls $S/merge/*.rc 2>/dev/null | wc -l)/$(cat $S/flags.txt 2>/dev/null | wc -l) merge checks done"
-      touch $S/MC_TIMEOUT; kill -TERM -- -$SFPID 2>/dev/null
+      # GNU timeout (run() wraps each godot in it) calls setpgid, so the group TERM misses timeout+xvfb+godot: also TERM every descendant
+      # pid of OUR saved $SFPID (collected before the group dies); timeout forwards TERM to its own group (xvfb-run, Xvfb, godot).
+      desc() { local c; for c in $(ps -o pid= --ppid $1 2>/dev/null); do echo $c; desc $c; done; }; D=$(desc $SFPID)
+      touch $S/MC_TIMEOUT; kill -TERM -- -$SFPID 2>/dev/null; [ -n "$D" ] && kill -TERM $D 2>/dev/null
       for _i in $(seq 18); do kill -0 $SFPID 2>/dev/null || exit 0; sleep 5; done
       kill -KILL -- -$SFPID 2>/dev/null; exit 0; fi
     sleep 20; done ) & WDPID=$!
