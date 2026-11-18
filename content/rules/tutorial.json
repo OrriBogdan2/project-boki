@@ -79,14 +79,6 @@
    "Hook the Sentinel to you"
   ],
   [
-   "pick_ult",
-   "Level 6: unlock your big move"
-  ],
-  [
-   "ult",
-   "Merge with %s and win"
-  ],
-  [
    "ranks",
    "Spend your spare points"
   ],
@@ -113,7 +105,6 @@
   "pick_dash": "%L",
   "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
-  "pick_ult": "Merge with %s: one body, with both your powers, for a while.",
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
@@ -152,8 +143,7 @@
   "summon": "Back at your last stop. Press %M and let %s out first",
   "pack": "Back at your last stop. Fight with solid ground behind you",
   "kin": "Back at your last stop. Line them up, then use %A",
-  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar",
-  "ult": "Back at your last stop. Fuse with %s, then hold your ground"
+  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar"
  },
  "need": {},
  "cds": 0.25,
@@ -223,14 +213,6 @@
    ],
    "to": 6,
    "far": true
-  },
-  "ult": {
-   "foes": [
-    "skitter",
-    "spitter",
-    "skitter"
-   ],
-   "to": 0
   }
  }
 }

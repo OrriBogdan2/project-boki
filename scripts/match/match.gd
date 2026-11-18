@@ -5412,8 +5412,8 @@ func _tips() -> void:
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
-		_tip("ability", TipText.ability(player.ak != null))
-	if player.ult >= 1.0 and player.kin:
+		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
