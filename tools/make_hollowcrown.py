@@ -71,6 +71,7 @@ SIZE = 540          # the map's side in tiles (= metres): the one number to chan
 DESIGN = 540        # the grid every coordinate below is written on; scale_layout() maps it onto SIZE
 K = SIZE / DESIGN
 WAYS = SIZE / 216   # the Ways Out rule's scale (its numbers are metres on the 216 m design)
+PLAY_SPACE = {"trios": 280, "solos": 208}   # m round the Heart the match starts in the Blight's edge (decision 0084)
 LEVEL = 0.8
 
 def poly(pts, lv=0, **k):
@@ -1352,7 +1353,7 @@ def main():
                      "each region a different fight. Nothing is placed by dice except what the match rolls: which spawn "
                      "points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
-               winds=[], train=train, heart=heart, ways_scale=round(WAYS, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
+               winds=[], train=train, heart=heart, ways_scale=round(WAYS, 3), play_space=PLAY_SPACE, outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

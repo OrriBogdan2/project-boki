@@ -7,6 +7,7 @@ const DT := 1.0 / 60.0
 
 var opts := {}
 var world: World
+var layout := {}              # the authored map's data (empty on a generated one)
 var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
@@ -322,7 +323,7 @@ func _start(o: Dictionary) -> void:
 	add_child(world)
 	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
-	var layout := {}
+	layout = {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
 		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
@@ -689,9 +690,10 @@ func bot_kin_record() -> Dictionary:
 func _spawn_hunters() -> void:
 	var n_teams := int(opts.get("teams", 4))
 	var squad := int(opts.get("squad", 1))
-	# one starting island per squad, spread out as far as possible
+	# one starting island per squad, spread out as far as possible, inside the play space the match starts with
+	var spawns: Array = Heart.in_play(layout, opts, world.spawns)
 	var by_isl := {}
-	for sp in world.spawns:
+	for sp in spawns:
 		var ii := world.island_of(sp.x, sp.z)
 		if not by_isl.has(ii): by_isl[ii] = sp
 	var pool: Array = by_isl.values()
@@ -708,7 +710,7 @@ func _spawn_hunters() -> void:
 		spots.append(pool[best]); pool.remove_at(best)
 	# more squads than islands: share the bigger islands, still as far apart as possible
 	if spots.size() < n_teams:
-		var rest: Array = world.spawns.filter(func(q): return not spots.has(q))
+		var rest: Array = spawns.filter(func(q): return not spots.has(q))
 		while spots.size() < n_teams and rest.size() > 0:
 			var best := 0; var bd := -1.0
 			for i in rest.size():
@@ -717,7 +719,7 @@ func _spawn_hunters() -> void:
 				if dmin > bd: bd = dmin; best = i
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
-		spots = world.spawns.duplicate()
+		spots = spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
 	var taken: Array = [Save.d.get("name", "Hunter")]
@@ -1660,7 +1662,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1709,7 +1711,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 

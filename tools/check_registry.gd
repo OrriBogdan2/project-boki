@@ -608,6 +608,7 @@ const CHECKS := {
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
+	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # expedition modes: solos, play space (0084)
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>: any first Relic
 	# Skip on every step
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],

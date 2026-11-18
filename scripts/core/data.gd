@@ -50,10 +50,16 @@ const TEAM_COLORS := [
 ## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
 ## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
 const TEAM_COLOR_GAP := 0.08
-## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
-## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
-## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
+## A trios expedition has this many hunters (10 squads of three). 30 on the 305 m Hollow Crown: 40
+## would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a 40-hunter match was
+## not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
 const MATCH_PLAYERS := 30
+## A solos expedition has this many hunters, each their own squad (decision 0084; bots fill).
+const SOLO_PLAYERS := 20
+## The expedition modes a player can queue for, as shown on the expedition panel and the online lobby.
+const MODES := ["trios", "solos"]
+## The one line each mode's card reads (ModeCards): who is in it and how big the map plays.
+const MODE_LINES := {"trios": "10 squads of 3, bigger map", "solos": "20 Hunters, every one for themself, smaller map"}
 
 const CLASSES := {
 	"light":
@@ -429,6 +435,20 @@ const BOT_DIFF := {
 	{"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05, "fire": 1.0, "abil": 1.0, "aggro": 1.1, "ring": 8.0},
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
+
+
+## Match opts for an expedition mode (MODES): its squads, squad size and hunter count.
+static func mode_opts(mode: String) -> Dictionary:
+	var solos := mode == "solos"
+	var squad := 1 if solos else 3
+	var n := SOLO_PLAYERS if solos else MATCH_PLAYERS
+	return {"teams": n / squad, "squad": squad, "total": n}
+
+
+## The mode last picked (Save.d "exp_mode"; trios until you pick another).
+static func saved_mode() -> String:
+	var mode := String(Save.d.get("exp_mode", "trios"))
+	return mode if mode in MODES else "trios"
 
 
 ## Which difficulty "auto" means for a run: the tier sets the base (Meadow easy, Dusk Isles medium,
