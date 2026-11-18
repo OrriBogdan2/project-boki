@@ -245,7 +245,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip tutorial", "back", leave)
 		else:
 			var lb: Button = _menu_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")

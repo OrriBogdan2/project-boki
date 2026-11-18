@@ -130,7 +130,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## 5. Follow-ups (not fixed)
 1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
    `ranks` and the three gap steps are the obvious merges.
-2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
+2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
@@ -144,7 +144,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## Garden first 15 (`--garden-first-15-check`)
 
 The game is playable without extraction, and in the first visit the player must never be left without
-a next step. The check plays a fresh save that skips the match tutorial ("Skip the tutorial" on the
+a next step. The check plays a fresh save that skips the match tutorial ("Skip tutorial" on the
 naming card), takes the first Relic and lands on the garden (`base_mode` on). A bot then plays 15
 minutes of garden time, never opens a match, and every second asks what is on screen to guide the
 player:
