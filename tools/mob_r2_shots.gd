@@ -5,7 +5,7 @@ extends RefCounted
 ## (2) the mob spawned in a real match, seen by the match camera at the closest wheel zoom, cropped.
 
 const SHOTS := "idle:0:front,idle:0:tq,idle:0:side,idle:0:back,walk:0.25:tq,windup:1:tq,windup:1:front,strike:0.15:tq"
-const CROP := 560
+const CROP := 720
 
 var main: Node
 var dir := "user://mob_r2_shots"
@@ -146,8 +146,14 @@ func _in_match() -> void:
 	for v in variants:
 		_use(v)
 		var kind := String(v[0])
-		var mb := m.spawn_mob(kind, P.pos + Vector3(2.5, 0, 0))
-		await _frames(120)
+		var ad := P.aim_dir().normalized()
+		var mb := m.spawn_mob(kind, P.pos + Vector3(ad.x, 0, ad.y) * 3.2)
+		print("MOBR2 aim ", ad)
+		mb.face = PI - 0.45  # toward the camera, three-quarter
+		m.mobs.erase(mb)  # out of Match's loops: no AI (a bomber would blow itself up on the player); posed here instead
+		for f in 60:
+			mb.render(1.0 / 60.0, 1.0)
+			await main.get_tree().process_frame
 		print("MOBR2 at ", mb.pos, " player ", P.pos, " vis ", mb.visible, " dead ", mb.dead, " hp ", mb.hp, " parentvis ", m.is_visible_in_tree(), " time ", m.time)
 		var img := main.get_viewport().get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
@@ -157,8 +163,9 @@ func _in_match() -> void:
 		img.get_region(Rect2i(x, y, CROP, CROP)).save_png(dir.path_join("%s_%s_match.png" % [kind, String(v[1])]))
 		if OS.get_cmdline_user_args().has("--full"):
 			img.save_png(dir.path_join("%s_%s_full.png" % [kind, String(v[1])]))
-		mb.hurt(mb.hp + mb.max_hp, P, {"src": "shot"})
-		await _frames(150)
+		m.ents_by_id.erase(mb.nid)
+		mb.queue_free()
+		await _frames(10)
 		print("MOBR2 match ", kind, " ", v[1])
 
 func _aabb(n: Node3D) -> AABB:
