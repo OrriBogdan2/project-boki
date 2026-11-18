@@ -17,6 +17,7 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-ab]  (one process, one GPU: the match part as walking pets, Boki wisps, pets again; no other parts)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
@@ -37,6 +38,7 @@ const BLIGHT_AT := 22.0             # m from the Heart the Blight claws out: pas
 const HEART_BLIGHT := ["bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter",
 	"bl_warden", "bl_skitter"]
 
+const AB_WARM_S := 5.0              # s of each --bench-ab run left out of its BENCH AB numbers
 const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
 const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
@@ -55,6 +57,7 @@ var trios := 0           # --bench-trios: bot trios in the expedition (0: the us
 var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
 var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
+var ab := false          # --bench-ab: pets, wisps, pets again
 var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
 var hud_us := 0
@@ -69,6 +72,10 @@ func run(main_node: Node) -> void:
 		return
 	if "--bench-fight" in OS.get_cmdline_user_args():
 		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
+		_finish()
+		return
+	if ab:
+		await _ab()
 		_finish()
 		return
 	await _match()
@@ -98,6 +105,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
+		if a == "--bench-ab": ab = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -117,9 +125,32 @@ func _finish() -> void:
 		if fa: fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit(1 if failed else 0)
 
-func _match() -> Array:
-	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
-	return await _play(m, "match", [m.player], _bring_fight, FIGHT_AT)
+func _match(part := "match", extra := {}) -> Array:
+	var m := await _start(part, {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101}.merged(extra))
+	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
+
+## Walking pets, Boki wisps, walking pets again: the same seed and autoplay path each time, the repeat shows
+## run-order drift.
+func _ab() -> void:
+	for r in [["pets_1", false], ["wisps", true], ["pets_2", false]]:
+		_ab_line(r[0], await _match(r[0], {"boki_wisps": r[1]}))
+
+## Mean, p95 and worst wall ms, draws, and the count of frames over SLOW_MS, after the AB_WARM_S warm-up.
+func _ab_line(part: String, fl: Array) -> void:
+	var w: Array = []
+	var draws := 0.0
+	for f in fl.slice(int(AB_WARM_S / DT)):
+		w.append(float(f["wall"]))
+		draws += float(f["draws"])
+	var mean := 0.0
+	for x in w:
+		mean += x / maxf(1.0, w.size())
+	w.sort()
+	var over := w.filter(func(x): return x > SLOW_MS).size()
+	var line := "BENCH AB %s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
+	print((line + "draws %.0f, over %.0f ms: %d")
+		% [part, AB_WARM_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1], draws / maxf(1.0, w.size()),
+		SLOW_MS, over])
 
 ## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
 ## (the tide closed to its last ring) and the Blight clawing out just past them.
