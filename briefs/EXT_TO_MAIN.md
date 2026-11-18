@@ -10177,3 +10177,4 @@ READY ext/sparkle-dollA-game-1118 8de24530d15ecdbf174e7739dd3cb4459f8e94f7 (Spar
 READY ext/play-probe-1118 fc4dafb9ce (play probe: automated player for all 13 Hunters via real InputEvents, PR #297; 4 FLAGs on main)
 READY ext/lmb-stuck-1118 895b5c0906d3 (LMB release: focus-out lets go of held keys, map closes on landing, release-mid-hitstop/stun/dash/pause regression; bots beside a standing you step about instead of freezing 14.5 s; PR #288)
 READY ext/anim-select-poses-v95 184695fa9b (lobby stage: Sparkle and Motley lock-in windows no longer open on arms-spread / empty box; lockin-shots tool fixed; 13-Hunter before/after sheet)
+READY ext/merge-lane-clean2-1118 cf6ec3715b (merge lane clean2 train c: anim-cancel-blend-port re-tuned for Neve re-port, stacked on train -a; 13 anim flags NEW-RED 0, export 872 MB)
