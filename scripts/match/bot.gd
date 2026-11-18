@@ -1163,9 +1163,11 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 
 ## Tiles of slack round the trip a tile path may use. Heading for the Heart ring or back in out of the
 ## Blight (BotWays) a bot may also try a wide window, enough to reach a ramp beside a cliff (The Crown's
-## raised Heart has two, 23 m out east and west); everywhere a wide window had bots turning between detours.
+## raised Heart has three stairs, 50-63 m out); everywhere a wide window had bots turning between detours.
 const PATH_SLACK := 8
-const PATH_SLACK_RING := 24
+const PATH_SLACK_RING := 40      # tiles: The Crown's stairs are 50-63 m out, a bot below its raised ground is that far
+const PATH_STEPS := 4000         # tiles one search may open: the tight window...
+const PATH_STEPS_RING := 14000   # ...and the wide one
 const RING_GOALS := ["ring", "ring_in"]
 
 ## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
@@ -1173,16 +1175,16 @@ const RING_GOALS := ["ring", "ring_in"]
 ## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
 func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := false) -> Array:
 	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
-	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap)
+	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap, PATH_STEPS)
 	if p.is_empty() and wide:
-		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap)
+		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap, PATH_STEPS_RING)
 	if p.is_empty() and h:
 		return _grid_path(m, a, b, null, wide)
 	return p
 
 ## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
-## `cap` from the Heart, returning tile centres.
-func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float) -> Array:
+## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float, max_steps: int) -> Array:
 	var W: World = m.world
 	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
 	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
@@ -1191,7 +1193,7 @@ func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, ca
 	var q: Array = [a]
 	var found := false
 	var steps := 0
-	while q.size() > 0 and steps < 4000:
+	while q.size() > 0 and steps < max_steps:
 		steps += 1
 		var cur: Vector2i = q.pop_front()
 		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
