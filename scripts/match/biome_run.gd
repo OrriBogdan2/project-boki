@@ -69,7 +69,7 @@ func _danger(p: Vector3) -> int:
 # ------------------------------------------------------------------ spawning
 ## The monsters for a camp, from its region's table: base monster kinds, weighted. Empty when the
 ## camp isn't in a biome (the match's own mix is used then).
-func camp_comp(c: Dictionary) -> Array:
+func camp_comp(c: Dictionary, dice := rng) -> Array:
 	var B := _biome(c["pos"])
 	var mobs: Array = B.get("mobs", [])
 	if mobs.is_empty():
@@ -85,13 +85,13 @@ func camp_comp(c: Dictionary) -> Array:
 			if String(e["kind"]) in ["brute", "sentinel"]:
 				out.append(String(e["kind"])); break
 	while out.size() < n:
-		out.append(String(_pick(mobs)["kind"]))
+		out.append(String(_pick(mobs, dice)["kind"]))
 	return out
 
-func _pick(entries: Array) -> Dictionary:
+func _pick(entries: Array, dice := rng) -> Dictionary:
 	var tot := 0.0
 	for e in entries: tot += float(e.get("w", 1.0))
-	var r := rng.randf() * tot
+	var r := dice.randf() * tot
 	for e in entries:
 		r -= float(e.get("w", 1.0))
 		if r <= 0.0: return e
@@ -99,8 +99,9 @@ func _pick(entries: Array) -> Dictionary:
 
 ## Makes a freshly spawned monster belong to its region: the region's version of it (name, colour,
 ## stats), a rarity, and mutations from the region's list. Rarity climbs with the tier and with how
-## dangerous the island is; rarer monsters roll more mutations.
-func dress(mb: Mob) -> void:
+## dangerous the island is; rarer monsters roll more mutations. `dice` is the camp's own dice when it
+## stands in one (Camps), so the same camp holds the same rarities every match.
+func dress(mb: Mob, dice := rng) -> void:
 	if mb == null or mb.mkind in ["warden", "glimmer"]:
 		return
 	var B := _biome(mb.pos)
@@ -120,7 +121,7 @@ func dress(mb: Mob) -> void:
 	var lift := float(int(m.tier) + _danger(mb.pos)) * float(B.get("danger_mult", 1.0))
 	var wts := [60.0 - lift * 12.0, 25.0 + lift * 4.0, 11.0 + lift * 5.0, 4.0 + lift * 3.0]
 	var ri := 0
-	var roll: float = rng.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
+	var roll: float = dice.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
 	for i in 4:
 		roll -= maxf(1.0, wts[i])
 		if roll <= 0.0: ri = i; break
@@ -131,13 +132,13 @@ func dress(mb: Mob) -> void:
 	var mm := float(B.get("mutation_mult", 1.0))
 	if not pool.is_empty():
 		var want := 0
-		if rng.randf() < float(R["mut"]) * mm: want = 1
-		if want == 1 and int(R["max_mut"]) > 1 and rng.randf() < (0.35 if ri == 2 else 0.75) * mm: want = 2
+		if dice.randf() < float(R["mut"]) * mm: want = 1
+		if want == 1 and int(R["max_mut"]) > 1 and dice.randf() < (0.35 if ri == 2 else 0.75) * mm: want = 2
 		var keys: Array = pool.keys()
 		for _k in want:
 			var tot := 0.0
 			for k in keys: if not muts.has(k): tot += float(pool[k])
-			var r := rng.randf() * tot
+			var r := dice.randf() * tot
 			for k in keys:
 				if muts.has(k): continue
 				r -= float(pool[k])
@@ -162,7 +163,7 @@ func dress(mb: Mob) -> void:
 	mb.md = md
 	mb.set_meta("rarity", ri)
 	mb.set_meta("muts", muts)
-	mb.set_meta("mut_t", rng.randf_range(2.0, 4.0))
+	mb.set_meta("mut_t", dice.randf_range(2.0, 4.0))
 	_recolor(mb, Color(md["color"]))
 	var s := float(R["scale"])
 	if s != 1.0:
