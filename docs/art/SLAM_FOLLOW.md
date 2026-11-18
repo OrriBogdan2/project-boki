@@ -26,7 +26,8 @@ Eight slams: Kael's Finishing Slam and Meteor Drop, Tenzo's RMB slam and tap sla
 Albert's charged swing and Faultline. 31 of 32 rows pass. Kael's meteor landing whips 40 m/s going back to the legs (the
 sword arcs between the drag and the carry pose mid-blend): it sits in the check's `OPEN` and needs a nearer key in
 Blender. Kael's Finishing Slam needed `blend_out` 0.45 (0.2 whipped 41 m/s) and Tenzo's slam ends on the kit's 1.51 s
-(the 1.36 s of the first map left him on the legs 0.16 s early).
+(the 1.36 s of the first map left him on the legs 0.16 s early). On main of 11-18 Tenzo's tap slam landing hit
++4 f after the kit's hit (limit +3); its map got a key on the impact (clip 0.27 s at 0.045 s): +3 f, holds 4 f.
 
 Render a strip with `jobq submit --tree . --needs gpu --out slam_shots -- --slam-follow-check --shots-dir=slam_shots`:
 every 3rd frame from 0.2 s before the hit, with and without the follow-through keys.
