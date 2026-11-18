@@ -317,8 +317,8 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "from": h.pos}
 	play("gunslinger_dash")
-	# green-fire streaks off her chest and heels and a kick of dust. No rings or discs: those mean damage or an
-	# area in this game
+	# green-fire streaks off her chest and heels; the scrape's dust trickles under her (_tick_slide). No puff,
+	# rings or discs: those mean damage or an area in this game
 	vfx("slide")
 	return true
 
@@ -367,7 +367,6 @@ func _tick_slide(dt: float) -> void:
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
-				vfx("slide_hold")
 				return
 			slide["tap"] = true
 		_skid(t, dd)
