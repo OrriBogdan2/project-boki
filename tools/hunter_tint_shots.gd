@@ -1,6 +1,6 @@
 extends RefCounted
-## --hunter-tint-shots --shots-dir=<dir> [--size=1920x1080] [--lit-only]: every Hunter's colour as the game shows it, against
-## its .glb as authored (the 11-11 "hunters read red" report). Writes at the window size:
+## --hunter-tint-shots --shots-dir=<dir> [--size=1920x1080] [--lit-only]: every Hunter's colour as the game shows it,
+## against its .glb as authored (the 11-11 "hunters read red" report). Writes at the window size:
 ## neutral.png (each .glb's own glTF materials, white key, grey ambient: the model as a glTF viewer shows it),
 ## select.png (the Hunters screen's turntable stage, HunterViewer, one per Hunter) and match.png / match_close.png
 ## (one of each Hunter in a real match's world and light at the match camera, then closer) and lit.png (each

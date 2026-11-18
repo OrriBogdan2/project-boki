@@ -85,6 +85,17 @@ func _contents(rig: BokiRig) -> void:
 	_flight_clips(rig)
 	for c in ["swim", "paddle"]:
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	var cast := rig.player.get_animation("cast")
+	var src := rig.player.get_animation(BokiSwing.FROM)
+	var off := 0.0
+	for t in cast.get_track_count():
+		if cast.track_get_type(t) == Animation.TYPE_ROTATION_3D:
+			off = maxf(off, cast.rotation_track_interpolate(t, BokiSwing.CAST_WIND).angle_to(
+				src.rotation_track_interpolate(t, BokiSwing.release_of(src))))
+	ok(cast.length <= 0.6 and cast.loop_mode == Animation.LOOP_NONE, "cast is short (%.2f s), plays once" % cast.length)
+	var release := BokiSwing.release_of(src)
+	ok(off < 0.15, "cast: keyed release %.2f s of %.2f is the pose at %.2f s (off %.3f rad)" % [
+		release, src.length, BokiSwing.CAST_WIND, off])
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -266,7 +277,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
-	ok(rig.clip == "ability", "a cast pulse plays the ability")
+	ok(rig.clip == "cast", "a cast pulse plays the cast")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
