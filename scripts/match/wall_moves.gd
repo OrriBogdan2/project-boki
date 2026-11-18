@@ -78,7 +78,10 @@ func try_kick(h: Hunter) -> bool:
 		var push := h.wall_n * KICK_PUSH * share + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
 		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP * share, push.y)
 	else:
-		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE * share
+		# kick 1 adds to the jump you are on; a later kick only lifts the rise left to its own share, so presses
+		# mashed on the way up never stack (decision 0100)
+		var left := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV)
+		var rise := left + KICK_RISE if chain == 0 else maxf(left, KICK_RISE * share)
 		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
 	chain += 1
 	_met_wall(h)

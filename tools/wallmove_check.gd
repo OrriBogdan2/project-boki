@@ -201,8 +201,8 @@ func _diminish(wl: Dictionary, danced: Dictionary) -> void:
 	WallMoves._curve = curve
 	var mashed := _attempt(wl, true, true, true)
 	ok(curve == [1.0, 0.6, 0.3], "the curve is 100%%, 60%%, 30%% (%s)" % [curve])
-	ok(flat["peak"] - mashed["peak"] > 0.3 and mashed["kicks"] >= 3,
-		"mashed kicks on a 5-terrace wall peak at %.2fm on the curve, %.2fm at 100%% (timed: %.2fm), %d kicks" % [
+	ok(flat["peak"] - mashed["peak"] > 0.3 and mashed["kicks"] >= 3 and not mashed["top"],
+		"mashed kicks on a 5-terrace wall (4.0m, stays sheer) peak at %.2fm on the curve, %.2fm at 100%% (timed: %.2fm), %d kicks" % [
 			mashed["peak"], flat["peak"], danced["peak"], mashed["kicks"]])
 	_attempt(wl, true)
 	ok(h.wall_moves.chain > 1, "a dance builds a chain (%d)" % h.wall_moves.chain)

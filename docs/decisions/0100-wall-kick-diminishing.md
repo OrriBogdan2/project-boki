@@ -15,6 +15,7 @@ Decision 0007 and item 149 let a hunter kick off a wall again and again with no 
 ## Decision
 - `WallMoves.chain` counts kicks since the feet last touched the ground (`land()` resets it).
 - A kick scales its rise (wall climb) or its push and push-jump (push-off) by the curve entry for its place: 100%, 60%, then 30% for every later kick (`content/rules/wall_kick.json`).
+- Kick 1 adds its rise to the jump you are on, as before. A later kick in the chain only lifts the rise you have left up to its own share (it never adds to it), so presses mashed on the way up do not stack (11-18 follow-up: the first pass let a press every step stack 30% kicks past 5 terraces).
 - `HOP_CLIMB_CAP` stays. The first kick is as before, so 4 terraces still climbs with one kick.
 
 ## Consequences
