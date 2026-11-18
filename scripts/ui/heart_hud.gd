@@ -5,12 +5,13 @@ extends RefCounted
 ##   - the carrier's glyph on every map (revealed) with their name, and a waypoint over them;
 ##   - the Heart Gate (dim until the Heartspark is carried, then lit), the Heart ring's progress once it opens;
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
-##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
-##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
+##   - out past the ring: a crimson tint, a line saying so, a red pulse on every hit and the edge arrow
+##     (the one off-screen marker, Hud._draw_waypoint) to the nearest way in.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
+const EDGE_IN := 6.0            # m inside the ring that the edge arrow points to
 
 # ------------------------------------------------------------------ the world
 static func world_labels(hud) -> void:
@@ -19,7 +20,7 @@ static func world_labels(hud) -> void:
 	if ht == null or m.player == null or ht.site == Vector3.INF:
 		return
 	var cam: Camera3D = m.cam
-	_outside(hud, m, ht)
+	var out := _outside(hud, m, ht)
 	if ht.carrier and ht.carrier != m.player:
 		var who := "%s has the Heartspark" % ht.carrier.pname
 		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.col())
@@ -28,7 +29,7 @@ static func world_labels(hud) -> void:
 			hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.gate_col())
 	elif ht.spark_live() and ht.state != Heart.S.FINAL:
 		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.col())
-	elif ht.state == Heart.S.CHARGING:      # (the open ring is WaysOutPins')
+	elif not out and ht.state == Heart.S.CHARGING:      # (the open ring is WaysOutPins')
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.col())
 	elif m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
 		var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
@@ -42,12 +43,13 @@ static func world_labels(hud) -> void:
 		hud._ctext(cp2, "You carry the Heartspark  ·  everyone sees you", 13, Heart.col(), hud.big)
 
 # ------------------------------------------------------------------ the maps
-## Past the ring the screen is tinted and says so; each tide tick pulses the edges red.
-static func _outside(hud, m: Match, ht: Heart) -> void:
+## Past the ring the screen is tinted and says so; each tide tick pulses the edges red; the edge arrow points
+## in (it stands in for the Heart's own waypoint, which points the same way). True while the player is out.
+static func _outside(hud, m: Match, ht: Heart) -> bool:
 	var p: Hunter = m.player
 	var tr := Heart.tide_r(m)
 	if tr <= 0.0 or p.out or p.extracted or Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).length() <= tr:
-		return
+		return false
 	var sz: Vector2 = hud.c.size
 	var calm := 0.3 if Settings.get_v("reduce_flashes") else 1.0
 	var k := 0.07 + 0.13 * Heart.tide_out(m, p.pos)
@@ -59,8 +61,8 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
 	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
-	if WaysHints.arrow_due(m):
-		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.col())
+	var way_in := Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).normalized() * maxf(tr - EDGE_IN, 0.0)
+	hud._draw_waypoint(Vector3(ht.site.x + way_in.x, p.pos.y, ht.site.z + way_in.y), "Zone edge", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
 	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
@@ -70,6 +72,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+	return true
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
