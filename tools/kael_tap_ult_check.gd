@@ -1,7 +1,7 @@
 extends RefCounted
 ## Kael, owner playtest 11-08 item 11 (the tap strike while the Smash rests is not ported: main's --cd-gate-check
-## keeps a slot on cooldown silent): RMB aims anywhere once E has hooked, a Lunge carried past the chain's length breaks it,
-## and the Gilded Riposte keeps his momentum (a run carries on, a rise gets a lift, a ledge rise hands over).
+## keeps a slot on cooldown silent): RMB aims anywhere once E has hooked, a Lunge carried past the chain's length
+## breaks it, and the Gilded Riposte keeps his momentum (a run carries on, a rise gets a lift, a ledge rise hands over).
 ## Runs inside --juggernaut-combo-check (tools/zedran_feel_check.gd). A is tools/archetype_check.gd.
 
 const AKCheck := preload("res://tools/archetype_check.gd")

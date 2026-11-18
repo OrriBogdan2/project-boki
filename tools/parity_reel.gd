@@ -253,7 +253,7 @@ func _p_r() -> void:
 		return
 	await _seg("R, then the recast", 6.0, _r_presses)
 
-## R pressed mid-run toward the far dummy, the keys held on (owner 11-17, Vex: the ult must not stop her).
+## R pressed mid-run toward the far dummy, the keys held on (Vex: the ult must not stop her).
 ## Prints REEL_RRUN with the metres covered in the 0.5 s after the press.
 func _p_r_run() -> void:
 	P.ak.cd["x"] = 0.0

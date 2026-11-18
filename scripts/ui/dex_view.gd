@@ -50,7 +50,8 @@ static func type_chip(t: String) -> PanelContainer:
 	var chip := PanelContainer.new()
 	var fill := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
 	chip.add_theme_stylebox_override("panel", fill)
-	var h := UI.hbox(6); chip.add_child(h)
+	var h := UI.hbox(6)
+	chip.add_child(h)
 	h.add_child(TypeIcon.new(t, 18.0))
 	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	return chip

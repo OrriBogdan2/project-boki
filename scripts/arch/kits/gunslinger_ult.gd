@@ -6,7 +6,7 @@ extends RefCounted
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
 ## time, a fair window to step out; its centre stays see-through (DISC_ALPHA), the rivet ring is the lit rim.
 ## The impact hits everyone on the disc, harder in the centre, and leaves a burning patch that hurts and slows
-## for a few seconds. Vex never stops for it (owner 11-17): a short wind-up (WINDUP) slows her walk to WINDUP_MOVE
+## for a few seconds. Vex never stops for it: a short wind-up (WINDUP) slows her walk to WINDUP_MOVE
 ## while the barrel goes up and fires, the legs keep running under it (an upper-body clip).
 
 const FALL := "fall"
