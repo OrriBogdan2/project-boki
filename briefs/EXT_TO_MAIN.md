@@ -10208,3 +10208,5 @@ READY ext/hud-portraits-1118 02d667635eb (all 13 hunters 3-mood HUD portraits: +
 READY ext/p11-port-1118 d6ad20bd8ea9e2cb6019fb42be8ac3177dd55f46 (merged main; --ostra-combo-check fixed 277/0: footed control now rebuilt + clip rig stepped)
 READY ext/merge-lane-clean1-1118 04398eca89 (lane clean1 bundle a: 11 branches, NEW-RED 0, export OK)
 READY ext/merge-lane-clean1-1118-b 9833d33c9f (lane clean1 bundle b: a + vex-single-dash, boki-models-everywhere, vfx1; NEW-RED 0, export OK)
+READY ext/farm-boki-xp-curve-port 9b9074b8b3 (bulk-rebase: origin/main merged in mechanically, was 8b202e18f0; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/slam-follow-through-port 81e0d6d39a (bulk-rebase: origin/main merged in mechanically, was a612d42273; union 1 gen 0 files; the branch's own READY checks still apply)
