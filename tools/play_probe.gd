@@ -70,11 +70,20 @@ func run(host: Node) -> void:
 			out_dir = s.get_slice("=", 1)
 	if heroes.is_empty():
 		heroes = Arch.ORDER.duplicate()
+	var fade: ScreenFade = main.get("fade")
+	if fade:
+		fade.reveal(0.01)  # (the boot splash stays up when a tool starts the match by hand: clips would show it)
 	for h in heroes:
 		await _hero(String(h))
 	var cmd := "tools/play_probe.sh <out dir>%s" % (" --clips" if clip_on else "")
 	var sha := OS.get_environment("PROBE_SHA")
-	judge.write(ProjectSettings.globalize_path(out_dir), cmd, heroes, clip_paths, {"sha": sha, "frames": frames})
+	judge.write(
+		ProjectSettings.globalize_path(out_dir),
+		cmd,
+		heroes,
+		clip_paths,
+		{"sha": sha, "frames": frames, "display": DisplayServer.get_name()}
+	)
 	print("PLAY PROBE DONE, flags: %d, report: %s" % [judge.rows.size(), out_dir.path_join("play_probe_report.md")])
 	main.get_tree().quit()
 

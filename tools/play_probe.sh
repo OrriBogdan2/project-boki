@@ -2,7 +2,8 @@
 # The play probe (tools/play_probe.gd): every Hunter driven by real input events; writes
 # <out>/play_probe_report.md and <out>/play_probe.json. Nightly: tools/play_probe.sh /tmp/play_probe
 # Usage: tools/play_probe.sh <out dir> [--clips] [--heroes=archer,mage]
-#   --clips: draw and save an mp4 per FLAG (GPU worker: jobq submit --needs gpu -- tools/play_probe.sh <out> --clips)
+#   --clips: draw and save an mp4 per FLAG (llvmpipe here is slow: pass the flagged --heroes). The GPU workers have
+#   no X11, so Godot runs a headless display there and the mouse never reaches the game: run it here, on xvfb.
 set -euo pipefail
 out=$(realpath -m "${1:?out dir}"); shift
 clips=""; heroes=""

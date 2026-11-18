@@ -519,9 +519,10 @@ the idle blend while moving, legs running while stopped, feet sliding (plain run
 hunter or jolting on a smooth run, and falling out of the map. Damage and balance are out of scope.
 
 Run it: `tools/play_probe.sh <out dir> [--heroes=archer,mage]` (xvfb, no drawing, about 4 min a Hunter, 50 min for
-all 13); it writes `<out>/play_probe_report.md` and `play_probe.json`. With clips (one mp4 per FLAG, needs drawing):
-`jobq submit --needs gpu --tree <tree> --out probe_out -- --fixed-fps 60 -- --play-probe
---play-probe-out=res://probe_out --play-probe-clips`. Not in the gate suite (its flag has no `-check`).
+all 13); it writes `<out>/play_probe_report.md` and `play_probe.json`. Clips (one mp4 per FLAG, drawn):
+`tools/play_probe.sh <out> --clips --heroes=<the flagged ones>`. It needs a real display server: on the GPU workers
+(no X11 libs, 11-18) Godot falls back to a headless display, the mouse never reaches the viewport and the aim, the
+camera and the glide numbers come out wrong (the report says so in bold). Not in the gate suite (no `-check`).
 
 Not covered yet: props (trees, rocks) and slopes (this map's terraces only have stairs), a single terrace step up
 (none on seed 77 with a straight run-up), Fuse (X) and the Boki keys.

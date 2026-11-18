@@ -15,6 +15,7 @@ const REST_EPS := 0.004  # rad: a skeleton this close to its rest pose is standi
 const CAM_JERK_M := 0.06
 const BODY_SMOOTH_M := 0.005  # m: the body's own one-frame change of step under this is smooth
 const JITTER_M := 0.04  # m: back-and-forth along the push direction while pressed into a wall
+const HEADLESS_WARN := "**Headless display: mouse events miss the viewport; aim and camera are wrong. Use xvfb.**"
 ## FLAG kind -> [impact 1-10, what a player would say]
 const KINDS := {
 	"stuck_fire": [9, "the attack keeps going after I let go of the button"],
@@ -278,6 +279,8 @@ func write(dir: String, cmd: String, heroes: Array, clips: Dictionary, meta: Dic
 		)
 	)
 	out.append("Real InputEvents through Input.parse_input_event; damage and balance are out of scope.")
+	if meta.get("display", "") == "headless":
+		out.append(HEADLESS_WARN)
 	out.append("")
 	out.append("## FLAGs, most noticeable first")
 	out.append("")
