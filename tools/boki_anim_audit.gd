@@ -27,7 +27,7 @@ const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE b
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
 	"gloamshell": "blob (snail foot)", "gibbelle": "blob", "casquebill": "seal (flippers)",
 	"floenatee": "seal (flippers)", "goliathite": "caterpillar", "threadwyrm": "worm", "velvorm": "caterpillar",
-	"caecilith": "worm"}
+	"caecilith": "worm", "hoarheron": "heron on skates"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
@@ -36,17 +36,19 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 const OVER := {
 	"burrlet run": 0.78, "burrlet walk": 0.27, "cairnback run": 0.59, "duskapi run": 0.52, "glaciyak run": 0.44,
 	"glintmole run": 0.86, "glintmole walk": 0.40, "heatherhorn run": 0.44, "hivara run": 0.84,
-	"hivara walk": 0.39, "kestrike run": 0.61, "kestrike walk": 0.37, "kilnbadger run": 0.44,
-	"kilnbadger walk": 0.27, "kindlewren run": 0.57, "limpetor run": 0.51, "limpetor walk": 0.37,
-	"lodestick run": 0.94, "marchleaf run": 0.98, "marchleaf walk": 0.99, "moonloris run": 0.51,
-	"moonloris walk": 0.32, "moundvark run": 0.42, "moundvark walk": 0.29, "murmurling run": 0.65,
-	"murmurling walk": 0.34, "nacrolin run": 0.44, "nettlynx run": 0.89, "nettlynx walk": 0.45,
-	"nimbostrich run": 0.33, "opalisk run": 0.66, "opalisk walk": 0.38, "orchisloth run": 0.49,
-	"orchisloth walk": 0.28, "pebbit run": 0.84, "pebbit walk": 0.52, "puddlet run": 0.76,
-	"rimeshrew run": 0.48, "scaldamus run": 0.43, "scaldamus walk": 0.27, "sentrikat run": 0.50,
-	"spatewader run": 0.49, "spatewader walk": 0.35, "squalltross run": 0.65, "squalltross walk": 0.34,
-	"tuatrune run": 0.52, "tuatrune walk": 0.36, "wisplet run": 0.62, "wisplet walk": 0.47
+	"hivara walk": 0.39, "kestrike run": 0.61, "kestrike walk": 0.37,
+	"kilnbadger run": 0.44, "kilnbadger walk": 0.27, "kindlewren run": 0.57, "limpetor run": 0.51,
+	"limpetor walk": 0.37, "lodestick run": 0.94, "marchleaf run": 0.98, "marchleaf walk": 0.99,
+	"moonloris run": 0.51, "moonloris walk": 0.32, "moundvark run": 0.42, "moundvark walk": 0.29,
+	"murmurling run": 0.65, "murmurling walk": 0.34, "nacrolin run": 0.46, "nettlynx run": 0.89,
+	"nettlynx walk": 0.45, "nimbostrich run": 0.56, "nimbostrich walk": 0.29, "opalisk run": 0.66,
+	"opalisk walk": 0.38, "orchisloth run": 0.49, "orchisloth walk": 0.28, "pebbit run": 0.84,
+	"pebbit walk": 0.52, "puddlet run": 0.76, "rimeshrew run": 0.48, "scaldamus run": 0.43,
+	"scaldamus walk": 0.27, "sentrikat run": 0.50, "spatewader run": 0.49, "spatewader walk": 0.35,
+	"squalltross run": 0.65, "squalltross walk": 0.34, "tuatrune run": 0.52, "tuatrune walk": 0.36,
+	"wisplet run": 0.62, "wisplet walk": 0.47
 }
+
 
 ## A loop's wrap may be no rougher than the roughest moment inside the clip (seam()).
 const MAX_SEAM := 1.0
@@ -57,7 +59,7 @@ const SEAM_OVER := {
 	"caecilith walk": 1.54, "cairnback walk": 1.61, "duskapi walk": 1.43, "floenatee idle": 1.04,
 	"floenatee run": 1.21, "floenatee walk": 1.39, "glaciyak walk": 1.42, "gloamshell walk": 1.18,
 	"goliathite idle": 1.04, "goliathite run": 1.22, "goliathite walk": 1.41, "heatherhorn walk": 1.42,
-	"hoarheron walk": 1.50, "kestrike walk": 1.33, "kilnbadger walk": 1.46, "limpetor walk": 1.44,
+	"hoarheron idle": 1.10, "hoarheron run": 1.25, "hoarheron walk": 1.45, "kestrike walk": 1.33, "kilnbadger walk": 1.46, "limpetor walk": 1.44,
 	"lodestick run": 1.06, "marchleaf walk": 1.45, "moonloris walk": 1.42, "mossgrade walk": 1.07,
 	"moundvark walk": 1.44, "murmurling walk": 1.46, "nacrolin walk": 1.46, "nimbostrich walk": 1.47,
 	"opalisk walk": 1.45, "orchisloth walk": 1.45, "puddlet walk": 1.18, "scaldamus walk": 1.41,

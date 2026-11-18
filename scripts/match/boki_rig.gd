@@ -185,7 +185,7 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.21, 0.207, 0.0736), "right flank": Vector3(0.21, 0.207, 0.0736),
 			"back": Vector3(0, 0.445, 0.258), "chest": Vector3(0, 0.159, -0.368)}},
 	"hoarheron": {"head": Vector3(0, 0.384, -0.44), "top": 0.62, "carry": Vector3(0, 0.739, 0.16),
-		"ear_tip": Vector3(0.0722, 0.62, 0.14), "tail_tip": Vector3(0, 0.177, 0.56), "tip_bone": "hips", "hip": 0.355,
+		"ear_tip": Vector3(0.0722, 0.62, 0.14), "tail_tip": Vector3(0, 0.177, 0.56), "tip_bone": "hips", "hip": 0,
 		"marks": {"left flank": Vector3(-0.178, 0.192, 0.08), "right flank": Vector3(0.178, 0.192, 0.08),
 			"back": Vector3(0, 0.414, 0.28), "chest": Vector3(0, 0.148, -0.4)}},
 	"floenatee": {"head": Vector3(0, 0.56, -0.42), "top": 0.7, "carry": Vector3(0, 0.72, -0.05),
@@ -278,12 +278,11 @@ const STRIDE := {
 	"orchisloth": [0.33, 1.35],
 	"limpetor": [0.30, 1.25],
 	"opalisk": [0.30, 1.24],
-	"nimbostrich": [0.44, 1.82],
-	"hoarheron": [0.57, 2.49],
+	"nimbostrich": [0.30, 1.22],
 	"sentrikat": [0.34, 1.33],
-	"nacrolin": [0.34, 1.35],
-	"murmurling": [0.28, 1.17],
-	"squalltross": [0.28, 1.17],
+	"nacrolin": [0.34, 1.34],
+	"murmurling": [0.29, 1.17],
+	"squalltross": [0.29, 1.17],
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.

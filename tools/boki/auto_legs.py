@@ -39,16 +39,25 @@ def smooth(t):
 def legs_of(co, top):
     """Four leg centres (x, y) and radii from the verts under the belly. Verts along the midline are tail, snout
     or belly, not legs; each side's verts split front and back by a 2-means on y, and the two sides are mirrored."""
+    if len(LEGS) == 2:
+        # a biped's plumes and tail hang beside its legs: only the lowest slice is surely leg. The two feet may stand
+        # front and back (a stride pose) as well as left and right: 2-means along the wider axis
+        low = co[co[:, 2] < top * 0.3][:, :2]
+        axis = int(np.ptp(low[:, 1]) > np.ptp(low[:, 0]))
+        cen = np.array([np.percentile(low, 20, axis=0), np.percentile(low, 80, axis=0)])
+        cen[:, 1 - axis] = np.median(low[:, 1 - axis])
+        for _ in range(12):
+            hi = np.linalg.norm(low - cen[1], axis=1) < np.linalg.norm(low - cen[0], axis=1)
+            cen = np.array([np.median(low[~hi], axis=0), np.median(low[hi], axis=0)])
+        hi = np.linalg.norm(low - cen[1], axis=1) < np.linalg.norm(low - cen[0], axis=1)
+        order = [0, 1] if (cen[0][0], cen[0][1]) < (cen[1][0], cen[1][1]) else [1, 0]      # .L: the smaller x
+        rad = []
+        for i in order:
+            pts = low[hi] if i else low[~hi]
+            rad.append(min(float(np.percentile(np.linalg.norm(pts - cen[i], axis=1), 90)) * 1.3, top * 0.25))
+        return cen[order], rad
     low = co[co[:, 2] < top * 0.5][:, :2]
     low = low[np.abs(low[:, 0]) >= 0.35 * np.percentile(np.abs(low[:, 0]), 75)]
-    if len(LEGS) == 2:
-        cen, rad = [], []
-        for sd in (-1, 1):
-            pts = low[np.sign(low[:, 0]) == sd]
-            c = np.array([sd * np.abs(low[:, 0]).mean(), low[:, 1].mean()])
-            cen.append(c)
-            rad.append(min(float(np.percentile(np.linalg.norm(pts - c, axis=1), 90)), top * 0.5))
-        return np.array(cen), rad
     side = {}
     for sign in (-1, 1):
         pts = low[np.sign(low[:, 0]) == sign]
