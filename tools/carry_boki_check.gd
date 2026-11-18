@@ -161,6 +161,7 @@ func _hold_lifts(k: Dictionary) -> void:
 	var tap := {"kind": "kin", "k": k}
 	var frame := func(): await main.get_tree().process_frame
 	k["hold_t"] = 0.0
+	InteractGate.reset()   # home._process disarms the gate while its world is not free; the check drives the key by hand
 	Input.action_press("interact")
 	c.tick(STEP, tap, true)
 	await frame.call()
@@ -168,6 +169,7 @@ func _hold_lifts(k: Dictionary) -> void:
 	c.tick(STEP, tap, true)
 	ok(c.k.is_empty() and float(k["hold_t"]) > 0.0, "a quick tap still pats instead of lifting")
 	await frame.call()
+	InteractGate.reset()
 	Input.action_press("interact")
 	c.tick(STEP, tap, true)
 	await frame.call()
