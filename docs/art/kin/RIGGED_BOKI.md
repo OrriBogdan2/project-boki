@@ -247,6 +247,31 @@ itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
 
+## Legs for borrowed-rig species (`tools/boki/auto_legs.py`)
+
+The 26 scan species ported on the glomwort rig (`boki_scan.BORROWED`: every lobe on root, no leg bones) walked with
+rigid legs: the body bobbed while the feet glided (100% slide in the 11-18 audit, `--boki-anim-audit` crashed on them
+and on its stale tables). `auto_legs.py` gives 18 of them real legs straight on their game .glb (no Meshy sources
+needed; the model, face, other clips and every existing node's rest pose stay as they are, checked node by node):
+`legs=4` adds `fleg1/2`, `fpaw`, `hleg1/2`, `hpaw` (.L/.R: the names BokiPlant, BokiDna's limb roll and
+BokiHomePoses already read on nettlynx and cairnback), `legs=2` the `hleg` pair of a biped. Leg centres come from the
+verts under the belly (`top`, a share of the body height, per species), skin weights hand the leg region to the new
+bones, and walk and run are re-keyed: a trot (diagonal pairs), planted paws (the paw goes back at one speed while it
+is down, then a lifted Hermite swing that lands moving back), solved by two-bone IK, the body crouched and bobbing
+so both ends of the sweep reach the ground (`reach` stretches the stride for stubby legs). The borrowed walk's
+whole-body surge and squash is replaced for these two clips. Every other clip keeps the legs at rest. Species:
+quadrupeds duskapi, glaciyak, heatherhorn, kilnbadger, moundvark, tuatrune, moonloris, scaldamus, spatewader,
+orchisloth, limpetor, opalisk; bipeds nimbostrich, hoarheron, sentrikat, nacrolin, murmurling, squalltross. Run it,
+then `--boki-anim-audit --boki=<id>` and put the measured stride in `BokiRig.STRIDE`, the belly height in FRAME "hip".
+Max slide at the four speeds, before -> after: sentrikat 95/90% -> 20/49% (walk/run), nacrolin 95/91 -> 19/43,
+duskapi 100 -> 25/51 (they had no stepping feet), and `BokiRig.STRIDE` refreshed to the clips on puddlet 23 -> 10%,
+hivara 57 -> 38, kindlewren 51 -> 19, glintmole 45 -> 39, pebbit 58 -> 51, nettlynx 54 -> 44, burrlet 30 -> 26 at
+a stroll. Runs at match speed stay capped by `MAX_CADENCE` (the ceilings are in `OVER`). Still glide with no feet:
+casquebill, floenatee (seals), goliathite, velvorm (caterpillars), threadwyrm, caecilith (worms), the blobs, selenfin,
+zephyrak, thrumbird; their walk is the borrowed body bob.
+`tools/boki_anim_shots.gd --video` records a state tour (idle, stroll, run, stop, attack, hit, faint, revive, trot) as
+jpg frames for an mp4.
+
 ## State coverage
 
 `--boki-anim-audit` also drives all 22 rigged Boki through every state the game plays (`tools/boki_state_cover.gd`)
