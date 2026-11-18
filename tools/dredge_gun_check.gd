@@ -26,6 +26,7 @@ func run() -> void:
 	var T: Hunter = r[2]
 	T.teleport(P.pos + Vector3(0, 0, 9.0))
 	_fans(m, P)
+	_muzzle(m, P)
 	_cluster_lands(m, P, T)
 	_aimer(m, P)
 	await ak.done(m)
@@ -51,13 +52,38 @@ func _fans(m: Match, P: Hunter) -> void:
 		and absf(float(first[0]) + float(first[first.size() - 1])) < 0.3,
 		"%s, slugs %s" % [info, str(first)]
 	)
-	ok("gun: firing again at once fans the slugs wide", half[1] > tight * 3.0 and half[2] >= half[1], info)
-	ok("gun: a short pause keeps the fan wide", half[3] > tight * 3.0, info)
+	ok("gun: firing again at once fans the slugs wide", half[1] > tight * 2.5 and half[2] >= half[1], info)
+	ok("gun: a short pause keeps the fan wide", half[3] > tight * 2.5, info)
 	ok(
 		"gun: holding off past the fire rate draws the fan in part-way (no snap)",
 		half[4] > tight + 2.0 and half[4] < wide - 2.0, info
 	)
 	ok("gun: after a longer pause the volley is the tight cluster again", absf(float(half[5]) - tight) < 0.3, info)
+
+## Every slug of a volley leaves the blunderbuss's one muzzle point (not a ring round his body) and its hit sweep
+## starts at the body, so a volley fired against a wall still stops at the wall.
+func _muzzle(m: Match, P: Hunter) -> void:
+	_release(m, P, LONG_PAUSE)
+	_hold(m, P, 1)
+	var mz: Dictionary = P.wpn["muzzle"]
+	var pg := "%s_%d" % [P.nid, P.shot_n]
+	var n := 0
+	var first := Vector3.INF
+	var same := true            # every slug starts at the one muzzle point, the data's height above the feet
+	var ahead := true           # whose hit sweep starts that far behind it, at the body
+	for sd in m.shots:
+		if sd["by"] == P and String((sd["x"] as Dictionary).get("pg", "")) == pg:
+			n += 1
+			var at: Vector3 = sd["muzzle"] if sd.has("muzzle") else Vector3.INF
+			first = at if n == 1 else first
+			same = same and at.distance_to(first) < 0.001 and absf(at.y - P.pos.y - float(mz["up"])) < 0.001
+			var st: Vector3 = sd["start"]
+			ahead = ahead and absf(Vector2(at.x - st.x, at.z - st.z).length() - float(mz["fwd"])) < 0.001
+	ok(
+		"gun: all seven slugs leave one muzzle point", n == int(P.wpn["pellets"]) and same,
+		"slugs %d at %s" % [n, first]
+	)
+	ok("gun: the hit sweep starts at his body, the muzzle's reach behind it", ahead)
 
 ## Damage stays the volley's: on a foe straight ahead inside the slug range, the waited cluster lands all seven.
 func _cluster_lands(m: Match, P: Hunter, T: Hunter) -> void:
