@@ -89,6 +89,7 @@ const CHECKS := {
 	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
 	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
 	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--fusion-off-check": ["res://tools/fusion_off_check.gd", "fusion_off_check", null],      # 0101: Fusion off by default
 	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
@@ -955,6 +956,7 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
+			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on; --fusion-off-check sets its own)
 			seed(hash(flag))
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)

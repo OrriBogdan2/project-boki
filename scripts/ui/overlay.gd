@@ -422,6 +422,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
+	if not MergeForm.enabled():
+		named.erase("ultimate")       # (X stays reserved, but no row offers it while Fusion is off)
 	var shown := {}
 	var extra: Array = []
 	for g in groups:
@@ -434,7 +436,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			_bind_row(v, an, named[an])
 		if groups.find(g) >= BASIC_KEY_GROUPS:
 			extra.append_array(v.get_children().slice(first_extra))
-	var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
+	var rest: Array = Settings.ACTIONS.filter(func(a): return named.has(String(a[0])) and not shown.has(String(a[0])))
 	if not rest.is_empty():
 		var first_rest := v.get_child_count()
 		_group(v, "Other")

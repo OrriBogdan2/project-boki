@@ -66,7 +66,7 @@ static func for_downed(p: Hunter, time: float, blight: bool) -> String:
 static func pick(trig: Array, blight := true) -> String:
 	var seen: Array = Save.d["tutorial"].get("tips_seen", [])
 	var pool: Array = (rules()["tips"] as Array).filter(
-		func(t): return blight or not String(t["text"]).contains("Blight"))
+		func(t): return (blight or not String(t["text"]).contains("Blight")) and (MergeForm.enabled() or not t.get("needs_fusion", false)))
 	var fresh := pool.filter(func(t): return not seen.has(t["id"]))
 	if fresh.is_empty():
 		seen = []

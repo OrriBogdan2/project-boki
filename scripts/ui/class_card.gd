@@ -100,13 +100,14 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
 	return row
 
-## A Hunter's kit in one tooltip: its name, then dash, passive, and the right click, signature and fusion keys.
+## A Hunter's kit in one tooltip: its name, then dash, passive, and the right click and signature keys (and fusion while it is on).
 static func kit_tip(id: String) -> String:
 	var adf := Arch.def(id)
 	var nm := func(slot: String) -> String: return String(adf[slot]["name"])
 	var head := "%s\nDash: %s  ·  Passive: %s\n" % [Arch.name_of(id), nm.call("dash"), nm.call("passive")]
 	var keys := [Settings.key_cap("secondary"), nm.call("rmb"), Settings.key_cap("signature"), nm.call("e")]
-	return head + "%s: %s  ·  %s: %s  ·  %s: Boki Fusion" % (keys + [Settings.key_cap("ultimate")])
+	var tip := head + "%s: %s  ·  %s: %s" % keys
+	return tip + "  ·  %s: Boki Fusion" % Settings.key_cap("ultimate") if MergeForm.enabled() else tip
 
 ## How the Hunter plays, three short lines (what you do, the combo to learn first, what to avoid) from the
 ## Hunter's "howto" data. `{action}` is that action's key cap (Settings.key_cap), so rebinds show.

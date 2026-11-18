@@ -3278,6 +3278,8 @@ func _gather_input() -> void:
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
+		if a[0] == "ultimate" and not MergeForm.enabled():
+			continue       # Fusion is off: X is reserved and does nothing
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
@@ -3603,6 +3605,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
+		Content.rules("merge_forms")["fusion_enabled"] = true
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
