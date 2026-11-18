@@ -144,7 +144,7 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 	while t < BOT_FARM_S:
 		g.tick(0.1)
 		t += 0.1
-		var hint: bool = g.hint_visible() and g.hint_box.visible and g.hint_lbl.text != ""
+		var hint: bool = g.hint_visible() and g.hint_box.visible and g.hint_text() != ""
 		var marker: bool = is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""
 		_span("f_dead", not hint and not marker, 0.1)
 		if place:

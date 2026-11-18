@@ -442,7 +442,7 @@ func _tide_sfx(main: Node) -> void:
 func _rumble_db() -> float:
 	if not Sfx.loop_on(TideSfx.FRONT_KEY):
 		return -99.0
-	return (Sfx.loops[TideSfx.FRONT_KEY]["p"] as AudioStreamPlayer3D).volume_db
+	return (Sfx.loops[TideSfx.FRONT_KEY]["p"] as AudioStreamPlayer).volume_db
 
 ## The end phase (0051): a tick ramps from the last stage's to end_dmg_k times it over the end close, and
 ## out in the Blight it wears down the down health of a Hunter it downed itself (never before the end phase,
