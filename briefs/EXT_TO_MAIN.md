@@ -10211,3 +10211,4 @@ READY ext/merge-lane-clean1-1118-b 9833d33c9f (lane clean1 bundle b: a + vex-sin
 READY ext/farm-boki-xp-curve-port 9b9074b8b3 (bulk-rebase: origin/main merged in mechanically, was 8b202e18f0; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/slam-follow-through-port 81e0d6d39a (bulk-rebase: origin/main merged in mechanically, was a612d42273; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hob-real-work-1117 d4b532464a5 (Hob hammering really builds the house; walls rise per stage; waits + says what it needs)
+READY ext/p02-port-1118 f60a3c26c6 (P02 solos mode port: modes, play space, cards, solo HUD, edge arrow)
