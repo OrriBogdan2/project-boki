@@ -30,3 +30,6 @@ Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus, H
   Boki's own game.
 - match.gd +3 (interact, match end), hunter.gd +2, KinLoss and KinCommand skip a Boki whose wisp is not with its
   own hunter. `--wisp-steal-check` covers it, including the stacking rows.
+- HUD: up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside an ally-blue thief
+  ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's squad row wears a
+  count badge (`TeamBoki`). It sits on the Boki box's group. `--stolen-hud-check` covers it.
