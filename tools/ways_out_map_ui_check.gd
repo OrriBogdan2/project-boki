@@ -138,8 +138,7 @@ func run(main: Node) -> void:
 	H._force(Heart.S.WAITING, "test")
 	var t0: float = Heart.r("tide_start_s")
 	m.time = 10.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.r("tide_r0") * H.ways_scale),
-		"before the tide the dashed ring is the first ring")
+	ok(is_equal_approx(Heart.next_r(m), H.start_r), "before the tide moves the dashed ring is the play space")
 	m.time = t0 + 100.0 - m.sess_t0
 	var ahead := (100.0 + Heart.r("tide_next_s")) / Heart.r("tide_close_s")
 	var want := lerpf(Heart.r("tide_r0"), Heart.r("tide_r1"), ahead) * H.ways_scale

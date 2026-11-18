@@ -15,7 +15,10 @@ static func pick(mode: String, cb: Callable) -> void:
 static func make(cur: String, cb: Callable) -> VBoxContainer:
 	var col := UI.vbox(8)
 	for mode in Data.MODES:
-		var card := UI.tile_card(mode == cur, func(): if mode != cur: cb.call(mode), 14)
+		var pressed := func() -> void:
+			if mode != cur:
+				cb.call(mode)
+		var card := UI.tile_card(mode == cur, pressed, 14)
 		card.set_meta("mode", mode)
 		var v := UI.vbox(3)
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE

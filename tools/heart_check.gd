@@ -138,7 +138,7 @@ func _early_seat(main: Node) -> void:
 		"the Heart keeps the map's site; another match seeds another Gate")
 	var p: Hunter = m.player
 	# ---- the tide
-	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
+	ok(is_equal_approx(Heart.tide_r(m), H.start_r), "before the close starts the ring is the play space (%.0f m)" % H.start_r)
 	m.time = 5000.0
 	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
 		"the tide has closed to its smallest ring")
@@ -173,8 +173,8 @@ func _early_seat(main: Node) -> void:
 		"embers only on presets that can afford them, inside the budget")
 	m2.time = 0.0
 	m2.step(Match.DT)
-	ok(not W.wall.wall.visible and is_equal_approx(Heart.next_r(m2), float(rl["tide_r0"]) * W.ways_scale),
-		"before the tide: no wall, and the first ring is the next ring")
+	ok(W.wall.wall.visible and is_equal_approx(Heart.next_r(m2), m2.heart.start_r),
+		"before the tide moves: the wall stands on the play space, which is the next ring too")
 	_free(m2)
 	m.time = 0.0
 	# ---- asleep, then charging

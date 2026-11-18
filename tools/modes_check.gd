@@ -47,7 +47,10 @@ func _play_space() -> void:
 		var first := Heart.r("tide_r0") * float(layout.get("ways_scale", 1.0))
 		var trios := Heart.start_r_of(layout, Data.mode_opts("trios"))
 		var solos := Heart.start_r_of(layout, Data.mode_opts("solos"))
-		ok(solos < trios and trios < first, "%s: solos %.0f m, trios %.0f m, first ring %.0f m" % [id, solos, trios, first])
+		ok(
+			solos < trios and trios < first,
+			"%s: solos %.0f m, trios %.0f m, first ring %.0f m" % [id, solos, trios, first]
+		)
 
 
 func _results() -> void:
@@ -81,10 +84,15 @@ func _trios() -> void:
 	var squads := {}
 	for h in m.hunters:
 		squads[h.team] = int(squads.get(h.team, 0)) + 1
-	ok(m.hunters.size() == 30 and squads.size() == 10 and squads.values().all(func(n): return n == 3),
-		"trios: %d hunters in %d squads of three" % [m.hunters.size(), squads.size()])
+	ok(
+		m.hunters.size() == 30 and squads.size() == 10 and squads.values().all(func(n): return n == 3),
+		"trios: %d hunters in %d squads of three" % [m.hunters.size(), squads.size()]
+	)
 	var want := float(m.layout["play_space"]["trios"])
-	ok(is_equal_approx(m.heart.start_r, want), "trios: the tide starts on the trios play space (%.0f m)" % m.heart.start_r)
+	ok(
+		is_equal_approx(m.heart.start_r, want),
+		"trios: the tide starts on the trios play space (%.0f m)" % m.heart.start_r
+	)
 	ok(Life.has_mates(m, m.player), "trios: the player has squadmates")
 	await _done(m)
 
@@ -97,23 +105,27 @@ func _solos() -> void:
 		teams[h.team] = true
 	ok(m.hunters.size() == 20 and teams.size() == 20, "solos: %d hunters, %d squads" % [m.hunters.size(), teams.size()])
 	var want := float(m.layout["play_space"]["solos"])
-	ok(is_equal_approx(Heart.tide_r(m), want) and is_equal_approx(Heart.next_r(m), want),
-		"solos: the tide is in at the start, on the solos play space (%.0f m)" % Heart.tide_r(m))
+	ok(
+		is_equal_approx(Heart.tide_r(m), want) and is_equal_approx(Heart.next_r(m), want),
+		"solos: the tide is in at the start, on the solos play space (%.0f m)" % Heart.tide_r(m)
+	)
 	var outside := 0
 	for z in range(0, m.world.h, 4):
 		for x in range(0, m.world.w, 4):
 			if not m.world.is_void(x, z) and Vector2(x - heart.site.x, z - heart.site.z).length() > heart.start_r:
 				outside += 1
 	ok(outside > 0, "solos: part of the map starts inside the Blight (%d land samples out)" % outside)
-	var lands: Array = m.hunters.map(func(h): return h.ai.get("land", h.pos))      # (bots on the ship plan their landing)
-	var in_play := lands.filter(func(p): return Vector2(p.x - heart.site.x, p.z - heart.site.z).length() <= heart.start_r)
+	var lands: Array = m.hunters.map(func(h): return h.ai.get("land", h.pos))  # (bots on the ship plan their landing)
+	var in_play := lands.filter(
+		func(p): return Vector2(p.x - heart.site.x, p.z - heart.site.z).length() <= heart.start_r
+	)
 	ok(in_play.size() == 20, "solos: %d of 20 hunters start or land inside the play space" % in_play.size())
 	ok(not Life.has_mates(m, m.player) and m.beacons.is_empty(), "solos: no squadmates and no revive beacons")
 	await _done(m)
 
 
 func _panel() -> void:
-	var d := Save.fresh()      # a farm past the first-run steps, so the portal opens the expedition panel
+	var d := Save.fresh()  # a farm past the first-run steps, so the portal opens the expedition panel
 	var kin := Save.new_kin("zapple", "Pip")
 	d["roster"].append(kin)
 	d["active"] = kin["uid"]
