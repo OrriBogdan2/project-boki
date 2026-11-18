@@ -15,7 +15,7 @@ const HERO_PARTS := {
 	"archer": ["string", "lmb", "far", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"],
 	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]}
-const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup"]
+const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -23,7 +23,8 @@ const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
 const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
-const FRAME_W := 960                      # px wide, each --reel-frames frame
+const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
+const FRAME_W := 1280                     # px wide, each --reel-frames frame
 
 var only := ""
 var frame_dir := ""            # --reel-frames: where each drawn frame goes
@@ -190,6 +191,23 @@ func _part_tierup() -> void:
 	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
 		[0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57])
 	await _go(2.2, ups, marks, 1.5)
+	await _go(GAP)
+
+## The shared armour language on the dummy: two hits on the shell, the hit that breaks it, then a hit on health.
+func _part_armour() -> void:
+	await _reset(3.0)
+	T.armor = T.max_armor
+	var hits := func(t: float):
+		if _at(t, 0.15) or _at(t, 0.7):
+			T.hurt(10.0, P, {})
+		if _at(t, 1.2):
+			T.armor = 3.0
+			T.hurt(10.0, P, {})
+		if _at(t, 1.9):
+			T.hurt(10.0, P, {})
+		_aim(T.pos)
+	await _go(2.4, hits, _sheet("armour", "armour hit, armour hit, the break, then a health hit",
+		[0.17, 0.22, 0.72, 0.77, 1.22, 1.3, 1.45, 1.92, 1.98]), 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael
@@ -416,6 +434,30 @@ func _dredge_hook() -> void:
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
+## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand
+## inside the fan (the Hunter on his side, so its Boki leaves him be): every body and nameplate must read through it.
+func _dredge_r() -> void:
+	await _reset(4.5)
+	if T2 == null:
+		var pip := Save.new_kin("zapple", "Pip")
+		T2 = m.make_hunter("T2", P.team, "medium", "Mate", "idle", pip, home, {"arch": "bulwark"})
+	T2.teleport(home + Vector3(2.6, 0, -1.8))
+	var spots := [Vector3(3.4, 0, 1.6), Vector3(5.2, 0, -0.6)]
+	for kin in m.kins:
+		if not spots.is_empty():
+			kin.teleport(home + spots.pop_front())
+	var cast := func(t: float):
+		if _at(t, 0.1):
+			P.ak.cd["x"] = 0.0
+			P.ak.cast_ult()
+		_aim(T.pos)
+	var fan_mid := func() -> Vector3: return home + Vector3(3.0, 0.9, 0)
+	crop_px = FAN_CROP
+	await _go(2.8, cast, _sheet("r", "R over a crowd: the dummy, a Hunter and its Boki inside the fan",
+			[0.3, 0.7, 1.1, 1.22, 1.3, 1.45, 1.82, 1.9, 2.4], fan_mid), 3.0)
+	crop_px = SHEET_CROP
+	await _go(GAP)
+
 func _archer_miss() -> void:
 	await _reset(8.0)
 	var off := home + Vector3(5.5, 0, -2.5)
@@ -450,7 +492,7 @@ func _archer_heavy() -> void:
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
 			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
-			+ "with its thick thread, the shove, the seam it leaves",
+			+ "with its thick thread, the shove; nothing left behind",
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
 
@@ -489,11 +531,11 @@ func _archer_r() -> void:
 		if _at(t, 0.1):
 			K.cd["x"] = 0.0
 			K.cast_ult()
-		P.inp["fire"] = t > 0.6 and t < 0.66 or t > 1.6 and t < 1.66 or t > 2.6 and t < 2.66
+		P.inp["fire"] = t > 1.2 and t < 1.26 or t > 2.3 and t < 2.36
 		_aim(T.pos)
 	await _go(4.6, ult, _sheet("r",
-			"X Starpiercer: armed, a nock, the beam stitching a seam across the ground, the hit, the last and "
-			+ "deepest beam", [0.15, 0.3, 0.8, 0.95, 1.05, 1.3, 2.95, 3.1, 4.4]), 3.0)
+			"X Starpiercer: the first beam the frame X is pressed, the seam across the ground, the hit, two more "
+			+ "on the presses, the last and deepest beam", [0.1, 0.15, 0.3, 0.5, 1.2, 1.3, 2.3, 2.4, 3.2]), 3.0)
 	await _go(GAP)
 
 func _archer_voice() -> void:

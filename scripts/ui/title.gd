@@ -12,10 +12,10 @@ var stung := false
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")          # its own slow drone, not the match wind
 	_build_ui()
 
 func _process(delta: float) -> void:
@@ -70,7 +70,7 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 150)      # shrinks on a short window; the list below never leaves it
+	lt.custom_minimum_size = Vector2(500, 90 if Overlay.admin_allowed() else 150)      # shrinks on a short window (and gives its room to the owner's Test Zone row); the list below never leaves it
 	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
@@ -87,6 +87,8 @@ func _build_ui() -> void:
 	var items: Array = []
 	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if Overlay.admin_allowed():
+		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
@@ -99,6 +101,7 @@ func _build_ui() -> void:
 		items.append(["Party", func(): Game.goto("party", {}), "bond"])
 	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
+	items.append(["Help", _open_words, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
@@ -137,6 +140,10 @@ func _build_ui() -> void:
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
 	b1.grab_focus()
+
+func _open_words() -> void:
+	Overlay.ctx = "title"
+	Overlay.open_words()
 
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:

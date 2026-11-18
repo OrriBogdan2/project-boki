@@ -191,6 +191,14 @@ func _arena() -> void:
 	ok("the V glove fires alone: V on cooldown, Q ready", float(P.gear_cd[1]) > 0.0 and float(P.gear_cd[0]) <= 0.0)
 	m.use_gear(P, 0)
 	ok("then the Q glove fires too", float(P.gear_cd[0]) > 0.0)
+	var cast_all := true
+	for gid in Gear.ALL:
+		if Gear.active(gid) and Gear.slot_of(gid) == 0:
+			P.gear[0] = {"id": gid, "rar": 1}
+			P.gear_cd[0] = 0.0
+			m.use_gear(P, 0)
+			cast_all = cast_all and float(P.gear_cd[0]) > 0.0
+	ok("every active glove casts (their own sounds play)", cast_all)
 	A.give_glove("blink", 1)
 	ok("one glove can't be worn twice: blink to V empties Q", A.gloves[0] == "" and gid0.call(1) == "blink")
 	A.give_glove("grapple", 0)
@@ -321,8 +329,10 @@ func _arena() -> void:
 				# one
 				B.hp = B.max_hp - 20.0
 			# step back every 5s: with no glove ranks its RMB is ready so often that it never leaves melee for an E
+			# (toward the ring's middle: on the Training Area' open floor, a step back to the far side of a
+			# wall, after the Thief swaps places with you, puts the bot out of sight and it wanders off)
 			if int(tb / DT) % int(5.0 / DT) == 2:
-				B.teleport(P.pos + Vector3(6.0, 0, 0))
+				B.teleport(P.pos + Vector3(6.0 if P.pos.x < A.home.x + 3.0 else -6.0, 0, 0))
 			m.step(DT); tb += DT
 			if B.ak is ThiefKit and float((B.ak as ThiefKit).primed_t) > 0.0: seen["dash"] = true
 			if B.ak is JuggernautKit and String(B.ak.st.get("last_dash", "")) == "rampage": seen["dash"] = true

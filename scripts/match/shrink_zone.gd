@@ -57,6 +57,7 @@ var cur_r := 0.0
 var fallen := false
 var told := 0  # the last close the feed and the kin warned of (the first-match guide reads it)
 var _owed := {}  # Hunter -> outside damage not landed yet
+var audio: ZoneSfx  # the warning, the wall's hum, the crossing and the damage tick
 var _wall: MeshInstance3D = null
 var _mat: ShaderMaterial = null
 
@@ -120,9 +121,10 @@ func _init(match_node: Match) -> void:
 		t0[j] = t
 		t += float(ph[j - 1]["shrink"]) * tk
 		t1[j] = t
-		dps[j] = float(ph[j - 1]["dps"])
+		dps[j] = Heart.tide_dmg(int(ph[j - 1]["stage"])) / float(Data.CLASSES["medium"]["hp"])
 	cur_c = cs[0]
 	cur_r = rs[0]
+	audio = ZoneSfx.new(self)
 	_build_wall()
 
 
@@ -175,6 +177,7 @@ func tick(dt: float) -> void:
 	while k < last() and m.time >= t0[k + 1]:
 		k += 1
 	_warn()
+	audio.update()
 	if k > 0:
 		_hurt_outside(dt)
 	if not fallen and m.time >= t1[last()]:
@@ -197,10 +200,11 @@ func _warn() -> void:
 		BokiChatter.say(m, m.player.kin, "zone")
 	if m.hud:
 		m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	m.sfx("warn", null, 0.0)
+	audio.warn()
 
 
-## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain).
+## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no
+## flinch or hitstop either, and the player hears ZoneSfx's tick instead of a hurt voice).
 func _hurt_outside(dt: float) -> void:
 	var R := rules()
 	for h in m.hunters:
@@ -209,7 +213,8 @@ func _hurt_outside(dt: float) -> void:
 			continue
 		var owed: float = float(_owed.get(h, 0.0)) + dps[k] * h.max_hp * dt
 		if owed >= dps[k] * h.max_hp * float(R["tick_s"]):
-			h.hurt(owed, null, {"src": "zone"})
+			if h.hurt(owed, null, {"src": "zone", "tick": true}) > 0.0 and h == m.player:
+				audio.tick()
 			owed = 0.0
 		_owed[h] = owed
 
@@ -296,7 +301,7 @@ func hud_row(hud, r: Rect2) -> float:
 	hud.c.draw_circle(r.position + Vector2(11, 10), 4.0, COL)
 	hud._text(r.position + Vector2(21, 14), _secs_text(hud), 10, COL, hud.big)
 	if m.player and not m.player.out and k > 0 and outside(m.player.pos):
-		var t := "OUTSIDE  -%d%%/s" % int(round(dps[k] * 100.0))
+		var t := "OUTSIDE  -%.1f%%/s" % (dps[k] * 100.0)
 		var a := 0.6 + 0.4 * sin(m.time * 8.0)
 		var tw: float = hud.big.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		hud._text(Vector2(r.end.x - 8 - tw, r.position.y + 14), t, 10, Color(hud.BAD, a), hud.big)

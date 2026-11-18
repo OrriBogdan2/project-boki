@@ -71,7 +71,7 @@ var hold_skip: HoldSkip
 var type_tw: Tween              # the caption typing itself in (a tap finishes it)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if then_go == "hatch" and Save.d["tutorial"].get("prologue", false):
 		set_process(false)
 		set_process_unhandled_input(false)

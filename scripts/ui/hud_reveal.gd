@@ -1,27 +1,51 @@
 class_name HudReveal
 extends RefCounted
-## What a new player's match HUD holds back until it matters (docs/HUD.md "First real match"). In a real Extraction
-## for a save under HudGroups.NEW_PLAYER_MATCHES expeditions, the weapon card (with the belt row above it) waits for
-## the first shot, hit taken or pickup, and the squads/players-left counters wait for the first fight or Tab. Each
-## test reads a count that only goes up, so a block that has appeared stays for the match. Everyone else (veterans,
-## the tutorial, training, duels, the arena) sees the whole HUD as before. Draws nothing.
+## Show only what is needed (DECISIONS 2026-11-08, design review 11-10 fix 8): each HUD group has a
+## reveal stage in content/rules/hud_reveal.json. A group shows from its match number ("from_match"),
+## or once its first event has happened ("first", remembered in Save.d.hud_reveal), or while Tab
+## (the scoreboard key) is held. Everything shows outside expeditions (duel, training, tutorial,
+## arena), with Settings "Show full HUD", and on saves from before the reveal (no "hud_reveal" key).
+##   if HudReveal.on(m, "feed"): ...       # draw the group
+##   HudReveal.see("seat_pips")            # its first event happened: it stays from now on
 
-static func newcomer(m: Match) -> bool:
-	if not HudGroups.new_player():
+const RULES_PATH := "res://content/rules/hud_reveal.json"
+static var _groups: Dictionary = {}
+
+static func groups() -> Dictionary:
+	if _groups.is_empty():
+		var p = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
+		_groups = p.get("groups", {}) if typeof(p) == TYPE_DICTIONARY else {}
+	return _groups
+
+## The expedition this match is for the save: 1 for the first.
+static func match_no() -> int:
+	return int(Save.d.get("matches", 0)) + 1
+
+## Whether `key` draws now.
+static func on(m: Match, key: String) -> bool:
+	if not staged(m) or Input.is_action_pressed("scores"):
+		return true
+	var seen: Dictionary = Save.d["hud_reveal"]
+	if seen.has(key):
+		return true
+	var g: Dictionary = groups().get(key, {})
+	var from := int(g.get("from_match", 1))
+	return from > 0 and match_no() >= from
+
+## Whether this match stages the HUD at all.
+static func staged(m: Match) -> bool:
+	if Settings.get_v("hud_full") or not Save.d.has("hud_reveal"):
 		return false
-	for skip in ["tutorial", "duel", "arena", "training"]:
-		if m.opts.get(skip, false):
-			return false
-	return true
+	if m.duel or m.tut:
+		return false
+	return not (m.opts.get("training", false) or m.opts.get("tutorial", false) or m.opts.get("arena", false))
 
-## Has the first fight started (a shot, a hit taken, a kill, knock or gem)?
-static func fought(p: Hunter) -> bool:
-	return p.ammo < int(p.wpn["mag"]) or p.swing_at > -9.0 or p.dmg_taken > 0.0 or p.kills + p.knocks + p.gems > 0
+## A group's first event happened: it shows from now on (this save).
+static func see(key: String) -> void:
+	if Save.d.has("hud_reveal"):
+		Save.d["hud_reveal"][key] = true
 
-## The weapon card and the belt row above it.
-static func weapon_shown(m: Match, p: Hunter) -> bool:
-	return not newcomer(m) or fought(p) or not p.pack.is_empty()
-
-## The squads and players left (and under them your own numbers).
-static func counters_shown(m: Match) -> bool:
-	return not newcomer(m) or MapDetail.holding() or fought(m.player)
+## A new player in a staged match (a save under HudGroups.NEW_PLAYER_MATCHES expeditions): ExtractGoal points
+## them only at the newcomer seats.
+static func newcomer(m: Match) -> bool:
+	return staged(m) and HudGroups.new_player()

@@ -2,7 +2,7 @@
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
-Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--no-import]
+Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
 
 import argparse
@@ -33,6 +33,7 @@ ART = {
 }
 TRIS = 60000  # the body's triangles in game (RIG_CONTRACT "Budget": the v95 masters' own-paint models)
 TEX = 4096  # the largest side of each of the master's images in the .glb (px)
+HEAD_SHARE = 0.45  # the head's share of the body triangles (a 20% head band tears the face at 60k even with seam-weighted collapses)
 SECOND_TEX = 2048  # px: the game's size limit for a master's other images (VRAM: 4096 is 11 MB compressed, 2048 2.7 MB)
 
 
@@ -97,16 +98,16 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
+    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
     spec = spec_for(art)
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
     tris = a.tris or spec.get("own_tris", TRIS)
-    k = tris / float(spec["tris"])
-    spec.update(master=master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
+    spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if spec.get("head_tris"):
-        spec["head_tris"] = int(spec["head_tris"] * k)
+        spec["head_tris"] = int(tris * HEAD_SHARE)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
     spec["move_bones"] = {b: v for b, v in spec.get("move_bones", {}).items() if isinstance(v, dict)}
     work = os.path.abspath(os.path.expanduser(a.work or "~/meshy/v95/_ingame/%s" % a.name))

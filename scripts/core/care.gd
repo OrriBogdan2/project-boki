@@ -159,6 +159,13 @@ static func ensure(rec: Dictionary) -> void:
 static func sulky() -> Dictionary:
 	return Content.rules("care").get("sulky", {}) if FarmUnlocks.base_mode() else {}
 
+## Joy lost each awake minute: base_mode's own pace (care.json base_joy_decay) so a Boki left alone at the base
+## grows glum enough to seek its toys; DECAY's joy off base_mode and for time you were away.
+static func joy_decay(away := false) -> float:
+	if away or not FarmUnlocks.base_mode():
+		return float(DECAY["joy"])
+	return float(Content.rules("care")["base_joy_decay"])
+
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
 	return float(rec["needs"].get(n, 50.0))
@@ -171,8 +178,10 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 
 ## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
 ## farm, which some kinds love and some hate (BokiQuirks.rain_joy); friend: another Boki close by
-## (KinAiling.friend_near), which helps a weak or sick one get better.
-static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false) -> void:
+## (KinAiling.friend_near), which helps a weak or sick one get better; away: time you were gone (catch_up), when
+## joy wears at Care.DECAY's slow pace because nobody models the toys it played with meanwhile.
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false,
+		away := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -198,7 +207,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 		nd["energy"] = clampf(float(nd["energy"]) - DECAY["energy"] * mins, 0.0, 100.0)
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
-	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
+	var joy_loss: float = joy_decay(away) * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
 	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
 	if raining and not sleeping:
 		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
@@ -227,8 +236,8 @@ static func catch_up(rec: Dictionary) -> float:
 		var before := {}
 		for k in floors: before[k] = float(nd[k])
 		var st0 := float(rec.get("starve", 0.0))
-		tick(rec, gone * 0.5, true)
-		tick(rec, minf(gone * 0.5, 1800.0), false)
+		tick(rec, gone * 0.5, true, false, false, true)
+		tick(rec, minf(gone * 0.5, 1800.0), false, false, false, true)
 		for k in floors:
 			nd[k] = maxf(float(nd[k]), minf(float(before[k]), floors[k]))
 		# the floor means it found enough to get by; one that was already empty starved the whole time
@@ -499,15 +508,15 @@ static func migrate_habits(data: Dictionary) -> void:
 		if typeof(rec) == TYPE_DICTIONARY and not rec.is_empty():
 			ensure(rec)
 
-## Raises trust for kind "pet", "food" or "win" by its named amount, once per cooldown per kind.
+## Raises trust for kind "pet", "food" or "win" by its named amount (times `mul`), once per cooldown per kind.
 ## Returns the line to show, or "" when nothing changed (cooling down, or trust already full).
-static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "") -> String:
+static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "", mul := 1.0) -> String:
 	var r := Content.rules("garden_trust")
 	var last: Dictionary = rec.get("care_t", {})
 	if now_s < float(last.get(kind, -1.0e9)) + float(r["cooldown_h"]) * float(r["hour_s"]):
 		return ""
 	var was := float(rec.get("trust", 0.0))
-	rec["trust"] = clampf(was + float(r[kind]), 0.0, 100.0)
+	rec["trust"] = clampf(was + float(r[kind]) * mul, 0.0, 100.0)
 	if float(rec["trust"]) <= was:
 		return ""
 	last[kind] = now_s
@@ -623,7 +632,7 @@ static func rare_ivs(rng: RandomNumberGenerator) -> Dictionary:
 static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp := "", inherit_n := IV_INHERIT) -> Dictionary:
 	if sp == "" or not Data.KIN.has(sp):
 		sp = a["species"] if rng.randf() < 0.5 else b["species"]
-	var baby := Save.new_kin(sp)
+	var baby := Save.new_kin(Data.egg_species(sp, rng))      # eggs hatch the first form, even an old save's
 	for t in baby["traits"]:
 		var mix := (float(a["traits"].get(t, 0.5)) + float(b["traits"].get(t, 0.5))) * 0.5
 		baby["traits"][t] = clampf(mix + rng.randf_range(-0.12, 0.12), 0.05, 0.95)
@@ -693,13 +702,10 @@ static func settle_rare_egg() -> bool:
 	Incubator.ensure()
 	return Incubator.settle() > 0
 
-## What hatches from a Rare Egg: a kin of the rare species its boss guarded, a little grown already,
+## What hatches from a Rare Egg: the first form of its line (never a legendary), a little grown already,
 ## glad to see you, now and then shimmering too.
 static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
-	var sp := String(egg.get("sp", ""))
-	if not Data.KIN.has(sp):
-		sp = String(Data.common_kin()[0])
-	var baby := Save.new_kin(sp)
+	var baby := Save.new_kin(Data.egg_species(String(egg.get("sp", "")), rng))      # always the line's first form
 	baby["rare"] = true
 	baby["level"] = 3
 	baby["trust"] = 50.0
@@ -748,6 +754,9 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		"form":
 			if extra != "" and not (e["forms"] as Array).has(extra): e["forms"].append(extra)
 		"shimmer": e["shimmer"] = true
+		"echo":           # a stolen wisp's soul echo (KinSteal)
+			e["seen"] = true
+			e["echo"] = int(e.get("echo", 0)) + 1
 		"mutation":
 			if extra != "" and not (e["mutations"] as Array).has(extra): e["mutations"].append(extra)
 

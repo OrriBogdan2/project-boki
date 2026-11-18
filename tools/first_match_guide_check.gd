@@ -1,7 +1,7 @@
 extends RefCounted
 ## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
 ##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
-##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
+##   2. a walk through the triggers: rank, send, chest, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
 ##   3. in squads, the B line (base to a teammate) shows when they're all far off and clears on the wheel
 ##   4. every line fits the banner lane in at most two lines at 1280x720
@@ -21,6 +21,7 @@ func run(mn: Node) -> void:
 	for id in ["archer", "juggernaut", "gunslinger"]:      # Lace, Kael, Vex: the guide is the same for all
 		_walk(id)
 	_mates()
+	_first_ult()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -78,12 +79,7 @@ func _walk(hunter: String) -> void:
 	if m.chests.is_empty():
 		m.chests.append({"open": false, "pos": p.pos, "prog": 0.0})
 	var move0: Vector2 = p.inp["move"]
-	p.dropping = true
-	_tick(0.2)
-	ok(g.id == "land" and g.line.begins_with("Pick a landing spot"), "dropping: pick a landing spot (%s)" % g.line)
-	p.dropping = false
-	_tick(0.2)
-	ok(g.line == "", "landed: the line clears and a quiet gap follows")
+	_no_hints_in_flight(p)
 	_tick(1.5)
 	ok(g.id == "rank" and g.line.contains("Rank up"), "a skill point: rank an ability (%s)" % g.line)
 	p.skill_pts = 0
@@ -96,31 +92,24 @@ func _walk(hunter: String) -> void:
 	ok(g.line == "", "sent: it clears")
 	_tick(1.6)
 	ok(g.id == "chest" and g.line.contains("chest"), "a chest to open: loot it (%s)" % g.line)
+	var hd := Vector2(1920, 1080)
+	ok(g.bottom(hd) > TutorialStrip.rect(hd).position.y, "the message column starts under the line's strip")
 	p.add_stat("chests")
 	_tick(0.2)
 	ok(g.line == "", "opened: it clears")
-	var foe: Hunter = null
-	for h in m.hunters:
-		if h != p and h.team != p.team:
-			foe = h
-	_tick(1.6)
-	foe.pos = p.pos + Vector3(10, 0, 0)
-	_tick(0.2)
-	ok(g.id == "squad" and g.line.contains("squad"), "another squad close by: fight or avoid (%s)" % g.line)
-	var hd := Vector2(1920, 1080)
-	ok(g.bottom(hd) > TutorialStrip.rect(hd).position.y, "the message column starts under the line's strip")
-	foe.pos = p.pos + Vector3(300, 0, 0)
-	_tick(0.2)
-	ok(g.line == "", "they are gone: it clears")
 	ok(g.bottom(hd) == 0.0, "with no line up the message column keeps its place")
 	var fnt := ThemeDB.fallback_font
 	var long_line := "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves"
 	var cut := TextCache.fit(fnt, long_line, 13, 300.0)
 	var fits := TextCache.width(fnt, cut, 13) <= 300.0 and cut.ends_with("…")
 	ok(fits and TextCache.fit(fnt, "short", 13, 300.0) == "short", "a long feed line is cut at a word (%s)" % cut)
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
 	foe.pos = p.pos + Vector3(10, 0, 0)
 	_tick(2.0)
-	ok(g.line == "", "a line shows only once a match")
+	ok(g.line == "" and not g.shown.has("squad"), "a squad close by gets no line")
 	m.time = m.length * 0.7
 	_tick(1.6)
 	ok(g.id == "blight" and g.line.contains("Blight"), "the match is closing: the Blight line (%s)" % g.line)
@@ -174,6 +163,18 @@ func _mates() -> void:
 	p.inp.erase("bwheel")
 	ok(g.line == "", "opening the wheel clears it")
 
+## The plane ride and the drop: no guide line, and no first-time tip card, however due they are.
+func _no_hints_in_flight(p: Hunter) -> void:
+	for st in ["riding", "dropping"]:
+		p.set(st, true)
+		g._gap = 0.0
+		_tick(0.5)
+		ok(g.line == "" and g.shown.is_empty(), "%s: no guide line" % st)
+		m._tip_t = 20.0
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: no hint card" % st)
+		p.set(st, false)
+
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))
 	var w := strip.size.x - strip.size.y
@@ -183,3 +184,63 @@ func _fit() -> void:
 		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
 			px -= 1
 		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
+		var gone := txt.contains("slip away")
+		ok(not gone, "%s is not the squad or landing line" % row[0])
+
+# ------------------------------------------------------------------ 5. the first-ready ult hint
+func _first_ult() -> void:
+	var p: Hunter = m.player
+	ok(p.ak != null, "the player is a hero with a kit")
+	if p.ak == null:
+		return
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(FirstUltHint.KEY)
+	p.downed = false
+	p.dropping = false
+	p.riding = false      # (a match now starts aboard the skyship)
+	p.lvl = int(Hunter.ULT_AT[0]) - 1
+	p.ak.cd["x"] = 0.0
+	m._tip_t = 2.0
+	m.time = 100.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "below the ult level: no hint")
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 5.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "cooling down: no hint")
+	p.ak.cd["x"] = 0.0
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m.time = 101.0
+	CombatBus.hit_landed.emit(p, foe, 5.0, ["primary"])
+	m.time = 101.9
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "ready 1.9 s into a fight: held back")
+	var before: int = m.hud.msgs.count()
+	m.time = 102.1
+	m._tips()
+	ok(bool(seen.get(FirstUltHint.KEY, false)), "ready 2.1 s into the fight, still being hit: shown")
+	ok(m.hud.msgs.count() == before + 1, "through the hint lane, one line")
+	var want := FirstUltHint.text(p.ak)
+	var cap := Settings.key_cap("hunter_ult")
+	ok(want.begins_with(cap + " is ready: " + String(p.ak.x_def()["name"]) + ", "), "the key cap and name (%s)" % want)
+	m._tips()
+	ok(m.hud.msgs.count() == before + 1, "once per save: no second line")
+	seen.erase(FirstUltHint.KEY)
+	m.time = 200.0
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "a new fight after a quiet spell holds it again")
+	seen[FirstUltHint.KEY] = true
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		if not f.ends_with(".json"):
+			continue
+		var json: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		var xd: Dictionary = json.get("x", {})
+		if xd.is_empty():
+			continue
+		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
+		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])

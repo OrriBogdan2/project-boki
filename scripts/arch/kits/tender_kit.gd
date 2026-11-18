@@ -54,6 +54,9 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
+
 ## A move that waits for the one playing to finish (passive procs never cut an ability's move).
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
@@ -80,6 +83,15 @@ func add_kindle(t: Ent, n := 1) -> void:
 		vfx("kindled", t.pos)
 		m.sfx("tend_kindled", t.pos, -2.0, 1.0)
 		play_soft("mm_kindled")
+		ComboMark.payoff(m, h, t)        # the Kindle payoff: full stacks, every shot now hits harder
+
+## The Kindle on `t`, for the ComboMark tag: a pip per stack; the ring is the Kindle left.
+func combo_read(t: Ent) -> Dictionary:
+	var n := kindle_on(t)
+	if n == 0:
+		return {}
+	return {"icon": "burst", "n": n, "max": int(res_def().get("max", 5)),
+			"left": float(kind[t.get_instance_id()]["left"]), "total": float(res_def().get("dur", 4.0))}
 
 func best_kindle() -> int:
 	var b := 0

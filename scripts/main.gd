@@ -41,7 +41,7 @@ func _ready() -> void:
 			var which := a.substr(10).split(":")
 			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
-		if a == "--god": opts["god"] = true
+		if a == "--god" and AdminGate.unlocked(): opts["god"] = true
 		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
@@ -922,8 +922,9 @@ func _boss_check() -> void:
 		b.hurt(5.0, P, {"src": "shot"})
 		run.call(0.2)
 		var ew = L.get("egg_wp")
-		var egg_shown: bool = m.lairs.egg_pings.size() > 0
-		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
+		var egg_shown: bool = m.feed_all.any(func(t): return " got the " in String(t) and String(t).ends_with(" Egg"))
+		var egg_n: int = m.hunters.reduce(func(n, h): return n + h.pack.filter(func(it): return Loot.is_rare_egg(it)).size(), 0) + m.wpicks.slice(w0).filter(func(wp): return wp.has("egg")).size()
+		var egg_ok: bool = egg_n == 1 and m.hunters.all(func(h): return h.pack.all(func(it): return not Loot.is_rare_egg(it) or not Data.no_egg(String(it["sp"]))))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
@@ -938,15 +939,12 @@ func _boss_check() -> void:
 		walk.call(P, Vector2(L["out"].x, L["out"].y), 1.2)
 		ok.call(m.lairs.inside(L, P.pos, 0.0) and gate_shut.call(L), "after the kill: walking at the shut gate keeps you in")
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
-		# a small pile, all of it good, and the egg on its own spot a few steps away
+		# a small pile, all of it good
 		var pile: Array = pile_now.filter(func(wp): return not wp.get("egg", false))
 		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and (pile.any(func(wp): return wp.has("tune")) or P.perks.filter(func(k): return String(k).begins_with("brand_")).size() > brands0)
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
-		var apart := 99.0
-		if ew != null:
-			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
-		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
-			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp))))), apart])
+		ok.call(pile.size() <= 4 and usable and good,
+			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp)))))])
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
@@ -1036,8 +1034,13 @@ func _boss_check() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ok.call(not m.lairs.inside(L, P.pos, 1.0), "after the kill you walk out through the gate (%.1fs)" % tw)
 		ok.call(L["state"] == "cleared" and egg_ok and strong and P.xp > xp0 + 100.0 and egg_shown,
-			"%s falls: a Rare %s on the ground (on everyone's map), an Epic+ weapon, +%d XP" % [b.md["name"], Data.egg_name(String(Pack.ground_item(ew)["sp"])) if ew != null else "?", int(P.xp - xp0)])
-		if ew != null: egg_items.append(ew)
+			"%s falls: exactly one Rare Egg, to one hunter in the pit (told in the feed), an Epic+ weapon, +%d XP" % [b.md["name"], int(P.xp - xp0)])
+		var holder: Array = [P, C].filter(func(h): return h.pack.any(func(it): return Loot.is_rare_egg(it)))
+		if holder.size() == 1:      # (the later steps use it lying on the ground)
+			var egg: Dictionary = holder[0].pack.filter(func(it): return Loot.is_rare_egg(it))[0]
+			holder[0].pack.erase(egg)
+			egg_items.append(m.lairs.drop_egg(L, egg, L["c"]))
+		elif ew != null: egg_items.append(ew)
 	# 6. the egg takes a pack slot: a full pack asks what to leave
 	var ew0: Dictionary = egg_items[0]
 	spot.call(P, ew0["pos"])
@@ -1068,14 +1071,14 @@ func _boss_check() -> void:
 	Save.d["incubator"] = {}; Save.d["rare_eggs"] = []; Save.d["egg"] = {}
 	var out := Game.apply_result({"extracted": true, "haul": Pack.haul(C), "tier": 0, "gems": 0, "kin_runs": []})
 	var q: Array = [Incubator.eggs()[0]] if not Incubator.eggs().is_empty() else []
-	ok.call(q.size() == 1 and Data.is_rare(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
+	ok.call(q.size() == 1 and not Data.no_egg(String(q[0]["sp"])) and (out.get("haul", []) as Array).any(func(it): return Loot.is_rare_egg(it)),
 		"extract: a %s goes to the Incubator %s" % [Data.egg_name(String(q[0]["sp"])) if not q.is_empty() else "?", str(q)])
 	ok.call(not Incubator.eggs().is_empty() and Save.d.get("egg", {}).is_empty() and Save.d.get("rare_eggs", []).is_empty(), "home: it goes straight into the Incubator's cradle (the breeding nest stays free)")
 	var rr := RandomNumberGenerator.new(); rr.seed = 3
 	var inc_egg: Dictionary = Incubator.eggs()[0].duplicate()
 	var baby := Care.hatch_rare(inc_egg, rr)
-	ok.call(Data.is_rare(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(Data.MOBS[String(inc_egg["boss"])]["egg"]),
-		"hatch: a rare %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
+	ok.call(not Data.no_egg(String(baby["species"])) and baby.get("rare", false) and String(baby["species"]) == String(inc_egg["sp"]),
+		"hatch: a rare-egg %s (%s)" % [Data.KIN[baby["species"]]["name"], baby["species"]])
 	# 9. rare kin never turn up wild, on rivals or as a starter
 	var any_rare := false
 	for i in 60:
@@ -1456,7 +1459,7 @@ func _social_cmd(c: String, current) -> void:
 			if p.size() > 3: Save.add_seed(p[3], 3)
 			_soc_reply(true)
 		"soc:publish": Social.publish_profile(true); _soc_reply(true)
-		"soc:create": Social.create_guild(p[2], "We test things", func(okk): _soc_reply(okk))
+		"soc:create": Social.create_guild(p[2], "We test things", "", func(okk): _soc_reply(okk))
 		"soc:join": Social.join_guild(p[2], func(okk): _soc_reply(okk))
 		"soc:leave": Social.leave_guild(func(): _soc_reply(true))
 		"soc:guilds": Social.list_guilds(func(rows): _soc_reply(rows))

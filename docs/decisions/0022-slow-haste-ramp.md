@@ -6,7 +6,7 @@
 
 ## Problem
 A Slow or a speed boost should change run speed the way the source does and return the same way when it
-ends. The source (supervive_physics.md: BrakingDecelerationWalking 2220, GroundFriction 1.0, MaxAcceleration
+ends. The source (sv/briefs/physics.md: BrakingDecelerationWalking 2220, GroundFriction 1.0, MaxAcceleration
 4700-5400; UE's CharacterMovement) has no ramp time: the cap steps at once and the body follows it, down at
 the walking brake and up at MaxAcceleration, ~0.05 s for a 30% Slow on a run. Ours routed every Slow and
 haste through the one cap already, but the downward follow borrowed `Hunter.GROUND_OVERSPEED` (30 m/s², a

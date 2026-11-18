@@ -1,5 +1,14 @@
 # Sable (thief): import note
 
+## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
+The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
+IDLE_AUDIT section 9):
+
+    python3 tools/art1/glb_add_clips.py sable.glb <old idle-thief sable.glb> idle,stance out.glb --drop-missing
+
+The mesh, the other 57 clips, anchors and weights are unchanged. The old build's `x_breath` and `x_twirl` tracks are dropped (the v95
+rig has neither bone), so there is no chest breath and no pistol spin; the hand still flicks and dips.
+
 ## LIVE tilt1112 master in game (2026-11-14, ext/ingame-sync-sable)
 `~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb` (current.json 11-12 22:27Z: the low4 body with the braid long down the back,
 the prop1111/cand_B head with its solid grey-black moth eyes, the mouth repainted level and calm) swapped onto the current
@@ -58,7 +67,7 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 - **Budget:** 14,893 tris, 8 materials, one 2048 atlas, baked normal map. Shared armature, every FX point and anchor name, the 47 clips and the kit wiring are unchanged.
 - **Scan:** Meshy multi-image of four edited turnaround crops. It keeps the body, coat, belt, gem and chain positions. The edits take out the antennae, braid, wings, coat tails, knives, keys and pistols, which `sable_pieces.py` rebuilds so they can move and stay in budget.
 - **Canon choices:** ONE long white braid (the small sheet views wrongly draw two), on the existing spring chain, its lobes zigzagging with a shallow pinch and chevron creases painted on. Fuzzy moth antennae on a short spring replace the old head wings: feather plumes in a V, a thin dark stem with dusty lilac fuzz on both sides (two sheets back to back, 192 tris each). Top of the model about 1.97, so `height_3d` in tools/warden_model_check.gd is now 1.06 (the old wings stood taller still).
-- **Coat:** the front edges are rigid to the torso (no chest bone, so "hips"), so the plunge holds in runs, dashes and shooting. Tails and moth wings are short bone chains; the wings are alpha cards projected from the turnaround's back view.
+- **Coat:** the front edges are rigid to the torso (no chest bone, so "hips"), so the plunge holds in runs, dashes and shooting. Tails and moth wings are short bone chains; the wings are alpha cards projected from the turnaround's back view. The wings fold down at rest and are raised open now and then, procedurally (WardenWings). After a body swap, `python3 tools/art1/sable_wings.py NEW.glb art/wardens/sable/sable.glb` puts the chains and cards back on, fitted to the new back (docs/SABLE_WINGS.md).
 - **Weapons:** twin flintlocks skinned to hand.R / hand.L, procedural silver and maroon wood with violet runes and a crystal, scaled up from v1 to the sheet (not projected from it). The silver and wood ramps sit a step under the sheet because the engine's toon light lifts them; the muzzle halos are small so the barrels keep their grey. Two moth-curved knives on each hip, from the turnaround's side view (the master shows two on her right). `anchor_bola` keeps its name on the hips; the kit needs the name.
 - **Face and skin:** the scan's stitched mouth was removed in three places: the low mesh's crease smoothed (`sable_finish.py`), the normal bake flattened there, and a thin smile painted (`face_fix` in `sable_paint.py`). The same pass grades the skin toward the sheet's grey-lilac (tuned in the engine: a step below the hair, not the Blender preview), redraws the beauty mark, cleans collar violet off the neck and paints the cut buns back to hair.
 - **The back of the skull:** the buns the scan grew are cut in `sable_source.py`; `hairback()` closes the hole with a fitted ellipsoid down to the nape.

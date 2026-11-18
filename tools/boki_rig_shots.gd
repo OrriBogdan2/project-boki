@@ -6,6 +6,8 @@ extends RefCounted
 ## Needs a renderer.
 
 const YAWS := 8
+const SHEET_COLS := 6
+const SHEET_YAWS := [PI - 0.6, PI - PI / 2.0]    # front three-quarters, side
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [
@@ -24,7 +26,7 @@ const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0
 const MATCH_FOV := 32.0
 const FARM_BOKI_SCALE := 1.7        # Home's farm scale
-const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x HOME_ZOOM (1.2)
+const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x the old arrival zoom (1.2)
 const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
 const ENLARGE := 4
 const FUSION_PART_K := 1.3            # merge_forms "part_k" of the fallback forms
@@ -48,6 +50,12 @@ func run(m: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--sheet="):    # one picture a view of every species listed, named, in a grid
+			await _sheet(a.substr(8).split(","))
+			print("BOKI_RIG_SHOTS_DONE")
+			main.get_tree().quit()
+			return
 	await _turntable()
 	await _faces()
 	await _coats()
@@ -141,6 +149,32 @@ func _turntable() -> void:
 		img.save_png(out.path_join("frames_turn_%d.png" % i))
 	sheet.save_png(out.path_join("turntable.png"))
 	vp.queue_free()
+
+## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
+## three-quarters and the side, standing (idle), as the game builds it.
+func _sheet(ids: PackedStringArray) -> void:
+	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
+	for view in SHEET_YAWS.size():
+		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+		for n in ids.size():
+			species = ids[n]
+			var vp := _stage(Vector2i(px, px))
+			var cam := _close_cam(vp)
+			cam.position = Vector3(0, 0.8, 3.3)
+			cam.look_at(Vector3(0, 0.42, 0))
+			var tag := Label.new()
+			tag.text = species
+			tag.add_theme_font_size_override("font_size", px / 16)
+			vp.add_child(tag)
+			var kr := _kin(vp)
+			await RenderingServer.frame_post_draw
+			(kr[1] as BokiRig).seek(0.5)
+			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
+			var img: Image = await _grab(vp)
+			img.convert(Image.FORMAT_RGBA8)
+			sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px))
+			vp.queue_free()
+		sheet.save_png(out.path_join("sheet_%d.png" % view))
 
 func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)

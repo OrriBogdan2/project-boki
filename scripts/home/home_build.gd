@@ -468,6 +468,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var n: Node3D = null
 	if HomeLayout.CATALOG.get(id, {}).has("toy"):
 		return FarmModels.toy(id)
+	if id == FeedBowl.ID:
+		return FeedBowl.model(e)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
@@ -1052,7 +1054,7 @@ func toggle() -> void:
 		_drop_held()
 		active = false
 		close_ui()
-		h.cam.zoom_to = clampf(h.cam.zoom_to, 0.55, 1.6)
+		h.cam.zoom_to = clampf(h.cam.zoom_to, CamWheel.near(), CamWheel.far())
 		Placement.build_view(h.cam, false)
 		h.set_build_ui(false)
 		Save.save_game()
@@ -1866,8 +1868,10 @@ func place_held() -> bool:
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
-	if from < 0 and TOY_CATS.has(String(c["cat"])):
+	if from < 0 and (TOY_CATS.has(String(c["cat"])) or c.get("toy", false)):      # base toys too (GARDEN.md 4)
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
+	elif from < 0 and c.get("toy", false) and h.life:
+		h.life.new_toy(popped)      # a base toy: the Boki near it come to look, the most curious tries it (BaseLife)
 	var msg := ""
 	if not site.is_empty():
 		msg = "Site marked out: hold %s to hammer, Boki help. %s" % [Settings.key_cap("interact"), FarmTutorial.site_hint()]
@@ -2089,7 +2093,7 @@ func _tab_items() -> Array:
 var make := {}                          # item -> [options]; options are Vector2i (feeder) or {x, z, r}
 var make_pick := {}
 var make_marks: Array = []
-## Catalog groups whose new pieces nearby Boki come to look at (ComeLook).
+## Catalog groups whose new pieces nearby Boki come to look at (ComeLook); a base toy ("toy": true) is news too.
 const TOY_CATS := ["Furniture", "Statues"]
 const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Boki Cottage lot", "ff9ac8"]]
 

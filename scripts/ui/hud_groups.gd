@@ -42,12 +42,6 @@ static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
-	if not HudReveal.weapon_shown(m, p):
-		out.erase("weapon")      # the card, the belt and the Q/V/X slots are one block of the weapon panel
-		out.erase("belt")
-		out.erase("slots")
-	if not HudReveal.counters_shown(m):
-		out.erase("counters")
 	if p.perks.size() > 0:
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):

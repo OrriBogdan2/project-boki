@@ -2,7 +2,7 @@ extends RefCounted
 ## --warden-model-check (concept phase 2: the in-engine Warden models, scripts/heroes/warden_*.gd). For
 ## each Warden built from its concept sheet: the rig keeps every node the animation and the kits look
 ## up (and the hero's own weapon anchors); HunterAnim binds every part and each of the hero's keyed
-## moves still moves the body; the hit radius and the ring that shows it are the class's, frozen here;
+## moves still moves the body; the ring that shows the hit radius is drawn at it (--hurtbox-check holds the radius);
 ## the true height (sole to the top of the head) and the width sit on the hero sheet's scale against a
 ## medium hunter; at both ends of every MantleLook slider the height moves no more than the clamps
 ## allow, the anchors stay and the hit ring doesn't change; the portrait frames the head.
@@ -10,58 +10,48 @@ extends RefCounted
 const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const EPS := 0.0005
-## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
+## Per Warden: its height against a medium hunter (hero sheets, "Body,
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 ## The heights follow the owner's final height chart (Nov 8, ext/hero-heights) where it moved a Warden off its sheet.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
 	# (Albert i1, owner 11-12: the masts and their sails stand 1.7x the old top, as wide)
-	"bulwark": {"hit_r": 0.46, "height": 1.03, "height_3d": 1.74, "width": [1.3, 5.2], "moves": "bul_"},
-	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
+	"bulwark": {"height": 1.03, "height_3d": 1.74, "width": [1.3, 5.2], "moves": "bul_"},
+	"archer": {"height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
-	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},  # (slim)
+	"gunslinger": {"height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},  # (slim)
 	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
-	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
+	"mage": {"height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
-	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
+	"thief": {"height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
-	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
+	"dolm": {"height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
 	# (height_3d: the appeal3 model's cap points flop out to the sides, not up over his crown; was 1.26)
-	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
+	"ostra": {"height": 1.28, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
-	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
+	"rimewright": {"height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
-	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
+	"ashwick": {"height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
-	"juggernaut": {"hit_r": 0.428, "height": 1.24, "height_3d": 1.28, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"height": 1.24, "height_3d": 1.28, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
-	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
+	"dredge": {"height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears; the appeal3 v95 swap's ears stand lower: 0.71)
-	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
+	"tender": {"height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
 	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
 	# yet, so "moves" is "" and the rig's generic poses play; the v95 swap's hat stands lower: 0.896)
-	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.9, "width": [0.5, 1.5], "moves": ""},
+	"gil": {"height": 0.794, "height_3d": 0.9, "width": [0.5, 1.5], "moves": ""},
 }
-const REF_WEAPON := "gunslinger"  # the reference medium hunter carries the class's default weapon
-const ANIM_SEED := 1  # one rest pose for every model measured
-const HEIGHT_TOL := 0.04  # the true height within 4% of the sheet's
-const ANCHORS := [
-	"Rig/Legs/LegL/Knee",
-	"Rig/Legs/LegR/Knee",
-	"Rig/Torso/HeadPivot/Head",
-	"Rig/Torso/Aim/Gun/Muzzle",
-	"Rig/Torso/ArmLPivot/Elbow/Hand",
-	"Rig/Torso/ArmRPivot/Elbow/Hand",
-	"Rig/Torso/PauldronL",
-	"Rig/Torso/PauldronR",
-	"Rig/Torso/Skirt",
-	"Rig/Torso/Shoulder",
-	"Rig/Torso/Glider",
-	"TeamRing"
-]
+const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
+const ANIM_SEED := 1          # one rest pose for every model measured
+const HEIGHT_TOL := 0.04       # the true height within 4% of the sheet's
+const HEAD := "Rig/Torso/HeadPivot/Head"      # the procedural head (a .glb Warden draws its own)
+const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", HEAD, "Rig/Torso/Aim/Gun/Muzzle",
+	"Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Torso/ArmRPivot/Elbow/Hand", "Rig/Torso/PauldronL", "Rig/Torso/PauldronR",
+	"Rig/Torso/Skirt", "Rig/Torso/Shoulder", "Rig/Torso/Glider", "TeamRing"]
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["hammer", "Glider", "Gun", "Shield", "TeamRing"]  # not part of the body's silhouette
@@ -98,12 +88,16 @@ func run(main: Node) -> void:
 	print("WARDEN_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
 
-
-## A Warden's model; id "" with an at-home look is the plain medium hunter (no Warden's shape or class
-## size) every height is measured against.
-func _model(id: String, look: Dictionary) -> Node3D:
+## A Warden's procedural model (its .glb's with glb: that one builds no procedural body); id "" with an at-home
+## look is the plain medium hunter (no Warden's shape or class size) every height is measured against.
+func _model(id: String, look: Dictionary, glb := false) -> Node3D:
 	var cls := Arch.weight(id) if id != "" else "medium"
+	var proc := not glb and WardenGlb.uses_model(id)
+	if proc:
+		WardenGlb._measuring = true
 	var m := Models.hunter(cls, Data.TEAM_COLORS[0], Arch.signature(id if id != "" else REF_WEAPON), "", look, id)
+	if proc:
+		WardenGlb._measuring = false
 	# the rest pose's stance (which leg takes the weight) is seeded per node: fix the seed so every model
 	# is measured in the same pose and the size comparisons don't drift from build to build
 	m.set_meta("anim_seed", ANIM_SEED)
@@ -117,6 +111,12 @@ func _anchors(id: String) -> void:
 	var want: Array = ANCHORS + HERO_ANCHORS.get(id, [])
 	var missing := want.filter(func(p): return not m.has_node(p))
 	ok(missing.is_empty(), "%s keeps every node the animation and kits look up (missing %s)" % [id, str(missing)])
+	if WardenGlb.uses_model(id):
+		var g := _model(id, PlayerLook.neutral(), true)
+		var g_missing := want.filter(func(p): return p != HEAD and not g.has_node(p))
+		ok(g_missing.is_empty(), "%s's 3D model keeps them too, all but the procedural head (missing %s)"
+				% [id, str(g_missing)])
+		g.free()
 	if id == "bulwark":
 		var pv: Node3D = null
 		for ch in m.get_node("Rig/Torso/Aim/Gun").get_children():
@@ -147,15 +147,8 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [
-		HunterAnim.KMOVES,
-		KMovesPinBjorn.MOVES,
-		KMovesDJ.MOVES,
-		KMovesVV.MOVES,
-		KMovesStone.MOVES,
-		KMovesCare.MOVES,
-		KMovesPair.MOVES
-	]:
+	for t in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]):
 				moves.append(mv)
@@ -191,10 +184,6 @@ func _pose(an: HunterAnim, m: Node3D, mv: String, tt: float) -> Array:
 func _hitbox(id: String) -> void:
 	var cdat: Dictionary = Data.CLASSES[Arch.weight(id)]
 	var hr := Arch.hit_r(id, cdat)
-	ok(
-		absf(hr - float(WARDENS[id]["hit_r"])) < EPS,
-		"%s: hit radius %.2f m, the class's (%.2f)" % [id, hr, WARDENS[id]["hit_r"]]
-	)
 	var m := _model(id, PlayerLook.neutral())
 	var ring := m.get_node("TeamRing") as MeshInstance3D
 	var drawn := (ring.mesh as PlaneMesh).size.x * 0.5 * ring.global_transform.basis.x.length()
@@ -208,8 +197,11 @@ func _scale(id: String, ref_h: float, ref_w: float) -> void:
 	var w := _body_box(m).size.x / ref_w
 	var want := float(WARDENS[id]["height"])
 	ok(absf(h - want) <= HEIGHT_TOL, "%s stands %.3fx a medium hunter (sheet %.2fx)" % [id, h, want])
-	if m.has_node("Warden"):
-		var hg := _glb_top(m) / ref_h
+	if WardenGlb.uses_model(id):
+		var g := _model(id, PlayerLook.neutral(), true)
+		w = _body_box(g).size.x / ref_w      # (the width drawn: its 3D model's)
+		var hg := _glb_top(g) / ref_h
+		g.free()
 		var want3 := float(WARDENS[id].get("height_3d", want))
 		ok(
 			absf(hg - want3) <= HEIGHT_TOL,
@@ -231,17 +223,17 @@ func _sliders(id: String) -> void:
 	# the height slider scales the whole model; leg length scales the legs' share of it, head size and
 	# jaw the head's (and a bigger head sits a little higher on its pivot: the small margin)
 	var leg_share := ((m0.get_node("Rig/Torso") as Node3D).global_position.y - m0.global_position.y) / h0
-	var head := m0.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var head := m0.get_node(HEAD) as MeshInstance3D
 	var head_share := (head.global_transform * head.mesh.get_aabb()).size.y / h0
 	var c: Dictionary = w["clamp"]
 	var grow := 1.0 + float(c["limbs"]) * leg_share + (float(c["head"]) + float(c["jaw"])) * head_share
 	var reach := (1.0 + float(c["height"])) * grow - 1.0 + 0.012
-	var g0 := _glb_top(m0) if m0.has_node("Warden") else 0.0
+	var g0 := _glb_top_of(id, PlayerLook.neutral())
 	m0.free()
 	for v in [0.0, 1.0]:
 		var m := _model(id, MANTLE_CHECK.flat(v))
-		if m.has_node("Warden"):
-			var hg := _glb_top(m) / g0
+		if g0 > 0.0:
+			var hg := _glb_top_of(id, MANTLE_CHECK.flat(v)) / g0
 			# the sliders reshape the 3D model too (its bones follow the rig's move from the neutral look)
 			ok(
 				absf(hg - 1.0) <= reach and absf(hg - 1.0) > 0.02,
@@ -267,16 +259,24 @@ func _sliders(id: String) -> void:
 func _portrait(id: String) -> void:
 	var m := _model(id, PlayerLook.neutral())
 	var at := Portraits.head_at(m)
-	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var head := m.get_node(HEAD) as MeshInstance3D
 	var hb := head.global_transform * head.mesh.get_aabb()
 	ok(hb.grow(0.02).has_point(m.global_position + at), "%s: the portrait frames its head" % id)
 	m.free()
 
 
 func _head_top(m: Node3D) -> float:
-	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var head := m.get_node(HEAD) as MeshInstance3D
 	return (head.global_transform * head.mesh.get_aabb()).end.y - m.global_position.y
 
+## The top of the Warden's .glb model in this look (0 when it has none).
+func _glb_top_of(id: String, look: Dictionary) -> float:
+	if not WardenGlb.uses_model(id):
+		return 0.0
+	var g := _model(id, look, true)
+	var top := _glb_top(g)
+	g.free()
+	return top
 
 ## The top of a .glb Warden as skinned in its current pose (every vertex through its bones), above its feet.
 func _glb_top(m: Node3D) -> float:

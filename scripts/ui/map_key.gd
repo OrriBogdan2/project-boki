@@ -15,7 +15,7 @@ const ICON_X := 16.0      # px from the panel's left edge to the icon's centre
 
 ## Every kind, in the order the key lists it: [id, word].
 const KINDS := [
-	["squad", "Squad"], ["boki", "Boki"], ["exit", "Uplink"], ["way", "Way out"], ["hot", "Hot"], ["stop", "Stop"],
+	["squad", "Squad"], ["boki", "Boki"], ["exit", "Extract"], ["way", "Way out"], ["hot", "Hot"], ["stop", "Stop"],
 ]
 
 ## The ids of the kinds on the map now, in KINDS order.
@@ -99,7 +99,7 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			c.draw_circle(at, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 			Icons.draw(c, "paw", at, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
 		"exit":
-			fm.hud._draw_exit_icon(at, m.exits.list[0])
+			ExitMark.glyph(c, at, 6.5, ExitMark.SAMPLE, 0.0)
 		"way":
 			WaysOutMap.badge(c, at, 6.0, 2, {"st": WaysOutHud.St.OPEN, "team": -1, "viewer": 0, "t": -1.0}, m.time)
 		"hot":

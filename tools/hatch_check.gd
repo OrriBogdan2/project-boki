@@ -29,7 +29,7 @@ class FxSpy extends Fx:
 		pass
 	func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
 		got_bursts.append([col, amount])
-	func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+	func ring(at: Vector3, radius: float, col: Color, dur := 0.35, _order := 0) -> void:
 		got_rings += 1
 
 func run(m: Node) -> void:
@@ -75,7 +75,7 @@ func run(m: Node) -> void:
 	ok(seen["done"], "the egg hatches all the way through (%.1f s)" % float(seen["clock"]))
 	var shell_s: float = float(seen["t_shell"]) - float(seen["t_pop"])
 	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
-	var beat_s: float = (float(seen["t_done"]) - float(seen["t_pop"])) / 1000.0
+	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])   # game seconds (the clock sums frame deltas)
 	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s)" % beat_s)
 	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
 	ok(seen["looked_away"], "it looks around before it finds you")
@@ -127,6 +127,7 @@ func run(m: Node) -> void:
 	ok(named["go"], "Name it hands over to naming")
 	await _skip_row(tree, waited)
 	await _first_mask(tree)
+	await _name_card(tree)
 	_parents_row(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
@@ -234,20 +235,44 @@ func _first_mask(tree: SceneTree) -> void:
 	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
 		"nothing is worn before the pick, and no one else can be picked")
-	cards[2].mouse_entered.emit()      # (Vex's card in focus: the Take button takes him)
+	var shots_dir := ""
 	for arg in OS.get_cmdline_user_args():      # --shots-dir=<dir>: the pick screen as hatch_pick.png
 		if String(arg).begins_with("--shots-dir="):
-			cards[0].mouse_entered.emit()
-			if main.fade:
-				main.fade.reveal(0.05)
-			for i in 90: await tree.process_frame
-			var dir := String(arg).substr(12)
-			DirAccess.make_dir_recursive_absolute(dir)
-			tree.root.get_texture().get_image().save_png(dir.path_join("hatch_pick.png"))
-			cards[2].mouse_entered.emit()
-	var picker: Array = hx.ui.find_children("*", "Button", true, false).filter(
-			func(b): return (b as Button).text == "Take Vex")
-	picker[0].emit_signal("pressed")
+			shots_dir = String(arg).substr(12)
+	if shots_dir != "":
+		cards[0].mouse_entered.emit()
+		if main.fade:
+			main.fade.reveal(0.05)
+		await _shot(tree, shots_dir, "hatch_pick.png")
+	var offer_root: Control = hx.ui.find_children("*", "VBoxContainer", true, false).filter(
+			func(c): return c.has_meta("mask_offer"))[0]
+	ok(_button(offer_root, "Take Vex") == null and _button(offer_root, "Take Lace") == null,
+		"there is no bottom Take button: the card itself picks")
+	_click(cards[2])      # (a click on Vex's card asks before it takes him)
+	await tree.process_frame
+	var ask := _ask(hx)
+	ok(ask != null and _texts(ask).has("Take Vex?") and _button(ask, "Yes, take Vex") != null
+		and _button(ask, "Back") != null, "clicking Vex's card asks \"Take Vex?\" with Yes and Back")
+	ok(ask != null and not ask.find_children("*", "Control", true, false).filter(
+			func(p): return p.has_meta("portrait_art")).is_empty(), "the question shows his portrait")
+	ok(ClassUnlock.needs_starters() and hx.get_children().filter(func(c): return c is MaskMoment).is_empty(),
+		"asking takes nothing yet")
+	if shots_dir != "":
+		await _shot(tree, shots_dir, "hatch_pick_ask.png")
+	_button(ask, "Back").pressed.emit()
+	await tree.process_frame
+	ok(_ask(hx) == null and hx.stage == "mask" and ClassUnlock.needs_starters(), "Back keeps the pick screen as it was")
+	_click(cards[0])
+	await tree.process_frame
+	ok(_ask(hx) != null and _texts(_ask(hx)).has("Take Lace?"), "another card asks about its own Relic")
+	Input.parse_input_event(_action_event("ui_cancel"))
+	await tree.process_frame
+	await tree.process_frame
+	ok(_ask(hx) == null and ClassUnlock.needs_starters(), "Esc is Back")
+	cards[2].gui_input.emit(_action_event("ui_accept"))      # (Enter on a focused card asks too)
+	await tree.process_frame
+	ok(_ask(hx) != null and _texts(_ask(hx)).has("Take Vex?"), "Enter on a card asks as well")
+	_button(_ask(hx), "Yes, take Vex").pressed.emit()
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(moments.size() == 1, "taking one leads into the Relic moment, not the match")
 	if moments.is_empty():
@@ -296,6 +321,50 @@ func _first_mask(tree: SceneTree) -> void:
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 
+## The naming card (hatch.gd _show_name): no Label may collapse to a sliver (a wrapping label in a row with no
+## width wrapped one letter per line and ran off the top of the screen), and the whole card fits the screen
+## at 1280x720, 1920x1080 and 2560x1440. --shots-dir=<dir> saves each as name_<w>x<h>.png.
+func _name_card(tree: SceneTree) -> void:
+	var dir := ""
+	for arg in OS.get_cmdline_user_args():
+		if String(arg).begins_with("--shots-dir="):
+			dir = String(arg).substr(12)
+	for sz in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		tree.root.size = sz
+		Save.d = Save.fresh()
+		Save.d["tutorial"] = {"intro": true}
+		Save.d["look"] = Unmasked.default_look()
+		var hx = load("res://scripts/ui/hatch.gd").new()
+		main.add_child(hx)
+		for i in 4: await tree.process_frame
+		hx._looks_good()
+		hx.chosen = 0
+		hx.stage = "name"
+		hx._show_name()
+		if main.fade:
+			main.fade.reveal(0.05)
+		for i in 60: await tree.process_frame
+		var screen: Rect2 = hx.get_viewport().get_visible_rect()
+		var bad_l: Array = []
+		var seen_l := 0
+		for l in hx.bottom.find_children("*", "Label", true, false):
+			var lab := l as Label
+			if not lab.is_visible_in_tree() or lab.text.strip_edges() == "":
+				continue
+			seen_l += 1
+			var r := lab.get_global_rect()
+			if r.size.x < 80.0 or lab.get_line_count() >= 6 or not screen.encloses(r):
+				bad_l.append("%s %s x%d" % [lab.text.left(16), r, lab.get_line_count()])
+		ok(seen_l > 6 and bad_l.is_empty(), "name card %s: labels 80+ px wide, under 6 lines, on screen (%d) %s"
+				% [str(sz), seen_l, str(bad_l)])
+		var card: Rect2 = (hx.bottom.get_child(0) as Control).get_global_rect()
+		ok(screen.encloses(card), "name card %s fits the screen (%s in %s)" % [str(sz), str(card), str(screen)])
+		if dir != "":
+			DirAccess.make_dir_recursive_absolute(dir)
+			tree.root.get_texture().get_image().save_png(dir.path_join("name_%dx%d.png" % [sz.x, sz.y]))
+		hx.queue_free()
+		for i in 3: await tree.process_frame
+
 ## A pair's egg appearing in the Nesting Nook (NestReveal): one soft ring, one small sparkle burst in
 ## the egg's type colour, and one wobble that settles back upright.
 func _nest_reveal(sp: String) -> void:
@@ -320,6 +389,38 @@ func _nest_reveal(sp: String) -> void:
 		"and it wobbles once (tips %.2f rad), then sits upright (%.3f)" % [tip, shell.rotation.z])
 	nest.queue_free()
 	spy.queue_free()
+
+## A left click on a control.
+func _click(c: Control) -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	c.gui_input.emit(ev)
+
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	return ev
+
+## The open "Take <name>?" question of the first-Relic pick, or null.
+func _ask(hx: Node) -> Control:
+	for l in hx.find_children("*", "CanvasLayer", true, false):
+		for c in l.get_children():
+			if c is UI.Modal and not c.is_queued_for_deletion():
+				return c
+	return null
+
+func _button(root: Node, text: String) -> Button:
+	for b in root.find_children("*", "Button", true, false):
+		if (b as Button).text == text and not (b as Button).disabled:
+			return b
+	return null
+
+func _shot(tree: SceneTree, dir: String, file: String) -> void:
+	for i in 60: await tree.process_frame
+	DirAccess.make_dir_recursive_absolute(dir)
+	tree.root.get_texture().get_image().save_png(dir.path_join(file))
 
 func _texts(n: Node) -> Array:
 	var out: Array = []

@@ -49,6 +49,7 @@
 		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
+			"upper": "moving",
 			"hold_from": 0.24
 		, "air_legs": true},
 		"breah_punch": {
@@ -56,6 +57,10 @@
 			"upper": "moving"
 		, "air_legs": true},
 		"breah_crouch": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
+		"breah_windup": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
 		},
@@ -77,7 +82,8 @@
 			"clip": "rmb_lunge"
 		},
 		"breah_leap_land": {
-			"clip": "dash_land"
+			"clip": "dash_land",
+			"upper": "moving"
 		},
 		"breah_exdash": {
 			"clip": "dash_air",
@@ -116,8 +122,10 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
-		"dead_t": 1.6,
+		"dead_t": 2.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {
@@ -132,9 +140,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",

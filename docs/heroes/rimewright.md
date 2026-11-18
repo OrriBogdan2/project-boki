@@ -24,11 +24,11 @@ Internal design doc. Source behaviour reference: the hero named in the Inspired-
 
 Body (`body` in rimewright.json): the final design (art/wardens/claire/IMPORT.md): a grown woman on skates, about 1.08 of a medium to the crown and 1.21 with the hood and horns. The hitbox stays the light 0.35 (her height adds nothing to the top-down target). Long skater's strides (1.4x step cadence), arms held out.
 
-Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x2 (wiki; the footage's 56/35 is 1.6x), spear detonation from the source tooltip (supervive_kits.md, Celeste; PARITY FIRST, ext/parity-ttk-cinder-neve): 190 against the spear hit 156 -> 22 on our 18. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is the source's 155 against the spear's 156 -> 18 (it was 40, sized from footage darts). Both ratios are pinned in content/rules/kit_parity.json; docs/TTK.md's share table measures them (spear hit and detonation 0.96, crash 0.97 of the source's share of the target). The owner's burst rule still holds: `--rimewright-combo-check` "burst:" gives 18 + 66 = 84 of 145 at level 6, no armor.
+Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x2 (wiki; the footage's 56/35 is 1.6x), spear detonation from the source tooltip (sv/briefs/kits.md, Celeste; PARITY FIRST, ext/parity-ttk-cinder-neve): 190 against the spear hit 156 -> 22 on our 18. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is the source's 155 against the spear's 156 -> 18 (it was 40, sized from footage darts). Both ratios are pinned in content/rules/kit_parity.json; docs/TTK.md's share table measures them (spear hit and detonation 0.96, crash 0.97 of the source's share of the target). The owner's burst rule still holds: `--rimewright-combo-check` "burst:" gives 18 + 66 = 84 of 145 at level 6, no armor.
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
-bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+bulwark doc does it. [D] = game data (sv/briefs/kits.md, `Upg:` II / III / IV). Our seconds keep
 the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
 no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
@@ -41,7 +41,7 @@ no such upgrade). LMB and the passive have no tiers in the data and do not rank;
 | Passive Hoarfrost | none [D] | - | - | - |
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
-Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
+Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, ref-rimewright), [footage] = briefs/hero-ref/tamsin.md (5 fps).
 
 | Slot | Source | Ours before | Ours now | Asserted (`--rimewright-combo-check`) |
 |---|---|---|---|---|
@@ -81,13 +81,13 @@ The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255ac
 | 3 | Shatter payoff size | closed: `fan_splinter` 60 = 15x a 4 dart, 2.7 m spike starburst, frost glow grows per dart | 74447a97b; "the stacks show on your FAN badge", "8 darts on one foe Shatter them" (-60). In flight, not this row: ext/neve-chill-shatter (knock tell) |
 | 4 | Spear lands at the cursor, long delay | closed: lands at the clamped cursor, slow zone with a spinning crystal, detonates 1.8 s later as the big hit (18 landing, 60 detonation) | 74447a97b; owner items 13/28 (a palm push at 18 m/s instead of the footage's 45 m/s); the "tm RMB" rows |
 | 5 | Ice Wall spawn and growth | closed: 1.8 m block erupts 1 bh ahead, widens to 4.5 m while it slides, shoves foes, stops shots. Owner override: travel +50% (up to 16.2 m, 3.6 s) and it stands 4.5 s, not the footage's about 3 s | OWNER_REVIEW_1103 item 13; the "tm E" rows. The freeze recast is the wiki's. In flight, look only: ext/neve-lmb-celeste |
-| 6 | Darts while skating | match: straight beams at 2x damage. The footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus (removed in the data pass). Trust order owner > data > wiki > footage: the data gives no number, and no Neve line in DECISIONS.md or OWNER_REVIEW_1103.md says otherwise (DECISIONS 317 is only "darts semi-home while skating too"), so the wiki's 2x applies | `dash.skate_dart_dmg_k` 2.0, read in `rimewright_kit.gd` `_throw_dart`; `--rimewright-combo-check` "darts while skating ... 2x" (plain dart 4.00, skating beam 8.00) |
+| 6 | Darts while skating | open: straight beams (done), but normal damage; the footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus. Removed in the data pass | "darts while skating are straight beams at normal damage". Fix is in rimewright_kit.gd and rimewright.json, both in flight |
 | 7 | Skate over edges | closed: the skate goes on over a ledge | "she skates on over a ledge" |
 | 8 | Cooldowns | skate closed (13 s, the data); in flight: wall 17 s and spear 10.2 s (the data pass's 0.85x) go to the source's 20 s and 12 s on ext/cooldown-parity-verify (READY, supersedes ext/parity-cooldowns) | rimewright.json on that branch, `--cooldown-parity-check` |
 | 9 | Aim line | closed: the thin aim line is always up (shared with every hunter, `Match.aim_line`) | "the thin aim line to the cursor is always up" |
 | 10 | Rink Wall cast tell | closed: a 0.2 s sparkle at her feet, the path shown to all, then the wall | "tm E: a 0.2 s tell first" |
 
-Suggestion, not built: the footage's 1.6x (56/35) instead of the wiki's 2x for skating darts (row 6), if the owner wants footage over the wiki.
+Suggestions, not built: restore the 1.6x skating dart damage (row 6) if the owner wants footage over the data.
 
 ## Audit (Nov 3 23:40)
 Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on main 200effce) against this branch. (a) done on the branch, (b) fixed now, (c) not applicable or disagree.
@@ -116,37 +116,37 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
 |---|---|---|---|---|
-| Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
-| 8 dart hits on one target trigger Shatter | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (0068) | yes | "8 darts on one foe Shatter them" |
-| Darts are semi-homing, curving toward the cursor side | [wiki](https://supervive.wiki.gg/wiki/Celeste), footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
-| Darts hit harder while skating | [wiki](https://supervive.wiki.gg/wiki/Celeste) (2x), footage (1.6x); not in the tooltip data | yes | 2x (wiki), `dash.skate_dart_dmg_k`; the footage's 1.6x not used | "darts while skating are straight beams at double damage" |
-| Hold to skate in your direction, release to stop, early release refunds part of the cooldown | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
+| Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | wiki | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
+| 8 dart hits on one target trigger Shatter | wiki | yes (0068) | yes | "8 darts on one foe Shatter them" |
+| Darts are semi-homing, curving toward the cursor side | wiki, footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
+| Darts hit harder while skating | wiki (2x), footage (1.6x); not in the tooltip data | yes | removed in the data pass (straight beams, normal damage) | "darts while skating are straight beams at normal damage" |
+| Hold to skate in your direction, release to stop, early release refunds part of the cooldown | wiki | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
 | Skating carries on over a ledge | footage (0199) | yes | yes | "she skates on over a ledge" |
-| The spear: closer hits slow more, far hits deal more | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | replaced by the slow zone (footage) | (see Assumptions) |
-| The spear detonates again after a delay | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes (1.8-2s) | yes | "it detonates about 1.8 s after landing" |
-| The wall moves, blocks projectiles, pushes what it hits | [wiki](https://supervive.wiki.gg/wiki/Celeste) | yes | yes | "it slides toward the cursor, widening, and shoves the foe ahead"; "the wall stops a foe's shot" |
-| Recast freezes the wall in place; a frozen wall lasts 6s | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 22.01.25) | no | yes | "E again freezes it where it stands, for 6 s" |
+| The spear: closer hits slow more, far hits deal more | wiki | no | replaced by the slow zone (footage) | (see Assumptions) |
+| The spear detonates again after a delay | wiki | yes (1.8-2s) | yes | "it detonates about 1.8 s after landing" |
+| The wall moves, blocks projectiles, pushes what it hits | wiki | yes | yes | "it slides toward the cursor, widening, and shoves the foe ahead"; "the wall stops a foe's shot" |
+| Recast freezes the wall in place; a frozen wall lasts 6s | wiki (patch 22.01.25) | no | yes | "E again freezes it where it stands, for 6 s" |
 | A thin aim line to the cursor | footage | yes | yes | "the thin aim line to the cursor is always up" |
 | R: invulnerable and rooted inside the shell | card, footage | yes | yes | "tm R: inside the shell she is invulnerable and rooted, and nothing fires" |
-| R: the zone's slow stacks for up to 3.5s | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | no: a flat 35% while they stay (parity first, no ramp) | "tm R: a foe in the rink is Chilled and slowed a flat 35%" |
+| R: the zone's slow stacks for up to 3.5s | wiki | no | no: a flat 35% while they stay (parity first, no ramp) | "tm R: a foe in the rink is Chilled and slowed a flat 35%" |
 | R: it goes off by itself at the end (about 3.5s) | footage (f25 -> f57) | yes | yes | "tm R: it cracks open by itself at 3.5 s" |
-| R: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes | "tm R: R in the last 0.75 s cracks it open early at two thirds" |
-| R: reactivating earlier cancels it, no stun | [wiki](https://supervive.wiki.gg/wiki/Celeste), sheet correction | no | yes | "tm R: R early ends it with no damage, no stun and no bond" |
-| R: the crash is blocked by line of sight | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (from the rink's centre) | "tm R: a foe behind a rock is not hit (line of sight)" |
-| R: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm R: sealed in, the 4 bh rink shown to everyone" |
+| R: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | wiki (patch 05.03.25) | no | yes | "tm R: R in the last 0.75 s cracks it open early at two thirds" |
+| R: reactivating earlier cancels it, no stun | wiki, sheet correction | no | yes | "tm R: R early ends it with no damage, no stun and no bond" |
+| R: the crash is blocked by line of sight | wiki | no | yes (from the rink's centre) | "tm R: a foe behind a rock is not hit (line of sight)" |
+| R: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | wiki (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm R: sealed in, the 4 bh rink shown to everyone" |
 | R: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
 | X: invulnerable and rooted inside the shell | card, footage | yes | yes | "tm X: inside the shell she is invulnerable and rooted, and nothing fires" |
-| X: the zone's slow stacks for up to 3.5s | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | no: a flat 35% while they stay (parity first, no ramp) | "tm X: a foe in the rink is Chilled and slowed a flat 35%" |
+| X: the zone's slow stacks for up to 3.5s | wiki | no | no: a flat 35% while they stay (parity first, no ramp) | "tm X: a foe in the rink is Chilled and slowed a flat 35%" |
 | X: it goes off by itself at the end (about 3.3s) | footage (f25 -> f57; 0363 -> 0379) | yes | yes | "tm X: it cracks open by itself at 3.3 s" |
-| X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
-| X: reactivating earlier cancels it, no stun | [wiki](https://supervive.wiki.gg/wiki/Celeste), sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
-| X: the crash is blocked by line of sight | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
-| X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone" |
+| X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | wiki (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
+| X: reactivating earlier cancels it, no stun | wiki, sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
+| X: the crash is blocked by line of sight | wiki | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
+| X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | wiki (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone" |
 | X: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
 
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -201,7 +201,7 @@ card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `le
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
 [W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
 origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
@@ -259,7 +259,7 @@ whether a second E there should buffer into the freeze would settle it.
 | After the crash, 0.4 s of recovery (footage f57 -> f61): locked, a press in its last 0.15 s goes as it ends, Shift skates out | "anim rime: she is locked from the burst ...", "anim rime: no walking, darts or E ...", "anim rime: an E pressed in its last 0.15 s ...", "anim rime: Shift in the recovery ..." |
 
 ## Animation moves
-In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`. The model plays hand-keyed clips on these timings (`content/rules/warden_anim/claire.json`, `tools/art1/claire_clips.py`): she carries the spear, so darts flick off its tip or her left palm, and the RMB push is both hands driving the shaft. Tone: gentle figure-skating, modest, never seductive.
+In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`. The model plays hand-keyed clips as long as these moves (`content/rules/warden_anim/claire.json`, `tools/art1/claire_clips.py`), their hit poses on the kit's hits (Animation timing below): she carries the spear, so darts flick off its tip or her left palm, and the RMB push is both hands driving the shaft. Tone: gentle figure-skating, modest, never seductive.
 
 | Ability | Move | Beats (s) | Shape |
 |---|---|---|---|
@@ -269,7 +269,7 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 | RMB release | `tm_spear` | 0.05 load deeper, 0.1 both palms fully out (the spear leaves them), 0.28 held through the recoil, 0.55 | a two-palm push into a lunge after it (owner 19:50: no arm-back wind-up, no throwing release) |
 | RMB detonation | `tm_clench` | 0.05 / 0.1 / 0.34 | a sharp clench of the free hand |
 | LMB large dart | `tm_dart_heavy` | 0.04 wound away, both hands back to the hip; 0.08 both arms sling forward, the fan snapping open; 0.18 | the barrage's 3 large darts |
-| E | `tm_wall` | 0.1-0.2 the tell (a deep crouch, both palms drawn back to the hips), 0.27 both palms shoved out low and wide as the ice erupts, 0.42 held into the slide, 0.7 | footage: "both hands pushed forward" |
+| E | `tm_wall` | 0.1 the tell (a deep crouch, both palms drawn back to the hips), 0.2 both palms shoved out low and wide as the ice erupts (= `e.tell`), 0.35 held into the slide, 0.7 | footage: "both hands pushed forward" |
 | E again | `tm_freeze` | 0.07 knee up, 0.13 stamp, 0.42 | a stamp of the blade, a fist pulled down |
 | Shift start | `tm_skate_go` | 0.08 push, 0.16 into the stride | a crouch and a hard push off the back blade |
 | Shift held | `tm_skate` (looped by the kit every 0.56s) | 0 / 0.28 / 0.56 | low and leaning hard, knees deep, long pushes one leg then the other, the arms and fan swinging against them, the body rocking |
@@ -286,7 +286,7 @@ The skate leaves a ribbon of ice chips, ice plates under her blades (`IceStrip`,
 Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
 
 ## Animation timing (parity against the footage)
-Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), measured in game by `tools/rimewright_anim_check.gd` (rows `anim ...` in `--rimewright-combo-check`). "Pose lag" is how late the clip's hit pose (flick, sling, thrust, palms out, stamp) lands after the kit's hit. Before the fix the kit hit at the move's start while the clip was still cocking, so the pose trailed it by the whole cock. Now `claire.json` gives each such move a `lead` (s of the clip skipped), so the pose lands on the hit; the GLB is untouched.
+Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), measured in game by `tools/rimewright_anim_check.gd` (rows `anim ...` in `--rimewright-combo-check`). "Pose lag" is how late the clip's hit pose (flick, sling, thrust, palms out, stamp) lands after the kit's hit. Before the fix the kit hit at the move's start while the clip was still cocking, so the pose trailed it by the whole cock. `claire.json` then skipped the cock with a `lead`; now the clips are re-keyed (`tools/art1/claire_clips.py`, put into `claire.glb` by `tools/art1/glb_add_clips.py`): each hit pose sits at the kit's hit (the flick, sling, thrust, stamp and clench at 0, the wall's shove at 0.2), with no `lead`. `--clip-check` finds each pose in the GLB at its time (the frame its hand is farthest from where the clip ends), the `anim` rows hold those times to the kit's hits. The held spear grows to full size by 0.12 s (`SPEAR_FORM_T`), as her palms gather it. Strips before/after: `docs/shots/neve-spear-keys/`.
 
 | Move | Source (s) | Ours before | Ours after |
 |---|---|---|---|
@@ -296,7 +296,7 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 | Spear (RMB) | palms out, then flight | release 0.10 s = pose key | unchanged |
 | Spear detonation | 1.8-2.0 after landing | 1.82 s | unchanged |
 | Clench (the burst) | on the detonation | pose 0.10 s late | pose on the burst |
-| Wall tell | 0.2 sparkle, then it erupts | 0.22 s; shove 0.05 s late | 0.22 s; shove on the eruption |
+| Wall tell | 0.2 sparkle, then it erupts | 0.22 s; shove 0.05 s late | 0.22 s; shove 0.02 s early (key 0.2) |
 | Freeze (Wall recast) | on the press | pose 0.13 s late | pose on the stamp |
 | Skate push-off / stop | full speed within 0.2; stop 0.1-0.2 | 0.18 s / 0.03 s | unchanged |
 | Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
@@ -308,12 +308,12 @@ The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.j
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%. (The ult's 3.5 s hold listed here had no owner item behind it; it is the footage's 3.3 s since Nov 12, see Rimelock length.)
 
-Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption).
+Model re-key wishes (GLB / `tools/art1`): none open here: the flick, sling and thrust keys sit at 0 (no `lead`), `spear_aim` gathers the spear by `SPEAR_FORM_T` (0.12 s) and `rime_crash` is main's 0.4 s recovery.
 
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars and the ice slab between them (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes. How it ended reads on her (HeroVfx, content/vfx): ended by X or Shift (the late crack too) the shell breaks outward, a 0.1s flash and a fast ring of shards (`rime_break`); run out at 3.5s it melts, drips, a low mist and a wet frost patch (`rime_melt`), under the crash's rink shards and ring (`rime_crash`). Her frozen body is `IceBody` (`ice_body.gd`) with `shaders/hero_ice.gdshader`: her own colour and atlas under translucent ice (screen refraction, a fresnel rim, an inner glow, a Voronoi crack web, a sparkle), a bright frost front climbing feet to head on the cast and back down on the thaw; it works on the procedural model (its material_override a part) and on `claire.glb` (an override a surface).
 - The Hoar Fan model: nine bone slats with long ice-crystal tips, a frosted web and a teal tassel.
-- Sounds (`tools/gen_sfx_claire.py`, set `content/sfx/rimewright.json`, docs/AUDIO.md): glass-clear ice, cracking-ice chirps, a steel blade on ice and a wordless woman's voice, airy and siren-like, cold on down and death. Darts `rime_shard` / skating `rime_beam` (3 takes each) and `rimewright_dart_hit` on each dart that lands; the spear `rime_spear_aim` (forming), `rime_lance` (pushed out), `rime_zone` (landing), `rime_burst` (detonation); the Shatter `rime_splinter`; the wall `rime_wall_tell`, `rime_wall`, `rime_freeze`; the skate `rimewright_dash` (push-off), `rimewright_skate_scrape` (each stride, levelled by her speed), the `rimewright_skate_glide` loop (held while she skates, pitch and level following her speed), `rimewright_skate_carve` (an edge scrape at most every 0.12 s, louder and higher as the turn rate nears the 1.6 rad/s cap), `rime_stop` and the `rimewright_skate_hiss` loop (the slide-out, from the release until she stops), all in `RimeSkateSfx`, which other players' games run off her synced move and velocity (positional, 6 dB quieter); Rimelock `rime_lock`, `rime_creak` (the hold, quickening), `rime_crash` and `rime_crack` (the early break). Signatures: the skate scrape and `rimewright_chime` (the ice crystal chime: the 8-dart shell, the spear's spinning crystal, the wall freezing). Voice and steps through `HeroSfx`: `rimewright_hurt|down|death`, `rimewright_step_<surface>` (a light heel and the tick of her blade).
+- Sounds (`tools/gen_sfx_claire.py`, set `content/sfx/rimewright.json`, docs/AUDIO.md): glass-clear ice, cracking-ice chirps, a steel blade on ice and a wordless woman's voice, airy and siren-like, cold on down and death. Darts `rime_shard` / skating `rime_beam` (3 takes each) and `rimewright_hit` on each dart that lands; the spear `rime_spear_aim` (forming), `rime_lance` (pushed out), `rime_zone` (landing), `rime_burst` (detonation); the Shatter `rime_splinter`; the wall `rime_wall_tell`, `rime_wall`, `rime_freeze`; the skate `rimewright_dash` (push-off), `rimewright_skate_scrape` (each stride, levelled by her speed), the `rimewright_skate_glide` loop (held while she skates, pitch and level following her speed), `rimewright_skate_carve` (an edge scrape at most every 0.12 s, louder and higher as the turn rate nears the 1.6 rad/s cap), `rime_stop` and the `rimewright_skate_hiss` loop (the slide-out, from the release until she stops), all in `RimeSkateSfx`, which other players' games run off her synced move and velocity (positional, 6 dB quieter); Rimelock `rime_lock`, `rime_creak` (the hold, quickening), `rime_crash` and `rime_crack` (the early break). Signatures: the skate scrape and `rimewright_chime` (the ice crystal chime: the 8-dart shell, the spear's spinning crystal, the wall freezing). Voice and steps through `HeroSfx`: `rimewright_hurt|down|death`, `rimewright_step_<surface>` (a light heel and the tick of her blade).
 
 ## Engine notes
 - Kit: `scripts/arch/kits/rimewright_kit.gd`; data: `content/archetypes/rimewright.json`, `content/weapons/hoar_fan.json`.
@@ -323,10 +323,10 @@ Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and th
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> R is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
-- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. `WardenClips._pick` adds a kmove's `lead` to the kit's `kmove_t`.
+- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. Her clips carry no `lead` (`WardenClips._pick` would add it to the kit's `kmove_t`).
 
 ## Parity verify, Nov 9
-Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, `briefs/hero-ref/tamsin.md`, `briefs/supervive-data/supervive_kits.md` (Celeste) and DECISIONS (owner notes win). Verdicts: match, differ (owner), regressed, open. K = `scripts/arch/kits/rimewright_kit.gd`, J = `content/archetypes/rimewright.json`, W = `content/weapons/hoar_fan.json`, D = `content/dash_flow/rimewright.json`. Checks on main: `--rimewright-combo-check` 90/0, `--hero-combo-check` 304/0, `--dash-flow-check` 0 fails, `--clip-check` 0, `--warden-clips-check` 0. No gameplay file changed here: K, J and `care_combo_check.gd` have unmerged Neve branches (neve-chill-shatter, parity-neve-skate-home, neve-lmb-celeste, vfx-neve-crash), so the one open row that needs K is listed, not fixed.
+Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, `briefs/hero-ref/tamsin.md`, `sv/briefs/kits.md` (Celeste) and DECISIONS (owner notes win). Verdicts: match, differ (owner), regressed, open. K = `scripts/arch/kits/rimewright_kit.gd`, J = `content/archetypes/rimewright.json`, W = `content/weapons/hoar_fan.json`, D = `content/dash_flow/rimewright.json`. Checks on main: `--rimewright-combo-check` 90/0, `--hero-combo-check` 304/0, `--dash-flow-check` 0 fails, `--clip-check` 0, `--warden-clips-check` 0. No gameplay file changed here: K, J and `care_combo_check.gd` have unmerged Neve branches (neve-chill-shatter, parity-neve-skate-home, neve-lmb-celeste, vfx-neve-crash), so the one open row that needs K is listed, not fixed.
 
 | Row | Source | Ours on main (file:line) | Verdict |
 |---|---|---|---|

@@ -2,9 +2,9 @@ class_name HeroSfx
 extends RefCounted
 ## A Hunter's own version of a shared sound: "<arch>_<kind>" (gunslinger_dash, archer_hurt,
 ## bulwark_step_wood) when its sound branch made one, else the shared fallback. Kinds the game asks
-## for: dash, dash_air, hurt, down, death, step_<surface> (grass, stone, wood, snow), pickup and recast_open /
-## recast_tick (RecastCue). Answers are cached per name, so footsteps stay cheap. The sound sets are listed in
-## content/sfx/<arch>.json (docs/AUDIO.md).
+## for: dash, dash_air, hurt, down, death, step_<surface> (grass, stone, wood, snow; water and metal fall back
+## to StepSurface's steps per weight class), pickup and recast_open / recast_tick (RecastCue). Answers are cached
+## per name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
 
 static var _has := {}          # sound name -> whether audio/ has it
 
@@ -25,15 +25,27 @@ static func hit_tick(h: Hunter, o: Dictionary) -> String:
 	var lmb: bool = o.get("src", "") == "shot" or o.get("ab", "") in ["primary", "lmb"]
 	return String(h.wpn.get("hit", "hit")) if lmb else "hit"
 
-## The sound of `h`'s dash starting: <arch>_dash_air with no floor under it, else <arch>_dash, else the shared
-## dash. A remote Hunter's grounded flag isn't sent, so its height over the ground says it.
+## The sound of `h`'s dash starting, chosen by the floor under it: in the air <arch>_dash_air, else the shared
+## dash_air; on the ground <arch>_dash, else the shared dash_ground. A sound picked in the sound tester
+## (SfxPicks) for the shared path wins over every Hunter's own. A remote Hunter's grounded flag isn't sent, so
+## its height over the ground says it.
 static func dash_name(h: Hunter) -> String:
-	var ground_name := of(h, "dash", "dash")
 	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
-	return of(h, "dash_air", ground_name) if in_air else ground_name
+	var shared := "dash_air" if in_air else "dash_ground"
+	if SfxPicks.active(shared):
+		return shared
+	return of(h, "dash_air" if in_air else "dash", shared)
 
 ## Plays `h`'s own sound for `kind` at the hunter (nothing if it has none): the wordless voice lines.
 static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	var sname := of(h, kind, "")
 	if sname != "":
 		m.sfx(sname, h.pos, vol_db)
+
+## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
+## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
+static func hit_sound(by: Ent, o := {}) -> String:
+	if not by is Hunter:
+		return "hit"
+	var h := by as Hunter
+	return of(h, "hit", hit_tick(h, o))

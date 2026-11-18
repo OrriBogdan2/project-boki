@@ -305,6 +305,7 @@ func _move_part(m: Node) -> void:
 	ok(bb != null and bb.life != null, "Bramblebank loads with base life")
 	if bb == null or bb.life == null:
 		return
+	_nap_spots_row(bb, "Bramblebank")
 	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
 	var rec: Dictionary = k["rec"]
 	ZoneCards.move_to(bb, k)
@@ -383,8 +384,8 @@ func _horizon_part(hub, open_ids: Array) -> void:
 	ok(follows, "the islands follow Save.d zones (open: %s)" % ", ".join(open_ids))
 	ok(mats.size() == (2 if open_ids.size() < isles.size() else 1), "islands share one material per state")
 	# seen as you arrive: the hub's own camera (arrival zoom, on the landing spot) takes in every island
-	hub.cam.zoom_to = hub.HOME_ZOOM
-	hub.cam.zoom = hub.HOME_ZOOM
+	hub.cam.zoom_to = CamWheel.far()
+	hub.cam.zoom = CamWheel.far()
 	hub.cam.snap(HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF)
 	var seen := isles.filter(func(n): return _in_frame(hub.cam, n.global_position))
 	ok(seen.size() == isles.size(), "at arrival zoom %d of %d islands are in frame" % [seen.size(), isles.size()])
@@ -412,9 +413,9 @@ func _reload_part(m: Node) -> void:
 	if hub != null:
 		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])
 		hub.day_t = 0.5
-		await _hub_shot(m, hub, "hub_horizon_day.png", hub.HOME_ZOOM, true)
+		await _hub_shot(m, hub, "hub_horizon_day.png", CamWheel.far(), true)
 		hub.day_t = 0.97
-		await _hub_shot(m, hub, "hub_horizon_night.png", hub.HOME_ZOOM, true)
+		await _hub_shot(m, hub, "hub_horizon_night.png", CamWheel.far(), true)
 	Content.rules("farm_build")["base_mode"] = false
 
 func _texts(n: Node) -> String:
@@ -454,7 +455,7 @@ func _glasswater_part(m: Node) -> void:
 		"its layout stands in while it is open; the save's own layout stays Bramblebank's")
 	ok(gw.toys.toys().any(func(t): return t["id"] == "toy_tub"),
 		"the splash tub stands in it")
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var types: Array = GardenZones.info("glasswater")["types"]
 	ok(snacks.size() == 3 and snacks.all(func(f): return types.has(Content.rules("lean")["foods"][f])),
 		"its patch grows Water, Ice and Crystal snacks (%s)" % ", ".join(snacks))
@@ -467,6 +468,7 @@ func _glasswater_part(m: Node) -> void:
 	ok(gw.hway.node != null and gw.player.position.distance_to(gw.hway.node.position) < 0.5,
 		"you arrive on its return pad")
 	ok(not gw.hb.can_build(), "build mode is off in the zone")
+	_nap_spots_row(gw, "Glasswater")
 	var batches: Array = gw.find_children("*", "MultiMeshInstance3D", false, false)
 	var mats := {}
 	var n := 0
@@ -483,6 +485,21 @@ func _glasswater_part(m: Node) -> void:
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
 	Content.rules("farm_build")["base_mode"] = false
 
+## Every nap spot of the open zone is a free place a Boki of it can walk to (BaseLife._free_spot).
+func _nap_spots_row(home, zone: String) -> void:
+	var k: Dictionary = home.kins[0]
+	var spots := BaseLife.nap_spots()
+	var found := {}
+	for i in spots.size():
+		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
+		k["pos"] = home.world.free_spot_near(tile, [], 0.8, 0.45, 5.0)       # stands near the spot, on its island
+		var spot: Dictionary = home.life._free_spot(k, {})
+		if not spot.is_empty():
+			found[int(spot["i"])] = true
+	ok(spots.size() >= 3 and found.size() == spots.size(),
+		"%s: its %d nap spots (%s) are open ground (%d found)" % [zone, spots.size(),
+			", ".join(spots.map(func(s): return s[0])), found.size()])
+
 func _cinderstep_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	_new_save()
@@ -493,9 +510,10 @@ func _cinderstep_part(m: Node) -> void:
 	if cs == null or cs.hshove == null:
 		return
 	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
+	_nap_spots_row(cs, "Cinderstep")
 	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
 	ok(ids.has("toy_stone") and ids.has("toy_post"), "a warm stone and a climbing post (%s)" % ", ".join(ids))
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var grown := {}
 	for f in snacks:
 		grown[Content.rules("lean")["foods"][f]] = true
@@ -536,7 +554,7 @@ func _thrive_part() -> void:
 	for i in 2:
 		var r: Dictionary = [rec, other][i]
 		r["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 90.0}
-		Care.tick(r, 600.0)
+		Care.tick(r, 60.0 * 30.0 / Care.joy_decay())      # a 30-point fall at the usual pace, clear of the sulky floor
 		lost[i] = 90.0 - Care.need(r, "joy")
 	ok(lost[1] > 0.0 and is_equal_approx(lost[0], lost[1] * float(T["joy_rate"])),
 		"thriving joy falls at %.1fx (%.1f vs %.1f)" % [float(T["joy_rate"]), lost[0], lost[1]])
@@ -723,4 +741,8 @@ func _visit_part(m: Node) -> void:
 	var zone = await _arrived(m, hub)
 	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
 		"and finds only Ash there, still a visit")
+	var egg := Incubator.add(String(Data.common_kin()[0]))
+	for _f in 20: await m.get_tree().process_frame
+	ok(zone != null and zone.hinc == null and float(Incubator.find(String(egg["id"])).get("heat", 0.0)) > 0.0,
+		"your own Rare Egg keeps warming while you visit (play time; decision 0080)")
 	Content.rules("farm_build")["base_mode"] = false
