@@ -193,17 +193,15 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	_diminish(w5, danced)
 
 ## Chained kicks keep less each time (content/rules/wall_kick.json), and the ground resets the chain.
-## `danced` is the spammed run on the curve; the same run on a flat curve is what it was before.
+## `danced` is the timed run (a press each fall). A press every step must not climb past it: a climb never
+## stacks on an earlier climb's rise (decision 0100; on 11-17 main the same mash peaked at 4.98m).
 func _diminish(wl: Dictionary, danced: Dictionary) -> void:
 	var curve := WallMoves._curve
-	WallMoves._curve = [1.0]
-	var flat := _attempt(wl, true, true, true)
-	WallMoves._curve = curve
 	var mashed := _attempt(wl, true, true, true)
 	ok(curve == [1.0, 0.6, 0.3], "the curve is 100%%, 60%%, 30%% (%s)" % [curve])
-	ok(flat["peak"] - mashed["peak"] > 0.3 and mashed["kicks"] >= 3 and not mashed["top"],
-		"mashed kicks on a 5-terrace wall (4.0m, stays sheer) peak at %.2fm on the curve, %.2fm at 100%% (timed: %.2fm), %d kicks" % [
-			mashed["peak"], flat["peak"], danced["peak"], mashed["kicks"]])
+	ok(mashed["kicks"] >= 3 and not mashed["top"] and mashed["peak"] < danced["peak"] + 0.2,
+		"mashed kicks on a 5-terrace wall (4.0m) stay sheer: peak %.2fm (timed %.2fm), %d kicks" % [
+			mashed["peak"], danced["peak"], mashed["kicks"]])
 	_attempt(wl, true)
 	ok(h.wall_moves.chain > 1, "a dance builds a chain (%d)" % h.wall_moves.chain)
 	for i in 120:

@@ -45,6 +45,7 @@ const WALL_BACK := -0.1         # share of the speed into a wall a walker or jum
 static var scuffs := 0          # (tests) hop scuffs played
 static var _curve: Array = []   # share of a kick kept by its place in the chain (wall_kick.json)
 var chain := 0                  # kicks since the feet last touched the ground
+var _climbing := false          # the last kick in the chain was a climb (not a push-off)
 var bounce_t := 0.0
 var _rebound := Vector2.ZERO
 var _rebound_speed := 0.0
@@ -57,6 +58,7 @@ var _pose_n := Vector2.ZERO     # that face's outward normal
 func land() -> void:
 	bounce_t = 0.0
 	chain = 0
+	_climbing = false
 
 ## The share of a kick's rise and push that the next kick keeps: the curve entry for its place in the chain.
 func kick_share() -> float:
@@ -78,11 +80,13 @@ func try_kick(h: Hunter) -> bool:
 		var push := h.wall_n * KICK_PUSH * share + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
 		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP * share, push.y)
 	else:
-		# kick 1 adds to the jump you are on; a later kick only lifts the rise left to its own share, so presses
-		# mashed on the way up never stack (decision 0100)
+		# a climb adds to the jump or push-off you are on, but not to an earlier climb's rise still going: that
+		# one only lifts to its own share, so presses mashed on the way up never stack (decision 0100)
 		var left := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV)
-		var rise := left + KICK_RISE if chain == 0 else maxf(left, KICK_RISE * share)
+		var on_climb := _climbing and h.vel.y > 0.0
+		var rise := maxf(left, KICK_RISE * share) if on_climb else left + KICK_RISE * share
 		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
+	_climbing = toward <= KICK_AWAY
 	chain += 1
 	_met_wall(h)
 	h.wall_touch_t = 0.0
