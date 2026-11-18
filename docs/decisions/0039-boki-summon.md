@@ -38,3 +38,7 @@ Left out on purpose: guardian summon, kill credit (the kill-feed task), bots sum
 - End warning: `KinSummon.warn`, two soft rising notes of the species' voice `WARN_S` (2 s) before the window ends;
   your own in your ear, others positional and quieter. A sent-back or knocked-down summon never warns.
   `--summon-end-sfx-check` covers it.
+- Bots (`BotKin.summon`, `--bot-summon-check`): a bot presses Summon on entering a fight it will take (a rival or brute
+  within 12 m, health at least 45%) or when a teammate is downed within 15 m; never fleeing, on cooldown or while the
+  Boki is out. Easy bots wait longer and skip the moment more often; tutorial bots stay muted until a beat sets
+  `summon_ok`.
