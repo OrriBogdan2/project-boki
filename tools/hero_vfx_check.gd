@@ -362,6 +362,7 @@ func _lean() -> void:
 	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
 	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
 
+
 ## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
 ## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
 func _armour(m: Match, P: Hunter) -> void:
@@ -389,6 +390,7 @@ func _armour(m: Match, P: Hunter) -> void:
 	plates._watch(foe, 0.016)
 	ok(plates.armor_flash_of(foe) > 0.5, "the armour strip flashes as it loses some")
 	foe.hp = 0.0
+
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
@@ -481,6 +483,11 @@ func _dolm_rocks(m: Match) -> void:
 				if c.r > c.b:
 					warm.append(kind)
 		n.free()
+	for i in RockLook.COLS.size():  # his raised rocks (Stone Row, Basalt Spine): cobalt slate too (owner 11-17)
+		var sm := RockLook._crag(i)[1] as ShaderMaterial
+		var hues: Array = ["glow", "rim_col", "stone", "stone_hi", "cap_col"].map(sm.get_shader_parameter)
+		if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r >= c.b):
+			warm.append("crag%d" % i)
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
 
 
