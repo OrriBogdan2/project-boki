@@ -57,6 +57,7 @@ func run(main: Node) -> void:
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
+			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
