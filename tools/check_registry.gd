@@ -176,6 +176,7 @@ const CHECKS := {
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
+	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],      # the Boki summon pad
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
@@ -241,6 +242,7 @@ const CHECKS := {
 	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],
 	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],
 	"--relics-fold-check": ["res://tools/relics_fold_check.gd", "relics_fold_check", null],      # first visit folds
+	"--expedition-arrows-check": ["res://tools/expedition_arrows_check.gd", "expedition_arrows_check", null],
 	# time to down, LMB matrix (docs/TTK_MATRIX.md)
 	"--ttk-matrix-check": ["res://tools/ttk_matrix_check.gd", "ttk_matrix_check", null],
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
@@ -729,6 +731,7 @@ const CHECKS := {
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],  # docs/decisions/0013-market.md
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],  # the opening drop
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],  # --expedition-shots=<dir>
+	"--expedition-trim-shots": ["res://tools/expedition_trim_shots.gd", "expedition_trim_shots", null],  # --shots-dir
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay

@@ -29,3 +29,6 @@ Left out on purpose: guardian summon, kill credit (the kill-feed task), bots sum
 - Net.VERSION 0.24.14: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--summon-check` (alias `--summon-leash-check`) covers the key, the table, the kills, the snapshot round trip and the leash
   (chase, dash, glide, knock). The Summon prompts read `Settings.key_cap("summon")`.
+- The Training Grounds' Boki island has a summon pad (`SummonStation`, content/rules/summon_station.json): stand on it for the
+  round-vs-critter card and the live Summon key, interact for the next of three practice Bokis with different windows.
+  `--summon-station-check` covers the card, each window and cooldown, and the early send-back.
