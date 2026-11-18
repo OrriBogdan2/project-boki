@@ -1,5 +1,15 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+
+## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
+`cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
+20261118-032222-a1; same topology as cand_A_s18, only chest vertices moved). No re-rig: the master's per-vertex chest
+delta reaches each game vertex by UV barycentric lookup, through the local master->game Jacobian (affine fit over UV
+neighbours, scale ~0.82), then an 8 mm spatial median across all body prims (metal and skin seams move together),
+scaled so the volume change is the master's at game scale (-0.40 L). 5,574 vertices moved, max 19.6 mm; normals turned
+with the mesh's own normal change. Weights, bones, clips, UVs, images byte-identical. Scripts:
+`~/meshy/v95/Cinder/bust1118/game/` (transfer.py, clean.py, K=0.916). Stretch check: worst 7.60 lance_stoke, as main.
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
 Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
