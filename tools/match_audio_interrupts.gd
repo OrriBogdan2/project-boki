@@ -3,7 +3,8 @@ extends RefCounted
 ## one: the cast starts, its wind-up voice plays, a stun breaks it, and within CUT_MAX that voice is silent,
 ## the caster heard the "broken" tick, and Sfx made no new player for any of it (the pool's voices only).
 
-const CUT_MAX := 100           # ms: the wind-up's voice must be silent this soon after the cast breaks
+const CUT_MAX := 100           # ms of game time: the wind-up's voice must be silent this soon after the cast breaks
+const CUT_FRAMES := 60         # frames the check waits for the voice to end (a slow box draws few per second)
 const HOLD := 1.0              # s: held casts (a bow draw, a fist) are held at most this long for their sound
 ## arch -> the slot its wind-up sounds are kept under (KitWindup)
 const SLOTS := {"bulwark": "x", "dredge": "e", "gunslinger": "e", "juggernaut": "rmb", "ostra": "rmb",
@@ -45,10 +46,13 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 		m.step(Match.DT)
 		t += Match.DT
 	c.ok(not k.windups.has(slot), "%s %s: a stun breaks the cast" % [arch, slot])
-	var at := Time.get_ticks_msec()
-	while held.any(Sfx.sounding) and Time.get_ticks_msec() - at <= CUT_MAX * 3:
+	var took := 0                  # ms of game time before the frame the voice ended in (not the box's speed)
+	var frames := 0
+	while held.any(Sfx.sounding) and frames < CUT_FRAMES:
 		await m.get_tree().process_frame
-	var took := Time.get_ticks_msec() - at
+		frames += 1
+		if held.any(Sfx.sounding):
+			took += roundi(m.get_process_delta_time() * 1000.0)
 	var gone := not held.any(Sfx.sounding)
 	c.ok(gone and took <= CUT_MAX, "%s: the wind-up's voice ends %d ms after the break" % [arch, took])
 	c.ok(Sfx.last_played.has(KitWindup.BROKEN), "%s: the caster hears the broken tick" % arch)
