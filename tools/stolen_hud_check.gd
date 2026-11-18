@@ -23,6 +23,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	Save.d.erase("hud_reveal")  # (a staged HUD hides the squad rows until their first event: draw them all)
 	Game.god = false  # (god mode would stand the downed thief straight back up)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
