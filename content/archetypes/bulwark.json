@@ -8,7 +8,7 @@
 	"weight": "heavy",
 	"color": "#fff0b0",
 	"body": {
-		"size": 1.39, "bulk": 0.8,
+		"size": 1.464, "bulk": 0.8,
 		"build": 1.4,
 		"hit_r": 0.404, "hit_h": 1.78, "body_r": 0.46,
 		"head": 0.3,
