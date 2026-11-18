@@ -32,7 +32,7 @@ func run(main_node: Node) -> void:
 	m.start(
 		{
 			"teams": 2,
-			"squad": 3,
+			"squad": 4,  # (a 3rd knock on a squad of 3 is a wipe: out, no wisp to grab)
 			"tier": 0,
 			"length": 1e9,
 			"seed": 78,
