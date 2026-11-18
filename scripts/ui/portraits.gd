@@ -74,13 +74,15 @@ static func draw(c: CanvasItem, r: Rect2, ak: String, fallback: Texture2D, edge:
 	var rad := corner(r.size)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE_EDGE, rad + 2, Color(edge, 0.9), 2), r.grow(2.0))
 	var path := art_path(ak, splash, mood)
+	if mood != "" and path != art_path(ak, splash) and cut_soon(ak, path, Vector2i(r.size.round())) == null:
+		path = art_path(ak, splash)  # the mood face is still reading/cutting off the main thread: the neutral one meanwhile (no hitch on the first hit)
 	if path == "":
 		if fallback:
 			c.draw_texture_rect(fallback, r, false)
 	else:
 		_draw_art(c, r, ak, path, state == "dead")
 		var drain := 0.85 if state == "down" else low * 0.5
-		var grey_cut := cut(ak, path, Vector2i(r.size.round()), true) if drain > 0.0 else null
+		var grey_cut := cut_soon(ak, path, Vector2i(r.size.round()), true) if drain > 0.0 else null
 		if grey_cut:
 			c.draw_texture_rect(grey_cut, r, false, Color(1, 1, 1, drain))
 	c.draw_line(r.position + Vector2(rad, 1), Vector2(r.end.x - rad, r.position.y + 1), Color(1, 1, 1, 0.16), 1.0)
