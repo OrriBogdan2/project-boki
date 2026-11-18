@@ -10233,3 +10233,4 @@ READY ext/idle-ostra-port d37ae63b3c3b4a385735276fe1e6123e4d0cf0fa (Motley x_bre
 READY ext/ui-stolen-wisps-port b46f1d02a6 (stolen wisp HUD rows + teammate count badge on current main; port of ext/ui-stolen-wisps; 6 HUD/steal checks pass; PR via gh-outbox/new-pr.md)
 READY ext/merge-lane-hunters3-1117 e56bb2e253b9158f270539d19efaf2e4bfee4a38 (re-merged origin/main; conflicts tutorial.gd/tutorial.json = kept both: main's summon steps + branch's aim; --tut-aim-check 0 fail, --check 0, tutorial-fight-check 11 fails identical on main, health --strict reds are main's long_line files; SUPERSEDES b1e816cadd7)
 READY ext/sable-face-game-1118 e34303c07493a32e3a8d7414609991b5d4042131 (Sable face candidate A + lip-corner fix; hold for owner pick; PR #284 overlap note stays)
+READY ext/sable-face-game-1118 e34303c07493a32e3a8d7414609991b5d4042131 (Sable face candidate A + lip-corner fix; hold for owner pick; PR #284 overlap note stays)
