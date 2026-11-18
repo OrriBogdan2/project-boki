@@ -50,7 +50,7 @@ func may_level(slot: String) -> bool:
 		var sid := String(all[i][0])
 		if sid == "ranks":
 			return true
-		if sid.begins_with("pick_"):
+		if sid.begins_with("pick_") and (sid != "pick_ult" or MergeForm.enabled()):
 			return slot == sid.substr(5)
 	return true
 

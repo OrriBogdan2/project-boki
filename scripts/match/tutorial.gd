@@ -187,9 +187,9 @@ func id() -> String:
 	return String(steps()[step][0]) if step >= 0 and step < steps().size() else ""
 
 
-## Whether this hunter's kit has the thing a step teaches.
+## Whether this hunter's kit has the thing a step teaches (the Fusion steps wait for MergeForm.enabled).
 func applies(sid: String) -> bool:
-	return sid != "gkey" or m.player.kin != null
+	return (sid != "gkey" or m.player.kin != null) and (MergeForm.enabled() or not sid in ["pick_ult", "ult"])
 
 
 ## Called by Match every step.
