@@ -104,6 +104,9 @@ func _windup(m: Match, k: String) -> void:
 	ok(absf(lasted - wind) <= DT * 1.5, "%s: wind-up lasts the telegraph, %.3f s of %.3f s" % [k, lasted, wind])
 	var off_by := "%s: pivots sit on the key at wind-up end (off %.1f%% of travel)" % [k, tracked * 100.0]
 	ok(rig != null and tracked < 0.05, off_by)
+	# Mob.render leans every body back as it gathers; the keyed pivots must not pull that lean back to rest
+	var lean := (mb.model.get_node("Body") as Node3D).rotation.x
+	ok(lean > 0.1, "%s: the wind-up lean shows on the body (%.3f rad, want > 0.1)" % [k, lean])
 
 ## The legs follow the ground: a walking monster's gait advances one stride per STRIDE_M walked whatever its
 ## speed, stands still when it stops, and a hit shows on the body without leaving the walk.

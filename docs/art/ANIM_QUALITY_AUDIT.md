@@ -47,7 +47,7 @@ at least 0.02 and loops that close; every pivot named exists in the model; the w
 shader progress on every frame, lasts the data's `windup` seconds to within one frame, and the first pivot sits on its
 key at the end; 30 monsters pose in under 0.5 ms a frame (0.21 ms measured, 300 frames, headless).
 
-`--mob-anim-check` also walks each kind 30 frames and checks the gait advanced by distance (not time), stands still when the monster stops, and that a hit keeps the walk. `--mob-fight-clip` (GPU, `jobq submit --needs gpu`) records each kind chasing the player, taking three hits and dying, 60 fps; run it on two trees and `hstack` the frames for an old-vs-new MP4.
+`--mob-anim-check` also walks each kind 30 frames and checks the gait advanced by distance (not time), stands still when the monster stops, and that a hit keeps the walk. `--mob-fight-clip` (GPU, `jobq submit --needs gpu`) records each kind chasing the player, taking three hits and dying, 60 fps; run it on two trees and `hstack` the frames for an old-vs-new MP4. It also checks the shared wind-up lean survives MobAnim (rotation masks are per axis, so a Body `ry` track no longer pulls the x lean and z shiver back to rest: skitter/spitter lean 0.04 -> 0.20 rad).
 
 `--perf-bench` (30 s match, jobq rp1, software GL so wall time is noise; script numbers compare): match script avg
 24.2 ms before, 21.4 ms after (p99 49.9 / 44.2 ms); step section `mobs` 3.17 ms before, 3.04 ms after. No regression;

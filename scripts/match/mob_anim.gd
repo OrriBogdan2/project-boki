@@ -45,8 +45,10 @@ const SAMPLES := 32
 const STRIDE := 10                # floats per pivot in Rig.acc: rx ry rz px py pz sx sy sz wy
 const CHANS := {"rx": [0], "ry": [1], "rz": [2], "px": [3], "py": [4], "pz": [5], "sx": [6], "sy": [7], "sz": [8],
 	"sxz": [6, 8], "sa": [6, 7, 8], "wy": [9]}
-## per channel: which of rotation, position, scale, spin a pivot needs
-const KIND_BIT := [1, 1, 1, 2, 2, 2, 4, 4, 4, 8]
+## per channel: which of rotation x, y, z, position, scale, spin a pivot needs. Rotation is per axis so an axis no
+## track drives is left alone: Mob.render leans and shivers Body on x and z, and a Body ry track must not undo that.
+const KIND_BIT := [1, 16, 32, 2, 2, 2, 4, 4, 4, 8]
+const ROT_BITS := 1 | 16 | 32 | 8
 
 const SK_A := ["Leg0-1", "Leg2-1", "Leg11"]            # skitter tripods
 const SK_B := ["Leg01", "Leg21", "Leg1-1"]
@@ -519,12 +521,17 @@ static func pose(mb: Mob, delta: float) -> bool:
 		var n := rig.nodes[k]
 		var b := k * STRIDE
 		var mk := rig.mask[k]
-		if mk & 1 or mk & 8:
+		if mk & ROT_BITS:
 			var rr := rig.rest_r[k]
 			var r := n.rotation
-			r.x = lerpf(r.x, rr.x + acc[b], a)
-			r.z = lerpf(r.z, rr.z + acc[b + 2], a)
-			r.y = r.y + acc[b + 9] * delta if mk & 8 else lerpf(r.y, rr.y + acc[b + 1], a)
+			if mk & 1:
+				r.x = lerpf(r.x, rr.x + acc[b], a)
+			if mk & 32:
+				r.z = lerpf(r.z, rr.z + acc[b + 2], a)
+			if mk & 8:
+				r.y = r.y + acc[b + 9] * delta
+			elif mk & 16:
+				r.y = lerpf(r.y, rr.y + acc[b + 1], a)
 			n.rotation = r
 		if mk & 2:
 			var rp := rig.rest_p[k]
