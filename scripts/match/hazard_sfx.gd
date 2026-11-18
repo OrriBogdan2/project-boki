@@ -82,8 +82,8 @@ func contact(h: Hunter, kind: String, safe: bool, st: Dictionary, entered: bool,
 	var K: Dictionary = play_rules()["kinds"][kind]
 	if K.has("breath"):
 		_breath(h, K, safe, st)
-	var cue := String(K.get("warded_contact", "")) if safe else String(K["contact"])
-	if cue == "" or float(K["every_s"]) <= 0.0:
+	var cue := String(K.get("contact", ""))
+	if safe or cue == "" or float(K["every_s"]) <= 0.0:
 		return
 	st["snd"] = 0.0 if entered else float(st.get("snd", 0.0)) - dt
 	if float(st["snd"]) > 0.0:
