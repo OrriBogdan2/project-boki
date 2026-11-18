@@ -667,9 +667,10 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 
 | Setting | Value |
 |---|---|
-| _doc | The Boki summon (KinSummon, decisions 0039, 0044, 0045): killed_cd_mult = cooldown x after a rival hunter kills it (a monster's kill counts as a rival's if a rival hurt it in the last rival_window_s s), home_speed = m/s the wisp flies home, reveal_s = s its owner shows to the killer squad; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| _doc | card_lines: [from s, text], the plain line on the Field Book card for a window of at least that many s (the last one reached). The Boki summon (KinSummon, decisions 0039, 0044, 0045): killed_cd_mult = cooldown x after a rival hunter kills it (a monster's kill counts as a rival's if a rival hurt it in the last rival_window_s s), home_speed = m/s the wisp flies home, reveal_s = s its owner shows to the killer squad; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
 | table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
 | fallback | [10, 60] |
+| card_lines | [[0, "Short summon, strong"], [13, "Long summon, steady"]] |
 | uptime_band | [0.09, 0.2] |
 | killed_cd_mult | 1.25 |
 | rival_window_s | 3 |
@@ -2395,6 +2396,15 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | linger_chance | 0.6 |
 | linger_secs | [4.0, 8.0] |
 | joy_per_sec | 0.8 |
+
+## wall_kick (`content/rules/wall_kick.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Diminishing returns for chained wall kicks (WallMoves, decision 0100, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high. |
+| curve | [1.0, 0.6, 0.3] |
 
 ## warden_look (`content/rules/warden_look.json`)
 
