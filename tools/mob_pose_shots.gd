@@ -9,9 +9,19 @@ const ORDER := ["idle", "walk", "windup", "strike"]
 
 var main: Node
 var m: Match
+var out_dir := "user://mob_pose_shots"
 
 
 func run(mn: Node) -> void:
+	var kinds := await setup(mn)
+	for k in kinds:
+		await _case(out_dir, String(k))
+	print("MOBPOSESHOT DONE")
+	main.get_tree().quit()
+
+
+## The match every mob tool plays in: the still player, a start island, the closest view. Returns the kinds to show.
+func setup(mn: Node) -> Array:
 	main = mn
 	Save.no_write = true
 	var d := Save.fresh()
@@ -20,14 +30,13 @@ func run(mn: Node) -> void:
 	d["active"] = rec["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	Save.d = d
-	var dir := "user://mob_pose_shots"
 	var kinds := ["skitter", "spitter", "bomber", "glimmer", "warden", "brute", "sentinel"]
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
-			dir = String(a).substr(12)
+			out_dir = String(a).substr(12)
 		if String(a).begins_with("--kinds="):
 			kinds = Array(String(a).substr(8).split(","))
-	DirAccess.make_dir_recursive_absolute(dir)
+	DirAccess.make_dir_recursive_absolute(out_dir)
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
@@ -56,10 +65,7 @@ func run(mn: Node) -> void:
 	m.cam.user_zoom = float(CamWheel.rules()["min"])  # the wheel's closest view
 	await _frames(30)
 	P.process_mode = Node.PROCESS_MODE_DISABLED  # the player stands still and never fires back
-	for k in kinds:
-		await _case(dir, String(k))
-	print("MOBPOSESHOT DONE")
-	main.get_tree().quit()
+	return kinds
 
 
 func _frames(n: int) -> void:
