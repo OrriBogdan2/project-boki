@@ -15,7 +15,7 @@ extends RefCounted
 ##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
 ##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
-const ROCK_COL := Color("c98d4a")
+const ROCK_COL := Color("4a6fb0")   # Tenzo's rocks: cobalt slate (their hit and break bursts)
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
 # m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
 const ROCK_TOP := 2.2
@@ -98,9 +98,9 @@ static func rock(
 	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var w: Dictionary = m.verbs.add_wall(
-		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
-	)
+	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true}
+	e["color"] = "#" + ROCK_COL.to_html(false)
+	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)
 	var tall := top / ROCK_TOP

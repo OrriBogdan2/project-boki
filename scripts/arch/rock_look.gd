@@ -1,8 +1,9 @@
 class_name RockLook
 extends RefCounted
 ## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
-## columns in warm earth tones, the main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit
-## upward faces that read from the match camera, warm light on the edges, thin molten cracks in the ground at
+## columns of cold cobalt slate like his stone arm (owner 11-17: his stones are cobalt, never grey or warm), the
+## main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit slate on the upward faces that read from
+## the match camera, a cobalt rim (KitLooks.basalt_mat, as his thrown rocks), thin cobalt cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,
 ## broken or timed out, crack and crumble into the ground. No other wall in the game looks like it.
 ## The rules (collision, climbing, Net) stay in HeroZones and StoneStand.
@@ -11,9 +12,9 @@ const TOP := HeroZones.ROCK_TOP
 const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
 const CRACK_A := 0.95                # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
 const CRUMBLE_T := 0.34              # s: a broken rock slumps into the ground
-const STONE := Color("3d2618")       # umber in the cracks and shadows
-const STONE_HI := Color("96663c")    # warm sandstone on the faces
-const CAP := Color("eccb96")         # the upward faces, in the sun: what the match camera sees most
+const STONE := Color("1a2438")       # cobalt-black in the cracks and shadows
+const STONE_HI := Color("3e5784")    # cobalt slate on the faces (his arm's stone)
+const CAP := Color("93aee0")         # the upward faces, in the sun: what the match camera sees most
 const RIM := 0.4
 const RUMBLE_GAP := 0.09             # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
@@ -147,7 +148,7 @@ static func _crag(i: int) -> Array:
 		for v in [rings[-1][s], rings[-1][(s + 1) % SIDES], peak]:
 			st.add_vertex(v)
 	st.generate_normals()
-	var mt := KitLooks.rock_mat(0.3, float(i) * 1.7)
+	var mt := KitLooks.basalt_mat(float(i) * 1.7)
 	mt.set_shader_parameter("stone", STONE)
 	mt.set_shader_parameter("stone_hi", STONE_HI)
 	mt.set_shader_parameter("rim", RIM)
