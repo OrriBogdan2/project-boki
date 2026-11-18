@@ -72,10 +72,13 @@ pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones
 ### Cloth chains (skirt panels, coat tails; SpringBoneSimulator3D)
 Bones named `cloth_<name>_<i>` (extra leaves, no clip animates them) form a chain like the spring chains: `_0` a child of a
 contract bone (`hips`), each the next one's child, the last the tip (no skin). `WardenCloth` (run by Sync after the springs)
-puts a Godot `SpringBoneSimulator3D` on them, with collision spheres on the thighs, shins and feet, so the skirt hangs and
-trails instead of being skinned to the legs. The skeleton's modifiers run only through `WardenCloth.step` (manual mode).
+puts a Godot `SpringBoneSimulator3D` on them, with collision capsules on the thighs and shins and spheres on the feet, so the
+skirt hangs and trails instead of being skinned to the legs. The skeleton's modifiers run only through `WardenCloth.step`
+(manual mode). Beyond `WardenCloth.LOD_M` (12 m) from the camera the sim is off and the chains ride the hips (the game
+camera: no cost in a match).
 `tools/art1/glb_cloth_bones.py <glb> art/wardens/src/<art>_cloth.json` adds the chains to a built .glb and re-skins the
-named materials' vertices (those mostly skinned to the thighs) to them by angle and height: no Blender, mesh, UVs, textures
+named materials' vertices (those mostly skinned to the thighs, plus small strand pieces in other colour slots: `loose`) to
+them by angle and height: no Blender, mesh, UVs, textures
 and clips stay byte-identical. Lace (`hem`) is the first: 8 panels x 5 joints + tip.
 `--cloth-shots` (tools/cloth_shots.gd) renders a Warden moving (idle, run, dash, lmb; game and orbit cameras) and benches 8 copies.
 
