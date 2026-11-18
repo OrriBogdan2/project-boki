@@ -10139,3 +10139,4 @@ READY ext/rig-bakeoff-meshy-1117 3bcc73e630f78c7537db26826d31923994a4b7c6 (SUPER
 READY ext/grimble-ingame-fix-1117 058943d972 (Grimble: black shards at goo hand and feet removed, close/game videos before-after in /home/boki/meshy/grimble-puddle-1117/vid)
 READY ext/rig-ship-1117 be298fdf40bc8e785be43d4299ea1c3611c2a87a (Rig: better skin weights for Sable, Tenzo, Kael, Lace (owner demo build); one NEW-RED: --warden-model-check juggernaut width 0.96x vs 1.00 floor, arms hang closer; proof+MP4s in /home/boki/meshy/rig-ship-1117/)
 READY ext/hunter-screen-name f26d5cb4a7 (PR #24 re-merged with origin/main ef7c8160c9, clean; kit_card shows hunter name big, title subtitle)
+READY ext/grimble-ingame-fix-1117 6f00297e5e (Grimble right shin+foot rebuilt from mirrored left: no more torn leg in every move; GPU before/after MP4s in meshy/grimble-puddle-1117/vid)
