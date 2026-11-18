@@ -174,6 +174,8 @@ const CHECKS := {
 	"--see-through-check": ["res://tools/see_through_check.gd", "see_through_check", null],  # trees thin only over you
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
 	# first press after a panel closes
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],
 	"--move-drills-check": ["res://tools/move_drills_check.gd", "move_drills_check", null],

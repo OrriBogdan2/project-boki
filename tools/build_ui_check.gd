@@ -19,6 +19,7 @@ func run(m: Node) -> void:
 			await load("res://tools/build_ui_shots.gd").new().run(m, arg.substr(17))
 			return
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm
 	await _farm()
 	await _house()
 	_migration()
