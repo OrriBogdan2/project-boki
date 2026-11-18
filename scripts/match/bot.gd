@@ -927,9 +927,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
 		elif spent or not BotWays.inside(m, a["wander"]):
-			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
-			if alive_mobs.size() > 0 and randf() < 0.6:
-				a["wander"] = alive_mobs.pick_random().pos
+			var camp := BotCamps.goal(m, h)     # (camps level you; the Blight doesn't)
+			if camp != Vector3.INF and randf() < m.camps.cfg["bot_camp_share"]:
+				a["wander"] = camp
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"
