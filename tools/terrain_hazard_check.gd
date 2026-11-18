@@ -12,7 +12,8 @@ extends RefCounted
 ## a warded one doesn't,
 ## and the sounds: HazardSfx (a contact cue per kind, heard only in range, one gasp before drowning, the warded cue
 ## once per kind, the beds placed at the nearest ground and capped) and HazardMoveSfx (a splash going in and out of
-## deep water, a stroke per swim arm stroke, a catch when ice footing returns, a rival's quieter),
+## deep water, a stroke per swim arm stroke, a catch when ice footing returns, a rival's quieter, a dash's spray;
+## a Boki's splash, spray and wading loop in deep water, none on dry ground),
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
@@ -296,12 +297,12 @@ func _listen(ai: int) -> void:
 	Sfx.listener = P.pos
 
 func _sounds() -> void:
-	var R := HazardSfx.play_rules()
+	var rules := HazardSfx.play_rules()
 	_kin(PLAIN)
 	for kind in COUNTER:
-		if not R["kinds"][kind].has("contact"):
+		if not rules["kinds"][kind].has("contact"):
 			continue
-		var cue := String(R["kinds"][kind]["contact"])
+		var cue := String(rules["kinds"][kind]["contact"])
 		_listen(_first(kind))
 		if kind == "static":
 			tz.areas[_first(kind)]["t"] = 0.6
@@ -368,11 +369,11 @@ func _beds() -> void:
 		au.scan(Sfx.listener)
 		au.scan_t = 1.0
 		au.tick(0.0)
-		var L: Dictionary = Sfx.loops.get("hazard_bed%d" % ai, {})
+		var bed: Dictionary = Sfx.loops.get("hazard_bed%d" % ai, {})
 		var at: Vector3 = au.beds.get(ai, Vector3.INF)
 		var off := Vector2(at.x - Sfx.listener.x, at.z - Sfx.listener.z).length()
 		var placed: bool = tz.area_at(at) == ai and off <= d + 1.0
-		vols.append((L["p"] as AudioStreamPlayer).volume_db if placed and not L.is_empty() else -99.0)
+		vols.append((bed["p"] as AudioStreamPlayer).volume_db if placed and not bed.is_empty() else -99.0)
 	ok("the lava bed sounds from its nearest ground, louder 2 m off than 10 m", vols[0] > -99.0 and vols[1] > vols[0],
 		"%.1f dB -> %.1f dB" % vols)
 	var most := 0
@@ -412,9 +413,12 @@ func _move_sounds() -> void:
 	_kin(PLAIN)
 	_listen(_first("deep_water"))
 	var r := await _hear(2.5)
-	ok("deep water: a splash going in and a stroke splash per arm stroke (%d in 2.5 s)" % r["strokes"],
-		r["bits"] & HazardMoveSfx.ENTER != 0 and r["strokes"] >= 2 and "splash" in r["heard"] and "swim" in r["heard"],
+	var splash := "water_land_" + StepSurface.weight_of(P.arch)
+	ok("deep water: a %s going in and a stroke splash per arm stroke (%d in 2.5 s)" % [splash, r["strokes"]],
+		r["bits"] & HazardMoveSfx.ENTER != 0 and r["strokes"] >= 2 and splash in r["heard"] and "swim" in r["heard"],
 		str(r["heard"]))
+	ok("a dash while swimming is the spray", HeroSfx.dash_name(P) == "water_dash", HeroSfx.dash_name(P))
+	_kin_water()
 	_listen(_first("ice"))
 	r = await _hear(0.5)
 	ok("leaving the water: a splash coming out", r["bits"] & HazardMoveSfx.EXIT != 0 and "splash" in r["heard"],
@@ -450,3 +454,32 @@ func _move_sounds() -> void:
 	ok("out of earshot (60 m): no sound", Sfx.last_played.is_empty(), str(Sfx.last_played.keys()))
 	rival.anim.hz_cues = 0
 	P.anim.hz_cues = 0
+
+
+## The player's Boki in the deep water beside it: its size's splash landing, a spray, the wading loop while it moves
+## (none standing still); on dry ground, none of them.
+func _kin_water() -> void:
+	var k := P.kin as Kin
+	var was := [k.pos, k.vel, k.grounded]
+	var splash := "water_land_" + String(HazardMoveSfx.KIN_WEIGHT.get(k.ks.size if k.ks else "small", "light"))
+	var key := "wade%d" % k.get_instance_id()
+	for wet in [true, false]:
+		k.pos = P.pos if wet else Vector3(P.pos.x, P.pos.y + 5.0, P.pos.z)
+		k.grounded = true
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.loop_stop(key)
+		k.vel = Vector3.ZERO
+		HazardMoveSfx.kin_wade(k)
+		var still := Sfx.loop_on(key)
+		HazardMoveSfx.kin_land(k)
+		HazardMoveSfx.kin_dash(k)
+		k.vel = Vector3(k.speed, 0.0, 0.0)
+		HazardMoveSfx.kin_wade(k)
+		var heard := [splash in Sfx.last_played, "water_dash" in Sfx.last_played, Sfx.loop_on(key) and not still]
+		ok("a Boki %s: splash, spray, wading loop = %s" % ["in deep water" if wet else "on dry ground", wet],
+			heard == [wet, wet, wet], str(heard))
+	Sfx.loop_stop(key)
+	k.pos = was[0]
+	k.vel = was[1]
+	k.grounded = was[2]

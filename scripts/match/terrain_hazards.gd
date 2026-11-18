@@ -153,6 +153,11 @@ func area_at(p: Vector3) -> int:
 		return -1
 	return a
 
+## Whether p is standing in Deep Water.
+func in_deep(p: Vector3) -> bool:
+	var a := area_at(p)
+	return a >= 0 and areas[a]["kind"] == "deep_water"
+
 ## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
 func guards(h: Hunter, kind: String) -> bool:
 	return kin_guards(h.kin as Kin, kind)

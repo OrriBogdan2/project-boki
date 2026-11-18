@@ -28,8 +28,10 @@ static func hit_tick(h: Hunter, o: Dictionary) -> String:
 ## The sound of `h`'s dash starting, chosen by the floor under it: in the air <arch>_dash_air, else the shared
 ## dash_air; on the ground <arch>_dash, else the shared dash_ground. A sound picked in the sound tester
 ## (SfxPicks) for the shared path wins over every Hunter's own. A remote Hunter's grounded flag isn't sent, so
-## its height over the ground says it.
+## its height over the ground says it. Swimming in deep water it is the spray, water_dash (HazardMoveSfx).
 static func dash_name(h: Hunter) -> String:
+	if HazardMoves.of(h) == HazardMoves.SWIM:
+		return "water_dash"
 	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
 	var shared := "dash_air" if in_air else "dash_ground"
 	if SfxPicks.active(shared):
