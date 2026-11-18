@@ -11,7 +11,7 @@
 	"howto": ["Play: floating mid-range; pull the fight in with seeds.", "Combo: {secondary} stuns, drop a {signature} seed on them.", "Avoid: spamming {dash}; with no charge it does nothing."],
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
 	"card": {"role_word": "Controller", "loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "dash": "Lob a lantern; foes in its circle swap places with you.", "passive": "Hits fill Swell; full, you are Swollen 9s and everything grows.", "rmb": "Shard bundle that stuns the first foe, longer the further it flew.", "e": "Plant a bomb that grows for 6.5s; press again to pop it.", "x": "Open a well that stuns and pulls in everything for 3.5s.", "weapons": {"tether_lantern": "Quick orbs through walls; wait longer between shots for bigger ones."}, "chips": {"rmb": ["9.5 dmg"], "e": ["12.5 dmg"]}},
-	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.434, "hit_h": 2.22, "body_r": 0.412},
+	"body": {"size": 0.952, "build": 0.65, "legs": 1.8, "hit_r": 0.434, "hit_h": 2.22, "body_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
