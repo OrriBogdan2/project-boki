@@ -105,6 +105,7 @@ var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
+var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
@@ -222,6 +223,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length,
 			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	var ring: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("loco")
+	steps = WardenSteps.new(model, tree, ring, lc.get("plants", {}), lib)
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
 	_setup_out()
@@ -717,6 +720,7 @@ func step(dt: float) -> void:
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
