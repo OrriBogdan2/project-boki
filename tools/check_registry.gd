@@ -403,6 +403,7 @@ const CHECKS := {
 	"--scout-cam-shots": ["res://tools/scout_cam_check.gd", "scout_cam_check", "shots"],
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],      # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
+	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
