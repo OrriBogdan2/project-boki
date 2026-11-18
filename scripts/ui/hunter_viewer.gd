@@ -20,6 +20,8 @@ const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
 		"r": "ultimate"}
 ## The slots that get a clip; the rest (passive, the Boki Fusion) are a line each.
+const IDLE_WARM_STEPS := 4     # idle updates run as a model is built, before its first drawn frame
+const IDLE_WARM_DT := 0.1      # s each: past the clip fade, so the idle owns the body
 const CLIP_SLOTS := ["lmb", "rmb", "e", "dash", "x"]
 const PORTRAIT_PX := 64.0     # px: the Hunter's face beside its name
 static var _rules: Dictionary = {}
@@ -309,6 +311,8 @@ func _build_model() -> void:
 	model = PreviewBuild.model(id)
 	pivot.add_child(model)
 	anim = HunterAnim.new(model)
+	for _i in IDLE_WARM_STEPS:      # settle into the idle first: a lock-in pose fades in from it, not from the T-pose
+		anim.update(IDLE_WARM_DT, _stand_state())
 	_aim_camera()
 
 ## The Hunter's lock-in pose (data "lockin" in its warden_anim file), from the start; back to its idle after.
@@ -352,7 +356,7 @@ func tick(dt: float) -> void:
 	spin_t += dt
 	if not stage_only:
 		pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
-	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
+	var s := _stand_state()
 	if lockin_t >= 0.0:
 		s["lockin_t"] = lockin_t
 		lockin_t = lockin_t + dt if lockin_t + dt < lockin_len else -1.0
@@ -374,6 +378,9 @@ func tick(dt: float) -> void:
 			burst_t = -1.0
 			model.scale = Vector3.ONE * float(model.get_meta("base_scale", model.scale.y))
 	if fx: fx.queue_redraw()
+
+func _stand_state() -> Dictionary:
+	return {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
 
 ## 0..1 while the unlock is held: the Hunter crouches into its power, its light builds, the stage thrums.
 func power(k: float) -> void:
