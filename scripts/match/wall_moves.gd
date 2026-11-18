@@ -5,11 +5,11 @@ extends RefCounted
 ## again and again, no glider and no cooldown, with a stone scuff everyone near hears. Keys into the wall or
 ## none add KICK_RISE of height to the jump you are on; keys away push you off it. Each kick in a row without
 ## touching the ground keeps less of that rise and push (content/rules/wall_kick.json, decision 0100). A hop
-## only starts up to HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
-## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
-## opens the glider: the glide button still does). Bounce: hitting a
-## wall at an angle with speed in the air (a dash, a boosted jump) rebounds you off it;
-## head-on you just stop, as ever, and a jump there kicks. Slide: the glider never bounces or stops dead
+## only starts up to HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a
+## mantle on top and a five-terrace one stays sheer however long you dance. Near a wall a capped press does
+## nothing (it never opens the glider: the glide button still does). Bounce: hitting a wall at an angle with
+## speed in the air (a dash, a boosted jump) rebounds you off it; head-on you just stop, as ever, and a jump
+## there kicks. Slide: the glider never bounces or stops dead
 ## on a wall, see stopped().
 
 const RULES_PATH := "res://content/rules/wall_kick.json"
