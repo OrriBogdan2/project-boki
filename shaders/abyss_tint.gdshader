@@ -6,20 +6,19 @@ uniform float pulse = 0.0;   // heartbeat 0..1
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
-	// [reference footage] under island level the whole view goes a saturated magenta / rose at once,
-	// deepening toward crimson-magenta lower down; the picture keeps its shapes (shading, clouds)
-	vec3 rose = vec3(0.98, 0.30, 0.66);
-	vec3 deep = vec3(0.70, 0.05, 0.30);
-	vec3 tint = mix(rose, deep, smoothstep(0.55, 1.0, k));
-	// [reference] strong as soon as it's in (k ~0.55 just under the lip), redder and darker deeper
-	float s = 0.9 * smoothstep(0.0, 0.6, k);
+	// Graded (owner 11-17): k is 0 until the start depth and builds to 1 at the point of no return.
+	// First the edges redden (a vignette, the centre stays readable), then the whole view drains toward
+	// red; the full wash only comes near the end.
+	vec3 rose = vec3(0.95, 0.22, 0.30);
+	vec3 deep = vec3(0.70, 0.03, 0.12);
+	vec3 tint = mix(rose, deep, smoothstep(0.3, 1.0, k));
+	float s = 0.85 * smoothstep(0.25, 1.0, k) * k;
 	vec3 g = mix(c, tint * (0.3 + 1.05 * l), s);
-	// right at the end: darker, and the edges close in with the heartbeat
-	float e = smoothstep(0.8, 1.0, k);
+	float e = smoothstep(0.6, 1.0, k);
 	g *= 1.0 - 0.3 * e;
 	float aspect = SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
 	float r = length((SCREEN_UV - 0.5) * vec2(aspect, 1.0));
-	float v = smoothstep(0.75 - pulse * 0.05, 1.05, r);
-	g = mix(g, vec3(0.16, 0.0, 0.06), v * e * 0.8);
+	float v = smoothstep(0.85 - 0.35 * k - pulse * 0.05 * k, 1.05, r);
+	g = mix(g, vec3(0.40, 0.0, 0.05), v * (0.15 + 0.65 * k) * smoothstep(0.0, 0.15, k));
 	COLOR = vec4(g, 1.0);
 }

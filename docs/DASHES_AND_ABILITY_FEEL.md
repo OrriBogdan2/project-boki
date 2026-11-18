@@ -482,6 +482,10 @@ Rules:
   this to ref-tender's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
+- A status icon shows its seconds only while 0.5 s or more are left (HudPlate.shows_time): a zone that
+  tops a slow up every frame shows the icon, never a stuck "0.2". A hero's own hold (Neve's Rimelock
+  statue, ArchKit.holds_still) is not a status at all. `--ult-label-scan` fails any ult that leaves a
+  stray number on screen.
 - (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
   (ARCHETYPES.md), so you can track their big tools.
 

@@ -1117,6 +1117,11 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
+## The Rimelock statue roots her every frame (_rime_hold_body): her own hold, not a status.
+func holds_still() -> bool:
+	return not rime.is_empty()
+
+
 func cast_ult() -> bool:
 	return not recovering() and HeroUlt.press(self, _start_rime)
 
