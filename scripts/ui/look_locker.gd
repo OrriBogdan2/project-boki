@@ -15,8 +15,9 @@ signal finished
 const TABS := ["Body", "Hollow", "Shroud", "Glider"]
 const TAB_ICONS := {"Body": "ruler", "Hollow": "eye", "Shroud": "cloak", "Glider": "updraft"}
 ## The look keys each tab shows, in order (the rows come from Unmasked.ROWS and Shrouds.ROWS; "accent" is the
-## trim's colour, "Match" first). The Glider tab lists Gliders.LIST instead.
-const TAB_KEYS := {"Body": ["gender", "height", "build"], "Hollow": ["hollow", "glow", "ghost", "aura"],
+## trim's colour, "Match" first, and "shroud" starts with "None"). The Body tab adds the frame sliders. The Glider
+## tab lists Gliders.LIST instead.
+const TAB_KEYS := {"Body": ["gender", "void", "line"], "Hollow": ["hollow", "glow", "ghost", "aura"],
 	"Shroud": ["shroud", "colour", "accent", "hood", "trim", "accessory"]}
 const AT := Vector3(0.8, 0, 1.6)            # m: the turntable's centre on the hatch dais
 const TOP := 0.07                           # m: the turntable's top, where your feet stand
@@ -341,9 +342,29 @@ func _fill() -> void:
 		if row.is_empty():
 			continue
 		_list.add_child(UI.section(String(row[1])))
-		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key == "accent" else 0))
+		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key in ["accent", "shroud"] else 0))
+		if key == "gender":
+			_frame_rows()
 	if tab == "Body":
 		_mastery_rows()
+
+## The frame's sliders (EmptyFrame): drag one and the model follows.
+func _frame_rows() -> void:
+	for k in EmptyFrame.KEYS:
+		var hr := UI.hbox(8)
+		var l := UI.label(String(EmptyFrame.rules()["frame"][k]["label"]), UI.T_BODY, UI.MUTED)
+		l.custom_minimum_size.x = 120
+		hr.add_child(l)
+		var sl := HSlider.new()
+		sl.name = "Frame_%s" % k
+		sl.max_value = 1.0
+		sl.step = EmptyFrame.STEP
+		sl.value = float(look["frame"][k])
+		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sl.custom_minimum_size.y = 28
+		sl.value_changed.connect(func(v: float): look["frame"][k] = v)
+		hr.add_child(sl)
+		_list.add_child(hr)
 
 ## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
 func _mastery_rows() -> void:
@@ -372,6 +393,8 @@ func _row(key: String) -> Array:
 		return ["accent", "Trim colour", ["Match"] + Unmasked.COLOURS]
 	if key == "hood" and not Shrouds.has_hood(int(look["shroud"])):
 		return []
+	if key == "shroud":
+		return ["shroud", "Shroud", ["None"] + Shrouds.LABELS]
 	for row in Unmasked.ROWS + Shrouds.ROWS:
 		if row[0] == key:
 			return row

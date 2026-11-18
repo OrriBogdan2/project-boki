@@ -64,7 +64,9 @@ func _tabs() -> void:
 	var tabs: Array = hx.root_ui.find_children("*", "Button", true, false).filter(func(b): return b.has_meta("tab"))
 	ok(tabs.map(func(b): return String(b.get_meta("tab"))) == LookLocker.TABS, "four tabs: %s" % str(LookLocker.TABS))
 	ok(tabs.all(func(b): return b.has_meta("glyph") and b.custom_minimum_size.y >= 48), "big tabs, each with its icon")
-	ok(_opts("gender:").size() == 2 and _opts("height:").size() == 3, "Body shows sex and height as tiles")
+	var sliders: Array = hx.root_ui.find_children("Frame_*", "HSlider", true, false)
+	ok(_opts("gender:").size() == 2 and sliders.size() == EmptyFrame.KEYS.size(),
+		"Body shows sex as tiles and the %d frame sliders" % sliders.size())
 	await _frames(60)
 	var head := locker.model.global_position + Vector3(0, 1.5, 0)
 	var body_d: float = locker._cam.global_position.distance_to(head)
@@ -180,7 +182,7 @@ func _tour() -> void:
 	if main.fade != null:
 		main.fade.reveal(0.05)
 	Save.d["gliders"] = ["sunset", "moth"]
-	var steps := {30: ["try", "gender:0"], 50: ["pick", "gender", 0], 70: ["try", "height:2"], 85: ["untry"],
+	var steps := {30: ["try", "gender:0"], 50: ["pick", "gender", 0], 70: ["try", "void:2"], 85: ["untry"],
 		100: ["tab", "Hollow"], 130: ["try", "glow:2"], 145: ["try", "glow:3"], 160: ["pick", "glow", 3],
 		180: ["pick", "hollow", 2], 205: ["tab", "Shroud"], 225: ["try", "shroud:4"], 238: ["try", "shroud:8"],
 		250: ["pick", "shroud", 1], 260: ["pick", "colour", 5], 270: ["pick", "accessory", 2],
