@@ -4,7 +4,7 @@ Picking things up should feel as quick as the source. This is what the source do
 
 ## Sources
 
-Tags as in docs/SUPERVIVE_FEEL.md. `[kits]` = `ext/agent-briefs:briefs/supervive-data/supervive_kits.md`, `[physics]` = `supervive_physics.md`, `[hero-ref]` = `briefs/hero-ref/*.md` (footage notes), `[est]` = my estimate from footage memory, nothing in the briefs says it.
+Tags as in sv/FEEL.md. `[kits]` = `ext/agent-briefs:sv/briefs/kits.md`, `[physics]` = `sv/briefs/physics.md`, `[hero-ref]` = `briefs/hero-ref/*.md` (footage notes), `[est]` = my estimate from footage memory, nothing in the briefs says it.
 
 - `[kits]` "Interact prompts seen: F Buy Stuff (shop), Hold F Brew Vive (healing station)": stations and shops take the interact key, a press or a hold. The same key on chests and deathboxes (README "hold F").
 - `[kits]` Soulpack: "can pick up and carry allied Wisps"; `[hero-ref]` mooshmoosh: "Passive, Backpack, walk over: Walk over ally wisps to pick up and carry them"; dredge: "the arm also picks up wisps it passes". Wisps are taken by walking over them, no key.
@@ -19,7 +19,7 @@ Tags as in docs/SUPERVIVE_FEEL.md. `[kits]` = `ext/agent-briefs:briefs/supervive
 | Armour shards | walk over `[est]` | same | walk over | same `walk` rule | same | same |
 | Gems, seeds | walk over `[est]` (gold) | same | walk over | same `walk` rule | same | same |
 | Rift key, chest key | n/a in the source | | walk over (a full stack leaves it glinting) | same `walk` rule (keys.json `pickup_pull` was a dead copy of it: removed) | same | same |
-| Weapon tuning | n/a (SUPERVIVE has no tunings) | | walk over | `tune` 1.1 / 1.0 | first in list | numbers moved to rules; wall blocks |
+| Weapon tuning | n/a (REFERENCE has no tunings) | | walk over | `tune` 1.1 / 1.0 | first in list | numbers moved to rules; wall blocks |
 | Gear (gloves, armour, boots, passives) | interact key `[est]` (an upgrade may auto-equip; not settled, see Open) | the piece under the cursor `[est]` | interact key (press) | `interact` 1.5 / 1.2 | **nearest the cursor** (was nearest the hunter) | cursor order; wall blocks |
 | Treasure (valuables) | n/a | | interact key, player only | `interact` 1.5 / 1.2 | nearest the cursor | same |
 | Bots: gear better than theirs, tunings | | | walk over | `bot` 1.4 / 1.0 | first in list | numbers moved to rules; wall blocks |

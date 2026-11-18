@@ -101,6 +101,7 @@ const WIRED := {
 	"blight_rumble": ["match/blight.gd", "match/blight_nests.gd"],
 	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_fuse_end": ["match/merge_xform.gd"], "boki_fuse_tired": ["match/merge_xform.gd"],
 	"boki_unfuse": ["match/merge_xform.gd"],
 	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
 }
@@ -428,7 +429,7 @@ func _level_cues() -> void:
 	ok(pitched, "every ranked slot has its own confirm pitch")
 	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
 	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
-	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl)\n\t\t\tLevelSfx"),
 			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
@@ -583,11 +584,12 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash on the ground: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash"]
+	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash_ground: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash_ground"]
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
+	ok(Sfx.ensure("dash_ground") and Sfx.ensure("dash_air"), "the shared dash_ground and dash_air exist")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:
@@ -979,7 +981,8 @@ func _held_fire(main: Node) -> void:
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
 		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run.has(0)
 		var others := _distinct(run)
-		ok(opens and repeats == 0 and others >= 3,
+		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
+		ok(opens and repeats == 0 and others >= want_others,
 			"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)" % [
 				sname, others, str(takes.slice(0, 8))])
 		await main.get_tree().create_timer(1.0).timeout

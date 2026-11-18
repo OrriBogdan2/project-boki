@@ -34,16 +34,21 @@ const T := {
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
-	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
+	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"aim_side_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no strafe slow: across the aim / toward it"],
 	"aim_back_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no backpedal slow: away from the aim / toward it"],
 	"aim_back_fire_speed_k":   ["~", [0.99, 1.01], "x", "[game data] the same, fire held: one fire slow either way"],
 	"aim_back_3m_frames":      ["<=", 0.0, "frames", "[game data] frames for 3 m away from the aim minus toward it"],
-	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
-	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
-	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	"speed_light":             ["~", [5.1, 5.7], "m/s", "[game data] MoveSpeed 445-485 uu/s x body_scale 1.16 (0061)"],
+	"speed_medium":            ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
+	"speed_heavy":             ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
+	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
+	"haste_two_bonus_x":       ["~", [1.49, 1.51], "x", "haste 0.35 + kin buff 0.15 add (1.55 if stacked)"],
+	"haste_bonus_slow_x":      ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
+	"haste_cap_mps":           ["~", [6.95, 7.0], "m/s", "[game data] MaxMoveSpeed 700 uu/s"],
+	"haste_clip_rate":         ["~", [0.99, 1.01], "x", "clip rate / (speed / clip speed), worst Warden"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
@@ -57,7 +62,11 @@ const T := {
 	# the glide's extra over run bleeds at tuning.json air.drag 2/s, the owner's 11-08 model (decision 0052)
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
+	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] a let-go brakes the same under a cast"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	"vault_exit_run":          ["~", [0.95, 1.05], "x", "[footage] Sable's Cartwheel runs down into her hasted run"],
+	"vault_slow_frames":       ["<=", 0.0, "frames", "[footage] past the peak, no step under the hasted run (no dip)"],
+	"vault_shot_gap_frames":   ["<=", 0.0, "frames", "[footage 0193] she throws as the flip ends (mid-flip too)"],
 	# Grimble's Barge chain ([owner 11-03] three short fast shoves) as a burst of Brute Dash, a ~0.12 s near-blink
 	# that arrives with almost no skid and turns back to the aim within ~0.1 s (briefs/hero-ref/dredge.md 296-306)
 	"barge_chain_shoves":      ["~", [3.0, 3.0], "", "[owner 11-03] three charges, a Shift tap inside each shove"],
@@ -88,6 +97,12 @@ const T := {
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
+	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push: full speed at once"],
+	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s, mean 9.8 (fit 1.42)"],
+	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
+	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
+	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
+	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix fit 1.88 (a step misses the tip)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -114,7 +129,8 @@ const T := {
 	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
 	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
-	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
+	"glide_sink":              ["~", [1.38, 1.42], "m/s", "hunter_move.json glide_sink (ours: no footage to count)"],
+	"glide_overheat_s":        ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
 	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
@@ -131,8 +147,9 @@ const T := {
 	"swoop_left":              ["<=", 0.05, "m/s", "over cruise 1.5 s after the level-out"],
 	"swoop_hot_x":             ["~", [1.2, 1.3], "x", "overheated: the swoop at half strength"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
-	"dashglide_1s_speed":      ["<=", 9.0, "m/s", "[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
-	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
+	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[owner 11-13] the glide carries the dash"],
+	"dashglide_2s_speed":      ["~", [7.0, 9.0], "m/s", "[owner 11-13] still fast, bleeding back"],
+	"dashglide_3s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] back toward cruise"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
@@ -173,6 +190,18 @@ const T := {
 	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
 	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
 	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
+	# three ledge heights x walk / jump / glide (docs/MOVEMENT_FEEL.md "Ledge mantle timing"): the rise from
+	# the catch to the top, and the speed over the lip against the source's floor
+	"ledge_jump_1.6_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a running jump"],
+	"ledge_jump_2.4_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a running jump"],
+	"ledge_glide_1.6_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a glide"],
+	"ledge_glide_2.4_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a glide"],
+	"ledge_glide_3.2_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; four terraces from a glide"],
+	"ledge_jump_1.6_keep":     [">=", 1.0, "x", "[game data] over the lip at least max(0.6x the approach, 3.5 m/s): MiniMantleXYSpeedTarget"],
+	"ledge_jump_2.4_keep":     [">=", 1.0, "x", "[game data] the same floor, three terraces from a running jump"],
+	"ledge_glide_1.6_keep":    [">=", 1.0, "x", "[game data] the same floor, two terraces from a glide"],
+	"ledge_glide_2.4_keep":    [">=", 1.0, "x", "[game data] the same floor, three terraces from a glide"],
+	"ledge_glide_3.2_keep":    [">=", 1.0, "x", "[game data] the same floor, four terraces from a glide"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.42, "s", "one air model, DECISIONS 11-08: 90% of 14 m/s in 0.39 s + a step"],
@@ -252,7 +281,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.pad = {}; P.grap = {}; P.grap_cd = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.dropping = false; P.diving = false
 	P.stun_t = 0.0; P.root_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.0
-	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
+	P.coyote = 0.0; P.jump_buf = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
 	_clear_mobs()
@@ -307,6 +336,7 @@ func _begin(main: Node) -> void:
 func run(main: Node) -> void:
 	_begin(main)
 	_ground()
+	_haste()
 	_face_turn()
 	_jump()
 	_glide()
@@ -316,6 +346,7 @@ func run(main: Node) -> void:
 	_dash_exit()
 	_brake_exact()
 	_slow_ramp()
+	_brake_cast()
 	_dash_curves()
 	_dash_jump_keep()
 	_plain_dash()
@@ -328,6 +359,7 @@ func run(main: Node) -> void:
 	load("res://tools/move_feel_knock.gd").run(self)     # the knock arc (docs/MOVEMENT_FEEL.md "Knock arc")
 	_ledge()
 	_glide_wall()
+	_ledge_matrix()
 	_drop()
 	_landing()
 	_camera()
@@ -337,6 +369,7 @@ func run(main: Node) -> void:
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
 	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
+	_overheat()         # after every timed row: its ~9 s of level glide would move them
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
@@ -347,7 +380,10 @@ func _ground() -> void:
 	for c in ["light", "medium", "heavy"]:
 		_reset(flat)
 		P.cls = c
-		P.base_speed = float(Data.CLASSES[c]["speed"])
+		var of_weight := Arch.ids().filter(func(a: String) -> bool: return Arch.weight(a) == c)
+		var hero: String = of_weight[0]
+		P.base_speed = HunterMove.speed(hero)
+		P.ground_accel = HunterMove.accel(hero)
 		P.inp["move"] = Vector2(1, 0)
 		var first := -1; var t95 := -1.0
 		for i in 40:
@@ -401,7 +437,52 @@ func _ground() -> void:
 				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+	HunterMove.apply(P)
+
+# ---------------------------------------------------------------- move-speed bonuses (HunterMove.ground_speed)
+## Top speed after a straight run with the bonuses and slows `setup` puts on.
+func _run_speed(setup: Callable) -> float:
+	_reset(flat + Vector3(-3, 0, 0))
+	_clear_speed()
+	setup.call()
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	return _hv(P).length()
+
+func _haste() -> void:
+	var plain := _run_speed(func() -> void: pass)
+	var two := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.add_buff("move_speed", 0.15, 5.0))
+	rec("haste_two_bonus_x", two / plain)
+	var slowed := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.slow_t = 5.0
+		P.slow_k = 0.4)
+	rec("haste_bonus_slow_x", slowed / plain)
+	var capped := _run_speed(func() -> void:
+		P.haste_t = 5.0
+		P.add_buff("move_speed", 1.0, 5.0))
+	rec("haste_cap_mps", capped)
+	var worst := 1.0
+	var gait := WardenGait.new(Skeleton3D.new(), {}, 1.0, 1.0)
+	for f in DirAccess.get_files_at("res://content/rules/warden_anim"):
+		var row: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/warden_anim/" + f))
+		var lc: Dictionary = row.get("loco", {})
+		var run := float(lc.get("run_speed", 4.6))
+		var at_run := gait.plan(run, lc, Vector2.UP, 1.0)
+		for spd: float in [two, capped]:
+			var k := (gait.plan(spd, lc, Vector2.UP, 1.0) / at_run) / (spd / run)
+			if absf(k - 1.0) > absf(worst - 1.0): worst = k
+	rec("haste_clip_rate", worst)
+	_reset(flat)
+	_clear_speed()
+
+func _clear_speed() -> void:
+	P.haste_t = 0.0
+	P.slow_t = 0.0
+	P.slow_k = 0.0
+	P.kbuffs.erase("move_speed")
 
 ## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
 func _face_turn() -> void:
@@ -645,7 +726,7 @@ func _glide() -> void:
 	_steps(60)
 	P.inp["jump"] = true
 	var tc := -1.0
-	var sink: float = Hunter.GLIDE_SINK
+	var sink: float = HunterMove.glide_sink
 	for i in 90:
 		P.inp["glide"] = true
 		m.step(DT)
@@ -723,7 +804,7 @@ func _glide_high() -> void:
 			if peak > _hv(P).length():
 				break
 	rec("glide_high_sink", sink)
-	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - Hunter.GLIDE_SINK))
+	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - HunterMove.glide_sink))
 
 # ---------------------------------------------------------------- glide dive
 ## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
@@ -831,6 +912,21 @@ func _swoop(h0: float, at: int, frames: int, hot: bool) -> Array:
 	return [(peak - base) / maxf(0.01, shed), gone, left]
 
 # ---------------------------------------------------------------- dash into glide
+## A level glide (its height pinned so it never lands) from a full glider to overheat, per unit of glide_cap.
+func _overheat() -> void:
+	_glide_at(25.0)
+	var y: float = P.pos.y
+	P.inp["jump"] = true
+	var t := 0.0
+	for i in 60 * 30:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2.ZERO
+		m.step(DT)
+		P.pos.y = y
+		if P.gliding: t += DT
+		if P.gliding and P.glide_fuel <= 0.001: break
+	rec("glide_overheat_s", t / float(P.cdat.get("glide_cap", 1.0)))
+
 func _dash_glide() -> void:
 	var kit_was := P.arch
 	P.set_arch("")      # the class dash: core physics (each kit's own air dash is its combo check's job)
@@ -841,8 +937,8 @@ func _dash_glide() -> void:
 	P.ex_cd = 0.0; P.dashes = P.max_dashes()
 	P.inp["dash"] = true
 	var dash_end := -1; var reopen := -1; var open_v := 0.0
-	var v1 := 0.0; var v2 := 0.0
-	for i in 200:
+	var v1 := 0.0; var v2 := 0.0; var v3 := 0.0
+	for i in 240:
 		P.inp["glide"] = true; P.inp["move"] = Vector2(1, 0)
 		var was_rolling := P.roll_t > 0.0 or i == 0
 		m.step(DT)
@@ -854,10 +950,12 @@ func _dash_glide() -> void:
 			var since := (i - (dash_end + reopen - 1)) * DT
 			if absf(since - 1.0) < DT * 0.5: v1 = _hv(P).length()
 			if absf(since - 2.0) < DT * 0.5: v2 = _hv(P).length()
+			if absf(since - 3.0) < DT * 0.5: v3 = _hv(P).length()
 	rec("dashglide_reopen_frames", reopen)
 	rec("dashglide_open_speed", open_v)
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
+	rec("dashglide_3s_speed", v3)
 	P.set_arch(kit_was)
 
 # ---------------------------------------------------------------- the walking brake against UE's own
@@ -1042,45 +1140,95 @@ func _run_up() -> float:
 	return _hv(P).length()
 
 
+## Let go of the keys and press RMB in the same frame at full speed, all 12 Hunters: the source brakes a let-go
+## the same under a cast (UE CalcVelocity brakes whenever the keys are off; a cast's move scale only caps the
+## walk, a CastHold hover steers like the ground), so the stop slide must match the plain stop. A tap that
+## moves the Hunter itself (a step, a hop, a knock, leaving the ground) is printed and not compared.
+func _brake_cast() -> void:
+	var kit_was := P.arch
+	var cls_was := P.cls
+	var gap := 0.0
+	for id in Arch.ids():
+		P.reclass(Arch.weight(id), id)
+		var plain := _cast_stop(false)
+		var cast := _cast_stop(true)
+		var row := "brake_cast %-11s plain %.3f m %.3f s, cast %.3f m %.3f s" % [
+				id, plain["dist"], plain["t"], cast["dist"], cast["t"]]
+		if cast["moved"]:
+			print("MFEEL note %s: RMB moves him itself, no stop compare" % row)
+			continue
+		var d := absf(float(cast["dist"]) - float(plain["dist"]))
+		gap = maxf(gap, d)
+		ok(d <= 0.05 and float(cast["t"]) > 0.0, row)
+	rec("brake_cast_gap_m", gap)
+	P.reclass(cls_was, kit_was)
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = false
+	# (the casts left shots, areas and delayed steps in the match: later rows start without them)
+	for a in [m.shots, m.zones, m.fields, m.mobs, m._later]:
+		a.clear()
+	for a in [m.gpads, m.smokes, m.plats]:
+		a.clear()
+	_reset(flat)
+
+## A run to full speed, then the keys off (and RMB pressed the same frame when cast): the stop's distance
+## and time, and whether the kit moved him (a dash, a knock, leaving the ground).
+func _cast_stop(cast: bool) -> Dictionary:
+	_reset(flat + Vector3(-3.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	var x0 := P.pos.x
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = cast
+	var moved := false
+	var ts := -1.0
+	for i in 60:
+		m.step(DT)
+		moved = moved or P.roll_t > 0.0 or P.fly_t > 0.0 or P.knock_t > 0.0 or not P.grounded
+		if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
+	return {"dist": P.pos.x - x0, "t": ts, "moved": moved}
+
+
 ## Each fitted hero's plain ground dash, keys held the way it goes: the speed of every step on the curve, where
 ## it peaks, the distance against the kit's, and the speed it hands the walk.
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var x0 := 0.0
-		for i in 90:
-			var x_was := P.pos.x
+		var p0 := Vector3.ZERO
+		var want := 0.0
+		for i in 120:
+			var pos_was := P.pos
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				p0 = pos_was
+				want = _curve_dist(id)
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
-		var dd := P.ak.dash_def()
-		var feel := P.ak.dash_feel()
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
-		rec("dash_curve_dist", (P.pos.x - x0) / want)
+		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		# against her run, a kit haste in it (Sable hands over at her hasted run)
-		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
+		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * (P.ak.move_k() + P.ak.speed_bonus())))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
+			var dd := P.ak.dash_def()
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
-			t *= float(feel["time"])
+			t *= float(P.ak.dash_feel()["time"])
 			rec("dash_curve_time", speeds.size() * DT / t)
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
@@ -1138,6 +1286,14 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
+
+## The metres a fitted hero's dash is set to cover: the kit's distance under the dash feel, or for Sparkle's
+## Wirerun (a lane length from the charge, along the aim) the length its run took.
+func _curve_dist(id: String) -> float:
+	if id == "mage":
+		return float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
+	var dd := P.ak.dash_def()
+	return float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(P.ak.dash_feel()["dist"])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
@@ -1687,18 +1843,8 @@ func _ledge() -> void:
 		print("MFEEL (no ledge rise on this build)")
 		return
 	var wl := _wall2()
-	var carved := []      # [index, old level] to put back afterwards (later sections use the flat spot)
 	if wl.is_empty():
-		# carve one beside the flat test spot: a 5x3 block two terraces high, 3m east of it
-		var x0 := int(floor(flat.x)); var z0 := int(floor(flat.z))
-		var lv := int(w.level[w.idx(x0, z0)])
-		for dz in range(-2, 3):
-			for dx in range(3, 6):
-				var ci := w.idx(x0 + dx, z0 + dz)
-				carved.append([ci, w.level[ci]])
-				w.level[ci] = lv + 2
-		var face := Vector2(x0 + 3.0, z0 + 0.5)
-		wl = {"at": face - Vector2(1, 0) * (P.r + 0.6), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + 2) * World.LEVEL}
+		wl = _carve_wall(2)
 	var n: Vector2 = wl["n"]
 	var top: float = wl["top"]
 	var out := {}
@@ -1735,8 +1881,85 @@ func _ledge() -> void:
 	rec("ledge_fling_gain", out["timed"]["dist"] / maxf(0.1, out["none"]["dist"]))
 	rec("ledge_window_s", out["none"]["win"])
 	print("MFEEL ledge: no jump +%.2fm then %.2fm on; early jump +%.2fm %.2fm; timed +%.2fm %.2fm" % [out["none"]["peak"], out["none"]["dist"], out["early"]["peak"], out["early"]["dist"], out["timed"]["peak"], out["timed"]["dist"]])
-	for cv in carved:
+	_uncarve(wl)
+
+## Carves a straight wall `terraces` high beside the flat test spot: a 5x3 block 3m east of it, with
+## the spot's level ground in front. The wall (face point, normal, low and top heights) and the tiles
+## to put back (_uncarve: later sections use the flat spot).
+func _carve_wall(terraces: int) -> Dictionary:
+	var x0 := int(floor(flat.x)); var z0 := int(floor(flat.z))
+	var lv := int(w.level[w.idx(x0, z0)])
+	var carved := []
+	for dz in range(-2, 3):
+		for dx in range(3, 6):
+			var ci := w.idx(x0 + dx, z0 + dz)
+			carved.append([ci, w.level[ci]])
+			w.level[ci] = lv + terraces
+	var face := Vector2(x0 + 3.0, z0 + 0.5)
+	return {"at": face - Vector2(1, 0) * (P.r + 0.6), "n": Vector2(1, 0), "low": lv * World.LEVEL,
+		"top": (lv + terraces) * World.LEVEL, "carved": carved}
+
+func _uncarve(wl: Dictionary) -> void:
+	for cv in wl.get("carved", []):
 		w.level[int(cv[0])] = cv[1]
+
+## Two, three and four terraces (1.6, 2.4, 3.2m; one is a walk-up ramp, LAYOUT_RULES) x walk / jump /
+## glide, keys into the face: a walk never climbs (as in the source: jump, and you mantle at the top), a running
+## jump tops two and three but never four (the wall tier), a glide tops all three. Caught ledges rise
+## in the footage's time and send you over the lip at the source's speed floor.
+func _ledge_matrix() -> void:
+	for terraces in [2, 3, 4]:
+		var wl := _carve_wall(terraces)
+		var h: float = float(wl["top"]) - float(wl["low"])
+		for mode in ["walk", "jump", "glide"]:
+			var r := _ledge_run(wl, mode)
+			var tag := "ledge_%s_%.1f" % [mode, h]
+			var expect: bool = mode == "glide" or (mode == "jump" and terraces < 4)
+			ok(bool(r["top"]) == expect, "%s %s the top" % [tag, "reaches" if expect else "never reaches"])
+			if expect and bool(r["top"]):
+				rec(tag + "_t", r["t"])
+				var floor_v := maxf(float(r["v_in"]) * HunterMove.mantle_launch_keep, HunterMove.mantle_launch_min)
+				rec(tag + "_keep", float(r["v_out"]) / floor_v)
+			print("MFEEL ledge %.1fm %-5s: %s, in %.2f m/s, catch to top %.3fs, over the lip %.2f m/s" % [
+				h, mode, "top" if r["top"] else "no", r["v_in"], r["t"], r["v_out"]])
+		_uncarve(wl)
+
+## One approach at the carved wall: whether you reach its top, the time from the catch to the top,
+## and the horizontal speed you came in with and leave the lip with.
+func _ledge_run(wl: Dictionary, mode: String) -> Dictionary:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = wl["at"]
+	var top: float = wl["top"]
+	if mode == "glide":
+		# gliding in 3m back, aimed at the face's upper half (the sink takes a little off on the way)
+		var st := at - n * 3.0
+		_reset(Vector3(st.x, top - 0.3 + 0.6 * HunterMove.glide_sink, st.y), false)
+		P.last_gy = wl["low"]
+		P.gliding = true
+		P.vel = Vector3(n.x, 0.0, n.y) * Hunter.GLIDE_SPEED
+	else:
+		# running in from half a metre back (a jump at the face from a standstill catches it too, at ~2 m/s)
+		var st := at - n * 0.5
+		_reset(Vector3(st.x, wl["low"], st.y))
+		P.vel = Vector3(n.x, 0.0, n.y) * P.base_speed
+	var out := {"top": false, "t": 0.0, "v_in": 0.0, "v_out": 0.0}
+	var rising := 0
+	for i in 150:
+		P.inp["move"] = n
+		P.inp["glide"] = mode == "glide"
+		P.inp["glide_btn"] = mode == "glide"
+		P.inp["jump"] = mode == "jump" and i == 2
+		m.step(DT)
+		if P.call("mantling"):
+			if rising == 0: out["v_in"] = float(P.get("lfloat").get("v_in", 0.0))
+			rising += 1
+		elif rising > 0 and float(out["v_out"]) == 0.0:
+			out["v_out"] = _hv(P).length()
+		if rising > 0 and float(out["t"]) == 0.0 and P.pos.y >= top: out["t"] = rising * DT
+		if P.grounded and P.pos.y >= top - 0.05:
+			out["top"] = true
+			break
+	return out
 
 # ---------------------------------------------------------------- the opening drop
 # ---------------------------------------------------------------- glider on a wall
@@ -1910,6 +2133,33 @@ func _landing() -> void:
 		if P.vel.x > 0.5: dead = i + 1; break
 	rec("land_dead_frames", dead)
 	rec("land_squash", sq)
+	_landing_quiet()
+
+## No landing draws a ring or a burst (DECISIONS: none on landings): the hop, a fall, a glide's end, a glide dive,
+## the opening drop's touchdown. Each is [m/s down, under the glider, in the drop, the HunterAnim.land_tier it plays].
+const LANDINGS := [[6.8, false, false, 1], [12.0, false, false, 2], [2.5, true, false, 2], [25.0, true, false, 3],
+		[2.2, true, true, 2]]
+func _landing_quiet() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for way: Array in LANDINGS:
+		_reset(flat + Vector3(0, 0.01, 0), false)
+		m.fields.clear()
+		P.xp = 0.0
+		P.vel.y = -float(way[0])
+		P.gliding = way[1]
+		P.dropping = way[2]
+		var radial0: int = m.fx.radial
+		for i in 30:
+			m.step(DT)
+		var tier := HunterAnim.land_tier(float(way[0]), way[1])
+		ok(tier == int(way[3]), "a landing at %.1f m/s plays land tier %d (want %d)" % [float(way[0]), tier, way[3]])
+		var off := " off the glider" if way[1] else ""
+		if way[2]:
+			off = " out of the drop"
+		ok(P.grounded and m.fx.radial == radial0, "a landing at %.1f m/s%s spawns no ring or burst (%d)"
+				% [float(way[0]), off, m.fx.radial - radial0])
+	m.biomes = biomes
 
 # ---------------------------------------------------------------- camera
 func _render_pos() -> Vector3:
@@ -1970,6 +2220,7 @@ func _glide_cam(cam: CamRig) -> void:
 	_reset(flat)
 	cam.snap(P.pos)
 	cam.zoom = 1.0
+	cam.user_zoom = 1.0      # the style's own framing: the rows below are the glide's widening on top of it
 	P.inp["jump"] = true
 	_cam_step(cam)
 	P.inp["jump"] = false

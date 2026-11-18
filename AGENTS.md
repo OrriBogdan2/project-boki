@@ -6,6 +6,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Apply the expert checklist.** Go through `docs/GAMEDEV_CHECKLIST.md` (game feel, systems, performance, rendering) for anything gameplay-facing, and use the matching techniques by name.
 - **Read the area first.** Find the existing system that already does something similar and extend it. Don't build a parallel one. Search with `grep -rn` across `scripts/` and `content/`.
 - **Anything that touches a core system needs a short design note first.** Core systems are movement, combat, networking, the save format, and the match flow. Write it in `docs/decisions/NNNN-title.md` using the template there. It covers the problem, the options, the choice, and what it affects, in 10-20 lines. Small features don't need one.
+- **Outside reference material stays private.** Other games' data, footage notes and parity audits live only in the private reports repo (`OrriBogdan2/project-boki-reports`, folder `sv/`; hetzner clone `/home/boki/reports-repo`, elsewhere `git clone` it and `git pull` first). Never commit them here and never name the outside game in code, docs or content: say 'reference' or 'target feel'. Its hunters are `ref-<label>` (key in `docs/ARCHETYPES.md`), and no game-file table, asset or property names go in. Our own numbers are in `docs/MOVEMENT_TUNING.md` and `docs/COMBAT_NUMBERS.md`. `tools/lint_gate.py` (check `private-ref`) fails on new mentions; old code comments are baselined and get scrubbed when you touch the file.
 - **Data over code.** Classes, Boki, gloves, weapons, maps and rules live in `content/` as JSON. A new hero, item or map should mostly be data plus one focused script, never edits scattered across `match.gd`.
 
 ## 2. Where code goes
@@ -70,6 +71,13 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - The branch is deleted after it merges. Job checkpoints (`wip/cj-*`) are deleted when the job ends.
 - **Before building any system, search the repo for an existing one** and extend it (§1, §3).
 - Small, clearly labeled commits (§6).
+
+## 7a. Generated files and parallel runs
+- Never hand-write `uid://` values or `.uid`/`.import` files: create the file, run the import, commit what Godot made.
+- A hand-written `.tscn`/`.tres` references by `path=` with no `uid=`.
+- Move a file's `.uid`/`.import` sibling with it in the same commit. Never commit `.godot/`.
+- A SceneTree test does its work in `_initialize()`, not `_init()` (no autoloads exist yet in `_init()`).
+- Never `pkill`/`killall` Godot: other agents' runs share the box.
 
 ## 8. Review before merge
 The integrator (the main session) merges branches into `main`. Before merging any feature branch, a separate reviewer agent reads the diff with fresh eyes against this file, looking for:
