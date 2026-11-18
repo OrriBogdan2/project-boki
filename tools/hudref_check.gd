@@ -2,11 +2,11 @@ extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
 ##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
-##   3. armour (a strip under health) and shields (past the end of health) are drawn; your own shield
+##   3. armour (a strip above health) and shields (past the end of health) are drawn; your own shield
 ##      is a strip over your health with its source's icon, drains before health, fades before it drops
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
-##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   6. key caps come from Settings.key_cap, one Merge slot, one G slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
@@ -308,6 +308,9 @@ func _check_keys(P: Hunter) -> void:
 		"the Merge shows the Merge key '%s', not '%s'" % [merge_key, Settings.key_cap("hunter_ult")])
 	var merge_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "r")
 	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
+	var throw_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "throw")
+	ok(throw_slots.size() == (1 if P.kin else 0),
+		"the G slot is drawn once, not again beside the utility belt (%d)" % throw_slots.size())
 	P.lvl = int(Hunter.ULT_AT[0])
 	P.ak.cd["x"] = 12.3
 	await hud.panels.draw
