@@ -228,25 +228,45 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	_settle(m, P, home, 0.5)
 
 ## R: the barrel comes up over 0.1 s and the shot leaves on its kick key (0.14 s), not at the press: the source's
-## raise, then fire. She is held GunslingerUlt.COMMIT (0.76 s, the source's ~0.8 s); the clip hands back on that
-## frame. A jump early in it is dropped, one in its last DashFlow.BUFFER_S goes as it lifts.
+## raise, then fire. She is never held: walking through it the legs walk under the raised rifle (an
+## upper-body clip), slowed to GunslingerUlt.WINDUP_MOVE in the 0.25 s wind-up and at full speed after; a jump in
+## the wind-up goes at once.
 func _nuke(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	C.ac.aim_at(P, home + Vector3(8.0, 0, 0))
 	K.cd["x"] = 0.0
+	var walk := {}
 	var rec := {}
-	var t0 := m.time
-	var probe := _lock_probe(P, 0.0, [["jump", 0.2], ["jump", 0.66]], 0.5, 1.0, rec,
-			func() -> bool: return P.jump_at > t0)
+	var wp := _walk_probe(P, 0.0, 0.2, walk)
+	var probe := func(t: float) -> void:
+		wp.call(t)
+		if not rec.has("free") and t >= GunslingerUlt.WINDUP + 0.1:
+			rec["free"] = Vector2(P.vel.x, P.vel.z).length()
 	K.cast_ult()
 	var fired := func() -> bool:
 		return K.ult.shells.size() > 0 and bool((K.ult.shells[0] as Dictionary).get("fired", true))
-	var r := _time(m, P, K, "gunslinger_x", 1.2, fired, probe)
-	C.ok("Vex timing R: the shot leaves on the raised barrel (0.14 s), the clip hands back as the hold lifts",
+	var r := _time(m, P, K, "gunslinger_x", 1.4, fired, probe)
+	P.inp["move"] = Vector2.ZERO
+	C.ok("Vex timing R: the shot leaves on the raised barrel (0.14 s), the clip plays its 0.6 s and hands back",
 			absf(float(r["hit"]) - GunslingerUlt.FIRE_T) <= DT * 1.5 and absf(float(r["len"]) - 0.6) < CLIP_TOL
-			and absf(float(r["out"]) - GunslingerUlt.COMMIT) <= DT * 1.5,
-			"hit %.2f len %.2f out %.2f lift %.2f" % [r["hit"], r["len"], r["out"], GunslingerUlt.COMMIT])
-	_lock_lines("R", "0.76 s from the tap (venator.md R 4: ~0.8 s committed)", GunslingerUlt.COMMIT,
-			1 if P.jump_at > t0 else 0, rec)
+			and float(r["out"]) > 0.6 and float(r["out"]) < 0.6 + _back(P, "gunslinger_x"),
+			"hit %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]])
+	var run := P.base_speed
+	C.ok("Vex timing R: walking through the wind-up the legs walk, slowed but never stopped",
+			_legs_walk(walk) and float(walk.get("speed", 0.0)) < run * 0.8,
+			_walk_line("at 0.2", walk) + " (run %.1f)" % run)
+	C.ok("Vex timing R: after the 0.25 s wind-up she runs at full speed",
+			float(rec.get("free", 0.0)) > run * 0.9, "%.2f m/s (run %.1f)" % [rec.get("free", 0.0), run])
+	_settle(m, P, home, 2.0)
+	K.ult.shells.clear()
+	K.x_wind_end = 0.0
+	# a jump in the wind-up goes at once (no hold)
+	K.cd["x"] = 0.0
+	K.cast_ult()
+	var j0 := m.time
+	P.inp["jump"] = true
+	_frame(m, P)
+	P.inp["jump"] = false
+	C.ok("Vex timing R: a jump in the wind-up goes at once", P.jump_at >= j0, "jump_at %.2f t0 %.2f" % [P.jump_at, j0])
 	_settle(m, P, home, 2.0)
 	K.ult.shells.clear()
 
