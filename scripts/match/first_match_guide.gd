@@ -102,9 +102,18 @@ func _start(lid: String, p: Hunter) -> void:
 			txt = String(row[1])
 	if lid == "dive":
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
+	if lid == "exit":
+		txt = _exit_text(txt)
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)
+
+## The exit line names the way out the top-centre goal line points at, so the guide, the line and the map agree.
+func _exit_text(txt: String) -> String:
+	var i := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	if i < 0:
+		return String(rules()["exit_none"])
+	return txt.replace("%X", WaysOutMap.WORDS[i]).replace("%H", ExtractGoal.how(i))
 
 func _left() -> float:
 	return (m.length - m.time) / m.length
@@ -167,7 +176,14 @@ func draw(h, sz: Vector2) -> void:
 static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
 	if text == "":
 		return
-	var below := WaysOutHud.bottom(h.m)
-	if h.m.skydrop and h.m.skydrop.planning:
+	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, t, _below(h.m)), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+
+## Where the line's strip ends (0 with no line up): the message column starts under it, never behind it.
+func bottom(sz: Vector2) -> float:
+	return TutorialStrip.rect(sz, _below(m)).end.y + MsgLane.GAP if line != "" else 0.0
+
+static func _below(mm: Match) -> float:
+	var below := WaysOutHud.bottom(mm)
+	if mm.skydrop and mm.skydrop.planning:
 		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, t, below), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+	return below
