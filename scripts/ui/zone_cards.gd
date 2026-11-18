@@ -41,7 +41,9 @@ static func open(h, here: String) -> void:
 			var pick := func(): h.hway.hop(id)     # refused: the knock and what it still needs
 			if ready:
 				pick = func(): h.hway.attune(id)
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true))
+			var card: Control = _card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true)
+			card.tooltip_text = "\n".join(key_hints(id))     # where each key comes from, off the one-line card
+			row.add_child(card)
 
 ## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
 ## the showcase wall's winners.
@@ -99,6 +101,15 @@ static func lock_line(id: String) -> String:
 		return food[0].to_upper() + food.substr(1) + "."
 	var seed := "Find its Wayseed in a run's lair or at the trader"
 	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+
+## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
+static func key_hints(id: String) -> Array:
+	var best := GardenZones.closest(id)
+	var lean := "Feed a Boki meals of those types."
+	if not best.is_empty():
+		lean = "Closest: %s, %s %d of %d." % [best["rec"]["name"], String(best["type"]).capitalize(), int(best["lean"]),
+				int(GardenZones.rules()["lean_key"])]
+	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
 
 ## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:

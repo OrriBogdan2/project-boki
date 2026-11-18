@@ -307,6 +307,13 @@ Short wordless barks in a Hunter's own voice (`<arch>_call_ult|boki|low|knock`, 
 - One bark per Hunter per 6 s (`COOLDOWN_S`, match time); a bark inside it is dropped. No bark while downed or out. Settings > Audio > Sounds "Hunter callouts" (`hunter_barks`, on) turns them off.
 - `--sfx-set-check` asserts every one of the 13 voiced Hunters has all four, the reach and the wiring; `--match-audio-check` the cooldown, who hears what and the setting.
 
+## Steal cues (`content/sfx/steals.json`, `tools/gen_sfx_steals.py`)
+A prize monster's fight should be heard, not only seen. `StealSfx` (`scripts/match/steal_sfx.gd`), ticked by every monster's frame on every machine (off the health and stagger it sees, so nothing new is synced):
+- **`steal_cry_<kind>`** (grunt): a prize monster (a lair boss, an elite, a key carrier) cries once, the first time it is at or under a quarter of its health. One cry per voice kind of the monster voices (`v_<kind>`), strained and pitched up; the lair bosses use the warden's. Positional, 40 m.
+- **`steal_reel`** (heavy_impact): a low thud each time a prize monster starts to reel (its stagger), positional, 40 m.
+- The stolen-kill stings stay `steal_won` / `steal_lost` from `KillCues` (above).
+- Rate limits in `SfxKits.MIN_GAP`: a cry kind 400 ms, the reel 300 ms.
+
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
