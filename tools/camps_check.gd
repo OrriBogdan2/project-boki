@@ -32,8 +32,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
 	m.set_process(false)
-	var P: Hunter = m.player
-	P.set_arch("")
+	var me: Hunter = m.player
+	me.set_arch("")
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
@@ -58,18 +58,18 @@ func run(main: Node) -> void:
 	ok(same, "a camp's monsters are the same whatever Match.rng has rolled")
 	# ---- 3. a clear pays the camp's XP to the last hit's squad
 	var cp: Dictionary = cps[0]
-	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
+	var foes: Array = m.hunters.filter(func(x): return x.team != me.team)
 	for h in foes:
 		_spot(h, m.world.spawns[-1])
-	_spot(P, cp["pos"])
-	P.xp = 0.0
-	_kill_all(cp, P)
-	ok(is_equal_approx(P.xp, cp["xp"]), "the camp's XP is paid on its kills (%.1f of %.1f)" % [P.xp, cp["xp"]])
+	_spot(me, cp["pos"])
+	me.xp = 0.0
+	_kill_all(cp, me)
+	ok(is_equal_approx(me.xp, cp["xp"]), "the camp's XP is paid on its kills (%.1f of %.1f)" % [me.xp, cp["xp"]])
 	# ---- 4. it comes back once, on its clock, with nobody near
 	ok(m.camps.comeback() == 0 and float(cp["cleared_at"]) > -1e8, "the clear is noted")
 	m.time += float(m.camps.cfg["back_s"]) + 1.0
 	ok(m.camps.comeback() == 0, "nobody near: it waits while a Hunter stands in it")
-	_spot(P, m.world.spawns[-1])
+	_spot(me, m.world.spawns[-1])
 	ok(m.camps.comeback() == 1 and not m.camps._all_dead(cp), "it returns after back_s with nobody near")
 	ok(m.camps.comeback() == 0, "and only once")
 	# ---- 5. bots farm what they can beat
@@ -80,15 +80,15 @@ func run(main: Node) -> void:
 		if c["size"] != "heavy":
 			c["cleared_at"] = 0.0
 	if not by_size["heavy"].is_empty():
-		P.lvl = 1
-		ok(BotCamps.goal(m, P) == Vector3.INF, "a level 1 bot passes a Great Camp")
-		P.lvl = 4
-		ok(by_size["heavy"].any(func(c): return c["pos"] == BotCamps.goal(m, P)), "a level 4 bot goes to it")
+		me.lvl = 1
+		ok(BotCamps.goal(m, me) == Vector3.INF, "a level 1 bot passes a Great Camp")
+		me.lvl = 4
+		ok(by_size["heavy"].any(func(c): return c["pos"] == BotCamps.goal(m, me)), "a level 4 bot goes to it")
 	for c in by_size["light"]:
 		c["cleared_at"] = -1e9
 	if not by_size["light"].is_empty():
-		P.lvl = 1
-		var g := BotCamps.goal(m, P)
+		me.lvl = 1
+		var g := BotCamps.goal(m, me)
 		ok(by_size["light"].any(func(c): return c["pos"] == g), "a level 1 bot goes to a Small Camp")
 	print("CAMPS done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -35,7 +35,14 @@ func spawn_all() -> void:
 		await m._slice()
 		var dice := dice_at(c["pos"])
 		var comp := _comp(c, dice)
-		var cp := {"pos": c["pos"], "size": String(c.get("kind", "normal")), "comp": comp, "dice": dice, "cleared_at": -1e9, "xp": 0.0}
+		var cp := {
+			"pos": c["pos"],
+			"size": String(c.get("kind", "normal")),
+			"comp": comp,
+			"dice": dice,
+			"cleared_at": -1e9,
+			"xp": 0.0
+		}
 		cp["mobs"] = _stand(cp)
 		list.append(cp)
 
@@ -94,7 +101,9 @@ func _comp(c: Dictionary, dice: RandomNumberGenerator) -> Array:
 			return cfg["sizes"]["heavy"]["fixed"].duplicate()
 		"light":
 			var lr := dice.randf()
-			return ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
+			if lr < 0.4:
+				return ["skitter", "skitter"]
+			return ["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"]
 	var nr := dice.randf()
 	if nr < 0.15 * m.tier + 0.2:
 		return ["brute", "skitter", "bomber"]
@@ -134,6 +143,10 @@ func _all_dead(cp: Dictionary) -> bool:
 
 func _hunter_near(p: Vector3) -> bool:
 	for h in m.hunters:
-		if not h.out and not h.extracted and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < float(cfg["back_clear_r"]):
+		if (
+			not h.out
+			and not h.extracted
+			and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < float(cfg["back_clear_r"])
+		):
 			return true
 	return false
