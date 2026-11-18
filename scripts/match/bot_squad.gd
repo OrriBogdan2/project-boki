@@ -203,7 +203,8 @@ static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 	if g == Vector3.INF or ld.flat_dist(g) > GUARD_M or m.time > float(a.get("guard_t", 0.0)):
 		for i in 4:      # (a step away from where it stands, or it never moves)
 			var ang := randf() * TAU
-			g = m.world.free_spot_near(ld.pos + Vector3(cos(ang), 0.0, sin(ang)) * randf_range(2.5, 4.5), [], 1.0, 0.45, 3.0)
+			var at: Vector3 = ld.pos + Vector3(cos(ang), 0.0, sin(ang)) * randf_range(2.5, 4.5)
+			g = m.world.free_spot_near(at, [], 1.0, 0.45, 3.0)
 			if h.flat_dist(g) >= 2.0:
 				break
 		a["guard"] = g
