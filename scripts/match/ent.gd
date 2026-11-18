@@ -53,7 +53,7 @@ var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
 var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
-var tp_n := 0                   # teleports over NetSmooth.TP_JUMP (its parity is NetSmooth.TP_BIT)
+var jump_n := 0                 # teleports over NetSmooth.TP_JUMP (its parity is NetSmooth.TP_BIT)
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -68,7 +68,7 @@ func set_model(n: Node3D) -> void:
 
 func teleport(p: Vector3) -> void:
 	if pos.distance_to(p) > NetSmooth.TP_JUMP:
-		tp_n += 1
+		jump_n += 1
 	pos = p
 	prev = p
 	position = p

@@ -4829,7 +4829,7 @@ func _flags(h: Hunter) -> int:
 	if h.roll_t > 0.0: f |= 16
 	if h.grounded: f |= 32
 	if h.fortify_t > 0.0: f |= 64
-	if h.tp_n & 1: f |= NetSmooth.TP_BIT
+	if h.jump_n & 1: f |= NetSmooth.TP_BIT
 	if h.gliding: f |= 256
 	if h.dropping: f |= 512
 	if h.riding: f |= 1024
