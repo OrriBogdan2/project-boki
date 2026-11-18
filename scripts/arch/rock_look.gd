@@ -1,7 +1,7 @@
 class_name RockLook
 extends RefCounted
 ## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
-## columns of cold cobalt slate like his stone arm (owner 11-17: his stones are cobalt, never grey or warm), the
+## columns of cold cobalt slate like his stone arm, never grey or warm, the
 ## main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit slate on the upward faces that read from
 ## the match camera, a cobalt rim (KitLooks.basalt_mat, as his thrown rocks), thin cobalt cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,

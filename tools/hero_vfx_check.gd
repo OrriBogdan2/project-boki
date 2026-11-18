@@ -483,7 +483,7 @@ func _dolm_rocks(m: Match) -> void:
 				if c.r > c.b:
 					warm.append(kind)
 		n.free()
-	for i in RockLook.COLS.size():  # his raised rocks (Stone Row, Basalt Spine): cobalt slate too (owner 11-17)
+	for i in RockLook.COLS.size():  # his raised rocks (Stone Row, Basalt Spine): cobalt slate too
 		var sm := RockLook._crag(i)[1] as ShaderMaterial
 		var hues: Array = ["glow", "rim_col", "stone", "stone_hi", "cap_col"].map(sm.get_shader_parameter)
 		if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r >= c.b):
