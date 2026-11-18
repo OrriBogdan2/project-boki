@@ -8,3 +8,4 @@ Format and rules: docs/AUDIO.md.
 `glint.json` is Glint Fishing (scripts/home/glint_sfx.gd).
 `quest.json` is the quest seats' own cues (scripts/match/quest_sfx.gd); `heart.json` the Heartspark and the Ways Out calls.
 `training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
+`hazards.json` is the terrain hazard areas' beds and cues, the gasp before drowning and the footing catch on ice (scripts/match/hazard_sfx.gd, hazard_move_sfx.gd).

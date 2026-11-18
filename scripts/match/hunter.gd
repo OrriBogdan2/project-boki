@@ -2839,6 +2839,7 @@ func render(delta: float, alpha: float) -> void:
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed:
 		StepReach.contact(self)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)

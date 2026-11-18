@@ -10,6 +10,9 @@ extends RefCounted
 ##   bramble     slowed and scratched                    / bloom: neither
 ## and the body's move there (HazardMoves): every hunter in deep water swims, one without footing on ice says so,
 ## a warded one doesn't,
+## and the sounds: HazardSfx (a contact cue per kind, heard only in range, one gasp before drowning, the warded cue
+## once per kind, the beds placed at the nearest ground and capped) and HazardMoveSfx (a splash going in and out of
+## deep water, a stroke per swim arm stroke, a catch when ice footing returns, a rival's quieter),
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
@@ -59,6 +62,8 @@ func run(main_node: Node) -> void:
 				var hud_safe: Variant = tz.underfoot(P).get("safe", null)
 				ok("%s %s: the HUD reads it (safe = %s)" % [kind, _who(safe), safe], hud_safe == safe)
 				_hint(kind, safe)
+		await _sounds()
+		await _move_sounds()
 		_bots()
 		_map()
 	print("TERRAIN CHECK DONE, %d checks, failures: %d" % [n, fails])
@@ -281,3 +286,167 @@ func _map() -> void:
 	await main.get_tree().process_frame
 	ok("the areas paint on a square and a round map", painted > 0, str(painted))
 	c.queue_free()
+
+# ------------------------------------------------------------------ sounds (HazardSfx)
+## Stands the player fresh on the area and starts listening there.
+func _listen(ai: int) -> void:
+	_stand(ai)
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	Sfx.listener = P.pos
+
+func _sounds() -> void:
+	var R := HazardSfx.play_rules()
+	_kin(PLAIN)
+	for kind in COUNTER:
+		if not R["kinds"][kind].has("contact"):
+			continue
+		var cue := String(R["kinds"][kind]["contact"])
+		_listen(_first(kind))
+		if kind == "static":
+			tz.areas[_first(kind)]["t"] = 0.6
+			tz.areas[_first(kind)]["phase"] = "idle"
+		await _run(1.0 if kind == "static" else 0.1)
+		ok("%s without: its contact cue plays (%s)" % [kind, cue], Sfx.last_played.has(cue),
+			str(Sfx.last_played.keys()))
+	_listen(_first("lava"))
+	Sfx.listener = P.pos + Vector3(60, 0, 0)
+	await _run(0.1)
+	ok("the lava burn tick is positional: 60 m off it is out of earshot", not Sfx.last_played.has("hazard_lava_burn"))
+	_listen(_first("deep_water"))
+	var gasps := 0
+	var gasp_t := -1.0
+	var hurt_t := -1.0
+	var t := 0.0
+	while t < float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5:
+		m.step(Match.DT)
+		t += Match.DT
+		if Sfx.last_played.has("hazard_breath"):
+			Sfx.last_played.erase("hazard_breath")
+			gasps += 1
+			gasp_t = t
+		if hurt_t < 0.0 and P.hp < P.max_hp: hurt_t = t
+	ok("deep water without: one gasp before it starts to drown", gasps == 1 and gasp_t < hurt_t,
+		"%d gasps at %.1f s, drowning at %.1f s" % [gasps, gasp_t, hurt_t])
+	tz.audio.warded.clear()
+	_kin(COUNTER["lava"])
+	_listen(_first("lava"))
+	await _run(0.2)
+	var first := Sfx.last_played.has("hazard_warded") and not Sfx.last_played.has("shield")
+	_listen(_first("lava"))
+	await _run(0.2)
+	ok("warded: a soft cue the first time the Boki keeps the lava off, not again", first
+		and not Sfx.last_played.has("hazard_warded"), str(Sfx.last_played.keys()))
+	_kin(PLAIN)
+	_beds()
+
+## The beds: the lava's sounds from its nearest ground, louder 2 m off its edge than 10 m off; none far
+## from every area; never more than beds_max at once, standing anywhere.
+func _beds() -> void:
+	var au := tz.audio
+	var ai := _first("lava")
+	var edge := Vector3.ZERO
+	var out := Vector3.ZERO
+	for q: Vector2i in tz.areas[ai]["cells"]:
+		var dry := 0
+		for k in range(1, 11):
+			var west := Vector2i(q.x - k, q.y)
+			if not m.world.inb(west.x, west.y) or tz.cell[m.world.idx(west.x, west.y)] != 0: break
+			dry += 1
+		var at := Vector3(q.x + 0.5, float(tz.areas[ai]["y"]), q.y + 0.5)
+		if dry < 10:
+			continue
+		au.scan(at + Vector3(-10, 0, 0))
+		if au.beds.has(ai) and (au.beds[ai] as Vector3).distance_to(at) < 1.5:
+			edge = at
+			out = Vector3(-1, 0, 0)
+			break
+	ok("a lava edge with nothing of it nearer than 10 m off its west side", out != Vector3.ZERO)
+	var vols := []
+	for d in [10.0, 2.0]:
+		Sfx.listener = edge + out * d
+		au.scan(Sfx.listener)
+		au.scan_t = 1.0
+		au.tick(0.0)
+		var L: Dictionary = Sfx.loops.get("hazard_bed%d" % ai, {})
+		var at: Vector3 = au.beds.get(ai, Vector3.INF)
+		var off := Vector2(at.x - Sfx.listener.x, at.z - Sfx.listener.z).length()
+		var placed: bool = tz.area_at(at) == ai and off <= d + 1.0
+		vols.append((L["p"] as AudioStreamPlayer).volume_db if placed and not L.is_empty() else -99.0)
+	ok("the lava bed sounds from its nearest ground, louder 2 m off than 10 m", vols[0] > -99.0 and vols[1] > vols[0],
+		"%.1f dB -> %.1f dB" % vols)
+	var most := 0
+	var quiet := false
+	for x in range(4, m.world.w - 4, 6):
+		for z in range(4, m.world.h - 4, 6):
+			au.scan(Vector3(x + 0.5, 0, z + 0.5))
+			most = maxi(most, au.beds.size())
+			quiet = quiet or au.beds.is_empty()
+	ok("the beds: silent far from every area, at most %d at once anywhere" % int(HazardSfx.play_rules()["beds_max"]),
+		quiet and most >= 1 and most <= int(HazardSfx.play_rules()["beds_max"]), "most %d" % most)
+	au.beds.clear()
+
+# ------------------------------------------------------------------ the moves' sounds (HazardMoveSfx)
+## Runs the real frames for secs and returns what the player's pose found: the strokes counted, every sound played.
+func _hear(secs: float) -> Dictionary:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	var strokes := 0
+	var bits := 0
+	var t := 0.0
+	while t < secs:
+		m.step(Match.DT)
+		P.render(Match.DT, 1.0)
+		await main.get_tree().process_frame
+		var c := P.anim.hz_cues
+		strokes += 1 if c & HazardMoveSfx.STROKE else 0
+		bits |= c
+		t += Match.DT
+	return {"strokes": strokes, "bits": bits, "heard": Sfx.last_played.keys()}
+
+## The volume of the sound Sfx played last (its pool voice).
+func _last_db() -> float:
+	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
+
+func _move_sounds() -> void:
+	_kin(PLAIN)
+	_listen(_first("deep_water"))
+	var r := await _hear(2.5)
+	ok("deep water: a splash going in and a stroke splash per arm stroke (%d in 2.5 s)" % r["strokes"],
+		r["bits"] & HazardMoveSfx.ENTER != 0 and r["strokes"] >= 2 and "splash" in r["heard"] and "swim" in r["heard"],
+		str(r["heard"]))
+	_listen(_first("ice"))
+	r = await _hear(0.5)
+	ok("leaving the water: a splash coming out", r["bits"] & HazardMoveSfx.EXIT != 0 and "splash" in r["heard"],
+		str(r["heard"]))
+	ok("ice, no footing: the skid scrape", "hazard_ice_skid" in r["heard"], str(r["heard"]))
+	_kin(COUNTER["ice"])
+	r = await _hear(0.5)
+	ok("a frost Boki puts the footing back: a catch", r["bits"] & HazardMoveSfx.CATCH != 0
+		and "hazard_catch" in r["heard"], str(r["heard"]))
+	_kin(PLAIN)
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h != P:
+			rival = h
+			break
+	ok("a rival to compare with", rival != null)
+	if rival == null:
+		return
+	rival.render(Match.DT, 1.0)       # (builds its pose: the match's own render is off)
+	var db := {}
+	for who: Hunter in [P, rival]:
+		Sfx.listener = who.pos
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		who.anim.hz_cues = HazardMoveSfx.CATCH
+		HazardMoveSfx.play(who)
+		db[who] = _last_db()
+	ok("a rival's catch is %.0f dB quieter than yours" % -HazardMoveSfx.OTHERS_DB,
+		is_equal_approx(float(db[P]) - float(db[rival]), -HazardMoveSfx.OTHERS_DB), str(db.values()))
+	Sfx.listener = rival.pos + Vector3(60, 0, 0)
+	Sfx.last_played.clear()
+	HazardMoveSfx.play(rival)
+	ok("out of earshot (60 m): no sound", Sfx.last_played.is_empty(), str(Sfx.last_played.keys()))
+	rival.anim.hz_cues = 0
+	P.anim.hz_cues = 0
