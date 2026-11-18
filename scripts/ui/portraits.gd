@@ -32,6 +32,22 @@ static func art_path(ak: String, splash := false) -> String:
 	var path := art_dir + ak + ".jpg"
 	return path if ResourceLoader.exists(path) else ""
 
+## The fallen Hunter's memories for the Relic moment (MaskBeat): three painted memories (their past, their fall,
+## the legend: art/portraits/memory/<archetype>_1..3.webp), else their face and then their splash.
+static func memory_frames(ak: String) -> Array[String]:
+	var out: Array[String] = []
+	for i in 3:
+		var p := art_dir + "memory/%s_%d.webp" % [ak, i + 1]
+		if not ResourceLoader.exists(p):
+			out.clear()
+			break
+		out.append(p)
+	if out.is_empty():
+		for f in [art_path(ak), art_path(ak, true)]:
+			if f != "" and not out.has(f):
+				out.append(f)
+	return out
+
 ## Whether an archetype has a painted portrait (else its frames show the rendered model).
 static func has_art(ak: String) -> bool:
 	return art_path(ak) != ""
