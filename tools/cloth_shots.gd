@@ -81,6 +81,8 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 		await tree.process_frame
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
+	if OS.get_cmdline_user_args().has("--no-sim") and (sync as WardenSync).cloth:
+		(sync as WardenSync).cloth.sim.active = false      # (the chains ride the hips rigidly: what the sim adds)
 	DirAccess.make_dir_recursive_absolute(dir)
 	var state := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
 	model.set_meta(WardenClips.STATE, state)
