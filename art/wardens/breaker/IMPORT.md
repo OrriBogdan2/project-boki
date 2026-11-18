@@ -31,9 +31,13 @@ hatch shield kept on `x_shield` (`keep`).
 - **Glow:** the cracks and lure glow from the master's emission map (`emit`), which WardenGlb tints to the bulwark
   model_glow; the lure ball is `glow-lure`.
 - **Fish:** hangs from his left mast on `x_fish`; the spring chain `spring_hangfish_*` moved there with it (`move_bones`).
-- **Face:** the porthole glass is `eyes-mood` with a flat disc UV (`screen`), so the baked face never shows: WardenMood swaps
-  the material for shaders/warden_mood.gdshader, which draws the approved face (cyan rounded half-moon eyes, D smile, pale
-  core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
+- **Face (11-18, ext/hunter-picks-1118):** the porthole glass is `eyes-v95` (since 28d0f88bc3 the baked paint shows, not
+  WardenMood's drawn glass face). The owner picked face A of ~/meshy/face-albert-1118 (`final_A.glb` = FhapS_1: fat cyan
+  crescent eyes, modest smile) as the default, keeping the old angry eyes in game. `v95` here = the old game image +
+  resize(final_A albedo) - resize(i1 master albedo) at 4096, masked to the two glass islands (q92); the old image is kept
+  as `breaker_v95_angry.jpg` (import size limit 2048: 2.7 MB of VRAM). The master's new normal/roughness maps are not
+  ported (this glb has albedo only). WardenMood's `tex_faces` (warden_anim/breaker.json "mood") puts the angry texture
+  on the glass for angry/determined/sad and for `combat`: 4 s after he swings, casts or is hit; the smile otherwise.
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
 
