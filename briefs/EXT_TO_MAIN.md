@@ -10213,3 +10213,4 @@ READY ext/slam-follow-through-port 81e0d6d39a (bulk-rebase: origin/main merged i
 READY ext/hob-real-work-1117 d4b532464a5 (Hob hammering really builds the house; walls rise per stage; waits + says what it needs)
 READY ext/p02-port-1118 f60a3c26c6 (P02 solos mode port: modes, play space, cards, solo HUD, edge arrow)
 READY ext/merge-lane-misc-1117 d6d9805ecb (lane misc round 2: summon pad, wisp proc, tutorial wisp beats, killed-summon hint; 11 targeted checks PASS, export OK)
+READY ext/p09-port-1118 b533f0903b (P09 Empty frame sliders + void body + None shroud + creator/clan sounds; NEW-RED 0 on 54 Empty/Hunter checks, export OK)
