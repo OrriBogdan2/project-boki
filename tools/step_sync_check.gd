@@ -64,6 +64,7 @@ func _hero(main: Node, id: String) -> void:
 		m.free()
 		return
 	sync.set_process(false)
+	clips.twist_on = false  # (the ring's own points: a twisting Hero's legs would run another loop than the one at `at`)
 	var bs: AnimationNodeBlendSpace2D = (clips.tree.tree_root as AnimationNodeBlendTree).get_node("loco")
 	var ring := []  # [point index, clip, position, timeline s per clip s (the walks play stretched)]
 	for i in bs.get_blend_point_count():
