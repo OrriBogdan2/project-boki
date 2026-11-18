@@ -48,7 +48,8 @@ func _ready() -> void:
 	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	track.add_child(modes)
-	var kinds := Data.MODES.map(func(k): return [k, String(k).capitalize()]) + [["heart_raid", "Heart Raid (prototype)"]]
+	var kinds := Data.MODES.map(func(k): return [k, String(k).capitalize()])
+	kinds.append(["heart_raid", "Heart Raid (prototype)"])
 	for m in kinds:
 		var key: String = m[0]
 		var b := UI.button(m[1], func(): _pick_mode(key))

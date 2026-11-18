@@ -614,7 +614,6 @@ const CHECKS := {
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
-	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>: any first Relic
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>[:wisps]: any first Relic
 	# Skip on every step
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],

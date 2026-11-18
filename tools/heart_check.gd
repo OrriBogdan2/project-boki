@@ -138,7 +138,8 @@ func _early_seat(main: Node) -> void:
 		"the Heart keeps the map's site; another match seeds another Gate")
 	var p: Hunter = m.player
 	# ---- the tide
-	ok(is_equal_approx(Heart.tide_r(m), H.start_r), "before the close starts the ring is the play space (%.0f m)" % H.start_r)
+	var before := "before the close starts the ring is the play space (%.0f m)" % H.start_r
+	ok(is_equal_approx(Heart.tide_r(m), H.start_r), before)
 	m.time = 5000.0
 	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
 		"the tide has closed to its smallest ring")

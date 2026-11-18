@@ -95,7 +95,8 @@ static func _conditions(h: Home, into: Control, details: Control) -> void:
 	into.add_child(UI.section("Conditions"))
 	into.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), blurb))
 	details.add_child(UI.section("Match"))
-	details.add_child(UI.label("Everyone drops together; about 10 minutes. Bots fill the empty places.", UI.T_SMALL, UI.MUTED))
+	var drop_line := "Everyone drops together; about 10 minutes. Bots fill the empty places."
+	details.add_child(UI.label(drop_line, UI.T_SMALL, UI.MUTED))
 	details.add_child(UI.para("%s: %s" % [RaidLook.NAMES.get(rc, rc), blurb], 12, UI.MUTED))
 	details.add_child(UI.para("The drop: " + String(Data.TIERS[h.exp_tier]["desc"]), 12, UI.MUTED))
 
