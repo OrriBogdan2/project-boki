@@ -32,3 +32,9 @@ Left out on purpose: guardian summon, kill credit (the kill-feed task), bots sum
 - The Training Grounds' Boki island has a summon pad (`SummonStation`, content/rules/summon_station.json): stand on it for the
   round-vs-critter card and the live Summon key, interact for the next of three practice Bokis with different windows.
   `--summon-station-check` covers the card, each window and cooldown, and the early send-back.
+- Cards: the Field Book species page and the garden Boki card (In a match rows) show `Summon N s / rest N s` from
+  `KinSummon.times` (the same cell the summon reads) and a plain line picked by `card_lines` in boki_summon.json
+  (`DexView.summon_row`). `--wisp-check` covers it.
+- End warning: `KinSummon.warn`, two soft rising notes of the species' voice `WARN_S` (2 s) before the window ends;
+  your own in your ear, others positional and quieter. A sent-back or knocked-down summon never warns.
+  `--summon-end-sfx-check` covers it.

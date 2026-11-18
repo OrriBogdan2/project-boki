@@ -35,30 +35,38 @@ const TYPES := {
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
+
 static func type_of(spk: String) -> String:
 	return String(Data.KIN.get(spk, {}).get("type", ""))
+
 
 static func type_name(t: String) -> String:
 	return String(TYPES.get(t, {}).get("name", t.capitalize()))
 
+
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
+
 
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
 static func number(spk: String) -> int:
 	return FieldBook.number(spk)
 
+
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
+
 
 static func entry(spk: String) -> Dictionary:
 	var dx: Dictionary = Save.d.get("dex", {})
 	return dx.get(spk, {})
 
+
 ## [seen, caught] across every entry (caught ones count as seen).
 static func counts() -> Vector2i:
 	return Vector2i(FieldBook.seen_count(), FieldBook.caught_count())
+
 
 ## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
@@ -76,7 +84,8 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	v.add_child(head)
 	var g := GridContainer.new()
 	g.columns = 6
-	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
+	g.add_theme_constant_override("h_separation", 10)
+	g.add_theme_constant_override("v_separation", 10)
 	var fill := func():
 		for ch in g.get_children():
 			ch.queue_free()
@@ -85,6 +94,7 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	v.add_child(KinFilter.new(fill))
 	v.add_child(g)
 	fill.call()
+
 
 ## The entries the filter shows, in the picked order (legendaries last). Entries you have not met pass
 ## only under "All" (their type is not yours to know yet); one you own sorts by its best Boki, the rest by number.
@@ -99,6 +109,7 @@ static func listed() -> Array:
 		if recs.has(key) and (not recs[key].has("uid") or KinBox.sorted([recs[key], r], KinFilter.sort)[0] == r):
 			recs[key] = r
 	return KinBox.sorted(recs.values(), KinFilter.sort).map(func(r): return FieldBook.entry_key(String(r["species"])))
+
 
 ## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
 static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
@@ -134,7 +145,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if not is_caught:
-			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not caught: a dark silhouette
+			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)  # seen, not caught: a dark silhouette
 		holder.add_child(pv)
 		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()
@@ -150,11 +161,14 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 	else:
 		var q := UI.title("?", 40, Color(1, 1, 1, 0.16))
 		pic.add_child(q)
-	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
+	var name_l := UI.label(
+		String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi
+	)
 	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	FitLabel.shrink(name_l)
 	col.add_child(name_l)
 	return t
+
 
 ## Screenshots only (--dex-demo, never saved): one species seen but not caught, and a shimmer found.
 static func demo() -> void:
@@ -170,7 +184,9 @@ static func demo() -> void:
 			break
 	if not ids.is_empty() and dx.has(ids[1]):
 		dx[ids[1]]["shimmer"] = true
-		if not (dx[ids[1]]["forms"] as Array).has("Pudward"): dx[ids[1]]["forms"].append("Pudward")
+		if not (dx[ids[1]]["forms"] as Array).has("Pudward"):
+			dx[ids[1]]["forms"].append("Pudward")
+
 
 # ------------------------------------------------------------------ a Boki's page
 ## The page for one species: picture on the left, field notes on the right. An entry with two forms
@@ -191,9 +207,11 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var spin := Spinner.make({"species": spk, "level": 5, "shimmer": false}, not is_caught)
 		stage.add_child(spin)
 	else:
-		var dc := CenterContainer.new(); stage.add_child(dc)
+		var dc := CenterContainer.new()
+		stage.add_child(dc)
 		var d := KinPortrait.view({"species": spk}, tree, 160)
-		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		if not is_caught:
+			d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
 	BokiCry.play(spk)
 	var info := UI.vbox(7)
@@ -208,7 +226,8 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	var tchip := PanelContainer.new()
 	var chip_box := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
 	tchip.add_theme_stylebox_override("panel", chip_box)
-	var th := UI.hbox(6); tchip.add_child(th)
+	var th := UI.hbox(6)
+	tchip.add_child(th)
 	th.add_child(TypeIcon.new(t, 18.0))
 	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	trow.add_child(tchip)
@@ -228,6 +247,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	info.add_child(summon_row(spk))
 	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
 	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
 	if BokiQuirks.quirk(spk) != "":
@@ -244,8 +264,10 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var fc := UI.vbox(2)
 		fc.custom_minimum_size.x = 64
 		var fp := KinPortrait.view(_form_rec(spk, String(fname)), tree, 46.0)
-		if not is_caught: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
-		var fcc := CenterContainer.new(); fcc.add_child(fp)
+		if not is_caught:
+			fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		var fcc := CenterContainer.new()
+		fcc.add_child(fp)
 		fc.add_child(fcc)
 		var fn := UI.label(String(fname), 11, UI.MUTED)
 		fn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -253,15 +275,23 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		fc.add_child(fn)
 		fr.add_child(fc)
 	if bool(e.get("shimmer", false)):
-		var sc := UI.vbox(2); sc.custom_minimum_size.x = 64
-		var sh := Control.new(); sh.custom_minimum_size = Vector2(46, 46)
-		var spv := KinPortrait.view({"species": spk, "level": 5, "shimmer": true, "uid": "dex|shimmer|" + spk}, tree, 46.0)
+		var sc := UI.vbox(2)
+		sc.custom_minimum_size.x = 64
+		var sh := Control.new()
+		sh.custom_minimum_size = Vector2(46, 46)
+		var spv := KinPortrait.view(
+			{"species": spk, "level": 5, "shimmer": true, "uid": "dex|shimmer|" + spk}, tree, 46.0
+		)
 		spv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		sh.add_child(spv)
-		var spk2 := Sparkle.new(); spk2.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); sh.add_child(spk2)
-		var scc := CenterContainer.new(); scc.add_child(sh)
+		var spk2 := Sparkle.new()
+		spk2.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		sh.add_child(spk2)
+		var scc := CenterContainer.new()
+		scc.add_child(sh)
 		sc.add_child(scc)
-		var sn := UI.label("Shimmer", 11, UI.MUTED); sn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var sn := UI.label("Shimmer", 11, UI.MUTED)
+		sn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		sc.add_child(sn)
 		fr.add_child(sc)
 	fl.add_child(fr)
@@ -272,18 +302,22 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var ml := UI.vbox(4)
 		ml.add_child(UI.section("Yours"))
 		var mr := HFlowContainer.new()
-		mr.add_theme_constant_override("h_separation", 8); mr.add_theme_constant_override("v_separation", 6)
+		mr.add_theme_constant_override("h_separation", 8)
+		mr.add_theme_constant_override("v_separation", 6)
 		for r in mine.slice(0, 8):
 			var pc := PanelContainer.new()
 			var pill := UI.frame(Color(1, 1, 1, 0.05), UI.R_PILL, Color(0, 0, 0, 0), 0, 10, 3, 0.0)
 			pc.add_theme_stylebox_override("panel", pill)
-			var ph := UI.name_with_sex(r, "%s  Lv %d" % [String(r["name"]), int(r.get("level", 1))], UI.T_SMALL, UI.INK, UI.semi, 12.0)
+			var ph := UI.name_with_sex(
+				r, "%s  Lv %d" % [String(r["name"]), int(r.get("level", 1))], UI.T_SMALL, UI.INK, UI.semi, 12.0
+			)
 			pc.add_child(ph)
 			mr.add_child(pc)
 		if mine.size() > 8:
 			mr.add_child(UI.label("+%d more" % (mine.size() - 8), UI.T_SMALL, UI.MUTED))
 		ml.add_child(mr)
 		info.add_child(ml)
+
 
 ## A labelled fact line: an icon, a short label, the value.
 static func _fact(parent: Control, icon: String, k: String, val: String) -> void:
@@ -299,6 +333,26 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	r.add_child(vl)
 	parent.add_child(r)
 
+
+## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
+## itself reads), a ring icon and the plain line (KinSummon.card_line). The Boki card and loadout show it too.
+static func summon_text(spk: String) -> String:
+	var t := KinSummon.times(KinLib.kin(spk))
+	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
+
+
+static func summon_row(spk: String) -> Control:
+	var r := UI.hbox(8)
+	r.add_child(UI.IconDot.new("ring", type_col(type_of(spk)), 15.0))
+	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
+	l.name = "SummonText"
+	r.add_child(l)
+	var cl := UI.label(KinSummon.card_line(KinSummon.times(KinLib.kin(spk)).x), UI.T_SMALL, UI.MUTED)
+	cl.name = "SummonLine"
+	r.add_child(cl)
+	return r
+
+
 ## One or two lines about the species (its flavour text, cut at the second sentence).
 static func _field_note(spk: String) -> String:
 	var f := String(Data.KIN[spk].get("flavor", Data.KIN[spk].get("desc", "")))
@@ -307,16 +361,23 @@ static func _field_note(spk: String) -> String:
 	var parts: Array = Array(f.strip_edges().trim_suffix(".").split(". "))
 	return ". ".join(parts.slice(0, 2)) + "."
 
+
 ## From its smallest (XS) to its biggest (XL), in cm and kg.
 static func _size_range(spk: String) -> String:
 	var b := Unique.base_size(spk)
 	var lo := 1.0 + Unique.XS_Z * Unique.SIZE_SD
 	var hi := 1.0 + Unique.XL_Z * Unique.SIZE_SD
-	var cm := float(b["cm"]); var kg := float(b["kg"])
-	return "%d to %d cm, %s to %s kg" % [int(round(cm * lo)), int(round(cm * hi)), _kg(kg * lo * lo * lo), _kg(kg * hi * hi * hi)]
+	var cm := float(b["cm"])
+	var kg := float(b["kg"])
+	return (
+		"%d to %d cm, %s to %s kg"
+		% [int(round(cm * lo)), int(round(cm * hi)), _kg(kg * lo * lo * lo), _kg(kg * hi * hi * hi)]
+	)
+
 
 static func _kg(x: float) -> String:
 	return ("%.1f" % x) if x < 10.0 else str(int(round(x)))
+
 
 ## Where it lives: wild across the islands, or only from a lair boss's Rare Egg; and where you've
 ## caught yours.
@@ -333,19 +394,24 @@ static func _habitat(spk: String) -> String:
 		out = "Wild, on any island of the Skylands. Eggs hatch this first form."
 	var places: Array = []
 	for r in Save.d.get("roster", []):
-		if String(r.get("species", "")) != spk: continue
+		if String(r.get("species", "")) != spk:
+			continue
 		var o = r.get("origin", null)
-		if typeof(o) != TYPE_DICTIONARY or String(o.get("how", "")) != "wild": continue
+		if typeof(o) != TYPE_DICTIONARY or String(o.get("how", "")) != "wild":
+			continue
 		var w = o.get("where", {})
-		if typeof(w) != TYPE_DICTIONARY: continue
+		if typeof(w) != TYPE_DICTIONARY:
+			continue
 		var pl := String(w.get("island", w.get("map", "")))
-		if pl != "" and not places.has(pl): places.append(pl)
+		if pl != "" and not places.has(pl):
+			places.append(pl)
 	if not places.is_empty():
 		out += " You caught yours at %s." % ", ".join(places.slice(0, 2))
 	var sighted: Array = FieldBook.places(spk)
 	if not sighted.is_empty():
-		out += " Last seen at %s." % ", ".join(sighted.slice(-2))      # (logged on sight, newest last)
+		out += " Last seen at %s." % ", ".join(sighted.slice(-2))  # (logged on sight, newest last)
 	return out
+
 
 ## A look-only record wearing a found form (an old save's form name: the root plus an affinity's suffix).
 static func _form_rec(spk: String, fname: String) -> Dictionary:
@@ -356,10 +422,12 @@ static func _form_rec(spk: String, fname: String) -> Dictionary:
 		for i in sfx.size():
 			if fname == root + String(sfx[i]) or fname.begins_with(root + String(sfx[i]) + " "):
 				var fs: Array = []
-				for k in i + 1: fs.append(aff)
+				for k in i + 1:
+					fs.append(aff)
 				rec["forms"] = fs
 				return rec
 	return rec
+
 
 ## A type badge drawn on any canvas (the Field Book's TypeIcon, the HUD's Boki box and overhead row):
 ## a disc in the type's colour with its glyph, centred at `c`, radius `r`.
@@ -374,39 +442,69 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
-		"spore":       # a toadstool
-			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]), ink)
+		"spore":  # a toadstool
+			ci.draw_colored_polygon(
+				PackedVector2Array(
+					[P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]
+				),
+				ink
+			)
 			ci.draw_rect(Rect2(P.call(-0.22, 0.0), Vector2(0.44, 0.8) * s), ink)
-		"titan":       # a peak
-			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.95, 0.75), P.call(-0.15, -0.8), P.call(0.25, -0.1), P.call(0.45, -0.4), P.call(0.95, 0.75)]), ink)
-		"venom":       # a drop
+		"titan":  # a peak
+			ci.draw_colored_polygon(
+				PackedVector2Array(
+					[
+						P.call(-0.95, 0.75),
+						P.call(-0.15, -0.8),
+						P.call(0.25, -0.1),
+						P.call(0.45, -0.4),
+						P.call(0.95, 0.75)
+					]
+				),
+				ink
+			)
+		"venom":  # a drop
 			var pts := PackedVector2Array()
 			for i in 16:
 				var a := PI * i / 15.0
 				pts.append(P.call(cos(a) * 0.6, 0.25 + sin(a) * 0.6))
 			pts.append(P.call(0.0, -0.9))
 			ci.draw_colored_polygon(pts, ink)
-		"swarm":       # a honeycomb cell
+		"swarm":  # a honeycomb cell
 			var hx := PackedVector2Array()
 			for i in 6:
 				var a := TAU * i / 6.0 + PI / 6.0
 				hx.append(P.call(cos(a) * 0.82, sin(a) * 0.82))
 			ci.draw_colored_polygon(hx, ink)
-		"gravity":     # a weight pressing down
+		"gravity":  # a weight pressing down
 			ci.draw_line(P.call(0.0, -0.9), P.call(0.0, 0.2), ink, w, true)
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
 			ci.draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
-		"prism":       # a cut gem
-			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
-		"lunar":       # a crescent
+		"prism":  # a cut gem
+			ci.draw_colored_polygon(
+				PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink
+			)
+		"lunar":  # a crescent
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
 			ci.draw_circle(P.call(0.35, -0.25), s * 0.68, Color(col.darkened(0.15), alpha))
-		"echo":        # rings of sound
+		"echo":  # rings of sound
 			for k in 3:
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
-		"tempest":     # a bolt
-			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
-		"ghost":       # a sheet ghost: round head, wavy hem, two eyes
+		"tempest":  # a bolt
+			ci.draw_colored_polygon(
+				PackedVector2Array(
+					[
+						P.call(0.25, -0.95),
+						P.call(-0.55, 0.15),
+						P.call(-0.05, 0.15),
+						P.call(-0.3, 0.95),
+						P.call(0.55, -0.2),
+						P.call(0.05, -0.2)
+					]
+				),
+				ink
+			)
+		"ghost":  # a sheet ghost: round head, wavy hem, two eyes
 			var body := PackedVector2Array()
 			for i in 13:
 				var a := PI + PI * i / 12.0
@@ -416,7 +514,7 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 			ci.draw_colored_polygon(body, ink)
 			for ex in [-0.27, 0.27]:
 				ci.draw_circle(P.call(ex, -0.2), s * 0.13, Color(col.darkened(0.55), alpha))
-		"dark":        # a slit eye open in the night
+		"dark":  # a slit eye open in the night
 			var lid := PackedVector2Array()
 			for i in 15:
 				var x := -0.95 + 1.9 * i / 14.0
@@ -426,22 +524,46 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
 			ci.draw_colored_polygon(lid, ink)
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
-		"stone":       # a boulder
-			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.85, 0.6), P.call(-0.7, -0.1), P.call(-0.25, -0.6),
-				P.call(0.35, -0.55), P.call(0.8, -0.05), P.call(0.9, 0.6)]), ink)
-		"ember":       # a two-tongued flame
-			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, 0.85), P.call(-0.6, 0.35), P.call(-0.45, -0.3),
-				P.call(-0.15, 0.0), P.call(0.0, -0.9), P.call(0.3, -0.2), P.call(0.5, -0.45), P.call(0.6, 0.35)]), ink)
-		"frost":       # a snowflake
+		"stone":  # a boulder
+			ci.draw_colored_polygon(
+				PackedVector2Array(
+					[
+						P.call(-0.85, 0.6),
+						P.call(-0.7, -0.1),
+						P.call(-0.25, -0.6),
+						P.call(0.35, -0.55),
+						P.call(0.8, -0.05),
+						P.call(0.9, 0.6)
+					]
+				),
+				ink
+			)
+		"ember":  # a two-tongued flame
+			ci.draw_colored_polygon(
+				PackedVector2Array(
+					[
+						P.call(0.0, 0.85),
+						P.call(-0.6, 0.35),
+						P.call(-0.45, -0.3),
+						P.call(-0.15, 0.0),
+						P.call(0.0, -0.9),
+						P.call(0.3, -0.2),
+						P.call(0.5, -0.45),
+						P.call(0.6, 0.35)
+					]
+				),
+				ink
+			)
+		"frost":  # a snowflake
 			for k in 3:
 				var a := PI * k / 3.0
 				ci.draw_line(P.call(cos(a) * 0.9, sin(a) * 0.9), P.call(-cos(a) * 0.9, -sin(a) * 0.9), ink, w, true)
-		"bloom":       # a five-petal flower
+		"bloom":  # a five-petal flower
 			for k in 5:
 				var a := TAU * k / 5.0 - PI / 2.0
 				ci.draw_circle(P.call(cos(a) * 0.5, sin(a) * 0.5), s * 0.32, ink)
 			ci.draw_circle(c, s * 0.24, Color(col.darkened(0.15), alpha))
-		"storm":       # a cloud with rain
+		"storm":  # a cloud with rain
 			for b in [[-0.4, 0.0, 0.36], [0.05, -0.25, 0.48], [0.45, 0.05, 0.34]]:
 				ci.draw_circle(P.call(b[0], b[1]), s * b[2], ink)
 			ci.draw_rect(Rect2(P.call(-0.4, -0.05), Vector2(0.85, 0.42) * s), ink)
@@ -450,27 +572,36 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 
+
 # ------------------------------------------------------------------ widgets
 ## A type badge: a disc in the type's colour with its glyph.
-class TypeIcon extends Control:
+class TypeIcon:
+	extends Control
 	var t := ""
+
 	func _init(type_id: String, px := 16.0) -> void:
 		t = type_id
 		custom_minimum_size = Vector2(px, px)
 		mouse_filter = Control.MOUSE_FILTER_PASS
 		size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		tooltip_text = "%s type" % DexView.type_name(type_id)
+
 	func _draw() -> void:
 		DexView.draw_type(self, t, size * 0.5, minf(size.x, size.y) * 0.5)
 
+
 ## A soft twinkle over a portrait: the shimmer form has been found.
-class Sparkle extends Control:
+class Sparkle:
+	extends Control
 	var t := 0.0
+
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_PASS
+
 	func _process(d: float) -> void:
 		t += d
 		queue_redraw()
+
 	func _draw() -> void:
 		var spots := [Vector2(0.18, 0.2), Vector2(0.84, 0.32), Vector2(0.7, 0.86), Vector2(0.26, 0.78)]
 		for i in spots.size():
@@ -478,12 +609,35 @@ class Sparkle extends Control:
 			var r := (2.0 + 3.2 * a) * minf(size.x, size.y) / 70.0
 			var p: Vector2 = size * (spots[i] as Vector2)
 			var col := Color(1.0, 0.95, 0.75, 0.25 + 0.6 * a)
-			draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r * 1.6), p + Vector2(r * 0.35, 0), p + Vector2(0, r * 1.6), p + Vector2(-r * 0.35, 0)]), col)
-			draw_colored_polygon(PackedVector2Array([p + Vector2(-r * 1.6, 0), p + Vector2(0, r * 0.35), p + Vector2(r * 1.6, 0), p + Vector2(0, -r * 0.35)]), col)
+			draw_colored_polygon(
+				PackedVector2Array(
+					[
+						p + Vector2(0, -r * 1.6),
+						p + Vector2(r * 0.35, 0),
+						p + Vector2(0, r * 1.6),
+						p + Vector2(-r * 0.35, 0)
+					]
+				),
+				col
+			)
+			draw_colored_polygon(
+				PackedVector2Array(
+					[
+						p + Vector2(-r * 1.6, 0),
+						p + Vector2(0, r * 0.35),
+						p + Vector2(r * 1.6, 0),
+						p + Vector2(0, -r * 0.35)
+					]
+				),
+				col
+			)
+
 
 ## A Boki turning slowly on a little stand, live (for the Field Book page).
-class Spinner extends SubViewportContainer:
+class Spinner:
+	extends SubViewportContainer
 	var turn: Node3D
+
 	static func make(rec: Dictionary, silhouette := false) -> Spinner:
 		var c := Spinner.new()
 		c.stretch = true
@@ -504,22 +658,28 @@ class Spinner extends SubViewportContainer:
 		vp.add_child(env)
 		var key := DirectionalLight3D.new()
 		key.rotation_degrees = Vector3(-35, 200, 0)
-		key.light_color = Color("fff1dc"); key.light_energy = 1.15
+		key.light_color = Color("fff1dc")
+		key.light_energy = 1.15
 		vp.add_child(key)
 		var rim := DirectionalLight3D.new()
 		rim.rotation_degrees = Vector3(-10, 20, 0)
-		rim.light_color = Color("a8c8ff"); rim.light_energy = 0.5
+		rim.light_color = Color("a8c8ff")
+		rim.light_energy = 0.5
 		vp.add_child(rim)
 		c.turn = Node3D.new()
 		vp.add_child(c.turn)
 		var mdl := Models.kin(String(rec["species"]), rec)
 		mdl.scale = Vector3.ONE
 		for ch in mdl.get_children():
-			if ch is CPUParticles3D or ch is GPUParticles3D: (ch as Node3D).visible = false
+			if ch is CPUParticles3D or ch is GPUParticles3D:
+				(ch as Node3D).visible = false
 		c.turn.add_child(mdl)
 		# the stand: a low disc
 		var st := MeshInstance3D.new()
-		var cm := CylinderMesh.new(); cm.top_radius = 0.55; cm.bottom_radius = 0.6; cm.height = 0.06
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.55
+		cm.bottom_radius = 0.6
+		cm.height = 0.06
 		st.mesh = cm
 		st.material_override = Models.toon(Color("2a2f45"), false)
 		st.position = Vector3(0, -0.03, 0)
@@ -527,14 +687,15 @@ class Spinner extends SubViewportContainer:
 		# frame the whole Boki whatever its size: the camera backs off to fit its bounds
 		var bb := _bounds(mdl)
 		# turning, its widest reach is the diagonal of its footprint
-		var reach := 0.0          # how far it sweeps from the axis it turns on (its origin)
+		var reach := 0.0  # how far it sweeps from the axis it turns on (its origin)
 		for k in 8:
 			var cr := bb.get_endpoint(k)
 			reach = maxf(reach, Vector2(cr.x, cr.z).length())
 		var rad := maxf(0.25, maxf(reach, bb.size.y * 0.55))
 		var at := Vector3(0, bb.get_center().y, 0)
 		st.position = Vector3(0, bb.position.y - 0.03, 0)
-		cm.top_radius = rad * 0.8; cm.bottom_radius = rad * 0.84
+		cm.top_radius = rad * 0.8
+		cm.bottom_radius = rad * 0.84
 		var cam := Camera3D.new()
 		cam.fov = 30.0
 		vp.add_child(cam)
@@ -544,8 +705,11 @@ class Spinner extends SubViewportContainer:
 		if silhouette:
 			c.modulate = Color(0.05, 0.06, 0.1, 0.94)
 		return c
+
 	func _process(d: float) -> void:
-		if turn: turn.rotation.y += d * 0.7
+		if turn:
+			turn.rotation.y += d * 0.7
+
 	## The model's bounds in its own space (all its meshes).
 	static func _bounds(n: Node3D) -> AABB:
 		var out := AABB()
@@ -560,5 +724,6 @@ class Spinner extends SubViewportContainer:
 				out = b if first else out.merge(b)
 				first = false
 			for ch in nd.get_children():
-				if ch is Node3D: stack.append([ch, xf * (ch as Node3D).transform])
+				if ch is Node3D:
+					stack.append([ch, xf * (ch as Node3D).transform])
 		return out if not first else AABB(Vector3(-0.4, 0, -0.4), Vector3(0.8, 0.8, 0.8))
