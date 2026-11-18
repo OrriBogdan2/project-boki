@@ -333,7 +333,10 @@ func _swim() -> void:
 		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
-	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
+	var dd := K.dash_def()
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash (owner 11-11)",
+		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
 	ok("Ground Swim: he stays hittable underground", under and hit_on)
@@ -480,7 +483,7 @@ func _rmb_numbers() -> void:
 	ok("numbers RMB: a charge comes back 5 s after the first throw", absf(m.time - t0 - 5.0) < 0.1,
 		"%.2f s" % (m.time - t0))
 
-## Ground Swim: under for 0.4 s, 4 damage and the 0.5 s knockup on surfacing, a charge back after 8 s.
+## Ground Swim: under for 0.55 s, 4 damage and the 0.5 s knockup on surfacing, a charge back after 8 s.
 func _dash_numbers() -> void:
 	_reset(5.0)
 	var d0 := P.dashes
@@ -490,7 +493,7 @@ func _dash_numbers() -> void:
 		m.step(DT)
 		under += DT
 	step(m, 0.1)
-	ok("numbers Shift: under the ground about 0.4 s (the shared dash feel's time scale)", under > 0.25 and under < 0.6,
+	ok("numbers Shift: under the ground about 0.55 s (the shared dash feel's time scale)", under > 0.4 and under < 0.75,
 		"%.2f s" % under)
 	ok("numbers Shift: surfacing deals 4", absf(dmg(T) - 4.0) < 0.2, "%.1f" % dmg(T))
 	var back := 0.0
