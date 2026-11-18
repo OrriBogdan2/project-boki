@@ -1264,3 +1264,7 @@ Where the source lets a move touch an ally (`sv/briefs/kits.md`), the check excu
 | Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
 
 Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.
+
+## Stomp break sweep (`--stomp-break-sweep-check`)
+
+Every slot (LMB, RMB, E, R, Shift) of all 13 kits is cast at a bot that is mid-stomp (3 m away, key tapped, plus a table of pinned casts). The stomp must break if and only if a hard CC (stun, root, Ground, pull, knock or launch) had landed by then, and the wisp must live; a slow, Daze or plain damage never breaks it. No row breaks the rule on main. The pinned casts are the check's `EXPECT` list. Not reached by a generic tap (so not pinned): Ostra's and Gil's R, Gunslinger's R and Sable's E slow, Pip's delayed Burrseed root, and every wall stun.
