@@ -10153,3 +10153,4 @@ READY ext/rig-ship-1117 4ac78ea908c9faf216468cbefd1393e381147ce3 (Tenzo: pick's 
 READY ext/merge-lane-wiki-regen-1117 41186217f5 (wiki regen: Rules.md summon_station table, gen_wiki --check 1->0, docs only)
 READY ext/vision-cone-1117 6d95e38f33f6271ff5fb55d85c722d0518c177ee (PR #264: hudref demo faces the row so the 120 deg cone keeps rival plates; --hudref-check 0 fails)
 READY ext/merge-lane-hunters3-1117 b1e816cadd7 (lane hunters3: tutorial E-step miss refund port of cooldown-gate-1111 dfc15de + lace gate fix; --tut-aim-check 0 fail, tutorial-fight-check NEW-RED 0)
+READY ext/hunter-first-hints-port 26a506400 (merged origin/main, only conflict content/archetypes/dredge.json: kept hint + main card; --hunter-hint-check PASS, --check 0 failures; health --strict red only on style ratchet from main drift, same on origin/main)
