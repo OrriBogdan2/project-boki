@@ -85,8 +85,9 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
-	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	# the Training Grounds (the farm opens the same one): every kit against dummies and a sparring bot, no save needed
+	var hunter := Arch.of_save() if has else ""
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts(hunter)), "knock"])
 	if Overlay.admin_allowed():
 		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:

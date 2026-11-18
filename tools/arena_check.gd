@@ -27,6 +27,7 @@ func run(main_node: Node) -> void:
 	await _cards()
 	await _loadout()
 	printerr("ARENACHECK (training match next)")
+	_farm_entry()
 	await _training()
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -430,6 +431,18 @@ func _press(start: String) -> bool:
 	b.pressed.emit()
 	await main.get_tree().process_frame
 	return true
+
+## One Training Grounds entry: the farm's way in (_start_training) opens the Arena's opts, as the title does.
+func _farm_entry() -> void:
+	var g_main = Game.main
+	Game.main = null          # (goto only records the opts)
+	var home: Node = load("res://scripts/home/home.gd").new()
+	home._start_training()
+	home.free()
+	Game.main = g_main
+	var same := Game.match_opts == Match.arena_opts(Arch.of_save())
+	ok("the farm opens the title's Training Grounds", same, str(Game.match_opts))
+
 
 func _training() -> void:
 	var m := Match.new()
