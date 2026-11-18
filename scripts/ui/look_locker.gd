@@ -32,6 +32,7 @@ const ZOOM_MIN := 0.6                       # x the shot's distance, wheel in
 const ZOOM_MAX := 1.35                      # ... wheel out
 const ZOOM_STEP := 0.08                     # per wheel notch
 const DRAG_TURN := 0.012                    # rad per pixel dragged
+const TURN_NOTCH := 0.35                    # rad of drag-turn per notch sound (about 20 degrees)
 const KEY_TURN := 2.5                       # rad/s while A / D is held
 const SPIN_DECAY := 6.0                     # 1/s: how fast a flicked turntable slows to a stop
 const GLIDE_LIFT := 0.35                    # m: you hang this high over the turntable under an open glider
@@ -58,6 +59,7 @@ var _tabs: Control
 var _list: VBoxContainer
 var _look_at := Vector3.ZERO
 var _zoom := 1.0
+var _notch := 0.0                           # rad dragged since the last notch sound
 var _spin := 0.0                            # rad/s left from a flick
 var _dragging := false
 var _trial: Dictionary = {}                 # the look being tried on (hovered), {} when none
@@ -114,6 +116,14 @@ func pick(key: String, value: Variant) -> void:
 	_rebuild_model(look)
 	_fill()
 	_pop()
+
+## One notch sound per TURN_NOTCH of dragging you round: `acc` is the turn since the last one, returns the new one.
+static func turn_notch(acc: float, turned: float) -> float:
+	acc += absf(turned)
+	if acc < TURN_NOTCH:
+		return acc
+	Sfx.play("ui_turn", null, -8.0)
+	return fmod(acc, TURN_NOTCH)
 
 ## The turntable's turn (rad); the shot tools set it.
 func set_yaw(yaw: float) -> void:
@@ -278,6 +288,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var dx: float = (event as InputEventMouseMotion).relative.x * DRAG_TURN
 		_turn.rotation.y += dx
 		_spin = dx / maxf(get_process_delta_time(), 0.001)
+		_notch = turn_notch(_notch, dx)
 
 # ---- the panel
 
@@ -299,7 +310,7 @@ func _build_panel(ui_root: Control) -> void:
 	v.add_child(_name_row())
 	var foot := UI.hbox(10)
 	foot.alignment = BoxContainer.ALIGNMENT_END
-	foot.add_child(UI.ghost("Random", _random, 120, "swap"))
+	foot.add_child(UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice"))
 	foot.add_child(UI.primary("Looks good", func(): finished.emit(), 200))
 	v.add_child(foot)
 	ui_root.add_child(card)

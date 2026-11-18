@@ -37,6 +37,8 @@ extends RefCounted
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ## Never touches the save.
+##  15. the creator and the clan screens: the creator's Random plays the dice, dragging you round ticks once per
+##      notch either way, and the guild registry's Found it, Join and Leave each play their own sound once
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -130,6 +132,7 @@ func run(main: Node) -> void:
 	_wired()
 	_fallback()
 	_ult_cues()
+	_creator_clans()
 	_nuke_fall()
 	_garden_names()
 	_garden()
@@ -1515,3 +1518,22 @@ func _falloff() -> void:
 	ok(clear, "a cue at the screen edge (%.1f m) is heard clearly (%.1f dB, clear bus)" % [edge, at_edge])
 	ok(off < at_edge - 4.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
 	ok(is_nan(gone), "...and past ~30 m it is silent")
+
+## 15. The creator and the clan screens (the screens need a whole hatch or town, so their buttons are read from source).
+func _creator_clans() -> void:
+	Sfx.last_played.clear()
+	var acc := LookLocker.turn_notch(0.0, LookLocker.TURN_NOTCH * 0.5)
+	var quiet := Sfx.last_played.is_empty()
+	acc = LookLocker.turn_notch(acc, -LookLocker.TURN_NOTCH * 0.6)
+	ok(quiet and Sfx.last_played.keys() == ["ui_turn"] and acc < LookLocker.TURN_NOTCH * 0.2,
+		"dragging you round ticks once per notch, either way")
+	var locker_src := FileAccess.get_file_as_string("res://scripts/ui/look_locker.gd")
+	ok(locker_src.contains('UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice")'),
+		"the creator's Random plays the dice")
+	var town_src := FileAccess.get_file_as_string("res://scripts/social/town.gd")
+	var once := true
+	for cue in ["ui_clan_found", "ui_clan_join"]:
+		once = once and town_src.count('Sfx.play("%s")' % cue) == 1
+	var leave_at := town_src.find('UI.button("Leave the guild"')
+	ok(once and town_src.find('"ui_clan_leave"', leave_at) > leave_at and not town_src.contains('Sfx.play("unlock")'),
+		"clan found, join and leave each play their own sound once")
