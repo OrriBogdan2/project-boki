@@ -10243,3 +10243,4 @@ READY ext/hunter-picks-1118 8b24c69e7e (Breaker spawns happy: idle_fire starts e
 READY ext/merge-lane-hunters1-1117 3dafab2683 (merge lane hunters1: results-stage win/lose beats, 1 of 25; 24 HARD; main 10a659bdee merged)
 READY ext/sable-face-game-1118 3bbc4408cb (Sable face r4: cheek streak/under-eye blue softened, texture-only, keeps lip fix)
 READY ext/merge-lane-hunters8-1117 326bd432af (merge lane hunters8: 6 hunter/kit branches ported, main merged clean; PR via gh-outbox; 20 archived, 6 HARD)
+READY ext/merge-lane-clean2-1118-a aa3dec8f4d (train a re-merged onto origin/main: 14 conflicts were style rewraps, main wrapping kept; --check 0, --camps-check 0, --results-stage-check 0; health --strict reds all identical on main (gil_kit, gil_combo, gil_rmb_video, ryzz_live, check_registry L461); supersedes 15396f5a8e)
