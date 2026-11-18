@@ -25,7 +25,7 @@ const WARDENS := {
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
 	"thief": {"height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
-	# (height_3d: the 11-15 age-down pick's dreads stand a hand over the head, measured 1.131; was 1.08 for the 11-13 body)
+	# (height_3d: the age-down pick's dreads stand a hand over the head, measured 1.131)
 	"dolm": {"height": 1.09, "height_3d": 1.13, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
