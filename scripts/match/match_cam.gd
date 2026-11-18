@@ -45,7 +45,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 		cam.top_to = 0.0
 		cam.lead_vel = m.cam_lead_vel()
 		var peek := m.mate_look.focus(StepSmooth.view(player, alpha), alpha)
-		cam.follow(peek, delta, m.mate_look.looking == null)
+		cam.follow(peek, delta, m.mate_look.looking == null, HunterMove.stand_y(player))
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)

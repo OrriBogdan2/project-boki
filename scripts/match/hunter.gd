@@ -1879,7 +1879,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	var keep: float = HunterMove.step_down + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
