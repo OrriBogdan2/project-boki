@@ -20,7 +20,10 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
-  swing of its own side's leg. No key: the clip plays as keyed.
+  swing of its own side's leg. `stop_rate` (1/s, default 5, `WardenClips.STOP_RATE`) is how fast the blend falls back
+  to the idle on a let-go (a start follows the stick at 12/s): the clip rate follows the feet of the blend as it
+  stands, so the legs slow with the body and hold their stride, and standing the leg bones settle into the idle at 3/s
+  (docs/art/ANIM_QUALITY_AUDIT.md, Stop). No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (the sneak clip's own ground speed, m/s: the clip runs at the game's crouch speed over it, up to `WardenClips.CROUCH_RATE_MAX`, so the planted foot stays put; `--crouch-check` measures it). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
   `aim_twist` (Vex, Lace, Cinder): run-and-aim as the source does it. The walk and run play forward with the legs turned
   to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
