@@ -235,20 +235,44 @@ func _first_mask(tree: SceneTree) -> void:
 	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
 		"nothing is worn before the pick, and no one else can be picked")
-	cards[2].mouse_entered.emit()      # (Vex's card in focus: the Take button takes him)
+	var shots_dir := ""
 	for arg in OS.get_cmdline_user_args():      # --shots-dir=<dir>: the pick screen as hatch_pick.png
 		if String(arg).begins_with("--shots-dir="):
-			cards[0].mouse_entered.emit()
-			if main.fade:
-				main.fade.reveal(0.05)
-			for i in 90: await tree.process_frame
-			var dir := String(arg).substr(12)
-			DirAccess.make_dir_recursive_absolute(dir)
-			tree.root.get_texture().get_image().save_png(dir.path_join("hatch_pick.png"))
-			cards[2].mouse_entered.emit()
-	var picker: Array = hx.ui.find_children("*", "Button", true, false).filter(
-			func(b): return (b as Button).text == "Take Vex")
-	picker[0].emit_signal("pressed")
+			shots_dir = String(arg).substr(12)
+	if shots_dir != "":
+		cards[0].mouse_entered.emit()
+		if main.fade:
+			main.fade.reveal(0.05)
+		await _shot(tree, shots_dir, "hatch_pick.png")
+	var offer_root: Control = hx.ui.find_children("*", "VBoxContainer", true, false).filter(
+			func(c): return c.has_meta("mask_offer"))[0]
+	ok(_button(offer_root, "Take Vex") == null and _button(offer_root, "Take Lace") == null,
+		"there is no bottom Take button: the card itself picks")
+	_click(cards[2])      # (a click on Vex's card asks before it takes him)
+	await tree.process_frame
+	var ask := _ask(hx)
+	ok(ask != null and _texts(ask).has("Take Vex?") and _button(ask, "Yes, take Vex") != null
+		and _button(ask, "Back") != null, "clicking Vex's card asks \"Take Vex?\" with Yes and Back")
+	ok(ask != null and not ask.find_children("*", "Control", true, false).filter(
+			func(p): return p.has_meta("portrait_art")).is_empty(), "the question shows his portrait")
+	ok(ClassUnlock.needs_starters() and hx.get_children().filter(func(c): return c is MaskMoment).is_empty(),
+		"asking takes nothing yet")
+	if shots_dir != "":
+		await _shot(tree, shots_dir, "hatch_pick_ask.png")
+	_button(ask, "Back").pressed.emit()
+	await tree.process_frame
+	ok(_ask(hx) == null and hx.stage == "mask" and ClassUnlock.needs_starters(), "Back keeps the pick screen as it was")
+	_click(cards[0])
+	await tree.process_frame
+	ok(_ask(hx) != null and _texts(_ask(hx)).has("Take Lace?"), "another card asks about its own Relic")
+	Input.parse_input_event(_action_event("ui_cancel"))
+	await tree.process_frame
+	await tree.process_frame
+	ok(_ask(hx) == null and ClassUnlock.needs_starters(), "Esc is Back")
+	cards[2].gui_input.emit(_action_event("ui_accept"))      # (Enter on a focused card asks too)
+	await tree.process_frame
+	ok(_ask(hx) != null and _texts(_ask(hx)).has("Take Vex?"), "Enter on a card asks as well")
+	_button(_ask(hx), "Yes, take Vex").pressed.emit()
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
 	ok(moments.size() == 1, "taking one leads into the Relic moment, not the match")
 	if moments.is_empty():
@@ -365,6 +389,38 @@ func _nest_reveal(sp: String) -> void:
 		"and it wobbles once (tips %.2f rad), then sits upright (%.3f)" % [tip, shell.rotation.z])
 	nest.queue_free()
 	spy.queue_free()
+
+## A left click on a control.
+func _click(c: Control) -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	c.gui_input.emit(ev)
+
+func _action_event(action: String) -> InputEventAction:
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	return ev
+
+## The open "Take <name>?" question of the first-Relic pick, or null.
+func _ask(hx: Node) -> Control:
+	for l in hx.find_children("*", "CanvasLayer", true, false):
+		for c in l.get_children():
+			if c is UI.Modal and not c.is_queued_for_deletion():
+				return c
+	return null
+
+func _button(root: Node, text: String) -> Button:
+	for b in root.find_children("*", "Button", true, false):
+		if (b as Button).text == text and not (b as Button).disabled:
+			return b
+	return null
+
+func _shot(tree: SceneTree, dir: String, file: String) -> void:
+	for i in 60: await tree.process_frame
+	DirAccess.make_dir_recursive_absolute(dir)
+	tree.root.get_texture().get_image().save_png(dir.path_join(file))
 
 func _texts(n: Node) -> Array:
 	var out: Array = []
