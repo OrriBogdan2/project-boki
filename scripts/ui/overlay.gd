@@ -60,13 +60,13 @@ func _process(_d: float) -> void:
 func is_open() -> bool:
 	return page != ""
 
-## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner. They are hidden
-## (no ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
-## recording mode (F10) is on, so filmed footage never shows them.
+## Admin tools are for the game's owner only (AdminGate: a dev build, the web artifact's owner, or the desktop dev
+## key). They are also hidden (no ` panel, no Admin or Mod mode entries in the menus) when launched with
+## `-- --showcase`, or while recording mode (F10) is on, so filmed footage never shows them.
 func admin_allowed() -> bool:
 	if OS.get_cmdline_user_args().has("--showcase") or Record.clean():
 		return false
-	return not OS.has_feature("web") or Social.is_owner
+	return AdminGate.unlocked()
 
 # ------------------------------------------------------------------ input
 func _input(event: InputEvent) -> void:
@@ -207,6 +207,7 @@ func back() -> void:
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
 			"bowl": open_bowl()
+			"admin": open_admin()
 			_: close()
 	else:
 		close()
@@ -900,11 +901,15 @@ func _play_slot(n: int) -> void:
 
 # ------------------------------------------------------------------ admin
 func open_admin() -> void:
+	if not AdminGate.unlocked():
+		return
 	if page != "admin" and page != "":
 		stack.append(page)
 	var c := ctx_now()
 	var v := _page("admin", "Admin tools", 640)
 	v.add_child(UI.label("For testing. ` opens this anywhere.", 13, UI.MUTED))
+	if TestZone.current(): v.add_child(UI.primary("Test Zone tools", open_test_zone, 290))
+	else: v.add_child(UI.primary("Test Zone", TestZone.start, 290))
 	var god := CheckButton.new()
 	god.text = "God mode: can't be hurt or fall, no cooldowns, endless ammo"
 	god.button_pressed = Game.god
@@ -993,6 +998,8 @@ var admin_mut := ""            # admin spawn: the rare mutation the next kin com
 var admin_shimmer := false
 ## Admin: pick any species to add to your farm.
 func open_spawn_kin() -> void:
+	if not AdminGate.unlocked():
+		return
 	if page != "spawn" and page != "":
 		stack.append(page)
 	var v := _page("spawn", "Spawn a Boki", 640)
@@ -1032,6 +1039,12 @@ func open_spawn_kin() -> void:
 	stat.name = "AdminStat"
 	v.add_child(stat)
 	_admin_refresh()
+
+## The Test Zone's page (TestZone): god mode, Hunters, monsters, a Boki partner, reset and home.
+func open_test_zone() -> void:
+	var m := TestZone.current()
+	if m and AdminGate.unlocked():
+		TestZone.fill(_page("testzone", "Test Zone", 680, true), m, open_test_zone)
 
 func _admin_refresh() -> void:
 	var st := root.find_child("AdminStat", true, false)

@@ -78,6 +78,8 @@ extends RefCounted
 ##      drops, and stops on a heal, a down or out
 ##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
+##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
+##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -159,6 +161,7 @@ func run(main: Node) -> void:
 	_ui_cues()
 	_low_hp()
 	_voices()
+	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
