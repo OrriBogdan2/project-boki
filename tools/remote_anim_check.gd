@@ -4,7 +4,8 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop, the same
 ## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log
-## every change of the move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
+## every change of the
+## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
 ## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
 ## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
 ## Then the lair bosses (Net 0.24.6's "bat" event): the
