@@ -10155,3 +10155,4 @@ READY ext/vision-cone-1117 6d95e38f33f6271ff5fb55d85c722d0518c177ee (PR #264: hu
 READY ext/merge-lane-hunters3-1117 b1e816cadd7 (lane hunters3: tutorial E-step miss refund port of cooldown-gate-1111 dfc15de + lace gate fix; --tut-aim-check 0 fail, tutorial-fight-check NEW-RED 0)
 READY ext/hunter-first-hints-port 26a506400 (merged origin/main, only conflict content/archetypes/dredge.json: kept hint + main card; --hunter-hint-check PASS, --check 0 failures; health --strict red only on style ratchet from main drift, same on origin/main)
 READY ext/vex-coin-palm-1117 5c1633b019 (bulk-rebase: origin/main merged in mechanically, was e33788e81d; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/lmb-stuck-1118 8914590a3b (holds end on focus loss; map closes on landing; --input-release-check + --bot-idle-check; small, v0.24.11 candidate)
