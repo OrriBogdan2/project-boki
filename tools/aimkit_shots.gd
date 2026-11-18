@@ -23,7 +23,7 @@ const SHOTS := [
 	["vee_open", 6.0, 3.0, false, "Draw V opening 25 degrees at k 0.3, a glint riding the line (Lisette LMB draw toward Empowered)"],
 	["vee_closed", 6.0, 3.0, false, "Draw V closed into one bright line at k 1 (Lisette Empowered ready)"],
 	["cone_fill", 6.0, 4.0, false, "Filled cone from a stuck point back out, filling over its fuse, seen by all (Vex wall cone)"],
-	["cone_edges", 6.0, 3.0, false, "Cone edges only: a 30 degree spread to a range (the shape Grimble's LMB used before 11-18)"],
+	["cone_edges", 6.0, 3.0, false, "Cone edges only: a 30 degree spread to a range (old Grimble LMB)"],
 	["circle_landing", 6.5, 3.5, false, "Landing circle at the cursor with four ticks, plus the thin aim line (Vex R Mini Nuke placement)"],
 	["sweet_spot", 6.0, 2.5, false, "Slam circle a hop ahead with the inner sweet-spot ring growing, k 0.5 (Tarek RMB Volcano Crusher)"],
 	["arc_wall", 6.0, 4.0, false, "Curved arc wall at the cursor distance, 120 degrees in 7 panels (Lisette E Rain of Arrows)"],
