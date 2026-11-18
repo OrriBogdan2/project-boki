@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the flag: content/rules/merge_forms.json ships `fusion_enabled` false
 ##   2. off: X, the bot's merge call, the Boki's leap and a full bond meter start nothing; the meter never fills;
 ##      no hunter in a bot match merges; the Boki-ability tip, loading tips, words, cards, controls and the
-##      keybind list (X stays reserved in the input map) say nothing about it; the tutorial skips its steps
+##      keybind list (X stays reserved in the input map) say nothing about it; the tutorial never has Fusion steps
 ##   3. on: the same calls start a Fusion, and the same screens show it again
 
 var bad := 0
@@ -152,7 +152,7 @@ func _on() -> void:
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
 	var tu := _tutorial()
-	ok(tu.applies("pick_ult") and tu.applies("ult"), "on: the tutorial teaches it")
+	ok(not tu.applies("pick_ult") and not tu.applies("ult"), "on: the tutorial still skips Fusion (11-18)")
 
 
 # ------------------------------------------------------------------ helpers
