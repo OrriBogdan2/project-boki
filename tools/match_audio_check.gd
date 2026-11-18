@@ -708,7 +708,7 @@ func _walk(am: Match, P: Hunter, rim: Dictionary, glide: bool, cold: bool) -> Ar
 func _teammate(am: Match, o: Hunter, rim: Dictionary) -> void:
 	var out_at: Vector2 = rim["lip"] + Vector2(rim["dir"]) * 3.0
 	var heard := {}
-	for case in [["whoosh", 5.0], ["whoosh", 30.0], ["fallout", 30.0], ["fallout", 60.0]]:
+	for case in [["whoosh", 5.0], ["whoosh", 36.0], ["fallout", 30.0], ["fallout", 60.0]]:
 		o.remote = true
 		o.out = false
 		o.net_t = -1.0
@@ -727,8 +727,8 @@ func _teammate(am: Match, o: Hunter, rim: Dictionary) -> void:
 			o.abyss_sfx.tick(o, Match.DT)
 		heard["%s %d" % case] = Sfx.last_played.has("abyss_" + String(case[0]))
 	o.remote = false
-	ok(heard["whoosh 5"] and not heard["whoosh 30"],
-		"a teammate's whoosh is positional: heard at 5 m, not at 30 m %s" % [heard])
+	ok(heard["whoosh 5"] and not heard["whoosh 36"],
+		"a teammate's whoosh is positional: heard at 5 m, not at 36 m (past the 30 m hearing range) %s" % [heard])
 	ok(heard["fallout 30"] and not heard["fallout 60"],
 		"...their fall-out carries further: heard at 30 m, not at 60 m")
 
