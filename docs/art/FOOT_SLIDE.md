@@ -178,3 +178,24 @@ really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfe
 | Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
 | Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
 
+## Back and strafe loops on their own speeds (Nov 18, ext/p11-port-1118)
+
+`WardenGait.plan` mixes `loco.back_foot_mps` in by how far the blend points back (next to `side_foot_mps`).
+`--foot-slide-check --fit-dirs` reads, at each Hunter's walk and run ring and in all four directions, the share of
+the body's speed a planted foot covers, and prints the foot speed that would plant it (the current one times that
+share; going from the run straight to a walk is a WardenStride let-go, so each walk read starts from a stand). One
+round of fits on main's v95 glbs, kept only where the sweep's worst slip fell (m/s):
+
+| Hunter | Worst before | Worst after | Bar |
+|---|---|---|---|
+| Sparkle (`mage`) | 2.16 (back 4.65) | 0.93 (back 4.65) | 1.55 -> 0.95 |
+| Kael (`juggernaut`) | 1.17 (left 4.55) | 0.92 (left 4.50) | 0.95 |
+| Sable (`thief`) | 1.18 (right 3.00) | 1.07 (left 2.50) | 1.5 -> 1.1 |
+| Vex (`gunslinger`) | 1.05 (left 4.55), wobble 1.06 | 0.97, wobble 0.98 | 1.0 |
+| Grimble (`dredge`) | 0.92 (back 3.50) | 0.73 (back 3.50) | 0.95 -> 0.75 |
+| Tenzo (`dolm`) | fwd 1.23, back 1.40 | fwd 0.49, back 0.79 (strafe 3.77 at the rate cap) | 2.7 |
+
+Not changed (the fit made them worse, or the clips cannot be fixed by a rate): Lace (`archer`, forward run covers
+0.64 of the speed, 4.63 m/s), Albert (`bulwark`, strafe loops cover 0.06-0.19: 5.33 m/s), Meeko (`tender`, 1.77 at
+fwd 2.50, mid-blend), Neve (`rimewright`, skates, no bar), Cinder (`ashwick`, already 0.97-1.00). These five stay red
+on main and here alike: their loops need re-keying (docs/DEBT.md).

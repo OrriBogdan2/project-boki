@@ -46,7 +46,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
   swing of its own side's leg; `side_foot_mps` [walk, run] is the strafe loops' own foot speed, mixed in by how far the
-  move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
+  move points sideways, and `back_foot_mps` the back loops', by how far it points back (both fitted with
+  `--foot-slide-check --fit-dirs`). `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
   so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
   `--foot-slide-check`). No key: the clip plays as keyed.
   `plants` {clip: {"L": [s], "R": [s]}}: when each walk and run loop puts a foot down (s into the clip at rate 1); the
