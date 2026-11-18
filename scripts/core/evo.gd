@@ -123,9 +123,26 @@ static func form_name(rec: Dictionary) -> String:
 static func rules() -> Dictionary:
 	return Content.rules("evolve")
 
+const OLD_XP_PER_LEVEL := 50       # the curve before v21: XP from level n to n + 1 was 50 x n, flat from level 20
+const OLD_XP_FLAT_FROM := 20
+
 ## The highest level a Boki can reach.
 static func cap() -> int:
 	return int(rules()["cap"])
+
+## Save v20 -> v21: the XP per level changed (50 x level, flat from 20, to Game.xp_need), so a saved Boki keeps
+## the same share of the way to its next level: nobody loses progress and nobody levels twice on the spot.
+static func migrate_xp(data: Dictionary) -> void:
+	var recs: Array = (data.get("roster", []) as Array).duplicate()
+	for lost in data.get("lost_kin", []):
+		if typeof(lost) == TYPE_DICTIONARY and typeof(lost.get("rec")) == TYPE_DICTIONARY:
+			recs.append(lost["rec"])
+	for rec in recs:
+		if typeof(rec) != TYPE_DICTIONARY or not rec.has("xp"):
+			continue
+		var lv := maxi(int(rec.get("level", 1)), 1)
+		var share := clampf(float(rec["xp"]) / float(OLD_XP_PER_LEVEL * mini(lv, OLD_XP_FLAT_FROM)), 0.0, 0.999)
+		rec["xp"] = int(share * Game.xp_need(lv))
 
 ## A final form: a species that evolves into nothing.
 static func is_final(species: String) -> bool:

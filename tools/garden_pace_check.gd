@@ -195,9 +195,8 @@ func _check_rows() -> void:
 	GardenXp.play("relay", rec, true, true)
 	ok(int(rec["xp"]) == 0, "a game not in the list pays no XP")
 	var c: Dictionary = r["curve"]
-	var flat := int(c["flat_from"])
-	ok(Game.xp_need(1) == int(c["per_level"]) and Game.xp_need(flat + 30) == Game.xp_need(flat),
-			"Game.xp_need follows the curve (%d at level 1, flat from level %d)" % [Game.xp_need(1), flat])
+	ok(Game.xp_need(1) == int(c["base"]) and Game.xp_need(4) == roundi(float(c["base"]) * pow(4.0, float(c["power"]))),
+			"Game.xp_need follows the curve (%d at level 1, %d at level 4)" % [Game.xp_need(1), Game.xp_need(4)])
 
 func run(m: Node) -> void:
 	Save.no_write = true
