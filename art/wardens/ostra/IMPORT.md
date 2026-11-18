@@ -41,3 +41,7 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **Clips:** `tools/art1/ostra_clips.py` (keys; gliding, the box swings back on the spring's top, `swing`, and treads), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).
+
+**Shard Snap's free arm (2026-11-17, port of ext/ostra-gait-rebased):** `snap_wind` and `snap` hold the fan in at the ruff (`HELD_L`), re-keyed on this glb's rig
+(`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
+bounding walk and run were not ported: main's tread gait (Nov 11) stays.
