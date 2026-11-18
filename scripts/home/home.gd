@@ -125,6 +125,8 @@ var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
+var crouch_look := HomeCrouchLook.new()   # holding crouch pulls the camera out as in a match (crouch_look.gd)
+var crouch_grounded := false    # crouching on the ground this frame (what the camera look asks)
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -423,7 +425,7 @@ func _ready_rest() -> void:
 	item_fx = GardenItemFx.new()
 	add_child(item_fx)
 	cam = CamRig.new(); add_child(cam)
-	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
+	cam.zoom_to = CamWheel.far(); cam.zoom = cam.zoom_to; cam.lead = 0.2      # arriving: the wheel's widest
 	_apply_cam_settings()
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
@@ -1102,6 +1104,7 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	else: Incubator.tick(d)      # visiting a friend, your eggs still warm at the plain pace
 	_apply_cam_settings()
+	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
@@ -1138,7 +1141,6 @@ var dash := DashState.new()    # the dash charges and the long dash cooldown, th
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
-const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
 const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
@@ -1172,7 +1174,7 @@ func _exit_tree() -> void:
 	Sfx.clear_amb_layers()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
-## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
+## expedition's (HOME_ACROSS_REF framing at zoom 1.2), and at match size a Boki was a speck beside
 ## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size).
 const FARM_BOKI_SCALE := 1.7
 
@@ -1271,6 +1273,7 @@ func _move_player(d: float) -> void:
 	water.step(wdep, d, mv, air)
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
+	crouch_grounded = crouching
 	if can_act and mover.pressed(&"dash") and dash_t <= 0.0 and not water.swimming:
 		if not try_dash(mv, air) and dash_slot:
 			dash_slot.deny()
@@ -2388,8 +2391,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_kin(hover_k["rec"])
 			get_viewport().set_input_as_handled()
 			return
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
+		var notch := CamWheel.notch(event)      # the match's wheel: same steps and range, not over a menu or talk
+		if notch != 0 and not building_now and not chat_open and train.is_empty():
+			crouch_look.wheel(cam, notch)
 	if panel_open == HomeClasses.TITLE and event.is_action_pressed("kit_card") and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
@@ -3579,7 +3583,7 @@ func _play_evolutions() -> void:
 		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		_emote(k, "★")
 		building_now = false
-		cam.zoom_to = HOME_ZOOM
+		cam.zoom_to = CamWheel.far()
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
