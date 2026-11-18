@@ -3,14 +3,16 @@ extends RefCounted
 ## A hunter's wall kick and wall bounce (one instance per hunter, hooked from Hunter).
 ## Kick (item 149, the reference's wall dance): in the air touching or facing a wall, a jump hops you off it,
 ## again and again, no glider and no cooldown, with a stone scuff everyone near hears. Keys into the wall or
-## none add KICK_RISE of height to the jump you are on; keys away push you off it. A hop only starts up to
-## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
-## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
-## opens the glider: the glide button still does). Bounce: hitting a
-## wall at an angle with speed in the air (a dash, a boosted jump) rebounds you off it;
-## head-on you just stop, as ever, and a jump there kicks. Slide: the glider never bounces or stops dead
+## none add KICK_RISE of height to the jump you are on; keys away push you off it. Each kick in a row without
+## touching the ground keeps less of that rise and push (content/rules/wall_kick.json, decision 0100). A hop
+## only starts up to HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a
+## mantle on top and a five-terrace one stays sheer however long you dance. Near a wall a capped press does
+## nothing (it never opens the glider: the glide button still does). Bounce: hitting a wall at an angle with
+## speed in the air (a dash, a boosted jump) rebounds you off it; head-on you just stop, as ever, and a jump
+## there kicks. Slide: the glider never bounces or stops dead
 ## on a wall, see stopped().
 
+const RULES_PATH := "res://content/rules/wall_kick.json"
 const KICK_RISE := 0.8          # m of extra jump height: one terrace (World.LEVEL)
 const HOP_CLIMB_CAP := 1.6      # m above the take-off ground a hop may still start (a plain jump's apex)
 const FACE_REACH := 0.4         # m past the body a wall you face (not touching) still answers a hop
@@ -41,6 +43,8 @@ const FACE_STEP := 0.1          # m between the probes that find the wall face f
 const WALL_BACK := -0.1         # share of the speed into a wall a walker or jumper gets back off it (a nudge clear)
 
 static var scuffs := 0          # (tests) hop scuffs played
+static var _curve: Array = []   # share of a kick kept by its place in the chain (wall_kick.json)
+var chain := 0                  # kicks since the feet last touched the ground
 var bounce_t := 0.0
 var _rebound := Vector2.ZERO
 var _rebound_speed := 0.0
@@ -52,6 +56,13 @@ var _pose_n := Vector2.ZERO     # that face's outward normal
 ## Landing ends a rebound.
 func land() -> void:
 	bounce_t = 0.0
+	chain = 0
+
+## The share of a kick's rise and push that the next kick keeps: the curve entry for its place in the chain.
+func kick_share() -> float:
+	if _curve.is_empty():
+		_curve = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))["curve"]
+	return float(_curve[mini(chain, _curve.size() - 1)])
 
 ## A jump pressed in the air at a wall: hops you up it or off it. True if the press is the wall's (it hopped,
 ## or the hop is capped), so it never falls through to opening the glider.
@@ -62,12 +73,14 @@ func try_kick(h: Hunter) -> bool:
 		return true
 	var keys: Vector2 = h.inp.get("move", Vector2.ZERO)
 	var toward := keys.normalized().dot(h.wall_n) if keys.length() >= KICK_KEYS_MIN else -1.0
+	var share := kick_share()
 	if toward > KICK_AWAY:
-		var push := h.wall_n * KICK_PUSH + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
-		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP, push.y)
+		var push := h.wall_n * KICK_PUSH * share + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
+		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP * share, push.y)
 	else:
-		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
+		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE * share
 		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
+	chain += 1
 	_met_wall(h)
 	h.wall_touch_t = 0.0
 	# no glider until the rise is done, so a held jump keeps the kick's height
