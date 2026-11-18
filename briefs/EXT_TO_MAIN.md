@@ -10171,3 +10171,4 @@ READY ext/tenzo-eyestones-1118 0a5675a246855a628e4671e708a467eba1bf68ca (re-merg
 READY ext/wallkick-diminish f745e30628 (wall kick diminishing returns 100/60/30%, curve in content/rules/wall_kick.json, chain resets on ground, HOP_CLIMB_CAP kept; 5-terrace wall mashed-kick peak 4.98m before -> 4.26m after, timed presses 2.28m both; --wallmove-check new asserts ok, its Lace turn-back FAIL and feel-golden 104 fails are same on main)
 READY ext/merge-lane-clean2-1118-a 15396f5a8e (lane clean2 train a: 11 clean branches, NEW-RED 0, export 872 MB)
 READY ext/merge-lane-clean2-1118-b bd60ecdd2a (lane clean2 train b: 9 clean branches + size baseline bump to 888.6 MB, NEW-RED 0)
+READY ext/tenzo-eyestones-1118 1a83484fc606c1ac582c97a9ab67b807fea51111 (Tenzo cobalt eye-stones/shards in glb + E/R rocks cobalt VFX; on rig-ship-1117; rpc1 gate ENV-BROKEN overload, export OK 858 MB, gh-outbox PR filed)
