@@ -217,3 +217,11 @@ game .glb's `v95` image (`tools/art1/glb_image_swap.py`), not by a v95_to_game r
 re-weights the body (Motley 11-17: worst stretch 7.93 -> 17.80, 31 clips past 10x). The face lock in v95-promote put the
 whole live atlas back on r3 A (`cand_A_keephead.glb` is pixel-identical to the old master, smear included), so the paint
 came from `cand_A.glb`: its changed texels (2.4%, tail) composited over the live 4096 game image.
+
+## Black shards, 2026-11-18 (ext/grimble-ingame-fix-1117)
+The toon outline is an inverted hull: any triangle that shows its back to the camera draws black. The Grimble port left
+three kinds (wedges at the goo hand, spikes at both feet): floating sheets, patches wound inside-out, and the rip's
+needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb` flips,
+drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
+`--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
+`godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
