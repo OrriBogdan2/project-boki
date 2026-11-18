@@ -79,6 +79,9 @@ const CHECKS := {
 	"--revive-check": ["res://tools/revive_check.gd", "revive_check", null],
 	"--weapon-clip-check": ["res://tools/weapon_clip_check.gd", "weapon_clip_check", null],
 	"--farm-start-check": ["res://tools/farm_start_check.gd", "farm_start_check", null],
+	"--farm-crouch-look-check": ["res://tools/farm_crouch_look_check.gd", "farm_crouch_look_check", "check"],
+	# --shots-dir=<dir> (GPU)
+	"--farm-crouch-look-shots": ["res://tools/farm_crouch_look_check.gd", "farm_crouch_look_check", "shots"],
 	"--work-check": ["res://tools/work_check.gd", "work_check", null],
 	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
 	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
