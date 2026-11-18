@@ -41,7 +41,7 @@ func _ready() -> void:
 			var which := a.substr(10).split(":")
 			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
-		if a == "--god": opts["god"] = true
+		if a == "--god" and AdminGate.unlocked(): opts["god"] = true
 		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
@@ -428,8 +428,6 @@ func _ready() -> void:
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
 		show_screen("home", {"visit": Social.clean_island(Social.profile_doc()), "visit_id": "test"})    # test: visiting an island
-	elif "--feel-lab" in args:
-		get_tree().change_scene_to_file.call_deferred("res://tests/feel_test.tscn")    # the Supervive feel playground
 	elif "--prologue" in args:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:

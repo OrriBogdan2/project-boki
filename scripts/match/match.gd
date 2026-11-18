@@ -2408,7 +2408,7 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same wedge)
+const VIEW_COS := 0.5          # 120 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
@@ -3288,6 +3288,10 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 	if Input.is_action_just_pressed("summon") and not paused:
 		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		FocusRelease.release_all(self)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if CamWheel.input(self, event): return
