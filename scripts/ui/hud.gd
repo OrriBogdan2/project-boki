@@ -133,6 +133,7 @@ func _place_msgs() -> void:
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
