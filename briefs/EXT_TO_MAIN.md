@@ -10205,3 +10205,4 @@ READY ext/vfx-utility-read-port d895074d4b (bulk-rebase: origin/main merged in m
 READY ext/hud-portraits-1118 ad1e42c3c9a (7 hunters 3-mood HUD portraits; sheet /home/boki/meshy/hud-portraits-1118/compare_hud.jpg)
 READY ext/hunter-picks-1118 19a0bc242b6 (note: Breaker now spawns happy; idle_fire starts at 99, clips check covers it)
 READY ext/hud-portraits-1118 02d667635eb (all 13 hunters 3-mood HUD portraits: +Kael, Vex, Cinder, Lace, Meeko; Gil excited/hurt with live neutral; Malgrave has no archetype, skipped; sheet /home/boki/meshy/hud-portraits-1118/compare_hud_add8.jpg)
+READY ext/p11-port-1118 d6ad20bd8ea9e2cb6019fb42be8ac3177dd55f46 (merged main; --ostra-combo-check fixed 277/0: footed control now rebuilt + clip rig stepped)
