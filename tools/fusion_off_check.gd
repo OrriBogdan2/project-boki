@@ -153,6 +153,12 @@ func _on() -> void:
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
 	var tu := _tutorial()
 	ok(not tu.applies("pick_ult") and not tu.applies("ult"), "on: the tutorial still skips Fusion (11-18)")
+	var tut_tips := {}
+	for i in 60:
+		Save.d["tutorial"]["tips_seen"] = []
+		tut_tips[TipPick.pick(["no_summon"], true, false)] = true
+	ok(not tut_tips.keys().any(func(t): return String(t).contains("fuses you")),
+			"on: no loading/downed tip in the tutorials mentions the fuse")
 
 
 # ------------------------------------------------------------------ helpers
