@@ -29,6 +29,7 @@ var win := 0.0  # s: the window it started with (the most `left` seen), for Summ
 var shrink := 0.0  # s of the shrink back left
 var grow := 0.0  # s of the bloom left (drawing only)
 var cd := 0.0  # s until it can be summoned again
+var fused := false  # merged by R (fuse): it folds back into the wisp when the merge ends
 var warned := false  # the end warning has played for this window (drawing only)
 var cd_full := 1.0  # s: the cooldown now running (longer after a rival's kill), for the HUD ring
 var fly := 0.0  # s of the flight home left after a kill (drawing only)
@@ -109,7 +110,22 @@ func burst(window: float) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+	fused = false
 	warned = window <= WARN_S
+
+
+## R (KinMerge.cast) fuses it as the Boki itself, from the wisp or out of a summon. A summon's window ends here and
+## its one cooldown starts now; a merge from the wisp leaves the cooldown alone.
+func fuse() -> void:
+	if not k.wisp and not out():
+		return  # (Boki wisps off: the walking Boki merges as before)
+	if out():
+		cd = cd_base
+		cd_full = cd_base
+	left = 0.0
+	shrink = 0.0
+	fused = true
+	KinWisp.set_wisp(k, false)
 
 
 ## The window is over (timer or sent back early): the shrink starts.
@@ -192,14 +208,18 @@ func tick(dt: float) -> void:
 	grow = maxf(0.0, grow - dt)
 	fly = maxf(0.0, fly - dt)
 	var o := k.owner_h
-	if left > 0.0:
+	if fused:
+		_unfuse(o)
+	elif KinMerge.transforming(o):
+		return  # (the window holds while the Boki leaps in to merge)
+	elif left > 0.0:
 		left -= dt
 		if left <= 0.0:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
 			k.teleport(KinFollow.side_spot(k))  # you dashed or glided off: it re-blooms beside you
 			popped(false)
-	elif shrink > 0.0 and k.state != "fused":
+	elif shrink > 0.0:
 		shrink -= dt
 		if shrink > 0.0:
 			return
@@ -209,10 +229,21 @@ func tick(dt: float) -> void:
 			_back(cd_base)
 
 
+## The merge is over (KinMerge.end let it out): it folds back into the wisp, the cooldown as it was.
+func _unfuse(o: Hunter) -> void:
+	if o != null and KinMerge.active(o) and o.kin == k:
+		return
+	fused = false
+	if o != null and not o.out and not KinLoss.guarding(k):
+		_fold()
+
+
 ## The bloom (into the Boki) or the puff (back into the wisp), on every game (KinWisp.set_wisp).
 func popped(to_wisp: bool) -> void:
 	if not to_wisp:
 		warned = left <= WARN_S  # (a re-bloom late in the window does not warn twice)
+		if fused or k.state == "fused":
+			return  # (fused by R: the merge's own transformation is the show)
 	var glow: Color = k.sp.get("glow", k.sp["color"])
 	if to_wisp:
 		k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), glow, 8, 2.0)
@@ -224,10 +255,15 @@ func popped(to_wisp: bool) -> void:
 
 
 func _back(cool: float) -> void:
-	left = 0.0
-	shrink = 0.0
 	cd = cool
 	cd_full = cool
+	_fold()
+
+
+func _fold() -> void:
+	fused = false
+	left = 0.0
+	shrink = 0.0
 	k.hp = k.max_hp
 	KinWisp.set_wisp(k, true)
 	k.stow()

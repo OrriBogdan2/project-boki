@@ -315,7 +315,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		Color("cfe8ff"),
 		0.0,
 		0.0,
-		k.ready_to_fight() and k.throw_cd <= 0.0
+		k.ready_to_fight() and not k.wisp and k.throw_cd <= 0.0
 	)
 	var hf := KinCommand.hold_frac(p)
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
