@@ -501,6 +501,31 @@ What the source settles, and what it doesn't:
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, a landing or arrival pose (`"land": true` in the move's keys: Sparkle's streak arrival, Motley's Trade arrival, Tenzo's crash) never holds the glider, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Play probe: an automated player for every Hunter (`--play-probe`, owner 11-17)
+`tools/play_probe.gd` plays each Hunter in a real match with keyboard and mouse InputEvents sent through
+`Input.parse_input_event` (InputMap actions, `Match._gather_input`, `_unhandled_input` for the map and the pack). The
+harness only resets between scenarios (teleport, fresh kit, dash charges); inside one, everything is input. Per frame it
+records the body (position, velocity, ground, locomotion state, glide, dash), what the hunter did (shots, swings,
+casts, kit moves, slot uses), the camera and the model (clip blend, rest-pose distance, the planted foot's speed).
+`tools/play_probe_judge.gd` turns that into PASS/FLAG lines with a player-words reason and an impact score.
+
+Scenarios: run, sneak, reverse, diagonal, stop; jump (tap, running, held: never a glide); dash (running, standing,
+4 taps for charges, air); glide (open on a fresh press, fold on release, held into a landing); LMB/RMB/E/R/Q as tap
+and as a 1.5 s hold, then walk away; fire during a dash, a jump and a glide; LMB/RMB held while the map or the pack
+opens and the button comes up under it; walking with the map up; focus loss with keys down; walk and dash into a
+wall; down a terrace; up stairs; off the island edge; into the other Hunter and your Boki; a strong shove (open
+ground and into a wall); 8 seeded short walks (stuck with open ground ahead). Every scenario also checks T-pose,
+the idle blend while moving, legs running while stopped, feet sliding (plain run and sneak), the camera losing the
+hunter or jolting on a smooth run, and falling out of the map. Damage and balance are out of scope.
+
+Run it: `tools/play_probe.sh <out dir> [--heroes=archer,mage]` (xvfb, no drawing, about 4 min a Hunter, 50 min for
+all 13); it writes `<out>/play_probe_report.md` and `play_probe.json`. With clips (one mp4 per FLAG, needs drawing):
+`jobq submit --needs gpu --tree <tree> --out probe_out -- --fixed-fps 60 -- --play-probe
+--play-probe-out=res://probe_out --play-probe-clips`. Not in the gate suite (its flag has no `-check`).
+
+Not covered yet: props (trees, rocks) and slopes (this map's terraces only have stairs), a single terrace step up
+(none on seed 77 with a straight run-up), Fuse (X) and the Boki keys.
+
 ## Input latency: press to first motion or shot (`--input-latency-check`)
 Source feel is instant: the first frame of motion, or the shot, follows the press. `tools/input_latency_check.gd` presses LMB, RMB, E, dash and jump for every Hunter through the real input path (Input actions, `Match._process`: gather, pending input, the step, the render). It holds each press for 6 ticks (a quick 0.1 s tap) and records the first tick on which the Hunter's velocity, its animation state (what `HunterAnim` is told: the kit move, the cast, the shot, the swing, the dodge, leaving the ground) or a projectile of theirs changes. Tick 0 is the step run in the frame of the press. Target: tick 0 or 1, unless a sourced wind-up applies (the check's `WINDUP` table cites it).
 
