@@ -8,9 +8,9 @@ extends "res://tools/hero_vfx_reel.gd"
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
 ## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
 ## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
-## then one past it, from the ground or a jump's top), "run" (run at the dummy, then circle it) and "death" (the
-## knocked-down beat). --reel-close swaps the match camera for a close orbit round the Hunter (about CLOSE_FILL of
-## the frame high, the HUD hidden). Never writes the save.
+## then one past it, from the ground or a jump's top), "run" (run at the dummy, then circle it), "death" (the
+## knocked-down beat) and "backfaces" (every surface flat, red where it shows its back). --reel-close swaps the match
+## camera for a close orbit round the Hunter (CLOSE_FILL of the frame high, no HUD). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -26,7 +26,7 @@ const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in t
 const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
 const CLOAK_TD := 3.6                   # m to the dummy in Cinder's E part: inside her 4.5 m pull
 const CLOSE_FILL := 0.7                 # --reel-close: the Hunter's share of the frame height
-const CLOSE_PITCH := 45.0               # degrees the close camera sits above level (the match's lean tips the Hunter 20)
+const CLOSE_PITCH := 45.0               # degrees the close camera sits above level (the match tips a Hunter 20)
 const CLOSE_ORBIT := 0.6                # rad/s the close camera turns round the Hunter
 const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
 const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
@@ -385,3 +385,17 @@ func _p_dash_lmb() -> void:
 			P.inp["move"] = Vector2(0, 1) if t < 0.3 else Vector2.ZERO
 			P.inp["dash"] = _in(t, 0.2)
 			P.inp["fire"] = _in(t, 0.25 + late, 2.2), 6.0)
+
+## Every surface drawn flat: green where it faces the camera, red where it shows its back (the toon outline draws those
+## black). The check for tools/art1/glb_backface_fix.py.
+func _p_backfaces() -> void:
+	var sh := Shader.new()
+	sh.code = "shader_type spatial; render_mode unshaded, cull_disabled; " \
+		+ "void fragment() { ALBEDO = FRONT_FACING ? vec3(0.2, 0.8, 0.2) : vec3(1.0, 0.0, 0.0); }"
+	var mt := ShaderMaterial.new()
+	mt.shader = sh
+	for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var inst := mi as MeshInstance3D
+		for s in inst.mesh.get_surface_count():
+			inst.set_surface_override_material(s, mt)
+	await _seg("Front green, back red", 2.0, func(_t: float) -> void: pass)
