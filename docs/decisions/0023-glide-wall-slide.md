@@ -7,10 +7,10 @@
 ## Problem
 A glider meeting a cliff face, a ruin wall or a Tenzo rock 20 to 70 degrees off the normal at 4 m/s or more into it
 reflected off it (the `WallMoves` bounce of decision 0007 listed "a glide"), and any other hit gave it 10% of its
-into-wall speed back each step, so head-on it shivered on the face and a shallow hit jittered in and out. SUPERVIVE's
+into-wall speed back each step, so head-on it shivered on the face and a shallow hit jittered in and out. the reference's
 glide runs on UE's CharacterMovementComponent, whose wall hit slides (HandleImpact, SlideAlongSurface): the part of
 the velocity into the wall is dropped, the part along it kept, no bounce, no stop, and the canopy stays open.
-[?] The physics dump (briefs/supervive-data/supervive_physics.md) has no glide-wall row of its own and the hero-ref
+[?] The physics dump (sv/briefs/physics.md) has no glide-wall row of its own and the hero-ref
 footage never shows a glider on a wall; GlidePreserveSpeedSteeringAngle/Rate exist by name only.
 
 ## Options

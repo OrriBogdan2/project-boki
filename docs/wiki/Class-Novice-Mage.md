@@ -49,7 +49,7 @@ throws whatever potion comes out of his bag next, and chains crowd control until
 
 |  |  |
 |---|---|
-| Body | 124 health, 4.4 m/s, 1 dash charge |
+| Body | 124 health, 5.34 m/s, 1 dash charge |
 | Signature weapon | Swordfish (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached. |
 | Silhouette | the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip |
@@ -78,7 +78,6 @@ What the in-game kit card (K) says.
 **Grab Bag (RMB, 5s cooldown, 2 charges).**
 
 - *Tap:* Throw the next potion from the bag in an arc to the cursor (8m at most).
-- *Hold:* The landing circle shows while you hold, and the throw reaches 50% further.
 - *In the air:* In the air or gliding, the potion drops straight down under you.
 
 **Riptide (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press it again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.

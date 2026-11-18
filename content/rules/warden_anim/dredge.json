@@ -84,7 +84,7 @@
 		"dr_quake": {
 			"clip": "quake"
 		},
-		"dr_lunge": {
+		"dr_lunge": {"dash": true, 
 			"clip": "lunge",
 			"hold_from": 0.39
 		},
@@ -93,7 +93,7 @@
 			"rate": 1.4,
 			"fade_out": 0.12
 		},
-		"dr_pounce": {
+		"dr_pounce": {"dash": true, 
 			"clip": "pounce"
 		},
 		"dr_flex": {
@@ -119,6 +119,8 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"dead_t": 1.5,
 		"stun": "stun",
@@ -178,9 +180,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [

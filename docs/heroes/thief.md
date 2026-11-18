@@ -6,7 +6,7 @@ from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate b
 section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Shiv, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared steps are not used). Cooldown cuts keep the
+Source: ref-thief, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared steps are not used). Cooldown cuts keep the
 source's fraction of its own cooldown (Bolas -4 of 13, Farstep -8 of 28; Farstep's 20s is read at tier IV, so 28 at tier I).
 The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twice; our X has a fixed 24s), so it is not changed.
 
@@ -18,7 +18,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 
 ## Research summary
 
-- **Source hero:** Shiv, from SUPERVIVE. The kit now follows the footage reference sheet
+- **Source hero:** ref-thief, from the reference. The kit now follows the footage reference sheet
   (`briefs/hero-ref/dancer.md`, frames at 5 fps) where it disagrees with the wiki text.
 - **The big change:** the source's left click is a ranged bolt from alternating hands that stops at the
   cursor. Our old signature (Twin Blades, a melee combo) is replaced by **Arc Bolts** (our name, our model).
@@ -39,7 +39,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 ## Feel pass (item 7)
 
 Owner review 1103 item 7: her Cartwheel, the empowered bolt after it and the reset are the source's identity.
-[game data] is briefs/supervive-data/supervive_kits.md (Shiv, read at level 15); [footage] is
+[reference data] is sv/briefs/kits.md (ref-thief, read at level 15); [footage] is
 briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asserted in `--dancer-combo-check`
 (tools/dancer_feel_check.gd, lines `dancer feel: ...`).
 
@@ -59,14 +59,14 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
 | The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
 | Auto rate | 0.45s [footage card] | 0.45s | unchanged |
-| Reset | landing the empowered shot resets Quickflip and refunds its mana [game data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
-| Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
+| Reset | landing the empowered shot resets Quickflip and refunds its mana [reference data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
+| Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [reference data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
 ## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
 
 Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
-supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+sv/briefs/kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
 show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
 owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
 
@@ -104,7 +104,7 @@ Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s f
 ## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
 
 Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
-supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+sv/briefs/kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
 show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
 owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
 
@@ -123,14 +123,14 @@ Asserted in `--dancer-combo-check` (`dancer quick: ...`).
 | What | Source | Ours before | Ours now |
 |---|---|---|---|
 | Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | unchanged |
-| Range | 850 units = 8.5m, "the aim laser length" (docs/SUPERVIVE_FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). supervive_kits.md gives no range [game data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
+| Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [reference data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
 | Projectile speed | no figure in the data; the footage shows a bolt cover 200 px in about 0.2s, 1000 px/s x 0.0375 = 37.5 m/s [footage, one frame at 5 fps, so rough] | 34 m/s | 37.5 m/s (8.5m in 0.23s) |
 
 Asserted in `--dancer-combo-check` (`dancer LMB: clamped to 8.5m`, `dancer LMB: flight time`, the empowered 9.5m line).
 
 ## Shadow Knife audit (ext/sable-knife-audit, Nov 12)
 
-Every `e` field in content/archetypes/thief.json against Shiv's Farstep Dagger card (supervive_kits.md) [D], the
+Every `e` field in content/archetypes/thief.json against Shiv's Farstep Dagger card (sv/briefs/kits.md) [D], the
 footage sheet (briefs/hero-ref/dancer.md, frames 0219-0280 and the info panel 0401) [F] and the wiki rows under
 Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none that a source settles is off.
 `[?]` = no source settles it; left as is for the owner. Locked rows are in content/rules/kit_parity.json.
@@ -138,7 +138,7 @@ Small mechanics. 1 bh = 1.8 m (docs/KIT_PARITY.md). No number is changed: none t
 | Field | Source | Ours | Verdict |
 |---|---|---|---|
 | Throw: sticks in the first foe, else lands at the end of its path | [F] 0222-0258; [D] "throw a dagger" | same, to the cursor | match |
-| `range` | [D] none. [F] a throw with no target landed about 9 bh (16.2 m) away, at the cursor or the end of range; the max is not seen | 14 m | [?] 14 is shorter than the one throw seen; the max is unknown |
+| `range` | [D] none. [F] a throw with no target (0222, landed 0226) flew 284 px over a 34 px body height = 8.3 bh (15.0 m), past the cursor, so the end of its path | 15 m | match; locked in kit_parity (tol 0.5), docs/KIT_PARITY.md |
 | `speed` | [F] about 25 bh/s (45 m/s), read at 5 fps | 40 m/s | match within footage error (16.2 m in 0.41 s against 0.36 s, a quarter of a frame); locked 45 +-5 |
 | `dmg` | [D] the card gives no damage (every other Shiv row has one); [F] no number read on the stick (0255-0258) | 8 (0.62 of a bolt) | [?] |
 | `slow` | [D] none; [F] the panel says "Slows", the dummy slowed (0258); wiki Q: 50% | 0.5 | match (wiki); locked |
@@ -180,7 +180,7 @@ The task: time a Bola pair stun in the Shiv footage, from the tie to the first f
 +-0.2 s), and set `rmb.bola.pair_stun` to it if it lands outside 0.9 +- 0.2 s.
 
 - Sources read: `briefs/hero-ref/dancer.md` (Trickshot, frames 0076-0128) and the Chain Bolas card in
-  `briefs/supervive-data/supervive_kits.md` (origin/ext/agent-briefs). The card gives no stun length.
+  `sv/briefs/kits.md` (origin/ext/agent-briefs). The card gives no stun length.
 - The only stun clip is frames 0115-0125 (`0117.jpg`): ONE training dummy, GROUNDED, then STUNNED with 199, the word
   shown about 9 frames (about 1.8 s +- 0.2 s). The second "target" was the tree beside it (owner item 121: a
   person then a tree or wall also stuns), so no clip has two foes tied together.
@@ -194,8 +194,8 @@ The task: time a Bola pair stun in the Shiv footage, from the tie to the first f
 ## Parity pass (LMB first)
 
 The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
-slot against the source. [game data] is briefs/supervive-data (Shiv; the shared rotation rate from
-supervive_physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
+slot against the source. [reference data] is sv/briefs (ref-thief; the shared rotation rate from
+sv/briefs/physics.md); [footage] is briefs/hero-ref/dancer.md (5 fps). Asserted in `--dancer-combo-check`
 (tools/dancer_parity_check.gd, lines `dancer parity ...`); the Cartwheel and the empowered bolt are the feel
 pass above.
 
@@ -292,7 +292,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | X Encore | the same ring and blades | the same, glider stays open | [D] Shiv: no air rule |
 ## Moving while casting (RMB and E)
 
-Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
 
 | Move and phase | Source | Ours | Verdict |
 |---|---|---|---|
@@ -321,8 +321,8 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 
 ## Small mechanics
 
-From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Shiv), two guides
-(https://gamerblurb.com/articles/supervive-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
+From the wiki's ability page and patch notes (reference notes), two guides
+(https://gamerblurb.com/articles/the reference-how-to-play-shiv) and the footage sheet. "Built" means it is in the kit
 and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 
 | Mechanic | Source | Footage | Ours |
@@ -406,7 +406,7 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
 or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero

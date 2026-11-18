@@ -5,7 +5,7 @@
 - **Area:** movement / farm
 
 ## Problem
-The farm (`Home._move_player`) and the match (`Hunter._physics`) moved with two controllers: the farm's air WASD was an exponential pull (rate 6/s), the match's `HunterMove.air_steer` was SUPERVIVE's 0.015 AirControl. The owner overruled the low air control (DECISIONS 11-08) and asked for one feel everywhere, a glide that adds no speed, glide drag, and Shift cancelling into the glide.
+The farm (`Home._move_player`) and the match (`Hunter._physics`) moved with two controllers: the farm's air WASD was an exponential pull (rate 6/s), the match's `HunterMove.air_steer` was the reference's 0.015 AirControl. The owner overruled the low air control (DECISIONS 11-08) and asked for one feel everywhere, a glide that adds no speed, glide drag, and Shift cancelling into the glide.
 
 ## Options
 1. Copy the farm's numbers into the match: still two code paths that drift.
