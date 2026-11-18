@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
@@ -137,6 +136,9 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## Is the kit holding its own hero still (Neve's Rimelock statue)? That root is the move itself, so the
+## HUD shows no ROOTED icon or timer for it (HudPlate.statuses).
+func holds_still() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
 ## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if unused)}.
 ## The base reports E while it's up and e_recastable().
@@ -176,7 +178,7 @@ func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against
 func move_k() -> float: return 1.0
 ## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
 func speed_bonus() -> float: return 0.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -261,7 +263,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -277,7 +279,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -292,7 +294,7 @@ func _r_end() -> void: pass
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
-## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+## its last Loco.press_buffer for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
 ## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
 ## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
@@ -320,8 +322,17 @@ func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned...). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -822,9 +833,10 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
+			var pip_cap := 0 if single_dash() else int(dmax)
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": pip_cap, "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 ## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
@@ -926,6 +938,8 @@ func dash_charges(class_n: float) -> float:
 
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+## One plain dash with one cooldown: no charge pips, no Second Wind (Vex's Slipstep, owner 11-16).
+func single_dash() -> bool: return false
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass

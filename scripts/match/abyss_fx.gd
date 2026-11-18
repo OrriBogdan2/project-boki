@@ -35,15 +35,9 @@ func show_danger(amount: float, beat: float) -> void:
 		mat.set_shader_parameter("pulse", beat)
 
 
-## How deep into the abyss p is, as the tint's strength: 0 (at or above the balloon line, 0.5m under
-## the lowest lip around) to 1 (the point of no return, Hunter.abyss_kill_y). An overheated glider
-## (no lift left) reads worse.
-## [reference footage, feelfix] D1 (0.33s frames): the tint is there in the first frame after you
-## drop below the lip (strong by ~2-3m down, with the balloon marker), stays while you fall, is gone
-## as soon as the glider is lifting you back up (fading over one frame) even while you're still out
-## over the void, and comes straight back when you fall again. BH (0.75s frames): faint for a frame
-## as it starts, then strong; the deepest dip goes crimson with dark edges. So: a quick onset near
-## the lip, deepening with depth to full right before the point of no return, and off while rising.
+## How deep into the abyss p is, as the tint's strength: 0 above the start depth (see danger_depth), rising
+## smoothly to 1 at the point of no return (Hunter.abyss_kill_y). An overheated glider (no lift left) reads worse.
+## Off while the glider lifts you back up.
 static func danger(p: Hunter) -> float:
 	if p == null or p.out or p.grounded or not p.over_void():
 		return 0.0
@@ -54,22 +48,17 @@ static func danger(p: Hunter) -> float:
 	return danger_depth(top - p.pos.y, top - p.abyss_kill_y(), p.glide_fuel <= 0.001)
 
 
-## The same from a depth under the balloon line and the span down to the point of no return.
+## The same from a depth under the balloon line and the span down to the point of no return: 0 until
+## start_depth (content/rules/abyss_danger.json: a small dip shows nothing), then a smooth ramp to 1 at the
+## point of no return. An overheated glider (no_heat) reads a quarter worse, never before the start.
 static func danger_depth(depth: float, span: float, no_heat := false) -> float:
-	if depth <= 0.0:
+	var rules := Content.rules("abyss_danger")
+	var start := float(rules["start_depth"])
+	if depth <= start:
 		return 0.0
-	var x := clampf(depth / maxf(1.0, span), 0.0, 1.0)
-	# a quick onset just under the lip (to ONSET_K over the first ONSET of the drop), then deepening
-	# steadily to full right before the point of no return
-	var a := ONSET_K * smoothstep(0.0, ONSET, x)
-	var b := (1.0 - ONSET_K) * pow(clampf((x - ONSET) / (FULL_AT - ONSET), 0.0, 1.0), 1.2)
-	x = clampf(a + b, 0.0, 1.0)
-	if no_heat and x > 0.0:
-		x = minf(1.0, x * 1.25 + 0.08)
-	return x
+	var x := clampf((depth - start) / maxf(1.0, span - start), 0.0, 1.0)
+	x = pow(x, float(rules["curve"]))
+	return minf(1.0, x * 1.25) if no_heat else x
 
 
-const ONSET := 0.12  # share of the drop (balloon line to point of no return) the tint takes to come in
-const ONSET_K := 0.55  # ...and how strong it is by then (unmistakable, still rose rather than crimson)
-const FULL_AT := 0.95  # full strength (crimson, dark edges) from here to the point of no return
 const RISE_OFF := 1.0  # rising faster than this (m/s): no tint

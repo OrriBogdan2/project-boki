@@ -9,7 +9,7 @@ const DT := 1.0 / 60.0
 
 var main: Node
 var m: Match
-var you: Hunter
+var P: Hunter
 var dir := ""
 var lines: Array = []
 
@@ -22,9 +22,9 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	await _go(0.4)
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != you.team)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	for kind in ["skitter", "brute"]:
-		for side in [["yours", you], ["rival", foe]]:
+		for side in [["yours", P], ["rival", foe]]:
 			await _die(kind, side[0], side[1])
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
@@ -36,7 +36,7 @@ func run(main_node: Node) -> void:
 
 ## A monster in front of the player dies to `by`; frames at the flash and the dissolve.
 func _die(kind: String, side: String, by: Hunter) -> void:
-	var at := you.pos + Vector3(2.0, 0, -3.0)
+	var at := P.pos + Vector3(2.0, 0, -3.0)
 	var mb := m.spawn_mob(kind, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	await _go(0.3)
 	mb.hp = 0.0
@@ -54,7 +54,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	you = m.player
+	P = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -65,14 +65,14 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	var spot := m.world.random_ground()
-	you.teleport(spot)
+	P.teleport(spot)
 	var away := m.world.random_ground()
 	for k in 500:
 		if away.distance_to(spot) > 45.0:
 			break
 		away = m.world.random_ground()
 	for h in m.hunters:
-		if h != you:
+		if h != P:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
 
 
@@ -81,9 +81,9 @@ func _go(secs: float, drift := Vector3.ZERO) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
-		you.pos += drift
-		you.prev = you.pos
-		m.cam.snap(you.pos)
+		P.pos += drift
+		P.prev = P.pos
+		m.cam.snap(P.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame

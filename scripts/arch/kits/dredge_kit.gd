@@ -712,7 +712,8 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = Hunter.DASH_BUFFER        # held, never dropped: the next shove goes the step the gap ends
+		# held, never dropped: the next shove goes the step the gap ends (a gap longer than the press window too)
+		h.dash_buf = maxf(Loco.press_buffer, next_barge - m.time + Match.DT)
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()

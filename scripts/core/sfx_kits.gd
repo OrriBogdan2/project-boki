@@ -20,4 +20,8 @@ const NAMES := [
 ## the weapon-family hit ticks (content/sfx/hit.json) wait as long as the shared `hit` does.
 const MIN_GAP := {
 	"hit_gun": 45, "hit_bow": 45, "hit_blade": 45, "hit_blunt": 45, "hit_magic": 45, "hit_thrown": 45,
+	# the steal cues (StealSfx): prize monsters dropping together cry once a kind
+	"steal_cry_bomber": 400, "steal_cry_brute": 400, "steal_cry_glimmer": 400, "steal_cry_sentinel": 400,
+	"steal_cry_skitter": 400, "steal_cry_spitter": 400, "steal_cry_warden": 400,
+	"steal_reel": 300,
 }

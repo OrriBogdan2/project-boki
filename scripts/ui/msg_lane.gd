@@ -27,6 +27,7 @@ var top := 100.0                ## px from the top of the screen where the colum
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
+var one_hint := false           ## true: one hint (a line with its own life) on show at a time (a match's TopStack sets it)
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -147,13 +148,19 @@ func _process(delta: float) -> void:
 	_layout(delta)
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
-## while `hold` is on only URGENT lines move.
+## while `hold` is on only URGENT lines move. With `one_hint` on, one hint (a line with its own life) at a time:
+## the next waits for it (a home or scripted beat's lines still stack).
 func _promote() -> void:
 	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
-		var best := 0
+		var hint_up := one_hint and _shown.any(func(e: Dictionary) -> bool: return bool(e["own_life"]))
+		var best := -1
 		for i in _waiting.size():
-			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			if hint_up and bool(_waiting[i]["own_life"]):
+				continue
+			if best < 0 or int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if best < 0:
+			return
 		if hold and int(_waiting[best]["prio"]) < URGENT:
 			return
 		if int(_waiting[best]["prio"]) == LOW and not _shown.is_empty():

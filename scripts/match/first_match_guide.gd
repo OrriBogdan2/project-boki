@@ -83,6 +83,10 @@ func _watch_glide(p: Hunter, dt: float) -> void:
 	var open := p.gliding and not p.dropping and GlideDive.height(p) > float(rules()["dive_height"])
 	_glide_t = _glide_t + dt if open else 0.0
 
+## Seconds the line has been up, -1 when none is.
+func strip_age() -> float:
+	return _t if line != "" else -1.0
+
 func _life(lid: String) -> float:
 	for row: Array in rules()["lines"]:
 		if row[0] == lid:
@@ -102,6 +106,8 @@ func _start(lid: String, p: Hunter) -> void:
 			txt = String(row[1])
 	if lid == "dive":
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
+	if lid == "send":
+		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)
@@ -163,11 +169,14 @@ func _done(lid: String, p: Hunter) -> bool:
 func draw(h, sz: Vector2) -> void:
 	draw_line(h, sz, line, _t)
 
+## Where the banner line sits at age `t` (under the Ways Out strip and the ship's countdown line).
+static func strip_rect(mt: Match, sz: Vector2, t := INF) -> Rect2:
+	var below := WaysOutHud.bottom(mt)
+	if mt.skydrop and mt.skydrop.planning:
+		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
+	return TutorialStrip.shown(sz, t, below)
+
 ## One banner line, faded in over its first quarter second (the crouch hint draws through this too).
 static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
-	if text == "":
-		return
-	var below := WaysOutHud.bottom(h.m)
-	if h.m.skydrop and h.m.skydrop.planning:
-		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, t, below), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+	if text != "":
+		TutorialStrip.paint(h.c, h.big, strip_rect(h.m, sz, t), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))

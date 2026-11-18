@@ -39,7 +39,7 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"orchisloth":         MESHY_TRIS, "scaldamus": MESHY_TRIS, "sentrikat": MESHY_TRIS,
 	"spatewader": MESHY_TRIS, "squalltross":         MESHY_TRIS, "threadwyrm": MESHY_TRIS,
 	"tuatrune": MESHY_TRIS, "velvorm": MESHY_TRIS, "wisplet": MESHY_TRIS, "zephyrak": MESHY_TRIS,
-	"nimbostrich": MESHY_TRIS}
+	"nimbostrich": MESHY_TRIS, "rimeshrew": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in
