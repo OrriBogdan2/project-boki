@@ -2,7 +2,7 @@ extends RefCounted
 ## --cloth-shots --warden=<id> --shots-dir=<dir> [--scene=idle|run|dash|lmb] [--cam=game|orbit|side|back]
 ## [--fps=30] [--size=540] [--mp4] [--dash=pin_roll] [--lmb=arc_loose]: a Warden MOVING through the world (position advanced each frame, so a
 ## cloth chain feels the motion) in the game's renderer: <dir>/<scene>_<cam>/f000.png... (ffmpeg makes the MP4).
-## --bench[=<n>] [--secs=<s>]: n copies (default 8) running in a ring, prints the mean frame time and the engine's
+## --bench[=<n>] [--secs=<s>]: n copies (default 8) running, cloth simulated vs switched off in turns in one process;
 ## mean process time (needs a real GPU for the frame time; compare a tree with the cloth bones against one without).
 ## Scenes: idle (3 s standing); run (0.5 s stand, then 4.6 m/s); dash (run, then the dash kit move, run on);
 ## lmb (run, an LMB kit move mid-way).
@@ -179,17 +179,26 @@ func _bench(id: String, n: int, secs: float) -> void:
 	for k in 60:
 		await tree.process_frame
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	# the same process, back to back: the chains simulated, then the modifier switched off (the skin and everything
-	# else stays), twice over
-	for phase in ["cloth on", "cloth off", "cloth on", "cloth off"]:
-		for m in models:
-			var cl := ((m as Node3D).get_node("Warden/Sync") as WardenSync).cloth
-			if cl:
-				cl.sim.active = phase == "cloth on"
-		var t0 := Time.get_ticks_usec()
-		var frames := 0
-		while float(Time.get_ticks_usec() - t0) / 1e6 < secs:
-			await tree.process_frame
-			frames += 1
-		print("CLOTH_BENCH %s n=%d frames=%d frame_ms=%.3f" % [phase, n, frames,
-				float(Time.get_ticks_usec() - t0) / 1000.0 / frames])
+	# the same process, back to back and uncapped: the chains simulated, then the modifier switched off (the skin and
+	# everything else stays), six times over; prints each phase and the means (the sim runs in the skeleton update,
+	# so only whole frames show its cost)
+	Engine.max_fps = 0
+	var sums := {"cloth on": 0.0, "cloth off": 0.0}
+	var runs := {"cloth on": 0, "cloth off": 0}
+	for r in 6:
+		for phase in ["cloth on", "cloth off"]:
+			for m in models:
+				var cl := ((m as Node3D).get_node("Warden/Sync") as WardenSync).cloth
+				if cl:
+					cl.sim.active = phase == "cloth on"
+			var t0 := Time.get_ticks_usec()
+			var frames := 0
+			while float(Time.get_ticks_usec() - t0) / 1e6 < secs:
+				await tree.process_frame
+				frames += 1
+			var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / frames
+			sums[phase] += ms
+			runs[phase] += 1
+			print("CLOTH_BENCH %s n=%d frames=%d frame_ms=%.3f" % [phase, n, frames, ms])
+	print("CLOTH_BENCH_MEAN n=%d on=%.3f off=%.3f extra_ms=%.3f" % [n, sums["cloth on"] / runs["cloth on"],
+			sums["cloth off"] / runs["cloth off"], (sums["cloth on"] - sums["cloth off"]) / runs["cloth on"]])
