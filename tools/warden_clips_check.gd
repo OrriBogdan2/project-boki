@@ -317,13 +317,21 @@ func _porthole(m: Node3D, md: WardenMood) -> void:
 		[{"kmove": "bul_guard"}, true, "his guard glares"],
 		[{"fired": 4.5, "cast": 9.0, "hit_t": 9.0}, false, "4 s after the fight he smiles again"],
 		[{"emote": "x"}, false, "an emote smiles"],
-		[{"fired": float(load("res://scripts/match/hunter.gd").new().idle_fire)}, false, "a fresh spawn smiles (idle_fire starts expired)"],
+		[_spawn_state(), false, "a fresh spawn smiles (shot, cast and hit timers all start expired)"],
 	]
 	for row in rows:
 		m.set_meta(WardenClips.STATE, row[0])
 		md.step(0.1)
 		var shown := mat.get_shader_parameter("albedo_tex") as Texture2D
 		ok(shown == (angry if row[1] else own), "breaker: %s" % row[2])
+
+
+## A Hunter's own spawn defaults at match time 0, as its snapshot would read them: no shot, cast or hit yet.
+func _spawn_state() -> Dictionary:
+	var h: Object = load("res://scripts/match/hunter.gd").new()
+	var st := {"fired": float(h.idle_fire), "cast": 0.0 - float(h.cast_at), "hit_t": 0.0 - float(h.hurt_at)}
+	h.free()
+	return st
 
 
 ## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
