@@ -25,6 +25,10 @@ Spec (art/wardens/src/<art>_cloth.json), one entry per cloth group in "groups":
               closer than r (the first entry whose y it is above) to a leg's vertical axis is pushed out to r, so no
               chain starts inside the game's leg capsules (a joint inside one is shoved out sideways: the panel
               vanishes behind the leg)
+  hug         {"r": [r0, r1], "z": [z0, z1]}: hybrid weights. Cloth that lies on a leg (closer than r0 to its axis,
+              and in front of z0) keeps its own leg weights, cloth beyond r1 (or behind z1) goes to the chains, and the
+              band between blends both (smoothstep): a panel painted onto the thigh would be buried by the moving leg
+              if it hung from the hips; a loose strand would tent if it rode the thigh
   tag         bone tag (cloth_<tag><sector>_<i>)
 Needs numpy."""
 import json
@@ -170,12 +174,24 @@ def build(j, b, spec):
                     f = f * f * (3 - 2 * f)
                 if li >= 0:
                     inf = {}
+                hug = 0.0
+                if g.get("hug") and li >= 0:
+                    lx = g.get("legs", {}).get("x", g.get("leg_x", 0.09))
+                    r0, r1 = g["hug"]["r"]
+                    z0, z1 = g["hug"].get("z", [9.0, 10.0])
+                    hug = (1 - _smooth((math.hypot(abs(p[0]) - lx, p[2]) - r0) / (r1 - r0))) * \
+                        (1 - _smooth((p[2] - z0) / (z1 - z0)))
+                ws_chain = 1.0 - hug
                 for s, ws in ((s0, 1 - t), ((s0 + 1) % ns, t)):
                     if ws <= 1e-4 or li < 0:
                         continue
-                    inf[jid(s, li)] = inf.get(jid(s, li), 0) + ws * (1 - f)
+                    inf[jid(s, li)] = inf.get(jid(s, li), 0) + ws_chain * ws * (1 - f)
                     if f > 1e-4:
-                        inf[jid(s, li + 1)] = inf.get(jid(s, li + 1), 0) + ws * f
+                        inf[jid(s, li + 1)] = inf.get(jid(s, li + 1), 0) + ws_chain * ws * f
+                if hug > 1e-4:
+                    for c in range(4):
+                        if wt[v, c] > 0:
+                            inf[int(jn[v, c])] = inf.get(int(jn[v, c]), 0) + hug * float(wt[v, c])
                 top = sorted(inf.items(), key=lambda kv: -kv[1])[:4]
                 tot = sum(w for _, w in top)
                 jn[v] = 0
@@ -250,6 +266,11 @@ def loose_pieces(j, b, pr, pos, dom, bones, lo, leg_x, cz):
             ok[vs] = True
     return ok
 
+
+
+def _smooth(x):
+    x = min(max(x, 0.0), 1.0)
+    return x * x * (3 - 2 * x)
 
 
 def _t(p):
