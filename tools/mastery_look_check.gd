@@ -93,12 +93,13 @@ func _creator_toggle(main: Node) -> void:
 		"the creator has a Keep button for the earned feature only")
 	btn.pressed.emit()
 	await tree.process_frame
+	var lk: Dictionary = hx.locker.look
 	btn = hx.find_child("Feature_vex_glow", true, false) as Button
-	ok(hx.look["features"]["vex_glow"] == false and btn.text == "Faded" and _pieces(hx.look, "vex_glow").is_empty(),
+	ok(lk["features"]["vex_glow"] == false and btn.text == "Faded" and _pieces(lk, "vex_glow").is_empty(),
 		"the toggle fades it on the character")
 	btn.pressed.emit()
 	await tree.process_frame
-	ok(hx.look["features"]["vex_glow"] == true and _pieces(hx.look, "vex_glow").size() == 2, "and keeps it again")
+	ok(lk["features"]["vex_glow"] == true and _pieces(lk, "vex_glow").size() == 2, "and keeps it again")
 	await _shots(main, hx, tree)
 	hx.queue_free()
 	await tree.process_frame
@@ -114,14 +115,16 @@ func _shots(main: Node, hx: Node, tree: SceneTree) -> void:
 	if main.fade != null:
 		main.fade.reveal(0.05)
 	_master("juggernaut", ClassUnlock.mastery("juggernaut").size())
-	MasteryLook.refresh(hx.look)
-	hx.preview_yaw = PI
+	var lk: Dictionary = hx.locker.look
+	MasteryLook.refresh(lk)
+	hx.locker.set_look(lk)
+	hx.locker.set_yaw(PI)
 	for file in ["mastery_look_creator", "mastery_look_faded"]:
-		hx._show_create()
 		await tree.create_timer(1.0).timeout
 		tree.root.get_texture().get_image().save_png(dir.path_join(file + ".png"))
-		for id in hx.look["features"]:
-			MasteryLook.toggle(hx.look, String(id))
+		for id in lk["features"]:
+			MasteryLook.toggle(lk, String(id))
+		hx.locker.set_look(lk)
 
 func _migration() -> void:
 	_fresh()

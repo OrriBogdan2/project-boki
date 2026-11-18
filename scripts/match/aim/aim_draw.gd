@@ -3,8 +3,8 @@ extends Node3D
 ## The one node per match that draws every AimKit telegraph (docs/AIMKIT.md). Entries live in a
 ## dictionary keyed by hunter and id; each frame the whole set is rebuilt into one surface of a single
 ## ImmediateMesh, so showing, moving or hiding a telegraph never creates a node. Its child AimReticle
-## draws the cursor states. Local visuals only: nothing here is synced (a remote hunter's kit draws its
-## own on its own machine).
+## draws the cursor states. `all` entries of the hunters this game runs go to the other games through
+## AimNet (Net event "tele"); a remote hunter's arrive the same way and draw here like a local one.
 
 const KEEP := 0.1          # s of match time an entry lives after its last refresh (kits refresh per step)
 
@@ -14,9 +14,11 @@ var mesh := ImmediateMesh.new()
 var mi := MeshInstance3D.new()
 var geo := AimGeo.new()
 var mat := StandardMaterial3D.new()
+var mat_foe := StandardMaterial3D.new()   # a rival's telegraphs: their own surface, drawn after the rest
 var reticle: AimReticle
 var built := 0             # entries drawn by the last rebuild (tests)
 var ret := {}              # hunter instance id -> the cursor states: {h, k, t, col, flare, perfect, pcol}
+var net := AimNet.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -28,7 +30,9 @@ func _ready() -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-	mat.render_priority = 2
+	mat.render_priority = SideColor.ORDER_OWN
+	mat_foe = mat.duplicate()
+	mat_foe.render_priority = SideColor.ORDER_FOE
 	mi.mesh = mesh
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 16384.0       # the mesh is rebuilt every frame; never cull it by a stale AABB
@@ -44,9 +48,17 @@ static func key(h: Node, id: String) -> String:
 	return "%d:%s" % [h.get_instance_id(), id]
 
 func put(h: Hunter, id: String, e: Dictionary) -> void:
+	var k := key(h, id)
+	if e["all"] and not (entries.has(k) and live(entries[k])):
+		TellCue.aim(m, h, id, e)        # a rival's area starting: its wind-up where it lands
 	e["h"] = h
 	e["t"] = float(m.time)
-	entries[key(h, id)] = e
+	if e.has("ease"):
+		# the drawn width carries over from the last refresh and glides on from there (track)
+		e["deg_at"] = float((entries[k] as Dictionary).get("deg_at", e["deg"])) if entries.has(k) else float(e["deg"])
+	entries[k] = e
+	if e["all"]:
+		net.out(m, h, id, e)
 
 func drop(h: Node, id: String) -> void:
 	entries.erase(key(h, id))
@@ -65,8 +77,23 @@ func live(e: Dictionary) -> bool:
 	return float(m.time) - float(e["t"]) <= float(e["keep"])
 
 func _process(delta: float) -> void:
+	track(delta)
 	rebuild()
 	tick_reticle(delta)
+
+## Per drawn frame, after the hunters rendered: a "follow" entry starts at its hunter's drawn body and points
+## at the aim gathered this frame; an "ease" cone's width glides toward its latest value (exponential, so the
+## same over any frame rate).
+func track(delta: float) -> void:
+	for k in entries:
+		var e: Dictionary = entries[k]
+		var h = e["h"]
+		if e.get("follow", false) and is_instance_valid(h):
+			var at: Vector3 = (h as Hunter).global_position
+			e["from"] = Vector2(at.x, at.z)
+			e["dir"] = (h as Hunter).aim_dir()
+		if e.has("ease"):
+			e["deg_at"] = lerpf(float(e["deg_at"]), float(e["deg"]), 1.0 - exp(-float(e["ease"]) * delta))
 
 ## The cursor states run on real time, so a perfect-window flash still shows through a hit stop.
 func tick_reticle(delta: float) -> void:
@@ -84,32 +111,68 @@ func ret_of(h: Hunter) -> Dictionary:
 		ret[k] = {"h": h, "k": -1.0, "t": -99.0, "col": Color.WHITE, "flare": 0.0, "perfect": 0.0, "pcol": Color.WHITE, "fcol": Color.WHITE}
 	return ret[k]
 
+## True when a telegraph the local player sees (a disc, lane or cone) lies over the ground point `p`.
+func covers(p: Vector3) -> bool:
+	var q := Vector2(p.x, p.z)
+	var me = m.get("player")
+	for e in entries.values():
+		if not e["all"] and e["h"] != me:
+			continue
+		match String(e["kind"]):
+			"circle":
+				if q.distance_to(e["at"]) <= float(e["r"]):
+					return true
+			"lane", "cone":
+				if _in_ray(e, q):
+					return true
+	return false
+
+func _in_ray(e: Dictionary, q: Vector2) -> bool:
+	var rel: Vector2 = q - e["from"]
+	var dir: Vector2 = e["dir"]
+	if rel.dot(dir) < 0.0 or rel.dot(dir) > float(e["len"]):
+		return false
+	if e["kind"] == "cone":
+		return absf(rel.angle_to(dir)) <= deg_to_rad(float(e["deg"])) * 0.5
+	return absf(rel.cross(dir)) <= maxf(float(e["width"]), float(e["width_end"])) * 0.5
+
 ## Prune expired entries and draw the rest (also called directly by tests).
 func rebuild() -> void:
 	for k in entries.keys():
 		if not live(entries[k]):
 			entries.erase(k)
+	net.sweep(m, entries)
 	mesh.clear_surfaces()
 	built = 0
 	geo.world = m.get("world")
 	geo.reset()
 	var me = m.get("player")
-	for k in entries:
-		var e: Dictionary = entries[k]
-		if not e["all"] and e["h"] != me:
-			continue                    # an aim reticle: only its own player sees it
-		if e["all"] and me != null and int((e["h"] as Hunter).team) != int(me.team):
-			e = e.duplicate()
-			e["col"] = (e["col"] as Color).lerp(Feel.RIM_ENEMY, 0.45)     # a foe's telegraph reads hostile
-			e["col2"] = (e["col2"] as Color).lerp(Feel.RIM_ENEMY, 0.3)
-		AimShapes.build(geo, e)
-		built += 1
+	var split := 0                      # first vertex of the rivals' telegraphs: drawn over a teammate's, then yours
+	for tier in [SideColor.ORDER_ALLY, SideColor.ORDER_OWN, SideColor.ORDER_FOE]:
+		if tier == SideColor.ORDER_FOE:
+			split = geo.v.size()
+		for k in entries:
+			var e: Dictionary = entries[k]
+			if (not e["all"] and e["h"] != me) or SideColor.order(m, e["h"]) != tier:
+				continue                # an aim reticle: only its own player sees it
+			if e["all"] and me != null and e["h"] != me:
+				e = e.duplicate()        # someone else's telegraph: a rival's reads hostile, a teammate's cool
+				e["col"] = SideColor.fx(m, e["h"], e["col"])
+				e["col2"] = SideColor.fx(m, e["h"], e["col2"])
+			AimShapes.build(geo, e)
+			built += 1
 	if geo.v.is_empty():
 		mi.visible = false
 		return
 	mi.visible = true
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, mat)
-	for i in geo.v.size():
+	_surface(0, split, mat)
+	_surface(split, geo.v.size(), mat_foe)
+
+func _surface(first: int, last: int, surf_mat: Material) -> void:
+	if last <= first:
+		return
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, surf_mat)
+	for i in range(first, last):
 		mesh.surface_set_color(geo.c[i])
 		mesh.surface_add_vertex(geo.v[i])
 	mesh.surface_end()

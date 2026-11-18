@@ -1,0 +1,152 @@
+#!/bin/bash
+# merge-train [--group N] [--no-comment] [--no-push] PR... : a serial queue of gate-ready PRs, one gate at a time (gate-shard).
+# Each car = up to N PRs (default 1: the batch PRs are big already; pass N=3..5 for small ones) merged, in order, onto the
+# train's running base (origin/main to start) in a scratch worktree with ops/merge-rush-1113/merge_batch.sh's conflict policy.
+# - Green car: base moves to it, so the next car is gated on main + every green car before it (the coordinator merges in
+#   queue order and never re-gates). Each PR gets "GATE GREEN <head sha> <summary>" (gh when logged in, GH_TOKEN with curl,
+#   else the text is left in $OUT/comment-<pr>.md for `gh pr comment`) and a line in $MERGE_READY (default
+#   /home/boki/coord/MERGE_READY.md) with the one command that merges it.
+# - Red car of 2+ PRs: bisect, first half then second half (the second half is gated on the base the first half left). A single
+#   red PR is dropped with its NEW-RED list; the train goes on without it. A PR that cannot merge onto the base is dropped
+#   with the conflicting files ("needs rebase"). Nothing is merged, approved or bypassed here: the coordinator merges.
+# - GATE=/path/to/script replaces gate-shard (same arguments and exit codes) so the queue logic can be tested without the cluster.
+# - Work dir $TRAIN_WORK (default ../train-work next to the repo, which jobq --tree wants inside /home/boki/cj/<id>/).
+#   Log: $OUT/train.log (default $TRAIN_WORK/out); per-gate output under $OUT/gate-<n>/. A stop file $TRAIN_WORK/STOP ends
+#   the train after the running gate.
+# - Stamp (1-PR cars, unless --no-push): the gated candidate commit (main merged into the PR head, so a fast-forward) is pushed
+#   to the PR's ext/* branch, then "GATE GREEN <full sha>: ..." names that head, which contains origin/main (MERGE RULE).
+#   Car k>1 was gated on main + car k-1: the train waits (WAIT_MERGE s, default 1200) until origin/main contains car k-1,
+#   merges origin/main into car k's candidate and, if that gives the very tree that was gated (main only gained car k-1),
+#   stamps it without a new gate; any other tree is re-gated on the new main (whose greens gate-shard has cached by tree).
+set -u
+GROUP=1 COMMENT=1 PUSH=1
+while [[ ${1:-} == --* ]]; do
+	case $1 in --group) GROUP=$2; shift ;; --no-comment) COMMENT=0 ;; --no-push) PUSH=0 ;; *) sed -n 2,20p "$0"; exit 2 ;; esac; shift
+done
+[ $# -ge 1 ] || { sed -n 2,20p "$0"; exit 2; }
+WAIT_MERGE=${WAIT_MERGE:-1200}
+REPO=$(git rev-parse --show-toplevel) HERE=$(cd "$(dirname "$0")" && pwd)
+WORK=$(realpath -m "${TRAIN_WORK:-$REPO/../train-work}") OUT=${OUT:-$WORK/out}
+READY=${MERGE_READY:-/home/boki/coord/MERGE_READY.md}
+REPO_SLUG=${REPO_SLUG:-OrriBogdan2/project-boki}
+RUSH=$REPO/ops/merge-rush-1113/merge_batch.sh
+mkdir -p "$WORK/bin" "$OUT"; N=0
+# run a private copy: bash reads a script as it goes, so editing gate-shard mid-gate would corrupt the running gate
+cp "$HERE/gate-shard" "$HERE/gate_shard_run.gd" "$WORK/bin/"
+log() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/train.log"; }
+
+git -C "$REPO" fetch -q origin main
+MAIN=$(git -C "$REPO" rev-parse origin/main) BASE=$MAIN
+for pr in "$@"; do git -C "$REPO" fetch -q origin "refs/pull/$pr/head:refs/remotes/pr/$pr" || { log "PR #$pr: fetch failed"; exit 2; }; done
+
+fresh_tree() {  # fresh_tree DIR SHA : a detached worktree at SHA (reused dirs are reset, so .godot imports survive)
+	[ -d "$1/.git" ] || [ -f "$1/.git" ] || git -C "$REPO" worktree add -q --detach "$1" "$2"
+	git -C "$1" reset -q --hard "$2" && git -C "$1" clean -fdq -e .godot
+}
+
+post() {  # post PR TEXT
+	local pr=$1 text=$2
+	printf '%s\n' "$text" > "$OUT/comment-$pr.md"
+	[ "$COMMENT" = 1 ] || return 0
+	if command -v gh > /dev/null && gh auth status > /dev/null 2>&1; then gh pr comment "$pr" --repo "$REPO_SLUG" --body "$text" > /dev/null
+	elif [ -n "${GH_TOKEN:-}" ]; then
+		curl -sf -X POST -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$REPO_SLUG/issues/$pr/comments" \
+			-d "$(python3 -I -c 'import json,sys; print(json.dumps({"body": sys.argv[1]}))' "$text")" > /dev/null
+	else log "PR #$pr: no gh or GH_TOKEN here, comment text left in $OUT/comment-$pr.md"; fi
+}
+
+ready() {  # ready PR SHA SUMMARY NOTE : the GATE GREEN comment and the MERGE_READY line
+	local s=${3#GATE GREEN }
+	post "$1" "GATE GREEN $2: ${s%% (cand *} ($4)"
+	echo "- $(date -u +%F\ %H:%M) #$1 $2 ($4; $(grep -o 'checks=[0-9]* new_red=[0-9]*' <<< "$3")): \`gh pr comment $1 --repo $REPO_SLUG -F $OUT/comment-$1.md && gh pr merge $1 --repo $REPO_SLUG --merge --match-head-commit $2\`" >> "$READY"
+}
+
+head_ref() {  # head_ref PR : the PR's branch when it lives in this repo (fetched read-only from the public API)
+	curl -sf "https://api.github.com/repos/$REPO_SLUG/pulls/$1" | python3 -I -c 'import json,sys
+d = json.load(sys.stdin); h = d["head"]
+print(h["ref"] if h["repo"] and h["repo"]["full_name"] == d["base"]["repo"]["full_name"] else "")'
+}
+
+stamp() {  # stamp PR GATED_ON SUMMARY : make the gated tree the PR's head (fast-forward push) and post GATE GREEN for it;
+	# 0 stamped, 5 handled here (re-gated, dropped or skipped)
+	local pr=$1 on=$2 summary=$3 ref sha tree
+	tree=$(git -C "$WORK/cand" rev-parse "HEAD^{tree}") sha=$(git -C "$WORK/cand" rev-parse HEAD)
+	if [ "$on" != "$MAIN" ]; then  # gated on main + the cars before it: wait for the coordinator to merge those
+		local t=$(date +%s)
+		until git -C "$REPO" fetch -q origin main && git -C "$REPO" merge-base --is-ancestor "$on" origin/main; do
+			[ $(( $(date +%s) - t )) -lt "$WAIT_MERGE" ] || { log "PR #$pr: green on ${on:0:10}, which main did not take in ${WAIT_MERGE}s; re-gating on main"; regate "$pr"; return 5; }
+			sleep 60
+		done
+		git -C "$WORK/cand" merge -q --no-ff -m "Merge origin/main (merge-train restamp)" origin/main > /dev/null 2>&1 \
+			|| { git -C "$WORK/cand" merge --abort; log "PR #$pr: origin/main no longer merges clean"; regate "$pr"; return 5; }
+		MAIN=$(git -C "$REPO" rev-parse origin/main)
+		[ "$(git -C "$WORK/cand" rev-parse "HEAD^{tree}")" = "$tree" ] || { log "PR #$pr: main gained more than the cars before it; re-gating"; regate "$pr"; return 5; }
+		sha=$(git -C "$WORK/cand" rev-parse HEAD) BASE=$sha; log "PR #$pr: restamped ${sha:0:10}, same tree as gated, no new gate"
+	fi
+	ref=$(head_ref "$pr")
+	[[ $ref == ext/* ]] || { log "PR #$pr: head is not an ext/* branch of this repo, not pushed"; ready "$pr" "$(git -C "$REPO" rev-parse "pr/$pr")" "$summary" "gate #$N on ${sha:0:10}, not pushed"; return 0; }
+	git -C "$REPO" push -q origin "$sha:refs/heads/$ref" 2> "$OUT/push-$pr.err" \
+		|| { log "PR #$pr: push to $ref refused (branch moved during the gate?): $(tail -1 "$OUT/push-$pr.err")"; DROPPED+=("$pr moved"); BASE=$on; return 5; }
+	log "PR #$pr: pushed ${sha:0:10} to $ref"
+	ready "$pr" "$sha" "$summary" "gate #$N, head contains main ${MAIN:0:10}"
+}
+
+regate() {  # regate PR : start the PR over on the current origin/main (one more gate)
+	git -C "$REPO" fetch -q origin main; MAIN=$(git -C "$REPO" rev-parse origin/main) BASE=$MAIN
+	[ "${REGATED[$1]:-0}" -lt 1 ] || { log "PR #$1: second re-gate, left for the next train"; SKIPPED+=("$1"); return 1; }
+	REGATED[$1]=1; car "$1"
+}
+
+gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE moves), 1 red, 3 nothing left to gate
+	local prs=() pr sha list="$OUT/list-$N.txt" skips="$OUT/skips-$N.txt" cand="$WORK/cand" summary
+	: > "$list"; : > "$skips"
+	for pr in "$@"; do echo "pr/$pr $(git -C "$REPO" rev-parse "pr/$pr")" >> "$list"; done
+	fresh_tree "$cand" "$BASE"
+	(cd "$cand" && bash "$RUSH" "$list" "$skips" > /dev/null 2>&1)
+	while read -r b _ _ files; do
+		pr=${b#pr/}; log "PR #$pr: DROPPED needs rebase, conflict in: $files"; DROPPED+=("$pr conflict: $files")
+	done < "$skips"
+	for pr in "$@"; do grep -q "^pr/$pr " "$skips" || prs+=("$pr"); done
+	[ ${#prs[@]} -gt 0 ] || return 3
+	N=$((N + 1)); local out="$OUT/gate-$N"
+	log "gate $N: PRs ${prs[*]} on base ${BASE:0:10} (main ${MAIN:0:10})"
+	fresh_tree "$WORK/main" "$MAIN"
+	local rc green=${GS_CACHE:-$HOME/.gate-shard-cache}/green-$(git -C "$cand" rev-parse "HEAD^{tree}").txt
+	if [ -z "${GATE:-}" ] && [ -f "$green" ]; then  # this exact tree already passed a full gate: no new gate
+		mkdir -p "$out"; cp "$green" "$out/summary.txt"; rc=0; log "gate $N: tree already GREEN (cached $(date -ur "$green" +%H:%M))"
+	else
+		GS_TAG="mt$N" bash "${GATE:-$WORK/bin/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1; rc=$?
+	fi
+	summary=$(head -1 "$out/summary.txt" 2>/dev/null)
+	[ $rc -eq 2 ] && { log "gate $N: usage or import failure, train stopped"; exit 2; }
+	log "gate $N rc=$rc: ${summary:-no summary (import failure?)}"
+	if [ $rc -eq 0 ]; then
+		local gated_on=$BASE
+		BASE=$(git -C "$cand" rev-parse HEAD)
+		if [ ${#prs[@]} -eq 1 ] && [ "$PUSH" = 1 ]; then
+			stamp "${prs[0]}" "$gated_on" "$summary" && GREEN+=("${prs[0]}")
+			return 0  # stamp itself records a re-gate, a drop or a skip
+		else
+			for pr in "${prs[@]}"; do ready "$pr" "$(git -C "$REPO" rev-parse "pr/$pr")" "$summary" "gate #$N, in candidate ${BASE:0:10}, not pushed"; done
+			GREEN+=("${prs[@]}")
+		fi
+		return 0
+	fi
+	for pr in "${prs[@]}"; do LAST_RED[$pr]=$(grep -h '^NEW-RED' "$out/summary.txt" | head -1); [ -n "${LAST_RED[$pr]}" ] || LAST_RED[$pr]=$(grep -o '^GATE RED ([^)]*)' "$out/summary.txt"); done
+	return 1
+}
+
+car() {  # car PR... : gate, and on red bisect in halves
+	[ -f "$WORK/STOP" ] && { log "STOP file: leaving ${*}"; SKIPPED+=("$@"); return; }
+	gate_car "$@"; local rc=$?
+	[ $rc -eq 1 ] || return 0
+	if [ $# -eq 1 ]; then log "PR #$1: DROPPED red: ${LAST_RED[$1]:-export or import failure}"; DROPPED+=("$1 red: ${LAST_RED[$1]:-export/import}"); return; fi
+	local half=$(($# / 2)); car "${@:1:half}"; car "${@:half+1}"
+}
+
+GREEN=() DROPPED=() SKIPPED=(); declare -A LAST_RED REGATED
+T0=$(date +%s)
+queue=("$@")
+while [ ${#queue[@]} -gt 0 ]; do car "${queue[@]:0:GROUP}"; queue=("${queue[@]:GROUP}"); done
+log "train done in $(( ($(date +%s) - T0 + 59) / 60 )) min: green [${GREEN[*]}] dropped [${DROPPED[*]}] skipped [${SKIPPED[*]}] final base ${BASE:0:10}"
+[ ${#DROPPED[@]} -eq 0 ]

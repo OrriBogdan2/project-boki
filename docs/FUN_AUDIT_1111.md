@@ -1,4 +1,4 @@
-# Fun audit 11-11: a SUPERVIVE player's read of Project Boki
+# Fun audit 11-11: a REFERENCE player's read of Project Boki
 
 Base: origin/ext/release-integ-0245 (92df78ce4). Owner rules first: briefs/DECISIONS.md (PARITY FIRST 11-07, cooldowns at 1.0x, TTK bar 0.8 to 1.25 in `--ttk-check`). Kits are judged against the source; personality is ours and not judged here. The Boki loop (catch, garden, summon) is covered by reviews/DESIGN_REVIEW_1110_FUN.md and is only linked below.
 
@@ -26,6 +26,6 @@ Not judged with real pacing: the tour shortens waits (instant uplink, granted le
 - `content/archetypes/gunslinger.json`: Longneedle dmg 36 to 24, Dazed `rattle_k` 0.9 to 0.76, texts.
 - `scripts/arch/kits/gunslinger_kit.gd`: the Dazed falloff pause removed (not in the source).
 - `tools/hero_combo_check.gd`, `tools/venator_parity_check.gd`: the asserted numbers follow (0.08 s rounds, +76%, Longneedle 24, the falloff keeps counting).
-- `scripts/ui/hud.gd`: `dealt_at`, set by `hitmarker`; the lane's fight budget uses the later of the last hit taken and dealt.
+- `scripts/ui/hud.gd`: `dealt_at`, set by the reticle (`Reticle._on_hit`); the lane's fight budget uses the later of the last hit taken and dealt.
 - `tools/msg_queue_check.gd`: asserts a landed hit starts the fight budget.
 - docs/KIT_PARITY.md Vex rows, docs/TTK.md table (`--ttk-check --write`; other rows moved since 11-09 on their own), docs/wiki (gen_wiki).

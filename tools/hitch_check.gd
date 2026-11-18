@@ -61,6 +61,8 @@ var headless := false
 var budget_ms := -1.0
 var seed_v := 4101
 var squad := 3
+var teams := 6
+var fast_forward := true   # the planning, ride and drop run several steps a frame (--match-profile: one)
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
 var hop_only := false      # --load-check=hop: a Waystone hop from the hub to Bramblebank (see _hop_check)
@@ -137,7 +139,7 @@ func _ready() -> void:
 		opts.merge({"no_drop": true, "autoplay": true, "probe": true})
 		Game.main.show_screen("match", opts)
 		return
-	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
+	Game.main.show_screen("match", {"teams": teams, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
 	if _end or home_only:
@@ -185,9 +187,10 @@ func _process(_delta: float) -> void:
 		lf["marks"] = marks
 		lf["compiles"] = new_c
 	var k := 1
-	match phase:
-		"planning", "ride": k = 6
-		"drop": k = 3
+	if fast_forward:
+		match phase:
+			"planning", "ride": k = 6
+			"drop": k = 3
 	# the first moments of the ride and the last of the drop are judged frame by frame
 	if phase == "ride" and phase_t < 1.0: k = 1
 	if phase == "drop" and m.player and m.player.pos.y - m.world.ground_at(m.player.pos.x, m.player.pos.z) < 8.0: k = 1
@@ -203,6 +206,7 @@ func _process(_delta: float) -> void:
 	var t2 := Time.get_ticks_usec()
 	Match.prof_on = true
 	Match.vprof.clear()
+	m.acc -= DT if k == 1 else 0.0      # _process steps on its own clock: net it out, the steps were taken above
 	m._process(DT if k == 1 else 0.0)
 	Match.prof_on = false
 	var vsecs: Dictionary = Match.vprof.duplicate()

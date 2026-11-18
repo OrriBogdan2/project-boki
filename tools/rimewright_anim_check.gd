@@ -1,17 +1,19 @@
 extends RefCounted
 ## Claire's (rimewright) animation timing, measured in game against the source footage
 ## (briefs/hero-ref/tamsin.md, one frame 0.2 s; the ult strip 0.1 s) and docs/heroes/rimewright.md "Animation timing":
-## when the kit's hit or release happens after a move starts, and whether the hand-keyed clip (claire.json, "lead")
-## shows its hit pose on that same frame. Runs on tools/support_check.gd's setup (--rimewright-combo-check).
+## when the kit's hit or release happens after a move starts, and whether the hand-keyed clip shows its hit pose
+## on that same frame (--clip-check finds each pose in claire.glb at HIT_KEY). Runs on tools/support_check.gd's
+## setup (--rimewright-combo-check).
 
 const DT := 1.0 / 60.0
 const TOL := 0.03          # s: two frames at 60 fps
 const SOURCE_FRAME := 0.2  # s: the footage's resolution (tamsin.md)
-## The clip's hit pose (s into the clip; tools/art1/claire_clips.py): the flick, the sling, the thrust, the palms
-## fully out, the shove, the stamp, the clench.
+## The clip's hit pose (s into the clip; tools/art1/claire_clips.py) and the hand that makes it: the flick, the sling,
+## the thrust, the palms fully out, the shove, the stamp, the clench.
 const HIT_KEY := {
-	"tm_dart_r": 0.07, "tm_dart_l": 0.07, "tm_dart_heavy": 0.08, "tm_beam": 0.08, "tm_spear": 0.1,
-	"tm_wall": 0.27, "tm_freeze": 0.13, "tm_clench": 0.1}
+	"tm_dart_r": [0.0, "hand.R"], "tm_dart_l": [0.0, "hand.L"], "tm_dart_heavy": [0.0, "hand.R"],
+	"tm_beam": [0.0, "hand.R"], "tm_spear": [0.1, "hand.R"], "tm_wall": [0.2, "hand.L"], "tm_freeze": [0.0, "hand.L"],
+	"tm_clench": [0.0, "hand.L"]}
 
 var sc        # the SupportCheck running us
 
@@ -33,10 +35,9 @@ func _event(m: Match, K: RimewrightKit, id: String, done: Callable, cap := 2.0) 
 		t += DT
 	return _into(m, K, id) if done.call() else 99.0
 
-## The pose lag (s) of `id`'s hit pose behind the kit's hit at `event` s into the move, with the clip's "lead".
+## The pose lag (s) of `id`'s hit pose behind the kit's hit at `event` s into the move.
 func _lag(id: String, event: float) -> float:
-	var lead := float(WardenClips.data("claire")["kmoves"][id].get("lead", 0.0))
-	return float(HIT_KEY[id]) - lead - event
+	return float(HIT_KEY[id][0]) - event
 
 func _line(id: String, event: float, what: String) -> void:
 	var lag := _lag(id, event)
@@ -66,7 +67,7 @@ func _stream() -> void:
 	ok("anim darts: a dart every 0.15-0.2 s through the hold (footage 0009-0090)",
 			gap >= 0.15 and gap <= 0.2, "%.3f s" % gap)
 	P.inp["fire"] = false
-	# the let-go ends the burst on the large darts (supervive_kits Celeste LMB)
+	# the let-go ends the burst on the large darts (sv/briefs/kits Celeste LMB)
 	_event(m, K, "tm_dart_heavy", func(): return K.stats["heavies"] >= 1)
 	_line("tm_dart_heavy", _into(m, K, "tm_dart_heavy"), "a large dart leaves")
 	step(m, 1.0)
@@ -78,6 +79,9 @@ func _spear() -> void:
 	var K: RimewrightKit = P.ak
 	sc.aim_at(P, P.pos + Vector3(6.0, 0, 0))
 	step(m, 0.05)
+	var gather := float(WardenClips.data("claire")["kmoves"]["tm_spear_aim"]["hold_from"])
+	ok("anim spear: the held spear is full size as her palms gather it (%.2f s)" % gather,
+		absf(RimewrightKit.SPEAR_FORM_T - gather) <= TOL, "%.2f s" % RimewrightKit.SPEAR_FORM_T)
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	step(m, 0.3)
@@ -167,3 +171,67 @@ func _rime() -> void:
 		t >= 3.2 and t <= 3.55, "%.2f s" % t)
 	ok("anim rime: the crash clip is the footage's 0.4 s from the burst to her recovery (f57 -> f61)",
 		K.anim_id == "tm_rime_crash" and absf(KMovesCare.length("tm_rime_crash") - 0.4) < 0.001)
+	var rec := float(xd["recover"])
+	ok("anim rime: she is locked from the burst for the crash clip's length, 0.4 s (control and body agree)",
+		K.recovering() and absf(rec - 0.4) < 0.001 and absf(KMovesCare.length("tm_rime_crash") - rec) < 0.001
+		and absf(K.recover_until - m.time - rec) <= DT)
+	_recover(m, P, K)
+	_recover_dash()
+
+## In the recovery she walks and casts nothing; an E pressed in its last DashFlow.BUFFER_S goes as it ends.
+func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
+	var end: float = K.recover_until
+	var at := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	var darts := int(K.stats["darts"])
+	P.inp["sig"] = true
+	_step_firing(m, P)
+	P.inp["sig"] = false
+	var early_e := float(K.cd["e"]) > 0.0
+	while m.time < end - DashFlow.BUFFER_S + DT:
+		_step_firing(m, P)
+	P.inp["sig"] = true
+	_step_firing(m, P)
+	P.inp["sig"] = false
+	var cast_in := float(K.cd["e"]) > 0.0
+	while m.time < end - DT:
+		_step_firing(m, P)
+	var moved := Vector2(P.pos.x - at.x, P.pos.z - at.z).length()
+	var locked_darts := int(K.stats["darts"]) - darts
+	var e_at := -1.0
+	while m.time < end + 0.3:
+		_step_firing(m, P)
+		if e_at < 0.0 and float(K.cd["e"]) > 0.0:
+			e_at = m.time
+	P.inp["move"] = Vector2.ZERO
+	P.inp["fire"] = false
+	ok("anim rime: no walking, darts or E in the recovery", moved < 0.05 and locked_darts == 0 and not early_e
+		and not cast_in, "%.2f m, %d darts" % [moved, locked_darts])
+	ok("anim rime: an E pressed in its last 0.15 s goes as it ends; she walks and fires again",
+		e_at >= end and e_at <= end + 2.0 * DT and Vector2(P.pos.x - at.x, P.pos.z - at.z).length() > 0.3
+		and int(K.stats["darts"]) > darts, "E at %+.3f s, %.2f m, %d darts" % [e_at - end,
+		Vector2(P.pos.x - at.x, P.pos.z - at.z).length(), int(K.stats["darts"]) - darts])
+
+## One step with LMB held (the kit's lock clears the key each step, as a fresh read of the mouse would set it).
+func _step_firing(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	step(m, DT)
+
+## Shift in the recovery skates out at once (her into_dash.x row: cancel, carry).
+func _recover_dash() -> void:
+	var r: Array = sc.setup("rimewright", 4.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	HunterKeys.ult_pressed(P)
+	var t := 0.0
+	while K.stats["crashes"] < 1 and t < 5.0:
+		step(m, DT)
+		t += DT
+	step(m, 0.1)
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	step(m, DT)
+	P.inp["dash"] = false
+	ok("anim rime: Shift in the recovery skates out of it at once", K.rinkrunning() and not K.recovering())
+	P.inp["move"] = Vector2.ZERO

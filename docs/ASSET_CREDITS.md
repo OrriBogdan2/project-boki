@@ -17,7 +17,7 @@ http://creativecommons.org/publicdomain/zero/1.0/ ... This content is free to us
 educational and commercial projects. Support me by crediting Kay Lousberg, www.kaylousberg.com
 (this is not mandatory)".
 
-No assets from SUPERVIVE or any other commercial game are used.
+No assets from the reference or any other commercial game are used.
 
 ## What's vendored
 
@@ -51,7 +51,8 @@ game also falls back to them for any model that fails to load.
 
 ## Audio
 
-Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen_train_sfx.py` and `tools/gen_reset_sfx.py` (the dash-reset cue, three variants), `tools/gen_mask_sfx.py` (the Mask moment: swell, heartbeat, whisper, impact, sting), `tools/gen_sfx_garden.py` (the garden minigames)
+Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen_train_sfx.py` and `tools/gen_reset_sfx.py` (the dash-reset cue, three variants), `tools/gen_mask_sfx.py` (the Mask moment: swell, heartbeat, whisper, impact, sting), `tools/gen_sfx_armor_up.py` (the armour tier-up rise, a short positional cue and a fuller one for your own Hunter), `tools/gen_sfx_garden.py` (the garden minigames)
+Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen_train_sfx.py` and `tools/gen_reset_sfx.py` (the dash-reset cue, three variants), `tools/gen_sfx_ui.py` (the interface set, with the monster-kill XP tick and the two steal stings), `tools/gen_mask_sfx.py` (the Mask moment: swell, heartbeat, whisper, impact, sting), `tools/gen_sfx_garden.py` (the garden minigames)
 (written to `audio/*.wav`; the combat layer, ability casts and impacts, and footsteps come from
 `tools/sfx_combat.py`, which `gen_sfx.py` runs last), and glider skins and the home whistle are made in code by
 `scripts/core/synth.gd`. Music and ambience are composed procedurally by `tools/gen_music.py` /
@@ -69,3 +70,8 @@ runtime. No outside asset is used.
 
 The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`, `zephyrak/`, `pebbit/`, `cairnback/`, `wisplet/`, `zapple/`, `hivara/`) are ours: built by script in Blender
 (`tools/boki/`). Their concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
+
+The look locker's dais and the shroud's satchel and lantern (`art/look/`, drawn by `scripts/match/look_props.gd`) are
+ours: made in Meshy (text-to-image concept, then image-to-3D), cleaned up in Blender (scaled, pivoted, decimated,
+base colour only; the worn two at 700 triangles with their paint baked into vertex colours, so the Empty draws them
+with its own leather inside its 8-material budget). No outside asset is used.

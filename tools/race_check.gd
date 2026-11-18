@@ -9,13 +9,19 @@ extends RefCounted
 ##   5. on the base: no race post with base_mode off; with it on, a race runs to a result card
 ##   6. the Training post on the base is a solo lap of the loop: perfect cheers add Speed (and a journal
 ##      line), missed ones add none, a Boki at its cap or too tired does not start
-##   7. weekly formats: each Dash format's tweak changes the lap as it says (pace, wobble, a second water stretch)
-##   8. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
+##   7. the cues: three cheer marks and the finish line appear with the lap, light as your Boki passes them
+##      (all three by the last stretch) and are gone when it ends
+##   8. weekly formats: each Dash format's tweak changes the lap as it says (pace, wobble, a second water stretch)
+##   9. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
 ##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
+##  10. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ##   9. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ##  10. courses: every garden zone has its own, closed, no sharper than max_turn, and every rigged body plan
 ##      runs it to the line in a lap time inside lap_band; the zone's own Home puts the loop on land,
 ##      clear of its toys, with no step in the ground a runner could not take
+##  10. the runners' beats (RaceBeats) never change a result: 20 seeded races finish in the same order at the same
+##      times with and without them; on the base they crouch through the countdown (the race holds), burst off the
+##      line, the first two home celebrate by temper, the rest sulk, and each is let go once its clips are played
 ## Never touches the real save.
 
 const RACES := 20
@@ -47,6 +53,7 @@ func run(m: Node) -> void:
 	_formats()
 	_courses()
 	await _zone_tracks()
+	_beats_keep_order()
 	await _on_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -221,7 +228,7 @@ func _on_base() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "first_race": true}      # (the practice lap is its own section)
 	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
 	Save.d = d
 	HomeLayout.ensure(Save.d)
@@ -247,6 +254,8 @@ func _on_base() -> void:
 			k.erase("indoors")
 		race.use()
 		ok(race.run != null and race.runners.size() >= 2, "on: a race starts with %d Boki" % race.runners.size())
+		var fresh: bool = race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0
+		ok(fresh, "cue: three unlit marks and a finish line with the lap")
 		if race.run != null:
 			race.bar.m = race.bar.zone        # a press right on the gold
 			var press := InputEventAction.new()
@@ -254,11 +263,37 @@ func _on_base() -> void:
 			press.pressed = true
 			race.input(press)
 			ok(home.verbs.act == "cheer", "on: a good race cheer plays your Hunter's cheer (%s)" % home.verbs.act)
+		var nodes: Array = race.runners.map(func(k: Dictionary) -> Node3D: return k["node"])
+		ok(nodes.all(func(n: Node3D) -> bool: return n.get_meta("kact", "") == "crouch"),
+				"on: the runners crouch on the line for the countdown")
+		var played: Array = nodes.map(func(_n: Node3D) -> Dictionary: return {})
 		var t := 0.0
+		var peak := 0
+		var held_still := true
 		while race.run != null and t < MAX_S:
 			race.tick(0.1)
 			t += 0.1
+			if race.cue != null:
+				peak = maxi(peak, race.cue.lit)
+			if race.run != null and t < GardenSfx.GO_S - 0.05 and race.run.t > 0.0:
+				held_still = false
+			for i in nodes.size():
+				played[i][String(nodes[i].get_meta("kact", ""))] = true
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
+		ok(peak == 3 and race.cue == null, "cue: the marks lit one by one (%d of 3) and cleared at the end" % peak)
+		ok(held_still, "on: the race does not start until 'go'")
+		ok(played.all(func(p: Dictionary) -> bool: return p.has("burst")), "on: every runner bursts off the line")
+		ok(played.any(func(p: Dictionary) -> bool: return p.has("hop") or p.has("spin")) \
+				and played.any(func(p: Dictionary) -> bool: return p.has("sulk")),
+				"on: the winner celebrates, the last sulks")
+		var left := 0.0
+		while race.beats.playing() and left < MAX_S:
+			race.tick(0.1)
+			left += 0.1
+		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
+				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
+				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
+		await _practice(home)
 		await _solo(home)
 		var wall: Array = Save.d.get("showcase", [])
 		var game := String(BaseRace.twist()["game"])
@@ -271,6 +306,58 @@ func _on_base() -> void:
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## The same seeded race stepped bare and through RaceBeats (countdown hold, clips) finishes identically.
+func _beats_keep_order() -> void:
+	var same := 0
+	var ran := 0
+	for n in RACES:
+		var seed_rng := RandomNumberGenerator.new()
+		seed_rng.seed = 7000 + n
+		var recs: Array = []
+		for i in 2 + n % 3:
+			var sp: String = ["zapple", "cindle", "puddlet", "kestrike"][seed_rng.randi() % 4]
+			recs.append(_kin(sp, "B%d" % i, seed_rng.randi_range(0, 40), seed_rng.randf_range(20.0, 100.0)))
+		var bare := BaseRace.Run.new(recs, 0, _seeded(n))
+		while not bare.over() and bare.t < MAX_S:
+			bare.step(DT)
+		var kins: Array = recs.map(func(rec: Dictionary) -> Dictionary: return {"rec": rec, "node": Node3D.new()})
+		var beats := RaceBeats.new(kins)
+		var run := BaseRace.Run.new(recs, 0, _seeded(n))
+		var frames := 0
+		while not run.over() and run.t < MAX_S:
+			beats.step(run, DT)
+			frames += 1
+		ran += 1
+		if run.order() == bare.order() and run.done_t == bare.done_t:
+			same += 1
+		for k in kins:
+			(k["node"] as Node3D).free()
+		if n == 0:
+			var held := frames - roundi(run.t / DT)
+			ok(absi(held - roundi(GardenSfx.GO_S / DT)) <= 1,
+					"beats: the race holds %d frames for the %.2f s countdown" % [held, GardenSfx.GO_S])
+	ok(same == ran, "beats: %d of %d seeded races finish in the same order at the same times with the beats"
+			% [same, ran])
+	var calm := _kin("zapple", "Calm", 0, 50.0)
+	calm["traits"] = {"temper": 0.5, "bravery": 0.5}
+	var timid := _kin("zapple", "Shy", 0, 50.0)
+	timid["traits"] = {"temper": 0.5, "bravery": 0.1}
+	var grumpy := _kin("zapple", "Huff", 0, 50.0)
+	grumpy["traits"] = {"temper": 0.9, "bravery": 0.5}
+	ok(RaceBeats.finish(calm, 0, 4) == ["hop", "spin"] and RaceBeats.finish(calm, 1, 4) == ["hop", "spin"],
+			"beats: the first two of four home hop then spin")
+	ok(RaceBeats.finish(calm, 2, 4) == ["sulk"] and RaceBeats.finish(calm, 1, 2) == ["sulk"],
+			"beats: the rest sulk, and the last one home always does")
+	ok(RaceBeats.finish(timid, 0, 3) == ["hop"] and RaceBeats.finish(calm, 0, 1) == ["hop", "spin"],
+			"beats: a timid winner only hops; a solo lap celebrates")
+	ok(String(HomeCarry.temper_of(grumpy)) == "grumpy" and RaceBeats.rules()["sulk_face"]["grumpy"] == "angry",
+			"beats: a grumpy loser huffs (angry face)")
+
+func _seeded(n: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = 9000 + n
+	return r
 
 ## One solo training lap: presses on every mark (perfect: the marker sits in the gold) or none.
 func _lap(home, perfect: bool) -> void:
@@ -298,6 +385,7 @@ func _solo(home) -> void:
 	rec["stats"]["speed"] = 10
 	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
 	await _lap(home, false)
+	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
 	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
 			"solo: a lap of missed cheers adds no Speed")
 	rec["needs"]["energy"] = 90.0
@@ -319,6 +407,41 @@ func _solo(home) -> void:
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
 	rec["needs"]["energy"] = 90.0
 
+## The first race opens with one practice lap that ends at the first press: no race, no cost, once per save.
+func _practice(home) -> void:
+	var race: BaseRace = home.hrace
+	var rec := Save.active_kin()
+	var speed: int = rec["stats"]["speed"]
+	rec["needs"]["energy"] = 90.0
+	Save.d["tutorial"].erase("first_race")
+	race.use()
+	ok(race.run != null and race.practice and race.runners.size() == 1, "practice: the first race opens as a solo lap")
+	ok(Save.d["tutorial"].get("first_race", false), "practice: offered once per save")
+	var press := InputEventAction.new()
+	press.action = "interact"
+	press.pressed = true
+	race.input(press)
+	ok(race.run == null and not race.practice, "practice: the first cheer ends it")
+	ok(int(rec["stats"]["speed"]) == speed and float(rec["needs"]["energy"]) == 90.0, "practice: no gain, no cost")
+	race.use()
+	ok(race.run != null and not race.practice and race.runners.size() >= 2, "practice: the next time is the real race")
+	race._end(false)
+	Save.d["tutorial"].erase("first_race")
+	race.use()
+	var t := 0.0
+	while race.run != null and t < MAX_S:
+		race.tick(DT)
+		t += DT
+	ok(race.run == null and int(rec["stats"]["speed"]) == speed and race.runners.is_empty(),
+			"practice: a lap left unpressed ends, no race result")
+	Save.d["tutorial"].erase("first_race")
+	Settings.v["tips"] = false
+	race.use()
+	ok(not race.practice, "practice: tips off, no offer")
+	race._end(false)
+	Settings.v["tips"] = true
+	Save.d["tutorial"]["first_race"] = true
+
 func _drill(home) -> void:
 	if home.yard == null:
 		ok(true, "drill: no Training post on this base (skipped)")
@@ -326,12 +449,12 @@ func _drill(home) -> void:
 	var rec := Save.active_kin()
 	rec["needs"]["energy"] = 90.0
 	rec["needs"]["food"] = 90.0
-	home._start_drill(rec, "speed")
+	home.drill.start(rec, "speed")
 	ok(not home.train.is_empty() and home.train["bar"] is TimingBar, "drill: starts on the timing bar")
 	for i in 3:
-		home._train_hit()
+		home.drill.hit()
 		for f in 40:
-			home._train_process(1.0 / 30.0)
+			home.drill.process(1.0 / 30.0)
 	ok(home.train.is_empty(), "drill: three presses end it (%s)" % rec["stats"]["speed"])
 
 ## The species that stand for each body plan: the rigged ones (KinPuppet.BODY) and one older round kin.

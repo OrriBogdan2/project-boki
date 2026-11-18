@@ -17,6 +17,7 @@ import boki_meshy
 import boki_scan
 import boki_sdf
 import face
+import glb_tangents
 import importlib
 
 import boki_rig
@@ -38,6 +39,11 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "hivara": ("hivara", "hivara", "hivara_anim"),
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
          "gibbelle": ("glomwort", "glomwort", "glomwort_anim"),     # a scan (boki_scan) on the simplest rig there is
+         "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
+         "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
+         "floenatee": ("glomwort", "glomwort", "glomwort_anim"),
+         **{i: ("glomwort",) * 2 + ("glomwort_anim",)
+           for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
@@ -439,7 +445,9 @@ def main():
         if a.startswith("--blend="):
             bpy.ops.wm.save_as_mainfile(filepath=a[8:], compress=True)
     if "--no-export" not in argv:
-        boki_rig.export(os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb"), tangents=hasattr(creature, "model"))
+        glb = os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb")
+        boki_rig.export(glb, tangents=hasattr(creature, "model"))
+        glb_tangents.fix(glb)
     for a in argv:
         if a.startswith("--preview="):
             preview(a[10:])

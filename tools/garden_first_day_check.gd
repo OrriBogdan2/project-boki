@@ -105,6 +105,7 @@ func _list() -> void:
 func _bot() -> void:
 	Save.d = _fresh_save()
 	Save.d["tutorial"]["day1_done"] = true      # the guided tutorial stays out of it
+	Save.d["tutorial"]["first_race"] = true     # past the first-race practice lap (BaseRace._practice)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var lay := HomeLayout.ensure(Save.d)
@@ -154,10 +155,11 @@ func _race(home) -> void:
 	ok(race != null, "bot: the base has the Dash")
 	if race == null:
 		return
+	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var t := 0.0
-	while race.run != null and t < RACE_MAX_S:
-		race.tick(0.1)
+	while (race.run != null or race.beats.playing()) and t < RACE_MAX_S:     # the runners are let go after
+		race.tick(0.1)                                                       # their finish clips
 		t += 0.1
 	ok(GardenFirstDay.did("race"), "bot: a finished race ticks 'race' (%.0f s)" % t)
 

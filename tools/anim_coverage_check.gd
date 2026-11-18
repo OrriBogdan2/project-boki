@@ -13,7 +13,8 @@ const END := "<!-- table:end -->"
 const HUNTER_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp",
 	"strafe", "crouch", "upper"]
 const BOKI_COLS := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp"]
-## A kit move key with one of these words is that state's clip (HunterAnim poses the rest).
+## A kit move key with one of these words is that state's clip (HunterAnim poses the rest); a move whose name says
+## something else ("ostra_swap", "dr_lunge") is the dash when its warden_anim entry has "dash": true.
 const DASH_RE := "dash|skate|vault"
 const CAST_RE := "_e$|_e_|aim|call|seed|well|swap|wall|freeze|beam|spear|roar|cloak|mend|flare|hearth|raise|sense" \
 	+ "|spine|encore|bola|ult|rime|stoke|xform"
@@ -51,11 +52,13 @@ func _cell(clip_ok: bool, proc_ok: bool = true) -> String:
 		return "clip"
 	return "proc" if proc_ok else "missing"
 
-## Clip names of the kit moves (not the fusion one) whose key matches the pattern, all present in the .glb.
-func _move(d: Dictionary, clips: Array, pattern: String) -> bool:
+## Whether a kit move whose key matches the pattern, or that carries `flag`, has its clip in the .glb.
+func _move(d: Dictionary, clips: Array, pattern: String, flag := "") -> bool:
 	var re := RegEx.create_from_string(pattern)
 	for k in d.get("kmoves", {}):
-		if re.search(String(k)) != null and clips.has(String(d["kmoves"][k]["clip"])):
+		var mv: Dictionary = d["kmoves"][k]
+		var named := re.search(String(k)) != null or bool(mv.get(flag, false))
+		if named and clips.has(String(mv["clip"])):
 			return true
 	return false
 
@@ -87,11 +90,13 @@ func _hunter_row(art: String) -> Array:
 		_cell(clips.has(loco.get("idle", ""))), _cell(walk_ok), _cell(run_ok),
 		_cell(attacks > 0), _cell(hit_ok),
 		_cell(clips.has(st.get("dead", "")), false), _cell(clips.has(air.get("rise", ""))), _cell(clips.has(land_clip)),
-		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE)), _cell(_move(d, clips, CAST_RE)),
-		"proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))), _cell(upper)]
+		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE, "dash")),
+		_cell(_move(d, clips, CAST_RE)), "proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))),
+		_cell(upper)]
 
-## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits and landings spring
-## KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side (Kin.render).
+## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
+## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
+## (Kin.render).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
@@ -101,7 +106,8 @@ func _boki_row(id: String) -> Array:
 	var jump := _cell(clips.has("hop") and kin_src.contains('set_meta("kact", "hop" if airborne'), false)
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", jump,
-		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing", "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")), "missing"]
 
 ## The live rig: a Boki in the air (kact hop) plays its hop clip, and the run clip once the hop clip is gone.

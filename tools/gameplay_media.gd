@@ -1,10 +1,14 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
-## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=source_scale).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
-##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
+##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
+##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
+##                   (1.0: the match camera's own, the combat-clarity films in docs/COMBAT_CLARITY.md)
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
@@ -15,12 +19,37 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
+##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
+##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
+##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
+##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
+##                   (11 and 12 follow with the game's own camera, as a player sees it)
+##  13 boss focus    a rival bot sealed in a lair fights the boss, not the player standing beside it (0061)
+##  14 forest walk   your Hunter walks through the thickest wood on the map, behind trees and past them
+##                   (the see-through canopies: SeeThrough)
+##  15 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
+##                   backpedal facing east, then kite north 4 s with the aim swaying east (KITE_SWAY), on the game
+##                   camera (--media-secs=28 for all of it); <dir>/loco_<id>.tsv logs body and feet per frame;
+##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
+##  16 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
+##                   following: the walk speed for a before/after cut (decision 0061)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
+const AUDIT := preload("res://tools/anim_audit.gd")
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
+const MATE_GAP := 13.0           # m from the player to each teammate (far enough that the teleport reads)
 const FRAME := 2.0 * STEP        # s per rendered frame
+## [from s, move (screen x east, y south; length = stick), label]: the player always faces east (the aim stays put).
+const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"], [4.0, Vector2.ZERO, "stop"],
+		[5.0, Vector2(1, 0), "run"], [8.0, Vector2.ZERO, "stop"], [9.0, Vector2(0, -1), "strafe_l"],
+		[13.0, Vector2.ZERO, "stop"], [14.0, Vector2(0, 1), "strafe_r"], [18.0, Vector2.ZERO, "stop"],
+		[19.0, Vector2(-1, 0), "back"], [23.0, Vector2.ZERO, "stop"], [24.0, Vector2(0, -1), "kite"],
+		[28.0, Vector2.ZERO, "stop"]]
+const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
+const FIGHT := "ashwick,juggernaut,gunslinger/archer,bulwark,mage"     # clip 1's squads, yours first
+const FIGHT_KIN := ["cindle", "pebbit", "zapple", "wisplet", "burrlet", "puddlet"]     # ... their Boki, in that order
 const CHARGE_LEFT := 2.5         # s of the uplink's charge left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
 const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
@@ -38,7 +67,11 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
+var fight := FIGHT               # --media-fight=
+var loco_id := "gunslinger"      # --media-hunter=: clip 15's Hunter
+var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -56,6 +89,14 @@ func run(main_node: Node) -> void:
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
+		if arg.begins_with("--media-fight="):
+			fight = arg.substr(14)
+		if arg.begins_with("--media-hunter="):
+			loco_id = arg.substr(15)
+		if arg.begins_with("--media-zoom="):
+			fight_zoom = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -65,6 +106,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
@@ -75,6 +118,13 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
+		10: await _base_tp()
+		11: await _shift_glide(secs)
+		12: await _dive_feather(secs)
+		13: await _boss_focus(secs)
+		14: await _forest(secs)
+		15: await _locomotion(secs)
+		16: await _walk(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -92,6 +142,8 @@ func _record(res: String) -> void:
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
 		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
 		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
+	if "--media-log" in OS.get_cmdline_user_args():     # the TSV only: headless, no video, same 1/30 s steps
+		args = ["--headless", "--fixed-fps", "30", "--path", ProjectSettings.globalize_path("res://"), "--"]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--media-child")
 	var out: Array = []
@@ -136,6 +188,8 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 
 ## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
 func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
 	m.cam.zoom = z
 	m.cam.zoom_to = z
 
@@ -150,15 +204,20 @@ func _ground(p: Vector3) -> Vector3:
 	return m.world.free_spot_near(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z), [], 1.2, 0.5, 6.0)
 
 ## Steps `secs` of the match, one rendered frame per 1/30 s. `each(t)` runs before every frame's steps,
-## `cam_to(t)` gives the camera's point.
-func _go(secs: float, each: Callable, cam_to: Callable) -> void:
+## `cam_to(t)` gives the camera's point (`follow`: the game camera's own follow, as in play, instead of a snap).
+func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void:
 	var t := 0.0
 	while t < secs:
 		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
-		m.cam.snap(cam_to.call(t))
+		if follow:
+			m.cam.follow(cam_to.call(t), FRAME, false)
+		else:
+			m.cam.snap(cam_to.call(t))
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
@@ -207,26 +266,50 @@ func _assist(t: float, hs: Array, foes: Array) -> void:
 
 # ------------------------------------------------------------------ 1: squad fight
 func _fight(secs: float) -> void:
-	await _start("ashwick", "cindle")
+	var a := fight.get_slice("/", 0).split(",")
+	var b := fight.get_slice("/", 1).split(",")
+	await _start(a[0], FIGHT_KIN[0])
 	var P := m.player
 	P.ctrl = "bot"
 	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	var base := _ground(P.pos)
 	var foe_at := _ground(base + Vector3(FIGHT_GAP, 0, 0))
-	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", _ground(base + Vector3(-1.4, 0, 1.6))),
-			_hunter("a2", 0, "gunslinger", "zapple", _ground(base + Vector3(-1.4, 0, -1.6)))]
-	squad_b = [_hunter("b0", 1, "archer", "wisplet", foe_at),
-			_hunter("b1", 1, "bulwark", "burrlet", _ground(foe_at + Vector3(1.4, 0, 1.6))),
-			_hunter("b2", 1, "mage", "puddlet", _ground(foe_at + Vector3(1.4, 0, -1.6)))]
+	squad_a = [P, _hunter("a1", 0, a[1], FIGHT_KIN[1], _ground(base + Vector3(-1.4, 0, 1.6))),
+			_hunter("a2", 0, a[2], FIGHT_KIN[2], _ground(base + Vector3(-1.4, 0, -1.6)))]
+	squad_b = [_hunter("b0", 1, b[0], FIGHT_KIN[3], foe_at),
+			_hunter("b1", 1, b[1], FIGHT_KIN[4], _ground(foe_at + Vector3(1.4, 0, 1.6))),
+			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(0.55)
+	_zoom(fight_zoom)
 	still_at = 4.0
 	_mark("start")
 	await _go(secs, func(t: float):
 		_assist(t, squad_a, squad_b)
 		_assist(t, squad_b, squad_a),
 		func(_t: float): return _centre(squad_a + squad_b))
+
+# ------------------------------------------------------------------ 16: walk
+const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
+const WALK_LANE := 22.0         # m of the cleared lane the walk crosses (the match screen is ~23 m across)
+
+func _walk(secs: float) -> void:
+	await _start("gunslinger", "zapple")
+	var P := m.player
+	P.teleport(MoveSpeedCheck.flat_lane(m.world, P.pos, int(WALK_LANE) + 2))
+	var still_cam := P.pos + Vector3(WALK_LANE * 0.5, 0, 0)
+	_zoom(1.0)
+	still_at = 2.0
+	_mark("across")
+	var x0 := P.pos.x
+	await _go(secs, func(t: float):
+		var mv := Vector2(-1, 0)      # the second half: back the other way, the camera following
+		if t < secs * 0.5:
+			mv = Vector2(1, 0) if P.pos.x < x0 + WALK_LANE else Vector2.ZERO
+		P.inp["move"] = mv
+		P.inp["aim"] = P.pos + Vector3(5.0 if t < secs * 0.5 else -5.0, 0.9, 0),
+		func(t: float): return still_cam if t < secs * 0.5 else P.pos)
+	print("MEDIA_WALK speed %.2f m/s" % HunterMove.speed(P.arch))
 
 # ------------------------------------------------------------------ 2: Boki combat
 func _boki_combat(secs: float) -> void:
@@ -292,6 +375,56 @@ func _hatch(secs: float) -> void:
 			still_at = -1.0
 		t += FRAME
 		frame += 1
+
+# ------------------------------------------------------------------ 14: forest walk
+const WOOD_R := 11.0             # m: how near trees count as one wood
+const BEHIND := Vector3(0.3, 0, -1.5)      # m off a tree's foot the walk passes it (camera side is +z)
+const GROVE_STEP := 3.2          # m between the trees planted to thicken the wood (the maps only have clumps)
+const WALK := 0.6                # share of full speed the Hunter strolls at
+
+## The thickest wood on the map, thickened with planted trees of its own style; the Hunter strolls from
+## tree to tree, there and back, passing just behind each one.
+func _forest(secs: float) -> void:
+	await _start("gunslinger", "")
+	var P := m.player
+	var w := m.world
+	var trees: Array = w.tree_spots.duplicate()
+	var heart: Vector3 = trees[0]
+	var most := 0
+	for t in trees:
+		var n := trees.filter(func(u: Vector3) -> bool: return u.distance_to(t) < WOOD_R).size()
+		if n > most:
+			most = n
+			heart = t
+	var path: Array = trees.filter(func(t: Vector3) -> bool: return t.distance_to(heart) < WOOD_R)
+	var style := Flora.style_ok(w.style_at(w.idx(int(heart.x), int(heart.z))))
+	for k in 8:
+		for row in [-1.0, 1.0]:
+			var at := heart + Vector3((k - 3.5) * GROVE_STEP, 0, row * 2.2 + (k % 2) * 0.6)
+			at.y = w.ground_at(at.x, at.z)
+			if w.is_void(at.x, at.z) or w.is_block(at.x, at.z) or absf(at.y - heart.y) > 0.3:
+				continue
+			if path.any(func(t: Vector3) -> bool: return t.distance_to(at) < 2.0):
+				continue
+			var tree := Flora.node("tree", style, k % 3, 1.1)
+			tree.position = at
+			w.add_child(tree)
+			path.append(at)
+	path.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	var back := path.duplicate()
+	back.reverse()
+	path.append_array(back)
+	P.teleport(_ground(path[0] + BEHIND))
+	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	var next := [0]
+	await _go(secs, func(_t: float) -> void:
+		var goal: Vector3 = path[next[0] % path.size()] + BEHIND
+		var d := Vector2(goal.x - P.pos.x, goal.z - P.pos.z)
+		if d.length() < 0.6:
+			next[0] += 1
+		P.inp["move"] = d.normalized() * WALK
+		SeeThrough.for_match(m),
+		func(_t: float) -> Vector3: return P.pos)
 
 # ------------------------------------------------------------------ the Boki base
 ## A fresh base with `n` rested level-6 Boki out (Ember, Ripple, Moss), `stats` per Boki when given, and the player
@@ -431,6 +564,58 @@ func _relay(secs: float) -> void:
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
 
+# ------------------------------------------------------------------ 9, 10: movement feel (decision 0061)
+## The player's keys for the next rendered frame, as a player's (a press lasts one step: the hunter clears it).
+func _keys(pl: Hunter, move: Vector2, jump: bool, glide: bool, dash := false) -> void:
+	pl.inp["move"] = move
+	pl.inp["aim"] = pl.pos + Vector3(move.x, 0, move.y) * 8.0 + Vector3(0, 0.9, 0)
+	pl.inp["glide_press_only"] = true
+	pl.inp["jump"] = jump
+	pl.inp["glide"] = glide
+	pl.inp["dash"] = dash
+
+## Kingpin runs east, jumps, Shifts in the air and presses Space; the second time Space comes just after the dash.
+func _shift_glide(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	pl.teleport(_ground(pl.pos))
+	_zoom(0.55)
+	_mark("start")
+	var plan := [[0.4, 0.75, 0.85], [3.6, 3.95, 4.2]]      # [jump, Shift, Space] s: Space mid-dash, then 0.07s after it
+	await _go(secs, func(t: float):
+		var move := Vector2(1, 0) if fmod(t, 6.4) < 3.2 else Vector2(-1, 0)
+		var jump := false
+		var dash := false
+		var glide := false
+		for k in plan:
+			jump = jump or absf(t - float(k[0])) < FRAME * 0.5 or absf(t - float(k[2])) < FRAME * 0.5
+			dash = dash or absf(t - float(k[1])) < FRAME * 0.5
+			glide = glide or (t >= float(k[2]) and t < float(k[2]) + 1.4)
+		_keys(pl, move, jump, glide, dash),
+		func(_t: float): return pl.render_pos(1.0), true)
+
+## Glides out over the abyss at island level from the nearest edge east of the start, lets go for 1s, opens the glider
+## again (the feather up), and once more.
+func _dive_feather(secs: float) -> void:
+	await _start("dredge", "cindle")
+	var pl := m.player
+	var edge := pl.pos
+	while not m.world.is_void(edge.x + 0.5, edge.z) and edge.x < pl.pos.x + 200.0:
+		edge.x += 0.5
+	var lip := m.world.ground_at(edge.x, edge.z)
+	pl.teleport(Vector3(edge.x - 4.0, lip + 1.5, edge.z))
+	pl.grounded = false
+	pl.air_t = 1.0
+	pl.gliding = true
+	pl.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+	_zoom(0.55)
+	_mark("start")
+	await _go(secs, func(t: float):
+		var c := fmod(t, 3.6)          # glide 1s, drop 1s, feather 1.6s
+		_keys(pl, Vector2(1, 0), absf(c - 2.0) < FRAME * 0.5, c < 1.0 or c >= 2.0),
+		func(_t: float): return pl.render_pos(1.0), true)
+
+
 func _duo(secs: float) -> void:
 	Save.d["name"] = HeroTitle.base_name("gunslinger")
 	m = Match.new()
@@ -441,3 +626,159 @@ func _duo(secs: float) -> void:
 		await fade.reveal(0.01)
 	var tu := m.duo
 	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
+
+# ------------------------------------------------------------------ 10: base to a teammate
+
+func _base_tp() -> void:
+	await _start("ashwick", "cindle")
+	var me := m.player
+	me.ctrl = "local"
+	var base := _ground(me.pos)
+	var mates := [_hunter("a1", me.team, "juggernaut", "pebbit", _ground(base + Vector3(MATE_GAP, 0, -3.0))),
+			_hunter("a2", me.team, "gunslinger", "zapple", _ground(base + Vector3(-3.0, 0, MATE_GAP)))]
+	for h in mates:
+		h.ctrl = "idle"
+		h.teleport(h.pos)
+	_zoom(0.75)
+	still_at = 4.5
+	_mark("take1")
+	await _wheel_take(me, mates[0], 1.0, base)
+	await _go(1.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+	# take 2: back where we started, a rival close by, and its hit breaks the channel 2 s in
+	me.teleport(base)
+	me.base_cd = 0.0
+	me.weak_t = 0.0
+	var foe := _hunter("b0", 1 - me.team, "archer", "wisplet", _ground(base + Vector3(-4.0, 0, -5.0)))
+	foe.ctrl = "idle"
+	foe.teleport(foe.pos)
+	_mark("take2")
+	await _wheel_take(me, mates[1], 2.0, base, foe)
+	await _go(2.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+
+## Opens the wheel, sweeps to `to`'s slice, lets go, then films the channel; with a `foe`, it shoots the
+## player `hit_at` s in (and a hit lands then for sure), else the channel runs to the end.
+func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunter = null) -> void:
+	var o := main.get_viewport().get_visible_rect().size * 0.5 + Vector2(0, 40)
+	var mates := BaseRecall.mates(m, me)
+	var slice := BaseWheel.dir(mates.find(to), mates.size()) * 110.0
+	var still := func(_t: float): me.inp["move"] = Vector2.ZERO
+	await _go(0.6, still, func(_t: float): return base)
+	BaseWheel.open(me, o, mates)
+	await _go(1.2, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		BaseWheel.update(me, o + slice * clampf((t - 0.3) / 0.5, 0.0, 1.0), FRAME),
+		func(_t: float): return base)
+	me.inp["base_pick"] = BaseWheel.close(me)
+	var hit := [false]
+	var span := BaseRecall.CHANNEL_S + 0.2 if foe == null else hit_at + 0.1
+	await _go(span, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		if foe and t >= hit_at - 0.35 and not hit[0]:
+			hit[0] = true
+			foe.inp["aim"] = me.pos + Vector3(0, 0.9, 0)
+			foe.ak.press_rmb()
+		if foe and t >= hit_at and me.base_t > 0.0:
+			me.hurt(6.0, foe, {"src": "media"}),
+		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
+# ------------------------------------------------------------------ 13: boss focus
+func _boss_focus(secs: float) -> void:
+	await _start("ashwick", "cindle", true)
+	var P := m.player
+	var L: Dictionary = m.lairs.list[0]
+	L["active"] = false      # (_start purged its sleeping boss with the other mobs: wake the lair up again)
+	m.lairs.activate(L)
+	for g in L["guards"]:
+		if is_instance_valid(g):
+			g.dead = true
+			g.visible = false
+	m.lairs.open(L, P, "dial")
+	var side := Vector3(-L["out"].y, 0, L["out"].x)
+	P.teleport(_ground(L["c"] + side * 3.0))
+	var B := _hunter("b0", 1, "juggernaut", "pebbit", _ground(L["c"] - side * 3.0))
+	var boss: Boss = m.lairs.boss_of(L)
+	_zoom(0.6)
+	still_at = 5.0
+	_mark("start")
+	var each := func(_t: float) -> void:
+		for h in [P, B]:
+			h.hp = h.max_hp
+		boss.hp = maxf(boss.hp, boss.max_hp * 0.3)      # (still up when the clip ends)
+	await _go(secs, each, func(_t: float): return (P.pos + B.pos + boss.pos) / 3.0)
+
+# ------------------------------------------------------------------ 15: locomotion
+
+## The player (--media-hunter) walks, runs and strafes the plan on the game camera; feet and speed go to a TSV.
+func _locomotion(secs: float) -> void:
+	await _start(loco_id, "cindle")
+	var pl := m.player
+	pl.teleport(_loco_start(pl.pos))
+	_zoom(fight_zoom)
+	var sk := WardenGlb.skeleton(pl.model.get_node_or_null("Warden"))
+	var log := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
+	# (aL aR: the ankles now, a0L a0R: at rest, in the body's own frame: _ankle; hL hR: the foot bones' height in the
+	# model's frame, the camera lean taken out: the strafe drift in FOOT_SLIDE.md)
+	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy\taL\taR\ta0L\ta0R\thL\thR")
+	var rest := [_ankle(sk, "L", true), _ankle(sk, "R", true)]
+	_mark("start")
+	await _go(secs, func(t: float):
+		var move := Vector2.ZERO
+		var label := "idle"
+		for k in LOCO_PLAN:
+			if t >= float(k[0]):
+				move = k[1]
+				label = k[2]
+		pl.inp["move"] = move
+		var sway := KITE_SWAY * sin(TAU * 0.7 * t) if label == "kite" else 0.0
+		pl.inp["aim"] = pl.pos + Vector3(8.0 * cos(sway), 0.9, 8.0 * sin(sway))
+		var pts := AUDIT.points(sk)
+		var lean_inv := pl.model.global_transform.affine_inverse()     # (the game leans the model toward the camera:
+		var fl: Vector3 = pts["foot.L"]                                # a foot's height is read in its own frame)
+		var fr: Vector3 = pts["foot.R"]
+		var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
+		var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
+		var cols := "%.4f\t%s" + "\t%.4f".repeat(20)
+		log.store_line(cols % [
+				t, label, pl.pos.x, pl.pos.z, pl.vel.x, pl.vel.z, fl.x, fl.y, fl.z, fr.x, fr.y, fr.z, pl.pos.y,
+				(pts["hips"] as Vector3).y, knee_l.y, knee_r.y, _ankle(sk, "L", false), _ankle(sk, "R", false),
+				rest[0], rest[1], (lean_inv * fl).y, (lean_inv * fr).y]),
+		func(_t: float): return pl.render_pos(1.0), true)
+	log.close()
+
+## A leg's ankle height (m) in the body's own frame, its feet's floor at 0 (the Hunters lean back toward the camera,
+## CamRig.char_lean, so the world's height is not the floor's): the foot bone's head, or for a rig without one the
+## shin's tip a thigh's length down it (as anim_audit's "foot"). `rest`: in the rest pose (the feet flat on it).
+static func _ankle(sk: Skeleton3D, side: String, rest: bool) -> float:
+	var shin := WardenSkeleton.find(sk, "shin." + side)
+	var foot := WardenSkeleton.find(sk, "foot." + side)
+	if foot < 0:
+		foot = WardenSkeleton.find(sk, "x_foot." + side)
+	var pose := sk.get_bone_global_rest if rest else sk.get_bone_global_pose
+	var at: Vector3
+	if foot >= 0:
+		at = (pose.call(foot) as Transform3D).origin
+	else:
+		var thigh := sk.get_bone_global_rest(sk.get_bone_parent(shin)).origin
+		var leg := sk.get_bone_global_rest(shin).origin.distance_to(thigh)
+		var gs: Transform3D = pose.call(shin)
+		at = gs.origin + gs.basis.y.normalized() * leg
+	return at.y * sk.global_basis.get_scale().y
+
+## The nearest spot to `p` with the plan's whole path (east 22 m, north 21 m, back, west 20 m, north 21 m) on open,
+## level ground.
+func _loco_start(p: Vector3) -> Vector3:
+	for rad in range(0, 90, 3):
+		for k in maxi(1, int(TAU * rad / 3.0)):
+			var a := TAU * k / maxi(1, int(TAU * rad / 3.0))
+			var at := Vector2(p.x + cos(a) * rad, p.z + sin(a) * rad)
+			var ok := true
+			for i in 23:
+				ok = ok and m.world.call("_fits", at.x + i, at.y, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 22.0, at.y - 0.95 * i, 0.7)
+				ok = ok and m.world.call("_fits", at.x + 2.0, at.y - 0.95 * i, 0.7)
+				ok = ok and absf(m.world.ground_at(at.x + i, at.y) - m.world.ground_at(at.x, at.y)) < 0.3
+				ok = ok and absf(m.world.ground_at(at.x + 22.0, at.y - 0.95 * i) - m.world.ground_at(at.x, at.y)) < 0.3
+				if not ok:
+					break
+			if ok:
+				return Vector3(at.x, m.world.ground_at(at.x, at.y), at.y)
+	return _ground(p)

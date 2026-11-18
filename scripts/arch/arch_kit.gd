@@ -30,6 +30,7 @@ var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
 var bot_hold := {"rmb": 0.0, "dash": 0.0}
+var bot_lead := {}             # a bot's delayed cast still being aimed (BotLead)
 var last_variant := ""         # the RMB variant that last fired (HUD, tests)
 var last_e := ""
 var st := {}                   # the subclass's own state
@@ -78,7 +79,7 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
+## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
@@ -88,8 +89,9 @@ func rank(slot: String) -> int:
 
 ## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
 ## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
-func rank_k(table: String, slot: String, shared: float) -> float:
-	var row: Array = d.get(table, {}).get(slot, [])
+## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
+func rank_k(table: String, slot: String, shared: float, key := "") -> float:
+	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
 	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
 
 ## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
@@ -170,15 +172,21 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 ## The colour of the floating damage number this hit shows (a kit tints its own ramp).
 func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
+func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
+## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
+func speed_bonus() -> float: return 0.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true
-## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
+## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
+## own hold set it.
+func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
@@ -199,6 +207,11 @@ func describe_rmb_variant(c: Dictionary) -> String:
 	return "tap"
 
 # ------------------------------------------------------------------ per step
+## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+func sound_tick(_dt: float) -> void:
+	pass
+
 func tick(dt: float) -> void:
 	if KinMerge.transforming(h):
 		drop_holds()
@@ -219,6 +232,7 @@ func tick(dt: float) -> void:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
+	if not bot_lead.is_empty(): BotLead.hold(self, dt)
 	if rmb_down:
 		if h.downed or h.stun_t > 0.0:
 			_drop_rmb()
@@ -277,13 +291,37 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
+## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+func lock_left() -> float: return 0.0
+## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
+## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
+## A recast row it doesn't have is its first cast's (a second press of a slot with no recast changes nothing).
+func turn_rule(slot: String) -> Dictionary:
+	var rows: Dictionary = d.get("turn", {})
+	var row: Dictionary = rows.get(slot, rows.get(slot.trim_suffix("_recast"), {}))
+	return {"early": row.get("early", "free"), "late": row.get("late", "free")}
+## A capped row's turn rate (deg/s) for a window, read where the cast steers.
+func turn_deg_s(slot: String, window: String) -> float:
+	return float(d["turn"][slot][window])
+## A capped-turn aim lock: `cur` turned toward the raw cursor (not aim_dir(), which returns the lock) by at
+## most `deg_s` degrees per second. A committed charge keeps its line near-planted this way.
+func turn_lock(cur: Vector2, deg_s: float, dt: float) -> Vector2:
+	var a: Vector3 = h.inp["aim"]
+	var want := Vector2(a.x - h.pos.x, a.z - h.pos.z)
+	if want.length() < 0.05:
+		return cur
+	var step := deg_to_rad(deg_s) * dt
+	return cur.rotated(clampf(cur.angle_to(want), -step, step))
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
+## A fresh glide press in the air: the kit's own flight lets go for the glider (Rock Hop). True = it ended now.
+func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -294,7 +332,7 @@ func press_rmb() -> void:
 		return
 	if rmb_press_extra():
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -319,6 +357,14 @@ func _drop_rmb() -> void:
 	rmb_t = 0.0
 	AimKit.clear(h)
 	_rmb_dropped()
+## The RMB slot as the bar shows it (slot_info "ready": a charge, the kit's own lock-out): on cooldown the press is
+## refused before it starts anything (no hold pose, wind-up, sound or step) and the bar shows the deny.
+## Every RMB press goes through here: the player's, a bot's, DashFlow's held one and a kit's own buffer.
+func rmb_open() -> bool:
+	if bool(slot_info("sec")["ready"]):
+		return true
+	h._ab_feedback("sec", "deny")
+	return false
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -365,6 +411,11 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
+## The loading screen's rehearsal of this kit's own effect library (Match.warm_up): its pools filled with one of
+## every look at `at`, so the first cast makes nothing mid-fight (--first-cast-check). Kits with a library override it.
+func warm_fx(_at: Vector3) -> void:
+	pass
+
 ## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
 func cast_ult() -> bool:
 	return false
@@ -399,7 +450,8 @@ func use_r() -> void:
 		return
 	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
 	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
-	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	var guard := String(r_def().get("fuse_guard", "none"))
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": guard, "fx": 0.0, "at": h.pos}
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
@@ -424,8 +476,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
-	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
 	if bond:
@@ -454,6 +504,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "r_fuse", {"at": fuse["at"], "r": 2.4, "col": col, "fill": k, "all": true})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -496,48 +547,42 @@ func _fire_r(will_bond: bool) -> void:
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
 			Sfx.duck(0.3)
 
-## The ult going off: a burst, a ring, a flash and a camera punch (the payoff of the fuse).
+## The ult going off: a burst, a flash and a camera punch (the payoff of the fuse).
 func _r_impact() -> void:
 	var col := col_of(r_def())
-	m.fx.ring(h.pos, 3.6, Color(col, 0.95), 0.4)
-	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.9), 0.25)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
 	Shake.incoming_big(m, h.pos, 0.6, h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
-	if m.net_on and not h.remote:
-		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 3.6, col.to_html(false)])
 
 ## The 0.35s transform tell of a Bonded R: a column in the kin's colour visible within 25m.
 func _bond_tell() -> void:
 	var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE) if h.kin else Color.WHITE
-	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
+## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", DashState.long_cd(h.cdat))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
-		if h.ex_cd > 0.0:
+		if not h.dash.spend_long(long_dash_cd()):
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:
-		if h.dashes < 1.0:
+		if not h.dash.spend_short():
 			h._ab_feedback("dash", "deny")
 			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
@@ -551,23 +596,28 @@ func dash_dir() -> Vector2:
 static var _dash_feel := {}
 var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
-## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
-func dash_feel() -> Dictionary:
+## The dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers. move: one of the
+## kit's Shift moves; its "moves" row (a move with no source figure) overrides the hunter's dist and time.
+func dash_feel(move := "") -> Dictionary:
 	if _dash_feel.is_empty():
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
-	return _dash_feel.get(id, _dash_feel["default"])
+	var f: Dictionary = _dash_feel.get(id, _dash_feel["default"])
+	var mv: Dictionary = (f.get("moves", {}) as Dictionary).get(move, {})
+	return f if mv.is_empty() else f.merged(mv, true)
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
 ## buffer all work as before). extra "curved": the hero's measured ground dash, which then runs on its
 ## dash_feel "curve" (docs/decisions/0025) instead of a constant speed. The hero's own: no Boki changes it
-## (DECISIONS 2026-11-05, --boki-dash-check).
+## (DECISIONS 2026-11-05, --boki-dash-check). extra "feel": the Shift move's name for its dash_feel row.
 func travel(dist: float, t: float, extra := {}) -> void:
-	var feel := dash_feel()
+	var feel := dash_feel(String(extra.get("feel", "")))
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]
+	if extra.has("feel"):
+		e["ex_feel"] = [float(feel["dist"]), float(feel["time"])]     # a long dash runs the class's numbers x this
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
 	var curve: Array = feel.get("curve", [])
 	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0
@@ -712,31 +762,6 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
 	res_wait = maxf(res_wait, float(res_def().get("wait", 3.0)) if wait < 0.0 else wait)
@@ -759,9 +784,8 @@ func _tells(dt: float) -> void:
 		fx_t = 0.18
 		if tell != "":
 			var rc := res_col()
+			# sparks on the body only: a ground ring means gameplay, and this one landed under every dash
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
-			if tell == "full" and int(m.time * 5.0) % 3 == 0:
-				m.fx.ring(h.pos, 0.9, Color(rc, 0.7), 0.25)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
 			var kp: Vector3 = (h.kin as Kin).position
@@ -815,10 +839,11 @@ func e_recastable() -> bool: return false
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
-var anim_rt := 0               # counts explicit re-times (retime()), so other games apply each one at any size
+var anim_rt := 0               # counts plays and re-times (play(), retime()), so other games apply each one at any size
 
 ## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
-## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. NET_CLEAR: the kit cleared its move (a lowered
+## shield, a cancelled draw); empty id: a move older than NET_MOVE_LIFE, which the copy plays on.
 ## The age is snapped to 0.05 s; its hundredths carry the re-time count (anim_rt mod NET_RETIMES, decision 0098).
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
@@ -826,20 +851,29 @@ const NET_AGE_SNAP := 0.05
 const NET_RETIME_STEP := 0.01
 const NET_RETIMES := 5
 const NET_RESYNC := 0.3        # s: a resend whose age is off by more than this restarts the copy (latency, the snap)
+const NET_CLEAR := "-"
 
 static func net_move(h: Hunter) -> Array:
 	var k: ArchKit = h.ak
-	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
+	if k == null:
+		return ["", 0.0]
+	if k.anim_id == "":
+		return [NET_CLEAR, 0.0]
+	if h.m.time - k.anim_at > NET_MOVE_LIFE:
 		return ["", 0.0]
 	return [k.anim_id, snappedf(h.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
 
-## A remote hunter's move starts when the id changes, the sender re-timed it, or its clock says it restarted,
-## then plays on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+## A remote hunter's move starts when the id changes, the sender played or re-timed it again, or its clock says
+## it restarted, then plays on locally like any kit move; NET_CLEAR ends it. Old hosts send nothing and the
+## hunter just keeps its weapon poses.
 static func apply_net_move(h: Hunter, it: Array) -> void:
 	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
 		return
 	var id := String(it[NET_MOVE_AT])
 	if id == "":
+		return
+	if id == NET_CLEAR:
+		h.ak.anim_id = ""
 		return
 	var wire := float(it[NET_MOVE_AT + 1])
 	var rt := roundi(fposmod(wire, NET_AGE_SNAP) / NET_RETIME_STEP) % NET_RETIMES
@@ -860,6 +894,7 @@ func retime(at: float) -> void:
 func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
+	anim_rt += 1               # a restart of the same move is a new play for the other game
 
 ## A hold clip: it starts HOLD_POSE_T into the hold (key down `t` s), never on the press, and not again while it plays.
 func play_hold(move: String, t: float) -> void:
@@ -885,6 +920,10 @@ func flip_for(dir: Vector2, base: String) -> String:
 func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
+## Dash charges: the kit's dash.charges (the source hero's count) or else the class's `class_n`, plus extra_dashes().
+func dash_charges(class_n: float) -> float:
+	return float(dash_def().get("charges", class_n)) + extra_dashes()
+
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
 
@@ -937,6 +976,13 @@ func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
 ## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
 func dash_vy(_dt: float) -> float: return 0.0
+
+## A ground dash ran off a ledge and ended in the air (HunterMove.dash_off_ledge): its ground pose stops there,
+## and so does its wind-down (the glider kept shut a beat after a dash is for a dash that stays on the ground).
+func on_dash_off_ledge() -> void:
+	if anim_at >= dash_press_at:
+		anim_id = ""
+	h.glide_cd = 0.0
 ## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
 func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
@@ -1018,6 +1064,20 @@ static func net_vel(h: Hunter) -> Vector3:
 func move_vel() -> Vector3:
 	return h.vel
 
+## A ground cone everyone must dodge (Net 0.24.6): other players' games don't run this kit, so they get its
+## true length and width and draw the same AimKit cone for `dur` s (net_cone_in).
+func net_cone(at: Vector3, dir: Vector2, length: float, deg: float, dur: float, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["cone", h.nid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
+				m._r(length), m._r(deg), m._r(dur), col.to_html(false)])
+
+static func net_cone_in(match_node: Node, x: Array) -> void:
+	var who: Variant = match_node.ents_by_id.get(String(x[2]), null)
+	if who is Hunter and not (who as Hunter).is_local():
+		var p := {"from": Vector3(x[3], x[4], x[5]), "dir": Vector2(x[6], x[7]), "len": float(x[8]), "deg": float(x[9])}
+		p.merge({"dur": float(x[10]), "all": true, "col": Color.html(String(x[11]))})
+		AimKit.cone(who as Hunter, "net_cone", p)
+
 ## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
 ## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).
 func net_pulse(dt: float, on: bool, r := 1.1) -> void:
@@ -1037,13 +1097,9 @@ func armed_fx(slot := "sec") -> void:
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
-## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
+## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
-		rings := true) -> void:
-	if rings:
-		m.fx.ring(at, 2.4, col, 0.38)
-		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
@@ -1051,8 +1107,6 @@ func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
-	if rings:
-		net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -1120,7 +1174,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["jug_ting", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["dolm_rock_crunch", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)
@@ -1141,7 +1195,7 @@ func charge_now() -> Array:
 		return ["rmb", clampf(rmb_t / rf, 0.0, 1.0)]
 	if h.draw_t >= 0.0 and h.draw_t < 5.0:
 		return ["draw", clampf(h.draw_t / 0.9, 0.0, 1.0)]
-	var ck := h.charge_k()
+	var ck := h.atk.charge_k()
 	if ck > 0.0:
 		return ["melee", ck]
 	var dk := dash_charge()
@@ -1187,10 +1241,9 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		var rc := SideColor.fx(m, h, col)
+		var reach := 1.15 * float(h.cdat.get("scale", 1.0))
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, reach, Color(rc, 0.9), SideColor.order(m, h))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)

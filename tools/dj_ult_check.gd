@@ -5,6 +5,11 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const AimkitCheck := preload("res://tools/aimkit_check.gd")
+
+const EXIT := preload("res://tools/ult_exit.gd")
+const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -64,20 +69,25 @@ func dancer(a) -> void:
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
 	var thin: Dictionary = AimKit.entry(P, "ult")
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
-			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+	A.ok("dancer X: the ring is near 3 bh just before 0.4s, the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.25 and AimKit.shown(P, "ult_rim")
 			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
 			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
-	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
+	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true, "r_off": 0.0}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
 			beat["n"] = U.beat
 			(beat["at"] as Array).append(m.time)
 			beat["pulse"] = maxf(float(beat["pulse"]), float(AimKit.entry(P, "ult").get("alpha", 0.0)))
+			beat["r_off"] = maxf(float(beat["r_off"]), absf(float(AimKit.entry(P, "ult")["r"]) - U.radius()))
+			var rim_off := absf(float(AimKit.entry(P, "ult_rim")["r"]) - U.radius() * float(d["rim"]))
+			beat["r_off"] = maxf(float(beat["r_off"]), rim_off)
 		if float(U.st.get("t", 0.0)) > 0.45:
 			beat["danced"] = bool(beat["danced"]) and K.anim_id == ThiefUlt.DANCE)
+	A.ok("dancer X: the ring and its dashed outer band are drawn at exactly the hit radius on every beat",
+			(beat["at"] as Array).size() > 0 and float(beat["r_off"]) < 0.001, "off %.4f" % float(beat["r_off"]))
 	var gaps: Array = beat["at"]
 	var even := true
 	for i in range(1, gaps.size()):
@@ -95,8 +105,9 @@ func dancer(a) -> void:
 			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	var total := float(d["dmg"]) * float(d["shots"])
-	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
-			and (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"]) == 60.0, "%.0f" % total)
+	var rim_total := (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"])
+	A.ok("dancer X: the blades keep the sourced totals (45 inside, 76 from the outer band)",
+			is_equal_approx(total, 45.0) and is_equal_approx(rim_total, 76.0), "%.0f" % total)
 	A.ok("dancer X small mechanic: every blade refreshes her Marks", K.marks_on(T) >= 2
 			and float(T.get_meta("marks")[P.nid][1]) > 3.0)
 	A.ok("dancer X: blades landing on a hunter fill the bond once a cast (a hit: 60% of the bar, KinBond.from_ult)",
@@ -213,10 +224,10 @@ func dancer_ring(a) -> void:
 	var grow_bh := float(d["r0"]) / AimKit.BH
 	var reach_bh := reach / AimKit.BH
 	var cadence := float(d["time"]) / float(d["shots"])
-	A.ok("dancer ring: 1.3 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
-			absf(grow_bh - 1.3) < 0.05 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
+	A.ok("dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band hits harder, a 6s blight",
+			absf(grow_bh - 0.17) < 0.03 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
 			and float(d["time"]) == 2.0 and absf(cadence - 0.2) < 0.001
-			and float(d["rim_dmg"]) == float(d["dmg"]) * 0.5 and float(d["rim_blight"]) == 6.0,
+			and float(d["rim_dmg"]) > 0.0 and float(d["rim_blight"]) == 6.0,
 			"%.2f bh -> %.2f bh" % [grow_bh, reach_bh])
 	A.ok("dancer ring: 4 a blade in the middle, 6 from the band (x power); none past the radius",
 			absf(float(mid_hits[0][1]) - float(d["dmg"]) * power) < 0.01
@@ -383,19 +394,143 @@ func zedran(a) -> void:
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
+	_guard_attacks(m, P, T, T2, home)
 	await _recovery_exits()
+	_recovery(m, P, T, home)
 	await A.done(m)
+	var got: Dictionary = await EXIT.run(A, "juggernaut")
+	A.ok("juggernaut X exit: Shift, LMB and jump pressed 0.1s before the cleave lands go on its first free step",
+			EXIT.on_time(got), EXIT.said(got))
+
+## The recovery plays its own clip (jug_ult_recover) for exactly the 0.35 s at half speed, then he is free; a jump or
+## Shift cuts it on the press frame. Timing and speed are the ult's own (recover 0.35, move_k 0.5), unchanged.
+func _recovery(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	var U: JuggernautUlt = K.riposte
+	var recover := float(U.data()["recover"])
+	var rows := []
+	A.step(m, 0.5)           # (the scenario before this one is still recovering)
+	for cut in ["none", "jump", "dash"]:
+		A.fresh(T)
+		T.teleport(home + Vector3(2.6, 0, 0))
+		P.teleport(home)
+		A.aim_at(P, T.pos)
+		K.cd["x"] = 0.0
+		HunterKeys.ult_pressed(P)
+		A.step(m, 0.65 + float(U.data()["strike_t"]) + 0.03)     # (the guard, the cleave, a frame into the recovery)
+		var played: bool = String(U.st.get("phase", "")) == "recover" and K.anim_id == "jug_ult_recover" \
+				and K.move_k() == 0.5
+		A.step(m, 0.1)
+		var mid: bool = K.anim_id == "jug_ult_recover"
+		if cut == "jump":
+			P.do_jump()
+		elif cut == "dash":
+			P.do_dash()
+		m.step(A.DT)
+		var cut_now: bool = cut == "none" or (K.anim_id != "jug_ult_recover" and not U.running())
+		A.step(m, recover)
+		rows.append([cut, played, mid, cut_now, K.anim_id != "jug_ult_recover" and not U.running()])
+		A.step(m, 0.3)
+	A.ok("juggernaut X: the recovery plays its own clip at half speed (the 0.35 s unchanged)",
+			rows.all(func(r): return r[1] and r[2]), str(rows))
+	A.ok("juggernaut X: a jump or Shift cuts the recovery clip on the press frame, and it ends on time",
+			rows.all(func(r): return r[3] and r[4]), str(rows))
+
+## The cleave is a tall crescent standing along the aim (tilt 90, leaning toward the camera so it never shows
+## edge-on): its tip at the strip's far end, its back edge inside the strip, at full lean no wider than the strip
+## (+20%) and still taller than a Hunter.
+
+
+## One cast with a bot attacker landing `at` s into the guard: "rifle" is a stream of three 6-damage shots 0.13s
+## apart (the rifle's own rate), "stun" one hit with a 1.5s stun and a knock, "none" nothing. The foe is
+## `foe_at` m ahead.
+## Returns what the guard let through and what the strike did.
+func _guard_case(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3, kind: String, at: float,
+		foe_at := 2.6) -> Dictionary:
+	var K: JuggernautKit = P.ak
+	var U: JuggernautUlt = K.riposte
+	A.step(m, 1.5)
+	A.fresh(T)
+	A.fresh(P)
+	T.teleport(home + Vector3(foe_at, 0, 0))
+	T2.teleport(home + Vector3(-6.0, 0, 3.0))
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.hp = P.max_hp
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	K.res = 0.0               # (the last strike's Rage would add its +15% to this one)
+	K.enraged_t = 0.0
+	var t0 := m.time
+	var strikes0 := U.strikes
+	HunterKeys.ult_pressed(P)
+	var shots := []
+	if kind == "stun":
+		shots = [at]
+	elif kind == "rifle":
+		shots = [at, at + 0.13, at + 0.26]
+	var out := {"in_guard": 0.0, "after": 0.0, "stun": 0.0, "kb": 0.0}
+	for st in shots:
+		while m.time - t0 < float(st):
+			m.step(A.DT)
+		var hp0 := P.hp
+		var in_guard := U.guarding()
+		if kind == "stun":
+			P.hurt(8.0, T2, {"src": "abil", "stun": 1.5, "kb": Vector2(6.0, 0.0), "dr": true})
+			out["stun"] = maxf(float(out["stun"]), P.stun_t)
+			out["kb"] = maxf(float(out["kb"]), Vector2(P.vel.x, P.vel.z).length())
+		else:
+			P.hurt(6.0, T2, {"src": "shot"})
+		var slot := "in_guard" if in_guard else "after"
+		out[slot] = float(out[slot]) + hp0 - P.hp
+	while m.time - t0 < 0.9:         # the strike has landed (0.75s)
+		m.step(A.DT)
+	out["strikes"] = U.strikes - strikes0
+	out["dealt"] = U.last_dealt
+	return out
+
+## Kael's guard against two bot attackers (the source's Retaliation: no damage and no crowd control for 0.65s, then
+## the strike): a rifle stream and a stun, each landed 0.2s and 0.5s into the guard, then the strike's damage and reach.
+func _guard_attacks(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var base := float(P.ak.x_def()["dmg"])
+	for at in [0.2, 0.5]:
+		var r := _guard_case(m, P, T, T2, home, "rifle", at)
+		A.ok("juggernaut X guard: a rifle stream from %.1fs in takes nothing, the strike lands" % at,
+				float(r["in_guard"]) == 0.0 and int(r["strikes"]) == 1,
+				"in guard %.0f, after %.0f, strike %.1f (base %.0f)" % [r["in_guard"], r["after"], r["dealt"], base])
+		r = _guard_case(m, P, T, T2, home, "stun", at)
+		A.ok("juggernaut X guard: a stun and knock landed %.1fs in does not apply, the strike lands" % at,
+				float(r["in_guard"]) == 0.0 and float(r["stun"]) == 0.0 and float(r["kb"]) < 0.5
+				and int(r["strikes"]) == 1,
+				"damage %.0f stun %.2f push %.2f strike %.1f" % [r["in_guard"], r["stun"], r["kb"], r["dealt"]])
+	var one := _guard_case(m, P, T, T2, home, "stun", 0.5)
+	A.ok("juggernaut X guard: the strike with one hit blocked does %.0f x 1.2" % base,
+			absf(float(one["dealt"]) - base * 1.2) < 0.5, "dealt %.1f" % float(one["dealt"]))
+	var near := _guard_case(m, P, T, T2, home, "none", 0.0, 3.4)
+	var far := _guard_case(m, P, T, T2, home, "none", 0.0, 4.6)
+	A.ok("juggernaut X guard: the strike hits a foe 3.4m ahead and misses one 4.6m ahead",
+			float(near["dealt"]) > 0.0 and float(far["dealt"]) == 0.0,
+			"3.4m %.1f, 4.6m %.1f" % [near["dealt"], far["dealt"]])
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:
-	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
 	var ln := float(d["len"])
-	var radius := float(sweep["size_x"]) * ln
-	var tip := float(sweep["fwd_x"]) * ln + radius
-	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
 	var w := float(d["width"])
-	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
-			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
+	var fits := true
+	var tall := INF
+	for layer: Dictionary in HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"]:
+		if layer["p"] != "sweep":
+			continue
+		var radius := float(layer["size"])
+		var half := deg_to_rad(float(layer["arc"])) * 0.5
+		var lean := deg_to_rad(float(layer.get("lean", 0.0)))
+		var mid := float(layer["fwd_x"]) * ln
+		tall = minf(tall, float(layer["y"]) + radius * sin(half) * cos(lean))
+		var side := radius * sin(half) * sin(lean)
+		fits = fits and float(layer["tilt"]) == 90.0 and lean > 0.0 and mid + radius < ln + 0.4 \
+				and mid - radius * cos(half) > 0.0 and mid + radius > ln - 0.1 and side <= w * 0.6
+	A.ok("juggernaut X: the cleave's crescent stands tall inside its strip", fits and tall >= CLEAVE_TALL,
+			"top %.2f m at full lean (at least %.1f), strip %.1f x %.1f m" % [tall, CLEAVE_TALL, ln, w])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:

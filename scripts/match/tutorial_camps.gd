@@ -9,6 +9,7 @@ extends RefCounted
 const PICK_LVL := {"sec": 1, "dash": 2, "kin": 3, "ult": 6}     # the level each pick step is at
 ## m to a row camp's first monster: past an idle monster's notice (Mob, 7.5 m), so the line holds
 const ROW_FROM := 10.0
+const ROW_STEP := 1.6     # m between a row camp's monsters, one behind the other
 
 var tu: Tutorial
 var granting := false        # the tutorial is paying XP right now (any other XP is ignored)
@@ -82,7 +83,7 @@ func spawn(sid: String) -> void:
 	for i in kinds.size():
 		var at := Vector3.INF
 		if c.get("row", false):
-			at = tu.spot(ROW_FROM + i * 1.6, ang)       # (one behind the other, to line up)
+			at = tu.spot(ROW_FROM + i * ROW_STEP, ang)       # (one behind the other, to line up)
 		elif c.get("far", false):
 			at = tu.spot(8.5 - i * 3.0, ang + i * 0.7)
 		else:
@@ -108,6 +109,14 @@ func _cull_strays() -> void:
 			culled = true
 	if culled and alive() == 0:
 		spawn(tu.id())
+## A retry: the camp goes without a kill (no XP) and the ledger starts again, so the camp brought back pays
+## only what is left to its level.
+func clear() -> void:
+	for e: Dictionary in ledger:
+		if is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead:
+			(e["mb"] as Mob).vanish()
+	ledger.clear()
+	count = 0
 
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:

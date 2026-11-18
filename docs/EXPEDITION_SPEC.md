@@ -6,7 +6,7 @@ not from extracted game data. Treat them as starting points to tune
 against, not ground truth. Where a value is a pure guess from footage it
 is marked (eyeball).
 
-Sources: supervive.wiki.gg (Gliding, Getting Started), Deltia's Gaming
+Sources: the community wiki (Gliding, Getting Started), Deltia's Gaming
 gliding guide, general gameplay footage. The wiki's own stats pages are
 flagged outdated, so hard numbers are scarce; mechanics are well
 documented, magnitudes are inferred.
@@ -154,6 +154,16 @@ risk, theft/chase). Borrow:
 Recommendation: **adapt.** Use the basecamp idea for our extraction
 points; keep our kin-centric stakes.
 
+### Boss lairs: one exit, two prizes
+
+All three lairs of a map are live every match (`spawn_points.boss` pick 3 of 3 on Skyreach and the
+Hollow Crown). The match seed makes one of them the **Sealed Lair**: the only lair that leads out of the
+match (open 2:00 to 5:30, the winning squad leaves by its updraft). The other two are **prize lairs**: the
+boss kill pays kill XP (260) to the last hit's squad and its mates within 30 m, plus the boss's pile,
+Rare Egg and three perk orbs (the boss's buff), and nobody leaves the match by them. So the camps spec's
+mid-game XP is the two prize lairs; the Sealed Lair's XP is a by-product of leaving. `--lair-lock-check`
+asserts one exit and two prize lairs on both maps.
+
 ---
 
 ## 9. Map scale (roughest estimates)
@@ -170,6 +180,13 @@ large island broken into zones around a shrinking boundary.
 Recommendation: our expedition maps are smaller and tier-based; **don't
 match their scale.** Use the "zone with a basecamp and a boss" unit as a
 building block and size to our match length.
+
+Ours (owner order 11-11, docs/decisions/0060-shrinking-zone.md): on the
+2x Hollow Crown the zone closes in 4 phases toward a seeded final area round
+an outpost (closes at 150-200, 280-325, 395-435, 490-520 s of 612;
+r 150, 95, 58, 32 m; outside 1/2/4/7% of max health a second). The islands
+outside the last circle fall at 520 s; the clock's fall at 612 s stays.
+Numbers: content/rules/shrink_zone.json.
 
 ---
 
@@ -193,17 +210,10 @@ building block and size to our match length.
 
 ## 11. If we later get exact data (legal routes only)
 
-With written permission from Theorycraft, or an official data source, the
-real values live in these tables (names seen in the asset registry, not
-their contents):
-
-- `CT_LokiCharacterAttributes`, `CT_PrimaryAttackSpeeds`,
-  `CT_LokiAbilityAttributes`, `CT_LokiPowerAttributes`,
-  per-hero `CT_*Attributes`, `CT_*DashScaling`,
-  `CT_StunDurationByDistance`.
-- Camera: `BP_LokiPlayerCameraManager`, player-controller camera
-  components, `GE_Gliding_CameraZoom`.
-- Main map bounds: the Skylands map level asset.
+With written permission from the reference's studio, or an official data source,
+the real values replace these estimates: hunter and ability stats, attack
+speeds, stun by distance, the camera and glide-zoom settings, and the main
+map bounds (which tables hold them: private reports repo sv/).
 
 Swap the estimates above for those values and re-flag this doc as
 measured. Until then: estimates.
@@ -250,19 +260,19 @@ heavy camp hits about as hard as a 3-monster normal one.
 
 **Source column (2026-11-11).** — means the source publishes nothing on this. [W] is the wiki. The
 measured rows above are origin/main at 88b06b9e7. Where we looked:
-- `briefs/supervive-data`: the game-file pull covers Hunter attributes only, with no creature tables.
-- The wiki: Creeps, Normal Camps, Biome Leaders, Soul Bosses and Major Monsters (supervive.wiki.gg).
+- `sv/briefs`: the game-file pull covers Hunter attributes only, with no creature tables.
+- The wiki: Creeps, Normal Camps, Biome Leaders, Soul Bosses and Major Monsters (reference.wiki.gg).
   None gives a creature's health, damage or attack rate. They give only the camp makeup (3 small creeps
   and 1 elite, back each day) and that a stagger takes 3x damage. There is one damage number: the Soul
   Boss's phase-3 laser, charged and fired four ways, deals "roughly around 700" (Soul Bosses page,
   edited 26 Jul 2024).
 - Patch notes (wiki Patch Open Beta; Steam): loot and XP for creeps were retuned, but no damage change.
 - The footage in briefs: training-range kit footage against dummies (docs/CAMP_PARITY.md on
-  ext/camp-parity says the same). The walkthroughs in docs/SUPERVIVE_DATA.md can't be fetched from the
+  ext/camp-parity says the same). The walkthroughs in sv/DATA.md can't be fetched from the
   workers (YouTube asks them to sign in).
 
 The source's base Hunter health is 1,290 for most Hunters, plus 77.4 a level (6%)
-(`briefs/supervive-data/supervive_physics.md`). Ours is 145 for a Medium plus 6% a level, so the
+(`sv/briefs/physics.md`). Ours is 145 for a Medium plus 6% a level, so the
 curve matches, and so does the level-5 gain over level 1 (+24%). Source numbers run about 9x ours
 (1,290 / 145), so read source damage as a share of base health.
 
@@ -305,7 +315,7 @@ spitter@5: slowest 19.4s vs fastest 2.3s (8.37x)
 brute@5:   slowest 22.6s vs fastest 1.9s (12.00x)
 ```
 
-**Findings.** `briefs/supervive-data` has no creature hp or damage, so there is nothing to compare against. The proposed band is slowest no more than 1.6x the fastest. It is **not met**, and mob numbers can't meet it: with Skitter, Spitter, Brute and Puffbomb hp all doubled, the spread is still 4.7x to 7.2x. The gap is how the bots use the slow kits:
+**Findings.** `sv/briefs` has no creature hp or damage, so there is nothing to compare against. The proposed band is slowest no more than 1.6x the fastest. It is **not met**, and mob numbers can't meet it: with Skitter, Spitter, Brute and Puffbomb hp all doubled, the spread is still 4.7x to 7.2x. The gap is how the bots use the slow kits:
 - Bulwark's tap throws the hammer, which has to come back.
 - Ashwick's hose (27 dps, 7 m) is fired in the bot's on/off bursts for fast guns, from a heavy's 5.5 m, so it lands about half its damage.
 - Juggernaut and Dolm close in and cleave whole camps.

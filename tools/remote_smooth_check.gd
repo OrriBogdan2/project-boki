@@ -3,19 +3,24 @@ extends RefCounted
 ## Two real games over the desktop relay, like --displace-net-check (whose match builder it reuses): this
 ## process runs the relay and the host game; the guest (--remote-smooth-check=guest) is a second headless
 ## game. The relay here holds every packet 40 ms +-20 ms one way (80 ms ping, 20 ms jitter each way)
-## and drops 2% of snapshots, keeping ENet's unreliable-ordered rule (a late snapshot behind a newer one
-## is dropped). The host's Hunter runs, stops, turns, dashes, is lifted 5 m (a teleport), glides and is
-## knocked, then becomes Sparkle and casts Kitefall (its scripted 0.2 s fall onto a spot 12 m off, numbered
-## on its own); the guest records where its game puts that Hunter every frame. Both clocks are the wall clock.
+## and drops 2% of snapshots; packets to one peer arrive in the order they were sent, as through a real
+## queue (the host's hunter and world snapshots of one step are two packets). The host's Hunter runs,
+## stops, turns, dashes, is lifted 5 m (a teleport), glides and is knocked, then becomes Sparkle and casts
+## Kitefall (its scripted 0.2 s fall onto a spot 12 m off, numbered on its own); the guest records where its
+## game puts that Hunter every step. Both games step their match on the wall clock as Match._process does
+## (a slow frame takes two steps) and stamp each step with the wall moment it stands for. The host draws
+## nothing: only the line and the guest's buffer are measured, and a host drawn on a loaded software
+## display has frames over Match's 0.1 s clamp that put its match clock behind the wall (the owner's game
+## in slow motion, not the line). RSMOOTH load says what such frames still cost each game's clock in the
+## run, so a stall can be told from a jerk.
 ## Numbers (the drawn path against the true one, shifted by the best-fit delay):
 ##   snaps      frames where the drawn body jumps more than SNAP_STEP; only the one teleport may
 ##   jerks      frames where the drawn speed changes by more than JERK_DV while the true one doesn't
 ##   backsteps  frames where the drawn body steps back against the way the true one moves
 ##   overshoot  frames where the drawn body is more than OFF_PATH from anywhere on the true path
 ##   max step   the drawn body's biggest step in one frame (the fall: under NET_CAP, no jump)
-## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>; the guest prints RSMOOTH guest pid=<pid>.
+## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0        # s for the guest to come up and build its match
 const ONE_WAY_MS := 40        # ms: half the 80 ms ping
@@ -32,35 +37,29 @@ const DN := preload("res://tools/displace_net_check.gd")
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
 	var rng := RandomNumberGenerator.new()
-	var held: Array = []          # [due msec, peer id, message, fast, seq]
-	var seq := 0
-	var last_fast := {}           # peer id -> seq of the newest snapshot it got
-	var last_due := {}            # peer id -> due msec of its last reliable message (they stay in order)
-	var lost := 0
+	var wire: Array = []          # [due msec, peer id, message, fast]
+	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
+	var dropped := 0
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
-		seq += 1
 		if fast and rng.randf() < LOSS:
-			lost += 1
+			dropped += 1
 			return
 		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
-		if not fast:
-			due = maxi(due, int(last_due.get(id, 0)))
-			last_due[id] = due
-		held.append([due, id, d, fast, seq])
+		due = maxi(due, int(last_due.get(id, 0)))
+		last_due[id] = due
+		wire.append([due, id, d, fast])
 
 	func _process(dt: float) -> void:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
-		held.sort_custom(func(a, b): return a[0] < b[0])
-		while not held.is_empty() and int(held[0][0]) <= now:
-			var x: Array = held.pop_front()
-			if x[3]:
-				if int(x[4]) < int(last_fast.get(x[1], 0)):
-					lost += 1
-					continue
-				last_fast[x[1]] = x[4]
-			super._send(x[1], x[2], x[3])
+		var later: Array = []
+		for x in wire:              # in send order: each peer's due times never go down
+			if int(x[0]) <= now:
+				super._send(x[1], x[2], x[3])
+			else:
+				later.append(x)
+		wire = later
 
 var main: Node
 var bad := 0
@@ -68,7 +67,11 @@ var dn                         # the --displace-net-check helper that builds the
 var m: Match = null
 var stop := false
 var dumped := false
-var rec: Array = []            # guest: [wall s, x, y, z] of the host's Hunter each frame
+var rec: Array = []            # guest: [wall s, x, y, z] of the host's Hunter each step
+var acc := 0.0                 # s of wall clock the match is owed (Match._process's accumulator)
+var last_us := 0               # usec of the last frame _tick counted
+var stalls: Array = []         # [wall s, s]: frames over the 0.1 s clamp, the match clock lost that much
+var guest_stalls: Array = []   # the guest's, written with its record
 var guest_pid := 0
 var dir := ""
 
@@ -80,13 +83,16 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	dn = DN.new()
 	dn.main = main
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == "--remote-smooth-check=guest": guest = true
 		if a.begins_with("--rs-port="): dn.port = int(a.substr(10))
-	dir = ProjectSettings.globalize_path("user://remote_smooth")
+		if a.begins_with("--rs-dir="): dir = a.substr(9)      # the guest writes its record where the host reads it
+	if dir == "":
+		dir = ProjectSettings.globalize_path("user://remote_smooth")
 	DirAccess.make_dir_recursive_absolute(dir)
 	Net.message.connect(_on_msg)
 	if guest:
@@ -96,16 +102,17 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	dn.port = 7990 + OS.get_process_id() % 40
+	dn.port = CheckChild.free_port(7990 + OS.get_process_id() % 40)
+	RenderingServer.render_loop_enabled = false
 	var relay := LagRelay.new()
 	relay.rng.seed = 80
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
-	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d '--rs-dir=%s'" % [dn.port, dir],
+			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -122,8 +129,9 @@ func _host() -> void:
 	await dn._build(d)
 	m = dn.m
 	var G: Hunter = null
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _host_run(0.2, "", [])
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null, "the guest's game is sending")
@@ -136,7 +144,12 @@ func _host() -> void:
 		await _host_run(0.1, "", [])
 	ok(dumped, "the guest wrote its record")
 	if dumped:
-		_report(truth, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json"))), relay.lost)
+		var got = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json")))
+		if typeof(got) == TYPE_DICTIONARY:
+			guest_stalls = got["stalls"]
+			_report(truth, got["drawn"], relay.dropped)
+		else:
+			ok(false, "the guest's record reads")
 	_finish()
 
 ## The run the host's Hunter makes, recorded as [wall s, x, y, z, phase].
@@ -190,22 +203,34 @@ func _kitefall(truth: Array) -> void:
 func _host_run(secs: float, phase: String, truth: Array) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
+		var w: float = await _tick()
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
 		t += DT
 		if phase != "":
 			var p := m.player.pos
-			truth.append([Time.get_unix_time_from_system(), p.x, p.y, p.z, phase])
+			truth.append([w, p.x, p.y, p.z, phase])
+
+## Waits until the wall clock owes the match a step, as Match._process's accumulator counts it (frames
+## clamped to 0.1 s), takes it and returns the wall time (s) that step stands for.
+func _tick() -> float:
+	if last_us == 0:
+		last_us = Time.get_ticks_usec()
+	while acc < DT:
 		await main.get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		var frame := (now - last_us) / 1e6
+		acc += minf(frame, 0.1)
+		if frame > 0.1:
+			stalls.append([Time.get_unix_time_from_system(), frame - 0.1])
+		last_us = now
+	acc -= DT
+	return Time.get_unix_time_from_system() - acc
 
 func _finish() -> void:
 	Net.lobby_emit("rs", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	var p := dir.path_join("guest.log")
-	if FileAccess.file_exists(p):
-		for line in FileAccess.get_file_as_string(p).split("\n"):
-			if line.begins_with("RSMOOTH guest pid="): guest_pid = int(line.get_slice("=", 1))
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("RSMOOTH DONE, failures: ", bad)
@@ -260,8 +285,10 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			if tv.length() > 1.0 and step.dot(tv.normalized()) < -0.01: r["backsteps"] += 1
 			if off > OFF_PATH: r["overshoot"] += 1
 			r["max_off"] = maxf(r["max_off"], off)
-	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost or overtaken); drawn %.0f ms behind" % [
+	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
 		ONE_WAY_MS, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
+	print("RSMOOTH load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
+		_stalled(stalls, w0, w1) * 1000.0, _stalled(guest_stalls, w0 + lag, w1 + lag) * 1000.0])
 	for ph in phases:
 		var r: Dictionary = tot[ph]
 		var head := "RSMOOTH %-5s frames %4d  snaps %2d  jerks %3d" % [ph, r["n"], r["snaps"], r["jerks"]]
@@ -278,6 +305,13 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	var f: Dictionary = tot["fall"]
 	ok(f["n"] > 60 and f["max_step"] < NET_CAP, "Kitefall's fall is drawn as a drop, not a jump",
 		"%d frames, max step %.2f m" % [f["n"], f["max_step"]])
+
+## Seconds of match clock the stalls between wall times a and b cost.
+static func _stalled(list: Array, a: float, b: float) -> float:
+	var s := 0.0
+	for x in list:
+		if float(x[0]) >= a and float(x[0]) <= b: s += float(x[1])
+	return s
 
 ## The delay (s) that best lines the drawn path up with the true one.
 func _best_lag(truth: Array, drawn: Array, w0: float, w1: float) -> float:
@@ -330,7 +364,6 @@ static func _off_path(truth: Array, j: int, q: Vector3) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("RSMOOTH guest pid=%d" % OS.get_process_id())
 	if not await dn._connect():
 		print("RSMOOTH guest: no relay")
 		main.get_tree().quit(1)
@@ -338,14 +371,14 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
+		var w: float = await _tick()
 		for mb in m.mobs: mb.queue_free()       # (as on the host: nothing shoves the bodies)
 		m.mobs.clear()
 		m.step(DT)
 		var H: Ent = m.ents_by_id.get("P" + Net.host, null)
 		if H:
-			rec.append([Time.get_unix_time_from_system(), H.pos.x, H.pos.y, H.pos.z])
-		await main.get_tree().process_frame
+			rec.append([w, H.pos.x, H.pos.y, H.pos.z])
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -362,7 +395,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			m = dn.m
 		"dump":
 			var f := FileAccess.open(dir.path_join("drawn.json"), FileAccess.WRITE)
-			f.store_string(JSON.stringify(rec, "", true, true))
+			f.store_string(JSON.stringify({"drawn": rec, "stalls": stalls}, "", true, true))
 			f.close()
 			Net.lobby_emit("rs_r", {"n": rec.size()})
 		"done": stop = true

@@ -5,7 +5,7 @@
 - **Area:** movement
 
 ## Problem
-The Cinder Steps plateau (4 terraces, 3.2m) was out of reach (jump + mantle ~2.85m). Hitting a wall at speed just stopped you. Ledges only caught you near a jump's apex, and a ledge lower than where you last stood never caught you at all, so gliding up to one near the top of the map failed. The abyss lift felt flat next to SUPERVIVE.
+The Cinder Steps plateau (4 terraces, 3.2m) was out of reach (jump + mantle ~2.85m). Hitting a wall at speed just stopped you. Ledges only caught you near a jump's apex, and a ledge lower than where you last stood never caught you at all, so gliding up to one near the top of the map failed. The abyss lift felt flat next to the reference.
 
 ## Options
 1. Raise the jump or the mantle reach: rejected, it changes every wall on every map.
@@ -21,3 +21,4 @@ The Cinder Steps plateau (4 terraces, 3.2m) was out of reach (jump + mantle ~2.8
 - Movement runs on the owning machine; nothing new on the wire.
 - The light class's second wall kick is gone (one kick per airtime).
 - `--mantle-check`'s steering-away window is 24 steps (a ledge now catches earlier). New check: `--wallmove-check`.
+- Chained kicks keep less each time: decision 0100.

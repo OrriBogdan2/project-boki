@@ -17,6 +17,7 @@ const K_MIN := 0.5             # strength of a chip hit
 const K_PER_FRAC := 4.0        # strength gained per share of max health a hit takes
 const K_MAX := 1.3
 const LAND_FRAC := 0.25        # the share of max health a landing jolts like (a squash, no shove: K_MAX)
+const DASH_FRAC := 0.2         # the share of max health a dash start jolts like (the lean, K_MAX before mass)
 ## Per body plan, per unit of strength: pitch and roll (rad), yaw twist (rad), shove (m), squash and lift (m).
 const PLAN := {
 	"quad": {"pitch": 0.15, "roll": 0.11, "yaw": 0.0, "shove": 0.025, "squash": 0.08, "lift": 0.0},
@@ -48,6 +49,11 @@ static func hit(model: Node3D, push: Vector3, frac: float, mass: float) -> void:
 ## A Boki touching down after a throw or a leap: the hit's spring with no push, so it only squashes.
 static func land(model: Node3D, mass: float) -> void:
 	hit(model, Vector3.ZERO, LAND_FRAC, mass)
+
+## A Boki setting off on a dash along `dir` (world): the hit's spring shoved the way it goes, so it leans into the
+## move and settles at the end (the landing squash). Mass sizes it: light Boki lean more, heavy ones less.
+static func dash(model: Node3D, dir: Vector3, mass: float) -> void:
+	hit(model, dir, DASH_FRAC, mass)
 
 ## Takes up a new hit if there is one and steps the spring; then rot, shove, wide and tall are the pose.
 func update(root: Node3D, dt: float) -> void:

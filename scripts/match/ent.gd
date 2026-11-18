@@ -12,7 +12,8 @@ var kind := ""
 var pos := Vector3.ZERO
 var prev := Vector3.ZERO
 var vel := Vector3.ZERO
-var r := 0.4
+var r := 0.4          # the hurtbox: shots and abilities hit inside it
+var body_r := -1.0    # the body's collision radius against walls and other bodies; -1 = same as r
 var hp := 100.0
 var max_hp := 100.0
 var grounded := true
@@ -21,13 +22,16 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
+var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
+var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
@@ -42,6 +46,7 @@ var marks := {}             # combo setups on this body: combo id -> {team, owne
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var combat_at := -99.0      # match time it last dealt or took fight damage (InCombat)
 var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
@@ -73,7 +78,11 @@ func ground() -> float:
 		var d: float = st.deck_y(pos)
 		if d > World.VOID + 1.0 and (g < d or g > pos.y + 0.9):
 			g = d
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, g)
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), g)
+
+## The radius this body takes up against walls, rocks and other bodies (its hurtbox is `r`).
+func hull_r() -> float:
+	return r if body_r < 0.0 else body_r
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)
@@ -87,7 +96,7 @@ func over_void() -> bool:
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
 	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
-	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
+	return StoneStand.top_under(m.world.dyn_walls, pos, hull_r(), World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o
@@ -114,11 +123,15 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
+		dmg *= TerrainHazards.hit_mult(mt, by)     # wading in deep water, your hits are weaker
+	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
+			if opts.get("src", "") == "wisp":
+				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
+			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
-			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -145,9 +158,10 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
+	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	freeze_t = 0.05 if d >= 10.0 else 0.03
-	squash = 0.1
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
+		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
 			set("knock_steer", float(opts.get("kbi", 0.3)))
@@ -167,6 +181,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st1 in ["stun", "root", "slow"]:
 			if float(opts.get(st1, 0.0)) > 0.0:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
+	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
@@ -180,6 +195,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
+	CcSfx.play(self, cc_cue)
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
 			CombatBus.status_applied.emit(self, st, by, float(opts[st]))
@@ -193,6 +209,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if hp <= 0.0:
 		_on_zero(by, opts)
 	return d
+
+func _took(_d: float, _by: Ent) -> void:
+	pass
 
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg
@@ -278,7 +297,7 @@ func slide(dt: float, guard := false) -> bool:
 	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
-	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, hull_r(), pos.y)
 	if po.distance_squared_to(tgt) > 1e-10:
 		var bn := (po - tgt).normalized()
 		var hv := Vector2(vel.x, vel.z)
@@ -289,14 +308,14 @@ func slide(dt: float, guard := false) -> bool:
 		bumped = true
 		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
-	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
+	var b1: float = m.world.occupy(nx, pos.z, hull_r(), pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
 		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
-	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
+	var b2: float = m.world.occupy(pos.x, nz, hull_r(), pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
@@ -306,6 +325,7 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
+	if shell_t > 0.0: shell_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
@@ -323,19 +343,23 @@ func tick_status(dt: float) -> void:
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
+		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
+		if ticked:
+			dot_tick_at = m.time
 		if not remote:
 			hp -= burn_dps * dt
-			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
+			if ticked:
 				_burn_number()
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
-## The burn's tick number, only for burns that involve you; it rolls into the same label as the
-## burner's other damage on this body.
+## The burn's tick number: Fx.damage_number's tick kind, only for burns that involve you; it rolls
+## with the burner's other ticks on this body.
 func _burn_number() -> void:
 	var mt := m as Match
-	if mt and (self == mt.player or burn_by == mt.player):
-		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, "", Fx.roll_key(burn_by, self))
+	if mt:
+		var by: Ent = burn_by if is_instance_valid(burn_by) else null
+		mt.fx.damage_number(self, by, burn_dps * 0.25, {"src": "burn"}, mt.player)
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
@@ -357,9 +381,31 @@ func net_follow(dt: float) -> void:
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
+const FLASH_FADE := 0.07    # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
+const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
 var _flash_n := -1
 var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
 var wash_col := Color.WHITE
+## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
+## else the DoT tint (DotLook).
+func show_flash(hit: float) -> void:
+	var f := hit
+	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
+	elif f <= 0.0:
+		f = DotLook.amount(self, Settings.quality() == "low")
+		if f > 0.0:
+			fc = DotLook.COL
+	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
+		_flash_set = f
+		_flash_col = fc
+		_flash_n = mats.size()
+		for mt in mats:
+			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -376,16 +422,4 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	var fc := Color.WHITE
-	if f <= 0.0 and wash > 0.0:
-		f = wash
-		fc = wash_col
-	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
-		_flash_set = f
-		_flash_col = fc
-		_flash_n = mats.size()
-		for mt in mats:
-			mt.set_shader_parameter("flash", f)
-			mt.set_shader_parameter("flash_color", fc)
+	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))

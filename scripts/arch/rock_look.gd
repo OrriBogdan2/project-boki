@@ -9,6 +9,7 @@ extends RefCounted
 
 const TOP := HeroZones.ROCK_TOP
 const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
+const CRACK_A := 0.95                # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
 const CRUMBLE_T := 0.34              # s: a broken rock slumps into the ground
 const STONE := Color("3d2618")       # umber in the cracks and shadows
 const STONE_HI := Color("96663c")    # warm sandstone on the faces
@@ -27,21 +28,72 @@ const COLS := [
 static var _rumble_at := -9.0
 static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
+const SPARES := "rock_spares"        # the match's meta: rocks done with (crumbled, launched), hidden, for the next take
+
+## A rock for HeroZones.rock under `m`: a spare one made fresh again, else built now. Spares are built at match
+## load (prewarm: a Stone Row built 57 meshes in one frame, --first-cast-check) and come back through park.
+static func take(m: Node) -> Node3D:
+	var spares := _spares(m)
+	while not spares.is_empty():
+		var s = spares.pop_back()
+		if is_instance_valid(s):
+			_fresh(s)
+			return s
+	var n := make()
+	m.add_child(n)
+	return n
+
+## `count` spare rocks under `m` (the loading screen's rehearsal).
+static func prewarm(m: Node, count: int) -> void:
+	for i in count - _spares(m).size():
+		var n := make()
+		m.add_child(n)
+		park(n)
+
+## A rock done with: hidden and kept for the next take under its match.
+static func park(n: Node3D) -> void:
+	n.visible = false
+	_spares(n.get_parent()).append(n)
+
+static func _spares(m: Node) -> Array:
+	if not m.has_meta(SPARES):
+		m.set_meta(SPARES, [])
+	return m.get_meta(SPARES)
+
+## A spare rock as built: the columns standing where they stood, the shadow back, the cracks hot again.
+static func _fresh(n: Node3D) -> void:
+	n.visible = true
+	var i := 0
+	for c in n.get_children():
+		if c.name == "Shadow":
+			(c as Node3D).visible = true
+		elif c.name == "Cracks":
+			(c as Node3D).visible = true
+			for mi in c.get_children():
+				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
+					"color", Color(0.35, 0.6, 1.0, CRACK_A))
+		elif c.name.begins_with("Col"):
+			_stand(c as Node3D, i)
+			i += 1
 
 static func make() -> Node3D:
 	var n := Node3D.new()
 	_shadow(n)
 	for i in COLS.size():
-		var c: Array = COLS[i]
 		var col := Node3D.new()
 		col.name = "Col"
-		col.position = Vector3(float(c[0]), 0, float(c[1]))
-		col.rotation = Vector3(float(c[4]) * 0.6, 0.0, float(c[4]))
+		_stand(col, i)
 		n.add_child(col)
 		var crag: Array = _crag(i)
 		Models.part(col, crag[0], crag[1])
 	_cracks(n)
 	return n
+
+## Column `i` where it stands and leans as built.
+static func _stand(col: Node3D, i: int) -> void:
+	var c: Array = COLS[i]
+	col.position = Vector3(float(c[0]), 0, float(c[1]))
+	col.rotation = Vector3(float(c[4]) * 0.6, 0.0, float(c[4]))
 
 ## Stands the columns straight, so a low rock can be squashed without shearing them.
 static func upright(n: Node3D) -> void:
@@ -113,7 +165,7 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(0.35, 0.6, 1.0, 0.95)),
+			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(0.35, 0.6, 1.0, CRACK_A)),
 			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
@@ -126,25 +178,23 @@ static func cool(n: Node3D) -> void:
 		return
 	var tw := n.create_tween().set_parallel()
 	for mi in cracks.get_children():
-		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		tw.tween_property(mat, "shader_parameter/color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
 ## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).
 static func hush(m: Node, secs: float) -> void:
 	_hush_until = float(m.time) + secs
 
-## A rock coming up: a burst of dust and earth at its foot and one short rumble.
-static func rise_fx(m: Node, at: Vector3) -> void:
-	m.fx.dust(at, 14)
-	m.fx.burst(at + Vector3(0, 0.3, 0), STONE_HI, 12, 3.5, 0.45, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("3a7cff"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
+## A rock coming up: one short rumble (the debris and dust are its kit's HeroVfx move, content/vfx/dolm.json).
+static func rumble(m: Node, at: Vector3) -> void:
 	if float(m.time) >= _hush_until and absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
 
 ## A rock broken or timed out (Verbs._break_wall's kx_end): it takes the node over, so the columns can snap,
-## lean out and slump into the ground in a spray of chips. A launched rock leaves through HeroZones.remove_rock.
+## lean out and slump into the ground in a spray of chips, then waits as a spare. A launched rock leaves through
+## HeroZones.remove_rock.
 static func crumble(m: Node, w: Dictionary) -> void:
 	var n := w.get("node") as Node3D
 	if n == null or not is_instance_valid(n):
@@ -152,8 +202,9 @@ static func crumble(m: Node, w: Dictionary) -> void:
 	w["node"] = null
 	var at := n.global_position
 	m.sfx("br_crumble", at, -4.0, 1.0)
-	m.fx.dust(at, 12)
-	KitLooks.of(m).chips(at + Vector3(0, TOP * 0.5, 0), 6, 0.2)
+	var by := w.get("by") as Hunter
+	if by != null and is_instance_valid(by):
+		HeroVfx.of(m).play(by, "rock_crumble", at + Vector3(0, TOP * 0.5, 0), Vector2.ZERO)
 	var shadow := n.get_node_or_null("Shadow") as Node3D
 	if shadow != null:
 		shadow.visible = false
@@ -165,4 +216,4 @@ static func crumble(m: Node, w: Dictionary) -> void:
 			var sunk := col.position + out * 0.8 - Vector3(0, TOP, 0)
 			tw.tween_property(col, "position", sunk, CRUMBLE_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 			tw.tween_property(col, "rotation:z", col.rotation.z + signf(out.x + 0.01) * -0.5, CRUMBLE_T)
-	tw.chain().tween_callback(n.queue_free)
+	tw.chain().tween_callback(park.bind(n))

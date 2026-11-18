@@ -1,4 +1,4 @@
-# Down, death, revive and respawn (built on Supervive's rules, tuned for extraction)
+# Down, death, revive and respawn (built on the reference's rules, tuned for extraction)
 
 Code: `scripts/match/` (`life.gd`, `box_revive.gd`, `beacons.gd`; numbers in `content/rules/revive.json`). Rules per mode: `data/rules/trios.tres`, `duos.tres`, `solo.tres` (script `life_rules.gd`; every value is tagged in that file). Rules per run tier: `data/tiers/shallows.tres`, `deeps.tres`, `abyss.tres`.
 
@@ -19,8 +19,11 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
 | Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
+| Death recap | Down or out, one short card (`scripts/ui/death_recap.gd`): who got you (a Hunter, in their squad colour), the ability, the damage you took in the last 10s by source. Who you watch once out is Spectate's (below). Hits are kept per Hunter from `CombatBus.hit_landed`; nothing new on the wire | 10s window | owner (parity with the source) |
+| Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
 | Takedown reward | Knocking or killing an enemy hunter (not a mob): the knocker and every teammate whose damage or CC landed on the victim in the last 4 s get their dash back (a one-charge dash refills, a multi-charge dash gains one charge) and the long-dash cooldown clears; only the knocker heals 5% of max health (`DashReset`, docs/decisions/0022). The local hunter gets the reset cue (softer for an assist) and a pop on the Shift icon. A hero's `dash.knock_refresh: false` opts out (none do) | +250 HP, +1 dash; multi-charge +1 | [patch] / owner (159) |
-| Last one up | The last standing hunter of a squad of two or more (every teammate down or dead, none extracted) wears a glow in the viewer's side colour (`SideColor`: you, ally, foe), moves **+8%** faster and mends **1 hp/s** once 5 s have passed since a hit (`LastAlive`). It is derived from who is up, so it needs no Net message and ends the moment a teammate is revived or redeployed. Solos never get it. Our source refs give no last-alive numbers; these are small picks. The own HUD shows one small toast when it starts | +8% / 1 hp/s | [design] |
+| Last one up | The last standing hunter of a squad of two or more (every teammate down or dead, none extracted) wears a glow in the viewer's side colour (`SideColor`: you, ally, foe), moves **+8%** faster and mends **1 hp/s** once 5 s have passed since a hit (`LastAlive`). It is derived from who is up, so it needs no Net message and ends the moment a teammate is revived or redeployed. Solos never get it. Our source refs give no last-alive numbers; these are small picks. The own HUD shows one small toast when it starts, and only you hear it: a rising sting, a low heartbeat bed under the score while it lasts, a release on the revive (docs/AUDIO.md) | +8% / 1 hp/s | [design] |
+| Last one up | The last standing hunter of a squad of two or more (every teammate down or dead, none extracted) wears a glow in the viewer's side colour (`SideColor`: you, ally, foe), moves **+8%** faster and mends **1 hp/s** once 5 s have passed since a hit (`LastAlive`). It is derived from who is up, so it needs no Net message and ends the moment a teammate is revived or redeployed. Solos never get it. The glow is a rim of light hugging the body with bands climbing it, plus a lit pool and ring on the ground, on the hunter only (no screen tint; owner 11-12). It is mixed, not added, so it reads on snow as well as on dark ground. It follows the squad frames: on when every teammate's row reads KNOCKED or DEAD. Our source refs give no last-alive numbers; these are small picks. The own HUD shows one small toast when it starts | +8% / 1 hp/s | [design] |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
 | Box colour | Grey / blue / purple / gold by value | 500 / 2k / 5k | [patch] (colour by value) |
@@ -43,7 +46,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 **Keep solos, but as their own queue with different rules. Don't mix solos into team lobbies.** That's what `solo.tres` does:
 
 - **No wisp:** 0 HP = dead, deathbox, done. That's how solo modes in extraction games generally work, since there's no one to pick you up.
-- **Self-revive item** (`self_revive_items`, a rare consumable): you go down as a wisp and get back up on your own after **8s** (Supervive's Guardian Angel), unless an enemy stands on you. It's a high-value find worth fighting over.
+- **Self-revive item** (`self_revive_items`, a rare consumable): you go down as a wisp and get back up on your own after **8s** (The reference's Guardian Angel), unless an enemy stands on you. It's a high-value find worth fighting over.
 
 Reasons to keep solos:
 - A big share of extraction players queue alone.
@@ -52,7 +55,7 @@ Reasons to keep solos:
 The real risk is player count. Three queues (solo, duo, trio) split a small launch population three ways. A sensible order:
 1. **Launch trios (plus duos)** while the player base is small.
 2. Turn on solos when queue times allow.
-3. Same for Supervive: it moved its main queue from squads to trios at 1.0.
+3. Same for the reference: it moved its main queue from squads to trios at 1.0.
 
 ## Kin when you die: depends on the run tier
 
@@ -76,7 +79,8 @@ All names and multipliers are placeholders.
 
 **Other kin rules in every tier:**
 - **Knocked out while you're alive:** a kin comes back to you after `kin_recall_time` (25s).
-- **While you're downed:** your kin rides round your wisp as a Boki wisp and pulls you up (`KinWispForm`).
+- **While you're downed:** a Boki that was summoned (out, alive) when you went down rides round your wisp as its guardian and pulls you up (`KinWispForm`). One still on your shoulder, or summoned after you fell, never does.
+- **Team out:** when the last standing teammate goes down, the team stays in only while a downed teammate's guardian Boki is alive and pulling (one pull, at most `GUARD_CAP` 11s: start plus a ~6s pull; an enemy on the Wisp, or an enemy knocking the guardian out (it can be hit while it pulls), ends it). Otherwise everyone is out at once ("team wiped", `Match._check_team`).
 - **However you come back:** a kin that's still loose returns to you, so kin don't need beacons of their own.
 
 **Worth deciding before launch:**
@@ -134,10 +138,10 @@ All names and multipliers are placeholders.
 - A teammate within 9 m sees the revive reach on the ground (thin, filling as they revive) and "Step onto <name>'s wisp to revive" on the HUD.
 - Your Boki come back to you and ride round your wisp as Boki wisps (no fighting, can't be hit); they pull you up after a short wait unless an enemy stands on you, and pop back onto your shoulder when you're up (`KinWispForm`).
 - The downed player sees "<name> is reviving you" under their revive bar.
-- Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
+- Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes. So it reads from 25 m: a thin tether runs from the reviver's chest to the soul over the box in the reviver's side colour, and a core inside the soul grows with the progress; both go the moment the channel breaks, and on completion the soul rises and fades (no burst or ring; `BoxReviveFx`). Online, a remote teammate's channel arrives as the synced "revive" hold in their hunter flags and is timed locally (`BoxRevive.mirror_remote`), so the hum, rings and tether show for everyone.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
 - A committed stomp (holding interact on a wisp for `stomp_commit`) runs its 2.4 s animation and cannot be cancelled or moved out of; only the animation ending (the wisp dies) or the stomper being hard-CC'd ends it, and then the wisp lives (decision 2026-11-11, `Life.cc_break`). Hard CC: a stun (wall stuns, Snap, Rimelock, Bola pair, Anchor, Nightwell included), a knock, a root, Grounded, a tow (Nightwell draw, a reel, a drag). Slows and Daze do not break it. `--stomp-check` sweeps every row of KIT_PARITY's Crowd control table.
-- Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+- Checked by `--box-revive-check` (tether, core, clear on interrupt, rise, remote hold) and `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
 
 ## Watching your squad while you're out
 - Out with a teammate still in it, the camera, minimap and Boki card follow one of them (`scripts/match/spectate.gd`). The fire and secondary keys (rebindable) step to the next or previous living teammate, wrapping and skipping the out and the extracted.

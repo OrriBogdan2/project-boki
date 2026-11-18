@@ -47,21 +47,22 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var d: Dictionary = UtilityBelt.def(id)
 	var col: Color = d.get("col", Color.WHITE)
 	if use_of(id) == "key":
-		return BeltKeys.use(h, id)       # the lock spends the key when it opens
+		var opened := BeltKeys.use(h, id)       # the lock spends the key when it opens
+		if opened:
+			UtilityPose.start(h, id)
+		return opened
 	match use_of(id):
 		"drink":
 			h._fold_for_action()
 			h.drink_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
 			h._fold_for_action()
 			h.kit_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":
 			h.heal(MEND_HP)
@@ -86,7 +87,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
 			m.sfx("skill", h.pos, -4.0, 1.0)
-	# the instant ones are spent now; the channelled ones when they finish (tick)
+	# the instant ones are spent now, with a quick body beat; the channelled ones when they finish (tick)
+	UtilityPose.start(h, id)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
 	if i < UtilityBelt.SLOTS and not (h.belt[i] as Dictionary).is_empty():
@@ -121,6 +123,9 @@ static func pad_launch(h: Hunter) -> void:
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
+	if h.beat_t > 0.0:
+		var spilled: bool = h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out
+		h.beat_t = 0.0 if spilled else maxf(0.0, h.beat_t - dt)
 	if h.drink_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.drink_t = 0.0
@@ -131,7 +136,6 @@ static func tick(h: Hunter, dt: float) -> void:
 				if UtilityBelt.take(h, "tonic", 1) > 0:
 					h.heal(channel("tonic", "heal") * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					h.m.sfx("heal", h.pos, -2.0)
-					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.kit_t = 0.0

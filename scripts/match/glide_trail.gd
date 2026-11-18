@@ -6,13 +6,14 @@ extends Node3D
 ## back to the pool once its tail has faded. No burst on open or close (DECISIONS: no bursts on dashes,
 ## landings or resets). The same on every preset: one unshaded, vertex-coloured draw per glider.
 
-const LIFE := 1.2       # s a point of the trail takes to fade out: gone within a second or two of passing
-const WIDTH := 0.3      # m across at the glider, narrowing to nothing at the tail
-const ALPHA := 0.85     # opacity at the glider
-const LIFT := 1.8       # m above the feet (times the Hunter's scale): the canopy's height
-const STEP := 0.08      # s between the points a trail lays
-const POINTS := 16      # points a trail keeps: LIFE / STEP, rounded up
-const LIGHTEN := 0.25   # mixed toward white so the darker team colours still read over the abyss
+const LIFE := 1.2  # s a point of the trail takes to fade out: gone within a second or two of passing
+const WIDTH := 0.3  # m across at the glider, narrowing to nothing at the tail
+const ALPHA := 0.85  # opacity at the glider
+const LIFT := 1.8  # m above the feet (times the Hunter's scale): the canopy's height
+const STEP := 0.08  # s between the points a trail lays
+const POINTS := 16  # points a trail keeps: LIFE / STEP, rounded up
+const LIGHTEN := 0.25  # mixed toward white so the darker team colours still read over the abyss
+
 
 ## One glider's trail: a ring of the points it laid (newest at `head`), each with its age in seconds.
 class Trail:
@@ -24,16 +25,18 @@ class Trail:
 	var n := 0
 	var since := 0.0
 	var col := Color.WHITE
-	var open := false       # still laying points (the glider is open)
+	var open := false  # still laying points (the glider is open)
 
 	func _init() -> void:
 		pts.resize(POINTS)
 		ages.resize(POINTS)
 
+
 var m: Match
 var _free: Array[Trail] = []
-var _by: Dictionary = {}       # Hunter -> its Trail, until the trail has faded
+var _by: Dictionary = {}  # Hunter -> its Trail, until the trail has faded
 var _mat := StandardMaterial3D.new()
+
 
 ## The match's glider trails, made with the match (Match._start).
 static func of(match_node: Match) -> GlideTrail:
@@ -46,23 +49,28 @@ static func of(match_node: Match) -> GlideTrail:
 	match_node.set_meta("glide_trail", n)
 	return n
 
+
 func _ready() -> void:
 	_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_mat.vertex_color_use_as_albedo = true
 	_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED      # (written depth tints the frame)
+	_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED  # (written depth tints the frame)
 	_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
 
 func _process(delta: float) -> void:
 	step(delta)
+
 
 ## Trails in use, one per glider open or fading (checks).
 func live() -> int:
 	return _by.size()
 
+
 ## Trail nodes made so far, in use or pooled (checks: the pool only grows to the most gliders at once).
 func made() -> int:
 	return _by.size() + _free.size()
+
 
 func step(dt: float) -> void:
 	for h in m.hunters:
@@ -85,16 +93,19 @@ func step(dt: float) -> void:
 			continue
 		_draw(t, at, cam)
 
+
 func _shows(h: Hunter) -> bool:
 	return h.gliding and not h.out and h.model != null and h.model.visible
+
 
 func _take(h: Hunter) -> Trail:
 	var t: Trail = _free.pop_back() if not _free.is_empty() else _make()
 	t.n = 0
-	t.since = STEP          # the first point goes down at once
+	t.since = STEP  # the first point goes down at once
 	t.col = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()].lerp(Color.WHITE, LIGHTEN)
 	t.mi.visible = true
 	return t
+
 
 func _make() -> Trail:
 	var t := Trail.new()
@@ -102,9 +113,10 @@ func _make() -> Trail:
 	t.mi.mesh = t.im
 	t.mi.material_override = _mat
 	t.mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	t.mi.top_level = true          # (points are in world space)
+	t.mi.top_level = true  # (points are in world space)
 	add_child(t.mi)
 	return t
+
 
 ## Ages the points, drops the faded tail and, while the glider is open, lays a point every STEP.
 func _age(t: Trail, dt: float, at: Vector3) -> void:
@@ -123,10 +135,11 @@ func _age(t: Trail, dt: float, at: Vector3) -> void:
 	t.ages[t.head] = 0.0
 	t.n = mini(t.n + 1, POINTS)
 
+
 ## The ribbon from the glider (or the newest point, once folded) back to the oldest, turned to the camera.
 func _draw(t: Trail, at: Vector3, cam: Camera3D) -> void:
 	t.im.clear_surfaces()
-	var lead := 1 if t.open else 0          # while open, the glider itself is the ribbon's first point
+	var lead := 1 if t.open else 0  # while open, the glider itself is the ribbon's first point
 	var count := t.n + lead
 	if count < 2:
 		return

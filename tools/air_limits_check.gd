@@ -8,8 +8,9 @@ extends RefCounted
 ##  3. A free fall with Shift mashed: no chain of dashes, never more than the hero's ground charges in FALL_S
 ##     (a kit's own air version, like Vex's air taps, spends those charges; item 183 audits each air dash).
 ##  4. The "In the air" tables of Vex, Kael, Lace, Cinder, Meeko and Tenzo (docs/heroes/*.md): LMB, RMB tap, RMB
-##     hold and E cast mid-jump and mid-fall as on the ground (Kael's RMB goes to his own Air Slam slot), none
-##     fire out of a glide on LMB (the glider shuts the weapon), and Tenzo's RMB folds the glider and slams.
+##     hold and E cast mid-jump and mid-fall as on the ground (Kael's RMB goes to his own Air Slam slot), LMB out
+##     of a glide fires only for a kit whose Cancels row says so (ArchKit.fires_in_glide: Vex, Lace, Cinder; the
+##     glider shuts the others' weapon), and Tenzo's RMB folds the glider and slams.
 
 const HEIGHT := 60.0
 const HOLD_S := 0.35            # s a hold is charged on the ground before it's carried off the ledge
@@ -253,7 +254,7 @@ func _cast_table(m: Match, home: Vector3, arch: String) -> void:
 			var got: Dictionary = _cast(m, home, state, key)
 			var what := "%s %s %s" % [arch, key, state]
 			var want: bool = ground["acted"]
-			if key == "fire" and state == "glide":
+			if key == "fire" and state == "glide" and not m.player.ak.fires_in_glide():
 				want = false                  # the glider shuts the weapon
 			elif arch == "dolm" and key == "sig":
 				if state == "rise":

@@ -42,24 +42,48 @@ func _draw_panels() -> void:
 	hud.hover_spots.clear()
 	var m: Match = hud.m
 	var p: Hunter = m.player
-	if not (m.tut and m.tut.intro):
+	if DropHud.aboard(p):
+		hud._draw_minimap(size)      # aboard the rocket: the map and nothing else (DropHud)
+	elif not (m.tut and m.tut.intro):
 		var sz := size
-		hud._draw_top(sz)
+		HudScale.pass_start()
+		HudScale.begin(hud, "top", sz)
+		if HudReveal.on(m, "counters"):
+			hud._draw_top(sz)
 		if p and m.lairs:
+			HudScale.begin(hud, "boss", sz)
 			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
-		hud._draw_feed(sz)
+		HudScale.begin(hud, "feed", sz)
+		if HudReveal.on(m, "feed"):
+			hud._draw_feed(sz)
+		HudScale.begin(hud, "minimap", sz)
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
+			HudScale.begin(hud, "vitals", sz)
 			HudVitals.draw(hud, sz, p)
+			RankMarks.watch(hud)
+			HudScale.begin(hud, "abilities", sz)
+			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
+			HudScale.begin(hud, "weapon", sz)
 			hud._draw_weapon(sz, p)
-			GearPanel.draw(hud, sz, p)
+			if HudReveal.on(m, "gear"):
+				HudScale.begin(hud, "gear", sz)
+				GearPanel.draw(hud, sz, p)
+			HudScale.begin(hud, "kin", sz)
 			hud._draw_kin_card(sz, p)
-			hud._draw_squad(sz, p)
-			TeamBoki.draw(hud, p)
-			hud._draw_perks(sz, p)
+			if HudReveal.on(m, "squad"):
+				HudScale.begin(hud, "squad", sz)
+				SquadFrames.draw(hud, sz, p)
+				TeamBoki.draw(hud, p)
+			if HudReveal.on(m, "perks"):
+				HudScale.begin(hud, "perks", sz)
+				hud._draw_perks(sz, p)
 		else:
 			m.spectate.draw(hud, sz)
+	HudScale.close(hud)
+	SafeArea.begin("")
+	HudScale.pass_end()
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0

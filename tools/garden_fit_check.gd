@@ -2,13 +2,15 @@ extends RefCounted
 ## --garden-fit-check [--shots-dir=<dir>]: the garden's newer screens (the Waystone's zone cards with locked
 ## zones and "Move to...", the games board, the Waystone wishes card, the games picker, the Nesting Nook
 ## preview, the Boki card's Family tab with its lineage) at 1280x720, 1920x1080, 2560x1080, a small
-## 960x540 window and 1280x720 with the Interface size slider at its top (1.5). Every visible control must
-## sit inside its panel (no overflowing text, nothing cut off sideways), no one-line label or button may clip or
-## ellipsize its text, and the panel must sit inside the window's safe margin. With --shots-dir (a real
-## renderer: jobq --needs gpu) each is saved as <dir>/<W>x<H>_<screen>.png. Never touches the real save.
+## 960x540 window and 1280x720 with the Interface size slider at its top (UI_SCALE_MAX). Every visible
+## control must sit inside its panel (no overflowing text, nothing cut off sideways), no one-line label or
+## button may clip or ellipsize its text, and the panel must sit inside the window's safe margin. With
+## --shots-dir (a real renderer: jobq --needs gpu) each is saved as <dir>/<W>x<H>_<screen>.png. Never touches
+## the real save.
 
+const SettingsScript := preload("res://scripts/core/settings.gd")
 const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
-		[Vector2i(960, 540), 1.0], [Vector2i(1280, 720), 1.5]]      # [window, Settings "ui_scale"]
+		[Vector2i(960, 540), 1.0], [Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
 const SAFE_MIN := 16.0       # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
 const SLACK := 1.5           # px a control may stick out of its panel (rounding of the torn frames)
 const SETTLE := 8            # frames for a panel and its scroll to size themselves

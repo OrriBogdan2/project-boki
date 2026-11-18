@@ -19,6 +19,9 @@ class FakeGame:
 	func tick(_dt: float) -> void:
 		pass
 
+	func find(_p: Vector2) -> Dictionary:
+		return {}
+
 var bad := 0
 var main: Node
 var home
@@ -130,6 +133,7 @@ func _tips(glint: StatGlint, rec: Dictionary) -> void:
 	for s in ["speed", "focus"]:
 		await _settle(glint)
 		StatMeaning.last_s -= StatMeaning.GAP_S
+		lane.clear()  # in play the last tip faded long ago (GAP_S >> TIP_LIFE); the lane shows 2 cards at most
 		Care.add_stat(rec, s, 1)
 		await _frames(2)
 		ok(seen.has(s) and lane.texts().has(Care.STATS[s]["means"]), "%s: its line shows at its first rise" % s)
@@ -222,7 +226,7 @@ func _shots() -> void:
 	home.cam.zoom = 0.5
 	home.cam.snap(at + Vector3(0.6, 0, 0.4))
 	await main.get_tree().create_timer(0.8).timeout
-	home._train_anim(striker, "power", "great")
+	home.drill._anim(striker, "power", "great")
 	var spin: Tween = home.create_tween()
 	spin.tween_property(spinner["node"], "rotation:y", (spinner["node"] as Node3D).rotation.y + TAU, 0.6)
 	await main.get_tree().create_timer(0.15).timeout

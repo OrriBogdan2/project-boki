@@ -5,6 +5,7 @@ extends RefCounted
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
 ##   -> Hob's second Relic -> the first expedition, played out through the Ways Out Uplink.
 ## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
+## The first Mask is Lace, Kael or Vex: `-- --starter=archer|juggernaut|gunslinger` picks whose (default Vex).
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
 
@@ -14,6 +15,7 @@ const WALL_FACTOR := 12.0      # real s allowed per s of game time (a loaded box
 const EXPEDITION_SEED := 4242      # a fixed map and drop, so the driver's landing is the same every run
 const DROP_S := 90.0      # s of game time the opening drop may take
 const SIM_STALL_S := 45.0      # s of game time one tutorial step may take (as --tutorial-hud-check)
+const HINT_MAX := 120      # characters: the longest farm tutorial hint (the fresh-run log found three of 138-147)
 const COURSE_S := 900.0      # s of game time the whole tutorial course may take
 
 var bad := 0
@@ -21,6 +23,7 @@ var main: Node
 var tree: SceneTree
 var stage_name := ""
 var stage_start := 0
+var starter := "gunslinger"      # the Hunter taken on the starter pick
 var timings: Array = []
 
 func ok(cond: bool, what: String) -> void:
@@ -33,6 +36,9 @@ func run(m: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--starter="): starter = a.substr(10)
+	ok(starter in ["archer", "juggernaut", "gunslinger"], "the starter is Lace, Kael or Vex (%s)" % starter)
 	main.get_window().size = Vector2i(1280, 720)
 	await _prologue()
 	await _hatch()
@@ -85,11 +91,23 @@ func _button(root: Node, text: String) -> Button:
 
 ## A real button the player can see: says so, and presses it.
 func _press(root: Node, text: String) -> bool:
+	await _before_act("press " + text)
 	var b := _button(root, text)
 	ok(b != null, "there is a way forward: '%s'" % text)
 	if b != null:
 		b.pressed.emit()
 	return b != null
+
+## Hooks for --fresh-run-log (this check does nothing in them): what the player sees before each act, one
+## sim step of the tutorial match, and the farm step about to be done.
+func _before_act(_what: String) -> void:
+	pass
+
+func _sim_tick(_m: Match, _t: float) -> void:
+	pass
+
+func _farm_step(_home, _id: String) -> void:
+	pass
 
 func _child_of(parent: Node, type_name: String) -> Node:
 	for c in parent.get_children():
@@ -123,7 +141,7 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
-	var key := InputEventKey.new()      # any key skips it (the prologue's first-press skip)
+	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
 	pr._unhandled_input(key)
@@ -135,17 +153,18 @@ func _hatch() -> void:
 	_begin("hatch: card and look")
 	var hx = main.current
 	await _wait(func(): return hx.stage == "intro", "the hatch opens on its card")
-	_press(hx, String(hx.CARD_BUTTON))
+	await _press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
-	_press(hx, "Looks good")
+	await _press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
-	_press(hx, "This one")
+	await _press(hx, "This one")
 	var chosen: int = hx.chosen
 	ok(chosen >= 0 and _button(hx, "Hatch it") != null, "choosing an egg offers 'Hatch it'")
-	_press(hx, "Hatch it")
+	await _press(hx, "Hatch it")
 	await _wait(func(): return hx.stage == "warm", "the egg waits for knocks")
+	await _before_act("knock")
 	for i in hx.TAPS:
 		hx._unhandled_input(_key("jump"))
 		await tree.create_timer(0.25).timeout
@@ -160,22 +179,31 @@ func _hatch() -> void:
 	_press(hx, "Learn to fight")
 	await _relic(hx)
 
-## Vex's card on the starter pick (HobOffer), or null before it shows.
-func _vex_card(hx) -> Control:
+## The starter's card on the starter pick (HobOffer), or null before it shows.
+func _starter_card(hx) -> Control:
 	for c in hx.ui.find_children("*", "PanelContainer", true, false):
-		if String(c.get_meta("mask_card", "")) == "gunslinger":
+		if String(c.get_meta("mask_card", "")) == starter:
 			return c
 	return null
+
+## Takes a Relic off a pick the way a player does: clicks its card, then "Yes, take <name>" on the question.
+func _take(root: Node, card: Control, id: String) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	card.gui_input.emit(click)
+	await tree.process_frame
+	await _press(root, "Yes, take " + HeroTitle.base_name(id))
 
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
-	await _wait(func(): return hx.stage == "mask" and _vex_card(hx) != null, "naming leads into the starter pick")
-	_vex_card(hx).mouse_entered.emit()      # (Vex in focus: the Take button takes him, as the tutorial always did)
-	_press(hx, "Take Vex")
+	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
+	await _take(hx, _starter_card(hx), starter)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
+	await _before_act("put the Relic on")
 	moment._unhandled_input(_key("interact"))
 	await _wait(func(): return moment.phase == "intro", "putting it on opens its page")
 	await _wait(func(): return moment.go_button != null, "the page has a way on")
@@ -197,17 +225,24 @@ func _tutorial_match():
 	var step_t := 0.0
 	var last := -1
 	var worst := 0.0
+	var seen := {}
 	while t < COURSE_S and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		_course_tick(m)
 		t += Match.DT
+		await _sim_tick(m, t)
 		step_t += Match.DT
 		if m.tut.step != last:
 			last = m.tut.step
+			seen[m.tut.id()] = true
 			step_t = 0.0
 		worst = maxf(worst, step_t)
 	ok(m.player.extracted, "the driver finishes the course and extracts (%.0f s of play)" % t)
+	ok(m.player.arch == starter, "the course is played as the starter (%s)" % m.player.arch)
+	var missed: Array = Tutorial.steps().map(func(row): return String(row[0])).filter(
+			func(sid: String): return not seen.has(sid) and m.tut.applies(sid))
+	ok(missed.is_empty(), "every step the kit has was taught: %d of them (missed: %s)" % [seen.size(), missed])
 	ok(worst < SIM_STALL_S, "no step took more than %.0f s of play (%.0f s)" % [SIM_STALL_S, worst])
 	_begin("results")
 	await _wait(func(): return main.current is CanvasLayer, "the course ends on the results")
@@ -215,7 +250,7 @@ func _tutorial_match():
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 1, "it counts as the first expedition")
 	ok(ClassUnlock.second_pending(), "and the second Relic is on offer")
-	_press(main.current, "Go home")
+	await _press(main.current, "Go home")
 	_begin("farm: first arrival")
 	await _wait(func(): return _is_screen("home.gd"), "'Go home' opens the farm")
 	var home = main.current
@@ -237,7 +272,10 @@ func _farm_tutorial(home) -> void:
 		if cur == "":
 			ok(false, "a step is always open while the tutorial runs (stalled after %d)" % FarmTutorial.done_count())
 			return
-		ok(FarmTutorial.hint_text(cur) != "", "'%s' tells you what to do" % cur)
+		var hint := FarmTutorial.hint_text(cur)
+		ok(hint != "", "'%s' tells you what to do" % cur)
+		ok(hint.length() <= HINT_MAX, "and in at most %d characters (%d)" % [HINT_MAX, hint.length()])
+		await _farm_step(home, cur)
 		_do_step(cur)
 	ok(bool(FarmTutorial.state()["done"]) and not FarmTutorial.state()["skipped"], "every step can be done in turn")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "the axe and the pickaxe were handed over")
@@ -278,9 +316,10 @@ func _second_relic(home) -> void:
 		await tree.process_frame
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
-	ok(offer.ids.size() == 3 and offer.take_button != null, "three to choose from, with a Take button")
+	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
+	ok(offer.ids.size() == want, "%d to choose from" % want)
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _take(chat.box, offer.cards[0], pick)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
@@ -298,8 +337,49 @@ func _first_expedition(home) -> void:
 	m.set_process(false)
 	var worn := Arch.of_save()
 	ok(m.player.ak != null and m.player.ak.id == worn, "you play as the Relic you chose (%s)" % worn)
+	_begin("first expedition: first knock")
+	_knock_tip(m)
 	_begin("first expedition: play")
 	await _ways_out(m)
+
+## The first knock of the first expedition: one two-line card, the tip for what hit hardest; not again.
+func _knock_tip(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h: Hunter): return h.team != P.team)[0]
+	var mob: Mob = m.mobs[0]
+	ok(m.ktip != null and not m.ktip.shown, "the first expedition gets the first-knock card")
+	m.on_damage(P, mob, 30.0, {})
+	m.on_damage(P, rival, 20.0, {})
+	m.on_damage(P, mob, 50.0, {})
+	var want: String = KnockTip.card("monster")
+	m.knock(P, mob, {})
+	var lane: Array = m.hud.msgs._shown + m.hud.msgs._waiting
+	var texts: Array = lane.map(func(e): return e["text"])
+	ok(texts.has(want) and want.count("\n") == 1, "the card is two lines and names monsters, the top damage")
+	ok(want.contains(Settings.key_cap("throw")), "its tip is the monster one: send your Boki")
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1 and m.ktip.shown, "it is counted once")
+	P.downed = false
+	m.on_damage(P, rival, 90.0, {})
+	m.knock(P, rival, {})
+	ok(int(Save.d["tutorial"]["knock_tip"]) == 1, "a second knock in the same match shows nothing")
+	P.downed = false
+	P.hp = P.max_hp
+	var k := KnockTip.for_match(m, m.guide)
+	k.note(rival, 40.0, {})
+	ok(k.top() == "rival" and KnockTip.card("rival").contains("squad"), "a hunter's hits give the squad tip")
+	k.note(null, 80.0, {"src": "wall"})
+	var dash_tip := KnockTip.card("blight").contains(Settings.key_cap("dash"))
+	ok(k.top() == "blight" and dash_tip, "the Blight gives the dash tip")
+	Save.d["tutorial"]["knock_tip"] = 2
+	ok(KnockTip.for_match(m, m.guide) == null, "after two cards there is never a third")
+	Save.d["tutorial"]["knock_tip"] = 1
+	Settings.set_v("tips", false, false)
+	var quiet := KnockTip.for_match(m, m.guide)
+	quiet.m = m
+	quiet.on_knock()
+	ok(not quiet.shown and int(Save.d["tutorial"]["knock_tip"]) == 1, "with tips off there is no card")
+	Settings.set_v("tips", true, false)
+	ok(KnockTip.for_match(m, null) == null, "a match outside the first two gets none")
 
 ## The stick direction from the hunter to a spot on the ground.
 func _toward(p: Hunter, at: Vector3) -> Vector2:
@@ -313,7 +393,9 @@ func _ways_out(m: Match) -> void:
 	var fall_t := 0.0
 	ok(P.riding, "you start on the skyship")
 	while (P.riding or P.dropping or not P.grounded) and fall_t < DROP_S:
-		P.inp["jump"] = P.riding and fall_t > float(P.ai.get("jump_at", 0.0)) and int(fall_t * 20.0) % 2 == 0
+		# jump launches the rocket (DropRocket); aboard it, no keys: a press would jump out of it
+		P.inp["jump"] = (P.riding and P.rocket == null and fall_t > float(P.ai.get("jump_at", 0.0))
+				and int(fall_t * 20.0) % 2 == 0)
 		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
 		m.step(Match.DT)
 		fall_t += Match.DT
@@ -348,7 +430,7 @@ func _ways_out(m: Match) -> void:
 	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
-	_press(main.current, "Back to the farm")
+	await _press(main.current, "Back to the farm")
 	await _wait(func(): return _is_screen("home.gd"), "back on the farm")
 	_end()
 
@@ -391,7 +473,6 @@ func _portal_relic(home) -> void:
 	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
-	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _take(home.panel_host, cards[2], "gunslinger")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

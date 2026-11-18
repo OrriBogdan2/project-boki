@@ -99,12 +99,21 @@ func run(main: Node) -> void:
 	KeyMigrate.run(two)
 	var untouched: bool = not fresh["keys"].has("gear2") and two["keys"]["gear2"].size() == 2
 	ok(untouched, "an unsaved or two-key glove 2 is untouched")
+	# C: the Boki key (send/recall) in a match, a Boki's details at home; old saved G moves to C
+	ok(S.slots("throw")[0] == "key:%d" % KEY_C and S.conflicts(_key(KEY_C), "throw").is_empty(),
+			"the Boki key ships on C and shares it with details (home only) without a clash")
+	var s6 := {"keys": {"throw": ["key:%d" % KEY_G]}, "keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1,
+			"keys6_v": 1}
+	KeyMigrate.run(s6)
+	ok(not s6["keys"].has("throw") and int(s6["keys7_v"]) == 1, "a saved G Boki key moves to C (%s)" % str(s6))
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
 	S.swap_bind("ultimate", 0, _key(KEY_F), cf)
 	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_X, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
 	S.reset_all()
+	var clash = load("res://tools/keybind_clash_check.gd").new()
+	bad += clash.rules(S)
 	_dash_on_r(S)
 	# (the move of old saves to the new defaults is --ultbond-check)
 	# the arena and duel resets are on Backspace now
@@ -129,6 +138,9 @@ func run(main: Node) -> void:
 	ok(Overlay.has_meta("bind_conflict") and is_instance_valid(Overlay.get_meta("bind_conflict")), "the binding page warns about the clash and offers a swap")
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/keybinds_conflict.png")
+	(Overlay.get_meta("bind_conflict") as Control).queue_free()
+	await tree.process_frame
+	bad += await clash.page(tree, S)
 	var stale: Array = S.ACTIONS.filter(func(x): return String(x[1]).containsn("archetype"))
 	ok(stale.is_empty(), "no Controls label says Archetype (the game says Hunter)")
 	S.reset_all()

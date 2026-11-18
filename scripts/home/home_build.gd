@@ -51,6 +51,7 @@ var popped := -1                       # uid of the deco just placed (its node g
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
 const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
+const POND_Y := 0.05       # m: the ponds' water surface above the ground
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
@@ -467,6 +468,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var n: Node3D = null
 	if HomeLayout.CATALOG.get(id, {}).has("toy"):
 		return FarmModels.toy(id)
+	if id == FeedBowl.ID:
+		return FeedBowl.model(e)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
@@ -534,7 +537,7 @@ func _make_base(e: Dictionary) -> Node3D:
 			var sp := String(e.get("sp", "zapple"))
 			if not Data.KIN.has(sp): sp = Data.KIN.keys()[0]
 			var k := Models.kin(sp, {})
-			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE * 1.25
+			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE
 			for mi in k.find_children("*", "MeshInstance3D", true, false):
 				(mi as MeshInstance3D).material_override = stone
 			for gp in k.find_children("*", "GPUParticles3D", true, false): gp.queue_free()
@@ -682,7 +685,7 @@ func _sync_water() -> void:
 	var stones: Array = []
 	for k in wt:
 		var c := HomeLayout.unkey(k)
-		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, 0.05, c.y + 0.5)))
+		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, POND_Y, c.y + 0.5)))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
 			# foam along the bank (the strip's UV.y runs from the bank out onto the water)
@@ -817,6 +820,8 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 		return "Something's in the way"
 	if reserved.has(i) or _near_feeder(c) or _near_plot(c):
 		return "That spot is kept clear"
+	if h.hob != null and h.hob.crowds(c):
+		return HobSpot.REASON
 	return ""
 
 ## Tiles flooded from the house door, with free_cells opened up and solid_cells shut. Packed bytes, 1 = reached.
@@ -941,6 +946,9 @@ func fits(item: Dictionary, at: Array) -> bool:
 			if not w.inb(dt.x, dt.y) or w.kind[w.idx(dt.x, dt.y)] != World.T_GROUND or occ.has(w.idx(dt.x, dt.y)):
 				why = "Its door would face something"
 				return false
+	if door != Vector3.INF and h.hob != null and h.hob.crowds_point(door):
+		why = HobSpot.REASON
+		return false
 	if solid or door != Vector3.INF:
 		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
 			why = PlaceClearance.why(trapped)
@@ -1046,7 +1054,7 @@ func toggle() -> void:
 		_drop_held()
 		active = false
 		close_ui()
-		h.cam.zoom_to = clampf(h.cam.zoom_to, 0.55, 1.6)
+		h.cam.zoom_to = clampf(h.cam.zoom_to, CamWheel.near(), CamWheel.far())
 		Placement.build_view(h.cam, false)
 		h.set_build_ui(false)
 		Save.save_game()
@@ -1382,6 +1390,9 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		return false
 	if w.kind[i] != World.T_GROUND and o != tag: why = "Something's in the way"; return false
 	if reserved.has(i) or _near_plot(t): why = "That spot is kept clear"; return false
+	if h.hob != null and h.hob.crowds(t):
+		why = HobSpot.REASON
+		return false
 	var p := Vector3(t.x + 0.5, 0, t.y + 0.5)
 	for f in Econ.feeders():
 		if String(f["id"]) == from: continue
@@ -1857,8 +1868,10 @@ func place_held() -> bool:
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
-	if from < 0 and TOY_CATS.has(String(c["cat"])):
+	if from < 0 and (TOY_CATS.has(String(c["cat"])) or c.get("toy", false)):      # base toys too (GARDEN.md 4)
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
+	elif from < 0 and c.get("toy", false) and h.life:
+		h.life.new_toy(popped)      # a base toy: the Boki near it come to look, the most curious tries it (BaseLife)
 	var msg := ""
 	if not site.is_empty():
 		msg = "Site marked out: hold %s to hammer, Boki help. %s" % [Settings.key_cap("interact"), FarmTutorial.site_hint()]
@@ -2080,7 +2093,7 @@ func _tab_items() -> Array:
 var make := {}                          # item -> [options]; options are Vector2i (feeder) or {x, z, r}
 var make_pick := {}
 var make_marks: Array = []
-## Catalog groups whose new pieces nearby Boki come to look at (ComeLook).
+## Catalog groups whose new pieces nearby Boki come to look at (ComeLook); a base toy ("toy": true) is news too.
 const TOY_CATS := ["Furniture", "Statues"]
 const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Boki Cottage lot", "ff9ac8"]]
 

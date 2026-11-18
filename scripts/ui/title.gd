@@ -12,10 +12,10 @@ var stung := false
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")          # its own slow drone, not the match wind
 	_build_ui()
 
 func _process(delta: float) -> void:
@@ -70,7 +70,7 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 150)      # shrinks on a short window; the list below never leaves it
+	lt.custom_minimum_size = Vector2(500, 90 if Overlay.admin_allowed() else 150)      # shrinks on a short window (and gives its room to the owner's Test Zone row); the list below never leaves it
 	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
@@ -80,25 +80,28 @@ func _build_ui() -> void:
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
-	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
+	var b1 := _menu_main(("Continue" if has else "New Game"), _continue if has else func(): Game.goto("prologue"))
 	col.add_child(b1)
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if Overlay.admin_allowed():
+		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+		items.append(["Demo Match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if has:
-		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
+		items.append(["Play with Your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
-		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
+		items.append(["Play with Friends", func(): Game.goto("lobby", {}), "bond"])
 	if Net.mm.addr != "":
 		items.append(["Party", func(): Game.goto("party", {}), "bond"])
-	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
+	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
+	items.append(["Help", _open_words, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
@@ -138,6 +141,10 @@ func _build_ui() -> void:
 	root.add_child(keys)
 	b1.grab_focus()
 
+func _open_words() -> void:
+	Overlay.ctx = "title"
+	Overlay.open_words()
+
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:
 	var out: Array = []
@@ -162,12 +169,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		nxt.grab_focus()
 		get_viewport().set_input_as_handled()
 
+## Continue: back into the tutorial when it was left part-way, else to the farm.
+func _continue() -> void:
+	if TutorialResume.pending():
+		Game.start_match(TutorialResume.opts())
+	else:
+		Game.goto("home")
+
 func _menu_main(text: String, cb: Callable) -> Button:
 	var b := UI.button(text, cb)
 	b.theme_type_variation = "MenuMain"
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
-	b.mouse_entered.connect(func(): if not b.has_focus(): b.grab_focus())
+	_lit_on_focus(b, "MenuMain")
 	return b
 
 func _menu_item(text: String, cb: Callable, icon := "") -> Button:
@@ -179,15 +193,19 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
 	b.pressed.connect(func(): Sfx.play("click"); cb.call())
-	# pointing at an item focuses it, so mouse and keyboard always agree on which one is lit
+	b.focus_entered.connect(func(): Sfx.play("hover", null, -12.0, 0.05))
+	_lit_on_focus(b, "MenuItem")
+	return b
+
+## Pointing at a menu button focuses it, and a focused one wears its hover look, so mouse and keyboard
+## always agree on which one is lit (no separate focus ring).
+func _lit_on_focus(b: Button, kind: String) -> void:
 	b.mouse_entered.connect(func(): if not b.has_focus(): b.grab_focus())
 	b.focus_entered.connect(func():
-		Sfx.play("hover", null, -12.0, 0.05)
-		b.add_theme_stylebox_override("normal", b.get_theme_stylebox("hover", "MenuItem"))
+		b.add_theme_stylebox_override("normal", b.get_theme_stylebox("hover", kind))
 		b.add_theme_color_override("font_color", Color.WHITE)
 		b.queue_redraw())
 	b.focus_exited.connect(func():
 		b.remove_theme_stylebox_override("normal")
 		b.remove_theme_color_override("font_color")
 		b.queue_redraw())
-	return b

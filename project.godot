@@ -22,6 +22,7 @@ boot_splash/minimum_display_time=0
 
 [autoload]
 CrashReport="*res://scripts/core/crash_report.gd"
+CheckWatchdog="*res://tools/check_watchdog.gd"
 Data="*res://scripts/core/data.gd"
 Save="*res://scripts/core/save.gd"
 Sfx="*res://scripts/core/sfx.gd"
@@ -87,9 +88,21 @@ vis_blocks={
 "type": "sampler2D",
 "value": ""
 }
+fx_ground={
+"type": "sampler2D",
+"value": ""
+}
+fx_ground_size={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
 vis_range={
 "type": "float",
 "value": 24.0
+}
+vis_scout={
+"type": "vec2",
+"value": Vector2(0, 1)
 }
 vis_allies={
 "type": "float",

@@ -206,8 +206,10 @@ func take(it: Dictionary) -> void:
 		return
 	if String(it["key"]) == "pack" and int(it["i"]) == _held:
 		_held = -1
+		Sfx.play("click")
 	elif not LootFull.click(_m, p, _b, it) and LootFull.holdable(it):
 		_held = int(it["i"])
+		Sfx.play("click")
 	_fill()
 
 func _take_all() -> void:
@@ -292,7 +294,8 @@ func _row(icon: String, col: Color, item_name: String, tag: String, tag_col: Col
 	if verb != "":
 		var b: Button = UI.primary(verb, cb, 76) if primary else UI.button(verb, cb, 76)
 		b.focus_mode = Control.FOCUS_NONE       # Space jumps: a focused button would take things by itself
+		b.set_meta("snd", InvSfx.SILENT)        # the action plays its own cue (InvSfx, the rattle), or take() clicks
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
-		LootHold.row_click(rp, cb)
+		LootHold.row_click(rp, cb, true)
 	return rp

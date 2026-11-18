@@ -33,10 +33,41 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    model before skin_relax, for looking at the weights. It fits the low mesh
    onto the rig (grimble_source.py's segment method), weights it (bone heat on the body bones, on a rig copy whose
    hips bone reaches the neck), detaches and caps, slots it, moves the anchors, runs skin_relax (no edge past 1.3x
-   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`,
+   in any clip) and exports with the clips. Copy OUT_GLB over `art/wardens/<id>/<id>.glb`, run
+   `python3 tools/art1/glb_relax.py <glb> <glb>` on it (the swap's heat weights leave hand and forearm weight on the hip
+   and thigh skin a scan's arms hung against; this takes them off, rips the fused contact, relaxes; no Blender),
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+   A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
+   it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
+
+## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
+The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
+were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
+the face and the print and flattens the shape. Now `python3 tools/art1/v95_to_game.py <Name>` (Albert ... tarek, the
+v95 folder names) takes the Hunter's current master (CURRENT_OVERRIDES.txt's last line for it, else current.json), and
+v95_swap.py's `keep_uv` mode decimates the master itself to `tris` (60k) keeping its UVs, materials and Meshy images
+(each scaled to 4096 at most, "v95", "v95b", ... in game), drops `drop_mats` (the master's copies of props the game
+.glb carries: Kael's sword, Lace's bow, Neve's spear, Tarek's eye stones, Meeko's sun and cloud, Gil's staff), and runs
+steps 2-4 unchanged on the Warden's current .glb (rig, clips, anchors and `keep` props as they are; fixed-offset
+`move_bones` are skipped: that .glb has them already). A spec's `own` object holds the keys only this mode uses.
+Then the .glb replaces the game's and Godot re-imports; run the checks as in step 3. A later promote into v95 reaches
+the game with the same command.
+
+## Sable 2026-11-14 (ext/ingame-sync-sable): tilt1112 master in game
+The 11-13 blocker below (left hand 6.0 -> 21.1x) was the new pistols fused to the thighs and coat, not the joint points:
+`detach` hand.L/hand.R from hips and their thigh brings the worst clip to 15.3 (bola; main 18.4), 0 clips over 18.5.
+
+## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
+The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
+on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
+into the fit frame, scaled by the height ratio, under one `props_fit_to_master` empty; the master is untouched.
+Recipes: `ostra` (Motley: the Fan on his left palm, the 8 orbit cards on their two rings, one spin clip), `breaker` (Albert:
+the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fist shards, the ground rings). Outputs:
+`~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
+and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
+Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
 
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
@@ -56,7 +87,10 @@ best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Alread
 Grimble, Motley, Lace. Not swapped:
 - Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
   points need refitting to the new body first.
-- Sparkle, Albert i1 and Gil: still as in the 11-12 evening section above (memory/base colour, solid cyan glow, no spec).
+- Sparkle and Albert i1: still as in the 11-12 evening section above (memory/base colour, solid cyan glow).
+Gil (later the same day): swapped to current.json r2/v95a/cand_B (`gil_v95.json`, art/wardens/gil/IMPORT.md). Two
+new swap keys came with him: `drop_meshes` (the game glb's own meshes the master replaces: his scripted Tail and
+Dorsal) and, for a game glb with no clips, skin_relax is skipped (nothing to sample).
 bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
 separate Meshy part on their own texture).
 
@@ -79,6 +113,13 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Cinder 2026-11-13 (ext/cinder-ba-promote): B-A body live
+Owner pick B-A (`~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb`, CURRENT_OVERRIDES Cinder line): the curvy1113 B-A body (bust
+about two sizes up, waist and hips unchanged) under the live facekeep head, head_diff `[]`. The live hair is carried down
+past the neck cut at the back, and its dark locks are grown down from the cut at the front, so there is no hair ledge
+(no `--ramp`). Lava kept orange with glow (Meshy lavafix emission). Tail cut, swapped and checked as on 11-12; notes,
+sheets and the unpromoted B-A bust + S-B hips mix in `~/meshy/cinder-body-1113/`.
 
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
@@ -169,3 +210,18 @@ list (it refuses unless that list is found exactly once).
 Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
 the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
 `v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.
+
+## Repaint only, 2026-11-17 (ext/motley-r3a-game): `glb_image_swap.py`
+A promote that only repaints the master (same mesh and UVs: Motley's r3 A tail) goes into the game by swapping the
+game .glb's `v95` image (`tools/art1/glb_image_swap.py`), not by a v95_to_game re-port: the re-port re-fits and
+re-weights the body (Motley 11-17: worst stretch 7.93 -> 17.80, 31 clips past 10x). The face lock in v95-promote put the
+whole live atlas back on r3 A (`cand_A_keephead.glb` is pixel-identical to the old master, smear included), so the paint
+came from `cand_A.glb`: its changed texels (2.4%, tail) composited over the live 4096 game image.
+
+## Black shards, 2026-11-18 (ext/grimble-ingame-fix-1117)
+The toon outline is an inverted hull: any triangle that shows its back to the camera draws black. The Grimble port left
+three kinds (wedges at the goo hand, spikes at both feet): floating sheets, patches wound inside-out, and the rip's
+needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb` flips,
+drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
+`--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
+`godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.

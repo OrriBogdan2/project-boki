@@ -68,7 +68,8 @@ func inb(x: int, z: int) -> bool:
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return VOID
 	var i := idx(ix, iz)
@@ -87,6 +88,12 @@ func ground_at(x: float, z: float) -> float:
 func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
 
+## The tile under a point: T_GROUND, T_BLOCK or T_VOID (off the map counts as the void).
+func tile_kind(x: float, z: float) -> int:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return kind[idx(ix, iz)] if inb(ix, iz) else T_VOID
+
 ## Tile idx -> top height of a block you can climb (the farm's placed blocks); a block not in here is BLOCK_H tall.
 var block_top := {}
 
@@ -98,11 +105,13 @@ func is_stand_block(x: float, z: float) -> bool:
 	return is_block(x, z) and block_top.has(idx(int(floor(x)), int(floor(z))))
 
 func is_block(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and kind[idx(ix, iz)] == T_BLOCK
 
 func island_of(x: float, z: float) -> int:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	if not inb(ix, iz):
 		return -1
 	return island[idx(ix, iz)]
@@ -163,11 +172,12 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers (Blockers "phase") and terrain don't block,
+## only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty() and not ghost:
-		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
+	if not dyn_walls.is_empty():
+		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
@@ -184,7 +194,7 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	if not ghost:
 		for o in BODY_SAMPLES:
 			var g := ground_at(x + o.x * r, z + o.y * r)
-			if g > y + STEP:
+			if g > y + STEP and g > y + STEP + stair_slope(x, z, x + o.x * r, z + o.y * r):      # (a stair's rise: no wall)
 				worst = maxf(worst, g)
 				hit = true
 	if hit:
@@ -194,6 +204,19 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 		if ground_at(x, z) <= VOID + 1.0:
 			return -1.0
 	return 0.0
+
+## Is (x, z) on a flight of stairs? Its ground is a slope (rising LEVEL per metre), not a wall or a ledge.
+func on_stairs(x: float, z: float) -> bool:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return inb(ix, iz) and stairs.has(idx(ix, iz))
+
+## How far the ground may rise or fall between (x0, z0) and (x, z) and still be one walkable slope: the stairs'
+## rise over that distance when either end is on a flight, or 0 off stairs, where any rise is a wall or ledge.
+func stair_slope(x0: float, z0: float, x: float, z: float) -> float:
+	if not (on_stairs(x, z) or on_stairs(x0, z0)):
+		return 0.0
+	return LEVEL * Vector2(x - x0, z - z0).length()
 
 const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
 const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
@@ -247,16 +270,18 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			break
 	return p
 
-## Line of sight at height y between two points (rocks and higher ground block it).
+## Line of sight at height y between two points (rocks and higher ground block it). A sample every
+## 0.4 m, each read straight off the grid and a tile read once however many samples land on it (its
+## ground is one height, stairs aside): can_see, Bot.can_hit and the kits ask this hundreds of times
+## a step in a ten-squad brawl, and the three lookups a sample were a quarter of the step.
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		if is_block(px, pz) and ground_at(px, pz) + BLOCK_H > y:
-			return false
-		if ground_at(px, pz) > y + 0.2:
+		var gy := ground_at(px, pz)      # (once a sample: bots' sight tests march this every think)
+		if gy > y + 0.2 or (gy + BLOCK_H > y and is_block(px, pz)):
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue
@@ -682,7 +707,8 @@ func vis_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 func in_bush(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
+	var ix := int(floor(x))
+	var iz := int(floor(z))
 	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
@@ -824,9 +850,10 @@ func _wind_link(a: int, b: int, g: Array) -> void:
 	links.append({"from": b, "to": a, "take": pb, "land": land_a, "wind": true})
 	winds.append({"a": pa + Vector3(0, 1.6, 0), "b": pb + Vector3(0, 1.6, 0)})
 
-## Where wind carries a glider at p: {dir (along the road, either way), y (its height)} or {}.
+## Where wind carries a glider at p: {dir (along the road, either way), y (its height), i (the road)} or {}.
 func wind_at(p: Vector3) -> Dictionary:
-	for wd in winds:
+	for i in winds.size():
+		var wd: Dictionary = winds[i]
 		var a: Vector3 = wd["a"]; var b: Vector3 = wd["b"]
 		var ab := Vector2(b.x - a.x, b.z - a.z)
 		var l2 := ab.length_squared()
@@ -834,7 +861,7 @@ func wind_at(p: Vector3) -> Dictionary:
 		var t := clampf(Vector2(p.x - a.x, p.z - a.z).dot(ab) / l2, 0.0, 1.0)
 		var q := a.lerp(b, t)
 		if Vector2(p.x - q.x, p.z - q.z).length() < 1.9 and absf(p.y - q.y) < 3.0 and t > 0.0 and t < 1.0:
-			return {"dir": Vector3(ab.x, b.y - a.y, ab.y).normalized(), "y": q.y}
+			return {"dir": Vector3(ab.x, b.y - a.y, ab.y).normalized(), "y": q.y, "i": i}
 	return {}
 
 ## Rising air off island edges: glide into it to climb.
@@ -1189,7 +1216,9 @@ func build_meshes() -> void:
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	mat.set_shader_parameter("height_tex", tm.height_texture())
+	var heights: ImageTexture = tm.height_texture()
+	mat.set_shader_parameter("height_tex", heights)
+	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())
@@ -1217,7 +1246,10 @@ func build_meshes() -> void:
 		landmarks = Landmarks.new(self)
 		landmarks.build(_deco)
 	await _stage("world.landmarks")
-	_build_air()
+	var air := CurrentFx.new()     # the wind roads' and updrafts' look
+	air.name = "Air"
+	air.build(self, float(Settings.q("fx")))
+	add_child(air)
 	await _stage("world.air")
 
 ## Per tile, for the terrain shader's painted ground: the biome style (R, nearest) and the painted
@@ -1536,68 +1568,6 @@ func _bio_of_island(ii: int) -> Dictionary:
 func _bio(i: int) -> Dictionary:
 	var ii := island[i] if i >= 0 and i < island.size() else -1
 	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
-
-## Wind roads as ribbons of flowing streaks; updrafts as glowing columns of rising air.
-func _build_air() -> void:
-	var wsh: Shader = load("res://shaders/wind.gdshader")
-	for wd in winds:
-		var a: Vector3 = wd["a"]; var b: Vector3 = wd["b"]
-		var d := b - a
-		var len := d.length()
-		for k in 3:
-			var mi := MeshInstance3D.new()
-			var qm := QuadMesh.new(); qm.size = Vector2(len, 2.4 if k == 0 else 1.4)
-			mi.mesh = qm
-			var mat := ShaderMaterial.new(); mat.shader = wsh
-			mat.set_shader_parameter("color", Color(0.75, 0.95, 1.0, 0.32 if k == 0 else 0.22))
-			mat.set_shader_parameter("tiles", maxf(2.0, len / 3.0))
-			mat.set_shader_parameter("speed", 0.9 + 0.25 * k)
-			mi.material_override = mat
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			add_child(mi)
-			# lay the quad along the road: flat for the main ribbon, tilted for the two wisps
-			var fwd := d.normalized()
-			var side := fwd.cross(Vector3.UP).normalized()
-			var up := side.cross(fwd).normalized()
-			var roll: float = [0.0, 1.0, -1.0][k]
-			# QuadMesh faces +z; turn it so its width runs along the road and it lies flat
-			mi.basis = Basis(fwd, up.rotated(fwd, roll * 0.9), -side.rotated(fwd, roll * 0.9))
-			mi.position = (a + b) * 0.5 + Vector3(0, -0.2 + k * 0.25, 0)
-	for u in updrafts:
-		var c: Vector3 = u["pos"]
-		var air := updraft_visual(float(u["r"]), c.y - 6.0, float(u["top"]))
-		air.position = Vector3(c.x, 0.0, c.z)
-		add_child(air)
-
-## A column of rising air (the updraft shader, plus motes climbing it), from y0 up to y1 in the node's
-## own space. Island-edge updrafts and a lair's escape updraft both use it.
-static func updraft_visual(r: float, y0: float, y1: float, tint := Color(1.0, 0.95, 0.75, 0.35)) -> Node3D:
-	var root := Node3D.new()
-	var hgt: float = y1 - y0
-	var col := MeshInstance3D.new()
-	var cm := Models.plain_cyl(r, r * 1.15, hgt, 18)
-	cm.cap_top = false; cm.cap_bottom = false
-	col.mesh = cm
-	var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/updraft.gdshader")
-	mat.set_shader_parameter("tiles", hgt / 4.0)
-	if tint != Color(1.0, 0.95, 0.75, 0.35):
-		mat.set_shader_parameter("color", Color(tint, 0.85))
-		mat.set_shader_parameter("speed", 1.1)
-	col.material_override = mat
-	col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	col.position = Vector3(0, y0 + hgt * 0.5, 0)
-	col.name = "Column"
-	root.add_child(col)
-	var p := CPUParticles3D.new()
-	p.amount = 18; p.lifetime = 1.6; p.preprocess = 1.6
-	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = r * 0.8
-	p.direction = Vector3.UP; p.spread = 8.0; p.initial_velocity_min = 5.0; p.initial_velocity_max = 8.0
-	p.gravity = Vector3.ZERO
-	p.mesh = Models.sphere(0.06, 4)
-	p.material_override = Models.glow_mat(Color(1.0, 0.96, 0.8, 0.8) if tint == Color(1.0, 0.95, 0.75, 0.35) else Color(tint, 0.85))
-	p.position = Vector3(0, y0 + 3.0, 0)
-	root.add_child(p)
-	return root
 
 func _decorate() -> void:
 	var drng := RandomNumberGenerator.new(); drng.seed = rng.seed + 11
@@ -2675,7 +2645,7 @@ func _stamp_lair(D: Dictionary, ii: int) -> void:
 	islands[ii]["lair"] = true
 	lair_defs.append({"id": String(D.get("id", "lair%d" % lair_defs.size())), "name": String(D.get("name", "Boss Lair")),
 		"boss": String(D.get("boss", "colossus")), "c": c, "half": hf, "gate": gate, "gate_tiles": gate_tiles, "out": out,
-		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"])})
+		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["breach"])})
 	labels.append({"name": String(D.get("name", "Boss Lair")), "pos": Vector3(c.x, 0, c.y), "kind": "lair", "role": "lair", "height": lv * LEVEL})
 
 ## Nothing else is placed inside a lair: no spawns, chests, camps, wild kin or loot lying about.
@@ -2735,7 +2705,7 @@ func _place_lairs() -> void:
 		var gate := ("e" if to_mid.x > 0 else "w") if absf(to_mid.x) > absf(to_mid.y) else ("s" if to_mid.y > 0 else "n")
 		var boss: String = Data.BOSSES[(b0 + lair_defs.size()) % Data.BOSSES.size()]
 		var nm: String = {"colossus": "The Sunken Forge", "serpent": "Stormcrown Eyrie", "brood": "The Thornhive"}.get(boss, "Boss Lair")
-		var entry: Array = {"colossus": ["dial"], "serpent": ["dial", "runes"], "brood": ["dial", "wards"]}.get(boss, ["dial"])
+		var entry: Array = {"serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
 		_stamp_lair({"id": "lair%d" % lair_defs.size(), "name": nm, "boss": boss, "at": [best.x, best.y], "half": hf, "gate": gate, "entry": entry}, ii)
 		used.append(ii)
 	_clear_lair_spots()

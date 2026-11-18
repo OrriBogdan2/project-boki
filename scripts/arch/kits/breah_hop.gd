@@ -16,6 +16,7 @@ const CROUCH := 0.06           # s: the first rock bursts up and he crouches on 
 const RISE_LEAD := 0.06        # s before touchdown: the landing rock comes up to meet him
 const RAIL_BACK := 0.3         # m: the rock's centre lies this far ahead of the landing, so the skid stays on it
 const FOOT_KEY := "br_foot"
+const HOP_COL := Color("3a7cff")   # the landing circle and the recast marker
 
 var k: DolmKit
 var h: Hunter
@@ -55,6 +56,15 @@ func drop() -> void:
 	AimKit.hide(h, "leap")
 	KitLooks.of(m).release(FOOT_KEY)
 
+## A glide press in a hop's flight: the flight (launch_to's fly_t) ends there at its own speed, no landing, no
+## rock, no crash. A hop up onto a ledge is the shared sure arc (pad) and keeps it, like every Hunter's.
+func let_go() -> bool:
+	if st.is_empty() or String(st["phase"]) != "air" or not h.pad.is_empty():
+		return false
+	h.fly_t = 0.0
+	drop()
+	return true
+
 ## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
 ## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
 ## last flight's final BUFFER_S is held for the landing (_crash).
@@ -79,7 +89,6 @@ func start() -> void:
 	k.play("breah_hop")
 	if not h.grounded:
 		return
-	m.fx.dust(h.pos, 10)
 	m.sfx("br_rise", h.pos, -4.0, 1.2)
 	_raise(h.pos, st["dir"])
 	CombatBus.ability_used.emit(h, String(dd().get("id", "dash")), "dodge")
@@ -101,7 +110,7 @@ func _aim_hop() -> bool:
 	var at: Vector3 = spot["at"]
 	AimKit.circle(
 		h, "leap",
-		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": Color("3a7cff"), "dur": st["T"] + 0.4}
+		{"at": at, "r": float(dd()["land_r"]), "fill": 0.0, "all": true, "col": HOP_COL, "dur": st["T"] + 0.4}
 	)
 	return true
 
@@ -132,7 +141,7 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 func _lands(p: Vector3, g: float) -> bool:
 	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var fits: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
+	var fits: bool = m.world.occupy(p.x, p.z, h.hull_r(), maxf(g, h.pos.y), false) == 0.0
 	StoneStand.mover = asking
 	return fits
 
@@ -172,6 +181,7 @@ func _raise(at: Vector3, dir: Vector2) -> Dictionary:
 		float(d["hop_rock_t"]), float(d["hop_rock_hp"]), true, float(d["hop_top"])
 	)
 	w["hop"] = true
+	k.vfx("leap_rise", at, dir)
 	return w
 
 func tick(dt: float) -> void:
@@ -243,7 +253,7 @@ func _kick() -> void:
 		h.inv_t = maxf(h.inv_t, float(d["invuln"]))
 	h.dash_at = m.time
 	k.play("breah_hop")
-	m.fx.dust(h.pos, 6)
+	k.vfx("leap")
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 
 ## Rock Hop falls at its own leap_grav: the pull on top of gravity.
@@ -251,13 +261,18 @@ func _pull() -> float:
 	return maxf(0.0, float(dd().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
 
 func _tick_air(dt: float) -> void:
+	if bool(h.inp.get("jump", false)) and not h.grounded and (h.over_void() or h.pos.y - h.ground() > 0.9):
+		h.fly_t = 0.0       # a fresh Space press in a hop's flight ends the chain and opens the glider
+		drop()
+		h.do_jump()
+		return
 	var t := float(st["t"])
 	var T := float(st["T"])
 	AimKit.circle(
 		h, "leap",
 		{
 			"at": st["spot"]["at"], "r": float(dd()["land_r"]), "fill": clampf(t / T, 0.0, 1.0), "all": true,
-			"col": Color("3a7cff")
+			"col": HOP_COL
 		}
 	)
 	if not h.grounded and h.pad.is_empty():
@@ -286,7 +301,7 @@ func _touchdown() -> void:
 	st["left"] = maxf(float(d["window"]) - float(st["t"]), float(d["skid_min"]))
 	st["t"] = 0.0
 	k.play("breah_skate")
-	m.fx.dust(h.pos, 8)
+	k.vfx("dust_step")
 	m.sfx("br_slam", h.pos, -11.0, 1.5)
 	var dir: Vector2 = st["dir"]
 	h.vel.x = 0.0
@@ -309,6 +324,8 @@ func _skid_room(dir: Vector2) -> float:
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
+	if not h.grounded:
+		return             # skidded off a ledge: the next hop and the crash wait for the ground below
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
 		st["press"] = false
 		if _aim_hop():
@@ -318,6 +335,17 @@ func _tick_skid(dt: float) -> void:
 		return
 	if float(st["left"]) <= 0.0:
 		_crash()
+		return
+	_mark_next()
+
+## The key on the spot the next hop would land on (toward the cursor as it is now) while the skid waits for it.
+func _mark_next() -> void:
+	var left := int(dd()["hops"]) - int(st["n"])
+	if left <= 0 or not h.is_local():
+		return
+	var spot := spot_for(h.aim_dir(), left - 1)
+	if not spot.is_empty():
+		RecastMarker.show_at(h, "dash", spot["at"], float(st["left"]), float(dd()["window"]), HOP_COL)
 
 ## A landing's nudge: a small shove, no damage.
 func _nudge() -> void:
@@ -338,7 +366,7 @@ func _crash() -> void:
 	chain_dist = Vector2(at.x - start_at.x, at.z - start_at.z).length()
 	k.leap_lands += 1
 	k.play("breah_leap_land")
-	m.fx.dust(at, 14)      # the hit area showed all through the flight: no ring or blast here
+	k.vfx("leap_land", at)      # the hit area showed all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
 	for f in k.foes_in(at, r, 2.0):
 		k.leap_hits += 1
@@ -366,7 +394,6 @@ func _landslide(at: Vector3, dir: Vector2) -> void:
 	var d := dd()
 	k.landslides += 1
 	var from := at + Vector3(dir.x * 0.9, 0.85, dir.y * 0.9)
-	m.fx.burst(from, Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
-	m.fx.dust(from, 8)
+	k.vfx("landslide", from, dir)
 	k._fire_rock(from, dir, float(d["dmg"]) * k.power("dash"), "dash", "dashrock", float(d["rock_range"]))
 	m.sfx("br_roll", from, -3.0, 1.0)

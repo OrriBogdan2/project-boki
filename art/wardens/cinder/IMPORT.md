@@ -1,5 +1,15 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+
+## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
+`cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
+20261118-032222-a1; same topology as cand_A_s18, only chest vertices moved). No re-rig: the master's per-vertex chest
+delta reaches each game vertex by UV barycentric lookup, through the local master->game Jacobian (affine fit over UV
+neighbours, scale ~0.82), then an 8 mm spatial median across all body prims (metal and skin seams move together),
+scaled so the volume change is the master's at game scale (-0.40 L). 5,574 vertices moved, max 19.6 mm; normals turned
+with the mesh's own normal change. Weights, bones, clips, UVs, images byte-identical. Scripts:
+`~/meshy/v95/Cinder/bust1118/game/` (transfer.py, clean.py, K=0.916). Stretch check: worst 7.60 lance_stoke, as main.
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
 Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
@@ -75,3 +85,34 @@ command (rest poses equal to 2e-6); every other clip, the garden set and `x_brea
 
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
+Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clips.py (arms-wide peak 0.13 -> 0.03 s) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
+stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
+glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
+Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `leap` (Soot Ram) re-keyed to the felt ram (3.4 m / 0.33 s, fastest at
+the start): flat out by 0.12 s, the stop on RAM_IMPACT_KEY 0.36 as before. The source .blend was not on the art worker, so
+the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade_root` (a control bake of `leap` and `hop`
+matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
+6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
+On the v95 swap the `leap` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... leap`.
+
+**v95 master A (11-16, ext/cinder-3d-a-1116):** the owner accepted Cinder 3D option A (job 20261116-200037-a2, Meshy rebuild from the
+owner-picked sheet: glowing amber eyes, clean lips, deeper bust). Master: `~/meshy/v95/Cinder/r8/pick1116/cands/A.glb` (live in
+`CURRENT_OVERRIDES.txt` / `current.json`). A carries a fused tail, so the game swap uses a copy with it cut off
+(`~/meshy/v95/Cinder/r8/pick1116/game/A_notail.glb`, made by `cut_tail_A.py`, an adaptation of `_body5_tools/cut_tail.py`: 115,030 of
+682,993 vertices) and the game keeps its own spring tail (`keep`). Swap:
+`python3 tools/art1/v95_to_game.py Cinder --master <A_notail.glb>` (new `--master` flag) with `art/wardens/src/cinder_v95.json`
+(joints re-read from `v95_grid.py` renders of A). Result: 60,711 tris, same rig, clips, spring tail and jets. Judges disagree:
+the promote judge scored A 53 vs A2 71, the source job's judge 83 vs 65; the owner picked A by eye.
+
+**board1117 A2 colours (11-18, ext/hunter-picks-tcg-1117):** owner 11-17 "cinder your call" on the 3D board, coordinator call A
+(board1117 g13: crown hair maroon, lower flame ramp on the hair, thin orange crack emission, skin graded toward the ref).
+A2 is a texture-only grade of the depth1117 master (same mesh, UVs and images 1-3, 5-6), so it goes on top of the live
+bust A chest without a re-port: master `~/meshy/v95/Cinder/board1117/A2_bust_m20.glb` = bust_m20's mesh + A2's three changed
+images. In this glb only `v95`, `v95c` and `v95d` changed (`tools/art1/glb_image_swap.py`), each = game image + resize(A2) -
+resize(bust_m20) at the game size (JPEG q92); mesh, rig, clips, tail and jets byte-equal.

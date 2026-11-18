@@ -27,6 +27,8 @@ const ANIM := {
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
+	"jug_ult_recover": ["juggernaut", "greatsword",
+			[1.2, 1.24, 1.28, 1.32, 1.36, 1.4, 1.44, 1.48, 1.52, 1.56, 1.6, 1.64, 1.68, 1.72]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.55, 0.74, 0.79, 0.86, 0.94, 1.15]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
@@ -137,7 +139,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["fire"] = t > 0.49 and t < 0.51
 		"jug_wave":
 			P.inp["fire"] = t > 0.4 and t < 1.44
-		"jug_riposte":
+		"jug_riposte", "jug_ult_recover":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.4, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5): cast_ult(P)
 		"jug_slam":

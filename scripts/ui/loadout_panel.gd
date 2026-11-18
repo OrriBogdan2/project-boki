@@ -166,7 +166,7 @@ func _pack_row(i: int) -> PanelContainer:
 	var it: Dictionary = _p.pack[i]
 	var buttons: Array = []
 	if String(it.get("t", "")) == "gear":
-		buttons.append(["Wear", func(): _act(func(): Pack.use_from_pack(_m, _p, i)), true])
+		buttons.append(["Wear", func(): _act(func(): _wear(i)), true, true])
 	buttons.append(["Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))])
 	var row := LootHold.item_row(it, buttons)
 	_drag.add(row, {"inv": "pack", "i": i}, Loot.name_of(it), Loot.col_of(it))
@@ -201,9 +201,19 @@ func _input(event: InputEvent) -> void:
 
 func _wear_or_take_off(i: int) -> void:
 	if _hover["kind"] == "worn":
-		Pack.take_off(_m, _p, i)
+		_take_off_slot(i)
 	else:
-		Pack.use_from_pack(_m, _p, i)
+		_wear(i)
+
+## Wears backpack thing i (in `slot`, or where it goes when -1), with the equip cue.
+func _wear(i: int, slot := -1) -> void:
+	if Pack.use_from_pack(_m, _p, i, slot):
+		InvSfx.equip()
+
+## Takes worn piece `slot` off into the backpack, with the set-down cue.
+func _take_off_slot(slot: int) -> void:
+	if Pack.take_off(_m, _p, slot):
+		InvSfx.drop()
 
 func _drop(i: int) -> void:
 	if _hover["kind"] == "worn":
@@ -230,17 +240,19 @@ func _move(from: Dictionary, to: Dictionary) -> String:
 			var id := String(it["id"])
 			if not Pack.fits_slot(id, b):
 				return "That goes in the %s slot" % ("Glove" if Gear.is_glove(id) else Gear.slot_name(id))
-			_act(func(): Pack.use_from_pack(_m, _p, a, b))
+			_act(func(): _wear(a, b))
 		["worn", "worn"]:
 			if a > 1 or b > 1:
 				return "Only the gloves swap"
 			_act(func(): Pack.swap_gloves(_p))
+			InvSfx.drop()
 		["worn", "pack"]:
 			if not Pack.room(_p):
 				return "Your pack is full"
-			_act(func(): Pack.take_off(_m, _p, a))
+			_act(func(): _take_off_slot(a))
 		["belt", "belt"]:
 			_act(func(): UtilityBelt.swap_slots(_p, a, b))
+			InvSfx.drop()
 		["pack", "pack"]:
 			return ""
 		["belt", _]:

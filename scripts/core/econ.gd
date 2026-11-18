@@ -81,8 +81,8 @@ static func _store(it: Dictionary) -> void:
 	if Loot.is_ink(it):
 		Goods.give(Loot.ink_key(it))      # an Ink is a good: it goes to the farm's goods, where Boki use it
 		return
-	if Loot.is_wayseed(it):
-		Save.add_item(String(it["id"]), 1)      # a bag item: the Waystone looks for it there (GardenZones)
+	if Loot.is_bag_item(it):
+		Save.add_item(String(it["id"]), 1)      # the garden bag: the Waystone and the feed menu look there
 		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]

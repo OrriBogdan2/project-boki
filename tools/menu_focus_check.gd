@@ -40,7 +40,7 @@ func run(m: Node) -> void:
 	for px in SIZES:
 		# the menus lay out at window / ui factor (Settings._apply_ui_scale), so 1080p, 720p and 1440p
 		# share one 1280x720 layout: it is checked once, and a 4:3 window checks a different one
-		var f := minf(minf(px.y / 720.0, px.x / 1240.0), minf(px.y / 640.0, px.x / 1100.0))
+		var f := minf(px.y / 720.0, px.x / 1240.0)
 		var layout := Vector2(px) / f
 		if layout.is_equal_approx(last):
 			continue

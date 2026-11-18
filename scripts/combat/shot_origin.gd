@@ -11,8 +11,12 @@ extends RefCounted
 ## landing 0.9 m ahead, a punched rock, a split) keeps its own origin.
 const BODY_REACH := 0.7
 
+## A shot with `body_sweep` (a weapon whose muzzle sits further out than BODY_REACH: Grimble's blunderbuss) always
+## sweeps from the body.
 ## The point the hit sweep starts from: `at` pulled back along the flight line to the body's centre.
 static func hit_from(by: Ent, at: Vector3, v2: Vector2, x: Dictionary) -> Vector3:
+	if by != null and x.get("body_sweep", false):
+		return body(by, at)
 	if by == null or x.get("cos", false) or x.has("lob") or x.get("cos_free", false):
 		return at
 	var lead := Vector2(at.x - by.pos.x, at.z - by.pos.z)
@@ -21,6 +25,10 @@ static func hit_from(by: Ent, at: Vector3, v2: Vector2, x: Dictionary) -> Vector
 		return at
 	return body(by, at)
 
+## A weapon's muzzle from its data `{"fwd": m ahead of the body along the aim, "up": m above the feet}`.
+static func muzzle_at(by: Ent, mz: Dictionary, dir: Vector2) -> Vector3:
+	return Vector3(by.pos.x + dir.x * float(mz["fwd"]), by.pos.y + float(mz["up"]), by.pos.z + dir.y * float(mz["fwd"]))
+
 ## The shooter's centre at the height of `at` (the muzzle).
 static func body(by: Ent, at: Vector3) -> Vector3:
 	return Vector3(by.pos.x, at.y, by.pos.z)
@@ -28,6 +36,15 @@ static func body(by: Ent, at: Vector3) -> Vector3:
 ## The flight time added so a shot pulled back to the body still reaches as far as the kit asked.
 static func extra_life(at: Vector3, from: Vector3, v2: Vector2) -> float:
 	return Vector2(at.x - from.x, at.z - from.z).length() / maxf(0.01, v2.length())
+
+## The launch velocity for a slowing shot (`decel`, Grimble's slugs) pulled back to the body: fast enough to still
+## stop where the kit asked, `range` past the muzzle, not 0.6 m short of it.
+static func keep_reach(at: Vector3, from: Vector3, v2: Vector2, x: Dictionary) -> Vector2:
+	if not x.has("decel") or at == from or v2.length() < 0.01:
+		return v2
+	var lead := Vector2(at.x - from.x, at.z - from.z).length()
+	return v2.normalized() * sqrt(v2.length_squared() + 2.0 * float(x["decel"]) * lead)
+
 
 ## Where to draw shot `s` whose swept point is `p`: never behind its muzzle (once past it, as swept).
 static func drawn(s: Dictionary, p: Vector3) -> Vector3:

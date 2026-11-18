@@ -56,6 +56,8 @@ func show_result(r: Dictionary) -> void:
 		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
 	if WaysResult.hid_line(r) != "":
 		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
+	if r.has("heart_raid"):
+		head.add_child(UI.label(HeartRaid.result_line(r["heart_raid"]), UI.T_BODY, HeartRaid.COL, UI.semi))
 	if won and s.has("heart"):
 		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
 		head.add_child(UI.para(WaysResult.other_line(String(r.get("how", ""))), UI.T_BODY, UI.MUTED))
@@ -71,7 +73,9 @@ func show_result(r: Dictionary) -> void:
 		if i > 0:
 			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
 			sh.add_child(sep)
-		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
+		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
+		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
+		sh.add_child(tile)
 	v.add_child(strip)
 	var det := UI.vbox(6)      # what is behind the Details toggle
 	det.visible = false
@@ -81,7 +85,9 @@ func show_result(r: Dictionary) -> void:
 		if int(s["gems"]) > 0:
 			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
 		for sd in s["seeds"]:
-			chips.append(["seed", "%d %s seeds" % [s["seeds"][sd], Data.CROPS[sd]["name"]], Data.CROPS[sd]["color"]])
+			var crop: Dictionary = Data.CROPS[sd]
+			var n := int(s["seeds"][sd])
+			chips.append(["seed", "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"], crop["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
 			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
@@ -115,9 +121,9 @@ func show_result(r: Dictionary) -> void:
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch a baby Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		var gear_head := "Gear you kept, in the armory"
+		var gear_head := "Gear you kept, in the gear shed"
 		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
 		v.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
@@ -130,7 +136,7 @@ func show_result(r: Dictionary) -> void:
 			det.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
 					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
-			det.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
+			det.add_child(_note("Your gear shed was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
 	v.add_child(ClassCard.results_strip(s))
 	var lost_it: Array = s.get("lost_items", [])
 	if not won and not lost_it.is_empty():
@@ -178,6 +184,9 @@ func show_result(r: Dictionary) -> void:
 	outer.add_child(row)
 	go.grab_focus()
 	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
+
+## One line of plain words on hover for the strip tiles that need one (by icon).
+const STAT_TIPS := {"knock": "Enemy hunters you put on the ground this match."}
 
 ## One stat on the strip: a number that counts up from zero, with what it is under it.
 func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
@@ -253,7 +262,7 @@ func _kin_card(s: Dictionary, det: Control) -> Control:
 	if s["levelup"]:
 		var lu := UI.label("%s grew to level %d!" % [k["name"], k["level"]], 17, UI.GOLD, UI.big)
 		kv.add_child(lu)
-		tw.tween_callback(func(): Sfx.play("unlock", null, -4.0); UI.pop_in(lu))
+		tw.tween_callback(func(): Sfx.play("garden_trait", null, -4.0); UI.pop_in(lu))
 	for et in s.get("evo", []):
 		kv.add_child(UI.label(et, 15, Color("c9a0ff")))
 	var mem: Array = k["memory"]

@@ -180,10 +180,6 @@ func _match() -> void:
 	P.add_perk("brand_frost")
 	ok("the latest Brand wins", P.welem == "frost", P.welem)
 	ok("the upgrade line names them", WeaponUps.summary(P).contains("Hotload") and WeaponUps.summary(P).contains("Brand"), WeaponUps.summary(P))
-	# a level-up takes the hero's fixed weapon path (no choice); the full per-hero check is --perkorb-check
-	var lv_before := P.perks.size()
-	var step := WeaponPath.on_level(P, 2)
-	ok("a level-up applies a weapon upgrade by itself", not step.is_empty() and P.perks.size() == lv_before + 1 and Data.PERKS[step["perk"]].has("wup"), str(step.get("perk", "")))
 	# 4. drop tables: gear and tunings, never a weapon
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
@@ -251,7 +247,9 @@ func _match() -> void:
 ## Two gloves (Q and V) chain into each other: a hook drags a foe in and a fissure on the other key
 ## throws them up at once; each glove keeps its own cooldown; a passive glove sits in either slot.
 func _glove_combos() -> void:
-	var r: Array = main._ac_setup(7.0)
+	var ac = load("res://tools/ability_check.gd").new()      # its dummy-rival setup (moved out of main.gd)
+	ac.main = main
+	var r: Array = ac._ac_setup(7.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -301,6 +299,14 @@ func _glove_combos() -> void:
 	m.spawn_gear("quake", 1, P.pos, "", false)
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
 	ok("a different glove goes in the free slot (V)", String(P.gear[1].get("id", "")) == "quake", str(P.gear))
+	for gid in ["gust_fan", "rocket", "hover"]:      # the launch numbers come from content/gear "launch"
+		P.gear[0] = {"id": gid, "rar": 1}
+		P.gear_cd[0] = 0.0
+		P.vel = Vector3.ZERO
+		m.use_gear(P, 0)
+		var up: float = Gear.ALL[gid]["launch"]["up_mps"]
+		var fired: bool = P.gear_cd[0] > 0.0 and absf(P.vel.y - up) < 0.01
+		ok("%s launches at its content speed (%.1f m/s up)" % [gid, up], fired)
 	# pickups fill Q first, then V; a freed slot is the next one filled
 	P.gear = Gear.empty_slots()
 	var order: Array = []

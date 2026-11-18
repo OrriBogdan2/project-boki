@@ -3,7 +3,9 @@ extends RefCounted
 ## For every item on three sample Boki, preview() changes nothing, apply() does exactly the deltas preview
 ## named (and nothing else), writes one journal line, and an item that can't be used changes nothing. Also:
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
-## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
+## through Care.feed, and an old v12 save gaining the new fields. Their sounds: each fed item's family cue
+## (GardenSfx.item), a path token's pip, and the brighter chime at a Boki's evolve level (HomeChimes). Never
+## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
@@ -43,7 +45,10 @@ func run(m: Node) -> void:
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
+	_loot()
 	_migration()
+	await _cues()
+	_evolve_chime()
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -217,6 +222,105 @@ func _feeding() -> void:
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+
+## An expedition's lair-pile bite: carried out, banked in the garden bag, eaten at home. The Boki card's
+## journal then says which item changed what.
+func _loot() -> void:
+	var drop: Dictionary = GardenItems.rules()["lair_drop"]
+	ok(GardenItems.lair_drop(0.0, 1) == String(drop["ids"][1]) and GardenItems.lair_drop(0.99, 1) == "",
+			"a lair pile holds a bite below the chance roll and none above it")
+	for id in drop["ids"]:
+		var v: Dictionary = Loot.VALUABLES.get(id, {})
+		ok(GardenItems.has(id) and v.get("bag", false) and String(v.get("name", "")) == GardenItems.item_name(id)
+				and String(GardenItems.item(id)["effect"]["kind"]) == "stat",
+				"lair drop %s is a stat bite carried as treasure under its own name" % id)
+		_loot_card(id)
+
+func _loot_card(id: String) -> void:
+	Save.d = Save.fresh()
+	var out := {}
+	Econ.after_raid({"extracted": true, "haul": [Loot.valuable(id)]}, out)
+	ok(int(Save.d["items"].get(id, 0)) == 1 and not Save.d["valuables"].has(id),
+			"%s brought out of a match lands in the garden bag, not the sell shelf" % id)
+	var stat := String(GardenItems.item(id)["effect"]["stat"])
+	var rec := _boki("cindle", 3, stat)
+	rec["stats"][stat] = 4
+	var before := (rec["journal"] as Array).size() if rec.has("journal") else 0
+	var pv := GardenItems.use(rec, id)
+	var lines: Array = rec["journal"]
+	var gain := int(rec["stats"][stat]) - 4
+	var card := VBoxContainer.new()
+	JournalCard.add(rec, card)
+	var shown := ""
+	for c in card.get_children():
+		shown += (c as Label).text + "\n" if c is Label else ""
+	card.free()
+	var name_ := GardenItems.item_name(id)
+	ok(pv["ok"] and gain > 0 and lines.size() == before + 1 and int(Save.d["items"][id]) == 0,
+			"%s eaten at home: +%d %s, one journal line, bag empty" % [id, gain, stat])
+	ok(shown.contains(name_) and shown.contains("%s +%d (4 to %d)" % [Care.STATS[stat]["name"], gain, 4 + gain]),
+			"%s: the Boki card's journal shows the item and the change" % id)
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## The cues played since `before` (a copy of GardenSfx.heard), one entry a play.
+func _played(before: Dictionary) -> Array:
+	var out := []
+	for sname in GardenSfx.heard:
+		for i in int(GardenSfx.heard[sname]) - int(before.get(sname, 0)):
+			out.append(sname)
+	return out
+
+## Every fed item has its family's cue on file; a give plays exactly that one at the Boki, and a path token's pip
+## clicks into the meter PIP_S later.
+func _cues() -> void:
+	var pips := _heard("garden_item_pip")
+	GardenSfx.item(main, Vector3.ZERO, "keepstone")
+	ok(_heard("garden_item_token") > 0 and _heard("garden_item_pip") == pips, "Keepstone: the token cue, no pip yet")
+	await main.get_tree().create_timer(GardenSfx.PIP_S + 0.15).timeout
+	ok(_heard("garden_item_pip") == pips + 1, "...then its pip clicks into the meter %.2f s later" % GardenSfx.PIP_S)
+	var missing := []
+	var wrong := []
+	for id in GardenItems.ids().filter(GardenItems.fed):
+		var want := String(GardenSfx.ITEM.get(String(GardenItems.item(id)["effect"]["kind"]), ""))
+		if want == "" or not Sfx.ensure(want):
+			missing.append(id)
+			continue
+		var before := GardenSfx.heard.duplicate()
+		GardenSfx.item(main, Vector3.ZERO, id)
+		if _played(before) != [want]:
+			wrong.append(id)
+	ok(missing.is_empty(), "every fed item has its family's cue, on file (missing: %s)" % [missing])
+	ok(wrong.is_empty(), "a give plays one cue, its family's (wrong: %s)" % [wrong])
+
+## The brighter chime (HomeChimes "ready") once a Boki reaches its evolve level: Zapple's branching final.
+func _evolve_chime() -> void:
+	var rec := _boki("zapple", 5, "focus")
+	var due := EvoPath.level(rec)
+	rec["level"] = due - 1
+	var home := FakeHome.new()
+	home.kins = [{"rec": rec, "pos": Vector3.ZERO, "node": null}]
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	var ready := _heard("garden_chime_ready")
+	var level := _heard("garden_chime_level")
+	rec["level"] = due
+	chimes.tick(1.0)
+	var bright := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level
+	ok(bright, "Zapple reaches level %d, its evolve level: the brighter chime instead of the level one" % due)
+	rec["level"] = due + 1
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 1, "a level past it: the level chime, no second brighter one")
+	Save.d["items"]["stayleaf"] = 1
+	GardenItems.use(rec, "stayleaf")
+	rec["level"] = due + 2
+	chimes.tick(1.0)
+	var held := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level + 2
+	ok(held, "a Stayleaf holds it: no brighter chime, a level is the level chime")
+	GardenItems.take_off(rec, "stayleaf")
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 2, "the Stayleaf off: it can evolve again, the brighter chime")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")

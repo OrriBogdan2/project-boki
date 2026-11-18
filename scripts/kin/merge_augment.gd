@@ -102,7 +102,8 @@ static func _addon(h: Hunter, key: String) -> void:
 	if a.is_empty():
 		return
 	var form := MergeForm.of(h)
-	Effects.run(a.get("effects", []), h, {"slot": key, "ability": "%s_%s_aug" % [form["id"], key], "level": 1})
+	var ctx := {"slot": key, "ability": "%s_%s_aug" % [form["id"], key], "level": 1, "hit_snd": MergeSfx.hit_ctx(h)}
+	Effects.run(a.get("effects", []), h, ctx)
 	var k := float(a.get("cd_k", 1.0))
 	if k < 1.0:
 		if h.ak != null:
@@ -111,9 +112,6 @@ static func _addon(h: Hunter, key: String) -> void:
 				h.ak.cd[ck] = float(h.ak.cd[ck]) * k
 		elif h.runner != null and h.runner.slots.has("utility") and key == "rmb":
 			h.runner.slots["utility"]["cd"] = float(h.runner.slots["utility"]["cd"]) * k
-	var col: Color = form["glow"]
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(a.get("name", "")).to_upper(), col)
-	h.m.fx.ring(h.pos, 1.4, Color(col, 0.8), 0.3)
 	_announce(h, key, 1.4)
 
 static func _announce(h: Hunter, slot: String, radius: float, secs := 0.0) -> void:
@@ -129,17 +127,16 @@ static func _dash(h: Hunter) -> void:
 	var st := _state(h)
 	var kind := String(d["kind"])
 	st["dash"] = {"kind": kind, "t": float(d["window"]), "last": h.pos, "hit": {}, "mirror": {}}
+	if not MergeSfx.play(h, "travel"):
+		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
+	_announce(h, "dash", 0.0)
 	if kind == "trail":
 		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
-		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
 		return
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
 		"sweep":
-			h.m.sfx("zap", h.pos, -3.0, 1.5)
 			h.m.fx.bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * 4.0 + Vector3(0, 1.0, 0), col)
 		"charge":
-			h.m.sfx("ab_slam", h.pos, -4.0, 0.8)
 			h.m.fx.dust(h.pos, 8)
 		"reflect":
 			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, mirror_spec(d, col))
@@ -207,7 +204,7 @@ static func warn_left(h: Hunter) -> float:
 		left = float(h.get_meta("mf_left"))
 	return left if left > 0.0 and left <= float(MergeForm.data()["warn_s"]) else -1.0
 
-## A rising tick each second, a ring in the form's colour. The local hunter hears it loudest; rivals hear it too.
+## A rising tick each second. The local hunter hears it loudest; rivals hear it too.
 static func _warn_tick(h: Hunter, sec: int) -> void:
 	var m := h.m
 	var warn_s := float(MergeForm.data()["warn_s"])
@@ -215,7 +212,6 @@ static func _warn_tick(h: Hunter, sec: int) -> void:
 	var rise := 1.0 + (warn_s - float(sec)) * 0.3
 	m.sfx("click", h.pos, -2.0 if h.is_local() else -12.0, rise)
 	m.sfx("warn", h.pos, -6.0 if h.is_local() else -16.0, rise * 0.9)
-	m.fx.ring(h.pos, 1.8 + (warn_s - float(sec)) * 0.4, Color(col, 0.9), 0.35)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 
@@ -258,6 +254,7 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 			var dir := seg.normalized() if seg.length() > 0.01 else h.aim_dir()
 			f.impulse(dir * float(d["shove"]) * f.mass())
 			h.m.fx.dust(f.pos, 3)
+		MergeSfx.play(h, "hit", f.pos)
 		f.hurt(dmg, h, o)
 
 # ------------------------------------------------------------------ the HUD's views

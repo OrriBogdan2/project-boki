@@ -82,7 +82,7 @@ func _put(hm, at: Vector3) -> void:
 	hm.pvy = 0.0
 	hm.pvel = Vector3.ZERO
 	hm.dash_t = 0.0
-	hm.dash_charges = 2.0
+	hm.dash.charges = 2.0
 	hm.water.was = hm.water.depth(at.x, at.z)
 	hm.water.wade_k = 0.0
 
