@@ -10174,3 +10174,4 @@ READY ext/merge-lane-clean2-1118-b bd60ecdd2a (lane clean2 train b: 9 clean bran
 READY ext/tenzo-eyestones-1118 1a83484fc606c1ac582c97a9ab67b807fea51111 (Tenzo cobalt eye-stones/shards in glb + E/R rocks cobalt VFX; on rig-ship-1117; rpc1 gate ENV-BROKEN overload, export OK 858 MB, gh-outbox PR filed)
 READY ext/tenzo-eyestones-1118 0a5675a246855a628e4671e708a467eba1bf68ca (supersedes 1a83484 line: same Tenzo cobalt eye-stones/E-R rocks work + main merge/style by another session)
 READY ext/sparkle-dollA-game-1118 8de24530d15ecdbf174e7739dd3cb4459f8e94f7 (Sparkle doll A: new face + smaller bust in game)
+READY ext/play-probe-1118 fc4dafb9ce (play probe: automated player for all 13 Hunters via real InputEvents, PR #297; 4 FLAGs on main)
