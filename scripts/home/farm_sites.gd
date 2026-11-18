@@ -381,6 +381,7 @@ static func player_swing(hw, e: Dictionary, who := "You") -> void:
 static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	if stalled(e): return
 	var up := is_upgrading(e)
+	var st0 := FarmModels.stage_of(e)
 	var spent := settle(e)
 	if not spent.is_empty():
 		hw.h._refresh_top()
@@ -396,6 +397,8 @@ static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 		hw.scan_t = 0.0
 	elif FarmLots.is_lot(e):
 		FarmLots.restage(hw.h, e)
+	elif hw.h.hb and FarmModels.stage_of(e) != st0:
+		hw.h.hb.apply(false)      # a layout site (the house): its walls rise to the next stage
 	Save.save_game()
 
 ## Station tiers speed their jobs up (HomeWork._boost).

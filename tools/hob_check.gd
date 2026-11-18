@@ -316,7 +316,10 @@ func _real_work() -> void:
 			"Hob hammers and a swing lands on the house after %.1f s (every %.1f s)" % [t, swing_s])
 	ok(int(bar.get_meta("k", 0)) > 0 and FarmSites.have("wood") < wood0,
 			"the bar moved and the first materials were spent")
+	var rise0 := _rise(u)
 	hob.rules()["swing_s"] = 0.4      # (the pace is checked above; this keeps the run short)
+	await _wait(func(): return int(FarmSites.entry(u)["site"]["got"]) >= 9, swing_s + 9.0 * 0.4 + 4.0)
+	ok(_rise(u) > rise0 + 0.5, "the walls rise as he works (%.2f m -> %.2f m at 9/12)" % [rise0, _rise(u)])
 	var t_all := await _wait(func(): return not FarmSites.has_site(FarmHob.house_entry()), 12.0 * 0.4 + 6.0)
 	ok(not FarmSites.has_site(FarmHob.house_entry()) and Progress.stat("fb_built") >= 1,
 			"with nobody helping the house is done in %.1f s" % t_all)
@@ -374,6 +377,11 @@ func _tutorial_path() -> void:
 	ok(int(FarmSites.entry(u)["site"]["got"]) == 2, "and Hob's swing adds one more")
 
 # ------------------------------------------------------------------ helpers
+## How tall the house site's walls stand so far (its "Rise" box), in metres.
+func _rise(u: int) -> float:
+	var r := home.hb.nodes[u].find_child("Rise", true, false) as MeshInstance3D
+	return r.get_aabb().size.y if r else 0.0
+
 ## One press on the talk box: it waits out a camera move first.
 func _advance(box: TalkBox) -> void:
 	await _wait(func(): return not box.frozen, 3.0)
