@@ -2224,6 +2224,17 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 |---|---|
 | immune | ["gnd"] |
 
+## summon_station (`content/rules/summon_station.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Training Grounds' Boki summon pad (scripts/match/summon_station.gd), on the Boki island. at: map tiles; r: metres, how close you stand to be on it. species: the practice Bokis the pad's interact key cycles; each has its own window and cooldown from boki_summon.json (short and strong, middle, long and supportive). |
+| at | [24.4, 56.5] |
+| r | 1.6 |
+| species | ["kestrike", "cindowary", "moonloris"] |
+
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
 Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
