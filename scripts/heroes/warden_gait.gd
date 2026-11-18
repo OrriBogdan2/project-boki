@@ -46,7 +46,8 @@ var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+# [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+var arms: Array = []
 var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
 var run_len := 1.0           # s: of the forward run clip
 var foot := {}               # the last "footing" data (kept while it fades out)

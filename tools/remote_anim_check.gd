@@ -157,8 +157,8 @@ func _first_k(rows: Array, move_name: String) -> float:
 ## Deep water and ice on the host's strip (the training island has none; only the owner's game needs the areas:
 ## the copy's move comes from the snapshot). Its hunter, with no ward, stands in each and on dry ground.
 func _hazard_moves() -> void:
-	var P := m.player
-	P.perks.clear()
+	var host_h := m.player
+	host_h.perks.clear()
 	if m.biomes == null:
 		m.biomes = BiomeRun.new(m)
 	m.biomes.terrain = TerrainHazards.new(m)
@@ -169,10 +169,10 @@ func _hazard_moves() -> void:
 		tz._add_area(kind, [[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5],
 			[c.x - 2.5, c.z + 2.5]])
 	for kind: String in spots:
-		_fresh(P)
-		P.teleport(spots[kind])
+		_fresh(host_h)
+		host_h.teleport(spots[kind])
 		await _run(0.8)
-		var mine := [bool(P.anim_s.get("swim", false)), not (P.anim_s.get("footing", {}) as Dictionary).is_empty()]
+		var mine := [bool(host_h.anim_s.get("swim", false)), not (host_h.anim_s.get("footing", {}) as Dictionary).is_empty()]
 		replies.clear()
 		Net.lobby_emit("ra", {"c": "hz"})
 		await _reply()
@@ -180,12 +180,13 @@ func _hazard_moves() -> void:
 		var theirs := [bool(got.get("swim", false)), bool(got.get("footing", false))]
 		var want := [kind == "deep_water", kind == "ice"]
 		var where := kind if kind != "" else "dry ground"
-		ok(mine == want, "hazard moves: the host's hunter on %s (swim, no footing) = %s" % [where, str(want)], str(mine))
+		var label := "hazard moves: the host's hunter on %s (swim, no footing) = %s" % [where, str(want)]
+		ok(mine == want, label, str(mine))
 		ok(theirs == want, "hazard moves: the guest's copy on %s shows the same" % where, str(theirs))
 		var sunk := -float(got.get("sink", 0.0))
 		ok((sunk > 0.4) == (kind == "deep_water"), "hazard moves: the copy is sunk in only in deep water (%s)" % where,
 			"%.2f m" % sunk)
-	_fresh(P)
+	_fresh(host_h)
 
 func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
 	var P := m.player
