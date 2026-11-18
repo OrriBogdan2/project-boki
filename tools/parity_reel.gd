@@ -2,7 +2,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ## --parity-reel --shots-dir=<dir> --reel-hero=<arch> [--reel-only=<part>]: one Hunter's whole move set in the
 ## Training Grounds against a dummy, at the match camera, for the parity reel (docs/parity_reel/): LMB tap and
 ## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a glide and a mantle
-## (`--reel-only=dash_lmb`: LMB held, then Shift into LMB at once and late, for Sable's quick bolts). A
+## (`--reel-only=lmb_bursts`: three short bursts, the drum refilling between; `dash_lmb`: LMB held, then Shift
+## into LMB at once and late, for Sable's quick bolts). A
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
@@ -174,6 +175,11 @@ func _p_lmb_tap() -> void:
 func _p_lmb_hold() -> void:
 	await _seg("LMB hold", 3.4, func(t: float) -> void:
 		P.inp["fire"] = _in(t, 0.2, 2.4))
+
+## Short bursts with the trigger up between them (the quill rifle's drum refills; a held string halves its hits).
+func _p_lmb_bursts() -> void:
+	await _seg("LMB bursts x3", 4.8, func(t: float) -> void:
+		P.inp["fire"] = _in(t, 0.2, 0.6) or _in(t, 1.9, 0.6) or _in(t, 3.6, 0.6))
 
 func _p_rmb() -> void:
 	await _seg("RMB, then again", 4.0, func(t: float) -> void:

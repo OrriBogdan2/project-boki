@@ -18,6 +18,10 @@ var burst_t := 0.0             # s until the next round of the burst
 func _init(hunter: Hunter) -> void:
 	h = hunter
 
+## The drum's share left under which the HUD shows it low (and a weapon with `low_mag_dmg` hits softer).
+func low_frac() -> float:
+	return float(h.wpn.get("low_mag_at", 0.25))
+
 func can_fire() -> bool:
 	if Capture.active(h):
 		return false
@@ -348,6 +352,8 @@ func emit_shot() -> void:
 	if h.wpn.has("sustain_loss"):
 		dmg *= 1.0 - float(h.wpn["sustain_loss"]) * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
 	h.sus_n += 1
+	if h.wpn.has("low_mag_dmg") and float(h.ammo) < float(h.wpn["mag"]) * low_frac():
+		dmg *= float(h.wpn["low_mag_dmg"])      # a string that has spent half the drum: a burst hits harder
 	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0))}
 	extra.merge(h.wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if h.wpn.has("decel"):
