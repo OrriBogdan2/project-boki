@@ -358,22 +358,24 @@ def seg_weights(P):
     return W / W.sum(1, keepdims=True)
 
 
+def region_mask(P, r):
+    """The vertices in a spec region's `box`, less its `except_segs` / `except_boxes`, only within its `in_segs`."""
+    x0, x1, y0, y1, z0, z1 = r["box"]
+    m = (P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1)
+    for seg, rad in r.get("except_segs", []):
+        j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
+        m &= seg_dist(P, j0, j1) >= rad
+    for seg, rad in r.get("in_segs", []):     # only within these capsules (a limb pinned whole where a part touches it)
+        j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
+        m &= seg_dist(P, j0, j1) < rad
+    for x0, x1, y0, y1, z0, z1 in r.get("except_boxes", []):
+        m &= ~((P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1))
+    return m
+
+
 def region_masks(P):
     """(bone, mask) per spec region."""
-    out = []
-    for r in SPEC.get("regions", []):
-        x0, x1, y0, y1, z0, z1 = r["box"]
-        m = (P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1)
-        for seg, rad in r.get("except_segs", []):
-            j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
-            m &= seg_dist(P, j0, j1) >= rad
-        for seg, rad in r.get("in_segs", []):     # only within these capsules (a limb pinned whole where a part touches it)
-            j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
-            m &= seg_dist(P, j0, j1) < rad
-        for x0, x1, y0, y1, z0, z1 in r.get("except_boxes", []):
-            m &= ~((P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1))
-        out.append((r["bone"], m))
-    return out
+    return [(r["bone"], region_mask(P, r)) for r in SPEC.get("regions", [])]
 
 
 def seg_of(arm, bone):
@@ -492,6 +494,21 @@ def place_weights(gr, P):
         for nm in gr:
             gr[nm] = gr[nm] * ~m
         gr[bone] = gr.get(bone, np.zeros(len(P))) + m
+    # `off` [{"bones", "else", "box", ...}]: in the box these bones hold nothing (Tenzo's r2 A: the rig's hand hangs inside
+    # his wide trousers, so bone heat hung the cloth on it); a vertex with no other weight goes to `else`. The fit is not
+    # touched: a region there would move the cloth.
+    for r in SPEC.get("off", []):
+        m = region_mask(P, r)
+        for nm in r["bones"]:
+            if nm in gr:
+                gr[nm] = gr[nm] * ~m
+        rest = sum(np.broadcast_to(gr[nm], (len(P),)) for nm in gr)
+        lone = m & (rest < 1e-4)
+        gr[r["else"]] = gr.get(r["else"], np.zeros(len(P))) + lone
+        k = np.where(m & ~lone, 1.0 / np.maximum(rest, 1e-4), 1.0)
+        for nm in gr:
+            gr[nm] = gr[nm] * k
+        print("off %s: %d vertices, %d to %s" % (r["bones"], int(m.sum()), int(lone.sum()), r["else"]), flush=True)
     return gr
 
 
