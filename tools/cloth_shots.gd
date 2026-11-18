@@ -95,6 +95,9 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 	sync.set_process(false)
 	if OS.get_cmdline_user_args().has("--no-sim") and (sync as WardenSync).cloth:
 		(sync as WardenSync).cloth.enabled = false      # (the chains ride the hips rigidly: what the sim adds)
+	if OS.get_cmdline_user_args().has("--no-col") and (sync as WardenSync).cloth:      # (the sim without the leg shapes)
+		for col in (sync as WardenSync).cloth.sim.get_children():
+			col.queue_free()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--tune=") and (sync as WardenSync).cloth:      # stiffness,gravity,drag (tuning runs)
 			var t := a.substr(7).split_floats(",")
@@ -107,6 +110,25 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 		sync.call("_process", 1.0 / fps)
 	var data := WardenClips.data(WardenGlb.art(id))
 	var n := int(length * fps)
+	var marks: Array = []      # --joints: a dot on every cloth joint (drawn through the mesh; the chains' rest is
+	if OS.get_cmdline_user_args().has("--joints") and (sync as WardenSync).cloth:      # what --no-sim shows)
+		var mat := StandardMaterial3D.new()
+		mat.no_depth_test = true
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		var sk := (sync as WardenSync).cloth.skel
+		for bi in sk.get_bone_count():
+			if sk.get_bone_name(bi).begins_with(WardenCloth.PREFIX):
+				var mi := MeshInstance3D.new()
+				var sm := SphereMesh.new()
+				sm.radius = 0.015
+				sm.height = 0.03
+				mi.mesh = sm
+				var m2 := mat.duplicate() as StandardMaterial3D
+				var k := int(sk.get_bone_name(bi).substr(11, 1))      # cloth_skirt<k>_: a colour per chain
+				m2.albedo_color = Color.from_hsv(k / 8.0, 1, 1)
+				mi.material_override = m2
+				shots.holder.add_child(mi)
+				marks.append([bi, mi])
 	var clips: WardenClips = sync.get("clips")
 	for i in n:
 		var t := float(i) / fps
@@ -131,6 +153,8 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 		state["vel"] = Vector3(0, 0, -speed)
 		model.position.z -= speed / fps
 		sync.call("_process", 1.0 / fps)
+		if marks:
+			_marks(sync as WardenSync, marks)
 		_camera(model, cam_kind, t / length)
 		await _grab(dir.path_join("f%03d.%s" % [i, "jpg" if jpg else "png"]))
 	model.queue_free()
@@ -143,6 +167,11 @@ func _one(id: String, scene: String, cam_kind: String, dir: String, dash_move: S
 			DirAccess.remove_absolute(dir)
 		else:
 			print("CLOTH_SHOTS_FFMPEG_FAILED ", rc)
+
+func _marks(sync: WardenSync, marks: Array) -> void:
+	var sk := sync.cloth.skel
+	for m in marks:
+		(m[1] as Node3D).global_position = sk.global_transform * sk.get_bone_global_pose(int(m[0])).origin
 
 var jpg := false      # --jpg: JPEG frames (a GPU host has no ffmpeg: encode them where it is)
 
