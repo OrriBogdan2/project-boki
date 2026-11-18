@@ -648,7 +648,8 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
 	var pick := {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-			"hold": mv.has("hold_from"), "fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
+			"hold": mv.has("hold_from"), "fade": float(mv.get("fade", FADE)),
+			"out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
 			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	# ("blend_out": s before the clip's end over which the body goes back to the legs while the clip plays on)
@@ -774,7 +775,8 @@ static func _restarts(clip: String, live: String, t: float, last: float, want: D
 ## The channel a new clip goes on: the one with less weight on screen, so a cancel inside the last fade never snaps a
 ## half-shown pose. `chan` is the live channel (xf is 1 on channel 1).
 static func _next_channel(chan: int, xf: float) -> int:
-	return 1 - chan if (xf if chan == 1 else 1.0 - xf) >= 0.5 else chan
+	var shown := xf if chan == 1 else 1.0 - xf
+	return 1 - chan if shown >= 0.5 else chan
 
 ## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
 func _carry(on: bool, dt: float) -> void:

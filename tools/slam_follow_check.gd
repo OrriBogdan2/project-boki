@@ -30,7 +30,7 @@ const SLAMS := [
 
 ## Rows found open: "<hero> <move>:<test>" -> what. Each fix removes its entry (the check says when one now passes).
 const OPEN := {
-	"juggernaut jug_meteor_land:whip": "the sword arcs between the drag and the carry pose mid-blend; needs a nearer key",
+	"juggernaut jug_meteor_land:whip": "the sword arcs from drag to carry pose mid-blend: needs a nearer key",
 }
 const SHOT_KEYS := ["time", "fade", "blend_out"]
 const SHOT_DIST := {"bulwark": 15.0}      # m the camera stands off (default 10: the blade's whole arc in frame)

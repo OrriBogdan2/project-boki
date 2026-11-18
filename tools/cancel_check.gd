@@ -166,7 +166,7 @@ func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array,
 			t += DT
 			i += 1
 			if k == seq.size() - 1 and t <= win + DT / 2.0:
-				# (a move owns the body at some frame inside the window, then may already blend out; the legs do at its end)
+				# (a move owns the body at some frame in the window, then may blend out; the legs do at its end)
 				var now := settled(clips, dd, String(st[0]))
 				owned = owned or now
 				done = owned if clip_of(dd, String(st[0])) != "" else now
@@ -181,7 +181,9 @@ func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array,
 			last = p
 	var top := 0.0
 	for i in overs.size():
-		var near := maxf(float(overs[i - 1]) if i > 0 else 0.0, float(overs[i + 1]) if i + 1 < overs.size() else 0.0)
+		var before := float(overs[i - 1]) if i > 0 else 0.0
+		var after := float(overs[i + 1]) if i + 1 < overs.size() else 0.0
+		var near := maxf(before, after)
 		if float(overs[i]) > SPIKE * near:
 			top = maxf(top, float(overs[i]))
 	return [top, done]
