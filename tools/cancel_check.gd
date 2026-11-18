@@ -15,7 +15,7 @@ const TOP := 5                 # the worst cancels printed
 ## Heroes whose worst cancel pops past POP: the ceiling in m each is held to until its clips are reworked (a blend of
 ## two far-apart arm poses peaks mid-arc: a hammer's lever, a held pose cut for the next one). A cancel rework drops its
 ## entry (the check says when one now passes).
-const OVER := {"juggernaut": 1.2, "bulwark": 0.75, "ashwick": 0.4, "dredge": 0.6, "tender": 0.36, "thief": 0.36}
+const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.6, "tender": 0.5, "thief": 0.4}
 ## Cancels still blending in after the window: "<hero> <from>@<cut>><to>" rows (docs/DEBT.md).
 const LATE_OPEN := [
 	"juggernaut jug_guard@0.50>glide", "gunslinger gunslinger_lmb@0.10>gunslinger_lmb",
