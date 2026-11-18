@@ -10162,3 +10162,4 @@ READY ext/admin-testzone-1118 7f0d5b9826 (admin lock via dev key + owner Test Zo
 READY ext/mobs-ingame-1118 bc246ce320 (6 mob A models in game + sentinel; brute rig-weight re-skin fixes gauntlet stretch; --mob-pose-shots tool)
 READY ext/mobs-ingame-1118 54728ae88a (same as bc246ce320 + the tool's .uid file)
 READY ext/boki-more-ingame-1118 33828a6f7f (40 more Boki in game: 39 evolved forms + Rampartoad body, 89 species with data, 88 with a model; stacked on ext/boki-dex-port-1117)
+READY ext/merge-lane-hunters6-1117 497090db1c (re-merge onto main: gil.json keeps Ground Swim 4.5m/0.55s + main's tap-only Grab Bag; gil-combo-check 4 fails identical on main, NEW-RED 0; health --strict style reds from main files, not branch)
