@@ -19,12 +19,6 @@ static func ctrl_zoom() -> float:
 	return far() * float(rules()["ctrl"])
 
 
-## The zoom to aim for: the wheel's `base`, or while Ctrl is held on the ground the Ctrl look past it (never
-## closer than `base`). The match (CamRig.air_zoom) and the farm both ask here, so they pull out the same.
-static func look_zoom(base: float, crouching: bool) -> float:
-	return maxf(base, ctrl_zoom()) if crouching else base
-
-
 ## The widest the view goes with the glider and height stacked on the wheel.
 static func cap() -> float:
 	return float(rules()["cap"])

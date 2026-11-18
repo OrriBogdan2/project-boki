@@ -79,7 +79,8 @@ static func drive(m: Match) -> void:
 				if sid == "glide": p.inp["glide"] = true
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			_kick_up(m, tu.stop("crouch").y)
+			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
+				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
@@ -91,13 +92,8 @@ static func drive(m: Match) -> void:
 				else:
 					goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
-		"sec", "shoot", "gkey", "summon", "kin", "hook", "ult":
+		"sec", "shoot", "gkey", "kin", "hook", "ult":
 			_fight(m, tu, goto)
-		"steal":
-			var at := tu.goal("steal")
-			if at != Vector3.INF:
-				goto.call(at, 1.0)
-				p.inp["interact"] = Vector2(at.x - p.pos.x, at.z - p.pos.z).length() < 1.6
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
@@ -144,13 +140,6 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 		_miss = _rng.randf() < MISS_RATE
 	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
-## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
-## take-off on, or the mantle climbs a low cliff first and the kick never counts).
-static func _kick_up(m: Match, top_y: float) -> void:
-	var p := m.player
-	if not p.grounded and p.pos.y < top_y - 0.2:
-		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
-
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var sid := tu.id()
@@ -176,11 +165,6 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
 				_acted = true
 			p.inp["fire"] = tu.flag and fire_key(m)
-		"summon":
-			var s: KinSummon = p.kin.summon if p.kin else null
-			if s and not s.out() and s.cd <= 0.0 and tu.t > 1.0:
-				KinSummon.press(p)       # (as the Summon key does; again each time its ring fills)
-			p.inp["fire"] = tu.wb.seen_out and fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 			p.inp["fire"] = tu.flag and fire_key(m)

@@ -19,10 +19,9 @@ const WARDENS := {
 	"bulwark": {"height": 1.03, "height_3d": 1.74, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
-	# (height_3d: the owner's 11-17 alive1117 A master stands lower than the chart, 1.038x measured)
-	"gunslinger": {"height": 1.09, "height_3d": 1.04, "width": [0.5, 1.15], "moves": "gunslinger_"},
-	# (slim, long-legged; height_3d: 11-17 face1117b A, short pack rods 0.999x; v2: 1.13)
-	"mage": {"height": 1.08, "height_3d": 1.0, "width": [0.6, 1.3], "moves": "mage_"},
+	"gunslinger": {"height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},  # (slim)
+	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
+	"mage": {"height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable v2's moth antennae stand over her head, as on the turnaround)
 	"thief": {"height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
@@ -35,8 +34,8 @@ const WARDENS := {
 	"rimewright": {"height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
 	"ashwick": {"height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
-	# (Kael on his long-legged rig; height_3d: e1 pick, legs x1.15 and mane, 1.44x measured)
-	"juggernaut": {"height": 1.24, "height_3d": 1.44, "width": [0.95, 2.0], "moves": "jug"},
+	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
+	"juggernaut": {"height": 1.24, "height_3d": 1.28, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
 	"dredge": {"height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)

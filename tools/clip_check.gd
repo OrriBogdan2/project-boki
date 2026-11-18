@@ -211,7 +211,6 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
-	_beats(id, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -276,30 +275,8 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
-
-
-## The result beats (WardenBeats): win and lose each map to a clip the .glb plays that is its own (no two beats share
-## one), and the state's "beat" picks it.
-func _beats(id: String, clips: WardenClips) -> void:
-	var mapped := 0
-	var picked := 0
-	var used: Array = []
-	for nm in WardenBeats.NAMES:
-		var b: Dictionary = clips.beats.get(nm, {})
-		mapped += 1 if not b.is_empty() else 0
-		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
-		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
-		if not b.is_empty():
-			used.append(b["clip"])
-	ok(mapped == 2 and picked == 2 and used[0] != used[1],
-			"%s: win and lose mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
-
-
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
-	for b in (dd.get("beats", {}) as Dictionary).values():
-		if b.has("clip"):
-			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		out.append(mv["clip"])
 		if mv.has("alt"):
@@ -571,15 +548,6 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := float(moves[km].get("fit", clips.lib.get_animation(String(moves[km]["clip"])).length))
-		var pts: Array = moves[km].get("time", [])
-		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
-			var on := true
-			for i in pts.size():
-				var c := float(pts[i][1])
-				on = on and c >= 0.0 and c <= clips.lib.get_animation(String(moves[km]["clip"])).length + 0.001 \
-						and (i == 0 or pts[i][0] > pts[i - 1][0])
-			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
-			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off

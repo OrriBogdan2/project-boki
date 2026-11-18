@@ -542,10 +542,8 @@ func _wired() -> void:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
-	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
-		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
-	ok(FileAccess.get_file_as_string("res://scripts/match/exits.gd").contains("WarnSfx.countdown("),
-		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
+		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
 	_warn_behaviour()
 
 ## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
@@ -1328,7 +1326,6 @@ func _menus(main: Node) -> void:
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
-	Overlay.more_tabs = true          # (every tab, not just Main and Controls)
 	Overlay.open_settings()
 	for t in Overlay.SETTINGS_TABS:
 		await _settle(main)

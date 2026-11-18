@@ -31,14 +31,6 @@ run A of 4 (all four turnaround views); the runs and `gen_log.tsv` are in `~/mes
 Gloamshell have their picks in `~/meshy/boki/<id>/run1` but no row yet. A new row may leave out `eye_c`, `eye_r` and `eye_yaw`
 for its first fit sheet: it starts on the proxy's eyes.
 
-11-17 "batch 2": nothing is left to port. The game has 50 species (`content/kin`); 48 have an `art/kin` Meshy body
-(batch 1 and earlier) and `BokiRig.has` loads it for every wild, owned and farm Boki, with no older-model fallback.
-The other masters in `~/meshy/boki3d` (about 250 `ok`, 207 scored 70 or more) are roster names that have no game
-data (`content/kin_v2`, `content/kin`), so a model in `art/kin` would never load; they come in when a species gets
-its data. The two game species without a body, `basaltoad` (master `rampartoad`, score 84) and `cindowary`
-(`bellowary`), have no `model.glb` on disk any more (Meshy's download link expired 11-13): regenerate, then
-`auto_port.py`.
-
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 

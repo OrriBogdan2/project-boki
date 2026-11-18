@@ -47,22 +47,12 @@ func run(main_node: Node) -> void:
 	m.hud.open_swap(m.wpicks[m.wpicks.size() - 1])
 	await _frames(8)
 	await _shot("ground_full", "A ground item with a full backpack: the incoming item outlined red above your things")
-	await _ground_compare(p)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
 		f.store_line(c)
 	f.close()
 	print("LOOTFULLSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
-
-## Standing at better boots on the ground while wearing worse ones: the compare card over the prompt.
-func _ground_compare(p: Hunter) -> void:
-	m.spawn_gear("windstep_boots", 4, p.pos + Vector3(0.6, 0, 0))
-	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
-	m.interact = {"kind": "weapon", "wp": wp, "label": m._pickup_label(p, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-	await _frames(8)
-	await _shot("ground_compare", "Gear on the ground for a worn slot: above the prompt, what it replaces and where, "
-		+ "then each changed number, better in green, worse in red")
 
 func _frames(k: int) -> void:
 	for i in k:

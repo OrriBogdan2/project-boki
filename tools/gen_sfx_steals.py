@@ -48,7 +48,8 @@ def cry_brute():
 
 def cry_bomber():
     d = 0.5
-    return mix(am(S.voice(d, 220, 430, 'eh', vib=0.04, scale=1.1, a=0.04), 13, 0.35), lpf(S.hiss(d, 1800, 5000), 5000) * 0.08)
+    voice = am(S.voice(d, 220, 430, 'eh', vib=0.04, scale=1.1, a=0.04), 13, 0.35)
+    return mix(voice, lpf(S.hiss(d, 1800, 5000), 5000) * 0.08)
 
 
 def cry_sentinel():

@@ -62,7 +62,7 @@ var over := false
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
-var feed: Array = []        # kill feed rows (KnockFeed) {text, t}; a knock adds by, who, icon
+var feed: Array = []        # kill feed lines {text, t}
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
@@ -140,7 +140,6 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
-var camps: Camps = null         # the monster camps: sizes, clears, rewards, comebacks (scripts/match/camps.gd)
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
@@ -383,8 +382,7 @@ func _start(o: Dictionary) -> void:
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
-		camps = Camps.new(self)      # (the tutorial brings its own monsters, one step at a time)
-		await camps.spawn_all()
+		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
@@ -962,6 +960,43 @@ func _apply_treat(k: Kin) -> void:
 		"treat_power": k.power *= 1.25
 		"treat_hardy": k.max_hp *= 1.4; k.hp = k.max_hp
 		"treat_calm": k.trust = minf(100.0, k.trust + 12.0)
+
+func _spawn_mobs() -> void:
+	if net_on and not is_host:
+		return
+	for c in world.camp_spots:
+		await _slice()
+		var p: Vector3 = c["pos"]
+		var comp: Array
+		match String(c.get("kind", "normal")):
+			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
+			"light":
+				var lr := rng.randf()
+				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
+			_:
+				var nr := rng.randf()
+				if nr < 0.15 * tier + 0.2:
+					comp = ["brute", "skitter", "bomber"]
+				elif nr < 0.5:
+					comp = ["skitter", "bomber", "spitter"]
+				elif nr < 0.75:
+					comp = ["sentinel", "skitter", "skitter"]
+				else:
+					comp = ["spitter", "skitter", "bomber"]
+		# a camp in a biome region spawns from that region's table instead
+		var bcomp: Array = biomes.camp_comp(c) if biomes else []
+		if not bcomp.is_empty(): comp = bcomp
+		var made: Array = []
+		for kk in comp:
+			var q := p
+			for _t in 20:
+				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
+				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
+					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
+			var smb := spawn_mob(kk, q)
+			if biomes: biomes.dress(smb)
+			made.append(smb)
+		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
@@ -1683,7 +1718,7 @@ var feed_all: Array = []
 func add_feed(t: String) -> void:
 	feed_all.append("%d %s" % [int(time), t])
 	feed.append({"text": t, "t": 0.0})
-	if feed.size() > KnockFeed.ROWS:
+	if feed.size() > 5:
 		feed.pop_front()
 
 # ------------------------------------------------------------------ events
@@ -1753,7 +1788,7 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
@@ -1770,8 +1805,9 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	h.revive = 0.0
 	h.cloak_t = 0.0
 	h.grap = {}
-	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
-	var icon := KnockFeed.icon_of(by, credit, o)
+	var credit: Ent = by
+	if by is Kin and by.owner_h:
+		credit = by.owner_h
 	if h == player:
 		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
@@ -1785,7 +1821,7 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		KnockFeed.add(self, credit as Hunter, h, icon)
+		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -1793,14 +1829,14 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
-		KnockFeed.add(self, null, h, icon)
+		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), SideColor.of(self, h), 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else "", icon])
+		net_event(["knock", h.nid, credit.nid if credit else ""])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -2147,7 +2183,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KillXp.pay(self, mb, credit)
-	if camps: camps.on_mob_dead(mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
@@ -2155,7 +2190,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
-	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot and not Camps.is_camp(mb))
+	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot)
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
@@ -3171,7 +3206,7 @@ func _process(delta: float) -> void:
 	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
-		if f["t"] > KnockFeed.LIFE_S: feed.erase(f)
+		if f["t"] > 6.0: feed.erase(f)
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
@@ -3823,7 +3858,6 @@ func step(dt: float) -> void:
 		_update_ship(dt)
 	for s in ships:
 		_update_one_ship(s, dt)
-	if camps: camps.tick(dt)
 	if rolling:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
@@ -5087,7 +5121,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				KnockFeed.add(self, by as Hunter, who, String(x[3]) if x.size() > 3 else "")
+				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
@@ -5178,7 +5212,6 @@ func _net_ev(x, from: String) -> void:
 			if who is Blight and not who.dead:
 				(who as Blight).burrow()
 		"nest": if blight: blight.nests.net(x)      # a Blight nest's stock and refill clock (BlightNests)
-		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
 		"mobdead":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
@@ -5389,8 +5422,6 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	var proc_tip := WispProc.tip(k)      # its carry passive just acted: name it once
-	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])

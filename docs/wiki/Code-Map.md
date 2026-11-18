@@ -141,8 +141,9 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 
 ## scripts/feel/
 
-`feel_config.gd` (`FeelConfig`: the step smoothing rows `StepSmooth` reads) and `hold_teach.gd` (`HoldTeach`: the
-answer to a tap on a hold action). The match's real movement is in `scripts/match/hunter.gd`.
+A stand-alone movement and camera lab (`--feel-lab`): `hunter_controller.gd`, `top_down_camera.gd`,
+`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `jump_pad.gd`, `kinfall_input.gd`. The
+match's real movement is in `scripts/match/hunter.gd`.
 
 ## scripts/server/ and scripts/social/
 

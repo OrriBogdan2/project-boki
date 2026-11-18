@@ -2,7 +2,7 @@
 Run from tools/: python3 gen_sfx_warn.py
 
   warn_heartbeat  a soft two-beat pulse (lub-dub), felt more than heard, so it can run under a fight
-  warn_tick       a dry little wood tick; played at a rising pitch for the last ten seconds of an open uplink lift
+  warn_tick       a dry little wood tick; played at a rising pitch for the last five seconds of an extraction
   blight_rumble   the ground turning over: a sub drop, a grinding band of noise and a few dark cracks
 """
 import numpy as np

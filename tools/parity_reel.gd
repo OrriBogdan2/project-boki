@@ -1,8 +1,8 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## --parity-reel --shots-dir=<dir> --reel-hero=<arch> [--reel-only=<part>]: one Hunter's whole move set in the
 ## Training Grounds against a dummy, at the match camera, for the parity reel (docs/parity_reel/): LMB tap and
-## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a dash straight back, a glide
-## and a mantle (`--reel-only=dash_lmb`: LMB held, then Shift into LMB at once and late, for Sable's quick bolts). A
+## hold, RMB, E, R (each with a second press for the recast), a ground and an air dash, a glide and a mantle
+## (`--reel-only=dash_lmb`: LMB held, then Shift into LMB at once and late, for Sable's quick bolts). A
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
@@ -12,7 +12,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## knocked-down beat) and "backfaces" (every surface flat, red where it shows its back). --reel-close swaps the match
 ## camera for a close orbit round the Hunter (CLOSE_FILL of the frame high, no HUD). Never writes the save.
 
-const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "dash_back", "glide", "mantle"]
+const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
 const KEYS := ["W", "A", "S", "D", "LMB", "RMB", "E", "R", "Shift", "Space"]
 const FAR := 12.0                       # m to the dummy for the moves that travel
@@ -253,22 +253,6 @@ func _p_r() -> void:
 		return
 	await _seg("R, then the recast", 6.0, _r_presses)
 
-## R pressed mid-run toward the far dummy, the keys held on (Vex: the ult must not stop her).
-## Prints REEL_RRUN with the metres covered in the 0.5 s after the press.
-func _p_r_run() -> void:
-	P.ak.cd["x"] = 0.0
-	var rec := {}
-	var run := func(t: float) -> void:
-		P.inp["move"] = _toward_far(t)
-		if _at(t, 0.7):
-			r_down = true
-			HunterKeys.ult_pressed(P)
-			rec["at"] = P.pos
-		if rec.has("at") and not rec.has("m") and t >= 1.2:
-			rec["m"] = Vector2(P.pos.x - rec["at"].x, P.pos.z - rec["at"].z).length()
-	await _travel("Run, then R on the move", 3.2, run)
-	print("REEL_RRUN %s moved %.2f m in the 0.5 s after the R press" % [who, rec.get("m", -1.0)])
-
 func _r_presses(t: float) -> void:
 	if _at(t, 0.2) or _at(t, 2.6):
 		r_down = true
@@ -330,20 +314,6 @@ func _p_dash_air() -> void:
 		P.inp["jump"] = _in(t, 0.2)
 		P.inp["dash"] = _in(t, 0.55)
 	await _travel("Jump, then dash in the air", 3.0, dash)
-
-## Dash one way, then straight back at once, on the ground and in the air (a turn costs the speed you
-## carry, TurnCost). Charges are refilled at each press so every dash goes.
-func _p_dash_back() -> void:
-	var dash := func(t: float) -> void:
-		var back := (t >= 0.6 and t < 1.1) or t >= 2.45
-		var way := -1.0 if back else 1.0
-		P.inp["move"] = Vector2.ZERO if t >= 3.4 else Vector2(way, 0)
-		P.inp["jump"] = _in(t, 1.8)
-		P.inp["dash"] = _in(t, 0.3) or _in(t, 0.75) or _in(t, 1.2) or _in(t, 2.1) or _in(t, 2.6)
-		if P.inp["dash"]:
-			P.dashes = P.max_dashes()
-			P.ex_cd = 0.0
-	await _seg("Dash, then straight back at once (ground, then air)", 4.0, dash, FAR)
 
 func _p_glide() -> void:
 	var glide := func(t: float) -> void:

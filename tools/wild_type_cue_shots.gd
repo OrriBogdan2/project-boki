@@ -1,7 +1,6 @@
 extends RefCounted
-## --wild-type-cue-shots --shots-dir=<dir> [--species=a,b,...]: wild_type_cue.png, six wild Boki of six types
-## (or the listed species) standing round the player at the match camera. Needs a renderer (jobq --needs gpu).
-## Never touches the save.
+## --wild-type-cue-shots --shots-dir=<dir>: wild_type_cue.png, six wild Boki of six types standing round the
+## player at the match camera. Needs a renderer (jobq --needs gpu). Never touches the save.
 
 const TYPES := ["fire", "grass", "electric", "ice", "poison", "psychic"]
 const RADIUS := 6.0       # m from the player
@@ -11,12 +10,9 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var dir := "user://"
-	var picked: PackedStringArray = []
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
-		if String(a).begins_with("--species="):
-			picked = String(a).substr(10).split(",")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"}
@@ -28,9 +24,9 @@ func run(main: Node) -> void:
 		if o != P:
 			o.ctrl = "idle"
 			o.teleport(P.pos + Vector3(60, 0, 60))
-	var spots := picked.size() if not picked.is_empty() else TYPES.size()
+	var spots := TYPES.size()
 	for i in spots:
-		var sid := picked[i] if not picked.is_empty() else _species_of(TYPES[i])
+		var sid := _species_of(TYPES[i])
 		var a := TAU * float(i) / float(spots)
 		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), P.pos + Vector3(cos(a), 0, sin(a)) * RADIUS, true)
 		k.dazed_t = 1e9

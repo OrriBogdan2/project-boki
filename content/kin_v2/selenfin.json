@@ -7,7 +7,6 @@
 		"Moonstone"
 	],
 	"theme": "lunar",
-	"type2": "tide",
 	"flavor": "A silver hatchetfish that swims through the air, a moonstone glowing in Selenfin's keel. Where Selenfin floats, wounds close.",
 	"colors": {
 		"body": "#c8d0e0",
@@ -112,10 +111,5 @@
 		"temper": "Serene",
 		"desc": "Something serene is in here.",
 		"play": "Keeps you alive and patched up."
-	},
-	"roster": {
-		"art": "todo",
-		"line": "selenfin",
-		"stage": 1
 	}
 }

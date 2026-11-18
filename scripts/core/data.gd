@@ -231,7 +231,7 @@ const PERKS := {
 	"overcharge":
 	{
 		"name": "Overcharge",
-		"desc": "Your bond meter fills 30% faster.",
+		"desc": "Your bond ultimate charges 30% faster.",
 		"icon": "bond",
 		"col": Color("ffd23f"),
 		"max": 1
@@ -1209,5 +1209,9 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"down_hp": 100.0,  # the pool a downed hunter bleeds out of (it drains over 15 seconds)
+	"extract_time": 4.0,  # seconds standing in an exit's circle to leave; a hit from another hunter resets it
+	"revive_time": 3.0,
+	"kin_revive_time": 5.0,
+	"bleed": 2.5,  # downed health lost per second
+	"down_hp": 100.0,  # so about 40 seconds downed before you bleed out
 }

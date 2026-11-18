@@ -9,7 +9,7 @@ extends RefCounted
 ## and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
-## nothing here writes to it. Field notes, not a checklist: no completion
+## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
 ## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
 ## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
@@ -31,7 +31,6 @@ const TYPES := {
 	"frost": {"name": "Frost", "col": Color("a6eeff"), "ink": Color("2a5a7a")},
 	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
 	"storm": {"name": "Storm", "col": Color("5f7fb8")},
-	"wild": {"name": "Normal", "col": Color("e8d9a8")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -44,17 +43,6 @@ static func type_name(t: String) -> String:
 
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
-
-## The type pill: the type's icon and "<Name> type", in its colour.
-static func type_chip(t: String) -> PanelContainer:
-	var chip := PanelContainer.new()
-	var fill := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
-	chip.add_theme_stylebox_override("panel", fill)
-	var h := UI.hbox(6)
-	chip.add_child(h)
-	h.add_child(TypeIcon.new(t, 18.0))
-	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
-	return chip
 
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
@@ -242,7 +230,6 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	_fact(info, "pin", "Lives", _habitat(spk))
 	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
 	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
-	HazardCounter.add_row(info, spk, 18.0, UI.T_SMALL)
 	if BokiQuirks.quirk(spk) != "":
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":

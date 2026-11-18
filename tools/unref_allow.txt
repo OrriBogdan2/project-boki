@@ -1,5 +1,6 @@
 # Scripts and scenes nothing names on purpose (tools/unref_check.gd, --unref-check). One res-relative
 # path per line, then # and why. Drop a line when its file goes or gets wired in.
+tests/feel_sim.gd      # godot -s tests/feel_sim.gd: headless sim of the scripts/feel prototype (docs/CODE_HEALTH.md)
 tests/glider_gallery.tscn      # screenshot gallery, run by its path with -- --shot=
 tests/portrait_gallery.tscn      # screenshot gallery, run by its path with -- --shot=
 tests/net/match_probe.gd      # godot -s: a scripted online client for relay tests

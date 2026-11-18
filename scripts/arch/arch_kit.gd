@@ -822,10 +822,9 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
-			var pip_cap := 0 if single_dash() else int(dmax)
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": pip_cap, "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 ## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
@@ -927,8 +926,6 @@ func dash_charges(class_n: float) -> float:
 
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
-## One plain dash with one cooldown: no charge pips, no Second Wind (Vex's Slipstep, owner 11-16).
-func single_dash() -> bool: return false
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass

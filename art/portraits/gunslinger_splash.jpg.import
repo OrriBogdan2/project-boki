@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/gunslinger_splash.jpg-32a7dd7c8ec5f6cc1c96095
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
-compress/lossy_quality=0.85
+compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

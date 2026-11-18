@@ -28,7 +28,7 @@
 - [Gear and items](Gear-and-Items.md)
   - [Weapons](Weapons.md)
   - [Gloves](Gloves.md)
-- [Training Grounds](Arena-and-Training.md)
+- [Arena and training](Arena-and-Training.md)
 
 **Team**
 - [Architecture](Architecture.md)

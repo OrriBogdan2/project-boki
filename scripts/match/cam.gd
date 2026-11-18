@@ -73,7 +73,7 @@ const ALT_ZOOM_MAX := 0.7     # ...up to +70%
 func air_zoom(h: Hunter, alt: float) -> float:
 	var z := GLIDE_ZOOM if h.gliding else 1.0
 	# Ctrl on the ground: a wide look around, past the wheel's range wherever the wheel was left
-	z *= CamWheel.look_zoom(user_zoom, h.crouch and h.grounded)
+	z *= CamWheel.ctrl_zoom() if h.crouch and h.grounded else user_zoom
 	z = minf(z * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX)), CamWheel.cap())
 	return maxf(z, zoom) if h.glide_dive.on else z
 

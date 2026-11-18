@@ -83,10 +83,7 @@
 		},
 		"bul_smash": {
 			"clip": "lmb_slam",
-			"air_legs": true,
-			"fade": 0.04,
-			"time": [[0, 0.1], [0.1, 0.117], [0.5, 0.23]],
-			"blend_out": 0.38
+			"air_legs": true
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -136,10 +133,7 @@
 		},
 		"bul_ult_slam": {
 			"clip": "x_slam",
-			"upper": "moving",
-			"fade": 0.04,
-			"time": [[0, 0.1], [0.1, 0.15], [0.6, 0.3]],
-			"blend_out": 0.4
+			"upper": "moving"
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -232,6 +226,5 @@
 		"in": "crouch_in",
 		"out": "crouch_out",
 		"speed": 1.65
-	},
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	}
 }

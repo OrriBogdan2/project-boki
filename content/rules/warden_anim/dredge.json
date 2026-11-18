@@ -75,19 +75,14 @@
 		"dr_anchor": {
 			"clip": "anchor",
 			"upper": "moving",
-			"air_legs": true,
-			"time": [[0, 0], [0.4, 0.4], [0.45, 0.5], [1.0, 1.0]],
-			"blend_out": 0.2
+			"air_legs": true
 		},
 		"dr_dive": {
 			"clip": "dive",
 			"hold_from": 0.12
 		},
 		"dr_quake": {
-			"clip": "quake",
-			"fade": 0.05,
-			"time": [[0, 0], [0.1, 0.33], [0.75, 0.733]],
-			"blend_out": 0.2
+			"clip": "quake"
 		},
 		"dr_lunge": {"dash": true, 
 			"clip": "lunge",
@@ -206,6 +201,5 @@
 		"eye",
 		"hoard",
 		"gun"
-	],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}}
+	]
 }

@@ -14,7 +14,7 @@ Your Boki live with you on a floating-island farm. Each species is built from on
 2. Open Godot, choose **Import**, and pick this folder's `project.godot`.
 3. Press **F5** to play.
 
-Desktop builds use Forward+; the web and mobile builds use the Compatibility renderer.
+The project uses the Compatibility renderer so the same build runs on the web.
 
 ## Controls
 
@@ -23,7 +23,7 @@ Desktop builds use Forward+; the web and mobile builds use the Compatibility ren
 | WASD | Move |
 | Mouse | Aim |
 | Left click | Weapon attack |
-| Right click | Your class's right-click ability |
+| Right click | Your weapon's ability |
 | Shift | Dash (in the air it's the long dash; your class decides distance and charges) |
 | Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide (hold in the air; never jumps) |
@@ -33,18 +33,9 @@ Desktop builds use Forward+; the web and mobile builds use the Compatibility ren
 | R | Bond ultimate, once the bond meter is full |
 | B | Base to a teammate (squads): hold for a wheel of teammates, let go on one; a 5.5s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
 | 1 | Heal: a tonic when you're hurt, an armor kit when your health is full |
-| Q / V | Your two gloves (found on the run) |
-| E | Your class's utility |
-| R | Your hunter's ultimate (from level 6) |
-| X | Fuse with your Boki, once the bond meter is full (X again releases) |
-| G | Tap: send your Boki out, or call it back. Hold: the order wheel (Chase, Guard, Return, Follow) |
-| Middle mouse | Ping for your squad |
-| B | Base to a teammate (squads): a 3s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
-| 1-4 | Utility belt (a tonic and an armor kit to start) |
 | F | Catch a dazed Boki, revive a teammate, open a chest, take a found weapon or glove |
 | Ctrl | Sneak (hold; tap to toggle on the web version, since Ctrl+W closes browser tabs) |
 | Tab | Scoreboard |
-| M | Full map (click to ping) |
 | Esc | Menu: settings, controls, save files |
 | F1 or ` | Admin tools (god mode, gems, unlocks) for the game's owner |
 
@@ -63,7 +54,7 @@ Touch the side of an island while you're falling (or gliding) and you float back
 - **Boss lairs.** Every map has walled lairs (Skyreach has three; each match rolls two or three of them live, shown on the full map; the rest lie dormant). A ward seals each one. Open the gate's lock: a dial with a sweeping needle and lit arcs; press F (or click, or A on a pad) as the needle crosses each arc, through three or four locks that get faster and tighter. A miss resets the lock, rings a chime that pings you to everyone nearby and calls guards. Stormcrown Eyrie can also be opened by lighting three rune pylons, the Thornhive by breaking three ward stones. Inside: the Stone Colossus (slams with shockwave rings you jump, boulders, fissures), Stormcoil the Sky Serpent (telegraphed lunges, lightning circles, static discharge) or the Brood Mother (acid spit and puddles, egg sacs that hatch adds, burrowing). Phases at 66% and 33%, an enrage timer (75 s), and they fight anyone in the lair. Step past the threshold and the gate seals behind you for up to 90 s; everyone within 150 m hears the roar, gets a ping with the boss's icon and sees a shaft of light over the lair, and the seal's clock floats over the gate, so a squad outside can choose to camp it. After the kill the gate stays shut for 20 s unless someone inside pulls the lever by it, and an updraft at the back carries those who fought up over the wall to glide out a different way. The boss drops a Rare Egg (on everyone's minimap for a few seconds): it takes a backpack slot, stays in your deathbox if you fall, and if you get it home it goes to the Incubator beside the Nesting Nook, where it warms for two expeditions or about eight minutes at home (twice as fast with an Ember Boki minding it) and hatches into a rare Boki (Cairnback, Zephyrak or Hivara) with three IVs of 26 or better.
 - **Events.** A meteor shower comes down about a quarter of the way in (the stars leave gems), the Warden wakes on the center island, and halfway through a Glimmerkin appears and runs. Bring it down before it slips away.
 - **Islands and flight.** Every island has a shape of its own: crescents, atolls with a hole to the sky, twin lobes on a narrow neck, mesas, stepped terraces, split canyons, highlands, some with ruined walls to fight around. Close islands are crossed by gliding: jump off the edge and glide through the air rings between them for a burst of speed. The glider runs on fuel, and speed is what keeps you up: fast gliders barely sink, slow ones drift down. Steer hard against your heading to brake. Jump pads only cover the long gaps.
-- **Combat.** You have armor over your health (40 light, 50 medium, 65 heavy). It soaks hits first, shatters with a blue flash, and snaps back a few seconds after you stop taking damage; health only regenerates once armor is full. Armor shards drop from crates and big monsters. Shots spread more while you move, jump or dash, so plant your feet for accuracy. Hold E, R, X or Q to see where an ability will land and let go to cast it (right click cancels; "Quick cast" in Settings fires on press instead). Red arcs around the middle of the screen point at whoever is hitting you.
+- **Combat.** You have armor over your health (40 light, 50 medium, 65 heavy). It soaks hits first, shatters with a blue flash, and snaps back a few seconds after you stop taking damage; health only regenerates once armor is full. Armor shards drop from crates and big monsters. Shots spread more while you move, jump or dash, so plant your feet for accuracy. Hold E, R or Q to see where an ability will land and let go to cast it (right click cancels; "Quick cast" in Settings fires on press instead). Red arcs around the middle of the screen point at whoever is hitting you.
 - **Weapons.** Each class carries one of three weapons (two guns and a sword): SMG, sniper or twin blades (light), rifle, burst rifle or longsword (medium), shotgun, minigun or greatsword (heavy). Every weapon has its own right-click utility.
 - **Walls and grass.** Islands have stone walls, corners, pillars and small keeps to fight around. Walls block shots and sight, so you can peek and duck back. Jump at a wall in the air to kick off it (light hunters get two kicks). Anyone knocked hard into a wall is stunned, monsters too.
 - **Sight.** You see a cone in front of you (where you aim) plus a small circle around you; everything else is dimmed and rival hunters there are hidden. Walls cast sight shadows. Teammates share what they see. Tall grass hides you from anyone outside it, and firing or getting hit gives you away for a moment. Crouching (Ctrl) slows you down and steadies your aim, and rivals only spot you at close range.
@@ -90,12 +81,12 @@ Code: `scripts/core/lifeline.gd`, `scripts/core/boki_pens.gd`, `scripts/core/exc
 Code: `scripts/core/care.gd`, `scripts/core/kin_speak.gd`, the raising section of `scripts/home/home.gd`.
 
 - **Needs.** Full, Energy, Happy and Clean drift down at home and drop after every expedition. A thought bubble over a Boki shows what it wants. Hungry Boki hang around the cooking pot, tired ones go to bed, dusty ones shed dust. How it's doing changes how it fights: a Boki in great shape gets +10%, a struggling one loses up to 18% and is more likely to refuse you.
-- **Care.** Pet (F), fetch (V) and talk (T) out in the world. The card (C) has Feed, Brush, Bath, Nap, Train, Dress and Pair, and each one plays out on the farm, not in a menu.
+- **Care.** Pet (F), fetch (G) and talk (T) out in the world. The card (C) has Feed, Brush, Bath, Nap, Train, Dress and Pair, and each one plays out on the farm, not in a menu.
 - **Likes.** Every Boki loves one food, refuses another and has a favourite way to spend time. You find out by trying, and the card remembers.
 - **Training.** Four stats (Power, Guard, Speed, Focus) trained at the yard with a three-round timing drill. A happy Boki learns faster, a tired one won't train. Points are capped by level.
 - **Bond.** Trust ranks: Wary, Friendly, Close (skills hit harder), Devoted (rushes to revive you), Soulbound (never refuses, +10% to everything).
 - **Talking.** Newly hatched Boki only say their own name ("Ves! Vespyx?"), and get their meaning across with tone and what they do. Around level 4 with some trust they pick up a few words, around level 8 short sentences, and by level 12 with a Devoted bond they talk freely.
-- **Natures, life stages, eggs.** Each Boki has a nature from its strongest traits and grows from Hatchling to Youngling, Grown and Elder. Two Boki at level 5 with a Close bond can leave an egg in the nest; the baby mixes their personalities and may come out shimmering (rare colours, also found wild, about 1 in 4096; an egg is the same, a little better with a shimmering parent).
+- **Natures, life stages, eggs.** Each Boki has a nature from its strongest traits and grows from Hatchling to Youngling, Grown and Elder. Two Boki at level 5 with a Close bond can leave an egg in the nest; the baby mixes their personalities and may come out shimmering (rare colours, also found wild about 1 in 25).
 - **No two Boki alike.** Every Boki is born with its own height and weight (a bell curve for its species, with rare XS and XL ones at the edges, and the Giant and Tiny mutations rarer still), slightly different proportions, a shift in its colours, its own coat pattern (spots, stripes, patches or freckles, placed so no two match), an eye colour, ear and tail shapes, an idle habit, a voice of its own, a birthmark and a favourite food. Eggs take after both parents. Size matters a little in a fight: bigger Boki are a touch tougher and slower, smaller ones quicker, never by more than 4%. The About tab on a Boki's card shows all of it, plus where and when it was found, who first raised it, and its number among its kind ("#0042 of Vespyx"). See `docs/BOKI_IDENTITY.md`.
 - **Outfits and the Bokidex.** The stall sells things for Boki to wear, worn into matches too. The Bokidex tab in the inventory tracks every species you've seen, caught, evolved and found shimmering.
 

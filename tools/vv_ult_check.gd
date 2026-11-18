@@ -527,15 +527,7 @@ func gunslinger() -> void:
 			U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])))
 	ok("Cinderfall: it lands exactly at the cursor", not s.is_empty() and hc._flat(s["at"], t_at) < 0.1)
 	ok("Cinderfall: the rifle goes straight up (gunslinger_x)", K.anim_id == "gunslinger_x")
-	# owner 11-17: the ult never roots her; the 0.25 s wind-up (GunslingerUlt.WINDUP) only slows the walk
-	var w0 := P.pos
-	ac.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
-	var wind_v := Vector2(P.vel.x, P.vel.z).length()
-	P.inp["move"] = Vector2.ZERO
-	ok("Cinderfall: she walks through the cast, slowed not stopped",
-			hc._flat(P.pos, w0) > 0.4 and wind_v > 0.5 * P.base_speed and wind_v < 0.8 * P.base_speed,
-			"%.2f m in 0.2 s, %.2f m/s (run %.1f)" % [hc._flat(P.pos, w0), wind_v, P.base_speed])
-	ac.step(m, 0.3)
+	ac.step(m, 0.5)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
 	var core := AimKit.entry(P, "xc1")
@@ -546,7 +538,7 @@ func gunslinger() -> void:
 			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
 			and is_equal_approx(float(core.get("fill", 0)), fill),
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
-	# past the wind-up (GunslingerUlt.WINDUP) she is free while it falls: she walks at full speed and the rifle works
+	# past the shot's commit (GunslingerUlt.COMMIT) she is free while it falls: she walks and the rifle works
 	ac.step(m, 0.3)
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))

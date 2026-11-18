@@ -204,8 +204,7 @@ def walk_speed(aid):
     return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
-KIN2 = {kid: k for kid, k in content("kin_v2").items() if not k.get("data_only")}
-KIN_LATER = {kid: k for kid, k in content("kin_v2").items() if k.get("data_only")}
+KIN2 = content("kin_v2")
 KIN1 = content("kin")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
@@ -216,7 +215,7 @@ def wname(wid):
     return WEAPONS.get(wid, {}).get("name", wid.replace("_", " ").title())
 
 def kname(kid):
-    return (KIN2.get(kid) or KIN_LATER.get(kid) or {}).get("name", kid)
+    return KIN2.get(kid, {}).get("name", kid)
 
 # ------------------------------------------------------------------ lore
 LORE = load_json(os.path.join(ROOT, "content", "rules", "lore.json"))
@@ -272,7 +271,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []
@@ -424,9 +423,6 @@ def gen_boki():
         for p in k.get("evolution", {}).get("paths", []):
             paths.append("%s: %s" % (p["affinity"].title(), " > ".join(EVO.get(n, {}).get("name", n) for n in p["nodes"])))
         if paths: body += "\n- Evolution paths: " + "; ".join(paths)
-    body += "\n\n## Not in the game yet\n\nIn the roster (docs/boki/ROSTER.md) with no model yet, so they never spawn.\n\n"
-    body += table(["Boki", "Type", "Evolves from"], [[k["name"], " / ".join(t.title() for t in [k["theme"], k.get("type2", "")] if t),
-        kname(k["roster"]["from"]) if k["roster"].get("from") else "-"] for k in KIN_LATER.values()])
     page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training

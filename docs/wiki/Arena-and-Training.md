@@ -1,8 +1,8 @@
-# Training Grounds
+# Arena and training
 
 Three places to practise, none of which cost you anything: nobody dies and nothing is lost.
 
-## The Training Grounds
+## The Arena
 
 From the title screen (no save needed). A round floor ringed by low ruined walls with four gates,
 four pillars to slam people into, a raised dais on the north side and two patches of tall grass.

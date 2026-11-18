@@ -8,8 +8,6 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
-## - on the Training Grounds, the Boki summon pad beside them (SummonPad): stand on it for the wisp card,
-##   interact brings the next of three practice Boki, the Summon key bursts it out at the dummies
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -45,7 +43,6 @@ var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
 var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
-var pad: SummonPad = null      # the Training Grounds only
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node
@@ -78,8 +75,6 @@ func setup(match_node: Match, which: String) -> void:
 	if layout == "arena":
 		grounds = Grounds.new(self)
 		grounds.build()
-	if layout == "practice":
-		pad = SummonPad.new(self, _free_near(home + SummonPad.offset()))
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
@@ -240,8 +235,6 @@ func tick(dt: float) -> void:
 	drill.tick(dt)
 	if grounds:
 		grounds.tick()
-	if pad:
-		pad.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -680,8 +673,6 @@ class ArenaKeys extends Node:
 	func _unhandled_input(e: InputEvent) -> void:
 		if not (e is InputEventKey and e.pressed and not e.echo):
 			return
-		if a.pad and e.is_action_pressed("interact") and not a.m.paused and a.pad.on_pad():
-			a.pad.cycle()
 		var k := (e as InputEventKey).physical_keycode
 		var handled := true
 		match k:

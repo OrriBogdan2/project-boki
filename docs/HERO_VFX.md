@@ -49,9 +49,6 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `fist` | a translucent cel-shaded fist (a closed-fist mesh, knuckles down) falling onto the ground: it drops over `fall` of its `life` (a share, or an option), rests, then fades | `size` width, `drop` m it falls from, `fall`, `fwd`, `pitch` (deg, negative tips the wrist back so the knuckles face a top-down camera); `cut` (any surface): it goes if its hunter is stunned or downed before that share of its life |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
-A palette's optional `"peak"` (RRGGBBAA) is what the hottest part turns toward, its alpha how far (absent: halfway to
-white; Kael's: all the way to red, so a red stays red).
-
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
 `pitch_k`, `var`, `delay`, `at`, `when` / `unless`.

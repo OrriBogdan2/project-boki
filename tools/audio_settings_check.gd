@@ -64,21 +64,14 @@ func _sliders(where: String) -> void:
 			var got := _db(Settings.BUSES[key])
 			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, Settings.BUSES[key]]
 			ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
-	# the same through the settings pages' own sliders: Master is the last one on Main, the rest are listed on Audio
-	Overlay.tab = "Main"
-	Overlay.open_settings()
-	var master := Overlay.find_children("*", "HSlider", true, false).back() as HSlider
-	master.value = 0.35
-	var moved_master := absf(_db("Master") - Sfx.slider_db(0.35)) < TOL
-	ok(moved_master, "%s: dragging the master slider moves the Master bus (%.1f dB)" % [where, _db("Master")])
+	# the same through the Settings > Audio page's own sliders (the order they are listed in)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
-	await main.get_tree().process_frame          # (the Main page is freed at the end of the frame)
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
-	ok(sliders.size() >= 3, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
-	# one slider per Settings.BUSES entry after Master, in that order (Voices and UI sit between the others)
-	for i in mini(Settings.BUSES.size() - 1, sliders.size()):
-		var key: String = Settings.BUSES.keys()[i + 1]
+	ok(sliders.size() >= 4, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
+	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
+	for i in mini(Settings.BUSES.size(), sliders.size()):
+		var key: String = Settings.BUSES.keys()[i]
 		var bus: String = Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
 		var moved := absf(_db(bus) - Sfx.slider_db(0.35)) < TOL
@@ -171,9 +164,9 @@ func _stays(where: String) -> void:
 
 ## A real mouse press on the Music slider's track (not a script write), as a player does it.
 func _mouse_drag(where: String, sliders: Array) -> void:
-	if sliders.is_empty():
+	if sliders.size() < 2:
 		return
-	var sl: HSlider = sliders[0]
+	var sl: HSlider = sliders[1]
 	Settings.set_v("music", 1.0, false)
 	sl.value = 1.0
 	await main.get_tree().process_frame

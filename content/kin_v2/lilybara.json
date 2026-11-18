@@ -7,7 +7,6 @@
 		"Hot-spring pool"
 	],
 	"theme": "bloom",
-	"type2": "tide",
 	"flavor": "A capybara with a hot spring on Soakybara's back; you ride sitting in the bath, and the steam heals the squad. Calm and sociable, the friend of everything; nothing ruffles Soakybara.",
 	"colors": {
 		"body": "#9a7050",
@@ -117,11 +116,5 @@
 		"temper": "Calm",
 		"desc": "Something calm is in here.",
 		"play": "Keeps you alive and patched up."
-	},
-	"roster": {
-		"art": "locked",
-		"line": "dribbara",
-		"stage": 2,
-		"from": "dribbara"
 	}
 }

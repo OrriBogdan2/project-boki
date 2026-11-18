@@ -88,17 +88,6 @@ func camp_comp(c: Dictionary) -> Array:
 		out.append(String(_pick(mobs)["kind"]))
 	return out
 
-## A camp of n monsters from the region's table: `big` (if any) and small ones (no Brute or Sentinel, so a
-## camp size always pays the same XP). Empty when the spot isn't in a biome (Camps).
-func camp_comp_n(p: Vector3, n: int, big: String) -> Array:
-	var mobs: Array = _biome(p).get("mobs", []).filter(func(e): return not String(e["kind"]) in ["brute", "sentinel"])
-	if mobs.is_empty():
-		return []
-	var out: Array = [big] if big != "" else []
-	while out.size() < n:
-		out.append(String(_pick(mobs)["kind"]))
-	return out
-
 func _pick(entries: Array) -> Dictionary:
 	var tot := 0.0
 	for e in entries: tot += float(e.get("w", 1.0))
