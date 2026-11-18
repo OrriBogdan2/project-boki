@@ -1,5 +1,14 @@
 # Sable (thief): import note
 
+## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
+The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
+IDLE_AUDIT section 9):
+
+    python3 tools/art1/glb_add_clips.py sable.glb <old idle-thief sable.glb> idle,stance out.glb --drop-missing
+
+The mesh, the other 57 clips, anchors and weights are unchanged. The old build's `x_breath` and `x_twirl` tracks are dropped (the v95
+rig has neither bone), so there is no chest breath and no pistol spin; the hand still flicks and dips.
+
 ## LIVE tilt1112 master in game (2026-11-14, ext/ingame-sync-sable)
 `~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb` (current.json 11-12 22:27Z: the low4 body with the braid long down the back,
 the prop1111/cand_B head with its solid grey-black moth eyes, the mouth repainted level and calm) swapped onto the current
