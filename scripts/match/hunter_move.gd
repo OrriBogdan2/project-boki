@@ -1,8 +1,10 @@
 class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
-## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+
+const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 
 static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
@@ -23,6 +25,12 @@ static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
+static var lift_heat: float = _phys["lift_heat"]
+static var lift_tap_heat: float = _phys["lift_tap_heat"]
+static var hit_heat_per_dmg: float = _phys["hit_heat"] * 0.30 / 34.5      # 34.5 damage heats it hit_heat x 30%
+static var overheat_burn: float = _phys["overheat_burn"]
+static var overheat_speed: float = _phys["overheat_speed"]
+static var overheat_lift: float = _phys["overheat_lift"]
 static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
 static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
@@ -35,7 +43,6 @@ static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
 static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
-const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
