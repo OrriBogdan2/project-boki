@@ -3,7 +3,8 @@
  "master": "~/meshy/v95/tarek/r2/hunter3d1115/A.glb",
  "game": "art/wardens/tarek/tarek.glb",
  "own": {
-  "weights": "meshy"
+  "weights": "meshy",
+  "rebake": true
  },
  "tris": 13000,
  "head": {

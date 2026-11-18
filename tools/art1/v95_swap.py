@@ -218,6 +218,41 @@ def own_images(low, tex):
         m["img"] = m["img"] or next(iter(done.values()))
 
 
+def rebake_paint(high, low, hd):
+    """`rebake` (a master whose atlas is a patchwork of thousands of tiny islands, Meshy's Tenzo: a 60k collapse that
+    carries those UVs leaves triangles that span several islands, which draw as black and orange specks): the low mesh
+    is decimated without its UVs, unwrapped (bake_warden's unwrap) and the master's base colour and emission baked onto
+    it as the images "v95" (`tex`) and "v95b" (SECOND_TEX at most), on one material that names them like own_images does."""
+    BW.unwrap(low, hd, float(SPEC.get("head_uv", 2.0)), float(SPEC.get("uv_margin", 0.0008)), float(SPEC.get("uv_angle", 66.0)),
+              int(SPEC.get("uv_smooth", 30)))
+    low.data.uv_layers[0].name = "UVMap"
+    tex = int(SPEC.get("tex", 4096))
+    mat = bpy.data.materials.new("rebaked")
+    mat["emit"] = ""
+    layers = [("v95", "Base Color", None, tex)]
+    emit = BW.base_image(high, "Emission Color") if SPEC.get("emit") else None
+    if SPEC.get("emit"):
+        if emit is None:
+            sys.exit("v95_swap: `emit` is set but the master has no emission map")
+        layers.append(("v95b", "Emission Color", emit, min(tex, SECOND_TEX)))
+    for name, socket, src, size in layers:
+        low.data.materials.clear()
+        img = BW.bake_colour(high, low, size, CAGE, RAY, MARGIN_PX, src)
+        body = np.array(img.pixels[:], F).reshape(size, size, 4)
+        if socket == "Base Color":
+            fill_misses(body, max(32, size // 64))
+        body[..., 3] = 1
+        img.pixels = body.ravel()
+        img.name = name
+        img.pack()
+        img.use_fake_user = True
+        mat["img" if socket == "Base Color" else "emit"] = name
+    low.data.materials.clear()
+    low.data.materials.append(mat)
+    for p in low.data.polygons:
+        p.material_index = 0
+
+
 def bake_own(high, game):
     """Step 1 with `keep_uv`: WORK/bake.blend with Low (the master decimated, its own UVs, materials and images) and Kept
     (the old parts on their old materials and atlas)."""
@@ -238,9 +273,13 @@ def bake_own(high, game):
     if hd:
         x, y, z = hd["centre"]
         hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
-    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
-    low.data.uv_layers[0].name = "UVMap"
-    own_images(low, int(SPEC.get("tex", 4096)))
+    rebake = SPEC.get("rebake", False)
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), not rebake)
+    if rebake:
+        rebake_paint(high, low, hd)
+    else:
+        low.data.uv_layers[0].name = "UVMap"
+        own_images(low, int(SPEC.get("tex", 4096)))
     arm, old = import_game(game)
     kept = kept_parts(old, SPEC.get("keep", []), SPEC.get("keep_mats", []))
     kept.data.uv_layers.remove(kept.data.uv_layers["UVMap"])
