@@ -314,7 +314,9 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
+2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights. Re-measured on
+   the v95 build (Nov 17): orb 5 % (the arms-in `FAN_IN` of Nov 11), snap 77 %. Snap now keeps the fan in at the ruff
+   (`HELD_L` in tools/art1/ostra_clips.py, `snap_wind` and `snap` re-keyed): snap 13 % sideways, free arm travel 0.57 to 0.45.
 3. No arm swing (reach 0.03).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)

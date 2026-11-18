@@ -8,6 +8,7 @@ extends RefCounted
 
 const LINES := ["%s is ready to change.", "Pick what it grows into.", "It keeps its name and memories."]
 const LINE_S := 2.4        # s between two lines, and from the last line to the card
+const LINE_LIFE := 1.9     # x LINE_S a line stays: two at most are up (MsgLane.MAX_SHOWN), so the next never waits
 const SCAN_S := 1.0        # s between two looks over the garden's Boki while no beat runs
 const MARK_UP := 2.2       # m above the Boki's feet the marker floats
 const TIP_COL := Color("f3e6c8")
@@ -74,7 +75,8 @@ func _run() -> void:
 	_t = LINE_S
 	if step < LINES.size():
 		var line := String(LINES[step])
-		MsgLane.of(h.root_ui).push(line % rec["name"] if step == 0 else line, TIP_COL, MsgLane.NORMAL, LINE_S * 3.0)
+		var text := line % rec["name"] if step == 0 else line
+		MsgLane.of(h.root_ui).push(text, TIP_COL, MsgLane.NORMAL, LINE_S * LINE_LIFE)
 		step += 1
 		return
 	var r := rec

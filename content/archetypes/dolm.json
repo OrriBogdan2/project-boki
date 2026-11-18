@@ -12,7 +12,7 @@
 	"silhouette": "the huge stone left arm, the stone gauntlet and the three floating eye stones",
 	"model_glow": {"core": "#5ce6b8", "edge": "#2fc2b4"},
 	"card": {"role_word": "Builder", "loop": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.", "role": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.", "dash": "Spring off a rock toward the cursor; up to 3 hops.", "passive": "Punching your own rocks gives a shield; sneaking shows foes through walls.", "rmb": "Tap to slam ahead; hold to hop forward and slam harder.", "e": "Raise three rocks ahead to climb, hide behind, or punch.", "x": "Raise a ridge of rocks at the cursor; drag to turn it.", "weapons": {"rubble_fists": "Tap throws a boulder; hold and release to punch the lane."}, "chips": {"dash": ["12 dmg"], "rmb": ["14-30 dmg"]}},
-	"body": {"size": 0.752, "build": 1.08, "head": 0.8, "legs": 2.9, "arms": 1.5, "neck": -0.02, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.388},
+	"body": {"size": 0.798, "build": 1.08, "head": 0.8, "legs": 2.9, "arms": 1.5, "neck": -0.02, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.388},
 	"signature": "rubble_fists",
 	"resource": {"id": "rocks", "name": "Rocks", "max": 6, "kind": "count", "col": "#9ad0ff"},
 	"passive": {"name": "Shardskin", "len": 18.0, "len_max": 25.0, "deg": [25.0, 40.0], "grow": 2.0, "guard": {"shield": 18.0, "cap": 4, "t": 6.0},
