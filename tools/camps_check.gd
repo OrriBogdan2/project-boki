@@ -90,5 +90,15 @@ func run(main: Node) -> void:
 		me.lvl = 1
 		var g := BotCamps.goal(m, me)
 		ok(by_size["light"].any(func(c): return c["pos"] == g), "a level 1 bot goes to a Small Camp")
+	# ---- 6. a late join finds camps picked over
+	var cleared: int = m.camps.picked_over(1.0, RandomNumberGenerator.new())
+	ok(
+		cleared == cps.size() and m.camps.live().is_empty(),
+		"a rolling start can find every camp cleared (%d)" % cleared
+	)
+	ok(
+		cps.all(func(c): return float(c["cleared_at"]) > -float(m.camps.cfg["back_s"]) - 1.0),
+		"cleared up to back_s ago"
+	)
 	print("CAMPS done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
