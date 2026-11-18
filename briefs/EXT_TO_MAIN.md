@@ -10156,3 +10156,4 @@ READY ext/merge-lane-hunters3-1117 b1e816cadd7 (lane hunters3: tutorial E-step m
 READY ext/hunter-first-hints-port 26a506400 (merged origin/main, only conflict content/archetypes/dredge.json: kept hint + main card; --hunter-hint-check PASS, --check 0 failures; health --strict red only on style ratchet from main drift, same on origin/main)
 READY ext/vex-coin-palm-1117 5c1633b019 (bulk-rebase: origin/main merged in mechanically, was e33788e81d; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lmb-stuck-1118 8914590a3b (holds end on focus loss; map closes on landing; --input-release-check + --bot-idle-check; small, v0.24.11 candidate)
+READY ext/cinder-bust-a-1118 758be1a117a029fbdfe850a096bc2971d0803e3e (Cinder bust A -20% chest in game, owner pick 11-18; for v0.24.11; only cinder.glb + IMPORT.md; stretch/glb/model/cinder-art checks = main; GPU before/after frames ~/meshy/v95/Cinder/bust1118/game/shots)
