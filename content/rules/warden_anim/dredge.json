@@ -180,7 +180,8 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"base"
+		"base",
+		"swim"
 	],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [

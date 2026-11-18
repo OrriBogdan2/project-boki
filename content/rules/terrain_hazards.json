@@ -1,5 +1,5 @@
 {
-	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).",
+	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader). moves: how a hunter the ground beats moves on it (HazardMoves); in deep water every hunter swims, a counter or not.",
 	"hint": {
 		"near_m": 8.0,
 		"every_s": 0.5,
@@ -60,6 +60,12 @@
 			"hurts": "no footing",
 			"effect": {
 				"grip": 0.12
+			},
+			"moves": {
+				"doc": "How a hunter without footing moves on it (HazardMoves -> the anim state 'footing' -> WardenGait): stride x the run's thigh swing, cadence x the clip rate, arms_out rad the free arms (loco arm_swing) lift out from the side.",
+				"stride": 0.6,
+				"cadence": 1.2,
+				"arms_out": 0.45
 			},
 			"counter": {
 				"themes": ["frost"],

@@ -13,6 +13,9 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
+## Then the hazard moves (HazardMoves): the host lays a deep water and an ice area on its strip, its hunter
+## stands in each, and the guest's copy must swim (sunk in) and lose its footing as the host's does, and
+## neither on dry ground.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -90,6 +93,7 @@ func _host() -> void:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
+	await _hazard_moves()
 	_finish()
 
 ## One boss of `kind` on the host, asleep, woken, one attack, a phase change: the guest's copy plays the same.
@@ -149,6 +153,39 @@ func _first_k(rows: Array, move_name: String) -> float:
 		if String(r[2]) == move_name:
 			return float(r[3])
 	return -1.0
+
+## Deep water and ice on the host's strip (the training island has none; only the owner's game needs the areas:
+## the copy's move comes from the snapshot). Its hunter, with no ward, stands in each and on dry ground.
+func _hazard_moves() -> void:
+	var P := m.player
+	P.perks.clear()
+	if m.biomes == null:
+		m.biomes = BiomeRun.new(m)
+	m.biomes.terrain = TerrainHazards.new(m)
+	var tz := m.biomes.terrain
+	var spots := {"deep_water": home + Vector3(-5.0, 0, -6.0), "ice": home + Vector3(10.0, 0, -6.0), "": home}
+	for kind in ["deep_water", "ice"]:
+		var c: Vector3 = spots[kind]
+		tz._add_area({"kind": kind, "poly": [[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5],
+			[c.x - 2.5, c.z + 2.5]]})
+	for kind: String in spots:
+		_fresh(P)
+		P.teleport(spots[kind])
+		await _run(0.8)
+		var mine := [bool(P.anim_s.get("swim", false)), not (P.anim_s.get("footing", {}) as Dictionary).is_empty()]
+		replies.clear()
+		Net.lobby_emit("ra", {"c": "hz"})
+		await _reply()
+		var got: Dictionary = replies[0] if not replies.is_empty() else {}
+		var theirs := [bool(got.get("swim", false)), bool(got.get("footing", false))]
+		var want := [kind == "deep_water", kind == "ice"]
+		var where := kind if kind != "" else "dry ground"
+		ok(mine == want, "hazard moves: the host's hunter on %s (swim, no footing) = %s" % [where, str(want)], str(mine))
+		ok(theirs == want, "hazard moves: the guest's copy on %s shows the same" % where, str(theirs))
+		var sunk := -float(got.get("sink", 0.0))
+		ok((sunk > 0.4) == (kind == "deep_water"), "hazard moves: the copy is sunk in only in deep water (%s)" % where,
+			"%.2f m" % sunk)
+	_fresh(P)
 
 func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
 	var P := m.player
@@ -365,6 +402,10 @@ func _on_msg(topic: String, data, from: String) -> void:
 				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
 				reply["tele"] = tele
 				Net.lobby_emit("dn_r", reply)
+			"hz":
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "swim": bool(R.anim_s.get("swim", false)),
+					"footing": not (R.anim_s.get("footing", {}) as Dictionary).is_empty(),
+					"sink": R.model.position.y if R.model else 0.0})
 		return
 	super._on_msg(topic, data, from)
 

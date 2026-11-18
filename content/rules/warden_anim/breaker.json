@@ -163,7 +163,8 @@
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"base"
+		"base",
+		"swim"
 	],
 	"upper": [
 		"hips",

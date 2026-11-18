@@ -18,6 +18,8 @@ extends RefCounted
 ##    BOB_FIX_MAX; "loco.bob_m": [walk, run] is the up and down travel that aims at (m). Only as far as the blend
 ##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob; and by
 ##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
+##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
+##    the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -44,9 +46,11 @@ var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
 var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
 var run_len := 1.0           # s: of the forward run clip
+var foot := {}               # the last "footing" data (kept while it fades out)
+var foot_w := 0.0            # 0 sure footing .. 1 none
 
 func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed := false) -> void:
 	skel = sk
@@ -65,7 +69,14 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
 		var ti := WardenSkeleton.find(sk, "thigh." + String(side))
 		if ai >= 0 and hi >= 0 and ti >= 0:
-			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
+			var out := signf(sk.get_bone_global_rest(ai).origin.x)      # (turning toward this side lifts it out)
+			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN, out])
+
+## Eases toward the state's "footing" ({} on sure ground) before plan.
+func footing(dt: float, ft: Dictionary) -> void:
+	foot_w = move_toward(foot_w, 0.0 if ft.is_empty() else 1.0, FADE_RATE * dt)
+	if not ft.is_empty():
+		foot = ft
 
 ## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
 ## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
@@ -77,12 +88,12 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 ## (Held at a speed, `w` is the speed's share from "walk_speed" to "run_speed".)
 func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	var stride: Array = lc.get("stride", [1.0, 1.0])
-	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
-	var side: Array = lc.get("side_foot_mps", foot)
+	var feet: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
+	var side: Array = lc.get("side_foot_mps", feet)
 	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
-	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k)
-	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k)
-	gain = lerpf(float(stride[0]), float(stride[1]), w)
+	var walk_mps := lerpf(float(feet[0]), float(side[0]), side_k)
+	var run_mps := lerpf(float(feet[1]), float(side[1]), side_k)
+	gain = lerpf(float(stride[0]), float(stride[1]), w) * lerpf(1.0, float(foot.get("stride", 1.0)), foot_w)
 	var b: Array = lc.get("bob", [1.0, 1.0])
 	bob = lerpf(float(b[0]), float(b[1]), w)
 	var bm: Array = lc.get("bob_m", BOB_M)
@@ -93,7 +104,8 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	var cycle := lerpf(walk_len, run_len, w)
 	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
 	var top := RATE_MAX * maxf(1.0, spd / maxf(run_mps, 0.1))      # hasted past the run clip: ceiling grows
-	return clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, top) * run_len / cycle
+	var rate := clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, top) * run_len / cycle
+	return rate * lerpf(1.0, float(foot.get("cadence", 1.0)), foot_w)
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:
@@ -125,9 +137,11 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 		if arm_w <= 0.0:
 			continue
 		var turn := (float(r[5]) - float(r[4]) * angle_difference(r[6], leg_p) - arm_p) * arm_w
+		var spread := float(foot.get("arms_out", 0.0)) * foot_w * arm_w * float(r[7])
 		var pq := _basis_q(r[1])
 		var q := skel.get_bone_pose_rotation(r[0])
-		skel.set_bone_pose_rotation(r[0], pq.inverse() * Quaternion(Vector3.RIGHT, turn) * pq * q)
+		var turn_q := Quaternion(Vector3.BACK, spread) * Quaternion(Vector3.RIGHT, turn)
+		skel.set_bone_pose_rotation(r[0], pq.inverse() * turn_q * pq * q)
 
 ## How far forward (rad, + forward, -Z) a direction points from straight down.
 func _pitch(dir: Vector3) -> float:

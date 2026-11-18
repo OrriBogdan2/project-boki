@@ -716,6 +716,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	if d.has("recoil"):
 		_recoil(s, dt)
@@ -899,6 +900,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 		goal = _aim_twist(flat, face, k)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
+	gait.footing(dt, s.get("footing", {}))
 	var ring := _walk_ring()
 	var rate := gait.plan(spd, lc, loco_pos, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)

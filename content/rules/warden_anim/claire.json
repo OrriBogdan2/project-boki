@@ -36,6 +36,6 @@
 		"mantle": {"clip": "mantle", "rise": 0.28},
 		"ledge": {"clip": "ledge", "rise": 0.3}
 	},
-	"procedural": ["ledge", "mantle", "base"],
+	"procedural": ["ledge", "mantle", "base", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
 }
