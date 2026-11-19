@@ -95,6 +95,8 @@ func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 
 ## A kin wearing its rigged model, whether or not Models.kin is wired to it yet.
 static func rigged_kin(id: String, rec := {}) -> Node3D:
+	if not Data.KIN.has(id):
+		return _bare_kin(id)
 	var k := Models.kin(id, rec)
 	var flex := k.get_node("Body/Flex") as Node3D
 	if flex.has_node("BokiRig"):
@@ -110,6 +112,21 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 	if not d.is_empty():
 		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"), rec)
 	return k
+
+## A species with a body in art/kin but no game data yet: its rig on a bare Body/Flex, neutral colours.
+static func _bare_kin(id: String) -> Node3D:
+	var root := Node3D.new()
+	var body := Node3D.new()
+	body.name = "Body"
+	root.add_child(body)
+	var flex := Node3D.new()
+	flex.name = "Flex"
+	body.add_child(flex)
+	var neutral := Models.toon(Color.WHITE)
+	var eye := Models.toon(Color.WHITE, false)
+	BokiRig.build(id, flex, {"body": neutral, "belly": neutral, "dark": neutral, "glow": neutral, "eye": eye}, [])
+	return root
+
 
 func _kin(vp: SubViewport) -> Array:
 	var k := rigged_kin(species)
