@@ -136,11 +136,13 @@ static func pad_launch(h: Hunter) -> void:
 
 
 ## A drink or repair that did not finish: nothing is used up, and everyone sees and hears it spill.
+## Its cue: the tonic splashes out ("belt_spill"), the kit's plates clatter ("belt_fumble"; content/sfx/belt.json).
 static func spill(h: Hunter) -> void:
+	var cue := "belt_spill" if h.drink_t > 0.0 else "belt_fumble"
 	h.drink_t = 0.0
 	h.kit_t = 0.0
 	h.m.fx.burst(h.pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
-	h.m.sfx("crit", h.pos, -4.0, 0.7)
+	h.m.sfx(cue, h.pos, -2.0)
 
 
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it

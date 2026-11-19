@@ -3,7 +3,7 @@ extends RefCounted
 ## teammate back with resurrection sickness (12 s, -25% damage and healing), shown as a heart status
 ## with its seconds on the plate and squad row and carried in the hunter snapshot (HunterNet "sk");
 ## another game stands the lamp up from the "bcn" "lamp" event; a tonic washes out anti-heal; a
-## drink or repair that spills uses nothing.
+## drink or repair that spills uses nothing and plays its own cancel cue (belt_spill, belt_fumble).
 
 var bad := 0
 var main: Node
@@ -22,6 +22,7 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d.erase("hud_reveal")  # the whole HUD, squad rows included (HudReveal)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 7, "no_drop": true})
@@ -33,7 +34,9 @@ func run(mn: Node) -> void:
 	_lamp()
 	_snapshot()
 	_net()
+	await _squad_row()
 	_tonic_and_spill()
+	_kit_spill()
 	m.queue_free()
 	print("LAMP DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -84,6 +87,27 @@ func _net() -> void:
 	ok(m.beacons.size() == n + 1, "...once")
 
 
+## The teammate's squad row puts a heart and the whole seconds left where its state word goes.
+func _squad_row() -> void:
+	ok(m.hud != null, "the match has a HUD")
+	if m.hud == null:
+		return
+	ally.out = false
+	ally.downed = false
+	ally.sick_t = 8.2
+	m.hud.panels.queue_redraw()
+	await m.hud.panels.draw
+	var row: Dictionary = SquadFrames.shown.get(ally.nid, {})
+	ok(
+		row.get("state", "") == "ALIVE" and int(row.get("sick", 0)) == 9,
+		"the squad row shows the heart and 9s (%s)" % row
+	)
+	ally.sick_t = 0.0
+	m.hud.panels.queue_redraw()
+	await m.hud.panels.draw
+	ok(not SquadFrames.shown.get(ally.nid, {}).has("sick"), "...and drops it when the sickness ends")
+
+
 func _tonic_and_spill() -> void:
 	p.belt = UtilityBelt.empty()
 	UtilityBelt.grant(p, "tonic", 2)
@@ -97,3 +121,20 @@ func _tonic_and_spill() -> void:
 	p.stun_t = 1.0
 	_steps(0.1)
 	ok(p.drink_t <= 0.0 and UtilityBelt.count(p, "tonic") == 1, "a stun spills it and nothing is used")
+	p.stun_t = 0.0
+
+
+## A spilt drink splashes ("belt_spill"), a dropped repair clatters ("belt_fumble"): own files, not a stock cue.
+func _kit_spill() -> void:
+	Sfx.cue_log = []
+	p.kit_t = 1.0
+	UtilityUse.spill(p)
+	p.drink_t = 1.0
+	UtilityUse.spill(p)
+	var got: Array = (Sfx.cue_log as Array).filter(func(x): return String(x[0]).begins_with("belt_"))
+	Sfx.cue_log = null
+	ok(
+		got.size() == 2 and got[0][0] == "belt_fumble" and got[1][0] == "belt_spill" and got[0][2] and got[1][2],
+		"the kit fumbles and the tonic spills, each with its own sound on file (%s)" % [got]
+	)
+	ok(p.kit_t <= 0.0 and p.drink_t <= 0.0, "a spill ends the channel")

@@ -9,3 +9,4 @@ Format and rules: docs/AUDIO.md.
 `quest.json` is the quest seats' own cues (scripts/match/quest_sfx.gd); `heart.json` the Heartspark and the Ways Out calls.
 `training.json` is the Training Grounds' station cues and the duel ring's countdown (scripts/match/training_sfx.gd).
 `blight_mobs.json` is the Blight mobs' wind-up voices (`v_bl_*`, played by `Mob._begin_attack`).
+`belt.json` is the belt cancel cues (`belt_spill` for a spilt tonic, `belt_fumble` for a dropped repair), played by `UtilityUse.spill`; `--hearth-lamp-check`.

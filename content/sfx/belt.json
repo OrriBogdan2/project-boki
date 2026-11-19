@@ -1,0 +1,9 @@
+{
+ "group": "belt",
+ "name": "Belt cancel cues",
+ "script": "tools/gen_sfx_belt.py",
+ "sounds": {"belt_spill": "cast", "belt_fumble": "cast"},
+ "signature": [],
+ "reach": {},
+ "replaces": []
+}
