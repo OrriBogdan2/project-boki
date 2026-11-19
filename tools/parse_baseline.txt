@@ -1,0 +1,11 @@
+tests/glider_gallery.gd
+tests/prop_gallery.gd
+tools/anim/uthana_bake.gd
+tools/anim/uthana_view.gd
+tools/boki_state_cover.gd
+tools/foot_plant_check.gd
+tools/garden_fit_check.gd
+tools/heart_check.gd
+tools/incubator_check.gd
+tools/land_lean_shots.gd
+tools/stride_shots.gd
