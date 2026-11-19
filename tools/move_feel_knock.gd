@@ -81,7 +81,10 @@ static func run(c) -> void:
 		var row := [key, REF[key], arc["rest"], arc["stop_t"], arc["slam_m"], WALL_GAP, _wall_frame(c, float(REF[key]))]
 		print(
 			(
-				"MFEEL knock %s push %.1f: rest %.2f m after %.2f s, wall slams up to %.2f m, cliff %.1f m ahead: step %d"
+				(
+					"MFEEL knock %s push %.1f: rest %.2f m after %.2f s, wall slams up to %.2f m,"
+					+ " cliff %.1f m ahead: step %d"
+				)
 				% row
 			)
 		)
