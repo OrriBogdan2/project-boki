@@ -304,7 +304,7 @@ Sound: `tools/gen_sfx_ult_cues.py` (`hostile`, category cast). `--sfx-set-check`
 ## Hunter callouts
 Short wordless barks in a Hunter's own voice (`<arch>_call_ult|boki|low|knock`, four takes each, `grunt` level; `tools/gen_sfx_barks.py`, own seed, voice profiles copied from each Hunter's hurt line; set `content/sfx/barks.json`), played by `HunterBarks` (`scripts/match/hunter_barks.gd`) through `m.sfx`, so the pool's voice cap applies:
 - **ult**: your ultimate is back (not at match start); **low**: your health drops under 30% (again only after it is back over 50%); **knock**: you knocked a rival (`Match._reward_moment`, host and client); **boki**: your Boki went down (`Match.on_kin_down`, or the `kcmd down` event from another game).
-- Only you hear your own barks. The exception is **boki**: your teammates hear it too, at you, carrying 60 m (`reach`); a rival's Boki going down is silent.
+- Only you hear your own barks. A Boki going down also gives its owner a UI alert (`ui_extract_fail`, -4 dB, unpositioned, so it is noticed off-screen; with the Boki's own positional cry and, back up, the soft `boki_revive`); a teammate's Boki going down is only a quiet `ui_tab` tick (-14 dB), a rival's is silent. Neither repeats inside 4 s (`ALERT_GAP_S`) for one owner; it follows the "Hunter callouts" setting.
 - One bark per Hunter per 6 s (`COOLDOWN_S`, match time); a bark inside it is dropped. No bark while downed or out. Settings > Audio > Sounds "Hunter callouts" (`hunter_barks`, on) turns them off.
 - `--sfx-set-check` asserts every one of the 13 voiced Hunters has all four, the reach and the wiring; `--match-audio-check` the cooldown, who hears what and the setting.
 
