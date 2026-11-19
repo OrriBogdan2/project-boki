@@ -13,6 +13,9 @@ extends RefCounted
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
+##   6. real work: after Skip tutorial the house site goes up while Hob hammers (a swing every swing_s: the bar and
+##      the walls move, the materials are spent) and is done in bounded time; with no materials he does not
+##      hammer, the site says what it needs and he says it too; the normal tutorial path still builds
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
 ## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
 ## hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
@@ -45,6 +48,7 @@ func run(m: Node) -> void:
 	await _offer()
 	await _later_and_legacy()
 	await _skip_check()
+	await _real_work()
 	print("HOBCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -174,6 +178,7 @@ func _offer() -> void:
 	FarmTutorial.mark("axe")
 	FarmTutorial.mark("chop")
 	Work.add_mat("wood", 10)
+	Work.add_mat("stone", 6)
 	home.guide.place_house()
 	home._sync_fixtures()
 	FarmTutorial.detect()
@@ -279,7 +284,105 @@ func _later_and_legacy() -> void:
 	ok(not ClassUnlock.second_pending() and not hob.chat.offer_due() and ClassUnlock.is_open("juggernaut"),
 			"a save that already has its second Mask keeps it and is not offered another")
 
+## A new farm with the intro over and only Hob working (no Boki takes a swing).
+func _worksite_farm() -> FarmHob:
+	await _new_farm()
+	Work.set_prio("craft", 0)
+	var hob: FarmHob = home.hob
+	await _wait(func(): return hob.chat.intro_on, 12.0)
+	_click()
+	await _wait(func(): return not hob.chat.busy(), 3.0)
+	return hob
+
+
+## Hob's hammering builds the house (or he says why not). Only Hob works here: no Boki takes a swing.
+func _real_work() -> void:
+	var hob := await _worksite_farm()
+	home.guide.skip()
+	await _frames(3)
+	var e := FarmHob.house_entry()
+	var u := int(e["u"])
+	var cost := FarmSites.build_cost("house")
+	var wood0 := FarmSites.have("wood")
+	var stone0 := FarmSites.have("stone")
+	ok(FarmSites.is_site(e) and FarmSites.have("wood") >= int(cost["wood"]) and not FarmSites.stalled(e),
+			"skip tutorial: the house is a site with its materials (%d wood, %d stone)"
+			% [FarmSites.have("wood"), FarmSites.have("stone")])
+	await _wait(func(): return hob.node.pose == "hammer", 25.0)
+	var swing_s := float(hob.rules()["swing_s"])
+	var got0 := int(e["site"]["got"])
+	var t := await _wait(func(): return int(FarmSites.entry(u)["site"]["got"]) > got0, swing_s + 2.0)
+	var bar := home.hb.nodes[u].get_node("Bar") as Sprite3D
+	ok(hob.node.pose == "hammer" and int(FarmSites.entry(u)["site"]["got"]) == got0 + 1,
+			"Hob hammers and a swing lands on the house after %.1f s (every %.1f s)" % [t, swing_s])
+	ok(int(bar.get_meta("k", 0)) > 0 and FarmSites.have("wood") < wood0,
+			"the bar moved and the first materials were spent")
+	var rise0 := _rise(u)
+	hob.rules()["swing_s"] = 0.4      # (the pace is checked above; this keeps the run short)
+	await _wait(func(): return int(FarmSites.entry(u)["site"]["got"]) >= 9, swing_s + 9.0 * 0.4 + 4.0)
+	ok(_rise(u) > rise0 + 0.5, "the walls rise as he works (%.2f m -> %.2f m at 9/12)" % [rise0, _rise(u)])
+	var t_all := await _wait(func(): return not FarmSites.has_site(FarmHob.house_entry()), 12.0 * 0.4 + 6.0)
+	ok(not FarmSites.has_site(FarmHob.house_entry()) and Progress.stat("fb_built") >= 1,
+			"with nobody helping the house is done in %.1f s" % t_all)
+	ok(FarmSites.have("wood") == wood0 - int(cost["wood"]) and FarmSites.have("stone") == stone0 - int(cost["stone"]),
+			"and its materials were spent as it went (%d wood, %d stone left)"
+			% [FarmSites.have("wood"), FarmSites.have("stone")])
+	hob.rules()["swing_s"] = swing_s
+	await _wait_stalled()
+	await _tutorial_path()
+
+## No materials: the house waits, Hob stands by it with his hands down and says what it needs.
+func _wait_stalled() -> void:
+	var hob := await _worksite_farm()
+	ClassUnlock.state()["second"] = []      # (no Mask offer and no new blueprints: a "!" over him is for the site)
+	home.guide.skip()
+	FarmBuilder.draw_up()
+	for m in FarmSites.MATS:
+		FarmSites.pay({m: FarmSites.have(m)})
+	await _wait(func(): return hob.node.position.distance_to(hob.pos) < 0.1 and hob.node.pose == "idle", 25.0)
+	var e := FarmHob.house_entry()
+	var u := int(e["u"])
+	var need := FarmSites.need_text(e)
+	await _wait(func(): return false, float(hob.rules()["swing_s"]) + 2.0)
+	var tag := home.hb.nodes[u].get_node_or_null("Need") as Label3D
+	ok(need.begins_with("Needs") and hob.waiting() and hob.node.pose == "idle"
+			and int(FarmSites.entry(u)["site"]["got"]) == 0,
+			"no materials: Hob does not hammer and the house stays at 0 swings (%s)" % need)
+	ok(tag != null and tag.visible and tag.text == need and hob.node.mark.visible,
+			"the label over the site says '%s' and his '!' shows" % need)
+	ok(hob.wait_line().contains(need.to_lower()) and hob.node.position.distance_to(HomeLayout.deco_center(e)) < 8.0,
+			"he stands by it and says '%s'" % hob.wait_line())
+	FarmSites.top_up(e)
+	var got0 := int(e["site"]["got"])
+	await _wait(func(): return int(FarmSites.entry(u)["site"]["got"]) > got0, float(hob.rules()["swing_s"]) + 3.0)
+	var hammering: bool = hob.node.pose == "hammer" and not hob.node.mark.visible
+	ok(not hob.waiting() and int(FarmSites.entry(u)["site"]["got"]) > got0 and hammering,
+			"given the materials he starts hammering again")
+
+## The normal tutorial: the house is placed by hand, your own swings still count, Hob adds his.
+func _tutorial_path() -> void:
+	var hob := await _worksite_farm()
+	Work.add_mat("wood", 10)
+	Work.add_mat("stone", 6)
+	ok(home.guide.place_house(), "tutorial: the house is placed as a site")
+	home._sync_fixtures()
+	FarmTutorial.detect()
+	var e := FarmHob.house_entry()
+	var u := int(e["u"])
+	await _wait(func(): return hob.node.pose == "hammer", 25.0)
+	_stand_by(HomeLayout.deco_center(e))
+	FarmSites.player_swing(home.hw, e)
+	ok(int(FarmSites.entry(u)["site"]["got"]) == 1, "your own swing still adds one")
+	hob.swing_t = 0.0
+	await _frames(2)
+	ok(int(FarmSites.entry(u)["site"]["got"]) == 2, "and Hob's swing adds one more")
+
 # ------------------------------------------------------------------ helpers
+## How tall the house site's walls stand so far (its "Rise" box), in metres.
+func _rise(u: int) -> float:
+	var r := home.hb.nodes[u].find_child("Rise", true, false) as MeshInstance3D
+	return r.get_aabb().size.y if r else 0.0
+
 ## One press on the talk box: it waits out a camera move first.
 func _advance(box: TalkBox) -> void:
 	await _wait(func(): return not box.frozen, 3.0)
