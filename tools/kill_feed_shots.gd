@@ -28,6 +28,8 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d.erase("hud_reveal")
+	Settings.set_v("hud_full", true, false)      # (every HUD group: the staged HUD hides the feed early)
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
