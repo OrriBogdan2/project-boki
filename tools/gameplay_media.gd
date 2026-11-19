@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-17> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
@@ -33,6 +33,8 @@ extends RefCounted
 ##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
 ##  16 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
 ##                   following: the walk speed for a before/after cut (decision 0061)
+##  17 dash refill  Thief dashes, presses on empty, walks: each charge's quiet return cue alone
+##                   (tools/gameplay_media_refill.gd)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
@@ -125,6 +127,7 @@ func run(main_node: Node) -> void:
 		14: await _forest(secs)
 		15: await _locomotion(secs)
 		16: await _walk(secs)
+		17: await preload("res://tools/gameplay_media_refill.gd").run(self, secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 

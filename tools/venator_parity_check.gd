@@ -23,6 +23,8 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_tracking(m, P, home)
 	_dash_aim(m, P, K, home)
 	_drum(m, P, K, home)
+	_falloff(m, P, K, home)
+	_shift_charges(P)
 	_brackets(m, P, home)
 	_rifle_pose()
 	_launcher(m, P, K, T, home)
@@ -127,6 +129,52 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and float(t_full["at"]) > 0.0 and float(t_full["at"]) <= REFILL_BY,
 			"after 12: %d, after 0.25s rest: %d, full at %.2f s" % [after12, t_full["early"], t_full["at"]])
 	_dry(m, P, K, home)
+
+## The rifle's falloff: each round of a string carries its share of full damage (100% down to the 50% floor over
+## the first ten rounds) and the look thins with it; a pause starts the string over.
+func _falloff(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	P.teleport(home)
+	P.ammo = MAG
+	C.ac.step(m, 0.6)
+	P.fire_cd = 0.0
+	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
+	var share: Array[float] = []
+	var seen := P.shot_n
+	for i in 200:
+		if share.size() >= 12:
+			break
+		P.inp["fire"] = true
+		m.step(C.DT)
+		if P.shot_n != seen:
+			seen = P.shot_n
+			share.append(_last_share(m, P))
+	P.inp["fire"] = false
+	C.ac.step(m, 0.6)
+	P.fire_cd = 0.0
+	P.inp["fire"] = true
+	var again := P.shot_n
+	for i in 40:
+		m.step(C.DT)
+		if P.shot_n != again:
+			break
+	P.inp["fire"] = false
+	var restart := _last_share(m, P)
+	var floor_k := 1.0 - float(P.wpn["sustain_loss"])
+	C.ok("Vex LMB: damage decays over the first 10 rounds to 50%, then holds; a pause starts the string over",
+			share.size() == 12 and is_equal_approx(share[0], 1.0) and is_equal_approx(share[10], floor_k)
+			and is_equal_approx(share[11], floor_k) and share[5] < share[0] and share[5] > share[10]
+			and is_equal_approx(restart, 1.0), "shares %s, after a pause %.2f" % [share, restart])
+	C.ok("Vex LMB: the look thins with the round (full at round 1, thinnest at the floor)",
+			is_equal_approx(K._faded(share[0]), 0.0) and is_equal_approx(K._faded(share[10]), 1.0)
+			and K._faded(share[5]) > 0.0 and K._faded(share[5]) < 1.0,
+			"faded %.2f / %.2f / %.2f" % [K._faded(share[0]), K._faded(share[5]), K._faded(share[10])])
+
+func _last_share(m: Match, P: Hunter) -> float:
+	var shots: Array = m.get("shots")
+	for i in range(shots.size() - 1, -1, -1):
+		if shots[i]["by"] == P:
+			return float((shots[i]["x"] as Dictionary).get("sus_k", -1.0))
+	return -1.0
 
 ## Item 109: a dash east with the cursor north, LMB held from before it to after it. Every round leaves north, none
 ## goes missing across the dash, and the body stays on the aim while the legs turn toward the dash.
@@ -527,3 +575,13 @@ func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	C.ok("Vex audit: Shift in the Longneedle charge slides and the beam fires; after a Burr Charge she slides at once",
 			e_ok and rmb_ok and rows, "E %s RMB %s rows %s" % [e_ok, rmb_ok, rows])
 	C.ac.step(m, 1.5)
+
+## The source's Combat Slide is one charge: her own dash.charges, even over a two-charge class dodge.
+func _shift_charges(P: Hunter) -> void:
+	var roll := P.dodge_def
+	P.dodge_def = Content.class_dodge("heavy")
+	var over_two := P.max_dashes()
+	P.dodge_def = roll
+	var own := P.max_dashes()
+	C.ok("Vex Shift: one charge (the source's slide), her own count over a two-charge class dodge",
+			own == 1.0 and over_two == 1.0, "%.0f, over a two-charge dodge %.0f" % [own, over_two])
