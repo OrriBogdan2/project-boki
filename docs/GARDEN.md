@@ -198,3 +198,13 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
+
+## Fishing derby
+`scripts/home/fishing_derby.gd`: at the Glint Fishing rock (when the shared store answers) you choose to fish alone or race
+a friend's stored catch. Every finished session keeps its points per cast in your save (`fish_last`: a landed glint 1, a
+rare 3), `Social.profile_doc` puts them in your visit snapshot, and `clean_island` bounds them on the way in, so a derby
+needs no new snapshot or store doc and no extraction: a garden-only player can play it. Your five casts against the
+friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per friend per garden day (`fish_paid`),
+and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
+Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
+alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
