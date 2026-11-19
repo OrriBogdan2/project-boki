@@ -6,7 +6,8 @@ extends RefCounted
 ## Metal is the sky train's car decks, wood a plank bridge (World.bridge); the Hollow Crown's
 ## stone bridges are painted paths (stone) and it has no skiff docks since the Ways Out. Water is the
 ## farm's shallow ponds (HomeWater): match maps have none.
-## A bare ground tile's set comes from its biome style (content/rules/step_biomes.json): ash and dark crystal are stone, frost snow.
+## A bare ground tile's set comes from its biome style (content/rules/step_biomes.json): ash and dark crystal
+## are stone, frost snow.
 ## A Hunter's own "<arch>_step_<surface>" wins when it has one. docs/AUDIO.md lists each region.
 
 const RULES := "step_biomes"

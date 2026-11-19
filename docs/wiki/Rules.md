@@ -2239,6 +2239,16 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 | _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
 | at | 0.25 |
 
+## step_biomes (`content/rules/step_biomes.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | StepSurface (scripts/match/step_surface.gd): which of the four step sets every Hunter has (grass, stone, wood, snow) a bare ground tile plays, by World.style_at (its island's authored biome, or its region on a generated map). Bridges (wood), stairs, paint and non-ground tiles (stone) and the sky train (metal) are decided before this. No new sounds: ash (ember) and the dark crystal ground (gloom) are stone; storm's wet fern-and-reed ground stays grass. |
+| default | grass |
+| styles | {"meadow": "grass", "bloom": "grass", "storm": "grass", "frost": "snow", "ember": "stone", "gloom": "stone"} |
+
 ## summon_cc (`content/rules/summon_cc.json`)
 
 What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
