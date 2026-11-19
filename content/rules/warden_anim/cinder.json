@@ -17,6 +17,7 @@
 			"walk_l": {"L": [0.383], "R": [0.1]},
 			"walk_r": {"L": [0.433], "R": [0.05]}
 		},
+		"stop_rate": 12,
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},

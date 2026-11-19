@@ -102,9 +102,9 @@ func _fit(id: String, m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D)
 		var now: Array = lc.get(keys[dir], fw)
 		var cells: Array = []
 		for ring in 2:
-			var s := float(lc.get("walk_speed" if ring == 0 else "run_speed", 2.2 if ring == 0 else 4.6))
+			var s := float(lc.get("walk_speed", 2.2)) if ring == 0 else float(lc.get("run_speed", 4.6))
 			if ring == 0:
-				_slip(m, sync, clips, sk, Vector3.ZERO)     # (from the run straight to a walk is a let-go: WardenStride)
+				_slip(m, sync, clips, sk, Vector3.ZERO)     # (run straight to walk is a let-go: WardenStride)
 			var r := _slip(m, sync, clips, sk, DIRS[dir] * s)
 			var rate := float(clips.tree.get("parameters/loco_rate/scale"))
 			cells.append("%s %.2f m/s cover %.2f rate %.2f: %.2f -> %.2f" % [["walk", "run"][ring], s, r.y, rate,
