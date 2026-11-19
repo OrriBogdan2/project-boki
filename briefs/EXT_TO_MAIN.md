@@ -10278,3 +10278,4 @@ READY ext/boki-dex-port-1117 c4cda92743 (bulk-rebase: origin/main merged in mech
 READY ext/boki-more-ingame-1118 323dce5053 (bulk-rebase: origin/main merged in mechanically, was fac36e2f36; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-artdata-1118-b 5a5a85d0da (bulk-rebase: origin/main merged in mechanically, was a56f93457b; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/training-time-trial-1119 33d666801b (Training Grounds time trial: arches, 10 gates, wall tower, pad, per-Hunter best, Save v21, --time-trial-check)
+READY ext/summon-pop-1119 8dcfac59b8 (PR #380: summon pop + Hunter summon call/recall gesture; wisp/clip/summon checks green, clip-check FAIL set same as branch base, health OK)
