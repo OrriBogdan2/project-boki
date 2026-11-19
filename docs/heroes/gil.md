@@ -41,7 +41,7 @@ this: see F6.
 | RMB x3 | two throws, the third does nothing; a charge back 5 s after the first | "numbers RMB: ..." (3 lines) |
 | Three different potions on one foe in 5 s | Beached 0.75 s, then 8 s before the next | "Fish Out of Water: ..." (4 lines) |
 | Two potions, wait 5 s, a third | no Beach (the old marks dropped) | "numbers passive: marks last 5 s (two, a 5 s wait, a third: no Beach)" |
-| Shift near a foe | 6 m under the ground, hittable, a knockup where he surfaces | "Ground Swim: ..." (4 lines); "numbers Shift: ..." (3 lines) |
+| Shift near a foe | 4.5 m under the ground, hittable, a knockup where he surfaces | "Ground Swim: ..." (4 lines); "numbers Shift: ..." (3 lines) |
 | E | the spin hurts round him, rising | "Riptide: E starts the spin"; "Riptide: the spin hurts foes around him"; "numbers E: 8 spin ticks, 2 at first, rising, under 5"; "numbers E: he moves at 70% while he spins" |
 | E, then E again / E and wait 2 s | the spout runs the line, knocks up 1 s; a full spin makes the biggest spout | "Riptide recast: ..."; "Riptide: at 2 s the spout goes on its own"; "Riptide: a longer spin makes a wider spout"; "numbers E: a full 2 s spin sends an 11 m, 2.2 m wide, 22 m/s spout"; "numbers E: the spout does 10 ..." |
 | X | untargetable for the ride, knockup then slow, a shield on landing, 90 s | "Tidal Wave: ..." (5 lines); "numbers X: ..." (4 lines) |

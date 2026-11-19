@@ -335,7 +335,10 @@ func _swim() -> void:
 		top["out"] = top["out"] or K.anim_id == "gil_surface"
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
-	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
+	var dd := K.dash_def()
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
+		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
 	ok("Ground Swim: he stays hittable underground", under and hit_on)
