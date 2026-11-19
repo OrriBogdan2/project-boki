@@ -13,7 +13,7 @@
   5
  ],
  "price": 30,
- "desc": "Drink for a second to heal. You are open while you drink.",
+ "desc": "Drink for a second to heal and wash out anything that blunts healing. You are open while you drink: a hit spills it.",
  "channel": {
   "time": 1.0,
   "move": 1.0,

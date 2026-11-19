@@ -47,3 +47,4 @@ First-time tips (`scripts/match/belt_tips.gd`, `--belt-tips-check`): the first g
 - Chained drinks by holding the key (patch 1.02): our belt press ignores a hold.
 - Stack of 8 for the tonic and kit (source) against our 5 and 4.
 - Footage pass for: slow while drinking, dash/jump/ability cancels, whether a cancelled Brew is used up.
+- Tonic washes out anti-heal before its heal; a drink or repair that spills (hit, stun, roll, glide) plays the cancel cue (`UtilityUse.spill`) and uses nothing. Checks: `--hearth-lamp-check`, `--belt-tips-check`.

@@ -53,6 +53,7 @@ const CHECKS := {
 	"--bot-ways-check": ["res://tools/bot_ways_check.gd", "bot_ways_check", null],      # bot plans, cap, delay, ring
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	"--belt-tips-check": ["res://tools/belt_tips_check.gd", "belt_tips_check", null],      # one-time belt item tips
+	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp
 	"--lpage-fit-check": ["res://tools/lpage_fit_check.gd", "lpage_fit_check", null],      # practice L panel fits
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
