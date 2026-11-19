@@ -77,7 +77,17 @@ LIMITS = {
     "black_texels": (0.15, 0.60),
 }
 # Counts (not shares) use these keys.
-COUNT_KEYS = {"no_skin", "no_clips", "all_clips_static", "static_clips", "nan", "floating_islands", "blend_materials", "alpha_lt1_materials", "missing_texture"}
+COUNT_KEYS = {
+    "no_skin",
+    "no_clips",
+    "all_clips_static",
+    "static_clips",
+    "nan",
+    "floating_islands",
+    "blend_materials",
+    "alpha_lt1_materials",
+    "missing_texture",
+}
 # Materials whose job is to be see-through or emissive; BLEND there is a design choice, still reported as INFO.
 BLEND_OK = re.compile(r"(eye|glow|flame|fx|cards|spark|aura)", re.I)
 
@@ -111,9 +121,9 @@ class Glb:
         bv = self.j["bufferViews"][a["bufferView"]]
         start = bv.get("byteOffset", 0) + a.get("byteOffset", 0)
         stride = bv.get("byteStride") or dt.itemsize * ncomp
-        arr = np.ndarray(
-            (count, ncomp), dtype=dt, buffer=self.bin, offset=start, strides=(stride, dt.itemsize)
-        ).astype(np.float64)
+        arr = np.ndarray((count, ncomp), dtype=dt, buffer=self.bin, offset=start, strides=(stride, dt.itemsize)).astype(
+            np.float64
+        )
         if a.get("normalized") and dt.kind in "iu":
             arr = arr / float(np.iinfo(dt).max)
             if dt.kind == "i":
@@ -187,7 +197,15 @@ class Rig:
                 if "node" not in tgt or tgt["path"] not in ("translation", "rotation", "scale"):
                     continue
                 s = an["samplers"][ch["sampler"]]
-                chans.append((tgt["node"], tgt["path"], g.acc(s["input"])[:, 0], g.acc(s["output"]), s.get("interpolation", "LINEAR")))
+                chans.append(
+                    (
+                        tgt["node"],
+                        tgt["path"],
+                        g.acc(s["input"])[:, 0],
+                        g.acc(s["output"]),
+                        s.get("interpolation", "LINEAR"),
+                    )
+                )
             dur = max((c[2][-1] for c in chans if len(c[2])), default=0.0)
             self.clips.append((an.get("name", "anim"), dur, chans))
 
@@ -424,7 +442,11 @@ def weight_checks(body: Body, ibm: np.ndarray, jnodes: list[int], rig: Rig, heig
             d = np.minimum(d, np.linalg.norm(p - t[:, None] * ab[None, :], axis=1))
         worst[use] = np.maximum(worst[use], d)
     far = worst > FAR_BONE * height
-    res = {"bad_weight_sum": int(bad_sum.sum()), "far_bone_verts": int(far.sum()), "far_bone_max_h": round(float(worst.max()) / height, 3)}
+    res = {
+        "bad_weight_sum": int(bad_sum.sum()),
+        "far_bone_verts": int(far.sum()),
+        "far_bone_max_h": round(float(worst.max()) / height, 3),
+    }
     vflag = bad_sum | far
     return res, {"bad_vertex": vflag}
 
@@ -509,7 +531,9 @@ def material_checks(g: Glb, body: Body) -> tuple[dict, list[str]]:
         pbr = m.get("pbrMetallicRoughness", {})
         mode = m.get("alphaMode", "OPAQUE")
         if mode == "BLEND":
-            (notes if BLEND_OK.search(name) else blend).append(f"{name} BLEND ({int(ntri[mi])} tris)" if not BLEND_OK.search(name) else f"{name} BLEND ok")
+            (notes if BLEND_OK.search(name) else blend).append(
+                f"{name} BLEND ({int(ntri[mi])} tris)" if not BLEND_OK.search(name) else f"{name} BLEND ok"
+            )
         if pbr.get("baseColorFactor", [1, 1, 1, 1])[3] < 0.999:
             alpha.append(name)
         tex = pbr.get("baseColorTexture")
@@ -603,13 +627,18 @@ def render_png(path: Path, body: Body, flags: dict, worst_pos, title: str, lines
         im = Image.new("RGB", (S, S + 40), (24, 24, 28))
         d = ImageDraw.Draw(im)
         tri = body.tris
-        pts = np.stack([(pos[:, 0] - (lo[0] + hi[0]) / 2) * scale + S / 2, S - 0.04 * S - (pos[:, 1] - lo[1]) * scale], axis=1)
+        pts = np.stack(
+            [(pos[:, 0] - (lo[0] + hi[0]) / 2) * scale + S / 2, S - 0.04 * S - (pos[:, 1] - lo[1]) * scale], axis=1
+        )
         depth = pos[tri][..., 2].mean(axis=1)
         order = np.argsort(depth)  # +z is toward the viewer in glTF, draw far first
         light = np.clip(
             np.abs(
                 np.cross(pos[tri[:, 1]] - pos[tri[:, 0]], pos[tri[:, 2]] - pos[tri[:, 0]])[:, 2]
-                / np.maximum(np.linalg.norm(np.cross(pos[tri[:, 1]] - pos[tri[:, 0]], pos[tri[:, 2]] - pos[tri[:, 0]]), axis=1), 1e-12)
+                / np.maximum(
+                    np.linalg.norm(np.cross(pos[tri[:, 1]] - pos[tri[:, 0]], pos[tri[:, 2]] - pos[tri[:, 0]]), axis=1),
+                    1e-12,
+                )
             ),
             0.0,
             1.0,
@@ -646,7 +675,14 @@ def render_png(path: Path, body: Body, flags: dict, worst_pos, title: str, lines
 def check_glb(data: bytes, name: str, frames: int, clip_re: str | None, png: Path | None, hunter: bool = False) -> dict:
     g = Glb(data)
     if not g.j.get("meshes"):  # a clip library (e.g. vex_cast_clips.glb): nothing to render, nothing to tear
-        return {"name": name, "tris": 0, "verts": 0, "verdict": "PASS", "codes": {}, "notes": ["no mesh: clip-only file"]}
+        return {
+            "name": name,
+            "tris": 0,
+            "verts": 0,
+            "verdict": "PASS",
+            "codes": {},
+            "notes": ["no mesh: clip-only file"],
+        }
     body = Body(g)
     ntri, nvert = len(body.tris), len(body.pos)
     fin = np.isfinite(body.pos).all(axis=1)
@@ -662,7 +698,11 @@ def check_glb(data: bytes, name: str, frames: int, clip_re: str | None, png: Pat
     else:
         skin = g.j["skins"][body.skin]
         jnodes = skin["joints"]
-        ibm = g.acc(skin["inverseBindMatrices"]).reshape(-1, 4, 4).transpose(0, 2, 1) if "inverseBindMatrices" in skin else np.stack([np.eye(4)] * len(jnodes))
+        ibm = (
+            g.acc(skin["inverseBindMatrices"]).reshape(-1, 4, 4).transpose(0, 2, 1)
+            if "inverseBindMatrices" in skin
+            else np.stack([np.eye(4)] * len(jnodes))
+        )
         rig = Rig(g)
         r, wflags = weight_checks(body, ibm, jnodes, rig, height)
         res.update(r)
@@ -676,13 +716,17 @@ def check_glb(data: bytes, name: str, frames: int, clip_re: str | None, png: Pat
     r, _ = material_checks(g, body)
     res.update(r)
     level, codes = verdict(res, ntri, nvert)
-    if hunter and codes.get("no_clips") == "FAIL":  # a hunter's poses can come from HunterAnim (gil.json): a clip-less glb is a WARN there
+    if (
+        hunter and codes.get("no_clips") == "FAIL"
+    ):  # a hunter's poses can come from HunterAnim (gil.json): a clip-less glb is a WARN there
         codes["no_clips"] = "WARN"
         level = "FAIL" if "FAIL" in codes.values() else "WARN"
     res["verdict"], res["codes"] = level, codes
     if png is not None:
         title = f"{name}: {level}  " + " ".join(f"{k}={res.get(k)}" for k in codes)
-        label = f"worst pose: {res.get('worst_clip')} f{res.get('worst_frame')}" if res.get("worst_clip") else "worst frame"
+        label = (
+            f"worst pose: {res.get('worst_clip')} f{res.get('worst_frame')}" if res.get("worst_clip") else "worst frame"
+        )
         wf = {**flags}
         res["png"] = str(png) if render_png(png, body, wf, worst_pos, title, [label]) else None
     return res
@@ -703,7 +747,11 @@ MODEL_DIRS = ("art/wardens", "art/kin")  # Hunters and Boki (kin): <dir>/<name>/
 
 def changed_hunters(base: str, head: str | None = None) -> list[str]:
     """Model GLBs a branch touches vs `base`: the .glb itself, or any file next to it (.import, textures), or the warden clips json."""
-    r = subprocess.run(["git", "diff", "--name-only", f"{base}...{head or 'HEAD'}", "--", *MODEL_DIRS, "content/rules"], capture_output=True, text=True)
+    r = subprocess.run(
+        ["git", "diff", "--name-only", f"{base}...{head or 'HEAD'}", "--", *MODEL_DIRS, "content/rules"],
+        capture_output=True,
+        text=True,
+    )
     out: list[str] = []
 
     def add(glb: str):
@@ -739,15 +787,24 @@ def new_warnings(head: dict, base: dict | None) -> list[str]:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("paths", nargs="*", help="GLB files or directories (default art/wardens)")  # kin: pass art/kin
     ap.add_argument("--out", type=Path, help="directory for the review PNGs")
     ap.add_argument("--json", type=Path, help="write the full results here")
     ap.add_argument("--frames", type=int, default=8, help="frames sampled per clip (default 8)")
     ap.add_argument("--clips", default=None, help="regex on clip names (default: every clip)")
-    ap.add_argument("--base", help="git ref to compare against: each GLB is also checked at that ref, no new WARN allowed")
-    ap.add_argument("--changed-vs", help="only check hunters whose art/wardens or warden_anim files differ from this ref")
-    ap.add_argument("--head-ref", help="read the GLBs from this git ref instead of the working tree (scan a PR head without a checkout)")
+    ap.add_argument(
+        "--base", help="git ref to compare against: each GLB is also checked at that ref, no new WARN allowed"
+    )
+    ap.add_argument(
+        "--changed-vs", help="only check hunters whose art/wardens or warden_anim files differ from this ref"
+    )
+    ap.add_argument(
+        "--head-ref",
+        help="read the GLBs from this git ref instead of the working tree (scan a PR head without a checkout)",
+    )
     ap.add_argument("--quiet", action="store_true", help="only print the verdict table")
     a = ap.parse_args(argv)
 
@@ -760,7 +817,9 @@ def main(argv=None) -> int:
         for p in a.paths or ["art/wardens"]:
             pp = Path(p)
             if a.head_ref and pp.is_dir():
-                ls = subprocess.run(["git", "ls-tree", "-r", "--name-only", a.head_ref, p], capture_output=True, text=True).stdout.split()
+                ls = subprocess.run(
+                    ["git", "ls-tree", "-r", "--name-only", a.head_ref, p], capture_output=True, text=True
+                ).stdout.split()
                 files += sorted(x for x in ls if x.endswith(".glb"))
             else:
                 files += sorted(str(x) for x in pp.rglob("*.glb")) if pp.is_dir() else [p]
@@ -792,7 +851,9 @@ def main(argv=None) -> int:
         print(f"{r['verdict']:4} {r['name']:8} tris={r['tris']} {worst} {codes}{extra}")
         if not a.quiet and r["codes"]:
             for c in r.get("worst_clips", [])[:3]:
-                print(f"       clip {c['clip']}: stretched={c['stretched']} collapsed={c['collapsed']} f{c['worst_frame']}")
+                print(
+                    f"       clip {c['clip']}: stretched={c['stretched']} collapsed={c['collapsed']} f{c['worst_frame']}"
+                )
     if a.json:
         a.json.parent.mkdir(parents=True, exist_ok=True)
         a.json.write_text(json.dumps(results, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o)))
