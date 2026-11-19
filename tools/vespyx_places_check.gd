@@ -54,7 +54,8 @@ func run(m: Node) -> void:
 	var result := {"extracted": true, "gems": 1, "seeds": {}, "caught": [rec], "knocks": 0, "damage": 1, "taken": 1,
 		"kills": 0, "downs": 0, "deaths": 0, "revives": 0, "armor_tier": 1, "time": 60.0}
 	await _place("results_caught", "results", result)
-	var match_opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+	var match_opts := {"training": true, "teams": 1, "squad": 1,
+		"tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"demo_kin": species, "sandbox_demo": false, "kin_demo": true}
 	await _place("match_own_boki", "match", match_opts)
 	await _reveal()
@@ -208,4 +209,5 @@ func _rigs() -> PackedStringArray:
 func _grab(label: String) -> void:
 	if out != "":
 		await RenderingServer.frame_post_draw
-		main.get_viewport().get_texture().get_image().save_png(out.path_join("%s%s_%s_%s.png" % [tag, kind, species, label]))
+		var png := out.path_join("%s%s_%s_%s.png" % [tag, kind, species, label])
+		main.get_viewport().get_texture().get_image().save_png(png)
