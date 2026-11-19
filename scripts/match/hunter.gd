@@ -2410,7 +2410,7 @@ func can_level(slot: String) -> bool:
 	if not TutorialCamps.lets_level(self, slot):
 		return false
 	if slot == "ult":
-		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
+		return MergeForm.enabled() and lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
 	return true
 
 func level_slot(slot: String) -> bool:
