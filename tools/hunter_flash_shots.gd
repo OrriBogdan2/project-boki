@@ -4,8 +4,8 @@ extends RefCounted
 ## Prints per Hunter how much the body brightens (mean luminance gain over the body's pixels) and what share of its
 ## room to white that is; fails when any Hunter's flash closes less than REL_MIN of that room, so a pale model's flash
 ## reads as clearly as a dark one's (a dark body has more room, so the raw gain alone would favour it).
-## The impact sparks and numbers (Fx) are hidden: this measures the body flash alone. Needs a renderer. Never
-## touches the save.
+## The impact sparks and numbers (Fx), the hit's shove and the idle motion are held off: this measures the body
+## flash alone. Needs a renderer. Never touches the save.
 
 const DT := 1.0 / 60.0
 const HIT := 12.0  # damage of the test hit
@@ -108,6 +108,7 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	var mid := (foot + head) * 0.5
 	var size := main.get_viewport().get_texture().get_image().get_size()
 	var rg := Rect2i(Vector2i(mid - px * 0.5), Vector2i(px)).intersection(Rect2i(Vector2i.ZERO, size))
+	Engine.time_scale = 0.0  # (the idle pose holds still, so the frames differ by the flash alone)
 	h.visible = false
 	await _frames(h, 2)
 	var out: Array = [_grab(rg)]
@@ -118,10 +119,12 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	h.dropping = false
 	h.hurt(HIT, player, {"src": "primary"})
 	ok(h.flash_t > 0.0, "%s takes the hit (its flash runs)" % h.arch)
+	h.flinch = Vector3.ZERO  # (nor the hit's shove)
 	await _frames(h, FULL_STEPS)
 	out.append(_grab(rg))
 	await _frames(h, FADE_STEPS - FULL_STEPS)
 	out.append(_grab(rg))
+	Engine.time_scale = 1.0
 	return out
 
 
