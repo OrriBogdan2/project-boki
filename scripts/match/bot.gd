@@ -784,6 +784,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
+	# the early game is camps: clear the region's (smallest first), later a camp close by while behind
+	if goal == Vector3.INF:
+		var cg := BotCamps.goal(m, h)
+		if not cg.is_empty():
+			goal = cg[0]
+			gk = String(cg[1])
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
 	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
