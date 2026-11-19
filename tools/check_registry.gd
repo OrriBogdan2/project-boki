@@ -193,6 +193,7 @@ const CHECKS := {
 	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
+	"--neve-feel-check": ["res://tools/support_check.gd", "support_check", "neve"],      # owner 11-11
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
 	# barrier hit ripple; --shots-dir=<dir>
 	"--barrier-hit-check": ["res://tools/barrier_hit_check.gd", "hero_pair_check", null],

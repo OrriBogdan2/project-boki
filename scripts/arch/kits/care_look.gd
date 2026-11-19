@@ -5,8 +5,8 @@ extends RefCounted
 ##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
 ##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
-##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, her air dash's
-##   frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
+##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the ice shards stuck in a foe, her air
+##   dash's frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -18,6 +18,12 @@ const ICE: Shader = preload("res://shaders/care_ice.gdshader")
 const GLOW: Shader = preload("res://shaders/care_glow.gdshader")
 const KEEP := 0.1             # s a held look stays after its last refresh
 const CAP := 24               # per kind: past this the oldest live one is reused
+const SHARDS := 7             # ice shards a foe can carry: one per dart stack short of the 8-dart Shatter
+const SHARD_LEN := 0.62       # m, one shard: long enough to read at match zoom
+const SHARD_POP := 0.15       # s a new shard takes to punch in
+## every look _build makes (prewarm builds one of each at load)
+const KINDS := ["ember", "burr", "shard", "beam", "spear", "plus", "column", "beam_root", "disc", "flare", "zone",
+	"kindle", "hearth", "spikes", "shell", "shards", "slab", "wall"]
 
 var m: Node
 var h: Hunter
@@ -28,9 +34,6 @@ var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
 var strip: IceStrip = null    # the skate's ice plates, one MultiMesh (built on the first plate)
-## every look _build makes (prewarm builds one of each at load)
-const KINDS := ["ember", "burr", "shard", "beam", "spear", "plus", "column", "beam_root", "disc", "flare", "zone",
-	"kindle", "hearth", "spikes", "shell", "frost", "slab", "wall"]
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -224,12 +227,24 @@ func _build(kind: String) -> Node3D:
 						n, Models.crystal(0.16, 1.1 - 0.12 * (i % 3), 5), ice_mat(Color("bff7ef"), 0.55, 0.2),
 						Vector3(cos(a6) * 0.32, 0.6 + 0.12 * (i % 2), sin(a6) * 0.32)))
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
-		"frost":
-			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
+		"shards":
+			_build_shards(n)
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
 	return n
+
+## Ice shards stuck in a body, tips out: one per dart stack (keep shows the first n). Spread round the body by
+## the golden angle at staggered heights, so any count reads from the match camera.
+func _build_shards(n: Node3D) -> void:
+	var mat := ice_mat(Color("6fd8ff"), 0.95, 0.2, Color("e8ffff"))
+	for i in SHARDS:
+		var a := float(i) * 2.39996
+		var out := Vector3(cos(a), 0.55 - 0.25 * float(i % 3), sin(a)).normalized()
+		var tip := Vector3(cos(a) * 0.3, 0.55 + 0.17 * float(i % 4), sin(a) * 0.3)
+		var s := _off(Models.part(n, Models.crystal(0.09, SHARD_LEN - 0.04 * float(i % 3), 4), mat, tip))
+		s.basis = Basis(Quaternion(Vector3.UP, out))
+		s.position += out * SHARD_LEN * 0.3
 
 ## The Hearthlight's lantern: a small caged lantern of light floating over the disc's middle, with a halo.
 func _build_lamp(n: Node3D) -> void:
@@ -495,9 +510,8 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 	match kind:
 		"wall":
 			_place_wall(n, p)
-		"frost":
-			n.scale = Vector3.ONE * float(p.get("r", 1.0))
-			_tint(n, Color.WHITE, float(p.get("a", 1.0)))
+		"shards":
+			_show_shards(n, p)
 		"spear":
 			n.global_transform = p["xf"]          # the held spear, placed by the kit in her raised hand
 			(n.get_node("Tail") as Node3D).visible = false
@@ -523,6 +537,22 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 				sp.rotation.y = m.time * 2.6
 				sp.position.y = 0.9 + 0.08 * sin(m.time * 3.0)
 				sp.scale = Vector3.ONE / maxf(0.3, r) * 1.6
+
+## The first p.n shards out (the newest pops in over SHARD_POP s since p.pop), sized to the body (p.r) and
+## glowing brighter as the count nears the Shatter; p.a fades them as the stacks run out.
+func _show_shards(n: Node3D, p: Dictionary) -> void:
+	n.scale = Vector3.ONE * float(p.get("r", 1.0))
+	var shown := int(p.get("n", 0))
+	var grow := _out_back(clampf(float(p.get("pop", 1.0)) / SHARD_POP, 0.0, 1.0))
+	var i := 0
+	for c in n.get_children():
+		var mi := c as MeshInstance3D
+		mi.visible = i < shown
+		mi.scale = Vector3.ONE * (maxf(0.05, grow) if i == shown - 1 else 1.0)
+		i += 1
+	var mt := (n.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	mt.set_shader_parameter("glow", 0.2 + 0.8 * float(shown) / float(SHARDS))
+	mt.set_shader_parameter("alpha", float(p.get("a", 1.0)))
 
 func drop(key: String) -> void:
 	var e: Dictionary = held.get(key, {})

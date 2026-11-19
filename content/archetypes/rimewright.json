@@ -55,8 +55,8 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
-		"steer": 3.6,
+		"desc": "Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving wide curves with the move keys; you carry on over ledges. Let go and you glide to a stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
+		"steer": 1.6,
 		"skate_dart_dmg_k": 2.0,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
@@ -66,7 +66,7 @@
 		"ice_col": "#bff0ff",
 		"ramp": 0.2,
 		"air_fall": 1.5,
-		"stop": 0.15
+		"slide_out": 0.7
 	},
 	"rmb": {
 		"ground": {"range": "lance.range", "r": "lance.zone_r"},
@@ -157,7 +157,7 @@
 	"rank2": {"sec": "Rank 2: cooldown 10.2s -> 8.7s, damage +15%.", "dash": "Rank 2: recharge 13s -> 11.5s.", "kin": "Rank 2: cooldown 17s -> 14.9s."},
 	"rank_next": {"sec": "Rank 3: cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder.", "dash": "Rank 3: recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s.", "kin": "Rank 3: cooldown 17s -> 12.8s; the wall is 40 points tougher."},
 	"tells": {
-		"half": "a frost glow on foes that grows with each dart",
+		"half": "ice shards stuck in the foe, one more with each dart, gone on the Shatter or when the stacks run out",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
 	},

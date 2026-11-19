@@ -79,8 +79,8 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying and scraping off the edge",
-			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
+			"tm Shift: she steers the skate into a wide curve (not a snap) with ice spraying and scraping off the edge",
+			K.rinkrunning() and turned > 25.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 10.0
 				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
 			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
@@ -1691,11 +1691,11 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
-	# the badges carry no label (DECISIONS 11-11): the FAN badge is the mark on this foe
+	# no overhead badge for her (owner 11-11): the shards on this foe are the read
 	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
-			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
-			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
+			"tm passive: the ice shards in the foe count the stacks (no badge for her, owner 11-11)",
+			(fan.is_empty() and K.lk().showing("shards%d" % T.get_instance_id())) or K.splinter_log > 0)
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes
@@ -1843,7 +1843,7 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop (a ground pose; no disc) and refunds part of the charge",
+			"tm Shift: letting go slides out into the stop (a ground pose; no disc) and refunds part of the charge",
 			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == ("tm_skate_stop" if P.grounded else "")
 				and _no_disc(m), "dashes %.2f grounded %s" % [P.dashes, P.grounded])
 	await _free(m)
