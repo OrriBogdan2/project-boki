@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the tracker shows its five lines first, in order, ticked ones last; the card is hidden when done
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
-##      Boki in the Nook, and the list finishes by itself
+##      Boki in the hub's Nook (the base has none of its own), and the list finishes by itself
 ##   5. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
 ##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
