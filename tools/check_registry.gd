@@ -678,6 +678,7 @@ const CHECKS := {
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	# which surfaces a wall stun counts
 	"--wall-stun-check": ["res://tools/wall_stun_check.gd", "wall_stun_check", null],
+	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],      # monster + boss machines (M9)
 	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
