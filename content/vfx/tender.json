@@ -3,7 +3,7 @@
 		"main": "#ffd27a", "hot": "#fff6dc", "char": "#5a4a7a", "pink": "#f6a6c8", "lilac": "#c8a8ff",
 		"mint": "#a8f0d0", "sky": "#a8d8ff", "smoke": "#f4e8ff", "own": "#5fdc6a",
 		"leaf": "#5fdc6a", "leaf_lit": "#b4f7a8", "leaf_hot": "#efffe4", "leaf_char": "#1f4f2a",
-		"root": "#9a6aff", "root_hot": "#efe2ff"
+		"root": "#7ad45a", "root_hot": "#efe2ff"
 	},
 	"field": {"col": "leaf", "rim": "leaf_lit", "fill": 0.45, "a": 0.9, "band": 0.14, "motes_every": 0.3, "root": "root"},
 	"anchors": {
@@ -19,49 +19,49 @@
 				"curl": 1.5, "life": 1.2, "size": 0.12, "c": "pink", "c2": "hot", "near": true}
 		]},
 		"cast": {"net": false, "fx": [
-			{"p": "flare", "size": 0.28, "size_k": 1.0, "grow": 1.0, "life": 0.1, "c": "pink", "c2": "main", "c3": "lilac"},
+			{"p": "flare", "size": 0.28, "size_k": 1.0, "grow": 1.0, "life": 0.1, "c": "leaf_lit", "c2": "leaf", "c3": "leaf_lit"},
 			{"p": "star", "n": 4, "way": "fwd", "speed": 2.0, "spread": 0.5, "drag": 2.0, "life": 0.4, "size": 0.1,
-				"c": "main", "c2": "hot"}
+				"c": "leaf", "c2": "hot"}
 		]},
 		"ember_hit": {"net": false, "fx": [
 			{"p": "chunk", "y": 0.1, "way": "back", "lift": 0.6, "n": 8, "speed": 4.5, "spread": 0.6, "grav": 14.0, "drag": 0.3, "life": 0.55, "size": 0.09, "radius": 0.3, "c": "leaf", "c3": "leaf_char"},
 			{"p": "ember", "y": 0.1, "way": "back", "lift": 0.5, "n": 14, "speed": 6.0, "spread": 0.7, "grav": 6.0, "life": 0.45, "size": 0.05, "radius": 0.3, "c": "main", "c2": "hot"}
 		]},
 		"cast_trail": {"fx": [
-			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "pink", "c2": "hot", "c3": "lilac"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "leaf_lit", "c2": "hot", "c3": "leaf_lit"}
 		]},
 		"kindled": {"fx": [
-			{"p": "flare", "y": 1.0, "size": 1.3, "grow": 1.3, "life": 0.25, "c": "lilac", "c2": "hot", "c3": "char"},
+			{"p": "flare", "y": 1.0, "size": 1.3, "grow": 1.3, "life": 0.25, "c": "leaf_lit", "c2": "hot", "c3": "leaf_char"},
 			{"p": "star", "y": 1.0, "n": 14, "speed": 3.0, "spread": 0.9, "drag": 2.0, "grav": -0.5, "life": 0.7,
-				"size": 0.14, "c": "lilac", "c2": "hot"}
+				"size": 0.14, "c": "leaf_lit", "c2": "hot"}
 		]},
 		"hop": {"fx": [
 			{"p": "star", "y": 0.3, "n": 6, "way": "back", "speed": 1.2, "spread": 0.6, "grav": -0.4, "life": 0.6,
-				"size": 0.1, "c": "main", "c2": "hot"},
+				"size": 0.1, "c": "leaf", "c2": "hot"},
 			{"p": "smoke", "y": 0.15, "n": 2, "way": "back", "speed": 0.8, "spread": 0.6, "life": 0.6, "size": 0.15,
-				"c": "smoke", "c3": "lilac", "near": true}
+				"c": "smoke", "c3": "leaf_lit", "near": true}
 		]},
 		"dash_trail": {"fx": [
 			{"p": "star", "at": "chest", "n": 22, "way": "back", "lift": 0.2, "speed": 0.8, "spread": 0.6, "grav": -0.3,
-				"drag": 1.5, "curl": 1.2, "life": 0.8, "size": 0.18, "c": "main", "c2": "hot"},
+				"drag": 1.5, "curl": 1.2, "life": 0.8, "size": 0.18, "c": "leaf", "c2": "hot"},
 			{"p": "star", "at": "chest", "n": 8, "way": "back", "speed": 0.5, "spread": 0.8, "grav": -0.2, "life": 0.8,
-				"size": 0.09, "c": "pink", "c2": "hot", "near": true}
+				"size": 0.09, "c": "leaf_lit", "c2": "hot", "near": true}
 		]},
 		"seed_aim": {"fx": [
 			{"p": "star", "at": "lantern", "n": 10, "shape": "gather", "radius": 0.6, "speed": 2.0, "life": 0.3,
-				"size": 0.08, "c": "lilac", "c2": "hot"}
+				"size": 0.08, "c": "leaf_lit", "c2": "hot"}
 		]},
 		"seed_cast": {"fx": [
-			{"p": "flare", "size": 0.35, "grow": 1.2, "life": 0.18, "c": "lilac", "c2": "pink", "c3": "char"},
+			{"p": "flare", "size": 0.35, "grow": 1.2, "life": 0.18, "c": "leaf_lit", "c2": "leaf_lit", "c3": "leaf_char"},
 			{"p": "star", "n": 8, "way": "fwd", "speed": 3.0, "spread": 0.5, "drag": 2.0, "life": 0.5,
-				"size": 0.12, "c": "lilac", "c2": "hot"}
+				"size": 0.12, "c": "leaf_lit", "c2": "hot"}
 		]},
 		"seed_trail": {"fx": [
-			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.22, "c": "lilac", "c2": "hot", "c3": "char"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.22, "c": "leaf_lit", "c2": "hot", "c3": "leaf_char"}
 		]},
 		"seed_stick": {"fx": [
 			{"p": "star", "y": 1.2, "n": 10, "speed": 1.5, "spread": 0.9, "drag": 1.5, "life": 0.6, "size": 0.12,
-				"c": "lilac", "c2": "hot"}
+				"c": "leaf_lit", "c2": "hot"}
 		]},
 		"seed_field": {"net": false, "fx": [
 			{"p": "star", "y": 0.1, "n": 3, "shape": "arc", "arc": 360, "w": 0.15, "radius": "r", "radius_x": 0.95,
@@ -76,10 +76,10 @@
 				"speed": 1.8, "spread": 0.3, "grav": -0.8, "drag": 1.5, "life": 0.8, "size": 0.14, "c": "leaf", "c2": "leaf_hot"}
 		]},
 		"seed_root": {"fx": [
-			{"p": "ring", "size": 0.9, "life": 0.5, "c": "root", "c2": "root_hot", "c3": "char"},
-			{"p": "flare", "y": 1.0, "size": 1.0, "grow": 1.2, "life": 0.18, "c": "root", "c2": "root_hot", "c3": "char"},
+			{"p": "ring", "size": 0.9, "life": 0.5, "c": "leaf", "c2": "leaf_hot", "c3": "leaf_char"},
+			{"p": "flare", "y": 1.0, "size": 1.0, "grow": 1.2, "life": 0.18, "c": "leaf", "c2": "leaf_hot", "c3": "leaf_char"},
 			{"p": "star", "y": 0.1, "n": 8, "shape": "disc", "radius": 0.5, "speed": 2.2, "spread": 0.2, "grav": 1.0,
-				"drag": 1.0, "life": 0.6, "size": 0.12, "c": "root", "c2": "root_hot"}
+				"drag": 1.0, "life": 0.6, "size": 0.12, "c": "leaf", "c2": "leaf_hot"}
 		]},
 		"hearth": {"fx": [
 			{"p": "flare", "at": "lantern", "size": 1.3, "grow": 1.3, "life": 0.3, "c": "main", "c2": "hot", "c3": "pink"},
