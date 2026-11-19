@@ -21,6 +21,7 @@ var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
 var tab := "Main"
 var more_tabs := false          # the other settings tabs are showing
+var search := ""                # the settings search box (SettingsSearch); empty shows the current tab
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var bind_hot: Array = []        # [action, slot] pairs shown red while a clash waits for Swap or Keep both
@@ -108,6 +109,11 @@ func _input(event: InputEvent) -> void:
 			else: open_admin()
 			get_viewport().set_input_as_handled()
 			return
+	if page == "settings" and search != "" and event.is_action_pressed("menu"):     # Esc clears the search first
+		search = ""
+		_show_settings()
+		get_viewport().set_input_as_handled()
+		return
 	if page != "" and (event.is_action_pressed("menu") or (event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"))):
 		back()
 		get_viewport().set_input_as_handled()
@@ -220,6 +226,7 @@ func close() -> void:
 	page = ""
 	stack.clear()
 	listening = ""
+	search = ""
 	delete_armed = -1
 	UI.show_backdrop(dim, false)
 	Sfx.play("ui_close", null, -14.0)
@@ -342,8 +349,26 @@ func _show_settings() -> void:
 			more_tabs = true
 		else:
 			tab = t
+		search = ""
 		_show_settings())
-	match tab:
+	SettingsSearch.field(v, search, func(t):
+		search = t
+		_show_settings.call_deferred())
+	if SettingsSearch.active(search):
+		SettingsSearch.fill(v, search, SETTINGS_TABS, _build_tab)
+	else:
+		_build_tab(tab, v)
+	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
+		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
+			Settings.reset_all()
+			_show_settings())))
+	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
+	UI.footer(v).add_child(done)
+	(v.get_meta("shell") as Control).set_meta("primary", done)
+
+## One settings tab's rows.
+func _build_tab(t: String, v: VBoxContainer) -> void:
+	match t:
 		"Main": _tab_main(v)
 		"Gameplay": _tab_gameplay(v)
 		"Controls": _tab_controls(v)
@@ -352,13 +377,6 @@ func _show_settings() -> void:
 		"Video": _tab_video(v)
 		"Accessibility": _tab_access(v)
 		"Demo": _tab_demo(v)
-	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
-		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
-			Settings.reset_all()
-			_show_settings())))
-	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
-	UI.footer(v).add_child(done)
-	(v.get_meta("shell") as Control).set_meta("primary", done)
 
 ## What most players change: picture quality, window, volume. Keys are the next tab.
 func _tab_main(v: VBoxContainer) -> void:
@@ -574,6 +592,7 @@ func _group(v: VBoxContainer, txt: String) -> void:
 func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxContainer:
 	var r := UI.hbox(16)
 	r.set_meta("setting", key)
+	r.set_meta("label", label_txt)      # what SettingsSearch matches
 	r.custom_minimum_size.y = 40
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL

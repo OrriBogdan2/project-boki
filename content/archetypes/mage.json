@@ -66,6 +66,8 @@
 		"charges": 1,
 		"hold": 1.0,
 		"min_t": 0.33,
+		"self_slow": 0.18,
+		"slow_in": 0.3,
 		"coil": {
 			"dmg": [
 				16.0,
