@@ -44,7 +44,8 @@ func draw_hud_tip(sz: Vector2, p: Hunter) -> void:
 	for i in range(1, lines.size()):
 		h += wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
 	var anchor: Rect2 = hit[0]
-	var pos := HudTip.place(anchor, Vector2(w, h), sz)  # above if it fits, else beside; always on screen, never over the slot
+	# above if it fits, else beside; always on screen, never over the slot
+	var pos := HudTip.place(anchor, Vector2(w, h), sz)
 	var a := clampf((H.hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))
 	H._rounded(box, Color(0.05, 0.06, 0.09, 0.95 * a), 12, Color(head[1], 0.6 * a), 2)
@@ -163,7 +164,7 @@ func arch_tip(id: String, p: Hunter) -> Array:
 	if id == "sec":
 		var rd := p.ak.res_def()
 		out.append(
-			["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12]
+			["Passive: %s" % AbilityText.full(p.arch, "passive"), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12]
 		)
 	out.append(
 		[

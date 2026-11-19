@@ -22,6 +22,7 @@
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down; blocking builds Guard."],
 	"silhouette": "the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist",
+	"hint": {"lmb": "Tap {fire} to throw the hammer, tap again to call it back", "rmb": "Hold {secondary} to block shots from the front", "e": "Press {signature} for a healing light on your hammer", "dash": "Press {dash} for a spin smash; aegis up, a shield charge"},
 	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Blocking builds Guard; at 50, Shield Charge becomes a Shield Slam.", "rmb": "Hold to block shots from the front; your dash key becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "rmb": ["18 slam"], "e": ["18 burst"], "x": ["18 dmg"]}},
 	"signature": "tower_shield",
 	"resource": {
@@ -100,7 +101,7 @@
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 12.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). {dash} while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -147,7 +148,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."

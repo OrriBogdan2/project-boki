@@ -139,6 +139,11 @@ func update() -> void:
 		var owed := float(Hunter.XP_TO[to - 1]) - p.xp
 		grant(owed / float(left + 1) + (0.01 if left == 0 else 0.0))
 
+## Is `e` one of this camp's monsters?
+func has(e: Node) -> bool:
+	return ledger.any(func(x): return x["mb"] == e)
+
+
 func alive() -> int:
 	return ledger.filter(func(e): return is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead).size()
 

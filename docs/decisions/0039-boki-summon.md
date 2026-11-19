@@ -32,3 +32,7 @@ Left out on purpose: guardian summon, kill credit (the kill-feed task), bots sum
 - The Training Grounds' Boki island has a summon pad (`SummonStation`, content/rules/summon_station.json): stand on it for the
   round-vs-critter card and the live Summon key, interact for the next of three practice Bokis with different windows.
   `--summon-station-check` covers the card, each window and cooldown, and the early send-back.
+- Cards: the Field Book species page shows `Summon N s / rest N s` from `KinSummon.times` (the same cell the summon
+  reads) and a plain line picked by `card_lines` thresholds in boki_summon.json ("Short summon, strong" / "Long summon,
+  steady") (DexView.summon_row; ported from ext/ui-summon-card 10b3b9152a; the garden card and loadout rows are left
+  out because home.gd is frozen).

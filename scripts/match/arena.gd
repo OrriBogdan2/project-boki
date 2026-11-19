@@ -8,6 +8,8 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
+## - on the Training Grounds, the Boki summon pad beside them (SummonPad): stand on it for the wisp card,
+##   interact brings the next of three practice Boki, the Summon key bursts it out at the dummies
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -43,6 +45,7 @@ var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
 var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
+var pad: SummonPad = null      # the Training Grounds only
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node
@@ -75,6 +78,8 @@ func setup(match_node: Match, which: String) -> void:
 	if layout == "arena":
 		grounds = Grounds.new(self)
 		grounds.build()
+	if layout == "practice":
+		pad = SummonPad.new(self, _free_near(home + SummonPad.offset()))
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
@@ -235,6 +240,8 @@ func tick(dt: float) -> void:
 	drill.tick(dt)
 	if grounds:
 		grounds.tick()
+	if pad:
+		pad.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -289,7 +296,7 @@ func set_arch(a: String, w := "") -> void:
 		if gloves[i] != "": give_glove(String(gloves[i]), i)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), AbilityText.loop(a)], Arch.color(a))
 	if card_layer: _open_card()
 
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
@@ -512,7 +519,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for a in Arch.ids():
 		var aa: String = a
 		var b := UI.choice(HeroTitle.base_name(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), MENU_PICK_W)
-		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))]
+		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), AbilityText.loop(a)]
 		b.add_theme_font_size_override("font_size", 14)
 		ag.add_child(b)
 	left.add_child(ag)
@@ -602,7 +609,7 @@ func _menu_header(arch: String) -> HBoxContainer:
 	var who := UI.vbox(2)
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.add_child(UI.label(HeroTitle.base_name(arch), 26, Arch.color(arch), UI.big))
-	who.add_child(UI.para(String(Arch.def(arch).get("card", {}).get("loop", "")), 13, UI.MUTED))
+	who.add_child(UI.para(AbilityText.loop(arch), 13, UI.MUTED))
 	hd.add_child(who)
 	var side := UI.vbox(4)
 	var hint := UI.label("Everything applies at once. Esc or L closes.", 12, UI.MUTED)
@@ -673,6 +680,8 @@ class ArenaKeys extends Node:
 	func _unhandled_input(e: InputEvent) -> void:
 		if not (e is InputEventKey and e.pressed and not e.echo):
 			return
+		if a.pad and e.is_action_pressed("interact") and not a.m.paused and a.pad.on_pad():
+			a.pad.cycle()
 		var k := (e as InputEventKey).physical_keycode
 		var handled := true
 		match k:

@@ -129,6 +129,7 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
@@ -1526,9 +1527,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Ability")), rdesc, ak.col_of(ak.rmb_def())])
-		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "Utility")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), AbilityText.name_of(p.arch, "e"), AbilityText.full(p.arch, "e"), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_caps("hunter_ult"), AbilityText.name_of(p.arch, "r") + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), AbilityText.full(p.arch, "r"), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -1635,6 +1636,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}

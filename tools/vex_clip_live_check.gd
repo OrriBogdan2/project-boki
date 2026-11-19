@@ -1,19 +1,26 @@
 extends RefCounted
 ## --vex-clip-live-check: Vex's clips through the real match code (see --clip-live-check for Kael): her clips
 ## are on and no procedural gun shows; the slide's legs turn to the dash while the cannon arm stays on the aim
-## (aims_in_dash); a tapped RMB swings the launcher forward; LMB plays; a knock-out plays the death clip.
+## (aims_in_dash); a tapped RMB flicks the coin hand out with the gun down; E raises the open palm with the gun down;
+## LMB plays; a knock-out plays the death clip.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const AIM_OFF := 0.3           # rad: how far the cannon may sit off the aim mid slide
+const AIM_OFF := 0.3  # rad: how far the cannon may sit off the aim mid slide
+const FLICK := 0.2  # m: how far past rest the coin hand reaches along her facing
+const PALM_UP := 1.2  # m: the raised palm above her feet while Palm Lance charges
+const PALM_OUT := 0.25  # m: the palm ahead of her while Palm Lance charges
+const GUN_REST := 0.15  # m: the most the gun hand may rise over its rest height in a coin toss or a palm cast
 
 var A
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("LIVE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _frame(m: Match, h: Array) -> void:
 	m.step(DT)
@@ -25,12 +32,15 @@ func _frame(m: Match, h: Array) -> void:
 			if x.visible or x.out:
 				sync.call("_process", DT)
 
+
 func _clips(h: Hunter) -> WardenClips:
 	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
+
 
 func _yaw_of(h: Hunter, sk: Skeleton3D, bone: String, along: Vector3) -> float:
 	var d := sk.global_transform.basis * (sk.get_bone_global_pose(sk.find_bone(bone)).basis * along)
 	return atan2(-d.x, -d.z)
+
 
 func _shown(h: Hunter) -> int:
 	var n := 0
@@ -40,11 +50,15 @@ func _shown(h: Hunter) -> int:
 			n += 1
 	return n
 
+
 ## The world yaw a pair of bones faces: the line from the left one's head to the right one's is his right.
 func _line_yaw(sk: Skeleton3D, left: String, right: String) -> float:
-	var d := sk.global_transform.basis * (sk.get_bone_global_pose(sk.find_bone(right)).origin
-			- sk.get_bone_global_pose(sk.find_bone(left)).origin)
+	var d := (
+		sk.global_transform.basis
+		* (sk.get_bone_global_pose(sk.find_bone(right)).origin - sk.get_bone_global_pose(sk.find_bone(left)).origin)
+	)
 	return atan2(-d.z, d.x)
+
 
 ## A frame of running `move` (the stick) while aiming +X, or `swing` rad round from it.
 func _run_frame(m: Match, P: Hunter, T: Hunter, home: Vector3, move: Vector2, swing := 0.0) -> void:
@@ -53,8 +67,10 @@ func _run_frame(m: Match, P: Hunter, T: Hunter, home: Vector3, move: Vector2, sw
 	P.inp["move"] = move
 	_frame(m, [P])
 
+
 func _run_rel(P: Hunter) -> float:
 	return wrapf(atan2(-P.vel.x, -P.vel.z) - P.face, -PI, PI)
+
 
 ## Running one way while aiming another (+X): the legs turn to the run, the torso stays on the aim. Within the limit
 ## the legs turn the way he runs (the sign of his run off the aim); beyond it they turn round and run backwards, so
@@ -74,12 +90,20 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		var rel := _run_rel(P)
 		var back: bool = absf(rel) > c.twist_max
 		var want := rel - signf(rel) * PI if back else rel
-		ok(absf(c.head_turn - want) < 0.15 and c.twist_back == back,
-				"run %d deg off the aim: legs turn %.2f rad (want %.2f, %s)" % [deg, c.head_turn, want,
-				"backwards" if c.twist_back else "forwards"])
-		ok(absf(wrapf(legs.angle() - want, -PI, PI)) < 0.3 and absf(torso.angle()) < 0.3,
-				"  on the skeleton: the thighs face %.2f rad off the aim, the shoulders %.2f" % [legs.angle(),
-				torso.angle()])
+		ok(
+			absf(c.head_turn - want) < 0.15 and c.twist_back == back,
+			(
+				"run %d deg off the aim: legs turn %.2f rad (want %.2f, %s)"
+				% [deg, c.head_turn, want, "backwards" if c.twist_back else "forwards"]
+			)
+		)
+		ok(
+			absf(wrapf(legs.angle() - want, -PI, PI)) < 0.3 and absf(torso.angle()) < 0.3,
+			(
+				"  on the skeleton: the thighs face %.2f rad off the aim, the shoulders %.2f"
+				% [legs.angle(), torso.angle()]
+			)
+		)
 	# near 90 deg off the aim: just past the limit the legs turn round, running backwards holds a little inside it (no
 	# flicker) and lets go further in; either way he never twists past the limit (100 to 88 to 82 on one side, so the
 	# run never swings through the aim on the way)
@@ -92,9 +116,16 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 			_run_frame(m, P, T, home, Vector2(1, 0).rotated(deg_to_rad(deg)))
 			most = maxf(most, absf(c.head_turn))
 		backs.append(c.twist_back)
-	ok(backs == [false, false, true, true, false] and most <= c.twist_max + 0.01,
-			("runs 0, 8 inside the limit, 4 past it, 8 inside, 2 inside the release: backwards %s, "
-			+ "the twist at most %.2f rad (limit %.2f)") % [backs, most, c.twist_max])
+	ok(
+		backs == [false, false, true, true, false] and most <= c.twist_max + 0.01,
+		(
+			(
+				"runs 0, 8 inside the limit, 4 past it, 8 inside, 2 inside the release: backwards %s, "
+				+ "the twist at most %.2f rad (limit %.2f)"
+			)
+			% [backs, most, c.twist_max]
+		)
+	)
 	# the aim swings 70 deg toward his run in a tenth of a second: the legs hold his way, the torso takes the swing
 	var run_60 := Vector2(1, 0).rotated(deg_to_rad(60.0))
 	for f in 40:
@@ -115,14 +146,24 @@ func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		var was := c.torso_turn
 		c._turn_to_heading(st, roll, false, DT)
 		jump = maxf(jump, absf(c.torso_turn - was))
-	ok(absf(c.head_turn) > 0.5 and absf(c.torso_turn - c.head_turn) < 0.1 and jump < 0.3, ("a roll out of the run "
-			+ "turns him whole: the torso %.2f rad off the legs, eased (%.2f rad a frame at most)")
-			% [c.torso_turn - c.head_turn, jump])
+	ok(
+		absf(c.head_turn) > 0.5 and absf(c.torso_turn - c.head_turn) < 0.1 and jump < 0.3,
+		(
+			(
+				"a roll out of the run "
+				+ "turns him whole: the torso %.2f rad off the legs, eased (%.2f rad a frame at most)"
+			)
+			% [c.torso_turn - c.head_turn, jump]
+		)
+	)
 	P.inp["move"] = Vector2.ZERO
 	for f in 40:
 		_frame(m, [P])
-	ok(absf(c.head_turn) < 0.05 and absf(c.torso_turn) < 0.05,
-			"the legs and torso unwind when he stops (%.2f, %.2f rad)" % [c.head_turn, c.torso_turn])
+	ok(
+		absf(c.head_turn) < 0.05 and absf(c.torso_turn) < 0.05,
+		"the legs and torso unwind when he stops (%.2f, %.2f rad)" % [c.head_turn, c.torso_turn]
+	)
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -165,29 +206,58 @@ func run(main: Node) -> void:
 			frames += 1
 	P.inp["move"] = Vector2.ZERO
 	ok(seen.has("dash"), "the dash plays her slide")
-	ok(frames > 0 and legs_turn > 0.8, "the legs follow the dash (up to %.2f rad off the aim, %d frames)"
-			% [legs_turn, frames])
+	ok(
+		frames > 0 and legs_turn > 0.8,
+		"the legs follow the dash (up to %.2f rad off the aim, %d frames)" % [legs_turn, frames]
+	)
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
 	_twist(m, P, T, home)
-	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
-	var fire := WardenGlb.anchor(P.model, "launcher_fire")
-	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")
-	if fire:
-		var ahead := (fire.global_position - P.model.global_position).dot(P.model.global_transform.basis.z * -1.0)
-		print("LIVE launcher_fire %.2f m along her facing at rest" % ahead)
-	var lb := sk.find_bone("launcher")
-	var rest_q := sk.get_bone_pose_rotation(lb)
+	# RMB tap: the coin is flicked from her free hand: the palm goes out ahead of her, the gun hand stays down
+	var vfx := HeroVfx.of(m)
+	var rel := func(bone: String) -> Vector3:
+		return sk.global_transform * sk.get_bone_global_pose(sk.find_bone(bone)).origin - P.pos
+	var fwd := func() -> float:
+		var a := P.aim_dir()
+		return (vfx.anchor_pos(P, "palm") - P.pos).dot(Vector3(a.x, 0, a.y))
+	var rest_ahead: float = fwd.call()
+	var gun_rest: float = (rel.call("hand.R") as Vector3).y
 	seen.clear()
 	P.inp["sec"] = true
-	var swung := 0.0
+	var flick := -9.0
+	var gun_up := -9.0
 	for f in 30:
 		_frame(m, [P])
 		seen[_clips(P).cur] = true
-		swung = maxf(swung, sk.get_bone_pose_rotation(lb).angle_to(rest_q))
-	ok(seen.has("rmb"), "a tapped RMB plays its clip")
-	ok(swung > 2.4, "the launcher swings forward for the throw (%.2f rad)" % swung)
+		flick = maxf(flick, fwd.call() - rest_ahead)
+		gun_up = maxf(gun_up, (rel.call("hand.R") as Vector3).y - gun_rest)
+	P.inp["sec"] = false
+	ok(seen.has("coin_flick"), "a tapped RMB plays the coin flick clip")
+	ok(flick > FLICK, "the coin hand flicks out ahead of her (%.2f m past rest %.2f m)" % [flick, rest_ahead])
+	ok(gun_up < GUN_REST, "the gun stays down through the coin toss (%.2f m over rest)" % gun_up)
+	# E: the Palm Lance charges from the raised open palm, out in front at chest height, the gun hand down
+	for f in 60:
+		_frame(m, [P])
+	seen.clear()
+	K.cd["e"] = 0.0
+	K.use_e()
+	var high := 0.0
+	var out := 0.0
+	gun_up = -9.0
+	for f in 45:
+		_frame(m, [P])
+		seen[_clips(P).cur] = true
+		if not K.needle.is_empty():
+			high = maxf(high, (vfx.anchor_pos(P, "palm") - P.pos).y)
+			out = maxf(out, fwd.call())
+			gun_up = maxf(gun_up, (rel.call("hand.R") as Vector3).y - gun_rest)
+	ok(seen.has("palm_cast"), "the Palm Lance plays the palm cast clip")
+	ok(
+		high > PALM_UP and out > PALM_OUT,
+		"the palm is raised and out for the charge (%.2f m up, %.2f m ahead)" % [high, out]
+	)
+	ok(gun_up < GUN_REST, "the gun stays down through the palm cast (%.2f m over rest)" % gun_up)
 	# LMB
 	seen.clear()
 	for f in 60:
@@ -213,7 +283,9 @@ func run(main: Node) -> void:
 		_frame(m, [P])
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
-	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)"
-			% [dead_seen, was_visible])
+	ok(
+		dead_seen and was_visible,
+		"a knock-out plays the death clip on screen (clip %s, visible %s)" % [dead_seen, was_visible]
+	)
 	print("VEX_CLIP_LIVE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

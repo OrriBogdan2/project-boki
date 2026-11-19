@@ -1772,7 +1772,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
-		if tut and by == player and target is Mob: tut.on_hit()
+		if tut and by == player and target is Mob: tut.on_hit(target)
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
@@ -5391,6 +5391,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+var hunter_hints := HunterHints.new()   # the first-time lines for each fighting slot of a Hunter
 
 func _tips() -> void:
 	tips_live = false
@@ -5417,6 +5418,8 @@ func _tips() -> void:
 	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
@@ -5426,6 +5429,8 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var proc_tip := WispProc.tip(k)      # its carry passive just acted: name it once
+	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
