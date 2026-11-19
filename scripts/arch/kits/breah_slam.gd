@@ -6,7 +6,8 @@ extends RefCounted
 ## everyone sees the circle where the hop will land with its sweet spot growing from the centre; he can walk
 ## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
 ## the tap slam dunks foes in the air (GlideSpike.dunks; the hop and the dive are leaps and do not), rocks
-## inside fly outward, and at rank 3 each slam that catches something adds a Shardskin shield stack (DolmKit.guard_stack).
+## inside fly outward, and at rank 3 each slam that catches something adds a Shardskin shield stack
+## (DolmKit.guard_stack).
 ## Owner 11-08 (the hop read as too fast and glitchy): the held hop now winds up first (planted in a deep
 ## crouch for `windup`), leaves the ground fast and eases its ground speed to nil at the landing, falls harder
 ## than it rose (a thrown stone), and stops short at the first body in its path (a swept test each step) instead
