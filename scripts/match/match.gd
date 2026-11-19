@@ -2393,7 +2393,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", TipText.stagger(String(mb.md["name"])))
+		_tip("stagger", TipText.stagger())
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -5418,7 +5418,7 @@ func _tips() -> void:
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
-		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+		_tip("overheat_lift", TipText.overheat_lift())
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
@@ -5428,11 +5428,11 @@ func _tips() -> void:
 		return
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
-	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("exit_uplink", TipText.exit_uplink())
+	if player.downed: _tip("down", TipText.down())
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

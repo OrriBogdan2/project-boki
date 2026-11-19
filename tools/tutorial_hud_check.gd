@@ -41,6 +41,7 @@ func run(mn: Node) -> void:
 	_reach()
 	_dive_hint()
 	_cc_tips()
+	_hint_lines()
 	_zone_lines()
 	await _pointers()
 	print("TUTHUD DONE, failures: ", bad)
@@ -335,6 +336,24 @@ func _dive_hint() -> void:
 	dm.queue_free()
 
 # ------------------------------------------------------------------ 8. the first crowd control
+## The first-time hints (TipText): one short line each, and any key in them is the player's own (key_cap).
+func _hint_lines() -> void:
+	for pair in TipText.all_lines():
+		var line := String(pair[1])
+		var short := line.length() <= TipText.MAX_LEN and not line.contains("\n")
+		ok(short, "hint '%s' is one short line (%d chars)" % [pair[0], line.length()])
+	var keyed := {"move": ["fire", "dash", "jump"], "ability": ["signature", "ultimate"],
+			"ability (kit)": ["throw", "ultimate"], "ult": ["ultimate"],
+			"stagger": ["signature", "ultimate", "gear1"], "overheat_lift": ["jump"]}
+	var lines := {}
+	for pair in TipText.all_lines():
+		lines[pair[0]] = String(pair[1])
+	for k in keyed:
+		for act: String in keyed[k]:
+			ok(String(lines[k]).contains(Settings.key_cap(act)), "hint '%s' shows the live %s key" % [k, act])
+	var down := String(lines["down"])
+	ok(not down.contains("trusting") and down.contains("wisp"), "the down hint speaks of the wisp")
+
 func _cc_tips() -> void:
 	var tips: Dictionary = Content.rules("tutorial")["tips"]
 	for cc: String in ["stun", "root", "grounded"]:
