@@ -22,7 +22,9 @@ static func run(g, secs: float) -> void:
 		var dash := false
 		for at in DASH_AT:
 			dash = dash or absf(t - float(at)) < FRAME * 0.5
-		var mv := Vector2(1, 0) if t < 1.6 else Vector2(0.35 if fmod(t, 6.0) < 3.0 else -0.35, 0)
+		var mv := Vector2(1, 0)
+		if t >= 1.6:
+			mv.x = 0.35 if fmod(t, 6.0) < 3.0 else -0.35
 		if P.pos.x > x0 + LANE:
 			mv.x = minf(mv.x, 0.0)
 		g._keys(P, mv, false, false, dash)

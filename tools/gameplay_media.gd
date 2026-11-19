@@ -33,7 +33,8 @@ extends RefCounted
 ##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
 ##  16 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
 ##                   following: the walk speed for a before/after cut (decision 0061)
-##  17 dash refill  Thief dashes twice, then walks: each charge's quiet return cue alone (tools/gameplay_media_refill.gd)
+##  17 dash refill  Thief dashes, presses on empty, walks: each charge's quiet return cue alone
+##                   (tools/gameplay_media_refill.gd)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const AUDIT := preload("res://tools/anim_audit.gd")
