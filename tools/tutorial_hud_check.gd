@@ -45,6 +45,10 @@ func ok(cond: bool, what: String) -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
+	var fresh: Dictionary = Save.d.duplicate(true)
+	for id in STARTERS:
+		_framing(id)
+		Save.d = fresh.duplicate(true)      # (a finished course leaves the save's tutorial flags set)
 	_lanes()
 	_course()
 	_reach()
@@ -52,8 +56,6 @@ func run(mn: Node) -> void:
 	_cc_tips()
 	_zone_lines()
 	await _pointers()
-	for id in STARTERS:
-		_framing(id)
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -530,7 +532,8 @@ func _framing(arch: String) -> void:
 	var fm := Match.new()
 	main.add_child(fm)
 	fm.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
-			"demo_kin": "cindle", "arch": arch, "cls": Arch.weight(arch)})
+			"demo_kin": "cindle", "arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch),
+			"boki_wisps": false})
 	fm.set_process(false)
 	var tu: Tutorial = fm.tut
 	var rows := {}      # step id -> [frames, frames on screen, px tall while on screen, on screen last frame]
