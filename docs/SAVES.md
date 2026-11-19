@@ -11,11 +11,11 @@ save marked "from a newer game", a lost kin or field, or a key `Settings` no lon
 | `feedback.json` | `Feedback` | `Feedback._load` reads minutes, answered versions and the queue back |
 | `warm_stamp.json` | `WarmStamp.save` (a cache; a stale one is ignored) | the file still has its fields |
 
-`save_v1.json` is the oldest format (hand-made, v1); `save_v21_*` (v21: the Training Grounds time trial's bests) are the
-newest pair: `save_v21_fresh.json` is a new save, `save_v21_farm.json` a
-populated farm. `save_v20_*` (v20: per-Hunter stats, on top of main's v15-v19
-chain: drills, tutorial resume, clans, XP hints, sleepovers) are the pair before it; they load through v20 -> v21 (kin, bonds, incubator egg, home layout). `save_v15_*` are dev saves from the integ-1113-D1 line, whose v15 was the
-per-Hunter stats step (main's v15 is the drills); they load through v15 -> v21 like any v15 file.
+`save_v1.json` is the oldest format (hand-made, v1); `save_v22_*` (v22: the Training Grounds time trial's bests) are the
+newest pair: `save_v22_fresh.json` is a new save, `save_v22_farm.json` a
+populated farm. `save_v21_*` (v21: first-time hints per Hunter) and `save_v20_*` (v20: per-Hunter stats, on top of main's v15-v19
+chain: drills, tutorial resume, clans, XP hints, sleepovers) are the pairs before it; they load through v20 -> v22 (kin, bonds, incubator egg, home layout). `save_v15_*` are dev saves from the integ-1113-D1 line, whose v15 was the
+per-Hunter stats step (main's v15 is the drills); they load through v15 -> v22 like any v15 file.
 
 ## Changing a format on purpose
 Per AGENTS.md section 4 an old save must still load, so a format change ships with a migration:

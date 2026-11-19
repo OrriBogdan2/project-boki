@@ -28,7 +28,7 @@ var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
-var trial: TimeTrial = null  # the time trial's gates and arches (docs/decisions/0101)
+var trial: TimeTrial = null  # the time trial's gates and arches (docs/decisions/0102)
 var prompt: Label = null
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null

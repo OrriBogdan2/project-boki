@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 21
+const VERSION := 22
 const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
@@ -19,7 +19,7 @@ const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
 		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20", 20: "_migrate_20_to_21"}
+		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -373,8 +373,12 @@ func _migrate_19_to_20(data: Dictionary) -> void:
 	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
 		data["drills"] = {}
 
-## v20 -> v21: the Training Grounds' time trial. Every Hunter starts with no personal best (TimeTrial).
+## v20 -> v21: a Hunter the save has already played gets none of its first-time hints (HunterHints).
 func _migrate_20_to_21(data: Dictionary) -> void:
+	HunterHints.migrate(data)
+
+## v21 -> v22: the Training Grounds' time trial. Every Hunter starts with no personal best (TimeTrial).
+func _migrate_21_to_22(data: Dictionary) -> void:
 	TimeTrial.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
