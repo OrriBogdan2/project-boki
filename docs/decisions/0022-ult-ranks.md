@@ -1,6 +1,6 @@
 # 0022: Ultimate ranks
 
-- **Status:** proposed (spec only, no code)
+- **Status:** accepted (owner 2026-11-18: option 2, R rank 3 at level 10; built on ext/ult-ranks)
 - **Date:** 2026-11-09
 - **Area:** combat, progression
 
@@ -74,6 +74,19 @@ strings. No new files. `tools/gen_wiki.py` and `docs/ABILITIES.md` pick the stri
 same int). Net.VERSION: bump once when `SLOT_MAX` and `ULT_AT` change, because a v-old client would clamp
 a 3. No save field changes, so no migration; a run in progress is not saved. Practice `unlock_all` stays at
 rank 1.
+
+## As built (ext/ult-ranks)
+- `x.per_rank` holds, per key, what R ranks 2 and 3 each add in the key's own unit (a +20% source step is
+  written as 20% of our current base), read by `HeroUlt.ranked` through `ArchKit.x_def()` (cached per rank),
+  so no kit code changed. A kit with `per_rank` takes only its own steps (no generic +15% / -10% on top);
+  tender and gil (no source tiers) take the shared -10% cooldown step. Rimewright's ult reads `power("x")`.
+- Cooldown steps are the source deltas scaled by our base / the source's, rounded to 0.5s:
+  juggernaut -4, gunslinger -4, dredge -3, mage -5, bulwark -4, thief -2.5, ashwick -12 at rank 2.
+  Alternative: the unscaled source deltas (-5 each) if the owner prefers the absolute numbers.
+- Text: `rank2.ult` / `rank_next.ult` (the slot key the other slots use, read by `Arch.next_ranks` and the wiki),
+  not `rank2.x` / `rank3.x`. No rank-3 toast: no other slot has one.
+- Bots take R ranks 1-2 as they open and rank 3 once every slot is rank 2 (no `order` edits).
+- Juggernaut's +5% AP per tier is not built (our ult has no AP ratio). Check: `--ult-rank-check`.
 
 ## Consequences
 - One shared edit (hunter.gd constants, a few lines; `hero_ult.gd` cooldown and `level_k`) plus data per hero.

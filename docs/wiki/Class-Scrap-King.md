@@ -89,6 +89,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
 | Dash (Shift) | recharge 10s -> 8.2s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 6.4s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge. |
 | E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
+| R (ultimate) | Brass Broadside cooldown 21s -> 18s, damage 4 -> 4.8. The Merge lasts 30% longer. | Brass Broadside cooldown 21s -> 15s, damage 4 -> 5.6. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 

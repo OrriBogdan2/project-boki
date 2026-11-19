@@ -99,13 +99,14 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-3, docs/decisions/0022-ult-ranks.md). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Sound (`RankSfx`, your own HUD only, so bots' and other players' ranks are silent): a new point gives a short rising chime 0.9 s after the level-up chime, once, never again while it waits (none if you spent it first); spending it plays a rising pair pitched by slot (RMB, Shift, E, R = C, D, E, G); the point that maxes a slot plays a soft bloom instead (`--rank-ui-check`). Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
 - each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%
 - kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds
 - the merge at rank 2 lasts 30% longer and its effects hit 15% harder
+- the hero ultimate on X (`HeroUlt`) grows by its own `x.per_rank` steps at R ranks 2 and 3 (the source R tiers, 0022); a kit without them takes the 10% cooldown step only
 - dash and charge distances never grow: dashes stay short
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
