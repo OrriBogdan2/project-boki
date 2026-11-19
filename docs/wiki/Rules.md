@@ -468,7 +468,7 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | lean_centre | {"temper": 0.36, "loyalty": 0.72, "curiosity": 0.55} |
 | lean_floor | 0.34 |
 | lean_min | 0.05 |
-| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin_v2, birth noise included. |
+| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin, birth noise included. |
 | honest | [0.7, 0.5] |
 | honest_doc | Chance the tell you see is the move the other side really plans: for the side with the higher Focus, and for the other (and on equal Focus). |
 | rival_read | 0.35 |
@@ -1298,7 +1298,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
 | arrive | {"prints": 8, "step_m": 0.9, "print_m": 0.16, "alpha": 0.45, "fade_in_s": 2.0, "hold_s": 8.0, "fade_out_s": 3.0, "shimmer_s": 3.0, "mote_s": 0.3, "motes": 3, "glint_s": 2.5} |
 | arrive_doc | How a visitor reads as a stranger (scripts/home/visitor_arrive.gd): prints footprints, step_m m apart (print_m m wide, up to alpha opaque), run from the island edge to where it stands, fade in over fade_in_s, hold hold_s and fade out over fade_out_s; a burst of motes sparks of its type colour on it every mote_s seconds for its first shimmer_s seconds; one glint every glint_s seconds on an egg it left, until the egg is hatched. |
-| groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
+| groups_doc | Species themes (content/kin theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 
 ## garden_xp (`content/rules/garden_xp.json`)
 
@@ -1538,7 +1538,7 @@ First-time lines (Glossary, docs/UI_FIRST15.md 4): a word a new player meets on 
 | boss_s | 660 |
 | _boss_s | the boss comes at this time, or boss_after_clear_s after the last wave is cleared, whichever is first |
 | boss_after_clear_s | 20 |
-| boss | {"kind": "colossus", "name": "Blighted Cairnhorn", "hp": 4000.0, "half": 13.0, "enrage": 150.0, "_doc": "the one prototype boss: a Lair boss kit (scripts/match/boss.gd) fought in the open around the Heart, named for the Boki it is (content/kin/*.json \"boss\"). hp is for a squad of 4 at tier 1 before scale.boss_hp; enrage = seconds before it hits harder (a Lair's is 75); half = the half-width in metres of the square it fights in, centred on the Heart"} |
+| boss | {"kind": "colossus", "name": "Blighted Cairnhorn", "hp": 4000.0, "half": 13.0, "enrage": 150.0, "_doc": "the one prototype boss: a Lair boss kit (scripts/match/boss.gd) fought in the open around the Heart, named for the Boki it is (content/kin_home/*.json \"boss\"). hp is for a squad of 4 at tier 1 before scale.boss_hp; enrage = seconds before it hits harder (a Lair's is 75); half = the half-width in metres of the square it fights in, centred on the Heart"} |
 | warn_s | 10 |
 | _warn_s | a wave's gates are marked (a ring and a countdown on the ground, a badge on the minimap) this many seconds before it comes out of them |
 | gates | {"_doc": "the fixed points every wave comes out of (principle 1, clarity: never a random spot or time). deg: bearing from the Heart, clockwise from north (-z); m: metres from the Heart; guard: its monsters guard the Heart, else they come for the squad. An outer gate the tide has closed past is pulled in to EDGE_IN inside the ring the tide has at that wave's time (the same every raid)", "n": {"deg": 0, "m": 11, "guard": true}, "se": {"deg": 120, "m": 11, "guard": true}, "sw": {"deg": 240, "m": 11, "guard": true}, "ne": {"deg": 60, "m": 28, "guard": false}, "s": {"deg": 180, "m": 28, "guard": false}, "nw": {"deg": 300, "m": 28, "guard": false}} |
@@ -1689,7 +1689,7 @@ The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hat
 |---|---|
 | doc | Where Inks come from in a match (scripts/match/ink_drops.gd, called from GearDrops.run_table). An Ink is a backpack item (Loot.ink): carry it out and it goes to your goods (Goods, content/rules/market.json 'ink_<type>'), where Boki that evolve by Ink use it (content/rules/evolve.json). Bosses drop the Ink of their kin's type; camp monsters and guards rarely drop a random one. Per expedition, Goods.on_result adds one more small chance (market.json finds.ink). |
 | inks | ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"] |
-| type_ink_doc | The 18 types (theme ids in content/kin_v2, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once. |
+| type_ink_doc | The 18 types (theme ids in content/kin, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once. |
 | type_ink | {"ember": "ember", "tide": "tide", "bloom": "bloom", "storm": "storm", "frost": "frost", "shadow": "shadow", "lunar": "lunar", "prism": "prism", "wyrm": "wyrm", "spore": "bloom", "swarm": "bloom", "venom": "shadow", "tempest": "wyrm", "titan": "ember", "stone": "frost", "echo": "storm", "gravity": "lunar", "wild": "prism"} |
 | chance_doc | Chance a kill drops one Ink, by drop table (a mob's kind, or 'boss' for a lair boss). Absent = never. A boss always drops its own. The rest are rare on purpose: an Ink is a 60-gem good and a match has about 40 small kills, so the small ones add up to roughly one Ink in ten matches; guards and the Glimmerkin are the few worth hunting for. |
 | chance | {"boss": 1.0, "warden": 0.1, "glimmer": 0.1, "brute": 0.03, "sentinel": 0.01, "spitter": 0.003, "bomber": 0.003, "skitter": 0.003} |

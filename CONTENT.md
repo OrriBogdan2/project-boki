@@ -3,22 +3,22 @@
 Everything here is plain JSON under `content/`. The game reads it when it starts; no code changes.
 Colours are hex strings, times are seconds, distances are tiles.
 
-## A new kin: the kin grammar (`content/kin_v2`, `content/abilities_v2`, `content/merges_v2`)
+## A new kin: the kin grammar (`content/kin`, `content/abilities_v2`, `content/merges_v2`)
 
-Kin are built from a compositional grammar: a kin file (`content/kin_v2/<id>.json`) names its body,
+Kin are built from a compositional grammar: a kin file (`content/kin/<id>.json`) names its body,
 looks, a 20-point stat profile, how it's carried (shoulder, perch or mount), its throw and dodge
 rider, its E ability, an auto ability and its merge (R); abilities and merges are built from
 deliveries, effects, modifiers and triggers. The full format, the vocabulary and the runtime rules
 are in `docs/KIN_GRAMMAR.md`. Check your files with `--grammar-check`; the game skips any file with
 errors. Kin files are data only: nothing in them is ever loaded or run.
 
-`content/kin/<id>.json` now only holds a species' home and economy data:
+`content/kin_home/<id>.json` now only holds a species' home and economy data:
 
 - `work`: its work elements, the farm jobs it does on its own, each at a level 1-4, e.g. `{"bloom": 3, "forage": 2, "ranch": 1}`. Elements: ember, tide, bloom, spark, craft, forage, timber, stone, frost, haul, mend, ranch (see `scripts/core/work.gd`). Two or three per kin.
 - `shiny`: its hand-picked shimmer palette, `{"color", "belly", "glow"}` (and `"wing"` for winged kin). Shimmers are 1 in 4096 (see `scripts/core/shiny.gd`).
 - `rare` and `boss`: a rare kin only hatches from that lair boss's Rare Egg.
 
-A kin with no `content/kin` file is fine: it's not rare, and its work elements are guessed from its theme.
+A kin with no `content/kin_home` file is fine: it's not rare, and its work elements are guessed from its theme.
 
 IVs aren't set per species: every kin is born with its own (Health, Power, Speed, Work, Bond, 0-31 each; `Care.IVS` in `scripts/core/care.gd`), worth at most +10% (+5% Speed) at 31 through `Care.iv_mult`. Bred kin take 3 from their parents; Rare Eggs (which hatch on the Incubator by the Nesting Nook, `scripts/core/incubator.gd`) always have 3 at 26 or better. `--iv-check` and `--incubator-check` test them.
 

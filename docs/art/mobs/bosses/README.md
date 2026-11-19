@@ -4,7 +4,7 @@ Owner 11-10 ~12:50 PM EST: the 7 mobs and the 3 lair bosses get final 3D before 
 
 ## Files
 - `colossus.md` (The Stone Colossus, lair: The Sunken Forge), `serpent.md` (Stormcoil, Stormcrown Eyrie), `brood.md` (The Brood Mother, The Thornhive). Each: design card + turnaround prompt card.
-- Sources: `scripts/match/boss_models.gd` (current bodies), `scripts/match/boss.gd` (attacks, telegraph colours), `scripts/core/data.gd` (stats), `scripts/match/lairs.gd` (lair colours), the egg kin in `content/kin_v2/` (each boss drops the egg of its own kin).
+- Sources: `scripts/match/boss_models.gd` (current bodies), `scripts/match/boss.gd` (attacks, telegraph colours), `scripts/core/data.gd` (stats), `scripts/match/lairs.gd` (lair colours), the egg kin in `content/kin/` (each boss drops the egg of its own kin).
 
 ## Boss changes to the mob spec
 - **Size tier "boss":** taller than 2 H or longer than 3 H. The scale column shows the hunter figure next to the boss at true scale; the views still fill 70% of the view-row height.

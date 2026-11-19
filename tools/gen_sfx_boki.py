@@ -458,7 +458,7 @@ SPECIES_VOICE = {
 def species_data(sp):
     """(weight kg, theme, curiosity, temper) of a species from its content files."""
     home = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
-    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin_v2', sp + '.json')))
+    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
     pers = v2['personality']
     return home['size']['kg'], v2['theme'], pers['curiosity'], pers['temper']
 
