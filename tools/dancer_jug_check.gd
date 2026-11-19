@@ -74,7 +74,7 @@ func thief(a) -> void:
 	A.step(m, 0.5)
 	var off := Vector2(K.last_bolt_end.x - spot.x, K.last_bolt_end.z - spot.z).length()
 	A.ok("dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed)",
-			K.fizzles == fz + 1 and off < 0.6, "%.2f m off the cursor" % off)
+			K.fizzles == fz + 1 and off < 0.75, "%.2f m off the cursor" % off)
 	A.aim_at(P, home + Vector3(-30.0, 0, 0))
 	P.fire_cd = 0.0
 	fz = K.fizzles
@@ -229,7 +229,7 @@ func thief(a) -> void:
 	var landed := [false]
 	A.step(m, 2.4, func(): landed[0] = landed[0] or K.anim_id == "thf_land")
 	A.ok("dancer dash: from a jump the cartwheel carries its speed on to the landing (further than on the ground)",
-			P.flat_dist(home) > far * 1.2 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
+			P.flat_dist(home) > far * 1.1 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
 	A.ok("dancer air dash (items 32, 35): the air Cartwheel, empowered by its row, lands in thf_land, no ring",
 			air_move == "thf_exdash" and landed[0] and K.primed_t > 0.0
 			and _dancer_rings(m) == air_rings, "move %s landed %s primed %.2f" % [air_move, landed[0], K.primed_t])

@@ -6,7 +6,7 @@ extends RefCounted
 
 const GROUND_M := 4.5        # m: the ground Cartwheel (sheet: 105-144 px, about 4.5m)
 const GROUND_S := 0.48       # s: start to upright (sheet: 0.45-0.5s)
-const PEAK_MS := [14.0, 17.0]        # m/s: the sheet's peak, 15-16.5 m/s ...
+const PEAK_MS := [14.0, 18.0]        # m/s: the fitted curve's peak (dash_feel.json "thief": 1.84 x the mean, about 17 m/s) ...
 const PEAK_AT := [0.08, 0.27]        # s: ... at +0.1 to 0.27s
 const AIR_CARRY := 1.2       # m: from a jump, at most this past the ground Cartwheel (the air's drag to the landing)
 const EMP_K := 2.34          # the empowered bolt over a plain one (data: +214 on a 160 bolt)
@@ -60,7 +60,7 @@ func _ground(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			absf(float(s["dist"]) - GROUND_M) < 0.35 and absf(float(s["end"]) - GROUND_S) < 0.05
 			and K.dash_feel()["dist"] == 1.0,
 			"%.2f m in %.2f s" % [s["dist"], s["end"]])
-	A.ok("dancer feel: it bursts to about 15 m/s near 0.15s, then runs down into the hasted run",
+	A.ok("dancer feel: it bursts to about 17 m/s near 0.18s, then runs down into the hasted run",
 			float(s["peak"]) >= PEAK_MS[0] and float(s["peak"]) <= PEAK_MS[1]
 			and float(s["peak_at"]) >= PEAK_AT[0] and float(s["peak_at"]) <= PEAK_AT[1],
 			"peak %.1f m/s at %.2f s" % [s["peak"], s["peak_at"]])
