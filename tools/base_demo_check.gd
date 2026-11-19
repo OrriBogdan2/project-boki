@@ -1,7 +1,8 @@
 extends RefCounted
 ## --base-demo-check (GARDEN.md section 9.8): the demo base (BaseDemo) loads on a throwaway save in under 10 s with
 ## four Boki, the two bonds set (friends, rivals), the three toys, the snacks and an egg ready to hatch, something
-## happens within 5 s (a Boki at a toy, or a friend or rival reaction), no panel (the away card) covers the base, and the player's real save file is untouched.
+## happens within 5 s (a Boki at a toy, or a friend or rival reaction), no panel (the away card) covers the base,
+## and the player's real save file is untouched.
 
 const LOAD_SECS := 10.0      # s: the base is ready
 const SHOW_SECS := 5.0       # s: a Boki is doing something
@@ -50,7 +51,10 @@ func run(m: Node) -> void:
 	var snacks: Dictionary = d["crops"]
 	ok(snacks.size() >= 3 and snacks.keys().all(func(c): return Lean.key_of(c) != ""),
 		"element snacks in the bag (%s)" % str(snacks))
-	ok(Incubator.ready_eggs().size() == 1 and home.hinc.node.visible, "an egg is ready to hatch in the incubator")
+	# base mode: the Nook and its Incubator stand in the hub, not on the demo farm
+	var hub_nook := HubLayout.holds(HomeLayout.of(home._d()), "nesting_nook")
+	ok(Incubator.ready_eggs().size() == 1 and (hub_nook or home.hinc.node.visible),
+		"an egg is ready to hatch in the incubator (%s)" % ("the hub's Nook" if hub_nook else "on the farm"))
 	home._show_when_free(["A Rare Spore Egg is ready to hatch"])      # a late arrival card is dropped too
 	var shown := -1.0
 	var t := 0.0
@@ -62,7 +66,8 @@ func run(m: Node) -> void:
 				shown = t
 	ok(shown >= 0.0, "something happens within %.0f s (%.2f s)" % [SHOW_SECS, shown])
 	await main.get_tree().create_timer(1.0).timeout      # a card queued late would open by now
-	ok(home.panel_open == "" and home.arrivals.jobs.is_empty(), "no panel is open at 5 s (no away card over the Boki: '%s')" % home.panel_open)
+	ok(home.panel_open == "" and home.arrivals.jobs.is_empty(),
+		"no panel is open at 5 s (no away card over the Boki: '%s')" % home.panel_open)
 	print(home.life.readout())
 	ok(Save.no_write and FileAccess.get_md5(real) == before, "the real save is untouched (no_write, file unchanged)")
 	FarmUnlocks.rules()["base_mode"] = false

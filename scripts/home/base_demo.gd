@@ -44,7 +44,8 @@ static func save() -> Dictionary:
 	Incubator.find(String(egg["id"]))["heat"] = Incubator.need()
 	return d
 
-## Puts the toys and the Nook on the built farm, the Boki beside them, and sets the scene for the camera.
+## Puts the toys (and the Nook, unless the hub holds it) on the built farm, the Boki beside them,
+## and sets the scene for the camera.
 func stage(h) -> void:
 	var land := HomeLayout.LANDING
 	h.arrivals.quiet = true      # no first-arrival card (While you were away, the egg is ready) over the whole base
@@ -54,7 +55,8 @@ func stage(h) -> void:
 	h.day_t = 0.42
 	for id in TOYS:
 		h.hg.demo_place(id, land + TOYS[id])
-	h.hg.demo_place("nesting_nook", land + NOOK_AT)
+	if not HubLayout.holds(HomeLayout.of(h._d()), "nesting_nook"):
+		h.hg.demo_place("nesting_nook", land + NOOK_AT)      # base mode: the Nook and its egg are the hub's
 	h._sync_fixtures()
 	h.hinc.refresh()
 	h.ppos = land + Vector3(0, 0, 1.0)
