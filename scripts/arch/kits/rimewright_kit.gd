@@ -1271,7 +1271,7 @@ func _rime_crash(k: float) -> void:
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
 		f.hurt(
-			float(xd["dmg"]) * power("ult") * k,
+			float(xd["dmg"]) * power("x") * k,
 			h,
 			{"src": "abil", "ab": "ult", "stun": stun, "dr": true, "payoff": true, "tags": ["ult", "rimelock"]}
 		)
