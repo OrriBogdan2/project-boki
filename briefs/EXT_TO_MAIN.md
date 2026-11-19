@@ -10387,3 +10387,4 @@ READY ext/vfx-sable-lmb 2f7ec04e80 (Sable LMB: 0.8 m cel tracer under the chakra
 READY ext/vfx-albert-dome d337c451e8 (Albert: last mint VFX, Mending Ground burst sparks, now his palette ivory from content/vfx; mint dash dome already gone on main; reel part mend + before/after strip)
 READY ext/customize-v3-1119 6e896d576e (look locker quality pass: lit set + backdrop, tile pictures, camera swings per tab, pick reactions; anim-select-poses-v95 ported)
 READY ext/merge-lane-n19f-1119 b25d0ae459 (lane n19f: glide-lead camera spring port of move-feel-1111; 24 HARD/ported, see lanes/n19f-RESULT.md)
+READY ext/merge-lane-n19g-1119 ab852f30e6 (merge lane n19g: kin dedupe, tutorial frame checks, dash sweep (opt-in), zone clock; 21 other branches archived/HARD per SALVAGE-n19g-1119)
