@@ -80,7 +80,7 @@ const T := {
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
 	"haste_land_0p1s":         ["~", [0.99, 1.01], "x", "[game data] a haste lands as a Slow ends: MaxAcceleration"],
 	"haste_end_0p1s":          ["~", [0.99, 1.01], "x", "[game data] and ends as a Slow lands: the walking brake"],
-	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
+	# the fitted ground dash curves (sv/FEEL_NOTES.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
 	"dash_curve_gunslinger_peak_u":   ["~", [0.04, 0.18], "", "[footage] Ghost slide peaks 0.04-0.06s into 0.47s"],
 	"dash_curve_gunslinger_peak_k":   ["~", [1.65, 1.9], "x", "[footage] Ghost peak 18.4 m/s, mean 10.2 (fit 1.81)"],
@@ -153,7 +153,7 @@ const T := {
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
-	# decoded and no footage shows such a dash (docs/SUPERVIVE_FEEL.md), so these rows only print what ours does
+	# decoded and no footage shows such a dash (sv/FEEL_NOTES.md), so these rows only print what ours does
 	"airdash_fall_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a 10 m fall's speed (12 m/s) the dash keeps"],
 	"airdash_fall_speed":      [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
 	"airdash_dive_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a glide dive's fall speed the dash keeps"],
@@ -1237,7 +1237,7 @@ func _dash_curves() -> void:
 ## Jump out of a ground dash, keys let go: the take-off keeps tuning.json dash.jump_keep of the dash's speed. The
 ## jump is pressed once the dash is at full travel (past Kael's wind-up and the slow start of Lace's roll); the
 ## speed after the jump step has that step's air drag (Loco.air_step, no keys) undone. One shared value: the
-## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (docs/MOVEMENT_PARITY.md).
+## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (sv/MOVEMENT_PARITY.md).
 func _dash_jump_keep() -> void:
 	var was := [P.cls, P.arch]
 	var keep := Loco.dash_jump_keep
