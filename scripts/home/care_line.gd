@@ -19,7 +19,8 @@ static func pairs(h: Node, k: Dictionary) -> Array:
 		[Settings.key_cap("interact"), VERBS.get(act, "Pet"), act != "feed"],
 		[Settings.key_cap("interact"), "Feed (no food)" if no_food else "Feed", act == "feed"],
 		[Settings.key_cap("play"), "Play", not k.has("fetch")],
-		["Hold " + Settings.key_cap("interact"), lift, held or h.carry.can_lift(k)]]
+		["Hold " + Settings.key_cap("interact"), lift, held or h.carry.can_lift(k)]
+	]
 
 
 ## Greys the actions of `row` (the key row built from `pairs`) that can't be done now (a third item false).
