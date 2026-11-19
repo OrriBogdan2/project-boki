@@ -223,7 +223,7 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   Add a new garden panel to its `screens`.
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
-Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip the tutorial / Save
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip tutorial / Save
 and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
 Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
 panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the

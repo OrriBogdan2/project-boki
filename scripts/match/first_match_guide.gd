@@ -106,6 +106,8 @@ func _start(lid: String, p: Hunter) -> void:
 			txt = String(row[1])
 	if lid == "dive":
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
+	if lid == "send":
+		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
 	if lid == "exit":
 		txt = _exit_text(txt)
 	if lid == "send":
