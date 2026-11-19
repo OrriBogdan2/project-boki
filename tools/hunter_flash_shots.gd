@@ -85,17 +85,22 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	m.cam.snap(spot)
 	await _frames(h, WARM)
 	var cam := main.get_viewport().get_camera_3d()
-	var tl := cam.unproject_position(spot + Vector3(-1.0, 2.6, 0))
-	var br := cam.unproject_position(spot + Vector3(1.0, -0.2, 0))
+	var foot := cam.unproject_position(spot)
+	var head := cam.unproject_position(spot + Vector3(0, 2.4, 0))
+	var px := Vector2(absf(foot.y - head.y) * 1.3 * CELL.x / CELL.y, absf(foot.y - head.y) * 1.3)
+	var mid := (foot + head) * 0.5
 	var size := main.get_viewport().get_texture().get_image().get_size()
-	var rg := Rect2i(Vector2i(tl), Vector2i(br - tl)).intersection(Rect2i(Vector2i.ZERO, size))
+	var rg := Rect2i(Vector2i(mid - px * 0.5), Vector2i(px)).intersection(Rect2i(Vector2i.ZERO, size))
 	h.visible = false
 	await _frames(h, 2)
 	var out: Array = [_grab(rg)]
 	h.visible = true
 	await _frames(h, 2)
 	out.append(_grab(rg))
-	m.on_damage(h, P, HIT, {"src": "primary"})
+	h.inv_t = 0.0
+	h.dropping = false
+	h.hurt(HIT, P, {"src": "primary"})
+	ok(h.flash_t > 0.0, "%s takes the hit (its flash runs)" % h.arch)
 	await _frames(h, FULL_STEPS)
 	out.append(_grab(rg))
 	await _frames(h, FADE_STEPS - FULL_STEPS)
