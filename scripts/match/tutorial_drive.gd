@@ -80,8 +80,7 @@ static func drive(m: Match) -> void:
 				if sid == "glide": p.inp["glide"] = true
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
+			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
@@ -204,6 +203,14 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
+
+## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
+## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+static func _kick_up(m: Match, top_y: float) -> void:
+	var p := m.player
+	if not p.grounded and p.pos.y < top_y - 0.2:
+		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
+
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
