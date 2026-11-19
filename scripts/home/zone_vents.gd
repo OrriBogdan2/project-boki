@@ -11,7 +11,7 @@ const PAD_R := 0.8             # m, the pad's radius
 const PAD_H := 0.06            # m, the pad's thickness
 const COLUMN_R := 0.55         # m, the column of air's radius
 const COLUMN_H := 3.0          # m, how high the column stands
-const PAD_COL := Color("f2d45a")
+const PAD_COL := Color("f7e8a6")
 const COLUMN_COL := Color(0.96, 0.92, 0.7, 0.16)
 const JITTER := 0.6            # m: a flier that drifts to a vent stops within this of its middle
 
@@ -70,7 +70,7 @@ static func _glow(c: Color, clear: bool) -> StandardMaterial3D:
 	m.albedo_color = c
 	m.emission_enabled = true
 	m.emission = Color(c.r, c.g, c.b)
-	m.emission_energy_multiplier = 0.5 if clear else 0.35
+	m.emission_energy_multiplier = 0.5 if clear else 0.2
 	if clear:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
