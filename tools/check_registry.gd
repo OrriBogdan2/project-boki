@@ -92,6 +92,7 @@ const CHECKS := {
 	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
 	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
 	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--fusion-off-check": ["res://tools/fusion_off_check.gd", "fusion_off_check", null],  # 0101
 	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
@@ -332,6 +333,8 @@ const CHECKS := {
 	"--blight-nest-check": ["res://tools/blight_nest_check.gd", "blight_nest_check", null],      # docs/decisions/0061
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
+	"--charge-hint-shots": ["res://tools/charge_hint_shots.gd", "charge_hint_shots", null],  # GPU, drain.png
+	"--first-choice-shots": ["res://tools/first_choice_shots.gd", "first_choice_shots", null],  # GPU
 	"--tg-swap-dash-check": ["res://tools/tg_swap_dash_check.gd", "tg_swap_dash_check", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
@@ -514,6 +517,8 @@ const CHECKS := {
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
+	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # rigged Boki in the .pck
+	"--vespyx-places-check": ["res://tools/vespyx_places_check.gd", "vespyx_places_check", null],  # Vespyx in every screen, rigged or primitive
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],      # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],  # Sparkle / Vex screenshots
@@ -603,6 +608,8 @@ const CHECKS := {
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
+	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
+	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
@@ -617,6 +624,8 @@ const CHECKS := {
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
+	"--tutorial-playtest-check": ["res://tools/tutorial_playtest_check.gd", "tutorial_playtest_check", null],
+	"--tutorial-playtest-shots": ["res://tools/tutorial_playtest_shots.gd", "tutorial_playtest_shots", null],  # GPU
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>[:wisps]: any first Relic
 	# Skip on every step
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],
@@ -627,12 +636,14 @@ const CHECKS := {
 	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
+	"--hunter-hint-check": ["res://tools/hunter_hint_check.gd", "hunter_hint_check", null],
 	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the XP first-time lines
 	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
 	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--bus-sliders-check": ["res://tools/bus_sliders_check.gd", "bus_sliders_check", null],      # a volume per bus
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
+	"--prompt-queue-check": ["res://tools/prompt_queue_check.gd", "prompt_queue_check", null],
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
 	# the absolute combat HUD budget, nothing over the hunter
@@ -743,6 +754,7 @@ const CHECKS := {
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
+	"--tutorial-playthrough-check": ["res://tools/tutorial_playthrough_check.gd", "tutorial_playthrough_check", null],
 	"--tutorial-timing-check": ["res://tools/tutorial_timing_check.gd", "tutorial_timing_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],  # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],  # never stuck
@@ -960,6 +972,7 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
+			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
 			seed(hash(flag))
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)
