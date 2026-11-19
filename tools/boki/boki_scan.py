@@ -363,7 +363,6 @@ AUTO = {  # id: overrides on AUTO_BASE
     "stamproo": BORROWED,
     "starcap": BORROWED,
     "stratarch": BORROWED,
-    "sundormouse": BORROWED,
     "teapotamus": BORROWED,
     "tiltster": BORROWED,
     "torpecone": BORROWED,
