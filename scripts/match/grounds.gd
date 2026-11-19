@@ -28,6 +28,7 @@ var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
+var hints: GroundsHints = null  # the first-time line for each station
 var prompt: Label = null
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
@@ -106,6 +107,7 @@ func build() -> void:
 		_duel(v3(g["duel"]))
 	summon_pad = SummonStation.new(a)
 	GroundsLanes.build(m, g)
+	hints = GroundsHints.new(m)
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
@@ -199,6 +201,7 @@ func tick() -> void:
 	if p == null or prompt == null:
 		return
 	summon_pad.tick()
+	hints.tick()
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
