@@ -46,6 +46,8 @@ const MEANING := {
 	"c8b48c": "arrow feathers",
 	"c8b496": "earth dust",
 	"b8946a": "earth dust",
+	"7a5c3a": "earth thrown up by a dive",
+	"1a5a6a": "the anchor spiral: seafoam stands off the grass",
 	"f6a6c8": "Hearthlight's rose heal motes"
 }
 ## Moves whose colours are the thing they act on or heal: a broken Boki's type, a heal.
