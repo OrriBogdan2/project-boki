@@ -45,7 +45,7 @@ func _tab_names() -> Array:
 
 func _saved(key: String):
 	var cf := ConfigFile.new()
-	cf.load(Settings.PATH)
+	cf.load(Settings.path)
 	return cf.get_value("s", key)
 
 ## Changes a row the way a player would, and returns false if nothing about it moved.
@@ -82,7 +82,10 @@ func run(main: Node) -> void:
 	if main.fade:
 		main.fade.reveal(0.05)
 		await tree.create_timer(0.35).timeout
+	var player_file := ProjectSettings.globalize_path(Settings.PLAYER_PATH)
+	var player_before := FileAccess.get_file_as_string(player_file)
 	Settings.reset_all()
+	ok(Settings.path != Settings.PLAYER_PATH, "a check run keeps its settings in a file of its own (%s)" % Settings.path)
 	Overlay.ctx = "title"
 	Overlay.more_tabs = false
 	# the first page
@@ -161,5 +164,6 @@ func run(main: Node) -> void:
 	ok(lost.is_empty(), "a fresh load keeps every saved value (changed: %s)" % str(lost))
 	Overlay.close()
 	Settings.reset_all()
+	ok(FileAccess.get_file_as_string(player_file) == player_before, "the player's settings.cfg is untouched")
 	print("TRIM DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)

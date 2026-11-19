@@ -188,10 +188,10 @@ func _capture(out: String) -> void:
 	Settings.v["keys_v"] = Settings.KEYS_V
 	Settings.save()
 	var cf := ConfigFile.new()
-	cf.load(Settings.PATH)
+	cf.load(Settings.path)
 	cf.set_value("save", "slot", 2)
-	cf.save(Settings.PATH)
-	_write(out + "/settings.cfg", FileAccess.get_file_as_string(Settings.PATH))
+	cf.save(Settings.path)
+	_write(out + "/settings.cfg", FileAccess.get_file_as_string(Settings.path))
 	Feedback.path = out + "/feedback.json"
 	Feedback.poster = func(_body, _done): pass
 	Feedback.submit(Save, {"combat": 4.0, "boki": 5.0}, "golden note")

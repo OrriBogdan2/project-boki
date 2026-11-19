@@ -130,20 +130,20 @@ func _removed(src: Dictionary) -> void:
 ## A settings file from before the audit loses the removed keys on the next start, and keeps the rest.
 func _migration() -> void:
 	var keep := ConfigFile.new()
-	var had := keep.load(Settings.PATH) == OK
+	var had := keep.load(Settings.path) == OK
 	var cf := ConfigFile.new()
-	cf.load(Settings.PATH)
+	cf.load(Settings.path)
 	for k in Settings.REMOVED:
 		cf.set_value("s", k, true)
 	cf.set_value("s", "music", 0.42)
 	cf.set_value("s", "audio_v", 2)      # (a file already on the perceptual volume curve)
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
 	for i in 3:
 		await main.get_tree().process_frame
 	var after := ConfigFile.new()
-	after.load(Settings.PATH)
+	after.load(Settings.path)
 	var left: Array = Settings.REMOVED.filter(func(k): return after.has_section_key("s", k))
 	ok("an old settings file drops the removed keys on start", left.is_empty(), str(left))
 	var kept := is_equal_approx(float(after.get_value("s", "music", 0.0)), 0.42)
@@ -156,9 +156,9 @@ func _migration() -> void:
 	main.remove_child(fresh)
 	fresh.free()
 	if had:
-		keep.save(Settings.PATH)
+		keep.save(Settings.path)
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 
 
 # ------------------------------------------------------------------ 3, 4: the look

@@ -13,6 +13,7 @@ const UNNAMED := "Hunter"      # the name of a player who never typed one (the r
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
+const SettingsScript := preload("res://scripts/core/settings.gd")   # where the last slot is remembered (file_path)
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
@@ -27,7 +28,7 @@ var slot := 1                 # which save file is in play
 func _ready() -> void:
 	# the last save you played comes back (remembered next to the settings)
 	var cf := ConfigFile.new()
-	if cf.load("user://settings.cfg") == OK:
+	if cf.load(SettingsScript.file_path()) == OK:
 		slot = clampi(int(cf.get_value("save", "slot", 1)), 1, SLOTS)
 	load_game()
 
@@ -52,9 +53,9 @@ func use_slot(n: int) -> void:
 	slot = clampi(n, 1, SLOTS)
 	load_game()
 	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
+	cf.load(SettingsScript.file_path())
 	cf.set_value("save", "slot", slot)
-	cf.save("user://settings.cfg")
+	cf.save(SettingsScript.file_path())
 
 func delete_slot(n: int) -> void:
 	for q in _copies(path_for(n)):

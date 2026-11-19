@@ -27,7 +27,7 @@ func run(main_node: Node) -> void:
 	if Array(OS.get_cmdline_user_args()).has(PROBE):
 		_probe()
 		return
-	var keep := FileAccess.get_file_as_string(Settings.PATH)
+	var keep := FileAccess.get_file_as_string(Settings.path)
 	await _sliders("title")
 	_routes("title")
 	await _heard()
@@ -206,7 +206,7 @@ func _boot_with_saved_cfg(current: bool) -> void:
 		cf.set_value("s", k, SAVED[k])
 	if current:
 		cf.set_value("s", "audio_v", 2)
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	var out := []
 	var args := ["--headless", "--", "--audio-settings-check", PROBE]
 	if OS.has_feature("editor"):
@@ -223,9 +223,9 @@ func _boot_with_saved_cfg(current: bool) -> void:
 
 func _put_back(keep: String) -> void:
 	if keep == "":
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 		return
-	var f := FileAccess.open(Settings.PATH, FileAccess.WRITE)
+	var f := FileAccess.open(Settings.path, FileAccess.WRITE)
 	f.store_string(keep)
 	f.close()
 

@@ -955,15 +955,23 @@ const COVERED := {
 ## Returns true when one started (Main stops there). The global random draws are seeded from the flag,
 ## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run.
 static func run(main: Node, args: PackedStringArray) -> bool:
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = CHECKS[flag]
+	seed(hash(flag))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = CHECKS[flag]
-			seed(hash(flag))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
+			return flag
+	return ""
