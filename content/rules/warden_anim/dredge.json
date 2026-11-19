@@ -15,7 +15,7 @@
 		"hook": "hand.R",
 		"gun": "root",
 		"hoard": "hips",
-		"ball": "root"
+		"ball": "hips"
 	},
 	"blade": {
 		"root": "anchor_gun_root",
