@@ -1747,6 +1747,11 @@ func rimewright() -> void:
 	ok(
 			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
 			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
+	T2.slow_t = 0.0
+	K.splinter(T2.pos, 1.0, 2.0)
+	ok(
+			"tm passive: the Shatter burst is damage only, no slow of ours (the source has none)",
+			T2.slow_t <= 0.0, "slow_t %.2f" % T2.slow_t)
 	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
 	K.chill.erase(T2.get_instance_id())
 	K.fan_hits.clear()
