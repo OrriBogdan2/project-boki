@@ -168,6 +168,7 @@ func _crouch_hint() -> void:
 	P.pos = camp.pos + Vector3(8, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
+	camp._go(Mob.S.CHASE, "check")  # (NOTICE has no way to IDLE)
 	camp.calm("check")
 	hint.tick(0.6)
 	ok(
