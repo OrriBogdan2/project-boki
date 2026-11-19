@@ -57,13 +57,15 @@ func run(main: Node) -> void:
 		var m: Match = flow._match(main, hero, 2)
 		if m.biomes:
 			m.biomes.hazards.clear()  # a lightning rod's stun would break stomps (see stomp_check.gd)
-		for slot in SLOTS:
-			var seen := _trial(m, hero, slot, TAP[0], TAP[1])
-			print("SWEEP %s %s: %s" % [hero, slot, seen.keys()])
+		# (the pinned rows run first, on a fresh match: right after the sweep's dash trial the next cast landed
+		# nothing about one run in two)
 		for row in EXPECT:
 			if row[0] == hero:
 				var got := _trial(m, hero, row[1], row[2], row[3])
 				ok(got.has(row[4]), "%s %s lands %s on the stomper (%s)" % [hero, row[1], row[4], got.keys()])
+		for slot in SLOTS:
+			var seen := _trial(m, hero, slot, TAP[0], TAP[1])
+			print("SWEEP %s %s: %s" % [hero, slot, seen.keys()])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("STOMP BREAK SWEEP DONE, rows: %d, failures: %d" % [rows, bad])
