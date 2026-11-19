@@ -3,6 +3,7 @@ extends RefCounted
 ## real renderer, e.g. xvfb-run --rendering-driver opengl3 --resolution 1280x720): the intro card,
 ## the drop, the landing, and each beat after it: the point, every forced pick (its gold ring), each camp
 ## and the move it teaches, the wall kick, the lookout, the glove, the fuse, the ranks and the way out.
+## --arch=<id> plays it as that hero (a starter: archer, juggernaut, gunslinger), else the save's.
 ## Files are <dir>/<WxH>_NN_<what>.png.
 
 var main: Node
@@ -17,13 +18,17 @@ const GUARD := 24000      # ticks of 2 sim steps (800 s): the slow steps wait ~1
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	var o := {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"}
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--arch="):
+			o["arch"] = String(a).substr(7)
+			o["cls"] = Arch.weight(o["arch"])
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	await m.start(o)
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
