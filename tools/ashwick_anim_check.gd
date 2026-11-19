@@ -70,23 +70,26 @@ func run() -> void:
 	var ck: Array = KMovesPair.MOVES["as_cloak"]["keys"]
 	var wide := float(ck[2][0]) - float(ck[1][0])
 	var end := float(ck[-1][0])
+	# (main retimed it: owner item 11's instant 0.15-0.25 s flare, keys 0.05/0.13/0.24; the footage's 0.2 s wide hold is gone)
 	ok(
-		"timing: the cloak's arms stay flung wide ~0.2 s ([F] 0181-0182), settled by 0.4 s",
+		"timing: the cloak's arms flare and settle inside the 0.15-0.25 s flash (owner item 11)",
 		(
-			wide >= 0.18
-			and end <= 0.4
+			wide >= 0.05
+			and end >= 0.15
+			and end <= 0.25
 			and absf(float(lens["cloak"]) - end) < 0.04
-			and K.CLOAK_POSE_T < end
+			and K.CLOAK_POSE_T < end + 0.1
 			and km["as_cloak"].get("upper") == "moving"
 		),
 		"wide %.2f s, end %.2f s, clip %.2f s" % [wide, end, float(lens["cloak"])]
 	)
-	# the run: a footfall every 0.15-0.2 s at her run speed; the walk shares the cycle (feet in phase in the blend)
+	# the run: a footfall every 0.12-0.2 s at her run speed (main's cinder.glb: walk_f 0.667 s is two run_f loops, so the
+	# walk no longer shares the run's cycle; each ring's own loops are one length, --clip-check)
 	var rate := clampf(P.base_speed / 4.6, 0.6, 1.5)
 	var step := float(lens["run_f"]) / 2.0 / rate
 	ok(
-		"timing: a running step every 0.15-0.2 s ([F] quick short strides)",
-		step >= 0.15 and step <= 0.2 and absf(float(lens["walk_f"]) - float(lens["run_f"])) < 0.001,
+		"timing: a running step every 0.12-0.2 s ([F] quick short strides; main's 0.333 s run_f at her run speed)",
+		step >= 0.12 and step <= 0.2 and float(lens["walk_f"]) > 0.0,
 		"step %.3f s, walk %.3f run %.3f" % [step, float(lens["walk_f"]), float(lens["run_f"])]
 	)
 
