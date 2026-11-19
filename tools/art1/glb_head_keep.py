@@ -74,14 +74,39 @@ def dominant(g, j, prim, names):
     return np.array([names[J[i, k]] in HEAD for i, k in enumerate(W.argmax(1))])
 
 
-# 1. drop the new glb's head triangles
+# 0. the live head's bind-space points: a new head triangle is dropped only where the live head covers it (within COVER),
+#    so the new neck/back pieces the live head does not reach stay (no holes at the neck)
+COVER = 0.07
+live_pts = []
+for pr in jo["meshes"][0]["primitives"]:
+    hv = dominant(go, jo, pr, names_o)
+    idx = acc_raw(go, pr["indices"]).reshape(-1, 3)
+    sel = hv[idx].all(1)
+    if sel.any():
+        live_pts.append(go.acc(pr["attributes"]["POSITION"]).reshape(-1, 3)[np.unique(idx[sel])])
+live_pts = np.concatenate(live_pts).astype(np.float32)
+
+
+def covered(P):
+    out = np.zeros(len(P), bool)
+    for k in range(0, len(P), 512):
+        d = ((P[k:k + 512, None, :] - live_pts[None, :, :]) ** 2).sum(-1).min(1)
+        out[k:k + 512] = d < COVER * COVER
+    return out
+
+
+# 1. drop the new glb's head triangles that the live head covers
 dropped = 0
 for m in jn["meshes"]:
     kept = []
     for pr in m["primitives"]:
         hv = dominant(gn, jn, pr, names_n)
         idx = acc_raw(gn, pr["indices"]).reshape(-1, 3)
-        keep = ~hv[idx].all(1)
+        cv = np.zeros(len(hv), bool)
+        cand = np.unique(idx[hv[idx].all(1)])
+        if len(cand):
+            cv[cand] = covered(gn.acc(pr["attributes"]["POSITION"]).reshape(-1, 3)[cand].astype(np.float32))
+        keep = ~(hv[idx].all(1) & cv[idx].all(1))
         dropped += int((~keep).sum())
         if keep.any():      # (a primitive left with no triangles is invalid glTF: Godot refuses the whole file)
             pr["indices"] = add_acc(idx[keep].reshape(-1, 1), 5125, "SCALAR", 34963)

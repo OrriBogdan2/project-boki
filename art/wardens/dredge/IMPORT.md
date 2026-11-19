@@ -76,5 +76,8 @@ Method B for the arm/hip tearing: the owner-approved turnaround got an arms-clea
 goo-arm hook lifted clear of the leg), Meshy multi-image A-pose M4 (front+back, task 01a1f4c3-89bd-7435-ac9f-e5956f1fb512;
 arms 10-17 cm clear of the torso at rest), swapped onto this rig and its clips with `tools/art1/v95_to_game.py Grimble
 --spec art/wardens/src/grimble_rb1119.json`, then the live head kept with `tools/art1/glb_head_keep.py` (the face is the
-in-game one). Edges >= 8 mm stretched > 2x in any clip (ball prop left out): 1353 -> 583; worst 8.52x (ledge) -> 5.69x (run_f).
+in-game one). Edges >= 8 mm stretched > 2x in any clip (ball prop left out): 1353 -> 609; worst 8.52x (ledge) -> 5.69x (run_f); game
+--stretch-check worst 8.52 -> 5.26, clips over 3x 48 -> 41 (all 52 still over 1.3). NOT shippable yet (owner sheet red): the
+body paint is magenta vs the live grey-mauve grade, the gauntlet forearm band renders black, the blunderbuss sits at the belt
+(live: in the gauntlet, owner 11-17), and a few of the new head's coins show above the live head.
 Files: /home/boki/gens/rebuild-dredge-1119/ (gen_log.tsv, views/, meshy/, chk/, renders/, sheet).
