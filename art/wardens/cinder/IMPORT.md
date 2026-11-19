@@ -12,6 +12,11 @@ worst clip 4.63% -> 0.29% -> 0.12%; worst edge 152x -> 13.9x -> 8.6x (inner elbo
 worst edge 68.9x -> 8.9x -> 6.5x. Godot `--stretch-check`: worst 7.60 -> 5.02 -> 5.02, median clip worst 4.79 -> 3.24 -> 3.12.
 In idle/stance the posed mesh differs from retry 3 by at most 3 cm on 83 vertices (the creases above). Script + evidence:
 `/home/boki/gens/cinder-rigfix-1119/retry4/` (tool/fix3.py r3.glb out.glb).
+Seam weld (same retry): the body and the head/hair piece are separate meshes that touch along the neck (y 1.356-1.367 m), and
+the crotch piece touches the body at y 0.77-0.86 m. Retry 3's neck band gave the two sides different weights, so a see-through slit
+opened across the neck (413 touching pairs over 1 cm apart, up to 4.7 cm, even in idle; live 63-101 pairs, up to 3.3 cm).
+`tool/fix6.py` gives every group of touching spots (<3 mm, pieces over 50 spots) one shared weight set and blends 4 rings into
+each piece harmonically: 0 pairs over 1 cm in all 54 clips (worst 0.3 cm; live 4,449 pair-opens summed over clips, worst 7.8 cm).
 
 ## LIVE 11-19 (retry 3, PR #362): skinning fix, weights only (same vertices, triangles, UVs, images, bones and clips as live)
 `cinder.glb` = main's 11-18 glb (sha c4c7001f) with only JOINTS_0/WEIGHTS_0 changed: no vertex or triangle added, moved, cut or
