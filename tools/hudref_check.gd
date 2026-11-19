@@ -596,6 +596,8 @@ func _hud_size(demo: Match) -> void:
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
 	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
+	var had_obj = Save.d["tutorial"].get(FirstObjective.KEY)
+	Save.d["tutorial"][FirstObjective.KEY] = true      # (a save past its first expedition: the first-expedition card (--safe-area-check, --first-objective-check) takes left-column room this test measures the minimap against)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -642,6 +644,8 @@ func _hud_size(demo: Match) -> void:
 						"%s: 130%% draws the minimap bigger (held to the room above the bottom block)" % tag)
 	Settings.v["hud_scale"] = keep
 	Settings.set_v("hud_full", false, false)
+	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
+	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
 
 func _done() -> void:
