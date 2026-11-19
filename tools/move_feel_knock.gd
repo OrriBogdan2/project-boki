@@ -13,6 +13,11 @@ const REF := {
 	"albert": 13.0,     # hammer swing, bulwark.json lmb.smash_kb [5, 13]
 	"kael": 6.0,        # Finishing Slam, juggernaut.json rmb.slam.push
 }
+## Every kit knock's push (m/s) and lift, printed only (docs/KIT_PARITY.md "Knock distances"): where it comes to
+## rest on flat ground, no keys. A lift above 0 starts the body airborne (shoves 2.5, Tenzo's hits 2.0).
+const SWEEP := [[1.0, -1.0], [1.5, -1.0], [3.0, -1.0], [3.5, -1.0], [4.0, -1.0], [4.4, -1.0], [5.0, -1.0],
+	[6.0, -1.0], [6.6, -1.0], [7.0, -1.0], [8.0, -1.0], [9.0, -1.0], [11.0, -1.0], [12.0, -1.0], [13.0, -1.0],
+	[18.2, -1.0], [6.0, 2.0], [8.0, 2.0], [11.0, 2.0], [4.0, 2.5], [5.0, 2.5], [6.0, 2.5], [11.0, 2.5]]
 const SAMPLES := [6, 12, 24]   # steps: 0.1, 0.2 and 0.4 s at 60 steps a second
 const SETTLE := 90             # steps (1.5 s): every reference knock is at rest by then
 const WALL_GAP := 1.5          # m from the body's centre to the cliff face
@@ -54,14 +59,18 @@ static func run(c) -> void:
 		print("MFEEL knock %s push %.1f: rest %.2f m after %.2f s, wall slams up to %.2f m, cliff %.1f m ahead: step %d"
 			% row)
 	c.rec("knock_done_04", done, T)
+	for row in SWEEP:
+		var a := _arc(c, float(row[0]), float(row[1]))
+		var vals := [row[0], row[1], a["rest"], a["stop_t"]]
+		print("MFEEL knock sweep push %.1f lift %.1f: rest %.2f m after %.2f s" % vals)
 
 ## Distance over time on open ground, the step the keys come back, and how far the body gets while a wall
 ## would still count as a slam (Hunter: inside 0.6 s of the knock and faster than 8 m/s).
-static func _arc(c, push: float) -> Dictionary:
+static func _arc(c, push: float, lift := -1.0) -> Dictionary:
 	var P: Hunter = c.P
 	c._reset(c.flat + Vector3(-3.0, 0, 0))
 	var x0 := P.pos.x
-	c.m.displace.knock(P, Vector2(push, 0.0))
+	c.m.displace.knock(P, Vector2(push, 0.0), lift)
 	var out := {"d": [0.0, 0.0, 0.0], "keys_t": -1.0, "stop_t": -1.0, "slam_m": 0.0}
 	for i in SETTLE:
 		c.m.step(c.DT)
