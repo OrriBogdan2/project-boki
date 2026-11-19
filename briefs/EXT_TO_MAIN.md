@@ -10352,3 +10352,4 @@ READY ext/cancel-matrix-land b4c3a1f7a3 (origin/main merged in; only conflicts w
 READY ext/vfx-ability-colours 2ae47064f3 (ability colours on each Hunter kit palette, 39 colour-family rows in --hero-vfx-check, 9 before/after GPU sheets)
 READY ext/worker-prune cd3108df09f (ops/worker-prune: age out idle /root/mcshard shards on pods, dry-run default, tested on fake tree only)
 READY ext/p02-port-1118 4c8dd20cef (P02 solos mode port, merged origin/main 2ee0e648d3; modes/heart/ways-map/ways-hints/tutorial checks 0 fail; PR opened via gh-outbox)
+READY ext/worker-prune 701a9278f04 (worker-prune: ctime + any-process check; PR via outbox)
