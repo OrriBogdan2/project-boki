@@ -1,13 +1,17 @@
 # Sable (thief): import note
 
-## Skin weights off hip/thigh, no tearing under animation (2026-11-19, ext/hunter-fix-sable-1118)
-Weights and vertex splits only: bind-pose triangles, UVs, textures, skeleton, bone names and all 59 clips are unchanged
-(same triangle set at bind, checked). Hand/forearm weight was lifted off the hip, thigh and torso-side skin, the
-triangles fused between arm and body (and between the legs) were cut by splitting their vertices (+717 verts, same
-positions), limb weights were re-blended along the bone chain, then a weights-only relax smoothed the vertices that still
-stretched >1.6x in any clip (413 poses, every clip, 7 samples each; the check uses other sample times).
-Edges stretched over 3x vs bind (numpy skin, every clip, 6 samples): mean 6.53% -> 0.02%, worst clip 9.52% -> 0.04%,
-worst edge 361x -> 12.1x. `--stretch-check` thief worst 23.85 -> 4.15, clips over the ceiling 43 -> 0.
+## Skin weights off hip/thigh, no tearing under animation (2026-11-19 retry, ext/hunter-fix-sable-1118)
+Restarted from the live glb (the first attempt tore the back, waist and braid). Weights plus vertex splits only:
+bind-pose triangles, UVs, textures, skeleton, bone names and all 59 clips are unchanged (rest triangle set and positions identical).
+1. Weights of same-spot vertex copies are welded (all copies of a position share one weight vector) so UV seams never open.
+2. Forearm/hand weight is allowed only within ~9-13 cm of the arm chain or on the pistol part; the rest (belt, holster and coat
+   panels that the scan weighted to the hands) takes the diffused hip/thigh weights.
+3. Only the fused forearm/hand/pistol-to-body contact (963 tris) is cut by splitting 566 vertices; torso, back, upper arms,
+   head and braid are never cut. Then a weights-only relax (welded graph, below y 1.25 m, 120 iterations on 1/6 of the poses of
+   every clip) smooths vertices that still stretch.
+Numbers (numpy skin, every clip, 12 samples shifted off the relax samples, edges over 3x vs bind): mean clip share 6.58% -> 0.55%,
+worst clip 9.59% -> 1.09%, `--stretch-check` thief worst 23.85 -> 14.82, clips over the 10.0 ceiling 43 -> 5 (ledge, mantle,
+revive, crouch_in, crouch_l: legs folded, thigh/hips). hunter_mesh_check stretched tris 2626 -> 77.
 
 ## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
 The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
