@@ -209,6 +209,8 @@ def bake():
         body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
         if name == "atlas":     # (not the emission map, where black is no glow)
             fill_misses(body, max(32, tex // 64))
+        elif SPEC.get("emit_tint"):     # the glow's hue pinned (sRGB, its brightest channel 1): thin seams keep their colour
+            body[..., :3] = body[..., :3].max(-1, keepdims=True) * np.array(SPEC["emit_tint"], F)
         if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
             lay_kept(old, kept, body, tex, socket)
         body[..., 3] = 1

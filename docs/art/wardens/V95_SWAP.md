@@ -58,6 +58,16 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
 
+## Status (2026-11-13, ext/cinder-ba-promote): Cinder B-A in game
+Cinder's LIVE master is now `r2/ba1113/cand_BA2.glb` (curvy B-A body, bust about two cups up, under the face3 head
+kept byte for byte; `head_graft.py --hair-zone 0.0` carries the live hair past the cut: at the back the head's non-skin tris, at the front its hair-dark locks grown down from the cut, with the B-A hair-dark tris beside them dropped). Re-swapped on `6530ff1947^`'s
+cinder.glb with the tail-cut body `ba1113/cinder_v95_ba_body.glb`. The body glb has two materials (head and body
+images), so `bake_warden.bake_colour` now takes each material's own image and Emission Color instead of the first
+material's for all: a single-material master bakes as before.
+B-A's lava seams are thin and their glow paler (more green and blue) than live's, so in game they read pink-white; the
+spec key `emit_tint` (sRGB, brightest channel 1: Cinder `[1.0, 0.31, 0.065]`, live's mean lava colour) pins the baked
+emission map to one hue at each texel's own brightness.
+
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
 Cinder (the facekeep body: body6 cand_B's shape with the cand_A face3 image), Sable (prop1111 cand_B), Vex (prop1111

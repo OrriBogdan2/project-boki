@@ -75,3 +75,11 @@ command (rest poses equal to 2e-6); every other clip, the garden set and `x_brea
 
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
+v95 B-A 11-13 (ext/cinder-ba-promote): LIVE master `~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb` (curvy B-A: bust about
+two cups up, waist and hips as before) under the face3 head, kept byte for byte by `tools/meshy/head_graft.py --cut 0.57
+--hair-zone 0.0` (the live hair carried down past the cut at the back, and the front locks grown down through their hair-dark triangles with the B-A hair beside them dropped: no ledge at the seam, front or back). Game body
+`~/meshy/v95/Cinder/r2/ba1113/cinder_v95_ba_body.glb`: the tail cut the same as the 11-12 facekeep body (body islands
+under 10k welded vertices and the tris on the live tail dropped; the game keeps its own tail and jets). Swapped on
+`6530ff1947^`'s cinder.glb (no move_bones), so the clips are the same 44. The body is two materials (head + body), so
+the bake now reads each material's own image and its own Emission Color (bake_warden.bake_colour, per material).
