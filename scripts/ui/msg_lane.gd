@@ -3,11 +3,12 @@ extends Control
 ## The one lane for short messages on screen: toasts, pickups, hints and the lines the
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
-## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
+## a repeat of one on show or waiting merges into it ("Ember  x3"); at most `max_shown` show at once
 ## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
 ## short while (FIGHT_LIFE at most in a fight). A low-priority line only shows on an empty lane (never
 ## beside another card), is dropped outright in a fight, and is dropped if it waits too long.
-## URGENT is for what a fight needs now (your Boki is down, you are being stomped): it alone passes `hold`.
+## URGENT is for what a fight needs now (your Boki is down, you are being stomped): it alone passes `hold`
+## and `fight`; everything else queues until the fight is over and then shows, one row at a time.
 
 enum { LOW, NORMAL, HIGH, URGENT }
 const MAX_SHOWN := 2
@@ -20,15 +21,15 @@ const FADE_OUT := 0.35          # s
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
-const FIGHT_SHOWN := 1          # lines on show at most while the player is in a fight
-const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
+const FIGHT_SHOWN := 1          # urgent lines on show at most while the player is in a fight
+const FIGHT_LIFE := 2.0         # s: the longest a line already up lives once a fight starts (a hint's own life aside)
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
 var keep_off: Array[Rect2] = [] ## other HUD blocks a card slides aside of the same way (the kill feed's rows, KnockFeed)
-var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
-var one_hint := false           ## true: one hint (a line with its own life) on show at a time (a match's TopStack sets it)
+var fight := false              ## true while the player is in a fight (Hud sets it): only URGENT comes in
+var max_shown := MAX_SHOWN      ## lines on show at once (a match's TopStack sets 1: one card at a time)
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -149,20 +150,15 @@ func _process(delta: float) -> void:
 	_layout(delta)
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
-## while `hold` is on only URGENT lines move. With `one_hint` on, one hint (a line with its own life) at a time:
-## the next waits for it (a home or scripted beat's lines still stack).
+## while `hold` or `fight` is on only URGENT lines move. `max_shown` is 1 in a match: one card at a time
+## (a home or scripted beat's lines still stack two).
 func _promote() -> void:
-	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
-		var hint_up := one_hint and _shown.any(func(e: Dictionary) -> bool: return bool(e["own_life"]))
-		var best := -1
+	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else max_shown):
+		var best := 0
 		for i in _waiting.size():
-			if hint_up and bool(_waiting[i]["own_life"]):
-				continue
-			if best < 0 or int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
-		if best < 0:
-			return
-		if hold and int(_waiting[best]["prio"]) < URGENT:
+		if (hold or fight) and int(_waiting[best]["prio"]) < URGENT:
 			return
 		if int(_waiting[best]["prio"]) == LOW and not _shown.is_empty():
 			return

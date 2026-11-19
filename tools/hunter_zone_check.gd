@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the zone is a real screen area round the hunter's body and plate
 ##   2. a damage number you take, a heal number and a floating word all end up clear of it (HunterZone via Fx)
 ##   3. a message card dropped right on the hunter slides aside; the knock banner does too
-##   4. the lane shows 2 cards (1 in a fight); a small line never sits beside another and is dropped in a fight
+##   4. the lane shows one card at a time (none in a fight but urgent ones); a small line never sits beside another and is dropped in a fight
 ##   5. armour breaking (yours or theirs) and a wall slam toast nothing: the bar and the number already say it
 ## Never touches the save.
 
@@ -72,7 +72,7 @@ func _label_boxes(m: Match) -> Array[Rect2]:
 func _numbers(m: Match, zone: Rect2) -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x != m.player)[0]
 	m.player.hp = m.player.max_hp
-	m.fx.hit_number(m.player, foe, 31.0, Color.WHITE, false)  # damage you take: over your own head
+	m.fx.damage_number(m.player, foe, 31.0, {}, m.player)      # damage you take: over your own head
 	m.fx.healed(m.player, 12.0)
 	m.fx.word(m.player.pos + Vector3(0, 1.3, 0), "COMBO", Color.WHITE)
 	m.fx.number(m.player.pos + Vector3(0, 1.0, 0), 80.0, Color.RED, true)
@@ -124,7 +124,7 @@ func _lane_budget(m: Match) -> void:
 	for t in ["one", "two", "three"]:
 		lane.push(t, Color.WHITE)
 	lane._process(0.1)
-	ok(lane.texts().size() == 2 and MsgLane.MAX_SHOWN == 2, "at most 2 cards on show (%d)" % lane.texts().size())
+	ok(lane.texts().size() == 1 and lane.max_shown == 1, "a match shows one card at a time (%d)" % lane.texts().size())
 	lane.clear()
 	lane.push("big", Color.WHITE)
 	lane.push("small", Color.WHITE, MsgLane.LOW)
@@ -142,7 +142,7 @@ func _lane_budget(m: Match) -> void:
 	lane.push("one", Color.WHITE)
 	lane.push("two", Color.WHITE)
 	lane._process(0.1)
-	ok(lane.texts().size() == 1 and MsgLane.FIGHT_SHOWN == 1, "in a fight one card at most (%d)" % lane.texts().size())
+	ok(lane.texts().is_empty() and lane.waiting() == 2, "in a fight no card shows, both wait (%d)" % lane.texts().size())
 	lane.clear()
 	lane.fight = false
 
