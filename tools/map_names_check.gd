@@ -6,15 +6,17 @@ extends RefCounted
 ##   2. a name that would print over one already drawn (a halt under a region name) is left off
 ## Never touches the save.
 
-const REGION_PX := 17          # a region name's size at the map's opening zoom (FullMap._labels)
-const SEEDS := [7, 7401]       # two spawn layouts (7 is the one --ui-screens-shots films)
+const REGION_PX := 17  # a region name's size at the map's opening zoom (FullMap._labels)
+const SEEDS := [7, 7401]  # two spawn layouts (7 is the one --ui-screens-shots films)
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 	print("MAPNAMES %s  %s" % ["ok  " if cond else "FAIL", what])
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -28,16 +30,20 @@ func run(main: Node) -> void:
 			await main.get_tree().process_frame
 		var fm: FullMap = m.hud.full_map
 		fm.open()
-		fm._layout(m.hud.c.size)      # (the HUD's own canvas: 1280x720 units, scaled up on a bigger screen)
+		fm._layout(m.hud.c.size)  # (the HUD's own canvas: 1280x720 units, scaled up on a bigger screen)
 		fm._taken.clear()
 		fm._obstacles()
-		ok(m.world.layout_id == "hollowcrown" and fm._spots.size() > 10,
-			"seed %d: %s, %d markers on the map" % [seed_n, m.world.layout_id, fm._spots.size()])
+		ok(
+			m.world.layout_id == "hollowcrown" and fm._spots.size() > 10,
+			"seed %d: %s, %d markers on the map" % [seed_n, m.world.layout_id, fm._spots.size()]
+		)
 		_regions(m, fm)
 		if seed_n == SEEDS[0]:
 			fm._taken = [fm._label_rect("STORMCROWN GAOL", Vector2(800, 500), REGION_PX)]
-			ok(not fm.label("Watch Halt", Vector2(800, 505), 10, Color.WHITE),
-				"a halt name over a region name is left off")
+			ok(
+				not fm.label("Watch Halt", Vector2(800, 505), 10, Color.WHITE),
+				"a halt name over a region name is left off"
+			)
 		fm._taken.clear()
 		fm.close()
 		m.queue_free()
@@ -45,16 +51,17 @@ func run(main: Node) -> void:
 	print("MAPNAMES DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 ## 1: each region name at its own spot (how it was drawn before) and at the spot FullMap picks.
 func _regions(m: Match, fm: FullMap) -> void:
 	var regions := {}
 	for isl in m.world.islands:
 		regions[String(isl.get("name", ""))] = isl
-	var pinned := fm._taken.duplicate()      # the words reserved before any name (FullMap._obstacles)
+	var pinned := fm._taken.duplicate()  # the words reserved before any name (FullMap._obstacles)
 	var placed: Array = []
 	var was := 0
-	var touching: Array = []      # names left on a marker or a pinned word
-	var over: Array = []          # names over another region name
+	var touching: Array = []  # names left on a marker or a pinned word
+	var over: Array = []  # names over another region name
 	for lb in m.world.labels:
 		var nm := String(lb["name"]).to_upper()
 		if String(lb["kind"]) in ["perch", "rail", "choke"] or not regions.has(String(lb["name"])):
@@ -70,11 +77,20 @@ func _regions(m: Match, fm: FullMap) -> void:
 		if placed.any(func(q): return r.intersects(q)):
 			over.append(nm)
 		placed.append(r)
-		fm._taken.append(r)      # (as FullMap._labels places them, one after another)
+		fm._taken.append(r)  # (as FullMap._labels places them, one after another)
 	ok(placed.size() >= 8, "%d region names" % placed.size())
-	ok(touching.size() <= 1 and was >= 5, ("names on a marker: %d at their own spot; now on a marker or a pinned"
-			+ " word: %s (at most one: a name wider than its crowded island)") % [was, touching])
+	ok(
+		touching.size() <= 1 and was >= 5,
+		(
+			(
+				"names on a marker: %d at their own spot; now on a marker or a pinned"
+				+ " word: %s (at most one: a name wider than its crowded island)"
+			)
+			% [was, touching]
+		)
+	)
 	ok(over.is_empty(), "no region name over another: %s" % [over])
+
 
 func _on_marker(fm: FullMap, txt: String, at: Vector2) -> bool:
 	var r: Rect2 = fm._label_rect(txt, at, REGION_PX).grow(FullMap.MARKER_PAD)
