@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 	m.cam.snap(P.pos)
 	_caption = Label.new()
 	_caption.add_theme_font_size_override("font_size", 44)
-	_caption.position = Vector2(40, 600)
+	_caption.position = Vector2(40, 380)
 	main.add_child(_caption)
 	var frame := 0
 	var kills := KILL_AT.duplicate()
