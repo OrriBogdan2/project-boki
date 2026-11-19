@@ -1,17 +1,24 @@
 # Sable (thief): import note
 
-## Skin weights off hip/thigh, no tearing under animation (2026-11-19 retry, ext/hunter-fix-sable-1118)
-Restarted from the live glb (the first attempt tore the back, waist and braid). Weights plus vertex splits only:
-bind-pose triangles, UVs, textures, skeleton, bone names and all 59 clips are unchanged (rest triangle set and positions identical).
-1. Weights of same-spot vertex copies are welded (all copies of a position share one weight vector) so UV seams never open.
-2. Forearm/hand weight is allowed only within ~9-13 cm of the arm chain or on the pistol part; the rest (belt, holster and coat
-   panels that the scan weighted to the hands) takes the diffused hip/thigh weights.
-3. Only the fused forearm/hand/pistol-to-body contact (963 tris) is cut by splitting 566 vertices; torso, back, upper arms,
-   head and braid are never cut. Then a weights-only relax (welded graph, below y 1.25 m, 120 iterations on 1/6 of the poses of
-   every clip) smooths vertices that still stretch.
-Numbers (numpy skin, every clip, 12 samples shifted off the relax samples, edges over 3x vs bind): mean clip share 6.58% -> 0.55%,
-worst clip 9.59% -> 1.09%, `--stretch-check` thief worst 23.85 -> 14.82, clips over the 10.0 ceiling 43 -> 5 (ledge, mantle,
-revive, crouch_in, crouch_l: legs folded, thigh/hips). hunter_mesh_check stretched tris 2626 -> 77.
+## Skin weights only, no tearing under animation (2026-11-19 retry 11-19f, ext/hunter-fix-sable-1118)
+Restarted from main's sable.glb. WEIGHTS ONLY: vertex count (51,363), positions, normals, UVs, colours, indices, textures,
+skeleton, bone names and all 59 clips are byte-identical to main; only JOINTS_0/WEIGHTS_0 change. No vertex split, no cut,
+nothing deleted. Rest pose skins to main's within 0.3 micrometre. Script: `~/gens/sable-fix-1119s/fix6.py` (v12).
+1. Forearm/hand/pistol weight stays only on the real arm surface: within 3.5-6.5 cm of the MESH arm axis (elbow -> wrist ->
+   pistol grip; the bones sit about 6 cm inside the mesh) and facing away from it, plus the pistol part.
+2. The arm/body split runs along existing UV seams (the scan has 2,734 UV charts): a chart is arm only if most of it is arm
+   surface; small charts ringed by the other side take that side (these islands were the shards left beside the waist).
+   142 positions sit on this seam (main: 348 positions with mismatched weights).
+3. Every other same-spot copy shares one weight (UV seams stay shut). Body charts get no forearm/hand weight, and none of the
+   upper arm below 1.08 m; the lost weight is refilled from neighbouring body weights. Head weight is capped below the waist.
+4. The braid (hair-v95b) was on upper_arm.R/forearm.R, so it swung out with her right arm: it now runs head (top) to hips (tip).
+5. A stretch-driven weights relax (only where an edge stretches over 2.2x in a clip pose) smooths what still pulls.
+Numbers (main -> this): edges stretched over 3x, mean per clip 6.58% -> 0.45%, worst clip 9.59% (fusion) -> 1.26% (ledge);
+copies opening over 1 cm 675 -> 176; far-bone verts 28 -> 0; hunter_mesh_check stretched tris 2626 -> 61 (collapsed tris at
+its worst frame 36 -> 85, union over all frames 252 -> 170); worst edge 354x -> 52x.
+Left: the coat still folds into a ball on her back in mantle f4-f6 (knees tucked to the chest), and a small belt flap
+shows at her left waist with both arms raised (reset, fusion).
+Proof: `~/gens/sable-fix-1119s/final/` (rest pose 4 sides, every clip live beside fixed MP4, review sheet).
 
 ## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
 The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
