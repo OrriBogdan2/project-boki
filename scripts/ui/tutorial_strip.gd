@@ -20,6 +20,7 @@ const ARROW_W := 0.53           # of the strip's height: the way-to-go arrow and
 const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
 const CHIME := "ui_open"        # the UI set's panel-drop sound, played once as a new objective's pulse starts
 const FIGHT_S := 3.0            # s after your last hurt that still counts as a fight (the chime ducks)
+static var chimes := 0          # chimes played so far (--tutorial-hud-check counts these: HUD panels share the CHIME sound)
 
 ## Where the strip sits for a screen size: under the safe margin, and under `below` (the bottom of the
 ## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
@@ -32,6 +33,7 @@ static func rect(sz: Vector2, below := 0.0) -> Rect2:
 ## unchanged objective: the callers only ask when the objective itself changes). Levels: content/rules/
 ## sfx_levels.json "cue_db"; `m` is the match (null on the farm), a fight there plays the ducked one.
 static func chime(m: Match = null) -> void:
+	chimes += 1
 	Sfx.play(CHIME, null, chime_db(m), 0.02)
 
 ## The chime's volume_db: ducked while `m`'s player is in a fight.

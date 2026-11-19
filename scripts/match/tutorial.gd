@@ -77,8 +77,10 @@ const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks th
 const FAR_SCOUT := 38.0  # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
+
 var m: Match
 var step := -1
+var restarts := 0               # beats started again (retry): the beat re-pulses, with its chime
 var intro := true  # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
 var text := ""  # this step's one line, on the panel
@@ -363,6 +365,7 @@ func retry() -> void:
 	flag = false
 	wait = 0.0
 	camps.clear()
+	restarts += 1
 	_back()
 	_enter()
 	if m.hud:

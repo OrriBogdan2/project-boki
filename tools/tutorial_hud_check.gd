@@ -122,13 +122,15 @@ func _course() -> void:
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		var before := tu.step
-		Sfx.last_played.erase(TutorialStrip.CHIME)
+		var chimes0 := TutorialStrip.chimes
+		var restarts0 := tu.restarts
 		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
-		if Sfx.last_played.has(TutorialStrip.CHIME):
-			if tu.step != before: chimed += 1
+		var pulsed := tu.step != before or tu.restarts > restarts0      # (a beat started again re-pulses: one chime)
+		if TutorialStrip.chimes > chimes0:      # (the strip's own count: HUD panels drop with the same "ui_open" sound)
+			if pulsed: chimed += 1
 			else: stray += 1
-		if tu.step != before:
+		if pulsed:
 			changes += 1
 		t += Match.DT
 		if tu.step != last:
