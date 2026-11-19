@@ -10320,3 +10320,4 @@ READY ext/training-time-trial-1119 c22228c227 (SUPERSEDES 33d666801b: merged ori
 READY ext/sfx-dash-refill 86e9e05865 (dash slot plays one quiet ab_ready cue per returned charge, local bar only, ducked in a fight; dash-slot-check + sfx-set-check row)
 READY ext/ui-name-title-canon 704000fe75baee7eb84e9cdff85591f43dae56bb (hero-title-check canon titles Snowglide/Ashen Kiss + no 'the The'/dot join; health --strict green)
 READY ext/extra-clan-chat 442719ee93 (clan chat: clan-only rate-limited channel in Nook panel, social store, offline echo, mute; --clan-check chat rows)
+READY ext/tut-pace-1116 e027ab5dba (TUTORIAL_PACE re-measured on main; pace tool covers the Uplink exit again; prologue shows Hold to skip after 4 s: wait with no way out 37 s -> 4 s)
