@@ -4644,6 +4644,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.spacer(4))
 		dv.add_child(UI.label("Click a Boki to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
 	ClanLoanPanel.side_rows(dv, _open_nook)
+	ClanChatPanel.side_rows(dv)
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
