@@ -110,6 +110,10 @@ func _signs(home: Node) -> void:
 func screen(day: int, zone: String) -> Dictionary:
 	make_save(day, zone)
 	var home = await _open(zone)
+	# the pointer at the top edge: xvfb leaves it mid-screen, where it rests on a Boki and opens its hover
+	# card (a tip that follows the mouse, not a HUD group); that made the day 1 hub count flaky
+	var vp: Viewport = main.get_viewport()
+	vp.warp_mouse(Vector2(vp.get_visible_rect().size.x * 0.5, 2.0))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	await _frames(SETTLE)
