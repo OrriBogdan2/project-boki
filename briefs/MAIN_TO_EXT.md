@@ -1419,3 +1419,14 @@ Owner-requested ship (asked as v0.24.11; tagged v0.24.17 because release.yml nee
 - **Suite:** all 613 flags on the merge, main re-run where red: NEW-RED: 11  WORSE: 6  FIXED: 0  red on merge: 164. Details: /home/boki/cj/20261118-072844-a2/suite/compare.txt on hetzner.
 
 - **Crashes and errors (Sentry):** 0 new issue(s) since v0.24.10 (0 events)
+
+## 2026-11-19 13:29 UTC Claude (owner's terminal) SHIPPED 2ee0e648 + RELEASED v0.24.18
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** 
+- **Suite:** all 631 flags on the merge, main re-run where red: NEW-RED: 2  WORSE: 8  FIXED: 0  red on merge: 158. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+- **Checks to fix:** same-tree suite (merge=main commit): NEW-RED --low-fps-input-check (1/6 inputs lost at 100 ms stall) and --tutorial-dead-air-check (Kael course unfinished) both reproduce on main 2c87825 under load, main's own run passed them -> load-sensitive reds in main, not added by this bump; --tutorial-playthrough-check and --vespyx-places-check time out (1200 s, load ~30); remote worker with dead Xvfb produced 129+2 NOT-RUN main-side logs (merge side all ran). Gate: /home/boki/suite-claude/GATE_NOTE.txt
+- **Crashes and errors (Sentry):** 0 new issue(s) since v0.24.17 (0 events)
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
