@@ -8,7 +8,9 @@ signal closed
 ## The settings body's held height: as tall as the window allows on every tab (most tabs need more than a
 ## 720p window has, and scroll), so switching tabs never resizes the panel.
 const SETTINGS_H := INF
-const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+const SETTINGS_TABS := ["Main", "Controls", "Gameplay", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+const MAIN_TABS := 2            # the first tabs are always shown; the rest wait behind "More..."
+const BASIC_KEY_GROUPS := 2     # Moving and Fighting; the other key groups wait behind "More keys"
 
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
@@ -17,7 +19,8 @@ var fps_lbl: PerfOverlay
 var page := ""                  # "" when nothing is open
 var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
-var tab := "Gameplay"
+var tab := "Main"
+var more_tabs := false          # the other settings tabs are showing
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var bind_hot: Array = []        # [action, slot] pairs shown red while a clash waits for Swap or Keep both
@@ -231,7 +234,7 @@ func open_pause(where: String) -> void:
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
 	var res: Button = _menu_item(v, "Resume", "next", close, "Esc", "Primary")
 	_menu_item(v, "Settings", "gear", func():
-		if tab == "Controls": tab = "Gameplay"
+		if tab == "Controls": tab = "Main"
 		open_settings())
 	_menu_item(v, "More", "satchel", open_more)
 	v.add_child(UI.spacer(2))
@@ -242,7 +245,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip tutorial", "back", leave)
 		else:
 			var lb: Button = _menu_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -328,10 +331,18 @@ func open_sfx_tester() -> void:
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
 	UI.hold(v, SETTINGS_H)
-	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
-		tab = t
+	more_tabs = more_tabs or SETTINGS_TABS.find(tab) >= MAIN_TABS
+	var shown: Array = SETTINGS_TABS.slice(0, SETTINGS_TABS.size() if more_tabs else MAIN_TABS)
+	if not more_tabs:
+		shown.append("More...")
+	UI.shell_tabs(v, shown, tab, func(t):
+		if t == "More...":
+			more_tabs = true
+		else:
+			tab = t
 		_show_settings())
 	match tab:
+		"Main": _tab_main(v)
 		"Gameplay": _tab_gameplay(v)
 		"Controls": _tab_controls(v)
 		"Camera": _tab_camera(v)
@@ -346,6 +357,24 @@ func _show_settings() -> void:
 	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
 	UI.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
+
+## What most players change: picture quality, window, volume. Keys are the next tab.
+func _tab_main(v: VBoxContainer) -> void:
+	_group(v, "Picture")
+	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred(),
+		"From your next expedition")
+	_toggle(v, "Fullscreen", "fullscreen")
+	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD")
+	_group(v, "Volume")
+	_slider(v, "Master", "master", 0.0, 1.0)
+
+## The quality presets, with what "Auto" would pick on this machine.
+func _quality_options() -> Array:
+	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
+	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
+	for qk in Settings.QUALITY_ORDER:
+		qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
+	return qopts
 
 func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "You")
@@ -365,7 +394,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
-	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
 	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
 		+ "Off: it walks beside you"
 	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
@@ -376,8 +405,8 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
-	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
-	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
+	_toggle(v, "Quick cast", "cast_on_press", "Fire on press. Off: hold to aim, release to cast")
+	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: dash the way you are moving")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
 	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
@@ -393,19 +422,28 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
+	if not MergeForm.enabled():
+		named.erase("ultimate")       # (X stays reserved, but no row offers it while Fusion is off)
 	var shown := {}
+	var extra: Array = []
 	for g in groups:
+		var first_extra := v.get_child_count()
 		_group(v, String(g[0]))
 		for an in g[1]:
 			if not named.has(an):
 				continue
 			shown[an] = true
 			_bind_row(v, an, named[an])
-	var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
+		if groups.find(g) >= BASIC_KEY_GROUPS:
+			extra.append_array(v.get_children().slice(first_extra))
+	var rest: Array = Settings.ACTIONS.filter(func(a): return named.has(String(a[0])) and not shown.has(String(a[0])))
 	if not rest.is_empty():
+		var first_rest := v.get_child_count()
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
+		extra.append_array(v.get_children().slice(first_rest))
+	ExpFold.add(v, extra, "More keys")
 	_note(v, "Esc always opens the menu.")
 
 func _tab_camera(v: VBoxContainer) -> void:
@@ -418,7 +456,6 @@ func _tab_camera(v: VBoxContainer) -> void:
 
 func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
-	_slider(v, "Master", "master", 0.0, 1.0)
 	_slider(v, "Music", "music", 0.0, 1.0)
 	_slider(v, "Effects", "sfx", 0.0, 1.0, 0.05, "Shots, hits, steps and abilities")
 	_slider(v, "Voices", "voices", 0.0, 1.0, 0.05, "Hunters, Boki and monsters calling out")
@@ -445,32 +482,24 @@ func _tab_audio(v: VBoxContainer) -> void:
 
 func _tab_video(v: VBoxContainer) -> void:
 	_group(v, "Display")
-	_toggle(v, "Fullscreen", "fullscreen")
 	if not OS.has_feature("web"):
 		_toggle(v, "V-sync", "vsync", "Stops tearing; can add a little input delay")
 	var fps := [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]]
-	_choice(v, "Frame rate limit", "max_fps", fps)
+	_choice(v, "Frame rate cap", "max_fps", fps)
 	_group(v, "Quality")
-	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
-	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
-	for qk in Settings.QUALITY_ORDER:
-		qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
-	_choice(v, "Graphics quality", "quality", qopts, func(): _show_settings.call_deferred(),
-		"Grass, draw distance, cloud layers and particles change from your next expedition")
-	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
+	_choice(v, "Smooth edges", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]])
 	_toggle(v, "Shadows", "shadows")
-	_choice(v, "Frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
-		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
+	_choice(v, "Show frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
+		"Top right. The overlay adds draw calls and timings")
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	var sizes := Settings.TEXT_SIZES.map(func(x): return [x, "%d%%" % roundi(x * 100.0)])
 	_choice(v, "Text size", "text_size", sizes, func(): _show_settings.call_deferred(),
 			"How big the words are in menus and the HUD; long lines wrap or shorten instead of shrinking")
-	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
 	_slider(v, "HUD size", "hud_scale", HudScale.MIN, HudScale.MAX, 0.05, "Match HUD only, each part from its corner")
 	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
-	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	_toggle(v, "Show heights clearly", "depth_cues", "Shaded cliffs and a shadow under each hunter")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
 	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),
 		"Swaps the colours that tell you, your squad and rivals apart. Ability colours stay")
@@ -482,7 +511,8 @@ func _tab_access(v: VBoxContainer) -> void:
 func _tab_demo(v: VBoxContainer) -> void:
 	_group(v, "Recording")
 	var rec_hint := "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD"
-	var rec_row := _row(v, "Recording mode", rec_hint % [Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+	var rec_keys := [Settings.key_cap("record"), Settings.key_cap("record_orbit")]
+	var rec_row := _row(v, "Recording mode", rec_hint % rec_keys, "rec_level")
 	var rec_ob := OptionButton.new()
 	rec_ob.custom_minimum_size.x = 280
 	rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -514,7 +544,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 	Settings.changed.connect(preview.queue_redraw.unbind(1))
 	v.get_child(v.get_child_count() - 1).add_child(preview)
 	_slider(v, "Size", "reticle_size", 0.5, 2.0)
-	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground")
+	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground", "reticle_col")
 	for id in Reticle.COLORS:
 		var sw := Button.new()
 		sw.custom_minimum_size = Vector2(26, 26)
@@ -538,8 +568,9 @@ func _group(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
-func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
+func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxContainer:
 	var r := UI.hbox(16)
+	r.set_meta("setting", key)
 	r.custom_minimum_size.y = 40
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -554,7 +585,7 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	return r
 
 func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
-	var r := _row(v, what)
+	var r := _row(v, what, "", "bind:" + an)
 	r.custom_minimum_size.y = 34
 	var sl := Settings.slots(an)
 	var red: Array = [[an, 0] in bind_hot, [an, 1] in bind_hot]
@@ -597,7 +628,7 @@ func _bind_text(code: String, slot: int) -> String:
 	return "Not set" if slot == 0 else "+ second key"
 
 func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05, hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var sl := HSlider.new()
 	sl.min_value = lo
 	sl.max_value = hi
@@ -627,7 +658,7 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 	r.add_child(pct)
 
 func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var cb := CheckButton.new()
 	cb.button_pressed = bool(Settings.get_v(key))
 	cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -639,7 +670,7 @@ func _note(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.para(txt, UI.T_SMALL, UI.MUTED))
 
 func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.x = 280
 	ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
