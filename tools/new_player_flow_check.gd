@@ -141,6 +141,12 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
+	var hs: HoldSkip = pr.hold_skip      # a watcher who presses nothing is told what skips it, after HINT_AT s
+	ok(hs.modulate.a == 0.0, "the prologue's skip hint is not up on the first frame")
+	hs._process(HoldSkip.HINT_AT - 0.5)
+	hs._process(0.6)
+	hs._process(0.4)
+	ok(hs.modulate.a > 0.9, "but shows by itself after %.0f s with nothing pressed" % HoldSkip.HINT_AT)
 	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
