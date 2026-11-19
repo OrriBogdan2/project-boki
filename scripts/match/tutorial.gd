@@ -226,7 +226,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:

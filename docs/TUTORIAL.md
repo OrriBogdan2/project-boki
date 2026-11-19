@@ -233,3 +233,10 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 
 Not changed here: porting the cut is a core change to the tutorial and its checks and collides with the open `ext/tut-*`
 branches above, so it needs the owner's order (merge those hint branches first, then cut the course).
+
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
