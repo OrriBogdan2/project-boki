@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you; hp = its own share of the monster's health in place of camp_hp). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (camp_hp times the health, so the kills come quickly; size up, damage and attack tempo down). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat. retry: the one line shown when you fall into the abyss and the beat starts again (same tokens; default for the steps without one).",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you; hp = its own share of the monster's health in place of camp_hp). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %K the step's own key (its cap), %Y the Ultimate's key (R) and %Z its name (the Fusion is the ultimate key, X), %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (camp_hp times the health, so the kills come quickly; size up, damage and attack tempo down). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat. retry: the one line shown when you fall into the abyss and the beat starts again (same tokens; default for the steps without one).",
  "tips": {
   "stun": "Stunned: no moving, attacks or dash for a moment",
   "root": "Rooted: no walking or dash for a moment, but you can still fight",
@@ -8,35 +8,35 @@
  "steps": [
   [
    "land",
-   "Steer down to the meadow"
-  ],
-  [
-   "points",
-   "You start with 1 ability point"
-  ],
-  [
-   "pick_sec",
-   "Unlock %A"
-  ],
-  [
-   "sec",
-   "Hit the monsters with %A"
+   "Walk down to the meadow (%K)"
   ],
   [
    "shoot",
-   "Now shoot them down"
+   "Shoot the monsters down (%K)"
+  ],
+  [
+   "points",
+   "You have 1 ability point to spend"
+  ],
+  [
+   "pick_sec",
+   "Press %K to unlock %A"
+  ],
+  [
+   "sec",
+   "Use %A (%K) on the monsters"
   ],
   [
    "pick_dash",
-   "Level 2: unlock %A"
+   "Press %K to unlock %A"
   ],
   [
    "dash",
-   "Dash across the gap"
+   "Dash across the gap (%K)"
   ],
   [
    "exdash",
-   "Jump, then dash in mid-air"
+   "Jump, then dash (%K) in mid-air"
   ],
   [
    "glide",
@@ -44,15 +44,15 @@
   ],
   [
    "wallkick",
-   "Jump at the cliff, then again"
+   "Jump (%J) at the cliff, then again"
   ],
   [
    "crouch",
-   "Hold to crouch and scout"
+   "Stand on top and hold %K to crouch"
   ],
   [
    "gkey",
-   "Send %s at the monsters"
+   "Press %K to send %s at the monsters"
   ],
   [
    "summon",
@@ -64,47 +64,39 @@
   ],
   [
    "pick_kin",
-   "Level 3: unlock %A"
+   "Press %K to unlock %A"
   ],
   [
    "kin",
-   "Hit the line with %A"
+   "Use %A (%K) on the monster row"
   ],
   [
    "glove",
-   "Grab the glove"
+   "Grab the glove (%K)"
   ],
   [
    "hook",
-   "Hook the Sentinel to you"
-  ],
-  [
-   "pick_ult",
-   "Level 6: unlock your big move"
-  ],
-  [
-   "ult",
-   "Merge with %s and win"
+   "Press %K to hook the Sentinel to you"
   ],
   [
    "ranks",
-   "Spend your spare points"
+   "Spend your spare points (%K)"
   ],
   [
    "wayout",
-   "Few ways out: reach the outpost"
+   "Few ways out: walk to the outpost"
   ],
   [
    "uplink",
-   "Capture the uplink mast"
+   "Press %K at the uplink mast"
   ],
   [
    "defend",
-   "Defend the outpost"
+   "Defend the outpost: stay in the circle"
   ],
   [
    "extract",
-   "Step into the light"
+   "Step into the light to leave"
   ]
  ],
  "detail": {
@@ -113,7 +105,6 @@
   "pick_dash": "%L",
   "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
-  "pick_ult": "Merge with %s: one body, with both your powers, for a while.",
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
@@ -130,16 +121,17 @@
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has few ways out; this one is at the outpost.",
   "uplink": "Stay in the circle, or the capture slips back.",
-  "defend": "Stay in the circle, or the capture slips back."
+  "defend": "Stay in the circle, or the capture slips back.",
+  "kin": "They stand in a row: line them up, then use it."
  },
  "alt": {
-  "sec_hold": "Tap, then hold, to use %A",
+  "sec_hold": "Tap, then hold %K, to use %A",
   "summon_out": "%s is out for %D seconds",
   "summon_rest": "%s is resting",
   "summon_early": "That calls it back early: let it stay",
   "pack_wait": "Wait for the bright ring, then press %M",
-  "shoot_draw": "Hold to draw, let go to loose",
-  "shoot_melee": "Step in and swing at them"
+  "shoot_draw": "Hold %K to draw, let go to loose",
+  "shoot_melee": "Step in and swing at them (%K)"
  },
  "retry": {
   "default": "Back at your last stop. Try again",
@@ -152,8 +144,7 @@
   "summon": "Back at your last stop. Press %M and let %s out first",
   "pack": "Back at your last stop. Fight with solid ground behind you",
   "kin": "Back at your last stop. Line them up, then use %A",
-  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar",
-  "ult": "Back at your last stop. Fuse with %s, then hold your ground"
+  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar"
  },
  "need": {},
  "cds": 0.25,
@@ -179,6 +170,13 @@
   "extract": "Lift"
  },
  "camps": {
+  "shoot": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 0
+  },
   "sec": {
    "foes": [
     "skitter",
@@ -191,7 +189,8 @@
     "skitter",
     "skitter"
    ],
-   "to": 3
+   "to": 3,
+   "held": true
   },
   "summon": {
    "foes": [
@@ -223,14 +222,6 @@
    ],
    "to": 6,
    "far": true
-  },
-  "ult": {
-   "foes": [
-    "skitter",
-    "spitter",
-    "skitter"
-   ],
-   "to": 0
   }
  }
 }
