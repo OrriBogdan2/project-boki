@@ -1749,9 +1749,10 @@ func rimewright() -> void:
 			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
 	T2.slow_t = 0.0
 	K.splinter(T2.pos, 1.0, 2.0)
+	# the engine's own 0.28 s stagger on a big (payoff) hit is not the kit's; the old rider was 1.2 s at 30%
 	ok(
 			"tm passive: the Shatter burst is damage only, no slow of ours (the source has none)",
-			T2.slow_t <= 0.0, "slow_t %.2f" % T2.slow_t)
+			T2.slow_t <= T2.stagger_t + 0.01, "slow_t %.2f, stagger %.2f" % [T2.slow_t, T2.stagger_t])
 	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
 	K.chill.erase(T2.get_instance_id())
 	K.fan_hits.clear()
