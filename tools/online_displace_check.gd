@@ -180,7 +180,7 @@ func _scenario(G: Hunter) -> void:
 	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Neve Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
-	if OS.get_environment("ODISP_SWEEP") != "":      # (the sweep doubles the run: --online-displace-check times out at 300 s with it)
+	if OS.get_environment("ODISP_SWEEP") != "":      # (the sweep doubles the run, past the suite's 300 s)
 		await _dash_sweep(G, B)
 	await _finish()
 
@@ -190,7 +190,9 @@ func _scenario(G: Hunter) -> void:
 func _dash_sweep(G: Hunter, B: Hunter) -> void:
 	for arch in DASHERS:
 		var who: String = HeroTitle.base_name(arch)
-		await _move("%s dash, ground" % who, arch, Vector3(0, 0, -6), _dash_tap, 1.0, G, B, ["self"], _dash_opt(arch, {}))
+		await _move(
+			"%s dash, ground" % who, arch, Vector3(0, 0, -6), _dash_tap, 1.0, G, B, ["self"], _dash_opt(arch, {})
+		)
 		await _move("%s dash, air" % who, arch, Vector3(0, 0, -6), _dash_tap, 4.0, G, B, ["self"],
 			_dash_opt(arch, {"air": true}))
 	await _move("Kael Lunge", "juggernaut", Vector3(0, 0, -6), _lunge, 1.0, G, B, ["self"], {"dash": true})

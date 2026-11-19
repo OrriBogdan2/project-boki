@@ -171,7 +171,7 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
-	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],      # Training Grounds Hunters = a real match's
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -611,9 +611,9 @@ const CHECKS := {
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
-	"--tutorial-frame-archer-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "archer"],  # step framing, archer
-	"--tutorial-frame-juggernaut-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "juggernaut"],  # step framing, juggernaut
-	"--tutorial-frame-gunslinger-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "gunslinger"],  # step framing, gunslinger
+	"--tutorial-frame-archer-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "archer"],
+	"--tutorial-frame-juggernaut-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "juggernaut"],
+	"--tutorial-frame-gunslinger-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "gunslinger"],
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
 	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
