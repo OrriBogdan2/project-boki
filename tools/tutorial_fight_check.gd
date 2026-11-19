@@ -3,8 +3,9 @@ extends RefCounted
 ## Vex's gun). The test driver plays the course with each one; the fight beats (sec..ult) must
 ## take FIGHT_MIN..FIGHT_MAX s without the hunter being brought down, and the first fight line
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
-## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
-## (right click, attack, dash, wall kick, Boki, E, glove, ultimate), and only the camps paid XP.
+## ability locked, the first pick can only be the right click, every ability but the ultimate ends up unlocked
+## and used (right click, attack, dash, wall kick, Boki, E, glove; the tutorial has no Fusion, so the ultimate
+## stays locked), and only the camps paid XP.
 ## The first camp is telegraphed: its marker and countdown show (world + minimap, CampMark) for TELEGRAPH_T
 ## with no monster out, then the monsters appear on the spots the marker showed.
 
@@ -12,7 +13,7 @@ var bad := 0
 
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
 const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
-const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove", "ult"]
+const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
 const FIGHT_MIN := 12.0       # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s)
@@ -80,7 +81,7 @@ func _play(main: Node, id: String) -> void:
 	var names_move: bool = hint.contains(HINT_WORD[id]) and hint.length() <= 34
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
-	var all_on: bool = m.player.slot_lv.values().all(func(v): return int(v) > 0)
+	var all_on: bool = m.player.slot_lv.keys().all(func(k): return k == "ult" or int(m.player.slot_lv[k]) > 0)
 	ok(all_on, "%s: every ability unlocked %s" % [id, str(m.player.slot_lv)])
 	var missing := USED.filter(func(k): return not tu.seen.get(k, false))
 	ok(missing.is_empty(), "%s: every ability used (missing %s)" % [id, str(missing)])

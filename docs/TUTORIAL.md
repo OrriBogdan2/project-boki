@@ -6,6 +6,8 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 60 s wall, headless.
+
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
 Time for a person). **Words** = the banner line plus the plain-words line under it (screens: every visible label and button,
@@ -43,10 +45,10 @@ plain text: fixed (section 4).
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
 |---|---|---|---|---|---|---|---|
 | land | 3.7 | sim | 5 | 1.9 | WASD | - | Steer down to the meadow |
+| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Shoot the monsters down Full-auto rifle. Dazed foes take 90% more. |
 | points | 3.5 | sim | 19 | 5.9 | - | - | You start with 1 ability point Choose wisely: every level gives one more. Monsters give XP when they fall. |
 | pick_sec | 0.6 | sim | 12 | 3.9 | RMB | - | Unlock Burr Charge Fire the charge from your cannon; its blast Dazes. |
 | sec | 0.6 | sim | 6 | 2.2 | RMB | - | Hit the monsters with Burr Charge |
-| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Now shoot them down Full-auto rifle. Dazed foes take 90% more. |
 | pick_dash | 0.6 | sim | 10 | 3.3 | SHIFT | - | Level 2! Unlock Slipstep Skid or slide, and keep shooting. |
 | dash | 3.8 | sim | 4 | 1.6 | SHIFT | - | Dash across the gap |
 | exdash | 2.2 | sim | 5 | 1.9 | SHIFT | - | Jump, then dash in mid-air |
@@ -130,7 +132,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## 5. Follow-ups (not fixed)
 1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
    `ranks` and the three gap steps are the obvious merges.
-2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
+2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
@@ -144,7 +146,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## Garden first 15 (`--garden-first-15-check`)
 
 The game is playable without extraction, and in the first visit the player must never be left without
-a next step. The check plays a fresh save that skips the match tutorial ("Skip the tutorial" on the
+a next step. The check plays a fresh save that skips the match tutorial ("Skip tutorial" on the
 naming card), takes the first Relic and lands on the garden (`base_mode` on). A bot then plays 15
 minutes of garden time, never opens a match, and every second asks what is on screen to guide the
 player:
@@ -233,6 +235,27 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 
 Not changed here: porting the cut is a core change to the tutorial and its checks and collides with the open `ext/tut-*`
 branches above, so it needs the owner's order (merge those hint branches first, then cut the course).
+
+## Playtest fixes, 11-17 (`--tutorial-playtest-check`, `--tutorial-playtest-shots`)
+
+The owner's first-match playtest on the PC build, and what each fix is:
+
+- **Every line names its key.** The token `%K` in a step's line or detail is the step's own key cap (the real bound key,
+  `Settings.key_cap`; the WASD keys on `land`, Alt + E on `ranks`). Unlock steps read "Press RMB to unlock Burr Charge".
+  `%Y` and `%Z` (TutorialText) are the Ultimate's key (R, `hunter_ult`) and its name. The **Fusion** (X, `ultimate`) is a
+  different thing: `pick_ult` unlocks it ("Press X to unlock Fusion"), `ult` uses it, and its second line says the Ultimate
+  is R. The point on `pick_ult` goes to the Fusion; the hunter's Ultimate opens by level alone.
+- **The Boki send (`gkey`).** Its camp has fixed posts in the open (map `course.gkey.foes`, `Tutorial.foe_spot`), level
+  ground with no cliff or wall in the line from the lookout. The monsters are `held` (Mob.held): they stand still, notice
+  nobody and the Boki leaves them alone until the send lands (`TutorialCamps.release`). Before, they spawned at random
+  6 m from the player on the lookout, walked at him and jammed against its cliff, and the Boki fought them on its own
+  first, so a G tap read as "call back" and never counted. A send now registers for any launch, a leap that lands within
+  `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
+- **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
+  check crouches at all four far edges and at the foot of the cliff.
+- **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
+  half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
+  `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
 
 ## Telegraphed first camp
 

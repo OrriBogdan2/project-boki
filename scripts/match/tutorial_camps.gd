@@ -53,7 +53,7 @@ func may_level(slot: String) -> bool:
 		var sid := String(all[i][0])
 		if sid == "ranks":
 			return true
-		if sid.begins_with("pick_"):
+		if sid.begins_with("pick_") and sid != "pick_ult":
 			return slot == sid.substr(5)
 	return true
 
@@ -103,12 +103,16 @@ func _plan(sid: String, kinds: Array) -> Array:
 	var ang := randf() * TAU
 	var spots: Array = []
 	for i in kinds.size():
-		if c.get("row", false):
-			spots.append(tu.spot(ROW_FROM + i * ROW_STEP, ang))       # (one behind the other, to line up)
+		var at := Vector3.INF
+		if c.get("held", false):
+			at = tu.foe_spot(sid, i)       # (fixed posts in the open, clear of every cliff: they never wander off)
+		elif c.get("row", false):
+			at = tu.spot(ROW_FROM + i * ROW_STEP, ang)       # (one behind the other, to line up)
 		elif c.get("far", false):
-			spots.append(tu.spot(8.5 - i * 3.0, ang + i * 0.7))
+			at = tu.spot(8.5 - i * 3.0, ang + i * 0.7)
 		else:
-			spots.append(tu.spot(6.0 + (i % 3) * 1.2, ang + i * 1.3))
+			at = tu.spot(6.0 + (i % 3) * 1.2, ang + i * 1.3)
+		spots.append(at)
 	return spots
 
 func _place(sid: String, kinds: Array, spots: Array) -> void:
@@ -118,7 +122,14 @@ func _place(sid: String, kinds: Array, spots: Array) -> void:
 		if spots[i] != Vector3.INF:
 			var mb := tu.m.spawn_mob(kinds[i], spots[i])
 			tu.tank(mb, float(c.get("hp", camp_hp)))
+			mb.held = bool(c.get("held", false))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
+
+## The send is in: the camp's held monsters wake (the Boki and they go at each other).
+func release() -> void:
+	for e: Dictionary in ledger:
+		if is_instance_valid(e["mb"]):
+			(e["mb"] as Mob).held = false
 
 ## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, and if that
 ## empties the camp a new one comes.
