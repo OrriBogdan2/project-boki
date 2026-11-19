@@ -9,7 +9,8 @@ extends RefCounted
 ##      the scores key (Tab) shows every icon's card
 ## Runs the --hudref-demo=plates scene (real frames, the real HUD) and reads BuffStack.shown.
 ## --buff-stack-shots --shots-dir=<dir> (GPU): the stack mid-fight with three icons (three.png), with
-## seven (seven.png), the mouse on the second icon (hover.png) and Tab held (tab.png).
+## seven (seven.png) and Tab held (tab.png: every icon's card; a real window keeps its own cursor, so
+## the one-icon hover card is only asserted by the check).
 ## Runs the --hudref-demo scene (real frames, the real HUD) and reads BuffStack.shown. Never touches the save.
 
 var bad := 0
@@ -84,11 +85,6 @@ func shots(out: String) -> void:
 	three(p, 9.0)
 	await frames_until(m.time + 2.0)
 	shot(out, "three")
-	for i in 20:
-		hover("fever")      # the window moves the real cursor between frames: put it back every frame
-		await main.get_tree().process_frame
-	shot(out, "hover")
-	hover("")
 	Input.action_press("scores")
 	await frames_until(m.time + 0.3)
 	shot(out, "tab")
