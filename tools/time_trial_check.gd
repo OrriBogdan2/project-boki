@@ -42,6 +42,11 @@ func _built(m: Match, T: TimeTrial) -> void:
 		moves[g.move] = true
 	var placed := T.start != Vector3.INF and T.finish != Vector3.INF and T.pad_at != Vector3.INF
 	ok("ten gates, start and finish arch, pad", T.gates.size() == 10 and placed, "%d gates" % T.gates.size())
+	var c := T.clock
+	var centred := c.anchor_left == 0.0 and c.anchor_right == 1.0 and c.offset_left == 0.0 and c.offset_right == 0.0
+	ok("the clock is centred, under the top panel", centred and c.offset_top >= 180.0, "top %.0f" % c.offset_top)
+	var gap := Vector2(T.finish.x - T.start.x, T.finish.z - T.start.z).length()
+	ok("the finish arch stands apart from the start arch", gap > 7.0, "%.1f m" % gap)
 	ok("the gates ask for dash, kick, pad, glide", moves.has("dash") and moves.has("kick") and moves.has("pad")
 		and moves.has("glide"), str(moves.keys()))
 	var on_floor := [T.start, T.finish, T.pad_at].all(func(p): return m.world.island_id(p.x, p.z) == "floor")
