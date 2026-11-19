@@ -58,6 +58,7 @@ func _strip(chk, main: Node, species: String, form_id: String) -> Image:
 	it.append_array(extra)
 	R.remote = true
 	KinNet.apply_hunter(R, it)
+	_clear_view(m)
 	var frames: Array = []
 	for face in [0.0, PI]:
 		for who in [P, R]:
@@ -82,6 +83,16 @@ func _strip(chk, main: Node, species: String, form_id: String) -> Image:
 	for i in frames.size():
 		out.blit_rect(frames[i], Rect2i(Vector2i.ZERO, (frames[i] as Image).get_size()), Vector2i(i * fw, 0))
 	return out
+
+## Nothing over the two hunters but their own plates: no grass tufts, ground loot or chest by the start.
+func _clear_view(m: Match) -> void:
+	for g: MultiMeshInstance3D in m.find_children("*", "MultiMeshInstance3D", true, false):
+		g.visible = false
+	for w in m.wpicks:
+		(w["node"] as Node).queue_free()
+	m.wpicks.clear()
+	for c in m.chests:
+		(c["node"] as Node3D).visible = false
 
 func _crop(main: Node, h: Hunter) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
