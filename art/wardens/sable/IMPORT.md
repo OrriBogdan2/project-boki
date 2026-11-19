@@ -111,3 +111,14 @@ Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from
 
 ## Mouth-corner fix (2026-11-18, ext/sable-face-game-1118)
 Owner: the screen-left lip corner showed two endpoints. Cause: the painted lips (from the 2D edit) sat 5-6 mm below the mesh lip slit on the screen-left half (offset 57 px at the corner, 0 at the right corner at 10 px/mm in a front ortho render), so the paint ended at one point and the mesh crease at another, plus a dotted seam line and a lower-lip line that never met the right corner. Texture-only fix in the head/body albedo (`sable_v95b.jpg`; mouth region only, 7.7k texels at 4096): lip paint warped up to the mesh slit (offset removed, tapered to 0 at the right corner), lower-lip lines squeezed into each corner, paint beyond each mesh corner replaced by skin. Mesh, UVs, eyes, mole, blush and `sable_v95.jpg` untouched. Source/tools: `~/meshy/sable-lipfix-1118/`.
+
+## Weights-only retry 11-19l (ext/hunter-fix-sable-1118, PR #371)
+On top of the 11-19f weights (Fable review r3: sleeves re-split). Only JOINTS_0/WEIGHTS_0 change; every other buffer and the
+json are byte-equal to main (positions, UVs, normals, textures, skeleton, 59 clips). No triangle deleted, no vertex split.
+- 22 small sleeve/cuff UV charts (320 verts) that v12 had put on hips/head go back to their arm (live's weights, arm bones only);
+  24 upper-sleeve charts (433 verts) get live's weights with the head share moved to the upper arm (no sleeve on head).
+- Every same-spot vertex group carries one weight set: seams opening >1 cm 675 (live) -> 0; new cracks vs live 389 -> 0.
+- Coat cloth farther than 5-11 cm from the leg bones hands up to 60% of its shin weight to the thigh (smooth ramp), so it
+  no longer folds flat behind a bent knee (collapsed tris in ledge 85 -> 21).
+- Stretch-driven weight relax on welded positions (hand/forearm weight never spreads to a new vertex).
+Edges stretched >3x, mean per clip: 6.58% -> 0.31% (numpy), Blender 6.51% -> 0.31%. Scripts: ~/gens/sable-fix-1119t/scripts/.
