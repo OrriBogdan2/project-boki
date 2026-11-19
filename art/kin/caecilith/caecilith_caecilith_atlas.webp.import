@@ -3,11 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bv5w8pel2ouls"
-valid=false
+path.bptc="res://.godot/imported/caecilith_caecilith_atlas.webp-9d4952cf3dbcfe72b0184d7c9f8f3f2d.bptc.ctex"
+path.astc="res://.godot/imported/caecilith_caecilith_atlas.webp-9d4952cf3dbcfe72b0184d7c9f8f3f2d.astc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://art/kin/caecilith/caecilith_caecilith_atlas.webp"
+dest_files=["res://.godot/imported/caecilith_caecilith_atlas.webp-9d4952cf3dbcfe72b0184d7c9f8f3f2d.bptc.ctex", "res://.godot/imported/caecilith_caecilith_atlas.webp-9d4952cf3dbcfe72b0184d7c9f8f3f2d.astc.ctex"]
 
 [params]
 
