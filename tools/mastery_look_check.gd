@@ -3,7 +3,9 @@ extends RefCounted
 ## A Hunter's mastery level gives a feature on your own character (Vex: green eye glow, Kael: a white-hot scar):
 ## locked until its level, then shown at home (the Unmasked model), never in a match (the Hunter's own look), faded
 ## and kept again by the creator's toggle, and an old save's look gains the key and any feature it already earned.
-## With --shots-dir=<dir>: mastery_look_creator.png (both features on, front view) and mastery_look_faded.png.
+## The first feature is explained once (MasterySeep), on the first farm arrival after it is earned.
+## With --shots-dir=<dir>: mastery_look_creator.png (both features on, front view), mastery_look_faded.png and
+## mastery_seep.png (the farm line).
 
 var bad := 0
 
@@ -18,6 +20,8 @@ func run(main: Node) -> void:
 	_unlock_and_show()
 	await _creator_toggle(main)
 	_migration()
+	_seep_rules()
+	await _seep_farm(main)
 	print("MASTERYLOOK CHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -138,3 +142,53 @@ func _migration() -> void:
 	var again: Dictionary = Save.d["look"].duplicate(true)
 	Unmasked.migrate(Save.d)
 	ok(Save.d["look"] == again, "migrating twice changes nothing")
+
+## The line: none before a feature is earned, then the feature's name, the menu key and "Change your look".
+func _seep_rules() -> void:
+	_fresh()
+	ok(MasterySeep.line() == "", "no feature earned: no line")
+	_master("gunslinger", int(MasteryLook.features()[0]["level"]))
+	var said := MasterySeep.line()
+	var named := said.contains("green eye glow") and said.contains("Change your look")
+	ok(named and said.contains(Settings.key_cap("menu")),
+		"the line names the feature, the menu key and Change your look (%s)" % said)
+
+## The real arrival: the farm says it once; the next arrival and a save that has not earned one say nothing.
+func _seep_farm(main: Node) -> void:
+	var tree := main.get_tree()
+	_fresh()
+	(Save.d["roster"] as Array).append(Save.new_kin("zapple", "Pip"))
+	Save.d["active"] = Save.d["roster"][0]["uid"]
+	Save.d["tutorial"] = {"hatched": true, "intro": true, "home": true}
+	HomeLayout.ensure(Save.d)
+	var said := await _arrive(main)
+	ok(said == "", "no feature earned: the farm says nothing")
+	_master("gunslinger", int(MasteryLook.features()[0]["level"]))
+	said = await _arrive(main)
+	ok(said == MasterySeep.line() and Save.d["tutorial"].get("mastery_seep", false), "first arrival after it: the line")
+	await _farm_shot(main, tree)
+	ok(await _arrive(main) == "", "the next arrival says nothing")
+
+## Goes to the farm and returns what its message lane says once it has settled.
+func _arrive(main: Node) -> String:
+	Game.goto("home", {})
+	var t := 0.0
+	while t < 12.0:
+		await main.get_tree().process_frame
+		t += main.get_process_delta_time()
+		var cur = Game.main.current
+		if is_instance_valid(cur) and cur.get("building") != true and cur.get("root_ui") != null \
+				and not Game.main.fade.covered and cur.get("player") != null:
+			await main.get_tree().create_timer(0.5).timeout
+			return " ".join(MsgLane.of(cur.root_ui).texts())
+	return "NO FARM"
+
+func _farm_shot(main: Node, tree: SceneTree) -> void:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			var dir := String(a).substr(12)
+			DirAccess.make_dir_recursive_absolute(dir)
+			await main.fade.reveal(0.01)
+			await tree.create_timer(0.6).timeout
+			await RenderingServer.frame_post_draw
+			tree.root.get_texture().get_image().save_png(dir.path_join("mastery_seep.png"))

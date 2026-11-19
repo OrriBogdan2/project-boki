@@ -724,6 +724,7 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
+		MasterySeep.maybe_show(self)     # the first mastery feature on you, explained once
 	if not visit.is_empty() and not play_hub:     # (the hub counts as a visit; the picker opens there too)
 		ClanBase.draw(self, world, kins, visit.get("clan_base", {}))
 	elif play_hub:
