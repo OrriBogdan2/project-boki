@@ -126,7 +126,7 @@
 		"pull_reach": 9.0,
 		"stacks": 1
 	},
-	"x": {
+	"x": {"per_rank": {"cooldown": [-5, -5], "dmg": [4.5, 0.0]},
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Kitefall",
 		"card_range": "range",
@@ -164,8 +164,8 @@
 	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
 	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
-	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
-	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
+	"rank2": {"ult": "Rank 2: Kitefall cooldown 42s -> 37s, damage 9 -> 13.5. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
+	"rank_next": {"ult": "Rank 3: Kitefall cooldown 42s -> 32s, damage 9 -> 13.5.", "sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown"},

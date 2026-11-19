@@ -159,15 +159,15 @@
 	"rank_cd": {"sec": [1, 1, 0.7391], "dash": [1, 0.8929, 0.7857], "kin": [1, 1, 0.75], "air": [1, 0.8929, 0.7857]},
 	"rank_dmg": {"sec": [1, 1.4, 1.4], "dash": [1, 1, 1], "kin": [1, 1.225, 1.5]},
 	"rank3": {"sec": "the roots last 0.3s longer, the burst is twice as wide and takes half again as much from ability power", "dash": "picking up a teammate refreshes your long air dash", "kin": "the thrown light's healing boost is 100% instead of 50%"},
-	"rank2": {"sec": "Rank 2: damage +40% (seed 9 -> 12.6, burst 32 -> 44.8).", "dash": "Rank 2: recharge 7s -> 6.25s; the air glide 14s -> 12.5s.", "kin": "Rank 2: healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27)."},
-	"rank_next": {"sec": "Rank 3: cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power.", "dash": "Rank 3: recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash.", "kin": "Rank 3: cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%."},
+	"rank2": {"ult": "Rank 2: Hearth Call cooldown 46s -> 42s, healing a second 7 -> 8.75. The Merge lasts 30% longer.", "sec": "Rank 2: damage +40% (seed 9 -> 12.6, burst 32 -> 44.8).", "dash": "Rank 2: recharge 7s -> 6.25s; the air glide 14s -> 12.5s.", "kin": "Rank 2: healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27)."},
+	"rank_next": {"ult": "Rank 3: Hearth Call cooldown 46s -> 38s, healing a second 7 -> 10.5.", "sec": "Rank 3: cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power.", "dash": "Rank 3: recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash.", "kin": "Rank 3: cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%."},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
 		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
-	"x": {
+	"x": {"per_rank": {"cooldown": [-4, -4], "heal_ps": [1.75, 1.75]},
 		"name": "Hearth Call",
 		"card_range": "range",
 		"short": "Call",
