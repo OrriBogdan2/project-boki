@@ -10306,3 +10306,4 @@ READY ext/split-lairs b903cf12cc (split lairs.gd into fight/lock/bots/demo, API 
 READY ext/merge-lane-tutorial-1119 3fa6f4d132 (supersedes 857fd4d1f9: + origin/main 4aaa301350 (clean); drop-feel-check fixed for the LMB-first tutorial beat; PR #349 GATE GREEN: full suite at 857fd NEW-RED 1 -> re-run at 3fa6f4 0 red, export dry-run OK 885 MB)
 READY ext/split-exits 53c878df43 (split exits.gd into flow/look, API unchanged)
 READY ext/ui-demo-no-away-card 2822998b26b (--base-demo opens with no away card: BaseDemo.stage sets ArrivalQueue.quiet; --base-demo-check asserts no panel at 5 s)
+READY ext/ui-settings-search af45fe2562 (Settings search box: filters every tab's rows by label with the tab name beside each hit, Esc clears; size+trim checks green)
