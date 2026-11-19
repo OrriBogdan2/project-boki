@@ -5,9 +5,11 @@ extends RefCounted
 var ex: Exits
 var m: Match
 
+
 func _init(l: Exits) -> void:
 	ex = l
 	m = l.m
+
 
 func _start(x: Dictionary, h: Hunter) -> void:
 	x["state"] = "charging"
@@ -26,9 +28,19 @@ func _start(x: Dictionary, h: Hunter) -> void:
 		var mine: bool = m.player != null and h.team == m.player.team
 		if mine:
 			UiSfx.extract_start()
-		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
+		m.add_feed(
+			("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"])
+		)
 		if m.hud and m.player and not m.player.out:
-			m.hud.toast("Uplink started: hold the outpost until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
+			m.hud.toast(
+				(
+					"Uplink started: hold the outpost until it's charged"
+					if mine
+					else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]]
+				),
+				ExitModels.UPLINK
+			)
+
 
 func _tick_outpost(x: Dictionary, dt: float) -> void:
 	var n: Node3D = x["node"]
@@ -41,8 +53,10 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				if not ex._live(h) or h.downed or not ex.in_yard(x, h):
 					continue
 				# truce partners share the yard: they hold it with you rather than contest it
-				if h.team == team or (m.truce and m.truce.allied(team, h.team)): squad += 1
-				else: foes[h.team] = int(foes.get(h.team, 0)) + 1
+				if h.team == team or (m.truce and m.truce.allied(team, h.team)):
+					squad += 1
+				else:
+					foes[h.team] = int(foes.get(h.team, 0)) + 1
 			x["contested"] = not foes.is_empty()
 			x["crew"] = squad
 			# nobody in the yard at all: the charge drains away, and at nothing the uplink shuts off. (A
@@ -66,7 +80,9 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 					m.fx.ring(x["pos"], Exits.OUTPOST_R, Color("ff8a6a"), 0.5)
 					var who := ""
 					for h in m.hunters:
-						if h.team == int(x["team"]) and ex.in_yard(x, h): who = h.pname; break
+						if h.team == int(x["team"]) and ex.in_yard(x, h):
+							who = h.pname
+							break
 					m.add_feed("%s took over the uplink at %s" % [who, x["name"]])
 			else:
 				x["steal"] = 0.0
@@ -76,10 +92,12 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 		"open":
 			x["t"] = float(x["t"]) - dt
 			var p: Vector3 = x["pos"]
-			var seat: bool = x.get("seat", false)      # the Uplink seat: its lift is the finishing squad's alone
+			var seat: bool = x.get("seat", false)  # the Uplink seat: its lift is the finishing squad's alone
 			var rode := false
 			for h in m.hunters:
-				var at_lift: bool = ex._live(h) and not h.remote and h.flat_dist(p) < Exits.LIFT_R and absf(h.pos.y - p.y) < 1.5
+				var at_lift: bool = (
+					ex._live(h) and not h.remote and h.flat_dist(p) < Exits.LIFT_R and absf(h.pos.y - p.y) < 1.5
+				)
 				if at_lift and (not seat or h.team == int(x["team"])):
 					m._extract(h, "uplink", x["name"])
 					rode = true
@@ -89,8 +107,8 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 					if ex._live(h) and not h.remote and h.downed and h.team == int(x["team"]) and ex.in_yard(x, h):
 						m._extract(h, "uplink", x["name"])
 			if float(x["t"]) <= 0.0:
-				x["state"] = "closed" if seat else "spent"      # (one use: the Uplink seat doesn't come back)
-				x["taken"] = true     # the lift opened once: WaysOutLook shows the seat used
+				x["state"] = "closed" if seat else "spent"  # (one use: the Uplink seat doesn't come back)
+				x["taken"] = true  # the lift opened once: WaysOutLook shows the seat used
 				x["t"] = Exits.UPLINK_CD
 				n.get_node("Lift").visible = false
 				m.sfx("thump", p, -6.0, 0.8)
@@ -109,8 +127,11 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
-				x["state"] = "idle"; x["team"] = -1; x["prog"] = 0.0
+				x["state"] = "idle"
+				x["team"] = -1
+				x["prog"] = 0.0
 	ex._show_outpost(x, n)
+
 
 ## The Uplink seat shut (its window ran out): dark for the rest of the match.
 func close_outpost(x: Dictionary) -> void:
@@ -122,7 +143,9 @@ func close_outpost(x: Dictionary) -> void:
 	x["draining"] = false
 	var n: Node3D = x["node"]
 	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
-	if was == "charging": m.sfx("uplink_shut", x["pos"], -4.0)
+	if was == "charging":
+		m.sfx("uplink_shut", x["pos"], -4.0)
+
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -141,6 +164,7 @@ func _fizzle(x: Dictionary) -> void:
 			UiSfx.extract_fail()
 			m.hud.toast("The uplink shut off: nobody held the outpost. Start it again to charge it", ExitModels.UPLINK)
 
+
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
 	x["t"] = 1e9 if x.get("tut", false) else Exits.LIFT_T
@@ -156,6 +180,7 @@ func _open_lift(x: Dictionary) -> void:
 			m.add_feed("The lift is open at %s for %ds" % [x["name"], int(Exits.LIFT_T)])
 	if m.hud and m.player and int(x["team"]) == m.player.team and not m.player.out:
 		m.hud.toast("Uplink complete! The lift is open: step into the light", ExitModels.UPLINK)
+
 
 ## While an uplink is charging, the local monsters keep coming at it: every WAVE_EVERY seconds, out of
 ## the outpost's fixed posts, which glow on the ground WAVE_WARN seconds first (every peer sees it).
@@ -176,7 +201,8 @@ func _waves(x: Dictionary, dt: float) -> void:
 	var focus: Vector3 = x["pos"]
 	var alive := 0
 	for mb in m.mobs:
-		if not mb.dead and int(mb.get_meta("exit", -1)) == int(x["i"]): alive += 1
+		if not mb.dead and int(mb.get_meta("exit", -1)) == int(x["i"]):
+			alive += 1
 	var n := 2 if x.get("tut", false) else 2 + m.tier + (1 if int(x["waves"]) >= 2 else 0)
 	n = mini(n, Exits.WAVE_CAP - alive)
 	var wave := int(x["waves"])
@@ -193,15 +219,20 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if kinds.is_empty():
 			kinds = ["skitter", "spitter", "bomber", "skitter"] + (["brute"] if int(x["waves"]) >= 3 else [])
 		var mb: Mob = m.spawn_mob(String(kinds[(wave + k) % kinds.size()]), at)
-		if m.biomes: m.biomes.dress(mb)
+		if m.biomes:
+			m.biomes.dress(mb)
 		mb.set_meta("exit", int(x["i"]))
-		mb.camp = focus          # they press in on the outpost
+		mb.camp = focus  # they press in on the outpost
 		mb.st = "chase"
-		var best: Hunter = null; var bd := 16.0
+		var best: Hunter = null
+		var bd := 16.0
 		for h in m.hunters:
-			if h.targetable() and mb.flat_dist(h) < bd: bd = mb.flat_dist(h); best = h
+			if h.targetable() and mb.flat_dist(h) < bd:
+				bd = mb.flat_dist(h)
+				best = h
 		mb.tgt = best
-		if best == null: mb.st = "idle"
+		if best == null:
+			mb.st = "idle"
 		m.fx.burst(at + Vector3(0, 0.4, 0), Color("ff9a6a"), 12, 3.0, 0.5)
 		m.fx.dust(at, 6)
 		spawned += 1
@@ -210,28 +241,30 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
 			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
+
 ## The outpost's wave posts: WAVE_POSTS evenly round it on open ground of its island, turned by the
 ## exit's index so neighbouring outposts differ. Worked out once; the same on every peer.
 func wave_posts(x: Dictionary) -> Array:
 	if x.has("posts"):
 		return x["posts"]
-	var W := m.world
+	var world := m.world
 	var focus: Vector3 = x["pos"]
-	var ii := W.island_of(focus.x, focus.z)
+	var ii := world.island_of(focus.x, focus.z)
 	var posts: Array = []
 	for k in Exits.WAVE_POSTS:
 		var a := int(x["i"]) * 2.4 + TAU * k / Exits.WAVE_POSTS
 		for d in Exits.WAVE_R:
 			var px: float = focus.x + cos(a) * d
 			var pz: float = focus.z + sin(a) * d
-			if W.is_void(px, pz) or W.is_block(px, pz) or (ii >= 0 and W.island_of(px, pz) != ii):
+			if world.is_void(px, pz) or world.is_block(px, pz) or (ii >= 0 and world.island_of(px, pz) != ii):
 				continue
-			if W.edge_dist(int(px), int(pz), 2) < 2:
+			if world.edge_dist(int(px), int(pz), 2) < 2:
 				continue
-			posts.append(Vector3(px, W.ground_at(px, pz), pz))
+			posts.append(Vector3(px, world.ground_at(px, pz), pz))
 			break
 	x["posts"] = posts
 	return posts
+
 
 func _hunter_near(p: Vector3, r: float) -> bool:
 	for h in m.hunters:
