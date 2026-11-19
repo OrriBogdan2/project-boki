@@ -5,7 +5,7 @@ extends RefCounted
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
 ## ability locked, the first pick can only be the right click, every ability but the ultimate ends up unlocked
 ## and used (right click, attack, dash, wall kick, Boki, E, glove; the tutorial has no Fusion, so the ultimate
-## stays locked), and only the camps paid XP.
+## stays locked), and only the camps paid XP. Each run also judges the framing at 1280x720 (TutorialFraming).
 
 var bad := 0
 
@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 
 func _play(main: Node, id: String) -> void:
 	seed(11)       # (the same run each time)
+	Save.d["tutorial"].erase("tut_beat")      # (each starter plays from the start, not from the last run's beat)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
@@ -48,10 +49,12 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
+	var framing := TutorialFraming.new()
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		framing.tick(m)
 		texts[tu.id()] = tu.text
 		if tu.id() == "pick_sec" and not forced:
 			forced = true
@@ -71,6 +74,7 @@ func _play(main: Node, id: String) -> void:
 	var names_move: bool = hint.contains(HINT_WORD[id]) and hint.length() <= 34
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
+	framing.judge(id, ok)
 	var all_on: bool = m.player.slot_lv.keys().all(func(k): return k == "ult" or int(m.player.slot_lv[k]) > 0)
 	ok(all_on, "%s: every ability unlocked %s" % [id, str(m.player.slot_lv)])
 	var missing := USED.filter(func(k): return not tu.seen.get(k, false))
