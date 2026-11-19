@@ -8,6 +8,7 @@ extends RefCounted
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
 const LINE_FS := 13
+const WORD_PX := 11             # a seat's word on the full map
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
 
@@ -127,6 +128,15 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 	if m.heart_raid:
 		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
+## A seat badge's radius on the full map at its zoom `k` (px).
+static func badge_r(k: float) -> float:
+	return clampf(8.0 + k * 0.8, 12.0, 18.0)
+
+## Where seat i's word sits from its badge on the full map: over the Heart Gate (its own name is under it),
+## under the rest. FullMap reserves its spot before it places the names.
+static func word_dy(i: int, r: float) -> float:
+	return -r - 16.0 if i == 1 else r + 30.0
+
 static func full_map(fm) -> void:
 	var m: Match = fm.m
 	if m.heart == null:
@@ -134,7 +144,7 @@ static func full_map(fm) -> void:
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var area: Rect2 = fm.rect.grow(-14.0)
-	var r := clampf(8.0 + fm.k() * 0.8, 12.0, 18.0)
+	var r := badge_r(fm.k())
 	for i in 4:
 		if at[i] == Vector3.INF:
 			continue
@@ -142,8 +152,7 @@ static func full_map(fm) -> void:
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
 			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
-			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
-			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
+			fm.label(word(i, sd[i]), pv + Vector2(0, word_dy(i, r)), WORD_PX, color_of(sd[i]), true)    # (reserved)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
 # ------------------------------------------------------------------ the dead and the watching
