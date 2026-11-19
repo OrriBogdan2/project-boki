@@ -10358,3 +10358,4 @@ READY ext/vfx-utility-read-port 75e571a01a (origin/main 2ee0e648d3 merged; one c
 READY ext/early-camps-bots-a3-port 0bd417101b8d68c187dffe55184ed6638ff0f304 (merged origin/main 2ee0e648d3; net.gd conflict fixed: Net.VERSION 0.24.19 for the campclr event since main took 0.24.18; --camps-check 0 failures, --check 0 failures, health --strict OK; supersedes 8906aa9b)
 READY ext/merge-lane-n19d-1119 fb773175bd (lane n19d bundle: tut-wide-cam + one kin folder kin_v2->kin + zone clock in the clock chip; checks match main, export OK)
 READY ext/p10-port-1118 e2ebeea6c (P10 movement/glide port: Gil Ground Swim 4.5 m/0.55 s without TurnCost, spike blocks on GlideSpike, plus earlier one-profile/Wirerun-glide/heat/impact-cap/range-screen; PR #328; reds vs main: none new, health --strict OK)
+READY ext/p07-port-1118 5a7d649b2218 (P07 port: tut-wide-cam framing per starter in --tutorial-fight-check, driver wall-kick fix, fight check 11 FAIL on main -> 0; PR via gh-outbox)
