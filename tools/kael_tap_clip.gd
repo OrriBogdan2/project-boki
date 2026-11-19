@@ -24,32 +24,32 @@ func run(mn: Node, _who := "") -> void:
 
 func _case(c: String, out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
-	var A := AKCheck.new()
-	A.main = main
-	var r = A.setup("juggernaut", 2.5)
+	var chk := AKCheck.new()
+	chk.main = main
+	var r = chk.setup("juggernaut", 2.5)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: JuggernautKit = P.ak
+	var pl: Hunter = r[1]
+	var tgt: Hunter = r[2]
+	var kt: JuggernautKit = pl.ak
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
-	K.ch_rmb = 0.0 if c == "tap" else 1.0
-	K.cd["rmb"] = 99.0 if c == "tap" else 0.0
-	A.aim_at(P, T.pos)
+	kt.ch_rmb = 0.0 if c == "tap" else 1.0
+	kt.cd["rmb"] = 99.0 if c == "tap" else 0.0
+	chk.aim_at(pl, tgt.pos)
 	for i in 10:
 		await _frame(m)
 	for n in FRAMES:
 		for s in STEPS:
-			_drive(c, A, m, P, K, n * STEPS + s)
+			_drive(c, chk, m, pl, kt, n * STEPS + s)
 			m.step(Match.DT)
 		await _frame(m)
 		m.get_viewport().get_texture().get_image().save_png(out.path_join("f%03d.png" % n))
 	print(
 		(
 			"KCLIP %s %d frames, foe took %.0f, vel %s -> %s"
-			% [c, FRAMES, A.dmg(T), K.riposte.vel_before, K.riposte.vel_after]
+			% [c, FRAMES, chk.dmg(tgt), kt.riposte.vel_before, kt.riposte.vel_after]
 		)
 	)
 	m.queue_free()
@@ -57,27 +57,27 @@ func _case(c: String, out: String) -> void:
 
 
 ## What the player does at step `i` of the case.
-func _drive(c: String, A, m: Match, P: Hunter, K: JuggernautKit, i: int) -> void:
-	A.aim_at(P, P.pos + Vector3(4.0, 0, 0))
+func _drive(c: String, chk, m: Match, pl: Hunter, kt: JuggernautKit, i: int) -> void:
+	chk.aim_at(pl, pl.pos + Vector3(4.0, 0, 0))
 	match c:
 		"tap":
 			if i == 0:
-				A.tap(m, P)
+				chk.tap(m, pl)
 		"hold":
-			P.inp["sec_hold"] = i < 40
+			pl.inp["sec_hold"] = i < 40
 			if i == 0:
-				K.press_rmb()
+				kt.press_rmb()
 		"ult_sprint":
-			P.inp["move"] = Vector2(1, 0)
+			pl.inp["move"] = Vector2(1, 0)
 			if i == 30:
-				K.cd["x"] = 0.0
-				K.riposte.start()
+				kt.cd["x"] = 0.0
+				kt.riposte.start()
 		"ult_jump":
 			if i == 10:
-				P.vel.y = 6.0
+				pl.vel.y = 6.0
 			if i == 20:
-				K.cd["x"] = 0.0
-				K.riposte.start()
+				kt.cd["x"] = 0.0
+				kt.riposte.start()
 
 
 func _frame(m: Match) -> void:

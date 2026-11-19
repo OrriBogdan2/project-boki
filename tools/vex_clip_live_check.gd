@@ -42,29 +42,29 @@ func _shown(h: Hunter) -> int:
 
 ## Owner 11-08 item 17: a dash pressed in the air is her tucked barrel roll, never the
 ## ground skid, and once she lands the roll gives way to the landing.
-func _air_dash(m: Match, P: Hunter, home: Vector3) -> void:
-	P.teleport(home)
-	P.dashes = P.max_dashes()
-	P.inp["move"] = Vector2(0, -1)
-	P.pos.y = home.y + 2.5
-	P.grounded = false
-	P.vel = Vector3.ZERO
-	_frame(m, [P])
-	P.do_dash()
+func _air_dash(m: Match, pl: Hunter, home: Vector3) -> void:
+	pl.teleport(home)
+	pl.dashes = pl.max_dashes()
+	pl.inp["move"] = Vector2(0, -1)
+	pl.pos.y = home.y + 2.5
+	pl.grounded = false
+	pl.vel = Vector3.ZERO
+	_frame(m, [pl])
+	pl.do_dash()
 	var seen := {}
 	var after_land := ""
 	for f in 90:
-		_frame(m, [P])
-		var c := _clips(P)
+		_frame(m, [pl])
+		var c := _clips(pl)
 		seen[c.cur] = true
-		if P.grounded and after_land == "" and f > 2:
+		if pl.grounded and after_land == "" and f > 2:
 			for i in 3:
-				_frame(m, [P])
-			after_land = _clips(P).cur
-	P.inp["move"] = Vector2.ZERO
-	P.teleport(home)
+				_frame(m, [pl])
+			after_land = _clips(pl).cur
+	pl.inp["move"] = Vector2.ZERO
+	pl.teleport(home)
 	for f in 60:
-		_frame(m, [P])           # (standing still again: the next move plays full-body)
+		_frame(m, [pl])           # (standing still again: the next move plays full-body)
 	ok(seen.has("dash_ex") and not seen.has("dash"), "an air dash rolls, no skid (clips %s)" % str(seen.keys()))
 	ok(after_land != "dash_ex", "the roll gives way once she lands (clip after: %s)" % after_land)
 ## The world yaw a pair of bones faces: the line from the left one's head to the right one's is his right.

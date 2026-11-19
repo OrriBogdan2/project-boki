@@ -20,13 +20,14 @@ var A: AKCheck
 func run(main_node: Node, who := "all") -> void:
 	A = AKCheck.new()
 	A.main = main_node
+	var handoff := load("res://tools/prop_handoff_check.gd")
 	if who in ["all", "thief"]:
 		await thief(A)
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
-		await load("res://tools/prop_handoff_check.gd").new(A, A.ok).run("thief")
+		await handoff.new(A, A.ok).run("thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
-		await load("res://tools/prop_handoff_check.gd").new(A, A.ok).run("juggernaut")
+		await handoff.new(A, A.ok).run("juggernaut")
 		await HOLD.kael(A)
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "juggernaut")
 	await combos(A)

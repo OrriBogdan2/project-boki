@@ -10,8 +10,8 @@ extends RefCounted
 ## the save.
 
 const DT := 1.0 / 30.0
-const TOL := 0.15             # of the reach: how far the tip may land short of or past the hit area's edge
-const RAM_TOUCH := 0.45       # m: the Soot Ram hits a foe within hit_r + this of Cinder's centre (ashwick_kit)
+const TOL := 0.15  # of the reach: how far the tip may land short of or past the hit area's edge
+const RAM_TOUCH := 0.45  # m: the Soot Ram hits a foe within hit_r + this of Cinder's centre (ashwick_kit)
 ## Strikes docs/art/wardens/CLIPS.md found short at the owner's heights: "<id>:<move>" -> why (docs/DEBT.md). Reported,
 ## not failed; a re-keyed clip that reaches removes its entry.
 const OPEN := {
@@ -24,10 +24,12 @@ const OPEN := {
 var bad := 0
 var trace := false
 
+
 func ok(cond: bool, what: String) -> void:
 	print("REACH %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -51,6 +53,7 @@ func run(main: Node) -> void:
 	print("STRIKE_REACH_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A Hero's strikes (the model `m` in the tree, its Sync not processing): the rows checked. Returns how many.
 func hero(id: String, m: Node3D, sync: Node, dd: Dictionary, tree: SceneTree) -> int:
 	var clips: WardenClips = sync.get("clips")
@@ -71,7 +74,7 @@ func hero(id: String, m: Node3D, sync: Node, dd: Dictionary, tree: SceneTree) ->
 		var length := clips.lib.get_animation(clip).length
 		var end := float(mv.get("hold_from", length))
 		var rule := String(spec[2])
-		var pick := Vector3.ZERO      # the point at the frame the rule reads
+		var pick := Vector3.ZERO  # the point at the frame the rule reads
 		var pick_t := -1.0
 		var t := 0.0
 		while t <= end + 0.001:
@@ -81,8 +84,9 @@ func hero(id: String, m: Node3D, sync: Node, dd: Dictionary, tree: SceneTree) ->
 			await tree.process_frame
 			var p := _point(m, sync, sk, String(spec[0]))
 			if trace:
-				print("TRACE %s %s t %.3f flat %.2f fwd %.2f y %.2f" % [
-						id, km, t, Vector2(p.x, p.z).length(), -p.z, p.y])
+				print(
+					"TRACE %s %s t %.3f flat %.2f fwd %.2f y %.2f" % [id, km, t, Vector2(p.x, p.z).length(), -p.z, p.y]
+				)
 			var better := false
 			match rule:
 				"edge":
@@ -99,6 +103,7 @@ func hero(id: String, m: Node3D, sync: Node, dd: Dictionary, tree: SceneTree) ->
 		_judge(id, String(km), String(spec[0]), rule, pick, pick_t, reach)
 	return n
 
+
 func _judge(id: String, km: String, point: String, rule: String, p: Vector3, t: float, reach: float) -> void:
 	var flat := Vector2(p.x, p.z).length()
 	var fwd := -p.z
@@ -107,12 +112,16 @@ func _judge(id: String, km: String, point: String, rule: String, p: Vector3, t: 
 	match rule:
 		"edge":
 			good = absf(flat / reach - 1.0) <= TOL
-			what = "%s lands on the hit area's edge: %.2f of %.2f m (%+.0f%%) at %.2f s" % [
-					point, flat, reach, (flat / reach - 1.0) * 100.0, t]
+			what = (
+				"%s lands on the hit area's edge: %.2f of %.2f m (%+.0f%%) at %.2f s"
+				% [point, flat, reach, (flat / reach - 1.0) * 100.0, t]
+			)
 		"ground":
 			good = fwd >= 0.0 and flat <= reach and p.y < 0.6
-			what = "%s lands inside the area ahead: %.2f m out (%.2f fwd, %.2f up) of %.2f at %.2f s" % [
-					point, flat, fwd, p.y, reach, t]
+			what = (
+				"%s lands inside the area ahead: %.2f m out (%.2f fwd, %.2f up) of %.2f at %.2f s"
+				% [point, flat, fwd, p.y, reach, t]
+			)
 		"start":
 			good = fwd > 0.0 and flat <= reach
 			what = "%s starts inside the area: %.2f m fwd of %.2f at %.2f s" % [point, fwd, reach, t]
@@ -127,6 +136,7 @@ func _judge(id: String, km: String, point: String, rule: String, p: Vector3, t: 
 	else:
 		ok(good, "%s %s: %s" % [id, km, what])
 
+
 static func _reach(id: String, path: String) -> float:
 	if path == "ram":
 		return Arch.hit_r(id, Data.CLASSES[Arch.weight(id)]) + RAM_TOUCH
@@ -135,8 +145,10 @@ static func _reach(id: String, path: String) -> float:
 		v = (v as Dictionary).get(k, {}) if v is Dictionary else (v as Array)[int(k)]
 	return float(v) if v is float or v is int else -1.0
 
+
 static func _bone(m: Node3D, sk: Skeleton3D, b: String) -> Vector3:
 	return sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin - m.global_position
+
 
 ## The striking point in the Hero's own frame (it stands at the origin facing -z).
 static func _point(m: Node3D, sync: Node, sk: Skeleton3D, which: String) -> Vector3:

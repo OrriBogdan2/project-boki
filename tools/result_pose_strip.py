@@ -2,11 +2,24 @@
 """The strip of all twelve Hunters' win, lose and board beats from --result-pose-shots (needs ffmpeg).
 Usage: result_pose_strip.py <shots-dir> <out.png> [--width=<px per frame>]. One row per Hunter in Arch.ORDER,
 columns win/lose/board x (arriving, held, breathing out)."""
+
 import subprocess
 import sys
 
-ORDER = ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
-         "rimewright", "tender", "thief"]
+ORDER = [
+    "archer",
+    "ashwick",
+    "bulwark",
+    "dolm",
+    "dredge",
+    "gunslinger",
+    "juggernaut",
+    "mage",
+    "ostra",
+    "rimewright",
+    "tender",
+    "thief",
+]
 BEATS = ["win", "lose", "board"]
 
 

@@ -5,20 +5,24 @@ extends RefCounted
 ## and filmed is what the farm plays. The model faces -Z and walks toward -Z.
 
 const DT := 1.0 / 30.0
-const START_Z := 47.5          # on the bank, a run up before the water
-const END_Z := 24.5            # out the far side, dry again
-const STOP_Z := 31.5           # m: where it stops to tread water
-const TREAD_S := 4.0           # s: treading water
-const EDGE_X := 32.5           # the line it walks
-const DRY_SPEED := 5.0         # the farm's walk speed (Home.SPEED)
-const POND := Rect2i(28, 26, 9, 10)          # the deep pond (tiles x, z; its rim is the shallow edge)
-const CHANNEL := Rect2i(32, 36, 1, 6)        # a one-tile shallow channel from the bank to the pond
+const START_Z := 47.5  # on the bank, a run up before the water
+const END_Z := 24.5  # out the far side, dry again
+const STOP_Z := 31.5  # m: where it stops to tread water
+const TREAD_S := 4.0  # s: treading water
+const EDGE_X := 32.5  # the line it walks
+const DRY_SPEED := 5.0  # the farm's walk speed (Home.SPEED)
+const POND := Rect2i(28, 26, 9, 10)  # the deep pond (tiles x, z; its rim is the shallow edge)
+const CHANNEL := Rect2i(32, 36, 1, 6)  # a one-tile shallow channel from the bank to the pond
+
 
 ## What HomeWater asks of its Home: the layout's water tiles (the farm's own pond is too small to film a stroke in).
 class Layout:
 	var cells := {}
-	func L() -> Dictionary:
+
+	# (the name mirrors HomeBuild.L(), the real API HomeWater reads)
+	func L() -> Dictionary:  # gdlint:ignore=function-name
 		return {"water": cells}
+
 
 ## The Home that HomeWater reads (its fields and walk_speed()), with the farm's plain walk speed.
 class Host:
@@ -33,8 +37,10 @@ class Host:
 	func walk_speed() -> float:
 		return DRY_SPEED
 
+
 ## The phase a frame is in: "dry" before the water, "wade", "swim", "tread" (stopped in deep water), "out" after it.
 var phase := "dry"
+
 
 func _layout() -> Layout:
 	var lay := Layout.new()
@@ -43,6 +49,7 @@ func _layout() -> Layout:
 			for z in range(rect.position.y, rect.end.y):
 				lay.cells[HomeLayout.key(x, z)] = true
 	return lay
+
 
 ## Walks `m` (driven by `anim`) through the pond; `on_frame` (a coroutine or not) is called after each step with
 ## {phase, depth, speed, state}. HunterAnim and the Hero's clips are stepped here.

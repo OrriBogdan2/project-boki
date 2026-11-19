@@ -8,8 +8,8 @@ A Hero's clips file gives its READY pose and these numbers (cfg):
   rise / tail seconds, w how far the torso folds over the lip (a heavy Hero more), nod how far the head and chest drop on the landing,
   extra {phase: {keys}} the Hero's own face, tail, weapon and wings on each phase: reach, over, step, up, top, pop, land."""
 
-DEEP = 1.4        # m: the face a typical rise climbs (a jump's reach), so the lip starts about shoulder-high
-SOLE = 0.12       # m: the body ends this far above the lip (hunter.gd `_ledge_rise`), then pops
+DEEP = 1.4  # m: the face a typical rise climbs (a jump's reach), so the lip starts about shoulder-high
+SOLE = 0.12  # m: the body ends this far above the lip (hunter.gd `_ledge_rise`), then pops
 
 
 def surface(k):
@@ -33,18 +33,58 @@ def clip(C, base, cfg):
     def pose(phase, p):
         return dict(p, **ex.get(phase, {}))
 
-    reach = dict(base, **on_lip(0.0, 0.34), pel=(0.0, 0.0, 0.0), prt=(-0.12, 0.0, 0.0), tor=(0.05, 0.0, 0.0), hed=(-0.34, 0.0, 0.0),
-                 FL=(-0.11, 0.20, air(0.22)), FR=(0.11, 0.25, air(0.40)), FLp=0.0, FRp=0.0)
-    over = dict(reach, **on_lip(0.25, 0.36), pel=(0.0, 0.08, -0.02), prt=(0.42 * w, 0.0, 0.0), tor=(0.38 * w, 0.0, 0.0), hed=(-0.5, 0.0, 0.0),
-                FL=(-0.11, 0.06, air(0.12)), FR=(0.11, 0.30, air(0.56)))
-    step = dict(over, **on_lip(0.5, 0.36), pel=(0.0, 0.05, 0.0), prt=(0.32 * w, 0.0, 0.0), tor=(0.28 * w, 0.0, 0.0), hed=(-0.4, 0.0, 0.0),
-                FL=(-0.11, 0.00, air(0.26)), FR=(0.11, 0.30, air(surface(0.5) + 0.02)))
-    up = dict(base, pel=(0.0, 0.02, 0.0), prt=(0.24 * w, 0.0, 0.0), tor=(0.16 * w, 0.0, 0.0), hed=(-0.15, 0.0, 0.0),
-              FL=(-0.11, 0.28, air(0.32)), FR=(0.12, 0.12, air(surface(0.75) + 0.02)))
+    reach = dict(
+        base,
+        **on_lip(0.0, 0.34),
+        pel=(0.0, 0.0, 0.0),
+        prt=(-0.12, 0.0, 0.0),
+        tor=(0.05, 0.0, 0.0),
+        hed=(-0.34, 0.0, 0.0),
+        FL=(-0.11, 0.20, air(0.22)),
+        FR=(0.11, 0.25, air(0.40)),
+        FLp=0.0,
+        FRp=0.0,
+    )
+    over = dict(
+        reach,
+        **on_lip(0.25, 0.36),
+        pel=(0.0, 0.08, -0.02),
+        prt=(0.42 * w, 0.0, 0.0),
+        tor=(0.38 * w, 0.0, 0.0),
+        hed=(-0.5, 0.0, 0.0),
+        FL=(-0.11, 0.06, air(0.12)),
+        FR=(0.11, 0.30, air(0.56)),
+    )
+    step = dict(
+        over,
+        **on_lip(0.5, 0.36),
+        pel=(0.0, 0.05, 0.0),
+        prt=(0.32 * w, 0.0, 0.0),
+        tor=(0.28 * w, 0.0, 0.0),
+        hed=(-0.4, 0.0, 0.0),
+        FL=(-0.11, 0.00, air(0.26)),
+        FR=(0.11, 0.30, air(surface(0.5) + 0.02)),
+    )
+    up = dict(
+        base,
+        pel=(0.0, 0.02, 0.0),
+        prt=(0.24 * w, 0.0, 0.0),
+        tor=(0.16 * w, 0.0, 0.0),
+        hed=(-0.15, 0.0, 0.0),
+        FL=(-0.11, 0.28, air(0.32)),
+        FR=(0.12, 0.12, air(surface(0.75) + 0.02)),
+    )
     top = dict(up, FL=(-0.11, 0.20, air(0.06)), FR=(0.12, -0.04, az), prt=(0.22 * w, 0.0, 0.0))
     pop = dict(top, FL=(-0.11, 0.12, air(0.14)), FR=(0.12, -0.12, air(0.18)))
-    land = dict(base, prt=(0.2 * w + nod, 0.0, 0.0), tor=(0.12 * w + nod, 0.0, 0.0), hed=(-0.1 - nod, 0.0, 0.0), pel=(0.0, 0.0, -0.04 * w),
-                FL=(-0.11, 0.22, az), FR=(0.12, -0.18, air(0.03)))
+    land = dict(
+        base,
+        prt=(0.2 * w + nod, 0.0, 0.0),
+        tor=(0.12 * w + nod, 0.0, 0.0),
+        hed=(-0.1 - nod, 0.0, 0.0),
+        pel=(0.0, 0.0, -0.04 * w),
+        FL=(-0.11, 0.22, az),
+        FR=(0.12, -0.18, air(0.03)),
+    )
     phases = [("reach", reach), ("over", over), ("step", step), ("up", up), ("top", top)]
     keys = [(rise * i / 4.0, pose(n, p), "out" if n == "over" else "smooth") for i, (n, p) in enumerate(phases)]
     keys += [(rise + tail * 0.3, pose("pop", pop)), (rise + tail * 0.7, pose("land", land), "out"), (rise + tail, base)]

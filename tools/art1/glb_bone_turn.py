@@ -3,6 +3,7 @@ frame (y up, the Hero faces -z), ramping in from t_in, full at t_peak, gone by t
 out while the clip keeps every other beat. The bone's keys are rewritten in place (every clip is keyed at 30 fps).
 Run: python3 tools/art1/glb_bone_turn.py <glb> <clip> <bone> <x,y,z> <deg> <t_in:t_full[:t_held]:t_out> [out.glb]
   e.g. lmb_slam upper_arm.R 1,0,0 -14 0.0:0.067:0.2:0.3  (the arm pitched up about x, full from the impact to 0.2 s)"""
+
 import math
 import struct
 import sys
@@ -15,21 +16,25 @@ def floats(j, b, i, n):
     ac = j["accessors"][i]
     bv = j["bufferViews"][ac["bufferView"]]
     off = bv.get("byteOffset", 0) + ac.get("byteOffset", 0)
-    return list(struct.unpack("<%df" % n, b[off:off + 4 * n]))
+    return list(struct.unpack("<%df" % n, b[off : off + 4 * n]))
 
 
 def store(j, b, i, vals):
     ac = j["accessors"][i]
     bv = j["bufferViews"][ac["bufferView"]]
     off = bv.get("byteOffset", 0) + ac.get("byteOffset", 0)
-    b[off:off + 4 * len(vals)] = struct.pack("<%df" % len(vals), *vals)
+    b[off : off + 4 * len(vals)] = struct.pack("<%df" % len(vals), *vals)
 
 
 def qmul(a, c):
     ax, ay, az, aw = a
     cx, cy, cz, cw = c
-    return [aw * cx + ax * cw + ay * cz - az * cy, aw * cy - ax * cz + ay * cw + az * cx,
-            aw * cz + ax * cy - ay * cx + az * cw, aw * cw - ax * cx - ay * cy - az * cz]
+    return [
+        aw * cx + ax * cw + ay * cz - az * cy,
+        aw * cy - ax * cz + ay * cw + az * cx,
+        aw * cz + ax * cy - ay * cx + az * cw,
+        aw * cw - ax * cx - ay * cy - az * cz,
+    ]
 
 
 def qinv(q):
@@ -50,7 +55,7 @@ def sample(j, b, anim, node, t):
             n = j["accessors"][sm["input"]]["count"]
             ts = floats(j, b, sm["input"], n)
             k = min(range(n), key=lambda i: abs(ts[i] - t))
-            return floats(j, b, sm["output"], n * 4)[k * 4:k * 4 + 4]
+            return floats(j, b, sm["output"], n * 4)[k * 4 : k * 4 + 4]
     return j["nodes"][node].get("rotation", [0, 0, 0, 1])
 
 
@@ -86,10 +91,10 @@ def turn(j, b, clip, bone, axis, deg, window):
             p = qmul(sample(j, b, anim, up, ts[k]), p)
             up = parent.get(up)
         d = axis_angle(axis, deg * w)
-        local = qmul(qmul(qinv(p), d), p)      # the model-frame turn seen from the parent
-        q = qmul(local, vs[k * 4:k * 4 + 4])
+        local = qmul(qmul(qinv(p), d), p)  # the model-frame turn seen from the parent
+        q = qmul(local, vs[k * 4 : k * 4 + 4])
         m = math.sqrt(sum(x * x for x in q))
-        vs[k * 4:k * 4 + 4] = [x / m for x in q]
+        vs[k * 4 : k * 4 + 4] = [x / m for x in q]
     store(j, b, sm["output"], vs)
 
 

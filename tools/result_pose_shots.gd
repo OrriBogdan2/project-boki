@@ -3,7 +3,8 @@ extends "res://tools/idle_shots.gd"
 ## game plays them (HunterAnim state with "beat" and "beat_t"), three frames each: the pose arriving, held, and
 ## breathing out. <dir>/<id>/<beat>_<n>.png; tools/result_pose_strip.py makes the strip of all twelve. Needs a renderer.
 
-const SAMPLES := [0.25, 0.9, 2.2]     # s into the beat
+const SAMPLES := [0.25, 0.9, 2.2]  # s into the beat
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -11,9 +12,12 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	frame_px = 256
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -24,6 +28,7 @@ func run(main: Node) -> void:
 		await _beats(String(id), out.path_join(String(id)))
 	print("RESULT_POSE_SHOTS_DONE ", ids.size())
 	tree.quit()
+
 
 func _beats(id: String, dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -47,8 +52,14 @@ func _beats(id: String, dir: String) -> void:
 		for n in SAMPLES.size():
 			while t < SAMPLES[n]:
 				t += DT
-				var s := {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true, "beat": beat, "beat_t": t,
-						"crouch": 0.0}
+				var s := {
+					"vel": Vector3.ZERO,
+					"face": model.rotation.y,
+					"grounded": true,
+					"beat": beat,
+					"beat_t": t,
+					"crouch": 0.0
+				}
 				anim.update(DT, s)
 				sync.call("_process", DT)
 			await _grab(dir.path_join("%s_%d.png" % [beat, n]))

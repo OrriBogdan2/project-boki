@@ -9,7 +9,7 @@ import numpy as np
 from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from posekit import Clip, FnClip, Solver, add_breath, bake, ang_dir as D, at, eul, FPS, frame_of, BREATH_AXES
+from posekit import Clip, FnClip, Solver, add_breath, bake, ang_dir as D, eul, FPS, frame_of, BREATH_AXES
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
 import gardenkit

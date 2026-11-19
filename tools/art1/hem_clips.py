@@ -18,7 +18,7 @@ import hem_pieces as H
 import actionkit
 import crouchkit
 import gardenkit
-from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp, two_bone
+from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = H.joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))

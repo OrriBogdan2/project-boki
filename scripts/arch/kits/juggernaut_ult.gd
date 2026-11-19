@@ -24,12 +24,11 @@ var blocked := 0                       # hits blocked over the run
 var resets := 0                        # knocks that made it ready again
 var last_dealt := 0.0
 var last_healed := 0.0
+var vel_before := Vector3.ZERO      # (debug readout) his velocity at the cast, before and after the ult touched it
+var vel_after := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
-
-var vel_before := Vector3.ZERO      # (debug readout) his velocity at the cast, before and after the ult touched it
-var vel_after := Vector3.ZERO
 
 func data() -> Dictionary:
 	return k.x_def()

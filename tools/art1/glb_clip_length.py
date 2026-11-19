@@ -1,6 +1,7 @@
 """Sets one clip of a .glb to a new length with no Blender: every key time of the clip is scaled by new/old, nothing
 else in the file changes (the clip's time accessors must be its own; a time accessor another clip shares stops it).
 Run: python3 tools/art1/glb_clip_length.py <glb> <clip> <seconds> [out.glb]"""
+
 import struct
 import sys
 

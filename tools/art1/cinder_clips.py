@@ -8,11 +8,10 @@ not mad, just certain, and pleased with herself.
 Run: blender -b --python tools/art1/cinder_clips.py -- <cinder.blend> <out.glb> [clip,clip]"""
 import sys, os, math
 import bpy
-import numpy as np
 from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
+from posekit import Clip, FnClip, Solver, bake, ang_dir as D, eul, FPS, frame_of
 import cinder_pieces as K
 import actionkit
 import crouchkit

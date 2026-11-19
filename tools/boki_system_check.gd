@@ -36,9 +36,9 @@ func _fresh(species := "cindle") -> Match:
 	seed(4242)      # the Boki's random choices should not depend on how many rolls building the map took
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
+	var pl: Hunter = m.player
 	var W = m.world
-	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
+	var hx := int(floor(pl.pos.x)); var hz := int(floor(pl.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
 	for dz in range(-20, 21):
@@ -49,16 +49,16 @@ func _fresh(species := "cindle") -> Match:
 			W.level[i] = lv
 			W.island[i] = W.island[hi]
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
-	P.teleport(Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5))
-	P.vel = Vector3.ZERO
+	pl.teleport(Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5))
+	pl.vel = Vector3.ZERO
 	for t in ["bravery", "loyalty", "temper", "curiosity"]:
-		P.kin.traits[t] = 0.5
-	P.kin.trust = 60.0
-	P.slot_lv["ult"] = 1
+		pl.kin.traits[t] = 0.5
+	pl.kin.trust = 60.0
+	pl.slot_lv["ult"] = 1
 	var R: Hunter = rival()
 	if R:
 		R.ctrl = "idle"
-		R.teleport(Vector3(P.pos.x + 38.0, P.pos.y, P.pos.z + 18.0))
+		R.teleport(Vector3(pl.pos.x + 38.0, pl.pos.y, pl.pos.z + 18.0))
 		if R.kin:      # (its random Boki, e.g. a pouncing nettlynx, would shove the carrier: this check is about yours)
 			R.kin.dead = true
 			m.kins.erase(R.kin)
