@@ -23,6 +23,8 @@ a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiH
 The look both ways is BokiWispPop: the wisp swells and the Boki grows out of it, squashes on landing and opens
 its eyes last; the fold shuts the eyes, shrinks the Boki into the wisp and zips it to the shoulder. Soft light
 only: the bloom's spark burst and ground ring are gone (DECISIONS: explosions only for things that truly explode).
+The Hunter gestures with it (warden_anim "summon_call", about 0.3 s on the upper layer, KinSummon.anim_state): a
+call flung toward the burst, a recall pulled in to the chest as it folds; none on a re-bloom, while downed or after a kill.
 Carry passives: the wisp rides on the shoulder with the Return order, so its passives are on at 100 % whether
 it is a wisp or out; stolen wisps add theirs at a share (decision 0041). Stealing (0041), the killed summon (0044)
 and one rule set for PvE and PvP (0045) have their own notes.

@@ -476,6 +476,9 @@ func _summon() -> void:
 		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
 	pop._process(BokiWispPop.DURATION + 0.01)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
+	var cs := {}
+	KinSummon.anim_state(p, cs)
+	ok(cs["call"] == "call" and float(cs["call_t"]) < 0.05, "...and its Hunter's call gesture starts with the burst")
 	ok(k.tp_n > 0, "...put beside its hunter by a teleport, which the rig does not read as speed (%d)" % k.tp_n)
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
 	var lsh := k.brain.leash()
@@ -488,6 +491,8 @@ func _summon() -> void:
 	p.prev = p.pos
 	_frames(0.1)
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
+	KinSummon.anim_state(p, cs)
+	ok(float(cs["call_t"]) > 0.25, "...without a second call gesture (%.2f s since the burst's)" % cs["call_t"])
 	_frames(8.0 + KinSummon.SHRINK_S)
 	ok(k.wisp and k.state == "shoulder" and s.cd > 59.0 and s.cd <= 60.0,
 		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd)
@@ -503,9 +508,20 @@ func _summon() -> void:
 	k.render(DT, 1.0)
 	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
 	ok(pop != null and not pop.out and not k.model.visible, "...folding into its wisp (BokiWispPop)")
+	KinSummon.anim_state(p, cs)
+	ok(cs["call"] == "recall" and float(cs["call_t"]) < 0.05, "...and its Hunter's recall gesture starts with the fold")
 	_frames(KinSummon.SHRINK_S + 0.05)
 	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
+	s.cd = 0.0
+	p.downed = true
+	s.burst(s.dur)
+	p.downed = false
+	KinSummon.anim_state(p, cs)
+	ok(not k.wisp and float(cs["call_t"]) > 0.05,
+		"summon: a burst while the Hunter is down (the guardian) makes no gesture")
+	s.end()
+	_frames(KinSummon.SHRINK_S + 0.05)
 	s.cd = 0.0
 	KinSummon.press(p)
 	var foe: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]

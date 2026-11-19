@@ -16,6 +16,8 @@ extends RefCounted
 
 const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
+const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
+const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
 
 var k: Kin
 var dur := 10.0  # s: this species' window
@@ -181,7 +183,7 @@ func tick(dt: float) -> void:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
 			k.teleport(KinFollow.side_spot(k))  # you dashed or glided off: it re-blooms beside you
-			popped(false)
+			popped(false, false)
 	elif shrink > 0.0 and k.state != "fused":
 		shrink -= dt
 		if shrink > 0.0:
@@ -194,9 +196,11 @@ func tick(dt: float) -> void:
 
 ## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
 ## playing through the shrink carries on; one that never shrank (killed, or a late snapshot) folds from here.
-func popped(to_wisp: bool) -> void:
+func popped(to_wisp: bool, gesture := true) -> void:
 	if not to_wisp:
 		_pop(true, false)
+		if gesture:
+			_call("call")
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
 	elif _folding:
 		_drop_pop()
@@ -256,11 +260,27 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		_call("recall")
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false  # left behind mid-fold: it stays the walking Boki
 		_drop_pop()
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)
+
+
+## The Hunter's gesture (warden_anim "summon_call", WardenClips' upper layer): a call on the burst, a recall on the
+## fold. Not on a re-bloom, not while downed (the guardian), not after a kill. Drawing only: the pop has happened.
+func _call(kind: String) -> void:
+	var o := k.owner_h
+	if o and not o.downed and not o.out:
+		o.set_meta(CALL_AT, k.m.time)
+		o.set_meta(CALL_K, kind)
+
+
+## The gesture's kind and age for the Hunter's anim state (WardenClips reads call and call_t).
+static func anim_state(h: Hunter, s: Dictionary) -> void:
+	s["call"] = String(h.get_meta(CALL_K, ""))
+	s["call_t"] = h.m.time - float(h.get_meta(CALL_AT, -99.0))
 
 
 ## Where the wisp is drawn while it streaks home after a kill: from where it fell towards `target`.
