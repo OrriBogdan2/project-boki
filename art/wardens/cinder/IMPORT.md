@@ -18,6 +18,16 @@ Numbers (edges stretched over 3x vs bind, Blender, idle / run_f / run_f / shot):
 by design), collapsed 52 -> 0. Floating sheets: none found (floating_islands 0, no needle islands), so nothing was deleted.
 Scripts: `/home/boki/gens/cinder-rigfix-1119/tool/` (fix.py, smooth.py, glbrw.py).
 
+### Retry 11-19 (Fable review: new holes at the hips, scraps on the forearms), still weights plus added cap triangles only
+No triangle of the scan is deleted or moved, and every original vertex keeps its bind position, so the rest pose looks like live.
+- Two floating islands the cut left behind (20 + 24 triangles of hip skin from under the left forearm, they rode the forearm as
+  red scraps) now take their hip twins' weights.
+- Every loop the cut opened (~120 half-edges, hip and armpit sides) is closed from its own side with a flat cap (ear clipping,
+  long thin triangles halved), weights of the loop's own vertices, UVs and colours of the nearest skin of the same side.
+  Loops that were already open in the scan (front crotch, tail root) are left alone, as in live.
+- Edges stretched over 3x vs bind (all 46 clips, every 0.1 s): median clip 3.44% -> 0.09%, worst clip 4.62% -> 0.25%.
+Scripts: `/home/boki/cj/20261119-054029-a5/work/tool/` (isl.py, cap13.py on top of fix.py output).
+
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
 20261118-032222-a1; same topology as cand_A_s18, only chest vertices moved). No re-rig: the master's per-vertex chest
