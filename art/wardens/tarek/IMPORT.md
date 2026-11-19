@@ -85,3 +85,8 @@ sash and trouser strips stay on the body. Arm weight taken off body skin (right 
 at the sash and back to the leg bones lower down (0.6-1.0 m ramp: hips-held trousers folded black behind the knee in
 crouches); shin weight above the knee fades into the thigh; the skin round the old contact is smoothed (10 cm). Skeleton, bone names, clips, materials and textures are unchanged.
 Tools: /home/boki/gens/tarek-fix-1119k/tool (cut5.py, openhand.py, build.py, writeglb2.py, caps.py).
+Knee 11-19 (retry): the freed arm weight on the right trouser leg (rest height below 1.15 m, x > 0) is a harmonic fill from the
+untouched skin around it (Laplace over the welded mesh) instead of the 0.6-1.0 m hips/leg ramp, which had left a pale dome on the
+right knee in crouch_idle/downed. Cap vertices take the UV of the opening vertex they copy (82 of 82 matched within 3 cm; 5 cap
+triangles stay one colour). Live vertex positions, normals, UVs and colours stay byte-identical.
+Tools: job dir 20261119-181046-a1/w (shells.py, knee2.py `fixed2.glb out.glb 1.15 fill 1`, capuv.py `... 0.03`), copied to /home/boki/gens/tarek-fix-1119m/tool.
