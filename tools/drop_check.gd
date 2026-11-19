@@ -35,6 +35,7 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 	var t := 0.0
 	var k: Kin = m.player.kin
 	var hp0 := k.hp
+	var lesson := false
 	while t < secs:
 		# the ship waits during planning, and the match clock with it: not part of the window
 		var planning: bool = m.skydrop != null and m.skydrop.planning
@@ -50,7 +51,10 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 		if (m.player.riding or m.player.dropping) and k.flat_dist(m.player) > 6.0:
 			var gap := k.flat_dist(m.player)
 			return "t=%.2fs left behind (%s, kin y %.1f), %.0f m from you" % [t, k.state, k.pos.y, gap]
-		if k.dead or k.state == "downed" or k.hp < hp0 - 0.01:
+		# the tutorial's first lesson (LMB) brings its camp in once you are down: from then on its monsters may
+		# nip the Boki (that is the lesson, not the drop), but it still must not go down
+		lesson = lesson or (m.tut != null and not (m.player.riding or m.player.dropping) and m.tut.camps.alive() > 0)
+		if k.dead or k.state == "downed" or (k.hp < hp0 - 0.01 and not lesson):
 			return "t=%.2fs state=%s hp=%.1f/%.1f at %s" % [t, k.state, k.hp, hp0, str(k.pos)]
 	return ""
 
