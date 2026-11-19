@@ -293,6 +293,8 @@ const CHECKS := {
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],      # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],      # 0051 results
+	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
+	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],      # kill XP tick, steal stings
 	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],  # camp time-to-fall table

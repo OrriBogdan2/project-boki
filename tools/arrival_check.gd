@@ -1,6 +1,6 @@
 extends RefCounted
 ## --arrival-check: the first minutes' declutter (briefs/UI_DECLUTTER_PLAN.md, sections 4 and 5).
-##   1. results: three big numbers, no armor tile, the rest behind "Details", the way home on screen
+##   1. results: the three numbers and the rest behind More, no armor tile, the way home on screen
 ##   2. the arrival queue: modals open one at a time, in order, and wait while something else is open
 ##   3. the top bar's counters show from the first time you have some (old saves see them all)
 ##   4. the key row: each hint goes after 3 uses; whistle and build wait for the tutorial's end
@@ -48,21 +48,22 @@ func _results() -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var shown := _texts(scr, true)
-	var three := "KNOCKS" in shown and "DAMAGE" in shown and "TIME" in shown
-	ok("Vex made it out" in shown and three, "results: the hunter's name in the headline and three numbers")
+	var all := _texts(scr, false)
+	var three := "HUNTERS DOWNED" in all and "DAMAGE" in all and "TIME" in all and not ("DAMAGE" in shown)
+	ok("Vex made it out" in shown and three, "results: the hunter's name in the headline, three numbers behind More")
 	ok(not ("ARMOR" in _texts(scr, false)), "results: no armor tile")
 	ok(not ("Damage taken" in shown) and not ("Your vault kept 9 of the gems you dropped." in shown),
 			"results: the small numbers and notes are hidden")
 	var toggle: Button = null
 	var home_btn: Button = null
 	for b in scr.find_children("*", "Button", true, false):
-		if (b as Button).text.begins_with("Details"): toggle = b
+		if (b as Button).text.begins_with("More"): toggle = b
 		if (b as Button).text == "Back to the farm": home_btn = b
 	ok(toggle != null and home_btn != null and home_btn.is_visible_in_tree(),
-			"results: a Details toggle and the way home on screen")
+			"results: a More toggle and the way home on screen")
 	if toggle:
 		toggle.pressed.emit()
-		ok("Damage taken" in _texts(scr, true), "results: Details shows them")
+		ok("Damage taken" in _texts(scr, true), "results: More shows them")
 	scr.queue_free()
 
 func _queue() -> void:

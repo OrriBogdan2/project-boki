@@ -61,8 +61,14 @@ func show_result(r: Dictionary) -> void:
 	if won and s.has("heart"):
 		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
 		head.add_child(UI.para(WaysResult.other_line(String(r.get("how", ""))), UI.T_BODY, UI.MUTED))
+	head.set_meta("results_group", "outcome")
 	v.add_child(head)
-	# the three numbers that matter, big and counting up, on one strip; the rest behind Details
+	# four groups in the first view (outcome, what you kept, your Boki, progress) and the way home; the stat
+	# tiles and the rest sit behind More
+	var kept := _group("kept")
+	var boki := _group("boki")
+	var progress := _group("progress")
+	v.add_child(kept); v.add_child(boki); v.add_child(progress)
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
@@ -76,9 +82,9 @@ func show_result(r: Dictionary) -> void:
 		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
 		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
 		sh.add_child(tile)
-	v.add_child(strip)
-	var det := UI.vbox(6)      # what is behind the Details toggle
+	var det := UI.vbox(6)      # what is behind the More toggle
 	det.visible = false
+	det.add_child(strip)
 	det.add_child(_small_stats(r, String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])))
 	if won:
 		var chips: Array = []
@@ -98,7 +104,7 @@ func show_result(r: Dictionary) -> void:
 			elif Loot.is_ink(it):
 				chips.append(["gem", "Brought home %s" % Loot.name_of(it), Loot.col_of(it)])
 		if not chips.is_empty():
-			v.add_child(UI.section("Brought home"))
+			kept.add_child(UI.section("Brought home"))
 			var flow := HFlowContainer.new()
 			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
 			for i in chips.size():
@@ -112,40 +118,40 @@ func show_result(r: Dictionary) -> void:
 					var hb: HBoxContainer = ch.get_child(0)
 					hb.add_child(UI.label("·  " + ("Boki Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
 				flow.add_child(ch)
-			v.add_child(flow)
+			kept.add_child(flow)
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
-				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
+				kept.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
 					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch a baby Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		kept.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch a baby Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
 		var gear_head := "Gear you kept, in the gear shed"
 		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
-		v.add_child(UI.section(gear_head))
+		kept.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
 			var it: Dictionary = haul[i]
 			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + _fate_note(it), Loot.col_of(it), 0.9 + i * 0.1))
-		v.add_child(hf)
+		kept.add_child(hf)
 		if int(s.get("salvage_gems", 0)) > 0:
 			det.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
 					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
 			det.add_child(_note("Your gear shed was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
-	v.add_child(ClassCard.results_strip(s))
+	progress.add_child(ClassCard.results_strip(s))
 	var lost_it: Array = s.get("lost_items", [])
 	if not won and not lost_it.is_empty():
 		var names: Array = lost_it.map(func(it): return Loot.name_of(it))
-		v.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
+		kept.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
 	if s.has("kin"):
-		v.add_child(_kin_card(s, det))
+		boki.add_child(_kin_card(s, det))
 	for back in s.get("rescued", []):
-		v.add_child(_note("You took %s back! It's home again, and it won't forget you came for it." % back["name"], UI.GOOD))
+		boki.add_child(_note("You took %s back! It's home again, and it won't forget you came for it." % back["name"], UI.GOOD))
 	# kin left behind when you went down, and where they ended up
 	var lost_news: Array = s.get("lost_news", [])
 	if not lost_news.is_empty():
@@ -154,7 +160,7 @@ func show_result(r: Dictionary) -> void:
 		lv.add_child(UI.section("Left behind", Color("ffb0a0")))
 		for ln in lost_news:
 			lv.add_child(UI.label(WaysResult.boki_line(ln), 15, UI.BAD if String(ln["fate"]) == "rival" else UI.GOOD))
-		v.add_child(lc)
+		boki.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		det.add_child(_note(String(nw), Color("ffd58a")))
 	for line in s.get("market_news", []):
@@ -163,17 +169,20 @@ func show_result(r: Dictionary) -> void:
 		det.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
 	for fe in s.get("floor", []):
 		if String(fe.get("kind", "")) == "stray":
-			v.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
+			boki.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
 	if s.get("kin_stranded", false):
-		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
+		boki.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:
 		det.add_child(_note("Your vault kept %d of the gems you dropped." % int(s["vault_gems"]), UI.GOLD))
 	if s["crops_ready"] > 0:
 		det.add_child(_note("%d crop%s ready to harvest on your farm." % [s["crops_ready"], "s" if s["crops_ready"] > 1 else ""], UI.GOOD))
-	v.add_child(_details_toggle(det))
+	for g in [kept, boki, progress]:
+		g.visible = g.get_children().any(func(c): return not (c is VBoxContainer and c.get_child_count() == 0))
 	v.add_child(det)
 	# the way out stays on screen whatever page the details are on
 	var row := UI.hbox(14)
+	row.set_meta("results_group", "next")
+	row.add_child(_details_toggle(det, sc))
 	if r.get("tutorial", false):
 		var tl := UI.label("That's the basics. Now come see your home.", UI.T_BODY, UI.ACCENT_HI)
 		tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -281,12 +290,20 @@ func _small_stats(r: Dictionary, tier_name: String) -> Control:
 		small.add_child(one)
 	return small
 
-## "Details ▾": shows or hides what is behind it.
-func _details_toggle(det: Control) -> Button:
-	var b := UI.button("Details ▾", Callable(), 0)
+## One first-view group; hidden when nothing was put in it.
+func _group(id: String) -> VBoxContainer:
+	var g := UI.vbox(10)
+	g.set_meta("results_group", id)
+	return g
+
+## "More ▾", next to the way home so it never scrolls away: shows or hides what is behind it, and scrolls to it.
+func _details_toggle(det: Control, sc: ScrollContainer) -> Button:
+	var b := UI.button("More ▾", Callable(), 0)
 	b.pressed.connect(func():
 		det.visible = not det.visible
-		b.text = "Details ▴" if det.visible else "Details ▾")
+		b.text = "More ▴" if det.visible else "More ▾"
+		if det.visible:
+			sc.ensure_control_visible.call_deferred(det))
 	b.focus_mode = Control.FOCUS_NONE
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	return b
