@@ -26,7 +26,7 @@
 		"dr_throw": {"clip": "throw", "upper": "moving", "air_legs": true},
 		"dr_reel": {"clip": "reel", "hold_from": 0.18, "upper": "moving", "air_legs": true},
 		"dr_pullend": {"clip": "pullend", "upper": "moving", "air_legs": true},
-		"dr_anchor": {"clip": "anchor", "upper": "moving", "air_legs": true, "strike": ["fist", "e/radius", "ground"]},
+		"dr_anchor": {"clip": "anchor", "fit": 0.8, "upper": "moving", "air_legs": true, "strike": ["fist", "e/radius", "ground"]},
 		"dr_dive": {"clip": "dive", "hold_from": 0.12},
 		"dr_quake": {"clip": "quake", "strike": ["fist", "e/quake_r", "ground"]},
 		"dr_lunge": {"clip": "lunge", "hold_from": 0.39, "rate": 1.1, "dash": true},
