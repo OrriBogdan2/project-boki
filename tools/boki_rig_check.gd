@@ -24,7 +24,13 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"chimelop", "cometail", "coolatee", "critwom", "cubbat", "domeleon", "dynaboa", "echolop", "ermink",
 	"fawngus", "filefin", "fizzlet", "foalaround", "frigatee", "furnacowary", "galleotter", "glaivyx",
 	"gloamwade", "glockodile", "gongibbon", "gramofrill", "gravadillo", "gravigrub", "hatstag", "jerbit",
-	"jerbolt", "kayak", "kingpinguin", "knotwyrm", "lensling"]
+	"jerbolt", "kayak", "kingpinguin", "knotwyrm", "lensling",
+	"lockwren", "luckhop", "lunink", "lunowl", "marimbite", "medushroom", "moatpole", "morelkin", "morelossus",
+	"mothlet", "mycroll", "narfoil", "oarlet", "oarter", "orrinox", "orrisol", "palloth", "pillaroo", "pinguin",
+	"pocketpus", "polyshroom", "postroo", "prismander", "reelacine", "rollguin", "sandwidow", "sawright",
+	"scopeleon", "sirencada", "skidlet", "stamproo", "starcap", "stratarch", "teapotamus", "tiltster",
+	"torpecone", "truffapir", "twinklup", "vespyx", "voltalon", "wickapi", "wickapi.old-chibi-1111", "xylogator",
+	"zippelith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
@@ -72,7 +78,18 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"glaivyx": MESHY_TRIS, "gloamwade": MESHY_TRIS, "glockodile": MESHY_TRIS, "gongibbon": MESHY_TRIS,
 	"gramofrill": MESHY_TRIS, "gravadillo": MESHY_TRIS, "gravigrub": MESHY_TRIS, "hatstag": MESHY_TRIS,
 	"jerbit": MESHY_TRIS, "jerbolt": MESHY_TRIS, "kayak": MESHY_TRIS, "kingpinguin": MESHY_TRIS,
-	"knotwyrm": MESHY_TRIS, "lensling": MESHY_TRIS}
+	"knotwyrm": MESHY_TRIS, "lensling": MESHY_TRIS,
+	"lockwren": MESHY_TRIS, "luckhop": MESHY_TRIS, "lunink": MESHY_TRIS, "lunowl": MESHY_TRIS,
+	"marimbite": MESHY_TRIS, "medushroom": MESHY_TRIS, "moatpole": MESHY_TRIS, "morelkin": MESHY_TRIS,
+	"morelossus": MESHY_TRIS, "mothlet": MESHY_TRIS, "mycroll": MESHY_TRIS, "narfoil": MESHY_TRIS,
+	"oarlet": MESHY_TRIS, "oarter": MESHY_TRIS, "orrinox": MESHY_TRIS, "orrisol": MESHY_TRIS,
+	"palloth": MESHY_TRIS, "pillaroo": MESHY_TRIS, "pinguin": MESHY_TRIS, "pocketpus": MESHY_TRIS,
+	"polyshroom": MESHY_TRIS, "postroo": MESHY_TRIS, "prismander": MESHY_TRIS, "reelacine": MESHY_TRIS,
+	"rollguin": MESHY_TRIS, "sandwidow": MESHY_TRIS, "sawright": MESHY_TRIS, "scopeleon": MESHY_TRIS,
+	"sirencada": MESHY_TRIS, "skidlet": MESHY_TRIS, "stamproo": MESHY_TRIS, "starcap": MESHY_TRIS,
+	"stratarch": MESHY_TRIS, "teapotamus": MESHY_TRIS, "tiltster": MESHY_TRIS, "torpecone": MESHY_TRIS,
+	"truffapir": MESHY_TRIS, "twinklup": MESHY_TRIS, "vespyx": MESHY_TRIS, "voltalon": MESHY_TRIS,
+	"wickapi": MESHY_TRIS, "wickapi.old-chibi-1111": MESHY_TRIS, "xylogator": MESHY_TRIS, "zippelith": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in
