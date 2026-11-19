@@ -72,6 +72,10 @@ expected at 100 ms; the avoidable part was the wait for the next snapshot.
 ## Re-running
 `godot --headless -- --online-feel-check` (about 6 minutes; needs `python3` for the proxy). It fails if the game adds
 more than 60 ms to the line's delay for any press (`NET_SLACK_MS`). Before the fix 6 of the 11 measured rows failed that budget.
+The run takes ~330 s at 58 fps even pinned to one core. It picks a free relay port (`CheckChild.free_port`, proxy 100 above),
+stops pressing after 840 s (red, with an `OFEEL timing` line) and ends its helpers: the proxy gets `--parent-pid` and
+`--max-life` and logs to `user://online_feel/proxy.log`; the actor quits when the host is gone. None of them holds the
+caller's stdout, so a timed-out run leaves nothing behind.
 # Online feel: moves that carry a Hunter
 
 Abilities that move a Hunter (a pull, a swap, a launch, a knock into a wall) must look the same online as offline.

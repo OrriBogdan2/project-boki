@@ -10,8 +10,11 @@ extends RefCounted
 const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the actor to come up and build its match
+const PROXY_GAP := 100       # the delay proxy (the actor's door) listens this far above the relay's port
 const LAG_MS := 100.0        # added delay each way on the actor's link
 const SEED := 4242
+const BUDGET_S := 840.0      # s of wall clock for the host run; the gate's cap is 1200 s: a slow box ends red, clean
+const MAX_LIFE_S := 1500.0   # s: hard cap on the proxy's life, whatever happens to this run
 const REPS := 5             # presses per hero and case: the table shows the median and the range
 const PARK := Vector3(0, 0, -9.0)       # m from home: where the actor stands
 const HEROES := ["gunslinger", "juggernaut", "rimewright"]      # Vex, Kael, Neve
@@ -25,6 +28,8 @@ const AGE_AT := 32          # the kit move's age: a drop in it is the same move 
 var main: Node
 var bad := 0
 var port := 0
+var t_start := 0             # the host: when it started (ms)
+var host_pid := 0            # the actor: the host's pid; it quits when that is gone
 var dir := ""
 var pids: Array = []
 var m: Match = null
@@ -52,6 +57,7 @@ func run(main_node: Node) -> void:
 	Engine.max_fps = 60
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--of-port="): port = int(a.substr(10))
+		if a.begins_with("--of-parent="): host_pid = int(a.substr(12))
 	Net.message.connect(_on_msg)
 	if "--online-feel-check=guest" in OS.get_cmdline_user_args():
 		await _guest()
@@ -60,23 +66,35 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	port = 7900 + OS.get_process_id() % 50
+	t_start = Time.get_ticks_msec()
+	# a free port, with the proxy's (port + PROXY_GAP) free too: seven other checks pick relay ports in 7860-7990 in
+	# the same gate, and a fixed pid-derived one can land on theirs (the actor joins another relay or none, and the
+	# run waits out its caps until the gate's 1200 s timeout)
+	port = CheckChild.free_port(7900 + OS.get_process_id() % 50, PROXY_GAP)
 	dir = ProjectSettings.globalize_path("user://online_feel")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var root := ProjectSettings.globalize_path("res://")
 	var relay := RelayServer.new()
 	relay.name = "Relay"
 	main.add_child(relay)
-	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	var listening := relay.start(PackedStringArray(["--port=%d" % port])) == OK
+	ok(listening, "the relay listens on %d" % port)
+	if not listening:
+		return _finish()
 	relay.api.peer_packet.connect(func(id: int, bytes: PackedByteArray): _sniff(str(id), bytes))
 	var proxy := root.path_join("tools/online_feel_proxy.py")
-	pids.append(OS.create_process("python3", [proxy, str(port + 100), str(port), str(LAG_MS)]))
+	# the proxy dies with this run: it watches our pid, has a hard lifetime cap, and logs to a file, not our stdout
+	# (an orphan with our pipe open once hung a gate for 1h40m)
+	var pcmd := "exec python3 '%s' %d %d %s --parent-pid %d --max-life %d > '%s' 2>&1 < /dev/null" % [
+		proxy, port + PROXY_GAP, port, str(LAG_MS), OS.get_process_id(), int(MAX_LIFE_S), dir.path_join("proxy.log")]
+	pids.append(OS.create_process("/bin/sh", ["-c", pcmd]))
 	ok(await _connect(port), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && exec %s --headless -- --online-feel-check=guest --of-port=%d > '%s' 2>&1" % [
-		root, GODOT, port + 100, dir.path_join("guest.log")]
+	var cmd := "cd '%s' && exec %s --headless -- --online-feel-check=guest --of-port=%d --of-parent=%d" % [
+		root, GODOT, port + PROXY_GAP, OS.get_process_id()]
+	cmd += " > '%s' 2>&1 < /dev/null" % dir.path_join("guest.log")
 	pids.append(OS.create_process("/bin/sh", ["-c", cmd]))
 	var t0 := Time.get_ticks_msec()
-	while gid == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
+	while gid == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0 and OS.is_process_running(pids[1]):
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: gid = String(id)
@@ -96,17 +114,26 @@ func _host() -> void:
 	ok(A != null and A.remote, "the actor's hunter is here, driven by the actor's game")
 	if A == null:
 		return _finish()
+	var done := 0
+	var t_run := Time.get_ticks_msec()
+	var f_run := Engine.get_process_frames()
 	for arch in HEROES:
 		for what in CASES:
 			for rep in REPS:
+				if (Time.get_ticks_msec() - t_start) / 1000.0 > BUDGET_S: break
 				await _measure(A, arch, what)
+				done += 1
+	var secs := (Time.get_ticks_msec() - t_run) / 1000.0
+	print("OFEEL timing: %d of %d presses in %.0f s, %.1f fps" % [done, HEROES.size() * CASES.size() * REPS, secs,
+		(Engine.get_process_frames() - f_run) / maxf(secs, 0.001)])
+	ok(done == HEROES.size() * CASES.size() * REPS, "every press ran in the %.0f s budget" % BUDGET_S, "%d done" % done)
 	_table()
 	_finish()
 
 func _finish() -> void:
 	Net.lobby_emit("of", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	for p in pids:   # the proxy also exits on its own when this game is gone (tools/online_feel_proxy.py)
+	for p in pids:
 		if OS.is_process_running(p): OS.kill(p)
 	print("OFEEL DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -256,7 +283,7 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 900000:
+	while m != null and not stop and Time.get_ticks_msec() - t0 < 900000 and _host_up():
 		if req.is_empty():
 			await _run(DT)
 		else:
@@ -264,6 +291,14 @@ func _guest() -> void:
 			req = {}
 			await _play(String(c["a"]), String(c["w"]))
 	main.get_tree().quit(0)
+
+func _host_up() -> bool:
+	if host_pid <= 0: return true
+	# (get_file_as_string reads 0 bytes of /proc)
+	var f := FileAccess.open("/proc/%d/stat" % host_pid, FileAccess.READ)
+	if f == null: return false
+	var st := f.get_line()
+	return st != "" and not st.rsplit(")", false, 1)[-1].strip_edges().begins_with("Z")
 
 func _on_msg(topic: String, data, _from: String) -> void:
 	if typeof(data) != TYPE_DICTIONARY:

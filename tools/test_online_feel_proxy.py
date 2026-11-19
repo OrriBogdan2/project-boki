@@ -48,6 +48,16 @@ class ProxyReap(unittest.TestCase):
         parent.wait()
         self.assertTrue(wait_gone(pid), "proxy outlived its killed parent")
 
+    def test_dies_with_parent_pid(self):
+        # the check's way: the proxy runs under sh, --parent-pid names the game, which is SIGKILLed
+        game = subprocess.Popen(["sleep", "60"])
+        p = start(["--parent-pid", str(game.pid)], 47341)
+        time.sleep(1.0)
+        self.assertTrue(alive(p.pid))
+        game.kill()
+        game.wait()
+        self.assertTrue(wait_gone(p.pid), "proxy outlived --parent-pid")
+
     def test_dies_on_sigterm(self):
         p = start([], 47321)
         time.sleep(1.0)
@@ -55,8 +65,8 @@ class ProxyReap(unittest.TestCase):
         self.assertEqual(p.wait(timeout=6), 0)
 
     def test_lifetime_cap(self):
-        p = start(["1"], 47331)
-        self.assertEqual(p.wait(timeout=6), 0, "proxy ignored MAX_SECS")
+        p = start(["--max-life", "1"], 47331)
+        self.assertEqual(p.wait(timeout=6), 0, "proxy ignored --max-life")
 
 
 if __name__ == "__main__":
