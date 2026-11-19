@@ -10255,3 +10255,4 @@ READY ext/merge-lane-artdata-1118 10e0e16a2c (artdata lane: 8 branches, NEW-RED 
 READY ext/tutorial-playthrough-check-1119 f37d49de0ab (absolute tutorial playthrough gate check; passes on main, 62 s)
 READY ext/merge-lane-artdata-1118-b 7e15624154 (boki-more-ingame alone, size baseline bump, NEW-RED 0)
 READY ext/fullscreen-start-1119 eee57e22a4 (fullscreen start: engine-created fullscreen on Windows, Settings keeps choice, F11/Alt+Enter, click test 38/38)
+READY ext/merge-lane-artdata-1118-b a56f93457b (supersedes 7e15624154: origin/main c614a18701 merged in, no conflicts remained; import 0 errors, roster-check 0 failed, gen_wiki --check 50 unchanged after regen, size_budget 0 failures 1210.1 MB; health --strict still red only on style items already on main (check_registry line 462, gil_kit, gil_combo_check, gil_rmb_video, ryzz_live_check))
