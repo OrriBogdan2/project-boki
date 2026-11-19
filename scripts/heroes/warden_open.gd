@@ -127,7 +127,7 @@ func cancelled(s: Dictionary) -> bool:
 func _g(nm: String) -> Transform3D:
 	return skel.get_bone_global_pose(int(b[nm]))
 
-func _set(nm: String, xf: Transform3D) -> void:
+func _put(nm: String, xf: Transform3D) -> void:
 	skel.set_bone_global_pose(int(b[nm]), xf)
 
 ## The whole pose at full weight in skeleton space, then each moved bone's local pose eased from the clips' by `k`.
@@ -150,20 +150,20 @@ func _pose(lid: Vector3, k: float) -> void:
 	right = fwd.cross(up)
 	var tl := lid + (-fwd * IN - right * SPREAD + up * ABOVE) * unit
 	var tr := lid + (-fwd * IN + right * SPREAD + up * ABOVE) * unit
-	_set("root", r)
+	_put("root", r)
 	if plan.is_empty():
 		plan = _plan(fwd, right, tl, tr, unit)
 	r.origin += fwd * float(plan["step"])
-	_set("root", r)
+	_put("root", r)
 	var soles := [_sole("L"), _sole("R")]
 	r.origin -= up * float(plan["drop"])
-	_set("root", r)
+	_put("root", r)
 	for i in 2:
 		var sd: String = ["L", "R"][i]
 		_ik("thigh." + sd, "shin." + sd, soles[i], _g("shin." + sd).origin + fwd * thigh, thigh, shin, true)
 	var hp := _g("hips")
 	hp.basis = Basis(right, -float(plan["lean"])) * hp.basis
-	_set("hips", hp)
+	_put("hips", hp)
 	var stir := Vector3(sin(t * TAU * RUMMAGE_HZ), 0.0, cos(t * TAU * RUMMAGE_HZ * 0.5)) * RUMMAGE * unit
 	for i in 2:
 		var sd: String = ["L", "R"][i]
@@ -198,7 +198,8 @@ func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) 
 				for p in [[sl, tl], [sr, tr]]:
 					var dd: float = (base + rot * (p[0] as Vector3)).distance_to(p[1])
 					miss += maxf(dd - ARM_K * arm, 0.0) + maxf(ARM_MIN * arm - dd, 0.0)
-				var c := 0.6 * si / 3.0 + (1.0 - knees) * di / 7.0 + knees * li / 7.0
+				# squared, so a bit of knees and a bit of back beats all of either
+				var c := 0.6 * pow(si / 3.0, 2) + (1.0 - knees) * pow(di / 7.0, 2) + knees * pow(li / 7.0, 2)
 				if miss < miss_best - 0.0001 or (miss <= miss_best + 0.0001 and c < cost):
 					miss_best = minf(miss, miss_best)
 					cost = c
@@ -238,4 +239,4 @@ func _turn(nm: String, from: Vector3, to: Vector3) -> void:
 		return
 	var g := _g(nm)
 	g.basis = Basis(Quaternion(from.normalized(), to.normalized())) * g.basis
-	_set(nm, g)
+	_put(nm, g)
