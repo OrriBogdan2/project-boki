@@ -8,7 +8,7 @@
 	"weight": "heavy",
 	"color": "#fff0b0",
 	"body": {
-		"size": 1.39, "bulk": 0.8,
+		"size": 1.464, "bulk": 0.8,
 		"build": 1.4,
 		"hit_r": 0.404, "hit_h": 1.78, "body_r": 0.46,
 		"head": 0.3,
@@ -18,10 +18,11 @@
 		"neck": 0.0
 	},
 	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
-	"plate_offset": 2.6,
+	"plate_offset": 2.74,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down; blocking builds Guard."],
 	"silhouette": "the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist",
+	"hint": {"lmb": "Tap {fire} to throw the hammer, tap again to call it back", "rmb": "Hold {secondary} to block shots from the front", "e": "Press {signature} for a healing light on your hammer", "dash": "Press {dash} for a spin smash; aegis up, a shield charge"},
 	"card": {"role_word": "Tank", "loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.", "dash": "Short dash ending in a spinning hit; with aegis up, Shield Charge.", "passive": "Blocking builds Guard; at 50, Shield Charge becomes a Shield Slam.", "rmb": "Hold to block shots from the front; your dash key becomes Shield Charge.", "e": "Healing zone around your hammer for 4s, ending in a burst.", "x": "Plant and slam: the ground erupts down a lane, throwing foes up.", "weapons": {"tower_shield": "Tap throws the hammer, tap again recalls; hold to spin and slam."}, "chips": {"dash": ["24 dmg"], "rmb": ["18 slam"], "e": ["18 burst"], "x": ["18 dmg"]}},
 	"signature": "tower_shield",
 	"resource": {
