@@ -4,21 +4,20 @@ extends RefCounted
 ## portrait with a thin health bar under it, so a squad sees whose Boki is down. It tints for a downed Boki
 ## (red), a resting one (blue) and an owner who is a wisp (violet). Online, a teammate's Boki is the Kin the
 ## snapshot already updates (hp, state, rest seconds), so it reads that and adds no net traffic. A teammate who
-## carries stolen wisps (KinSteal) also wears a count badge on the icon's corner, in the thief's side ring colour.
+## carries stolen wisps (KinSteal) also wears a small count badge on the icon's corner, in the thief's side colour.
 
-const ICON := 14.0  # px: the Boki icon's side
-const BAR_H := 2.0  # px: its health bar
+const ICON := 14.0             # px: the Boki icon's side
+const BAR_H := 2.0             # px: its health bar
 const AT := Vector2(70.0, -9.0)  # px from the row's portrait centre to the icon's top-left (past the bars)
 const TINT_DOWN := Color("ff4a3a")
 const TINT_REST := Color("6aa8ff")
 const TINT_WISP := Color("b08cff")
-const TINT_ALPHA := 0.45  # how strongly a tint covers the icon
+const TINT_ALPHA := 0.45       # how strongly a tint covers the icon
 
 ## hunter nid -> {"state": "", "down", "rest" or "wisp", "frac": health 0..1}: what the last draw put on each row
 static var shown := {}
 ## hunter nid -> how many stolen wisps the badge on their row says
 static var stolen_shown := {}
-
 
 ## The icon's state for a teammate's Boki: "down", "rest", "wisp" (its owner is down) or "".
 static func state_of(h: Hunter, k: Kin) -> String:
@@ -28,20 +27,21 @@ static func state_of(h: Hunter, k: Kin) -> String:
 		return "rest"
 	return "wisp" if h.downed else ""
 
-
 static func draw(hud, p: Hunter) -> void:
 	shown.clear()
 	stolen_shown.clear()
 	var all := SquadFrames.rows(hud.m, p)
 	for i in all.size():
 		var h: Hunter = all[i]
-		if h != p and h.kin != null and not h.out and not h.extracted:
-			_icon(hud, SquadFrames.centre(hud, i) + AT, h, h.kin)
+		if h == p or h.out or h.extracted:
+			continue
+		var at := SquadFrames.centre(hud, i) + AT
+		if h.kin != null:
+			_icon(hud, at, h, h.kin)
 		var n := KinSteal.count(h)
-		if h != p and n > 0 and not h.out and not h.extracted:
+		if n > 0:
 			stolen_shown[h.nid] = n
-			HudStyle.count_badge(hud.c, SquadFrames.centre(hud, i) + AT + Vector2(ICON, 0.0), n, SideColor.ally())
-
+			HudStyle.count_badge(hud.c, at + Vector2(ICON, 0.0), n, SideColor.ally())
 
 static func _icon(hud, at: Vector2, h: Hunter, k: Kin) -> void:
 	var st := state_of(h, k)

@@ -63,20 +63,24 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var rar_frame := HudStyle.box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(rar_col(g), 0.95), 2)
 	hud.c.draw_style_box(rar_frame, r.grow(2.0))
 	if not active:
-		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 8, Color(HudStyle.INK, 0.6))
+		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 10, Color(HudStyle.INK, 0.6))
 
 
 ## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
 	var has_boki := k != null and is_instance_valid(k)
-	if has_boki and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
+	var fusion := MergeForm.enabled()
+	if has_boki and fusion and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
 		BokiHud.r_slot(hud, p, r)
 		return
 	var key := Settings.key_cap("ultimate")
-	HudSlot.shown_keys["r"] = key
-	hud.hover_spots.append([r, "r"])
+	if fusion:
+		HudSlot.shown_keys["r"] = key
+		hud.hover_spots.append([r, "r"])
 	if not has_boki:
+		if not fusion:
+			return
 		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
 		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
 		return
@@ -93,7 +97,8 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
 	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
 	var bond := clampf(p.ult, 0.0, 1.0)
-	hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
+	if fusion:
+		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
 	if bond > 0.0:
 		var full := KinMerge.ready(p)
 		var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if full else 0.85
@@ -110,12 +115,13 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	hud._bar(bar, 0.0 if down else frac, SideColor.ally())
 	var tag := BokiHud.tag(p)
 	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac}
-	if tag == "":
+	if tag == "" and fusion:
 		var pct_at := Vector2(ctr.x + 7.0, r.position.y + 14.0)
 		HudStyle.ctext(hud.c, pct_at, "%d%%" % int(bond * 100.0), 10, Color(HudStyle.INK, 0.8))
-	else:
+	elif tag != "":
 		BokiHud.chip(hud, r, tag, HudStyle.HURT if tag in ["RESCUE", "TOO FAR"] else tc)
-	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
+	if fusion:
+		HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
 
 
 ## The hover text for a glove box (hud ids "gear0", "gear1").

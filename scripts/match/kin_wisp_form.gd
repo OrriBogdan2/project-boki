@@ -17,16 +17,17 @@ extends RefCounted
 ## state their owner's game sends (Kin state "wisp", Match.KIN_STATES).
 
 const STATE := "wisp"
-const JOINS := ["active", "flying", "flying_home", "returning"]  # summoned states: it leaves them to ride as a wisp
-const GUARD_CAP := 11.0  # s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull once its last standing member is down
-const ZIP_S := 0.3  # s: the flight back to its Hunter
-const ZIP_RANGE := 14.0  # m: farther (or out of walking reach), it blinks there instead
-const ORBIT_R := 0.75  # m from the Hunter Wisp's centre
-const ORBIT_UP := 0.95  # m over the Hunter's feet: shoulder height, above the low Hunter Wisp
-const ORBIT_HZ := 0.35  # turns per second round the Hunter
-const POP_RING := 0.6  # m: the little ring where it lands or leaves
-const SIZE := 1.5  # the Boki wisp's scale in a match (BokiWispLook builds it gallery-sized)
-
+const JOINS := ["active", "flying", "flying_home", "returning"]   # summoned states: it leaves them to ride as a wisp
+# s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull
+# once its last standing member is down
+const GUARD_CAP := 11.0
+const ZIP_S := 0.3           # s: the flight back to its Hunter
+const ZIP_RANGE := 14.0      # m: farther (or out of walking reach), it blinks there instead
+const ORBIT_R := 0.75        # m from the Hunter Wisp's centre
+const ORBIT_UP := 0.95       # m over the Hunter's feet: shoulder height, above the low Hunter Wisp
+const ORBIT_HZ := 0.35       # turns per second round the Hunter
+const POP_RING := 0.6        # m: the little ring where it lands or leaves
+const SIZE := 1.5            # the Boki wisp's scale in a match (BokiWispLook builds it gallery-sized)
 
 ## A Boki of a downed Hunter that should be riding as their wisp but is not yet.
 static func wants(k: Kin) -> bool:

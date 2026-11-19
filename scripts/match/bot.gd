@@ -940,7 +940,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if _banned(m, a, goal):
 		var dt: Vector3 = a.get("detour", Vector3.INF)
 		if dt == Vector3.INF or _banned(m, a, dt) or h.flat_dist(dt) < 2.0:
-			dt = m.world.random_ground()
+			dt = BotWays.keep_inside(m, m.world.random_ground())      # (a detour too stays out of the tide)
 			a["detour"] = dt
 		goal = dt; gk = "roam"
 	# outside the zone, or a goal outside it: head inside first
@@ -1075,7 +1075,8 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt, h)}
+		var wide: bool = String(h.ai.get("goal_kind", "")) in RING_GOALS
+		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt, h, wide)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -1161,17 +1162,39 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres. With
+## Tiles of slack round the trip a tile path may use. Heading for the Heart ring or back in out of the
+## Blight (BotWays) a bot may also try a wide window, enough to reach a ramp beside a cliff (The Crown's
+## raised Heart has three stairs, 50-63 m out); everywhere a wide window had bots turning between detours.
+const PATH_SLACK := 8
+const PATH_SLACK_RING := 40      # tiles: The Crown's stairs are 50-63 m out, a bot below its raised ground is that far
+const PATH_STEPS := 4000         # tiles one search may open: the tight window...
+const PATH_STEPS_RING := 14000   # ...and the wide one
+const RING_GOALS := ["ring", "ring_in"]
+
+## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
+## No path leads deeper into the Blight's tide than the ring or where the bot stands (BotWays.path_r). With
 ## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
-func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
+func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := false) -> Array:
+	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
+	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap, PATH_STEPS)
+	if p.is_empty() and wide:
+		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap, PATH_STEPS_RING)
+	if p.is_empty() and h:
+		return _grid_path(m, a, b, null, wide)
+	return p
+
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
+## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float, max_steps: int) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
+	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
+	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false
 	var steps := 0
-	while q.size() > 0 and steps < 4000:
+	while q.size() > 0 and steps < max_steps:
 		steps += 1
 		var cur: Vector2i = q.pop_front()
 		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
@@ -1183,7 +1206,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
 			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not W.inb(nx.x, nx.y):
 				continue
 			var i := W.idx(nx.x, nx.y)
-			if W.kind[i] != World.T_GROUND:
+			if W.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
 				continue
 			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
@@ -1192,7 +1215,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null) -> Array:
 			prev[nx] = cur
 			q.append(nx)
 	if not found:
-		return _grid_path(m, a, b) if h else []
+		return []
 	var out: Array = []
 	var c := b
 	while c != a:
