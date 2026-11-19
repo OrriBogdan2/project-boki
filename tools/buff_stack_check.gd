@@ -84,8 +84,9 @@ func shots(out: String) -> void:
 	three(p, 9.0)
 	await frames_until(m.time + 2.0)
 	shot(out, "three")
-	hover("fever")
-	await frames_until(m.time + 0.3)
+	for i in 20:
+		hover("fever")      # the window moves the real cursor between frames: put it back every frame
+		await main.get_tree().process_frame
 	shot(out, "hover")
 	hover("")
 	Input.action_press("scores")
