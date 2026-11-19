@@ -75,8 +75,12 @@ other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
 
-Weights pass 11-19 (ext/hunter-fix-tarek-1118, weights only: positions, UVs, indices, skeleton and clips byte-identical, so the
-rest pose is unchanged): the stone (left) forearm/hand influence is taken off the apron, skirt and trousers (25 cm taper from
-the arm), the right forearm/hand influence tapers off body skin over 60 cm, and shin weight above the knee fades into the
-thigh. The right hand is modelled inside the sash at the hip (one welded surface), so the hip-to-right-hand wing in arms-up
-clips stays: weights cannot separate it; that needs the hand cut free and capped, or a re-generation with the arms apart.
+Hand split 11-19 (ext/hunter-fix-tarek-1118, replaces the weights-only pass): the scan welded the right fist into the
+sash at the hip, so every arms-up clip pulled a wing of apron and trouser after the hand. The vertices the fist shares
+with the sash/beads are duplicated (119 glb vertices; every existing vertex keeps its position, normal, UV and colour
+bytes; no triangle is deleted), so the fist and gauntlet are their own skin island; each opening is closed on both sides
+by a flat cap (70 triangles, 60,069 total) coloured from the texture just around it. Weights: the fist/gauntlet island
+keeps only arm bones plus its own hips share, smoothed inside the island; body skin loses right-arm weight (to hips);
+the stone (left) arm's weight leaves the trousers/apron (to hips, not the thigh, so crouches do not swell the apron);
+shin weight above the knee fades into the thigh. Skeleton, bone names, clips, materials and textures are unchanged.
+Tools: /home/boki/gens/tarek-fix-1119k/tool (cut5.py, openhand.py, build.py, writeglb2.py, caps.py).
