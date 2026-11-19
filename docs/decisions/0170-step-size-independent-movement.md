@@ -1,4 +1,4 @@
-# 0101: Movement that doesn't depend on the step size
+# 0170: Movement that doesn't depend on the step size
 
 - **Status:** accepted
 - **Date:** 2026-11-09
