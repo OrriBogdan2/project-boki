@@ -194,6 +194,8 @@ var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
+var stomp_st: Dictionary = StompLook.style("")   # the stomp style being played
+var stomp_cyc := 0.0      # foot cycles into the stomp
 var revive_k := 0.0
 var fall_k := 0.0           # into the knocked-down beat (state "fall"), 0 when not
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
@@ -599,8 +601,10 @@ func update(dt: float, s: Dictionary) -> void:
 	var ledge: bool = s.get("ledge", false)
 	var mant := float(s.get("mantle", -1.0))
 	ledge_k = _ease(ledge_k, 1.0 if ledge or mant >= 0.0 else 0.0, 14.0, dt)
-	var st_ph := float(s.get("stomp", -1.0))
-	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
+	stomp_cyc = float(s.get("stomp", -1.0))
+	stomp_k = _ease(stomp_k, 1.0 if stomp_cyc >= 0.0 else 0.0, 16.0, dt)
+	if stomp_cyc >= 0.0:
+		stomp_st = StompLook.style(String(s.get("stomp_style", "")))
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
 	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
@@ -868,11 +872,11 @@ func update(dt: float, s: Dictionary) -> void:
 	var ledge_up := 1.0 if mant < 0.0 else clampf(mk * 1.6, 0.0, 1.0)
 	hl = lerpf(hl, lerpf(0.4, 1.3, ledge_up), ledge_k); kl = lerpf(kl, lerpf(-0.5, -1.7, ledge_up), ledge_k)
 	hr = lerpf(hr, lerpf(0.1, 0.5, ledge_up), ledge_k); kr = lerpf(kr, lerpf(-0.3, -0.9, ledge_up), ledge_k)
-	# stomping a wisp: the right foot lifts high, then slams down, over and over
+	# stomping a wisp: a foot lifts, then slams down, over and over (the style says which, how high and how the body sits)
 	if stomp_k > 0.01:
-		var up := sin(clampf(st_ph, 0.0, 1.0) / 0.7 * PI) if st_ph < 0.7 else 0.0
-		hr = lerpf(hr, 1.35 * up - 0.05, stomp_k); kr = lerpf(kr, -1.6 * up - 0.1, stomp_k)
-		hl = lerpf(hl, 0.2, stomp_k); kl = lerpf(kl, -0.4, stomp_k)
+		var leg := StompLook.legs(stomp_st, stomp_cyc)
+		hl = lerpf(hl, leg.x, stomp_k); kl = lerpf(kl, leg.y, stomp_k)
+		hr = lerpf(hr, leg.z, stomp_k); kr = lerpf(kr, leg.w, stomp_k)
 	# reviving: down on one knee beside them
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
@@ -911,7 +915,8 @@ func update(dt: float, s: Dictionary) -> void:
 	# ================================================================ BODY
 	var breath := sin(t * float(st["breath"]) + seed_ph)
 	var pitch := -float(st["lean"]) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
-	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
+	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - revive_k * 0.35
+	pitch -= stomp_k * StompLook.lean(stomp_st)
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
 	act_last[2] = lerpf(act_was[2], _act_pitch(), _swap_k()) if not act_was.is_empty() else _act_pitch()
 	pitch -= act_k * float(act_last[2])
@@ -1619,10 +1624,16 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		var up_r := sh_r + Vector3(0.05, 0.4, -0.15) if mk < 0.0 or mk < 0.35 else sh_r + Vector3(0.08, -0.2, -0.3)
 		fl = fl.lerp(up_t, ledge_k); fr = fr.lerp(up_r, ledge_k)
 		free_l = maxf(free_l, ledge_k)
-	# stomp: arms out for balance
+	# stomp: the style's arms (out for balance, up, fists, on the hips); the weapon stays in a hand it leaves be
 	if stomp_k > 0.01:
-		fl = fl.lerp(sh_l + Vector3(-0.32, -0.15, -0.05), stomp_k)
-		free_l = maxf(free_l, stomp_k)
+		var sl := StompLook.hand(stomp_st, stomp_cyc, sh_l, -1.0)
+		var sr := StompLook.hand(stomp_st, stomp_cyc, sh_r, 1.0)
+		if sl != Vector3.INF:
+			fl = fl.lerp(sl, stomp_k)
+			free_l = maxf(free_l, stomp_k)
+		if sr != Vector3.INF:
+			fr = fr.lerp(sr, stomp_k)
+			free_r = maxf(free_r, stomp_k)
 	# revive: the left hand reaches down over them
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)
