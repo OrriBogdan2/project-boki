@@ -190,7 +190,12 @@ func _priority() -> void:
 	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "free": true})
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(-8, 0, 0.5))
 	T.max_hp = 1e5; T.hp = 1e5
+	# start quiet: a map chest called during _fresh() leaves its gap and cooldown running, and by the time
+	# they end the Boki has knocked the rival inside the on-screen range where "behind" isn't said
 	k.comp.history.clear()
+	k.comp.gap_t = 0.0
+	k.comp.cds.clear()
+	k.comp.seen.clear()
 	var t := 0.0
 	while t < 22.0:
 		P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
@@ -405,7 +410,10 @@ func _tutorial() -> void:
 	ok(back_ok, "a fall into the void puts you back at the last stop")
 	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
 	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
-	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
+	# (goexit and uplink both point at the outpost: when the fight ends next to it, goexit can be over in a
+	# second, while the Boki is still flying back or riding your shoulder over the last gap)
+	var outpost := led.has("goexit") or led.has("uplink")
+	ok(led.has("chest") and outpost, "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 
