@@ -55,6 +55,15 @@ static func times(ks: KinSpec) -> Vector2:
 	return Vector2(float(cell[0]), float(cell[1]))
 
 
+## The cards' plain line for a window ("Short summon, strong"): the last card_lines entry whose from (s) it reaches.
+static func card_line(window: float) -> String:
+	var out := ""
+	for cl in rules()["card_lines"]:
+		if window >= float(cl[0]):
+			out = String(cl[1])
+	return out
+
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
@@ -97,6 +106,16 @@ func burst(window: float) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+
+
+## R fused the Boki into its hunter (KinMerge): a window still running is over, with the full cooldown of
+## sending it back early. A wisp's cooldown is left as it is: the merge is a separate resource.
+func fused() -> void:
+	if out():
+		left = 0.0
+		shrink = 0.0
+		cd = cd_base
+		cd_full = cd_base
 
 
 ## The window is over (timer or sent back early): the shrink starts.
