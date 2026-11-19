@@ -24,7 +24,7 @@ const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
 const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
 const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
-const FRAME_W := 960                      # px wide, each --reel-frames frame
+const FRAME_W := 1280                     # px wide, each --reel-frames frame
 
 var only := ""
 var frame_dir := ""            # --reel-frames: where each drawn frame goes

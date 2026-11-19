@@ -268,6 +268,15 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
 	rig._speed = 0.0
+	rig._track_speed(0.016)
+	k.global_position += Vector3(6, 0, 0)
+	k.set_meta("tp", int(k.get_meta("tp", 0)) + 1)      # (Kin.teleport: a burst, a re-bloom, a blink)
+	rig._track_speed(0.016)
+	ok(rig._speed < BokiRig.WALK_SPEED, "a teleport is not speed (%.2f m/s)" % rig._speed)
+	k.global_position += Vector3(0.5, 0, 0)
+	rig._track_speed(0.016)
+	ok(rig._speed >= BokiRig.WALK_SPEED, "a real step still is (%.2f m/s)" % rig._speed)
+	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
 	ok(rig.clip == "ability", "a cast pulse plays the ability clip")

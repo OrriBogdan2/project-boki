@@ -49,10 +49,20 @@ const LOOKS := {
 		"rings": [[0.8, 0.22], [1.3, 0.3], [1.8, 0.38]]},
 }
 
+## A Boki's type is its theme (KinParts.THEMES, what sp["type"] holds); each theme wears one look above.
+## (11-17: LOOKS came from a lane keyed by another type list, so only spore and dark ever matched.)
+const BY_THEME := {"venom": "poison", "spore": "spore", "gravity": "dragon", "prism": "crystal", "lunar": "fairy",
+	"echo": "sound", "ember": "fire", "frost": "ice", "storm": "electric", "stone": "rock", "bloom": "grass",
+	"ghost": "psychic", "dark": "dark", "titan": "steel", "swarm": "bug", "tempest": "flying"}
+
+## The LOOKS key for a type: a theme maps through BY_THEME, a look name stays itself, else "".
+static func key(type: String) -> String:
+	return String(BY_THEME.get(type, type if LOOKS.has(type) else ""))
+
 ## The accent for a cast by a Boki of `type`, at `at` (its feet), toward `dir` (flat cast direction).
 ## An unknown type (a Boki with no type) plays nothing.
 static func play(fx: Fx, type: String, at: Vector3, dir: Vector2) -> void:
-	var look: Dictionary = LOOKS.get(type, {})
+	var look: Dictionary = LOOKS.get(key(type), {})
 	if look.is_empty():
 		return
 	var col := Color(String(look["col"]))

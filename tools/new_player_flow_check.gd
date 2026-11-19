@@ -186,12 +186,20 @@ func _starter_card(hx) -> Control:
 			return c
 	return null
 
+## Takes a Relic off a pick the way a player does: clicks its card, then "Yes, take <name>" on the question.
+func _take(root: Node, card: Control, id: String) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	card.gui_input.emit(click)
+	await tree.process_frame
+	await _press(root, "Yes, take " + HeroTitle.base_name(id))
+
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
-	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	_press(hx, "Take " + HeroTitle.base_name(starter))
+	await _take(hx, _starter_card(hx), starter)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -309,9 +317,9 @@ func _second_relic(home) -> void:
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
 	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
-	ok(offer.ids.size() == want and offer.take_button != null, "%d to choose from, with a Take button" % want)
+	ok(offer.ids.size() == want, "%d to choose from" % want)
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _take(chat.box, offer.cards[0], pick)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
@@ -465,7 +473,6 @@ func _portal_relic(home) -> void:
 	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
-	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _take(home.panel_host, cards[2], "gunslinger")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

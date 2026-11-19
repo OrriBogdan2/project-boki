@@ -28,7 +28,7 @@ Owner feedback: height, ledges and drop depth are hard to read; the reference re
 | Height tint of tiers | Lower tiers are not darker (only AO at the foot). Not done: absolute y varies per island, needs per-island reference. | shader |
 | Projectile drop shadows | Not done; same disc idea, one more quad per projectile. | per projectile |
 
-## Built (setting Settings > Accessibility > Height cues, `depth_cues`, default on; applies from the next expedition)
+## Built (setting Settings > Accessibility > Show heights clearly, `depth_cues`, default on; applies from the next expedition)
 Cliff faces: brightened at the lip, darkening toward the foot by drop height (full dark at 3.2 m).
 Ground lip lit where it ends in a drop. A soft dark disc on the ground under every hunter, at the
 ground's own height (hidden over void). Gameplay, camera, aim and ranges untouched.

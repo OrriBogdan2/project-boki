@@ -69,3 +69,9 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   pelvis dip 0, seam last key = first. Alternative kept out: a shorter "A" build (walk 0.604 s, run 0.5 s) that steps too fast for a 1.49 m
   hunched Hero. Rebuild: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- dredge.glb out.glb walk_f run_f b,l,r,f 0.75 0.542`.
 **Barge clips (2026-11-12):** `lunge` is re-keyed (the ball stays closed from shove to shove) and `lunge_out` is new, by `tools/art1/grimble_barge_clips.py` run on the .glb with no Blender (the .blend is not needed); `tools/art1/grimble_clips.py` still has the old `lunge` keys, so a clip rebuild from the .blend must re-run that script. Why and how it plays: docs/heroes/dredge.md, "Animation timing".
+
+**board1117 A colours (11-18, ext/hunter-picks-tcg-1117):** owner 11-17 "grimble your call", coordinator call A (masked grade of
+the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, darker pack/belt/loincloth, gun bell iron grey and
+stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
+UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
+resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.

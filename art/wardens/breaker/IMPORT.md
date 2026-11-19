@@ -66,3 +66,5 @@ them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw f
 (bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
 the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.py <shipped> <new> <clip,...>` (the
 other clips re-bake byte-equal that way).
+
+Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): Albert's happy ^^ face A texture-only: `python3 -I tools/art1/face_swap.py <game glb> /home/boki/meshy/face-albert-1118/final_A.glb /home/boki/meshy/face-albert-1118/cand/LIVE.glb OUT.glb` blends the face-pass albedo changes into the embedded 4096 `v95` image (mesh, rig, clips, props untouched; the game glb has no normal/roughness map, so those face-pass maps are not used). The old angry paint stays as his fight face.
