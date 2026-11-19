@@ -244,9 +244,7 @@ func _steer() -> void:
 			t = _nearest(mb.pos, reach)
 			if t == null:
 				continue
-			mb.tgt = t
-			if mb.st == "idle":
-				mb.st = "chase"
+			mb.aggro(t, "heart raid")
 		mb.camp = t.pos
 
 
@@ -298,7 +296,7 @@ func _spawn_boss() -> void:
 	b.max_hp = float(bd["hp"]) * tier_k * scale("boss_hp")
 	b.dmg_mult *= float(diff()["dmg"])
 	b.hp = b.max_hp
-	b.dormant = false
+	b.set_asleep(false)
 	m.add_child(b)
 	m._draw_range(b)
 	m.mobs.append(b)

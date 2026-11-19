@@ -37,7 +37,7 @@ static func net_in(m: Match, x: Array) -> void:
 	b.atk = String(ATKS[int(x[2])]) if int(x[2]) >= 0 and int(x[2]) < ATKS.size() else ""
 	b.atk_t = float(x[3])      # (how far into the attack the host was when it sent)
 	b.phase = int(x[4])
-	b.dormant = (int(x[5]) & F_DORMANT) != 0
+	b.set_asleep((int(x[5]) & F_DORMANT) != 0)      # (Boss.dormant is a view of its machine)
 	b.enraged = (int(x[5]) & F_ENRAGED) != 0
 	b.md["windup"] = float(x[6])      # (each attack sets its own wind-up seconds; BossAnim.hit_t reads it)
 	if woke or b.dormant:
