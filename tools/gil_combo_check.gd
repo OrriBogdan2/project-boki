@@ -258,7 +258,9 @@ func _hold_and_air() -> void:
 	K.cd["rmb"] = 0.0
 	K.bag.append("air")
 	tap(m, P)
-	var far_tap := Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length() if not K.flying.is_empty() else 0.0
+	var far_tap := 0.0
+	if not K.flying.is_empty():
+		far_tap = Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length()
 	_land()
 	_reset(6.0)
 	K.ch_rmb = 2.0
@@ -709,7 +711,8 @@ func _leap_off() -> void:
 	var run := Vector2(x1.x - p0.x, x1.z - p0.z).length()
 	var carry := Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length()
 	ok("leap off: he stopped riding (4 m of the 14 at 0.3 s, a short run-out after), back on the ground",
-		run < 6.5 and P.grounded and carry < 8.0, "%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
+		run < 6.5 and P.grounded and carry < 8.0,
+		"%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
 	ok("leap off: the 90 s cooldown stands, no second wave, R does nothing more",
 		float(K.cd["x"]) > 85.0 and not HunterKeys.ult_pressed(P) and K.wave.is_empty())
 	K.ch_rmb = 2.0

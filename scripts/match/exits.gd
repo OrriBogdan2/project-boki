@@ -158,7 +158,7 @@ func interact_for(h: Hunter) -> Dictionary:
 					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 				else:
 					best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-			"charging": best = {"label": "Uplink %d%%  ·  hold the yard%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+			"charging": best = {"label": "Uplink %d%%  ·  hold the outpost%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
 			"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 			"open": best = {"label": "The lift is open! Step into the light"}
 			"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
@@ -224,7 +224,7 @@ func _start(x: Dictionary, h: Hunter) -> void:
 			UiSfx.extract_start()
 		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
 		if m.hud and m.player and not m.player.out:
-			m.hud.toast("Uplink started: hold the yard until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
+			m.hud.toast("Uplink started: hold the outpost until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
 
 func _tick_outpost(x: Dictionary, dt: float) -> void:
 	var n: Node3D = x["node"]
@@ -336,7 +336,7 @@ func _fizzle(x: Dictionary) -> void:
 		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
 		if m.hud and was == m.player.team:
 			UiSfx.extract_fail()
-			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
+			m.hud.toast("The uplink shut off: nobody held the outpost. Start it again to charge it", ExitModels.UPLINK)
 
 ## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
 ## the yard's edge only while you stand in it or it is contested.
@@ -508,8 +508,8 @@ func status_for(p: Hunter) -> Dictionary:
 		if x["state"] == "charging" and in_yard(x, p):
 			var mine: bool = int(x["team"]) == p.team
 			var t := "Uplink %d%%" % int(x["prog"] * 100.0)
-			if x["contested"]: t += "  ·  CONTESTED: clear the yard"
-			elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
+			if x["contested"]: t += "  ·  CONTESTED: clear the outpost"
+			elif not mine: t += "  ·  a rival's uplink: hold the outpost to take it"
 			elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
 			var st := {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
 			if mine and not x["contested"] and int(x.get("crew", 0)) <= 1:
@@ -520,7 +520,7 @@ func status_for(p: Hunter) -> Dictionary:
 			return st
 		if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
 			# our uplink with nobody in its yard: the charge running out, and how long it has
-			return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
+			return {"text": "Uplink draining  ·  %d%%  ·  back to the outpost: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
 				"col": ExitModels.UPLINK.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 7.0))}
 	return {}
 
