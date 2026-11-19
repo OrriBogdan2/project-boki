@@ -5,9 +5,9 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
 Every dash and ability charge count read against the tooltips [D]: all match but two. **Albert** had the heavy class's 2
 dash charges; Oath's Spin Dash has 1, so `bulwark.json` `dash.charges` is 1 (a kit's `dash.charges` now overrides the
-class's, `ArchKit.dash_charges`). **Grimble** keeps 3 (owner, Kingpin has 1 + an air slot); it moved from
+class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium class has one already; the row locks it). **Grimble** keeps 3 (owner, Kingpin has 1 + an air slot); it moved from
 `DredgeKit.extra_dashes()` to `dredge.json` `dash.charges`. Tenzo (Tetra +1 at an upgrade), Kael (Brall +1 at tier II),
-Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Table: coord/reports/charges-sv-1116.md.
+Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
 ## Still open: 0.24.5 re-read (ext/release-integ-0245 272368589 and the 0.24.6 waves, 2026-11-11)
 
