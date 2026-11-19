@@ -27,7 +27,7 @@
 		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3},
 		"ostra_snap": {"clip": "snap"},
 		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16},
-		"ostra_swap": {"clip": "swap", "lead": 0.1, "dash": true},
+		"ostra_swap": {"dash": true, "clip": "swap"},
 		"ostra_swap_air": {"dash": true, "clip": "swap_air", "hold_from": 0.47, "lead": 0.06},
 		"ostra_arrive": {"clip": "arrive"},
 		"ostra_seed": {"clip": "seed", "lead": 0.06, "fade": 0.03},

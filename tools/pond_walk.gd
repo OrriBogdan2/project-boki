@@ -20,6 +20,19 @@ class Layout:
 	func L() -> Dictionary:
 		return {"water": cells}
 
+## The Home that HomeWater reads (its fields and walk_speed()), with the farm's plain walk speed.
+class Host:
+	var fs := false
+	var hb: Layout
+	var fx = null
+	var ppos := Vector3.ZERO
+	var pvel := Vector3.ZERO
+	var pvy := 0.0
+	var dash_t := 0.0
+
+	func walk_speed() -> float:
+		return DRY_SPEED
+
 ## The phase a frame is in: "dry" before the water, "wade", "swim", "tread" (stopped in deep water), "out" after it.
 var phase := "dry"
 
@@ -34,8 +47,9 @@ func _layout() -> Layout:
 ## Walks `m` (driven by `anim`) through the pond; `on_frame` (a coroutine or not) is called after each step with
 ## {phase, depth, speed, state}. HunterAnim and the Hero's clips are stepped here.
 func walk(tree: SceneTree, m: Node3D, sync: Node, anim: HunterAnim, on_frame: Callable) -> void:
-	var host := {"fs": false, "hb": _layout(), "fx": null, "ppos": Vector3(EDGE_X, 0, START_Z), "pvy": 0.0,
-			"SPEED": DRY_SPEED}
+	var host := Host.new()
+	host.hb = _layout()
+	host.ppos = Vector3(EDGE_X, 0, START_Z)
 	var water := HomeWater.new(host)
 	var pos := Vector3(EDGE_X, 0, START_Z)
 	var treaded := 0.0
@@ -49,7 +63,7 @@ func walk(tree: SceneTree, m: Node3D, sync: Node, anim: HunterAnim, on_frame: Ca
 			spd = 0.0
 			treaded += DT
 		pos.z -= spd * DT
-		host["ppos"] = pos
+		host.ppos = pos
 		phase = "dry"
 		if treading:
 			phase = "tread"
