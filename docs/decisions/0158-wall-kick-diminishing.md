@@ -1,4 +1,4 @@
-# 0100: Diminishing returns for chained wall kicks
+# 0158: Diminishing returns for chained wall kicks
 
 - **Status:** accepted (owner request 11-13)
 - **Date:** 2026-11-18

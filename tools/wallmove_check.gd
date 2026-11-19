@@ -194,7 +194,7 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 
 ## Chained kicks keep less each time (content/rules/wall_kick.json), and the ground resets the chain.
 ## `danced` is the timed run (a press each fall). A press every step must not climb past it: a climb never
-## stacks on an earlier climb's rise (decision 0100; on 11-17 main the same mash peaked at 4.98m).
+## stacks on an earlier climb's rise (decision 0158; on 11-17 main the same mash peaked at 4.98m).
 func _diminish(wl: Dictionary, danced: Dictionary) -> void:
 	var curve := WallMoves._curve
 	var mashed := _attempt(wl, true, true, true)

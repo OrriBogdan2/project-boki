@@ -8,7 +8,8 @@ extends RefCounted
 var bad := 0
 var main: Node
 const KEY_WORD := "\\b(LMB|RMB|MMB|Shift|Space|Ctrl)\\b|\\b[EQRFXCVZ]\\b"  # a key named in words, in a text
-## Not ability text: the personality (story), "howto" (ClassCard fills its {action} tokens itself) and the design sources.
+## Not ability text: the personality (story), "howto" (ClassCard fills its {action} tokens itself) and the
+## design sources.
 const SKIP := ["personality", "howto", "src", "source", "sources"]
 const NUMBER := "\\d+(?:\\.\\d+)?"
 ## Where the slots sit in the HUD (Hunter.slot_info) and in the card.
@@ -143,7 +144,8 @@ func _contexts(m: Match, a: String) -> void:
 		ok(same and (nm == card["name"] or slot == "r"), "%s: one name '%s' on card, viewer and HUD slot" % [tag, nm])
 		var short_ok: bool = hud["short"] == AbilityText.short_name(a, slot)
 		short_ok = short_ok and (slot == "r" or card["short"] == hud["short"])
-		ok(short_ok or (a == "gil" and slot == "rmb"), "%s: one short name '%s'" % [tag, hud["short"]])  # (Gil's tile names the next vial)
+		# (Gil's tile names the next vial)
+		ok(short_ok or (a == "gil" and slot == "rmb"), "%s: one short name '%s'" % [tag, hud["short"]])
 		if slot != "r":
 			var from_helper: bool = card["line"] == AbilityText.line(a, slot)
 			from_helper = from_helper and hud["desc"] == AbilityText.full(a, slot)
