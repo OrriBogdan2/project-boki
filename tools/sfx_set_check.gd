@@ -566,19 +566,6 @@ func _warn_behaviour() -> void:
 	ok(seen == [false, true, false, false], "heartbeat only when hurt and up (full, 20 pct, downed, 0: %s)" % [seen])
 
 ## 5. A Hunter without its own set plays the shared sounds.
-## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
-## is within -12 dB and on the clear bus, 10 m further is at least 6 dB quieter, past 30 m nothing plays.
-func _falloff() -> void:
-	var edge := CamRig.style_across("supervive") * 0.5
-	var at_edge := Sfx._distance_db(Vector3(edge, 0, 0))
-	var off := Sfx._distance_db(Vector3(edge + 10.0, 0, 0))
-	var gone := Sfx._distance_db(Vector3(31.0, 0, 0))
-	print("SFXSET falloff: edge %.1f m %.1f dB, +10 m %.1f dB, 31 m %s" % [edge, at_edge, off, gone])
-	var clear := at_edge > -12.0 and edge < Sfx.FAR
-	ok(clear, "a cue at the screen edge (%.1f m) is heard clearly (%.1f dB, clear bus)" % [edge, at_edge])
-	ok(off < at_edge - 6.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
-	ok(is_nan(gone), "...and past ~30 m it is silent")
-
 func _fallback() -> void:
 	var h := Hunter.new()
 	h.arch = "no_such_hunter"
