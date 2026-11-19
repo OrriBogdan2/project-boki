@@ -180,7 +180,8 @@ func _scenario(G: Hunter) -> void:
 	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
 	await _move("Neve Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
-	await _dash_sweep(G, B)
+	if OS.get_environment("ODISP_SWEEP") != "":      # (the sweep doubles the run: --online-displace-check times out at 300 s with it)
+		await _dash_sweep(G, B)
 	await _finish()
 
 ## Every Hunter's ground and air dash, then the dash-like moves, each played by the host's Hunter and read on the

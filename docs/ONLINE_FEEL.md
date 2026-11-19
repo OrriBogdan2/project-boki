@@ -146,7 +146,7 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
 
 ## Dash sweep: every Hunter's dash on the other game
 
-The same check also plays each Hunter's ground dash and air dash (Shift with the move keys held, the air one from
+Set `ODISP_SWEEP=1` to add it (it doubles the run, over the suite's 300 s timeout, so it is off by default). The same check then also plays each Hunter's ground dash and air dash (Shift with the move keys held, the air one from
 8 m up, 7 m back from the strip's middle so the gliders have room) and Kael's Lunge on the host, and reads the
 host's Hunter on the guest's game, frame by frame. Neve's skate push-off, Motley's Trade, Grimble's Barge, Tenzo's
 Rock Hop and Sable's Cartwheel are those Hunters' dash rows. A row is **flagged** (`DISPNET FLAG`, not failed) when

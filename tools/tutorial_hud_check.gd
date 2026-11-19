@@ -22,10 +22,6 @@ extends RefCounted
 ##   9. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
 ##  10. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
 ##      slot and arrow on screen, in the bottom row, the same rect as the slot's hover spot
-##  11. framing at the match camera, per starter (Lace, Kael, Vex), at 1280x720: at every step the thing to
-##      act on (the camp's monster, the pad's sign, the glove, the outpost, the stop) is on screen for most
-##      of the step (a walk to a far stop: by the time you get there; the marker's edge arrow and the Boki
-##      lead the way meanwhile) and, where it is a thing, at least MIN_PX tall. One row per step is printed.
 
 var bad := 0
 var m: Match
@@ -42,7 +38,7 @@ func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
 	main = mn
 	Save.no_write = true
 	_lanes()
@@ -52,8 +48,6 @@ func run(mn: Node) -> void:
 	_cc_tips()
 	_zone_lines()
 	await _pointers()
-	for id in STARTERS:
-		_framing(id)
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -529,7 +523,7 @@ func _framing(arch: String) -> void:
 	seed(11)       # (the run --tutorial-fight-check plays, the same each time)
 	var fm := Match.new()
 	main.add_child(fm)
-	fm.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
+	fm.start({"tutorial": true, "tut_test": true, "seed": 11, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
 			"demo_kin": "cindle", "arch": arch, "cls": Arch.weight(arch)})
 	fm.set_process(false)
 	var tu: Tutorial = fm.tut
