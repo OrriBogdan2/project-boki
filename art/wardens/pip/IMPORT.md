@@ -74,3 +74,18 @@ lie). Then 120 iterations of stretch-driven weight relax over every clip. Script
 Numbers, live -> fixed: edges over 3x vs bind (edges >= 2 mm, 47 clips x 8 samples), mean 2.59% -> 0.05%, worst clip
 3.86% -> 0.17%. `--stretch-check --wardens=tender` worst 7.69 (call_hold) -> 4.78 (hearth); all 55 clips are still
 over the 1.3 limit (the linear-blend crease at the elbows and crotch). `hunter_mesh_check` stretched tris 400 -> 13.
+
+### Retry after review (2026-11-19, same branch)
+- Ears: the first pass moved ear weight to `head`, so the bandaged ear bent less than live. Now the ear zone
+  (live ear.R/ear.L weight > 0.01, grown 1.5 cm, above 1.40 m) uses live's weights, spatially averaged over 1.5 cm
+  (3 passes). The ear bends like live (median 0.6 cm from live, was 1.5 cm), and the bandage no longer tears off it
+  (live had 46x edges there in `downed`).
+- Right paw: with clean arm weights the paw follows `hand.R`, and in the raised-paw clips that bone sits beside the
+  eye, so the flat arm strip lay across the face. With the old blended weights it sank into the neck instead (the
+  dark block). The strip has no inner surface, so weights cannot fix this. Re-key, rotation only: in call, call_hold,
+  call_end, hearth, flare and seed_aim, `upper_arm.R` is slerped from rest toward its key by 0.6 and `forearm.R` by
+  0.45. The paw now ends at the chest. The other 41 clips, the skeleton and the arm weights are unchanged, so idle
+  and stance look the same as the first pass.
+- The wings ride `wing.R`/`wing.L` whole, on purpose: live's arm and hip weight on them is a stretch source. No
+  visible change.
+- Scripts (not in git): `~/cj/20261119-185903-a5/w/` (`ear2.py`, `write.py`, `evg.py`).
