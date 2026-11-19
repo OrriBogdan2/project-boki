@@ -60,3 +60,17 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
   `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).
 
 - **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.
+
+## Skin tearing fix (2026-11-19, ext/hunter-fix-pip-1118)
+Weights only: `pip.glb`'s JOINTS_0/WEIGHTS_0 changed. Positions, UVs, normals, indices, skeleton, textures and all 47
+clips are byte-equal to main, so the bind pose is unchanged. Cause (live audit 11-19): the scan's arms are flat strips
+fused onto the torso sides, and the heat weights left forearm/hand weight on the hip, satchel, wing and thigh skin and
+upper-arm weight over the capelet. Fix: forearm/hand weight is kept only on the arm's own UV charts (whole arm), stripped
+from every other chart and refilled from neighbours. Upper-arm weight on body skin fades out 0.10-0.20 m from the bone,
+and leg weight 0.18-0.28 m from the leg bones. The wings ride `wing.R`/`wing.L` whole. Same-position seam copies share
+one weight, so no seam opens and nothing is cut or deleted (a cut would open holes in the torso where the fused arms
+lie). Then 120 iterations of stretch-driven weight relax over every clip. Scripts (not in git): job dir
+`~/cj/20261119-114258-a6/w/fix_pip.py` (`'{"arm_ymax":0.95,"weld":1,"leg_d0":0.18,"leg_d1":0.28,"iters":120,"stride":3}'`).
+Numbers, live -> fixed: edges over 3x vs bind (edges >= 2 mm, 47 clips x 8 samples), mean 2.59% -> 0.05%, worst clip
+3.86% -> 0.17%. `--stretch-check --wardens=tender` worst 7.69 (call_hold) -> 4.78 (hearth); all 55 clips are still
+over the 1.3 limit (the linear-blend crease at the elbows and crotch). `hunter_mesh_check` stretched tris 400 -> 13.
