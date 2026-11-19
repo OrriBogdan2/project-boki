@@ -531,7 +531,7 @@ func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	_wh_mp = mp
 	_wh_still += H.get_process_delta_time()
 	var testing := "--hover-rival" in OS.get_cmdline_user_args() or "--hover" in OS.get_cmdline_user_args()
-	if (Record.clean() or _wh_still < 0.4) and not testing:
+	if (Record.clean() or _wh_still < 0.4 or H.in_fight()) and not testing:
 		return
 	if "--hover-rival" in OS.get_cmdline_user_args():
 		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
