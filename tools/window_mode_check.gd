@@ -133,9 +133,9 @@ func run(main: Node) -> void:
 		ok(_inside(_button("Settings"), view), "title: Settings button is on screen " + tag)
 		ok(_inside(_button("Quit"), view), "title: Quit button is on screen " + tag)
 		Overlay.tab = "Main"
-		var gear := _button("Settings")
+		await tree.create_timer(1.8).timeout  # (the menu pops in over ~1.5 s)
+		var gear := _button("Settings")  # (looked up after the wait: the menu may have been rebuilt meanwhile)
 		if gear:
-			await tree.create_timer(1.8).timeout  # (the menu pops in over ~1.5 s)
 			await _click(gear)
 		for _i in 3:
 			await tree.process_frame
