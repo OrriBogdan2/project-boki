@@ -15,6 +15,8 @@ static func _load(kind: String, id: String) -> Dictionary:
 		var j = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if j is Dictionary:
 			out = j
+			if kind == "archetypes":
+				ArchText.fill(out)
 		else:
 			push_warning("Content: couldn't read " + path)
 	_cache[key] = out

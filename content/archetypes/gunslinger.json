@@ -141,9 +141,9 @@
 	],
 	"rank_cd": {"sec": [1, 0.8333, 0.6667], "dash": [1, 0.8696, 0.7391], "kin": [1, 1, 1]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1.2, 1.4]},
-	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for 2s when a slide ends", "kin": "every hunter hit takes 30% off the cooldown"},
-	"rank2": {"sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
-	"rank_next": {"sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
+	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for 2s when a slide ends", "kin": "every hunter hit takes {e.shave_rank3%}% off the cooldown"},
+	"rank2": {"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s.", "dash": "Rank 2: recharge {cd.dash}s -> {cd2.dash}s.", "kin": "Rank 2: damage +{dmg2.kin%}%."},
+	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown"},

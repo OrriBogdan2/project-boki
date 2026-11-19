@@ -100,7 +100,7 @@
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 12.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). {dash} while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -147,10 +147,10 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
-			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
+			"full": "Guard {resource.slam}+: the Shield Charge ends in a Shield Slam, {rmb.slam.dmg} damage, push {rmb.slam.push} and stun {rmb.slam.stun}s (spends {resource.slam})."
 		},
 		"sockets": {
 			"hit": "add",
@@ -177,7 +177,7 @@
 		"tick_heal": 2.0,
 		"heal": 18.0,
 		"shield": 60.0,
-		"desc": "A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.",
+		"desc": "A green light column comes down for {e.delay}s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside {e.tick_heal} every {e.every}s for {e.time}s, following the hammer, and ends in a burst of {e.heal}; if your aegis is raised the burst mends it {e.shield}. A downed teammate inside is a third of the way back up at the burst.",
 		"sockets": {
 			"guard": "add",
 			"ctrl": "swap",

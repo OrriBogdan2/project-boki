@@ -37,9 +37,9 @@
 	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank_cd": {"sec": [1, 1, 0.6923], "dash": [1, 1, 1], "kin": [1, 0.7143, 0.7143]},
 	"rank_dmg": {"sec": [1, 1.5, 1.5], "dash": [1, 1, 1], "kin": [1, 1, 1]},
-	"rank3": {"sec": "flies 1m further after the first foe, the cooldown 4.8s, and two foes caught pool their Marks", "dash": "the empowered bonus +40% in all, and the Vault's speed boost is half again as big", "kin": "sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back"},
-	"rank2": {"sec": "Rank 2: damage +50%.", "dash": "Rank 2: the empowered bonus +20%.", "kin": "Rank 2: cooldown 15s -> 10.7s."},
-	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back.", "dash": "Rank 3: the empowered bonus +40% in all, and the speed boost is half again as big."},
+	"rank3": {"sec": "flies {rmb.bola.after_r3}m further after the first foe, the cooldown {cd3.sec}s, and two foes caught pool their Marks", "dash": "the empowered bonus +40% in all, and the Vault's speed boost is half again as big", "kin": "sticking refunds {e.refund_wall%}% of the cooldown ({e.refund_foe%}% in a foe), and a knife that sticks in a foe gives the Vault back"},
+	"rank2": {"sec": "Rank 2: damage +{dmg2.sec%}%.", "dash": "Rank 2: the empowered bonus +{dash.prime_rank%}%.", "kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s."},
+	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; flies {rmb.bola.after_r3}m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown {cd3.kin}s; sticking refunds {e.refund_wall%}% of the cooldown ({e.refund_foe%}% in a foe), and a knife that sticks in a foe gives the Vault back.", "dash": "Rank 3: the empowered bonus +40% in all, and the speed boost is half again as big."},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:72 'she faces the cursor while firing', :413 the torso snaps to the cursor"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dancer.md:26 a lane shows 0.4-0.6 s toward the cursor, then the throw; no turn limit shown"},

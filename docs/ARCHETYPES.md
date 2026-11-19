@@ -114,6 +114,20 @@ Priority when several apply: **resource full > during R > during E > airborne or
 - Each variant is a normal grammar AbilitySpec (`from: owner`). The archetype's input router picks
   which one fires. The executor (Phase 2) only ever runs plain stages.
 
+### 3.3b Ability words: one reader
+
+`AbilityText` (`scripts/arch/ability_text.gd`) is the only code that reads a slot's name, short name, line
+and full text: the HUD slot and its tooltip, the kit card and strip, the viewer, the E hint and the pick
+line all call it. Two token kinds live in the archetype JSON text:
+
+- `{path}` is a number from the same file (`{e.slow%}`, `{cd2.sec}`, `{weapon.primary.range}`); `ArchText`
+  fills it once when `Content` loads the file, so every screen shows the number the kit uses.
+- `{action}` is the player's own key (`{dash}`, `{secondary}`, `{signature}`, `{fire}`); `AbilityText` fills it
+  through `Settings.fill_keys` when it reads, so a rebind shows. Never type a key letter in an ability text.
+
+`--tooltip-check` holds the numbers (nothing unfilled, typed numbers on disk only shrink) and
+`--ability-text-check` holds the readers (card, strip and viewer say the same name and line for all 13 kits).
+
 ### 3.4 Run levels and unlocks
 
 Run levels already exist: `Hunter.XP_TO` (10 levels), `skill_pts` (1 at the start, +1 per level),

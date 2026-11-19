@@ -32,7 +32,7 @@
 		"slam": {"time": 0.25, "reach": 1.6, "hop": 2.5, "radius": [3.82, 4.5], "core": [0.9, 1.8], "core_k": 1.2, "dmg": [14.0, 30.0], "stun": [0.5, 1.2], "kb": 6.0,
 			"walk_k": 0.55, "leap": 3.2, "leap_up": 6.8, "lunge": 1.5, "lunges": 1,
 			"dunk_k": 0.4, "dunk_void": 20.0, "dive_speed": 26.0, "glide_dive_speed": 32.5, "void_drop": 3.0},
-		"variants": {"tap": "An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.", "hold": "Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.", "air": "In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss."},
+		"variants": {"tap": "An instant slam just ahead, no hop: a slightly smaller circle, {rmb.slam.dmg.0} damage and a shove; the centre stuns, rocks in the ring fly outward.", "hold": "Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.", "air": "In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops {rmb.slam.void_drop}m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +{rmb.slam.dunk_k%}%, +{rmb.slam.dunk_void} more over the abyss."},
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"},
 		"card_range": "slam.reach"},
 	"e": {"delivery": "burst", "name": "Stone Row", "short": "Row", "icon": "dolm_e", "col": "#7aa8ff", "cooldown": 12.5, "dist": 3.4, "gap": 2.4, "curve": 0.45, "row_gap": 3.6, "tell": 0.2,
@@ -55,7 +55,7 @@
 	"rank_dmg": {"sec": [1, 1.24, 1.48], "dash": [1, 1, 1], "kin": [1, 1, 1]},
 	"rank3": {"sec": "slamming a foe or a rock gives a Shardskin shield of 18, up to 4 stacks", "dash": "a second charge, and each hop goes a third further", "kin": "an extra row of rocks behind the first"},
 	"rank2": {"sec": "Rank 2: cooldown 11s -> 10s, damage +24%.", "dash": "Rank 2: recharge 12s -> 10s per charge.", "kin": "Rank 2: cooldown 12.5s -> 11.5s."},
-	"rank_next": {"sec": "Rank 3: cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks.", "kin": "Rank 3: cooldown 12.5s -> 10s; an extra row of rocks behind the first.", "dash": "Rank 3: recharge 12s -> 10s; a second charge, and each hop goes a third further."},
+	"rank_next": {"sec": "Rank 3: cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks.", "kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s; an extra row of rocks behind the first.", "dash": "Rank 3: recharge 12s -> 10s; a second charge, and each hop goes a third further."},
 	"tells": {"half": "stone pebbles orbit the shoulder, one per live rock", "full": "six stone pebbles spinning", "dash_spent": "a trail of rubble"},
 	"src": {
 		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
