@@ -513,6 +513,8 @@ const CHECKS := {
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
+	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # rigged Boki in the .pck
+	"--vespyx-places-check": ["res://tools/vespyx_places_check.gd", "vespyx_places_check", null],  # Vespyx in every screen, rigged or primitive
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],      # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],  # Sparkle / Vex screenshots
@@ -741,6 +743,7 @@ const CHECKS := {
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
+	"--tutorial-playthrough-check": ["res://tools/tutorial_playthrough_check.gd", "tutorial_playthrough_check", null],
 	"--tutorial-timing-check": ["res://tools/tutorial_timing_check.gd", "tutorial_timing_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],  # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],  # never stuck
