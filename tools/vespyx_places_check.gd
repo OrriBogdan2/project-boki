@@ -5,7 +5,7 @@ extends RefCounted
 ## Body/Flex) or the old primitive body (KinModels' fallback, a Flex with no BokiRig)? Meant to run from an
 ## exported .pck (godot --main-pack <pck> -- --vespyx-places-check), so a missing import remap shows up.
 ## --save=old builds the record like a pre-0.24 save (no dna, no sex, no care block); shimmer: a shimmer.
-## --glb=<abs path>: wear that .glb (a pre-swap one from git, say) instead of the species' own, to see old and new side by side.
+## --glb=<path>: wear that .glb (a pre-swap one from git, say) instead of the species' own: old and new side by side.
 ## --pack (with --shots-dir): this process exports the Windows pack of its own project, then runs this check in
 ## a second godot from that .pck alone for the fresh, old and shimmer saves, and prints their VESPYX lines.
 ## With a renderer and --shots-dir it also saves the whole window of each place. Fails on any OLD body.
@@ -45,12 +45,18 @@ func run(m: Node) -> void:
 	Save.d["active"] = rec["uid"]
 	Save.d["tutorial"]["home"] = true
 	Save.d["tutorial"]["day1_done"] = true
-	print("VESPYX_PLACES species=%s save=%s renderer=%s glb=%s has=%s" % [species, kind, DisplayServer.get_name(), BokiRig.PATH % [species, species], BokiRig.has(species)])
+	var glb: String = BokiRig.PATH % [species, species]
+	var head := "VESPYX_PLACES species=%s save=%s renderer=%s glb=%s has=%s"
+	print(head % [species, kind, DisplayServer.get_name(), glb, BokiRig.has(species)])
 	await _place("starter_pick", "hatch", {})
 	await _place("farm_home", "home", {})
 	await _place("party", "party", {})
-	await _place("results_caught", "results", {"extracted": true, "gems": 1, "seeds": {}, "caught": [rec], "knocks": 0, "damage": 1, "taken": 1, "kills": 0, "downs": 0, "deaths": 0, "revives": 0, "armor_tier": 1, "time": 60.0})
-	await _place("match_own_boki", "match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "demo_kin": species, "sandbox_demo": false, "kin_demo": true})
+	var result := {"extracted": true, "gems": 1, "seeds": {}, "caught": [rec], "knocks": 0, "damage": 1, "taken": 1,
+		"kills": 0, "downs": 0, "deaths": 0, "revives": 0, "armor_tier": 1, "time": 60.0}
+	await _place("results_caught", "results", result)
+	var match_opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+		"demo_kin": species, "sandbox_demo": false, "kin_demo": true}
+	await _place("match_own_boki", "match", match_opts)
 	await _reveal()
 	await _portrait(rec)
 	await _dex_card()
@@ -71,11 +77,13 @@ func _via_pack() -> void:
 	var pck := dir.path_join("win.pck")
 	var exp_out: Array = []
 	var rc := OS.execute(exe, ["--headless", "--path", proj, "--export-pack", "Windows", pck], exp_out, true)
-	print("VESPYX_PACK export rc=%d pck=%s bytes=%d" % [rc, pck, FileAccess.get_file_as_bytes(pck).size() if FileAccess.file_exists(pck) else -1])
+	var bytes := FileAccess.get_file_as_bytes(pck).size() if FileAccess.file_exists(pck) else -1
+	print("VESPYX_PACK export rc=%d pck=%s bytes=%d" % [rc, pck, bytes])
 	var worst := rc
 	for kind_s in ["fresh", "old", "shimmer"]:
 		var res: Array = []
-		var cmd := "cd /tmp && timeout 900 '%s' --main-pack '%s' -- --vespyx-places-check --save=%s --shots-dir='%s'" % [exe, pck, kind_s, dir]
+		var cmd := "cd /tmp && timeout 900 '%s' --main-pack '%s' -- --vespyx-places-check --save=%s --shots-dir='%s'"
+		cmd = cmd % [exe, pck, kind_s, dir]
 		var r := OS.execute("sh", ["-c", cmd], res, true)
 		worst = maxi(worst, r)
 		var full := String(res[0] if res.size() > 0 else "")
@@ -174,7 +182,8 @@ func _report(label: String) -> void:
 	var rigs := names.size()
 	var old := 0
 	for f in _bodies():
-		if f.get_node_or_null("BokiRig") == null and (f.get_node_or_null("Tail") != null or f.get_node_or_null("Legs") != null):
+		var primitive: bool = f.get_node_or_null("Tail") != null or f.get_node_or_null("Legs") != null
+		if f.get_node_or_null("BokiRig") == null and primitive:
 			old += 1
 	print("VESPYX_PLACES %s: rigs=%d (%s) old=%d" % [label, rigs, ",".join(names), old])
 	if old > 0:
@@ -182,7 +191,8 @@ func _report(label: String) -> void:
 
 
 func _bodies() -> Array:
-	return main.get_tree().root.find_children("Flex", "Node3D", true, false).filter(func(f): return f.get_parent() != null and f.get_parent().name == "Body")
+	var all := main.get_tree().root.find_children("Flex", "Node3D", true, false)
+	return all.filter(func(f): return f.get_parent() != null and f.get_parent().name == "Body")
 
 
 ## The species of every rigged Boki body in the tree.

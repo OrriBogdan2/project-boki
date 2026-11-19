@@ -48,6 +48,8 @@ jobs:
 
       - name: Export Windows and macOS
         run: |
+          # the build's commit, shown on the title screen next to the version, so a tester can tell which build they run
+          sed -i "s|^config/name=.*|&\nconfig/version=\"$(git log -1 --format=%h)\"|" project.godot
           godot --headless --path . --import || true
           mkdir -p ../build/win ../build/mac
           godot --headless --path . --export-release "Windows" ../build/win/ProjectBoki.exe
