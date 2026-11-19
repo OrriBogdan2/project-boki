@@ -914,7 +914,7 @@ The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, 
 | | E Stone Row | not seen | 1.0 | not seen |
 | | R Basalt Spine hold and drag | "she can move while aiming", no number | 1.0 | match (no slow shown) |
 | Sparkle `mage` (vireo.md, 110 px/s) | LMB | stood still in every LMB shot | 0.9 | not seen |
-| | RMB Storm Rod hold | did not walk in the hold | 1.0 | not seen |
+| | RMB Storm Rod hold | did not walk in the hold | 0.82 (`rmb.self_slow` 0.18, ramps in over 0.3 s) | owner 11-08 playtest |
 | | E Skycall hold and drag | never walked during a cast | 1.0 | not seen |
 | | Dash Wirerun hold | a crouch while held, the lane does not grow | no steering while held | match (no walk speed to compare) |
 | Grimble `dredge` (dredge.md, 220-250 px/s) | LMB Buckshot | "walks between shots", no number while firing | 0.8 (shared default) | not measured |

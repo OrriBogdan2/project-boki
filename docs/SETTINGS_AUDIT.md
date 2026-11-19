@@ -65,3 +65,9 @@ Main (or the last tab you used); its Controls entry opens Controls. No key was r
 `--settings-trim-check` asserts that every key still has a row, that each row saves to `settings.cfg` and that a fresh
 load keeps every value. Labels: "Anti-aliasing" is "Smooth edges", "Frame rate limit" is "Frame rate cap", "Frame rate"
 is "Show frame rate", "Height cues" is "Show heights clearly".
+
+**Search.** A box under the tab bar (`SettingsSearch`) lists the rows of every tab, behind "More..." and "More keys"
+too, whose label holds the typed text. The hits are the rows the tabs build (no copies), each with its tab's name beside
+it. Clicking a tab or pressing Esc clears the search (Esc with an empty box leaves Settings). `--settings-trim-check`
+covers the filter; `--settings-size-check` holds the panel's size inside the safe area at 720p and two ultrawides, with
+and without a search.
