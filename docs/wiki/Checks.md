@@ -66,6 +66,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
+| `--camp-layout-check` | No camp stands within 20 m of a Ways Out outpost (reads the layout's outposts only), over three seeds |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
