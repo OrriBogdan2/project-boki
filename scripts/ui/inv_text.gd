@@ -16,24 +16,32 @@ static func slot_label(slot: int) -> String:
 		return "%s  ·  %s" % [Gear.WORN_NAMES[slot], Gloves.key_cap(slot)]
 	return Gear.WORN_NAMES[slot]
 
+## "<lead> Frostmail  ·  Armor" (what sits in `slot` now), or where it would go when the slot is empty.
+static func worn_line(h: Hunter, slot: int, lead: String) -> Array:
+	var worn: Dictionary = h.gear[slot]
+	if worn.is_empty():
+		return ["Goes in your empty %s slot" % slot_label(slot), MUTED, SMALL]
+	var worn_name := Loot.name_of(Loot.gear(String(worn["id"]), int(worn["rar"])))
+	return ["%s %s  ·  %s" % [lead, worn_name, slot_label(slot)], MUTED, SMALL]
+
+## One line per number that changes from `worn` to gear `it`, green when better and red when worse.
+static func change_lines(it: Dictionary, worn: Dictionary) -> Array:
+	var out: Array = []
+	for c in GearCompare.changes(it, worn):
+		out.append([c[0], GOOD if c[1] else BAD])
+	if out.is_empty():
+		out.append(["Same numbers as what you wear", MUTED, SMALL])
+	return out
+
 ## Hover card for a piece of gear (not worn yet): what it does and how it differs from what you wear.
 static func compare(h: Hunter, it: Dictionary) -> Array:
 	var id := String(it["id"])
 	var rar := int(it["rar"])
 	var slot := GearCompare.slot_for(h, it)
-	var worn: Dictionary = h.gear[slot]
 	var out: Array = [[Loot.name_of(it), Loot.col_of(it)]]
 	out.append([Gear.stat_text(id, rar), INK])
-	if worn.is_empty():
-		out.append(["Goes in your empty %s slot" % slot_label(slot), MUTED, SMALL])
-	else:
-		var worn_name := Loot.name_of(Loot.gear(String(worn["id"]), int(worn["rar"])))
-		out.append(["Instead of %s  ·  %s" % [worn_name, slot_label(slot)], MUTED, SMALL])
-	var changes := GearCompare.changes(it, worn)
-	for c in changes:
-		out.append([c[0], GOOD if c[1] else BAD])
-	if changes.is_empty():
-		out.append(["Same numbers as what you wear", MUTED, SMALL])
+	out.append(worn_line(h, slot, "Instead of"))
+	out.append_array(change_lines(it, h.gear[slot]))
 	out.append([Gear.desc_of(id, rar), MUTED, SMALL])
 	return out
 
