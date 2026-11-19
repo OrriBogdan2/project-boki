@@ -168,6 +168,7 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],      # Training Grounds Hunters = a real match's
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
