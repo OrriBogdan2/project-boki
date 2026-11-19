@@ -49,7 +49,9 @@ func _input(ev: InputEvent) -> void:
 		return
 	if Overlay.listening != "":
 		return      # (a right click being bound to an action in Settings > Controls)
-	if not panel.get_global_rect().has_point(panel.get_global_mouse_position()):
+	# (the click's own position, in the panel's frame: the pointer can lag a synthetic or remapped click)
+	var at: Vector2 = panel.get_global_transform_with_canvas().affine_inverse() * mb.position
+	if not Rect2(Vector2.ZERO, panel.size).has_point(at):
 		_close(ev)
 
 ## Esc and the pad's B, after the screens' own uses of them (a key being rebound, a confirm box).
