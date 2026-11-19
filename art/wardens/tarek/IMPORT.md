@@ -80,7 +80,7 @@ sash at the hip, so every arms-up clip pulled a wing of apron and trouser after 
 with the sash/beads are duplicated (119 glb vertices; every existing vertex keeps its position, normal, UV and colour
 bytes; no triangle is deleted), so the fist and gauntlet are their own skin island; each opening is closed on both sides
 by a flat cap (70 triangles, 60,069 total) coloured from the texture just around it. Weights: the fist/gauntlet island
-keeps only arm bones plus its own hips share, smoothed inside the island; the knuckles (skin-coloured) go with the hand,
+keeps only arm bones plus its own hips share, smoothed inside the island; the two knuckle shells (135 verts) that touched only the sash at rest ride the sash (11-19 retry: their seam verts take the weights of the sash verts they sit on, the inside is a smooth fill, so they weld back to one skin and never float; following hand.R left them 9-24 cm off the gauntlet),
 sash and trouser strips stay on the body. Arm weight taken off body skin (right hand and the stone left arm) goes to hips
 at the sash and back to the leg bones lower down (0.6-1.0 m ramp: hips-held trousers folded black behind the knee in
 crouches); shin weight above the knee fades into the thigh; the skin round the old contact is smoothed (10 cm). Skeleton, bone names, clips, materials and textures are unchanged.
