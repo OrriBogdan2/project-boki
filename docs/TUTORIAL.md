@@ -6,6 +6,8 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 60 s wall, headless.
+
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
 Time for a person). **Words** = the banner line plus the plain-words line under it (screens: every visible label and button,
