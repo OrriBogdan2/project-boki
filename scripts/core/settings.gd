@@ -605,9 +605,10 @@ const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
 const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
 
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
-## training-only actions, the lobby's push to talk).
+## training-only actions, the lobby's push to talk; Boki key and Summon: a wisp takes no orders, so C is Summon
+## on a wisp and send / recall on a Boki that is out).
 const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
-		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"], ["goals", "scout"]]
+		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"], ["goals", "scout"], ["throw", "summon"]]
 
 ## Two actions may share a key only when they never run in the same place: one at home, the other in a match
 ## (or a pair listed in SHARED_OK).
