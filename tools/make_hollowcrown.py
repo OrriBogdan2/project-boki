@@ -1350,7 +1350,7 @@ def main():
     print("train loop %.0f m, %d stops, a lap %.0f s" % (loop, len(stops), sum(l[2] for l in legs)))
     for (nm, isl, d), (a, b, ride, run) in zip(stops, legs):
         print("train %-12s (%-9s pier %4.1f m) -> %-12s ride %3.0f s, run %s" % (nm, isl, d, b, ride, "%.0f s" % run if run < 1e9 else "no way on foot"))
-    out = dict(id="hollowcrown", name="The Hollow Crown", size=SIZE, seed=5150, hand=True,
+    out = dict(id="hollowcrown", name="The Hollow Crown", size=SIZE, seed=5150, legendaries=["cairnback", "hivara"], hand=True,
                notes="Hand-made expedition map (tools/make_hollowcrown.py; the format is described there; the design is "
                      "docs/MAP_V2.md). A broken continent round the Hollow: wide joined land in the west, broken high "
                      "ground in the east, Stormbreak's shards in the void between, the walled Crown on its north rim; "
