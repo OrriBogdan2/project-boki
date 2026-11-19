@@ -4,10 +4,11 @@ extends RefCounted
 ## Never touches the save.
 
 const AKCheck := preload("res://tools/archetype_check.gd")
-const STEPS := 4                 # 60 Hz steps per 15 fps frame
+const STEPS := 4  # 60 Hz steps per 15 fps frame
 const FRAMES := 24
 
 var main: Node
+
 
 func run(mn: Node, _who := "") -> void:
 	main = mn
@@ -19,6 +20,7 @@ func run(mn: Node, _who := "") -> void:
 	for c in ["tap", "hold", "ult_sprint", "ult_jump"]:
 		await _case(c, dir.path_join(c))
 	main.get_tree().quit()
+
 
 func _case(c: String, out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
@@ -44,10 +46,15 @@ func _case(c: String, out: String) -> void:
 			m.step(Match.DT)
 		await _frame(m)
 		m.get_viewport().get_texture().get_image().save_png(out.path_join("f%03d.png" % n))
-	print("KCLIP %s %d frames, foe took %.0f, vel %s -> %s" % [c, FRAMES, A.dmg(T),
-			K.riposte.vel_before, K.riposte.vel_after])
+	print(
+		(
+			"KCLIP %s %d frames, foe took %.0f, vel %s -> %s"
+			% [c, FRAMES, A.dmg(T), K.riposte.vel_before, K.riposte.vel_after]
+		)
+	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 ## What the player does at step `i` of the case.
 func _drive(c: String, A, m: Match, P: Hunter, K: JuggernautKit, i: int) -> void:
@@ -71,6 +78,7 @@ func _drive(c: String, A, m: Match, P: Hunter, K: JuggernautKit, i: int) -> void
 			if i == 20:
 				K.cd["x"] = 0.0
 				K.riposte.start()
+
 
 func _frame(m: Match) -> void:
 	var span := STEPS * Match.DT

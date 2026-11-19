@@ -6,18 +6,21 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const DT := 1.0 / 60.0
-const TOL := 0.04              # s: a 30 fps key either side of the kit's hit
-const MOVES := ["bul_throw", "bul_recall", "bul_smash", "bul_guard", "bul_whirl", "bul_lumber", "bul_mend",
-		"bul_ult_slam"]
+const TOL := 0.04  # s: a 30 fps key either side of the kit's hit
+const MOVES := [
+	"bul_throw", "bul_recall", "bul_smash", "bul_guard", "bul_whirl", "bul_lumber", "bul_mend", "bul_ult_slam"
+]
 var A: AKCheck
-var beats := {}                # kmove -> {len, cock, peak, settle, vmax, bar}
-var leads := {}                # kmove -> its "lead" (s skipped at the start)
-var fades := {}                # kmove -> s it blends in over
+var beats := {}  # kmove -> {len, cock, peak, settle, vmax, bar}
+var leads := {}  # kmove -> its "lead" (s skipped at the start)
+var fades := {}  # kmove -> s it blends in over
+
 
 func run(a) -> void:
 	A = a
 	clips()
 	await kit()
+
 
 # ------------------------------------------------------------------ the clips, offline
 ## Sweeps each kmove clip at 60 Hz through an AnimationPlayer on the clips' library (no blend) and tracks the
@@ -51,8 +54,11 @@ func clips() -> void:
 		while t < length:
 			ap.seek(t, true)
 			sk.force_update_all_bone_transforms()
-			var p := sk.get_bone_global_pose(shield).origin if km == "bul_guard" \
-					else sk.get_bone_global_pose(hb) * tip.position
+			var p := (
+				sk.get_bone_global_pose(shield).origin
+				if km == "bul_guard"
+				else sk.get_bone_global_pose(hb) * tip.position
+			)
 			pts.append(m.to_local(sk.global_transform * p))
 			t += DT
 		var v: Array[float] = []
@@ -62,9 +68,14 @@ func clips() -> void:
 		leads[km] = float(mv.get("lead", 0.0))
 		fades[km] = float(mv.get("fade", WardenClips.FADE))
 		var b: Dictionary = beats[km]
-		print("BEAT %-13s len %.2f cock %.2f peak %.2f settle %.2f vmax %4.1f lead %s  |%s|" % [km, length,
-				b["cock"], b["peak"], b["settle"], b["vmax"], str(mv.get("lead", "-")), b["bar"]])
+		print(
+			(
+				"BEAT %-13s len %.2f cock %.2f peak %.2f settle %.2f vmax %4.1f lead %s  |%s|"
+				% [km, length, b["cock"], b["peak"], b["settle"], b["vmax"], str(mv.get("lead", "-")), b["bar"]]
+			)
+		)
 	m.free()
+
 
 ## From the tracked point's speed per frame: cock (the last quiet frame before the fastest), peak, settle (quiet
 ## for 0.1 s).
@@ -91,6 +102,7 @@ func _beats(v: Array[float], length: float) -> Dictionary:
 		bar += str(mini(9, int(9.0 * sqrt(v[i] / maxf(vmax, 0.001)))))
 	return {"len": length, "cock": ic * DT, "peak": (ip + 1) * DT, "settle": settle * DT, "vmax": vmax, "bar": bar}
 
+
 # ------------------------------------------------------------------ the kit, in a match
 ## Steps until `ev` holds (or `limit` s): returns [age of the kit's clip when it did, its anim_id, s since the press].
 func _until(m: Match, K: BulwarkKit, ev: Callable, limit: float, each := Callable()) -> Array:
@@ -104,16 +116,21 @@ func _until(m: Match, K: BulwarkKit, ev: Callable, limit: float, each := Callabl
 			return [m.time - K.anim_at, K.anim_id, t]
 	return [-1.0, K.anim_id, t]
 
+
 func _ev(what: String, r: Array) -> void:
 	print("EVENT %-18s at %.3f into %s (%.2f s after the press)" % [what, r[0], r[1], r[2]])
+
 
 ## The clip's beat (`at`: "peak" or "settle", less the lead) sits on the kit's moment, within TOL.
 func _on_beat(km: String, at: String, r: Array) -> void:
 	var b: Dictionary = beats.get(km, {})
 	var clip_at := float(b.get(at, -1.0)) - float(leads.get(km, 0.0))
-	A.ok("bjorn anim: %s %s on the kit's moment" % [km, at], r[1] == km and absf(clip_at - float(r[0])) <= TOL,
-			"clip %.2f - lead %.2f = %.2f vs kit %.3f into %s" % [b.get(at, -1.0), leads.get(km, 0.0), clip_at,
-			r[0], r[1]])
+	A.ok(
+		"bjorn anim: %s %s on the kit's moment" % [km, at],
+		r[1] == km and absf(clip_at - float(r[0])) <= TOL,
+		"clip %.2f - lead %.2f = %.2f vs kit %.3f into %s" % [b.get(at, -1.0), leads.get(km, 0.0), clip_at, r[0], r[1]]
+	)
+
 
 func _fresh(m: Match, P: Hunter, K: BulwarkKit, home: Vector3, T: Hunter) -> void:
 	P.inp["fire"] = false
@@ -132,6 +149,7 @@ func _fresh(m: Match, P: Hunter, K: BulwarkKit, home: Vector3, T: Hunter) -> voi
 	T.hp = T.max_hp
 	m.step(DT)
 	A.aim_at(P, T.pos)
+
 
 func kit() -> void:
 	var r := A.setup("bulwark", 7.0)
@@ -168,7 +186,7 @@ func kit() -> void:
 	P.inp["sec_hold"] = true
 	K.press_rmb()
 	e = _until(m, K, func(): return not K.wall.is_empty(), 0.5, func(): P.inp["sec_hold"] = true)
-	_ev("aegis up", e)          # (the arm settles 0.07 s into bul_guard: inside the 0.1 s blend, kept)
+	_ev("aegis up", e)  # (the arm settles 0.07 s into bul_guard: inside the 0.1 s blend, kept)
 	P.inp["sec_hold"] = false
 	# Shift: the 360 Smash spin hit
 	_fresh(m, P, K, home, T)
@@ -184,6 +202,9 @@ func kit() -> void:
 	_ev("ult slam", e)
 	# (the hammer meets the ground where it stops: the clip's settle, not its fastest frame)
 	_on_beat("bul_ult_slam", "settle", e)
-	A.ok("bjorn anim: bul_ult_slam blends in inside a 30 fps key", fades["bul_ult_slam"] <= TOL,
-			"fade %.2f" % fades["bul_ult_slam"])
+	A.ok(
+		"bjorn anim: bul_ult_slam blends in inside a 30 fps key",
+		fades["bul_ult_slam"] <= TOL,
+		"fade %.2f" % fades["bul_ult_slam"]
+	)
 	await A.done(m)

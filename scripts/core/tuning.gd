@@ -3,6 +3,7 @@ class_name Tuning
 
 static var _all: Dictionary = {}
 
+
 ## One system's numbers, e.g. Tuning.of("lace")["perfect_window_s"].
 static func of(section: String) -> Dictionary:
 	if _all.is_empty():

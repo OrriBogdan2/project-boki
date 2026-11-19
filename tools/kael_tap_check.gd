@@ -5,6 +5,7 @@ extends RefCounted
 const AKCheck := preload("res://tools/archetype_check.gd")
 var A: AKCheck
 
+
 func run(main_node: Node, _who := "") -> void:
 	A = AKCheck.new()
 	A.main = main_node
@@ -26,8 +27,11 @@ func run(main_node: Node, _who := "") -> void:
 	A.tap(m, P)
 	A.step(m, 0.7)
 	var full := float(K.rmb_def()["slam"]["dmg"])
-	A.ok("kael tap with the Smash resting: a lighter strike lands",
-			A.dmg(T) > 1.0 and A.dmg(T) < full * 0.95, "took %.0f of %.0f" % [A.dmg(T), full])
+	A.ok(
+		"kael tap with the Smash resting: a lighter strike lands",
+		A.dmg(T) > 1.0 and A.dmg(T) < full * 0.95,
+		"took %.0f of %.0f" % [A.dmg(T), full]
+	)
 	A.tap(m, P)
 	A.step(m, 0.1)
 	A.ok("kael tap strike: its cooldown holds a second tap", K.slam_w.is_empty() and float(K.cd["tap"]) > 0.0)
@@ -44,8 +48,9 @@ func run(main_node: Node, _who := "") -> void:
 	P.ak.use_e()
 	A.aim_at(P, T.pos)
 	A.step(m, 1.0)
-	A.ok("kael RMB aim follows the cursor live during E (90 deg off the throw)", A.dmg(T) >= 20.0,
-			"took %.0f" % A.dmg(T))
+	A.ok(
+		"kael RMB aim follows the cursor live during E (90 deg off the throw)", A.dmg(T) >= 20.0, "took %.0f" % A.dmg(T)
+	)
 	# 180 deg off the throw (behind him): the strike goes there too
 	K.warchain.snap()
 	A.fresh(T)
@@ -58,8 +63,9 @@ func run(main_node: Node, _who := "") -> void:
 	P.ak.use_e()
 	A.aim_at(P, T.pos)
 	A.step(m, 1.0)
-	A.ok("kael RMB aim follows the cursor live during E (180 deg, behind him)", A.dmg(T) >= 20.0,
-			"took %.0f" % A.dmg(T))
+	A.ok(
+		"kael RMB aim follows the cursor live during E (180 deg, behind him)", A.dmg(T) >= 20.0, "took %.0f" % A.dmg(T)
+	)
 	# the ult keeps momentum
 	K.warchain.snap()
 	P.teleport(home)
@@ -67,29 +73,38 @@ func run(main_node: Node, _who := "") -> void:
 	K.cd["x"] = 0.0
 	K.riposte.start()
 	var sp := Vector2(P.vel.x, P.vel.z).length()
-	A.ok("kael ult keeps horizontal momentum", absf(sp - 6.0 * float(tn["ult_carry_k"])) < 0.1,
-			"before %s after %s" % [K.riposte.vel_before, K.riposte.vel_after])
+	A.ok(
+		"kael ult keeps horizontal momentum",
+		absf(sp - 6.0 * float(tn["ult_carry_k"])) < 0.1,
+		"before %s after %s" % [K.riposte.vel_before, K.riposte.vel_after]
+	)
 	A.step(m, 0.1)
 	A.ok("kael ult: still moving 0.1s in", Vector2(P.vel.x, P.vel.z).length() > 1.0)
 	K.riposte.drop()
 	P.vel = Vector3(0, 3.0, 4.0)
 	K.riposte.start()
-	A.ok("kael ult adds a vertical bonus on upward speed", absf(P.vel.y - (3.0 + float(tn["ult_up_bonus_mps"]))) < 0.05,
-			"vy %.2f" % P.vel.y)
+	A.ok(
+		"kael ult adds a vertical bonus on upward speed",
+		absf(P.vel.y - (3.0 + float(tn["ult_up_bonus_mps"]))) < 0.05,
+		"vy %.2f" % P.vel.y
+	)
 	K.riposte.drop()
 	P.vel = Vector3(0, 3.0, 4.0)
-	P.lfloat = {"t": 0.0}      # (mid-mantle: a ledge rise is running)
+	P.lfloat = {"t": 0.0}  # (mid-mantle: a ledge rise is running)
 	K.riposte.start()
 	A.step(m, 0.05)
-	A.ok("kael ult mid-mantle: the ledge rise hands over, the bonus stays", P.lfloat.is_empty() and P.vel.y > 3.0,
-			"vy %.2f" % P.vel.y)
+	A.ok(
+		"kael ult mid-mantle: the ledge rise hands over, the bonus stays",
+		P.lfloat.is_empty() and P.vel.y > 3.0,
+		"vy %.2f" % P.vel.y
+	)
 	K.riposte.drop()
 	# tether: a Lunge aimed away past the length breaks it; sideways within range keeps it
 	A.fresh(T)
 	P.teleport(home)
 	T.teleport(home + Vector3(5.0, 0, 0))
 	K.cd["e"] = 0.0
-	K.e_def()["tether_max"] = 7.5      # (short, so one Lunge can outrun it)
+	K.e_def()["tether_max"] = 7.5  # (short, so one Lunge can outrun it)
 	A.aim_at(P, T.pos)
 	P.ak.use_e()
 	A.step(m, 0.4)
@@ -103,7 +118,10 @@ func run(main_node: Node, _who := "") -> void:
 	A.aim_at(P, home + Vector3(-9.0, 0, 6.0))
 	K._lunge(1.0, false)
 	A.step(m, 0.8)
-	A.ok("kael lunge backward past the length breaks the tether", not K.warchain.hooked() and K.warchain.breaks >= 1,
-			"breaks %d" % K.warchain.breaks)
+	A.ok(
+		"kael lunge backward past the length breaks the tether",
+		not K.warchain.hooked() and K.warchain.breaks >= 1,
+		"breaks %d" % K.warchain.breaks
+	)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)

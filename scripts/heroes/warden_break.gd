@@ -6,23 +6,24 @@ extends RefCounted
 ## match, the Training Area or at home). Any key, button or move, a hit, a shot or an ability cancels it at once.
 
 const RULES := "idle_breaks"
-const WAIT := 6.0            # s of calm standing before a break
-const GAP := 6.0             # s of calm added after a break before the next one
-const COMBAT_FREE := 6.0     # s since the last shot, ability or hit
-const STILL := 0.25          # m/s: below this he is standing
+const WAIT := 6.0  # s of calm standing before a break
+const GAP := 6.0  # s of calm added after a break before the next one
+const COMBAT_FREE := 6.0  # s since the last shot, ability or hit
+const STILL := 0.25  # m/s: below this he is standing
 const FADE_OUT_RATE := 14.0  # 1/s: a cancelled break unwinds in about 0.07 s
 ## State keys that, when set, mean the hunter is busy with something (not standing idle).
 const BUSY_FLAGS := ["gliding", "rolling", "downed", "stun", "reviving", "dead", "statue"]
-const BUSY_TIMERS := ["mantle", "stomp", "drink", "base"]      # -1 while off
+const BUSY_TIMERS := ["mantle", "stomp", "drink", "base"]  # -1 while off
 
 var root: Node3D
 var skel: Skeleton3D
 var dur := 0.0
-var tracks: Array = []       # {bone, rot (Vector3, rad about model x/y/z), from, to, in, out, beats}, parents first
-var calm_t := 0.0            # s standing calm; below 0 is the gap after a break
-var play_t := -1.0           # s into the break, -1 when none
-var fade := 0.0              # how much of the break is laid on the body
-var shown_u := 0.0           # the break's progress last frame (its pose while it fades out)
+var tracks: Array = []  # {bone, rot (Vector3, rad about model x/y/z), from, to, in, out, beats}, parents first
+var calm_t := 0.0  # s standing calm; below 0 is the gap after a break
+var play_t := -1.0  # s into the break, -1 when none
+var fade := 0.0  # how much of the break is laid on the body
+var shown_u := 0.0  # the break's progress last frame (its pose while it fades out)
+
 
 ## The break for a Hunter (archetype id), or null when its data has none.
 static func make(model: Node3D, sk: Skeleton3D, arch: String) -> WardenBreak:
@@ -40,11 +41,19 @@ static func make(model: Node3D, sk: Skeleton3D, arch: String) -> WardenBreak:
 	b.tracks.sort_custom(func(x, y): return b._depth(int(x["bone"])) < b._depth(int(y["bone"])))
 	return b
 
+
 func _track(bone: int, tr: Dictionary) -> Dictionary:
 	var rot: Array = tr["rot"]
-	return {"bone": bone, "rot": Vector3(rot[0], rot[1], rot[2]), "from": float(tr.get("from", 0.0)),
-			"to": float(tr.get("to", 1.0)), "in": float(tr.get("in", 0.3)), "out": float(tr.get("out", 0.3)),
-			"beats": float(tr.get("beats", 0.0))}
+	return {
+		"bone": bone,
+		"rot": Vector3(rot[0], rot[1], rot[2]),
+		"from": float(tr.get("from", 0.0)),
+		"to": float(tr.get("to", 1.0)),
+		"in": float(tr.get("in", 0.3)),
+		"out": float(tr.get("out", 0.3)),
+		"beats": float(tr.get("beats", 0.0))
+	}
+
 
 func _depth(bone: int) -> int:
 	var n := 0
@@ -53,13 +62,16 @@ func _depth(bone: int) -> int:
 		n += 1
 	return n
 
+
 func playing() -> bool:
 	return play_t >= 0.0
+
 
 ## A key, button or click: whatever the break was doing stops.
 func press() -> void:
 	calm_t = 0.0
 	play_t = -1.0
+
 
 ## One frame, after the clips posed the bones. `s` is the HunterAnim state.
 func step(dt: float, s: Dictionary) -> void:
@@ -84,27 +96,30 @@ func step(dt: float, s: Dictionary) -> void:
 	if fade > 0.0:
 		_lay()
 
+
 func _standing(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	if Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true)):
 		return false
 	if float(s.get("crouch", 0.0)) > 0.05 or String(s.get("emote", "")) != "" or String(s.get("kmove", "")) != "":
 		return false
-	if String(s.get("tool", "")) != "" or String(s.get("act", "")) != "":     # ("act": a home verb or an open channel)
+	if String(s.get("tool", "")) != "" or String(s.get("act", "")) != "":  # ("act": a home verb or an open channel)
 		return false
 	for k in BUSY_FLAGS:
-		if s.get(k, false):      # (a flag, or "act": the home verb's name, "" when none)
+		if s.get(k, false):  # (a flag, or "act": the home verb's name, "" when none)
 			return false
 	for k in BUSY_TIMERS:
 		if float(s.get(k, -1.0)) >= 0.0:
 			return false
 	return true
 
+
 func _combat_free(s: Dictionary) -> bool:
 	for k in ["fired", "cast", "hit_t"]:
 		if float(s.get(k, 99.0)) < COMBAT_FREE:
 			return false
 	return true
+
 
 ## How far a track is turned at progress `u` (0..1 of the break): eased in and out, pulsed `beats` times when set.
 static func amount(tr: Dictionary, u: float) -> float:
@@ -116,6 +131,7 @@ static func amount(tr: Dictionary, u: float) -> float:
 	if float(tr["beats"]) > 0.0:
 		a *= 0.5 - 0.5 * cos(w * float(tr["beats"]) * TAU)
 	return a
+
 
 ## Turns each bone about its own head, the angles taken in the model's frame.
 func _lay() -> void:

@@ -9,12 +9,15 @@ const GLB := "res://art/wardens/cinder/cinder.glb"
 var ak = null
 var ok_fn: Callable
 
+
 func _init(arch_check, ok_cb: Callable) -> void:
 	ak = arch_check
 	ok_fn = ok_cb
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
+
 
 func run() -> void:
 	var r: Array = ak.setup("ashwick", 16.0, "", true)
@@ -53,13 +56,15 @@ func run() -> void:
 	var fly_at := float((KMovesPair.MOVES["lw_jet"]["keys"] as Array)[2][0]) - (m.time - K.anim_at)
 	ok(
 		"timing: Flue Flight is flying 0.1 s after the press ([F] f25 burst, flying from f26)",
-		K.jet.running() and K.anim_id == "lw_jet" and absf(fly_at - 0.1) < 0.02, "fly pose at %.2f s" % fly_at
+		K.jet.running() and K.anim_id == "lw_jet" and absf(fly_at - 0.1) < 0.02,
+		"fly pose at %.2f s" % fly_at
 	)
 	ak.step(m, 0.3)
 	HunterKeys.ult_pressed(P)
 	ok(
 		"timing: the landing has no stop, her legs walk on out of it ([F] f39-f41)",
-		K.anim_id == "lw_land" and km["lw_land"].get("upper") == "moving", "%s %s" % [K.anim_id, km["lw_land"]]
+		K.anim_id == "lw_land" and km["lw_land"].get("upper") == "moving",
+		"%s %s" % [K.anim_id, km["lw_land"]]
 	)
 	# Furnace Cloak: the arms stay flung wide about 0.2 s, settled by 0.4 s, legs free while she walks
 	var ck: Array = KMovesPair.MOVES["as_cloak"]["keys"]
@@ -67,8 +72,13 @@ func run() -> void:
 	var end := float(ck[-1][0])
 	ok(
 		"timing: the cloak's arms stay flung wide ~0.2 s ([F] 0181-0182), settled by 0.4 s",
-		wide >= 0.18 and end <= 0.4 and absf(float(lens["cloak"]) - end) < 0.04 and K.CLOAK_POSE_T < end
-			and km["as_cloak"].get("upper") == "moving",
+		(
+			wide >= 0.18
+			and end <= 0.4
+			and absf(float(lens["cloak"]) - end) < 0.04
+			and K.CLOAK_POSE_T < end
+			and km["as_cloak"].get("upper") == "moving"
+		),
 		"wide %.2f s, end %.2f s, clip %.2f s" % [wide, end, float(lens["cloak"])]
 	)
 	# the run: a footfall every 0.15-0.2 s at her run speed; the walk shares the cycle (feet in phase in the blend)
@@ -79,6 +89,7 @@ func run() -> void:
 		step >= 0.15 and step <= 0.2 and absf(float(lens["walk_f"]) - float(lens["run_f"])) < 0.001,
 		"step %.3f s, walk %.3f run %.3f" % [step, float(lens["walk_f"]), float(lens["run_f"])]
 	)
+
 
 ## The lengths (s) of these clips in her glb as Godot imported it (-1: missing).
 static func _clip_lens(names: Array) -> Dictionary:

@@ -10,39 +10,67 @@ extends "res://tools/idle_shots.gd"
 const ART := {"gunslinger": "vex", "dolm": "tarek", "dredge": "dredge", "mage": "ryzz"}
 # (x, z) off the facing
 const DIRS := {"f": Vector2(0, -1), "b": Vector2(0, 1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
-const SETTLE := 30              # frames on the gait before anything starts
-const LAYER_AT := 0.2           # s into the run the layer comes on
-const LAYER_ON := 1.0           # s it stays on
-const TAIL := 0.6               # s filmed after it goes off
+const SETTLE := 30  # frames on the gait before anything starts
+const LAYER_AT := 0.2  # s into the run the layer comes on
+const LAYER_ON := 1.0  # s it stays on
+const TAIL := 0.6  # s filmed after it goes off
 const FILM_FRAMES := 8
-const SHOT_GAP := 0.12          # s between a held rifle's shots (the quill rifle's rate)
-const AIM := 0.35               # rad: the aim pitch's clamp, held
+const SHOT_GAP := 0.12  # s between a held rifle's shots (the quill rifle's rate)
+const AIM := 0.35  # rad: the aim pitch's clamp, held
 
 ## id -> layers: kmove (a held move's id; "cycle" s then it restarts, else it runs on), "hit", or "aim" (rad).
 const LAYERS := {
-	"gunslinger": {
-		"shoot": {"kmove": "gunslinger_lmb", "cycle": SHOT_GAP}, "rmb": {"kmove": "gunslinger_rmb"},
-		"knock": {"kmove": "gunslinger_knock"}, "flinch": {"hit": true},
-		"aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
-	"dolm": {
-		"wind": {"kmove": "breah_wind"}, "boulder": {"kmove": "breah_throw"}, "punch": {"kmove": "breah_punch"},
-		"flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
-	"dredge": {
-		"shot": {"kmove": "dr_shot"}, "throw": {"kmove": "dr_throw"}, "reel": {"kmove": "dr_reel"},
-		"blast": {"kmove": "dr_blast"}, "flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
-	"mage": {
-		"cast": {"kmove": "mage_lmb_l", "cycle": SHOT_GAP * 2.0}, "hold": {"kmove": "mage_rmb_hold"},
-		"e": {"kmove": "mage_e"}, "flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
+	"gunslinger":
+	{
+		"shoot": {"kmove": "gunslinger_lmb", "cycle": SHOT_GAP},
+		"rmb": {"kmove": "gunslinger_rmb"},
+		"knock": {"kmove": "gunslinger_knock"},
+		"flinch": {"hit": true},
+		"aim_up": {"aim": AIM},
+		"aim_down": {"aim": -AIM}
+	},
+	"dolm":
+	{
+		"wind": {"kmove": "breah_wind"},
+		"boulder": {"kmove": "breah_throw"},
+		"punch": {"kmove": "breah_punch"},
+		"flinch": {"hit": true},
+		"aim_up": {"aim": AIM},
+		"aim_down": {"aim": -AIM}
+	},
+	"dredge":
+	{
+		"shot": {"kmove": "dr_shot"},
+		"throw": {"kmove": "dr_throw"},
+		"reel": {"kmove": "dr_reel"},
+		"blast": {"kmove": "dr_blast"},
+		"flinch": {"hit": true},
+		"aim_up": {"aim": AIM},
+		"aim_down": {"aim": -AIM}
+	},
+	"mage":
+	{
+		"cast": {"kmove": "mage_lmb_l", "cycle": SHOT_GAP * 2.0},
+		"hold": {"kmove": "mage_rmb_hold"},
+		"e": {"kmove": "mage_e"},
+		"flinch": {"hit": true},
+		"aim_up": {"aim": AIM},
+		"aim_down": {"aim": -AIM}
+	},
 }
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	var ids: Array = LAYERS.keys()
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
 	if out != "":
 		if main.get("fade") != null:
 			main.fade.reveal(0.01)
@@ -54,6 +82,7 @@ func run(main: Node) -> void:
 		await _hero(String(id), out)
 	print("LAYER_VERIFY_DONE")
 	tree.quit()
+
 
 func _hero(id: String, out: String) -> void:
 	var lc: Dictionary = WardenClips.data(ART[id])["loco"]
@@ -69,6 +98,7 @@ func _hero(id: String, out: String) -> void:
 				if layers[ln].has("kmove"):
 					solo = await _take(id, layers[ln], DIRS[dn] * speed, "", true)
 				_report(id, "%s %s_%s" % [ln, gait, dn], rec, plain, solo, layers[ln])
+
 
 ## One run of LAYER_AT + LAYER_ON + TAIL s: per frame the feet, hands and head (skeleton-local), the arm's turn.
 func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool) -> Array:
@@ -94,7 +124,7 @@ func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool)
 	var rec: Array = []
 	for i in steps:
 		_drive(s, layer, i * DT - LAYER_AT, m)
-		if solo:      # (the move's own clip, whole body: what its hand does by itself)
+		if solo:  # (the move's own clip, whole body: what its hand does by itself)
 			clips.force = {}
 			if s.has("kmove"):
 				var clip := String(clips.d["kmoves"][s["kmove"]]["clip"])
@@ -113,9 +143,11 @@ func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool)
 	m.free()
 	return rec
 
+
 func _at(sk: Skeleton3D, bone: String) -> Vector3:
 	var bi := WardenSkeleton.find(sk, bone)
 	return sk.get_bone_global_pose(bi).origin if bi >= 0 else Vector3.ZERO
+
 
 ## The state at t s from the layer coming on (negative before it, past LAYER_ON after it).
 func _drive(s: Dictionary, layer: Dictionary, t: float, m: Node3D) -> void:
@@ -134,6 +166,7 @@ func _drive(s: Dictionary, layer: Dictionary, t: float, m: Node3D) -> void:
 		s["kmove_t"] = fmod(t, float(layer["cycle"])) if layer.has("cycle") else t
 		s["fired"] = s["kmove_t"]
 
+
 func _report(id: String, what: String, rec: Array, plain: Array, solo: Array, layer: Dictionary) -> void:
 	var legs := 0.0
 	var pop := 0.0
@@ -146,7 +179,7 @@ func _report(id: String, what: String, rec: Array, plain: Array, solo: Array, la
 		for j in 3:
 			var step := (rec[i]["pts"][j] as Vector3).distance_to(rec[i - 1]["pts"][j])
 			var calm := (plain[i]["pts"][j] as Vector3).distance_to(plain[i - 1]["pts"][j])
-			for k in range(maxi(i - 2, 1), mini(i + 3, solo.size())):      # (a frame or two either way: the fade)
+			for k in range(maxi(i - 2, 1), mini(i + 3, solo.size())):  # (a frame or two either way: the fade)
 				calm = maxf(calm, (solo[k]["pts"][j] as Vector3).distance_to(solo[k - 1]["pts"][j]))
 			if step - calm > pop:
 				pop = step - calm
@@ -155,5 +188,9 @@ func _report(id: String, what: String, rec: Array, plain: Array, solo: Array, la
 	if layer.has("cycle"):
 		var i := rec.size() - 1
 		left = rad_to_deg((rec[i]["arm"] as Quaternion).angle_to(plain[i]["arm"]))
-	print("LAYER %s %s: legs off %.3f m, hand/head jump +%.3f m @%.2f s, arm left %.2f deg"
-			% [id, what, legs, pop, at, left])
+	print(
+		(
+			"LAYER %s %s: legs off %.3f m, hand/head jump +%.3f m @%.2f s, arm left %.2f deg"
+			% [id, what, legs, pop, at, left]
+		)
+	)

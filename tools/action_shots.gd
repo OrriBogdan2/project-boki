@@ -12,6 +12,7 @@ var tree: SceneTree
 var cam: Camera3D
 var px := 480
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
@@ -21,13 +22,20 @@ func run(main: Node) -> void:
 	var fov := 30.0
 	var grab: Array = []
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--warden="): id = a.substr(9)
-		if a.begins_with("--variant="): variant = a.substr(10)
-		if a.begins_with("--state="): which = a.substr(8)
-		if a.begins_with("--size="): px = int(a.substr(7))
-		if a.begins_with("--fov="): fov = float(a.substr(6))
-		if a.begins_with("--grab="): grab = Array(a.substr(7).split(",", false)).map(func(x): return int(x))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--warden="):
+			id = a.substr(9)
+		if a.begins_with("--variant="):
+			variant = a.substr(10)
+		if a.begins_with("--state="):
+			which = a.substr(8)
+		if a.begins_with("--size="):
+			px = int(a.substr(7))
+		if a.begins_with("--fov="):
+			fov = float(a.substr(6))
+		if a.begins_with("--grab="):
+			grab = Array(a.substr(7).split(",", false)).map(func(x): return int(x))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
@@ -69,9 +77,12 @@ func run(main: Node) -> void:
 		while t < float(lens[st]):
 			var s := {"vel": Vector3.ZERO, "face": yaw, "grounded": true, "crouch": 0.0, "fired": 99.0}
 			match st:
-				"stomp": s["stomp"] = fmod(t, cycle) / cycle
-				"revive": s["reviving"] = true
-				"drink": s["drink"] = t / UtilityUse.channel("tonic", "time")
+				"stomp":
+					s["stomp"] = fmod(t, cycle) / cycle
+				"revive":
+					s["reviving"] = true
+				"drink":
+					s["drink"] = t / UtilityUse.channel("tonic", "time")
 			anim.update(DT, s)
 			sync.call("_process", DT)
 			t += DT
@@ -84,16 +95,19 @@ func run(main: Node) -> void:
 	print("ANIM_SHOTS_DONE")
 	tree.quit()
 
+
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
 	tree.root.get_texture().get_image().save_png(path)
+
 
 func _stage(main: Node) -> Node3D:
 	var holder := Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
@@ -106,6 +120,7 @@ func _stage(main: Node) -> Node3D:
 	holder.add_child(cam)
 	cam.make_current()
 	return holder
+
 
 ## The world box of the meshes shown under n (zero size: none).
 func _shown_box(n: Node) -> AABB:

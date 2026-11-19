@@ -5,16 +5,19 @@ extends RefCounted
 ## turn to watch, no burst or ring, and a Boki off screen gets no moment. Works headless.
 ## --evolve-moment-shots --shots-dir=<dir>: one sheet per type (needs a renderer, xvfb with opengl3).
 
-const SHOT_TYPES := ["titan", "lunar", "prism"]    # three type colours: sand, pale blue, pink
+const SHOT_TYPES := ["titan", "lunar", "prism"]  # three type colours: sand, pale blue, pink
 const SHOT_TIMES := [0.0, 0.5, 0.8, 1.0, 1.4, 2.2]
-const CROP := 300          # px square around the Boki in a sheet cell
-const STEP := 0.05         # s per hand-driven step
+const CROP := 300  # px square around the Boki in a sheet cell
+const STEP := 0.05  # s per hand-driven step
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("EVOLVEMOMENT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node, mode: String = "check") -> void:
 	Save.no_write = true
@@ -24,6 +27,7 @@ func run(main: Node, mode: String = "check") -> void:
 	else:
 		_check(main, stage)
 	main.get_tree().quit(bad)
+
 
 ## A bare stage: ground, light, camera, an Fx.
 func _stage(main: Node, rendered: bool) -> Dictionary:
@@ -36,8 +40,9 @@ func _stage(main: Node, rendered: bool) -> Dictionary:
 		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		main.add_child(vp)
 		var env := WorldEnvironment.new()
-		env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"),
-			"horizon": Color("ffd2a8"), "stars": 0.0})
+		env.environment = Look.environment(
+			{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+		)
 		vp.add_child(env)
 		vp.add_child(host)
 	else:
@@ -62,11 +67,13 @@ func _stage(main: Node, rendered: bool) -> Dictionary:
 	host.add_child(fx)
 	return {"host": host, "cam": cam, "fx": fx, "vp": vp}
 
+
 func _species_of(type: String) -> String:
 	for spk in Data.KIN:
 		if DexView.type_of(spk) == type:
 			return spk
 	return "zapple"
+
 
 func _make(stage: Dictionary, spk: String, watcher: bool) -> EvolveMoment:
 	var m := EvolveMoment.new()
@@ -84,11 +91,12 @@ func _make(stage: Dictionary, spk: String, watcher: bool) -> EvolveMoment:
 	if watcher:
 		var w := Models.kin("zapple", Save.new_kin("zapple", "W"))
 		w.position = Vector3(2.5, 0, 0)
-		w.rotation.y = -PI * 0.5     # facing away from the middle
+		w.rotation.y = -PI * 0.5  # facing away from the middle
 		m.host.add_child(w)
 		m.watchers = [{"node": w}]
 	m.start()
 	return m
+
 
 func _check(_main: Node, stage: Dictionary) -> void:
 	var fx: Fx = stage["fx"]
@@ -173,12 +181,15 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	ok(not "fx.burst" in body and not "fx.ring" in body, "home's evolve path calls no burst or ring")
 	print("EVOLVEMOMENT DONE, failures: %d" % bad)
 
+
 func _washed(n: Node) -> bool:
 	if n is MeshInstance3D and (n as MeshInstance3D).material_overlay != null:
 		return true
 	for c in n.get_children():
-		if _washed(c): return true
+		if _washed(c):
+			return true
 	return false
+
 
 ## One sheet per type: the moment at SHOT_TIMES, side by side.
 func _shots(main: Node, stage: Dictionary) -> void:

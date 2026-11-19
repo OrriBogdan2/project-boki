@@ -6,10 +6,11 @@ extends "res://tools/clip_shots.gd"
 
 const PondWalk := preload("res://tools/pond_walk.gd")
 const WATER_COL := Color(0.25, 0.55, 0.85, 0.55)
-const BED_DEPTH := 1.2         # m the pond bed lies below the surface
+const BED_DEPTH := 1.2  # m the pond bed lies below the surface
 
 var water: MeshInstance3D
 var ground: MeshInstance3D
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -17,16 +18,20 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	var every := 9
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
-		if a.begins_with("--every="): every = int(a.substr(8))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
+		if a.begins_with("--every="):
+			every = int(a.substr(8))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
-	ground = holder.get_child(holder.get_child_count() - 2) as MeshInstance3D      # (_stage: ground, then camera)
+	ground = holder.get_child(holder.get_child_count() - 2) as MeshInstance3D  # (_stage: ground, then camera)
 	water = MeshInstance3D.new()
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(80, 60)
@@ -42,6 +47,7 @@ func run(main: Node) -> void:
 	print("POND_SHOTS_DONE ", ids.size())
 	tree.quit()
 
+
 func _hunter(id: String, dir: String, every: int) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
@@ -52,13 +58,13 @@ func _hunter(id: String, dir: String, every: int) -> void:
 	for k in 30:
 		await tree.process_frame
 	var tall := 1.6 * absf(model.scale.y)
-	var aim := Vector3(0, tall * 0.3, -tall * 0.4)      # (a swimmer lies along -Z: look at the middle of it)
+	var aim := Vector3(0, tall * 0.3, -tall * 0.4)  # (a swimmer lies along -Z: look at the middle of it)
 	cam.position = aim + Vector3(tall * 3.2, tall * 0.1, 0)
 	cam.look_at(aim)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var seen := {"i": 0, "names": ""}      # (a Dictionary: the callback fills it)
+	var seen := {"i": 0, "names": ""}  # (a Dictionary: the callback fills it)
 	var film := func(info: Dictionary) -> void:
 		var wet: bool = info["depth"] > 0
 		water.visible = wet
