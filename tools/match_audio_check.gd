@@ -4,9 +4,9 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
-## The ultimate-ready chime (UltReadyCue): once per R coming back, only for you (never a rival's or a
-## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
-## under a kill callout.
+## The ultimate-ready chime (UltReadyCue; your E's tick too, _e_tick): once per R coming back, only for you
+## (never a rival's or a teammate's R), never on a match's first look, held while you're down until you're up,
+## and set lower under a kill callout.
 ## And the abyss (tools/gen_sfx_abyss.py, AbyssSfx): a scripted walk off a Hollow Crown rim plays the whoosh
 ## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
 ## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
@@ -121,6 +121,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	if mate == null or rival == null or P.ak == null:
 		return
 	P.ctrl = "local"          # (a bot could cast it the step it's back; you hold no keys here)
+	P.ak.cd["e"] = 99.0       # (E's own tick is _e_tick's; kept out of the R rows)
 	var fresh := UltReadyCue.new()
 	for h in [P, mate, rival]:
 		h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
@@ -140,8 +141,10 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 1, "your R coming back chimes once (%d)" % (cue.plays - before))
 	_step(m, 1.0)
 	ok(cue.plays == before + 1, "...and only once while it stays ready (%d)" % (cue.plays - before))
+	var e_down := cue.e_plays
 	m.knock(P, rival, {})
 	P.ak.cd["x"] = 0.3
+	P.ak.cd["e"] = 0.3        # (E back while you're down too: _e_tick checks it stayed quiet)
 	_step(m, 0.6)
 	ok(P.downed and HeroUlt.ready(P.ak) and cue.plays == before + 1, "back while you're down: no chime yet")
 	m.revive_hunter(P, mate)
@@ -155,7 +158,30 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
+	_e_tick(m, P, e_down)
 	P.ctrl = "bot"
+
+## Your E back: an E that came back while you were down (_ult_chime's knock) stays quiet once you're up; its own
+## tick once; with R back the same step, R first and E at least GAP later.
+func _e_tick(m: Match, P: Hunter, e_down: int) -> void:
+	var cue: UltReadyCue = m.ult_cue
+	P.ak.cd["x"] = 99.0
+	_step(m, UltReadyCue.MUTE_BACK + 0.2)     # (past the revive above)
+	ok(cue.e_plays == e_down, "an E back while you're down stays quiet when you're up (%d)" % (cue.e_plays - e_down))
+	P.ak.cd["e"] = 99.0
+	_step(m, 0.1)
+	var e0 := cue.e_plays
+	P.ak.cd["e"] = 0.05
+	_step(m, 0.3)
+	var heard := Sfx.last_played.has(UltReadyCue.E_SOUND)
+	ok(cue.e_plays == e0 + 1 and heard, "your E coming back ticks once (%d)" % (cue.e_plays - e0))
+	var r0 := cue.plays
+	P.ak.cd["e"] = 0.05
+	P.ak.cd["x"] = 0.05
+	_step(m, 0.15)
+	ok(cue.plays == r0 + 1 and cue.e_plays == e0 + 1, "E and R back together: R first, E waits")
+	_step(m, 0.3)
+	ok(cue.e_plays == e0 + 2, "...then E, %.1f s on" % UltReadyCue.GAP)
 ## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
 ## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
 func _shields(m: Match, P: Hunter) -> void:
