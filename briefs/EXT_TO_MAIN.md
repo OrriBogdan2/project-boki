@@ -10328,3 +10328,4 @@ READY ext/tut-camps-telegraph 94c68e4c6e (re-merged origin/main: kept main held-
 READY ext/sfx-xp-armour-cues 4d2f5b08fe (xp-cue-check rows: kill XP, armour tier-up, level-up are 3 separate cues + 20 s MP4 reel; no new sounds, they were on main)
 READY ext/extra-fishing-derby b3dcdb4299 (fishing derby: five casts vs a friend stored catch from the visit snapshot, 10 gems per win; --glint-fishing-check derby rows, 56 ok)
 READY ext/sfx-dash-refill eb1b4ad84177a4f408f74070b49889d32a99ad1f (one quiet ab_ready cue per refilled dash charge, own bar, ducked in a fight; sfx coverage row; gameplay-media clip 17 film)
+READY ext/sfx-garden-play 920e962d83 (quiet PlaySfx cues for tag start/catch/cheer, squabble huffs and toy finish, 3 per 3 s per zone cap; base-life-check 0 fails, garden-sfx-check 0 fails, 20s MP4 with audio)
