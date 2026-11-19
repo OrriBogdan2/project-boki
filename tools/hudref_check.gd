@@ -597,7 +597,8 @@ func _hud_size(demo: Match) -> void:
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
 	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
 	var had_obj = Save.d["tutorial"].get(FirstObjective.KEY)
-	Save.d["tutorial"][FirstObjective.KEY] = true      # (a save past its first expedition: the first-expedition card (--safe-area-check, --first-objective-check) takes left-column room this test measures the minimap against)
+	# A save past its first expedition: the objective card (--first-objective-check) would crowd the minimap.
+	Save.d["tutorial"][FirstObjective.KEY] = true
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
