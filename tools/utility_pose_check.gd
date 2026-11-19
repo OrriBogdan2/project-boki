@@ -95,7 +95,7 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	var crouched := 0.0
 	var run_crouch := 0.0
 	var kind_ok := true
-	var heal_hp := UtilityUse.heal_of(P, id) if UtilityUse.use_of(id) == "drink" else 0.0
+	var heal_hp := UtilityUse.channel(id, "heal") if UtilityUse.use_of(id) == "drink" else 0.0
 	while steps < int(cast / Match.DT) + 20:
 		P._anim_state(0.0)
 		var s := P.anim_s
@@ -116,4 +116,4 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	ok(run_crouch < 0.01, tag + " leaves the legs free on the move")
 	match UtilityUse.use_of(id):
 		"drink": ok(heal_hp <= 0.0 or P.hp > P.max_hp * 0.5, tag + " heals when the drink lands")
-		"repair": ok(P.armor >= P.max_armor * UtilityUse.repair_frac(P) - 0.5, tag + " repairs when the kit lands")
+		"repair": ok(P.armor >= P.max_armor - 0.5, tag + " repairs when the kit lands")

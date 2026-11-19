@@ -33,7 +33,7 @@ static func fill(h: Hunter, s: Dictionary) -> void:
 	var id := h.beat_id
 	var left := h.beat_t
 	if h.drink_t > 0.0:
-		id = h.drink_id
+		id = "tonic"
 		left = h.drink_t
 	elif h.kit_t > 0.0:
 		id = "armor_kit"

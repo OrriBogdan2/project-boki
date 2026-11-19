@@ -18,7 +18,7 @@ same body, then finds, buys and earns the rest. Your Boki is the one lasting dif
 ## Decision
 Option 3. The whole ext/equal design, by part:
 
-**Bring-in (ext/equal-loadout).** From home: the two gloves, boots, up to six utility items and a backpack.
+**Bring-in (ext/equal-loadout).** From home: the two gloves, boots, up to four utility items and a backpack.
 Everything brought is at risk (it drops in your deathbox). Rarity is capped by difficulty tier
 (`content/rules/equal.json` `rarity_cap_by_tier`: Rare, Epic, Legendary for The Meadow, Dusk Isles,
 The Hollow); utility stacks are capped per item per tier (`content/utility/*.json` `bring`). Not
@@ -97,12 +97,6 @@ utility via `UtilityBelt.grant` and `UtilityBelt.price_of`, weapon perks) and th
 kind, not on a key), boots, 4 utility slots (1-4), up to 5 perk orbs, and no upgrading of anything.
 Built so far: gloves, boots, the belt on 1-4, backpacks, no ranks. Not built yet: charms (a follow-up;
 old minor glove-like items map to charms then).
-
-**Six slots (ext/utility-parity, Nov 9).** The belt grew to six slots like the source's: slot 1 is
-the tonic's and slot 2 the armor kit's (an item's `slot` field pins it; nothing else goes there),
-slots 3 to 6 are open to any other item. Home picks fill the open slots only; an old four-item
-`belt_pick` save reads back as pinned tonic and kit plus its other picks in order, so no save
-version bump was needed.
 
 ## The split and where parts meet
 - loadout owns utility definitions (`content/utility/`, `UtilityBelt`, `UtilityUse`), bring-in

@@ -415,7 +415,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch", "scout"]],
 		["Fighting", [
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
-			"util1", "util2", "util3", "util4", "util5", "util6", "base",
+			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
