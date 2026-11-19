@@ -84,7 +84,8 @@ func _trial(t: TimeTrial) -> void:
 	cam.current = false
 	m.cam.current = true
 	cam.queue_free()
-	var spots := [["start", t.start], ["dash", t.gates[1].at + Vector3(1.5, 0, 2.0)], ["kick", t.gates[3].at + Vector3(2.5, 0, 3.0)],
+	var spots := [["start", t.start], ["dash", t.gates[1].at + Vector3(1.5, 0, 2.0)],
+		["kick", t.gates[3].at + Vector3(2.5, 0, 3.0)],
 		["pad", t.pad_at + Vector3(0, 0, 2.0)], ["padtop", t.pad_land], ["finish", t.finish + Vector3(-1.0, 0, 3.0)]]
 	for s in spots:
 		var at: Vector3 = s[1]
