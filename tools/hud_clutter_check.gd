@@ -43,8 +43,11 @@ func run(main_node: Node) -> void:
 	m.set_process(false)
 	var rival: Hunter = m.hunters.filter(func(h): return h != m.player)[0]
 	rival.position = m.player.position + Vector3(RIVAL_GAP, 0.0, 0.0)
-	for i in int(FIGHT_S / Match.DT):
+	var steps := int(FIGHT_S / Match.DT)
+	for i in steps:
 		m.step(Match.DT)
+		if i == steps - int(1.0 / Match.DT):  # one landed hit 1 s before judging: the fight never hangs on the seed's AI
+			rival.hurt(10.0, m.player)
 		if i % 20 == 0:
 			await main.get_tree().process_frame
 	m.hud.panels.queue_redraw()
