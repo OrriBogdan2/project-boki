@@ -28,6 +28,10 @@ func run(main_node: Node) -> void:
 	cancels.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
+	var feel = load("res://tools/albert_feel_check.gd").new()
+	feel.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		_wall_climb()
@@ -44,14 +48,15 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		await feel.albert()
 	if both or "--archer-combo-check" in args:
 		await _spirit_look()
 	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
 	hits.main = main_node
 	if both:
 		await hits.audit()
-	n += ult.n + own.n + launch.n + tall.n + cancels.n + bow.n + hits.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails + bow.fails + hits.fails
+	n += ult.n + own.n + launch.n + tall.n + feel.n + cancels.n + bow.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + feel.fails + cancels.fails + bow.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -1094,9 +1099,10 @@ func _bulwark_combos() -> void:
 		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
 		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
 	)
-	step(m, 7.0)
+	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
+	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
 	ok(
-		"bjorn: the planted hammer never comes back by itself",
+		"bjorn: the planted hammer stays planted until the rope's time runs out",
 		String(K.mace.get("st", "")) == "ground",
 		str(K.mace.get("st"))
 	)

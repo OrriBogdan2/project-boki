@@ -21,6 +21,7 @@ var k: Kin
 var dur := 10.0  # s: this species' window
 var cd_base := 60.0  # s: this species' cooldown
 var left := 0.0  # s of the window left (0: a wisp, or shrinking)
+var win := 0.0  # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0  # s of the shrink back left
 var grow := 0.0  # s of the bloom left (drawing only)
 var cd := 0.0  # s until it can be summoned again
@@ -37,6 +38,8 @@ func _init(kin: Kin) -> void:
 	var t := times(kin.ks)
 	dur = t.x
 	cd_base = t.y
+	if kin.m.get("tut") != null:
+		cd_base *= float(Content.rules("tutorial")["summon_cd_mult"])  # (a quicker rest to learn it by)
 
 
 static func rules() -> Dictionary:

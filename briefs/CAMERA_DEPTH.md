@@ -1,10 +1,10 @@
 # Camera depth readability (job 20261107-123002-a4)
 
-Owner feedback: height, ledges and drop depth are hard to read; Supervive reads well. Sources: the owner's
-34 s mantle clip (contact sheet and frames in /home/boki/refs/supervive-mantle/), our captures from
+Owner feedback: height, ledges and drop depth are hard to read; the reference reads well. Sources: the owner's
+34 s mantle clip (contact sheet and frames in /home/boki/refs/the reference-mantle/), our captures from
 `--depth-shots` (tools/depth_shots.gd, seed 77, GPU job), shots in briefs/camera_depth/.
 
-## What Supervive does (from the clip)
+## What the reference does (from the clip)
 1. **Value contrast between lit ground and everything below it.** Ground is bright and saturated (green
    or stone); the abyss and cliff faces are dark navy, a clearly lower value. The lit top reads as "up",
    the dark mass as "down".
@@ -28,7 +28,7 @@ Owner feedback: height, ledges and drop depth are hard to read; Supervive reads 
 | Height tint of tiers | Lower tiers are not darker (only AO at the foot). Not done: absolute y varies per island, needs per-island reference. | shader |
 | Projectile drop shadows | Not done; same disc idea, one more quad per projectile. | per projectile |
 
-## Built (setting Settings > Accessibility > Height cues, `depth_cues`, default on; applies from the next expedition)
+## Built (setting Settings > Accessibility > Show heights clearly, `depth_cues`, default on; applies from the next expedition)
 Cliff faces: brightened at the lip, darkening toward the foot by drop height (full dark at 3.2 m).
 Ground lip lit where it ends in a drop. A soft dark disc on the ground under every hunter, at the
 ground's own height (hidden over void). Gameplay, camera, aim and ranges untouched.

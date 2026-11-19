@@ -1,7 +1,8 @@
-"""Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
+"""Copies named clips from one .glb into another, leaving everything else in the target unchanged (a replaced clip's accessors and buffer views are dropped, not left orphaned), so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
 only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--hold-moved-rest]
+Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--hold-moved-rest] [--drop-missing]
+--drop-missing: a track of a node the target lacks (x_breath on a v95 rig) is skipped and listed, not an error.
 --hold-moved-rest: a node whose rest (translation/rotation) differs between the two builds (a spring bone the new model moved)
 gets its target rest held for the whole clip instead of the source's keys; the held names are printed. Use it only when the
 moved nodes are ones the clips hold still anyway (spring chains: the runtime sim moves them).
@@ -44,7 +45,46 @@ def write(path, j, bin_):
         f.write(bin_)
 
 
-def add(tj, tb, sj, sb, wanted, hold=False, held=None):
+def accessor_refs(j):
+    """Every place that names an accessor: (dict, key) pairs."""
+    out = []
+    for m in j.get("meshes", []):
+        for pr in m["primitives"]:
+            out += [(pr["attributes"], k) for k in pr["attributes"]] + ([(pr, "indices")] if "indices" in pr else [])
+            out += [(t, k) for t in pr.get("targets", []) for k in t]
+    out += [(s, "inverseBindMatrices") for s in j.get("skins", []) if "inverseBindMatrices" in s]
+    out += [(s, k) for a in j.get("animations", []) for s in a["samplers"] for k in ("input", "output")]
+    return out
+
+
+def prune(j, bin_):
+    """Drops the accessors and buffer views nothing names any more (a replaced clip's), packing the bytes that stay."""
+    refs = accessor_refs(j)
+    keep_ac = sorted({d[k] for d, k in refs})
+    ac_at = {old: new for new, old in enumerate(keep_ac)}
+    for d, k in refs:
+        d[k] = ac_at[d[k]]
+    j["accessors"] = [j["accessors"][i] for i in keep_ac]
+    users = j["accessors"] + [im for im in j.get("images", []) if "bufferView" in im]
+    keep_bv = sorted({u["bufferView"] for u in users})
+    bv_at = {old: new for new, old in enumerate(keep_bv)}
+    for u in users:
+        u["bufferView"] = bv_at[u["bufferView"]]
+    out = bytearray()
+    views = []
+    for i in keep_bv:
+        bv = dict(j["bufferViews"][i])
+        off0 = bv.get("byteOffset", 0)
+        out.extend(b"\0" * (-len(out) % 4))
+        bv["byteOffset"] = len(out)
+        out.extend(bin_[off0:off0 + bv["byteLength"]])
+        views.append(bv)
+    j["bufferViews"] = views
+    j["buffers"][0]["byteLength"] = len(out) + (-len(out) % 4)
+    return out
+
+
+def add(tj, tb, sj, sb, wanted, hold=False, held=None, dropped=None):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
     snames = {n.get("name"): n for n in sj["nodes"]}
 
@@ -88,6 +128,9 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
         new = {"name": a["name"], "channels": [], "samplers": []}
         for ch in a["channels"]:
             nm = sj["nodes"][ch["target"]["node"]].get("name")
+            if nm not in names and dropped is not None:
+                dropped.add(nm)
+                continue
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
             sm = a["samplers"][ch["sampler"]]
@@ -112,15 +155,18 @@ def add(tj, tb, sj, sb, wanted, hold=False, held=None):
 
 if __name__ == "__main__":
     hold = "--hold-moved-rest" in sys.argv
-    args = [x for x in sys.argv[1:] if x != "--hold-moved-rest"]
+    dropped = set() if "--drop-missing" in sys.argv else None
+    args = [x for x in sys.argv[1:] if not x.startswith("--")]
     target, source, keys = args[:3]
     out = args[3] if len(args) > 3 else target
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
     held = set()
-    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held)
-    write(out, tj, tb)
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held, dropped)
+    write(out, tj, prune(tj, tb))
     print("added", len(done), done)
     if hold:
         print("held at target rest:", sorted(held))
+    if dropped:
+        print("dropped (no such node in the target):", sorted(dropped))

@@ -58,7 +58,7 @@ every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.28 m/s, 2 dash charges |
 | Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |

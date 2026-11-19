@@ -5,7 +5,7 @@ end a summon, a kill does). Rules data: `content/rules/summon_cc.json`. Code: `S
 asked by `KitStatus.apply`. Check: `--summon-cc-check`.
 
 ## Source data
-The repo's source notes (SUPERVIVE_DATA.md, KIT_PARITY.md, docs/heroes) have nothing on how the source treats
+The repo's source notes (sv/DATA.md, KIT_PARITY.md, docs/heroes) have nothing on how the source treats
 pets or summons under crowd control. So every row below is the closest Hunter rule. If footage of a source summon
 under CC turns up, change the row, not the code path.
 

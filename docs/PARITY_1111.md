@@ -13,7 +13,7 @@ These branches changed kit numbers after the KIT_PARITY re-audit (`origin/ext/pa
 | ext/vex-rmb-1111 | a796f3a38 | main 88b06b9e7 |
 | ext/meeko-rmb-1111 | a2e62336b | main 88b06b9e7 |
 
-**Method.** For each branch I diffed `content/archetypes`, `content/rules` and `scripts/arch` against its base. I checked every changed number, cancel and timing against `briefs/supervive-data/supervive_kits.md` [D] and `briefs/hero-ref/<sheet>.md` [F] (1 bh = 1.8 m, 5 fps, so a time read is good to about 0.2 s). Trust order is O (owner) > D > wiki > F. Text-only and look-only changes are listed only where they change what a player can read or aim by.
+**Method.** For each branch I diffed `content/archetypes`, `content/rules` and `scripts/arch` against its base. I checked every changed number, cancel and timing against `sv/briefs/kits.md` [D] and `briefs/hero-ref/<sheet>.md` [F] (1 bh = 1.8 m, 5 fps, so a time read is good to about 0.2 s). Trust order is O (owner) > D > wiki > F. Text-only and look-only changes are listed only where they change what a player can read or aim by.
 
 **Verdicts.**
 - `match`: the same as the source, within footage error.

@@ -1350,7 +1350,8 @@ func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
 		fallback = portrait_grey(h) if state == "dead" else portrait(h)
 	var hurt := plates.flash_of(h) if state == "" else 0.0
 	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
-	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
+	var mood := plates.mood_of(h, low) if state == "" else ""
+	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time, false, mood)
 
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
@@ -1677,7 +1678,7 @@ func _draw_crosshair(p: Hunter) -> void:
 		if ph and not ph.unseen:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
-	var ck := p.charge_k()
+	var ck := p.atk.charge_k()
 	if ck > 0.0:
 		# a sword's charge: fills, then flashes when it's ready to release
 		var full := ck >= 1.0

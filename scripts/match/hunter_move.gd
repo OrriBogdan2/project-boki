@@ -1,8 +1,10 @@
 class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
-## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+
+const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 
 static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
@@ -21,6 +23,14 @@ static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
 static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
+static var glide_sink: float = _phys["glide_sink"]
+static var glide_heat_s: float = _phys["glide_heat_s"]
+static var lift_heat: float = _phys["lift_heat"]
+static var lift_tap_heat: float = _phys["lift_tap_heat"]
+static var hit_heat_per_dmg: float = _phys["hit_heat"] * 0.30 / 34.5      # 34.5 damage heats it hit_heat x 30%
+static var overheat_burn: float = _phys["overheat_burn"]
+static var overheat_speed: float = _phys["overheat_speed"]
+static var overheat_lift: float = _phys["overheat_lift"]
 static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
 static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
@@ -33,10 +43,10 @@ static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
 static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
-const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
 
 static func rules() -> Dictionary:
 	return _rules
@@ -45,11 +55,25 @@ static func rules() -> Dictionary:
 static func of(arch: String) -> Dictionary:
 	return _rules.get(arch, _rules["default"])
 
+## This archetype's walk speed (m/s): its source MoveSpeed at our body scale. Every mode reads it.
+static func speed(arch: String) -> float:
+	return float(of(arch)["speed"]) * body_scale
+
+## This archetype's ground acceleration (m/s^2), at the same scale so reaching the walk takes the source's time.
+static func accel(arch: String) -> float:
+	return float(of(arch)["accel"]) * body_scale
+
 ## Sets the hunter's run speed and acceleration for its archetype.
 static func apply(h: Hunter) -> void:
-	var row := of(h.arch)
-	h.base_speed = float(row["speed"])
-	h.ground_accel = float(row["accel"])
+	h.base_speed = speed(h.arch)
+	h.ground_accel = accel(h.arch)
+
+## One step of walking on the ground, shared by the match and the farm: toward `want` (m/s) at `acc`, speed over
+## it shed under the walking brake; with no keys, the brake alone. grip < 1 on ice.
+static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float) -> Vector2:
+	if want.length() < 0.001:
+		return brake(hv, grip, dt)
+	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
 
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).

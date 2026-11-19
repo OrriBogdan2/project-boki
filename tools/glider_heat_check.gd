@@ -1,8 +1,12 @@
 extends "res://tools/abyss_check.gd"
 ## --glider-heat-check (item 63): the glide input opens the glider at ANY heat (full, nearly spent, overheated, right
 ## after an overheated one closed), an overheated glider lifts at half strength out of the abyss, the climb
-## from deep down stays under the softened cap, and each hit kind spikes a gliding dummy or not (decision
-## 0022). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## from deep down stays under the softened cap, a level glide sinks at HunterMove.glide_sink and
+## overheats HunterMove.glide_heat_s after it opens, each hit kind spikes a gliding dummy or not
+## (decision 0022), and the other heat rows in hunter_move.json (heat_doc) do what they say: a real glide
+## press 8 m deep spends the footage's quarter to a third of the bar, an overheated glider flies
+## at overheat_speed and burns overheat_burn of your health a second in 20-damage ticks.
+## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 ## Fastest climb and time to the lip when the glider opens `dp` m under the lip with `fuel` heat left.
 func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
@@ -28,6 +32,25 @@ func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
 			break
 	h.inp["glide"] = false
 	return [peak, t_up]
+
+## A level glide 6 m over the rim (under glide_height, above the lip: no lift): [its sink in m/s after 2 s,
+## s from the open to overheat]. The height is pinned so it never lands before the heat runs out.
+func _level_glide(e: Dictionary) -> Array:
+	var y: float = float(e["top"]) + 6.0
+	_reset(Vector3(e["at"].x, y, e["at"].z), Vector3(0, -HunterMove.glide_sink, 0))
+	h.last_gy = e["top"]
+	h.air_t = 1.0
+	h.gliding = true
+	var sink := 0.0
+	var t := 0.0
+	while t < 30.0 and h.glide_fuel > 0.001:
+		h.inp["glide"] = true
+		m.step(Match.DT)
+		t += Match.DT
+		if absf(t - 2.0) < Match.DT * 0.5: sink = -h.vel.y
+		h.pos.y = y
+	h.inp["glide"] = false
+	return [sink, t]
 
 ## Presses glide (a fresh press) in the air at the given heat/cooldown; true if the glider opens within 0.4s.
 func _opens(e: Dictionary, fuel: float, cd: float, btn: bool) -> bool:
@@ -113,12 +136,86 @@ func run(main: Node) -> void:
 	var cap_txt := "the climb from deep down stays under the new cap (%.1f m/s <= %.1f)" % [deep_peak, 26.0 * 0.7]
 	ok(deep_peak <= 26.0 * 0.7 + 0.3, cap_txt)
 	ok(deep_peak >= 12.0, "...and is still a real lift (%.1f m/s)" % deep_peak)
+	var level: Array = _level_glide(e)
+	var gear_k: float = 1.0 + h.gear_stat("heat")      # worn gear's heat stat (the save's armory boots) stretches it
+	var heat_s: float = HunterMove.glide_heat_s * float(h.cdat.get("glide_cap", 1.0)) * gear_k
+	var sink_txt := "a level glide sinks at %.2f m/s (hunter_move.json glide_sink %.2f)"
+	ok(absf(float(level[0]) - HunterMove.glide_sink) < 0.02, sink_txt % [level[0], HunterMove.glide_sink])
+	var heat_txt := "a level glide overheats %.2f s after it opens (glide_heat_s x glide_cap x gear heat %.2f)"
+	ok(absf(float(level[1]) - heat_s) <= Match.DT * 2.0, heat_txt % [level[1], heat_s])
+	_heat_rows(e, heat_s)
 	_spike_kinds()
 	_burn_hint(e)
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## lift_heat, overheat_speed and overheat_burn, from what the glider does. `heat_s`: this hunter's level glide time.
+func _heat_rows(e: Dictionary, heat_s: float) -> void:
+	# [footage] ~1 s of falling (8 m deep), a glide press, back at the lip ~1 s later for a quarter to a third
+	# of the bar
+	var lift: Array = _lift_cost(e, 8.0)
+	var lift_txt := "a press 8 m deep is back at the lip in %.2f s for %.0f%% of the %.1f s bar (lift_heat %.1f)"
+	ok(float(lift[0]) < 3.0 and float(lift[1]) > 0.22 and float(lift[1]) < 0.36,
+		lift_txt % [lift[0], float(lift[1]) * 100.0, heat_s, HunterMove.lift_heat])
+	# under the 8.5 m height hold, so no lift or swoop
+	var cool := _glide_speed(e, 1.0)
+	var hot := _glide_speed(e, 0.0)
+	var speed_txt := "overheated glide speed %.2f is overheat_speed %.2f of %.2f"
+	ok(absf(hot / maxf(0.01, cool) - HunterMove.overheat_speed) < 0.06,
+		speed_txt % [hot, HunterMove.overheat_speed, cool])
+	_glide_at(Vector3(e["at"].x, float(e["top"]) + 30.0, e["at"].z), 0.0)
+	h.heat_burn = 0.0
+	for i in int(4.0 / Match.DT):
+		h.inp["glide"] = true
+		h.glide_fuel = 0.0
+		m.step(Match.DT)
+	h.inp["glide"] = false
+	var burnt := h.max_hp - h.hp
+	var burn_want := floorf(HunterMove.overheat_burn * h.max_hp * 4.0 / 20.0) * 20.0
+	var burn_txt := "4 s overheated burns %.0f of %.0f health (want %.0f)" % [burnt, h.max_hp, burn_want]
+	ok(is_equal_approx(burnt, burn_want), burn_txt)
+
+## [s to the lip, heat spent] when glide is pressed (a real press) `dp` m under the lip, falling.
+func _lift_cost(e: Dictionary, dp: float) -> Array:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	_reset(Vector3(e["ex"] + dir.x * 4.0, top - dp, e["ez"] + dir.y * 4.0), Vector3(0, -10.0, 0))
+	h.last_gy = top
+	h.air_t = 1.0
+	var t := 0.0
+	while t < 4.0 and h.pos.y < top - 0.5:
+		h.inp["glide"] = true
+		h.inp["glide_btn"] = true
+		m.step(Match.DT)
+		t += Match.DT
+	h.inp["glide"] = false
+	h.inp["glide_btn"] = false
+	return [t, 1.0 - h.glide_fuel]
+
+## Opens the glider in the air at `fuel` heat, with no swoop speed left over.
+func _glide_at(at: Vector3, fuel: float) -> void:
+	_reset(at, Vector3.ZERO)
+	h.air_t = 1.0
+	h.gliding = true
+	h.glide_fuel = fuel
+	h.inp["glide"] = true
+	h.glide_lift.swoop = 0.0
+
+## Horizontal glide speed after 0.8 s of steering inland at `fuel` heat, 7.5 m over the island.
+func _glide_speed(e: Dictionary, fuel: float) -> float:
+	_glide_at(Vector3(e["at"].x, float(e["top"]) + 7.5, e["at"].z), fuel)
+	var dir: Vector2 = e["dir"]
+	for i in int(0.8 / Match.DT):
+		h.inp["move"] = -dir
+		h.inp["glide"] = true
+		if fuel <= 0.0:
+			h.glide_fuel = 0.0
+		m.step(Match.DT)
+	h.inp["move"] = Vector2.ZERO
+	h.inp["glide"] = false
+	return Vector2(h.vel.x, h.vel.z).length()
 
 ## The first overheat over the abyss says one plain line once per save (Match._tip): the live glide key,
 ## no input block, one line in the lane; hot over solid ground, or a second time, says nothing.

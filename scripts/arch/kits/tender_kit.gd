@@ -10,7 +10,7 @@ extends ArchKit
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
-const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const THRUST_T := 0.03         # s after the ember when the arm is straight out (pip.json "fade"; the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
@@ -83,6 +83,15 @@ func add_kindle(t: Ent, n := 1) -> void:
 		vfx("kindled", t.pos)
 		m.sfx("tend_kindled", t.pos, -2.0, 1.0)
 		play_soft("mm_kindled")
+		ComboMark.payoff(m, h, t)        # the Kindle payoff: full stacks, every shot now hits harder
+
+## The Kindle on `t`, for the ComboMark tag: a pip per stack; the ring is the Kindle left.
+func combo_read(t: Ent) -> Dictionary:
+	var n := kindle_on(t)
+	if n == 0:
+		return {}
+	return {"icon": "burst", "n": n, "max": int(res_def().get("max", 5)),
+			"left": float(kind[t.get_instance_id()]["left"]), "total": float(res_def().get("dur", 4.0))}
 
 func best_kindle() -> int:
 	var b := 0

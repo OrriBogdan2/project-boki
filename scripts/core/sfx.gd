@@ -157,6 +157,8 @@ const VOICES := [
 	"v_sentinel",
 	"v_glimmer",
 	"v_warden",
+	"v_bl_skitter",
+	"v_bl_warden",
 	"die_small",
 	"die_big",
 	"step_grass",
@@ -233,9 +235,13 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
-const NEAR := 3.5
-const FAR := 9.0
+## Distance falloff, sized to the match view (SUPERVIVE camera, ~37 m across, so ~18.5 m to the side edge): what you
+## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
+## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
+## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
+const NEAR := 5.5
+const SPREAD := 8.0
+const FAR := 19.0
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
@@ -249,7 +255,7 @@ var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loop
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
-var hear_range := 22.0
+var hear_range := 30.0     # m: silent beyond this (a sound's own "reach" overrides it)
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
@@ -522,7 +528,8 @@ func match_voices() -> int:
 		if not nm in MATCH_BEDS:
 			own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
+		var voice := c is AudioStreamPlayer or c is AudioStreamPlayer3D
+		if voice and c.playing and not c in players and not c in music and c != amb and not c in own:
 			n += 1  # also a stem or bed or loop still fading out
 	return n
 
@@ -614,8 +621,8 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var dist := Vector2(pos.x - listener.x, pos.z - listener.z).length()
 	if dist > hr:
 		return NAN
-	# a soft inverse-distance roll-off (about -8 dB by 10 m), easing to silence at the edge of hearing
-	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
+	# a soft inverse-distance roll-off (about -8 dB at the screen edge), easing to silence at the edge of hearing
+	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / SPREAD) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 

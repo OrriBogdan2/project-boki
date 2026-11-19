@@ -13,6 +13,7 @@ var species := "cindle"
 var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
+var trail_t := 0.0               # s since its last type-trail particle (KinTypeTrail)
 var unseen := false             # a rival's kin out of the local player's sight
 var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | wisp | wild | dazed | bench | fused | away
 var settle := 1.0                 # 0..1 while settling onto the shoulder
@@ -58,8 +59,6 @@ var down_t := 0.0                 # downed: seconds until it comes round on its 
 var down_total := 0.0
 var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
 var rescue_on := false            # downed: its owner is carrying it in their arms right now
-var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
-var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
 var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
 var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
 var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
@@ -70,7 +69,7 @@ var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
 var callout_seen := {}
-var think_t := 0.0
+var think_t := 0.0                 # out of combat: seconds until it looks for a fight again (_may_think)
 var hop_ph := 0.0
 var home := Vector3.ZERO          # wild kin wander around here
 var wander_to := Vector3.INF
@@ -107,6 +106,7 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var tp_n := 0                     # teleports so far (the "tp" meta; BokiRig ignores the jump as speed)
 var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
 var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
 var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
@@ -187,6 +187,13 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 
 func t(k: String) -> float:
 	return float(traits.get(k, 0.5))
+
+## Put somewhere (the summon bursting or re-blooming, a blink, a swap): the rig must not read the jump as speed.
+func teleport(p: Vector3) -> void:
+	super.teleport(p)
+	tp_n += 1
+	if model:
+		model.set_meta("tp", tp_n)
 
 func is_wild() -> bool:
 	return owner_h == null
@@ -446,6 +453,8 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	var cx := KinExec.make_cx(m, caster, self, owner_h, p, pw * Effects.level_k({"level": rank}), slot, def.id, chain)
 	KinExec.cast(effective(slot), cx)
 	CombatBus.ability_used.emit(caster, def.id, slot)
+	if not unseen:
+		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
@@ -855,8 +864,7 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) \
-				or flat_dist(target) > brain.chase_range() + 3.0 or brain.spares(target) or rng.randf() < dt * 0.5:
+		elif _target_stale(dt) and _may_think():
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -911,6 +919,23 @@ func _land_strike() -> void:
 	m.sfx("kinhit", pos, -6.0, 1.0)
 	melee_n += 1
 	fire_trigger("on_hit", {"at": tp})
+
+## Its target is gone, out of reach, or it fancies a change (a few times a minute).
+func _target_stale(dt: float) -> bool:
+	if target == null or target.dead or not target.hittable() or (target is Hunter and target.downed):
+		return true
+	return flat_dist(target) > brain.chase_range() + 3.0 or brain.spares(target) or rng.randf() < dt * 0.5
+
+## In combat (its own or its owner's, InCombat) a Boki looks for a fight every step; out of it, at
+## InCombat.CALM_HZ only (the perf pass: companion AI ticks slower when nothing is happening).
+func _may_think() -> bool:
+	if InCombat.is_in(self) or (owner_h != null and InCombat.is_in(owner_h)):
+		think_t = 0.0
+		return true
+	if think_t > 0.0:
+		return false
+	think_t = 1.0 / InCombat.CALM_HZ
+	return true
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
@@ -1062,6 +1087,9 @@ func render(delta: float, alpha: float) -> void:
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
+	if model:
+		SummonRing.tick(self)
+	trail_t = KinTypeTrail.of(m.fx).tick(self, trail_t, delta, m.fx.particles / Fx.PARTICLES)
 	if not model or KinWispForm.render(self, model) or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")

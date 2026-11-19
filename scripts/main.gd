@@ -41,7 +41,7 @@ func _ready() -> void:
 			var which := a.substr(10).split(":")
 			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
-		if a == "--god": opts["god"] = true
+		if a == "--god" and AdminGate.unlocked(): opts["god"] = true
 		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
 		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
@@ -428,8 +428,6 @@ func _ready() -> void:
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
 		show_screen("home", {"visit": Social.clean_island(Social.profile_doc()), "visit_id": "test"})    # test: visiting an island
-	elif "--feel-lab" in args:
-		get_tree().change_scene_to_file.call_deferred("res://tests/feel_test.tscn")    # the Supervive feel playground
 	elif "--prologue" in args:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
@@ -924,7 +922,8 @@ func _boss_check() -> void:
 		var ew = L.get("egg_wp")
 		var egg_shown: bool = m.feed_all.any(func(t): return " got the " in String(t) and String(t).ends_with(" Egg"))
 		var egg_n: int = m.hunters.reduce(func(n, h): return n + h.pack.filter(func(it): return Loot.is_rare_egg(it)).size(), 0) + m.wpicks.slice(w0).filter(func(wp): return wp.has("egg")).size()
-		var egg_ok: bool = egg_n == 1 and m.hunters.all(func(h): return h.pack.all(func(it): return not Loot.is_rare_egg(it) or not Data.no_egg(String(it["sp"]))))
+		var egg_ok: bool = egg_n == 1 and m.hunters.all(func(h): return h.pack.all(
+				func(it): return not Loot.is_rare_egg(it) or not Data.no_egg(String(it["sp"]))))
 		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
@@ -1459,7 +1458,7 @@ func _social_cmd(c: String, current) -> void:
 			if p.size() > 3: Save.add_seed(p[3], 3)
 			_soc_reply(true)
 		"soc:publish": Social.publish_profile(true); _soc_reply(true)
-		"soc:create": Social.create_guild(p[2], "We test things", func(okk): _soc_reply(okk))
+		"soc:create": Social.create_guild(p[2], "We test things", "", func(okk): _soc_reply(okk))
 		"soc:join": Social.join_guild(p[2], func(okk): _soc_reply(okk))
 		"soc:leave": Social.leave_guild(func(): _soc_reply(true))
 		"soc:guilds": Social.list_guilds(func(rows): _soc_reply(rows))

@@ -15,6 +15,8 @@ const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
 const CHIP_DRAIN := 1.6        # of the bar per second once it drains (plus an ease-out)
 const FLASH_T := 0.14          # s the frame flashes white when struck
 const ARMOR_FLASH_T := 0.2     # s the armour strip flashes white after it loses some
+const PAIN_T := 1.2           # s a hunter's portrait wears its hurt face after a hit
+const CHEER_T := 2.5          # s it wears its excited face after a kill
 const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
@@ -55,6 +57,7 @@ func _state(e: Ent) -> Dictionary:
 	var s: Dictionary = st.get(e.nid, {})
 	if s.is_empty():
 		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "aflash": 0.0,
+			"pain": 0.0, "cheer": 0.0, "kills": -1,
 			"brk": 0.0, "down": false, "burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
 		st[e.nid] = s
 	return s
@@ -71,11 +74,19 @@ func chip_of(e: Ent, frac: float, dt: float) -> float:
 	if was >= 0.0 and frac < was - 0.0005:
 		s["hold"] = CHIP_HOLD
 		s["flash"] = FLASH_T
+		s["pain"] = PAIN_T
 	elif was < 0.0:
 		s["chip"] = frac
 	s["frac"] = frac
 	s["hold"] = maxf(0.0, float(s["hold"]) - dt)
 	s["flash"] = maxf(0.0, float(s["flash"]) - dt)
+	s["pain"] = maxf(0.0, float(s["pain"]) - dt)
+	var hunter := e as Hunter
+	if hunter:
+		if int(s["kills"]) >= 0 and hunter.kills > int(s["kills"]):
+			s["cheer"] = CHEER_T
+		s["kills"] = hunter.kills
+	s["cheer"] = maxf(0.0, float(s["cheer"]) - dt)
 	var ch := maxf(float(s["chip"]), frac)
 	if float(s["hold"]) <= 0.0:
 		var gap := ch - frac
@@ -85,6 +96,14 @@ func chip_of(e: Ent, frac: float, dt: float) -> float:
 
 func flash_of(e: Ent) -> float:
 	return clampf(float(_state(e)["flash"]) / FLASH_T, 0.0, 1.0)
+
+## The portrait face this hunter wears: "hurt" for a moment after a hit or while nearly down, "excited"
+## for a moment after a kill, else "" (neutral).
+func mood_of(e: Ent, low: float) -> String:
+	var s := _state(e)
+	if float(s["pain"]) > 0.0 or low > 0.5:
+		return "hurt"
+	return "excited" if float(s["cheer"]) > 0.0 else ""
 
 ## 1 as the armour strip loses some (a hit on the shell), fading to 0 over ARMOR_FLASH_T.
 func armor_flash_of(e: Ent) -> float:
@@ -193,7 +212,8 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
+		var nm := ClanInfo.tagged(h.pname, h.clan_tag)
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), nm, HudStyle.PLATE_NAME_FS, name_col)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
@@ -319,7 +339,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(H.m.player, h))
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
-	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
+	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), ClanInfo.tagged(h.pname, h.clan_tag), HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
 	var line := "DOWN"
 	var lcol := bcol
