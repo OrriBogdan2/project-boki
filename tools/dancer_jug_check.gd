@@ -519,26 +519,43 @@ func juggernaut(a) -> void:
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
 	K.res = 0.0
-	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
+	# RMB tap: the Finishing Slam leaps onto the cursor (4m at most) and bursts where it lands; +50% under 35%; its
+	# sweet spot (the burst's outer ring) is the payoff
 	P.teleport(home)
 	A.fresh(T)
-	T.teleport(home + Vector3(2.6, 0, 0))
+	T.teleport(home + Vector3(5.6, 0, 0))
 	A.aim_at(P, T.pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	A.tap(m, P)
-	var early := A.dmg(T)
-	var winding := not K.slam_w.is_empty()
-	A.step(m, 0.3)
-	var lane: Dictionary = AimKit.entry(P, "slam")
-	A.ok("juggernaut RMB tap: the strike lane shows through the wind-up (everyone sees it)",
-			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and absf(float(lane.get("len", 0.0)) - 4.0) < 0.1,
-			str(lane.get("len", -1)))
+	var cd0 := float(K.cd["rmb"])
+	var crouched := K.meteor.phase == "crouch" and K.meteor.mode == "leap" and K.anim_id == "jug_leap"
+	var ring: Dictionary = AimKit.entry(P, "slam")
+	var land := K.meteor.land
+	var peak := 0.0
+	var early := 0.0
+	var ring_air := true
+	while K.meteor.owns():
+		peak = maxf(peak, P.pos.y - home.y)
+		early = maxf(early, A.dmg(T))
+		ring_air = ring_air and AimKit.shown(P, "slam")
+		m.step(A.DT)
+	A.ok("juggernaut RMB tap: the landing circle shows from the press to the impact (everyone sees it), 4m out",
+			crouched and ring_air and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 2.4) < 0.05
+			and absf(land.distance_to(home) - 4.0) < 0.2 and not AimKit.shown(P, "slam"),
+			"crouch %s r %.1f land %.1f" % [crouched, float(ring.get("r", -1)), land.distance_to(home)])
+	A.ok("juggernaut RMB tap: a leap, about 3m up, a beat at the top, down onto the circle",
+			peak >= 2.5 and peak <= 4.0 and K.meteor.phases == ["crouch", "rise", "hang", "dive", "impact", "recover"]
+			and K.meteor.leaps == 1 and K.meteor.last_leap.distance_to(land) < 0.3
+			and K.meteor.last_air > 0.6 and K.meteor.last_air < 1.0,
+			"peak %.2f air %.2f %s" % [peak, K.meteor.last_air, str(K.meteor.phases)])
+	A.ok("juggernaut RMB tap: the Finishing Slam lands at the circle, nothing before",
+			early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
+	A.ok("juggernaut RMB: the Slam's outer ring is the sweet spot, and marks the foe for the Riposte reset",
+			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()) and A.dmg(T) >= 36.0,
+			"spots %d took %.0f" % [K.sweet_spots, A.dmg(T)])
+	A.ok("juggernaut RMB: short cooldown (2s)", cd0 <= 2.0 and cd0 > 1.5, "%.2f" % cd0)
 	A.step(m, 0.4)
-	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
-			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
-	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
-			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(1.2, 0, 0))
@@ -551,11 +568,9 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB ready: the wounded (under 35%) are outlined red",
 			AimKit.shown(P, "exec%d" % T.get_instance_id()))
 	A.tap(m, P)
-	A.step(m, 0.7)
-	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
+	A.step(m, 1.0)
+	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot landing right on them",
 			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
-	A.ok("juggernaut RMB: short cooldown (2s)",
-			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
 	# hold: the charged Lunge into the first foe; a miss doubles the cooldown
 	P.teleport(home)
 	A.fresh(T)
@@ -758,7 +773,7 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	K.cd["x"] = 15.0
 	A.tap(m, P)
-	A.step(m, 0.9)
+	A.step(m, 1.0)
 	T.hp = 4.0
 	P.hp = 1.0
 	T.hurt(10.0, P, {"src": "shot"})
@@ -783,7 +798,7 @@ func juggernaut(a) -> void:
 	var spots0 := K.sweet_spots
 	var resets0 := K.slam_resets
 	A.tap(m, P)
-	A.step(m, 0.9)
+	A.step(m, 1.0)
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
@@ -873,7 +888,7 @@ func combos(a) -> void:
 	A.step(m, 1.0)
 	hook.call()
 	A.tap(m, P)
-	A.ok("combo jug: E > RMB tap = Finishing Slam", not K.slam_w.is_empty() and K.last_variant == "tap")
+	A.ok("combo jug: E > RMB tap = Finishing Slam", K.meteor.mode == "leap" and K.meteor.owns() and K.last_variant == "tap")
 	A.ok("combo jug: the attached Warchain draws as a link chain",
 			is_instance_valid(DJFx.of(m).chains.get("war%d" % P.get_instance_id(), {}).get("node"))
 			and (DJFx.of(m).chains["war%d" % P.get_instance_id()]["node"] as Node3D).visible)
@@ -1095,11 +1110,11 @@ func merge_holds() -> void:
 	P.merge_cd = 0.0
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
-	A.ok("merge hold jug: the Finishing Slam is winding up", not K.slam_w.is_empty())
+	A.ok("merge hold jug: the Finishing Slam's leap is under way", K.meteor.mode == "leap" and K.meteor.owns())
 	KinMerge.cast(P)
 	A.step(m, 1.0)
-	A.ok("merge hold jug: the wound-up slam does not land",
-			K.slam_w.is_empty() and K.sweet_spots == 0 and A.dmg(T) <= ctl + 0.5,
+	A.ok("merge hold jug: the leap is dropped, no slam lands",
+			not K.meteor.running() and K.meteor.leaps == 0 and K.sweet_spots == 0 and A.dmg(T) <= ctl + 0.5,
 			"took %.0f (merge alone %.0f)" % [A.dmg(T), ctl])
 	await A.done(m)
 	# the Smash held (the Lunge charge), and a Haul Slam armed for the end of a pull

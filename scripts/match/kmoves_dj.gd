@@ -17,19 +17,17 @@ const MOVES := {
 		[0.32, {"blade": Vector3(1.7, 0.05, 0.0), "bw": 0.8, "y": -0.7, "p": -0.25, "lw": 0.8,
 				"legs": [0.8, -0.9, -0.5, -0.3]}],
 		[0.6, {}]]},
-	# Finishing Slam (footage 0155-0158): 0.6s of wind-up, the blade cocked low behind and the body
-	# coiled, rising onto the front foot, the strike at 0.6 (the hit), then a heavy recovery
-	"jug_slam": {"keys": [
+	# Finishing Slam, the leap (0.3s, Kael's "jump" clip): a deep crouch with the blade dragged low behind, the
+	# spring up and forward hauling it overhead, the knees tucked at the top of the rise; jug_meteor takes over
+	# (the blade driven down) and jug_meteor_land is the landing
+	"jug_leap": {"keys": [
 		[0.0, {}],
-		[0.3, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": 0.1, "y": 0.75, "lift": -0.1, "lw": 1.0,
-				"legs": [0.9, -1.4, -0.3, -0.7], "sq": 0.2}],
-		[0.56, {"blade": Vector3(-1.5, -0.3, 1.5), "bw": 1.0, "rad": 0.45, "p": 0.18, "y": 0.95, "lift": -0.12,
-				"lw": 1.0, "legs": [1.0, -1.5, -0.35, -0.8], "sq": 0.28}],
-		[0.62, {"blade": Vector3(1.1, -0.35, 1.4), "bw": 1.0, "rad": 0.6, "p": -0.55, "y": -0.6, "lift": -0.05,
-				"sq": -0.2, "lw": 1.0, "legs": [1.15, -0.7, -0.75, -0.25]}],
-		[0.85, {"blade": Vector3(1.2, -0.4, 1.4), "bw": 0.9, "rad": 0.55, "p": -0.45, "y": -0.5, "lw": 1.0,
-				"legs": [1.0, -0.8, -0.6, -0.3]}],
-		[1.15, {}]]},
+		[0.1, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": 0.3, "sq": 0.35, "lift": -0.2,
+				"lw": 1.0, "legs": [1.2, -1.8, 0.9, -1.6]}],
+		[0.2, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "rad": 0.45, "p": -0.1, "sq": -0.25, "lift": 0.1,
+				"lw": 1.0, "legs": [0.3, -0.4, -0.2, -0.6]}],
+		[0.3, {"blade": Vector3(0.0, 3.0, 0.0), "bw": 1.0, "rad": 0.45, "p": 0.2, "sq": -0.1, "lift": 0.1,
+				"lw": 1.0, "legs": [1.0, -1.6, 0.8, -1.4]}]]},
 	# the Lunge, held as long as RMB is held, ready to lunge: he sinks onto the loaded
 	# back leg and levels the blade forward at the aim, leaning in behind it
 	"jug_lunge_wind": {"hold": true, "keys": [

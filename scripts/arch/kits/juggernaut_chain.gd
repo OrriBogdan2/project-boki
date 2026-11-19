@@ -91,7 +91,7 @@ func _throw() -> void:
 	var h := k.h
 	state = "throwing"
 	e_pressed_at = -9.0
-	if k.slam_w.is_empty() and k.lunge.is_empty():      # a heavy move keeps its own body (E goes on top of it)
+	if k.lunge.is_empty() and not k.meteor.owns():      # a heavy move keeps its own body (E goes on top of it)
 		k.play("jug_chain")
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},

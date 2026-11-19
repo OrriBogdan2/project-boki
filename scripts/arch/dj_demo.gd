@@ -25,7 +25,7 @@ const ANIM := {
 	"thf_flourish": ["thief", "arc_bolts", [0.5, 0.58, 0.68, 0.85, 1.0, 1.3]],
 	"jug_slash": ["juggernaut", "greatsword", [0.5, 0.54, 0.58, 0.64, 0.74, 0.95]],
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
-	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
+	"jug_leap": ["juggernaut", "greatsword", [0.58, 0.8, 0.98, 1.16, 1.3, 1.5]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
@@ -140,8 +140,8 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 		"jug_riposte":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.4, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5): cast_ult(P)
-		"jug_slam":
-			if t < 0.45: P.teleport(Vector3(D.pos.x - 3.2, P.pos.y, D.pos.z))
+		"jug_leap":
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 5.6, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0
