@@ -195,8 +195,8 @@ func tick_weapon(dt: float) -> void:
 		h.sus_n = 0
 	if not h.strike_at_end.is_empty():
 		if h.roll_t > 0.0 and not h.downed and h.stun_t <= 0.0:
-			# the lunge curves to follow your aim
-			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			# the lunge curves to follow your aim (10% a 60 Hz step, at any step)
+			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()
 		else:
 			var st: Dictionary = h.strike_at_end
 			h.strike_at_end = {}
