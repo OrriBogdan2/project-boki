@@ -15,13 +15,18 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
     +1 is a natural counter-swing, -1 is pacing (arm and leg of one side go forward together).
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
   - **bob**, **steps/s** (cadence, timed between a leg's forward crossings), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
+  - **ring** (`ring` in the json): the same hand-off moving each of the eight ways (f, b, l, r, fl, fr, bl, br) at the
+    walk and the run speed: the planted foot's slide over the ground, both axes, as a share of the speed.
   - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
     share of frames with an arm raised 60 degrees or more and sideways (T-pose).
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
+  `--dirs=b,l,fr,...` shoots only the walk and run of those ring directions, each turned so the move runs along the
+  screen.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  counter under 0.3 on a Hunter with legs, fails; a Hero whose ring is baked in step (`loco.in_step`) holds the same
+  25 % moving every way of the ring, at the walk and the run. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
 
 ## What is wrong with all of them

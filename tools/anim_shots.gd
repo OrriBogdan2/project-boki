@@ -5,6 +5,8 @@ extends "res://tools/clip_shots.gd"
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
+## --dirs=b,l,fr,...: only the walk and run strips of those ring directions (walk_<dir>, run_<dir>), each turned so the
+## move runs along the screen (DIR_YAW) and the floor posts pass under it.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -17,7 +19,14 @@ const POST_COUNT := 14
 const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
+## deg: the facing a ring direction is shot at, so its move runs screen right or left and he never shows his back
+const DIR_YAW := {"f": -90.0, "b": -90.0, "l": 180.0, "r": 180.0, "fl": -135.0, "br": -135.0, "fr": 135.0,
+		"bl": 135.0}
+## his right, ahead
+const DIR_MOVE := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
+
 var close := false
+var dirs: Array = []
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -39,6 +48,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a.begins_with("--dirs="): dirs = Array(a.substr(7).split(",", false))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -91,6 +101,12 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
+	for k in dirs:
+		await _loco(model, sync, dir.path_join("walk_" + String(k)), WALK_MPS, frames, String(k))
+		await _loco(model, sync, dir.path_join("run_" + String(k)), RUN_MPS, frames, String(k))
+	if not dirs.is_empty():
+		model.queue_free()
+		return
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -109,18 +125,25 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+## `k`: the ring direction he moves in (DIR_MOVE, a diagonal is two letters), shot at DIR_YAW.
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, k := "f") -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
-	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
-	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
-	for k in int(WARM_S / DT):
+	var face := deg_to_rad(float(DIR_YAW[k]))
+	model.rotation.y = face
+	var move := Vector2.ZERO
+	for letter in k:
+		move += DIR_MOVE[letter]
+	move = move.normalized()
+	var vel := (Vector3(cos(face), 0.0, -sin(face)) * move.x + Vector3(-sin(face), 0.0, -cos(face)) * move.y) * mps
+	model.set_meta(WardenClips.STATE, {"vel": vel, "face": face, "grounded": true})
+	for i in int(WARM_S / DT):
 		sync.call("_process", DT)
-		_scroll(mps, DT)
+		_scroll(vel.x, DT)
 	var steps := int(round(1.0 / (LOCO_FPS * DT)))
 	for i in frames:
-		for k in steps:
+		for j in steps:
 			sync.call("_process", DT)
-			_scroll(mps, DT)
+			_scroll(vel.x, DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
 
