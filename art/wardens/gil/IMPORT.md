@@ -48,8 +48,13 @@ LMB, RMB, E + recast, X + leap, hit, death).
   the same). Edges past 3x: live 3.95% -> 0.068%; past 2x: 7.71% -> 0.86%; worst 30.2x -> 5.3x; seam cracks 0.
 - Grip: no finger bones, so the three right fingers are curled in the mesh (rest pose) round the swordfish's
   tail stalk; the thumb and the rest of the body are not moved. The swordfish (same 3000 triangles, same shape)
-  is held by the tail stalk, bill out of the little-finger side (reverse grip), turned so that in all 900 frames
-  at most 27 of its 3901 points touch the head, hat or body (was 1645 in dash). Same skin blend as the hand.
+  is held at the tail, bill FORWARD as in the splash (fwd component 0.62 in idle, walk, run, glide, hit), set
+  diagonally across the palm; rigid, weight 1.0 on hand.R (forearm.R and hand.R share one matrix in every game
+  frame). Over the 1080-frame game dump it stays clear of head, hat and body everywhere except dash_ground
+  272-288, where the dash pose itself puts this fist on the hat brim (open: a clip/HunterAnim matter).
+- Cuffs (retry 5): the right forearm, cuff and hand (right-arm-dominant verts below y 0.66) follow forearm.R
+  only, blending back to the solved weights by y 0.80. The inner cuff had 66% upper_arm.R and up to 49% torso,
+  which smeared the cuff band when the arm was raised. Edges past 3x: 0.068% -> 0.05% (live 3.90%).
 - Ink: COLOR_0 is now RGBA on the body and the swordfish. Alpha holds the ink room (`fit_warden.ink_room`, 0.02 m),
   as on the other v95 Hunters. Before this the outline shell grew full width everywhere and poked through
   thin and folded parts as black specks.
