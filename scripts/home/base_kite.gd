@@ -252,6 +252,13 @@ func input(event: InputEvent) -> bool:
 	_end(false)
 	return true
 
+## Space in flight: spends a flap (with its sound); false when none is left or nothing flies.
+func flap() -> bool:
+	if run == null or not run.flap():
+		return false
+	GardenSfx.cue("kite_flap", flier["pos"])
+	return true
+
 func tick(d: float) -> void:
 	if card_t > 0.0:
 		card_t -= d
@@ -259,8 +266,8 @@ func tick(d: float) -> void:
 			card.queue_free()
 	if run == null:
 		return
-	if Input.is_action_just_pressed("jump") and run.flap():
-		GardenSfx.cue("kite_flap", flier["pos"])
+	if Input.is_action_just_pressed("jump"):
+		flap()
 	var refunds := run.refunds
 	var passed := run.step(d, Input.get_axis("left", "right"))
 	if run.refunds > refunds:      # counted, not read off passed: a vent and a ring can share a step
