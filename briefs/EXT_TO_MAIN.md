@@ -10333,3 +10333,6 @@ READY ext/extra-typed-calls-b fa3f4898ce (kin box + incubator views: typed Home,
 READY ext/vfx-no-generic-orange 1ece6871d5030db3fbd5316d76ee7bffee38848f (no Hunter cast reaches the generic damage orange: make_cx sets hero_col for any Hunter caster, generic_col asserts, fence pins hero_col per Hunter)
 READY ext/extra-kin-v2-one 7e0f980f514e7ddebc1a6a858ac04e4831043f63 (kin size family moved from content/kin to kin_v2, DEBT lists shiny/work/data.gd families left)
 READY ext/ui-buff-hover 3f7e895acd (BuffStack hover card: name, source, seconds left; Tab/backpack shows all; check + shots)
+READY ext/boki-dex-port-1117 735f778ce3 (bulk-rebase: origin/main merged in mechanically, was c4cda92743; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/boki-more-ingame-1118 cd020fdc02 (bulk-rebase: origin/main merged in mechanically, was 323dce5053; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-artdata-1118-b 30f95a5734 (bulk-rebase: origin/main merged in mechanically, was 5a5a85d0da; union 1 gen 0 files; the branch's own READY checks still apply)
