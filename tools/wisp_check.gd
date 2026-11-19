@@ -468,8 +468,14 @@ func _summon() -> void:
 	var s := k.summon
 	ok(Settings.key_cap("summon") != "?" and Settings.ACTIONS.any(func(a): return a[0] == "summon"),
 		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
+	var radial0: int = m.fx.radial
 	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
 		"summon: the wisp bursts into the full Boki")
+	var pop := k.get_node_or_null(KinSummon.POP) as BokiWispPop
+	ok(pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
+		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
+	pop._process(BokiWispPop.DURATION + 0.01)
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
 	ok(k.tp_n > 0, "...put beside its hunter by a teleport, which the rig does not read as speed (%d)" % k.tp_n)
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
 	var lsh := k.brain.leash()
@@ -494,8 +500,12 @@ func _summon() -> void:
 	ok((k.model.get_node("Trail") as CPUParticles3D).emitting, "...bright again when ready")
 	KinSummon.press(p)
 	ok(KinSummon.press(p) and s.shrink > 0.0, "summon: Summon again sends it back early")
+	k.render(DT, 1.0)
+	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
+	ok(pop != null and not pop.out and not k.model.visible, "...folding into its wisp (BokiWispPop)")
 	_frames(KinSummon.SHRINK_S + 0.05)
 	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
 	s.cd = 0.0
 	KinSummon.press(p)
 	var foe: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]

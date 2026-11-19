@@ -17,9 +17,12 @@ numbers (Q1), one summon at a time (Q3), damage never ending it but death doing 
 Option 2. `content/rules/boki_summon.json` holds the role x size table (window, cooldown) and the uptime band;
 every species takes its cell (no per-species override until one is needed). Summon: the kin bursts beside you
 whole, on its normal AI and orders, leash 10 m (+-2 m by aggression), re-blooming beside you past 20 m.
-Damage never ends it; a kill turns it back into a wisp (the cooldown and what follows: decision 0044). The window ends in a 0.35 s
-shrink; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
+Damage never ends it; a kill turns it back into a wisp (the cooldown and what follows: decision 0044). The window ends in a 0.25 s
+fold; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
 a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiHud.summon_ring).
+The look both ways is BokiWispPop: the wisp swells and the Boki grows out of it, squashes on landing and opens
+its eyes last; the fold shuts the eyes, shrinks the Boki into the wisp and zips it to the shoulder. Soft light
+only: the bloom's spark burst and ground ring are gone (DECISIONS: explosions only for things that truly explode).
 Carry passives: the wisp rides on the shoulder with the Return order, so its passives are on at 100 % whether
 it is a wisp or out; stolen wisps add theirs at a share (decision 0041). Stealing (0041), the killed summon (0044)
 and one rule set for PvE and PvP (0045) have their own notes.

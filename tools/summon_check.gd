@@ -204,13 +204,16 @@ func _chase() -> void:
 	k.teleport(p.pos + east * (lsh - 2.0))
 	var far := 0.0
 	var turned := false
+	var flew := -99  # the last frame it was flying: a rush ability flight and its landing are not the walk
 	for i in 360:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
 		if i == int(RUSH_S * 60) + 20:  # (the rush flew it home: back to the edge, the walk is measured)
 			k.teleport(p.pos + east * (lsh - 2.0))
-		if i > RUSH_S * 60 + 20:
+		if k.state in ["flying", "flying_home"]:
+			flew = i
+		if i > RUSH_S * 60 + 20 and i - flew > 10:
 			far = maxf(far, k.flat_dist(p))
 		turned = turned or k.state == "returning"
 	ok(far > lsh - 1.5, "chase: it walks out to a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
