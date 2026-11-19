@@ -46,6 +46,7 @@ SECOND_TEX = 2048  # px: a master's other images (a joined prop's, emission), as
 LIMBS = ("upper_arm", "forearm", "thigh", "shin")
 CAGE, RAY, MARGIN_PX = 0.008, 0.03, 16       # (m, m, px) bake_warden's defaults
 CAP_SIDES = 2000             # the longest opening a detach caps (edges round it)
+CRUMB_FACES = 400            # a detach never cuts off a patch of faces smaller than this (absorb_crumbs)
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
@@ -521,6 +522,45 @@ def partners(bone, bones):
     return (out & set(bones)) - {bone}
 
 
+def absorb_crumbs(bm, lab, cuts):
+    """Before a detach cuts: each patch of faces on one bone that is under CRUMB_FACES and borders a bone it would be cut
+    from takes its neighbours' bone instead (most shared edges wins), until none is left. A region box or capsule edge
+    runs through thin goo strands and cloth tatters, so a detach used to cut slivers and single strand tips off onto the
+    wrong bone: ragged rims at rest and loose shards flying with the leg in the clips (Grimble's crescent, 11-19)."""
+    for _ in range(8):
+        seen, moved = set(), 0
+        for f0 in bm.faces:
+            if f0 in seen:
+                continue
+            patch, stack = [], [f0]
+            seen.add(f0)
+            while stack:
+                f = stack.pop()
+                patch.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g not in seen and lab[g] == lab[f0]:
+                            seen.add(g)
+                            stack.append(g)
+            if len(patch) >= CRUMB_FACES:
+                continue
+            border = {}
+            for f in patch:
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if lab[g] != lab[f0]:
+                            border[lab[g]] = border.get(lab[g], 0) + 1
+            if not any(b in cuts[lab[f0]] for b in border):
+                continue
+            new = max(border, key=border.get)
+            for f in patch:
+                lab[f] = new
+            moved += len(patch)
+        print("detach: %d crumb faces moved to their neighbours' bone" % moved, flush=True)
+        if not moved:
+            break
+
+
 def detach(low, G, names):
     """Cuts the faces of each `detach` bone pair apart ("*": any other bone) and caps both openings: a scan fuses the gun to
     the belt, the pack to the shoulders, the hook's crescent to the shin, and those bones swing apart in the clips. Each
@@ -537,6 +577,7 @@ def detach(low, G, names):
     for f in bm.faces:
         votes = [dom[v.index] for v in f.verts]
         lab[f] = max(set(votes), key=votes.count)
+    absorb_crumbs(bm, lab, cuts)
     cut = [e for e in bm.edges if len(e.link_faces) == 2 and lab[e.link_faces[1]] in cuts[lab[e.link_faces[0]]]]
     ends = {v.index for e in cut for v in e.verts}
     bmesh.ops.split_edges(bm, edges=cut)
