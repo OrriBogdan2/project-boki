@@ -32,16 +32,19 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
-| `master`, `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
+| `master` | Main > Volume | `settings.gd` (`Settings.BUSES`) | |
+| `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
 | `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
-| `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
-| `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
+| `fullscreen` | Main | `settings.gd` | |
+| `vsync`, `max_fps` | Video > Display | `settings.gd` | |
+| `quality` | Main (Graphics quality) | `settings.gd` | `quality_found`, `video_v` stay internal |
+| `msaa`, `shadows` | Video > Quality | `settings.gd` | |
 | `show_fps` | Video > Quality | `overlay.gd` | |
-| `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `ui_scale` | Main (Interface size) | `settings.gd` | |
 | `text_size` | Accessibility > Readability | `settings.gd` (UI.set_text_size) | 100/125/150%; old configs load at 100% |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
@@ -54,5 +57,11 @@ the X ultimate is the main session's (ultbond).
 
 ## Tab order
 
-Gameplay, Controls, Camera, Audio, Video, Accessibility, Demo. The Esc menu's Settings entry opens
-Gameplay (or the last tab you used); its Controls entry opens Controls.
+The first page, **Main**, shows only what most players change: Graphics quality, Fullscreen, Interface size and Master
+volume (moved here from Video, Accessibility and Audio; the keys are the same, so no saved value moves). **Controls** is
+next, with Moving and Fighting binds first and the rest behind "More keys". Everything else sits behind a "More..."
+tab: Gameplay, Camera, Audio (the other volumes), Video, Accessibility, Demo. The Esc menu's Settings entry opens
+Main (or the last tab you used); its Controls entry opens Controls. No key was renamed, so there is no migration;
+`--settings-trim-check` asserts that every key still has a row, that each row saves to `settings.cfg` and that a fresh
+load keeps every value. Labels: "Anti-aliasing" is "Smooth edges", "Frame rate limit" is "Frame rate cap", "Frame rate"
+is "Show frame rate", "Height cues" is "Show heights clearly".
