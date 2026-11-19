@@ -2,10 +2,11 @@ class_name LookSet
 extends Node3D
 ## The look locker's set round its turntable: the light rig and a backdrop with depth. The rig is a warm key from the
 ## front left that casts your shadow, a rim from behind right in your glow's colour, a cool kicker from behind left, a
-## soft top light and a low fill. The backdrop is a curved wall (shaders/look_wall.gdshader) that fades from a band of your glow down into the dark,
-## a halo behind you, standing stones at three depths (the camera's soft focus blurs them), a pool of light on the
-## floor, a soft shadow under your feet and motes drifting up in your glow's colour. Nothing here reads the model,
-## so any model on the turntable is lit the same way. tint() follows your glow; flash() is the light's answer to a pick.
+## soft top light and a low fill. The backdrop is a curved wall (shaders/look_wall.gdshader) that fades from a band
+## of your glow down into the dark, a halo behind you, standing stones at three depths (the camera's soft focus blurs
+## them), a pool of light on the floor, a soft shadow under your feet and motes drifting up in your glow's colour.
+## Nothing here reads the model, so any model on the turntable is lit the same way. tint() follows your glow;
+## flash() is the light's answer to a pick.
 ##
 ##   var lset := LookSet.create(centre, top)
 ##   lset.tint(glow)
