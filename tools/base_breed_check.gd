@@ -41,6 +41,8 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	seed(11)
 	Save.d = Save.fresh()
+	var was_base: bool = FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false      # base_mode is the default now; the pace model is the old-farm rules
 	var grown := _raising_min()      # the pace model's own conditions, before the base is built
 	FarmUnlocks.rules()["base_mode"] = true
 	await _start()
@@ -56,7 +58,7 @@ func run(m: Node) -> void:
 	print("BREED gate first egg laid: %.0f min; baby out: %.0f min (limit %.0f)" % [maxf(grown, friends), total, limit])
 	_over("the baby", total, limit)
 	ok(int(Save.d["matches"]) == 0, "no match was entered (matches %d)" % int(Save.d["matches"]))
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = was_base
 	home.queue_free()
 	await main.get_tree().process_frame
 	print("BREED DONE, failures: %d" % bad)

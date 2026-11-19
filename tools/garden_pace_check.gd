@@ -195,14 +195,17 @@ func _check_rows() -> void:
 	GardenXp.play("relay", rec, true, true)
 	ok(int(rec["xp"]) == 0, "a game not in the list pays no XP")
 	var c: Dictionary = r["curve"]
-	var flat := int(c["flat_from"])
-	ok(Game.xp_need(1) == int(c["per_level"]) and Game.xp_need(flat + 30) == Game.xp_need(flat),
-			"Game.xp_need follows the curve (%d at level 1, flat from level %d)" % [Game.xp_need(1), flat])
+	ok(Game.xp_need(1) == int(c["base"]) and Game.xp_need(4) == roundi(float(c["base"]) * pow(4.0, float(c["power"]))),
+			"Game.xp_need follows the curve round(%d x L^%s): %d at level 1, %d at level 4" % [int(c["base"]), str(c["power"]), Game.xp_need(1), Game.xp_need(4)])
 
 func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	rng.seed = 4242
+	# The pace model is the old-farm rules (no sulky floors, the DECAY joy pace): base_mode is on by default now
+	# (farm_build.json), so it is switched off here and put back at the end.
+	var was_base: bool = FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false
 	var pace: Dictionary = GardenXp.rules()["pace"]
 	var garden := minutes_garden_only()
 	var runner := minutes_runner(pace)
@@ -217,5 +220,6 @@ func run(m: Node) -> void:
 	ok(int(rec["xp"]) > 0, "a farm action gives XP")
 	_check_rows()
 	_breed_table(pace)
+	FarmUnlocks.rules()["base_mode"] = was_base
 	print("PACE CHECK DONE, failures: ", bad)
 	m.get_tree().quit()
