@@ -6,8 +6,8 @@
 				{"p": "ribbon", "streak": true, "size": 0.26, "life": 2.0, "tail": 0.02, "head": 0.36, "head_len": 1.6, "c": "main", "c2": "slot", "c3": "deep"},
 				{"p": "ribbon", "streak": true, "size": 0.1, "life": 2.0, "tail": 0.016, "c": "white", "c2": "white", "c3": "hot"}]},
 		"bolt_hit": {"net": false,
-			"fx": [{"p": "flare", "size": 1.2, "grow": 1.3, "life": 0.16, "c": "slot", "c2": "white", "c3": "deep"},
-				{"p": "sweep", "size": 0.9, "arc": 150, "tilt": 62, "lean": 40, "life": 0.22, "c": "slot", "c2": "hot", "c3": "deep"},
+			"fx": [{"p": "flare", "size": 0.8, "grow": 1.2, "life": 0.16, "c": "slot", "c2": "white", "c3": "deep"},
+				{"p": "sweep", "size": 0.75, "arc": 150, "tilt": 62, "lean": 40, "life": 0.22, "c": "slot", "c2": "hot", "c3": "deep"},
 				{"p": "star", "n": 2, "speed": 0.2, "spread": 1.0, "life": 0.14, "size": 0.5, "c": "hot", "c2": "white", "c3": "main"},
 				{"p": "ember", "way": "fwd", "n": 9, "speed": 6.5, "spread": 0.6, "grav": 7.0, "drag": 1.5, "life": 0.28, "size": 0.05, "stretch": 0.05, "c": "slot", "c2": "hot", "c3": "deep", "near": true}]}
 	}
