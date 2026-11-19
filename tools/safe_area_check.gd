@@ -208,6 +208,8 @@ func _ways_set(st: String) -> void:
 	ht._force(Heart.S.ASLEEP, "check")
 	pl.out = false
 	m.interact = {}
+	# a new save sees the one-line goal, not the four-seat strip; the Last Way Out scene wants the strip
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES if st == "last_way_out" else 0
 	out_x["state"] = "idle"
 	m.sess_t0 = 30.0 - m.time
 	pl.teleport(m.world.free_spot_near(ht.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))

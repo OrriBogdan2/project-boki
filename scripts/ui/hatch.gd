@@ -651,7 +651,7 @@ func _show_name() -> void:
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
-	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
@@ -676,6 +676,17 @@ func _path_card(label: String, line: String, go: Callable) -> Control:
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
 
+## The player's name box: empty (with a hint) until they type one; an unnamed player stays Save.UNNAMED.
+func _your_name_edit() -> LineEdit:
+	var le := LineEdit.new()
+	var cur := String(Save.d.get("name", Save.UNNAMED))
+	le.text = "" if cur == Save.UNNAMED else cur
+	le.placeholder_text = "Type your name"
+	le.max_length = 16
+	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return le
+
+
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else _hatched_rec(sp_id)
 	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
@@ -685,7 +696,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else Save.UNNAMED
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
