@@ -55,6 +55,14 @@
    "Send %s at the monsters"
   ],
   [
+   "summon",
+   "Press %M to summon %s"
+  ],
+  [
+   "pack",
+   "Beat the pack, and summon when the ring is bright"
+  ],
+  [
    "pick_kin",
    "Level 3: unlock %A"
   ],
@@ -112,6 +120,11 @@
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%T sends %s at a monster; tap again to recall %s.",
+  "summon": "%s bursts out and fights for %D seconds: watch the ring",
+  "summon_warn": "Almost time. %s is getting tired.",
+  "summon_back": "Back to a light. %s rests now.",
+  "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
+  "pack": "A dim light means %s rests (%B seconds); bright means ready",
   "glove": "Gloves need no points; %Q uses this one.",
   "hook": "It shoots from afar, and your glove drags it to your feet.",
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
@@ -121,6 +134,10 @@
  },
  "alt": {
   "sec_hold": "Tap, then hold, to use %A",
+  "summon_out": "%s is out for %D seconds",
+  "summon_rest": "%s is resting",
+  "summon_early": "That calls it back early: let it stay",
+  "pack_wait": "Wait for the bright ring, then press %M",
   "shoot_draw": "Hold to draw, let go to loose",
   "shoot_melee": "Step in and swing at them"
  },
@@ -132,12 +149,15 @@
   "sec": "Back at your last stop. Use %A away from the edge",
   "shoot": "Back at your last stop. Fight with solid ground behind you",
   "gkey": "Back at your last stop. Tap %T and let %s go in first",
+  "summon": "Back at your last stop. Press %M and let %s out first",
+  "pack": "Back at your last stop. Fight with solid ground behind you",
   "kin": "Back at your last stop. Line them up, then use %A",
   "hook": "Back at your last stop. Hook the Sentinel with %Q from afar",
   "ult": "Back at your last stop. Fuse with %s, then hold your ground"
  },
  "need": {},
  "cds": 0.25,
+ "summon_cd_mult": 0.33,
  "mob": {
   "scale": 1.4,
   "dmg": 0.1,
@@ -170,6 +190,19 @@
    "foes": [
     "skitter",
     "skitter"
+   ],
+   "to": 3
+  },
+  "summon": {
+   "foes": [
+    "spitter"
+   ],
+   "to": 0
+  },
+  "pack": {
+   "foes": [
+    "skitter",
+    "spitter"
    ],
    "to": 3
   },
