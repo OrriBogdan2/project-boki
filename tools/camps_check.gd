@@ -97,10 +97,13 @@ func run(main: Node) -> void:
 	print("CAMPS info %d Great Camp spots, %d guarded rare Boki" % [heavy_n, guarded.size()])
 	ok(heavy_n == 0 or guarded.size() == mini(2, heavy_n), "rare Boki are guarded by Great Camps")
 	ok(
-		guarded.all(func(c): return c["active"] and c["ref"] == null and m.world.camp_spots[c["camp"]]["kind"] == "heavy"),
+		guarded.all(
+			func(c): return c["active"] and c["ref"] == null and m.world.camp_spots[c["camp"]]["kind"] == "heavy"
+		),
 		"a guarded Boki is not out while its camp stands"
 	)
-	ok(guarded.all(func(c): return sp.state_for(c, me.team) == "active"), "the map shows the guarded camps from the start")
+	var shown := guarded.all(func(c): return sp.state_for(c, me.team) == "active")
+	ok(shown, "the map shows the guarded camps from the start")
 	# ---- 7. a late join finds camps picked over
 	var cleared: int = m.camps.picked_over(1.0, RandomNumberGenerator.new())
 	ok(
@@ -114,6 +117,7 @@ func run(main: Node) -> void:
 	# ---- 8. a cleared Great Camp frees its Boki
 	if sp:
 		ok(sp.free_guarded() == guarded.size(), "every cleared Great Camp frees its Boki (%d)" % guarded.size())
-		ok(guarded.all(func(c): return c["ref"] is Kin and (c["ref"] as Kin).is_wild()), "the freed Boki is wild and catchable")
+		var wild := guarded.all(func(c): return c["ref"] is Kin and (c["ref"] as Kin).is_wild())
+		ok(wild, "the freed Boki is wild and catchable")
 	print("CAMPS done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

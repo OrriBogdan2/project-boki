@@ -36,7 +36,9 @@ const DROP_REVEAL_R := 14.0    # ... and from the glider on the way down
 
 var m: Match
 var cats := {}                 # id -> def (CATS plus anything registered)
-var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, taken, known: {team: true}}; a guarded pick also has camp: its camp_spots index
+# {id, cat, i, pos: Vector3, name, active, ref, taken, known: {team: true}}; a guarded pick also has
+# camp: its camp_spots index
+var cands: Array = []
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
@@ -212,11 +214,14 @@ func _guard(cat: String, g: int, r: RandomNumberGenerator) -> int:
 			spots.append(i)
 	for i in range(spots.size() - 1, 0, -1):
 		var j := r.randi_range(0, i)
-		var t = spots[i]; spots[i] = spots[j]; spots[j] = t
+		var t = spots[i]
+		spots[i] = spots[j]
+		spots[j] = t
 	for si in spots.slice(0, g):
 		var spot: Dictionary = m.world.camp_spots[si]
 		var ii := int(spot.get("island", -1))
-		var c := add_candidate(cat, spot["pos"], String(m.world.islands[ii].get("name", "")) if ii >= 0 and ii < m.world.islands.size() else "")
+		var isl_name := String(m.world.islands[ii].get("name", "")) if ii >= 0 and ii < m.world.islands.size() else ""
+		var c := add_candidate(cat, spot["pos"], isl_name)
 		c["camp"] = si
 		c["active"] = true
 	return mini(g, spots.size())
@@ -228,9 +233,10 @@ func free_guarded() -> int:
 		return 0
 	var freed := 0
 	for c in cands:
-		if c.has("camp") and c["ref"] == null and int(c["camp"]) < m.camps.list.size() and m.camps.cleared(int(c["camp"])):
+		var ci := int(c.get("camp", -1))
+		if ci >= 0 and c["ref"] == null and ci < m.camps.list.size() and m.camps.cleared(ci):
 			var r := RandomNumberGenerator.new()
-			r.seed = m.seed_val * 53 + 17 * int(c["camp"]) + 11
+			r.seed = m.seed_val * 53 + 17 * ci + 11
 			c["ref"] = _spawn_rare(c["pos"], r)
 			freed += 1
 	return freed

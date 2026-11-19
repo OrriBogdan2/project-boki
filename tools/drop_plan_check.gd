@@ -130,9 +130,9 @@ func run(main_node: Node) -> void:
 	print("DCHECK generated map candidates: %s (same both times=%s)" % [str(counts), gpos == g2.cands.map(func(cc): return cc["pos"])])
 	if g1.count_of("rare_kin") < 3 or g1.count_of("vault") < 2 or g1.count_of("cache") < 4 or gpos != g2.cands.map(func(cc): return cc["pos"]): ok = false; print("DCHECK FAIL generated map candidates")
 	gm.world.free(); gm.free()
-	# rare kin only at the live rare-kin points, one at each
+	# rare kin only at the live rare-kin points, one at each (a Great Camp still holds its guarded one)
 	var rare: Array = m.kins.filter(func(k): return k.has_meta("rare"))
-	var live: Array = sp.active_of("rare_kin")
+	var live: Array = sp.active_of("rare_kin").filter(func(cc): return not cc.has("camp"))   # (guarded: --camps-check)
 	var stray := 0
 	for k in rare:
 		var near := false
