@@ -27,7 +27,7 @@ uniform vec4 weight_g = vec4(1.0);
 uniform vec4 weight_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 const float FLASH_GLOW = 0.9;    // the hit flash's glow on a dark or mid surface (it reads there already)
-const float FLASH_PALE = 1.6;    // and up to this much more on a pale one (luminance 0.35 .. 0.8)
+const float FLASH_PALE = 1.6;    // and up to this much more on a pale one (linear luminance 0.15 .. 0.6)
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 // the Hunter's ultimate (UltGlow): 0 none, ~0.4 a quiet rim glow while it is ready, 1 the cast flash, all in ult_color
 uniform float ult_glow : hint_range(0.0, 1.0) = 0.0;
@@ -273,7 +273,7 @@ void fragment() {
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
 	// the hit flash: white albedo plus a glow, more of it on pale surfaces (an ice-white or pink body is already near
 	// the flash's white, so it reads by going past it: brighter, and over the glow threshold it blooms)
-	float flash_k = FLASH_GLOW + FLASH_PALE * smoothstep(0.35, 0.8, dot(c, vec3(0.3, 0.59, 0.11)));
+	float flash_k = FLASH_GLOW + FLASH_PALE * smoothstep(0.15, 0.6, dot(c, vec3(0.3, 0.59, 0.11)));
 	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * flash_k + c * glow * heat + c * own_ambient * (1.0 - fog)
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
