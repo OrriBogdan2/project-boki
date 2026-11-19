@@ -1126,14 +1126,15 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 
 | Setting | Value |
 |---|---|
-| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name. mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
+| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name, %X the way out ExtractGoal points at (its map badge) and %H how to use it (exit_none when no way out is on offer). mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
 | matches | 2 |
 | gap | 1.5 |
 | close_at | 0.4 |
 | mates_far | 30 |
+| exit_none | Go to an exit and hold %F to leave |
 | dive_open_s | 1.5 |
 | dive_height | 15 |
-| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
+| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
 
 ## garden_daily (`content/rules/garden_daily.json`)
 
@@ -1592,6 +1593,10 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 | _ways_out_lead_s | the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on |
 | always | ["minimap", "clock", "counters", "vitals", "abilities", "glider", "belt", "slots", "weapon"] |
 | _always | blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen) |
+| newcomer_seats | [2, 3] |
+| _newcomer_seats | the Ways Out seats (0 Lair, 1 Heart Gate, 2 Uplink, 3 Heart ring) a new player's objective line points at: the two that need no boss fight and no carried Heart (ExtractGoal) |
+| goal_how | ["Beat the boss, then ride the lift", "Carry the Heartspark to the Gate, hold %F", "Hold %F at the outpost until the lift opens", "Stand in the Heart ring until the end"] |
+| _goal_how | ExtractGoal: how to leave through each seat, in seat order; %F is the interact key |
 
 ## hud_reveal (`content/rules/hud_reveal.json`)
 
