@@ -62,7 +62,7 @@ const MOVES := {
 	# (the body fully below the surface) until gil_surface replaces it
 	"gil_dive": {"hold": true, "keys": [
 		[0.0, {"p": 0.15, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.9, -1.4],
-				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "blade": Vector3(0.0, 1.4, 0.0), "bw": 1.0, "rad": 0.4}],
+				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "blade": Vector3(-0.45, 1.15, 0.0), "bw": 1.0, "rad": 0.55}],
 		[0.07, {"p": -0.8, "fx": -0.7, "sq": -0.35, "lift": -0.7, "lw": 1.0, "legs": [-0.2, -0.1, -0.2, -0.1],
 				"fl": Vector3(-0.1, 0.2, -0.9), "hw": 1.0, "blade": Vector3(0.0, -0.3, 0.0), "bw": 1.0, "rad": 0.8}],
 		[0.15, {"p": -0.9, "fx": -1.2, "sq": -0.35, "lift": -2.8, "lw": 1.0, "legs": [-0.2, -0.1, -0.2, -0.1],
@@ -70,9 +70,9 @@ const MOVES := {
 	# ... and out: he bursts up through the ground, stretched, arms and point up, then lands in a squash
 	"gil_surface": {"keys": [
 		[0.0, {"p": 0.1, "sq": -0.35, "lift": -2.2, "lw": 1.0, "legs": [0.2, -0.3, 0.2, -0.3],
-				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "blade": Vector3(0.0, 1.5, 0.0), "bw": 1.0, "rad": 0.5}],
+				"fl": Vector3(-0.2, 1.0, 0.0), "hw": 1.0, "blade": Vector3(-0.8, 1.1, 0.0), "bw": 1.0, "rad": 0.6}],
 		[0.1, {"p": 0.15, "sq": -0.35, "lift": 0.6, "lw": 1.0, "legs": [0.6, -1.2, 0.3, -0.8],
-				"fl": Vector3(-0.3, 1.0, 0.0), "hw": 1.0, "blade": Vector3(0.0, 1.5, 0.0), "bw": 1.0, "rad": 0.5}],
+				"fl": Vector3(-0.3, 1.0, 0.0), "hw": 1.0, "blade": Vector3(-0.8, 1.1, 0.0), "bw": 1.0, "rad": 0.6}],
 		[0.24, {"p": 0.05, "sq": 0.05, "lift": 0.3, "lw": 1.0, "legs": [0.9, -1.5, 0.7, -1.3],
 				"fl": Vector3(-0.5, 0.5, 0.0), "hw": 0.8, "blade": Vector3(-0.6, 0.6, 0.6), "bw": 0.8, "rad": 0.4}],
 		[0.34, {"p": -0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.6, 0.8, -1.5]}],
