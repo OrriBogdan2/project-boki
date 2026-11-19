@@ -152,9 +152,9 @@ func _finish() -> void:
 	h._garden_xp(rec, "drill", pts)
 	var sname := String(Care.STATS[stat]["name"]).to_lower()
 	if gained > 0:
-		CareJournal.note(rec, "trained %s at the yard: +%d" % [sname, gained])
+		CareJournal.note(rec, "trained %s at the Training post: +%d" % [sname, gained])
 	if Care.care_day(rec, "trained"):
-		Save.remember(rec, "trained", "trained %s with you at the yard" % sname, 1.0)
+		Save.remember(rec, "trained", "trained %s with you at the Training post" % sname, 1.0)
 	Save.save_game()
 	var shown := int(rec["stats"][stat])
 	var msg := "No gain this time. Try again after a rest"

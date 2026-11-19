@@ -521,7 +521,7 @@ func _start_wave() -> bool:
 	vfx("wave", h.pos, dir, {"len": length, "w": float(xd["width"])})
 	return true
 
-## R again while he surfs: he leaps off the crest early (owner 11-17). The wave and the untargetable time end at
+## R again while he surfs: he leaps off the crest early. The wave and the untargetable time end at
 ## once; the dash hands over to a run with a small hop, and he lands with the usual shield (and its sound).
 func ult_recast() -> bool:
 	if wave.is_empty():
