@@ -280,7 +280,7 @@ static func status(id: String) -> String:
 static func locked_line(id: String) -> String:
 	if is_open(id):
 		return ""
-	if is_bonus(id) and not can_unlock(id):
+	if is_bonus(id):
 		return "Finish an expedition to choose your second Hunter"
 	return challenge_text(id)
 
