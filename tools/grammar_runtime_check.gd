@@ -42,6 +42,8 @@ func _grt_out(k: Kin, at: Vector3) -> void:
 	k.grounded = true
 	k.wind_do = Callable()       # a fresh Boki: no cast still winding up (BokiSwing.CAST_WIND)
 	k.wind_t = 0.0
+	k.cmd = "guard"              # holds where it stands: no hop home while a cast winds up (BokiSwing.CAST_WIND)
+	k.hold_at = at
 
 func _grt_reset(T: Hunter) -> void:
 	T.hp = T.max_hp
@@ -268,6 +270,7 @@ func run(main_node: Node) -> void:
 	P.slot_lv["kin"] = 1
 	_grt("locked Boki slot never casts", locked, "")
 	k.target = T
+	k.cmd = "follow"
 	k.runner.reset()
 	var used := {"k1": 0, "k2": 0}
 	for i in 60:
@@ -276,8 +279,9 @@ func run(main_node: Node) -> void:
 		k.brain.think_abilities(0.1)
 		if k.runner.charges("k1") < c1: used["k1"] += 1
 		if k.runner.charges("k2") < c2: used["k2"] += 1
+		_ac_run(m, BokiSwing.CAST_WIND + Match.DT)      # the wound-up cast releases; one winds up at a time, so the auto waits
 		k.runner.reset()
-		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T
+		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T; k.cmd = "follow"      # (its own AI, not the Guard hold)
 	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
 	_ac_run(m, 1.0); _grt_reset(T)
 	# ---- 6. carry modes

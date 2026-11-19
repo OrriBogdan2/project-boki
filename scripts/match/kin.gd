@@ -652,7 +652,7 @@ func sim(dt: float) -> void:
 		if wind_t <= 0.0:
 			var land := wind_do
 			wind_do = Callable()
-			if ready_to_fight():      # (a recall or a landing mid-wind-up still lets the skill go; down, dazed or away loses it)
+			if state == "active" and ready_to_fight():
 				land.call()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
