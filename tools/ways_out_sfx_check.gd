@@ -234,7 +234,8 @@ func _heart(main: Node) -> void:
 	H = m.heart
 	_to(m, float(rl["wake_s"]))
 	_run(m, float(rl["charge_s"]) + 0.5)
-	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
+	# a standing rival: by now idle hunters go down now and then (no hitter), so which one is up at the pick is luck of the spawns
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team and not h.downed and not h.out)[0]
 	rival.teleport(m.world.free_spot_near(H.site + Vector3(1, 0, 0), [], 1.0, 0.45, 6.0))
 	H._pick(rival)
 	m.step(Match.DT)
