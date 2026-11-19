@@ -20,7 +20,7 @@ extends RefCounted
 ##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
 ##  - "loco.foot_lock": [walk, run] (0..1, default 0) holds a foot where it came down while it is on the ground (the
 ##    lowest LOCK_BAND of its own height range), the ground under it going back at the body's speed, by the legs'
-##    two-bone IK (FootPlant.reach_bones), at most LOCK_PULL of the leg off the clip's ankle; lifted, it eases back
+##    two-bone IK (WardenSkeleton.reach_bones), at most LOCK_PULL of the leg off the clip's ankle; lifted, it eases back
 ##    onto the clip. For run clips whose planted foot sweeps back unevenly, which no playback rate keeps planted
 ##    (Albert, Lace, Neve). The ground's way is the blend's (`pos`), so a run-and-aim's turned legs lock true.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
@@ -186,7 +186,7 @@ func _lock_feet(dt: float) -> void:
 	var a := 1.0 - exp(-dt / LOCK_RANGE_TAU)
 	var back := 1.0 - exp(-dt / LOCK_EASE_TAU)
 	for f in feet:
-		var ank := FootPlant.ankle(skel, f[0], f[1])
+		var ank := WardenSkeleton.ankle(skel, f[0], f[1])
 		f[5] = minf(ank.y, lerpf(f[5], ank.y, a)) if f[5] < INF else ank.y
 		f[6] = maxf(ank.y, lerpf(f[6], ank.y, a)) if f[6] > -INF else ank.y
 		var down := ank.y <= float(f[5]) + LOCK_BAND * maxf(float(f[6]) - float(f[5]), 0.02)
@@ -201,7 +201,7 @@ func _lock_feet(dt: float) -> void:
 		f[4] = ank
 		f[7] = down
 		if off.length_squared() > 1e-8:
-			FootPlant.reach_bones(skel, f[0], f[1], ank + off * on)
+			WardenSkeleton.reach_bones(skel, f[0], f[1], ank + off * on)
 
 
 ## How far forward (rad, + forward, -Z) a direction points from straight down.

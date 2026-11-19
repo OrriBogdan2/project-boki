@@ -177,13 +177,9 @@ static func foot(leg: Node3D, knee: Node3D) -> Vector3:
 	return leg.transform * (knee.transform * Vector3(0.0, -HunterAnim.SHIN, 0.0))
 
 
-## The ankle in the skeleton's space: the shin's first child bone (the foot), or a thigh's length down the shin.
+## The ankle in the skeleton's space (WardenSkeleton.ankle).
 static func ankle(sk: Skeleton3D, thigh: int, shin: int) -> Vector3:
-	var kids := sk.get_bone_children(shin)
-	var tip := Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
-	if not kids.is_empty():
-		tip = sk.get_bone_rest(kids[0]).origin
-	return sk.get_bone_global_pose(shin) * tip
+	return WardenSkeleton.ankle(sk, thigh, shin)
 
 
 ## Two-bone IK in the Legs node's space: bends the knee and turns the hip so the ankle moves by move,
@@ -199,32 +195,6 @@ static func _reach(leg: Node3D, knee: Node3D, move: Vector3) -> void:
 	leg.basis = Basis(Quaternion(now.normalized(), to.normalized())) * leg.basis
 
 
-## Two-bone IK on the skeleton (its space): turns the thigh and shin bones so the ankle reaches tgt, the knee
-## bending in the plane the clip bent it in; the foot keeps the clip's turn.
+## Two-bone IK on the skeleton (WardenSkeleton.reach_bones).
 static func reach_bones(sk: Skeleton3D, thigh: int, shin: int, tgt: Vector3) -> void:
-	var tp := sk.get_bone_global_pose(thigh)
-	var sp := sk.get_bone_global_pose(shin)
-	var kids := sk.get_bone_children(shin)
-	var foot := kids[0] if not kids.is_empty() else -1
-	var fp := sk.get_bone_global_pose(foot) if foot >= 0 else Transform3D.IDENTITY
-	var hip := tp.origin
-	var knee := sp.origin
-	var ankle := ankle(sk, thigh, shin)
-	var upper := hip.distance_to(knee)
-	var lower := knee.distance_to(ankle)
-	var to := tgt - hip
-	var span := clampf(to.length(), absf(upper - lower) + 0.001, upper + lower - 0.001)
-	var dir := to.normalized()
-	var side := (knee - hip) - dir * (knee - hip).dot(dir)
-	if side.length_squared() < 1e-8:
-		side = tp.basis.z - dir * tp.basis.z.dot(dir)
-	side = side.normalized()
-	var ca := clampf((upper * upper + span * span - lower * lower) / (2.0 * upper * span), -1.0, 1.0)
-	var knee_to := hip + dir * (upper * ca) + side * (upper * sqrt(1.0 - ca * ca))
-	var turn_t := Basis(Quaternion((knee - hip).normalized(), (knee_to - hip).normalized()))
-	sk.set_bone_global_pose(thigh, Transform3D(turn_t * tp.basis, hip))
-	var shin_dir := turn_t * (ankle - knee)
-	var turn_s := Basis(Quaternion(shin_dir.normalized(), (hip + dir * span - knee_to).normalized()))
-	sk.set_bone_global_pose(shin, Transform3D(turn_s * turn_t * sp.basis, knee_to))
-	if foot >= 0:
-		sk.set_bone_global_pose(foot, Transform3D(fp.basis, sk.get_bone_global_pose(foot).origin))
+	WardenSkeleton.reach_bones(sk, thigh, shin, tgt)
