@@ -46,11 +46,12 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
 
-**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118, retry):** the v95 scan has the sleeves fused to the coat, so the re-derived
-weights drag triangles into black spikes in the dynamic clips. Only `Body` JOINTS_0/WEIGHTS_0 changed (the diff against main is inside those
-two buffers; the index list, vertices, UVs, rig, bone names, clips, materials and the Fan/card meshes are byte for byte the same: no triangle
-is removed, open boundary edges stay at 77). Weights: only the vertices on edges that stretch past 2x in the 57 game clips (visible edges:
-rest length >= 8 mm or posed >= 5 cm) are smoothed (screened Laplacian, 1 ring, lambda 3), repeated while any stay over 2x; after every round each
-touched vertex is blended back toward its live weights until its position in idle/stance/crouch_idle/walk_* is within 3.5 cm of live (linear in
-the weights), so the resting and idle look stays the live one; vertices that would add a crushed long edge are reverted to live.
-Stretched triangles (ratio > 2.5 and edge >= 7 cm) in the worst pose: 879 -> 214; crushed triangles never above live in any pose.
+**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118, retry 11-19f):** the v95 scan has the sleeves fused to the coat, and the
+re-derived weights leave forearm weight on the shoulder puff and coat, so the clips pull small triangles into dark slivers. Only `Body`
+JOINTS_0/WEIGHTS_0 rows of 4,050 of 41,044 vertices changed; everything else in the file is byte for byte main's (index list, vertices, UVs,
+rig, bone names, clips, materials, Fan/cards; no triangle removed, open boundary edges 77). Locked to main's bytes: every vertex whose main
+weight is led by a hand, finger, box, lid, head/face bone. Weights: a smoothed proposal on the spike vertices, then per welded vertex blended
+toward main's weights until (1) in idle/stance/walk_* (game poses at 30 fps) no vertex moves more than 0.9 cm unless it sits on an edge that
+is already stretched past 2x there, and (2) no clip's worst edge (tools/stretch_check.gd measure, all 57 game clips at 0.125 s) is above
+main's and no edge newly passes 2.5x. Worst clip edge 7.93 -> 5.78, median clip 6.57 -> 4.77; hunter_mesh_check stretched tris (16 frames)
+worst pose 872 -> 558, union 1268 -> 808. Proof: /home/boki/gens/ostra-fix-1119f/.
