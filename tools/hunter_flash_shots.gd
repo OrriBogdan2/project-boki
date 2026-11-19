@@ -1,6 +1,7 @@
 extends RefCounted
 ## --hunter-flash-shots --shots-dir=<dir>: every Hunter (Arch.ids, its current model) in both team colours takes
-## one hit at the match camera. <dir>/strip.png: per team a row before the hit and a row on the flash's full frame.
+## one hit at the match camera. <dir>/strip.png: per team a row before the hit, one on the flash's full frame and
+## one on its fade.
 ## Prints per Hunter how much the body brightens (mean luminance gain over the body's pixels) and what share of its
 ## room to white that is; fails when any Hunter's flash closes less than REL_MIN of that room, so a pale model's flash
 ## reads as clearly as a dark one's (a dark body has more room, so the raw gain alone would favour it).
@@ -55,7 +56,7 @@ func run(root: Node) -> void:
 	var spot := player.pos + Vector3(0, 0, 5)
 	var ids: Array = Arch.ids()
 	var teams: Array = [player.team, 2 if player.team != 2 else 1]
-	var strip := Image.create_empty(CELL.x * ids.size(), CELL.y * teams.size() * 2, false, Image.FORMAT_RGBA8)
+	var strip := Image.create_empty(CELL.x * ids.size(), CELL.y * teams.size() * 3, false, Image.FORMAT_RGBA8)
 	var gains: Array = []
 	for ti in teams.size():
 		for i in ids.size():
@@ -78,10 +79,10 @@ func run(root: Node) -> void:
 			gains.append([rel, ids[i], teams[ti]])
 			var row := [ids[i], teams[ti], g[1], g[0], rel, gf[0]]
 			print("HUNTERFLASH %-12s team %d base %.2f gain %.2f rel %.2f fade %.2f" % row)
-			for r in 2:
+			for r in 3:
 				var cell: Image = shots[1 + r]
 				cell.resize(CELL.x, CELL.y, Image.INTERPOLATE_LANCZOS)
-				strip.blit_rect(cell, Rect2i(Vector2i.ZERO, CELL), Vector2i(i * CELL.x, (ti * 2 + r) * CELL.y))
+				strip.blit_rect(cell, Rect2i(Vector2i.ZERO, CELL), Vector2i(i * CELL.x, (ti * 3 + r) * CELL.y))
 			h.visible = false
 	strip.save_png(dir.path_join("strip.png"))
 	var worst: Array = gains.reduce(func(a, b): return a if a[0] <= b[0] else b)
@@ -103,7 +104,7 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	await _frames(h, WARM)
 	var cam := main.get_viewport().get_camera_3d()
 	var foot := cam.unproject_position(spot)
-	var head := cam.unproject_position(spot + Vector3(0, 2.4, 0))
+	var head := cam.unproject_position(spot + Vector3(0, 3.2, 0))
 	var px := Vector2(absf(foot.y - head.y) * 1.3 * CELL.x / CELL.y, absf(foot.y - head.y) * 1.3)
 	var mid := (foot + head) * 0.5
 	var size := main.get_viewport().get_texture().get_image().get_size()
