@@ -59,6 +59,8 @@ func _via_pack() -> void:
 			dir = a.substr(12)
 	var exe := OS.get_executable_path()
 	var proj := ProjectSettings.globalize_path("res://")
+	if not dir.is_absolute_path():
+		dir = proj.path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
 	var pck := dir.path_join("win.pck")
 	var exp_out: Array = []
@@ -70,7 +72,11 @@ func _via_pack() -> void:
 		var cmd := "cd /tmp && timeout 900 '%s' --main-pack '%s' -- --vespyx-places-check --save=%s --shots-dir='%s'" % [exe, pck, kind_s, dir]
 		var r := OS.execute("sh", ["-c", cmd], res, true)
 		worst = maxi(worst, r)
-		for line in String(res[0] if res.size() > 0 else "").split("\n"):
+		var full := String(res[0] if res.size() > 0 else "")
+		var lf := FileAccess.open(dir.path_join("child_%s.log" % kind_s), FileAccess.WRITE)
+		lf.store_string(full)
+		lf.close()
+		for line in full.split("\n"):
 			if line.begins_with("VESPYX_PLACES"):
 				print(line)
 		print("VESPYX_PACK save=%s rc=%d" % [kind_s, r])
@@ -92,8 +98,10 @@ func _record() -> Dictionary:
 
 func _place(label: String, screen: String, opts: Dictionary) -> void:
 	main.show_screen(screen, opts)
-	for i in 90:
+	for i in 600:       # a farm or a match takes a while to build: up to 600 frames until a rigged Boki shows
 		await main.get_tree().process_frame
+		if i >= 90 and not _rigs().is_empty():
+			break
 	_report(label)
 	await _grab(label)
 
@@ -135,22 +143,29 @@ func _dex_card() -> void:
 
 ## Counts the rigged and the primitive bodies in the tree right now (a body is the Flex node under Body).
 func _report(label: String) -> void:
-	var tree := main.get_tree().root
-	var rigs := 0
+	var names := _rigs()
+	var rigs := names.size()
 	var old := 0
-	var names := PackedStringArray()
-	for f in tree.find_children("Flex", "Node3D", true, false):
-		if f.get_parent() == null or f.get_parent().name != "Body":
-			continue
-		var rig := f.get_node_or_null("BokiRig")
-		if rig != null:
-			rigs += 1
-			names.append(String(rig.get("species")))
-		elif f.get_node_or_null("Tail") != null or f.get_node_or_null("Legs") != null:
+	for f in _bodies():
+		if f.get_node_or_null("BokiRig") == null and (f.get_node_or_null("Tail") != null or f.get_node_or_null("Legs") != null):
 			old += 1
 	print("VESPYX_PLACES %s: rigs=%d (%s) old=%d" % [label, rigs, ",".join(names), old])
 	if old > 0:
 		bad += 1
+
+
+func _bodies() -> Array:
+	return main.get_tree().root.find_children("Flex", "Node3D", true, false).filter(func(f): return f.get_parent() != null and f.get_parent().name == "Body")
+
+
+## The species of every rigged Boki body in the tree.
+func _rigs() -> PackedStringArray:
+	var names := PackedStringArray()
+	for f in _bodies():
+		var rig: Node = f.get_node_or_null("BokiRig")
+		if rig != null:
+			names.append(String(rig.get("species")))
+	return names
 
 
 func _grab(label: String) -> void:
