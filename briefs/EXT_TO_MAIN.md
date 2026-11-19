@@ -10288,3 +10288,4 @@ READY ext/tut-training-stations 45345fab6c (Training Grounds: one first-time hin
 READY ext/farm-blocks-climbable 8b59dae87d (every solid catalog piece placed + climbed in --farm-climb-blocks-check, Boki S/M/L walk past; no piece blocked, no data fix needed)
 READY ext/tut-camps-telegraph fb3d7c78f2 (tutorial first camp: marker + 3 s countdown on world and minimap before monsters; CampMark; fight-check asserts telegraph before spawn)
 READY ext/sfx-step-biomes da12a4cff8 (footsteps by biome: ember/gloom stone, frost snow, rest grass, content/rules/step_biomes.json; sfx-set-check style rows)
+READY ext/garden-pair-after-grown c314c97aa0 (first-day 'Pair two Boki' row shows only once a Boki is Grown; asserted in --garden-first-day-check, 0 fails)
