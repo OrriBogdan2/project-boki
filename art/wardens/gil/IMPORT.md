@@ -40,14 +40,20 @@ triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so sk
 v95 hat stands lower than the v1 floppy one).
 
 ## Skinning fix (2026-11-19, ext/hunter-fix-gil-1118)
-`gil.glb` is byte-for-byte the live v95 mesh (same vertices, normals, UVs, colours, 60000 + 3000 triangles, skeleton,
-bones, textures, materials) with only the Body skin weights replaced. Nothing is cut, split or added, so the bind pose
-and every silhouette hole are exactly as live.
-Gil has no clips: the game poses his bones from the rig, so the fix was measured by dumping the real game's bone matrices
-(idle, walk, run, jump, glide, both dashes, LMB, RMB, E and its recast, X wave and leap; 900 frames) and skinning offline.
-- Live fault: weights were noisy on the fused scan (arm weight on hip skin, hips/thigh/tail mixed on the hem) and the
-  two copies of a UV-seam vertex carried different weights (827 seam points opened over 1 cm, up to 0.73 m).
-- Fix: arm bones removed from body skin and body bones from arm skin, then a stretch-minimising solve (tools: the job's
-  opt.py) over the 900 pose frames, anchored to the live weights, with the interior of each clean region pinned and
-  every UV-seam copy forced to the same weights. The robe keeps its leg follow.
-- Result: edges past 3x 3.56% -> 0.10% (worst 25x -> 4.2x); seam gaps over 1 cm 827 -> 0.
+Body: byte-for-byte the live v95 mesh (same vertices, normals, UVs, colours, 60000 triangles, skeleton, bind matrices,
+textures, materials); only its skin weights change. Nothing is cut, split, added or deleted, so the rest pose silhouette
+and every hole are exactly as live. Swordfish: same 3000 triangles, moved rigidly (no rotation, +0.18 x, +0.20 y,
++0.07 z) so its tail grip sits in the right hand instead of hanging 20 cm away by the knee, and skinned 50/50 forearm.R +
+hand.R, the same blend as the hand skin, so the hand and the sword move as one.
+Gil has no clips: the game poses his bones from the rig, so the fix is measured by skinning offline over a dump of the
+real game's bone matrices (idle, walk, run, jump, glide, both dashes, LMB, RMB, E and its recast, X wave and leap; 900
+frames).
+- Live fault: the fused scan's weights left arm weight on hip skin and hips/thigh/tail mixed on the hem; the two copies of
+  a UV-seam vertex carried different weights (827 seam points opened over 1 cm, up to 0.73 m).
+- Right arm: the left arm's clean weight field (sleeve and the robe band beside it) is mirrored onto the right side; the
+  hand is 50/50 forearm.R + hand.R with no body bone, the cuff blends into it. The right hand follows its bones like the
+  left (live had it 8 cm off, dragged by hip weight).
+- Then a stretch-minimising solve over the pose frames around the changed region (hand and cuff locked; arm skin may use
+  only arm bones; body skin beside the sleeve may share upper_arm.R; no root weight), every UV-seam copy forced to the
+  same weights.
+- Result (900 frames): see the PR body for the measured numbers (edges past 3x, hand-to-bone, sword-to-hand).
