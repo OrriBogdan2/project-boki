@@ -3488,11 +3488,10 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same one the title and the expedition panel open), as your expedition Hunter.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:

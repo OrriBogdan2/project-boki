@@ -194,6 +194,7 @@ func _duel(at: Vector3) -> void:
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
+	m.duel_hint = DuelRingHint.make(m)
 
 
 ## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
