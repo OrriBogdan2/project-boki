@@ -107,6 +107,12 @@ func _casts(arch: String) -> void:
 		var r: Array = ac.setup(arch, 8.0, kin_sp)
 		var m: Match = r[0]
 		var P: Hunter = r[1]
+		# whichever path builds a Hunter's cast context, it carries that Hunter's slot colour (KinExec.make_cx)
+		if kin_sp == "":
+			var cx := KinExec.make_cx(m, P, P.kin, P, P.pos, 1.0, "e", "probe")
+			var own := Arch.color(arch)
+			ok.call(KinExec.is_hunter_cast(cx) and cx.get("hero_col", Color.TRANSPARENT) == own,
+					"%s: a hand-built cast context carries its slot colour %s" % [arch, own.to_html(false)])
 		var spy := CatSpy.new()
 		m.add_child(spy)
 		m.fx = spy
