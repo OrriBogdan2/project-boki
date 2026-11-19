@@ -849,6 +849,7 @@ const CHECKS := {
 	# the shell follows amount and time
 	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],
 	"--current-check": ["res://tools/current_check.gd", "current_check", null], # wind roads, updrafts look
+	"--zone-next-shots": ["res://tools/zone_next_shots.gd", "zone_next_shots", null],      # GPU, --shots-dir=
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--recast-marker-check": ["res://tools/recast_marker_check.gd", "recast_marker_check", null],
 	"--recast-marker-shots": ["res://tools/recast_marker_shots.gd", "recast_marker_shots", null],

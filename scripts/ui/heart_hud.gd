@@ -7,10 +7,12 @@ extends RefCounted
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 ##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
+##   - the zone clock under the minimap: "Closing in 0:30" before the tide moves, the time left while it does.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
+const CLOCK_H := 22.0           # px: height of the zone clock under the minimap
 
 # ------------------------------------------------------------------ the world
 static func world_labels(hud) -> void:
@@ -70,6 +72,30 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+
+
+## The zone clock's words: "Closing in 0:30" before the tide moves, "Closing  7:12 left" while it does,
+## empty once the ring holds (or with no Heart).
+static func zone_line(m: Match) -> String:
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return ""
+	var t := Heart.close_in(m)
+	if t > 0.0:
+		return "Closing in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+	t = Heart.close_left(m)
+	return "Closing  %d:%02d left" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
+
+## A small pill under the minimap with the zone clock (nothing once the ring holds); moves mm_bottom down.
+static func zone_clock(hud, below: Rect2) -> void:
+	var line := zone_line(hud.m)
+	if line.is_empty():
+		return
+	var r := Rect2(below.position + Vector2(0, 4), Vector2(below.size.x, CLOCK_H))
+	hud.mm_bottom = r.end.y
+	hud.c.draw_style_box(HudStyle.box(HudStyle.SHADE, 6, Color(Heart.col(), 0.5), 1), r)
+	hud.c.draw_arc(r.position + Vector2(13, CLOCK_H * 0.5), 5.0, 0, TAU, 20, Heart.col(), 2.0, true)
+	hud.c.draw_arc(r.position + Vector2(13, CLOCK_H * 0.5), 2.0, 0, TAU, 12, Heart.col().lightened(0.4), 1.5, true)
+	HudStyle.text(hud.c, r.position + Vector2(26, 16), line, 12, HudStyle.INK, 3)
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
