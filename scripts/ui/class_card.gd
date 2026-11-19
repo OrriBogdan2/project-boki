@@ -113,10 +113,7 @@ static func kit_tip(id: String) -> String:
 static func howto_lines(id: String) -> Array:
 	var out: Array = []
 	for line in Arch.def(id).get("howto", []):
-		var text := String(line)
-		for action in ["fire", "secondary", "dash", "signature", "hunter_ult"]:
-			text = text.replace("{%s}" % action, Settings.key_cap(action))
-		out.append(text)
+		out.append(Settings.fill_keys(String(line)))
 	return out
 
 ## The three how-to lines as a small block, `width` px wide (tagged meta "howto").

@@ -781,7 +781,7 @@ func kit_line(key: String) -> String:
 	var ln := String(ak.d.get("clip", {}).get("lines", {}).get(key, ""))
 	if ln != "":
 		return ln
-	ln = String(ak.d.get("card", {}).get(key, ""))
+	ln = AbilityText.line(m.player.arch, key)
 	var cut := ln.find(": ")
 	if cut > 0 and cut < 24:
 		ln = ln.substr(cut + 2)
