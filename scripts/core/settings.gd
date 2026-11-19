@@ -388,6 +388,7 @@ func apply(k: String) -> void:
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
 			var fxaa: bool = m == 0 and bool(q("fxaa"))
 			get_tree().root.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
+			_apply_render_scale()      # (the ink's pixel measure follows the smoothing)
 		"shadows":
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 				(n as DirectionalLight3D).shadow_enabled = bool(v[k]) and _casts(n as DirectionalLight3D)
@@ -476,6 +477,9 @@ func _apply_render_scale() -> void:
 	root.scaling_3d_scale = clampf(minf(float(px) / h if px > 0 else 1.0, float(q("scale"))), 0.25, 1.0)
 	var fsr := RenderingServer.get_current_rendering_method() != "gl_compatibility" and root.scaling_3d_scale < 0.999
 	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if fsr else Viewport.SCALING_3D_MODE_BILINEAR
+	# (outline.gdshader min_px: the 3D's drawn height; with no MSAA or FXAA to smooth it a line needs twice the width)
+	var smooth := int(v.get("msaa", 0)) > 0 or bool(q("fxaa"))
+	RenderingServer.global_shader_parameter_set("ink_px_h", h * root.scaling_3d_scale * (1.0 if smooth else 0.5))
 
 func _env_quality(e: Environment) -> void:
 	if not e.has_meta("ssao0"):

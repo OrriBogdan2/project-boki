@@ -94,6 +94,7 @@ const EMIT_FLICKER := 0.55     # and how much it crackles
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_MIN_PX := 0.4         # no line thinner than this many drawn pixels: it broke into specks (min_px)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
@@ -706,6 +707,7 @@ static func _painted_ink() -> ShaderMaterial:
 		_ink.set_shader_parameter("width", INK_WIDTH)
 		_ink.set_shader_parameter("ink_mask", true)
 		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+		_ink.set_shader_parameter("min_px", INK_MIN_PX)
 	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
