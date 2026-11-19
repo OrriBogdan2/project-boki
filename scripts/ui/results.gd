@@ -293,7 +293,7 @@ func _details_toggle(det: Control) -> Button:
 
 func _note(txt: String, col: Color) -> Label:
 	var l := UI.label(txt, 15, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	return l
 
 var shown_at := 0

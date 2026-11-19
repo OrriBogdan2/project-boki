@@ -450,7 +450,7 @@ func _show_pick() -> void:
 		v.add_child(dl)
 		if i == chosen:
 			var pl := UI.label(d["play"], 13, UI.INK)
-			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UI.wrapped(pl)
 			v.add_child(pl)
 		var ii := i
 		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -520,7 +520,7 @@ func _start_hatch() -> void:
 	var v := UI.vbox(10); card.add_child(v)
 	var knock := "Knock on the egg: click (or press %s). Every knock wakes the Boki inside a little more, and the knocks come back."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
@@ -634,8 +634,6 @@ func _show_name() -> void:
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	# (a long line wraps, so it must be given the row's width: in an HBox with no expand it shrank to ~0 wide
-	# and wrapped one letter per line, a column running off the top of the screen)
 	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
 		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
 	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL

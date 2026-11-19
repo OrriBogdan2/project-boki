@@ -50,6 +50,7 @@ const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
 const PAD := 26          # inside a panel
+const WRAP_MIN_W := 200.0      # least width of a wrapping Label: ~30 characters, never a column of letters
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
@@ -156,15 +157,24 @@ static func label(text: String, size := 16, col := INK, font: Font = null) -> La
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
-	# short labels sit on one line; only real sentences wrap (a wrapping label in a row collapses to nothing)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if text.length() > 48 else TextServer.AUTOWRAP_OFF
+	# short labels sit on one line; only real sentences wrap (see wrapped)
+	if text.length() > 48:
+		wrapped(l)
+	else:
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	return l
+
+## Makes a label wrap, with a minimum width. A wrapping Label reports ~0 minimum width (it can break at any
+## letter), so a row or card sized by its content gave it nothing and it broke one letter per line
+## (the Name-your-Boki line); EXPAND_FILL only shares out spare room, and there is none. min_w is the floor.
+static func wrapped(l: Label, min_w := WRAP_MIN_W) -> Label:
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size.x = maxf(l.custom_minimum_size.x, min_w)
 	return l
 
 ## Body text that wraps: the usual muted line under a heading.
 static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
-	var l := label(text, size, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return l
+	return wrapped(label(text, size, col))
 
 static func title(text: String, size := 34, col := INK) -> Label:
 	var l := label(text, size, col, big)

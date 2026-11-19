@@ -459,7 +459,7 @@ func open_feeder(f: Dictionary) -> void:
 		var parts: Array = []
 		for key in counts: parts.append("%s ×%d" % [Care.food_name(key), counts[key]])
 		var il := UI.label("In it: " + ", ".join(parts), 14, UI.INK)
-		il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(il)
 		v.add_child(il)
 	var hungry: Array = KinBox.farm().filter(func(r): return Care.need(r, "food") < Econ.HUNGRY_AT).map(func(r): return String(r["name"]))
 	v.add_child(UI.label(("Hungry now: " + ", ".join(hungry)) if not hungry.is_empty() else "Nobody's hungry right now.", 13, Color("ffb070") if not hungry.is_empty() else UI.GOOD))
@@ -581,7 +581,7 @@ func _notice(title: String, lines: Array) -> void:
 		var v: VBoxContainer = h._new_panel(title, 560)
 		for l in lines:
 			var lb := UI.label(String(l), 15, UI.INK)
-			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			UI.wrapped(lb)
 			v.add_child(lb))
 
 ## Why your partner can't come out (starving too long), or "".
@@ -634,7 +634,7 @@ func open_grave(g: Dictionary) -> void:
 		v.add_child(UI.label("Not much. It hadn't been with you long.", 14, UI.MUTED))
 	for i in range(mem.size() - 1, -1, -1):
 		var ml := UI.label("·  It %s." % String(mem[i].get("text", "")), 14, UI.INK)
-		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(ml)
 		v.add_child(ml)
 	v.add_child(UI.section("Its soul"))
 	_soul_row(v, g)
@@ -643,7 +643,7 @@ func open_grave(g: Dictionary) -> void:
 func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 	if not Save.has_building("shrine"):
 		var l := UI.label("A Soul Shrine could keep its soul, and one day bring it back. Build one beside the graveyard (it needs a Soul Ember from a vault or a Watcher).", 13, UI.MUTED)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(l)
 		v.add_child(l)
 		return
 	var r := UI.hbox(10)
@@ -670,7 +670,7 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 			r.add_child(UI.label(why2, 12, Color("ffb0a0")))
 	v.add_child(r)
 	var note := UI.label("A Boki brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(note)
 	v.add_child(note)
 
 func _revive(g: Dictionary) -> void:
@@ -938,7 +938,7 @@ func _treasure(v: VBoxContainer) -> void:
 	var vd: Dictionary = Save.d.get("valuables", {})
 	if vd.is_empty():
 		var el := UI.label("No treasure yet. Coins, pearls, idols and crown shards from chests, Watchers and rival hunters' boxes end up here to sell.", 15, UI.MUTED)
-		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(el)
 		v.add_child(el)
 		return
 	var total := 0
