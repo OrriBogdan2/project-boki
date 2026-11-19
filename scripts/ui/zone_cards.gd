@@ -34,11 +34,6 @@ static func open(h, here: String) -> void:
 					"You are here" if id == here else "Go", id != here))
 		else:
 			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
-			var hints := key_hints(id)
-			if not GardenZones.keys_for(id)["seed"]:
-				lines.append(UI.para(hints[0], 11, UI.FAINT))
-			if not GardenZones.keys_for(id)["lean"]:
-				lines.append(UI.para(hints[1], 11, UI.FAINT))
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)
@@ -100,10 +95,11 @@ static func lock_line(id: String) -> String:
 	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]]
 	if keys["seed"] and keys["lean"]:
 		return "Ready to wake."
+	var near := "" if keys["lean"] else " " + String(key_hints(id)[1])   # "Closest: Pip, Water 3 of 12."
 	if keys["seed"]:
-		return food[0].to_upper() + food.substr(1) + "."
+		return food[0].to_upper() + food.substr(1) + "." + near
 	var seed := "Find its Wayseed in a run's lair or at the trader"
-	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+	return seed + "." if keys["lean"] else seed + ", and " + food + "." + near
 
 ## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
 static func key_hints(id: String) -> Array:
