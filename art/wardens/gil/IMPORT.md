@@ -51,4 +51,4 @@ and skinning the mesh with them offline.
   opens as a seam in motion instead of a spike; his hand skin is pure hand.R (swordfish to hand: 0.077 m at rest, 0.077
   to 0.078 m in every pose); the robe hem eases into the leg on its side; a patch of torso wall sits under each upper
   sleeve (hidden at rest, it covers the scan's missing torso side when the arm leaves); 66 needle triangles are dropped.
-- Result: edges past 3x 0.01%, 14 triangles of 60k removed outright, no look change at bind pose.
+- Result: edges past 3x 0.01%; body 60000 -> 62117 triangles (66 needles out, 2183 torso-patch triangles in); no look change at bind pose.
