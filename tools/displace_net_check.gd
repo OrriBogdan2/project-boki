@@ -66,11 +66,15 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 ## Brings up the relay, the guest game and both matches; the guest's hunter as the host sees it, or null.
+## The relay this check runs (a check with a bad line returns one that holds its packets).
+func _relay() -> RelayServer:
+	return RelayServer.new()
+
 func _host_up() -> Hunter:
 	port = CheckChild.free_port(7930 + OS.get_process_id() % 60)
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
-	var relay := RelayServer.new()
+	var relay := _relay()
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)

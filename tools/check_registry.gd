@@ -768,6 +768,9 @@ const CHECKS := {
 	"--online-rocket-check": ["res://tools/online_rocket_check.gd", "online_rocket_check", null],      # drop, 2 games
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
+	# 2 games, laggy relay: dash, air dash, wall slide, glider per kit; --rs-ms=N one way
+	"--remote-move-check": ["res://tools/remote_move_check.gd", "remote_move_check", null],
+	"--remote-move-slow-check": ["res://tools/remote_move_check.gd", "remote_move_check", null],      # 150 ms ping
 	# 2 games, relay: kit statuses
 	"--status-net-check": ["res://tools/status_net_check.gd", "status_net_check", null],
 	"--blocker-check": ["res://tools/blocker_check.gd", "hero_pair_check", null],      # docs/ABILITIES.md blockers

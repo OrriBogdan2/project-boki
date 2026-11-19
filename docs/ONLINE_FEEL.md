@@ -362,3 +362,30 @@ What it showed:
 - **Harness caveat found on the way:** one sim step a frame at less than 60 fps drifted the two games' clocks
   apart by 0.2 s, which NetSmooth reads as lag and shows as a 1.3 m step every snapshot; the check steps on real
   time for that reason (`--online-displace-check` still steps one a frame).
+
+## Remote moves: dash, air dash, wall slide, glider (`--remote-move-check`, `--remote-move-slow-check`)
+
+A remote Hunter's moves on the other player's screen, per kit (Vex, Kael, Lace, Cinder): the host's Hunter dashes,
+air-dashes, dashes into a rock at 45 degrees and slides along it, opens the glider with its button and closes it; the
+guest's drawn copy is recorded every step. `--remote-move-check` is an 80 ms ping (40 ms +-20 each way), the slow one a
+150 ms ping (75 ms +-20), both with 2% of snapshots lost (`--rs-ms=N`, `--rm-kit=Name`, `--rm-reps=N` for a quick look
+or more samples). Frames within 0.3 s before and 0.8 s after a frame over 0.1 s (the box, not the line) are left out.
+"jump" is how far the drawn body's biggest one-frame step is over the host's own biggest step of that move.
+
+| 3 runs of the script, worst jump | 80 ms ping | 150 ms ping |
+|---|---|---|
+| origin/main | 16.8 cm (Cinder dash) | 18.6 cm (Cinder dash) |
+| flattened curve + catch-up | 4.0 cm (Cinder air dash) | 4.1 cm (Cinder air dash) |
+
+- **Worst state: a velocity change inside the 0.1 s between two snapshots** (a dash that starts or ends, an air dash
+  while falling). The cubic through the two positions and velocities speeds up past both: a third over the dash's own
+  speed for a few frames (Cinder's 24 m/s dash drawn at 33 m/s). `NetSmooth._flatten` moves the pair's tangents toward
+  the chord until the curve's fastest speed is no more than the faster snapshot's (or the pair's average); a pair
+  whose velocities agree with its positions is left as it was.
+- **Second state: a lost or late snapshot at the start of a move.** The body is drawn running on its last velocity;
+  the snapshot that arrives puts the curve up to a few metres ahead, one big step (119 cm seen in the 80 ms baseline
+  run, Lace's dash). `NetSmooth.behind` keeps where the body was drawn and gives the catch-up back at 30% of its speed
+  (1 m/s at least), only for a body that was guessing and up to 0.4 s of its speed.
+- **Glider open and close were already smooth** (`--glide-net-check`, now over the 80 ms line with jitter and loss):
+  the copy's biggest step is -6 to +1 cm against the guest's own, before and after.
+- Kitefall's fall, a teleport and a blink are unchanged (`--remote-smooth-check` green with both).
