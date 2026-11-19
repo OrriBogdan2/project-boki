@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#ff5ab4", "core": "#ff3fb4", "hot": "#ffc4ea", "white": "#ffffff", "deep": "#3a1440",
-		"char": "#1a1420", "copper": "#e08a46", "violet": "#3a1c8c", "dusk": "#20104d", "dust": "#d1ccb8",
+		"char": "#1a1420", "rose": "#ff7ac0", "violet": "#3a1c8c", "dusk": "#4a1050", "dust": "#d1ccb8",
 		"soot": "#8a8478", "gold": "#ffc23a"
 	},
 	"anchors": {
@@ -138,7 +138,7 @@
 			{"p": "bolt", "y": 9.0, "fwd": -0.4, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.75, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.5, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "ring", "size": "r", "life": 0.35, "c": "core", "c2": "hot", "c3": "deep"},
-			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.9, "life": 0.45, "c": "char", "c2": "core", "c3": "copper"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.9, "life": 0.45, "c": "char", "c2": "core", "c3": "rose"},
 			{"p": "flare", "y": 1.0, "size": 1.8, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"},
 			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
@@ -174,7 +174,7 @@
 			{"p": "bolt", "y": 12.0, "fwd": -0.5, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "bolt", "y": 12.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.7, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "ring", "size": "r", "life": 0.35, "c": "core", "c2": "hot", "c3": "deep"},
-			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.8, "life": 0.4, "c": "char", "c2": "core", "c3": "copper"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.8, "life": 0.4, "c": "char", "c2": "core", "c3": "rose"},
 			{"p": "ember", "y": 0.3, "n": 26, "way": "up", "speed": 11.0, "spread": 0.8, "grav": 8.0, "life": 0.4, "size": 0.08,
 				"stretch": 0.06, "c": "core", "c2": "hot", "c3": "deep"},
 			{"p": "flare", "y": 1.2, "size": 2.4, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"}
@@ -183,7 +183,7 @@
 			{"p": "bolt", "jag": 0.5, "size": 0.6, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"x_after": {"net": false, "fx": [
-			{"p": "bolt", "jag": 0.5, "size": 0.3, "life": 0.12, "c": "copper", "c2": "core", "c3": "deep"}
+			{"p": "bolt", "jag": 0.5, "size": 0.3, "life": 0.12, "c": "rose", "c2": "core", "c3": "deep"}
 		]}
 	}
 }
