@@ -10277,3 +10277,4 @@ READY ext/revive-sickness-lamp f7d6dda4d3 (revive sickness status heart+seconds 
 READY ext/boki-dex-port-1117 c4cda92743 (bulk-rebase: origin/main merged in mechanically, was 9a4ba02dd1; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/boki-more-ingame-1118 323dce5053 (bulk-rebase: origin/main merged in mechanically, was fac36e2f36; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-artdata-1118-b 5a5a85d0da (bulk-rebase: origin/main merged in mechanically, was a56f93457b; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/training-time-trial-1119 33d666801b (Training Grounds time trial: arches, 10 gates, wall tower, pad, per-Hunter best, Save v21, --time-trial-check)
