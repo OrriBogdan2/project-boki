@@ -10289,3 +10289,4 @@ READY ext/farm-blocks-climbable 8b59dae87d (every solid catalog piece placed + c
 READY ext/tut-camps-telegraph fb3d7c78f2 (tutorial first camp: marker + 3 s countdown on world and minimap before monsters; CampMark; fight-check asserts telegraph before spawn)
 READY ext/sfx-step-biomes da12a4cff8 (footsteps by biome: ember/gloom stone, frost snow, rest grass, content/rules/step_biomes.json; sfx-set-check style rows)
 READY ext/garden-pair-after-grown c314c97aa0 (first-day 'Pair two Boki' row shows only once a Boki is Grown; asserted in --garden-first-day-check, 0 fails)
+READY ext/tut-goals-next 3434ba54c7 (Goals card: max 3 rows, never empty via plain next steps; --goals-next-check asserts it at first hub arrival and after the first expedition)
