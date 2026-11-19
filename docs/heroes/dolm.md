@@ -307,7 +307,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Charge, punch | a lunge forward, no punch | `small: a punch during the charge lunges her forward` |
 | Slam that knocks or kills | nothing: Quakefall has no reset (data pass) | `data: a slam that knocks does not reset Quakefall` |
 | Rock Hop beside a foe | a mid-chain landing nudges it with no damage; the last landing's crash shoves it, then the rock comes down after him and rolls into it (shred, slow) | `shove: a mid-chain landing nudges with no damage`, `crash: the last landing hits and shoves a foe beside it`, `crash: the rock comes down after him`, `crash: the rock rolls on and hits` |
-| Rock Hop crash, then slam | the crash pops the foe up, the slam dunks it while it is airborne | `crash: the last landing hits ...`, `rmb: a foe in the air is dunked` |
+| Rock Hop crash, then slam | the crash pops the foe up, the slam dunks it while it is airborne | `crash: the last landing hits ...`, `rmb spike: the tap slam drives a foe in the air down ...` |
 | Two bursts on one foe | the second inside 0.8s deals 30% less | `small: a second burst on the same foe inside 0.8s deals 30% less` |
 | Boulder into a pair | the one beside takes half | `small: the boulder's burst splashes the foe beside it` |
 | Merge start | dive, charge, its leap, Rock Hop, the Spine's aim and telegraphs all drop | `merge hold: ...` |
@@ -365,7 +365,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
 - The KNOCK beam on the dunk is a vertical light (no word) (a generic knock look in the source, it seems).
-- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems).
+- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems). Only the tap slam dunks (docs/SPIKE_SLAM.md): the hop and dive landings are leaps.
 - Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rock Hop's landing spots: the cursor clamped to a hop's reach, pulled back to the nearest ground a body fits on (never into
   a wall). In the air Shift stays the class long dash. See Rock Hop below.
