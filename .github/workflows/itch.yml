@@ -9,9 +9,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# A build takes tens of minutes and main moves every ~27 min on average: cancelling the running build for each
+# push could starve itch of any finished build. Let the running one finish; GitHub keeps only the newest waiting.
 concurrency:
   group: itch
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   GODOT_VERSION: "4.6.2"
@@ -48,6 +50,8 @@ jobs:
 
       - name: Export Windows and macOS
         run: |
+          # the build's commit, shown on the title screen next to the version, so a tester can tell which build they run
+          sed -i "s|^config/name=.*|&\nconfig/version=\"$(git log -1 --format=%h)\"|" project.godot
           godot --headless --path . --import || true
           mkdir -p ../build/win ../build/mac
           godot --headless --path . --export-release "Windows" ../build/win/ProjectBoki.exe

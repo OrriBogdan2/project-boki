@@ -35,7 +35,9 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 2 at once (1 in a fight), the most important first, short lives (2 s at most in a fight); a small (`toast_small`) line only shows on an empty lane and is dropped in a fight; a card slides aside off your hunter (`avoid`); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check`, `--hunter-zone-check` |
+| `top_stack.gd` (`TopStack`) | the top-centre of a real match is one column: Ways Out strip, then the one-line banner (the first-match guide, else the crouch hint), then the message lane. The lane sits under the banner and holds its lines while the banner is fresh (`Tutorial.CARD_T`; URGENT passes); the guide's Boki-key line takes the Boki-key hint's place (`Match.tip_once("ability")`). Check: `--prompt-queue-check` |
 | `hunter_zone.gd` (`HunterZone`) | the screen area over your own hunter (feet to plate): floating numbers and words (`Fx`), message cards and the knock banner slide sideways out of it, plate labels fade under it (`LabelSpacing`). Nothing prints over your hunter. Check: `--hunter-zone-check`; shots: `--hunter-zone-shots` |
+| `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
 | `loot_feed.gd` (`LootFeed`, one on `hud.loot`) | what you just picked up (gems, seeds, belt items, gear worn or packed off the ground): bottom right over the slot row, icon + name + count per row, the same thing again within 2 s adds to its row, at most 4 rows, each fades out by 3 s; its own pickup tick pitched by rarity, silent while the lane keeps its fight budget except Rare and up. Counts as the `loot` HUD group only while it has rows. Check: `--loot-feed-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips (the count beside them past a full row: Sable's uncapped Marks) and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it and their squad (side by side, each in their own colour) (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks, Kael's Slam window and Warchain hold, Gil's splash marks toward a Beach). No state on a foe, no tag: Lace, Albert, Tenzo, Zed and Motley have none (their payoffs are instant hits or self buffs). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
@@ -365,11 +367,26 @@ removed: `--hud-groups-check` pins the landing at 9 groups for a fresh save (mai
 [After shots](hud_timeline/after), 0-30 s only, taken before the merge (that run was stopped when the walk fell).
 Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh save in a real match, veterans unchanged).
 
+### Newcomer staging and the extraction line (11-15, owner playtest 11-13 "the UI is SO overloaded")
+The branch's own first-fight staging (weapon card and counters held back until the first shot, hit or pickup)
+was dropped in the 11-18 uihud merge: main's `HudReveal` table (`content/rules/hud_reveal.json`, counters, feed, gear,
+squad and perks from match 4) stages the newcomer HUD now; `HudReveal.newcomer(m)` (a staged match on a save under
+`NEW_PLAYER_MATCHES`) is what ExtractGoal reads.
+`ExtractGoal` is the one line for the way out: seat, when it opens or how far it is, and the key ("Uplink open · 140 m
+Hold F at the outpost until the lift opens"), the open seat or else the one opening soonest. A new player gets it in
+place of the four-seat strip and only for the Uplink and the Heart ring (`hud_groups.json` `newcomer_seats`: no boss
+fight, no carried Heart); everyone else gets it under the strip until they are on a quest seat (the QuestTracker card
+takes the slot). The minimap names the seat's badge (always for the goal, for all four while Tab/M is held) and the
+full map's key lists "Way out" next to "Extract" (the outpost banner). Checks: `--extract-goal-check`,
+`--minimap-check`.
+The first-match guide's exit line names the same seat and how ("Head for the Uplink badge on your map: Hold F at the
+outpost until the lift opens"; `exit_none` when no seat is on offer), and while a guide line is up the message column
+starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `--first-match-guide-check`.
+
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
   the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
-- The tutorial and expedition HUD would want one staging table (`ext/ui-hud-reveal-1110` builds that: `HudReveal` and
-  `content/rules/hud_reveal.json`, not on main); `HudGroups`' reveal rules are to be folded into it when it lands.
+- `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
 - Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
