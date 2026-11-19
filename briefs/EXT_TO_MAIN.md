@@ -10254,3 +10254,4 @@ READY ext/merge-lane-tutorial-1119 0388c6d954db82597076cdc961c1dde9507a4f44 (mer
 READY ext/merge-lane-artdata-1118 10e0e16a2c (artdata lane: 8 branches, NEW-RED 0, export 872.9 MB vs main 872.7)
 READY ext/tutorial-playthrough-check-1119 f37d49de0ab (absolute tutorial playthrough gate check; passes on main, 62 s)
 READY ext/merge-lane-artdata-1118-b 7e15624154 (boki-more-ingame alone, size baseline bump, NEW-RED 0)
+READY ext/fullscreen-start-1119 eee57e22a4 (fullscreen start: engine-created fullscreen on Windows, Settings keeps choice, F11/Alt+Enter, click test 38/38)
