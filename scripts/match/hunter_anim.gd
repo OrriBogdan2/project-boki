@@ -601,8 +601,8 @@ func update(dt: float, s: Dictionary) -> void:
 	ledge_k = _ease(ledge_k, 1.0 if ledge or mant >= 0.0 else 0.0, 14.0, dt)
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
-	var stomp_st := StompLook.style(String(s.get("stomp_style", "")))
-	var stomp_b := StompLook.body(stomp_st, st_ph) if st_ph >= 0.0 else Vector3(float(stomp_st["lean"]), 0.0, 0.0)
+	var stomp_st := StompLook.style(String(s.get("stomp_style", ""))) if stomp_k > 0.0 else {}
+	var stomp_b := StompLook.body(stomp_st, maxf(st_ph, 0.0)) if stomp_k > 0.0 else Vector3.ZERO
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
 	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
