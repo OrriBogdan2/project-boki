@@ -293,6 +293,47 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Asserted (`--dolm-combo-check`): `item 67: a rock's top is at least 1.6x...`, `item 67: the look reaches the top...`,
   `item 67: every rock has a ground shadow`, `rock (item 25): ...`. Old vs new: /home/boki/shots-s2/kits/tarek/.
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+the kit data, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than that can't be seen, and
+each ability's frames are a separate stretch of the clip, so no pair is shown back to back), [W] the wiki page
+linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours was first read on
+d255acbee (cancel-matrix-b, 11-09) and re-read on main 11-19 (cancel-matrix-land): where main's code changed since,
+the row says so and the newest code wins. **Unsettled** means no frame, card line or wiki line shows the pair: ours
+stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no shared cast lock), except
+that every press is ignored, not buffered, while stunned or downed, and the attack key does nothing from a glide
+(`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB tap (boulder, 0.6 s) | LMB | "Quake Punch (0.6s)" | waits only while the button is held: the next wind-up starts when the 0.6 s ends; a tap let go inside it is dropped | unsettled (the cadence matches, the press handling is not shown) | [D]; [F] card 0.6 s; `lmb_override` |
+| LMB held (punch lane up, full at 0.9 s) | LMB release | "hold and release", about 0.75 s | the punch; no timeout (held as long as you like) | match | [D]; [F] 0118-0121 |
+| Punch recovery | walk | "Afterwards she can walk while her fist recovers" | free to walk; no lock | match | [F] 0118-0124 |
+| Punch recovery (0.6 s from the cast) | LMB | "Quake Punch (0.6s)"; patch notes: the cooldown starts at the cast | next attack at 0.6 s, the boulder's rate (was 0.7 s until 11-09) | match (fixed by cancel-matrix-b: `lmb.punch.rate` 0.7 -> 0.6, the card and the boulder's 0.6) | [D]; [F] card; `cancel: the punch's recovery is the card's 0.6 s` |
+| Punch recovery | RMB, E, X | not shown | both | unsettled | |
+| LMB held | RMB | not shown | the punch charge is **dropped** once RMB has been down 0.1 s (half its 0.2 s tap window); before that both | unsettled | `BreahSlam.charging` in `lmb_override` |
+| RMB held (Quakefall charge) | LMB press | "Punch to Extend: a held punch during the charge carries her and the circle further" | a 1.5 m lunge, the circle rides along, once per charge | match (the count is ours) | [F] 0938-0958; `BreahSlam.extend` |
+| RMB held | jump | "Jump while charging to leap forward" | the bigger leap (3.2 m), the circle comes with her | match | [D]; [F] 0938-0958; owner #61 |
+| RMB held | walk | "can she walk while charging?" is an open question | walks at 55% | unsettled (the footage has her standing) | [F] open question 3; `walk_k` |
+| RMB held | E, X | not shown | both: Stone Row goes; X starts its aim | unsettled | |
+| RMB hop arc and slam, leap, air press | glide | not shown | the glider stays shut until she lands, except over the abyss | owner | item 162b; `DolmKit.locks_glide`; `glide (item 162b ...)` in `--dolm-combo-check` |
+| RMB, air press | glide | not shown | from a glide the glider folds at once and she plunges at its dive speed; glide still held does not reopen it | owner (23:00) | `_glide_slam`; `BreahSlam` |
+| Rock Hop (Shift) in flight | glide | DECISIONS 11-08 | the hop lets go and the glider opens at its own speed | owner | `BreahHop.let_go`; Rock Hop section above |
+| E Stone Row tell (0.2 s, rocks rise after) | LMB punch | "punch them with Quake Punch to launch them" | the punch goes at once; the rocks are not up yet so it sweeps none; not buffered | unsettled | [D]; `_raise` runs `tell` s later |
+| X Basalt Spine aim (held) | walk | "She can move while aiming. The cast itself is instant on release." | walks freely | match | [F] Tetraform f35-f41 |
+| X aim | LMB, RMB, E | not shown | both; the aim stays up | unsettled | |
+| X aim | stun, knock, merge | not shown | cancels the aim unspent (cooldown refunded) | ours | `BreahSpine.drop`; Basalt Spine row |
+| X after release | any | "instant on release" | free at once | match | [F] Tetraform |
+
+Stale note found: the doc comment above `_tick_dive` in `dolm_kit.gd` ("the glider wins (item 26)") and the
+"Cancels:" row in the audit table above still say item 26, which 162b replaced; the code and the check follow 162b.
+Not changed here.
+Suggestions (not built): whether a tapped LMB inside the recovery should buffer is not shown anywhere; the answer
+would also settle the same row on the boulder. Unsettled rows for a follow-up: the 7 marked above.
+
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
