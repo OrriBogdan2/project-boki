@@ -1565,11 +1565,12 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - pad.x, bottom - total), Vector2(w, total))
+	var fr := SafeArea.frame(sz)  # (with the corner panels: a centred 16:9 frame on wider screens)
+	var box := Rect2(Vector2(fr.end.x - w - pad.x, bottom - total), Vector2(w, total))
 	if m.opts.get("training", false):
 		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
 		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(pad.x, pad.y + 222.0)
+		box.position = Vector2(fr.position.x + pad.x, pad.y + 222.0)
 		if total > sz.y - box.position.y - pad.y - 178.0:
 			compact = true
 			hs = []

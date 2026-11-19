@@ -14,8 +14,13 @@ func _init(hud) -> void:
 	H = hud
 
 
+## A panel-frame rect (Hud.hover_spots) in the Hud's own coordinates.
+func _on_screen(r: Rect2) -> Rect2:
+	return Rect2(r.position + H.panels.position, r.size)
+
+
 func draw_hud_tip(sz: Vector2, p: Hunter) -> void:
-	var mp: Vector2 = H.c.get_local_mouse_position()
+	var mp: Vector2 = H.panels.get_local_mouse_position()  # (the spots are in the panels' frame)
 	var hit: Array = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--hover="):  # test hook: point at a HUD element
@@ -30,7 +35,7 @@ func draw_hud_tip(sz: Vector2, p: Hunter) -> void:
 		H.hover_id = id
 		H.hover_t = 0.0
 	H.hover_t += H.get_process_delta_time()
-	if AbilityCard.on_hud(H.c, id, hit[0] if hit.size() > 0 else Rect2(), p):  # Tab held: the ability card
+	if AbilityCard.on_hud(H.c, id, _on_screen(hit[0]) if hit.size() > 0 else Rect2(), p):  # Tab held: the ability card
 		return
 	if id == "" or H.hover_t < 0.25:
 		return
@@ -43,7 +48,7 @@ func draw_hud_tip(sz: Vector2, p: Hunter) -> void:
 	var h := 40.0
 	for i in range(1, lines.size()):
 		h += wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
-	var anchor: Rect2 = hit[0]
+	var anchor := _on_screen(hit[0])
 	var pos := HudTip.place(anchor, Vector2(w, h), sz)  # above if it fits, else beside; always on screen, never over the slot
 	var a := clampf((H.hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))
