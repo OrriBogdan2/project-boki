@@ -14,12 +14,12 @@ skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the r
    (190 directions, none from below) shows is never seen at rest; the others stay open (a cap there would show at rest).
 4. 11-19 retry (review hem.md: black hole in the skirt at the left hip under the belt when the hand leaves it). Every skirt-side
    rim the cut left (arm weight < 0.2; left hip 11 rims incl. 18.2 cm and 8.7 cm, right hip 2) gets a cap: rim on a disk by arc
-   length, Delaunay with interior points at >= 1.6x the median edge, harmonic 3D membrane with the rim fixed (bulge <= 5 mm,
-   inside the hip, under the hand at rest), harmonic weights from the rim (hips/thigh only), one median texel of the material
+   length, Delaunay with interior points at >= 1.6x the median edge, harmonic 3D membrane with the rim fixed, then sunk up to
+   6 mm toward the body axis (0 at the rim) so it stays under the hand at rest, harmonic weights from the rim (hips/thigh only), one median texel of the material
    with the most skirt area around the rim (cloth-v95b, belt rim leather), cap edge 0.05 mm inside the rim with the rim's own
    weights. 394 verts / 577 triangles added, nothing deleted or moved. Edges over 3x stay 0 (worst 2.72), Godot stretch
-   worst 2.72 (hail), hunter_mesh_check nonmanifold 18 (unchanged), spike edges 127 -> 128 (the many small cap edges lower the
-   mesh median, an old quiver triangle crosses 12x median). Script: cap.py in ~/cj/20261119-191052-a1/work (job dir).
+   worst 2.72 (hail), hunter_mesh_check nonmanifold 18 and spike edges 127 (both unchanged). Rest pose: at most 47 px of a
+   1024 px frame change (wrist/belt seam line, 8 views), as small as live vs the previous fix (12-45 px). Script: cap.py in ~/cj/20261119-191052-a1/work (job dir).
 Scripts: job dir split.py (FIT=0, D=0.15, LAM=4, KAP=2, GAM=3, CLOTHY=1.15, ISL=200) + capray.py (Blender BVH) + lb.py
 (PEN=cauchy CS=1 CALMW=30, T=2 / 1.6 / 1.4), all in ~/gens/hunter-fix-hem-1119c/scripts.
 Numbers vs live (welded, rest edge >= 8 mm, every clip at 0.1 s): edges over 3x 252 -> 0 of 46,445 (live 46,376; 0.54% -> 0%),
