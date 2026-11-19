@@ -488,7 +488,8 @@ func _all() -> void:
 	ok("reel: a second Deep Reach is denied", K.grapples == 1)
 	K.cd["e"] = 0.0
 	P.ak.use_e()
-	ok("reel: E is denied while reeling", K.anchors == 0 and K.wind <= 0.0)
+	ok("reel: E is not cast while reeling (it waits for the arrival)", K.anchors == 0 and K.wind <= 0.0 and K.e_queued)
+	K.e_queued = false              # (this check casts its own Anchor after the arrival, below)
 	ok("reel: the gun is locked", not K.can_shoot())
 	var pos0 := P.pos
 	ak.aim_at(P, T.pos)

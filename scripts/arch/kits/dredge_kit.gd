@@ -37,6 +37,7 @@ const FOLD_T := 0.033                  # s into the `lunge` clip where the ball 
 const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
+const FEET_R := 0.25                   # m past touching: a foe in reach this little ahead stops the Anchor's hop
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
 const GHOST_THICK := 0.45              # m: the arm's silhouette where it runs through rock
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
@@ -57,6 +58,9 @@ var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
 var wind := 0.0                 # hold: the Anchor's wind-up left
+var e_queued := false           # E pressed while reeling a foe: the Anchor Drop goes the moment it arrives, at it
+var e_at := Vector2.ZERO        # (cast_e) the direction a queued Anchor Drop locks to: the hauled foe
+var e_plant := false            # a queued Anchor Drop winding up: he stands planted over the hauled foe
 var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
@@ -179,7 +183,9 @@ func move_k() -> float:
 		return hook_hold.slow_k           # a slow walk while the hand flies out (mid-jump: his run-up)
 	if not pull.is_empty():
 		return float(rmb_def()["fly_slow"])   # braced side-on while he reels (footage), a shuffle that still swings it
-	return 0.7 if wind > 0.0 else 1.0
+	if wind > 0.0:
+		return 0.0 if e_plant else 0.7      # the hook-into-slam stands planted; a fresh Anchor walks at 70%
+	return 1.0
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
@@ -216,6 +222,7 @@ func _tick(dt: float) -> void:
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
+	e_plant = false
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
@@ -501,6 +508,14 @@ func _end_pull(arrived: bool) -> void:
 		var rdf := rmb_def()
 		if not ally:
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
+	var queued := e_queued
+	e_queued = false
+	if queued and arrived and not ally and is_instance_valid(f) and not (f as Ent).dead:
+		var to := Vector2((f as Ent).pos.x - h.pos.x, (f as Ent).pos.z - h.pos.z)
+		e_at = to.normalized() if to.length() > 0.05 else h.aim_dir()
+		use_e()
+		e_at = Vector2.ZERO
+		e_plant = wind > 0.0
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -513,7 +528,8 @@ func cast_e() -> bool:
 		_start_dive(height)
 		return true
 	wind = float(ed["windup"])
-	slam_dir = h.aim_dir()
+	e_plant = false
+	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
 	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
@@ -522,7 +538,9 @@ func cast_e() -> bool:
 
 func use_e() -> void:
 	if not pull.is_empty():
-		h._ab_feedback("k1", "deny")          # only the barge works while reeling
+		# only the barge works while reeling (wiki); an E on a foe waits for the arrival, so hook into slam lands
+		e_queued = not bool(pull.get("ally", false)) and float(cd["e"]) <= 0.0
+		if not e_queued: h._ab_feedback("k1", "deny")
 		return
 	super.use_e()
 
@@ -533,6 +551,7 @@ func _tick_wind(dt: float) -> void:
 	wind -= dt
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
+		e_plant = false
 		AimKit.hide(h, "e_tell")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
@@ -541,6 +560,7 @@ func _tick_wind(dt: float) -> void:
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if wind <= 0.0:
 		wind = 0.0
+		e_plant = false
 		AimKit.hide(h, "e_tell")
 		_anchor()
 
@@ -552,9 +572,25 @@ func _hop(ed: Dictionary, t: float) -> void:
 		return
 	if not h.grounded or h.roll_t > 0.0:
 		return
+	if _foe_at_feet():
+		var fwd := maxf(0.0, Vector2(h.vel.x, h.vel.z).dot(slam_dir))     # the hop so far stops dead too
+		h.vel.x -= slam_dir.x * fwd
+		h.vel.z -= slam_dir.y * fwd
+		return
 	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
 	h.vel.x = v.x
 	h.vel.z = v.y
+
+## A foe inside the slam's cone already level with his front (one hauled to his feet): hopping on would carry him past
+## it or shove him round its body and swing the locked cone off it, so he slams from where he stands.
+func _foe_at_feet() -> bool:
+	var half := deg_to_rad(float(e_def()["angle"])) * 0.5
+	for f in foes_in(h.pos, float(e_def()["radius"])):
+		var to := Vector2((f as Ent).pos.x - h.pos.x, (f as Ent).pos.z - h.pos.z)
+		var ahead := to.dot(slam_dir)
+		if ahead < h.r + (f as Ent).r + FEET_R and (to.length() < 0.05 or absf(slam_dir.angle_to(to)) <= half):
+			return true
+	return false
 
 ## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
