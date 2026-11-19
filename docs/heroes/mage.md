@@ -259,6 +259,7 @@ Source = the hero sheet (briefs/hero-ref) and sv/briefs/kits.md; the footage is 
   A fresh glide-key press in the air (Space held never) cancels the charge or the streak the same way and opens the
   glider; it ends Kitefall's climb or hang too, with no strike (source patch 05.03.25: "Glider cancel the state").
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
+- Shift pressed during the streak with no charge back is dropped (tester 11-19: "a weird small dash" after the run, the 4.25 m plain dash); with the charge back (a Blowout or orb in the run) it plays a full Wirerun. A fresh press after the streak still gets the plain dash. `--tester-feedback-check` "joule: Shift mashed in the streak ...".
 - Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
