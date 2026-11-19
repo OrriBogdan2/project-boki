@@ -115,7 +115,7 @@ func _sulky_run(trust: float, joy: float, what: String, quick: float) -> void:
 	ok(first < 0.3, "%s has not set off after %.2f s" % [what, DT])
 	var t := _until_close(k, REACH_SECS)
 	var moved := Vector2(k["pos"].x - start.x, k["pos"].z - start.z).length()
-	var slow_m := 4.4 * 0.5 * (REACH_SECS - 0.5)      # m: the farthest a slow walk (half the call run) can cover
+	var slow_m: float = home.walk_speed() * 0.5 * (REACH_SECS - 0.5)      # m: the farthest a slow walk (half the call run) can cover
 	ok(moved > 3.0 and moved < slow_m, "%s walks over slowly (%.1f m in %.0f s)" % [what, moved, REACH_SECS])
 	ok(t == INF or t > quick, "%s is slower than the lukewarm one (%.2f s)" % [what, quick])
 
