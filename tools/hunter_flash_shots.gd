@@ -1,8 +1,9 @@
 extends RefCounted
 ## --hunter-flash-shots --shots-dir=<dir>: every Hunter (Arch.ids, its current model) in both team colours takes
 ## one hit at the match camera. <dir>/strip.png: per team a row before the hit and a row on the flash's full frame.
-## Prints per Hunter how much the body brightens (mean luminance gain over the body's pixels, 0..1) and fails when
-## the dimmest Hunter's gain falls under GAIN_MIN, so a dark model's flash reads as clearly as a light one's.
+## Prints per Hunter how much the body brightens (mean luminance gain over the body's pixels) and what share of its
+## room to white that is; fails when any Hunter's flash closes less than REL_MIN of that room, so a pale model's flash
+## reads as clearly as a dark one's (a dark body has more room, so the raw gain alone would favour it).
 ## The impact sparks and numbers (Fx) are hidden: this measures the body flash alone. Needs a renderer. Never
 ## touches the save.
 
@@ -11,7 +12,7 @@ const HIT := 12.0           # damage of the test hit
 const WARM := 20            # frames the model settles before the shots
 const FULL_STEPS := 1       # steps after the hit to the flash's full frame (it holds full for 3)
 const FADE_STEPS := 4       # steps after the hit to a fading frame
-const GAIN_MIN := 0.3       # the least mean luminance gain the body may show on the full frame
+const REL_MIN := 0.5        # the least share of the body's room to white (1 - its luminance) the full flash closes
 const BODY_DIFF := 0.08     # a pixel is the body's when the before frame differs this much from the empty frame
 const CELL := Vector2i(150, 210)    # px of one Hunter in the strip
 
@@ -65,8 +66,10 @@ func run(root: Node) -> void:
 			var shots := await _shoot(h, spot)
 			var g := _gain(shots[0], shots[1], shots[2])
 			var gf := _gain(shots[0], shots[1], shots[3])
-			gains.append(g)
-			print("HUNTERFLASH %-12s team %d base %.2f gain %.2f fade %.2f" % [ids[i], teams[ti], g[1], g[0], gf[0]])
+			var rel: float = g[0] / maxf(1.0 - g[1], 0.05)
+			gains.append([rel, ids[i], teams[ti]])
+			print("HUNTERFLASH %-12s team %d base %.2f gain %.2f rel %.2f fade %.2f" % [ids[i], teams[ti], g[1], g[0], rel,
+				gf[0]])
 			for r in 2:
 				var cell: Image = shots[1 + r]
 				cell.resize(CELL.x, CELL.y, Image.INTERPOLATE_LANCZOS)
@@ -74,7 +77,8 @@ func run(root: Node) -> void:
 			h.visible = false
 	strip.save_png(dir.path_join("strip.png"))
 	var worst: Array = gains.reduce(func(a, b): return a if a[0] <= b[0] else b)
-	ok(worst[0] >= GAIN_MIN, "every Hunter's body flash brightens it by >= %.2f (dimmest %.2f)" % [GAIN_MIN, worst[0]])
+	ok(worst[0] >= REL_MIN, "every Hunter's flash closes >= %.2f of its room to white (least: %s team %d, %.2f)" % [
+		REL_MIN, worst[1], worst[2], worst[0]])
 	print("HUNTERFLASH DONE, failures: %d, strip %s" % [bad, dir.path_join("strip.png")])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
