@@ -1,7 +1,7 @@
 extends RefCounted
 ## --zone-next-shots --shots-dir=<dir>: the zone telegraph on the HUD (GPU, under xvfb with a renderer), at the
 ## window's size (run it with --resolution=1280x720 and --resolution=3440x1440 for ultrawide):
-##   <w>_clock    30 s before the tide moves: the clock under the minimap, the edge and the next circle on it
+##   <w>_clock    30 s before the tide moves: the zone clock in the clock chip, the edge and next circle
 ##   <w>_closing  mid close: the time left
 
 var main: Node
