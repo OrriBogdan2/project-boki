@@ -1,6 +1,18 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
 
+## LIVE 11-19 (retry 4, PR #362): local weight smoothing on top of retry 3 (weights only)
+`cinder.glb` = retry 3's glb with JOINTS_0/WEIGHTS_0 changed on 4,518 vertices (positions, triangles, UVs, images, bones, clips
+byte-equal to live). Every edge still over 3.2x in any clip (552 sampled poses) gets a 3-ring region; each region gets a harmonic
+(Laplace, 1/length) weight solve from its border and is kept only if its own worst edge drops and no edge in it goes past 4x.
+Arm-tube and flank vertices below 1.10 m keep retry 3's rule (pure arm stays pure arm, torso flank gets no arm weight).
+Fixed by it: ankle/boot fronts (13.9x), crotch seam (12.4x), back of neck/shoulder (11.0x), hip/thigh bands.
+Numbers, live -> retry 3 -> retry 4 (edges >2 mm, all 46 glb clips every 0.05 s): edges over 3x median clip 3.50% -> 0.13% -> 0.06%,
+worst clip 4.63% -> 0.29% -> 0.12%; worst edge 152x -> 13.9x -> 8.6x (inner elbow crease at the gauntlet plate, LBS); median clip
+worst edge 68.9x -> 8.9x -> 6.5x. Godot `--stretch-check`: worst 7.60 -> 5.02 -> 5.02, median clip worst 4.79 -> 3.24 -> 3.12.
+In idle/stance the posed mesh differs from retry 3 by at most 3 cm on 83 vertices (the creases above). Script + evidence:
+`/home/boki/gens/cinder-rigfix-1119/retry4/` (tool/fix3.py r3.glb out.glb).
+
 ## LIVE 11-19 (retry 3, PR #362): skinning fix, weights only (same vertices, triangles, UVs, images, bones and clips as live)
 `cinder.glb` = main's 11-18 glb (sha c4c7001f) with only JOINTS_0/WEIGHTS_0 changed: no vertex or triangle added, moved, cut or
 deleted, so the rest pose is live's. Every group of same-spot vertices that shared weights in live still shares one weight set, so no
