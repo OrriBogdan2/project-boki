@@ -139,6 +139,9 @@ a fight covers the middle of the screen or stays more than 2 s; edge-anchored, s
 fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (3 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
 
+What a fight shows now (11-19 inventory, `--combat-hud-shots --fight=duel|pve` at 1920x1080): your health and armour, the ability row, ammo and the belt slots, the minimap and the one goal line.
+Waiting for a quiet 3 s instead: the message lane (one card at a time), the armour hint, the level-up card, the loot counters (seeds, gems, pack) and the ground loot names; the "UNLOCK" word under a slot drops while the gold glow stays. A rival's name shows only under the mouse (or when they are down).
+
 | Pop-up | Where, size | How long | Now |
 |---|---|---|---|
 | Ally knocked | was a 300x70 card top centre, pulsing red, portrait, timer, arrow, all the time they were down | 1.25 s | owner 11-12: a short banner is wanted (`KnockBanner`, ~96 px portrait + word + name, top 13-29% of the screen, never over the middle), then gone. The squad row keeps it: KNOCKED tag and X arrow (left, under the minimap), row outlined steadily (pulses only while stomped), the edge arrow toward them (`_draw_squad_markers`, only while they're off screen), "Revive Nm" only within 9 m (`DownedMarks`) |
