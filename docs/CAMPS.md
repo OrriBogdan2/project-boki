@@ -21,6 +21,12 @@ player learned. Code: `scripts/match/camps.gd` (`Camps`, owned by `Match.camps`)
 (`sizes.lvl`: Small 1, Camp 2, Great 4), in place of a random monster. `bot_camp_share` of its roam picks go
 to a camp, the rest still explore.
 
+## Steal window
+Prize monsters (`content/rules/steal_window.json` `prize`: Brute, Glimmer, Warden, the lair bosses) cry once at
+the quarter-health line `StealTell` already marks and stand open for `reel` (1.2 s: no attacks, normal damage)
+on the first drop under it (`StealReel`, `Mob.reel`): the fighting squad's planned burst. The cry and the reel
+read off the health every machine sees, so nothing is synced.
+
 ## Not here yet
-Camp markers on the drop map and minimap, region lines, smoke, camp sounds, the steal window, Boon cues,
-a guarded rare Boki and the summon-cooldown refund (second PR of P04). Online clients have no camp list.
+Camp markers on the drop map and minimap, region lines, smoke, camp idle sounds, steal stings, Boon cues, a
+guarded rare Boki and the summon-cooldown refund (needs P05). Online clients have no camp list.

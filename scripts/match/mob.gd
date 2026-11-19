@@ -30,6 +30,9 @@ const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
+var stagger_mult := STAGGER_DMG  # damage taken while staggered (1 in a kill-window reel)
+var win_cried := false  # the kill window's cry sounded here (StealReel)
+var win_reeled := false  # the kill window's reel already happened (StealReel)
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null  # a treasure kin slips away if nobody hurts it for a while
 
@@ -104,7 +107,7 @@ func _cancel_tele() -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if not remote and not dead and d > 0.0:
 		if stagger_t > 0.0:
-			d *= STAGGER_DMG
+			d *= stagger_mult
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
@@ -112,6 +115,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 	if dealt > 0.0:
 		calm_t = 0.0
 		held = false
+		StealReel.on_hurt(self)
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
@@ -134,7 +138,18 @@ func _took(d: float, by: Ent) -> void:
 		damage_by[dealer.team] = float(damage_by.get(dealer.team, 0.0)) + d
 
 
+## A kill-window reel (StealReel): the stagger's stillness without its bonus damage or refund.
+func reel() -> void:
+	stagger_mult = 1.0
+	stagger_t = StealReel.reel_time()
+	stun_t = maxf(stun_t, stagger_t)
+	_cancel_tele()
+	st = "recover"
+	st_t = stagger_t
+
+
 func _stagger(by: Ent, opts: Dictionary) -> void:
+	stagger_mult = STAGGER_DMG
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
 	stun_t = maxf(stun_t, stagger_t)
 	stag_open = 0.0
@@ -208,6 +223,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealReel.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
