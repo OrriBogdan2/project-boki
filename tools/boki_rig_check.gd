@@ -38,7 +38,11 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"hydrangor", "jarmit", "jibbatross", "kerchick", "kintsuwyrm", "kitlet", "klaxada", "knotling", "lanternmit",
 	"latchling", "loafhopper", "lurklet", "malletary", "maulangler", "meteorab", "mortarfly", "moundlet", "mumblet",
 	"nymphane", "olmlet", "orbitle", "pagodito", "pagoguana", "parasolth", "parrywhal", "pavonazar", "pawnfry",
-	"pebblamb"]
+	"pebblamb",
+	"pickadactyl", "pinster", "pipwom", "prismink", "proofhop", "puffuse", "pyrraven", "quivertoad", "rattlebub",
+	"reapant", "ribbonwyrm", "rimekit", "ringrove", "rosedart", "sarcobra", "scarabit", "scoopsy", "siegephant",
+	"slog", "sloggoth", "snapler", "sorbeast", "spanglin", "sphinxblight", "stormit", "sundormouse", "terrarimit",
+	"tesselamb", "tootle", "wayshell", "zipling"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
@@ -111,7 +115,15 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"malletary": MESHY_TRIS, "maulangler": MESHY_TRIS, "meteorab": MESHY_TRIS, "mortarfly": MESHY_TRIS,
 	"moundlet": MESHY_TRIS, "mumblet": MESHY_TRIS, "nymphane": MESHY_TRIS, "olmlet": MESHY_TRIS, "orbitle": MESHY_TRIS,
 	"pagodito": MESHY_TRIS, "pagoguana": MESHY_TRIS, "parasolth": MESHY_TRIS, "parrywhal": MESHY_TRIS,
-	"pavonazar": MESHY_TRIS, "pawnfry": MESHY_TRIS, "pebblamb": MESHY_TRIS}
+	"pavonazar": MESHY_TRIS, "pawnfry": MESHY_TRIS, "pebblamb": MESHY_TRIS,
+	"pickadactyl": MESHY_TRIS, "pinster": MESHY_TRIS, "pipwom": MESHY_TRIS, "prismink": MESHY_TRIS,
+	"proofhop": MESHY_TRIS, "puffuse": MESHY_TRIS, "pyrraven": MESHY_TRIS, "quivertoad": MESHY_TRIS,
+	"rattlebub": MESHY_TRIS, "reapant": MESHY_TRIS, "ribbonwyrm": MESHY_TRIS, "rimekit": MESHY_TRIS,
+	"ringrove": MESHY_TRIS, "rosedart": MESHY_TRIS, "sarcobra": MESHY_TRIS, "scarabit": MESHY_TRIS,
+	"scoopsy": MESHY_TRIS, "siegephant": MESHY_TRIS, "slog": MESHY_TRIS, "sloggoth": MESHY_TRIS, "snapler": MESHY_TRIS,
+	"sorbeast": MESHY_TRIS, "spanglin": MESHY_TRIS, "sphinxblight": MESHY_TRIS, "stormit": MESHY_TRIS,
+	"sundormouse": MESHY_TRIS, "terrarimit": MESHY_TRIS, "tesselamb": MESHY_TRIS, "tootle": MESHY_TRIS,
+	"wayshell": MESHY_TRIS, "zipling": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in
