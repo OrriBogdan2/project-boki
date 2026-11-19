@@ -259,7 +259,7 @@ func _aim_tick() -> void:
 	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": leap["from"], "r": float(data()["range"])})
 	leap["land"] = land_point()
 	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
-	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
+	crown.merge({"col": MageKit.DEEP_PINK, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 	if phase() == AIR:
 		var hover := float(data()["hover"])
@@ -373,7 +373,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
-## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
+## Rose-pink lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
 	var rng := kit.fx().rng
 	if rng.randf() > 14.0 * dt:
