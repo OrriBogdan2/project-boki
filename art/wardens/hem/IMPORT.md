@@ -1,16 +1,18 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
-## 2026-11-19: arm pull taken off the skirt (ext/hunter-fix-hem-1118), weights only
-Live skin weights put 10 to 40% of the hand and forearm bones on skirt and hip verts, so arm clips dragged the skirt tatters toward the
-hands. Only JOINTS_0/WEIGHTS_0 of the body mesh changed (positions, indices, UVs, skeleton, bone names, 53 clips, textures, bow, arrow are
-byte-identical; no triangle cut or removed). For the 10.8k verts more than 9 cm from an arm bone (fade to 50 cm), each vertex's weights
-were refitted (non-negative least squares over its own bones plus hips and thighs): in the calm clips (idle, stance, crouch_idle, walk_f,
-run_f) it lands where the live skin puts it, in every other clip where the same skin without its arm share puts it (weight 0.5).
-Numbers vs live: arm weight on skirt/leg skin 0.112 -> 0.066 mean; arm pull on those verts in the gesture clips 8.9 -> 3.1 cm mean
-(p95 39.6 -> 15 cm); in-game outline change vs live, close camera: idle 2.6%, stance 3.3%, crouch_idle 2.5%; bind pose unchanged
-(4 sides). Not fixed: the stretched triangles at the hand/hip contact (the scan fuses the hands to the hips; 0.54% of edges over 3x,
-`--stretch-check` worst 17.81 roll, `hunter_mesh_check` stretched_tris 660 -> 636, far_bone_verts 586 -> 170) need the contact split,
-which weights cannot do; the left glove's layered sleeve is part of that.
+## 2026-11-19: torn skin relaxed, weights only (ext/hunter-fix-hem-1118, retry 11-19d)
+Restarted from main's glb. Only JOINTS_0/WEIGHTS_0 of the body mesh changed: positions, indices, UVs, the glTF JSON (skeleton, bone
+names, 53 clips), textures, bow and arrow are byte-identical; no triangle cut, removed or added. The 13.3k verts within 3 edge rings of a
+torn edge (over 2.5x its rest length in any clip) got new weights from one L-BFGS fit over every clip sample (softmax per vertex over
+its own bones plus its neighbours' main bones, top 4 kept): each vertex stays where the live skin puts it (30x weight in idle, stance,
+walk*, run*, crouch*), plus a robust (Cauchy) penalty on edges stretched past 2x (length floor 8 mm), so the strain at the fused
+hand/hip contact stays in a thin sliver instead of a sheet. Script: job dir lb.py (PEN=cauchy CS=1 T=2 CALMW=30 ITERS=250).
+Numbers vs live: edges over 3x in any clip 252 -> 126 of 46,376 (0.54% -> 0.27%), worst 17.2x -> 4.2x; `--stretch-check` worst
+17.81 (roll) -> 4.99 (g_wave), idle 4.56 -> 2.46, crouch_idle 9.74 -> 2.98; `hunter_mesh_check` stretched_tris 660 -> 74.
+In-game outline vs live (close camera): rest pose 4 sides 0.16-0.22% (render noise), idle 1.95%, stance 1.61%, crouch_idle 2.01%,
+walk_f 2.01%, run_f 1.83%. Not changed: the skirt lifting toward a raised hand (g_wave, g_salute, g_flag; arm pull 8.9 cm mean)
+because the live idle hem hangs on those arm weights (taking them off moved run/stance up to 9 cm); bind-pose spike edges, the
+floating island and far_bone_verts (586) are geometry or idle-look items weights cannot fix.
 
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb` (the body6 pick, CURRENT_OVERRIDES 11-12) on main's hem.glb rig (no keep parts, so the earlier swap's mesh is dropped whole); bow, arrow and anchor_nock unchanged. Was appeal3 body b below. 13.9k tris (body 13.0k), 2048 atlas + 2048, 51 clips (pet/give/cheer gain sampled channels, same timing).
