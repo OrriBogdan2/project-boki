@@ -159,6 +159,7 @@ func _mouse_to(p: Vector2) -> void:
 	e.position = main_vp.get_screen_transform() * p      # (input arrives in window pixels)
 	e.global_position = e.position
 	Input.parse_input_event(e)
+	main_vp.warp_mouse(p)      # (under xvfb a parsed motion alone left the pointer mid-screen)
 
 ## The egg cards in the pick row (the last thing in the bottom box).
 func _cards(hx) -> int:
