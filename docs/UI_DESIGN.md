@@ -119,10 +119,15 @@ What made the menus feel blocky, samey and hard to get through:
   Enter presses the panel's primary when nothing else has focus.
 
 - **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
-  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a lit turntable (a carved Meshy dais,
-  `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
-  that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
-  or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
+  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a turntable (a carved Meshy dais,
+  `art/look/`) in a lit set (`look_set.gd`: warm key with shadow, a rim in your glow's colour, a cool kicker, a top
+  light; a curved wall, standing stones at three depths and drifting motes behind you, blurred by the camera's soft
+  focus). Tabs Body / Hollow / Shroud / Glider: the camera swings round to each tab's shot and field of view (Body and
+  Shroud head to toe, Hollow on the face, Glider pulled back) while the rows fade in one by one. Named choices are
+  tiles with a picture of you wearing them (`look_thumbs.gd`: an offscreen stage, one picture a frame, kept by look;
+  it builds through the locker's one model maker, so any model works), colours are swatches; both try themselves on
+  while hovered and click on hover. A pick pops the model, plays a short emote, flares the rim light and rings the
+  dais. Gliders show in their rarity colour (`Gliders.rarity`). Drag or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
   GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)

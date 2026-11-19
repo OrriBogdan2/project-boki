@@ -52,6 +52,7 @@ const LIST_H := 420.0                       # px: the choices scroll past this h
 const TILE := Vector2(94, 116)             # px: a named choice, its picture over its name
 const THUMB := Vector2(86, 80)              # px: the picture on a tile
 const SWATCH := 34.0                        # px: a colour choice
+const GLIDER_PIC := Vector2(64, 54)         # px: the picture of you under a glider, on its tile
 
 var look: Dictionary = {}
 var tab := "Body"
@@ -176,7 +177,7 @@ func _build_stage() -> void:
 	var dof := CameraAttributesPractical.new()
 	dof.dof_blur_far_enabled = true
 	dof.dof_blur_far_transition = 5.0
-	dof.dof_blur_amount = 0.07
+	dof.dof_blur_amount = 0.1
 	_cam.attributes = dof
 
 func _glow_mat(col: Color) -> StandardMaterial3D:
@@ -216,14 +217,20 @@ func _make_model(lk: Dictionary) -> Node3D:
 	return m
 
 
-## A tile picture's model: built under the picture stage and settled into its standing idle.
-func _thumb_model(lk: Dictionary, parent: Node) -> Node3D:
+## A tile picture's model: built under the picture stage and settled into its idle (standing, or hanging under the
+## open glider for a glider's picture).
+func _thumb_model(lk: Dictionary, parent: Node, framing: String) -> Node3D:
 	var m := _make_model(lk)
-	m.get_node("Rig/Torso/Glider").visible = false
+	var gl := m.get_node("Rig/Torso/Glider") as Node3D
+	gl.visible = framing == "glider"
+	gl.rotation.x = GLIDER_TILT
 	parent.add_child(m)
 	var anim := HunterAnim.new(m, 1)
+	var st := {"fired": 99.0, "face": PI}
+	if gl.visible:
+		st.merge({"grounded": false, "gliding": true, "vel": Vector3(0, -1.0, 0)})
 	for i in 8:
-		anim.update(0.1, {"fired": 99.0, "face": PI})
+		anim.update(0.1, st)
 	return m
 
 
@@ -413,36 +420,53 @@ func _grid(key: String, opts: Array, cur: int, shift: int) -> Control:
 		flow.add_child(c)
 	return flow
 
-## A named choice: a picture of you wearing it (LookThumbs fills it in) over its name.
+## A named choice: a picture of you wearing it (LookThumbs fills it in) over its name; a choice with nothing to
+## picture (the trim's Match) is just its name, swatch high.
 func _tile(key: String, text: String, on: bool, val: Variant) -> Control:
 	var t := UI.tile_card(on, func(): pick(key, val), 4)
-	t.custom_minimum_size = TILE
 	t.set_meta("look_opt", "%s:%s" % [key, str(val)])
+	if not THUMB_FRAME.has(key):
+		t.custom_minimum_size = Vector2(TILE.x, SWATCH)
+		t.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		t.add_child(_tile_name(text, on))
+		return t
+	t.custom_minimum_size = TILE
 	t.tooltip_text = text
 	var v := UI.vbox(2)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(_pic(key, val, String(THUMB_FRAME[key]), THUMB))
+	v.add_child(_tile_name(text, on))
+	t.add_child(v)
+	return t
+
+
+## The picture of you with look[key] = val, taken in this framing, at this size.
+func _pic(key: String, val: Variant, framing: String, px: Vector2) -> TextureRect:
 	var pic := TextureRect.new()
 	pic.name = "Pic"
-	pic.custom_minimum_size = THUMB
+	pic.custom_minimum_size = px
 	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(pic)
 	var wearing := look.duplicate(true)
 	wearing[key] = val
-	_thumbs.want(wearing, String(THUMB_FRAME.get(key, "body")), pic, "%s:%s" % [key, str(val)])
+	_thumbs.want(wearing, framing, pic, "%s:%s" % [key, str(val)])
+	return pic
+
+
+func _tile_name(text: String, on: bool) -> Label:
 	var l := UI.label(text, UI.T_SMALL, UI.INK if on else UI.MUTED, UI.semi)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	l.clip_text = true
 	l.custom_minimum_size.x = THUMB.x
-	v.add_child(l)
-	t.add_child(v)
-	return t
+	return l
 
 func _swatch(key: String, col: Color, on: bool, val: Variant) -> Control:
 	var b := Button.new()
 	b.custom_minimum_size = Vector2(SWATCH, SWATCH)
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	b.set_meta("look_opt", "%s:%s" % [key, str(val)])
 	var edge := UI.ACCENT if on else Color(1, 1, 1, 0.22)
 	b.add_theme_stylebox_override("normal", UI.frame(col, UI.R_PILL, edge, 3 if on else 1))
@@ -472,8 +496,9 @@ func _glider_grid() -> void:
 		var row := UI.hbox(8)
 		var bar := ColorRect.new()
 		bar.color = rc
-		bar.custom_minimum_size = Vector2(4, 30)
+		bar.custom_minimum_size = Vector2(4, GLIDER_PIC.y)
 		row.add_child(bar)
+		row.add_child(_pic("glider", gid, "glider", GLIDER_PIC))
 		var names := UI.vbox(0)
 		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		names.add_child(UI.label(String(g["name"]), UI.T_SMALL, UI.INK if owned else UI.MUTED, UI.semi))

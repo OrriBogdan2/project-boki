@@ -17,12 +17,13 @@ const RIM_ENERGY := 6.0
 const KICK_ENERGY := 2.4
 const FLASH_K := 2.2                        # x the rim's energy at the top of a pick's flash
 const FLASH_S := 0.45                       # s the flash takes to settle back
-const WALL_R := 3.6                         # m: the curved wall's radius round the centre
+const WALL_R := 6.5                         # m: the curved wall's radius round the centre (every shot stays inside)
 const WALL_H := 4.5                         # m: its height (it fades out before its top)
-## The standing stones behind you: [x, z, height, radius] (m from the centre), three depths for parallax.
-const STONES := [[-1.9, -1.9, 2.6, 0.22], [2.1, -2.3, 3.2, 0.26], [-0.6, -3.1, 3.8, 0.3], [1.0, -3.2, 2.2, 0.2],
-	[-2.5, -2.4, 3.4, 0.28], [2.9, -1.4, 1.8, 0.18]]
-const STONE_COL := Color("241d3c")
+## The standing stones behind you, tall enough to leave the shot at the top: [x, z, height, radius] (m from the
+## centre), at three depths for parallax as the camera swings.
+const STONES := [[-2.6, -3.2, 7.0, 0.26], [2.4, -3.6, 7.0, 0.3], [-0.9, -4.8, 7.0, 0.34], [1.3, -5.2, 7.0, 0.3],
+	[-3.9, -4.4, 7.0, 0.36], [3.9, -2.9, 7.0, 0.24]]
+const STONE_COL := Color("3a2f5e")
 const MOTES := 28
 
 var _rim: SpotLight3D
@@ -89,8 +90,8 @@ func _spot(at: Vector3, col: Color, energy: float, shadow: bool) -> SpotLight3D:
 
 
 func _build_backdrop() -> void:
-	# the wall: the inside of a cylinder (its near half culled), dark at the floor, your glow's band at chest height,
-	# clear at the top so the sky still shows over it
+	# the wall: a cylinder round every shot, dark at the floor, your glow's band at chest height, clear at the top so
+	# the sky still shows over it
 	var cyl := CylinderMesh.new()
 	cyl.top_radius = WALL_R
 	cyl.bottom_radius = WALL_R
@@ -110,7 +111,7 @@ func _build_backdrop() -> void:
 	_wall_mat = _flat_mat(Color.WHITE)
 	_wall_mat.albedo_texture = tex
 	_wall_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_wall_mat.cull_mode = BaseMaterial3D.CULL_FRONT
+	_wall_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var wall := _mesh(cyl, _wall_mat, Vector3(0, WALL_H * 0.5 - 0.05, 0))
 	wall.sorting_offset = -4.0      # drawn behind the halo and the motes
 	var stone_mat := Models.toon(STONE_COL)
