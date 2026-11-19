@@ -350,6 +350,7 @@ func _draw_world_labels() -> void:
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
 		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))
+	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
@@ -744,6 +745,9 @@ func _draw_minimap(sz: Vector2) -> void:
 		var tv: Vector2 = to_map.call(m.tut.target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
 		else: edge_mini.add(tv - inner.get_center(), Color("8fe3c8"), EdgeMarker.PRIO_GOAL)
+	if m.objective and m.objective.target_pos() != Vector3.INF:
+		var ov: Vector2 = to_map.call(m.objective.target_pos())
+		ObjectiveTracker.minimap(self, ov, on_map.call(ov, 4.0), inner.get_center())
 	for pg in m.pings:
 		if pg.has("team") and m.player and int(pg["team"]) != m.player.team:
 			continue        # another squad's ping
@@ -822,6 +826,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_arc(ctr, mm_circ.z + 1.0, 0, TAU, 72, Color(0.85, 0.8, 1.0, 0.55), 2.5, true)
 		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
+	ObjectiveTracker.draw(self)
 
 ## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.

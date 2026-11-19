@@ -1,0 +1,23 @@
+{
+ "doc": "The first-expedition objective (scripts/match/first_objective.gd, drawn by scripts/ui/objective_tracker.gd): one short verb-first line under the minimap with a pin or edge arrow on what it names, until the save has got out of one expedition (Save tutorial first_objective). near: metres from the wild Boki at which 'Find' turns into 'Knock it out'; far: metres more before it turns back; keep: metres a farther Boki must be closer by before the pin moves to it; yard: metres from the outpost at which 'Go to' turns into 'Start the uplink'; done_s: seconds a finished step stays ticked under the line. %F is the interact key, %d the uplink's charge, %s a countdown.",
+ "near": 18.0,
+ "far": 8.0,
+ "keep": 12.0,
+ "yard": 7.0,
+ "done_s": 2.2,
+ "steps": [
+  ["find", "Find a wild Boki", "Wild Boki", "Found a wild Boki"],
+  ["knock", "Knock it out", "Knock it out", "Knocked it out"],
+  ["scan", "Scan it: hold %F beside it", "Scan it", "Scanned: it is in your box"],
+  ["leave", "Go to the outpost", "Outpost", "Got out"]
+ ],
+ "leave": {
+  "wait": "Go to the outpost (opens %s)",
+  "go": "Go to the outpost",
+  "start": "Start the uplink: hold %F",
+  "hold": "Hold the yard: uplink %d%%",
+  "back": "Get back in the outpost yard",
+  "contested": "Clear the yard of rivals",
+  "lift": "Step into the lift"
+ }
+}
