@@ -126,6 +126,12 @@ Each line: the debt, why it matters, and the fix. Remove the line when it's fixe
   read the planted patch of skinned sole verts (ext/anim-meeko-loops-length 04ceff4e16 did, before main's merge), then
   re-measure every `foot_mps` and bar (that reading put Kael 47 %, Tenzo 36 %, Albert 31 % on main's old loops).
   Animation owner.
+- Foot-slide speeds: `--foot-slide-check`'s sweep and `--anim-audit` run each Hunter at the raw
+  `hunter_move.json` speed (`HunterMove.of(id)["speed"]`, Albert 4.85 m/s), but the game runs `HunterMove.speed()`,
+  that times `body_scale` (1.195: Albert 5.79 m/s in the play probe), and `loco.run_speed`/`foot_mps` were fitted to
+  the raw speeds, so the run clips play about 20 % faster in game than any bar measured. Only the SKATE row
+  (ext/foot-slide-1118) uses the game speed. Fix: sweep to `HunterMove.speed()`, re-fit `foot_mps`, re-bar. Owner:
+  the anim queue.
 - Head look-at (`scripts/heroes/warden_look_at.gd`, docs/art/wardens/LOOK_AT.md): the yaw and pitch clamps (70 and 25 degrees) and the ease rate are estimates, the source data and `briefs/hero-ref` give no head-turn figure: measure them off footage and set the consts. A remote Hunter's head does not look: the aim is not in the net snapshot (adding it is a Net shape change and a Net.VERSION bump). The procedural body without a .glb gets no look-at.
 - Farm clipping (`--farm-clip-check`, ext/farm-clip-1111): the Training post's mat, the Ranch Pen, Seed Garden, Graveyard and crop plots are open ground on purpose (Boki work and spar on them), so the hunter walks through the dummy's pole and the pen's rails. Fix: a thin per-prop collider (the pole's tile corner, the rails' edges) instead of a blocking footprint. The check lists `training_post` in `WALKABLE` until then. It sweeps the props only: the wild trees and rocks, the house door and the camera through walls are not covered yet.
 - NetSmooth runs a remote Hunter on at its last velocity (RUN_ON) when a snapshot is lost or late. If the true body was slowing (the end of a knock slide), the next snapshot pulls it back ~0.15 m in one frame: `--remote-smooth-check` shows 1 backstep in about 1 run in 12 (docs/ONLINE_FEEL.md). Fix: blend from the drawn position into the new curve instead of jumping back. Do it after ext/feel-online-150's NetSmooth jitter buffer lands, which rewrites the same code.
