@@ -1,0 +1,25 @@
+--- /home/boki/bin/suite-fast.sh	2026-11-18 01:29:24.411082041 +0000
++++ suite-fast.sh	2026-11-18 12:46:30.552215898 +0000
+@@ -160,10 +160,12 @@
+   for _w in $(seq 180); do [ $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) -ge ${SUITE_MIN_FREE_MB:-$(awk '/MemTotal/{m=int($2/1024/5); print (m>12000?12000:m)}' /proc/meminfo)} ] && break; sleep 5; done
+   (set -o noclobber; echo server > $OUT/$side/$n.claim) 2>/dev/null || return   # pods (suite-pod) claim both sides
+   X=$(mktemp -d /tmp/xdg.$SID.XXXX); t0=$(date +%s)
++  echo "$(date -u +%FT%TZ) suite start $side $flag"   # 11-18 retro: log each check start/end (merge-candidate.log went quiet for hours)
+   (cd $T && XDG_DATA_HOME=$X timeout 1200 xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag 2>&1 | timeout -k 5 1300 tail -c 20000000 >$OUT/$side/$n.log; exit ${PIPESTATUS[0]})  # cap 20 MB: Godot leak spam made 2 GB logs (11-11 disk full)
+   rc=$?; rm -rf $X; secs=$(( $(date +%s) - t0 )); rm -f $OUT/$side/$n.cached
+   echo $secs > $OUT/$side/$n.secs; printf '%s\t%s\t%s\tserver\t%s\n' "$flag" $side $secs "$(date -u +%FT%TZ)" >> $DUR
+   echo "$rc $(grep -cE 'FAIL|SCRIPT ERROR' $OUT/$side/$n.log)" > $OUT/$side/$n.rc
++  echo "$(date -u +%FT%TZ) suite end $side $flag rc=$rc ${secs}s"
+   rm -f $OUT/merge/$n.claim.server $OUT/$side/$n.claim
+   if [ $side = merge ] && [ $rc = 124 ]; then local nt nd
+     nt=$(grep -l '^124 ' $OUT/merge/*.rc 2>/dev/null | wc -l); nd=$(ls $OUT/merge/*.rc 2>/dev/null | wc -l)
+@@ -231,6 +233,9 @@
+ trap 'pod_stop; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
+ for p in $PODS; do h=${p%%:*}; sl=${p#*:}; [ "$sl" = "$p" ] && sl=8
+   OUT=$OUT GW=$GW SUITE_POD_KEY=$PODK bash ${SUITE_POD_BIN:-/home/boki/bin/suite-pod} $h $sl > $OUT/pod-$h.log 2>&1 & PODPIDS="$PODPIDS $!"; done
++# 11-18 heartbeat every 10 min (also covers checks that pods deliver, which print no start/end line here)
++( while kill -0 $$ 2>/dev/null; do for _i in $(seq 10); do sleep 60; kill -0 $$ 2>/dev/null || exit; done
++    echo "$(date -u +%FT%TZ) suite heartbeat: merge $(ls $OUT/merge/*.rc 2>/dev/null | wc -l)/$(wc -l < $OUT/flags.txt) done, main $(ls $OUT/main/*.rc 2>/dev/null | wc -l) done, running here $(ls $OUT/*/*.claim 2>/dev/null | wc -l) claims, pods: ${PODS:-none}"; done ) &
+ # 1. merge side, every flag
+ nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/order.txt
+ [ -f $OUT/ABORT ] && stop_suite "$(cat $OUT/ABORT)"

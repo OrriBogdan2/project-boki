@@ -1,5 +1,5 @@
 extends RefCounted
-## --gil-rmb-video --shots-dir=<dir>: Gil's RMB is a press, and R again leaps him off the wave (owner 11-17), through
+## --gil-rmb-video --shots-dir=<dir>: Gil's RMB is a press, and R again leaps him off the wave, through
 ## the game's own camera and HUD, for the owner's review. Recorded like tools/gameplay_media.gd (a child Godot under the
 ## movie writer, 30 fps, <dir>/clip1.avi); encode with ffmpeg. Run it on a GPU worker (jobq --needs gpu).
 ##   0-1 s     he stands, the next potion glowing
