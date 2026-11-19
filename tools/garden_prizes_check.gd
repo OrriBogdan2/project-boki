@@ -93,7 +93,28 @@ func _cup() -> void:
 		later.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + WEEK, rng))
 	ok(GardenPrizes.ribbon_count(me, "shove") == 2 and later[2]["ribbon"], "the next week's Crown grants again")
 	_echo_crown(rng, t + 5.0 * WEEK)
+	_own_stat(rng, t + 7.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
+
+## The cup compares the game's own stat (Speed for the Dash), not the stat total.
+func _own_stat(rng: RandomNumberGenerator, t: float) -> void:
+	Save.d = Save.fresh()
+	var me := _boki(20)
+	me["stats"]["speed"] = 60
+	var big := _boki(40)                      # a far bigger total, but slower than Pip
+	big["stats"]["speed"] = 30
+	var fast := _boki(5)                      # a small total, but 1.15x Pip's Speed
+	fast["stats"]["speed"] = 69
+	ok(GardenPrizes.cup_stat("dash", me) == "speed" and GardenPrizes.cup_stat("shove", me) == "power",
+			"the Dash runs on Speed, the Shove on Power")
+	ok(GardenPrizes.cup_stat("show", me) == "speed", "the Show compares the backed Boki's best stat")
+	var r1 := GardenPrizes.settle("dash", me, big, true, t, rng)
+	ok(r1["round"] == "", "Dash: a bigger total with less Speed is no round")
+	var r2 := GardenPrizes.settle("dash", me, fast, true, t, rng)
+	ok(r2["round"] == "Sprout", "Dash: a faster rival is a round, total or not")
+	var pick := GardenPrizes.strongest([me, big, fast], me, "dash")
+	ok(pick == fast, "the Dash rival is the fastest, not the biggest total")
+	ok(GardenPrizes.strongest([me, big, fast], me) == big, "...with no game named it is still the biggest total")
 
 ## Echo Steps' first Crown also gives Chimegrass; the next one does not.
 func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
