@@ -10323,3 +10323,4 @@ READY ext/extra-clan-chat 442719ee93 (clan chat: clan-only rate-limited channel 
 READY ext/tut-pace-1116 e027ab5dba (TUTORIAL_PACE re-measured on main; pace tool covers the Uplink exit again; prologue shows Hold to skip after 4 s: wait with no way out 37 s -> 4 s)
 READY ext/ui-picker-unlock-line abe5948a808eebe88fe61ba172080289b0dd887b (Hunter picker: locked second Hunter says 'Finish an expedition to choose your second Hunter'; text only)
 READY ext/ui-demo-no-away-card 8a136b076c1e6452a9dc5ab5e135d0f8ef3eeded (base demo: no away card at start, base-demo-check asserts no panel at 5 s, all green; health --strict green)
+READY ext/tut-mastery-seep e4d0e52e7fd319717e826789b9e87b49a109603e (first mastery feature gets one plain farm line pointing at Change your look, once per save)
