@@ -1,0 +1,20 @@
+{
+	"id": "strobolin",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/strobolin.json.",
+	"work": {
+		"craft": 2,
+		"mend": 1,
+		"tide": 3
+	},
+	"shiny": {
+		"belly": "#84ccb6",
+		"color": "#659c8b",
+		"glow": "#90ffa6"
+	},
+	"size": {
+		"cm": 107,
+		"kg": 70.0,
+		"fit": 1.71,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

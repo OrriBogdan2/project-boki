@@ -1,0 +1,114 @@
+{
+	"grammar": 1,
+	"id": "lodestaff",
+	"name": "Magnestaff",
+	"animals": [
+		"Stick insect",
+		"Lodestone staff"
+	],
+	"theme": "gravity",
+	"flavor": "Evolution of Magnestick.",
+	"colors": {
+		"belly": "#6c546c",
+		"body": "#3c3c54",
+		"glow": "#a3a3ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "burr",
+		"tail": "none",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 3,
+		"kin_speed": 13,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.49,
+		"curiosity": 0.68,
+		"loyalty": 0.48,
+		"temper": 0.5
+	},
+	"ai": {
+		"aggression": 0.45,
+		"loyalty": 0.55,
+		"caution": 0.65,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Still Staff",
+		"passives": [
+			{
+				"stat": "dodge_regen",
+				"amount": 0.25
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "pull",
+				"strength": 8
+			}
+		]
+	},
+	"active": "moon_mark",
+	"auto": "updraft",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Mag",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "deadpan, slow, dry",
+		"syllables": [
+			"Mag",
+			"nestaff"
+		]
+	},
+	"egg": {
+		"name": "Magnestaff Egg",
+		"temper": "Still",
+		"desc": "Something still is in here.",
+		"play": "Slippery and full of tricks."
+	}
+}

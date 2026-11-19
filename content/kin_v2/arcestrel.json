@@ -1,0 +1,122 @@
+{
+	"grammar": 1,
+	"id": "arcestrel",
+	"name": "Arcestrel",
+	"animals": [
+		"Kestrel",
+		"Copper wire"
+	],
+	"theme": "storm",
+	"flavor": "Falcon with lightning-rod crest and coil talons.",
+	"colors": {
+		"belly": "#b46c6c",
+		"body": "#b46c54",
+		"glow": "#ff916d"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "sparks"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 3,
+		"kin_hp": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.7,
+		"curiosity": 0.82,
+		"loyalty": 0.61,
+		"temper": 0.55
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Copper Rod",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "storm_arc",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Ar",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "clipped, proud, stern",
+		"syllables": [
+			"Ar",
+			"cestrel"
+		]
+	},
+	"egg": {
+		"name": "Arcestrel Egg",
+		"temper": "Proud",
+		"desc": "Something proud is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

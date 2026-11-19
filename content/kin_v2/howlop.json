@@ -1,0 +1,119 @@
+{
+	"grammar": 1,
+	"id": "howlop",
+	"name": "Howlop",
+	"animals": [
+		"Hare",
+		"Tuning fork"
+	],
+	"theme": "echo",
+	"flavor": "Predator bat-hare, sonic fangs.",
+	"colors": {
+		"belly": "#9c6c6c",
+		"body": "#846c6c",
+		"glow": "#ff87c3"
+	},
+	"look": {
+		"ears": "none",
+		"body": "echolop",
+		"tail": "none",
+		"feet": "none",
+		"aura": "rings"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 3,
+		"kin_hp": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.78,
+		"curiosity": 0.7,
+		"loyalty": 0.55,
+		"temper": 0.56
+	},
+	"ai": {
+		"aggression": 0.65,
+		"loyalty": 0.35,
+		"caution": 0.35,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Howl Tempo",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.2
+			},
+			{
+				"stat": "reload",
+				"amount": 0.2
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.9
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "echolocate",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "How",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form",
+					"zapple_overtone"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "loud, bold, competitive",
+		"syllables": [
+			"How",
+			"lop"
+		]
+	},
+	"egg": {
+		"name": "Howlop Egg",
+		"temper": "Hyper",
+		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"id": "scythant",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/scythant.json.",
+	"work": {
+		"bloom": 2,
+		"craft": 1,
+		"ranch": 3
+	},
+	"shiny": {
+		"belly": "#8684cc",
+		"color": "#5d5484",
+		"glow": "#8d89ff"
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 0.81,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

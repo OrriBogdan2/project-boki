@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "seamwyrm",
+	"name": "Seamwyrm",
+	"animals": [
+		"Sea serpent",
+		"Open zipper"
+	],
+	"theme": "dark",
+	"flavor": "Great dragon-worm, zipper splits open as its jaws.",
+	"colors": {
+		"belly": "#6c546c",
+		"body": "#3c243c",
+		"glow": "#b367ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "drop",
+		"tail": "zig",
+		"feet": "none",
+		"aura": "none"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 7,
+		"kin_speed": 9,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.37,
+		"curiosity": 0.62,
+		"loyalty": 0.62,
+		"temper": 0.33
+	},
+	"ai": {
+		"aggression": 0.45,
+		"loyalty": 0.55,
+		"caution": 0.65,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Seam Burrow",
+		"passives": [
+			{
+				"stat": "dodge_regen",
+				"amount": 0.25
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "mark",
+				"mode": "reveal",
+				"duration": 3
+			}
+		]
+	},
+	"active": "moon_mark",
+	"auto": "echolocate",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Seam",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "sly, deep, mocking",
+		"syllables": [
+			"Seam",
+			"wyrm"
+		]
+	},
+	"egg": {
+		"name": "Seamwyrm Egg",
+		"temper": "Sly",
+		"desc": "Something sly is in here.",
+		"play": "Slippery and full of tricks."
+	}
+}
