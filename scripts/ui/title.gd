@@ -112,7 +112,10 @@ func _build_ui() -> void:
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
+	# the commit an itch build was made from (itch.yml writes it into project.godot): "is this the latest build?"
+	var commit := String(ProjectSettings.get_setting("application/config/version", ""))
+	var ver_text := "v" + Net.VERSION + ("  ·  " + commit if commit != "" else "")
+	var ver := UI.label(ver_text, 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
