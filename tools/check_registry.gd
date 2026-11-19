@@ -855,6 +855,7 @@ const CHECKS := {
 	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],      # Hob's clear ring
 	"--hob-spot-shots": ["res://tools/hob_spot_shots.gd", "hob_spot_shots", null],      # =<dir>, before/after
+	"--hob-work-shots": ["res://tools/hob_work_shots.gd", "hob_work_shots", null],      # =<dir>, the house going up
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],  # steps never jolt
 	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],      # --shots-dir=<dir>
 	"--npc-check": ["res://tools/npc_check.gd", "npc_check", null],      # the rigged NPCs (Hob, Pell)
