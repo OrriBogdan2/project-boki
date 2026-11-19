@@ -6,9 +6,9 @@ extends RefCounted
 const COL := Color("ffd27a")        # the objective's colour: the pin, the ring and the card's rim
 const TICK_COL := Color("8fe3c8")   # a finished step
 const CARD_W := 240.0               # px, in HUD units
-const CARD_H := 46.0
+const CARD_H := 38.0
 const TEXT_W := CARD_W - 28.0       # px the line may take (the rim and the right margin)
-const GAP := 8.0                    # px under the minimap column
+const GAP := 6.0                    # px under the minimap column
 const LINE_PX := 15
 const PING_SAME_M := 6.0            # m: a ping this close to the target is on it
 const PIPS_R := 3.5                 # px radius of a step pip
