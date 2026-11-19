@@ -75,7 +75,7 @@ static func name_of(id: String) -> String:
 
 ## "Ranged marksman": the role, the part of the kit card's one-line loop before the colon.
 static func role_of(id: String) -> String:
-	return String(Arch.def(id).get("card", {}).get("loop", "")).get_slice(":", 0)
+	return AbilityText.loop(id).get_slice(":", 0)
 
 static func _pick(home: Node, id: String) -> void:
 	if not HeroGrid.save_pick(id):
