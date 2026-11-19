@@ -10265,3 +10265,4 @@ READY ext/garden-pair-after-grown fa9631749e5eb9277e7a873271269778e2465cc1 (firs
 READY ext/garden-crown-intent 768f777f48 (Crown compares the game's own stat, Speed for the Dash; Dash card says friends pull together)
 READY ext/tester-feedback-1119 65aa6b5eda (tester 11-19: Joule stack + no tiny re-dash, Shiv range/miss, Celeste aim assist, Grimble hook into slam; tester-feedback-check 17/0, dredge 148/0)
 READY ext/neve-shatter-slow 18ac885a59 (Neve Shatter burst: ours-only slow 1.2s/30% removed, assert + docs rows closed)
+READY ext/feel-high-refresh-input 171ef911ae (FireTap latches LMB press across a tick at 144/240 Hz; fps-parity-check gains 240 fps and PRESS rows for LMB/RMB/E/R/Shift/jump/glide)
