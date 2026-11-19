@@ -70,3 +70,11 @@ the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, dark
 stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
 UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
 resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.
+
+## Rebuild candidate 2026-11-19 (ext/rebuild-dredge-1119, draft, owner visual check first)
+Method B for the arm/hip tearing: the owner-approved turnaround got an arms-clear AI edit (Vertex; pose only, A-pose,
+goo-arm hook lifted clear of the leg), Meshy multi-image A-pose M4 (front+back, task 01a1f4c3-89bd-7435-ac9f-e5956f1fb512;
+arms 10-17 cm clear of the torso at rest), swapped onto this rig and its clips with `tools/art1/v95_to_game.py Grimble
+--spec art/wardens/src/grimble_rb1119.json`, then the live head kept with `tools/art1/glb_head_keep.py` (the face is the
+in-game one). Edges >= 8 mm stretched > 2x in any clip (ball prop left out): 1353 -> 583; worst 8.52x (ledge) -> 5.69x (run_f).
+Files: /home/boki/gens/rebuild-dredge-1119/ (gen_log.tsv, views/, meshy/, chk/, renders/, sheet).
