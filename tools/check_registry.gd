@@ -30,6 +30,7 @@ const CHECKS := {
 	"--pit-egg-check": ["res://tools/pit_egg_check.gd", "pit_egg_check", null],      # one boss egg, one winner
 	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
+	"--r2-view": ["res://tools/r2_view.gd", "r2_view", null],      # GPU, --shots-dir= --wardens= [--close]: a Hunter as the player sees it (idle/run/2 attacks)
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],      # a dead check run ends
