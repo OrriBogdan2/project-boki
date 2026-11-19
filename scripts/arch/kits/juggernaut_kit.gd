@@ -70,7 +70,6 @@ func _setup() -> void:
 	warchain = JuggernautChain.new(self)
 	meteor = JuggernautDrop.new(self)
 	cd["air"] = 0.0             # the Meteor Drop's own cooldown slot
-	cd["tap"] = 0.0             # the tap strike's own short cooldown (used while the Smash rests)
 
 func full_ready() -> bool:
 	return false               # no resource-full Smash: Enraged buffs everything instead
@@ -664,10 +663,9 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash). On
-## the ground a tap with the Smash resting is the lighter strike, which keeps its own cooldown and deny (_tap_strike).
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
 func rmb_open() -> bool:
-	return (not h.grounded and ch_rmb >= 1.0) or (h.grounded and ch_rmb < 1.0) or super.rmb_open()
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
 ## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
@@ -753,9 +751,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var spin: bool = c.get("e", false)
 	var dropping: bool = c.get("air", false) and not spin
 	var held: bool = c.get("hold", false)
-	if not spin and not dropping and not held and ch_rmb < 1.0:
-		_tap_strike()               # the Smash rests: a tap is still an overhead strike, lighter, on its own cooldown
-		return
 	if dropping:
 		if not spend_air(): return
 	elif not spend_rmb():
@@ -777,16 +772,6 @@ func _start_slam(dk: float, rk: float, windup: float) -> void:
 	slam_w = {"t": windup, "t0": windup, "dk": dk, "rk": rk, "dir": h.aim_dir()}
 	play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 	vfx("slam_tell")
-
-## A tap with the Smash resting: the lighter strike (content/rules/tuning.json "kael"), no charge spent.
-func _tap_strike() -> void:
-	if float(cd["tap"]) > 0.0:
-		h._ab_feedback("sec", "deny")
-		return
-	var tn := Tuning.of("kael")
-	cd["tap"] = float(tn["tap_cooldown_s"])
-	h._ab_feedback("sec", "cast")
-	_start_slam(float(tn["tap_dmg_k"]), float(tn["tap_range_k"]), float(tn["tap_windup_s"]))
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt

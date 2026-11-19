@@ -1,5 +1,5 @@
 extends RefCounted
-## Kael's tap strike, live RMB aim during E, tether break, and the ult's kept momentum.
+## Kael's live RMB aim during E, tether break, and the ult's kept momentum.
 ## Run as --kael-tap-check (tools/check_registry.gd).
 
 const AKCheck := preload("res://tools/archetype_check.gd")
@@ -16,27 +16,7 @@ func run(main_node: Node, _who := "") -> void:
 	var home: Vector3 = r[4]
 	var kt: JuggernautKit = pl.ak
 	var tn := Tuning.of("kael")
-	# tap with the Smash resting: a lighter overhead strike still goes off, once, on its own cooldown
-	pl.teleport(home)
-	chk.fresh(tgt)
-	tgt.teleport(home + Vector3(1.0, 0, 0))
-	chk.aim_at(pl, tgt.pos)
-	kt.ch_rmb = 0.0
-	kt.cd["rmb"] = 99.0
-	kt.cd["tap"] = 0.0
-	chk.tap(m, pl)
-	chk.step(m, 0.7)
-	var full := float(kt.rmb_def()["slam"]["dmg"])
-	chk.ok(
-		"kael tap with the Smash resting: a lighter strike lands",
-		chk.dmg(tgt) > 1.0 and chk.dmg(tgt) < full * 0.95,
-		"took %.0f of %.0f" % [chk.dmg(tgt), full]
-	)
-	chk.tap(m, pl)
-	chk.step(m, 0.1)
-	chk.ok("kael tap strike: its cooldown holds a second tap", kt.slam_w.is_empty() and float(kt.cd["tap"]) > 0.0)
 	# RMB aim is live during E: wind up, throw E, turn 90 deg: the strike goes where the cursor is at the blow
-	chk.step(m, float(tn["tap_cooldown_s"]))
 	chk.fresh(tgt)
 	tgt.teleport(home + Vector3(2.5, 0, 0))
 	kt.ch_rmb = 1.0
@@ -57,6 +37,7 @@ func run(main_node: Node, _who := "") -> void:
 	kt.warchain.snap()
 	chk.fresh(tgt)
 	tgt.teleport(home + Vector3(-2.5, 0, 0))
+	kt.ch_rmb = 1.0
 	kt.cd["rmb"] = 0.0
 	kt.cd["e"] = 0.0
 	chk.aim_at(pl, home + Vector3(6.0, 0, 0))

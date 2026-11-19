@@ -1,5 +1,5 @@
 extends RefCounted
-## --kael-tap-clip --shots-dir=<dir>: Kael's tap strike, charged hold, and ult cast mid-sprint and mid-jump, in the
+## --kael-tap-clip --shots-dir=<dir>: Kael's tap Smash, charged hold, and ult cast mid-sprint and mid-jump, in the
 ## Training Area at the match camera, 15 fps: <dir>/<case>/f000.png... Needs a renderer (jobq --needs gpu).
 ## Never touches the save.
 
@@ -35,8 +35,8 @@ func _case(c: String, out: String) -> void:
 		await main.fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
-	kt.ch_rmb = 0.0 if c == "tap" else 1.0
-	kt.cd["rmb"] = 99.0 if c == "tap" else 0.0
+	kt.ch_rmb = 1.0
+	kt.cd["rmb"] = 0.0
 	chk.aim_at(pl, tgt.pos)
 	for i in 10:
 		await _frame(m)
