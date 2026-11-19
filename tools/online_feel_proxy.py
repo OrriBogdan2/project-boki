@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Userspace stand-in for `tc netem delay` on loopback (no root needed): a UDP proxy that holds every
 packet for DELAY_MS each way. Used by --online-feel-check (tools/online_feel_check.gd).
-Usage: online_feel_proxy.py LISTEN_PORT TARGET_PORT DELAY_MS   (stop it by its pid)"""
+Usage: online_feel_proxy.py LISTEN_PORT TARGET_PORT DELAY_MS [--parent-pid PID] [--max-life SECONDS]
+It exits by itself when PID is gone (or a zombie) and after SECONDS (default 1500), so a check that is killed
+or times out never leaves it behind holding the caller's pipe (11-14: it hung a release gate for 1h40m)."""
+import argparse
 import asyncio
-import sys
+import os
+import signal
 
 
 class Leg(asyncio.DatagramProtocol):
@@ -42,5 +46,36 @@ async def main(listen, target, delay_ms):
     await asyncio.Event().wait()
 
 
+def alive(pid):
+    """True while pid is a running process (a zombie counts as gone)."""
+    try:
+        with open("/proc/%d/stat" % pid) as f:
+            return f.read().rsplit(")", 1)[1].split()[0] != "Z"
+    except (OSError, IndexError):
+        return False
+
+
+async def watch(parent, max_life):
+    """Return when the parent is gone or the cap is hit. Without --parent-pid: when we are re-parented."""
+    ppid = os.getppid()
+    waited = 0.0
+    while waited < max_life and (alive(parent) if parent else os.getppid() == ppid):
+        await asyncio.sleep(0.5)
+        waited += 0.5
+    os.kill(os.getpid(), signal.SIGTERM)
+
+
+async def run(a):
+    signal.signal(signal.SIGTERM, lambda *_: os._exit(0))
+    asyncio.get_running_loop().create_task(watch(a.parent_pid, a.max_life))
+    await main(a.listen, a.target, a.delay_ms)
+
+
 if __name__ == "__main__":
-    asyncio.run(main(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3])))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("listen", type=int)
+    ap.add_argument("target", type=int)
+    ap.add_argument("delay_ms", type=float)
+    ap.add_argument("--parent-pid", type=int, default=0)
+    ap.add_argument("--max-life", type=float, default=1500.0)
+    asyncio.run(run(ap.parse_args()))
