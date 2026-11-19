@@ -10273,3 +10273,4 @@ READY ext/feel-remote-move-smooth d81a70adf26d4f2950bcba71234a080e06b16f98 (NetS
 READY ext/rpc6-settings-pollution-1117 2b3b22c9217384807b17cd95535dde489c690fa2 (checks use a per-run settings file; rpc6 settings.cfg pollution)
 READY ext/ui-ability-text-one-v3 2f7f5a48cf (AbilityText reader + {action}/{path} tokens + ArchText + --tooltip-check/--ability-text-check)
 READY ext/cancel-matrix-land 9a7b06769b (supersedes ext/cancel-matrix-b and -c, which were already in main: adds the missing Albert and Tenzo Cancels sections re-read on main, drops Grimble duplicate, restores Tenzo 0.6 s recovery assert; dolm/bulwark/rimewright/dredge/tender/ostra combo checks + kit-parity green, health --strict OK)
+READY ext/revive-sickness-lamp f7d6dda4d3 (revive sickness status heart+seconds on plate and squad row, Net 0.24.18, Hearth Lamp, tonic cleanse, belt_spill/belt_fumble cancel cues; PR via gh-outbox)
