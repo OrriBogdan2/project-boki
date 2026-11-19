@@ -134,6 +134,11 @@ func _stand(cp: Dictionary) -> Array:
 	return made
 
 
+## Has camp i (its camp_spots index) no monster standing? (SpawnPlan.free_guarded)
+func cleared(i: int) -> bool:
+	return _all_dead(list[i])
+
+
 func _all_dead(cp: Dictionary) -> bool:
 	for mb in cp["mobs"]:
 		if is_instance_valid(mb) and not mb.dead:

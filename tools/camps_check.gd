@@ -90,7 +90,18 @@ func run(main: Node) -> void:
 		me.lvl = 1
 		var g := BotCamps.goal(m, me)
 		ok(by_size["light"].any(func(c): return c["pos"] == g), "a level 1 bot goes to a Small Camp")
-	# ---- 6. a late join finds camps picked over
+	# ---- 6. rare Boki wait in Great Camps (SpawnPlan guarded picks)
+	var sp := m.spawn_plan
+	var guarded: Array = sp.of("rare_kin").filter(func(c): return c.has("camp")) if sp else []
+	var heavy_n := m.world.camp_spots.filter(func(c): return String(c.get("kind", "")) == "heavy").size()
+	print("CAMPS info %d Great Camp spots, %d guarded rare Boki" % [heavy_n, guarded.size()])
+	ok(heavy_n == 0 or guarded.size() == mini(2, heavy_n), "rare Boki are guarded by Great Camps")
+	ok(
+		guarded.all(func(c): return c["active"] and c["ref"] == null and m.world.camp_spots[c["camp"]]["kind"] == "heavy"),
+		"a guarded Boki is not out while its camp stands"
+	)
+	ok(guarded.all(func(c): return sp.state_for(c, me.team) == "active"), "the map shows the guarded camps from the start")
+	# ---- 7. a late join finds camps picked over
 	var cleared: int = m.camps.picked_over(1.0, RandomNumberGenerator.new())
 	ok(
 		cleared == cps.size() and m.camps.live().is_empty(),
@@ -100,5 +111,9 @@ func run(main: Node) -> void:
 		cps.all(func(c): return float(c["cleared_at"]) > -float(m.camps.cfg["back_s"]) - 1.0),
 		"cleared up to back_s ago"
 	)
+	# ---- 8. a cleared Great Camp frees its Boki
+	if sp:
+		ok(sp.free_guarded() == guarded.size(), "every cleared Great Camp frees its Boki (%d)" % guarded.size())
+		ok(guarded.all(func(c): return c["ref"] is Kin and (c["ref"] as Kin).is_wild()), "the freed Boki is wild and catchable")
 	print("CAMPS done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
