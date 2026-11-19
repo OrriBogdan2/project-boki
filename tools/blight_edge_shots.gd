@@ -1,9 +1,11 @@
 extends RefCounted
-## --blight-edge-shots --shots-dir=<dir> [--quality=low|medium|high|ultra]: does the Blight's edge read?
+## --blight-edge-shots --shots-dir=<dir> [--quality=low|medium|high|ultra] [--raid=clear|night|fog|...]: does the Blight's edge read?
 ## One standing spot on the Heart's island, the camera turned to the tide ring, the ring set by the
 ## match clock to sit 60 m off, 5 m off, and 5 m behind the player (out in the Blight):
 ##   wall_60m    the wall 60 m away, low camera (the steep play camera sees only the nearest ground)
 ##   wall_edge   the wall 5 m off, play camera
+##   wall_inside 20 m off inside the ring, play camera; wall_moving_a/_b the same view 20 s of match clock apart
+##               (the ring a few metres closer: the front the wall's motion cue has to show)
 ##   in_blight   5 m past it: tint, line, red pulse of a tide hit
 ##   minimap     crop of the minimap with the ring and the dashed next ring
 ##   full_map    the drop map (planning) before the tide starts: the first ring, dashed
@@ -31,6 +33,8 @@ func run(main_node: Node) -> void:
 	var play_pitch := m.cam.pitch
 	await _view("wall_60m", d + 60.0, LOW_PITCH, "The wall 60 m away from the spot, seen from a low camera")
 	await _view("wall_edge", d + 5.0, play_pitch, "The wall 5 m off, the play camera")
+	await _view("wall_inside", d + 20.0, play_pitch, "The wall 20 m off, the play camera")
+	await _moving(d + 20.0, play_pitch)
 	m.heart.hit_t = 1.0e9
 	await _view("in_blight", d - 5.0, play_pitch, "5 m out in the Blight: tint, the line, the red pulse of a hit")
 	_crop_take("minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the ring, the dashed next ring, the Heart")
@@ -50,8 +54,12 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true,
-		"heart": true, "god": true})
+	var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true,
+		"heart": true, "god": true}
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--raid="):
+			opts["raid"] = String(a).substr(7)
+	await m.start(opts)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -80,10 +88,21 @@ func _setup() -> void:
 		if h != P:
 			h.teleport(m.world.free_spot_near(site, [], 1.0, 0.45, 6.0))
 
+## The wall while it moves: the same view twice, the ring 20 s of the close apart (the live motion cue).
+func _moving(ring: float, pitch: float) -> void:
+	var rl := Heart.rules()
+	var k := (float(rl["tide_r0"]) - ring / m.heart.ways_scale) / (float(rl["tide_r0"]) - float(rl["tide_r1"]))
+	var t0 := float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k - m.sess_t0
+	m.cam.pitch = pitch
+	for n in ["wall_moving_a", "wall_moving_b"]:
+		m.time = t0 + (20.0 if n.ends_with("b") else 0.0)
+		await _go(0.25)
+		_take(n, "The wall mid-close, play camera (%s)" % n.right(1))
+
 ## Ring radius `ring` m on the clock, the camera looking out at the wall, then a shot.
 func _view(file: String, ring: float, pitch: float, caption: String) -> void:
 	var rl := Heart.rules()
-	var k := (float(rl["tide_r0"]) - ring) / (float(rl["tide_r0"]) - float(rl["tide_r1"]))
+	var k := (float(rl["tide_r0"]) - ring / m.heart.ways_scale) / (float(rl["tide_r0"]) - float(rl["tide_r1"]))
 	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k - m.sess_t0
 	m.cam.pitch = pitch
 	m.cam.yaw = atan2(-out.x, -out.y)
