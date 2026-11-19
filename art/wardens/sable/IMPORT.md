@@ -91,3 +91,12 @@ Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from
 
 ## Mouth-corner fix (2026-11-18, ext/sable-face-game-1118)
 Owner: the screen-left lip corner showed two endpoints. Cause: the painted lips (from the 2D edit) sat 5-6 mm below the mesh lip slit on the screen-left half (offset 57 px at the corner, 0 at the right corner at 10 px/mm in a front ortho render), so the paint ended at one point and the mesh crease at another, plus a dotted seam line and a lower-lip line that never met the right corner. Texture-only fix in the head/body albedo (`sable_v95b.jpg`; mouth region only, 7.7k texels at 4096): lip paint warped up to the mesh slit (offset removed, tapered to 0 at the right corner), lower-lip lines squeezed into each corner, paint beyond each mesh corner replaced by skin. Mesh, UVs, eyes, mole, blush and `sable_v95.jpg` untouched. Source/tools: `~/meshy/sable-lipfix-1118/`.
+
+## Method B rebuild candidate (2026-11-19, ext/rebuild-sable-1119, draft: owner visual check first)
+Arm tear fix by rebuild, not weights: the live turnaround's arms were AI-edited out to an A-pose (Vertex Nano Banana Pro, per view),
+Meshy multi-image-to-3D (meshy-7.1, pose_mode a-pose, 50k) made 4 bodies with the arms clear of the coat; C2 is used. The live
+head (face, moth eyes, hair, antennae, neck) and braid, and the live hands with their pistols, are kept verbatim; the new body
+paint is `sable_v95c.jpg` (`<slot>-v95c` materials). The arms are bound in A-pose through the skin's inverse bind matrices only:
+node rests and all 59 clips are byte-identical to main. Body weights are capsule weights + mesh smoothing; the arm chain never
+weights the hips/thigh skin. Scripts and measurements: ~/meshy/rebuild-sable-1119/ (scripts/assemble.py, measure/).
+`--stretch-check --wardens=thief --limit=2.0`: worst 23.85 (ledge) -> 15.81 (bola); clips over the 10.0 ceiling 43 -> 20.
