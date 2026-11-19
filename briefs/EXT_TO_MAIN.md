@@ -10253,3 +10253,4 @@ READY ext/first-expedition-objective 7293bb526e (first-expedition next-step card
 READY ext/merge-lane-tutorial-1119 0388c6d954db82597076cdc961c1dde9507a4f44 (merge lane: tutorial fusion-off, LMB-then-RMB, key prompts, no-overlap popups, outpost wording, hunter hints; replaces PRs 336 237 252 259 236 212)
 READY ext/merge-lane-artdata-1118 10e0e16a2c (artdata lane: 8 branches, NEW-RED 0, export 872.9 MB vs main 872.7)
 READY ext/tutorial-playthrough-check-1119 f37d49de0ab (absolute tutorial playthrough gate check; passes on main, 62 s)
+READY ext/merge-lane-artdata-1118-b 7e15624154 (boki-more-ingame alone, size baseline bump, NEW-RED 0)
