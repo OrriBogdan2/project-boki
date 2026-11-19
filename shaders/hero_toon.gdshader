@@ -27,7 +27,7 @@ uniform vec4 weight_g = vec4(1.0);
 uniform vec4 weight_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 const float FLASH_GLOW = 0.9;    // the hit flash's glow on a dark or mid surface (it reads there already)
-const float FLASH_PALE = 1.6;    // and up to this much more on a pale one (linear luminance 0.15 .. 0.6)
+const float FLASH_PALE = 2.4;    // and up to this much more on a pale one (linear luminance 0.15 .. 0.6)
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 // the Hunter's ultimate (UltGlow): 0 none, ~0.4 a quiet rim glow while it is ready, 1 the cast flash, all in ult_color
 uniform float ult_glow : hint_range(0.0, 1.0) = 0.0;
