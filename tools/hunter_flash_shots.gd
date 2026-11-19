@@ -8,18 +8,18 @@ extends RefCounted
 ## touches the save.
 
 const DT := 1.0 / 60.0
-const HIT := 12.0           # damage of the test hit
-const WARM := 20            # frames the model settles before the shots
-const FULL_STEPS := 1       # steps after the hit to the flash's full frame (it holds full for 3)
-const FADE_STEPS := 4       # steps after the hit to a fading frame
-const REL_MIN := 0.5        # the least share of the body's room to white (1 - its luminance) the full flash closes
-const BODY_DIFF := 0.08     # a pixel is the body's when the before frame differs this much from the empty frame
-const CELL := Vector2i(150, 210)    # px of one Hunter in the strip
+const HIT := 12.0  # damage of the test hit
+const WARM := 20  # frames the model settles before the shots
+const FULL_STEPS := 1  # steps after the hit to the flash's full frame (it holds full for 3)
+const FADE_STEPS := 4  # steps after the hit to a fading frame
+const REL_MIN := 0.5  # the least share of the body's room to white (1 - its luminance) the full flash closes
+const BODY_DIFF := 0.08  # a pixel is the body's when the before frame differs this much from the empty frame
+const CELL := Vector2i(150, 210)  # px of one Hunter in the strip
 
 var bad := 0
 var main: Node
 var m: Match
-var P: Hunter
+var player: Hunter
 
 
 func ok(cond: bool, what: String) -> void:
@@ -43,7 +43,7 @@ func run(root: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	player = m.player
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -52,24 +52,32 @@ func run(root: Node) -> void:
 	m.fx.visible = false
 	for h in m.hunters:
 		h.visible = false
-	var spot := P.pos + Vector3(0, 0, 5)
+	var spot := player.pos + Vector3(0, 0, 5)
 	var ids: Array = Arch.ids()
-	var teams: Array = [P.team, 2 if P.team != 2 else 1]
+	var teams: Array = [player.team, 2 if player.team != 2 else 1]
 	var strip := Image.create_empty(CELL.x * ids.size(), CELL.y * teams.size() * 2, false, Image.FORMAT_RGBA8)
 	var gains: Array = []
 	for ti in teams.size():
 		for i in ids.size():
-			var h := m.make_hunter("HF%d_%d" % [ti, i], teams[ti], Arch.weight(ids[i]), String(ids[i]), "idle", {},
-				spot, {"arch": ids[i], "weapon": "?"})
-			h.armor = 0.0       # (armour turns the flash cyan: a different case)
+			var h := m.make_hunter(
+				"HF%d_%d" % [ti, i],
+				teams[ti],
+				Arch.weight(ids[i]),
+				String(ids[i]),
+				"idle",
+				{},
+				spot,
+				{"arch": ids[i], "weapon": "?"}
+			)
+			h.armor = 0.0  # (armour turns the flash cyan: a different case)
 			h.face = PI
 			var shots := await _shoot(h, spot)
 			var g := _gain(shots[0], shots[1], shots[2])
 			var gf := _gain(shots[0], shots[1], shots[3])
 			var rel: float = g[0] / maxf(1.0 - g[1], 0.05)
 			gains.append([rel, ids[i], teams[ti]])
-			print("HUNTERFLASH %-12s team %d base %.2f gain %.2f rel %.2f fade %.2f" % [ids[i], teams[ti], g[1], g[0], rel,
-				gf[0]])
+			var row := [ids[i], teams[ti], g[1], g[0], rel, gf[0]]
+			print("HUNTERFLASH %-12s team %d base %.2f gain %.2f rel %.2f fade %.2f" % row)
 			for r in 2:
 				var cell: Image = shots[1 + r]
 				cell.resize(CELL.x, CELL.y, Image.INTERPOLATE_LANCZOS)
@@ -77,8 +85,13 @@ func run(root: Node) -> void:
 			h.visible = false
 	strip.save_png(dir.path_join("strip.png"))
 	var worst: Array = gains.reduce(func(a, b): return a if a[0] <= b[0] else b)
-	ok(worst[0] >= REL_MIN, "every Hunter's flash closes >= %.2f of its room to white (least: %s team %d, %.2f)" % [
-		REL_MIN, worst[1], worst[2], worst[0]])
+	ok(
+		worst[0] >= REL_MIN,
+		(
+			"every Hunter's flash closes >= %.2f of its room to white (least: %s team %d, %.2f)"
+			% [REL_MIN, worst[1], worst[2], worst[0]]
+		)
+	)
 	print("HUNTERFLASH DONE, failures: %d, strip %s" % [bad, dir.path_join("strip.png")])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -103,7 +116,7 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	out.append(_grab(rg))
 	h.inv_t = 0.0
 	h.dropping = false
-	h.hurt(HIT, P, {"src": "primary"})
+	h.hurt(HIT, player, {"src": "primary"})
 	ok(h.flash_t > 0.0, "%s takes the hit (its flash runs)" % h.arch)
 	await _frames(h, FULL_STEPS)
 	out.append(_grab(rg))

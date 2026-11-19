@@ -171,7 +171,8 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
-	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],      # Training Grounds Hunters = a real match's
+	# Training Grounds Hunters = a real match's
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -699,7 +700,7 @@ const CHECKS := {
 	"--garden-item-fx-shots": ["res://tools/garden_item_fx_check.gd", "garden_item_fx_check", "shots"],
 	"--hit-flash-kind-check": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "check"],
 	"--hit-flash-kind-shots": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "shots"],
-	"--hunter-flash-shots": ["res://tools/hunter_flash_shots.gd", "hunter_flash_shots", null],  # GPU: each Hunter's body flash
+	"--hunter-flash-shots": ["res://tools/hunter_flash_shots.gd", "hunter_flash_shots", null],  # GPU
 	"--garden-first-15-check": ["res://tools/garden_first15_check.gd", "garden_first15_check", null],
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
