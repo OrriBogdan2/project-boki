@@ -134,6 +134,7 @@ func _place_msgs() -> void:
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
@@ -1546,7 +1547,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud and MergeForm.enabled(): lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	if p.kin:
 		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
@@ -1716,7 +1717,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
-		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
 		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
