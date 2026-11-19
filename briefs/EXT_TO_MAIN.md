@@ -10271,3 +10271,4 @@ READY ext/stuck-integ-d7919026 efcce3f6b925 (supersedes: ext/anim-boki-slide-bat
 READY ext/mantle-port-a 982af504e63a34c164f591899cae1733cbbd264f (#135 conflicts resolved vs main 4cb...; pond-walk swim harness fixed)
 READY ext/feel-remote-move-smooth d81a70adf26d4f2950bcba71234a080e06b16f98 (NetSmooth flattens dash-start overshoot and eases late-snapshot catch-up; --remote-move-check/-slow-check: worst remote jump 16.8/18.6 cm -> 4.0/4.1 cm at 80/150 ms; glide-net rows over a lagged line)
 READY ext/rpc6-settings-pollution-1117 2b3b22c9217384807b17cd95535dde489c690fa2 (checks use a per-run settings file; rpc6 settings.cfg pollution)
+READY ext/ui-ability-text-one-v3 2f7f5a48cf (AbilityText reader + {action}/{path} tokens + ArchText + --tooltip-check/--ability-text-check)
