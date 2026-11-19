@@ -70,6 +70,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 11s -> 10s, damage +24%. | cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 12s -> 10s per charge. | recharge 12s -> 10s; a second charge, and each hop goes a third further. |
 | E | cooldown 12.5s -> 11.5s. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| R (ultimate) | Basalt Spine cooldown 45s -> 40s, lasts 7s -> 9.5s. The Merge lasts 30% longer. | Basalt Spine cooldown 45s -> 35s, lasts 7s -> 12s. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

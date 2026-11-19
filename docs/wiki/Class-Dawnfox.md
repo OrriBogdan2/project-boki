@@ -96,6 +96,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | damage +40% (seed 9 -> 12.6, burst 32 -> 44.8). | cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power. |
 | Dash (Shift) | recharge 7s -> 6.25s; the air glide 14s -> 12.5s. | recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash. |
 | E | healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27). | cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%. |
+| R (ultimate) | Hearth Call cooldown 46s -> 42s, healing a second 7 -> 8.75. The Merge lasts 30% longer. | Hearth Call cooldown 46s -> 38s, healing a second 7 -> 10.5. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 
