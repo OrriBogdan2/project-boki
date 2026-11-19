@@ -218,9 +218,17 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   Add a new garden panel to its `screens`.
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
-Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip the tutorial / Save
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip tutorial / Save
 and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
 Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
 panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
 count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
 720p, 1080p and ultrawide.
+
+## Admin tools and the Test Zone (owner only)
+Admin tools (`, More > Admin tools, Mod mode, `--god`) open only for a debug build, the web artifact's owner,
+or a desktop with the owner's dev key at `user://dev.key` (SHA-256 checked against `AdminGate.KEY_SHA256`; the
+key itself is never in the repo). A release download without it has none of them. The Test Zone (top of
+Admin tools, and on the title for the owner) is the quiet sandbox map with the practice dummies; its page
+picks any Hunter, a Boki partner (searchable), spawns any monster in front of you, toggles god mode, resets
+the dummies and goes home. `--test-zone-check` holds both.

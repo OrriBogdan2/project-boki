@@ -151,6 +151,14 @@ static func _paid(cost: Dictionary) -> Dictionary:
 		if int(cost.get(m, 0)) > 0: out[m] = int(cost[m])
 	return out
 
+## Hands over the materials the rest of a site's build still needs and you lack (a skipped tutorial).
+static func top_up(e: Dictionary) -> void:
+	var s: Dictionary = e["site"]
+	for m in MATS:
+		var left := int(s["cost"].get(m, 0)) - int(s["paid"].get(m, 0))
+		_add(m, maxi(0, left - have(m)))
+
+
 ## Takes a site down: what was paid comes back. The entry is left as it was before (tier kept).
 static func cancel(e: Dictionary) -> void:
 	if not has_site(e): return
@@ -365,14 +373,15 @@ static func swing(hw, k: Dictionary, J: Dictionary) -> void:
 	if e.is_empty() or not has_site(e): return
 	land(hw, e, J["look"], String(k["rec"]["name"]))
 
-## The player's own swing (FarmHob): the same as a Boki's.
-static func player_swing(hw, e: Dictionary) -> void:
+## The player's own swing, or Hob's (FarmHob): the same as a Boki's.
+static func player_swing(hw, e: Dictionary, who := "You") -> void:
 	if has_site(e):
-		land(hw, e, HomeLayout.deco_center(e), "You")
+		land(hw, e, HomeLayout.deco_center(e), who)
 
 static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	if stalled(e): return
 	var up := is_upgrading(e)
+	var st0 := FarmModels.stage_of(e)
 	var spent := settle(e)
 	if not spent.is_empty():
 		hw.h._refresh_top()
@@ -388,6 +397,8 @@ static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 		hw.scan_t = 0.0
 	elif FarmLots.is_lot(e):
 		FarmLots.restage(hw.h, e)
+	elif hw.h.hb and FarmModels.stage_of(e) != st0:
+		hw.h.hb.apply(false)      # a layout site (the house): its walls rise to the next stage
 	Save.save_game()
 
 ## Station tiers speed their jobs up (HomeWork._boost).

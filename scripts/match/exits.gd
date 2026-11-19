@@ -158,7 +158,7 @@ func interact_for(h: Hunter) -> Dictionary:
 					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 				else:
 					best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-			"charging": best = {"label": "Uplink %d%%  ·  hold the yard%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+			"charging": best = {"label": "Uplink %d%%  ·  hold the outpost%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
 			"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 			"open": best = {"label": "The lift is open! Step into the light"}
 			"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
@@ -215,8 +215,7 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["steal"] = 0.0
 	x["started_at"] = m.time
 	x["draining"] = false
-	m.sfx("warn", x["pos"], 0.0, 0.9)
-	m.sfx("zap", x["pos"], -2.0, 0.7)
+	m.sfx("uplink_start", x["pos"], 0.0)
 	m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.6)
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
@@ -225,7 +224,7 @@ func _start(x: Dictionary, h: Hunter) -> void:
 			UiSfx.extract_start()
 		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
 		if m.hud and m.player and not m.player.out:
-			m.hud.toast("Uplink started: hold the yard until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
+			m.hud.toast("Uplink started: hold the outpost until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
 
 func _tick_outpost(x: Dictionary, dt: float) -> void:
 	var n: Node3D = x["node"]
@@ -259,7 +258,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				if float(x["steal"]) >= STEAL_T:
 					x["steal"] = 0.0
 					x["team"] = int(foes.keys()[0])
-					m.sfx("zap", x["pos"], 0.0, 1.3)
+					m.sfx("uplink_steal", x["pos"], 0.0)
 					m.fx.ring(x["pos"], OUTPOST_R, Color("ff8a6a"), 0.5)
 					var who := ""
 					for h in m.hunters:
@@ -296,13 +295,13 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			x["t"] = float(x["t"]) - dt
 			var k := FIZZLE_T - float(x["t"])
 			if int(k / 0.45) != int((k - dt) / 0.45):
-				m.sfx("zap", x["pos"], -3.0, 0.6 + 0.1 * int(k / 0.45))
+				m.sfx("uplink_sputter", x["pos"], -3.0, 0.8 + 0.1 * int(k / 0.45))
 				m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.3)
 			if float(x["t"]) <= 0.0:
 				x["state"] = "spent"
 				x["t"] = FIZZLE_CD
 				x["team"] = -1
-				m.sfx("thump", x["pos"], -4.0, 0.6)
+				m.sfx("uplink_shut", x["pos"], -4.0)
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
@@ -319,7 +318,7 @@ func close_outpost(x: Dictionary) -> void:
 	x["draining"] = false
 	var n: Node3D = x["node"]
 	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
-	if was == "charging": m.sfx("thump", x["pos"], -4.0, 0.6)
+	if was == "charging": m.sfx("uplink_shut", x["pos"], -4.0)
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -331,12 +330,12 @@ func _fizzle(x: Dictionary) -> void:
 	x["draining"] = false
 	var n: Node3D = x["node"]
 	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
-	m.sfx("warn", x["pos"], -2.0, 0.6)
+	m.sfx("uplink_fizzle", x["pos"], -2.0)
 	if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
 		if m.hud and was == m.player.team:
 			UiSfx.extract_fail()
-			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
+			m.hud.toast("The uplink shut off: nobody held the outpost. Start it again to charge it", ExitModels.UPLINK)
 
 ## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
 ## the yard's edge only while you stand in it or it is contested.
@@ -366,8 +365,7 @@ func _open_lift(x: Dictionary) -> void:
 	x["contested"] = false
 	var n: Node3D = x["node"]
 	n.get_node("Lift").visible = true
-	m.sfx("unlock", x["pos"], 0.0, 0.9)
-	m.sfx("portal", x["pos"], 0.0, 0.8)
+	m.sfx("uplink_lift", x["pos"], 0.0)
 	m.fx.burst(x["pos"] + Vector3(0, 1.0, 0), ExitModels.UPLINK, 34, 6.0, 0.8, -3.0)
 	m.fx.ring(x["pos"], LIFT_R + 0.4, ExitModels.UPLINK, 0.6)
 	if not x.get("tut", false):
@@ -509,8 +507,8 @@ func status_for(p: Hunter) -> Dictionary:
 		if x["state"] == "charging" and in_yard(x, p):
 			var mine: bool = int(x["team"]) == p.team
 			var t := "Uplink %d%%" % int(x["prog"] * 100.0)
-			if x["contested"]: t += "  ·  CONTESTED: clear the yard"
-			elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
+			if x["contested"]: t += "  ·  CONTESTED: clear the outpost"
+			elif not mine: t += "  ·  a rival's uplink: hold the outpost to take it"
 			elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
 			var st := {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
 			if mine and not x["contested"] and int(x.get("crew", 0)) <= 1:
@@ -521,7 +519,7 @@ func status_for(p: Hunter) -> Dictionary:
 			return st
 		if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
 			# our uplink with nobody in its yard: the charge running out, and how long it has
-			return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
+			return {"text": "Uplink draining  ·  %d%%  ·  back to the outpost: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
 				"col": ExitModels.UPLINK.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 7.0))}
 	return {}
 

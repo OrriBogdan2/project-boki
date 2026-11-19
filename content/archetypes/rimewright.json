@@ -8,7 +8,7 @@
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.014,
+		"size": 1.11,
 		"bulk": 1.0,
 		"hit_r": 0.395, "hit_h": 1.66, "body_r": 0.38,
 		"head": 0.6,
@@ -23,6 +23,7 @@
 	"howto": ["Play: mid-range ice; darts Chill, hold {dash} to skate.", "Combo: land 8 darts on one foe to Shatter their Chill.", "Avoid: standing still in the open; keep skating."],
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 
+	"hint": {"lmb": "Hold {fire} for darts that curve onto the foe at the cursor", "rmb": "Press {secondary} to push an ice spear that bursts later", "e": "Press {signature} to slide an ice wall, again to freeze it", "dash": "Hold {dash} to skate; your darts fly straight and thick"},
 	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate; darts fly straight and hit twice as hard.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; use it again to freeze it.", "x": "Sealed, invulnerable, rooted; cracks open at 3.3s to stun.", "weapons": {"hoar_fan": "Hold for slow homing darts; big ones every few shots."}, "chips": {"rmb": ["18 hit", "22 burst"], "x": ["18 dmg"]}},
 	"signature": "hoar_fan",
 	"resource": {

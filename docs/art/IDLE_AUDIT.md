@@ -326,6 +326,16 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she spins the pistol back into its holster grip, a sleight of hand.
 - **Target stance (6 s):**
   - The same feet, a crouch lower. Her free hand rolls a coin or trinket across the knuckles, then it vanishes.
+- **Done (ext/p18-port-1118, port of ext/idle-thief):**
+  - sable_clips.py bakes a 5 s idle and a 6 s stance on one set of feet (`FEET`): the weight rides the right leg with
+    the left on its toe, then shifts across and back. Pelvis, chest, head and hands lag it (`LAG`); the knees stay soft.
+    The head snaps left at 0.55 s and holds; every curve runs whole cycles of its loop (`--clip-check` seam 0.0x the limit).
+  - The stance keeps the raised right pistol, a crouch lower on the idle's feet; the left hand turns its pistol over at
+    the thigh three times, tucks it behind her hip (2.5 to 4.7 s) and brings it back. No coin prop, no finger bones.
+  - Ported onto the v95 glb with `glb_add_clips.py ... idle,stance --drop-missing`. The v95 mesh has the pistols fused to
+    the hands and no `x_breath` / `x_twirl` bones, so those two tracks are dropped: no chest breath, and the right
+    pistol does not spin (the hand still flicks up and dips for the catch). Alternative, not done: re-skin the right
+    pistol's islands onto a leaf bone under hand.R (the old build's `x_twirl`) and re-run sable_clips.py.
 
 ### 10. Vex the Hired Gun (`gunslinger`, art `vex`)
 
