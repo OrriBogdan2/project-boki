@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	_lane(m)
+	await _level_card(m)
 	_names(m)
 	m.queue_free()
 	print("CALM DONE, failures: ", bad)
@@ -68,6 +69,19 @@ func _lane(m: Match) -> void:
 	ok(worst == 0, "no card entered the centre %d%% or the hunter's zone (%d frames)" % [int(CENTRE * 100.0), worst])
 	ok(lane.count() == 0, "the queue drains (%d left)" % lane.count())
 	lane.clear()
+
+
+func _level_card(m: Match) -> void:
+	m.player.hurt_at = m.time
+	m.hud.level_up(2, {})
+	for i in 30:
+		await main.get_tree().process_frame
+	var cue: LevelUpCue = m.hud.lvl_cue
+	ok(cue.t == LevelUpCue.LIFE, "the level-up card waits while you fight (%.2f s left)" % cue.t)
+	m.time += QUIET_S
+	for i in 30:
+		await main.get_tree().process_frame
+	ok(cue.t < LevelUpCue.LIFE, "... and runs once it is quiet (%.2f s left)" % cue.t)
 
 
 func _names(m: Match) -> void:
