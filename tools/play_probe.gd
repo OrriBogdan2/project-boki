@@ -232,6 +232,7 @@ func _sample() -> void:
 				"p": me.pos,
 				"v": me.vel,
 				"g": me.grounded,
+				"sp": me.spirit_t > 0.0,
 				"st": me.loco.state_name(),
 				"gl": me.gliding,
 				"dash": me.roll_t > 0.0 or me.loco.state == Loco.S.DASHING,
@@ -872,13 +873,14 @@ func _push(name: String, extra: int) -> void:
 
 
 ## Frames this scenario the body stood over a wall's tile, and the most it was above the floor there (m): about 0
-## is inside the wall, about World.BLOCK_H is on its top.
+## is inside the wall, about World.BLOCK_H is on its top. Frames in a Spirit Walk (Lace's dash goes through rocks by
+## design) don't count: she is only inside a wall if the walk ended with her there.
 func _in_wall() -> Vector2:
 	var n := 0
 	var up := 0.0
 	for s in ss:
 		var p: Vector3 = s["p"]
-		if w.is_block(p.x, p.z) and not w.is_stand_block(p.x, p.z):
+		if not s["sp"] and w.is_block(p.x, p.z) and not w.is_stand_block(p.x, p.z):
 			n += 1
 			up = maxf(up, p.y - w.level[w.idx(int(floor(p.x)), int(floor(p.z)))] * World.LEVEL)
 	return Vector2(n, up)
