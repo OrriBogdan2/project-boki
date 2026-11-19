@@ -85,7 +85,7 @@ func run(main: Node) -> void:
 	var player_file := ProjectSettings.globalize_path(Settings.PLAYER_PATH)
 	var player_before := FileAccess.get_file_as_string(player_file)
 	Settings.reset_all()
-	ok(Settings.path != Settings.PLAYER_PATH, "a check run keeps its settings in a file of its own (%s)" % Settings.path)
+	ok(Settings.path != Settings.PLAYER_PATH, "a check run keeps its settings in its own file (%s)" % Settings.path)
 	Overlay.ctx = "title"
 	Overlay.more_tabs = false
 	# the first page

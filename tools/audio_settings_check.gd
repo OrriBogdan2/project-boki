@@ -198,7 +198,7 @@ func _mouse_drag(where: String, sliders: Array) -> void:
 	var what := "%s: a mouse click near the left of the Music slider turns the Music bus down" % where
 	ok(_db("Music") < -12.0, "%s (%.1f dB)" % [what, _db("Music")])
 
-## A saved settings.cfg is what the game boots with: write one, start the game again on the same user dir.
+## A saved settings.cfg is what the game boots with: write one, start the game again on it (--settings-file).
 ## A file from before the perceptual curve (no audio_v) boots sounding as it did: gain = its old slider.
 func _boot_with_saved_cfg(current: bool) -> void:
 	var cf := ConfigFile.new()
@@ -208,7 +208,7 @@ func _boot_with_saved_cfg(current: bool) -> void:
 		cf.set_value("s", "audio_v", 2)
 	cf.save(Settings.path)
 	var out := []
-	var args := ["--headless", "--", "--audio-settings-check", PROBE]
+	var args := ["--headless", "--", "--audio-settings-check", PROBE, "--settings-file=" + Settings.path]
 	if OS.has_feature("editor"):
 		args = ["--path", ProjectSettings.globalize_path("res://")] + args
 	var code := OS.execute(OS.get_executable_path(), args, out, true)

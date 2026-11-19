@@ -219,16 +219,20 @@ static func migrate_cam(d: Dictionary) -> void:
 
 ## The player's settings file, or for a check run (a registered check flag or --check-child) a file of its own that
 ## starts empty and goes when the run ends: checks never change a player's or a gate box's settings (rpc6, 11-16:
-## a check left sfx=0.0 and ult_ready_cue=false behind and later gates heard no effects).
+## a check left sfx=0.0 and ult_ready_cue=false behind and later gates heard no effects). A check's second game boots
+## from the check's own file with --settings-file=<path>.
 static func file_path() -> String:
 	var args := OS.get_cmdline_user_args()
+	for a in args:
+		if a.begins_with("--settings-file="):
+			return a.substr(16)
 	if args.has("--check-child") or CheckRegistry.flag_in(args) != "":
 		return "user://check_settings_%d.cfg" % OS.get_process_id()
 	return PLAYER_PATH
 
 
 func _exit_tree() -> void:
-	if path != PLAYER_PATH and Settings == self:
+	if path == "user://check_settings_%d.cfg" % OS.get_process_id() and Settings == self:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
