@@ -134,7 +134,8 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 		return ""
 	var lead := leading(rec)
 	for o in fits:
-		if String(o.get("path", "")) == lead: return String(o["id"])
+		var path = o.get("path", "")        # one affinity, or a list of them
+		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
