@@ -400,7 +400,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 					13
 				]
 			)
-		"util1", "util2", "util3", "util4":
+		"util1", "util2", "util3", "util4", "util5", "util6":
 			out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level":
 			out = ArmorHud.tip(p)
