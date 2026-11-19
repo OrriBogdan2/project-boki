@@ -108,6 +108,8 @@ static func rock(
 		RockLook.upright(n)
 	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	RockLook.cool(n)
+	if RockLook.is_ridge(rid):
+		RockLook.ridge(n)
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
