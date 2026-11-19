@@ -11,7 +11,6 @@ const FLASH_S := 0.5      # seconds a bought row glows
 ## Builds the panel on the HUD, beside the screen centre, and returns it.
 static func open(m, v: Dictionary) -> PanelContainer:
 	var pc := PanelContainer.new()
-	pc.theme = UI.theme()
 	pc.mouse_filter = Control.MOUSE_FILTER_STOP
 	pc.custom_minimum_size.x = WIDTH
 	var th := ShopStock.theme(String(v["theme"]))

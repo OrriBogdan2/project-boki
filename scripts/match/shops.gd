@@ -124,7 +124,7 @@ static func _complete(m, h, v: Dictionary, i: int) -> String:
 static func why_not(h, row: Dictionary) -> String:
 	return "Sold out" if int(row["left"]) <= 0 else ShopStock.can_buy(h, row)
 
-static func _bought(m, h, row: Dictionary, paid: int) -> void:
+static func _bought(m, h, row: Dictionary, _paid: int) -> void:
 	var s := _st(m)
 	if h == m.player and s["panel"] != null and is_instance_valid(s["panel"]):
 		ShopPanel.refresh(m, s["panel"], s["vendor"])
@@ -133,7 +133,6 @@ static func _bought(m, h, row: Dictionary, paid: int) -> void:
 	m.fx.ring(h.pos, 1.3, col, 0.3)
 	if h == m.player and m.hud:
 		m.hud.toast_small("Bought %s  ·  %d gems left" % [ShopStock.name_of(row), int(h.gems)], TOAST_COL)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "-%d" % paid, TOAST_COL, false)
 
 ## Remote events: "sbuy" (the host settles it), "sgot" (a sale happened), "sno" (it was gone).
 static func on_net(m, x: Array) -> void:
