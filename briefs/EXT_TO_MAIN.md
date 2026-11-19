@@ -10354,3 +10354,4 @@ READY ext/worker-prune cd3108df09f (ops/worker-prune: age out idle /root/mcshard
 READY ext/p02-port-1118 4c8dd20cef (P02 solos mode port, merged origin/main 2ee0e648d3; modes/heart/ways-map/ways-hints/tutorial checks 0 fail; PR opened via gh-outbox)
 READY ext/worker-prune 701a9278f04 (worker-prune: ctime + any-process check; PR via outbox)
 READY ext/p03-port-1118 128891803c (P03 carry-out slot: 1 slot rides home, stealable, arrival event, cues, hints; Net 0.24.19; PR via gh-outbox, gate pending)
+READY ext/vfx-utility-read-port 75e571a01a (origin/main 2ee0e648d3 merged; one conflict net.gd VERSION: main's 0.24.18 is released, shop events now Net 0.24.19; --check 0 fail, shops 53/0, utility-pose/parity/vfx, box-revive, inventory, loot-feed 0 fail; equal-check 1 fail (glove boxes) identical on main; health --strict OK)
