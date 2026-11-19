@@ -10374,3 +10374,4 @@ READY ext/ingame-scale-1119 728abfab37a (Kael head top 1.93 m, Gil 1.60 m; Alber
 READY ext/p04-port-1118 e9301016a13772e0f74e2d9bb5db215b725b3376 (P04 part 1: fixed camps+XP, bots on camps, --camps-check, steal reel, guarded rare Boki; PR #329 GATE GREEN)
 READY ext/p06-port-1118 017bb55f99 (P06 stomp break feedback: crack/relief sfx, deathbox under collapse, online stomp event Net 0.24.19, break sweep check)
 READY ext/p06-stomp-styles-1118 c7d99a8f95 (P06 2/2: stomp styles + Hunters-screen stomp picker, --stomp-style-check)
+READY ext/release-gate-pods 11d89f80650c2f6f24f5c42556ec436af6cedf8c (release gate on dedicated idle pods + confirm mode: 2h29m vs 5.5h)
