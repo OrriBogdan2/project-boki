@@ -3,6 +3,7 @@ extends RefCounted
 ##   1. G: a tap is told from a hold by the release (a hold opens the wheel); a thrown Boki's landing staggers what it lands on
 ##   2. Call back: the leap to your side hits what is on its path; only within the recall range
 ##   3. the Guard and Follow orders (the G wheel's picks; the wheel itself is in --boki-follow-check)
+##   3b. the Boki answers each command with one species cry (KinAck): owner and nearby teammates only, rate-limited
 ##   4. C: the Boki's own ability from where it stands (out), or through you (on the shoulder)
 ##   5. a downed Boki: stays where it fell, no C / merge while down, the owner rescues it by touch,
 ##      else it comes round alone after 15-20s at low health; a fall into the abyss only has the timer
@@ -114,7 +115,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "acks", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -207,6 +208,67 @@ func _modes() -> void:
 	ok(KinCommand.order(P, "follow") and k.cmd == "follow" and k.hold_at == Vector3.INF, "the Follow order releases the spot")
 	run_for(3.0)
 	ok(k.flat_dist(P) < 5.5, "follow: it comes back to your side (%.1fm away, %s)" % [k.flat_dist(P), k.state])
+
+# ------------------------------------------------------------------ 3b. the Boki answers a command
+## The species cries the log holds since entry `from`.
+func _cries(from: int, species: String) -> Array:
+	var mine := func(e: Array) -> bool:
+		return String(e[0]).contains("_" + species + "_") or String(e[0]).begins_with("kin_")
+	return Sfx.cue_log.slice(from).filter(mine)
+
+## Passes if exactly one cry of `mood` sounded since entry `from`.
+func _one_cry(from: int, k: Kin, mood: String, what: String) -> void:
+	var cries := _cries(from, k.species)
+	ok(cries.size() == 1 and cries[0][0] == KinVoice.cue(k.species, mood), "%s: one %s cry (%s)" % [what, mood, cries])
+
+## One command, one cry: send, recall and the four orders each sound once in the owner's species voice; a second
+## command inside KinAck.GAP_S stays quiet; a rival's Boki is never heard, a teammate's only in earshot.
+func _acks() -> void:
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	Sfx.cue_log = []
+	Sfx.listener = P.pos
+	k.stow()
+	aim_at(P, P.pos + Vector3(7.0, 0, 0))
+	var at: int = Sfx.cue_log.size()
+	KinCommand.tap(P)
+	_one_cry(at, k, "alert", "send")
+	at = Sfx.cue_log.size()
+	KinCommand.order(P, "guard")
+	ok(_cries(at, k.species).is_empty(), "an order right after a send stays quiet (the %.1f s gap)" % KinAck.GAP_S)
+	var moods := {"guard": "alert", "follow": "happy", "return": "happy"}
+	for id in moods:
+		m.time += KinAck.GAP_S + 0.1
+		at = Sfx.cue_log.size()
+		ok(KinCommand.order(P, id), "setup: the %s order is given" % id)
+		_one_cry(at, k, moods[id], id)
+	k.pos = P.pos + Vector3(10.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
+	k.hold_at = Vector3.INF
+	k.cmd = "follow"
+	m.time += KinAck.GAP_S + 0.1
+	at = Sfx.cue_log.size()
+	KinCommand.tap(P)
+	ok(k.state == "flying_home", "setup: a tap with the Boki away calls it back")
+	_one_cry(at, k, "happy", "recall")
+	var R := rival()
+	var rk := Kin.new()      # a bare Boki: KinAck reads only its match, species, record, owner, team and spot
+	rk.m = m
+	rk.species = k.species
+	rk.rec = k.rec
+	rk.owner_h = R
+	rk.team = R.team
+	rk.pos = P.pos + Vector3(40.0, 0, 0)
+	m.time += KinAck.GAP_S + 0.1
+	ok(not KinAck.say(rk, "send"), "a rival's Boki is never heard")
+	rk.team = P.team
+	ok(not KinAck.say(rk, "send"), "a teammate's Boki out of earshot (40 m) is not heard")
+	rk.pos = P.pos + Vector3(8.0, 0, 0)
+	ok(KinAck.say(rk, "send") and not KinAck.say(rk, "recall"), "a teammate's Boki in earshot answers once, then waits")
+	rk.free()
+	Sfx.cue_log = null
 
 # ------------------------------------------------------------------ 4. the Boki's own ability
 func _cast_c() -> void:
