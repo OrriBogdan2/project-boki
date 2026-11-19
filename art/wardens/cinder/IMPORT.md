@@ -1,6 +1,23 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
 
+## LIVE 11-19: skinning fix (job 20261119-024205-a3, ext/hunter-fix-cinder-1118): weights and contact cuts only
+`cinder.glb` = the 11-18 board1117 A2 glb with the same positions, UVs, images, bones and 54 clips; only the skin weights
+changed and 90 vertices were split. Why: the scan fused the forearms to the hips and ribs, and the re-derived heat weights
+left forearm weight on hip skin and torso weight on forearm skin, so every clip dragged those triangles into spikes.
+- Skin that lies on the forearm or lower upper arm (x outside 0.145 m, y below 1.12 m) is labelled arm, the rest by smoothed
+  cluster weight (arm L/R, leg L/R, core). Arm vertices lose torso and leg weight, torso vertices lose forearm/hand weight.
+- Fused arm/leg/torso contact triangles (120) are cut by splitting their vertices: same position, so the bind pose is
+  identical, but the arm separates from the body when it moves.
+- Arm and leg chains get a smooth blend along the limb (smoothstep, 14 cm at the elbow, 8 cm at the wrist, knee/ankle alike)
+  instead of a one-vertex hinge; torso weight fades out 10 cm down the limb.
+- Targeted weight smoothing (25 passes, alpha 0.6) on the vertices of edges that still stretch over 2.2x, never across the cuts
+  and never from torso skin into forearms.
+Numbers (edges stretched over 3x vs bind, Blender, idle / run_f / run_f / shot): 1.83 / 2.51 / 2.29 / 3.33 % -> 0.03 / 0.06 /
+0.03 / 0.12 %, worst 205x -> 10x. hunter_mesh_check stretched tris in the worst clip 762 -> 96 (the jet flame cones, which grow
+by design), collapsed 52 -> 0. Floating sheets: none found (floating_islands 0, no needle islands), so nothing was deleted.
+Scripts: `/home/boki/gens/cinder-rigfix-1119/tool/` (fix.py, smooth.py, glbrw.py).
+
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
 20261118-032222-a1; same topology as cand_A_s18, only chest vertices moved). No re-rig: the master's per-vertex chest
