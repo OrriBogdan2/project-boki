@@ -341,7 +341,6 @@ func slam(c: float, at_feet: bool) -> void:
 				d2 += float(s["dunk_void"])
 			o.erase("lift")
 			k.dunks += 1
-			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 			k.vfx("dunk", f.pos)
 		f.hurt(d2, h, o)
 		if air:
