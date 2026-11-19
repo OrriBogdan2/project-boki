@@ -10386,3 +10386,4 @@ READY ext/ult-ranks-source c50e97aec5 (ult ranks from source R tiers: R rank 3 a
 READY ext/vfx-sable-lmb 2f7ec04e80 (Sable LMB: 0.8 m cel tracer under the chakram replaces the flat 1.8 m slab; hits a lit violet flare + crescent rim + cross flare + sparks; VFX_QUALITY 18->21; strips docs/shots/vfx-sable-lmb)
 READY ext/vfx-albert-dome d337c451e8 (Albert: last mint VFX, Mending Ground burst sparks, now his palette ivory from content/vfx; mint dash dome already gone on main; reel part mend + before/after strip)
 READY ext/customize-v3-1119 6e896d576e (look locker quality pass: lit set + backdrop, tile pictures, camera swings per tab, pick reactions; anim-select-poses-v95 ported)
+READY ext/merge-lane-n19f-1119 b25d0ae459 (lane n19f: glide-lead camera spring port of move-feel-1111; 24 HARD/ported, see lanes/n19f-RESULT.md)
