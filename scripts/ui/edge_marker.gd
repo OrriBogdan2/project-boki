@@ -103,17 +103,26 @@ func _extent(it: Dictionary, s: float) -> float:
 	if it["text"] == "":
 		return arrow
 	var d: Vector2 = it["d"]
-	var w := _half.x * 2.0
-	var flat := _radius <= 0.0 and (s < w or (s >= w + _half.y * 2.0 and s < 2.0 * w + _half.y * 2.0))
+	var flat := _on_flat(s)
 	var along := absf(d.x if flat else d.y) * (arrow + LABEL_GAP)
 	return maxf(arrow, (_label_w(it) if flat else LABEL_H) * 0.5 + along)
+
+## Is rim position s on the top or bottom edge of the rectangle?
+func _on_flat(s: float) -> bool:
+	var w := _half.x * 2.0
+	return _radius <= 0.0 and (s < w or (s >= w + _half.y * 2.0 and s < 2.0 * w + _half.y * 2.0))
 
 func _label_w(it: Dictionary) -> float:
 	return TextCache.width(HudStyle.BIG, it["text"], LABEL_PX)
 
-## The label sits this far inside the arrow, along -d.
+## The label sits this far inside the arrow, along -d; on the left and right edges also half its width, so the
+## arrow never covers its first letters.
 func _label_at(it: Dictionary, p: Vector2) -> Vector2:
-	return p - (it["d"] as Vector2) * (_size * 1.4 + LABEL_GAP)
+	var d: Vector2 = it["d"]
+	var at := p - d * (_size * 1.4 + LABEL_GAP)
+	if _radius <= 0.0 and not _on_flat(float(it["s"])):
+		at.x -= signf(d.x) * _label_w(it) * 0.5
+	return at
 
 func _fix(it: Dictionary) -> void:
 	var p := _rim_at(float(it["s"]))
