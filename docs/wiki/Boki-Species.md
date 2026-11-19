@@ -179,7 +179,7 @@ _Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's a
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Vespyx
@@ -299,7 +299,7 @@ _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for h
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Glintmole
@@ -480,7 +480,7 @@ _Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-ho
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Kindlewren
@@ -780,7 +780,7 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Dense Plate; Curious: Curious; Swift: Swift
 
 ## Prismander
@@ -840,7 +840,7 @@ _Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engi
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Selenfin
@@ -1000,7 +1000,7 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Pipewurm

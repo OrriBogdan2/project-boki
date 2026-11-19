@@ -45,7 +45,7 @@
 	"e": {"delivery": "dash", "name": "Riptide", "short": "Riptide", "icon": "barrage", "col": "#3aa892", "cooldown": 12.0,
 		"spin_t": 2.0, "spin_r": 2.2, "every": 0.25, "tick": [2.0, 5.0], "move_k": 0.7,
 		"range": [7.0, 11.0], "width": [1.2, 2.2], "speed": [14.0, 22.0], "dmg": 10.0, "lift": 9.0, "knockup": 1.0,
-		"desc": "Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press E again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.",
+		"desc": "Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press the key again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
 	"x": {"name": "Tidal Wave", "short": "Wave", "icon": "dash", "col": "#24806f", "cooldown": 90.0, "unlock": 6,
 		"range": 14.0, "width": 3.6, "time": 1.0, "dmg": 18.0, "lift": 9.0, "knockup": 1.0, "slow_k": 0.5, "slow": 2.0, "shield": 40.0, "shield_t": 3.0,
