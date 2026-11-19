@@ -122,6 +122,11 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 		"open":
 			if cur: c.add_child(UI.label("Playing", 11, UI.GOOD, UI.semi))      # (other open Hunters: just the name)
 		"ready": c.add_child(UI.label("Hold to unlock", 11, ClassCard.GOAL_COL, UI.semi))
+		_ when ClassUnlock.is_bonus(id):      # (waits for the first expedition: one wrapped line says so)
+			var wl := UI.label(ClassUnlock.locked_line(id), 11, UI.FAINT)
+			wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			wl.set_meta("locked_line", id)
+			c.add_child(wl)
 		_:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
@@ -158,6 +163,12 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 			var wl := UI.label("Challenge done: %s" % ClassUnlock.challenge_text(id), 12, UI.MUTED)
 			wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			box.add_child(wl)
+		_ when ClassUnlock.is_bonus(id):
+			var ll := UI.para(ClassUnlock.locked_line(id), 13, UI.INK)
+			ll.custom_minimum_size.x = 300.0
+			ll.set_meta("locked_line", id)
+			ll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			box.add_child(ll)
 		_:
 			var gb := ClassCard.challenge_block(id, 300.0)
 			gb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

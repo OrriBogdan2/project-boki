@@ -690,6 +690,20 @@ func _home(tree: SceneTree) -> void:
 	ok(ml != null and _count_meta(ml, "mastery_goal") == ClassUnlock.mastery("thief").size(),
 			"and its mastery goals with their rewards")
 	await shot(tree, "hunters_screen", 50)
+	# --- a garden-only save (first Relic picked, no expedition yet): the second-Relic choices say what they wait for
+	var keep_save: Dictionary = Save.d.duplicate(true)
+	new_save()
+	ClassUnlock.choose_starters([FIRST])
+	HomeClasses.open(hm, "juggernaut")
+	await tree.process_frame
+	var plain := "Finish an expedition to choose your second Hunter"
+	ok(ClassUnlock.locked_line("juggernaut") == plain
+			and ClassUnlock.locked_line("thief") == ClassUnlock.challenge_text("thief"),
+			"a waiting second Hunter's line is plain; a challenge Hunter's line is its challenge")
+	var n_lines := _count_meta(hm.panel_host, "locked_line")
+	ok(n_lines >= SECOND.size() + 1 and _any_text(hm.panel_host, plain),
+			"the Relics screen shows that line on each waiting tile and under the viewer (%d)" % n_lines)
+	Save.d = keep_save
 	# --- an open Hunter with a mastery glider earned: the glider pick
 	HomeClasses.open(hm, "archer")
 	await tree.process_frame
