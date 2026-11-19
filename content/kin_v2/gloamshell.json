@@ -114,5 +114,10 @@
 		"temper": "Private",
 		"desc": "Something private is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

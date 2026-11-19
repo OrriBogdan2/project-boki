@@ -231,11 +231,10 @@ static func blend_center(a: Dictionary, b: Dictionary) -> Dictionary:
 static func base_size(species: String) -> Dictionary:
 	if _sizes.has(species):
 		return _sizes[species]
-	var j: Dictionary = Content._load("kin", species)
-	var s = j.get("size", null)
+	var ks: KinSpec = KinLib.kin(species)
 	var out := DEFAULT_SIZE.duplicate()
-	if typeof(s) == TYPE_DICTIONARY:
-		out = {"cm": float(s.get("cm", DEFAULT_SIZE["cm"])), "kg": float(s.get("kg", DEFAULT_SIZE["kg"]))}
+	if ks != null and not ks.avg_size.is_empty():
+		out = ks.avg_size.duplicate()
 	_sizes[species] = out
 	return out
 

@@ -111,5 +111,10 @@
 		"temper": "Gentle",
 		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
 		"play": "Shields you and dazzles foes with bent light. Loyal, a bit of a worrier."
+	},
+	"size": {
+		"cm": 26,
+		"kg": 2.1,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

@@ -405,7 +405,7 @@ def gen_boki():
         work = h.get("work") or work_fb.get(kid, {})
         info = [
             ["Type", k.get("theme", "").title()],
-            ["Body", "%s, reach %s, mass %s%s" % (k["body"].get("size", ""), num(k["body"].get("reach", "")), num(k["body"].get("mass", "")), ("; about %s cm, %s kg on average" % (num(h["size"]["cm"]), num(h["size"]["kg"]))) if h.get("size") else "")],
+            ["Body", "%s, reach %s, mass %s%s" % (k["body"].get("size", ""), num(k["body"].get("reach", "")), num(k["body"].get("mass", "")), ("; about %s cm, %s kg on average" % (num(k["size"]["cm"]), num(k["size"]["kg"]))) if k.get("size") else "")],
             ["Stat points", ", ".join("%s %s" % (stats_names.get(s, s), num(v)) for s, v in st.items())],
             ["Personality", ", ".join("%s %s" % (t, num(v)) for t, v in pers.items())],
             ["Fighting style", "%s; aggression %s, loyalty %s, caution %s" % (ai.get("role", ""), num(ai.get("aggression", "")), num(ai.get("loyalty", "")), num(ai.get("caution", "")))],
