@@ -124,6 +124,7 @@ func run(main: Node) -> void:
 			gold.append(f)
 	ok(gold.is_empty(), "no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour %s" % [gold])
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
+	preload("res://tools/hero_colour_check.gd").new().run(ok)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
