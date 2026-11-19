@@ -28,6 +28,7 @@ var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
+var trial: TimeTrial = null  # the time trial's gates and arches (docs/decisions/0101)
 var prompt: Label = null
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
@@ -119,6 +120,8 @@ func build() -> void:
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer)
 
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
@@ -193,13 +196,15 @@ func _duel(at: Vector3) -> void:
 	m.duel_pad = at
 
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): the time trial, the near pedestal's name, use on interact, bring a faller home.
+func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null or prompt == null:
 		return
 	summon_pad.tick()
+	trial.tick(dt)
 	if p.pos.y < FALL_Y and not p.downed:
+		trial.stop()
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
 		if m.hud:
