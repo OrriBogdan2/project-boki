@@ -51,6 +51,7 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     landings (+)      [[x,z]] where squads come down (World.spawns)
     camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
     chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel|keg"]];  weapons (+) [[x,z]]
+    shops (+)         [[x,z,"armor|move|gear|perks"]] a vendor and its stock theme (content/rules/shops.json)
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
@@ -135,6 +136,7 @@ islands = [
                      (262, 76, 262, 78), (214, 72, 215, 73), (208, 92, 209, 93), (380, 80, 381, 81)),
          chests=[[394, 53]],
          areas=[[394, 53, "Frostgate Keep"], [290, 96, "Rimefield"], [300, 50, "The Shelf"]],
+         shops=[[290, 100, "armor"]],
          fill=dict(chests=5, camps=["light", "normal", "normal", "heavy"], landings=8, breakables=9, weapons=2, wardens=3, traps=1)),
     # ---- HIGHWATCH (towers): four rock towers over a low yard (lv 2): the Spur (lv 9), the Bellcliff
     # (lv 11), the Ward (lv 6) and the Lantern (a lv 8 ledge, then lv 14: the map's highest ground). One
@@ -174,6 +176,7 @@ islands = [
          ramps=[up(130, 398, "n", 4, 2, 6), up(186, 372, "w", 3, 2, 6)],
          wild=[[62, 404], [66, 410], [58, 412]],
          areas=[[140, 368, "Bramble Rise"], [62, 408, "Nest Glade"]],
+         shops=[[138, 372, "perks"]],
          groves=95,
          fill=dict(chests=7, camps=["light", "normal", "normal", "heavy"], landings=7, breakables=8, weapons=1, wardens=3, traps=2)),
     # ---- SALTMERE (water edges): a lv 2 salt rim round a sunken lagoon (lv 0, the hazard branch's deep
@@ -213,6 +216,7 @@ islands = [
          shrine=[300, 367],
          chests=[[308, 364]],
          areas=[[300, 367, "Shrine Table"]],
+         shops=[[296, 364, "move"]],
          fill=dict(camps=["normal"], landings=1, breakables=3, wardens=1, traps=1)),
 ] + [dict(id=i, name=n, role="landing", region=3, biome="storm", danger=1, poi=p, noise=0.05, landmark="",
           shapes=[poly(s, 2)], sheer=[[0, 360]], fill=dict(chests=1, landings=1, breakables=2))
@@ -237,6 +241,7 @@ islands = [
          crates=[[420, 250], [421, 250], [420, 251]],
          chests=[[500, 244], [474, 168]],
          areas=[[498, 240, "The Kilns"], [414, 300, "Forge Yard"]],
+         shops=[[490, 248, "gear"]],
          fill=dict(chests=8, camps=["light", "normal", "normal", "heavy"], landings=6, breakables=9, weapons=2, wardens=3, traps=2)),
 ]
 
@@ -684,7 +689,7 @@ def check(lv, owner, stairs):
         if q not in lv or lv[q] == -2 and False: probs.append("%s %s not on ground" % (what, p))
         elif q in stairs: probs.append("%s %s on a stair" % (what, p))
     for d in islands:
-        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps"]:
+        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "shops"]:
             for p in d.get(k, []): ground(p, "%s.%s" % (d["id"], k))
         for R in d.get("rocks", []):      # a boulder half over the void is clipped to a post
             if any((x, z) not in lv for x in range(R[0], R[2] + 1) for z in range(R[1], R[3] + 1)):
@@ -938,7 +943,7 @@ class Cover:
         self.hard |= self.solid
         for d in islands:
             for R in d.get("ramps", []): self.hard |= ramp_tiles(R)
-            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables"):
+            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables", "shops"):
                 for p in d.get(k, []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 1.7)
             if d.get("shrine"): self.hard |= _disc_r(d["shrine"][0], d["shrine"][1], 3.0)
             for p in d.get("camps", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 3.6)
