@@ -124,7 +124,8 @@ func arch_tip(id: String, p: Hunter) -> Array:
 			)
 			return out
 	var si := p.slot_info(id)
-	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}     # (the key is shown once, below)
+	# (the key is shown once, below)
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -288,7 +289,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 				)
 		"r":
 			var ud := KinMerge.def_for(p.kin) if p.kin else null
-			if ud == null:
+			if ud == null or not MergeForm.enabled():
 				return []
 			var giant: bool = (p.kin as Kin).carry_style() == "mount"
 			out.append([ud.display_name, H.GOLD])
@@ -512,7 +513,7 @@ func kit_lines(lines: Array, k: Kin) -> void:
 			["%s  %s: %s" % [tag, d.display_name, KinText.ability(k.effective(slot))], KinText.color(d).lightened(0.2)]
 		)
 	var ms := KinMerge.def_for(k)
-	if ms:
+	if ms and MergeForm.enabled():
 		var ml: Array = KinText.merge(ms, k.carry_style() == "mount")
 		var first := String(ml[0]) if not ml.is_empty() else ""
 		lines.append(["%s  %s: %s" % [Settings.key_cap("ultimate"), ms.display_name, first], Color(H.GOLD, 0.95)])

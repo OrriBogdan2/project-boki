@@ -156,7 +156,7 @@ need a design call:
 3. **The second starter Hunter waits for the first finished expedition** (`ClassUnlock` bonus). It has
    no goal row now (it printed an empty one, fixed), but nothing at home ever opens it. Fine if Hunters
    are an expedition feature; say so in the Hunter picker if not.
-4. **The match tutorial comes before the garden** unless the player presses "Skip the tutorial" on the
+4. **The match tutorial comes before the garden** unless the player presses "Skip tutorial" on the
    naming card. Skipping is offered; whether the card should say "go straight to the garden" is a
    wording call.
 5. **Held Boki and the Black Market ransom** count expeditions ("sold on after your next expedition").
