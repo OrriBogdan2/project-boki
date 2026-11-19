@@ -232,8 +232,28 @@ A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG,
 
 Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dBFS) and never clips; a hold is 3 to 7 dB lower in RMS, so it reads as a rattle with a crack on top rather than a smear. Not built: a shorter "hold" take per weapon (would let the cap pass every round; costs new files), and the voice priority table of `ext/sfx-voice-limits` (not on main; the cap here is per emitter and does not depend on it).
 
+## Falloff (`Sfx.NEAR/SPREAD/FAR/hear_range`)
+All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The SUPERVIVE view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
+- NEAR 3.5 -> 5.5 m, SPREAD 5 -> 8 m, FAR 9 -> 19 m (muffling now starts just past the side edge), hear_range 22 -> 30 m (the edge fade still starts at 0.7 of it). `scan_call` reach 11 -> 15 m (stays half of hear range).
+- Unchanged: a sound's own `reach` (ult cues 60 m), the scan hum's 26 m, hidden rivals' footsteps (`Juice.footstep` still skips rivals past 14 m and unseen ones; `Sfx.step` volumes as before).
+
+| distance (m) | before (3.5/5/9/22) | after (5.5/8/19/30) |
+|---|---|---|
+| 5 | -2.3 dB, clear | 0.0 dB, clear |
+| 10 | -7.2 dB, muffled | -3.9 dB, clear |
+| 11.75 (old screen edge) | -8.5 dB, muffled | -5.0 dB, clear |
+| 15 | -10.4 dB, muffled | -6.8 dB, clear |
+| 18.5 (new screen edge) | -17.3 dB, muffled | -8.4 dB, clear |
+| 22 | -73 dB, muffled | -10.0 dB, muffled |
+| 25 | silent | -15.4 dB, muffled |
+| 28.5 (10 m off screen) | silent | -34.4 dB, muffled |
+| 30 | silent | -72.2 dB, muffled |
+| 31 | silent | silent |
+
+`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 6 dB quieter but present, one at 31 m is silent.
+
 ## Ultimate cast cues
-You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
+You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 19 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
 ## Rival telegraph wind-ups
 You hear where a rival's ability will land before it lands. `TellCue` (scripts/arch/tell_cue.gd) plays `tell_foe` (a dry low tick and a short buzzing swell, unlike any cast sound or team tag) at the centre of a ground telegraph a rival Hunter shows everyone, the moment it starts: `ArchKit.tele_circle`/`tele_lane`, and AimKit areas (circle, lane, cone, arc wall, span, swap) with `all`, on the first step `AimDraw.put` gets them (a refresh plays nothing). Bigger areas play lower and louder: 3 m² and under at -10 dB and pitch 1.15, 40 m² and over at -3 dB and 0.8, under the ult cues. Yours and your team's play nothing; ultimates (the R fuse, `ult_running`, AimKit ids starting `x`/`ult`) are UltCue's. It goes through `Sfx.play` with a 120 ms `MIN_GAP`, so the stacking cap and the voice pool hold. Local only: kits run in their owner's game, so it covers bots and local rivals; an online rival's telegraph has no cue yet. Sound: `tools/gen_sfx_ult_cues.py`, in `content/sfx/ult_cues.json`. `--match-audio-check` asserts where and how it plays and what is silent; `--sfx-set-check` that it exists and is wired.
