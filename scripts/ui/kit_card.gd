@@ -197,11 +197,12 @@ func _show_detail(slot: String) -> void:
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
 ## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge; an X tile for a hero ultimate).
 static func slots_of(a: String) -> Array:
-	return SLOTS.filter(func(s): return not s in ["r", "x"] or Arch.def(a).has(s))
+	var fusion := MergeForm.enabled()
+	return SLOTS.filter(func(s): return (not s in ["r", "x"] or Arch.def(a).has(s)) and (s != "r" or fusion))
 
-## The rows the card lists: the kit, the hunter's ultimate if it has one, and the Boki Fusion always.
+## The rows the card lists: the kit, the hunter's ultimate if it has one, and the Boki Fusion while it is on.
 static func card_slots(a: String) -> Array:
-	return ROWS.filter(func(s): return s == "r" or s in slots_of(a))
+	return ROWS.filter(func(s): return s in slots_of(a) or (s == "r" and MergeForm.enabled()))
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
@@ -253,9 +254,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
 			var xcol := Color(String(xd.get("col", "#ffffff")))
 			out.merge({"icon": String(xd.get("icon", "")), "col": xcol, "tag": tag}, true)
-			out["detail"] = [["", AbilityText.full(a, slot)],
-				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Fusion on %s."
-					% Settings.key_cap("ultimate")]]
+			out["detail"] = [["", AbilityText.full(a, slot)]]
+			if MergeForm.enabled():
+				var bond := "Landing it on a hunter fills your Boki bond a long way, ready for the Fusion on %s."
+				out["detail"].append(["Bond", bond % Settings.key_cap("ultimate")])
 		"r" when not d.has("r"):
 			# no hero ultimate: the Merge key is the Boki's Merge
 			out.merge({"name": "Boki Fusion", "short": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
