@@ -90,7 +90,7 @@ func _keep_in(h: Hunter) -> void:
 func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
 	if f.downed:
-		f.down_hp = Data.MATCH["down_hp"]      # (a sparring rival is never finished: the match would respawn it outside the ring)
+		f.down_hp = Data.MATCH["down_hp"]      # (never finished: a respawn would land it outside the ring)
 		_down_t[f] = float(_down_t.get(f, 0.0)) + dt
 		if float(_down_t[f]) >= float(tu.cfg["knock_hold"]):
 			_back_up(f, i)

@@ -1355,7 +1355,9 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -HunterMove.glide_sink, Loco.glide_catch * d)
 		else:
-			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			var vy := maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			py += 0.5 * (pvy - vy) * d       # (exact gravity, as the match's HunterMove.fall: same apex at any step)
+			pvy = vy
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
