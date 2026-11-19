@@ -38,3 +38,17 @@ texture now `gil_Image_0.jpg`. The satchel rides the hips (bone heat had put it 
 triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so skin_relax is skipped and
 `--stretch-check --wardens=gil` reports "no clips", as on the base. warden_model_check's `height_3d` is 0.9 (the
 v95 hat stands lower than the v1 floppy one).
+
+## Skinning fix (2026-11-19, ext/hunter-fix-gil-1118)
+`gil.glb` is the same v95 mesh, skeleton, bones, UVs and textures, re-skinned (weights and triangle list only; the bind
+pose is unchanged). Gil has no clips: the game poses his bones from the rig, so the fix was measured by dumping the real
+game's bone matrices (idle, walk, run, jump, glide, both dashes, LMB, RMB, E and its recast, X wave and leap, hit, death)
+and skinning the mesh with them offline.
+- The scan fused his arms, tail and legs to the robe and the re-derived weights spread every contact over stretched
+  triangles (edges past 3x: 1.96% of 41k, worst 18x) and put 28% hips weight on his right hand, so the swordfish
+  (all on hand.R) hung 0.17 m off the fist.
+- Now each triangle takes the weights of its own bone cluster (right arm, left arm, tail, each leg, body), so a contact
+  opens as a seam in motion instead of a spike; his hand skin is pure hand.R (swordfish to hand: 0.077 m at rest, 0.077
+  to 0.078 m in every pose); the robe hem eases into the leg on its side; a patch of torso wall sits under each upper
+  sleeve (hidden at rest, it covers the scan's missing torso side when the arm leaves); 66 needle triangles are dropped.
+- Result: edges past 3x 0.01%, 14 triangles of 60k removed outright, no look change at bind pose.
