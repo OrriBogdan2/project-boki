@@ -6,7 +6,7 @@ extends RefCounted
 ##   2. no visible HUD rect (Control nodes, drawn panels, message cards, the knock banner) overlaps the
 ##      hunter's screen box (HunterZone.rect: feet to the top of the overhead plate)
 ##   3. with a renderer (xvfb, not --headless) a screenshot is saved to --shots-dir (default: user data dir)
-## The budget changes only through ops/hud-budget.json, with the owner's OK.
+## To raise the budget on purpose, change ops/hud-budget.json in the same PR and say why; the owner must OK it.
 ## Never touches the save.
 
 const BUDGET_PATH := "res://ops/hud-budget.json"
