@@ -688,6 +688,7 @@ const CHECKS := {
 	"--hit-flash-kind-shots": ["res://tools/hit_flash_kind_check.gd", "hit_flash_kind_check", "shots"],
 	"--garden-first-15-check": ["res://tools/garden_first15_check.gd", "garden_first15_check", null],
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
+	"--goals-next-check": ["res://tools/goals_next_check.gd", "goals_next_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
 	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],      # a pat by personality

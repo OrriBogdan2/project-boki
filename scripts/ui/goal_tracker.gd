@@ -1,7 +1,8 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from six sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from the sources below, at most three on the card; caps and the title are in
+## content/rules/farm_tutorial.json "tracker":
 ##   shelter   no Boki after the first hatch: where the Shelter is (leads; clears on adopting)
 ##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
 ##   garden    the garden's own long goal: your Boki's next level (base_mode), always there for a player who stays home
@@ -9,8 +10,10 @@ extends RefCounted
 ##   mastery   the goals of the Hunter you play that are not done
 ##   milestone a farm milestone not reached (FarmUnlocks)
 ##   level     the next farm level, always last
+##   next      plain steps (hatch a ready egg, visit your Boki, start an expedition), only when nothing else is
+##             left, so the card is never empty
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
-## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
+## closest to done comes first. It shows one line, "Next: ...",
 ## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
 const SOURCE_ORDER := ["shelter", "first_day", "garden", "unlock", "mastery", "milestone", "level"]
@@ -30,6 +33,8 @@ static func lines() -> Array:
 		if src != "first_day":
 			rows.sort_custom(func(a, b): return _closer(a, b))
 		picked.append_array(rows.slice(0, int(caps.get(src, 1))))
+	if picked.is_empty():
+		picked = _next()
 	var order := picked.duplicate()      # sort_custom is not stable: equal rows keep their order through this
 	picked.sort_custom(func(a, b):
 		if bool(a["ready"]) != bool(b["ready"]):
@@ -112,6 +117,17 @@ static func _level() -> Array:
 	var have := mini(int(float(p[0])), need)
 	return [_row("Reach farm level %d" % (FarmUnlocks.level() + 1), _prog(have, need), "level")]
 
+## The plain steps for a card with nothing else on it: a ready egg, your Boki, the portal.
+static func _next() -> Array:
+	var words: Dictionary = cfg()["next"]
+	var steps: Array = []
+	if Incubator.any_ready():
+		steps.append(words["egg"])
+	if Lifeline.boki_count() > 0:
+		steps.append(words["boki"])
+	steps.append(words["go"])
+	return steps.map(func(t): return _row(String(t), _prog(0, 1), "next"))
+
 static func _prog(have: int, need: int) -> Dictionary:
 	return {"have": have, "need": need, "frac": float(have) / float(need)}
 
@@ -120,11 +136,9 @@ static func signature() -> String:
 	var rows := lines().map(func(r): return "%s:%d/%d:%s" % [r["text"], r["have"], r["need"], r["ready"]])
 	return "%s|%s" % [all, "|".join(rows)]
 
-## The card, or null when there is nothing to show.
+## The card (there is always a row to show).
 static func build() -> PanelContainer:
 	var rows := lines()
-	if rows.is_empty():
-		return null
 	var box := UI.glass(12, 14, 0.5)
 	box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	box.offset_left = -316

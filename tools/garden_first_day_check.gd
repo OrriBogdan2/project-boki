@@ -77,14 +77,14 @@ func _list() -> void:
 	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
 	var texts: Array = (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["text"]))
-	ok(rows.size() == 5 and rows.map(func(r): return r["text"]) == texts,
-			"the tracker leads with the five lines, in order")
+	ok(rows.size() == 3 and rows.map(func(r): return r["text"]) == texts.slice(0, 3),
+			"the tracker leads with the first three lines, in order (the card shows at most three)")
 	ok(rows.all(func(r): return r["source"] == "first_day" and int(r["need"]) == 1),
 			"one line each, none of them a tutorial step")
 	GardenFirstDay.mark("toy")
 	rows = GoalTracker.lines()
-	ok(int(rows[-1]["have"]) == 1 and rows[-1]["text"] == texts[1] and rows[0]["text"] == texts[0],
-			"a ticked line drops to the end")
+	ok(rows.map(func(r): return r["text"]) == [texts[0], texts[2], texts[3]],
+			"a ticked line drops out of the first three, to the end of the list")
 	GardenFirstDay.mark("toy")
 	GardenFirstDay.mark("bogus")
 	var gems0 := int(Save.d["gems"])

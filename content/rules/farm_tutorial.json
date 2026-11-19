@@ -302,7 +302,7 @@
 	},
 	"tracker": {
 		"title": "Goals",
-		"max": 5,
+		"max": 3,
 		"per_source": {
 			"shelter": 1,
 			"first_day": 5,
@@ -311,12 +311,18 @@
 			"milestone": 1,
 			"level": 1
 		},
+		"next": {
+			"egg": "Hatch your egg at the Nest",
+			"boki": "Visit your Boki",
+			"go": "Start an expedition at the portal"
+		},
+		"next_doc": "Plain steps for a card that would be empty: a ready egg, your Boki, the portal. Always at least two, so the player is never left with nothing to do.",
 		"shelter": {
 			"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)",
 			"locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"
 		},
 		"shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.",
-		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
+		"per_source_doc": "At most this many rows from each source, so the top rows are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
 		"axe": "Hob hands you an axe.",
