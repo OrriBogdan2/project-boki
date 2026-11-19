@@ -22,6 +22,7 @@
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"free_arm": {"lance": "L", "shot": "L"},
 	"loco": {
+		"stop_rate": 12,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 6.0,

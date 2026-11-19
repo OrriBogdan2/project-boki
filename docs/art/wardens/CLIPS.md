@@ -21,7 +21,10 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
-  swing of its own side's leg. No key: the clip plays as keyed.
+  swing of its own side's leg. `stop_rate` (1/s, default 5, `WardenClips.STOP_RATE`) is how fast the blend falls back
+  to the idle on a let-go (a start follows the stick at 12/s): the clip rate follows the feet of the blend as it
+  stands, so the legs slow with the body and hold their stride, and standing the leg bones settle into the idle at 3/s
+  (docs/art/ANIM_QUALITY_AUDIT.md, Stop). No key: the clip plays as keyed.
 - `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne. Over the glide clip (and the dive, which
