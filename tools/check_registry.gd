@@ -738,6 +738,7 @@ const CHECKS := {
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
+	"--tutorial-playthrough-check": ["res://tools/tutorial_playthrough_check.gd", "tutorial_playthrough_check", null],
 	"--tutorial-timing-check": ["res://tools/tutorial_timing_check.gd", "tutorial_timing_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],  # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],  # never stuck
