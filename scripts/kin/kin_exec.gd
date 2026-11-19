@@ -542,7 +542,8 @@ static func _trap(st: StageSpec, cx: Dictionary) -> void:
 			_then(st, "on_trigger", cx, tat, d, f)
 		var end := func(tat: Vector3) -> void:
 			if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, tat, d)
-		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end}, {})
+		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end,
+			"max_live": int(p.get("max_live", 0)), "group": String(cx.get("ability", ""))}, {})
 
 static func _wall(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
