@@ -55,7 +55,8 @@ var m: Node
 var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
-var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the global randf the sim uses
+# shader seeds only: a look never draws from the global randf the sim uses
+var _look_rng := RandomNumberGenerator.new()
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
