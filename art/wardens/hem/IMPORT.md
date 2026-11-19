@@ -16,7 +16,7 @@ skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the r
    rim the cut left (arm weight < 0.2; left hip 11 rims incl. 18.2 cm and 8.7 cm, right hip 2) gets a cap: rim on a disk by arc
    length, Delaunay with interior points at >= 1.6x the median edge, harmonic 3D membrane with the rim fixed, then sunk up to
    6 mm toward the body axis (0 at the rim) so it stays under the hand at rest, harmonic weights from the rim (hips/thigh only), one median texel of the material
-   with the most skirt area around the rim (cloth-v95b, belt rim leather), cap edge 0.05 mm inside the rim with the rim's own
+   of the skirt leather (leather-v95b: renders as the skirt mauve; a cloth texel read as a red patch), cap edge 0.05 mm inside the rim with the rim's own
    weights. 394 verts / 577 triangles added, nothing deleted or moved. Edges over 3x stay 0 (worst 2.72), Godot stretch
    worst 2.72 (hail), hunter_mesh_check nonmanifold 18 and spike edges 127 (both unchanged). Rest pose: at most 47 px of a
    1024 px frame change (wrist/belt seam line, 8 views), as small as live vs the previous fix (12-45 px). Script: cap.py in ~/cj/20261119-191052-a1/work (job dir).
