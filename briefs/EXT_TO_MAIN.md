@@ -10330,3 +10330,4 @@ READY ext/extra-fishing-derby b3dcdb4299 (fishing derby: five casts vs a friend 
 READY ext/sfx-dash-refill eb1b4ad84177a4f408f74070b49889d32a99ad1f (one quiet ab_ready cue per refilled dash charge, own bar, ducked in a fight; sfx coverage row; gameplay-media clip 17 film)
 READY ext/sfx-garden-play 920e962d83 (quiet PlaySfx cues for tag start/catch/cheer, squabble huffs and toy finish, 3 per 3 s per zone cap; base-life-check 0 fails, garden-sfx-check 0 fails, 20s MP4 with audio)
 READY ext/extra-typed-calls-b fa3f4898ce (kin box + incubator views: typed Home, 6 has_method removed)
+READY ext/vfx-no-generic-orange 1ece6871d5030db3fbd5316d76ee7bffee38848f (no Hunter cast reaches the generic damage orange: make_cx sets hero_col for any Hunter caster, generic_col asserts, fence pins hero_col per Hunter)
