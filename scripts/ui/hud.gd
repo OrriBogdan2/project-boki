@@ -133,6 +133,7 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
@@ -613,13 +614,14 @@ var feed_top := 18.0
 ## loss you caused, blue for your own side, gold for everything else.
 func _draw_feed(sz: Vector2) -> void:
 	var y := maxf(feed_top, HudStyle.safe_pad(sz).y)
+	var max_w := sz.x * (0.5 - TutorialStrip.WIDTH_FRAC * 0.5) - HudStyle.safe_pad(sz).x - 38.0
 	var mine: Array = []
 	if m.player:
 		for h in m.hunters:
 			if h.team == m.player.team: mine.append(h.pname)
 	for f in m.feed:
 		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = f["text"]
+		var s: String = TextCache.fit(big, f["text"], 13, max_w)      # ends short of the top-centre strips
 		var w := TextCache.width(big, s, 13)
 		var ours := false; var first := ""
 		for nm in mine:
@@ -1264,20 +1266,12 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		var aw := TextCache.width(big, str(p.ammo), 28)
 		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
 	# the row of small slots above the weapon card
-	var s := 44.0; var gap := 8.0
+	var s := 44.0
 	var y := r.position.y - s - 22.0
-	var x := r.end.x - s
-	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
-	x = BeltHud.draw(self, p, x, y)
+	# 1 2 3 4: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves (GripHud); G is on the Boki
+	# card only (BokiHud), not again beside the belt
+	BeltHud.draw(self, p, r.end.x - s, y)
 	GripHud.draw(self, p, r)
-	# C: throw / recall your kin
-	if k:
-		var kc: Color = Data.KIN[k.species]["color"]
-		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
-		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
-		x -= s + gap
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])

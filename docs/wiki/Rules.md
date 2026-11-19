@@ -1075,6 +1075,9 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 | stall_stand | {"out": 1.6, "side": 2.2, "desc": "Metres out in front of the market stall and to its side: where his home spot is first looked for (HobSpot)."} |
 | clear | {"m": 3.5, "reach_m": 1.9, "desc": "Metres: the clear ring round Hob's home spot. No placed tile, door or other place you interact with comes closer, and build mode refuses a piece inside it. When his spot is chosen, places you interact with are also kept talk_reach + reach_m (the usual 1.9 m interact reach) away, so his talk ring and theirs do not overlap and the talk camera has open ground."} |
 | walk_mps | 2.4 |
+| swing_s | 6 |
+| swing_doc | s between his own swings at a house site; with no materials he waits and says wait_line. |
+| wait_line | Can't hammer yet: the house {need}. |
 | talk_reach | 2.4 |
 | hint_more | Talk to Hob for more |
 | toast | New blueprints: talk to Hob |
@@ -1124,14 +1127,15 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 
 | Setting | Value |
 |---|---|
-| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name. mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
+| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name, %X the way out ExtractGoal points at (its map badge) and %H how to use it (exit_none when no way out is on offer). mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
 | matches | 2 |
 | gap | 1.5 |
 | close_at | 0.4 |
 | mates_far | 30 |
+| exit_none | Go to an exit and hold %F to leave |
 | dive_open_s | 1.5 |
 | dive_height | 15 |
-| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
+| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
 
 ## garden_daily (`content/rules/garden_daily.json`)
 
@@ -1493,11 +1497,17 @@ First-time lines (Glossary, docs/UI_FIRST15.md 4): a word a new player meets on 
 | _end_after_final_s | once the final seat is taken the islands fall this many seconds later |
 | tide_start_s | 90 |
 | tide_close_s | 510 |
-| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this (the last close), then the end phase closes on |
 | tide_next_s | 60 |
 | _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
 | tide_r0 | 130 |
 | tide_r1 | 34 |
+| end_close_s | 60 |
+| _end_close_s | the end phase (0051 "The end phase"): from the last close, when the final seat opens, the ring closes on from tide_r1 to end_r over this long, then holds to the islands' fall |
+| end_r | 28 |
+| _end_r | the final circle round the Heart, scaled like the tide radii (70 m on the 2.5x Hollow Crown: The Crown's raised Heart ground and the feet of its three stairs, 50-63 m out, so the way up never lies in the Blight): nowhere to hide |
+| end_dmg_k | 2 |
+| _end_dmg_k | a tide tick outside the ring deals the last stage's damage times this once the end close is done (1x at the last close, linear between); in the end phase it also wears down the down health of those it downed |
 | tide_boost | 0.55 |
 | _tide_boost | added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out |
 | tide_dmg | [[0, 3.0], [1, 6.0], [2, 50.0], [10, 450.0]] |
@@ -1510,7 +1520,7 @@ First-time lines (Glossary, docs/UI_FIRST15.md 4): a word a new player meets on 
 | reward | {"_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is 3x to 4x minor in what it pays (gems 150 vs 40) and the only one with the egg; the ratio is an open question in docs/decisions/0051", "minor": {"egg": false, "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1}, "goods": {"heartwood": 1}, "gems": 40, "trust": 6.0}, "major": {"egg": true, "seeds": {"emberberry": 3, "sunroot": 3, "mindmint": 3, "tidebloom": 3}, "goods": {"heartwood": 2, "starstone": 2}, "gems": 150, "trust": 20.0}} |
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
 | place | {"_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)", "gems_per_squad_below": 5, "gems_max": 40, "min_level": 2, "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"} |
-| bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
+| bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats", "end_edge_m": 5.0, "_end_edge_m": "in the end phase (0051) a bot this far inside the ring's edge (design map metres, times ways_scale) drops everything and walks in, so a rival's knock-back in the last fight leaves it inside"} |
 | hints | {"_doc": "first-time one-line hints for a new player (scripts/match/ways_hints.gd), each once per save, in the message lane: tide when the Blight first closes, quest when a quest seat first opens, heart when the Heart wakes", "tide": "The Blight is closing. Get inside the circle.", "quest": "A way out is open: the first squad to finish its quest leaves", "heart": "The Heart is awake: carry its spark to the Gate and your squad leaves early"} |
 | demo_charge | 1 |
 
@@ -1584,6 +1594,10 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 | _ways_out_lead_s | the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on |
 | always | ["minimap", "clock", "counters", "vitals", "abilities", "glider", "belt", "slots", "weapon"] |
 | _always | blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen) |
+| newcomer_seats | [2, 3] |
+| _newcomer_seats | the Ways Out seats (0 Lair, 1 Heart Gate, 2 Uplink, 3 Heart ring) a new player's objective line points at: the two that need no boss fight and no carried Heart (ExtractGoal) |
+| goal_how | ["Beat the boss, then ride the lift", "Carry the Heartspark to the Gate, hold %F", "Hold %F at the outpost until the lift opens", "Stand in the Heart ring until the end"] |
+| _goal_how | ExtractGoal: how to leave through each seat, in seat order; %F is the interact key |
 
 ## hud_reveal (`content/rules/hud_reveal.json`)
 
