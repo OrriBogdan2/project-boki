@@ -322,7 +322,6 @@ static func _by_blight(h: Hunter) -> bool:
 ## down those it downed itself out there (a Boki's revive stops the bleed, not the Blight; Life ends them
 ## at 0); one a rival downed keeps the usual bleed, even with the edge past them.
 func _tide_tick(dt: float) -> void:
-	var st := maxi(tide_stage(m), 0)      # (before the close starts the play space's edge hurts at stage 0)
 	_tide_t += dt
 	if _tide_t < r("tide_tick_s"):
 		return
