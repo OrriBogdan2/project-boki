@@ -1,18 +1,24 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
-## 2026-11-19: torn skin relaxed, weights only (ext/hunter-fix-hem-1118, retry 11-19d)
-Restarted from main's glb. Only JOINTS_0/WEIGHTS_0 of the body mesh changed: positions, indices, UVs, the glTF JSON (skeleton, bone
-names, 53 clips), textures, bow and arrow are byte-identical; no triangle cut, removed or added. The 13.3k verts within 3 edge rings of a
-torn edge (over 2.5x its rest length in any clip) got new weights from one L-BFGS fit over every clip sample (softmax per vertex over
-its own bones plus its neighbours' main bones, top 4 kept): each vertex stays where the live skin puts it (30x weight in idle, stance,
-walk*, run*, crouch*), plus a robust (Cauchy) penalty on edges stretched past 2x (length floor 8 mm), so the strain at the fused
-hand/hip contact stays in a thin sliver instead of a sheet. Script: job dir lb.py (PEN=cauchy CS=1 T=2 CALMW=30 ITERS=250).
-Numbers vs live: edges over 3x in any clip 252 -> 126 of 46,376 (0.54% -> 0.27%), worst 17.2x -> 4.2x; `--stretch-check` worst
-17.81 (roll) -> 4.99 (g_wave), idle 4.56 -> 2.46, crouch_idle 9.74 -> 2.98; `hunter_mesh_check` stretched_tris 660 -> 74.
-In-game outline vs live (close camera): rest pose 4 sides 0.16-0.22% (render noise), idle 1.95%, stance 1.61%, crouch_idle 2.01%,
-walk_f 2.01%, run_f 1.83%. Not changed: the skirt lifting toward a raised hand (g_wave, g_salute, g_flag; arm pull 8.9 cm mean)
-because the live idle hem hangs on those arm weights (taking them off moved run/stance up to 9 cm); bind-pose spike edges, the
-floating island and far_bone_verts (586) are geometry or idle-look items weights cannot fix.
+## 2026-11-19: hands/forearms split from the skirt, weights + vertex split (ext/hunter-fix-hem-1118, retry 11-19k)
+Restarted from main's glb (sha1 fd2a8ff1). Positions, UVs, normals, colours of every live vertex, every live triangle, the
+skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the rest pose is identical. Body mesh only:
+1. Each forearm/hand was welded to the skirt/hip skin. A min cut (unary = live arm weight, cut cost = rest edge length / live
+   stretch^2, skin/leather and arm-band cloth only; skirt and belt pouches stay on the body) gives every triangle near a
+   forearm/hand bone a side. The 196 verts shared by both sides are duplicated (same position, normal, UV, colour); the arm
+   triangles use the copy. No triangle deleted. Islands the cut would leave hanging are given to the side they touch.
+2. Weights: arm side = arm bones only (harmonic fill from clean arm verts, below the chest); body side below the chest = no arm
+   bones at all (harmonic fill from verts with no arm weight; hips, legs, skirt bone, cape); chest/shoulder keep their upper
+   arm share and lose only forearm/hand. Then one robust (Cauchy) weight relax over every clip (glb_relax sampling).
+3. The cut leaves closed rims; 3 of them get a hidden cap (19 extra triangles, centroid fan, one flat colour) that a ray test
+   (190 directions, none from below) shows is never seen at rest; the others stay open (a cap there would show at rest).
+Scripts: job dir split.py (FIT=0, D=0.15, LAM=4, KAP=2, GAM=3, CLOTHY=1.15, ISL=200) + capray.py (Blender BVH) + lb.py
+(PEN=cauchy CS=1 T=2 CALMW=30 ITERS=250), all in ~/gens/hunter-fix-hem-1119c/scripts.
+Numbers vs live (welded, rest edge >= 8 mm, every clip at 0.1 s): edges over 3x 252 -> 12 of 46,445 (live 46,376; 0.54% -> 0.026%),
+over 10x 4 -> 0, worst 17.2x -> 4.1x, clips with an edge over 3x 53 -> 4; hunter_mesh_check stretched_tris 660 -> 12,
+far_bone_verts 586 -> 170 (spike edges 127, floating islands 1, black texels unchanged: geometry/texture).
+Look change: the skirt no longer hangs on the arm weights, so in idle/stance/crouch it drapes as in the rest pose instead of
+being pulled toward the hands (the live drape came from the ~25% hand weight on the thigh/skirt skin that tore in bow clips).
 
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb` (the body6 pick, CURRENT_OVERRIDES 11-12) on main's hem.glb rig (no keep parts, so the earlier swap's mesh is dropped whole); bow, arrow and anchor_nock unchanged. Was appeal3 body b below. 13.9k tris (body 13.0k), 2048 atlas + 2048, 51 clips (pet/give/cheer gain sampled channels, same timing).
