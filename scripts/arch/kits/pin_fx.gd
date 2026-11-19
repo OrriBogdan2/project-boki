@@ -118,7 +118,7 @@ func _ready() -> void:
 		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
 		wisps.append({"node": wisp, "t": 0.0})
 	for i in FLAMES:
-		var fm := KitShaders.mat("flame", Color("5aa8ff"))
+		var fm := KitShaders.mat("flame", Color("ff4a3a"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
 	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
@@ -187,7 +187,7 @@ func _dress(n: Node3D, kind: String) -> void:
 	var core := n.get_node("Core") as MeshInstance3D
 	core.visible = false      # (the Heavy Shot is the bow's arrow, just bigger: owner Nov 4)
 	core.scale = Vector3.ONE * s * 0.5
-	KitShaders.param(core, "color", Color("fff0b0"))
+	KitShaders.param(core, "color", PALE)
 	KitShaders.param(core, "power", 2.4)
 	var thick := s * (2.2 if kind == "super" else 1.0)
 	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
