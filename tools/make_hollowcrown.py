@@ -725,6 +725,12 @@ def hazard_cells(A):
     return [(x, z) for z in range(int(min(zs)), int(max(zs)) + 1) for x in range(int(min(xs)), int(max(xs)) + 1)
             if shape_d({"poly": A["poly"]}, x + 0.5, z + 0.5) < 1.0]
 
+GRASSY_HAZARDS = ("bramble",)      # hazard kinds tall grass still grows in
+
+def bare_cells(d):
+    """An island's tiles where no grass grows: its hazard areas but the grassy ones."""
+    return {q for A in d.get("hazard_areas", []) if A["kind"] not in GRASSY_HAZARDS for q in hazard_cells(A)}
+
 def check_hazards(lv, owner, stairs):
     """Each hazard area sits on one terrace of its own island, off stairs and bridges, clear of spots, exits,
     stair feet and lairs, and never cuts its island in two: every spot can still be walked to around it."""
@@ -1143,17 +1149,24 @@ def place_cover(lv, owner, stairs):
                         C.plant(iid, P[0], P[1], kind); progressed = True; break
             if not progressed: break
         carry[d["biome"]] = max(0.0, want - have())
-        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]]
+        # no grass on lava, water, ice or static: their clumps go (the roll above stays as it was; the
+        # bramble keeps its grass, a thicket you can hide in at the price of the thorns)
+        wet = bare_cells(d)
+        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]
+                     if not wet & _disc(c[0], c[1], c[2])]
     return C
 
 def cover_report(C, lv, owner):
     T = _targets()
     ground = {}; bush = {}
     for d in islands:
+        # the ground grass can grow on (not the bare hazard areas), and the grass left on it
+        wet = bare_cells(d)
+        kept = set().union(*[_disc(c[0], c[1], c[2]) for c in d.get("bush", [])])
         for q in INISLE[d["id"]]:
-            if q in C.solid or q in C.stairs: continue
+            if q in C.solid or q in C.stairs or q in wet: continue
             ground[d["biome"]] = ground.get(d["biome"], 0) + 1
-            if q in C.bush: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
+            if q in C.bush and q in kept: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
     rows = []
     for b in ("bloom", "meadow", "gloom", "storm", "ember", "frost"):
         share = bush.get(b, 0) / max(1, ground.get(b, 1))
