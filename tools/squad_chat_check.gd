@@ -108,4 +108,4 @@ func _mute_cap_off() -> void:
 
 
 func _offline(main: Node) -> void:
-	ok(SquadChat.attach(main, {"squad": 2}) == null, "an offline squad gets no chat")
+	ok(SquadChat.attach(main, {"squad": 2}, null) == null, "an offline squad gets no chat")
