@@ -7,7 +7,7 @@ so the wiki stays in step with the game.
 
 Plain Python 3, no Godot needed. Idempotent: running it twice changes nothing the second time.
 
-Sources: content/ (archetypes, dash_flow, classes, kin_v2, kin, abilities_v2, merges_v2, evolution_v2,
+Sources: content/ (archetypes, dash_flow, classes, kin, kin_home, abilities_v2, merges_v2, evolution_v2,
 mutations, gloves, weapons, abilities, maps, biomes, combos, rules) and a few constant tables read
 straight out of the GDScript (Data.CLASSES, Data.TIERS, Life.R, Care.BONDS, HomeLayout.CATALOG...).
 Those are parsed as literals; if one stops parsing, the script says which and carries on.
@@ -204,8 +204,8 @@ def walk_speed(aid):
     return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
-KIN2 = content("kin_v2")
-KIN1 = content("kin")
+KIN2 = content("kin")
+KIN1 = content("kin_home")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
 EVO = content("evolution_v2")
@@ -390,7 +390,7 @@ def gen_boki():
         themes.setdefault(k.get("theme", "?"), []).append(k["name"])
         src = "Starter egg" if kid in starters else ("Rare Egg from %s" % egg_of[kid] if kid in egg_of else "Wild, nest eggs")
         rows.append(["[%s](#%s)" % (k["name"], slug(k["name"])), " + ".join(k.get("animals", [])), k.get("theme", "").title(), k["body"].get("size", ""), k["ai"].get("role", ""), src])
-    body = "Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its home file (`content/kin/<id>.json`). "
+    body = "Every species, read from its grammar file (`content/kin/<id>.json`) and its home file (`content/kin_home/<id>.json`). "
     body += "The id in brackets is the internal name the code and save files use.\n\n"
     body += table(["Boki", "Animals", "Type", "Size", "Fights as", "Where it comes from"], rows)
     body += "\n\n## Types\n\nA Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see " + link("Boki") + "). Types in use:\n\n"
@@ -423,7 +423,7 @@ def gen_boki():
         for p in k.get("evolution", {}).get("paths", []):
             paths.append("%s: %s" % (p["affinity"].title(), " > ".join(EVO.get(n, {}).get("name", n) for n in p["nodes"])))
         if paths: body += "\n- Evolution paths: " + "; ".join(paths)
-    page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
+    page("Boki-Species.md", "Boki species", body, ["content/kin", "content/kin_home", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
     ev = load_json(os.path.join(ROOT, "content", "rules", "evolve.json"))
@@ -531,7 +531,7 @@ def _terrain_hazards(hz_at):
     """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
     which Boki walks it safely."""
     R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
-    kin = content("kin_v2")
+    kin = content("kin")
     rows = []
     for kind, D in R.items():
         where = sorted({nm for k, nm in hz_at if k == kind})
@@ -583,7 +583,7 @@ def gen_maps():
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
         if m.get("legendaries"):
             chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
-            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []
@@ -665,7 +665,7 @@ def gen_farm():
             rows.append([c.get("name", cid), num(c.get("grow", "")), num(c.get("price", "")), c.get("desc", "")])
         body += "\n\n## Crops\n\nA watered plant grows a stage every %s seconds at home, and every expedition grows everything a stage.\n\n" % num(gd_const("core/data.gd", "WATER_TIME") or "?")
         body += table(["Crop", "Stages", "Seed price (gems)", "What it's for"], rows)
-    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin"])
+    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin_home"])
 
 # ------------------------------------------------------------------ controls
 def gen_controls():

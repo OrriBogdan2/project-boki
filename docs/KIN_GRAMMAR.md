@@ -43,7 +43,7 @@ The rules that keep it safe:
 content/abilities_v2/<id>.json   AbilitySpec   one ability
 content/merges_v2/<id>.json      MergeSpec     a bond ultimate (the merge)
 content/evolution_v2/<id>.json   EvolutionNode one evolution step (shared or kin-specific)
-content/kin_v2/<id>.json         KinSpec       one kin species
+content/kin/<id>.json         KinSpec       one kin species
 ```
 
 A file's name must match its `id`. Check everything with:
@@ -129,7 +129,7 @@ name a preset; the preset fills its numbers and the file can still override any 
 asked for an optional preset on the AbilityDef. A whole-ability preset is ambiguous when an ability
 has two damage effects, so presets live on parts.)
 
-## KinSpec (`content/kin_v2/<id>.json`)
+## KinSpec (`content/kin/<id>.json`)
 
 | field | required | meaning |
 |---|---|---|
@@ -226,7 +226,7 @@ exist and stay within bounds.
 
 - **Library.** `KinLib` loads `res://content` through the checker once. A file with errors is skipped
   (with a warning), and so is a kin whose ability or merge was skipped: the live game only runs
-  content that passed. `Data.KIN` is built from `kin_v2` (`KinLib.species`); `content/kin/<id>.json`
+  content that passed. `Data.KIN` is built from `kin` (`KinLib.species`); `content/kin_home/<id>.json`
   now holds only home and economy data (rare/boss egg, work elements, shiny palette).
 - **Stats.** Kin health, damage and speed are `base + points x per_point` after evolution's
   budget-neutral stat shifts (`KinLib.points`). Levels add `KinRules.LEVEL_GROWTH` (3%) per level to
