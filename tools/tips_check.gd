@@ -10,20 +10,24 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TIPSCHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _fresh() -> void:
 	Save.d = Save.fresh()
 	TipPick.last = []
+
 
 func _id_of(text: String) -> String:
 	for t in TipPick.rules()["tips"]:
 		if TipPick.render(String(t["text"])) == text:
 			return String(t["id"])
 	return ""
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -34,6 +38,7 @@ func run(main_node: Node) -> void:
 	await _crouch_hint()
 	print("TIPSCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
 
 func _table() -> void:
 	var R := TipPick.rules()
@@ -57,6 +62,7 @@ func _table() -> void:
 	var n_trig := (R["triggers"] as Dictionary).size()
 	ok(used_triggers.size() == n_trig, "every trigger has tips (%d)" % n_trig)
 
+
 func _picking() -> void:
 	_fresh()
 	var tr := TipPick.triggers({"summons": 0, "glide_t": 30.0}, {"k1": 3}, "", 200.0)
@@ -67,11 +73,13 @@ func _picking() -> void:
 	ok(second != first and _id_of(second).begins_with("summon_"), "a seen tip is not repeated: the next one differs")
 	ok(TipPick.triggers({"summons": 0}, {}, "", 30.0).is_empty(), "a run shorter than min_time_s blames nothing")
 	var base := {"summons": 1, "glide_t": 60.0}
-	var checks := {"abyss": TipPick.triggers(base, {"k1": 1}, "abyss", 120.0),
+	var checks := {
+		"abyss": TipPick.triggers(base, {"k1": 1}, "abyss", 120.0),
 		"blight": TipPick.triggers(base.merged({"blight_downs": 1}, true), {"k1": 1}, "", 120.0),
 		"wisp_stolen": TipPick.triggers(base.merged({"wisp_stolen": 1}, true), {"k1": 1}, "", 120.0),
 		"no_e": TipPick.triggers(base, {}, "", 120.0),
-		"few_glide": TipPick.triggers(base.merged({"glide_t": 1.0}, true), {"k1": 1}, "", 120.0)}
+		"few_glide": TipPick.triggers(base.merged({"glide_t": 1.0}, true), {"k1": 1}, "", 120.0)
+	}
 	for k in checks:
 		_fresh()
 		var got := _id_of(TipPick.pick(checks[k]))
@@ -102,6 +110,7 @@ func _picking() -> void:
 		InputMap.action_add_event("signature", o)
 	ok(e_tip.begins_with("J "), "a rebound key reads from Settings.key_cap: '%s'" % e_tip)
 
+
 func _match_counts() -> void:
 	_fresh()
 	var m := Match.new()
@@ -127,6 +136,7 @@ func _match_counts() -> void:
 	ok(TipPick.last.has("abyss") and TipPick.for_loading(true) != "", "the loading screen reads the last run")
 	m.queue_free()
 
+
 ## The crouch hint: which tip it says, when it fires, that it fires once, and that its claim holds.
 func _crouch_hint() -> void:
 	_fresh()
@@ -136,8 +146,10 @@ func _crouch_hint() -> void:
 	CrouchHint.migrate(old)
 	var fresh := {"matches": 0, "tutorial": {}}
 	CrouchHint.migrate(fresh)
-	ok(old["tutorial"].get("crouch_hint", false) and not fresh["tutorial"].has("crouch_hint"),
-		"an old save has had it; a new one has not")
+	ok(
+		old["tutorial"].get("crouch_hint", false) and not fresh["tutorial"].has("crouch_hint"),
+		"an old save has had it; a new one has not"
+	)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
@@ -148,7 +160,7 @@ func _crouch_hint() -> void:
 	ok(hint != null, "a new save's real match has the hint")
 	for mb: Mob in m.mobs:
 		if mb != camp:
-			mb.aggro(P, "check")      # only the camp under test counts as quiet
+			mb.aggro(P, "check")  # only the camp under test counts as quiet
 	P.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "", "far from every camp: no line")
@@ -158,8 +170,10 @@ func _crouch_hint() -> void:
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
 	camp.calm("check")
 	hint.tick(0.6)
-	ok(hint.line == said and Save.d["tutorial"].get("crouch_hint", false),
-		"near a quiet camp: the line shows and the flag is set")
+	ok(
+		hint.line == said and Save.d["tutorial"].get("crouch_hint", false),
+		"near a quiet camp: the line shows and the flag is set"
+	)
 	hint.tick(CrouchHint.LIFE + 0.1)
 	ok(m.crouch_hint == null, "it goes after its time and does not come back")
 	ok(CrouchHint.for_match(m, {}) == null, "the next match has none")
@@ -179,6 +193,8 @@ func _crouch_hint() -> void:
 		P.inp["move"] = Vector2(0, -1)
 		P.grounded = true
 		P.sim(Match.DT)
-	ok(not P.crouch and steady < 0.0 and P.bloom > steady,
-		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, P.bloom])
+	ok(
+		not P.crouch and steady < 0.0 and P.bloom > steady,
+		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, P.bloom]
+	)
 	m.queue_free()

@@ -11,11 +11,13 @@ const ATKS := ["", "phase", "slam", "boulders", "fissure", "dash", "storm", "sta
 const F_DORMANT := 1
 const F_ENRAGED := 2
 
+
 ## The remote copy of a lair boss: its lair is the one it sleeps in.
 static func make(m: Match, nid: String, kind: String, at: Vector3) -> Boss:
 	var b := Boss.new()
 	b.init_boss(m, nid, kind, at, 1.0, m.lairs.lair_of(at, 1.0))
 	return b
+
 
 ## Host, once per boss step: send the state if it changed since the last send.
 static func watch(b: Boss) -> void:
@@ -28,6 +30,7 @@ static func watch(b: Boss) -> void:
 	b.set_meta("bat", key)
 	b.m.net_event(["bat", b.nid, ATKS.find(b.atk), snappedf(b.atk_t, 0.01), b.phase, flags, key[4]])
 
+
 ## A remote game: take the host's event.
 static func net_in(m: Match, x: Array) -> void:
 	var b := m.ents_by_id.get(String(x[1]), null) as Boss
@@ -35,13 +38,14 @@ static func net_in(m: Match, x: Array) -> void:
 		return
 	var woke := (int(x[5]) & F_DORMANT) == 0 and b.dormant
 	b.atk = String(ATKS[int(x[2])]) if int(x[2]) >= 0 and int(x[2]) < ATKS.size() else ""
-	b.atk_t = float(x[3])      # (how far into the attack the host was when it sent)
+	b.atk_t = float(x[3])  # (how far into the attack the host was when it sent)
 	b.phase = int(x[4])
-	b.set_asleep((int(x[5]) & F_DORMANT) != 0)      # (Boss.dormant is a view of its machine)
+	b.set_asleep((int(x[5]) & F_DORMANT) != 0)  # (Boss.dormant is a view of its machine)
 	b.enraged = (int(x[5]) & F_ENRAGED) != 0
-	b.md["windup"] = float(x[6])      # (each attack sets its own wind-up seconds; BossAnim.hit_t reads it)
+	b.md["windup"] = float(x[6])  # (each attack sets its own wind-up seconds; BossAnim.hit_t reads it)
 	if woke or b.dormant:
 		b.awake_t = 0.0
+
 
 ## A remote game, every frame: the clocks the host's step would have run.
 static func advance(b: Boss, delta: float) -> void:

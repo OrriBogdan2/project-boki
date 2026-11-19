@@ -6,13 +6,16 @@ extends RefCounted
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
 const BOSSES := ["colossus", "serpent", "brood"]
 const DT := 1.0 / 60.0
-const ASH_WIPE_MAX := 72      # ash particles a wiped 6-camp may emit in all (12 per body)
+const ASH_WIPE_MAX := 72  # ash particles a wiped 6-camp may emit in all (12 per body)
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MOBDEATH %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -27,12 +30,14 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	m.set_process(false)
 	for mb in m.mobs:
-		if not mb is Boss: mb.queue_free()
-	m.mobs.assign(m.mobs.filter(func(x): return x is Boss))      # (the lair bosses stay for _boss)
+		if not mb is Boss:
+			mb.queue_free()
+	m.mobs.assign(m.mobs.filter(func(x): return x is Boss))  # (the lair bosses stay for _boss)
 	if m.biomes:
-		m.biomes.hazards.clear()      # (a lightning rod's strike is a burst too; fx.radial must count deaths only)
+		m.biomes.hazards.clear()  # (a lightning rod's strike is a burst too; fx.radial must count deaths only)
 	for o in m.hunters:
-		if o != m.player: o.ctrl = "idle"
+		if o != m.player:
+			o.ctrl = "idle"
 	_sizes()
 	for k in KINDS:
 		_kill_one(m, k)
@@ -44,10 +49,13 @@ func run(main: Node) -> void:
 	print("MOBDEATH DONE, failures: %d" % bad)
 	main.get_tree().quit(mini(bad, 1))
 
+
 func _frames(m: Match, sec: float) -> void:
 	for i in int(ceil(sec / DT)):
 		m.step(DT)
-		for mb in m.mobs: mb.render(DT, 1.0)
+		for mb in m.mobs:
+			mb.render(DT, 1.0)
+
 
 ## 0.3 s for the smallest, 0.6 s for a boss, never shorter for something bigger.
 func _sizes() -> void:
@@ -64,8 +72,10 @@ func _sizes() -> void:
 	var big := MobDissolve.duration(float(Data.MOBS["brood"]["r"]))
 	ok(is_equal_approx(small, 0.3) and is_equal_approx(big, 0.6), "skitter 0.3 s, a boss 0.6 s")
 
+
 func _spot(m: Match, i: int) -> Vector3:
 	return m.player.pos + Vector3(6.0 + i * 1.6, 0, 3.0)
+
 
 func _kill_one(m: Match, k: String) -> void:
 	var mb := m.spawn_mob(k, _spot(m, 0))
@@ -93,6 +103,7 @@ func _kill_one(m: Match, k: String) -> void:
 	_frames(m, 0.3)
 	ok(_loot(m) > pk0, "%s: the drops spilled after it (+%d)" % [k, _loot(m) - pk0])
 
+
 ## A lair boss plays its keyed death move (BossAnim.DEATH_S) and then dissolves the same way, over its 0.6 s.
 func _boss(m: Match) -> void:
 	var L: Dictionary = m.lairs.list[0]
@@ -103,7 +114,8 @@ func _boss(m: Match) -> void:
 	b.set_asleep(false)
 	b.stagger_t = 0.0
 	b.invul_t = 0.0
-	if b.buried: b._surface()
+	if b.buried:
+		b._surface()
 	b.hurt(b.hp + b.max_hp, m.player, {"src": "shot"})
 	_frames(m, 0.05)
 	ok(b.dead and b.visible and not b.has_meta("dis_mat"), "%s boss: dies, its death move first" % b.mkind)
@@ -111,6 +123,7 @@ func _boss(m: Match) -> void:
 	ok(b.visible and b.has_meta("dis_mat"), "%s boss: then dissolves" % b.mkind)
 	_frames(m, MobDissolve.DUR_MAX + 0.15)
 	ok(not b.visible, "%s boss: gone within %.2f s" % [b.mkind, MobDissolve.DUR_MAX + 0.2])
+
 
 ## A camp wiped in one frame ripples instead of flashing out together, and the loot follows each body.
 func _wipe(m: Match) -> void:
@@ -143,6 +156,7 @@ func _wipe(m: Match) -> void:
 	ok(MobDissolve.made == made, "a second wipe reuses the pooled materials (%d built in all)" % made)
 	ok(pack.all(func(mb): return not mb.visible), "the whole camp is gone after the ripple")
 
+
 ## The particles row: the ash is the only particle cost of a death, small per body, none on Low.
 func _particles(m: Match) -> void:
 	var ash0 := m.fx.ash
@@ -158,6 +172,7 @@ func _particles(m: Match) -> void:
 	ok(m.fx.ash == ash0, "particles: Low emits no ash")
 	Settings.v.erase("quality")
 
+
 ## The Low preset: no shader swap and no ash, a shorter fade, the drops still spill.
 func _low(m: Match) -> void:
 	Settings.v["quality"] = "low"
@@ -171,6 +186,7 @@ func _low(m: Match) -> void:
 	_frames(m, 1.0)
 	ok(not mb.visible and _loot(m) > pk0, "Low: gone, and the drops spilled")
 	Settings.v.erase("quality")
+
 
 ## Everything lying on the ground, by value: gems stack onto a pile already there (DropMerge), so a spill can add
 ## value without adding a pickup.

@@ -5,16 +5,19 @@ extends RefCounted
 ## monsters pose in under PERF_MS. Never touches the save.
 
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
-const MIN_MOVE := 0.02        # rad / m / scale: a state whose largest track moves less than this is static
-const PERF_MS := 0.5          # ms: posing 30 monsters in a frame
+const MIN_MOVE := 0.02  # rad / m / scale: a state whose largest track moves less than this is static
+const PERF_MS := 0.5  # ms: posing 30 monsters in a frame
 const PERF_FRAMES := 300
 const DT := 1.0 / 60.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MOBANIM %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -29,16 +32,19 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for o in m.hunters:
-		if o != m.player: o.ctrl = "idle"
+		if o != m.player:
+			o.ctrl = "idle"
 	for k in KINDS:
 		_windup(m, k)
 	_perf(m)
 	m.queue_free()
 	print("MOBANIM DONE, failures: %d" % bad)
 	main.get_tree().quit(mini(bad, 1))
+
 
 ## Every state a kind can enter has tracks; they name real pivots, move, and loops close.
 func _tables() -> void:
@@ -68,6 +74,7 @@ func _tables() -> void:
 			if MobAnim.pivot(body, String(nm)) == null:
 				missing.append(nm)
 		ok(missing.is_empty(), "%s: every pivot exists in the model (missing %s)" % [k, str(missing)])
+
 
 ## Forces an attack and steps the real sim: the body phase must equal what the telegraph shows each frame, the
 ## wind-up must last the data's windup seconds, and the pivots must follow the key.
@@ -105,6 +112,7 @@ func _windup(m: Match, k: String) -> void:
 	var off_by := "%s: pivots sit on the key at wind-up end (off %.1f%% of travel)" % [k, tracked * 100.0]
 	ok(rig != null and tracked < 0.05, off_by)
 
+
 ## How far the first wind-up track's pivot is from where its key says it should be, as a share of that track's travel.
 func _follow(mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
 	var tr: Array = rig.def["states"][MobAnim.WINDUP][0]
@@ -117,13 +125,17 @@ func _follow(mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
 	var want := (cv[i] + (cv[i + 1] - cv[i]) * (x - i)) * float((tr[1] as PackedFloat32Array)[0])
 	var n := rig.nodes[slot]
 	var got := 0.0
-	if ch < 3: got = n.rotation[ch] - rig.rest_r[slot][ch]
-	elif ch < 6: got = n.position[ch - 3] - rig.rest_p[slot][ch - 3]
-	elif ch < 9: got = n.scale[ch - 6] - 1.0
+	if ch < 3:
+		got = n.rotation[ch] - rig.rest_r[slot][ch]
+	elif ch < 6:
+		got = n.position[ch - 3] - rig.rest_p[slot][ch - 3]
+	elif ch < 9:
+		got = n.scale[ch - 6] - 1.0
 	var travel := 0.0
 	for v in cv:
 		travel = maxf(travel, absf(v))
 	return absf(got - want) / maxf(travel, 0.1)
+
 
 ## 30 monsters of every kind in every state, posed 300 frames: the mean cost of one frame's poses.
 func _perf(m: Match) -> void:
@@ -152,7 +164,8 @@ func _perf(m: Match) -> void:
 	for f in PERF_FRAMES:
 		for mb in crowd:
 			mb.anim += DT * 4.0
-			if MobAnim.pose(mb, DT): posed += 1
+			if MobAnim.pose(mb, DT):
+				posed += 1
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / PERF_FRAMES
 	ok(posed == crowd.size() * PERF_FRAMES, "all 30 monsters are posed every frame (%d)" % posed)
 	ok(ms < PERF_MS, "30 monsters pose in %.3f ms a frame (budget %.1f)" % [ms, PERF_MS])

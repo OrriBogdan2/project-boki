@@ -10,10 +10,12 @@ extends RefCounted
 
 var fails := 0
 
+
 func _ok(cond: bool, what: String) -> void:
 	print("CROWD %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		fails += 1
+
 
 static func oklab(c: Color) -> Vector3:
 	var l := c.srgb_to_linear()
@@ -23,9 +25,12 @@ static func oklab(c: Color) -> Vector3:
 	lm = pow(lm, 1.0 / 3.0)
 	mm = pow(mm, 1.0 / 3.0)
 	sm = pow(sm, 1.0 / 3.0)
-	return Vector3(0.2104542553 * lm + 0.7936177850 * mm - 0.0040720468 * sm,
+	return Vector3(
+		0.2104542553 * lm + 0.7936177850 * mm - 0.0040720468 * sm,
 		1.9779984951 * lm - 2.4285922050 * mm + 0.4505937099 * sm,
-		0.0259040371 * lm + 0.7827717662 * mm - 0.8086757660 * sm)
+		0.0259040371 * lm + 0.7827717662 * mm - 0.8086757660 * sm
+	)
+
 
 func _colours() -> void:
 	var cs: Array = Data.TEAM_COLORS
@@ -40,6 +45,7 @@ func _colours() -> void:
 				pair = "%d/%d" % [i, j]
 	var gap := Data.TEAM_COLOR_GAP
 	_ok(worst >= gap, "colours: closest pair %s at %.3f (gap %.2f)" % [pair, worst, gap])
+
 
 func _napping(main: Node) -> void:
 	var m := Match.new()
@@ -66,6 +72,7 @@ func _napping(main: Node) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 func _models() -> void:
 	var arch := ""
 	for a in Arch.ORDER:
@@ -83,6 +90,7 @@ func _models() -> void:
 	_ok(sc != null and WardenGlb._scene(arch) == sc, "models: %s's scene loaded once for two Hunters" % arch)
 	for n in built:
 		(n as Node).free()
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

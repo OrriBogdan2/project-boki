@@ -34,60 +34,69 @@ extends RefCounted
 ## everyone inside the lair at the kill, any team (_award_egg); with nobody inside it lies on the floor,
 ## shown on everyone's minimap for a few seconds. Plus a strong weapon, a glove, treasure and XP.
 
-const DIAL_R := 1.8            # reach to work the dial
-const SEALED_STATES := ["sealed", "dormant"]      # lair states whose walls put bodies back out
-const SEAL_KIN_STATES := ["active", "flying", "returning", "wild", "dazed"]   # a Boki out in the world, not on a shoulder
+const DIAL_R := 1.8  # reach to work the dial
+const SEALED_STATES := ["sealed", "dormant"]  # lair states whose walls put bodies back out
+const SEAL_KIN_STATES := ["active", "flying", "returning", "wild", "dazed"]  # a Boki out in the world, not on a shoulder
 const LOCKS := {"colossus": 4, "serpent": 3, "brood": 3}
-const SPEEDS := [1.7, 2.25, 2.8, 3.4]      # the needle's speed per lock (radians a second)
-const WIDTHS := [0.95, 0.74, 0.58, 0.46]   # each lit arc's width per lock (radians)
-const TARGETS := [2, 2, 3, 3]              # lit arcs per lock
-const SLACK := 0.05            # a hair of forgiveness either side of an arc
-const JAM_T := 0.7             # after a miss the dial is jammed this long
-const GRACE_T := 0.3           # the press that starts the dial doesn't count as a stop
-const GUARD_CAP := 6           # guards a lair can have out at once
-const GUARD_R := 3.5           # metres from the dial, rune or ward that called guards climb out
-const GUARD_FAN := 0.5         # radians between their posts, fanned on the side away from the lair
+const SPEEDS := [1.7, 2.25, 2.8, 3.4]  # the needle's speed per lock (radians a second)
+const WIDTHS := [0.95, 0.74, 0.58, 0.46]  # each lit arc's width per lock (radians)
+const TARGETS := [2, 2, 3, 3]  # lit arcs per lock
+const SLACK := 0.05  # a hair of forgiveness either side of an arc
+const JAM_T := 0.7  # after a miss the dial is jammed this long
+const GRACE_T := 0.3  # the press that starts the dial doesn't count as a stop
+const GUARD_CAP := 6  # guards a lair can have out at once
+const GUARD_R := 3.5  # metres from the dial, rune or ward that called guards climb out
+const GUARD_FAN := 0.5  # radians between their posts, fanned on the side away from the lair
 const RUNE_HOLD := 2.2
-const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
-const EGG_HOLD_T := 10.0       # s a winner's egg, dropped at their feet (full pack), is theirs alone
-const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
-const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
-const LOCK_T := 90.0           # the longest a fight can keep you sealed in
-const VICTORY_T := 20.0        # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
-const LEVER_R := 1.7           # reach to pull the gate lever
-const ALERT_R := 150.0         # everyone this close hears a lair fight start (and its boss fall)
-const UP_R := 1.5              # the escape updraft's radius
-const UP_TOP := 9.0            # ... and how high over the lair floor it carries you
-const UP_PUSH := 8.0           # ... and how hard it throws you out over the wall at the top
-const UP_LAND_ROOM := 9        # tiles of ground the ride's landing looks for round it (a dash out of the ride runs ~8 m on)
+const EGG_PING_T := 8.0  # the dropped egg shows on everyone's minimap this long
+const EGG_HOLD_T := 10.0  # s a winner's egg, dropped at their feet (full pack), is theirs alone
+const EGG_APART := 4.5  # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
+const CARRY_PING_T := 5.0  # ... and so does whoever picks it up
+const LOCK_T := 90.0  # the longest a fight can keep you sealed in
+const VICTORY_T := 20.0  # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
+const LEVER_R := 1.7  # reach to pull the gate lever
+const ALERT_R := 150.0  # everyone this close hears a lair fight start (and its boss fall)
+const UP_R := 1.5  # the escape updraft's radius
+const UP_TOP := 9.0  # ... and how high over the lair floor it carries you
+const UP_PUSH := 8.0  # ... and how hard it throws you out over the wall at the top
+const UP_LAND_ROOM := 9  # tiles of ground the ride's landing looks for round it (a dash out of the ride runs ~8 m on)
 const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
 var m: Match
 var list: Array = []
-var wayseed_given := false     # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
-var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
-var _prev := {}                # hunter nid -> was interact held last tick
+var wayseed_given := false  # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
+var egg_pings: Array = []  # {pos, until, follow: Hunter or null, text}
+var _prev := {}  # hunter nid -> was interact held last tick
 var _told := {}
 var music_on := false
 var breach: LairBreach
-var press_log: Array = []      # tests: every stop attempt {lair, ok, lock}
-var alert_log: Array = []      # tests: every outside alert {lair, kind: fight|fallen, nid}
+var press_log: Array = []  # tests: every stop attempt {lair, ok, lock}
+var alert_log: Array = []  # tests: every outside alert {lair, kind: fight|fallen, nid}
+
 
 func setup(match_node: Match) -> void:
 	m = match_node
 	breach = LairBreach.new(m, self)
-	if m.opts.get("training", false) or m.opts.get("duel", false) or m.opts.get("tutorial", false) or m.opts.get("sandbox", false):
+	if (
+		m.opts.get("training", false)
+		or m.opts.get("duel", false)
+		or m.opts.get("tutorial", false)
+		or m.opts.get("sandbox", false)
+	):
 		return
 	if HeartRaid.on(m.opts):
-		return      # a raid's one boss is at the Heart (HeartRaid); its lairs stay empty
+		return  # a raid's one boss is at the Heart (HeartRaid); its lairs stay empty
 	for D in m.world.lair_defs:
 		_add(D)
+
 
 static func color_of(L: Dictionary) -> Color:
 	return SPRITE.get(String(L.get("boss", "")), Color("ffd36a"))
 
+
 func boss_name(L: Dictionary) -> String:
 	return String(Data.MOBS.get(String(L["boss"]), {}).get("name", "the boss"))
+
 
 # ------------------------------------------------------------------ building a lair
 func _add(D: Dictionary) -> void:
@@ -99,13 +108,48 @@ func _add(D: Dictionary) -> void:
 	var col: Color = SPRITE.get(String(D["boss"]), Color("ffd36a"))
 	var gate_c := c + Vector3(out.x, 0, out.y) * hf
 	var dial := c + Vector3(out.x, 0, out.y) * (hf + 2.6)
-	dial = Vector3(dial.x, w.ground_at(dial.x, dial.z), dial.z) if not w.is_void(dial.x, dial.z) else gate_c + Vector3(out.x, 0, out.y) * 1.6
-	var L := {"i": list.size(), "id": D["id"], "name": D["name"], "boss": String(D["boss"]), "c": c, "half": hf, "out": out,
-		"gate_tiles": D["gate_tiles"], "gate_c": gate_c, "dial": dial, "entry": D.get("entry", ["breach"]),
+	dial = (
+		Vector3(dial.x, w.ground_at(dial.x, dial.z), dial.z)
+		if not w.is_void(dial.x, dial.z)
+		else gate_c + Vector3(out.x, 0, out.y) * 1.6
+	)
+	var L := {
+		"i": list.size(),
+		"id": D["id"],
+		"name": D["name"],
+		"boss": String(D["boss"]),
+		"c": c,
+		"half": hf,
+		"out": out,
+		"gate_tiles": D["gate_tiles"],
+		"gate_c": gate_c,
+		"dial": dial,
+		"entry": D.get("entry", ["breach"]),
 		"state": "dormant",
-		"locks": int(LOCKS.get(String(D["boss"]), 3)), "lock": 0, "targets": [], "needle": randf() * TAU, "dir": 1.0, "active": false,
-		"user": null, "jam": 0.0, "grace": 0.0, "fails": 0, "boss_mob": null, "adds": [], "guards": [], "runes": [], "wards": [],
-		"gate_k": 0.0, "opened_by": "", "woke_at": -1.0, "bot_ti": -1, "bot_roll": false, "bot_wait": 0.0, "egg_wp": null, "egg_told": false}
+		"locks": int(LOCKS.get(String(D["boss"]), 3)),
+		"lock": 0,
+		"targets": [],
+		"needle": randf() * TAU,
+		"dir": 1.0,
+		"active": false,
+		"user": null,
+		"jam": 0.0,
+		"grace": 0.0,
+		"fails": 0,
+		"boss_mob": null,
+		"adds": [],
+		"guards": [],
+		"runes": [],
+		"wards": [],
+		"gate_k": 0.0,
+		"opened_by": "",
+		"woke_at": -1.0,
+		"bot_ti": -1,
+		"bot_roll": false,
+		"bot_wait": 0.0,
+		"egg_wp": null,
+		"egg_told": false
+	}
 	list.append(L)
 	for q in D["gate_tiles"]:
 		w.kind[w.idx(q.x, q.y)] = World.T_BLOCK
@@ -127,8 +171,13 @@ func _add(D: Dictionary) -> void:
 	if (L["entry"] as Array).has("breach"):
 		L["seal_at"] = LairBreach.anchor(L, w)
 	var lbl := Label3D.new()
-	lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
-	lbl.modulate = col.lightened(0.3); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
+	lbl.font = UI.big
+	lbl.font_size = 40
+	lbl.pixel_size = 0.01
+	lbl.outline_size = 12
+	lbl.modulate = col.lightened(0.3)
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lbl.no_depth_test = true
 	lbl.position = gate.position + Vector3(0, 4.6, 0)
 	lbl.text = "%s\nDormant  ·  its gate rusted shut" % L["name"]
 	lbl.modulate = Color(0.7, 0.7, 0.75)
@@ -164,6 +213,7 @@ func _add(D: Dictionary) -> void:
 	# lairs stay dormant (empty, sealed for good) until SpawnPlan rolls them live: see plug_into
 	_tint_dormant(L, true)
 
+
 ## Where the escape updraft throws you: open ground beyond the back wall (or failing that one of the side
 ## walls), never the gate side. The roomiest such spot wins (the first found of the most room, up to
 ## UP_LAND_ROOM): a dash out of the ride carries you metres past the landing, and a spot only a few metres
@@ -176,7 +226,9 @@ func _escape_spot(c: Vector3, hf: int, out: Vector2) -> Vector3:
 		var d: Vector2 = dv
 		for dist in [3.5, 5.0, 6.5, 8.0, 10.0]:
 			for slide in [0.0, 2.0, -2.0, 4.0, -4.0]:
-				var p: Vector3 = c + Vector3(d.x, 0, d.y) * (float(hf) + float(dist)) + Vector3(-d.y, 0, d.x) * float(slide)
+				var p: Vector3 = (
+					c + Vector3(d.x, 0, d.y) * (float(hf) + float(dist)) + Vector3(-d.y, 0, d.x) * float(slide)
+				)
 				if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.lair_at(p.x, p.z, 1.5) >= 0:
 					continue
 				var room := w.edge_dist(int(p.x), int(p.z), UP_LAND_ROOM)
@@ -188,6 +240,7 @@ func _escape_spot(c: Vector3, hf: int, out: Vector2) -> Vector3:
 	var far := c - Vector3(out.x, 0, out.y) * (float(hf) + 6.0)
 	return Vector3(far.x, c.y, far.z)
 
+
 ## A dormant lair: its seal greyed out, its dial dark. A live one glows its boss's colour.
 func _tint_dormant(L: Dictionary, dormant: bool) -> void:
 	var dome: Node3D = L["nodes"]["dome"]
@@ -197,6 +250,7 @@ func _tint_dormant(L: Dictionary, dormant: bool) -> void:
 	(dome.get_node("Rim") as MeshInstance3D).visible = not dormant
 	if L["nodes"]["dial"]:
 		(L["nodes"]["dial"] as Node3D).get_node("Ring").visible = not dormant
+
 
 ## SpawnPlan decides which lairs are live this match: every lair is a "boss" candidate; the rolled ones
 ## get their boss, guards and wards (see activate), the others stay dormant. Skyreach and the Hollow Crown
@@ -208,28 +262,41 @@ func plug_into(plan: SpawnPlan) -> void:
 		for L in list:
 			plan.add_candidate("boss", L["c"], String(L["name"]))
 		plan.register("boss", {"pick": [1, list.size()]})
-	plan.set_spawner("boss", func(_p, cand): return activate_near(cand["pos"]),
-		func(cand): return String(_near(cand["pos"]).get("state", "")) == "cleared")
+	plan.set_spawner(
+		"boss",
+		func(_p, cand): return activate_near(cand["pos"]),
+		func(cand): return String(_near(cand["pos"]).get("state", "")) == "cleared"
+	)
 	plugged = true
+
 
 var plugged := false
 
+
 func _near(p: Vector3) -> Dictionary:
-	var best := {}; var bd := 1e9
+	var best := {}
+	var bd := 1e9
 	for L in list:
 		var d := Vector2(p.x - float(L["c"].x), p.z - float(L["c"].z)).length()
-		if d < bd: bd = d; best = L
+		if d < bd:
+			bd = d
+			best = L
 	return best if bd < 6.0 else {}
+
 
 func activate_near(p: Vector3) -> Dictionary:
 	var L := _near(p)
-	if not L.is_empty(): activate(L)
+	if not L.is_empty():
+		activate(L)
 	return L
+
 
 ## Without a spawn plan (tests, odd modes) every lair is live.
 func ensure_live() -> void:
 	if not plugged:
-		for L in list: activate(L)
+		for L in list:
+			activate(L)
+
 
 ## Wakes a lair up for this match: its boss asleep in the middle, guards at the gate, and its other way in.
 func activate(L: Dictionary) -> void:
@@ -244,7 +311,10 @@ func activate(L: Dictionary) -> void:
 	if m.net_on and not m.is_host:
 		return
 	var w := m.world
-	var c: Vector3 = L["c"]; var hf := int(L["half"]); var out: Vector2 = L["out"]; var dial: Vector3 = L["dial"]
+	var c: Vector3 = L["c"]
+	var hf := int(L["half"])
+	var out: Vector2 = L["out"]
+	var dial: Vector3 = L["dial"]
 	var col: Color = L["col"]
 	var D := {"boss": L["boss"], "entry": L["entry"]}
 	# the boss, asleep in the middle
@@ -261,7 +331,8 @@ func activate(L: Dictionary) -> void:
 	for i in 3 + mini(int(m.tier), 1):
 		var gk: String = ["skitter", "spitter", "bomber", "brute" if m.tier >= 1 else "skitter"][i % 4]
 		var gp := dial + Vector3(out.x, 0, out.y) * 2.5 + Vector3(-out.y, 0, out.x) * (i - 1.5) * 1.6
-		if w.is_void(gp.x, gp.z): gp = dial + Vector3(-out.y, 0, out.x) * (i - 1.5) * 1.4
+		if w.is_void(gp.x, gp.z):
+			gp = dial + Vector3(-out.y, 0, out.x) * (i - 1.5) * 1.4
 		var g := m.spawn_mob(gk, Vector3(gp.x, w.ground_at(gp.x, gp.z), gp.z))
 		g.camp = dial + Vector3(out.x, 0, out.y) * 2.0
 		L["guards"].append(g)
@@ -270,7 +341,8 @@ func activate(L: Dictionary) -> void:
 	if (L["entry"] as Array).has("runes"):
 		for s in sides:
 			var at := _round_spot(c, hf, s)
-			if at == Vector3.INF: continue
+			if at == Vector3.INF:
+				continue
 			var rn := BossModels.rune_pylon(col)
 			rn.position = at
 			m.add_child(rn)
@@ -278,11 +350,13 @@ func activate(L: Dictionary) -> void:
 	if (L["entry"] as Array).has("wards"):
 		for s in sides:
 			var at := _round_spot(c, hf, s)
-			if at == Vector3.INF: continue
+			if at == Vector3.INF:
+				continue
 			var wd := m.spawn_mob("ward", at)
 			wd.camp = at
 			wd.set_meta("lair", L["i"])
 			L["wards"].append(wd)
+
 
 ## A spot just outside the middle of one wall, on open ground (INF if there's none).
 func _round_spot(c: Vector3, hf: int, s: Vector2) -> Vector3:
@@ -294,16 +368,20 @@ func _round_spot(c: Vector3, hf: int, s: Vector2) -> Vector3:
 				return Vector3(floor(p.x) + 0.5, w.ground_at(p.x, p.z), floor(p.z) + 0.5)
 	return Vector3.INF
 
+
 # ------------------------------------------------------------------ queries
 func inside(L: Dictionary, p: Vector3, pad := 0.0) -> bool:
 	var c: Vector3 = L["c"]
 	var hf := float(L["half"]) - 0.5 + pad
 	return absf(p.x - c.x) <= hf and absf(p.z - c.z) <= hf
 
+
 func lair_of(p: Vector3, pad := 0.0) -> Dictionary:
 	for L in list:
-		if inside(L, p, pad): return L
+		if inside(L, p, pad):
+			return L
 	return {}
+
 
 ## The lair's boss, or null once it's gone (or was never spawned here).
 func boss_of(L: Dictionary) -> Boss:
@@ -312,11 +390,14 @@ func boss_of(L: Dictionary) -> Boss:
 		return null
 	return b as Boss
 
+
 ## The lair whose dial this hunter is working, or {}.
 func puzzle_of(h: Hunter) -> Dictionary:
 	for L in list:
-		if is_same(L["user"], h): return L
+		if is_same(L["user"], h):
+			return L
 	return {}
+
 
 ## The awake boss the local player is fighting (inside its lair, or right by it), or null.
 func boss_for(p: Hunter) -> Mob:
@@ -328,55 +409,113 @@ func boss_for(p: Hunter) -> Mob:
 			return b
 	return m.heart_raid.boss_for(p) if m.heart_raid else null
 
+
 func adds_alive(L: Dictionary) -> int:
 	L["adds"] = (L["adds"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead)
 	return (L["adds"] as Array).size()
+
 
 func _guards_alive(L: Dictionary) -> int:
 	L["guards"] = (L["guards"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead)
 	return (L["guards"] as Array).size()
 
+
 ## What the minimap shows: sealed, open, the boss awake, cleared.
 func icon_state(L: Dictionary) -> String:
 	return String(L["state"])
+
 
 # ------------------------------------------------------------------ interact
 func interact_for(h: Hunter) -> Dictionary:
 	var k := Settings.key_cap("interact")
 	for L in list:
 		if can_pull(L, h):
-			return {"kind": "lair", "what": "lever", "lair": L, "act": true, "col": color_of(L), "label": "%s: Open the gate" % k}
+			return {
+				"kind": "lair",
+				"what": "lever",
+				"lair": L,
+				"act": true,
+				"col": color_of(L),
+				"label": "%s: Open the gate" % k
+			}
 	for L in list:
 		if L["state"] != "sealed":
 			continue
 		var wait := seat_wait(L)
-		var near: bool = h.flat_dist(L["dial"]) < DIAL_R \
-			or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
+		var near: bool = (
+			h.flat_dist(L["dial"]) < DIAL_R or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
+		)
 		if wait != "" and near:
 			return {"kind": "lair", "what": "wait", "lair": L, "col": color_of(L), "label": wait}
 		var bp := breach.prompt(L, h)
 		if not bp.is_empty():
 			return bp
-		if h.flat_dist(L["dial"]) < DIAL_R and absf(h.pos.y - float(L["dial"].y)) < 1.5 and (L["entry"] as Array).has("dial"):
+		if (
+			h.flat_dist(L["dial"]) < DIAL_R
+			and absf(h.pos.y - float(L["dial"].y)) < 1.5
+			and (L["entry"] as Array).has("dial")
+		):
 			var u = L["user"]
 			if is_same(u, h):
-				return {"kind": "lair", "what": "dial", "lair": L, "act": true, "col": color_of(L),
-					"label": "Press %s as the needle crosses a lit arc  ·  lock %d of %d" % [k, int(L["lock"]) + 1, int(L["locks"])]}
+				return {
+					"kind": "lair",
+					"what": "dial",
+					"lair": L,
+					"act": true,
+					"col": color_of(L),
+					"label":
+					(
+						"Press %s as the needle crosses a lit arc  ·  lock %d of %d"
+						% [k, int(L["lock"]) + 1, int(L["locks"])]
+					)
+				}
 			if u != null:
-				return {"kind": "lair", "what": "busy", "lair": L, "act": true, "col": color_of(L), "label": "%s is working the lock" % (u as Hunter).pname}
-			return {"kind": "lair", "what": "dial", "lair": L, "act": true, "col": color_of(L),
-				"label": "Press %s to work the lock of %s  ·  a miss rings a chime" % [k, L["name"]]}
+				return {
+					"kind": "lair",
+					"what": "busy",
+					"lair": L,
+					"act": true,
+					"col": color_of(L),
+					"label": "%s is working the lock" % (u as Hunter).pname
+				}
+			return {
+				"kind": "lair",
+				"what": "dial",
+				"lair": L,
+				"act": true,
+				"col": color_of(L),
+				"label": "Press %s to work the lock of %s  ·  a miss rings a chime" % [k, L["name"]]
+			}
 		for rn in L["runes"]:
 			if not rn["lit"] and h.flat_dist(rn["pos"]) < 1.7 and absf(h.pos.y - float(rn["pos"].y)) < 1.5:
 				var lit: int = (L["runes"] as Array).filter(func(x): return x["lit"]).size()
-				return {"kind": "lair", "what": "rune", "lair": L, "rune": rn, "act": true, "col": color_of(L),
-					"label": "Hold %s to light the rune  (%d of %d lit)  ·  guards will come" % [k, lit, (L["runes"] as Array).size()]}
+				return {
+					"kind": "lair",
+					"what": "rune",
+					"lair": L,
+					"rune": rn,
+					"act": true,
+					"col": color_of(L),
+					"label":
+					(
+						"Hold %s to light the rune  (%d of %d lit)  ·  guards will come"
+						% [k, lit, (L["runes"] as Array).size()]
+					)
+				}
 	return {}
+
 
 ## Can this hunter pull the lair's gate lever right now? (After the kill, from inside, standing at it.)
 func can_pull(L: Dictionary, h: Hunter) -> bool:
-	return L.get("victory", false) and not h.downed and not h.out and h.flat_dist(L["lever"]) < LEVER_R \
-		and absf(h.pos.y - float(L["lever"].y)) < 1.5 and inside(L, h.pos, 0.0)
+	return (
+		L.get("victory", false)
+		and not h.downed
+		and not h.out
+		and h.flat_dist(L["lever"]) < LEVER_R
+		and absf(h.pos.y - float(L["lever"].y)) < 1.5
+		and inside(L, h.pos, 0.0)
+	)
+
 
 ## Holding interact on something a lair offers (runes; the dial takes presses, see _tick_dial).
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
@@ -390,11 +529,13 @@ func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if float(rn["prog"]) >= 1.0:
 		_light_rune(it["lair"], rn, h)
 
+
 func _light_rune(L: Dictionary, rn: Dictionary, h: Hunter) -> void:
 	rn["lit"] = true
 	rn["prog"] = 1.0
 	var n: Node3D = rn["node"]
-	if is_instance_valid(n): n.get_node("Lit").visible = true
+	if is_instance_valid(n):
+		n.get_node("Lit").visible = true
 	m.sfx("unlock", rn["pos"], 2.0, 1.2)
 	m.fx.burst(rn["pos"] + Vector3(0, 1.4, 0), color_of(L), 24, 4.0, 0.6, -2.0)
 	loud(L, rn["pos"], h, "A rune flares at %s" % L["name"])
@@ -404,6 +545,7 @@ func _light_rune(L: Dictionary, rn: Dictionary, h: Hunter) -> void:
 		open(L, h, "runes")
 	elif h == m.player and m.hud:
 		m.hud.toast("Rune %d of %d lit" % [lit, (L["runes"] as Array).size()], color_of(L))
+
 
 # ------------------------------------------------------------------ the dial
 func _new_lock(L: Dictionary) -> void:
@@ -420,23 +562,30 @@ func _new_lock(L: Dictionary) -> void:
 		var a := needle + dirn * randf_range(0.9, TAU - 0.6)
 		var ok := true
 		for t in arcs:
-			if absf(wrapf(a - float(t["a"]), -PI, PI)) < wd + 0.55: ok = false; break
-		if ok: arcs.append({"a": wrapf(a, -PI, PI), "w": wd, "hit": false})
+			if absf(wrapf(a - float(t["a"]), -PI, PI)) < wd + 0.55:
+				ok = false
+				break
+		if ok:
+			arcs.append({"a": wrapf(a, -PI, PI), "w": wd, "hit": false})
 	L["targets"] = arcs
 	L["bot_ti"] = -1
 
+
 func speed_of(L: Dictionary) -> float:
 	return SPEEDS[clampi(int(L["lock"]), 0, SPEEDS.size() - 1)]
+
 
 ## Which unlit arc the needle is in now (-1 for none).
 func target_under(L: Dictionary) -> int:
 	var nd := float(L["needle"])
 	var ts: Array = L["targets"]
 	for i in ts.size():
-		if ts[i]["hit"]: continue
+		if ts[i]["hit"]:
+			continue
 		if absf(wrapf(nd - float(ts[i]["a"]), -PI, PI)) <= float(ts[i]["w"]) * 0.5 + SLACK:
 			return i
 	return -1
+
 
 func _start_dial(L: Dictionary, h: Hunter) -> void:
 	L["user"] = h
@@ -446,10 +595,13 @@ func _start_dial(L: Dictionary, h: Hunter) -> void:
 	m.sfx("click", L["dial"], 0.0, 0.8)
 	# (no toast: the dial panel and the interact prompt both say how already; a third copy sat on your health bar)
 
+
 func _stop_dial(L: Dictionary) -> void:
 	L["user"] = null
 	# the lock you were on resets when you walk away; the locks you opened stay open
-	for t in L["targets"]: t["hit"] = false
+	for t in L["targets"]:
+		t["hit"] = false
+
 
 ## One press: hit the arc under the needle, or miss.
 func press(L: Dictionary, h: Hunter) -> bool:
@@ -476,6 +628,7 @@ func press(L: Dictionary, h: Hunter) -> bool:
 				m.hud.toast("LOCK %d OF %d OPEN" % [int(L["lock"]), int(L["locks"])], color_of(L))
 	return true
 
+
 func _miss(L: Dictionary, h: Hunter) -> void:
 	L["fails"] = int(L["fails"]) + 1
 	L["jam"] = JAM_T
@@ -489,6 +642,7 @@ func _miss(L: Dictionary, h: Hunter) -> void:
 	call_guards(L, L["dial"], 2 + mini(int(m.tier), 1))
 	if h == m.player and m.hud:
 		m.hud.toast("MISSED  ·  the lock resets and the chime calls guards", Color("ff8a6a"))
+
 
 ## Something loud happened at a lair: a ping and a feed line for everyone close enough to hear it, a
 ## sound ping on the minimap, and nearby bots come and look.
@@ -505,6 +659,7 @@ func loud(L: Dictionary, at: Vector3, by: Hunter, text: String) -> void:
 			m.add_feed(text)
 		elif o.ctrl == "bot" and o.team != by.team and d < 45.0 and randf() < 0.35:
 			o.ai["wander"] = at
+
 
 func call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 	if m.net_on and not m.is_host:
@@ -525,6 +680,7 @@ func call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 		g.aggro(L["user"], "chime")
 		m.fx.burst(g.pos + Vector3(0, 0.5, 0), Color("c9a0ff"), 14, 3.0, 0.5, -2.0)
 		L["guards"].append(g)
+
 
 func _tick_dial(L: Dictionary, dt: float) -> void:
 	if L["state"] != "sealed" or not (L["entry"] as Array).has("dial"):
@@ -554,8 +710,10 @@ func _tick_dial(L: Dictionary, dt: float) -> void:
 			_start_dial(L, h)
 			return
 
+
 func _pressed(h: Hunter) -> bool:
 	return bool(h.inp.get("interact", false)) and not bool(_prev.get(h.nid, false))
+
 
 ## Bots work the dial too: as the needle enters a lit arc they either catch it (more often the better
 ## they are, less often as the locks get faster) or press a beat too late.
@@ -579,7 +737,8 @@ func _bot_dial(L: Dictionary, h: Hunter, dt: float) -> void:
 		L["bot_ti"] = -1
 		if missed:
 			L["jam"] = 0.0
-			press(L, h)       # too late: the needle has already left the arc
+			press(L, h)  # too late: the needle has already left the arc
+
 
 # ------------------------------------------------------------------ opening, waking, clearing
 func open(L: Dictionary, by: Hunter, how: String) -> void:
@@ -601,13 +760,21 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 40, 6.0, 0.7, 4.0, 1.4)
 	m.fx.ring(L["c"], float(L["half"]) + 1.0, color_of(L), 0.8)
-	var how_s: String = {"breach": "broke down the gate of",
-		"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
+	var how_s: String = (
+		{
+			"breach": "broke down the gate of",
+			"dial": "cracked the lock of",
+			"runes": "lit the runes of",
+			"wards": "broke the wards of"
+		}
+		. get(how, "opened")
+	)
 	m.add_feed("%s %s %s" % [by.pname if by else "Someone", how_s, L["name"]])
 	if m.player and not m.player.out:
 		m.ping(L["gate_c"], color_of(L))
 		if m.player.flat_dist(L["c"]) < 60.0 and m.hud:
 			m.hud.toast("%s IS OPEN" % String(L["name"]).to_upper(), color_of(L))
+
 
 func wake(L: Dictionary, by: Ent) -> void:
 	var b: Boss = boss_of(L)
@@ -625,11 +792,13 @@ func wake(L: Dictionary, by: Ent) -> void:
 	lock_in(L)
 	if m.player and not m.player.out:
 		if inside(L, m.player.pos, 6.0):
-			if m.hud: m.hud.toast("BOSS AWAKE  ·  %s" % String(b.md["name"]).to_upper(), color_of(L))
+			if m.hud:
+				m.hud.toast("BOSS AWAKE  ·  %s" % String(b.md["name"]).to_upper(), color_of(L))
 			m.sfx("ult", null, 0.0, 0.6)
 			_music(true)
 		else:
 			m.ping(L["c"], color_of(L))
+
 
 func _music(on: bool) -> void:
 	if on == music_on:
@@ -639,19 +808,23 @@ func _music(on: bool) -> void:
 	if m.music_dir == null or not m.music_dir.started:
 		Sfx.play_music("hollow" if on or m.tier >= 2 else "match", 0.8)
 
+
 ## The lair emptied: the boss settles back to sleep in the middle and heals up.
 func reset_boss(b: Boss) -> void:
 	var L: Dictionary = b.lair
 	b.fall_asleep("lair reset")
 	for a in L["adds"]:
-		if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
+		if is_instance_valid(a) and not a.dead:
+			a.dead = true
+			a.visible = false
 	L["adds"] = []
 	unlock(L)
-	L["calm_until"] = m.time + 8.0      # a breather: whoever's still inside can walk out before it stirs again
+	L["calm_until"] = m.time + 8.0  # a breather: whoever's still inside can walk out before it stirs again
 	L["state"] = "open"
 	(L["nodes"]["label"] as Label3D).text = "%s\nOpen" % L["name"]
 	m.add_feed("%s settles back to sleep" % b.md["name"])
 	_music(false)
+
 
 func on_boss_phase(b: Boss, p: int) -> void:
 	var L: Dictionary = b.lair
@@ -660,11 +833,13 @@ func on_boss_phase(b: Boss, p: int) -> void:
 	BossSfx.phase(m, b)
 	Juice.boss_phase(m, b)
 
+
 func on_enrage(b: Boss) -> void:
 	if m.player and inside(b.lair, m.player.pos, 6.0) and m.hud:
 		m.hud.toast("%s IS ENRAGED" % String(b.md["name"]).to_upper(), Color("ff5a4a"))
 	m.add_feed("%s is enraged" % b.md["name"])
 	BossSfx.phase(m, b, true)
+
 
 ## Adds a boss calls up (the Brood Mother's brood); they belong to the lair and stay in it.
 func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
@@ -676,10 +851,11 @@ func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
 	a.aggro(b.tgt if b and is_instance_valid(b) else null, "brood")
 	L["adds"].append(a)
 
+
 ## Every monster death passes through here: bosses, ward stones, guards.
 func on_mob_dead(mb: Mob, credit: Ent) -> void:
 	if mb is Boss and (mb as Boss).lair.get("heart_raid", false):
-		return      # the raid's boss: HeartRaid sees it fall
+		return  # the raid's boss: HeartRaid sees it fall
 	if mb is Boss:
 		_boss_dead((mb as Boss).lair, mb as Boss, credit)
 		return
@@ -690,7 +866,9 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 		return
 	if mb.mkind == "ward" and mb.has_meta("lair"):
 		var L: Dictionary = list[int(mb.get_meta("lair"))]
-		var left: int = (L["wards"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead and x != mb).size()
+		var left: int = (
+			(L["wards"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead and x != mb).size()
+		)
 		m.sfx("boom", mb.pos, 2.0, 0.8)
 		m.fx.burst(mb.pos + Vector3(0, 1.5, 0), Color("8fd8ff"), 30, 6.0, 0.6, 3.0)
 		var hb: Hunter = credit if credit is Hunter else null
@@ -699,35 +877,52 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 		elif hb == m.player and m.hud:
 			m.hud.toast("Ward broken  ·  %d left" % left, color_of(L))
 
+
 ## Why the Sealed Lair's gate can't be worked now ("" for any other lair, or when it can): QuestSeats.
 func seat_wait(L: Dictionary) -> String:
 	return m.exits.seats.lair_wait(L) if m.exits and m.exits.seats else ""
 
+
 ## A ward stone was hit for the first time: its guards come out. (A Gate Seal's hits go to LairBreach.)
 func on_ward_hit(mb: Mob, by: Ent) -> void:
 	if mb.mkind == "gate":
-		if mb.has_meta("lair"): breach.on_hit(list[int(mb.get_meta("lair"))])
+		if mb.has_meta("lair"):
+			breach.on_hit(list[int(mb.get_meta("lair"))])
 		return
 	if mb.has_meta("woke"):
 		return
 	mb.set_meta("woke", true)
 	var L: Dictionary = list[int(mb.get_meta("lair"))]
-	var hb: Hunter = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else (by as Hunter if by is Hunter else null)
-	if hb: loud(L, mb.pos, hb, "A ward stone shrieks at %s" % L["name"])
+	var hb: Hunter = (
+		(by as Kin).owner_h if by is Kin and (by as Kin).owner_h else (by as Hunter if by is Hunter else null)
+	)
+	if hb:
+		loud(L, mb.pos, hb, "A ward stone shrieks at %s" % L["name"])
 	call_guards(L, mb.pos, 3)
 
+
 func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
-	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
+	var killer: Hunter = (
+		(credit as Kin).owner_h
+		if credit is Kin and (credit as Kin).owner_h
+		else (credit as Hunter if credit is Hunter else null)
+	)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
-	L["won_by"] = killer.team if killer else -1      # (the Sealed Lair seat goes to this squad: QuestSeats)
+	L["won_by"] = killer.team if killer else -1  # (the Sealed Lair seat goes to this squad: QuestSeats)
 	# everyone's Boki who fought it cheers (and remembers it)
 	for hh in m.hunters:
-		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "downed":
+		if (
+			hh.kin
+			and hh.kin.comp
+			and not hh.out
+			and (hh == killer or hh.flat_dist(b) < 22.0)
+			and hh.kin.state != "downed"
+		):
 			hh.kin.comp.on_boss_kill(String(b.md.get("name", "the boss")), b.pos)
 	(L["nodes"]["label"] as Label3D).text = "%s\nCleared" % L["name"]
 	if L.get("locked", false):
-		_victory(L, b)      # the gate stays shut a moment: the lever, the updraft, or wait it out
+		_victory(L, b)  # the gate stays shut a moment: the lever, the updraft, or wait it out
 	else:
 		unlock(L)
 	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
@@ -735,7 +930,13 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	# (1.6 m out: at 0.9 their names ran into each other)
-	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "boss": b.mkind, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
+	GearDrops.run_table(
+		m,
+		"boss",
+		at,
+		m.rng,
+		{"r": 1.6, "boss": b.mkind, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0}
+	)
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	var bite := GardenItems.lair_drop(m.rng.randf(), m.rng.randi())
 	if bite != "":
@@ -747,29 +948,35 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
-	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)
-		if inside(L, wp["pos"], 0.0): pile_at.append(wp["pos"])
+	for wp in m.wpicks:  # (the gear just dropped, and anything already lying on the lair's floor)
+		if inside(L, wp["pos"], 0.0):
+			pile_at.append(wp["pos"])
 	var egg_at := at
 	var best := -1.0
 	for k in 12:
 		var a := TAU * float(k) / 12.0
 		var q := _floor_spot(L, at + Vector3(cos(a), 0, sin(a)) * EGG_APART, 1.8)
 		var near := 1e9
-		for pp in pile_at: near = minf(near, Vector2(q.x - pp.x, q.z - pp.z).length())
-		if near > best: best = near; egg_at = q
+		for pp in pile_at:
+			near = minf(near, Vector2(q.x - pp.x, q.z - pp.z).length())
+		if near > best:
+			best = near
+			egg_at = q
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		_award_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
-		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
+		PerkOrbs.drop(m, "boss", b.pos, 0, killer)  # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:
-		if is_instance_valid(a) and not a.dead: a.camp = a.pos
+		if is_instance_valid(a) and not a.dead:
+			a.camp = a.pos
 	m.add_feed("%s felled %s!" % [killer.pname if killer else "Someone", b.md["name"]])
 	BossSfx.fall(m, b)
 	BossSfx.defeat(m, b, killer)
 	_music(false)
+
 
 ## The boss is dead and its gate still shut: VICTORY_T on the clock, the lever lit, the updraft
 ## blowing at the back. Everyone near hears it fall (a different cry from the fight's roar) and their
@@ -779,13 +986,15 @@ func _victory(L: Dictionary, b: Boss) -> void:
 	L["victory_at"] = m.time
 	L["flown"] = []
 	var lvn: Node3D = L["nodes"]["lever"]
-	if is_instance_valid(lvn): lvn.get_node("Lit").visible = true
+	if is_instance_valid(lvn):
+		lvn.get_node("Lit").visible = true
 	_set_updraft(L, true)
 	var bn: String = b.md["name"] if b else "The boss"
 	var ins: Array = L.get("sealed_in", [])
 	if m.player and m.hud and ins.has(m.player):
 		m.hud.toast("VICTORY  ·  PULL THE LEVER BY THE GATE, OR RIDE THE UPDRAFT OUT THE BACK", color_of(L))
 	_alert(L, "fallen", "%s has fallen at %s" % [bn, L["name"]])
+
 
 ## Shout a lair's news to everyone outside within ALERT_R: a spatial cry from the lair, a ping with
 ## the boss's icon on the minimap and full map, a toast. kind: "fight" (it woke and sealed) or "fallen".
@@ -808,9 +1017,12 @@ func _alert(L: Dictionary, kind: String, text: String) -> void:
 		if o == m.player:
 			m.ping(c, color_of(L))
 			m.add_feed(text)
-			if m.hud: m.hud.toast(text.to_upper() if kind == "fallen" else text, color_of(L) if kind == "fight" else Color("ffd36a"))
+			if m.hud:
+				m.hud.toast(
+					text.to_upper() if kind == "fallen" else text, color_of(L) if kind == "fight" else Color("ffd36a")
+				)
 		elif o.ctrl == "bot" and kind == "fight":
-			o.ai.erase("camp_" + String(L["id"]))      # (a fresh fight: think again about camping it)
+			o.ai.erase("camp_" + String(L["id"]))  # (a fresh fight: think again about camping it)
 	if near_any or (m.player and ins.has(m.player)):
 		# the cry carries: spatial, loud, from the lair itself
 		if kind == "fight":
@@ -829,15 +1041,22 @@ func _alert(L: Dictionary, kind: String, text: String) -> void:
 		for nm in ["Shaft", "Core"]:
 			var mi: MeshInstance3D = beam.get_node(nm)
 			var base: Color = Color("ffd36a") if gold else color_of(L)
-			(mi.material_override as ShaderMaterial).set_shader_parameter("color", Color(base.lightened(0.5 if nm == "Core" else 0.0), 0.55 if nm == "Core" else 0.3))
+			(mi.material_override as ShaderMaterial).set_shader_parameter(
+				"color", Color(base.lightened(0.5 if nm == "Core" else 0.0), 0.55 if nm == "Core" else 0.3)
+			)
+
 
 ## Did this hunter hear the lair's fight (or its boss fall) and is it still news?
 func alerted(L: Dictionary, h: Hunter) -> bool:
 	return h != null and (L["heard"] as Dictionary).has(h.nid) and alert_on(L)
 
+
 ## A lair's alert holds while its seal does, and a few seconds after.
 func alert_on(L: Dictionary) -> bool:
-	return String(L.get("alert", "")) != "" and (L.get("locked", false) or m.time - float(L.get("unlock_at", -99.0)) < 8.0)
+	return (
+		String(L.get("alert", "")) != "" and (L.get("locked", false) or m.time - float(L.get("unlock_at", -99.0)) < 8.0)
+	)
+
 
 ## The lever was pulled (or the clock ran out): the gate opens, the updraft dies down.
 func _victory_open(L: Dictionary, by: Hunter) -> void:
@@ -862,6 +1081,7 @@ func _victory_open(L: Dictionary, by: Hunter) -> void:
 	L["opened_by_lever"] = by.pname if by else ""
 	unlock(L)
 
+
 func _set_updraft(L: Dictionary, on: bool) -> void:
 	L["up_on"] = on
 	var vn: Node3D = L["nodes"].get("vent")
@@ -871,6 +1091,7 @@ func _set_updraft(L: Dictionary, on: bool) -> void:
 	if on:
 		m.sfx("glide", L["up"], 4.0, 0.6)
 		m.fx.burst(L["up"] + Vector3(0, 0.6, 0), Color(1, 1, 1), 26, 6.0, 0.6, 6.0, 1.0, Vector3.UP, 20.0)
+
 
 ## The column of light is 12 m tall and stands at the back of the lair, right where the camera looks
 ## over it at anyone who has just landed beyond the back wall: it washed the whole view out in a white
@@ -890,8 +1111,13 @@ func _updraft_view(L: Dictionary) -> void:
 		var fwd := -m.cam.global_basis.z
 		var f2 := Vector2(fwd.x, fwd.z).normalized()
 		var rel := Vector2(p.pos.x - u.x, p.pos.z - u.z)
-		behind = rel.dot(f2) > 0.0 and absf(rel.cross(f2)) < float(L["half"]) + 4.0 and rel.length() < float(L["half"]) * 2.0 + 10.0
+		behind = (
+			rel.dot(f2) > 0.0
+			and absf(rel.cross(f2)) < float(L["half"]) + 4.0
+			and rel.length() < float(L["half"]) * 2.0 + 10.0
+		)
 	air.visible = not behind
+
 
 ## Out of the column the updraft's glide carries you on to the landing spot beyond the wall and sets
 ## you down there; steer (or take the glide key) and you fly yourself instead.
@@ -901,23 +1127,33 @@ func _tick_flyers(L: Dictionary) -> void:
 	var flown: Array = L["flown"]
 	for h in flown.duplicate():
 		if not is_instance_valid(h) or h.out or h.grounded and not h.auto_glide:
-			if not L.get("up_on", false): flown.erase(h)
+			if not L.get("up_on", false):
+				flown.erase(h)
 			continue
 		if not h.auto_glide or h.remote:
 			continue
 		if Vector2(h.pos.x - u.x, h.pos.z - u.z).length() < UP_R + 0.4 and h.pos.y < u.y + UP_TOP - 0.6:
-			continue      # (still in the column)
+			continue  # (still in the column)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		var steering: bool = h.ctrl != "bot" and (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.2
 		if not steering:
-			var want := to.normalized() * minf(UP_PUSH, maxf(1.5, to.length() * 1.4)) if to.length() > 0.05 else Vector2.ZERO
-			h.vel.x = want.x; h.vel.z = want.y
-		if not inside(L, h.pos, 1.0) and not m.world.is_void(h.pos.x, h.pos.z) and to.length() < (2.5 if not steering else 0.0):
-			h.auto_glide = false      # over the landing: fold the glider and drop onto it
+			var want := (
+				to.normalized() * minf(UP_PUSH, maxf(1.5, to.length() * 1.4)) if to.length() > 0.05 else Vector2.ZERO
+			)
+			h.vel.x = want.x
+			h.vel.z = want.y
+		if (
+			not inside(L, h.pos, 1.0)
+			and not m.world.is_void(h.pos.x, h.pos.z)
+			and to.length() < (2.5 if not steering else 0.0)
+		):
+			h.auto_glide = false  # over the landing: fold the glider and drop onto it
+
 
 ## Seconds until the gate opens on its own after the kill.
 func victory_left(L: Dictionary) -> float:
 	return maxf(0.0, VICTORY_T - (m.time - float(L.get("victory_at", m.time))))
+
 
 ## Is this hunter allowed on the lair's escape updraft (sealed in for the fight, or already on it)?
 func may_fly(L: Dictionary, h: Hunter) -> bool:
@@ -925,6 +1161,7 @@ func may_fly(L: Dictionary, h: Hunter) -> bool:
 	if (L.get("escaped", []) as Array).has(h):
 		return false
 	return (L.get("sealed_in", []) as Array).has(h) or (L.get("flown", []) as Array).has(h)
+
 
 ## The escape updraft: those who fought step into it and it lifts them high over the lair, then
 ## throws them out on the glider toward up_land, over the back wall. Anyone else is shoved off it.
@@ -944,8 +1181,10 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 		if not may_fly(L, h):
 			# not one of those who fought: it won't carry you, it shoves you off
 			var pd := rel.normalized() if rel.length() > 0.05 else Vector2(L["out"].x, L["out"].y)
-			h.vel.x = pd.x * 5.0; h.vel.z = pd.y * 5.0
-			if h.vel.y > 0.0: h.vel.y = 0.0
+			h.vel.x = pd.x * 5.0
+			h.vel.z = pd.y * 5.0
+			if h.vel.y > 0.0:
+				h.vel.y = 0.0
 			if h == m.player and m.hud and m.time - float(_told.get("up", -9.0)) > 2.5:
 				_told["up"] = m.time
 				m.hud.toast("The updraft only carries those who fought", color_of(L))
@@ -972,12 +1211,14 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 	_tick_flyers(L)
 	# whoever has flown out over the wall is free of the seal
 	var ins: Array = L.get("sealed_in", [])
-	for h in (L["flown"] as Array):
+	for h in L["flown"] as Array:
 		if is_instance_valid(h) and ins.has(h) and not inside(L, h.pos, 0.3):
 			ins.erase(h)
-			if not L.has("escaped"): L["escaped"] = []
+			if not L.has("escaped"):
+				L["escaped"] = []
 			(L["escaped"] as Array).append(h)
 			m.add_feed("%s rode the updraft out of %s" % [h.pname, L["name"]])
+
 
 ## A clear spot on a lair's floor near `p`, at least `margin` in from the walls.
 func _floor_spot(L: Dictionary, p: Vector3, margin: float) -> Vector3:
@@ -987,6 +1228,7 @@ func _floor_spot(L: Dictionary, p: Vector3, margin: float) -> Vector3:
 	q = m.world.free_spot_near(q, [], 0.8, 0.5, 4.0)
 	q.y = m.world.ground_at(q.x, q.z)
 	return q
+
 
 ## The boss's egg: one hunter picked at random (the match RNG) from all those inside the lair gets it
 ## in their pack. A full pack puts it at their feet for EGG_HOLD_T, theirs alone. Nobody inside: on the floor.
@@ -1009,9 +1251,11 @@ func _award_egg(L: Dictionary, item: Dictionary, floor_at: Vector3) -> void:
 	if m.player and m.hud and not m.player.out and inside(L, m.player.pos):
 		m.hud.toast(line, Color("ffd36a"))
 
+
 ## Is this egg still reserved for someone else (its winner's pack was full)?
 func held_from(wp: Dictionary, h: Hunter) -> bool:
 	return wp.get("only") != null and wp["only"] != h and m.time < float(wp["free_at"])
+
 
 ## Puts a Rare Egg on the ground (a boss's, or one spilled from a pack), loud.
 func drop_egg(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
@@ -1021,15 +1265,20 @@ func drop_egg(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
 	m.sfx("unlock", at, 4.0, 0.6)
 	if m.player and not m.player.out:
 		m.ping(at, Color("ffd36a"))
-		if m.hud: m.hud.toast("A RARE EGG DROPPED AT %s" % String(L["name"]).to_upper(), Color("ffd36a"))
+		if m.hud:
+			m.hud.toast("A RARE EGG DROPPED AT %s" % String(L["name"]).to_upper(), Color("ffd36a"))
 	return wp
+
 
 func _egg_on_floor(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
 	m.spawn_val(item, at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	var old: Node3D = wp["node"]
-	if is_instance_valid(old): old.queue_free()
-	var n := BossModels.rare_egg(Data.KIN[String(item["sp"])]["glow"] if Data.KIN.has(String(item["sp"])) else Color("ffd36a"))
+	if is_instance_valid(old):
+		old.queue_free()
+	var n := BossModels.rare_egg(
+		Data.KIN[String(item["sp"])]["glow"] if Data.KIN.has(String(item["sp"])) else Color("ffd36a")
+	)
 	n.position = at
 	m.add_child(n)
 	wp["node"] = n
@@ -1038,6 +1287,7 @@ func _egg_on_floor(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
 	L["egg_uid"] = String(item["uid"])
 	L["egg_told"] = false
 	return wp
+
 
 # ------------------------------------------------------------------ every tick
 func tick(dt: float) -> void:
@@ -1054,11 +1304,18 @@ func tick(dt: float) -> void:
 		_tick_show(L)
 		if not L.get("up_on", false) and not (L.get("flown", []) as Array).is_empty():
 			_tick_flyers(L)
-		if L["state"] in ["open", "awake"] and not L.get("locked", false) and m.time >= float(L.get("calm_until", 0.0)) and (not m.net_on or m.is_host):
+		if (
+			L["state"] in ["open", "awake"]
+			and not L.get("locked", false)
+			and m.time >= float(L.get("calm_until", 0.0))
+			and (not m.net_on or m.is_host)
+		):
 			for h in m.hunters:
 				if not h.out and not h.extracted and not h.dropping and not h.downed and inside(L, h.pos, -0.6):
-					if L["state"] == "open": wake(L, h)
-					else: lock_in(L)       # woken from outside (a shot through the gate): seals once someone steps in
+					if L["state"] == "open":
+						wake(L, h)
+					else:
+						lock_in(L)  # woken from outside (a shot through the gate): seals once someone steps in
 					break
 	# the dial's needle on the lectern turns for everyone to see
 	for L in list:
@@ -1071,6 +1328,7 @@ func tick(dt: float) -> void:
 		_prev[h.nid] = bool(h.inp.get("interact", false))
 	if m.player and music_on and boss_for(m.player) == null:
 		_music(false)
+
 
 ## What a lair shows the world while its fight is on: the seal's clock over the gate (it floats there
 ## for anyone outside to read), and the shaft of light over it, pulsing, until the news is old.
@@ -1088,11 +1346,16 @@ func _tick_show(L: Dictionary) -> void:
 		# only lands on top of your HUD)
 		var in_l: bool = m.player != null and inside(L, m.player.pos, 1.0)
 		if in_l != lbl.has_meta("hid_in"):
-			if in_l: lbl.set_meta("hid_in", lbl.visible); lbl.visible = false
-			else: lbl.visible = bool(lbl.get_meta("hid_in")); lbl.remove_meta("hid_in")
+			if in_l:
+				lbl.set_meta("hid_in", lbl.visible)
+				lbl.visible = false
+			else:
+				lbl.visible = bool(lbl.get_meta("hid_in"))
+				lbl.remove_meta("hid_in")
 	elif nodes.has("label") and is_instance_valid(nodes["label"]) and (nodes["label"] as Node).has_meta("hid_in"):
 		var l2: Label3D = nodes["label"]
-		l2.visible = bool(l2.get_meta("hid_in")); l2.remove_meta("hid_in")
+		l2.visible = bool(l2.get_meta("hid_in"))
+		l2.remove_meta("hid_in")
 	var beam: Node3D = nodes.get("beam")
 	if is_instance_valid(beam) and (beam.visible or (alert_on(L) and beam.has_meta("hid"))):
 		# (it's for those outside: hidden for whoever is in the lair, where it would only glare)
@@ -1106,21 +1369,27 @@ func _tick_show(L: Dictionary) -> void:
 			(beam.get_node("Shaft") as Node3D).scale = Vector3(k, 1.0, k)
 			(beam.get_node("Ring") as Node3D).rotation.y = m.time * 0.4
 
+
 ## m:ss, rounded up (a clock that reads 0:15 for the whole first second).
 static func clock(t: float) -> String:
 	var s := int(ceil(maxf(0.0, t)))
 	return "%d:%02d" % [s / 60, s % 60]
+
 
 ## While a lair is sealed, its ward keeps everything out: walking, gliding or being thrown in bounces.
 func _tick_seal(L: Dictionary, dt: float) -> void:
 	if not L["state"] in SEALED_STATES:
 		return
 	for h in m.hunters:
-		if not h.out and not h.extracted and not h.riding: _seal_body(L, h)
+		if not h.out and not h.extracted and not h.riding:
+			_seal_body(L, h)
 	for k in m.kins:
-		if not k.dead and k.state in SEAL_KIN_STATES: _seal_body(L, k)
+		if not k.dead and k.state in SEAL_KIN_STATES:
+			_seal_body(L, k)
 	for mb in m.mobs:
-		if not mb.dead and not (mb is Boss): _seal_body(L, mb)
+		if not mb.dead and not (mb is Boss):
+			_seal_body(L, mb)
+
 
 ## A body found inside a sealed lair's walls is put back out. Hunters still dropping in from the
 ## skyship, and anyone flying high over the walls, pass over; whoever comes down inside (or walks,
@@ -1141,27 +1410,39 @@ func _seal_body(L: Dictionary, e: Ent) -> void:
 		m.hud.toast(line % L["name"], color_of(L))
 		m.sfx("shield", e.pos, -4.0, 1.4)
 
+
 ## Puts someone just outside a lair's walls, out the nearest side (or by the dial), set down still.
 func _push_out(L: Dictionary, e: Ent) -> void:
 	var c: Vector3 = L["c"]
 	var hf := float(L["half"]) - 0.5
-	var dx: float = e.pos.x - c.x; var dz: float = e.pos.z - c.z
-	var push := Vector2(signf(dx) if dx != 0.0 else 1.0, 0) if absf(dx) > absf(dz) else Vector2(0, signf(dz) if dz != 0.0 else 1.0)
+	var dx: float = e.pos.x - c.x
+	var dz: float = e.pos.z - c.z
+	var push := (
+		Vector2(signf(dx) if dx != 0.0 else 1.0, 0)
+		if absf(dx) > absf(dz)
+		else Vector2(0, signf(dz) if dz != 0.0 else 1.0)
+	)
 	var to: Vector3 = e.pos
-	if push.x != 0.0: to.x = c.x + push.x * (hf + 1.6)
-	else: to.z = c.z + push.y * (hf + 1.6)
+	if push.x != 0.0:
+		to.x = c.x + push.x * (hf + 1.6)
+	else:
+		to.z = c.z + push.y * (hf + 1.6)
 	to = m.world.free_spot_near(to, [], 0.6, e.r, 4.0)
 	if m.world.is_void(to.x, to.z) or m.world.is_block(to.x, to.z) or inside(L, to, 0.6):
 		to = L["dial"]
-	e.pos = Vector3(to.x, maxf(e.pos.y, m.world.ground_at(to.x, to.z)), to.z); e.prev = e.pos
+	e.pos = Vector3(to.x, maxf(e.pos.y, m.world.ground_at(to.x, to.z)), to.z)
+	e.prev = e.pos
 	# set down just outside, still: a shove here could carry someone off the island's edge
 	if e.grounded or e.pos.y <= m.world.ground_at(to.x, to.z) + 0.05:
 		e.vel = Vector3.ZERO
-		e.pos.y = m.world.ground_at(to.x, to.z); e.prev = e.pos
+		e.pos.y = m.world.ground_at(to.x, to.z)
+		e.prev = e.pos
 	else:
 		e.vel = Vector3(push.x * 2.0, maxf(e.vel.y, 1.5), push.y * 2.0)
-	if e is Kin and (e as Kin).state == "flying": (e as Kin).state = "returning"
+	if e is Kin and (e as Kin).state == "flying":
+		(e as Kin).state = "returning"
 	m.fx.burst(e.pos + Vector3(0, 1.0, 0), color_of(L), 12, 3.0, 0.4, -2.0)
+
 
 # ------------------------------------------------------------------ sealed in with the boss
 ## The boss woke with someone inside: the gate shuts behind them and the ward lights up. Whoever is
@@ -1179,7 +1460,7 @@ func lock_in(L: Dictionary) -> void:
 	L["locked"] = true
 	L["lock_at"] = m.time
 	L["sealed_in"] = ins
-	L["grudges"] = {}         # fighter -> {rival who hit them in here: true}
+	L["grudges"] = {}  # fighter -> {rival who hit them in here: true}
 	L["heard"] = {}
 	L["flown"] = []
 	L["escaped"] = []
@@ -1187,12 +1468,21 @@ func lock_in(L: Dictionary) -> void:
 	var c: Vector3 = L["c"]
 	var keep := float(L["half"]) - 0.95
 	for h in ins:
-		h.pos.x = clampf(h.pos.x, c.x - keep, c.x + keep); h.pos.z = clampf(h.pos.z, c.z - keep, c.z + keep); h.prev = h.pos
+		h.pos.x = clampf(h.pos.x, c.x - keep, c.x + keep)
+		h.pos.z = clampf(h.pos.z, c.z - keep, c.z + keep)
+		h.prev = h.pos
 	var w := m.world
 	for q in L["gate_tiles"]:
 		var tc := Vector3(q.x + 0.5, 0, q.y + 0.5)
 		for e in m.hunters + m.kins + m.mobs:
-			if is_instance_valid(e) and not e.dead and not (e is Boss) and absf(e.pos.x - tc.x) < 0.5 + e.r and absf(e.pos.z - tc.z) < 0.5 + e.r and not ins.has(e):
+			if (
+				is_instance_valid(e)
+				and not e.dead
+				and not (e is Boss)
+				and absf(e.pos.x - tc.x) < 0.5 + e.r
+				and absf(e.pos.z - tc.z) < 0.5 + e.r
+				and not ins.has(e)
+			):
 				_push_out(L, e)
 		w.kind[w.idx(q.x, q.y)] = World.T_BLOCK
 	m.sfx("boom", L["gate_c"], 2.0, 0.55)
@@ -1201,12 +1491,23 @@ func lock_in(L: Dictionary) -> void:
 	m.fx.ring(L["c"], float(L["half"]) + 0.6, color_of(L), 0.7)
 	(L["nodes"]["label"] as Label3D).text = "%s\nSealed in  ·  a fight is on" % L["name"]
 	var b: Boss = boss_of(L)
-	m.add_feed("%s is sealed: %s fight%s %s" % [L["name"], ", ".join(ins.map(func(x): return x.pname)), "s" if ins.size() == 1 else "", b.md["name"] if b else "the boss"])
+	m.add_feed(
+		(
+			"%s is sealed: %s fight%s %s"
+			% [
+				L["name"],
+				", ".join(ins.map(func(x): return x.pname)),
+				"s" if ins.size() == 1 else "",
+				b.md["name"] if b else "the boss"
+			]
+		)
+	)
 	if m.player and m.hud:
 		if ins.has(m.player):
 			m.hud.toast("SEALED IN  ·  DEFEAT %s" % (String(b.md["name"]).to_upper() if b else "THE BOSS"), color_of(L))
 	_alert(L, "fight", "%s fight at %s" % [b.md["name"] if b else "Boss", L["name"]])
 	_tick_show(L)
+
 
 ## The seal drops: the gate opens again (the boss died, everyone in it went down, or time ran out).
 func unlock(L: Dictionary) -> void:
@@ -1219,7 +1520,8 @@ func unlock(L: Dictionary) -> void:
 		L["victory"] = false
 		_set_updraft(L, false)
 		var lvn: Node3D = L["nodes"]["lever"]
-		if is_instance_valid(lvn): lvn.get_node("Lit").visible = false
+		if is_instance_valid(lvn):
+			lvn.get_node("Lit").visible = false
 	var w := m.world
 	for q in L["gate_tiles"]:
 		w.kind[w.idx(q.x, q.y)] = World.T_GROUND
@@ -1227,10 +1529,12 @@ func unlock(L: Dictionary) -> void:
 	m.sfx("unlock", L["gate_c"], 3.0, 0.8)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 24, 5.0, 0.6, 3.0, 1.0)
 
+
 ## Is this spot inside a sealed lair this hunter isn't sealed in (so it can't get there)?
 func walled_off(h: Hunter, p: Vector3) -> bool:
 	var L := lair_of(p, 0.0)
 	return not L.is_empty() and L.get("locked", false) and not (L.get("sealed_in", []) as Array).has(h)
+
 
 ## Is this hunter sealed in a lair right now? (Returns the lair, or {}.)
 func sealed_lair(h: Hunter) -> Dictionary:
@@ -1238,6 +1542,7 @@ func sealed_lair(h: Hunter) -> Dictionary:
 		if L.get("locked", false) and (L["sealed_in"] as Array).has(h):
 			return L
 	return {}
+
 
 ## Is this hunter in a boss fight: sealed in a lair whose boss is still up? (The lair, or {}.)
 func boss_fight(h: Hunter) -> Dictionary:
@@ -1247,11 +1552,13 @@ func boss_fight(h: Hunter) -> Dictionary:
 	var b := boss_of(L)
 	return L if b and not b.dead and not b.dormant else {}
 
+
 ## In a boss fight the boss is the target (decision 0061): a bot (and its Boki) leaves alone a rival
 ## sealed in with it until that rival lands a hit of their own on it (see _note_grudges).
 func spares(h: Hunter, o: Hunter) -> bool:
 	var L := boss_fight(h)
 	return not L.is_empty() and not (L["grudges"].get(h, {}) as Dictionary).has(o)
+
 
 ## Match.on_damage: a rival sealed in with a fighter hits them, themselves (not their Boki, which picks
 ## its own fights). Remembered for the rest of the fight (spares).
@@ -1262,9 +1569,11 @@ func on_damage(target: Ent, by: Ent) -> void:
 	if not L.is_empty() and (L["sealed_in"] as Array).has(by):
 		(L["grudges"].get_or_add(target, {}) as Dictionary)[by] = true
 
+
 ## Seconds until the seal fails on its own.
 func lock_left(L: Dictionary) -> float:
 	return maxf(0.0, LOCK_T - (m.time - float(L.get("lock_at", m.time))))
+
 
 ## While sealed: those inside stay inside (walking, dashing, gliding or shoved), those outside stay
 ## out; it breaks when everyone inside is down or out, or when LOCK_T runs out (the boss resets).
@@ -1274,11 +1583,16 @@ func _tick_lock(L: Dictionary, dt: float) -> void:
 	var b: Boss = boss_of(L)
 	if L.get("victory", false):
 		# the boss is down and the gate still shut: the lever, the updraft, or the clock
-		L["sealed_in"] = (L["sealed_in"] as Array).filter(func(x): return is_instance_valid(x) and not x.out and not x.extracted)
+		L["sealed_in"] = (L["sealed_in"] as Array).filter(
+			func(x): return is_instance_valid(x) and not x.out and not x.extracted
+		)
 		for h in m.hunters:
 			if h.out or h.extracted or h.remote:
 				continue
-			if can_pull(L, h) and (_pressed(h) or (h.ctrl == "bot" and String(h.ai.get("goal_kind", "")) == "lair_lever")):
+			if (
+				can_pull(L, h)
+				and (_pressed(h) or (h.ctrl == "bot" and String(h.ai.get("goal_kind", "")) == "lair_lever"))
+			):
 				_victory_open(L, h)
 				return
 		if victory_left(L) <= 0.0:
@@ -1290,17 +1604,31 @@ func _tick_lock(L: Dictionary, dt: float) -> void:
 	if b == null or b.dead or L["state"] != "awake":
 		unlock(L)
 		return
-	var ins: Array = (L["sealed_in"] as Array).filter(func(x): return is_instance_valid(x) and not x.out and not x.extracted)
+	var ins: Array = (L["sealed_in"] as Array).filter(
+		func(x): return is_instance_valid(x) and not x.out and not x.extracted
+	)
 	L["sealed_in"] = ins
 	var standing: Array = ins.filter(func(x): return not x.downed)
 	if standing.is_empty() or m.time - float(L["lock_at"]) >= LOCK_T:
 		var wiped := standing.is_empty()
-		m.add_feed(("%s wiped the party in %s" if wiped else "The seal on %s failed: %s settles back to sleep") % ([b.md["name"], L["name"]] if wiped else [L["name"], b.md["name"]]))
+		m.add_feed(
+			(
+				("%s wiped the party in %s" if wiped else "The seal on %s failed: %s settles back to sleep")
+				% ([b.md["name"], L["name"]] if wiped else [L["name"], b.md["name"]])
+			)
+		)
 		if m.player and m.hud and m.player.flat_dist(L["c"]) < 40.0:
-			m.hud.toast(("THE SEAL BREAKS  ·  %s HEALS AND SLEEPS" if wiped else "THE SEAL FAILS  ·  %s RESETS") % String(b.md["name"]).to_upper(), color_of(L))
+			m.hud.toast(
+				(
+					("THE SEAL BREAKS  ·  %s HEALS AND SLEEPS" if wiped else "THE SEAL FAILS  ·  %s RESETS")
+					% String(b.md["name"]).to_upper()
+				),
+				color_of(L)
+			)
 		reset_boss(b)
 		return
 	_hold_seal(L, b)
+
 
 ## While sealed, those inside stay in and those outside stay out (anyone riding the escape updraft
 ## is let over the wall).
@@ -1315,10 +1643,12 @@ func _hold_seal(L: Dictionary, b: Boss) -> void:
 			continue
 		if ins.has(h):
 			if not inside(L, h.pos, 0.0):
-				h.pos.x = clampf(h.pos.x, c.x - keep, c.x + keep); h.pos.z = clampf(h.pos.z, c.z - keep, c.z + keep)
+				h.pos.x = clampf(h.pos.x, c.x - keep, c.x + keep)
+				h.pos.z = clampf(h.pos.z, c.z - keep, c.z + keep)
 				h.pos.y = maxf(h.pos.y, m.world.ground_at(h.pos.x, h.pos.z))
 				h.prev = h.pos
-				h.vel.x = 0.0; h.vel.z = 0.0
+				h.vel.x = 0.0
+				h.vel.z = 0.0
 				if h == m.player and m.hud and m.time - float(_told.get("lock", -9.0)) > 2.5:
 					_told["lock"] = m.time
 					if L.get("victory", false):
@@ -1331,6 +1661,7 @@ func _hold_seal(L: Dictionary, b: Boss) -> void:
 			if h == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
 				_told["seal"] = m.time
 				m.hud.toast("%s is sealed while its fight is on" % L["name"], color_of(L))
+
 
 func _tick_gate(L: Dictionary, dt: float) -> void:
 	if L["state"] in ["sealed", "dormant"]:
@@ -1356,11 +1687,14 @@ func _tick_gate(L: Dictionary, dt: float) -> void:
 		dome.get_node("Rim").visible = k < 0.5
 		dome.visible = k < 1.0
 
+
 func _tick_runes(L: Dictionary, dt: float) -> void:
 	for rn in L["runes"]:
-		if rn["lit"]: continue
+		if rn["lit"]:
+			continue
 		if m.time - float(rn["held"]) > 0.1:
 			rn["prog"] = maxf(0.0, float(rn["prog"]) - dt * 0.5)
+
 
 ## Who has the egg now: the first time someone picks it up, everyone hears about it.
 func _tick_egg(L: Dictionary) -> void:
@@ -1382,6 +1716,7 @@ func _tick_egg(L: Dictionary) -> void:
 					m.ping(h.pos, Color("ffd36a"))
 				return
 
+
 # ------------------------------------------------------------------ bots
 ## Where a bot wants to go for the lairs: a dropped egg first, then (for the bolder ones) a lair.
 func bot_goal(h: Hunter, leaving: bool) -> Array:
@@ -1390,7 +1725,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	if not sl.is_empty():
 		if sl.get("victory", false):
 			return _bot_exit(sl, h)
-		return [sl["c"], "lair_fight"]      # sealed in: there's only the boss
+		return [sl["c"], "lair_fight"]  # sealed in: there's only the boss
 	# riding the escape updraft out: steer for where it throws you
 	for L in list:
 		if (L.get("flown", []) as Array).has(h) and not h.grounded and h.auto_glide:
@@ -1398,7 +1733,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	for L in list:
 		var wp = L.get("egg_wp")
 		if wp != null and m.wpicks.has(wp) and h.flat_dist(wp["pos"]) < 50.0 and not held_from(wp, h):
-			if not a.has("egg_" + String(L["id"])): a["egg_" + String(L["id"])] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
+			if not a.has("egg_" + String(L["id"])):
+				a["egg_" + String(L["id"])] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 			if a["egg_" + String(L["id"])]:
 				return [wp["pos"], "lair_egg"]
 	var cg := _bot_camp(h, leaving)
@@ -1415,28 +1751,34 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		a["boss_hunt"] = randf() < 0.12 + 0.45 * float(a.get("skill", 0.5))
 	if not a["boss_hunt"]:
 		return []
-	var best := {}; var bd := 110.0
+	var best := {}
+	var bd := 110.0
 	for L in list:
-		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
+		if L["state"] in ["cleared", "dormant"] or L.get("locked", false):
+			continue
 		if L.get("seat", false) and not BotWays.may_start(m, h.team, "lair"):
-			continue      # (the Sealed Lair: the bots' 30 s delay and seat cap)
+			continue  # (the Sealed Lair: the bots' 30 s delay and seat cap)
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
-		if L["state"] == "sealed" and not L.has("seal_at") and not (L["entry"] as Array).has("dial"): continue
+		if L["state"] == "sealed" and not L.has("seal_at") and not (L["entry"] as Array).has("dial"):
+			continue
 		# (the lair we picked last time reaches a little further: at the edge of the range a bot
 		# walking about flipped between it and a roam goal every think, turning round each time)
 		var d := h.flat_dist(L["c"]) - (15.0 if a.get("lair_pick", "") == String(L["id"]) else 0.0)
-		if d < bd: bd = d; best = L
+		if d < bd:
+			bd = d
+			best = L
 	if best.is_empty():
 		a.erase("lair_pick")
 		return []
 	a["lair_pick"] = String(best["id"])
 	return bot_lair(best, h)
 
+
 ## Into this lair: work its dial or batter its seal (or wait beside it while someone else does), or walk in and fight.
 func bot_lair(L: Dictionary, h: Hunter) -> Array:
 	if L["state"] == "sealed":
 		if L.has("seal_at"):
-			return [LairBreach.stand(L), "lair_breach"]      # batter the seal: any number can at once
+			return [LairBreach.stand(L), "lair_breach"]  # batter the seal: any number can at once
 		if not (L["entry"] as Array).has("dial"):
 			return []
 		var u = L["user"]
@@ -1445,6 +1787,7 @@ func bot_lair(L: Dictionary, h: Hunter) -> Array:
 		return [L["dial"], "lair_dial"]
 	return [L["c"], "lair_fight"]
 
+
 ## A bot sealed in after the kill: the egg if it's still lying here, then out. With rivals waiting at
 ## the gate (and the updraft blowing) it rides the updraft out the back; otherwise it pulls the lever.
 func _bot_exit(L: Dictionary, h: Hunter) -> Array:
@@ -1452,7 +1795,8 @@ func _bot_exit(L: Dictionary, h: Hunter) -> Array:
 	var wp = L.get("egg_wp")
 	if wp != null and m.wpicks.has(wp) and inside(L, wp["pos"], 0.0) and victory_left(L) > 3.0 and not held_from(wp, h):
 		var key := "egg_" + String(L["id"])
-		if not a.has(key): a[key] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
+		if not a.has(key):
+			a[key] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 		if a[key]:
 			return [wp["pos"], "lair_egg"]
 	var way := "updraft" if L.get("up_on", false) and campers(L, h.team) > 0 else "lever"
@@ -1460,6 +1804,7 @@ func _bot_exit(L: Dictionary, h: Hunter) -> Array:
 	if way == "updraft":
 		return [L["up"], "lair_updraft"]
 	return [L["lever"], "lair_lever"]
+
 
 ## Rivals of this team standing outside a lair's gate (waiting for whoever comes out).
 func campers(L: Dictionary, team: int) -> int:
@@ -1471,6 +1816,7 @@ func campers(L: Dictionary, team: int) -> int:
 			n += 1
 	return n
 
+
 ## A fight we heard about: some squads go and camp its gate for whoever comes out, more often the
 ## stronger they are (more of them up, healthier, better bots), never when they're leaving.
 func _bot_camp(h: Hunter, leaving: bool) -> Array:
@@ -1480,13 +1826,14 @@ func _bot_camp(h: Hunter, leaving: bool) -> Array:
 		if not alerted(L, h) or String(L["state"]) == "dormant":
 			continue
 		if (L.get("sealed_in", []) as Array).any(func(x): return is_instance_valid(x) and x.team == h.team):
-			continue      # (our own squad is in there)
+			continue  # (our own squad is in there)
 		var key := "camp_" + String(L["id"])
 		if not h.ai.has(key):
 			h.ai[key] = randf() < camp_odds(h)
 		if h.ai[key]:
 			return [camp_spot(L, h), "lair_camp"]
 	return []
+
 
 ## How likely a bot is to go and camp a lair fight it heard: its skill, how many of its squad are up,
 ## and how healthy they are.
@@ -1496,11 +1843,15 @@ func camp_odds(h: Hunter) -> float:
 	if up.is_empty():
 		return 0.0
 	var hpk := 0.0
-	for x in up: hpk += x.hp / maxf(1.0, x.max_hp)
+	for x in up:
+		hpk += x.hp / maxf(1.0, x.max_hp)
 	hpk /= float(up.size())
 	if up.size() == 1 and hpk < 0.5:
 		return 0.0
-	return clampf(0.1 + 0.3 * float(h.ai.get("skill", 0.5)) + 0.15 * float(mini(up.size(), 4) - 1) + 0.3 * (hpk - 0.5), 0.0, 0.85)
+	return clampf(
+		0.1 + 0.3 * float(h.ai.get("skill", 0.5)) + 0.15 * float(mini(up.size(), 4) - 1) + 0.3 * (hpk - 0.5), 0.0, 0.85
+	)
+
 
 ## Where a camper waits: a few steps out from the gate, off to one side of the path.
 func camp_spot(L: Dictionary, h: Hunter) -> Vector3:
@@ -1511,6 +1862,7 @@ func camp_spot(L: Dictionary, h: Hunter) -> Vector3:
 		if not m.world.is_void(p.x, p.z) and not m.world.is_block(p.x, p.z) and not inside(L, p, 1.0):
 			return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 	return L["dial"]
+
 
 ## Bots that reach a dropped egg pick it up (into the pack, dropping their least valuable thing if full).
 func bot_pickups() -> void:
@@ -1534,6 +1886,7 @@ func bot_pickups() -> void:
 				m.sfx("pickup", h.pos, 0.0, 0.8)
 				break
 
+
 # ------------------------------------------------------------------ test hooks
 ## --lair-demo=puzzle|fight|egg|sealed|victory|updraft|outside: a scene set up for a screenshot ("sealed": just
 ## inside the gate after it has shut behind you; "victory": the boss just fallen, the gate still shut,
@@ -1548,7 +1901,8 @@ func demo(mode: String) -> void:
 	var pick := String(m.opts.get("demo_boss", ""))
 	var L: Dictionary = list[0]
 	for x in list:
-		if String(x["boss"]) == pick: L = x
+		if String(x["boss"]) == pick:
+			L = x
 	activate(L)
 	if m.has_meta("lair_demo_done"):
 		if mode == "puzzle" and is_same(L["user"], P):
@@ -1559,18 +1913,23 @@ func demo(mode: String) -> void:
 			if b and is_instance_valid(b) and not b.dead:
 				P.hp = P.max_hp
 				if not inside(L, P.pos, -1.0):
-					var back: Vector3 = L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (2.0 if mode == "fight" else float(L["half"]) - 2.6)
+					var back: Vector3 = (
+						L["c"]
+						+ Vector3(L["out"].x, 0, L["out"].y) * (2.0 if mode == "fight" else float(L["half"]) - 2.6)
+					)
 					P.teleport(Vector3(back.x, m.world.ground_at(back.x, back.z), back.z))
 				for o in m.hunters:
-					if o != P and o.team == P.team: o.hp = o.max_hp
+					if o != P and o.team == P.team:
+						o.hp = o.max_hp
 		if mode in ["victory", "updraft"]:
 			var b: Boss = boss_of(L)
 			if b and not b.dead and L.get("locked", false):
-				b.hurt(b.max_hp * 3.0, null, {"src": "test"})      # (no killer: no perk choice over the shot)
+				b.hurt(b.max_hp * 3.0, null, {"src": "test"})  # (no killer: no perk choice over the shot)
 			if mode == "victory":
-				m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
+				m.cam.zoom = 1.9
+				m.cam.zoom_to = 1.9  # (the match eases the camera back to 1 every frame)
 			if L.get("victory", false):
-				L["victory_at"] = m.time - 2.2      # (hold the clock for the shot)
+				L["victory_at"] = m.time - 2.2  # (hold the clock for the shot)
 				P.hp = P.max_hp
 				if mode == "updraft" and L.get("up_on", false) and not m.has_meta("updraft_demo"):
 					# step into the escape updraft and ride it out (--shot-times= for the whole ride)
@@ -1578,21 +1937,41 @@ func demo(mode: String) -> void:
 					var u: Vector3 = L["up"]
 					P.teleport(Vector3(u.x, m.world.ground_at(u.x, u.z), u.z))
 					print("LAIRDEMO into the updraft at %.1f" % m.time)
-				if mode == "updraft" and m.has_meta("updraft_demo") and P.grounded and not inside(L, P.pos, 0.0) and not m.has_meta("updraft_landed"):
+				if (
+					mode == "updraft"
+					and m.has_meta("updraft_demo")
+					and P.grounded
+					and not inside(L, P.pos, 0.0)
+					and not m.has_meta("updraft_landed")
+				):
 					m.set_meta("updraft_landed", m.time)
-					print("LAIRDEMO landed outside at %.1f (%.1f s after stepping in)" % [m.time, m.time - float(m.get_meta("updraft_demo"))])
+					print(
+						(
+							"LAIRDEMO landed outside at %.1f (%.1f s after stepping in)"
+							% [m.time, m.time - float(m.get_meta("updraft_demo"))]
+						)
+					)
 		if mode in ["outside", "outside_map"]:
-			if mode == "outside_map" and m.hud and not m.hud.map_open() and L.get("locked", false) and m.time - float(L.get("alert_at", m.time)) > 0.8:
+			if (
+				mode == "outside_map"
+				and m.hud
+				and not m.hud.map_open()
+				and L.get("locked", false)
+				and m.time - float(L.get("alert_at", m.time)) > 0.8
+			):
 				m.hud.open_map()
 			L["lock_at"] = m.time - 18.6
 			P.hp = P.max_hp
-			m.cam.zoom = 2.2; m.cam.zoom_to = 2.2
+			m.cam.zoom = 2.2
+			m.cam.zoom_to = 2.2
 			for o in L.get("sealed_in", []):
 				o.hp = o.max_hp
 		return
 	m.set_meta("lair_demo_done", true)
 	for g in L["guards"]:
-		if is_instance_valid(g): g.dead = true; g.visible = false
+		if is_instance_valid(g):
+			g.dead = true
+			g.visible = false
 	for o in m.hunters:
 		if o.team != P.team:
 			o.teleport(m.world.spawns[-1] if not m.world.spawns.is_empty() else o.pos)
@@ -1608,14 +1987,19 @@ func demo(mode: String) -> void:
 			L["targets"][0]["hit"] = true
 			m.cam.snap(P.pos)
 		"exterior":
-			var at: Vector3 = L["dial"] + Vector3(L["out"].x, 0, L["out"].y) * 1.2 + Vector3(-L["out"].y, 0, L["out"].x) * 1.5
+			var at: Vector3 = (
+				L["dial"] + Vector3(L["out"].x, 0, L["out"].y) * 1.2 + Vector3(-L["out"].y, 0, L["out"].x) * 1.5
+			)
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-			m.cam.zoom_to = 1.7; m.cam.zoom = 1.7
+			m.cam.zoom_to = 1.7
+			m.cam.zoom = 1.7
 			m.cam.snap(P.pos)
 		"fight", "egg", "sealed":
 			open(L, P, "dial")
 			L["gate_k"] = 0.999
-			var at: Vector3 = L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (float(L["half"]) - 2.6 if mode == "sealed" else 2.0)
+			var at: Vector3 = (
+				L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (float(L["half"]) - 2.6 if mode == "sealed" else 2.0)
+			)
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 			for o in m.hunters:
 				if o != P and o.team == P.team:
@@ -1639,7 +2023,8 @@ func demo(mode: String) -> void:
 					o.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 					o.ctrl = "idle"
 			if mode == "victory":
-				m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
+				m.cam.zoom_to = 2.0
+				m.cam.zoom = 2.0
 			m.cam.snap(P.pos)
 			wake(L, P)
 		"outside", "outside_map":
@@ -1661,7 +2046,9 @@ func demo(mode: String) -> void:
 				if o != P and o.team == P.team:
 					o.teleport(P.pos + side * -2.2)
 					o.ctrl = "idle"
-			m.cam.zoom_to = 2.3; m.cam.zoom = 2.3
+			m.cam.zoom_to = 2.3
+			m.cam.zoom = 2.3
 			m.cam.snap(P.pos)
 			var b: Boss = boss_of(L)
-			if b: wake(L, b.tgt if b.tgt else P)
+			if b:
+				wake(L, b.tgt if b.tgt else P)

@@ -16,18 +16,28 @@ extends RefCounted
 ## out of sight. Their state reaches other players through Match's mob snapshots (Net).
 
 const LVL_MAX := 1.6
-const GRACE := 45.0               # seconds after a squad lands before anything comes for it
-const RAMP := 420.0               # seconds (per squad) from the soft start to full strength
-const CAP_BASE := 5               # Blight alive at once (all squads), on top of the Wardens
+const GRACE := 45.0  # seconds after a squad lands before anything comes for it
+const RAMP := 420.0  # seconds (per squad) from the soft start to full strength
+const CAP_BASE := 5  # Blight alive at once (all squads), on top of the Wardens
 const CAP_MAX := 18
-const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0, "scan": 12.0}
+const LOUD := {
+	"shot": 15.0,
+	"boom": 24.0,
+	"revive": 9.0,
+	"kin": 8.0,
+	"chest": 13.0,
+	"dash": 7.0,
+	"step": 4.5,
+	"shriek": 16.0,
+	"scan": 12.0
+}
 
 var m: Match
 var rng := RandomNumberGenerator.new()
 var raid_k := 1.0
 var host := true
-var land_at := {}                 # team -> match time its squad landed
-var noises: Array = []            # {pos, loud, t, kind} the last few seconds of noise (for tests and the HUD)
+var land_at := {}  # team -> match time its squad landed
+var noises: Array = []  # {pos, loud, t, kind} the last few seconds of noise (for tests and the HUD)
 var nests: BlightNests
 var _tick_t := 0.0
 var _vis_t := 0.0
@@ -37,6 +47,7 @@ var spawned := 0
 var shrieks := 0
 var wardens: Array = []
 
+
 static func enabled(opts: Dictionary) -> bool:
 	if "--no-blight" in OS.get_cmdline_user_args():
 		return false
@@ -45,12 +56,15 @@ static func enabled(opts: Dictionary) -> bool:
 			return false
 	return bool(opts.get("blight", opts.get("big", true)))
 
+
 ## Health and damage multipliers for a strength level: soft early, the full numbers at 1.
 static func hp_k(l: float) -> float:
 	return 0.45 + 0.65 * l
 
+
 static func dmg_k(l: float) -> float:
 	return 0.4 + 0.7 * l
+
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -58,6 +72,7 @@ func _init(match_node: Match) -> void:
 	host = not m.net_on or m.is_host
 	rng.seed = int(m.seed_val) * 31 + 977
 	nests = BlightNests.new(self)
+
 
 # ------------------------------------------------------------------ strength
 ## How dangerous a spot is: 0.55 on the outer islands, 1 in between, 1.45 in the core.
@@ -71,31 +86,38 @@ func region_k(p: Vector3) -> float:
 	var k := clampf(Vector2(p.x, p.z).distance_to(c) / (minf(w.w, w.h) * 0.5), 0.0, 1.0)
 	return lerpf(1.45, 0.55, k)
 
+
 ## Seconds this squad has been down on the islands (0 until its first hunter lands).
 func squad_time(team: int) -> float:
 	if not land_at.has(team):
 		return 0.0
 	return maxf(0.0, m.time - float(land_at[team]))
 
+
 func time_k(t: float) -> float:
 	return clampf((t - 20.0) / RAMP, 0.0, 1.0)
+
 
 ## The Blight's strength at a spot, against a squad.
 func level(p: Vector3, team: int) -> float:
 	var tk := time_k(squad_time(team)) if team >= 0 else time_k(m.sess_time())
 	return clampf((0.1 + 0.9 * tk) * region_k(p) * raid_k + Heart.tide_boost(m, p), 0.0, LVL_MAX)
 
+
 func level_vs(b: Blight, team: int) -> float:
 	return level(b.pos, team)
+
 
 ## A Warden or a Skitter between squads: as strong as the match is old, where it stands.
 func level_here(p: Vector3) -> float:
 	var base := (0.1 + 0.9 * time_k(m.sess_time())) * region_k(p) * raid_k
 	return clampf(base + Heart.tide_boost(m, p), 0.0, LVL_MAX)
 
+
 func on_landed(h: Hunter) -> void:
 	if not land_at.has(h.team):
 		land_at[h.team] = m.time
+
 
 # ------------------------------------------------------------------ setup
 ## Wardens stand on the islands from the start: one or two on the dangerous ones, few on the
@@ -110,15 +132,19 @@ func setup() -> void:
 		var dg := island_danger(ii)
 		var n := 0
 		match dg:
-			2: n = 1 + (1 if rng.randf() < 0.5 * raid_k else 0)
-			1: n = 1 if rng.randf() < 0.8 else 0
-			_: n = 1 if rng.randf() < 0.22 * raid_k else 0
+			2:
+				n = 1 + (1 if rng.randf() < 0.5 * raid_k else 0)
+			1:
+				n = 1 if rng.randf() < 0.8 else 0
+			_:
+				n = 1 if rng.randf() < 0.22 * raid_k else 0
 		for _i in n:
 			var at := _warden_spot(ii)
 			if at != Vector3.INF:
 				var b := spawn("bl_warden", at, level_here(at))
 				wardens.append(b)
 	nests.populate()
+
 
 ## An island's danger 0 (outer) .. 2 (core): the hand map says; a generated one goes by region_k.
 func island_danger(ii: int) -> int:
@@ -128,6 +154,7 @@ func island_danger(ii: int) -> int:
 	var k := region_k(Vector3(float(c.get("cx", 0.0)), 0, float(c.get("cz", 0.0))))
 	return 2 if k > 1.2 else (1 if k > 0.8 else 0)
 
+
 func _warden_spot(ii: int) -> Vector3:
 	var w := m.world
 	if w.hand:
@@ -135,7 +162,9 @@ func _warden_spot(ii: int) -> Vector3:
 		var posts: Array = w.warden_posts.filter(func(wp): return int(wp["island"]) == ii)
 		for k in range(posts.size() - 1, 0, -1):
 			var j := rng.randi_range(0, k)
-			var tmp = posts[k]; posts[k] = posts[j]; posts[j] = tmp
+			var tmp = posts[k]
+			posts[k] = posts[j]
+			posts[j] = tmp
 		for wp in posts:
 			var q: Vector3 = wp["pos"]
 			if _near_any(q, wardens.map(func(b): return b.pos), 6.0):
@@ -160,10 +189,14 @@ func _warden_spot(ii: int) -> Vector3:
 			continue
 		if m.lairs and not m.lairs.lair_of(p, 6.0).is_empty():
 			continue
-		if _near_any(p, wardens.map(func(b): return b.pos), 14.0) or _near_any(p, nests.list.map(func(n): return n["pos"]), 9.0):
+		if (
+			_near_any(p, wardens.map(func(b): return b.pos), 14.0)
+			or _near_any(p, nests.list.map(func(n): return n["pos"]), 9.0)
+		):
 			continue
 		return p
 	return Vector3.INF
+
 
 ## A random ground tile on an island, from the Blight's own dice (World.random_ground rolls the
 ## world's, and the rest of the match shouldn't shift because the Blight is on).
@@ -172,11 +205,13 @@ func _rand_ground(ii: int, r: RandomNumberGenerator = null) -> Vector3:
 	if r == null:
 		r = rng
 	for _t in 500:
-		var x := r.randi_range(0, w.w - 1); var z := r.randi_range(0, w.h - 1)
+		var x := r.randi_range(0, w.w - 1)
+		var z := r.randi_range(0, w.h - 1)
 		var i := w.idx(x, z)
 		if w.kind[i] == World.T_GROUND and w.island[i] == ii:
 			return Vector3(x + 0.5, w.level[i] * World.LEVEL, z + 0.5)
 	return Vector3.INF
+
 
 func _near_any(p: Vector3, pts: Array, d: float) -> bool:
 	for q in pts:
@@ -184,19 +219,23 @@ func _near_any(p: Vector3, pts: Array, d: float) -> bool:
 			return true
 	return false
 
+
 func spawn(kind: String, at: Vector3, l: float) -> Blight:
 	at = m._clear_spot(at)
 	var b := Blight.new()
 	b.init_blight(m, m.next_id("m"), kind, at, l, self)
 	m.add_child(b)
-	if m.time > 0.0: m._draw_range(b)
+	if m.time > 0.0:
+		m._draw_range(b)
 	m.mobs.append(b)
 	m.ents_by_id[b.nid] = b
 	spawned += 1
 	return b
 
+
 func alive() -> Array:
 	return m.mobs.filter(func(x): return x is Blight and not x.dead)
+
 
 func skitters_alive() -> int:
 	var n := 0
@@ -204,6 +243,7 @@ func skitters_alive() -> int:
 		if x is Blight and not x.dead and x.mkind == "bl_skitter":
 			n += 1
 	return n
+
 
 # ------------------------------------------------------------------ noise
 ## Something loud happened (Match.note_sound, chests, dashes, running). The Blight in earshot
@@ -223,6 +263,7 @@ func noise(at: Vector3, kind: String, _by = null) -> void:
 			if bb.flat_dist(at) < reach:
 				bb.hear(at, loud)
 
+
 ## A Warden shrieked at someone: every Blight nearby comes, and nests close by give up what they
 ## hold (BlightNests.on_shriek). A shriek never makes Skitters of its own.
 func on_shriek(w: Blight, at_h: Ent) -> void:
@@ -236,9 +277,15 @@ func on_shriek(w: Blight, at_h: Ent) -> void:
 	if host:
 		nests.on_shriek(w.pos, tp)
 
+
 # ------------------------------------------------------------------ tick
 func cap() -> int:
-	return clampi(CAP_BASE + int(round(10.0 * level_here(Vector3(m.world.w * 0.5, 0, m.world.h * 0.5)) / LVL_MAX * raid_k)), CAP_BASE, CAP_MAX)
+	return clampi(
+		CAP_BASE + int(round(10.0 * level_here(Vector3(m.world.w * 0.5, 0, m.world.h * 0.5)) / LVL_MAX * raid_k)),
+		CAP_BASE,
+		CAP_MAX
+	)
+
 
 func tick(dt: float) -> void:
 	_vis_t -= dt
@@ -253,9 +300,16 @@ func tick(dt: float) -> void:
 		_step_t = 0.5
 		for h in m.hunters:
 			if not land_at.has(h.team) and h.grounded and not h.dropping and not h.riding and not h.out:
-				land_at[h.team] = m.time       # (matches without a skydrop start on the ground)
+				land_at[h.team] = m.time  # (matches without a skydrop start on the ground)
 			# running (not sneaking) is a little noise of its own; Blight right by you hear it
-			if h.grounded and not h.crouch and not h.out and not h.extracted and not h.downed and Vector2(h.vel.x, h.vel.z).length() > 3.6:
+			if (
+				h.grounded
+				and not h.crouch
+				and not h.out
+				and not h.extracted
+				and not h.downed
+				and Vector2(h.vel.x, h.vel.z).length() > 3.6
+			):
 				noise(h.pos, "step", h)
 	nests.tick(dt)
 	_lvl_t -= dt
@@ -268,6 +322,7 @@ func tick(dt: float) -> void:
 	_tick_t = 1.0
 	_despawn_tick()
 
+
 ## Blight on the map grow with the match (Wardens, and Skitters between fights).
 func _relevel() -> void:
 	for b in m.mobs:
@@ -276,6 +331,7 @@ func _relevel() -> void:
 			var l := level_here(bb.pos)
 			if l > bb.lvl + 0.04:
 				bb.set_level(l)
+
 
 func _squads() -> Dictionary:
 	var out := {}
@@ -286,6 +342,7 @@ func _squads() -> Dictionary:
 			out[h.team] = []
 		out[h.team].append(h)
 	return out
+
 
 ## Idle Skitters far from everyone burrow home (back into their nest's stock, BlightNests.home). In the end
 ## phase every Blight inside the ring does, but its nests (Heart.end_phase: the final circle is squad against squad).
@@ -303,10 +360,12 @@ func _despawn_tick() -> void:
 		var far := true
 		for h in m.hunters:
 			if not h.out and not h.extracted and bb.flat_dist(h) < 30.0:
-				far = false; break
+				far = false
+				break
 		if far:
 			nests.home(bb)
 			bb.burrow()
+
 
 # ------------------------------------------------------------------ the local player's view
 ## Skitters out of your sight aren't drawn (you hear them first). A Warden's lamp and a nest show from afar.
@@ -321,6 +380,7 @@ func _update_seen() -> void:
 			bb.unseen = false
 			continue
 		bb.unseen = p.flat_dist(bb) > 2.6 and not m.sees(p.team, bb.pos + Vector3(0, 0.3, 0))
+
 
 ## A sound before they're seen: a dry chitter from Skitters you can't see yet, a low drone from
 ## a Warden, and a mark on the minimap.
@@ -349,10 +409,13 @@ func _cues() -> void:
 			m.sfx("hover", bb.pos, -14.0, 0.45)
 		played += 1
 
+
 # ------------------------------------------------------------------ screenshots
 ## --blight-demo[=skitters|warden]: a Warden sweeping its light beside you and a pack of Skitters
 ## coming in (screenshots). You don't take damage while it runs.
 var _demo := {}
+
+
 func demo(mode: String) -> void:
 	var P := m.player
 	if P == null:
@@ -364,10 +427,12 @@ func demo(mode: String) -> void:
 	if _demo.is_empty():
 		_demo["t0"] = m.time
 		Settings.v["tips"] = false
-		if m.hud: m.hud.guide_hidden = true
+		if m.hud:
+			m.hud.guide_hidden = true
 		var wspot := m.demo_clear_spot(7.0)
 		for b in alive():
-			if b.flat_dist(P) < 30.0: (b as Blight).burrow()
+			if b.flat_dist(P) < 30.0:
+				(b as Blight).burrow()
 		if mode != "skitters":
 			var wd := spawn("bl_warden", Vector3(wspot.x, m.world.ground_at(wspot.x, wspot.z), wspot.z), 0.4)
 			wd.sweep0 = atan2(P.pos.x - wd.pos.x, P.pos.z - wd.pos.z) + 0.55
@@ -385,11 +450,14 @@ func demo(mode: String) -> void:
 				sk.append(s)
 			_demo["skitters"] = sk
 	P.inp["move"] = Vector2.ZERO
-	var near: Blight = null; var nd := 1e9
+	var near: Blight = null
+	var nd := 1e9
 	for s in _demo.get("skitters", []):
 		var sb: Blight = s
-		if not sb.dead and P.flat_dist(sb) < nd: nd = P.flat_dist(sb); near = sb
-		sb.cd = maxf(sb.cd, 1.0)          # (they close in and circle, but hold the bite for the shot)
+		if not sb.dead and P.flat_dist(sb) < nd:
+			nd = P.flat_dist(sb)
+			near = sb
+		sb.cd = maxf(sb.cd, 1.0)  # (they close in and circle, but hold the bite for the shot)
 		if sb.flat_dist(P) < 3.2:
 			var back := -sb.dir_to(P) * (3.2 - sb.flat_dist(P))
 			sb.pos += Vector3(back.x, 0, back.y)
@@ -400,4 +468,4 @@ func demo(mode: String) -> void:
 		P.inp["aim"] = wd2.pos + Vector3(0, 1.5, 0)
 	if wd2 and not wd2.dead:
 		wd2.spot = clampf((m.time - float(_demo["t0"])) / 3.0, 0.0, 0.85)
-		wd2.sense_t = 99.0          # (the light keeps sweeping; it doesn't shriek for the shot)
+		wd2.sense_t = 99.0  # (the light keeps sweeping; it doesn't shriek for the shot)

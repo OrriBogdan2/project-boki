@@ -5,13 +5,16 @@ extends RefCounted
 ## Never touches the save.
 
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
-const PASS_OFF := 13.0      # m beside the camp: past idle sight (7.5) plus a monster's wander (4.8)
+const PASS_OFF := 13.0  # m beside the camp: past idle sight (7.5) plus a monster's wander (4.8)
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MOBNOTICE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -22,7 +25,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var P: Hunter = m.player
 	var far := m.world.random_ground()
@@ -69,12 +73,15 @@ func run(main: Node) -> void:
 	print("MOBNOTICE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _cued(camp: Array) -> int:
 	return camp.filter(func(mb): return mb.noticed_at > -INF).size()
 
+
 func _put(m: Match, P: Hunter, at: Vector3) -> void:
 	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-	Sfx.listener = P.pos       # (the camera that moves it is off with the match's process)
+	Sfx.listener = P.pos  # (the camera that moves it is off with the match's process)
+
 
 ## A ground spot away from the other hunters (who stand at `far`) with solid level ground under the pass.
 func _flat_spot(m: Match, far: Vector3) -> Vector3:
@@ -83,6 +90,7 @@ func _flat_spot(m: Match, far: Vector3) -> Vector3:
 		if p.distance_to(far) > 60.0 and _level(m, p):
 			return p
 	return m.world.random_ground()
+
 
 func _level(m: Match, c: Vector3) -> bool:
 	for x in range(-14, 15, 2):

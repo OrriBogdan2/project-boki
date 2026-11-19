@@ -25,11 +25,12 @@ var weave_ph := 0.0
 var _pose := 0.0
 var _clock := 0.0
 var _twitch := 0.0
-var next_tell := 0.0              # match time of the next tell (sim side, so every game agrees)
-var tells := 0                    # how many tells it has given (the check counts them)
+var next_tell := 0.0  # match time of the next tell (sim side, so every game agrees)
+var tells := 0  # how many tells it has given (the check counts them)
 var _trng := RandomNumberGenerator.new()
-var _held_last := 0.0             # root + stun + slow seconds last tick: a fresh one is a hit
-var _bush_tile := -1              # the World.live_bush tile it is holding, or -1
+var _held_last := 0.0  # root + stun + slow seconds last tick: a fresh one is a hit
+var _bush_tile := -1  # the World.live_bush tile it is holding, or -1
+
 
 func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	var sr: Dictionary = KeyRun.rules()["shrubling"]
@@ -43,12 +44,14 @@ func init_shrub(match_node: Node, id: String, at: Vector3, tier := 1.0) -> void:
 	next_tell = m.time + _tell_gap()
 	KeyCarry.mark(self)
 	_show_glint(false)
-	ShrublingModel.recolour(model, leaf_colour(m, at))      # the same colour as the grass it hides in
+	ShrublingModel.recolour(model, leaf_colour(m, at))  # the same colour as the grass it hides in
+
 
 ## True for a Shrubling that is still pretending to be a bush. Anything that PICKS a target for a Boki
 ## (Chase, the engage scan) calls this and skips it, so a Boki does not give a bush away; a hit still lands.
 static func hidden(e: Ent) -> bool:
 	return e is Shrubling and (e as Shrubling).ss == "disguised"
+
 
 ## The colour World gives a tall-grass tile at `at` (its biome's leaf, a third of the way to the top).
 static func leaf_colour(m: Node, at: Vector3) -> Color:
@@ -58,13 +61,16 @@ static func leaf_colour(m: Node, at: Vector3) -> Color:
 		return Color(b["leaf"]).lerp(Color(b["top"]), 0.35)
 	return Color("5f9a46")
 
+
 func mass() -> float:
 	return 1.0
+
 
 ## Seconds to the next tell: 5 to 10, from its own seeded stream.
 func _tell_gap() -> float:
 	var tw: Array = KeyRun.rules()["shrubling"]["tell_s"]
 	return _trng.randf_range(float(tw[0]), float(tw[1]))
+
 
 ## Disguised, its tile is cover like any grass clump; up and running, it is not.
 func _sync_bush() -> void:
@@ -85,9 +91,12 @@ func _sync_bush() -> void:
 	if want >= 0:
 		m.world.live_bush[want] = int(m.world.live_bush.get(want, 0)) + 1
 
+
 func _show_glint(on: bool) -> void:
 	var g := KeyCarry.glint_of(self)
-	if g: g.visible = on
+	if g:
+		g.visible = on
+
 
 # ------------------------------------------------------------------ the brain (the game that owns it)
 func sim(dt: float) -> void:
@@ -129,14 +138,17 @@ func sim(dt: float) -> void:
 		spd = 0.0
 	_move(dt, wish * spd, spd)
 
+
 ## It runs on its own states (ss): a hit only marks who did it, the Mob machine stays IDLE.
 func aggro(t: Ent, _why: String) -> void:
 	tgt = t
+
 
 func _set_state(s: String) -> void:
 	ss = s
 	_show_glint(s != "disguised")
 	_sync_bush()
+
 
 ## A hunter within `r` m (flat) and about level with it, or null.
 func _nearest_hunter(r: float) -> Hunter:
@@ -151,13 +163,16 @@ func _nearest_hunter(r: float) -> Hunter:
 			best = h
 	return best
 
+
 ## True while a grab or pull (Verbs.yank) is carrying it.
 func _dragged() -> bool:
 	if m.verbs == null:
 		return false
 	for dg in m.verbs.drags:
-		if dg["ent"] == self: return true
+		if dg["ent"] == self:
+			return true
 	return false
+
 
 func _reveal(by: Ent) -> void:
 	if ss != "disguised":
@@ -173,6 +188,7 @@ func _reveal(by: Ent) -> void:
 		var away := -dir_to(threat)
 		face = atan2(-away.x, -away.y)
 
+
 ## Anyone hiding in it when it bolts is in the open at once: no more cover, and seen for a moment.
 ## Each game exposes the hunters it owns, so a hider on another machine is caught too.
 func _expose_hiders() -> void:
@@ -186,13 +202,16 @@ func _expose_hiders() -> void:
 			if h == m.player and m.hud:
 				m.hud.toast_small("Your bush ran off!", Color("f2c84a"))
 
+
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	var dealt := super.hurt(d, by, opts)
 	if not dead and (dealt > 0.0 or d > 0.0):
-		if dealt > 0.0: m.sfx("squeak", pos, -2.0, randf_range(0.9, 1.2))
+		if dealt > 0.0:
+			m.sfx("squeak", pos, -2.0, randf_range(0.9, 1.2))
 		if ss == "disguised" and not remote:
-			_reveal(by if by is Hunter else _nearest_hunter(40.0))      # any hit wakes it, a Boki's too
+			_reveal(by if by is Hunter else _nearest_hunter(40.0))  # any hit wakes it, a Boki's too
 	return dealt
+
 
 # ------------------------------------------------------------------ running and hiding
 func _flee(dt: float, sr: Dictionary) -> Vector2:
@@ -231,6 +250,7 @@ func _flee(dt: float, sr: Dictionary) -> Vector2:
 			dir = _free_dir(dir)
 	return dir.normalized()
 
+
 ## A free direction near `dir` (blocked ahead): tries either side, wider and wider.
 func _free_dir(dir: Vector2) -> Vector2:
 	for a in [0.5, -0.5, 1.0, -1.0, 1.6, -1.6]:
@@ -239,6 +259,7 @@ func _free_dir(dir: Vector2) -> Vector2:
 		if not m.world.is_block(q.x, q.z) and not m.world.is_void(q.x, q.z):
 			return d2
 	return dir
+
 
 ## Picks the grass patch to run to: far from the hunter, away from them, out of their sight, not
 ## far to run. Only the best few get the A*.
@@ -288,6 +309,7 @@ func _pick_hide() -> void:
 			path = p
 			return
 
+
 func _follow_path() -> Vector2:
 	if path.is_empty():
 		return Vector2.ZERO
@@ -302,6 +324,7 @@ func _follow_path() -> Vector2:
 	var d := pick - from
 	return d.normalized() if d.length() > 0.05 else Vector2.ZERO
 
+
 func _dive(sr: Dictionary) -> void:
 	_set_state("dive")
 	ss_t = float(sr["dive_t"])
@@ -310,13 +333,15 @@ func _dive(sr: Dictionary) -> void:
 	m.sfx("rustle", pos, -6.0, randf_range(0.75, 0.9))
 	m.fx.burst(pos + Vector3(0, 0.3, 0), Color(md["color"]).lightened(0.1), 10, 2.5, 0.4, 5.0)
 
+
 func _rehide(_sr: Dictionary) -> void:
 	camp = pos
 	hide_at = Vector3.INF
 	path = []
 	_set_state("disguised")
 	next_tell = m.time + _tell_gap()
-	ShrublingModel.recolour(model, leaf_colour(m, pos))      # (it may have run onto another island)
+	ShrublingModel.recolour(model, leaf_colour(m, pos))  # (it may have run onto another island)
+
 
 ## The same move step as every Mob: ease the velocity toward the wish, never walk off the edge.
 func _move(dt: float, wish: Vector2, spd: float) -> void:
@@ -337,6 +362,7 @@ func _move(dt: float, wish: Vector2, spd: float) -> void:
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
 
+
 # ------------------------------------------------------------------ looks
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
@@ -345,7 +371,7 @@ func render(delta: float, alpha: float) -> void:
 	_clock += delta
 	var want := 0.0 if ss in ["disguised", "dive"] else 1.0
 	_pose = move_toward(_pose, want, delta * (7.0 if ss != "dive" else 3.0))
-	_twitch = maxf(0.0, _twitch - delta * 2.0)      # (a tell lasts about half a second)
+	_twitch = maxf(0.0, _twitch - delta * 2.0)  # (a tell lasts about half a second)
 	if ss == "alert":
 		_twitch = 0.8
 	ShrublingModel.pose(model, _pose, _clock, Vector2(vel.x, vel.z).length(), _twitch)

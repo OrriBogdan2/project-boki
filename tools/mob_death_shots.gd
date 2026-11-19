@@ -3,13 +3,14 @@ extends RefCounted
 ## same spot cropped at fixed times after the kill: mob_death_<case>.png, left to right (see TIMES). Cases: a
 ## skitter, a warden, a lair boss, and a wiped camp of skitters (the staggered kill).
 
-const TIMES := [0.0, 0.1, 0.2, 0.3, 0.45, 0.6, 0.9]     # s after the kill
-const CROP := 520                                       # px, the square around the screen centre
-const STAND_FRAMES := 20                                # frames the foes are drawn alive before the kill
-const SETTLE_S := 1.0                                   # s the camera gets to settle on the spot
+const TIMES := [0.0, 0.1, 0.2, 0.3, 0.45, 0.6, 0.9]  # s after the kill
+const CROP := 520  # px, the square around the screen centre
+const STAND_FRAMES := 20  # frames the foes are drawn alive before the kill
+const SETTLE_S := 1.0  # s the camera gets to settle on the spot
 
 var main: Node
 var m: Match
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -32,7 +33,8 @@ func run(mn: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	for o in m.hunters:
-		if o != m.player: o.ctrl = "idle"
+		if o != m.player:
+			o.ctrl = "idle"
 	m.hud.visible = false
 	await _case(dir, "skitter", 1)
 	await _case(dir, "warden", 1)
@@ -41,9 +43,11 @@ func run(mn: Node) -> void:
 	print("MOBDEATHSHOT DONE")
 	main.get_tree().quit()
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
+
 
 ## The foes to kill: `n` monsters (or the first lair's boss) a few metres ahead of the player.
 func _foes(kind_s: String, n: int) -> Array:
@@ -63,6 +67,7 @@ func _foes(kind_s: String, n: int) -> Array:
 	for i in n:
 		out.append(m.spawn_mob(mob_kind, at + Vector3((i % 3 - 1) * 1.0, 0, (i / 3) * 1.0)))
 	return out
+
 
 func _case(dir: String, kind_s: String, n: int) -> void:
 	var P: Hunter = m.player
