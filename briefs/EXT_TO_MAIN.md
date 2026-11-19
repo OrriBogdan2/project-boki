@@ -10302,3 +10302,4 @@ READY ext/vfx-ability-colours 2253836636 (DECISIONS 11-08 ability colours full a
 READY ext/ttk-main-1116 442e4478a314a3166d310431561c431b6cbe7990 (TTK re-run on main for Vex/Kael/Lace/Cinder: 16 pairs, L1+L6, no armour+tier 2, delta table + owner calls in docs/TTK.md; matrix check gets a bow draw mode and set/level/armor args; no game number changed)
 READY ext/stomp-picker-sweep 040c762583e31f863e176a6eb4de00521c1aa244 (StompPick + StompLook styles on Hunters screen; --stomp-break-sweep-check 13x5 + 20 CC rows; PR in gh-outbox)
 READY ext/online-feel-proxy-reap 9ac61c75f58aa878df8d87b8b2f2bbfe34895cef (online-feel-check: proxy dies with the run, --parent-pid/--max-life, log file, free port, 840 s budget; 2 runs green 328 s)
+READY ext/split-lairs b903cf12cc (split lairs.gd into fight/lock/bots/demo, API unchanged)
