@@ -30,8 +30,25 @@ static func moves_caster(ab: AbilitySpec) -> bool:
 
 ## A fresh context for a cast.
 static func make_cx(m: Node, caster: Ent, kin: Ent, owner: Ent, aim: Vector3, power: float, slot: String, ability_id: String, chain: Array = []) -> Dictionary:
-	return {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
+	var cx := {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
 		"power": power, "slot": slot, "ability": ability_id, "chain": chain + [ability_id], "depth": 1, "k": 1.0}
+	# Every cast a Hunter makes draws in that Hunter's slot colour, whichever path built the context
+	# (a kit, a merge, a hand-built stage); the category colours stay for Boki and generic casts.
+	if is_hunter_cast(cx):
+		cx["hero_col"] = Arch.color((caster as Hunter).arch)
+	return cx
+
+## Is this cast a Hunter's (a Hunter with an archetype as the caster)? Such a cast never reaches the
+## generic category colours (--hero-vfx-check pins it).
+static func is_hunter_cast(cx: Dictionary) -> bool:
+	var who = cx.get("caster")
+	return who is Hunter and (who as Hunter).arch != ""
+
+## The generic colour a cast falls back to (Boki and generic casts only). A Hunter's cast must never get
+## here: make_cx sets "hero_col" for it, so this asserts if some path built its context another way.
+static func generic_col(cx: Dictionary, col: Color) -> Color:
+	assert(not is_hunter_cast(cx), "a Hunter's cast fell back to the generic category colour (no hero_col)")
+	return col
 
 ## Casts every top-level stage of an ability.
 static func cast(ab: AbilitySpec, cx: Dictionary) -> void:
@@ -170,12 +187,12 @@ static func _color(st: StageSpec, cx: Dictionary) -> Color:
 	if cx.has("hero_col"):
 		return cx["hero_col"]
 	if not st.effects.is_empty():
-		return KinRules.effects_color(st.effects)
+		return generic_col(cx, KinRules.effects_color(st.effects))
 	for ev in st.then:
 		for sub in st.then[ev]:
 			if not (sub as StageSpec).effects.is_empty():
-				return KinRules.effects_color((sub as StageSpec).effects)
-	return KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility")
+				return generic_col(cx, KinRules.effects_color((sub as StageSpec).effects))
+	return generic_col(cx, KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility"))
 
 static func _height(u) -> float:
 	if u is Hunter: return 0.95
@@ -805,7 +822,7 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	if cats.has("control"):
 		col = KinRules.cat_color("control")
 	elif cats.has("damage"):
-		col = cx.get("hero_col", KinRules.cat_color("damage"))
+		col = cx["hero_col"] if cx.has("hero_col") else generic_col(cx, KinRules.cat_color("damage"))
 	m.fx.burst(f.pos + Vector3(0, 0.8, 0), col, 6, 2.5, 0.3)
 	# an archetype ability's own follow-up on what it hit (Marks, Shadow Step windows, wall pins)
 	var cb = cx.get("on_foe")
