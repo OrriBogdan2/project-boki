@@ -604,6 +604,8 @@ func _build(d: Dictionary) -> void:
 	for dx in range(1, 8):      # a cliff face along z = home + 7: a knock north slams into it
 		for dz in range(7, 10):
 			W.level[W.idx(hx + dx, hz + dz)] = lv + 3
+	m = nm
+	_clear_wild()
 	for h in nm.hunters:
 		if h.kin:
 			h.kin.dead = true
@@ -646,9 +648,20 @@ func _run(secs: float) -> void:
 				if not mb is Boss:
 					mb.queue_free()
 					m.mobs.erase(mb)
+			_clear_wild()
 			m.step(DT)
 			_stepped()
 		await main.get_tree().process_frame
+
+## No wild Boki about either: one standing on the strip shoves the player's body off its mark (which wild
+## Bokis a seed puts near the strip shifts with every change to what the match builds first).
+func _clear_wild() -> void:
+	for k in m.kins.duplicate():
+		if k.is_wild():
+			k.dead = true
+			m.kins.erase(k)
+			m.ents_by_id.erase(k.nid)
+			k.queue_free()
 
 ## After each match step: the host's mirror of the watched tow, and the longest stun seen.
 func _stepped() -> void:
