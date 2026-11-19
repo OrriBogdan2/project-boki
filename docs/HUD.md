@@ -141,7 +141,7 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 (`ext/tutorial-visibility`) and not covered here.
 
 What a fight shows now (11-19 inventory, `--combat-hud-shots --fight=duel|pve` at 1920x1080): your health and armour, the ability row, ammo and the belt slots, the minimap and the one goal line.
-Waiting for a quiet 3 s instead: the message lane (one card at a time), the armour hint, the level-up card, the loot counters (seeds, gems, pack) and the ground loot names; the "UNLOCK" word under a slot drops while the gold glow stays. A rival's name shows only under the mouse (or when they are down).
+Waiting for a quiet 3 s instead: the message lane (one card at a time), the armour hint, the level-up card, the loot counters (seeds, gems, pack) and the ground loot names; the "UNLOCK" word under a slot drops while the gold glow stays. A rival's name shows only under the mouse (or when they are down). The world hover card (a 440 px card about whatever the cursor rests on) stays shut through a fight (`HudHover.world_tip_waits`, `--combat-calm-check`).
 
 | Pop-up | Where, size | How long | Now |
 |---|---|---|---|
