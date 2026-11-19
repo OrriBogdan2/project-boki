@@ -58,11 +58,22 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
 
-## Tearing audit 11-19 (ext/hunter-fix-vex-1118): weights-only fix did not beat live
-Live glb kept unchanged. Measured with the repo's own edge rule (rest edge >= 8 mm, tools/stretch_check.gd): 1.0 % of
-edges stretch over 3x, 12.4 % over 1.3x, worst 10.2x; the 5.9 % figure from the audit counts sub-8 mm edges and is noise.
-The tearing sits where the left hand is fused to the hip (live blends hand/thigh 50/50 there) and in the gun-sleeve fan
-(rigid, 12-22 cm triangles). Tried without deleting or cutting anything: welding seam copies, local weight search,
-stripping arm weights from lower-body skin and the reverse, weight smoothing. Each lowers some numbers and raises
-others (hard split: 119x edges and +31 % black pixels; smoothing: 3 % of edges over 3x). A clean result needs the
-contact separated in the mesh (cut plus cap) or a re-scan of that region, not weights.
+## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 3): arm-to-body contact split, weights per side
+Live (v95, 11-15) welds the left hand/forearm to the hip and thigh, and the arms to the torso sides, with shared vertices, so the
+re-derived weights drag hip skin after the hand (black webs from hip to hand in drink, cheer, fusion, glide, x, emote...).
+Fix (scripts: /home/boki/gens/hunter-fix-vex-1118/retry3/tool/, `fix2.py` then `prune.py`):
+- Faces are split into arm side and body side by their own vertex weights (row level, so the gun sleeve's existing seam to the
+  belly skin stays as live). Below y 1.33 m the vertices both sides share are duplicated (372 left, 40 right). No face is deleted,
+  no vertex moves: positions, UVs, normals, colours, rig, clips and textures are as live.
+- Arm-side copies keep only arm bones, body-side copies only body bones; weights that changed by >15 % are diffused over their
+  own side (3857 verts). The coin keeps its live weights (it is a child of hand.L and every clip keys it).
+- The openings get small fan caps (420 new triangles, flat colour of the nearest skin/cloth texel), centred inside the body
+  (winding test) and pruned to those not seen at rest from 14 directions; rims are inset 1 mm so no welded edge has >2 faces.
+- Rest pose renders: 0 px differ from live full body, 6-8 px of 480k at 2.2x zoom (Blender workbench, 4 sides).
+- Edges >= 8 mm stretched over 3x 1.005 % -> 0.112 %; worst 10.16x -> 6.86x; edges growing over 10 cm 286 -> 37;
+  hunter_mesh_check stretched_tris (worst clip) 524 -> 44.
+- Left as live: the skin fan that sticks out 20 cm from the outer left thigh at rest (now rides on thigh.L instead of being
+  torn between thigh and hand), and the gun sleeve's seam to the belly (sleeve rigid on forearm.R as live).
+Earlier weights-only attempts (no split) did not beat live: hard split 119x edges, smoothing 2.18 % of edges over 3x. The
+audit's "5.9 % of all edges" counts sub-8 mm edges too; those are not noise for the eye (a 5 mm edge growing to 20 cm is a
+needle), so absolute growth (cm) is reported next to the >= 8 mm ratio.
