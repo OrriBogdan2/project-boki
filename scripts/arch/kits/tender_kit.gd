@@ -85,7 +85,7 @@ func add_kindle(t: Ent, n := 1) -> void:
 		play_soft("mm_kindled")
 		ComboMark.payoff(m, h, t)        # the Kindle payoff: full stacks, every shot now hits harder
 
-## The Kindle on `t`, for the ComboMark tag: a pip per stack; the ring is the Kindle left.
+## The Kindle on `t`, for the plate status row (HudPlate.row): a pip per stack; the ring is the Kindle left.
 func combo_read(t: Ent) -> Dictionary:
 	var n := kindle_on(t)
 	if n == 0:

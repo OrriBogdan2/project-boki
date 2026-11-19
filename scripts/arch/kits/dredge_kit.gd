@@ -93,7 +93,6 @@ func warm_fx(at: Vector3) -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 
 ## Is this hunter a Dredge reeling someone in? (Hunter.do_dash: Grounded doesn't stop the barge then.)

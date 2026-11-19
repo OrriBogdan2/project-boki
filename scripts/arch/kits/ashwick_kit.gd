@@ -74,7 +74,6 @@ func rd() -> Dictionary: return res_def()
 func lmbd() -> Dictionary: return d.get("lmb", {})
 func res_text() -> String: return "%d" % int(_best_char())
 func res_frac() -> float: return clampf(_best_char() / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else ""
 
 func _setup() -> void:
 	fx = LDFx.of(m)
@@ -237,7 +236,7 @@ func _shield_swirls() -> void:
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
-## stage is the ComboMark tag over their plate instead (combo_read).
+## stage is the plate status row instead (combo_read).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
@@ -279,7 +278,7 @@ func _tick_tells(dt: float) -> void:
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
 
-## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
+## The burn on `f`, for the status row (HudPlate.row): Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
 func combo_read(f: Ent) -> Dictionary:
 	var lvl := burning(f)
 	if lvl == 0:
@@ -723,18 +722,6 @@ func recast_window() -> Dictionary:
 	var t := float(x_def()["time"])
 	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
 
-## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var ttl := float(rd()["expire"])
-	for key in chars:
-		var c: Dictionary = chars[key]
-		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
-			continue
-		var lvl := burning(c["e"])
-		var left: float = ttl - (m.time - float(c["t"]))
-		if left > 0.0 or lvl > 0:
-			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

@@ -3,12 +3,14 @@ extends RefCounted
 ## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
 ## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
 ## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
-## armour-break crack, status icons to the right, and a downed plate with a
+## armour-break crack, the status row to the right, and a downed plate with a
 ## knock burst. Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
-## same chip tracker feeds the mob and boss bars and the squad list (chip_of).
+## same chip tracker feeds the mob and boss bars and the squad list (chip_of), and the same status row
+## (row, draw_row) sits under monster bars.
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
 ##   name / status word ............ sp.y - 7
 ##   frame (armour + health) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
+##   status row (others) ........... right of the frame, on its vertical centre (row, draw_row)
 ##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
 
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
@@ -22,8 +24,17 @@ const BURST_T := 1.1           # s of the knock burst over someone who just went
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
+const ROW_MAX := 4             # icons a status row shows at most; the lowest in the order wait
+const ROW_R := 8.0             # px radius of a status icon's disc (reads at 1280x720 at the match camera)
+const ROW_RING_W := 2.5        # px width of the ring round it that empties with the time left
+const ROW_STEP := 2.0 * (ROW_R + ROW_RING_W) + 1.0   # px between two icons' centres
+const RING_REFRESH := 0.15     # s the time left must jump up to restart a ring (a re-applied status, not net jitter)
+const RING_LAPSE := 0.25       # s a status may go undrawn before its ring starts over when it is seen again
+const STOPS := ["status_stunned", "status_rooted", "status_grounded"]   # what stops them: ahead of your marks
+## A kit mark's icon -> the plain status it stands in for (Vex's Daze, Cinder's Ablaze): only the mark shows.
+const MARK_FOR := {"mark_daze": "status_dazed", "fireball": "status_burning"}
 
-## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
+## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen, tot (the status row's ring clocks)}
 var st := {}
 var now := 0.0
 var _prune_at := 0.0
@@ -147,18 +158,82 @@ static func statuses(e: Ent) -> Array:
 	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
 	return out
 
-## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
-## time left shows it under its tile, shrinking.
-static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> void:
-	var x := at.x
-	for ic in icons:
-		var r := Rect2(Vector2(x, at.y - tile * 0.5), Vector2(tile, tile))
-		c.draw_rect(r, HudStyle.SHADE)
-		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
-		Icons.draw(c, String(ic[0]), r.get_center(), tile * 0.36, ic[1])
-		if float(ic[3]) > 0.0:
-			HudStyle.ctext(c, Vector2(r.get_center().x, r.end.y + 9.0), "%.1f" % float(ic[3]), 10, ic[1])
-		x += tile + 2.0
+## The status row `viewer` sees on `e`, at most ROW_MAX, each {icon, col, left, total, n}: what stops them (stun,
+## root, Ground), then the combo state their attackers put on them (ArchKit.combo_read for the viewer and then each
+## squadmate; the Boki setups the viewer made), then the rest of `sts` (statuses(e)). A mark takes the place of the
+## plain status it stands in for (MARK_FOR). A status's ring runs over the longest time left seen since it went on.
+func row(viewer: Hunter, e: Ent, sts: Array) -> Array:
+	var marks: Array = []
+	if viewer:
+		for o in (viewer.m as Match).hunters:
+			if o != e and o.ak and (o == viewer or (o.team == viewer.team and not o.out)):
+				var d: Dictionary = o.ak.combo_read(e)
+				if not d.is_empty():
+					marks.append({"icon": d["icon"], "col": o.ak.res_col(), "left": float(d["left"]),
+						"total": float(d["total"]), "n": int(d["n"])})
+		for id in e.marks:       # a combo setup this hunter or its Boki put on them (Combos)
+			var setup: Dictionary = e.marks[id]
+			var left := float(setup["until"]) - float(viewer.m.time)
+			if setup["owner"] == viewer and left > 0.0:
+				marks.append({"icon": "bond", "col": HudStyle.GOLD, "left": left,
+					"total": float(setup["window"]), "n": 0})
+	if sts.is_empty() and marks.is_empty():
+		return []
+	var s := _state(e)
+	s["seen"] = now
+	var tot: Dictionary = s.get("tot", {})       # icon -> Vector3(ring total, time left, plate clock) last drawn
+	s["tot"] = tot
+	var out: Array = []
+	for stops in [true, false]:
+		for x in sts:
+			var replaced := marks.any(func(mk): return MARK_FOR.get(mk["icon"], "") == x[0])
+			if (x[0] in STOPS) == stops and not replaced:
+				out.append(_status_item(x, tot))
+		if stops:
+			out.append_array(marks)
+	out.resize(mini(out.size(), ROW_MAX))
+	return out
+
+func _status_item(x: Array, tot: Dictionary) -> Dictionary:
+	var left := float(x[3])
+	return {"icon": x[0], "col": x[1], "left": left, "total": _ring_total(tot, String(x[0]), left), "n": 0}
+
+## How long the clock behind `left` runs, for its ring: the most left seen since the status went on. Re-applied
+## (left jumps up past RING_REFRESH) or unseen for RING_LAPSE, it starts full again. -1 for a status with no clock.
+func _ring_total(tot: Dictionary, icon: String, left: float) -> float:
+	if left < 0.0:
+		return -1.0
+	var was: Vector3 = tot.get(icon, Vector3(0.0, 0.0, -INF))
+	var total := was.x
+	if left > was.y + RING_REFRESH or now - was.z > RING_LAPSE:
+		total = left
+	total = maxf(total, left)
+	tot[icon] = Vector3(total, left, now)
+	return total
+
+## Draws a status row (from row()) from `at`, its left end at the vertical centre, or centred on `at`.
+static func draw_row(c: CanvasItem, at: Vector2, items: Array, centred := false) -> void:
+	var left_end := at.x - (items.size() * ROW_STEP - 1.0) * 0.5 if centred else at.x
+	var x := left_end + ROW_R + ROW_RING_W
+	for it in items:
+		_row_icon(c, Vector2(x, at.y), it)
+		x += ROW_STEP
+
+## One status: its icon on a dark disc, a ring in its colour emptying with the time left (whole and faint with no
+## clock), and the stack count at the lower right.
+static func _row_icon(c: CanvasItem, at: Vector2, it: Dictionary) -> void:
+	var col: Color = it["col"]
+	var ring_r := ROW_R + ROW_RING_W * 0.5
+	c.draw_circle(at, ROW_R + ROW_RING_W + 1.0, HudStyle.SHADE)
+	var left := float(it["left"])
+	if left < 0.0:
+		c.draw_arc(at, ring_r, 0.0, TAU, 24, Color(col, 0.45), ROW_RING_W, true)
+	else:
+		var frac := clampf(left / maxf(0.05, float(it["total"])), 0.0, 1.0)
+		c.draw_arc(at, ring_r, -PI * 0.5, -PI * 0.5 + TAU * frac, 24, col, ROW_RING_W, true)
+	Icons.draw(c, String(it["icon"]), at, ROW_R * 0.6, col)
+	if int(it["n"]) > 0:
+		HudStyle.ctext(c, at + Vector2(ROW_R, ROW_R + 2.0), str(it["n"]), 10, HudStyle.INK, 3)
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
 static func shield_frac(h: Hunter) -> float:
@@ -199,8 +274,7 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var has_ar := _armor(c, h, ar, s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(viewer, h))
-	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
-	# body (BodyTell, KitStatus), so no icon tiles beside the plate
+	# the name, or what's being done to them (stunned, rooted ...) in its colour, and the status row beside the plate
 	var sts := statuses(h)
 	var word := ""
 	var word_col := Color("9ae8ff")
@@ -215,10 +289,12 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
 		var nm := ClanInfo.tagged(h.pname, h.clan_tag)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), nm, HudStyle.PLATE_NAME_FS, name_col)
+	var items := row(viewer, h, sts)
+	draw_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), items)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"]), "row": items}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -258,7 +334,7 @@ func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
-		icon_row(c, Vector2(sp.x - sts.size() * 8.0, frame.end.y + 18.0), sts)
+		draw_row(c, Vector2(sp.x, frame.end.y + 18.0), row(p, p, sts), true)
 		word = String(sts[0][2])
 		if word != "":
 			HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, sts[0][1])
@@ -323,7 +399,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
 ## filling over it in green, a cross in place of the level, and what's happening under it. The
-## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
+## moment a rival goes down a burst of rays pops over them.
 func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 14.0)
@@ -357,7 +433,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
 		"word": line, "chip": 0.0, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
-## The knock burst: rays flung outward from a ring, and the word popping in big then settling.
+## The knock burst: rays flung outward from a ring (no word: the plate itself shows the fall).
 static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:
 	if t <= 0.0:
 		return
@@ -373,5 +449,3 @@ static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:
 		pts.append(at + d * (r0 + 8.0 + 6.0 * float(i % 2)))
 	c.draw_multiline(pts, Color(col, a), 3.0)
 	c.draw_arc(at, 8.0 + 20.0 * ez, 0, TAU, 28, Color(Color.WHITE, 0.6 * a), 2.0, true)
-	var sc := 1.0 + 0.6 * (1.0 - minf(1.0, k * 5.0))
-	HudStyle.ctext(c, at + Vector2(0, 8.0 * sc), "DOWN", int(22.0 * sc), Color(Color.WHITE.lerp(col, 0.35), a), 6)

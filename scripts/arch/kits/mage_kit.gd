@@ -17,7 +17,6 @@ const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISION
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
-const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 const STATIC_GAP := 0.35             # s between the Static sparks' puffs on a marked foe (each lives as long)
@@ -103,16 +102,6 @@ func recast_window() -> Dictionary: return ult.window()
 func move_vel() -> Vector3:
 	return ult.move_vel()
 
-## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var rd := res_def()
-	for key in sparks:
-		var sp: Dictionary = sparks[key]
-		if is_instance_valid(sp["e"]):
-			var n := int(sp["n"])
-			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
-
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -140,9 +129,6 @@ func res_text() -> String:
 
 func res_frac() -> float:
 	return float(_best()) / float(res_def()["max"])
-
-func ready_label() -> String:
-	return "LIVE FOE: WIRERUN THROUGH" if full_ready() else ""
 
 func live(f: Ent) -> bool:
 	var s = sparks.get(f.get_instance_id())
@@ -183,7 +169,7 @@ func combo_read(f: Ent) -> Dictionary:
 	if s == null:
 		return {}
 	return {"icon": "mark_static", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
-			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
+			"total": float(res_def()["dur"])}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()

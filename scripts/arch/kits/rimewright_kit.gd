@@ -106,7 +106,7 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
-## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+## The Chill on `t`, for the plate status row (HudPlate.row) (one state, no stacks); the ring is the Chill left.
 func combo_read(t: Ent) -> Dictionary:
 	if not chilled(t):
 		return {}
@@ -953,22 +953,6 @@ func recast_window() -> Dictionary:
 		if left <= float(xd["late"]):
 			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
 	return {}
-
-
-## RecastCue's badges: Chill (a knock on it Shatters) and the Fan stacks toward the burst.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var pd: Dictionary = d["passive"]
-	for key in chill:
-		var c: Dictionary = chill[key]
-		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), true))
-	for key in fan_hits:
-		var f: Dictionary = fan_hits[key]
-		if is_instance_valid(f["t"]):
-			var n := int(f["n"])
-			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, full))
 
 
 func e_recast() -> bool:

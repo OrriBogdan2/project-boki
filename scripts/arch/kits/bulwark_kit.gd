@@ -112,9 +112,6 @@ func full_ready() -> bool:
 func res_text() -> String:
 	return "SLAM" if full_ready() else "%d" % int(res)
 
-func ready_label() -> String:
-	return "SHIELD SLAM READY" if full_ready() else ""
-
 func add_guard(v: float) -> void:
 	var was := res
 	add_res(v)

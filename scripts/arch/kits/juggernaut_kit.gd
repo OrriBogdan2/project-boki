@@ -80,10 +80,6 @@ func res_frac() -> float:
 func res_text() -> String:
 	return "ENRAGED" if enraged_t > 0.0 else "%d" % int(res)
 
-func ready_label() -> String:
-	if not slam_w.is_empty(): return "SMASH  ·  aim it"
-	return "ENRAGED" if enraged_t > 0.0 else ""
-
 ## How hot it is, 0..1 (Enraged counts as all the way).
 func heat_k() -> float:
 	return res_frac()
@@ -244,7 +240,8 @@ func _reset_riposte() -> bool:
 func _riposte_resettable() -> bool:
 	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
 
-## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+## The combo state for the status row (HudPlate.row): the Warchain's hold on `t`, else the Slam's 2s window in
+## which a knock readies X.
 func combo_read(t: Ent) -> Dictionary:
 	if warchain.hooked() and warchain.target == t:
 		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
@@ -855,8 +852,6 @@ func _tick_lunge() -> void:
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			if was_chain:
-				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -994,16 +989,6 @@ func recast_window() -> Dictionary:
 	if not warchain.hooked():
 		return {}
 	return RecastCue.window("e", warchain.tether_t, float(warchain.data()["time"]), warchain.anchor)
-
-## RecastCue's badge: a foe the Finishing Slam hit; a knock on them in time resets the Riposte.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var reset_t := float(rmb_def()["slam"].get("reset_t", 2.0))
-	for key in slam_hit:
-		var f := instance_from_id(key) as Ent
-		var left: float = reset_t - (m.time - float(slam_hit[key]))
-		if f != null and not f.dead and left > 0.0:
-			out.append(RecastCue.mark(f, 0, left, reset_t, true))
 
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

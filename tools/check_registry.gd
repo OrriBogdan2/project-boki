@@ -392,6 +392,7 @@ const CHECKS := {
 	"--buff-stack-check": ["res://tools/buff_stack_check.gd", "buff_stack_check", null],
 	"--buff-stack-shots": ["res://tools/buff_stack_check.gd", "buff_stack_check", "shots"],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--plate-status-check": ["res://tools/plate_status_check.gd", "plate_status_check", null],      # one status row
 	"--number-looks-check": ["res://tools/number_looks_check.gd", "number_looks_check", null],      # by source
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],

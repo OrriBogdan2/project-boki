@@ -9,7 +9,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_panels.gd` (`HudPanels`, one on `hud.panels`) | nothing of its own: the fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability / weapon slots, gear, Boki card, squad, perks) draw on this canvas under `hud.c`, at most 20 times a second (item 94); world-anchored and mouse-following parts stay on `hud.c`, every frame. `hover_spots` fill here |
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
-| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin (a rival's turns warm with an up triangle 2+ levels above you, cool with a down triangle 2+ below: `LevelGap`), name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin (a rival's turns warm with an up triangle 2+ levels above you, cool with a down triangle 2+ below: `LevelGap`), name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, the status row to the right (`row`/`draw_row`, below), downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour strip flashing white as it loses some, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_reveal.gd` (`HudReveal`) | the staged HUD (DECISIONS 2026-11-08, design review 11-10 fix 8): one table, `content/rules/hud_reveal.json`, gives each group its first match (1: vitals, abilities, clock, Boki card, minimap; 4: counters, feed, gear, squad, perks, weather, plate name colours) or its first event (the Ways Out strip on the first open seat, kept in `Save.d.hud_reveal`). Tab shows all; so do Settings > Accessibility "Show full HUD", older saves (no `hud_reveal`) and every non-expedition match. Check: `--hud-reveal-check` |
@@ -38,7 +38,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hunter_zone.gd` (`HunterZone`) | the screen area over your own hunter (feet to plate): floating numbers and words (`Fx`), message cards and the knock banner slide sideways out of it, plate labels fade under it (`LabelSpacing`). Nothing prints over your hunter. Check: `--hunter-zone-check`; shots: `--hunter-zone-shots` |
 | `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
 | `loot_feed.gd` (`LootFeed`, one on `hud.loot`) | what you just picked up (gems, seeds, belt items, gear worn or packed off the ground): bottom right over the slot row, icon + name + count per row, the same thing again within 2 s adds to its row, at most 4 rows, each fades out by 3 s; its own pickup tick pitched by rarity, silent while the lane keeps its fight budget except Rare and up. Counts as the `loot` HUD group only while it has rows. Check: `--loot-feed-check` |
-| `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips (the count beside them past a full row: Sable's uncapped Marks) and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it and their squad (side by side, each in their own colour) (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks, Kael's Slam window and Warchain hold, Gil's splash marks toward a Beach). No state on a foe, no tag: Lace, Albert, Tenzo, Zed and Motley have none (their payoffs are instant hits or self buffs). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
+| `combo_mark.gd` (`ComboMark`) | the payoff of a combo state on a foe: a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, sound). The state itself is a status-row icon (`HudPlate.row`, reading `ArchKit.combo_read(foe)`). Check: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate's squad row while knocked (pink-red italic KNOCKED tag on the row's top edge, red X in a white arrow beside it) or dead (grey DEAD tag, grey X, greyed portrait); back up, eliminated or soul lost: one faint line beside the row (1.5 s) and a sound. Check: `--hudref-check` |
 | `knock_banner.gd` (`KnockBanner`, a Control on `hud.knocks`) | the knock banner top-centre (top at 13% of the screen, under any toasts): ALLY KNOCKED (cyan ring, white word with a blue edge, pink X) when a teammate goes down, KNOCK (pink-red ring and word, white edge and X) when your squad knocks a rival; round portrait over an ink slash, name pill. The slash and the pill are see-through (`back_alpha` 0.5, owner 11-12) and anti-aliased; the ring, portrait and words stay solid, the words drawn at their real pixel size through the pop and the banner placed on whole pixels, so nothing blurs at 1080p. Pops 1.25 -> 1.0 in 0.12 s, holds, fades and rises out at 1.25 s; a new knock replaces it, the same kind within 0.3 s counts x2. Sounds: `warn` low (teammate), `knock_confirm` (rival). Numbers: `content/rules/knock_banner.json`. Check: `--hudref-check`; film: `--knock-banner-clip` (GPU) |
@@ -59,11 +59,15 @@ Rules of the look:
 - Space kept free for other widgets: under each plate from `sp.y + HudStyle.PLATE_ICON_ROW` (loadout
   icons), and the right half of the bottom bar.
 
-- Crowd control on the plate: one status row (`HudPlate.statuses`, drawn by `icon_row` on your own plate and
-  `Hud._status_row` on monsters; other Hunters' plates show only the word, their body shows the rest, BodyTell,
-  docs/COMBAT_CLARITY.md) with one icon per kind, in order: stun, root, Ground, Daze, Slow, then burn,
-  weakened, shield, guard. Stun/root/slow read `Ent.stun_t/root_t/slow_t`; Ground and Daze read `KitStatus`
-  (`grounded_left`, `rattled_left`). Each shows its time left, shrinking, in the icon's colour; no icons, no row.
+- One status row per plate (`HudPlate.row` builds it, `draw_row` draws it: right of every Hunter's plate, under
+  monster bars via `Hud._status_row`; plates past `LabelCull.FAR_M` are not laid out, so neither is the row).
+  Icon on a dark disc with a ring in its colour that empties with the time left, at most `ROW_MAX` = 4, in order:
+  what stops them (stun, root, Ground), then the combo state their attackers put on them (`ArchKit.combo_read`
+  for you and each squadmate, in the kit's colour with a stack count; your Boki's setups), then Daze, Slow,
+  burn, weakened, shield, guard. A kit mark stands in for the plain status it matches (`MARK_FOR`: Vex's Daze,
+  Cinder's Ablaze). Stun/root/slow read `Ent.stun_t/root_t/slow_t`; Ground and Daze read `KitStatus`
+  (`grounded_left`, `rattled_left`). The ring total is the most time left seen since the status went on.
+  Check: `--plate-status-check`, `--clarity-check` section 4.
   A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
 
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
@@ -274,15 +278,15 @@ no kit draws its own recast HUD.
 - **Reporting (pull).** `ArchKit.recast_window()` returns `RecastCue.window(slot, left, total, at, armed, auto)`
   while a recast is open: `slot` is `e`, `x`, `dash` or `lmb`; `at` is what the recast triggers (the seed, the
   knife, the hammer, the landing spot); `armed` false is dim (a minimum hold; the slot says WAIT); `auto` means the window fires by
-  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total,
-  ready)` for every foe carrying the kit's mark, stack or Daze. `_tick_recast` runs `RecastCue.track` for the
+  itself at the end (no EXPIRED). A foe's mark, stack or Daze is not
+  reported here: it is `ArchKit.combo_read` on the foe's plate status row (HudPlate). `_tick_recast` runs `RecastCue.track` for the
   local hunter only.
 - **Slot.** The slot pulses in the ability colour (`slot_col`), a timer ring empties (red under `WARN` = 0.6 s),
   and a big "<KEY> AGAIN" sits over it on a dark pill; the key is `Settings.key_cap` of the live InputMap action.
   A window that ran out (not used, not `auto`) shows EXPIRED for 0.9 s.
 - **World.** No key letter and no word on world objects (DECISIONS 2026-11-11, replacing the 11-08 key on the
   marker): over `at` a plain ring that empties with the window and pulses hot under `WARN` (dim while `armed` is
-  false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
+  false). A white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
 - **First-time hint.** The first time a Hunter's window opens in a real match (not training, tutorial, arena),

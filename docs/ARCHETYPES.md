@@ -888,12 +888,12 @@ set the bar for "oomph": one resource that the kit's own abilities build, a hunt
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
 follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
-`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`).
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `e_payoff_ready`, `teardown`).
 No kit prints a word in the world (owner 11-11): armed, landed, reset and crowd-control moments read
 through glow, ring, flash, sound and the plate's status icon; only numbers float.
 
-- **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
-  while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
+- **HUD:** the resource bar and crosshair arc as before (no ready word under the crosshair) and the gold "ready"
+  dot on the slot the payoff lives on.
 - **Remote players** (whose games don't run your kit): the armed moment and every payoff send the
   existing Net `fx` ring / bolt events, and an armed kit pulses a ring under the hunter every 1.1s.
   The protocol shape is unchanged (no `Net.VERSION` bump).
@@ -1100,7 +1100,7 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |

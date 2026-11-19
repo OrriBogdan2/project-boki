@@ -100,9 +100,6 @@ func res_text() -> String:
 func fever_k() -> float:
 	return float(res_def()["vamp"]) * floorf(res)
 
-func ready_label() -> String:
-	return ""
-
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	if res_wait <= 0.0 and res > 0.0:
@@ -570,13 +567,6 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)
-
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		if KitStatus.rattled(f):
-			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).

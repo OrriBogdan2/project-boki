@@ -263,9 +263,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -833,16 +830,6 @@ func recast_window() -> Dictionary:
 		w["at"] = knife.get("pos", h.pos)
 		w["auto"] = true
 	return w
-
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")
