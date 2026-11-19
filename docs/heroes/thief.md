@@ -122,7 +122,7 @@ Asserted in `--dancer-combo-check` (`dancer quick: ...`).
 
 | What | Source | Ours before | Ours now |
 |---|---|---|---|
-| Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | unchanged |
+| Stops at the cursor | the bolt fizzles in a blue-violet puff at the cursor, 4.7 bh away (0004 -> 0005, 0009 -> 0010) [footage] | cursor-placed | tester note 11-19: always the full 8.5 m along the aim, whatever the cursor distance (`--tester-feedback-check`) |
 | Range | 850 units = 8.5m, "the aim laser length" (sv/FEEL.md, wiki rules); the empowered 850 -> 950 (+12%, wiki patch 26.11.2024). sv/briefs/kits.md gives no range [reference data]. Footage: every bolt hits a dummy about 7 bh away (11-12.6m) [footage, disagrees] | 12m, 13.4m empowered | 8.5m, 9.5m empowered (data beats footage) |
 | Projectile speed | no figure in the data; the footage shows a bolt cover 200 px in about 0.2s, 1000 px/s x 0.0375 = 37.5 m/s [footage, one frame at 5 fps, so rough] | 34 m/s | 37.5 m/s (8.5m in 0.23s) |
 
@@ -249,7 +249,7 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 37.5 m/s; it flies to the cursor (8.5m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 8.5m (the wiki's 850 units); no magazine |
+| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 37.5 m/s; it always flies its full 8.5m along the aim (the cursor only turns it) and fizzles at the end in a blue-violet puff. A thin white aim line to its full range with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 8.5m (the wiki's 850 units); no magazine |
 | Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): a flat +1.3 bolt damage per Mark (the data's +16 on 160), weapon upgrades do not grow it. A knock heals 20% on top of the takedown's 5% (25% in all, the data's) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
 | Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
@@ -539,3 +539,7 @@ dagger is lost; holding the step until she is free would read better.
   Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on R it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+
+## Tester note 11-19
+The empowered bolt must land to refresh the Vault: a Shift press waiting for it (`ThiefChain.waiting`) is dropped when the bolt misses, so a miss gives no Vault and no long dash. Checked by `--tester-feedback-check` and the `_miss` row of `--dancer-combo-check`.
