@@ -1,7 +1,9 @@
 extends RefCounted
 ## --look-locker-check: making yourself in the LookLocker (scripts/ui/look_locker.gd). The four tabs with their
 ## icons; each tab's camera shot (Hollow closes in on the head, Glider pulls back); hovering a choice tries it on
-## the model without keeping it; picking one keeps it, pops the model and flashes the turntable; the hood row
+## the model without keeping it; the set (LookSet: key, glow rim and kicker, a curved wall and stones behind you) and
+## every named choice's tile picture slot (LookThumbs) for any model; a tab's rows fade in while the camera swings
+## (Shroud full length from three-quarters, its own field of view); a pick's reaction (an emote) and the rim's flash; picking one keeps it, pops the model and flashes the turntable; the hood row
 ## only on a cut with a hood; the dais, satchel and lantern are the Meshy pieces; glider tiles in their rarity
 ## colours, a locked one never equips; the wheel zooms within its limits and a drag turns the turntable; Looks
 ## good saves the look and takes the locker down.
@@ -36,6 +38,7 @@ func run(main_node: Node, mode: String) -> void:
 		return
 	ok(locker != null and hx.stage == "create", "Change your look opens the locker")
 	await _tabs()
+	await _presentation()
 	await _try_and_pick()
 	_hood()
 	_props()
@@ -80,6 +83,33 @@ func _tabs() -> void:
 		"under the open glider you hang over the turntable")
 	locker.show_tab("Shroud")
 	await _frames(2)
+
+func _presentation() -> void:
+	var lset: LookSet = locker._set
+	var spots := lset.find_children("*", "SpotLight3D", false, false)
+	ok(spots.size() >= 4 and spots.filter(func(l): return l.shadow_enabled).size() == 1,
+		"the set's rig: a key that casts your shadow, a glow rim, a cool kicker and a top light")
+	var stones := lset.find_children("*", "MeshInstance3D", false, false).filter(
+		func(m): return m.mesh is CylinderMesh and (m.mesh as CylinderMesh).radial_segments == 6)
+	ok(stones.size() == LookSet.STONES.size() and lset.find_children("*", "CPUParticles3D", false, false).size() == 1,
+		"a backdrop with depth: standing stones behind you and motes drifting up")
+	var tiles := _opts("shroud:")
+	ok(tiles.all(func(t): return t.find_child("Pic", true, false) is TextureRect),
+		"every named choice has a picture of you wearing it (%d shroud tiles)" % tiles.size())
+	ok(LookThumbs.FRAMES.has(String(LookLocker.THUMB_FRAME["ghost"])) and LookLocker.THUMB_FRAME["ghost"] == "head",
+		"face choices are pictured close on the head")
+	var rows: Array = locker._list.get_children()
+	ok(rows.size() > 1 and (rows[-1] as Control).modulate.a < 0.5, "a new tab's rows fade in one after another")
+	await main.get_tree().create_timer(LookLocker.SWING_S + 0.4).timeout      # the swing and the fades are timed
+	ok(rows.all(func(r): return not is_instance_valid(r) or (r as Control).modulate.a > 0.99), "and settle fully lit")
+	var head := locker.model.global_position + Vector3(0, 1.5, 0)
+	ok(locker._cam.global_position.distance_to(head) > 2.4 and is_equal_approx(locker._cam.fov, 40.0),
+		"Shroud frames you head to toe")
+	var rim_e: float = lset._rim.light_energy
+	locker.pick("colour", 2)
+	await _frames(2)
+	ok(locker._react_t < 0.5 and lset._rim.light_energy > rim_e, "a pick plays a reaction and flares the rim light")
+
 
 func _try_and_pick() -> void:
 	var tile := _opt("shroud:3")
