@@ -54,19 +54,19 @@ static func line(arch: String, slot: String) -> String:
 		return weapon_line(arch, String(ws[0])) if not ws.is_empty() else ""
 	var card: Dictionary = Arch.def(arch).get("card", {})
 	var text := String(card.get(BLOCK.get(slot, slot), block(arch, slot).get("desc", "")))
-	return Settings.fill_keys(text)
+	return _keys(text)
 
 
 ## A kit weapon's card line.
 static func weapon_line(arch: String, weapon: String) -> String:
 	var wl: Dictionary = Arch.def(arch).get("card", {}).get("weapons", {})
-	return Settings.fill_keys(String(wl.get(weapon, Data.weapon_stats(weapon).get("desc", ""))))
+	return _keys(String(wl.get(weapon, Data.weapon_stats(weapon).get("desc", ""))))
 
 
 ## The whole description; the right click has no single one: its variants, one per line.
 static func full(arch: String, slot: String) -> String:
 	if BLOCK.get(slot, slot) != "rmb":
-		return Settings.fill_keys(String(block(arch, slot).get("desc", "")))
+		return _keys(String(block(arch, slot).get("desc", "")))
 	return "\n".join(variant_rows(arch).map(func(r): return "%s: %s" % r))
 
 
@@ -76,10 +76,15 @@ static func variant_rows(arch: String) -> Array:
 	var rows: Array = []
 	for v in VARIANTS:
 		if vs.has(v):
-			rows.append([Settings.fill_keys(VARIANTS[v]), Settings.fill_keys(String(vs[v]))])
+			rows.append([_keys(VARIANTS[v]), _keys(String(vs[v]))])
 	return rows
 
 
 ## The role in a sentence (the hero pick, the arena toast).
 static func loop(arch: String) -> String:
-	return Settings.fill_keys(String(Arch.def(arch).get("card", {}).get("loop", "")))
+	return _keys(String(Arch.def(arch).get("card", {}).get("loop", "")))
+
+
+## `s` with the player's keys in it; most texts have no key token, and the HUD asks every frame.
+static func _keys(s: String) -> String:
+	return Settings.fill_keys(s) if "{" in s else s
