@@ -73,6 +73,8 @@ func pick_target() -> Ent:
 			continue      # (a disguised Shrubling is not given away by its Boki)
 		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
 			continue      # it gave up on this one a moment ago (couldn't reach it)
+		if f is Mob and (f as Mob).held:
+			continue      # a tutorial dummy waits for you to send it (Mob.held)
 		near.append(f)
 	if near.is_empty():
 		return null
