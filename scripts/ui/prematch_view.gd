@@ -30,6 +30,7 @@ var chat_hint: Label
 var talk_btn: Button
 var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
 var stage_slot: Control          # where the stage stands, beside the Hunter grid
+const SQUAD_PX := 40.0        # px, a squadmate's portrait in the strip
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
@@ -311,6 +312,14 @@ func _stage_pick() -> void:
 		stage.set_hunter(pm.pick)
 	stage.play_lockin()
 
+## A squadmate who hasn't picked yet: a dim square where their portrait goes.
+func _empty_face() -> Control:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", UI.frame(UI.WELL, UI.R_SMALL, UI.LINE))
+	p.custom_minimum_size = Vector2(SQUAD_PX, SQUAD_PX)
+	return p
+
+
 ## Your squad in pick order; whoever is picking is outlined.
 func _fill_squad() -> void:
 	for c in squad_box.get_children():
@@ -320,9 +329,10 @@ func _fill_squad() -> void:
 	for m in mates:
 		var ak: String = m["arch"]
 		var chip := UI.card(PICKING_FILL if m == now else UI.CARD, 8, 6)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		var h := UI.hbox(8)
 		chip.add_child(h)
-		h.add_child(ClassCard.portrait(ak, 36.0) if Arch.exists(ak) else UI.label("?", 20))
+		h.add_child(ClassCard.portrait(ak, SQUAD_PX) if Arch.exists(ak) else _empty_face())
 		var you: bool = m["you"]
 		var shown := String(m["name"]) + ("  (you)" if you else "")
 		h.add_child(UI.label(shown, UI.T_BODY, UI.ACCENT_HI if you else UI.INK, UI.semi))

@@ -60,7 +60,7 @@ static func _outside(hud, m: Match, ht: Heart) -> bool:
 		var a := (0.1 + 0.3 * hit) * (1.0 - i / 6.0)
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
-	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
+	var per_s := Heart.tick_dmg(m) / Heart.r("tide_tick_s")
 	var way_in := Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).normalized() * maxf(tr - EDGE_IN, 0.0)
 	hud._draw_waypoint(Vector3(ht.site.x + way_in.x, p.pos.y, ht.site.z + way_in.y), "Zone edge", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)

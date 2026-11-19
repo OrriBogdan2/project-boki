@@ -3280,6 +3280,8 @@ func _gather_input() -> void:
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
+		if a[0] == "ultimate" and not MergeForm.enabled():
+			continue       # Fusion is off: X is reserved and does nothing
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
@@ -3605,6 +3607,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
+		Content.rules("merge_forms")["fusion_enabled"] = true
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
@@ -5393,6 +5396,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+var hunter_hints := HunterHints.new()   # the first-time lines for each fighting slot of a Hunter
 
 func _tips() -> void:
 	tips_live = false
@@ -5411,14 +5415,16 @@ func _tips() -> void:
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
-		_tip("ability", TipText.ability(player.ak != null))
-	if player.ult >= 1.0 and player.kin:
+		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
 	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
@@ -5433,7 +5439,7 @@ func _tips() -> void:
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
 	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
