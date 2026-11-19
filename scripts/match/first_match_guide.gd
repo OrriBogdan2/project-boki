@@ -110,8 +110,6 @@ func _start(lid: String, p: Hunter) -> void:
 		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
 	if lid == "exit":
 		txt = _exit_text(txt)
-	if lid == "send":
-		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)

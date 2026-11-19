@@ -143,7 +143,14 @@ func _crouch_hint() -> void:
 	await _run_for(0.5)
 	ok(TopStack.strip_age(m) == ch.strip_age(), "the guide done: the crouch hint takes the banner")
 	m.hud.toast("A second toast", Color.WHITE)
+	# the lane ages on frame time, so on a loaded box the card may already be gone a beat after the hold ends:
+	# step until it shows (never past the banner's fresh time + 2 s) and measure it then
 	await _run_for(Tutorial.CARD_T)
+	for _i in 20:
+		if not lane.rects().is_empty():
+			break
+		m.hud.toast("A second toast", Color.WHITE)
+		await _run_for(0.1)
 	await _shot("crouch")
 	var cards: Array[Rect2] = lane.rects()
 	ok(
