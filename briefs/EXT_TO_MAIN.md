@@ -10287,3 +10287,4 @@ READY ext/tut-hint-lines 88a949176f (first-time hints: one short plain line each
 READY ext/tut-training-stations 45345fab6c (Training Grounds: one first-time hint per station, once per save; grounds-check asserts once-only)
 READY ext/farm-blocks-climbable 8b59dae87d (every solid catalog piece placed + climbed in --farm-climb-blocks-check, Boki S/M/L walk past; no piece blocked, no data fix needed)
 READY ext/tut-camps-telegraph fb3d7c78f2 (tutorial first camp: marker + 3 s countdown on world and minimap before monsters; CampMark; fight-check asserts telegraph before spawn)
+READY ext/sfx-step-biomes da12a4cff8 (footsteps by biome: ember/gloom stone, frost snow, rest grass, content/rules/step_biomes.json; sfx-set-check style rows)
