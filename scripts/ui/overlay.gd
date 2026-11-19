@@ -366,7 +366,7 @@ func _tab_main(v: VBoxContainer) -> void:
 	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred(),
 		"From your next expedition")
 	_toggle(v, "Fullscreen", "fullscreen", "F11 or Alt+Enter")
-	_sync_fullscreen_switch(Settings.window_is_fullscreen(), v)      # (shows the window as it is; the saved choice is left alone)
+	_sync_fullscreen_switch(Settings.window_is_fullscreen(), v)      # (the window as it is; the choice stays)
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD")
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
