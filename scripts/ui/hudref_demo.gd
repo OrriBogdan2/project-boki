@@ -5,9 +5,12 @@ extends RefCounted
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
 ##           cooling down, and a heal shield on you (the vitals' shield strip). Everyone else stands still.
+##   wash:   the plates row, you at 18% health, hit at HIT_AT by a rival standing to your left
+##           (the low-health wash, heavier on that edge: HurtWash).
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
-##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
+##           a hint, toasts and a repeat, you stunned, rooted and slowed): shoot it with --shot-time a
+##           little after BUSY_AT.
 
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
@@ -141,6 +144,9 @@ static func _busy(m, P: Hunter) -> void:
 			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
 			break
 	m.hud.level_up(8)
+	P.stun_t = 1.5                               # crowd control on you: the line under your vitals
+	P.root_t = 3.0
+	P.slow_t = 4.0
 	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
 	m.hud.toast("Bramble Isle", Color("f2c84a"))
 	for i in 3:

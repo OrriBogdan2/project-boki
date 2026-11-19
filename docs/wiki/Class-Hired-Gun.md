@@ -23,7 +23,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
-6. There is no R: the Boki Fusion takes that key.
+6. There is no R ultimate yet. X fuses you with your Boki.
 
 ## Combos and interactions
 
@@ -81,7 +81,7 @@ What the in-game kit card (K) says.
 
 **Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
-**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You keep moving as you fire (a brief slow while the rifle points up), then shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
+**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
 ### Ranks
 

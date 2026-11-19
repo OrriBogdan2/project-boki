@@ -23,7 +23,8 @@ static func note(target: Ent, by: Ent) -> void:
 	if target is Hunter and cred is Hunter and cred.team != target.team:
 		target.hit_by[cred.get_instance_id()] = float(target.m.time)
 
-## `h` earned a takedown on enemy hunter `victim`: refresh `h` and the teammates who assisted.
+## `h` earned a takedown on enemy hunter `victim`: refresh `h` and the teammates who assisted, and count
+## their assists (Hunter.assists, read by the Tab board).
 static func takedown(h: Hunter, victim: Hunter) -> void:
 	if h == null or victim == null or h == victim or h.team == victim.team:
 		return
@@ -32,7 +33,10 @@ static func takedown(h: Hunter, victim: Hunter) -> void:
 	for mate in h.m.hunters:
 		var at = victim.hit_by.get(mate.get_instance_id())
 		if mate != h and mate.team == h.team and at != null and float(h.m.time) - float(at) <= ASSIST_WINDOW:
+			if float(at) > victim.assist_t:
+				mate.assists += 1      # a knock and the finish after it count one assist for the same hits
 			_refresh(mate, "assist")
+	victim.assist_t = float(h.m.time)
 
 ## The Second Wind perk: a hit that takes `h` from at least SECOND_WIND_HP of its health to under it
 ## refreshes the dash, at most once every SECOND_WIND_CD seconds. `hp_before` is its health before the hit.

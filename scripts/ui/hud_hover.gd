@@ -521,6 +521,11 @@ func kit_lines(lines: Array, k: Kin) -> void:
 		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 
 
+## the world hover card stays shut while recording, until the cursor rests 0.4 s, and all through a fight
+func world_tip_waits() -> bool:
+	return Record.clean() or _wh_still < 0.4 or H.in_fight()
+
+
 func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	var mp: Vector2 = H.c.get_local_mouse_position()
 	var cam: CamRig = H.m.cam
@@ -531,7 +536,7 @@ func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	_wh_mp = mp
 	_wh_still += H.get_process_delta_time()
 	var testing := "--hover-rival" in OS.get_cmdline_user_args() or "--hover" in OS.get_cmdline_user_args()
-	if (Record.clean() or _wh_still < 0.4) and not testing:
+	if world_tip_waits() and not testing:
 		return
 	if "--hover-rival" in OS.get_cmdline_user_args():
 		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)

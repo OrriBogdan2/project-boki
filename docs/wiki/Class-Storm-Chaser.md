@@ -22,6 +22,7 @@ straight through them is a Blowout that gives your dash back at once.
 4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
 5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
 6. There is no R: the Boki Merge takes that key.
+6. A knock heals you for 15% of your health. There is no R ultimate yet. X fuses you with your Boki.
 
 ## Combos and interactions
 
