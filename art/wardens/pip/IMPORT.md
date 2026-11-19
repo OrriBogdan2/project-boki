@@ -83,8 +83,12 @@ over the 1.3 limit (the linear-blend crease at the elbows and crotch). `hunter_m
 - Right paw: with clean arm weights the paw follows `hand.R`, and in the raised-paw clips that bone sits beside the
   eye, so the flat arm strip lay across the face. With the old blended weights it sank into the neck instead (the
   dark block). The strip has no inner surface, so weights cannot fix this. Re-key, rotation only: in call, call_hold,
-  call_end, hearth, flare and seed_aim, `upper_arm.R` is slerped from rest toward its key by 0.6 and `forearm.R` by
-  0.45. The paw now ends at the chest. The other 41 clips, the skeleton and the arm weights are unchanged, so idle
+  call_end, hearth, flare and seed_aim, `upper_arm.R` and `forearm.R` are slerped from rest toward their keys by 0.15
+  (retry 11-19: was 0.6 / 0.45, which held the strip out at chest height like a flag). The right forearm in the
+  scan is not a tube: it is a flat sheet that ends in comb-like strips over the satchel (manifold with the satchel
+  skin, so a vertex split would open holes). At rest it is tucked against the satchel and reads as a paw, so the
+  paw now stays there in those clips. A real arm needs a mesh repair (Meshy), not weights. `hearth` also slerps
+  `upper_arm.L` by 0.85 so the raised left paw strip passes 5 cm wider and 13 cm behind the face instead of across it. The other 41 clips, the skeleton and the arm weights are unchanged, so idle
   and stance look the same as the first pass.
 - The wings ride `wing.R`/`wing.L` whole, on purpose: live's arm and hip weight on them is a stretch source. No
   visible change.
