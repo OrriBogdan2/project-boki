@@ -264,12 +264,12 @@ func _wind_up() -> void:
 	while t < 1.0 and landed < 0.0:
 		run_for(Match.DT)
 		t += Match.DT
-		held = held or (k.wind_do.is_valid() and k.melee_n == bites)
+		held = held or (k.strike_t > 0.0 and k.melee_n == bites)
 		if k.melee_n > bites:
 			landed = t
 	ok(held, "a bite is held in its wind-up")
-	var on_time := landed >= BokiSwing.LUNGE_WIND - 0.03 and landed <= BokiSwing.LUNGE_WIND + 0.1
-	ok(on_time, "...and lands on the lunge's release frame (%.2f s)" % landed)
+	var on_time := landed >= Kin.STRIKE_WINDUP - 0.03 and landed <= Kin.STRIKE_WINDUP + 0.1
+	ok(on_time, "...and lands on the bite's contact frame (%.2f s)" % landed)
 
 # ------------------------------------------------------------------ 5. downed
 func _downed() -> void:

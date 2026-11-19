@@ -1032,20 +1032,6 @@ func fall_out() -> void:
 		return
 	go_down(true)
 
-## The bite lands: the lunge, the hit and the on_hit trigger (on the release frame of a rigged Boki's lunge clip).
-func _bite(foe: Ent) -> void:
-	if foe == null or not is_instance_valid(foe) or foe.dead:
-		return
-	var to := Vector2(foe.pos.x - pos.x, foe.pos.z - pos.z).normalized()
-	lunge_t = 0.15
-	vel.x += to.x * 5.0
-	vel.z += to.y * 5.0
-	var tp := foe.pos
-	foe.hurt(dmg * power, self, {"kb": to * 2.0, "src": "kin", "tags": ["kin", "melee"]})
-	m.sfx("kinhit", pos, -6.0, 1.0)
-	melee_n += 1
-	fire_trigger("on_hit", {"at": tp})
-
 ## Holds `what` for `delay` s, the wind-up of its clip. Dropped if the Boki cannot fight by then.
 func _wind(delay: float, what: Callable) -> void:
 	wind_t = delay
