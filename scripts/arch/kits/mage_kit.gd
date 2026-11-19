@@ -559,6 +559,13 @@ func rmb_charge_full() -> float:
 func rmb_auto_t() -> float:
 	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
 
+## Holding the Storm Rod slows her by rmb.self_slow, ramping in over rmb.slow_in s (never a snap).
+func move_k() -> float:
+	if not rmb_down:
+		return 1.0
+	var rd := rmb_def()
+	return 1.0 - float(rd["self_slow"]) * clampf(rmb_t / float(rd["slow_in"]), 0.0, 1.0)
+
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
 		_summon_rod()
