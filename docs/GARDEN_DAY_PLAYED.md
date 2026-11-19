@@ -25,7 +25,7 @@ and `Save.no_write`: the real save file's md5 is checked unchanged.
 
 | Row | What | Status |
 |---|---|---|
-| A | The demo opens with a "While you were away: A Rare Spore Egg is ready to hatch" card over the whole base (already row 13 of `docs/GARDEN_SLICE_CHECK.md`, still there). Any demo film or first screenshot hides the Boki | Follow-up 1 |
+| A | The demo opens with a "While you were away: A Rare Spore Egg is ready to hatch" card over the whole base (already row 13 of `docs/GARDEN_SLICE_CHECK.md`, still there). Any demo film or first screenshot hides the Boki | **Fixed** (`BaseDemo.stage` sets `arrivals.quiet`, so no arrival card opens; `--base-demo-check` asserts no panel at 5 s). Check still has one older red: the Nook is the hub's in base mode, so the demo's incubator stays hidden |
 | B | The Nook's "Friends" gate compared the base's bond (`rec.bonds`, -1..1) with 50, so in a base no pair could ever be friends: "Pip and Moss need to be friends" at bond 0.9 | **Fixed** (`NookRules.friends` reads `base_life.friend_at`, 0.5; `ext/farm-garden-default` has the same hunk, so it merges clean); `--nook-check` moved to the -1..1 scale |
 | C | The Nook tile said "Lv 5 needed" while Grown is level 8 | **Fixed** (`home.gd` `_pair_short` prints `NookRules.GROWN_LV`) |
 | D | Away card: a Boki living in Cinderstep trained "at the toys" of the zone you arrive in (Bramblebank's toys, +3 focus on the card) | **Fixed** (`GardenAway._toys` skips Boki that do not walk the arrival zone). The check asserts it |

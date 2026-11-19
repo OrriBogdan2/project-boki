@@ -47,6 +47,10 @@ static func save() -> Dictionary:
 ## Puts the toys and the Nook on the built farm, the Boki beside them, and sets the scene for the camera.
 func stage(h) -> void:
 	var land := HomeLayout.LANDING
+	h.arrivals.quiet = true      # no first-arrival card (While you were away, the egg is ready) over the whole base
+	h.arrivals.jobs.clear()
+	if h.panel_open != "":
+		h._close_panel()
 	h.day_t = 0.42
 	for id in TOYS:
 		h.hg.demo_place(id, land + TOYS[id])
