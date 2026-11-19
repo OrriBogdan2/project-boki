@@ -105,7 +105,8 @@ func _species(main: Node) -> void:
 	_feel(k, rig)
 	await _states(main, k, rig)
 	await _stepping(main, rig)
-	await _own_look(main)
+	if Data.KIN.has(kin_id):    # a body with no game data yet has no DNA look to wear
+		await _own_look(main)
 	k.queue_free()
 
 func _contents(rig: BokiRig) -> void:
