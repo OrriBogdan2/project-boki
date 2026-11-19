@@ -10304,3 +10304,4 @@ READY ext/stomp-picker-sweep 040c762583e31f863e176a6eb4de00521c1aa244 (StompPick
 READY ext/online-feel-proxy-reap 9ac61c75f58aa878df8d87b8b2f2bbfe34895cef (online-feel-check: proxy dies with the run, --parent-pid/--max-life, log file, free port, 840 s budget; 2 runs green 328 s)
 READY ext/split-lairs b903cf12cc (split lairs.gd into fight/lock/bots/demo, API unchanged)
 READY ext/merge-lane-tutorial-1119 3fa6f4d132 (supersedes 857fd4d1f9: + origin/main 4aaa301350 (clean); drop-feel-check fixed for the LMB-first tutorial beat; PR #349 GATE GREEN: full suite at 857fd NEW-RED 1 -> re-run at 3fa6f4 0 red, export dry-run OK 885 MB)
+READY ext/split-exits 53c878df43 (split exits.gd into flow/look, API unchanged)
