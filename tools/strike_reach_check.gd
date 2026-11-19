@@ -19,6 +19,7 @@ const OPEN := {
 	"juggernaut:jug_slash_l": "tip 2.1 of 3.1 m: the arm folds, the sword is the splash's 0.61; straight out 2.6",
 	"juggernaut:jug_riposte": "tip 1.9 of the 3.6 m strip: the elbow sits behind the shoulder; straight out 2.2",
 	"bulwark:bul_whirl": "head 2.9 of the 3.5 m ring: arm and hammer straight out reach 3.2",
+	"bulwark:bul_smash": "tip 2.1 of the 2.8 m reach: main's v95 Breaker hammer is shorter than the clips were keyed for",
 }
 
 var bad := 0
