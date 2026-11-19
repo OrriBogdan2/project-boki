@@ -10360,3 +10360,4 @@ READY ext/merge-lane-n19d-1119 fb773175bd (lane n19d bundle: tut-wide-cam + one 
 READY ext/p10-port-1118 e2ebeea6c (P10 movement/glide port: Gil Ground Swim 4.5 m/0.55 s without TurnCost, spike blocks on GlideSpike, plus earlier one-profile/Wirerun-glide/heat/impact-cap/range-screen; PR #328; reds vs main: none new, health --strict OK)
 READY ext/p07-port-1118 5a7d649b2218 (P07 port: tut-wide-cam framing per starter in --tutorial-fight-check, driver wall-kick fix, fight check 11 FAIL on main -> 0; PR via gh-outbox)
 READY ext/sfx-extract-cues-port 958d0df411 (PR #227: merged main 2ee0e648d3; nightmare-check red was a flake, 7/7 green)
+READY ext/p08-port-1118 9d758744f5 (P08 round 2: full-map labels never overprint, sentence labels wrap, one Materials chip, ui-simplify word cuts; PR via gh-outbox)
