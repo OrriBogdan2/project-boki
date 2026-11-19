@@ -1,5 +1,15 @@
 # Ryzz (ART-1 rebuild): how this model is made
 
+## Tear fix pass 3 (2026-11-19, ext/hunter-fix-ryzz-1118, art-gate retry): weights, needle split, wrist roll
+Starts from pass 2 below. Scripts and numbers: `/home/boki/gens/hunter-fix-ryzz-1118/v3/` (split.py, fix3.py, rekey.py).
+- Needles: the 254 bind-pose needle triangles (`hunter_mesh_check` spike_edges) are split at the midpoint of every edge longer than 10x the median edge (7.3 cm). The new vertex sits on the old edge and takes the average of every attribute, so the surface, UVs and look do not change. Nothing is deleted and no hole is added: every original vertex is byte-identical, there are 493 new vertices, area is equal and there are 0 spike edges.
+- Wrist roll (the arm ribbons in dash, crouch, emote, glide, ult): 30 clips roll the hand 60-350 deg about the forearm, and linear skinning pinches a ~180 deg wrist to a strip whatever the weights. Half the roll moves into the forearm about its own long axis (forearm*Ry(a), Ry(-a)*hand). With a 240 deg wrap, no joint passes 120 deg. The hand's world pose, every finger and every other channel are unchanged.
+- Hair: the pigtails and hair (hair-v95b/c) follow `head` only. They had upper-arm weight where they touch the shoulders. The 1369 verts welded to skin keep their weights, with a 4-hop blend.
+- Crotch: no leg weight more than 1 cm across the midline. Each side's thigh weight fades in over 4 cm from the midline (the web in squats and dash_ex).
+- Sash cloth: no arm, head or shin weight. It is harmonic between the seams where it is welded to the body. The tails are fused to the back of the thigh at both ends, so they follow the thigh and do not hang as a free board.
+- Loose parts: 4 small islands move rigidly with the body vertex under them.
+Live -> here: `stretch_check.gd` worst 15.34 -> 6.18, clips over the 7.0 ceiling 54 -> 0 of 56. Edges over 3x, worst clip: 3.18% -> 0.08%. `hunter_mesh_check`: spike_edges 254 -> 0, stretched tris worst clip 1694 -> 45. Open boundary edges 3705 = 3705 (no new hole).
+
 ## Tear fix 11-19 (ext/hunter-fix-ryzz-1118): skin weights only
 Same v95 mesh: vertex positions, normals, UVs, triangles, textures, skeleton, bone names and clips are byte-identical to live, so the rest pose cannot differ. Only JOINTS_0/WEIGHTS_0 changed. Each vertex got one body region (head, torso, arm L/R, leg L/R) from its old weights; arm-weighted vertices more than 7 cm from the mesh's own arm axis (backpack wires, sash, hair, torso skin) left the arm; sash cloth inside the body outline lost all arm influence (wrist cuffs keep theirs); weights stay on that region's bones; vertices within 6 edges of an arm/body or leg/leg contact get a smoothed gradient so fused faces stretch gently instead of spiking. No face deleted, no cap added. Edges over 3x their bind length, worst clip: 5.90% -> 0.15%. stretch_check.gd worst ratio 15.34 -> 7.12 (clips over the 7.0 ceiling 54 -> 2). Tool and numbers: /home/boki/gens/hunter-fix-ryzz-1118/.
 
