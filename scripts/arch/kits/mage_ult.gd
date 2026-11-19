@@ -259,7 +259,7 @@ func _aim_tick() -> void:
 	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": leap["from"], "r": float(data()["range"])})
 	leap["land"] = land_point()
 	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
-	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
+	crown.merge({"col": MageKit.DEEP_PINK, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 	if phase() == AIR:
 		var hover := float(data()["hover"])
