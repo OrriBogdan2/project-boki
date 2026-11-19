@@ -134,9 +134,9 @@ for the squad rows). Verified 11-11:
 
 ## Pop-up budget
 
-Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
+Owner playtest 11-09: "ally knocked is way too in your face"; 11-19: "way too much ui clutter ... its blocking combat". The rule now: in a fight toasts and hints queue and wait for it to end (only an urgent line shows), one card at a time, and a rival's name shows only under the mouse (`--combat-calm-check`). Before that: nothing that pops up during
 a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
-fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (4 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
+fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (3 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
 
 | Pop-up | Where, size | How long | Now |
@@ -145,12 +145,10 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Your squad knocked a rival | none (the knock burst and your flash) | 1.25 s | the KNOCK banner, same spot and timing |
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
-| Message lane (`toast`, `toast_small`, `level_up`: armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, one card at a time in a match (2 at home) | in a fight: only urgent lines show; the rest queue and show once 3 s pass without a hit (a hint keeps its own life); repeats already merge ("x3") |
 | Loot feed (`LootFeed`: ground pickups) | bottom right over the slot row, 230x23 px rows, 14 px | 3 s, 4 rows, repeats within 2 s merge | out of the lane; silent in a fight unless Rare+ |
-| Message lane (`toast`, `toast_small`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
 | Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
 | Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
-| Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
 | Kill feed (`KnockFeed`) | top right, its own lane under the counters, rows at most 266 px | 5 s and a 0.5 s fade, 4 rows | edge-anchored; knocks read as faces and an icon, not sentences |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
 | Level-up | was a lane line top centre (3.2 s) and a gold full-screen wash on even levels | was 3.2 s | **one moment, by you:** the chime, a gold column over your hero (0.8 s), a card over the vitals naming what improved (2.6 s); no lane line, no wash (`--level-hud-check`) |

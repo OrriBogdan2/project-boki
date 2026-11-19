@@ -23,6 +23,9 @@ static func note(hud, at: Vector2) -> void:
 	var n: Array = hud.get_meta("armor_note", [])
 	if n.is_empty():
 		return
+	if hud.in_fight():
+		hud.set_meta("armor_note", [n[0], hud.m.time + hud.TIP_LIFE])      # it waits the fight out
+		return
 	var left: float = float(n[1]) - hud.m.time
 	if left <= 0.0:
 		hud.set_meta("armor_note", [])

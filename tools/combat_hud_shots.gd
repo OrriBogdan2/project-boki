@@ -4,6 +4,7 @@ extends RefCounted
 ## Prints COMBATHUD <fight> <n> lines for the HUD calm check and saves <fight>.png.
 
 const DT := 1.0 / 60.0
+const SHOT_SIZE := Vector2i(1920, 1080)      # px: the frame the owner reads
 const FIGHT_SECS := 4.0      # s of real fighting before the frame is taken
 
 var main: Node
@@ -20,6 +21,7 @@ func run(main_node: Node) -> void:
 		elif String(a).begins_with("--fight="):
 			fight = String(a).substr(8)
 	DirAccess.make_dir_recursive_absolute(dir)
+	main.get_window().size = SHOT_SIZE
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()

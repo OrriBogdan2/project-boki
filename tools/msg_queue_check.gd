@@ -127,7 +127,7 @@ func _fight(host: Control) -> void:
 	ok(str(lane.texts()) == str(["down"]) and lane.waiting() == 3,
 		"a fight: only the urgent line shows, three wait (%s, %d)" % [str(lane.texts()), lane.waiting()])
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(lane.texts().is_empty(), "a fight: the urgent line goes after %.1fs and nothing else takes its row" % MsgLane.FIGHT_LIFE)
+	ok(lane.texts().is_empty(), "a fight: the urgent line goes after %.1fs, nothing takes its row" % MsgLane.FIGHT_LIFE)
 	lane.fight = false
 	lane._process(0.5)
 	ok(lane.texts().size() == MsgLane.MAX_SHOWN and lane.waiting() == 1,

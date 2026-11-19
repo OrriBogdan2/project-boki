@@ -448,8 +448,10 @@ func _draw_world_labels() -> void:
 	_draw_ground_tags(cam)
 
 ## Gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
-## already drawn this frame step up above it, so a few drops side by side stay readable.
+## already drawn this frame step up above it, so a few drops side by side stay readable. None in a fight.
 func _draw_ground_tags(cam: Camera3D) -> void:
+	if in_fight():
+		return      # a loot name is not worth reading mid-fight
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
 	var tags: Array = []
 	for wp in m.wpicks:
@@ -1246,6 +1248,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# card only (BokiHud), not again beside the belt
 	BeltHud.draw(self, p, r.end.x - s, y)
 	GripHud.draw(self, p, r)
+	if in_fight():
+		return      # the loot counters (seeds, gems, pack) wait the fight out: ammo and the slots stay
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])

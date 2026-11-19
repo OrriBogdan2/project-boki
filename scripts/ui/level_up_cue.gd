@@ -3,7 +3,8 @@ extends RefCounted
 ## Your level-up moment (Hunter.gain_xp -> Hud.level_up), the one place it is told: a gold light column
 ## with chevrons rising over your hero, and a short card just over the vitals (above the XP tracker) saying
 ## what improved (health and ability power, the weapon's step, the ultimate opening, points to spend). It is gone in
-## LIFE s. No toast and no screen wash; the sound is Hunter's, the world glow is Fx.body_glow.
+## LIFE s (it waits for a fight to end first). No toast and no screen wash; the sound is Hunter's,
+## the world glow is Fx.body_glow.
 ## Hud keeps one (hud.lvl_cue); checks read `t` and `lines`.
 
 const LIFE := 2.6          # s the card is up, its fade included
@@ -14,13 +15,15 @@ const COL_W := 46.0        # px: the light column's width
 const COL_H := 150.0       # px: how far the chevrons rise over the hero's feet
 const CARD_GAP := 10.0     # px between the card and the health number under it
 
-var t := 0.0               # s left on the card (0: nothing shown)
+var t := 0.0               # s left on the card (0: nothing shown); stands still in a fight
+var body_age := BODY       # s since the level-up: the light column's clock (it ends at BODY)
 var lines: Array = []      # [title, gains, news]; news may be ""
 
 ## A level was reached: what the card will say.
 func start(p: Hunter, lv: int, info: Dictionary) -> void:
 	lines = text_for(p, lv, info)
 	t = LIFE
+	body_age = 0.0
 
 static func text_for(p: Hunter, lv: int, info: Dictionary) -> Array:
 	var hp_gain := roundi(LevelGrowth.rate("hp") * 100.0)
@@ -36,10 +39,10 @@ static func text_for(p: Hunter, lv: int, info: Dictionary) -> Array:
 
 ## Over your hero, on the world pass: a soft gold column and three chevrons climbing it.
 func body(H, cam: Camera3D, p: Hunter) -> void:
-	var age := LIFE - t
-	if t <= 0.0 or age > BODY or p == null or p.model == null or cam.is_position_behind(p.position):
+	body_age += H.get_process_delta_time()
+	if body_age > BODY or p == null or p.model == null or cam.is_position_behind(p.position):
 		return
-	var k := age / BODY
+	var k := body_age / BODY
 	var feet := cam.unproject_position(p.position)
 	var a := 1.0 - k
 	var c: CanvasItem = H.c
@@ -59,8 +62,8 @@ func body(H, cam: Camera3D, p: Hunter) -> void:
 
 ## The card just over the vitals and ability row (at `x0`, its bottom on `y_bottom`).
 func card(H, x0: float, y_bottom: float) -> void:
-	if t <= 0.0:
-		return
+	if t <= 0.0 or H.in_fight():
+		return      # in a fight the card waits, then shows for its full time
 	t = maxf(0.0, t - H.get_process_delta_time())
 	var age := LIFE - t
 	var a := clampf(t / FADE, 0.0, 1.0)
