@@ -140,25 +140,23 @@ func _shots() -> void:
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("results_%s_%s.png" % [id, tag]))
 		if tag == "after":
 			_open_more(main)
-			for k in 10:
+			for k in 20:
 				await tree.process_frame
 			await RenderingServer.frame_post_draw
 			main.get_viewport().get_texture().get_image().save_png(dir.path_join("results_%s_more.png" % id))
 	print("RESULTSFIVE_SHOTS_DONE")
 
-## Frames for the fade and the count-up, then more while the screen is still one flat colour.
+## Frames for the fade and the count-up, then more while the ink wipe has not cleared (a slow worker).
 func _settle() -> void:
 	for k in 150:
 		await tree.process_frame
-	main.fade.reveal(0.01)      # a slow worker can still be inside the ink dissolve
-	for k in 30:
+	for k in 900:
+		if not main.fade.covered and main.fade.rect.color.a < 0.01:
+			break
 		await tree.process_frame
-	for k in 600:
-		await RenderingServer.frame_post_draw
-		var img := main.get_viewport().get_texture().get_image()
-		if img.get_pixel(100, 100) != img.get_pixel(900, 300):
-			return
+	for k in 20:
 		await tree.process_frame
+	await RenderingServer.frame_post_draw
 
 func _open_more(root: Node) -> void:
 	for b in root.find_children("*", "Button", true, false):

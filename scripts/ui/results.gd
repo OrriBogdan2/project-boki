@@ -303,7 +303,10 @@ func _details_toggle(det: Control, sc: ScrollContainer) -> Button:
 		det.visible = not det.visible
 		b.text = "More ▴" if det.visible else "More ▾"
 		if det.visible:
-			sc.ensure_control_visible.call_deferred(det))
+			await get_tree().process_frame      # the panel grows first
+			await get_tree().process_frame
+			if is_instance_valid(sc):
+				sc.ensure_control_visible(det))
 	b.focus_mode = Control.FOCUS_NONE
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	return b

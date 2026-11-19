@@ -225,6 +225,16 @@ panel stack; Back and Esc return to the menu. Labels are one plain line. `--paus
 count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
 720p, 1080p and ultrawide.
 
+## The results screen (DECISIONS 2026-11-08, "UI is too much for a new player")
+The first view is at most four groups plus the way home, tagged `results_group` in `scripts/ui/results.gd`:
+the outcome (title, how you left or placed, placement pay, Heart reward), what you kept (gems, seeds,
+Boki, gear, what stayed in the deathbox), your Boki (level, trust, news) and progress (mastery and Relic
+goals). Empty groups are hidden. The three stat tiles (Hunters downed, Damage, Time), Kills, Damage taken,
+Times downed, Revives and the market notes sit behind More, a button beside Back to the farm that opens them
+and scrolls to them. `--results-five-check` holds the group count (5 or fewer) and that every number and
+reward is still in the screen; `--results-five-shots` takes the four screens (extracted, died, Heart,
+Ways Out) at 1280x720.
+
 ## Admin tools and the Test Zone (owner only)
 Admin tools (`, More > Admin tools, Mod mode, `--god`) open only for a debug build, the web artifact's owner,
 or a desktop with the owner's dev key at `user://dev.key` (SHA-256 checked against `AdminGate.KEY_SHA256`; the
