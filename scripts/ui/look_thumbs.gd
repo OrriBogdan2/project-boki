@@ -12,7 +12,7 @@ extends SubViewport
 const PX := Vector2i(184, 168)  # px: one picture (shown at about half size, so it stays crisp)
 ## Each framing: [camera, the point it looks at, field of view (deg), the model's turn (rad)], from the model's feet.
 const FRAMES := {
-	"head": [Vector3(0.1, 1.5, 1.35), Vector3(0, 1.38, 0), 30.0, 0.15],
+	"head": [Vector3(0.05, 1.45, 1.12), Vector3(0, 1.38, 0), 30.0, 0.08],
 	"glider": [Vector3(0, 2.3, 3.6), Vector3(0, 1.9, 0), 40.0, 0.5],
 	"bust": [Vector3(0, 1.35, 1.6), Vector3(0, 1.2, 0), 36.0, 0.45],
 	"body": [Vector3(0, 1.05, 3.4), Vector3(0, 0.92, 0), 36.0, 0.4]
