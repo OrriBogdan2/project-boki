@@ -1,8 +1,7 @@
 # Ryzz (ART-1 rebuild): how this model is made
 
-## Tear fix 11-19 (ext/hunter-fix-ryzz-1118): weights and contact faces only
-
-Same v95 mesh, skeleton, bone names and clips; vertex positions are untouched. Each vertex got one body region (head, torso, arm L/R, leg L/R) from its old weights, arm vertices more than 10 cm from the mesh's own arm axis (sash tails, hair, torso skin) left the arm, and weights were limited to that region's bones, then smoothed 20 passes over the faces. The 844 faces that joined an arm to the hips/legs/head (or one thigh to the other) were deleted and 221 small holes capped. Edges stretched over 3x their bind length, worst clip: 5.9% -> 0.16%. Tool and numbers: /home/boki/gens/hunter-fix-ryzz-1118/.
+## Tear fix 11-19 (ext/hunter-fix-ryzz-1118): skin weights only
+Same v95 mesh: vertex positions, normals, UVs, triangles, textures, skeleton, bone names and clips are byte-identical to live, so the rest pose cannot differ. Only JOINTS_0/WEIGHTS_0 changed. Each vertex got one body region (head, torso, arm L/R, leg L/R) from its old weights; arm-weighted vertices more than 7 cm from the mesh's own arm axis (backpack wires, sash, hair, torso skin) left the arm; sash cloth inside the body outline lost all arm influence (wrist cuffs keep theirs); weights stay on that region's bones; vertices within 6 edges of an arm/body or leg/leg contact get a smoothed gradient so fused faces stretch gently instead of spiking. No face deleted, no cap added. Edges over 3x their bind length, worst clip: 5.90% -> 0.15%. stretch_check.gd worst ratio 15.34 -> 7.12 (clips over the 7.0 ceiling 54 -> 2). Tool and numbers: /home/boki/gens/hunter-fix-ryzz-1118/.
 
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Sparkle/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), on the rig before the underbust swap (95f0fef3e5^, so the move_bones deltas apply once). 13.2k tris, one 4096 atlas (head_uv 4), 45 clips.
