@@ -566,9 +566,11 @@ func _ridge_part(m: Node) -> void:
 		clear = clear and free and apart
 	ok(clear, "every vent stands on open ground, 2 m from any toy")
 	var gale: Dictionary = rh.kins.filter(func(k) -> bool: return String(k["rec"]["name"]) == "Gale")[0]
-	rh.ppos = Vector3(-500, 0, -500)
-	gale["pos"] = vents[0] + Vector3(1.4, 0, 0.4)
+	rh.ppos = vents[0] + Vector3(2.2, 0, 2.6)
+	rh.player.position = rh.ppos
+	gale["pos"] = vents[0]
 	gale["goal"] = gale["pos"]
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout      # the arrival wipe clears first
 	for day in [["ridge_vents_day.png", 0.5], ["ridge_vents_night.png", 0.97]]:
 		rh.day_t = day[1]
 		await _hub_shot(m, rh, day[0], 0.8, false, vents[0])
