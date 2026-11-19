@@ -10378,3 +10378,4 @@ READY ext/release-gate-pods 11d89f80650c2f6f24f5c42556ec436af6cedf8c (release ga
 READY ext/p19-models-split-1118 058239cc74 (P19 2/2: models.gd split into 11 parts behind a facade; stacked on #326)
 READY ext/p14-port-1118 f50055d04cb (P14 kit VFX/SFX port re-merged with main: thief_kit conflict resolved = main violet palette + branch hit flash; --check 0 fail, incoming-hit/clarity/sfx-set/dolm-combo green; hero-vfx gunslinger LMB red is on main too; health --strict red = check_registry.gd line 173 long_line, already on main)
 READY ext/hunter-edge-speckle 6a0ec7b402 (Hunter ink: no sub-pixel line -> no specks/shredded edges on Very Low + website clips; draft PR)
+READY ext/vex-quill-ammo-1117 d984262dd4 (Vex quill ammo: merged origin/main becb5036c0, hunter_attack.gd conflict resolved keeping sus_k + low-drum dmg; --quill-mag-check 7 ok/0 fail, --check 0 failures, health --strict OK)
