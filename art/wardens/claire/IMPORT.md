@@ -17,6 +17,12 @@ Close-camera renders (30 clips, 15 fps): idle leg black px per frame live 9.9, f
 frames with a 100+ px black blob over all clips live 88, first pass 84, now 74 (hip/thigh wedge gone in run, spear, stomp,
 walk, mantle; crouch band 379 -> 211 px).
 Not fixed (identical in live, not leg skin): the dark wrist cuff and glove, hand slivers, the dark patch by the shoulder in emote.
+Retry 2 (11-19, Fable review: 21 thigh points still followed hand.R, upper right thigh fatter than live): no leg-skin
+vertex keeps any arm weight now (89 -> 0). The stripped weight goes to hips at bind y >= 0.76 m (under the hem), blending to
+thigh.L/R at <= 0.68 m. Giving it all to the thigh bone (first try) opened a bigger black wedge under the right hem. Upper right
+thigh idle width 20.6 cm (live 23.3, bind 16.8). Godot --stretch-check worst 9.15 -> 5.73 (fusion), lower in all 69 clips. Known
+residual: hit_f f1-f6 shows a black wedge under the right hem, larger than live's. In live, hand-weighted thigh points hid that
+gap by accident. Weighting the thigh top to hips hides it but tears every crouch clip.
 
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
