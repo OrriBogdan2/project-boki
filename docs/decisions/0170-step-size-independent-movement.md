@@ -17,3 +17,4 @@ Option 2, in `HunterMove`: `fall` (trapezoid gravity). The hunter's lunge steer 
 ## Consequences
 - `--fps-feel-check` runs Vex, Kael, Albert and Sable at 1/30, 1/60, 1/144: apex, dash tap and hold, glide sink, knock agree within 3%; the apex matches JUMP_V^2/2g and the high glide sink the 3.5 m/s.
 - At 60 Hz the apex goes 1.52 -> 1.57 m and a 1 s free fall to 7.10 m (the target feel's 7.1 m). No Net or save change.
+- Exact gravity lands an aimed arc (`launch_to`) on its flight time T, so the step after T finds the ground a step late. Dolm's Rock Hop stops its sideways motion once T is up, so it never drifts past its aimed spot (the hop chain slid 0.14 m over an abyss lip without this; `--dolm-combo-check`).
