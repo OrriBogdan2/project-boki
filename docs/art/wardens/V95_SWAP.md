@@ -225,3 +225,16 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Hunter tear-fix gate (11-19)
+
+Cutting the stretch number is not a pass: reviewers fail a fix for black patches, holes, loose bits or a silhouette that no
+longer matches live. Before a fix job reports done it runs, against the live GLB:
+
+    python3 tools/hunter_mesh_check.py art/wardens/<id>/<id>.glb --review --base origin/main --out build/review
+
+It must exit 0 (no FAIL: black/see-inside px, enclosed holes, loose blobs or shards worse than live; silhouette within 1.5% at
+rest and 5% in idle; no lost tris or clips; no new open edges). Open the `<id>_review.png` rows (live | fix | overlay: red = only
+in the fix, blue = only in live, yellow = black, magenta = looking into the shell) and look at them. The check is unlit and
+front/side only: an in-engine shadow wedge (pip hit_f, 11-19) still needs the in-game shot.
+

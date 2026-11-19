@@ -805,6 +805,13 @@ def main(argv=None) -> int:
         "--head-ref",
         help="read the GLBs from this git ref instead of the working tree (scan a PR head without a checkout)",
     )
+    ap.add_argument(
+        "--review",
+        action="store_true",
+        help="fix-review mode: also render each GLB against live (--live GLB, or the --base ref) and FAIL on black patches, "
+        "holes, loose bits, a changed silhouette, lost clips (tools/hunter_mesh_review.py)",
+    )
+    ap.add_argument("--live", type=Path, help="with --review: the live GLB to compare one file against")
     ap.add_argument("--quiet", action="store_true", help="only print the verdict table")
     a = ap.parse_args(argv)
 
@@ -839,16 +846,33 @@ def main(argv=None) -> int:
                 res["base_verdict"] = base["verdict"] if base else "(new)"
                 res["base_codes"] = base["codes"] if base else {}
             res["new_warnings"] = new_warnings(res, base) if a.base else []
+            if a.review:
+                live_bytes = a.live.read_bytes() if a.live else git_bytes(a.base, f) if a.base else None
+                if live_bytes is None:
+                    raise FileNotFoundError("--review needs --live GLB or --base REF with the GLB in it")
+                import hunter_mesh_review as hmr
+
+                rv = hmr.compare(live_bytes, data, a.frames, a.clips, a.out, nm)
+                res["review"] = rv
+                res["codes"].update({"review_" + k: v for k, v in rv["codes"].items()})
+                if rv["verdict"] == "FAIL":
+                    res["verdict"] = "FAIL"
             results.append(res)
         except Exception as ex:  # noqa: BLE001 - report which file broke, keep checking the rest
             print(f"ERROR {f}: {ex!r}", file=sys.stderr)
             rc = 2
     fails = [r for r in results if r["verdict"] == "FAIL"]
     for r in results:
-        codes = " ".join(f"{k}={r.get(k)}[{v}]" for k, v in r["codes"].items()) or "-"
+        codes = " ".join(f"{k}={r.get(k, '')}[{v}]" for k, v in r["codes"].items()) or "-"
         worst = f"worst {r.get('worst_clip')} f{r.get('worst_frame')}" if r.get("worst_clip") else ""
         extra = f"  base={r['base_verdict']} new_warn={r['new_warnings']}" if a.base else ""
         print(f"{r['verdict']:4} {r['name']:8} tris={r['tris']} {worst} {codes}{extra}")
+        for k, (lv, fv, where) in (r.get("review") or {}).get("worst", {}).items():
+            if r["codes"].get("review_" + k) and not a.quiet:
+                print(f"       review {k}: live {lv} -> fix {fv} at {where}")
+        for k, (v, where) in (r.get("review") or {}).get("sil", {}).items():
+            if r["codes"].get("review_sil_" + k) and not a.quiet:
+                print(f"       review silhouette {k}: {v * 100:.1f}% of live changed at {where}")
         if not a.quiet and r["codes"]:
             for c in r.get("worst_clips", [])[:3]:
                 print(
