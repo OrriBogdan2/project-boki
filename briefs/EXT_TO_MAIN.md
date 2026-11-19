@@ -10324,3 +10324,4 @@ READY ext/tut-pace-1116 e027ab5dba (TUTORIAL_PACE re-measured on main; pace tool
 READY ext/ui-picker-unlock-line abe5948a808eebe88fe61ba172080289b0dd887b (Hunter picker: locked second Hunter says 'Finish an expedition to choose your second Hunter'; text only)
 READY ext/ui-demo-no-away-card 8a136b076c1e6452a9dc5ab5e135d0f8ef3eeded (base demo: no away card at start, base-demo-check asserts no panel at 5 s, all green; health --strict green)
 READY ext/tut-mastery-seep e4d0e52e7fd319717e826789b9e87b49a109603e (first mastery feature gets one plain farm line pointing at Change your look, once per save)
+READY ext/tut-camps-telegraph 94c68e4c6e (re-merged origin/main: kept main held-camp foe_spot posts + first-camp marker/3 s countdown; --check 0 fails; --tutorial-fight-check telegraph asserts PASS, its 11 other fails (juggernaut/gunslinger stall, archer kick) identical on main; health --strict same style-ratchet/numpy-missing reds as main)
