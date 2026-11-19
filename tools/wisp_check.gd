@@ -470,6 +470,7 @@ func _summon() -> void:
 		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
 	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
 		"summon: the wisp bursts into the full Boki")
+	ok(k.tp_n > 0, "...put beside its hunter by a teleport, which the rig does not read as speed (%d)" % k.tp_n)
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
 	var lsh := k.brain.leash()
 	ok(lsh >= 8.0 and lsh <= 12.0, "...on a short leash (%.1f m)" % lsh)
