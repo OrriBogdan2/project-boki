@@ -1,10 +1,10 @@
 extends "res://tools/hero_vfx_reel.gd"
-## Sable's reel (tools/hero_vfx_reel.gd): Encore at match zoom, the ring growing out over its 0.4s, then a Vault
+## Sable's reel (tools/hero_vfx_reel.gd): her generic parts, then Encore at match zoom, the ring growing out over its 0.4s, then a Vault
 ## across the ring with the blade layer riding on her.
 
 
 func parts() -> Array:
-	return ["x"]
+	return ["lmb", "rmb", "dash", "e", "x"]
 
 
 func _part_x() -> void:
