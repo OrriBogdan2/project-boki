@@ -9,18 +9,20 @@ extends SubViewport
 ##   var thumbs := LookThumbs.create(func(lk, parent, framing): return make_posed_model_under(parent, lk, framing))
 ##   thumbs.want(trial_look, "head", texture_rect)
 
-const PX := Vector2i(184, 168)              # px: one picture (shown at about half size, so it stays crisp)
+const PX := Vector2i(184, 168)  # px: one picture (shown at about half size, so it stays crisp)
 ## Each framing: [camera, the point it looks at, field of view (deg), the model's turn (rad)], from the model's feet.
-const FRAMES := {"head": [Vector3(0.1, 1.5, 1.35), Vector3(0, 1.38, 0), 30.0, 0.15],
+const FRAMES := {
+	"head": [Vector3(0.1, 1.5, 1.35), Vector3(0, 1.38, 0), 30.0, 0.15],
 	"glider": [Vector3(0, 2.3, 3.6), Vector3(0, 1.9, 0), 40.0, 0.5],
 	"bust": [Vector3(0, 1.35, 1.6), Vector3(0, 1.2, 0), 36.0, 0.45],
-	"body": [Vector3(0, 1.05, 3.4), Vector3(0, 0.92, 0), 36.0, 0.4]}
-const CACHE_MAX := 160                      # pictures kept before the oldest are dropped
+	"body": [Vector3(0, 1.05, 3.4), Vector3(0, 0.92, 0), 36.0, 0.4]
+}
+const CACHE_MAX := 160  # pictures kept before the oldest are dropped
 
-var _make: Callable                         # (look, parent, framing) -> the model, built and posed under parent
-var _queue: Array = []                      # [look, framing, TextureRect, slot], oldest first
+var _make: Callable  # (look, parent, framing) -> the model, built and posed under parent
+var _queue: Array = []  # [look, framing, TextureRect, slot], oldest first
 var _cache := {}
-var _last := {}                             # a tile's slot -> its latest picture, shown while its new one is taken
+var _last := {}  # a tile's slot -> its latest picture, shown while its new one is taken
 var _cam: Camera3D
 var _busy := false
 
@@ -52,8 +54,9 @@ static func can_shoot() -> bool:
 	return DisplayServer.get_name() != "headless"
 
 
-## Puts the picture of `lk` in this framing ("head", "bust", "body", "glider") on `into`: at once if it is kept, else soon,
-## showing the last picture taken for the same `slot` (a tile's choice) meanwhile so a pick never blanks the tiles.
+## Puts the picture of `lk` in this framing ("head", "bust", "body", "glider") on `into`: at once if it is kept,
+## else soon, showing the last picture taken for the same `slot` (a tile's choice) meanwhile so a pick never blanks
+## the tiles.
 func want(lk: Dictionary, framing: String, into: TextureRect, slot: String) -> void:
 	var key := [lk, framing].hash()
 	if _cache.has(key):
@@ -76,7 +79,7 @@ func _process(_delta: float) -> void:
 
 func _shoot() -> void:
 	var job: Array = _queue.pop_front()
-	if not is_instance_valid(job[2]):      # its tile is gone
+	if not is_instance_valid(job[2]):  # its tile is gone
 		return
 	var into: TextureRect = job[2]
 	var key := [job[0], job[1]].hash()

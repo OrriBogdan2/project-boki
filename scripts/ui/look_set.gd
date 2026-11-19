@@ -4,25 +4,31 @@ extends Node3D
 ## front left that casts your shadow, a rim from behind right in your glow's colour, a cool kicker from behind left, a
 ## soft top light and a low fill. The backdrop is a curved wall that fades from a band of your glow down into the dark,
 ## a halo behind you, standing stones at three depths (the camera's soft focus blurs them), a pool of light on the
-## floor, a soft shadow under your feet and motes drifting up in your glow's colour. Nothing here reads the model, so any model on the turntable is
-## lit the same way. tint() follows your glow; flash() is the light's answer to a pick.
+## floor, a soft shadow under your feet and motes drifting up in your glow's colour. Nothing here reads the model,
+## so any model on the turntable is lit the same way. tint() follows your glow; flash() is the light's answer to a pick.
 ##
 ##   var lset := LookSet.create(centre, top)
 ##   lset.tint(glow)
 
-const KEY_AT := Vector3(-1.7, 3.3, 2.4)     # m from the centre: the key light, front left and high
-const RIM_AT := Vector3(1.1, 2.6, -2.2)     # the glow-coloured rim, behind right
-const KICK_AT := Vector3(-1.4, 2.2, -2.0)   # the cool kicker, behind left
+const KEY_AT := Vector3(-1.7, 3.3, 2.4)  # m from the centre: the key light, front left and high
+const RIM_AT := Vector3(1.1, 2.6, -2.2)  # the glow-coloured rim, behind right
+const KICK_AT := Vector3(-1.4, 2.2, -2.0)  # the cool kicker, behind left
 const RIM_ENERGY := 6.0
 const KICK_ENERGY := 2.4
-const FLASH_K := 2.2                        # x the rim's energy at the top of a pick's flash
-const FLASH_S := 0.45                       # s the flash takes to settle back
-const WALL_R := 6.5                         # m: the curved wall's radius round the centre (every shot stays inside)
-const WALL_H := 4.5                         # m: its height (it fades out before its top)
+const FLASH_K := 2.2  # x the rim's energy at the top of a pick's flash
+const FLASH_S := 0.45  # s the flash takes to settle back
+const WALL_R := 6.5  # m: the curved wall's radius round the centre (every shot stays inside)
+const WALL_H := 4.5  # m: its height (it fades out before its top)
 ## The standing stones behind you, tall enough to leave the shot at the top: [x, z, height, radius] (m from the
 ## centre), at three depths for parallax as the camera swings.
-const STONES := [[-2.6, -3.2, 7.0, 0.26], [2.4, -3.6, 7.0, 0.3], [-0.9, -4.8, 7.0, 0.34], [1.3, -5.2, 7.0, 0.3],
-	[-3.9, -4.4, 7.0, 0.36], [3.9, -2.9, 7.0, 0.24]]
+const STONES := [
+	[-2.6, -3.2, 7.0, 0.26],
+	[2.4, -3.6, 7.0, 0.3],
+	[-0.9, -4.8, 7.0, 0.34],
+	[1.3, -5.2, 7.0, 0.3],
+	[-3.9, -4.4, 7.0, 0.36],
+	[3.9, -2.9, 7.0, 0.24]
+]
 const STONE_COL := Color("3a2f5e")
 const MOTES := 28
 
@@ -59,7 +65,8 @@ func flash() -> void:
 		_flash.kill()
 	_rim.light_energy = RIM_ENERGY * FLASH_K
 	_flash = create_tween()
-	_flash.tween_property(_rim, "light_energy", RIM_ENERGY, FLASH_S).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var tw := _flash.tween_property(_rim, "light_energy", RIM_ENERGY, FLASH_S)
+	tw.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _build_lights() -> void:
@@ -85,7 +92,7 @@ func _spot(at: Vector3, col: Color, energy: float, shadow: bool) -> SpotLight3D:
 	s.spot_range = 9.0
 	s.spot_angle = 26.0
 	s.shadow_enabled = shadow
-	s.transform = Transform3D(Basis.looking_at(Vector3(0, 1.0, 0) - at), at)      # aimed at your chest
+	s.transform = Transform3D(Basis.looking_at(Vector3(0, 1.0, 0) - at), at)  # aimed at your chest
 	return s
 
 
@@ -113,7 +120,7 @@ func _build_backdrop() -> void:
 	_wall_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_wall_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var wall := _mesh(cyl, _wall_mat, Vector3(0, WALL_H * 0.5 - 0.05, 0))
-	wall.sorting_offset = -4.0      # drawn behind the halo and the motes
+	wall.sorting_offset = -4.0  # drawn behind the halo and the motes
 	var stone_mat := Models.toon(STONE_COL)
 	for st in STONES:
 		var c := CylinderMesh.new()

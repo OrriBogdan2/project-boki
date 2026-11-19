@@ -16,43 +16,58 @@ const TABS := ["Body", "Hollow", "Shroud", "Glider"]
 const TAB_ICONS := {"Body": "ruler", "Hollow": "eye", "Shroud": "cloak", "Glider": "updraft"}
 ## The look keys each tab shows, in order (the rows come from Unmasked.ROWS and Shrouds.ROWS; "accent" is the
 ## trim's colour, "Match" first). The Glider tab lists Gliders.LIST instead.
-const TAB_KEYS := {"Body": ["gender", "height", "build"], "Hollow": ["hollow", "glow", "ghost", "aura"],
-	"Shroud": ["shroud", "colour", "accent", "hood", "trim", "accessory"]}
-const AT := Vector3(0.8, 0, 1.6)            # m: the turntable's centre on the hatch dais
-const TOP := 0.07                           # m: the turntable's top, where your feet stand
+const TAB_KEYS := {
+	"Body": ["gender", "height", "build"],
+	"Hollow": ["hollow", "glow", "ghost", "aura"],
+	"Shroud": ["shroud", "colour", "accent", "hood", "trim", "accessory"]
+}
+const AT := Vector3(0.8, 0, 1.6)  # m: the turntable's centre on the hatch dais
+const TOP := 0.07  # m: the turntable's top, where your feet stand
 ## Each tab's shot, from the turntable's centre: [camera, the point it looks at] (m), and its field of view (deg).
 ## The look point sits left of you so you stand right of the panel; Body and Shroud show you head to toe (Shroud from
 ## a three-quarter angle so the cloak's shape reads), Hollow is a close-up of the head, Glider pulls back to the canopy.
-const SHOTS := {"Body": [Vector3(-0.75, 1.2, 3.15), Vector3(-0.6, 0.98, 0), 40.0],
+const SHOTS := {
+	"Body": [Vector3(-0.75, 1.2, 3.15), Vector3(-0.6, 0.98, 0), 40.0],
 	"Hollow": [Vector3(-0.4, 1.58, 1.55), Vector3(-0.28, 1.47, 0), 32.0],
 	"Shroud": [Vector3(-1.5, 1.15, 2.85), Vector3(-0.55, 0.92, 0), 40.0],
-	"Glider": [Vector3(-1.05, 1.75, 4.3), Vector3(-0.85, 1.75, 0), 44.0]}
-const CAM_EASE := 5.0                       # 1/s: how fast the camera settles on a zoom
-const SWING_S := 0.55                       # s: the camera's swing from one tab's shot to the next
+	"Glider": [Vector3(-1.05, 1.75, 4.3), Vector3(-0.85, 1.75, 0), 44.0]
+}
+const CAM_EASE := 5.0  # 1/s: how fast the camera settles on a zoom
+const SWING_S := 0.55  # s: the camera's swing from one tab's shot to the next
 ## The reaction to a pick on each tab: an emote HunterAnim plays (Glider has none: you are hanging in the air).
 const REACT := {"Body": "accept", "Hollow": "laugh", "Shroud": "thanks"}
-const REACT_S := 1.4                        # s a reaction plays before the idle takes back over
-const LIST_STAGGER := 0.03                  # s between each row fading in on a new tab
-const LIST_FADE := 0.18                     # s one row takes to fade in
+const REACT_S := 1.4  # s a reaction plays before the idle takes back over
+const LIST_STAGGER := 0.03  # s between each row fading in on a new tab
+const LIST_FADE := 0.18  # s one row takes to fade in
 ## Which picture each look key's tiles show (LookThumbs framings); keys not here are colours (swatches).
-const THUMB_FRAME := {"gender": "body", "height": "body", "build": "body", "hollow": "head", "ghost": "head",
-	"aura": "body", "shroud": "body", "hood": "head", "trim": "bust", "accessory": "bust"}
-const ZOOM_MIN := 0.6                       # x the shot's distance, wheel in
-const ZOOM_MAX := 1.35                      # ... wheel out
-const ZOOM_STEP := 0.08                     # per wheel notch
-const DRAG_TURN := 0.012                    # rad per pixel dragged
-const KEY_TURN := 2.5                       # rad/s while A / D is held
-const SPIN_DECAY := 6.0                     # 1/s: how fast a flicked turntable slows to a stop
-const GLIDE_LIFT := 0.35                    # m: you hang this high over the turntable under an open glider
-const GLIDER_TILT := 0.25                   # rad: the open canopy leans back over you, as in flight
-const TRY_SETTLE := 0.06                    # s: a hovered choice rebuilds the model at most this often
-const POP_SCALE := 1.07                     # x your size at the top of the pick pop
+const THUMB_FRAME := {
+	"gender": "body",
+	"height": "body",
+	"build": "body",
+	"hollow": "head",
+	"ghost": "head",
+	"aura": "body",
+	"shroud": "body",
+	"hood": "head",
+	"trim": "bust",
+	"accessory": "bust"
+}
+const ZOOM_MIN := 0.6  # x the shot's distance, wheel in
+const ZOOM_MAX := 1.35  # ... wheel out
+const ZOOM_STEP := 0.08  # per wheel notch
+const DRAG_TURN := 0.012  # rad per pixel dragged
+const KEY_TURN := 2.5  # rad/s while A / D is held
+const SPIN_DECAY := 6.0  # 1/s: how fast a flicked turntable slows to a stop
+const GLIDE_LIFT := 0.35  # m: you hang this high over the turntable under an open glider
+const GLIDER_TILT := 0.25  # rad: the open canopy leans back over you, as in flight
+const TRY_SETTLE := 0.06  # s: a hovered choice rebuilds the model at most this often
+const POP_SCALE := 1.07  # x your size at the top of the pick pop
 const PANEL_W := 540.0
-const LIST_H := 420.0                       # px: the choices scroll past this height
-const TILE := Vector2(94, 116)             # px: a named choice, its picture over its name
-const THUMB := Vector2(86, 80)              # px: the picture on a tile
-const SWATCH := 34.0                        # px: a colour choice
-const GLIDER_PIC := Vector2(64, 54)         # px: the picture of you under a glider, on its tile
+const LIST_H := 420.0  # px: the choices scroll past this height
+const TILE := Vector2(94, 116)  # px: a named choice, its picture over its name
+const THUMB := Vector2(86, 80)  # px: the picture on a tile
+const SWATCH := 34.0  # px: a colour choice
+const GLIDER_PIC := Vector2(64, 54)  # px: the picture of you under a glider, on its tile
 
 var look: Dictionary = {}
 var tab := "Body"
@@ -60,7 +75,7 @@ var model: Node3D
 var _anim: HunterAnim
 var _cam: Camera3D
 var _fx: Fx
-var _turn: Node3D                           # the turntable and you on it (drag turns this)
+var _turn: Node3D  # the turntable and you on it (drag turns this)
 var _ring_mat: StandardMaterial3D
 var _set: LookSet
 var _thumbs: LookThumbs
@@ -69,22 +84,23 @@ var _tabs: Control
 var _list: VBoxContainer
 var _look_at := Vector3.ZERO
 var _zoom := 1.0
-var _spin := 0.0                            # rad/s left from a flick
+var _spin := 0.0  # rad/s left from a flick
 var _dragging := false
-var _trial: Dictionary = {}                 # the look being tried on (hovered), {} when none
-var _shown := 0                             # hash of the look the model was built from
+var _trial: Dictionary = {}  # the look being tried on (hovered), {} when none
+var _shown := 0  # hash of the look the model was built from
 var _settle := 0.0
-var _fov0 := 40.0                           # the camera's field of view before the locker, put back on close
-var _swing_t := 1.0                         # 0..1 through the camera's swing to this tab's shot
-var _swing_pos := Vector3.ZERO              # where the swing started: the camera, its look point, its fov
+var _fov0 := 40.0  # the camera's field of view before the locker, put back on close
+var _swing_t := 1.0  # 0..1 through the camera's swing to this tab's shot
+var _swing_pos := Vector3.ZERO  # where the swing started: the camera, its look point, its fov
 var _swing_at := Vector3.ZERO
 var _swing_fov := 40.0
-var _react_t := 99.0                        # s since the last pick's reaction began
+var _react_t := 99.0  # s since the last pick's reaction began
+
 
 static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary) -> LookLocker:
 	var lk := LookLocker.new()
 	lk.look = start.duplicate(true)
-	MasteryLook.refresh(lk.look)      # a Relic's new mark shows up (kept) the first time you look
+	MasteryLook.refresh(lk.look)  # a Relic's new mark shows up (kept) the first time you look
 	lk._cam = cam
 	lk._fov0 = cam.fov
 	lk._fx = fx
@@ -97,6 +113,7 @@ static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: D
 	lk._look_at = AT + SHOTS["Body"][1]
 	return lk
 
+
 ## Ends the locker: the stage, the panel and the camera's soft focus go.
 func close() -> void:
 	set_process(false)
@@ -106,12 +123,14 @@ func close() -> void:
 		_panel.queue_free()
 	queue_free()
 
+
 ## Shows these choices on the model and the panel (Random, the shot tools).
 func set_look(lk: Dictionary) -> void:
 	look = lk.duplicate(true)
 	_trial = {}
 	_rebuild_model(look)
 	_fill()
+
 
 ## Opens a tab: its choices fade in row by row, and the camera swings to its shot.
 func show_tab(t: String) -> void:
@@ -134,6 +153,7 @@ func show_tab(t: String) -> void:
 		row.create_tween().tween_property(row, "modulate:a", 1.0, LIST_FADE).set_delay(i * LIST_STAGGER)
 	Sfx.play("whoosh", null, -16.0, 0.05, 1.2)
 
+
 ## Picks a choice: the look takes it, the model pops and the turntable flashes.
 func pick(key: String, value: Variant) -> void:
 	if key == "glider":
@@ -145,12 +165,15 @@ func pick(key: String, value: Variant) -> void:
 	_fill()
 	_pop()
 
+
 ## The turntable's turn (rad); the shot tools set it.
 func set_yaw(yaw: float) -> void:
 	_turn.rotation.y = yaw
 	_spin = 0.0
 
+
 # ---- the stage
+
 
 func _build_stage() -> void:
 	_turn = Node3D.new()
@@ -180,17 +203,20 @@ func _build_stage() -> void:
 	dof.dof_blur_amount = 0.1
 	_cam.attributes = dof
 
+
 func _glow_mat(col: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.albedo_color = col
 	return m
 
+
 ## Your glow's colour on the turntable's ring and the set (its rim light, backdrop band, halo and motes).
 func _tint() -> void:
 	var col: Color = Unmasked.GLOWS[int(look["glow"])]
 	_ring_mat.albedo_color = col.lerp(Color.WHITE, 0.2)
 	_set.tint(col)
+
 
 func _rebuild_model(lk: Dictionary) -> void:
 	_shown = lk.hash()
@@ -202,6 +228,7 @@ func _rebuild_model(lk: Dictionary) -> void:
 	_dress_for_tab()
 	_tint()
 
+
 ## On the Glider tab you hang over the turntable under your open glider; elsewhere you stand, glider packed.
 func _dress_for_tab() -> void:
 	var gliding := tab == "Glider"
@@ -210,9 +237,10 @@ func _dress_for_tab() -> void:
 	gl.visible = gliding
 	gl.rotation.x = GLIDER_TILT
 
+
 ## You, wearing `lk`: the one place the locker builds a model (the turntable and the tile pictures).
 func _make_model(lk: Dictionary) -> Node3D:
-	var m := Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", lk)      # empty-handed: just you
+	var m := Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", lk)  # empty-handed: just you
 	m.get_node("Rig/Torso/Aim/Gun").free()
 	return m
 
@@ -245,7 +273,9 @@ func _pop() -> void:
 	_react_t = 0.0
 	Sfx.play("unlock", null, -10.0, 0.05, 1.3)
 
+
 # ---- every frame: the camera, the turntable, trying a choice on
+
 
 func _process(delta: float) -> void:
 	_frame_shot(delta)
@@ -267,6 +297,7 @@ func _process(delta: float) -> void:
 	if tab == "Glider":
 		st.merge({"grounded": false, "gliding": true, "vel": Vector3(0, -1.0, 0)})
 	_anim.update(delta, st)
+
 
 ## The camera on this tab's shot: a swing round the turntable (its angle, distance and height eased) when the tab
 ## changes, then it follows the zoom.
@@ -305,7 +336,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_turn.rotation.y += dx
 		_spin = dx / maxf(get_process_delta_time(), 0.001)
 
+
 # ---- the panel
+
 
 func _build_panel(ui_root: Control) -> void:
 	var card := UI.card(UI.CARD, 14, 16)
@@ -330,9 +363,10 @@ func _build_panel(ui_root: Control) -> void:
 	v.add_child(foot)
 	ui_root.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46       # clear of the title
+	card.offset_top += 46  # clear of the title
 	card.offset_bottom += 46
 	_fill()
+
 
 ## The four tabs, big, each with its icon.
 func _tab_row() -> Control:
@@ -341,6 +375,7 @@ func _tab_row() -> Control:
 		UI.set_icon(b, String(TAB_ICONS[String(b.get_meta("tab"))]), 18)
 		(b as Button).custom_minimum_size.y = 48
 	return tabs
+
 
 func _name_row() -> Control:
 	var row := UI.hbox(8)
@@ -354,6 +389,7 @@ func _name_row() -> Control:
 	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
 	row.add_child(ne)
 	return row
+
 
 ## The tab's choices, the current ones lit.
 func _fill() -> void:
@@ -373,6 +409,7 @@ func _fill() -> void:
 	if tab == "Body":
 		_mastery_rows()
 
+
 ## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
 func _mastery_rows() -> void:
 	var feats := MasteryLook.features().filter(func(f): return (look["features"] as Dictionary).has(String(f["id"])))
@@ -385,14 +422,19 @@ func _mastery_rows() -> void:
 		var l := UI.label("%s  (%s)" % [f["name"], HeroTitle.base_name(String(f["hunter"]))], UI.T_BODY, UI.MUTED)
 		l.custom_minimum_size.x = 250
 		hr.add_child(l)
-		var b := UI.ghost("Keep" if bool(look["features"][id]) else "Faded", func():
-			MasteryLook.toggle(look, id)
-			_trial = {}
-			_rebuild_model(look)
-			_fill(), 120)
+		var b := UI.ghost(
+			"Keep" if bool(look["features"][id]) else "Faded",
+			func():
+				MasteryLook.toggle(look, id)
+				_trial = {}
+				_rebuild_model(look)
+				_fill(),
+			120
+		)
 		b.name = "Feature_%s" % id
 		hr.add_child(b)
 		_list.add_child(hr)
+
 
 ## A look key's row ([key, label, choices, tip?]); {} for the hood on a cut that has none.
 func _row(key: String) -> Array:
@@ -404,6 +446,7 @@ func _row(key: String) -> Array:
 		if row[0] == key:
 			return row
 	return []
+
 
 ## Choices as tiles (names) or swatches (colours). `shift`: the first choice saves as -shift (accent's Match is -1).
 func _grid(key: String, opts: Array, cur: int, shift: int) -> Control:
@@ -419,6 +462,7 @@ func _grid(key: String, opts: Array, cur: int, shift: int) -> Control:
 		c.mouse_exited.connect(_untry)
 		flow.add_child(c)
 	return flow
+
 
 ## A named choice: a picture of you wearing it (LookThumbs fills it in) over its name; a choice with nothing to
 ## picture (the trim's Match) is just its name, swatch high.
@@ -463,6 +507,7 @@ func _tile_name(text: String, on: bool) -> Label:
 	l.custom_minimum_size.x = THUMB.x
 	return l
 
+
 func _swatch(key: String, col: Color, on: bool, val: Variant) -> Control:
 	var b := Button.new()
 	b.custom_minimum_size = Vector2(SWATCH, SWATCH)
@@ -476,6 +521,7 @@ func _swatch(key: String, col: Color, on: bool, val: Variant) -> Control:
 	b.pressed.connect(func(): pick(key, val))
 	b.mouse_entered.connect(func(): Sfx.play("hover", null, -14.0, 0.05))
 	return b
+
 
 ## Every glider skin as a tile in its rarity's colour: owned ones glide on at a click, the rest say how to get
 ## them (you can still hover any to see it on you).
@@ -515,23 +561,27 @@ func _glider_grid() -> void:
 	_list.add_child(UI.section("Glider"))
 	_list.add_child(flow)
 
+
 func _glider_how(gid: String) -> String:
 	var how := Gliders.how(gid)
 	if how != "":
 		return "Earned: " + how
 	return "%d gems at the glider rack" % int(Gliders.get_skin(gid).get("cost", 0))
 
+
 ## A random person, still on your glider.
 func _random() -> void:
 	var lk := Unmasked.random_look()
 	lk["glider"] = look.get("glider", "classic")
-	lk["features"] = look.get("features", {})      # what your Relics left on you stays as you set it
+	lk["features"] = look.get("features", {})  # what your Relics left on you stays as you set it
 	set_look(lk)
+
 
 ## Tries a choice on the model while it's hovered (or focused).
 func _try(key: String, val: Variant) -> void:
 	_trial = look.duplicate(true)
 	_trial[key] = val
+
 
 func _untry() -> void:
 	_trial = {}
