@@ -153,7 +153,8 @@ func _clips() -> void:
 			continue
 		var keys: Array = KMovesPair.MOVES[k]["keys"]
 		var kit_end := float((keys[-1] as Array)[0])
-		var clip_end := player.get_animation(String(mv["clip"])).length
+		# "fit": the clip is retimed to play over the kit's own length (WardenClips.move_len)
+		var clip_end := float(mv["fit"]) if mv.has("fit") else player.get_animation(String(mv["clip"])).length
 		if absf(clip_end - kit_end) > 0.03:
 			off.append("%s %.2f/%.2f" % [k, clip_end, kit_end])
 	ok("timing clips: every move's .glb clip lasts as long as the kit's keyed move", off.is_empty(), str(off))
