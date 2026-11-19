@@ -58,25 +58,18 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
 
-## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 3): hand-to-hip contact split, weights per side
-Live (v95, 11-15) welds the left hand/forearm to the hip and thigh with shared vertices, so the re-derived weights drag hip skin
-after the hand (black webs from hip to hand in drink, cheer, fusion, glide, x, emote, stance...).
-Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry3/tool/: `YMAX=1.10 YMAXR=1.33 CAPMIN=2 fix2.py live.glb out.glb`):
-- Faces are put on an arm side or a body side by their own vertex weights (row level, so the gun sleeve's existing seam to the
-  belly skin stays as live). Where both sides share a vertex (left side below 1.10 m, right side below 1.33 m) it is duplicated
-  (591 rows). No face is added or deleted (60095 tris as live); no position, UV, normal, colour, bone, clip or texture changes.
-- Arm-side copies keep only arm bones, body-side copies only body bones (ramped in over 10 cm at the zone top); changed weights
-  are diffused over their own side. The coin keeps its live weights (child of hand.L, keyed by every clip). The gold coin hip
-  chain stays on the body: it takes the weights of the nearest trouser skin (live had it 20-80 % on the hand).
-- No caps: caps hidden at rest showed as shards in idle (tested), and the split zone is kept below the jacket hem so the idle
-  and stance look stays as live (a higher zone left a jagged edge at the left waist in idle).
-- Rest pose renders: 0 px differ from live (Blender workbench, 4 sides full body; 2 px of 480k at 2.2x zoom).
-- Edges >= 8 mm stretched over 3x 1.005 % -> 0.281 %; edges growing over 10 cm 286 -> 114; hunter_mesh_check stretched
-  tris (worst clip) 524 -> 172, no new warning; stretch_check worst 10.16 -> 9.25 (28 clips better, 15 slightly worse).
-- Known change in idle: the left hand now hangs where the idle clip puts hand.L; live smears it onto the hip.
-- Left as live: the skin fan that sticks out 20 cm from the outer left thigh at rest (keeps its live weights: on the thigh
-  alone it showed as spikes in idle and stance, on the hand it floats), the gun
-  sleeve's seam to the belly (sleeve rigid on forearm.R), the upper-arm-to-torso blend above 1.10 m.
-Earlier weights-only attempts (no split) did not beat live: hard split 119x edges, smoothing 2.18 % of edges over 3x. The
-audit's "5.9 % of all edges" counts sub-8 mm edges too; those are not noise for the eye (a 5 mm edge growing to 20 cm is a
-needle), so absolute growth (cm) is reported next to the >= 8 mm ratio.
+## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 6): weights only, no split, no caps
+Cause: the left forearm and hand only join the rest of the mesh at the elbow (a graph cut on the welded mesh finds one 50-edge
+ring there), but live weights put 30-70 % hand/forearm weight on the left hip/thigh skin and 30-40 % hip/thigh weight on
+the hand. So clips drag hip skin after the hand (black/orange curtains from hip to hand) and leave the hand on the hip.
+Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry6/tool/: `seg2.py c1.json` labels, `build_ns.py lab.npy out.glb n3.json`):
+- In the box x -0.45..0.08, y 0.56..1.32 m only. Forearm/hand verts (graph-cut label): arm-chain bones only. Hip/thigh verts:
+  their forearm/hand weight moves onto their own hips/thigh share (never onto the chest bone `head`). Stripping fades out over
+  y 1.20..1.30 so the elbow and sleeve stay continuous. Every vertex outside the box keeps its live weights bit for bit.
+- Same vertices, triangles, positions, normals, UVs, colours, texture, skeleton and clips as live (48236 verts, 60095 tris).
+- Rest pose: 0 px over 30 differ in game (live-audit bind, same worker); Blender 4 sides x 4 zooms: at most 1 px.
+- Edges >= 8 mm over 3x: 1.005 % -> 0.134 %; worst 10.16 -> 5.22; edges growing > 10 cm 286 -> 60, > 20 cm 11 -> 0.
+  Seam verts open > 10 cm 156 -> 156 (as live), open boundary edges 189 -> 189. tools/stretch_check.gd worst 10.16 -> 5.53,
+  35 clips better, 0 worse. hunter_mesh_check stretched tris 524 -> 120, no new warning.
+- Changes on purpose: in idle/stance the left hand now sits where hand.L puts it (on the hip, fingers visible) and the gold bead
+  chain stays on the trousers (live dragged it with the hand); the black spike at the left hip from behind is gone.
