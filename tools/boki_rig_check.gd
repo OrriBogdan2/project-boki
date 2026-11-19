@@ -29,7 +29,7 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"mothlet", "mycroll", "narfoil", "oarlet", "oarter", "orrinox", "orrisol", "palloth", "pillaroo", "pinguin",
 	"pocketpus", "polyshroom", "postroo", "prismander", "reelacine", "rollguin", "sandwidow", "sawright",
 	"scopeleon", "sirencada", "skidlet", "stamproo", "starcap", "stratarch", "teapotamus", "tiltster",
-	"torpecone", "truffapir", "twinklup", "vespyx", "voltalon", "wickapi", "wickapi.old-chibi-1111", "xylogator",
+	"torpecone", "truffapir", "twinklup", "vespyx", "voltalon", "wickapi", "xylogator",
 	"zippelith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
@@ -89,7 +89,7 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"sirencada": MESHY_TRIS, "skidlet": MESHY_TRIS, "stamproo": MESHY_TRIS, "starcap": MESHY_TRIS,
 	"stratarch": MESHY_TRIS, "teapotamus": MESHY_TRIS, "tiltster": MESHY_TRIS, "torpecone": MESHY_TRIS,
 	"truffapir": MESHY_TRIS, "twinklup": MESHY_TRIS, "vespyx": MESHY_TRIS, "voltalon": MESHY_TRIS,
-	"wickapi": MESHY_TRIS, "wickapi.old-chibi-1111": MESHY_TRIS, "xylogator": MESHY_TRIS, "zippelith": MESHY_TRIS}
+	"wickapi": MESHY_TRIS: MESHY_TRIS, "xylogator": MESHY_TRIS, "zippelith": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in
