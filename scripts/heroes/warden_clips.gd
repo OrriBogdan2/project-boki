@@ -509,6 +509,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
 	for k in ["stomp", "drink"]:
 		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and k == "stomp" and not bool(s.get("stomp_own", true)):
+			return {"proc": true}     # a worn stomp style plays on the rig (StompLook)
 		if ph >= 0.0 and st.has(k):
 			var clip := String(st[k])
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)

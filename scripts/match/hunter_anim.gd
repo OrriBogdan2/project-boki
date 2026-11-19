@@ -601,6 +601,8 @@ func update(dt: float, s: Dictionary) -> void:
 	ledge_k = _ease(ledge_k, 1.0 if ledge or mant >= 0.0 else 0.0, 14.0, dt)
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
+	var stomp_st := StompLook.style(String(s.get("stomp_style", "")))
+	var stomp_b := StompLook.body(stomp_st, st_ph) if st_ph >= 0.0 else Vector3(float(stomp_st["lean"]), 0.0, 0.0)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
 	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
@@ -868,11 +870,11 @@ func update(dt: float, s: Dictionary) -> void:
 	var ledge_up := 1.0 if mant < 0.0 else clampf(mk * 1.6, 0.0, 1.0)
 	hl = lerpf(hl, lerpf(0.4, 1.3, ledge_up), ledge_k); kl = lerpf(kl, lerpf(-0.5, -1.7, ledge_up), ledge_k)
 	hr = lerpf(hr, lerpf(0.1, 0.5, ledge_up), ledge_k); kr = lerpf(kr, lerpf(-0.3, -0.9, ledge_up), ledge_k)
-	# stomping a wisp: the right foot lifts high, then slams down, over and over
+	# stomping a wisp: a foot (or both) lifts high, then slams down, over and over, in the stomp's style
 	if stomp_k > 0.01:
-		var up := sin(clampf(st_ph, 0.0, 1.0) / 0.7 * PI) if st_ph < 0.7 else 0.0
-		hr = lerpf(hr, 1.35 * up - 0.05, stomp_k); kr = lerpf(kr, -1.6 * up - 0.1, stomp_k)
-		hl = lerpf(hl, 0.2, stomp_k); kl = lerpf(kl, -0.4, stomp_k)
+		var sl := StompLook.legs(stomp_st, maxf(st_ph, 0.0), int(s.get("stomp_n", 0)))
+		hl = lerpf(hl, sl.x, stomp_k); kl = lerpf(kl, sl.y, stomp_k)
+		hr = lerpf(hr, sl.z, stomp_k); kr = lerpf(kr, sl.w, stomp_k)
 	# reviving: down on one knee beside them
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
@@ -911,12 +913,13 @@ func update(dt: float, s: Dictionary) -> void:
 	# ================================================================ BODY
 	var breath := sin(t * float(st["breath"]) + seed_ph)
 	var pitch := -float(st["lean"]) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
-	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
+	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * stomp_b.x - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
 	act_last[2] = lerpf(act_was[2], _act_pitch(), _swap_k()) if not act_was.is_empty() else _act_pitch()
 	pitch -= act_k * float(act_last[2])
 	pitch -= smoothstep(0.4, 0.8, fall_k) * FALL_SLUMP
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
+	yaw += stomp_k * stomp_b.y
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
 	if arch == "thief":
@@ -1091,6 +1094,7 @@ func update(dt: float, s: Dictionary) -> void:
 	off.y += KMovesStone.hover(arch, t)
 	off.y += base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
+	off.y += stomp_k * stomp_b.z
 	if not km.is_empty():
 		off.y += float(km["lift"])
 	if roll_t >= 0.0:
@@ -1619,10 +1623,18 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		var up_r := sh_r + Vector3(0.05, 0.4, -0.15) if mk < 0.0 or mk < 0.35 else sh_r + Vector3(0.08, -0.2, -0.3)
 		fl = fl.lerp(up_t, ledge_k); fr = fr.lerp(up_r, ledge_k)
 		free_l = maxf(free_l, ledge_k)
-	# stomp: arms out for balance
+	# stomp: arms out for balance, or as the style has them
 	if stomp_k > 0.01:
-		fl = fl.lerp(sh_l + Vector3(-0.32, -0.15, -0.05), stomp_k)
-		free_l = maxf(free_l, stomp_k)
+		var stomp_st := StompLook.style(String(s.get("stomp_style", "")))
+		var st_ph := maxf(float(s.get("stomp", -1.0)), 0.0)
+		var st_hl := StompLook.hand(stomp_st, st_ph, sh_l, -1.0)
+		var st_hr := StompLook.hand(stomp_st, st_ph, sh_r, 1.0)
+		if st_hl != Vector3.INF:
+			fl = fl.lerp(st_hl, stomp_k)
+			free_l = maxf(free_l, stomp_k)
+		if st_hr != Vector3.INF:
+			fr = fr.lerp(st_hr, stomp_k)
+			free_r = maxf(free_r, stomp_k)
 	# revive: the left hand reaches down over them
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)
