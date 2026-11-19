@@ -46,7 +46,6 @@ SECOND_TEX = 2048  # px: a master's other images (a joined prop's, emission), as
 LIMBS = ("upper_arm", "forearm", "thigh", "shin")
 CAGE, RAY, MARGIN_PX = 0.008, 0.03, 16       # (m, m, px) bake_warden's defaults
 CAP_SIDES = 2000             # the longest opening a detach caps (edges round it)
-CRUMB_FACES = 400            # a detach never cuts off a patch of faces smaller than this (absorb_crumbs)
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
@@ -522,11 +521,13 @@ def partners(bone, bones):
     return (out & set(bones)) - {bone}
 
 
-def absorb_crumbs(bm, lab, cuts):
-    """Before a detach cuts: each patch of faces on one bone that is under CRUMB_FACES and borders a bone it would be cut
+def absorb_crumbs(bm, lab, cuts, crumb_faces):
+    """Before a detach cuts: each patch of faces on one bone that is under `crumb_faces` (spec `absorb_crumbs`, e.g. 400) and borders a bone it would be cut
     from takes its neighbours' bone instead (most shared edges wins), until none is left. A region box or capsule edge
     runs through thin goo strands and cloth tatters, so a detach used to cut slivers and single strand tips off onto the
-    wrong bone: ragged rims at rest and loose shards flying with the leg in the clips (Grimble's crescent, 11-19)."""
+    wrong bone: ragged rims at rest and loose shards flying with the leg in the clips (Grimble's crescent, 11-19).
+    Grimble 11-19 with 400: the shin/knee shards went (islands 168 -> 62, open edges 34 -> 20 body heights) but the throw
+    clip gained long stretched strands (run_f worst 29x -> 72x): off by default until the webs are solved."""
     for _ in range(8):
         seen, moved = set(), 0
         for f0 in bm.faces:
@@ -542,7 +543,7 @@ def absorb_crumbs(bm, lab, cuts):
                         if g not in seen and lab[g] == lab[f0]:
                             seen.add(g)
                             stack.append(g)
-            if len(patch) >= CRUMB_FACES:
+            if len(patch) >= crumb_faces:
                 continue
             border = {}
             for f in patch:
@@ -577,7 +578,8 @@ def detach(low, G, names):
     for f in bm.faces:
         votes = [dom[v.index] for v in f.verts]
         lab[f] = max(set(votes), key=votes.count)
-    absorb_crumbs(bm, lab, cuts)
+    if SPEC.get("absorb_crumbs"):     # (opt-in: Grimble 11-19 lost the shin shards but gained stretched webs in throw)
+        absorb_crumbs(bm, lab, cuts, int(SPEC["absorb_crumbs"]))
     cut = [e for e in bm.edges if len(e.link_faces) == 2 and lab[e.link_faces[1]] in cuts[lab[e.link_faces[0]]]]
     ends = {v.index for e in cut for v in e.verts}
     bmesh.ops.split_edges(bm, edges=cut)
