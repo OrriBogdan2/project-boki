@@ -365,8 +365,8 @@ func _tab_main(v: VBoxContainer) -> void:
 	_group(v, "Picture")
 	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred(),
 		"From your next expedition")
-	Settings.v["fullscreen"] = Settings.window_is_fullscreen()      # (the switch shows the window as it is)
 	_toggle(v, "Fullscreen", "fullscreen", "F11 or Alt+Enter")
+	_sync_fullscreen_switch(Settings.window_is_fullscreen(), v)      # (shows the window as it is; the saved choice is left alone)
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD")
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
@@ -659,11 +659,11 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 	r.add_child(pct)
 
 ## F11 and Alt+Enter flip the window while Settings is open: the switch follows.
-func _sync_fullscreen_switch() -> void:
-	for r in root.find_children("*", "HBoxContainer", true, false):
+func _sync_fullscreen_switch(on: bool = bool(Settings.get_v("fullscreen")), under: Node = root) -> void:
+	for r in under.find_children("*", "HBoxContainer", true, false):
 		if r.get_meta("setting", "") == "fullscreen":
 			for cb in r.find_children("*", "CheckButton", true, false):
-				(cb as CheckButton).set_pressed_no_signal(bool(Settings.get_v("fullscreen")))
+				(cb as CheckButton).set_pressed_no_signal(on)
 
 func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> void:
 	var r := _row(v, label_txt, hint, key)

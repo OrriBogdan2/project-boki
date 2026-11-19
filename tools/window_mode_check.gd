@@ -42,8 +42,31 @@ func _button(text: String) -> Button:
 			return b
 	return null
 
+## A real left click at the middle of a control (what the player does; a covering layer would eat it).
+func _click(c: Control) -> void:
+	var at := c.get_global_rect().get_center()
+	var mv := InputEventMouseMotion.new()
+	mv.position = at
+	mv.global_position = at
+	Input.parse_input_event(mv)
+	await tree.process_frame
+	for down in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.position = at
+		e.global_position = at
+		e.pressed = down
+		Input.parse_input_event(e)
+		await tree.process_frame
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
+	# the engine itself makes a Windows window fullscreen (no switch after the window is up to lose a race);
+	# the editor, Linux shots and the browser start windowed and Settings takes over from there
+	ok(int(ProjectSettings.get_setting("display/window/size/mode")) == DisplayServer.WINDOW_MODE_WINDOWED,
+		"project: base window mode is windowed")
+	ok(int(ProjectSettings.get_setting("display/window/size/mode.windows", -1)) == DisplayServer.WINDOW_MODE_FULLSCREEN,
+		"project: Windows builds create the window fullscreen")
 	var was_export := Settings.desktop_export
 	ok(_loads_fullscreen(true, null, 5), "export, no save: opens fullscreen")
 	ok(_loads_fullscreen(true, false, 4), "export, old save that says windowed (never chosen): opens fullscreen")
@@ -67,6 +90,21 @@ func run(main: Node) -> void:
 	if main.fade:
 		main.fade.reveal(0.05)
 		await tree.create_timer(0.35).timeout
+	# a window that came up windowed while the choice is fullscreen: Settings shows it off, keeps the choice
+	Settings.v["fullscreen"] = true
+	Overlay.ctx = "title"
+	Overlay.tab = "Main"
+	Overlay.open_settings()
+	for _i in 3: await tree.process_frame
+	var sw: CheckButton = null
+	for r in Overlay.root.find_children("*", "HBoxContainer", true, false):
+		if String(r.get_meta("setting", "")) == "fullscreen":
+			sw = r.find_children("*", "CheckButton", true, false)[0]
+	ok(sw != null and not sw.button_pressed, "settings: the switch shows the window as it is (windowed)")
+	ok(Settings.v["fullscreen"] == true, "settings: opening it does not overwrite the saved fullscreen choice")
+	Overlay.close()
+	Settings.v["fullscreen"] = false
+	await tree.process_frame
 	for sz: Vector2i in SIZES:
 		tree.root.size = sz
 		main.show_screen("title", {})
@@ -75,10 +113,17 @@ func run(main: Node) -> void:
 		var tag := "at %dx%d" % [sz.x, sz.y]
 		ok(_inside(_button("Settings"), view), "title: Settings button is on screen " + tag)
 		ok(_inside(_button("Quit"), view), "title: Quit button is on screen " + tag)
-		Overlay.ctx = "title"
 		Overlay.tab = "Main"
-		Overlay.open_settings()
+		var gear := _button("Settings")
+		if gear:
+			await tree.create_timer(1.8).timeout      # (the menu pops in over ~1.5 s)
+			await _click(gear)
 		for _i in 3: await tree.process_frame
+		ok(Overlay.page == "settings", "title: a mouse click on Settings opens it " + tag)
+		if Overlay.page != "settings":
+			Overlay.ctx = "title"
+			Overlay.open_settings()
+			for _i in 3: await tree.process_frame
 		var row: Control = null
 		for r in Overlay.root.find_children("*", "HBoxContainer", true, false):
 			if String(r.get_meta("setting", "")) == "fullscreen":
