@@ -29,6 +29,7 @@ var main: Node
 
 const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (the fresh-run log found 157)
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+const MAX_LINE := 40  # chars of a banner line (it names its key too; --tutorial-playtest-check measures the fit)
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -148,7 +149,8 @@ func _course() -> void:
 			key_label += 1
 			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
-			toast_in_card += m.hud.msgs.texts().size()
+			# (a Boki that falls says so at once, as an URGENT line: the one kind a banner lets through)
+			toast_in_card += m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t).size()
 			bubble_in_card += m.bubbles.size()
 			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
@@ -175,7 +177,7 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > 34)
+	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var details: Dictionary = Content.rules("tutorial")["detail"]      # the plain lines' templates (key caps fill in short)
 	var long_lines: Array = details.keys().filter(func(k): return String(details[k]).length() > DETAIL_MAX)
@@ -190,7 +192,7 @@ func _course() -> void:
 		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
-	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+	ok(tl.contains("send "), "the Boki step says to send it ('%s')" % tl)
 
 ## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
 ## and revive prompt get through; when the banner settles the toast shows.

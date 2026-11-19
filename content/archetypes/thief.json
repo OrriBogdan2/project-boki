@@ -12,6 +12,7 @@
 	"fantasy": "The duelist. Sticks to one mark from range, cartwheels past them, never lets go.",
 	"howto": ["Play: duelist; stick to one target from range.", "Combo: {dash} vault, then a shot that hits resets it.", "Avoid: missing the shot after {dash}; no reset."],
 	"silhouette": "the long braid, the moth wings and the twin pistols",
+	"hint": {"lmb": "Hold {fire} to throw bolts that land at the cursor", "rmb": "Press {secondary} to throw a Bola that grounds and slows", "e": "Press {signature} to throw a dagger, again to blink to it", "dash": "Press {dash} to cartwheel; your next shot is empowered"},
 	"card": {"role_word": "Duelist", "loop": "Ranged duelist: stay on one foe, cartwheel, and land the big shot.", "dash": "Cartwheel, then an empowered shot that refunds Vault if it lands.", "passive": "Each hit on a foe adds a Mark: +10% damage, uncapped.", "rmb": "Bola down the lane: grounds the first foe, stuns a second too.", "e": "Throw a dagger; press it again to blink to it.", "x": "A ring of blades for 2s, harder at its edge.", "weapons": {"arc_bolts": "Bolts from alternating hands every 0.45s, landing at your cursor."}, "chips": {"rmb": ["3 dmg", "6.1 pair"], "e": ["8 dmg"], "x": ["3.1-4.5 per blade"]}},
 	"signature": "arc_bolts",
 	"resource": {"id": "marks", "name": "Marks", "max": 8, "kind": "on_targets", "dur": 4.0, "mark_dmg": 1.3, "gap": 0.0, "heal_knock": 0.2, "heal_assist": 0.25, "col": "#ffd23f"},

@@ -656,24 +656,30 @@ func _show_name() -> void:
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
-	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, step.chosen(), ye.text, false)))
-	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, step.chosen(), ye.text, true)))
+	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, step.chosen(), ye.text, true), true))
+	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, step.chosen(), ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Tend the garden"
+	# Enter in either box is the same as "Skip tutorial"
 	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	step.box.grab_focus()
 	step.box.select_all()
 
-## One of the two equal ways on from the naming card: a button and a line under it, one click.
-func _path_card(label: String, line: String, go: Callable) -> Control:
+## One of the two ways on from the naming card: a button and a line under it, one click.
+## The main way is bright; the other is a flat grey button.
+func _path_card(label: String, line: String, go: Callable, main_way: bool) -> Control:
 	var c := UI.vbox(6)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c.add_child(UI.primary(label, go, 240))
+	if main_way:
+		c.add_child(UI.primary(label, go, 240))
+	else:
+		var b := UI.button(label, go, 240)
+		b.flat = true
+		c.add_child(b)
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
 
