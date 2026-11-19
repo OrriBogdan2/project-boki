@@ -10363,3 +10363,4 @@ READY ext/sfx-extract-cues-port 958d0df411 (PR #227: merged main 2ee0e648d3; nig
 READY ext/p08-port-1118 9d758744f5 (P08 round 2: full-map labels never overprint, sentence labels wrap, one Materials chip, ui-simplify word cuts; PR via gh-outbox)
 READY ext/hunter-review-check 9b5a410e43 (hunter_mesh_check --review: fix-vs-live renders, black/holes/loose/silhouette/clips; tools only, no game change)
 READY ext/p14-port-1118 cc266687f0c (P14 kit VFX/SFX port: Kael black-red, Tenzo ridge fin, Meeko leaf hits, Sable hit flash, incoming-hit cue, uplink ticks; PR via gh-outbox/new-pr.md)
+READY ext/p09-port-1118 c579cf22c069 (P09 creator v2 part 1: void body, frame sliders, no-cloak, creator/clan sounds; PR via gh-outbox)
