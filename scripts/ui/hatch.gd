@@ -666,30 +666,47 @@ func _show_name() -> void:
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
-	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
-	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false)))
-	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true)))
+	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, ne.text, ye.text, true), true))
+	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, ne.text, ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Tend the garden"
+	# Enter in either box is the same as "Skip tutorial"
 	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
 
-## One of the two equal ways on from the naming card: a button and a line under it, one click.
-func _path_card(label: String, line: String, go: Callable) -> Control:
+## One of the two ways on from the naming card: a button and a line under it, one click.
+## The main way is bright; the other is a flat grey button.
+func _path_card(label: String, line: String, go: Callable, main_way: bool) -> Control:
 	var c := UI.vbox(6)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c.add_child(UI.primary(label, go, 240))
+	if main_way:
+		c.add_child(UI.primary(label, go, 240))
+	else:
+		var b := UI.button(label, go, 240)
+		b.flat = true
+		c.add_child(b)
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
+
+## The player's name box: empty (with a hint) until they type one; an unnamed player stays Save.UNNAMED.
+func _your_name_edit() -> LineEdit:
+	var le := LineEdit.new()
+	var cur := String(Save.d.get("name", Save.UNNAMED))
+	le.text = "" if cur == Save.UNNAMED else cur
+	le.placeholder_text = "Type your name"
+	le.max_length = 16
+	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return le
+
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else _hatched_rec(sp_id)
@@ -700,7 +717,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else Save.UNNAMED
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
