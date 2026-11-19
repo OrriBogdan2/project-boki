@@ -35,7 +35,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
 | stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
 | stomp_cycle | 0.7 | one foot-lift-and-slam |
-| kin_revive_time | 6 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
+| kin_revive_time | 6 | your kin pulling you up (as long as the reference game's self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |

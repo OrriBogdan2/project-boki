@@ -22,7 +22,7 @@ const R := {
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
-	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
+	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as the reference game's self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)

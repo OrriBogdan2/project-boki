@@ -542,7 +542,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | archer | RMB | free | free | briefs/hero-ref/pin.md:21 hold to charge toward the cursor; no turn limit shown |
 | archer | E | free | free | briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown |
 | archer | ult (X) | free | free | briefs/hero-ref/pin.md:254 'a self-buff with no cast lock' |
-| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51) |
+| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (private reports repo, sv/DATA.md) |
 | juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane |
 | juggernaut | E | free | free | briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown |
 | juggernaut | E recast | free | free | briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown |
@@ -558,7 +558,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | rimewright | LMB hold | free | free | briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s |
 | rimewright | RMB | free | free | briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown |
 | rimewright | E | free | free | briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown |
-| rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
+| rimewright | E recast | free | free | data: recast freezes the wall (private reports repo, sv/DATA.md); no turn limit shown |
 | rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
 | rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
 | ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15) |
