@@ -604,6 +604,7 @@ const CHECKS := {
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
+	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],

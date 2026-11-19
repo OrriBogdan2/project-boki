@@ -148,7 +148,8 @@ func _course() -> void:
 			key_label += 1
 			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
-			toast_in_card += m.hud.msgs.texts().size()
+			# (a Boki that falls says so at once, as an URGENT line: the one kind a banner lets through)
+			toast_in_card += m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t).size()
 			bubble_in_card += m.bubbles.size()
 			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()

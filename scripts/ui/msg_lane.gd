@@ -29,7 +29,7 @@ var right_edge := 0.0           ## 0: the column is centred; else its right edge
 var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
-var one_hint := false           ## true: one hint (a line with its own life) on show at a time (a match's TopStack sets it)
+var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
