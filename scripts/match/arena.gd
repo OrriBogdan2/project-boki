@@ -289,7 +289,7 @@ func set_arch(a: String, w := "") -> void:
 		if gloves[i] != "": give_glove(String(gloves[i]), i)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), AbilityText.loop(a)], Arch.color(a))
 	if card_layer: _open_card()
 
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
@@ -512,7 +512,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for a in Arch.ids():
 		var aa: String = a
 		var b := UI.choice(HeroTitle.base_name(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), MENU_PICK_W)
-		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))]
+		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), AbilityText.loop(a)]
 		b.add_theme_font_size_override("font_size", 14)
 		ag.add_child(b)
 	left.add_child(ag)
@@ -602,7 +602,7 @@ func _menu_header(arch: String) -> HBoxContainer:
 	var who := UI.vbox(2)
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.add_child(UI.label(HeroTitle.base_name(arch), 26, Arch.color(arch), UI.big))
-	who.add_child(UI.para(String(Arch.def(arch).get("card", {}).get("loop", "")), 13, UI.MUTED))
+	who.add_child(UI.para(AbilityText.loop(arch), 13, UI.MUTED))
 	hd.add_child(who)
 	var side := UI.vbox(4)
 	var hint := UI.label("Everything applies at once. Esc or L closes.", 12, UI.MUTED)
