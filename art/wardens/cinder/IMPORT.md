@@ -18,17 +18,17 @@ Numbers (edges stretched over 3x vs bind, Blender, idle / run_f / run_f / shot):
 by design), collapsed 52 -> 0. Floating sheets: none found (floating_islands 0, no needle islands), so nothing was deleted.
 Scripts: `/home/boki/gens/cinder-rigfix-1119/tool/` (fix.py, smooth.py, glbrw.py).
 
-### Retry 11-19 (Fable review: new holes at the hips, scraps on the forearms), still weights plus added cap triangles only
-No triangle of the scan is deleted or moved, and every original vertex keeps its bind position, so the rest pose looks like live.
+### Retry 11-19 (Fable review: new holes at the hips, scraps on the forearms): weights only, same triangles as live
+Still 63,096 triangles, no triangle added, moved or deleted; every original vertex keeps its bind position, so the rest pose looks
+like live. Two more weight steps on top of the 11-19 cut:
 - Two floating islands the cut left behind (20 + 24 triangles of hip skin from under the left forearm, they rode the forearm as
-  red scraps) now take their hip twins' weights.
+  red scraps and left a hole in the left hip) now take their hip twins' weights, so the hip is whole again.
 - The cut at the armpits (upper arm vs ribs, y above 0.98 m) is undone: the seam pairs take the mean of their two weight sets, so
   the armpit is one skinned surface again (raising an arm opened a hollow there).
-- Every loop the cut opened at the hips and thighs is closed from its own side with a flat cap (fan or ear clipping, long thin
-  triangles halved), weights of the loop's own vertices, UVs and colours of the nearest skin of the same side.
-  Loops that were already open in the scan (front crotch, tail root) are left alone, as in live.
-- Edges stretched over 3x vs bind (all 46 clips, every 0.1 s): median clip 3.44% -> 0.12%, worst clip 4.62% -> 0.29%.
-Scripts: `/home/boki/cj/20261119-054029-a5/work/tool/` (isl.py, unify.py, cap13.py on top of fix.py output).
+Tried and dropped: flat caps over the hip loops. They closed nothing the island step had not, and in the game's renderer the
+tail's spring bones dragged them into black wings.
+Edges stretched over 3x vs bind (all 46 glb clips, every 0.1 s): median clip 3.44% -> 0.12%, worst clip 4.62% -> 0.29%.
+Scripts: `/home/boki/cj/20261119-054029-a5/work/tool/` (isl.py, unify.py on top of fix.py output).
 
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
