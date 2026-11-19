@@ -302,6 +302,19 @@ const V11_SUFFIX := {
 	"swift": ["dart", "wing", "gale", "streak", "comet"],
 }
 
+## Save v21 -> v22: the Boki XP curve changed from 50 x min(L, 20) to round(18 x L^1.5) (Game.xp_need), so
+## saved XP keeps its share of the way to the next level: nobody loses progress, nobody levels twice on the spot.
+static func migrate_xp(data: Dictionary) -> void:
+	var recs: Array = (data.get("roster", []) as Array).duplicate()
+	for L in data.get("lost_kin", []):
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY: recs.append(L["rec"])
+	for rec in recs:
+		if typeof(rec) != TYPE_DICTIONARY or not rec.has("xp"):
+			continue
+		var lv := maxi(int(rec.get("level", 1)), 1)
+		var share := clampf(float(rec["xp"]) / (50.0 * mini(lv, 20)), 0.0, 0.999)
+		rec["xp"] = int(share * float(GardenXp.need(lv)))
+
 ## Save v11 -> v12: levels and forms stay as they are (a level over the cap comes down to it), and
 ## each Boki keeps the form name it had. Safe to run twice.
 static func migrate(data: Dictionary) -> void:
