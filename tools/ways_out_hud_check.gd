@@ -209,11 +209,11 @@ func _tracker(main: Node, m: Match) -> void:
 	var boss_k := QuestTracker.progress(m, qs.lair)
 	var lair_on := QuestTracker.seat_of(m, P.team) == qs.lair and is_equal_approx(boss_k, 0.3)
 	ok(lair_on and r.has_area(), "your squad sealed in the Sealed Lair, you outside: the tracker reads the boss, 30%")
-	b.dormant = false
+	b.set_asleep(false)
 	P.teleport(qs.lair.site())
 	r = await _tracker_rect(main, m)
 	ok(m.lairs.boss_for(P) == b and not r.has_area(), "inside the fight the boss bar is the objective: no tracker")
-	b.dormant = true
+	b.set_asleep(true)
 	P.teleport(away)
 	P.out = true
 	r = await _tracker_rect(main, m)

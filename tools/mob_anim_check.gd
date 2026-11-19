@@ -80,6 +80,8 @@ func _windup(m: Match, k: String) -> void:
 	mb.tgt = P
 	mb.cd = 0.0
 	mb.engaged = true
+	mb.aggro(P, "check")
+	mb._go(Mob.S.CHASE, "check")
 	mb._begin_attack()
 	ok(mb.tele != null and MobAnim.state_of(mb) == MobAnim.WINDUP, "%s: wind-up starts with its telegraph" % k)
 	var wind := float(md["windup"])
@@ -137,8 +139,9 @@ func _perf(m: Match) -> void:
 			2:
 				mb.vel = Vector3(5.0, 0, 0)
 			3:
-				mb.st = "windup"
-				mb.st_t = 0.3
+				mb.aggro(m.player, "check")
+				mb._go(Mob.S.CHASE, "check")
+				mb._go(Mob.S.WINDUP, "check", 0.3)
 			4:
 				mb.stagger_t = 1.0
 			5:

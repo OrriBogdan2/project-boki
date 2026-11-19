@@ -100,7 +100,7 @@ func _boss(m: Match) -> void:
 	if L["state"] == "sealed":
 		m.lairs.open(L, m.player, "dial")
 	var b: Boss = L["boss_mob"]
-	b.dormant = false
+	b.set_asleep(false)
 	b.stagger_t = 0.0
 	b.invul_t = 0.0
 	if b.buried: b._surface()

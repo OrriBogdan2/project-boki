@@ -148,15 +148,15 @@ func _crouch_hint() -> void:
 	ok(hint != null, "a new save's real match has the hint")
 	for mb: Mob in m.mobs:
 		if mb != camp:
-			mb.st = "chase"      # only the camp under test counts as quiet
+			mb.aggro(P, "check")      # only the camp under test counts as quiet
 	P.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "", "far from every camp: no line")
-	camp.st = "chase"
+	camp.aggro(P, "check")
 	P.pos = camp.pos + Vector3(8, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
-	camp.st = "idle"
+	camp.calm("check")
 	hint.tick(0.6)
 	ok(hint.line == said and Save.d["tutorial"].get("crouch_hint", false),
 		"near a quiet camp: the line shows and the flag is set")

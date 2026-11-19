@@ -91,7 +91,7 @@ func _trial(m: Match, p: Hunter, home: Vector3, comp: Array, i: int) -> Array:
 	for kk in comp:
 		var mb := m.spawn_mob(kk, at)
 		mb.tgt = p
-		mb.st = "chase"
+		mb.aggro(p, "check")
 		made.append(mb)
 	var t0 := m.time
 	var dmg := 0.0

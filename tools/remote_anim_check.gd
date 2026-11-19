@@ -113,7 +113,7 @@ func _boss(kind: String, atk: String) -> void:
 	last_row = ["?", "?"]
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.3)
-	b.dormant = false
+	b.set_asleep(false)
 	b.awake_t = 0.0
 	await _run(2.0)
 	b.tgt = P
