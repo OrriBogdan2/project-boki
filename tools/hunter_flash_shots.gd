@@ -108,11 +108,11 @@ func _shoot(h: Hunter, spot: Vector3) -> Array:
 	var mid := (foot + head) * 0.5
 	var size := main.get_viewport().get_texture().get_image().get_size()
 	var rg := Rect2i(Vector2i(mid - px * 0.5), Vector2i(px)).intersection(Rect2i(Vector2i.ZERO, size))
-	Engine.time_scale = 0.0  # (the idle pose holds still, so the frames differ by the flash alone)
 	h.visible = false
 	await _frames(h, 2)
 	var out: Array = [_grab(rg)]
 	h.visible = true
+	Engine.time_scale = 0.0  # (the idle pose holds still, so the frames differ by the flash alone)
 	await _frames(h, 2)
 	out.append(_grab(rg))
 	h.inv_t = 0.0
