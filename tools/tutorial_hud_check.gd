@@ -179,7 +179,7 @@ func _course() -> void:
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var details: Dictionary = Content.rules("tutorial")["detail"]      # the plain lines' templates (key caps fill in short)
+	var details: Dictionary = Content.rules("tutorial")["detail"]
 	var long_lines: Array = details.keys().filter(func(k): return String(details[k]).length() > DETAIL_MAX)
 	ok(long_lines.is_empty(), "every plain-words line is at most %d characters (%s)" % [DETAIL_MAX, str(long_lines)])
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
