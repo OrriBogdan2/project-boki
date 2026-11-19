@@ -47,7 +47,7 @@ func run(main_node: Node) -> void:
 	KillFeed.knock(m, foes[1], me.kin, KillFeed.icon_of(me.kin, {"ab": "k1"}))
 	KillFeed.out(m, foes[2], foes[3], "finished")
 	KillFeed.knock(m, mate, blight, KillFeed.icon_of(blight, {}))
-	for i in 20:
+	for i in 150:      # (the painted faces are cut on a worker: a few seconds of frames)
 		m.hud.panels.queue_redraw()
 		await main.get_tree().process_frame
 	var lane := Rect2()
