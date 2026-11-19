@@ -21,6 +21,7 @@ func run(main_node: Node) -> void:
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main_node
 	await _joule()
+	await _joule_mash()
 	await _shiv()
 	await _celeste()
 	await _grimble()
@@ -64,6 +65,46 @@ func _joule() -> void:
 		ok("joule: the Wirerun through a foe at %d Static leaves %d" % [before, before + 1],
 				K.spark_n(T) == before + 1 and K.blowouts == 0, "stacks %d" % K.spark_n(T))
 	await ac.done(m)
+
+
+## Joule: Shift mashed during the streak with no charge back is dropped (no 4 m plain dash after it);
+## with the charge back (a reset in the run) it plays a full second Wirerun.
+func _joule_mash() -> void:
+	for reset in [false, true]:
+		var r: Array = ac.setup("mage", 40.0, "", true)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var home: Vector3 = r[4]
+		var K: MageKit = P.ak
+		(r[2] as Hunter).teleport(home + Vector3(0, 0, 40))
+		(r[3] as Hunter).teleport(home + Vector3(0, 0, -40))
+		P.teleport(home)
+		ac.step(m, 0.3)
+		P.dashes = P.max_dashes()
+		ac.aim_at(P, home + Vector3(20, 0, 0))
+		P.inp["dash_down"] = true
+		P.do_dash()
+		m.step(DT)
+		P.inp["dash_down"] = false
+		ac.step(m, 0.05)
+		if reset:
+			K.grant_reset()
+		P.inp["dash"] = true
+		P.inp["dash_down"] = true
+		m.step(DT)
+		P.inp["dash"] = false
+		ac.step(m, 0.1)
+		P.inp["dash_down"] = false
+		ac.step(m, 1.2)
+		var went := _flat(P.pos, home)
+		if reset:
+			ok("joule: Shift in the streak after a reset plays a full second Wirerun", K.run_n == 2 and went > 14.0,
+					"runs %d went %.1f m" % [K.run_n, went])
+		else:
+			ok("joule: Shift mashed in the streak with no charge plays no tiny dash after it",
+					K.run_n == 1 and P.ex_cd <= 0.0 and K.last_dash_kind == "wire" and went < 7.5,
+					"runs %d ex_cd %.1f went %.1f m" % [K.run_n, P.ex_cd, went])
+		await ac.done(m)
 
 
 ## Shiv (thief, Sable): a bolt flies its full range whatever the cursor; a missed empowered bolt gives no dash.
@@ -168,29 +209,42 @@ func _dart_end(m: Match, P: Hunter, K: RimewrightKit) -> Vector3:
 	return last
 
 
-## Grimble (dredge): Deep Reach hooks a foe and hauls it in; the Anchor Drop cast right after must hit it.
+## Grimble (dredge): Deep Reach hooks a foe and reels it in; the Anchor Drop lands on it whether E is pressed
+## during the reel (it waits for the arrival, planted) or after it, and with a move key held.
 func _grimble() -> void:
-	var r: Array = ac.setup("dredge", 8.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: DredgeKit = P.ak
-	ac.aim_at(P, T.pos)
-	K.cd["rmb"] = 0.0
-	K.cd["e"] = 0.0
-	ac.tap(m, P)
-	var t := 0.0
-	while K.arrivals < 1 and t < 4.0:
-		ac.step(m, 0.05)
-		t += 0.05
-	var gap := _flat(P.pos, T.pos)
-	ac.aim_at(P, T.pos)
-	var hp0 := T.hp
-	P.ak.use_e()
-	ac.step(m, 0.8)
-	ok("grimble: hook then Anchor Drop hits the hauled foe", K.arrivals == 1 and K.anchors == 1 and hp0 - T.hp >= 20.0,
-			"arrivals %d anchors %d gap %.2f took %.0f" % [K.arrivals, K.anchors, gap, hp0 - T.hp])
-	await ac.done(m)
+	for c in [["mid-reel E", false, false], ["mid-reel E, strafing", false, true], ["E after, strafing", true, true]]:
+		var late: bool = c[1]
+		var strafe: bool = c[2]
+		var r: Array = ac.setup("dredge", 9.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var T: Hunter = r[2]
+		var K: DredgeKit = P.ak
+		ac.aim_at(P, T.pos)
+		K.cd["rmb"] = 0.0
+		K.cd["e"] = 0.0
+		ac.tap(m, P)
+		var hp0 := T.hp
+		var pressed := false
+		var waited := true
+		var t := 0.0
+		while t < 4.0 and K.anchors < 1:
+			if strafe:
+				P.inp["move"] = Vector2(0, 1)
+			if not pressed and (K.arrivals > 0 if late else (not K.pull.is_empty() and t > 0.6)):
+				pressed = true
+				if late:
+					ac.aim_at(P, T.pos)
+				P.ak.use_e()
+				waited = late or (K.anchors == 0 and K.wind <= 0.0)
+			m.step(DT)
+			t += DT
+		P.inp["move"] = Vector2.ZERO
+		ac.step(m, 0.6)
+		ok("grimble: hook, %s: the Anchor Drop hits the hauled foe" % c[0],
+				waited and K.arrivals == 1 and K.anchors == 1 and hp0 - T.hp >= 25.0,
+				"arrivals %d anchors %d took %.0f" % [K.arrivals, K.anchors, hp0 - T.hp])
+		await ac.done(m)
 
 
 ## Brall (juggernaut): the hook, then the pull with a Haul Slam, or a Slam after the pull, hits the hooked foe.
