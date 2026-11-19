@@ -4,7 +4,7 @@ extends RefCounted
 ## MIN_WRAP_W wide and breaks into a handful of lines (a wrapping Label in a shrinking row once collapsed
 ## to a column of one letter per line, running off the top of the screen), and the card fits the window.
 ## With --shots-dir the screen is saved as name_card_<tag>_<w>x<h>.png (run it under xvfb with a renderer,
-## --resolution 1920x1080 or 1280x720).
+## --resolution 1920x1080 or 1280x720; the layout is scaled to the window, so the card is measured in its units).
 
 const MIN_WRAP_W := 200.0      # px: a wrapping line narrower than this is a column of fragments
 const MAX_WRAP_LINES := 4      # the longest sentence on the card wraps to a few lines at most
@@ -56,7 +56,8 @@ func run(main: Node) -> void:
 	if dir != "":
 		DirAccess.make_dir_recursive_absolute(dir)
 		var img := main.get_viewport().get_texture().get_image()
-		img.save_png(dir.path_join("name_card_%s_%dx%d.png" % [tag, int(win.x), int(win.y)]))
+		var px := main.get_window().size      # (the window in pixels: the layout is scaled to it)
+		img.save_png(dir.path_join("name_card_%s_%dx%d.png" % [tag, px.x, px.y]))
 	print("NAMECARD done, bad=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
