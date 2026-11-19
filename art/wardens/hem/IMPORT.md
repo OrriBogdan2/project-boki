@@ -9,14 +9,15 @@ skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the r
    triangles use the copy. No triangle deleted. Islands the cut would leave hanging are given to the side they touch.
 2. Weights: arm side = arm bones only (harmonic fill from clean arm verts, below the chest); body side below the chest = no arm
    bones at all (harmonic fill from verts with no arm weight; hips, legs, skirt bone, cape); chest/shoulder keep their upper
-   arm share and lose only forearm/hand. Then one robust (Cauchy) weight relax over every clip (glb_relax sampling).
+   arm share and lose only forearm/hand. Then three robust (Cauchy) weight relax passes over every clip (glb_relax sampling).
 3. The cut leaves closed rims; 3 of them get a hidden cap (19 extra triangles, centroid fan, one flat colour) that a ray test
    (190 directions, none from below) shows is never seen at rest; the others stay open (a cap there would show at rest).
 Scripts: job dir split.py (FIT=0, D=0.15, LAM=4, KAP=2, GAM=3, CLOTHY=1.15, ISL=200) + capray.py (Blender BVH) + lb.py
-(PEN=cauchy CS=1 T=2 CALMW=30 ITERS=250), all in ~/gens/hunter-fix-hem-1119c/scripts.
-Numbers vs live (welded, rest edge >= 8 mm, every clip at 0.1 s): edges over 3x 252 -> 12 of 46,445 (live 46,376; 0.54% -> 0.026%),
-over 10x 4 -> 0, worst 17.2x -> 4.1x, clips with an edge over 3x 53 -> 4; hunter_mesh_check stretched_tris 660 -> 12,
-far_bone_verts 586 -> 170 (spike edges 127, floating islands 1, black texels unchanged: geometry/texture).
+(PEN=cauchy CS=1 CALMW=30, T=2 / 1.6 / 1.4), all in ~/gens/hunter-fix-hem-1119c/scripts.
+Numbers vs live (welded, rest edge >= 8 mm, every clip at 0.1 s): edges over 3x 252 -> 0 of 46,445 (live 46,376; 0.54% -> 0%),
+over 10x 4 -> 0, worst 17.2x -> 2.72x, clips with an edge over 3x 53 -> 0; hunter_mesh_check stretched_tris 660 -> 1,
+far_bone_verts 586 -> 170; Godot `--stretch-check` worst 17.81 (roll) -> 2.72 (hail), every clip under 3.0,
+60 of 61 clips lower than live (g_nod 1.12 -> 1.39 at the left shoulder) (spike edges 127, floating islands 1, black texels unchanged: geometry/texture).
 Look change: the skirt no longer hangs on the arm weights, so in idle/stance/crouch it drapes as in the rest pose instead of
 being pulled toward the hands (the live drape came from the ~25% hand weight on the thigh/skirt skin that tore in bow clips).
 
