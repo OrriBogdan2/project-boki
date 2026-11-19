@@ -31,7 +31,7 @@
 		"thf_vault_f": {"clip": "vault_f"},
 		"thf_vault_b": {"clip": "vault_b"},
 		"thf_vault_twist": {"clip": "vault_twist"},
-		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "heading": true, "turn_max": 3.2, "air_clip": "exdash", "ground_clip": "vault_f"},
+		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "heading": true, "turn_max": 3.2, "air_clip": "exdash"},
 		"thf_land": {"clip": "land_v"},
 		"thf_bola": {"clip": "bola", "upper": "moving", "air_legs": true},
 		"thf_knife": {"clip": "knife", "air_legs": true, "strike": ["hand.R", "e/range", "throw"], "upper": "moving"},
