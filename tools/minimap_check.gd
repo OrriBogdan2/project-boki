@@ -121,7 +121,8 @@ func _zone(main: Node) -> void:
 	m.sess_t0 = 60.0 - m.time
 	ok(HeartHud.zone_line(m) == "Closing in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = start + 75.0 - m.time
-	ok(HeartHud.zone_line(m) == "Closing  %d:%02d left" % [int(held - start - 75.0) / 60, int(held - start - 75.0) % 60],
+	var left := int(held - start - 75.0)
+	ok(HeartHud.zone_line(m) == "Closing  %d:%02d left" % [left / 60, left % 60],
 		"while it closes: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = held + 5.0 - m.time
 	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")
