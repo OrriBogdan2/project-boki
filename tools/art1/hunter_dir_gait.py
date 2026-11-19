@@ -9,6 +9,8 @@ never sits lower than forward (--clip-check bounds it). Off the forward line the
 TURN degrees into the move (back half: its back to the move), so the feet pass and never cross, while the chest keeps
 the source clip's facing. The upper body (arms, head, weapon, springs) is the shipped clip of that direction (a
 diagonal takes the forward or back one), resampled to the new length and put in phase with the new legs.
+A rig with no foot bone (Kael: the boot is skinned to the shin) plants the shin's lowest verts (BOOT) from an ankle
+on the shin's line (ANKLE_UP); its sole can't pitch, so the heel and toe rolls are skipped.
   blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED
   python3 tools/art1/glb_add_clips.py SRC.glb OUT.glb walk_b,walk_l,...,run_br"""
 import math
@@ -37,15 +39,18 @@ PIVOT_MAX = 65.0   # deg: how far a sole may pivot on its heel or toe to stay in
 TOE_UP, HEEL_UP = 10.0, 30.0   # deg: the sole's pitch at the strike and at the push (mirrored walking backwards)
 DIRS = {"f": Vector((0, 1, 0)), "b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
 DIRS.update({a + b: (DIRS[a] + DIRS[b]).normalized() for a in "fb" for b in "lr"})
-LEGS = ("thigh", "shin", "foot")
-LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
+BOOT = 0.14        # m: on a rig with no foot bone (Kael: the boot is skinned to the shin) the sole is the shin's verts this low
+ANKLE_UP = 0.07    # m: and the ankle is the point of the shin's line this far above the sole
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.render.fps = FPS
 bpy.ops.import_scene.gltf(filepath=SRC)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-body = max((o for o in bpy.data.objects if o.type == "MESH" and "foot.L" in o.vertex_groups),
+LEGS = ("thigh", "shin", "foot") if "foot.L" in arm.data.bones else ("thigh", "shin")
+LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
+END = LEGS[-1]      # the bone the sole is skinned to
+body = max((o for o in bpy.data.objects if o.type == "MESH" and END + ".L" in o.vertex_groups),
            key=lambda o: len(o.data.vertices))
 layer = bpy.context.view_layer
 PB = arm.pose.bones
@@ -77,21 +82,30 @@ def verts(idx):
 
 
 def foot_idx(side):
-    g = body.vertex_groups["foot." + side].index
+    g = body.vertex_groups["%s.%s" % (END, side)].index
     return np.array([v.index for v in body.data.vertices if any(e.group == g and e.weight > 0.3 for e in v.groups)])
 
 
-FOOT = {s: foot_idx(s) for s in "LR"}
 arm.animation_data_create()
 arm.animation_data.action = None
 for pb in PB:
     pb.matrix_basis = Matrix()
 layer.update()
+FOOT = {s: foot_idx(s) for s in "LR"}
+ANKLE = {}          # per side, in the END bone's space: the ankle (a foot bone's head; with none, a point of the shin's line)
 SOLE = {}           # per side: the ankle's rest place, the heel and toe ends of the sole from it (m, along y), its height
 for s in "LR":
     co = verts(FOOT[s])
+    knee = REST["shin." + s]
+    if END == "shin":
+        FOOT[s] = FOOT[s][co[:, 2] < co[:, 2].min() + BOOT]
+        co = verts(FOOT[s])
+        down = (knee.translation - REST["thigh." + s].translation).normalized()
+        ankle = knee.translation + down * ((co[:, 2].min() + ANKLE_UP - knee.translation.z) / down.z)
+    else:
+        ankle = REST["foot." + s].translation
+    ANKLE[s] = REST["%s.%s" % (END, s)].inverted() @ ankle
     low = co[co[:, 2] < co[:, 2].min() + 0.012]
-    ankle = REST["foot." + s].translation
     SOLE[s] = (ankle.copy(), float(low[:, 1].min() - ankle.y), float(low[:, 1].max() - ankle.y), float(ankle.z - co[:, 2].min()))
 
 
@@ -104,8 +118,12 @@ def action(clip):
     return act
 
 
+def ankle_at(side):
+    return PB["%s.%s" % (END, side)].matrix @ ANKLE[side]
+
+
 LEG = ((REST["shin.L"].translation - REST["thigh.L"].translation).length
-       + (REST["foot.L"].translation - REST["shin.L"].translation).length)
+       + (SOLE["L"][0] - REST["shin.L"].translation).length)
 HIP_IN_ROOT = REST["root"].inverted() @ ((REST["thigh.L"].translation + REST["thigh.R"].translation) / 2)
 
 
@@ -125,7 +143,7 @@ def read(clip):
                         hips=PB["hips"].matrix.copy(), root=PB["root"].matrix.copy(),
                         low={s: float(verts(FOOT[s])[:, 2].min()) for s in "LR"},
                         co={s: verts(FOOT[s]) for s in "LR"},
-                        ankle={s: PB["foot." + s].head.copy() for s in "LR"},
+                        ankle={s: ankle_at(s) for s in "LR"},
                         hc=(PB["thigh.L"].head + PB["thigh.R"].head) / 2))
     floor = float(np.percentile([k["low"][s] for k in out for s in "LR"], 20))
     on = np.array([k["low"]["R"] < floor + CONTACT for k in out])
@@ -139,11 +157,12 @@ def read(clip):
 
 def leg_ik(side, ankle, foot_turn, pole):
     """Two bones from the hip to the ankle, the knee toward `pole`; then the foot at its own angle. Returns the miss."""
-    th, sh, ft = (PB["%s.%s" % (n, side)] for n in LEGS)
-    for pb in (th, sh, ft):
+    bones = [PB["%s.%s" % (n, side)] for n in LEGS]
+    th, sh = bones[:2]
+    for pb in bones:
         pb.matrix_basis = Matrix()
     layer.update()
-    hip, knee, old = th.head.copy(), sh.head.copy(), ft.head.copy()
+    hip, knee, old = th.head.copy(), sh.head.copy(), ankle_at(side)
     l1, l2 = (knee - hip).length, (old - knee).length
     want = ankle - hip
     d = min(max(want.length, abs(l1 - l2) + 1e-4), l1 + l2 - 1e-4)
@@ -152,13 +171,15 @@ def leg_ik(side, ankle, foot_turn, pole):
     side_pole = pole - u * u.dot(pole)
     knee_to = hip + u * x + side_pole.normalized() * math.sqrt(max(0.0, l1 * l1 - x * x))
     turn_about(th, (knee - hip).rotation_difference(knee_to - hip).to_matrix().to_4x4())
-    turn_about(sh, (ft.head - sh.head).rotation_difference(hip + u * d - sh.head).to_matrix().to_4x4())
-    ft.matrix = Matrix.Translation(ft.head) @ foot_turn @ REST[ft.name].to_3x3().to_4x4()
-    layer.update()
-    for pb in (th, sh, ft):
+    turn_about(sh, (ankle_at(side) - sh.head).rotation_difference(hip + u * d - sh.head).to_matrix().to_4x4())
+    if END == "foot":
+        ft = bones[2]
+        ft.matrix = Matrix.Translation(ft.head) @ foot_turn @ REST[ft.name].to_3x3().to_4x4()
+        layer.update()
+    for pb in bones:
         pb.location = (0, 0, 0)
     layer.update()
-    return (ft.head - ankle).length
+    return (ankle_at(side) - ankle).length
 
 
 def turn_about(pb, turn):
@@ -231,8 +252,8 @@ class Gait:
         hip = PB["thigh." + side].head
         ahead = (flat - hip).dot(self.face.to_3x3() @ Vector((0, 1, 0)))
         sign = 1.0 if ahead > 0 else -1.0
-        ankle, turn = self.place(side, flat, pitch)
-        while (ankle - hip).length > 0.995 * LEG and abs(pitch) < PIVOT_MAX:
+        ankle, turn = self.place(side, flat, pitch if END == "foot" else 0.0)   # (a boot on the shin rolls with it)
+        while END == "foot" and (ankle - hip).length > 0.995 * LEG and abs(pitch) < PIVOT_MAX:
             pitch = pitch + 4.0 * sign if pitch * sign >= 0 else 0.0
             nearer = self.place(side, flat, pitch)
             if (nearer[0] - hip).length >= (ankle - hip).length:   # (a heel pivot lowers the ankle: past a point it costs reach)
@@ -283,7 +304,7 @@ def pose(g, src, ph, feet, drop):
             miss = leg_ik(side, ankle, turn, pole)
             low = float(verts(FOOT[side])[:, 2].min()) - g.floor
             if planted or low < 0:                        # the sole on the floor from the skinned verts: no hover, no sink
-                ankle.z -= low - (PB["foot." + side].head.z - ankle.z)   # (less what a leg that fell short hangs above it)
+                ankle.z -= low - (ankle_at(side).z - ankle.z)   # (less what a leg that fell short hangs above it)
                 miss = leg_ik(side, ankle, turn, pole)
             now = verts(FOOT[side])
             both = ((now[:, 2] < g.floor + CONTACT) & (was["co"][:, 2] < g.floor + CONTACT)
