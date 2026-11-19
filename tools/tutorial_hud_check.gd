@@ -31,6 +31,7 @@ var bad := 0
 var m: Match
 var main: Node
 
+const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (the fresh-run log found 157)
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
 const FRAME_VIEW := Vector2(1280, 720)   # the smallest screen the tutorial is built for
@@ -186,6 +187,8 @@ func _course() -> void:
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
+	var long_lines := details.keys().filter(func(k): return String(details[k]).length() > DETAIL_MAX)
+	ok(long_lines.is_empty(), "every plain-words line is at most %d characters (%s)" % [DETAIL_MAX, str(long_lines)])
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
