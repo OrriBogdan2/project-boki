@@ -46,6 +46,11 @@ func _built(m: Match, trial: TimeTrial) -> void:
 		moves[g.move] = true
 	var placed := trial.start != Vector3.INF and trial.finish != Vector3.INF and trial.pad_at != Vector3.INF
 	ok("ten gates, start and finish arch, pad", trial.gates.size() == 10 and placed, "%d gates" % trial.gates.size())
+	var c := trial.clock
+	var centred := c.anchor_left == 0.0 and c.anchor_right == 1.0 and c.offset_left == 0.0 and c.offset_right == 0.0
+	ok("the clock is centred, under the top panel", centred and c.offset_top >= 180.0, "top %.0f" % c.offset_top)
+	var gap := Vector2(trial.finish.x - trial.start.x, trial.finish.z - trial.start.z).length()
+	ok("the finish arch stands apart from the start arch", gap > 7.0, "%.1f m" % gap)
 	ok(
 		"the gates ask for dash, kick, pad, glide",
 		moves.has("dash") and moves.has("kick") and moves.has("pad") and moves.has("glide"),

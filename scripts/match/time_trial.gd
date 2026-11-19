@@ -16,6 +16,7 @@ const PAD_R := 0.8  # [m] how close to the pad's middle you step to be thrown (a
 const MOVE_TAG := {"dash": "DASH", "kick": "WALL KICK", "pad": "JUMP PAD", "glide": "GLIDE"}
 const NEXT_COL := Color("ffd25a")  # the gate you go through next
 const ARCH_COL := Color("8fe3c8")
+const CLOCK_Y := 188.0  # [px] the run clock's top: clear of the kit drill panel and the HUD's top-right lines
 
 var m: Match
 var gates: Array[Gate] = []
@@ -92,14 +93,15 @@ func build(layer: CanvasLayer) -> void:
 	pad.rotation.y = atan2(-(pad_land.x - pad_at.x), -(pad_land.z - pad_at.z))
 	m.add_child(pad)
 	clock = Label.new()
-	clock.position = Vector2(0, 104)
-	clock.size = Vector2(1280, 30)
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	clock.add_theme_font_size_override("font_size", 26)
 	clock.add_theme_color_override("font_color", NEXT_COL)
 	clock.add_theme_color_override("font_outline_color", Color.BLACK)
 	clock.add_theme_constant_override("outline_size", 8)
-	clock.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	clock.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)  # centred, under the kit drill's top panel
+	clock.offset_top = CLOCK_Y
+	clock.offset_bottom = CLOCK_Y + 32.0
+	clock.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clock.visible = false
 	layer.add_child(clock)
 	_light(0)
