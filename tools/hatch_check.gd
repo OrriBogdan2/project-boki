@@ -118,7 +118,7 @@ func run(m: Node) -> void:
 	var labels: Array = rv.info.find_children("*", "Label", true, false)
 	var golden := labels.filter(func(l): return (l as Label).get_theme_color("font_color").is_equal_approx(UI.GOLD))
 	ok(golden.is_empty(), "no gold rarity text on its card (%d)" % golden.size())
-	ok(labels.any(func(l): return (l as Label).text.contains("Its egg was guarded by")), "a rare one gets a line of provenance")
+	ok(labels.any(func(l): return (l as Label).text.contains("egg was guarded by")), "a rare one gets a line of provenance")
 	var waited := _end_state(rv)
 	rv._go()
 	frames = 0
@@ -139,7 +139,7 @@ func run(m: Node) -> void:
 func _end_state(rv: KinReveal) -> Dictionary:
 	return {
 		"met": rv.met, "ready": rv.ready_to_name, "can_name": not rv.name_btn.disabled,
-		"title": rv.title_lbl.text, "sub": rv.sub_lbl.text,
+		"title": rv.title_lbl.text, "sub": rv.sub_lbl.text.contains("looking at you"),
 		"faces": absf(wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)) < 0.2,
 		"turned_up": absf(rv.kin.get_node("Body").rotation.x) < 0.01,
 	}
@@ -204,12 +204,15 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 		await tree.process_frame
 		frames += 1
 	ok(hx.stage == "name", "Name it hands over to naming")
+	var sex: String = Unique.sex(hx.new_rec)
+	ok(sex != "" and hx.new_rec["species"] == sp, "the Boki's record is made as it hatches, with a sex (%s)" % sex)
 	hx._finish(sp, "Ember", "Orri", true)
 	var rec: Dictionary = Save.d["roster"][0] if not Save.d["roster"].is_empty() else {}
 	var same: bool = rec.get("species", "") == sp and rec.get("name", "") == "Ember" and rec.get("starter", false)
 	var saved: bool = Save.d["active"] == rec.get("uid", "") and Save.d["tutorial"].get("hatched", false)
 	ok(Save.d["roster"].size() == 1 and same and saved,
 		"the same Boki is saved: your %s, Ember, first of the roster" % sp)
+	ok(Unique.sex(rec) == sex, "and it keeps the sex the reveal showed")
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 

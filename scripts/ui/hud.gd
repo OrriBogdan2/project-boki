@@ -1318,7 +1318,8 @@ func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
 		fallback = portrait_grey(h) if state == "dead" else portrait(h)
 	var hurt := plates.flash_of(h) if state == "" else 0.0
 	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
-	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
+	var mood := plates.mood_of(h, low) if state == "" else ""
+	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time, false, mood)
 
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
