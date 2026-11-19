@@ -365,11 +365,26 @@ removed: `--hud-groups-check` pins the landing at 9 groups for a fresh save (mai
 [After shots](hud_timeline/after), 0-30 s only, taken before the merge (that run was stopped when the walk fell).
 Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh save in a real match, veterans unchanged).
 
+### Newcomer staging and the extraction line (11-15, owner playtest 11-13 "the UI is SO overloaded")
+The branch's own first-fight staging (weapon card and counters held back until the first shot, hit or pickup)
+was dropped in the 11-18 uihud merge: main's `HudReveal` table (`content/rules/hud_reveal.json`, counters, feed, gear,
+squad and perks from match 4) stages the newcomer HUD now; `HudReveal.newcomer(m)` (a staged match on a save under
+`NEW_PLAYER_MATCHES`) is what ExtractGoal reads.
+`ExtractGoal` is the one line for the way out: seat, when it opens or how far it is, and the key ("Uplink open · 140 m
+Hold F at the outpost until the lift opens"), the open seat or else the one opening soonest. A new player gets it in
+place of the four-seat strip and only for the Uplink and the Heart ring (`hud_groups.json` `newcomer_seats`: no boss
+fight, no carried Heart); everyone else gets it under the strip until they are on a quest seat (the QuestTracker card
+takes the slot). The minimap names the seat's badge (always for the goal, for all four while Tab/M is held) and the
+full map's key lists "Way out" next to "Extract" (the outpost banner). Checks: `--extract-goal-check`,
+`--minimap-check`.
+The first-match guide's exit line names the same seat and how ("Head for the Uplink badge on your map: Hold F at the
+outpost until the lift opens"; `exit_none` when no seat is on offer), and while a guide line is up the message column
+starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `--first-match-guide-check`.
+
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
   the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
-- The tutorial and expedition HUD would want one staging table (`ext/ui-hud-reveal-1110` builds that: `HudReveal` and
-  `content/rules/hud_reveal.json`, not on main); `HudGroups`' reveal rules are to be folded into it when it lands.
+- `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
 - Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
