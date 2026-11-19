@@ -1,15 +1,22 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
-## 2026-11-19: tearing fix (ext/hunter-fix-claire-1118), weights only
+## 2026-11-19: tearing fix (ext/hunter-fix-claire-1118), skin weights only
 Under animation the v95 mesh tore (hand/forearm/shin weight on hip and thigh skin, 3-15x edge growth, black spikes). Only
-JOINTS_0/WEIGHTS_0 of the body mesh changed (plus 7 triangles made degenerate where an arm was fused to the hip); the spear
-mesh, skeleton, bone names, clips, UVs and textures are byte-identical, so the bind pose looks the same.
-Method: tools/art1/skin_relax limbs_apart + relax on the glb's own 59 clips, with every edge measured as posed length /
+JOINTS_0/WEIGHTS_0 of the body mesh changed; the spear mesh, skeleton, bone names, clips, UVs, indices and textures are
+byte-identical, so the bind pose looks the same.
+Method (first pass): tools/art1/skin_relax limbs_apart + relax on the glb's own clips, every edge measured as posed length /
 (rest length + 1 cm) so short edges (under 8 mm, which glb_relax skips and where the elbow and hair spikes were) count.
+Retry (Fable review: the first pass put black blobs on the thighs in idle): the legs/hands skin primitive (skin-v95b) was
+re-weighted differently. It keeps the live thigh/shin/hips mix; only the arm bones (hand/forearm/upper_arm, 22% on the thigh
+at worst) are removed from the thigh skin and the rest renormalised, and the 7 faces the first pass had made degenerate are
+back (those holes were the black blobs). The top of the thigh (bind y 0.70-0.80 m, under the skirt hem) keeps the live
+weights, blended in, so the thigh opening stays hidden. Skirt, sleeve, shoulder and hair weights are the first pass's.
 Numbers (own numpy skinner, unique edges): share over 3x bind length at idle / run_f 0.25 / run_f 0.60 1.12 / 1.15 / 1.24 %
--> 0.16 / 0.15 / 0.13 %; edges over 3x and 3 cm in any clip 1834 -> 98; triangles grown over 8x in spear 163 -> 4.
-`--stretch-check --wardens=rimewright`: worst 8.46 -> 5.32 (every clip is still over 1.3: elbow/knee creases).
-Not fixed: dark ink patches where the legs cross (skate/rime clips); they come from the ink shell, not the skin.
+-> 0.18 / 0.16 / 0.14 %; triangles over 8x in any of the 59 clips 245 -> 0.
+Close-camera renders (30 clips, 15 fps): idle leg black px per frame live 9.9, first pass 50.4, now 12.9 (no frame over 30 px);
+frames with a 100+ px black blob over all clips live 88, first pass 84, now 74 (hip/thigh wedge gone in run, spear, stomp,
+walk, mantle; crouch band 379 -> 211 px).
+Not fixed (identical in live, not leg skin): the dark wrist cuff and glove, hand slivers, the dark patch by the shoulder in emote.
 
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
