@@ -93,9 +93,13 @@
    0.1
   ]
  },
- "relax": {
-  "CUTS": 0
- },
+ "detach": [
+  ["forearm.R", "hips"], ["forearm.R", "thigh.L"], ["forearm.R", "thigh.R"], ["forearm.R", "shin.L"], ["forearm.R", "shin.R"],
+  ["hand.R", "hips"], ["hand.R", "thigh.L"], ["hand.R", "thigh.R"], ["hand.R", "shin.L"], ["hand.R", "shin.R"],
+  ["forearm.L", "hips"], ["forearm.L", "thigh.L"], ["forearm.L", "thigh.R"], ["forearm.L", "shin.L"], ["forearm.L", "shin.R"],
+  ["hand.L", "hips"], ["hand.L", "thigh.L"], ["hand.L", "thigh.R"], ["hand.L", "shin.L"], ["hand.L", "shin.R"]
+ ],
+ "relax": {"CUTS": 0, "LIMIT": 2.0, "PULL": true, "STEP": 1},
  "past_wrist": {
   "R": "hand.R",
   "L": "hand.L"

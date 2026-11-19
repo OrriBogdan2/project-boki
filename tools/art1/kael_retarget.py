@@ -19,7 +19,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glb_add_clips import read, write
 
-NCOMP = {"SCALAR": 1, "VEC3": 3, "VEC4": 4, "MAT4": 16}
+NCOMP = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 DTYPE = {5121: np.uint8, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
 BREATH_AT = (0.0, 0.36, 0.08)  # m under hips (glTF: up, back): the back of the rib cage, 1.22 m up on the v2 body
 BREATH_BAND = (1.00, 1.10, 1.27, 1.36)  # m up: hips weights between the inner two go whole to x_breath, ramped outside
@@ -50,7 +50,8 @@ def get(j, b, i):
 def set_(j, b, i, arr):
     off, n, k, dt = span(j, i)
     assert arr.shape == (n, k)
-    b[off:off + arr.nbytes] = arr.astype(dt).tobytes()
+    raw = arr.astype(dt).tobytes()
+    b[off:off + len(raw)] = raw
 
 
 def put(j, b, arr, typ):
