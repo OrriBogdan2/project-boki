@@ -7,6 +7,9 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 
 | Boki | Animals | Type | Size | Fights as | Where it comes from |
 |---|---|---|---|---|---|
+| [Harpwhal](#harpwhal) | Narwhal + Harpoon | Gravity | medium | controller | Wild, nest eggs |
+| [Arcestrel](#arcestrel) | Kestrel + Copper wire | Storm | medium | skirmisher | Wild, nest eggs |
+| [Barostorm](#barostorm) | Meerkat + Storm barometer | Storm | large | support | Wild, nest eggs |
 | [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Stone | medium | tank | Wild, nest eggs |
 | [Mycroll](#mycroll) | Hedgehog + Toadstool | Spore | small | controller | Starter egg |
 | [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
@@ -14,46 +17,82 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
+| [Vatmander](#vatmander) | Salamander + Glass orbs | Storm | large | tank | Wild, nest eggs |
+| [Citadoad](#citadoad) | Toad + Fortress walls | Stone | large | tank | Wild, nest eggs |
+| [Crofthollow](#crofthollow) | Highland cow + Thatched roof | Bloom | large | tank | Wild, nest eggs |
+| [Dreadnoyak](#dreadnoyak) | Yak + Icebreaker bow | Frost | large | tank | Wild, nest eggs |
 | [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Ghost | large | trickster | Wild, nest eggs |
+| [Eclipsowl](#eclipsowl) | Owl + Eclipse | Lunar | large | trickster | Wild, nest eggs |
+| [Effigoon](#effigoon) | Beetle pupa + Marble cocoon | Stone | large | tank | Wild, nest eggs |
+| [Embrook](#embrook) | Rook + Hearth fire | Ember | medium | skirmisher | Wild, nest eggs |
 | [Frigatee](#frigatee) | Manatee + Antique icebox | Frost | large | support | Wild, nest eggs |
+| [Forgebrock](#forgebrock) | Badger + Open furnace | Ember | large | tank | Wild, nest eggs |
+| [Geodemole](#geodemole) | Mole + Split geode | Stone | medium | controller | Wild, nest eggs |
+| [Geyserbara](#geyserbara) | Capybara + Geyser | Bloom | large | support | Wild, nest eggs |
 | [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Echo | medium | controller | Wild, nest eggs |
+| [Glaciatee](#glaciatee) | Walrus + Aurora crown | Frost | large | support | Wild, nest eggs |
 | [Prowyak](#prowyak) | Yak + Icebreaker prow | Frost | large | tank | Wild, nest eggs |
+| [Glassolotl](#glassolotl) | Axolotl + Blown glass | Prism | medium | support | Wild, nest eggs |
 | [Glintmole](#glintmole) | Star-nosed mole + Quartz geode | Stone | small | controller | Wild, nest eggs |
 | [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Dark | small | controller | Wild, nest eggs |
+| [Duskspire](#duskspire) | Garden snail + Dark crystal spire | Dark | medium | controller | Wild, nest eggs |
 | [Glomwort](#glomwort) | Slime mold + Puffball | Spore | small | controller | Wild, nest eggs |
+| [Glombulus](#glombulus) | Slime mold + Rainbow layers | Spore | medium | controller | Wild, nest eggs |
 | [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Stone | large | tank | Wild, nest eggs |
+| [Gongrowl](#gongrowl) | Gibbon + Bronze gong | Echo | medium | controller | Wild, nest eggs |
+| [Gravidon](#gravidon) | Armadillo + Orbiting stones | Gravity | large | tank | Wild, nest eggs |
 | [Crofthorn](#crofthorn) | Highland cow + Stone cottage garden | Bloom | large | tank | Wild, nest eggs |
 | [Hivara](#hivara) | Honeybee + Praying mantis | Swarm | small | bruiser | Rare Egg from Calderoise |
 | [Skateron](#skateron) | Grey heron + Ice skates | Frost | medium | controller | Wild, nest eggs |
+| [Howlop](#howlop) | Hare + Tuning fork | Echo | medium | skirmisher | Wild, nest eggs |
 | [Kestrike](#kestrike) | Kestrel + Copper lightning rod | Storm | small | skirmisher | Wild, nest eggs |
 | [Anvilbrock](#anvilbrock) | Honey badger + Blacksmith's anvil | Ember | medium | tank | Wild, nest eggs |
 | [Kindlewren](#kindlewren) | Wren + Ember coal | Ember | small | skirmisher | Wild, nest eggs |
+| [Lanceron](#lanceron) | Heron + Ice lance | Frost | large | controller | Wild, nest eggs |
+| [Glowris](#glowris) | Slow loris + Paper lantern string | Lunar | medium | support | Wild, nest eggs |
 | [Soakybara](#soakybara) | Capybara + Hot-spring pool | Bloom | large | support | Wild, nest eggs |
 | [Buckleron](#buckleron) | Giant limpet + Riveted iron shield | Stone | large | tank | Wild, nest eggs |
+| [Magnestaff](#magnestaff) | Stick insect + Lodestone staff | Gravity | medium | trickster | Wild, nest eggs |
 | [Lodestick](#lodestick) | Stick insect + Lodestone | Gravity | small | trickster | Wild, nest eggs |
+| [Lyrewing](#lyrewing) | Hummingbird + Golden harp | Echo | medium | support | Wild, nest eggs |
 | [Marchleaf](#marchleaf) | Leafcutter ant + Leaf | Swarm | small | bruiser | Wild, nest eggs |
 | [Lanterloris](#lanterloris) | Slow loris + Paper lantern | Lunar | medium | support | Wild, nest eggs |
+| [Mosstodon](#mosstodon) | Tardigrade + Moss hill | Bloom | medium | support | Wild, nest eggs |
 | [Mossgrade](#mossgrade) | Tardigrade + Cushion moss | Bloom | small | support | Wild, nest eggs |
 | [Spirevark](#spirevark) | Aardvark + Termite clay spire | Swarm | large | tank | Wild, nest eggs |
 | [Murmurling](#murmurling) | Starling + Pan-pipes | Swarm | medium | skirmisher | Wild, nest eggs |
+| [Murmuron](#murmuron) | Starling + Pan-pipes | Swarm | medium | skirmisher | Wild, nest eggs |
 | [Mirrolin](#mirrolin) | Pangolin + Disco ball | Prism | medium | tank | Wild, nest eggs |
 | [Nettlynx](#nettlynx) | Lynx kitten + Stinging nettle | Venom | small | bruiser | Wild, nest eggs |
 | [Boltstrich](#boltstrich) | Ostrich + Thunderhead and copper coil | Storm | large | skirmisher | Wild, nest eggs |
 | [Bubblisk](#bubblisk) | Basilisk lizard + Soap bubble | Prism | small | trickster | Wild, nest eggs |
 | [Terrasloth](#terrasloth) | Three-toed sloth + Glass greenhouse | Bloom | medium | support | Wild, nest eggs |
 | [Gravadillo](#gravadillo) | Armadillo + Rhino beetle | Gravity | large | tank | Wild, nest eggs |
+| [Pipeworth](#pipeworth) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
 | [Prismander](#prismander) | Axolotl | Prism | small | support | Starter egg |
+| [Rimefang](#rimefang) | Wolf + Hoarfrost | Frost | large | skirmisher | Wild, nest eggs |
 | [Rimeshrew](#rimeshrew) | Shrew + Hoarfrost | Frost | small | skirmisher | Wild, nest eggs |
 | [Chuggamus](#chuggamus) | Hippopotamus + Steam locomotive | Ember | large | tank | Wild, nest eggs |
+| [Scythant](#scythant) | Leafcutter ant + Grass sickle | Swarm | medium | bruiser | Wild, nest eggs |
+| [Seamwyrm](#seamwyrm) | Sea serpent + Open zipper | Dark | large | trickster | Wild, nest eggs |
 | [Selenfin](#selenfin) | Hatchetfish + Moonstone | Lunar | small | support | Wild, nest eggs |
+| [Lunarca](#lunarca) | Whale + Full moon | Lunar | medium | support | Wild, nest eggs |
 | [Barokat](#barokat) | Meerkat + Brass barometer | Storm | medium | support | Wild, nest eggs |
+| [Shinobant](#shinobant) | Leafcutter ant + Leaf mask | Swarm | medium | bruiser | Wild, nest eggs |
 | [Barrelmander](#barrelmander) | Giant salamander + Wooden rain barrel | Storm | large | tank | Wild, nest eggs |
+| [Sporcupine](#sporcupine) | Porcupine + Mushroom stalks | Spore | medium | controller | Wild, nest eggs |
 | [Canvastross](#canvastross) | Albatross + Patched ship sails | Tempest | large | skirmisher | Wild, nest eggs |
+| [Strobolin](#strobolin) | Pangolin + Disco ball | Prism | large | tank | Wild, nest eggs |
+| [Thistlynx](#thistlynx) | Lynx + Thistle | Venom | medium | bruiser | Wild, nest eggs |
 | [Knotwyrm](#knotwyrm) | Slow worm + Knotted hemp rope | Spore | medium | controller | Wild, nest eggs |
 | [Thrumbird](#thrumbird) | Hummingbird + Tuning fork | Echo | small | support | Wild, nest eggs |
+| [Thundrich](#thundrich) | Ostrich + Thunderhead | Storm | large | skirmisher | Wild, nest eggs |
+| [Tidalisk](#tidalisk) | Sea serpent + Soap bubble | Prism | medium | trickster | Wild, nest eggs |
 | [Lockatara](#lockatara) | Tuatara + Iron padlock | Titan | medium | tank | Wild, nest eggs |
 | [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Ghost | large | tank | Wild, nest eggs |
+| [Vaultara](#vaultara) | Tuatara + Vault door | Titan | large | tank | Wild, nest eggs |
 | [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
+| [Vespox](#vespox) | Fox + Scorpion | Venom | medium | bruiser | Wild, nest eggs |
 | [Lunowl](#lunowl) | Owl + Luna moth | Lunar | small | trickster | Wild, nest eggs |
 | [Echolop](#echolop) | Hare + Bat | Echo | small | skirmisher | Wild, nest eggs |
 | [Zephyrak](#zephyrak) | Moray eel + Swift | Tempest | small | skirmisher | Rare Egg from Sarcobra |
@@ -64,22 +103,82 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 
 | Type | Species |
 |---|---|
-| Bloom | Crofthorn, Soakybara, Mossgrade, Terrasloth |
-| Dark | Zippelith, Gloamshell |
-| Echo | Gongibbon, Thrumbird, Echolop |
-| Ember | Bellowary, Anvilbrock, Kindlewren, Chuggamus |
-| Frost | Frigatee, Prowyak, Skateron, Rimeshrew |
+| Bloom | Crofthollow, Geyserbara, Crofthorn, Soakybara, Mosstodon, Mossgrade, Terrasloth |
+| Dark | Zippelith, Gloamshell, Duskspire, Seamwyrm |
+| Echo | Gongibbon, Gongrowl, Howlop, Lyrewing, Thrumbird, Echolop |
+| Ember | Bellowary, Embrook, Forgebrock, Anvilbrock, Kindlewren, Chuggamus |
+| Frost | Dreadnoyak, Frigatee, Glaciatee, Prowyak, Skateron, Lanceron, Rimefang, Rimeshrew |
 | Ghost | Snuffapi, Umbrathere |
-| Gravity | Anchorbill, Lodestick, Gravadillo |
-| Lunar | Lanterloris, Selenfin, Lunowl |
-| Prism | Mirrolin, Bubblisk, Prismander |
-| Spore | Mycroll, Glomwort, Knotwyrm |
-| Stone | Rampartoad, Glintmole, Effigeetle, Buckleron |
-| Storm | Kestrike, Boltstrich, Barokat, Barrelmander |
-| Swarm | Hivara, Marchleaf, Spirevark, Murmurling |
+| Gravity | Harpwhal, Anchorbill, Gravidon, Magnestaff, Lodestick, Gravadillo |
+| Lunar | Eclipsowl, Glowris, Lanterloris, Selenfin, Lunarca, Lunowl |
+| Prism | Glassolotl, Mirrolin, Bubblisk, Prismander, Strobolin, Tidalisk |
+| Spore | Mycroll, Glomwort, Glombulus, Sporcupine, Knotwyrm |
+| Stone | Rampartoad, Citadoad, Effigoon, Geodemole, Glintmole, Effigeetle, Buckleron |
+| Storm | Arcestrel, Barostorm, Vatmander, Kestrike, Boltstrich, Barokat, Barrelmander, Thundrich |
+| Swarm | Hivara, Marchleaf, Spirevark, Murmurling, Murmuron, Scythant, Shinobant |
 | Tempest | Canvastross, Zephyrak |
-| Titan | Cairnhorn, Lockatara |
-| Venom | Vespyx, Nettlynx, Pipewurm |
+| Titan | Cairnhorn, Lockatara, Vaultara |
+| Venom | Vespyx, Nettlynx, Pipeworth, Thistlynx, Pipewurm, Vespox |
+
+## Harpwhal
+
+_Narwhal + Harpoon_ (`anchorhorn`). Harpwhal, art-lane design.
+
+|  |  |
+|---|---|
+| Type | Gravity |
+| Body | medium, reach 1.4, mass 1.1; about 54 cm, 16.2 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.42, curiosity 0.57, loyalty 0.77, temper 0.35 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Harpoon Head) |
+| Farm work | Haul 2, Stone 3, Timber 1 |
+| Egg | Harpwhal Egg: Something dignified is in here. |
+
+- E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Arcestrel
+
+_Kestrel + Copper wire_ (`arcestrel`). Falcon with lightning-rod crest and coil talons.
+
+|  |  |
+|---|---|
+| Type | Storm |
+| Body | medium, reach 1.4, mass 1.1; about 50 cm, 8 kg on average |
+| Stat points | Damage 3, Health 3, Speed 12, owner_move_speed 2 |
+| Personality | bravery 0.7, curiosity 0.82, loyalty 0.61, temper 0.55 |
+| Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
+| Rides | perch (Copper Rod) |
+| Farm work | Haul 1, Spark 3, Tide 2 |
+| Egg | Arcestrel Egg: Something proud is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Barostorm
+
+_Meerkat + Storm barometer_ (`barostorm`). Barostorm, art-lane design.
+
+|  |  |
+|---|---|
+| Type | Storm |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 30 kg on average |
+| Stat points | Damage 1, Health 9, Speed 4, Your shield 2, owner_regen 4 |
+| Personality | bravery 0.51, curiosity 0.58, loyalty 0.88, temper 0.21 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | mount (Storm Watch) |
+| Farm work | Haul 1, Spark 3, Tide 2 |
+| Egg | Barostorm Egg: Something alert is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Rampartoad
 
@@ -222,6 +321,86 @@ _Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a lea
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Vatmander
+
+_Salamander + Glass orbs_ (`cisternmander`). Giant salamander with a water-tower body.
+
+|  |  |
+|---|---|
+| Type | Storm |
+| Body | large, reach 1.6, mass 2; about 82 cm, 67 kg on average |
+| Stat points | Damage 5, Health 12, Speed 2, owner_armor 1 |
+| Personality | bravery 0.81, curiosity 0.35, loyalty 0.68, temper 0.4 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Cistern Rider) |
+| Farm work | Haul 1, Spark 3, Tide 2 |
+| Egg | Vatmander Egg: Something lazy is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Citadoad
+
+_Toad + Fortress walls_ (`citadoad`). A fortress toad with spiked plates and a mace tail; Buckleron's evolution.
+
+|  |  |
+|---|---|
+| Type | Stone |
+| Body | large, reach 1.6, mass 2; about 73 cm, 54 kg on average |
+| Stat points | Damage 5, Health 12, Speed 2, owner_armor 1 |
+| Personality | bravery 0.74, curiosity 0.43, loyalty 0.86, temper 0.33 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Fortress Skin) |
+| Farm work | Haul 1, Stone 3, Timber 2 |
+| Egg | Citadoad Egg: Something stubborn is in here. |
+
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Crofthollow
+
+_Highland cow + Thatched roof_ (`crofthollow`). Crofthollow, art-lane design.
+
+|  |  |
+|---|---|
+| Type | Bloom |
+| Body | large, reach 1.5, mass 1.5; about 85 cm, 108 kg on average |
+| Stat points | Damage 4, Health 11, Speed 4, owner_armor 1 |
+| Personality | bravery 0.77, curiosity 0.29, loyalty 0.74, temper 0.39 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Thatch Back) |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
+| Egg | Crofthollow Egg: Something gentle is in here. |
+
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Dreadnoyak
+
+_Yak + Icebreaker bow_ (`dreadnoyak`). Colossal black yak: skull face, swept horns, white crest, icebreaker iron hull under the chest, ice tusks curling over it.
+
+|  |  |
+|---|---|
+| Type | Frost |
+| Body | large, reach 1.5, mass 1.5; about 94 cm, 135.5 kg on average |
+| Stat points | Damage 4, Health 11, Speed 4, owner_armor 1 |
+| Personality | bravery 0.74, curiosity 0.46, loyalty 0.7, temper 0.35 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Dread Plough) |
+| Farm work | Craft 2, Frost 3, Mend 1 |
+| Egg | Dreadnoyak Egg: Something steady is in here. |
+
+- E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Snuffapi
 
 _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; snuff the candles and Snuffapi is gone, leaving a smoke copy behind. Shy and graceful, vanishes when strangers come; trusts one rider and only one.
@@ -242,6 +421,66 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Eclipsowl
+
+_Owl + Eclipse_ (`eclipsowl`). Great owl, eclipse-ring facial disc, moth cloak wings.
+
+|  |  |
+|---|---|
+| Type | Lunar |
+| Body | large, reach 1.5, mass 1.6; about 44 cm, 3.2 kg on average |
+| Stat points | Damage 2, Health 7, Speed 9, owner_move_speed 2 |
+| Personality | bravery 0.49, curiosity 0.8, loyalty 0.48, temper 0.48 |
+| Fighting style | trickster; aggression 0.4, loyalty 0.6, caution 0.7 |
+| Rides | mount (Umbrastep) |
+| Farm work | Craft 2, Frost 2, Ranch 1 |
+| Egg | Eclipsowl Egg: Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift > Long Throw
+
+## Effigoon
+
+_Beetle pupa + Marble cocoon_ (`effigoon`). Evolution of Sculptillar.
+
+|  |  |
+|---|---|
+| Type | Stone |
+| Body | large, reach 1.6, mass 2; about 73 cm, 54 kg on average |
+| Stat points | Damage 5, Health 12, Speed 2, owner_armor 1 |
+| Personality | bravery 0.73, curiosity 0.4, loyalty 0.86, temper 0.39 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Marble Shell) |
+| Farm work | Haul 1, Stone 3, Timber 2 |
+| Egg | Effigoon Egg: Something earnest is in here. |
+
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Embrook
+
+_Rook + Hearth fire_ (`embrook`). Rook with a coal-bed back and cinder wings.
+
+|  |  |
+|---|---|
+| Type | Ember |
+| Body | medium, reach 1.4, mass 1.1; about 50 cm, 8 kg on average |
+| Stat points | Damage 3, Health 3, Speed 12, owner_move_speed 2 |
+| Personality | bravery 0.7, curiosity 0.68, loyalty 0.45, temper 0.52 |
+| Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
+| Rides | perch (Hearth Kindling) |
+| Farm work | Craft 2, Ember 3, Forage 1 |
+| Egg | Embrook Egg: Something cheeky is in here. |
+
+- E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
+- Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
+- Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Frigatee
 
 _Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on Frigatee's back; your loot stays cold in Frigatee's drawers until someone kicks them open. Kind and slow, everyone's friend; hums low songs you feel through your boots.
@@ -256,6 +495,66 @@ _Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on Fr
 | Rides | mount (Floe Saddle) |
 | Farm work | Frost 3, Craft 2, Mend 1 |
 | Egg | Floenatee Egg: Something kind is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Forgebrock
+
+_Badger + Open furnace_ (`forgebrock`). Bigger forge badger, hammer-head paws, furnace chest.
+
+|  |  |
+|---|---|
+| Type | Ember |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 20 kg on average |
+| Stat points | Damage 4, Health 11, Speed 4, owner_armor 1 |
+| Personality | bravery 0.67, curiosity 0.38, loyalty 0.81, temper 0.32 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Forged Hide) |
+| Farm work | Craft 2, Ember 3, Forage 1 |
+| Egg | Forgebrock Egg: Something fearless is in here. |
+
+- E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Geodemole
+
+_Mole + Split geode_ (`geodemole`). Geodemole has grown heavy enough to sit up on its haunches, and the geode on its back has split along the top with amethyst pushing out of the crack. Crystal plates are creeping down its forearms. It still sorts the stones it digs up by colour, as it did when small.
+
+|  |  |
+|---|---|
+| Type | Stone |
+| Body | medium, reach 1.4, mass 1.1; about 50 cm, 8 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.59, curiosity 0.63, loyalty 0.62, temper 0.43 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Sorter Sense) |
+| Farm work | Haul 1, Stone 3, Timber 2 |
+| Egg | Geodemole Egg: Something shy is in here. |
+
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Geyserbara
+
+_Capybara + Geyser_ (`geysirbara`). Massive capybara, erupting geyser pool and moss terraces.
+
+|  |  |
+|---|---|
+| Type | Bloom |
+| Body | large, reach 1.5, mass 1.5; about 94 cm, 135.5 kg on average |
+| Stat points | Damage 1, Health 9, Speed 4, Your shield 2, owner_regen 4 |
+| Personality | bravery 0.46, curiosity 0.51, loyalty 0.82, temper 0.12 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | mount (Steam Bath) |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
+| Egg | Geyserbara Egg: Something calm is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
@@ -282,6 +581,26 @@ _Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bel
 - Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Glaciatee
+
+_Walrus + Aurora crown_ (`glaciatee`). Huge manatee, walk-in ice-vault body.
+
+|  |  |
+|---|---|
+| Type | Frost |
+| Body | large, reach 1.6, mass 2; about 82 cm, 67 kg on average |
+| Stat points | Damage 1, Health 10, Speed 3, Your shield 2, owner_regen 4 |
+| Personality | bravery 0.45, curiosity 0.54, loyalty 0.77, temper 0.24 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | mount (Glacier Saddle) |
+| Farm work | Craft 2, Frost 3, Mend 1 |
+| Egg | Glaciatee Egg: Something kind is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Prowyak
 
 _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for horns; Prowyak ploughs through the snow and anything standing in the way. Steady and warm-hearted; snorts frost when Prowyak laughs.
@@ -301,6 +620,26 @@ _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for h
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Glassolotl
+
+_Axolotl + Blown glass_ (`glassolotl`). Glass-bodied axolotl, prism gills.
+
+|  |  |
+|---|---|
+| Type | Prism |
+| Body | medium, reach 1.4, mass 1.1; about 40 cm, 6.6 kg on average |
+| Stat points | Damage 1, Health 7, Speed 5, Your shield 3, owner_regen 4 |
+| Personality | bravery 0.47, curiosity 0.58, loyalty 0.93, temper 0.2 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | perch (Glass Glow) |
+| Farm work | Bloom 1, Mend 2, Tide 3 |
+| Egg | Glassolotl Egg: Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Wide Prism; Curious: Curious; Swift: Swift
 
 ## Glintmole
 
@@ -342,6 +681,26 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Duskspire
+
+_Garden snail + Dark crystal spire_ (`gloamspire`). Evolution of Duskargot.
+
+|  |  |
+|---|---|
+| Type | Dark |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.55, curiosity 0.54, loyalty 0.6, temper 0.3 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Spire Trail) |
+| Farm work | Craft 2, Forage 3, Haul 1 |
+| Egg | Duskspire Egg: Something private is in here. |
+
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Glomwort
 
 _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net and fruits little puffballs. Step on one and the spores hold you fast.
@@ -356,6 +715,26 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 | Rides | shoulder (Creep) |
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Glomwort Egg: Something curious is in here. |
+
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Glombulus
+
+_Slime mold + Rainbow layers_ (`glomworth`). Evolution of Glomwort.
+
+|  |  |
+|---|---|
+| Type | Spore |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.54, curiosity 0.57, loyalty 0.6, temper 0.26 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Mound Creep) |
+| Farm work | Bloom 3, Mend 2, Ranch 1 |
+| Egg | Glombulus Egg: Something curious is in here. |
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
@@ -381,6 +760,46 @@ _Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a car
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Gongrowl
+
+_Gibbon + Bronze gong_ (`gongrowl`). Roaring gibbon with a gong crest grown from its skull.
+
+|  |  |
+|---|---|
+| Type | Echo |
+| Body | medium, reach 1.4, mass 1.1; about 75 cm, 33 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.5, curiosity 0.72, loyalty 0.6, temper 0.43 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Iron Song) |
+| Farm work | Craft 1, Forage 2, Spark 3 |
+| Egg | Gongrowl Egg: Something joyful is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Gravidon
+
+_Armadillo + Orbiting stones_ (`gravitank`). Evolution of Gravadillo.
+
+|  |  |
+|---|---|
+| Type | Gravity |
+| Body | large, reach 1.4, mass 1.4; about 60 cm, 30 kg on average |
+| Stat points | Damage 5, Health 12, Speed 2, owner_armor 1 |
+| Personality | bravery 0.65, curiosity 0.4, loyalty 0.86, temper 0.27 |
+| Fighting style | tank; aggression 0.55, loyalty 0.75, caution 0.15 |
+| Rides | mount (Orbit Anchor) |
+| Farm work | Haul 2, Stone 3, Timber 2 |
+| Egg | Gravidon Egg: Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here. |
+
+- E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Dense Plate; Curious: Curious; Swift: Swift
 
 ## Crofthorn
 
@@ -443,6 +862,26 @@ _Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick 
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Howlop
+
+_Hare + Tuning fork_ (`howlop`). Predator bat-hare, sonic fangs.
+
+|  |  |
+|---|---|
+| Type | Echo |
+| Body | medium, reach 1.4, mass 1.1; about 64 cm, 10.3 kg on average |
+| Stat points | Damage 3, Health 3, Speed 12, owner_move_speed 2 |
+| Personality | bravery 0.78, curiosity 0.7, loyalty 0.55, temper 0.56 |
+| Fighting style | skirmisher; aggression 0.65, loyalty 0.35, caution 0.35 |
+| Rides | perch (Howl Tempo) |
+| Farm work | Forage 1, Haul 2, Spark 3 |
+| Egg | Howlop Egg: Deep blue and humming. Tap it and it taps back. Something restless is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift > Overtone
+
 ## Kestrike
 
 _Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest that draws lightning. Kestrike hangs still in the wind, then strikes like the bolt Kestrike caught.
@@ -503,6 +942,46 @@ _Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Lanceron
+
+_Heron + Ice lance_ (`lanceron`). Ice-armoured heron, beak an ice lance, blade feathers.
+
+|  |  |
+|---|---|
+| Type | Frost |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 20 kg on average |
+| Stat points | Damage 2, Health 8, Speed 5, Your max health 2, Your shield 3 |
+| Personality | bravery 0.59, curiosity 0.69, loyalty 0.69, temper 0.34 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | mount (Lance Glide) |
+| Farm work | Craft 2, Frost 3, Mend 1 |
+| Egg | Lanceron Egg: Something patient is in here. |
+
+- E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Glowris
+
+_Slow loris + Paper lantern string_ (`lanternlong`). Evolution of Lanterloris.
+
+|  |  |
+|---|---|
+| Type | Lunar |
+| Body | medium, reach 1.4, mass 1.1; about 54 cm, 16.2 kg on average |
+| Stat points | Damage 1, Health 7, Speed 5, Your shield 3, owner_regen 4 |
+| Personality | bravery 0.42, curiosity 0.57, loyalty 0.75, temper 0.2 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | perch (Lantern String) |
+| Farm work | Craft 1, Frost 3, Mend 2 |
+| Egg | Glowris Egg: Something sleepy is in here. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Soakybara
 
 _Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on Soakybara's back; you ride sitting in the bath, and the steam heals the squad. Calm and sociable, the friend of everything; nothing ruffles Soakybara.
@@ -543,6 +1022,26 @@ _Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is
 - Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Magnestaff
+
+_Stick insect + Lodestone staff_ (`lodestaff`). Evolution of Magnestick.
+
+|  |  |
+|---|---|
+| Type | Gravity |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 2, Health 3, Speed 13, owner_move_speed 2 |
+| Personality | bravery 0.49, curiosity 0.68, loyalty 0.48, temper 0.5 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | perch (Still Staff) |
+| Farm work | Haul 2, Stone 3, Timber 1 |
+| Egg | Magnestaff Egg: Something still is in here. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Lodestick
 
 _Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone twigs. Things drift toward Lodestick, and Lodestick drifts toward nothing.
@@ -561,6 +1060,26 @@ _Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone 
 - E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Lyrewing
+
+_Hummingbird + Golden harp_ (`lyrewing`). Lyrebird whose tail is a harp of strings.
+
+|  |  |
+|---|---|
+| Type | Echo |
+| Body | medium, reach 1.4, mass 1.1; about 54 cm, 9.5 kg on average |
+| Stat points | Damage 1, Health 7, Speed 5, Your shield 3, owner_regen 4 |
+| Personality | bravery 0.39, curiosity 0.51, loyalty 0.78, temper 0.1 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | perch (Lyre Hum) |
+| Farm work | Craft 1, Forage 2, Spark 3 |
+| Egg | Lyrewing Egg: Something bright is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Marchleaf
@@ -601,6 +1120,26 @@ _Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern
 - E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Mosstodon
+
+_Tardigrade + Moss hill_ (`mossbastion`). Evolution of Mossgrade.
+
+|  |  |
+|---|---|
+| Type | Bloom |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 1, Health 7, Speed 5, Your shield 3, owner_regen 4 |
+| Personality | bravery 0.42, curiosity 0.62, loyalty 0.89, temper 0.08 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | perch (Moss Hill) |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
+| Egg | Mosstodon Egg: Something unbothered is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Mossgrade
@@ -657,6 +1196,26 @@ _Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; eve
 | Rides | perch (Flock) |
 | Farm work | Ranch 3, Bloom 2, Craft 1 |
 | Egg | Murmurling Egg: Something sociable is in here. |
+
+- E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Murmuron
+
+_Starling + Pan-pipes_ (`murmuron`). Murmuron, art-lane design.
+
+|  |  |
+|---|---|
+| Type | Swarm |
+| Body | medium, reach 1.4, mass 1.1; about 54 cm, 16.2 kg on average |
+| Stat points | Damage 3, Health 3, Speed 12, owner_move_speed 2 |
+| Personality | bravery 0.79, curiosity 0.73, loyalty 0.51, temper 0.53 |
+| Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
+| Rides | perch (Piper Flock) |
+| Farm work | Bloom 2, Craft 1, Ranch 3 |
+| Egg | Murmuron Egg: Something sociable is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
@@ -783,6 +1342,26 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 - Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Dense Plate; Curious: Curious; Swift: Swift
 
+## Pipeworth
+
+_Velvet worm + Piping bag_ (`pipeworth`). Evolution of Pipewurm.
+
+|  |  |
+|---|---|
+| Type | Venom |
+| Body | medium, reach 1.4, mass 1.1; about 54 cm, 16.2 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.6, curiosity 0.56, loyalty 0.61, temper 0.43 |
+| Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
+| Rides | perch (Icing Glands) |
+| Farm work | Ember 3, Forage 1, Mend 2 |
+| Egg | Pipeworth Egg: Something soft is in here. |
+
+- E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Prismander
 
 _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. Prismander bends light into shields and dazzling beams.
@@ -802,6 +1381,26 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. Prisman
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
 - Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Wide Prism; Curious: Curious; Swift: Swift
+
+## Rimefang
+
+_Wolf + Hoarfrost_ (`rimefang`). Evolution of Rimeshrew.
+
+|  |  |
+|---|---|
+| Type | Frost |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 30 kg on average |
+| Stat points | Damage 3, Health 8, Speed 7, owner_move_speed 2 |
+| Personality | bravery 0.67, curiosity 0.72, loyalty 0.58, temper 0.51 |
+| Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
+| Rides | mount (Frost Fang) |
+| Farm work | Craft 2, Frost 3, Mend 1 |
+| Egg | Rimefang Egg: Something frantic is in here. |
+
+- E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Rimeshrew
 
@@ -843,6 +1442,46 @@ _Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engi
 - Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Scythant
+
+_Leafcutter ant + Grass sickle_ (`scythant`). Soldier ant, leaf-blade mandibles.
+
+|  |  |
+|---|---|
+| Type | Swarm |
+| Body | medium, reach 1.4, mass 1.1; about 50 cm, 8 kg on average |
+| Stat points | Damage 4, Health 5, Speed 8, Your max health 3 |
+| Personality | bravery 0.84, curiosity 0.53, loyalty 0.53, temper 0.53 |
+| Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
+| Rides | perch (Sickle Crew) |
+| Farm work | Bloom 2, Craft 1, Ranch 3 |
+| Egg | Scythant Egg: Something dutiful is in here. |
+
+- E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Seamwyrm
+
+_Sea serpent + Open zipper_ (`seamwyrm`). Great dragon-worm, zipper splits open as its jaws.
+
+|  |  |
+|---|---|
+| Type | Dark |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 20 kg on average |
+| Stat points | Damage 2, Health 7, Speed 9, owner_move_speed 2 |
+| Personality | bravery 0.37, curiosity 0.62, loyalty 0.62, temper 0.33 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | mount (Seam Burrow) |
+| Farm work | Craft 2, Forage 3, Haul 1 |
+| Egg | Seamwyrm Egg: Something sly is in here. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Selenfin
 
 _Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through the air, a moonstone glowing in Selenfin's keel. Where Selenfin floats, wounds close.
@@ -857,6 +1496,26 @@ _Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through 
 | Rides | shoulder (Moonwater) |
 | Farm work | Frost 3, Mend 2, Craft 1 |
 | Egg | Selenfin Egg: Something serene is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Lunarca
+
+_Whale + Full moon_ (`selenwhale`). Evolution of Lunafin.
+
+|  |  |
+|---|---|
+| Type | Lunar |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 1, Health 7, Speed 5, Your shield 3, owner_regen 4 |
+| Personality | bravery 0.38, curiosity 0.58, loyalty 0.84, temper 0.08 |
+| Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
+| Rides | perch (Moon Tide) |
+| Farm work | Craft 1, Frost 3, Mend 2 |
+| Egg | Lunarca Egg: Something serene is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
@@ -883,6 +1542,26 @@ _Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in Barokat
 - Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Shinobant
+
+_Leafcutter ant + Leaf mask_ (`shinobant`). Shinobant, art-lane design.
+
+|  |  |
+|---|---|
+| Type | Swarm |
+| Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
+| Stat points | Damage 4, Health 5, Speed 8, Your max health 3 |
+| Personality | bravery 0.74, curiosity 0.4, loyalty 0.65, temper 0.56 |
+| Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
+| Rides | perch (Shadow Crew) |
+| Farm work | Bloom 2, Craft 1, Ranch 3 |
+| Egg | Shinobant Egg: Something dutiful is in here. |
+
+- E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
+- Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
+- Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Barrelmander
 
 _Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with a rain barrel strapped on Barrelmander's back; your loot goes in the barrel, and a hard hit bursts the barrel in a flash flood. Lazy and good-natured, dozes in puddles; comes alive in a storm.
@@ -903,6 +1582,26 @@ _Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with 
 - Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Sporcupine
+
+_Porcupine + Mushroom stalks_ (`sporcupine`). Porcupine whose quills are mushroom stalks.
+
+|  |  |
+|---|---|
+| Type | Spore |
+| Body | medium, reach 1.4, mass 1.1; about 34 cm, 5.1 kg on average |
+| Stat points | Damage 2, Health 6, Speed 6, Your max health 3, Your shield 3 |
+| Personality | bravery 0.52, curiosity 0.69, loyalty 0.74, temper 0.42 |
+| Fighting style | controller; aggression 0.5, loyalty 0.6, caution 0.45 |
+| Rides | perch (Stalk Web) |
+| Farm work | Bloom 3, Forage 2, Ranch 1 |
+| Egg | Sporcupine Egg: Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here. |
+
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
+- Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious > Spore Drift; Swift: Swift
+
 ## Canvastross
 
 _Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship sails for wings; grab the rigging under Canvastross and Canvastross carries you across the gap. Easygoing, fearless, a wanderer; restless when Canvastross has not seen the sea.
@@ -921,6 +1620,46 @@ _Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Strobolin
+
+_Pangolin + Disco ball_ (`strobolin`). The grand final form: a tall pangolin in mirror-plate armour with a huge crystal crest and two long tails, each carrying a mirror ball.
+
+|  |  |
+|---|---|
+| Type | Prism |
+| Body | large, reach 1.5, mass 1.6; about 107 cm, 70 kg on average |
+| Stat points | Damage 4, Health 11, Speed 4, owner_armor 1 |
+| Personality | bravery 0.65, curiosity 0.44, loyalty 0.7, temper 0.31 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Mirror Armour) |
+| Farm work | Craft 2, Mend 1, Tide 3 |
+| Egg | Strobolin Egg: Something timid is in here. |
+
+- E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Thistlynx
+
+_Lynx + Thistle_ (`thistlynx`). Grown lynx, thistle mane, barbed ear tufts.
+
+|  |  |
+|---|---|
+| Type | Venom |
+| Body | medium, reach 1.4, mass 1.1; about 50 cm, 8 kg on average |
+| Stat points | Damage 4, Health 5, Speed 8, Your max health 3 |
+| Personality | bravery 0.76, curiosity 0.47, loyalty 0.58, temper 0.71 |
+| Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
+| Rides | perch (Thistle Sting) |
+| Farm work | Ember 3, Forage 1, Mend 2 |
+| Egg | Thistlynx Egg: Something prickly is in here. |
+
+- E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
+- Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
+- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Knotwyrm
@@ -963,6 +1702,46 @@ _Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings
 - Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Thundrich
+
+_Ostrich + Thunderhead_ (`thunderstrich`). Coil-necked storm ostrich crackling with lightning.
+
+|  |  |
+|---|---|
+| Type | Storm |
+| Body | large, reach 1.5, mass 1.5; about 94 cm, 135.5 kg on average |
+| Stat points | Damage 3, Health 8, Speed 7, owner_move_speed 2 |
+| Personality | bravery 0.83, curiosity 0.67, loyalty 0.56, temper 0.52 |
+| Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
+| Rides | mount (Thunderhead Run) |
+| Farm work | Haul 1, Spark 3, Tide 2 |
+| Egg | Thundrich Egg: Something skittish is in here. |
+
+- E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
+- Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
+- Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Tidalisk
+
+_Sea serpent + Soap bubble_ (`tidalisk`). Sleek wave-runner, crest of breaking foam.
+
+|  |  |
+|---|---|
+| Type | Prism |
+| Body | medium, reach 1.4, mass 1.1; about 67 cm, 17 kg on average |
+| Stat points | Damage 2, Health 3, Speed 13, owner_move_speed 2 |
+| Personality | bravery 0.48, curiosity 0.71, loyalty 0.64, temper 0.45 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | perch (Tide Flash) |
+| Farm work | Craft 2, Mend 1, Tide 3 |
+| Egg | Tidalisk Egg: Something showy is in here. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Lockatara
 
 _Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a crest and a keyhole for a third eye; Lockatara's tail is the key. Ancient, calm, faintly amused; watches you through the keyhole when you are not looking.
@@ -1003,6 +1782,26 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 - Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam, roll through foes, drag them in, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
+## Vaultara
+
+_Tuatara + Vault door_ (`vaultara`). Huge tuatara with a vault-door shell.
+
+|  |  |
+|---|---|
+| Type | Titan |
+| Body | large, reach 1.5, mass 1.6; about 60 cm, 20 kg on average |
+| Stat points | Damage 4, Health 11, Speed 4, owner_armor 1 |
+| Personality | bravery 0.73, curiosity 0.33, loyalty 0.79, temper 0.24 |
+| Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
+| Rides | mount (Vault Door) |
+| Farm work | Haul 3, Stone 2, Timber 1 |
+| Egg | Vaultara Egg: Something ancient is in here. |
+
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
 ## Pipewurm
 
 _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles for a face; Pipewurm pipes sticky poison icing that glues your feet down. Looks sweet, hunts like a cat; loves being stroked, hates being ignored.
@@ -1022,6 +1821,26 @@ _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles fo
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Hive Crown** (7s). Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Vespox
+
+_Fox + Scorpion_ (`vespox`). Leaner fox, bigger pincers, longer sting tail. Male locked, female redo out.
+
+|  |  |
+|---|---|
+| Type | Venom |
+| Body | medium, reach 1.4, mass 1.1; about 52 cm, 13.5 kg on average |
+| Stat points | Damage 4, Health 5, Speed 8, Your max health 3 |
+| Personality | bravery 0.77, curiosity 0.46, loyalty 0.53, temper 0.69 |
+| Fighting style | bruiser; aggression 0.8, loyalty 0.4, caution 0.25 |
+| Rides | perch (Patrol Venom) |
+| Farm work | Ember 3, Forage 1, Mend 1 |
+| Egg | Vespox Egg: A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here. |
+
+- E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
+- Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
+- Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
+- Evolution paths: Fierce: Fierce > Barbed Tail; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Lunowl
 
