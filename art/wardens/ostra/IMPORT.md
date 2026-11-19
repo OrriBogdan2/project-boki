@@ -45,3 +45,11 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 **Shard Snap's free arm (2026-11-17, port of ext/ostra-gait-rebased):** `snap_wind` and `snap` hold the fan in at the ruff (`HELD_L`), re-keyed on this glb's rig
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
+
+**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118):** the v95 scan has the sleeves fused to the coat, so the re-derived
+weights tore triangles in every clip (2.9% of edges over 3x in Blender, worst 32x; `--stretch-check` worst 7.93). Only the
+skin weights and the index list of `Body` changed (rig, bone names, clips, vertices, UVs and textures are byte for byte the
+same). Weights: the vertices of every edge that stretches past 1.6x in any of the 57 game clips (8 samples each) are
+smoothed over the mesh (screened Laplacian, 3 rings, lambda 15). Fused contact triangles still past 2.5x afterwards (784 of
+60,051, mostly the armpit and shoulder seams, hidden behind the arm) are removed. After: no edge past 2.8x in any clip,
+`--stretch-check` worst 2.51, Blender share over 3x 0.03-0.34% (all edges). Bind pose is unchanged.
