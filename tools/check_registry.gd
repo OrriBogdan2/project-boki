@@ -919,6 +919,7 @@ const CHECKS := {
 	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
 	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
+	"--xp-armour-cues-reel": ["res://tools/xp_armour_cues_reel.gd", "xp_armour_cues_reel", null],  # film
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
 	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
