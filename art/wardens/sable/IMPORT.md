@@ -54,3 +54,4 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 
 ## Body6 (2026-11-11, patch 0.24.6)
 Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/sable_v95.json`) onto the body6 pick cand_A from `~/meshy/v95/Sable/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick). Re-ran `tools/art1/sable_wings.py` after the swap.
+Idle loop seam (clip-check, 0.24.6): the appeal4 glb's `idle` closed 1.63 deg off on forearm.R (limit 1.0; main's appeal3 idle closed 0.80). Its last key on upper_arm.R, forearm.R, hand.R and shin.L was eased back to the first key over the clip's last 40% (smoothstep, in place in the glb); the worst seam is now 0.47 deg (shin.R). A later re-swap that carries this glb's clips keeps the fix.
