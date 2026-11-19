@@ -52,6 +52,7 @@ static var _data := {}         # arch -> its content/vfx data ({} when the Hero 
 
 var m: Node
 var pools := {}                # kind -> nodes made for it
+var last_voice := -1           # the Sfx handle of the last sound a move started at once (KitWindup.keep)
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
 # shader seeds only: a look never draws from the global randf the sim uses
@@ -231,6 +232,7 @@ func tier_up(h: Hunter, tier: int) -> void:
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
+	last_voice = -1
 	var k := float(o.get("k", 0.0))
 	for s: Dictionary in rec.get("sfx", []):
 		if not _wanted(s, o):
@@ -244,7 +246,7 @@ func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 		if delay > 0.0:
 			m.later(delay, Sfx.play.bind(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch))
 		else:
-			Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
+			last_voice = Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
 
 static func _wanted(entry: Dictionary, o: Dictionary) -> bool:
 	if entry.has("when") and not o.get(String(entry["when"]), false):
