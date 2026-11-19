@@ -10292,3 +10292,4 @@ READY ext/garden-pair-after-grown c314c97aa0 (first-day 'Pair two Boki' row show
 READY ext/tut-goals-next 3434ba54c7 (Goals card: max 3 rows, never empty via plain next steps; --goals-next-check asserts it at first hub arrival and after the first expedition)
 READY ext/sfx-boki-down-alert d5eb3c2285 (Boki down: owner-only UI alert + teammate tick, 4 s no-stack, asserted in --match-audio-check)
 READY ext/ui-results-five 6bc32fc809 (results first view = outcome, kept, Boki, progress + way home (4 groups); stat tiles/kills/damage taken behind More beside Back to the farm; --results-five-check 46 ok, --results-ways-check 0 fail, arrival-check 0 fail; --uipolish-check 3 reds identical on main; shots 1280x720)
+READY ext/extra-mantle-look-one-home 5b14b981bd (DEBT line for Mantle look gender removed; code already in main via ext/extra-mantle-gender-home)
