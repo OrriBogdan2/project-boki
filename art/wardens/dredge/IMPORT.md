@@ -1,5 +1,18 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Skin weights only, tear fix (2026-11-19, ext/hunter-fix-dredge-1118, retry of the 11-18 job):** dredge.glb differs from
+the 11-17 pick only in JOINTS_0/WEIGHTS_0. Positions, indices, normals, UVs, textures, nodes, skin and all 45 clips are
+byte-identical, so the rest pose is the same and no triangle was removed. (The first 11-18 pass deleted 2,088 triangles and
+opened holes; it was reverted.) The weights were smoothed only where an edge stretched past 3x in the game's own clip poses
+(dumped from the stretch_check sampling): inverse-edge-length Laplacian smoothing of the weights, seam copies kept equal, ball,
+spring chains, gun and the hoard (backpack) left as they were, then a local pass that keeps a change only if the worst
+stretch over every sampled frame drops. Not done on purpose: cutting hand/forearm weight off the fused thigh and hip skin
+(it opens the fused contacts into black inside-of-shell patches in crouch, anchor and throw), and copying the right shin's
+weights onto the left shin (black wedge behind the left knee in crouch_r and downed). Scripts: ~/gens/hunter-fix-dredge-1118/retry-1119f/tools/.
+Game check (tools/stretch_check.gd): worst 8.52 (ledge) -> 7.63 (mantle); 51 of 52 clips lower, none higher; clips with an
+edge past 3x 48 -> 32. Left as it was (not weights): the ball floats in run/anchor (bone `ball` hangs off `root`, a clip
+job), and the claw curl's open shell shows black backfaces even at rest.
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
