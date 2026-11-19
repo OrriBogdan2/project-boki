@@ -439,7 +439,7 @@ func _bolt() -> void:
 		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_COL, 1.8, 0.42)
-		fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
+		fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
 	last_bolt_emp = emp
 
 ## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
