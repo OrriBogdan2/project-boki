@@ -234,7 +234,7 @@ func tick(dt: float) -> void:
 			P.hp = P.max_hp
 	drill.tick(dt)
 	if grounds:
-		grounds.tick(dt)
+		grounds.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 

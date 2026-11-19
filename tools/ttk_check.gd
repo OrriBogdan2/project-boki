@@ -51,17 +51,22 @@ const HEROES := [
 ]
 const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
+## The share table watches one cast this long (s): a damage-a-second source number (Rain of Arrows) is counted
+## over the same window, and Meeko's Burrseed shows its sourced hit, not the burst 2 s after it sticks.
+const HIT_S := 2.0
+const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Heavy Shot at full draw)
+
 ## Casts the share table lists that no combo row uses: hero -> slot -> source damage of one cast, a level 1
-## tooltip against the level 1 target (the footage LMB is level 9, so Celeste cannot join a combo). our_hit
-## casts the ult, then waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
+## tooltip against the level 1 target (the footage LMB is level 9, so these five cannot join a combo). our_hit
+## casts the ult, then waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s; Starpiercer's
+## three shots).
 const SHARE_ONLY := {
 	"rimewright": {"rmb": 346.0, "x": 155.0},
-	"archer": {"rmb": 35.0, "e": 61.0 * 2.0, "x": 326.0 + 326.0 + 422.0},      # (E: 61 a second, over our 2 s)
+	"archer": {"rmb": 35.0, "e": 61.0 * HIT_S, "x": 326.0 + 326.0 + 422.0},
 	"tender": {"rmb": 49.0},
 	"dredge": {"e": 264.0},
 }
 const ULT_WAIT := 4.5
-const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Heavy Shot at full draw)
 
 ## Owner decisions that accept a slower Hunter: hero -> [damage share given up, "DECISIONS date: what"].
 ## A row above RATIO_HI passes as "override" only up to RATIO_HI / (1 - share).
@@ -182,7 +187,7 @@ func our_hit(arch: String, slot: String) -> float:
 	var m: Match = f[0]
 	var P: Hunter = f[1]
 	var T: Hunter = f[2]
-	var wait := 2.0
+	var wait := HIT_S
 	var hold: float = RMB_HOLD.get(arch, 0.0) if slot == "rmb" else 0.0
 	if slot == "x":
 		P.slot_lv["ult"] = 1

@@ -1,6 +1,7 @@
 extends RefCounted
 ## --tutorial-check[=<arch>]: the match tutorial works for any first Relic (gunslinger = Vex, archer = Lace,
-## juggernaut = Kael). The Hunter is forced by the param, so it never waits for the pick screen.
+## juggernaut = Kael; "<arch>:wisps" runs it with the Boki riding as a wisp: the Summon steps replace the
+## Send-the-Boki step). The Hunter is forced by the param, so it never waits for the pick screen.
 ## Each run plays the whole course with the driver and asserts: every line names this kit's ability and
 ## key, no banner talks about ammo or a rifle, the E step (kin) waits for E, the shoot step takes the kit's own
 ## attack (Lace's draw and release, Kael's melee combo), the dummies stand where the kit can reach them,
@@ -8,10 +9,12 @@ extends RefCounted
 
 var bad := 0
 var arch := "gunslinger"
+var wisps := false
 
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
-const FOE_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
+const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack",
+		"kin", "hook", "ult"]
 const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
@@ -22,12 +25,15 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--tutorial-check="): arch = a.substr(17)
+		if a.begins_with("--tutorial-check="):
+			arch = a.substr(17).get_slice(":", 0)
+			wisps = a.ends_with(":wisps")
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle",
-			"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch), "tut_test": true})
+			"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch), "tut_test": true,
+			"boki_wisps": wisps})
 	m.set_process(false)
 	ok(m.player.ak != null and m.player.ak.id == arch, "the Hunter is forced to %s" % arch)
 	var tu: Tutorial = m.tut
@@ -36,6 +42,8 @@ func run(main: Node) -> void:
 	var t := 0.0
 	var idle_ok := true
 	var reach := ""
+	var early_seen := false      # the summon step: the first window was called back early, and the step stayed
+	var second_seen := false     # the pack step: summoned again after the ring went bright
 	while t < MAX_RUN_T and not m.player.extracted:
 		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
@@ -44,13 +52,25 @@ func run(main: Node) -> void:
 			TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		early_seen = early_seen or (tu.id() == "summon" and tu.sm.early)
+		second_seen = second_seen or (tu.id() == "pack" and tu.sm.second)
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
+			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
 	_words(m.player, seen)
+	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
+	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
+	ok(teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
+			"%s steps %s ran, %s did not" % ["wisp" if wisps else "walking Boki", teaches, skipped])
+	if wisps:
+		var sk: Dictionary = seen.get("summon", {})
+		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
+		ok(early_seen, "a window called back early keeps the summon step (and says so)")
+		ok(second_seen, "the pack step waited for a second summon after the ring went bright")
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)
 	ok(reach == "", "every dummy stands where this kit can reach it" + reach)
 	print("TUTCHECK DONE %s, failures: %d" % [arch, bad])
@@ -102,7 +122,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
 	var sh: Dictionary = seen.get("shoot", {})
 	var melee: bool = p.wpn.get("melee", false)
-	var want := "Hold to draw" if p.wpn.has("draw") else "Now shoot"
+	var want := "Hold to draw" if p.wpn.has("draw") else "Shoot"
 	if melee:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
