@@ -593,6 +593,9 @@ func _dash_air() -> void:
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
+	var slot_src := FileAccess.get_file_as_string("res://scripts/ui/dash_slot.gd")
+	ok(Sfx.ensure(DashSlot.REFILL_SOUND) and slot_src.contains("Sfx.play(REFILL_SOUND"),
+		"the dash refill cue (%s) exists and DashSlot plays it when a charge returns" % DashSlot.REFILL_SOUND)
 	ok(Sfx.ensure("dash_ground") and Sfx.ensure("dash_air"), "the shared dash_ground and dash_air exist")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
@@ -1330,6 +1333,7 @@ func _menus(main: Node) -> void:
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
+	Overlay.more_tabs = true          # (every tab, not just Main and Controls)
 	Overlay.open_settings()
 	for t in Overlay.SETTINGS_TABS:
 		await _settle(main)

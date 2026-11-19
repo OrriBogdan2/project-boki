@@ -96,7 +96,7 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 		return
 	H.c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.5))
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
-	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
+	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 10, Color(H.INK, 0.8), H.big)
 
 ## The summon timer round the Boki box (KinSummon) while Boki ride as wisps. Out: a ring in its glow colour
 ## drains with the seconds left. Resting: a grey ring refills, with the seconds. Ready: a soft pulse and the
@@ -121,6 +121,64 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	else:
 		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * sin(float(H.m.time) * 4.0)), 2.0)
 		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
+
+## The wisps you stole (KinSteal), one row each above the Boki box, up to the carry limit: the critter in its own
+## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
+## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
+const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
+const STOLEN_H := 24.0       # px: a row's height
+const STOLEN_ICON := 18.0    # px: the critter's side
+const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
+
+## What the last draw put on screen: one {"name", "passive", "state"} per row.
+static var stolen_shown: Array = []
+
+## "out" / "ready" / "used": where a stolen wisp's one summon stands.
+static func stolen_state(k: Kin) -> String:
+	if k.summon != null and k.summon.out():
+		return "out"
+	return "used" if k.stolen_summoned else "ready"
+
+## The rows for the wisps `h` carries, in the order KinSteal counts them.
+static func stolen_rows(h: Hunter) -> Array:
+	var out: Array = []
+	var share := float(KinSteal.rules()["passive_k"])
+	for k in h.m.kins:
+		if k.owner_h == h and KinSteal.stolen(k) and not k.dead and k.ks != null:
+			var passive := "no carry bonus"
+			if not k.ks.carry_passives.is_empty():
+				passive = KinText.passives(k.ks.carry_passives, share)
+			out.append({"kin": k, "name": String(k.rec.get("name", "Boki")), "state": stolen_state(k),
+				"passive": passive})
+	return out
+
+static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
+	stolen_shown.clear()
+	var y := r.position.y - STOLEN_LIFT
+	for row in stolen_rows(p):
+		var k: Kin = row["kin"]
+		var glow: Color = k.sp.get("glow", k.sp["color"])
+		var st := String(row["state"])
+		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
+		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
+		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
+		var tex := KinPortrait.tex(k.rec, H.get_tree())
+		if tex != null:
+			H.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
+		else:
+			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
+			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
+		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
+		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
+		if st == "ready":
+			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
+		else:
+			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
+			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
+			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
+		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
+		y -= STOLEN_H + 3.0
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
@@ -199,7 +257,8 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
 	var away := out and KinCommand.is_away(p, k)
-	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), 0.0, 0.0, k.ready_to_fight() and k.throw_cd <= 0.0)
+	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), minf(1.0, k.throw_cd), k.throw_cd,
+		k.ready_to_fight() and k.throw_cd <= 0.0)      # its wait counts down here (the one G slot)
 	var hf := KinCommand.hold_frac(p)
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
 		H.c.draw_arc(gr.get_center(), 22.0, -PI / 2, -PI / 2 + TAU * hf, 28, Color("cfe8ff"), 3.0, true)
@@ -219,7 +278,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 10, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return x + 42.0

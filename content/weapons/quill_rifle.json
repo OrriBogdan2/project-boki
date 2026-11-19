@@ -22,7 +22,7 @@
 		"refill_rate": 40.0,
 		"desc": "A long-shrouded auto rifle fed from a 30-round drum that refills fast whenever the trigger rests (no reloading by hand); run it dry and it fires again once the drum is full, about a second later. It fires out to full range. Hold the trigger past half the drum and every round hits for half; short bursts hit full; Dazed foes take 76% more.",
 		"kick": 0.06,
-		"tracer": 1.2,
+		"tracer": 0.82,
 		"aim": "max",
 		"fire_slow": 1.0
 	},

@@ -12,7 +12,7 @@ extends ArchKit
 
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
-const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
+const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
 const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
@@ -558,6 +558,13 @@ func rmb_charge_full() -> float:
 
 func rmb_auto_t() -> float:
 	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
+
+## Holding the Storm Rod slows her by rmb.self_slow, ramping in over rmb.slow_in s (never a snap).
+func move_k() -> float:
+	if not rmb_down:
+		return 1.0
+	var rd := rmb_def()
+	return 1.0 - float(rd["self_slow"]) * clampf(rmb_t / float(rd["slow_in"]), 0.0, 1.0)
 
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:

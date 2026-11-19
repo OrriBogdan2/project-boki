@@ -218,7 +218,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
-		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t))
+		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t), {"k": _faded_now()})
 	if res > 0.0:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
@@ -249,8 +249,9 @@ func _tick_lmb() -> void:
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
 			var mouth := _gun_muzzle()
-			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2)
-			HeroVfx.of(m).trail(h, "shot_trail", sd["node"])
+			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2, faded)
+			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -289,6 +290,18 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
+## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string is
+## past its first ten rounds. The shot, trail and hit looks (content/vfx/gunslinger.json) shrink by it ("size_k").
+func _faded(sus_k: float) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
+## The decay of the round landing now: a hit does not carry its round's sus_k, so this reads the string's count
+## (a round or two ahead at most).
+func _faded_now() -> float:
+	var rounds := float(h.wpn.get("sustain_rounds", 10))
+	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
+
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -317,8 +330,8 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "from": h.pos}
 	play("gunslinger_dash")
-	# green-fire streaks off her chest and heels and a kick of dust. No rings or discs: those mean damage or an
-	# area in this game
+	# green-fire streaks off her chest and heels; the scrape's dust trickles under her (_tick_slide). No puff,
+	# rings or discs: those mean damage or an area in this game
 	vfx("slide")
 	return true
 
@@ -367,7 +380,6 @@ func _tick_slide(dt: float) -> void:
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
-				vfx("slide_hold")
 				return
 			slide["tap"] = true
 		_skid(t, dd)

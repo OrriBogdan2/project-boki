@@ -349,6 +349,9 @@ func _mage() -> void:
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
 	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
+	var rd: Dictionary = K.rmb_def()
+	ok("Storm Rod held: self-slow %.0f%% once ramped in (move_k)" % (float(rd["self_slow"]) * 100.0),
+			absf(K.move_k() - (1.0 - float(rd["self_slow"]))) < 0.001, "%.2f" % K.move_k())
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false
 	m.step(DT)

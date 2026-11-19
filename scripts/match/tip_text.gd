@@ -16,11 +16,11 @@ static func rings() -> String:
 			+ "of speed. Fast gliders barely sink.") % glide_how()
 
 ## A hunter with a kit sends the Boki on the Boki key; the others use their E ability.
-static func ability(kit: bool) -> String:
-	var fuse := Settings.key_cap("ultimate")
+static func ability(kit: bool, bond_ok := true) -> String:
+	var bond := "  ·  full bond: %s" % Settings.key_cap("ultimate") if bond_ok and MergeForm.enabled() else ""
 	if kit:
-		return "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), fuse]
-	return "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), fuse]
+		return "%s sends your Boki (hold: orders)%s" % [Settings.key_cap("throw"), bond + " fuses" if bond else ""]
+	return "%s: your Boki's ability%s" % [Settings.key_cap("signature"), bond]
 
 static func bond_full(fuse_name: String, next: bool) -> String:
 	return "Bond full  ·  %s%s fuses: %s" % ["your next " if next else "", Settings.key_cap("ultimate"), fuse_name]
