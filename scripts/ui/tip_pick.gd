@@ -50,23 +50,28 @@ static func text(id: String) -> String:
 			return render(String(t["text"]))
 	return ""
 
-## The tip for the loading screen. blight: false drops the tips that talk about the Blight.
-static func for_loading(blight: bool) -> String:
-	return pick(last, blight)
+## The tip for the loading screen. blight: false drops the tips that talk about the Blight; fusion: false
+## drops the Fusion tips (the tutorials never mention Fusion, whatever the flag says).
+static func for_loading(blight: bool, fusion := true) -> String:
+	return pick(last, blight, fusion)
 
 ## The tip under "You're down", chosen once per knock (the HUD asks every frame).
-static func for_downed(p: Hunter, time: float, blight: bool) -> String:
+static func for_downed(p: Hunter, time: float, blight: bool, fusion := true) -> String:
 	var key := "%d:%d" % [p.get_instance_id(), p.downs]
 	if key != _down_key:
 		_down_key = key
-		_down_tip = pick(triggers(p.stats, p.used, "", time), blight)
+		_down_tip = pick(triggers(p.stats, p.used, "", time), blight, fusion)
 	return _down_tip
 
 ## The most relevant unseen tip for these triggers, else a random unseen one; marks it seen.
-static func pick(trig: Array, blight := true) -> String:
+static func pick(trig: Array, blight := true, fusion := true) -> String:
 	var seen: Array = Save.d["tutorial"].get("tips_seen", [])
 	var pool: Array = (rules()["tips"] as Array).filter(
-		func(t): return blight or not String(t["text"]).contains("Blight"))
+		func(t): return (
+			(blight or not String(t["text"]).contains("Blight"))
+			and ((fusion and MergeForm.enabled()) or not t.get("needs_fusion", false))
+		)
+	)
 	var fresh := pool.filter(func(t): return not seen.has(t["id"]))
 	if fresh.is_empty():
 		seen = []
