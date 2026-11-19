@@ -77,7 +77,13 @@ func spawn(sid: String) -> void:
 	if alive() > 0:
 		return
 	ledger.clear()
-	count = kinds.size()
+	count = 0
+	add(sid, kinds)
+
+## Adds monsters to a step's camp as it stands (a second wave): placed and paid as the step's camp is.
+func add(sid: String, kinds: Array) -> void:
+	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
+	count += kinds.size()
 	var camp_hp: float = Content.rules("tutorial")["mob"]["camp_hp"]
 	var ang := randf() * TAU
 	for i in kinds.size():
