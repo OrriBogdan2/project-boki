@@ -46,12 +46,15 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
 
-**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118, retry 11-19f):** the v95 scan has the sleeves fused to the coat, and the
-re-derived weights leave forearm weight on the shoulder puff and coat, so the clips pull small triangles into dark slivers. Only `Body`
-JOINTS_0/WEIGHTS_0 rows of 4,050 of 41,044 vertices changed; everything else in the file is byte for byte main's (index list, vertices, UVs,
-rig, bone names, clips, materials, Fan/cards; no triangle removed, open boundary edges 77). Locked to main's bytes: every vertex whose main
-weight is led by a hand, finger, box, lid, head/face bone. Weights: a smoothed proposal on the spike vertices, then per welded vertex blended
-toward main's weights until (1) in idle/stance/walk_* (game poses at 30 fps) no vertex moves more than 0.9 cm unless it sits on an edge that
-is already stretched past 2x there, and (2) no clip's worst edge (tools/stretch_check.gd measure, all 57 game clips at 0.125 s) is above
-main's and no edge newly passes 2.5x. Worst clip edge 7.93 -> 5.78, median clip 6.57 -> 4.77; hunter_mesh_check stretched tris (16 frames)
-worst pose 872 -> 558, union 1268 -> 808. Proof: /home/boki/gens/ostra-fix-1119f/.
+**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118, retry 11-19g):** the v95 scan has the sleeves fused to the coat, and the
+re-derived weights leave forearm weight (up to 38%) on the shoulder puff, above the shoulder joint, so the clips pull small triangles
+into dark slivers. Only `Body` JOINTS_0/WEIGHTS_0 rows of 5,240 of 41,044 vertices changed; everything else in the file is byte for byte
+main's (index list, vertices, UVs, rig, bone names, clips, materials, Fan/cards; no triangle removed, open boundary edges 77). Locked to
+main's bytes: every vertex whose main weight is led by a hand, finger, box, lid, head/face bone. Weights: the 11-19f result, then a
+torch optimisation of the sleeve/puff vertices near a stretched edge (stretch over 1.3 minimised; new spikes, the per-clip worst and
+idle/stance/walk moves as hard penalties), then per welded vertex blended toward main's weights until (1) in idle/stance/walk_* no
+vertex moves more than 0.9 cm unless it sits on an edge main already stretches past 2x, and (2) no clip's worst edge is above main's
+and no edge newly passes 2.5x. tools/stretch_check.gd (57 clips): worst 7.93 -> 5.30, median clip 6.54 -> 3.44, no clip above main.
+5.30 is the box-lid hinge, whose weights stay main's: the 1.3 stretch_check limit cannot be met by weights alone (docs/DEBT.md).
+Some dark patches at the shoulder/armpit are inward-facing triangles of the scan itself, already there at bind pose: weights cannot
+remove them. Proof: /home/boki/gens/ostra-fix-1119g/.
