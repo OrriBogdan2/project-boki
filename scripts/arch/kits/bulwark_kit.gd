@@ -16,7 +16,7 @@ extends ArchKit
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
 ##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
 ##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
-## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
+## - E, Mending Ground: an ivory column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
@@ -930,12 +930,13 @@ func _mend_burst() -> void:
 	var r: float = mend["r"]
 	mend = {}
 	var heal := float(ed["heal"]) * heal_k()
+	var mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
 	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
 	for o in _allies_in(at, r):
 		if o != h and o.downed:
 			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
 			kickstarts += 1
-			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
+			m.fx.burst(o.pos + Vector3(0, 0.8, 0), mend_col, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
 			o.heal(heal)
 			if o == h and not wall.is_empty():
@@ -947,7 +948,7 @@ func _mend_burst() -> void:
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
 	m.fx.ring(at, r, AimKit.hero_col(h), 0.45)
-	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
+	m.fx.burst(at + Vector3(0, 0.3, 0), mend_col, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
 	m.sfx("bjorn_purify_burst", at, 0.0)
 	net_ring(at, r, AimKit.hero_col(h))
 
