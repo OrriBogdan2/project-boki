@@ -1074,6 +1074,9 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 | stall_stand | {"out": 1.6, "side": 2.2, "desc": "Metres out in front of the market stall and to its side: where his home spot is first looked for (HobSpot)."} |
 | clear | {"m": 3.5, "reach_m": 1.9, "desc": "Metres: the clear ring round Hob's home spot. No placed tile, door or other place you interact with comes closer, and build mode refuses a piece inside it. When his spot is chosen, places you interact with are also kept talk_reach + reach_m (the usual 1.9 m interact reach) away, so his talk ring and theirs do not overlap and the talk camera has open ground."} |
 | walk_mps | 2.4 |
+| swing_s | 6 |
+| swing_doc | s between his own swings at a house site; with no materials he waits and says wait_line. |
+| wait_line | Can't hammer yet: the house {need}. |
 | talk_reach | 2.4 |
 | hint_more | Talk to Hob for more |
 | toast | New blueprints: talk to Hob |
@@ -1131,6 +1134,21 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | dive_open_s | 1.5 |
 | dive_height | 15 |
 | lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
+
+## first_objective (`content/rules/first_objective.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-expedition objective (scripts/match/first_objective.gd, drawn by scripts/ui/objective_tracker.gd): one short verb-first line under the minimap with a pin or edge arrow on what it names, until the save has got out of one expedition (Save tutorial first_objective). near: metres from the wild Boki at which 'Find' turns into 'Knock it out'; far: metres more before it turns back; keep: metres a farther Boki must be closer by before the pin moves to it; yard: metres from the outpost at which 'Go to' turns into 'Start the uplink'; done_s: seconds a finished step stays ticked under the line. %F is the interact key, %d the uplink's charge, %s a countdown. |
+| near | 18 |
+| far | 8 |
+| keep | 12 |
+| yard | 7 |
+| done_s | 2.2 |
+| steps | [["find", "Find a wild Boki", "Wild Boki", "Found a wild Boki"], ["knock", "Knock it out", "Knock it out", "Knocked it out"], ["scan", "Scan it: hold %F beside it", "Scan it", "Scanned: it is in your box"], ["leave", "Go to the outpost", "Outpost", "Got out"]] |
+| leave | {"wait": "Go to the outpost (opens %s)", "go": "Go to the outpost", "start": "Start the uplink: hold %F", "hold": "Hold the yard: uplink %d%%", "back": "Get back in the outpost yard", "contested": "Clear the yard of rivals", "lift": "Step into the lift"} |
 
 ## garden_daily (`content/rules/garden_daily.json`)
 
