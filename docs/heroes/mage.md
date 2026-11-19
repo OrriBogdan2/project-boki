@@ -206,7 +206,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 |---|---|---|
 | 3 bolts + Storm Rod / Skycall | the 4th Static: sky bolt, Live | `--mage-combo-check` |
 | Wirerun through a Live foe | double hit + Blowout, Static spent, Wirerun back | `--mage-combo-check` |
-| Wirerun through a foe under 4 Static | plain hit, no reset | `--mage-combo-check` |
+| Wirerun through a foe under 4 Static | plain hit, +1 Static (tester note 11-19), no reset | `--mage-combo-check`, `--tester-feedback-check` |
 | Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |

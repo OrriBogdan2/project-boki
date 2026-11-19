@@ -535,7 +535,9 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
-	if was_live and is_instance_valid(f) and not f.dead:
+	if not was_live:
+		add_spark(f)              # the run stacks Static like every hit of hers
+	elif is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
 func _blowout(f: Ent) -> void:

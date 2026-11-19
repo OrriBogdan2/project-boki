@@ -401,6 +401,7 @@ func _mage() -> void:
 	P.dashes = P.max_dashes()      # the press spends it; the pickup gives it back
 	K.motes.clear()
 	K.motes.append({"pos": home + Vector3(5, 0, 0), "t": 4.0, "node": K.own_node(), "owner": P})
+	T.teleport(home + Vector3(5, 0, 3))      # beside the orb, off the run's lane (the run itself stacks Static)
 	ac.aim_at(P, home + Vector3(8, 0, 0))
 	var ob0 := K.orb_bursts
 	_dash(m, P, 0.25)
