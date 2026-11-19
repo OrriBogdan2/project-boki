@@ -67,7 +67,7 @@ Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry6/tool/: `seg2.py c1.js
   their forearm/hand weight moves onto their own hips/thigh share (never onto the chest bone `head`). Stripping fades out over
   y 1.20..1.30 so the elbow and sleeve stay continuous. Every vertex outside the box keeps its live weights bit for bit.
 - Same vertices, triangles, positions, normals, UVs, colours, texture, skeleton and clips as live (48236 verts, 60095 tris).
-- Rest pose: 0 px over 30 differ in game (live-audit bind, same worker); Blender 4 sides x 4 zooms: at most 1 px.
+- Rest pose: Blender 4 sides x 4 zooms (full, eye, knee, hip): at most 1 px of 250k differs. (The live-audit bind shot only caught the boot logo.)
 - Edges >= 8 mm over 3x: 1.005 % -> 0.134 %; worst 10.16 -> 5.22; edges growing > 10 cm 286 -> 60, > 20 cm 11 -> 0.
   Seam verts open > 10 cm 156 -> 156 (as live), open boundary edges 189 -> 189. tools/stretch_check.gd worst 10.16 -> 5.53,
   35 clips better, 0 worse. hunter_mesh_check stretched tris 524 -> 120, no new warning.
