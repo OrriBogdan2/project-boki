@@ -116,7 +116,7 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 | Farm work | Bloom 3, Forage 2, Ranch 1 |
 | Egg | Spore Egg: Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious > Spore Drift; Swift: Swift
@@ -317,7 +317,7 @@ _Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is 
 | Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Glintmole Egg: Something shy is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -337,7 +337,7 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Gloamshell Egg: Something private is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -357,7 +357,7 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Glomwort Egg: Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -938,7 +938,7 @@ _Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps 
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Threadwyrm Egg: Something thoughtful is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
