@@ -102,6 +102,13 @@ func _place(label: String, screen: String, opts: Dictionary) -> void:
 		await main.get_tree().process_frame
 		if i >= 90 and not _rigs().is_empty():
 			break
+	var ld = main.get("_ld")
+	for i in 900:       # the loading screen of a match, then the fade in
+		if ld == null or not is_instance_valid(ld) or not ld.is_inside_tree():
+			break
+		await main.get_tree().process_frame
+	for i in 240:
+		await main.get_tree().process_frame
 	_report(label)
 	await _grab(label)
 
