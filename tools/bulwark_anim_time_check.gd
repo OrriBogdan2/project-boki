@@ -122,12 +122,12 @@ func _ev(what: String, r: Array) -> void:
 
 
 ## The clip's beat (`at`: "peak" or "settle", less the lead) sits on the kit's moment, within TOL.
-func _on_beat(km: String, at: String, r: Array) -> void:
+func _on_beat(km: String, at: String, r: Array, follow := 0.0) -> void:
 	var b: Dictionary = beats.get(km, {})
 	var clip_at := float(b.get(at, -1.0)) - float(leads.get(km, 0.0))
 	chk.ok(
 		"bjorn anim: %s %s on the kit's moment" % [km, at],
-		r[1] == km and absf(clip_at - float(r[0])) <= TOL,
+		r[1] == km and clip_at - float(r[0]) >= -TOL and clip_at - float(r[0]) <= TOL + follow,
 		"clip %.2f - lead %.2f = %.2f vs kit %.3f into %s" % [b.get(at, -1.0), leads.get(km, 0.0), clip_at, r[0], r[1]]
 	)
 
@@ -166,7 +166,9 @@ func kit() -> void:
 	pl.inp["fire"] = false
 	var e := _until(m, kt, func(): return not kt.mace.is_empty() and String(kt.mace["st"]) == "fly", 0.5)
 	_ev("throw leaves", e)
-	_on_beat("bul_throw", "peak", e)
+	# (the tracked hammer head peaks up to 0.1 s after the hand lets go: the swing's follow-through; the sound and the
+	# hand sit on the release itself, --sfx-strike-check)
+	_on_beat("bul_throw", "peak", e, 0.1)
 	chk.step(m, 0.6)
 	pl.inp["fire"] = true
 	m.step(DT)

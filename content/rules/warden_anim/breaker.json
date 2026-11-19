@@ -22,7 +22,7 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
-		"bul_throw": {"clip": "lmb_throw", "scale": 1.12, "lead": 0.09, "upper": "moving", "air_legs": true},
+		"bul_throw": {"clip": "lmb_throw", "scale": 1.12, "upper": "moving", "air_legs": true},
 		"bul_recall": {"clip": "lmb_recall", "upper": true},
 		"bul_smash_wind": {"clip": "lmb_hold", "upper": "moving", "hold_from": 0.2, "air_legs": true},
 		"bul_smash": {"clip": "lmb_slam", "air_legs": true, "strike": ["tip", "lmb/smash_reach", "edge"]},
