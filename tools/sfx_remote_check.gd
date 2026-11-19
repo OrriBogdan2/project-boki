@@ -40,9 +40,23 @@ func _host() -> void:
 				await _cast_sfx(arch, key, held)
 	_finish()
 
+## One cast, compared. A cue landing a frame either side of the mark/log window (a loaded box: the regate's
+## two games share it with a whole suite) shows as a doubled or missing cue, so a mismatch is cast once more
+## and only counts when it shows twice: a real net bug fails every time.
 func _cast_sfx(arch: String, key: String, held: bool) -> void:
-	var P := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	var res: Array = await _cast_once(arch, key, held)
+	if res[0] != "":
+		res = await _cast_once(arch, key, held)
+	var why: String = res[0]
+	n += 1
+	if why != "":
+		bad += 1
+	var verdict := "FAIL" if why != "" else "ok  "
+	print("%s %s %s: %d cues here, %d there %s" % [tag, verdict, what, res[1], res[2], why])
+
+func _cast_once(arch: String, key: String, held: bool) -> Array:
+	var P := m.player
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
@@ -68,12 +82,7 @@ func _cast_sfx(arch: String, key: String, held: bool) -> void:
 	Net.lobby_emit("sx", {"c": "log"})
 	await _reply()
 	var theirs: Array = replies[0].get("log", []) if not replies.is_empty() else []
-	var why := _diff(rows, theirs)
-	n += 1
-	if why != "":
-		bad += 1
-	var verdict := "FAIL" if why != "" else "ok  "
-	print("%s %s %s: %d cues here, %d there %s" % [tag, verdict, what, rows.size(), theirs.size(), why])
+	return [_diff(rows, theirs), rows.size(), theirs.size()]
 
 ## "" when the watcher's cues match the caster's, else what differs: a cue it never played, one it played
 ## more often than the caster's game did, or one played away from where the caster's game put it.
