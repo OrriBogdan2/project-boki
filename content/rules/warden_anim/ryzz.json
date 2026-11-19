@@ -26,6 +26,18 @@
 	},
 	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.2},
 	"states": {"mantle": "mantle", "ledge": "ledge", "downed": "downed", "reviving": "revive", "stomp": "stomp", "drink": "drink", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"cancels": [
+		["mage_dash", 0.4, "stun"],
+		["mage_dash", 0.4, "mage_dash_go"],
+		["mage_x_air", 0.5, "mage_x_dive"],
+		["mage_x", 0.2, "mage_x_air"],
+		["mage_rmb_hold", 0.3, "mage_lmb_l"],
+		["mage_rmb_hold", 0.3, "mage_rmb"],
+		["mage_rmb_hold", 0.3, "mage_e"],
+		["mage_dash", 0.4, "mage_lmb_r"],
+		["glide", 0.4, "mage_e"],
+		["mage_x_dive", 0.2, "mage_x_land"]
+	],
 	"flow": [["mage_lmb_l", 0.35], ["mage_lmb_r", 0.35], ["mage_dash", 0.3], ["mage_dash_go", 0.3], ["mage_dash_land", 0.42], ["mage_lmb_r", 0.3], ["mage_rmb_hold", 0.5], ["mage_rmb", 0.7], ["mage_e", 1.1], ["mage_e_snap", 0.55]],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "gum", "gg": "g_bow", "refuse": "g_wag"},
 	"cc": {"pull": 0.22, "tug_hz": 2.0, "twist": 0.18, "bow": 0.2},
