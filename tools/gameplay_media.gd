@@ -108,6 +108,13 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	# the game's own preset, not the recorder's: a GPU worker's GL is software (llvmpipe), where auto picks
+	# Very Low (the 3D at half size, no smoothing) and every Hunter's ink line broke into specks
+	# (--media-quality=<preset> to pick another)
+	Settings.v["quality"] = "medium"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--media-quality="): Settings.v["quality"] = arg.substr(16)
+	Settings.apply("quality")
 	if zoom_at > 0.0:
 		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
