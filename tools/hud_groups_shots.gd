@@ -1,6 +1,7 @@
 extends RefCounted
 ## --hud-groups-shots --shots-dir=<dir> [--size=WxH]: one picture per moment of --hud-groups-check (landing, fight,
 ## heart, race) on the real HUD, with the group list printed beside each. Needs a renderer (jobq submit --needs gpu).
+## --hud-only turns the 3D world off: the HUD on a dark ground, many times faster on a software renderer.
 
 const CHECK := preload("res://tools/hud_groups_check.gd")
 
@@ -8,14 +9,18 @@ const CHECK := preload("res://tools/hud_groups_check.gd")
 func run(main: Node) -> void:
 	var dir := "/tmp/hud_groups"
 	var win := Vector2i(1280, 720)
+	var hud_only := false
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a) == "--hud-only":
+			hud_only = true
 		elif String(a).begins_with("--size="):
 			var p := String(a).substr(7).split("x")
 			win = Vector2i(int(p[0]), int(p[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_tree().root.size = win
+	main.get_tree().root.disable_3d = hud_only
 	var m: Match = await CHECK.make_match(main)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
