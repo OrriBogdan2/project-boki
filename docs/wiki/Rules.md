@@ -1074,6 +1074,9 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 | stall_stand | {"out": 1.6, "side": 2.2, "desc": "Metres out in front of the market stall and to its side: where his home spot is first looked for (HobSpot)."} |
 | clear | {"m": 3.5, "reach_m": 1.9, "desc": "Metres: the clear ring round Hob's home spot. No placed tile, door or other place you interact with comes closer, and build mode refuses a piece inside it. When his spot is chosen, places you interact with are also kept talk_reach + reach_m (the usual 1.9 m interact reach) away, so his talk ring and theirs do not overlap and the talk camera has open ground."} |
 | walk_mps | 2.4 |
+| swing_s | 6 |
+| swing_doc | s between his own swings at a house site; with no materials he waits and says wait_line. |
+| wait_line | Can't hammer yet: the house {need}. |
 | talk_reach | 2.4 |
 | hint_more | Talk to Hob for more |
 | toast | New blueprints: talk to Hob |
@@ -1099,7 +1102,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
-| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
+| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"shelter": 1, "first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "shelter": {"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)", "locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"}, "shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.", "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1123,14 +1126,15 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 
 | Setting | Value |
 |---|---|
-| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name. mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
+| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]; the zone and wall lines show once per profile (Save tutorial guide_zone, guide_wall), the others once a match. dive_open_s: seconds with the glider open, and dive_height: metres above the ground, before the dive line shows (once per save, Save.d tutorial glide_dive, in any Extraction). In the text %C is the crouch key (the dive), %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %B the base-to-a-teammate key, %s the Boki's name, %X the way out ExtractGoal points at (its map badge) and %H how to use it (exit_none when no way out is on offer). mates_far: metres from every teammate at which the B line shows (it also shows after the squad line). |
 | matches | 2 |
 | gap | 1.5 |
 | close_at | 0.4 |
 | mates_far | 30 |
+| exit_none | Go to an exit and hold %F to leave |
 | dive_open_s | 1.5 |
 | dive_height | 15 |
-| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
+| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
 
 ## garden_daily (`content/rules/garden_daily.json`)
 
@@ -1589,6 +1593,10 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 | _ways_out_lead_s | the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on |
 | always | ["minimap", "clock", "counters", "vitals", "abilities", "glider", "belt", "slots", "weapon"] |
 | _always | blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen) |
+| newcomer_seats | [2, 3] |
+| _newcomer_seats | the Ways Out seats (0 Lair, 1 Heart Gate, 2 Uplink, 3 Heart ring) a new player's objective line points at: the two that need no boss fight and no carried Heart (ExtractGoal) |
+| goal_how | ["Beat the boss, then ride the lift", "Carry the Heartspark to the Gate, hold %F", "Hold %F at the outpost until the lift opens", "Stand in the Heart ring until the end"] |
+| _goal_how | ExtractGoal: how to leave through each seat, in seat order; %F is the interact key |
 
 ## hud_reveal (`content/rules/hud_reveal.json`)
 

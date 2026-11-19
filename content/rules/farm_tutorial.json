@@ -291,13 +291,13 @@
 	"first_day": {
 		"reward_gems": 15,
 		"start_items": {"kibble": 2},
-		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).",
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.",
 		"rows": [
 			{"id": "feed", "text": "Feed your Boki"},
 			{"id": "toy", "text": "Play with a toy"},
 			{"id": "race", "text": "Run your first race"},
 			{"id": "nap", "text": "See a nap pile", "two": true},
-			{"id": "pair", "text": "Pair two Boki in the Nook", "two": true}
+			{"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}
 		]
 	},
 	"tracker": {
