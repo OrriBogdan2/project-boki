@@ -5,6 +5,7 @@ extends RefCounted
 ## Body/Flex) or the old primitive body (KinModels' fallback, a Flex with no BokiRig)? Meant to run from an
 ## exported .pck (godot --main-pack <pck> -- --vespyx-places-check), so a missing import remap shows up.
 ## --save=old builds the record like a pre-0.24 save (no dna, no sex, no care block); shimmer: a shimmer.
+## --glb=<abs path>: wear that .glb (a pre-swap one from git, say) instead of the species' own, to see old and new side by side.
 ## --pack (with --shots-dir): this process exports the Windows pack of its own project, then runs this check in
 ## a second godot from that .pck alone for the fresh, old and shimmer saves, and prints their VESPYX lines.
 ## With a renderer and --shots-dir it also saves the whole window of each place. Fails on any OLD body.
@@ -14,6 +15,7 @@ var species := "cindle"
 var kind := "fresh"
 var out := ""
 var bad := 0
+var tag := ""
 
 
 func run(m: Node) -> void:
@@ -26,8 +28,12 @@ func run(m: Node) -> void:
 			species = a.substr(10)
 		if a.begins_with("--save="):
 			kind = a.substr(7)
+		if a.begins_with("--glb="):
+			_use_glb(a.substr(6))
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
+	if out != "" and not out.is_absolute_path():
+		out = ProjectSettings.globalize_path("res://").path_join(out)
 	if out != "" and DisplayServer.get_name() != "headless":
 		DirAccess.make_dir_recursive_absolute(out)
 	else:
@@ -83,6 +89,20 @@ func _via_pack() -> void:
 	main.get_tree().quit(1 if worst else 0)
 
 
+## Reads a .glb at run time and has BokiRig build the species from it.
+func _use_glb(path: String) -> void:
+	var st := GLTFState.new()
+	var doc := GLTFDocument.new()
+	var err := doc.append_from_file(ProjectSettings.globalize_path(path), st)
+	var root := doc.generate_scene(st) as Node3D
+	for n in root.find_children("*", "", true, false):
+		n.owner = root
+	var ps := PackedScene.new()
+	print("VESPYX_PLACES glb=%s read=%d pack=%d" % [path, err, ps.pack(root)])
+	BokiRig._scenes[BokiRig.PATH % [species, species]] = ps
+	tag = "oldglb_"
+
+
 ## A Boki record as the chosen save kind would hold it.
 func _record() -> Dictionary:
 	var rec := Save.new_kin(species, "Pip", 4242)
@@ -132,7 +152,7 @@ func _portrait(rec: Dictionary) -> void:
 	_report("menu_portrait")
 	if out != "" and t != null:
 		await RenderingServer.frame_post_draw
-		t.get_image().save_png(out.path_join("%s_%s_menu_portrait.png" % [kind, species]))
+		t.get_image().save_png(out.path_join("%s%s_%s_menu_portrait.png" % [tag, kind, species]))
 
 
 func _dex_card() -> void:
@@ -178,4 +198,4 @@ func _rigs() -> PackedStringArray:
 func _grab(label: String) -> void:
 	if out != "":
 		await RenderingServer.frame_post_draw
-		main.get_viewport().get_texture().get_image().save_png(out.path_join("%s_%s_%s.png" % [kind, species, label]))
+		main.get_viewport().get_texture().get_image().save_png(out.path_join("%s%s_%s_%s.png" % [tag, kind, species, label]))
