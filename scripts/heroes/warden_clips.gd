@@ -966,7 +966,6 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
 	_p("air_pose/blend_amount", rise_w)
-	land_t += dt      # (ticks under a move too: a landing a move covered is over, not owed afterwards)
 	if not grounded:
 		if not was_air:
 			_p("rise_seek/seek_request", 0.0)
@@ -978,6 +977,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 			if tier == 3:
 				land = land.duplicate()
 				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
+	# (ticks under a move too: a landing a move covered is over, not owed afterwards; after the touchdown above,
+	# so the first read next frame is dt in, as it was when _pick ticked it)
+	land_t += dt
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
