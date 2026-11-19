@@ -40,6 +40,8 @@ func _grt_out(k: Kin, at: Vector3) -> void:
 	k.fly = {}
 	k.settle = 0.0
 	k.grounded = true
+	k.wind_do = Callable()       # a fresh Boki: no cast still winding up (BokiSwing.CAST_WIND)
+	k.wind_t = 0.0
 
 func _grt_reset(T: Hunter) -> void:
 	T.hp = T.max_hp
@@ -92,6 +94,7 @@ func run(main_node: Node) -> void:
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
+	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)       # (a rigged Boki lets the skill go on its cast clip's release frame)
 	var thp := T.hp; var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
@@ -108,6 +111,7 @@ func run(main_node: Node) -> void:
 	var ntr := m.verbs.traps.size()
 	var nf := m.fields.list.size()
 	k.use_ability("k1", T.pos + Vector3(-3.5, 0, 0))
+	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)
 	_grt("burrlet E Puffcap Mines: 3 traps", m.verbs.traps.size() - ntr == 3, "%d" % (m.verbs.traps.size() - ntr))
 	_ac_run(m, 0.8)
 	acc["root"] = 0.0
@@ -128,7 +132,7 @@ func run(main_node: Node) -> void:
 	k = _grt_kin(m, P, "zapple")
 	_grt_out(k, home + Vector3(1.0, 0, 0))
 	k.use_ability("k1", T.pos)
-	_ac_run(m, 0.05)
+	_ac_run(m, BokiSwing.CAST_WIND + 0.05)
 	_grt("zapple E Echo Chain stuns", T.stun_t > 0.2 and T.hp < T.max_hp, "stun %.2f took %.0f" % [T.stun_t, T.max_hp - T.hp])
 	_ac_run(m, 1.5)
 	_grt_reset(T)
