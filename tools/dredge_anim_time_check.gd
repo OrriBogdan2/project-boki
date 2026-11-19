@@ -116,7 +116,7 @@ func _time(m: Match, pl: Hunter, kt: DredgeKit, move: String, secs: float, event
 			r["in"] = t
 		if c.cur != "" and String(r["clip"]) == "":
 			r["clip"] = c.cur
-			var mv: Dictionary = c.d["kmoves"].get(move, {})      # "fit": the clip plays over the kit's own length
+			var mv: Dictionary = c.d["kmoves"].get(move, {})  # "fit": the clip plays over the kit's own length
 			r["len"] = float(mv["fit"]) if mv.has("fit") else c.lib.get_animation(c.cur).length
 		owned = owned or w >= 0.999
 		if owned and float(r["out"]) < 0.0 and w <= 0.001:
