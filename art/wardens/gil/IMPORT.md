@@ -39,21 +39,19 @@ triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so sk
 `--stretch-check --wardens=gil` reports "no clips", as on the base. warden_model_check's `height_3d` is 0.9 (the
 v95 hat stands lower than the v1 floppy one).
 
-## Skinning fix (2026-11-19, ext/hunter-fix-gil-1118)
-Body: byte-for-byte the live v95 mesh (same vertices, normals, UVs, colours, 60000 triangles, skeleton, bind matrices,
-textures, materials); only its skin weights change. Nothing is cut, split, added or deleted, so the rest pose silhouette
-and every hole are exactly as live. Swordfish: same 3000 triangles, moved rigidly (no rotation, +0.18 x, +0.20 y,
-+0.07 z) so its tail grip sits in the right hand instead of hanging 20 cm away by the knee, and skinned 50/50 forearm.R +
-hand.R, the same blend as the hand skin, so the hand and the sword move as one.
-Gil has no clips: the game poses his bones from the rig, so the fix is measured by skinning offline over a dump of the
-real game's bone matrices (idle, walk, run, jump, glide, both dashes, LMB, RMB, E and its recast, X wave and leap; 900
-frames).
-- Live fault: the fused scan's weights left arm weight on hip skin and hips/thigh/tail mixed on the hem; the two copies of
-  a UV-seam vertex carried different weights (827 seam points opened over 1 cm, up to 0.73 m).
-- Right arm: the left arm's clean weight field (sleeve and the robe band beside it) is mirrored onto the right side; the
-  hand is 50/50 forearm.R + hand.R with no body bone, the cuff blends into it. The right hand follows its bones like the
-  left (live had it 8 cm off, dragged by hip weight).
-- Then a stretch-minimising solve over the pose frames around the changed region (hand and cuff locked; arm skin may use
-  only arm bones; body skin beside the sleeve may share upper_arm.R; no root weight), every UV-seam copy forced to the
-  same weights.
-- Result (900 frames): see the PR body for the measured numbers (edges past 3x, hand-to-bone, sword-to-hand).
+## Skinning, grip and ink fix (2026-11-19, ext/hunter-fix-gil-1118)
+Gil has no clips (the game poses his rig), so every number is measured by skinning offline over 900 frames of the
+real game's bone matrices (all 21 moves: idle x3, walk, run, stop, jump, jump_up, glide, land, both dashes, fall,
+LMB, RMB, E + recast, X + leap, hit, death).
+- Weights: the right arm uses the left arm's clean weight field, mirrored; the hand is 50/50 forearm.R + hand.R.
+  Then a stretch solve over the frames (hand locked, no root weight, no cross-side bones, every UV-seam copy
+  the same). Edges past 3x: live 3.95% -> 0.068%; past 2x: 7.71% -> 0.86%; worst 30.2x -> 5.3x; seam cracks 0.
+- Grip: no finger bones, so the three right fingers are curled in the mesh (rest pose) round the swordfish's
+  tail stalk; the thumb and the rest of the body are not moved. The swordfish (same 3000 triangles, same shape)
+  is held by the tail stalk, bill out of the little-finger side (reverse grip), turned so that in all 900 frames
+  at most 27 of its 3901 points touch the head, hat or body (was 1645 in dash). Same skin blend as the hand.
+- Ink: COLOR_0 is now RGBA on the body and the swordfish. Alpha holds the ink room (`fit_warden.ink_room`, 0.02 m),
+  as on the other v95 Hunters. Before this the outline shell grew full width everywhere and poked through
+  thin and folded parts as black specks.
+- Not changed: textures, materials, UVs, skeleton, bind matrices, every body vertex except the right fingers.
+  The hat brim keeps the scan's notches.
