@@ -8,7 +8,7 @@
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.014,
+		"size": 1.11,
 		"bulk": 1.0,
 		"hit_r": 0.395, "hit_h": 1.66, "body_r": 0.38,
 		"head": 0.6,

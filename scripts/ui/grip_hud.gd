@@ -28,7 +28,9 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	for i in Gloves.SLOTS:
 		_glove(hud, p, i, Rect2(Vector2(x0 + i * (BOX + GAP), y), Vector2(BOX, BOX)))
 	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
-	BokiHud.summon_ring(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
+	var br := Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX))
+	BokiHud.summon_ring(hud, p, br)
+	BokiHud.stolen_wisps(hud, p, br)
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
 static func rar_col(g: Dictionary) -> Color:
@@ -50,7 +52,7 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var rar_frame := HudStyle.box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(rar_col(g), 0.95), 2)
 	hud.c.draw_style_box(rar_frame, r.grow(2.0))
 	if not active:
-		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 8, Color(HudStyle.INK, 0.6))
+		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 10, Color(HudStyle.INK, 0.6))
 
 ## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:

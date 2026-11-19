@@ -251,14 +251,36 @@ func _puddle() -> void:
 	ok("Slime: gone with its slow", K.puddles.is_empty() and node.is_queued_for_deletion())
 
 func _hold_and_air() -> void:
+	# owner 11-17: RMB is a press. Held 3 s it throws once, at the same 8 m as a tap, and never again.
 	_reset(6.0)
 	aim_at(P, home + Vector3(30, 0, 0))
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
 	K.bag.append("air")
-	hold(m, P, 0.5)
-	var far := 0.0
+	tap(m, P)
+	var far_tap := 0.0
 	if not K.flying.is_empty():
-		far = Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length()
-	ok("Grab Bag hold: lands +50% further (12 m against 8)", far > 11.0 and far < 12.6, "%.2f m" % far)
+		far_tap = Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length()
+	_land()
+	_reset(6.0)
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
+	K.bag.append("air")
+	var thrown := 0
+	var throws0 := int(HeroVfx.of(m).plays.get("throw", 0))
+	P.inp["sec_hold"] = true       # the press (once), then the button stays down: only sec_hold is set while held
+	K.press_rmb()
+	var at_press := K.flying.size()
+	step(m, 3.0, func():
+		P.inp["sec_hold"] = true
+		thrown = maxi(thrown, K.flying.size()))
+	P.inp["sec_hold"] = false
+	m.step(DT)
+	var throws := int(HeroVfx.of(m).plays.get("throw", 0)) - throws0
+	ok("Grab Bag: holding RMB 3 s throws one potion at once, 8 m like a tap, and nothing more",
+		absf(far_tap - 8.0) < 0.6 and at_press == 1 and thrown <= 1 and throws == 1 and not K.rmb_down
+		and absf(K.ch_rmb - 1.0) < 0.05,
+		"tap %.2f m, %d at the press, %d throws, charges %.1f" % [far_tap, at_press, throws, K.ch_rmb])
 	_land()
 	_reset(6.0)
 	P.teleport(home + Vector3(0, 3.0, 0))
@@ -609,10 +631,6 @@ func _wave_cancels() -> void:
 	step(m, 0.1, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	var mid := [K.spin_t >= 0.0, K.flying.size(), K.combo_n, P.dashes]
-	var left := K.untarget_t
-	HunterKeys.ult_pressed(P)
-	m.step(DT)
-	ok("cancel X wave + X: nothing (no early landing)", not K.wave.is_empty() and K.untarget_t < left)
 	_press("dash")
 	ok("cancel X wave + E, RMB, LMB: nothing goes mid-ride", not mid[0] and mid[1] == 0 and mid[2] == 2, str(mid))
 	var t := 0.0
@@ -667,6 +685,50 @@ func _recast() -> void:
 	HunterKeys.ult_pressed(P)
 	m.step(DT)
 	ok("recast X: Tidal Wave opens no recast window", not K.wave.is_empty() and K.recast_window().is_empty())
+	K.drop_holds()
+	_leap_off()
+
+## Owner 11-17: R again while he surfs leaps him off at once; nothing stays stuck.
+func _leap_off() -> void:
+	_reset(6.0)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
+	var p0 := P.pos
+	HunterKeys.ult_pressed(P)
+	step(m, 0.3)
+	var on := not K.wave.is_empty() and K.untarget_t > 0.0 and K.anim_id == "gil_surf"
+	var shield0 := P.shield
+	ok("leap off: R at 0.3 s is taken, not parked", HunterKeys.ult_pressed(P))
+	ok("leap off: the wave ends at once (a press and no more steps)", on and K.wave.is_empty() and K.untarget_t <= 0.0
+		and K.anim_id != "gil_surf" and P.shield > shield0 and float(K.incoming(T, 10.0, {})[0]) == 10.0)
+	m.step(DT)
+	ok("leap off: he is hittable and free the next frame (no roll, no invuln, hop in the air)",
+		P.roll_t <= 0.0 and P.inv_t <= 0.12 and P.stun_t <= 0.0 and not P.grounded or P.vel.y > 0.0)
+	var x1 := P.pos
+	step(m, 0.7)
+	var run := Vector2(x1.x - p0.x, x1.z - p0.z).length()
+	var carry := Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length()
+	ok("leap off: he stopped riding (4 m of the 14 at 0.3 s, a short run-out after), back on the ground",
+		run < 6.5 and P.grounded and carry < 8.0,
+		"%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
+	ok("leap off: the 90 s cooldown stands, no second wave, R does nothing more",
+		float(K.cd["x"]) > 85.0 and not HunterKeys.ult_pressed(P) and K.wave.is_empty())
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
+	aim_at(P, T.pos)
+	tap(m, P)
+	ok("leap off: RMB still throws after it (no state stuck)", not K.flying.is_empty())
+	_land()
+	_reset(6.0)
+	# RMB then R at 0.3 s
+	K.cd["x"] = 0.0
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
+	tap(m, P)
+	step(m, 0.3)
+	ok("RMB then R at 0.3 s: the wave fires at once", HunterKeys.ult_pressed(P) and not K.wave.is_empty())
 	K.drop_holds()
 
 # ------------------------------------------------------------------ gil.md: the Relic screen clips

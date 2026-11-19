@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now.\nThe Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew.",
 	"weight": "medium",
-	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
+	"body": {"size": 0.941, "chest": 1.0, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
 	"clip": {"lines": {"dash": "Tap to skid, hold to slide; you keep firing through both.", "lmb": "Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.", "rmb": "Launcher shot: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.", "e": "Stand still 0.6s, then a beam fires through walls; its recoil shoves you back.", "x": "Mark a zone at the cursor: a shell lands there 1.6s later and burns.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}, "holds": ["lmb"]},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
@@ -126,7 +126,7 @@
 		"tick_dmg": 3.5,
 		"slow": 0.3,
 		"slow_t": 0.6,
-		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You stand for 0.76s as you fire, then move and shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
+		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You keep moving as you fire (a brief slow while the rifle points up), then shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
 	},
 	"order": [
 		"sec",
