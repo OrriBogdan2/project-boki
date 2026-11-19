@@ -85,7 +85,7 @@ func _let_go_all(m: Match, P: Hunter, K: ArcherKit) -> void:
 	K.ult.end()
 
 ## The draw, then E (both: the wall goes up, the draw keeps charging) and then X (the cast drops the draw with
-## no arrow; the held button nocks the first empowered shot at once).
+## no arrow; the first empowered shot leaves on the press, PinUlt.cast: no nock state since the 11-08 port).
 func _during_draw(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	_start_draw(m, P, T)
 	var t0 := P.draw_t
@@ -96,13 +96,14 @@ func _during_draw(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	_let_go_all(m, P, K)
 	_start_draw(m, P, T)
 	var loosed0 := K.draw.loosed_at
+	var fired0 := K.ult.fired
 	K.cd["x"] = 0.0
 	P.inp["fire"] = true
 	press_x(m, P)
 	step(m, 0.1, press_at.bind(P, T.pos))
-	ok("lace cancels: draw > X: the draw is dropped with no arrow, the held button nocks an empowered shot",
-		K.ult.active() and P.draw_t < 0.0 and K.draw.loosed_at == loosed0 and K.ult.nock_t >= 0.0,
-		"ult %s draw %.2f loosed %s nock %.2f" % [K.ult.active(), P.draw_t, K.draw.loosed_at != loosed0, K.ult.nock_t])
+	ok("lace cancels: draw > X: the draw is dropped with no arrow, the first empowered shot leaves on the press",
+		K.ult.active() and P.draw_t < 0.0 and K.draw.loosed_at == loosed0 and K.ult.fired > fired0,
+		"ult %s draw %.2f loosed %s ult shots %d" % [K.ult.active(), P.draw_t, K.draw.loosed_at != loosed0, K.ult.fired - fired0])
 	_let_go_all(m, P, K)
 
 ## The Heavy Shot held, then E, X and Shift: each goes at once and the hold carries on.
