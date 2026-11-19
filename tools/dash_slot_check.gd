@@ -2,7 +2,8 @@ extends RefCounted
 ## --dash-slot-check: the dash slot (DashSlot), one component at home and in a match. Checks, with the real
 ## HUD and the real Home: a pip per charge from the kit and class data for all twelve archetypes (plus the
 ## air-dash diamond where the kit has one); the recharging pip's fill and the countdown follow the
-## recharge timer; a charge returning flashes the slot and ticks (own bar only, not on first sight);
+## recharge timer; a charge returning flashes the slot and plays one quiet ab_ready cue, ducked in a fight
+## (own bar only, not on first sight);
 ## the key cap comes from Settings.key_cap; an empty press shakes it red; the overhead plates no longer
 ## carry a dash bar; and the farm draws the very same slot from its own copy of the same numbers, with
 ## no separate farm-only dash display left. Never touches the save.
@@ -101,12 +102,17 @@ func _flash_and_tick(m: Match, P: Hunter, hid: int) -> void:
 	P.dashes = 0.9
 	await _drawn(m.hud)
 	hud.ready_flash.erase("dash")
-	var tick0: int = int(Sfx.last_played.get("click", -1000))
+	var heard: Array = []
+	Sfx.cue_log = heard
 	P.dashes = 1.0
 	await _drawn(m.hud)
+	await _drawn(m.hud)
+	Sfx.cue_log = null
+	var cues := heard.filter(func(c): return c[0] == DashSlot.REFILL_SOUND).size()
 	var flash := float(hud.ready_flash.get("dash", 0.0))
 	ok(flash > 0.1, "a charge returning flashes the slot (%.2fs left)" % flash)
-	ok(int(Sfx.last_played.get("click", -1000)) > tick0 or Sfx.streams.is_empty(), "... and ticks softly")
+	ok(cues == 1, "... with one quiet ab_ready cue for the one charge, not one per redraw (%d)" % cues)
+	ok(DashSlot.REFILL_VOL <= -15.0 and DashSlot.REFILL_DUCK_DB < 0.0, "... under the dash, ducked in a fight")
 	hud.ready_flash.erase("dash")
 	DashSlot._was.erase(hid)
 	P.dashes = 2.0
