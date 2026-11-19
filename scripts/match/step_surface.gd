@@ -6,8 +6,10 @@ extends RefCounted
 ## Metal is the sky train's car decks, wood a plank bridge (World.bridge); the Hollow Crown's
 ## stone bridges are painted paths (stone) and it has no skiff docks since the Ways Out. Water is the
 ## farm's shallow ponds (HomeWater): match maps have none.
+## A bare ground tile's set comes from its biome style (content/rules/step_biomes.json): ash and dark crystal are stone, frost snow.
 ## A Hunter's own "<arch>_step_<surface>" wins when it has one. docs/AUDIO.md lists each region.
 
+const RULES := "step_biomes"
 const SHARED := ["water", "metal"]     # surfaces with steps per weight class, not per Hunter
 const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}     # dB on those steps: heavier boots carry more
 
@@ -25,7 +27,12 @@ static func at(m: Match, pos: Vector3) -> String:
 		return "wood"
 	if w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
 		return "stone"
-	return "snow" if w.style_at(i) == "frost" else "grass"
+	return for_style(w.style_at(i))
+
+## The step set a bare ground tile of biome `style` plays (content/rules/step_biomes.json): grass for an unknown one.
+static func for_style(style: String) -> String:
+	var r: Dictionary = Content.rules(RULES)
+	return String(r["styles"].get(style, r["default"]))
 
 ## The sound for `surf` underfoot of `h`: its own set when it has one, else the shared one.
 static func cue(h: Hunter, surf: String) -> String:

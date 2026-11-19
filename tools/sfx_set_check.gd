@@ -1043,6 +1043,7 @@ func _steps(main: Node) -> void:
 		var deck := Vector3(car.origin.x, m.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
 		ok(StepSurface.at(m, deck) == "metal", "a sky train car's deck is metal")
 		spots["metal"] = deck
+	_style_rows(m)
 	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
 	for surf in ["grass", "stone", "snow", "metal", "wood"]:
 		if surf == "wood":      # last: lays a plank tile on the grass one
@@ -1057,6 +1058,37 @@ func _steps(main: Node) -> void:
 		var wade := "step_water_" + StepSurface.weight_of(WEIGHT_ARCH[cls])
 		ok(wade == "step_water_" + cls and Sfx.ensure(wade), "farm wading: %s plays %s" % [cls, wade])
 	m.queue_free()
+
+
+## Every biome style a tile can have (Flora.STYLES, the generated regions, the styles the Hollow Crown's islands
+## carry) maps to one of the four step sets every Hunter has (content/rules/step_biomes.json), and the map's ember
+## and gloom ground plays stone, its frost snow.
+func _style_rows(m: Match) -> void:
+	var known := ["grass", "stone", "wood", "snow"]
+	var styles: Array = Flora.STYLES.duplicate()
+	for i in m.world.w * m.world.h:
+		var st := m.world.style_at(i)
+		if not styles.has(st):
+			styles.append(st)
+	var rules: Dictionary = Content.rules(StepSurface.RULES)
+	var bad := []
+	for st in styles:
+		if not rules["styles"].has(st) or not known.has(StepSurface.for_style(st)):
+			bad.append(st)
+	ok(bad.is_empty() and known.has(String(rules["default"])), "every biome style maps to a known step set (%s; unmapped %s)" % [styles, bad])
+	ok(rules["styles"].keys().all(func(k): return styles.has(k)), "step_biomes.json lists no style the game lacks")
+	for pair in [["ember", "stone"], ["gloom", "stone"], ["frost", "snow"], ["meadow", "grass"], ["bloom", "grass"], ["storm", "grass"]]:
+		ok(StepSurface.for_style(pair[0]) == pair[1], "%s ground plays %s" % pair)
+	var walked := {}
+	for z in m.world.h:
+		for x in m.world.w:
+			var i := m.world.idx(x, z)
+			if m.world.kind[i] == World.T_GROUND and not m.world.bridge.has(i) and not m.world.stairs.has(i) and not m.world.paint.has(i):
+				var p := Vector3(x + 0.5, m.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
+				var st := m.world.style_at(i)
+				if not walked.has(st):
+					walked[st] = true
+					ok(StepSurface.at(m, p) == StepSurface.for_style(st), "a bare %s tile on the Hollow Crown plays %s" % [st, StepSurface.for_style(st)])
 
 
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
