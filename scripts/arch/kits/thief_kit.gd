@@ -31,7 +31,6 @@ const GHOST := Color("b890ff")     # the blink's afterimages
 const KNOCK_STAR := Color("7b3aff")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
-const BOLT_TAIL := Color("7b3aff")     # the bolt's short deep-violet tail
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -434,25 +433,29 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
 		fx().star(muzzle, EMP_PALE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-	elif came_quick:            # the quick run after a Vault: the cartwheel's cyan in her hands and the tail
-		fx().ride(sd, "chakram", GHOST, BOLT_COL, 2.2, 0.42)
-		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
-		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_COL, 1.8, 0.42)
-		fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
+		# the spinning chakram heads a short cel tracer (bolt_trail: dark edge, violet body, hot core, about the
+		# source's comet length); the quick run after a Vault keeps the cartwheel's pale lilac in her hands
+		var head := fx().ride(sd, "chakram", BOLT_COL, GHOST if came_quick else BOLT_COL, 0.0)
+		HeroVfx.of(m).trail(h, "bolt_trail", head)
+		if came_quick:
+			fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
+		else:
+			fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
 	last_bolt_emp = emp
 
-## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
+## Where a bolt ends: on a hit a lit violet burst facing her with a cross flare and sparks (bolt_hit; the empowered
+## one a big pale star), a blue-violet puff at the cursor, sparks on a wall.
 func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> void:
 	s["dj_end"] = true
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
-	if e != null:
-		fx().star(at, BOLT_COL if not emp else Color("d8c0ff"),
-				1.5 if emp else 0.7,
-				0.24 if emp else 0.14)
-		if emp: m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
+	if e != null and emp:
+		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
+		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
+	elif e != null:
+		vfx("bolt_hit", at, -(s["vel"] as Vector2).normalized())
 	elif why == "expire":
 		fizzles += 1
 		fx().puff(at, FIZZLE, 0.75 if not emp else 1.1, 0.34, Color("c8b8ff"))

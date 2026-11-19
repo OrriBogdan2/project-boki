@@ -64,6 +64,10 @@ func thief(a) -> void:
 			K.bolts == 3 and hands.size() >= 3, "bolts %d hands %s" % [K.bolts, str(hands)])
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
+	var hv := HeroVfx.of(m)
+	A.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
+			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
+			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
 			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
