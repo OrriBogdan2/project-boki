@@ -12,6 +12,7 @@ const GAP := 6.0           # px between icons
 const EDGE := 14.0         # px from the screen's right edge
 const TOP := 250.0         # px from the top: under the counters and the kill feed
 const RING_W := 3.0        # px, the draining ring
+const CARD_PAD := 8.0      # px, inside the hover card
 
 static var ROWS: Array = []
 
@@ -20,8 +21,9 @@ static func _static_init() -> void:
 	ROWS = d["rows"] if typeof(d) == TYPE_DICTIONARY else []
 
 var peak := {}             # row id -> the most time it has had left (what the ring drains from)
-var shown: Array = []      # what the last frame drew: [{id, name, stacks, frac}, ...]
+var shown: Array = []      # what the last frame drew: [{id, name, src, left, stacks, frac, rect}, ...]
 var more := 0              # how many active rows did not fit
+var carded: Array = []     # ids whose card the last frame drew
 
 static func _field(o: Object, f: String) -> float:
 	return float(o.get(f)) if o != null and f in o else 0.0
@@ -47,7 +49,7 @@ static func _read_on(o: Object, row: Dictionary) -> Array:
 	var left := _field(o, String(row.get("time", "")))
 	return [_field(o, String(row["value"])) if row.has("value") else left, left]
 
-## Every active row, in file order: {id, name, icon, col, stacks, left, frac}.
+## Every active row, in file order: {id, name, src, icon, col, stacks, left, frac}.
 func active(h: Hunter) -> Array:
 	var out: Array = []
 	var live := {}
@@ -59,8 +61,9 @@ func active(h: Hunter) -> Array:
 		live[id] = true
 		var left := float(v[1])
 		peak[id] = maxf(left, float(peak.get(id, 0.0))) if left > 0.0 else 0.0
-		out.append({"id": id, "name": row["name"], "icon": row["icon"], "col": Color(String(row["col"])),
-			"stacks": int(floor(float(v[0]))) if row.get("stacks", false) else 1, "left": left,
+		out.append({"id": id, "name": row["name"], "src": row["src"], "icon": row["icon"],
+			"col": Color(String(row["col"])), "left": left,
+			"stacks": int(floor(float(v[0]))) if row.get("stacks", false) else 1,
 			"frac": clampf(left / float(peak[id]), 0.0, 1.0) if left > 0.0 else 1.0})
 	for id in peak.keys():
 		if not live.has(id): peak.erase(id)
@@ -69,6 +72,7 @@ func active(h: Hunter) -> Array:
 ## Draws the stack down the right edge of a screen `sz` wide, under TOP.
 func draw(hud, p: Hunter, sz: Vector2) -> void:
 	shown = []
+	carded = []
 	more = 0
 	if p.out or p.downed or p.extracted:
 		return
@@ -78,11 +82,42 @@ func draw(hud, p: Hunter, sz: Vector2) -> void:
 	var x := sz.x - EDGE - TILE
 	var y := TOP
 	for r in rows.slice(0, MAX_ICONS):
-		_tile(c, Rect2(Vector2(x, y), Vector2(TILE, TILE)), r)
-		shown.append({"id": r["id"], "name": r["name"], "stacks": r["stacks"], "frac": r["frac"]})
+		var rect := Rect2(Vector2(x, y), Vector2(TILE, TILE))
+		_tile(c, rect, r)
+		shown.append({"id": r["id"], "name": r["name"], "src": r["src"], "left": r["left"], "stacks": r["stacks"],
+			"frac": r["frac"], "rect": rect, "col": r["col"]})
 		y += TILE + GAP
 	if more > 0:
 		HudStyle.ctext(c, Vector2(x + TILE * 0.5, y + 12.0), "+%d" % more, 14, HudStyle.MUTED)
+	var all: bool = Input.is_action_pressed("scores") or (hud.pack_panel != null and hud.pack_panel.visible)
+	var at: Vector2 = c.get_local_mouse_position()
+	for r in shown:
+		if all or (r["rect"] as Rect2).has_point(at):
+			_card(c, r)
+			carded.append(r["id"])
+			if not all:
+				var tip := "Hold %s: every status" % Settings.key_cap("scores")
+				var tip_w := TextCache.width(HudStyle.BIG, tip, 11)
+				var tip_at: Vector2 = (r["rect"] as Rect2).end - Vector2(TILE + GAP + tip_w, -12.0)
+				HudStyle.text(c, tip_at, tip, 11, HudStyle.MUTED, 3)
+
+## What the hover card says about a row: the status name, then where it comes from and the seconds left.
+static func card_lines(r: Dictionary) -> Array:
+	var left := float(r["left"])
+	var when := "%.1f s left" % left if left > 0.0 else "while it lasts"
+	return [String(r["name"]), "%s, %s" % [r["src"], when]]
+
+## The card to the left of an icon: its name over its source and time. Every card shows while Tab
+## (the scores key) is held or the backpack is open; otherwise only the hovered icon's.
+static func _card(c: CanvasItem, r: Dictionary) -> void:
+	var lines := card_lines(r)
+	var w := maxf(TextCache.width(HudStyle.BIG, lines[0], 13), TextCache.width(HudStyle.BIG, lines[1], 11))
+	var rect := r["rect"] as Rect2
+	var box := Rect2(Vector2(rect.position.x - GAP - w - CARD_PAD * 2.0, rect.position.y),
+		Vector2(w + CARD_PAD * 2.0, TILE))
+	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(r["col"], 0.55), 1), box)
+	HudStyle.text(c, box.position + Vector2(CARD_PAD, 15.0), lines[0], 13, HudStyle.INK, 3)
+	HudStyle.text(c, box.position + Vector2(CARD_PAD, 29.0), lines[1], 11, HudStyle.MUTED, 3)
 
 static func _tile(c: CanvasItem, r: Rect2, row: Dictionary) -> void:
 	var col: Color = row["col"]

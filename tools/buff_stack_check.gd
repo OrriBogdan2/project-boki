@@ -5,9 +5,11 @@ extends RefCounted
 ##      file order, the stacking one carries its count, the timed ones' rings are full at the start
 ##   3. rings drain with the time left and each icon leaves when its time runs out
 ##   4. seven at once: six icons and "+1"
+##   5. hover card: the hovered icon (only it) gets a card with its name, source and seconds left; holding
+##      the scores key (Tab) shows every icon's card
 ## Runs the --hudref-demo=plates scene (real frames, the real HUD) and reads BuffStack.shown.
-## --buff-stack-shots --shots-dir=<dir> (GPU): the stack mid-fight with three icons (three.png)
-## and with seven (seven.png).
+## --buff-stack-shots --shots-dir=<dir> (GPU): the stack mid-fight with three icons (three.png), with
+## seven (seven.png), the mouse on the second icon (hover.png) and Tab held (tab.png).
 ## Runs the --hudref-demo scene (real frames, the real HUD) and reads BuffStack.shown. Never touches the save.
 
 var bad := 0
@@ -66,15 +68,33 @@ func seven(p: Hunter) -> void:
 	p.ak.res = 1.0
 	p.ak.res_wait = 8.0
 
+func hover(id: String) -> void:
+	var ev := InputEventMouseMotion.new()
+	ev.position = row(id)["rect"].get_center() if id != "" else Vector2(20, 20)
+	ev.global_position = main.get_viewport().get_screen_transform() * ev.position
+	Input.parse_input_event(ev)
+	Input.flush_buffered_events()
+
+func shot(out: String, name: String) -> void:
+	main.get_viewport().get_texture().get_image().save_png(out.path_join(name + ".png"))
+
 func shots(out: String) -> void:
 	var p := start("fight")
 	await frames_until(5.0)
 	three(p, 9.0)
 	await frames_until(m.time + 2.0)
-	main.get_viewport().get_texture().get_image().save_png(out.path_join("three.png"))
+	shot(out, "three")
+	hover("fever")
+	await frames_until(m.time + 0.3)
+	shot(out, "hover")
+	hover("")
+	Input.action_press("scores")
+	await frames_until(m.time + 0.3)
+	shot(out, "tab")
+	Input.action_release("scores")
 	seven(p)
 	await frames_until(m.time + 1.0)
-	main.get_viewport().get_texture().get_image().save_png(out.path_join("seven.png"))
+	shot(out, "seven")
 	main.get_tree().quit(0)
 
 func run(main_node: Node, mode := "check") -> void:
@@ -102,6 +122,19 @@ func run(main_node: Node, mode := "check") -> void:
 	ok(stacks("fever") == 2 and stacks("swift") == 1, "the stacking one carries its count (fever x2), the others none")
 	var fresh := frac("swift", 0.0)
 	ok(fresh > 0.9, "a fresh timer's ring is nearly full (%.2f)" % fresh)
+	hover("kin_damage")
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(hud.buffs.carded == ["kin_damage"], "the mouse on one icon: only its card (%s)" % str(hud.buffs.carded))
+	var lines := BuffStack.card_lines(row("kin_damage"))
+	ok(lines[0] == "Boki: more damage" and lines[1].begins_with("Your Boki, ") and lines[1].ends_with(" s left"),
+		"the card names it, its source and the seconds left (%s)" % str(lines))
+	hover("")
+	Input.action_press("scores")
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(hud.buffs.carded.size() == 3, "Tab held: a card for every icon (%s)" % str(hud.buffs.carded))
+	Input.action_release("scores")
 	await frames_until(t0 + 0.6)
 	var mid := frac("swift", 1.0)
 	ok(mid > 0.1 and mid < 0.7, "the ring drains with the time left (%.2f at 0.6 of 1.0 s)" % mid)
