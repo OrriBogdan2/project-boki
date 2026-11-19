@@ -117,6 +117,57 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 
 Out of the bar after the slice, each with the number that puts it there: **Kael** LMB 0.65, Slash 8 = 5.2% of our target against Caldera 43 = 3.3%; combo 0.55 / 0.59, Smash 26 = 16.9% against Execution Slam 130 = 10.1% (1.67x) and Warchain 8 against Feysteel Chain 30 (2.23x). The move from 0.45 / 0.16 is Rampage 0.175 -> 0.058 (tip 18 no longer lands; source Flame Step 49 = 0.038). **Vex** LMB 3.25, our 0.12 s cadence with `sustain_loss` 0.5 against MK7 51 every 0.08 s; combo max 0.78, Railgun share 0.234 against 202 = 0.157 (1.49x). **Cinder** LMB 0.78 / 0.74, stream 25.6% of the target a second against Flamethrower 258/s = 20.1%; combo 0.76 / 0.61, Cinder Shot 0.131 against Embry Bolt 106 = 0.082 (1.59x). **Lace** has no source row (Greenwood Bow has no damage number in sv/briefs/kits.md). No kit was tuned in this job.
 
+**11-19 re-run on current main (ext/ttk-main-1116, origin/main d254692c3f; no number changed).** Kits, ranks, armour tiers and cooldowns moved since the 11-11 slice, so both checks were run again.
+
+*`--ttk-check`*: 42 rows, 14 FAIL, 28 ok. The table between the `ttk:table` markers above is what main prints today: every row is identical to the 11-11 table (to the hundredth), except Gil's two combo rows (5.28 / 4.95 s in the doc, 4.95 / 4.62 s now; his Grab Bag draws vary, see Method). So for Vex, Kael, Lace and Cinder the delta against 11-11 is **0.00 on every row**; the later kit, rank, armour and cooldown merges did not move the idle-target fight.
+
+*`--ttk-matrix-check`* needed two tool changes first (tools/ttk_matrix_check.gd, no game file): (1) it failed 12 of 156 checks on main, because Lace's bow looses nothing on a held or mashed click since 8cc948ce6e (`draw_min`), so hold and tap never down the dummy; a **draw** mode (hold 1.2 s, release one step, only for weapons with a `draw` table) now measures her. (2) New optional args `--ttk-matrix-set=<arch,arch>`, `--ttk-matrix-level=N` (both sides at level N: `LevelGrowth` health +6% of base a level, ability power) and `--ttk-matrix-armor=none|tierN` (the dummy's `ArmorRules` tier N; tier 2 = Rare, 30% block, 350 durability; the base run is tier 0 Common, 20%). Without them the output is the old one. `tools/ttk_pairs.py` builds the tables below from the logs. Base run: 156 checks, 0 failures with the draw mode. Seconds to down; `~` = Kael measured at 2.7 m (a melee tap cannot reach 8 m). "Doc 11-11" is docs/TTK_MATRIX.md, last generated 11-10 and not re-run since; the delta is main drift since then (the four 11-11 branches move no TTK row, see above), and is not isolated per commit here. Lace has no source number, so no source seconds and no bar for her as attacker.
+
+| Pair (attacker into defender) | Doc 11-11, L1 Common | Now, L1 Common | Delta | L1 none | L1 tier 2 | L6 none | L6 tier 2 |
+|---|---|---|---|---|---|---|---|
+| Vex into Vex | 7.6 | 5.2 | -2.4 | 4.2 | 6.0 | 5.4 | 8.2 |
+| Vex into Kael | 10.7 | 7.6 | -3.1 | 5.5 | 8.4 | 7.8 | 11.3 |
+| Vex into Lace | n/a | 4.5 | n/a | 3.9 | 5.1 | 4.6 | 7.4 |
+| Vex into Cinder | 10.2 | 7.6 | -2.6 | 5.5 | 8.4 | 7.8 | 11.3 |
+| Kael into Vex | 8.7 | 5.5 | -3.2 | 4.3~ | 6.3~ | 5.5~ | 7.9~ |
+| Kael into Kael | 11.5 | 6.7 | -4.8 | 5.1~ | 7.5~ | 7.1~ | 10.3~ |
+| Kael into Lace | n/a | 3.9 | n/a | 3.5~ | 4.7~ | 4.3~ | 6.3~ |
+| Kael into Cinder | 10.7 | 6.7 | -4.0 | 5.1~ | 7.9~ | 7.1~ | 9.9~ |
+| Lace into Vex | n/a | 7.4 | n/a | 5.0 | 7.4 | 7.4 | 9.8 |
+| Lace into Kael | n/a | 9.8 | n/a | 7.4 | 11.1 | 9.8 | 13.5 |
+| Lace into Lace | n/a | 6.2 | n/a | 5.0 | 6.2 | 6.2 | 8.6 |
+| Lace into Cinder | n/a | 9.8 | n/a | 7.4 | 11.1 | 9.8 | 13.5 |
+| Cinder into Vex | 5.0 | 5.8 | +0.8 | 4.9 | 6.5 | 5.9 | 8.0 |
+| Cinder into Kael | 5.4 | 7.2 | +1.8 | 5.9 | 8.0 | 7.2 | 9.8 |
+| Cinder into Lace | n/a | 5.0 | n/a | 4.2 | 5.5 | 5.1 | 6.8 |
+| Cinder into Cinder | 5.2 | 7.2 | +2.0 | 6.0 | 8.0 | 7.2 | 9.8 |
+
+Ours / source time to down (bar 0.8 to 1.25). The source side is its base HP (sv/briefs/physics.md, +6% of base a level) over 1 - block (none 0, Common 0.2, tier 2 0.3) over the LMB DPS in `tools/ttk_matrix_source.json` (Vex 51 / 0.08 s, Kael 43 / 0.2 s, Cinder 258/s); Lace has none.
+
+| Pair | L1 none ours / source = ratio | L1 tier 2 ours / source = ratio | L6 none ours / source = ratio | L6 tier 2 ours / source = ratio |
+|---|---|---|---|---|
+| Vex into Vex | 4.2 / 1.9 = 2.20 **out** | 6.0 / 2.7 = 2.17 **out** | 5.4 / 2.5 = 2.15 **out** | 8.2 / 3.6 = 2.31 **out** |
+| Vex into Kael | 5.5 / 2.0 = 2.74 **out** | 8.4 / 2.9 = 2.91 **out** | 7.8 / 2.6 = 2.95 **out** | 11.3 / 3.8 = 3.00 **out** |
+| Vex into Lace | 3.9 / 1.7 = 2.25 **out** | 5.1 / 2.5 = 2.08 **out** | 4.6 / 2.2 = 2.06 **out** | 7.4 / 3.2 = 2.32 **out** |
+| Vex into Cinder | 5.5 / 2.0 = 2.74 **out** | 8.4 / 2.9 = 2.91 **out** | 7.8 / 2.6 = 2.95 **out** | 11.3 / 3.8 = 3.00 **out** |
+| Kael into Vex | 4.3 / 5.7 = 0.76 **out** | 6.3 / 8.1 = 0.78 **out** | 5.5 / 7.4 = 0.75 **out** | 7.9 / 10.6 = 0.75 **out** |
+| Kael into Kael | 5.1 / 6.0 = 0.85 | 7.5 / 8.6 = 0.88 | 7.1 / 7.8 = 0.91 | 10.3 / 11.1 = 0.93 |
+| Kael into Lace | 3.5 / 5.1 = 0.69 **out** | 4.7 / 7.3 = 0.65 **out** | 4.3 / 6.7 = 0.65 **out** | 6.3 / 9.5 = 0.67 **out** |
+| Kael into Cinder | 5.1 / 6.0 = 0.85 | 7.9 / 8.6 = 0.93 | 7.1 / 7.8 = 0.91 | 9.9 / 11.1 = 0.89 |
+| Cinder into Vex | 4.9 / 4.7 = 1.04 | 6.5 / 6.8 = 0.96 | 5.9 / 6.2 = 0.96 | 8.0 / 8.8 = 0.91 |
+| Cinder into Kael | 5.9 / 5.0 = 1.18 | 8.0 / 7.1 = 1.12 | 7.2 / 6.5 = 1.11 | 9.8 / 9.3 = 1.05 |
+| Cinder into Lace | 4.2 / 4.3 = 0.99 | 5.5 / 6.1 = 0.91 | 5.1 / 5.5 = 0.92 | 6.8 / 7.9 = 0.86 |
+| Cinder into Cinder | 6.0 / 5.0 = 1.20 | 8.0 / 7.1 = 1.12 | 7.2 / 6.5 = 1.11 | 9.8 / 9.3 = 1.06 |
+
+
+**Owner calls from the 11-19 table (listed, nothing built).**
+- Vex into all four (2.06 to 3.00 in all four settings; ttk-check LMB 2.20, combo 1.41 / 1.35): the LMB, which has no rank. Per round the damage share matches (6 of 154 = 3.9%, 51 of 1285 = 4.0%); ours fires every 0.12 s against about 0.08 s (cadence is [F], not [D]) and `sustain_loss` 0.5 halves every round after the tenth. His abilities are in the bar (Spike Grenade 1.11, Railgun 0.99), so the combo miss is the LMB. Owner call: cadence 0.12 -> 0.08 and sustain_loss, or accept the gap.
+- Kael into Vex (0.75 to 0.78) and into Lace (0.65 to 0.69): not an ability and not his rank. Kael into Kael and into Cinder is inside the bar (0.85 to 0.93). The cause is the defender's health: ours is 124 / 145 / 193 (light / medium / heavy, 0.64 / 0.75 / 1.00 of a heavy), the source's 1100 / 1225 / 1290 (0.85 / 0.95 / 1.00), so every attacker is relatively faster into a light or medium Hunter. Owner call: the class health spread (KIT_PARITY Health), not Kael's Slash. His own ttk-check rows stay out of the bar: LMB 0.65 (Slash 8 against Caldera 43); combo 0.57 / 0.65 (RMB Smash 1.67x at rank 1, Rampage dash 1.53x, Warchain E 1.67x).
+- Lace as attacker: no pairing verdict (Greenwood Bow has no damage number in sv/briefs/kits.md); her ttk-check LMB is inside (1.15), but her RMB row reads 7.15x because the check taps RMB and never looses the held Heavy Shot (a measurement gap), E 1.37x, X 0.46x. Owner call: supply her LMB number, and say whether the RMB row should hold and release.
+- Cinder: inside the bar at all 16 cell-settings with 0.86 to 1.20; the high edge is into the heavy Kael and Cinder at level 1 with no armour (1.18, 1.20) and the low edge into Lace at level 6 with tier 2 (0.86). No call.
+- Level and armour do not change a verdict: every pair keeps the same side of the bar at level 1 and 6, with no armour and with tier 2 (Vex 2.06 to 3.00, Kael into Vex / Lace 0.65 to 0.78, the rest inside). Tier 2 and level 6 lengthen ours and the source in proportion, because both sides take the same block and the same +6% health a level.
+- docs/TTK_MATRIX.md (the 12 x 12 table) still shows the pre-11-11 numbers and has no Lace row; regenerating it needs the full 12-attacker log (about 12 minutes). Owner call: regenerate it in a follow-up.
+
 **Outliers and causes (suggestions, nothing built)**
 
 | Hunter | Rows | Cause | Suggestion |
