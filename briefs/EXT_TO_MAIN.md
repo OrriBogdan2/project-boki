@@ -10331,3 +10331,4 @@ READY ext/sfx-dash-refill eb1b4ad84177a4f408f74070b49889d32a99ad1f (one quiet ab
 READY ext/sfx-garden-play 920e962d83 (quiet PlaySfx cues for tag start/catch/cheer, squabble huffs and toy finish, 3 per 3 s per zone cap; base-life-check 0 fails, garden-sfx-check 0 fails, 20s MP4 with audio)
 READY ext/extra-typed-calls-b fa3f4898ce (kin box + incubator views: typed Home, 6 has_method removed)
 READY ext/vfx-no-generic-orange 1ece6871d5030db3fbd5316d76ee7bffee38848f (no Hunter cast reaches the generic damage orange: make_cx sets hero_col for any Hunter caster, generic_col asserts, fence pins hero_col per Hunter)
+READY ext/extra-kin-v2-one 7e0f980f514e7ddebc1a6a858ac04e4831043f63 (kin size family moved from content/kin to kin_v2, DEBT lists shiny/work/data.gd families left)
