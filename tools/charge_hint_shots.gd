@@ -1,7 +1,8 @@
 extends RefCounted
 ## --charge-hint-shots --shots-dir=<dir>: the uplink's yard on screen at 0.6 s, 3.6 s and 5.5 s after
 ## you start charging it alone (run on a real GPU; see jobq). Uses only the exits' own entry points, so
-## the same tool runs on a tree without ZoneHint for the "before" set. Files: <dir>/t<seconds>.png.
+## the same tool runs on a tree without ZoneHint for the "before" set. Files: <dir>/t<seconds>.png, and
+## <dir>/drain.png (the "back to the outpost" prompt after you walk off).
 
 var main: Node
 var m: Match
@@ -51,5 +52,8 @@ func run(main_node: Node) -> void:
 		shown = t
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("t%.1f.png" % t))
 		print("CHARGESHOT t=%.1f" % t)
+	await _frames(1.5, up["pos"] + Vector3(14, 0, 0))      # walk off: the charge drains, "back to the outpost"
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("drain.png"))
+	print("CHARGESHOT drain")
 	m.over = true
 	main.get_tree().quit(0)
