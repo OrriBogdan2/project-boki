@@ -17,8 +17,9 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
-##   [--bench-ab]  (one process, one GPU: the match part as walking pets, Boki wisps, pets again; no other parts)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
+##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
+##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -38,7 +39,6 @@ const BLIGHT_AT := 22.0             # m from the Heart the Blight claws out: pas
 const HEART_BLIGHT := ["bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter",
 	"bl_warden", "bl_skitter"]
 
-const AB_WARM_S := 5.0              # s of each --bench-ab run left out of its BENCH AB numbers
 const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
 const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
@@ -57,8 +57,9 @@ var trios := 0           # --bench-trios: bot trios in the expedition (0: the us
 var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
 var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
-var ab := false          # --bench-ab: pets, wisps, pets again
 var failed := false      # a budget line said FAIL: the exit code carries it
+var wisps := ""          # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
+const AB_WARMUP_S := 5.0 # --bench-ab: the first this many s of each run are left out of its numbers
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -74,7 +75,7 @@ func run(main_node: Node) -> void:
 		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
 		_finish()
 		return
-	if ab:
+	if "--bench-ab" in OS.get_cmdline_user_args():
 		await _ab()
 		_finish()
 		return
@@ -105,7 +106,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
-		if a == "--bench-ab": ab = true
+		if a.begins_with("--boki-wisps="): wisps = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -125,32 +126,33 @@ func _finish() -> void:
 		if fa: fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit(1 if failed else 0)
 
-func _match(part := "match", extra := {}) -> Array:
-	var m := await _start(part, {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101}.merged(extra))
+func _match(part := "match") -> Array:
+	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
 	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
 
-## Walking pets, Boki wisps, walking pets again: the same seed and autoplay path each time, the repeat shows
-## run-order drift.
+## --bench-ab (from ext/wisp-gpu-ab): walking pets, wisps, walking pets again, the same seed and autoplay path each
+## time in one process, so the A/B shares one GPU; the repeat shows run-order drift.
 func _ab() -> void:
-	for r in [["pets_1", false], ["wisps", true], ["pets_2", false]]:
-		_ab_line(r[0], await _match(r[0], {"boki_wisps": r[1]}))
+	for r in [["pets_1", "off"], ["wisps", "on"], ["pets_2", "off"]]:
+		wisps = r[1]
+		_ab_line(r[0], await _match(r[0]))
 
-## Mean, p95 and worst wall ms, draws, and the count of frames over SLOW_MS, after the AB_WARM_S warm-up.
+## Mean, p95 and worst wall ms and draws after the warm-up, and the count of frames over 50 ms.
 func _ab_line(part: String, fl: Array) -> void:
 	var w: Array = []
 	var draws := 0.0
-	for f in fl.slice(int(AB_WARM_S / DT)):
+	for f in fl.slice(int(fl.size() * AB_WARMUP_S / secs)):
 		w.append(float(f["wall"]))
 		draws += float(f["draws"])
+	if w.is_empty():
+		return
 	var mean := 0.0
-	for x in w:
-		mean += x / maxf(1.0, w.size())
+	for x in w: mean += x / w.size()
 	w.sort()
-	var over := w.filter(func(x): return x > SLOW_MS).size()
-	var line := "BENCH AB %s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
-	print((line + "draws %.0f, over %.0f ms: %d")
-		% [part, AB_WARM_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1], draws / maxf(1.0, w.size()),
-		SLOW_MS, over])
+	var over := w.filter(func(x): return x > 50.0).size()
+	print("BENCH AB %s boki_wisps=%s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
+		% [part, wisps, AB_WARMUP_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1]]
+		+ "draws %.0f, over 50 ms: %d" % [draws / w.size(), over])
 
 ## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
 ## (the tide closed to its last ring) and the Blight clawing out just past them.
@@ -178,6 +180,8 @@ func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
 	o.merge({"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle"}, true)
 	o.merge(extra, true)
+	if wisps != "":
+		o["boki_wisps"] = wisps == "on"
 	if trios > 0 and part == "match":
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")

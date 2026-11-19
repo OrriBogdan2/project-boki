@@ -1,5 +1,7 @@
 {
 	"desc": "How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dash trail; the same for everyone, no tiers), and the weak surge.",
+	"fusion_enabled": false,
+	"fusion_enabled_doc": "docs/decisions/0159: Fusion is off by default (11-18). false: the Fusion key, bots and the Boki never start a Fusion and no screen mentions it; all fusion code and content stay. true switches it back on.",
 	"xform_s": 0.7,
 	"xform_contact_s": 0.45,
 	"ult_lock_s": 1.5,
