@@ -135,6 +135,7 @@ Notes:
 | 76 | Galleotter | Oarlet | Water/Steel | Early common | river |
 | 77 | Scoopsy | Scoopsy | Ice | Early common | rodent |
 | 78 | Sundormouse | Scoopsy | Ice/Normal | Early common | rodent |
+| 78+ | Sorbeast | Scoopsy | Ice/Normal | Early common | rodent |
 | 79 | Gravadillo | Gravadillo | Psychic/Bug | Early common | common |
 | 80 | Gravidon (Gravitank) | Gravadillo | Psychic/Bug (guess) | Early common | common |
 | 81 | Fizzlet | Fizzlet | Electric | Mid game | plains |

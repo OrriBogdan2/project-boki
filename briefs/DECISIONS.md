@@ -8,7 +8,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## 2026-11-19 ~9:00 PM EST: 3-day stabilize sprint (owner concern, coordinator call)
 Owner: "i am very concerned about: 1. combat clarity 2. tutorial 3. physics/movement 4. 3d models and animations 5. system for implementing new changes and not breaking old ones".
 Until 2026-11-22 ~9 PM EST:
-- No NEW features in combat, UI/HUD, tutorial or hunter 3D. Only: merge/rebase/fix-red, declutter, tutorial fixes, model fixes. Anything that adds a HUD element, toast, marker, banner or pop-up needs owner OK.
+- No NEW features in combat, UI/HUD or tutorial. Only: merge/rebase/fix-red, declutter, tutorial fixes.
+- 3D is NOT paused (owner 11-19 ~10 PM EST: "why pause 3d? the 3d needs to be in there"). Hunter and Boki 3D keep shipping at full speed: in-game hunters must look like the approved 3D, Boki must use the Bokidex 3D glbs. The guard is the model check (hunter_mesh_check + real-GPU animated renders + Fable review), not a pause. Anything that adds a HUD element, toast, marker, banner or pop-up needs owner OK.
 - Merge order: HUD declutter (#341 + ui-declutter-1119), tutorial (#259 and the tutorial lane), then the rest.
 - Absolute checks join the gate (not only NEW-RED vs main): hunter_mesh_check + Fable review of real-GPU renders for any hunter model/clip/material change; a combat HUD screenshot check (nothing over the hunter, element budget); a tutorial playthrough that must finish.
 - One owner per surface: no two jobs touch the same screen/scene at once (coordinator stacks them).

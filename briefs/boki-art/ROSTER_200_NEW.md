@@ -31,13 +31,13 @@ Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIG
 | 12 | Polyshroom > Starcap > Medushroom | 3 | Spore / Spore, Flying / Spore, Poison | y | |
 | 13 | Puffuse > Blastopuff | 2 | Electric / Electric, Psychic | y | |
 | 14 | Nymphane > Rosedart | 2 | Bug / Bug, Crystal | y | |
-| 15 | Pocketpus > Bladypus | 2 | Poison / Poison, Normal | y | |
+| 15 | Pocketpus > Bladypus > Cleavypus | 3 | Poison / Poison, Normal | y | |
 | 16 | Foldbat > Fanpire | 2 | Sound / Sound, Flying | y | |
 | 17 | Chiptero > Pickadactyl | 2 | Rock / Rock, Dragon | y | |
 | 18 | Bullpole > Bullsfrog | 2 | Poison / Poison, Normal | y | |
 | 19 | Rattlebub > Maracoil | 2 | Sound / Sound, Poison | y | |
 | 20 | Narfoil > Parrywhal | 2 | Ice / Ice, Steel | y | |
-| 21 | Scoopsy > Sundormouse | 2 | Ice / Ice, Normal | y | |
+| 21 | Scoopsy > Sundormouse > Sorbeast | 3 | Ice / Ice, Normal | y | |
 | 22 | Clinkpede > Chainipede | 2 | Poison / Poison, Bug | n | |
 | 23 | Pinster > Tiltster | 2 | Electric / Electric, Normal | y | |
 | 24 | Fawngus > Hatstag | 2 | Spore / Spore, Grass | n | |
@@ -548,7 +548,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** glossy red shell with a steel-grey hinge seam running round its middle.
 **Ability link:** the platypus is an egg-laying mammal with venom spurs; this line flicks out blades.
 
-### Pocketpus (1 of 2) · Poison
+### Pocketpus (1 of 3) · Poison
 - **Concept:** a platypus whose bill is a folded pocket knife.
 - **Rejected ideas:** platypus + duck decoy; platypus + flip phone.
 - **Mix:** platypus + closed folding knife
@@ -558,7 +558,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a brand cross or logo, a held knife, open blades.
 - **Archetype:** cute
 
-### Bladypus (2 of 2) · Poison
+### Bladypus (2 of 3) · Poison
 - **Concept:** a platypus that is an open multi-tool.
 - **Rejected ideas:** platypus + garden trowel; platypus + cricket bat.
 - **Mix:** platypus + multi-tool
@@ -567,6 +567,16 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Colours:** red lacquer and bright steel; accent venom green.
 - **Avoid:** a logo, a handle shape like Pocketpus, held tools.
 - **Archetype:** sleek
+
+### Cleavypus (3 of 3) · Poison
+- **Concept:** a heavy platypus whose whole body has opened into a butcher's multi-tool.
+- **Rejected ideas:** an upright armoured multi-tool bruiser (read as a person in a suit); a meaner Bladypus with the same kit.
+- **Mix:** platypus + cleaver + fully opened multi-tool
+- **Look:** A big, heavy-set, low platypus. Its bill is one long flat steel blade with a tapered tip; its spine carries a fin blade, a saw blade and a hook blade; a riveted steel plate guards each shoulder; its tail is a broad red cleaver with a bright steel edge and a hang hole. Venom-green spurs glow on its ankles.
+- **Face:** narrowed brown eyes, pink blush, a smug grin.
+- **Colours:** red lacquer and bright steel; accent venom green.
+- **Avoid:** a logo, held tools, a dark separate bill over the blade, an upright stance.
+- **Archetype:** tough
 
 ## 16. Foldbat line: fruit bat + iron war fan (egg-only)
 **Egg:** shell ribbed with fine pleats like a folded fan.
@@ -692,7 +702,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** cream shell flecked with pastel sprinkles and a frosty tip.
 **Ability link:** a sleepy healer that gives out cooling "brain-freeze" slows.
 
-### Scoopsy (1 of 2) · Ice
+### Scoopsy (1 of 3) · Ice
 - **Concept:** a dormouse curled up as a scoop of ice cream.
 - **Rejected ideas:** dormouse + snow globe (Terrarimit clash); dormouse + pillow.
 - **Mix:** dormouse + scoop of ice cream
@@ -702,7 +712,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a cone held, a bowl, cherries or toppings.
 - **Archetype:** cute
 
-### Sundormouse (2 of 2) · Ice, Normal
+### Sundormouse (2 of 3) · Ice, Normal
 - **Concept:** a dormouse that is a soft-serve with a waffle-cone spike tail.
 - **Rejected ideas:** dormouse + ice lolly; dormouse + sleeping bag (worn).
 - **Mix:** dormouse + soft-serve and waffle cone
@@ -711,6 +721,17 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Colours:** vanilla cream and waffle brown; accent ice blue.
 - **Avoid:** a scoop ball like Scoopsy, sprinkles all over, toppings, upright.
 - **Archetype:** fast
+
+### Sorbeast (3 of 3) · Ice, Normal
+- **Concept:** a full-grown soft-serve dormouse that stopped sleeping through the cold and hunts in it.
+- **Name options:** Sorbeast (picked), Glaciermouse (too close to Glaciatee/Glaciammoth), Conequake.
+- **Rejected ideas:** an ice-crystal ridge on the back (read as a generic ice lizard); a cracked glaze shell with cone spikes (busy, lost the dormouse).
+- **Mix:** dormouse + sorbet + sabre fangs
+- **Look:** A big, broad, low-prowling dormouse, its body swirled vanilla cream and ice-blue soft-serve with a curling frosted mane. Two long ice-blue sabre fangs, hooked waffle-cone claws, and a long waffle-cone tail ending in a spiked cone club.
+- **Face:** narrowed brown eyes, pink blush and nose, a fierce frown.
+- **Colours:** vanilla cream and ice blue; accent waffle brown.
+- **Avoid:** toppings, sprinkles, an upright stance, a snow-globe or crystal-armour look.
+- **Archetype:** tough
 
 ## 22. Clinkpede line: centipede + saw chain (found: scrapyards and old mines)
 **Ability link:** a looping charge that saws through anything in its path.
