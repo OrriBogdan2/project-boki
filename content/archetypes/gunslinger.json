@@ -7,12 +7,12 @@
 	"weight": "medium",
 	"body": {"size": 0.941, "chest": 1.0, "hit_r": 0.411, "hit_h": 1.89, "body_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
-	"clip": {"lines": {"dash": "Tap to skid, hold to slide; you keep firing through both.", "lmb": "Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.", "rmb": "Launcher shot: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.", "e": "Stand still 0.6s, then a beam fires through walls; its recoil shoves you back.", "x": "Mark a zone at the cursor: a shell lands there 1.6s later and burns.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}, "holds": ["lmb"]},
+	"clip": {"lines": {"dash": "Tap to skid, hold to slide; you keep firing through both.", "lmb": "Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.", "rmb": "Coin toss: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.", "e": "Stand still 0.6s, then your palm fires a beam through walls; its recoil shoves you back.", "x": "Mark a zone at the cursor: a shell lands there 1.6s later and burns.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}, "holds": ["lmb"]},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
-	"fantasy": "The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"fantasy": "The green-fire rifle skirmisher. Flicks a gold coin off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long lance of light from her open palm.",
 	"howto": ["Play: mid-range rifle; slide with {dash} while shooting.", "Combo: {secondary} past a foe to shove them back, then shoot.", "Avoid: standing still, except to charge {signature}."],
 	"silhouette": "the long scarf streaming behind, the brass ammo strap across a narrow black top, the gold coin on her choker and the six-barrel brass minigun for a right forearm",
-	"card": {"role_word": "Rifleman", "loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.", "dash": "Tap to skid, hold to slide further; keep shooting throughout.", "passive": "Knocking a hunter down returns Slipstep; landed abilities give lifesteal.", "rmb": "Shoot a charge that Dazes; hitting a wall blasts a cone back.", "e": "Stand still 0.6s, then fire a beam through walls and everything.", "x": "A shell lands at your cursor after 1.6s, then burns the patch.", "weapons": {"quill_rifle": "Full-auto rifle; Dazed foes take 90% more."}, "chips": {"rmb": ["22 hit", "16 cone"], "e": ["24 dmg"], "x": ["24 dmg"]}},
+	"card": {"role_word": "Rifleman", "loop": "Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts.", "dash": "Tap to skid, hold to slide further; keep shooting throughout.", "passive": "Knocking a hunter down returns Slipstep; landed abilities give lifesteal.", "rmb": "Flick a coin that Dazes; hitting a wall blasts a cone back.", "e": "Stand still 0.6s, then fire a beam from your palm through walls.", "x": "A shell lands at your cursor after 1.6s, then burns the patch.", "weapons": {"quill_rifle": "Full-auto rifle; Dazed foes take 90% more."}, "chips": {"rmb": ["22 hit", "16 cone"], "e": ["24 dmg"], "x": ["24 dmg"]}},
 	"signature": "quill_rifle",
 	"resource": {
 		"id": "fever",
@@ -26,7 +26,7 @@
 	},
 	"passive": {
 		"name": "Hot Streak",
-		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast, Palm Lance) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold)."
 	},
 	"dash": {
 		"id": "slipstep",
@@ -48,9 +48,9 @@
 	},
 	"rmb": {
 		"delivery": "projectile",
-		"name": "Burr Charge",
+		"name": "Coin Blast",
 		"card_range": "burr.range",
-		"short": "Burr",
+		"short": "Coin",
 		"icon": "gunslinger_rmb",
 		"col": "#c8f560",
 		"cooldown": 6.5,
@@ -70,7 +70,7 @@
 			"wall_daze": 0.6
 		},
 		"variants": {
-			"tap": "Tap the ability key: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
+			"tap": "Tap the ability key: she flicks a gold coin off her thumb on the press. The coin flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
 			"full": "Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone."
 		},
 		"sockets": {
@@ -82,9 +82,9 @@
 	},
 	"e": {
 		"delivery": "burst",
-		"name": "Longneedle",
+		"name": "Palm Lance",
 		"card_range": "range",
-		"short": "Needle",
+		"short": "Lance",
 		"icon": "gunslinger_e",
 		"col": "#eaffa8",
 		"cooldown": 11.5,
@@ -98,7 +98,7 @@
 		"rattle_k": 0.2,
 		"shave": 0.2,
 		"shave_rank3": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires from her open palm through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",

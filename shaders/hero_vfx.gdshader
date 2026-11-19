@@ -35,6 +35,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
+uniform float nose = 0.0;    // M_BOLT: the share of the strip over which it opens out of a point at A (0: full width from A)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool clean_streak = false;  // M_RIBBON "streak": a clean tracer (hot head, tail thins and cools, no burn-away)
@@ -280,6 +281,10 @@ vec4 bolt(vec2 uv) {
 	float thin = core_w > 0.0 ? core_w : (jag > 0.0 ? 0.07 : 0.16);
 	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
 	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
+	if (nose > 0.0) {
+		off /= mix(0.12, 1.0, smoothstep(0.0, nose, uv.x));      // a beam out of a hand: thin at A, the full strip by `nose`
+		reach *= 1.0 - smoothstep(0.8, 1.0, off);                // and its edge soft, the strip's own edge never seen
+	}
 	float fade = 1.0 - smoothstep(0.45, 1.0, life);
 	float core = (1.0 - smoothstep(thin * 0.5, thin, off)) * reach * fade;
 	float halo = (1.0 - smoothstep(thin, thin * 4.0, off)) * reach * fade * 0.6;

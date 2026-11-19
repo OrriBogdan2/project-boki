@@ -210,8 +210,8 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
 [gunslinger.mp4](gunslinger.mp4)
 
 Still differs:
-- RMB Burr Charge: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
-  112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
+- RMB Coin Blast (was Burr Charge): a gold coin flicked from her free hand on the press (owner, 11-17; before
+  that a launcher shot) along a fixed 10.5 m lane, no hold lane (owner item 112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
   still sticks and blows the cone (the "always procs in the air" bug); `ext/vex-rmb-1111` makes it a dud.
 - Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Longneedle 11.5 vs 12 / 10,
   Cinderfall 42 vs 55 (gap 10, owner call).

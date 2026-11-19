@@ -573,6 +573,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("jag", float(layer.get("jag", 0.0)))
 	mt.set_shader_parameter("core_w", float(layer.get("core", 0.0)))
+	mt.set_shader_parameter("nose", float(layer.get("nose", 0.0)) / span.length())  # (m from A to the full width)
 	var cam := get_viewport().get_camera_3d()
 	var view := -cam.global_basis.z if cam else Vector3.DOWN
 	var side := span.cross(view).normalized()
