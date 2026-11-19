@@ -123,6 +123,7 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
+	KitWindup.drop_all(self)
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled

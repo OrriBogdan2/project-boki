@@ -30,3 +30,11 @@ static func broken(k: ArchKit, slot: String) -> void:
 	k.windups.erase(slot)
 	if k.h.is_local():
 		Sfx.play(BROKEN, null, BROKEN_DB, 0.04)
+
+
+## Every wind-up sound of the kit stops, with no tick (ArchKit.drop_holds: a merge, a rescue, being out).
+static func drop_all(k: ArchKit) -> void:
+	for slot: String in k.windups:
+		for handle: int in k.windups[slot]:
+			Sfx.cut(handle)
+	k.windups.clear()

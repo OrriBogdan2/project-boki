@@ -15,6 +15,7 @@ const SLOTS := {
 
 var c: RefCounted  # the match audio check (ok)
 var team0 := 0  # the mate's own team (Meeko's call needs it on hers for a moment)
+var home := Vector3.ZERO  # where the caster stands for every case (a drift would walk them off an edge)
 
 
 func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
@@ -22,7 +23,10 @@ func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
 	team0 = mate.team
 	var was := [P.cls, P.arch, P.ctrl]
 	P.ctrl = "local"  # the caster is you (the tick is yours), and no bot brain presses keys
+	home = P.pos
 	if P.kin != null:
+		if P.kin.rescue_on:
+			KinDowned.stop(P.kin, P, "drop")  # (a rescue under way drops every hold, the Quake Fist's too)
 		P.kin.pos = P.pos + Vector3(KIN_AWAY, 0, 0)
 	for arch: String in SLOTS:
 		await _case(m, P, mate, arch, String(SLOTS[arch]))
@@ -32,6 +36,9 @@ func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
 
 func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> void:
 	P.stun_t = 0.0
+	P.pos = home
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	var k: ArchKit = P.ak
