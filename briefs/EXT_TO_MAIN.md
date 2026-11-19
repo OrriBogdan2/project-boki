@@ -10361,3 +10361,4 @@ READY ext/p10-port-1118 e2ebeea6c (P10 movement/glide port: Gil Ground Swim 4.5 
 READY ext/p07-port-1118 5a7d649b2218 (P07 port: tut-wide-cam framing per starter in --tutorial-fight-check, driver wall-kick fix, fight check 11 FAIL on main -> 0; PR via gh-outbox)
 READY ext/sfx-extract-cues-port 958d0df411 (PR #227: merged main 2ee0e648d3; nightmare-check red was a flake, 7/7 green)
 READY ext/p08-port-1118 9d758744f5 (P08 round 2: full-map labels never overprint, sentence labels wrap, one Materials chip, ui-simplify word cuts; PR via gh-outbox)
+READY ext/hunter-review-check 9b5a410e43 (hunter_mesh_check --review: fix-vs-live renders, black/holes/loose/silhouette/clips; tools only, no game change)
