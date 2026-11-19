@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+"""coord-relaunch: record coord background launches, relaunch the ones the low-memory reaper killed.
+
+  coord-relaunch wrap LABEL -- CMD...   run CMD in the foreground as its own process group; records START and DONE
+                                        (use as the body of a background shell: `coord-relaunch wrap tick -- coord-tick &`)
+  coord-relaunch launch LABEL -- CMD... detach (setsid) a `wrap`; prints id and pid; output in launch-logs/<id>.log
+  coord-relaunch [run] [--all] [--dry-run]
+                                        scan launches.tsv; relaunch entries whose process group is gone with no DONE line,
+                                        only when available memory > 10 GB; one per run (--all: one at a time, with a pause)
+  coord-relaunch drop ID                mark an entry DONE (rc=dropped) so it is never relaunched
+  coord-relaunch list                   show entries and state
+
+launches.tsv (tab separated, newest last; \\ \\t \\n escaped in fields):
+  START  iso  id  label  pgid  starttime_ticks  cwd  cmd  [from=<old id>]
+  DONE   iso  id  label  rc
+  RELAUNCHED iso old_id label new_id
+It never kills anything. When available memory < 8 GB it also logs the top 5 RSS users to LOG.md (at most every 10 min).
+Env: COORD_DIR (default /home/boki/coord), RELAUNCH_MIN_GB=10, LOW_GB=8, SETTLE_SECS=60, COORD_FAKE_AVAIL_GB (tests).
+"""
+import fcntl, hashlib, os, signal, subprocess, sys, time
+
+D = os.environ.get("COORD_DIR", "/home/boki/coord")
+TSV, LOG = f"{D}/launches.tsv", f"{D}/LOG.md"
+MIN_GB, LOW_GB = float(os.environ.get("RELAUNCH_MIN_GB", 10)), float(os.environ.get("LOW_GB", 8))
+SETTLE = float(os.environ.get("SETTLE_SECS", 60))
+ME = os.path.abspath(sys.argv[0])
+
+
+def esc(s):
+    return str(s).replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
+
+
+def unesc(s):
+    out, i = [], 0
+    while i < len(s):
+        if s[i] == "\\" and i + 1 < len(s):
+            out.append({"t": "\t", "n": "\n"}.get(s[i + 1], s[i + 1]))
+            i += 2
+        else:
+            out.append(s[i])
+            i += 1
+    return "".join(out)
+
+
+def now():
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def append(path, line):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(line.rstrip("\n") + "\n")
+
+
+def rec(*fields):
+    append(TSV, "\t".join(esc(x) for x in fields))
+
+
+def log(msg):
+    append(LOG, f"{now()} coord-relaunch {msg}")
+
+
+def avail_gb():
+    if "COORD_FAKE_AVAIL_GB" in os.environ:
+        return float(os.environ["COORD_FAKE_AVAIL_GB"])
+    for ln in open("/proc/meminfo"):
+        if ln.startswith("MemAvailable:"):
+            return int(ln.split()[1]) / 1048576  # same number as `free` "available"
+    return 0.0
+
+
+def proc_stat(pid):
+    """(pgrp, starttime, state) or None."""
+    try:
+        s = open(f"/proc/{pid}/stat").read()
+        f = s[s.rindex(")") + 2:].split()
+        return int(f[2]), int(f[19]), f[0]
+    except (OSError, ValueError):
+        return None
+
+
+def start_ticks(pid):
+    st = proc_stat(pid)
+    return st[1] if st else 0
+
+
+def group_alive(pgid, started):
+    """True if any live process is in group pgid (and not a pid-reuse stranger started before the wrapper)."""
+    for p in os.listdir("/proc"):
+        if p.isdigit():
+            st = proc_stat(p)
+            if st and st[0] == pgid and st[2] != "Z" and st[1] >= started:
+                return True
+    return False
+
+
+def entries():
+    ents, closed = {}, {}
+    if not os.path.exists(TSV):
+        return []
+    for ln in open(TSV):
+        f = [unesc(x) for x in ln.rstrip("\n").split("\t")]
+        if f[0] == "START" and len(f) >= 8:
+            ents[f[2]] = dict(id=f[2], iso=f[1], label=f[3], pgid=int(f[4]), st=int(f[5]), cwd=f[6], cmd=f[7])
+        elif f[0] == "DONE" and len(f) >= 5:
+            closed[f[2]] = "DONE rc=" + f[4]
+        elif f[0] == "RELAUNCHED" and len(f) >= 5:
+            closed[f[2]] = "RELAUNCHED as " + f[4]
+    for i, e in ents.items():
+        e["state"] = closed.get(i) or ("running" if group_alive(e["pgid"], e["st"]) else "DEAD")
+    return list(ents.values())
+
+
+def new_id(label):
+    return hashlib.sha1(f"{time.time_ns()}{label}{os.getpid()}".encode()).hexdigest()[:8]
+
+
+def cmd_wrap(label, argv, cwd=None, cmd=None, frm=None, eid=None):
+    try:
+        os.setpgid(0, 0)  # own process group: pgid == our pid, children inherit it
+    except OSError:
+        pass
+    cwd, eid = cwd or os.getcwd(), eid or new_id(label)
+    cmd = cmd if cmd is not None else " ".join(__import__("shlex").quote(a) for a in argv)
+    rec("START", now(), eid, label, os.getpid(), start_ticks(os.getpid()), cwd, cmd, *(["from=" + frm] if frm else []))
+    child = subprocess.Popen(["bash", "-c", cmd], cwd=cwd)
+
+    def fwd(sig, _):  # wrapper told to stop: pass it to our own child, record nothing (so it counts as killed)
+        child.send_signal(sig)
+        os._exit(128 + sig)
+
+    for s in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+        signal.signal(s, fwd)
+    rc = child.wait()
+    rec("DONE", now(), eid, label, rc)
+    return rc
+
+
+def cmd_launch(label, argv, cwd=None, cmd=None, frm=None):
+    os.makedirs(f"{D}/launch-logs", exist_ok=True)
+    eid = new_id(label)
+    args = [sys.executable, ME, "_wrap", eid, label, frm or "", cwd or os.getcwd(), cmd if cmd is not None else
+            " ".join(__import__("shlex").quote(a) for a in argv)]
+    out = open(f"{D}/launch-logs/{eid}.log", "ab")
+    p = subprocess.Popen(args, stdout=out, stderr=out, stdin=subprocess.DEVNULL, start_new_session=True)
+    return eid, p.pid
+
+
+def top5():
+    r = subprocess.run(["ps", "-eo", "pid,user,rss,args", "--sort=-rss"], capture_output=True, text=True).stdout
+    rows = []
+    for ln in r.splitlines()[1:6]:
+        pid, user, rss, args = ln.split(None, 3)
+        rows.append(f"{pid} {user} {int(rss) / 1048576:.1f}GB {args[:70]}")
+    return "; ".join(rows)
+
+
+def lowmem_note(a):
+    stamp = f"{D}/.relaunch-lowmem"
+    if os.path.exists(stamp) and time.time() - os.path.getmtime(stamp) < 600:
+        return
+    open(stamp, "w").close()
+    log(f"LOWMEM avail={a:.1f}GB (<{LOW_GB:g}) top5 RSS: {top5()}")
+
+
+def cmd_run(all_=False, dry=False):
+    a = avail_gb()
+    if a < LOW_GB and not dry:
+        lowmem_note(a)
+    dead = [e for e in entries() if e["state"] == "DEAD"]
+    if not dead:
+        print(f"nothing to relaunch (avail {a:.1f} GB)")
+        return 0
+    print(f"{len(dead)} dead: " + ", ".join(f"{e['id']}:{e['label']}" for e in dead))
+    for n, e in enumerate(dead):
+        a = avail_gb()
+        if a <= MIN_GB:
+            print(f"hold: avail {a:.1f} GB <= {MIN_GB:g} GB, {len(dead) - n} left")
+            return 0
+        if dry:
+            print(f"would relaunch {e['id']} {e['label']}: {e['cmd'][:80]}")
+            continue
+        if not os.path.isdir(e["cwd"]):
+            print(f"skip {e['id']}: cwd {e['cwd']} gone")
+            continue
+        nid, pid = cmd_launch(e["label"], None, cwd=e["cwd"], cmd=e["cmd"], frm=e["id"])
+        rec("RELAUNCHED", now(), e["id"], e["label"], nid)
+        log(f"RELAUNCHED {e['label']} (old {e['id']} pgid {e['pgid']} -> new {nid} pid {pid}; avail {a:.1f} GB) cmd: {e['cmd'][:100]}")
+        print(f"relaunched {e['label']} as {nid} pid {pid}")
+        if not all_:
+            return 0
+        time.sleep(SETTLE)  # let it ramp up before judging memory again
+    return 0
+
+
+def main(av):
+    c = av[0] if av else "run"
+    if c == "_wrap":
+        _, eid, label, frm, cwd, cmd = av
+        return cmd_wrap(label, None, cwd=cwd, cmd=cmd, frm=frm or None, eid=eid)
+    if c in ("wrap", "launch") and "--" in av:
+        i = av.index("--")
+        label, argv = " ".join(av[1:i]) or "unlabeled", av[i + 1:]
+        if not argv:
+            sys.exit("no command")
+        if c == "wrap":
+            return cmd_wrap(label, argv)
+        print("launched id=%s pid=%d" % cmd_launch(label, argv))
+        return 0
+    if c in ("run", "--all", "--dry-run"):
+        rest = av[1:] if c == "run" else av
+        return cmd_run("--all" in rest, "--dry-run" in rest)
+    if c == "drop" and len(av) == 2:
+        for e in entries():
+            if e["id"] == av[1]:
+                rec("DONE", now(), e["id"], e["label"], "dropped")
+                return 0
+        sys.exit("no such id")
+    if c == "list":
+        for e in entries():
+            print(f"{e['id']}\t{e['state']}\t{e['label']}\t{e['cmd'][:60]}")
+        return 0
+    sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
