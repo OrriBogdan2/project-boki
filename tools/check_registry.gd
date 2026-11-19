@@ -833,6 +833,7 @@ const CHECKS := {
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],  # MapDetail: default vs hold
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],  # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
+	"--zone-next-shots": ["res://tools/zone_next_shots.gd", "zone_next_shots", null],  # GPU, --shots-dir=
 	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],  # --shots-dir=<dir>
 	"--map-hover-check": ["res://tools/map_hover_check.gd", "map_hover_check", null],      # MapHover
 	"--map-clear-shots": ["res://tools/map_clear_shots.gd", "map_clear_shots", null],      # --shots-dir=<dir>

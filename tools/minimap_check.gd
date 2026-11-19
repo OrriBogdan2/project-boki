@@ -5,6 +5,8 @@ extends RefCounted
 ##   3. the draw code gates only kinds MapDetail lists, and every detail kind is gated somewhere
 ##   4. in a match: the nearest exit and an awake lair matter, a far exit and a dormant lair do not
 ##   5. the full map's key (MapKey) lists exactly the kinds on the map now, and the minimap never draws it
+##   6. the zone clock under the minimap: "Closing in 0:30" before the tide moves, the time left while it
+##      does, empty once it holds
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
@@ -22,6 +24,7 @@ func run(main: Node) -> void:
 	_kinds()
 	_source()
 	await _match(main)
+	await _zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -107,3 +110,20 @@ func _key(m: Match) -> void:
 	ok(not gated.contains("MapKey"), "the minimap (hud.gd) never draws the key")
 	var full := FileAccess.get_file_as_string("res://scripts/ui/full_map.gd")
 	ok(full.contains("MapKey.draw"), "the full map draws the key")
+
+func _zone(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.set_process(false)
+	var start := Heart.r("tide_start_s")
+	var held := start + Heart.r("tide_close_s")
+	m.sess_t0 = 60.0 - m.time
+	ok(HeartHud.zone_line(m) == "Closing in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = start + 75.0 - m.time
+	ok(HeartHud.zone_line(m) == "Closing  %d:%02d left" % [int(held - start - 75.0) / 60, int(held - start - 75.0) % 60],
+		"while it closes: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = held + 5.0 - m.time
+	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")
+	m.queue_free()
+	print("MINIMAP CHECK ZONE DONE, failures: ", bad)
