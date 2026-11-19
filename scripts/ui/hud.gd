@@ -158,7 +158,7 @@ func tip(text: String, near := "") -> void:
 	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
-const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
+const MSG_FIGHT_S := 3.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
 const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
 
 ## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
@@ -1328,14 +1328,11 @@ func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
 
 ## Who sees a rival's name on their plate (HudPlate draws it).
-const NP_NAME_NEAR := 9.0       # a rival this close shows their name
-const NP_HOVER_PX := 46.0       # ... or the mouse within this of their plate
+const NP_HOVER_PX := 46.0       # the mouse within this of a rival's plate shows their name
 
-## Does this hunter's plate show their name? Allies always; rivals when hovered or close, or down.
+## Does this hunter's plate show their name? Allies always; rivals only when hovered, or down.
 func _np_show_name(sp: Vector2, h: Hunter) -> bool:
 	if m.player == null or h.team == m.player.team or h.downed:
-		return true
-	if m.player.flat_dist(h) < NP_NAME_NEAR:
 		return true
 	return c.get_local_mouse_position().distance_to(sp) < NP_HOVER_PX
 

@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to;
+##   5. in a fight only URGENT lines show (FIGHT_SHOWN, none past FIGHT_LIFE) and the rest wait for the fight to end;
 ##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
@@ -122,15 +122,17 @@ func _fight(host: Control) -> void:
 	for t in ["a", "b"]:
 		lane.push(t, Color.WHITE, MsgLane.HIGH)
 	lane.push("hint", Color.WHITE, MsgLane.NORMAL, 6.0)
-	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN,
-		"a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
+	lane.push("down", Color.WHITE, MsgLane.URGENT)
+	lane._process(0.5)
+	ok(str(lane.texts()) == str(["down"]) and lane.waiting() == 3,
+		"a fight: only the urgent line shows, three wait (%s, %d)" % [str(lane.texts()), lane.waiting()])
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(not lane.texts().has("a"), "a fight: a line goes after %.1fs" % MsgLane.FIGHT_LIFE)
-	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(lane.texts().has("hint"), "a fight: a hint keeps its own life (%s)" % str(lane.texts()))
-	lane.clear()
+	ok(lane.texts().is_empty(), "a fight: the urgent line goes after %.1fs and nothing else takes its row" % MsgLane.FIGHT_LIFE)
 	lane.fight = false
+	lane._process(0.5)
+	ok(lane.texts().size() == MsgLane.MAX_SHOWN and lane.waiting() == 1,
+		"the fight is over: the waiting lines show, %d at a time (%s)" % [MsgLane.MAX_SHOWN, str(lane.texts())])
+	lane.clear()
 
 # ------------------------------------------------------------------ 6. one lane everywhere
 func _wiring() -> void:
