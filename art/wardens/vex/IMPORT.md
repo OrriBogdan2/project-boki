@@ -58,22 +58,25 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
 
-## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 3): arm-to-body contact split, weights per side
-Live (v95, 11-15) welds the left hand/forearm to the hip and thigh, and the arms to the torso sides, with shared vertices, so the
-re-derived weights drag hip skin after the hand (black webs from hip to hand in drink, cheer, fusion, glide, x, emote...).
-Fix (scripts: /home/boki/gens/hunter-fix-vex-1118/retry3/tool/, `fix2.py` then `prune.py`):
-- Faces are split into arm side and body side by their own vertex weights (row level, so the gun sleeve's existing seam to the
-  belly skin stays as live). Below y 1.33 m the vertices both sides share are duplicated (372 left, 40 right). No face is deleted,
-  no vertex moves: positions, UVs, normals, colours, rig, clips and textures are as live.
-- Arm-side copies keep only arm bones, body-side copies only body bones; weights that changed by >15 % are diffused over their
-  own side (3857 verts). The coin keeps its live weights (it is a child of hand.L and every clip keys it).
-- The openings get small fan caps (420 new triangles, flat colour of the nearest skin/cloth texel), centred inside the body
-  (winding test) and pruned to those not seen at rest from 14 directions; rims are inset 1 mm so no welded edge has >2 faces.
-- Rest pose renders: 0 px differ from live full body, 6-8 px of 480k at 2.2x zoom (Blender workbench, 4 sides).
-- Edges >= 8 mm stretched over 3x 1.005 % -> 0.112 %; worst 10.16x -> 6.86x; edges growing over 10 cm 286 -> 37;
-  hunter_mesh_check stretched_tris (worst clip) 524 -> 44.
-- Left as live: the skin fan that sticks out 20 cm from the outer left thigh at rest (now rides on thigh.L instead of being
-  torn between thigh and hand), and the gun sleeve's seam to the belly (sleeve rigid on forearm.R as live).
+## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 3): hand-to-hip contact split, weights per side
+Live (v95, 11-15) welds the left hand/forearm to the hip and thigh with shared vertices, so the re-derived weights drag hip skin
+after the hand (black webs from hip to hand in drink, cheer, fusion, glide, x, emote, stance...).
+Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry3/tool/: `YMAX=1.10 YMAXR=1.33 CAPMIN=2 fix2.py live.glb out.glb`):
+- Faces are put on an arm side or a body side by their own vertex weights (row level, so the gun sleeve's existing seam to the
+  belly skin stays as live). Where both sides share a vertex (left side below 1.10 m, right side below 1.33 m) it is duplicated
+  (591 rows). No face is added or deleted (60095 tris as live); no position, UV, normal, colour, bone, clip or texture changes.
+- Arm-side copies keep only arm bones, body-side copies only body bones (ramped in over 10 cm at the zone top); changed weights
+  are diffused over their own side. The coin keeps its live weights (child of hand.L, keyed by every clip). The gold coin hip
+  chain stays on the body: it takes the weights of the nearest trouser skin (live had it 20-80 % on the hand).
+- No caps: caps hidden at rest showed as shards in idle (tested), and the split zone is kept below the jacket hem so the idle
+  and stance look stays as live (a higher zone left a jagged edge at the left waist in idle).
+- Rest pose renders: 0 px differ from live (Blender workbench, 4 sides full body; 2 px of 480k at 2.2x zoom).
+- Edges >= 8 mm stretched over 3x 1.005 % -> 0.281 %; edges growing over 10 cm 286 -> 114; hunter_mesh_check stretched
+  tris (worst clip) 524 -> 172, no new warning; stretch_check worst 10.16 -> 9.25 (28 clips better, 15 slightly worse).
+- Known change in idle: the left hand now hangs where the idle clip puts hand.L; live smears it onto the hip.
+- Left as live: the skin fan that sticks out 20 cm from the outer left thigh at rest (keeps its live weights: on the thigh
+  alone it showed as spikes in idle and stance, on the hand it floats), the gun
+  sleeve's seam to the belly (sleeve rigid on forearm.R), the upper-arm-to-torso blend above 1.10 m.
 Earlier weights-only attempts (no split) did not beat live: hard split 119x edges, smoothing 2.18 % of edges over 3x. The
 audit's "5.9 % of all edges" counts sub-8 mm edges too; those are not noise for the eye (a 5 mm edge growing to 20 cm is a
 needle), so absolute growth (cm) is reported next to the >= 8 mm ratio.
