@@ -143,12 +143,11 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range **Not determinable**: Mini Nuke frames f29-f45 (dummy ~5 bh = 9 m away) and f95-f111 (empty ground) land at the cursor, and no cast was made at the cursor's maximum, so 14 stays |
 | Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | reach match; angle **Not determinable**: the one slam (frames 0154-0158) hit a dummy dead centre at 2.4 bh, no foe off-centre, so neither a cone nor a lane can be told apart; 70 stays |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
-| Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) · **owner** |
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] · **open** [?] |
 | Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] · **open** [?] |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) · **owner** |
-| Kael | RMB air slam disc, reach | 2.4, 0.8 m ahead (straight drop; was 2.2 at the cursor) | 1.2 bh (2.16), cursor to ~5 | differ · **owner** (11-10 down slam, ext/jugg-downslam); the check still pins 2.2 ±0.22 (see the re-audit) |
+| Kael | RMB air slam disc, reach | **2.4**, 0.8 ahead (straight down) | 1.2 bh (2.16), cursor to ~5 | owner 11-10 down slam (ext/jugg-downslam), not a gap |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not determinable (no clip pays out past the throw; 0305-0320: at most 5-6 bh, let go before a limit) | range match; tether max **not determinable**, 24 m ours (clips: docs/heroes/juggernaut.md "Tether length") |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) · **open** [?] (ext/kael-chain-length re-checked, no data) |
