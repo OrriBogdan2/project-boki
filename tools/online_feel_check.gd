@@ -72,7 +72,7 @@ func _host() -> void:
 	var proxy := root.path_join("tools/online_feel_proxy.py")
 	pids.append(OS.create_process("python3", [proxy, str(port + 100), str(port), str(LAG_MS)]))
 	ok(await _connect(port), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --online-feel-check=guest --of-port=%d > '%s' 2>&1" % [
+	var cmd := "cd '%s' && exec %s --headless -- --online-feel-check=guest --of-port=%d > '%s' 2>&1" % [
 		root, GODOT, port + 100, dir.path_join("guest.log")]
 	pids.append(OS.create_process("/bin/sh", ["-c", cmd]))
 	var t0 := Time.get_ticks_msec()
@@ -106,7 +106,7 @@ func _host() -> void:
 func _finish() -> void:
 	Net.lobby_emit("of", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	for p in pids:
+	for p in pids:   # the proxy also exits on its own when this game is gone (tools/online_feel_proxy.py)
 		if OS.is_process_running(p): OS.kill(p)
 	print("OFEEL DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

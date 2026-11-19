@@ -7,7 +7,7 @@ Local input latency is a separate job; this is only what the net adds.
 ## How it was measured
 - Two real headless games over the relay (as `--displace-net-check`): the host runs the relay in-process and
   watches; the actor connects through `tools/online_feel_proxy.py`, a userspace UDP proxy that holds every
-  packet 100 ms each way (no root here, so no netem; the proxy is the stand-in and removes nothing from the box).
+  packet 100 ms each way (no root here, so no netem; the proxy is the stand-in and removes nothing from the box). The proxy exits by itself when its parent game is gone, on SIGTERM, or after 20 min (`tools/test_online_feel_proxy.py`), so a killed or timed-out check cannot leave it holding a pipe.
 - The actor presses as Vex (gunslinger), Kael (juggernaut) and Neve (rimewright), 5 times per case. All clocks are
   this machine's wall clock, so one press is followed on both games and at the relay.
 - **Architecture note:** the relay only forwards. Each game owns its own hunter, so there is no server-confirmed
