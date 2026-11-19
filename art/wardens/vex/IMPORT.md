@@ -58,11 +58,11 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
 
-## Mesh-tearing fix 11-19 (ext/hunter-fix-vex-1118, partial)
-The shipped mesh tore under animation: the hand rests on the hip, and pants, chain and hand shared weights (stretch
-share >3x edges 5.8 %, worst 88x, hunter_mesh_check 524 stretched tris). Fix: no remodel, rig data only.
-1. Deleted the bind-pose needle fan at the gun sleeve (347 thin triangles) and the flat claw flaps at the left hip (1330).
-2. Stripped arm and gun bones from the pants, leather and ammo chain below the waist (coin keeps its weights).
-3. Re-labelled weights so neighbouring vertices move together, then gave each triangle still over 3x one weight set
-   (its vertices duplicated, so the surface parts like a seam instead of stretching): 2276 triangles, 3853 new vertices.
-Skeleton, bone names, clips and textures are unchanged. Not done: waist cracks still show black in run and lmb.
+## Tearing audit 11-19 (ext/hunter-fix-vex-1118): weights-only fix did not beat live
+Live glb kept unchanged. Measured with the repo's own edge rule (rest edge >= 8 mm, tools/stretch_check.gd): 1.0 % of
+edges stretch over 3x, 12.4 % over 1.3x, worst 10.2x; the 5.9 % figure from the audit counts sub-8 mm edges and is noise.
+The tearing sits where the left hand is fused to the hip (live blends hand/thigh 50/50 there) and in the gun-sleeve fan
+(rigid, 12-22 cm triangles). Tried without deleting or cutting anything: welding seam copies, local weight search,
+stripping arm weights from lower-body skin and the reverse, weight smoothing. Each lowers some numbers and raises
+others (hard split: 119x edges and +31 % black pixels; smoothing: 3 % of edges over 3x). A clean result needs the
+contact separated in the mesh (cut plus cap) or a re-scan of that region, not weights.
