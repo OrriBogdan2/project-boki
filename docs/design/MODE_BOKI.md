@@ -13,14 +13,14 @@ mode's harder difficulties.
   tiers with species in each, and each tier's gate is above the one before it. The legendaries are the rare kin
   (`Data.is_rare`), and their roll is under 30%.
 
-## This is a seed, not live yet
+## Wired behind a flag, off by default
 
-No spawn reads the table yet, so nothing in the game changes:
+`"live": false` in `content/rules/mode_boki.json` is the switch. While it is off nothing in the game changes:
 - Expedition still spawns every non-legendary species at every difficulty (`Data.common_kin`).
 - Garden visitors still come from every common species that has a rigged model.
 - Each boss still drops its own egg when it is killed.
 
-Wiring the table into spawning is a separate task, once the owner approves the split below.
+Flip it to `true` once the owner approves the split below, and `ModeBoki.offer` cuts each pool to its mode's species whose tier gate is open: Expedition wild kin (`Match` wild spots, `SpawnPlan._spawn_rare`) by the tier index, garden visitors (`GardenVisitor.pick`) by the zones open. `--mode-boki-check` asserts both states.
 
 ## How it was seeded
 
@@ -28,7 +28,7 @@ Nothing in today's data says which Boki is rarer, so the seed follows four rules
 
 | Mode | Species | How the tiers were picked | What the gate counts |
 |---|---|---|---|
-| Expedition: Hollow Crown | 29 | The 6 starters plus the unrigged species. Tier by adult size (`content/kin_home/*.json` `size.kg`): 9 kg or less is COMMON, 30 kg is RARE, 60 kg is VERY RARE. | `Data.TIERS` index: 0 The Meadow, 1 Dusk Isles, 2 The Hollow. Dusk Isles already promises "rarer Boki". |
+| Expedition: Hollow Crown | 29 | The 6 starters plus the unrigged species. Tier by adult size (`content/kin/*.json` `size.kg`): 9 kg or less is COMMON, 30 kg is RARE, 60 kg is VERY RARE. | `Data.TIERS` index: 0 The Meadow, 1 Dusk Isles, 2 The Hollow. Dusk Isles already promises "rarer Boki". |
 | Heart Raid (prototype) | 5 | A dark set that fits the Heart and the Blight: the unrigged shadow, lunar, tempest and one venom species. Tier by the same size rule. | The raid's difficulty level. The mode has no levels yet. |
 | Garden visitors | 13 | Today's visitor pool (rigged, non-starter, non-legendary). Tier by the zone the species' theme belongs to: Bramblebank (open from the start) is COMMON, Glasswater and Cinderstep are RARE, Hushwood and Ridge are VERY RARE. | Garden zones open: 1, 2 and 3. |
 | Legendaries | 3 | Cairnback, Hivara and Zephyrak, listed under Expedition with a 20% chance per match (DECISIONS 2026-11-09). This is not a tier. | n/a |

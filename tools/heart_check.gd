@@ -4,10 +4,13 @@ extends RefCounted
 ##   1. the site and Gate, the Blight's tide and its wall, the Heart asleep until wake_s, the Heartspark
 ##      charging, taking it, the carrier's slow and reveal, dropping on down, the Gate only for the carrier, the
 ##      minor bundle, no second Heartspark, a carrier leaving by uplink drops it, the major bundle at home, "ht"
-##      requests.
+##      requests, the two once-per-save tips (Heart.tip_for: charged and free, carrying it).
 ##   2. the Gate takes the carrier's squad within gate_take_r (a downed mate too), not a mate farther off.
 ##   3. the final seat: a squad alone fills the ring, a standing rival stalls it, an empty ring drains, full
 ##      takes that squad with major pay and the islands fall end_after_final_s later.
+##   3b. no stall to the end (spec LIMITED_WAY_OUTS risk 4): a Wisp (downed) or dead Hunter neither holds nor
+##      blocks the ring, a beaten squad's lone Hunter stalls it only while standing in it, and once no holder
+##      stands in it a squad alone in it takes it over at once.
 ##   4. the last squad standing: FINAL at once, filling rush_k faster.
 ##   5. the Heart opening over a spark still charging or carried (the carrier can still take the early seat).
 ##   6. Net: the host's "ht" events through JSON into a client game mirror the state and take its own Hunters.
@@ -103,6 +106,7 @@ func run(main: Node) -> void:
 	_early_seat(main)
 	_gate_squad(main)
 	_final(main)
+	_no_stall(main)
 	_rush(main)
 	_late(main)
 	_net(main)
@@ -135,9 +139,18 @@ func _early_seat(main: Node) -> void:
 	var p: Hunter = m.player
 	# ---- the tide
 	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
+	var last := Heart.last_close()
+	m.time = last - m.sess_t0
+	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale) and last == float(rl["final_s"]),
+		"the tide's last close is The Crown's ring, as the final seat opens (%.0f m)" % Heart.tide_r(m))
+	m.time = last + float(rl["end_close_s"]) * 0.5 - m.sess_t0
+	var mid := Heart.tide_r(m)
+	ok(mid < float(rl["tide_r1"]) * H.ways_scale and mid > float(rl["end_r"]) * H.ways_scale,
+		"the end phase closes on past it (%.0f m halfway)" % mid)
 	m.time = 5000.0
-	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
-		"the tide has closed to its smallest ring")
+	var fin := Heart.tide_r(m)
+	ok(is_equal_approx(fin, float(rl["end_r"]) * H.ways_scale) and fin > float(rl["final_r"]),
+		"then holds on the final circle round the Heart ring (%.0f m)" % fin)
 	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * 0.5 - m.sess_t0
 	var half := Heart.tide_r(m)
 	ok(half < float(rl["tide_r0"]) * H.ways_scale and half > float(rl["tide_r1"]) * H.ways_scale,
@@ -153,8 +166,8 @@ func _early_seat(main: Node) -> void:
 	m.time = t_keep
 	ok(with_tide > without or with_tide >= BlightDir.LVL_MAX - 1.0e-4,
 		"BlightDir reads the tide (%.2f vs %.2f at the same spot)" % [with_tide, without])
-	ok(Heart.tide_heat(m, far) > 0.0 and Heart.tide_heat(m, H.site) == 0.0,
-		"squads outside the ring heat the Blight sooner")
+	ok(Heart.tide_out(m, far) > 0.0 and Heart.tide_out(m, H.site) == 0.0,
+		"squads outside the ring are out in the tide (BlightNests stirs a nest near them on a clock)")
 	# ---- the wall in the world and the next ring on the maps (on m2: a step mid-tide wakes its Heart)
 	var W: Heart = m2.heart
 	m2.time = m.time
@@ -181,11 +194,13 @@ func _early_seat(main: Node) -> void:
 	ok(H.state == Heart.S.CHARGING, "a Heartspark starts charging when the Heart wakes")
 	_run(m, float(rl["charge_s"]) * 0.5)
 	ok(H.state == Heart.S.CHARGING and H.charge > 0.0, "still charging halfway")
+	ok(H.tip_for(p).is_empty(), "no Heartspark tip while it charges")
 	_put(m, p, H.site + Vector3(3, 0, 0))
 	_hold_f(m, p, 3.0)
 	ok(H.carrier == null, "an uncharged Heartspark can't be taken")
 	_run(m, float(rl["charge_s"]) * 0.5 + 1.0)
 	ok(H.state == Heart.S.READY, "the Heartspark is charged")
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_spark", "charged and free: the take-it tip")
 	# ---- taking it
 	_put(m, p, H.site + Vector3(6, 0, 0))
 	_hold_f(m, p, 3.0)
@@ -195,12 +210,15 @@ func _early_seat(main: Node) -> void:
 	ok(H.carrier == null, "a short hold doesn't take it")
 	_hold_f(m, p, float(rl["pickup_hold_s"]) + 0.3)
 	ok(H.state == Heart.S.CARRIED and H.carrier == p, "holding interact takes the Heartspark")
+	var other: Hunter = m.hunters.filter(func(x): return x != p)[0]
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_carry" and H.tip_for(other).is_empty(),
+		"the carrier gets the reach-the-Gate tip, nobody else a tip")
 	ok(is_equal_approx(float(p.get_meta("heart_slow", 0.0)), float(rl["carrier_slow"])),
 		"the carrier is slowed by %.0f%%" % (float(rl["carrier_slow"]) * 100.0))
 	p.set_meta("heart_slow", 0.0)
-	var k0 := p._chase_mod(Vector2(1, 0))
+	var k0 := p._move_mult()
 	p.set_meta("heart_slow", float(rl["carrier_slow"]))
-	ok(is_equal_approx(p._chase_mod(Vector2(1, 0)), k0 * (1.0 - float(rl["carrier_slow"]))),
+	ok(is_equal_approx(p._move_mult(), k0 * (1.0 - float(rl["carrier_slow"]))),
 		"that slow is in the move speed")
 	m.step(Match.DT)
 	ok(p.reveal_t > 0.0, "the carrier is revealed")
@@ -270,7 +288,7 @@ func _early_seat(main: Node) -> void:
 	# ---- the home half (the major bundle: egg and materials)
 	var major: Dictionary = H3.pay(m3.hunters[1], Heart.HOW_FINAL)
 	var egg_sp := String(major["egg"].get("sp", ""))
-	ok(Data.is_rare(egg_sp), "the major bundle has a rare egg (%s)" % egg_sp)
+	ok(Data.egg_pool().has(egg_sp), "the major bundle has a first-form egg (%s)" % egg_sp)
 	ok(major["goods"].has("starstone"), "...and starstone")
 	Incubator.ensure()
 	var eggs0 := Incubator.count()
@@ -418,6 +436,58 @@ func _final(main: Node) -> void:
 	ok(String(m.result.get("how", "")) == Heart.HOW_FINAL or m.player.team != 0, "...by the Heart ring")
 	var after := float(rl["end_after_final_s"])
 	ok(m.length <= m.time + after + 0.01, "the islands fall %.0f s later" % after)
+	ok(H.refused == 0, "no refused edges")
+	_free(m)
+
+# ------------------------------------------------------------------ 3b. no stall by a beaten squad
+## Holds each Hunter at its ring spot (k = index) for secs (the other squads' Boki knock them about).
+func _stand(m: Match, spots: Dictionary, secs: float) -> void:
+	for i in int(secs / 0.25):
+		for h in spots:
+			_ring(m, h, spots[h])
+		_run(m, 0.25)
+
+func _no_stall(main: Node) -> void:
+	var m := _match(main, 8105, 2)
+	var H: Heart = m.heart
+	for h in m.hunters:
+		_far(m, h)
+	_to(m, float(rl["final_s"]) + 0.1)
+	var a: Array = _squad(m, 0)
+	var b: Array = _squad(m, 1)
+	var c: Array = _squad(m, 2)
+	m.knock(a[0], null, {})
+	_ring(m, a[0], 0)
+	_run(m, 1.0)
+	ok(a[0].downed and H.final_team < 0 and H.final_prog == 0.0, "a Wisp alone in the ring neither holds nor fills it")
+	_stand(m, {b[0]: 1}, 2.0)
+	ok(H.final_team == 1 and H.final_prog > 0.0, "a Wisp in the ring doesn't block a rival squad taking it")
+	c[1].out = true
+	_ring(m, c[1], 3)
+	ok(not H.in_ring(c[1]), "a dead Hunter is never in the ring")
+	var held := H.final_prog
+	_stand(m, {b[0]: 1, c[0]: 2}, 2.0)
+	ok(absf(H.final_prog - held) < 0.01, "a beaten squad's lone Hunter stalls it while standing in the ring")
+	var a2 := TAU * 2 / 6.0
+	var edge: Vector3 = H.site + Vector3(cos(a2), 0, sin(a2)) * (float(rl["final_r"]) + 1.5)
+	_put(m, c[0], edge)
+	_stand(m, {b[0]: 1}, 1.0)
+	ok(not H.in_ring(c[0]) and H.final_prog > held,
+		"...and not from just outside it (%.1f m out)" % c[0].flat_dist(H.site))
+	_far(m, b[0])
+	_stand(m, {c[0]: 2}, 1.0)
+	ok(H.final_team == 2 and H.final_prog > 0.0 and H.final_prog < held,
+		"no holder standing in the ring: the squad alone in it takes it over from nothing")
+	_far(m, c[0])
+	_stand(m, {b[0]: 1}, 1.0)
+	var rate := 1.0 / float(rl["final_hold_s"])
+	ok(H.final_team == 1 and absf(H.final_prog - rate) < 0.02,
+		"the lone Hunter steps out: the squad in the ring takes it over at once (%.2f), no drain to wait"
+		% H.final_prog)
+	m.knock(b[0], null, {})
+	_ring(m, b[0], 1)
+	_stand(m, {c[0]: 2}, 1.0)
+	ok(H.final_team == 2 and H.final_prog > 0.0, "a downed holder doesn't hold it against a standing rival")
 	ok(H.refused == 0, "no refused edges")
 	_free(m)
 

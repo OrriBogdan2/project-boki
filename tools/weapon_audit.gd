@@ -61,8 +61,6 @@ func run(main: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
-	for id in wardens:
-		WardenGlb.set_model(String(id), true)
 	var cells := {}
 	if "--compose" in OS.get_cmdline_user_args():
 		for id in wardens:

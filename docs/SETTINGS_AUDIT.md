@@ -11,6 +11,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `dash_hold` | Gameplay: "Hold Shift for the long dash" | Hold-dashes are per hunter now (`inp["dash_down"]`, Slide, Rampage). The option only stretched the old non-hero dash into an "ex" dash. Its read in `match.gd` and the stretch in `hunter.gd` are gone. |
 | `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own ability is ordered by you (G), and the Merge is on T. A switch that lets the Boki spend that cooldown on its own fights all of that, so it is off for everyone. |
 | `hud_opacity` | (no row in the menu) | Nothing has read it since the HUD rework. |
+| `warden_models` | Video: per Warden "3D model" switch (Hunter models) | The 3D model is the only look a Warden with a .glb has; the procedural model stays for Wardens without one. Design variants are picked with `--warden-variant=` only. |
 
 ## Kept, with where they now live
 
@@ -31,13 +32,20 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
-| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
+| `master` | Main > Volume | `settings.gd` (`Settings.BUSES`) | |
+| `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
+| `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
+| `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
-| `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
-| `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
+| `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
+| `fullscreen` | Main | `settings.gd` | |
+| `vsync`, `max_fps` | Video > Display | `settings.gd` | |
+| `quality` | Main (Graphics quality) | `settings.gd` | `quality_found`, `video_v` stay internal |
+| `msaa`, `shadows` | Video > Quality | `settings.gd` | |
 | `show_fps` | Video > Quality | `overlay.gd` | |
-| `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `ui_scale` | Main (Interface size) | `settings.gd` | |
+| `text_size` | Accessibility > Readability | `settings.gd` (UI.set_text_size) | 100/125/150%; old configs load at 100% |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
 
@@ -49,5 +57,17 @@ the X ultimate is the main session's (ultbond).
 
 ## Tab order
 
-Gameplay, Controls, Camera, Audio, Video, Accessibility, Demo. The Esc menu's Settings entry opens
-Gameplay (or the last tab you used); its Controls entry opens Controls.
+The first page, **Main**, shows only what most players change: Graphics quality, Fullscreen, Interface size and Master
+volume (moved here from Video, Accessibility and Audio; the keys are the same, so no saved value moves). **Controls** is
+next, with Moving and Fighting binds first and the rest behind "More keys". Everything else sits behind a "More..."
+tab: Gameplay, Camera, Audio (the other volumes), Video, Accessibility, Demo. The Esc menu's Settings entry opens
+Main (or the last tab you used); its Controls entry opens Controls. No key was renamed, so there is no migration;
+`--settings-trim-check` asserts that every key still has a row, that each row saves to `settings.cfg` and that a fresh
+load keeps every value. Labels: "Anti-aliasing" is "Smooth edges", "Frame rate limit" is "Frame rate cap", "Frame rate"
+is "Show frame rate", "Height cues" is "Show heights clearly".
+
+**Search.** A box under the tab bar (`SettingsSearch`) lists the rows of every tab, behind "More..." and "More keys"
+too, whose label holds the typed text. The hits are the rows the tabs build (no copies), each with its tab's name beside
+it. Clicking a tab or pressing Esc clears the search (Esc with an empty box leaves Settings). `--settings-trim-check`
+covers the filter; `--settings-size-check` holds the panel's size inside the safe area at 720p and two ultrawides, with
+and without a search.

@@ -54,7 +54,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	parent.add_child(mi)
 	return mi
 
-static var _spheres := {}
+static var _spheres := MeshCache.new()
 
 ## A smooth sphere. The segment count scales with size (so big shapes stay round in close-ups and
 ## tiny dots stay cheap); `seg` is a floor. Cached, so every eye of every hunter shares one mesh.
@@ -64,23 +64,23 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 		sg = maxi(sg, int(clampf(r * 170.0, 16.0, 48.0)))
 	sg += sg % 2
 	var key := "%.4f|%d" % [r, sg]
-	if _spheres.has(key):
-		return _spheres[key]
+	var hit = _spheres.read(key)
+	if hit:
+		return hit
 	var s := SphereMesh.new()
 	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
-	_spheres[key] = s
-	return s
+	return _spheres.keep(key, s)
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
 	var key := "cap|%.4f|%.4f" % [r, h]
-	if _spheres.has(key):
-		return _spheres[key]
+	var hit = _spheres.read(key)
+	if hit:
+		return hit
 	var c := CapsuleMesh.new()
 	c.radius = r; c.height = h; c.radial_segments = int(clampf(r * 380.0, 20.0, 48.0)); c.rings = 16
-	_spheres[key] = c
-	return c
+	return _spheres.keep(key, c)
 
-static var _rbox := {}
+static var _rbox := MeshCache.new()
 
 ## A box with softly rounded edges and corners (a real fillet with several steps, so it shades and
 ## outlines cleanly instead of reading as a cube). Cached by size, so it costs nothing after the first.
@@ -92,11 +92,11 @@ static func box(x: float, y: float, z: float) -> Mesh:
 		b.size = Vector3(x, y, z)
 		return b
 	var key := "%.4f|%.4f|%.4f" % [x, y, z]
-	if _rbox.has(key):
-		return _rbox[key]
+	var hit = _rbox.read(key)
+	if hit:
+		return hit
 	var am := rounded_box(Vector3(x, y, z), r, 4 if mn > 0.1 else (3 if mn > 0.03 else 2))
-	_rbox[key] = am
-	return am
+	return _rbox.keep(key, am)
 
 ## A rounded box: every face is a grid whose outer rows are bent around the edges and corners on a
 ## radius r, with `steps` grid lines per 45 degrees of the bend.
@@ -167,14 +167,15 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
 	return MeshArrays.build([arrs])
 
-static var _lathes := {}
+static var _lathes := MeshCache.new()
 
 ## A smooth solid of revolution around Y: `profile` is (radius, height) from the bottom up. Points
 ## with radius 0 close the shape on the axis. Normals come from the profile's own curve, so it
 ## shades as one soft surface. Cached by `key` when one is given.
 static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMesh:
-	if key != "" and _lathes.has(key):
-		return _lathes[key]
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var n := profile.size()
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var idx: Array = []
 	var total := 0.0
@@ -202,8 +203,7 @@ static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMes
 			var b0 := (i + 1) * (seg + 1) + j
 			_quad(verts, norms, idx, a0, a0 + 1, b0 + 1, b0)
 	var am := _commit(verts, norms, uvs, idx)
-	if key != "": _lathes[key] = am
-	return am
+	return _lathes.keep(key, am) if key != "" else am
 
 ## A smooth curve through the given points (Catmull-Rom), `sub` steps per span. The ends are kept.
 static func smooth_curve(pts: PackedVector2Array, sub := 4) -> PackedVector2Array:
@@ -248,7 +248,7 @@ static func _fillet(poly: Array, r: float, steps: int) -> Array:
 			out.append(c + Vector2(cos(ang), sin(ang)) * rr)
 	return out
 
-static var _cyls := {}
+static var _cyls := MeshCache.new()
 
 ## A plain cylinder (open ends possible), for beams and columns of light.
 static func plain_cyl(top: float, bottom: float, h: float, seg := 14) -> CylinderMesh:
@@ -266,8 +266,9 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 		c.top_radius = top; c.bottom_radius = bottom; c.height = h; c.radial_segments = maxi(seg + 2, 8); c.rings = 1
 		return c
 	var key := "%.4f|%.4f|%.4f|%d" % [top, bottom, h, radial]
-	if _cyls.has(key):
-		return _cyls[key]
+	var hit = _cyls.read(key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var poly: Array = []
 	poly.append(Vector2(bottom, -hh) if bottom > 0.0005 else Vector2(0.0, -hh))
@@ -278,8 +279,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 	var loop := _fillet(poly, bev, 5)
 	var prof := _right_half(loop)
 	var am := lathe(prof, radial)
-	_cyls[key] = am
-	return am
+	return _cyls.keep(key, am)
 
 ## The x >= 0 half of a closed, counter-clockwise outline that is mirror-symmetric about x = 0,
 ## from where it crosses the axis at the bottom to where it crosses back at the top.
@@ -315,8 +315,9 @@ static func _right_half(loop: Array) -> PackedVector2Array:
 ## bottom, a little fuller a third of the way down (a muscle, a sleeve). Centred like a capsule.
 static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "limb|%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	# bottom cap
@@ -332,10 +333,9 @@ static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := smooth_curve(pts, 3)
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := lathe(prof, int(clampf(maxf(r0, r1) * 380.0, 24.0, 40.0)))
-	_lathes[key] = am
-	return am
+	return _lathes.keep(key, am)
 
-static var _eyes := {}
+static var _eyes := MeshCache.new()
 
 ## A glossy creature eye in one mesh: a dark eyeball with a big coloured iris (lighter toward the
 ## bottom, like a painted anime eye) and a pupil, all facing -Z. Coloured by vertex, so it squashes
@@ -343,7 +343,7 @@ static var _eyes := {}
 static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMesh:
 	var key := "%.4f|%s" % [r, iris.to_html()]
 	if _eyes.has(key):
-		return _eyes[key]
+		return _eyes.mesh(key)
 	var sm := SphereMesh.new()
 	sm.radius = r; sm.height = r * 2.0; sm.radial_segments = 40; sm.rings = 24
 	var arrs := sm.get_mesh_arrays()
@@ -366,15 +366,16 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 	arrs[Mesh.ARRAY_TANGENT] = null
 	var am := ArrayMesh.new()
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	_eyes[key] = am
+	_eyes.put(key, am)
 	return am
 
 ## A coat skirt or tunic: flares from r_top down to r_bot over h, with soft cloth folds that deepen
 ## toward the hem (their normals follow the folds, so they catch the light like painted drapery).
 static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07) -> ArrayMesh:
 	var key := "skirt|%.4f|%.4f|%.4f|%d|%.3f" % [r_top, r_bot, h, folds, amp]
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var seg := 72
 	var rows := 12
 	var hh := h * 0.5
@@ -413,16 +414,16 @@ static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07)
 		if fn.dot(Vector3.DOWN) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 		else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, idx)
-	_lathes[key] = am
-	return am
+	return _lathes.keep(key, am)
 
-static var _crystals := {}
+static var _crystals := MeshCache.new()
 
 ## A cut crystal: a faceted prism with a pointed top, flat-shaded on purpose so it glints.
 static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 	var key := "%.4f|%.4f|%d" % [r, h, sides]
-	if _crystals.has(key):
-		return _crystals[key]
+	var hit = _crystals.read(key)
+	if hit:
+		return hit
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var y0 := -h * 0.5; var y1 := h * 0.18; var y2 := h * 0.5
@@ -450,8 +451,7 @@ static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 			st.set_normal(-fn)
 			st.add_vertex(p)
 	var am := st.commit()
-	_crystals[key] = am
-	return am
+	return _crystals.keep(key, am)
 
 ## A glossy material: metal, gems, polished things catch a crisp highlight.
 static func shiny(c: Color, gloss := 0.6) -> ShaderMaterial:
@@ -588,7 +588,8 @@ static func _pivot(torso: Node3D, nm: String, at: Vector3) -> Node3D:
 		torso.add_child(n)
 	return n
 
-static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
+## The class emblem on the glider pack (light: a chevron, medium: a diamond, heavy: a shield).
+static func class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material, m_trim: Material) -> void:
 	var m_cls := class_mat(cls)
 	var at := Vector3(0, 0.655, 0.27 * bw)
 	var tilt := Vector3(-1.05, 0, 0)          # lying back on the rolled wing, facing up and back
@@ -606,13 +607,13 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 ## ribs, broad at the shoulders and rounded over into the neck. About 0.62 tall, centred.
 static func torso_mesh() -> ArrayMesh:
 	var key := "torso"
-	if _lathes.has(key):
-		return _lathes[key]
+	var hit = _lathes.read(key)
+	if hit:
+		return hit
 	var pts := PackedVector2Array([Vector2(0.0, -0.31), Vector2(0.13, -0.305), Vector2(0.2, -0.27), Vector2(0.218, -0.17), Vector2(0.205, -0.05),
 		Vector2(0.212, 0.05), Vector2(0.236, 0.14), Vector2(0.248, 0.205), Vector2(0.236, 0.255), Vector2(0.19, 0.293), Vector2(0.11, 0.312), Vector2(0.0, 0.318)])
 	var am := lathe(smooth_curve(pts, 4), 56)
-	_lathes[key] = am
-	return am
+	return _lathes.keep(key, am)
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
 ## class's own) the silhouette and gear, and the look the person inside it: a player's look
@@ -649,126 +650,34 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var oi: int = OUTFIT_KEYS.find(outfit)
 	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
 	if um: hero_col = Unmasked.colour(appearance)      # the shroud's colour
-	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
-	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
-	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
-	# colour set in HSV from the outfit's hue so nothing goes muddy; the team colour is kept off the
-	# cloth and only marks the key shapes
-	var coat_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.1, 0.06, 0.7), clampf(hero_col.v * 0.6, 0.36, 0.6))
-	var shirt_col := Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.45, 0.04, 0.3), 0.9)
-	var pants_col := Color.from_hsv(fposmod(coat_col.h + 0.02, 1.0), 0.28, 0.2)
-	var m_body := toon(coat_col)
-	var m_shirt := toon(shirt_col)
-	var m_pants := toon(pants_col)
-	var m_leather := toon(Color("6b4330").lerp(hero_col, 0.06))
-	var skin_c: Color = lk["skin_col"]
-	var hair_c: Color = lk["hair_col"]
-	var m_skin := toon(skin_c)
-	var m_hair := toon(hair_c)
-	var m_dark := toon(Color("2b2a33"))
-	var m_acc := toon(Color.from_hsv(team_col.h, minf(1.0, team_col.s * 1.08), team_col.v * 0.94))
-	var m_gold := shiny(Color("dcaa48"), 0.65); m_gold.set_shader_parameter("glow", 0.08)
-	var m_gun := shiny(Color("4a4d5c"), 0.5)
-	var m_hero := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 1.05, 0.06, 0.8), clampf(hero_col.v * 0.85, 0.45, 0.85)))
-	var m_trim := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.05, 0.75), clampf(hero_col.v * 0.95, 0.55, 0.95)))
-	var m_steel := shiny(Color("b0b2b8").lerp(hero_col, 0.06), 0.6)      # dark gunmetal: the highlights and the fresnel do the work
-	var m_glow := toon(hero_col.lerp(Color.WHITE, 0.35), false, 1.4)
-	var m_glow_soft := StandardMaterial3D.new()
-	m_glow_soft.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m_glow_soft.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m_glow_soft.albedo_color = Color(hero_col.lerp(Color.WHITE, 0.5), 0.28)
-	m_glow_soft.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	var m_bone := toon(Color("efe3c8"))
-	var m_wood := toon(Color("7a5236"))
-	var m_fur := toon(Color("4a3428").lerp(hero_col, 0.08))
-	var m_feather := toon(Color("f6f0e2"))
-	var m_cloak := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.06, 0.6), clampf(hero_col.v * 0.5, 0.3, 0.5)))
-	var m_hat := toon(Color("6e4a30").lerp(hero_col, 0.1))
-	for mm in [m_body, m_shirt, m_hair, m_acc, m_hero, m_trim, m_cloak, m_hat, m_feather]:
-		(mm as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
-	m_skin.set_shader_parameter("sss", 0.45)
-	m_hair.set_shader_parameter("gloss", 0.35)
-	m_leather.set_shader_parameter("gloss", 0.15)
-	m_bone.set_shader_parameter("gloss", 0.3)
-	for mm in [m_body, m_shirt, m_pants, m_acc, m_hero, m_trim, m_cloak, m_feather]:
-		painted(mm, 1, 0.3, 0.3, 0.26)
-	painted(m_leather, 2, 0.26, 0.26, 0.24); painted(m_hat, 2, 0.26, 0.24, 0.24); painted(m_dark, 2, 0.18, 0.2, 0.2)
-	painted(m_skin, 4, 0.0, 0.0, 0.18)     # no part gradient on skin: the jaw, nose and ears would show seams
-	painted(m_hair, 5, 0.3, 0.24, 0.24); painted(m_fur, 5, 0.3, 0.3, 0.3)
-	painted(m_gun, 3, 0.12, 0.1, 0.1); painted(m_gold, 3, 0.1, 0.0, 0.0); painted(m_steel, 3, 0.14, 0.12, 0.14); m_steel.set_shader_parameter("sky_ao", 0.12)
-	painted(m_bone, 0, 0.3, 0.2, 0.2); painted(m_wood, 2, 0.2, 0.2, 0.2)
-	m_acc.set_shader_parameter("gloss", 0.12)
+	# a Warden drawn from its .glb hides this body: only its rig (the pivots drive the .glb's bones) and the pieces
+	# the .glb keeps are built, not the body's meshes (HunterBody)
+	var rig_only := WardenGlb.will_dress(arch)
+	var mats: Dictionary = HunterBody.gun_mats(team_col) if rig_only else HunterBody.mats(hero_col, team_col, lk)
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = lk["build"]
 	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0)) * float(Arch.body(arch).get("build", 1.0))
-	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var fem := int(lk["gender"]) == 0
-	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]
-	# legs swing from the hip: a tapered thigh, a knee guard, and a boot in one piece hanging from
-	# the knee (so the leg can bend), with a cuff that overlaps the trousers
+	# legs swing from the hip, the boot hangs from the knee (so the leg can bend)
 	var knees := {}
 	for sx in [-1.0, 1.0]:
 		var leg := Node3D.new(); leg.name = "LegL" if sx < 0.0 else "LegR"
 		leg.position = Vector3(0.11 * sx * bw, 0.44, 0)
 		legs.add_child(leg)
-		part(leg, limb(0.108 * bw, 0.068 * bw, 0.34, 0.16), m_pants, Vector3(0, -0.12, 0))
 		var knee := Node3D.new(); knee.name = "Knee"; knee.position = Vector3(0, -0.2, 0)
 		leg.add_child(knee)
 		knees["L" if sx < 0.0 else "R"] = knee
-		if not heavy_gear:
-			part(knee, sphere(0.068, 14), m_pants, Vector3(0, 0.0, 0.0))      # (plate knee cops cover it on heavies)
-			part(knee, HeroKit.dome_plate("kneepad", 0.065, 0.45, 0.8, 0.2, 0.012), m_leather if arch != "thief" else m_dark, Vector3(0, 0.0, -0.045), Vector3.ONE, Vector3(-PI * 0.5 + 0.1, 0, 0))
-		part(knee, HeroKit.boot(boot_k), m_leather, Vector3.ZERO)
-		part(knee, HeroKit.sole(boot_k), m_dark, Vector3.ZERO)
-		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_steel if heavy_gear else (m_trim if arch != "thief" else m_leather), Vector3(0, -0.06, 0.005))
 	legs.scale.y = lk["limbs"] * float(Arch.body(arch).get("legs", 1.0))      # the Warden's leg length
 	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42 * legs.scale.y, 0); rig.add_child(torso)
 	root.set_meta("hip_y", torso.position.y)      # HunterAnim keeps the torso on the legs at this height
 	var chest_w := bw * (0.92 if fem else 1.12) * float(lk["shoulders"])
-	# hips, then the sculpted torso (waist, ribcage, chest or bust, shoulder blades), then the neck
-	# flaring into the shoulders so the head sits on the body, not on a peg
-	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, -0.08), Vector2(0.18, -0.07), Vector2(0.225, -0.02), Vector2(0.22, 0.06), Vector2(0.2, 0.1), Vector2(0, 0.1)]), 3), 40, "hips"),
-		m_pants, Vector3(0, 0.02, 0), Vector3((1.04 if fem else 1.0) * bw, 1.0, bw))
-	part(torso, HeroKit.torso(fem), m_body, Vector3(0, 0.33, 0), Vector3(chest_w, 1.0, bw * 0.9))
-	var nr := 0.072 if fem else 0.088
-	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0.0), Vector2(nr * 2.0, 0.0), Vector2(nr * 1.3, 0.035), Vector2(nr, 0.08), Vector2(nr * 0.98, 0.16), Vector2(0, 0.16)]), 3), 28, "neck%.3f" % nr), m_skin, Vector3(0, 0.58, 0))
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
-	# the glider pack: a rolled wing on a back plate (under whatever the archetype carries)
-	if not um:      # (the Empty's shroud covers its back)
-		part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
-		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-		for sx in [-1.0, 1.0]:
-			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
-	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
-	var hk := HeroKit.head_key(rid, fem)
-	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
-	if rid == "human" and not um:
-		for sx in [-1.0, 1.0]:
-			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
-			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	if um: Unmasked.face(torso, appearance)
-	else: _face(torso, lk, m_dark, m_skin, team_col)
-	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
-	# hood or helm: only what spills out below)
-	var cov := HeroGear.cover(arch, bare)
-	var hair_n := Node3D.new(); hair_n.name = "Hair"; torso.add_child(hair_n)
-	if rid == "human":
-		HeroHair.human(hair_n, int(lk["hair"]), fem, m_hair, hk, cov)
-	else:
-		_race_hair(hair_n, rid, int(lk["hair"]), m_hair, hair_c, skin_c, cov in ["hood", "helm"])
-	_race_parts(torso, rid, m_skin, m_hair, m_dark, skin_c, hair_c, hero_col)
-	var gear := Node3D.new(); gear.name = "Gear"; torso.add_child(gear)
-	# the arms and the gun move together from the shoulders ("Aim"), for recoil, reloads and poses
+	HunterBody.pivots(torso, rid, arch, bw)
+	# the arms and the gun move together from the shoulders ("Aim"), for recoil and poses
 	var aim := Node3D.new(); aim.name = "Aim"; aim.position = Vector3(0, 0.5, 0.0); torso.add_child(aim)
 	var gun := Node3D.new(); gun.name = "Gun"; gun.position = Vector3(0.22, -0.18, -0.18); aim.add_child(gun)
-	# arms: they hang from the shoulders with an elbow and a hand on joints of their own, so HunterAnim
-	# can put the hands on the weapon's grips (solving the elbows) or let them swing free.
-	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
-	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
-	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
-	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
+	# arms hang from the shoulders with an elbow and a hand on joints of their own: ArmXPivot (shoulder) > Elbow > Hand
 	var arms := {}
 	# (archetype body "arms": long arms as its art draws them; HunterAnim solves the same lengths)
 	var arm_k := float(Arch.body(arch).get("arms", 1.0))
@@ -779,18 +688,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 				0.5 * float(Arch.body(arch).get("torso", 1.0)), 0.0)
 		piv.position.x *= float(Arch.body(arch).get("shoulder", 1.0))
 		torso.add_child(piv)
-		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
-		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
 		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position.y = -0.21 * arm_k; piv.add_child(elbow)
-		part(elbow, sphere(0.064, 14), m_body)
-		part(elbow, limb(0.068, 0.05, 0.22, 0.14), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
 		var hand := Node3D.new(); hand.name = "Hand"; hand.position.y = -0.235 * arm_k; elbow.add_child(hand)
-		part(hand, HeroKit.mitten(), m_glove, Vector3(0, 0.0, 0.0), Vector3(hk2, hk2, hk2) * Vector3(1.0, 1.0, 1.0))
-		part(hand, HeroKit.thumb(), m_glove, Vector3(-0.042 * sx * hk2, 0.01, -0.03 * hk2), Vector3.ONE * hk2, Vector3(0, 0, 0.35 * sx))
-		part(hand, HeroKit.cuff(0.062 * hk2, 0.078 * hk2, 0.05), m_glove if heavy_gear else m_leather, Vector3(0, 0.065, 0))
-		if arch == "juggernaut":
-			for k in 3:
-				_spike(hand, m_bone, Vector3((k - 1) * 0.03 * hk2, -0.09 * hk2, -0.05 * hk2), Vector3(0, -0.3, -1.0), 0.014, 0.05)
 		arms[sd] = [piv, elbow, hand]
 	# shoulder pieces hang on their own pivots at the shoulders, which HunterAnim turns part of the
 	# way with the arm, so raised arms never come up through the plate
@@ -800,17 +699,10 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		pd.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
 		torso.add_child(pd)
 		pads["L" if sx < 0.0 else "R"] = pd
-	var ctx := {"torso": torso, "skirt": skirt_n, "gear": gear, "pl": pads["L"], "pr": pads["R"], "arms": arms, "knees": knees, "bw": bw, "cw": chest_w,
-		"fem": fem, "rid": rid, "hk": hk, "bare": bare, "arch": arch, "hero_col": hero_col,
-		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
-			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
-			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
-	if um: Unmasked.dress(ctx, appearance)
-	else: HeroGear.dress(arch, ctx)
-	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
+	gun_parts(gun, weapon, mats["gun"], mats["dark"], mats["acc"])
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
-		part(gun, box(0.06, 0.15, 0.09), m_acc, Vector3(0, -0.13, -0.24), Vector3.ONE, Vector3(0.15, 0, 0), "Mag")
+		part(gun, box(0.06, 0.15, 0.09), mats["acc"], Vector3(0, -0.13, -0.24), Vector3.ONE, Vector3(0.15, 0, 0), "Mag")
 	if not gun.has_node("Muzzle"):
 		var muzzle := Node3D.new(); muzzle.name = "Muzzle"; muzzle.position = Vector3(0, 0.02, -0.75); gun.add_child(muzzle)
 	var shoulder := Node3D.new(); shoulder.name = "Shoulder"; shoulder.position = Vector3(-0.3, 0.8, 0.04); torso.add_child(shoulder)
@@ -828,37 +720,21 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
+		if pc[0] == gset[0]: gmi.name = "Canopy"      # GliderHeat sets its heat on this material
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
-	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
+	ring.material_override = SideRings.mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
 	var head := Node3D.new(); head.name = "HeadPivot"
 	head.position = Vector3(0, 0.68 * float(Arch.body(arch).get("torso", 1.0)), 0)
 	torso.add_child(head)
-	for ch in torso.get_children():
-		if ch is MeshInstance3D and (String(ch.name).begins_with("@") or ch.name == "Head") and (ch as Node3D).position.y > 0.72 and not ch.has_meta("stay"):
-			torso.remove_child(ch)
-			head.add_child(ch)
-			(ch as Node3D).position.y -= 0.68
-	for nd in [hair_n, gear]:
-		torso.remove_child(nd); head.add_child(nd)
-		(nd as Node3D).position.y -= 0.68
-	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
-	# they drive the .glb's bones; "Focus" is kept and drawn)
-	var drop := WardenGlb.will_dress(arch)
-	for nd in [torso, head, hair_n, gear]:
-		merge_static(nd, drop)
-	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
-	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm), drop)
-		merge_static(legs.get_node(nm + "/Knee"), drop)
-	for sd in ["L", "R"]:
-		for nd in arms[sd]:
-			merge_static(nd, drop)
+	if not rig_only:
+		HunterBody.dress({"torso": torso, "legs": legs, "skirt": skirt_n, "pl": pads["L"], "pr": pads["R"], "arms": arms,
+			"knees": knees, "bw": bw, "cw": chest_w, "fem": fem, "rid": rid, "bare": bare, "arch": arch, "hero_col": hero_col,
+			"m": mats, "cls": cls, "um": um, "look": appearance, "lk": lk, "team_col": team_col})
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -913,12 +789,12 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
-	var bulk := float(body.get("bulk", 1.0))
+	var bulk := WardenBulk.apply(root, float(body.get("bulk", 1.0)))     # (a .glb Warden thins its skin instead)
 	var look_k := rs * ck * size_k * float(lk["height"])
-	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.scale = bulk * float(Data.CLASSES[cls]["scale"]) * look_k
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
+	ring.scale = Vector3.ONE / bulk * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -982,7 +858,7 @@ static func _on_head(x: float, y: float, z: float, out := 0.0) -> Vector3:
 ## Each race's own head styles (see HAIR_STYLES): fur for the Vulpin (parted round their ears),
 ## crystals, stone and moss for the Stoneborn, leaves and flowers for Sprigs, crests, frills, horns
 ## and spines for Scalefolk, feathers for Owlets. All in the hair colour.
-static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
+static func race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair_c: Color, skin_c: Color, covered: bool) -> void:
 	var light := toon(hair_c.lightened(0.3)); (light as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)
 	var dark := toon(hair_c.darkened(0.25))
 	match rid:
@@ -1168,7 +1044,7 @@ static func _race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hai
 						_blade(n, m_hair if i % 2 == 0 else light, _on_head(x * 2.0, 0.4, 0.9), Vector3(x, -1.0, 0.35), 0.44 - absf(i - 1.5) * 0.06, 0.08, PI * 0.5, 0.25)
 
 ## What each race adds: ears, tails, wings, snouts, crests, crystals.
-static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
+static func race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Material, m_dark: Material, skin_c: Color, hair_c: Color, hero_col: Color) -> void:
 	match rid:
 		"vulpin":
 			var inner := toon(Color("ffb6bf"))
@@ -1178,7 +1054,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			part(torso, sphere(0.1, 12), toon(skin_c.lightened(0.35)), Vector3(0, 0.79, -0.19), Vector3(1.15, 0.75, 0.9))   # muzzle
 			part(torso, sphere(0.035, 8), m_dark, Vector3(0, 0.81, -0.285))   # nose
 			# the tail: a big brush that sweeps up behind, with a white tip
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.02, 0.26); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			var pts := [[Vector3(0, -0.02, 0.08), 0.11], [Vector3(0.07, 0.07, 0.28), 0.19], [Vector3(0.19, 0.21, 0.46), 0.23], [Vector3(0.31, 0.4, 0.55), 0.19]]
 			for p in pts:
 				part(tail, sphere(float(p[1]), 12), m_hair, p[0])
@@ -1206,7 +1082,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			wing_m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			wing_m.albedo_color = Color(hero_col.lerp(Color("c8ffd8"), 0.5), 0.55)
 			wing_m.cull_mode = BaseMaterial3D.CULL_DISABLED
-			var wings := Node3D.new(); wings.name = "Wings"; wings.position = Vector3(0, 0.5, 0.3); torso.add_child(wings)
+			var wings := torso.get_node("Wings") as Node3D
 			for sx in [-1.0, 1.0]:
 				var wmi := part(wings, sphere(0.26, 12), wing_m, Vector3(0.26 * sx, 0.1, 0.1), Vector3(0.8, 1.9, 0.06), Vector3(1.0, 0.35 * sx, 0.95 * sx))
 				wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -1217,7 +1093,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			for sx in [-1.0, 1.0]:
 				part(torso, sphere(0.02, 6), m_dark, Vector3(0.05 * sx, 0.84, -0.385))
 			# a long tail that tapers down to the ground behind
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.0, 0.24); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			var segs := [[Vector3(0, -0.04, 0.08), 0.11, 0.3], [Vector3(0, -0.16, 0.3), 0.085, 0.3], [Vector3(0, -0.3, 0.52), 0.06, 0.28], [Vector3(0, -0.38, 0.72), 0.035, 0.22]]
 			for sg in segs:
 				part(tail, capsule(float(sg[1]), float(sg[2]) + float(sg[1]) * 2.0), m_skin, sg[0], Vector3.ONE, Vector3(1.05, 0, 0))
@@ -1225,7 +1101,7 @@ static func _race_parts(torso: Node3D, rid: String, m_skin: Material, m_hair: Ma
 			part(torso, cyl(0.0, 0.05, 0.13, 4), toon(Color("f2a24a")), Vector3(0, 0.8, -0.26), Vector3(1.0, 1.0, 0.8), Vector3(-PI / 2 + 0.35, 0, 0))   # beak
 			for sx in [-1.0, 1.0]:
 				part(torso, sphere(0.11, 14), m_hair, Vector3(0.27 * sx, 0.3, 0.05), Vector3(0.3, 1.0, 0.15), Vector3(0.1, 0, -0.25 * sx))   # wing feathers at the sides
-			var tail := Node3D.new(); tail.name = "Tail"; tail.position = Vector3(0, 0.0, 0.26); torso.add_child(tail)
+			var tail := torso.get_node("Tail") as Node3D      # (HunterBody.pivots)
 			for i in 5:
 				var a := (i - 2) * 0.32
 				part(tail, sphere(0.12, 16), m_hair if i % 2 == 0 else toon(hair_c.lightened(0.25)), Vector3(sin(a) * 0.12, -0.1, 0.14), Vector3(0.4, 1.95, 0.11), Vector3(1.0, 0, a))
@@ -1291,8 +1167,9 @@ static func _glider_set(gskin: String) -> Array:
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-## `discard`: those parts are only freed (a body nothing will draw).
-static func merge_static(node: Node3D, discard := false) -> void:
+## `discard`: those parts are only freed (a body nothing will draw). `keep_casts`: casters and
+## non-casters merge apart and keep their setting, so a merge changes no shadow (the farm's props).
+static func merge_static(node: Node3D, discard := false, keep_casts := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1307,9 +1184,10 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		if discard:
 			drop.append(mi)
 			continue
-		var key := _mat_key(mat)
+		var casts := mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var key := _mat_key(mat) + ("|%s" % casts if keep_casts else "")
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "parts": []}
+			groups[key] = {"mat": mat, "parts": [], "casts": casts}
 		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
 			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
@@ -1318,11 +1196,24 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
-		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		if not keep_casts:
+			ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		elif not g["casts"]:
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
 		d.free()
+
+## merge_static on `root` and on every plain node under it (pivots, cradles, shelves).
+static func merge_tree(root: Node3D, keep_casts := false) -> void:
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Node3D and not (n is MeshInstance3D):
+			merge_static(n, false, keep_casts)
+		for ch in n.get_children():
+			stack.append(ch)
 
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
@@ -1344,7 +1235,7 @@ static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 		out.append(arrs)
 	return out
 
-static var _part_y_cache := {}
+static var _part_y_cache := MeshCache.new()
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
 static func bake_part_y(n: Node) -> void:
 	var stack: Array = [n]
@@ -1356,9 +1247,8 @@ static func bake_part_y(n: Node) -> void:
 					and (mi.material_override as ShaderMaterial).shader == TOON \
 					and not (mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_TEX_UV2)):
 				var id := mi.mesh.get_instance_id()
-				if not _part_y_cache.has(id):
-					_part_y_cache[id] = _with_part_y(mi.mesh)
-				mi.mesh = _part_y_cache[id]
+				var baked = _part_y_cache.read(id)
+				mi.mesh = baked if baked else _part_y_cache.keep(id, _with_part_y(mi.mesh))
 		for ch in c.get_children(): stack.append(ch)
 
 ## Sets a toon material's painted structure: its brushwork (see toon.gdshader's `surface`), the
@@ -1395,7 +1285,7 @@ static func m_trim0(c: Color) -> ShaderMaterial:
 ## Eyes, brows and a mouth: small shapes, but they carry a lot of character.
 ## The face on the head: eyes, brows, nose and mouth for the look's expression and gender, sized and
 ## placed by its face factors (MantleLook params: eye_size, eye_shape, brow, nose), and its markings.
-static func _face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
+static func hunter_face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Material, paint: Color) -> void:
 	var face := int(lk["face"])
 	var detail := int(lk["detail"])
 	var skin: Color = lk["skin_col"]
@@ -1764,7 +1654,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
 
-## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
+## A piece of gear lying on the ground: a gem-like token in a rarity halo (LootGlow).
 static func gear_drop(col: Color, rar: int) -> Node3D:
 	var root := Node3D.new()
 	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
@@ -1774,12 +1664,7 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	part(spin, core, toon(col, true, 0.6), Vector3(0, -0.12, 0), Vector3.ONE, Vector3(PI, 0, 0))
 	var t := TorusMesh.new(); t.inner_radius = 0.28; t.outer_radius = 0.33
 	part(spin, t, toon(rc, false, 0.8), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-	var beam := part(root, cyl(0.12, 0.22, 4.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.0, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
-	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
-	root.add_child(ring)
+	LootGlow.attach(root, rar)
 	return root
 
 static func gear_pad(col: Color) -> Node3D:
@@ -1858,19 +1743,19 @@ static func kin_shell(c: Color) -> Node3D:
 	var root := Node3D.new()
 	var mi := part(root, capsule(0.62, 2.0), aura_mat(c, 0.75), Vector3(0, 1.0, 0))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := part(root, flat_quad(2.6), ring_mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
+	var ring := part(root, flat_quad(2.6), SideRings.mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 
 ## A kin. Every species has its own body shape, tail, feet and ears (from its "look" in
-## content/kin_home), a rim of light in its glow colour, a soft aura shell and a few drifting particles,
+## content/kin), a rim of light in its glow colour, a soft aura shell and a few drifting particles,
 ## so you can tell them apart at a glance and see them against busy ground.
 static func kin(species: String, rec := {}) -> Node3D:
 	var sp: Dictionary = Data.KIN[species]
 	var look: Dictionary = sp.get("look", {})
 	var shimmer: bool = rec.get("shimmer", false)
 	var ghost: bool = rec.get("ghost", false)       # brought back by the Soul Shrine: pale and glowing
-	# a shimmer wears its species' own alternate palette (Shiny.palette, hand-picked in content/kin_home)
+	# a shimmer wears its species' own alternate palette (Shiny.palette, hand-picked in content/kin)
 	var glow_c: Color = Shiny.col(species, rec, "glow") if (shimmer or ghost) else sp.get("glow", sp["color"])
 	var body_c: Color = Shiny.col(species, rec, "color")
 	var root := Node3D.new()
@@ -2027,6 +1912,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	pt.name = "Aura"
 	pt.amount = 7
 	pt.lifetime = 1.1
+	ParticleCount.tune(pt)
 	pt.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	pt.emission_sphere_radius = 0.38
 	pt.position = Vector3(0, 0.4, 0)
@@ -2070,6 +1956,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	painted(m_dark, 2, 0.2, 0.2, 0.2)
 	bake_part_y(body_root)
 	Evo.dress(root, rec)
+	GardenAura.dress(root, rec)          # a worn garden aura (Glowmoss Sprig), looks only
 	if shimmer:
 		# a shimmer sparkles a little, all the time
 		for i in 3:
@@ -2145,8 +2032,8 @@ static func air_ring() -> Node3D:
 static func training_yard() -> Node3D:
 	var root := Node3D.new()
 	var wood := toon(Color("8b6d52")); var straw := toon(Color("e2c47a")); var mat := toon(Color("c9604a"))
-	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(1.0, 0.65, -0.6))
-	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(1.0, 0.0, -0.6); root.add_child(dummy)
+	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(0.45, 0.65, -0.55))
+	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(0.45, 0.0, -0.55); root.add_child(dummy)
 	part(dummy, sphere(0.28, 12), straw, Vector3(0, 0.95, 0), Vector3(1, 1.3, 1))
 	part(dummy, sphere(0.16, 10), straw, Vector3(0, 1.45, 0))
 	part(dummy, box(0.7, 0.08, 0.08), wood, Vector3(0, 1.1, 0))
@@ -2158,8 +2045,8 @@ static func training_yard() -> Node3D:
 	var ring_m := toon(Color("f2c84a"))
 	for i in 2:
 		var t := TorusMesh.new(); t.inner_radius = 0.26; t.outer_radius = 0.32
-		part(root, t, ring_m, Vector3(-1.1 - i * 0.6, 0.34, 0.3 - i * 0.2), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
-		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-1.1 - i * 0.6, 0.0, 0.3 - i * 0.2))
+		part(root, t, ring_m, Vector3(-0.95 + i * 0.45, 0.34, 0.45 + i * 0.35), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
+		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-0.95 + i * 0.45, 0.0, 0.45 + i * 0.35))
 	return root
 
 ## The Nesting Nook at home: a flower arbor over a big straw nest with two cushions, where two kin
@@ -2196,18 +2083,14 @@ static func nesting_nook() -> Node3D:
 	part(heart, sphere(0.13, 12), toon(Color("ff5a7a"), false, 0.35), Vector3(0.08, 0.04, 0))
 	part(heart, cyl(0.0, 0.19, 0.24, 4), toon(Color("ff5a7a"), false, 0.35), Vector3(0, -0.1, 0), Vector3(1.0, 1.0, 0.45), Vector3(PI, PI / 4, 0))
 	PropAnim.on(heart, 0.0, 0.05, 2.0)
+	merge_tree(root, true)      # 60 draws to 17: the stones, stalks and flowers share colours
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
-static func nest_egg(c: Color, spot: Color) -> Node3D:
+static func nest_egg(kind: String, glow := 0.0, seam := Color(0, 0, 0, 0)) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(0.42, 0.34, 0.16, 16), toon(Color("c9a46a")), Vector3(0, 0.08, 0))
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	part(shell, sphere(0.26, 16), toon(c.lightened(0.15)), Vector3(0, 0.36, 0), Vector3(0.92, 1.25, 0.92))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(c.r * 1000 + spot.g * 100)
-	for i in 6:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.2, 0.55)
-		part(shell, sphere(0.05, 8), toon(spot), Vector3(cos(a) * 0.22, y, sin(a) * 0.22), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell(kind, 0.65, 0.035, glow, seam))
 	return root
 
 ## The Incubator beside the Nesting Nook: a clay brazier with a copper hood on a round stone hearth,
@@ -2279,19 +2162,13 @@ static func incubator() -> Node3D:
 			part(shelf, straw_ring, straw, Vector3(x, y + 0.04, 0), Vector3(1.0, 0.6, 1.0))
 			var mk := Marker3D.new(); mk.name = "S%d" % ((0 if y < 0.5 else 3) + j); mk.position = Vector3(x, y + 0.03, 0)
 			shelf.add_child(mk)
+	merge_tree(root, true)      # HomeIncubator finds the cradles, pebbles and grates by name only
 	return root
 
-## A small gold Rare Egg for the incubator's shelf and cradle, spotted in the colour of the kin inside.
-static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
+## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.
+static func rare_egg_small(seam: Color, s := 1.0) -> Node3D:
 	var root := Node3D.new()
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	var gold := toon(Color("ffd36a"), true, 0.35)
-	part(shell, sphere(0.26 * s, 16), gold, Vector3(0, 0.3 * s, 0), Vector3(0.9, 1.22, 0.9))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(spot.r * 991 + spot.g * 113 + spot.b * 7)
-	var sm := toon(spot, false, 1.0)
-	for i in 7:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.16, 0.5)
-		part(shell, sphere(0.045 * s, 8), sm, Vector3(cos(a) * 0.215 * s, y * s, sin(a) * 0.215 * s), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell("rare", 0.63 * s, 0.0, 0.2, seam))
 	return root
 
 # ---------------------------------------------------------------- monsters
@@ -2619,18 +2496,14 @@ static func chest_prim() -> Node3D:
 	root.set_meta("mats", [mw, mg])
 	return root
 
-## A dead hunter's deathbox: a squat crate with a glow in its value colour.
-static func deathbox(col: Color) -> Node3D:
+## A dead hunter's deathbox: a squat crate that glows in the rarity of the best thing in it.
+static func deathbox(col: Color, rar: int) -> Node3D:
 	var root := PropSculpt.chest() if Flora.v2() else chest_prim()
 	var own := root.get_node_or_null("Beacon")
 	if own:
-		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
+		root.remove_child(own); own.free()      # a deathbox glows in its loot's rarity, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
-	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.6)
-	ring.material_override = ring_mat(col, 0.1); ring.position.y = 0.04
-	g.add_child(ring)
+	LootGlow.attach(g, rar)
 	# the soul: a little wisp bobbing over the box while a teammate can still bring them back
 	var soul := Node3D.new(); soul.name = "Soul"; soul.position = Vector3(0, 1.3, 0); root.add_child(soul)
 	part(soul, sphere(0.16, 10), glow_mat(Color(0.85, 1.0, 0.95, 0.9)), Vector3.ZERO)
@@ -2725,12 +2598,15 @@ static func revive_beacon() -> Node3D:
 	var root := Node3D.new()
 	var stone := toon(Color("8f9aa0"))
 	var glow := Color("8fffc0")
-	part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
-	part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
-	for i in 4:
-		var a := TAU * i / 4.0 + 0.4
-		part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
-		part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	if ItemArt.add(root, "revive_beacon") == null:    # the sculpted dais and posts; the crystal stays ours
+		part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
+		part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
+		for i in 4:
+			var a := TAU * i / 4.0 + 0.4
+			part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
+			part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	else:
+		ItemArt.beacon_strips(root, toon(glow, false, 0.9))
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var cr := Node3D.new(); cr.position = Vector3(0, 1.7, 0); g.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)
@@ -2752,26 +2628,28 @@ static func shrine() -> Node3D:
 	var stone_l := toon(Color("cfc8bb"))
 	var moss := toon(Color("7fa65a"), false)
 	var glow := Color("8fe3c8")
-	# a two-step hexagonal dais with a carved, glowing inlay
-	if Flora.v2():
-		# (cut stones laid in two rings, a glowing inlay, a carved round altar)
-		ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
-		ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
-		part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
-	else:
-		part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
-		part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
-		part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
-	# three leaning standing stones with moss on top
-	for i in 3:
-		var a := TAU * i / 3.0 + 0.5
-		var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
-		var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
-		part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
-		part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
-		part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
+	# a two-step hexagonal dais with a carved, glowing inlay and three leaning standing stones (sculpted when
+	# art/items/shrine.glb is there; the crystal stays ours: it turns, and hides once the shrine is used)
+	if ItemArt.add(root, "shrine") == null:
+		if Flora.v2():
+			# (cut stones laid in two rings, a glowing inlay, a carved round altar)
+			ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
+			ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
+			part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
+		else:
+			part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
+			part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
+			part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
+		# three leaning standing stones with moss on top
+		for i in 3:
+			var a := TAU * i / 3.0 + 0.5
+			var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
+			var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
+			part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
+			part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
+			part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
 	# the healing crystal floats and turns above the dais
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 1.45, 0); root.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.42, 0.62, 0.42)
@@ -2848,6 +2726,9 @@ static func portal(c: Color) -> Node3D:
 	return root
 
 static func jump_pad(c: Color) -> Node3D:
+	var glb := PropGlb.build("jump_pad", c)      # the 3D model, its plate "Top" in c; else this primitive one
+	if glb:
+		return glb
 	var root := Node3D.new()
 	part(root, cyl(0.7, 0.8, 0.14, 20), toon(Color("3f4456")), Vector3(0, 0.07, 0))
 	var top := part(root, cyl(0.55, 0.55, 0.02, 20), toon(c.darkened(0.25), false, 0.45), Vector3(0, 0.15, 0), Vector3.ONE, Vector3.ZERO, "Top")
@@ -2856,15 +2737,12 @@ static func jump_pad(c: Color) -> Node3D:
 	return root
 
 static func gem() -> Node3D:
-	var root := Node3D.new()
-	var p := PrismMesh.new(); p.size = Vector3(0.28, 0.3, 0.28)
-	var m := toon(Color("7ef0d0"), false, 0.7)
-	part(root, p, m, Vector3(0, 0.15, 0))
-	part(root, p, m, Vector3(0, -0.15, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	return root
+	return ItemArt.gem()
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
+	if ItemArt.add(root, "armor_shard", -0.05, Color.WHITE, 0.3):
+		return root
 	var pm := PrismMesh.new(); pm.size = Vector3(0.22, 0.34, 0.08)
 	var m := toon(Color("7ac8ff"), false, 0.8)
 	part(root, pm, m, Vector3(0, 0.2, 0))
@@ -2872,11 +2750,7 @@ static func armor_shard() -> Node3D:
 	return root
 
 static func tonic() -> Node3D:
-	var root := Node3D.new()
-	part(root, sphere(0.16, 12), toon(Color("8ff0a0"), false, 0.6), Vector3(0, 0.16, 0))
-	part(root, cyl(0.05, 0.06, 0.14, 8), toon(Color("e6f2ea")), Vector3(0, 0.34, 0))
-	part(root, cyl(0.065, 0.065, 0.05, 8), toon(Color("8b6d52")), Vector3(0, 0.43, 0))
-	return root
+	return ItemArt.tonic()
 
 static func seed_bag(c: Color) -> Node3D:
 	var root := Node3D.new()
@@ -3340,7 +3214,6 @@ static func furniture(id: String) -> Node3D:
 	return root
 
 
-## The skyship that carries everyone over the islands at the start of an expedition.
 # ---------------------------------------------------------------- scenery islands
 ## A free-standing floating island for scenery (the title screen, distant backdrops): a grassy top
 ## with a wavy outline, a grass lip, cliffs with rock strata that taper into a jagged spike below.
@@ -3415,6 +3288,7 @@ static func waterfall(width: float, height: float) -> Node3D:
 	root.add_child(mi)
 	var p := CPUParticles3D.new()
 	p.amount = 24; p.lifetime = 2.0; p.preprocess = 2.0
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(width * 0.4, 0.3, 0.3)
 	p.direction = Vector3(0, 1, 0); p.spread = 60.0; p.initial_velocity_min = 0.3; p.initial_velocity_max = 0.8
 	p.gravity = Vector3(0, -0.2, 0)
@@ -3425,32 +3299,6 @@ static func waterfall(width: float, height: float) -> Node3D:
 	root.add_child(p)
 	return root
 
+## The skyship that carries everyone over the islands at the start of an expedition (SkyshipModel).
 static func skyship() -> Node3D:
-	var root := Node3D.new()
-	var wood := toon(Color("7a5236")); var dark := toon(Color("4e3424")); var cloth := toon(Color("f2e6cf"))
-	var stripe := toon(Color("d9604a")); var brass := toon(Color("e0b84a"), true, 0.3)
-	# the balloon
-	part(root, sphere(2.6, 22), cloth, Vector3(0, 4.2, 0), Vector3(1.0, 0.8, 1.9))
-	for i in 3:
-		part(root, cyl(2.08 * (1.0 - absf(i - 1) * 0.18), 2.08 * (1.0 - absf(i - 1) * 0.18), 0.32, 22), stripe, Vector3(0, 4.2, -2.2 + i * 2.2), Vector3(1, 1, 0.82), Vector3(PI / 2, 0, 0))
-	# ribbons running nose to tail over the top, so it reads from the bird's-eye camera too
-	for rz in [-0.42, 0.0, 0.42]:
-		part(root, sphere(2.63, 22), stripe if rz == 0.0 else toon(Color("f2c84a")), Vector3(0, 4.2, 0), Vector3(0.09, 0.84, 1.92), Vector3(0, 0, rz))
-	part(root, sphere(0.5, 12), brass, Vector3(0, 6.3, 0), Vector3(1.0, 0.4, 1.0))
-	# ropes
-	for x in [-1.0, 1.0]:
-		for z in [-1.6, 1.6]:
-			part(root, cyl(0.03, 0.03, 2.4, 6), dark, Vector3(x * 0.9, 2.0, z), Vector3.ONE, Vector3(0, 0, x * 0.25))
-	# the hull
-	part(root, box(2.0, 0.7, 4.4), wood, Vector3(0, 0.35, 0))
-	part(root, box(2.2, 0.18, 4.6), dark, Vector3(0, 0.75, 0))
-	part(root, cyl(0.6, 0.2, 2.0, 12), wood, Vector3(0, 0.35, -2.8), Vector3(1.6, 1, 0.5), Vector3(PI / 2, 0, 0))
-	# propellers at the back
-	for x in [-1.3, 1.3]:
-		var hub := Node3D.new(); hub.name = "Prop%s" % ("L" if x < 0 else "R"); hub.position = Vector3(x, 0.6, 2.4)
-		root.add_child(hub)
-		part(hub, cyl(0.12, 0.12, 0.3, 10), brass, Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-		for b in 3:
-			part(hub, box(0.12, 1.1, 0.04), wood, Vector3.ZERO, Vector3.ONE, Vector3(0, 0, TAU * b / 3.0))
-	part(root, box(0.1, 1.2, 0.8), stripe, Vector3(0, 1.3, 2.3))
-	return root
+	return SkyshipModel.build()

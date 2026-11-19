@@ -8,13 +8,31 @@ extends RefCounted
 static func rules() -> Dictionary:
 	return Content.rules("garden_daily")["away"]
 
-## The lines for the "While you were away" card; `since` is the last arrival's time (0 for the first).
-static func arrive(since: float, now: float) -> Array:
+## Each zone keeps its own last-arrival mark in Save.d["away_zone"], so one zone's arrival never uses up
+## another's gifts and toy training (the shared away_seen only marks the journal).
+## Moves the marks: every open zone without one is seeded from `old` (the shared away_seen before this
+## arrival), then the zone arrived in is set to `now`. Returns the arrival zone's previous mark (never later
+## than `old`: the shared mark is only ever newer, so setting it back, as a save edit does, still counts).
+static func mark(zone: String, old: float, now: float) -> float:
+	var marks: Dictionary = Save.d.get("away_zone", {})
+	for id in GardenZones.ids():
+		if GardenZones.is_open(id) and not marks.has(id):
+			marks[id] = old
+	var since := minf(float(marks.get(zone, old)), old)
+	marks[zone] = now
+	Save.d["away_zone"] = marks
+	return since
+
+## The lines for the "While you were away" card; `since` is the last arrival's time in `zone` (0 for the
+## first). The gifts and toy lines are the zone's own Boki's; the card puts them under the zone's name.
+static func arrive(since: float, now: float, zone: String = "") -> Array:
 	if since <= 0.0 or now <= since:
 		return []
-	var out: Array = _gifts(now - since, now)
+	if zone == "":
+		zone = GardenZones.current()
+	var out: Array = _gifts(now - since, now, zone)
 	if FarmUnlocks.base_mode():
-		out.append_array(_toys(now - since, now))
+		out.append_array(_toys(now - since, now, zone))
 		out.append_array(_patch_overflow(now))
 	return out
 
@@ -22,9 +40,11 @@ static func gift_count(gone_s: float) -> int:
 	var r := rules()
 	return clampi(floori(gone_s / (float(r["gift_every_h"]) * 3600.0)), 0, int(r["gift_max"]))
 
-## Each gift is a snack its Boki's leading lean loves, from a different Boki when there are several.
-static func _gifts(gone_s: float, now: float) -> Array:
-	var roster: Array = Save.d["roster"].filter(func(r): return not KinBox.is_boxed(r))
+## Each gift is a snack its Boki's leading lean loves, from a different Boki when there are several; only
+## from Boki that walk the zone arrived in (never one living in another zone).
+static func _gifts(gone_s: float, now: float, zone: String) -> Array:
+	var walkers := func(r): return not KinBox.is_boxed(r) and GardenZones.walks_in(r, zone)
+	var roster: Array = Save.d["roster"].filter(walkers)
 	var out: Array = []
 	if roster.is_empty():
 		return out
@@ -38,7 +58,7 @@ static func _gifts(gone_s: float, now: float) -> Array:
 	return out
 
 ## Points a Boki trains at a toy on the layout while away: the toy it fancies most, a quarter rate, capped.
-static func _toys(gone_s: float, now: float) -> Array:
+static func _toys(gone_s: float, now: float, zone: String) -> Array:
 	var r := rules()
 	var points := mini(floori(gone_s * float(r["toy_rate"]) / float(r["toy_cycle_s"])), int(r["toy_cap"]))
 	var defs: Dictionary = HomeToys.rules()["toys"]
@@ -48,8 +68,8 @@ static func _toys(gone_s: float, now: float) -> Array:
 	if points <= 0 or owned.is_empty():
 		return out
 	for rec in Save.d["roster"]:
-		if KinBox.is_boxed(rec):
-			continue
+		if KinBox.is_boxed(rec) or not GardenZones.walks_in(rec, zone):
+			continue      # a Boki living in another zone plays at that zone's toys, not these
 		Care.ensure(rec)
 		owned.sort_custom(func(a, b): return HomeToys.weight(rec, a) > HomeToys.weight(rec, b))
 		var stat := String(defs[owned[0]]["stat"])

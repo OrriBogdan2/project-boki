@@ -3,14 +3,17 @@ extends RefCounted
 ## real farm (home.gd _move_kin at 4 steps a second, BaseLife at 10 Hz) with one toy. Two hot tempers and two calm
 ## ones: at least one friend pair and one rival pair form, no state but Nap lasts over 90 s, the fourth Boki's
 ## arrival brings the others over (React), at night the three day Boki nap while the nocturnal Zapple stays up,
-## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map. Never
-## touches the real save.
+## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map; the sleepers
+## breathe and yawn (BokiNapSfx, _nap_sounds). Then nap spots: a tired Boki walks to a free one, its friend lies
+## down beside it, a third takes another. Never touches the real save.
 
 const SIM_SECS := 600.0      # 10 simulated minutes
 const DT := 0.25             # s per farm step (the machines tick at 10 Hz inside it)
 const NIGHT_AT := 480.0      # s: the last two minutes are night
 const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
 const LONGEST := 90.0        # s: no state but Nap may last longer
+const LET_GO_MIN_FRAMES := 5   # frames the breath check waits at least, however slow they run
+const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
 var main: Node
@@ -44,6 +47,145 @@ func _gather(home, at: Vector3) -> void:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 
+## The rivalry beat (BaseRival, garden_sim.json rivalry): rivals passing close turn, huff and walk on, once a
+## cooldown, and never play tag; a pair that is not rivals does nothing.
+func _rival_beat(home) -> void:
+	var R: Dictionary = BaseRival.rules()
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	var c: Dictionary = home.kins[2]
+	home.day_t = 0.4
+	home.life.night = false
+	for k in [a, b, c]:
+		for key in ["rival_cd", "play", "eat", "nap_t", "life_at", "life_rival"]:
+			k.erase(key)
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	# the beat walks 4 m away from the other, which only counts on open ground: start from the island's middle
+	var mid: Vector2 = home.world.islands[maxi(home.world.island_of(a["pos"].x, a["pos"].z), 0)]["c"]
+	a["pos"] = home.world.free_spot_near(Vector3(mid.x, 0, mid.y), [], 0.8)
+	(a["node"] as Node3D).position = a["pos"]
+	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
+	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
+	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
+	BaseLife.add_bond(a["rec"], c["rec"], 0.0 - BaseLife.bond(a["rec"], c["rec"]))
+	var heard := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
+		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
+	home.life.step(0.2)
+	var fa: Fsm = a["life"]
+	var fb: Fsm = b["life"]
+	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
+	ok(fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
+		"rivals passing within %.1f m both turn to each other (React)" % float(R["pass_m"]))
+	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
+	var after := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
+		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
+	ok(after == heard + 2, "each huffs through the garden SFX (%d cues)" % (after - heard))
+	ok((c["life"] as Fsm).is_in(BaseLife.S.ROAM), "a Boki that is not a rival is left alone")
+	var gap := BaseLife._dist(a, b)
+	for i in int(float(R["beat_s"]) / 0.1) + 2:
+		home.life.step(0.1)
+	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"), 
+		"the beat ends in %.1f s" % float(R["beat_s"]))
+	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
+	home.life.step(0.2)
+	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(R["cooldown_s"]))
+	for k in [a, b]:
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	home.life._tag(a, b)
+	ok(not fa.is_in(BaseLife.S.PLAY_WITH) and not fb.is_in(BaseLife.S.PLAY_WITH), "rivals never play tag together")
+
+## BokiNapSfx: of 30 Boki asleep around you only the nearest few breathe, within the loop's reach; a bigger
+## Boki breathes lower; the night's sleepers breathe near you, and at dawn they yawn and the woken ones' loops let go.
+func _nap_sounds(home) -> void:
+	var pile := []
+	for i in 30:
+		pile.append({"pos": Vector3(float(i % 6) * 1.2, 0, float(i / 6) * 1.2)})
+	var heard := BokiNapSfx.heard(pile, Vector3.ZERO)
+	var reach := float(Sfx.sound_reach.get(BokiNapSfx.LOOP, 0.0))
+	var inside := heard.all(func(k): return Vector2(k["pos"].x, k["pos"].z).length() < reach)
+	ok(heard.size() == BokiNapSfx.MAX_HEARD and inside and is_same(heard[0], pile[0]),
+		"of 30 asleep only the %d nearest breathe, all within %.0f m" % [heard.size(), reach])
+	var by_cm: Array = home.kins.map(func(k): return k["rec"])
+	by_cm.sort_custom(func(a, b): return float(Unique.size_info(a)["cm"]) < float(Unique.size_info(b)["cm"]))
+	var lower := true
+	for i in by_cm.size() - 1:
+		lower = lower and BokiNapSfx.pitch_of(by_cm[i + 1]) <= BokiNapSfx.pitch_of(by_cm[i])
+	ok(lower, "a bigger Boki breathes lower (%s)" % [by_cm.map(func(r): return "%.2f" % BokiNapSfx.pitch_of(r))])
+	var sleeper: Dictionary = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) > 0.0)[0]
+	Sfx.listener = sleeper["pos"]
+	home._move_kin(DT)
+	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
+	ok(on.size() >= 1 and on.size() <= BokiNapSfx.MAX_HEARD,
+		"the night's sleepers near you breathe (%d loops)" % on.size())
+	home.day_t = 0.3
+	Sfx.last_played.erase(BokiNapSfx.YAWN)
+	for i in int(10.0 / DT):
+		Sfx.listener = sleeper["pos"]
+		home._move_kin(DT)
+		if Sfx.last_played.has(BokiNapSfx.YAWN):
+			break
+	ok(Sfx.last_played.has(BokiNapSfx.YAWN), "a Boki waking at dawn yawns")
+	# Sfx.loop_hold lets go HOLD_MS of real time after the last hold; give the frames up to LET_GO_MS to run it
+	var t0 := Time.get_ticks_msec()
+	var left := _awake_breaths(home)
+	var frames := 0
+	# a loaded box can run only a frame or two in LET_GO_MS: wait for LET_GO_MS_MIN_FRAMES frames as well
+	while not left.is_empty() and (Time.get_ticks_msec() - t0 < LET_GO_MS or frames < LET_GO_MIN_FRAMES):
+		await main.get_tree().process_frame
+		frames += 1
+		left = _awake_breaths(home)
+	ok(left.is_empty(), "an awake Boki's breath lets go within %d ms (%d still on)" % [LET_GO_MS, left.size()])
+
+## The breathing loops still on for Boki that are awake.
+func _awake_breaths(home) -> Array:
+	var awake: Array = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) <= 0.0) \
+		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
+	return Sfx.loops.keys().filter(func(key): return key in awake)
+
+## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
+func _spots_part(home, center: Vector3) -> void:
+	var zone: Dictionary = GardenZones.info(GardenZones.start())
+	var kept: Array = zone["nap"]
+	var cx := int(center.x)
+	var cz := int(center.z)
+	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
+	var life: BaseLife = home.life
+	home.day_t = 0.4
+	for k in home.kins:
+		k["nap_t"] = 0.0
+		life.machine(k).go(BaseLife.S.ROAM, "test")
+		k["rec"]["bonds"] = {}
+		Care.need(k["rec"], "joy")
+		k["rec"]["needs"]["joy"] = 90.0
+	_gather(home, center)
+	var keys: Array = home.kins.map(func(k): return k["rec"].keys())
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	var c: Dictionary = home.kins[2]
+	BaseLife.add_bond(a["rec"], b["rec"], 0.6)
+	for k in [a, b, c]:
+		life._nap(k, "tired")
+	var sa: Dictionary = a.get("life_spot", {})
+	var sb: Dictionary = b.get("life_spot", {})
+	var sc: Dictionary = c.get("life_spot", {})
+	ok(not sa.is_empty() and int(sa["slot"]) == 0, "a tired Boki heads for a free nap spot")
+	ok(not sb.is_empty() and sb["i"] == sa.get("i") and int(sb["slot"]) == 1,
+		"its friend (bond 0.6) takes the place beside it")
+	ok(not sc.is_empty() and sc["i"] != sa.get("i") and int(sc["slot"]) == 0, "a third Boki takes the other spot")
+	var t := 0.0
+	while t < float(life.R["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
+		home._move_kin(DT)
+		t += DT
+	var on := [a, b, c].filter(func(k): return k.has("life_spot") and float(k["nap_t"]) > 0.0 \
+		and BaseLife._dist(k, {"pos": k["life_spot"]["pos"]}) < BaseLife.SPOT_AT * 2.0)
+	ok(on.size() == 3, "all three walked there and lie down on their places in %.1f s (%d of 3)" % [t, on.size()])
+	var was := BaseLife.bond(a["rec"], b["rec"])
+	for i in 20:
+		home._move_kin(DT)
+	ok(BaseLife.bond(a["rec"], b["rec"]) > was, "napping side by side, the friends' bond grows")
+	ok(home.kins.map(func(k): return k["rec"].keys()) == keys, "nothing of it is saved: the records gain no key")
+	zone["nap"] = kept
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -60,6 +202,10 @@ func run(m: Node) -> void:
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
+	# The farm's own _process steps the Boki by real frame time, which varies with machine load: from here the
+	# check steps them alone (fixed DT), and draws from a stream seeded after the build frames.
+	home.set_process(false)
+	seed(11)
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
@@ -118,6 +264,9 @@ func run(m: Node) -> void:
 	ok(pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
+	await _nap_sounds(home)
+	_spots_part(home, center)
+	_rival_beat(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

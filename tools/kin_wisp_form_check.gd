@@ -2,7 +2,8 @@ extends RefCounted
 ## --kin-wisp-form-check: a downed Hunter's Boki ride with them as wisps (KinWispForm). In a 2v2 with a
 ## bot teammate (the bot's Boki goes through the same code as yours):
 ##   1. knocked with its Boki out fighting a few metres off: the Boki zips back, rides as a wisp round
-##      them (Boki model hidden, a Boki wisp drawn), is not hittable and attacks nothing
+##      them (Boki model hidden, a Boki wisp drawn), can be hit only as a guardian (summoned at the knock) and attacks
+##      nothing
 ##   2. knocked with its Boki far away: it blinks straight to them
 ##   3. a teammate stands on the Wisp: back up, the Boki pops back onto the shoulder with its old order
 ##   4. nobody near: the Boki wisp pulls its Hunter up after its wait, and the bleed-out pauses meanwhile
@@ -59,7 +60,7 @@ func run(main_node: Node) -> void:
 	bot.down_hp = 1e6
 	_run(DT)
 	ok(k.state == KinWispForm.STATE, "knocked: the Boki leaves the fight for the wisp form (%s)" % k.state)
-	ok(not k.hittable() and k.target == null, "a Boki wisp can't be hit and has no target")
+	ok(k.hittable() and k.target == null, "a guardian Boki wisp can be hit (it stops the pull) and has no target")
 	_put(foe, bot.pos + Vector3(1.2, 0, 0))
 	var foe_hp := foe.hp
 	_run(KinWispForm.ZIP_S + 0.2)

@@ -1,7 +1,7 @@
 class_name KinLib
 extends RefCounted
 ## The live game's kin library (docs/KIN_GRAMMAR.md, Phase 2). Loads every grammar file under
-## res://content once (abilities_v2, merges_v2, evolution_v2, kin) through the checker, keeps
+## res://content once (abilities_v2, merges_v2, evolution_v2, kin_v2) through the checker, keeps
 ## only files that passed it, and builds what the match needs from them:
 ##
 ##   species(id)      the Data.KIN entry (name, colours, stats from points, slots, carry...)
@@ -13,6 +13,13 @@ extends RefCounted
 ## Everything here is data in, data out: nothing named in a file is loaded or called.
 
 const ROOT := "res://content"
+## A species' theme as its standard type (DECISIONS 2026-11-08 22:29). The type picks the cast cue k_<type>.
+const TYPE_OF_THEME := {"ember": "fire", "bloom": "grass", "storm": "electric", "frost": "ice", "venom": "poison",
+	"swarm": "bug", "tempest": "flying", "stone": "rock", "titan": "steel", "lunar": "fairy", "prism": "crystal",
+	"shadow": "dark", "echo": "sound", "gravity": "psychic", "spore": "spore"}
+## The 19 standard types (DECISIONS 2026-11-10: Shadow split into Ghost and Dark); each has a cast cue k_<type>.
+const TYPES := ["normal", "fire", "water", "grass", "spore", "electric", "ice", "rock", "psychic", "flying", "dragon",
+	"dark", "ghost", "poison", "bug", "steel", "fairy", "crystal", "sound"]
 
 static var _lib := {}
 static var _reports := {}
@@ -27,7 +34,7 @@ static func _load() -> void:
 	_reports = {}
 	var raw := KinGrammar.load_root(ROOT, _reports)
 	var out := {"abilities": {}, "merges": {}, "evolution": {}, "kin": {}}
-	var folder_of := {"abilities": "abilities_v2", "merges": "merges_v2", "evolution": "evolution_v2", "kin": "kin"}
+	var folder_of := {"abilities": "abilities_v2", "merges": "merges_v2", "evolution": "evolution_v2", "kin": "kin_v2"}
 	for kind in out:
 		for id in raw[kind]:
 			var rep: GrammarReport = _reports.get("%s/%s.json" % [folder_of[kind], id], null)
@@ -59,6 +66,12 @@ static func merge(id: String) -> MergeSpec:
 
 static func node(id: String) -> EvolutionNode:
 	return lib()["evolution"].get(id, null)
+
+## The cast cue of a theme or type: k_<type>. An old theme goes through TYPE_OF_THEME (shadow is dark); a type
+## id is its own cue, so a species already moved to ghost or dark has no gap.
+static func cue_of(theme: String) -> String:
+	var type := String(TYPE_OF_THEME.get(theme, theme))
+	return "k_" + (type if TYPES.has(type) else "normal")
 
 static func kin_ids() -> Array:
 	var ids: Array = lib()["kin"].keys()

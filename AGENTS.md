@@ -6,6 +6,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **Apply the expert checklist.** Go through `docs/GAMEDEV_CHECKLIST.md` (game feel, systems, performance, rendering) for anything gameplay-facing, and use the matching techniques by name.
 - **Read the area first.** Find the existing system that already does something similar and extend it. Don't build a parallel one. Search with `grep -rn` across `scripts/` and `content/`.
 - **Anything that touches a core system needs a short design note first.** Core systems are movement, combat, networking, the save format, and the match flow. Write it in `docs/decisions/NNNN-title.md` using the template there. It covers the problem, the options, the choice, and what it affects, in 10-20 lines. Small features don't need one.
+- **Outside reference material stays private.** Other games' data, footage notes and parity audits live only in the private reports repo (`OrriBogdan2/project-boki-reports`, folder `sv/`; hetzner clone `/home/boki/reports-repo`, elsewhere `git clone` it and `git pull` first). Never commit them here and never name the outside game in code, docs or content: say 'reference' or 'target feel'. Its hunters are `ref-<label>` (key in `docs/ARCHETYPES.md`), and no game-file table, asset or property names go in. Our own numbers are in `docs/MOVEMENT_TUNING.md` and `docs/COMBAT_NUMBERS.md`. `tools/lint_gate.py` (check `private-ref`) fails on new mentions; old code comments are baselined and get scrubbed when you touch the file.
 - **Data over code.** Classes, Boki, gloves, weapons, maps and rules live in `content/` as JSON. A new hero, item or map should mostly be data plus one focused script, never edits scattered across `match.gd`.
 
 ## 2. Where code goes
@@ -45,13 +46,14 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - **No silent dynamic calls.** Avoid `has_method`, `call("name")` and `get_script_method_list` for things you control. Use typed references or signals (`CombatBus`).
 - **Constants with a unit and a reason.** Put tuning numbers in `content/rules` or a named `const` with a one-line comment (units, what it controls), not magic numbers inline.
 - **Networking:** anything synced between players goes through `Net`. Bump `Net.VERSION` when the sync shape changes. Never rename Net functions, the `"st"`/`"hit"`/`"ev"` topics, or the `--relay`/`--server=`/`--token=` args.
-- **Saves:** every save-format change comes with a migration. Old saves must load.
+- **Saves:** every save-format change comes with a migration. Old saves must load; add a golden file (`docs/SAVES.md`; `--save-compat-check`). A build that grows more than 5% needs its baseline bumped in the same PR (`docs/SIZE_BUDGET.md`).
 - **Player-facing text:** write it in our own words and use our own names. Never copy text, names or assets from other games.
 
 ## 5. Testing (cheap and meaningful)
 - **Every feature adds or extends a check** that asserts its behaviour, in `tools/` and registered.
 - **While iterating, run only the checks for what you changed.** Run the full suite once, on your final commit.
 - **Don't weaken a check to make it pass.** If a check's assumption is wrong, fix the check and explain why in the commit.
+- **A check must not depend on the box.** Time budgets and wait caps use `CheckClock`, a second game or server uses `CheckChild`, a check that times frames against the wall clock without looking at them turns drawing off, random draws are seeded (`docs/GATE_SPEED_1111.md`).
 - **Godot runs go through `/home/claude/gq`** with a temp `XDG_DATA_HOME`. Never use `--fresh` or the shared dev save.
 
 ## 6. Finishing a change
@@ -64,7 +66,20 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 - Run `tools/check.sh` (health + style + the lint ratchet: gdlint, gdformat, ruff, vulture, glTF validation of every `.glb`, Godot unused-code and shadowing warnings). Old debt is in `tools/lint_baseline.json` and may not grow; new files must be clean (`gdformat --line-length 120`, `ruff format`). After cleaning a file up, `tools/check.sh --update` lowers its count. `pre-commit install` runs it on staged files.
 - Report: what changed, which files, the checks run and their results, and any debt you left (with the `docs/DEBT.md` entry).
 
-## 7. Review before merge
+## 7. Branches
+- **One branch per task** (`ext/<short-name>`). Retries and follow-ups reuse it: never push a `-rebased` or `-v2` copy. Bring it up to date by merging `origin/main` into it.
+- The branch is deleted after it merges. Job checkpoints (`wip/cj-*`) are deleted when the job ends.
+- **Before building any system, search the repo for an existing one** and extend it (§1, §3).
+- Small, clearly labeled commits (§6).
+
+## 7a. Generated files and parallel runs
+- Never hand-write `uid://` values or `.uid`/`.import` files: create the file, run the import, commit what Godot made.
+- A hand-written `.tscn`/`.tres` references by `path=` with no `uid=`.
+- Move a file's `.uid`/`.import` sibling with it in the same commit. Never commit `.godot/`.
+- A SceneTree test does its work in `_initialize()`, not `_init()` (no autoloads exist yet in `_init()`).
+- Never `pkill`/`killall` Godot: other agents' runs share the box.
+
+## 8. Review before merge
 The integrator (the main session) merges branches into `main`. Before merging any feature branch, a separate reviewer agent reads the diff with fresh eyes against this file, looking for:
 - god-file growth
 - bloat: features, options or abstractions nobody asked for; a net line count out of proportion to the task

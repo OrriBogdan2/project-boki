@@ -10,6 +10,9 @@ extends Node3D
 ## standing on it. A stun during the wind-up interrupts it (the cooldown comes back to "refund" s); a merge
 ## drops the wind-up with no slam.
 ##
+## The landing is the impact: a hit-stop for him (his own screen never shakes, item 50), a shake for players near,
+## a dust ring, rock debris, a cracked-ground decal and a sub-heavy quake under the slam.
+##
 ## Look (pooled): one outlined lane over the whole reach with a lightning crack down its middle that glows
 ## brighter through the wind-up (the parity reel: a tall outlined rectangle with a crack), gold light
 ## flooding the near cell on the slam, a streak racing down the lane, a bright column of light erupting in
@@ -17,14 +20,25 @@ extends Node3D
 ## Bond: every hunter it hits goes to HeroUlt.landed; the best event of the cast pays.
 
 const EMBER := Color("ff9a3a")
-const GOLD := Color("ffd25a")
+const ROCK := Color("5a4a42")       # the Faultline slam's rock debris
 const MAX_CELLS := 6           # pooled eruption columns
 const COLUMN_H := 4.5          # m, how high an eruption column stands at its peak
 const COLUMN_T := 0.9          # s an eruption column lives
 const CRACK_BREADTH := 1.0     # m the crack mesh is stretched across the lane (its kinks and width are in the mesh)
 
+## The hop's shape, as shares of "windup": a short hop, hammer overhead, a hang, then the slam
+const LEAP_CROUCH := 0.15      # he crouches this share before he leaves the ground
+const LEAP_TOP := 0.5          # by here he is "leap_h" up (easing out)
+const LEAP_HANG := 0.8         # he hangs to here, sinking to HANG_SINK of the top, then drives down
+const HANG_SINK := 0.9
+const DRIVE_CAP := 40.0        # m/s the drive down may fall at (past the usual 12 m/s fall cap)
+const SLAM_STOP := 0.09        # s of hit-stop for him on the landing, foes or none: the weight of the slam
+const QUAKE_SHAKE := 0.8       # the shake players near the landing feel (Shake.incoming_big; never his own)
+const DUST := Color("b8a58a")
+
 var k: BulwarkKit
 var h: Hunter
+var leap := false              # cast on the ground: the wind-up is the hop (in the air he falls as before)
 var phase := ""                # "" | "wind" (planted, hammer up) | "erupt" (the fissure running)
 var t := 0.0                   # s into the phase
 var dir := Vector2.RIGHT       # the lane's direction, locked on the press
@@ -53,13 +67,14 @@ func _init(kit: BulwarkKit) -> void:
 
 func _ready() -> void:
 	for i in MAX_CELLS:
-		var column := KitMeshes.inst(self, KitMeshes.pillar(0.4, 1.0, 1.0), KitShaders.mat("panel", GOLD, true))
-		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GOLD, true))
+		var col := AimKit.hero_col(h)
+		var column := KitMeshes.inst(self, KitMeshes.pillar(0.4, 1.0, 1.0), KitShaders.mat("panel", col, true))
+		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", col, true))
 		KitShaders.param(seam, "tail", 0.0)
 		_slabs.append({"column": column, "seam": seam, "t": 0.0})
 	var streak_mat := KitShaders.mat("streak", Color(1.0, 0.75, 0.35), true)
 	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), streak_mat)
-	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GOLD))
+	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", AimKit.hero_col(h)))
 	_crack = KitMeshes.inst(self, KitMeshes.crack(0.3, 0.45, 16), KitShaders.mat("streak", AimKit.hero_col(h), true))
 	KitShaders.param(_crack, "tail", 0.0)
 
@@ -69,6 +84,15 @@ func xd() -> Dictionary:
 ## Planted: the wind-up and the slam's own beat (he can't move, swing, block or dash).
 func planted() -> bool:
 	return phase == "wind" or (phase == "erupt" and t < float(xd().get("plant", 0.2)))
+
+## Seconds of the plant left (0: free): the wind-up's rest and the slam's beat.
+func lock_left() -> float:
+	if not planted():
+		return 0.0
+	var plant := float(xd().get("plant", 0.2))
+	if phase == "wind":
+		return float(xd().get("windup", 0.4)) - t + plant
+	return plant - t
 
 ## X pressed: plant, raise the hammer, lock the lane toward the cursor.
 func cast() -> bool:
@@ -84,9 +108,9 @@ func cast() -> bool:
 	thrown = {}
 	hunters = 0
 	h.vel = Vector3(0, h.vel.y, 0)
+	leap = h.grounded
 	k.play("bul_ult_wind")
 	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
-	k.net_ring(origin + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5, cell_len() * 0.5, EMBER)
 	return true
 
 func cell_len() -> float:
@@ -98,11 +122,15 @@ func _reach() -> Array:
 	var out: Array = []
 	var cl := cell_len()
 	var y0 := origin.y
-	for i in int(xd().get("cells", 4)):
+	var n := int(xd().get("cells", 4))
+	var lane := Vector3(dir.x * cl * n, 0.5, dir.y * cl * n)
+	# placed walls and rocks stop it as terrain does (Blockers)
+	var walled := Blockers.cut(k.m.verbs.walls, origin + Vector3(0, 0.5, 0), origin + lane, k.h.team, "solid")
+	for i in n:
 		var a := origin + Vector3(dir.x, 0, dir.y) * cl * i
 		var c := a + Vector3(dir.x, 0, dir.y) * cl * 0.5
 		var g: float = k.m.world.ground_at(c.x, c.z)
-		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2) and i > 0:
+		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2 or cl * (i + 0.5) > walled) and i > 0:
 			break
 		out.append(Vector3(a.x, y0, a.z))
 	return out
@@ -128,12 +156,16 @@ func tick(dt: float) -> void:
 		return
 	t += dt
 	_telegraph()
+	if planted() and h.vel.y > 0.0:
+		h.vel.y = 0.0          # no jumping off the plant (it lands straight back): dash_flow into_jump.x lock
 	if phase == "wind":
 		h.vel = Vector3(0, h.vel.y, 0)
 		if h.stun_t > 0.0 or h.downed or h.out:
 			_interrupt()
 		elif t >= float(xd().get("windup", 0.4)):
 			_slam()
+		else:
+			_hop(dt)
 		return
 	var x := xd()
 	var lead := float(x.get("lead", 0.2))
@@ -150,12 +182,41 @@ func tick(dt: float) -> void:
 		var length := cell_len() * cells.size()
 		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
 
-## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill running
-## down it as the cells erupt.
+## m over the cast's ground he should be at `s` (share of the wind-up) into the hop.
+func leap_y(s: float) -> float:
+	var top := float(xd().get("leap_h", 1.2))
+	if s < LEAP_CROUCH:
+		return 0.0
+	if s < LEAP_TOP:
+		return top * ease((s - LEAP_CROUCH) / (LEAP_TOP - LEAP_CROUCH), 0.4)
+	if s < LEAP_HANG:
+		return top * lerpf(1.0, HANG_SINK, (s - LEAP_TOP) / (LEAP_HANG - LEAP_TOP))
+	return top * HANG_SINK * (1.0 - ease(minf(1.0, (s - LEAP_HANG) / (1.0 - LEAP_HANG)), 1.8))
+
+## Steers his height onto the hop's curve this step (Hunter's air step takes gravity off before it moves him).
+func _hop(dt: float) -> void:
+	if not leap or dt <= 0.0:
+		return
+	var want := origin.y + leap_y(t / float(xd().get("windup", 0.4)))
+	if h.grounded and want <= h.pos.y + 0.001:
+		return
+	h.grounded = false
+	h.vel.y = (want - h.pos.y) / dt + Hunter.H_GRAV * dt
+
+## m/s his fall may reach while the hop drives him down (0: the usual cap).
+func dive_cap() -> float:
+	return DRIVE_CAP if leap and phase != "" and not h.grounded else 0.0
+
+## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill sweeping
+## down it over exactly the wind-up (full on the step the slam lands), then running down it again as the cells
+## erupt.
 func _telegraph() -> void:
 	var done := float(erupted) / cells.size()
-	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 4.0)),
-		"all": true, "col2": GOLD, "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6, "dur": 0.15})
+	if phase == "wind":
+		done = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
+	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 5.5)),
+		"all": true, "col2": AimKit.hero_col(h), "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6,
+		"dur": 0.15})
 	AimKit.entry(h, "x")["y"] = _trail_y(origin + Vector3(dir.x, 0, dir.y) * trail_len() * 0.5)
 
 func _interrupt() -> void:
@@ -188,11 +249,31 @@ func _slam() -> void:
 	struck = 1
 	var c0 := _cell_mid(0)
 	_flood_t = 0.3
-	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
+	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 5.5))))
 	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
-	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
+	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), AimKit.hero_col(h), 24, 7.0, 0.4, 3.0, 1.3)
 	k.m.fx.dust(c0, 14)
-	k.net_ring(c0, cell_len() * 0.6, GOLD)
+	_impact(origin + Vector3(dir.x, 0, dir.y) * 1.0)
+
+## The landing's weight: hit-stop, a shake for the players round it, a dust ring, rock debris, cracked ground
+## and the quake.
+func _impact(at: Vector3) -> void:
+	var m: Node = k.m
+	var w := float(xd().get("width", 5.5))
+	if h == m.get("player") and not bool(m.get("net_on")):
+		m.freeze_frame(SLAM_STOP)
+	else:
+		h.freeze_t = maxf(h.freeze_t, SLAM_STOP)
+	for f in k.foes_in(origin, cell_len() * 1.2):
+		if hit.has(f.get_instance_id()):
+			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})
+	Shake.incoming_big(m, at, QUAKE_SHAKE, h)
+	m.fx.ring(at + Vector3(0, 0.15, 0), w * 0.5, DUST, 0.45)
+	m.fx.ring(at + Vector3(0, 0.1, 0), w * 0.8, DUST, 0.7)
+	m.fx.burst(at + Vector3(0, 0.3, 0), ROCK, 18, 8.0, 0.8, 18.0, 1.6, Vector3.UP, 55.0)
+	m.fx.burst(at + Vector3(0, 0.2, 0), DUST, 14, 5.0, 0.6, 2.0, 1.8)
+	LDFx.of(m).scorch(at, 2.0, 1.8, Color("8a7a66"), Color("2a241e"))
+	m.sfx("bjorn_ult_quake", at, 0.0 if h.is_local() else -4.0)
 
 ## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
 func _strike(i: int) -> void:
@@ -243,7 +324,7 @@ func _foes_in(i: int) -> Array:
 	for f in k.m.foes_of(h.team):
 		if not f.hittable() or absf(f.pos.y - a.y) > 2.5:
 			continue
-		if AimMode.in_lane(a, dir, cell_len(), float(xd().get("width", 4.0)), f.pos, f.r):
+		if AimMode.in_lane(a, dir, cell_len(), float(xd().get("width", 5.5)), f.pos, f.r):
 			out.append(f)
 	return out
 
@@ -300,18 +381,17 @@ func _process(delta_in: float) -> void:
 		_place_flat(_streak, Vector3(head.x, _trail_y(head) + 0.25, head.z), Vector2(2.4, 0.9))
 		_streak.visible = _streak_t > 0.0
 
-## The crack's glow: dim and hero-coloured as the cast starts, hotter and goldener every moment until the slam,
-## white-gold as the fissure runs, then the cooling ember scar that flickers out over its last second.
+## The crack's glow: dim and hero-coloured as the cast starts, hotter every moment until the slam
+## at full heat as the fissure runs, then the cooling ember scar that flickers out over its last second.
 func _glow_crack() -> void:
 	if not _crack.visible:
 		return
 	var heat := 1.0
 	var power := 3.0
-	var col := GOLD
+	var col := AimKit.hero_col(h)
 	if phase == "wind":
 		heat = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
 		power = lerpf(0.8, 3.0, heat * heat)
-		col = AimKit.hero_col(h).lerp(GOLD, heat)
 	elif phase == "":
 		power = (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * clampf(float(scar.get("t", 0.0)), 0.0, 1.0)
 		col = EMBER
@@ -321,7 +401,7 @@ func _glow_crack() -> void:
 ## Each cell's column of light shoots up fast over the whole cell, hangs, then fades; the molten seam under
 ## it glows then cools.
 func _tick_slabs(delta: float) -> void:
-	var w := float(xd().get("width", 4.0))
+	var w := float(xd().get("width", 5.5))
 	for s in _slabs:
 		var seam: MeshInstance3D = s["seam"]
 		var column: MeshInstance3D = s["column"]

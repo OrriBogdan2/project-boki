@@ -5,7 +5,7 @@ takes over the controls. Boki act on foes, the world and the hunter's stats (hea
 exception is the obvious abyss rescue (Moonlift). Owner 11-08: "make sure the boki changes to not interfere
 with ur gameplay (only buff/aid it)". Decision note: [0022](decisions/0022-boki-never-move-you.md).
 
-Re-audited on main d255acbee: every kin species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
+Re-audited on main d255acbee: every kin_v2 species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
 evolution_v2 (10), the throw, carry styles and passives, and the Boki body itself. The starting point was the
 item 186 audit (briefs/BOKI_PLAYER_AUDIT.md, main 7907d9af).
 
@@ -42,7 +42,7 @@ On the Return order a Boki heavier than `follow.shoulder_max_mass` (1.2: the lar
 guards at your side. Smaller ones still ride your shoulder or pack.
 - The spot is `guard_side_m` (1.7 m) out, square to your facing. It keeps that flank as you move, and takes
   the other one when that flank is void, a block, or a step off your level.
-- It is never closer than `guard_min_m` (1.2 m), and its feet are never below yours: it hops with your jumps.
+- It is never closer than `guard_min_m` (1.2 m), and it stays on the ground under its own nav: your jumps do not lift it.
 - When you glide or cross a gap it can't walk, or both flanks are blocked, it curls up on your back. It goes
   back to its flank when you land.
 - Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`. Tuning: `content/rules/boki_system.json` "follow".

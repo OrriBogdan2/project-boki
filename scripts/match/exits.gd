@@ -16,23 +16,28 @@ const UPLINK_DECAY_T := 18.0  # an empty yard drains a full charge in this long
 const UPLINK_GRACE := 3.0     # a just-started uplink isn't shut off for an empty yard this soon
 const FIZZLE_T := 1.8         # the uplink flickering before it shuts off
 const FIZZLE_CD := 8.0        # then it can be started again after this
-const TUT_UPLINK_T := 14.0
+const TUT_UPLINK_T := 8.0      # s: the tutorial outpost's capture (long enough for its one wave to arrive)
 const OUTPOST_R := 3.6        # the yard
 const LIFT_R := 1.7
 const LIFT_T := 15.0
 const UPLINK_CD := 30.0
 const STEAL_T := 5.0          # holding someone else's uplink alone this long makes it yours
 const WAVE_CAP := 7           # monsters a single exit's waves can have alive at once
+const WAVE_EVERY := 12.0      # seconds between an uplink's monster waves
+const WAVE_WARN := 2.5        # seconds the wave posts glow on the ground before monsters climb out of them
+const WAVE_POSTS := 6         # fixed posts round each outpost that its waves come from (docs/SPAWNS.md)
+const WAVE_R := [10.0, 8.0, 12.0, 6.0]   # metres from the outpost a post may sit, tried in this order
 
 var m: Match
 var list: Array = []          # every exit, see _add_*
 var rush := false             # the last squad standing: uplinks charge faster
 var seats: QuestSeats = null  # Limited Ways Out: the Sealed Lair and the Uplink seats (null outside the mode)
+var hints := ZoneHint.new()   # the fading "more teammates fuel it faster" tip
 
 func setup(match_node: Match) -> void:
 	m = match_node
-	if m.opts.get("training", false) or m.opts.get("duel", false):
-		return
+	if m.opts.get("training", false) or m.opts.get("duel", false) or HeartRaid.on(m.opts):
+		return      # (a raid's only way out is the Heart ring once its boss is down)
 	var tut: bool = m.opts.get("tutorial", false)
 	if Heart.enabled(m.opts): seats = QuestSeats.new(m)      # (the Heart itself is built after the exits)
 	var defs: Array = m.world.exit_defs if not m.world.exit_defs.is_empty() else _default_defs()
@@ -153,7 +158,7 @@ func interact_for(h: Hunter) -> Dictionary:
 					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 				else:
 					best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-			"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+			"charging": best = {"label": "Uplink %d%%  ·  hold the outpost%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
 			"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 			"open": best = {"label": "The lift is open! Step into the light"}
 			"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
@@ -205,19 +210,21 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["team"] = h.team
 	x["prog"] = 0.0
 	x["waves"] = 0
-	x["wave_t"] = 1.5
+	x["wave_t"] = WAVE_WARN
+	x["warned"] = false
 	x["steal"] = 0.0
 	x["started_at"] = m.time
 	x["draining"] = false
-	m.sfx("warn", x["pos"], 0.0, 0.9)
-	m.sfx("zap", x["pos"], -2.0, 0.7)
+	m.sfx("uplink_start", x["pos"], 0.0)
 	m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.6)
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
 		var mine: bool = m.player != null and h.team == m.player.team
+		if mine:
+			UiSfx.extract_start()
 		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
 		if m.hud and m.player and not m.player.out:
-			m.hud.toast("Uplink started: hold the yard until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
+			m.hud.toast("Uplink started: hold the outpost until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
 
 func _tick_outpost(x: Dictionary, dt: float) -> void:
 	var n: Node3D = x["node"]
@@ -251,7 +258,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				if float(x["steal"]) >= STEAL_T:
 					x["steal"] = 0.0
 					x["team"] = int(foes.keys()[0])
-					m.sfx("zap", x["pos"], 0.0, 1.3)
+					m.sfx("uplink_steal", x["pos"], 0.0)
 					m.fx.ring(x["pos"], OUTPOST_R, Color("ff8a6a"), 0.5)
 					var who := ""
 					for h in m.hunters:
@@ -288,13 +295,13 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			x["t"] = float(x["t"]) - dt
 			var k := FIZZLE_T - float(x["t"])
 			if int(k / 0.45) != int((k - dt) / 0.45):
-				m.sfx("zap", x["pos"], -3.0, 0.6 + 0.1 * int(k / 0.45))
+				m.sfx("uplink_sputter", x["pos"], -3.0, 0.8 + 0.1 * int(k / 0.45))
 				m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.3)
 			if float(x["t"]) <= 0.0:
 				x["state"] = "spent"
 				x["t"] = FIZZLE_CD
 				x["team"] = -1
-				m.sfx("thump", x["pos"], -4.0, 0.6)
+				m.sfx("uplink_shut", x["pos"], -4.0)
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
@@ -311,7 +318,7 @@ func close_outpost(x: Dictionary) -> void:
 	x["draining"] = false
 	var n: Node3D = x["node"]
 	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
-	if was == "charging": m.sfx("thump", x["pos"], -4.0, 0.6)
+	if was == "charging": m.sfx("uplink_shut", x["pos"], -4.0)
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -323,11 +330,12 @@ func _fizzle(x: Dictionary) -> void:
 	x["draining"] = false
 	var n: Node3D = x["node"]
 	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
-	m.sfx("warn", x["pos"], -2.0, 0.6)
+	m.sfx("uplink_fizzle", x["pos"], -2.0)
 	if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
 		if m.hud and was == m.player.team:
-			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
+			UiSfx.extract_fail()
+			m.hud.toast("The uplink shut off: nobody held the outpost. Start it again to charge it", ExitModels.UPLINK)
 
 ## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
 ## the yard's edge only while you stand in it or it is contested.
@@ -338,7 +346,9 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	elif x.get("draining", false) and x["state"] == "charging":
 		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
 	var raised := OutpostLook.held(x)
-	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
+	var col := OutpostLook.NEUTRAL
+	if raised:
+		col = SideColor.of_team(m.player.team if m.player else -1, int(x["team"]))
 	var key := [snappedf(lit, 0.01), raised, col]
 	if key != x.get("look"):
 		x["look"] = key
@@ -355,8 +365,7 @@ func _open_lift(x: Dictionary) -> void:
 	x["contested"] = false
 	var n: Node3D = x["node"]
 	n.get_node("Lift").visible = true
-	m.sfx("unlock", x["pos"], 0.0, 0.9)
-	m.sfx("portal", x["pos"], 0.0, 0.8)
+	m.sfx("uplink_lift", x["pos"], 0.0)
 	m.fx.burst(x["pos"] + Vector3(0, 1.0, 0), ExitModels.UPLINK, 34, 6.0, 0.8, -3.0)
 	m.fx.ring(x["pos"], LIFT_R + 0.4, ExitModels.UPLINK, 0.6)
 	if not x.get("tut", false):
@@ -367,14 +376,20 @@ func _open_lift(x: Dictionary) -> void:
 		m.hud.toast("Uplink complete! The lift is open: step into the light", ExitModels.UPLINK)
 
 # ------------------------------------------------------------------ monster waves
-## While an uplink is charging, the local monsters keep coming at it.
+## While an uplink is charging, the local monsters keep coming at it: every WAVE_EVERY seconds, out of
+## the outpost's fixed posts, which glow on the ground WAVE_WARN seconds first (every peer sees it).
 func _waves(x: Dictionary, dt: float) -> void:
 	if x.get("tut", false) and int(x["waves"]) >= 1:
 		return
 	x["wave_t"] = float(x["wave_t"]) - dt
+	if not x.get("warned", false) and float(x["wave_t"]) <= WAVE_WARN:
+		x["warned"] = true
+		for at in wave_posts(x):
+			m.fx.ring(at, 1.2, Color("ff9a6a"), WAVE_WARN)
 	if float(x["wave_t"]) > 0.0:
 		return
-	x["wave_t"] = 12.0
+	x["wave_t"] = WAVE_EVERY
+	x["warned"] = false
 	if m.net_on and not m.is_host:
 		return
 	var focus: Vector3 = x["pos"]
@@ -383,21 +398,20 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if not mb.dead and int(mb.get_meta("exit", -1)) == int(x["i"]): alive += 1
 	var n := 2 if x.get("tut", false) else 2 + m.tier + (1 if int(x["waves"]) >= 2 else 0)
 	n = mini(n, WAVE_CAP - alive)
-	x["waves"] = int(x["waves"]) + 1
+	var wave := int(x["waves"])
+	x["waves"] = wave + 1
 	if n <= 0:
 		return
-	var ii := m.world.island_of(focus.x, focus.z)
+	var posts := wave_posts(x).filter(func(p): return not _hunter_near(p, 4.0))
 	var spawned := 0
-	for k in n:
-		var at := _wave_spot(focus, ii)
-		if at == Vector3.INF:
-			continue
+	for k in mini(n, posts.size()):
+		var at: Vector3 = posts[(wave + k) % posts.size()]
 		var kinds: Array = ["skitter"] if x.get("tut", false) else []
 		if kinds.is_empty() and m.biomes:
 			kinds = m.biomes.camp_comp({"pos": at, "kind": "normal" if int(x["waves"]) >= 3 else "light"})
 		if kinds.is_empty():
 			kinds = ["skitter", "spitter", "bomber", "skitter"] + (["brute"] if int(x["waves"]) >= 3 else [])
-		var mb: Mob = m.spawn_mob(String(kinds[m.rng.randi() % kinds.size()]), at)
+		var mb: Mob = m.spawn_mob(String(kinds[(wave + k) % kinds.size()]), at)
 		if m.biomes: m.biomes.dress(mb)
 		mb.set_meta("exit", int(x["i"]))
 		mb.camp = focus          # they press in on the outpost
@@ -415,31 +429,44 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
 			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
-func _wave_spot(focus: Vector3, ii: int) -> Vector3:
+## The outpost's wave posts: WAVE_POSTS evenly round it on open ground of its island, turned by the
+## exit's index so neighbouring outposts differ. Worked out once; the same on every peer.
+func wave_posts(x: Dictionary) -> Array:
+	if x.has("posts"):
+		return x["posts"]
 	var W := m.world
-	for k in 40:
-		var a := m.rng.randf() * TAU
-		var d := m.rng.randf_range(7.0, 13.0) if k < 30 else m.rng.randf_range(4.0, 8.0)
-		var x := focus.x + cos(a) * d; var z := focus.z + sin(a) * d
-		if W.is_void(x, z) or W.is_block(x, z) or (ii >= 0 and W.island_of(x, z) != ii):
-			continue
-		if W.edge_dist(int(x), int(z), 2) < 2:
-			continue
-		var near := false
-		for h in m.hunters:
-			if _live(h) and Vector2(h.pos.x - x, h.pos.z - z).length() < 4.0: near = true; break
-		if near:
-			continue
-		return Vector3(x, W.ground_at(x, z), z)
-	return Vector3.INF
+	var focus: Vector3 = x["pos"]
+	var ii := W.island_of(focus.x, focus.z)
+	var posts: Array = []
+	for k in WAVE_POSTS:
+		var a := int(x["i"]) * 2.4 + TAU * k / WAVE_POSTS
+		for d in WAVE_R:
+			var px: float = focus.x + cos(a) * d
+			var pz: float = focus.z + sin(a) * d
+			if W.is_void(px, pz) or W.is_block(px, pz) or (ii >= 0 and W.island_of(px, pz) != ii):
+				continue
+			if W.edge_dist(int(px), int(pz), 2) < 2:
+				continue
+			posts.append(Vector3(px, W.ground_at(px, pz), pz))
+			break
+	x["posts"] = posts
+	return posts
+
+
+func _hunter_near(p: Vector3, r: float) -> bool:
+	for h in m.hunters:
+		if _live(h) and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < r:
+			return true
+	return false
 
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
 	if seats: seats.tick(dt)
+	var viewer := SideColor.viewer(m)
 	for x in list:
 		_tick_outpost(x, dt)
 		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
-		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time, viewer)
 
 ## The team of someone standing in a live outpost's yard, or -1.
 func occupant(x: Dictionary) -> int:
@@ -461,6 +488,7 @@ func on_last_team() -> void:
 func admin_ready() -> void:
 	for x in list:
 		if x.has("open_at"): x["open_at"] = minf(float(x["open_at"]), m.time)
+		if seats: seats.open_now(x)      # (the Uplink seat's own window too, or the prompt offers a start it refuses)
 		if x["state"] == "charging": x["prog"] = maxf(float(x["prog"]), 0.95)
 
 # ------------------------------------------------------------------ for the HUD
@@ -479,14 +507,19 @@ func status_for(p: Hunter) -> Dictionary:
 		if x["state"] == "charging" and in_yard(x, p):
 			var mine: bool = int(x["team"]) == p.team
 			var t := "Uplink %d%%" % int(x["prog"] * 100.0)
-			if x["contested"]: t += "  ·  CONTESTED: clear the yard"
-			elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
+			if x["contested"]: t += "  ·  CONTESTED: clear the outpost"
+			elif not mine: t += "  ·  a rival's uplink: hold the outpost to take it"
 			elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
-			else: t += "  ·  bring your squad: more of you charge it faster"
-			return {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
+			var st := {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
+			if mine and not x["contested"] and int(x.get("crew", 0)) <= 1:
+				var a := hints.alpha("outpost", m.time)
+				if a > 0.0:
+					st["hint"] = "More teammates in the %s fuel it faster!" % x["name"]
+					st["hint_a"] = a
+			return st
 		if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
 			# our uplink with nobody in its yard: the charge running out, and how long it has
-			return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
+			return {"text": "Uplink draining  ·  %d%%  ·  back to the outpost: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
 				"col": ExitModels.UPLINK.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 7.0))}
 	return {}
 

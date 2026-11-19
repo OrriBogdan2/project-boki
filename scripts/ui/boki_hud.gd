@@ -75,7 +75,7 @@ static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 		var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
 		H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
 		chip = "ENDS %.1fs" % wl
-	_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
+	chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
 
 ## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
 ## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
@@ -96,7 +96,89 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 		return
 	H.c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.5))
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
-	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
+	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 10, Color(H.INK, 0.8), H.big)
+
+## The summon timer round the Boki box (KinSummon) while Boki ride as wisps. Out: a ring in its glow colour
+## drains with the seconds left. Resting: a grey ring refills, with the seconds. Ready: a soft pulse and the
+## Summon key. The seconds or key sit in a badge on the box's top-left corner (the rank badge has the right).
+const SUMMON_GROW := 7.0     # px: the summon ring sits outside the bond ring
+static func summon_ring(H, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k) or k.summon == null or not (k.wisp or k.summon.out()):
+		return
+	var s := k.summon
+	var col: Color = k.sp.get("glow", k.sp["color"])
+	var rr := r.grow(SUMMON_GROW)
+	var at := r.position + Vector2(2, -2)
+	if s.out():
+		_ring(H, rr, s.left / s.dur, col, 3.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.left), 13, col, H.big)
+	elif s.cd > 0.0:
+		_ring(H, rr, 1.0 - s.cd / maxf(0.1, s.cd_full), Color(HudStyle.MUTED, 0.8), 2.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.cd), 12, HudStyle.MUTED, H.big)
+	else:
+		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * sin(float(H.m.time) * 4.0)), 2.0)
+		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
+
+## The wisps you stole (KinSteal), one row each above the Boki box, up to the carry limit: the critter in its own
+## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
+## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
+const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
+const STOLEN_H := 24.0       # px: a row's height
+const STOLEN_ICON := 18.0    # px: the critter's side
+const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
+
+## What the last draw put on screen: one {"name", "passive", "state"} per row.
+static var stolen_shown: Array = []
+
+## "out" / "ready" / "used": where a stolen wisp's one summon stands.
+static func stolen_state(k: Kin) -> String:
+	if k.summon != null and k.summon.out():
+		return "out"
+	return "used" if k.stolen_summoned else "ready"
+
+## The rows for the wisps `h` carries, in the order KinSteal counts them.
+static func stolen_rows(h: Hunter) -> Array:
+	var out: Array = []
+	var share := float(KinSteal.rules()["passive_k"])
+	for k in h.m.kins:
+		if k.owner_h == h and KinSteal.stolen(k) and not k.dead and k.ks != null:
+			var passive := "no carry bonus"
+			if not k.ks.carry_passives.is_empty():
+				passive = KinText.passives(k.ks.carry_passives, share)
+			out.append({"kin": k, "name": String(k.rec.get("name", "Boki")), "state": stolen_state(k),
+				"passive": passive})
+	return out
+
+static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
+	stolen_shown.clear()
+	var y := r.position.y - STOLEN_LIFT
+	for row in stolen_rows(p):
+		var k: Kin = row["kin"]
+		var glow: Color = k.sp.get("glow", k.sp["color"])
+		var st := String(row["state"])
+		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
+		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
+		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
+		var tex := KinPortrait.tex(k.rec, H.get_tree())
+		if tex != null:
+			H.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
+		else:
+			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
+			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
+		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
+		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
+		if st == "ready":
+			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
+		else:
+			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
+			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
+			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
+		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
+		y -= STOLEN_H + 3.0
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
@@ -133,11 +215,26 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 		H.c.draw_polyline(out, col, width, true)
 
 ## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
-static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
-	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
+static func chip(H, ur: Rect2, text: String, col: Color) -> void:
+	var tw: float = TextCache.width(H.big, text, 10) + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
+
+## The short word over the Boki box (GripHud.boki): RESCUE (it is down), RESTING (after a Fusion), TOO FAR (the bond
+## is full but it is out of leap range), FUSE (the Merge can go now), else "".
+static func tag(p: Hunter) -> String:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k):
+		return ""
+	if k.state in ["downed", "reviving"]:
+		return "RESCUE"
+	if k.resting():
+		return "RESTING"
+	match KinMerge.plan(p):
+		"far": return "TOO FAR"
+		"merge", "leap", "surge": return "FUSE"
+	return ""
 
 ## The Boki ability and G badges, after the ultimate tiles. Returns the x where the next badge starts.
 static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
@@ -152,7 +249,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var in_form := KinMerge.in_form(p)
 	if in_form:
 		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
-	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
+	var from_txt := "Boki's move" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
 	if in_form:
 		from_txt = "FUSED"
 	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)
@@ -160,7 +257,8 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
 	var away := out and KinCommand.is_away(p, k)
-	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), 0.0, 0.0, k.ready_to_fight() and k.throw_cd <= 0.0)
+	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), minf(1.0, k.throw_cd), k.throw_cd,
+		k.ready_to_fight() and k.throw_cd <= 0.0)      # its wait counts down here (the one G slot)
 	var hf := KinCommand.hold_frac(p)
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
 		H.c.draw_arc(gr.get_center(), 22.0, -PI / 2, -PI / 2 + TAU * hf, 28, Color("cfe8ff"), 3.0, true)
@@ -180,7 +278,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 10, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return x + 42.0
@@ -258,10 +356,15 @@ static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([edge + dir * 14.0, edge - dir * 8.0 + side * 10.0, edge - dir * 8.0 - side * 10.0]), col)
 	H._ctext(edge - dir * 22.0 + Vector2(0, 4), "%ds" % int(ceil(k.down_t)), 11, Color(H.INK, 0.9), H.big)
 
+## Your Boki when the maps mark it: out and about (not tucked away or down), else null.
+static func mapped_kin(m: Match) -> Kin:
+	var k: Kin = m.player.kin if m.player else null
+	return k if k != null and k.state in ["active", "flying", "returning", "flying_home", "dazed"] else null
+
 ## Your Boki on the minimap once it is off your shoulder: a paw in its colour (the default minimap's "boki" kind).
 static func map_kin(c: Control, m: Match, to_map: Callable, on_map: Callable) -> void:
-	var k: Kin = m.player.kin if m.player else null
-	if k == null or not k.state in ["active", "flying", "returning", "flying_home", "dazed"]:
+	var k := mapped_kin(m)
+	if k == null:
 		return
 	var pv: Vector2 = to_map.call(k.position)
 	if on_map.call(pv, 3.0):

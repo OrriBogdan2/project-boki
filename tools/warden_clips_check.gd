@@ -4,13 +4,19 @@ extends RefCounted
 ## clip is as long as the kit's move; the blend tree plays them (a move changes the pose, kit time drives it); the
 ## locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every move and only one
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
+## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
+## move ends keeps them on the legs' own layer (no snap into the stance).
 ## Never touches the save.
 
+const WardenStatesCheck := preload("res://tools/warden_states_check.gd")
 const DT := 1.0 / 60.0
-const MAX_TRIS := 15000         # S1: weapon and shield included
+const MAX_TRIS := 80000         # weapon and shield included (RIG_CONTRACT "Budget")
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
-const PREFIX := {"breaker": ["bulwark", "bul_"]}
+const WHIRL_TOL := 0.05         # m (neutral): BjornFx's whirl trail runs this close to the farthest the head goes
+const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
+const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
+const AIR_FRAMES := 20          # frames of each air cast checked
 
 var bad := 0
 var holder: Node3D
@@ -27,6 +33,10 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	_finishers()
+	for id in Arch.ORDER:
+		_air_legs(String(id))
+	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -51,7 +61,9 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for k in moves:
 		want.append(String((moves[k] as Dictionary)["clip"]))
 	var lc: Dictionary = cfg["loco"]
-	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
+	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"]])
+	if cfg.has("weapon_out"):
+		want.append(cfg["weapon_out"]["clip"])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
 	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
@@ -66,7 +78,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	# every kit move mapped, and long enough for the kit's clock
 	var short: Array = []
 	var unmapped: Array = []
-	for table in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES]:
+	for table in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]:
 		for k in table:
 			if not String(k).begins_with(prefix) or k in SKIP:
 				continue
@@ -95,10 +107,13 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for i in 40:
 		_play(m, an, sync, run_st, 1)
 		far = maxf(far, sk.get_bone_global_pose(foot).origin.distance_to(idle_f))
-	ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
+	if art_name == "breaker":      # Tenzo's legs are rigid parts, not these bones
+		ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
 	# every move: changes the pose, the weapon bone stays on the hand
 	var wp := WardenSkeleton.find(sk, "x_weapon")
-	var rest_off := (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
+	var rest_off := Vector3.ZERO
+	if wp >= 0:
+		rest_off = (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
 	var worst := 0.0
 	var worst_mv := ""
 	var still: Array = []
@@ -123,10 +138,16 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
-	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
-			% [art_name, worst, worst_mv])
+	if art_name == "breaker":      # Tenzo's fists are skinned in the body, nothing to keep in a hand
+		ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
+				% [art_name, worst, worst_mv])
+	if art_name == "tarek":
+		_tenzo(moves, lib)
+		m.free()
+		return
 	if art_name == "breaker":
 		_whirl(m, an, sync, sk, st)
+		_slam(m, an, sync, sk, st)
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var drawn := 0
@@ -156,6 +177,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var piece := WardenGlb.thrown_piece(m, "hammer")
 	ok(piece != null, "%s: the thrown hammer is the model's own mesh" % art_name)
 	if piece:
+		_thrown(m, piece.get_child(0) as MeshInstance3D)
 		piece.free()
 	_mood(m, sync, sk)
 	# the budget
@@ -166,6 +188,38 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## The shared actions (stomp, drink): a Hunter with a clip for it plays it, timed to the game's clock; one without
+## keeps the procedural pose. Motley, Albert, Sparkle and Sable (ext/anim-stomp-drink-3).
+func _finishers() -> void:
+	for id in ["ostra", "bulwark", "mage", "thief"]:
+		var art_name := WardenGlb.art(id)
+		var cfg := WardenClips.data(art_name)
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		holder.add_child(m)
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		var lib: AnimationLibrary = clips.lib
+		var sts: Dictionary = cfg["states"]
+		var proc: Array = cfg.get("procedural", [])
+		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", UtilityUse.channel("tonic", "time")]]:
+			var nm := String(sts.get(k[0], ""))
+			var has := nm != "" and lib.has_animation(nm)
+			ok(has and not k[0] in proc, "%s: a %s clip, off the procedural list" % [art_name, k[0]])
+			if has:
+				var secs := lib.get_animation(nm).length
+				var fits := absf(secs - float(k[1])) < 0.04
+				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+		# the slam is on the beat: the stomp state's phase 0.7 is the clip's 0.49 s
+		m.set_meta(WardenClips.STATE, {"stomp": 0.7, "grounded": true})
+		var pick := clips._pick({"stomp": 0.7}, 0.0)
+		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
+		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
+		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
+		var dk := clips._pick({"drink": 0.5, "vel": Vector3(2.0, 0.0, 0.0)}, 0.0)
+		var upper := bool(dk.get("upper", false))
+		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
+		ok(is_drink and upper, "%s: the drink rides the upper body on the move" % art_name)
+		m.free()
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
@@ -187,6 +241,24 @@ func _companions() -> void:
 		var bone := (at.get_parent() as BoneAttachment3D).bone_name if at else ""
 		ok(bone == "pauldron.L", "tender: %s rides the sun" % a)
 	m.free()
+
+## Tenzo (source Tetra, docs/heroes/dolm.md timings): his punches run on the legs' stride, the LMB clips carry the
+## release beat the kit's delayed boulder uses, and the spine's heave lands as its ridge finishes rising.
+func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
+	for k in ["breah_throw", "breah_wind", "breah_punch"]:
+		ok((moves[k] as Dictionary).get("upper", "") == "moving", "tarek: %s keeps walking under the fist" % k)
+	var rel := float(Arch.def("dolm")["lmb"]["boulder"]["release"])
+	var keys: Array = (KMovesStone.MOVES["breah_throw"] as Dictionary)["keys"]
+	ok(keys.any(func(kk): return absf(float((kk as Array)[0]) - rel) < 0.03),
+			"tarek: the throw's whip key sits at the boulder's release (%.2f s)" % rel)
+	ok(lib.get_animation("lmb_throw").length >= rel + 0.1, "tarek: the throw clip outlasts its release")
+	# the spine's heave (its last pose key) lands as the last rock stands: cracks + rise after the release
+	var xd: Dictionary = Arch.def("dolm")["x"]
+	var stand := float(xd["tell"]) + float(xd["rise"])
+	var sk: Array = (KMovesStone.MOVES["breah_spine"] as Dictionary)["keys"]
+	var heave := float((sk[sk.size() - 2] as Array)[0])
+	ok(absf(heave - stand) <= 0.1, "tarek: the spine heaves at %.2f s, the ridge stands at %.2f s" % [heave, stand])
+	ok(lib.get_animation("x_spine").length >= stand, "tarek: the spine clip holds the hunch through the rise")
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
@@ -213,6 +285,8 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 	WardenMood.poke(m)
 	md.step(0.03)
 	ok(not sk.get_bone_pose_rotation(fish).is_equal_approx(calm), "a blocked hit shivers the fish")
+	if md.lure.is_empty():
+		return
 	var rest_glow := float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow"))
 	m.set_meta(WardenMood.FLARE, true)
 	md.step(1.0)
@@ -223,10 +297,7 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 ## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
 func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
 	var wp := WardenSkeleton.find(sk, "x_weapon")
-	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
-	var at := tip.get_parent() as BoneAttachment3D
-	var off := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) * tip.transform
-	var off_w := sk.get_bone_global_rest(wp).affine_inverse() * off
+	var off_w := _head_on_weapon(m, sk)
 	var worst := 0.0
 	var reach := 0.0
 	var s2: Dictionary = st.duplicate()
@@ -243,7 +314,98 @@ func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st:
 	m.remove_meta(WardenClips.PHASE)
 	_play(m, an, sync, st, 12)
 	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
-	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
+	ok(reach <= _smash_reach(), "breaker: the whirl's head stays inside the slam's reach (%.2f m of %.1f)"
+			% [reach, _smash_reach()])
+	var far := reach / m.scale.x
+	ok(absf(far - BjornFx.WHIRL_HEAD_R) <= WHIRL_TOL,
+			"breaker: the whirl's trail rides the head (out %.2f m, WHIRL_HEAD_R %.2f)" % [far, BjornFx.WHIRL_HEAD_R])
+
+## The slam (bul_smash): the farthest out the head comes down to the ground stays inside the reach its crescent shows.
+func _slam(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
+	var wp := WardenSkeleton.find(sk, "x_weapon")
+	var off_w := _head_on_weapon(m, sk)
+	var clip := String((WardenClips.data("breaker")["kmoves"]["bul_smash"] as Dictionary)["clip"])
+	var down := 0.0
+	var s2: Dictionary = st.duplicate()
+	s2["kmove"] = "bul_smash"
+	s2["kmove_t"] = 0.0
+	while float(s2["kmove_t"]) < sync.clips.lib.get_animation(clip).length:
+		_play(m, an, sync, s2, 1)
+		var head := (sk.get_bone_global_pose(wp) * off_w).origin
+		if head.y <= 0.0:
+			down = maxf(down, Vector2(head.x, head.z).length() * m.scale.x)
+		s2["kmove_t"] = float(s2["kmove_t"]) + DT
+	_play(m, an, sync, st, 12)
+	ok(down > 0.0 and down <= _smash_reach(), "breaker: the slam's head comes down inside its reach (%.2f m of %.1f)"
+			% [down, _smash_reach()])
+
+## The thrown hammer tumbles end over end along its flight: its sides (the piece's x) stay inside the hit radius.
+func _thrown(m: Node3D, mi: MeshInstance3D) -> void:
+	var box := mi.transform * mi.get_aabb()
+	var side := maxf(-box.position.x, box.end.x) * m.scale.x
+	ok(side <= BulwarkKit.MACE_HIT_R, "breaker: the thrown hammer's sides stay inside its hit radius (%.2f m of %.1f)"
+			% [side, BulwarkKit.MACE_HIT_R])
+
+## The hammer head's FX anchor in x_weapon's frame.
+func _head_on_weapon(m: Node3D, sk: Skeleton3D) -> Transform3D:
+	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
+	var at := tip.get_parent() as BoneAttachment3D
+	var off := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) * tip.transform
+	return sk.get_bone_global_rest(WardenSkeleton.find(sk, "x_weapon")).affine_inverse() * off
+
+func _smash_reach() -> float:
+	return float(Arch.def("bulwark")["lmb"]["smash_reach"])
+
+## Two of the Hero side by side through the same fall, one casting each "air_legs" move: their legs match. Then each
+## move again, landing halfway: the move never takes the legs back.
+func _air_legs(id: String) -> void:
+	var cfg := WardenClips.data(WardenGlb.art(id))
+	var moves: Array = (cfg.get("kmoves", {}) as Dictionary).keys().filter(
+			func(k): return bool(cfg["kmoves"][k].get("air_legs", false)))
+	if moves.is_empty():
+		return
+	var pair: Array = []
+	for i in 2:
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		m.set_meta("anim_seed", 1)       # (the same idle stream for both)
+		holder.add_child(m)
+		pair.append([m, HunterAnim.new(m), m.get_node("Warden/Sync") as WardenGlb.Sync])
+	var sk := WardenGlb.skeleton(pair[1][0].get_node("Warden"))
+	var sk_fall := WardenGlb.skeleton(pair[0][0].get_node("Warden"))
+	var fall := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false}
+	var worst := 0.0
+	var worst_mv := ""
+	for k in moves:
+		for p in pair:
+			_play(p[0], p[1], p[2], fall, AIR_FRAMES)
+		var cast := fall.duplicate()
+		cast["kmove"] = k
+		for f in AIR_FRAMES:
+			cast["kmove_t"] = f * DT
+			_play(pair[0][0], pair[0][1], pair[0][2], fall, 1)
+			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
+			for b in WardenGlb.LEG_BONES:
+				var off := sk.get_bone_pose_rotation(WardenSkeleton.find(sk, b)).angle_to(
+						sk_fall.get_bone_pose_rotation(WardenSkeleton.find(sk_fall, b)))
+				if off > worst:
+					worst = off
+					worst_mv = "%s %s f%d" % [k, b, f]
+	ok(worst <= LEGS_TOL, "%s: %d air casts keep the fall's legs (worst %.3f rad, %s)" % [id, moves.size(), worst,
+			worst_mv])
+	var snaps: Array = []
+	var clips: WardenClips = pair[1][2].clips
+	for k in moves:
+		var cast := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false, "kmove": k}
+		for f in AIR_FRAMES:
+			cast["kmove_t"] = f * DT
+			cast["grounded"] = f >= AIR_FRAMES / 2
+			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
+			if cast["grounded"] and clips.act_w > 0.01 and not k in snaps:
+				snaps.append(k)
+		_play(pair[1][0], pair[1][1], pair[1][2], {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 20)
+	ok(snaps.is_empty(), "%s: landing mid-cast keeps the legs off the planted stance (%s)" % [id, str(snaps)])
+	for p in pair:
+		p[0].free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

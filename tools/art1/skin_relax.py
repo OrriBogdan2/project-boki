@@ -3,25 +3,32 @@ Evaluates linear-blend skinning in numpy for every action of the armature (the s
 edges that stretch past LIMIT, and blends the weights of their vertices toward their neighbours'. Edges that weights alone cannot
 save (a hook that leaves the wrist, a crouch that pulls the belly apart) are then cut: their triangles go, each hole is closed again
 with a flat cap on its own side (cut()), and the edges the caps add are checked the same way. Compression is not stretch.
-Use: skin_relax.relax(arm) from a clips script, before the export. Blender only (bpy, numpy)."""
-import bmesh
-import bpy
+Use: skin_relax.relax(arm) from a clips script, before the export (Blender: bpy, numpy). relax_skin() and Skin.of() are numpy
+only, for a shipped .glb (tools/art1/glb_relax.py), so bpy and bmesh are imported only where Blender is needed.
+A shipped .glb whose bake cannot run again (its WORK files are gone) is relaxed in place, its spec's "relax" keys as KEY=JSON:
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- IN.glb OUT.glb [CAP_LAST=true ...]"""
+import json
+import os
+import sys
+
 import numpy as np
 
 LIMIT = 1.22         # x rest length: the target, under the game's 1.3 check (tools/stretch_check.gd)
 BLEND = 0.6          # how far a bad vertex's weights move toward its neighbours' per pass
-CUT_LIMIT = 1.3      # the cut takes the edges still over this after the weights are done
+CUT_LIMIT = 1.26     # the cut takes the edges still over this after the weights are done (under 1.3: the game samples between frames)
 MAX_ITER = 60
 RINGS = 1            # rings of vertices around the bad ones that relax with them (the band the stretch spreads over widens)
-STEP = 3             # frames between samples of a clip (the last frame is always sampled)
+STEP = 1             # frames between samples of a clip (every 3rd let 1.34x through between samples)
 MIN_EDGE = 0.008     # m: shorter rest edges say nothing about stretch (as in the check)
-CUTS = 3             # rounds of cut and cap; the last only cuts
+CUTS = 3             # rounds of cut and cap; the last only cuts unless CAP_LAST
+CAP_LAST = False     # the last round caps too: no open holes, the caps' own stretch is left to the check's ceiling
 HOLE_SIDES = 400     # biggest hole (edges round it) that is capped
 MAX_INFL = 4         # bones per vertex the glTF exporter keeps
 
 
 def pose_matrices(arm):
     """The skinning matrices [bone, 4, 4] (rest to pose, armature space) of every sampled frame, with the action's name."""
+    import bpy
     inv = [b.matrix_local.inverted() for b in arm.data.bones]
     out = []
     keep = arm.animation_data.action
@@ -61,6 +68,15 @@ class Skin:
         ln = np.linalg.norm(self.rest[ed[:, 0]] - self.rest[ed[:, 1]], axis=1)
         self.edges, self.len = ed[ln >= MIN_EDGE], ln[ln >= MIN_EDGE]
 
+    @classmethod
+    def of(cls, rest, w, edges):
+        """A Skin from arrays (no Blender object): rest [vertex, 3], weights [vertex, bone], edges [n, 2]."""
+        s = cls.__new__(cls)
+        s.ob, s.groups, s.rest, s.w = None, [], rest, w
+        ln = np.linalg.norm(rest[edges[:, 0]] - rest[edges[:, 1]], axis=1)
+        s.edges, s.len = edges[ln >= MIN_EDGE], ln[ln >= MIN_EDGE]
+        return s
+
     def stretch(self, poses):
         """Worst ratio of each edge over all poses [edge], and each pose's worst ratio [pose]."""
         top = np.argsort(-self.w, axis=1)[:, :MAX_INFL]
@@ -99,6 +115,11 @@ class Skin:
         np.put_along_axis(w, top, 0.0, axis=1)
         self.w[pick] = w / np.maximum(w.sum(1, keepdims=True), 1e-9)
 
+    def keep_apart(self, apart):
+        """Drops, from every vertex, the bones `apart` (limbs_apart()) forbids next to its main bone."""
+        self.w[apart[self.w.argmax(1)]] = 0.0
+        self.w /= np.maximum(self.w.sum(1, keepdims=True), 1e-9)
+
     def store(self):
         """Write the weights back to the vertex groups."""
         for g, bi in self.groups:
@@ -109,7 +130,8 @@ class Skin:
 
 def cut(s, poses, arm):
     """Deletes the triangles on edges still over CUT_LIMIT and caps each hole (no new vertices: the weights stay as they are).
-    Up to CUTS rounds; the last one only deletes. Returns the Skin of the cut mesh."""
+    Up to CUTS rounds; the last one only deletes (unless CAP_LAST). A cap takes the paint its rim has. Returns the Skin of the cut mesh."""
+    import bmesh
     for rnd in range(CUTS):
         worst, _ = s.stretch(poses)
         bad = {tuple(sorted(e)) for e in s.edges[worst > CUT_LIMIT].tolist()}
@@ -120,15 +142,22 @@ def cut(s, poses, arm):
         bm.faces.ensure_lookup_table()
         gone = [f for f in bm.faces if any(tuple(sorted((e.verts[0].index, e.verts[1].index))) in bad for e in f.edges)]
         mat, count = gone[0].material_index, len(gone)
+        opened = {v for f in gone for v in f.verts}
         bmesh.ops.delete(bm, geom=gone, context="FACES_ONLY")
         bmesh.ops.delete(bm, geom=[e for e in bm.edges if not e.link_faces], context="EDGES")
-        if rnd < CUTS - 1:
-            rim = [e for e in bm.edges if len(e.link_faces) == 1]
+        if rnd < CUTS - 1 or CAP_LAST:          # (only the holes the cut opened: the mesh's own openings stay open)
+            rim = [e for e in bm.edges if len(e.link_faces) == 1 and all(v in opened for v in e.verts)]
             new = bmesh.ops.holes_fill(bm, edges=rim, sides=HOLE_SIDES)["faces"]
             new = bmesh.ops.triangulate(bm, faces=new)["faces"]
             bmesh.ops.recalc_face_normals(bm, faces=new)
+            uv = bm.loops.layers.uv.active
+            caps = set(new)
             for f in new:
                 f.material_index = mat
+                for lp in f.loops:
+                    src = next((x for x in lp.vert.link_loops if x.face not in caps), None)
+                    if uv is not None and src is not None:
+                        lp[uv].uv = src[uv].uv
         bm.to_mesh(s.ob.data)
         bm.free()
         s.ob.data.update()
@@ -137,35 +166,91 @@ def cut(s, poses, arm):
     return s
 
 
+def limbs_apart(names, parent):
+    """[bone, bone] mask: True where the second bone may not weight a vertex whose main bone is the first. A limb is an
+    upper_arm.* or thigh.* bone and every bone under it; a limb's deeper bones (forearm, hand, props, shin, foot) stay off the
+    torso and off the other limbs (heat weights bleed a hanging hand into the thigh beside it). The limb roots may blend
+    with anything (shoulder, hip and crotch). parent: each bone's parent index, -1 for none."""
+    limb = []
+    for i in range(len(names)):
+        j = i
+        while j >= 0 and not names[j].startswith(("upper_arm.", "thigh.")):
+            j = parent[j]
+        limb.append(j)
+    limb = np.array(limb)
+    deep = (limb >= 0) & (limb != np.arange(len(names)))
+    return deep[None, :] & (limb[None, :] != limb[:, None])
+
+
+def relax_skin(s, poses, name):
+    """Blends the weights of `s` until no edge stretches past LIMIT in any pose or MAX_ITER passes; prints before and after."""
+    before, per = s.stretch(poses)
+    first, bad0 = max(per), int((before > LIMIT).sum())
+    live = poses
+    for it in range(MAX_ITER):
+        if it % 8 == 0:        # every few passes, look at every pose again; in between, only at those that were over
+            before, per = s.stretch(poses)
+            live = [p for p, r in zip(poses, per) if r > LIMIT] or poses
+        bad = before > LIMIT
+        if not bad.any():
+            if live is poses:
+                break
+            live = poses
+            before, per = s.stretch(poses)
+            continue
+        s.relax_once(bad)
+        before, per = s.stretch(live)
+    before, per = s.stretch(poses)
+    print("relax %s: edges over 1.3: %d, over 2: %d, over 5: %d" % (name, (before > 1.3).sum(), (before > 2).sum(), (before > 5).sum()))
+    print("relax %-14s verts %5d edges over %.2f: %d -> %d after %d passes, worst %.2f -> %.2f"
+          % (name, len(s.w), LIMIT, bad0, int((before > LIMIT).sum()), it, first, max(per)), flush=True)
+
+
 def relax(arm):
     """Relaxes every mesh skinned to `arm`; prints the worst stretch per action before and after. Returns the edges left over."""
+    import bpy
     poses = pose_matrices(arm)
     skins = [Skin(o, arm) for o in bpy.data.objects if o.type == "MESH" and any(m.type == "ARMATURE" and m.object == arm for m in o.modifiers)]
     left = 0
     for s in skins:
-        before, per = s.stretch(poses)
-        first, bad0 = max(per), int((before > LIMIT).sum())
-        live = poses
-        for it in range(MAX_ITER):
-            if it % 8 == 0:        # every few passes, look at every pose again; in between, only at those that were over
-                before, per = s.stretch(poses)
-                live = [p for p, r in zip(poses, per) if r > LIMIT] or poses
-            bad = before > LIMIT
-            if not bad.any():
-                if live is poses:
-                    break
-                live = poses
-                before, per = s.stretch(poses)
-                continue
-            s.relax_once(bad)
-            before, per = s.stretch(live)
-        before, per = s.stretch(poses)
-        print("relax %s: edges over 1.3: %d, over 2: %d, over 5: %d" % (s.ob.name, (before > 1.3).sum(), (before > 2).sum(), (before > 5).sum()))
-        print("relax %-14s verts %5d edges over %.2f: %d -> %d after %d passes, worst %.2f -> %.2f"
-              % (s.ob.name, len(s.w), LIMIT, bad0, int((before > LIMIT).sum()), it, first, max(per)), flush=True)
+        relax_skin(s, poses, s.ob.name)
         s.store()
         s = cut(s, poses, arm)
         before, per = s.stretch(poses)
         left += int((before > LIMIT).sum())
         print("relax %s after cuts: edges over %.2f: %d, worst %.2f" % (s.ob.name, LIMIT, (before > LIMIT).sum(), max(per)), flush=True)
     return left
+
+
+def relax_glb(src, out, overrides):
+    """Imports a game .glb (bone axes as exported, so the rest re-exports unchanged), relaxes it and exports it again with
+    v95_swap.py's export settings."""
+    import bpy
+    from posekit import FPS
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.context.scene.render.fps = FPS     # (the importer keys the clips on the scene's frames: at 24 fps their ends round off)
+    bpy.ops.import_scene.gltf(filepath=src, bone_heuristic="BLENDER")
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    if arm.animation_data is None:
+        arm.animation_data_create()
+    for k, v in overrides.items():
+        setattr(sys.modules[__name__], k, json.loads(v))
+    relax(arm)
+    for act in bpy.data.actions:        # an imported clip ends a hair under its last frame, and the export would drop it
+        act.use_frame_range = True
+        act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
+    arm.animation_data.action = None
+    for o in bpy.data.objects:
+        o.select_set(o.type in ("ARMATURE", "MESH", "EMPTY"))
+    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    tris = sum(len(p.vertices) - 2 for o in bpy.data.objects if o.type == "MESH" for p in o.data.polygons)
+    print("relax exported", out, "tris", tris, flush=True)
+
+
+if __name__ == "__main__" and "--" in sys.argv:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    args = sys.argv[sys.argv.index("--") + 1:]
+    relax_glb(args[0], args[1], dict(a.split("=", 1) for a in args[2:]))

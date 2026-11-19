@@ -14,22 +14,29 @@ static func line(k: Kin, trigger_id: String) -> String:
 	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
-static func say(m: Match, k: Kin, trigger_id: String) -> void:
+## fill: placeholders in the line and what replaces them ("%H" -> "the lava").
+static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if k == null or k.dead or k.state == "downed":
 		return
 	if k.state == "fused" and k.owner_h != null and KinMerge.in_form(k.owner_h):
 		return
 	var txt := line(k, trigger_id)
+	for key in fill:
+		txt = txt.replace(key, fill[key])
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
+
+## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
+static func heard(m: Match, k: Kin) -> bool:
+	return k.owner_h == m.player or m.music_dir == null or not m.music_dir.fight_on(m)
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
 	"land": ["That meadow looks nice and quiet!", "(peeks over your shoulder at the ground below)"],
 	"points": ["One point to start. Pick well!", "(holds up one paw, very serious)"],
-	"pick_sec": ["That one! Your right click!", "(points its nose at the glowing button)"],
+	"pick_sec": ["That one! Press %S!", "(points its nose at the glowing button)"],
 	"sec": ["Use your power on them!", "(watches your hands, tail going)"],
-	"shoot": ["Get them! They're worth XP!", "(growls at the monster)"],
+	"shoot": ["Get them!", "(growls at the monster)"],
 	"pick_dash": ["You leveled up! Take the dash!", "(zips off to the side and back, showing you)"],
 	"dash": ["Dash across, like this!", "(zips off to the side and back, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],

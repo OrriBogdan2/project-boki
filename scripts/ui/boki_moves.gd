@@ -32,11 +32,11 @@ func _init(species: String, rec := {}) -> void:
 		var lines := [KinText.ability(eff), "%s  ·  %ss cooldown" % [_when(ad, slot), KinText.n(ad.cooldown)]]
 		_add(ad.display_name, KinText.icon(ad), KinText.color(ad).lerp(UI.INK, 0.2), lines, false)
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud:
+	if ud and MergeForm.enabled():
 		var head: Array = KinText.merge(ud, kspec != null and kspec.carry_style == "mount")
 		var what := String(head[0]) if not head.is_empty() else ""
 		var lines := [what, "Fill the bond meter, then press %s to fuse" % Settings.key_caps("ultimate")]
-		_add(ud.display_name, "bond", BOND_COL, lines, true)
+		_add(ud.display_name, KinText.merge_icon(ud), BOND_COL, lines, true)
 	tip = UI.card(Color(UI.NIGHT, 0.96), 12, 10)
 	UI.set_card_border(tip, UI.LINE, 1)
 	tip.top_level = true
@@ -50,9 +50,9 @@ func _init(species: String, rec := {}) -> void:
 ## When it goes off: its first ability on its own once it is out, the others on their own cue.
 func _when(ad: AbilitySpec, slot: String) -> String:
 	if slot == "k1":
-		return "Uses it on its own once you send it out (%s)" % Settings.key_cap("throw")
+		return "The Boki uses it by choice once you send the Boki out (%s)" % Settings.key_cap("throw")
 	var w := KinText.when(ad)
-	return w if w != "" else "Uses it on its own"
+	return w if w != "" else "The Boki uses it by choice"
 
 func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> void:
 	var t := PanelContainer.new()

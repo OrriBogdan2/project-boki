@@ -2,12 +2,21 @@ class_name FirstMatchGuide
 extends RefCounted
 ## "What to do next" for a new player's first two real Extractions: one highlighted plain line at a time
 ## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
-## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
+## on its trigger or after its time, and never in the plane or the drop.
+## It is only drawn: it never pauses or blocks anything. The save's
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
+## The "dive" line outlives that: the first time the glider has been open for a while, high up, in any
+## Extraction, it says which key dives. It shows once per save and stops at the first dive
+## (Save.d tutorial glide_dive); a guide kept only for it has `dive_only`.
+## The closing zone's two lines (the safe ring at the first warning; "you are outside" once the wall has
+## passed you) are told once per profile, not once per match.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
-const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
+## What to say first when two lines are due.
+const ORDER := ["land", "dive", "zone", "wall", "mates", "blight", "exit", "rank", "send", "chest"]
+## The closing zone's two lines: taught once, then the save remembers.
+const ONCE_PER_PROFILE := ["zone", "wall"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
@@ -17,6 +26,8 @@ var shown := {}               # ids already shown this match
 var _t := 0.0                 # s the line has been up
 var _gap := 0.0               # s of quiet left before the next line
 var _throws0 := 0             # the Boki's sends when its line came up
+var dive_only := false        # past the first matches: only the dive line can show
+var _glide_t := 0.0           # s the glider has been open (and above dive_height) without a break
 
 static func rules() -> Dictionary:
 	return Content.rules("first_match_guide")
@@ -27,12 +38,18 @@ static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
 		if opts.get(skip, false):
 			return null
 	var n := int(Save.d.get("first_guide", 0))
-	if n >= int(rules()["matches"]):
-		return null
-	Save.d["first_guide"] = n + 1
 	var g := FirstMatchGuide.new()
 	g.m = mt
+	if n < int(rules()["matches"]):
+		Save.d["first_guide"] = n + 1
+	elif dive_taught():
+		return null
+	else:
+		g.dive_only = true
 	return g
+
+static func dive_taught() -> bool:
+	return bool(Save.d["tutorial"].get("glide_dive", false))
 
 ## Old saves: one that has played already has had its first matches (keyed by its own field, like FarmBuilder).
 static func migrate(data: Dictionary) -> void:
@@ -41,11 +58,12 @@ static func migrate(data: Dictionary) -> void:
 
 func tick(dt: float) -> void:
 	var p := m.player
-	if p == null or p.out or p.extracted or p.downed:
+	if p == null or p.out or p.extracted or p.downed or p.riding or p.dropping:
 		line = ""
 		id = ""
 		return
 	_gap = maxf(_gap - dt, 0.0)
+	_watch_glide(p, dt)
 	if id != "":
 		_t += dt
 		if _t >= _life(id) or _done(id, p):
@@ -54,9 +72,20 @@ func tick(dt: float) -> void:
 			_gap = float(rules()["gap"])
 	if id == "" and _gap <= 0.0:
 		for cand: String in ORDER:
-			if not shown.has(cand) and _due(cand, p):
+			if not shown.has(cand) and (cand == "dive" or not dive_only) and _due(cand, p):
 				_start(cand, p)
 				return
+
+## Times the open glider; a dive (here or anywhere) counts as learnt for good.
+func _watch_glide(p: Hunter, dt: float) -> void:
+	if p.glide_dive.on:
+		Save.d["tutorial"]["glide_dive"] = true
+	var open := p.gliding and not p.dropping and GlideDive.height(p) > float(rules()["dive_height"])
+	_glide_t = _glide_t + dt if open else 0.0
+
+## Seconds the line has been up, -1 when none is.
+func strip_age() -> float:
+	return _t if line != "" else -1.0
 
 func _life(lid: String) -> float:
 	for row: Array in rules()["lines"]:
@@ -67,27 +96,47 @@ func _life(lid: String) -> float:
 func _start(lid: String, p: Hunter) -> void:
 	id = lid
 	shown[lid] = true
+	if lid in ONCE_PER_PROFILE:
+		Save.d["tutorial"]["guide_" + lid] = true
 	_t = 0.0
 	_throws0 = p.kin.st_throws if p.kin else 0
 	var txt := ""
 	for row: Array in rules()["lines"]:
 		if row[0] == lid:
 			txt = String(row[1])
+	if lid == "dive":
+		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
+	if lid == "send":
+		m.tip_once("ability")      # the same lesson as the Boki-key hint: one voice, not two
+	if lid == "exit":
+		txt = _exit_text(txt)
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
-	line = TutorialText.fill(txt, p).replace("%s", who)
+	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
+	TutorialStrip.chime(m)
+
+## The exit line names the way out the top-centre goal line points at, so the guide, the line and the map agree.
+func _exit_text(txt: String) -> String:
+	var i := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	if i < 0:
+		return String(rules()["exit_none"])
+	return txt.replace("%X", WaysOutMap.WORDS[i]).replace("%H", ExtractGoal.how(i))
 
 func _left() -> float:
 	return (m.length - m.time) / m.length
 
-func _enemy_near(p: Hunter) -> bool:
-	for h in m.hunters:
-		if h.team != p.team and not h.out and not h.extracted and not h.downed \
-				and h.pos.distance_to(p.pos) <= float(rules()["squad_range"]):
-			return true
-	return false
-
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
+
+func _zone_told(lid: String) -> bool:
+	return bool(Save.d["tutorial"].get("guide_" + lid, false))
+
+
+## B is worth knowing: a teammate can take you, and they're all far off.
+func _mates_due(p: Hunter) -> bool:
+	if BaseRecall.target(m, p) == null:
+		return false
+	return BaseRecall.mates(m, p).all(
+			func(o: Hunter): return o.pos.distance_to(p.pos) > float(rules()["mates_far"]))
 
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
@@ -98,8 +147,13 @@ func _due(lid: String, p: Hunter) -> bool:
 		return p.dropping
 	if p.dropping:
 		return false
+	if lid in ONCE_PER_PROFILE and (m.zone == null or _zone_told(lid)):
+		return false
 	match lid:
-		"squad": return _enemy_near(p)
+		"dive": return not dive_taught() and _glide_t >= float(rules()["dive_open_s"])
+		"zone": return m.zone.told >= 1
+		"wall": return m.zone.k >= 1 and m.zone.outside(p.pos)
+		"mates": return _mates_due(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
 		"rank": return p.ak != null and p.skill_pts > 0
@@ -110,8 +164,10 @@ func _due(lid: String, p: Hunter) -> bool:
 ## Has the player done what this line says (or is it no longer true)?
 func _done(lid: String, p: Hunter) -> bool:
 	match lid:
+		"dive": return p.glide_dive.on or not p.gliding
 		"land": return not p.dropping
-		"squad": return not _enemy_near(p)
+		"wall": return not m.zone.outside(p.pos)
+		"mates": return BaseWheel.is_open(p) or p.base_t > 0.0
 		"exit": return _exit_near(p)
 		"rank": return p.skill_pts == 0
 		"send": return not _kin_ready(p) or p.kin.st_throws > _throws0
@@ -120,9 +176,23 @@ func _done(lid: String, p: Hunter) -> bool:
 
 ## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.
 func draw(h, sz: Vector2) -> void:
-	if line == "":
-		return
-	var below := WaysOutHud.bottom(h.m)
-	if h.m.skydrop and h.m.skydrop.planning:
+	draw_line(h, sz, line, _t)
+
+## Where the banner line sits at age `t` (under the Ways Out strip and the ship's countdown line).
+static func strip_rect(mt: Match, sz: Vector2, t := INF) -> Rect2:
+	return TutorialStrip.shown(sz, t, _below(mt))
+
+## One banner line, faded in over its first quarter second (the crouch hint draws through this too).
+static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
+	if text != "":
+		TutorialStrip.paint(h.c, h.big, strip_rect(h.m, sz, t), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
+
+## Where the line's strip ends (0 with no line up): the message column starts under it, never behind it.
+func bottom(sz: Vector2) -> float:
+	return TutorialStrip.rect(sz, _below(m)).end.y + MsgLane.GAP if line != "" else 0.0
+
+static func _below(mm: Match) -> float:
+	var below := WaysOutHud.bottom(mm)
+	if mm.skydrop and mm.skydrop.planning:
 		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
+	return below

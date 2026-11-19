@@ -1,52 +1,52 @@
-# Weapon firing data: how attacks work in Supervive, and what Project Boki does with it
+# Weapon firing data: how attacks work in the reference, and what Project Boki does with it
 
 Sources:
 - Frame-by-frame measurements of 60fps practice-range footage: Ryan Lemur's all-abilities video and the TheSixGame walkthrough.
 - Patch notes (Steam/SteamDB) and the wiki.
 
-Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]` = never published.
+Units: The reference's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]` = never published.
 
 ## 1. The big rules
 
 | Rule | Detail | Source |
 |---|---|---|
 | **No hitscan** | Every attack is a projectile, bolt, shot or beam. Even fast rifles fire real projectiles | [patch]/[wiki] |
-| Standard shot speed | **32–40 m/s**: Shiv 32.5 (35 at 1.0, 40 empowered), Crysta 36 | [patch] 1.0–1.04 |
+| Standard shot speed | **32–40 m/s**: ref-thief 32.5 (35 at 1.0, 40 empowered), ref-crystal 36 | [patch] 1.0–1.04 |
 | Rifle tracers | Too fast to follow on video (≥100 m/s visually); streak visible ~0.08s | [footage] |
 | Heavy single shots | Sniper round visibly travels ~30 m/s, so it can be dodged | [footage] |
 | Shots are height-aware | Hit volumes are 3D (patch fixes for targets above or below the shooter) | [patch] Jun 2025 |
 | Range is exact | Projectiles stop at max range ("tech change to precisely control projectile ranges") | [patch] Nov 2024 |
-| Fall-off | Elluna: none up to 50% of range, up to −50% past it. Saros: reduced up close, full after 9m. Shrike: 50% point-blank, full from ⅓–½ range | [wiki]/[patch] |
+| Fall-off | ref-tender: none up to 50% of range, up to −50% past it. ref-hunter: reduced up close, full after 9m. ref-sniper: 50% point-blank, full from ⅓–½ range | [wiki]/[patch] |
 | No crits or headshots | Instead: blade-tip sweet spots, perfect-release bonuses (bow), backstabs (+30%), executes on low HP | [wiki]/[patch] |
 | Global damage | S2: all damage ×0.90 | [patch] Nov 2025 |
 
 ## 2. Per weapon type
 
-| Type | What Supervive does | Numbers | Source |
+| Type | What the reference does | Numbers | Source |
 |---|---|---|---|
-| **Auto rifle** (Ghost) | Hold to fire. 30-round magazine. Damage per round falls over the first 10 rounds to 50%, so short bursts are rewarded | ~12 shots/s (0.08s apart) | [wiki] + [footage] |
-| **Burst blaster** (Carbine) | Up to 3 quick shots, then reload. First shot of a full magazine hits harder beyond ~50% range. Dashing gives a free empowered shot | reload time [gap] | [wiki] |
-| **Shotgun** (Kingpin) | 7 slugs in a wide fan; two white cone lines show the spread on the ground. Slugs **slow down and stop** at ~4.5m, leaving a row of dots. **Accuracy gets worse with every shot; dashing resets it.** Damage by slugs landing (1→7): 45.7 / 57.9 / 70.1 / 82.4 / 88.3 / 94.1 / 100% | one shot every **~0.9s**, cone **~70°** | [footage] + [patch] Nov 2025 |
-| **Minigun** (Hudson) | Hold to fire. Spread starts wide and tightens the longer you hold; standing still tightens it faster. Spin up (hold RMB) for more damage, range (11.5 → 13m) and fire rate, but you slow to 50% and turn at 45°/s max. Letting go when spun up = ~1s you can't fire | 0.1s per shot | [wiki]/[patch] |
-| **Sniper** (Shrike) | Press → **~0.6–0.7s aim with a laser enemies can see**, then the shot. 50% damage point-blank, full from ⅓ range. "Warmup" sound plays even in fog of war | one shot per **1.5s**; round ~30 m/s | [footage] + [patch] |
-| **Bow / charge** (Myth) | Hold to draw: green stage at 0.5s, blue stage up to 0.6s more (1.1s total). Damage, speed and distance grow. Releasing at the perfect moment gives bonus damage and a smaller self-slow | window [gap] | [wiki] |
-| **Rapid darts** (Celeste) | Hold for a burst of semi-homing darts ending in 3 bigger darts | — | [wiki] |
-| **Flamethrower** (Felix) | Hold. 0.35s before you can fire again after letting go, plus a 0.35s self-slow | 2 burn stacks every ~65ms | [patch] |
-| **Thrown weapon** (Oath hammer) | Throw (pierces), press again to recall. Minimum throw 5m; 0.25s recall lockout "so you can't autoclick" | — | [patch] |
-| **Idle-charged shot** (Void, Elluna) | After a short pause in firing, the next shot is empowered (faster or further, passes terrain) | idle time [gap] | [wiki] |
+| **Auto rifle** (ref-gunslinger) | Hold to fire. 30-round magazine. Damage per round falls over the first 10 rounds to 50%, so short bursts are rewarded | ~12 shots/s (0.08s apart) | [wiki] + [footage] |
+| **Burst blaster** (ref-burst) | Up to 3 quick shots, then reload. First shot of a full magazine hits harder beyond ~50% range. Dashing gives a free empowered shot | reload time [gap] | [wiki] |
+| **Shotgun** (ref-dredge) | 7 slugs in a wide fan; two white cone lines show the spread on the ground. Slugs **slow down and stop** at ~4.5m, leaving a row of dots. **Accuracy gets worse with every shot; dashing resets it.** Damage by slugs landing (1→7): 45.7 / 57.9 / 70.1 / 82.4 / 88.3 / 94.1 / 100% | one shot every **~0.9s**, cone **~70°** | [footage] + [patch] Nov 2025 |
+| **Minigun** (ref-minigun) | Hold to fire. Spread starts wide and tightens the longer you hold; standing still tightens it faster. Spin up (hold RMB) for more damage, range (11.5 → 13m) and fire rate, but you slow to 50% and turn at 45°/s max. Letting go when spun up = ~1s you can't fire | 0.1s per shot | [wiki]/[patch] |
+| **Sniper** (ref-sniper) | Press → **~0.6–0.7s aim with a laser enemies can see**, then the shot. 50% damage point-blank, full from ⅓ range. "Warmup" sound plays even in fog of war | one shot per **1.5s**; round ~30 m/s | [footage] + [patch] |
+| **Bow / charge** (ref-archer) | Hold to draw: green stage at 0.5s, blue stage up to 0.6s more (1.1s total). Damage, speed and distance grow. Releasing at the perfect moment gives bonus damage and a smaller self-slow | window [gap] | [wiki] |
+| **Rapid darts** (ref-rimewright) | Hold for a burst of semi-homing darts ending in 3 bigger darts | — | [wiki] |
+| **Flamethrower** (ref-ashwick) | Hold. 0.35s before you can fire again after letting go, plus a 0.35s self-slow | 2 burn stacks every ~65ms | [patch] |
+| **Thrown weapon** (ref-bulwark hammer) | Throw (pierces), press again to recall. Minimum throw 5m; 0.25s recall lockout "so you can't autoclick" | — | [patch] |
+| **Idle-charged shot** (ref-ostra, ref-tender) | After a short pause in firing, the next shot is empowered (faster or further, passes terrain) | idle time [gap] | [wiki] |
 
 ## 3. Melee
 
 | Rule | Detail | Source |
 |---|---|---|
-| Swing speed | Combo swings land **~0.2s apart**; each swing's trail shows for only ~2 frames | [footage] (Brall) |
-| Reach | Blade arc ~1.7m; a finishing spin ~2.5m; Brall's swing radius 3.2m (Sep 2025) | [footage]/[patch] |
+| Swing speed | Combo swings land **~0.2s apart**; each swing's trail shows for only ~2 frames | [footage] (ref-juggernaut) |
+| Reach | Blade arc ~1.7m; a finishing spin ~2.5m; ref-juggernaut's swing radius 3.2m (Sep 2025) | [footage]/[patch] |
 | Hitbox shape | A wedge ("slice") matching the animation, not a box. Width tuned to match the visual effect | [patch] |
-| Sweet spot | The central tip of the blade only (Brall, Nyx's 3rd hit) | [patch] Jan 2025 |
-| Tap vs hold | Tap = 3-hit combo (Wukong, Jin, Nyx); hold = charged attack. Jin: "release the moment it's fully charged" | [wiki]/[patch] |
-| Lunges | Many swings push you forward. **Repeated lunges get weaker: −25% per use within a short window**; lunges on the ground don't count toward it (Wukong) | [patch] Jul–Sep 2025 |
-| Aim during lunges | Jin's dashes curve to follow the cursor (for backstab angles) | [patch] Nov 2025 |
-| Knockback | Players **steer knockback with WASD**. High influence: Brall LMB, Beebo tap, Jin's first hit. Medium: charged hits | [patch] Jun 2025 |
+| Sweet spot | The central tip of the blade only (ref-juggernaut, Nyx's 3rd hit) | [patch] Jan 2025 |
+| Tap vs hold | Tap = 3-hit combo (ref-staff, ref-duelist, Nyx); hold = charged attack. ref-duelist: "release the moment it's fully charged" | [wiki]/[patch] |
+| Lunges | Many swings push you forward. **Repeated lunges get weaker: −25% per use within a short window**; lunges on the ground don't count toward it (ref-staff) | [patch] Jul–Sep 2025 |
+| Aim during lunges | ref-duelist's dashes curve to follow the cursor (for backstab angles) | [patch] Nov 2025 |
+| Knockback | Players **steer knockback with WASD**. High influence: ref-juggernaut LMB, ref-hunter tap, ref-duelist's first hit. Medium: charged hits | [patch] Jun 2025 |
 | Knockback and lag | Small knockbacks caused rubber-banding at high ping, so some were removed | [patch] Dec 2024 |
 | Flick tech | Sweeping the aim mid-swing to hit several enemies was removed | [patch] Sep 2025 |
 
@@ -55,8 +55,8 @@ Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]
 | Rule | Detail | Source |
 |---|---|---|
 | Input buffer | Press during a lockout and it fires when allowed, within **0.2s** (was 0.3) | [patch] Jan 2025 |
-| Self-slows | Common on heavy or charged attacks: minigun 50%, Joule LMB 0.4s, Felix 0.35s after release, bow while drawing, Wukong combo | [patch] |
-| Turn limits | Big wind-ups restrict turning (minigun 45°/s, Brall and Kingpin windups) | [patch] |
+| Self-slows | Common on heavy or charged attacks: minigun 50%, ref-mage LMB 0.4s, ref-ashwick 0.35s after release, bow while drawing, ref-staff combo | [patch] |
+| Turn limits | Big wind-ups restrict turning (minigun 45°/s, ref-juggernaut and ref-dredge windups) | [patch] |
 | Wind-down | Some attacks and dashes have recovery frames where you can't open the glider | [patch] |
 | Telegraphs | Sniper laser visible to enemies; red ground decals on big attacks; warning icon over a charging melee player; cast bar on the health bar; separate tap and hold cast bars | [patch]/[footage] |
 | Aim UI | Aiming laser (can extend past the cursor for piercing shots), ground circles showing hitboxes (including targets above or below you), cooldown ring on the cursor | [guide]/[patch] |
@@ -92,6 +92,7 @@ Units: Supervive's 1 unit = 1 cm. Tags: `[footage]`, `[patch]`, `[wiki]`, `[gap]
 - **`weapon_user.gd`:** fires whatever WeaponProfile is equipped.
   - **Guns:** auto, burst, single shot, spin-up and sniper warmup. Magazines with auto-reload; spread that grows per shot and recovers; dashing resets spread; minigun spread that tightens; rifle damage that drops when holding fire; fall-off near and far; shotgun slug-count damage table; slowed while firing; lockout and slow after letting go.
   - **Swords:** tap for the combo, hold to charge. Wedge-shaped hits with a blade-tip sweet spot and knockback the target can steer. **Kinfall change (Oct 2026):** a basic LMB swing never moves you (no per-swing lunge, no finisher step) and charged attacks are stationary too; gap-closers live on right click (Twin Blades' Shadow Lunge, Longsword's Rising Cut). Reach was raised a little so swings still connect: Twin Blades 2.0 -> 2.3m, Longsword 2.4 -> 2.7m, Greatsword 3.2 -> 3.4m.
+- **Where shots start (`scripts/combat/shot_origin.gd`, `Match.spawn_shot`):** where a shot leaves isn't published [gap]. One rule covers every shot: the hit sweep starts at the shooter's centre (at the muzzle's height), so nothing spawns inside a wall you hug, and a foe touching you takes the hit. The shot is still drawn from the muzzle, and the muzzle flash stays there too. Kits keep spawning at their muzzle (0.6 m ahead, melee strikes 0.25 m). Any start within 0.7 m, along the shot's own line, is pulled back to the body, and the shot's life grows so its reach is unchanged. Launch points placed further out (Dolm's landslide rock 0.9 m ahead, a punched rock, a split shot, a lob) keep their own start. A shot that meets a wall or cliff ends at the last free point in front of the face, so its miss puff (and any on-wall effect) shows. Cinder's fire stream starts at her body the same way (its rules nozzle was 1.3 m out), with its reach unchanged; it's still drawn from her palm. Remote copies start from the same point. Check: `--point-blank-check`.
 - **`training_dummy.gd`:** target with floating damage numbers, a hit flash, knockback and DPS tracking.
 - **The hunter** now has HP, `take_hit(info)` (gliders take ×2, damage heat, spike credit, steerable knockback, stun), and a speed multiplier weapons set while firing.
 

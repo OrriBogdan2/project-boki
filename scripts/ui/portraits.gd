@@ -25,12 +25,31 @@ static var _cuts := {}        # "path|w|h|grey" -> ImageTexture
 static var _art := {}         # path -> its Texture2D, kept once read (a face drawn again never reads the disk)
 static var _jobs := {}        # cut key -> [worker task id, the cut Image once done] for cut_soon
 
-## The painted art for an archetype: its splash if asked and it has one, else its portrait; "" if none.
-static func art_path(ak: String, splash := false) -> String:
+## The painted art for an archetype: its splash if asked and it has one, else its portrait (in `mood`
+## "hurt" or "excited": <archetype>_<mood>.jpg where it has one); "" if none.
+static func art_path(ak: String, splash := false, mood := "") -> String:
+	if mood != "" and ResourceLoader.exists(art_dir + ak + "_" + mood + ".jpg"):
+		return art_dir + ak + "_" + mood + ".jpg"
 	if splash and ResourceLoader.exists(art_dir + ak + "_splash.jpg"):
 		return art_dir + ak + "_splash.jpg"
 	var path := art_dir + ak + ".jpg"
 	return path if ResourceLoader.exists(path) else ""
+
+## The fallen Hunter's memories for the Relic moment (MaskBeat): three painted memories (their past, their fall,
+## the legend: art/portraits/memory/<archetype>_1..3.webp), else their face and then their splash.
+static func memory_frames(ak: String) -> Array[String]:
+	var out: Array[String] = []
+	for i in 3:
+		var p := art_dir + "memory/%s_%d.webp" % [ak, i + 1]
+		if not ResourceLoader.exists(p):
+			out.clear()
+			break
+		out.append(p)
+	if out.is_empty():
+		for f in [art_path(ak), art_path(ak, true)]:
+			if f != "" and not out.has(f):
+				out.append(f)
+	return out
 
 ## Whether an archetype has a painted portrait (else its frames show the rendered model).
 static func has_art(ak: String) -> bool:
@@ -49,11 +68,12 @@ static func corner(sz: Vector2) -> int:
 ## `edge`: the frame's colour. `state`: "" alive, "down" (red pulse, drained), "dead" (grey + X),
 ## "out" (check). `hurt` 0..1 flashes red on a hit; `low` 0..1 (health running out) drains the colour
 ## and pulses a red inner edge, the same rule as the health bar. `splash`: the splash where it has one.
+## `mood`: "hurt" / "excited" shows that face where the archetype has one.
 static func draw(c: CanvasItem, r: Rect2, ak: String, fallback: Texture2D, edge: Color, state := "", hurt := 0.0,
-		low := 0.0, time := 0.0, splash := false) -> void:
+		low := 0.0, time := 0.0, splash := false, mood := "") -> void:
 	var rad := corner(r.size)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE_EDGE, rad + 2, Color(edge, 0.9), 2), r.grow(2.0))
-	var path := art_path(ak, splash)
+	var path := art_path(ak, splash, mood)
 	if path == "":
 		if fallback:
 			c.draw_texture_rect(fallback, r, false)
@@ -190,14 +210,14 @@ static func _draw_state(c: CanvasItem, r: Rect2, rad: int, state: String, hurt: 
 		c.draw_style_box(HudStyle.box(Color(HudStyle.HURT, 0.4 * a), rad, Color(1, 0.92, 0.85, 0.8 * a), 2), r)
 	if low > 0.02:
 		var a := snappedf(clampf(low * (0.55 + 0.45 * pulse), 0.0, 1.0), 0.125)
-		c.draw_style_box(HudStyle.box(Color(0.6, 0.02, 0.0, 0.12 * a), rad, Color(HudStyle.FOE, a), 3), r)
+		c.draw_style_box(HudStyle.box(Color(0.6, 0.02, 0.0, 0.12 * a), rad, Color(SideColor.foe(), a), 3), r)
 	if state == "dead":
 		var k := r.size.x * 0.22
 		var cross := [[r.position + Vector2(k, k), r.end - Vector2(k, k)],
 			[Vector2(r.end.x - k, r.position.y + k), Vector2(r.position.x + k, r.end.y - k)]]
 		for pair in cross:
 			c.draw_line(pair[0], pair[1], Color(0, 0, 0, 0.7), 9.0, true)
-			c.draw_line(pair[0], pair[1], HudStyle.FOE, 5.0, true)
+			c.draw_line(pair[0], pair[1], SideColor.foe(), 5.0, true)
 	elif state == "out":
 		c.draw_style_box(HudStyle.box(Color(0.05, 0.15, 0.12, 0.5), rad, Color(0, 0, 0, 0), 0), r)
 		var tick := PackedVector2Array([r.position + r.size * Vector2(0.25, 0.52),

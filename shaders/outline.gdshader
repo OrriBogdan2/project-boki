@@ -25,6 +25,13 @@ uniform float glow_k = 1.3;
 uniform float glow_px = 1.4;    // (pixels of a 720 px tall view)
 uniform float glow_near = 7.0;
 uniform float glow_far = 14.0;
+// A shield's shell (ShieldLook): 0 to 1 fades the line from shell_from (the model's own ink colour) into color and
+// thins it to SHELL_THIN of its width; above 1 (the pulse before the shield expires) it also brightens and swells.
+// 1 for every other ink: color at full width.
+uniform float shell = 1.0;
+uniform vec4 shell_from : source_color = vec4(0.08, 0.065, 0.12, 1.0);
+const float SHELL_THIN = 0.4;
+const float SHELL_SWELL = 0.6;
 const float INK_ROOM = 0.02;
 varying float far_d;
 void vertex() {
@@ -42,6 +49,7 @@ void vertex() {
 		if (ink_mask) { w = min(w, COLOR.a * INK_ROOM); }
 		w *= 1.0 - far_thin * smoothstep(8.0, 18.0, d);
 	}
+	w *= mix(SHELL_THIN, 1.0, min(shell, 1.0)) * (1.0 + SHELL_SWELL * max(shell - 1.0, 0.0));
 	VERTEX += NORMAL * w;
 }
 void fragment() {
@@ -50,6 +58,6 @@ void fragment() {
 		ALBEDO = min(texture(glow_tex, UV).rgb * glow_col.rgb * glow_k, vec3(1.0));
 	} else {
 		if (far_cut > 0.0 && smoothstep(8.0, 18.0, far_d) >= far_cut) { discard; }
-		ALBEDO = color.rgb;
+		ALBEDO = mix(mix(shell_from.rgb, color.rgb, min(shell, 1.0)), vec3(1.0), max(shell - 1.0, 0.0));
 	}
 }

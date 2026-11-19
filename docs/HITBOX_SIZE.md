@@ -1,23 +1,10 @@
 # Hitbox size (OWNER_REVIEW item 46)
 
-Each hunter's hitbox radius is `Arch.hit_r(arch, class)`: the archetype's `body.hit_r` in `content/archetypes/<id>.json`, else the class's. The standard is the Medium class radius, 0.40 m. Hitboxes follow the Warden's visual size, compressed into 0.85-1.15 x standard so small hunters are not much harder to hit. Size and build both count: broad Wardens sit higher than their height alone, thin ones lower. Source of the multipliers: the concept art pass, `docs/art/concepts/README.md` (ext/concepts), "Heights and recommended hitbox size".
+Each hunter's hitbox radius is `Arch.hit_r(arch, class)`: the archetype's `body.hit_r` in `content/archetypes/<id>.json`, else the class's. The standard is the Medium class radius, 0.40 m. Hitboxes follow the Warden's final height chart (Nov 8, the `height` column of `--warden-model-check`), compressed into 0.85-1.15 x standard so small hunters are not much harder to hit: `hit_r = 0.40 x clamp(1 + 0.3 x (chart - 1), 0.85, 1.15)`. The height is the drawn height: `hit_h = 1.732 m x chart` (a medium hunter's head top 1.546 m x `Hunter.VIS_SCALE` 1.12). Shots hit from 0.45 m under the feet up to `hit_h + 0.9 m` (`Match.shot_band`; a hunter with no archetype keeps the old 1.5 m).
 
-Changing a hero's hit radius is one line (`body.hit_r`). The creator's look sliders never touch it (the hitbox is never read from the look). The ground circle (`TeamRing`, team colour, built in `Models.hunter`) is drawn at exactly `hit_r`.
+**Source:** the only published reference hero collision is the shared bot nav agent, radius 0.43 m, height 1.76 m (`sv/physics.md`); no per-hero capsule is in the data. Our standard hunter is 0.40 m by 1.73 m, so the heights match and the radius is 7% under, kept as the owner's item 46 standard (set the Medium class `hit_r` to 0.43 to match it).
 
-| Archetype | Warden | x standard | `hit_r` (m) | Why |
-|---|---|---|---|---|
-| bulwark | Mossy | 1.15 | 0.460 | tallest and widest (band cap; the hull itself is 0.95 m) |
-| dredge | Grimble | 1.13 | 0.452 | hulking |
-| juggernaut | Kael | 1.07 | 0.428 | broad |
-| gunslinger | Vex | 1.04 | 0.416 | broad |
-| ostra | Motley | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
-| mage | Sparkle | 1.00 | 0.400 | average |
-| archer | Lace | 0.98 | 0.392 | average, slim |
-| dolm | Tenzo (Breah's base) | 0.97 | 0.388 | lean |
-| thief | Sable | 0.96 | 0.384 | lean |
-| rimewright | Neve | 0.95 | 0.380 | slight |
-| ashwick | Cinder | 0.94 | 0.376 | low and hunched |
-| tender | Meeko | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
+**Body collision is separate.** `hit_r` is the hurtbox (`Ent.r`: shots and abilities). Walls, rocks and body-vs-body pushing use `Ent.hull_r()`, the archetype's `body_r`, which keeps the values the hurtbox had before the chart pass.
 
 Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hitbox-size-check` asserts the band, the drawn circle radius, and a shot just inside and outside the circle for the smallest and biggest.
 
@@ -25,7 +12,7 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 
 `godot --headless --path . -- --hit-shape-check` (tools/hit_shape_check.gd, about 35 s) stands each hunter on flat ground facing +X beside a grid of 70 training dummies (0.5 m apart, standard body radius 0.4 m + 0.08 m slack), fires each damaging input once aimed straight down +X (cursor 20 m out) and records which dummies lost health. Reach, width and arc below are recovered from that set: the dummy centre is corrected by its hit circle and half a grid cell, so every number is good to about +-0.5 m (and +-10 degrees of arc).
 
-**Source column.** `briefs/supervive-data/supervive_kits.md` is read off in-game tooltips and carries no hit sizes at all (no uu values for any reach, width, radius or arc); it only says shapes in words: Heartpiercer and the Arcane Railgun are long beams or shots, Rain of Arrows is "a hail of arrows in a cone", Brall's slam is "in front" with edge hits doing more, Tetra's Rockwave is "a wall of three rocks in front of you". There is no 100 uu = 1 m number to put beside our content value for any row, so the comparison here is measured against our content JSON (`content/archetypes/<id>.json`, `content/weapons/*.json`). Where the source names a shape, it is quoted under the table.
+**Source column.** `sv/briefs/kits.md` is read off in-game tooltips and carries no hit sizes at all (no uu values for any reach, width, radius or arc); it only says shapes in words: Heartpiercer and the Arcane Railgun are long beams or shots, Rain of Arrows is "a hail of arrows in a cone", ref-juggernaut's slam is "in front" with edge hits doing more, ref-dolm's Rockwave is "a wall of three rocks in front of you". There is no 100 uu = 1 m number to put beside our content value for any row, so the comparison here is measured against our content JSON (`content/archetypes/<id>.json`, `content/weapons/*.json`). Where the source names a shape, it is quoted under the table.
 
 **How to read a row.** `hit` = dummies damaged (out of 70). `reach` = farthest edge of the damage along the aim line. `width` = the widest lane across it. `arc` = the angle the damage spreads over, seen from the hero. `content` = the JSON number of the same kind (`range`/`reach`/`len`/`dist`, `width`, `deg`/`arc`), if there is one. A dash `–` is zero or nothing to compare. **FLAG** = the content number is more than 10% off the measurement; `~` = the gap is within the 0.5 m grid, so it is noise rather than a finding.
 
@@ -168,6 +155,8 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 | E | 0 | grid | – | – | – | 9.0 / – / – |  |
 | R (hero ult) | 0 | grid | – | – | – | 12.6 / – / – |  |
 | Dash | 0 | grid | – | – | – | 4.2 / – / – |  |
+**Finer run for four heroes.** `--hit-shape-fine` (one dummy moved around, game step 60 Hz, edges to about 0.1 m) re-measured Vex, Kael, Lace and Cinder: every area and lane matches its content number to 0.15 m, and the Kael LMB this grid reads short (1.6 m against 3.7 m fine) is a grid effect (each swing ray stops at the first dummy it meets); the same short reads on other heroes' swings (Breah, Bulwark) were not re-measured. Table and sources in docs/KIT_PARITY.md, "Hit shapes in game".
+
 ### Mismatches over 10% (follow-ups; nothing was changed in kits)
 
 Each is a row above flagged without `~`. Check the cause before changing a kit: some are the measurement (see Limits), some are the kit.

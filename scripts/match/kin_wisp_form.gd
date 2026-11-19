@@ -2,11 +2,13 @@ class_name KinWispForm
 extends RefCounted
 ## While its Hunter is down, a Boki comes back to them and rides as its wisp (docs/decisions/0019).
 ## Kin state "wisp":
-##   - the moment its Hunter is knocked, every Boki of theirs that is up (on the shoulder, out fighting, in
-##     the air) zips back to them; from farther than ZIP_RANGE, or a Boki the way is blocked for, it blinks
+##   - the moment its Hunter is knocked, every Boki of theirs that is summoned (out fighting, in the air)
+##     zips back to them and becomes their guardian (mark); one still on the shoulder never pulls anyone up;
+##     from farther than ZIP_RANGE, or a Boki the way is blocked for, it blinks
 ##     straight there (a puff where it was)
 ##   - it circles the Hunter Wisp as a small Boki wisp (BokiWispLook: critter outline, round = Hunter): it
-##     does not attack, cast or take orders, and nothing can hit or target it (Kin.hittable)
+##     does not attack, cast or take orders; a guardian can be hit, and knocking it out stops the pull
+##     (Kin.hittable)
 ##   - after a short wait (loyal, trusting Boki sooner) it pulls its Hunter up over Life.R kin_revive_time,
 ##     and the bleed-out pauses while it does; an enemy on the Wisp (the stomp) stops the pull
 ##   - revived: it pops back onto the shoulder with its old order. Bled out or finished: the Hunter's death
@@ -15,7 +17,10 @@ extends RefCounted
 ## state their owner's game sends (Kin state "wisp", Match.KIN_STATES).
 
 const STATE := "wisp"
-const JOINS := ["shoulder", "active", "flying", "flying_home", "returning"]   # states a Boki leaves to ride as a wisp
+const JOINS := ["active", "flying", "flying_home", "returning"]   # summoned states: it leaves them to ride as a wisp
+# s (slowest start + one ~6 s pull, Life kin_revive_time): the longest a team stays in on a Boki's pull
+# once its last standing member is down
+const GUARD_CAP := 11.0
 const ZIP_S := 0.3           # s: the flight back to its Hunter
 const ZIP_RANGE := 14.0      # m: farther (or out of walking reach), it blinks there instead
 const ORBIT_R := 0.75        # m from the Hunter Wisp's centre
@@ -28,6 +33,35 @@ const SIZE := 1.5            # the Boki wisp's scale in a match (BokiWispLook bu
 static func wants(k: Kin) -> bool:
 	var h := k.owner_h
 	return h != null and h.downed and not h.out and not k.dead and k.state in JOINS
+
+## Knock time: a summoned, alive Boki becomes the guardian that may pull this Hunter up and keep the team in
+## for GUARD_CAP s; summoning one after the knock does not count.
+static func mark(m: Match, h: Hunter) -> void:
+	for k in [h.kin, h.kin2]:
+		if k == null:
+			continue
+		if not k.dead and k.hp > 0.0 and k.state in JOINS:
+			k.set_meta("guard_until", m.time + GUARD_CAP)
+		else:
+			k.remove_meta("guard_until")
+	h.set_meta("guarded", guarding(m, h))
+
+## Does a guardian Boki of this downed Hunter still have a pull going (alive, in time, no enemy on the Wisp)?
+static func guarding(m: Match, h: Hunter) -> bool:
+	if h.get_meta("stomped", false):
+		return false
+	for k in [h.kin, h.kin2]:
+		if k and k.has_meta("guard_until") and not k.dead and k.hp > 0.0 and k.state != "downed":
+			if m.time < float(k.get_meta("guard_until")):
+				return true
+	return false
+
+## True once, the frame a Hunter's pull stops (time up or stomped): the team may be out.
+static func lapsed(m: Match, h: Hunter) -> bool:
+	var was := bool(h.get_meta("guarded", false))
+	var now := guarding(m, h)
+	h.set_meta("guarded", now)
+	return was and not now
 
 ## Leaves whatever it was doing and comes back to its Hunter.
 static func join(k: Kin) -> void:
@@ -74,12 +108,13 @@ static func leave(k: Kin) -> void:
 	k.settle = 1.0
 	k.cmd = String(k.get_meta("wisp_cmd", "follow"))
 	k.revive_wait = 0.0
+	k.remove_meta("guard_until")
 	k.m.fx.ring(k.pos, POP_RING, Color(k.sp["color"], 0.8), 0.25)
 
 ## Pulling its Hunter up now (the bleed-out pauses while it does)?
 static func pulling(k: Kin) -> bool:
-	return k.state == STATE and k.revive_wait <= 0.0 and k.hp > 0.0 and k.owner_h != null \
-		and not k.owner_h.get_meta("stomped", false)
+	return k.state == STATE and k.has_meta("guard_until") and k.revive_wait <= 0.0 and k.hp > 0.0 \
+		and k.owner_h != null and not k.owner_h.get_meta("stomped", false)
 
 ## Where it circles: its own side of the Hunter (a second Boki rides opposite the first).
 static func orbit_at(k: Kin) -> Vector3:
@@ -95,8 +130,8 @@ static func _place(k: Kin, zip: float) -> void:
 	k.grounded = false
 
 static func _pull_up(k: Kin, h: Hunter, dt: float) -> void:
-	if k.hp <= 0.0 or h.get_meta("stomped", false):
-		return                   # an enemy on the Wisp stops the pull
+	if k.hp <= 0.0 or not k.has_meta("guard_until") or h.get_meta("stomped", false):
+		return                   # no guardian mark (not summoned at the knock), or an enemy on the Wisp
 	k.revive_wait -= dt
 	if k.revive_wait > 0.0:
 		return

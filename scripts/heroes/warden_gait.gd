@@ -8,27 +8,65 @@ extends RefCounted
 ##    mean), so a planted foot stays put on the floor without the cadence going frantic;
 ##  - "loco.arm_swing": {"L": gain, "R": gain} puts the arm on the opposite swing of its own side's leg: its pitch
 ##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too).
+##  - "loco.bob": [walk, run] the hips' up and down about their running mean is scaled by it (0..1) for a clip that
+##    bobs too far for the speed (Grimble 17 cm, Kael 16 cm at a run). The clip's bob is the root bone's, which the
+##    thighs hang from too, so only the hips and what hangs from them (torso, arms, head) are held back: the feet stay
+##    planted.
+##  - the hips rise and fall with the legs' spread, the way a body moves over its feet: in a walk they are highest as
+##    the legs pass (feet together) and lowest with the legs apart; in a run lowest as the legs pass (the push-off)
+##    and highest with the legs apart (the flight). A clip keyed the other way round is pulled towards it, at most
+##    BOB_FIX_MAX; "loco.bob_m": [walk, run] is the up and down travel that aims at (m). Only as far as the blend
+##    points forward or back: a strafe's legs spread sideways, not in pitch, so it keeps its clip's own bob; and by
+##    "loco.bob_fix": [walk, run] (default 1: 0 for a clip already in step, which the pull only roughens).
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
 const MEAN_TAU := 0.8        # s: the running mean a stride or an arm swing is scaled around
-const RATE_MIN := 0.6        # x: slowest the walk and run clips play
 const RATE_MAX := 1.4        # x: fastest
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
+const BOB_M := [0.035, 0.06] # m: the hips' up and down travel at a walk and at a run
+const BOB_FIX_MAX := 0.04    # m: furthest the hips are moved off the clip's height to put the bob in step with the legs
+const RATE_MIN := 0.6        # x: slowest the walk and run clips play (while he holds a move)
+const SETTLE_RATE := 3.0     # 1/s: a stop's legs ease from their planted stride into the idle (body: loco.stop_rate)
+const SETTLE_BONES := ["thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R"]
+const SPREAD_TAU := 2.0      # s: how fast the widest leg spread seen fades (a slower stride re-learns it)
 
 var skel: Skeleton3D
+var bob := 1.0               # x: the hips' vertical travel at this speed
+var bob_m := 0.035           # m: the hips' up and down travel at this speed
+var bob_sign := -1.0         # -1 walk (high when the legs pass), +1 run (low when they pass), 0 between
+var spread_mean := 0.0       # rad: running mean of the legs' pitch spread
+var spread_peak := 0.0       # rad: the widest spread above the mean, fading
+var pull := 1.0              # 0..1: how far the bob is pulled in step (forward or back, not sideways; "bob_fix")
+var hips := -1               # hips bone index
+var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
+var hips_keyed := false      # the clips do key it (data "offset_bones": Motley's spring): their height, not the rest
+var hips_y := NAN            # m: running mean of the hips' height (skeleton space)
 var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var settle: Array = []       # [leg bone, the rotation it showed last frame]
+var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
+var run_len := 1.0           # s: of the forward run clip
 
-func _init(sk: Skeleton3D, swing: Dictionary) -> void:
+func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed := false) -> void:
 	skel = sk
+	walk_len = walk_s
+	run_len = run_s
+	hips_keyed = keyed
 	for b in LEG_BONES:
 		var bi := WardenSkeleton.find(sk, b)
 		if bi >= 0:
 			legs.append([bi, sk.get_bone_pose_rotation(bi)])
+	for b in SETTLE_BONES:
+		var bi := WardenSkeleton.find(sk, b)
+		if bi >= 0:
+			settle.append([bi, sk.get_bone_pose_rotation(bi)])
+	hips = WardenSkeleton.find(sk, "hips")
+	if hips >= 0:
+		hips_rest_y = sk.get_bone_pose_position(hips).y
 	for side in swing:
 		var ai := WardenSkeleton.find(sk, "upper_arm." + String(side))
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
@@ -36,24 +74,66 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 		if ai >= 0 and hi >= 0 and ti >= 0:
 			arms.append([ai, sk.get_bone_parent(ai), ti, hi, float(swing[side]), NAN, NAN])
 
-## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
-## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
-## rings at "walk_speed" and "run_speed".
-func plan(spd: float, lc: Dictionary) -> float:
-	var walk := float(lc.get("walk_speed", 2.2))
-	var run := float(lc.get("run_speed", 4.6))
-	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
+## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
+## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
+## the clips with it at rate 1 (m/s, tools/anim_audit.gd), "bob": [walk, run]. "side_foot_mps" (optional, same shape)
+## is the strafe loops' own, mixed in by how far `pos` (the blend position, x right, y forward) points sideways. The
+## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
+## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
+## feel it (a hasted run, up to HunterMove.speed_cap, keeps its feet planted instead of sliding at RATE_MAX).
+## (Held at a speed, `w` is the speed's share from "walk_speed" to "run_speed".) `moving` (0..1; 1 unless he is
+## stopping) is how much of the blend is out of the idle, which breathes at rate 1: the feet are those of the blend as
+## it stands, and the rate floor fades with it, so a stop keeps the legs in step with the body as he slows.
+func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> float:
 	var stride: Array = lc.get("stride", [1.0, 1.0])
-	var foot: Array = lc.get("foot_mps", [walk, run])
-	gain = lerpf(float(stride[0]), float(stride[1]), t)
-	return clampf(spd / maxf(lerpf(float(foot[0]), float(foot[1]), t), 0.1), RATE_MIN, RATE_MAX)
+	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
+	var side: Array = lc.get("side_foot_mps", foot)
+	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
+	var walk_mps := lerpf(float(foot[0]), float(side[0]), side_k)
+	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k)
+	gain = lerpf(float(stride[0]), float(stride[1]), w)
+	var b: Array = lc.get("bob", [1.0, 1.0])
+	bob = lerpf(float(b[0]), float(b[1]), w)
+	var bm: Array = lc.get("bob_m", BOB_M)
+	bob_m = lerpf(float(bm[0]), float(bm[1]), w)
+	bob_sign = clampf((w - 0.5) * 4.0, -1.0, 1.0)
+	var bf: Array = lc.get("bob_fix", [1.0, 1.0])
+	pull = (1.0 - side_k) * lerpf(float(bf[0]), float(bf[1]), w)
+	var cycle := lerpf(walk_len, run_len, w)
+	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
+	var top := RATE_MAX * maxf(1.0, spd / maxf(run_mps, 0.1))      # hasted past the run clip: ceiling grows
+	var rate := clampf(spd * cycle / maxf(reach * moving, 0.01), RATE_MIN * moving, top)
+	return follow(rate * run_len / cycle, moving)
 
-## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
-func apply(dt: float, legs_k: float, arm_k: float) -> void:
+## The clip rate `rate` that keeps the feet planted, as much as the move owns the blend (`moving` 0..1; the idle
+## breathes at 1).
+static func follow(rate: float, moving: float) -> float:
+	return lerpf(1.0, rate, moving)
+
+## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame; `stand_k`
+## 0..1: how much the standing idle does (a stop's planted stride settles into it at SETTLE_RATE).
+func apply(dt: float, legs_k: float, arm_k: float, stand_k: float) -> void:
+	var settle_a := 1.0 - exp(-dt * SETTLE_RATE)
+	for l in settle:
+		var q := skel.get_bone_pose_rotation(l[0])
+		if stand_k > 0.0:
+			q = q.slerp((l[1] as Quaternion).slerp(q, settle_a), stand_k)
+			skel.set_bone_pose_rotation(l[0], q)
+		l[1] = q
 	legs_w = move_toward(legs_w, legs_k, FADE_RATE * dt)
 	arm_w = move_toward(arm_w, arm_k, FADE_RATE * dt)
 	var a := 1.0 - exp(-dt / MEAN_TAU)
 	var k := 1.0 + (gain - 1.0) * legs_w
+	if hips >= 0:
+		var hp := skel.get_bone_pose_position(hips)
+		# (a clip that keys the hips set this frame's height; else it is the rest plus last frame's offset of ours)
+		var base := hp.y if hips_keyed else hips_rest_y
+		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - base)   # (the clip's, without our offset)
+		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
+		var dev := (gy - hips_y) * bob
+		hp.y = base - (gy - hips_y) * (1.0 - bob) * legs_w
+		hp.y += clampf(_bob_target(a, dt) - dev, -BOB_FIX_MAX, BOB_FIX_MAX) * legs_w * pull
+		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])
 		var m: Quaternion = l[1]
@@ -80,3 +160,14 @@ func _basis_q(bi: int) -> Quaternion:
 	if bi < 0:
 		return Quaternion.IDENTITY
 	return skel.get_bone_global_pose(bi).basis.orthonormalized().get_rotation_quaternion()
+
+## Where the hips should be about their mean (m): `bob_m` of travel, with the legs' pitch spread: the thighs' angle
+## apart, as a share of the widest seen. `a`: the running-mean step of this frame, `dt` its length.
+func _bob_target(a: float, dt: float) -> float:
+	if legs.size() < 2:
+		return 0.0
+	var spread := absf(angle_difference(_pitch(skel.get_bone_global_pose(legs[0][0]).basis.y),
+			_pitch(skel.get_bone_global_pose(legs[1][0]).basis.y)))
+	spread_mean = lerpf(spread_mean, spread, a)
+	spread_peak = maxf(spread - spread_mean, spread_peak * exp(-dt / SPREAD_TAU))
+	return bob_sign * 0.5 * bob_m * clampf((spread - spread_mean) / maxf(spread_peak, 0.05), -1.0, 1.0)

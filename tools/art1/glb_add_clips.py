@@ -1,9 +1,25 @@
-"""Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
-with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
+"""Copies named clips from one .glb into another, leaving everything else in the target unchanged (a replaced clip's accessors and buffer views are dropped, not left orphaned), so a clip set can go on any later build of the model
+with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
+only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
+Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--hold-moved-rest] [--drop-missing]
+--drop-missing: a track of a node the target lacks (x_breath on a v95 rig) is skipped and listed, not an error.
+--hold-moved-rest: a node whose rest (translation/rotation) differs between the two builds (a spring bone the new model moved)
+gets its target rest held for the whole clip instead of the source's keys; the held names are printed. Use it only when the
+moved nodes are ones the clips hold still anyway (spring chains: the runtime sim moves them).
+A key is a prefix ("crouch" takes crouch_idle, crouch_f ...); "=swap" is that clip only (not swap_aim, swap_air)."""
 import json
+import math
 import struct
 import sys
+
+REST = {"translation": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0]}
+
+
+def rest_moved(a, b, tol=0.002):
+    ta, tb = a.get("translation", REST["translation"]), b.get("translation", REST["translation"])
+    qa, qb = a.get("rotation", REST["rotation"]), b.get("rotation", REST["rotation"])
+    dot = min(1.0, abs(sum(x * y for x, y in zip(qa, qb))))
+    return max(abs(x - y) for x, y in zip(ta, tb)) > tol or 2 * math.degrees(math.acos(dot)) > 0.5
 
 
 def read(path):
@@ -29,26 +45,81 @@ def write(path, j, bin_):
         f.write(bin_)
 
 
-def add(tj, tb, sj, sb, wanted):
+def accessor_refs(j):
+    """Every place that names an accessor: (dict, key) pairs."""
+    out = []
+    for m in j.get("meshes", []):
+        for pr in m["primitives"]:
+            out += [(pr["attributes"], k) for k in pr["attributes"]] + ([(pr, "indices")] if "indices" in pr else [])
+            out += [(t, k) for t in pr.get("targets", []) for k in t]
+    out += [(s, "inverseBindMatrices") for s in j.get("skins", []) if "inverseBindMatrices" in s]
+    out += [(s, k) for a in j.get("animations", []) for s in a["samplers"] for k in ("input", "output")]
+    return out
+
+
+def prune(j, bin_):
+    """Drops the accessors and buffer views nothing names any more (a replaced clip's), packing the bytes that stay."""
+    refs = accessor_refs(j)
+    keep_ac = sorted({d[k] for d, k in refs})
+    ac_at = {old: new for new, old in enumerate(keep_ac)}
+    for d, k in refs:
+        d[k] = ac_at[d[k]]
+    j["accessors"] = [j["accessors"][i] for i in keep_ac]
+    users = j["accessors"] + [im for im in j.get("images", []) if "bufferView" in im]
+    keep_bv = sorted({u["bufferView"] for u in users})
+    bv_at = {old: new for new, old in enumerate(keep_bv)}
+    for u in users:
+        u["bufferView"] = bv_at[u["bufferView"]]
+    out = bytearray()
+    views = []
+    for i in keep_bv:
+        bv = dict(j["bufferViews"][i])
+        off0 = bv.get("byteOffset", 0)
+        out.extend(b"\0" * (-len(out) % 4))
+        bv["byteOffset"] = len(out)
+        out.extend(bin_[off0:off0 + bv["byteLength"]])
+        views.append(bv)
+    j["bufferViews"] = views
+    j["buffers"][0]["byteLength"] = len(out) + (-len(out) % 4)
+    return out
+
+
+def add(tj, tb, sj, sb, wanted, hold=False, held=None, dropped=None):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
+    snames = {n.get("name"): n for n in sj["nodes"]}
+
+    def const(vals, typ, minmax=False):
+        tb.extend(b"\0" * (-len(tb) % 4))
+        tj["bufferViews"].append({"buffer": 0, "byteOffset": len(tb), "byteLength": 4 * len(vals)})
+        tb.extend(struct.pack("<%df" % len(vals), *vals))
+        acc = {"bufferView": len(tj["bufferViews"]) - 1, "componentType": 5126, "count": 2, "type": typ}
+        if minmax:
+            acc["min"], acc["max"] = [min(vals)], [max(vals)]
+        tj["accessors"].append(acc)
+        return len(tj["accessors"]) - 1
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
 
-    def accessor(i):
-        if i in copied:
-            return copied[i]
+    def accessor(i, shift=(0.0, 0.0, 0.0)):
+        if (i, shift) in copied:
+            return copied[(i, shift)]
         ac = dict(sj["accessors"][i])
         bv = dict(sj["bufferViews"][ac["bufferView"]])
         off0, ln = bv.get("byteOffset", 0), bv["byteLength"]
         tb.extend(b"\0" * (-len(tb) % 4))
         bv["byteOffset"] = len(tb)
         tb.extend(sb[off0:off0 + ln])
+        if any(shift):
+            v = list(struct.unpack_from("<%df" % (3 * ac["count"]), tb, bv["byteOffset"]))
+            struct.pack_into("<%df" % len(v), tb, bv["byteOffset"], *[x + shift[k % 3] for k, x in enumerate(v)])
+            ac.pop("min", None)
+            ac.pop("max", None)
         bv["buffer"] = 0
         tj["bufferViews"].append(bv)
         ac["bufferView"] = len(tj["bufferViews"]) - 1
         tj["accessors"].append(ac)
-        copied[i] = len(tj["accessors"]) - 1
-        return copied[i]
+        copied[(i, shift)] = len(tj["accessors"]) - 1
+        return copied[(i, shift)]
 
     done = []
     for a in sj["animations"]:
@@ -57,10 +128,24 @@ def add(tj, tb, sj, sb, wanted):
         new = {"name": a["name"], "channels": [], "samplers": []}
         for ch in a["channels"]:
             nm = sj["nodes"][ch["target"]["node"]].get("name")
+            if nm not in names and dropped is not None:
+                dropped.add(nm)
+                continue
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
             sm = a["samplers"][ch["sampler"]]
-            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"]), "interpolation": sm.get("interpolation", "LINEAR")})
+            if hold and rest_moved(snames[nm], tj["nodes"][names[nm]]):
+                path = ch["target"]["path"]
+                end = max(sj["accessors"][s["input"]]["max"][0] for s in a["samplers"])
+                v = tj["nodes"][names[nm]].get(path, REST[path])
+                new["samplers"].append({"input": const([0.0, end], "SCALAR", True), "output": const(list(v) * 2, "VEC4" if path == "rotation" else "VEC3"), "interpolation": "LINEAR"})
+                new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": path}})
+                if held is not None:
+                    held.add(nm)
+                continue
+            rest = [t - s for t, s in zip(tj["nodes"][names[nm]].get("translation", (0, 0, 0)), sj["nodes"][ch["target"]["node"]].get("translation", (0, 0, 0)))]
+            shift = tuple(rest) if ch["target"]["path"] == "translation" and max(map(abs, rest)) > 1e-6 else (0.0, 0.0, 0.0)
+            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"], shift), "interpolation": sm.get("interpolation", "LINEAR")})
             new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": ch["target"]["path"]}})
         tj["animations"].append(new)
         done.append(a["name"])
@@ -69,11 +154,19 @@ def add(tj, tb, sj, sb, wanted):
 
 
 if __name__ == "__main__":
-    target, source, keys = sys.argv[1:4]
-    out = sys.argv[4] if len(sys.argv) > 4 else target
+    hold = "--hold-moved-rest" in sys.argv
+    dropped = set() if "--drop-missing" in sys.argv else None
+    args = [x for x in sys.argv[1:] if not x.startswith("--")]
+    target, source, keys = args[:3]
+    out = args[3] if len(args) > 3 else target
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
-    done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys))
-    write(out, tj, tb)
+    held = set()
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys), hold, held, dropped)
+    write(out, tj, prune(tj, tb))
     print("added", len(done), done)
+    if hold:
+        print("held at target rest:", sorted(held))
+    if dropped:
+        print("dropped (no such node in the target):", sorted(dropped))

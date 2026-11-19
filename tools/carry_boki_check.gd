@@ -6,6 +6,13 @@ extends RefCounted
 ## Never touches the real save.
 
 const STEP := 0.1
+const PLAYER_R := 0.3     # m: how wide you are to a prop (a Boki is 0.3 in the same walk)
+const RNG_SEED := 3          # the global rolls and the farm-start island
+## m: the led Boki's farthest from you in the walk. It starts 1 m in front and you walk off the other way, so the peak
+## is its catch-up from a stand at its own pace (4.4 m/s x 0.94-1.06 from its uid; you 4.5), 0.8 s in: 3.17 m here,
+## then 0.5-2.4 m. Random uids and islands gave 2.91, 3.03, 3.25 m, so a 3.0 m bar fell inside that spread. A led
+## Boki at the wander pace (2.4 m/s) peaks at 3.58 m: the bar sits between the two.
+const LEAD_FAR := 3.4
 var bad := 0
 var main: Node
 var home
@@ -16,7 +23,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func _species_of_weight(lo: float, hi: float) -> String:
-	for f in DirAccess.get_files_at("res://content/kin_home"):
+	for f in DirAccess.get_files_at("res://content/kin"):
 		var id := f.get_basename()
 		var kg := float(Unique.base_size(id)["kg"])
 		if f.ends_with(".json") and kg > lo and kg <= hi:
@@ -25,7 +32,8 @@ func _species_of_weight(lo: float, hi: float) -> String:
 
 ## An average-sized one, so its weight is its species' weight.
 func _plain(species: String, nm: String) -> Dictionary:
-	var rec := Save.new_kin(species, nm)
+	var rec := Save.new_kin(species, nm, nm.hash() & 0x7fffffff)      # a fixed Unique roll: the same body every run
+	rec["uid"] = "carry_%s" % nm      # the uid sets a share of its pace (home.gd _personality) and its likes
 	Unique.of(rec)["size"] = 0.0
 	Unique.of(rec)["girth"] = 1.0
 	return rec
@@ -48,14 +56,36 @@ func _entry(rec: Dictionary) -> Dictionary:
 func _put(rec: Dictionary) -> Dictionary:
 	var k: Dictionary = _entry(rec)
 	k["pos"] = home.ppos + Vector3(0.0, 0.0, -1.0)
+	k["vel"] = Vector3.ZERO      # held still before the lead starts, as it is when you take hold of it
 	(k["node"] as Node3D).position = k["pos"]
 	return k
+
+## Near the start, ground where the walk's circle (centre 2.25 m to your right) and the Boki's lane beside it are
+## clear of tiles it would have to path round, so the lead is tested on its pace and not on a tree.
+func _open_ground() -> Vector3:
+	var start := Vector3(38.0, 0.0, 30.0)
+	for r in [0.0, 2.0, 4.0, 6.0]:
+		for a in 8:
+			var at: Vector3 = start + Vector3(cos(a * TAU / 8.0), 0.0, sin(a * TAU / 8.0)) * r
+			var mid := Vector2(at.x + 2.25, at.z)
+			var clear: bool = not home.world.is_void(mid.x, mid.y)
+			for b in 16:
+				var from := mid + Vector2.from_angle(b * TAU / 16.0) * 2.25
+				clear = clear and home.hb.clear_line(from, mid + Vector2.from_angle((b + 1) * TAU / 16.0) * 2.25, 1.3)
+			if clear:
+				return at
+	return start
 
 func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
 	for i in int(secs / STEP):
 		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		var step: Vector3 = Vector3(sin(turn), 0.0, cos(turn)) * home.walk_speed() * home.carry.speed_mul() * STEP
+		# props stop you as they stop a Boki
+		if home.world.occupy(home.ppos.x + step.x, home.ppos.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.x += step.x
+		if home.world.occupy(home.ppos.x, home.ppos.z + step.z, PLAYER_R, 0.0, true) == 0.0:
+			home.ppos.z += step.z
 		home.player.position = home.ppos
 		home.carry.tick(STEP, {}, true)
 		home._move_kin(STEP)
@@ -65,9 +95,11 @@ func _walk(k: Dictionary, secs: float) -> float:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	seed(RNG_SEED)
 	var d := Save.fresh()
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+	HomeLayout.new_fs(d, RNG_SEED)      # a fixed farm-start island: a random one moved what the walk runs into
 	var small := "zapple"
 	var mid := _species_of_weight(HomeCarry.ARMS_KG * 1.3, HomeCarry.BACK_KG * 0.9)
 	var big := _species_of_weight(HomeCarry.BACK_KG * 1.3, 1000.0)
@@ -80,6 +112,7 @@ func run(m: Node) -> void:
 	HomeLayout.ensure(d)
 	home = await main._hb_home()
 	home.set_process(false)      # the check drives the frames itself
+	seed(RNG_SEED)      # again: the home used up a different number of rolls in the real frames it took to build
 	_sizes(mid, big)
 	home.ppos = Vector3(38.0, 0.0, 30.0)
 	home.pface = 0.0
@@ -109,6 +142,7 @@ func _lift_walk_drop(k: Dictionary) -> void:
 	var scale0: Vector3 = (k["node"] as Node3D).scale
 	ok(c.speed_mul() == 1.0, "no change to your speed before you lift")
 	await _hold_lifts(k)
+	_lifted(c)
 	ok(c.k == k and c.mode == "carry" and k["busy"], "holding interact lifts a small Boki into your arms")
 	ok(is_equal_approx(c.speed_mul(), 0.9) and c.anim_state()["act"] == "carry", "you walk at 90% with the carry pose")
 	var far := _walk(k, 3.0)
@@ -166,6 +200,7 @@ func _traits(timid: Dictionary, grumpy: Dictionary, brave: Dictionary) -> void:
 	c.drop()
 	var b := _put(brave)
 	c.press_hold(b)
+	_lifted(c)
 	var swing := 0.0
 	for i in 30:
 		c.tick(STEP, {}, true)
@@ -191,11 +226,20 @@ func _trust(brave: Dictionary, wary: Dictionary) -> void:
 
 func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
+	home.ppos = _open_ground()
 	var k := _put(rec)
+	for o in home.kins:     # the earlier rows left the small ones parked round you; leading is about the one you lead
+		if o != k:
+			o["pos"] = home.ppos + Vector3(14.0, 0.0, 14.0)
+			(o["node"] as Node3D).position = o["pos"]
+	k["pers"]["speed"] = 0.6      # the plodding end of a kind's own pace (home.gd _personality): a lead ignores it
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
 	var far := _walk(k, 4.0)
-	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	ok(far < LEAD_FAR, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	var pace := float(k["led"])
+	var top: float = home.walk_speed() * HomeCarry.SPEED_K * float(Content.rules("home_lead")["top_k"])
+	ok(pace >= BokiRig.RUN_SPEED and pace <= top + 0.01, "its pace (%.1f m/s) is a run, up to %.1f" % [pace, top])
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 
@@ -205,3 +249,8 @@ func _pose() -> void:
 		for i in 40:
 			a.update(1.0 / 60.0, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "act": mode})
 		ok(a.act_kind == mode and a.act_k > 0.9, "the hunter holds the %s pose while running" % mode)
+
+## Plays out the pick-up (HunterVerbs "lift"): you stand still for it, then walk and carry.
+func _lifted(c: HomeCarry) -> void:
+	if c.lifting():
+		c.h.verbs.act = ""

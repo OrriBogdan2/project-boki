@@ -13,5 +13,7 @@
   3
  ],
  "price": 35,
- "desc": "Set down a pad. Anyone who steps on it is launched high. Lasts 20s."
+ "desc": "Set down a pad. Anyone who steps on it is launched high. Lasts 20s.",
+ "move": "place",
+ "cast": 0.6
 }

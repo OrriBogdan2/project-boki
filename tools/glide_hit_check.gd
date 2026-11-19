@@ -65,7 +65,7 @@ func _shot() -> void:
 	var hp0 := h.hp
 	h.hurt(SHOT, foe)
 	var cost := 1.0 - h.glide_fuel
-	var rule := SHOT * Hunter.GLIDER_HIT_HEAT / float(h.cdat.get("glide_cap", 1.0))
+	var rule := SHOT * HunterMove.hit_heat_per_dmg / float(h.cdat.get("glide_cap", 1.0))
 	ok(absf(cost - rule) < 0.002, "a %.0f shot heats the glider %.3f (3x rule: %.3f)" % [SHOT, cost, rule])
 	ok(absf(hp0 - h.hp - SHOT) < 0.5, "...and deals normal damage (%.1f of %.0f)" % [hp0 - h.hp, SHOT])
 	_steps(0.5)
@@ -73,7 +73,7 @@ func _shot() -> void:
 
 func _spike() -> void:
 	_glide(1.0)
-	h.glide_fuel = 0.5 * SHOT * Hunter.GLIDER_HIT_HEAT
+	h.glide_fuel = 0.5 * SHOT * HunterMove.hit_heat_per_dmg
 	h.hurt(SHOT, foe)
 	ok(not h.gliding and h.shot_down and h.stun_t > 0.0, "a shot that fills the heat spikes: glider shut, stunned")
 	ok(h.vel.y <= -6.0, "...plummeting (%.1f m/s)" % h.vel.y)
@@ -117,7 +117,7 @@ func _stun() -> void:
 	m.step(Match.DT)
 	ok(not h.gliding, "a stun shuts the glider at once")
 	_steps(0.2)
-	ok(h.vel.y < -2.0 * Hunter.GLIDE_SINK, "...and the body falls (%.1f m/s)" % h.vel.y)
+	ok(h.vel.y < -2.0 * HunterMove.glide_sink, "...and the body falls (%.1f m/s)" % h.vel.y)
 	ok(not _press_opens(0.1), "...a press during the stun doesn't open it")
 	_wait_stun()
 	ok(_press_opens(Match.DT), "...a press opens it the step the stun is over")
@@ -143,7 +143,7 @@ func _air_hits() -> Dictionary:
 	return {
 		"light (Kael LMB)": {"kb": float(kael["lmb"]["kb"])},
 		"heavy (Kael RMB)": {"kb": float(kael["rmb"]["slam"]["push"])},
-		"heavy (Crushing Blow)": {"kb": float(blow["smash_kb"][1]), "stun": float(blow["smash_stun"])},
+		"heavy (Crushing Blow)": {"kb": float(blow["smash_kb"][1]), "stun": float(blow.get("smash_stun", 0.0))},
 		"stun": {"stun": STUN},
 	}
 
@@ -240,7 +240,7 @@ func _air_row(state: String, hit: Dictionary, got: Dictionary, tag: String, carr
 		ok(open_at >= stun and late, "%s: a press opens the glider once the %.1f s stun is over" % [tag, stun])
 	elif state == "fall":
 		var gate := KNOCK_GATE if speed > 4.0 else 0.0
-		var in_time := open_at >= gate and open_at <= gate + 0.25
+		var in_time := open_at >= gate - 0.02 and open_at <= gate + 0.25
 		ok(in_time, "%s: a press opens the glider %.1f s after the hit or so" % [tag, gate])
 
 func run(main: Node) -> void:

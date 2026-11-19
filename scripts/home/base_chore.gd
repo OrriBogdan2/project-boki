@@ -11,10 +11,12 @@ const KINDS := {"ember": "mind", "mend": "cheer", "haul": "fetch"}      # knack 
 const GLUM_AT := 40.0       # joy need below which a Boki counts as glum
 const CHEER_JOY := 18.0     # joy a cheered-up Boki gains
 const CHEER_BOND := 0.05    # added to both Boki's bond when one cheers the other up
-const AT_EGG := 1.3         # m: a Boki this close to the egg is minding it
+const AT_EGG := 1.8         # m: a Boki this close to the egg is minding it (the egg sits 1 m inside the Nook)
 const AT_BALL := 0.6        # m: close enough to pick up or put down the ball
 const BALL_FAR := 4.5       # m: how far from the toy spot the ball lies
 const HATCH_CUT := 0.5      # share of the egg's remaining home hatch time that is left after minding
+const STALL_S := 8.0        # s a walking Boki may go without getting STALL_GAIN nearer before it gives the chore up
+const STALL_GAIN := 0.5     # m nearer its goal that count as getting somewhere
 const JOURNAL_KEEP := 20    # lines kept per Boki (CareJournal.KEEP)
 
 ## The chore this Boki would do now ("" for none): its best knack among Ember, Mend and Haul whose chore can run.
@@ -29,8 +31,9 @@ static func can_do(life: BaseLife, k: Dictionary, kind: String) -> bool:
 	match kind:
 		"mind":
 			var egg: Dictionary = Save.d.get("egg", {})
-			return not egg.is_empty() and not egg.get("rare", false) and not egg.get("minded", false) \
-				and not life.h._egg_ready() and is_instance_valid(life.h.nest)
+			var nook_here: bool = life.h.NEST_AT.x > -100.0 and is_instance_valid(life.h.nest)      # a Nook here
+			return nook_here and not egg.is_empty() and not egg.get("rare", false) and not egg.get("minded", false) \
+				and not life.h._egg_ready()
 		"cheer":
 			return not glum(life, k).is_empty()
 		"fetch":
@@ -58,8 +61,18 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 		"mind": done = _mind(life, k, m, dt)
 		"cheer": done = _cheer(life, k, c)
 		"fetch": done = _fetch(life, k, c)
-	if done or KinAvoid.shut(k) or m.since >= float(life.R["max"]["chore"]):
+	if done or KinAvoid.shut(k) or m.since >= float(life.R["max"]["chore"]) or _stalled(k, c, m.since):
 		m.go(BaseLife.S.ROAM, "%s done" % c["kind"] if done else "%s gave up" % c["kind"])
+
+## Boxed in on the way (by a parked Boki beside a toy: it wobbles, so KinAvoid's pin test never fires) and no
+## nearer its goal for STALL_S s. Standing at the egg or the friend it came for is not stalling.
+static func _stalled(k: Dictionary, c: Dictionary, since: float) -> bool:
+	var goal: Vector3 = k["goal"]
+	var left := Vector2(goal.x - k["pos"].x, goal.z - k["pos"].z).length()
+	if left <= AT_EGG or left < float(c.get("best", INF)) - STALL_GAIN:
+		c["best"] = left
+		c["best_t"] = since
+	return since - float(c.get("best_t", 0.0)) > STALL_S
 
 static func label(k: Dictionary) -> String:
 	return String(k["life_chore"]["kind"]) if k.has("life_chore") else ""
