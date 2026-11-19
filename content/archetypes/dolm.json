@@ -48,7 +48,7 @@
 	"order": ["sec", "dash", "kin", "sec", "dash", "kin", "sec", "kin", "dash", "gear"],
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:79 the lane points at the cursor; :427 'she faces the cursor at once'"},
-		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown; turn rate while held: match 1280 (ext/hero-ref-footage breah 0253-0258, 0265-0268: no cursor swing in the charge)"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:27 a row placed in front, across the aim; no turn limit shown"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/breah.md:379 'she can move while aiming', the cast is instant on release"}
 	},

@@ -543,11 +543,11 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | archer | E | free | free | briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown |
 | archer | ult (X) | free | free | briefs/hero-ref/pin.md:254 'a self-buff with no cast lock' |
 | juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51) |
-| juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane |
+| juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane; turn rate while held: match 1280 (ext/hero-ref-footage juggernaut 0122-0126: the cursor never swings in the hold) |
 | juggernaut | E | free | free | briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown |
 | juggernaut | E recast | free | free | briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown |
 | juggernaut | ult (X) | free | free | briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free |
-| gunslinger | LMB hold | free | free | briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking' |
+| gunslinger | LMB hold | free | free | briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'; turn rate while held: match 1280 (ext/hero-ref-footage venator_ghost 0014-0015: the shots follow a ~65 deg swing inside one 0.2 s frame) |
 | gunslinger | RMB | free | free | briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown |
 | gunslinger | E | slow (30 deg/s) | free | briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner 11-09: a strong yaw lock, the charge creeps round at 30 deg/s at most (was 90, item 144); free after the shot |
 | gunslinger | ult (X) | free | free | briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held |
@@ -561,17 +561,17 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
 | rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
 | rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
-| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15) |
+| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15); turn rate while held: match 1280 (ext/hero-ref-footage linwick 0014-0018: the nozzle follows 45 and 90 deg swings inside one 0.2 s frame) |
 | ashwick | RMB | free | free | briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown |
 | ashwick | E | free | free | briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown |
 | ashwick | ult (X) | slow (90 deg/s) | slow (90 deg/s) | briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 90 deg/s, x.turn_deg) |
 | ashwick | ult (X) recast | slow (90 deg/s) | free | briefs/hero-ref/linwick.md:235 'X again lands early'; on the ground he turns freely again |
 | dolm | LMB hold | free | free | briefs/hero-ref/breah.md:79 the lane points at the cursor; :427 'she faces the cursor at once' |
-| dolm | RMB | free | free | briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown |
+| dolm | RMB | free | free | briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown; turn rate while held: match 1280 (ext/hero-ref-footage breah 0253-0258, 0265-0268: no cursor swing in the charge) |
 | dolm | E | free | free | briefs/hero-ref/breah.md:27 a row placed in front, across the aim; no turn limit shown |
 | dolm | ult (X) | free | free | briefs/hero-ref/breah.md:379 'she can move while aiming', the cast is instant on release |
 | mage | LMB hold | free | free | briefs/hero-ref/vireo.md:72 'she faces the cursor' |
-| mage | RMB | free | free | briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown |
+| mage | RMB | free | free | briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown; turn rate while held: match 1280 (ext/hero-ref-footage vireo 0043-0048, 0057-0062: no cursor swing in the hold) |
 | mage | E | free | free | briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction |
 | mage | ult (X) | free | free | briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor |
 | mage | ult (X) recast | free | free | briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown |
@@ -593,4 +593,4 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | ostra | RMB | free | free | briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown |
 | ostra | E | free | free | briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown |
 | ostra | E recast | free | free | briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown |
-| ostra | ult (X) | free | locked | briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248) |
+| ostra | ult (X) | free | locked | briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248); turn rate in the wind-up: match 1280 (ext/hero-ref-footage ostra 0436-0441: the cursor stays put through the telegraph) |
