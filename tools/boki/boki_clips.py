@@ -8,6 +8,7 @@ from vespyx_sides import SIDES
 
 TAU = math.tau
 TAIL_N = 7         # plates or joints in the tail; set by the species
+PLANTED = 0.5      # a paw in the lowest this share of its lift is on the ground (tools/boki_anim_audit.gd)
 LOOK_UP = 0.36     # standing, it looks up at you: the high cameras then see its face, not the top of its head
 
 
@@ -281,6 +282,110 @@ def part_bones(parts):
         if head is not None:
             out["part_" + pid] = (tuple(head), (head[0], head[1] + 0.1, head[2]), parent)
     return out
+
+
+def _turn(rx, ry, rz):
+    """A pose's rotation as matrix rows: about y, then x, then z (boki_rig.quat_of)."""
+    cx, sx, cy, sy, cz, sz = math.cos(rx), math.sin(rx), math.cos(ry), math.sin(ry), math.cos(rz), math.sin(rz)
+    return ((cy * cz + sy * sx * sz, sy * sx * cz - cy * sz, sy * cx), (cx * sz, cx * cz, -sx),
+            (cy * sx * sz - sy * cz, sy * sz + cy * sx * cz, cy * cx))
+
+
+def bone_at(bones, pose, bone):
+    """Where `bone`'s head sits under `pose` (m, the creature's axes), the way boki_rig.make_clips keys it: each
+    bone turns about its head, root squashes, root and hips shift by their "_at"."""
+    at = bones[bone][0]
+    up = bones[bone][2]
+    while up:
+        head, _, parent = bones[up]
+        rot = pose.get(up, (0, 0, 0))
+        rows = _turn(*((0, 0, 0) if rot == "on" else rot))
+        size = pose.get("root_sc", (1, 1, 1)) if up == "root" else (1, 1, 1)
+        off = pose.get(up + "_at", (0, 0, 0)) if parent is None or up == "hips" else (0, 0, 0)
+        arm = [(at[i] - head[i]) * size[i] for i in range(3)]
+        at = [head[i] + off[i] + sum(rows[i][j] * arm[j] for j in range(3)) for i in range(3)]
+        up = parent
+    return at
+
+
+def key_count(seconds, fps=30):
+    """Keys in a clip, its last one the loop's first again."""
+    return max(2, int(round(seconds * fps)))
+
+
+def stance(path):
+    """Per key of a paw's `path` round the loop: True while it is planted from this key to the next, which is low
+    (in the lowest PLANTED of its lift at either end) and going back."""
+    low = min(at[1] for at in path)
+    limit = low + PLANTED * (max(at[1] for at in path) - low)
+    after = path[1:] + path[:1]
+    return [b[2] > a[2] and min(a[1], b[1]) <= limit for a, b in zip(path, after)]
+
+
+def swept(path):
+    """How far back (m) each key of a paw's `path` should sit so every stance crosses the ground at one steady
+    speed, from where it lands to where it lifts; None at the keys outside a stance and at its two ends."""
+    n = len(path)
+    down = stance(path)
+    out = [None] * n
+    for first in range(n):
+        if not down[first] or down[first - 1]:
+            continue
+        count = 1
+        while down[(first + count) % n] and count < n:
+            count += 1
+        z0 = path[first][2]
+        z1 = path[(first + count) % n][2]
+        for i in range(1, count):
+            out[(first + i) % n] = z0 + (z1 - z0) * i / count
+    return out
+
+
+def planted(fn, bones, keys, axis=0):
+    """Gait `fn` with each paw's stance swept back in a line, not on the hip's sine: the hip turns about `axis`
+    (0 rx, 1 ry) by what puts the paw there. A planted paw then holds the ground at one clip rate."""
+    hips = {}
+    for paw in [b for b in bones if "paw" in b]:
+        hip = bones[paw][2]
+        while "leg" in bones[hip][2]:
+            hip = bones[hip][2]
+        hips[paw] = hip
+    poses = [fn(k / keys) for k in range(keys)]
+    goals = {paw: swept([bone_at(bones, pose, paw) for pose in poses]) for paw in hips}
+
+    def clip(t):
+        pose = fn(t)
+        at = t * keys
+        k = int(at) % keys
+        for paw, hip in hips.items():
+            a, b = goals[paw][k], goals[paw][(k + 1) % keys]
+            if a is None and b is None:
+                continue
+            ends = [bone_at(bones, poses[i % keys], paw)[2] for i in (k, k + 1)]
+            a = ends[0] if a is None else a
+            b = ends[1] if b is None else b
+            _turn_to(pose, bones, paw, hip, axis, a + (b - a) * (at - int(at)))
+        return pose
+    return clip
+
+
+def _turn_to(pose, bones, paw, hip, axis, goal):
+    """Turns `hip` about `axis` until `paw` sits `goal` m back (secant steps from the pose as keyed)."""
+    base = pose.get(hip, (0, 0, 0))
+
+    def miss(turn):
+        rot = list(base)
+        rot[axis] += turn
+        pose[hip] = tuple(rot)
+        return bone_at(bones, pose, paw)[2] - goal
+
+    a, b = 0.0, 0.05
+    fa, fb = miss(a), miss(b)
+    for _ in range(12):
+        if abs(fb) < 1e-6 or fa == fb:
+            return
+        a, b, fa = b, b - fb * (b - a) / (fb - fa), fb
+        fb = miss(b)
 
 
 DROP = -0.09       # how far a flop lowers it (m); set by the species
