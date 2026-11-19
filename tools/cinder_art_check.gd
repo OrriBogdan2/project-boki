@@ -97,11 +97,8 @@ func run(main: Node) -> void:
 		fr += 1
 		if fr < 30:
 			continue
-		var pts := jet.jet_points(P.aim_dir())
-		if pts.size() != 2:
-			stowed = false
-			continue
-		spread = maxf(spread, (pts[0] as Vector3).distance_to(pts[1]))
+		var vfx := HeroVfx.of(m)
+		spread = maxf(spread, vfx.anchor_pos(P, "tank_l").distance_to(vfx.anchor_pos(P, "tank_r")))
 		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 		var bi := sk.find_bone("jet.0")
 		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)
