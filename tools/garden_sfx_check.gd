@@ -24,6 +24,9 @@ extends RefCounted
 ##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
 ##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
 ##      when sulky, nothing while it sleeps
+##  13. Boki at play (play_sfx.gd): one zone plays at most MAX_CUES cues per WINDOW_S however many Boki play, a
+##      cue over the cap is dropped, another zone has its own allowance (the tag, squabble and toy hooks are
+##      --base-life-check's)
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -43,10 +46,32 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_names()
+	_play_cap()
 	await _games()
 	await _fishing()
 	print("GARDENSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _play_cap() -> void:
+	var sfx := PlaySfx.new()
+	var rec := _kin("zapple", "Pip")
+	var here := GardenZones.here
+	GardenZones.here = "play_cap_zone"
+	GardenSfx.heard.clear()
+	for i in 10:
+		sfx.tag_end(rec, Vector3(float(i), 0.0, 0.0))
+	ok(_count("garden_cheer_good") == PlaySfx.MAX_CUES and sfx.dropped == 10 - PlaySfx.MAX_CUES,
+			"play: ten cues at once play %d, %d held back" % [PlaySfx.MAX_CUES, sfx.dropped])
+	GardenZones.here = "play_cap_other"
+	sfx.tag_end(rec, Vector3.ZERO)
+	ok(_count("garden_cheer_good") == PlaySfx.MAX_CUES + 1, "play: another zone has its own allowance")
+	sfx.tick(PlaySfx.WINDOW_S)
+	GardenZones.here = "play_cap_zone"
+	sfx.squabble(rec, Vector3.ZERO)
+	ok(_count("garden_sulk_" + GardenSfx.size_word(rec)) == 1, "play: the allowance is back after the window")
+	ok(PlaySfx.DB < GardenSfx.DB, "play: its cues sit under the minigame level (%.0f dB)" % PlaySfx.DB)
+	GardenZones.here = here
+	GardenSfx.heard.clear()
 
 func _kin(sp: String, kname: String) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
