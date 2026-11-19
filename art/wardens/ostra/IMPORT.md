@@ -46,10 +46,11 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
 
-**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118):** the v95 scan has the sleeves fused to the coat, so the re-derived
-weights tore triangles in every clip (2.9% of edges over 3x in Blender, worst 32x; `--stretch-check` worst 7.93). Only the
-skin weights and the index list of `Body` changed (rig, bone names, clips, vertices, UVs and textures are byte for byte the
-same). Weights: the vertices of every edge that stretches past 1.6x in any of the 57 game clips (8 samples each) are
-smoothed over the mesh (screened Laplacian, 3 rings, lambda 15). Fused contact triangles still past 2.5x afterwards (784 of
-60,051, mostly the armpit and shoulder seams, hidden behind the arm) are removed. After: no edge past 2.8x in any clip,
-`--stretch-check` worst 2.51, Blender share over 3x 0.03-0.34% (all edges). Bind pose is unchanged.
+**Skin stretch fix (2026-11-19, ext/hunter-fix-ostra-1118, retry):** the v95 scan has the sleeves fused to the coat, so the re-derived
+weights drag triangles into black spikes in the dynamic clips. Only `Body` JOINTS_0/WEIGHTS_0 changed (the diff against main is inside those
+two buffers; the index list, vertices, UVs, rig, bone names, clips, materials and the Fan/card meshes are byte for byte the same: no triangle
+is removed, open boundary edges stay at 77). Weights: only the vertices on edges that stretch past 2x in the 57 game clips (visible edges:
+rest length >= 8 mm or posed >= 5 cm) are smoothed (screened Laplacian, 1 ring, lambda 3), repeated while any stay over 2x; after every round each
+touched vertex is blended back toward its live weights until its position in idle/stance/crouch_idle/walk_* is within 3.5 cm of live (linear in
+the weights), so the resting and idle look stays the live one; vertices that would add a crushed long edge are reverted to live.
+Stretched triangles (ratio > 2.5 and edge >= 7 cm) in the worst pose: 879 -> 214; crushed triangles never above live in any pose.
