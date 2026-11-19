@@ -519,9 +519,10 @@ dagger is lost; holding the step until she is free would read better.
 ## Look and sound (all ours)
 
 - Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
-- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the gold chakram and its
-  comet trail, the empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
-  dagger, the cyan afterimage chain, the knock star and heal pillar, the cartwheel arc.
+- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the spinning chakram, the
+  empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the dagger, the cyan
+  afterimage chain, the knock star and heal pillar, the cartwheel arc. The plain bolt's cel tracer and its hit
+  (a lit violet burst, crescent rim, cross flare and sparks) are HeroVfx data: content/vfx/thief.json.
 - Sounds: tools/gen_sfx_sable.py (`dj_*`, `thief_*`), synthesized; set in content/sfx/thief.json.
 
 ## Engine notes
