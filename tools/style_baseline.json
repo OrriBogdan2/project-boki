@@ -417,9 +417,17 @@
 "semicolon": 43
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
+"long_line": 5,
+"semicolon": 4
+},
+"scripts/match/exits_flow.gd": {
+"long_line": 3,
 "nested_ternary": 1,
-"semicolon": 13
+"semicolon": 4
+},
+"scripts/match/exits_look.gd": {
+"long_line": 3,
+"semicolon": 3
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
