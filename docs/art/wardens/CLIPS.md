@@ -26,6 +26,17 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
+## Opening a box
+No clip: one shared layer on the contract bones (`scripts/heroes/warden_open.gd`, WardenOpen), laid over the clips by
+Sync while the Hero holds a chest or a deathbox open (`Hunter.holding()` "chest" or "loot"; the player's open loot
+window holds "loot"). The state's `act_at` is the lid's top (`WardenOpen.lid_near`, the nearest closed chest or full box).
+It turns the root to the box, steps in (at most 0.45 m), sinks with the soles kept (leg IK), leans the hips and lays both
+wrists on the lid (arm IK, elbows out), reaching in over 0.25 s, stirring a little while held, and going straight back
+in 0.1 s when the hold ends. Step, drop and lean are searched once per reach against the Hero's own shoulders and arm
+length, so a tall Hero folds deeper and every Hero's hands reach the same lid. A move, dash, cast, hit, stun or a jump
+takes it off the frame it comes; a hold that goes on reaches in again. The channel's timing is the game's own
+(ChestLoot `hold_s`, Life `loot_time`): the layer only shows it. `--loot-open-check` asserts every Hero with clips.
+
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
