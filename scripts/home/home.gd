@@ -1523,7 +1523,7 @@ func _move_kin(d: float) -> void:
 				# everyone has a favourite corner of the farm they drift back to
 				k["goal"] = _haunt(k, here) + Vector3(randf_range(-1.6, 1.6), 0, randf_range(-1.6, 1.6))
 			else:
-				k["goal"] = world.random_ground(maxi(here, 0))
+				k["goal"] = ZoneVents.goal(k, world.random_ground(maxi(here, 0)))
 			if randf() < 0.3 * float(pers.get("chatty", 1.0)):
 				_emote(k, "♥" if trust > 65.0 else ("?" if trust < 30.0 else "★"))
 		if k.has("fetch"):

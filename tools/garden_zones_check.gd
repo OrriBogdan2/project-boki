@@ -54,6 +54,7 @@ func run(m: Node) -> void:
 	await _move_part(m)
 	await _glasswater_part(m)
 	await _cinderstep_part(m)
+	await _ridge_part(m)
 	await _reload_part(m)
 	_thrive_part()
 	await _unlock_part(m)
@@ -425,7 +426,7 @@ func _texts(n: Node) -> String:
 	return out
 
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
-func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
+func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false, at := Vector3.INF) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): dir = a.substr(12)
@@ -434,7 +435,10 @@ func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> voi
 	DirAccess.make_dir_recursive_absolute(dir)
 	hub.cam.zoom_to = zoom
 	hub.cam.zoom = zoom
-	hub.cam.snap(HubWaystone.HUB_AT + (HubWaystone.ARRIVE_OFF if arrival else Vector3.ZERO))
+	var focus := at
+	if at == Vector3.INF:
+		focus = HubWaystone.HUB_AT + (HubWaystone.ARRIVE_OFF if arrival else Vector3.ZERO)
+	hub.cam.snap(focus)
 	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
 	hub.prompt_box.visible = false
 	await m.get_tree().process_frame
@@ -533,6 +537,45 @@ func _cinderstep_part(m: Node) -> void:
 		and crack.material_override == terrace.material_override,
 		"terraces and glowing cracks, one batch each on one material (%s)" % str(kinds))
 	Content.rules("farm_build")["base_mode"] = false
+## Kitewind Ridge (step 7d): updraft vents from the zone's data, on open ground clear of the toys, drawn as two
+## batches (a pad and a column each) however many there are.
+func _ridge_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Save.d["zones"]["ridge"] = {"open": true}
+	var wing := Save.new_kin("kestrike", "Gale")
+	wing["zone"] = "ridge"
+	Save.d["roster"].append(wing)
+	Game.goto("home", {"zone": "ridge"})
+	var rh = await _arrived(m, Game.main.current)
+	ok(rh != null, "Kitewind Ridge loads")
+	if rh == null:
+		return
+	var vents := ZoneVents.spots("ridge")
+	ok(vents.size() >= 3, "the ridge has updraft vents (%d)" % vents.size())
+	ok(ZoneVents.spots("glasswater").is_empty() and ZoneVents.spots("hushwood").is_empty(), "no other zone has them")
+	var pads: MultiMeshInstance3D = rh.find_child("vent_pads", false, false)
+	var columns: MultiMeshInstance3D = rh.find_child("vent_columns", false, false)
+	ok(pads != null and columns != null and pads.multimesh.instance_count == vents.size()
+		and columns.multimesh.instance_count == vents.size(), "each vent is one pad and one column, two batches")
+	var clear := true
+	for v in vents:
+		var on_land: bool = not rh.world.is_void(v.x, v.z)
+		var free: bool = on_land and rh.world.occupy(v.x, v.z, ZoneVents.PAD_R, 0.0, false) == 0.0
+		var apart: bool = rh.toys.toys().all(func(t) -> bool: return _flat(t["pos"], v) > 2.0)
+		clear = clear and free and apart
+	ok(clear, "every vent stands on open ground, 2 m from any toy")
+	var gale: Dictionary = rh.kins.filter(func(k) -> bool: return String(k["rec"]["name"]) == "Gale")[0]
+	rh.ppos = Vector3(-500, 0, -500)
+	gale["pos"] = vents[0] + Vector3(1.4, 0, 0.4)
+	gale["goal"] = gale["pos"]
+	for day in [["ridge_vents_day.png", 0.5], ["ridge_vents_night.png", 0.97]]:
+		rh.day_t = day[1]
+		await _hub_shot(m, rh, day[0], 0.8, false, vents[0])
+	Content.rules("farm_build")["base_mode"] = false
+func _flat(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
+
 ## Thriving is a lean in the zone's types or a matching trait over 0.6; joy, toy training and the daily pull follow.
 func _thrive_part() -> void:
 	Content.rules("farm_build")["base_mode"] = true

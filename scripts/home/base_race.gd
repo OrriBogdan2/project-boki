@@ -145,6 +145,8 @@ static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 		"jump":
 			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
 			p *= lerpf(1.0, float(R["glide"]), g)
+	if s.has("vent") and winged(rec):
+		p *= float(R["vent_mult"])
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -591,7 +593,12 @@ func _place_runners() -> void:
 		runners[i]["pos"] = p
 		if winged(runners[i]["rec"]):
 			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
-			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
+			var vent: bool = st[s].has("vent")
+			var gap: bool = String(st[s]["kind"]) == "jump" or vent      # it glides the gap or rides a vent
+			n.set_meta("aloft", gap and BokiFly.glides(left))
+			if vent:
+				var f := clampf(into / float(st[s]["len"]), 0.0, 1.0)
+				n.position.y += float(BokiFly.rules()["vent_h"]) * sin(PI * f)
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:

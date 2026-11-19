@@ -110,6 +110,10 @@ check: `--base-life-check`.
   a carry) brings it down first; a game sets it down at once. Up there it skips wading. Check: `--boki-rig-check`
   (two fliers on Kitewind Ridge for 120 s: never over 3 s on foot while roaming, hovering in the band, every landing
   flares, plus a bridge and a leap).
+  Updraft vents (`scripts/home/zone_vents.gd`, the ridge's `vents` in `garden_zones.json`): over one a roaming flier
+  rises at `vent_climb` to `vent_h` m and holds it, a roaming flier's next goal is a vent `vent_pull` of the time, and
+  The Dash's ridge track (`vent` on its top stretch, `vent_mult` in `base_race.json`) lifts winged runners through
+  the first vent. Two MultiMesh draws for all of them. Checks: `--garden-zones-check`, `--race-check`, `--boki-rig-check`.
   The rest wade through. A rigged Boki finds the deep middle `swim_depth` deep and floats there (BokiRig's swim
   state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
   `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and
