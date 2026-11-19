@@ -4,12 +4,13 @@ extends RefCounted
 ## Prints COMBATHUD <fight> <n> lines for the HUD calm check and saves <fight>.png.
 
 const DT := 1.0 / 60.0
-const SHOT_SIZE := Vector2i(1920, 1080)      # px: the frame the owner reads
-const FIGHT_SECS := 4.0      # s of real fighting before the frame is taken
+const SHOT_SIZE := Vector2i(1920, 1080)  # px: the frame the owner reads
+const FIGHT_SECS := 4.0  # s of real fighting before the frame is taken
 
 var main: Node
 var m: Match
-var P: Hunter
+var player: Hunter
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -29,33 +30,34 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "length": 1e9})
 	m.set_process(false)
-	P = m.player
+	player = m.player
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
 	var foe = _stage(fight)
 	for i in int(FIGHT_SECS / DT):
-		P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
-		P.inp["fire"] = true
+		player.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
+		player.inp["fire"] = true
 		m.step(DT)
-		m.cam.snap(P.pos)
+		m.cam.snap(player.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(fight + ".png"))
-	print("COMBATHUD ", fight, " hp ", int(P.hp), " foe ", int(foe.hp))
+	print("COMBATHUD ", fight, " hp ", int(player.hp), " foe ", int(foe.hp))
 	main.get_tree().quit(0)
+
 
 ## Puts the player beside the first rival (duel) or the nearest monster (pve); returns the target.
 func _stage(fight: String):
-	var foes: Array = m.hunters.filter(func(h): return h.team != P.team)
+	var foes: Array = m.hunters.filter(func(h): return h.team != player.team)
 	var target = foes[0]
 	if fight == "pve":
 		var near: Array = m.mobs.duplicate()
-		near.sort_custom(func(a, b): return a.pos.distance_to(P.pos) < b.pos.distance_to(P.pos))
+		near.sort_custom(func(a, b): return a.pos.distance_to(player.pos) < b.pos.distance_to(player.pos))
 		target = near[0]
 	for h in m.hunters:
-		if h != P and h != target:
+		if h != player and h != target:
 			h.ctrl = "idle"
-	P.teleport(m.world.free_spot_near(target.pos + Vector3(5, 0, 3), [], 1.0, 0.45, 4.0))
+	player.teleport(m.world.free_spot_near(target.pos + Vector3(5, 0, 3), [], 1.0, 0.45, 4.0))
 	return target

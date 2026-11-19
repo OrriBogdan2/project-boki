@@ -3,8 +3,8 @@ extends RefCounted
 ## only an urgent line shows; once 3 s pass without a hit they show one at a time, under the top row, never in
 ## the centre 40% of the screen or over the hunter; a rival's name shows only under the mouse. Never touches the save.
 
-const CENTRE := 0.4      # of the screen's width and height: the middle nothing pops into
-const QUIET_S := 3.1     # s without a hit that end a fight (Hud.MSG_FIGHT_S is 3)
+const CENTRE := 0.4  # of the screen's width and height: the middle nothing pops into
+const QUIET_S := 3.1  # s without a hit that end a fight (Hud.MSG_FIGHT_S is 3)
 
 var bad := 0
 var main: Node
@@ -86,7 +86,7 @@ func _level_card(m: Match) -> void:
 
 func _names(m: Match) -> void:
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	foe.pos = m.player.pos + Vector3(3, 0, 0)      # well inside the old 9 m "close enough to read" range
+	foe.pos = m.player.pos + Vector3(3, 0, 0)  # well inside the old 9 m "close enough to read" range
 	var far: Vector2 = m.hud.c.size * 0.9
 	ok(not m.hud._np_show_name(far, foe), "a rival's name stays hidden with the mouse away, even up close")
 	var near: Vector2 = m.hud.c.get_local_mouse_position()
