@@ -135,6 +135,7 @@ func _place_msgs() -> void:
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	msgs.keep_off = KnockFeed.rects()      # a wide card slides aside of the kill feed's rows (right edge)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
