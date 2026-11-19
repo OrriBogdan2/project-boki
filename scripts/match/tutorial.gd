@@ -645,6 +645,14 @@ func goal(sid: String) -> Vector3:
 	return Vector3.INF
 
 
+## The sign over a gap step's pad (null for a step without one).
+func pad_sign(sid: String) -> Label3D:
+	for pd in _pads:
+		if pd["id"] == sid:
+			return pd["label"]
+	return null
+
+
 ## Where your Boki runs ahead to: the glowing pad before a gap, else the goal itself.
 func _lead_goal(sid: String) -> Vector3:
 	if sid in GAP_STEPS:
