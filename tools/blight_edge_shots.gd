@@ -4,7 +4,7 @@ extends RefCounted
 ## match clock to sit 60 m off, 5 m off, and 5 m behind the player (out in the Blight):
 ##   wall_60m    the wall 60 m away, low camera (the steep play camera sees only the nearest ground)
 ##   wall_edge   the wall 5 m off, play camera
-##   wall_inside 20 m off inside the ring, play camera; wall_moving_a/_b the same view 20 s of match clock apart
+##   wall_inside 20 m off inside the ring, play camera; wall_moving_a/_b 40 m off, low camera, 20 s of clock apart
 ##               (the ring a few metres closer: the front the wall's motion cue has to show)
 ##   in_blight   5 m past it: tint, line, red pulse of a tide hit
 ##   minimap     crop of the minimap with the ring and the dashed next ring
@@ -34,7 +34,7 @@ func run(main_node: Node) -> void:
 	await _view("wall_60m", d + 60.0, LOW_PITCH, "The wall 60 m away from the spot, seen from a low camera")
 	await _view("wall_edge", d + 5.0, play_pitch, "The wall 5 m off, the play camera")
 	await _view("wall_inside", d + 20.0, play_pitch, "The wall 20 m off, the play camera")
-	await _moving(d + 20.0, play_pitch)
+	await _moving(d + 40.0, LOW_PITCH)
 	m.heart.hit_t = 1.0e9
 	await _view("in_blight", d - 5.0, play_pitch, "5 m out in the Blight: tint, the line, the red pulse of a hit")
 	_crop_take("minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the ring, the dashed next ring, the Heart")
