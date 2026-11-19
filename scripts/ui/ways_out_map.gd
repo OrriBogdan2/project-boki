@@ -113,12 +113,15 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 		return      # (no Ways Out: the tutorial, training, a duel)
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
+	var goal := ExtractGoal.pick(m, HudReveal.newcomer(m))
 	for i in 4:
 		if at[i] == Vector3.INF:
 			continue
 		var pv: Vector2 = to_map.call(at[i])
 		if on_map.call(pv, 8.0):
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
+			if i == goal or MapDetail.holding():
+				HudStyle.ctext(hud.c, pv + Vector2(0, 22), WORDS[i], 10, HudStyle.INK, 3)      # the badge's name
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
 	if m.heart_raid:
