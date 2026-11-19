@@ -1,5 +1,14 @@
 # Sable (thief): import note
 
+## Skin weights off hip/thigh, no tearing under animation (2026-11-19, ext/hunter-fix-sable-1118)
+Weights and vertex splits only: bind-pose triangles, UVs, textures, skeleton, bone names and all 59 clips are unchanged
+(same triangle set at bind, checked). Hand/forearm weight was lifted off the hip, thigh and torso-side skin, the
+triangles fused between arm and body (and between the legs) were cut by splitting their vertices (+717 verts, same
+positions), limb weights were re-blended along the bone chain, then a weights-only relax smoothed the vertices that still
+stretched >1.6x in any clip (413 poses, every clip, 7 samples each; the check uses other sample times).
+Edges stretched over 3x vs bind (numpy skin, every clip, 6 samples): mean 6.53% -> 0.02%, worst clip 9.52% -> 0.04%,
+worst edge 361x -> 12.1x. `--stretch-check` thief worst 23.85 -> 4.15, clips over the ceiling 43 -> 0.
+
 ## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
 The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
 IDLE_AUDIT section 9):
