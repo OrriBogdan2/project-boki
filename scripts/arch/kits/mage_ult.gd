@@ -373,7 +373,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
-## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
+## Rose-pink lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
 	var rng := kit.fx().rng
 	if rng.randf() > 14.0 * dt:
