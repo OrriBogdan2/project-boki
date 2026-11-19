@@ -1,35 +1,24 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
 
-## LIVE 11-19: skinning fix (job 20261119-024205-a3, ext/hunter-fix-cinder-1118): weights and contact cuts only
-`cinder.glb` = the 11-18 board1117 A2 glb with the same positions, UVs, images, bones and 54 clips; only the skin weights
-changed and 90 vertices were split. Why: the scan fused the forearms to the hips and ribs, and the re-derived heat weights
-left forearm weight on hip skin and torso weight on forearm skin, so every clip dragged those triangles into spikes.
-- Skin that lies on the forearm or lower upper arm (x outside 0.145 m, y below 1.12 m) is labelled arm, the rest by smoothed
-  cluster weight (arm L/R, leg L/R, core). Arm vertices lose torso and leg weight, torso vertices lose forearm/hand weight.
-- Fused arm/leg/torso contact triangles (120) are cut by splitting their vertices: same position, so the bind pose is
-  identical, but the arm separates from the body when it moves.
-- Arm and leg chains get a smooth blend along the limb (smoothstep, 14 cm at the elbow, 8 cm at the wrist, knee/ankle alike)
-  instead of a one-vertex hinge; torso weight fades out 10 cm down the limb.
-- Targeted weight smoothing (25 passes, alpha 0.6) on the vertices of edges that still stretch over 2.2x, never across the cuts
-  and never from torso skin into forearms.
-Numbers (edges stretched over 3x vs bind, Blender, idle / run_f / run_f / shot): 1.83 / 2.51 / 2.29 / 3.33 % -> 0.03 / 0.06 /
-0.03 / 0.12 %, worst 205x -> 10x. hunter_mesh_check stretched tris in the worst clip 762 -> 96 (the jet flame cones, which grow
-by design), collapsed 52 -> 0. Floating sheets: none found (floating_islands 0, no needle islands), so nothing was deleted.
-Scripts: `/home/boki/gens/cinder-rigfix-1119/tool/` (fix.py, smooth.py, glbrw.py).
-
-### Retry 11-19 (Fable review: new holes at the hips, scraps on the forearms): weights only, same triangles as live
-Still 63,096 triangles, no triangle added, moved or deleted; every original vertex keeps its bind position, so the rest pose looks
-like live. Two more weight steps on top of the 11-19 cut:
-- Two floating islands the cut left behind (20 + 24 triangles of hip skin from under the left forearm, they rode the forearm as
-  red scraps and left a hole in the left hip) now take their hip twins' weights, so the hip is whole again.
-- The cut at the armpits (upper arm vs ribs, y above 1.06 m, 89 vertices) is undone: the seam pairs take the mean of their two weight
-  sets, so the armpit is one skinned surface again (raising an arm opened a hollow there). Lower contact (forearm vs hip, y 0.9-1.06 m)
-  stays cut: merging it brought the stretch back (check worst 14.9x).
-Tried and dropped: flat caps over the hip loops. They closed nothing the island step had not, and in the game's renderer the
-tail's spring bones dragged them into black wings.
-Edges stretched over 3x vs bind (all 46 glb clips, every 0.1 s): median clip 3.44% -> 0.10%, worst clip 4.62% -> 0.25%.
-Scripts: `/home/boki/cj/20261119-054029-a5/work/tool/` (isl.py, unify.py on top of fix.py output).
+## LIVE 11-19 (retry 3, PR #362): skinning fix, weights only (same vertices, triangles, UVs, images, bones and clips as live)
+`cinder.glb` = main's 11-18 glb (sha c4c7001f) with only JOINTS_0/WEIGHTS_0 changed: no vertex or triangle added, moved, cut or
+deleted, so the rest pose is live's. Every group of same-spot vertices that shared weights in live still shares one weight set, so no
+seam can open (largest same-spot drift in any clip 0.06 cm; live's open edges 1941 -> 1941).
+Why live tears: the scan's heat weights put the back of the upper arm, the elbow guard and the forearm mostly on `hips`, so the elbow
+skin stayed with the torso while the forearm followed its bone (black sheets at every elbow/forearm), and hand weight sat on hip skin.
+- Arm vs body is found by a min cut on the mesh below the armpit (y < 1.12 m): below the armpit the arm meets the body only where the
+  palm is fused into the thigh. Arm skin below 1.08 m follows only the arm chain (upper arm -> forearm smoothstep 1.05-0.97 m, wrist
+  blend into live's hand weights 0.84-0.78 m, 6 smoothing passes); body skin below the armpit has no arm weight.
+- Shoulder/armpit ring (within 24 cm of the shoulder joint, y 1.0-1.40 m): harmonic weights over the mesh (Laplace, 1/length), so
+  the arm/chest change is spread over the ring and raising an arm stretches the armpit smoothly instead of making a web.
+- Palm/thigh contact (8 cm each side): harmonic between the hand and the thigh. The palm is fused into the thigh (the thigh has no
+  skin under the palm), so a weights-only split would open a hole; this spreads the gap instead of spiking.
+- Hip/thigh band (y 0.56-1.0 m) and neck band (y 1.26-1.40 m, incl. the head seam): harmonic, replacing live's hard steps.
+- Hair/head pieces lose arm weight (97 verts); small floating islands (6, 274 spots) move rigidly.
+Numbers (live -> fixed): edges over 3x, all 46 clips every 0.05 s: median clip 3.50% -> 0.13%, worst clip 4.63% -> 0.29%, worst edge
+152x -> 13.9x. hunter_mesh_check: stretched tris worst clip 762 -> 96 (jet flame cones), median clip 287 -> 11, collapsed union 85 -> 66.
+Scripts + evidence: `/home/boki/gens/cinder-rigfix-1119/retry3/` (tool/fix2.py live.glb out.glb; labels arm_L/R.npy from tool/cut.py).
 
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
