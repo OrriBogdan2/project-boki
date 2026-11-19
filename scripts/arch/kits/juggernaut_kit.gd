@@ -689,7 +689,7 @@ func _rmb_waits() -> bool:
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
-	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
+	return (not slam_w.is_empty() and not _slam_young()) or not lunge.is_empty() or meteor.airborne()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
@@ -904,6 +904,24 @@ func _chain_lunge(k: float) -> void:
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
+
+## A Slam wound up less than BUFFER ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+func _slam_young() -> bool:
+	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= BUFFER
+
+## The pull starting with a Smash pressed just before it (still down, or a young Slam): that press is the
+## Cinder Spin (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
+func spin_early() -> bool:
+	if _slam_young():
+		slam_w = {}                 # (its charge is spent: the spin is that Smash)
+		last_variant = "during_e"
+		_spin()
+		return true
+	if not rmb_down or rmb_ctx.get("air", false) or rmb_t >= BUFFER:
+		return false
+	rmb_ctx["e"] = true
+	_release_rmb()
+	return true
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:

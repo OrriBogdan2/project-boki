@@ -1186,6 +1186,7 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
 			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
 			"spins %d slams %d" % [K.spins, K.haul_slams])
+	_spin_timing(m, P, K, hook)
 	# E attached, RMB tapped (not pulling): a normal Finishing Slam
 	A.step(m, 1.0)
 	hook.call()
@@ -1631,3 +1632,57 @@ func _edge(sname: String, hit: float) -> Dictionary:
 		elif t < hit - 0.005 or t >= hit + 0.03: rest = maxf(rest, v)
 	return {"len": snappedf(float(b.size() - 44) / 2.0 / 44100.0, 0.001),
 			"edge": snappedf(linear_to_db(edge / 32768.0), 0.1), "lead": snappedf(linear_to_db(edge / rest), 0.1)}
+
+## The Cinder Spin is forgiving: an RMB press at the pull's start, middle, last frame, just after it ended (the
+## arrival, or a dash that cut it short) or just before it (tapped, or still held) is exactly one spin; a press
+## outside all that is the normal Smash.
+func _spin_timing(m: Match, P: Hunter, K: JuggernautKit, hook: Callable) -> void:
+	var cases := ["start", "middle", "last frame", "0.14 s after arriving", "0.1 s after a dash cut it",
+			"0.1 s before (tapped)", "0.1 s before (held)"]
+	for name: String in cases:
+		A.step(m, 1.0)
+		hook.call()
+		K.slam_w = {}
+		var spins0 := K.spins
+		var early := name.begins_with("0.1 s before")
+		if early:
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			A.step(m, 0.1, func(): P.inp["sec_hold"] = name.ends_with("(held)"))
+			P.ak.use_e()
+		else:
+			P.ak.use_e()
+		match name:
+			"middle":
+				A.step(m, 0.1)
+			"last frame", "0.14 s after arriving":
+				while K.warchain.pulling():
+					m.step(A.DT)
+				if name != "last frame":
+					A.step(m, 0.14)
+			"0.1 s after a dash cut it":
+				A.step(m, 0.04)
+				P.do_dash()
+				A.step(m, 0.1)
+		if not early:
+			A.tap(m, P)
+		A.step(m, 0.1)
+		P.inp["sec_hold"] = false
+		A.step(m, 0.8)
+		A.ok("jug spin timing: RMB %s = exactly one Cinder Spin" % name,
+				K.spins == spins0 + 1 and K.slam_w.is_empty(), "spins %d" % (K.spins - spins0))
+	# outside the pull: the ordinary Smash (a tap on a hooked chain, and well after a pull) is a Slam, no spin
+	A.step(m, 1.0)
+	hook.call()
+	K.slam_w = {}
+	var spins1 := K.spins
+	A.tap(m, P)
+	A.ok("jug spin timing: RMB on the hooked chain (no pull) = the Slam", not K.slam_w.is_empty() and K.spins == spins1)
+	A.step(m, 1.0)
+	K.warchain.snap()
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.tap(m, P)
+	A.ok("jug spin timing: RMB 1 s after the chain is gone = the Slam", not K.slam_w.is_empty() and K.spins == spins1)
+	A.step(m, 1.0)
+	K.slam_w = {}
