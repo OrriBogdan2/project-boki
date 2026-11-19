@@ -549,7 +549,7 @@ Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses 
 | juggernaut | ult (X) | free | free | briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free |
 | gunslinger | LMB hold | free | free | briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking' |
 | gunslinger | RMB | free | free | briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown |
-| gunslinger | E | slow (90 deg/s) | free | briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner item 144 (briefs/MAIN_TO_EXT.md 11-05): cap the charge's aim turn at ~90 deg/s; free after the shot |
+| gunslinger | E | slow (30 deg/s) | free | briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner 11-09: a strong yaw lock, the charge creeps round at 30 deg/s at most (was 90, item 144); free after the shot |
 | gunslinger | ult (X) | free | free | briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held |
 | bulwark | LMB hold | free | free | briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line |
 | bulwark | RMB | free | free | briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once |
