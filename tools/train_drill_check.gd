@@ -13,6 +13,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (the shipped rules have the garden on)
 	var d := Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
 	k["level"] = 5
