@@ -106,10 +106,13 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
-## The Chill on `t`, for the plate status row (HudPlate.row) (one state, no stacks); the ring is the Chill left.
+## The Chill on `t`, else its Fan stacks, for the plate status row (HudPlate.row); the ring is the time left.
 func combo_read(t: Ent) -> Dictionary:
 	if not chilled(t):
-		return {}
+		var fan: Dictionary = fan_hits.get(t.get_instance_id(), {})
+		if fan.is_empty():
+			return {}
+		return {"icon": "frost", "n": int(fan["n"]), "max": 0, "left": float(fan["left"]), "total": FAN_HOLD}
 	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
 			"total": float(d["passive"].get("chill_t", 4.0))}
 
