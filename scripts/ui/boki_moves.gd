@@ -32,7 +32,7 @@ func _init(species: String, rec := {}) -> void:
 		var lines := [KinText.ability(eff), "%s  ·  %ss cooldown" % [_when(ad, slot), KinText.n(ad.cooldown)]]
 		_add(ad.display_name, KinText.icon(ad), KinText.color(ad).lerp(UI.INK, 0.2), lines, false)
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud:
+	if ud and MergeForm.enabled():
 		var head: Array = KinText.merge(ud, kspec != null and kspec.carry_style == "mount")
 		var what := String(head[0]) if not head.is_empty() else ""
 		var lines := [what, "Fill the bond meter, then press %s to fuse" % Settings.key_caps("ultimate")]
