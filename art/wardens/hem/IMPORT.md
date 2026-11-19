@@ -1,5 +1,20 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+## 2026-11-19: tearing fix (ext/hunter-fix-hem-1118), weights and fused triangles only
+Under animation the v95 mesh tore (arm weight on hip/thigh skin, the skirt following the thighs only, black spikes).
+Only JOINTS_0/WEIGHTS_0 and the body mesh's indices changed; skeleton, bone names, 53 clips, UVs, textures, bow and arrow are
+byte-identical, and the bind pose renders the same (live vs fixed, same camera).
+Steps: `tools/art1/glb_relax.py` (limbs apart, rip fused arm/body triangles, relax); then the skirt top blended onto `hips` by
+height (0.85 to 1.1 m, at most 0.5, only outside the leg capsule) and relaxed again; then no thigh weight on an arm vertex and no arm
+weight on a thigh vertex (limb roots too); then triangles on edges still over 6x removed from the index buffers (not left degenerate:
+`hunter_mesh_check` fails a hunter with over 0.5% degenerate triangles). 569 triangles of 60.9k are gone, all at arm/body contact and
+in the skirt.
+Numbers (welded unique edges over 3x their bind length in any clip, 53 clips): 0.54% -> 0.11% (329 -> 65 raw edges, worst 17.2x -> 5.7x).
+`--stretch-check --wardens=archer`: worst 17.81 -> 6.65 (roll); every clip is still over 1.3 (elbow, knee and sleeve creases).
+Not fixed: the left forearm's glove layer still frays in the draw/loose clips (a second sleeve layer sits over the skin in the scan);
+the bow's tip piece is a 24-triangle island (a weapon part, kept); the hem tatters are the bind-pose look and stay.
+
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb` (the body6 pick, CURRENT_OVERRIDES 11-12) on main's hem.glb rig (no keep parts, so the earlier swap's mesh is dropped whole); bow, arrow and anchor_nock unchanged. Was appeal3 body b below. 13.9k tris (body 13.0k), 2048 atlas + 2048, 51 clips (pet/give/cheer gain sampled channels, same timing).
 Spec `art/wardens/src/hem_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
