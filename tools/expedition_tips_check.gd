@@ -16,7 +16,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	for k in ["blight", "camp", "deathbox", "wallkick"]:
+	for k in ["blight", "camp", "deathbox", "wallkick", "keg"]:
 		Save.d["tutorial"].erase(k)
 	var m := Match.new()
 	main.add_child(m)
@@ -42,8 +42,9 @@ func run(main: Node) -> void:
 	var line := String(ExpeditionTips.next(m)[1]) if _due(m) == "deathbox" else ""
 	ok(line.contains(Settings.key_cap("interact")), "a lootable deathbox: the tip with the interact key")
 	Save.d["tutorial"]["deathbox"] = true
+	_keg_rows(m, p)
 	_wall_rows(m, p)
-	ok(ExpeditionTips.next(m).is_empty(), "all four seen: nothing more on this save")
+	ok(ExpeditionTips.next(m).is_empty(), "all seen: nothing more on this save")
 	m.queue_free()
 	ok(_via_tips(main, "") == true, "a real match: Match._tips shows the camp tip")
 	for k in ["tutorial", "arena"]:
@@ -68,6 +69,27 @@ func _wall_rows(m: Match, p: Hunter) -> void:
 	p.wall_touch_t = 0.0
 
 
+## The keg tip: none with no keg within KEG_M, none while an interact prompt is up, then one line with the
+## fire key that says only kegs explode; once per save.
+func _keg_rows(m: Match, p: Hunter) -> void:
+	var saved := p.pos
+	var keg := {"kind": "keg", "dead": false, "pos": p.pos + Vector3(ExpeditionTips.KEG_M + 3.0, 0, 0)}
+	var crate := {"kind": "crate", "dead": false, "pos": p.pos + Vector3(2.0, 0, 0)}
+	m.breaks = [crate, keg]
+	m.interact = {}
+	ok(_due(m) == "", "a keg out of range, a crate close: no keg tip")
+	keg["pos"] = p.pos + Vector3(ExpeditionTips.KEG_M - 1.0, 0, 0)
+	m.interact = {"kind": "loot"}
+	ok(_due(m) == "", "a keg in range but another prompt up: the keg tip waits")
+	m.interact = {}
+	var line := String(ExpeditionTips.next(m)[1]) if _due(m) == "keg" else ""
+	ok(line.contains("explode") and line.contains(Settings.key_cap("fire")), "a keg in range: the line, fire key")
+	Save.d["tutorial"]["keg"] = true
+	ok(_due(m) == "", "seen once: never again")
+	m.breaks = []
+	p.pos = saved
+
+
 func _due(m: Match) -> String:
 	var t := ExpeditionTips.next(m)
 	return String(t[0]) if t else ""
@@ -75,7 +97,7 @@ func _due(m: Match) -> String:
 
 ## Whether Match._tips marks the camp tip after a kill at a lootable box (practice key: tutorial or arena).
 func _via_tips(main: Node, key: String) -> bool:
-	for k in ["blight", "camp", "deathbox"]:
+	for k in ["blight", "camp", "deathbox", "keg"]:
 		Save.d["tutorial"].erase(k)
 	var o := {"teams": 2, "squad": 1, "tier": 0, "seed": 4242}
 	if key != "":
