@@ -1,5 +1,14 @@
 # Ryzz (ART-1 rebuild): how this model is made
 
+## Tear fix pass 4 (2026-11-19, ext/hunter-fix-ryzz-1118, Fable review retry): clips back to live, hands ride the forearm, knees
+Starts from pass 3 below. Scripts, renders and numbers: `/home/boki/gens/hunter-fix-ryzz-1118/v4/` (tools/restore_clips.py, handrig.py, legfix.py).
+- Cause of the arm blades (fall, jump, rmb_hold, emote): the mage skeleton's arm hangs straight down at x=+-0.13 m, but the scan's arms angle out. The hand bone's pivot sits ~19 cm from the mesh wrist (hand verts at x=-0.34). Any hand bend or roll swings the mesh hand around a point outside it and tears the wrist into a flat black blade. The pass-3 wrist-roll re-key rolled the forearm about the same off-mesh axis.
+- Clips: every channel is put back to live, byte for byte (the pass-3 re-key of 30 clips is undone; 0 clips differ from main).
+- Hands: hand and finger weight goes to the forearm on each side, so the hand rides rigidly with the forearm and the wrist cannot tear. The hand no longer bends at the wrist (it never bent correctly with this skeleton).
+- Legs: the thigh/shin/foot split was smeared over ~40 cm (30% thigh at mid-shin, 25% shin in the boot sole), so the legs bent like rubber hoses. Each vertex keeps its total leg weight and every other bone's weight; the leg share is re-split by rest height at the knee joint (blend +-5 cm) and the ankle joint (+-3.5 cm). Sash cloth is untouched.
+- Unchanged: skeleton, bone names, bind matrices, materials, textures, every original vertex (position, normal, UV, colour), faces.
+Live -> pass 3 -> here: `stretch_check.gd` worst 15.34 -> 6.18 -> 6.18 (clips over 7.0: 54 -> 0 -> 0). Blender edges >3x, worst clip: 8.24% -> - -> 0.15%. `hunter_mesh_check` spike edges 254 -> 0 -> 0, stretched tris in the worst clip 1698 -> 38 -> 14. Flipped/collapsed arm tris (sum of per-clip max, L/R): 35116/31151 -> 5803/4919 -> 4559/3733; body 75992 -> 17759 -> 12693.
+
 ## Tear fix pass 3 (2026-11-19, ext/hunter-fix-ryzz-1118, art-gate retry): weights, needle split, wrist roll
 Starts from pass 2 below. Scripts and numbers: `/home/boki/gens/hunter-fix-ryzz-1118/v3/` (split.py, fix3.py, rekey.py).
 - Needles: the 254 bind-pose needle triangles (`hunter_mesh_check` spike_edges) are split at the midpoint of every edge longer than 10x the median edge (7.3 cm). The new vertex sits on the old edge and takes the average of every attribute, so the surface, UVs and look do not change. Nothing is deleted and no hole is added: every original vertex is byte-identical, there are 493 new vertices, area is equal and there are 0 spike edges.
