@@ -15,8 +15,8 @@ const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow e
 
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
-## setting. In the tutorial the setting rules too: with wisps its steps teach the summon (TutorialSummon),
-## without them the walking Boki's orders.
+## setting. In the tutorial the setting rules too: with wisps its steps teach the wisp, summon, pack and steal
+## (TutorialWisp, TutorialSummon), without them the walking Boki's orders.
 static func mode(m: Node) -> bool:
 	var o = m.get("opts")
 	if not o is Dictionary:
@@ -76,8 +76,11 @@ static func render(k: Kin) -> bool:
 	if k.wisp and KinSteal.loose(k) and k.model:
 		KinSteal.render(k)
 		return true
+	if not k.wisp:
+		WispProc.watch_carried(k)
+		return false
 	var o := k.owner_h
-	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:
+	if k.state != "shoulder" or o == null or o.model == null:
 		return false
 	if k.ring:
 		k.ring.visible = false
@@ -91,4 +94,5 @@ static func render(k: Kin) -> bool:
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
+	WispProc.watch(k)
 	return true

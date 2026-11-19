@@ -40,7 +40,8 @@ const KEYS := {
 	"pick_sec": "secondary",
 	"pick_dash": "dash",
 	"pick_kin": "signature",
-	"pick_ult": "ultimate"
+	"pick_ult": "ultimate",
+	"steal": "interact"
 }
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {
@@ -118,6 +119,7 @@ var _beams: Array = []
 var _pads: Array = []
 var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
 
+var wb: TutorialWisp  # the Boki-wisp steps (wisp, steal), with Boki wisps on
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -125,6 +127,7 @@ func _init(match_node: Match) -> void:
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
 	aim = TutorialAim.new()
+	wb = TutorialWisp.new(self, match_node)
 	sm = TutorialSummon.new(self)
 
 
@@ -188,7 +191,6 @@ func _add_pad(id: String) -> void:
 	m.add_child(lab)
 	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab})
 
-
 # ------------------------------------------------------------------ each step
 func id() -> String:
 	return String(steps()[step][0]) if step >= 0 and step < steps().size() else ""
@@ -201,6 +203,8 @@ func applies(sid: String) -> bool:
 			return m.player.kin != null and not sm.active()
 		"summon", "pack":
 			return sm.active()
+		"wisp", "steal":
+			return wb.on()
 	return true
 
 
@@ -232,6 +236,7 @@ func update(dt: float) -> void:
 	aim.update(self, dt, int(p.used.get("k1", 0)) - int(used0.get("k1", 0)))
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
+	wb.tick()
 	if got != got_seen:
 		got_seen = got
 		_refresh(p)  # (each move that lands is ready again at once)
@@ -403,6 +408,8 @@ func _enter() -> void:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
+	if sid in TutorialWisp.STEPS:
+		wb.enter(sid)
 	match sid:
 		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
 			camps.spawn(sid)
@@ -460,6 +467,8 @@ func _is_done(sid: String, dt: float) -> bool:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		return int(p.slot_lv[slot]) > 0
+	if sid in TutorialWisp.STEPS:
+		return wb.done(sid, dt)
 	match sid:
 		"land":
 			return not p.dropping
@@ -608,6 +617,7 @@ func goal(sid: String) -> Vector3:
 		"glove":
 			var wp := ground_item()
 			return wp["pos"] if not wp.is_empty() else stop("pickup")
+		"steal": return wb.goal(sid)
 		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
@@ -724,6 +734,8 @@ func _words() -> void:
 		line = String(alt["sec_hold"])
 	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	elif wb.alt(sid) != "":
+		line = String(alt[wb.alt(sid)])
 	text = fill(line)
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
 	if sid == "sec" and rmb_has_hold():
@@ -770,6 +782,8 @@ func fill(txt: String) -> String:
 	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	txt = txt.replace("%Q", Settings.key_cap("gear1")).replace("%L", kit_line(key))
+	txt = txt.replace("%C", Settings.key_cap("summon")).replace("%F", Settings.key_cap("interact"))
+	txt = txt.replace("%P", KinText.carry(p.kin.ks) if p.kin else "")
 	txt = txt.replace("%M", Settings.key_cap("summon"))
 	if p.kin and p.kin.summon:
 		txt = txt.replace("%D", str(roundi(p.kin.summon.dur))).replace("%B", str(roundi(p.kin.summon.cd_base)))

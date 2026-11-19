@@ -55,6 +55,10 @@
    "Send %s at the monsters"
   ],
   [
+   "wisp",
+   "%s rides with you as a wisp"
+  ],
+  [
    "summon",
    "Press %M to summon %s"
   ],
@@ -89,6 +93,10 @@
   [
    "ranks",
    "Spend your spare points"
+  ],
+  [
+   "steal",
+   "Round wisp: a Hunter. Critter wisp: a Boki"
   ],
   [
    "wayout",
@@ -130,7 +138,9 @@
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has few ways out; this one is at the outpost.",
   "uplink": "Stay in the circle, or the capture slips back.",
-  "defend": "Stay in the circle, or the capture slips back."
+  "defend": "Stay in the circle, or the capture slips back.",
+  "wisp": "While it rides, its carry power is yours. %P.",
+  "steal": "A downed Hunter's Boki wisp breaks loose. Steal it: it rides with you at half power and gives you one summon. It goes home after the match, and nothing of yours is lost."
  },
  "alt": {
   "sec_hold": "Tap, then hold, to use %A",
@@ -140,7 +150,8 @@
   "pack_wait": "Wait for the bright ring, then press %M",
   "shoot_draw": "Hold to draw, let go to loose",
   "shoot_melee": "Step in and swing at them",
-  "kin_miss": "Missed - aim at the group"
+  "kin_miss": "Missed - aim at the group",
+  "steal_grab": "Hold %F on its Boki wisp to steal it"
  },
  "retry": {
   "default": "Back at your last stop. Try again",
@@ -183,7 +194,8 @@
   "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",
-  "extract": "Lift"
+  "extract": "Lift",
+  "steal": "Boki wisp"
  },
  "camps": {
   "sec": {
