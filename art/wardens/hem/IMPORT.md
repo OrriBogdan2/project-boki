@@ -1,5 +1,29 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+## 2026-11-20b: skirt HANGS from the rig's own `skirt` bone; seam welds; no flecks (ext/hunter-fix-hem-1118, after art-gate FAIL)
+Gate (send-1120b): the hem still fanned into long strands behind a leg (f602 f604 f560 f563 f566), the skirt ran off as a
+flat slab in crouch_l/crouch_b, and specks floated by the hips. Two weight-only passes failed (2 FAIL rule), so this one changes method:
+1. Hang bone. The rig already has `skirt` (child of `hips`, contract bone) that carried no weight and whose track was an
+   identity constant in every clip. Its rotation track (same key times, nothing else) is re-keyed per clip so its down axis
+   points along normalize(down + 0.25 x mean thigh direction) in model space (clamped 75 deg from where the hips carry it,
+   one 1-2-1 smoothing pass, loops closed): the skirt hangs under a leaning torso instead of riding the hips or a raised
+   thigh. No body bone, key time or clip length changes.
+2. Skin. Skirt cloth (same mask as 11-20) = 11-20 field with the thigh share x0.15, the hips share moving to `skirt`
+   from 0.97 m down to 0.65 m; verts within 2-15 cm of a leg axis blend to their own weights; hip fix above 0.98 m kept.
+3. Flecks. Since the 11-19 passes, seam copies of one vertex carried different weights, so the mesh opened in motion into ~31
+   loose flecks per frame (the gate's specks). The 27 small pieces (< 30 verts) the skin holds apart from all round them
+   now take the weights of the piece they share the most rim with (178 verts); the two 11-19 hip caps stay. (Averaging every
+   seam pair instead was tried: it ties the hanging skirt to leg skin and gives 1.04% edges over 3x, rejected.)
+4. `content/rules/warden_anim/hem.json` "upper" also takes `skirt` with `hips`, so an upper-body move hangs the skirt
+   from the hips it plays.
+Positions, UVs, normals, texture, triangles, skeleton, bone names, clip set and timing unchanged; bind pose identical.
+Numbers LIVE / 11-20 FIX / NOW (every clip; ~/gens/hunter-fix-1118/reviews/hem-evidence-1120b/scripts): hem lift from
+straight down p95, median clip 41.6 / 14.7 / 3.8 deg (crouch_b 47.7 / 31.5 / 11.9, run_b 41.1 / 19.9 / 9.1, walk_b
+26.3 / 15.1 / 7.6); neighbouring-strand split p99 median 5.77 / 0.83 / 0.67 cm; edges over 3x 252 (0.558%) / 7 (0.015%) /
+20 (0.044%); Godot --stretch-check worst 17.81 / 4.37 / 3.96 (roll); loose pieces per frame 0 / 31 / 0 (plus the two
+11-19 hip caps, which stay on the hip); skirt verts inside a leg (median clip) 17.3 / 6.8 / 12.3% (a leg that steps back
+now passes between the hanging strands instead of dragging them). Script: hem_hang.py (`WT=0.25 KT=0.15 LEG_OUT=0.15 HANG_FULL=0.65`).
+
 ## 2026-11-20: skirt hem on one smooth hips->thighs field (ext/hunter-fix-hem-1118, after art-gate FAIL on match_loops.jpg)
 Gate: the 11-19 skirt still broke into long fanned strands (f602 f604 f560 f563 f566) and specks at the hip cut. Cause in
 numbers: that build bound the skirt ~90% to the thighs from waist to hem, and neighbouring strands carried different
