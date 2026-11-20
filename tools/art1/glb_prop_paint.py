@@ -6,7 +6,8 @@ slot and paint) and every UV of it lands on one texel of that atlas: a calm patc
 the colour) of the stone's own hue with no emission, at the stone's median brightness. The old material then goes
 with the textures, images and bytes only it used (glb_drop_mats.drop). Other parts (the eyes' glow) stay as they are.
 Run: python3 tools/art1/glb_prop_paint.py IN.glb OUT.glb --meshes eye_stone,shard --from leather-body.001 --to metal-v95
-(a Meshy regen sorts the cobalt arm into cloth-v95: --to cloth-v95 --near blue)
+(a Meshy regen sorts the cobalt arm into cloth-v95: --to cloth-v95 --near blue; --drop shard takes out the shards that
+orbit hand.R, his off hand since the v2 turnaround put the stone arm on his left: owner 11-20, no rocks on the off hand)
 """
 
 import argparse
@@ -87,10 +88,14 @@ def main():
     ap.add_argument("--meshes", required=True)
     ap.add_argument("--from", dest="old", required=True)
     ap.add_argument("--to", required=True)
+    ap.add_argument("--drop", default="", help="props (mesh names) to take out whole, e.g. shard: Tenzo's off-hand shards")
     ap.add_argument("--near", help='R,G,B or "blue": the texel of --to nearest that colour, not its median')
     a = ap.parse_args()
     near = a.near if a.near in (None, "blue") else np.array([float(v) for v in a.near.split(",")], np.float32)
     j, b = read(a.src)
+    for m in j["meshes"]:   # (their nodes go with the old material below: glb_drop_mats drops nodes left meshless)
+        if m.get("name") in a.drop.split(","):
+            m["primitives"] = []
     names = [m.get("name") for m in j["materials"]]
     old, to = names.index(a.old), names.index(a.to)
     uv, rgb = pick(j, b, to, near)
