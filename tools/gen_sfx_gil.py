@@ -2,6 +2,7 @@
 swordfish, throwing whatever bottle comes out of the bag, swimming through the ground.
 
     cd tools && python3 gen_sfx_gil.py      (then: python3 gen_sfx_dash.py, godot --headless --import)
+    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit and gil_slime_dry)
 
 Signatures: the swordfish thrust (gil_thrust) and the Beached flop (gil_beached). Everything is water,
 glass and a small wet body: thin blade swishes with a fin flick, glass that breaks five ways (one per
@@ -305,6 +306,31 @@ def build():
     S.save_cat('gil_death', death(), 'grunt')
 
 
+# ------------------------------------------------------------------ the bar pass (11-20): Tide's hit, the slime's end
+def tide_hit():
+    """Riptide Lunge lands (LMB held): the bill drives in behind a wall of water, a heavy wet thump and surf
+    running off (lower and fuller than a thrust's tock, so the two hits never sound alike)."""
+    tip = mix(click(0.004, 2200, 7000) * 1.0, crack(0.16, 600, 3800, 0.02) * 1.6)
+    body = mix(wet_slap(0.22, 200, 1800) * 0.9, kick(150, 55, 0.45, 0.012, 0.08, 2.2) * 0.8)
+    surf = at(lpf(noise(0.45), 2400) * env(N(0.45), 0.004, 0.14) * 0.8, 0.015)
+    return mix(tip, body, surf, at(spray(0.35, 2200, 8000, 0.12) * 0.5, 0.02), at(bubbles(0.4, 5, 300, 700, 0.25), 0.1))
+
+
+def slime_dry():
+    """The slime puddle drying up: a slow sticky suck draining away, the last fat bubbles popping slower."""
+    suck = lpf(noise(0.6), 700) * slow(0.6, 18, 0.8) * shape(0.6, 0.06, 0.1, 0.4) * 1.1
+    gulp = at(S.sweep(220, 90, 0.3) * env(N(0.3), 0.02, 0.12) * 0.25, 0.25)
+    last = mix(*[at(bubble(f, 0.09, 1.3) * g, t0) for f, t0, g in ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))])
+    return S.pad(mix(suck, gulp, last), 0.8)
+
+
+def build_bar():
+    """Only the bar pass's files (a full run re-rolls every other file's noise)."""
+    S.reseed(5154)
+    S.save_cat('gil_tide_hit', tide_hit(), 'impact')
+    S.save_cat('gil_slime_dry', slime_dry(), 'cast')
+
+
 if __name__ == '__main__':
-    build()
+    build_bar() if sys.argv[1:] == ['bar'] else build()
     print('gen_sfx_gil: done')
