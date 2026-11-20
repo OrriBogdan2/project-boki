@@ -832,11 +832,11 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
-	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(m.length - m.time), "ISLANDS FALLING" if m.length - m.time < 30.0 else "")), 30))
-	mm_bottom = r.end.y
 	var left := m.length - m.time
-	var phase := ""; var pc := MUTED
-	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
+	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
+	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
+	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(left), phase)), 30))
+	mm_bottom = r.end.y
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := TextCache.width(big, phase, 11)
@@ -1046,7 +1046,7 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
-	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
+	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "Spend point" at level 6
 	var tw := TextCache.width(big, txt, 11)
 	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
@@ -1174,13 +1174,13 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## What the R slot says about its lock: "LV 6" until then, "Spend point" with a point to spend on it,
 ## "" once it's unlocked.
 func r_lock_text(p: Hunter) -> String:
 	if int(p.slot_lv.get("ult", 0)) > 0:
 		return ""
 	if p.can_level("ult"):
-		return "UNLOCK"
+		return HudSlot.POINT_TAG
 	if p.lvl >= int(Hunter.ULT_AT[0]):
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])

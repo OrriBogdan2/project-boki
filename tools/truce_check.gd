@@ -88,7 +88,7 @@ func run(main_node: Node) -> void:
 	var traitor: Hunter = B[0]; var victim: Hunter = A[0]
 	victim.inv_t = 0.0
 	victim.hurt(20.0, traitor, {"src": "shot"})
-	var announced: bool = m.feed_all.any(func(f): return String(f).contains("broke the truce"))
+	var announced: bool = T.events.any(func(f): return String(f).contains("broke the truce"))
 	run.call(0.6)
 	var hits_back: int = A.filter(func(x): return x.ai.get("tgt") == traitor).size()
 	print("TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d" % [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back])
