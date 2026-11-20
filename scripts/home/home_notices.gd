@@ -7,14 +7,45 @@ extends RefCounted
 
 const STRAY := "A stray %s wandered in to stay."
 const STRAY_MORE := "Adopt more at the Shelter (the market stall)."
-## The farm-room notice for an old save, first time home since the Kin Burrow: %d = room, %d = resting.
-const BURROW := ["The farm has room for %d Boki out at once.", "Your partner and closest Boki stayed out.",
-	"The other %d curled up in the Boki Burrow.", "It is south of the market stall, by the pond.",
-	"Boki in the burrow don't get hungry.", "Swap them out any time, or expand the cottages."]
+## A Boki starved: the lines under its "has died" card. `now` = it happened just now, not while you were away.
+const DEATH_WHEN := "%s starved while you were away."
+const DEATH_NOW := "%s starved."
+const DEATH_REST := ["It had nothing to eat for days.", "Its grave is in the graveyard, east of the farm."]
+const DEATH_FEEDER := "A filled feeder keeps your Boki fed."
+const DEATH_SHRINE := "A Soul Shrine can bring a Boki back."
+const BACK_HOME := ["You took %s back!", "It's home again.", "It won't forget you came for it."]
+const EGG_HOME := ["Brought home %s!", "Off to the Incubator by the Nesting Nook.", "Eggs hatch one at a time."]
+const NO_BOKI_HOME := ["With no Boki left at home, %s let one go on credit.",
+	"It waited a long time and trusts you less now."]
+const SNACKS := ["The snack patch grew %d extra snacks.", "%d are in the bowl, the rest in the pantry."]
+
+
+## The farm-room notice for an old save, first time home since the Kin Burrow: `room` Boki out, `resting` asleep.
+static func burrow(room: int, resting: int) -> Array:
+	return ["The farm has room for %d Boki out at once." % room, "Your partner and closest Boki stayed out.",
+		"The other %d curled up in the Boki Burrow." % resting, "It is south of the market stall, by the pond.",
+		"Boki in the burrow don't get hungry.", "Swap them out any time, or expand the cottages."]
+
+
+## The lines under a Boki's "has died" card.
+static func death(rec_name: String, away: bool, has_shrine: bool) -> Array:
+	var lines: Array = [(DEATH_WHEN if away else DEATH_NOW) % rec_name] + DEATH_REST
+	lines.append(DEATH_FEEDER)
+	if not has_shrine:
+		lines.append(DEATH_SHRINE)
+	return lines
+
 
 ## Every fixed notice line, for --tutorial-text-check: a bullet card line over 60 characters fails.
 static func fixed_lines() -> Array:
-	return [STRAY % "Mossling", STRAY_MORE] + BURROW.map(func(l): return l % 8 if "%d" in l else l)
+	var out: Array = [STRAY % "Mossling", STRAY_MORE, DEATH_FEEDER, DEATH_SHRINE]
+	return out + burrow(8, 8) + death("Mossling", true, false) + fill(EGG_HOME, "a Rare Egg") \
+		+ fill(BACK_HOME, "Mossling") + fill(NO_BOKI_HOME, "Old Pell") + fill(SNACKS, 12)
+
+
+## `lines` with `arg` put into every line that has a "%" slot.
+static func fill(lines: Array, arg) -> Array:
+	return lines.map(func(l): return l % arg if "%" in String(l) else l)
 
 
 ## The toast when a stray turned up.

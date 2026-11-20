@@ -719,7 +719,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(HomeNotices.BURROW.map(func(l): return l % (KinBox.farm_cap() if l.begins_with("The farm") else nb) if "%d" in l else l))
+		_show_when_free(HomeNotices.burrow(KinBox.farm_cap(), nb))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
