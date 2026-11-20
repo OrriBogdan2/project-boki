@@ -61,7 +61,8 @@ var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
-var trail_t := 0.0              # the next barge after-image
+var trail_t := 0.0              # the next barge contact check
+var barge_met := {}             # foes the barge has already flashed on (instance ids)
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
@@ -740,6 +741,8 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
 	_clawed_turf(dir)
 	barge_t = h.roll_t
+	barge_met = {}
+	vfx("dash", null, null, {"t": h.roll_t})       # data: the gold trail (content/vfx/dredge.json "dash")
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
@@ -789,14 +792,19 @@ func on_dash_off_ledge() -> void:
 	super()
 	stop_t = 0.0
 
-## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
+## The barge touches nobody (no hit, no knock); a foe it runs into only gets a small gold flash where they meet
+## (data "dash_hit", once per foe per shove). The trail itself is the data "dash" ribbons, no ring or burst.
 func _barge_trail(dt: float) -> void:
 	trail_t -= dt
 	if trail_t > 0.0:
 		return
 	trail_t = 0.045
-	var d2 := h.aim_dir()
-	fx.puff(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, LDFx.M_ORB, BRASS, IRON, 0.9, 0.3)
+	for f in m.foes_of(h.team):
+		if f.hittable() and not barge_met.has(f.get_instance_id()) and absf(f.pos.y - h.pos.y) < 2.0 \
+				and Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).length() < h.r + f.r + 0.3:
+			barge_met[f.get_instance_id()] = true
+			# on the foe's near edge: the ball (wider than h.r) hides a flash at the mid point
+			vfx("dash_hit", f.pos.lerp(h.pos, f.r / maxf(0.1, f.pos.distance_to(h.pos))), null, {"hit": true})
 
 func own_dash_trail() -> bool: return true
 

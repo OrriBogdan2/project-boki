@@ -542,6 +542,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
+	m.sfx("mage_wire_hit", f.pos, -4.0)
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -684,7 +685,9 @@ func _coil(k: float) -> void:
 	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if not done["hit"]:
 			done["hit"] = true
-			_coil_hit(f, dir, k)}))
+			_coil_hit(f, dir, k),
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
+			if e == null and not done["hit"]: m.sfx("mage_rod_fizzle", at, -5.0)}))
 	var thrown: bool = shots.size() > n0 and shots[-1]["by"] == h
 	vfx("rmb", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir, {"len": rng, "loose": not thrown})
 	if thrown:
