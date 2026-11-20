@@ -10510,3 +10510,4 @@ READY ext/sparkle-3d-fix-1120 81d2603a5b (Sparkle 3D: quad remesh + Meshy retext
 READY ext/vfx-sable-lmb 9036f85072 (Sable LMB cel tracer + lit hit burst; merged origin/main, thief.json conflict resolved keeping main's anchors/moves + bolt_trail/bolt_hit; --dancer-combo-check 47/0 fail, --check 0 failures; health --strict only fails sfx loudness: numpy missing on w2)
 READY ext/tut-farm-skip c9aa1cf884 (Hob no longer calls a skipper over; farm tutorial check skips at each of 12 farm + 4 base steps; 3 stale assertions and wiki Rules.md fixed)
 READY ext/farm-bond-taper 8e2a103f5ed27bbfb607766510fadf5908c23f59 (per-day bond trust taper in garden_trust.json; grinder 7->30 min to Soulbound, balanced unchanged; --bond-pace-check)
+READY ext/vfx-sable-lmb cef94b99df (Sable LMB cel tracer + lit hit burst; merged origin/main facb5c3e22, clean; --check 0 failures, health --strict OK; --dancer-combo-check 3 fails identical on origin/main so not new)
