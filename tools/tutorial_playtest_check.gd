@@ -6,8 +6,8 @@ extends RefCounted
 ##      posts while nobody touches it, and a real G tap from the lookout registers the step, even for a Boki
 ##      that trusts you not at all (it never refuses in the tutorial)
 ##   3. every step's final text, in order: it names its key (the real bound one), unlocks say "Press <key> to
-##      unlock <name>", the Ultimate (R) and the Fusion (X) are told apart, the Fusion unlock comes before the
-##      Fusion step and can't be pressed early, and no text is the old jargon
+##      unlock <name>", the Ultimate (R) and the Fusion (X) are two keys, no Fusion step or line shows (the
+##      tutorial has none), and no text is the old jargon
 ##   4. every text fits the strip at 1280x720 and 1920x1080 beside the key cap, the arrow, the distance and the
 ##      counter, at a readable size
 ## It prints every step (TUTSTEP lines) so a reader sees what the player sees. Never touches the save.
@@ -199,8 +199,7 @@ func _open_ground(m: Match, tu: Tutorial, posts: Array) -> void:
 
 
 # ------------------------------------------------------------------ 3. the words
-func _words(m: Match) -> void:
-	var p := m.player
+func _words(_m: Match) -> void:
 	var caps := {"land": _wasd(), "ranks": TutorialText.rank_combo(), "glide": Settings.key_cap("jump")}
 	for sid in order:
 		var s: Dictionary = seen[sid]
@@ -218,36 +217,11 @@ func _words(m: Match) -> void:
 	var fuse: String = Settings.key_cap("ultimate")
 	var ulti: String = Settings.key_cap("hunter_ult")
 	ok(fuse != ulti, "the Fusion key (%s) and the Ultimate key (%s) are two keys" % [fuse, ulti])
-	ok(
-		String(seen["pick_ult"]["text"]).contains("Fusion") and String(seen["pick_ult"]["text"]).contains(fuse),
-		"pick_ult unlocks the Fusion with its own key: '%s'" % seen["pick_ult"]["text"]
-	)
-	var open_line: String = seen["pick_ult"]["detail"]
-	ok(
-		open_line.contains(ulti) and open_line.contains(String(p.ak.x_def().get("name", "?"))),
-		"pick_ult tells you the Ultimate (%s) is open too: '%s'" % [ulti, open_line]
-	)
-	var name: String = p.kin.rec.get("name", "")
-	ok(
-		String(seen["ult"]["text"]).contains("fuse with " + name) and String(seen["ult"]["text"]).contains(fuse),
-		"ult tells you to fuse with %s: '%s'" % [name, seen["ult"]["text"]]
-	)
-	var xname: String = p.ak.x_def().get("name", "")
-	var dt: String = seen["ult"]["detail"]
-	ok(
-		xname != "" and dt.contains(ulti) and dt.contains(xname) and dt.contains("Ultimate") and dt.contains(fuse),
-		"and its second line names the Ultimate (%s, %s) and the Fusion (%s): '%s'" % [ulti, xname, fuse, dt]
-	)
-	var pu: int = order.find("pick_ult")
-	var fuse_at := order.find("ult")
-	ok(pu >= 0 and pu < fuse_at, "the Fusion unlock (step %d) comes before the Fusion step (%d)" % [pu, fuse_at])
-	ok(
-		not bool(seen["hook"]["ult_open"]) and bool(seen["pick_ult"]["ult_open"]),
-		(
-			"X can't take the point before level %d, and can at pick_ult (lvl %d, %d points)"
-			% [Hunter.ULT_AT[0], seen["pick_ult"]["lvl"], seen["pick_ult"]["pts"]]
-		)
-	)
+	# The Fusion steps never run in the tutorial (Tutorial.applies, 663eed9da9): no unlock step, no fuse line.
+	for sid in ["pick_ult", "ult"]:
+		ok(not order.has(sid), "the Fusion step %s never shows in the tutorial" % sid)
+	var texts := " ".join(order.map(func(sid): return String(seen[sid]["text"])))
+	ok(not texts.contains("Fusion") and not texts.contains("fuse with"), "no tutorial line asks for the Fusion")
 
 
 func _wasd() -> String:

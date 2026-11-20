@@ -384,8 +384,8 @@ func _horizon_part(hub, open_ids: Array) -> void:
 	ok(follows, "the islands follow Save.d zones (open: %s)" % ", ".join(open_ids))
 	ok(mats.size() == (2 if open_ids.size() < isles.size() else 1), "islands share one material per state")
 	# seen as you arrive: the hub's own camera (arrival zoom, on the landing spot) takes in every island
-	hub.cam.zoom_to = hub.HOME_ZOOM
-	hub.cam.zoom = hub.HOME_ZOOM
+	hub.cam.zoom_to = CamWheel.far()
+	hub.cam.zoom = CamWheel.far()
 	hub.cam.snap(HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF)
 	var seen := isles.filter(func(n): return _in_frame(hub.cam, n.global_position))
 	ok(seen.size() == isles.size(), "at arrival zoom %d of %d islands are in frame" % [seen.size(), isles.size()])
@@ -413,9 +413,9 @@ func _reload_part(m: Node) -> void:
 	if hub != null:
 		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])
 		hub.day_t = 0.5
-		await _hub_shot(m, hub, "hub_horizon_day.png", hub.HOME_ZOOM, true)
+		await _hub_shot(m, hub, "hub_horizon_day.png", CamWheel.far(), true)
 		hub.day_t = 0.97
-		await _hub_shot(m, hub, "hub_horizon_night.png", hub.HOME_ZOOM, true)
+		await _hub_shot(m, hub, "hub_horizon_night.png", CamWheel.far(), true)
 	Content.rules("farm_build")["base_mode"] = false
 
 func _texts(n: Node) -> String:

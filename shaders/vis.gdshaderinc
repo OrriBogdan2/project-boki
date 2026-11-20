@@ -1,7 +1,7 @@
 // Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
 // (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
-// what your team can see is darkened and turned a cool grey-blue, so the lit space reads at a glance;
-// your own wedge's two sides carry a thin soft cyan line on the ground. Set from Match; the numbers
+// what your team can see is greyed out like fog (no colour at all, dimmer, a light veil), so the lit space
+// reads at a glance; the cone's sides are a soft fade, not a line. Set from Match; the numbers
 // are measured from the owner's reference in docs/specs/VISION_LOOK.md.
 global uniform float vis_on;
 global uniform vec3 vis_focus;
@@ -21,13 +21,10 @@ global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fa
 global uniform vec3 vis_reveal1;
 global uniform vec3 vis_reveal2;
 
-const float VIS_COS = 0.087;           // cos of half the wedge: 170 degrees wide (Match.VIEW_COS, the same rule)
+const float VIS_COS = 0.5;             // cos of half the cone: 120 degrees wide (Match.VIEW_COS, the same rule)
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
 const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
-const float VIS_SOFT = 0.35;           // m: the lit side fades in over this much past the wedge's side
-const float VIS_LINE_W = 0.035;        // m: the edge line core fades out by this far each side (~3 px solid at 1080p)
-const float VIS_GLOW_W = 0.25;         // m: the glow falling off into the lit side (1/e at ~7 px at 1080p)
-const vec3 VIS_LINE = vec3(0.32, 0.86, 1.0);   // the edge line's cyan
+const float VIS_SOFT = 1.6;            // m: the lit cone fades out over this much inside its sides (a soft edge, no line)
 
 // Metres from the wedge's nearer side, along the ground: negative inside the wedge, positive outside.
 float vis_side(vec2 d, float dist, vec2 dir) {
@@ -80,27 +77,46 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: darker and a cool blue (75% toward a blue with little red, then x vis_dark), but the
-// ground, walls and grass still read. Tuned on GPU shots (docs/specs/VISION_LOOK.md): a greyer blue
-// turns purple on warm ground, a deeper one goes near black. Inside: a touch brighter, so the lit space pops. What's hidden
-// stays hidden either way: rival hunters and Boki out of sight aren't drawn at all
-// (Match._update_vision), this only shades the world.
+// Outside sight: neutral grey fog, in every weather (owner 11-20: no blue behind you). The ground is pulled to its own
+// luma and a light neutral veil lifts the darks, then it is dimmed by vis_dark x VIS_DIM; the terrain, walls and grass
+// still read. Greying the albedo alone is not enough: the lighting tints it again (the blue ambient, the cool violet
+// shadow side, the warm sun, then the x1.9 grade), so the lit shaders (terrain, grass, flora, wall, toon) also grey
+// their light where it is fogged: fragment() writes the fog share to vis_f, light() uses vis_grey(LIGHT_COLOR) and
+// vis_grey(tone), and vis_ao + vis_ambient swap the coloured ambient for the same amount of grey (AO takes the ambient
+// out, emission puts back its luma) and takes out the weather haze's colour (vis_dehaze). Inside: a touch brighter, so the lit space pops. What's hidden stays hidden
+// either way: rival hunters and Boki out of sight aren't drawn at all (Match._update_vision), this only shades the
+// world. Check: --vision-check (asserts the fog colour is grey); GPU numbers in docs/specs/VISION_LOOK.md.
+global uniform float vis_amb;          // the ambient light's luma x energy, linear (RaidLook.apply)
+global uniform vec4 vis_haze;          // the env fog: rgb its colour x energy (linear), a its density (RaidLook.apply)
+global uniform vec2 vis_haze_h;        // the env fog's height and height density
+varying float vis_f;                   // fog share from fragment() for light()
+const vec3 VIS_LUMA = vec3(0.3, 0.59, 0.11);
+const float VIS_VEIL = 0.14;           // share of a mid-grey fog laid over it
+const float VIS_DIM = 0.84;            // a touch darker than the 11-18 fog (its cyan cut also took ~10% of the light)
+vec3 vis_grey(vec3 c, float fog) { return mix(c, vec3(dot(c, VIS_LUMA)), fog); }
+// The ambient swap is Forward+ only (desktop): the compatibility renderer (web, mobile) multiplies all light by AO, which
+// turned the fog black, and its ambient is not graded, so it stays grey without the swap.
+// The weather's haze (the env fog) is laid over after this and is coloured (blue-grey, navy at night), so where it is
+// fogged the emission also takes out in advance what the haze would add beyond its own grey: haze a over colour x
+// gives mix(x, h, a); x + a / (1 - a) x (grey(h) - h) gives mix(x, h, a) - h + grey(h). Same formula as the engine's
+// exponential fog (distance and height); `v` is VERTEX, `iv` INV_VIEW_MATRIX.
+vec3 vis_dehaze(float fog, vec3 v, mat4 iv) {
+	float a = 1.0 - exp(min(0.0, -length(v) * vis_haze.a));
+	if (abs(vis_haze_h.y) >= 0.0001) {
+		a = max(a, 1.0 - exp(min(0.0, ((iv * vec4(v, 1.0)).y - vis_haze_h.x) * vis_haze_h.y)));
+	}
+	a = min(a, 0.8);
+	return (vec3(dot(vis_haze.rgb, VIS_LUMA)) - vis_haze.rgb) * a / (1.0 - a) * fog;
+}
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+float vis_ao(float fog) { return 1.0; }
+vec3 vis_ambient(vec3 a, float fog, vec3 v, mat4 iv) { return vis_dehaze(fog, v, iv); }
+#else
+float vis_ao(float fog) { return 1.0 - fog; }
+vec3 vis_ambient(vec3 a, float fog, vec3 v, mat4 iv) { return a * fog * vis_amb + vis_dehaze(fog, v, iv); }
+#endif
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 blue = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.2, 0.75, 1.3) + vec3(0.0, 0.01, 0.04);
-	vec3 dark = mix(c, blue, 0.75) * vis_dark;
+	vec3 dark = mix(vec3(dot(c, VIS_LUMA)), vec3(0.5), VIS_VEIL) * vis_dark * VIS_DIM;
 	return mix(c * 1.05, dark, fog);
-}
-
-// The glow of your own wedge's two sides on the ground (added to EMISSION): from your near circle out
-// to your range, a thin cyan core with a soft fall-off into the lit side.
-vec3 vis_edge(vec3 wp) {
-	if (vis_on < 0.5) { return vec3(0.0); }
-	vec2 d = wp.xz - vis_focus.xz;
-	float dist = length(d);
-	float s = vis_side(d, dist, vis_dir);
-	float line_k = 1.0 - smoothstep(VIS_LINE_W * 0.5, VIS_LINE_W, abs(s));
-	float glow_k = s < 0.0 ? exp(s / VIS_GLOW_W * 3.0) * 0.45 : 0.0;
-	float span = smoothstep(VIS_NEAR, VIS_NEAR + 0.6, dist) * (1.0 - smoothstep(vis_range - 3.0, vis_range, dist));
-	return VIS_LINE * max(line_k, glow_k) * span;
 }

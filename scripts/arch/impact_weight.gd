@@ -64,5 +64,9 @@ static func holds_attacker(w: String) -> bool:
 static func shake(w: String) -> float:
 	return float(rules["tiers"][w]["shake"]) if w != "" else 0.0
 
+## How long the struck body flashes white for a hit of this tier (a tick, "", flashes the light one).
+static func flash_s(w: String) -> float:
+	return float(rules["tiers"][w if w != "" else "light"]["flash_ms"]) / 1000.0
+
 static func cap(key: String) -> float:
 	return float(rules["cap"][key])

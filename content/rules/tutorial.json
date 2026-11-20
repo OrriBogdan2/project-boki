@@ -55,6 +55,14 @@
    "Press %K to send %s at the monsters"
   ],
   [
+   "summon",
+   "Press %M to summon %s"
+  ],
+  [
+   "pack",
+   "Beat the pack, and summon when the ring is bright"
+  ],
+  [
    "pick_kin",
    "Press %K to unlock %A"
   ],
@@ -69,14 +77,6 @@
   [
    "hook",
    "Press %K to hook the Sentinel to you"
-  ],
-  [
-   "pick_ult",
-   "Press %K to unlock Fusion"
-  ],
-  [
-   "ult",
-   "Press %K to fuse with %s"
   ],
   [
    "ranks",
@@ -105,24 +105,31 @@
   "pick_dash": "%L",
   "glide": "A tap just flicks it: keep %J held until you are across.",
   "pick_kin": "%L",
-  "pick_ult": "Your Ultimate (%Y, %Z) is open; Fusion joins you and %s.",
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%T sends %s at a monster; tap again to recall %s.",
+  "summon": "%s bursts out and fights for %D seconds: watch the ring",
+  "summon_warn": "Almost time. %s is getting tired.",
+  "summon_back": "Back to a light. %s rests now.",
+  "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
+  "pack": "A dim light means %s rests (%B seconds); bright means ready",
   "glove": "Gloves need no points; %Q uses this one.",
   "hook": "It shoots from afar, and your glove drags it to your feet.",
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has few ways out; this one is at the outpost.",
   "uplink": "Stay in the circle, or the capture slips back.",
   "defend": "Stay in the circle, or the capture slips back.",
-  "ult": "Your Ultimate is %Y (%Z); the Fusion is %K.",
   "kin": "They stand in a row: line them up, then use it."
  },
  "alt": {
   "sec_hold": "Tap, then hold %K, to use %A",
+  "summon_out": "%s is out for %D seconds",
+  "summon_rest": "%s is resting",
+  "summon_early": "That calls it back early: let it stay",
+  "pack_wait": "Wait for the bright ring, then press %M",
   "shoot_draw": "Hold %K to draw, let go to loose",
   "shoot_melee": "Step in and swing at them (%K)"
  },
@@ -134,12 +141,14 @@
   "sec": "Back at your last stop. Use %A away from the edge",
   "shoot": "Back at your last stop. Fight with solid ground behind you",
   "gkey": "Back at your last stop. Tap %T and let %s go in first",
+  "summon": "Back at your last stop. Press %M and let %s out first",
+  "pack": "Back at your last stop. Fight with solid ground behind you",
   "kin": "Back at your last stop. Line them up, then use %A",
-  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar",
-  "ult": "Back at your last stop. Fuse with %s, then hold your ground"
+  "hook": "Back at your last stop. Hook the Sentinel with %Q from afar"
  },
  "need": {},
  "cds": 0.25,
+ "summon_cd_mult": 0.33,
  "mob": {
   "scale": 1.4,
   "dmg": 0.1,
@@ -183,6 +192,19 @@
    "to": 3,
    "held": true
   },
+  "summon": {
+   "foes": [
+    "spitter"
+   ],
+   "to": 0
+  },
+  "pack": {
+   "foes": [
+    "skitter",
+    "spitter"
+   ],
+   "to": 3
+  },
   "kin": {
    "foes": [
     "skitter",
@@ -200,14 +222,8 @@
    ],
    "to": 6,
    "far": true
-  },
-  "ult": {
-   "foes": [
-    "skitter",
-    "spitter",
-    "skitter"
-   ],
-   "to": 0
   }
- }
+ },
+ "lead_doc": "Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you, and one that stood stalled for stall_s s trying to lead (an edge or a wall on the straight way) falls in beside you for off_s s, then leads again.",
+ "lead": {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0, "stall_s": 0.3, "off_s": 2.0}
 }

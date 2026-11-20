@@ -10,10 +10,19 @@ ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.4
 FAN_UP = {"hL": (-0.30, 0.18, 1.10), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-1.0, -0.6, -0.5), "cL": 0.55, "sL": 0.6}
 # his arms in to the body while the other one casts: the deck held up at his chest, the right hand loose at his belt
 FAN_IN = {"hL": (-0.19, 0.17, 1.04), "fL": (-0.1, 0.35, 0.93), "pL": (0.3, -0.9, 0.2), "eL": (-0.5, -0.3, -0.8), "cL": 0.55, "sL": 0.6}
+# the same fan held in at the ruff, while the right hand does a move (Shard Snap: the T-pose of tools/anim_audit.gd)
+HELD_L = {"hL": (-0.12, 0.26, 1.12), "fL": (0.2, 0.45, 0.85), "pL": (0.45, -0.85, 0.25), "eL": (-0.4, -0.5, -1.0), "cL": 0.6, "sL": 0.5}
 HAND_IN_R = {"hR": (0.19, 0.14, 1.0), "fR": (0.0, 0.4, -0.9), "pR": (-0.9, 0.2, 0.0), "eR": (0.5, -0.3, -0.8), "cR": 0.4, "sR": 0.3}
 # the sheet's showman: arms flung wide, the open right hand and the fanned deck out past the ruff
 STILL = {**ORB_UP, **FAN_UP, "hR": (0.44, 0.12, 1.18), "hL": (-0.42, 0.14, 1.22), "spine": (8.0, -5.0, 2.0), "head": (-14.0, 6.0, 12.0),
          "brow": -0.5, "cheek": 0.3, "lid": 0.3}
+
+# standing on the spring (the idle): the right hand low and loose at his side, the deck held low in the left, the fan to the front
+LOOSE = dict(STILL, hR=(0.25, 0.10, 0.94), fR=(0.25, 0.35, -0.9), pR=(-0.9, 0.2, 0.0), eR=(1.0, -0.6, -0.2), cR=0.35, sR=0.4,
+             hL=(-0.25, 0.16, 1.00), fL=(-0.2, 0.55, 0.8), eL=(-1.0, -0.6, -0.2), cL=0.5)
+# the stance: sunk lower into the box, the deck worked between both hands (stance_add moves them), the grin wider
+SHUFFLE = dict(LOOSE, hR=(0.30, 0.24, 1.12), fR=(-0.3, 0.8, 0.2), pR=(-0.7, 0.0, -0.7), eR=(1.0, -0.6, -0.4), cR=0.3, hL=(-0.28, 0.22, 1.06),
+               spine=(14.0, -6.0, 0.0), head=(-20.0, 6.0, 8.0), brow=-1.0, cheek=0.6, lift=(0.0, 0.02, -0.06))
 
 # leaning out, both hands in it
 READY = dict(STILL, hR=(0.26, 0.32, 1.12), hL=(-0.26, 0.28, 1.14), spine=(18.0, -8.0, 0.0), head=(-22.0, 8.0, 8.0), brow=-1.0, cheek=0.6, lift=(0.0, 0.03, -0.05), box=(3.0, 0.0))
@@ -30,23 +39,89 @@ LIMP = {"hR": (0.2, 0.07, 0.82), "hL": (-0.2, 0.07, 0.82), "fR": (0.05, 0.1, -1.
         "cR": 0.3, "cL": 0.3, "sR": 0.2, "sL": 0.2, "eR": (1.0, -0.5, 0.0), "eL": (-1.0, -0.5, 0.0)}
 
 
-def breath(P, t, period, amp=0.6):
-    s = P["spine"]
-    P["spine"] = (s[0] + amp * math.sin(t / period * TAU), s[1], s[2])
+def loop_curve(pts):
+    """a closed curve through (phase, value) points, phase 0 first and under 1: Catmull-Rom across the seam too, so the
+    end meets the start in value and slope. -> f(phase), any phase (wraps)"""
+    n = len(pts)
+
+    def at(k):          # point k, wrapping, its phase unrolled past the seam
+        return pts[k % n][0] + k // n, pts[k % n][1]
+
+    def slope(k):
+        (a, va), (b, vb) = at(k - 1), at(k + 1)
+        return (vb - va) / (b - a)
+
+    def f(x):
+        x %= 1.0
+        k = max(i for i in range(n) if pts[i][0] <= x)
+        (a, va), (b, vb) = at(k), at(k + 1)
+        h, s = b - a, (x - a) / (b - a)
+        return ((2 * s ** 3 - 3 * s ** 2 + 1) * va + (s ** 3 - 2 * s ** 2 + s) * h * slope(k)
+                + (3 * s ** 2 - 2 * s ** 3) * vb + (s ** 3 - s ** 2) * h * slope(k + 1))
+    return f
+
+
+# one bob on the spring, -1 wound down: compress, a beat wound, the release flung past, a wobble settling, the hang
+SPRING = loop_curve([(0.0, 0.0), (0.09, -0.5), (0.16, -0.95), (0.21, -1.0), (0.29, 0.5), (0.38, -0.25), (0.47, 0.1), (0.56, -0.03),
+                     (0.68, 0.0), (0.84, 0.02)])
+# the stance's shuffle, on the same bob: the hands meet as the spring winds (1 together), part in an arc as it lets go
+TOGETHER = loop_curve([(0.0, 0.0), (0.05, 0.12), (0.15, 0.9), (0.2, 1.0), (0.24, 0.96), (0.33, 0.25), (0.4, -0.06), (0.5, 0.0), (0.75, 0.02)])
+FAN_OPEN = loop_curve([(0.0, 1.0), (0.12, 0.6), (0.19, 0.32), (0.24, 0.32), (0.31, 1.1), (0.38, 0.96), (0.46, 1.0)])
+
+IDLE_LEN, IDLE_BOB = 5.0, 2.5       # s: the idle loop, one bob on the spring (two a loop)
+STANCE_LEN, STANCE_BOB = 6.0, 3.0   # s: the stance loop, one bob and one shuffle (two a loop)
+
+
+def bob(t, period, frames=0):
+    """the spring's bob at t, frames (30 fps) late: each part down the chain answers it later"""
+    return SPRING((t - frames / 30.0) / period)
+
+
+def settle_on_spring(P, t, period, lift, sway):
+    """the overlap chain on one bob: the box leads, the pelvis rides the spring, the chest 3 frames late, the head 5,
+    the hands 7 and 8 (in the torso's frame, so their lag is their own bob less the hips'); a weight shift side to side
+    over the spring once a loop (the spring's soft knees); a breath per bob on x_breath, out as it winds, in on the hang"""
+    u = t / (period * 2)
+    side = math.sin(u * TAU)
+    b = P["box"]
+    P["box"] = (b[0] - 1.2 * bob(t, period, -2), b[1] + 0.8 * math.sin(u * TAU + 0.4))
     l = P["lift"]
-    P["lift"] = (l[0], l[1], l[2] + 0.006 * math.sin(t / period * TAU * 2))
+    P["lift"] = (l[0] + 0.010 * sway * side, l[1], l[2] + lift * bob(t, period))
+    s = P["spine"]
+    P["spine"] = (s[0] - 3.0 * bob(t, period, 3), s[1] + 2.0 * math.sin(u * TAU + 1.0), s[2] + 2.5 * sway * math.sin(u * TAU - 0.25))
+    h = P["head"]
+    P["head"] = (h[0] - 4.5 * bob(t, period, 5), h[1], h[2] - 1.5 * sway * math.sin(u * TAU - 0.6))
+    for hand, frames in (("hR", 7), ("hL", 8)):
+        x, y, z = P[hand]
+        P[hand] = (x + 0.006 * sway * math.sin(u * TAU - 0.9), y, z + lift * (bob(t, period, frames) - bob(t, period)))
+    P["breath"] = 0.03 * (0.5 - 0.5 * math.cos((t / period - 0.45) * TAU))
 
 
 def idle_add(P, t):
-    breath(P, t, 3.2)
-    P["wR"] = 0.1
-    P["wL"] = 0.06
+    """on the spring, hands low; the right drums one finger after another through each hang (12 ripples a loop)"""
+    settle_on_spring(P, t, IDLE_BOB, 0.022, 1.0)
+    v = (t / IDLE_BOB) % 1.0
+    P["wR"] = 0.16 * (0.5 - 0.5 * math.cos((v - 0.55) / 0.45 * TAU)) if v > 0.55 else 0.0
+    P["wL"] = 0.04
+    P["wph"] = t / IDLE_LEN * 12 * TAU
 
 
 def stance_add(P, t):
-    breath(P, t, 2.0, 0.7)
-    P["wR"] = 0.18
-    P["wL"] = 0.1
+    """sunk lower on the spring, shuffling: the left brings the deck up to the right in an arc, squares it as the spring
+    winds, and the cards spring back open as the left sweeps away and down; the head watches, a few frames late"""
+    settle_on_spring(P, t, STANCE_BOB, 0.016, 0.6)
+    w = t / STANCE_BOB
+    for hand, far, meet, frames in (("hR", (0.30, 0.24, 1.12), (0.07, 0.30, 1.16), 0), ("hL", (-0.28, 0.22, 1.06), (-0.04, 0.28, 1.10), 1)):
+        g = TOGETHER(w - frames / (30.0 * STANCE_BOB))
+        x, y, z = P[hand]
+        P[hand] = tuple(c + (m - f) * g for c, f, m in zip((x, y, z), far, meet))
+        P[hand] = (P[hand][0], P[hand][1], P[hand][2] + 0.24 * g * (1 - g))
+    P["fan"] = FAN_OPEN(w - 2 / (30.0 * STANCE_BOB))
+    g = TOGETHER(w - 4 / (30.0 * STANCE_BOB))
+    h = P["head"]
+    P["head"] = (h[0] + 6.0 * g, h[1] + 4.0 * g, h[2])
+    s = P["spine"]
+    P["spine"] = (s[0], s[1] + 3.0 * g, s[2])
 
 
 def laugh(a, rate=11.0, t0=0.0, t1=99.0):
@@ -107,13 +182,12 @@ AIM_LOW = {"hR": (0.30, -0.24, 0.92), "fR": (0.2, -0.75, -0.55), "pR": (-0.1, -0
            "hL": (-0.27, 0.27, 1.12), "fL": (-0.1, 0.9, 0.35), "pL": (0.4, -0.2, -0.85), "cL": 0.45, "sL": 1.0, "eL": (-1.0, -0.6, -0.4),
            "spine": (14.0, 20.0, 4.0), "head": (-14.0, -14.0, 6.0), "brow": -0.9, "cheek": 0.8, "lid": 0.5, "lift": (0.0, 0.0, -0.24), "smoke": 1.0, "box": (-3.0, 0.0)}
 
-WIND = {"hR": (0.13, 0.24, 1.26), "fR": (-0.45, 0.55, 0.65), "pR": (-0.8, -0.3, -0.5), "cR": 0.65, "sR": 0.8, "hL": (-0.13, 0.24, 1.2), "fL": (0.45, 0.55, 0.7),
-        "pL": (0.8, -0.3, -0.45), "cL": 0.65, "sL": 0.8, "eR": (1.0, -0.8, -0.2), "eL": (-1.0, -0.8, -0.2), "fan": 0.3,
-        "spine": (-16.0, 28.0, 0.0), "head": (0.0, -20.0, 6.0), "brow": -1.0, "cheek": 0.9, "lid": 0.9, "pld": (10.0, 10.0),
+WIND = {"hR": (0.13, 0.24, 1.26), "fR": (-0.45, 0.55, 0.65), "pR": (-0.8, -0.3, -0.5), "cR": 0.65, "sR": 0.8, "eR": (0.5, -0.6, -1.0), **HELD_L, "fan": 0.3,
+        "spine": (-10.0, 24.0, 0.0), "head": (0.0, -18.0, 6.0), "brow": -1.0, "cheek": 0.9, "lid": 0.9, "pld": (10.0, 10.0),
         "lift": (0.0, -0.08, -0.2), "box": (-5.0, 0.0), "smoke": 0.8}
 
-SHOVE = {"hR": (0.09, 0.44, 1.28), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 1.0, -0.4), "eR": (1.0, -0.4, -0.7), "cR": 0.05, "sR": 1.0, "hL": (-0.09, 0.44, 1.24),
-         "fL": (0.0, 0.5, 0.85), "pL": (0.0, 1.0, -0.4), "eL": (-1.0, -0.4, -0.7), "cL": 0.05, "sL": 1.0, "spine": (36.0, -18.0, 0.0), "head": (-26.0, 14.0, 0.0),
+# the release: the right palm thrown out, the fan kept in at the ruff
+SHOVE = {"hR": (0.09, 0.44, 1.28), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 1.0, -0.4), "eR": (0.4, -0.3, -1.0), "cR": 0.05, "sR": 1.0, **HELD_L, "spine": (36.0, -18.0, 0.0), "head": (-26.0, 14.0, 0.0),
          "brow": -1.0, "cheek": 1.0, "lid": 0.6, "jaw": 8.0, "pld": (-10.0, -10.0), "lift": (0.0, 0.2, 0.1), "box": (7.0, 0.0), "smoke": 0.0, "fan": 1.0}
 
 DOWN = dict(LIMP, spine=(34.0, 0.0, 9.0), head=(34.0, 8.0, 16.0), hL=(-0.16, 0.22, 0.86), hR=(0.14, 0.16, 0.84), brow=0.4, cheek=0.0, jaw=8.0, lid=0.8, fan=0.5,
@@ -169,17 +243,21 @@ def pump(P, t):
 
 
 CLIPS = {
-    # ---------------------------------------------------------------- loco: he glides upright and leads; the box hung on the spring trails and treads
-    "idle": {"len": 3.2, "base": STILL, "add": idle_add, "loop": True, "keys": [
+    # ---------------------------------------------------------------- loco: the box goes first, tilting toward the way he moves; the body rides late
+    # the jester on his spring. Fidget once a loop: the head tilts over too far, past natural, holds, and snaps back with
+    # the grin as the spring lets go (2.95 s); its keys rest everywhere else, so the seam closes
+    "idle": {"len": IDLE_LEN, "base": LOOSE, "add": idle_add, "loop": True, "keys": [
         (0.0, {}),
-        (1.3, {}),
-        # a jack's tick: the head snapped over, held, snapped back, the grin wider
-        (1.42, {"head": (-14.0, -10.0, -9.0), "brow": -0.2, "cheek": 0.7}, "snap"),
-        (2.3, {"head": (-12.0, -8.0, -10.0)}),
-        (2.42, {"head": (-14.0, 6.0, 12.0), "brow": -0.5, "cheek": 0.3}, "snap"),
-        (3.2, {}),
+        (1.55, {}),
+        (2.55, {"head": (-10.0, 14.0, 40.0), "brow": 0.3, "cheek": 0.15, "lid": 0.0}, "in"),
+        (2.95, {"head": (-11.0, 15.0, 43.0)}),
+        (3.05, {"head": (-18.0, 2.0, -2.0), "brow": -0.8, "cheek": 1.0, "jaw": 7.0, "lid": 0.4}, "snap"),
+        (3.45, {"head": (-14.0, 7.0, 15.0), "jaw": 2.0}),
+        (3.8, {"head": LOOSE["head"], "jaw": 0.0}),
+        (4.4, {"brow": LOOSE["brow"], "cheek": LOOSE["cheek"], "lid": LOOSE["lid"]}),
+        (IDLE_LEN, {}),
     ]},
-    "stance": {"len": 2.0, "base": READY, "add": stance_add, "loop": True, "keys": [(0.0, {}), (2.0, {})]},
+    "stance": {"len": STANCE_LEN, "base": SHUFFLE, "add": stance_add, "loop": True, "keys": [(0.0, {}), (STANCE_LEN, {})]},
     "walk_f": {"len": 1.4, "loop": True, "base": loco((4.0, 0.0), (6.0, -4.0, 2.0), (0.0, 0.02, -0.03), head=(-18.0, 4.0, 8.0), swing=(12.0, 0.0)), "add": tread(1.4, "f", 5.0, 6.0, wobble(1.4, 2.5, 2.0, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
     "walk_b": {"len": 1.4, "loop": True, "base": loco((-4.0, 0.0), (10.0, -4.0, 0.0), (0.0, -0.02, -0.03), head=(-12.0, 2.0, 10.0), swing=(-10.0, 0.0)), "add": tread(1.4, "b", 4.0, 5.0, wobble(1.4, 2.5, 2.0, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
     "walk_l": {"len": 1.4, "loop": True, "base": loco((2.0, -4.0), (6.0, 8.0, 6.0), (-0.02, 0.0, -0.03), swing=(0.0, 11.0)), "add": tread(1.4, "l", 5.0, 5.0, wobble(1.4, 2.0, 2.5, 0.012)), "keys": [(0.0, {}), (1.4, {})]},
@@ -243,14 +321,14 @@ CLIPS = {
     # ---------------------------------------------------------------- RMB: Shard Snap (the spring wound right down, then the release)
     "snap_wind": {"len": 0.70, "base": STILL, "add": lambda P, t: t > 0.3 and twitch(0.5, 44.0)(P, t), "keys": [
         (0.00, {}),
-        (0.133, dict(WIND, spine=(0.0, 12.0, 0.0), head=(-8.0, -8.0, 8.0), hR=(0.13, 0.25, 1.14), hL=(-0.13, 0.25, 1.1), lift=(0.0, -0.03, -0.1), smoke=0.3)),
+        (0.133, dict(WIND, spine=(0.0, 12.0, 0.0), head=(-8.0, -8.0, 8.0), hR=(0.13, 0.25, 1.14), lift=(0.0, -0.03, -0.1), smoke=0.3)),
         (0.30, WIND),
         (0.70, WIND),
     ]},
     "snap": {"len": 0.50, "base": WIND, "keys": [
         (0.00, {}),
         (0.067, SHOVE, "snap"),
-        (0.167, {"spine": (-12.0, -14.0, 0.0), "lift": (0.0, -0.1, 0.03), "hR": (0.2, 0.32, 1.32), "hL": (-0.28, 0.2, 1.12), "fL": (-0.3, 0.7, 0.3), "cR": 0.35, "cL": 0.4, "head": (-6.0, 10.0, 6.0), "box": (-6.0, 0.0)}),
+        (0.167, {"spine": (-6.0, -12.0, 0.0), "lift": (0.0, -0.06, 0.03), "hR": (0.18, 0.34, 1.22), "eR": (0.3, -0.3, -1.0), "cR": 0.35, "head": (-6.0, 10.0, 6.0), "box": (-6.0, 0.0)}),
         (0.30, {"spine": (12.0, -8.0, 0.0), "lift": (0.0, 0.04, -0.03), "box": (3.0, 0.0)}),
         (0.50, dict(STILL, jaw=0.0, pld=(0.0, 0.0), lift=(0.0, 0.0, 0.0), box=(0.0, 0.0))),
     ]},

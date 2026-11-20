@@ -6,6 +6,8 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 60 s wall, headless.
+
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
 Time for a person). **Words** = the banner line plus the plain-words line under it (screens: every visible label and button,
@@ -130,11 +132,18 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## 5. Follow-ups (not fixed)
 1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
    `ranks` and the three gap steps are the obvious merges.
-2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
+2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
    sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
+   2026-11-20 (`ext/tut-glove-stall`): the glove stall did not come back on main: 24 of 24 `--tutorial-playthrough-check`
+   runs passed, glove 5.7 to 7.3 s, no void fall in the 8 traced runs. What did stall, every time, was `--tutorial-fight-check`'s second and third
+   starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
+   `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
+   landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
+   locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
@@ -144,7 +153,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## Garden first 15 (`--garden-first-15-check`)
 
 The game is playable without extraction, and in the first visit the player must never be left without
-a next step. The check plays a fresh save that skips the match tutorial ("Skip the tutorial" on the
+a next step. The check plays a fresh save that skips the match tutorial ("Skip tutorial" on the
 naming card), takes the first Relic and lands on the garden (`base_mode` on). A bot then plays 15
 minutes of garden time, never opens a match, and every second asks what is on screen to guide the
 player:

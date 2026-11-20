@@ -6,7 +6,7 @@ extends Ent
 ## Three separate pieces talk through CombatBus signals and plain calls:
 ##   this body (movement, states, visuals), KinTactics (who to chase, when to use an ability by
 ##   itself) and a KinRunner holding its two grammar abilities (k1 = the active on E, k2 = the auto
-##   active it casts itself) from content/kin_v2. KinExec runs them from their parts; KinMerge runs
+##   active it casts itself) from content/kin. KinExec runs them from their parts; KinMerge runs
 ##   its bond ultimate. How it's carried (shoulder, perch or mount) comes from its KinSpec.
 
 var species := "cindle"
@@ -89,7 +89,7 @@ var st_skills := 0
 var cd_mult := 1.0
 var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
-var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
+var ks: KinSpec = null            # its species in the grammar (content/kin)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
 var melee_n := 0                  # its own melee hits, for "on_hit" triggers
 var low_fired := {}               # on_low_hp triggers already fired this dip
@@ -106,6 +106,7 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var tp_n := 0                     # teleports so far (the "tp" meta; BokiRig ignores the jump as speed)
 var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
 var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
 var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
@@ -186,6 +187,13 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 
 func t(k: String) -> float:
 	return float(traits.get(k, 0.5))
+
+## Put somewhere (the summon bursting or re-blooming, a blink, a swap): the rig must not read the jump as speed.
+func teleport(p: Vector3) -> void:
+	super.teleport(p)
+	tp_n += 1
+	if model:
+		model.set_meta("tp", tp_n)
 
 func is_wild() -> bool:
 	return owner_h == null
@@ -692,6 +700,8 @@ func bubble_at() -> Vector3:
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
+		if wisp and comp and comp.lead_pos != Vector3.INF:
+			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
@@ -940,7 +950,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
 	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
-		hv = Vector2.ZERO
+		hv = _edge_slide(hv)
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
@@ -948,6 +958,16 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 		last_safe = pos
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
+
+## Walking into an edge: it slides along it (the smallest turn, up to square, that keeps ground ahead) instead of
+## standing there pressing at the void until the stuck watch hops it back.
+func _edge_slide(hv: Vector2) -> Vector2:
+	for a: float in [0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.57, -1.57]:
+		var d := hv.rotated(a)
+		var p := Vector2(pos.x, pos.z) + d.normalized() * (r + 0.25)
+		if not m.world.is_void(p.x, p.y):
+			return d * maxf(cos(a), 0.5)
+	return Vector2.ZERO
 
 func _sim_return(dt: float) -> void:
 	if owner_h == null or owner_h.out:
@@ -1124,7 +1144,12 @@ func render(delta: float, alpha: float) -> void:
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
-	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
+	var glides := on_you and owner_h != null and owner_h.gliding and carry_style() != "mount"
+	# BokiRig: the hop clip in the air, not the run; the glide clip on your back through your glide (0.15 s blend)
+	var act := "hop" if airborne else ""
+	if glides:
+		act = "glide"
+	model.set_meta("kact", act)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
 			scan_by != null and Capture.active(scan_by), m.time - angry_since)
