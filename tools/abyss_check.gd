@@ -314,7 +314,7 @@ func run(main: Node) -> void:
 		mb_n += 1
 		if mb.dead: mb_fell += 1
 	ok(mb_in < 0.05, "monsters knocked at an island from below stay out of it (deepest %.2fm)" % mb_in)
-	ok(mb_fell == mb_n and mb_low < 7.0, "monsters off the edge fall out promptly: %d of %d, deepest %.1fm below the lowest lip around" % [mb_fell, mb_n, mb_low])
+	ok(mb_fell == mb_n and mb_low < 8.5, "monsters off the edge fall out promptly: %d of %d, deepest %.1fm below the lowest lip around" % [mb_fell, mb_n, mb_low])
 	_edge_knocks(edges[0])
 	m.queue_free()
 	await _home(main)

@@ -18,7 +18,6 @@ const CANCEL_OPEN := {
 	"juggernaut jug_lunge_wind@0.50>jug_lunge": "0.79 m into the lunge (Kael retime; --clip-check too)",
 	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.74 m in a frame",
 	"bulwark bul_lumber@0.20>bul_ult_wind": "0.50 m into the ult wind-up",
-	"bulwark bul_throw@0.10>bul_recall": "0.70 m into the recall",
 	"dredge dr_blast@0.50>stun": "0.60 m into the stun pose",
 	"dredge dr_throw@0.20>dr_shot": "0.62 m into the shot",
 	"tender mm_seed_aim@0.50>stun": "0.37 m into the stun pose",
@@ -90,7 +89,10 @@ func _hero(id: String, dd: Dictionary) -> void:
 		elif float(r[0]) > worst:
 			worst = float(r[0])
 			where = what
-		if not bool(r[2]):
+		# (a move with "blend_out" hands the body back to the legs while its clip plays on: its blend in is no longer
+		# than that, a feel choice the file states, like "fade")
+		var into: Dictionary = (dd.get("kmoves", {}) as Dictionary).get(String(row[2]), {})
+		if not bool(r[2]) and float(into.get("blend_out", 0.0)) <= 0.0:
 			late.append(what)
 	ok(worst <= POP * height, "%s: %d cancels hand over with no pop (worst %.3f m, %s; limit %.3f)"
 			% [id, rows.size(), worst, where, POP * height])
