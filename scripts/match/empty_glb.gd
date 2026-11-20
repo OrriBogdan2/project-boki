@@ -9,8 +9,8 @@ extends RefCounted
 
 const KEYS := ["empty_f", "empty_m"]       # WardenGlb art names, by Unmasked "gender" (0 female, 1 male)
 const CUT := 0                             # Shrouds.STYLES: the Hooded Cloak, the cut the models wear
-const CLOTH_PAINT := Color("2c3150")       # the models' painted cloak colour (their atlas, mid-tone)
-const TRIM_PAINT := Color("9aa6c2")        # and their painted hem band
+const CLOTH_PAINT := Color("2f3245")       # the models' painted cloak colour (their atlas: median of the cloak texels)
+const TRIM_PAINT := Color("909db7")        # and of their hem band
 ## Procedural pieces that stay over the .glb: the void head (its hollow shell rides on it) and WardenGlb's own.
 const KEEP := ["Head", "Aura"]
 

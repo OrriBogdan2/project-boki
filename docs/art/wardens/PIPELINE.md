@@ -662,3 +662,15 @@ Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01
 Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (raws: ~/meshy/<name>/rvA, rvB). None was
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
+
+## The Empty (2026-11-20, ext/empty-3d-1119): the player's own body in 3D
+Art names `empty_f` / `empty_m` (EmptyGlb.KEYS), not Wardens: no archetype, no WardenGlb.ART line. The Meshy runs are
+the 11-17 multi-image runs with enhancement off (`~/meshy/empty-3d-1117/run_{F,M}_off`, task ids in task.json),
+graded against the 1115b picks (F_A, M_A): M_on had bare see-through hands, F_on a poncho cut. No Cycles rebake (a
+4096 bake did not finish in an hour on a loaded worker): the run is pre-decimated to 150k with its own UVs and the
+paint scaled to 4096 (`~/meshy/empty-3d-1119/tools/prep.py`), then `fit_warden.py` with
+`art/wardens/src/empty_{f,m}_fit.json` on the rig `--warden-rig-json --warden=empty_f|empty_m` writes (measured on
+the default Empty of that sex, WardenGlb.rest_model). The game's chibi rig (hips 0.44, crown 1.53) shortens the legs
+and grows the hood: closer to the 2D picks than the Meshy proportions. The male's front cloak panels follow the
+arms down into crossed strips unless weight_rules pins them to the hips. Only the Hooded Cloak, hood up, plain trim,
+no accessory has a model; every other shroud choice stays procedural (EmptyGlb.key).
