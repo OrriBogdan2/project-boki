@@ -49,6 +49,7 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var base_secs := 60.0
+var pipes_draw := 0      # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
 var tracy_dir := ""
@@ -238,9 +239,12 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 		var now := Time.get_ticks_usec()
 		fl.append(_frame(part, fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
+		# pipelines the renderer built at draw time this frame (a stall: a shader or pipeline the warm-up missed)
+		var pd := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
-				added])
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f, pipelines at draw %d), new nodes: %s" % [m.time, wall,
+				script_ms, pd - pipes_draw, added])
+		pipes_draw = pd
 		added.clear()
 		last = now
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
