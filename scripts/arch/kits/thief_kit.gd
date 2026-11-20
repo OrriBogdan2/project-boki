@@ -423,7 +423,7 @@ func _bolt() -> void:
 		chain.bolt_thrown(float(sd["life"]))
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
-		x["kb"] = 3.0
+		x["kb"] = float(dash_def().get("prime_kb", 0.0))      # 0: the card has no knock
 		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
 		fx().star(muzzle, EMP_PALE, 0.9, 0.16)
