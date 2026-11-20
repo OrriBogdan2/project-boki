@@ -10535,3 +10535,4 @@ READY ext/check-guest-host-pid 81c97f9a4cfc533d1b28ceede8a6adee0c9587ba (check g
 READY ext/blocked-hit-spark b32adbb7e2 (one Juice.blocked: deflect spark in the blocker's colour + metallic tick for shield, rock, ice, wall, Shield Charge guard, Riposte guard; --barrier-hit-check asserts 3 blockers)
 READY ext/vfx-hazard-fields cf3ec31620 (hazard fields: dark outline + glow band edge, guard ring cue for a countering Boki; stills mode in terrain-hazard-reel; check extended)
 READY ext/sfx-hunter-footsteps ab9fb67f1e (footsteps pitched+levelled by archetype weight class, asserted in match-audio-check)
+READY ext/p17-port-1118 7291f708e5 (P17: mob and boss Fsm + --mob-fsm-check; merged main, re-applied into lairs_fight/lairs_lock; same reds as main: lair-lock 5, blight 1, keys 5, vv_ult_check parse)
