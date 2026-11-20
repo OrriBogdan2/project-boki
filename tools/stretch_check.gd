@@ -4,7 +4,8 @@ extends RefCounted
 ## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
 ## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
 ## the ratio is divided by it. A Hero in CEILING is held at its ceiling instead of the limit. Prints one line per clip
-## and a table per Hero. Never touches the save.
+## and a table per Hero. --stretch-dump=<clip> also prints that clip's DUMP_N worst edges at its worst time (each
+## end's rest position, main bone and the edge's rest and posed length in m), to find a tear on the model. Never touches the save.
 
 const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain links) say nothing about stretch
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
@@ -19,6 +20,10 @@ var limit := 1.3
 var step := 0.125                # s between samples of a clip
 var parts: Array = []            # per skinned mesh: {verts, bones, weights, stride, skin, edges, rest, bind_bones}
 var skel: Skeleton3D
+var dump_clip := ""
+var min_edge := MIN_EDGE          # --min-edge=<m> (with --stretch-dump: also the tiny edges of a fringe)
+var dump: Array = []              # [ratio, line] of every over-limit edge while dumping
+const DUMP_N := 40
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -28,6 +33,8 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(","))
 		if a.begins_with("--limit="): limit = float(a.substr(8))
 		if a.begins_with("--step="): step = float(a.substr(7))
+		if a.begins_with("--stretch-dump="): dump_clip = a.substr(15)
+		if a.begins_with("--min-edge="): min_edge = float(a.substr(11))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var holder := Node3D.new()
@@ -101,7 +108,7 @@ func _collect(glb: Node) -> void:
 					var b := idx[t + (k + 1) % 3]
 					var key := mini(a, b) * verts.size() + maxi(a, b)
 					var d := verts[a].distance_to(verts[b])
-					if d >= MIN_EDGE and not seen.has(key):
+					if d >= min_edge and not seen.has(key):
 						seen[key] = true
 						edges.append_array([a, b])
 						rest.append(d)
@@ -129,6 +136,17 @@ func _clip(clips: WardenClips, nm: String) -> Array:
 		if float(r[0]) > float(worst[0]):
 			worst = [r[0], tt, r[1]]
 		t += step
+	if nm == dump_clip:
+		clips.force = {"clip": nm, "t": float(worst[1])}
+		sync.call("_process", DT)
+		for k in 2:
+			await tree.process_frame
+		dump = [[0.0, "", 0.0]]
+		_measure()
+		dump.sort_custom(func(a, b): return float(a[2]) > float(b[2]))
+		for d in dump.slice(0, DUMP_N):
+			print("STRETCH_DUMP %s t=%.2f %.2f %s" % [nm, worst[1], d[0], d[1]])
+		dump = []
 	clips.force = {}
 	return worst
 
@@ -184,6 +202,10 @@ func _measure() -> Array:
 				var key := "%s>%s" % [_main_bone(p, edges[e * 2]), _main_bone(p, edges[e * 2 + 1])]
 				var cur: Array = pairs.get(key, [0, 0.0])
 				pairs[key] = [int(cur[0]) + 1, maxf(float(cur[1]), ratio)]
+				if not dump.is_empty():
+					dump.append([ratio, "%s %s rest %.3f now %.3f" % [key, "(%.2f %.2f %.2f)-(%.2f %.2f %.2f)" % [
+						verts[ea].x, verts[ea].y, verts[ea].z, verts[eb].x, verts[eb].y, verts[eb].z],
+						rest[e], pos[ea].distance_to(pos[eb])], pos[ea].distance_to(pos[eb]) - rest[e]])
 	return [best, _worst_pairs(pairs)]
 
 ## The three bone pairs with the most over-limit edges: "a>b x12 (4.2)".

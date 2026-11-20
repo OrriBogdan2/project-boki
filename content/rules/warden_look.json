@@ -221,12 +221,12 @@
 	},
 	"breaker": {
 		"no_ink": ["moss", "brass", "scan"],
-		"painted": {"top_light": 0.2, "far_lift": 0.1, "fres": 0.35, "fres_tint": 0.8, "rim_far": 0.25, "rim_far_color": [0.3, 0.85, 0.8]},
+		"painted": {"fres": 0.35, "fres_tint": 0.8, "albedo": [1.4, 1.4, 1.4]},
 		"slots": {
 			"leather": {"fres": 0.2, "gloss": 0.0, "sheen": 0.0},
 			"metal": {"fres": 0.25, "fres_tint": 0.7, "gloss": 0.1, "sheen": 0.0},
 			"brass": {"fres": 0.3, "gloss": 0.05, "far_lift": 0.2},
-			"cloth": {"fres": 0.2}
+			"cloth": {"fres": 0.2, "albedo": [1.1, 1.1, 1.1]}, "leather-v95": {"fres": 0.2, "gloss": 0.0, "sheen": 0.0, "albedo": [1.26, 1.48, 1.48]}
 		}
 	},
 	"ostra": {
