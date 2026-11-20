@@ -96,6 +96,7 @@ func tick(dt: float) -> void:
 	if float(st["t"]) >= float(d["grow"]):
 		Sfx.loop_hold(whirr_key(), "dj_encore_whirr", h.pos, WHIRR_DB)   # her position every tick: it rides with her
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
+		k.m.sfx("thief_encore_end", h.pos, -6.0 if h.is_local() else -9.0)     # the blades fold away (not on a knock)
 		drop()                             # a plain fade: no final burst
 
 ## From the first beat on the dance runs, on the beat: back in time after a flip, a Bola or anything else she did.
