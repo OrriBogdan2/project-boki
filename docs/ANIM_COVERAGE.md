@@ -81,8 +81,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | nimbostrich | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | orchisloth | shared | shared | shared | shared | shared | shared | proc | proc |
-| scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
-| sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
 | spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
 | squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -106,7 +104,9 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
+| scaldamus | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| sentrikat | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
