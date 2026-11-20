@@ -10445,3 +10445,4 @@ READY ext/ryzz-gum-mouth c455317de45ca972bec8998994c1a83f530a6537 (Sparkle with 
 READY ext/combat-ttk-rest-eight c1f13e16bb0c326c02e92b47cb1d91aa462fb678 (TTK re-read of the 8 non-slice Hunters on main a1b35c78ee: --ttk-check table matches, matrix drift and moving commits listed in docs/TTK.md, no data regression, no number changed; docs only)
 READY ext/stuck-integ-f44ae5a2 5fb2049879692e93079cb9b7f62f9d268e4b8480 (supersedes: ext/merge-lane-leftover-1117 ext/stuck-integ-5d6d8248 ext/merge-lane-hunters5-1117 ext/mantle-port-a; on main a1b35c78ee; import 0 err, --check/kinbox/kael-tap/carry-boki/swim/grammar-runtime 0 fail, warden-model+mantle reds = main; needs GATE)
 READY ext/vision-fog-noblue-1120 0b3f2019d8 (Vision: neutral grey fog outside sight in every weather, no blue behind the player; PR via gh-outbox)
+READY ext/extra-shadow-warnings 91955e1803 (rename shadowing locals in 5 worst files, 0 Godot shadow warnings left there, baseline lowered)
