@@ -2,23 +2,25 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cfp6hryi2j6tv"
-path="res://.godot/imported/gil_Image_0.jpg-bcc447c45e5edea675648c9c486c3eb0.ctex"
+uid="uid://cpeakvwmhrxvk"
+path.s3tc="res://.godot/imported/gil_swordfish.jpg-dae94e66da3b6355642f17c4acfa5e33.s3tc.ctex"
+path.etc2="res://.godot/imported/gil_swordfish.jpg-dae94e66da3b6355642f17c4acfa5e33.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "ba2c37ea349930aea636f6424e1256ea"
+"md5": "56adcaad14048f10c0819e325a851ad0"
 }
 
 [deps]
 
-source_file="res://art/wardens/gil/gil_Image_0.jpg"
-dest_files=["res://.godot/imported/gil_Image_0.jpg-bcc447c45e5edea675648c9c486c3eb0.ctex"]
+source_file="res://art/wardens/gil/gil_swordfish.jpg"
+dest_files=["res://.godot/imported/gil_swordfish.jpg-dae94e66da3b6355642f17c4acfa5e33.s3tc.ctex", "res://.godot/imported/gil_swordfish.jpg-dae94e66da3b6355642f17c4acfa5e33.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

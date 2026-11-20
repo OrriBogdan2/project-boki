@@ -1,0 +1,315 @@
+{
+ "doc": "Gil regen 11-20 r2 candidate b5 (ext/hunter-regen-gil-1120): gil_v95.json with this master's joints; y shifted by 0.01; joints measured off the mesh (r2 scripts/joints.py); build: v95_to_game.py Gil --weights meshy --spec THIS --tris 96000, then gil_parts.py --fish-only ... --len 1.2 --pitch 60",
+ "master": "/home/boki/gens/hunter-regen-1120/gil/r2/gen/rm_b5/glb.glb",
+ "game": "art/wardens/gil/gil.glb",
+ "own": {
+  "drop_mats": []
+ },
+ "tris": 12500,
+ "max_tris": 13500,
+ "head": {
+  "centre": [
+   0.0,
+   0.206,
+   1.41
+  ],
+  "r": 0.22
+ },
+ "head_tris": 2600,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "keep": [],
+ "drop_meshes": [
+  "Tail",
+  "Dorsal"
+ ],
+ "joints": {
+  "pelvis": [
+   0,
+   0.207,
+   0.55
+  ],
+  "neck": [
+   0,
+   0.247,
+   1.27
+  ],
+  "crown": [
+   0,
+   0.206,
+   1.6
+  ],
+  "shoulder.R": [
+   0.21,
+   0.207,
+   1.19
+  ],
+  "shoulder.L": [
+   -0.21,
+   0.207,
+   1.19
+  ],
+  "elbow.R": [
+   0.359,
+   0.172,
+   1.004
+  ],
+  "elbow.L": [
+   -0.359,
+   0.172,
+   1.004
+  ],
+  "wrist.R": [
+   0.458,
+   0.138,
+   0.88
+  ],
+  "wrist.L": [
+   -0.458,
+   0.138,
+   0.88
+  ],
+  "hip.R": [
+   0.12,
+   0.207,
+   0.51
+  ],
+  "hip.L": [
+   -0.12,
+   0.207,
+   0.51
+  ],
+  "knee.R": [
+   0.12,
+   0.207,
+   0.29
+  ],
+  "knee.L": [
+   -0.12,
+   0.207,
+   0.29
+  ],
+  "ankle.R": [
+   0.12,
+   0.187,
+   0.11
+  ],
+  "ankle.L": [
+   -0.12,
+   0.187,
+   0.11
+  ]
+ },
+ "relax": {
+  "CUTS": 0
+ },
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {
+   "bone": "hips",
+   "box": [
+    0.15,
+    0.43,
+    -0.043,
+    0.407,
+    0.5,
+    0.86
+   ],
+   "except_segs": [
+    [
+     "forearm.R",
+     0.07
+    ]
+   ],
+   "why": "the satchel at his right hip (bone heat put it on the right hand)"
+  },
+  {
+   "bone": "tail",
+   "box": [
+    -0.5,
+    0.5,
+    -9,
+    -0.133,
+    0,
+    0.85
+   ]
+  },
+  {
+   "bone": "head",
+   "box": [
+    -0.45,
+    0.45,
+    0.177,
+    9,
+    1.36,
+    9
+   ]
+  },
+  {
+   "bone": "head",
+   "box": [
+    -0.45,
+    0.45,
+    -9,
+    9,
+    1.45,
+    9
+   ]
+  }
+ ],
+ "slots": [
+  {
+   "slot": "leather",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    0,
+    0.25
+   ],
+   "v": [
+    0,
+    0.45
+   ],
+   "why": "the boots' dark stripes and soles"
+  },
+  {
+   "slot": "cloth",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    0,
+    0.25
+   ],
+   "s": [
+    0.45,
+    1
+   ],
+   "v": [
+    0.45,
+    1
+   ]
+  },
+  {
+   "slot": "leather",
+   "h": [
+    0.02,
+    0.13
+   ],
+   "s": [
+    0.35,
+    1
+   ],
+   "v": [
+    0.12,
+    0.6
+   ],
+   "why": "satchel and strap"
+  },
+  {
+   "slot": "cloth",
+   "h": [
+    0.03,
+    0.13
+   ],
+   "s": [
+    0.5,
+    1
+   ],
+   "v": [
+    0.6,
+    1
+   ],
+   "why": "the orange trims, hat band, boot stripes"
+  },
+  {
+   "slot": "cloth",
+   "v": [
+    0,
+    0.22
+   ],
+   "why": "the near-black coat and hat"
+  },
+  {
+   "slot": "skin",
+   "bone": "head"
+  },
+  {
+   "slot": "skin",
+   "bone": "hand.R"
+  },
+  {
+   "slot": "skin",
+   "bone": "hand.L"
+  },
+  {
+   "slot": "skin",
+   "bone": "tail"
+  },
+  {
+   "slot": "skin",
+   "bone": "shin.R"
+  },
+  {
+   "slot": "skin",
+   "bone": "shin.L"
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.13,
+    0.13,
+    -9,
+    -0.013,
+    0.9,
+    1.42
+   ],
+   "why": "the dorsal fin"
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.08,
+    0.08,
+    0.307,
+    9,
+    0.3,
+    0.8
+   ],
+   "s": [
+    0,
+    0.45
+   ],
+   "v": [
+    0.5,
+    1
+   ],
+   "why": "the pale belly between the coat's fronts"
+  }
+ ],
+ "slot_default": "cloth",
+ "room": {
+  "*": 0.5
+ },
+ "anchors": {
+  "anchor_head_top": [
+   0.0,
+   0.15599999999999997,
+   1.68
+  ],
+  "anchor_chest": [
+   0.0,
+   0.40700000000000003,
+   1.0
+  ]
+ }
+}

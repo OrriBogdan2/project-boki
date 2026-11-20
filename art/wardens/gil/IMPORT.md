@@ -38,3 +38,20 @@ texture now `gil_Image_0.jpg`. The satchel rides the hips (bone heat had put it 
 triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so skin_relax is skipped and
 `--stretch-check --wardens=gil` reports "no clips", as on the base. warden_model_check's `height_3d` is 0.9 (the
 v95 hat stands lower than the v1 floppy one).
+
+## Regen 11-20 r2 candidate A (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+Body: a new Meshy multi-image-to-3d (meshy-7.1, A-pose) from the 11-19 turnaround views with the live open fish grin
+(gens/hunter-regen-1120/gil/r2/gen/b5: grin front/3-4/side + arms-clear back), quad remesh 60k (119k tris), then
+
+    python3 tools/art1/v95_to_game.py Gil --weights meshy --spec art/wardens/src/gil_regen1120/r2_b5.json --tris 96000
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only art/wardens/gil/gil.glb FISH.glb art/wardens/gil/gil.glb --len 1.2 --pitch 60
+
+(`--tris 96000`: the head band keeps all its ~7k triangles and the body gets ~53k, 59.5k in all as live's 60k; the
+default 60000 left 39.7k.) The spec's joints are measured off the mesh, the arm's own elbow and wrist included
+(`v95_regen_spec.py --joints`). One connected body, no loose parts, 24 open edges.
+Swordfish: a new Meshy fish from the live splash's swordfish (gens/.../r2/fish: splash crop -> image edits with the
+long bill -> multi-image-to-3d s7 -> Meshy remesh to 4k triangles, texture rebaked by Meshy), 1.2 m (the splash: about
+0.7 of his height; the old one was 0.74 m), held at the palm of the right hand on the palm's own bone, 60 degrees under
+level at rest so the game's idle and thrusts carry it level and forward. Its texture is `gil_swordfish.jpg`;
+`gil_Image_0.jpg` (the old fish's) is gone. The old fish rode a bone point under the hand (live skins the hand to
+forearm.R), so it floated below the fist in every pose.

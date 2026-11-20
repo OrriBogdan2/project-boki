@@ -7,7 +7,7 @@ extends RefCounted
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --proc: a Hunter with no keyed clips (Gil) through its HunterAnim moves in one take (<dir>/proc/); --fov=<deg> zooms
-## the camera's lens (--match --fov=4: the match camera's angle, the figure big enough to judge, no upscale).
+## the camera's lens, --cam-y=<m> sets the camera's height (knee level) (--match --fov=4: the match camera's angle, the figure big enough to judge, no upscale).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -88,6 +88,9 @@ func run(main: Node) -> void:
 	else:
 		cam.fov = 30.0
 		cam.position = Vector3(0, at_y + 0.25, dist)
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--cam-y="):
+				cam.position.y = float(a.substr(8))  # (--cam-y=0.35 --at=0.9: from knee height, looking up at him)
 		cam.look_at(Vector3(0, at_y, 0))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--fov="):
@@ -195,6 +198,7 @@ const PROC_SEGS := {
 func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 	var dir := out.path_join("proc")
 	DirAccess.make_dir_recursive_absolute(dir)
+	await tree.create_timer(3.0).timeout  # (the title's logo fades in real time, not in frames: a frame-count wait caught it)
 	var an := HunterAnim.new(model, 1)
 	var face := model.rotation.y
 	var fwd := Vector3(-sin(face), 0, -cos(face))
