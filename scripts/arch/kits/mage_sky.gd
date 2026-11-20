@@ -118,6 +118,7 @@ func _strike(s: Dictionary) -> void:
 	kit.run(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
+		kit.m.sfx("mage_sky_ground", f.pos, -6.0)     # each foe pinned, under the strike's thunder
 		_slide(f, dir, ed)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
