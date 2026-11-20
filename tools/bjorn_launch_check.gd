@@ -666,7 +666,7 @@ const SPAN_EDGE := deg_to_rad(4.0)     # how far inside and outside each end of 
 ## lands on the aegis and one from just outside lands on him. T ends back where it stood.
 func _aegis_span(P: Hunter, T: Hunter, K: BulwarkKit) -> void:
 	var col: Color = (K.fx.plate_mats[0] as ShaderMaterial).get_shader_parameter("albedo")
-	var pale := Color(String(HeroVfx.data("bulwark")["palette"]["plate"]))
+	var pale := Color(String(HeroVfx.data("bulwark")["palette"]["slab"]))
 	ok("bjorn aegis: the slab is drawn in the palette's pale gold",
 		col.is_equal_approx(pale) and pale.h > 0.09 and pale.h < 0.14 and pale.s <= 0.55 and pale.v >= 0.9,
 		"#%s h %.2f s %.2f v %.2f" % [col.to_html(false), pale.h, pale.s, pale.v])
