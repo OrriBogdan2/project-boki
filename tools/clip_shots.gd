@@ -1,5 +1,5 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--match]
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--at=y] [--dist=m] [--cam-y=y] [--match]
 ## [--turn [--turn-clip=run_f]]
 ## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
 ## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
+	var cam_y := NAN
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
@@ -48,6 +49,8 @@ func run(main: Node) -> void:
 			dist = float(a.substr(7))
 		if a.begins_with("--at="):
 			at_y = float(a.substr(5))
+		if a.begins_with("--cam-y="):
+			cam_y = float(a.substr(8))  # (the camera's own height: knee level looking up at --at, the owner's low view)
 		if a == "--turn":
 			turn = true
 		if a.begins_with("--turn-clip="):
@@ -85,7 +88,7 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, 0.8, 0))
 	else:
 		cam.fov = 30.0
-		cam.position = Vector3(0, at_y + 0.25, dist)
+		cam.position = Vector3(0, at_y + 0.25 if is_nan(cam_y) else cam_y, dist)
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
