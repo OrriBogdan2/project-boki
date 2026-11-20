@@ -79,9 +79,13 @@ Right side: between the jacket cuff and the ammo belt the scan has blade-like le
 junk patches that were weighted to hips/thigh.R, so every clip that moves the gun arm left them hanging at the hip (the dark
 needles above the gun in idle, the floating tan chunk at the hip in run/glide).
 Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/deep/tool/: `folds.py`, `blade.py 0.03`, `finsel.py`, `debris.py`,
-`finsplit2.py ns3.glb fin_b.npy upper_arm.R,forearm.R,hand.R,gatling,launcher out.glb`):
+`finsplit4.py ns3.glb fin_b.npy upper_arm.R,forearm.R,hand.R,gatling,launcher out.glb 8`):
 - 629 fin/junk triangles (fold edges grown over big flat triangles, plus the patches that already broke off as islands).
-- Where they touch the hip skin their 256 vertices are duplicated; every fin vertex takes the weights of the nearest
-  sleeve/gun vertex (>= 95 % on the right arm chain). Nothing deleted: 60095 tris, positions, UVs, normals, colours,
+- Where they touch the hip skin their 256 vertices are duplicated; every fin vertex not already on the arm takes the
+  distance-blended weights of its 8 nearest sleeve/gun vertices (>= 95 % on the right arm chain). Nothing deleted: 60095 tris, positions, UVs, normals, colours,
   texture, skeleton and clips as before, so the bind pose is identical (48236 -> 48492 verts).
 - The left-side retry 6 weights are kept as they were.
+- Numbers (live -> this glb): edges >= 8 mm over 3x 1.005 % -> 0.134 %, worst 10.16 -> 5.22 (numpy, 41 glb clips x 24 samples);
+  tools/stretch_check.gd worst 10.16 -> 5.53, mean clip worst 5.02 -> 3.85, 35 clips better, g_laugh 1.76 -> 2.00;
+  posed loose islands (seams joined within 5 mm) 373 -> 159 tris; hunter_mesh_check stretched tris 524 -> 120 (WARN cleared),
+  spike_edges 188 -> 188 (bind-pose scan slivers, untouched: no remodel).
