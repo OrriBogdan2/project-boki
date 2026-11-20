@@ -60,9 +60,9 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
 
 ### Boki garden states
 
@@ -135,9 +135,12 @@ Worst five, backlog-ready:
    legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
    loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
    and death, foot bones; then drop `clips_from`.
-2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
-   and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
-   the move and the landing squash settles it.
+2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
+   .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
+   species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`_ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form still curls into a ball on your back.
+   The dash is `proc` too: `KinFlinch.dash` leans the body into the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
    (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
    hand-keyed clip on their v95 .glb for the whole dash, with none of the procedural pose under it (`--dash-frames-check
