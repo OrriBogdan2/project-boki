@@ -89,6 +89,9 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
+	# (no turning on the spot: the TurnStep holds the feet where they stood while the shots turn the model under them,
+	# so the legs kept one world yaw, the back below the waist in every turned frame; found on Sparkle 11-20)
+	model.remove_meta(TurnStep.META)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
@@ -105,12 +108,10 @@ func run(main: Node) -> void:
 			sync.call("_process", 1.0 / 30.0)
 		for i in 48:
 			model.rotation.y = TAU * i / 48.0
-			_stand(model)
 			clips.force = {"clip": turn_clip, "t": fmod(i / 15.0, turn_len)}
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
 		model.rotation.y = deg_to_rad(yaw)
-	_stand(model)
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
 	for nm in names:
 		var anim_name := String(nm)
@@ -170,13 +171,6 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 			s.erase("kmove")
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
-
-
-## Standing still facing the model's yaw, as the game's Hero state has it. With no state the clips' heading reads a
-## facing of 0, so on a turned model (the default --yaw is 150) the legs held yaw 0 while the torso turned with it:
-## every shot showed the back below the waist under a front-facing torso (found on Sparkle 11-20, all Heroes had it).
-func _stand(model: Node3D) -> void:
-	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true})
 
 
 func _grab(path: String) -> void:
