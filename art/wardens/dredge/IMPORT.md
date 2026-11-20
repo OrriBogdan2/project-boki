@@ -79,3 +79,13 @@ with `meshy_smooth` 24: worst stretch (`--stretch-check`) 17.2x (first regen) ->
 The goo arm below the wrist rides `hook` (boxes plus goo-coloured paint low down); the right shin and foot are pinned back on the leg.
 Open: the master fuses the goo tip to his right shin, so slabs of goo still tear off that shin in motion (needs a gen with the goo tip clear
 of the leg). The gun is on his hip, as in the turnaround (live 11-17 pick: in the gauntlet). Raws, sheets, numbers: `~/gens/hunter-regen-1120/dredge/deep/`.
+
+**Regen r2 (2026-11-20, job 20261120-103741-a6, same branch, replaces candidate A above, draft until the owner looks):** the
+front/back crops were re-posed by Meshy image edits (nano-banana-pro, 32 tries, 4 pairs kept) so the goo arm hangs out from his side,
+clear of the right leg; the original face is pasted back unedited, side crop unedited; 7 Meshy multi-image runs (2 kept: single goggle,
+no extra hand on the goo), run R5 used. Root cause of the shin slabs (r1 too): `v95_swap`'s fit moves everything past the wrist with the
+forearm segment, turned from the master forearm onto the rig's, which hangs straight down; a goo arm 39 deg out swung ~40 cm in across
+his legs. The spec now declares the master wrist straight below the elbow (no turn), `meshy_smooth` 32, `meshy_reach` thigh [0.1, 0.16],
+the goo below the wrist on `hook` by one box, a loose floor drip on `foot.R`. `--stretch-check`: worst 6.56x (ledge only; live 8.52x,
+r1 5.75x), median 3.74 (live 4.36), clips over 5x 4 (live 20), 45 of 54 clips below live. Raws, logs, sheets: `~/gens/hunter-regen-1120/dredge/r2/`.
+The gun is still on his hip (turnaround), not in the gauntlet.

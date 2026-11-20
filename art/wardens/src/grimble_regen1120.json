@@ -1,13 +1,13 @@
 {
- "doc": "hunter-regen-dredge-1120 candidate A (job 20261120-064603-a4, draft, owner visual check): Meshy multi-image-to-3d meshy-7.1 A-pose, front/side/back crops of ~/gens/v95-latest-ta-1119/grimble.png (run H, a rerun of the 051509 run A recipe; raw/runH), quad remesh 60k (raw/rmH), Meshy auto-rig weights (`weights` meshy, rig of the master: deep/hrig), joints from that rig; crown, head and the head anchors = run A's offsets from the neck (Meshy's head_end sits in the pack), fist/gun anchors = run A's offsets from wrist.L. `meshy_smooth` 24 (worst stretch 17.2 -> 5.75). `meshy_regions`: the goo arm below the wrist on `hook` (boxes), goo-coloured paint below 0.45 m on `hook` (h 0.7-0.895 or s 0.45+), then the right shin capsule and foot box back on the leg. Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- <this spec + game.glb (main's dredge.glb) in WORK> WORK OUT.glb",
- "master": "~/gens/hunter-regen-1120/dredge/raw/rmH/glb.glb",
+ "doc": "hunter-regen-dredge-1120 r2 (job 20261120-103741-a6): Meshy multi-image-to-3d meshy-7.1 A-pose from front/side/back crops of ~/gens/v95-latest-ta-1119/grimble.png whose front/back goo arm was re-posed clear of the right leg by Meshy image edits (nano-banana-pro; the original face pasted back unedited), quad remesh 60k, Meshy auto-rig weights + 32 smoothing passes. Joints from Meshy's rig (crown kept at H's neck offset), anchors shifted by the neck / wrist.L moves, the goo arm below the wrist whole on `hook` by one box (x > 0.235: the gap between goo and leg), no shin/colour hacks. Inputs and logs in ~/gens/hunter-regen-1120/dredge/r2/. Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- <spec> WORK OUT.glb r2 fix: v95_swap fits everything past the wrist by the forearm segment, rotated from the master forearm onto the rig forearm (which hangs straight down); the goo arm held 39 deg out swung ~40 cm in across the legs (the shin slabs, also behind r1 at 17 deg), so the master wrist.R is declared straight below the elbow (same length): no rotation, the goo keeps its pose. meshy_reach thigh [0.1, 0.16] moves the loincloth off the thighs. A loose goo drip on the floor by his right foot rides foot.R (last meshy_regions box), not the goo arm.",
+ "master": "~/gens/hunter-regen-1120/dredge/r2/rmR5/glb.glb",
  "game": "art/wardens/dredge/dredge.glb",
  "tris": 60000,
  "head": {
   "centre": [
-   0.009,
-   0.009,
-   1.3284
+   -0.006,
+   -0.0361,
+   1.2289
   ],
   "r": 0.236
  },
@@ -20,84 +20,84 @@
  ],
  "joints": {
   "pelvis": [
-   0.0127,
-   -0.0102,
-   0.8985
+   -0.0179,
+   -0.0749,
+   0.8125
   ],
   "neck": [
-   -0.0029,
-   -0.0285,
-   1.1706
-  ],
-  "crown": [
-   -0.0029,
-   0.0468,
-   1.4856
+   -0.0179,
+   -0.0736,
+   1.0711
   ],
   "shoulder.R": [
-   0.2257,
-   -0.0544,
-   1.2319
+   0.2063,
+   -0.0916,
+   1.1768
   ],
   "elbow.R": [
-   0.324,
-   -0.0239,
-   0.9902
+   0.3367,
+   -0.1123,
+   0.9486
   ],
   "wrist.R": [
-   0.3977,
-   -0.028,
-   0.7486
+   0.3367,
+   -0.1123,
+   0.7245
   ],
   "hip.R": [
-   0.1369,
-   -0.0102,
-   0.8128
+   0.0963,
+   -0.0749,
+   0.7378
   ],
   "knee.R": [
-   0.1766,
-   0.004,
-   0.4648
+   0.1574,
+   -0.0164,
+   0.4392
   ],
   "ankle.R": [
-   0.197,
-   0.0219,
-   0.1342
+   0.1696,
+   -0.1267,
+   0.1295
   ],
   "shoulder.L": [
-   -0.2126,
-   -0.021,
-   1.2155
+   -0.2216,
+   -0.1142,
+   1.1483
   ],
   "elbow.L": [
-   -0.3231,
-   -0.0316,
-   0.9247
+   -0.3398,
+   -0.1517,
+   0.916
   ],
   "wrist.L": [
-   -0.4542,
-   0.0768,
-   0.683
+   -0.5232,
+   -0.0099,
+   0.7
   ],
   "hip.L": [
-   -0.1052,
-   -0.0102,
-   0.8095
+   -0.1327,
+   -0.0749,
+   0.7354
   ],
   "knee.L": [
-   -0.1634,
-   0.0322,
-   0.4537
+   -0.1931,
+   -0.0192,
+   0.427
   ],
   "ankle.L": [
-   -0.1757,
-   -0.0748,
-   0.1301
+   -0.1972,
+   -0.1262,
+   0.1295
+  ],
+  "crown": [
+   -0.0179,
+   0.0017,
+   1.3861
   ],
   "crown_meshy_head_end": [
-   -0.0082,
-   -0.0062,
-   1.7149
+   -0.0299,
+   -0.0834,
+   1.7519
   ]
  },
  "relax": {
@@ -284,12 +284,12 @@
     1
    ],
    "box": [
-    -0.08,
-    0.14,
-    0.34,
-    0.6,
-    1.22,
-    1.42
+    -0.095,
+    0.125,
+    0.29490000000000005,
+    0.5549,
+    1.1204999999999998,
+    1.3204999999999998
    ]
   },
   {
@@ -328,64 +328,64 @@
  },
  "anchors": {
   "anchor_eye": [
-   0.0671,
-   0.3466,
-   1.2656
+   0.0521,
+   0.3015,
+   1.1661
   ],
   "anchor_head_top": [
-   -0.0029,
-   0.0468,
-   1.4856
+   -0.0179,
+   0.0017,
+   1.3861
   ],
   "anchor_claw": [
-   0.044,
-   0.02,
-   0.4
+   0.443,
+   0.181,
+   0.075
   ],
   "anchor_hook_tip": [
-   0.044,
-   0.02,
-   0.4
+   0.443,
+   0.181,
+   0.075
   ],
   "anchor_fist": [
-   -0.4842,
-   0.1368,
-   0.433
+   -0.5532,
+   0.0501,
+   0.45
   ],
   "anchor_lamp_r": [
-   0.3471,
-   -0.045,
-   1.4056
+   0.3321,
+   -0.0901,
+   1.3061
   ],
   "anchor_lamp_l": [
-   -0.332,
-   -0.045,
-   1.4056
+   -0.347,
+   -0.0901,
+   1.3061
   ],
   "anchor_coins": [
-   0.009,
-   0.2066,
-   1.4456
+   -0.006,
+   0.1615,
+   1.3461
   ],
   "anchor_hoard_top": [
-   0.009,
-   0.035,
-   1.8963
+   -0.006,
+   -0.0101,
+   1.7968
   ],
   "anchor_chest": [
-   0.0,
-   0.17,
-   1.004
+   -0.015,
+   0.1249,
+   0.9045
   ],
   "weapon_muzzle": [
-   -0.4842,
-   0.3368,
-   0.433
+   -0.5532,
+   0.2501,
+   0.45
   ],
   "anchor_gun_root": [
-   -0.4842,
-   0.1368,
-   0.433
+   -0.5532,
+   0.0501,
+   0.45
   ]
  },
  "anchor_bones": {
@@ -443,116 +443,34 @@
   {
    "bone": "hook",
    "box": [
-    0.24589999999999998,
+    0.235,
     9,
     -9,
     9,
     -1,
-    0.7754
-   ],
-   "except_segs": [
-    [
-     "thigh.R",
-     0.1
-    ],
-    [
-     "shin.R",
-     0.08
-    ]
-   ]
-  },
-  {
-   "bone": "hook",
-   "box": [
-    -0.02,
-    9,
-    -9,
-    9,
-    -1,
-    0.31647
-   ],
-   "except_segs": [
-    [
-     "shin.R",
-     0.07
-    ],
-    [
-     "shin.L",
-     0.07
-    ]
-   ],
-   "except_boxes": [
-    [
-     0.0888,
-     0.2888,
-     -0.15,
-     0.2,
-     -1,
-     0.1
-    ]
-   ]
-  },
-  {
-   "bone": "hook",
-   "box": [
-    -0.02,
-    9,
-    -9,
-    9,
-    -1,
-    0.45
-   ],
-   "h": [
-    0.7,
-    0.895
-   ]
-  },
-  {
-   "bone": "hook",
-   "box": [
-    -0.02,
-    9,
-    -9,
-    9,
-    -1,
-    0.45
-   ],
-   "s": [
-    0.45,
-    1
-   ]
-  },
-  {
-   "bone": "shin.R",
-   "box": [
-    -9,
-    9,
-    -9,
-    9,
-    0.08,
-    0.5
-   ],
-   "in_segs": [
-    [
-     "shin.R",
-     0.075
-    ]
+    0.771
    ]
   },
   {
    "bone": "foot.R",
    "box": [
-    0.08,
-    0.3,
-    -0.12,
-    0.22,
+    0.2,
+    0.34,
+    -9,
+    9,
     -1,
-    0.13
+    0.22
    ]
   }
  ],
  "keep_uv": true,
  "max_tris": 66000,
  "weights": "meshy",
- "meshy_smooth": 24
+ "meshy_smooth": 32,
+ "meshy_reach": {
+  "thigh": [
+   0.1,
+   0.16
+  ]
+ }
 }
