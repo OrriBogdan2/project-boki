@@ -10593,3 +10593,4 @@ READY ext/tut-gate-playthrough e96434928c (tutorial playthrough check, match+gar
 READY ext/farm-tut-patch-step 3c1816eadcb (base tutorial: Plant the snack patch step lit on Garden tab tile; farm-tutorial-check 0 fails; health strict OK)
 READY ext/snack-first-60s b0083f252421724eee5790e44e3cdd29e77b8a0b (first snack batch ripens in 60 s, later 480 s; old saves keep 480 s)
 READY ext/garden-xp-pace 3ac0d4ffa7 (garden XP numbers: Lv4 in 36 min garden-only, was 123; Grown 224 min, was 669)
+READY ext/sfx-garden-moments 0700c42b63 (bond rank-up has its own rising chime garden_bond_up instead of garden_friends; stat gain already had garden_chime_stat; checks assert one cue per event, no unlock)
