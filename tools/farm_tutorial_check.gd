@@ -623,14 +623,19 @@ func _tracker_rules() -> void:
 	_stats(0, 0, 1, 4)
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var rows := GoalTracker.lines()
-	ok(rows.size() >= 2 and rows.size() <= 5, "the tracker has a few rows, at most 5 (%d)" % rows.size())
+	ok(rows.size() >= 2 and rows.size() <= 3, "the tracker has a few rows, at most 3 (%d)" % rows.size())
 	var tut_words: Array = []
 	for s in FarmTutorial.steps():
 		tut_words.append(String(s["title"]))
 		for k in s["hints"]:
 			tut_words.append(String(s["hints"][k]))
 	ok(rows.all(func(r): return not tut_words.has(String(r["text"]))), "no row is tutorial text")
-	ok(String(rows[-1]["source"]) == "level", "the next farm level is the last row")
+	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
+	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	rows = GoalTracker.lines()
+	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
 	for r in rows:
 		counts[r["source"]] = int(counts.get(r["source"], 0)) + 1
@@ -684,9 +689,10 @@ func _tracker_rules() -> void:
 		var hs: Dictionary = ClassUnlock.state().get("hunters", {}) as Dictionary
 		hs[mast_id] = hs.get(mast_id, {})
 		hs[mast_id][String(g["stat"])] = int(g["target"])
+	var plain := GoalTracker.lines()
 	ok(
-		GoalTracker.lines().is_empty() and GoalTracker.build() == null,
-		"with nothing left to work towards the card is hidden"
+		plain.size() >= 2 and plain.size() <= 3 and plain.all(func(r): return r["source"] == "next"),
+		"with nothing left to work towards the card lists plain steps, never empty (%d)" % plain.size()
 	)
 
 
