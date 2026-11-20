@@ -29,6 +29,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--archetype-check` | Every class kit in a flat arena: each dash, passive and resource, RMB variants, E, R (locked until level 6), the bonded R, controls, weapon locks, Boki infusion, feel |
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
 | `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
+| `--hunter-parity-check` | Every Hunter in the Training Grounds (started as them, or swapped in place from another, with no save, a fresh one, and after the title screen) is the one a real match builds: model file, kit script, node tree, bone scales, and every mesh surface's shader, uniforms, visibility range and shadow setting |
 | `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks and mastery: Vex as the one starter and the second Relic (Kael, Cinder or Meeko) after the first expedition (offered by Hob: `--hob-check`), no Relic pick before the egg, challenge-only Hunters never offered, each Hunter's challenge (tier, target, measurable stat) making it ready and hold to unlock opening it (a partial hold cancels, the reveal plays), mastery goals counted per Hunter with cosmetic-only rewards (no stat or ability anywhere in the progression data), glider skins changing no handling, the feats HunterFeats records, save migration keeping every Hunter a save had unlocked or played, the viewer showing every ability as a clip of it working (keys from the bindings, one short line each, no story or gender text), the glider pick, locked Hunters playable in the Arena (its Training dummy) and practice picker |
 | `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges; each kit's payoff plays its own sound once at the fight-mix level |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
@@ -66,6 +67,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
+| `--camp-layout-check` | No camp stands within 20 m of a Ways Out outpost (reads the layout's outposts only), over three seeds |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
@@ -97,6 +99,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--speak-test` | Prints how Boki talk at each stage |
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
+| `--first-cast-check` *(GPU for drawn frames)* | Each Hunter in a fresh Training Area match (loaded with `warm_up`): LMB, RMB, E, R, dash and Q once, then twice more; fails when a first press costs 8 ms over its repeat and the median frame, and names the pipelines and nodes it made. `=gunslinger,mage` runs just those |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
 | `--mob-damage-check` | PvE: a level-1 and level-5 Hunter standing still in each monster, camp mix and lair, never fighting back. Prints the seconds to fall, damage per hit and per second (docs/EXPEDITION_SPEC.md section 13). Asserts that every damaging row fells them within 90 s over 3 or more hits, the Glimmerkin never hurts anyone, and a lone Puffbomb blows up once |
 

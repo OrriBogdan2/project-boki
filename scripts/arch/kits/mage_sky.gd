@@ -63,7 +63,7 @@ func tick(dt: float) -> void:
 		# a pink ticked rim with the chevron on it pointing the drag; once counting only the rim, so the dark disc
 		# (content/vfx/mage.json) shows through instead of a pink fill
 		var rim := {"at": at, "r": r, "ticks": true, "pointer": s["dir"], "all": true}
-		rim.merge({"col": MageKit.PINK, "col2": MageKit.DEEP_GOLD, "band": 0.12 if counting else 0.0})
+		rim.merge({"col": MageKit.PINK, "col2": MageKit.DEEP_PINK, "band": 0.12 if counting else 0.0})
 		AimKit.circle(kit.h, "e%d" % i, rim)
 		_chevron(at, s["dir"] as Vector2, r)
 	for s in kit.strikes.duplicate():
@@ -118,6 +118,7 @@ func _strike(s: Dictionary) -> void:
 	kit.run(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
+		kit.m.sfx("mage_sky_ground", f.pos, -6.0)     # each foe pinned, under the strike's thunder
 		_slide(f, dir, ed)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))

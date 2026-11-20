@@ -6,7 +6,13 @@ seams split (one per UV island) are welded first, so both sides of a seam get th
 Each mesh first loses the deeper limb bones off its torso and other limbs (skin_relax.limbs_apart), then the
 triangles that still join such a limb to the body (a scan's hand fused to the thigh it hung beside): they become
 degenerate (not drawn), so the contact opens as the arm swings away instead of pulling a web of skin after it.
-Run: python3 tools/art1/glb_relax.py <in.glb> <out.glb>   (numpy only, no Blender)"""
+Run: python3 tools/art1/glb_relax.py <in.glb> <out.glb> [--i-checked-renders]   (numpy only, no Blender)
+It refuses to write a shipped Hunter (art/wardens/<id>/<id>.glb) without --i-checked-renders: on 11-17 a merge lane
+re-ran it on five owner-picked models and flattened their arms and hands (docs/DEBT.md). Render before and after on
+the GPU and get the owner's pick first."""
+
+import os
+import re
 import struct
 import sys
 
@@ -15,8 +21,8 @@ import numpy as np
 import glb_add_clips
 import skin_relax
 
-SAMPLE = 0.1        # s between samples of a clip (the end is always sampled)
-WELD = 1e-5         # m: seam copies of one vertex sit at the same position
+SAMPLE = 0.1  # s between samples of a clip (the end is always sampled)
+WELD = 1e-5  # m: seam copies of one vertex sit at the same position
 WELD_WEIGHT = 1e-3  # and carry the same weights (to this step)
 TYPES = {"SCALAR": 1, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 DTYPE = {5121: np.uint8, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
@@ -35,9 +41,13 @@ def accessor(j, bin_, i):
 
 def quat_matrix(q):
     x, y, z, w = q
-    return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-                     [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-                     [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
 
 
 def local_matrix(trs):
@@ -73,8 +83,14 @@ def poses(j, bin_, skin):
     for i, nd in enumerate(nodes):
         for c in nd.get("children", []):
             parent[c] = i
-    rest = [{"translation": nd.get("translation", [0, 0, 0]), "rotation": nd.get("rotation", [0, 0, 0, 1]),
-             "scale": nd.get("scale", [1, 1, 1])} for nd in nodes]
+    rest = [
+        {
+            "translation": nd.get("translation", [0, 0, 0]),
+            "rotation": nd.get("rotation", [0, 0, 0, 1]),
+            "scale": nd.get("scale", [1, 1, 1]),
+        }
+        for nd in nodes
+    ]
     ibm = accessor(j, bin_, skin["inverseBindMatrices"])[0].reshape(-1, 4, 4).transpose(0, 2, 1)
     out = []
     for anim in j.get("animations", []):
@@ -97,6 +113,7 @@ def poses(j, bin_, skin):
                 if glob[i] is None:
                     glob[i] = local_matrix(trs[i]) if parent[i] < 0 else world(parent[i]) @ local_matrix(trs[i])
                 return glob[i]
+
             out.append((anim["name"], np.array([world(jt) @ ibm[k] for k, jt in enumerate(skin["joints"])])))
     return out, parent
 
@@ -116,9 +133,17 @@ def skinned(j, bin_):
             assert j["accessors"][at["WEIGHTS_0"]]["componentType"] == 5126, "float weights only"
             idx, idx_at, _ = accessor(j, bin_, pr["indices"])
             pos = accessor(j, bin_, at["POSITION"])[0].astype(float)
-            out.setdefault(m["name"], []).append({"pos": pos, "joints": jo.astype(int), "weights": wt.astype(float),
-                                                  "jo": (jo_at, jo_st, jo.dtype), "wt": (wt_at, wt_st),
-                                                  "idx": idx[:, 0], "idx_at": idx_at})
+            out.setdefault(m["name"], []).append(
+                {
+                    "pos": pos,
+                    "joints": jo.astype(int),
+                    "weights": wt.astype(float),
+                    "jo": (jo_at, jo_st, jo.dtype),
+                    "wt": (wt_at, wt_st),
+                    "idx": idx[:, 0],
+                    "idx_at": idx_at,
+                }
+            )
     return out
 
 
@@ -171,8 +196,8 @@ def store(bin_, prims, w, maps, tris):
         idx = p["idx"].reshape(-1, 3).copy()
         gone = t[:, 1] == t[:, 0]
         idx[gone] = idx[gone][:, :1]
-        bin_[p["idx_at"]:p["idx_at"] + idx.nbytes] = idx.tobytes()
-        top = np.argsort(-w[mp], axis=1)[:, :skin_relax.MAX_INFL]
+        bin_[p["idx_at"] : p["idx_at"] + idx.nbytes] = idx.tobytes()
+        top = np.argsort(-w[mp], axis=1)[:, : skin_relax.MAX_INFL]
         wt = np.take_along_axis(w[mp], top, 1)
         wt = wt / np.maximum(wt.sum(1, keepdims=True), 1e-9)
         top[wt == 0.0] = 0
@@ -180,9 +205,9 @@ def store(bin_, prims, w, maps, tris):
         wt_at, wt_st = p["wt"]
         for v in range(len(mp)):
             o = jo_at + v * jo_st
-            bin_[o:o + 4 * jo_dt.itemsize] = top[v].astype(jo_dt).tobytes()
+            bin_[o : o + 4 * jo_dt.itemsize] = top[v].astype(jo_dt).tobytes()
             o = wt_at + v * wt_st
-            bin_[o:o + 16] = struct.pack("<4f", *wt[v])
+            bin_[o : o + 16] = struct.pack("<4f", *wt[v])
 
 
 def per_clip(s, pz, out):
@@ -207,6 +232,10 @@ def relax_mesh(prims, pz, apart, name, before, after):
 
 
 def main(args):
+    checked = "--i-checked-renders" in args
+    args = [a for a in args if a != "--i-checked-renders"]
+    if re.search(r"(^|/)art/wardens/([^/]+)/\2\.glb$", os.path.abspath(args[1])) and not checked:
+        sys.exit("glb_relax: refusing to write a shipped Hunter glb (%s) without --i-checked-renders" % args[1])
     j, bin_ = glb_add_clips.read(args[0])
     skin = j["skins"][0]
     pz, parent = poses(j, bin_, skin)

@@ -133,6 +133,7 @@ func _tips(glint: StatGlint, rec: Dictionary) -> void:
 	for s in ["speed", "focus"]:
 		await _settle(glint)
 		StatMeaning.last_s -= StatMeaning.GAP_S
+		lane.clear()  # in play the last tip faded long ago (GAP_S >> TIP_LIFE); the lane shows 2 cards at most
 		Care.add_stat(rec, s, 1)
 		await _frames(2)
 		ok(seen.has(s) and lane.texts().has(Care.STATS[s]["means"]), "%s: its line shows at its first rise" % s)
