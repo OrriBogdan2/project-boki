@@ -1,18 +1,17 @@
 class_name ThiefUlt
 extends RefCounted
 ## Sable's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
-## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
-## then rides with her for 2s while she dances (thf_encore_dance, upper body over her walking legs) and on every
-## beat a blade leaves one hand or the other at every foe inside it (0.2s apart, up to 10 each), the ring pulsing.
-## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely
-## takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and every blade
-## refreshes her Marks. A blade landing on a rival hunter fills the bond meter (HeroUlt.landed: the best of
-## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
+## briefs/hero-ref/dancer.md "Ultimate (on X)"). A ring in her violet, a lit rim over a faint inside, grows out from
+## her over 0.4s (the short delay), then rides with her for 2s while she dances (thf_encore_dance, upper body over
+## her walking legs) and on every beat a blade leaves one hand or the other at every foe inside it (0.2s apart, up
+## to 10 each), the ring pulsing. Blades from the outer band of the ring (past 75% of its radius) hit harder and
+## blight (healing barely takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and
+## every blade refreshes her Marks. A blade landing on a rival hunter fills the bond meter (HeroUlt.landed: the best
+## of the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
-const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
-const BLADE_TIP := Color("fff2c0")
-const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hits: her violet, run hot
+## Her looks are content/vfx/thief.json: "encore" (the cast), "encore_beat" (a blade leaving her hand),
+## "encore_hit" / "encore_hit_rim" (a blade landing); the blades (DJFx meshes) wear its "main" and "hot".
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
@@ -59,10 +58,7 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	var cast_db := -2.0 if h.is_local() else -5.0
-	k.m.sfx("dj_encore", h.pos, cast_db, 1.0)
-	k.m.sfx("dj_encore_rise", h.pos, cast_db, 1.0)
-	k.net_ring(h.pos, float(d["reach"]), RING_COL)
+	k.vfx("encore", h.pos)
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
 
@@ -109,12 +105,13 @@ func _keep_dancing(d: Dictionary) -> void:
 		k.anim_id = DANCE
 		k.anim_at = k.m.time - into
 
-## The ring everyone sees: a thin line that grows out from her, then rides with her, its outer edge exactly the
-## radius the blades reach; a finer line marks the outer band. It brightens on every beat.
+## The ring everyone sees: a lit violet rim glowing inward over a faint inside (the zone rule: at most
+## AimShapes.SOFT_A at the centre) that grows out from her, then rides with her, its outer edge exactly the radius
+## the blades reach; a finer line marks the outer band. It brightens and runs hot on every beat.
 func _draw_ring(d: Dictionary, centre: Vector3) -> void:
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"at": centre, "r": r, "band": RING_W, "col": RING_COL,
-			"col2": AimKit.hero_col(k.h), "all": true, "alpha": 1.2 + 0.8 * pulse})
+	AimKit.circle(k.h, "ult", {"at": centre, "r": r, "band": RING_W, "col": AimKit.hero_col(k.h), "soft": true,
+			"all": true, "alpha": 1.2 + 0.8 * pulse, "hot": 0.25 + 0.5 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"at": centre, "r": r * float(d["rim"]), "band": RING_W * 0.4,
 			"col": Color(AimKit.hero_col(k.h), 0.7), "all": true, "alpha": 0.7})
 
@@ -125,7 +122,7 @@ func _orbit(d: Dictionary, centre: Vector3) -> void:
 		var a := a0 + TAU * float(i) / float(ORBITERS)
 		var at := centre + Vector3(cos(a) * ORBIT_R, 1.1 + 0.15 * sin(a * 2.0), sin(a) * ORBIT_R)
 		var vel := Vector2(-sin(a), cos(a)) * 6.0
-		k.fx().place("enc_orb%d" % i, "blade", at, vel, RING_COL, BLADE_TIP, 0.5, 0.18)
+		k.fx().place("enc_orb%d" % i, "blade", at, vel, _col("main"), _col("hot"), 0.5, 0.18)
 	if float(st["t"]) >= float(d["grow"]) + float(d["time"]) - 0.05:
 		for i in ORBITERS:
 			k.fx().unplace("enc_orb%d" % i)
@@ -150,8 +147,7 @@ func _volley(d: Dictionary) -> void:
 		_blade(f, rim, right)
 		thrown = true
 	if thrown:
-		k.fx().star(k.hand_pos(right), AimKit.hero_col(k.h), 0.5, 0.1, BLADE_TIP)
-		k.m.sfx("dj_blade", h.pos, -8.0, randf_range(0.95, 1.1))
+		k.vfx("encore_beat", k.hand_pos(right))
 
 ## A cosmetic blade flies from her hand; the hit lands when it arrives.
 func _blade(f: Ent, rim: bool, right: bool) -> void:
@@ -161,14 +157,13 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 	var dv := Vector2(to.x - from.x, to.z - from.z)
 	var dist := dv.length()
 	var n0: int = k.m.shots.size()
-	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, RING_COL, {"cos": true})
+	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, _col("main"), {"cos": true})
 	if k.m.shots.size() > n0:
-		var trail := AimKit.hero_col(k.h) if rim else RING_COL
-		k.fx().ride(k.m.shots[-1], "blade", trail, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
+		k.fx().ride(k.m.shots[-1], "blade", _col("main" if rim else "soft"), _col("flash"), BLADE_TRAIL, BLADE_WIDTH)
 	var fid := f.get_instance_id()      # (a lambda that captured a foe freed by then errors when it runs)
 	k.m.later(dist / BLADE_SPEED, func(): _hit(instance_from_id(fid) as Ent, rim))
 
-## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
+## A blade arrives: its damage (more from the outer band, which also blights), a violet flash, Marks refreshed,
 ## and the bond for a rival hunter.
 func _hit(f: Ent, rim: bool) -> void:
 	var h := k.h
@@ -185,8 +180,12 @@ func _hit(f: Ent, rim: bool) -> void:
 	blades += 1
 	if rim:
 		rim_blades += 1
-		k.fx().puff(f.pos + Vector3(0, 1.0, 0), AimKit.hero_col(k.h), 0.8, 0.3, HIT_COL)
-	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
-	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
+		k.vfx("encore_hit_rim", f.pos)
+	else:
+		k.vfx("encore_hit", f.pos)
 	k.refresh_marks()
 	HeroUlt.landed(k, f)
+
+## A colour of her data palette (content/vfx/thief.json).
+func _col(key: String) -> Color:
+	return HeroVfx.of(k.m).color(k.h, key)
