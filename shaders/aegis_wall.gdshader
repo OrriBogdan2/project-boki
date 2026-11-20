@@ -24,14 +24,14 @@ void fragment() {
 		float cx = abs(uv.x - 0.5) * arc_m;
 		float dy = (uv.y - 0.5) * 1.7;
 		float cross_m = max(step(cx, 0.06) * step(abs(dy), 0.3), step(abs(dy - 0.12), 0.05) * step(cx, 0.22));
-		col = mix(albedo.rgb * vec3(0.95, 0.68, 0.2), albedo.rgb * vec3(1.0, 0.92, 0.7), smoothstep(0.0, 0.85, uv.y));
-		col = mix(col, albedo.rgb * vec3(0.8, 0.5, 0.12), max(seam, band) * 0.85);
+		col = mix(albedo.rgb * vec3(0.97, 0.82, 0.4), albedo.rgb * vec3(1.0, 0.97, 0.85), smoothstep(0.0, 0.85, uv.y));
+		col = mix(col, albedo.rgb * vec3(0.78, 0.6, 0.22), max(seam, band) * 0.85);
 		col = mix(col, rim_color.rgb, cross_m * 0.9);
-		a = mix(0.8, 0.5, uv.y) + max(seam, band) * 0.2 + cross_m * 0.3;
+		a = mix(0.7, 0.42, uv.y) + max(seam, band) * 0.2 + cross_m * 0.3;
 		a *= smoothstep(0.0, 0.04, uv.y);
 	} else if (kind < 1.5) {
 		// the inner sheet: shorter and brighter at its top edge, clear low down, so two layers show through each other
-		col = mix(albedo.rgb * vec3(1.0, 0.85, 0.5), rim_color.rgb, uv.y);
+		col = mix(albedo.rgb * vec3(1.0, 0.9, 0.6), rim_color.rgb, uv.y);
 		a = (0.15 + 0.55 * smoothstep(0.45, 1.0, uv.y)) * (1.0 - smoothstep(0.96, 1.0, uv.y));
 	} else if (kind < 2.5) {
 		// the rim on top: a lit ivory bar with a hot centre line
@@ -41,7 +41,7 @@ void fragment() {
 	} else {
 		// the ground contact: brightest at the foot, a soft falloff both ways, gone at the ends
 		float foot = exp(-pow((uv.y - 0.33) * 3.6, 2.0));
-		col = mix(albedo.rgb * vec3(1.0, 0.8, 0.4), rim_color.rgb, foot * 0.6);
+		col = mix(albedo.rgb * vec3(1.0, 0.86, 0.5), rim_color.rgb, foot * 0.5);
 		a = 0.9 * foot;
 	}
 	a *= ends;
