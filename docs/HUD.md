@@ -33,6 +33,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `map_hover.gd` (`MapHover`) | full-map tooltips: rest the cursor 0.6 s on any marker (exits, ways-out seats, hunters, your Boki, spawns, shrines, lairs, beacons, boxes, halts, the train, ships, pings, places, the hot zone) and a card gives its name and one line. `--map-hover-check`; `--map-clear-shots` takes before/after shots |
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
+| `heart_hud.gd` (`HeartHud.zone_line`) | the zone clock, in the clock chip's middle under the minimap (where ISLANDS FALLING shows in the last 30 s, so it takes no room of its own): "CLOSES IN 0:30" before the Blight's tide starts to move, "CLOSING 7:12" while it closes, gone once the ring holds (`Heart.close_in` / `close_left`). Check: `--minimap-check` (zone rows); shots: `--zone-next-shots` (GPU) |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 2 at once (1 in a fight), the most important first, short lives (2 s at most in a fight); a small (`toast_small`) line only shows on an empty lane and is dropped in a fight; a card slides aside off your hunter (`avoid`); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check`, `--hunter-zone-check` |
 | `top_stack.gd` (`TopStack`) | the top-centre of a real match is one column: Ways Out strip, then the one-line banner (the first-match guide, else the crouch hint), then the message lane. The lane sits under the banner and holds its lines while the banner is fresh (`Tutorial.CARD_T`; URGENT passes); the guide's Boki-key line takes the Boki-key hint's place (`Match.tip_once("ability")`). Check: `--prompt-queue-check` |
@@ -343,11 +344,11 @@ nearly twice the budget.
 
 **Shown before it matters** (at 0-30 s of a fresh save): the four top-right counters (squads, kills, knocks, gems, all 0), the
 "Your kit" card, the gear row (four empty dots), Q/V "Glove (empty)", the locked X box (LV 6) and R tile, belt slots 3 and 4
-(empty), the "Quick Feed" perk line, the kill feed's truce and knock lines for fights far away, the minimap's "Next train"
+(empty), the "Quick Feed" perk line, the kill feed's knock lines for fights far away (truce lines gone 11-20), the minimap's "Next train"
 label.
 
-**Jargon before it is explained:** UNLOCK (on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
-AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, DOCKS IN, SIGHT 85%, DUSK, "made a truce", "broke the truce", Quick
+**Jargon before it is explained:** ~~UNLOCK~~ (now "Spend point", on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
+AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, ~~DOCKS IN~~ (gone), SIGHT 85%, DUSK, ~~"made a truce", "broke the truce"~~ (off the feed), Quick
 Feed, "0 seeds · Box 0/3", the portrait caption "The Hired Gunslinger Medium", "went down / is out", the toast "Frostreach: ...
 hits slow you, and they shatter when they die".
 
@@ -388,9 +389,11 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
 
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
-  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
+  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line.
 - `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
-- Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
+- Plain words (done 11-20): the locked-slot tag says "Spend point" (`HudSlot.POINT_TAG`, fitted to the tile width), the kill
+  feed no longer prints the truce lines (`truce.gd` keeps them in `events`; the toast for your own truce stays). "DOCKS IN" is
+  already gone from the code (the Ways Out strip replaced the dock clock).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
   title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
