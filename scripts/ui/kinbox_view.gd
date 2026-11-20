@@ -18,7 +18,7 @@ static var sel := ""
 static var confirm := ""            # uid waiting on "release?"
 static var renaming := false
 
-var home: Node = null
+var home: Home = null
 var v: VBoxContainer
 var summary: Label
 var farm_box: VBoxContainer
@@ -30,7 +30,7 @@ var detail: VBoxContainer
 var msg: Label
 var _msg_t := 0
 
-static func open(h: Node) -> KinBoxView:
+static func open(h: Home) -> KinBoxView:
 	KinBox.ensure()
 	var kv := KinBoxView.new()
 	kv.home = h
@@ -154,8 +154,8 @@ func _done(t: String) -> void:
 	Sfx.play("click")
 	refresh()
 	_say(t)
-	if home and home.has_method("_spawn_kin"): home._spawn_kin()
-	if home and home.has_method("_refresh_burrow"): home._refresh_burrow()
+	if home: home._spawn_kin()
+	if home: home._refresh_burrow()
 
 func _fail(t: String) -> void:
 	UiSfx.error()
@@ -198,7 +198,7 @@ func _build_farm(fk: Array) -> void:
 			else:
 				Sfx.play("unlock")
 				_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
-				if home and home.has_method("_refresh_top"): home._refresh_top(), FARM_COLS * CELL.x + 6)
+				if home: home._refresh_top(), FARM_COLS * CELL.x + 6)
 		eb.tooltip_text = "A Boki Cottage expansion: +2 Boki out on the farm"
 		eb.disabled = int(Save.d["gems"]) < cost and not Game.modding()
 		farm_box.add_child(eb)
@@ -458,7 +458,7 @@ func _build_detail() -> void:
 		bb.tooltip_text = KinBox.pinned(rec)
 		btns.add_child(bb)
 	btns.add_child(UI.button("Details", func():
-		if home and home.has_method("_open_kin"): home._open_kin(r), 90))
+		if home: home._open_kin(r), 90))
 	if String(rec["uid"]) != str(Save.d.get("active", "")):
 		btns.add_child(UI.button("Make partner", func():
 			var swapped := KinBox.bring_out(r)
