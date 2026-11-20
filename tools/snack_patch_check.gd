@@ -7,6 +7,8 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+const OLD_SAVE := "user://snack_patch_check_old.json"
+
 func ok(cond: bool, what: String) -> void:
 	print("SNACK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
@@ -96,6 +98,13 @@ func _first_batch() -> void:
 	var keep: Dictionary = Save.d
 	Save.d = old
 	ok(is_equal_approx(SnackPatch.grow_secs(), grow), "an older save with no counter keeps 480 s")
+	var f := FileAccess.open(OLD_SAVE, FileAccess.WRITE)
+	f.store_string(JSON.stringify(old))
+	f.close()
+	Save.load_from(OLD_SAVE)
+	DirAccess.remove_absolute(OLD_SAVE)
+	ok(int(Save.d.get("snack_picks", 0)) >= 1 and is_equal_approx(SnackPatch.grow_secs(), grow),
+			"loading an older save file (no counter) keeps 480 s, no second starter gift")
 	Save.d = keep
 
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.

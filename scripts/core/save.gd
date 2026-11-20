@@ -522,6 +522,8 @@ func load_from(p: String) -> void:
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
+	if not parsed.has("snack_picks"):
+		parsed["snack_picks"] = 1      # an older save had its first snack batch: no early 60 s one
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
