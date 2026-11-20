@@ -1,6 +1,6 @@
 {
- "doc": "r3 candidate (ta-fix-3d-r3, job 20261120-003157-a4, LOCAL ONLY, not pushed): Meshy multi-image A-pose rebuild T1 (front+back of the approved v2 turnaround: off arm bare skin + cream upper-arm bandage + navy wrist cuff, one stone arm, his left), joints read on v95_grid renders. Earlier: v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-18 (ext/r2a-tenzo-neve-grimble-1118): the owner-approved r2 A (~/meshy/ta-fix-3d-1118/Tenzo/A.glb: the 11-15 age-down master r2/hunter3d1115/A.glb, base colour repainted; one material, emission map for the teal runes), joints, pauldron box and slots re-read for it (blue slate stone = metal by hue; wraps, blindfold, waistband, beads = cloth by low saturation). Earlier 11-13 (ext/showcase-1113): current.json n95/c01, a body pass with the live head (eye stones left out: tarek_c01_body.glb). Earlier: Tarek's v95 master, appeal3 candidate b (waist taper, new warm-brown face with the gentle smile; ~/meshy/v95/tarek/r2/appeal3/cand_b.glb, its three floating eye stones left out: tarek_v95_b_body.glb) onto tarek.glb's (dolm's) skeleton, clips and anchors. The game's own eye stones (stone_0-2), shards and ground rings stay as they are. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The stone arm is his LEFT, as in the v2 turnaround; the master carries it in the paint (no emission map).",
- "master": "/home/boki/meshy/ta-fix-3d-r3-1120/tenzo/meshy/T1/model.glb",
+ "doc": "r3 candidate (ta-fix-3d-r3, job 20261120-003157-a4, LOCAL ONLY, not pushed): Meshy multi-image A-pose rebuild T2 (front+side+back of the approved v2 turnaround: off arm bare skin + cream upper-arm bandage + navy wrist cuff, one stone arm, his left), joints read on v95_grid renders. Earlier: v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-18 (ext/r2a-tenzo-neve-grimble-1118): the owner-approved r2 A (~/meshy/ta-fix-3d-1118/Tenzo/A.glb: the 11-15 age-down master r2/hunter3d1115/A.glb, base colour repainted; one material, emission map for the teal runes), joints, pauldron box and slots re-read for it (blue slate stone = metal by hue; wraps, blindfold, waistband, beads = cloth by low saturation). Earlier 11-13 (ext/showcase-1113): current.json n95/c01, a body pass with the live head (eye stones left out: tarek_c01_body.glb). Earlier: Tarek's v95 master, appeal3 candidate b (waist taper, new warm-brown face with the gentle smile; ~/meshy/v95/tarek/r2/appeal3/cand_b.glb, its three floating eye stones left out: tarek_v95_b_body.glb) onto tarek.glb's (dolm's) skeleton, clips and anchors. The game's own eye stones (stone_0-2), shards and ground rings stay as they are. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The stone arm is his LEFT, as in the v2 turnaround; the master carries it in the paint (no emission map).",
+ "master": "/home/boki/meshy/ta-fix-3d-r3-1120/tenzo/meshy/T2/model.glb",
  "game": "art/wardens/tarek/tarek.glb",
  "own": {
   "drop_mats": [
@@ -26,49 +26,49 @@
  "keep": [],
  "joints": {
   "pelvis": [
-   0.025,
+   0.02,
    0.0,
    0.92
   ],
   "neck": [
    0.03,
    -0.02,
-   1.56
+   1.55
   ],
   "crown": [
    0.03,
    0.0,
-   1.88
+   1.89
   ],
   "shoulder.R": [
-   0.265,
+   0.27,
    -0.03,
-   1.44
+   1.43
   ],
   "elbow.R": [
-   0.375,
+   0.38,
    -0.02,
-   1.25
+   1.26
   ],
   "wrist.R": [
-   0.46,
+   0.47,
    0.03,
-   1.06
+   1.1
   ],
   "shoulder.L": [
-   -0.21,
+   -0.22,
    -0.03,
    1.44
   ],
   "elbow.L": [
-   -0.36,
+   -0.37,
    -0.02,
-   1.25
+   1.23
   ],
   "wrist.L": [
-   -0.43,
+   -0.44,
    0.03,
-   1.04
+   1.05
   ],
   "hip.R": [
    0.13,
@@ -76,29 +76,29 @@
    0.92
   ],
   "knee.R": [
-   0.19,
+   0.17,
    -0.01,
    0.52
   ],
   "ankle.R": [
-   0.22,
+   0.2,
    -0.04,
-   0.13
+   0.12
   ],
   "hip.L": [
-   -0.08,
+   -0.09,
    0.0,
    0.92
   ],
   "knee.L": [
-   -0.12,
+   -0.13,
    -0.01,
    0.52
   ],
   "ankle.L": [
-   -0.155,
+   -0.17,
    -0.04,
-   0.13
+   0.12
   ]
  },
  "relax": {
