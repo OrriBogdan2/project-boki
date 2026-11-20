@@ -10626,3 +10626,8 @@ READY ext/lace-knock-cut 673b43e50b (Lace longbow.kb 3.5 to 2.0 and ult x.kb 4 t
 READY ext/stuck-integ-1e7cf134 8b955e25c6 (supersedes: ext/merge-lane-misc-1117 ext/tenzo-eyestones-1118 ext/rig-ship-1117; on main 81c76afa43; import ok, --check/tutorial-wisp(fixed 2->0)/summon-death/summon-pad/wisp-proc/hero-title/tutorial/warden-model 0 fail; health red = main-own style rows only; delta triage of the 634-name list in ops/stuck-integ-1e7cf134/README.md: 4 already in main, 3 owned PRs #292 #284 #214, 5 superseded, rest per 8a30c285/f3c93892)
 READY ext/merge-lane-picks-1120 24fb07af6f53b3cb56e89af63742da09df1dde43 (merge lane picks 11-20: fps-feel gravity, incoming-hit cue, range-on-screen check, hunter foley; PR via gh-outbox)
 READY ext/merge-lane-N1-1120 9ff5db8c40 (lane N1: 12 conflicting branches ported onto main; full suite pending, bot gates the PR)
+READY ext/ui-retired-words 187ef305f5 (bulk-rebase: origin/main merged in mechanically, was 980fa52f2d; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/farm-minigame-fair 544f25aba6 (bulk-rebase: origin/main merged in mechanically, was 68db7415a8; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/ui-loadout-slots 0ae1bd96bb (bulk-rebase: origin/main merged in mechanically, was ca51cdad94; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/vfx-albert-e-wall d817894add (bulk-rebase: origin/main merged in mechanically, was 4462c4fd16; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/stomp-prompt-declutter 8dbbb87d56 (bulk-rebase: origin/main merged in mechanically, was 2ded416979; union 1 gen 0 files; the branch's own READY checks still apply)
