@@ -61,6 +61,14 @@ def suite_flags(tree):
     return out
 
 
+def absolute_flags(tree):
+    """tools/gate_absolute.txt of the gated tree: checks that always run and fail the gate on any merge red."""
+    path = Path(tree) / "tools/gate_absolute.txt"
+    if not path.is_file():
+        return []
+    return [ln.split("#", 1)[0].strip() for ln in path.read_text().splitlines() if ln.split("#", 1)[0].strip()]
+
+
 # ---------------------------------------------------------------- history / stats / order
 def load_history(src):
     """{flag: [secs, ...]} from a TSV (flag<TAB>secs per line) or a dir tree of <flag>.secs files."""
@@ -753,6 +761,8 @@ class Gate:
             if picked is not None:
                 flags = [f for f in flags if f in set(picked)]
                 scope = f"selected {len(flags)}"
+        absolute = self.absolute = [f for f in absolute_flags(a.merge) if f in set(suite_flags(a.merge))]
+        flags += [f for f in absolute if f not in flags]  # absolute checks run on every gate, whatever --flags/--select-base picked
         if a.order == "lpt":
             flags = order_flags(flags, hist)
         if not a.no_canary and not self.canary(flags):
@@ -789,6 +799,8 @@ class Gate:
         wall = time.time() - self.t0
         m, g = self.res["main"], self.res["merge"]
         new_red = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "green"]
+        # absolute checks (tools/gate_absolute.txt): red on merge fails the gate even when main is red or not run
+        abs_red = [f for f in getattr(self, "absolute", []) if g.get(f, {}).get("verdict") == "red" and f not in new_red]
         fixed = [f for f in flags if g.get(f, {}).get("verdict") == "green" and m.get(f, {}).get("verdict") == "red"]
         both = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "red"]
         mf = getattr(self, "main_flags", set())
@@ -805,6 +817,7 @@ class Gate:
             f" main red {sum(1 for r in m.values() if r['verdict'] == 'red')}/{len(m)}",
             f"NEW-RED {len(new_red)}: {' '.join(new_red)}",
             f"NEW-RED (new flag, no main) {len(main_only)}: {' '.join(main_only)}",
+            f"NEW-RED (absolute check, red on merge) {len(abs_red)}: {' '.join(abs_red)}",
             f"red on both {len(both)}: {' '.join(both)}",
             f"fixed {len(fixed)}: {' '.join(fixed)}",
         ]
@@ -821,7 +834,7 @@ class Gate:
                 if not r.get("cached"):
                     self.cache.put(r)
         print("\n".join(lines))
-        rc = 3 if self.abort.is_set() else (1 if new_red or main_only else 0)
+        rc = 3 if self.abort.is_set() else (1 if new_red or main_only or abs_red else 0)
         (self.out / "rc").write_text(f"{rc}\n")
         return rc
 
