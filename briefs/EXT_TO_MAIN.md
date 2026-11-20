@@ -10601,3 +10601,4 @@ READY ext/farm-bred-look 55b05d6d70 (bred Boki wear one parent's coat pattern in
 READY ext/vfx-boki-type-colours b76a1df97d (10 Boki cast accents now keep their type hue; --boki-type-colour-check asserts 196 stages in palette; HERO_VFX type table)
 READY ext/albert-guard-recut 4163b0b575528cc9b43eff671b8492c0a2521181 (Bulwark: Guard meter + Shield Slam cut again on current main, asserts restored, losing merge 5bfa1ad645 noted)
 READY ext/docs-parity-stale-rows 1a2af41c49 (KIT_PARITY one top-20 table + Still open list, closed rows carry commits, juggernaut.md rows closed, wiki Rules.md regenerated)
+READY ext/hunter-regen-gil-1120 a64edecbbb (Gil r3b A2 DRAFT for owner visual check: hand-off-forearm fix in warden_sync + no sleeve bar, fish clear of floor; proof gens/hunter-regen-1120/gil/r3/proof/gil_r3b_LIVE_vs_A2.mp4)
