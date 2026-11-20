@@ -10,7 +10,6 @@ extends RefCounted
 ## so one prompt shows at a time; what a fight needs now (MsgLane.URGENT, FIGHT_PROMPTS) still shows.
 
 const MINT := TutorialStrip.MINT
-const GOLD := TutorialStrip.GOLD
 const PANEL := TutorialStrip.PANEL
 
 const FIGHT_PROMPTS := ["revive", "finish", "stomping", "boxrev"]     # Match.interact kinds that never wait
@@ -44,7 +43,6 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.target != Vector3.INF and h.m.cam and h.m.player:
 		dir = MarkerDir.off_dir(h.m.cam, sz, tu.target, h.m.player.pos)
 	_bar(h, r, tu, dir)
-	_pick_ring(h, tu)
 	if not tu.card_up():
 		_extras(h, r, tu)
 	if tu.done_t > 0.0:
@@ -66,27 +64,11 @@ static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
 	if hint != "":
 		h._ctext(Vector2(r.get_center().x, r.end.y + 34.0), hint, int(h.c.size.y * 0.026), MINT, h.big)
-	if tu.id() in ["uplink", "defend"]:
+	if tu.leg() in ["uplink", "defend"]:
 		var o := tu.outpost()
 		if not o.is_empty():
 			var br := Rect2(Vector2(r.position.x + 20.0, r.end.y + 6.0), Vector2(r.size.x - 40.0, 6.0))
 			h._bar(br, clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
-
-## A pick step: a pulsing gold ring on the one skill slot that can take the point, an arrow dropping onto it.
-## The slot's rect is the one the HUD drew it at (RankMarks.face), so the ring follows the row wherever it sits.
-static func _pick_ring(h, tu: Tutorial) -> void:
-	var slot := TutorialCamps.pick_slot(tu.id())
-	var face := RankMarks.face(slot) if slot != "" else Rect2()
-	if face.size == Vector2.ZERO:
-		return
-	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 6.0)
-	var c := face.get_center()
-	var rad := maxf(face.size.x, face.size.y) * (0.78 + 0.1 * pulse)
-	h.c.draw_circle(c, rad, Color(GOLD, 0.12 + 0.1 * pulse))
-	h.c.draw_arc(c, rad, 0.0, TAU, 40, Color(GOLD, 0.7 + 0.3 * pulse), 4.0, true)
-	var tip := c - Vector2(0, rad + 6.0 + 10.0 * pulse)
-	var s := rad * 0.5
-	h.c.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-s, -s * 1.2), tip + Vector2(s, -s * 1.2)]), GOLD)
 
 ## The first-time intro: short, over a light dim, and the rest of the HUD stays away.
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:

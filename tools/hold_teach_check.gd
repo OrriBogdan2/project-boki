@@ -221,10 +221,7 @@ func _match_glide() -> void:
 # ------------------------------------------------------------------ 3. texts, and done teaching
 func _texts() -> void:
 	var tut: Dictionary = _json("res://content/rules/tutorial.json")
-	var glide_line := ""
-	for s in tut["steps"]:
-		if String(s[0]) == "glide":
-			glide_line = String(s[1])
+	var glide_line := String(tut["alt"].get("glide", ""))  # (the dash beat's glide leg)
 	ok(glide_line.contains("HOLD"), "the match tutorial's glide line says HOLD ('%s')" % glide_line)
 	ok(FarmTutorial.hint_text("chop").contains("HOLD"), "the farm tutorial's chop hint says HOLD")
 	# the farm's chop step waiting for a held chop: tools/farm_tutorial_check.gd

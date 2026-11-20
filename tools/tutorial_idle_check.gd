@@ -4,7 +4,7 @@ extends RefCounted
 ##   - a hint banner or the Boki lead is up within HINT_BY seconds, and the step's line stays on the pill
 ##   - a step with a place keeps its marker (beam, pin or edge arrow, and the distance label) every frame
 ##   - a nag (the pill and marker pulse, the Boki says it again) lands inside the window, so no wait
-##     goes SILENT_MAX seconds without a prompt; the timed waits all outlast a nag
+##     goes SILENT_MAX seconds without a prompt
 ## Then the farm tutorial: each step, with everything before it done, shows its hint line for IDLE_S
 ## seconds and, where it has a place, keeps its world marker. One table row per step is printed.
 
@@ -38,9 +38,6 @@ func _match_course() -> void:
 	var tu: Tutorial = m.tut
 	ok(Tutorial.NAG_T < IDLE_S, "a nag comes inside the %.0f s window (NAG_T %.0f s)" % [IDLE_S, Tutorial.NAG_T])
 	ok(Tutorial.NAG_T < SILENT_MAX, "and a nag comes before %.0f s of silence" % SILENT_MAX)
-	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T}
-	for k in timed:
-		ok(float(timed[k]) > Tutorial.NAG_T, "%s (%.0f s) outlasts a nag, so it never waits in silence" % [k, timed[k]])
 	print("IDLE match | step | hint s | Boki | nag s | marker | note")
 	var seen := {}
 	var t := 0.0
@@ -51,7 +48,8 @@ func _match_course() -> void:
 		if tu.step >= 0 and tu.step < Tutorial.steps().size() and not seen.has(tu.step):
 			seen[tu.step] = true
 			_idle_step(m, tu)
-	ok(seen.size() >= 15, "the idle window ran on %d steps" % seen.size())
+	var beats := Tutorial.steps().size() - 1      # (the Boki's beat is gkey or summon, never both)
+	ok(seen.size() >= beats, "the idle window ran on %d steps (of %d)" % [seen.size(), beats])
 	m.queue_free()
 
 ## Does nothing for IDLE_S s (or until the step ends by itself) and judges what the player saw.

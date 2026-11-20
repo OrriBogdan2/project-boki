@@ -124,10 +124,14 @@ func _off_text() -> void:
 
 func _off_tutorial() -> void:
 	var tu := _tutorial()
-	ok(not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
-			"off: the tutorial skips its Fusion steps")
+	ok(not _fusion_beat() and tu.applies("kin"), "off: the tutorial has no Fusion beat")
 	ok(TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
 			"off: no tutorial point goes to Fusion")
+
+
+## A Fusion beat in the tutorial's list (the eight beats have none, flag or not).
+func _fusion_beat() -> bool:
+	return Tutorial.steps().any(func(s: Array): return String(s[0]) in ["pick_ult", "ult"])
 
 
 # ------------------------------------------------------------------ 3. on
@@ -152,7 +156,7 @@ func _on() -> void:
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
 	var tu := _tutorial()
-	ok(not tu.applies("pick_ult") and not tu.applies("ult"), "on: the tutorial still skips Fusion (11-18)")
+	ok(not _fusion_beat() and tu.applies("kin"), "on: the tutorial still has no Fusion beat (11-18)")
 	var tut_tips := {}
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []

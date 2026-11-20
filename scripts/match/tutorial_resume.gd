@@ -5,9 +5,25 @@ extends RefCounted
 ## state that beat needs). Finishing or skipping it (Match._finish) sets tutorial.match, which ends all this.
 ## docs/decisions/0022-tutorial-resume.md.
 
-## Beats whose state lives in the world's outpost resume at the start of that run.
-const OUTPOST_RUN := ["uplink", "defend", "extract"]
-const OUTPOST_START := "goexit"
+## A save from the 23-step course: its last finished beat, as the last of the eight it covers.
+const OLD_BEATS := {
+	"points": "shoot",
+	"pick_sec": "shoot",
+	"sec": "fight",
+	"pick_dash": "fight",
+	"exdash": "fight",
+	"glide": "dash",
+	"wallkick": "dash",
+	"crouch": "dash",
+	"pack": "summon",
+	"pick_kin": "gkey",
+	"glove": "kin",
+	"hook": "kin",
+	"ranks": "kin",
+	"wayout": "kin",
+	"uplink": "kin",
+	"defend": "kin",
+}
 
 
 static func opts() -> Dictionary:
@@ -36,19 +52,10 @@ static func remember(beat: String) -> void:
 ## The step index to carry on at after a finished beat (0 when none, or the beat is unknown).
 static func step_after(beat: String) -> int:
 	var list := Tutorial.steps()
+	beat = String(OLD_BEATS.get(beat, beat))
 	for i in list.size():
 		if String(list[i][0]) == beat:
-			if i + 1 < list.size() and OUTPOST_RUN.has(String(list[i + 1][0])):
-				return _index(OUTPOST_START)
 			return i + 1
-	return 0
-
-
-static func _index(beat: String) -> int:
-	var list := Tutorial.steps()
-	for i in list.size():
-		if String(list[i][0]) == beat:
-			return i
 	return 0
 
 

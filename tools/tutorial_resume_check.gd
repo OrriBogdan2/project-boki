@@ -87,7 +87,8 @@ func _remember() -> void:
 				wrong += " " + before
 			last = tu.step
 	ok(wrong == "", "each finished beat is in the save the moment it ends (wrong:%s)" % wrong)
-	ok(String(Save.d["tutorial"]["tut_beat"]) == "defend", "extracting ends the course (Match sets tutorial.match)")
+	var before_last := String(Tutorial.steps()[-2][0])
+	ok(String(Save.d["tutorial"]["tut_beat"]) == before_last, "extracting ends the course (Match sets tutorial.match)")
 	m.free()
 
 
@@ -122,6 +123,13 @@ func _resume_each() -> void:
 		m.free()
 		tried += 1
 	ok(tried == steps.size() - 1, "every beat was tried (%d)" % tried)
+	var old_ok := TutorialResume.OLD_BEATS.keys().all(
+		func(b): return TutorialResume.step_after(b) == TutorialResume.step_after(TutorialResume.OLD_BEATS[b])
+	)
+	var mapped := TutorialResume.OLD_BEATS.values().all(
+		func(b): return Tutorial.steps().any(func(s: Array): return String(s[0]) == b)
+	)
+	ok(old_ok and mapped, "a save from the 23-step course carries on at one of the eight beats")
 
 
 # ------------------------------------------------------------------ 4. the farm tutorial

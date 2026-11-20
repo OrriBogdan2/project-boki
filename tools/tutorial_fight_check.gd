@@ -1,21 +1,21 @@
 extends RefCounted
 ## --tutorial-fight-check: the tutorial fight beats suit each starter (Lace's charge bow, Kael's melee,
-## Vex's gun). The test driver plays the course with each one; the fight beats (sec..ult) must
+## Vex's gun). The test driver plays the course with each one; the fight beats (shoot, gkey, kin, fight) must
 ## take FIGHT_MIN..FIGHT_MAX s without the hunter being brought down, and the first fight line
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
-## ability locked, the first pick can only be the right click, every ability but the ultimate ends up unlocked
-## and used (right click, attack, dash, wall kick, Boki, E, glove; the tutorial has no Fusion, so the ultimate
-## stays locked), and only the camps paid XP.
+## ability locked, each beat opens its own ability, every ability but the ultimate ends up unlocked
+## and used (right click, attack, dash, air dash, glide, Boki, E; the tutorial has no Fusion, so the ultimate
+## stays locked, and no point goes there), and only the camps paid XP.
 
 var bad := 0
 
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
-const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
-const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
+const FIGHT_STEPS := ["fight", "shoot", "gkey", "kin"]
+const USED := ["sec", "fire", "dash", "exdash", "glide", "boki", "kin", "chest"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
-const FIGHT_MIN := 12.0       # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s)
-const FIGHT_MAX := 70.0       # (six camps since 0.24.4: the bot's melee juggernaut walks to each, 52-61 s)
+const FIGHT_MIN := 8.0        # s: the fight beats together, bot-driven, per starter (four camps since the cut)
+const FIGHT_MAX := 70.0       # (four camps: the bot's melee juggernaut walks to each)
 const DAMAGE_MAX := 60.0      # hp taken over the fight beats (of 100)
 
 func ok(cond: bool, what: String) -> void:
@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 
 func _play(main: Node, id: String) -> void:
 	seed(11)       # (the same run each time)
+	Save.d["tutorial"].erase("tut_beat")       # (each starter from the first beat: no resume from the last run)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
@@ -53,11 +54,10 @@ func _play(main: Node, id: String) -> void:
 		m.step(Match.DT)
 		t += Match.DT
 		texts[tu.id()] = tu.text
-		if tu.id() == "pick_sec" and not forced:
+		if tu.id() == "shoot" and not forced:
 			forced = true
 			var p := m.player
-			var only: bool = p.can_level("sec") and not p.can_level("dash") and not p.can_level("kin")
-			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
+			ok(not p.can_level("ult"), id + ": the point can never go to the Fusion")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() in FIGHT_STEPS:
