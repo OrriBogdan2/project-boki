@@ -10391,3 +10391,4 @@ READY ext/merge-lane-n19g-1119 ab852f30e6 (merge lane n19g: kin dedupe, tutorial
 READY ext/vfx-hurt-flash-v95 6462008de4 (hit flash: shared pale-surface glow boost in hero_toon+warden_card; Neve/Meeko flash 0.44->0.50+ of room to white, dark v95 unchanged; --hunter-flash-shots before/after strips of all 13)
 READY ext/feel-cast-turn-rate 7b4ec9b14f3f306b18828250de9f7ade82e4e356 (cast turn rate: 6 held casts frame-stepped, all match 1280 deg/s; match rows + footage cites, no factor needed)
 READY ext/merge-lane-n19g-1119 0a8919f4b6 (merge lane n19g: +feel-one-tuning-home port (44 hunter feel consts -> tuning.json feel); 5 of 25 in, 6 archived, 14 HARD per n19g-RESULT.md)
+READY ext/name-card-wrap-1119 2840cdaa94 (name card wrap: real-flow check, wrap floor, sweep)
