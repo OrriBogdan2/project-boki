@@ -10430,3 +10430,4 @@ READY ext/v95-ingame-drift ed32db96d4 (v95 in-game drift tracker tool + table: 1
 READY ext/ui-retired-words 980fa52f2d5 (retired words Warden/Mantle/Bearer/Merge/Unmasked out of player text + content-json lint)
 READY ext/vfx-meeko-heal-hurt 385ce22668 (Meeko heals leaf green rising, hurts embers falling; Hearthlight/root field inside <=0.25 to rim, bloom rim-only; hero-vfx-check rows; before/after sheets)
 READY ext/gil-hero-anim-proc 0429f6a241 (Gil borrows Meeko's idle/walk/run/strafe/jump/fall/land/hit clips by bone name via warden_anim clips_from; coverage 7 cells proc->clip; clips/glb checks no new reds)
+READY ext/kael-open-rows 6ea5ba707a4 (Kael open rows closed: Lunge travels 4.5-5.4 m per footage + DECISIONS 11-11; Riposte resets on any living foe killed per data; dash and pull exits confirmed with commits; before/after table in juggernaut.md)
