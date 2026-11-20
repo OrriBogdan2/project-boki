@@ -384,7 +384,7 @@ func _own_look(main: Node) -> void:
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var marks := rig._coat.next_pass as ShaderMaterial
-	ok(marks != null and marks.shader.resource_path.ends_with("boki_marks.gdshader"), "its coat marks are on")
+	ok(marks != null and marks.shader.resource_path.begins_with("res://shaders/boki_marks"), "its coat marks are on")
 	await _grown_parts(main)
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
 	for nm in ["Tuft", "TailTuft", "Birthmark"]:
