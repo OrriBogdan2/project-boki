@@ -22,7 +22,7 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const BARGE_HOLD := 0.18               # s a press inside a shove is held (main's dash buffer; the shared press window is shorter)
+const BARGE_HOLD := 0.18               # s a press inside a shove is held (main: 0.18; the shared window is 0.15)
 const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
