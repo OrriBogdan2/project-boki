@@ -2,7 +2,7 @@
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
-Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy] [--spec-patch JSON] [--no-import]
+Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy [--meshy-rig GLB]] [--spec-patch JSON] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
 
 import argparse
@@ -102,6 +102,8 @@ def main():
         "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
     )
     ap.add_argument("--weights", choices=["meshy"], help="meshy: the skin weights from Meshy's auto-rig, not bone heat")
+    ap.add_argument("--meshy-rig", help="with --weights meshy: reuse this rigged_character.glb instead of a new Meshy auto-rig "
+                    "(5 credits a run): a rebuild of a shipped regen keeps its exact weights")
     ap.add_argument("--spec-patch", help="a JSON whose keys replace the spec's (a regen master's `joints`, `head`: meshy_joints.py)")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
@@ -126,6 +128,9 @@ def main():
         if os.path.exists(os.path.join(work, f)):
             os.remove(os.path.join(work, f))
     shutil.rmtree(os.path.join(work, "meshy"), ignore_errors=True)
+    if a.meshy_rig:     # (v95_swap.meshy_rig asks Meshy only when WORK/meshy has no rigged_character.glb)
+        os.makedirs(os.path.join(work, "meshy"))
+        shutil.copy(os.path.expanduser(a.meshy_rig), os.path.join(work, "meshy", "rigged_character.glb"))
     path = os.path.join(work, "spec.json")
     json.dump(spec, open(path, "w"), indent=1)
     print("v95_to_game:", a.name, "->", spec["game"], "master", spec["master"], flush=True)
