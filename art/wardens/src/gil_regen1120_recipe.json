@@ -1,0 +1,93 @@
+{
+ "doc": "Gil hunter REGEN 11-20 (owner: the 13 live 3D models are broken): RECIPE_95 steps crop/edit/prep/meshy from the 11-19 turnaround (~/gens/v95-latest-ta-1119/gil.webp, copied to <raw>/art/turnaround.png by hand), meshy-7.1 multi-image A-pose; then meshy_task.py remesh quad 60k and tools/art1/v95_to_game.py Gil --weights meshy. Variants: A the four sheet views as drawn, B front/side/back-three-quarter/back, C the arms-clear Meshy edits (arms a hand's width off the coat).",
+ "name": "gil",
+ "arch": "gil",
+ "tag": "regen1120",
+ "raw": "~/gens/hunter-regen-1120/gil",
+ "views": [
+  {
+   "name": "front",
+   "x0": 40,
+   "x1": 790
+  },
+  {
+   "name": "tq",
+   "x0": 780,
+   "x1": 1400,
+   "kill": [
+    [
+     1318,
+     90,
+     1400,
+     480
+    ]
+   ]
+  },
+  {
+   "name": "side",
+   "x0": 1318,
+   "x1": 1910,
+   "kill": [
+    [
+     1318,
+     1180,
+     1405,
+     1560
+    ]
+   ]
+  },
+  {
+   "name": "btq",
+   "x0": 1840,
+   "x1": 2440,
+   "kill": [
+    [
+     1840,
+     1180,
+     1912,
+     1560
+    ],
+    [
+     2405,
+     90,
+     2440,
+     480
+    ]
+   ]
+  },
+  {
+   "name": "back",
+   "x0": 2405,
+   "x1": 3040,
+   "kill": [
+    [
+     2405,
+     1180,
+     2442,
+     1580
+    ]
+   ]
+  }
+ ],
+ "edits_common": "Edit this character turnaround view of a blue fish-man wizard. Keep EVERYTHING exactly as drawn: the fish head, big round eyes, the open fish mouth, blue scales, pale belly, the dark navy polka-dot coat with orange trims, the pointed wizard hat with its orange band, the brown satchel and strap, the fish tail and fins, the orange-striped boots with curled toes, colours, proportions, framing and the grey background. Change ONLY the arms: both arms hang in a relaxed A-pose about 30 degrees out from the body, a clear gap of grey background between each arm and sleeve and the coat, hands open, fingers together.",
+ "edits": {
+  "front": "This is his front view.",
+  "tq": "This is his three-quarter front view.",
+  "side": "This is his side view.",
+  "back": "This is his back view."
+ },
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "A": {
+    "pose": "a-pose"
+   }
+  },
+  "keep": "A"
+ }
+}

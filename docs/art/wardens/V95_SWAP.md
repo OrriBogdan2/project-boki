@@ -12,7 +12,9 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    Read the joints (pelvis, neck, crown,
    shoulders, elbows, wrists, hips, knees, ankles), the head's centre, the rigid parts' boxes and the anchors.
 2. **Spec**: copy `art/wardens/src/grimble_v95.json` to `<name>_v95.json` and set `master`, `game`, `joints`,
-   `head`, `spread` ("rig": the limbs sit on the bones; without it they keep the master's spread), `past_wrist`
+   `head`, `spread` ("rig": the limbs sit on the bones; without it they keep the master's spread), `mirror_arm`
+   ("R"/"L": that arm is bent in a held pose; its targets mirror the other arm's, so the fit swings it onto the rig;
+   give its own joints, e.g. off Meshy's auto-rig, not the other arm's mirrored), `past_wrist`
    (the bone that takes each hand's weights: `hand.R`, or a fused weapon's bone), `regions` (boxes moved whole
    onto one bone, minus leg capsules and boxes; a later region wins), `detach` (bone pairs cut apart and capped:
    parts the scan fused that the clips swing apart), `slots` (toon slots by the paint's hue/sat/value, a bone or
@@ -41,6 +43,32 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
+
+## Meshy's skin weights, 2026-11-17 (ext/rig-bakeoff-meshy-1117): `--weights meshy`
+The owner (11-17): the picked masters are in the game, but they break when they move. The breaks are the skin weights
+(bone heat plus the spec's `regions` boxes: fins round the hands, a hand webbed to the hip, torn sashes), and the
+`relax` pass over them punches holes. `python3 tools/art1/v95_to_game.py <Name> --weights meshy` takes the weights
+from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, rig, clips and bone names unchanged):
+- v95_swap.py's `meshy_rig` sends the 60k body to Meshy's rigging API (`tools/meshy/meshy_task.py rig`, about 5
+  credits, 1-2 min) and keeps the answer in `WORK/meshy/` (a rerun of the swap step alone reuses it).
+- `meshy_weights` gives each vertex the weights of its nearest rigged vertex and puts Meshy's 24 bones on ours
+  (`MESHY`: spine and shoulders on `hips`, the neck half `hips` half `head`, arm, leg and foot bones one to one).
+- Three fixes for what Meshy's rig and ours do not share. A patch of arm weights not joined to the arm (the sash under
+  a resting hand) goes to the bones under it. Our thighs hang from `root`, not `hips`, so a thigh's weight above its
+  hip joint goes to `hips`, fading out over `PELVIS_RAMP` below it; without it the waist pinches when the game turns
+  the hips. (Tried and dropped: also moving weight shared by both thighs to `hips`; the layer under Tenzo's apron
+  pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
+  bone whole.
+- A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
+  bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  rig but carry no body weight in this mode.
+Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
+report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
+coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
+wide in her bow stance. Kael is built from the one-sword master (`A_keep_new.glb`, the master's sword faces
+dropped, the game's sword kept). A first run that asks Meshy for the rig can hang after the `meshy:` lines (11-17: twice,
+15 and 100 min); the same swap run again on that WORK dir, with `meshy/rigged_character.glb` already there, ends in
+2 min (run v95_swap.py itself: v95_to_game.py clears `meshy/` and asks again).
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
@@ -218,10 +246,28 @@ re-weights the body (Motley 11-17: worst stretch 7.93 -> 17.80, 31 clips past 10
 whole live atlas back on r3 A (`cand_A_keephead.glb` is pixel-identical to the old master, smear included), so the paint
 came from `cand_A.glb`: its changed texels (2.4%, tail) composited over the live 4096 game image.
 
-## Black shards, 2026-11-18 (ext/grimble-ingame-fix-1117)
-The toon outline is an inverted hull: any triangle that shows its back to the camera draws black. The Grimble port left
-three kinds (wedges at the goo hand, spikes at both feet): floating sheets, patches wound inside-out, and the rip's
-needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb` flips,
-drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
-`--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
-`godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+## Hunter regen from the turnaround, 2026-11-20 (Gil, ext/hunter-regen-gil-1120)
+A new Meshy master from the 11-19 turnaround (multi-image meshy-7.1, A-pose; `meshy_task.py remesh --topology quad`)
+goes in with `python3 tools/art1/v95_to_game.py Gil --weights meshy --spec <candidate>.json --work <dir> --no-import`.
+`--spec` takes the candidate's own joints and its own `master` (before 11-20 the Hunter's current master silently
+replaced it: the "candidate" was the live model re-fit). `tools/art1/v95_regen_spec.py` writes such a spec from the
+Warden's `*_v95.json` and the joints read off `v95_grid.py`'s renders; Gil's are in `art/wardens/src/gil_regen1120/`.
+With `--no-import`, run `texture_imports` (or v95_to_game without it) before committing: it sets the extracted images'
+VRAM compression. Proof shots: `--warden-shots --wardens=gil --knee` (knee_34.png). Gil's glb has no clips (his motion is
+the procedural rig's), so `--stretch-check` measures nothing for him and `--clip-shots` cannot film him.
+With `--weights meshy` only the spec's regions marked `"meshy": true` apply (11-20): Meshy's humanoid rig has no tail,
+so Gil's tail boxes (the fin and the stalk under the coat hem) are marked; a region written for bone heat (his satchel
+on the hips) would cut Meshy's right sleeve onto the hips. Candidates 11-20 round 2: E (sheet A: the grin views plus
+the turnaround's back-three-quarter for the full dorsal fin, on the branch), D (B), H (C: E's views with a fist edit).
+Round 6 (11-20, r6 on the branch), three export-level fixes on the r5 glb (mesh, rig and the rest of the paint unchanged):
+- Ink room: the meshy-weights route left COLOR_0 alpha flat (0.50 body, 0.35 fish), so the ink shell grew half width
+  everywhere and showed as dark specks on the hat brim, hem, fins and fish. `blender -b -P tools/art1/glb_ink_room.py --
+  IN OUT 0.02` writes fit_warden's ink room into an existing glb (44% of body and 67% of fish vertices get a thinner line).
+- Open coat: hero_toon culls back faces and ignores glTF doubleSided, so looking into Gil's one-shell coat showed the
+  black inside of the ink shell (the "torn hem"). `python3 tools/art1/glb_twosided.py IN OUT cloth-v95` adds a reversed
+  copy of the cloth triangles (ink room 0): 31k -> 63k cloth tris, 95k total (cap 105.6k). Not glb_backface_fix.py: that
+  one drops sheets open on both sides, which would delete the coat.
+- Mouth: a Meshy retexture (`meshy_task.py retexture --original-uv`, the r2 grin views re-edited to the splash's
+  blue-grey lips and pink mouth) taken only on the mouth triangles (head-weighted, red in the old paint, two rings out);
+  a whole-body retexture painted belly-blue streaks on the robe front, so the rest keeps r5's paint.
+

@@ -1,10 +1,14 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--match]
+## [--turn [--turn-clip=run_f]]
 ## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
 ## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
+## --proc: a Hunter with no keyed clips (Gil) through its HunterAnim moves in one take (<dir>/proc/); --fov=<deg> zooms
+## the camera's lens, --cam-y=<m> sets the camera's height (knee level) (--match --fov=4: the match camera's angle,
+## the figure big enough to judge, no upscale).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -16,6 +20,7 @@ var cam: Camera3D
 var tree: SceneTree
 var frame_px := 480
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
@@ -24,23 +29,38 @@ func run(main: Node) -> void:
 	var fps := 15.0
 	var yaw := 150.0
 	var turn := false
+	var turn_clip := "idle"
 	var game_cam := false
 	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--warden="): id = a.substr(9)
-		if a.begins_with("--clips="): wanted = Array(a.substr(8).split(",", false))
-		if a.begins_with("--fps="): fps = float(a.substr(6))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
-		if a.begins_with("--yaw="): yaw = float(a.substr(6))
-		if a.begins_with("--dist="): dist = float(a.substr(7))
-		if a.begins_with("--at="): at_y = float(a.substr(5))
-		if a == "--turn": turn = true
-		if a == "--match": game_cam = true
-		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
-		if a.begins_with("--ground="): ground_col = Color(a.substr(9))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--warden="):
+			id = a.substr(9)
+		if a.begins_with("--clips="):
+			wanted = Array(a.substr(8).split(",", false))
+		if a.begins_with("--fps="):
+			fps = float(a.substr(6))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
+		if a.begins_with("--yaw="):
+			yaw = float(a.substr(6))
+		if a.begins_with("--dist="):
+			dist = float(a.substr(7))
+		if a.begins_with("--at="):
+			at_y = float(a.substr(5))
+		if a == "--turn":
+			turn = true
+		if a.begins_with("--turn-clip="):
+			turn_clip = a.substr(12)
+		if a == "--match":
+			game_cam = true
+		if a == "--true-cam":
+			true_cam = true  # (the game's own camera: 23 m out at 66 degrees, fov 32)
+		if a.begins_with("--ground="):
+			ground_col = Color(a.substr(9))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -69,9 +89,21 @@ func run(main: Node) -> void:
 	else:
 		cam.fov = 30.0
 		cam.position = Vector3(0, at_y + 0.25, dist)
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--cam-y="):
+				cam.position.y = float(a.substr(8))  # (--cam-y=0.35 --at=0.9: from knee height, looking up at him)
 		cam.look_at(Vector3(0, at_y, 0))
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--fov="):
+			# (--match --fov=4: the match camera's angle, zoomed in by the lens, not by upscaling)
+			cam.fov = float(a.substr(6))
 	for k in 30:
-		await tree.process_frame       # (past the title's fade)
+		await tree.process_frame  # (past the title's fade)
+	if OS.get_cmdline_user_args().has("--proc"):
+		await _proc(model, id, fps, out)
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
@@ -82,12 +114,13 @@ func run(main: Node) -> void:
 	if turn:
 		var dir := out.path_join("turntable")
 		DirAccess.make_dir_recursive_absolute(dir)
-		clips.force = {"clip": "idle", "t": 0.0}
+		var turn_len := clips.lib.get_animation(turn_clip).length
+		clips.force = {"clip": turn_clip, "t": 0.0}
 		for k in 8:
 			sync.call("_process", 1.0 / 30.0)
 		for i in 48:
 			model.rotation.y = TAU * i / 48.0
-			clips.force = {"clip": "idle", "t": fmod(i / 15.0, 3.2)}
+			clips.force = {"clip": turn_clip, "t": fmod(i / 15.0, turn_len)}
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
 		model.rotation.y = deg_to_rad(yaw)
@@ -111,7 +144,7 @@ func run(main: Node) -> void:
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
 	if OS.get_cmdline_user_args().has("--cc"):
-		await tree.create_timer(1.5).timeout       # (the title's logo fades in real time, not in frames)
+		await tree.create_timer(1.5).timeout  # (the title's logo fades in real time, not in frames)
 		for key in ["stun", "rooted", "gnd"]:
 			await _cc(model, sync, fps, out, key)
 	var cast_speed := 4.0
@@ -127,6 +160,7 @@ func run(main: Node) -> void:
 		await _carry(model, sync, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
+
 
 ## --cast=<kmove>: moving at `speed` m/s (0: standing), the move is pressed 0.3 s in and let go at its clip's end;
 ## <dir>/cast_<kmove>/f###.png every 1/fps s for 0.6 s past that (the hand-over in, and back to the legs).
@@ -150,16 +184,135 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 
+
+## --proc: a Hunter with no keyed clips (Gil: HunterAnim poses him) played through PROC_SEGS in one take, every 1/fps s,
+## as <dir>/proc/f###.png, and <dir>/proc/segments.tsv (label, first frame, frame count) for the captions. The rig is
+## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump"
+## (a 0.9 s hop, the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the
+## knocked-down beat, 0..1),
+## "air" / "airdash" / "glide" (1 m up: falling, an air dash, gliding), "emote=<id>" (a Truce emote),
+## "t0=<s>" (the move's clock starts there: the surfacing take skips its first key, the body still under the ground).
+## --bone-dump=<file.json>: also writes every frame's skinning matrices (bone global pose x bind pose, per bind of
+## the first skinned mesh, skeleton space) with the segment label, for offline weight work (glb_relax.py --poses);
+## --no-grab skips the PNGs (headless: two process frames stand in for the drawn one).
+const PROC_SEGS := {
+	"gil": [["idle", "", 1.6, 0.0], ["walk", "", 1.6, 1.8], ["run", "", 1.6, 5.0], ["jump", "", 0.9, 0.0, "jump"],
+		["hit", "", 0.8, 0.0, "hit"], ["dash: Ground Swim dive", "gil_dive", 0.4, 0.0],
+		["dash: surfacing", "gil_surface", 0.8, 0.0, "t0=0.07"], ["attack 1: thrust", "gil_thrust_1", 0.4, 0.0],
+		["attack 2: thrust", "gil_thrust_2", 0.4, 0.0], ["attack 3: lunge", "gil_lunge", 0.6, 0.0],
+		["RMB: potion toss", "gil_throw", 0.6, 0.0], ["E: Riptide spin", "gil_spin", 1.0, 0.0],
+		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0], ["knocked down (death)", "", 1.2, 0.0, "fall"],
+		["sprint", "", 1.2, 8.0], ["fall", "", 0.8, 2.0, "air"], ["air dash", "", 0.5, 2.0, "airdash"],
+		["glide", "", 1.0, 4.0, "glide"], ["emote: wave", "", 1.6, 0.0, "emote=wave"],
+		["emote: laugh", "", 1.6, 0.0, "emote=laugh"]],
+}
+
+
+func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
+	var dir := out.path_join("proc")
+	DirAccess.make_dir_recursive_absolute(dir)
+	# (the title's logo fades in real time, not in frames: a frame-count wait caught it)
+	await tree.create_timer(3.0).timeout
+	var an := HunterAnim.new(model, 1)
+	var face := model.rotation.y
+	var fwd := Vector3(-sin(face), 0, -cos(face))
+	for k in 90:
+		an.update(1.0 / 60.0, {"fired": 99.0, "face": face, "grounded": true})
+	var tsv := "label\tfirst\tframes\n"
+	var i := 0
+	var dump_path := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--bone-dump="):
+			dump_path = a.substr(12)
+	var grab := not OS.get_cmdline_user_args().has("--no-grab")
+	var dump := {"binds": [], "frames": []}
+	var dskin: Skin = null
+	var dskel: Skeleton3D = null
+	if dump_path != "":
+		for mi in model.find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).skin != null:
+				dskin = (mi as MeshInstance3D).skin
+				dskel = (mi as MeshInstance3D).get_node_or_null((mi as MeshInstance3D).skeleton) as Skeleton3D
+				break
+		for b in dskin.get_bind_count():
+			dump["binds"].append(String(dskin.get_bind_name(b)))
+	for seg in PROC_SEGS.get(id, [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0]]):
+		var n := int(round(float(seg[2]) * fps))
+		tsv += "%s\t%d\t%d\n" % [seg[0], i, n]
+		var extra := String(seg[4]) if seg.size() > 4 else ""
+		var t0 := float(extra.substr(3)) if extra.begins_with("t0=") else 0.0
+		var base_y := model.position.y
+		for f in n:
+			var t := float(f) / fps
+			var s := {"fired": 99.0, "face": face, "grounded": true, "vel": fwd * float(seg[3])}
+			if String(seg[1]) != "":
+				s["kmove"] = seg[1]
+				s["kmove_t"] = t0 + t
+			if extra == "jump":
+				# a hop: 0.1 s crouch, 0.6 s up and down (6 m/s take-off), 0.2 s landing
+				var a := clampf((t - 0.1) / 0.6, 0.0, 1.0)
+				var air := t > 0.1 and t < 0.7
+				s["grounded"] = not air
+				s["vel"] = Vector3(0, 6.0 * (1.0 - 2.0 * a), 0) if air else Vector3.ZERO
+				s["air_h"] = 4.0 * 0.9 * a * (1.0 - a)
+				model.position.y = base_y + float(s["air_h"])
+			elif extra == "hit":
+				s["hit_t"] = t - 0.1 if t >= 0.1 else 99.0
+				s["hit_dir"] = Vector2(0, -1)
+			elif extra in ["air", "airdash", "glide"]:
+				# airborne 1 m up: falling, an air dash (rolling from its first frame) or gliding
+				s["grounded"] = false
+				s["vel"] = fwd * float(seg[3]) + Vector3(0, -1.5 if extra == "glide" else -6.0, 0)
+				s["air_h"] = 1.0
+				s["rolling"] = extra == "airdash"
+				s["dash_dir"] = Vector2(fwd.x, fwd.z)
+				s["gliding"] = extra == "glide"
+				model.position.y = base_y + 1.0
+			elif extra.begins_with("emote="):
+				s["emote"] = extra.substr(6)
+				s["emote_t"] = t
+			elif extra == "fall":
+				s["fall"] = clampf(t / float(seg[2]), 0.0, 1.0)
+				s["downed"] = true
+			an.update(1.0 / fps, s)
+			if grab:
+				await _grab(dir.path_join("f%03d.png" % i))
+			else:
+				await tree.process_frame
+				await tree.process_frame
+			if dskin != null:
+				var mats: Array = []
+				for b in dskin.get_bind_count():
+					var bi := dskin.get_bind_bone(b)
+					if bi < 0:
+						bi = dskel.find_bone(dskin.get_bind_name(b))
+					var m := dskel.get_bone_global_pose(bi) * dskin.get_bind_pose(b)
+					mats.append([m.basis.x.x, m.basis.x.y, m.basis.x.z, m.basis.y.x, m.basis.y.y, m.basis.y.z,
+						m.basis.z.x, m.basis.z.y, m.basis.z.z, m.origin.x, m.origin.y, m.origin.z])
+				dump["frames"].append({"label": seg[0], "m": mats})
+			i += 1
+		model.position.y = base_y
+	var fa := FileAccess.open(dir.path_join("segments.tsv"), FileAccess.WRITE)
+	fa.store_string(tsv)
+	fa.close()
+	if dump_path != "":
+		var fd := FileAccess.open(dump_path, FileAccess.WRITE)
+		fd.store_string(JSON.stringify(dump))
+		fd.close()
+
+
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
 	tree.root.get_texture().get_image().save_png(path)
+
 
 func _stage(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
@@ -172,18 +325,25 @@ func _stage(main: Node) -> void:
 	holder.add_child(cam)
 	cam.make_current()
 
+
 ## --flinch: running at 4 m/s, a hit lands 0.2 s in; <dir>/flinch/f###.png every 1/fps s for 1 s.
 func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 	var dir := out.path_join("flinch")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var heavy := OS.get_cmdline_user_args().has("--heavy")
-	var hit_k := Oomph.hit_strength(0.03, 2.0)      # a chip hit
+	var hit_k := Oomph.hit_strength(0.03, 2.0)  # a chip hit
 	if OS.get_cmdline_user_args().has("--solid"):
 		hit_k = Oomph.hit_strength(0.09, 8.0)
 	if heavy:
 		hit_k = Oomph.HEAVY_FLINCH
-	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0,
-			"hit_k": hit_k, "hit_dir": Vector2(0, -1)}
+	var s := {
+		"vel": Vector3(0, 0, -4.0),
+		"face": model.rotation.y,
+		"grounded": true,
+		"hit_t": 99.0,
+		"hit_k": hit_k,
+		"hit_dir": Vector2(0, -1)
+	}
 	model.set_meta(WardenClips.STATE, s)
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)
@@ -192,6 +352,7 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 		s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
 
 ## --cc: standing, state `key` on from 0.2 s to 1.0 s; <dir>/cc_<key>/f###.png every 1/fps s for 1.2 s.
 func _cc(model: Node3D, sync: Node, fps: float, out: String, key: String) -> void:
@@ -207,6 +368,7 @@ func _cc(model: Node3D, sync: Node, fps: float, out: String, key: String) -> voi
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
 
+
 ## --drop: the 12 Heroes 1.6 m apart in each drop pose: aboard the rocket, the skydive, banking into a right steer,
 ## and a beat after the glider opens; side-on, and from behind and above (as the skydive camera sees them).
 func _drop_lineup(out: String) -> void:
@@ -215,17 +377,22 @@ func _drop_lineup(out: String) -> void:
 	var ids: Array = ClipCheck.OWN_MODELS.keys()
 	var models: Array = []
 	for i in ids.size():
-		var m := Models.hunter(Arch.weight(ids[i]), Data.TEAM_COLORS[0], Arch.signature(ids[i]), "",
-				PlayerLook.neutral(), ids[i])
+		var m := Models.hunter(
+			Arch.weight(ids[i]), Data.TEAM_COLORS[0], Arch.signature(ids[i]), "", PlayerLook.neutral(), ids[i]
+		)
 		m.set_meta("anim_seed", 1)
 		holder.add_child(m)
 		m.position = Vector3((i - (ids.size() - 1) * 0.5) * 1.6, 1.2, 0.0)
 		m.get_node("Warden/Sync").set_process(false)
 		models.append(m)
 	for k in 120:
-		await tree.process_frame       # (past the title: 12 Heroes load slower than one)
-	var poses := {"ride": {"rocket": true}, "skydive": {"skydive": true}, "bank": {"skydive": true, "bank": true},
-		"open": {"gliding": true}}
+		await tree.process_frame  # (past the title: 12 Heroes load slower than one)
+	var poses := {
+		"ride": {"rocket": true},
+		"skydive": {"skydive": true},
+		"bank": {"skydive": true, "bank": true},
+		"open": {"gliding": true}
+	}
 	var views := {"side": [PI / 2.0, Vector3(0.0, 3.0, 30.0), 40.0], "behind": [0.0, Vector3(0.0, 14.0, 22.0), 48.0]}
 	for v in views:
 		var face := float(views[v][0])
@@ -235,7 +402,7 @@ func _drop_lineup(out: String) -> void:
 		for nm in poses:
 			var s: Dictionary = {"vel": Vector3(0, -13.0, 0), "face": face, "grounded": false}
 			s.merge(poses[nm], true)
-			if s.has("bank"):      # (steering right of the facing)
+			if s.has("bank"):  # (steering right of the facing)
 				s["vel"] = Vector3(cos(face), 0.0, -sin(face)) * Hunter.DIVE_SPEED + Vector3(0, -13.0, 0)
 			for k in 40:
 				for m in models:
@@ -244,13 +411,19 @@ func _drop_lineup(out: String) -> void:
 					(m as Node3D).get_node("Warden/Sync").call("_process", 1.0 / 30.0)
 			await _grab(dir.path_join("%s_%s.png" % [nm, v]))
 
+
 ## --moods: one frame of each face a Hero's mood data draws (WardenMood), <dir>/moods/<mood>.png.
 func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 	var dir := out.path_join("moods")
 	DirAccess.make_dir_recursive_absolute(dir)
 	clips.force = {"clip": "idle", "t": 0.0}
-	var states := {"calm": {}, "happy": {"emote": "x"}, "angry": {"kmove": "bul_smash"},
-		"determined": {"kmove": "bul_guard"}, "sad": {"downed": true}}
+	var states := {
+		"calm": {},
+		"happy": {"emote": "x"},
+		"angry": {"kmove": "bul_smash"},
+		"determined": {"kmove": "bul_guard"},
+		"sad": {"downed": true}
+	}
 	for nm in states:
 		model.set_meta(WardenClips.STATE, states[nm])
 		for k in 20:
@@ -262,6 +435,7 @@ func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 	await _grab(dir.path_join("flare.png"))
 	model.set_meta(WardenMood.FLARE, false)
 
+
 ## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames), a ball at the socket for the Boki; with
 ## --heart the Heartspark carry on the run instead, the ball at the held mote.
 func _carry(model: Node3D, sync: Node, out: String) -> void:
@@ -272,7 +446,7 @@ func _carry(model: Node3D, sync: Node, out: String) -> void:
 	ball.mesh = SphereMesh.new()
 	ball.scale = Vector3.ONE * (0.15 if heart else 0.3)
 	holder.add_child(ball)
-	(sync.get("clips") as WardenClips).force = {}      # (the state plays, not the clip the shots forced)
+	(sync.get("clips") as WardenClips).force = {}  # (the state plays, not the clip the shots forced)
 	var state := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true}
 	if heart:
 		state["heart"] = true

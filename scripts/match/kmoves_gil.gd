@@ -9,28 +9,30 @@ extends RefCounted
 const MOVES := {
 	# Fencer thrusts 1 and 2: the hit lands on the press, so the point snaps out in 0.05s from the guard and
 	# holds a beat (the read), then eases home. The second drives a little lower and turns the wrist over.
+	# The guard sits at chest height and the press aims a little under level (11-20): his big jaw juts forward, so a
+	# shoulder-high guard or press put the fist 8-11 cm from his face and the bill across it at the game camera.
 	"gil_thrust_1": {"stance": true, "keys": [
-		[0.0, {"blade": Vector3(0.1, 0.1, 0.0), "bw": 1.0, "rad": 0.22, "y": 0.25, "lw": 0.6}],
-		[0.05, {"blade": Vector3(0.0, -0.02, 0.0), "bw": 1.0, "rad": 0.78, "p": -0.25, "y": -0.45, "sq": -0.08,
+		[0.0, {"blade": Vector3(0.1, -0.60, 0.0), "bw": 1.0, "rad": 0.22, "y": 0.25, "lw": 0.6}],
+		[0.05, {"blade": Vector3(0.0, -0.37, 0.0), "bw": 1.0, "rad": 0.78, "p": -0.25, "y": -0.45, "sq": -0.08,
 				"fl": Vector3(-0.3, 0.4, 0.3), "hw": 0.8, "lw": 0.8, "legs": [-0.5, -0.3, 0.75, -0.5]}],
-		[0.16, {"blade": Vector3(0.0, -0.04, 0.0), "bw": 1.0, "rad": 0.72, "p": -0.2, "y": -0.4,
+		[0.16, {"blade": Vector3(0.0, -0.39, 0.0), "bw": 1.0, "rad": 0.72, "p": -0.2, "y": -0.4,
 				"fl": Vector3(-0.3, 0.4, 0.3), "hw": 0.8, "lw": 0.8, "legs": [-0.45, -0.3, 0.7, -0.5]}],
 		[0.32, {}]]},
 	"gil_thrust_2": {"stance": true, "keys": [
-		[0.0, {"blade": Vector3(-0.1, 0.05, 0.6), "bw": 1.0, "rad": 0.2, "y": 0.2, "lw": 0.6}],
-		[0.05, {"blade": Vector3(0.05, -0.12, 1.4), "bw": 1.0, "rad": 0.8, "p": -0.3, "y": -0.5, "sq": -0.08,
+		[0.0, {"blade": Vector3(-0.1, -0.65, 0.6), "bw": 1.0, "rad": 0.2, "y": 0.2, "lw": 0.6}],
+		[0.05, {"blade": Vector3(0.05, -0.47, 1.4), "bw": 1.0, "rad": 0.8, "p": -0.3, "y": -0.5, "sq": -0.08,
 				"fl": Vector3(-0.32, 0.45, 0.32), "hw": 0.8, "lw": 0.8, "legs": [-0.55, -0.3, 0.8, -0.55]}],
-		[0.16, {"blade": Vector3(0.05, -0.14, 1.4), "bw": 1.0, "rad": 0.74, "p": -0.25, "y": -0.45,
+		[0.16, {"blade": Vector3(0.05, -0.49, 1.4), "bw": 1.0, "rad": 0.74, "p": -0.25, "y": -0.45,
 				"fl": Vector3(-0.32, 0.45, 0.32), "hw": 0.8, "lw": 0.8, "legs": [-0.5, -0.3, 0.75, -0.5]}],
 		[0.32, {}]]},
 	# the third: a full fencing lunge, the front knee deep, the back leg straight, the whole body behind the point
 	"gil_lunge": {"keys": [
-		[0.0, {"blade": Vector3(0.05, 0.15, 0.0), "bw": 1.0, "rad": 0.15, "p": 0.05, "y": 0.4, "sq": 0.15,
+		[0.0, {"blade": Vector3(0.05, -0.55, 0.0), "bw": 1.0, "rad": 0.15, "p": 0.05, "y": 0.4, "sq": 0.15,
 				"lw": 1.0, "legs": [0.2, -0.6, 0.3, -0.7]}],
-		[0.06, {"blade": Vector3(0.0, -0.08, 0.0), "bw": 1.0, "rad": 0.95, "p": -0.5, "y": -0.6, "sq": -0.18,
+		[0.06, {"blade": Vector3(0.0, -0.43, 0.0), "bw": 1.0, "rad": 0.95, "p": -0.5, "y": -0.6, "sq": -0.18,
 				"lift": -0.14, "fl": Vector3(-0.25, 0.55, 0.4), "hw": 1.0, "lw": 1.0,
 				"legs": [-0.85, -0.1, 1.2, -1.1]}],
-		[0.26, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.9, "p": -0.42, "y": -0.55, "lift": -0.12,
+		[0.26, {"blade": Vector3(0.0, -0.45, 0.0), "bw": 1.0, "rad": 0.9, "p": -0.42, "y": -0.55, "lift": -0.12,
 				"fl": Vector3(-0.25, 0.55, 0.4), "hw": 1.0, "lw": 1.0, "legs": [-0.8, -0.1, 1.15, -1.05]}],
 		[0.48, {}]]},
 	# Tide Lunge held: he sinks onto the back leg and draws the point back along the aim, the back hand high;

@@ -7,6 +7,13 @@ Each mesh first loses the deeper limb bones off its torso and other limbs (skin_
 triangles that still join such a limb to the body (a scan's hand fused to the thigh it hung beside): they become
 degenerate (not drawn), so the contact opens as the arm swings away instead of pulling a web of skin after it.
 Run: python3 tools/art1/glb_relax.py <in.glb> <out.glb> [--i-checked-renders]   (numpy only, no Blender)
+A Hunter whose glb has no clips (the game poses it: Gil's HunterAnim) is relaxed over the game's own frames:
+--poses=<dump.json> (tools/clip_shots.gd --proc --bone-dump: skinning matrices per frame, labelled by move), with
+--only=<mesh> (the rest, a rigid prop, is left as it is), --no-rip (weights only: no limbs apart, no ripped triangles),
+--lock=<bone,...> (vertices whose main bone is one of these keep their weights: the fist round a prop) and
+--rigid=<bone>:<m> (vertices whose main bone is <bone> and that sit more than <m> past its head go wholly to it
+before the relax, and are locked: a fist round a prop stays one piece instead of twisting with the forearm) and
+--report (prints the worst ratio per move and writes nothing).
 It refuses to write a shipped Hunter (art/wardens/<id>/<id>.glb) without --i-checked-renders: on 11-17 a merge lane
 re-ran it on five owner-picked models and flattened their arms and hands (docs/DEBT.md). Render before and after on
 the GPU and get the owner's pick first."""
@@ -210,6 +217,24 @@ def store(bin_, prims, w, maps, tris):
             bin_[o : o + 16] = struct.pack("<4f", *wt[v])
 
 
+def dump_poses(path, names):
+    """[(move, skinning matrices [joint, 4, 4])] from a clip_shots --bone-dump file, its binds put in the glb's joint
+    order by name."""
+    import json
+
+    d = json.load(open(path))
+    order = [d["binds"].index(n) for n in names]
+    out = []
+    for fr in d["frames"]:
+        m = np.zeros((len(names), 4, 4))
+        a = np.array(fr["m"])[order]
+        m[:, :3, :3] = a[:, :9].reshape(-1, 3, 3).transpose(0, 2, 1)
+        m[:, :3, 3] = a[:, 9:]
+        m[:, 3, 3] = 1.0
+        out.append((fr["label"], m))
+    return out
+
+
 def per_clip(s, pz, out):
     """Raises out[clip] to the skin's worst ratio in that clip."""
     _, per = s.stretch(pz)
@@ -217,15 +242,26 @@ def per_clip(s, pz, out):
         out[name] = max(out.get(name, 0.0), float(r))
 
 
-def relax_mesh(prims, pz, apart, name, before, after):
+def relax_mesh(prims, pz, apart, name, before, after, rip_ok=True, lock=None, rigid=None):
     """Welds one mesh, takes the limbs apart, rips what still joins them, relaxes the weights and writes them back."""
     rest, w, maps = weld(prims, len(apart))
+    held = np.zeros(len(w), bool)
+    if rigid is not None:      # (bone, its head, metres)
+        bi, head, far = rigid
+        held = (w.argmax(1) == bi) & (np.linalg.norm(rest - head, axis=1) > far)
+        w[held] = 0.0
+        w[held, bi] = 1.0
+        print("glb_relax %s: %d vertices wholly on bone %d" % (name, held.sum(), bi))
     tris = triangles(prims, maps)
     s = skin_relax.Skin.of(rest, w, edges_of(tris))
     per_clip(s, pz, before)
-    s.keep_apart(apart)
-    ripped = rip(tris, s.w, apart)
+    ripped = 0
+    if rip_ok:
+        s.keep_apart(apart)
+        ripped = rip(tris, s.w, apart)
     s = skin_relax.Skin.of(rest, s.w, edges_of(tris))
+    if lock is not None or held.any():
+        s.lock = held | (lock[s.w.argmax(1)] if lock is not None else False)
     skin_relax.relax_skin(s, pz, "%s (%d triangles ripped)" % (name, ripped))
     per_clip(s, pz, after)
     return s.w, maps, tris
@@ -233,23 +269,42 @@ def relax_mesh(prims, pz, apart, name, before, after):
 
 def main(args):
     checked = "--i-checked-renders" in args
-    args = [a for a in args if a != "--i-checked-renders"]
+    opt = {a.split("=")[0]: a.partition("=")[2] for a in args if a.startswith("--")}
+    args = [a for a in args if not a.startswith("--")]
     if re.search(r"(^|/)art/wardens/([^/]+)/\2\.glb$", os.path.abspath(args[1])) and not checked:
         sys.exit("glb_relax: refusing to write a shipped Hunter glb (%s) without --i-checked-renders" % args[1])
     j, bin_ = glb_add_clips.read(args[0])
     skin = j["skins"][0]
     pz, parent = poses(j, bin_, skin)
     names = [j["nodes"][jt]["name"] for jt in skin["joints"]]
+    if "--poses" in opt:
+        pz = dump_poses(opt["--poses"], names)
+    lock = None
+    if opt.get("--lock"):
+        lock = np.isin(names, opt["--lock"].split(","))
+    rigid = None
+    if opt.get("--rigid"):
+        bone, far = opt["--rigid"].split(":")
+        ibm = accessor(j, bin_, skin["inverseBindMatrices"])[0].reshape(-1, 4, 4).transpose(0, 2, 1)
+        rigid = (names.index(bone), np.linalg.inv(ibm[names.index(bone)])[:3, 3], float(far))
     joint_of = {jt: k for k, jt in enumerate(skin["joints"])}
     apart = skin_relax.limbs_apart(names, [joint_of.get(parent[jt], -1) for jt in skin["joints"]])
     before, after = {}, {}
     for name, prims in skinned(j, bin_).items():
-        w, maps, tris = relax_mesh(prims, pz, apart, name, before, after)
+        if opt.get("--only") and name != opt["--only"]:
+            continue
+        if "--report" in opt:
+            rest, w, maps = weld(prims, len(apart))
+            per_clip(skin_relax.Skin.of(rest, w, edges_of(triangles(prims, maps))), pz, before)
+            after = before
+            continue
+        w, maps, tris = relax_mesh(prims, pz, apart, name, before, after, "--no-rip" not in opt, lock, rigid)
         store(bin_, prims, w, maps, tris)
     for clip in before:
         print("glb_relax %-14s %6.2f -> %6.2f" % (clip, before[clip], after[clip]))
     print("glb_relax worst %.2f -> %.2f" % (max(before.values()), max(after.values())))
-    glb_add_clips.write(args[1], j, bin_)
+    if "--report" not in opt:
+        glb_add_clips.write(args[1], j, bin_)
 
 
 if __name__ == "__main__":

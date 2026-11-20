@@ -39,6 +39,22 @@ triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so sk
 `--stretch-check --wardens=gil` reports "no clips", as on the base. warden_model_check's `height_3d` is 0.9 (the
 v95 hat stands lower than the v1 floppy one).
 
+## Regen 11-20 r2 candidate A (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+Body: a new Meshy multi-image-to-3d (meshy-7.1, A-pose) from the 11-19 turnaround views with the live open fish grin
+(gens/hunter-regen-1120/gil/r2/gen/b5: grin front/3-4/side + arms-clear back), quad remesh 60k (119k tris), then
+
+    python3 tools/art1/v95_to_game.py Gil --weights meshy --spec art/wardens/src/gil_regen1120/r2_b5.json --tris 96000
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only art/wardens/gil/gil.glb FISH.glb art/wardens/gil/gil.glb --len 1.2 --pitch 60
+
+(`--tris 96000`: the head band keeps all its ~7k triangles and the body gets ~53k, 59.5k in all as live's 60k; the
+default 60000 left 39.7k.) The spec's joints are measured off the mesh, the arm's own elbow and wrist included
+(`v95_regen_spec.py --joints`). One connected body, no loose parts, 24 open edges.
+Swordfish: a new Meshy fish from the live splash's swordfish (gens/.../r2/fish: splash crop -> image edits with the
+long bill -> multi-image-to-3d s7 -> Meshy remesh to 4k triangles, texture rebaked by Meshy), 1.2 m (the splash: about
+0.7 of his height; the old one was 0.74 m), held at the palm of the right hand on the palm's own bone, 60 degrees under
+level at rest so the game's idle and thrusts carry it level and forward. Its texture is `gil_swordfish.jpg`;
+`gil_Image_0.jpg` (the old fish's) is gone. The old fish rode a bone point under the hand (live skins the hand to
+forearm.R), so it floated below the fist in every pose.
 ## Skinning, grip and ink fix (2026-11-19, ext/hunter-fix-gil-1118)
 Gil has no clips (the game poses his rig), so every number is measured by skinning offline over 900 frames of the
 real game's bone matrices (all 21 moves: idle x3, walk, run, stop, jump, jump_up, glide, land, both dashes, fall,
@@ -60,3 +76,72 @@ LMB, RMB, E + recast, X + leap, hit, death).
   thin and folded parts as black specks.
 - Not changed: textures, materials, UVs, skeleton, bind matrices, every body vertex except the right fingers.
   The hat brim keeps the scan's notches.
+
+## Regen 11-20 r3 candidate A (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+r2's A had a long flat tail and a spiky back fin (from the 11-19 turnaround; neither the splash nor LIVE has them).
+r3: the four turnaround views edited with Meshy image-to-image (nano-banana-pro) to remove ONLY the tail and back fin
+(gens/hunter-regen-1120/gil/r3/edit, 12 edits), 6 new Meshy multi-image-to-3d gens (r3/gen/c1-c6, all tail-free),
+c3 picked (open grin), quad remesh 60k, then as r2:
+
+    python3 tools/art1/v95_to_game.py Gil --weights meshy --spec art/wardens/src/gil_regen1120/r3_c3.json --tris 96000
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only art/wardens/gil/gil.glb FISH.glb art/wardens/gil/gil.glb --len 1.2 --pitch 60
+
+Body 58,545 tris + swordfish 4,048 (r2's fish, 1.2 m). Open on main's Meeko-clip animation (PR #461): the Meshy-rig
+sleeve stretches into a black bar in surfacing/thrust/E, and the fish's bill points down in idle (pitch 60 was tuned
+for the old procedural poses).
+
+## Regen 11-20 r3b candidate A2 (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+Same Meshy body as r3 A (c3: no tail, no back fin, open grin) and the same 1.2 m swordfish; no new Meshy credits.
+r3 A's black sleeve bar had two causes, both measured over the game's own frames (`clip_shots --proc --bone-dump`,
+393 frames at 30 fps over all 14 moves; skinned offline as the game does):
+- **Game code:** WardenSync wrote the clips' hand position onto the rig's Hand nodes and it rode into the next
+  HunterAnim move: from the first kmove on, hand.R/hand.L sat 0.7 m off the forearm (GPU dump), so the swordfish
+  floated (LIVE too) and the hand dragged the sleeve after it. Fixed in warden_sync.gd (hands go home each step): 0.00 m.
+- **Fit:** this body's right arm is bent forward in a held pose (Meshy's auto-rig: the right wrist 0.3 m ahead of the
+  mirrored left), but the spec mirrored the left arm's joints onto it. `r3_c3b.json`: arm joints from Meshy's auto-rig,
+  `mirror_arm` "R" (the right arm swings down onto the rig like the left).
+
+    W=gens/.../gil/r3/cand/workc_c3 (work_c3's meshy/ rig and spec with r3_c3b's joints + mirror_arm, game.glb = main's)
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- $W/spec.json $W $W/gil.glb
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only $W/gil.glb FISH.glb F.glb --len 1.2 --pitch 15 --yaw 30
+    python3 tools/art1/glb_relax.py F.glb gil.glb --poses=DUMP.json --only=Body.002 --no-rip --rigid=hand.R:0.05
+
+- Weights relaxed over the game frames (weights only, no ripped triangles; the right fist wholly on hand.R).
+  Body edges past 3x over all moves: r3 A 4.16% (worst 30.6x) -> A2 0.35% (worst 7.3x); LIVE 0.44% (17.1x) with the fix.
+- Swordfish 15 degrees under level, bill swung 30 degrees out at rest (was 60 under): under main's borrowed Meeko
+  clips the old angle drove the bill 0.4-0.55 m into the floor in walk/run. Now its lowest point is at the soles in
+  every move; bill forward share (median) idle 0.62, walk 0.32, run 0.71, thrust 0.41, lunge 0.55 (was 0.34/0.75/0.68/0.85/0.95).
+- Body 58,541 tris + swordfish 4,048.
+
+## Regen 11-20 r4 candidate A (DRAFT; ext/hunter-regen-gil-1120)
+r3 failed the art-gate (stretched forearm, black sleeve bars, swordfish through the head). No new Meshy gen (balance 3 credits):
+the body is r3b A2's (r3 c3 body, arm refit onto the rig, forearm/sleeve weights relaxed over the game's frames with the
+WardenSync fix, so hand.R follows the forearm and main's hand-made forearm-led sleeve rule holds), plus two fixes:
+- Fish re-seated in the fist: A2's fist centre (0.197, 0.407, -0.03), rigid on hand.R, turned (`tools/art1/gil_fish_rot.py`) to 60 degrees
+  under level, 40 out, in rest space. Over the 393 game frames the bill points forward (median fwd share) idle 0.63, walk 0.49, run 0.55,
+  thrust/lunge/potion 0.95, jump 0.23, hit 0.35; in front of the face in 2% of frames (was 33% at 70/20 on the forearm trial); one
+  run frame within 5 cm of the coat (the swing), none at the head.
+- Tail fin back: `gil_parts.py --tail-only` adds the live model's fish tail (tube + forked fin, bone `tail`, 112 tris); no dorsal blade.
+- Stretch (14 moves x 393 frames, body mesh, fixed game code): LIVE worst 17.1x, mean of moves' worst 10.3x, edges over 3x 0.441%;
+  r3 30.6x / 17.7x / 4.16%; r4 7.3x / 4.3x / 0.347%. All 14 moves are still over the game's 1.3x at the coat hem and thighs.
+
+## Regen 11-20 r5 candidate A (DRAFT; ext/hunter-regen-gil-1120)
+r4 failed the art-gate (black holes in the coat at the match camera, a ragged hem, a black shard under the hem from behind,
+no dorsal fin). r4 and r3 used r3's c3 body, whose turnaround edits had removed the dorsal fin and tail. The turnaround has both,
+so r5 goes back to r2's Meshy b5 (the 11-19 turnaround grin views: open grin, dorsal fin, tail fin, full dot pattern). No new
+Meshy gen; one new Meshy auto-rig (5 credits). Then r4's fixed chain:
+
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/gil_regen1120/r5_b5.json W W/gil.glb   (W/game.glb = main's gil.glb)
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only W/gil.glb FISH.glb W/F.glb --len 1.2 --pitch 60 --yaw 40
+    python3 tools/art1/glb_relax.py W/F.glb W/R.glb --poses=DUMP.json --only=Body.002 --no-rip --rigid=hand.R:0.05
+    python3 tools/art1/gil_fish_rot.py W/R.glb gil.glb 0.263,0.395,-0.017 55 40
+
+- Tail and dorsal fin pinned in the meshy route (`"meshy": true` regions): tail 1,392 verts wholly on `tail` (r2 left it on
+  Meshy's thigh weights), dorsal fin 1,237 verts on `hips` (rigid on the torso, never swings behind the hat). r4's scripted
+  live tail (`gil_parts --tail-only`, gil_gil_fin.jpg) is gone.
+- Fish: r2's 1.2 m Meshy swordfish, rigid on hand.R at the fist centre, 55 degrees under level, 40 out (fish search over the
+  393 game frames). Bill forward share (median): idle 0.67, walk 0.47, run 0.57, thrusts/lunge/potion 0.89-0.93. Within
+  0.12 m of the head/hat in 4 of 393 frames (run, thrusts, lunge), where the game's pose puts the fist itself 4-8 cm from the brim.
+- Stretch, game `--stretch-check --wardens=gil` (57 clips): LIVE worst 18.17x, mean 10.89x; r5 worst 7.08x, mean 4.68x
+  (all 57 over 1.3x on both). Offline over the 393 HunterAnim frames: LIVE 17.1x / 10.3x / 0.441% edges over 3x; r5 7.1x / 5.1x / 0.445%.
+- Body 59,528 tris + swordfish 4,048.

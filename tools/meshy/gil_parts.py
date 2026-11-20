@@ -11,6 +11,13 @@
   at boot height, in his own plane (a thin line from behind); rigid on hips, `skin-tail`.
 - The dorsal fin on the upper back behind the collar: a ray fin, blue at the root and orange at the edge,
   rigid on hips, `skin-fin`.
+
+  B tools/meshy/gil_parts.py -- --tail-only <game gil.glb> <out.glb> [bone=tail]: only the fish tail onto a body that has none
+  B tools/meshy/gil_parts.py -- --fish-only <game gil.glb> <swordfish.glb> <out.glb> [--len 1.2] [--pitch 17] [--yaw 0]
+- A new swordfish on a game gil.glb (the regen 11-20 r2: the old one read dagger-sized): the old Swordfish mesh
+  and its three FX empties go, the new fish goes on as above at --len metres (the live splash: his swordfish is
+  about 0.7 of his height, ~1.2 m on the 1.7 m model), the rest of the .glb untouched (v95_swap's import and
+  export settings), so v95_swap.py keeps it on any later body (the .glb's own skinned swordfish stays).
 Fitted frame: his right +X, front +Y, up +Z, soles on 0. Every new mesh gets the ink-room colour (COLOR_0 alpha).
 """
 import math
@@ -176,7 +183,7 @@ def back_y(bvh, z, x=0.0):
     return None if loc is None else loc.y
 
 
-def swordfish(path, arm):
+def swordfish(path, arm, fish_len=None, grip_at=None, bone="hand.R", pitch=17.0, yaw=0.0):
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
     new = [o for o in bpy.data.objects if o not in before]
@@ -196,11 +203,12 @@ def swordfish(path, arm):
             bpy.data.objects.remove(o)
     fish.name = "Swordfish"
     n0 = sum(len(p.vertices) - 2 for p in fish.data.polygons)
-    md = fish.modifiers.new("dec", "DECIMATE")
-    md.ratio = min(1.0, FISH_TRIS / max(1, n0))
-    md.use_collapse_triangulate = True
-    with bpy.context.temp_override(object=fish, active_object=fish):
-        bpy.ops.object.modifier_apply(modifier=md.name)
+    if not (fish_len and n0 <= 10000):     # (--fish-only takes a Meshy remesh as it is: a 150k -> 1.6k collapse here
+        md = fish.modifiers.new("dec", "DECIMATE")          # tore the texture's seams into black blotches)
+        md.ratio = min(1.0, FISH_TRIS / max(1, n0))
+        md.use_collapse_triangulate = True
+        with bpy.context.temp_override(object=fish, active_object=fish):
+            bpy.ops.object.modifier_apply(modifier=md.name)
     co = np.array([v.co[:] for v in fish.data.vertices])
     ext = co.max(axis=0) - co.min(axis=0)
     ax = int(np.argmax(ext))
@@ -232,17 +240,26 @@ def swordfish(path, arm):
     up_ax = others[int(np.argmax(sp))] if abs(sp[0] - sp[1]) > 0.05 * L else 2 if ax != 2 else 1
     d_up = np.zeros(3)
     d_up[up_ax] = 1.0
+    u = co[:, up_ax] - np.median(co[:, up_ax])
+    if -u.min() > u.max():      # (the tall dorsal fin goes up)
+        d_up[up_ax] = -1.0
     # target frame on the hand
     hb = arm.data.bones["hand.R"]
     Mw = arm.matrix_world
     h0, h1 = Mw @ hb.head_local, Mw @ hb.tail_local
     fist = h0 + (h1 - h0) * 0.6 + Vector((0.0, 0.015, 0.0))
-    t_long = BILL_DIR
+    if grip_at is not None:     # (--fish-only: the palm, palm() below)
+        fist = grip_at
+    # (--fish-only --pitch: degrees under level in the rest pose; the game's idle and thrusts raise the hand ~60-70 degrees)
+    # (--yaw: degrees the bill swings out to his right (+X) at rest; 30 carries his idle's hanging bill forward)
+    cp, sy, cy = math.cos(math.radians(pitch)), math.sin(math.radians(yaw)), math.cos(math.radians(yaw))
+    t_long = BILL_DIR if not fish_len else Vector((cp * sy, cp * cy, -math.sin(math.radians(pitch))))
     t_up = (Vector((0.0, 0.0, 1.0)) - t_long * t_long.z).normalized()
     src = Matrix((Vector(d_long), Vector(d_up), Vector(np.cross(d_long, d_up)))).transposed()
     dst = Matrix((t_long, t_up, t_long.cross(t_up))).transposed()
     R = dst @ src.inverted()
-    k = FISH_LEN / L
+    fish_len = fish_len or FISH_LEN
+    k = fish_len / L
     M = Matrix.Translation(fist) @ R.to_4x4() @ Matrix.Diagonal((k, k, k, 1.0)) @ Matrix.Translation(-Vector(grip))
     fish.data.transform(M)
     tip_w = M @ Vector(tip)
@@ -261,23 +278,140 @@ def swordfish(path, arm):
             if bsdf and bsdf.inputs["Base Color"].links:
                 base = bsdf.inputs["Base Color"].links[0].from_node.image
     fish.data.materials.clear()
+    if fish_len:        # (--fish-only: the old fish's material and image go, so the new ones keep their names in the .glb)
+        for m in [m for m in bpy.data.materials if m.name.startswith("metal-swordfish")]:
+            bpy.data.materials.remove(m)
+        if base is not None:
+            base.name = "swordfish"
     fish.data.materials.append(flat_mat("metal-swordfish", base))
     for a in list(fish.data.color_attributes):
         fish.data.color_attributes.remove(a)
     ink_colour(fish, 0.35)
-    rigid(fish, arm, "hand.R")
-    # (Kael's FX empties: weapon_muzzle at the tip, anchor_blade_mid / _root along it, all on hand.R)
-    K.anchor(arm, "hand.R", "weapon_muzzle", tip_w)
-    K.anchor(arm, "hand.R", "anchor_blade_mid", (tip_w + fist) / 2)
-    K.anchor(arm, "hand.R", "anchor_blade_root", fist + (tip_w - fist).normalized() * 0.08)
+    rigid(fish, arm, bone)
+    # (Kael's FX empties: weapon_muzzle at the tip, anchor_blade_mid / _root along it, all on the fish's bone)
+    K.anchor(arm, bone, "weapon_muzzle", tip_w)
+    K.anchor(arm, bone, "anchor_blade_mid", (tip_w + fist) / 2)
+    K.anchor(arm, bone, "anchor_blade_root", fist + (tip_w - fist).normalized() * 0.08)
     log("swordfish: %d -> %d tris, length %.2f, grip %s, tip %s, bill on %s end" % (
-        n0, sum(len(p.vertices) - 2 for p in fish.data.polygons), FISH_LEN, tuple(round(x, 3) for x in fist),
+        n0, sum(len(p.vertices) - 2 for p in fish.data.polygons), fish_len, tuple(round(x, 3) for x in fist),
         tuple(round(x, 3) for x in tip_w), "+" if bill_hi else "-"))
     return fish
 
 
+def palm(body):
+    """The right palm on a game .glb's body, as its skinning moves it: the vertices whose biggest weight is hand.R (a v95
+    swap with Meshy weights), else the far end of forearm.R's (the 11-13 live gil.glb skins the whole hand to the
+    forearm, so a fish on hand.R's bone hung under the hand). Returns (centre, bone)."""
+    names = {g.index: g.name for g in body.vertex_groups}
+    by = {}
+    for v in body.data.vertices:
+        if v.groups:
+            e = max(v.groups, key=lambda e: e.weight)
+            by.setdefault(names[e.group], []).append(body.matrix_world @ v.co)
+    if len(by.get("hand.R", [])) >= 100:
+        P = np.array([p[:] for p in by["hand.R"]])
+        bone = "hand.R"
+    else:
+        P = np.array([p[:] for p in by["forearm.R"]])
+        P = P[P[:, 0] > P[:, 0].max() - 0.09]
+        bone = "forearm.R"
+    c = P.mean(axis=0)
+    log("palm on %s: %d verts, centre %s" % (bone, len(P), tuple(round(x, 3) for x in c)))
+    return Vector(c), bone
+
+
+def fish_only(game, fish_glb, out, fish_len, pitch=17.0, yaw=0.0):
+    """--fish-only: the game .glb's swordfish replaced (v95_swap's import_game / export settings)."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.ops.import_scene.gltf(filepath=game, bone_heuristic="BLENDER")
+    ink_back()
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    for o in list(bpy.data.objects):
+        if o.name.startswith("Swordfish") or o.name in ("weapon_muzzle", "anchor_blade_mid", "anchor_blade_root"):
+            log("dropped", o.name)
+            bpy.data.objects.remove(o)
+    body = max((o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("Icosphere")),
+               key=lambda o: len(o.data.vertices))
+    at, bone = palm(body)
+    fish = swordfish(fish_glb, arm, fish_len, at, bone, pitch, yaw)
+    fish.data.uv_layers[0].name = "UVMap"
+    objs = [o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY") and not o.name.startswith("Icosphere")]
+    log("tris: " + ", ".join("%s %d" % (o.name, K.tris([o])) for o in objs if o.type == "MESH"))
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    log("wrote", out)
+
+
+def build_tail(arm, bvh, hips, knee, bone="hips"):
+    """The fish tail (tube + forked caudal fin, one mesh, `skin-tail`) from inside the coat at the hips' back down and back
+    under the hem to boot height, rigid on `bone`. Returns (tail object, ramp image)."""
+    img = ramp_image("gil_fin")
+    # the tail: from inside the coat at the hips' back, down and back under the hem to a fork at boot height
+    z0, z1, z2 = hips * 0.95, knee * 0.95, knee * 0.55
+    yb = [back_y(bvh, z) for z in (z0, z1, z2)]
+    yb = [y if y is not None else -0.12 for y in yb]
+    y0 = yb[0] + 0.07       # (root inside the body)
+    path = [(0, y0, z0), (0, yb[1] - 0.02, z1 + 0.02), (0, min(yb[1], yb[2]) - 0.10, (z1 + z2) / 2),
+            (0, min(yb[1], yb[2]) - 0.17, z2)]
+    radii = [0.06, 0.05, 0.036, 0.022]
+    tail = tube("Tail", path, radii)
+    pc = np.array(path[-1], np.float64)
+    fin_o = [pc + (0, 0.01, 0.02), pc + (0, -0.12, 0.13), pc + (0, -0.20, 0.17), pc + (0, -0.14, 0.06),
+             pc + (0, -0.11, 0.0), pc + (0, -0.15, -0.06), pc + (0, -0.21, max(-0.10, 0.02 - pc[2])),
+             pc + (0, -0.10, max(-0.06, 0.03 - pc[2])), pc + (0, 0.01, -0.02)]
+    caud = sheet("TailFin", fin_o, [pc], th=0.008)
+    mskin = flat_mat("skin-tail", img)
+    mfin = flat_mat("skin-fin", img)
+    tail.data.materials.append(mskin)
+    caud.data.materials.append(mfin)
+    with bpy.context.temp_override(active_object=tail, selected_editable_objects=[tail, caud]):
+        bpy.ops.object.join()
+    ink_colour(tail, 0.4)
+    rigid(tail, arm, bone)
+    return tail, img
+
+
+def tail_only(game, out, bone="tail"):
+    """--tail-only: the fish tail (turnaround, the live model's) added to a game .glb that has none (regen r4: Meshy's body
+    has no tail), same import and export settings as --fish-only."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.ops.import_scene.gltf(filepath=game, bone_heuristic="BLENDER")
+    ink_back()
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    body = max((o for o in bpy.data.objects if o.type == "MESH"), key=lambda o: len(o.data.vertices))
+    bvh = BVHTree.FromObject(body, bpy.context.evaluated_depsgraph_get())
+    Mw = arm.matrix_world
+    hips = (Mw @ arm.data.bones["hips"].head_local).z
+    knee = (Mw @ arm.data.bones["shin.L"].head_local).z
+    tail, _ = build_tail(arm, bvh, hips, knee, bone)
+    objs = [o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")]
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    log("tail: %d tris, wrote %s" % (K.tris([tail]), out))
+
+
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
+    if a[0] == "--tail-only":
+        tail_only(a[1], a[2], a[3] if len(a) > 3 else "tail")
+        return
+    if a[0] == "--fish-only":
+        fish_only(a[1], a[2], a[3], float(a[a.index("--len") + 1]) if "--len" in a else 1.2,
+                  float(a[a.index("--pitch") + 1]) if "--pitch" in a else 17.0,
+                  float(a[a.index("--yaw") + 1]) if "--yaw" in a else 0.0)
+        return
     fit, fish_glb, out = a[0], a[1], a[2]
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=fit)
