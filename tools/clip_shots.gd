@@ -7,7 +7,8 @@ extends RefCounted
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --proc: a Hunter with no keyed clips (Gil) through its HunterAnim moves in one take (<dir>/proc/); --fov=<deg> zooms
-## the camera's lens, --cam-y=<m> sets the camera's height (knee level) (--match --fov=4: the match camera's angle, the figure big enough to judge, no upscale).
+## the camera's lens, --cam-y=<m> sets the camera's height (knee level) (--match --fov=4: the match camera's angle,
+## the figure big enough to judge, no upscale).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -94,7 +95,8 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--fov="):
-			cam.fov = float(a.substr(6))  # (--match --fov=4: the match camera's angle, zoomed in by the lens, not by upscaling)
+			# (--match --fov=4: the match camera's angle, zoomed in by the lens, not by upscaling)
+			cam.fov = float(a.substr(6))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
 	if OS.get_cmdline_user_args().has("--proc"):
@@ -185,11 +187,12 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 
 ## --proc: a Hunter with no keyed clips (Gil: HunterAnim poses him) played through PROC_SEGS in one take, every 1/fps s,
 ## as <dir>/proc/f###.png, and <dir>/proc/segments.tsv (label, first frame, frame count) for the captions. The rig is
-## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump" (a 0.9 s hop,
-## the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the knocked-down beat, 0..1),
+## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump"
+## (a 0.9 s hop, the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the
+## knocked-down beat, 0..1),
 ## "t0=<s>" (the move's clock starts there: the surfacing take skips its first key, the body still under the ground).
-## --bone-dump=<file.json>: also writes every frame's skinning matrices (bone global pose x bind pose, per bind of the first
-## skinned mesh, skeleton space) with the segment label, for offline weight work (tools/art1/glb_relax.py --poses);
+## --bone-dump=<file.json>: also writes every frame's skinning matrices (bone global pose x bind pose, per bind of
+## the first skinned mesh, skeleton space) with the segment label, for offline weight work (glb_relax.py --poses);
 ## --no-grab skips the PNGs (headless: two process frames stand in for the drawn one).
 const PROC_SEGS := {
 	"gil": [["idle", "", 1.6, 0.0], ["walk", "", 1.6, 1.8], ["run", "", 1.6, 5.0], ["jump", "", 0.9, 0.0, "jump"],
@@ -204,7 +207,8 @@ const PROC_SEGS := {
 func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 	var dir := out.path_join("proc")
 	DirAccess.make_dir_recursive_absolute(dir)
-	await tree.create_timer(3.0).timeout  # (the title's logo fades in real time, not in frames: a frame-count wait caught it)
+	# (the title's logo fades in real time, not in frames: a frame-count wait caught it)
+	await tree.create_timer(3.0).timeout
 	var an := HunterAnim.new(model, 1)
 	var face := model.rotation.y
 	var fwd := Vector3(-sin(face), 0, -cos(face))
