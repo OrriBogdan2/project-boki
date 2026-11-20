@@ -243,6 +243,7 @@
 		"out": "crouch_out",
 		"speed": 1.65
 	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["bul_smash_wind", 0.5, "bul_guard"],
 		["bul_smash_wind", 0.5, "bul_mend"],
