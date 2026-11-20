@@ -21,7 +21,8 @@ const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not st
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
-	"gloamshell": "blob (snail foot)", "gibbelle": "blob"}
+	"gloamshell": "blob (snail foot)", "gibbelle": "blob",
+	"nacrolin": "scan (legs ride the body)", "nimbostrich": "scan (legs ride the body)"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
@@ -104,7 +105,8 @@ func _species(main: Node, id: String) -> void:
 	var feetless: bool = measured.min() < FEETLESS
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
-		ok(BokiRig.STRIDE[id] == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		var kept: Array = BokiRig.STRIDE.get(id, GLIDE_STRIDE)
+		ok(kept == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
 		k.queue_free()
 		return
 	for i in 2:
