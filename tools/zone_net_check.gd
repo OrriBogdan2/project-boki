@@ -230,6 +230,9 @@ func _say() -> void:
 
 
 func _save(file: String) -> void:
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
 	m.cam.snap(home + NEAR)
