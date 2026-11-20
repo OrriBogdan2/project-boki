@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcanspc6y7nd"
-path="res://.godot/imported/ryzz_regenr_atlas.jpg-bce9e6536888bfae4ca673ca09cf0c63.ctex"
+uid="uid://b7y3swtxeeh8q"
+path="res://.godot/imported/ryzz_r3_atlas.jpg-452bac5af81c083fd7fb5a823d13d13b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://art/wardens/ryzz_regenr/ryzz_regenr_atlas.jpg"
-dest_files=["res://.godot/imported/ryzz_regenr_atlas.jpg-bce9e6536888bfae4ca673ca09cf0c63.ctex"]
+source_file="res://art/wardens/ryzz_r3/ryzz_r3_atlas.jpg"
+dest_files=["res://.godot/imported/ryzz_r3_atlas.jpg-452bac5af81c083fd7fb5a823d13d13b.ctex"]
 
 [params]
 

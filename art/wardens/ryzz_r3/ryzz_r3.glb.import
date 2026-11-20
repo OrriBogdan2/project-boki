@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cmnm8ulbfvh6x"
-path="res://.godot/imported/ryzz_regenr.glb-1fd5052d51e88c670ecd3f8e82855c44.scn"
+uid="uid://d171yulo3cshq"
+path="res://.godot/imported/ryzz_r3.glb-4b8ab12256c16b5293274c00c0e4a1ff.scn"
 
 [deps]
 
-source_file="res://art/wardens/ryzz_regenr/ryzz_regenr.glb"
-dest_files=["res://.godot/imported/ryzz_regenr.glb-1fd5052d51e88c670ecd3f8e82855c44.scn"]
+source_file="res://art/wardens/ryzz_r3/ryzz_r3.glb"
+dest_files=["res://.godot/imported/ryzz_r3.glb-4b8ab12256c16b5293274c00c0e4a1ff.scn"]
 
 [params]
 

@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dg2dlv3gtak8w"
-path="res://.godot/imported/ryzz_r2qb_atlas.jpg-0245154a6fde77195cd048cdcd56cfad.ctex"
+uid="uid://x40qqnjb56ql"
+path="res://.godot/imported/ryzz_r3_v95.jpg-87f8d5eb217a1651167c52ea2da832d9.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "d46de57214815718af14f2748bcdbc45"
+"md5": "804e530663176c62333328736b9e4962"
 }
 
 [deps]
 
-source_file="res://art/wardens/ryzz_r2qb/ryzz_r2qb_atlas.jpg"
-dest_files=["res://.godot/imported/ryzz_r2qb_atlas.jpg-0245154a6fde77195cd048cdcd56cfad.ctex"]
+source_file="res://art/wardens/ryzz_r3/ryzz_r3_v95.jpg"
+dest_files=["res://.godot/imported/ryzz_r3_v95.jpg-87f8d5eb217a1651167c52ea2da832d9.ctex"]
 
 [params]
 
