@@ -10432,3 +10432,4 @@ READY ext/vfx-meeko-heal-hurt 385ce22668 (Meeko heals leaf green rising, hurts e
 READY ext/gil-hero-anim-proc 0429f6a241 (Gil borrows Meeko's idle/walk/run/strafe/jump/fall/land/hit clips by bone name via warden_anim clips_from; coverage 7 cells proc->clip; clips/glb checks no new reds)
 READY ext/kael-open-rows 6ea5ba707a4 (Kael open rows closed: Lunge travels 4.5-5.4 m per footage + DECISIONS 11-11; Riposte resets on any living foe killed per data; dash and pull exits confirmed with commits; before/after table in juggernaut.md)
 READY ext/ui-trim-mask-egg-text dc922eea4c (first Relic page 83->~25 words: key+name only; egg cards/knock card one short line each; shots in ~/cj/20261120-034041-a1/shots)
+READY ext/farm-raise-shapes 891f1c61698 (raised stats show as body size, audit in GARDEN.md)
