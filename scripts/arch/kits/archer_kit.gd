@@ -346,7 +346,7 @@ func _pin(a: Vector3, k: float) -> void:
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
 		vfx("heavy_hit", f.pos, dir, {"k": k})
-		f.flash_t = 0.2                      # a hit flash on the body
+		f.flash_t = maxf(f.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
