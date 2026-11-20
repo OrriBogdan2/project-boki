@@ -8,8 +8,8 @@ extends RefCounted
 var bad := 0
 var main: Node
 const KEY_WORD := "\\b(LMB|RMB|MMB|Shift|Space|Ctrl)\\b|\\b[EQRFXCVZ]\\b"      # a key named in words, in a text
-## Not ability text: the personality (story), "howto" (ClassCard fills its {action} tokens itself) and the design
-## sources.
+## Not ability text: the personality (story), "howto" (ClassCard fills its {action} tokens itself)
+## and the design sources.
 const SKIP := ["personality", "howto", "src", "source", "sources"]
 const NUMBER := "\\d+(?:\\.\\d+)?"
 ## Where the slots sit in the HUD (Hunter.slot_info) and in the card.
