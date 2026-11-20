@@ -7,6 +7,8 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
+## --backfaces: every Warden surface drawn flat, green where it faces the camera and red where it shows its back (the
+## ink draws those black; parity_reel --reel-only=backfaces at the eye and knee cameras).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -109,6 +111,17 @@ func run(main: Node) -> void:
 		for mi in model.find_children("*", "MeshInstance3D", true, false):
 			if (mi as MeshInstance3D).is_visible_in_tree() and not String(model.get_path_to(mi)).begins_with("Warden"):
 				print("MESH ", model.get_path_to(mi), " ", (mi as Node3D).global_position)
+	if OS.get_cmdline_user_args().has("--backfaces"):
+		var sh := Shader.new()
+		sh.code = "shader_type spatial; render_mode unshaded, cull_disabled; " \
+			+ "void fragment() { ALBEDO = FRONT_FACING ? vec3(0.2, 0.8, 0.2) : vec3(1.0, 0.0, 0.0); }"
+		var mt := ShaderMaterial.new()
+		mt.shader = sh
+		for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+			var inst := mi as MeshInstance3D
+			inst.material_overlay = null
+			for s in inst.mesh.get_surface_count():
+				inst.set_surface_override_material(s, mt)
 	if turn:
 		var dir := out.path_join("turntable")
 		DirAccess.make_dir_recursive_absolute(dir)
