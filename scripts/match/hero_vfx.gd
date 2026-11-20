@@ -61,6 +61,7 @@ var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers:
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
+var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the sim's global randf
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
@@ -573,6 +574,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("jag", float(layer.get("jag", 0.0)))
 	mt.set_shader_parameter("core_w", float(layer.get("core", 0.0)))
+	mt.set_shader_parameter("nose", float(layer.get("nose", 0.0)) / span.length())  # (m from A to the full width)
 	var cam := get_viewport().get_camera_3d()
 	var view := -cam.global_basis.z if cam else Vector3.DOWN
 	var side := span.cross(view).normalized()
