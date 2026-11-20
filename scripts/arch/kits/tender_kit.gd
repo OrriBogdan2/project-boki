@@ -605,9 +605,9 @@ func _tick_hearth(dt: float) -> void:
 	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
 	# middle shading to teal, a brighter fill, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var own := AimKit.hero_col(h)
+	var own := AimKit.hero_col(h).lightened(0.2)      # a pastel leaf, not the signature's full green
 	var look_p := {
-		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
+		"r": hearth_r(), "col": own, "rim": own.lightened(0.35), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
 		look_p.merge({"fill": THROWN_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)

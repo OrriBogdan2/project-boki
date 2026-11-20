@@ -109,12 +109,13 @@ func _build(kind: String) -> Node3D:
 	match kind:
 		"ember":
 			# a comet to follow at the match camera (source: Moon Shot, a bright head with a long trail): a 0.7 m
-			# gold teardrop with a near-white core, a pink halo and a 0.8 m wide, 3.4 m long gold tail
+			# pastel leaf-green teardrop (tender.json "leaf_lit") with a near-white core, a pink halo and a 0.8 m wide,
+			# 3.4 m long pale-leaf tail
 			var head := Models.sphere(0.34, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
+			_off(Models.part(n, head, orb_mat(Color("b4f7a8", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
 			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.1)))
 			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
-			_tail(n, 0.8, 3.4, Color("ffe0a0", 1.0))
+			_tail(n, 0.8, 3.4, Color("d4fbc4", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -365,9 +366,11 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 	var back := Vector3(-d2.x, 0.4, -d2.y)
 	match kind:
 		"ember":
-			m.fx.flash(at, Color("fff0c0"), 0.6, 0.07)
-			m.fx.spark(at, back, Color("ffd27a"), 8, 6.0, 70.0, 0.25, 6.0)
-			burst("star", at, {"col": Color("9a6aff"), "rim": Color("e0c8ff"), "r": 0.8, "dur": 0.22})
+			# pastel leaf burst: sparks in the leaf slots (tender.json leaf_lit / pink), the ring in leaf, no violet
+			m.fx.flash(at, Color("efffe4"), 0.6, 0.07)
+			m.fx.spark(at, back, Color("b4f7a8"), 8, 6.0, 70.0, 0.25, 6.0)
+			m.fx.spark(at, back, Color("f6a6c8"), 4, 4.5, 90.0, 0.3, 4.0, 0.8)
+			burst("star", at, {"col": Color("5fdc6a"), "rim": Color("b4f7a8"), "r": 0.8, "dur": 0.22})
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
