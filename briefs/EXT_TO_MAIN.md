@@ -10434,3 +10434,4 @@ READY ext/kael-open-rows 6ea5ba707a4 (Kael open rows closed: Lunge travels 4.5-5
 READY ext/ui-trim-mask-egg-text dc922eea4c (first Relic page 83->~25 words: key+name only; egg cards/knock card one short line each; shots in ~/cj/20261120-034041-a1/shots)
 READY ext/farm-raise-shapes 891f1c61698 (raised stats show as body size, audit in GARDEN.md)
 READY ext/farm-minigame-fair 68db7415a89a3f4f6a14cdca41ecb2f02b1956d6 (--minigame-fair-check: 200 seeded runs per Boki game; Dash +10 Speed 100% -> 80%, Volley +20 97% -> 93%, Seek +10 58% -> 62%)
+READY ext/feel-warm-midmatch-shaders 8283500af3f57fed8e6d3808af16de664f629a3b (warm-up: 0 mid-match shader compiles on cold cache Forward+, was 2-5 frames; seat beacons, Boki trails, rocket, all shader files, particle keys, quality-step redraw)
