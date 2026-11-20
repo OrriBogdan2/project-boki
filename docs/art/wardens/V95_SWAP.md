@@ -42,6 +42,32 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Meshy's skin weights, 2026-11-17 (ext/rig-bakeoff-meshy-1117): `--weights meshy`
+The owner (11-17): the picked masters are in the game, but they break when they move. The breaks are the skin weights
+(bone heat plus the spec's `regions` boxes: fins round the hands, a hand webbed to the hip, torn sashes), and the
+`relax` pass over them punches holes. `python3 tools/art1/v95_to_game.py <Name> --weights meshy` takes the weights
+from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, rig, clips and bone names unchanged):
+- v95_swap.py's `meshy_rig` sends the 60k body to Meshy's rigging API (`tools/meshy/meshy_task.py rig`, about 5
+  credits, 1-2 min) and keeps the answer in `WORK/meshy/` (a rerun of the swap step alone reuses it).
+- `meshy_weights` gives each vertex the weights of its nearest rigged vertex and puts Meshy's 24 bones on ours
+  (`MESHY`: spine and shoulders on `hips`, the neck half `hips` half `head`, arm, leg and foot bones one to one).
+- Three fixes for what Meshy's rig and ours do not share. A patch of arm weights not joined to the arm (the sash under
+  a resting hand) goes to the bones under it. Our thighs hang from `root`, not `hips`, so a thigh's weight above its
+  hip joint goes to `hips`, fading out over `PELVIS_RAMP` below it; without it the waist pinches when the game turns
+  the hips. (Tried and dropped: also moving weight shared by both thighs to `hips`; the layer under Tenzo's apron
+  pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
+  bone whole.
+- A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
+  bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  rig but carry no body weight in this mode.
+Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
+report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
+coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
+wide in her bow stance. Kael is built from the one-sword master (`A_keep_new.glb`, the master's sword faces
+dropped, the game's sword kept). A first run that asks Meshy for the rig can hang after the `meshy:` lines (11-17: twice,
+15 and 100 min); the same swap run again on that WORK dir, with `meshy/rigged_character.glb` already there, ends in
+2 min (run v95_swap.py itself: v95_to_game.py clears `meshy/` and asks again).
+
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
 were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
@@ -225,3 +251,34 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Hunter regen (11-20): a new Meshy master with no hand-read grid
+A fresh multi-image-to-3d master (meshy_task.py create, 4 views of the owner's turnaround, then `remesh --topology quad`)
+needs a swap spec in its own frame. `blender -b --factory-startup --python tools/art1/meshy_spec.py -- OLD_SPEC MASTER
+RIGGED SPEC_OUT` takes the `joints` from Meshy's auto-rig of the master (`meshy_task.py rig OUT MASTER`) and carries the
+old spec's `head`, `anchors` and boxes over by body region. Then `v95_to_game.py <Name> --master MASTER --spec SPEC_OUT
+--weights meshy --work DIR --no-import` (it still copies its result over the shipped .glb: `git checkout` it after).
+A kept prop on its own bone (Sparkle's gum) stays at the old face: `glb_prop_move.py` puts it on the new lips;
+`glb_anchor_set.py --rod-tips` puts Sparkle's rod blooms on her rod tips. Compare in game as a design variant
+(`art/wardens/<art>_<tag>/`, `--warden-variant=<art>_<tag>`): it plays its Warden's clips and look unless it has its own.
+`--weights meshy` skips skin_relax, and Meshy's hard weight seams tear (Sparkle's A: a chest vertex at hips 0.56 +
+upper_arm 0.44 beside one at hips 1.0, 29.9x; `--stretch-check --stretch-where` prints each clip's worst edge). Relax
+only the extreme edges: `glb_relax.py IN OUT --limit=5.0` took her to 4.9x (0/58 clips over the 7.0 ceiling) touching
+587 of 41k vertices; the default 1.22 rewrote 27k and shredded her shawl tail. Look at the knee camera after.
+
+### Regen round 2 (11-20, Sparkle r2qb): fingers and the chest glow
+- Fingers: a 60k-quad remesh (118k tris) cut to 60k with `head_tris` (45% for the head) left the body ~33k tris and
+  fused the fingers into a 2-3 finger blob. Remesh at Meshy to 30k quads (~58k tris) and swap with `tris` = the
+  master's own count and `head_tris: 0`: the collapse is a no-op and the hands keep Meshy's fingers (58,569 tris).
+- Chest glow: the colour rule `glow` h 0.82-1.0, s >= 0.55 caught the warm-pink belly skin and whole chest triangles
+  (0.0126 m2 of `glow`, drawn as a flat magenta patch). For a regen use h 0.82-0.95, s >= 0.62, v >= 0.75: only the
+  bolt and the hem line glow (0.0044 m2); the crop top stays black.
+- `godot --headless --path . -- --stretch-check ...`: without the `--` the flags are not user args and the game just
+  idles at its menu (no output, timeout).
+
+### Regen round 4 (11-20, Sparkle r4): brown boots
+- Her boots (dark red-brown paint, v ~0.3) matched neither colour rule: half fell to `slot_default` skin (the skin
+  look's desat 0.6 greyed them), half to `leather` (v <= 0.28): near-black in game. A first rule `{"slot": "boots",
+  "box": [..., z <= 0.235], "v": [0, 0.6]}` gives them their own slot (5,499 tris; `boots` draws as leather,
+  warden_glb.gd SLOTS) and the look tints it alone (`"boots": {"albedo": [1.3, 1.4, 1.4], "desat": 0.55}`) without lifting the
+  black top, shorts and thigh-high.

@@ -45,8 +45,9 @@ const EXTRA := {
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
+## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f);
+## "boots" is leather split off by a box, so a look can tint brown boots alone (Sparkle r4: dark red-brown paint).
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "boots": 2, "fur": 5, "eyes": 0,
 	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
@@ -451,14 +452,16 @@ static func measure_rest(arch: String) -> Dictionary:
 	return rest
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
-## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon
-## slot after that, e.g. a painted skin or gunmetal the shared rim and top light would wash out. {} for none.
+## a design variant has its own, else its Warden's): "painted" sets hero-toon parameters on all of its surfaces,
+## "slots" per toon slot after that, e.g. a painted skin or gunmetal the shared rim and top light would wash out.
+## {} for none.
 static func look(nm: String) -> Dictionary:
 	if _look == null:
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(LOOK_PATH)) if FileAccess.file_exists(LOOK_PATH) \
 				else null
 		_look = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
-	return (_look as Dictionary).get(nm, {})
+	var all := _look as Dictionary
+	return all.get(nm, all.get(nm.get_slice("_", 0), {}))
 
 ## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Pip's lantern glow), so a
 ## prop that glows also lights what is round it: {"anchor", "colour" [r, g, b], "energy", "range"}.
