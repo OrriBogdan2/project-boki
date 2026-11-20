@@ -51,6 +51,7 @@ func run(progress := Callable()) -> void:
 				break
 		break
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
+	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
 	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
@@ -416,10 +417,11 @@ static func _mat_key(mt: Material) -> String:
 	if mt is ShaderMaterial:
 		var sh: Shader = (mt as ShaderMaterial).shader
 		s = "sh" + _code_hash(sh)
-	elif mt is BaseMaterial3D:
-		# the generated shader depends on its switches and modes and on which textures are set,
-		# not on colours and amounts
-		s = "std"
+	else:
+		# a generated shader (StandardMaterial3D, ParticleProcessMaterial...) depends on its switches and modes and
+		# on which textures are set, not on colours and amounts (keyed by class alone, every particle process
+		# material after the first was left out, and compiled when its emitter first ran mid-match)
+		s = "std" if mt is BaseMaterial3D else mt.get_class()
 		for pr in mt.get_property_list():
 			if not (int(pr["usage"]) & PROPERTY_USAGE_STORAGE):
 				continue
@@ -428,8 +430,6 @@ static func _mat_key(mt: Material) -> String:
 				s += "%d" % int(mt.get(pr["name"]))
 			elif t == TYPE_OBJECT:
 				s += "1" if mt.get(pr["name"]) is Texture else "0"
-	else:
-		s = mt.get_class()
 	if mt.next_pass:
 		s += ">" + _mat_key(mt.next_pass)
 	_mat_keys[id] = s
