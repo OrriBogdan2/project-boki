@@ -222,6 +222,7 @@ func _progress(label: String) -> void:
 func warm_up(progress := Callable()) -> void:
 	for h: Hunter in hunters.filter(func(x): return x.ak != null):
 		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
+	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -1276,9 +1277,8 @@ func use_gear(h: Hunter, slot: int) -> void:
 						tiles.append([i, int(world.level[i])])
 						world.kind[i] = World.T_GROUND
 						world.level[i] = clampi(lv, 0, 255)
-			var n := Models.gear_platform(col)
+			var n := SpanLooks.of(self).pad(col)      # (built at load: warm_up)
 			n.position = Vector3(floor(h.pos.x) + 0.5, lv * World.LEVEL, floor(h.pos.z) + 0.5)
-			add_child(n)
 			plats.append({"tiles": tiles, "t": 8.0, "node": n})
 			if h.pos.y < lv * World.LEVEL:
 				h.pos.y = lv * World.LEVEL + 0.05
@@ -1354,7 +1354,7 @@ func _update_gear_fx(dt: float) -> void:
 			for tv in pl["tiles"]:
 				world.kind[int(tv[0])] = World.T_VOID
 				world.level[int(tv[0])] = int(tv[1])
-			n.queue_free(); plats.erase(pl)
+			SpanLooks.of(self).give(n); plats.erase(pl)
 
 ## Inside a smoke cloud?
 func in_smoke(p: Vector3) -> bool:
@@ -2930,7 +2930,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3063,7 +3063,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
 			var f := 1.0 - 0.45 * minf(1.0, d / radius)
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
-			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f}
+			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
 			if x.has("burn"): o["burn"] = x["burn"]
 			if x.has("slow"): o["slow"] = x["slow"]

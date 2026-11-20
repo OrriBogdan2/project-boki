@@ -34,6 +34,7 @@ var player_biome := ""
 var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
 var terrain: TerrainHazards = null  # the map's lava, deep water, ice, static and bramble areas
 var rng := RandomNumberGenerator.new()
+var air: Array[CPUParticles3D] = []  # decorate's ambient emitters, paused beyond the draw distance (tick)
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -329,6 +330,9 @@ func tick(dt: float) -> void:
 		if muts.has("void") and mb.tgt and mb.st == "chase" and mb.flat_dist(mb.tgt) > 3.5:
 			_blink(mb)
 	_tick_hazards(dt)
+	var cam: Camera3D = m.get_viewport().get_camera_3d() if m.is_inside_tree() else null
+	if cam:
+		ParticleCount.pace(air, cam.global_position)
 	terrain.tick(dt)
 	_tick_region_banner()
 
@@ -619,6 +623,7 @@ func decorate() -> void:
 			p.material_override = Models.glow_mat(Color(col, minf(col.a, 0.8)))
 		m.add_child(p)
 		p.global_position = Vector3(c.x, 3.5, c.y)
+		air.append(p)
 
 ## Soft painted particles instead of plain dots: a camera-facing glow with a bright core that fades
 ## in and out (embers flicker and rise, snow is crisp and white, sparks streak, bloom spores are
