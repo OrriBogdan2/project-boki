@@ -296,6 +296,63 @@ def step(surface, i):
     return mix(hit(1.0), at(hit(0.45), 0.035 + 0.006 * i), at(jingle, 0.02))
 
 
+# ------------------------------------------------------------------ the cues each ability lacked (VFX_QUALITY Snd)
+def knife_whisk(i):
+    """The Shadow Knife in flight (`thief_knife_whisk`): a light blade spinning away, a thin whisk on every turn,
+    each a touch lower and fainter as it goes (0.38 s, its flight to full range)."""
+    d = 0.38
+    turns = mix(*[at(swish(0.06, 1900 - 90 * k, 5200 - 200 * k, 6.0) * (1.0 - 0.15 * k), 0.055 * k) for k in range(6)])
+    glint = at(ring((4380 - 60 * i, 6120), 0.12, (0.03, 0.02), (0.07, 0.03)), 0.02)
+    return lpf(pad(mix(turns * 0.9, glint), d), 8500)
+
+
+def knife_ground(i):
+    """The dagger biting into earth or stone (`thief_knife_ground`), not a foe: a dry chink, grit, a short high
+    ring of the blade standing in the ground. No flesh thunk: that is thief_knife_stick."""
+    d = 0.35; t = T(d)
+    chink = mix(click(0.002, 3000, 8000) * 1.1, crack(0.08, 1500, 6000, 0.006) * 1.2)
+    grit = bpf(noise(0.1), 900, 4200) * env(N(0.1), 0.001, 0.025) * 0.7
+    sing = np.sin(2 * np.pi * 3720 * t) * env(N(d), 0.002, 0.07) * 0.12 * (0.7 + 0.3 * np.sin(2 * np.pi * 42 * t))
+    return mix(chink, grit, sing, ring((5150,), d, (0.04,), (0.06,)))
+
+
+def shadow_whisk(i):
+    """The Shadow Knife's step behind a foe (`thief_shadow_whisk`): her light blade drawn twice through the air,
+    quick and close, and a silver glint. Replaces the shared swipe."""
+    d = 0.3
+    w1 = swish(0.09, 1500, 4800, 5.0)
+    w2 = swish(0.08, 4200, 1800, 5.0) * 0.8
+    return lpf(pad(mix(w1, at(w2, 0.085), at(bell(2960, 0.2, 0.06) * 0.12, 0.05)), d), 8500)
+
+
+def bola_bounce(i):
+    """The Bola glancing off a wall (`thief_bola_bounce`): the weights clack on stone, the chain jingles on."""
+    clack = mix(click(0.003, 1500, 5000) * 1.0, kick(700, 380, 0.06, 0.002, 0.012, 1.6) * 0.4,
+                ring((1530, 2410), 0.1, (0.025, 0.015), (0.2, 0.08)))
+    return pad(mix(clack, at(chain_clinks(0.2, (0.02, 0.05, 0.09), g=0.3), 0.01)), 0.3)
+
+
+def bola_tie(i):
+    """The Bola ends on nothing (`thief_bola_tie`): its cords whip round and knot on themselves, the two weights
+    clack together and drop in the dirt with the chain."""
+    whips = mix(*[at(swish(0.06, 900 + 250 * k, 3400 + 300 * k, 4.5) * (0.65 - 0.1 * k), 0.035 * k) for k in range(3)])
+    knot = at(mix(click(0.003, 1800, 5500) * 0.9, ring((1460, 2280), 0.12, (0.03, 0.02), (0.22, 0.09))), 0.11)
+    drop = at(mix(kick(210, 90, 0.2, 0.008, 0.03, 2.2) * 0.45, bpf(noise(0.12), 400, 2200) * env(N(0.12), 0.002, 0.03) * 0.4),
+              0.2)
+    return mix(whips, knot, drop, at(S.rattle(0.18, 70, 2000, 5000, decay=0.05) * 0.3, 0.2),
+               at(chain_clinks(0.25, (0.0, 0.04, 0.1), g=0.22), 0.21))
+
+
+def encore_end(i):
+    """Encore running out (`thief_encore_end`): the blades slow, three soft shings falling in pitch as they fold
+    away, a sheath click. A quiet end, never a burst (the ring fades)."""
+    d = 0.7
+    slow, _ = am_whirl(0.45, 12, 4, 800, 3800, 3.0)
+    folds = mix(*[at(shing(2900 - 330 * k, 0.6 - 0.12 * k), 0.12 + 0.11 * k) for k in range(3)])
+    sheath = at(mix(click(0.002, 2000, 6000) * 0.6, ring((2200,), 0.12, (0.03,), (0.1,))), 0.5)
+    return lpf(pad(mix(slow * env(N(0.45), 0.01, 0.15) * 0.5, folds, sheath), d), 9000)
+
+
 def build():
     takes('dj_bolt', bolt, 3, 'fire')
     save('thief_flintlock_crack', flintlock_crack(0), 'signature')
@@ -320,6 +377,13 @@ def build():
     save('thief_death', death(0), 'grunt')
     for s in ('grass', 'stone', 'wood', 'snow'):
         takes('thief_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
+    # (after the rest, so the seeded takes above stay as they were)
+    takes('thief_knife_whisk', knife_whisk, 2, 'fire')
+    takes('thief_knife_ground', knife_ground, 2, 'impact')
+    takes('thief_shadow_whisk', shadow_whisk, 2, 'fire')
+    takes('thief_bola_bounce', bola_bounce, 2, 'impact')
+    save('thief_bola_tie', bola_tie(0), 'impact')
+    save('thief_encore_end', encore_end(0), 'cast')
 
 
 if __name__ == '__main__':
