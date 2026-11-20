@@ -2097,7 +2097,8 @@ func _drop() -> void:
 	for i in 60:
 		m.step(DT)
 		if fd < 0 and not P.diving: fd = i + 1
-		if ts < 0.0 and not P.diving and absf(-P.vel.y - HunterFeel.drop_fall) <= 0.1 * HunterFeel.drop_fall: ts = (i + 1) * DT
+		if ts < 0.0 and not P.diving and absf(-P.vel.y - HunterFeel.drop_fall) <= 0.1 * HunterFeel.drop_fall:
+			ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
 	# steer under the canopy

@@ -10,7 +10,8 @@ extends RefCounted
 ## (DECISIONS 11-08): a fall you bring into the glider is absorbed. Decision 0095. Under a lip, open_kick's
 ## pull (decision 0061) is the one exception: the abyss dive carries into the feather.
 
-const OPEN_KICK := 6.0      # [est] m/s of spring when the glider opens more than HunterFeel.abyss_brake_dist under the lip
+# [est] m/s of spring when the glider opens more than HunterFeel.abyss_brake_dist under the lip
+const OPEN_KICK := 6.0
 const KICK_HEAT := 0.08     # [est] share of a full glider's heat the spring costs
 const PULL_FWD := 0.6       # [est] share of the fall speed (m/s) a glider opened below the lip turns into forward speed
 const PULL_RISE := 0.3      # [est] share of it the spring adds upward
