@@ -10539,3 +10539,4 @@ READY ext/p17-port-1118 7291f708e5 (P17: mob and boss Fsm + --mob-fsm-check; mer
 READY ext/hit-spark-contact 2eaeae2023 (hit spark at the real contact point clamped to the target's v95 collider via HitContact; --hit-shape-check asserts Vex shot, Kael strike, Cinder zone tick)
 READY ext/sfx-ability-audit-13 34b2b2c4dc (no silent ability: Gil fills from his own set, Vex Fever + Tenzo Shardskin cues, --sfx-set-check section 21 fails a silent ability, AUDIO.md before/after table)
 READY ext/sfx-enemy-ult-cue 5401040bf3 (enemy ult cue: same sound +3 dB on SFXFoe bus; keyboard ult press mirrored to other games; --sfx-remote-check ult rows for archer/mage/thief ally+rival)
+READY ext/sfx-wisp-steal 81827d818bd8d464f63b495954c5042ad414e7fa (wisp steal: steal_lost sting for owner+squad, soft pickup for thief; --wisp-steal-check asserts)
