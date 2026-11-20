@@ -76,3 +76,16 @@ LMB, RMB, E + recast, X + leap, hit, death).
   thin and folded parts as black specks.
 - Not changed: textures, materials, UVs, skeleton, bind matrices, every body vertex except the right fingers.
   The hat brim keeps the scan's notches.
+
+## Regen 11-20 r3 candidate A (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+r2's A had a long flat tail and a spiky back fin (from the 11-19 turnaround; neither the splash nor LIVE has them).
+r3: the four turnaround views edited with Meshy image-to-image (nano-banana-pro) to remove ONLY the tail and back fin
+(gens/hunter-regen-1120/gil/r3/edit, 12 edits), 6 new Meshy multi-image-to-3d gens (r3/gen/c1-c6, all tail-free),
+c3 picked (open grin), quad remesh 60k, then as r2:
+
+    python3 tools/art1/v95_to_game.py Gil --weights meshy --spec art/wardens/src/gil_regen1120/r3_c3.json --tris 96000
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only art/wardens/gil/gil.glb FISH.glb art/wardens/gil/gil.glb --len 1.2 --pitch 60
+
+Body 58,545 tris + swordfish 4,048 (r2's fish, 1.2 m). Open on main's Meeko-clip animation (PR #461): the Meshy-rig
+sleeve stretches into a black bar in surfacing/thrust/E, and the fish's bill points down in idle (pitch 60 was tuned
+for the old procedural poses).

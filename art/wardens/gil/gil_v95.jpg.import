@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0wgqy7iqoeyc"
+uid="uid://lrawjhsre2nr"
 path.s3tc="res://.godot/imported/gil_v95.jpg-89a27980d6ab7a90626259206f78d24a.s3tc.ctex"
 path.etc2="res://.godot/imported/gil_v95.jpg-89a27980d6ab7a90626259206f78d24a.etc2.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "56b3b2cef3e127ac8d650f147e710f0e"
+"md5": "36c22d2e22f8e6322276b22f0030fdf9"
 }
 
 [deps]
