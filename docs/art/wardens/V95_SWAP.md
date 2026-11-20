@@ -251,3 +251,13 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Hunter regen (11-20): a new Meshy master with no hand-read grid
+A fresh multi-image-to-3d master (meshy_task.py create, 4 views of the owner's turnaround, then `remesh --topology quad`)
+needs a swap spec in its own frame. `blender -b --factory-startup --python tools/art1/meshy_spec.py -- OLD_SPEC MASTER
+RIGGED SPEC_OUT` takes the `joints` from Meshy's auto-rig of the master (`meshy_task.py rig OUT MASTER`) and carries the
+old spec's `head`, `anchors` and boxes over by body region. Then `v95_to_game.py <Name> --master MASTER --spec SPEC_OUT
+--weights meshy --work DIR --no-import` (it still copies its result over the shipped .glb: `git checkout` it after).
+A kept prop on its own bone (Sparkle's gum) stays at the old face: `glb_prop_move.py` puts it on the new lips;
+`glb_anchor_set.py --rod-tips` puts Sparkle's rod blooms on her rod tips. Compare in game as a design variant
+(`art/wardens/<art>_<tag>/`, `--warden-variant=<art>_<tag>`): it plays its Warden's clips and look unless it has its own.

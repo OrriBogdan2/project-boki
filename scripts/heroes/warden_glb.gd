@@ -451,8 +451,9 @@ static func measure_rest(arch: String) -> Dictionary:
 	return rest
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
-## a design variant has its own, else its Warden's): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon
-## slot after that, e.g. a painted skin or gunmetal the shared rim and top light would wash out. {} for none.
+## a design variant has its own, else its Warden's): "painted" sets hero-toon parameters on all of its surfaces,
+## "slots" per toon slot after that, e.g. a painted skin or gunmetal the shared rim and top light would wash out.
+## {} for none.
 static func look(nm: String) -> Dictionary:
 	if _look == null:
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(LOOK_PATH)) if FileAccess.file_exists(LOOK_PATH) \
