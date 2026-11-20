@@ -860,10 +860,11 @@ func _tick_lunge() -> void:
 			if was_chain:
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
+			var leffs: Array = [{"type": "damage", "amount": dmg}]
+			if float(ld["push"]) > 0.0:
+				leffs.append({"type": "push", "strength": float(ld["push"]), "from": "caster"})
 			var stg := stage("rmb",
-					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
-							"effects": [{"type": "damage", "amount": dmg},
-									{"type": "push", "strength": float(ld["push"]), "from": "caster"}]},
+					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": leffs},
 					{"hit": "add", "mod": "add"})
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
@@ -957,9 +958,11 @@ func _haul_land(k: float) -> void:
 	haul = {}
 	haul_slams += 1
 	var at := h.pos
+	var heffs: Array = [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()}]
+	if float(hd["push"]) > 0.0:
+		heffs.append({"type": "push", "strength": float(hd["push"])})
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
-		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
-				{"type": "push", "strength": float(hd["push"])}]})
+			"effects": heffs})
 	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
