@@ -10523,3 +10523,5 @@ READY ext/stuck-integ-4dec4626 1a379a0f670 (supersedes: anim-cancel-blend-port e
 READY ext/dash-wasd-default a36b78a92b (--dash-dir-check: hold A + cursor right, ground and air; 10 hunters dash left, Lace included; mage/motley/tarek aimed per docs; Rules.md wiki regen)
 READY ext/anim-hit-react-dir 37bef1dbb3 (flinch-layer-check covers all 13 Hunters: Gil row added, 12 clipped Hunters already pass front/back/left/right)
 READY ext/run-speeds-data a601748ae55b4d99f1e56b2f92b01fc78834f064 (--move-speed-check times run/walk/crouch for all 13 hunters vs hunter_move.json: 0 fails, no code override found, no speed changed)
+READY ext/vfx-zones-remote a3d2aba5df (bulk-rebase: origin/main merged in mechanically, was 78e69c2aeb; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/albert-guardcut-regress db98db4cd1 (bulk-rebase: origin/main merged in mechanically, was 4ce1bd2953; union 1 gen 0 files; the branch's own READY checks still apply)
