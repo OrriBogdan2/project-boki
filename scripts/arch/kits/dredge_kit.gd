@@ -590,7 +590,7 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	m.displace.spike(f, -16.0, h)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	if tells_visible():
-		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a gold swirl over the stunned foe
+		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:
