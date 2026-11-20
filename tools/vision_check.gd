@@ -4,7 +4,7 @@ extends RefCounted
 ## not; one right behind you is (the near circle); crouching hides you at a range a standing rival is seen from;
 ## a hiding rival (crouched, in grass) shows no plate unless revealed, downed or a teammate; a rival out past the
 ## wedge's side who shoots or is hit is seen for the reveal's time inside her own soft lit circle (RevealLight), which
-## fades out with it. Outside sight is a neutral grey fog in every weather (owner 11-20: no blue behind you): the fog
+## fades out with it. Outside sight is a neutral grey fog in every weather (no blue behind you): the fog
 ## colour has no tint constant, and every lit world shader greys its light, shadow tint and ambient where fogged
 ## (a blue cast fails here; GPU numbers in docs/specs/VISION_LOOK.md). Never touches the save.
 
@@ -180,15 +180,20 @@ func _grey_fog(m: Match) -> void:
 	var tints := 0
 	var re := RegEx.create_from_string("vec3\\(([-0-9.]+), *([-0-9.]+), *([-0-9.]+)\\)")
 	for r in re.search_all(body):
-		if not (is_equal_approx(float(r.get_string(1)), float(r.get_string(2))) and is_equal_approx(float(r.get_string(2)), float(r.get_string(3)))):
+		var x := float(r.get_string(1))
+		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
 			tints += 1
-	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"), "the fog colour is grey: no tint in vis_apply (%d)" % tints)
+	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"),
+		"the fog colour is grey: no tint in vis_apply (%d)" % tints)
 	for n in FOG_LIT:
 		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
 		var light := s.substr(s.find("void light()"))
-		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") and not light.contains("* LIGHT_COLOR")
+		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
+			and not light.contains("* LIGHT_COLOR")
 		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
-		ok(greyed and tone_ok and s.contains("AO = vis_ao(vis_f)") and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)"),
+		var amb_ok := s.contains("AO = vis_ao(vis_f)") \
+			and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)")
+		ok(greyed and tone_ok and amb_ok,
 			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
 	var amb := RaidLook.vis_amb(m.env.environment)
 	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)

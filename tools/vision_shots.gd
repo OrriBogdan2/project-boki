@@ -2,7 +2,8 @@ extends RefCounted
 ## --vision-shots --shots-dir=<dir> [--fixed-fps 30]: the sight wedge at the match camera with the HUD. You stand
 ## aiming (a rival ahead with a plate, a crouched rival ahead with none, a rival behind you hidden), sweep your aim
 ## so the wedge turns over the one behind, crouch, then stand while the one behind shoots at you (revealed in her own
-## lit circle) and stops (it fades), then you hold the far look [--raid=<condition>, default clear]: <dir>/f0000.jpg... every frame from SETTLE, plus
+## lit circle) and stops (it fades), then you hold the far look (--raid=<condition>, default clear):
+## <dir>/f0000.jpg... every frame from SETTLE, plus
 ## stand.png, crouch.png, reveal.png and scout.png. Run on a real GPU (jobq --needs gpu); docs/specs/VISION_LOOK.md.
 
 const SPAWN_WAIT := 30   # frames before placing anyone (the match puts you on the map)
