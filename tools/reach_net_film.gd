@@ -2,14 +2,17 @@ extends "res://tools/tele_net_shots.gd"
 ## --reach-net-film --shots-dir=<dir>: Grimble's Deep Reach seen from another game (Net 0.24.19). Two games over the
 ## desktop relay (the --remote-anim-check harness): the guest (headless) plays Grimble and hooks this game's hunter
 ## CASTS times, reeling it in; this game draws every other step to <dir>/f_NNNN.png (30 fps) with the camera on
-## both, for an MP4 (ffmpeg). Run it with a renderer (GPU, jobq). Lines: REACHFILM ok|FAIL <what>.
+## both, for an MP4 (ffmpeg). Frames are kept small in memory and written after, so this game keeps real time with the
+## guest's. Run it with a renderer (GPU, jobq). Lines: REACHFILM ok|FAIL <what>.
 
 const CASTS := 5
 const STAND := Vector3(6.0, 0, 0)  # m from home: where this game's hunter waits to be hooked
 const CAST_GAP := 2.6  # s between the guest's casts (the reel and the arm's way home play out)
+const ZOOM := 0.4  # the camera, close on both
+const FRAME_W := 960  # px: each kept frame's width
 const FILM_S := 12.0  # s of game time filmed (the guest starts casting as this game comes up)
 
-var frame_n := 0
+var frames: Array[Image] = []
 var go := false  # (the guest) this game is filming: cast
 
 
@@ -34,6 +37,8 @@ func _host() -> void:
 	if m.hud:
 		m.hud.visible = false
 	copy.reclass(Arch.weight("dredge"), "dredge")  # the copy's body (the arch does not ride the snapshot)
+	m.cam.zoom = ZOOM
+	m.cam.zoom_to = ZOOM
 	_fresh(m.player)
 	m.player.teleport(home + STAND)
 	Net.lobby_emit("rf", {})
@@ -57,10 +62,12 @@ func _host() -> void:
 		if int(round(t / DT)) % 2 == 0:
 			var img := main.get_viewport().get_texture().get_image()
 			if img != null:
-				img.save_png(shots_dir.path_join("f_%04d.png" % frame_n))
-				frame_n += 1
+				img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+				frames.append(img)
+	for i in frames.size():
+		frames[i].save_png(shots_dir.path_join("f_%04d.png" % i))
 	ok(out_frames > 30, "the guest's Grimble's arm is out on this game (%d steps)" % out_frames)
-	ok(frame_n > 100, "frames saved (%d; needs a renderer)" % frame_n)
+	ok(frames.size() > 100, "frames saved (%d; needs a renderer)" % frames.size())
 	if FileAccess.file_exists(dir.path_join("guest.log")):
 		DirAccess.copy_absolute(dir.path_join("guest.log"), shots_dir.path_join("guest.log"))
 	_finish()
