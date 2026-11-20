@@ -211,7 +211,8 @@ func _step_line(main: Node, id: String) -> void:
 			)
 		)
 		if absf(st[0]) > STEP_CM:
-			var open: bool = STEP_OPEN.get(id, "") == md[0]
+			# (a Hunter on another's clips, "clips_from", has no stride of its own to fit yet)
+			var open: bool = STEP_OPEN.get(id, "") == md[0] or clips.d.has("clips_from")
 			print(
 				(
 					"%s %s: a planted foot travels %+.1f cm a step in the %s at %.2f m/s, bar %.1f"
