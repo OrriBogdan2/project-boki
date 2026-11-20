@@ -675,6 +675,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		step(m, 3.0, func():
 			Sfx.listener = P.pos      # (the camera sets it each frame; headless it stays at the origin, out of hearing)
 			P.render(DT, 1.0)
+			_clips_frame(P)
 			w[0] += steps.call()
 			if P.grounded and Vector2(P.vel.x, P.vel.z).length() > 4.0: w[1] += 1)
 		P.inp["move"] = Vector2.ZERO
@@ -698,6 +699,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 			T.grounded = true
 			Sfx.listener = P.pos
 			T.render(DT, 1.0)
+			_clips_frame(T)
 			n[0] += steps.call()
 		T.remote = false
 		T.vel = Vector3.ZERO
@@ -708,6 +710,13 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
 		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
 	)
+
+## The rest of a real frame after `h`'s render: its clips advance (WardenSync runs after Match), and a Hero's step
+## falls on their foot plants (WardenSteps), so a step heard there needs them moving.
+func _clips_frame(h: Hunter) -> void:
+	var sy := h.model.get_node_or_null("Warden/Sync")
+	if sy:
+		sy.call("_process", DT)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
