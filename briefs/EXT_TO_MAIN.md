@@ -10450,3 +10450,4 @@ READY ext/clarity-4v4-shots 7047a1391db814555f984656528776f768c4f370 (combat cla
 READY ext/farm-raise-shapes bf28076eca5 (raised stats show as body size, sqrt growth 0.12, model rebuilt on a stat bite; food/care audit in GARDEN.md)
 READY ext/stuck-integ-f44ae5a2 a8ce72698f25bd54d49b1b8c0e5f1fd6dda66c88 (supersedes: ext/merge-lane-leftover-1117 ext/stuck-integ-5d6d8248 ext/merge-lane-hunters5-1117 ext/mantle-port-a; PR #472 re-merged on main d422ead36b: Albert aegis = branch upright slab + main lit plates/no rivets; import 0 err; bulwark-combo 213/0 fail (was 1); hero-vfx gunslinger 0.154 m red = main; style hud_hover/ability_text/check_registry reds = main; needs GATE)
 READY ext/extra-shadow-warnings 123c3ae3ba (shadowing renames in home, ui, home_layout, hunter, arch_kit: godot-shadow 378 -> 258, no behaviour change)
+READY ext/ui-keycap-rebind 87002f3f2a (ability-bar-check rebind row: E to mouse 4, R to letter; bar, tooltips, tutorial show new caps)
