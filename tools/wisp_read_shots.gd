@@ -73,7 +73,9 @@ func _fight_shots() -> void:
 		if not shots.is_empty() and t >= float(shots[0]):
 			var n := SHOT_AT.size() - shots.size()
 			shots.pop_front()
-			main.get_viewport().get_texture().get_image().save_png(dir.path_join("fight_%d.png" % n))
+			var img := main.get_viewport().get_texture().get_image()
+			img.save_png(dir.path_join("fight_%d.png" % n))
+			print("WISPREAD image %d x %d, x%.2f" % [img.get_width(), img.get_height(), _px_k()])
 			print("WISPREAD shot %d at t=%.1f" % [n, t])
 			for k in m.kins:
 				if k.wisp and k.state == "shoulder":
@@ -85,7 +87,7 @@ func _fight_shots() -> void:
 ## Screenshot pixels per unit of the screen coordinates the camera projects to (the window may be stretched).
 func _px_k() -> float:
 	var vp := main.get_viewport()
-	return float(vp.get_texture().get_width()) / vp.get_visible_rect().size.x
+	return float(vp.size.x) / vp.get_visible_rect().size.x
 
 func _body_rect(feet: Vector3) -> Rect2:
 	var top := m.cam.unproject_position(feet + Vector3(0, HUNTER_H, 0))
