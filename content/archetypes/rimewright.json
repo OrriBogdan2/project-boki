@@ -64,7 +64,7 @@
 		"ice_width": 1.6,
 		"ice_time": 5.0,
 		"ice_col": "#bff0ff",
-		"ramp": 0.2,
+		"ramp": 0.12,
 		"air_fall": 1.5,
 		"stop": 0.15
 	},
