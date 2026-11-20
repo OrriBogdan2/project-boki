@@ -178,3 +178,40 @@ really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfe
 | Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
 | Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
 
+
+## The run at match scale: cm a planted foot travels a step (Nov 20, ext/anim-stride-foot-slide)
+
+A match draws every Hunter at `Hunter.VIS_SCALE` (1.12) and moves it at `HunterMove.speed` (the hunter_move.json row
+times `body_scale` 1.16, e.g. 5.39 m/s), but `WardenGait.plan` set the loco rate from the world speed over `foot_mps`,
+which `--anim-audit` reads on the model at its own scale: a 12 % bigger model covers 12 % more ground a cycle, so every
+run swept its planted foot 12 % too fast (Kael's grow scales it further). `WardenClips` now gives `plan` the speed at
+the model's own scale (`Models.hunter` stores it as the `look_scale` meta).
+
+`--foot-slide-check` prints a STEP line per Hunter for the forward run as a match shows it: the glb and its triangles,
+the cycle, the stride a planted foot sweeps a cycle at rate 1, the loco rate, the cadence, and how far a planted foot
+travels over the ground in one step (cm, + forward). A foot stands on the lower of its heel and toe (the sole's ends,
+`AnimAudit.sole_ends`) while that is within 3 cm of its lowest, sampled at 120 Hz (a 0.34 s run cycle plants a foot
+for a few 30 fps frames). FAIL past 5 cm. `foot_mps[1]` is fitted on it: the rate that plants the foot is the speed
+times the cycle over the stride. Where that rate alone ran a Hunter at 2.2 to 2.5 steps/s (Lace, Tenzo) or hit
+`RATE_MIN` (Neve), the run's stride stretch (`loco.stride[1]`) came down first.
+
+The glbs are the ones /home/boki/meshy/v95/<id>/current.json names (blob ids match on main c0aecb37d8). Neg = the
+foot slides back (the clip's sweep is faster than the body).
+
+| Hunter | glb (tris) | main cm/step (rate, steps/s) | after cm/step (rate, steps/s) | data change |
+|---|---|---|---|---|
+| Lace (`archer`) | hem (102,027) | -27.1 (1.42, 4.7) | +2.4 (1.31, 4.4) | stride run 1.5 -> 1.1, foot_mps 3.72 -> 3.6 |
+| Kael (`juggernaut`) | kael (112,322) | +5.8 (1.21, 3.6) | -0.7 (1.31, 3.9) | foot_mps 4.35 -> 3.6 |
+| Vex (`gunslinger`) | vex (120,190) | -1.4 (0.98, 3.4) | -0.5 (0.97, 3.4) | foot_mps 5.4 -> 4.88 (the scale fix alone read +6.8) |
+| Albert (`bulwark`) | breaker (108,541) | -9.0 (1.54, 6.2) | +0.3 (0.98, 3.9) | foot_mps 3.65 -> 5.12 |
+| Neve (`rimewright`) | claire (95,552) | -28.6 (1.17, 6.9) | -0.7 (0.60, 3.5) | stride run 1.0 -> 0.9, foot_mps 4.4 -> 8.51 (at RATE_MIN) |
+| Cinder (`ashwick`) | cinder (109,187) | -6.1 (1.05, 6.3) | +1.9 (0.94, 5.6) | scale fix only |
+| Tenzo (`dolm`) | tarek (95,626) | -23.8 (1.08, 3.9) | +0.4 (0.79, 2.9) | stride run 1.2 -> 1.0, foot_mps 5.0 -> 6.11 |
+| Sparkle (`mage`) | ryzz (97,646) | -10.3 (1.29, 4.3) | +0.2 (1.05, 3.5) | foot_mps 4.19 -> 4.6 |
+| Grimble (`dredge`) | dredge (125,032) | -10.0 (1.08, 3.4) | +0.2 (0.96, 3.0) | scale fix only |
+| Meeko (`tender`) | pip (121,292) | -10.3 (1.16, 6.8) | -0.1 (0.82, 4.8) | foot_mps 4.55 -> 5.75 |
+| Sable (`thief`) | sable (115,114) | -14.4 (1.70, 5.4) | +0.4 (1.36, 4.3) | foot_mps 3.18 -> 3.55 |
+
+Motley hovers and Gil has no loco clips: no STEP line. `--anim-audit`'s run reading poses the model at its own scale
+but at 5.39 m/s and counts the lowest 30 % of the ankle's height as planted (late swing too), so it reads these runs
+differently: Neve 39 -> 25 %, Albert 43 -> 26 %, Lace 89 -> 75 %, Tenzo 25 -> 37 % (DEBT.md).
