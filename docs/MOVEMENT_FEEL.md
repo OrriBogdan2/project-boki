@@ -1403,3 +1403,20 @@ Results on origin/main a1b35c78ee, unchanged by this pass:
 - No height inside the reach window (jump apex 1.57 m + `MANTLE_REACH` 1.5 m = 3.07 m) misses. No mantle snaps: no step in the rise moves more than 0.2 m past what its speed explains. So the reach window stays as it is.
 - The 3.2 m wall tier sits 0.13 m above the window, so jumps never top it (decision 0007). Glides top every height.
 - The only red was in the check itself: `face 4 jump_30` topped 10/160 3.2 m faces. The run slid 3 tiles along the face, caught a 2.4 m stretch and walked up a flight. A top now counts only over the face's own straight stretch (`_on_face`).
+## Run turn: the stick flipped 180 degrees at full run (`--move-feel-check` `run_turn_*`, `--anim-audit` TURNS)
+
+The source data settles it (no footage of a ground reversal exists in the reports): with keys held at or under the run, UE's walking step turns the velocity toward the keys with GroundFriction (1/s, 1.0) and adds MaxAcceleration (47-54 m/s²). The walking brake (22.2 m/s² plus friction x2) acts only with no keys or over the run, so it plays no part in a held flip. Ours (`Loco.accel_to`) has no turn friction and lands within one 60 Hz step of that rule for every kit, so no number in `content/rules/hunter_move.json` changed. The body faces the cursor, never the stick: with the cursor held ahead it does not turn (the legs backpedal); with the cursor flipped too it turns at `turn_rate` 1280 deg/s.
+
+| Kit | Run (m/s) | Zero | 95% back | Source rule | Body 180 (cursor flipped) |
+|---|---|---|---|---|---|
+| rimewright | 5.16 | 0.083 s | 0.167 s | 0.083 / 0.167 s | 0.150 s |
+| archer, juggernaut, gunslinger, tender | 5.28 | 0.100 s | 0.167 s | 0.083 / 0.167 s | 0.150 s |
+| gil | 5.34 | 0.100 s | 0.183 s | 0.083 / 0.167 s | 0.150 s |
+| ashwick, mage, thief, ostra | 5.39 | 0.100 s | 0.183 s | 0.083 / 0.167 s | 0.150 s |
+| dolm | 5.39 | 0.100 s | 0.183 s | 0.100 / 0.183 s | 0.150 s |
+| dredge | 5.39 | 0.100 s | 0.200 s | 0.100 / 0.183 s | 0.150 s |
+| bulwark | 5.63 | 0.117 s | 0.217 s | 0.100 / 0.200 s | 0.150 s |
+
+Asserted per kit (`tools/move_feel_turn.gd`): zero and 95%-back within 1 step of the source rule, the same with the cursor flipped, the body 180 within 9 steps, no body turn with the cursor held. `run_turn_err_frames` <= 1, `run_turn_full_t` <= 0.22 s, `run_turn_face_t` 0.12-0.17 s.
+
+Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip): with the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The steady run before and after reads 10-22% for most Hunters (the calibration), but the turn itself slides 52-119% (held) and 35-128% (flipped): the loco blend (ease 12/s) trails a reversal that takes 0.1 s to zero. No Hunter is under `MAX_SLIDE` 25% yet, so the audit prints OPEN lines and only fails past `TURN_CEIL` 140% (today's worst, archer 119-128%, plus a margin). Backlog: "run turn slide".
