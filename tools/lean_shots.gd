@@ -1,7 +1,8 @@
 extends "res://tools/boki_rig_shots.gd"
-## --lean-shots --shots-dir=<dir> [--species=a,b] [--foods=a,b,c] [--meals=N]: the food lean (Lean) at the garden camera (Home's
-## default framing, as farm.png). Each species is one row with base_mode on: fresh, `--meals=N` snacks  of each
-## food (from fresh; each at its size lean, Lean.size), then the part each of those leans grows at a form (Lean.grow_part) on this body. <dir>/lean_<species>.png
+## --lean-shots --shots-dir=<dir> [--species=a,b] [--foods=a,b,c] [--meals=N]: the food lean (Lean) at the garden
+## camera (Home's default framing, as farm.png). Each species is one row with base_mode on: fresh, `--meals=N`
+## snacks (default 3) of each food (from fresh; each at its size lean, Lean.size), then the part each of those leans
+## grows at a form (Lean.grow_part) on this body. <dir>/lean_<species>.png
 ## is one row, lean.png all rows stacked. Needs a renderer.
 
 const SPECIES := ["cindle", "puddlet", "burrlet", "zephyrak", "caecilith", "cairnback", "kestrike", "selenfin",
