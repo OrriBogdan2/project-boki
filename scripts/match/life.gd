@@ -154,6 +154,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
+	m.sfx("stomp_windup", h.pos, -2.0)     # positional: both squads in reach hear it commit
 	if o == m.player and m.hud:
 		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 	if not h.remote:
@@ -235,7 +236,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 				end_stomp(m, h, "done")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-				m.sfx("crit", o.pos, -2.0, 0.7)
+				m.sfx("stomp_finish", o.pos)
 			else:
 				end_stomp(m, h, "missed")
 

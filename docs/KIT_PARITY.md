@@ -22,12 +22,16 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Kael | Slam angle 70 `[?]` | **done** `ext/parity-kael-slam-lane` 704b7636e | no line; the source is a 0.72 m lane, not a cone (hero-ref 0157, measured); ext/slice-ranges-source calls the angle not determinable without that measure: take the lane |
 | Kael | Warchain leash 24 m `[?]` | **owner** | not determinable (ext/feel-warchain-leash 68f8b9a7a, frames 0301-0366); 24 m kept |
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
+| Kael | RMB lunge 4.5 to 7.5 vs 5 flat | **done** `ext/kael-open-rows` | travels 4.5 to 5.4 m (JSON [5.3, 6.35] x0.85 feel; DECISIONS 11-11 short lunge); docs/heroes/juggernaut.md "Open rows closed, Nov 20" |
+| Kael | Riposte reset on a kill `[?]` | **done** `ext/kael-open-rows` | the data's "killing a living enemy": a hunter taken down or a monster killed (footage f99-f101 dummy); dash, pull exits: same section |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
 | Lace | RMB range 14, R range 18 / width .5 `[?]` | **owner** | not determinable (ext/parity-ranges-slice); ours stands |
 | Lace | Spirit Walk ending inside a ledge | **done** `ext/combat-lace-spirit-ledges-rebased` 40f7865d8 | ext/w0246-combat-a |
 | Lace, Sparkle, Cinder, Tenzo | Unsourced dash-flow rows (8, 5, 3 + `dash.ground.lmb`, 6) `[?]` | **owner** | no source; the kit default (`keep`, Q `fire`) stands |
 | Cinder | RMB range 14 `[?]` | **owner** | not determinable (ext/slice-ranges-source: 0133 end was the cursor) |
 | Cinder, Grimble, Sparkle | Dash curve not decoded | **done** `ext/dash-curves-c` d8e71e611 | no line |
+| Tenzo | Rock Hop dash curve | **not determinable** | the footage's only ground dash is Tetra's Landslide push (frames 0516-0518, 128.77-129.40 s): its fit drops rms from 16.4% (constant) to 7.2% of the mean, but our Rock Hop is a leap (owner item 111, x0.85 / x1.15 kept) with no push to shape; the RMB hop (0258-0259) and dash-into-dunk (0985-0997) are too small at 4 fps. `dash_feel.json` dolm: no curve (ext/feel-dash-curves-d) |
+| Neve | Skate start (held, not via dash_feel) | **done** `ext/feel-dash-curves-d` | `dash.ramp` 0.2 to 0.12 s from the 5 fps pan of skates 0283-0291 and 0236-0244 (rms 6.0% to 4.1% and 15.4% to 14.8% of the cruise; best 0.08 s needs a shorter `tm_skate_go`, whose length the anim check ties to the ramp). Cruise and stop already matched |
 | Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a |
 | Albert | RMB slam range `[?]` | **done** | goes with the Shield Slam (the source has no slam) |
 | Albert | RMB aegis/bash routing `[?]` | **done** `ext/combat-albert-aegis-input` 91c3dba10 | ext/w0246-feel (its button-up latch gave way to held-fire-resume; the aegis asserts follow) |
