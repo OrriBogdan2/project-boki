@@ -553,6 +553,30 @@ def pieces(ob, on=None):
         lab = new
 
 
+def cloak_weights(G, P, names, cloak, ours):
+    """`meshy_cloak`: a long cloak Meshy hangs on the legs flares out in a run, so what is far from a leg's bones moves
+    its leg weight to the hips: all of it within `radius` m of the bones, easing out over `ramp` m to `keep` of it. A
+    ramp that is short tears the hem (its edges are ~1 cm: a weight step over one, times a stride's lever, is a
+    stretch). The boots are wider than the legs: below ankle + `boot_z` the radius eases to `boot_r`, and the foot's
+    own bones reach `toe` m forward. The weights G [vertex, bone] change in place."""
+    r, keep = float(cloak["radius"]), float(cloak.get("keep", 0.25))
+    ramp = float(cloak.get("ramp", 0.5 * r))
+    boot_r, boot_z, toe = float(cloak.get("boot_r", r)), float(cloak.get("boot_z", 0.3)), float(cloak.get("toe", 0.0))
+    for sd in "RL":
+        ankle = S_J["ankle." + sd]
+        foot = np.array([0, toe, -0.1])
+        h = np.clip(((P - ankle) @ foot) / (foot @ foot), 0, 1)
+        d = np.minimum(seg_dist(P, "hip." + sd, "knee." + sd), seg_dist(P, "knee." + sd, "ankle." + sd))
+        d = np.minimum(d, np.linalg.norm(P - (ankle + h[:, None] * foot), axis=1))
+        reach = r + (boot_r - r) * np.clip((ankle[2] + boot_z - P[:, 2]) / 0.1, 0, 1)
+        f = keep + (1 - keep) * np.clip((reach + ramp - d) / ramp, 0, 1)
+        legs = [names.index(b) for b in {ours(a + "." + sd) for a in ("thigh", "shin", "foot")} if b in names]
+        moved = G[:, legs] * (1 - f)[:, None]
+        G[:, legs] -= moved
+        G[:, names.index("hips")] += moved.sum(1)
+        print("meshy: cloak %s %d vertices off the leg" % (sd, int((f < 1).sum())), flush=True)
+
+
 def meshy_weights(low, arm, P):
     """`weights` "meshy": Meshy's auto-rig of Low on our bones. Each vertex takes the weights of its nearest rigged vertex
     (Meshy returns the same mesh, centred, its vertices split), each Meshy bone's on ours (MESHY; a hand's on its
@@ -613,18 +637,8 @@ def meshy_weights(low, arm, P):
         leg = names.index("thigh." + sd)
         G[:, hips] += G[:, leg] * up
         G[:, leg] *= 1 - up
-    cloak = SPEC.get("meshy_cloak")     # {"radius": m, "keep": share}: a long cloak Meshy hangs on the legs flares out in
-    if cloak:                           # a run; past radius (to 1.5x) from its leg's bones it keeps `keep` of that leg
-        r, keep = float(cloak["radius"]), float(cloak.get("keep", 0.25))
-        for sd in "RL":
-            d = np.minimum(seg_dist(P, "hip." + sd, "knee." + sd), seg_dist(P, "knee." + sd, "ankle." + sd))
-            f = keep + (1 - keep) * np.clip((1.5 * r - d) / (0.5 * r), 0, 1)
-            f[P[:, 2] < S_J["ankle." + sd][2] + 0.06] = 1       # (the boot reaches past radius: it stays on the leg)
-            legs = [names.index(b) for b in {ours(a + "." + sd) for a in ("thigh", "shin", "foot")} if b in names]
-            moved = G[:, legs] * (1 - f)[:, None]
-            G[:, legs] -= moved
-            G[:, hips] += moved.sum(1)
-            print("meshy: cloak %s %d vertices off the leg" % (sd, int((f < 1).sum())), flush=True)
+    if SPEC.get("meshy_cloak"):
+        cloak_weights(G, P, names, SPEC["meshy_cloak"], ours)
     rigid = 0
     for piece in np.unique(lab):
         m = lab == piece
