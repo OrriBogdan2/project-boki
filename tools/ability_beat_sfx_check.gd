@@ -124,7 +124,9 @@ func _sable() -> void:
 		_plays("thief_shadow_whisk", func(): kit._shadow_step(dummy)), "Sable step behind a foe: thief_shadow_whisk"
 	)
 	ac.fresh(dummy)
-	me.inp["aim"] = me.pos + Vector3(0, 0, -9)  # down an empty lane
+	me.teleport(r[4])  # back home, 4 m from the dummy (the step put her beside it)
+	me.vel = Vector3.ZERO
+	me.inp["aim"] = me.pos + Vector3(-9, 0, 0)  # down the empty lane, away from the dummy
 	kit._throw_bola()
 	ok.call(
 		_heard_within(m, "thief_bola_tie", 1.0), "Sable Bola end: a Bola that catches nobody ties off (thief_bola_tie)"
