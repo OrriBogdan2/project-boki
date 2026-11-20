@@ -12,6 +12,7 @@
 	"fantasy": "The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"howto": ["Play: mid-range rifle; slide with {dash} while shooting.", "Combo: {secondary} past a foe to shove them back, then shoot.", "Avoid: standing still, except to charge {signature}."],
 	"silhouette": "the long scarf streaming behind, the brass ammo strap across a narrow black top, the gold coin on her choker and the six-barrel brass minigun for a right forearm",
+	"hint": {"lmb": "Hold {fire} for full-auto fire; Dazed foes take more", "rmb": "Tap {secondary} to fire a Burr Charge that Dazes foes", "e": "Press {signature}, stand still, then it fires a long beam", "dash": "Tap {dash} to skid, hold to slide; keep shooting"},
 	"card": {"role_word": "Rifleman", "loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.", "dash": "Tap to skid, hold to slide further; keep shooting throughout.", "passive": "Knocking a hunter down returns Slipstep; landed abilities give lifesteal.", "rmb": "Shoot a charge that Dazes; hitting a wall blasts a cone back.", "e": "Stand still 0.6s, then fire a beam through walls and everything.", "x": "A shell lands at your cursor after 1.6s, then burns the patch.", "weapons": {"quill_rifle": "Full-auto rifle; Dazed foes take 90% more."}, "chips": {"rmb": ["22 hit", "16 cone"], "e": ["24 dmg"], "x": ["24 dmg"]}},
 	"signature": "quill_rifle",
 	"resource": {
@@ -30,6 +31,7 @@
 	},
 	"dash": {
 		"id": "slipstep",
+		"charges": 1,
 		"rank3_speed": 0.25,
 		"rank3_speed_t": 2.0,
 		"name": "Slipstep",
@@ -98,7 +100,7 @@
 		"rattle_k": 0.2,
 		"shave": 0.2,
 		"shave_rank3": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and creeps round toward your aim at 30 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -147,7 +149,7 @@
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown"},
-		"e": {"early": 90.0, "late": "free", "source": "briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner item 144 (briefs/MAIN_TO_EXT.md 11-05): cap the charge's aim turn at ~90 deg/s; free after the shot"},
+		"e": {"early": 30.0, "late": "free", "source": "briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner 11-09: a strong yaw lock, the charge creeps round at 30 deg/s at most (was 90, item 144); free after the shot"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held"}
 	},
 	"tells": {

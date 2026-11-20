@@ -3,7 +3,8 @@ extends RefCounted
 ## The tutorial's longer words: the second line under a step's banner (content/rules/tutorial.json
 ## "detail") and the Boki's hints, filled in from the player's own keys and the hunter's ability data.
 ## %C crouch (the dive), %E the E key, %U the ultimate's level, %F interact, %S the right-click key, %T the Boki key,
-## %R rank-up combo, %N the E ability's name, %X the E ability in plain words (key included).
+## %R rank-up combo, %N the E ability's name, %X the E ability in plain words (key included), %Y the Ultimate's
+## key (R: the hunter's own big move; the Fusion is the ultimate key, X, and %K in Tutorial) and %Z its name.
 
 ## "Press E: Longneedle. Stand still ..." built from the hunter's card text (any Hunter).
 static func ability_tip(h: Hunter) -> String:
@@ -25,9 +26,12 @@ static func rank_combo() -> String:
 ## Fills the tokens above in a line (the ability name comes from the hunter's data).
 static func fill(txt: String, h: Hunter) -> String:
 	var nm := "your ability"
+	var ult := "your Ultimate"
 	if h != null and h.ak != null:
 		nm = String(h.ak.e_def().get("name", nm))
+		ult = String(h.ak.x_def().get("name", ult))
 	return txt.replace("%X", ability_tip(h)).replace("%R", rank_combo()).replace("%N", nm) \
+			.replace("%Y", Settings.key_cap("hunter_ult")).replace("%Z", ult) \
 			.replace("%C", Settings.key_cap("crouch")).replace("%E", Settings.key_cap("signature")) \
 			.replace("%F", Settings.key_cap("interact")).replace("%S", Settings.key_cap("secondary")) \
 			.replace("%T", Settings.key_cap("throw")).replace("%U", str(Hunter.ULT_AT[0]))

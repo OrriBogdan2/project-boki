@@ -5,8 +5,7 @@ inside open, the outside walled in), and the needles, slivers and caps the swap'
 triangle is tested by rays (RAYS directions in a cone on each side of it, RANGE m): a patch wound inside-out is flipped
 (its vertices that no right-way triangle shares get their normal flipped too), a sheet open on both sides is made
 degenerate (not drawn), and the first pass also drops the needles/slivers/caps in --zone.
-Run: blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb [passes=3] [cap_from]
-cap_from: the first rip-cap triangle of this port's skin (default CAP_FROM, the 11-17 Grimble; the r2 A port: 29973).
+Run: blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb [passes=3]
 Uses Blender only for its BVH ray cast. Prints what each pass flipped and dropped."""
 import json
 import struct
@@ -77,9 +76,7 @@ def shapes(pos, idx):
 
 def main():
     src, dst = sys.argv[sys.argv.index("--") + 1:][:2]
-    more = sys.argv[sys.argv.index("--") + 1:][2:]
-    passes = int(more[0]) if more else 3
-    cap_from = int(more[1]) if len(more) > 1 else CAP_FROM
+    passes = int((sys.argv[sys.argv.index("--") + 1:] + ["3"])[2])
     data = bytearray(open(src, "rb").read())
     jlen = struct.unpack("<I", data[12:16])[0]
     j = json.loads(data[20:20 + jlen])
@@ -114,7 +111,7 @@ def main():
         flip[rows] = (op[:, 1] - op[:, 0] > FLIP_GAP) & ~sheet[rows]
         gone = sheet.copy()
         if rnd == 0:
-            gone |= junk(pos, idx, main_bone, names, live, cap_from)
+            gone |= junk(pos, idx, main_bone, names, live)
         flip &= ~gone
         idx[flip] = idx[flip][:, [0, 2, 1]]
         idx[gone] = idx[gone][:, [0, 0, 0]]
@@ -157,7 +154,7 @@ def scrap(pos, idx):
     return out
 
 
-def junk(pos, idx, main_bone, names, live, cap_from):
+def junk(pos, idx, main_bone, names, live):
     """Needles and slivers low on the right, tip vertices of one triangle with a long edge, and the rip caps of the right leg."""
     longest, area, mid = shapes(pos, idx)
     zone = (mid[:, 1] < ZONE_Y) & (mid[:, 0] > 0.0)
@@ -173,7 +170,7 @@ def junk(pos, idx, main_bone, names, live, cap_from):
         tip, o1, o2 = t[:, k], t[:, (k + 1) % 3], t[:, (k + 2) % 3]
         long_edge = np.maximum(np.linalg.norm(at[tip] - at[o1], axis=1), np.linalg.norm(at[tip] - at[o2], axis=1))
         gone |= (used[tip] == 1) & (long_edge > NEEDLE_EDGE) & (at[tip][:, 1] < 0.5) & live
-    caps = np.arange(len(idx)) >= cap_from
+    caps = np.arange(len(idx)) >= CAP_FROM
     bone = np.array([np.bincount(main_bone[tri]).argmax() for tri in idx])
     gone |= caps & np.isin(bone, [names.index(b) for b in CAP_BONES]) & live
     return gone

@@ -57,6 +57,7 @@ func run(main: Node) -> void:
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
+			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
@@ -121,7 +122,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
 	var sh: Dictionary = seen.get("shoot", {})
 	var melee: bool = p.wpn.get("melee", false)
-	var want := "Hold to draw" if p.wpn.has("draw") else "Now shoot"
+	var want := "Hold to draw" if p.wpn.has("draw") else "Shoot"
 	if melee:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
