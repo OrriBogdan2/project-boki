@@ -200,3 +200,21 @@ hold, and the item stays in the bag. The card does no math of its own: it reads 
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 
 **XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
+## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
+
+Every food and care input and what the player can see of it today:
+
+| Input | Changes | Seen |
+|---|---|---|
+| Meal / snack (`snacks.json`, `Care.FOODS`) | need bars, lean (`Evo.eat`) | body tint and flecks (`Evo.dress`, `Lean.mark`), journal line, chime on a new fleck |
+| Stat bites, toys, drill, loot bites (`garden_items.json`) | stats (`StatBudget`) | glint over the Boki (`StatGlint`), one tip, card number; **before this change no look on the body** |
+| Shaping items (token, sweet, rinse, aura) | path, lean, aura | preview card, ghost colour, aura (`GardenAura`) |
+| Pat, fetch, nap, chat (`care.json`) | trust, joy, xp once a kind a day | joy/trust bars, state animations |
+| Friends at the base (`BaseDrift`) | traits | journal line when a trait crosses a band |
+
+Gap closed first: raised stats now show as body size. `StatBudget.growth` = `care.json` `stat_budget.grow_max`
+(0.12) x sqrt(total points / `total_cap`), added to `evo_scale` in `Evo.dress` (60 points: 6% bigger, the full 240:
+12%; a fresh one is unchanged; it stacks with the 10% per form). A stat bite that changes the growth sets `look` in
+`GardenItems.use`, so the farm rebuilds the model (`_swap_kin_model`) and the size shows on the spot. No new HUD
+element. Check: `--garden-items-check`.
+Left for later (needs owner OK, stabilize sprint): a stat line on the Boki card, a trait word shown on the model.

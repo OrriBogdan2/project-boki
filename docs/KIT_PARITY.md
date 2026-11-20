@@ -552,7 +552,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | RMB | Shot, delayed Root, 11.5 s [D] | Hop form, windup 1.0, cd 10.5 | differ `[?]` motion |
 | LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion |
-| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours · **open** (branch ready: ext/parity-no-riders-meeko) |
+| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4; tap 6.75 m, after a 1 s pause the ember is bigger (x1.5) and flies 1.25x further (owner 11-17) | owner call; the footage's 13.5 m is halved on purpose |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion · **owner** (11-10) |
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, no self factor | match |
@@ -867,10 +867,10 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Vex | Longneedle self-recoil (`e.recoil`, on herself) | 6 | 1.56 m | Railgun: no knock on the card; about 0.5 bh (0.9 m) shove back in 0.2 s [F] | match (footage shows the recoil) | `[?]` (F: 0.9 m) |
 | Vex | Quill rifle shot (`quill_rifle.kb`) | 1.0 | nudge | Glyph Rifle: none | match (nudge) | n/a |
 | Kael | Finishing Slam (`rmb.slam.push`) | 6 | 1.56 m, 0.40 s | Execution Slam: 130 dmg, no knock on the card [D]; dummy knocked off a cliff edge, no distance (juggernaut.md 0291) [F] | `[?]` | `[?]` |
-| Kael | Chain Lunge (`rmb.lunge.push`) | 7 | 2.01 m | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | differ | n/a |
-| Kael | Haul Slam (`rmb.haul.push`) | 7 | 2.01 m | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | differ | n/a |
-| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 5, lift 2.5 / 9 | 1.55 m / 3.07 m | Flame Step: "dash attack, 49 dmg", no knock [D] | differ | n/a |
-| Kael | Gilded Riposte strike (`juggernaut_ult.gd`, 6.0 in code) | 6 | 1.56 m | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | differ | n/a |
+| Kael | Chain Lunge (`rmb.lunge.push`) | 0 (was 7) | none | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Haul Slam (`rmb.haul.push`) | 0 (was 7) | none | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 0 (was 5, lift 2.5) / 0 (was 9) | none / none (no hop either) | Flame Step: "dash attack, 49 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Gilded Riposte strike (`x.strike_kb`, was 6.0 in `juggernaut_ult.gd`) | 0 (was 6) | none | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Lace | Heavy Shot (`rmb.pin.push`, tap to full) | 8-12 | 2.52-5.12 m | Heartpiercer: "an arrow that knocks back" [D]; 2-3 bh (3.6-5.4 m) along the shot, charge not known (pin.md 0273) [F] | match | `[?]` (full charge inside F) |
 | Lace | Longbow shot (`longbow.kb`) | 3.5 | 0.62 m | Greenwood Bow: no knock [D] | differ | n/a |
 | Lace | Empowered ult shots (`x.kb`) | 4 | 0.76 m | Virideth's Fury: "greatly empowered", no knock [D] | differ | n/a |
@@ -896,8 +896,8 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Albert | Boop (`rmb.shield.boop`, a set slide) | 2.8 m at 18 m/s | 2.8 m | none on release; the bash knock-away is an augment [D, F] (bjorn.md item 9) | differ (ours, kept by bjorn.md) | n/a |
 | Sparkle | Storm Rod (`rmb.coil.push`, tap to full) | 4.4-6.6 | 0.92-1.78 m | Voltaic Spear: "knockback on first enemy hit" [D]; about 1 bh (1.8 m) on open ground, done by 0.4 s (vireo.md 0064-0066) [F] | match | `[?]` (full is inside F) |
 | Sparkle | Skycall slide (`e.slide_dist`/`slide_t`, a set slide) | 3.4 m over 1.1 s | 3.4 m | Lightning Strike: "pull or knockback" [D]; slides about 4 bh (7.2 m) over about 1 s (vireo.md 0197-0224) [F] | match | `[?]` (F: 7.2 m, ours 47%) |
-| Sparkle | Kitefall landing (`x.push`) | 8 | 2.52 m | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | differ | n/a |
-| Sable | Empowered bolt (`thief_kit.gd`, 3.0 in code) | 3 | 0.47 m | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | differ | n/a |
+| Sparkle | Kitefall landing (`x.push`, `x.lift`) | 0 (was 8, 2.52 m), lift 0 | none | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
+| Sable | Empowered bolt (`dash.prime_kb` in `thief.json`, was 3.0 in `thief_kit.gd`) | 0 (was 3, 0.47 m) | none | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
 | Sable | Arc bolt (`arc_bolts.kb`) | 0.8 | nudge | Arcslinger: none [D] | match (nudge) | n/a |
 
 **Fixed: none.** The task allowed up to three fixes where the data states a number. No knock row has a source number:
@@ -907,7 +907,7 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
 **Suggestions, not built (PARITY FIRST):**
 - Ours-only knocks the card does not list (14 rows marked **differ**): Kael's Lunge, Haul Slam, Flame Step and Riposte;
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Tenzo's slam; Grimble's
-  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
+  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall and Sable's empowered bolt (both now cut, `ext/sparkle-sable-knock-cut`, so 12 remain). Cutting
   them follows DECISIONS 2026-11-07 (ours-only riders: keep none). Lace's longbow kb 3.5 to 2.0 is the smallest change
   (it turns every arrow from a 0.62 m knock into a nudge).
 - Footage reads that are far off: Vex's wall cone (ours 4.43 m vs 6.3 m; a push near 13.5 would land about 6.3 m), Sparkle's Skycall
@@ -973,7 +973,7 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
-| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 6.8 m/.28 s |
+| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
