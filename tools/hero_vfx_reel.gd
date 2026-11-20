@@ -277,6 +277,20 @@ func _juggernaut_lunge() -> void:
 			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
 	await _go(GAP)
 
+## Vex's Slipstep held 0.9 s down a lane with nothing in it: the slide's whole length at the match camera.
+func _gunslinger_dash() -> void:
+	await _reset(14.0)
+	var slide := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		P.inp["dash_down"] = t > 0.15 and t < 1.05
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(2.4, slide, [], 2.5)
+	await _go(GAP)
+
 func _juggernaut_drop() -> void:
 	await _reset(2.4)
 	var K: JuggernautKit = P.ak
