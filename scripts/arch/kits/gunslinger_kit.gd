@@ -32,7 +32,6 @@ const BURR_RIDE := 0.25  # m: the least height the charge keeps over the ground,
 const BURR_R := 0.15  # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0  # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0  # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
-const HIT_HOLD := 0.3  # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9  # m up the screen the Fever pips sit, clear of her cap and face
 const PALM := "palm"  # the FX anchor on her free (left) hand: the coin and the beam leave from it
 const COIN_FLIP := 22.0  # rad/s: the coin turns end over end in flight
@@ -650,7 +649,7 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
 ## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
-	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	victim.flash_t = maxf(victim.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)
