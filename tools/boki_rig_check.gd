@@ -18,7 +18,13 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"dreadnoyak", "glaciatee", "thunderstrich", "cisternmander", "forgebrock", "tidalisk", "arcestrel", "shinobant",
 	"scythant", "thistlynx", "lyrewing", "eclipsowl", "howlop", "gongrowl", "vaultara", "gravitank", "anchorhorn",
 	"gloamspire", "glomworth", "effigoon", "crofthollow", "citadoad", "lodestaff", "lanternlong", "mossbastion",
-	"murmuron", "strobolin", "rimefang", "selenwhale", "barostorm", "pipeworth"]
+	"murmuron", "strobolin", "rimefang", "selenwhale", "barostorm", "pipeworth",
+	"anchorbill", "barokit", "bastionpet", "bastling", "bathilus", "bellowlet", "bladypus", "blotlet",
+	"brumetide", "bubblisk", "bullpole", "bullsfrog", "calderoise", "canopony", "carpenjaw", "carrousteed",
+	"chimelop", "cometail", "coolatee", "critwom", "cubbat", "domeleon", "dynaboa", "echolop", "ermink",
+	"fawngus", "filefin", "fizzlet", "foalaround", "frigatee", "furnacowary", "galleotter", "glaivyx",
+	"gloamwade", "glockodile", "gongibbon", "gramofrill", "gravadillo", "gravigrub", "hatstag", "jerbit",
+	"jerbolt", "kayak", "kingpinguin", "knotwyrm", "lensling"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
@@ -54,7 +60,19 @@ const OVER_TRIS := {"kindlewren": MESHY_TRIS, "marchleaf": MESHY_TRIS, "mossgrad
 	"gravitank": MESHY_TRIS, "anchorhorn": MESHY_TRIS, "gloamspire": MESHY_TRIS, "glomworth": MESHY_TRIS,
 	"effigoon": MESHY_TRIS, "crofthollow": MESHY_TRIS, "citadoad": MESHY_TRIS, "lodestaff": MESHY_TRIS,
 	"lanternlong": MESHY_TRIS, "mossbastion": MESHY_TRIS, "murmuron": MESHY_TRIS, "strobolin": MESHY_TRIS,
-	"rimefang": MESHY_TRIS, "selenwhale": MESHY_TRIS, "barostorm": MESHY_TRIS, "pipeworth": MESHY_TRIS}
+	"rimefang": MESHY_TRIS, "selenwhale": MESHY_TRIS, "barostorm": MESHY_TRIS, "pipeworth": MESHY_TRIS,
+	"anchorbill": MESHY_TRIS, "barokit": MESHY_TRIS, "bastionpet": MESHY_TRIS, "bastling": MESHY_TRIS,
+	"bathilus": MESHY_TRIS, "bellowlet": MESHY_TRIS, "bladypus": MESHY_TRIS, "blotlet": MESHY_TRIS,
+	"brumetide": MESHY_TRIS, "bubblisk": MESHY_TRIS, "bullpole": MESHY_TRIS, "bullsfrog": MESHY_TRIS,
+	"calderoise": MESHY_TRIS, "canopony": MESHY_TRIS, "carpenjaw": MESHY_TRIS, "carrousteed": MESHY_TRIS,
+	"chimelop": MESHY_TRIS, "cometail": MESHY_TRIS, "coolatee": MESHY_TRIS, "critwom": MESHY_TRIS,
+	"cubbat": MESHY_TRIS, "domeleon": MESHY_TRIS, "dynaboa": MESHY_TRIS, "echolop": MESHY_TRIS,
+	"ermink": MESHY_TRIS, "fawngus": MESHY_TRIS, "filefin": MESHY_TRIS, "fizzlet": MESHY_TRIS,
+	"foalaround": MESHY_TRIS, "frigatee": MESHY_TRIS, "furnacowary": MESHY_TRIS, "galleotter": MESHY_TRIS,
+	"glaivyx": MESHY_TRIS, "gloamwade": MESHY_TRIS, "glockodile": MESHY_TRIS, "gongibbon": MESHY_TRIS,
+	"gramofrill": MESHY_TRIS, "gravadillo": MESHY_TRIS, "gravigrub": MESHY_TRIS, "hatstag": MESHY_TRIS,
+	"jerbit": MESHY_TRIS, "jerbolt": MESHY_TRIS, "kayak": MESHY_TRIS, "kingpinguin": MESHY_TRIS,
+	"knotwyrm": MESHY_TRIS, "lensling": MESHY_TRIS}
 const MAX_BONES := 64
 const DEEP := 1.0              # m of water for the swim rows
 const SHALLOW := 0.1           # m: a puddle it stands in
@@ -87,7 +105,8 @@ func _species(main: Node) -> void:
 	_feel(k, rig)
 	await _states(main, k, rig)
 	await _stepping(main, rig)
-	await _own_look(main)
+	if Data.KIN.has(kin_id):    # a body with no game data yet has no DNA look to wear
+		await _own_look(main)
 	k.queue_free()
 
 func _contents(rig: BokiRig) -> void:

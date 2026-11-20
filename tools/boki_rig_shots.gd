@@ -38,6 +38,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
+var sheet_frames := 0    # --sheet-frames=N: an animated sheet (see _sheet)
 var dex_dir := ""    # --dex-dir=<dir> with --sheet: also dex_sheet_N.png from <dir>/<id>.glb, same height
 
 func run(m: Node) -> void:
@@ -47,6 +48,7 @@ func run(m: Node) -> void:
 		if a.begins_with("--species="): species = a.substr(10)
 		if a.begins_with("--px="): px = int(a.substr(5))
 		if a.begins_with("--dex-dir="): dex_dir = a.substr(10)
+		if a.begins_with("--sheet-frames="): sheet_frames = int(a.substr(15))
 		if a.begins_with("--normal-k="): BokiRig.normal_k = float(a.substr(11))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
@@ -93,6 +95,8 @@ func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 
 ## A kin wearing its rigged model, whether or not Models.kin is wired to it yet.
 static func rigged_kin(id: String, rec := {}) -> Node3D:
+	if not Data.KIN.has(id):
+		return _bare_kin(id)
 	var k := Models.kin(id, rec)
 	var flex := k.get_node("Body/Flex") as Node3D
 	if flex.has_node("BokiRig"):
@@ -108,6 +112,21 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 	if not d.is_empty():
 		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"), rec)
 	return k
+
+## A species with a body in art/kin but no game data yet: its rig on a bare Body/Flex, neutral colours.
+static func _bare_kin(id: String) -> Node3D:
+	var root := Node3D.new()
+	var body := Node3D.new()
+	body.name = "Body"
+	root.add_child(body)
+	var flex := Node3D.new()
+	flex.name = "Flex"
+	body.add_child(flex)
+	var neutral := Models.toon(Color.WHITE)
+	var eye := Models.toon(Color.WHITE, false)
+	BokiRig.build(id, flex, {"body": neutral, "belly": neutral, "dark": neutral, "glow": neutral, "eye": eye}, [])
+	return root
+
 
 func _kin(vp: SubViewport) -> Array:
 	var k := rigged_kin(species)
@@ -153,43 +172,56 @@ func _turntable() -> void:
 	vp.queue_free()
 
 ## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
-## three-quarters and the side, standing (idle), as the game builds it.
+## three-quarters and the side, standing (idle), as the game builds it. With --sheet-frames=N it is instead
+## <dir>/sheet_<clip>_<k>.png: one sheet per --clips clip and frame k of N through the clip (an animated review).
 func _sheet(ids: PackedStringArray) -> void:
-	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
+	if sheet_frames > 0:
+		for c in clips:
+			for k in sheet_frames:
+				await _sheet_png(ids, SHEET_YAWS[0], c, float(k) / sheet_frames, "sheet_%s_%d.png" % [c, k])
+		return
 	for view in SHEET_YAWS.size():
-		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
-		var dex_sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
-		for n in ids.size():
-			species = ids[n]
-			var vp := _stage(Vector2i(px, px))
-			var cam := _close_cam(vp)
-			cam.position = Vector3(0, 0.8, 3.3)
-			cam.look_at(Vector3(0, 0.42, 0))
-			var tag := Label.new()
-			tag.text = species
-			tag.add_theme_font_size_override("font_size", px / 16)
-			vp.add_child(tag)
-			var kr := _kin(vp)
-			await RenderingServer.frame_post_draw
-			(kr[1] as BokiRig).seek(0.5)
-			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
-			var img: Image = await _grab(vp)
-			img.convert(Image.FORMAT_RGBA8)
-			var at := Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px)
-			sheet.blit_rect(img, Rect2i(0, 0, px, px), at)
-			if dex_dir != "":
-				var dex := _dex_model(species, _height(kr[1] as BokiRig))
-				if dex != null:
-					(kr[0] as Node3D).visible = false
-					vp.add_child(dex)
-					dex.rotation.y = SHEET_YAWS[view] - PI    # glTF models face +z, the game's face -z
-					var dex_img: Image = await _grab(vp)
-					dex_img.convert(Image.FORMAT_RGBA8)
-					dex_sheet.blit_rect(dex_img, Rect2i(0, 0, px, px), at)
-			vp.queue_free()
-		sheet.save_png(out.path_join("sheet_%d.png" % view))
+		await _sheet_png(ids, SHEET_YAWS[view], "idle", -1.0, "sheet_%d.png" % view)
+
+
+## One sheet picture: every species in `clip` at `phase` (0..1 of its length; -1 = the idle pose at 0.5 s).
+func _sheet_png(ids: PackedStringArray, yaw: float, clip: String, phase: float, file: String) -> void:
+	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
+	var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+	var dex_sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
+	for n in ids.size():
+		species = ids[n]
+		var vp := _stage(Vector2i(px, px))
+		var cam := _close_cam(vp)
+		cam.position = Vector3(0, 0.8, 3.3)
+		cam.look_at(Vector3(0, 0.42, 0))
+		var tag := Label.new()
+		tag.text = species
+		tag.add_theme_font_size_override("font_size", px / 16)
+		vp.add_child(tag)
+		var kr := _kin(vp)
+		await RenderingServer.frame_post_draw
+		var rig := kr[1] as BokiRig
+		rig.set_clip(clip, 0.0)
+		rig.seek(0.5 if phase < 0.0 else phase * rig.player.get_animation(clip).length)
+		(kr[0] as Node3D).rotation.y = yaw
+		var img: Image = await _grab(vp)
+		img.convert(Image.FORMAT_RGBA8)
+		var at := Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px)
+		sheet.blit_rect(img, Rect2i(0, 0, px, px), at)
 		if dex_dir != "":
-			dex_sheet.save_png(out.path_join("dex_sheet_%d.png" % view))
+			var dex := _dex_model(species, _height(rig))
+			if dex != null:
+				(kr[0] as Node3D).visible = false
+				vp.add_child(dex)
+				dex.rotation.y = yaw - PI    # glTF models face +z, the game's face -z
+				var dex_img: Image = await _grab(vp)
+				dex_img.convert(Image.FORMAT_RGBA8)
+				dex_sheet.blit_rect(dex_img, Rect2i(0, 0, px, px), at)
+		vp.queue_free()
+	sheet.save_png(out.path_join(file))
+	if dex_dir != "":
+		dex_sheet.save_png(out.path_join("dex_" + file))
 
 
 ## A model's box in its root's space (the model need not be in the tree).
