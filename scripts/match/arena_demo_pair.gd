@@ -207,8 +207,6 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 static func _warm_looks(m: Node, at: Vector3) -> void:
 	var fx := LDFx.of(m)
 	fx.anchor_drop(at, 0.0, 0.05)
-	fx.orb(at, Color.BLACK, Color.BLACK, 0.01, 0.05)
-	fx.wave(at, 0.01, Color.BLACK, 0.05)
 
 ## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
 ## so the Deep Reach has to fly over it and drag the dummy back across it.

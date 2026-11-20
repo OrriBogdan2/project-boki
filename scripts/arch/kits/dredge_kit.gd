@@ -22,11 +22,8 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
-const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
 const BRASS := Color("e0a040")
-const BRASS_HOT := Color("fff0b0")
 const IRON := Color("3a3f48")
 const SLUG_COL := Color("ffc83a")      # a hot gold streak in flight
 const SLUG_CORE := Color("fff2d0")
@@ -90,7 +87,7 @@ func _setup() -> void:
 	broadside = DredgeBlast.new(self)
 
 func warm_fx(at: Vector3) -> void:
-	fx.prewarm(at, [float(e_def()["angle"]), float(broadside.xd()["fan_deg"])])
+	fx.prewarm(at)
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
@@ -247,8 +244,7 @@ func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
-	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
-	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
+	vfx("shot", mz, d2)
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
@@ -341,7 +337,7 @@ func _launch_hook() -> void:
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
 				_let_go(at)
-				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)}))
+				vfx("hook_end", at)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
@@ -434,7 +430,7 @@ func _grab(f: Ent, ally := false) -> void:
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	fx.orb(f.pos + Vector3(0, 1.0, 0), ARM_COL, BRASS_HOT, 1.1, 0.15)
+	vfx("hook_grab", f.pos)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
@@ -582,10 +578,7 @@ func _anchor() -> void:
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
-	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
-	fx.scorch(fist, 1.6, 1.4, Color("8a7a66"), Color("2a241e"))          # cracked ground under the fist
-	fx.scorch(at, float(ed["radius"]) * 0.7, 1.2, Color("6a5e50"), Color("2a241e"))
-	fx.orb(fist + Vector3(0, 0.3, 0), BRASS, BRASS_HOT, 1.2, 0.08)
+	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
 	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
 	m.later(0.06, _anchor_dust.bind(at))
@@ -601,7 +594,6 @@ func _anchor_dust(at: Vector3) -> void:
 	if not is_instance_valid(h):
 		return
 	m.fx.dust(at, 26)
-	fx.wave(ground(at), 1.8, ANCHOR_COL, 0.35, Color(IRON, 0.5))
 
 ## The Anchor's stun: +0.1s a rank, and rank 3 adds its own 0.2s.
 func _stun_t() -> float:
@@ -696,10 +688,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
-	fx.wave(at, r, ANCHOR_COL, 0.45, Color(IRON, 0.5))
-	fx.wave(at, r * 0.6, BRASS, 0.3)
-	fx.sunburst(at, r * 0.9, BRASS, BRASS_HOT, 0.35)
-	fx.scorch(at, r * 0.6, 1.2, Color("ffb040"), Color("3a3020"))
+	vfx("quake", at, d2, {"r": r})
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)

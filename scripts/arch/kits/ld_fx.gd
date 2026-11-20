@@ -9,8 +9,7 @@ extends Node3D
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
 ## - arm(id, a, b)         the silhouette of Grimble's stretched arm where it runs through rock, drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, puff, wisp, volley
-##   (a Broadside slug)
+## - one-shots: scorch, dot, lava, anchor_drop, volley (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
@@ -24,16 +23,13 @@ const M_FLAME := 0
 const M_ORB := 1
 const M_COMET := 2
 const M_CRESCENT := 3
-const M_SUNBURST := 4
 const M_LAVA := 5
 const M_SCORCH := 6
 const M_SWIRL := 7
 const M_LINKS := 8
 const M_PIP := 9
 const M_SPIRAL := 10
-const M_WAVE := 11
 const M_DOT := 12
-const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const WARM_T := 0.05           # s each look of the loading screen's rehearsal (prewarm) stays up
@@ -88,24 +84,15 @@ static func of(match_node: Node) -> LDFx:
 
 ## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every pooled kind played for a
 ## blink at `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all
-## (Dredge's first Abyssal Hand built 13 and compiled 6 pipelines in one frame). crescents: the arc widths (deg)
-## the kit sweeps, one pooled mesh each.
-func prewarm(at: Vector3, crescents: Array) -> void:
+## (Dredge's first Abyssal Hand built 13 and compiled 6 pipelines in one frame).
+func prewarm(at: Vector3) -> void:
 	var w := Color.WHITE
 	var b := at + Vector3.RIGHT
-	sunburst(at, 1.0, w, w, WARM_T)
-	sunburst(at, 1.0, w, w, WARM_T, true)
 	scorch(at, 1.0, WARM_T)
-	wave(at, 1.0, w, WARM_T)
-	orb(at, w, w, 0.6, WARM_T)
 	dot(at, w, 0.16, WARM_T)
-	puff(at, M_ORB, w, w, 1.0, WARM_T)
-	wisp(at, w, w, 1.0, WARM_T)
 	lava(at, b, 1.0, WARM_T)
 	volley(at, b, w, w, WARM_T, WARM_T)
 	anchor_drop(at, 0.0)["t"] = 1e3          # (planted and over: it hides on the next frame)
-	for deg in crescents:
-		crescent(at, Vector2.UP, float(deg), 1.0, w, w, WARM_T)
 	# (not the skull or the shot riders: their colours are baked in when built, so they're built in play)
 	for kind in ["swirl", "chain", "pip", "spiral", "pilot", "glow", "anchor", "hook"]:
 		place("warm_" + kind, kind, at, w, w)
@@ -297,13 +284,6 @@ func flame_off(id: String) -> void:
 	for mi in e.get("nodes", []):
 		if is_instance_valid(mi): (mi as Node3D).visible = false
 
-## How many hose puffs are showing for this id (tests).
-func flame_shown(id: String) -> int:
-	var c := 0
-	for mi in flames.get(id, {}).get("nodes", []):
-		if is_instance_valid(mi) and (mi as Node3D).visible: c += 1
-	return c
-
 # ------------------------------------------------------------------ one-shots
 func _fx(kind: String, mode: int, mesh: Mesh, bb: bool) -> MeshInstance3D:
 	return _take(kind, func(): return _mi(mesh, _mat(mode, Color.WHITE, Color.WHITE, bb))) as MeshInstance3D
@@ -328,42 +308,9 @@ func _flat(
 	n.rotation = Vector3(0, yaw, 0)
 	return _play(n, kind, col, col2, dur, Vector3(r, 1, r), n.material_override)
 
-## A spiky sunburst lying on the ground (the Furnace Cloak's blast), or standing up facing the camera.
-func sunburst(at: Vector3, r: float, col: Color, col2: Color, dur := 0.4, upright := false) -> void:
-	if upright:
-		var n := _fx("sunburst_bb", M_SUNBURST, _quad_mesh(), true)
-		n.global_position = at
-		_play(n, "sunburst_bb", col, col2, dur, Vector3.ONE * r, n.material_override)
-	else:
-		_flat("sunburst", M_SUNBURST, at, r, col, col2, dur, randf() * TAU)
-
 ## A cracked scorch mark that cools over `dur`.
 func scorch(at: Vector3, r: float, dur := 1.0, col := Color("ff7a2a"), col2 := Color("3a1a2a")) -> void:
 	_flat("scorch", M_SCORCH, at, r, col, col2, dur, randf() * TAU)
-
-## A thin ring that opens out to `r` (a landing ring, a fizzle).
-func wave(at: Vector3, r: float, col: Color, dur := 0.35, col2 := Color(0, 0, 0, 0)) -> void:
-	_flat("wave", M_WAVE, at, r, col, col2, dur)
-
-## A blade arc in front of `at` facing `dir`, swept over `dur`. tilt PI/2: standing up.
-func crescent(
-	at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.25, tilt := 0.0
-) -> void:
-	var key := "cres%d" % int(round(arc_deg))
-	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
-	n.global_position = at
-	var d3 := Vector3(dir.x, 0, dir.y)
-	if d3.length() < 0.01: d3 = Vector3.FORWARD
-	n.basis = Basis.looking_at(d3.normalized(), Vector3.UP) * Basis(Vector3.FORWARD, tilt)
-	var e := _play(n, key, col, col2, dur, Vector3.ONE * reach, n.material_override)
-	e["sweep"] = true
-
-## A camera-facing glow (a hit flash, the pilot flare).
-func orb(at: Vector3, col: Color, col2: Color, scl := 0.6, dur := 0.15) -> void:
-	var n := _fx("orb", M_ORB, _quad_mesh(), true)
-	n.global_position = at
-	var e := _play(n, "orb", col, col2, dur, Vector3.ONE * scl, n.material_override)
-	e["grow"] = 0.5
 
 ## A solid dot with a dark core left hanging in the air (a scattergun slug at its stop line).
 func dot(at: Vector3, col: Color, scl := 0.16, dur := HANG_T) -> void:
@@ -414,22 +361,6 @@ func _pose_volley(e: Dictionary, n: Node3D) -> void:
 		_param((c as MeshInstance3D).material_override, "life", fade)
 	var smear := maxf(0.01, VOLLEY_SMEAR * (1.0 - fade))
 	(n.get_node("Trail") as Node3D).scale = Vector3(VOLLEY_WIDTH, VOLLEY_WIDTH, smear)
-
-## A camera-facing puff that swells and fades (a dash's after-image): mode M_FLAME burns through the fire
-## ramp on its own, M_ORB uses col (the rim) and col2 (the centre).
-func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: float) -> void:
-	var kind := "puff%d" % mode
-	var n := _fx(kind, mode, _quad_mesh(), true)
-	n.global_position = at
-	var e := _play(n, kind, col, col2, dur, Vector3.ONE * scl, n.material_override)
-	e["grow"] = 0.6
-
-## A thin ribbon of smoke rising from `at` (camera-facing, `scl` m half-height, its foot on `at`): it wavers as it
-## climbs, breaks into streaks and fades (Dredge's stack); col its top, col2 its foot, col.a its cover.
-func wisp(at: Vector3, col: Color, col2: Color, scl: float, dur: float) -> void:
-	var n := _fx("wisp", M_SMOKE, _quad_mesh(), true)
-	n.global_position = at + Vector3(0, scl * 0.9, 0)
-	_play(n, "wisp", col, col2, dur, Vector3.ONE * scl, n.material_override)
 
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
@@ -720,8 +651,6 @@ func _process(_delta: float) -> void:
 				_pose_volley(e, n)
 			_:
 				_param(mt, "life", u)
-				if e.get("sweep", false): _param(mt, "progress", minf(1.0, u * 1.8))
-				if e.has("grow"): n.scale = (e["s0"] as Vector3) * (1.0 + float(e["grow"]) * u)
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)
