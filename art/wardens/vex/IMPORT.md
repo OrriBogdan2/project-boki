@@ -11,6 +11,16 @@ worst 8.31 (glide, hips) vs r3b 8.61 and live 10.16. The only model-check FAIL i
 v95_swap caches the atlas bake in WORK/bake.blend: after recolouring the master, delete bake.blend or the new glb still carries the old texture.
 Delete vex_v95*.jpg AND their .import before importing the swapped glb (see r3b).
 
+r4c/r4d/r4e (same day, after the first r4 shoot): hair slot limited to head + braid (no black patch on the jacket back), grey-brown trousers
+lifted out of the black, emerald hair k 0.84. BLACK PATCHES on the jacket back in the game but not in Blender were NOT texture: the Meshy
+mesh has layered inner shells whose back faces poke through the outer jacket; the ink pass (outline.gdshader, cull_front) and double-sided
+materials draw them black. Fix in the glb (scripts in /tmp/a4 on the worker, notes in ~/gens/hunter-regen-1120/vex/r4/): rewind tris whose
+face normal opposes the vertex normals, non-hair materials doubleSided false, hide (degenerate) 391 tris that are back-facing-exposed and never
+front-exposed (BVH ray casts from 405 directions), flat normals on 2595 tris whose vertex normals disagree, pink/dark atlas blobs repainted.
+The atlas images are EMBEDDED in the glb (loose vex_v95*.jpg are unused by the game): edit the embedded image, then repack to drop stale
+bufferViews (9.8 MB). STILL OPEN: a few small black triangular shards on the upper jacket back (cause not found), no ribbed ammo-belt ring
+round the gatling drum, a flatter collar, a noisier face/hair texture than the turnaround.
+
 ## DRAFT candidate on ext/hunter-regen-vex-1120: regen r3b (2026-11-20, awaiting the owner's visual check)
 Meshy multi-image meshy-7.1 `--pose t-pose` from briefs/art-refs/vex_v2/vex_v2_turnaround.jpg (front, 3/4, back; 30 gens in
 two rounds, 1 kept, C2: the gatling is her right forearm with no hand inside it, a brass mechanical left hand, no dangling
