@@ -4,12 +4,12 @@ extends RefCounted
 ## range; RMB, E, R, dash: the largest range-like number in the slot's data; plus Cinder's flight), the Hunter
 ## stands at the camera focus (the screen's centre, feet a little below it) and the slot's end, `reach` metres
 ## out along the aim up, down, left and right on the ground, is projected through the match camera at the
-## default and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768 (the lens is vertical, so
+## start view (the widest wheel zoom) and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768 (the lens is vertical, so
 ## 4:3 shows less width and 21:9 more). It prints one table row per slot (docs/MOVEMENT_FEEL.md, "Ability ranges
 ## on screen") with the ways whose end is off screen, and once more with the view leaning toward the end as the
 ## cursor held there makes it. Ranges are source data and stay as they are, so off-screen ends are reported, not
 ## failed. It fails when a Hunter has no rows (the data drifted), or when a range up to 18 m (half the source's
-## 37 m across) has its end off screen left or right at 1920x1080, zoom 1.0.
+## 37 m across) has its end off screen left or right at 1920x1080 at the start view.
 
 const VIEWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(1024, 768)]
 const EDGE_PX := 20.0      # CamRig.on_screen's margin: an end closer to the edge than this is off
@@ -34,10 +34,11 @@ func run(main: Node) -> void:
 	main.add_child(vp)
 	var cam := CamRig.new()
 	vp.add_child(cam)
-	cam.use_style("supervive")
-	var zooms: Array = [1.0, float(CamRig.RULES["zoom"]["match"]["min"])]
+	cam.use_style("default")
+	var start := float(CamRig.RULES["zoom"]["max"])      # the view a match starts at (the widest)
+	var zooms: Array = [start, float(CamRig.RULES["zoom"]["min"])]
 	print("RANGESCREEN table | Hunter | Slot | Reach m (data key) | ways off screen, Hunter centred, per view at")
-	print("RANGESCREEN table | zoom 1.0 / %.1f (1280x720, 1920x1080, 2560x1080, 1024x768) | with the lean |" % zooms[1])
+	print("RANGESCREEN table | zoom %.1f / %.1f (1280x720, 1920x1080, 2560x1080, 1024x768) | with the lean |" % [zooms[0], zooms[1]])
 	for r in rows:
 		var cells: Array = []
 		for v in VIEWS:
@@ -49,7 +50,7 @@ func run(main: Node) -> void:
 				per.append(_ways_off(cam, float(r[3]), v))
 			cells.append(" / ".join(per))
 		vp.size = VIEWS[1]
-		cam.zoom = 1.0
+		cam.zoom = start
 		cam.snap(Vector3.ZERO)
 		var leaned := _ways_off(cam, float(r[3]), VIEWS[1], true)
 		print("RANGESCREEN row | %s | %s | %.1f (%s) | %s | %s |" % [r[0], r[1], r[3], r[2], " ; ".join(cells), leaned])
@@ -57,7 +58,7 @@ func run(main: Node) -> void:
 			cam.snap(Vector3.ZERO)
 			var off := _ways_off(cam, float(r[3]), VIEWS[1])
 			ok(not (off.contains("left") or off.contains("right")),
-					"%s %s %.1f m: left and right stay on screen at 1920x1080, zoom 1.0" % [r[0], r[1], r[3]])
+					"%s %s %.1f m: left and right stay on screen at 1920x1080, zoom %.1f" % [r[0], r[1], r[3], start])
 	vp.queue_free()
 	print("RANGESCREEN CHECK DONE, %d rows, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
