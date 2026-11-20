@@ -44,7 +44,7 @@ func run(main: Node) -> void:
 		m.lairs.activate(L)
 		var b: Boss = L["boss_mob"]
 		bosses.append(b)
-		b.dormant = false
+		b.set_asleep(false)
 		b.tgt = m.player
 		m.player.teleport(Vector3(b.pos.x + 3.0, b.pos.y, b.pos.z))
 		_states(b)
@@ -214,9 +214,9 @@ func _states(b: Boss) -> void:
 	b.stagger_t = 2.0
 	_picks(b, "stagger")
 	b.stagger_t = 0.0
-	b.dormant = true
+	b.set_asleep(true)
 	_picks(b, "sleep")
-	b.dormant = false
+	b.set_asleep(false)
 	b.atk = "phase"
 	b.atk_t = 1.0
 	_picks(b, "phase")

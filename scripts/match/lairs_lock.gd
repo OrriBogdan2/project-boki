@@ -41,8 +41,7 @@ func call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 			p = at + Vector3(L["out"].x, 0, L["out"].y) * 2.5
 		var g := m.spawn_mob(String(pool[k % pool.size()]), Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		g.camp = at
-		g.st = "chase"
-		g.tgt = L["user"] if L["user"] != null else null
+		g.aggro(L["user"], "chime")
 		m.fx.burst(g.pos + Vector3(0, 0.5, 0), Color("c9a0ff"), 14, 3.0, 0.5, -2.0)
 		L["guards"].append(g)
 
