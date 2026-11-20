@@ -10,30 +10,46 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given.
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
+    With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
+    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax;
+    `meshy_regions` (the `regions` format) then move the parts its humanoid rig has no bone for whole onto ours,
+    `meshy_reach` {"arm"|"thigh": [r0, r1]} moves limb weight far from the limb's bones to the hips (a loincloth, a skirt),
+    and `meshy_smooth` passes and `meshy_relax` blend and relax the result as bone heat's are.
+    A region may also take "h"/"s"/"v" ranges: only the vertices whose paint (their texels' mean) falls in them (Grimble's
+    goo by its purple where it wraps his shin). `cap_sides` (default CAP_SIDES): the longest `detach` opening that is capped.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
 With `keep_uv` step 1 bakes nothing: the low mesh is the master itself, decimated (`tris`) with its own UVs, materials
 and paint (each base and emission image scaled to `tex` at most), minus the `drop_mats` faces (props the game glb carries);
 the kept parts keep their old materials and atlas. tools/art/v95_to_game.py runs it for a Hunter's current master.
+`lining` [{box, h, s, v, inset}]: twins of a thin cloth shell's faces wound the other way (add_lining), so its inside draws as cloth, not
+the outline's black. `follow` {bone: leader}: after the export, the keys of a bone that the clips leave standing (Grimble's junk ball, under the root)
+ride the leader (tools/art1/glb_follow.py), so the ball does not hang in the air when the body dips.
 Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 0, the master's metres (v95_grid.py).
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
 import os
 import shutil
+import subprocess
 import sys
 
 import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
+from mathutils.kdtree import KDTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path[:0] = [HERE, os.path.join(REPO, "tools", "meshy")]
 import bake_warden as BW
 import fit_warden as FW
+import glb_add_clips
+import glb_follow
 import skin_relax
+import swap_lining
+from glb_relax import accessor
 from meshkit import smooth
 from posekit import FPS
 
@@ -48,6 +64,15 @@ CAGE, RAY, MARGIN_PX = 0.008, 0.03, 16       # (m, m, px) bake_warden's defaults
 CAP_SIDES = 2000             # the longest opening a detach caps (edges round it)
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
+MESHY = {"Hips": "hips", "Spine": "hips", "Spine01": "hips", "Spine02": "hips", "neck": "hips head", "Head": "head",
+         "head_end": "head", "headfront": "head"}       # the bones of Meshy's auto-rig on ours (two: half each)
+for _sd, _side in (("R", "Right"), ("L", "Left")):
+    MESHY.update({_side + "Shoulder": "hips", _side + "Arm": "upper_arm." + _sd, _side + "ForeArm": "forearm." + _sd,
+                  _side + "Hand": "hand." + _sd, _side + "UpLeg": "thigh." + _sd, _side + "Leg": "shin." + _sd,
+                  _side + "Foot": "foot." + _sd, _side + "ToeBase": "foot." + _sd})
+PELVIS_RAMP = 0.4            # of the thigh's length below the hip joint: a thigh's weight above it is the hips', fading out over this
+RIGID_SHARE = 0.7            # a loose piece with this share of its weight on one bone rides that bone whole
+ARM = ("upper_arm", "forearm", "hand")
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
 
 
@@ -60,6 +85,90 @@ def verts(ob):
 def set_verts(ob, v):
     ob.data.vertices.foreach_set("co", np.asarray(v, F).ravel())
     ob.data.update()
+
+
+def _hsv(a):
+    r, g, b = a[:, 0], a[:, 1], a[:, 2]
+    mx, mn = a.max(1), a.min(1)
+    d = mx - mn
+    nz = d > 1e-9
+    dd = np.where(nz, d, 1)
+    h = np.where(r == mx, (g - b) / dd, np.where(g == mx, 2 + (b - r) / dd, 4 + (r - g) / dd))
+    h = np.where(nz, (h / 6) % 1, 0)
+    return h, np.where(mx > 0, d / np.where(mx > 0, mx, 1), 0), mx
+
+
+def _rgb(h, s, v):
+    i = np.floor(h * 6).astype(int) % 6
+    f = h * 6 - np.floor(h * 6)
+    p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
+    return np.stack([np.choose(i, [v, q, p, p, t, v]), np.choose(i, [t, v, v, q, p, p]), np.choose(i, [p, p, t, v, v, q])], 1)
+
+
+def grade_skin(im, g):
+    """`grade` {"h": [lo, hi], "feather": f, "s": mult, "v": mult}: the paint whose hue is in [lo, hi] (a soft edge `feather`
+    wide) and whose saturation is in `s_range` has its saturation and value scaled: the game's toon pass lifts a scan's skin
+    to a hotter magenta than the turnaround's, so the skin is eased back to the turnaround's saturation (goo, gold, wood and
+    leather are other hues and stay). Pixels of a sRGB image are sRGB-encoded in bpy, no conversion."""
+    n = len(im.pixels)
+    a = np.empty(n, np.float32)
+    im.pixels.foreach_get(a)
+    a = a.reshape(-1, 4)
+    h, s, v = _hsv(a[:, :3].astype(np.float64))
+    lo, hi = g["h"]
+    f = float(g.get("feather", 0.03))
+    w = np.clip((h - lo) / f + 1, 0, 1) * np.clip((hi - h) / f + 1, 0, 1)
+    sl, sh = g.get("s_range", [0.1, 0.8])
+    w *= np.clip((s - sl) / 0.05, 0, 1) * np.clip((sh - s) / 0.05, 0, 1)
+    s2 = np.clip(s * (1 + w * (float(g.get("s", 1)) - 1)), 0, 1)
+    v2 = np.clip(v * (1 + w * (float(g.get("v", 1)) - 1)), 0, 1)
+    a[:, :3] = _rgb(h, s2, v2)
+    im.pixels.foreach_set(a.ravel())
+    im.update()
+    im.pack()
+    print("SWAP grade: %.1f%% of texels, s x%s v x%s" % (100 * float((w > 0.5).mean()), g.get("s", 1), g.get("v", 1)), flush=True)
+
+
+def lift_normals(low, rules):
+    """`lift_normals` [{"box": [x0, x1, y0, y1, z0, z1], "k": 0..1}]: the vertex normals inside a box lean `k` of the way to
+    straight up. A loincloth's hem and its second layer hang facing down, the toon light never reaches them and the pass drew
+    them black (the dark shard under the hem, from behind and from the side); lit from above they read as the cloth they are.
+    A skin and its clips are untouched, only the shading normals of those vertices change."""
+    me = low.data
+    me.update()
+    V = verts(low)
+    nrm = np.array([v.normal for v in me.vertices])
+    new = nrm.copy()
+    for r in rules:
+        b = r["box"]
+        sel = (V[:, 0] >= b[0]) & (V[:, 0] <= b[1]) & (V[:, 1] >= b[2]) & (V[:, 1] <= b[3]) & (V[:, 2] >= b[4]) & (V[:, 2] <= b[5])
+        new[sel] = nrm[sel] * (1 - r["k"]) + np.array([0, 0, 1.0]) * r["k"]
+        print("SWAP lift_normals: %d vertices" % int(sel.sum()), flush=True)
+    new /= np.linalg.norm(new, axis=1, keepdims=True)
+    me.normals_split_custom_set_from_vertices([tuple(n) for n in new])
+
+
+def stretch_limb(low, arm, sp):
+    """`stretch` {"bone": "hook", "k": 1.15, "min_w": 0.0}: the vertices that ride `bone` are lengthened by k along the bone's
+    reach (its head to their farthest vertex) in the rest pose, by their weight on it (the elbow end blends); the goo arm of
+    the turnaround hangs to the floor and the scan's is shorter."""
+    bone = sp["bone"]
+    k = float(sp["k"])
+    g = low.vertex_groups[bone].index
+    V = verts(low)
+    w = np.zeros(len(V))
+    for v in low.data.vertices:
+        for e in v.groups:
+            if e.group == g:
+                w[v.index] = e.weight
+    head = np.array(arm.matrix_world @ arm.data.bones[bone].head_local)
+    sel = w > 0.5
+    tip = V[sel][np.argmax(np.linalg.norm(V[sel] - head, axis=1))]
+    d = (tip - head) / np.linalg.norm(tip - head)
+    t = (V - head) @ d
+    V2 = V + np.outer(w * np.maximum(t, 0) * (k - 1), d)
+    set_verts(low, V2)
+    print("SWAP stretch %s x%.2f: head %s tip %s -> %s" % (bone, k, head.round(3), tip.round(3), (head + (tip - head) * k).round(3)), flush=True)
 
 
 def select(obs, active):
@@ -302,6 +411,7 @@ def bake():
 
 
 # ----------------------------------------------------- step 2: the fit (grimble_source.py's, from the spec)
+VHSV = None
 S_J = {k: np.array(v, float) for k, v in SPEC["joints"].items()}
 SEG = [("torso", "pelvis", "neck", 0.30), ("headseg", "neck", "crown", 0.12)]
 for _sd in "RL":
@@ -358,10 +468,10 @@ def seg_weights(P):
     return W / W.sum(1, keepdims=True)
 
 
-def region_masks(P):
-    """(bone, mask) per spec region."""
+def region_masks(P, regions=None):
+    """(bone, mask) per spec region (`regions`, or the list given: `meshy_regions`)."""
     out = []
-    for r in SPEC.get("regions", []):
+    for r in SPEC.get("regions", []) if regions is None else regions:
         x0, x1, y0, y1, z0, z1 = r["box"]
         m = (P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1)
         for seg, rad in r.get("except_segs", []):
@@ -372,6 +482,9 @@ def region_masks(P):
             m &= seg_dist(P, j0, j1) < rad
         for x0, x1, y0, y1, z0, z1 in r.get("except_boxes", []):
             m &= ~((P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1))
+        for k, key in enumerate("hsv"):     # (the vertex's paint, as `slots` reads it: Grimble's goo by its purple, not by a box)
+            if key in r:
+                m &= (VHSV[k] >= r[key][0]) & (VHSV[k] <= r[key][1])
         out.append((r["bone"], m))
     return out
 
@@ -391,7 +504,14 @@ def seg_of(arm, bone):
     return "torso"
 
 
-def fit_weights(arm, P):
+def fit_weights(arm, P, gr=None):
+    """Each point's share of each segment: by distance, the `regions` whole; or from its skin weights `gr` (each part moves
+    with the bones that will carry it)."""
+    if gr:
+        W = np.zeros((len(P), len(SEG)))
+        for bone, w in gr.items():
+            W[:, SEG_NAMES.index(seg_of(arm, bone))] += w
+        return W
     W = seg_weights(P)
     for bone, m in region_masks(P):
         W[m] = np.eye(len(SEG))[SEG_NAMES.index(seg_of(arm, bone))]
@@ -483,6 +603,145 @@ def heat_weights(low, arm, P):
     return place_weights(gr, P)
 
 
+def meshy_rig(low):
+    """`weights` "meshy": WORK/meshy/rigged_character.glb, Meshy's auto-rig of Low (the master's pose, facing +Z as its
+    docs ask, under its 380k triangles), asked for once."""
+    out = os.path.join(WORK, "meshy")
+    rigged = os.path.join(out, "rigged_character.glb")
+    if os.path.exists(rigged):
+        return rigged
+    os.makedirs(out, exist_ok=True)
+    tmp = low.copy()
+    tmp.data = low.data.copy()
+    bpy.context.scene.collection.objects.link(tmp)
+    for i, own in enumerate(low.data.materials):      # (Low's materials carry only their images' names)
+        m = bpy.data.materials.new("meshy%d" % i)
+        m.use_nodes = True
+        t = m.node_tree.nodes.new("ShaderNodeTexImage")
+        t.image = bpy.data.images[own["img"]]
+        m.node_tree.links.new(t.outputs[0], m.node_tree.nodes["Principled BSDF"].inputs[0])
+        tmp.data.materials[i] = m
+    select([tmp], tmp)
+    src = os.path.join(out, "low.glb")
+    bpy.ops.export_scene.gltf(filepath=src, export_format="GLB", use_selection=True, export_yup=True, export_animations=False,
+                              export_image_format="JPEG", export_jpeg_quality=85)
+    bpy.data.objects.remove(tmp)
+    height = np.ptp(verts(low)[:, 2])
+    subprocess.run(["python3", os.path.join(REPO, "tools/meshy/meshy_task.py"), "rig", out, src, "--height", "%.2f" % height],
+                   check=True)
+    return rigged
+
+
+def pieces(ob, on=None):
+    """Each vertex's loose piece of the mesh (of its `on` vertices alone): the lowest vertex index it is joined to by edges."""
+    ed = np.empty(len(ob.data.edges) * 2, np.int64)
+    ob.data.edges.foreach_get("vertices", ed)
+    ed = ed.reshape(-1, 2)
+    if on is not None:
+        ed = ed[on[ed].all(1)]
+    lab = np.arange(len(ob.data.vertices))
+    while True:
+        new = lab.copy()
+        np.minimum.at(new, ed[:, 0], lab[ed[:, 1]])
+        np.minimum.at(new, ed[:, 1], lab[ed[:, 0]])
+        new = new[new]
+        if (new == lab).all():
+            return lab
+        lab = new
+
+
+def meshy_weights(low, arm, P):
+    """`weights` "meshy": Meshy's auto-rig of Low on our bones. Each vertex takes the weights of its nearest rigged vertex
+    (Meshy returns the same mesh, centred, its vertices split), each Meshy bone's on ours (MESHY; a hand's on its
+    `past_wrist` bone, a foot's on the shin of a rig without feet). A patch of arm weights that is not joined to the arm
+    goes to the bones under it, a thigh's weight above its hip joint to the hips (PELVIS_RAMP). A loose piece of the
+    mesh (a sword, a pistol, a horn) with RIGID_SHARE of its weight on one bone rides that bone whole. P: the vertices in
+    the spec's `joints` space."""
+
+    def ours(bone):
+        if bone.startswith("hand."):
+            return SPEC["past_wrist"][bone[5:]]
+        return bone if bone in arm.data.bones else bone.replace("foot", "shin")
+
+    j, bin_ = glb_add_clips.read(meshy_rig(low))
+    to = [[ours(b) for b in MESHY[j["nodes"][n]["name"]].split()] for n in j["skins"][0]["joints"]]
+    names = sorted({b for bs in to for b in bs})
+    R, M = [], []
+    for pr in (pr for me in j["meshes"] for pr in me["primitives"]):
+        at = pr["attributes"]
+        R.append(accessor(j, bin_, at["POSITION"])[0])
+        J, Wt = accessor(j, bin_, at["JOINTS_0"])[0], accessor(j, bin_, at["WEIGHTS_0"])[0]
+        m = np.zeros((len(J), len(names)))
+        for c in range(4):
+            for k, bs in enumerate(to):
+                rows = J[:, c] == k
+                for b in bs:
+                    m[rows, names.index(b)] += Wt[rows, c] / len(bs)
+        M.append(m)
+    V = verts(low)
+    R = np.concatenate(R)[:, (0, 2, 1)] * (1, -1, 1)        # (glTF's +Y up, +Z front: ours)
+    R = (R - R.min(0)) * (np.ptp(V, 0) / np.ptp(R, 0)) + V.min(0)
+    tree = KDTree(len(R))
+    for i, p in enumerate(R):
+        tree.insert(p, i)
+    tree.balance()
+    near = [tree.find(p) for p in V]
+    G = np.concatenate(M)[[n[1] for n in near]]
+    G /= G.sum(1, keepdims=True)
+    lab = pieces(low)
+    hips = names.index("hips")
+    for sd in "RL":     # (a hand resting on the hip: Meshy weights the sash under it, the shawl beside it to the arm)
+        chain = [names.index(b) for b in {ours(a + "." + sd) for a in ARM}]
+        on = G[:, chain].sum(1) >= 0.5
+        part = pieces(low, on)
+        hand = np.bincount(part[on], G[on, names.index(ours("hand." + sd))], len(V))
+        best = {}       # each loose piece's arm: its patch of arm weights with the most hand in it
+        for p in np.unique(part[on]):
+            if hand[p] >= hand[best.setdefault(lab[p], p)]:
+                best[lab[p]] = p
+        off = on & ~np.isin(part, list(best.values()))
+        G[np.ix_(off, chain)] = 0
+        G[off, hips] += 1e-6
+        G[off] /= G[off].sum(1, keepdims=True)
+        print("meshy: arm %s weights off %d vertices not joined to it" % (sd, off.sum()), flush=True)
+    for sd in "RL":     # (our thighs hang from the root, not the hips: a pelvis on them stays behind when the hips turn)
+        hip, knee = S_J["hip." + sd][2], S_J["knee." + sd][2]
+        up = np.clip(1 + (P[:, 2] - hip) / (PELVIS_RAMP * (hip - knee)), 0, 1)
+        leg = names.index("thigh." + sd)
+        G[:, hips] += G[:, leg] * up
+        G[:, leg] *= 1 - up
+    reach = SPEC.get("meshy_reach", {})     # {"arm": [r0, r1], "thigh": [r0, r1]}: limb weight past r1 from its bones
+    for sd in "RL" if reach else ():        # goes to the hips, faded from r0 (a cropped jacket's front panels that Meshy
+        sh, el, wr = (S_J[j + "." + sd] for j in ("shoulder", "elbow", "wrist"))   # gives the arm, a flared skirt the thigh)
+        for limb, segs, bones in (("arm", [(sh, el), (el, wr), (wr, wr + 0.9 * (wr - el))], ARM),
+                                  ("thigh", [(S_J["hip." + sd], S_J["knee." + sd])], ("thigh",))):
+            if limb not in reach:
+                continue
+            r0, r1 = reach[limb]
+            d = np.min([np.linalg.norm(P - (a0 + np.clip(((P - a0) @ (a1 - a0)) / ((a1 - a0) @ (a1 - a0)), 0, 1)[:, None]
+                                            * (a1 - a0)), axis=1) for a0, a1 in segs], axis=0)
+            cols = sorted({names.index(ours(b + "." + sd)) for b in bones})
+            off = G[:, cols] * (1 - np.clip((r1 - d) / (r1 - r0), 0, 1))[:, None]
+            G[:, hips] += off.sum(1)
+            G[:, cols] -= off
+            print("meshy: %s %s weight off %d vertices past %.2f m" % (limb, sd, (off.sum(1) > 0.05).sum(), r0), flush=True)
+    rigid = 0
+    for piece in np.unique(lab):
+        m = lab == piece
+        share = G[m].mean(0)
+        if share.max() >= RIGID_SHARE:
+            G[m] = np.eye(len(names))[share.argmax()]
+            rigid += 1
+    print("meshy: nearest rigged vertex within %.1f mm, %d loose pieces rigid" % (max(n[2] for n in near) * 1000, rigid), flush=True)
+    gr = dict(zip(names, G.T))
+    for bone, m in region_masks(P, SPEC.get("meshy_regions", [])):    # (parts Meshy's humanoid rig has no bone for, whole:
+        for nm in gr:                                                  # Grimble's pack on `hoard`, his goo arm on `hook`)
+            gr[nm] = gr[nm] * ~m
+        gr[bone] = gr.get(bone, np.zeros(len(P))) + m
+        print("meshy_regions: %d vertices on %s" % (m.sum(), bone), flush=True)
+    return gr
+
+
 def place_weights(gr, P):
     """Each hand's weights to its `past_wrist` bone, then the `regions`, whole."""
     for sd, bone in SPEC["past_wrist"].items():
@@ -541,7 +800,7 @@ def detach(low, G, names):
     ends = {v.index for e in cut for v in e.verts}
     bmesh.ops.split_edges(bm, edges=cut)
     rim = [e for e in bm.edges if len(e.link_faces) == 1 and all(v[orig] in ends for v in e.verts)]
-    caps = bmesh.ops.triangulate(bm, faces=bmesh.ops.holes_fill(bm, edges=rim, sides=CAP_SIDES)["faces"])["faces"]
+    caps = bmesh.ops.triangulate(bm, faces=bmesh.ops.holes_fill(bm, edges=rim, sides=int(SPEC.get("cap_sides", CAP_SIDES)))["faces"])["faces"]
     bmesh.ops.recalc_face_normals(bm, faces=caps)
     uv = bm.loops.layers.uv.active
     capset = set(caps)
@@ -646,6 +905,34 @@ def hsv(rgb):
     return h, (mx - mn) / np.maximum(mx, 1e-6), mx
 
 
+def vertex_hsv(ob, imgs):
+    """Each vertex's paint (hue, saturation, value): its loops' texels averaged, `imgs` by material index."""
+    me = ob.data
+    uv = np.empty(len(me.loops) * 2, F)
+    me.uv_layers["UVMap"].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2) % 1.0
+    lv = np.empty(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    mi = np.zeros(len(me.polygons), np.int32)
+    me.polygons.foreach_get("material_index", mi)
+    ls, lt = np.empty(len(me.polygons), np.int32), np.empty(len(me.polygons), np.int32)
+    me.polygons.foreach_get("loop_start", ls)
+    me.polygons.foreach_get("loop_total", lt)
+    lm = np.minimum(np.repeat(mi, lt), len(imgs) - 1)
+    rgb = np.zeros((len(lv), 3), F)
+    for k, img in enumerate(imgs):
+        w, h = img.size
+        px = np.empty(w * h * 4, F)
+        img.pixels.foreach_get(px)
+        px = px.reshape(h, w, 4)[..., :3]
+        m = lm == k
+        rgb[m] = px[np.clip((uv[m, 1] * h).astype(int), 0, h - 1), np.clip((uv[m, 0] * w).astype(int), 0, w - 1)]
+    acc = np.zeros((len(me.vertices), 3))
+    np.add.at(acc, lv, rgb)
+    acc /= np.maximum(np.bincount(lv, minlength=len(me.vertices)), 1)[:, None]
+    return hsv(acc)
+
+
 def tri_slots(ob, imgs, top_bone, P):
     """Each triangle's toon slot, read off its paint: `imgs` by material index (one: the atlas)."""
     me = ob.data
@@ -719,18 +1006,31 @@ def main():
         img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
         img.name = "atlas"
         imgs = [img]
+    if SPEC.get("grade") and own:
+        grade_skin(imgs[0], SPEC["grade"])      # (the body's paint: the material on the most faces)
     sole = bpy.context.scene["sole"]
     arm, old = import_game(os.path.join(WORK, "game.glb"))
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
     T, K = targets(arm)
-    set_verts(low, fit(P, fit_weights(arm, P), T, K))
-    gr = heat_weights(low, arm, P)
+    meshy = SPEC.get("weights") == "meshy"
+    global VHSV
+    VHSV = vertex_hsv(low, imgs)      # (regions with "h"/"s"/"v" ranges pick vertices by their paint)
+    gr = meshy_weights(low, arm, P) if meshy else None
+    if meshy:       # (a forearm or hand that touches the body in the master's pose is fused to it there)
+        for sd, hand in SPEC["past_wrist"].items():
+            limb = {"upper_arm." + sd, "forearm." + sd, hand}
+            SPEC.setdefault("detach", []).extend([b, x] for b in ("forearm." + sd, hand) for x in gr if x not in limb)
+    set_verts(low, fit(P, fit_weights(arm, P, gr), T, K))
+    gr = gr or heat_weights(low, arm, P)
     names = list(gr)
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
+    passes = int(SPEC.get("meshy_smooth", 0)) if meshy else int(SPEC.get("smooth", 0))     # (meshy_smooth: blends a region's edge)
+    gr = dict(zip(names, smooth_weights(low, W, passes).T))
     top = set_groups(low, gr)
+    if SPEC.get("stretch"):
+        stretch_limb(low, arm, SPEC["stretch"])
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
     slots = [s + "-" + (tags[i] if own else "atlas") for i, s in enumerate(tri_slots(low, imgs, top, P))]
@@ -799,21 +1099,35 @@ def main():
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "fit.blend"))      # (before the relax: for looking at the weights)
     for k, v in SPEC.get("relax", {}).items():      # e.g. {"CUTS": 0}: relax only, no cut-and-cap holes
         setattr(skin_relax, k, v)
-    if bpy.data.actions:
+    if meshy and not SPEC.get("meshy_relax"):       # (Meshy's weights stay as they are; meshy_relax: relaxed like bone heat's)
+        print("SWAP weights meshy: skin_relax skipped", flush=True)
+    elif bpy.data.actions:
         skin_relax.relax(arm)
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
         print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
     BW._unfold(low)     # (the fit folds a few more over: Motley's four 10-17 cm collar shards came from here, not the collapse)
+    if SPEC.get("lining"):
+        swap_lining.add_lining(low, SPEC["lining"])
+    if SPEC.get("lift_normals"):
+        lift_normals(low, SPEC["lift_normals"])
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:
         act.use_frame_range = True
         act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
     select([o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")], arm)
+    # (NAME, not ACTIVE: a kept part's material reads "Col" in its node tree, and then the exporter wrote COLOR_0 as rgb
+    # for the whole mesh: the ink room in its alpha never reached the game, every vertex got the full line)
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="NAME", export_vertex_color_name="Col",
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    for follower, leader in SPEC.get("follow", {}).items():     # (the junk ball hangs in the air in a run: glb_follow.py)
+        gj, gb = glb_add_clips.read(OUT)
+        done = glb_follow.follow(gj, gb, follower, leader)
+        gj["buffers"][0]["byteLength"] = len(gb)
+        glb_add_clips.write(OUT, gj, gb)
+        print("SWAP follow: %s rides %s in %d clips" % (follower, leader, len(done)), flush=True)
     print("SWAP exported", OUT, os.path.getsize(OUT), "tris", sum(len(p.vertices) - 2 for p in me.polygons), flush=True)
 
 
