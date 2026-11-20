@@ -17,7 +17,8 @@ static func tune(p: CPUParticles3D) -> void:
 static func pace(emitters: Array, eye: Vector3) -> void:
 	for p: CPUParticles3D in emitters:
 		var reach := p.visibility_range_end + maxf(p.emission_box_extents.x, 12.0)
-		var mode := Node.PROCESS_MODE_DISABLED if p.global_position.distance_to(eye) > reach else Node.PROCESS_MODE_INHERIT
+		var far := p.global_position.distance_to(eye) > reach
+		var mode := Node.PROCESS_MODE_DISABLED if far else Node.PROCESS_MODE_INHERIT
 		if p.process_mode != mode:
 			p.process_mode = mode
 
@@ -29,12 +30,14 @@ static func of(n: Node) -> int:
 	return (n as CPUParticles3D).amount
 
 
-## Particles of every emitting, running emitter under root (a paused one simulates nothing), by "parent/name" with the numbering stripped.
+## Particles of every emitting, running emitter under root (a paused one simulates nothing), by "parent/name"
+## with the numbering stripped.
 static func by_owner(root: Node) -> Dictionary:
 	var by := {}
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
 		for n in root.find_children("*", cls, true, false):
-			if not n.get("emitting") or not (n as Node3D).is_visible_in_tree() or not (n as Node).can_process():
+			var on: bool = n.get("emitting") and (n as Node3D).is_visible_in_tree()
+			if not on or not (n as Node).can_process():
 				continue
 			var up := String(n.get_parent().name).rstrip("0123456789@")
 			var key := "%s/%s" % [up, String(n.name).rstrip("0123456789@")]
