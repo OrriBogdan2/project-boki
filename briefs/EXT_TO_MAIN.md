@@ -10428,3 +10428,4 @@ READY ext/feel-first-cast-pool f1d87917a54740a1ed67ed73b54943aad10e98a2 (bridge 
 READY ext/vfx-albert-e-slab f7a4a55d529ffe9e5dc1b41836ced013ac972a4a (Albert aegis lit slab plates + ivory rim, dark cubes gone; Mending Ground disc rim rule; GPU strips)
 READY ext/v95-ingame-drift ed32db96d4 (v95 in-game drift tracker tool + table: 13/13 game glbs match current.json/overrides by blob, tris, clips; mesh check 10 WARN 3 FAIL; drift next items in docs/heroes/V95_CONTACT.md)
 READY ext/ui-retired-words 980fa52f2d5 (retired words Warden/Mantle/Bearer/Merge/Unmasked out of player text + content-json lint)
+READY ext/vfx-meeko-heal-hurt 385ce22668 (Meeko heals leaf green rising, hurts embers falling; Hearthlight/root field inside <=0.25 to rim, bloom rim-only; hero-vfx-check rows; before/after sheets)
