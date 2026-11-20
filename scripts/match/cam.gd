@@ -215,7 +215,8 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 ## along `turned`, in the frame `_cast_room` solves: `lens_at` is the view's distance from the point it aims at, the
 ## tangent of half its vertical lens and that across.
 func _box_at(s: float, plate: Vector3, view: Vector2, lens_at: Vector3, turned: Vector2) -> Rect2:
-	return HunterZone.box(_px_at(s, plate, view, lens_at, turned), _px_at(s, Vector3(0, -rise, 0), view, lens_at, turned))
+	var feet := _px_at(s, Vector3(0, -rise, 0), view, lens_at, turned)
+	return HunterZone.box(_px_at(s, plate, view, lens_at, turned), feet)
 
 ## The screen px of `at` (metres from the point the view aims at: x to the right, z toward the camera) with the view
 ## leaned `s` metres (see _box_at).

@@ -8,7 +8,7 @@ extends RefCounted
 ##      held, not outside it, not past it, and not without the hold; the hold rides the hunter flags (Net)
 ##   4. walk: holding it leaves walking speed unchanged; the key is C, shown by Settings.key_cap
 ##   5. HUD: a full far look toward each corner keeps you clear of the HUD's groups (a stand-in HUD, then the live one)
-## --scout-cam-shots (GPU, --shots-dir=<dir>): a live match with the cursor up and to the right: the usual
+## --scout-cam-shots (GPU, --shots-dir=<dir> [--res=WxH]): a live match with the cursor up and to the right: the usual
 ## view, the far look held, and half way back after release, then the far look held at each screen corner, one PNG
 ## each (the corner lines print how many px of your zone a HUD group covers: 0 is clear).
 
@@ -18,6 +18,7 @@ const STEP := 1.0 / 60.0             # s: one frame of the ease
 const CLEAR := 34                    # m: the flattened patch round the player (past the far look's reach)
 const SHOT_CURSOR := Vector2(0.8, 0.25)   # share of the screen the cursor sits at in the shots
 const CORNERS := [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]   # a full lean at each (-1..1)
+const CORNER_NAMES := ["tl", "tr", "bl", "br"]
 
 var bad := 0
 
@@ -259,6 +260,10 @@ func _shots(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--res="):
+			var wh := String(a).substr(6).split("x")
+			DisplayServer.window_set_size(Vector2i(int(wh[0]), int(wh[1])))
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
@@ -293,7 +298,7 @@ func _shots(main: Node) -> void:
 		for i in 90:
 			vp.warp_mouse(at)
 			await main.get_tree().process_frame
-		var name := "scout_corner_%s%s" % ["t" if rel.y < 0 else "b", "l" if rel.x < 0 else "r"]
+		var name := "scout_corner_%s_%dp" % [CORNER_NAMES[CORNERS.find(rel)], main.get_window().size.y]
 		vp.get_texture().get_image().save_png(dir.path_join(name + ".png"))
 		var zone := HunterZone.rect(m)
 		var worst := ["", 0.0]
