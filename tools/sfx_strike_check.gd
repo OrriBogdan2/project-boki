@@ -1,5 +1,5 @@
 extends RefCounted
-## --sfx-strike-check: does each Hero ability's own sound land on what it belongs to? Every move of the 12 kits
+## --sfx-strike-check: does each Hero ability's own sound land on what it belongs to? Every move of the 13 kits
 ## (LMB tap and hold, RMB tap and hold, E, R) is pressed once in a real match at a dummy 3 m away, and per frame
 ## it logs the Hero's own fire/cast/impact/signature sounds (content/sfx/<arch>.json), the dummy's damage (the
 ## gameplay hit), the release (a shot of the Hero's own appearing: a throw, a bolt, a swing's reach; a rock of
@@ -12,8 +12,8 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const ARCHES := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
-	"rimewright", "tender", "thief"]
+const ARCHES := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gil", "gunslinger", "juggernaut", "mage",
+	"ostra", "rimewright", "tender", "thief"]
 const MOVES := ["lmb", "lhold", "rmb", "hold", "e", "r"]
 const WATCH := 2.0             # s watched after each press
 const HELD := 0.5              # s a held button stays down
@@ -34,6 +34,7 @@ const KNOWN := {
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
 	"dredge": {"rmb": ["dredge_coin_jingle"], "hold": ["dredge_coin_jingle"]},
+	"gil": {"rmb": ["gil_toss"], "hold": ["gil_toss"], "r": ["gil_wave_land"]},
 	"gunslinger": {"rmb": ["gunslinger_grenade_thunk"], "hold": ["gunslinger_grenade_thunk"], "r": ["vn_nuke_fire"]},
 	"juggernaut": {"lhold": ["jug_ting"], "hold": ["jug_ting"], "r": ["juggernaut_heal"]},
 	"mage": {"r": ["vv_ult_rise"]},

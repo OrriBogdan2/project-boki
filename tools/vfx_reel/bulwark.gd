@@ -8,7 +8,7 @@ extends "res://tools/hero_vfx_reel.gd"
 const HOLD := 1.5              # s the swing is held: past full charge and its perfect window
 
 func parts() -> Array:
-	return ["throw", "charge", "swing", "shield", "boop", "bash", "wall", "dash", "e", "r", "rope"]
+	return ["throw", "charge", "swing", "shield", "boop", "bash", "wall", "dash", "e", "mend", "r", "rope"]
 
 ## Each part starts with the hammer in his hand and the shield down (the last part may have left it out).
 func _hand() -> void:
@@ -152,6 +152,18 @@ func _part_boop() -> void:
 			T.teleport(home + Vector3(2.3, 0, 0))
 		_aim(home + Vector3(6.0, 0, 0))
 	await _go(2.2, boop, _sheet("boop", "RMB up, LMB: the boop", [0.7, 0.75, 0.8, 0.9, 1.0, 1.35, 1.45]), 1.5)
+	await _go(GAP)
+
+## E held to its end: the zone's last ticks and the closing burst (cast 0.1 s + 1 s column + 4 s zone, ~5.1 s),
+## the burst's sparks in his palette's ivory (content/vfx/bulwark.json), not mint.
+func _part_mend() -> void:
+	await _reset(5.0)
+	_hand()
+	var cast := func(t: float):
+		P.inp["sig"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(6.0, cast, _sheet("mend", "E to its end: the last tick and the closing burst",
+		[1.2, 4.9, 5.05, 5.12, 5.2, 5.3, 5.4, 5.55, 5.8]), 2.5)
 	await _go(GAP)
 
 func _part_r() -> void:
