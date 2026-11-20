@@ -11,7 +11,8 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
     With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
-    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax.
+    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax;
+    `meshy_regions` (the `regions` format) then move the parts its humanoid rig has no bone for whole onto ours.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -373,10 +374,10 @@ def seg_weights(P):
     return W / W.sum(1, keepdims=True)
 
 
-def region_masks(P):
-    """(bone, mask) per spec region."""
+def region_masks(P, regions=None):
+    """(bone, mask) per spec region (`regions`, or the list given: `meshy_regions`)."""
     out = []
-    for r in SPEC.get("regions", []):
+    for r in SPEC.get("regions", []) if regions is None else regions:
         x0, x1, y0, y1, z0, z1 = r["box"]
         m = (P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1)
         for seg, rad in r.get("except_segs", []):
@@ -620,7 +621,13 @@ def meshy_weights(low, arm, P):
             G[m] = np.eye(len(names))[share.argmax()]
             rigid += 1
     print("meshy: nearest rigged vertex within %.1f mm, %d loose pieces rigid" % (max(n[2] for n in near) * 1000, rigid), flush=True)
-    return dict(zip(names, G.T))
+    gr = dict(zip(names, G.T))
+    for bone, m in region_masks(P, SPEC.get("meshy_regions", [])):    # (parts Meshy's humanoid rig has no bone for, whole:
+        for nm in gr:                                                  # Grimble's pack on `hoard`, his goo arm on `hook`)
+            gr[nm] = gr[nm] * ~m
+        gr[bone] = gr.get(bone, np.zeros(len(P))) + m
+        print("meshy_regions: %d vertices on %s" % (m.sum(), bone), flush=True)
+    return gr
 
 
 def place_weights(gr, P):
