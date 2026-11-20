@@ -10658,3 +10658,4 @@ READY ext/release-gate-pods 9bd3132ab87 (release gate: pod drain wait + --reserv
 READY ext/boki-idle-batch-a be0003c414 (Boki idles for nine species)
 READY ext/merge-lane-N1-1120 286ec15752 (lane N1: 11 branches; farm-boki-xp-curve-port dropped red; one open red --boki-rig-check fliers roam time; PR opened by relay, bot gates)
 READY ext/boki-own-clips-h e3bf650be184bfc17a894d70e50f1984461eacc8 (own clips for scaldamus, sentrikat)
+READY ext/anim-dash-drive-hold ecf8aefeec5 (Kael lunge + Vex slide hold drive pose)
