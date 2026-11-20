@@ -10447,3 +10447,4 @@ READY ext/stuck-integ-f44ae5a2 5fb2049879692e93079cb9b7f62f9d268e4b8480 (superse
 READY ext/vision-fog-noblue-1120 0b3f2019d8 (Vision: neutral grey fog outside sight in every weather, no blue behind the player; PR via gh-outbox)
 READY ext/extra-shadow-warnings 91955e1803 (rename shadowing locals in 5 worst files, 0 Godot shadow warnings left there, baseline lowered)
 READY ext/clarity-4v4-shots 7047a1391db814555f984656528776f768c4f370 (combat clarity: --clarity-shots 3v3 slice fight counts what sits on each Hunter; cut glove row in fights, merge ground ring, merge name; --clarity-check element budget)
+READY ext/farm-raise-shapes bf28076eca5 (raised stats show as body size, sqrt growth 0.12, model rebuilt on a stat bite; food/care audit in GARDEN.md)
