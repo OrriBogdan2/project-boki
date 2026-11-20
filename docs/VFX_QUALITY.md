@@ -82,7 +82,7 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only its pooled hammer, whirl, beacon and aegis meshes: Albert's one-shot bursts are data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -98,6 +98,14 @@ Still open (shared, not done here):
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
+Albert (bulwark), ext/albert-vfx-data: his remaining code-drawn one-shots are `bulwark.json` moves, in his ivory and with no
+fill or ring where there was none to keep: `aegis_up` (the wall rising: dust and ivory sparks), `block` (sparks and a flare on
+the face), `mend_burst` (Mending Ground's end: one lit ring at its radius and rising motes) and `mend_revive` (the
+kickstarted ally), and the Faultline's `fault_slam` (the near cell), `fault_land` (rock, dust and the char mark; the two
+dust rings are cut: no rings on a landing), `fault_cell` (each cell heaving up) and `fault_foe` (a foe thrown). All are
+`"net": false`, as the code bursts were (the lane and the ring ride their own events). Timings, hit shapes and sounds are
+unchanged. `BjornFx` keeps its pooled meshes (whirl trail, beacon, wake, the plated wall) with their colours from the
+palette (`main`, `ember`, `slab`, `ivory`), and the shared charge ring is his ivory, not gold.
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
