@@ -102,14 +102,14 @@ def main():
         "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
     )
     ap.add_argument("--weights", choices=["meshy"], help="meshy: the skin weights from Meshy's auto-rig, not bone heat")
-    ap.add_argument("--spec", help="a swap spec file instead of the Warden's art/wardens/src/*_v95.json (a regen candidate's joints)")
+    ap.add_argument("--spec", help="a swap spec file instead of the Warden's art/wardens/src/*_v95.json: a regen candidate's joints and its own `master`")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
     spec = json.load(open(a.spec)) if a.spec else spec_for(art)
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
     tris = a.tris or spec.get("own_tris", TRIS)
-    spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
+    spec.update(master=os.path.expanduser(a.master or (spec["master"] if a.spec else master(a.name))), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if a.weights:
         spec["weights"] = a.weights
     if spec.get("head_tris"):
