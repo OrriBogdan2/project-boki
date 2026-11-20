@@ -2,7 +2,7 @@
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
-Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--no-import]
+Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy] [--spec-patch JSON] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
 
 import argparse
@@ -98,14 +98,22 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
-    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
+    ap.add_argument(
+        "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
+    )
+    ap.add_argument("--weights", choices=["meshy"], help="meshy: the skin weights from Meshy's auto-rig, not bone heat")
+    ap.add_argument("--spec-patch", help="a JSON whose keys replace the spec's (a regen master's `joints`, `head`: meshy_joints.py)")
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
     spec = spec_for(art)
     spec.update(spec.pop("own", {}))  # (the spec's keep_uv-only keys: `drop_mats`, the master's props the game glb has)
+    if a.spec_patch:
+        spec.update(json.load(open(a.spec_patch)))
     tris = a.tris or spec.get("own_tris", TRIS)
     spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
+    if a.weights:
+        spec["weights"] = a.weights
     if spec.get("head_tris"):
         spec["head_tris"] = int(tris * HEAD_SHARE)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
@@ -117,6 +125,7 @@ def main():
     for f in ("bake.blend", "fit.blend", "swap.blend", out):
         if os.path.exists(os.path.join(work, f)):
             os.remove(os.path.join(work, f))
+    shutil.rmtree(os.path.join(work, "meshy"), ignore_errors=True)
     path = os.path.join(work, "spec.json")
     json.dump(spec, open(path, "w"), indent=1)
     print("v95_to_game:", a.name, "->", spec["game"], "master", spec["master"], flush=True)
@@ -133,6 +142,9 @@ def main():
             out,
         ],
         check=True,
+        # (one BLAS thread: after --weights meshy's in-process Meshy rig call, the threaded numpy left Blender spinning
+        # on 52 threads with no progress for 25+ min; with one thread the same swap ends in ~2.5 min, Sable 11-20)
+        env=dict(os.environ, OPENBLAS_NUM_THREADS="1", OMP_NUM_THREADS="1", MKL_NUM_THREADS="1"),
     )
     shutil.copy(out, os.path.join(REPO, spec["game"]))
     if not a.no_import:
