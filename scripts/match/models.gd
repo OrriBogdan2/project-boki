@@ -792,6 +792,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var bulk := WardenBulk.apply(root, float(body.get("bulk", 1.0)))     # (a .glb Warden thins its skin instead)
 	var look_k := rs * ck * size_k * float(lk["height"])
 	root.scale = bulk * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.set_meta("look_scale", root.scale.y)     # WardenClips: a match's draw scale over this is a longer stride
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
 	ring.scale = Vector3.ONE / bulk * ring_k
