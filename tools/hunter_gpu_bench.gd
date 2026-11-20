@@ -52,7 +52,6 @@ func _cast(holder: Node3D, wardens: Array) -> Array:
 	var anims: Array = []
 	for i in HUNTERS:
 		var id := String(wardens[i % wardens.size()])
-		WardenGlb.set_model(id, true)
 		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		h.position = Vector3((i - (HUNTERS - 1) * 0.5) * GAP, 0, 0)
 		h.rotation.y = PI

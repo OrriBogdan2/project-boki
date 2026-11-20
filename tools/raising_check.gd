@@ -169,7 +169,6 @@ func run(m: Node) -> void:
 	home._pet_kin(k)
 	var t1 := float(rec["trust"])
 	ok(t1 > t0, "petting builds trust (%.1f -> %.1f)" % [t0, t1])
-	k["pet_ok"] = 0.0
 	home._pet_kin(k)
 	ok(is_equal_approx(float(rec["trust"]), t1),
 		"petting again the same farm day adds no trust (%.1f)" % float(rec["trust"]))

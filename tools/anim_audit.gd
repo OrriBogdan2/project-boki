@@ -6,14 +6,14 @@ extends RefCounted
 ##    foot is planted (m/s and % of the speed), the clip's own speed, hip bob, arm swing against the legs, how far
 ##    the arms reach;
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
-##  - the two attacks of anim_shots.gd, with the hips upright: the weapon hand's travel and how long an arm stands
-##    out sideways.
+##  - the two attacks of anim_shots.gd, with the hips upright, a game frame (FRAME) apart: the weapon hand's travel,
+##    the largest one-frame hand jump, and how long an arm stands out sideways.
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
 const SAMPLE_S := 2.4        # s of locomotion sampled
-const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
+const SPEEDS := [2.2, 3.4, 5.39]     # m/s: walk, a jog, full stick (HunterMove.speed)
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const SOLE_BAND := 0.02      # m: a foot vert this close to the foot's lowest at rest is on the sole
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
@@ -26,12 +26,26 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const MAX_BOB_CM := 11.0
+const HIP_PHASE := 0.2         # hips and leg spread: a walk wants a correlation under minus this, a run over it
 const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
 ## The start gate: the idle's first pose to the first walk pose played when he sets off (loco "start_phase", the
 ## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters.
 const MAX_START_GAP := 0.25
 const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick", "dredge", "mage"]
+const TURN_DT := 1.0 / 60.0  # s: a start or stop is judged at the game's frame rate
+const TURN_LEAD_S := 0.3     # s of the gait before a stop, the steady slide it is held against
+const TURN_S := 0.4          # s after the let-go: the source is in its next pose by 0.2 s (5 fps refs)
+const PHASES := 8            # let-gos spread evenly over one stride cycle, averaged
+const WALK_MPS := 2.2        # m/s: an analog-stick walk
+const CROUCH_K := 0.55       # x run speed: the crouch walk (Hunter._move's speed while crouched)
+const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics tick) apart
+## The attack gate: a hand moves at most this many body heights in one frame. Their strikes are keyed at 60 fps (at 30,
+## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
+## ask: the slam drops 1.5 body heights in 0.08 s, the punch drives 1.1 in 0.05 s. The others are listed open.
+const MAX_JUMP := {"bulwark": 0.4, "dolm": 0.45}
+const TURN_CEIL := 1.25      # the run turn's regression ceiling (share of the run): see _gate_turns
+const TURN := preload("res://tools/anim_audit_turn.gd")     # the 180 stick flip at a run
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -100,6 +114,9 @@ func _hero(main: Node, id: String) -> void:
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
+	if not id in NO_LEGS:
+		row["stops"] = _stops(m, sync, clips, sk, id)
+		_gate_stops(id, row["stops"])
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	var jog: Dictionary = live[str(SPEEDS[1])]
@@ -111,7 +128,9 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, live)
 	row["set_off_at"] = _set_off_at(m, sync, clips)
-	var want := ph * float(row["cfg"]["walk_len"])
+	# (the walk loop plays stretched to "cycle_s", else to the run clip's cycle: WardenClips._gait_loop)
+	var loop_s := float(lc.get("cycle_s", 0.0))
+	var want := ph * (loop_s if loop_s > 0.0 else float(row["cfg"]["run_len"]))
 	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
 		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
 				want])
@@ -121,6 +140,15 @@ func _hero(main: Node, id: String) -> void:
 				row["pop"]["idle_walk"], MAX_START_GAP, row["pop"]["idle_walk_best"][0],
 				row["pop"]["idle_walk_best"][1]])
 		bad += 1
+	for nm in row["attacks"]:
+		var at: Dictionary = row["attacks"][nm]
+		if at["jump"] > MAX_JUMP.get(id, INF):
+			print("FAIL %s %s: the hand jumps %.2f body heights in one frame at %.3f s (limit %.2f)"
+					% [id, nm, at["jump"], at["jump_t"], MAX_JUMP[id]])
+			bad += 1
+	if not id in NO_LEGS:      # last: it leaves the clips mid-turn
+		row["turns"] = TURN.turns(self, m, sync, clips, sk, id)
+		_gate_turns(id, row["turns"], row["stops"]["run"]["steady"])
 	m.free()
 
 func _gate(id: String, live: Dictionary) -> void:
@@ -133,6 +161,15 @@ func _gate(id: String, live: Dictionary) -> void:
 	var top: Dictionary = live[str(SPEEDS[2])]
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
+		bad += 1
+	var walk_hips: float = live[str(SPEEDS[0])]["hip_spread"]
+	if walk_hips > -HIP_PHASE:
+		print("FAIL %s: hips rise as the legs spread at a walk (correlation %.2f, wanted under %.2f)" % [id,
+				walk_hips, -HIP_PHASE])
+		bad += 1
+	if top["hip_spread"] < HIP_PHASE:
+		print("FAIL %s: hips rise as the legs pass at a run (correlation %.2f, wanted over %.2f)" % [id,
+				top["hip_spread"], HIP_PHASE])
 		bad += 1
 	if top["bob_cm"] > MAX_BOB_CM:
 		print("FAIL %s: hips bob %.1f cm at a run (limit %.0f)" % [id, top["bob_cm"], MAX_BOB_CM])
@@ -271,6 +308,125 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	out.merge(_swing(fr))
 	return out
 
+## The gaits a Hunter stops in: name -> {mps, crouch}. Run is his full stick (hunter_move.json).
+static func gaits(id: String) -> Dictionary:
+	var run := HunterMove.speed(id)
+	return {"run": {"mps": run, "crouch": 0.0}, "walk": {"mps": WALK_MPS, "crouch": 0.0},
+			"crouch": {"mps": run * CROUCH_K, "crouch": 1.0}}
+
+## His ground speed frame by frame after a let-go from `mps`, under the game's own walking brake.
+static func stop_speed(mps: float, n: int, dt: float) -> PackedFloat32Array:
+	var hv := Vector2(0.0, mps)
+	var out := PackedFloat32Array()
+	for i in n:
+		out.append(hv.length())
+		hv = HunterMove.brake(hv, 1.0, dt)
+	return out
+
+## The stop of every gait of `gaits`, the speed ramped as the game brakes it: a planted foot's mean speed against the
+## ground over the TURN_S after the let-go as a share of the gait's speed ("share": a foot the blend drags once he
+## stands counts too) and "skate_m", how far one foot skates; both the mean of PHASES let-gos through the stride.
+## "steady": the same share over the TURN_LEAD_S of the gait before each let-go, what the gait slides on its own.
+func _stops(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String) -> Dictionary:
+	var out := {}
+	var all := gaits(id)
+	for nm in all:
+		var g: Dictionary = all[nm]
+		var crouched := float(g["crouch"]) > 0.0
+		var ring: Dictionary = clips.d["crouch"]["walk"] if crouched else clips.d["loco"][String(nm)]
+		var row := {"stop": 0.0, "skate_m": 0.0, "steady": 0.0}
+		_hold(m, sync, float(g["mps"]), float(g["crouch"]), WARM_S / TURN_DT)
+		var rate := float(clips.tree.get("parameters/%s/scale" % ("crouch_rate" if crouched else "loco_rate")))
+		var cycle := clips.lib.get_animation(String(ring["f"])).length / maxf(rate, 0.1)
+		for i in PHASES:
+			_hold(m, sync, float(g["mps"]), float(g["crouch"]), (WARM_S + i * cycle / PHASES) / TURN_DT)
+			var one := _stop(m, sync, sk, g)
+			for key in row:
+				row[key] += one[key] / PHASES
+		out[nm] = row
+	m.set_meta(WardenClips.STATE, {})
+	return out
+
+## One let-go of gait `g`: TURN_LEAD_S of the gait and TURN_S after it; the slide shares and the skate.
+func _stop(m: Node3D, sync: Node, sk: Skeleton3D, g: Dictionary) -> Dictionary:
+	var n_lead := int(TURN_LEAD_S / TURN_DT)
+	var sp := PackedFloat32Array()
+	sp.resize(n_lead)
+	sp.fill(float(g["mps"]))
+	sp.append_array(stop_speed(float(g["mps"]), int(TURN_S / TURN_DT), TURN_DT))
+	var fr: Array = []
+	for v in sp:
+		_hold(m, sync, v, float(g["crouch"]), 1)
+		fr.append(points(sk))
+	var after := _turn_slide(fr, sp, n_lead, fr.size(), float(g["mps"]))
+	var lead := _turn_slide(fr, sp, 1, n_lead, float(g["mps"]))
+	return {"stop": after["share"], "skate_m": after["skate_m"], "steady": lead["share"]}
+
+## `frames` steps of TURN_DT with the state at `mps` forward (facing -Z), crouched by `crouch`.
+func _hold(m: Node3D, sync: Node, mps: float, crouch: float, frames: float) -> void:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -mps), "face": 0.0, "grounded": true, "crouch": crouch})
+	for k in int(frames):
+		sync.call("_process", TURN_DT)
+
+## Frames `from` to `to` of `fr`; the lift range is the whole of it. The foot's speed against the ground (the body
+## goes -Z at sp, so +Z is backward) over the frames it is planted, as a share of `mps`.
+func _turn_slide(fr: Array, sp: PackedFloat32Array, from: int, to: int, mps: float) -> Dictionary:
+	var slide := 0.0
+	var n := 0
+	var skate := 0.0
+	for f in ["foot.L", "foot.R"]:
+		var lo := INF
+		var hi := -INF
+		for p in fr:
+			lo = minf(lo, (p[f] as Vector3).y)
+			hi = maxf(hi, (p[f] as Vector3).y)
+		var foot := 0.0
+		for i in range(maxi(from, 1), mini(to, fr.size() - 1)):
+			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
+				continue
+			var v := ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * TURN_DT)
+			var s := Vector2(v.x, sp[i] - v.z).length()
+			slide += s
+			n += 1
+			foot += s * TURN_DT
+		skate = maxf(skate, foot)
+	return {"share": slide / maxi(n, 1) / mps, "skate_m": skate}
+
+## A stop slides no more than MAX_SLIDE of the speed, or than the gait slides on its own when that is more (the walks
+## the gait jobs left open).
+func _gate_stops(id: String, stops: Dictionary) -> void:
+	var line := "STOPS %-10s" % id
+	for nm in stops:
+		var st: Dictionary = stops[nm]
+		var limit := maxf(MAX_SLIDE, st["steady"])
+		line += " %s %d%% (steady %d%%) %.2f m" % [nm, round(100.0 * st["stop"]), round(100.0 * st["steady"]),
+				st["skate_m"]]
+		if st["stop"] > limit:
+			print("FAIL %s: the stop from a %s slides a foot %d%% of the speed (limit %d%%)" % [id, nm,
+					round(100.0 * st["stop"]), round(100.0 * limit)])
+			bad += 1
+	print(line)
+
+## A 180 stick flip at a run (anim_audit_turn.gd) should slide no more than MAX_SLIDE of the run, or than the run
+## slides on its own. WardenStride locks the feet through a reversal; most Hunters are still over it (the loops' own
+## run and backpedal slide, the locks let go as the clip lifts each foot), so past that it prints OPEN, and only past
+## TURN_CEIL (today's worst, archer 117% with the cursor flipped, plus a margin) does it FAIL.
+func _gate_turns(id: String, turns: Dictionary, steady: float) -> void:
+	var line := "TURNS %-10s" % id
+	for nm in turns:
+		var t: Dictionary = turns[nm]
+		line += " %s %d%% (run %d%%, after %d%%) %.2f m dip %.2f ends %s" % [nm, round(100.0 * t["share"]),
+				round(100.0 * t["lead"]), round(100.0 * t["after"]), t["skate_m"], t["dip"], t["ring"]]
+		var limit := maxf(MAX_SLIDE, steady)
+		if t["share"] > maxf(TURN_CEIL, limit):
+			print("FAIL %s: the run turn (%s) slides a foot %d%% of the run (ceiling %d%%)" % [id, nm,
+					round(100.0 * t["share"]), round(100.0 * maxf(TURN_CEIL, limit))])
+			bad += 1
+		elif t["share"] > limit:
+			print("OPEN %s: the run turn (%s) slides a foot %d%% of the run (limit %d%%)" % [id, nm,
+					round(100.0 * t["share"]), round(100.0 * limit)])
+	print(line)
+
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
 ## `sole`: read it at the lower of the heel and toe (the point a pinned sole pivots on), not the ankle (the gate's).
 func _slide(fr: Array, s: float, sole: bool) -> Dictionary:
@@ -311,6 +467,9 @@ func _swing(fr: Array) -> Dictionary:
 		for side in ["L", "R"]:
 			arm[side].append(-((p["hand." + side] as Vector3).z - (p["hips"] as Vector3).z))
 			leg[side].append(-((p["foot." + side] as Vector3).z - (p["hips"] as Vector3).z))
+	var spread: Array = []
+	for i in leg["L"].size():
+		spread.append(absf(leg["L"][i] - leg["R"][i]))
 	var lo: float = hy.min()
 	var hi: float = hy.max()
 	var peaks := 0
@@ -322,7 +481,8 @@ func _swing(fr: Array) -> Dictionary:
 	var reach_r: float = (arm["R"] as Array).max() - (arm["R"] as Array).min()
 	var against_l := -_corr(arm["L"], leg["L"])
 	var against_r := -_corr(arm["R"], leg["R"])
-	return {"bob_cm": 100.0 * (hi - lo), "peaks": peaks, "peak_hz": peaks / span, "reach_L": reach_l,
+	return {"bob_cm": 100.0 * (hi - lo), "hip_spread": _corr(hy, spread), "peaks": peaks, "peak_hz": peaks / span,
+			"reach_L": reach_l,
 			"reach_R": reach_r,
 			"against_L": against_l, "against_R": against_r,
 			"counter": (reach_l * against_l + reach_r * against_r) / maxf(reach_l + reach_r, 0.01),
@@ -411,28 +571,31 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 	return float(best) / (fr.size() - 1)
 
 func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
-	var fr := _clip_frames(sync, clips, sk, clip, 24).map(_upright)
+	var length := clips.lib.get_animation(clip).length
+	var fr := _clip_frames(sync, clips, sk, clip, ceili(length / FRAME) + 1).map(_upright)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
 	var out_side := {"L": 0, "R": 0}
 	var jump := 0.0
+	var jump_t := 0.0
 	for i in fr.size():
 		for side in ["L", "R"]:
 			if i > 0:
 				var step := ((fr[i]["hand." + side] as Vector3) - (fr[i - 1]["hand." + side] as Vector3)).length()
 				path[side] += step
-				jump = maxf(jump, step)
+				if step > jump:
+					jump = step
+					jump_t = length * i / (fr.size() - 1)
 		for side in ["L", "R"]:
 			out_side[side] += int(_t_posed(fr[i], side))
 		if _t_posed(fr[i], "L") or _t_posed(fr[i], "R"):
 			out_frames += 1
 	var weapon := "R" if path["R"] >= path["L"] else "L"
 	var loose: String = "L" if weapon == "R" else "R"
-	var length := clips.lib.get_animation(clip).length
 	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
-			"jump": jump / hgt}
+			"jump": jump / hgt, "jump_t": jump_t}
 
 ## The points about the hips with the hips' tilt taken out, so a whole-body roll or flip (Sable's cartwheel) does not
 ## count as an arm flung or raised. A turn about the vertical (a twisted stance) is kept: the arm is read as before.

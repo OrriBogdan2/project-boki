@@ -219,6 +219,7 @@ func _play(dt: float) -> void:
 		flinch.step(dt)
 	if drop_pose:
 		drop_pose.step(dt)
+	clips.feel(dt, rig_root.is_empty())
 	if sway:
 		sway.step(dt)
 	aim.step(1.0 - w)

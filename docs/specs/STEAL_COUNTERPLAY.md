@@ -2,7 +2,7 @@
 
 Owner call 2026-11-10: a monster's XP and kill bonus go to the squad that lands the last hit. A rival who lands it takes both. Make that readable and give the victim an answer. Mechanics only; no new abilities.
 
-## 1. What the source does (from our notes: SUPERVIVE_DATA.md sections 4, 7, 9, 10 and the kit tables)
+## 1. What the source does (from our notes: sv/DATA.md sections 4, 7, 9, 10 and the kit tables)
 - **Kill credit:** XP is paid to the killer and to teammates close by. Our notes record no damage-share rule for monsters. The owner's call is last hit takes all.
 - **Boss buff ownership:** our notes record no buff that a boss kill grants and then owns. Night bosses, Soul Bosses (3 phases) and the Major Monster exist; their rewards are not published. Treat as a gap.
 - **Execute / smite:** the only execute is the finisher on a downed Hunter's wisp (about 3 s). Nothing in the notes finishes a monster. There is no smite-like tool.

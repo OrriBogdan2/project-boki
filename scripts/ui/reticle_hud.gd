@@ -1,14 +1,12 @@
 class_name ReticleHud
 extends RefCounted
 ## The in-match cursor reticle with its aim states (the HUD owns one): the Reticle ring that opens with bloom,
-## the archetype's resource arc, the charge / warm-up / spin-up / reload arc or the ammo arc round it, the
-## full-charge flare, and the hit confirm (thin ticks off the ring, longer and gold on a crit, pale on
-## armour, with a ring flash). Thin strokes, a dark edge under every one, the Hunter's accent on the dot
+## the archetype's resource arc, the charge / warm-up / spin-up arc or the ammo arc round it, the
+## full-charge flare, and the hit tick (thin strokes off the ring, longer with a pulse ring on a crit or a
+## knock, gold on a crit, pale on armour, with a ring flash). The tick's state is the HUD's Reticle. Thin strokes, a dark edge under every one, the Hunter's accent on the dot
 ## and arcs. Numbers: content/rules/tuning.json "reticle". The AimKit cursor states are AimReticle.
 
-var hit_t := 0.0               # s left of the hit confirm
-var hit_crit := false
-var hit_armor := false
+var rt: Reticle               # the hit tick's state (the HUD's)
 var pin := Vector2.INF        # review tools: draw here (HUD canvas px) instead of at the mouse
 var _full := false             # the charge arc was full last frame
 var _flare_at := -99.0         # when it last reached full (m.time)
@@ -19,14 +17,8 @@ static func _t(key: String) -> float:
 static func _tc(key: String) -> Color:
 	return Reticle.tc(key)
 
-func tick(delta: float) -> void:
-	hit_t = maxf(0.0, hit_t - delta)
-
-## A hit landed (the player's): starts the confirm.
-func hit(crit: bool, armor: bool) -> void:
-	hit_t = _t("hit_s")
-	hit_crit = crit
-	hit_armor = armor
+func _init(reticle: Reticle) -> void:
+	rt = reticle
 
 ## Draws the reticle and its states at `at` on `c` for the player `p`; `time` is the match clock.
 func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
@@ -35,20 +27,20 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	var hc := _hit_color()
-	var k := hit_t / _t("hit_s")
+	var k := rt.tick_k()
 	Reticle.draw(c, at, spread, accent, Color(hc, k * _t("hit_ring_flash")))
 	if p.ak and p.ak.has_meter():
 		var rc := p.ak.res_col()
 		var full := p.ak.tell == "full"
 		_arc(c, at, _t("res_r"), PI * 1.62, PI * 0.76, p.ak.res_frac(), rc, 0.95 if full else 0.7, full)
 	_states(c, p, at, time, accent)
-	if hit_t > 0.0:
+	if rt.tick_t > 0.0:
 		_hit(c, at, spread, hc, k)
 
-## The charge, warm-up, spin-up, reload or ammo arc (one at a time).
+## The charge, warm-up, spin-up or ammo arc (one at a time).
 func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) -> void:
 	var r := _t("charge_r")
-	var ck := p.charge_k()
+	var ck := p.atk.charge_k()
 	if ck > 0.0:
 		var full := ck >= 1.0
 		if full and not _full:
@@ -62,8 +54,6 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 		_arc(c, at, r, -PI * 0.5, TAU, p.spin, _tc("col_warm_up"), 1.0, false)
 	elif p.wpn.get("melee", false):
 		pass
-	elif p.reload_t > 0.0:
-		_arc(c, at, r, -PI * 0.5, TAU, 1.0 - p.reload_t / float(p.wpn["reload"]), _tc("col_reload"), 1.0, false)
 	else:
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
 		var low := af <= _t("low_ammo_frac")
@@ -94,15 +84,16 @@ func _flare(c: CanvasItem, at: Vector2, r: float, time: float, accent: Color) ->
 	c.draw_arc(at, r + 1.5 + e * _t("flare_grow"), 0.0, TAU, 32, col, _t("arc_w"), true)
 
 func _hit_color() -> Color:
-	if hit_armor:
-		return _tc("col_armor_crit" if hit_crit else "col_armor")
-	return _tc("col_crit" if hit_crit else "col_hit")
+	if rt.tick_armor:
+		return _tc("col_armor_crit" if rt.tick_crit else "col_armor")
+	return _tc("col_crit" if rt.tick_crit else "col_hit")
 
-## The hit confirm: four thin ticks leave the ring on the diagonals, snapping out and settling; a crit's are
-## longer and bolder with a pulse ring. `k` runs 1 -> 0 over the hit.
+## The hit tick: four thin strokes leave the ring on the diagonals, snapping out and settling; a crit's or a
+## knock's are longer and bolder with a pulse ring. `k` runs 1 -> 0 over the hit.
 func _hit(c: CanvasItem, at: Vector2, spread: float, hc: Color, k: float) -> void:
-	var len_t := _t("hit_len_crit" if hit_crit else "hit_len")
-	var w := _t("hit_w_crit" if hit_crit else "hit_w")
+	var strong := rt.tick_crit or rt.tick_knock
+	var len_t := _t("hit_len_crit" if strong else "hit_len")
+	var w := _t("hit_w_crit" if strong else "hit_w")
 	var ring := _t("ring_r") + minf(spread, _t("spread_max"))
 	var from := ring + _t("hit_gap") + (1.0 - k) * _t("hit_pop")
 	var a := minf(1.0, k * 2.5)
@@ -110,6 +101,6 @@ func _hit(c: CanvasItem, at: Vector2, spread: float, hc: Color, k: float) -> voi
 		var n: Vector2 = d.normalized()
 		c.draw_line(at + n * from, at + n * (from + len_t), Color(0.05, 0.03, 0.08, 0.65 * a), w + 1.6, true)
 		c.draw_line(at + n * from, at + n * (from + len_t), Color(hc, a), w, true)
-	if hit_crit:
+	if strong:
 		var pulse_r := from + (1.0 - k) * _t("crit_pulse_grow")
 		c.draw_arc(at, pulse_r, 0.0, TAU, 32, Color(hc, 0.7 * k), _t("arc_w"), true)

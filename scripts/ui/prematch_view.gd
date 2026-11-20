@@ -30,6 +30,7 @@ var chat_hint: Label
 var talk_btn: Button
 var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
 var stage_slot: Control          # where the stage stands, beside the Hunter grid
+const SQUAD_PX := 40.0        # px, a squadmate's portrait in the strip
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
@@ -251,8 +252,8 @@ func _show_howto(ak: String) -> void:
 	if Arch.exists(ak):
 		howto_slot.add_child(ClassCard.howto_box(ak, HOWTO_W, 12))
 
-## One card: portrait, name, role word. Stats and the unlock quest are the tooltip. A shut Hunter is dim
-## with a padlock.
+## One card: portrait, name, role word (a starter wears a "Start here" stamp until the first match). Stats and
+## the unlock quest are the tooltip. A shut Hunter is dim with a padlock.
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
@@ -286,6 +287,7 @@ func _tile(ak: String) -> PanelContainer:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
+	ClassCard.add_start_chip(card, ak)
 	card.set_meta("arch", ak)
 	return card
 
@@ -307,6 +309,14 @@ func _stage_pick() -> void:
 		stage.set_hunter(pm.pick)
 	stage.play_lockin()
 
+## A squadmate who hasn't picked yet: a dim square where their portrait goes.
+func _empty_face() -> Control:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", UI.frame(UI.WELL, UI.R_SMALL, UI.LINE))
+	p.custom_minimum_size = Vector2(SQUAD_PX, SQUAD_PX)
+	return p
+
+
 ## Your squad in pick order; whoever is picking is outlined.
 func _fill_squad() -> void:
 	for c in squad_box.get_children():
@@ -316,9 +326,10 @@ func _fill_squad() -> void:
 	for m in mates:
 		var ak: String = m["arch"]
 		var chip := UI.card(PICKING_FILL if m == now else UI.CARD, 8, 6)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		var h := UI.hbox(8)
 		chip.add_child(h)
-		h.add_child(ClassCard.portrait(ak, 36.0) if Arch.exists(ak) else UI.label("?", 20))
+		h.add_child(ClassCard.portrait(ak, SQUAD_PX) if Arch.exists(ak) else _empty_face())
 		var you: bool = m["you"]
 		var shown := String(m["name"]) + ("  (you)" if you else "")
 		h.add_child(UI.label(shown, UI.T_BODY, UI.ACCENT_HI if you else UI.INK, UI.semi))

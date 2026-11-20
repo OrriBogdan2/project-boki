@@ -10,7 +10,8 @@ extends RefCounted
 ## Poses (SimLod.pose_every): a rival far on screen at the widest match view (the sky ship ride's camera) is
 ## posed every SimLod.POSE_FAR frames, off screen every POSE_OFF_SCREEN, hidden every POSE_UNSEEN, every frame
 ## once on the player's squad or in a fight with it; one that comes on screen is posed that frame, and a Hero's
-## clips and skeleton (WardenGlb.Sync) hold with it and catch up the time.
+## clips and skeleton (WardenGlb.Sync) hold with it and catch up the time. Under SimLod.SLOW_FPS a rival in view
+## past POSE_SLOW_M is posed every POSE_SLOW frames (one nearer or after the player every frame) until EASE_FPS.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -18,6 +19,9 @@ extends RefCounted
 ## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
 ## Fight effects (FxPool): a flurry of rings, after-images, bolts, beams and swings adds no node to the Fx, and every
 ## mesh is back in its pool once they end.
+## once and reused until it changes. SpawnPlan's sight checks are spread over frames. World.los and
+## World.tile_kind read the grid once a tile and agree with the plain per-sample rule; Hunter.gear_stat's
+## worn-gear and perk sums are kept a step and renewed by refresh_gear and a perk taken.
 
 var main: Node
 var fails := 0
@@ -40,6 +44,9 @@ func run(main_node: Node) -> void:
 	_bot_los()
 	await _pose_rates()
 	_shadows()
+	_spawn_sight()
+	_sight_lines()
+	_worn_sums()
 	await _plates()
 	await _rig_pace()
 	await _fx_pools()
@@ -51,6 +58,97 @@ func _step(secs: float) -> void:
 	while t < secs:
 		m.step(Match.DT)
 		t += Match.DT
+
+## SpawnPlan looks at a slice of its spots each frame, each spot again within REVISIT_S, and a squad
+## standing on one still learns it in that time.
+func _spawn_sight() -> void:
+	var sp := m.spawn_plan
+	ok(sp != null and sp.cands.size() > 4, "setup: a spawn plan with spots")
+	if sp == null or sp.cands.size() <= 4:
+		return
+	var n := sp.cands.size()
+	var c: Dictionary = sp.cands[n / 2]
+	(c["known"] as Dictionary).erase(m.player.team)
+	m.player.teleport(c["pos"])
+	var at := sp._next
+	sp.tick(Match.DT)
+	var per := posmod(sp._next - at, n)
+	ok(per <= ceili(n * Match.DT / SpawnPlan.REVISIT_S), "one frame looks at %d of %d spots" % [per, n])
+	var t := Match.DT
+	while not (c["known"] as Dictionary).has(m.player.team) and t < SpawnPlan.REVISIT_S + 0.1:
+		sp.tick(Match.DT)
+		t += Match.DT
+	ok((c["known"] as Dictionary).has(m.player.team), "the spot underfoot is known within %.2f s" % t)
+
+## World.los reads each tile once (three lookups a sample before); World.tile_kind is one read. On random
+## lines over the real map both agree with the plain per-sample reading of the same rule.
+func _sight_lines() -> void:
+	var W: World = m.world
+	ok(W.dyn_walls.is_empty(), "setup: no ability walls up (the plain rule below reads terrain only)")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var bad := 0
+	for i in 400:
+		var a := Vector3(rng.randf_range(0.0, W.w), 0.0, rng.randf_range(0.0, W.h))
+		var b := a + Vector3(rng.randf_range(-12.0, 12.0), 0.0, rng.randf_range(-12.0, 12.0))
+		var y := rng.randf_range(0.5, 2.0)
+		if not W.is_void(a.x, a.z):
+			y += W.ground_at(a.x, a.z)
+		if W.los(a, b, y) != _plain_los(W, a, b, y):
+			bad += 1
+		var plain := World.T_GROUND
+		if W.is_block(b.x, b.z):
+			plain = World.T_BLOCK
+		elif W.is_void(b.x, b.z):
+			plain = World.T_VOID
+		if W.tile_kind(b.x, b.z) != plain:
+			bad += 1
+	ok(bad == 0, "los and tile_kind agree with the plain per-sample reading on 400 random lines (%d differ)" % bad)
+
+## The sight rule as World.los stated it before, a fresh read of every sample.
+func _plain_los(W: World, a: Vector3, b: Vector3, y: float) -> bool:
+	var d := Vector2(b.x - a.x, b.z - a.z)
+	var n := int(d.length() / 0.4) + 1
+	for i in range(1, n):
+		var t := float(i) / n
+		var px := a.x + d.x * t
+		var pz := a.z + d.y * t
+		if W.is_block(px, pz) and W.ground_at(px, pz) + World.BLOCK_H > y:
+			return false
+		if W.ground_at(px, pz) > y + 0.2:
+			return false
+	return true
+
+## Hunter.gear_stat keeps its worn-gear and perk sums for a step: a slot changed through refresh_gear
+## and a perk taken count in the same step, not the next.
+func _worn_sums() -> void:
+	var p: Hunter = m.player
+	p.gear = Gear.empty_slots()
+	p.refresh_gear()
+	var base := p.gear_stat("speed")
+	var gid := ""
+	for g in Gear.ALL:
+		if float((Gear.ALL[g]["stats"] as Dictionary).get("speed", 0.0)) > 0.0:
+			gid = String(g)
+			break
+	ok(gid != "", "setup: a gear piece with a speed stat")
+	if gid != "":
+		p.gear[0] = {"id": gid, "rar": 1}
+		p.refresh_gear()
+		ok(p.gear_stat("speed") > base, "gear put on through refresh_gear counts in the same step")
+	var pid := ""
+	var pk := ""
+	for id in Data.PERKS:
+		var st: Dictionary = (Data.PERKS[id] as Dictionary).get("stats", {})
+		if not st.is_empty() and String(st.keys()[0]) != "dmg" and p.perk_open(String(id)):
+			pid = String(id)
+			pk = String(st.keys()[0])
+			break
+	ok(pid != "", "setup: an open perk with a stat")
+	if pid != "":
+		var before := p.gear_stat(pk)
+		p.add_perk(pid)
+		ok(p.gear_stat(pk) != before, "a perk taken counts in the same step (%s: %s)" % [pid, pk])
 
 func _mob_naps() -> void:
 	var mb: Mob = null
@@ -208,6 +306,29 @@ func _pose_rates() -> void:
 	b.team = P.team
 	ok(SimLod.pose_every(m, b) == 1, "the player's squad: every frame")
 	b.team = team
+	var off := Vector3(SimLod.POSE_SLOW_M + 1.5, 0, 0)
+	SimLod.force_slow = 1
+	b.teleport(P.pos + off)
+	ok(SimLod.pose_every(m, b) == SimLod.POSE_SLOW,
+		"the match slow: a rival %.1f m off is posed every %d frames" % [off.x, SimLod.POSE_SLOW])
+	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival within %.0f m every frame" % SimLod.POSE_SLOW_M)
+	b.teleport(P.pos + off)
+	b.ai["tgt"] = P
+	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival after the player every frame")
+	b.ai["tgt"] = null
+	SimLod.force_slow = 0
+	ok(SimLod.pose_every(m, b) == 1, "the match quick: that rival every frame")
+	SimLod.force_slow = -1
+	SimLod.slow = false
+	SimLod.judge(30.0)
+	ok(SimLod.slow, "under %.0f fps the match is slow" % SimLod.SLOW_FPS)
+	SimLod.judge(45.0)
+	ok(SimLod.slow, "slow until the fps is back over %.0f" % SimLod.EASE_FPS)
+	SimLod.judge(55.0)
+	ok(not SimLod.slow, "over %.0f fps it is quick again" % SimLod.EASE_FPS)
+	SimLod.judge(45.0)
+	ok(not SimLod.slow, "quick until the fps is under %.0f" % SimLod.SLOW_FPS)
 	b.teleport(P.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_OFF_SCREEN, "off screen: every %d frames" % SimLod.POSE_OFF_SCREEN)
 	var held := false

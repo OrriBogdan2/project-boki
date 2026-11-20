@@ -20,7 +20,7 @@ the same for every Hero: no per-hero script, no per-hero data, and the keyed pos
 ## The numbers
 | const | value | from |
 |---|---|---|
-| `YAW_MAX` | 70 degrees | estimate: the source data (`briefs/supervive-data`) and `briefs/hero-ref` give no figure |
+| `YAW_MAX` | 70 degrees | estimate: the source data (`sv/briefs`) and `briefs/hero-ref` give no figure |
 | `PITCH_MAX` | 25 degrees | estimate, as above |
 | `RATE` | 40 1/s | estimate: about half the way to the aim each 60 Hz frame |
 | `OFF_S` / `ON_S` | 0.06 s / 0.15 s | ours: off inside the first third of a dash (0.19 s) |

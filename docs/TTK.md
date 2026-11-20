@@ -1,11 +1,11 @@
 # Time to knock against the source
 
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (28 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (20 of 38 rows today); that is the finding, not a flake. Tuned so far: Sparkle's and Sable's damage (ext/parity-ttk-sparkle-sable-lace, pinned in content/rules/kit_parity.json); the other outliers are listed with their causes as suggestions. Rows of Hunters not tuned here moved since 11-09 with other changes on main.
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (18 of 38 rows today); that is the finding, not a flake. Only Motley is tuned (below); the other outliers are listed with their causes as suggestions.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `sv/briefs/kits.md` (sv/briefs on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (28 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `sv/briefs/kits.md` (sv/briefs on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (20 of 38 rows today); that is the finding, not a flake. Tuned so far: Sparkle's and Sable's damage (ext/parity-ttk-sparkle-sable-lace, pinned in content/rules/kit_parity.json); the other outliers are listed with their causes as suggestions. Rows of Hunters not tuned here moved since 11-09 with other changes on main.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `sv/briefs/kits.md` (sv/briefs on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (18 of 38 rows today); that is the finding, not a flake. Only Motley is tuned (below); the other outliers are listed with their causes as suggestions.
 
 **Method**
-- Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, supervive_physics.md) and Common armour, 20% reduction (docs/SUPERVIVE_DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1); a footage row read at level N faces the level N mean (1285 + (N - 1) x 77.1).
+- Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, sv/briefs/physics.md) and Common armour, 20% reduction (sv/DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1); a footage row read at level N faces the level N mean (1285 + (N - 1) x 77.1).
 - (a) LMB only, held (taps for Kael and Albert, a 1.1 s draw for Lace). (b) Combo: every direct-damage non-ult ability the source has a number for, cast once at the start and again whenever its cooldown or charge is back, LMB between. Conditional bonuses (Dazed, Static, Ignite, Quickflip's empowered shot, sweet spots, stacks) are left out of the source side; ours runs live, so its passives count.
 - Rank 0 is the unspent rank (slot_lv 1); max is rank 3 for ours and every listed upgrade for the source (a "x2" upgrade counts for both tiers it covers, charges included). LMB has no ranks, so (a) is the same at both.
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
@@ -13,7 +13,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 - Gil has no source hero. His bar is the roster median: the median source time of the same row (LMB or combo, same rank) across the Hunters that have one. He gets no per-cast share rows. His combo varies by a few tenths of a second between runs, because the Grab Bag draws vary.
 - Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES`, which names the damage share the owner gave up; a row then passes as override up to 1.25 / (1 - share). One today: Motley, DECISIONS 2026-11-06 (item 117, briefs/archive/OWNER_REVIEW_1103-2026-11-06.md) "loses ~15% held-fire DPS, no compensation buff", so up to 1.47.
 
-**Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
+**Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `sv/briefs/kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
 
 | Hunter (source) | Clip, level | Hits read | Source LMB used | Interval |
 |---|---|---|---|---|
@@ -35,93 +35,86 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | juggernaut (Brall) | LMB rank 0 | 8.47 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | LMB rank max | 8.47 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | combo rank 0 | 4.42 | 7.70 | 0.57 | FAIL |
-| gunslinger (Ghost) | LMB rank 0 | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | LMB rank max | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | combo rank 0 | 1.77 | 1.92 | 0.92 | ok |
-| gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
-| juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
-| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
-| ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
-| ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
-| ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
-| mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
-| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
-| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | combo rank 0 | 2.68 | 9.00 | 0.30 | FAIL |
-| bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
-| thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
-| thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
-| ostra (Void) | LMB rank 0 | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
-| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| juggernaut (Brall) | combo rank max | 4.52 | 7.00 | 0.65 | FAIL |
+| ashwick (Felix) | LMB rank 0 | 5.72 | 6.20 | 0.92 | ok |
+| ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
+| ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
+| ashwick (Felix) | combo rank max | 2.63 | 3.00 | 0.88 | ok |
+| mage (Joule) | LMB rank 0 | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | LMB rank max | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | combo rank 0 | 8.13 | 9.00 | 0.90 | ok |
+| mage (Joule) | combo rank max | 6.63 | 6.40 | 1.04 | ok |
+| bulwark (Oath) | LMB rank 0 | 6.55 | 6.75 | 0.97 | ok |
+| bulwark (Oath) | LMB rank max | 6.55 | 6.75 | 0.97 | ok |
+| bulwark (Oath) | combo rank 0 | 5.92 | 5.85 | 1.01 | ok |
+| bulwark (Oath) | combo rank max | 5.27 | 5.00 | 1.05 | ok |
+| thief (Shiv) | LMB rank 0 | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | LMB rank max | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | combo rank 0 | 4.23 | 4.95 | 0.86 | ok |
+| thief (Shiv) | combo rank max | 4.23 | 4.95 | 0.86 | ok |
+| ostra (Void) | LMB rank 0 | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | LMB rank max | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | combo rank 0 | 5.43 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.83 | 4.80 | 1.01 | ok |
 | archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
 | archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
-| tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
-| tender (Elluna) | LMB rank max | 7.10 | 10.40 | 0.68 | FAIL |
-| dolm (Tetra) | LMB rank 0 | 13.30 | 11.40 | 1.17 | ok |
-| dolm (Tetra) | LMB rank max | 13.30 | 11.40 | 1.17 | ok |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | 3.50 | 2.70 | FAIL |
-| dredge (Kingpin) | LMB rank max | 9.43 | 3.50 | 2.70 | FAIL |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | 13.40 | 0.22 | FAIL |
-| rimewright (Celeste) | LMB rank max | 2.93 | 13.40 | 0.22 | FAIL |
-| gil (roster median) | LMB rank 0 | 6.43 | 6.60 | 0.97 | ok |
-| gil (roster median) | LMB rank max | 6.43 | 6.60 | 0.97 | ok |
-| gil (roster median) | combo rank 0 | 5.43 | 4.95 | 1.10 | ok |
-| gil (roster median) | combo rank max | 5.03 | 4.95 | 1.02 | ok |
-| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
-| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
-| archer (Myth) | LMB rank 0 | 7.83 | never | n/a | n/a |
-| archer (Myth) | LMB rank max | 7.83 | never | n/a | n/a |
-| tender (Elluna) | LMB rank 0 | 7.10 | never | n/a | n/a |
-| tender (Elluna) | LMB rank max | 7.10 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank 0 | 13.30 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank max | 13.30 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| tender (Elluna) | LMB rank 0 | 7.12 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.12 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.48 | 11.40 | 1.18 | ok |
+| dolm (Tetra) | LMB rank max | 13.48 | 11.40 | 1.18 | ok |
+| dredge (Kingpin) | LMB rank 0 | 6.85 | 3.50 | 1.96 | FAIL |
+| dredge (Kingpin) | LMB rank max | 6.85 | 3.50 | 1.96 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 3.35 | 13.40 | 0.25 | FAIL |
+| rimewright (Celeste) | LMB rank max | 3.35 | 13.40 | 0.25 | FAIL |
+| gil (roster median) | LMB rank 0 | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | LMB rank max | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | combo rank 0 | 5.28 | 4.95 | 1.07 | ok |
+| gil (roster median) | combo rank max | 4.95 | 4.95 | 1.00 | ok |
 
-| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
-|---|---|---|---|---|
-| gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 |
-| gunslinger (Ghost) | e | 0.156 | 0.157 | 0.99 |
-| juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
-| juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
-| ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
-| ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
-| ashwick (Felix) | e | 0.045 | 0.060 | 0.76 |
-| mage (Joule) | rmb | 0.104 | 0.104 | 1.00 |
-| mage (Joule) | dash | 0.119 | 0.119 | 1.00 |
-| mage (Joule) | e | 0.126 | 0.126 | 1.00 |
-| bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
-| thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
-| ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
-| ostra (Void) | e | 0.091 | 0.154 | 0.59 |
-| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
-| rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
-| thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
-| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
-| ostra (Void) | e | 0.172 | 0.154 | 1.11 |
+| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source | Bar |
+|---|---|---|---|---|---|
+| gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 | ok |
+| gunslinger (Ghost) | e | 0.156 | 0.157 | 0.99 | ok |
+| juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 | out |
+| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 | out |
+| juggernaut (Brall) | e | 0.039 | 0.023 | 1.67 | out |
+| ashwick (Felix) | rmb | 0.094 | 0.082 | 1.14 | ok |
+| ashwick (Felix) | dash | 0.117 | 0.117 | 1.00 | ok |
+| ashwick (Felix) | e | 0.058 | 0.060 | 0.98 | ok |
+| mage (Joule) | rmb | 0.104 | 0.104 | 1.00 | ok |
+| mage (Joule) | dash | 0.119 | 0.119 | 1.00 | ok |
+| mage (Joule) | e | 0.126 | 0.126 | 1.00 | ok |
+| bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 | ok |
+| thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 | ok |
+| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 | ok |
+| ostra (Void) | e | 0.172 | 0.154 | 1.11 | ok |
+| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 | ok |
+| rimewright (Celeste) | x | 0.299 | 0.121 | 2.48 | out |
+| archer (Myth) | rmb | 0.195 | 0.027 | 7.15 | out |
+| archer (Myth) | e | 0.130 | 0.095 | 1.37 | out |
+| archer (Myth) | x | 0.385 | 0.836 | 0.46 | out |
+| tender (Elluna) | rmb | 0.058 | 0.038 | 1.53 | out |
+| dredge (Kingpin) | e | 0.162 | 0.205 | 0.79 | out |
 <!-- ttk:table -->
+
+**11-20 re-read of the eight (ext/combat-ttk-rest-eight, origin/main a1b35c78ee; re-run 11-20 on facb5c3e22f: all 42 rows the same, only Gil combo 1.07/1.00 -> 1.00/0.93 as noted below).** Albert, Sparkle, Meeko, Grimble, Neve, Tenzo, Motley and Sable, `--ttk-check` (the table above is this run: every row matches) and `--ttk-matrix-check` (cells against docs/TTK_MATRIX.md, written 11-10). Moved = more than 15% from the recorded value. No data regression found (no number disagrees with its archetype json or source), so nothing was changed.
+
+| Hunter | `--ttk-check` rows, recorded (11-09 or the 11-11 slice) -> now | Matrix row, 12 cells (now / 11-10) | Commit that moved it |
+|---|---|---|---|
+| Albert | LMB 0.72 -> 0.97; combo 0.70 / 0.84 -> 1.01 / 1.05 | 5 cells moved, median 1.12x | Window 11-12 to 11-13, ratio 0.97 by 11-13. Candidate 015f26780f (recall caught on the clip's catch key); not pinned: that commit's tree cannot run the check |
+| Sparkle | LMB 0.77 -> 1.01; combo 0.17 / 0.20 -> 0.90 / 1.04 | all 12 moved, median 1.34x | LMB 83386bb77c (11-11, damage at the source's share); combo 4b3b15186f (11-16, Kitefall back to 9; not pinned the same way) |
+| Meeko | LMB 0.68 -> 0.68 | none | unchanged |
+| Grimble | LMB 2.70 -> 1.96 | all 12 moved, median 0.52x | the tight cluster, 03a5a3844d and c08b5a31ab (11-11); 23282bb8a4 (11-18, one aim line) measured 2.11 -> 1.96 |
+| Neve | LMB 0.22 -> 0.25 (inside 15%) | 7 cells moved, median 1.24x | 5b008013f7 (11-12, a hold is one burst, then the barrage) |
+| Tenzo | LMB 1.18 -> 1.18 | none | unchanged |
+| Motley | LMB 1.91 -> 1.10; combo 2.15 / 1.74 -> 1.13 / 1.01 | all 12 moved, median 0.65x | a27412b9fa (11-11, orb 9 -> 14.5, the owner's ~15% held-fire loss kept) |
+| Sable | LMB 0.95, combo 0.86 -> same | none | unchanged |
+
+Still outside the bar and already listed above: Meeko LMB 0.68, Grimble LMB 1.96, Neve LMB 0.25; Albert and Sparkle are back inside. Notes: Gil's combo rows read 4.62 to 5.28 s between runs (his chain varies, as the method says), so they are not drift. The matrix check fails its 12 Lace cells on main (her bow never looses in its hold and tap modes: `inf`); the draw mode that fixes it is on ext/ttk-main-1116, and docs/TTK_MATRIX.md should be regenerated only once that lands, otherwise Lace's row drops out. The matrix rows of the eight are in `--ttk-matrix-check` output on that commit; the doc keeps its 11-10 values until then.
 
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
 
-| Hunter (source) | Branch | Row | 11-09 doc | origin/main | branch alone | all four merged | Source s (supervive_kits.md) |
+| Hunter (source) | Branch | Row | 11-09 doc | origin/main | branch alone | all four merged | Source s (sv/briefs/kits.md) |
 |---|---|---|---|---|---|---|---|
 | Kael (Brall) | kael-owner-1111 | LMB rank 0 / max | 8.45 s, 0.65 | 8.45 s, 0.65 | 8.45 s, 0.65 | 8.45 s, 0.65 | 12.95 (Caldera tap 43 / 0.35 s) |
 | Kael (Brall) | kael-owner-1111 | combo rank 0 | 3.48 s, 0.45 | 4.22 s, 0.55 | 4.22 s, 0.55 | 4.22 s, 0.55 | 7.70 (+ Execution Slam 130 / 2.5 s, Flame Step 49 / 13 s x2, Feysteel Chain 30 / 16 s) |
@@ -137,14 +130,13 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | Cinder (Felix) | albert-hold-cinder-orb | combo rank max | 1.83 s, 0.61 | 1.83 s, 0.61 | 1.83 s, 0.61 | 1.83 s, 0.61 | 3.00 |
 | Albert (Oath) | albert-hold-cinder-orb | combo rank 0 / max | 0.70 / 0.73 | 0.70 / 0.84 | 0.70 / 0.84 | 0.70 / 0.84 | 5.85 / 5.00 (Spin Dash 364) |
 
-Out of the bar after the slice, each with the number that puts it there: **Kael** LMB 0.65, Slash 8 = 5.2% of our target against Caldera 43 = 3.3%; combo 0.55 / 0.59, Smash 26 = 16.9% against Execution Slam 130 = 10.1% (1.67x) and Warchain 8 against Feysteel Chain 30 (2.23x). The move from 0.45 / 0.16 is Rampage 0.175 -> 0.058 (tip 18 no longer lands; source Flame Step 49 = 0.038). **Vex** LMB 3.25, our 0.12 s cadence with `sustain_loss` 0.5 against MK7 51 every 0.08 s; combo max 0.78, Railgun share 0.234 against 202 = 0.157 (1.49x). **Cinder** LMB 0.78 / 0.74, stream 25.6% of the target a second against Flamethrower 258/s = 20.1%; combo 0.76 / 0.61, Cinder Shot 0.131 against Embry Bolt 106 = 0.082 (1.59x). **Lace** has no source row (Greenwood Bow has no damage number in supervive_kits.md). No kit was tuned in this job.
+Out of the bar after the slice, each with the number that puts it there: **Kael** LMB 0.65, Slash 8 = 5.2% of our target against Caldera 43 = 3.3%; combo 0.55 / 0.59, Smash 26 = 16.9% against Execution Slam 130 = 10.1% (1.67x) and Warchain 8 against Feysteel Chain 30 (2.23x). The move from 0.45 / 0.16 is Rampage 0.175 -> 0.058 (tip 18 no longer lands; source Flame Step 49 = 0.038). **Vex** LMB 3.25, our 0.12 s cadence with `sustain_loss` 0.5 against MK7 51 every 0.08 s; combo max 0.78, Railgun share 0.234 against 202 = 0.157 (1.49x). **Cinder** LMB 0.78 / 0.74, stream 25.6% of the target a second against Flamethrower 258/s = 20.1%; combo 0.76 / 0.61, Cinder Shot 0.131 against Embry Bolt 106 = 0.082 (1.59x). **Lace** has no source row (Greenwood Bow has no damage number in sv/briefs/kits.md). No kit was tuned in this job.
 
 **Outliers and causes (suggestions, nothing built)**
 
 | Hunter | Rows | Cause | Suggestion |
 |---|---|---|---|
 | Vex (Ghost) | LMB 3.25x slow; combo max 0.78 | Per round the shares match (6 of 154 = 3.9%, 51 of 1285 = 4.0%), but ours fires every 0.12 s (wiki and weapon sheet say 0.08 s; our 5 fps footage says about 0.14 s) and `sustain_loss` 0.5 halves every round after the tenth, where the source's first 10 rounds are the extra ones and rounds 11 to 30 stay at base. Our grenade matches (1.11x), the E beam is 1.49x. | Drop `sustain_loss` so rounds 11+ keep full damage and the first 10 get a bonus; settle 0.08 vs 0.12 s from footage first. |
-| Kael (Brall) | LMB 0.65; combo 0.45 and 0.16 | Slash 8 is 5.2% of our target against 43 = 3.3% (1.56x, cadence 0.34 vs 0.35 s matches). Rampage hits 9 + tip 18 = 17.5% of the target against Flame Step 49 = 3.8% (4.6x); Warchain 5.2% vs 2.3% (2.2x); Smash 16.9% vs 10.1% (1.67x). Max rank adds +40% Smash and a shorter dash recharge on top. | Slash 8 -> 5, Rampage hit 9 / tip 18 -> about 2 / 4 (the tip doubling is ours), Warchain hit 8 -> 3.6, Smash 26 -> 15. |
 | Cinder (Felix) | LMB 0.78, 0.76; combo 0.76, 0.61 | Stream 25.6% of the target a second vs 20.1% (258 of 1285). Cinder Shot 13.1% vs 8.2% (1.59x); the dash 0.70x and the cloak 0.76x are under. | Stream damage x0.8; Cinder Shot 20 -> 13; dash x1.4, cloak x1.3. |
 | Sparkle (Joule) | combo 0.30, 0.20 (LMB 1.00 and every ability 1.00) | Traced 11-12 at rank 0: the Rod's orb gives the Wirerun back at 1.17 s, and the run at 1.27 s goes through a full-Static target, so it hits double and Blowouts: 64 of 154 health in one pass, 42% of the knock. With the orb off: 0.90 / 1.03. The source has the same loop but no number for its payoff, and the source side leaves the loop out. A loop modelled with our payoff as a stand-in would be circular, and since source casts land at once it pushes max rank to about 1.7. Every slot is at the source share, so no data change. | Owner: a number for the source payoff, or an override for these two rows. |
 | Albert (Oath) | LMB 0.73; combo 0.71, 0.73 | Hammer 12 is 7.8% against 192 of 2365 = 8.1% (match). Ours alternates throw and recall hits faster than 0.45 s (about 3.3 hits a second against 2.2); if the source recall hits as well, as the tooltip's "recall (192 dmg)" may mean, the source is 3.4 s and the ratio 1.45, still out. Spin Dash is at parity (1.01x). | Settle whether the source recall deals damage, then set throw_rate or recall_dmg. |

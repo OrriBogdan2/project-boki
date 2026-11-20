@@ -1,6 +1,6 @@
 # Project Boki classes and weapons (v1 numbers)
 
-These are Kinfall's own numbers, set inside the ranges Supervive's roster used (docs/SUPERVIVE_DATA.md §6). They're data files you can retune without touching code:
+These are Kinfall's own numbers, set inside the ranges the reference's roster used (sv/DATA.md §6). They're data files you can retune without touching code:
 
 - `data/classes/light.tres`, `medium.tres`, `heavy.tres` (script: `scripts/combat/class_profile.gd`)
 - `data/weapons/*.tres`, 9 weapons (script: `scripts/combat/weapon_profile.gd`), fired by `scripts/combat/weapon_user.gd`
@@ -10,21 +10,21 @@ These are Kinfall's own numbers, set inside the ranges Supervive's roster used (
 
 ## Classes
 
-| | Light | Medium | Heavy | Supervive range |
+| | Light | Medium | Heavy | The reference range |
 |---|---|---|---|---|
 | HP (level 1) | 900 | 1,050 | 1,400 | 880–1,596 |
 | HP at level 15 | 1,656 | 1,932 | 2,576 | +~6%/level |
 | Run speed | 4.85 m/s | 4.65 m/s | 4.40 m/s | 4.15–4.9 |
 | Hitbox radius | 0.35m | 0.40m | 0.50m | — |
 | Dash | 3.6m, every 6.5s (was 4.5m + slide) | 3.45m, every 9s (was 3.8m + slide) | 3.1m, 2 charges, 12s each (was 3.2m + slide) | 6.5–15s |
-| Air dash (ex) | 5m, 12s (was 7m) | 4.6m, 13s (was 6m) | 4.2m, 15s (was 5m) | Jin: 12.5s |
-| Knockback taken | ×1.18 (weight 0.85) | ×1.0 | ×0.74 (weight 1.35) | Beebo is "10% lighter" |
+| Air dash (ex) | 5m, 12s (was 7m) | 4.6m, 13s (was 6m) | 4.2m, 15s (was 5m) | ref-duelist: 12.5s |
+| Knockback taken | ×1.18 (weight 0.85) | ×1.0 | ×0.74 (weight 1.35) | ref-hunter is "10% lighter" |
 | Glide before overheat | ~17s (heat ×1.2) | ~14s | ~12s (heat ×0.85) | ~14s; Glide Boots +40% |
 | Knock heal | 250 | 250 | 250 | 250 (1.0) |
 
 How the classes differ:
 - **Light:** fragile and slippery. Fastest dash, longest glide, gets thrown furthest by hits.
-- **Medium:** the Supervive baseline.
+- **Medium:** the reference baseline.
 - **Heavy:** most HP, slowest, two short dashes instead of one long one, hard to push off ledges. That last point matters a lot in an abyss game.
 
 ### The kit (keys)
@@ -36,19 +36,19 @@ too) · Q active glove · E kin ability · C or middle mouse throw / recall kin 
 
 ## Weapons
 
-Each class has two guns and one sword. Firing behavior is measured from Supervive footage and patch notes (see WEAPON_FIRING_DATA.md).
+Each class has two guns and one sword. Firing behavior is measured from the reference footage and patch notes (see WEAPON_FIRING_DATA.md).
 
 | Weapon | Class | How it fires | Per hit | Rate | Range | Magazine / reload |
 |---|---|---|---|---|---|---|
 | SMG | Light | Hold; spread grows while firing; damage drops to 60% past 60% of range | 20 | 14/s | 7m, 55 m/s shots | 36 / 1.4s |
-| Sniper | Light | Press → 0.6s aim with a laser enemies can see → one round at 32 m/s you can dodge. 50% damage point-blank, full from half range. Slowed while aiming (Shrike) | 240 | every 1.5s | 16m | 5 / 2.2s |
-| Twin Blades | Light | Tap for a 3-hit combo with small lunges; hold 0.5s for a 4.5m lunging stab (Jin) | 38 / 38 / 64; charged 120 | 0.22s per swing | 2.0m, 110° | — |
-| Rifle | Medium | Hold; damage falls to 60% over the first 10 rounds, so short bursts win (Ghost) | 28 | 12.5/s | 9.5m, 110 m/s | 30 / 1.8s |
+| Sniper | Light | Press → 0.6s aim with a laser enemies can see → one round at 32 m/s you can dodge. 50% damage point-blank, full from half range. Slowed while aiming (ref-sniper) | 240 | every 1.5s | 16m | 5 / 2.2s |
+| Twin Blades | Light | Tap for a 3-hit combo with small lunges; hold 0.5s for a 4.5m lunging stab (ref-duelist) | 38 / 38 / 64; charged 120 | 0.22s per swing | 2.0m, 110° | — |
+| Rifle | Medium | Hold; damage falls to 60% over the first 10 rounds, so short bursts win (ref-gunslinger) | 28 | 12.5/s | 9.5m, 110 m/s | 30 / 1.8s |
 | Burst Rifle | Medium | 3-round bursts | 40 ×3 | burst every 0.48s | 10.5m, 60 m/s | 27 / 1.5s |
 | Longsword | Medium | 3-hit combo, +25% on the blade tip; hold 0.8s for a 3m lunge | 46 / 46 / 74; charged 160 | 0.28s | 2.4m, 140° | — |
-| Shotgun | Heavy | 7 slugs in a 60° fan that slow down and stop at 5m. Spread grows +8° per shot (max +24°); dashing resets it. One slug landing still does 46% (Kingpin) | 7 × 25 | every 0.9s | 5m | 6 / 1.8s |
-| Minigun | Heavy | Hold: 0.7s spin-up, then spread narrows from 14° to 3° over 1.5s. Slowed to 50% while firing; +1.5m range once spun up (Hudson) | 17 | 16.7/s | 10m (11.5m spun) | 150 / 3s |
-| Greatsword | Heavy | Slow 3-hit combo, +30% on the tip; hold 1s for a slam that stuns 0.6s and knocks back hard (Brall: 3.2m reach) | 64 / 64 / 104; charged 200 | 0.4s | 3.2m, 160° | — |
+| Shotgun | Heavy | 7 slugs in a 60° fan that slow down and stop at 5m. Spread grows +8° per shot (max +24°); dashing resets it. One slug landing still does 46% (ref-dredge) | 7 × 25 | every 0.9s | 5m | 6 / 1.8s |
+| Minigun | Heavy | Hold: 0.7s spin-up, then spread narrows from 14° to 3° over 1.5s. Slowed to 50% while firing; +1.5m range once spun up (ref-minigun) | 17 | 16.7/s | 10m (11.5m spun) | 150 / 3s |
+| Greatsword | Heavy | Slow 3-hit combo, +30% on the tip; hold 1s for a slam that stuns 0.6s and knocks back hard (ref-juggernaut: 3.2m reach) | 64 / 64 / 104; charged 200 | 0.4s | 3.2m, 160° | — |
 
 ## Time to kill (primary weapon only, every hit lands, reloads included, no armor)
 
@@ -68,7 +68,7 @@ Notes on the table:
 - **Rifle:** the number is for holding the trigger. Tapping keeps damage near full, ~250+ DPS while firing.
 - **Sniper and shotgun:** built around one big hit (240, and up to 175 point-blank), not DPS.
 
-**Why it's set this way.** Supervive fights are long by shooter standards, with abilities doing a big share of the damage. With guns and swords alone, ~5s of perfect aim to kill a Medium leaves room for dashing, gliding and knocking people into the abyss to matter more than raw DPS. Once kin abilities are in, real TTK will drop to ~3s.
+**Why it's set this way.** the reference fights are long by shooter standards, with abilities doing a big share of the damage. With guns and swords alone, ~5s of perfect aim to kill a Medium leaves room for dashing, gliding and knocking people into the abyss to matter more than raw DPS. Once kin abilities are in, real TTK will drop to ~3s.
 
 - **Armor stretches these times.** Common armor (20% reduction) makes them ~1.25× longer; Legendary (35%) makes them ~1.5× longer.
 - **Rifle DPS is the tapping number.** Held fire averages lower because of the falloff.
@@ -112,7 +112,7 @@ Notes on the table:
 - Hold B: a wheel opens round the cursor with a slice per teammate (portrait and name, greyed when they
   can't take you; one teammate still gets the wheel). Point the mouse or right stick at one and let go to
   start; let go in the middle to cancel (BaseWheel, sharing the G wheel's pick and dead zone).
-- A 5.5s channel (BaseRecall.CHANNEL_S) to that teammate. **Stationary**, like Supervive's recall:
+- A 5.5s channel (BaseRecall.CHANNEL_S) to that teammate. **Stationary**, like the reference's recall:
   moving, dashing, jumping, attacking or casting cancels it, and so does any damage (feedback toast,
   a 4s lockout; no progress kept). A hit breaks it loudly: a red burst, "INTERRUPTED" and its own sound.
   Everyone, foes too, sees a filling ring on you and a filling circle plus "incoming" on the teammate.
@@ -132,10 +132,10 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: the view leans toward the cursor in proportion to how far the
-  cursor is from your character (1.4m deadzone, 42% of the distance, capped at 7.5m), eased at 6/s,
-  so you see more where you aim and you never leave the screen. The old presets stay in Settings.
-- Sneaking (Ctrl) zooms the camera out to 1.45x, eased; the cursor lean works the same.
+- Default follow is **Supervive**: centred on you, the cursor never moves the view (measured from the
+  footage: docs/MOVEMENT_FEEL.md "Camera lead"). The Standard and Fully dynamic presets in Settings
+  slide toward the cursor the way the source's own options do.
+- Sneaking (Ctrl) zooms the camera out to 1.45x, eased.
 - Ground-targeted effects land at the cursor, clamped to 10m for hunters (gloves) or the ability's
   reach for kin. When your kin is out with its ability ready, a faint ring shows where it would land.
 - Weapon autos fire toward the cursor; the aim line shows the weapon's range.
@@ -143,6 +143,6 @@ Notes on the table:
 ## Hooks for the combat code
 - `notify_damaged(amount)`: returns true if the hit spiked a glider (credit the attacker).
 - `knockback(impulse)`: divided by the target's class weight.
-- `refund_dash_charge()`: call on knock (Supervive 1.0 knock reward), alongside healing `knock_heal`.
+- `refund_dash_charge()`: call on knock (The reference 1.0 knock reward), alongside healing `knock_heal`.
 - `incoming_damage_multiplier()`: ×2 while gliding.
 - `WeaponProfile.dps()`: sustained DPS, for balance checks.

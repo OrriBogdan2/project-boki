@@ -35,7 +35,8 @@ var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
-var rng := RandomNumberGenerator.new()      # look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
+# look-only randomness (shader seeds, spins): never the global randf the sim and bots draw from
+var rng := RandomNumberGenerator.new()
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -265,27 +266,6 @@ func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) 
 	n.global_position = at
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
-## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Sable's
-## cyan, Kael's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
-func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
-	n.global_position = at
-	var back := Vector3(-dir.x, 0, -dir.y)
-	if back.length() < 0.01: back = Vector3.BACK
-	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
-	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
-
-## A streak from `a` to `b` in space, hot at `b` and fading over `dur`: a trail laid in short pieces follows any path
-## (Sable's flip, whose hands and feet turn through the air).
-func seg(a: Vector3, b: Vector3, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var d := b - a
-	if d.length() < 0.01:
-		return
-	var n := _fx("seg", M_COMET, _ribbon_mesh(), false)
-	n.global_position = b
-	n.basis = Basis.looking_at(d.normalized(), Vector3.RIGHT if absf(d.normalized().y) > 0.95 else Vector3.UP)
-	_play(n, "seg", col, col2, dur, Vector3(width, width, d.length()))
-
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
@@ -421,9 +401,9 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	return n
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends; `on_end(at)` runs when it does.
-## trail: the streak's length in m, width: its width.
+## trail: the streak's length in m (0: none, a HeroVfx trail follows the returned node), width: its width.
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable()) -> Node3D:
 	var n := _rider(kind, col, col2)
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
@@ -431,6 +411,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	riders.append({"node": n, "sd": sd, "kind": kind, "spin": rng.randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
+	return n
 
 ## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
 func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,
@@ -462,9 +443,13 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 			"dagger": head.rotation.z = sin(spin) * 0.15
 			"crescent_bolt": head.scale = Vector3.ONE * (width / CRESCENT_CHORD)
 	var tr := n.get_node_or_null("Trail") as Node3D
-	if tr: tr.scale = Vector3(width, width, trail)
+	if tr:
+		tr.visible = trail > 0.0
+		tr.scale = Vector3(width, width, maxf(trail, 0.01))
 	var core := n.get_node_or_null("Core") as Node3D
-	if core: core.scale = Vector3(width * CORE_W, width * CORE_W, trail * 0.8)
+	if core:
+		core.visible = trail > 0.0
+		core.scale = Vector3(width * CORE_W, width * CORE_W, maxf(trail, 0.01) * 0.8)
 	var bolt := n.get_node_or_null("Bolt") as Node3D
 	if bolt: bolt.scale = Vector3(width * 1.6, width * 1.6, trail * 1.4)
 

@@ -122,7 +122,7 @@ func _loop_beat(t: float, kins: Array, did: Dictionary) -> void:
 			0: home._pet_kin(k)
 			1: home._play_with_kin(k)
 			2: home._care_brush(k["rec"])
-			3: home._start_drill(k["rec"], "power")
+			3: home.drill.start(k["rec"], "power")
 
 ## The drill's marker is pressed as it crosses the gold.
 func _press_in_gold() -> void:
@@ -130,7 +130,7 @@ func _press_in_gold() -> void:
 		return
 	var bar: TimingBar = home.train["bar"]
 	if absf(bar.m - bar.zone) < GOLD_BAND:
-		home._train_hit()
+		home.drill.hit()
 
 ## Shot 6: the Hunters screen (J on the farm) steps through every Hunter, then lands on `chosen` and picks it.
 func hunter_select(chosen: String) -> void:

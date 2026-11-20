@@ -220,6 +220,11 @@ static func _room(b: Button) -> float:
 	var gap := minf(b.position.x, par.size.x - b.position.x - b.size.x)
 	return 1.0 + maxf(0.0, gap) * 2.0 / b.size.x
 
+## The sound of a pick-one panel taking a card on one click (no confirm button to press): the UI
+## confirm family, once per take. Every such panel calls this from its take path, nowhere else.
+static func pick_taken(pitch := 1.0) -> void:
+	Sfx.play("ui_confirm", null, -6.0, 0.03, pitch)
+
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)
@@ -253,8 +258,10 @@ static func icon_button(icon: String, cb: Callable, tip := "", px := 16.0) -> Bu
 	b.tooltip_text = tip
 	b.custom_minimum_size = Vector2(px + 18, px + 18)
 	b.draw.connect(func():
-		var c := b.get_theme_color("font_hover_color" if b.is_hovered() else "font_color")
-		draw_icon(b, icon, b.size * 0.5, px * 0.5, c))
+		var state := "font_color"
+		if b.disabled: state = "font_disabled_color"
+		elif b.is_hovered(): state = "font_hover_color"
+		draw_icon(b, icon, b.size * 0.5, px * 0.5, b.get_theme_color(state)))
 	b.mouse_entered.connect(b.queue_redraw); b.mouse_exited.connect(b.queue_redraw)
 	return b
 

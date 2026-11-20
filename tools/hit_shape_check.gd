@@ -206,7 +206,14 @@ func _secs_for(kind: String, hold: float) -> float:
 		"e": return 1.2
 		"x": return 1.5
 		"lmb": return 0.5
+		"rmb", "rmb_hold": return maxf(hold + 0.5, 0.6) + _flight_s()
 	return hold + 0.5 if hold > 0.0 else 0.6
+
+## Seconds a thrown RMB (Gil's flask) spends in the air before it lands: its flight plus the flight per metre.
+func _flight_s() -> float:
+	var rd := P.ak.rmb_def()
+	var far := float(rd.get("range", 0.0)) * float(rd.get("hold_range", 1.0))
+	return float(rd.get("flight", 0.0)) + float(rd.get("flight_per_m", 0.0)) * far
 
 func _hold_for(kind: String) -> float:
 	match kind:
@@ -217,11 +224,77 @@ func _hold_for(kind: String) -> float:
 		"dash_hold": return float(P.ak.dash_def().get("hold", 0.6)) + 0.05
 	return 0.0
 
+## Where the spark of a hit on `tgt` spawned: the impact flash nearest its body, within 1.5 s of `kind` being
+## pressed as in _probe (`put_zone`: a Cinder patch under the target instead, nothing pressed).
+func _spark_at(arch: String, kind: String, tgt: Hunter, put_zone := false) -> Vector3:
+	parked = true      # (the grid dummies stand behind the hero: only `tgt` is in the line of fire)
+	_prep(arch)
+	m.fields.list.clear()
+	tgt.teleport(home + Vector3(1.6 if put_zone else 3.0, 0, 0))
+	tgt.hp = tgt.max_hp
+	tgt.vel = Vector3.ZERO
+	if put_zone:
+		var patch := {"radius": 2.0, "dmg": 5.0, "every": 0.2, "time": 3.0, "color": "#ff7a30"}
+		m.fields.add(P, tgt.pos, patch, {"slot": "zone"}, 1.0)
+	var t := 0.0
+	while t < 1.5:
+		m.fx.flashes.clear()
+		_press(kind, _hold_for(kind), t, t == 0.0)
+		m.step(0.002 if t == 0.0 else step_dt)
+		t += step_dt
+		if tgt.hp < tgt.max_hp:
+			break
+	_release()
+	var best := Vector3(INF, INF, INF)
+	for f in m.fx.flashes:
+		var at: Vector3 = (f["node"] as Node3D).global_position
+		if at.distance_to(tgt.pos) < best.distance_to(tgt.pos):
+			best = at
+	return best
+
+## A dummy of Hunter `arch`, parked out of the way (the shared hit shapes' dummies are all `arch: none`).
+func _target(id: String, arch: String, dz: float) -> Hunter:
+	var spot := home + Vector3(-6.0, 0, 6.0 + dz)
+	var t := m.make_hunter(id, 5, Arch.weight(arch), "Target", "idle", {}, spot, {"arch": arch})
+	t.reclass(Arch.weight(arch), arch)
+	t.max_hp = 1e6
+	t.hp = 1e6
+	return t
+
+## The spark of a hit sits inside the target's collider (its hurtbox circle, feet to top of head), whatever
+## the kit that hit: a projectile (Vex), a melee sweep (Kael), a zone tick (Cinder, low: a patch on the ground).
+func _contact_checks() -> void:
+	var cases := [["gunslinger", "lmb", false], ["juggernaut", "lmb", false], ["ashwick", "", true]]
+	for tarch in ["dredge", "tender"]:
+		var tgt := _target("T_" + tarch, tarch, 0.0)
+		for c in cases:
+			var at := _spark_at(c[0], c[1], tgt, c[2])
+			var h := Arch.hit_h(tarch)
+			var flat := Vector2(at.x - tgt.pos.x, at.z - tgt.pos.z).length()
+			var rise := at.y - tgt.pos.y
+			var what := "%s on %s (%.2f m tall): spark %.2f m up, %.2f m off centre" % [c[0], tarch, h, rise, flat]
+			ok(at.x < INF and flat <= tgt.r + 0.01 and at.y >= tgt.pos.y and at.y <= tgt.pos.y + h, what)
+			if c[2]:
+				ok(at.y - tgt.pos.y < 0.5, "%s: a zone tick sparks low, at the patch on the ground" % c[0])
+		tgt.teleport(home + Vector3(-6.0, 0, 6.0))
+	var tall := _target("T_tall", "dredge", 0.0)
+	var small := _target("T_small", "tender", 2.0)
+	var top := Vector3(tall.pos.x + 5.0, tall.pos.y + 9.0, tall.pos.z)
+	ok(is_equal_approx(HitContact.clamp_to(tall, top).y - tall.pos.y, Arch.hit_h("dredge") - HitContact.EDGE),
+			"a point over the head is held at the head top: tall")
+	ok(is_equal_approx(HitContact.clamp_to(small, top).y - small.pos.y, Arch.hit_h("tender") - HitContact.EDGE),
+			"a point over the head is held at the head top: small")
+	var side := HitContact.clamp_to(small, top)
+	ok(Vector2(side.x - small.pos.x, 0).length() <= small.r + 0.001, "a point off to the side is held in the hurtbox")
+	var struck := HitContact.point(small, tall, {}).y - small.pos.y
+	ok(struck > 0.0 and struck < Arch.hit_h("tender"), "a hit with no contact point still lands inside the collider")
+
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	await _spawn(main)
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	for a in Arch.ids():
 		var hits := 0
 		P.reclass(Arch.weight(a), a)
@@ -244,7 +317,8 @@ func run(main: Node) -> void:
 			print("HSROW|%s|%s|%d|%s|%.1f|%.1f|%.0f|%.1f|%.1f|%.0f|%s" % [a, kind, meas["n"], src,
 					meas["reach"], meas["width"], meas["arc"], cont["reach"], cont["width"], cont["arc"], flags])
 		ok(hits >= 1, "%s: at least one input hurt a dummy (%d did)" % [a, hits])
-	ok(Time.get_ticks_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((Time.get_ticks_msec() - t0) / 1000.0))
+	_contact_checks()
+	ok(CheckClock.own_msec() - t0 < 60000, "the run took %.1f s (budget 60)" % ((CheckClock.own_msec() - t0) / 1000.0))
 	HeroVfx.of(m).ribbons.clear()
 	print("HIT SHAPE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

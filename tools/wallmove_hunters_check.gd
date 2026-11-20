@@ -113,7 +113,6 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 		"root_t",
 		"wall_touch_t",
 		"fire_cd",
-		"reload_t",
 		"spirit_t"
 	]:
 		me.set(f, 0.0)

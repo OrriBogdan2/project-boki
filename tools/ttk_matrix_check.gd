@@ -77,7 +77,6 @@ func _time_to_down(m: Match, P: Hunter, T: Hunter, mode: String, dist: float, hp
 	step(m, 1.5, func(): P.inp["fire"] = false)      # rest: magazines refill, combos and cooldowns end
 	P.fire_cd = 0.0
 	P.warm_t = 0.0
-	P.reload_t = 0.0
 	T.max_hp = hp
 	T.hp = hp
 	T.max_armor = armor
@@ -95,7 +94,7 @@ func _time_to_down(m: Match, P: Hunter, T: Hunter, mode: String, dist: float, hp
 		match mode:
 			"tap": P.inp["fire"] = int(t / 0.05) % 2 == 0
 			"charge":
-				P.inp["fire"] = not (P.inp["fire"] and P.charge_k() >= 1.0)
+				P.inp["fire"] = not (P.inp["fire"] and P.atk.charge_k() >= 1.0)
 			_: P.inp["fire"] = true
 		P.teleport(home)      # (lunges and recoil would walk the shooter off the mark)
 		P.vel = Vector3.ZERO

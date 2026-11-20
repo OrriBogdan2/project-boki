@@ -3,7 +3,7 @@
 	"id": "puffcap_mines",
 	"name": "Puffcap Mines",
 	"short": "Mines",
-	"flavor": "Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.",
+	"flavor": "Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.",
 	"theme": "spore",
 	"tier": 1,
 	"from": "kin",
@@ -26,7 +26,8 @@
 				"spread": 1.5,
 				"radius": 0.9,
 				"arm": 0.5,
-				"duration": 18
+				"duration": 8,
+				"max_live": 3
 			},
 			"then": {
 				"on_trigger": [

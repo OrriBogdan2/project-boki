@@ -26,6 +26,7 @@ var lines: Array = []
 var strips := {}               # strip file -> Array of Image
 var ult_only := false
 var only_part := ""
+var extra_opts := {}           # more match options for a rig built on this one (a Boki on the shoulder: demo_kin)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -62,6 +63,7 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 	o.merge(Match.arena_opts(who), true)
+	o.merge(extra_opts, true)
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)

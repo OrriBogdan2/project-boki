@@ -3,6 +3,13 @@ extends RefCounted
 ## What a slain monster leaves behind. It spills out when the dissolve is mostly gone
 ## (MobDissolve.begin says when), so the body reads first and the loot after.
 
+## Spills after `delay` s. The lambda holds ids, not the nodes: a mob (or its killer) freed in the meantime
+## would make a captured node error when it runs.
+static func spill_later(m: Match, delay: float, mb: Mob, credit: Ent, loot: bool) -> void:
+	var mid := mb.get_instance_id()
+	var cid := credit.get_instance_id() if credit else 0
+	m.later(delay, func(): spill(m, instance_from_id(mid) as Mob, instance_from_id(cid) as Ent, loot))
+
 ## Everything `mb` leaves where it fell: a carried chest key and the big ones' perk orbs always, and when
 ## `loot` (not in the void, not its own blast) gems, armor, gear tunings, valuables and seeds.
 static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:

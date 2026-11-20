@@ -1,5 +1,14 @@
 # Sable (thief): import note
 
+## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
+The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
+IDLE_AUDIT section 9):
+
+    python3 tools/art1/glb_add_clips.py sable.glb <old idle-thief sable.glb> idle,stance out.glb --drop-missing
+
+The mesh, the other 57 clips, anchors and weights are unchanged. The old build's `x_breath` and `x_twirl` tracks are dropped (the v95
+rig has neither bone), so there is no chest breath and no pistol spin; the hand still flicks and dips.
+
 ## LIVE tilt1112 master in game (2026-11-14, ext/ingame-sync-sable)
 `~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb` (current.json 11-12 22:27Z: the low4 body with the braid long down the back,
 the prop1111/cand_B head with its solid grey-black moth eyes, the mouth repainted level and calm) swapped onto the current
@@ -58,7 +67,7 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 - **Budget:** 14,893 tris, 8 materials, one 2048 atlas, baked normal map. Shared armature, every FX point and anchor name, the 47 clips and the kit wiring are unchanged.
 - **Scan:** Meshy multi-image of four edited turnaround crops. It keeps the body, coat, belt, gem and chain positions. The edits take out the antennae, braid, wings, coat tails, knives, keys and pistols, which `sable_pieces.py` rebuilds so they can move and stay in budget.
 - **Canon choices:** ONE long white braid (the small sheet views wrongly draw two), on the existing spring chain, its lobes zigzagging with a shallow pinch and chevron creases painted on. Fuzzy moth antennae on a short spring replace the old head wings: feather plumes in a V, a thin dark stem with dusty lilac fuzz on both sides (two sheets back to back, 192 tris each). Top of the model about 1.97, so `height_3d` in tools/warden_model_check.gd is now 1.06 (the old wings stood taller still).
-- **Coat:** the front edges are rigid to the torso (no chest bone, so "hips"), so the plunge holds in runs, dashes and shooting. Tails and moth wings are short bone chains; the wings are alpha cards projected from the turnaround's back view.
+- **Coat:** the front edges are rigid to the torso (no chest bone, so "hips"), so the plunge holds in runs, dashes and shooting. Tails and moth wings are short bone chains; the wings are alpha cards projected from the turnaround's back view. The wings fold down at rest and are raised open now and then, procedurally (WardenWings). After a body swap, `python3 tools/art1/sable_wings.py NEW.glb art/wardens/sable/sable.glb` puts the chains and cards back on, fitted to the new back (docs/SABLE_WINGS.md).
 - **Weapons:** twin flintlocks skinned to hand.R / hand.L, procedural silver and maroon wood with violet runes and a crystal, scaled up from v1 to the sheet (not projected from it). The silver and wood ramps sit a step under the sheet because the engine's toon light lifts them; the muzzle halos are small so the barrels keep their grey. Two moth-curved knives on each hip, from the turnaround's side view (the master shows two on her right). `anchor_bola` keeps its name on the hips; the kit needs the name.
 - **Face and skin:** the scan's stitched mouth was removed in three places: the low mesh's crease smoothed (`sable_finish.py`), the normal bake flattened there, and a thin smile painted (`face_fix` in `sable_paint.py`). The same pass grades the skin toward the sheet's grey-lilac (tuned in the engine: a step below the hair, not the Blender preview), redraws the beauty mark, cleans collar violet off the neck and paints the cut buns back to hair.
 - **The back of the skull:** the buns the scan grew are cut in `sable_source.py`; `hairback()` closes the hole with a fitted ellipsoid down to the nape.
@@ -76,3 +85,9 @@ Merge of main's v95 cand_B swap (2026-11-13): `sable.glb` = main's model and cli
 run_f, the owner-fix idle and stance), plus the branch's walk_b, run_b/l/r and the eight diagonals by `glb_add_clips.py`
 (same 57 joints, rest pose equal; main's walk_f/run_f keep the branch loop's length and hips track, legs within a few
 degrees, so the ring stays in step). Alternative not taken: the branch's whole ring incl. its older walk_f/run_f.
+
+## Face paint pass (2026-11-18, ext/sable-face-game-1118)
+Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from the owner-picked 2D target (smd_3: both eyes open, solid dark moth eyes, winged liner, beauty mark under her right eye, plum lips). Mesh, UVs, skin weights and all 59 clips are byte-equal to main (accessor data checked). Eyeballs are kept from the live paint; no wink. Source: `~/meshy/sable-face3d-r2-1118/` (candidate A, `tools/project3.py`, 4096 jpg q88). Overlap: PR #284 also touches `sable.glb`; whichever lands second must re-apply the two jpgs (and the embedded `v95`/`v95b` images) onto the other's glb.
+
+## Mouth-corner fix (2026-11-18, ext/sable-face-game-1118)
+Owner: the screen-left lip corner showed two endpoints. Cause: the painted lips (from the 2D edit) sat 5-6 mm below the mesh lip slit on the screen-left half (offset 57 px at the corner, 0 at the right corner at 10 px/mm in a front ortho render), so the paint ended at one point and the mesh crease at another, plus a dotted seam line and a lower-lip line that never met the right corner. Texture-only fix in the head/body albedo (`sable_v95b.jpg`; mouth region only, 7.7k texels at 4096): lip paint warped up to the mesh slit (offset removed, tapered to 0 at the right corner), lower-lip lines squeezed into each corner, paint beyond each mesh corner replaced by skin. Mesh, UVs, eyes, mole, blush and `sable_v95.jpg` untouched. Source/tools: `~/meshy/sable-lipfix-1118/`.

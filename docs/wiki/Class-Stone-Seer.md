@@ -25,9 +25,9 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Rubble Fists (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you. |
+| Fantasy | The stone seer. Raises stone out of the ground, climbs it, then punches it into you. |
 | Silhouette | the huge stone left arm, the stone gauntlet and the three floating eye stones |
 | Resource | Rocks (max 6) |
 
@@ -38,13 +38,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy. |
-| Passive: Shardskin | Shardskin: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
-| Dash: Rock Hop | Rock Hop: spring off a rock toward the cursor; press again as you land to hop on, up to 3 hops. The last landing crashes, and a rock rolls on and slows. |
-| LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
-| RMB: Quakefall | Quakefall: tap to slam just ahead; hold for a moment to hop forward and up, then slam harder. The centre stuns. Jump while holding to leap further. |
-| E: Stone Row | Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes. |
-| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss the rocks are ground you can stand on. |
-| Weapon: Rubble Fists | Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
+| Passive: Shardskin | Punching your own rocks gives a shield; sneaking shows foes through walls. |
+| Dash: Rock Hop | Spring off a rock toward the cursor; up to 3 hops. |
+| RMB: Quakefall | Tap to slam ahead; hold to hop forward and slam harder. |
+| E: Stone Row | Raise three rocks ahead to climb, hide behind, or punch. |
+| Hunter ultimate: Basalt Spine | Raise a ridge of rocks at the cursor; drag to turn it. |
+| Weapon: Rubble Fists | Tap throws a boulder; hold and release to punch the lane. |
 
 ### Abilities in full
 
@@ -55,12 +54,12 @@ What the in-game kit card (K) says.
 **Quakefall (RMB, 11s cooldown).**
 
 - *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
-- *Hold:* Hold up to 0.45s (it goes by itself at the end): hop about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
+- *Hold:* Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
 - *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 4.8m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 
-**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 15 rocks, 21m long, in a shallow arc round you (about 25 degrees of bend, bowing away from you), centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the rocks are ground you can land on and walk along; when they crumble, whoever stands on them falls. 45s.
+**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** The press raises a slab of rock ground under you at once (abyss only, 3m across, for anyone to stand on): it cracks and shakes before it crumbles 6s later. Tap: a ridge of 15 rocks, 21m long, in a shallow arc round you (about 25 degrees of bend, bowing away from you), centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the rocks are ground you can land on and walk along; when they crumble, whoever stands on them falls. 45s.
 
 ### Ranks
 
@@ -68,9 +67,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
+| RMB | cooldown 11s -> 10s, damage +24%. | cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 12s -> 10s per charge. | recharge 12s -> 10s; a second charge, and each hop goes a third further. |
-| E | cooldown 12.5s -> 11.3s, rocks hit +15%. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| E | cooldown 12.5s -> 11.5s. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

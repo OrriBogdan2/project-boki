@@ -33,17 +33,17 @@ func run(mn: Node) -> void:
 	named = named and not line.contains("Arena")
 	ok(named, "the line names the key and a choice", line)
 	m.player.pos = pad + Vector3(DuelRingHint.NEAR_M + 6.0, 0, 0)
-	m._update_training(0.1)
+	m.training.update(0.1)
 	var seen := func() -> bool: return Save.d["tutorial"].get(DuelRingHint.SAVE_KEY, false)
 	ok(not seen.call() and m.duel_hint.beam == null, "far from the pad: nothing shown")
 	m.player.pos = pad + Vector3(DuelRingHint.NEAR_M - 2.0, 0, 0)
-	m._update_training(0.1)
+	m.training.update(0.1)
 	var beam: MeshInstance3D = m.duel_hint.beam
 	ok(beam != null and seen.call(), "walking into the area: beam up, save flagged")
 	var over := beam != null and absf(beam.position.x - pad.x) < 0.01 and beam.position.y > pad.y + 20.0
 	ok(over, "the beam stands over the pad")
 	m.player.pos = pad
-	m._update_training(0.1)
+	m.training.update(0.1)
 	ok(m.duel_hint == null and beam.is_queued_for_deletion(), "on the pad: the beam ends")
 	var ring := DuelRing.open(m)
 	var goes := ring.layer.find_children("*", "Button", true, false).filter(func(b): return b.text == "Go")

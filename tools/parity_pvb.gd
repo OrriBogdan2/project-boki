@@ -67,7 +67,7 @@ func pin() -> void:
 	step(m, 0.1, north)
 	ok("parity pin: mid-draw the body turns to a moved cursor at once (the source turns throughout)",
 		face_err(P) < TRACK_DEG and P.draw_t > 0.0, "%.0f deg" % face_err(P))
-	step(m, 0.4, north)             # (past the perfect window: the plain release move)
+	step(m, 0.5, north)             # (past the 0.35 s perfect window, before Supercharged: the plain release move)
 	var n0 := last_sid(m, P)
 	P.inp["fire"] = false
 	m.step(DT)
@@ -195,8 +195,10 @@ func breah() -> void:
 		t += DT
 		if K.boulders > b0 + times.size():
 			times.append(t)
-			speed = (shot_of(m, last_sid(m, P)).get("vel", Vector2.ZERO) as Vector2).length()
 	P.inp["fire"] = false
+	for _i in int(0.3 / DT):
+		m.step(DT)
+	speed = (shot_of(m, last_sid(m, P)).get("vel", Vector2.ZERO) as Vector2).length()
 	var gap := float(times[1]) - float(times[0]) if times.size() >= 2 else 0.0
 	ok("parity breah: tapped, a boulder every 0.6s (card 0.6s; footage 1 per 2-3 frames)", absf(gap - 0.6) < 0.05,
 		"%d boulders, gap %.2f s" % [times.size(), gap])

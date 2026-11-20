@@ -349,6 +349,9 @@ func _mage() -> void:
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
 	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
+	var rd: Dictionary = K.rmb_def()
+	ok("Storm Rod held: self-slow %.0f%% once ramped in (move_k)" % (float(rd["self_slow"]) * 100.0),
+			absf(K.move_k() - (1.0 - float(rd["self_slow"]))) < 0.001, "%.2f" % K.move_k())
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -729,7 +732,7 @@ func _mage() -> void:
 ## scales with the aim distance (none close in, the full 25% at the 18 m range).
 func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var ed: Dictionary = K.e_def()
-	var cap_deg: float = float(ed["turn_deg_s"]) * float(ed["charge"])
+	var cap_deg: float = K.turn_deg_s("e", "early") * float(ed["charge"])
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
@@ -982,6 +985,7 @@ func _gunslinger() -> void:
 	_gunslinger_beam_look(HeroVfx.of(m), K)
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
+	T.teleport(home + Vector3(8, 0, 0))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0

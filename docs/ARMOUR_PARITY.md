@@ -1,7 +1,7 @@
 # Armour parity: ours against the source (2026-11-09)
 
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07). Source: `docs/SUPERVIVE_DATA.md` section 3 (wiki, May 2025) and
-section 10 on `origin/ext/agent-briefs`; supervive_kits.md and supervive_physics.md say nothing about armour.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). Source: `sv/DATA.md` section 3 (wiki, May 2025) and
+section 10 on `origin/ext/agent-briefs`; sv/briefs/kits.md and sv/briefs/physics.md say nothing about armour.
 Ours: `content/rules/armor.json` (tiers), `ArmorRules`, `Hunter._mitigate` (the split), `Hunter.armor_gain`,
 `Match.on_armor_break`, `Juice.armor_break`, `content/utility/armor_kit.json`. Checked by `--armour-check`.
 
@@ -9,7 +9,7 @@ Ours: `content/rules/armor.json` (tiers), `ArmorRules`, `Hunter._mitigate` (the 
 source's medium ~1,040; Light 124/930 and Heavy 193/1,400 give 0.13 and 0.14). Durability and level-up damage
 are the source's times 0.14.
 
-**Evidence:** [D] source data (SUPERVIVE_DATA.md, wiki-sourced), [gap] the source data doesn't say.
+**Evidence:** [D] source data (sv/DATA.md, wiki-sourced), [gap] the source data doesn't say.
 
 | Topic | Source | Ours (before this change) | Ours now | Verdict |
 |---|---|---|---|---|

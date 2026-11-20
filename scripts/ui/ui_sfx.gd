@@ -47,3 +47,20 @@ static func _tick(s: Slider) -> void:
 	var span := maxf(s.max_value - s.min_value, 0.0001)
 	var pitch := 0.9 + 0.3 * (s.value - s.min_value) / span
 	Sfx.play("hover", null, -8.0, 0.0, pitch)
+
+## Event cues (2D, for you alone): a refusal (a full box, no room, a failed trade), a Boki caught, an extraction
+## started, made or failed. Files: tools/gen_sfx_ui.py; --sfx-set-check holds every name here to a file.
+static func error(vol_db := -8.0) -> void:
+	Sfx.play("ui_deny", null, vol_db)
+
+static func captured() -> void:
+	Sfx.play("ui_capture", null, -4.0, 0.02)
+
+static func extract_start() -> void:
+	Sfx.play("ui_extract_start", null, -4.0, 0.02)
+
+static func extract_success() -> void:
+	Sfx.play("extract_ok", null, -3.0)
+
+static func extract_fail() -> void:
+	Sfx.play("ui_extract_fail", null, -4.0, 0.02)

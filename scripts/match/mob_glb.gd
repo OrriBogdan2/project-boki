@@ -2,9 +2,10 @@ class_name MobGlb
 extends Node
 ## A common monster drawn from a skinned model (art/mobs/<kind>/<kind>.glb, see docs/art/MOB_MODELS.md) instead of
 ## MobModels' primitives. The primitives' pivots stay, so mob.gd animates the monster as before; the primitives
-## are hidden and this node, beside the model, copies each pivot's motion onto the bone of the same name every
-## frame. The model's paint keeps the region's colour: its body hue band is repainted like a pack model's cloth
-## (BiomeRun.recolor_mats, meta "pack_part"). A lair boss is a legendary Boki and keeps its own paint; its body has
+## are hidden and this node, beside the model, copies each pivot's motion onto the bone of the same name on each
+## frame the monster was posed (Match draws far ones every 4th frame, Ent.lod_dt). The model's paint keeps the
+## region's colour: its body hue band is repainted like a pack model's cloth (BiomeRun.recolor_mats,
+## meta "pack_part"). A lair boss is a legendary Boki and keeps its own paint; its body has
 ## no primitives, so each bone gets a bare pivot where it rests (BossModels.build).
 
 const PATH := "res://art/mobs/%s/%s.glb"
@@ -123,9 +124,28 @@ func _rel(n: Node3D) -> Transform3D:
 
 
 func _process(_delta: float) -> void:
-	if not _body.is_visible_in_tree():
-		return
+	var ent := get_parent().get_parent() as Ent
+	if not _body.is_visible_in_tree() or (ent and ent.lod_dt > 0.0):
+		return  # hidden, or Match skipped its pose this frame: the pivots have not moved
+	copy_pose()
+
+
+## Each linked bone onto its pivot's pose. Local poses are set against the parent's pose kept here, not read back:
+## set_bone_global_pose recomputed the dirty bones on every call (a monster's whole skeleton once per bone).
+func copy_pose() -> void:
 	var inv := _skel_rel.affine_inverse()
+	var real := {}  # bone -> its skeleton-space pose as set this frame
 	for l in _links:
-		var moved: Transform3D = _rel(l[1]) * l[2]
-		_skel.set_bone_global_pose(l[0], inv * moved * _skel_rel * l[3])
+		var bi: int = l[0]
+		var par := _real(_skel.get_bone_parent(bi), real)
+		_skel.set_bone_pose(bi, par.affine_inverse() * (inv * _rel(l[1]) * l[2] * _skel_rel * l[3]))
+		real[bi] = par * _skel.get_bone_pose(bi)
+
+
+## A bone's skeleton-space pose this frame: from real, else its parent's times its own local pose (kept in real).
+func _real(bi: int, real: Dictionary) -> Transform3D:
+	if bi < 0:
+		return Transform3D.IDENTITY
+	if not real.has(bi):
+		real[bi] = _real(_skel.get_bone_parent(bi), real) * _skel.get_bone_pose(bi)
+	return real[bi]

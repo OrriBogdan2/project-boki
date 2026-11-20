@@ -19,12 +19,14 @@ const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark co
 const int M_SHEEN = 9;      // a band of light climbing a body-shaped capsule, facing the camera: UV.y top (0) to foot (1)
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
+const int M_PORTAL = 11;    // a small upright portal facing the camera: UV across the quad
 const int M_FIST = 10;      // a translucent cel-shaded fist (a mesh) falling onto the ground over `fall` of its life
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);  // its hot part
 uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);  // char, what is left as it burns out
+uniform vec4 peak : source_color = vec4(1.0, 1.0, 1.0, 0.5);      // what the hottest part turns toward, alpha how far
 uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
@@ -80,7 +82,7 @@ vec3 ramp(float h) {
 	h = cel(clamp(h, 0.0, 1.0));
 	if (h < 0.3) { return mix(col3.rgb, col.rgb, h / 0.3); }
 	if (h < 0.72) { return mix(col.rgb, col2.rgb, (h - 0.3) / 0.42); }
-	return mix(col2.rgb, vec3(1.0), (h - 0.72) / 0.28 * 0.5);
+	return mix(col2.rgb, peak.rgb, (h - 0.72) / 0.28 * peak.a);
 }
 
 vec4 sweep(vec2 uv) {
@@ -283,7 +285,7 @@ vec4 bolt(vec2 uv) {
 	float core = (1.0 - smoothstep(thin * 0.5, thin, off)) * reach * fade;
 	float halo = (1.0 - smoothstep(thin, thin * 4.0, off)) * reach * fade * 0.6;
 	float flick = jag > 0.0 ? 0.7 + 0.3 * step(0.5, h21(vec2(tick, seed))) : 1.0;
-	vec3 c = col.rgb * halo + mix(col2.rgb, vec3(1.0), 0.5) * core;
+	vec3 c = col.rgb * halo + mix(col2.rgb, peak.rgb, peak.a) * core;
 	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
 }
 
@@ -322,7 +324,7 @@ vec4 ring(vec2 uv) {
 	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
 	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
-	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, vec3(1.0), 0.5), ring_v.y * (1.0 - hard(life - 0.2)));
+	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, peak.rgb, peak.a), ring_v.y * (1.0 - hard(life - 0.2)));
 	c = mix(col3.rgb, c, ring_v.x);
 	return vec4(c * a, a);
 }
@@ -338,6 +340,28 @@ vec4 fist(vec3 n, vec3 view) {
 	return vec4(mix(body, col2.rgb, rim) * cover, cover);
 }
 
+// A seam opened in the air: an upright almond, pointed at both ends, that opens from a slit, holds and closes back
+// to one. A lit lip (col2 on the very edge, col behind it), a dark inside (col3) lit toward the lip and crossed by
+// laces of col, a cel halo of col round it.
+vec4 portal(vec2 uv) {
+	vec2 p = vec2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);
+	float open = smoothstep(0.0, 0.22, life) * (1.0 - smoothstep(0.7, 1.0, life));
+	float half_w = 0.5 * open * pow(max(1.0 - p.y * p.y, 0.0), 0.7);
+	float e = abs(p.x) / max(half_w, 1e-3);            // 0 on the seam, 1 on the lip
+	float sway = (fbm3(vec2(p.y * 2.0 - TIME * 0.8, seed)) - 0.5) * 0.1;
+	float inner = hard(0.6 + sway - e);
+	float lip = hard(1.0 - e) * (1.0 - inner);
+	float edge = hard(e - 0.82) * lip;
+	float lace_a = abs(fract((p.y + p.x * 1.6) * 1.5 + seed) - 0.5);
+	float lace_b = abs(fract((p.y - p.x * 1.6) * 1.5 + seed) - 0.5);
+	float lace = max(hard(0.04 - lace_a), hard(0.04 - lace_b)) * inner;
+	float halo = cel_cover((1.0 - smoothstep(1.0, 2.2, e)) * (1.0 - hard(1.0 - e)) * 0.8 * open, uv + seed);
+	vec3 deep = mix(col3.rgb, col.rgb * 0.7, cel(smoothstep(0.2, 0.6, e)));
+	vec3 c = deep * inner * (1.0 - lace) + col.rgb * (lace + halo) + mix(col.rgb, col2.rgb, edge) * lip;
+	float fade = 1.0 - smoothstep(0.85, 1.0, life);
+	return vec4(c * fade, clamp(inner * 0.9 + lip + halo * 0.5, 0.0, 1.0) * fade);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -350,6 +374,7 @@ void fragment() {
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
 	else if (mode == M_FIST) { v = fist(NORMAL, VIEW); }
+	else if (mode == M_PORTAL) { v = portal(UV); }
 	else { v = thread(UV); }
 	// upright looks soften into the ground; flat ones (scorch, rings) lie on it
 	float g = gain * (billboard ? soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX) : 1.0);

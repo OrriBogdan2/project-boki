@@ -22,6 +22,7 @@ boot_splash/minimum_display_time=0
 
 [autoload]
 CrashReport="*res://scripts/core/crash_report.gd"
+CheckWatchdog="*res://tools/check_watchdog.gd"
 Data="*res://scripts/core/data.gd"
 Save="*res://scripts/core/save.gd"
 Sfx="*res://scripts/core/sfx.gd"
@@ -50,6 +51,7 @@ gdscript/warnings/shadowed_global_identifier=1
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/mode.windows=3
 window/stretch/mode="disabled"
 window/vsync/vsync_mode=1
 
@@ -99,6 +101,10 @@ vis_range={
 "type": "float",
 "value": 24.0
 }
+vis_scout={
+"type": "vec2",
+"value": Vector2(0, 1)
+}
 vis_allies={
 "type": "float",
 "value": 0.0
@@ -134,6 +140,18 @@ vis_ally_range={
 vis_dark={
 "type": "float",
 "value": 0.7
+}
+vis_amb={
+"type": "float",
+"value": 0.4
+}
+vis_haze={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+vis_haze_h={
+"type": "vec2",
+"value": Vector2(0, 0)
 }
 vis_reveals={
 "type": "float",

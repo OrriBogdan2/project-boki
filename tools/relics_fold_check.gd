@@ -1,13 +1,13 @@
 extends RefCounted
-## --relics-fold-check: the first visit to the expedition panel and the Relics page (docs/UI_FIRST15.md 5.5).
-##   1. first visit (only the first Where open): the expedition panel shows the picked Relic, one Where and Start;
-##      other Relics, locked drops, Boki, match settings and the mode links are folded, each one click away
+## --relics-fold-check: the expedition panel and the Relics page folds (docs/UI_FIRST15.md 5.5).
+##   1. first visit (only the first Where open): the expedition panel shows the picked Relic, the Boki, one Where
+##      and Start; other Relics, locked drops, match settings and the mode links are folded, each one click away
 ##   2. the Relics page shows the picked and open Relics; the locked ones fold and the fold shows every one
-##   3. once a second drop is open nothing is folded, on either screen
+##   3. once a second drop is open the Relics page folds nothing; the expedition panel stays compact (Details)
 ##   4. at 1280x720 no Relic name is cut or wrapped, on the Relics tiles or the expedition cards
 ## Reads the real panels on the farm. Never touches the save.
 
-const FOLD_TEXTS := ["Match", "Boki you bring", "Conditions", "Training Grounds"]
+const FOLD_TEXTS := ["Match", "Training Grounds"]
 var bad := 0
 
 func ok(cond: bool, what: String) -> void:
@@ -29,16 +29,18 @@ func run(main: Node) -> void:
 			"the expedition panel shows only the picked Relic (%d of %d)" % [shown.size(), cards.size()])
 	var tiers := _where_tiles(host)
 	ok(_shown(tiers).size() == 1, "and one Where (%d shown of %d)" % [_shown(tiers).size(), tiers.size()])
-	ok(FOLD_TEXTS.all(func(t): return not _visible_text(host, t)), "no Boki, match or mode link shows")
+	ok(FOLD_TEXTS.all(func(t): return not _visible_text(host, t)), "no match line or mode link shows")
 	var start := _button(host, "Start expedition")
 	ok(start != null and start.is_visible_in_tree(), "Start shows")
+	ok(_visible_text(host, "Boki you bring") and _visible_text(host, "Conditions"),
+			"and so do the Boki and the conditions")
 	_button(host, "All Relics").pressed.emit()
 	_button(host, "Locked drops").pressed.emit()
-	_button(host, "More: Boki, match and modes").pressed.emit()
+	_button(host, "Details").pressed.emit()
 	await _frames(tree)
 	ok(_shown(_cards(host)).size() == Arch.ids().size(), "the fold brings back every Relic")
 	ok(_shown(_where_tiles(host)).size() == Data.TIERS.size(), "and every Where")
-	ok(FOLD_TEXTS.all(func(t): return _visible_text(host, t)), "and Boki, match and the mode links")
+	ok(FOLD_TEXTS.all(func(t): return _visible_text(host, t)), "and the match lines and the mode links")
 	_names_whole(host, tree, "expedition", func(id): return HunterPickRow.name_of(id))
 	hm._close_panel()
 	HomeClasses.open(hm, Arch.of_save())
@@ -60,8 +62,8 @@ func run(main: Node) -> void:
 	hm._open_expedition()
 	await _frames(tree)
 	var host2: Node = hm.panel_host
-	var whole := _shown(_cards(host2)).size() == Arch.ids().size() and _button(host2, "All Relics") == null
-	ok(whole and _visible_text(hm.panel_host, "Match"), "the expedition panel is whole")
+	var compact := _shown(_cards(host2)).size() == 1 and _button(host2, "Details") != null
+	ok(compact and not _visible_text(host2, "Match"), "the expedition panel stays compact")
 	hm._close_panel()
 	HomeClasses.open(hm, Arch.of_save())
 	await _frames(tree)

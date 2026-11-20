@@ -4,8 +4,9 @@ extends RefCounted
 ## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs with a
 ## centre dot; the ring opens with weapon bloom, and on a hit it flashes. With the "hunter" colour (the
 ## default) the ring stays pale and the dot and the aim arcs take the Hunter's own accent (Arch.color).
-## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit marker and the AimKit
+## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit tick and the AimKit
 ## cursor states on their own layer) draw on top of it. Every number is in content/rules/tuning.json "reticle".
+## One instance per HUD also owns the hit tick's state (`new(match)`, `tick`): see below.
 
 ## Shape id -> its name in Settings.
 const SHAPES := [
@@ -25,6 +26,56 @@ const COLORS := {
 }
 const TUNING_PATH := "res://content/rules/tuning.json"
 static var _tune: Dictionary = {}
+
+var m: Match
+var tick_t := 0.0          # s left on the hit tick showing (ReticleHud draws it)
+var tick_knock := false    # the hit knocked a Hunter down: the strong tick
+var tick_crit := false     # it was a crit (gold)
+var tick_armor := false    # it landed on armour (pale)
+var ticks := 0             # ticks raised (read by --hit-marker-check)
+var dealt_at := -9.0       # match time your last hit (or your Boki's) landed
+
+## Listens on the shared damage path (CombatBus.hit_landed), so every weapon and ability raises it.
+func _init(match_node: Match = null) -> void:
+	m = match_node
+	if m:
+		CombatBus.hit_landed.connect(_on_hit)
+
+## `dealt_at` notes any hit you or your Boki land on a foe (the message lane's fight budget); the tick
+## itself shows only for hits you land yourself. Misses never reach here; zone (damage-over-time) ticks,
+## teammates' hits and anything else raise nothing.
+func _on_hit(by: Node, target: Node, amount: float, tags: Array) -> void:
+	var credit: Node = (by as Kin).owner_h if by is Kin else by
+	if credit == null or credit != m.player or tags.has("zone"):
+		return
+	if not (target is Hunter or target is Kin or target is Mob) or (target as Ent).team == m.player.team:
+		return
+	dealt_at = m.time
+	if by != m.player:
+		return
+	var e := target as Ent
+	# (a remote body's hp drops on its owner's game: this hit knocks it if it covers what's left)
+	raise(target is Hunter and not (target as Hunter).downed and e.hp <= (amount if e.remote else 0.0))
+
+## Starts one tick (`knock`: the strong one). The match then says what kind of hit it was (`flavour`).
+func raise(knock: bool) -> void:
+	tick_knock = knock
+	tick_crit = false
+	tick_armor = false
+	tick_t = t("hit_knock_s") if knock else t("hit_s")
+	ticks += 1
+
+## The hit that raised the tick was a crit and/or on armour (Match.on_damage, on_armor_break). Never starts a tick.
+func flavour(crit: bool, armor: bool) -> void:
+	tick_crit = tick_crit or crit
+	tick_armor = tick_armor or armor
+
+func tick(delta: float) -> void:
+	tick_t = maxf(0.0, tick_t - delta)
+
+## 1 -> 0 over the tick showing (0 when none).
+func tick_k() -> float:
+	return clampf(tick_t / t("hit_knock_s" if tick_knock else "hit_s"), 0.0, 1.0)
 
 ## The reticle's numbers (tuning.json "reticle"), read once.
 static func tune() -> Dictionary:

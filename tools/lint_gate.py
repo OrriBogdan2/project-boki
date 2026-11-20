@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Lint gate for Project Boki: one ratchet over gdlint, gdformat, ruff, vulture, gltf-validator, Godot warnings.
+"""Lint gate for Project Boki: one ratchet over gdlint, gdformat, ruff, vulture, gltf-validator, Godot warnings and
+private-ref (no outside game's name in tracked text files; old code mentions are baselined).
 
 Usage (normally through tools/check.sh, which sets up the venv):
   lint_gate.py                  all checks over the whole repo; exit 1 when any file is worse than the baseline
@@ -104,6 +105,27 @@ def run_ruff(files):
     return {"ruff": lint, "ruff-format": fmt}
 
 
+# The outside game's name, and its game-file table and blueprint ids (split so this file does not match itself).
+PRIVATE_NAME = re.compile("super" + "vive|\\b(?:CT|BP|GE|DA)_Lo" + "ki", re.I)
+PRIVATE_SUFFIXES = (".gd", ".tscn", ".tres", ".gdshader", ".gdshaderinc", ".json", ".md", ".py", ".sh", ".cfg", ".txt")
+
+
+def run_private_ref(only):
+    """The public repo carries no outside game's name: one line per mention, in file names too. Old code mentions are
+    baselined and get scrubbed on touch; nothing new may be added (outside material lives in the private reports repo)."""
+    found = {}
+    for p in tracked(*PRIVATE_SUFFIXES):
+        if only is not None and p not in only or p == "tools/lint_baseline.json":
+            continue
+        msgs = [f"{p}: file name names an outside game"] if PRIVATE_NAME.search(p) else []
+        with open(os.path.join(ROOT, p), encoding="utf-8", errors="replace") as f:
+            hint = "names an outside game, say 'reference' or 'target feel'"
+            msgs += [f"{p}:{n}: {hint}" for n, line in enumerate(f, 1) if PRIVATE_NAME.search(line)]
+        if msgs:
+            found[p] = msgs
+    return {"private-ref": found}
+
+
 def run_vulture(files):
     out = subprocess.run(
         [tool("vulture"), "--min-confidence", "80"] + tracked(".py"), cwd=ROOT, capture_output=True, text=True
@@ -202,6 +224,7 @@ def run_all(only, selected):
         res.update(run_ruff(py))
         res.update(run_vulture(set(py)))
     res.update(run_gltf(glb))
+    res.update(run_private_ref(only))
     if only is None and selected:
         res.update(run_godot_warnings())
     return res

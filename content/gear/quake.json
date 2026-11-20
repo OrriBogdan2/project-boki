@@ -25,7 +25,11 @@
    "lift": 7,
    "kb": 2,
    "stun": 0.3,
-   "color": "ff9a5a"
+   "color": "ff9a5a",
+   "sfx": "gl_quake_hit"
   }
- ]
+ ],
+ "sfx": {
+  "cast": "gl_quake"
+ }
 }

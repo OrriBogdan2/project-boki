@@ -70,11 +70,11 @@ func _sexes() -> void:
 	ok(all_f, "Save.new_kin hatches an all-female kind female")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
-	var a := Save.new_kin("hivara")
-	var b := Save.new_kin("hivara")
+	var a := Save.new_kin("mossgrade")
+	var b := Save.new_kin("mossgrade")
 	var bred := true
 	for i in 20:
-		if Unique.sex(Care.breed(a, b, rng, "hivara")) != "f": bred = false
+		if Unique.sex(Care.breed(a, b, rng, "mossgrade")) != "f": bred = false
 	ok(bred, "Care.breed keeps the kind's sexes after inheriting looks")
 
 ## Marchleaf's Nightmark: about 4% at hatch, from the seed, only that kind, kept by save and load.

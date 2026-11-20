@@ -69,7 +69,7 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_parts", [details, acts])
 	_fill(home, sel, viewer)
 	var kit := func(): HomeHero.kit(home, String(home.get_meta("hunters_sel")))
-	UI.footer_left(v).add_child(UI.ghost("Kit card (K)", kit, 0))
+	UI.footer_left(v).add_child(UI.ghost("Kit card (%s)" % Settings.key_cap("kit_card"), kit, 0))
 
 ## The picked Hunter's mastery goals and glider (left) and what you can do with it (over the viewer).
 static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
@@ -205,6 +205,7 @@ static func _glider_pick(home: Node, id: String) -> Control:
 	var v := UI.vbox(4)
 	v.set_meta("glider_pick", true)
 	v.add_child(UI.label("Glider (looks only)", 12, UI.MUTED, UI.caps))
+	Glossary.add_note(v, "Glider")
 	var flow := HFlowContainer.new()
 	flow.custom_minimum_size.x = left_w(home)
 	flow.add_theme_constant_override("h_separation", 6)

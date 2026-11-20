@@ -64,7 +64,9 @@ func run(m: Node) -> void:
 		var leads: Array = [Evo.leading(a), Evo.leading(b)]
 		var baby := Care.breed(a, b, rng)
 		var sp := String(baby["species"])
-		if sp != String(a["species"]) and sp != String(b["species"]): sp_bad += 1
+		var kin_of := [a, b].map(func(r): return Evo.base_form(String(r["species"])))      # eggs hatch the first form
+		var rerolled: bool = Data.no_egg(String(a["species"])) or Data.no_egg(String(b["species"]))
+		if not kin_of.has(sp) and not rerolled: sp_bad += 1
 		# sex: half and half, unless its species has a documented share
 		var f := 1 if Unique.sex(baby) == "f" else 0
 		if BokiQuirks.female_share(sp) == BokiQuirks.EVEN_SHARE:
@@ -128,7 +130,7 @@ func run(m: Node) -> void:
 		var c: Array = set_f[sp]
 		var fits := _z(int(c[1]), int(c[0]), share) <= SIGMA
 		ok(fits, "%s hatches %.0f%% female as documented (%d of %d)" % [sp, share * 100.0, c[1], c[0]])
-	ok(sp_bad == 0, "every baby's species is one of its parents' (%d off)" % sp_bad)
+	ok(sp_bad == 0, "every baby is a parent's first form, or a first form for a legendary parent (%d off)" % sp_bad)
 	ok(trait_bad == 0, "every trait is its parents' mean within %.2f (%d off)" % [TRAIT_NOISE, trait_bad])
 	ok(iv_bad == 0, "IVs: %d copied from a named parent, the rest in range (%d off)" % [Care.IV_INHERIT, iv_bad])
 	ok(aff_bad == 0, "the evolution head start is one parent's leading way (%d off)" % aff_bad)

@@ -12,7 +12,7 @@ extends ArchKit
 
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
-const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
+const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
 const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
@@ -32,6 +32,8 @@ var glide_key_was := false     # the glide key held last step (only a fresh pres
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
+const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (crackle and wire), one pooled node each
+
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
 var blowouts := 0              # tests and the demo
@@ -75,6 +77,14 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 
 func fx() -> VVFx:
 	return VVFx.of(m)
+
+## The rehearsal also pools the Coil's arcs and builds the Storm Rod: the first RMB built it mid-fight (7 meshes,
+## 6 shader compiles).
+func warm_fx(at: Vector3) -> void:
+	fx().prewarm(at, h, int(res_def()["max"]), COIL_ARCS)
+	if rod == null:
+		rod = _build_rod()
+		rod.visible = false
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
@@ -348,7 +358,7 @@ func on_dash(use_ex: bool) -> bool:
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
 			return true
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
-		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0})
+		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0, "feel": "long"})
 		play("mage_dash_ex")
 		vfx("dash_ex", null, h.roll_dir, {"len": ex_dist})
 		last_dash_kind = "ex"
@@ -437,11 +447,12 @@ func _tick_wire(dt: float) -> void:
 func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
 	var time := run_time(L)
-	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d, "curved": true})
 	# momentum carries: the streak adds the drift you had
 	var v := d * (L / time) + drift
 	h.roll_dir = v.normalized()
 	h.roll_speed = v.length()
+	if not curved.is_empty(): curved["speed"] = h.roll_speed    # Joule's fitted curve on the drifted speed
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	run_t = time
 	run_exit = true
@@ -515,8 +526,8 @@ func _arrive(n: int) -> void:
 	if h.model: h.model.visible = true
 	vfx("dash_land")              # a quiet arrival: no ring or burst on a dash, the hits are on the way
 	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
-	if ult.phase() != MageUlt.CROUCH:
-		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
+	if ult.phase() != MageUlt.CROUCH and h.grounded:
+		play("mage_dash_land")      # (out of Kitefall's crouch it lands in the crouch; off a ledge, the air pose)
 
 func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return
@@ -524,6 +535,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
+	m.sfx("mage_wire_hit", f.pos, -4.0)
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -539,7 +551,6 @@ func _blowout(f: Ent) -> void:
 	vfx("blowout", f.position)
 	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
@@ -548,6 +559,13 @@ func rmb_charge_full() -> float:
 
 func rmb_auto_t() -> float:
 	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
+
+## Holding the Storm Rod slows her by rmb.self_slow, ramping in over rmb.slow_in s (never a snap).
+func move_k() -> float:
+	if not rmb_down:
+		return 1.0
+	var rd := rmb_def()
+	return 1.0 - float(rd["self_slow"]) * clampf(rmb_t / float(rd["slow_in"]), 0.0, 1.0)
 
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
@@ -660,7 +678,9 @@ func _coil(k: float) -> void:
 	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if not done["hit"]:
 			done["hit"] = true
-			_coil_hit(f, dir, k)}))
+			_coil_hit(f, dir, k),
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
+			if e == null and not done["hit"]: m.sfx("mage_rod_fizzle", at, -5.0)}))
 	var thrown: bool = shots.size() > n0 and shots[-1]["by"] == h
 	vfx("rmb", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir, {"len": rng, "loose": not thrown})
 	if thrown:
@@ -787,7 +807,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 			_grab_mote(mt)
 
 ## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
-## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+## usual reset cue (the chime and the Shift icon). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
 	var was_spent := h.dashes < h.max_dashes()

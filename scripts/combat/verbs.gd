@@ -6,6 +6,16 @@ extends RefCounted
 ## Each one is plain data plus one scene node, so new abilities are new JSON, not new code.
 
 const DECOY_A := 0.28      # the decoy ghost's opacity (brighter blooms into a flash at every dash start)
+const WALL_TH := 0.32      # half thickness of a barrier
+const WALL_H := 2.3
+const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
+const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
+const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
+const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
+const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
+const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
+const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
+const BRIDGE_FALL_T := 0.45     # s: ...over this long
 
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
@@ -13,15 +23,12 @@ var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden),
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
-var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
+var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, col, slow, team, warn}
 var drags: Array = []     # {ent, from, to, t, dur, h}
 var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank, set down at `to` when it ends
 var decoys: Array = []    # {pos, team, t, node, owner}
 var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
-const WALL_TH := 0.32      # half thickness of a barrier
-const WALL_H := 2.3
-const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -40,12 +47,13 @@ func add_wall(by: Node, at: Vector3, d: Vector2, e: Dictionary, pw: float) -> Di
 		"block": String(e.get("block", "enemy")), "move": bool(e.get("move", false)), "reflect": bool(e.get("reflect", false)),
 		"col": col, "touch": e.get("touch", {}), "follow": bool(e.get("follow", false)), "dist": float(e.get("dist", 1.4)),
 		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else "",
-		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null)}
+		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null),
+		"hit_sfx": String(e.get("hit_sfx", "ab_shield_hit"))}
 	# don't seal anyone inside it: a movement-blocking wall skips the bits that would trap someone
 	w["node"] = _wall_node(w)
 	walls.append(w)
 	m.fx.burst(Vector3(c2.x, at.y + 0.4, c2.y), col, 20, 4.0, 0.45, 2.0, 1.2)
-	m.sfx("shield", at, -2.0, 0.7)
+	Effects.snd(m, e, "shield", at, -2.0, 0.7)
 	return w
 
 func _wall_node(w: Dictionary) -> Node3D:
@@ -145,8 +153,8 @@ func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 		n.set_meta("pool_key", key)
 		m.add_child(n)
 	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
-	m.sfx("shield", ent.pos, -3.0, 1.4)
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "hit_sfx": String(e.get("hit_sfx", "")), "node": n, "col": col, "caught": 0})
+	Effects.snd(m, e, "shield", ent.pos, -3.0, 1.4)
 	return mirrors[-1]
 
 func _release_mirror(mr: Dictionary) -> void:
@@ -211,6 +219,7 @@ func add_tether(a: Ent, b: Ent, e: Dictionary, pw: float) -> void:
 
 # ------------------------------------------------------------------ traps
 func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void:
+	_cap_traps(caster, e)
 	var col := Color(String(e.get("color", "#c8ff8a")))
 	var r := float(e.get("radius", 1.2))
 	var n := Node3D.new()
@@ -227,12 +236,28 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	n.global_position = at
 	traps.append({"at": at, "r": r, "team": int(caster.team), "arm": float(e.get("arm", 0.6)), "t": float(e.get("time", 20.0)),
 		"effects": e.get("on_trigger", []), "caster": caster, "ctx": ctx, "node": n, "col": col, "reveal": float(e.get("reveal", 0.0)),
-		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null)})
+		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null), "group": String(e.get("group", ""))})
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 8, 2.0, 0.3)
 	m.sfx("click", at, -4.0, 0.9)
 
+## e.max_live (> 0): a caster keeps at most that many traps of one group (e.group, an ability id) out at
+## once; placing one more pops the oldest. 0 or missing = no limit.
+func _cap_traps(caster: Node, e: Dictionary) -> void:
+	var cap := int(e.get("max_live", 0))
+	if cap <= 0:
+		return
+	var grp := String(e.get("group", ""))
+	var mine: Array = []
+	for tr in traps:
+		if tr["caster"] == caster and String(tr.get("group", "")) == grp:
+			mine.append(tr)
+	while mine.size() >= cap:
+		_drop_trap(mine.pop_front())
+
 # ------------------------------------------------------------------ terrain
-## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span).
+## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span). The ground is
+## solid at once; e.rise (s) heaves the slabs up into place, and e.warn (s) gives the last seconds a crumble
+## warning (cracks and a shake) in place of the flicker, the slabs dropping away at the end.
 func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var length := float(e.get("length", 9.0))
 	var width := float(e.get("width", 2.0))
@@ -241,11 +266,9 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var lv := int(round(from.y / World.LEVEL))
 	var tiles: Array = []
 	var seen := {}
-	var n := Node3D.new()
+	var at: Array[Vector3] = []      # each slab's place (SpanLooks: built at load, not here)
 	var side := Vector2(-d.y, d.x)
 	var k := 0.6
-	var mat := Models.toon(col, true, 0.5)
-	var glass := Models.glow_mat(Color(col.lightened(0.3), 0.45))
 	while k <= length:
 		for s in range(-int(width * 2.0), int(width * 2.0) + 1):
 			var p := Vector2(from.x, from.z) + d * k + side * (float(s) * 0.25)
@@ -261,18 +284,57 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 			tiles.append([i, int(w.kind[i]), int(w.level[i])])
 			w.kind[i] = World.T_GROUND
 			w.level[i] = clampi(lv, 0, 255)
-			var slab := Models.part(n, Models.box(1.0, 0.28, 1.0), mat, Vector3(tx + 0.5, lv * World.LEVEL - 0.14, tz + 0.5))
-			slab.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			var under := Models.part(n, Models.cyl(0.45, 0.05, 0.6, 6), glass, Vector3(tx + 0.5, lv * World.LEVEL - 0.55, tz + 0.5))
-			under.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			at.append(Vector3(tx + 0.5, lv * World.LEVEL, tz + 0.5))
 		k += 0.5
 	if tiles.is_empty():
-		n.free()
 		return 0
-	m.add_child(n)
-	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
-	m.sfx("shield", from, -2.0, 1.6)
+	var n := SpanLooks.of(m).span(at, col)
+	var rise := float(e.get("rise", 0.0))
+	if rise > 0.0:
+		n.position.y = -BRIDGE_RISE_DROP
+		SpanLooks.tween(n).tween_property(n, "position:y", 0.0, rise).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	terrain.append({
+		"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0),
+		"team": int(by.team), "warn": float(e.get("warn", 0.0)),
+	})
+	Effects.snd(m, e, "shield", from, -2.0, 1.6)
 	return tiles.size()
+
+## A crumble-warned span's last seconds: cracks show and the slabs shake harder as the end nears (smooth sines,
+## no per-frame jitter); at the end they drop away.
+func _bridge_warn(tz: Dictionary, n: Node3D) -> void:
+	var left := float(tz["t"])
+	var k := clampf(1.0 - left / float(tz["warn"]), 0.0, 1.0)
+	var a := BRIDGE_SHAKE * (0.3 + 0.7 * k * k)
+	var ph := float(m.time) * BRIDGE_SHAKE_HZ * TAU
+	n.position = Vector3(sin(ph) * a, sin(ph * 1.7 + 1.3) * a * 0.5, sin(ph * 1.3 + 2.1) * a)
+	if not tz.get("cracked", false):
+		_bridge_cracks(n, tz)
+	if float(m.time) - float(tz.get("puff_at", -9.0)) >= BRIDGE_PUFF_GAP:
+		tz["puff_at"] = float(m.time)
+		m.fx.dust(_bridge_mid(tz), 4 + int(6.0 * k))      # grit spilling off it, more toward the end
+
+## Two crossed cracks a slab, wide enough to read at the match camera (the span's own, hidden till now).
+func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
+	tz["cracked"] = true
+	SpanLooks.of(m).crack(n, (tz["tiles"] as Array).map(func(td: Array) -> int: return int(td[0])))
+	m.sfx("br_crack", _bridge_mid(tz), -6.0, 0.9)
+
+## The middle of a span (its middle tile's centre, on its top).
+func _bridge_mid(tz: Dictionary) -> Vector3:
+	var w: World = m.world
+	var i := int(tz["tiles"][tz["tiles"].size() / 2][0])
+	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, i / w.w + 0.5)
+
+## A crumble-warned span ends: its slabs drop into the abyss in a spray of dust.
+func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
+	var at := _bridge_mid(tz)
+	m.fx.dust(at, 12)
+	m.fx.burst(at + Vector3(0, 0.2, 0), tz["col"], 14, 4.0, 0.4, -6.0, 1.3)
+	m.sfx("br_crumble", at, -3.0, 0.9)
+	var tw := SpanLooks.tween(n)
+	tw.tween_property(n, "position:y", -BRIDGE_FALL, BRIDGE_FALL_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(SpanLooks.of(m).give.bind(n))
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
@@ -362,7 +424,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			_hit_wall(w, float(s["dmg"]) * 0.5, p)
 			return "bounce"
 		_hit_wall(w, float(s["dmg"]), p)
-		m.sfx("ab_shield_hit", p, -8.0)
+		m.sfx(String(w["hit_sfx"]), p, -8.0)
 		return "end"
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
@@ -398,10 +460,12 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		_take_shot(s, back * 1.1, ent, int(mr["team"]), float(mr["k"]))
 		m.fx.flash(p, mr["col"], 0.4, 0.06)
 		m.fx.burst(p, mr["col"], 8, 4.0, 0.3, 2.0)
-		m.sfx("shield", p, -4.0, 1.9)
-		m.sfx("ab_parry", p, -5.0, 1.25)
+		if mr["hit_sfx"] != "":
+			m.sfx(String(mr["hit_sfx"]), p)
+		else:
+			m.sfx("shield", p, -4.0, 1.9)
+			m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
-		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
 	return ""
 
@@ -462,6 +526,7 @@ func tick(dt: float) -> void:
 		var touch: Dictionary = w["touch"]
 		if not touch.is_empty():
 			for f in m.foes_of(int(w["team"])):
+				if not f.hittable(): continue
 				var c2 := Geometry2D.get_closest_point_to_segment(Vector2(f.pos.x, f.pos.z), w["a"], w["b"])
 				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and absf(f.pos.y - float(w["y"])) < 2.0:
 					var key: String = str(f.get_instance_id())
@@ -544,10 +609,14 @@ func tick(dt: float) -> void:
 		tz["t"] = float(tz["t"]) - dt
 		if float(tz["t"]) <= 0.0:
 			var w: World = m.world
+			if is_instance_valid(tz["node"]):
+				if float(tz["warn"]) > 0.0:
+					_bridge_crumble(tz["node"], tz)       # (reads the tiles' level: before they turn back)
+				else:
+					SpanLooks.of(m).give(tz["node"])
 			for td in tz["tiles"]:
 				w.kind[int(td[0])] = int(td[1])
 				w.level[int(td[0])] = int(td[2])
-			if is_instance_valid(tz["node"]): tz["node"].queue_free()
 			terrain.erase(tz)
 	for dg in drags.duplicate():
 		var ent: Ent = dg["ent"]
@@ -652,7 +721,11 @@ func render(_alpha: float) -> void:
 			rgn.material_override.set_shader_parameter("color", Color(tr["col"], (0.85 if armed else 0.35) if mine else 0.35))
 	for tz in terrain:
 		var n5: Node3D = tz["node"]
-		if is_instance_valid(n5) and float(tz["t"]) < 1.2:
+		if not is_instance_valid(n5):
+			continue
+		if float(tz["t"]) < float(tz["warn"]):
+			_bridge_warn(tz, n5)
+		elif float(tz["warn"]) <= 0.0 and float(tz["t"]) < 1.2:
 			n5.visible = fmod(float(tz["t"]), 0.24) > 0.08   # about to go: it flickers
 	for dc in decoys:
 		var n6: Node3D = dc["node"]

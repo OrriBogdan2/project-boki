@@ -133,6 +133,8 @@ func tick(d: float) -> void:
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
+			if st == "" and Care.STARVE_INFO.has(was) and not h._kin_entry(rec).is_empty():
+				KinAiling.perk_up(h, h._kin_entry(rec))
 			if st != "":
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
@@ -164,6 +166,12 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 		var fp := _fpos(f)
 		var dd := p2.distance_to(Vector2(fp.x, fp.z))
 		if dd < 1.7 and dd < bd: bd = dd; best = {"kind": "feeder", "f": f}
+	for e in FeedBowl.bowls(h):
+		var bp := FeedBowl.at(e)
+		var bowl_d := p2.distance_to(Vector2(bp.x, bp.z))
+		if bowl_d < FeedBowl.PICK_R and bowl_d < bd:
+			bd = bowl_d
+			best = {"kind": "bowl", "e": e}
 	for g in gnodes:
 		var gp: Vector3 = (g as Node3D).position
 		var dd := p2.distance_to(Vector2(gp.x, gp.z + 0.6))
@@ -181,6 +189,7 @@ func label(it: Dictionary) -> String:
 		"feeder":
 			var f: Dictionary = it["f"]
 			return "%s  ·  %d/%d meals" % [Econ.fdef(f)["name"], Econ.fill(f), int(Econ.fdef(f)["cap"])]
+		"bowl": return FeedBowl.label(it["e"])
 		"grave": return "Visit %s's grave" % it["g"]["name"]
 		"graveyard": return "The graveyard  ·  %d resting" % Econ.graves().size()
 	return ""
@@ -189,6 +198,7 @@ func use(it: Dictionary) -> void:
 	match String(it["kind"]):
 		"place": place()
 		"feeder": open_feeder(it["f"])
+		"bowl": FeedBowl.drop(h, it["e"])
 		"grave": open_grave(it["g"])
 		"graveyard": open_graveyard()
 
@@ -264,6 +274,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = sp
 			if Vector2(sp.x - pos.x, sp.z - pos.z).length() < 0.4:
 				e["phase"] = "eat"; e["t"] = 2.6
+				HomeVoice.say(k["rec"], "boki_eat", pos)
 				k["hold_t"] = 0.3
 				(k["node"] as Node3D).rotation.y = atan2(-(c.x - pos.x), -(c.z - pos.z))
 		"eat":
@@ -468,7 +479,6 @@ func open_feeder(f: Dictionary) -> void:
 	fill_b.disabled = Econ.room_in(f) <= 0
 	fill_b.tooltip_text = "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
 	UI.footer(v).add_child(fill_b)
-	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
 	if Econ.self_fills(f):
 		var on: bool = f.get("auto", true)

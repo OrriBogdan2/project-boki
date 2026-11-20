@@ -9,11 +9,11 @@ extends RefCounted
 ##  3. The guest dies again: a revive beacon the host stands on brings it back at the beacon, full
 ##     health with resurrection sickness, and both games have the beacon used.
 ##  4. The guest dies a third time and is gone for good: the host's marker no longer takes a revive.
-## Lines: RVNET ok|FAIL <what>; the guest prints RVNET guest pid=<pid>.
+## Lines: RVNET ok|FAIL <what>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
+const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const SEED := 4242
 const KEYS := 1              # chest keys the guest carries into its first death (the belt holds one)
 
@@ -36,6 +36,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == "--revive-net-check=guest": guest = true
@@ -48,24 +49,22 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	port = 7990 + OS.get_process_id() % 60
+	port = CheckChild.free_port(7990 + OS.get_process_id() % 60)
 	dir = ProjectSettings.globalize_path("user://revive_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := RelayServer.new()
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--revive-net-check=guest --rn-port=%d" % port, dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: other = String(id)
-		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return _finish()
@@ -75,12 +74,13 @@ func _host() -> void:
 	Net.lobby_emit("rn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	if G == null:
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	if G == null or G.net_t < 0.0:
 		return _finish()
 	await _box_case(G)
 	await _beacon_case(G)
@@ -159,21 +159,10 @@ func _hold(C: Hunter, B: Hunter, cap: float) -> float:
 func _finish() -> void:
 	Net.lobby_emit("rn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("RVNET DONE, %d checks, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-func _read_pid() -> void:
-	if guest_pid > 0:
-		return
-	var p := dir.path_join("guest.log")
-	if not FileAccess.file_exists(p):
-		return
-	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("RVNET guest pid="):
-			guest_pid = int(line.get_slice("=", 1))
 
 ## Tells the guest to do `c`, lets both games run `secs`, and returns what the guest says back.
 func _say_do(c: String, secs: float) -> Dictionary:
@@ -187,15 +176,14 @@ func _ask() -> Dictionary:
 	return await _say_do("ask", 0.0)
 
 func _reply() -> Dictionary:
-	var t := 0.0
-	while replies.is_empty() and t < 10.0:
+	var t0 := CheckClock.own_msec(guest_pid)
+	while (replies.is_empty() and CheckClock.own_msec(guest_pid) - t0 < REPLY_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.1)
-		t += 0.1
 	return replies[0] if not replies.is_empty() else {}
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("RVNET guest pid=%d" % OS.get_process_id())
 	if not await _connect():
 		print("RVNET guest: no relay")
 		main.get_tree().quit(1)
@@ -203,7 +191,7 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
 		await _run(DT)
 	main.get_tree().quit(0)
 
@@ -247,6 +235,8 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
+	if Net.enet:
+		CheckChild.hold(Net.enet.peer, START_S)
 	Net.set_presence({"name": "rn"})
 	return Net.mode == "server"
 

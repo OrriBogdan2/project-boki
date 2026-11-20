@@ -34,7 +34,7 @@ func run(m: Node) -> void:
 		k.position.y = -DEPTH
 		k.rotation.y = PI * 0.72
 		rig._water = DEPTH                           # what a pond says through the root meta "kwater"
-		rig._keep_flex()
+		rig._keep_flex(0.016)
 		var c := rig._swim_clip()
 		rig.set_clip(c if c != "" else "idle", 0.0)          # one that hovers stays over the water
 		var length := rig.player.get_animation(rig.clip).length

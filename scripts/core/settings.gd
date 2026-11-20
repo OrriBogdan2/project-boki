@@ -10,6 +10,7 @@ const PATH := "user://settings.cfg"
 ## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
 const UI_SCALE_MIN := 0.75
 const UI_SCALE_MAX := 1.1
+const WINDOW_MODE_RETRIES := 4      # frames after startup that re-ask for the saved window mode
 const DEFAULTS := {
 	# audio
 	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
@@ -19,26 +20,31 @@ const DEFAULTS := {
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "hud_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
+	"boki_wisps": false,
+	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
+	"hold_done": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
+	"cursor_confine": true,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "hunter", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
-	"depth_cues": true, "cam_style": "default", "cam_follow": "lean", "cam_lead": 1.0,
+	"depth_cues": true, "cam_style": "default", "cam_follow": "centred", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true,
+	"reset_cue": "a", "ult_ready_cue": true, "hunter_barks": true, "low_hp_pulse": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
+	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0, "hud_full": false,
 	"colour_vision": "default",      # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0, "keys7_v": 0,
 }
 ## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
 const TEXT_SIZES := [1.0, 1.25, 1.5]
@@ -67,34 +73,35 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
-##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   (x)  ·  fx_life: particle lifetime (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this
+##   far from the camera (m, 0: their own)
 ##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "occ": false},
+		"shafts": false, "fx": 0.25, "fx_life": 0.5, "volfog": false, "light_m": 40.0, "occ": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "occ": false},
+		"shafts": false, "fx": 0.45, "fx_life": 0.7, "volfog": false, "light_m": 50.0, "occ": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "occ": true},
+		"shafts": true, "fx": 0.7, "fx_life": 1.0, "volfog": false, "light_m": 70.0, "occ": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
+		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
+		"shafts": true, "fx": 1.0, "fx_life": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -106,7 +113,7 @@ func quality() -> String:
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
 
-## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## Settings > Video > Show frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
 func fps_mode() -> String:
 	match int(v.get("show_fps", 0)):
@@ -168,8 +175,10 @@ const KEYS_V := 3
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["scout", "Look ahead (hold: the view leans out toward the cursor, you see further in a narrow cone)"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
 	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
@@ -198,6 +207,8 @@ var _defaults_keys := {}
 var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
+## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
+var desktop_export := OS.has_feature("template") and not OS.has_feature("web")
 
 ## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
 static func migrate_cam(d: Dictionary) -> void:
@@ -226,6 +237,7 @@ func _ready() -> void:
 ## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
 func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
+	v["fullscreen"] = desktop_export
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
 		for k in DEFAULTS:
@@ -237,7 +249,7 @@ func load_file() -> ConfigFile:
 		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
-		v["cam_follow"] = "lean"     # the new cursor lean becomes everyone's default once
+		v["cam_follow"] = "centred"     # the centred follow becomes everyone's default once
 	migrate_cam(v)
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
@@ -259,6 +271,11 @@ func load_file() -> ConfigFile:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if int(v.get("video_v", 4)) < 5:
+		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
+		v["fullscreen"] = desktop_export
+		v["video_v"] = 5
+	v["hud_scale"] = HudScale.setting()      # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
@@ -303,6 +320,36 @@ func apply_all() -> void:
 	for k in v:
 		apply(k)
 	_started = true
+	_hold_window_mode()
+
+## True while the window is fullscreen (the saved choice can lag it: a request the OS dropped, or Win+Down).
+static func window_is_fullscreen() -> bool:
+	var m := DisplayServer.window_get_mode()
+	return m == DisplayServer.WINDOW_MODE_FULLSCREEN or m == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+
+## Alt+Enter and F11 (and Settings > Fullscreen): flips the window as it is now and saves that as the choice.
+func toggle_fullscreen() -> void:
+	set_v("fullscreen", not window_is_fullscreen())
+
+## The window may not be up yet when the first request is made (Windows drops it): ask again for a few frames.
+func _hold_window_mode() -> void:
+	for _i in WINDOW_MODE_RETRIES:
+		await get_tree().process_frame
+		if bool(v["fullscreen"]) != window_is_fullscreen():
+			apply("fullscreen")
+
+## A windowed start bigger than the screen's usable area (a 1280x720 window on a small or scaled laptop screen)
+## would hang its bottom edge, and the buttons there, off the screen: shrink it to fit.
+func _fit_window_to_screen() -> void:
+	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var deco := DisplayServer.window_get_size_with_decorations() - DisplayServer.window_get_size()
+	if usable.size.x <= 0:
+		return      # (headless: no screen)
+	var room := usable.size - deco
+	var win := DisplayServer.window_get_size()
+	if win.x > room.x or win.y > room.y:
+		DisplayServer.window_set_size(Vector2i(mini(win.x, room.x), mini(win.y, room.y)))
+		DisplayServer.window_set_position(usable.position)
 
 ## Seconds bots leave a fresh lander alone (Bot.fresh) with Settings > Demo > "Bots leave you be after
 ## landing" on Longer.
@@ -350,6 +397,7 @@ func save() -> void:
 
 func reset_all() -> void:
 	v = DEFAULTS.duplicate(true)
+	v["fullscreen"] = desktop_export
 	for a in _defaults_keys:
 		_bind(a, _defaults_keys[a])
 	for k in v:
@@ -367,9 +415,11 @@ func apply(k: String) -> void:
 			if OS.has_feature("web") and not _started:
 				v[k] = false
 				return
-			var want := DisplayServer.WINDOW_MODE_FULLSCREEN if v[k] else DisplayServer.WINDOW_MODE_WINDOWED
-			if DisplayServer.window_get_mode() != want:
-				DisplayServer.window_set_mode(want)
+			if bool(v[k]) != window_is_fullscreen():
+				var mode := DisplayServer.WINDOW_MODE_FULLSCREEN if v[k] else DisplayServer.WINDOW_MODE_WINDOWED
+				DisplayServer.window_set_mode(mode)
+			if not v[k]:
+				_fit_window_to_screen()
 		"vsync":
 			if not OS.has_feature("web"):
 				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
@@ -503,6 +553,14 @@ func _apply_quality() -> void:
 	for n in root.find_children("*", "WorldEnvironment", true, false):
 		if (n as WorldEnvironment).environment: _env_quality((n as WorldEnvironment).environment)
 
+func _input(event: InputEvent) -> void:
+	var k := event as InputEventKey
+	if k == null or not k.pressed or k.echo:
+		return
+	if k.keycode == KEY_F11 or (k.alt_pressed and k.keycode in [KEY_ENTER, KEY_KP_ENTER]):
+		toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and bool(v.get("mute_unfocused", false)):
 		AudioServer.set_bus_mute(0, true)
@@ -593,12 +651,12 @@ func holders(code: String, except := "") -> Array:
 
 ## Actions that only run at home (the garden) and ones that only run in a match.
 const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
-const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
 
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
 ## training-only actions, the lobby's push to talk).
 const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
-		["goals", "throw"], ["fold_guide", "whistle"]]
+		["goals", "throw"], ["fold_guide", "whistle"], ["details", "throw"], ["goals", "scout"]]
 
 ## Two actions may share a key only when they never run in the same place: one at home, the other in a match
 ## (or a pair listed in SHARED_OK).
@@ -664,6 +722,10 @@ func fill_keys(text: String) -> String:
 	for a in ACTIONS:
 		text = text.replace("{%s}" % a[0], key_cap(a[0]))
 	return text
+
+## The four walking keys' caps in a row ("WASD"), joined by `sep`.
+func move_caps(sep := "") -> String:
+	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:

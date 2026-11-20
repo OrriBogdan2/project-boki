@@ -21,16 +21,18 @@ extends RefCounted
 enum S { IDLE, CARRY, HUNT, RESULT }
 const TABLE := {S.IDLE: [S.CARRY], S.CARRY: [S.IDLE, S.HUNT], S.HUNT: [S.RESULT, S.IDLE], S.RESULT: [S.IDLE]}
 
-const BASKET_OFF := Vector3(0.0, 0, 2.6)     # m from the Training post to the scent basket
-const BASKET_R := 0.28                        # m, the basket's radius
-const BASKET_H := 0.3                         # m, its height
-const SCENT_R := 0.14                         # m, the hidden scent's glow
-const REACH := 1.6                            # m from the basket to pick the scent up
-const FIRST := "first_seek"                   # Save.d.tutorial: the practice hunt ran (FirstRound)
-const TURN := 6.0                             # rad/s a hunter turns to its heading
+const BASKET_OFF := Vector3(0.0, 0, 2.6)  # m from the Training post to the scent basket
+const BASKET_R := 0.28  # m, the basket's radius
+const BASKET_H := 0.3  # m, its height
+const SCENT_R := 0.14  # m, the hidden scent's glow
+const REACH := 1.6  # m from the basket to pick the scent up
+const FIRST := "first_seek"  # Save.d.tutorial: the practice hunt ran (FirstRound)
+const TURN := 6.0  # rad/s a hunter turns to its heading
+
 
 static func rules() -> Dictionary:
 	return Content.rules("base_seek")
+
 
 static func theme(rec: Dictionary) -> String:
 	return String(Data.KIN.get(String(rec.get("species", "")), {}).get("theme", ""))
@@ -39,10 +41,17 @@ static func theme(rec: Dictionary) -> String:
 static func night_type(rec: Dictionary) -> bool:
 	return rules()["night_themes"].has(theme(rec)) or Work.NOCTURNAL.has(String(rec.get("species", "")))
 
+
 ## m/s: from Focus.
 static func speed(rec: Dictionary) -> float:
 	var R := rules()
 	return float(R["speed"]) * (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["speed_per_focus"]))
+
+
+## Does the hunt run by the night rules: it is night, or this zone's sky never leaves dusk?
+static func is_dark(day_t: float) -> bool:
+	return HomeWork.is_night(day_t) or rules()["night_zones"].has(GardenZones.here)
+
 
 ## The chance a sniff points the right way: Focus, curiosity, and the night for night types.
 static func right_p(rec: Dictionary, night: bool) -> float:
@@ -53,23 +62,25 @@ static func right_p(rec: Dictionary, night: bool) -> float:
 		p += float(R["night_right"])
 	return clampf(p, float(R["right_min"]), float(R["right_max"]))
 
+
 ## The hunt itself: two hunters on the ground plane (x, z in metres) after a scent.
 class Hunt:
 	var R: Dictionary
-	var recs: Array                 # two records: a (index 0) and b (index 1)
-	var item: Vector2               # where the scent is hidden
-	var pos: Array = []             # each hunter's position
-	var head: Array = []            # each hunter's heading (unit vector)
-	var sniff_t: Array = [0.0, 0.0] # s until each hunter's next sniff
-	var right: Array = [false, false]   # each hunter's last sniff pointed the right way
+	var recs: Array  # two records: a (index 0) and b (index 1)
+	var item: Vector2  # where the scent is hidden
+	var pos: Array = []  # each hunter's position
+	var head: Array = []  # each hunter's heading (unit vector)
+	var sniff_t: Array = [0.0, 0.0]  # s until each hunter's next sniff
+	var right: Array = [false, false]  # each hunter's last sniff pointed the right way
 	var night: bool
 	var rng: RandomNumberGenerator
-	var can_walk: Callable          # (Vector2) -> bool: is this ground walkable (empty: everywhere)
+	var can_walk: Callable  # (Vector2) -> bool: is this ground walkable (empty: everywhere)
 	var t := 0.0
-	var found := -1                 # index of the hunter that reached it, -1 while nobody has
+	var found := -1  # index of the hunter that reached it, -1 while nobody has
 
-	func _init(pair: Array, starts: Array, at: Vector2, is_night: bool, r: RandomNumberGenerator,
-			walk := Callable()) -> void:
+	func _init(
+		pair: Array, starts: Array, at: Vector2, is_night: bool, r: RandomNumberGenerator, walk := Callable()
+	) -> void:
 		R = BaseSeek.rules()
 		recs = pair
 		item = at
@@ -117,7 +128,7 @@ class Hunt:
 			if can_walk.is_null() or can_walk.call(to):
 				pos[i] = to
 			else:
-				sniff_t[i] = 0.0                     # blocked: sniff again at once
+				sniff_t[i] = 0.0  # blocked: sniff again at once
 		var best := -1
 		var best_d := float(R["find_r"])
 		for i in 2:
@@ -126,6 +137,7 @@ class Hunt:
 				best = i
 				best_d = d
 		found = best
+
 
 ## Pays out a finished hunt: joy, trust, memories, energy, gems, bonds. Returns what the card shows.
 static func settle(hunt: Hunt) -> Dictionary:
@@ -137,7 +149,7 @@ static func settle(hunt: Hunt) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
-	MinigameHub.record("seek", String(win["name"]))     # best Boki on the title's picker
+	MinigameHub.record("seek", String(win["name"]))  # best Boki on the title's picker
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
@@ -146,20 +158,24 @@ static func settle(hunt: Hunt) -> Dictionary:
 	var prize := GardenPrizes.settle("seek", win, lose, true)
 	return {"win": win, "lose": lose, "gems": int(R["gems"]), "friends": friends, "prize": prize}
 
+
 # ------------------------------------------------------------------ on the base
-var h                          # the Home screen
+var h  # the Home screen
 var state := S.IDLE
-var refused := 0               # moves the TABLE turned down
-var state_t := 0.0             # s in the state
+var refused := 0  # moves the TABLE turned down
+var state_t := 0.0  # s in the state
 var basket: Node3D = null
 var scent: MeshInstance3D = null
 var hunt: Hunt = null
-var pair: Array = []           # the home's kin entries: a, b
+var pair: Array = []  # the home's kin entries: a, b
 var card: Control = null
+var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
 var practice := false          # the first practice hunt: short (practice_s), no gain, no cost
+
 
 func _init(home) -> void:
 	h = home
+
 
 ## The only writer of `state`: false (and counted) when the TABLE lacks the move.
 func go(to: S) -> bool:
@@ -170,6 +186,7 @@ func go(to: S) -> bool:
 	state_t = 0.0
 	practice = practice and to != S.IDLE and to != S.RESULT
 	return true
+
 
 ## The scent basket beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -193,6 +210,7 @@ func place() -> void:
 	basket.add_child(cup)
 	basket.add_child(_glow(Vector3(0, BASKET_H + SCENT_R * 0.5, 0)))
 
+
 func _glow(at: Vector3) -> MeshInstance3D:
 	var m := MeshInstance3D.new()
 	var sm := SphereMesh.new()
@@ -203,6 +221,7 @@ func _glow(at: Vector3) -> MeshInstance3D:
 	m.position = at
 	return m
 
+
 func find(p2: Vector2) -> Dictionary:
 	match state:
 		S.IDLE:
@@ -212,10 +231,12 @@ func find(p2: Vector2) -> Dictionary:
 			return {"kind": "seek"}
 	return {}
 
+
 func label() -> String:
 	if state == S.CARRY:
 		return "Hide the scent here"
 	return "Take the scent to hide (%s and the next Boki will hunt it)" % Save.active_kin().get("name", "your partner")
+
 
 func use() -> void:
 	if state == S.IDLE:
@@ -230,6 +251,7 @@ func use() -> void:
 				else "You hold the scent: walk anywhere on the base and hide it")
 	elif state == S.CARRY:
 		_hide(Vector2(h.ppos.x, h.ppos.z))
+
 
 func _hide(at: Vector2) -> void:
 	var ks: Array = h.hrace.entrants()
@@ -248,19 +270,23 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	var night: bool = BaseRace.tweak("seek").get("night", HomeWork.is_night(h.day_t))
+	var night: bool = BaseRace.tweak("seek").get("night", is_dark(h.day_t))
 	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, night, RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
 	GardenSfx.countdown(h, scent.position)
+	cue = GardenCues.SeekCue.new(h)
+
 
 func _walkable(p: Vector2) -> bool:
 	return h._ground_h(p.x, p.y) > -50.0
 
+
 func _ground(p: Vector2) -> float:
 	var g: float = h._ground_h(p.x, p.y)
 	return g if g > -50.0 else 0.0
+
 
 ## True when the hunt took the key (menu calls it off, or puts the scent back).
 func input(event: InputEvent) -> bool:
@@ -274,6 +300,7 @@ func input(event: InputEvent) -> bool:
 		go(S.IDLE)
 	return true
 
+
 func tick(d: float) -> void:
 	state_t += d
 	match state:
@@ -282,6 +309,7 @@ func tick(d: float) -> void:
 			_move_pair(d)
 			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
 			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
+			_lay_trails(d)
 			if hunt.over() or (practice and hunt.t >= float(rules()["practice_s"])):
 				_end(true)
 		S.RESULT:
@@ -289,6 +317,7 @@ func tick(d: float) -> void:
 				if is_instance_valid(card):
 					card.queue_free()
 				go(S.IDLE)
+
 
 func _move_pair(d: float) -> void:
 	for i in 2:
@@ -298,6 +327,11 @@ func _move_pair(d: float) -> void:
 		var want := atan2(hunt.head[i].x, hunt.head[i].y)
 		n.rotation.y = lerp_angle(n.rotation.y, want, minf(1.0, TURN * d))
 		pair[i]["pos"] = n.position
+
+## Each hunter's trail runs from the scent toward it, brighter the better its nose (best for night types at night).
+func _lay_trails(d: float) -> void:
+	for i in 2:
+		cue.update(i, hunt.item, hunt.pos[i], right_p(hunt.recs[i], hunt.night), _ground, d)
 
 func _end(finished: bool) -> void:
 	if practice and finished:
@@ -310,6 +344,8 @@ func _end(finished: bool) -> void:
 	if is_instance_valid(scent):
 		scent.queue_free()
 	GardenSfx.sniff_stop()
+	cue.clear()
+	cue = null
 	if finished:
 		go(S.RESULT)
 		_card(res, h.hrace.pin(res["win"], "seek"))
@@ -322,14 +358,23 @@ func _end(finished: bool) -> void:
 	hunt = null
 	pair = []
 
+
 func _card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var sulk := "%s is a good sport" if res["friends"] else "%s sulks"
 	if is_instance_valid(card):
 		card.queue_free()
-	card = BaseRace.result_card(h, [
-		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
-		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
-		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
+	card = BaseRace.result_card(
+		h,
+		(
+			[
+				["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
+				["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
+				[(sulk % lose["name"]) + ': "lost the Seek to %s"' % win["name"], 14, UI.MUTED],
+				["+%d gems" % res["gems"], 14, UI.GOLD]
+			]
+			+ BaseRace.pin_rows(pinned)
+			+ GardenPrizes.rows(res["prize"], 14)
+		)
+	)

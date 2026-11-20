@@ -1,6 +1,6 @@
 # Knock and kill resets
 
-Every reset or refund a knock, a kill or a hit earns. Sources: the source data `supervive_kits.md` [D],
+Every reset or refund a knock, a kill or a hit earns. Sources: the source data `sv/briefs/kits.md` [D],
 owner notes [O] (OWNER_REVIEW item 159, DECISIONS), the wiki [W]. Trust order: owner > data > wiki.
 Proof: `--knock-reset-check` (tools/knock_reset_check.gd), plus the combo checks named below.
 

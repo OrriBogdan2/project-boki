@@ -61,7 +61,8 @@ func _hunters(main: Node) -> void:
 	await m.start(Match.arena_opts())
 	var canvas := Control.new()
 	main.add_child(canvas)
-	var rh := ReticleHud.new()
+	var rt := Reticle.new()
+	var rh := ReticleHud.new(rt)
 	var drawn := [0]
 	canvas.draw.connect(func():
 		rh.draw(canvas, m.player, Vector2(100, 100), m.time)
@@ -69,18 +70,22 @@ func _hunters(main: Node) -> void:
 	for id in Arch.ids():
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
 		m.player.recoil = 1.0
-		rh.hit(true, id == "bulwark")
+		rt.raise(false)
+		rt.flavour(true, id == "bulwark")
 		canvas.queue_redraw()
 		await main.get_tree().process_frame
 	ok(drawn[0] >= Arch.ids().size(), "all %d Hunters draw their reticle (%d draws)" % [Arch.ids().size(), drawn[0]])
-	rh.hit(false, false)
+	rt.raise(false)
 	ok(rh._hit_color() == Reticle.tc("col_hit"), "a plain hit flashes white")
-	rh.hit(true, false)
+	rt.flavour(true, false)
 	ok(rh._hit_color() == Reticle.tc("col_crit"), "a crit flashes gold")
-	rh.hit(false, true)
+	rt.raise(false)
+	rt.flavour(false, true)
 	ok(rh._hit_color() == Reticle.tc("col_armor"), "an armour hit flashes pale blue")
-	rh.tick(Reticle.t("hit_s") + 0.01)
-	ok(rh.hit_t == 0.0, "the confirm runs out in %.2f s" % Reticle.t("hit_s"))
+	rt.raise(true)
+	ok(rt.tick_t == Reticle.t("hit_knock_s") and not rt.tick_crit, "a knock holds its tick for %.2f s" % Reticle.t("hit_knock_s"))
+	rt.tick(Reticle.t("hit_knock_s") + 0.01)
+	ok(rt.tick_t == 0.0, "the tick runs out")
 	canvas.queue_free()
 	m.queue_free()
 

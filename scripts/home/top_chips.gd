@@ -36,6 +36,8 @@ static func shows(id: String, count: int) -> bool:
 	return seen.has(id)
 
 static func add_to(row: Node) -> void:
+	if FarmUnlocks.base_mode():      # gems only: BaseCard shows the rest
+		return
 	for c in COUNTERS:
 		var n := have(String(c[0]))
 		if shows(String(c[0]), n):

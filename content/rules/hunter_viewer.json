@@ -4,7 +4,7 @@
 	"turn_rate_desc": "rad/s the viewer's turntable spins",
 	"moves": {
 		"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]},
-		"archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]},
+		"archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_loose", "pin_ult_final"]},
 		"mage": {"dash": ["mage_dash", "mage_dash_go"], "lmb": ["mage_lmb_r", "mage_lmb_l"], "rmb": ["mage_rmb_hold", "mage_rmb"], "e": ["mage_e"], "x": ["mage_x", "mage_x_land"]},
 		"gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]},
 		"juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]},

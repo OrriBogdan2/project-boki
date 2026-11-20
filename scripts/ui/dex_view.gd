@@ -234,6 +234,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
+	info.add_child(summon_row(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
@@ -299,6 +300,23 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	r.add_child(vl)
 	parent.add_child(r)
 
+## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
+## itself reads), a ring icon and the plain line (KinSummon.card_line).
+static func summon_text(spk: String) -> String:
+	var t := KinSummon.times(KinLib.kin(spk))
+	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
+
+static func summon_row(spk: String) -> Control:
+	var r := UI.hbox(8)
+	r.add_child(UI.IconDot.new("ring", type_col(type_of(spk)), 15.0))
+	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
+	l.name = "SummonText"
+	r.add_child(l)
+	var cl := UI.label(KinSummon.card_line(KinSummon.times(KinLib.kin(spk)).x), UI.T_SMALL, UI.MUTED)
+	cl.name = "SummonLine"
+	r.add_child(cl)
+	return r
+
 ## One or two lines about the species (its flavour text, cut at the second sentence).
 static func _field_note(spk: String) -> String:
 	var f := String(Data.KIN[spk].get("flavor", Data.KIN[spk].get("desc", "")))
@@ -322,12 +340,15 @@ static func _kg(x: float) -> String:
 ## caught yours.
 static func _habitat(spk: String) -> String:
 	var out := ""
-	if Data.is_rare(spk):
+	if Data.no_egg(spk):
 		var boss := String(Data.KIN[spk].get("boss", ""))
 		var bn := String(Data.MOBS.get(boss, {}).get("name", "a lair boss"))
-		out = "Never in the wild. It only hatches from a Rare Egg won from %s." % bn
+		out = "Never in the wild, and never from an egg. It keeps the lair of %s." % bn
+	elif Evo.base_form(spk) != spk:
+		var first := String(Data.KIN[Evo.base_form(spk)]["name"])
+		out = "Never from an egg: eggs hatch %s, and it grows from there." % first
 	else:
-		out = "Wild, on any island of the Skylands."
+		out = "Wild, on any island of the Skylands. Eggs hatch this first form."
 	var places: Array = []
 	for r in Save.d.get("roster", []):
 		if String(r.get("species", "")) != spk: continue
