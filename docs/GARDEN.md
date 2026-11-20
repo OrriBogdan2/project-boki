@@ -9,14 +9,14 @@ never reached a first form. Now the farm gives kin XP too: `content/rules/garden
 
 | Action | XP |
 |---|---|
-| First feed, first pat, first game of fetch of each Boki each day (`care`) | 5 each, then 0 |
-| Training yard, per point scored | 1 |
-| A played Dash, Shove, Seek or Volley (backed Boki) | 3 |
+| First feed, first pat, first game of fetch of each Boki each day (`care`) | 10 each, then 0 |
+| Training yard, per point scored | 2 |
+| A played Dash, Shove, Seek or Volley (backed Boki) | 5 |
 | ...a win | 5 |
 | ...the day's first win in that game | 60 |
 
-Level n to n + 1 needs 50 x n XP, flat at 1,000 from level 20 (`curve` in the same file; `Game.xp_need`).
-So level 4 is 300 XP and level 8 is 1,400. Relay and Show Ring pay no XP.
+Level n to n + 1 needs 35 x n XP, flat at 1,000 from level 20 (`curve` in the same file; `Game.xp_need`).
+So level 4 is 210 XP and level 8 is 980. Relay and Show Ring pay no XP.
 
 Stat gains are unchanged. An expedition gives 40, +40 for a win, +10 a knock.
 
@@ -25,7 +25,7 @@ assumptions are in the `pace` block of the rules file): time to the first form (
 
 | Player | Minutes |
 |---|---|
-| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 123 |
+| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 36 |
 | Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 76 |
 | Ratio | 1.63 (limit 2.0, `pace.max_ratio`) |
 
@@ -49,8 +49,8 @@ climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
-| Garden-only | 5 min | 669 min (11 h) | 33 min | 1346 min (22 h) |
-| 1 expedition a session | 29 min | 320 min (5.3 h) | 108 min | 648 min (11 h) |
+| Garden-only | 5 min | 224 min (3.7 h) | 33 min | 462 min (7.7 h) |
+| 1 expedition a session | 29 min | 223 min (3.7 h) | 108 min | 454 min (7.6 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
 games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
@@ -198,3 +198,5 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
+
+**XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 10, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 35 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 36 min (runs 76 to 43, ratio 1.63 to 0.84: the farm now pays about as well as a 12 min run, a default taken; the alternative tried, care 8 and curve 40, gave 42 min and ratio 0.71); Grown 669 to 224 min, first egg 1346 to 462 min. `tools/garden_sim.py`: Lv 8 day, home only 5 min 14 to 9, 20 min 7 to 4 (new player home20), 30 min 5 to 3. The egg is still 7.7 h of play, so a 20 min a day player breeds in about 3 weeks by the pace model's minutes (462 / 20); the sim's starter reaches Lv 8 on day 4. A week needs a lower Grown level (`breed_options` grown_5/grown_6), left unapplied.

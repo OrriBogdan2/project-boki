@@ -42,6 +42,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## abyss_danger (`content/rules/abyss_danger.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How the abyss warns you as you fall (scripts/match/abyss_fx.gd danger_depth: the red tint and vignette; scripts/match/abyss_fall_sfx.gd warn_db / warn_rate: the heartbeat warning). Depths are metres under the lowest island lip around you. Nothing shows until start_depth, so a small dip under an island's height is free; from there the danger rises smoothly (curve = share of the way to the point of no return, to the power curve) to 1 at the kill depth (Hunter.abyss_kill_y). Rising faster than the glider lift (AbyssFx.RISE_OFF) or climbing back above start_depth lets go. warn_*: the warning heartbeat starts at danger warn_from, at warn_db_min dB and warn_rate_min beats a second, and rises to warn_db_max dB and warn_rate_max at full danger. edge_from: danger where the crimson screen-edge rings start (they ramp up to full at 1). |
+| start_depth | 4 |
+| curve | 1.5 |
+| warn_from | 0.02 |
+| warn_db_min | -20 |
+| warn_db_max | -2 |
+| warn_rate_min | 1.2 |
+| warn_rate_max | 4.6 |
+| edge_from | 0.1 |
+
 ## armor (`content/rules/armor.json`)
 
 
@@ -1102,7 +1118,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
-| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
+| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"shelter": 1, "first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "shelter": {"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)", "locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"}, "shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.", "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1254,11 +1270,11 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | toy_doc | assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there. |
 | toys | ["speed", "power", "focus", "guard", "focus"] |
 | toys_doc | toys.json: ball, post, tub, stone, dig: the stat each trains; a Boki picks one at random. |
-| line | burrlet |
+| line | sporcupine |
 | line_doc | The path meter tracked: Sporcupine to Amanitusk (Power) or Ringrove (Guard), both ends in reach of the built games. |
 | families_extra | {"bramble_honey": "lean", "cinderbrittle": "lean", "glassdew": "lean", "hush_truffle": "lean", "twinbun": "personality", "dare_pepper": "personality", "lullwort_tea": "personality", "peekbox": "personality", "glowmoss_sprig": "looks", "cup_ribbon": "looks"} |
 | families_extra_doc | Families of catalogue items not yet in garden_items.json (brief 1.2). |
-| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
+| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home20": {"name": "home only, 20 min", "minutes": 20, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
 | players_doc | minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them). |
 | fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
 
@@ -1307,15 +1323,15 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | Setting | Value |
 |---|---|
 | _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace and Balance). scripts/home/garden_xp.gd reads it, tools/garden_sim.py fits it. care: a kin's first feed, first pat and first game of fetch each day pay it once. drill_per_point: per training point. games: the garden games that pay (GardenPrizes.settle): play for a played game, win for a win, first_win for the day's first win in that game; the Boki you backed gets it. curve: XP from level n to n + 1 is per_level x n, flat from level flat_from on (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock) to the lead Boki. The pace assumptions are what tools/garden_pace_check.gd models; session_min and base_sessions are how long one sitting is and how many a base-only player gets to their first baby; grown_max_ratio is the same slowness limit as max_ratio but to Grown, not the first form (tools/base_breed_check.gd). |
-| care | 5 |
-| drill_per_point | 1 |
+| care | 10 |
+| drill_per_point | 2 |
 | breed_options_doc | DATA ONLY, NOT APPLIED (docs/GARDEN.md Breeding pace): what tools/garden_pace_check.gd prints a second table for. xp_mult scales every XP above (care, drill, games), grown_lv is the level the Nook asks for (now Care.STAGES Grown, 8). Pick one by editing the real values. |
 | breed_options | [{"id": "xp_x3", "xp_mult": 3.0, "grown_lv": 8}, {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5}, {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}] |
 | games | ["dash", "shove", "seek", "volley", "kite"] |
-| play | 3 |
-| win | 5 |
+| play | 5 |
+| win | 8 |
 | first_win | 60 |
-| curve | {"per_level": 50, "flat_from": 20} |
+| curve | {"per_level": 35, "flat_from": 20} |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0, "grown_max_ratio": 2.2, "session_min": 45, "base_sessions": 2} |
 
 ## garden_zones (`content/rules/garden_zones.json`)
