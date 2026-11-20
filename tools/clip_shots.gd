@@ -190,6 +190,7 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 ## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump"
 ## (a 0.9 s hop, the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the
 ## knocked-down beat, 0..1),
+## "air" / "airdash" / "glide" (1 m up: falling, an air dash, gliding), "emote=<id>" (a Truce emote),
 ## "t0=<s>" (the move's clock starts there: the surfacing take skips its first key, the body still under the ground).
 ## --bone-dump=<file.json>: also writes every frame's skinning matrices (bone global pose x bind pose, per bind of
 ## the first skinned mesh, skeleton space) with the segment label, for offline weight work (glb_relax.py --poses);
@@ -200,7 +201,10 @@ const PROC_SEGS := {
 		["dash: surfacing", "gil_surface", 0.8, 0.0, "t0=0.07"], ["attack 1: thrust", "gil_thrust_1", 0.4, 0.0],
 		["attack 2: thrust", "gil_thrust_2", 0.4, 0.0], ["attack 3: lunge", "gil_lunge", 0.6, 0.0],
 		["RMB: potion toss", "gil_throw", 0.6, 0.0], ["E: Riptide spin", "gil_spin", 1.0, 0.0],
-		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0], ["knocked down", "", 1.2, 0.0, "fall"]],
+		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0], ["knocked down (death)", "", 1.2, 0.0, "fall"],
+		["sprint", "", 1.2, 8.0], ["fall", "", 0.8, 2.0, "air"], ["air dash", "", 0.5, 2.0, "airdash"],
+		["glide", "", 1.0, 4.0, "glide"], ["emote: wave", "", 1.6, 0.0, "emote=wave"],
+		["emote: laugh", "", 1.6, 0.0, "emote=laugh"]],
 }
 
 
@@ -255,6 +259,18 @@ func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 			elif extra == "hit":
 				s["hit_t"] = t - 0.1 if t >= 0.1 else 99.0
 				s["hit_dir"] = Vector2(0, -1)
+			elif extra in ["air", "airdash", "glide"]:
+				# airborne 1 m up: falling, an air dash (rolling from its first frame) or gliding
+				s["grounded"] = false
+				s["vel"] = fwd * float(seg[3]) + Vector3(0, -1.5 if extra == "glide" else -6.0, 0)
+				s["air_h"] = 1.0
+				s["rolling"] = extra == "airdash"
+				s["dash_dir"] = Vector2(fwd.x, fwd.z)
+				s["gliding"] = extra == "glide"
+				model.position.y = base_y + 1.0
+			elif extra.begins_with("emote="):
+				s["emote"] = extra.substr(6)
+				s["emote_t"] = t
 			elif extra == "fall":
 				s["fall"] = clampf(t / float(seg[2]), 0.0, 1.0)
 				s["downed"] = true
