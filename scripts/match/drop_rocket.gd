@@ -58,7 +58,7 @@ static func launch(match_node: Match, l: Hunter) -> DropRocket:
 			if not h.remote:
 				h.teleport(r.pos)
 	var col: Color = Data.TEAM_COLORS[l.team % Data.TEAM_COLORS.size()]
-	r.node = _model(col)
+	r.node = model(col)
 	match_node.add_child(r.node)
 	r._place_node()
 	r.snd.start(r)
@@ -258,7 +258,8 @@ func project() -> Dictionary:
 	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
 
 ## A small rocket, nose along its local -Y (it dives nose first): a body, a nose cone, three fins and a flame.
-static func _model(col: Color) -> Node3D:
+## (WarmUp builds one under the map: its lit body and flame compiled mid-ride at the first launch.)
+static func model(col: Color) -> Node3D:
 	var root := Node3D.new()
 	var body := CylinderMesh.new()
 	body.top_radius = BODY_R
