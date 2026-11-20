@@ -49,6 +49,9 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `fist` | a translucent cel-shaded fist (a closed-fist mesh, knuckles down) falling onto the ground: it drops over `fall` of its `life` (a share, or an option), rests, then fades | `size` width, `drop` m it falls from, `fall`, `fwd`, `pitch` (deg, negative tips the wrist back so the knuckles face a top-down camera); `cut` (any surface): it goes if its hunter is stunned or downed before that share of its life |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
+A palette's optional `"peak"` (RRGGBBAA) is what the hottest part turns toward, its alpha how far (absent: halfway to
+white; Kael's: all the way to red, so a red stays red).
+
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
 `pitch_k`, `var`, `delay`, `at`, `when` / `unless`.
@@ -104,6 +107,18 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
 - **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
+- **Ability colours (DECISIONS 2026-11-08):** every Hunter's LMB / RMB / E / R / dash / passive effects, slot colours and
+  weapon colour sit within 40 degrees of hue of its archetype `color` (grey, pale and dark colours are free). A colour
+  that means something stays and is named in `MEANING` in `tools/hero_colour_check.gd` (heals, a shield's blue, timing
+  and status cues, materials such as dust and copper), as do the moves in `EXEMPT_MOVES` (Gil's Shatter wears the broken
+  Boki's type). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
+  kit scripts, slots and weapon) and fails on a stray. A new literal outside the family needs a `MEANING` line or a retint.
+- **Heal vs hurt (Meeko, 11-20):** a support's heals and hurts must not look alike. Meeko's heals (Hearthlight, Hearth
+  Call, the bloom, the tether) are her leaf green family with soft rising stars and pluses; her hurts (Ember Cast,
+  Kindle, Burrseed and its root field) are embers (`MEANING` `ff8c32` / `ffb45a`): short sharp streaks that fall, no
+  curl. The Hearthlight disc (`tender.json` `hearth_disc`) and the root field stay at most 0.25 alpha inside up to their
+  rim; the bloom swirls only on its rim (`thin`). `--hero-vfx-check` rows "Meeko: heals leaf green and rising, hurts
+  embers falling" and the inside-to-rim alpha rows.
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
   (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
   under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).
@@ -124,7 +139,10 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   ash, pickup motes, the ash storm, landmark and exit motes) follow them; High and Ultra are untouched. The ash storm
   follows `fx` instead of `Settings.lite()`. `--particle-budget-check` (~1 min) builds a 30-Hunter match at each preset
   and adds the worst a fight piles on (the full Fx pools and the Hero VFX cap): each preset under 4,000, each one down
-  draws less, High and Ultra draw the same.
+  draws less, Ultra at least what High draws. The region motes over each island (`BiomeRun.decorate`) also pause
+  past their draw distance (`ParticleCount.pace`, 110 m x the preset's `draw`), and paused emitters are not counted:
+  the fight's busiest moment went 1,867 -> 1,120 at High on a real GPU (jobq 11-20, same worker; the motes 957 -> 140), and the
+  30-Hunter check's High worst case 3,847 -> 3,100.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness

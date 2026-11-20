@@ -272,6 +272,7 @@ const STRIDE := {
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
 const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
+const GLIDE_FADE := 0.15      # s into and out of a carried glide pose (Kin.render's kact glide)
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
 const GAIT_FADE := {"thrumbird": 0.45}
@@ -602,7 +603,7 @@ func _pick_clip(dt: float) -> void:
 		_pulse = p
 		_start_shot("ability")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
-	if attacking and not _attacking:
+	if attacking and not _attacking and not (_shot == "ability" and _shot_left > 0.0):  # (a cast's wind-up strikes too)
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
@@ -628,7 +629,12 @@ func _pick_clip(dt: float) -> void:
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
-	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
+	var fade := FADE
+	if "glide" in [want, clip]:
+		fade = GLIDE_FADE
+	elif want in GAITS and clip in GAITS:
+		fade = gait_fade()
+	set_clip(want, fade)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want in NAP_CLIPS:
 		player.speed_scale /= _nap.slow
