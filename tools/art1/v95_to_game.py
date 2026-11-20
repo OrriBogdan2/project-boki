@@ -2,7 +2,7 @@
 The master is ~/meshy/v95/CURRENT_OVERRIDES.txt's last line for the Hunter, else its current.json. The Warden's swap spec
 (art/wardens/src/*_v95.json whose `game` is the Hunter's .glb: joints, regions, anchors, `drop_mats`) runs in v95_swap.py's
 `keep_uv` mode on the Warden's current .glb (its rig, clips and kept props), then the .glb replaces it and Godot re-imports.
-Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy] [--no-import]
+Run: python3 tools/art1/v95_to_game.py <Name> [--tris N] [--tex PX] [--work DIR] [--master GLB] [--weights meshy] [--remeshed] [--no-import]
 A later Meshy pass promoted into v95 (v95-promote) reaches the game with the same command."""
 
 import argparse
@@ -102,6 +102,9 @@ def main():
         "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
     )
     ap.add_argument("--weights", choices=["meshy"], help="meshy: the skin weights from Meshy's auto-rig, not bone heat")
+    ap.add_argument(
+        "--remeshed", action="store_true", help="the master is already a game mesh (a Meshy remesh): no head budget pass"
+    )
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
@@ -112,7 +115,8 @@ def main():
     if a.weights:
         spec["weights"] = a.weights
     if spec.get("head_tris"):
-        spec["head_tris"] = int(tris * HEAD_SHARE)
+        # (a Meshy remesh at the budget has clean even topology: a head pass would collapse its body to make room)
+        spec["head_tris"] = 0 if a.remeshed else int(tris * HEAD_SHARE)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
     spec["move_bones"] = {b: v for b, v in spec.get("move_bones", {}).items() if isinstance(v, dict)}
     work = os.path.abspath(os.path.expanduser(a.work or "~/meshy/v95/_ingame/%s" % a.name))
