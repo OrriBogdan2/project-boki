@@ -10565,3 +10565,4 @@ READY ext/boki-glide-pose 997f1533c67 (carried Boki glide pose: proc glide clip 
 READY ext/vfx-cinder-blade-glow 0314ce6240 (Cinder palm glow builds with the RMB hold: flare size, heat, white-hot bloom; GPU before/after strip; VFX_QUALITY row 11)
 READY ext/vfx-grimble-dash 7a15798eb150212fed3453b6a6b9b96cd6a03cc5 (Grimble barge: gold dash trail + contact flash in content/vfx/dredge.json, orange puffs gone, GPU before/after strip)
 READY ext/vfx-meeko-c-column 7ca2ecccf45f (Meeko VFX colour C 2->3: pastel leaf/pink LMB orb+hit, pastel Hearthlight, leaf root ring, pink Kindled sparks; GPU strips)
+READY ext/anim-land-weight 115eb75f69f9e7a06dc894250f229eeb5ac2e0b6 (landing squash + glb land clip hold per weight class from land_feel.json; footage cells light jump 0.15 s, heavy slam 0.5 s; medium [est])
