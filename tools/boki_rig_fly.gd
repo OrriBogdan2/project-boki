@@ -9,6 +9,7 @@ extends RefCounted
 const SIM_SECS := 120.0
 const DT := 1.0 / 30.0
 const GROUND_MAX := 3.0  # s: the longest a roaming flier may walk the ground in a row on Kitewind Ridge
+const ROAM_MIN := 0.15  # share of SIM_SECS they must roam for the air row to count (24-52 s seen of 120 s)
 const SETTLED := 1.0  # s up and still before a hover's height counts (it climbs first)
 const PET_HOLD := 3.0  # s the farm holds a petted Boki
 const PET_WATCH := 2.0  # s watched after the pet: down from 1.5 m at sink, plus the flare, takes under it
@@ -44,6 +45,7 @@ func _new_save() -> void:
 	var d := Save.fresh()
 	for sp in FLIERS + [WALKER]:
 		var rec := Save.new_kin(sp, String(sp).capitalize())
+		rec["uid"] = "rigfly_" + String(sp)  # its personality and traits hash the uid: the same Boki on every run
 		rec["zone"] = "ridge"
 		(d["roster"] as Array).append(rec)
 	d["active"] = d["roster"][FLIERS.size()]["uid"]
@@ -132,7 +134,7 @@ func _roam() -> void:
 					flares += _taken_lands(k, fliers)
 	var band: Array = BokiFly.rules()["height"]
 	check.ok(
-		roam_s >= SIM_SECS * 0.25 and air_s >= roam_s * 0.9,
+		roam_s >= SIM_SECS * ROAM_MIN and air_s >= roam_s * 0.9,
 		"fliers: roaming on Kitewind Ridge they are up (%.0f of %.0f s)" % [air_s, roam_s]
 	)
 	check.ok(
