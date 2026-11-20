@@ -90,6 +90,7 @@ func run(main: Node) -> void:
 	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	_spot(P, m.lairs._floor_spot(F, B.pos + side * 3.0, 0.0))      # (within a provoked bot's reach)
+	P.reveal_t = maxf(P.reveal_t, 1.2)      # (a real shot shows its muzzle flash, hunter_attack.gd: the bot sees who fired, whichever way it faces)
 	B.hurt(2.0, P, {"src": "shot"})
 	var turned := false
 	for i in int(TURN_T / Match.DT):
