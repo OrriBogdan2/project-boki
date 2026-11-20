@@ -13,6 +13,11 @@ const CLOTH_PAINT := Color("2f3245")       # the models' painted cloak colour (t
 const TRIM_PAINT := Color("909db7")        # and of their hem band
 ## Procedural pieces that stay over the .glb: the void head (its hollow shell rides on it) and WardenGlb's own.
 const KEEP := ["Head", "Aura"]
+## The painted egg of a head inside each model's hood, by sex as KEYS (model space at rest, m: its centre, its
+## height; measured on the .glb's faces in the hood that are neither cloak nor trim). The void head is fitted onto
+## it, so the hood frames the void face as in the art (the procedural head is about twice its size).
+const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.216, -0.11), 0.211]]
+const EGG_COVER := 1.06                    # x the egg's height: the void shell just covers the painted egg
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
@@ -43,6 +48,7 @@ static func dress(root: Node3D, appearance: Dictionary, lk: Dictionary) -> void:
 	if not bool(root.get_meta("glb", false)):
 		return
 	_hide_body(root.get_node("Rig") as Node3D)
+	_into_hood(root, KEYS.find(k))
 	_dye(root.get_node("Warden") as Node3D, Unmasked.clean(appearance))
 
 
@@ -54,6 +60,17 @@ static func _hide_body(n: Node3D) -> void:
 		if c is GeometryInstance3D:
 			(c as GeometryInstance3D).visible = false
 		_hide_body(c as Node3D)
+
+
+## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg.
+static func _into_hood(root: Node3D, sex: int) -> void:
+	var head := root.get_node("Rig/Torso/HeadPivot/Head") as Node3D
+	var hollow := head.get_node("Hollow") as MeshInstance3D
+	var box := WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
+	head.scale *= float(EGG[sex][1]) * EGG_COVER / box.size.y
+	box = WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
+	var pivot := WardenGlb.model_xf(root, head.get_parent() as Node3D)
+	head.position += pivot.basis.inverse() * (EGG[sex][0] - box.get_center())
 
 
 ## The cloak takes the shroud colour and the hem band the accent (or, matching the shroud, its own lighter shade):

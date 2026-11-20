@@ -103,6 +103,8 @@ func _try_and_pick() -> void:
 ## The Hooded Cloak, hood up, plain, is the 3D model of your sex (EmptyGlb), the procedural body hidden under it and
 ## the void head kept; the shroud colour dyes its cloak; another cut is the procedural Empty again.
 func _model3d() -> void:
+	for kv in [["shroud", 0], ["hood", 1], ["trim", 0], ["accessory", 0]]:      # (the picks before chose others)
+		locker.pick(kv[0], kv[1])
 	for sex in [1, 0]:
 		locker.pick("gender", sex)
 		var w := locker.model.get_node_or_null("Warden")
@@ -110,8 +112,9 @@ func _model3d() -> void:
 				and w.scene_file_path.ends_with("%s.glb" % EmptyGlb.KEYS[sex]), "sex %d wears its 3D model" % sex)
 		var hollow := locker.model.find_child("Hollow", true, false) as Node3D
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
-		var torso := locker.model.get_node("Rig/Torso")
-		ok(not torso.get_children().any(func(c): return c is MeshInstance3D and c.name != "Head" and c.visible),
+		var box := WardenGlb.model_xf(locker.model, hollow) * (hollow as MeshInstance3D).get_aabb()
+		ok(box.get_center().distance_to(EmptyGlb.EGG[sex][0]) < 0.05, "sex %d: the void head sits in the hood" % sex)
+		ok(not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
 				"sex %d: the procedural body is hidden" % sex)
 	locker.pick("colour", 5)
 	ok(_cloth_albedo().is_equal_approx(EmptyGlb._ratio(Unmasked.COLOURS[5], EmptyGlb.CLOTH_PAINT)),
@@ -120,6 +123,10 @@ func _model3d() -> void:
 	ok(not bool(locker.model.get_meta("glb", false)), "another cut is the procedural Empty")
 	locker.pick("shroud", 0)
 	locker.pick("colour", int(Unmasked.default_look()["colour"]))
+
+
+func _body_shows(c: Node) -> bool:
+	return c is MeshInstance3D and (c as MeshInstance3D).visible and not String(c.name) in EmptyGlb.KEEP + WardenGlb.KEEP
 
 
 func _cloth_albedo() -> Color:
