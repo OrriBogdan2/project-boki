@@ -453,3 +453,8 @@ Glide keeps its rule: a fresh press in the air opens it, letting go shuts it. Th
 wall kick are never glide taps. Kin pick-up shows the ring but is never taught (a tap there is a pat).
 The tutorials say HOLD and wait for one: the match glide step needs 0.6 s of gliding in one go, the farm's
 chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
+### Folded until they matter (ext/ui-hud-groups-five)
+`--hud-groups-check` now counts what the HUD really draws: the first landing is 5 groups (was 9), the later moments 7-8 (were 11-12).
+The counters follow `HudReveal` (from the 4th expedition), the glider ring shows only while gliding or the meter is not full
+(`HudGroups.glider_shown`), and the belt waits until a held item could be used, then stays for the save (`BeltHud.shown`, `hud_reveal.json`
+"belt"). The clock strip counts with the minimap it hangs under. Shots: `docs/ui_hud_groups_five/`. Keys 1-4 work while the belt is folded.
