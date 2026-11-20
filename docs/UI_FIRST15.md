@@ -241,12 +241,13 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 
 | Moment | Groups | Strip | Note |
 |---|---|---|---|
-| First landing | 10 | waits | nine always-on blocks + the button card |
-| First fight | 11 | waits | nine + toasts + loot prompt |
-| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
-| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+| First landing | 6 | waits | minimap, clock, vitals, abilities, belt, weapon (was 10 on 0.24.5: the kit card, the counters, Q/V and the glider are held back or not drawn) |
+| First fight | 8 | waits | six + toasts + loot prompt |
+| Heart unlock | 9 | shows | six + toasts + Gate prompt + strip |
+| Quest-exit race | 9 | shows | six + toasts + prompt + strip |
 
-All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
+Since ext/hud-holdback (11-20) a block counts only while it is drawn (`HudGroups._drawn`). The landing is still one over the owner's 5;
+the clock bar under the minimap is the next block to fold in (docs/HUD.md "Not fixed").
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)

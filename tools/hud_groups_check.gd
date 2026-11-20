@@ -13,7 +13,7 @@ extends RefCounted
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 7, "fight": 9, "heart": 10, "race": 10}      # groups, strip included where it shows
+const COUNTS := {"landing": 6, "fight": 8, "heart": 9, "race": 9}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -99,6 +99,10 @@ func run(main: Node) -> void:
 	hud.kit_t0 = m.time      # just landed: a veteran's kit card would be up
 	ok(HudGroups.new_player(), "a fresh save is a new player")
 	ok(not on_screen_has(hud, "kit"), "new player: no kit card at the landing")
+	ok(not on_screen_has(hud, "glider"), "on the ground with a cool glider: no glider group (no heat ring)")
+	p.glide_fuel = 0.5
+	ok(on_screen_has(hud, "glider"), "a glider with heat to shed: its ring is a group")
+	p.glide_fuel = 1.0
 	m.opts["training"] = true
 	ok(on_screen_has(hud, "kit"), "new player: the training room keeps the kit card")
 	m.opts["training"] = false

@@ -38,13 +38,16 @@ static func ways_out_shown(m: Match) -> bool:
 	return false
 
 ## Whether an always-on block is really drawn: the glove slots (Q/V) only with a glove worn, the counters once
-## HudReveal shows them (a fresh save: from match 4).
+## HudReveal shows them (a fresh save: from match 4), the glider's heat ring only while it glides or still has heat
+## to shed (the same test as Hud._draw_glider_heat; the old strip of glider icons is gone).
 static func _drawn(m: Match, p: Hunter, id: String) -> bool:
 	match id:
 		"slots":
 			return not (Gloves.worn(p, 0).is_empty() and Gloves.worn(p, 1).is_empty())
 		"counters":
 			return HudReveal.on(m, "counters")
+		"glider":
+			return not (p.dropping or p.downed or p.riding) and (p.gliding or 1.0 - p.glide_fuel >= 0.01)
 	return true
 
 ## The ids of the groups on screen now: the always-on blocks plus the ones that come and go.

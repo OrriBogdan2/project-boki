@@ -391,8 +391,11 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
   locked Merge (R) box until level 6 (`ult_tiles`); the Q/V glove slots and the gear row already draw nothing until a piece is worn
   (`GripHud._glove`, `GearPanel.worn_any`); the clock strip's Dusk/Sight chip is the `weather` group (from match 4). Tab and "Show full HUD"
   show them all. `HudGroups.on_screen` now counts only what is drawn (no `slots` without a glove, no `counters` while staged off):
-  a fresh save at the landing went from 9 groups to 7 (still over 5: minimap, clock, vitals, abilities, glider, belt, weapon).
-- Still to hold back: the kill feed's truce lines.
+  a fresh save at the landing went from 9 groups to 6 (`glider` now counts only while its heat ring draws: the old strip of
+  glider icons is gone). Still over 5: minimap, clock, vitals, abilities, belt (tonics and kits in 1/2), weapon. The clock bar sits
+  8 px under the minimap at its width; folding it into the minimap block (one group) is the next step, not done here.
+- The kill feed's truce lines: the whole feed waits until match 4 (`feed`), and a truce you are not in is feed-only (Truce), so
+  a new player sees none of them.
 - `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
 - Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
 ## Tutorial objective strip (one banner for both tutorials)
