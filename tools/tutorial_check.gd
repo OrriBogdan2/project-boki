@@ -17,6 +17,9 @@ const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack",
 		"kin", "hook", "ult"]
 const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
+const LEAD_FAR := 10.0         # m: a player this far from a lead step target is where the Boki should be out ahead
+const LEAD_STOP := 6.0         # m: the Boki ends a lead step this close to the target
+const LEAD_MIN_FRAMES := 30    # sim steps far from the target before "it runs ahead" is asked
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
 
 func ok(cond: bool, what: String) -> void:
@@ -44,6 +47,7 @@ func run(main: Node) -> void:
 	var reach := ""
 	var early_seen := false      # the summon step: the first window was called back early, and the step stayed
 	var second_seen := false     # the pack step: summoned again after the ring went bright
+	var lead := {}               # per leading step: how the Boki (or its wisp) moves to the step's target
 	while t < MAX_RUN_T and not m.player.extracted:
 		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
@@ -52,6 +56,7 @@ func run(main: Node) -> void:
 			TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		_lead_sample(m, tu, lead)
 		early_seen = early_seen or (tu.id() == "summon" and tu.sm.early)
 		second_seen = second_seen or (tu.id() == "pack" and tu.sm.second)
 		if tu.step != last:
@@ -71,6 +76,7 @@ func run(main: Node) -> void:
 		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
 		ok(early_seen, "a window called back early keeps the summon step (and says so)")
 		ok(second_seen, "the pack step waited for a second summon after the ring went bright")
+	_lead_rows(lead)
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)
 	ok(reach == "", "every dummy stands where this kit can reach it" + reach)
 	print("TUTCHECK DONE %s, failures: %d" % [arch, bad])
@@ -127,3 +133,53 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
 	ok(String(sh.get("cap", "")) == Settings.key_cap("fire"), "and shows the attack key (%s)" % sh.get("cap", ""))
+
+## The Boki leads (DECISIONS Nov 3: it runs ahead, waits, looks back; TutorialLead). One sample per sim step on every
+## step with a lead goal (Tutorial.leads), while the player is still far from the target and the Boki is not being
+## carried over a gap: "ahead" = it is nearer the target than the player, "wait" = it stood still for 0.6 s
+## waiting for you (not blocked), and "bad" = such a wait with its face more than 60 degrees off the player.
+## "min" is its closest approach to the target.
+func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
+	var id := tu.id()
+	var k = m.player.kin
+	if not Tutorial.leads(id) or k == null:
+		return
+	var to: Vector3 = tu.goal(id) if id not in Tutorial.GAP_STEPS else tu.stop(id, "pad")
+	if to == Vector3.INF:
+		return
+	var r: Dictionary = lead.get(id, {})
+	var kp: Vector3 = k.seen_pos()
+	if r.is_empty():
+		r = {"far": 0, "ahead": 0, "wait": 0, "bad": 0, "min": 999.0, "last": kp, "still": 0.0}
+		lead[id] = r
+	var pd := Vector2(m.player.pos.x - to.x, m.player.pos.z - to.z).length()
+	var d := Vector2(kp.x - to.x, kp.z - to.z).length()
+	var sp: float = Vector2(kp.x - r["last"].x, kp.z - r["last"].z).length() / Match.DT
+	r["still"] = float(r["still"]) + Match.DT if sp < 0.3 else 0.0
+	r["last"] = kp
+	if k.state == "shoulder" and not k.wisp:
+		return          # (carried over a gap or a glide: it cannot lead then)
+	r["min"] = minf(float(r["min"]), d)
+	if pd < LEAD_FAR:
+		return
+	r["far"] += 1
+	if d < pd - 2.0:
+		r["ahead"] += 1
+	if float(r["still"]) > 0.6 and (k.wisp or k.comp.lead_hold):
+		r["wait"] += 1
+		var fw := Vector2(-sin(k.face), -cos(k.face))
+		var tp := Vector2(m.player.pos.x - kp.x, m.player.pos.z - kp.z).normalized()
+		if rad_to_deg(acos(clampf(fw.dot(tp), -1.0, 1.0))) > 60.0:
+			r["bad"] += 1
+
+func _lead_rows(lead: Dictionary) -> void:
+	ok(not lead.is_empty(), "the course has steps with a lead goal")
+	for id in lead:
+		var r: Dictionary = lead[id]
+		print("TUTCHECK LEAD %s far %d ahead %d wait %d bad %d min %.1f" % [id, r["far"], r["ahead"], r["wait"],
+				r["bad"], r["min"]])
+		var near: bool = float(r["min"]) <= LEAD_STOP or float(r["min"]) == 999.0
+		ok(near, "%s: the Boki gets within %.0f m of the target (closest %.1f)" % [id, LEAD_STOP, r["min"]])
+		var ahead: bool = int(r["far"]) < LEAD_MIN_FRAMES or int(r["ahead"]) > 0
+		ok(ahead, "%s: it runs ahead of you (%d of %d far frames)" % [id, r["ahead"], r["far"]])
+		ok(int(r["bad"]) == 0, "%s: when it waits it faces you (%d of %d waits not)" % [id, r["bad"], r["wait"]])

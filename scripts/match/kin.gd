@@ -700,6 +700,8 @@ func bubble_at() -> Vector3:
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
+		if wisp and comp and comp.lead_pos != Vector3.INF:
+			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
