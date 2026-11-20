@@ -104,7 +104,8 @@ func _hunter_row(art: String) -> Array:
 		_cell(attacks > 0), _cell(hit_ok),
 		_cell(clips.has(st.get("dead", "")), false), _cell(clips.has(air.get("rise", ""))), _cell(clips.has(land_clip)),
 		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE, "dash")),
-		_cell(_move(d, clips, CAST_RE)), _stomp(art, st, clips), _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))),
+		_cell(_move(d, clips, CAST_RE)), _stomp(art, st, clips), _cell(walk_ok and run_ok),
+		_cell(_has(clips, crouch.get("idle", ""))),
 		_cell(upper)]
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
