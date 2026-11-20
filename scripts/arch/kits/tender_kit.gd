@@ -434,7 +434,7 @@ func burst_ap_k() -> float:
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n, "motes": 0.0})
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
+	lk().burst("column", e.pos, {"col": Color("7ad45a"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 

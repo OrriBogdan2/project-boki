@@ -1,9 +1,9 @@
 {
-	"palette": {"main": "4aa8ff", "hot": "e8f8ff", "char": "0c2a4a", "smoke": "9fc8e8",
-		"water": "3ad0ff", "foam": "f2fbff", "deep": "1a4f8a", "wave": "2a8cff",
+	"palette": {"main": "4ab0f4", "hot": "e8f8ff", "char": "0c2f4a", "smoke": "9fc8e8",
+		"water": "3ad0ff", "foam": "f2fbff", "deep": "1a5a85", "wave": "2a9ef0",
 		"dirt": "7a5c3a", "dirt_hot": "b8946a", "dirt_char": "2e2014", "mark": "7fd8ff",
 		"thunder": "5ab8ff", "thunder_hot": "f4fbff", "slime": "7be05a", "slime_hot": "c8f59a", "slime_char": "1f4a14",
-		"air": "f0f6ff", "air_char": "8aa4c0", "fire": "ff5a3a", "fire_hot": "ffd04a", "fire_char": "3a0c04",
+		"air": "f0f6ff", "air_char": "8aaec0", "fire": "ff5a3a", "fire_hot": "ffd04a", "fire_char": "3a0c04",
 		"zeep": "ff9a2a", "zeep_hot": "ffe39a"},
 	"anchors": {
 		"blade_tip": {"nodes": ["weapon_muzzle"], "gun": [0.0, 0.015, -1.0], "body": [0.3, 1.1, 1.0]},
