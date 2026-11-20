@@ -10429,3 +10429,4 @@ READY ext/vfx-albert-e-slab f7a4a55d529ffe9e5dc1b41836ced013ac972a4a (Albert aeg
 READY ext/v95-ingame-drift ed32db96d4 (v95 in-game drift tracker tool + table: 13/13 game glbs match current.json/overrides by blob, tris, clips; mesh check 10 WARN 3 FAIL; drift next items in docs/heroes/V95_CONTACT.md)
 READY ext/ui-retired-words 980fa52f2d5 (retired words Warden/Mantle/Bearer/Merge/Unmasked out of player text + content-json lint)
 READY ext/vfx-meeko-heal-hurt 385ce22668 (Meeko heals leaf green rising, hurts embers falling; Hearthlight/root field inside <=0.25 to rim, bloom rim-only; hero-vfx-check rows; before/after sheets)
+READY ext/gil-hero-anim-proc 0429f6a241 (Gil borrows Meeko's idle/walk/run/strafe/jump/fall/land/hit clips by bone name via warden_anim clips_from; coverage 7 cells proc->clip; clips/glb checks no new reds)
