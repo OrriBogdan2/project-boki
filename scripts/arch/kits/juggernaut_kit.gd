@@ -941,7 +941,8 @@ func _haul_land(k: float) -> void:
 	var heffs: Array = [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()}]
 	if float(hd["push"]) > 0.0:
 		heffs.append({"type": "push", "strength": float(hd["push"])})
-	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])}, "effects": heffs})
+	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
+			"effects": heffs})
 	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
