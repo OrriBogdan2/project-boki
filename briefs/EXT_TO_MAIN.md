@@ -10422,3 +10422,4 @@ READY ext/sfx-sparkle-sable-bar d4db065a78 (Sparkle+Sable: 10 generated cues fil
 READY ext/anim-boki-coverage-all 8d165d85c7740236cc04b2aa50a84b2d432ed748 (anim coverage: 48 rigged Boki x 8 garden states, 0 missing, 25 on shared clip set, five worst filed)
 READY ext/anim-neve-wrist 82ea2cd4f4 (Neve right arm refit onto bones, glove on hand.R, wrist roll split into forearm; stretch rimewright 9.15->7.81; clips check no new red)
 READY ext/sfx-motley-gil-bar 958a249bcd (Motley+Gil Snd bar: Snap miss, Trade far end, seed fizzle, Gil own set wired, Tide hit, slime end; set/strike checks green)
+READY ext/ui-clutter-all-hunters fd96b045814470ee97377f656e6a3c5489c40e0e (--hud-clutter-check --hunter=<id>: 13 Hunters mid-cast/ult, none over the Hunter; res pips + lit-slot panels merged, worst drawn panels 66 -> 60)
