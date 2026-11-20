@@ -65,6 +65,10 @@ func thief(a) -> void:
 			K.bolts == 3 and hands.size() >= 3, "bolts %d hands %s" % [K.bolts, str(hands)])
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
+	var hv := HeroVfx.of(m)
+	A.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
+			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
+			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
 			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
@@ -858,8 +862,8 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.hold(m, P, 0.95)
 	A.step(m, 0.5)
-	var far := 7.5 * float(K.dash_feel()["dist"])       # the full fling, after the global dash feel
-	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
+	var far := float(K.rmb_def()["lunge"]["dist"][1]) * float(K.dash_feel()["dist"])  # the full fling, after the feel
+	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
@@ -1194,6 +1198,7 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
 			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
 			"spins %d slams %d" % [K.spins, K.haul_slams])
+	_spin_timing(m, P, K, hook)
 	# E attached, RMB tapped (not pulling): a normal Finishing Slam
 	A.step(m, 1.0)
 	hook.call()
@@ -1639,3 +1644,57 @@ func _edge(sname: String, hit: float) -> Dictionary:
 		elif t < hit - 0.005 or t >= hit + 0.03: rest = maxf(rest, v)
 	return {"len": snappedf(float(b.size() - 44) / 2.0 / 44100.0, 0.001),
 			"edge": snappedf(linear_to_db(edge / 32768.0), 0.1), "lead": snappedf(linear_to_db(edge / rest), 0.1)}
+
+## The Cinder Spin is forgiving: an RMB press at the pull's start, middle, last frame, just after it ended (the
+## arrival, or a dash that cut it short) or just before it (tapped, or still held) is exactly one spin; a press
+## outside all that is the normal Smash.
+func _spin_timing(m: Match, P: Hunter, K: JuggernautKit, hook: Callable) -> void:
+	var cases := ["start", "middle", "last frame", "0.14 s after arriving", "0.1 s after a dash cut it",
+			"0.1 s before (tapped)", "0.1 s before (held)"]
+	for name: String in cases:
+		A.step(m, 1.0)
+		hook.call()
+		K.slam_w = {}
+		var spins0 := K.spins
+		var early := name.begins_with("0.1 s before")
+		if early:
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			A.step(m, 0.1, func(): P.inp["sec_hold"] = name.ends_with("(held)"))
+			P.ak.use_e()
+		else:
+			P.ak.use_e()
+		match name:
+			"middle":
+				A.step(m, 0.1)
+			"last frame", "0.14 s after arriving":
+				while K.warchain.pulling():
+					m.step(A.DT)
+				if name != "last frame":
+					A.step(m, 0.14)
+			"0.1 s after a dash cut it":
+				A.step(m, 0.04)
+				P.do_dash()
+				A.step(m, 0.1)
+		if not early:
+			A.tap(m, P)
+		A.step(m, 0.1)
+		P.inp["sec_hold"] = false
+		A.step(m, 0.8)
+		A.ok("jug spin timing: RMB %s = exactly one Cinder Spin" % name,
+				K.spins == spins0 + 1 and K.slam_w.is_empty(), "spins %d" % (K.spins - spins0))
+	# outside the pull: the ordinary Smash (a tap on a hooked chain, and well after a pull) is a Slam, no spin
+	A.step(m, 1.0)
+	hook.call()
+	K.slam_w = {}
+	var spins1 := K.spins
+	A.tap(m, P)
+	A.ok("jug spin timing: RMB on the hooked chain (no pull) = the Slam", not K.slam_w.is_empty() and K.spins == spins1)
+	A.step(m, 1.0)
+	K.warchain.snap()
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.tap(m, P)
+	A.ok("jug spin timing: RMB 1 s after the chain is gone = the Slam", not K.slam_w.is_empty() and K.spins == spins1)
+	A.step(m, 1.0)
+	K.slam_w = {}

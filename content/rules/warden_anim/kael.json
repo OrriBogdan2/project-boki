@@ -49,7 +49,7 @@
 		"ult_recover": {
 			"from": "riposte",
 			"keys": [
-				[0.0, 0.1, {}],
+				[0.0, 0.04, {}],
 				[0.1, 0.4, {"hips": [10, 0, 0], "root": [6, 0, 0], "head": [14, 0, 0]}],
 				[0.35, 0.4667, {"hips": [6, 0, 0], "root": [4, 0, 0], "head": [10, 0, 0]}]
 			]
@@ -75,12 +75,13 @@
 		, "air_legs": true},
 		"jug_wave": {
 			"clip": "wave",
-			"fade_out": 0.4
+			"fade_out": 0.4,
+			"lead": 0.03
 		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
-			"fade": 0.3,
-			"fade_out": 0.4
+			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
+			"blend_out": 0.45
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
@@ -91,21 +92,26 @@
 		"jug_lunge": {
 			"clip": "lunge",
 			"fade_out": 0.4,
-			"rate": 2.2
+			"rate": 2.2,
+			"lead": -0.45
 		},
 		"jug_meteor": {
 			"clip": "meteor",
 			"hold_from": 0.3,
-			"fade_out": 0.4
+			"fade_out": 0.4,
+			"lead": 0.14
 		},
 		"jug_meteor_land": {
 			"clip": "meteor_land",
-			"fade_out": 0.4
+			"fade": 0.05,
+			"time": [[0, 0.13], [0.03, 0.16], [0.1, 0.165], [0.5, 0.5]],
+			"blend_out": 0.4
 		},
 		"jug_dash": {
 			"clip": "dash",
 			"fade_out": 0.4,
-			"rate": 1.6
+			"rate": 1.6,
+			"lead": -0.12
 		},
 		"jug_exdash": {
 			"clip": "exdash",
@@ -149,7 +155,8 @@
 		},
 		"jug_riposte": {
 			"clip": "riposte",
-			"fade_out": 0.4
+			"fade_out": 0.4,
+			"lead": -0.08
 		},
 		"jug_ult_recover": {
 			"clip": "ult_recover",
