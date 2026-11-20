@@ -160,6 +160,7 @@ func run(main: Node) -> void:
 	_pick_taken()
 	_ui_cues()
 	_low_hp()
+	_stomp_cues()
 	_voices()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
@@ -546,8 +547,10 @@ func _wired() -> void:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
-	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
-		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
+		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
+	ok(FileAccess.get_file_as_string("res://scripts/match/exits.gd").contains("WarnSfx.countdown("),
+		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
 	_warn_behaviour()
 
 ## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
@@ -1429,6 +1432,29 @@ func _heard(sname: String, act: Callable) -> float:
 	if not Sfx.last_played.has(sname):
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
+
+## The stomp's cues (DECISIONS 2026-11-11): its own set, played once at a position (no `mine`, so both squads in
+## reach hear it) where Life starts it, finishes the wisp and loses it to hard CC; the wind-up rises.
+const STOMP_CUES := {"stomp_windup": "h.pos, -2.0)", "stomp_finish": "o.pos)", "stomp_crack": "h.pos)"}
+
+func _stomp_cues() -> void:
+	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/stomp.json"))
+	var src := FileAccess.get_file_as_string("res://scripts/match/life.gd")
+	var off := []
+	for sname: String in STOMP_CUES:
+		if not (d is Dictionary and (d["sounds"] as Dictionary).has(sname)) or not Sfx.ensure(sname):
+			off.append(sname + " (no set or file)")
+		elif src.count('m.sfx("%s", %s' % [sname, STOMP_CUES[sname]]) != 1:
+			off.append(sname + " not played once at its spot in life.gd")
+	ok(off.is_empty() and not src.contains('"whoosh"') and not src.contains('"crit"'),
+			"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off])
+	var data := _data("res://audio/stomp_windup.wav")
+	var half := data.size() / 4
+	var e := [0.0, 0.0]
+	for k in half * 2:
+		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
+	var gain := 10.0 * log(e[1] / maxf(e[0], 1e-9)) / log(10.0)
+	ok(e[1] > e[0] * 1.5, "stomp: the wind-up rises (second half %.1f dB over the first)" % gain)
 
 ## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
 func _boss_moves() -> void:
