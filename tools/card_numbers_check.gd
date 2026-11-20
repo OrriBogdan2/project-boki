@@ -80,6 +80,9 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 			return {"nums": [float(e["gap"]) * 2.0]}
 		"gunslinger":   # an air tap slides air_k of the slide; the beam is twice its half-width
 			return {"nums": [float(dash["slide"]) * float(dash["air_k"]), float(e["width"]) * 2.0]}
+		"juggernaut":   # the Lunge card states the metres it travels: dist x the 0.85 lunge feel (4.5 -> 5.4)
+			var ld: Array = d["rmb"]["lunge"]["dist"]
+			return {"about_pairs": [[float(ld[0]) * 0.85, float(ld[1]) * 0.85]]}
 		"mage":         # a returned run charges in reset_charge of the hold
 			return {"nums": [float(dash["hold"]) * float(dash["reset_charge"])]}
 		"tender":       # the rank 3 burst is r3_k times the radius
