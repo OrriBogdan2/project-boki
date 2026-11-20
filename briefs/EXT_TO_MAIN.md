@@ -10576,3 +10576,4 @@ READY ext/hud-holdback faffc716b2f8c9496cc15da1cdc1419ef2b851f1 (belt slots 3/4 
 READY ext/vfx-albert-e-wall 4462c4fd16 (bulk-rebase: origin/main merged in mechanically, was ab50135495; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hudreveal-fold 3035db634fc550c0148702779b4c0bba322e524d (HudReveal is the only HUD reveal gate: HudGroups' Ways Out lead, kit card 14 s, NEW_PLAYER_MATCHES folded into hud_reveal.json; parity asserted at matches 1/2/3/10 x expedition/duel/training/tutorial)
 READY ext/stomp-prompt-declutter 2ded4169797565ef67e7f04dd68f2a8a1703ae1f (stomp prompt: closest downed rival in reach only, short HoldPrompt ring, no teammate prompt; stomp/wisp/hud-clutter checks pass)
+READY ext/boki-own-clips-b ba98a780fb15414c697ecd4485f131b5c0012623 (own idle/walk/run/attack/cast/hop clips for floenatee, gibbelle, glaciyak: 3 *_anim.py + reclip.py, glbs re-keyed, coverage rows leave shared)
