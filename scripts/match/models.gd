@@ -1678,8 +1678,8 @@ static func gear_pad(col: Color) -> Node3D:
 static func gear_platform(col: Color) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(1.6, 1.3, 0.24, 24), toon(Color("e8dcc0")), Vector3(0, -0.12, 0))
-	part(root, cyl(1.62, 1.62, 0.06, 24), toon(col, false, 0.7), Vector3(0, 0.0, 0))
-	var g := part(root, cyl(1.0, 0.2, 0.7, 18), glow_mat(Color(col, 0.35)), Vector3(0, -0.6, 0))
+	part(root, cyl(1.62, 1.62, 0.06, 24), toon(col, false, 0.7), Vector3(0, 0.0, 0), Vector3.ONE, Vector3.ZERO, "Rim")
+	var g := part(root, cyl(1.0, 0.2, 0.7, 18), glow_mat(Color(col, 0.35)), Vector3(0, -0.6, 0), Vector3.ONE, Vector3.ZERO, "Glow")
 	g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 

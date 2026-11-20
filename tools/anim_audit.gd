@@ -44,6 +44,8 @@ const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics ti
 ## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
 ## ask: the slam drops 1.5 body heights in 0.08 s, the punch drives 1.1 in 0.05 s. The others are listed open.
 const MAX_JUMP := {"bulwark": 0.4, "dolm": 0.45}
+const TURN_CEIL := 1.4       # the run turn's regression ceiling (share of the run): see _gate_turns
+const TURN := preload("res://tools/anim_audit_turn.gd")     # the 180 stick flip at a run
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -126,7 +128,9 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, live)
 	row["set_off_at"] = _set_off_at(m, sync, clips)
-	var want := ph * float(row["cfg"]["walk_len"])
+	# (the walk loop plays stretched to "cycle_s", else to the run clip's cycle: WardenClips._gait_loop)
+	var loop_s := float(lc.get("cycle_s", 0.0))
+	var want := ph * (loop_s if loop_s > 0.0 else float(row["cfg"]["run_len"]))
 	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
 		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
 				want])
@@ -142,6 +146,9 @@ func _hero(main: Node, id: String) -> void:
 			print("FAIL %s %s: the hand jumps %.2f body heights in one frame at %.3f s (limit %.2f)"
 					% [id, nm, at["jump"], at["jump_t"], MAX_JUMP[id]])
 			bad += 1
+	if not id in NO_LEGS:      # last: it leaves the clips mid-turn
+		row["turns"] = TURN.turns(self, m, sync, clips, sk, id)
+		_gate_turns(id, row["turns"], row["stops"]["run"]["steady"])
 	m.free()
 
 func _gate(id: String, live: Dictionary) -> void:
@@ -398,6 +405,25 @@ func _gate_stops(id: String, stops: Dictionary) -> void:
 			print("FAIL %s: the stop from a %s slides a foot %d%% of the speed (limit %d%%)" % [id, nm,
 					round(100.0 * st["stop"]), round(100.0 * limit)])
 			bad += 1
+	print(line)
+
+## A 180 stick flip at a run (anim_audit_turn.gd) should slide no more than MAX_SLIDE of the run, or than the run
+## slides on its own. No Hunter makes it yet (the loco blend trails a 0.1 s reversal: the "run turn slide" backlog
+## item), so past that it prints OPEN, and only past TURN_CEIL (today's worst plus a margin) does it FAIL.
+func _gate_turns(id: String, turns: Dictionary, steady: float) -> void:
+	var line := "TURNS %-10s" % id
+	for nm in turns:
+		var t: Dictionary = turns[nm]
+		line += " %s %d%% (run %d%%, after %d%%) %.2f m dip %.2f ends %s" % [nm, round(100.0 * t["share"]),
+				round(100.0 * t["lead"]), round(100.0 * t["after"]), t["skate_m"], t["dip"], t["ring"]]
+		var limit := maxf(MAX_SLIDE, steady)
+		if t["share"] > maxf(TURN_CEIL, limit):
+			print("FAIL %s: the run turn (%s) slides a foot %d%% of the run (ceiling %d%%)" % [id, nm,
+					round(100.0 * t["share"]), round(100.0 * maxf(TURN_CEIL, limit))])
+			bad += 1
+		elif t["share"] > limit:
+			print("OPEN %s: the run turn (%s) slides a foot %d%% of the run (limit %d%%)" % [id, nm,
+					round(100.0 * t["share"]), round(100.0 * limit)])
 	print(line)
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
