@@ -170,6 +170,29 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 32 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 16 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Ability bar (a set's `"bar"`, `tools/sfx_bar_check.gd`)
+A Hunter set may list, per ability (`lmb`, `rmb`, `e`, `shift`, `r`), the sound of its **cast**, **travel**, **hit**
+and **end** (`""` where the move has no such beat) and the `ab` its hits carry. `--sfx-set-check` section 16 holds it:
+every named sound is in the set with a file and played by the kit, every ability has a cast, the hit is what
+`HeroSfx.hit_sound` plays for that `ab`, and no two abilities of a Hunter share a hit. An ability hit plays
+`<arch>_hit_<slot>` when the Hunter has one (`HeroSfx.HIT_SLOT`: utility/rmb, k1/e, dash, ult/x/r, Tenzo's
+`rock`), else `<arch>_hit`. Tenzo and Grimble (VFX_QUALITY Snd 3) were the first; their new cues are made by
+`tools/gen_sfx_ability_bar.py` and sit at their category level (impact -16, Grimble heavy_impact -14.5, loop -21,
+cast -18). Bold = added by that pass.
+
+| Hunter | ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Tenzo | LMB boulder (hold: punch) | br_throw (br_wind) | **br_boulder_fly** (loop on the boulder) | dolm_hit (stone fist) | br_boulder_hit |
+| Tenzo | RMB slam | br_shove | br_leap | **dolm_hit_rmb** (deep thump, low crunch) | br_slam |
+| Tenzo | E Stone Row (its rocks punched) | br_crack | br_launch | **dolm_hit_rock** (rock shattering) | br_burst |
+| Tenzo | Shift hop | dolm_dash | br_rise | **dolm_hit_dash** (flat stamp, skid) | br_roll |
+| Tenzo | R Basalt Spine | br_raise | br_rumble | **dolm_hit_r** (glassy basalt crack) | br_slam |
+| Grimble | LMB blunderbuss | dr_shot | - (6 m slugs, no flight to hear) | dredge_hit (scrap slug) | - |
+| Grimble | RMB Deep Reach | dr_throw | **dr_reach_fly** (chain loop on the hand) | **dredge_hit_rmb** (hook tchk, chain snap) | **dr_let_go** (miss or reel done) |
+| Grimble | E Anchor Drop | dr_anchor_wind | dr_dive (air) | **dredge_hit_e** (big iron clang) | dr_anchor |
+| Grimble | Shift barge | dr_barge | - | - (no damage) | - |
+| Grimble | R Brass Broadside | dr_blast_charge | dr_blast (each wave) | **dredge_hit_r** (brass ping) | **dr_blast_end** (casings fall) |
+
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
 
