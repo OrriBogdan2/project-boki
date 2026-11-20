@@ -45,9 +45,10 @@ const EXTRA := {
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
+## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f);
+## "trim" is cloth split off so it dyes apart (the Empty's hem band: EmptyGlb).
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
-	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
+	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0, "trim": 1}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
@@ -444,11 +445,18 @@ static func neutral_rest(arch: String) -> Dictionary:
 ## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
 static func measure_rest(arch: String) -> Dictionary:
 	_measuring = true
-	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+	var m := rest_model(arch)
 	_measuring = false
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
+
+## The procedural model a Warden's rig rest is measured on: in the neutral look, or for an Empty model (EmptyGlb)
+## the default Empty of its sex.
+static func rest_model(arch: String) -> Node3D:
+	if arch in EmptyGlb.KEYS:
+		return Models.hunter("medium", Data.TEAM_COLORS[0], "", "", EmptyGlb.rest_look(arch))
+	return Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
 ## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon
