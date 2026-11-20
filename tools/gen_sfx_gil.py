@@ -320,7 +320,8 @@ def slime_dry():
     """The slime puddle drying up: a slow sticky suck draining away, the last fat bubbles popping slower."""
     suck = lpf(noise(0.6), 700) * slow(0.6, 18, 0.8) * shape(0.6, 0.06, 0.1, 0.4) * 1.1
     gulp = at(S.sweep(220, 90, 0.3) * env(N(0.3), 0.02, 0.12) * 0.25, 0.25)
-    last = mix(*[at(bubble(f, 0.09, 1.3) * g, t0) for f, t0, g in ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))])
+    pops = ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))      # (Hz, s, gain): slower and lower
+    last = mix(*[at(bubble(f, 0.09, 1.3) * g, t0) for f, t0, g in pops])
     return S.pad(mix(suck, gulp, last), 0.8)
 
 

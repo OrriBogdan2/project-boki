@@ -23,7 +23,8 @@ low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle
                                (HoverHum levels and pitches it with his speed)
   ostra_hurt/down/death        wordless voice
   os_snap_fizz / os_trade_swap / os_seed_fizz   the ends (11-20): a Snap that hit no one, the bodies
-                               swapped where he left, a seed gone unpopped (`python3 gen_sfx_motley.py bar` writes only these)
+                               swapped where he left, a seed gone unpopped
+                               (`python3 gen_sfx_motley.py bar` writes only these)
 
 The os_* files were first written by tools/gen_pair_sfx.py; this script replaces them (content/sfx/
 ostra.json lists them under "replaces"). Original synthesis and an original tune, no samples.
