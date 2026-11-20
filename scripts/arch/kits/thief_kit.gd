@@ -22,17 +22,17 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-const BOLT_GOLD := Color("ffc04a")
-const BOLT_CORE := Color("fff2c0")
-const FIZZLE := Color("6a48ff")    # a bolt running out at the cursor: a blue-violet puff
-const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
+const BOLT_COL := Color("9a5cff")
+const BOLT_CORE := Color("e6d8ff")
+const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
+const EMP_PALE := Color("f0e6ff")  # the empowered shot's chakram
 const GLINT_EDGE := Color("2a1450")    # the dark violet edge round the hand glint
-const GHOST := Color("7af0ff")     # the blink's afterimages
-const KNOCK_STAR := Color("ff2a48")
+const GHOST := Color("b890ff")     # the blink's afterimages
+const KNOCK_STAR := Color("7b3aff")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
-const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
+const BOLT_TAIL := Color("7b3aff")     # the bolt's short deep-violet tail
+const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
@@ -431,15 +431,15 @@ func _bolt() -> void:
 		sd["r"] = 0.3
 		x["kb"] = 3.0
 		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
-		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
-		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
+		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
+		fx().star(muzzle, EMP_PALE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
 	elif came_quick:            # the quick run after a Vault: the cartwheel's cyan in her hands and the tail
-		fx().ride(sd, "chakram", GHOST, BOLT_GOLD, 2.2, 0.42)
+		fx().ride(sd, "chakram", GHOST, BOLT_COL, 2.2, 0.42)
 		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
-		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 1.8, 0.42)
-		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
+		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_COL, 1.8, 0.42)
+		fx().star(muzzle, BOLT_COL, 0.6, 0.1, BOLT_CORE)        # the violet muzzle star at the throwing hand
 	last_bolt_emp = emp
 
 ## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
@@ -449,16 +449,16 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
 	if e != null:
-		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"),
+		fx().star(at, BOLT_COL if not emp else Color("d8c0ff"),
 				1.5 if emp else 0.7,
 				0.24 if emp else 0.14)
-		if emp: m.fx.spark(at, Vector3.UP, EMP_BLUE, 14, 11.0, 70.0)
+		if emp: m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
 	elif why == "expire":
 		fizzles += 1
 		fx().puff(at, FIZZLE, 0.75 if not emp else 1.1, 0.34, Color("c8b8ff"))
 		m.sfx("dj_fizzle", at, -10.0 if h.is_local() else -14.0, 1.0)
 	else:
-		m.fx.spark(at, Vector3.UP, BOLT_GOLD, 6, 6.0, 80.0)
+		m.fx.spark(at, Vector3.UP, BOLT_COL, 6, 6.0, 80.0)
 
 # ------------------------------------------------------------------ dash: Vault
 ## The Cartwheel: a Vault charge, the same in the air as on the ground (item 183); out of charges, the class's
@@ -617,13 +617,13 @@ func _primed_hit(t: Ent) -> void:
 func _reset_fx(t: Ent) -> void:
 	var at := t.pos + Vector3(0, 1.0, 0)
 	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
-	fx().star(at, EMP_BLUE, 2.2, 0.2, Color.WHITE)
-	fx().crescent(at, dir, 160.0, 1.2, EMP_BLUE, Color.WHITE, 0.2, PI * 0.5)
+	fx().star(at, EMP_PALE, 2.2, 0.2, Color.WHITE)
+	fx().crescent(at, dir, 160.0, 1.2, EMP_PALE, Color.WHITE, 0.2, PI * 0.5)
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
-	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
+	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_PALE)
 	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -815,7 +815,7 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
+	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("c19bff"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
@@ -867,8 +867,8 @@ func _throw_knife() -> void:
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
-		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("ffcf5a"), 1.6, 0.26)
-	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("ffcf5a"), 0.7, 0.1)
+		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
+	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("b890ff"), 0.7, 0.1)
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 
 ## The shot ended with no foe: in the barrier that stopped it, else on the ground (at the wall, or where aimed).
@@ -898,7 +898,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
+	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("b890ff"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
@@ -920,7 +920,7 @@ func _tick_knife() -> void:
 	if knife.has("wall"): up = 0.0
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
-				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
+				col_of(e_def()), Color("b890ff"), 0.2, 0.2)
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:

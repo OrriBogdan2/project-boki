@@ -133,7 +133,7 @@
 		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "mage_x",
-		"col": "#ffd36a",
+		"col": "#ff8ac8",
 		"cooldown": 42.0,
 		"windup": 0.3,
 		"rise": 0.3,
