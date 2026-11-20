@@ -260,6 +260,7 @@ const STRIDE := {
 	"hivara": [0.64, 1.44],
 	"caecilith": [0.15, 0.38],
 	"glomwort": [1.50, 2.90],
+	"goliathite": [1.50, 2.90],
 	"kestrike": [0.33, 0.70],
 	"kindlewren": [0.89, 1.70],
 	"lodestick": [0.46, 1.62],
