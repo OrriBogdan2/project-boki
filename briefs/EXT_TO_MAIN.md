@@ -10555,3 +10555,4 @@ READY ext/sfx-knock-sides 09027a233a1d (ally-knocked now plays its own dark knoc
 READY ext/tut-camps-telegraph 60651bc7c1 (bulk-rebase: origin/main merged in mechanically, was 94c68e4c6e; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-n19c-1119 2044fdb865 (bulk-rebase: origin/main merged in mechanically, was a7cc0197e8; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/sfx-wisp-steal 6a283f4047 (bulk-rebase: origin/main merged in mechanically, was 81827d818b; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/feel-buffer-table a514d6601ceccbda150839ba6004d926ff2e9698 (press-window table in dash_interactions: all 17 buffer rows measured, Kael heavy-move buffer 0.12->shared 0.15, dash-flow-check bounds + Shift-in-cast measure)
