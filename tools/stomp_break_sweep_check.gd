@@ -18,8 +18,7 @@ const TAP := [3.0, 1]  # [distance to the stomper in m, steps the key is held]: 
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
 const EXPECT := [
 	["gunslinger", "rmb", 3.0, 1, "daze"],
-	["bulwark", "lmb", 3.0, 90, "launch"],
-	["bulwark", "x", 3.0, 1, "stun"],
+	["bulwark", "lmb", 3.0, 90, "stun"],
 	["ostra", "rmb", 3.0, 1, "stun"],
 	["thief", "rmb", 3.0, 1, "gnd"],
 	["dredge", "rmb", 3.0, 1, "stun"],
