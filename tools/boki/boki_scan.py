@@ -371,7 +371,6 @@ AUTO = {  # id: overrides on AUTO_BASE
     "vespyx": BORROWED,
     "voltalon": BORROWED,
     "wickapi": BORROWED,
-    "wickapi.old-chibi-1111": BORROWED,
     "xylogator": BORROWED,
     "zippelith": BORROWED,
     "caecilith": {},
