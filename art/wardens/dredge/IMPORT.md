@@ -1,5 +1,43 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Ball on his back at a stand (2026-11-19, ext/hunter-fix-dredge-1118):** bone `ball` hangs off `root`, and the `idle`
+and `stance` clips held it near its rest spot while `hips`/`hoard` swayed, so standing he showed the ball off his back
+(in-game probe, ball vs its rest offset from `hoard`: idle mean 0.18 m, stance 0.17 m). Only those two clips' ball
+translation/rotation keys are re-keyed so it sits at its rest offset from `hoard` (same key times and counts, in place);
+in game: idle 0.18 -> 0.03 m, stance 0.17 -> 0.04 m. Every other clip, the mesh and the weights are byte-identical.
+Not re-keyed on purpose: in game the ball still drifts off the pack in run, the forced moves and death (median over all
+clip frames 0.29 m), and that is not a key problem: dredge's "upper" layer (content/rules/warden_anim/dredge.json) plays
+`hips` and `hoard` from the move while `root` and `ball` stay on the loco clip, and WardenClips turns `root` for the
+heading, so no key in root space can follow the hoard (re-keying every clip measured worse in game: median 0.29 -> 0.40).
+The fix is the skeleton or data: `ball` under `hoard` (extra_bones + the roll clips re-keyed into hoard space), or "ball"
+in the upper list plus a hoard-relative pose in WardenClips. Re-key script: ~/gens/hunter-fix-dredge-1118/deep-1119/tools/ball_rekey.py
+in.glb out.glb [clips] (numpy only); a clip rebuild from tools/art1/grimble_clips.py brings the standing float back.
+
+**Inside-out pass (2026-11-20, ext/hunter-fix-dredge-1118, retry after review):** the 11-19 smoothing left new black
+wedges (stance left ribs and waist, the left shoulder ring when running). Each triangle is now also checked against its own
+skinning frame in all 545 game poses (inside-out = its posed normal points against the normal its bones would give it). A local
+pass re-weights 2-ring patches (live weights, 50/50 blend or neighbour smoothing), keeps a change only if area-weighted inside-out
+triangle-frames drop (new-vs-live ones count 4x) and the patch's worst stretch does not rise. Weights only again: every other
+byte is the same as the 11-19 glb. Inside-out triangle-frames: live 327,842, 11-19 85,760, now 76,249; of those, new vs live
+32,175 -> 19,700 (area 0.26 -> 0.18 of live's). Game check: worst 8.52 -> 7.63, 53 of 54 clips lower, none higher. Tried and
+dropped: hard revert of the new spots to live weights (worst 15.8, seams), fading thigh weight off the left shin (worst 9.5-14.3).
+The left lower leg is a geometry fault: below the knee the scan has only open shell shards (the goo claw hung over it at scan
+time), so it shows black shards in every clip, even standing straight; weights cannot make a shin. Scripts:
+/home/boki/gens/hunter-fix-dredge-1118/retry-1120/tools/ (opt2.py, cmpinv.py, bl_stretch.py).
+
+**Skin weights only, tear fix (2026-11-19, ext/hunter-fix-dredge-1118, retry of the 11-18 job):** dredge.glb differs from
+the 11-17 pick only in JOINTS_0/WEIGHTS_0. Positions, indices, normals, UVs, textures, nodes, skin and all 45 clips are
+byte-identical, so the rest pose is the same and no triangle was removed. (The first 11-18 pass deleted 2,088 triangles and
+opened holes; it was reverted.) The weights were smoothed only where an edge stretched past 3x in the game's own clip poses
+(dumped from the stretch_check sampling): inverse-edge-length Laplacian smoothing of the weights, seam copies kept equal, ball,
+spring chains, gun and the hoard (backpack) left as they were, then a local pass that keeps a change only if the worst
+stretch over every sampled frame drops. Not done on purpose: cutting hand/forearm weight off the fused thigh and hip skin
+(it opens the fused contacts into black inside-of-shell patches in crouch, anchor and throw), and copying the right shin's
+weights onto the left shin (black wedge behind the left knee in crouch_r and downed). Scripts: ~/gens/hunter-fix-dredge-1118/retry-1119f/tools/.
+Game check (tools/stretch_check.gd): worst 8.52 (ledge) -> 7.63 (mantle); 51 of 52 clips lower, none higher; clips with an
+edge past 3x 48 -> 32. Left as it was (not weights): the ball floats in run/anchor (bone `ball` hangs off `root`, a clip
+job), and the claw curl's open shell shows black backfaces even at rest.
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
