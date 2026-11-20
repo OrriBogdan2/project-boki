@@ -116,3 +116,10 @@ A2 is a texture-only grade of the depth1117 master (same mesh, UVs and images 1-
 bust A chest without a re-port: master `~/meshy/v95/Cinder/board1117/A2_bust_m20.glb` = bust_m20's mesh + A2's three changed
 images. In this glb only `v95`, `v95c` and `v95d` changed (`tools/art1/glb_image_swap.py`), each = game image + resize(A2) -
 resize(bust_m20) at the game size (JPEG q92); mesh, rig, clips, tail and jets byte-equal.
+
+**Regen r5 (11-20, DRAFT ext/hunter-regen-cinder-1120, job 20261120-145611-a1):** texture-only on top of r3 A (mesh, rig,
+weights and all 46 clips byte-equal, so stretch = r3 A). Only `v95` (body base), `v95b` (body emit) and `v95c` (tail base) changed
+(`tools/art1/glb_image_swap.py`). Body skin: Gemini 4K edit of the `v95` atlas (ref turnaround as input) pasted back only inside the
+live skin mask (head/face, clothing, boots, gloves, hair untouched); lava-crack pixels of the edit added to `v95b` as emission.
+Tail: Meshy retexture of the tail faces only (`--original-uv`, ref tail crop) pasted into the tail UV islands of `v95c`.
+Work files and scripts: ~/gens/hunter-regen-1120/cinder/r5 (cand/bf4b = this one).
