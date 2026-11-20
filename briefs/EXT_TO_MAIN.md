@@ -10460,3 +10460,4 @@ READY ext/lace-needle-anim a4b63c2407 (Lace needles in hand as animation: spin o
 READY ext/ui-loadout-slots ca51cdad94aa29cbc4adc1ccfb6fed52fdf294e2 (5-perk limit in data, slot-count rows in --backpack-check; charms still unbuilt GAP)
 READY ext/tut-step-count 8e41b669d9 (tutorials: match 23 -> 8 beats via tut-eight-steps merge, farm 12 -> 5 steps; tutorial/farm-tutorial/text checks = main reds only, health+wiki green)
 READY ext/ui-notice-bullets 2d049e166a2a9ccce221c4a93ccacac8cd9fef6d (notice cards as short plain bullets: burrow, stray, market, migration, starving/death, match-end notes; tutorial-text-check fails notice lines over 60 chars)
+READY ext/tut-playthrough-gate 62ef903e7cba7f529b0c7ae64cbf9cdec4c7254e (tutorial playthrough: 5/5 green, no stall; fixed hatch knock script error; 4x hatch screens ~25 s wall)
