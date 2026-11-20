@@ -47,6 +47,7 @@ ARM_W = 0.2  # an arm vertex carries at least this much of the side's arm weight
 STRAY_KEEP = 0.20  # m from the shoulder: arm weight off the arm is kept this near it (the shoulder blend)
 STRAY_FAR = 0.12  # m from the arm's line: arm weight further off fades out over STRAY_FADE
 STRAY_FADE = 0.15
+SCRAP = 200  # points: a loose piece this small keeps its weights (the scan's floating slivers)
 SHOULDER_BLEND = 0.08  # m along the arm over which the refit turns in from nothing (and the skin from hips)
 ELBOW_BLEND, WRIST_BLEND = 0.05, 0.025  # m either side of the skin's elbow and wrist
 REFIT_ELBOW, REFIT_WRIST = 0.04, 0.02  # m either side of the mesh's joints over which the refit's turn blends
@@ -164,6 +165,26 @@ def adjacency(prims, maps, pid):
     return nb
 
 
+def piece_sizes(nb):
+    """Each point's connected piece's point count."""
+    lab = np.full(len(nb), -1)
+    sizes = []
+    for i in range(len(nb)):
+        if lab[i] >= 0:
+            continue
+        lab[i] = len(sizes)
+        todo, n = [i], 0
+        while todo:
+            u = todo.pop()
+            n += 1
+            for k in nb[u]:
+                if lab[k] < 0:
+                    lab[k] = len(sizes)
+                    todo.append(k)
+        sizes.append(n)
+    return np.array(sizes)[lab]
+
+
 def grow(nb, seed, allowed):
     out = seed.copy()
     todo = list(np.nonzero(seed)[0])
@@ -262,7 +283,8 @@ def refit(j, bin_, sp, names):
     keep = 1 - smooth((dist[pid] - STRAY_FAR) / STRAY_FADE) * smooth(
         (np.linalg.norm(rest - S, axis=1) - STRAY_KEEP) / STRAY_FADE
     )
-    far = (~armr) & (aw_row > 0) & (keep < 1)
+    big = piece_sizes(nb) >= SCRAP  # loose scraps (a floating sliver) keep their weights
+    far = (~armr) & (aw_row > 0) & (keep < 1) & big[pid]
     k = keep[far, None]
     wn[far] = w[far] * np.where(np.isin(np.arange(w.shape[1]), [up, fo, ha]), k, 1.0)
     wn[far] += other[far] * (aw_row[far, None] * (1 - k))
