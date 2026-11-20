@@ -6,7 +6,8 @@ extends RefCounted
 ## match camera), turnaround_close.png, closeup.png and closeup_front.png (head and shoulders, 3/4 and front),
 ## vs_sheet.png (the concept sheet beside the close turnaround) and moves_close_N.png (the run and the hero's own
 ## kit moves, frame by frame), plus captions.txt.
-## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
+## --sheets names the folder holding the concept PNGs (<id>.png). --knee adds knee_34.png: front and 3/4 full length
+## from knee height (0.35 m), looking up a little (the hem, legs and tail as a low camera sees them). Needs a renderer.
 
 const YAWS := [PI, PI * 0.75, PI * 0.5, 0.0, -PI * 0.25]
 const YAW_NAMES := ["front", "3/4", "side", "back", "3/4 back"]
@@ -23,6 +24,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var knee := false              # --knee: also knee_34.png
 var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Motley's raised orb)
 
 func run(main: Node) -> void:
@@ -34,6 +36,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--sheets="): sheets = a.substr(9)
 		if a.begins_with("--wardens="): wardens = Array(a.substr(10).split(","))
+		if a == "--knee": knee = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
@@ -80,6 +83,9 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var pair := await _pair(row, 0, 1)
 	pair.save_png(dir.path_join("front_34.png"))
 	caps.append("front_34.png: %s full length, front and three-quarter (as the sheet's two views)" % title)
+	if knee:
+		(await _pair(row, 0, 1, 0.35)).save_png(dir.path_join("knee_34.png"))
+		caps.append("knee_34.png: %s full length from knee height, front and three-quarter" % title)
 	var back := await _pair(row, 3, 4)
 	back.save_png(dir.path_join("back_34.png"))
 	caps.append("back_34.png: %s full length, back and three-quarter back" % title)
@@ -210,7 +216,7 @@ func _top(row: Array) -> float:
 	return top
 
 ## Two hunters of the turnaround row (front and 3/4, or back and 3/4 back), each filling half the frame.
-func _pair(row: Array, a: int, b: int) -> Image:
+func _pair(row: Array, a: int, b: int, cam_y := -1.0) -> Image:
 	var out := Image.create(OUT_W, 720, false, Image.FORMAT_RGBA8)
 	for i in 2:
 		var h := row[[a, b][i]] as Node3D
@@ -218,6 +224,9 @@ func _pair(row: Array, a: int, b: int) -> Image:
 		var tall := maxf(_top([h]), 2.2)
 		cam.position = Vector3(h.position.x, tall * 0.52, h.position.z + (tall * 0.5) / tan(deg_to_rad(15.0)))
 		cam.rotation = Vector3(-0.04, 0, 0)
+		if cam_y >= 0.0:      # (--knee: low, looking up at the figure's middle)
+			cam.position.y = cam_y
+			cam.look_at(Vector3(h.position.x, tall * 0.42, h.position.z))
 		await _settle(4)
 		var img := await _grab()
 		var half := img.get_width() / 4
