@@ -435,6 +435,7 @@ func _swap_end(go: bool) -> void:
 		return
 	swaps += 1
 	vfx("trade_fold", from)
+	vfx("trade_swap", from)      # the spot he left sucks in (the landing rings out: trade_arrive)
 	if rank("dash") >= 3:
 		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
@@ -539,7 +540,8 @@ func _snap_release() -> void:
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	vfx("snap_hit", at, null, {"hit": e != null})
+	vfx("snap_hit", at)
+	vfx("snap_struck" if e != null else "snap_miss", at)      # the crown stun, or the spring sagging out
 	if e == null:
 		return
 	var sn: Dictionary = rmb_def()["snap"]
@@ -549,7 +551,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
 ## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
@@ -667,6 +668,7 @@ func _pop(hit: bool) -> void:
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
+		vfx("seed_fizz", p)      # gone unpopped: the crank unwinds
 		return
 	pops += 1
 	play("ostra_pop")
