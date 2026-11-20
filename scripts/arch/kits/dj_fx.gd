@@ -266,27 +266,6 @@ func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) 
 	n.global_position = at
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
-## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Sable's
-## cyan, Kael's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
-func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
-	n.global_position = at
-	var back := Vector3(-dir.x, 0, -dir.y)
-	if back.length() < 0.01: back = Vector3.BACK
-	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
-	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
-
-## A streak from `a` to `b` in space, hot at `b` and fading over `dur`: a trail laid in short pieces follows any path
-## (Sable's flip, whose hands and feet turn through the air).
-func seg(a: Vector3, b: Vector3, width: float, col: Color, col2: Color, dur := 0.25) -> void:
-	var d := b - a
-	if d.length() < 0.01:
-		return
-	var n := _fx("seg", M_COMET, _ribbon_mesh(), false)
-	n.global_position = b
-	n.basis = Basis.looking_at(d.normalized(), Vector3.RIGHT if absf(d.normalized().y) > 0.95 else Vector3.UP)
-	_play(n, "seg", col, col2, dur, Vector3(width, width, d.length()))
-
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
