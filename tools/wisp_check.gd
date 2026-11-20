@@ -6,13 +6,17 @@ extends RefCounted
 ## weight's time), then the hero model hides, the Wisp hums, it
 ## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
 ## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out plays the elimination beat (once,
-## mid-beat too; ends with the deathbox, nothing left). The
+## mid-beat too; ends with the deathbox, nothing left). Every frame of the hand-over, for every hero knocked
+## from idle, a run, a glide and its ultimate, shows the hero or the Wisp, in a clip's pose, near the hunter
+## (tools/wisp_swap_frames.gd). The
 ## downed gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
 ## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
 ## few keys builds, and the saved id round-trips. Prints PASS/FAIL.
 
+const SwapFrames := preload("res://tools/wisp_swap_frames.gd")
 const DT := 1.0 / 60.0
+const MATCH := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true}
 
 var bad := 0
 var _was_on := false
@@ -25,10 +29,11 @@ func run(main_node: Node) -> void:
 	_looks()
 	_styles()
 	_picker()
-	_start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	_start(MATCH)
 	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
+	_swap_frames()
 	_bleed_out()
 	_teammate()
 	_boki_wisps()
@@ -120,6 +125,24 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
 	ok(p.model.scale.is_equal_approx(base), tag + "the hero is back at full size")
+
+## Every hero knocked down from idle, a run, a glide and its own ultimate: no frame of the hand-over to the Wisp
+## shows nothing, a bind pose, or a mesh left far from the hunter (WispSwapFrames).
+func _swap_frames() -> void:
+	_start(MATCH)       # (the ultimates cast here leave their effects running: a match of its own)
+	var p: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	_spot = p.pos
+	var swap := SwapFrames.new(m, _sync)
+	for a in Arch.ids():
+		p.reclass(Arch.weight(a), a)
+		for pose in SwapFrames.POSES:
+			swap.scan(p, foe, _spot, pose)
+	for line in swap.found.slice(0, 12):
+		ok(false, "swap frames: " + line)
+	_start(MATCH)
+	ok(swap.found.is_empty(), "swap frames: %d frames over %d knocks, %d broken, %d ultimates cast" % [
+			swap.frames, Arch.ids().size() * SwapFrames.POSES.size(), swap.found.size(), swap.ult_cast])
 
 ## The knocked-down beat, frame by frame while the hunter crawls off and turns: the hero shows and plays its death
 ## clip (no clip: HunterAnim kneels), the body stays where it went down, pushed away from the knocker, facing the
