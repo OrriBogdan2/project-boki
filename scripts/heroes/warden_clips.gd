@@ -181,9 +181,9 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
 func move_len(mv: Dictionary) -> float:
 	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
-	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0))
-	rate *= (length / float(mv["fit"]) if mv.has("fit") else 1.0)
-	return length / rate - float(mv.get("lead", 0.0))
+	# (_move_clip's clock: clip t = (kit t x "rate" + "lead") x "scale" x the "fit" stretch)
+	var sc := float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	return (length / sc - float(mv.get("lead", 0.0))) / float(mv.get("rate", 1.0))
 
 static func _first_lib(player: AnimationPlayer) -> AnimationLibrary:
 	var names := player.get_animation_library_list()
@@ -641,8 +641,9 @@ static func lockin_dur(art_name: String) -> float:
 ## A keyed move's clip and time ({} once a move that does not hold has played out).
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
-	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
-	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit; under zero the first frame holds for it,
+	# since a t under zero would free-run the clip in step())
+	var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on
