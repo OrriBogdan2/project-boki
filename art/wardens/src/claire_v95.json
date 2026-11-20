@@ -1,16 +1,22 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Claire's v95 master: the live head (appeal3 face, owner-approved 11-10, ~/meshy/v95/claire/r2/appeal3/cand_a.glb, kept down to the fur collar at y 0.33) grafted by tools/meshy/head_graft.py onto the approved chiffon skirt body (r3/meshy1112/redo_skirt/cand/u1_rm), spear left out: graft/u1rm_livehead.glb onto claire.glb's skeleton, clips and anchors. claire.glb's own spear (the cloth and ice faces on hand.R) stays. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. Ears, hair and bow ride the head; the sheer cape behind her rides the hips.",
- "master": "~/meshy/v95/claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md), hunter-regen-claire-1120 candidate A (draft, owner visual check): Meshy multi-image-to-3d (meshy-7.1, a-pose) of the 11-19 turnaround (gens/v95-latest-ta-1119/neve.png), quad remesh 60k (~/meshy/v95/claire/regen1120/runB_quad60k.glb), joints from Meshy's auto-rig (pelvis = hip joints - 0.045, neck = its Head bone), `meshy_reach` on. Build: v95_swap.py with weights meshy and WORK/meshy/rigged_character.glb = regen1120/runB_meshy_rig.glb (a fresh Meshy rig gives other weights). claire.glb's spear (hand.R) stays.",
+ "master": "~/meshy/v95/claire/regen1120/runB_quad60k.glb",
  "game": "art/wardens/claire/claire.glb",
- "own": {"drop_mats": ["spear-candy", "ice-horn", "ice-bright"]},
+ "own": {
+  "drop_mats": [
+   "spear-candy",
+   "ice-horn",
+   "ice-bright"
+  ]
+ },
  "tris": 13000,
  "head": {
   "centre": [
    0.0,
-   -0.01,
-   1.49
+   0.008,
+   1.543
   ],
-  "r": 0.16
+  "r": 0.17
  },
  "head_tris": 2600,
  "head_uv": 2.0,
@@ -28,79 +34,79 @@
  },
  "joints": {
   "pelvis": [
-   0.0,
-   0.02,
-   0.86
+   0.0034,
+   -0.0051,
+   0.9301
   ],
   "neck": [
-   0.0,
-   0.02,
-   1.36
+   -0.0007,
+   -0.0103,
+   1.4293
   ],
   "crown": [
-   0.0,
-   -0.01,
-   1.62
+   -0.0216,
+   0.0258,
+   1.6561
   ],
   "shoulder.R": [
-   0.135,
-   0.03,
-   1.28
+   0.1384,
+   -0.0097,
+   1.3205
   ],
   "elbow.R": [
-   0.23,
-   0.0,
-   1.11
+   0.2243,
+   -0.0178,
+   1.1609
   ],
   "wrist.R": [
-   0.33,
-   0.03,
-   0.94
-  ],
-  "shoulder.L": [
-   -0.135,
-   0.03,
-   1.28
-  ],
-  "elbow.L": [
-   -0.23,
-   0.0,
-   1.11
-  ],
-  "wrist.L": [
-   -0.33,
-   0.03,
-   0.94
+   0.3348,
+   -0.0076,
+   1.0055
   ],
   "hip.R": [
-   0.08,
-   0.02,
-   0.8
+   0.0893,
+   -0.0051,
+   0.9755
   ],
   "knee.R": [
-   0.068,
-   -0.01,
-   0.47
+   0.1261,
+   0.0375,
+   0.5677
   ],
   "ankle.R": [
-   0.075,
-   -0.01,
-   0.13
+   0.1875,
+   -0.0128,
+   0.1831
+  ],
+  "shoulder.L": [
+   -0.148,
+   0.0046,
+   1.3246
+  ],
+  "elbow.L": [
+   -0.2135,
+   -0.0157,
+   1.1609
+  ],
+  "wrist.L": [
+   -0.3403,
+   -0.0084,
+   1.0014
   ],
   "hip.L": [
-   -0.08,
-   0.02,
-   0.8
+   -0.0826,
+   -0.0051,
+   0.9747
   ],
   "knee.L": [
-   -0.068,
-   -0.01,
-   0.47
+   -0.1194,
+   0.0375,
+   0.5636
   ],
   "ankle.L": [
-   -0.075,
-   -0.01,
-   0.13
+   -0.1848,
+   -0.0128,
+   0.1831
   ]
  },
  "past_wrist": {
@@ -109,6 +115,16 @@
  },
  "spread": "rig",
  "smooth": 12,
+ "meshy_reach": {
+  "arm": [
+   0.08,
+   0.12
+  ],
+  "thigh": [
+   0.1,
+   0.15
+  ]
+ },
  "regions": [
   {
    "bone": "hips",
@@ -213,8 +229,8 @@
     0.075,
     0.04,
     0.3,
-    1.39,
-    1.53
+    1.419,
+    1.554
    ]
   },
   {
@@ -224,7 +240,7 @@
     0.26,
     -0.26,
     0.26,
-    1.38,
+    1.429,
     9
    ],
    "s": [
@@ -299,24 +315,24 @@
  },
  "anchors": {
   "anchor_head_top": [
-   0.0,
-   -0.01,
-   1.62
+   -0.0216,
+   0.0258,
+   1.6561
   ],
   "anchor_chest": [
    0.0,
    0.1,
-   1.2
+   1.229
   ],
   "anchor_eye_r": [
-   0.045,
-   0.1,
-   1.485
+   0.043,
+   0.09,
+   1.506
   ],
   "anchor_eye_l": [
-   -0.045,
-   0.1,
-   1.485
+   -0.043,
+   0.09,
+   1.506
   ],
   "anchor_clasp": [
    -0.07,
