@@ -22,6 +22,11 @@ const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from ano
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
 const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
 const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
+const BLOCK_TICK := "jug_ting"          # the metallic tick of a blocked hit (a bright, crisp ting)
+const BLOCK_TICK_DB := -9.0             # dB: under a real hit, it is a tick
+const BLOCK_TICK_PITCH := 1.5           # a short tick, above the ting's own pitch
+const BLOCK_SPARKS := 7                 # deflect sparks, fewer and thinner than a damage hit's
+const BLOCK_SPARK_WHITE := 0.4          # how much of white the sparks carry over the blocker's colour
 
 ## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
 ## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
@@ -105,6 +110,18 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		m.sfx("armor_hit", null, -12.0, 0.85)
 	elif target != p and credit != p:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
+
+## The one blocked hit (Verbs walls through BarrierRipple, Albert's Shield Charge guard, Kael's Riposte guard): a
+## few deflect sparks in the blocker's colour off the face `dir` (flat, outward) and a metallic tick. Never a damage
+## number or a hurt flash: nothing was dealt. `pitch` lifts the tick (a guard that keeps blocking rings higher).
+static func blocked(m: Match, at: Vector3, dir: Vector3, col: Color, pitch := 1.0) -> void:
+	if m == null or m.fx == null or m.fx.own_look:
+		return
+	var p: Hunter = m.player
+	if p != null and Vector2(p.pos.x - at.x, p.pos.z - at.z).length() > FAR:
+		return
+	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), col.lerp(Color.WHITE, BLOCK_SPARK_WHITE), BLOCK_SPARKS, 7.0, 40.0, 0.2, 8.0, 0.8)
+	m.sfx(BLOCK_TICK, at, BLOCK_TICK_DB, BLOCK_TICK_PITCH * pitch)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
 static func rival_pickup(m: Match, h: Hunter) -> void:
