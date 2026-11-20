@@ -2954,7 +2954,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3087,7 +3087,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
 			var f := 1.0 - 0.45 * minf(1.0, d / radius)
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
-			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f}
+			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
 			if x.has("burn"): o["burn"] = x["burn"]
 			if x.has("slow"): o["slow"] = x["slow"]
