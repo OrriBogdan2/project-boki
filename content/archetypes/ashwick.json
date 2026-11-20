@@ -35,7 +35,7 @@
 	"x": {"per_rank": {"cooldown": [-12, 0], "trail_dps": [0.0, 1.125]}, "name": "Flue Flight", "short": "Flight", "icon": "ashwick_x", "col": "#ff7a2a", "unlock": 6, "cooldown": 36.0,
 		"lift_t": 0.15, "time": 1.8, "speed": 12.6, "turn_deg": 90.0, "hover": 0.45, "burst_r": 2.2, "boost_k": 0.8, "boost_max": 10.0,
 		"trail_t": 5.2, "trail_w": 1.8, "trail_dps": 4.5, "tick": 0.3, "char": 4.0, "slow": 0.3, "slow_for": 0.5,
-		"desc": "Lift off in a ring of embers, hang there a moment, then fly 1.8s toward the cursor, steering as you aim (up to 90 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.",
+		"desc": "Lift off in a ring of embers, hang there a moment, then fly 1.8s toward the cursor, steering as you aim (up to 90 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, {dash}, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.",
 		"again": "land early"},
 	"order": ["sec", "dash", "kin", "sec", "dash", "kin", "sec", "dash", "kin", "gear"],
 	"rank_cd": {"sec": [1, 0.8333, 0.6667], "dash": [1, 0.9167, 0.8333], "kin": [1, 0.8462, 0.6923]},
@@ -44,7 +44,7 @@
 	"rank3": {"dash": "+5 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "the shield is 80% bigger in all"},
 	"rank2": {"ult": "Rank 2: Flue Flight cooldown 36s -> 24s. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
 	"turn": {
-		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15)"},
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15); turn rate while held: match 1280 (ext/hero-ref-footage linwick 0014-0018: the nozzle follows 45 and 90 deg swings inside one 0.2 s frame)"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown"},
 		"x": {"early": 90.0, "late": 90.0, "source": "briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 90 deg/s, x.turn_deg)"},
