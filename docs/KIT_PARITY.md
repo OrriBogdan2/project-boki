@@ -564,6 +564,36 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | match: shield cut (owner 11-07). Drops on any damage (shot, DoT) or a stun, 4 s lock; root, slow, knock-back, heal hold them (traced and asserted, "mm carry" rows); "too much damage" has no figure [est] |
 | Anim | Footage poses | 16 moves, all on `pip.glb` (45) | match on coverage |
 
+### Meeko heals: amounts, ticks, reach (ext/parity-meeko-heals, 2026-11-19)
+
+PARITY FIRST (DECISIONS 2026-11-07). Source: `briefs/supervive-data/supervive_kits.md` (Elluna, [D]), `briefs/hero-ref/mooshmoosh.md` (footage [F] and the thebackdash fine print, [D]), both on origin/ext/agent-briefs; the x5 Wisp factor is the wiki row in "Small mechanics" in docs/heroes/tender.md. Source health converts at 154/1285 (our / source mean Hunter health, docs/TTK.md). `[?]` = no number in the data; the footage shows no hurt ally (mooshmoosh.md:104, :211, :245), so these stay ours.
+
+| Heal | What | Source | Ours (tender.json) | Verdict |
+|---|---|---|---|---|
+| E Hearthlight | amount over the zone | not stated `[?]` | `e.over` 10 over 2.5 s | `[?]` |
+| E | end burst | "burst at end" [D], no amount `[?]` | `e.burst` 22 | burst match; amount `[?]` |
+| E | tick rate | not stated `[?]` | `e.every` 0.5 s (5 ticks of 2) | `[?]` |
+| E | duration | 2.5 s [D] | `e.time` 2.5 | match, pinned (kit_parity.json) |
+| E | radius | 1.3-1.5 bh on her, 1.6 bh thrown [F] (1 bh = 1.8 m) | 2.6 m, thrown 2.9 m | match |
+| E | who | allies; attaches to any ally it passes through [D] | every teammate in the ring (downed too); latches onto the first it passes | match |
+| E | self-heal share | not stated (zone on her) | full tick, no `self_k` | match (the 0.33 rider is gone) |
+| E | on a downed teammate | heals on Wisps x5 [wiki] | `e.wisp_k` 5 into the bleed-out pool | match |
+| E | after a throw | rank 3 "healing increase after throwing doubled for 1s" [D]; base size `[?]` | +50% for 1 s, +100% at rank 3 | doubling match; 50% `[?]` |
+| E | ranks | +22.5% / +27.5% healing, -3 s [D] | `rank_dmg.kin` 1.225 / 1.5, cd x0.75 | match, pinned |
+| E | cooldown | 12 s [D] (card 10 s [F]) | 11 | open: ext/cooldown-parity-verify |
+| R Hearth Call | amount | 44 + 11.2% per second [D] = 5.27/s here | `x.heal_ps` **5.3** (was 7, 1.33x) | **set**, pinned |
+| R | the 11.2% part | 11.2% of what (AP?) not stated `[?]` | grows with level (`LevelGrowth.ap`) | `[?]` |
+| R | tick rate | not legible (mooshmoosh.md:245) `[?]` | `x.every` 0.5 s | `[?]` |
+| R | duration | 5 s [D], f25-f74 [F] | `x.time` 5 | match, pinned |
+| R | range | gold ring about 7 bh [F] | 12.6 m | match |
+| R | who | an ally or allied Wisp [D] | a teammate or downed teammate in reach; refused (cd kept) without one | match |
+| R | self-heal share | none (a channel on an ally) | none: only the target heals | match |
+| R | on a downed teammate | heals the Wisp, resurrects and teleports it [D] | bleed-out pool x5, stood up at her side at the end | match |
+| R | ranks | +25% heal, -5 s cd x2 [D] | no ult ranks | differ (our ults have no ranks) |
+| R | cooldown | 60 s [D] (card 41.6 s [F]) | 46 | open: ext/cooldown-parity-verify |
+
+**Rules kept.** Boki regen (`content/rules/boki_system.json` regen: 6%/s on you, 1.5%/s out, none while downed; `--kin-regen-check`): her heals only reach Hunters (`_pulse` and `_hearth_end` walk `m.hunters`, Hearth Call targets `CareUtil.mates`), so a Boki heals by KinRegen alone. No heal while downed: `Hunter.heal` does nothing while downed and `CareUtil.heal` sends a downed teammate's share to the bleed-out pool instead (the source's heal on a Wisp); "mm X: the tether heals the downed teammate ..." now asserts their health stays put. `[?]`: if Meeko is knocked with the ring on her, the ring keeps ticking on her own bleed-out pool until it ends (the source says nothing either way).
+
 ## Tenzo (`dolm`, source Tetra; was Tarek)
 
 **0.24.5:** dolm-combo 172/0. Ally hop stands; cooldowns 11, 12.5, 45, 12 already match the source. Open: rock and Rock Hop slows, punch charge scaling (ext/parity-tenzo-rock-slows, ext/parity-no-riders-grimble-tenzo).

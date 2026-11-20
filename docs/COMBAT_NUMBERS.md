@@ -28,4 +28,5 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 - **Casts:** windups 0.1 to 0.65 s (median 0.45), charge to full 0.5 to 1.25 s (median 1.0); more in DASHES_AND_ABILITY_FEEL.md.
 - **Class baselines:** Kinfall's own light, medium and heavy numbers (KINFALL_CLASSES.md); retune the data files, not code.
 - **Aim line:** the aim laser is 8.5 m long.
+- **Damage numbers on one target:** you and two teammates focusing one dummy for 3 s print at most 3 numbers over one spot (4 before the slide-apart rule in docs/HUD.md, Damage numbers). Asserted by `--dmg-number-check` ("trio focus").
 - **Dash cooldowns:** per kit in the archetype JSON; a held dash is longer on a longer cooldown (`dash_hold_for_ex`).

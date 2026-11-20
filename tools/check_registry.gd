@@ -417,6 +417,7 @@ const CHECKS := {
 	"--scout-cam-shots": ["res://tools/scout_cam_check.gd", "scout_cam_check", "shots"],
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],      # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
+	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
@@ -448,7 +449,8 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
-	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # one reader for ability words
+	# one reader for ability words
+	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
