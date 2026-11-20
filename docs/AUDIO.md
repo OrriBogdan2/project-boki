@@ -153,7 +153,7 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 - Pairing in the Nesting Nook (`NookSfx`, UI set): `nook_note` twice (a chime, each note pitched by one parent's size, the bigger the lower), the egg settling (`garden_egg`), `nook_nuzzle` and `nook_settle` each layered with a parent's own `kin_happy` chirp, and `nook_wobble` for an unstable mix (a sour, soft wobble: it needs care, it did not fail). All at the nest, timed from the pairing click; `--nook-check` guards it.
 - A Boki's life cues, through `BokiLifeSfx` (`scripts/core/boki_life_sfx.gd`): `boki_eat` as it eats (at a feeder, a snack it fetched, fed by hand), `boki_sleep` as it dozes off (`HomeChimes` watches every nap start), `boki_fuse` as it leaps into a Fusion and `boki_downed` as it goes down (other players' Boki too, from the `merge` and `down` events). Played through Sfx at the Boki, so the takes rotate (never one twice running), pitched by its voice roll, -4 dB in a match and -10 dB at home; a Boki voices one cue at a time (one that comes while its last still sounds is dropped). `--sfx-set-check` section 10, `--boki-system-check` part `cries`, `--feed-check`.
 - Farm reactions: `garden_feed|pet|friend|trait|toy` (UI set, `tools/gen_sfx_ui.py`), one per kind of good thing at home; `unlock` is only for real unlocks. The Boki eat and nap sounds (`boki_eat`, `boki_sleep`) play from the care states. `--garden-react-check` guards both. (No race exists on the farm yet, so there is no race cue.)
-- Warnings (`content/sfx/warn.json`, `tools/gen_sfx_warn.py`): `warn_heartbeat` (the local Hunter under 25% health, quicker as it falls, silent when healed, downed or out: `WarnSfx.low_hp`), `warn_tick` (one a second, rising in pitch, for the last 5 s of a skiff boarding or an open uplink lift: `WarnSfx.countdown`; the rift hatch has its own unlock ticks) and `blight_rumble` (a Skitter pack clawing out of the ground, a Blight Warden's shriek).
+- Warnings (`content/sfx/warn.json`, `tools/gen_sfx_warn.py`): `warn_heartbeat` (the local Hunter under 25% health, quicker as it falls, silent when healed, downed or out: `WarnSfx.low_hp`), `warn_tick` (one a second, rising in pitch, for the last 10 s of an open uplink lift: `WarnSfx.countdown`, UI-level for your squad's lift, from the lift for a rival's; the rift hatch has its own unlock ticks) and `blight_rumble` (a Skitter pack clawing out of the ground, a Blight Warden's shriek).
 - Boki moments: `boki_downed` / `boki_revive` (a Boki goes down / comes round, `KinDowned`, `KinNet`), `boki_fuse` / `boki_unfuse` (`MergeXform`), `boki_eat` (feeding at home), `boki_sleep` (a nap starts at home). `--sfx-set-check` asserts each is in a set, exists and is named by the script that plays it (`WIRED`).
 - UI and event cues go through `UiSfx` (`scripts/ui/ui_sfx.gd`): `error` (`ui_deny`), `captured` (`ui_capture`), `extract_start` / `extract_success` / `extract_fail` (`ui_extract_start`, `extract_ok`, `ui_extract_fail`). Item pickup stays per-Hunter via `HeroSfx` in `Pack`. `--sfx-set-check` asserts every name in `UiSfx` has a file.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
@@ -170,8 +170,37 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 32 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 16 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Ability cue maps: Motley and Gil (11-20, ext/sfx-motley-gil-bar)
+Which beat of each ability has its own cue (content/vfx/<arch>.json "sfx", or the kit's `m.sfx`). New this pass in
+bold; every hit is the Hunter's own file, and `--sfx-set-check` fails a move look that plays another Hunter's sound.
+
+| Hunter | Ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Motley | LMB orb | os_orb / os_orb_hot (os_prime at full) | (0.1 s flight) | ostra_hit | (the hit) |
+| Motley | RMB Shard Snap | os_snap_wind, os_snap | os_snap's 0.4 s streak (0.44 s flight) | os_snap_hit, now heard by everyone (`snap_struck`) | **os_snap_fizz** (no one hit, `snap_miss`) |
+| Motley | Shift Trade | os_swap_lob | os_swap_lob's tail | os_swap at the landing | **os_trade_swap** at the spot he left (`trade_swap`) |
+| Motley | E Brimseed | os_seed | ostra_music_box (ripe) | os_pop + ostra_spring_boing, his alone now (Gil's Zeep no longer borrows os_pop) | **os_seed_fizz** (gone unpopped, `seed_fizz`) |
+| Motley | X Nightwell | os_well | - | os_well_hum (opens) | none yet |
+| Gil | LMB thrust / lunge | gil_thrust | - | **gil_thrust_hit** (lunge: the same at 0.8 pitch + splash) | - |
+| Gil | LMB held Tide | shared swim/skewer/splash | - | **gil_tide_hit** | - |
+| Gil | RMB Grab Bag | **gil_toss** | gil_toss's tail | **gil_pop_thunder/slime/air/fire/zeep** | Slime: **gil_slime_dry** as the puddle's slow ends |
+| Gil | Shift Ground Swim | gil_dash (+ splash) | (under ground) | **gil_surface** | (the surfacing) |
+| Gil | E Riptide | **gil_spin** (each turn) | **gil_spout** | - | - |
+| Gil | X Tidal Wave | **gil_wave** | - | - | **gil_wave_land** |
+| Gil | passive Beached | **gil_beached** | | | |
+
+Gil's own set (tools/gen_sfx_gil.py, 11-11) was on file but his move looks still played stock and other Hunters'
+sounds (Kael's jug_lunge_hit and jug_ting, Grimble's dr_dive, Sparkle's mage_zap and mage_bubble_pop, Cinder's
+as_ignite, Motley's os_pop, the old Tarek kit's br_rise and br_rumble); they now play his. The new files are made by
+`python3 tools/gen_sfx_motley.py bar` and `python3 tools/gen_sfx_gil.py bar` (only those files, so the rest keep
+their noise), levelled to cast (-18) and impact (-16). Left: Nightwell's close, Riptide's spout hit and the Tide
+lunge's cast have no own cue.
+
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
+
+## The stomp (`content/sfx/stomp.json`, `tools/gen_sfx_stomp.py`)
+The stomp is an uncancellable finisher only a stun or hard CC breaks (DECISIONS 2026-11-11), and it has three cues of its own, all played by `Life` at a position (no `mine`), so everyone in reach hears them, both squads: `stomp_windup` (cast, a low rising groan and a heel scuff) when the hold commits (`Life.start_stomp`, at the stomper), `stomp_finish` (heavy_impact, a crushing thud and the wisp's light squeezed out, heard to 40 m) when the last slam kills the wisp (at the wisp), and `stomp_crack` (impact, a bright crack and a rising ring) when hard CC breaks it (`Life.end_stomp` "broken", at the stomper). Each foot slam keeps the shared `thump`. They replace the stand-in `crit` and `whoosh`. Online they play in the stomper's own game, like the slams (no Net event). Checks: `--sfx-set-check` (set, levels, wiring, the wind-up rises) and `--stomp-check` (the wind-up once per stomp, one crack per hard-CC break and none for slows or Daze, the thud once on the kill).
 
 ## Low-health heartbeat
 `heartbeat` (`tools/gen_sfx_health.py`, set `content/sfx/health.json`) plays through `LowHpCue` (`scripts/ui/low_hp_cue.gd`) for the local player only, via `Sfx.play`, one beat at a time so the rate can follow health. Line, rate, level and duck depth are in `content/rules/low_hp.json`; it ducks by `duck_db` while `Sfx.busy_voices()` is at least `duck_voices` (a fight). Toggle: Settings > Audio > Low-health heartbeat (`low_hp_pulse`). `--sfx-set-check` asserts it starts under the line, speeds up, and stops on heal, down or out.
@@ -188,6 +217,7 @@ The world goes dull while you are down or out (`SfxMix.set_muffle`, driven by `M
 - **Squad cues** (`Sfx.CUES`: `knock_confirm` when you or a squadmate down a rival Hunter, played by `KnockBanner.knocked` with the banner; `elim_confirm` when one is finished, wired in `Juice.kill`): played flat (not positional) on their own voice, so footsteps and the combat crowd never steal or thin them. Rivals' kills, friendly knocks and mobs play nothing. `--knock-sfx-check`.
 - Flybys: a rival's shot passing within 2 m of you plays `flyby_<family>` (`scripts/match/flyby.gd`, cues from `tools/gen_flyby_sfx.py`, `--flyby-check`). There is no occlusion bus yet, so they go through SFX like the rest.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+- An ability's sound plays from the event it belongs to (the release, the hit, the rock rising), never from its own timer beside it. `--sfx-strike-check` times every Hero move's sounds, from when each is heard, against the clip's strike, the release and the hit, and fails a kit with a sound off all of them; method and per-move reasons in docs/art/SFX_TIMING.md.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**; ones behind terrain via **SFXMuffled**, a 700 Hz low-pass and -4 dB: `SfxOcclusion` runs one heightmap line test per positional sound, cached 100 ms, never within 3.5 m so your own Hunter and UI sounds stay clean; `--sfx-occlusion-check`). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - Two kinds skip SFX for a bus of their own: voices (a Hunter set's `grunt` sounds, the `v_*` monster cries, the Boki cries in `Sfx.BOKI_CRIES`) play on **Voice**, near or far; the Interface set (`ui.json`) played with no position plays on **UI**. Each bus has a volume slider in Settings > Audio (Master, Music, Effects = SFX, Voices, Ambience, UI; `Settings.BUSES`), and letting go of a slider plays `ping` through its bus. A settings file from before Voices and UI starts both at its Effects level. `--bus-sliders-check` asserts the routing, each slider's bus, the save and load, and the old file.
 - Flybys: a rival's shot passing within 2 m of you plays `flyby_<family>` (`scripts/match/flyby.gd`, cues from `tools/gen_flyby_sfx.py`, `--flyby-check`). There is no occlusion bus yet, so they go through SFX like the rest.
@@ -341,7 +371,7 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).
 - **Success chime** by the Boki's rarity (`Capture.rarity_tier`, rules `pop_sounds`): `scan_pop` common, `scan_pop_fine` mutated, `scan_pop_rare` shimmer or a rare species. The music ducks (`duck_s`, `duck_db`) for a catch within hearing.
 - **`scan_fail`**: a scan cancelled by Space, a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
-- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 16 m.
+- **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 15 m (half of hear range).
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
 - A monster's notice cue (`MobNotice`, `scripts/match/mob_notice.gd`): when an idle monster turns to chase (it saw a Hunter or was hit) its kind's `v_<kind>` voice plays from it, pitched as a short alert (small kinds high, heavy kinds low). A camp waking is one cue: a monster stays quiet while a camp-mate (camp spots within 5 m) is awake or cued in the last 3 s of match time. Clients cue from the synced idle -> chase change. Checked in `--mob-notice-check`.
 - **Rarity stings** (`scripts/match/rarity_sting.gd`, `rarity_rare` / `rarity_very_rare`): a rare species (`Data.is_rare`) or a shimmer gets a short bell sting, 6 / 4 dB under full scale, so under the scan chime. Played when it comes into sight within 30 m in a match (`MusicDir` looks twice a second; once per Boki per match, the best of those new that look), when you claim it (`Capture._pop`, your own scans) and when it hatches (`EggHatch._pop`). While the fight stem is loud (`MusicDir.heat` 0.5 and up) a sight sting waits, and so does a claim sting (dropped). `--sfx-set-check` section 11.
@@ -432,3 +462,26 @@ Every Boki cry at home goes through `HomeVoice.say(rec, mood_or_cue, pos, vol)`:
 ## The Training Grounds (`scripts/match/training_sfx.gd`, `content/sfx/training.json`)
 The grounds (opts `training`: the practice island, the Arena and the duel room) don't borrow the match's sound: the match starts no `amb_match` there, and `MusicDir` hands its quarter-second ambience step to `TrainingSfx.ambience` instead of the abyss and ruins beds and the creature calls. Two beds by where you stand, through `Sfx.amb_layer` (the **Ambience** bus): `amb_training_wind` full on the open expanse (the island with the most ground, and the open air, a glide or a drop), and on the sky islands round it the wind down to `ISLAND_WIND` (0.35) under `amb_training_island` (a sheltered breeze, leaves, a far wind chime). Cues, on the **SFX** bus through `TrainingSfx.cue`: `training_dummy_hit` when your hit lands on a practice dummy (70 ms apart at most), `training_reset` on a station reset (Backspace), `training_bot_spawn` when a sparring bot appears (the Arena's N, the duel room), and the duel ring's count-in: `training_count` at 3, 2 and 1 (each a step higher) and `training_horn` as the round starts; nobody takes damage before the horn. Regenerate all of them with `tools/gen_sfx_training.py`. `--sfx-set-check` section 11 asserts each cue is its own sound of the set (a shared fallback such as `revive` fails), the count-in, the beds by position and their bus; `--arena-check` asserts the stations play their cues in a real training match.
 
+- Mob and boss attacks (`content/sfx/mob.json`, `tools/gen_sfx_mob.py`; on ext/sfx-mob-attacks, not on the 0.24.5 line yet, where `mob.gd`/`boss.gd` still borrow `k_*` and are listed as holes, docs/SFX_WORLD.md) play by kind, never a Boki `k_*` cue: `mob_<kind>_atk` as the mob strikes, `mob_<kind>_hit` where it lands (`Mob._snd`; a spitter's or sentinel's shot carries `"snd"` and plays it on the hit), `boss_<kind>_tell` from the start of each boss telegraph (`Boss._begin`), swelling to the strike, plus `boss_slam|throw|boulder|spit|glob`. `--sfx-set-check` fails if `mob.gd` or `boss.gd` plays a `k_` name.
+- Uplink outposts (`exits.gd`): `uplink_start`, `uplink_steal`, `uplink_fizzle`, `uplink_sputter`, `uplink_shut`, `uplink_lift`, positional (`tools/gen_sfx_heart.py`, set `heart`). Blight mob wind-ups `v_bl_skitter`, `v_bl_warden` (`tools/gen_sfx_blight_mobs.py`, set `blight_mobs`).
+- **World coverage** (`--sfx-set-check` section 10, docs/SFX_WORLD.md): every cue that mobs, pickups, gloves, utilities, the garden games and the Ways Out play must be one of the system's own sounds; `content/rules/sfx_world.json` names each system's sets and files and lists the holes left as a ratchet (a new hole fails, a fixed one must be dropped from the list).
+
+## Falloff (`Sfx.NEAR/SPREAD/FAR/hear_range`)
+All match sounds go through `Sfx._distance_db`; the numbers live in one place at the top of `scripts/core/sfx.gd`. There is one 2D pool (no 3D players), so the "max distance" of the SFX bus is `hear_range` and its "unit size" is NEAR (full level inside it) plus SPREAD (the roll-off is -20 log10(1 + (d - NEAR) / SPREAD)); SFXFar (the muffled send into SFX) starts at FAR. The view is the source's: what you see you hear, off-screen threats are quieter but there. The SUPERVIVE view is 37 m across (`Cam.style_across`), so the side edge is 18.5 m (the top and bottom edges ~10 m; the widest wheel zoom ~26 m). The old numbers were sized to the 23.5 m view (edge 11.75 m).
+- NEAR 3.5 -> 5.5 m, SPREAD 5 -> 8 m, FAR 9 -> 19 m (muffling now starts just past the side edge), hear_range 22 -> 30 m (the edge fade still starts at 0.7 of it). `scan_call` reach 11 -> 15 m (stays half of hear range).
+- Unchanged: a sound's own `reach` (ult cues 60 m), the scan hum's 26 m, hidden rivals' footsteps (`Juice.footstep` still skips rivals past 14 m and unseen ones; `Sfx.step` volumes as before).
+
+| distance (m) | before (3.5/5/9/22) | after (5.5/8/19/30) |
+|---|---|---|
+| 5 | -2.3 dB, clear | 0.0 dB, clear |
+| 10 | -7.2 dB, muffled | -3.9 dB, clear |
+| 11.75 (old screen edge) | -8.5 dB, muffled | -5.0 dB, clear |
+| 15 | -10.4 dB, muffled | -6.8 dB, clear |
+| 18.5 (new screen edge) | -17.3 dB, muffled | -8.4 dB, clear |
+| 22 | -73 dB, muffled | -10.0 dB, muffled |
+| 25 | silent | -15.4 dB, muffled |
+| 28.5 (10 m off screen) | silent | -34.4 dB, muffled |
+| 30 | silent | -72.2 dB, muffled |
+| 31 | silent | silent |
+
+`--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.

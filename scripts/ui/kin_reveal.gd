@@ -161,7 +161,8 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	var turn := "Drag to turn it round  ·  %s / %s" % [Settings.key_cap("left"), Settings.key_cap("right")]
+	var keys := [Settings.key_cap("left"), Settings.key_cap("right")]
+	var turn := KinSpeak.about(rec, "Drag to turn {him} round  ·  %s / %s") % keys
 	hint = UI.label(turn, 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
@@ -225,9 +226,11 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note(desc + "."))
 	if rare:
 		var boss := String(Data.MOBS.get(String(sp.get("boss", rec.get("from_boss", ""))), {}).get("name", "a lair boss"))
-		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
+		var kind := KinSpeak.about(rec, "{His} egg was guarded by %s. Few of {his} kind are ever seen.")
+		v.add_child(_note(kind % boss))
 	if rec.get("shimmer", false):
-		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+		var coat := KinSpeak.about(rec, "{His} coat came out in rare colours (about %s).")
+		v.add_child(_note(coat % Shiny.odds_text(Shiny.WILD)))
 	var rare := BokiQuirks.rare_of(rec)
 	if not rare.is_empty():
 		v.add_child(_note("%s, a rare trait: %s" % [rare["name"], rare["note"]]))
@@ -326,7 +329,7 @@ func skip() -> void:
 
 func _show_lines() -> void:
 	title_lbl.text = String(sp["name"])
-	sub_lbl.text = "It's looking at you. It knows your face now."
+	sub_lbl.text = KinSpeak.about(rec, "{He}'s looking at you. {He} knows your face now.")
 	var tt := create_tween().set_parallel(true)
 	tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
 	tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2)

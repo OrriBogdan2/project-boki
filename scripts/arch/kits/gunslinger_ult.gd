@@ -6,19 +6,25 @@ extends RefCounted
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
 ## time, a fair window to step out; its centre stays see-through (DISC_ALPHA), the rivet ring is the lit rim.
 ## The impact hits everyone on the disc, harder in the centre, and leaves a burning patch that hurts and slows
-## for a few seconds. Vex stands through the shot (COMMIT), then is free to move and shoot while it falls.
+## for a few seconds. Vex never stops for it: a short wind-up (WINDUP) slows her walk to WINDUP_MOVE
+## while the barrel goes up and fires, the legs keep running under it (an upper-body clip).
 
 const FALL := "fall"
 const BURN := "burn"
 const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
                                  # the source's raise, then fire
-const COMMIT := 0.76             # s she is held from the tap: the source's ~0.8 s, rifle raised, fired and lowered
-                                 # (briefs/hero-ref/venator.md, R 4: 561.8-562.4 s); the x clip (0.6 s) hands the
-                                 # body back (+ WardenClips.FADE_LOCO) on the same frame, under one 0.2 s footage frame
+const WINDUP := 0.25             # s from the tap: the barrel up and the shot out (FIRE_T), the walk slowed. Was a
+                                 # 0.76 s stand (the source's ~0.8 s, venator.md R 4); the owner's 11-17 playtest:
+                                 # "shouldn't cause her to not move at all"
+const WINDUP_MOVE := 0.7         # share of her walk kept in the wind-up (never 0); jump and Shift still go
 const DROP_T := 0.8              # s: the shell is seen falling for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const DISC_ALPHA := 0.45         # the countdown disc's share of AimKit's fill: its full fill and hot centre stack
                                  # to about 0.25 alpha at the centre (the zone rule, docs/VFX_QUALITY.md)
+const BURN_FILL_A := 3.0         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
+                                 # half), so the patch reads as a dark disc on pale sand (source: dark disc, lit rim)
+const BURN_DARK := Color(0.0086, 0.0194, 0.003)  # the charred floor, #17260a (Vex's green burnt near black) given
+                                 # linear: the aim layer reads vertex colours as linear
 
 var kit: GunslingerKit
 var shells: Array = []         # {at, t, phase, node, tick, n}
@@ -56,7 +62,7 @@ func cast() -> bool:
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	kit.commit_end = float(kit.m.time) + COMMIT
+	kit.x_wind_end = float(kit.m.time) + WINDUP
 	# the countdown disc shows at once (_fall_tick); the shot leaves the raised barrel on the clip's kick (_fire)
 	kit.m.sfx("vn_nuke_fall", at, -2.0)       # the whistle runs the whole fall, from the tap
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
@@ -165,8 +171,12 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	var xd := data()
 	var at: Vector3 = s["at"]
 	var r := float(xd["radius"])
-	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "lw": 0.08}
-	rim["alpha"] = 1.0 - 0.5 * float(s["t"]) / float(xd["zone_t"])
+	var left := 0.5 + 0.5 * (1.0 - float(s["t"]) / float(xd["zone_t"]))
+	var burnt := {"at": at, "r": r, "all": true, "col": BURN_DARK, "col2": BURN_DARK, "lw": 0.0, "fill": 1.0}
+	burnt["alpha"] = BURN_FILL_A * left
+	AimKit.circle(kit.h, "xf%d" % int(s["n"]), burnt)
+	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "lw": 0.12}
+	rim.merge({"hot": 0.5, "alpha": left})
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt
@@ -176,6 +186,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 		_zone_hit(at, r, xd)
 	if float(s["t"]) >= float(xd["zone_t"]):
 		AimKit.hide(kit.h, "xz%d" % int(s["n"]))
+		AimKit.hide(kit.h, "xf%d" % int(s["n"]))
 		shells.erase(s)
 
 func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
@@ -200,6 +211,6 @@ func clear() -> void:
 		var n: Node3D = s["node"]
 		if is_instance_valid(n):
 			n.visible = false
-		for id in ["x%d", "xc%d", "xr%d", "xz%d"]:
+		for id in ["x%d", "xc%d", "xr%d", "xz%d", "xf%d"]:
 			AimKit.hide(kit.h, id % int(s["n"]))
 	shells.clear()
