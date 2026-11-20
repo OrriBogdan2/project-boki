@@ -1,12 +1,12 @@
 extends "res://tools/clip_shots.gd"
-## --land-weight-shots --shots-dir=<dir> [--size=480]: one Hunter per weight class (gil light, ostra medium, dredge
-## heavy) taking the plain jump and the 3 m terrace drop through HunterAnim as in a match (its squash over the
-## hand-keyed land clip), at the match camera's angle pulled in to CAM_DIST, every 1/30 s into
-## <dir>/<way>/<class>/f000.png... plus key.json (the landing frame). tools/land_weight_video.sh tiles them into
-## <way>.mp4. Needs a renderer (jobq --needs gpu).
+## --land-weight-shots --shots-dir=<dir> [--size=480]: one Hunter per weight class (thief light, ostra medium,
+## juggernaut heavy: the footage's two) taking the plain jump and the 3 m terrace drop through HunterAnim as in a
+## match (its squash over the .glb land clip, WardenClips.land_play), at the match camera's angle pulled in to
+## CAM_DIST, every 1/30 s into <dir>/<way>/<class>/f000.png... plus key.json (the landing frame).
+## tools/land_weight_video.sh tiles them into <way>.mp4. Needs a renderer (jobq --needs gpu).
 
 const DT := 1.0 / 30.0
-const PICKS := {"light": "gil", "medium": "ostra", "heavy": "dredge"}
+const PICKS := {"light": "thief", "medium": "ostra", "heavy": "juggernaut"}
 const CAM_DIST := 8.0           # m: the match camera is 23 m out; in this close the squash reads
 const RUN_UP := 0.4          # s of standing before the jump
 const TAIL := 0.9            # s on the ground after the landing
