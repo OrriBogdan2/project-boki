@@ -7,6 +7,7 @@ extends RefCounted
 ## go to keep the line's tension inside the band while the glint pulls (Power widens the band) until it
 ## is landed. A sign by the rock lists what is biting today (the day number picks it); a Water lean
 ## doubles rare glints. Catches are banked like garden prizes: this is the item tap for home players.
+## At the rock you can also race a friend's stored catch instead (fishing_derby.gd): the same five casts.
 ## Tuning: content/rules/glint_fishing.json.
 ##
 ## One explicit state machine (briefs/STATE_MACHINES.md), Run.state: only Run.go() writes it, and a
@@ -285,6 +286,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(run.rec, "energy", -float(R["energy"]))
 	Care.change(run.rec, "joy", float(R["joy"]) * got.size())
 	var trust := float(R["trust"]) if not got.is_empty() else 0.0
+	FishingDerby.record(run)
 	Save.remember(run.rec, "fishing", "landed %d of %d glints off the rock" % [got.size(), run.casts.size()], trust)
 	return {"got": got, "casts": run.casts.size()}
 
@@ -299,6 +301,7 @@ var line: MeshInstance3D = null
 var mats: Dictionary = {}      # common, rare: the glints' two shared materials
 var run: Run = null
 var who: Dictionary = {}       # the home's kin entry fishing with you
+var foe: Dictionary = {}       # the friend's stored catch this session races ({} when fishing alone)
 var holding := false
 var last := Run.S.DONE         # the state the view last drew
 var bar: ColorRect = null
@@ -387,11 +390,19 @@ func use() -> void:
 	if not ComeLook.at_leisure(ks[0]):
 		h._toast("%s is asleep or busy right now" % ak["name"])
 		return
-	who = ks[0]
+	if Social.ok:
+		FishingDerby.choose(h, day_of(Time.get_unix_time_from_system()), _begin.bind(ks[0]))
+	else:
+		_begin({}, ks[0])
+
+## Starts the session with your partner `kin`, alone or racing the friend `rival`.
+func _begin(rival: Dictionary, kin: Dictionary) -> void:
+	who = kin
+	foe = rival
 	_call_over()
 	var dice := RandomNumberGenerator.new()
 	dice.randomize()
-	run = Run.new(ak, day_of(Time.get_unix_time_from_system()), dice)
+	run = Run.new(Save.active_kin(), day_of(Time.get_unix_time_from_system()), dice)
 	holding = false
 	last = Run.S.DONE
 	_open_bar()
@@ -589,6 +600,8 @@ func _open_bar() -> void:
 func _end(finished: bool) -> void:
 	var before := GameResultCard.snap([run.rec])
 	var res := settle(run) if finished else {}
+	if finished and not foe.is_empty():
+		res["derby"] = FishingDerby.settle(foe, run, day_of(Time.get_unix_time_from_system()))
 	who["busy"] = false
 	who["t"] = 1.5
 	who.erase("called_t")
@@ -608,13 +621,17 @@ func _end(finished: bool) -> void:
 	if finished:
 		_card(res, before)
 		Save.save_game()
+		Social.publish_profile()
 	run = null
 	who = {}
+	foe = {}
 
 func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
 	var prize: Array = []
+	if res.has("derby"):
+		prize.append(FishingDerby.card_line(foe, res["derby"]))
 	for e in res["got"]:
 		prize.append([GardenPrizes.entry_name(e), UI.GOLD if String(e["kind"]) == "item" else UI.INK])
 	if prize.is_empty():
