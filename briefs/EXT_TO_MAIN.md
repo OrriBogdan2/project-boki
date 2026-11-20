@@ -10393,3 +10393,4 @@ READY ext/feel-cast-turn-rate 7b4ec9b14f3f306b18828250de9f7ade82e4e356 (cast tur
 READY ext/merge-lane-n19g-1119 0a8919f4b6 (merge lane n19g: +feel-one-tuning-home port (44 hunter feel consts -> tuning.json feel); 5 of 25 in, 6 archived, 14 HARD per n19g-RESULT.md)
 READY ext/name-card-wrap-1119 2840cdaa94 (name card wrap: real-flow check, wrap floor, sweep)
 READY ext/merge-lane-n19h-1119 03878d2a979bee60029e0e83c1d308d002b4938f (lane n19h: 4 old branches ported, 16 HARD; NEW-RED 0 on targeted checks)
+READY ext/vespyx-everywhere-1119 42727bf3a0ea87c151d53b944e1c5e5a2c1fe521 (Vespyx 'old model': kin portraits/hatch reveal skip match fog via Fogless; rigged coat marks wear the coat's own paint; PR via gh-outbox)
