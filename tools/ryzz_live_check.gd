@@ -65,8 +65,8 @@ func run(main: Node) -> void:
 		_run(m, P, 54, seen)
 	ok(seen.has("lmb_l") and seen.has("lmb_r"), "the finger bolts play lmb_l and lmb_r")
 	# item 139: nothing but the model is drawn (the old wrist coil and forearm rings read as a gun); the bolts leave the
-	# fingertip of the hand that fires, left then right (0.25 m: her body size went 1.098 -> 1.235 with the hunter-heights
-	# pass, so the same hand sits 12-22 % further out; was 0.2 m)
+	# fingertip of the hand that fires, left then right (0.25 m: her body size went 1.098 -> 1.235 with the
+	# hunter-heights pass, so the same hand sits 12-22 % further out; previously 0.2 m)
 	var strays: Array = []
 	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
 		var n := String(P.model.get_path_to(mi))
