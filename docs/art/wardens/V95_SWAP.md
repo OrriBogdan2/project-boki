@@ -42,6 +42,32 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Meshy's skin weights, 2026-11-17 (ext/rig-bakeoff-meshy-1117): `--weights meshy`
+The owner (11-17): the picked masters are in the game, but they break when they move. The breaks are the skin weights
+(bone heat plus the spec's `regions` boxes: fins round the hands, a hand webbed to the hip, torn sashes), and the
+`relax` pass over them punches holes. `python3 tools/art1/v95_to_game.py <Name> --weights meshy` takes the weights
+from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, rig, clips and bone names unchanged):
+- v95_swap.py's `meshy_rig` sends the 60k body to Meshy's rigging API (`tools/meshy/meshy_task.py rig`, about 5
+  credits, 1-2 min) and keeps the answer in `WORK/meshy/` (a rerun of the swap step alone reuses it).
+- `meshy_weights` gives each vertex the weights of its nearest rigged vertex and puts Meshy's 24 bones on ours
+  (`MESHY`: spine and shoulders on `hips`, the neck half `hips` half `head`, arm, leg and foot bones one to one).
+- Three fixes for what Meshy's rig and ours do not share. A patch of arm weights not joined to the arm (the sash under
+  a resting hand) goes to the bones under it. Our thighs hang from `root`, not `hips`, so a thigh's weight above its
+  hip joint goes to `hips`, fading out over `PELVIS_RAMP` below it; without it the waist pinches when the game turns
+  the hips. (Tried and dropped: also moving weight shared by both thighs to `hips`; the layer under Tenzo's apron
+  pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
+  bone whole.
+- A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
+  bones). `regions`, `smooth` and `relax` are not run (`meshy_smooth`, below, widens Meshy's blends). The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  rig but carry no body weight in this mode.
+Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
+report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
+coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads
+wide in her bow stance. Kael is built from the one-sword master (`A_keep_new.glb`, the master's sword faces
+dropped, the game's sword kept). A first run that asks Meshy for the rig can hang after the `meshy:` lines (11-17: twice,
+15 and 100 min); the same swap run again on that WORK dir, with `meshy/rigged_character.glb` already there, ends in
+2 min (run v95_swap.py itself: v95_to_game.py clears `meshy/` and asks again).
+
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
 were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
@@ -225,3 +251,24 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+`meshy_reach` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): `{"arm": [r0, r1], "thigh": [r0, r1]}` m. Meshy's
+auto-rig gives a cropped jacket's front panels half to the arm and a flared skirt to the thighs; an arm or thigh weight on
+a vertex past r1 from that limb's bones goes to `hips`, faded from r0 (Neve: arm 0.08-0.12, thigh 0.10-0.15; her idle's
+worst stretch 19.3 -> 6.6 on run C). The joints of a fresh Meshy master can come from its own auto-rig: pelvis = the hip
+joints - 0.045 (the game rig's `hips` sit 0.04 below its thighs), neck = Meshy's `Head` bone (ours starts at the chin, not
+the collar); Meshy's `Hips` and `neck` put the pelvis at the waist and stretch the torso x1.8 onto the rig.
+
+`meshy_smooth` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): N passes of the `smooth` blend on Meshy's
+weights after `meshy_reach` and `detach` (default 0). `meshy_reach` and the pelvis ramp hand weight to `hips` over a
+few cm, so neighbouring skirt and crotch vertices carry very different thigh weight and those edges stretch
+(`hips>hips` in --stretch-check). Neve run C, 71 clips, worst / clips over 5x: 0 passes 12.17 / 50, 4 9.83 / 28,
+10 6.66 / 16, 20 5.56 / 5, 40 5.23 / 2 (live 11-10 glb 9.15 / 38). 20 keeps knees and elbows shaped in crouch_f
+and stomp.
+
+Neve r4 (2026-11-20, ext/hunter-regen-claire-1120): six fresh multi-image gens from the 11-19 turnaround (40 credits each),
+`create ... --texture-refs` and `--enhance off` varied; `--enhance off` speckles the skirt again (g6, as run B). The joints
+script is `~/gens/hunter-regen-1120/claire/r4/scripts/rig_joints.py` (Meshy rig on the quad master -> `joints.json`). Use
+`--warden-variant=claire_<tag>` (art/wardens/claire_<tag>/claire_<tag>.glb) to put several candidates in ONE tree for `jobq`
+(one relay, no same-name `.ctex` mtime trap). Stretch (71 clips, worst / mean / clips over 5x), smooth 20: g2 4.35 / 3.19 / 0,
+g5 5.08 / 3.33 / 1, g1 7.45 / 4.05 / 14 (r3 run C 5.56 / 3.58 / 5, live 9.15 / 5.47 / 38). The branch head is another job's G1 (4.86 worst, 0 over 5x); g2 stays a side candidate in `~/gens/hunter-regen-1120/claire/r4/cand_g2/` (it keeps the TA braid).
