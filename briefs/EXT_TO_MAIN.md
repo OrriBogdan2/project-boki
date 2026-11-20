@@ -10574,3 +10574,4 @@ READY ext/cinder-dash-clip 7468b3d2a6e827ac1a3f55e2ac592d93671dd360 (Cinder dash
 READY ext/hud-plain-words 60ff2e8891ebbc8ddf0493ea01d531f007b8904a (R/X/RMB locked-slot tag says "Spend point"; truce lines off the kill feed; DOCKS IN already gone)
 READY ext/hud-holdback faffc716b2f8c9496cc15da1cdc1419ef2b851f1 (belt slots 3/4 + locked X/R tiles held back via HudReveal; fresh-save landing groups 9 -> 7)
 READY ext/vfx-albert-e-wall 4462c4fd16 (bulk-rebase: origin/main merged in mechanically, was ab50135495; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/hudreveal-fold 3035db634fc550c0148702779b4c0bba322e524d (HudReveal is the only HUD reveal gate: HudGroups' Ways Out lead, kit card 14 s, NEW_PLAYER_MATCHES folded into hud_reveal.json; parity asserted at matches 1/2/3/10 x expedition/duel/training/tutorial)
