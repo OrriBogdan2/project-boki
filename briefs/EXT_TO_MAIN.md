@@ -10471,3 +10471,4 @@ READY ext/ui-ability-bar-charges 10ae49be97 (ability-bar-check now asserts every
 READY ext/combat-net-ghost-boki dd676c3f75 (guest ignores snapshots older than the caught event; boki-system-check ghost rows; online-feel-check 0 failures)
 READY ext/tut-eight-steps 9b0dcad4f6beedcd61b3ceba9b3c4b65f3244414 (supersedes 72e1da24d7c: origin/main merged in, only conflict tools/tutorial_check.gd = main marker rows kept, pack-step row stays cut; marker rows now follow the dash beat legs; --check 0, --tutorial-check gunslinger/archer/gunslinger:wisps 0 fail, tutorial-text 0, farm-tutorial 3 = same 3 rows as main, health --strict OK)
 READY ext/combat-foe-telegraphs 8f7201dd7960b208ff46d1c1f70d1796ac0f3154 (foe telegraph audit table + strips in docs/VFX_QUALITY.md; no vfx json stray found)
+READY ext/ui-loot-card-read 524317dbe5 (ground gear tag slot line 12px full ink; inventory hint one line; loot row tags 12px)
