@@ -548,7 +548,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | RMB | Shot, delayed Root, 11.5 s [D] | Hop form, windup 1.0, cd 10.5 | differ `[?]` motion |
 | LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion |
-| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours · **open** (branch ready: ext/parity-no-riders-meeko) |
+| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4; tap 6.75 m, after a 1 s pause the ember is bigger (x1.5) and flies 1.25x further (owner 11-17) | owner call; the footage's 13.5 m is halved on purpose |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion · **owner** (11-10) |
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, no self factor | match |
