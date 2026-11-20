@@ -56,3 +56,5 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 - Synthesised, no samples (`tools/gen_sfx_steps.py`).
 ### ext/sfx-breakables
 - Synthesised, no samples.
+### ext/sfx-stomp-cues (the stomp: wind-up, finish thud, CC crack)
+- Synthesised, no samples, CC0 (`tools/gen_sfx_stomp.py`: stomp_windup, stomp_finish, stomp_crack).

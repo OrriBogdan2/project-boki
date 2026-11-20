@@ -59,9 +59,11 @@ const FOLLOW_Y := 3.5         # 1/s
 var last_want := Vector3.ZERO # the followed point last frame (the cut test)
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
-const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
+const GLIDE_LEAD_EASE := 6.0  # 1/s: the lean's spring (critically damped), so it eases in and out with no kick at
+                              # the glider opening or closing (a plain lerp started at full speed)
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
+var lead_v := Vector3.ZERO    # m/s: how fast lead_off moves
 
 ## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
 ## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
@@ -157,6 +159,7 @@ func snap(p: Vector3) -> void:
 	last_want = p
 	pan = Vector3.ZERO
 	lead_off = Vector3.ZERO
+	lead_v = Vector3.ZERO
 	_apply(Vector3.ZERO)
 
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
@@ -357,7 +360,9 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	last_want = want
 	lift = p.y - want.y
 	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
-	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
+	var lead_to := (lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX)
+	lead_v += ((lead_to - lead_off) * GLIDE_LEAD_EASE * GLIDE_LEAD_EASE - lead_v * 2.0 * GLIDE_LEAD_EASE) * delta
+	lead_off += lead_v * delta
 	_tick_cast(delta)
 	_tick_scout(delta, mouse_lead)
 	focus = base + pan.lerp(cast_pan, cast_k).lerp(scout_pan, scout_k) + lead_off
