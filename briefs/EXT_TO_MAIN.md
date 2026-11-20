@@ -10631,3 +10631,4 @@ READY ext/farm-minigame-fair 544f25aba6 (bulk-rebase: origin/main merged in mech
 READY ext/ui-loadout-slots 0ae1bd96bb (bulk-rebase: origin/main merged in mechanically, was ca51cdad94; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/vfx-albert-e-wall d817894add (bulk-rebase: origin/main merged in mechanically, was 4462c4fd16; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/stomp-prompt-declutter 8dbbb87d56 (bulk-rebase: origin/main merged in mechanically, was 2ded416979; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/grimble-vfx-data 1bf12090ec57e5b669f5243be7ab34c480a32993 (Grimble kit looks on content/vfx/dredge.json: slugs, reel ring, xray rock arm, stun swirl, dive/quake fist; dredge_kit.gd has no LDFx; dead LDFx/shaders deleted; Broadside slugs stay LDFx.volley)
