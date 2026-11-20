@@ -15,6 +15,10 @@
 
 		"mend_burst": {"net": false, "fx": [{"p": "ring", "size": "r", "life": 0.45, "c": "ivory", "c2": "hot", "c3": "deep"},
 				{"p": "ember", "y": 0.3, "n": 24, "way": "up", "speed": 3.0, "spread": 0.7, "grav": -1.5, "life": 0.8, "size": 0.07, "radius": 0.9, "c": "ivory", "c2": "hot"}]},
+		"mend_fall": {"net": false, "fx": [{"p": "ember", "y": 7.0, "shape": "disc", "radius": "r", "radius_x": 0.85, "way": "up", "n": 16, "n_k": 1.0, "speed": 0.5, "spread": 0.2, "grav": 14.0, "drag": 0.2, "curl": 0.0, "life": 0.55, "size": 0.07, "stretch": 0.4, "c": "ivory", "c2": "hot"},
+				{"p": "ember", "y": 8.0, "shape": "disc", "radius": 0.5, "way": "up", "n": 10, "n_k": 1.0, "speed": 0.5, "spread": 0.1, "grav": 16.0, "drag": 0.2, "curl": 0.0, "life": 0.5, "size": 0.09, "stretch": 0.5, "c": "hot", "c2": "ivory"}]},
+		"mend_zone": {"net": false, "fx": [{"p": "ember", "y": 0.1, "shape": "disc", "radius": "r", "radius_x": 0.9, "way": "up", "n": 16, "speed": 1.0, "spread": 0.3, "grav": -0.8, "life": 1.0, "size": 0.06, "c": "ivory", "c2": "hot"},
+				{"p": "plus", "y": 0.2, "shape": "disc", "radius": "r", "radius_x": 0.7, "way": "up", "n": 4, "speed": 0.8, "spread": 0.3, "grav": -0.5, "life": 0.9, "size": 0.12, "c": "ivory", "c2": "hot"}]},
 		"mend_revive": {"net": false, "fx": [{"p": "plus", "y": 0.8, "n": 6, "way": "up", "speed": 1.6, "spread": 0.8, "grav": -1.0, "life": 0.6, "size": 0.14, "radius": 0.4, "c": "ivory", "c2": "hot"}]},
 
 		"fault_slam": {"net": false, "fx": [{"p": "ember", "y": 0.4, "n": 24, "way": "up", "speed": 5.0, "spread": 0.9, "grav": 3.0, "life": 0.4, "size": 0.08, "radius": 0.8, "c": "ivory", "c2": "hot"},
@@ -29,6 +33,12 @@
 
 		"plant": {"fx": [{"p": "chunk", "n": 7, "way": "up", "speed": 3.2, "spread": 0.6, "grav": 14.0, "life": 0.55, "size": 0.1, "radius": 0.4, "c": "iron"},
 				{"p": "smoke", "n": 4, "way": "up", "speed": 0.9, "spread": 0.8, "grav": -0.4, "life": 0.7, "size": 0.55, "radius": 0.4, "c": "dust", "near": true}]},
+
+		"plant_beacon": {"net": false, "fx": [{"p": "ember", "y": 0.3, "shape": "disc", "radius": 0.22, "way": "up", "n": 10, "speed": 3.5, "spread": 0.08, "grav": -1.0, "drag": 0.2, "curl": 0.0, "life": 1.1, "size": 0.07, "stretch": 0.35, "c": "ivory", "c2": "hot"},
+				{"p": "star", "y": 1.2, "shape": "disc", "radius": 0.3, "way": "up", "n": 3, "speed": 1.2, "spread": 0.2, "grav": -0.6, "life": 1.2, "size": 0.12, "c": "hot", "c2": "ivory"}]},
+
+		"dash": {"net": false, "fx": [{"p": "ember", "y": 1.0, "way": "back", "n": 10, "speed": 2.0, "spread": 0.5, "grav": 1.0, "life": 0.3, "size": 0.06, "radius": 0.35, "c": "ivory", "c2": "hot"},
+				{"p": "smoke", "y": 0.15, "way": "back", "n": 4, "speed": 1.0, "spread": 0.8, "grav": -0.4, "life": 0.5, "size": 0.45, "radius": 0.4, "c": "dust", "near": true}]},
 
 		"catch": {"fx": [{"p": "ember", "at": "hammer_grip", "n": 8, "speed": 2.6, "spread": 0.9, "grav": 3.0, "life": 0.3, "size": 0.05, "radius": 0.2, "c": "main", "c2": "hot"}]},
 
