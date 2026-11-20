@@ -41,7 +41,6 @@ judges. At match zoom the Hunter is small in a strip; the rows above and `--dash
 run on main's rules confirmed the headless numbers: Kael's Lunge rode 0.38 / 0.35 s, Cinder 0.30 s (jerk 70),
 Neve 0.53 s (jerk 101), Sparkle 0.38 s; on these rules none of those rows failed.
 
-Not done here (kit code, not clip data; see docs/DEBT.md): a variable-length dash (Kael's held Lunge, Vex's held slide)
-wants its drive pose held and a recovery played by the kit at the end; Kael's enrage roar swaps a dash's clip mid-travel.
+Held slide (Vex): the slide's three-key loop (clip 0.367-0.5) is now in kit seconds at the clip's rate (`SLIDE_LOOP_FROM`/`_T`), so the drive pose holds until the slide ends and the stand-up plays after it. Before, the loop sat 25% too late, caught the stand-up and snapped back each period (194 rad/s inside a 0.72 s travel). `--dash-frames-check` has a held-slide row for Vex and a row for every dash, "the drive pose holds while it travels" (`ENTRY_S`, `TAIL_S`, `HOLD_RATE` in `tools/dash_travel.gd`). Kael's Lunge needs no hold: it travels 0.25-0.38 s and the ease-back starts at 0.37 s. Not done here: Kael's enrage roar swaps a dash's clip mid-travel.
 
 `--cast-pop-check` asks a blend-out as long as the gap to the run needs (Kael and Cinder 0.4 s), so these dashes are shortened by `rate` alone, never by a shorter `fade_out`.
