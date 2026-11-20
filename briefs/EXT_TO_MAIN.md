@@ -10420,3 +10420,4 @@ READY ext/anim-motley-flinch-rng fc752f165f8831fcf55264f8263449c8c908845a (--rng
 READY ext/sfx-tenzo-grimble-bar 2738e9f30c (Tenzo+Grimble ability bar: 11 CC0 cues, per-ability hits rock crunch/scrap clang, boulder+hook travel loops, hook let-go + Broadside end; sfx-set 0 FAIL, strike rc0)
 READY ext/sfx-sparkle-sable-bar d4db065a78 (Sparkle+Sable: 10 generated cues filling missing cast/travel/hit/end beats; sfx-set/strike/match-audio 0 fail)
 READY ext/anim-boki-coverage-all 8d165d85c7740236cc04b2aa50a84b2d432ed748 (anim coverage: 48 rigged Boki x 8 garden states, 0 missing, 25 on shared clip set, five worst filed)
+READY ext/anim-neve-wrist 82ea2cd4f4 (Neve right arm refit onto bones, glove on hand.R, wrist roll split into forearm; stretch rimewright 9.15->7.81; clips check no new red)
