@@ -22,6 +22,7 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
+const BARGE_HOLD := 0.18               # s a press inside a shove is held (main's dash buffer; the shared press window is shorter)
 const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
@@ -722,7 +723,7 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = Loco.press_buffer        # held, never dropped: the next shove goes the step the gap ends
+		h.dash_buf = BARGE_HOLD              # held, never dropped: the next shove goes the step the gap ends
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()

@@ -74,8 +74,6 @@ func _state(e: Ent) -> Dictionary:
 			"brk": 0.0,
 			"down": false,
 			"burst": 0.0,
-			"lvl": -1,
-			"lvl_pop": 0.0,
 			"seen": now
 		}
 		st[e.nid] = s
@@ -257,9 +255,7 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		"downed": false,
 		"word": word,
 		"word_col": word_col,
-		"chip": ch,
-		"lvl": h.lvl,
-		"lvl_pop": float(s["lvl_pop"])
+		"chip": ch
 	}
 
 
@@ -311,9 +307,7 @@ func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 		"shield": p.shield > 0.0,
 		"downed": false,
 		"word": word,
-		"chip": ch,
-		"lvl": p.lvl,
-		"lvl_pop": float(s["lvl_pop"])
+		"chip": ch
 	}
 
 
@@ -416,9 +410,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		"shield": false,
 		"downed": true,
 		"word": line,
-		"chip": 0.0,
-		"lvl": h.lvl,
-		"lvl_pop": float(s["lvl_pop"])
+		"chip": 0.0
 	}
 
 
