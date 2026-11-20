@@ -320,6 +320,9 @@ func run(m: Node) -> void:
 	Save.d["roster"] = roster
 	Save.d["active"] = roster[0]["uid"]
 	Save.d["active2"] = roster[1]["uid"]
+	# a fresh save still owes its starter pick, and the portal shows that pick instead of the cards
+	if ClassUnlock.needs_starters():
+		ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var P = load("res://scripts/home/home.gd").new()
 	main.add_child(P)
 	ClassUnlock.choose_starters(["gunslinger"])      # (else the portal asks for a Relic)

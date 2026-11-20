@@ -38,6 +38,7 @@ static func first(m: Match, P: Hunter, slot: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	await _first_hint()
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
 	await _hint()
@@ -72,6 +73,8 @@ func _window(hero: String, slot: String) -> void:
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
 	var placed := at is Vector3 and (at as Vector3).is_finite()
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
+	var verb := RecastHint.verb(P.ak, slot)
+	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != RecastHint.FALLBACK_VERB, verb)
 	m.step(DT)
 	var cw: Dictionary = P.ak.cue.get("w", {})
 	var key := RecastCue.key_of(slot)
