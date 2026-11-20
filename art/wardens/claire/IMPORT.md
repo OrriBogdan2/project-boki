@@ -53,6 +53,19 @@ knee cam -27 %, game cam -14 %. Rest pose, 4 sides eye and knee level: 0 px diff
 Known residual (not fixed): death f22-37 (bent knee lying on the skirt, up to 127 px at eye level, 57 px at the match camera) and a
 wedge at the hem of a raised thigh (crouch_f, crouch_l, mantle, skate, wall; 196 knee-level frames with a new 100+ px piece) are new black vs live; idle f105 67 px at the
 match camera. Proof: /home/boki/gens/claire-fix6-1119/.
+Retry 6 (a66d7c0f4d): the front-right skirt hem gives 60 % of its thigh weight back to hips (crouch wedge under the raised right thigh).
+Retry 7 (11-20, deep job 20261119-235106-a4): weights only again (Body JOINTS_0/WEIGHTS_0; json, mesh, UVs, textures, spear, rig and
+clips byte-identical to live). Retry 6 still drew a new dark sliver on the front sash in every idle frame (and g_wave, glide, ledge):
+1247 waist points (y > 0.95 m, hips-led) had lost their live forearm share (up to 0.11) to hips, so the sash slid against the dress.
+Half of that share now goes to the same side's upper_arm, half stays on hips; no forearm or hand weight comes back on the torso
+(all of it on upper_arm opened a wedge under the raised arm in ledge; live weights back also worked but re-adds forearm on the waist).
+Smoothing the hard hips/thigh step on the right thigh top (it lifts walk_fl in --stretch-check) was tried and reopens the crouch hem
+(new black up to 875 px), so the step stays.
+Numbers vs live: Godot --stretch-check worst 9.15 -> 5.73 (fusion), median 5.33 -> 3.40, lower in 66 of 69 (walk_fl 3.33 -> 5.00,
+walk_br 4.00 -> 4.53, run_br 4.80 -> 5.01, same as retry 5). Edges >= 5 mm over 3x (1737 game frames): idle 0.86 -> 0.05 %,
+worst clip 1.56 -> 0.25 %. Local renders (software GL, all 1737 frames): match camera new black 40+ px 0 frames (retry 6: 7);
+close camera (1.8x) total black -30 %, idle new 40+ px 131 -> 24 frames (left: the hanging ribbon's outline, 1-2 px wide).
+Proof: /home/boki/gens/claire-fix7-1120/.
 
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
