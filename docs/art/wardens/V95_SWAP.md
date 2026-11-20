@@ -225,3 +225,40 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Regen from the turnaround, 2026-11-20 (ext/hunter-regen-*-1120): a new Meshy body instead of patching the scan
+Patching weights and caps on the scanned v95 masters moved the stretch numbers but ~1% of the pixels at the game camera.
+The regen route builds a new master from the owner's latest turnaround pick, Meshy for every visible step, Blender only
+to rig and export:
+1. `sheet_crops.py` (auto, or x0/x1 + a `kill` box for a sheet's ground line) and `pad_views.py`: front, 3/4, side, back.
+2. `meshy_task.py create OUT front tq side back --texture-refs <same> --polycount 30000 --topology quad --enhance off|on`
+   (meshy-7.1, a-pose, 8k PBR; ~40 credits). Keep the variant that keeps the signature props (Sable: enhance on kept
+   the pistols, off lost them; Lace: off, on bent an arm out).
+3. `meshy_joints.py prep GEN OUT H` scales it to the spec's height; `meshy_task.py rig RIGDIR OUT --height H` (5 credits);
+   `meshy_joints.py joints OUT RIGDIR/rigged_character.glb PATCH` reads the swap `joints` and `head` off Meshy's own
+   skeleton (no hand-read grid renders; Meshy's helper icosphere is left out of the box match).
+4. `v95_to_game.py <Name> --master OUT --weights meshy --spec-patch PATCH` onto the game rig, clips and props.
+5. Proof: the glb as a variant (`art/wardens/<art>_regen/`, plus local copies of its warden_anim, look and stride
+   entries), `--regen-audit` on the GPU queue with and without `--warden-variant`: every clip x 10 times, eye level,
+   knee level, match camera, hands and feet close.
+   Run `--stretch-check` one Hunter at a time: three at once in one tree end early without a table.
+   `--yaws=0,90,180` repeats every sample turned that many degrees past the 3/4 view (front, side, back coverage).
+6. A clenched fist needs `--pose ""` on `create` (Tenzo r3, 2026-11-20): Meshy's A-pose mode opened his stone fist in all
+   six r2 gens; the three without it kept the turnaround's fist and the same outline (within 2.6 cm a 10 cm band). A new
+   gen still needs its own Meshy auto-rig: r2 A's rig borrowed by nearest vertex, bone heat, and r2's game weights copied
+   by position all stretched far worse than r2 (run_f 55 / 18 / 89 vs 4.8: the sash strips and the hand on the hip).
+7. An unskinned prop (Tenzo's `eye_stone`, shared by the three orbiting stones) takes a Meshy prop's own mesh and paint with
+   `python3 tools/art1/glb_prop_mesh.py IN.glb OUT.glb eye_stone PROP.glb` (no Blender): fitted to the old mesh's box, its
+   glowing faces turned where the old glow faces pointed and put on `glow-rock`, the rest on `leather-rock`.
+8. A slot shared by two garments gets one look for both: Tenzo's maroon pants and orange sash were both `cloth`, and its
+   desat for the sash left the pants near black with red smears in game (2026-11-20). `python3 tools/art1/glb_mat_split.py
+   IN.glb OUT.glb cloth-v95 cloth-pants` (no Blender) moves the maroon triangles (texel hue, value, majority vote) to their
+   own material, and warden_look.json `slots."cloth-pants"` tunes them alone. Measure the render against the splash
+   (GPU, eye and knee level): Tenzo's pants went from value 0.33 to 0.43 at hue 0.98 (splash 0.31-0.40, hue 0.97).
+9. Tenzo r4 (2026-11-20): `--pbr off` with `--pose ""` and `--enhance on` gave a saturated cobalt stone arm (the PBR-on gens came out slate grey),
+   and 4 views with `--texture-refs` front + 3/4 only kept the swirl and runes brightest and wrapped the shins (N2/N5; N1/N3/N4 dropped runes
+   or the wraps). Meshy remesh quad 60k + `meshy_joints.py prep|joints` + `v95_to_game.py --weights meshy --no-import` is ~15 min a candidate;
+   `--no-import` still overwrites the tree's .glb, so `git checkout` it between candidates. The `--regen-audit` LIVE run needs the audit tools
+   (tools/regen_audit.gd, clip_shots.gd, check_registry.gd) in the main tree, or the job just sits on the game until its timeout.
+   Godot only re-extracts `art/wardens/<id>/<id>_v95.jpg` in the tree it imported the first glb in: copy the glb's own "v95" image over it
+   when a second candidate shares a tree.

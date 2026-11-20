@@ -1,3 +1,23 @@
+# Tarek (dolm): 11-20 regen r2, candidate A (ext/hunter-regen-tarek-1120, draft until the owner's visual check)
+
+`tarek.glb`: a new Meshy model from the CURRENT turnaround (`~/gens/v95-latest-ta-1119/tenzo.jpg`, 4 views + texture
+refs): multi-image-to-3d meshy-7.1, A-pose, enhance off, PBR off (6 gens, A picked), quad remesh 60k, Meshy auto-rig
+weights onto dolm's skeleton and clips; joints and head read off Meshy's rig (`meshy_joints.py`), the neck at z 1.58
+(the head-box line, as before). 47.8k tris. `glb_prop_paint.py --meshes eye_stone,shard --drop shard --from
+leather-body.001 --to leather-v95 --near 58,78,110`: the three round eye stones cobalt slate (a separate orbiting
+prop), the off-hand shards out. One stone arm (his LEFT), a bare five-finger off hand, cream bandage + cobalt cuff on
+the off forearm, cream ankle wraps (as the turnaround and live splash).
+
+Slots (spec `art/wardens/src/tarek_v95.json`): teal runes -> `glow` (0.45), the stone arm and wrist cuff (blue hue) ->
+`leather` (matte: gloss/sheen/fres 0, albedo x1.4, desat 0.4), cream wraps and bandages -> `cloth` (desat 0.4), so the
+skin slot's tint no longer browns them; skin desat 0.6, albedo [0.86, 0.8, 0.78], sss 0. In-game (RTX 4090, eye level,
+idle): stone H223 S0.51 V0.40 (splash rocks H224 S0.47 V0.43; live S0.22 grey), skin S0.54 (live 0.70, orange-red),
+runes teal H170. The game's environment adds saturation x1.14; tune colours on the GPU queue, not on llvmpipe/OpenGL.
+
+Checks: `--stretch-check --wardens=dolm` worst 15.06 -> 7.86, median 6.67 -> 4.91, clips over 3x 60 -> 50.
+`--warden-model-check`: the 3D model stands 1.175x -> 1.153x a medium hunter (sheet 1.08x, still over the 4%); the
+rig-only "stands 1.153x" line fails on main as well. Raw files, sheets and proof MP4s: ~/gens/hunter-regen-1120/tarek/r2.
+
 # Tarek (dolm): import note, v95 swap of Tarek appeal3, candidate b (2026-11-11)
 
 `tarek.glb`: Tarek's v95 r2 appeal3 `cand_b.glb` (a new warm-brown face with a gentle smile and a firmer jaw, plus a

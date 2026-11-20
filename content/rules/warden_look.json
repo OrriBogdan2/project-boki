@@ -182,8 +182,9 @@
 				"far_lift": 0.1,
 				"sheen": 0.0,
 				"shade": 0.78,
-				"desat": 0.2,
-				"albedo": [0.72, 0.62, 0.56],
+				"desat": 0.6,
+				"albedo": [0.86, 0.8, 0.78],
+				"sss": 0.0,
 				"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
@@ -193,24 +194,34 @@
 			},
 			"cloth": {
 				"far_lift": 0.12,
-				"desat": 0.2
+				"desat": 0.4
 			},
 			"cloth-accent": {
 				"far_lift": 0.3,
 				"desat": 0.0
 			},
+			"cloth-pants": {
+				"far_lift": 0.25,
+				"desat": 0.45,
+				"albedo": [1.5, 1.45, 1.6]
+			},
 			"leather": {
-				"emit": 1.8,
+				"glow": 0.0,
+				"albedo": [1.4, 1.4, 1.45],
+				"gloss": 0.0,
+				"sheen": 0.0,
+				"fres": 0.0,
 				"rim_far": 0.0,
-				"rim_amount": 0.2,
-				"desat": 0.3,
-				"far_lift": 0.2
+				"rim_amount": 0.1,
+				"desat": 0.4,
+				"far_lift": 0.05
 			},
 			"glow": {
-				"glow": 1.8,
+				"glow": 0.45,
 				"fres": 0.0,
 				"top_light": 0.0,
-				"far_lift": 0.1
+				"far_lift": 0.1,
+				"desat": 0.0
 			}
 		},
 		"halos": [
