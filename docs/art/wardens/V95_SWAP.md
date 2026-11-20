@@ -242,3 +242,8 @@ to rig and export:
    entries), `--regen-audit` on the GPU queue with and without `--warden-variant`: every clip x 10 times, eye level,
    knee level, match camera, hands and feet close.
    Run `--stretch-check` one Hunter at a time: three at once in one tree end early without a table.
+6. A Hunter with bones Meshy's humanoid rig lacks (Meeko: tail, ears, wings): with `weights` "meshy" the spec's
+   `regions` are skipped, so her tail went to hips and shin.L. List those bones in the patch's `meshy_regions` (their
+   regions go on whole) and add `meshy_smooth` passes over the seams (Meeko 11-20, stretch mean/worst LIVE 5.32/7.69:
+   regions alone 24.4/59.4, smooth 6 7.05/15.8, 12 5.50/11.7, 20 4.58/8.89). A spec region that sat on the old
+   master's satchel can land on the new one's hand or thigh: drop it (Meshy's weights carry a satchel).
