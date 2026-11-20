@@ -1114,12 +1114,13 @@ func _process(delta: float) -> void:
 	_abyss_tint(d)
 	_find_interact()
 	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	InteractGate.track(idle)
 	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
 	if carry.tick(d, interact, idle):
 		return
 	if idle and not interact.is_empty():
-		if Input.is_action_just_pressed("interact"):
+		if InteractGate.pressed():
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
@@ -1355,7 +1356,9 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -HunterMove.glide_sink, Loco.glide_catch * d)
 		else:
-			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			var vy := maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			py += 0.5 * (pvy - vy) * d       # (exact gravity, as the match's HunterMove.fall: same apex at any step)
+			pvy = vy
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
@@ -3107,7 +3110,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud and not compact:
+	if ud and not compact and MergeForm.enabled():
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return

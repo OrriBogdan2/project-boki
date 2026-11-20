@@ -33,6 +33,13 @@ static func line(font: Font, s: String, design_fs: int) -> TextLine:
 static func width(font: Font, s: String, fs: int) -> float:
 	return line(font, s, fs).get_size().x
 
+## `s` cut at a word and ended with "…" so it is at most `max_w` px wide (as it is when it already fits).
+static func fit(font: Font, s: String, fs: int, max_w: float) -> String:
+	var out := s
+	while width(font, out, fs) > max_w and out.contains(" "):
+		out = out.substr(0, out.rfind(" ")).trim_suffix(",").trim_suffix(":") + "…"
+	return out
+
 ## Left-aligned at `p` (the baseline, as CanvasItem.draw_string), with an outline under it when
 ## `outline` > 0.
 static func draw(c: CanvasItem, font: Font, p: Vector2, s: String, fs: int, col: Color, outline := 0,
