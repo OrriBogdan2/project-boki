@@ -33,12 +33,12 @@ static func hold(mp: ENetMultiplayerPeer, secs: float) -> void:
 	set_all.call()
 	mp.peer_connected.connect(set_all)
 
-## Starts a second headless game of this project with `user_args` and returns its pid. It keeps a user dir
-## of its own beside `log_path`, so the two games never share a save. The watchdog leaves it alone.
-static func start(user_args: String, log_path: String) -> int:
-	return run("XDG_DATA_HOME='%s' exec '%s' --headless --path '%s' -- %s %s" % [
-		log_path.get_basename() + "_data", OS.get_executable_path(), ProjectSettings.globalize_path("res://"),
-		user_args, Watchdog.CHILD_FLAG], log_path)
+## Starts a second game of this project (headless unless asked) with `user_args` and returns its pid. It keeps a
+## user dir of its own beside `log_path`, so the two games never share a save. The watchdog leaves it alone.
+static func start(user_args: String, log_path: String, headless := true) -> int:
+	return run("XDG_DATA_HOME='%s' exec '%s' %s --path '%s' -- %s %s" % [
+		log_path.get_basename() + "_data", OS.get_executable_path(), "--headless" if headless else "",
+		ProjectSettings.globalize_path("res://"), user_args, Watchdog.CHILD_FLAG], log_path)
 
 ## Starts the shell command `cmd` (one that execs its program) with its output in `log_path`, and returns the
 ## program's pid, so OS.kill ends it. A watcher beside it ends it within WATCH_S of this game's end,
