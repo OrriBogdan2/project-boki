@@ -11,7 +11,7 @@ extends Node3D
 ##   release
 ## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
-## - his aegis: a wall of lit plates (two rows, ribbed, a rim and a hammer boss in his ivory) leaning out
+## - his aegis (AegisWall): a translucent pale-gold wall in four layers with a lit ivory rim, leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden)
