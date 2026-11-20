@@ -326,7 +326,8 @@ const FACES := {
 }
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry",
+	"lunge": "angry", "cast": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
@@ -484,6 +485,7 @@ func _ready() -> void:
 	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+	BokiSwing.add_clips(player)
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_nap = KinNap.new(species)
 	if not _ear_bones.has(species):
@@ -623,8 +625,9 @@ func _pick_clip(dt: float) -> void:
 	_step_layer(feel, dt)
 	var want := _state_clip()
 	if want in GAITS and feel.has("clip"):
-		want = feel["clip"]
-	if want == "idle":
+		want = feel["clip"]       # a wild Boki's pose plays its own clip over the plain ones
+		_idle.rest(_rng)
+	elif want == "idle":
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)

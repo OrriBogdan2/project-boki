@@ -28,6 +28,8 @@ const STRIKE_WINDUP := 0.3
 const STRIKE_SLACK := 0.6         # m past its reach a target may have got to by then and still be bitten
 var atk_cd := 0.0
 var lunge_t := 0.0
+var wind_t := 0.0                 # s until a wound-up bite or cast lands (BokiSwing: its release frame)
+var wind_do := Callable()         # what lands then; one at a time
 var strike_t := 0.0               # s until the bite under way lands (0: none)
 var strike_at: Ent = null         # who it lands on
 var target: Ent = null
@@ -401,6 +403,8 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
 		return false
+	if wind_do.is_valid():
+		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
 		return false
@@ -439,6 +443,8 @@ func effective(slot: String) -> AbilitySpec:
 	var rank := owner_h.ability_level("kin") if owner_h else 1
 	return KinLib.effective(runner.def_of(slot), slot, ks, rec, rank, KinMerge.patch(owner_h, slot) if owner_h else {})
 
+## Starts a cast and pays for it. A rigged Boki casting for itself plays its cast clip first and lets go on the
+## clip's release frame (BokiSwing.CAST_WIND); knocked down in the wind-up, the skill is lost.
 func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array = []) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
@@ -447,6 +453,16 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	runner.spend(slot, rank)
 	if def.bond_cost > 0.0 and owner_h:
 		owner_h.ult = maxf(0.0, owner_h.ult - def.bond_cost)
+	if model:
+		model.set_meta("pulse", Time.get_ticks_msec())
+	if caster == self and BokiRig.has(species):
+		_wind(BokiSwing.CAST_WIND, _release.bind(slot, p, auto, caster, pw, chain))
+	else:
+		_release(slot, p, auto, caster, pw, chain)
+
+func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
+	var def := runner.def_of(slot)
+	var rank := owner_h.ability_level("kin") if owner_h else 1
 	var dd := Vector2(p.x - pos.x, p.z - pos.z)
 	if dd.length() > 0.1 and caster == self:
 		face = atan2(-dd.x, -dd.y)
@@ -474,7 +490,7 @@ func fire_trigger(type: String, ev := {}) -> bool:
 			continue
 		if (ev.get("chain", []) as Array).has(def.id):
 			continue          # no ability triggers itself
-		if not slot_open(slot) or not runner.is_ready(slot):
+		if not slot_open(slot) or not runner.is_ready(slot) or wind_do.is_valid():
 			continue
 		match type:
 			"on_hit":
@@ -631,6 +647,13 @@ func sim(dt: float) -> void:
 		strike_t -= dt
 		if strike_t <= 0.0:
 			_land_strike()
+	if wind_do.is_valid():      # a skill cast's wind-up (BokiSwing.CAST_WIND)
+		wind_t -= dt
+		if wind_t <= 0.0:
+			var land := wind_do
+			wind_do = Callable()
+			if state == "active" and ready_to_fight():
+				land.call()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
@@ -1009,6 +1032,11 @@ func fall_out() -> void:
 		return
 	go_down(true)
 
+## Holds `what` for `delay` s, the wind-up of its clip. Dropped if the Boki cannot fight by then.
+func _wind(delay: float, what: Callable) -> void:
+	wind_t = delay
+	wind_do = what
+
 # ---- wild kin
 func _sim_wild(dt: float) -> void:
 	var wish := Vector2.ZERO
@@ -1130,7 +1158,8 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	var on_you := state == "shoulder" and not beside
-	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
+	var striking := lunge_t > 0.0 or strike_t > 0.0 or wind_do.is_valid()
+	model.set_meta("kstate", "perch" if on_you else ("attack" if striking else ""))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
 	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...

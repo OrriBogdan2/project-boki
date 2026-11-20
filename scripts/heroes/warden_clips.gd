@@ -4,11 +4,15 @@ extends RefCounted
 ## so the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; no file: it
 ## stays on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state over
 ## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
-## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
-## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
+## clip can never drift from the hit it shows. The same for the data states "stomp" and "drink" (the clip is the state's
+## phase 0..1 laid over its length, so the slam lands on the game's beat; drink is an upper-body clip) and "reviving"
+## (a loop). States the data lists as "procedural" (ledges, bases, and the stomp or drink of a Hunter with no clip)
+## blend back to the retargeted rig, and so does any Hero model played by something that feeds no state (galleries,
+## portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
-## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## and rise, or the glide: a dive plays the glide too, pitched by HunterAnim's AIR_TILT) > upper (Blend2 filtered to
+## the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
 ## so one move hands to the next without a pop (item 32).
 ##
@@ -67,6 +71,7 @@ var alt_on := false          # this play of a move takes its "alt" clip
 var alt_km := ""
 var alt_t := 0.0
 var air_cast := false        # this play of the move has been in the air ("air_legs")
+var from_air := false        # this play of the move started off the ground ("air_clip", "ground_clip")
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
@@ -95,6 +100,7 @@ var climb_was := ""          # "mantle" or "ledge" while the climb state runs; e
 var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
+var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
@@ -176,8 +182,8 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
 func move_len(mv: Dictionary) -> float:
 	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
-	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0))
-	rate *= (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	var fit_k := length / float(mv["fit"]) if mv.has("fit") else 1.0
+	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0)) * fit_k
 	return length / rate - float(mv.get("lead", 0.0))
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -209,6 +215,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 		_retime_run(float(d["loco"]["run_cycle"]))
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
 			+ (d.get("summon_call", {}) as Dictionary).values())
+	beats = WardenBeats.build(lib, sk, glb, d.get("beats", {}))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -296,7 +303,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun"]
+	return nm in ["fall", "glide", "dive", "stun", d.get("states", {}).get("reviving", "revive")]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -497,6 +504,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
+	# (a move that has played out leaves the states below showing: a hit, a stun, a landing)
 	if moves.has(km):
 		return _move_clip(km, moves[km], s)
 	if km != "" and not WardenCarry.owns(km):
@@ -520,6 +528,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
+	var bt := String(s.get("beat", ""))
+	if beats.has(bt):
+		var b: Dictionary = beats[bt]
+		var length := lib.get_animation(String(b["clip"])).length
+		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+				"upper": b["upper"]}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -555,6 +569,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit,
 				"flinch": hk < Oomph.HEAVY_FLINCH, "flinch_w": Oomph.flinch_weight(hk)}
 	return {}
+
+## An air-started move is over once he lands or opens the glider: the clip fades into the land or glide pose.
+static func _air_over(s: Dictionary) -> bool:
+	return bool(s.get("grounded", true)) or bool(s.get("gliding", false))
 
 ## The "climb" data ({mantle|ledge: {clip, rise}}): a ledge rise plays its clip by how far up the face he is, so the
 ## hands meet the lip when the body does (rise: the clip second that is); a ledge float hangs there for `rise` s. When
@@ -609,18 +627,24 @@ static func lockin_dur(art_name: String) -> float:
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
 	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
-	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on
 		air_cast = false
+		from_air = not bool(s.get("grounded", true))
 	air_cast = air_cast or not bool(s.get("grounded", true))
 	alt_km = km
 	alt_t = tt
 	if mv.get("owns_land", false):
 		# this move is the landing (it may start in the air): the generic land clip must not follow it
 		land_t = LAND_DONE
+	if from_air and mv.has("air_clip") and _air_over(s):
+		return {}          # an air dash gives way to the glide or the landing below
 	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	# ("ground_clip" / "air_clip": the clip when the move starts on the ground / in the air; the kit's timing,
+	# hitbox and distance stay the same)
+	clip = String(mv.get("air_clip" if from_air else "ground_clip", clip))
 	# ("cut": the clip ends there (clip seconds), "scale": it runs that much faster: to fit the kit's cadence)
 	var length := minf(lib.get_animation(clip).length, float(mv.get("cut", 1e9)))
 	if mv.has("fit"):
@@ -738,7 +762,7 @@ func step(dt: float) -> void:
 	if root_bi >= 0:     # (the root's scale is unkeyed: reset, feel() can't build up)
 		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())
 	_out(dt)
-	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 	if reach:
 		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
@@ -911,14 +935,20 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
-	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
+	var rate := gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving)
+	# ("cadence": the run clip's rate over its planted feet, for a hero whose source scurries or plods; the walk
+	# keeps 1)
+	var walk := float(lc.get("walk_speed", 2.2))
+	rate *= lerpf(1.0, float(lc.get("cadence", 1.0)), clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
+	_p("loco_rate/scale", rate)      # (main's stop fix: the rate follows the feet of the blend as it stands, no fall-back to 1)
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
-	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
+	var diving := bool(s.get("diving", false))
+	var gliding := bool(s.get("gliding", false)) or diving
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
 	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
