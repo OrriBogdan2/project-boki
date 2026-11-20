@@ -69,7 +69,7 @@ func run(main: Node) -> void:
 	ok(k != null, "the downed teammate has a Boki")
 	if k:
 		ok(k.state != KinWispForm.STATE,
-			"a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state)
+				"a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state)
 		k.state = KinWispForm.STATE            # (a guardian's ride: summoned at the knock)
 		ok(BokiMarks.status(k) == "", "its Boki rides on it as a wisp: no icon over it")
 		k.state = "downed"

@@ -272,6 +272,7 @@ const STRIDE := {
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
 const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
+const GLIDE_FADE := 0.15      # s into and out of a carried glide pose (Kin.render's kact glide)
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
 const GAIT_FADE := {"thrumbird": 0.45}
@@ -377,7 +378,8 @@ var _now := {}                 # blend shape name -> weight
 var _want := {}
 var _face_name := "neutral"
 var _flex_y := 0.0
-var _pos_prev := Vector3.ZERO
+var _pos_prev := Vector3.INF      # (INF: not measured yet)
+var _tp := 0                  # the Kin's last teleport count seen (Kin.teleport)
 var _speed := 0.0
 var _land := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
@@ -484,7 +486,6 @@ func _ready() -> void:
 	BokiSwing.add_clip(player)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
-	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_nap = KinNap.new(species)
 	if not _ear_bones.has(species):
@@ -588,6 +589,11 @@ func _keep_flex(dt: float) -> void:
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
+	var tp := int(root.get_meta("tp", 0))
+	if _pos_prev == Vector3.INF or tp != _tp:
+		_tp = tp          # put somewhere (burst, re-bloom, blink, swap): not a run, so the speed stays as it was
+		_pos_prev = gp
+		return
 	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt      # rising or sinking is no stride
 	_pos_prev = gp
 	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
@@ -598,7 +604,7 @@ func _pick_clip(dt: float) -> void:
 		_pulse = p
 		_start_shot("cast")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
-	if attacking and not _attacking:
+	if attacking and not _attacking and not (_shot == "ability" and _shot_left > 0.0):  # (a cast's wind-up strikes too)
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
@@ -624,7 +630,12 @@ func _pick_clip(dt: float) -> void:
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
-	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
+	var fade := FADE
+	if "glide" in [want, clip]:
+		fade = GLIDE_FADE
+	elif want in GAITS and clip in GAITS:
+		fade = gait_fade()
+	set_clip(want, fade)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want in NAP_CLIPS:
 		player.speed_scale /= _nap.slow

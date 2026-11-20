@@ -131,7 +131,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			if opts.get("src", "") == "wisp":
 				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
 			StatusLooks.of(m).from_hit(self, opts)
-			flash_t = 0.12
+			flash_t = ImpactWeight.flash_s("")
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -159,7 +159,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	_took(d, by)
-	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
+	flash_t = maxf(flash_t, ImpactWeight.flash_s(""))       # (a combo payoff may have set it longer)
 	# a zone's periodic tick: no hit squash, only the flash (Feel skips its hold too)
 	if not opts.get("tick", false):
 		squash = 0.1
@@ -184,9 +184,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0)))
-		burn_dps = maxf(burn_dps, float(opts["burn"]))
-		burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk

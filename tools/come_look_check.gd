@@ -184,7 +184,7 @@ func run(m: Node) -> void:
 	ok(came.size() >= 2 and ComeLook._looks[0]["kind"] == "toy" and came[0] == _entry("A"),
 		"a base toy: %s come, A (most curious) first" % _names(came))
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"),
-		"a base toy: A keeps '%s'" % _last_mem("A"))
+			"a base toy: A keeps '%s'" % _last_mem("A"))
 	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)

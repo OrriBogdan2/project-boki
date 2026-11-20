@@ -15,10 +15,11 @@ const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow e
 
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
-## setting. Never in the tutorial: it teaches the walking Boki's orders.
+## setting. In the tutorial the setting rules too: with wisps its steps teach the summon (TutorialSummon),
+## without them the walking Boki's orders.
 static func mode(m: Node) -> bool:
 	var o = m.get("opts")
-	if not o is Dictionary or m.get("tut") != null:
+	if not o is Dictionary:
 		return false
 	return bool((o as Dictionary).get("boki_wisps", Settings.get_v("boki_wisps")))
 
@@ -39,6 +40,13 @@ static func set_wisp(k: Kin, on: bool) -> void:
 	k.set_model(look(k))
 	if k.summon:
 		k.summon.popped(on)
+
+
+## A merge ended (KinMerge.end): the Boki is a wisp on its hunter's shoulder again, its summon cooldown as it was.
+static func rewisp(k: Kin) -> void:
+	set_wisp(k, true)
+	k.stow()
+	k.scale = Vector3.ONE
 
 
 ## The step of a wisp's body. True when it handled it (the caller skips the walking state machine and the AI).
