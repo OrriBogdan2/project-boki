@@ -24,6 +24,12 @@ static func total(rec: Dictionary) -> int:
 		t += int(rec["stats"][s])
 	return t
 
+## Extra body size a Boki shows for its raised stats: `grow_max` x (total points / total_cap), 0 for a fresh one.
+static func growth(rec: Dictionary) -> float:
+	if not rec.has("stats"):
+		return 0.0
+	return float(rules().get("grow_max", 0.0)) * clampf(float(total(rec)) / float(rules()["total_cap"]), 0.0, 1.0)
+
 ## Points still open to stat s: under its own cap and the shared total. Never negative (old saves may be over).
 static func room(rec: Dictionary, s: String) -> int:
 	return maxi(0, mini(cap(rec) - int(rec["stats"].get(s, 0)), int(rules()["total_cap"]) - total(rec)))
