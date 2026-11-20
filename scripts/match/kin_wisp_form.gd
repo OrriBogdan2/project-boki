@@ -144,6 +144,8 @@ static func _pull_up(k: Kin, h: Hunter, dt: float) -> void:
 ## Draws it as its wisp while in the state (the Boki model hidden); true when it did. Back in any other
 ## state, the wisp node goes and the model comes back.
 static func render(k: Kin, model: Node3D) -> bool:
+	if k.wisp:
+		return false             # (a carried Boki wisp, KinWisp: its model is a "BokiWisp" too, not this node)
 	var node := k.get_node_or_null("BokiWisp") as Node3D
 	if k.state != STATE:
 		if node:
