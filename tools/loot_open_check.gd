@@ -40,12 +40,12 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		n += 1 if _hero(String(id)) else 0
-	ok(n == 12, "12 Heroes play clips and wear the open layer (%d)" % n)
+	ok(n == 13, "13 Heroes play clips and wear the open layer (%d)" % n)
 	_live(main)
 	print("LOOT_OPEN_CHECK_DONE heroes %d, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## False for a Hero with no clips (Gil until his .glb has them): the rig's own hold pose plays (HunterAnim._act_legs).
+## False for a Hero with no clips (none now: Gil borrows Meeko's through clips_from): the rig's own hold pose plays (HunterAnim._act_legs).
 func _hero(id: String) -> bool:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
