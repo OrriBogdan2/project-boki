@@ -96,7 +96,8 @@ func run(main_node: Node) -> void:
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
-	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)       # (a rigged Boki lets the skill go on its cast clip's release frame)
+	# (a rigged Boki lets the skill go on its cast clip's release frame)
+	_ac_run(m, BokiSwing.CAST_WIND + Match.DT)
 	var thp := T.hp; var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
