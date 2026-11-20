@@ -723,20 +723,40 @@ func play(
 	var p := _voice(pos, rk, sname)
 	if p == null:
 		return
+	p.stream = _take(sname, take)
+	p.volume_db = v
+	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
+	p.play()
+	played.emit(sname, pos, vol_db, pitch)
+
+
+## Starts sname on a voice at pos (placed, so it pans) at exactly vol_db and returns the voice, or null when the
+## pool drops it. No distance falloff and no repeat gap: the caller sets the level and keeps the one voice
+## (IncomingHitSfx: a flurry of hits on you is one voice). The pool's ranking and the bus (so the downed muffle) apply.
+func play_voice(sname: String, pos, vol_db: float, pitch := 1.0) -> AudioStreamPlayer:
+	if not streams.has(sname) and not _lazy(sname):
+		return null
+	var p := _voice(pos, voices.rank_of(pos, listener, true), sname)
+	if p == null:
+		return null
+	p.stream = _take(sname)
+	p.volume_db = vol_db
+	p.pitch_scale = pitch
+	p.play()
+	return p
+
+
+## The stream to play for sname: take `take` of it when it has several (-1: a random one that isn't the last).
+func _take(sname: String, take := -1) -> AudioStream:
 	var st = streams[sname]
 	if st is Array:
-		# a different take from last time
 		var arr: Array = st
 		var i := take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
 		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = _once(st)
-	p.volume_db = v
-	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
-	p.play()
-	played.emit(sname, pos, vol_db, pitch)
+	return _once(st)
 
 
 ## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
