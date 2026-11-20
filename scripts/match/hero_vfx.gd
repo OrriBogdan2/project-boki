@@ -20,9 +20,9 @@ const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 ## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
 ## the tracers riding Vex's rounds (6)
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "sheen": 6, "fist": 3, "portal": 4, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4,
-	"coin": 4, "star": 6, "drop": 6, "plus": 4}
+const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 20, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
+	"ring": 6, "sheen": 6, "fist": 3, "portal": 4, "xray": 2, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6,
+	"card": 4, "coin": 4, "star": 6, "drop": 6, "plus": 4}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
 	"plus": 12}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -49,6 +49,7 @@ const SHEEN_LIFT := 0.95       # m above the feet the square is centred (a Hunte
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
+static var _xray: Shader = null  # SURFACE drawn over walls and rock: an "xray" string (an arm inside a cliff)
 
 var m: Node
 var pools := {}                # kind -> nodes made for it
@@ -422,17 +423,17 @@ func prewarm_end() -> void:
 	scarves.prewarm_end()
 
 func _prewarm_node(kind: String) -> Node3D:
-	if not MODES.has(kind):
+	if not MODES.has(kind) and kind != "xray":
 		var p: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		p.amount_ratio = 2.0 / float(AMOUNT[kind])
 		p.lifetime = PREWARM_LIFE
 		p.one_shot = false
 		p.emitting = true          # (a finished one-shot isn't drawn, and a loading frame can outlast its life)
 		return p
-	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+	var mi: MeshInstance3D = _take(kind, (_string_build if kind == "xray" else _surface_node).bind(kind))
 	if kind == "sweep":
 		mi.mesh = _arc(120.0)
-	elif kind == "ribbon":
+	elif kind in ["ribbon", "xray"]:
 		_prewarm_strip(mi.mesh)
 		mi.set_meta("strip", true)
 	return mi
@@ -514,6 +515,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	if layer.has("cut"):
 		e["cut"] = float(layer["cut"])
 		e["h"] = h
+	if layer.has("fly") and o.get("to") is Vector3:     # it flies to the kit's `to` over "fly" s, then hangs there
+		var to: Vector3 = o["to"] + Vector3(0, float(layer.get("y", 0.0)), 0)
+		e.merge({"from": p, "to": to, "fly": maxf(0.01, _num(layer, "fly", o))})
 	if o.get("on") is Node3D:
 		e["on"] = o["on"]
 		e["off"] = p - (o["on"] as Node3D).global_position
@@ -737,6 +741,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	if holds.has(key):
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
+		holds[key]["pts"] = extra.get("pts")
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -759,7 +764,8 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 			continue
 		if kind == "string":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
-				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
+				var string_kind := "xray" if layer.get("xray", false) else "ribbon"
+				layers.append({"node": _string_node(layer, h, string_kind), "layer": layer, "n": 0})
 			continue
 		var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		var n := _aim_emitter(node, kind, layer, h, _way(layer, aim), o, lod)
@@ -772,7 +778,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		node.emitting = true
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
-	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at")}
+	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "pts": extra.get("pts")}
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
@@ -794,7 +800,7 @@ func _tick_holds() -> void:
 				node.global_position = _where(lay["layer"], hunter, base, aim)
 				_reaim(node, lay["layer"], aim)
 			else:
-				_draw_string(lay, hunter)
+				_draw_string(lay, hunter, e["pts"])
 
 ## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
 ## their own way, as a hose's fire does).
@@ -816,14 +822,24 @@ func _end_hold(e: Dictionary) -> void:
 		elif not lay.has("surface"):          # (a surface runs out the rest of its life)
 			node.visible = false
 
-## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.
-func _string_node(layer: Dictionary, h: Hunter) -> Node3D:
-	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
+## A thin glowing line through named anchors (a bowstring), or through the points the kit's hold passes ("pts"): a
+## mesh trail node drawn fresh each frame. An "xray" one draws over walls and rock.
+func _string_node(layer: Dictionary, h: Hunter, kind: String) -> Node3D:
+	var mi: MeshInstance3D = _take(kind, _string_build.bind(kind))
 	_paint(mi.material_override, layer, h)
 	mi.global_transform = Transform3D.IDENTITY
 	return mi
 
-func _draw_string(lay: Dictionary, h: Hunter) -> void:
+func _string_build(kind: String) -> MeshInstance3D:
+	var mi: MeshInstance3D = _surface_node("ribbon")
+	if kind == "xray":
+		if _xray == null:
+			_xray = Shader.new()
+			_xray.code = SURFACE.code.replace("render_mode ", "render_mode depth_test_disabled, ")
+		(mi.material_override as ShaderMaterial).shader = _xray
+	return mi
+
+func _draw_string(lay: Dictionary, h: Hunter, given: Variant) -> void:
 	var mesh: ImmediateMesh = (lay["node"] as MeshInstance3D).mesh
 	mesh.clear_surfaces()
 	var cam := get_viewport().get_camera_3d()
@@ -832,7 +848,9 @@ func _draw_string(lay: Dictionary, h: Hunter) -> void:
 	var layer: Dictionary = lay["layer"]
 	var half := float(layer.get("size", 0.05)) * 0.5
 	var view := -cam.global_basis.z
-	var pts: Array = (layer["through"] as Array).map(func(a): return anchor_pos(h, String(a)))
+	var pts: Array = given if given is Array else []
+	if pts.is_empty():
+		pts = (layer["through"] as Array).map(func(a): return anchor_pos(h, String(a)))
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in pts.size():
 		var along: Vector3 = pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]
@@ -865,6 +883,9 @@ func _process(delta: float) -> void:
 			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
 		if e.has("follow") and is_instance_valid(e["follow"]):
 			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
+		if e.has("fly"):
+			var flown := minf(float(e["t"]) / float(e["fly"]), 1.0)
+			(e["node"] as Node3D).global_position = (e["from"] as Vector3).lerp(e["to"], flown)
 		if e.has("on") and is_instance_valid(e["on"]):
 			(e["node"] as Node3D).global_position = (e["on"] as Node3D).global_position + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
