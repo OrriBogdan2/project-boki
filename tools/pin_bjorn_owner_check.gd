@@ -144,8 +144,9 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.4, hold)
 	var up := n.visible
 	P.stun_t = 0.3
-	step(m, 0.1, hold)
-	ok("114 needle: a stun drops it", up and not n.visible, "up %s visible %s" % [up, n.visible])
+	step(m, 0.3, hold)
+	ok("114 needle: a stun winds it back into thread and drops it", up and not n.visible,
+		"up %s visible %s" % [up, n.visible])
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.0)
