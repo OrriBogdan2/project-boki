@@ -10564,3 +10564,4 @@ READY ext/anim-downed-wisp af90e244b66 (wisp-check reads every frame of the down
 READY ext/boki-glide-pose 997f1533c67 (carried Boki glide pose: proc glide clip via BokiHomeClips, 0.15 s blend; coverage glide col proc for burrlet/cindle/puddlet; --glide-shots --boki)
 READY ext/vfx-cinder-blade-glow 0314ce6240 (Cinder palm glow builds with the RMB hold: flare size, heat, white-hot bloom; GPU before/after strip; VFX_QUALITY row 11)
 READY ext/vfx-grimble-dash 7a15798eb150212fed3453b6a6b9b96cd6a03cc5 (Grimble barge: gold dash trail + contact flash in content/vfx/dredge.json, orange puffs gone, GPU before/after strip)
+READY ext/vfx-meeko-c-column 7ca2ecccf45f (Meeko VFX colour C 2->3: pastel leaf/pink LMB orb+hit, pastel Hearthlight, leaf root ring, pink Kindled sparks; GPU strips)
