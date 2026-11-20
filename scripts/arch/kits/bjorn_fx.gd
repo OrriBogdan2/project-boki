@@ -15,11 +15,8 @@ extends Node3D
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden)
-## - Purify: the green light column coming down over the 1 s delay, then the rings
+## - Purify: the light column coming down over the 1 s delay, then the rings
 
-const GOLD := Color("ffc94a")
-const EMBER := Color("ff8a2a")
-const GREEN := Color("7dffb0")
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
@@ -58,8 +55,6 @@ const AEGIS_LEAN := 1.2
 const PLATE_N := 7
 ## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
 ## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
-const PLATE_COL := Color("f6e3a8")
-const PLATE_EDGE := Color("fff0b0")
 const PLATE_GLOW := 0.3        # the plates' own light (a block flashes over it)
 const EDGE_GLOW := 0.9
 const BROKEN_COL := Color("4a3a30")
@@ -73,8 +68,8 @@ var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
-var plate_col := PLATE_COL
-var edge_col := PLATE_EDGE
+var plate_col: Color
+var edge_col: Color
 var aegis_hit := 0.0
 var rise_t := 0.0
 var wakes: Array[MeshInstance3D] = []
@@ -110,7 +105,8 @@ func _ready() -> void:
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
-	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
+	var gold := _pal("main")
+	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", gold, true))
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", AimKit.hero_col(h), true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
@@ -118,16 +114,20 @@ func _ready() -> void:
 	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
-		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
-		KitShaders.param(wake, "color2", GOLD)
+		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", _pal("ember"), true))
+		KitShaders.param(wake, "color2", gold)
 		KitShaders.param(wake, "twist", 0.0)
 		wakes.append(wake)
 		wake_life.append(0.0)
-	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
+	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", gold))
 	column.material_override.set_shader_parameter("speed", -1.2)
 	# the zone: a lit rim on its edge, a soft falloff inside (the ground ring rule, VFX_QUALITY)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.0, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
+	disc = KitMeshes.inst(self, KitMeshes.band(0.0, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", gold))
 	KitShaders.param(disc, "edge", 1.0)
+
+## A colour of his palette (content/vfx/bulwark.json).
+func _pal(key: String) -> Color:
+	return Color(String((HeroVfx.data(h.arch).get("palette", {}) as Dictionary).get(key, key)))
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -190,9 +190,8 @@ func _build_aegis() -> void:
 	aegis.top_level = true
 	aegis.visible = false
 	add_child(aegis)
-	var pal: Dictionary = HeroVfx.data("bulwark").get("palette", {})
-	plate_col = Color(String(pal.get("slab", PLATE_COL.to_html(false))))
-	edge_col = Color(String(pal.get("ivory", PLATE_EDGE.to_html(false))))
+	plate_col = _pal("slab")
+	edge_col = _pal("ivory")
 	var plate := Models.toon(plate_col, false, PLATE_GLOW)
 	var edge := Models.toon(edge_col, false, EDGE_GLOW)
 	plate.set_shader_parameter("rim_amount", 0.6)
@@ -329,11 +328,11 @@ func _whirl(pv: Node3D, delta: float) -> void:
 	var head := _head_world() - centre
 	orbit_trail.scale = Vector3.ONE * Vector2(head.x, head.z).length() * ORBIT_PAST / ORBIT_OUT
 	KitShaders.param(orbit_trail, "power", ORBIT_POWER * lerpf(1.0, ORBIT_FAST, spin_k) * whirl_k)
-	_place_glint(pv)
+	_place_glint()
 
 ## The glint on the hammer head: it grows with the charge, and in the perfect window it burns bigger,
 ## whiter and pulses fast.
-func _place_glint(pv: Node3D) -> void:
+func _place_glint() -> void:
 	if not glint.visible:
 		return
 	glint.global_position = _head_world()
@@ -385,16 +384,14 @@ func aegis_hide() -> void:
 func aegis_rise(at: Vector3) -> void:
 	rise_t = RISE_T
 	aegis.scale = Vector3(1.0, 0.05, 1.0)
-	h.m.fx.dust(at, 14)
-	h.m.fx.burst(at + Vector3(0, 0.2, 0), PLATE_EDGE, 8, 3.0, 0.5, 8.0, 1.6, Vector3.UP, 40.0)
+	HeroVfx.of(h.m).play(h, "aegis_up", at, Vector2.ZERO)
 
 ## A block: the whole wall flashes and gold sparks fly off its face at `at`.
 func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
-	h.m.fx.spark(at, out, AimKit.hero_col(h), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
-	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
+	HeroVfx.of(h.m).play(h, "block", at, Vector2(out.x, out.z).normalized())
 
 ## Broken: the shared shield break (ShieldBreak) across the wall, like every other shield.
 func aegis_break(at: Vector3) -> void:

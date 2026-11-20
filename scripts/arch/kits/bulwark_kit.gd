@@ -220,9 +220,9 @@ func move_k() -> float:
 		k = 0.0
 	return k
 
-## The shared charge ring at his feet burns in his gold; the hammer head carries the hand tell (BjornFx).
+## The shared charge ring at his feet burns in his own ivory; the hammer head carries the hand tell (BjornFx).
 func charge_color() -> Color:
-	return BjornFx.GOLD
+	return AimKit.hero_col(h)
 
 func charge_orb() -> bool:
 	return false
@@ -935,7 +935,7 @@ func _mend_burst() -> void:
 		if o != h and o.downed:
 			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
 			kickstarts += 1
-			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
+			HeroVfx.of(m).play(h, "mend_revive", o.pos, Vector2.ZERO)
 		elif not o.downed:
 			o.heal(heal)
 			if o == h and not wall.is_empty():
@@ -946,8 +946,7 @@ func _mend_burst() -> void:
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
 	fx.purify_burst(at, r)
-	m.fx.ring(at, r, AimKit.hero_col(h), 0.45)
-	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
+	HeroVfx.of(m).play(h, "mend_burst", at, Vector2.ZERO, {"r": r})
 	m.sfx("bjorn_purify_burst", at, 0.0)
 	net_ring(at, r, AimKit.hero_col(h))
 
