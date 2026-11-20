@@ -1389,7 +1389,8 @@ func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, 
 	K._slam(0.5, true)
 	step(m, 0.6)
 	var moved := Vector2(T.pos.x - at0.x, T.pos.z - at0.z).length()
-	ok("rmb: the slam pushes nobody (stun and Dunk only, no knock)", moved < 0.05 and T.hp < 200.0, "moved %.2f m" % moved)
+	var still := moved < 0.05 and T.hp < 200.0
+	ok("rmb: the slam pushes nobody (stun and Dunk only, no knock)", still, "moved %.2f m" % moved)
 	var hits := []
 	for void_under in [false, true]:
 		reset.call()
@@ -1413,7 +1414,8 @@ func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, 
 			W.level[i] = saved[i][1]
 	ok(
 		"rmb: the Dunk over the abyss still fires without the push, with its bonus",
-		hits[0][0] and hits[1][0] and hits[0][2] < -10.0 and hits[1][1] - hits[0][1] > float(K.slam_def()["dunk_void"]) * 0.8,
+		hits[0][0] and hits[1][0] and hits[0][2] < -10.0
+				and hits[1][1] - hits[0][1] > float(K.slam_def()["dunk_void"]) * 0.8,
 		"land %.1f void %.1f" % [hits[0][1], hits[1][1]]
 	)
 
