@@ -621,7 +621,7 @@ func _menu_header(arch: String) -> HBoxContainer:
 func _pick_grid() -> GridContainer:
 	var g := GridContainer.new()
 	g.columns = 5
-	g.add_theme_constant_override("h_separation", 6)
+	g.add_theme_constant_override("h_separation", 4)      # (tight: long Boki names widen the columns)
 	g.add_theme_constant_override("v_separation", 6)
 	return g
 

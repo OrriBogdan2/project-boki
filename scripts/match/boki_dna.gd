@@ -73,7 +73,7 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 			var fold := "ear2." if skel.find_bone("ear2.L") >= 0 else "ear1."
 			_turn(fold + "L", Vector3.RIGHT, -FOLD)
 			_turn(fold + "R", Vector3.RIGHT, -FOLD)
-		"tufted":
+		"tufted" when skel.find_bone("ear1.L") >= 0:
 			var tuft := Models.sphere(0.03, 6)
 			var bone := "ear2." if skel.find_bone("ear2.L") >= 0 else "ear1."
 			var tip: Vector3 = frame["ear_tip"]
