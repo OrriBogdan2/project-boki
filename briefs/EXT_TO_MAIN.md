@@ -10392,3 +10392,4 @@ READY ext/vfx-hurt-flash-v95 6462008de4 (hit flash: shared pale-surface glow boo
 READY ext/feel-cast-turn-rate 7b4ec9b14f3f306b18828250de9f7ade82e4e356 (cast turn rate: 6 held casts frame-stepped, all match 1280 deg/s; match rows + footage cites, no factor needed)
 READY ext/merge-lane-n19g-1119 0a8919f4b6 (merge lane n19g: +feel-one-tuning-home port (44 hunter feel consts -> tuning.json feel); 5 of 25 in, 6 archived, 14 HARD per n19g-RESULT.md)
 READY ext/name-card-wrap-1119 2840cdaa94 (name card wrap: real-flow check, wrap floor, sweep)
+READY ext/merge-lane-n19h-1119 03878d2a979bee60029e0e83c1d308d002b4938f (lane n19h: 4 old branches ported, 16 HARD; NEW-RED 0 on targeted checks)
