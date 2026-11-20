@@ -184,6 +184,7 @@ func done(m: Match) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Content.rules("merge_forms")["fusion_enabled"] = true      # (the kits' bonded R and the controls here use Fusion)
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)

@@ -66,7 +66,8 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
-var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
+var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
+var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -158,13 +159,19 @@ func teardown() -> void:
 func move_k() -> float:
 	if commit_left() > 0.0:
 		return 0.0
-	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	var k := 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	return k * GunslingerUlt.WINDUP_MOVE if x_wind_left() > 0.0 else k
 
 ## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
 func fire_ok() -> bool:
 	return not dry and commit_left() <= 0.0
 
-## The source's recoveries (E_RECOVER, GunslingerUlt.COMMIT): she stands, and no ability, jump or Shift goes.
+## The ult's wind-up left (s): she walks slowed; the rifle, jump, Shift and abilities all still go (a held LMB
+## string goes on through the tap, the cancel rows' "both").
+func x_wind_left() -> float:
+	return maxf(0.0, x_wind_end - float(m.time))
+
+## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
 ## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
 func commit_left() -> float:
 	return maxf(0.0, commit_end - float(m.time))
@@ -211,7 +218,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
-		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t))
+		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t), {"k": _faded_now()})
 	if res > 0.0:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
@@ -242,8 +249,9 @@ func _tick_lmb() -> void:
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
 			var mouth := _gun_muzzle()
-			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2)
-			HeroVfx.of(m).trail(h, "shot_trail", sd["node"])
+			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2, faded)
+			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -282,6 +290,18 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
+## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string is
+## past its first ten rounds. The shot, trail and hit looks (content/vfx/gunslinger.json) shrink by it ("size_k").
+func _faded(sus_k: float) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
+## The decay of the round landing now: a hit does not carry its round's sus_k, so this reads the string's count
+## (a round or two ahead at most).
+func _faded_now() -> float:
+	var rounds := float(h.wpn.get("sustain_rounds", 10))
+	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
+
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -310,8 +330,8 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "from": h.pos}
 	play("gunslinger_dash")
-	# green-fire streaks off her chest and heels and a kick of dust. No rings or discs: those mean damage or an
-	# area in this game
+	# green-fire streaks off her chest and heels; the scrape's dust trickles under her (_tick_slide). No puff,
+	# rings or discs: those mean damage or an area in this game
 	vfx("slide")
 	return true
 
@@ -360,7 +380,6 @@ func _tick_slide(dt: float) -> void:
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
-				vfx("slide_hold")
 				return
 			slide["tap"] = true
 		_skid(t, dd)
