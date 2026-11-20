@@ -165,6 +165,7 @@ const CHECKS := {
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
 	# the owner's movement rules in DECISIONS, every Hunter
 	"--move-rule-guard-check": ["res://tools/move_rule_guard_check.gd", "move_rule_guard_check", null],
+	"--fps-feel-check": ["res://tools/fps_feel_check.gd", "fps_feel_check", null],      # same movement at 30/60/144 fps
 	"--fsm-check": ["res://tools/fsm_check.gd", "fsm_check", null],      # every Fsm's table (M1)
 	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
@@ -453,6 +454,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
+	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],  # slam impact hold
 	# one reader for ability words
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
@@ -828,6 +830,7 @@ const CHECKS := {
 	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],  # down/death card
 	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],      # the Boki box tags, bond %
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
+	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
