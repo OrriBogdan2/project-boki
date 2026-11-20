@@ -408,9 +408,9 @@
 "semicolon": 12
 },
 "scripts/match/ent.gd": {
-"long_line": 1,
+"long_line": 0,
 "nested_ternary": 1,
-"semicolon": 5
+"semicolon": 4
 },
 "scripts/match/exit_models.gd": {
 "long_line": 23,
@@ -950,7 +950,8 @@
 },
 "tools/hatch_check.gd": {
 "long_line": 10,
-"semicolon": 1
+"semicolon": 1,
+"shadow": 1
 },
 "tools/hero_check.gd": {
 "long_line": 3,

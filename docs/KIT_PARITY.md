@@ -122,7 +122,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 - **Glove band:** gloves must not outshine the kits' E. `--glove-band-check` holds every glove at every rarity to the 12 E abilities' maximum for damage per cooldown second (4.38), CC seconds per cast (4.4) and travel metres per cast (14). Launch gloves keep their numbers in content `launch` (m/s, m). Gust's forward launch went 9 to 7.5 m/s (15.9 to 13.3 m, over Thief's 14 m blink-to-knife before).
 - **Keys:** R = hunter ult (JSON slot `x`), X = Fuse, G = Boki (owner).
 - **Run speed, ground accel, gravity, fall cap:** match [D]. **Stopping, air control, dash carry:** differ, see gaps 2 to 4 (re-audit 11-11: stopping and carry **done**, air control **owner**).
-- **Buffer:** `DashFlow.BUFFER_S` 0.15 s past a dash's end; the data gives no window.
+- **Buffer:** `Loco.press_buffer` (tuning.json) 0.15 s past a dash's end; the data gives no window.
 - **Cooldowns below** read ours / source level 1 [D].
 
 **0.24.4 recheck (2026-11-12, main 88b06b9e7, slice Vex, Zedran = Kael, Hem = Lace, Cinder).** The last column of the four Hunter tables and of the Kael, Lace, Vex and Cinder rows in the ranges table says `still done`, `closed` (done since the audit), `changed` (an owner change) or `regressed`. Read from `content/` and the kit code, not played in `--arena` (no row needed eyes; Hem's ledge walk, gap 8, stays open unplayed). Combo checks gunslinger 126, juggernaut 210, archer 167, ashwick 125 PASS, 0 FAIL; `--kit-parity-check`, `--dash-flow-check`, `--move-feel-check` 0 failures. `--ttk-check` is the known red tracking bar (22 rows FAIL, 11 of them slice; ours / source: Vex LMB 3.25, combo max 0.78; Kael LMB 0.65, combo 0.55 and 0.59; Cinder LMB 0.78 and 0.74, combo 0.76 and 0.61; Hem passes). Not re-read against the source this time: CC numbers (Zedran's Meteor Drop ring slow 40% is gone with the down slam, 0a97eddab), the felt-dash and health tables (weight classes 124/145/193 unchanged).
@@ -219,9 +219,8 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] · **open** |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), cast 2-3 bh away | radius match; range not determinable: cast only on a near dummy, the clamp is never reached |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), no slam in the kit | aegis match; slam not determinable: the source has no slam (its only knock is the Empower Shield Bash augment, unmeasured), and DECISIONS 2026-11-07 cuts the Shield Slam (left to the owner). Clips: oath (bjorn) 0282-0361, one augmented hit at 0309 with no reach or cone recorded |
+| Albert | RMB aegis, slam | 6.0 wide, 1.6 out, bowed 0.55 (blocks the 141 deg it spans), 2.6 at 100 | slab 129-133 px = 3.3 bh wide (6.0), middle 0.9 bh out, ends 0.3 bh back (re-measured, docs/heroes/bulwark.md gap 8), bash not seen | aegis match; slam [?] |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] · **open** |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] · **open** |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
@@ -477,7 +476,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
 |---|---|---|---|---|
 | LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | A round every 0.13 s held (0.12 on the clock, frame-rounded), first 0.07 s after the press; 6.0, 5.7, 5.4, 5.1 on the first hits, 3.0 by round 10; 82 dmg in 3 s. **match** |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Still named Burr Charge: owner 11-08 Coin Blast not on this branch (gap A). **match, rename missing** |
+| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Named Coin Blast and flicked from her free hand since 11-17 (gap A closed). **match, rename missing** |
 | Q | none | glove | ours | not measured (ours) |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | Beam at 0.63 s, 36 dmg (+20% on Dazed, passes a wall), cd 11.5 s, shave 20%/30%. Still fires from the rifle: owner 11-08 Palm Lance (palm origin) not on this branch (gap A). **match, palm missing** |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) | Impact 1.62 s after the press (24, 36 in the core), then 3.5 per tick, 6 ticks 0.5 s apart over 3 s (21), cd 42 s. **match** |
@@ -809,7 +808,7 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 - Vex Coin Blast and Palm Lance: **not on this branch**, gap A.
 
 **Gaps, none an integration regression.**
-- **A. Vex Coin Blast / Palm Lance (owner 11-08).** `content/archetypes/gunslinger.json:59` still "Burr Charge", `:92` still "Longneedle", fired from the rifle. The work is READY as ext/vex-coin-palm-1108 `0478765f6` (9 commits on ext/vfx-gunslinger) and was never merged into the integration or main.
+- **A. Vex Coin Blast / Palm Lance (owner 11-08).** `content/archetypes/gunslinger.json:59` still "Burr Charge", `:92` still "Longneedle", fired from the rifle. The work is READY as ext/vex-coin-palm-1108 `0478765f6` (9 commits on ext/vfx-gunslinger) and was never merged into the integration or main. **Closed 11-17 (ext/vex-coin-palm-1117, owner 11-17 playtest):** RMB is the Coin Blast, a gold coin flicked from her free hand; E is the Palm Lance, charged at and fired from her open left palm; the gun arm stays down in both. Numbers unchanged.
 - **B. Vex hold slide is 10.3 m, not 7.** `scripts/arch/kits/gunslinger_kit.gd:369-372`: a held Shift joins the slide at the tap's 0.18 s mark, after the skid has already gone about 3.2 m; `:392` then adds the data's 7 m. Main did the same (9.1 m). Source length for a hold `[?]`; decide whether the 7 m includes the skid.
 - **C. Zone ticks run 0.52 s, not 0.5.** `scripts/arch/kits/gunslinger_ult.gd:181-183` (Cinderfall) and `scripts/arch/kits/archer_kit.gd:401-404` (Hail Wall) reset the tick timer and drop the remainder, so 0.5 s costs 31 frames. 3% slow, same on main. Keep the remainder (`+= every`) in both.
 

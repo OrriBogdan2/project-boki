@@ -116,3 +116,8 @@ A2 is a texture-only grade of the depth1117 master (same mesh, UVs and images 1-
 bust A chest without a re-port: master `~/meshy/v95/Cinder/board1117/A2_bust_m20.glb` = bust_m20's mesh + A2's three changed
 images. In this glb only `v95`, `v95c` and `v95d` changed (`tools/art1/glb_image_swap.py`), each = game image + resize(A2) -
 resize(bust_m20) at the game size (JPEG q92); mesh, rig, clips, tail and jets byte-equal.
+
+**Bust r12 (11-18, ext/hunter-picks-1118):** owner 11-18 "a for cinder" on ~/meshy/cinder-bust2-1118 (A = r12: chest -12.5%
+volume vs the -20% bust A, -30% vs depth1117). `game/r12.glb` was built on e9ed681b39's glb (before the A2 colours), so only
+its changed buffer views go in: POSITION and NORMAL of primitives 4 and 6 (views 38, 39, 54, 55; 3,172 + 2,330 vertices,
+max 9.9 mm). Images, rig, skin weights, clips, UVs and indices byte-equal to the A2-colours glb.

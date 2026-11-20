@@ -17,7 +17,8 @@ match end they go home and the thief keeps a soul echo. WISP_DESIGN_OPEN.md Q6/Q
 ## Decision
 Option 2, in `KinSteal`. Numbers in `content/rules/boki_summon.json` "steal": loose 10 s, grab 0.6 s hold within
 2 m, carry 2, passives at 50 % clamped at the carry cap, one summon at half the window (min 5 s) when your own Boki
-is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt.
+is resting or gone. The wisp pops 2.5 m off its fallen hunter so the grab never fights the stomp/revive prompt,
+with one `boki_downed` (`KinSteal.break_loose`).
 A thief who goes down (not only dies) scatters: the same moment that frees the owner's wisp. Ungrabbed wisps go
 back to their hunter, who keeps them for that down.
 Carry-passive stacking (Q8): `Hunter._refresh_kin_stats` sums your own Boki at 100 % and each stolen wisp at
@@ -33,3 +34,4 @@ Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus.
 - HUD: up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside an ally-blue thief
   ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's squad row wears
   a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups. `--stolen-hud-check`.
+- `--passive-stack-check` covers the Q8 stacking (own 100 %, stolen 50 %, clamp at the carry cap, 2 stolen, passives leave on escape or match end).

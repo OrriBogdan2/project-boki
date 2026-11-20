@@ -75,7 +75,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 		var length := clips.lib.get_animation(clip).length
 		var up = mv.get("upper", false)
 		var fade_in := float(mv.get("fade", WardenClips.FADE))
-		var fade_out := float(mv.get("fade_out", WardenClips.FADE_LOCO))
+		# (a "blend_out" move hands back to the legs over its last blend_out s: that is its fade out)
+		var fade_out := float(mv.get("fade_out", mv.get("blend_out", WardenClips.FADE_LOCO)))
 		var gaps: Array = []     # [stand in, stand out, walk in, walk out], each [m, point]
 		var full_up: bool = up is bool and up        # ("moving": upper only while he walks)
 		for mode in [[stand, full_up], [walk, full_up or up is String]]:

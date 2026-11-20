@@ -161,6 +161,7 @@ var seeds := {}
 var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
+var assists := 0             # takedowns a teammate got that your hit or CC helped (DashReset)
 var dmg_done := 0.0
 var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
 var belt_free: Dictionary = {}                # issued charges, used first and never taken home
@@ -236,7 +237,7 @@ var phase_t := 0.0            # Light's Phase Step: shots pass through you while
 var dash_pass := {}           # a grammar dash or a kit dash: what it does to foes you pass through {hit, opts}
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
-var idle_fire := 0.0
+var idle_fire := 99.0          # s since the last shot or ability; starts expired so a fresh spawn is not "in a fight"
 var dropping := false         # gliding down from the sky at the start of a match
 var drop_from := Vector2.INF  # where the drop started
 var diving := false           # the skydive part of the drop, before the glider opens
@@ -377,6 +378,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var n := DashState.base_charges(dodge_def, cdat)
+	if ak and ak.single_dash():
+		return 1.0
 	return ak.dash_charges(n) if ak else n
 
 func dash_regen() -> float:
@@ -965,7 +968,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
-const DASH_BUFFER := 0.18
 const DASH_KEEP := 0.5        # s: a press inside a dash this short waits for its end (a longer lock drops it)
 
 func do_dash() -> void:
@@ -980,7 +982,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
+		dash_buf = Loco.press_buffer + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
 		return
 	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1012,6 +1014,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
+var turn_cost := TurnCost.new()     # what a sharp turn costs a chained dash
 var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
@@ -1053,6 +1056,7 @@ func dash_with(e: Dictionary) -> void:
 	if e.has("dir") and (e["dir"] as Vector2).length() > 0.01:
 		d = e["dir"]
 	roll_dir = d.normalized()
+	turn_cost.start(Vector2(vel.x, vel.z), roll_dir, base_speed, m.time)
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
@@ -1566,6 +1570,7 @@ func sim(dt: float) -> void:
 	inp["kin_ab"] = false
 	for k in PRESS_KEYS:
 		inp[k] = false
+	FireTap.stepped(self)
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
@@ -1652,15 +1657,17 @@ func _physics(dt: float) -> void:
 	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
+		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)   # tuning.json speed less the turn cost
 		if not shove.is_empty():
 			_shove_along(dt)
 		if not dash_pass.is_empty():
 			_pass_along(dt)
-		if roll_t <= 0.0 and grounded:
+		if roll_t <= 0.0:
 			var run_v := HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
-			dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
-			hv = run_v
+			var air_v := turn_cost.hand_over(hv, run_v)      # a sharp turn hands over less (TurnCost)
+			if grounded:
+				dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
+			hv = run_v if grounded else air_v
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
@@ -2561,6 +2568,8 @@ func perk_n(id: String) -> int:
 
 ## Can this perk still be offered to you (not at its stack limit)?
 func perk_open(id: String) -> bool:
+	if id == "secondwind" and ak and ak.single_dash():
+		return false
 	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,

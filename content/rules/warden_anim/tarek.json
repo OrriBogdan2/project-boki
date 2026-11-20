@@ -68,6 +68,10 @@
 			"clip": "rmb_leap",
 			"hold_from": 0.3
 		},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
 		"breah_slam": {
 			"clip": "rmb_slam",
 			"time": [[0, 0], [0.66, 0.66], [0.76, 0.86], [1.51, 1.367]],
@@ -160,5 +164,19 @@
 		"jaw",
 		"lip.L",
 		"lip.R"
+	],
+	"beats": {"win": {"clip": "emote_toss"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["breah_wind", 0.5, "breah_crouch"],
+		["breah_wind", 0.5, "breah_punch"],
+		["breah_spine_aim", 0.4, "stun"],
+		["breah_spine_aim", 0.4, ""],
+		["breah_crouch", 0.4, "breah_lunge"],
+		["breah_crouch", 0.4, "breah_leap"],
+		["breah_crouch", 0.3, ""],
+		["breah_crouch", 0.4, "breah_raise"],
+		["glide", 0.4, "breah_dive"],
+		["breah_raise", 0.1, "breah_punch"],
+		["breah_skate", 0.4, "breah_spine_aim"]
 	]
 }
