@@ -38,7 +38,9 @@ Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, 
 The garden's moments (SFX_AUDIT row 22), each its own cue instead of the stock unlock, in G like the home theme
 (compose.py home_day, G mixolydian), notes from G major pentatonic so they sit in either:
   garden_egg       an egg laid in the Nook or ready in the Incubator: a soft shell tap and a warm low G-D-G
-  garden_friends   two Boki become friends (or one with you a bond rank): two chirps answering, a third apart
+  garden_friends   two Boki become friends: two chirps answering, a third apart
+  garden_bond_up   a Boki's bond with you goes up a rank: a slow rising G major run to a held bell and a warm "oh"
+                   (kin_bond_moment.gd; the stat chime is two notes, the level chime three, this one five and longer)
   garden_chime_part  a new part or a lean's fleck shows on a Boki: a sparkle down onto a single plucked B
   garden_cup_sprout / _bloom / _crown   a cup round won, growing step by step: a wooden clack and a G run of three,
                    four and five notes, the Bloom with a small bell, the Crown with a held bell over a G chord
@@ -504,6 +506,15 @@ def friends(i):
     return B.soft(B.room(mix(0.5 * a, 0.5 * b, 0.7 * under), 0.45), 5200)
 
 
+def bond_up(i):
+    """A bond rank: five plucks up G4 B4 D5 G5 B5, a G6 bell ringing out over them and a warm 'oh' under the top."""
+    run = [at(pluck(f * j(i, 0.01), 0.35 if k < 4 else 0.9, 0.12 if k < 4 else 0.3), 0.1 * k)
+           for k, f in enumerate([392, 494, 587, 784, 988])]
+    bell = at(0.35 * S.chime(1568, 0.9, 0.3), 0.4)
+    ooh = at(B.vowel(440 * j(i, 0.03), 660, 0.5, 'oh', 1.3, breath=0.15) * 0.25, 0.3)
+    return B.soft(B.room(mix(*run, bell, ooh), 0.5), 5600)
+
+
 def chime_part(i):
     """Something new shows: three glints falling D7-B6-G6, landing on a plucked B5 with a small 'oh'."""
     sparkle = [at(glint(f * j(i + k, 0.01), 0.12) * (0.5 - 0.1 * k), 0.05 * k) for k, f in enumerate([2349, 1976, 1568])]
@@ -620,6 +631,7 @@ def main():
     S.takes_cat('garden_locked', locked, 1, 'step')
     S.takes_cat('garden_egg', egg, 1, 'boki')
     S.takes_cat('garden_friends', friends, 2, 'boki')
+    S.takes_cat('garden_bond_up', bond_up, 2, 'boki')
     S.takes_cat('garden_chime_part', chime_part, 2, 'boki')
     S.takes_cat('garden_cup_sprout', cup(0), 0, 'boki')
     S.takes_cat('garden_cup_bloom', cup(1), 0, 'boki')
