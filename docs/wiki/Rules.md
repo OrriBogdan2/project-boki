@@ -1136,6 +1136,21 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | dive_height | 15 |
 | lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
 
+## first_objective (`content/rules/first_objective.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-expedition objective (scripts/match/first_objective.gd, drawn by scripts/ui/objective_tracker.gd): one short verb-first line under the minimap with a pin or edge arrow on what it names, until the save has got out of one expedition (Save tutorial first_objective). near: metres from the wild Boki at which 'Find' turns into 'Knock it out'; far: metres more before it turns back; keep: metres a farther Boki must be closer by before the pin moves to it; yard: metres from the outpost at which 'Go to' turns into 'Start the uplink'; done_s: seconds a finished step stays ticked under the line. %F is the interact key, %d the uplink's charge, %s a countdown. |
+| near | 18 |
+| far | 8 |
+| keep | 12 |
+| yard | 7 |
+| done_s | 2.2 |
+| steps | [["find", "Find a wild Boki", "Wild Boki", "Found a wild Boki"], ["knock", "Knock it out", "Knock it out", "Knocked it out"], ["scan", "Scan it: hold %F beside it", "Scan it", "Scanned: it is in your box"], ["leave", "Go to the outpost", "Outpost", "Got out"]] |
+| leave | {"wait": "Go to the outpost (opens %s)", "go": "Go to the outpost", "start": "Start the uplink: hold %F", "hold": "Hold the yard: uplink %d%%", "back": "Get back in the outpost yard", "contested": "Clear the yard of rivals", "lift": "Step into the lift"} |
+
 ## garden_daily (`content/rules/garden_daily.json`)
 
 The garden's daily hooks (scripts/home/garden_wishes.gd, scripts/home/garden_away.gd; briefs/design/GARDEN_MODERN.md section 5, ranks 1 and 3). Each garden day three Boki wish for something (a need back up); granting one is a gift, nothing is ever taken for missing a day. Coming back after time away brings small gifts. Nothing here lowers a need or a stat.
