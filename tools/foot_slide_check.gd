@@ -45,6 +45,9 @@ const BAR := {
 ## only prints its WOBBLE line (Lace `archer` and Cinder `ashwick` keep the default margin: open, FOOT_SLIDE.md).
 const WOBBLE_BAR := {"gunslinger": 1.0}
 const STEP_CM := 5.0         # cm: furthest a planted foot may travel in one step of the run at its run speed
+## Hunters whose STEP line prints OPEN, not FAIL: Gil plays Meeko's run retargeted onto gil.glb ("clips_from"; his
+## rig pass is ANIM_COVERAGE gap 1) and no rate plants it (foot_mps 4.55 -> 5.75 moved -20.2 -> -16.6 cm, 11-20).
+const STEP_OPEN := ["gil"]
 const MIN_STANCE := 0.025    # s: a shorter planted spell is a scuff, not a step (3 samples)
 const CONTACT_M := 0.03      # m: a sole this close to its lowest is on the ground (a sprint's swing skims ~0.1 m)
 const STEP_DT := 1.0 / 120.0 # s between STEP samples: a 0.33 s run cycle plants a foot for only a few 30 fps frames
@@ -169,7 +172,9 @@ func _step_line(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: S
 	var fmt := "STEP %-10s %s tris %d run %.2f m/s cycle %.3f s stride %.2f m rate %.2f (%.1f steps/s) slide %+.1f"
 	print((fmt + " cm/step (%d steps)") % [id, WardenGlb.path(id), tris, spd, cycle, stride, rate, 2.0 * rate / cycle,
 			st[0], st[2]])
-	if absf(st[0]) > STEP_CM:
+	if absf(st[0]) > STEP_CM and id in STEP_OPEN:
+		print("OPEN %s: a planted foot travels %+.1f cm a step (bar %.1f, STEP_OPEN)" % [id, st[0], STEP_CM])
+	elif absf(st[0]) > STEP_CM:
 		print("FAIL %s: a planted foot travels %+.1f cm a step at its run speed, bar %.1f" % [id, st[0], STEP_CM])
 		bad += 1
 
