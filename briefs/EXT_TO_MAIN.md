@@ -10400,3 +10400,4 @@ READY ext/hunter-edge-speckle ae7419ca0e (bulk-rebase: origin/main merged in mec
 READY ext/vex-quill-ammo-1117 ccb3c6301d (bulk-rebase: origin/main merged in mechanically, was d984262dd4; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/parity-meeko-heals ae24a928b0 (bulk-rebase: origin/main merged in mechanically, was 5ddb8b6541; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/p19-models-split-1118 d2a14e5e277a (P19 2/2 re-merged with main: models.gd split into 11 parts behind a facade; AbilityText conflicts resolved = main's code in gdformat'd layout, tutorial_text = main's; --check 0 fail, --ability-text-check, --fsm-check green, health --strict OK)
+READY ext/tut-glove-stall 8caabf54404 (tutorial resume goexit->wayout: Continue after wayout/uplink/defend no longer loops on the landing; resume+fight checks hardened; playthrough 10/10)
