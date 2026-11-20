@@ -19,7 +19,7 @@ const WANT := {
 	"thief": {"cooldown": [21.5, 19.0], "dmg": [4.95, 5.4], "rim_dmg": [3.41, 3.72]},
 	"dolm": {"cooldown": [40.0, 35.0], "time": [9.5, 12.0]},
 	"ostra": {"cooldown": [65.0, 60.0], "time": [3.5, 3.5]},
-	"tender": {"cooldown": [42.0, 38.0], "heal_ps": [8.75, 10.5]},
+	"tender": {"cooldown": [42.0, 38.0], "heal_ps": [6.625, 7.95]},
 	"gil": {"cooldown": [90.0, 90.0], "dmg": [18.0, 18.0]},
 }
 

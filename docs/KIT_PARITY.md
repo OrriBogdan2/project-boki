@@ -29,7 +29,7 @@ X was the same at R ranks 1 and 2 (rank 2 only lengthened the Merge) and R stopp
 | Motley (`ostra`) | Singularity 70s (117) | -5s, x2 | Nightwell cd 70 -> 65 -> 60s | match |
 | Neve (`rimewright`) | Chilling Finale 80s (36) | +40% dmg, -10s / -10s | Rimelock cd 80 -> 70 -> 60s; dmg 18 -> 25.2 -> 25.2 | match |
 | Sable (`thief`) | Fusillade 50s (101) | +10% dmg, -5s, x2 | Encore cd 24 -> 21.5 -> 19s; dmg 4.5 -> 4.95 -> 5.4; rim 3.1 -> 3.41 -> 3.72 | match (cd scaled) |
-| Meeko (`tender`) | Elluna's channel heal 60s (13) | +25% heal, -5s, x2 | Hearth Call cd 46 -> 42 -> 38s; heal 7 -> 8.75 -> 10.5/s | match (cd scaled) |
+| Meeko (`tender`) | Elluna's channel heal 60s (13) | +25% heal, -5s, x2 | Hearth Call cd 46 -> 42 -> 38s; heal 5.3 -> 6.63 -> 7.95/s | match (cd scaled) |
 | Gil (`gil`) | none (ours) | [?] | Tidal Wave 90s at every rank (as before) | [?] kept |
 
 ## Still open: 0.24.5 re-read (ext/release-integ-0245 272368589 and the 0.24.6 waves, 2026-11-11)
