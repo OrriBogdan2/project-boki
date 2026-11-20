@@ -247,7 +247,7 @@ uniform float power = 1.0;
 uniform float spin = 3.0;
 // how far the streaks lean round (a spiral)
 uniform float twist = 0.6;
-// 0: brightest mid-band; 1: a zone disc (inner radius 0), a lit rim on the outer edge and a soft falloff to
+// 0: brightest mid-band, 1: a zone disc (inner radius 0), a lit rim on the outer edge and a soft falloff to
 // nothing at the centre (the ground ring rule: rim, alpha 0.25 or less inside)
 uniform float edge = 0.0;
 """ + _LAYER_UNIFORMS + """
