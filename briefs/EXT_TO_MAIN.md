@@ -10548,3 +10548,4 @@ READY ext/kael-guard-edges 46d3d03ddacfe889a6f3c973b9a0c4d98bf1d3d4 (Kael guard 
 READY ext/neve-skate-dart-dmg 9586ccc0d3 (docs only: rimewright gap 6 marked closed; skating dart 2.0 and the 2x assert were already on main)
 READY ext/farm-feed-shapes-boki 1a361e03bc (food shapes the Boki: per-type size lean on model + card line, tint already by lean; --feed-check ten-meal rows; lean-shots --meals)
 READY ext/anim-land-blend-pops c2dfa29ace (--cast-pop-check POPDEG pass: all 12 clip Hunters through land, glide exit, dash end, cast end at 60 fps; blend times + arm-swing mean fix; 12 of 13 now under 25 deg, Albert/Tenzo/Motley held at ceilings)
+READY ext/ui-button-sfx 202943053d62c6e9f42608ce675bd302450766eb (silent raw Buttons wired via UI.sfx, --ui-sfx-check fails on unhooked Button)
