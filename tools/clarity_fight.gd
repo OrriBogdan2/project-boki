@@ -15,9 +15,17 @@ const GAP := 6.0  # m between the squads at the start
 const LEAD_S := 2.0  # s of fight before the first counted frame
 const EVERY_S := 1.0  # s between counted frames
 const NEAR_K := 1.0  # body widths round a Hunter's screen box that count as on it
+## --clarity-check's element budget: "kind what" prefix -> the most element-Hunter pairs a frame, on average.
+## Plates, ownership rings, telegraphs and your own damage numbers are gameplay and not held here.
+const BUDGET := {
+	"text": 1.0,  # words on a Hunter: only your own Boki's ability name, now and then (no callout words)
+	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
+	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
+	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
+}
 
 
-## Plays fight `archs` (6 ids, yours first) and calls `on_frame(m, i)` on each of `frames` frames, the camera on the fight.
+## Plays fight `archs` (6 ids, yours first) and calls `on_frame(m, i)` on each of `frames` frames, the camera on it.
 static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> Match:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -47,7 +55,8 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		var rec := Save.new_kin(KIN[i], "", i * 7919)
 		rec["level"] = 8
 		var kit := {"arch": archs[i], "weapon": Arch.signature(archs[i]), "perk": ""}
-		var h := m.make_hunter("h%d" % i, side, Arch.weight(archs[i]), HeroTitle.base_name(archs[i]), "bot", rec, at, kit)
+		var pname := HeroTitle.base_name(archs[i])
+		var h := m.make_hunter("h%d" % i, side, Arch.weight(archs[i]), pname, "bot", rec, at, kit)
 		h.unlock_all()
 		h.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	for h: Hunter in m.hunters:  # each starts hit by a rival: bots leave a fresh rival alone unless provoked
@@ -157,7 +166,8 @@ static func _kind(v: VisualInstance3D) -> String:
 	if v is Sprite3D:
 		return "icon"
 	var mi := v as MeshInstance3D
-	if mi and (mi.mesh is TorusMesh or String(v.name).to_lower().contains("ring")):
+	var ringed := String(v.name).to_lower().contains("ring") or _what(v).contains("ring.gdshader")
+	if mi and (mi.mesh is TorusMesh or ringed):
 		return "ring"
 	return "fx"
 
@@ -174,6 +184,8 @@ static func _what(v: VisualInstance3D) -> String:
 	var mi := v as MeshInstance3D
 	if mi and mi.mesh:
 		var mat := mi.material_override if mi.material_override else mi.mesh.surface_get_material(0)
-		var sh := (mat as ShaderMaterial).shader.resource_path.get_file() if mat is ShaderMaterial and mat.shader else ""
+		var sh := ""
+		if mat is ShaderMaterial and mat.shader:
+			sh = (mat as ShaderMaterial).shader.resource_path.get_file()
 		w += " <%s %s>" % [mi.mesh.get_class(), sh]
 	return w
