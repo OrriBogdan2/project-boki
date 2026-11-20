@@ -1,15 +1,15 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 evening (current.json r3/meshy1112/graft/m4c_livehead: the owner's chest fix, m4c turnaround chest body under the live head, head_graft). Before that: LIVE 11-12 (prop1111/cand_A: body6/cand_B with the bust depth squeezed to the ref; the round-2 face). Earlier: Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
- "master": "~/meshy/v95/Sparkle/r3/meshy1112/graft/m4c_livehead.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md). LIVE 11-20 (job 20261119-233613-a5): Meshy multi-image-to-3d (meshy-7.1, 4 views, then Meshy remesh to 60k triangles so the decimation keeps the chest print) of the owner's 11-19 turnaround pick A (ta-audit-1119/sparkle/r4) with the crop-top hem raised to the bust underside; joints re-read on v95_grid.py renders, region/slot boxes and other anchors scaled x0.946 (this master is 5% shorter in the fit frame than m4c), 3 rods (rod_1 = rod_2 = the centre rod). Before: doll pass A on the m4c frame. LIVE 11-12 evening (current.json r3/meshy1112/graft/m4c_livehead: the owner's chest fix, m4c turnaround chest body under the live head, head_graft). Before that: LIVE 11-12 (prop1111/cand_A: body6/cand_B with the bust depth squeezed to the ref; the round-2 face). Earlier: Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
+ "master": "~/meshy/sparkle-3d-1119/sparkle_ta1119_m1_rm60k.glb",
  "game": "art/wardens/ryzz/ryzz.glb",
  "tris": 13000,
  "head": {
   "centre": [
-   0.0,
-   0.03,
-   1.75
+   0,
+   0.05,
+   1.67
   ],
-  "r": 0.16
+  "r": 0.15
  },
  "head_tris": 2600,
  "head_uv": 4.0,
@@ -22,79 +22,79 @@
  ],
  "joints": {
   "pelvis": [
-   0.0,
-   0.03,
-   0.93
+   0,
+   0.01,
+   0.9
   ],
   "neck": [
-   0.0,
-   0.02,
-   1.57
+   0,
+   0.04,
+   1.52
   ],
   "crown": [
-   0.0,
-   0.03,
-   1.87
+   0,
+   0.04,
+   1.77
   ],
   "shoulder.R": [
-   0.176,
-   0.01,
-   1.476
+   0.16,
+   0.03,
+   1.44
   ],
   "elbow.R": [
-   0.3,
-   0.0,
-   1.33
+   0.25,
+   0.04,
+   1.25
   ],
   "wrist.R": [
-   0.44,
+   0.4,
    0.06,
-   1.116
+   1.05
   ],
   "shoulder.L": [
-   -0.176,
-   0.01,
-   1.476
+   -0.16,
+   0.03,
+   1.44
   ],
   "elbow.L": [
-   -0.29,
-   0.0,
-   1.33
+   -0.25,
+   0.04,
+   1.25
   ],
   "wrist.L": [
-   -0.434,
+   -0.4,
    0.06,
-   1.124
+   1.05
   ],
   "hip.R": [
    0.12,
-   0.03,
-   0.93
+   0.01,
+   0.9
   ],
   "knee.R": [
-   0.13,
+   0.12,
    0.02,
    0.55
   ],
   "ankle.R": [
-   0.15,
-   0.02,
-   0.15
+   0.13,
+   0.0,
+   0.14
   ],
   "hip.L": [
-   -0.12,
-   0.03,
-   0.93
+   -0.11,
+   0.01,
+   0.9
   ],
   "knee.L": [
-   -0.12,
+   -0.1,
    0.02,
    0.55
   ],
   "ankle.L": [
-   -0.15,
-   0.02,
-   0.15
+   -0.12,
+   0.0,
+   0.14
   ]
  },
  "relax": {
@@ -113,8 +113,8 @@
     -9,
     9,
     -9,
-    -0.07,
-    1.15,
+    -0.066,
+    1.088,
     9
    ],
    "except_segs": [
@@ -139,11 +139,11 @@
   {
    "bone": "head",
    "box": [
-    -0.32,
-    0.32,
-    -0.13,
-    0.4,
-    1.6,
+    -0.303,
+    0.303,
+    -0.123,
+    0.378,
+    1.514,
     9
    ]
   }
@@ -152,12 +152,12 @@
   {
    "slot": "skin",
    "box": [
-    -0.09,
-    0.09,
-    0.06,
-    0.4,
-    1.62,
-    1.8
+    -0.085,
+    0.085,
+    0.057,
+    0.378,
+    1.533,
+    1.703
    ]
   },
   {
@@ -175,12 +175,12 @@
     1
    ],
    "box": [
-    -0.13,
-    0.13,
-    0.04,
-    0.4,
-    1.36,
-    1.6
+    -0.123,
+    0.123,
+    0.038,
+    0.378,
+    1.287,
+    1.514
    ]
   },
   {
@@ -198,11 +198,11 @@
     1
    ],
    "box": [
-    -0.36,
-    0.36,
-    -0.22,
-    0.4,
-    1.28,
+    -0.341,
+    0.341,
+    -0.208,
+    0.378,
+    1.211,
     9
    ]
   },
@@ -242,8 +242,8 @@
     -9,
     9,
     -9,
-    -0.07,
-    1.15,
+    -0.066,
+    1.088,
     9
    ],
    "v": [
@@ -265,89 +265,89 @@
  },
  "anchors": {
   "anchor_eye_glow": [
-   -0.048,
-   0.14,
-   1.76
+   -0.04,
+   0.12,
+   1.66
   ],
   "anchor_gum": [
-   0.0,
-   0.17,
-   1.68
+   0,
+   0.14,
+   1.59
   ],
   "anchor_head_top": [
-   0.0,
-   0.03,
-   1.89
+   0,
+   0.04,
+   1.78
   ],
   "anchor_chest": [
    0.0,
-   0.2,
-   1.4
+   0.189,
+   1.324
   ],
   "anchor_harness": [
    0.0,
-   -0.12,
-   1.42
+   -0.114,
+   1.343
   ],
   "anchor_rod_0": [
-   -0.47,
+   -0.21,
    -0.17,
-   1.99
+   1.89
   ],
   "anchor_rod_1": [
-   -0.2,
+   0.0,
    -0.17,
-   1.96
+   1.9
   ],
   "anchor_rod_2": [
-   0.2,
+   0.0,
    -0.17,
-   1.96
+   1.9
   ],
   "anchor_rod_3": [
-   0.47,
+   0.21,
    -0.17,
-   1.99
+   1.89
   ],
   "anchor_wire_R": [
-   0.45,
-   0.06,
-   1.1
+   0.426,
+   0.057,
+   1.041
   ],
   "anchor_wire_L": [
-   -0.45,
-   0.06,
-   1.1
+   -0.426,
+   0.057,
+   1.041
   ],
   "anchor_gun_R": [
-   0.49,
-   0.08,
-   1.04
+   0.464,
+   0.076,
+   0.984
   ],
   "anchor_gun_L": [
-   -0.49,
-   0.08,
-   1.04
+   -0.464,
+   0.076,
+   0.984
   ],
   "weapon_muzzle": [
-   0.52,
-   0.09,
-   0.97
+   0.492,
+   0.085,
+   0.918
   ],
   "anchor_finger_L": [
-   -0.52,
-   0.09,
-   0.97
+   -0.492,
+   0.085,
+   0.918
   ],
   "anchor_thumb_R": [
-   0.47,
-   0.13,
-   1.0
+   0.445,
+   0.123,
+   0.946
   ],
   "anchor_thumb_L": [
-   -0.47,
-   0.13,
-   1.0
+   -0.445,
+   0.123,
+   0.946
   ]
  },
  "move_bones": {

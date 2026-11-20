@@ -46,3 +46,13 @@ Carried onto the v95 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ex
 Merge 11-15 (ext/merge-lane-anim-hard2-1115): main's glb (45 clips, idle, pigtails) with only the key-pose-read `lmb_l` put back from the branch (`glb_add_clips.py <main ryzz.glb> <branch ryzz.glb> =lmb_l`, then `glb_compact.py`); the other 44 clips are main's byte for byte.
 
 Doll pass A (2026-11-18, ext/sparkle-dollA-game-1118, owner pick): `/home/boki/meshy/sparkle-doll-1118/A_face_skin_bust_hips.glb` (new face with smirk, violet-magenta eyes, matte skin; bust -14%, thighs -7%, hips -3%; same tris/UVs as the v95 `cand_A.glb`) swapped in with `python3 tools/art1/v95_to_game.py` (keep_uv own-paint swap, spec `art/wardens/src/ryzz_v95.json`, 60k tris; work dir `~/meshy/v95/_ingame_doll1118/`). Rig, 49 clips and anchors kept from the previous glb; `ryzz_v95.jpg`, `ryzz_v95b.jpg`, `ryzz_v95c.jpg` are the new textures. Height unchanged (y -0.014..1.684 vs -0.014..1.685).
+
+## Turnaround pick A (2026-11-20, ext/sparkle-3d-ta-1119, owner pick 11-19)
+Owner 11-19 6:10 PM EST picked turnaround round 4 sheet A (`~/gens/ta-audit-1119/sparkle/r4/top3/A.png`). Before Meshy, one masked
+Nano Banana Pro edit per view (front, 3/4, side; the backpack hides the back hem) raised the crop-top hem to the bralette bottom
+(pink trim row 355-357 -> 341-345 px of 1024; 0.70% of pixels changed, all inside the hem masks): `~/gens/sparkle-3d-1119/A_hem.png`.
+Meshy multi-image-to-3d (meshy-7.1, 2k geometry, 8k PBR, the 4 views of A_hem as images and texture refs) gave 4 candidates
+(4 views, 3 views, 4 views without enhancement, front only); the 4-view one is closest. Meshy remesh to 60k triangles
+(`sparkle_ta1119_m1_rm60k.glb`) keeps the chest bolt and lace: the swap's keep_uv decimation of the 1M-triangle scan tore both.
+`v95_to_game.py Sparkle --master <rm60k>` with re-read joints (`ryzz_v95.json`; this master is 5% shorter in the fit frame)
+on main's glb: rig, 49 clips, anchors and the gum bubble kept; 40.4k triangles, one texture (`ryzz_v95.jpg`; v95b/c dropped).
