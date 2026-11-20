@@ -10483,3 +10483,4 @@ READY ext/sparkle-3d-fix-1120 aee492e3d8c0aed64ca79c306007bab47585a6b8 (Sparkle 
 READY ext/vfx-ambient-motes-budget ef6ec0c9a7 (region motes pause past draw distance via ParticleCount.pace; GPU bench-fight peak 1867->1120 particles, frame time within noise)
 READY ext/hunter-regen-pip-1120 9ccdfd550f (Meeko 3D regen candidate A, draft model PR awaiting owner visual check; meshy_regions/meshy_smooth for extra bones)
 READY ext/ui-ability-bar-charges b102483380a375f90556799fcffbda9b38e683f3 (origin/main a27e3bd234e merged in, was 10ae49be97; merge was clean; ability-bar-check 0 failures, --check 0, health --strict OK)
+READY ext/albert-guardcut-regress 4ce1bd29536 (Albert Guard meter + Shield Slam cut again; kit-parity-check now fails if they return)
