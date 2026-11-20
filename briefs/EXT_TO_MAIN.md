@@ -10661,3 +10661,4 @@ READY ext/boki-own-clips-h e3bf650be184bfc17a894d70e50f1984461eacc8 (own clips f
 READY ext/anim-dash-drive-hold ecf8aefeec5 (Kael lunge + Vex slide hold drive pose)
 READY ext/slam-follow-keys 2a1fe41009f908d7d0c04a80830ce111b80ab271 (slam clips keyed follow-through)
 READY ext/boki-idle-batch-c 78ae95bb74a9c8612a16466b0dcf41e1d1af99df (Boki idles for nine species)
+READY ext/boki-own-clips-d cdcf8db561 (own clips for heatherhorn, kilnbadger)
