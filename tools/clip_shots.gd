@@ -6,6 +6,8 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
+## --proc: a Hunter with no keyed clips (Gil) through its HunterAnim moves in one take (<dir>/proc/); --fov=<deg> zooms
+## the camera's lens (--match --fov=4: the match camera's angle, the figure big enough to judge, no upscale).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -87,8 +89,16 @@ func run(main: Node) -> void:
 		cam.fov = 30.0
 		cam.position = Vector3(0, at_y + 0.25, dist)
 		cam.look_at(Vector3(0, at_y, 0))
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--fov="):
+			cam.fov = float(a.substr(6))  # (--match --fov=4: the match camera's angle, zoomed in by the lens, not by upscaling)
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
+	if OS.get_cmdline_user_args().has("--proc"):
+		await _proc(model, id, fps, out)
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
@@ -168,6 +178,44 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 			s.erase("kmove")
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+
+## --proc: a Hunter with no keyed clips (Gil: HunterAnim poses him) played through PROC_SEGS in one take, every 1/fps s,
+## as <dir>/proc/f###.png, and <dir>/proc/segments.tsv (label, first frame, frame count) for the captions. The rig is
+## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter.
+const PROC_SEGS := {
+	"gil": [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0], ["dash: Ground Swim dive", "gil_dive", 0.5, 0.0],
+		["dash: surfacing", "gil_surface", 0.55, 0.0], ["attack 1: thrust", "gil_thrust_1", 0.4, 0.0],
+		["attack 2: thrust", "gil_thrust_2", 0.4, 0.0], ["attack 3: lunge", "gil_lunge", 0.6, 0.0],
+		["RMB: potion toss", "gil_throw", 0.6, 0.0], ["E: Riptide spin", "gil_spin", 1.0, 0.0],
+		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0]],
+}
+
+
+func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
+	var dir := out.path_join("proc")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var an := HunterAnim.new(model, 1)
+	var face := model.rotation.y
+	var fwd := Vector3(-sin(face), 0, -cos(face))
+	for k in 90:
+		an.update(1.0 / 60.0, {"fired": 99.0, "face": face, "grounded": true})
+	var tsv := "label\tfirst\tframes\n"
+	var i := 0
+	for seg in PROC_SEGS.get(id, [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0]]):
+		var n := int(round(float(seg[2]) * fps))
+		tsv += "%s\t%d\t%d\n" % [seg[0], i, n]
+		for f in n:
+			var s := {"fired": 99.0, "face": face, "grounded": true, "vel": fwd * float(seg[3])}
+			if String(seg[1]) != "":
+				s["kmove"] = seg[1]
+				s["kmove_t"] = float(f) / fps
+			an.update(1.0 / fps, s)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+	var fa := FileAccess.open(dir.path_join("segments.tsv"), FileAccess.WRITE)
+	fa.store_string(tsv)
+	fa.close()
 
 
 func _grab(path: String) -> void:
