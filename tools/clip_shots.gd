@@ -105,10 +105,12 @@ func run(main: Node) -> void:
 			sync.call("_process", 1.0 / 30.0)
 		for i in 48:
 			model.rotation.y = TAU * i / 48.0
+			_stand(model)
 			clips.force = {"clip": turn_clip, "t": fmod(i / 15.0, turn_len)}
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
 		model.rotation.y = deg_to_rad(yaw)
+	_stand(model)
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
 	for nm in names:
 		var anim_name := String(nm)
@@ -168,6 +170,13 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 			s.erase("kmove")
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+
+## Standing still facing the model's yaw, as the game's Hero state has it. With no state the clips' heading reads a
+## facing of 0, so on a turned model the legs held yaw 0 while the torso turned with it (a turntable showed her
+## back below the waist in every frame; Sparkle 11-20).
+func _stand(model: Node3D) -> void:
+	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true})
 
 
 func _grab(path: String) -> void:
