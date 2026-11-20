@@ -1,5 +1,16 @@
 # Vex (gunslinger): import note
 
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r4 (2026-11-20, after the r3b art-gate FAIL, awaiting the owner's visual check)
+r3b's hip was ragged (the gun baked into the body gave a skirt shelf and a stretched flap) and the gun, trousers and hair were
+off the splash. r4: a new Meshy regen of the BODY ONLY from the turnaround (no gun on the arm, so no shelf at the hip), a
+SEPARATE Meshy gatling (a massive arm-length gun with its ammo drum, composed on forearm.R by tools in
+~/gens/hunter-regen-1120/vex/r4/scripts/compose_r4.py), grey-brown cargo trousers with the green paint, hair toned to a darker
+emerald than the jacket (scripts/hair_tone.py, hair slot h 0.30-0.56), the left forearm and hand recoloured to brass
+(scripts/brass_arm.py), then the same v95_swap path with Meshy weights (spec: r4/work/swap/spec.json). Stretch-check (51 clips):
+worst 8.31 (glide, hips) vs r3b 8.61 and live 10.16. The only model-check FAIL is the old "stands 1.147x" one (not the glb).
+v95_swap caches the atlas bake in WORK/bake.blend: after recolouring the master, delete bake.blend or the new glb still carries the old texture.
+Delete vex_v95*.jpg AND their .import before importing the swapped glb (see r3b).
+
 ## DRAFT candidate on ext/hunter-regen-vex-1120: regen r3b (2026-11-20, awaiting the owner's visual check)
 Meshy multi-image meshy-7.1 `--pose t-pose` from briefs/art-refs/vex_v2/vex_v2_turnaround.jpg (front, 3/4, back; 30 gens in
 two rounds, 1 kept, C2: the gatling is her right forearm with no hand inside it, a brass mechanical left hand, no dangling
