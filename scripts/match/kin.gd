@@ -950,7 +950,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
 	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
-		hv = Vector2.ZERO
+		hv = _edge_slide(hv)
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
@@ -958,6 +958,16 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 		last_safe = pos
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
+
+## Walking into an edge: it slides along it (the smallest turn, up to square, that keeps ground ahead) instead of
+## standing there pressing at the void until the stuck watch hops it back.
+func _edge_slide(hv: Vector2) -> Vector2:
+	for a: float in [0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.57, -1.57]:
+		var d := hv.rotated(a)
+		var p := Vector2(pos.x, pos.z) + d.normalized() * (r + 0.25)
+		if not m.world.is_void(p.x, p.y):
+			return d * maxf(cos(a), 0.5)
+	return Vector2.ZERO
 
 func _sim_return(dt: float) -> void:
 	if owner_h == null or owner_h.out:
