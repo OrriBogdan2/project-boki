@@ -890,7 +890,8 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0))).T))
+    passes = int(SPEC.get("meshy_smooth", 0)) if meshy else int(SPEC.get("smooth", 0))     # (Meshy's own blends are
+    gr = dict(zip(names, smooth_weights(low, W, passes).T))     # kept unless the spec widens them: meshy_reach's hips seams)
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []

@@ -58,7 +58,7 @@ from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, ri
   pokes through.) A loose piece (a pistol, a sword, a horn) with `RIGID_SHARE` of its weight on one bone rides that
   bone whole.
 - A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
-  bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
+  bones). `regions`, `smooth` and `relax` are not run (`meshy_smooth`, below, widens Meshy's blends). The spring, `skirt`, `cape` and `pauldron` bones stay in the
   rig but carry no body weight in this mode.
 Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
 report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
@@ -258,3 +258,10 @@ a vertex past r1 from that limb's bones goes to `hips`, faded from r0 (Neve: arm
 worst stretch 19.3 -> 6.6 on run C). The joints of a fresh Meshy master can come from its own auto-rig: pelvis = the hip
 joints - 0.045 (the game rig's `hips` sit 0.04 below its thighs), neck = Meshy's `Head` bone (ours starts at the chin, not
 the collar); Meshy's `Hips` and `neck` put the pelvis at the waist and stretch the torso x1.8 onto the rig.
+
+`meshy_smooth` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): N passes of the `smooth` blend on Meshy's
+weights after `meshy_reach` and `detach` (default 0). `meshy_reach` and the pelvis ramp hand weight to `hips` over a
+few cm, so neighbouring skirt and crotch vertices carry very different thigh weight and those edges stretch
+(`hips>hips` in --stretch-check). Neve run C, 71 clips, worst / clips over 5x: 0 passes 12.17 / 50, 4 9.83 / 28,
+10 6.66 / 16, 20 5.56 / 5, 40 5.23 / 2 (live 11-10 glb 9.15 / 38). 20 keeps knees and elbows shaped in crouch_f
+and stomp.
