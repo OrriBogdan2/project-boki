@@ -20,7 +20,8 @@ const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scal
 ## (docs/DEBT.md).
 const STRIDE_DEBT := ["marchleaf", "lodestick"]
 ## Boki that came in on the borrowed rig after auto_legs ran (ext/boki-more-ingame-1118): their clips are not re-keyed
-## yet, so the stride match and the set-off check wait for auto_legs.py (docs/DEBT.md); slide and seam sit in OVER and SEAM_OVER.
+## yet, so the stride match and the set-off check wait for auto_legs.py (docs/DEBT.md);
+## slide and seam sit in OVER and SEAM_OVER.
 const UNKEYED := ["lilybara", "umbrathere"]
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
@@ -63,7 +64,8 @@ const SEAM_OVER := {
 	"caecilith walk": 1.54, "cairnback walk": 1.61, "duskapi walk": 1.43, "floenatee idle": 1.04,
 	"floenatee run": 1.21, "floenatee walk": 1.39, "glaciyak walk": 1.42, "gloamshell walk": 1.18,
 	"goliathite idle": 1.04, "goliathite run": 1.22, "goliathite walk": 1.41, "heatherhorn walk": 1.42,
-	"hoarheron idle": 1.10, "hoarheron run": 1.25, "hoarheron walk": 1.45, "kestrike walk": 1.33, "kilnbadger walk": 1.46, "limpetor walk": 1.44,
+	"hoarheron idle": 1.10, "hoarheron run": 1.25, "hoarheron walk": 1.45,
+	"kestrike walk": 1.33, "kilnbadger walk": 1.46, "limpetor walk": 1.44,
 	"lodestick run": 1.06, "marchleaf walk": 1.45, "moonloris walk": 1.42, "mossgrade walk": 1.07,
 	"moundvark walk": 1.44, "murmurling walk": 1.46, "nacrolin walk": 1.46, "nimbostrich walk": 1.47,
 	"opalisk walk": 1.45, "orchisloth walk": 1.45, "puddlet walk": 1.18, "scaldamus walk": 1.41,
@@ -118,7 +120,8 @@ func _species(main: Node, id: String) -> void:
 		measured.append(stride(steps[clip], rig.player.get_animation(clip).length))
 	for clip in ["walk", "run"]:
 		var even := start(rig, clip)
-		ok(even > HELD or id in EXEMPT or id in UNKEYED, "%s %s sets off at once (first sample %.2f of the median)" % [id, clip, even])
+		var set_off: bool = even > HELD or id in EXEMPT or id in UNKEYED
+		ok(set_off, "%s %s sets off at once (first sample %.2f of the median)" % [id, clip, even])
 	var loops: Array = []
 	for clip in ["idle", "walk", "run"]:
 		var sm := seam(rig, clip)
@@ -141,7 +144,8 @@ func _species(main: Node, id: String) -> void:
 	for i in 2:
 		var near: bool = absf(measured[i] - BokiRig.STRIDE.get(id, GLIDE_STRIDE)[i]) <= STRIDE_TOL * measured[i]
 		var kept: float = BokiRig.STRIDE.get(id, GLIDE_STRIDE)[i]
-		ok(near or id in STRIDE_DEBT or id in UNKEYED, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], kept])
+		var held: bool = near or id in STRIDE_DEBT or id in UNKEYED
+		ok(held, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], kept])
 	var speeds: Array = HOME_SPEEDS + [match_speed(id)]
 	var row: Array = []
 	for grown in SIZES:
