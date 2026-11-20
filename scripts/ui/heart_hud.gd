@@ -7,13 +7,11 @@ extends RefCounted
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 ##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
-##   - the zone clock under the minimap: "Closing in 0:30" before the tide moves, the time left while it does.
+##   - the zone clock in the raid row under the minimap: "Closing in 0:30" before the tide moves, then the time left.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
-const CLOCK_H := 14.0           # px: height of the zone clock under the minimap (it pushes the squad column down by
-		# this much: 22 + a 4 gap put the last squad row on the Boki card at HUD size 125% and up, --safe-area-check)
 
 # ------------------------------------------------------------------ the world
 static func world_labels(hud) -> void:
@@ -86,18 +84,25 @@ static func zone_line(m: Match) -> String:
 	t = Heart.close_left(m)
 	return "Closing  %d:%02d left" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
 
-## A small pill under the minimap with the zone clock (nothing once the ring holds); moves mm_bottom down.
-static func zone_clock(hud, below: Rect2) -> void:
+## The zone clock (nothing once the ring holds) in the raid row under the minimap, between the raid's name and
+## the sight read-out, right-aligned: `free` is the x range left there. It takes no height of its own (a pill of
+## its own pushed the squad column down into the Boki card at HUD size 125% and up, and held the minimap under
+## its 130% growth: --safe-area-check, --hudref-check). Too long for the room: just the time, else nothing.
+static func zone_clock(hud, row: Rect2, free: Vector2) -> void:
 	var line := zone_line(hud.m)
 	if line.is_empty():
 		return
-	var r := Rect2(below.position, Vector2(below.size.x, CLOCK_H))
-	hud.mm_bottom = r.end.y
-	SafeArea.note(r)      # (so the HUD size steps down for it, and the safe-area check sees it)
-	hud.c.draw_style_box(HudStyle.box(HudStyle.SHADE, 6, Color(Heart.col(), 0.5), 1), r)
-	hud.c.draw_arc(r.position + Vector2(10, CLOCK_H * 0.5), 3.5, 0, TAU, 20, Heart.col(), 2.0, true)
-	hud.c.draw_arc(r.position + Vector2(10, CLOCK_H * 0.5), 1.5, 0, TAU, 12, Heart.col().lightened(0.4), 1.5, true)
-	HudStyle.text(hud.c, r.position + Vector2(20, 11), line, 10, HudStyle.INK, 3)
+	var w := 10.0 + TextCache.width(hud.big, line, 10)       # (the ring mark, then the words)
+	if free.y - free.x < w:
+		line = line.replace("Closing in ", "").replace("Closing  ", "")
+		w = 10.0 + TextCache.width(hud.big, line, 10)
+		if free.y - free.x < w:
+			return
+	var x := free.y - w
+	var ring := Vector2(x + 3.5, row.position.y + row.size.y * 0.5)
+	hud.c.draw_arc(ring, 3.5, 0, TAU, 20, Heart.col(), 2.0, true)
+	hud.c.draw_arc(ring, 1.5, 0, TAU, 12, Heart.col().lightened(0.4), 1.5, true)
+	HudStyle.text(hud.c, Vector2(x + 10.0, row.position.y + 14), line, 10, HudStyle.INK, 3)
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m

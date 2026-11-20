@@ -855,13 +855,17 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
 	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
 	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
-	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
+	var rname := String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper()
+	_text(rr.position + Vector2(21, 14), rname, 10, rcol, big)
+	var free_x0 := rr.position.x + 21.0 + TextCache.width(big, rname, 10) + 8.0      # the room between the two words
+	var free_x1 := rr.end.x - 8.0
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
+		free_x1 -= TextCache.width(big, st, 10) + 8.0
 		_text(Vector2(rr.end.x - 8 - TextCache.width(big, st, 10), rr.position.y + 14), st, 10, MUTED, big)
+	HeartHud.zone_clock(self, rr, Vector2(free_x0, free_x1))
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
-	HeartHud.zone_clock(self, Rect2(r.position.x, mm_bottom, r.size.x, 0))
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
