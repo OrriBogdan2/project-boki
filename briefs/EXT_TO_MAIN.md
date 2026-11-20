@@ -10552,3 +10552,6 @@ READY ext/ui-button-sfx 202943053d62c6e9f42608ce675bd302450766eb (silent raw But
 READY ext/hunter-regen-gil-1120 e2a8b1d66d (Gil regen r2: new Meshy body A 59.5k tris + splash swordfish 1.2 m in the palm; DRAFT for the owner pick; GPU MP4 proof in gens/hunter-regen-1120/gil/r2/proof)
 READY ext/farm-feed-shapes-boki 17aa2e40541 (food lean now sizes the Boki: per-type size on model + card, 9 --feed-check rows; merged with main)
 READY ext/sfx-knock-sides 09027a233a1d (ally-knocked now plays its own dark knock_warn cue for the victim's squad only; knock_confirm stays for the attacker's side; --knock-sfx-check asserts both)
+READY ext/tut-camps-telegraph 60651bc7c1 (bulk-rebase: origin/main merged in mechanically, was 94c68e4c6e; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-n19c-1119 2044fdb865 (bulk-rebase: origin/main merged in mechanically, was a7cc0197e8; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/sfx-wisp-steal 6a283f4047 (bulk-rebase: origin/main merged in mechanically, was 81827d818b; union 1 gen 0 files; the branch's own READY checks still apply)
