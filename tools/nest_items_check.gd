@@ -175,6 +175,24 @@ func _rows() -> void:
 	NestItemRows.add(box, p[0], p[1], func(): pass)
 	ok(box.get_child_count() == 1 + 3 + 1, "with items: heading, three rows, the placed Locket line")
 	box.free()
+	_feed_menu_lines(p[0])
+
+## The feed menu lists every nest item in the bag with the line "Goes in the Nook" (and no Feed button).
+func _feed_menu_lines(rec: Dictionary) -> void:
+	var nest: Array = GardenItems.ids().filter(func(id): return not GardenItems.fed(id))
+	Save.d["items"] = {}
+	for id in nest:
+		Save.d["items"][id] = 1
+	var menu := VBoxContainer.new()
+	GardenItemRows.add_bag(menu, rec, [], func(_id): pass, func(_res): pass)
+	var lines: Array = menu.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var shown := nest.filter(func(id): return lines.has("Goes in the Nook") and lines.any(
+			func(t): return t.begins_with(GardenItems.item_name(id))))
+	var feedable := menu.find_children("*", "Button", true, false).size()
+	var all_lined: bool = shown.size() == nest.size() and lines.count("Goes in the Nook") == nest.size()
+	ok(nest.size() == 3 and all_lined and feedable == 0,
+			"feed menu: each of the %d nest items has a 'Goes in the Nook' line, no Feed" % nest.size())
+	menu.free()
 
 func _old_save() -> void:
 	Save.d = Save.fresh()
