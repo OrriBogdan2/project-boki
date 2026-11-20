@@ -42,6 +42,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## abyss_danger (`content/rules/abyss_danger.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How the abyss warns you as you fall (scripts/match/abyss_fx.gd danger_depth: the red tint and vignette; scripts/match/abyss_fall_sfx.gd warn_db / warn_rate: the heartbeat warning). Depths are metres under the lowest island lip around you. Nothing shows until start_depth, so a small dip under an island's height is free; from there the danger rises smoothly (curve = share of the way to the point of no return, to the power curve) to 1 at the kill depth (Hunter.abyss_kill_y). Rising faster than the glider lift (AbyssFx.RISE_OFF) or climbing back above start_depth lets go. warn_*: the warning heartbeat starts at danger warn_from, at warn_db_min dB and warn_rate_min beats a second, and rises to warn_db_max dB and warn_rate_max at full danger. edge_from: danger where the crimson screen-edge rings start (they ramp up to full at 1). |
+| start_depth | 4 |
+| curve | 1.5 |
+| warn_from | 0.02 |
+| warn_db_min | -20 |
+| warn_db_max | -2 |
+| warn_rate_min | 1.2 |
+| warn_rate_max | 4.6 |
+| edge_from | 0.1 |
+
 ## armor (`content/rules/armor.json`)
 
 
@@ -1102,7 +1118,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
-| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
+| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"shelter": 1, "first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "shelter": {"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)", "locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"}, "shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.", "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1771,6 +1787,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | gap | 10 |
 | far_m | 22 |
 | sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
+
+## land_feel (`content/rules/land_feel.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | How hard a Hunter's touchdown squashes (HunterAnim.land_tier picks the way down) by weight class (the 'weight' in content/archetypes). hop: a plain jump or a small step down. drop: a terrace drop or a glider let go. dive: the glide dive's plunge. depth: how far the squash goes (1 is the deepest crouch); a drop or a dive deepens with the fall speed up to 1, so theirs is the least. s: seconds from touchdown until the squash is gone. Parity first (DECISIONS 2026-11-07), source = the private footage reads. light: the thief's jump lands in a low crouch held ~0.1 s, then up in ~0.05 s (hop 0.15 s). heavy: the bulwark's slam lands in the deepest squash of the six, a crouch onto the knees, ~0.5 s in a low recovery (drop and dive: depth 1, 0.5 s). The other cells have no footage and keep the numbers the procedural landing ran before this table [est]: medium everywhere, light's drop and dive (medium's shorter by a quarter) and heavy's hop (a quarter longer than medium's). No burst, ring or disc on landing (DECISIONS). Asserted per class in --land-weight-check. |
+| light | {"hop": {"depth": 0.35, "s": 0.15}, "drop": {"depth": 0.7, "s": 0.24}, "dive": {"depth": 0.7, "s": 0.32}} |
+| medium | {"hop": {"depth": 0.35, "s": 0.1}, "drop": {"depth": 0.7, "s": 0.3}, "dive": {"depth": 0.7, "s": 0.4}} |
+| heavy | {"hop": {"depth": 0.35, "s": 0.125}, "drop": {"depth": 1.0, "s": 0.5}, "dive": {"depth": 1.0, "s": 0.5}} |
 
 ## lantern_match (`content/rules/lantern_match.json`)
 

@@ -35,7 +35,8 @@ func run(main: Node) -> void:
 			ok(absf(got.y - want.y) <= DT * FRAMES_TOL, "%s %s: gone in %.3f s (data %.3f)" % [cls, way, got.y, want.y])
 			lengths[cls + way] = got.y
 			depths[cls + way] = got.x
-	ok(absf(HunterAnim.land_feel("light", 1).y - 0.15) < 0.001, "light jump: up again in 0.15 s (source: crouch + rise)")
+	var light_hop := HunterAnim.land_feel("light", 1)
+	ok(absf(light_hop.y - 0.15) < 0.001, "light jump: up again in 0.15 s (source: crouch + rise)")
 	ok(HunterAnim.land_feel("heavy", 2).x == 1.0 and absf(HunterAnim.land_feel("heavy", 2).y - 0.5) < 0.001,
 			"heavy drop: the deepest squash, 0.5 s (source: the slam's recovery)")
 	ok(HunterAnim.land_feel("heavy", 3) == HunterAnim.land_feel("heavy", 2), "heavy dive lands like its drop")
