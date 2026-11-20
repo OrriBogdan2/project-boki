@@ -87,7 +87,7 @@ func run(main: Node) -> void:
 func _marker(m: Match, lost: Dictionary) -> void:
 	var tu: Tutorial = m.tut
 	var sid := tu.id()
-	var at := tu.goal(sid)
+	var at := tu.goal(tu.leg())     # (the dash beat runs in legs: pad, pad, pad)
 	if at == Vector3.INF or m.player.out:
 		return
 	var row: Dictionary = lost.get(sid, {"frames": 0, "beam": 0, "label": 0, "arrow": 0, "edge": 0})
