@@ -179,6 +179,34 @@ really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfe
 | Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
 
 
+## The run's foot lock (Nov 19, ext/foot-slide-1118)
+
+The play probe (`tools/play_probe.sh`, its `skate` number: over a 1.5 s run from a standstill, the median of the
+slower foot's flat speed over the ground as a share of the body's) flagged Albert 91 %, Lace 78 %, Neve 66 %; the
+others read 16 to 45 %. Their run clips sweep the planted foot back unevenly: Albert's at rate 1.33 goes from about
+1 m/s at touchdown to 8 m/s at lift-off, down only about a fifth of the cycle. So no playback rate fits: sweeping
+the run `foot_mps` from 2.4 to 7.0 m/s left Albert at 76 to 110 %, Lace at 40 to 105 % and Neve at 61 to 74 %.
+
+`loco.foot_lock` ([walk, run], 0..1; WardenGait) holds a foot where it came down while it is in the lowest 60 % of
+its height range, the ground under it going back at the body's speed, by the legs' two-bone IK
+(`FootPlant.reach_bones`), at most 0.6 of the leg off the clip's ankle; lifted, it eases back onto the clip in about
+0.05 s. The ground's way is the blend's, so a run-and-aim Hunter's turned legs lock true (Lace). Albert, Lace and
+Neve have it on the run only ([0, 1]); idle, walk, crouch, air and moves are untouched (it fades with the legs'
+locomotion weight). Albert's hips in idle read the same every frame before and after (480 frames, max frame step
+2.28 mm; the 85 mm travel is his idle-to-stance blend at 4 s, unchanged).
+
+| Hunter | play probe run, before | after | `--foot-slide-check` SKATE (bar 45 %) |
+|---|---|---|---|
+| Albert (`bulwark`, 5.79 m/s) | 91 % | 40 % | 35 % |
+| Lace (`archer`, 5.44 m/s) | 78 % | 27 % | 8 % |
+| Neve (`rimewright`, 5.32 m/s) | 66 % (probe job) | 9 % | 0 % |
+
+The SKATE row runs each `foot_lock` Hunter forward at `HunterMove.speed` from a standstill, as the probe does, and
+fails above 45 %. The run start is the hard part: from a standstill Albert reads 76 % with the lock's band at 30 %
+of the height range and 39 % at 60 %. Wider bands or a larger pull trade one Hunter for another (a 0.8 pull: Albert
+31 %, Lace 15 to 30 %). The forward sweep rows barely move for Albert: they read the estimated ankle (`DEBT.md`,
+foot-slide readers), which sits past his real one.
+
 ## The run at match scale: cm a planted foot travels a step (Nov 20, ext/anim-stride-foot-slide)
 
 A match draws every Hunter at `Hunter.VIS_SCALE` (1.12) and moves it at `HunterMove.speed` (the hunter_move.json row
@@ -230,17 +258,24 @@ needed 1.9 to 2.2). Motley hovers and Gil has no leg clips: not measured.
 
 | Hunter | Walk cm | Run cm | Strafe cm | Crouch cm | Model (game glb = v95 current.json), tris |
 |---|---|---|---|---|---|
-| Lace (`archer`) | +5.4 to +3.2 | -3.1 to +1.4 | -1.1 to +3.0 | +10.8 to +0.8 | `hem/hem.glb` 102027 |
+| Lace (`archer`) | +5.4 to +3.2 | -3.1 to -3.7 | -1.1 to -1.3 | +10.8 to +0.8 | `hem/hem.glb` 102027 |
 | Kael (`juggernaut`) | +14.2 to +3.3 | -0.7 to -0.6 | +17.2 to -0.2 | +33.2 to +0.3 | `kael/kael.glb` 112322 |
 | Vex (`gunslinger`) | -4.2 to -0.1 | -0.4 to -0.5 | +1.0 to +0.9 | +3.3 to +0.1 | `vex/vex.glb` 120190 |
-| Albert (`bulwark`) | -5.7 to -3.3 | -2.5 to -2.9 | -10.5 to +1.1 | +17.3 to +19.1 | `breaker/breaker.glb` 108541 |
-| Neve (`rimewright`) | -14.0 to +0.2 | -0.4 to -1.9 | +3.3 to -0.3 | -0.3 to +2.5 | `claire/claire.glb` 95552 |
+| Albert (`bulwark`) | -5.7 to -3.3 | -2.5 to +0.2 | -10.5 to +4.8 | +17.3 to +19.1 | `breaker/breaker.glb` 108541 |
+| Neve (`rimewright`) | -14.0 to +0.2 | -0.4 to +4.2 | +3.3 to +1.8 | -0.3 to +2.5 | `claire/claire.glb` 95552 |
 | Cinder (`ashwick`) | +5.4 to +3.4 | +1.9 to +1.9 | +2.5 to +2.5 | +15.3 to -0.7 | `cinder/cinder.glb` 109187 |
 | Tenzo (`dolm`) | -9.5 to -0.5 | +0.4 to +0.4 | -19.0 to -0.4 | +2.3 to +3.4 | `tarek/tarek.glb` 95626 |
 | Sparkle (`mage`) | -4.4 to +0.3 | +0.2 to +0.2 | -6.8 to +0.4 | -6.6 to -2.0 | `ryzz/ryzz.glb` 97646 |
 | Grimble (`dredge`) | -9.4 to -1.2 | +0.3 to +0.3 | -3.9 to +0.1 | -1.8 to -0.2 | `dredge/dredge.glb` 125032 |
 | Meeko (`tender`) | +15.9 to +2.3 | -0.1 to -0.1 | +1.6 to +1.6 | +3.3 to +0.3 | `pip/pip.glb` 121292 |
 | Sable (`thief`) | +4.9 to +4.9 | +1.0 to +1.0 | +26.2 to -0.8 | -7.3 to -1.7 | `sable/sable.glb` 115114 |
+
+Merged with the run's foot lock (ext/foot-slide-1118, above): the lock holds the planted foot of Albert, Lace and Neve on
+the run, so their run rate is no longer the only thing that plants it, and the run fits below were re-measured with
+`foot_lock` on (Nov 20, rpc5). Albert and Lace keep main's run keys (`foot_mps[1]` 3.65 and 3.72, Lace's run stride
+1.5) with the lock: run +0.2 / -3.7 cm, SKATE 43 % / 12 % (the stride branch's fitted run keys 5.12 / 3.6 read Albert
+SKATE 65 %, over the 45 % bar, and Lace +25.5 cm a run step). Neve keeps the fitted run key (8.51, stride 0.9): +4.2 cm
+and SKATE 40 %; main's key with the lock reads -6.6 cm. Their walk, strafe and crouch fits are the branch's.
 
 Open: Albert's crouch walk lifts a foot ~0.3 m/s, so no rate plants it (+19 cm; `STEP_OPEN`, docs/DEBT.md). The old
 `SLIP` sweep (scale 1, between the rings) is unchanged in its set of FAILs; Meeko's worst rose 1.68 to 2.23 m/s at
