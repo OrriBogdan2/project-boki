@@ -109,6 +109,8 @@ class Skin:
                 hit = near[self.edges[:, 0]] | near[self.edges[:, 1]]
                 near[self.edges[hit].ravel()] = True
             pick = np.nonzero(near)[0]
+        if getattr(self, "lock", None) is not None:
+            pick = pick[~self.lock[pick]]      # (glb_relax --lock: the fist keeps its weights)
         mean = acc[pick] / np.maximum(cnt[pick], 1)[:, None]
         w = self.w[pick] * (1 - BLEND) + mean * BLEND
         top = np.argsort(-w, axis=1)[:, MAX_INFL:]
