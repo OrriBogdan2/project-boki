@@ -1,6 +1,6 @@
 class_name HudPlate
 extends RefCounted
-## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
+## Overhead plates (one per hunter): the name or a status word, health in
 ## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
 ## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
 ## armour-break crack, status icons to the right, and a downed plate with a
@@ -21,7 +21,6 @@ const CHEER_T := 2.5          # s it wears its excited face after a kill
 const BREAK_T := 0.45          # s of the armour-break crack
 const TIMER_MIN := 0.5         # s: a status with less left shows no seconds (per-frame holds sit under it)
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
-const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
 
@@ -149,10 +148,6 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 		s["burst"] = BURST_T
 	s["down"] = h.downed
 	s["burst"] = maxf(0.0, float(s["burst"]) - dt)
-	if int(s["lvl"]) >= 0 and h.lvl > int(s["lvl"]):
-		s["lvl_pop"] = LVL_POP_T
-	s["lvl"] = h.lvl
-	s["lvl_pop"] = maxf(0.0, float(s["lvl_pop"]) - dt)
 	return s
 
 
@@ -234,8 +229,9 @@ func _draw_plate(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var hr := Rect2(Vector2(x0, ar.end.y + 1.0), Vector2(w, HudStyle.PLATE_HP_H))
 	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
 	var has_ar := _armor(c, h, ar, s)
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(viewer, h))
+	var gap := LevelGap.of(viewer, h)
+	if LevelGap.band(gap) != 0:      # name-only plates (clutter pass); the coin shows only a rival 2+ levels apart
+		level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, 0.0, gap)
 	# the name, or what's being done to them (stunned, rooted ...) in its colour; the rest of it is on their
 	# body (BodyTell, KitStatus), so no icon tiles beside the plate
 	var sts := statuses(h)
@@ -302,8 +298,6 @@ func _draw_self(H, sp: Vector2, p: Hunter) -> void:
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, ar, s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
@@ -383,7 +377,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
-## filling over it in green, a cross in place of the level, and what's happening under it. The
+## filling over it in green, and what's happening under it. The
 ## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
 func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
@@ -399,8 +393,9 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	if h.revive > 0.0:
 		var rev_w := w * clampf(h.revive, 0.0, 1.0)
 		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), HudStyle.REVIVE)
-	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(H.m.player, h))
+	var gap := LevelGap.of(H.m.player, h)
+	if LevelGap.band(gap) != 0:      # name-only plates (clutter pass); the coin shows only a rival 2+ levels apart
+		level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, 0.0, gap)
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
 	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), ClanInfo.tagged(h.pname, h.clan_tag), HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
