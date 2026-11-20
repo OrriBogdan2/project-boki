@@ -144,10 +144,12 @@ func run(progress := Callable()) -> void:
 	if not times.is_empty():
 		var setup := WarmStamp.setup_id()
 		Settings.note_benchmark(float(times[times.size() / 2]))
-		# a first launch's auto quality can step down here (shadows, MSAA): the game goes on, and comes back, at
-		# the new settings. The stamp follows them: the same shader code, only pipelines differ, and those
-		# build as this match draws them (else the next launch redrew every stand-in)
+		# a first launch's auto quality can step down here (shadows, MSAA, very low's unshaded draw): the game goes
+		# on, and comes back, at the new settings. The stand-ins draw once more under them, still behind the
+		# loading screen (else the first frame of play compiled the unshaded draw's shader and the pipelines for
+		# the new settings built at their first draw in play), and the stamp follows the new settings
 		if WarmStamp.setup_id() != setup:
+			await _batches(func(_f: float) -> void: pass, {})
 			WarmStamp.save(seen)
 	await DashPace.rehearse(m)
 	PerfLog.skip()
