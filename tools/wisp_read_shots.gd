@@ -9,9 +9,11 @@ const SHOT_AT := [1.5, 3.0, 4.5, 6.0]      # s into the fight
 const FIGHT_SECS := 6.5
 const HUNTER_H := 1.8                      # m: a Hunter's body, for its screen rectangle
 const HUNTER_W := 0.9                      # m
+const ZOOM := "--zoom="                    # the camera's zoom (1: the match's; under 1 closer, for a close-up)
 
 var hits := {}          # wisp owner -> summed share of other Hunters' bodies its wisp hid
 var own := {}           # ... of its own owner's body
+var zoom := 1.0
 var frames := 0
 var wisps := 0
 var sizes: Array = []    # px across of every wisp every frame
@@ -23,6 +25,8 @@ func run(main_node: Node) -> void:
 		var arg := String(a)
 		if arg.begins_with("--shots-dir="):
 			dir = arg.substr(12)
+		if arg.begins_with(ZOOM):
+			zoom = float(arg.substr(ZOOM.length()))
 		if arg.begins_with("--size="):
 			var p := arg.substr(7).split("x")
 			res = Vector2i(int(p[0]), int(p[1]))
@@ -59,8 +63,8 @@ func _fight_shots() -> void:
 			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	m.cam.zoom = 1.0
-	m.cam.zoom_to = 1.0
+	m.cam.zoom = zoom
+	m.cam.zoom_to = zoom
 	main.get_viewport().warp_mouse(Vector2(4, 4))     # (no hover card in the frames)
 	wisps = m.kins.filter(func(k): return k.wisp).size()
 	var shots: Array = SHOT_AT.duplicate()
