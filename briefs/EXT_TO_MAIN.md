@@ -10585,3 +10585,4 @@ READY ext/garden-toy-xp 9c211e6cc37e9097e5aca097ae1fdf6e916d4c6f (every finished
 READY ext/farm-tut-ends 379326e12b3866603dce9e63861b16f851e2eeba (base tutorial step 4 ends on zone wake or toy turn; banner line fits 42% strip; checks added)
 READY ext/vfx-wisp-read 74dba000fc4cfb3f5ca7db89eeacc0133b3584b4 (carried Boki wisps were freed on frame 1 so invisible: fixed; then side-colour rim, 1.5x, 0.8 m orbit, same draw calls; --wisp-read-shots + before/after sheet)
 READY ext/farm-tut-patch-step b021df711d (base tutorial: Plant the snack patch step before Feed it, tile lit; check +5 steps)
+READY ext/tut-gate-playthrough 51382ef80e (--tutorial-playthrough-check now also plays the whole garden tutorial; 4x hatch speed-up + hatch knock fix cherry-picked)
