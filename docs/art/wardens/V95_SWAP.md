@@ -255,3 +255,10 @@ to rig and export:
    IN.glb OUT.glb cloth-v95 cloth-pants` (no Blender) moves the maroon triangles (texel hue, value, majority vote) to their
    own material, and warden_look.json `slots."cloth-pants"` tunes them alone. Measure the render against the splash
    (GPU, eye and knee level): Tenzo's pants went from value 0.33 to 0.43 at hue 0.98 (splash 0.31-0.40, hue 0.97).
+9. Tenzo r4 (2026-11-20): `--pbr off` with `--pose ""` and `--enhance on` gave a saturated cobalt stone arm (the PBR-on gens came out slate grey),
+   and 4 views with `--texture-refs` front + 3/4 only kept the swirl and runes brightest and wrapped the shins (N2/N5; N1/N3/N4 dropped runes
+   or the wraps). Meshy remesh quad 60k + `meshy_joints.py prep|joints` + `v95_to_game.py --weights meshy --no-import` is ~15 min a candidate;
+   `--no-import` still overwrites the tree's .glb, so `git checkout` it between candidates. The `--regen-audit` LIVE run needs the audit tools
+   (tools/regen_audit.gd, clip_shots.gd, check_registry.gd) in the main tree, or the job just sits on the game until its timeout.
+   Godot only re-extracts `art/wardens/<id>/<id>_v95.jpg` in the tree it imported the first glb in: copy the glb's own "v95" image over it
+   when a second candidate shares a tree.
