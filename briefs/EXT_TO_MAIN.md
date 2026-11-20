@@ -10606,3 +10606,4 @@ READY ext/lost-cuts-audit 20e367c793 (lost-cuts audit: 1 lost cut re-cut (Gil Su
 READY ext/knock-rows-green c92fd7a6a24 (move-feel knock_lace_04/sparkle_04/done_04 asserts follow the sweep; Knock arc doc refreshed)
 READY ext/sparkle-sable-knock-cut fcd6f69208 (Kitefall push 8->0 and Sable empowered bolt kb 3.0->0 via thief.json dash.prime_kb; KIT_PARITY, mage.md, thief.md updated)
 READY ext/rule-guard-more fa53f52bf4 (rule guard +3 DECISIONS rows x 13 Hunters: tap hold pose, WASD dash, no movement rings; new rows 0 FAIL, 14 old reds = main, listed in MOVEMENT_FEEL)
+READY ext/hunter-regen-vex-1120 f2313b8c3f7 (Vex r3b draft model PR #488: Meshy auto-rig weights fix the torn/pinched waistband; proof /home/boki/gens/hunter-regen-1120/vex/r3/proof/vex_r3b_live_vs_A_eye_knee_match.mp4; awaits owner visual check)
