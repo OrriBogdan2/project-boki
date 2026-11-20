@@ -265,3 +265,10 @@ few cm, so neighbouring skirt and crotch vertices carry very different thigh wei
 (`hips>hips` in --stretch-check). Neve run C, 71 clips, worst / clips over 5x: 0 passes 12.17 / 50, 4 9.83 / 28,
 10 6.66 / 16, 20 5.56 / 5, 40 5.23 / 2 (live 11-10 glb 9.15 / 38). 20 keeps knees and elbows shaped in crouch_f
 and stomp.
+
+Neve r4 (2026-11-20, ext/hunter-regen-claire-1120): six fresh multi-image gens from the 11-19 turnaround (40 credits each),
+`create ... --texture-refs` and `--enhance off` varied; `--enhance off` speckles the skirt again (g6, as run B). The joints
+script is `~/gens/hunter-regen-1120/claire/r4/scripts/rig_joints.py` (Meshy rig on the quad master -> `joints.json`). Use
+`--warden-variant=claire_<tag>` (art/wardens/claire_<tag>/claire_<tag>.glb) to put several candidates in ONE tree for `jobq`
+(one relay, no same-name `.ctex` mtime trap). Stretch (71 clips, worst / mean / clips over 5x), smooth 20: g2 4.35 / 3.19 / 0,
+g5 5.08 / 3.33 / 1, g1 7.45 / 4.05 / 14 (r3 run C 5.56 / 3.58 / 5, live 9.15 / 5.47 / 38). The branch head is another job's G1 (4.86 worst, 0 over 5x); g2 stays a side candidate in `~/gens/hunter-regen-1120/claire/r4/cand_g2/` (it keeps the TA braid).
