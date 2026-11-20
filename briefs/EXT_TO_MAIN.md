@@ -10547,3 +10547,4 @@ READY ext/p06-port-1118 d4e715cf2c (P06 stomp feedback re-merged with main 0c762
 READY ext/kael-guard-edges 46d3d03ddacfe889a6f3c973b9a0c4d98bf1d3d4 (Kael guard edges asserted: 0.65 s window, strike/recovery hits in full, reel and wall slam pinned as ours; docs item 13 + KIT_PARITY)
 READY ext/neve-skate-dart-dmg 9586ccc0d3 (docs only: rimewright gap 6 marked closed; skating dart 2.0 and the 2x assert were already on main)
 READY ext/farm-feed-shapes-boki 1a361e03bc (food shapes the Boki: per-type size lean on model + card line, tint already by lean; --feed-check ten-meal rows; lean-shots --meals)
+READY ext/anim-land-blend-pops c2dfa29ace (--cast-pop-check POPDEG pass: all 12 clip Hunters through land, glide exit, dash end, cast end at 60 fps; blend times + arm-swing mean fix; 12 of 13 now under 25 deg, Albert/Tenzo/Motley held at ceilings)
