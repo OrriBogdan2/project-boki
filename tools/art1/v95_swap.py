@@ -82,6 +82,90 @@ def set_verts(ob, v):
     ob.data.update()
 
 
+def _hsv(a):
+    r, g, b = a[:, 0], a[:, 1], a[:, 2]
+    mx, mn = a.max(1), a.min(1)
+    d = mx - mn
+    nz = d > 1e-9
+    dd = np.where(nz, d, 1)
+    h = np.where(r == mx, (g - b) / dd, np.where(g == mx, 2 + (b - r) / dd, 4 + (r - g) / dd))
+    h = np.where(nz, (h / 6) % 1, 0)
+    return h, np.where(mx > 0, d / np.where(mx > 0, mx, 1), 0), mx
+
+
+def _rgb(h, s, v):
+    i = np.floor(h * 6).astype(int) % 6
+    f = h * 6 - np.floor(h * 6)
+    p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
+    return np.stack([np.choose(i, [v, q, p, p, t, v]), np.choose(i, [t, v, v, q, p, p]), np.choose(i, [p, p, t, v, v, q])], 1)
+
+
+def grade_skin(im, g):
+    """`grade` {"h": [lo, hi], "feather": f, "s": mult, "v": mult}: the paint whose hue is in [lo, hi] (a soft edge `feather`
+    wide) and whose saturation is in `s_range` has its saturation and value scaled: the game's toon pass lifts a scan's skin
+    to a hotter magenta than the turnaround's, so the skin is eased back to the turnaround's saturation (goo, gold, wood and
+    leather are other hues and stay). Pixels of a sRGB image are sRGB-encoded in bpy, no conversion."""
+    n = len(im.pixels)
+    a = np.empty(n, np.float32)
+    im.pixels.foreach_get(a)
+    a = a.reshape(-1, 4)
+    h, s, v = _hsv(a[:, :3].astype(np.float64))
+    lo, hi = g["h"]
+    f = float(g.get("feather", 0.03))
+    w = np.clip((h - lo) / f + 1, 0, 1) * np.clip((hi - h) / f + 1, 0, 1)
+    sl, sh = g.get("s_range", [0.1, 0.8])
+    w *= np.clip((s - sl) / 0.05, 0, 1) * np.clip((sh - s) / 0.05, 0, 1)
+    s2 = np.clip(s * (1 + w * (float(g.get("s", 1)) - 1)), 0, 1)
+    v2 = np.clip(v * (1 + w * (float(g.get("v", 1)) - 1)), 0, 1)
+    a[:, :3] = _rgb(h, s2, v2)
+    im.pixels.foreach_set(a.ravel())
+    im.update()
+    im.pack()
+    print("SWAP grade: %.1f%% of texels, s x%s v x%s" % (100 * float((w > 0.5).mean()), g.get("s", 1), g.get("v", 1)), flush=True)
+
+
+def lift_normals(low, rules):
+    """`lift_normals` [{"box": [x0, x1, y0, y1, z0, z1], "k": 0..1}]: the vertex normals inside a box lean `k` of the way to
+    straight up. A loincloth's hem and its second layer hang facing down, the toon light never reaches them and the pass drew
+    them black (the dark shard under the hem, from behind and from the side); lit from above they read as the cloth they are.
+    A skin and its clips are untouched, only the shading normals of those vertices change."""
+    me = low.data
+    me.update()
+    V = verts(low)
+    nrm = np.array([v.normal for v in me.vertices])
+    new = nrm.copy()
+    for r in rules:
+        b = r["box"]
+        sel = (V[:, 0] >= b[0]) & (V[:, 0] <= b[1]) & (V[:, 1] >= b[2]) & (V[:, 1] <= b[3]) & (V[:, 2] >= b[4]) & (V[:, 2] <= b[5])
+        new[sel] = nrm[sel] * (1 - r["k"]) + np.array([0, 0, 1.0]) * r["k"]
+        print("SWAP lift_normals: %d vertices" % int(sel.sum()), flush=True)
+    new /= np.linalg.norm(new, axis=1, keepdims=True)
+    me.normals_split_custom_set_from_vertices([tuple(n) for n in new])
+
+
+def stretch_limb(low, arm, sp):
+    """`stretch` {"bone": "hook", "k": 1.15, "min_w": 0.0}: the vertices that ride `bone` are lengthened by k along the bone's
+    reach (its head to their farthest vertex) in the rest pose, by their weight on it (the elbow end blends); the goo arm of
+    the turnaround hangs to the floor and the scan's is shorter."""
+    bone = sp["bone"]
+    k = float(sp["k"])
+    g = low.vertex_groups[bone].index
+    V = verts(low)
+    w = np.zeros(len(V))
+    for v in low.data.vertices:
+        for e in v.groups:
+            if e.group == g:
+                w[v.index] = e.weight
+    head = np.array(arm.matrix_world @ arm.data.bones[bone].head_local)
+    sel = w > 0.5
+    tip = V[sel][np.argmax(np.linalg.norm(V[sel] - head, axis=1))]
+    d = (tip - head) / np.linalg.norm(tip - head)
+    t = (V - head) @ d
+    V2 = V + np.outer(w * np.maximum(t, 0) * (k - 1), d)
+    set_verts(low, V2)
+    print("SWAP stretch %s x%.2f: head %s tip %s -> %s" % (bone, k, head.round(3), tip.round(3), (head + (tip - head) * k).round(3)), flush=True)
+
+
 def select(obs, active):
     bpy.ops.object.select_all(action="DESELECT")
     for o in obs:
@@ -917,6 +1001,8 @@ def main():
         img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
         img.name = "atlas"
         imgs = [img]
+    if SPEC.get("grade") and own:
+        grade_skin(imgs[0], SPEC["grade"])      # (the body's paint: the material on the most faces)
     sole = bpy.context.scene["sole"]
     arm, old = import_game(os.path.join(WORK, "game.glb"))
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
@@ -938,6 +1024,8 @@ def main():
     passes = int(SPEC.get("meshy_smooth", 0)) if meshy else int(SPEC.get("smooth", 0))     # (meshy_smooth: blends a region's edge)
     gr = dict(zip(names, smooth_weights(low, W, passes).T))
     top = set_groups(low, gr)
+    if SPEC.get("stretch"):
+        stretch_limb(low, arm, SPEC["stretch"])
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
     slots = [s + "-" + (tags[i] if own else "atlas") for i, s in enumerate(tri_slots(low, imgs, top, P))]
@@ -1013,6 +1101,8 @@ def main():
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
         print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
     BW._unfold(low)     # (the fit folds a few more over: Motley's four 10-17 cm collar shards came from here, not the collapse)
+    if SPEC.get("lift_normals"):
+        lift_normals(low, SPEC["lift_normals"])
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:

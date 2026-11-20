@@ -1,5 +1,5 @@
 {
- "doc": "hunter-regen-dredge-1120 r2 (job 20261120-103741-a6): Meshy multi-image-to-3d meshy-7.1 A-pose from front/side/back crops of ~/gens/v95-latest-ta-1119/grimble.png whose front/back goo arm was re-posed clear of the right leg by Meshy image edits (nano-banana-pro; the original face pasted back unedited), quad remesh 60k, Meshy auto-rig weights + 32 smoothing passes. Joints from Meshy's rig (crown kept at H's neck offset), anchors shifted by the neck / wrist.L moves, the goo arm below the wrist whole on `hook` by one box (x > 0.235: the gap between goo and leg), no shin/colour hacks. Inputs and logs in ~/gens/hunter-regen-1120/dredge/r2/. Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- <spec> WORK OUT.glb r2 fix: v95_swap fits everything past the wrist by the forearm segment, rotated from the master forearm onto the rig forearm (which hangs straight down); the goo arm held 39 deg out swung ~40 cm in across the legs (the shin slabs, also behind r1 at 17 deg), so the master wrist.R is declared straight below the elbow (same length): no rotation, the goo keeps its pose. meshy_reach thigh [0.1, 0.16] moves the loincloth off the thighs. A loose goo drip on the floor by his right foot rides foot.R (last meshy_regions box), not the goo arm.",
+ "doc": "hunter-regen-dredge-1120 r2 (job 20261120-103741-a6): Meshy multi-image-to-3d meshy-7.1 A-pose from front/side/back crops of ~/gens/v95-latest-ta-1119/grimble.png whose front/back goo arm was re-posed clear of the right leg by Meshy image edits (nano-banana-pro; the original face pasted back unedited), quad remesh 60k, Meshy auto-rig weights + 32 smoothing passes. Joints from Meshy's rig (crown kept at H's neck offset), anchors shifted by the neck / wrist.L moves, the goo arm below the wrist whole on `hook` by one box (x > 0.235: the gap between goo and leg), no shin/colour hacks. Inputs and logs in ~/gens/hunter-regen-1120/dredge/r2/. Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- <spec> WORK OUT.glb r2 fix: v95_swap fits everything past the wrist by the forearm segment, rotated from the master forearm onto the rig forearm (which hangs straight down); the goo arm held 39 deg out swung ~40 cm in across the legs (the shin slabs, also behind r1 at 17 deg), so the master wrist.R is declared straight below the elbow (same length): no rotation, the goo keeps its pose. meshy_reach thigh [0.1, 0.16] moves the loincloth off the thighs. A loose goo drip on the floor by his right foot rides foot.R (last meshy_regions box), not the goo arm. r3 (job 20261120-123155-a6): same master and Meshy rig; `grade` eases the skin's saturation (x0.65, value x1.3, hue 0.86-1.0) toward the approved turnaround's (game median S 0.62 -> turnaround 0.41), `stretch` lengthens the goo arm (hook bone) x1.15 along its reach (turnaround arm = 78% of body height, scan 67%), `lift_normals` leans the hip/loincloth shading normals 0.7 to straight up (the hem hung face-down and drew black: the dark shard), anchors hook tip/claw moved with the arm.",
  "master": "~/gens/hunter-regen-1120/dredge/r2/rmR5/glb.glb",
  "game": "art/wardens/dredge/dredge.glb",
  "tris": 60000,
@@ -338,14 +338,14 @@
    1.3861
   ],
   "anchor_claw": [
-   0.443,
-   0.181,
-   0.075
+   0.455,
+   0.215,
+   0.03
   ],
   "anchor_hook_tip": [
-   0.443,
-   0.181,
-   0.075
+   0.455,
+   0.215,
+   0.03
   ],
   "anchor_fist": [
    -0.5532,
@@ -472,5 +472,31 @@
    0.1,
    0.16
   ]
- }
+ },
+ "grade": {
+  "h": [
+   0.86,
+   1.0
+  ],
+  "feather": 0.03,
+  "s": 0.65,
+  "v": 1.3
+ },
+ "stretch": {
+  "bone": "hook",
+  "k": 1.15
+ },
+ "lift_normals": [
+  {
+   "box": [
+    -0.3,
+    0.3,
+    -0.45,
+    0.35,
+    0.4,
+    0.64
+   ],
+   "k": 0.7
+  }
+ ]
 }

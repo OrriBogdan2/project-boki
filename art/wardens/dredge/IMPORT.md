@@ -89,3 +89,14 @@ his legs. The spec now declares the master wrist straight below the elbow (no tu
 the goo below the wrist on `hook` by one box, a loose floor drip on `foot.R`. `--stretch-check`: worst 6.56x (ledge only; live 8.52x,
 r1 5.75x), median 3.74 (live 4.36), clips over 5x 4 (live 20), 45 of 54 clips below live. Raws, logs, sheets: `~/gens/hunter-regen-1120/dredge/r2/`.
 The gun is still on his hip (turnaround), not in the gauntlet.
+
+**Regen r3 (2026-11-20, job 20261120-123155-a6, same branch, draft):** the art-gate failed r2 A (back views only, dark shard under the
+loincloth, skin too magenta, goo arm short). Same Meshy master and rig as r2 (nothing re-generated); three `v95_swap` spec keys, new:
+`grade` (skin hue 0.86-1.0 saturation x0.65, value x1.3: the toon pass lifts the scan's skin to a hotter magenta; game-render median
+saturation 0.62 -> toward the turnaround's 0.41, goo/gold/wood/leather are other hues), `stretch` (the `hook` bone's vertices x1.15 along the
+arm's reach by weight: the turnaround's goo arm is ~78% of body height, the scan's ~67%; hook tip/claw anchors moved with it),
+`lift_normals` (hip/loincloth vertex normals lean 0.7 to straight up: the hem and its second layer hung face-down, the toon light missed
+them and they drew black). `--stretch-check` unchanged from r2: worst 6.56x (ledge), median 3.74, 4 clips over 5x; the shin did not regress.
+Still open: at a low side angle (~40 deg, knee height) a small dark gap shows between the hem and the thigh (a hollow under the cloth);
+the kept junk ball floats free of the pack in run/crouch side views (no chain); the gun is on the hip (turnaround).
+Views (front/3/4/side/back, eye+knee, head, crotch, idle/run/crouch), turntable and clip MP4s: `~/gens/hunter-regen-1120/dredge/r3/`.
