@@ -179,7 +179,7 @@ func _land(d: Dictionary) -> void:
 func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Shake.incoming_big(k.m, f.pos, 0.6, h)
+	Shake.incoming_big(k.m, f.pos, ImpactWeight.shake("heavy"), h)
 
 ## A hunter who was up and went down to the cleave: it is ready again at once.
 func _reset() -> void:
