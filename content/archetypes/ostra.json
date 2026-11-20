@@ -169,7 +169,7 @@
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
 		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
-		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
+		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248); turn rate in the wind-up: match 1280 (ext/hero-ref-footage ostra 0436-0441: the cursor stays put through the telegraph)"}
 	},
 	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 16 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies within 1.5m of you when you leave get a shield of a third of your health for 3s."},
 	"tells": {
