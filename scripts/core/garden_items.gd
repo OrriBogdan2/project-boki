@@ -99,12 +99,15 @@ static func _verb(id: String) -> String:
 	return String(it.get("verb", rules()["verbs"][it["use"]]))
 
 ## Takes one from the bag and applies it (a sweet with its pick): the result of apply() plus look
-## (the body colour changed) and id (the item: its cue, and GardenItemFx plays the give from it).
+## (the body colour or its raised size, StatBudget.growth, changed:
+## the farm rebuilds the model) and id (the item: its cue, and GardenItemFx plays the give from it).
 static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
+	var grew := StatBudget.growth(rec)
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
-	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
+	var resized := absf(StatBudget.growth(rec) - grew) > 0.001
+	pv["look"] = pv["ok"] and (String(item(id)["effect"]["kind"]) in ["sweet", "aura"] or resized)
 	pv["id"] = id
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
