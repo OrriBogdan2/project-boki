@@ -31,6 +31,10 @@ func run(main: Node) -> void:
 		ok(not Watchdog.is_check_flag(flag), "%s does not" % flag)
 	ok(Watchdog.watches(["--nofog", "--feed-check"]), "a check run is watched")
 	ok(not Watchdog.watches(["--displace-net-check=guest", Watchdog.CHILD_FLAG]), "a check's second game is not")
+	ok(Watchdog.host_pid(["--check-child", "--check-host-pid=4242"]) == 4242 and Watchdog.host_pid([]) == 0,
+		"a second game reads its host's pid from the args")
+	ok(Watchdog.pid_alive(OS.get_process_id()) and not Watchdog.pid_alive(0) and not Watchdog.pid_alive(4194999),
+		"a pid is alive for a live process and not for a missing one")
 	for flag: String in CheckRegistry.COVERED:
 		var script: String = CheckRegistry.CHECKS.get(flag, [""])[0]
 		var covers: Array = CheckRegistry.COVERED[flag]
