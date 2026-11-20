@@ -327,12 +327,14 @@ SEG_NAMES = [s[0] for s in SEG]
 
 def targets(arm):
     """The rig's joints for the master's: the limbs keep the master's spread (x K) and take the rig's joint heights, or with
-    `spread` "rig" sit on the rig's joints."""
+    `spread` "rig" sit on the rig's joints (`spread_legs` "master": the legs still keep the master's, for a master whose
+    thighs sit closer than the rig's thigh heads, which would flare them out)."""
     head = {b.name: np.array(b.head_local, float) for b in arm.data.bones}
     k = head["hips"][2] / S_J["pelvis"][2]
 
     def on_rig(j, z, at=None):
-        if at is not None and SPEC.get("spread") == "rig":
+        legs = j.split(".")[0] in ("hip", "knee", "ankle") and SPEC.get("spread_legs") == "master"
+        if at is not None and SPEC.get("spread") == "rig" and not legs:
             return at
         return (S_J[j] - (S_J["pelvis"][0], S_J["pelvis"][1], 0)) * (k, k, 0) + (0, 0, z)
 
