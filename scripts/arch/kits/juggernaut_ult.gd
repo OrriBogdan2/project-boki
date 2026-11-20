@@ -5,11 +5,11 @@ extends RefCounted
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
 ## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals. Taking a hunter
-## down with it (the source's "killing a living enemy": our lethal hit is a knock; a hunter already down takes
-## nothing from it, and a monster or a wisp doesn't count) makes it ready again at once. Landing it on a
-## rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain
-## still held pulls him through it: E in the guard or the cleave hauls him along the chain, the guard up, and
-## the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
+## down with it, or killing a monster or a foe Boki with it (the source's "killing a living enemy": our lethal hit
+## on a hunter is a knock; a hunter already down takes nothing from it, and a wisp doesn't count) makes it ready
+## again at once. Landing it on a rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the
+## best of the cast). A chain still held pulls him through it: E in the guard or the cleave hauls him along the
+## chain, the guard up, and the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const LANE_COL := Color("ffb820")      # the strip ahead: his gold
@@ -164,7 +164,9 @@ func _land(d: Dictionary) -> void:
 			continue
 		last_dealt += dealt
 		_impact(f, dir)
-		if HeroUlt.landed(k, f) in ["knock", "kill"]:
+		# a hunter taken down (knock or kill) or any other foe killed (a monster, a foe Boki): the source's "killing a
+		# living enemy"; its footage resets on a dummy kill (hero-ref/juggernaut.md f99-f101)
+		if HeroUlt.landed(k, f) in ["knock", "kill"] or (not (f is Hunter) and f.dead):
 			_reset()
 	if last_dealt > 0.0:
 		strikes += 1
@@ -182,7 +184,7 @@ func _impact(f: Ent, dir: Vector2) -> void:
 	k.vfx("riposte_hit", f.pos, dir)
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
-## A hunter who was up and went down to the cleave: it is ready again at once.
+## A hunter who was up and went down to the cleave, or a monster it killed: it is ready again at once.
 func _reset() -> void:
 	resets += 1
 	HeroUlt.reset(k)

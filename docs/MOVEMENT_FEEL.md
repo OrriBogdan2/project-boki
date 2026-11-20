@@ -140,7 +140,7 @@ defaults aren't cited, since the data names no field for these windows.
 | swoop_x / swoop_fade_s / swoop_left / swoop_hot_x (short dive, let go) | none | 2.5x / 1.5 s / 0 / 1.25x | 2.4–2.6 / 1.45–1.55 / <= 0.05 / 1.2–1.3 | [game data] SwoopSpeedTransferRatio, SwoopSpeedFadeTime; half strength overheated (decision 0095) |
 | airdash_fall_vy_keep / airdash_fall_speed (class air dash out of a 10 m fall, 12 m/s) | n/a | 0.00x / 23.0 m/s | 0–1 / reference | [?] AirDashSpeedMultiplier / AirDashSpeedClamp not decoded, not filmed (sv/FEEL.md) |
 | airdash_dive_vy_keep / _hv_keep / _speed (out of a glide dive, 32.5 m/s down) | n/a | 0.00x / 0.00x / 23.0 m/s | 0–1 / 0–1 / reference | [?] the same: ours drops the fall and the forward speed |
-| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
+| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / ~0.2 / 0.99 | <= 0.02 / >= 0.1 / >= 0.95 | owner 11-17: graded, nothing until content/rules/abyss_danger.json start_depth, full at the kill depth (--abyss-danger-check) |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
 | drop_dive_steer_t (90% of commanded) | 0.783s | 0.4s | <= 0.42s | the dive steers with every jump's air control (Loco.air_step, owner 11-08 one model; was 0.233s on its own 45 m/s² ramp) |
@@ -741,9 +741,9 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 | Grimble (Kingpin) | 0.80 (default) | hook out 0.15-0.25; Broadside 0.3 / 0.2 | full between shots | [F] dredge.md: walks between shots, no number | kept; Broadside: owner item 36 |
 | Vex (Ghost) | full (`fire_slow` 1.0) | Longneedle: planted (`self_slow` 1.0) | full | [F] venator.md: no fire slow; stands still through the cast | kept (matches) |
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84) | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check` |
-| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full **[?]** | full | [F] vireo.md (5 fps): all 3 holds (0043-0048, 0057-0062, 0078-0083) are planted with no move input or camera pan; the only runs (0154-0160, 0270-0274) have no cast; no other Joule clip in the notes or sv/briefs shows a hold, so walk-or-root can't be told | kept: full until a clip of a hold with movement input; ext/sparkle-dash-feel's 0.82 has no source either |
+| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: 0.82 (`rmb.self_slow`, ramps in over `slow_in` 0.3 s) **[?]** | full | [F] vireo.md (5 fps): all 3 holds (0043-0048, 0057-0062, 0078-0083) are planted with no move input or camera pan; the only runs (0154-0160, 0270-0274) have no cast; no other Joule clip in the notes or sv/briefs shows a hold, so walk-or-root can't be told | owner 11-08 playtest: 0.82 kept; no source number either way until a clip of a hold with movement input |
 | **Kael (Brall)** | tap: full; Searing Wave charge 0.55 | **Lunge charge 0.80 (was full)**; Finishing Slam wind-up 0.60 | the Lunge fling | [F] juggernaut.md: 85-95 px/s during the Heavy Attack hold against 113-124 on plain runs (0.69-0.84). Searing Wave: 0 px/s in all 7 holds (0062-0067 and 0076-0120, 5 fps; 1 px = 0.05 m) against about 4 m/s on his runs, but he also stands for the taps there, and the one hold away from the dummy (0062-0067) sits between two short walks; a stop by choice can't be told from a forced one | **changed**: `rmb.lunge.walk_k` 0.8; asserted in `--juggernaut-combo-check`. Searing Wave 0.55 kept: not determinable |
-| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: full on main | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (ext/sparkle-dash-feel adds 0.82 on its own) |
+| Sparkle (Joule) | 0.90 (`fire_slow`) | Storm Rod hold: 0.82 (`rmb.self_slow`) | full | [F] vireo.md: stood still in every shot; whether she can move while holding is an open question | kept (the owner playtest 0.82) |
 | Motley (Void) | 0.90 (`fire_slow`) | Snap wind-up 0.75 (`cast_slow`); Trade drift 0.3 | full after the 0.15 s recovery | [patch] Snap slows Void while casting (25% less) | kept |
 | Neve (Celeste) | full (kit-fired darts never set the fire cooldown; hoar_fan has no `fire_slow`) | Ice Spear aim: full | full | [F] rimewright.md: throws while walking or skating | kept (matches) |
 | Meeko (Elluna) | full (`fire_slow` 1.0) | Burrseed wind-up 0.5 (`wind_move`) | 0.5 until the seed leaves | [F] mooshmoosh.md: keeps walking while firing | kept |
@@ -1391,3 +1391,33 @@ Every failing row, with the drift `--feel-golden-check` printed on main before t
 ## Movement drills (Training Area)
 
 The Drills button on the Training Area's bar (`scripts/match/move_drills.gd`) runs five timed drills, one banner line each, pass or fail: dash through three hoops; tap jump, let go, press jump again and hold it to glide 4 m; glide and dive onto a mat; wall kick up a four-terrace wall; mantle a two-terrace ledge. The best pass time per drill is kept in `Save.d["drills"]` (save v15). Pressing the button again skips to the next drill. `--move-drills-check` passes each drill with a bot input script and fails the wrong plays.
+
+## Ledge heights after Hollow Crown 2.0 (`--cliff-mantle-check` height rows, tools/mantle_heights.gd; DECISIONS: ledges always responsive)
+Census of every ledge face on both tiers. Terrace steps: 0.8 m (884), 1.6 m (1020), 2.4 m (4), 3.2 m (3772, the wall tier), 4.0-7.2 m cliffs (1606).
+Stair-flight sides: 0.4-6.8 m (466). Sheer lips: 1.6 and 3.2 m (22, not grabbable by design). Ruin walls and boulders: 3.0 m blocks (5012, walls, never climbed).
+Meeko (tender), Vex (gunslinger) and Albert (bulwark) were driven into up to 6 faces per height from a running jump, a standing jump and a glide (2.5 m out).
+Results on origin/main a1b35c78ee, unchanged by this pass:
+| Height | Run | Jump | Glide |
+|---|---|---|---|
+| 0.4-2.8 m (steps and stair sides) | 228/228 | 228/228 | 228/228 |
+| 3.2-7.2 m | 0/240 | 0/240 | 240/240 |
+- No height inside the reach window (jump apex 1.57 m + `MANTLE_REACH` 1.5 m = 3.07 m) misses. No mantle snaps: no step in the rise moves more than 0.2 m past what its speed explains. So the reach window stays as it is.
+- The 3.2 m wall tier sits 0.13 m above the window, so jumps never top it (decision 0007). Glides top every height.
+- The only red was in the check itself: `face 4 jump_30` topped 10/160 3.2 m faces. The run slid 3 tiles along the face, caught a 2.4 m stretch and walked up a flight. A top now counts only over the face's own straight stretch (`_on_face`).
+## Run turn: the stick flipped 180 degrees at full run (`--move-feel-check` `run_turn_*`, `--anim-audit` TURNS)
+
+The source data settles it (no footage of a ground reversal exists in the reports): with keys held at or under the run, UE's walking step turns the velocity toward the keys with GroundFriction (1/s, 1.0) and adds MaxAcceleration (47-54 m/s²). The walking brake (22.2 m/s² plus friction x2) acts only with no keys or over the run, so it plays no part in a held flip. Ours (`Loco.accel_to`) has no turn friction and lands within one 60 Hz step of that rule for every kit, so no number in `content/rules/hunter_move.json` changed. The body faces the cursor, never the stick: with the cursor held ahead it does not turn (the legs backpedal); with the cursor flipped too it turns at `turn_rate` 1280 deg/s.
+
+| Kit | Run (m/s) | Zero | 95% back | Source rule | Body 180 (cursor flipped) |
+|---|---|---|---|---|---|
+| rimewright | 5.16 | 0.083 s | 0.167 s | 0.083 / 0.167 s | 0.150 s |
+| archer, juggernaut, gunslinger, tender | 5.28 | 0.100 s | 0.167 s | 0.083 / 0.167 s | 0.150 s |
+| gil | 5.34 | 0.100 s | 0.183 s | 0.083 / 0.167 s | 0.150 s |
+| ashwick, mage, thief, ostra | 5.39 | 0.100 s | 0.183 s | 0.083 / 0.167 s | 0.150 s |
+| dolm | 5.39 | 0.100 s | 0.183 s | 0.100 / 0.183 s | 0.150 s |
+| dredge | 5.39 | 0.100 s | 0.200 s | 0.100 / 0.183 s | 0.150 s |
+| bulwark | 5.63 | 0.117 s | 0.217 s | 0.100 / 0.200 s | 0.150 s |
+
+Asserted per kit (`tools/move_feel_turn.gd`): zero and 95%-back within 1 step of the source rule, the same with the cursor flipped, the body 180 within 9 steps, no body turn with the cursor held. `run_turn_err_frames` <= 1, `run_turn_full_t` <= 0.22 s, `run_turn_face_t` 0.12-0.17 s.
+
+Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip): with the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The steady run before and after reads 10-22% for most Hunters (the calibration), but the turn itself slides 52-119% (held) and 35-128% (flipped): the loco blend (ease 12/s) trails a reversal that takes 0.1 s to zero. No Hunter is under `MAX_SLIDE` 25% yet, so the audit prints OPEN lines and only fails past `TURN_CEIL` 140% (today's worst, archer 119-128%, plus a margin). Backlog: "run turn slide".
