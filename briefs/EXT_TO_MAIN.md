@@ -10417,3 +10417,4 @@ READY ext/anim-stride-foot-slide 811967d9b3 (Hunter runs plant at match scale: l
 READY ext/sfx-stomp-cues b3fdb5c5bc593171fdde419b702c298d801b8f4a (stomp wind-up/finish/crack cues in content/sfx/stomp.json, wired in Life, asserted in --sfx-set-check and --stomp-check)
 READY ext/anim-footstep-contacts 184a5ef8d5 (Hero footsteps cue on each v95 clip's own foot plants from a generated per-Hero table; --step-contacts-check 60/60 within 2 fr at 60 fps, worst 1; timer drift was up to 19 fr)
 READY ext/anim-motley-flinch-rng fc752f165f8831fcf55264f8263449c8c908845a (--rng-seed=N for checks; stale Motley flinch-RNG DEBT rows dropped, fixed by cd1042d2ad; clip-check ostra flinch 0.0000 m on 20 seeds)
+READY ext/sfx-tenzo-grimble-bar 2738e9f30c (Tenzo+Grimble ability bar: 11 CC0 cues, per-ability hits rock crunch/scrap clang, boulder+hook travel loops, hook let-go + Broadside end; sfx-set 0 FAIL, strike rc0)
