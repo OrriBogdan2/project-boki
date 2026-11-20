@@ -7,6 +7,7 @@ extends RefCounted
 ##      Hunter with no feet, KMovesStone.gait < 0.5: no step files, a <arch>_hover loop for HoverHum instead),
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##      and its signature weapon's JSON names one of them (no stock sound)
+##      and no Hunter's move looks (content/vfx/<arch>.json) play another Hunter's own sound
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. every sound named in UiSfx (capture, extraction, refusals) has its file
@@ -36,6 +37,8 @@ extends RefCounted
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
+##      (tools/ability_beat_sfx_check.gd; two short training matches)
 ## Never touches the save.
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
@@ -78,6 +81,8 @@ extends RefCounted
 ##      drops, and stops on a heal, a down or out
 ##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
+##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
+##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -123,6 +128,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_vfx_own()
 	await _menus(main)
 	_dash_air()
 	_wired()
@@ -140,6 +146,7 @@ func run(main: Node) -> void:
 	_hostile()
 	_level_cues()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	load("res://tools/ability_beat_sfx_check.gd").new().run(main, ok)
 	await _held_fire(main)
 	_hit_ticks()
 	_boss_moves()
@@ -158,7 +165,10 @@ func run(main: Node) -> void:
 	_pick_taken()
 	_ui_cues()
 	_low_hp()
+	_stomp_cues()
 	_voices()
+	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -264,6 +274,25 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
+
+## 3. A Hunter's move looks (content/vfx/<arch>.json) never play another Hunter's own sound, so every Hunter's hits
+## sound like its own (Gil's slime once borrowed Sparkle's bubble pop, his Super Zeep Motley's seed pop).
+func _vfx_own() -> void:
+	var owner_of := {}
+	for arch: String in Arch.ids():
+		var f := "res://content/sfx/%s.json" % arch
+		if FileAccess.file_exists(f):
+			for sname in (JSON.parse_string(FileAccess.get_file_as_string(f)) as Dictionary).get("sounds", {}):
+				owner_of[sname] = arch
+	var borrowed := []
+	for arch: String in Arch.ids():
+		var moves: Dictionary = HeroVfx.data(arch).get("moves", {})
+		for mv in moves:
+			for s: Dictionary in (moves[mv] as Dictionary).get("sfx", []):
+				var who := String(owner_of.get(String(s["n"]), arch))
+				if who != arch:
+					borrowed.append("%s %s: %s (%s)" % [arch, mv, s["n"], who])
+	ok(borrowed.is_empty() and owner_of.size() > 100, "move looks play only their Hunter's own sounds %s" % [borrowed])
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
 ## files the set lists under "kit_files" (paths under scripts/arch/kits/).
@@ -542,8 +571,10 @@ func _wired() -> void:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
-	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
-		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
+		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
+	ok(FileAccess.get_file_as_string("res://scripts/match/exits.gd").contains("WarnSfx.countdown("),
+		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
 	_warn_behaviour()
 
 ## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
@@ -589,6 +620,9 @@ func _dash_air() -> void:
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
+	var slot_src := FileAccess.get_file_as_string("res://scripts/ui/dash_slot.gd")
+	ok(Sfx.ensure(DashSlot.REFILL_SOUND) and slot_src.contains("Sfx.play(REFILL_SOUND"),
+		"the dash refill cue (%s) exists and DashSlot plays it when a charge returns" % DashSlot.REFILL_SOUND)
 	ok(Sfx.ensure("dash_ground") and Sfx.ensure("dash_air"), "the shared dash_ground and dash_air exist")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
@@ -1326,6 +1360,7 @@ func _menus(main: Node) -> void:
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
+	Overlay.more_tabs = true          # (every tab, not just Main and Controls)
 	Overlay.open_settings()
 	for t in Overlay.SETTINGS_TABS:
 		await _settle(main)
@@ -1422,6 +1457,29 @@ func _heard(sname: String, act: Callable) -> float:
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
 
+## The stomp's cues (DECISIONS 2026-11-11): its own set, played once at a position (no `mine`, so both squads in
+## reach hear it) where Life starts it, finishes the wisp and loses it to hard CC; the wind-up rises.
+const STOMP_CUES := {"stomp_windup": "h.pos, -2.0)", "stomp_finish": "o.pos)", "stomp_crack": "h.pos)"}
+
+func _stomp_cues() -> void:
+	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/stomp.json"))
+	var src := FileAccess.get_file_as_string("res://scripts/match/life.gd")
+	var off := []
+	for sname: String in STOMP_CUES:
+		if not (d is Dictionary and (d["sounds"] as Dictionary).has(sname)) or not Sfx.ensure(sname):
+			off.append(sname + " (no set or file)")
+		elif src.count('m.sfx("%s", %s' % [sname, STOMP_CUES[sname]]) != 1:
+			off.append(sname + " not played once at its spot in life.gd")
+	ok(off.is_empty() and not src.contains('"whoosh"') and not src.contains('"crit"'),
+			"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off])
+	var data := _data("res://audio/stomp_windup.wav")
+	var half := data.size() / 4
+	var e := [0.0, 0.0]
+	for k in half * 2:
+		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
+	var gain := 10.0 * log(e[1] / maxf(e[0], 1e-9)) / log(10.0)
+	ok(e[1] > e[0] * 1.5, "stomp: the wind-up rises (second half %.1f dB over the first)" % gain)
+
 ## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
 func _boss_moves() -> void:
 	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
@@ -1495,3 +1553,19 @@ func _voices() -> void:
 	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
+
+## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
+## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
+func _falloff() -> void:
+	var edge := CamRig.style_across("supervive") * 0.5
+	var was: Vector3 = Sfx.listener
+	Sfx.listener = Vector3.ZERO
+	var at_edge := Sfx._distance_db(Vector3(edge, 0, 0))
+	var off := Sfx._distance_db(Vector3(edge + 10.0, 0, 0))
+	var gone := Sfx._distance_db(Vector3(31.0, 0, 0))
+	Sfx.listener = was
+	print("SFXSET falloff: edge %.1f m %.1f dB, +10 m %.1f dB, 31 m %s" % [edge, at_edge, off, gone])
+	var clear := at_edge > -12.0 and edge < Sfx.FAR
+	ok(clear, "a cue at the screen edge (%.1f m) is heard clearly (%.1f dB, clear bus)" % [edge, at_edge])
+	ok(off < at_edge - 4.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
+	ok(is_nan(gone), "...and past ~30 m it is silent")

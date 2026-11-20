@@ -258,7 +258,9 @@ func _hold_and_air() -> void:
 	K.cd["rmb"] = 0.0
 	K.bag.append("air")
 	tap(m, P)
-	var far_tap := Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length() if not K.flying.is_empty() else 0.0
+	var far_tap := 0.0
+	if not K.flying.is_empty():
+		far_tap = Vector2(K.flying[0]["at"].x - home.x, K.flying[0]["at"].z - home.z).length()
 	_land()
 	_reset(6.0)
 	K.ch_rmb = 2.0
@@ -335,7 +337,7 @@ func _swim() -> void:
 		top["y"] = maxf(top["y"], T.pos.y - y0))
 	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
 	var dd := K.dash_def()
-	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash (owner 11-11)",
 		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
@@ -493,7 +495,7 @@ func _dash_numbers() -> void:
 		m.step(DT)
 		under += DT
 	step(m, 0.1)
-	ok("numbers Shift: under the ground about 0.55 s (the shared dash feel's time scale)", under > 0.35 and under < 0.8,
+	ok("numbers Shift: under the ground about 0.55 s (the shared dash feel's time scale)", under > 0.4 and under < 0.75,
 		"%.2f s" % under)
 	ok("numbers Shift: surfacing deals 4", absf(dmg(T) - 4.0) < 0.2, "%.1f" % dmg(T))
 	var back := 0.0
@@ -712,7 +714,8 @@ func _leap_off() -> void:
 	var run := Vector2(x1.x - p0.x, x1.z - p0.z).length()
 	var carry := Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length()
 	ok("leap off: he stopped riding (4 m of the 14 at 0.3 s, a short run-out after), back on the ground",
-		run < 6.5 and P.grounded and carry < 8.0, "%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
+		run < 6.5 and P.grounded and carry < 8.0,
+		"%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
 	ok("leap off: the 90 s cooldown stands, no second wave, R does nothing more",
 		float(K.cd["x"]) > 85.0 and not HunterKeys.ult_pressed(P) and K.wave.is_empty())
 	K.ch_rmb = 2.0
