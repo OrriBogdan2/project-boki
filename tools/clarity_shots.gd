@@ -10,6 +10,7 @@ extends RefCounted
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
+const FIGHT_PX := Vector2i(1920, 1080)  # the fight frames' size (the window: stretch is off)
 const RUN_S := 1.6         # s the scene plays before the picture (the downed teammate's Boki reacts)
 
 func run(main: Node) -> void:
@@ -86,6 +87,7 @@ func run(main: Node) -> void:
 func _fights(main: Node, dir: String) -> void:
 	var rows := PackedStringArray(["fight\tframe\tkind\twhat\thunters"])
 	var frames := {}  # "kind what" -> frames it was on a Hunter
+	main.get_window().size = FIGHT_PX
 	for f in ClarityFight.FIGHTS.size():
 		var on_frame := func(fm: Match, i: int) -> void:
 			var img := fm.get_viewport().get_texture().get_image()
