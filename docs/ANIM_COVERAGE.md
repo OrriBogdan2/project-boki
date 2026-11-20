@@ -33,7 +33,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
+| gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | proc | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
@@ -54,8 +54,13 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 
 ## Gaps, worst first
 
-1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
-   crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
+1. **Gil has no authored clips of his own** (empty `gil.glb` animation list). Until his Blender rig pass he borrows
+   Meeko's (`"clips_from": "pip"` in `warden_anim/gil.json`, `WardenClips._borrow`): his 17 bones are all contract
+   bones with the same rest rotations as hers, and her legs and arms are within 5% of his, so her idle, walk, run and
+   strafe rings, jump, fall, landing and hit staggers play on him by bone name (`--warden-clips-check`: no T-pose,
+   legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
+   loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
+   and death, foot bones; then drop `clips_from`.
 2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
    and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
    the move and the landing squash settles it.
