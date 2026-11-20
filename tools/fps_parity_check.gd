@@ -1,14 +1,24 @@
 extends RefCounted
-## --fps-parity-check: the same input script gives the same hunter at 30, 60 and 144 fps and through a 20 ms hitch.
+## --fps-parity-check: the same input script gives the same hunter at 30, 60, 144 and 240 fps and through a 20 ms hitch,
+## and one press of each key gives exactly one action at 60, 144 and 240 fps (the PRESS rows, below).
 ## Physics ticks at 60 Hz (Match.DT) inside Match._process, so only gameplay that reads the frame time would drift.
 ## Each frame this drives the real Match._process with that run's frame length (the tutorial-test option leaves the
 ## input to the script, as a player's keys are read once per frame), with presses landing on 1/30 s marks of sim time
 ## so every frame rate can press on the same tick. Script: dash, jump, glide 2 s, hold LMB 3 s, cast E.
 ## Compared against the 60 fps run: end position, jump apex, glide reach, dash length, swings, shots,
 ## flame ticks and the E cooldown end.
+## The PRESS rows drive the real input path (Input.action_press/release, Match._gather_input, the pending_input latch
+## and the fixed steps) at each render rate, with the press landing at every phase of the 60 Hz tick: LMB, RMB, E, R,
+## Shift and jump are each pressed and released inside one tick (one frame down, so at 144 and 240 the fixed step
+## may not run while the key is down) and must give exactly one action: a shot or swing, a spent cooldown or charge,
+## a lift-off. The glide key is a hold (the glider opens on a second fixed step with it still down), so it is tapped
+## for 3 ticks and must open the glider once.
 
 const HEROES := ["gunslinger", "juggernaut", "ashwick", "thief"]      # Vex, Kael, Cinder, Sparkle
-const RUNS := [["30 fps", 30, 0.0], ["60 fps", 60, 0.0], ["144 fps", 144, 0.0], ["60 fps + 20 ms hitches", 60, 0.020]]
+const RUNS := [
+	["30 fps", 30, 0.0], ["60 fps", 60, 0.0], ["144 fps", 144, 0.0], ["240 fps", 240, 0.0],
+	["60 fps + 20 ms hitches", 60, 0.020],
+]
 const BASE := 1                  # the run the others are measured against (60 fps)
 const TOL := 0.02                # agreement allowed between runs (a fraction)
 const HITCH_FIRST := 0.15       # s: the first hitch lands inside the dash
@@ -21,6 +31,17 @@ const T_FIRE := 6.0
 const T_FIRE_END := 9.0
 const T_CAST := 9.5
 const T_END := 12.0
+const PRESS_HZ := [60, 144, 240]
+const PRESS_HERO := "gunslinger"       # Vex: a shot, a cast, a dash and a hero R on every key
+const PRESS_WATCH := 0.5               # s: how long a press is watched for its action
+const PRESS_GLIDE_UP := 12.0           # m: the glide key is pressed this high above the ground
+const PRESS_GLIDE_HOLD := 0.05         # s: a 3-tick tap: the glider opens on a second step with the key down
+## key -> [the input action, the Hunter slot that spends]; lmb counts shots and swings, jump counts lift-offs, glide
+## counts the glider opening
+const PRESS_KEYS := {
+	"lmb": ["fire", ""], "rmb": ["secondary", "sec"], "e": ["signature", "e"], "r": ["hunter_ult", "x"],
+	"dash": ["dash", "dash"], "jump": ["jump", ""], "glide": ["glide", ""],
+}
 
 var bad := 0
 
@@ -30,12 +51,13 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 ## A fresh match as `arch` on a flat, empty patch of ground, no mobs, nobody else near.
-func _match(main: Node, arch: String) -> Match:
+## `real_input`: the match reads the keys itself (Match._gather_input), as in play; else the script drives the hunter.
+func _match(main: Node, arch: String, real_input := false) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
 		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"tut_test": true,
+		"tut_test": not real_input,
 		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch),
 	})
 	m.set_process(false)
@@ -137,6 +159,79 @@ func _run(main: Node, arch: String, fps: int, hitch: float) -> Dictionary:
 	m.queue_free()
 	return out
 
+## What a key has done so far, as one running count: shots and swings (LMB), lift-offs (jump), glider openings (glide),
+## else the times its slot spent a charge or started a cooldown (`watch` carries the last reading between frames).
+func _acts(m: Match, key: String, watch: Dictionary) -> int:
+	var hunter: Hunter = m.player
+	var n := int(watch.get("n", 0))
+	match key:
+		"lmb":
+			for s in m.shots:
+				if s["by"] == hunter and not s.has("_seen"):
+					s["_seen"] = true
+					n += 1
+			n += hunter.swing_n - int(watch.get("swings", hunter.swing_n))
+			watch["swings"] = hunter.swing_n
+		"jump":
+			n += int(not hunter.grounded and bool(watch.get("grounded", true)))
+			n += hunter.air_jumps - int(watch.get("air", 0))
+			watch["grounded"] = hunter.grounded
+			watch["air"] = hunter.air_jumps
+		"glide":
+			n += int(hunter.gliding and not bool(watch.get("gliding", false)))
+			watch["gliding"] = hunter.gliding
+		_:
+			var info: Dictionary = hunter.slot_info(String(PRESS_KEYS[key][1]))
+			var cd := float(info["cd"])
+			if watch.has("cd"):
+				n += int(int(info["charges"]) < int(watch["charges"]) or cd > float(watch["cd"]) + 0.01)
+			watch["charges"] = int(info["charges"])
+			watch["cd"] = cd
+	watch["n"] = n
+	return n
+
+## One press of `key` at `hz`, landing `phase` frames into a 60 Hz tick and let go a frame later (inside the same tick
+## at 144 and 240); returns the actions counted over the watch.
+func _press(main: Node, key: String, hz: int, phase: int) -> int:
+	Engine.max_fps = hz
+	var m := _match(main, PRESS_HERO, true)
+	var hunter: Hunter = m.player
+	if key == "glide":
+		hunter.teleport(hunter.pos + Vector3(0, PRESS_GLIDE_UP, 0))
+		hunter.grounded = false
+	if key == "r":
+		hunter.lvl = 20
+		hunter.ult = 1.0
+	var act := String(PRESS_KEYS[key][0])
+	var dt := 1.0 / float(hz)
+	var down := int(ceil(PRESS_GLIDE_HOLD * hz)) if key == "glide" else 1      # frames the key stays down
+	var watch := {}
+	_acts(m, key, watch)
+	m.acc = phase * dt
+	for f in int(ceil(PRESS_WATCH * hz)):
+		if f == 0:
+			Input.action_press(act)
+		elif f == down:
+			Input.action_release(act)
+		m._process(dt)
+		_acts(m, key, watch)
+		await main.get_tree().process_frame
+	if Input.is_action_pressed(act):
+		Input.action_release(act)
+	var n := int(watch["n"])
+	m.queue_free()
+	return n
+
+func _press_rows(main: Node) -> void:
+	for hz in PRESS_HZ:
+		var phases := maxi(1, int(ceil(float(hz) / 60.0)))      # frames in a tick: the press lands at each
+		for key in PRESS_KEYS:
+			var got := []
+			for ph in phases:
+				got.append(await _press(main, String(key), int(hz), ph))
+			var all_one := got.all(func(n): return n == 1)
+			ok(all_one, "PRESS %3d Hz %-4s: one press, one action (per tick phase: %s)" % [hz, key, str(got)])
+
 func _close(a: float, b: float) -> bool:
 	return absf(a - b) <= TOL * maxf(absf(b), 0.5)
 
@@ -167,6 +262,7 @@ func run(main: Node) -> void:
 			for k in ["dash", "apex", "glide", "end", "swings", "flames", "shots", "cd_end"]:
 				var got := float(run_row[k])
 				ok(_close(got, float(base[k])), "%s: %s %.3f vs %.3f" % [tag, k, got, float(base[k])])
+	await _press_rows(main)
 	Engine.max_fps = was_fps
 	print("FPSPAR DONE, failures: %d" % bad)
 	main.get_tree().quit()
