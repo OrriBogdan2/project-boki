@@ -14,6 +14,7 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax
     (but `meshy_regions`: the regions of bones Meshy's rig lacks, a tail, ears, wings, still go on whole).
     `meshy_map` {Meshy bone: "ours [ours]"} overrides MESHY for one Hunter.
+    `meshy_keep_head` [bone]: those regions skip the vertices Meshy weighs mostly to the head.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -870,7 +871,10 @@ def main():
     gr = meshy_weights(low, arm, P) if meshy else None
     if meshy:       # (bones Meshy's humanoid rig lacks, Meeko's tail, ears and wings: their `regions` whole, as the heat path)
         keep = set(SPEC.get("meshy_regions", []))
+        guard = set(SPEC.get("meshy_keep_head", []))     # (Meeko's wing boxes reach behind her head: head stays head)
         for bone, m in ((b, m) for b, m in region_masks(P) if b in keep):
+            if bone in guard and "head" in gr:
+                m = m & (gr["head"] < 0.5)
             for nm in gr:
                 gr[nm] = gr[nm] * ~m
             gr[bone] = gr.get(bone, np.zeros(len(P))) + m

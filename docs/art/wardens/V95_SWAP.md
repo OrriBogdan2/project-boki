@@ -247,3 +247,13 @@ to rig and export:
    regions go on whole) and add `meshy_smooth` passes over the seams (Meeko 11-20, stretch mean/worst LIVE 5.32/7.69:
    regions alone 24.4/59.4, smooth 6 7.05/15.8, 12 5.50/11.7, 20 4.58/8.89). A spec region that sat on the old
    master's satchel can land on the new one's hand or thigh: drop it (Meshy's weights carry a satchel).
+7. Meeko r2 (11-20): a region box can reach past its part. Her wing boxes took the back of her head (head 0.7 /
+   wing 0.3), so every wing flap tore the head: shot_r worst 8.89, head>head x2930. `meshy_keep_head` [bones] leaves
+   those regions off the vertices Meshy weighs mostly to the head (shot_r 8.89 -> 5.26). The tail base sat on both
+   thighs at the crotch: widen the tail region's `except_segs` (thigh 0.17, shin 0.13) and smooth 30 passes. Stretch
+   mean/worst over 57 clips: LIVE 5.32/7.69, old A 4.58/8.89, new gen H plain 5.78/8.44, smooth 30 5.19/7.96, wide
+   except 5.22/7.90, both 4.79/6.62. `meshy_map` {Meshy bone: ours} remaps one Hunter's Meshy bones (neck on hips
+   alone did nothing for Meeko). `--stretch-check` names the worst bone pairs, not where they sit; print the worst
+   edge's rest spot and weights before guessing.
+8. After a new glb, delete `<art>_v95.jpg` and `.godot/imported/<art>.glb-*` before importing: Godot keeps an old
+   extracted texture of the same name, and the new mesh renders with the old candidate's texture.
