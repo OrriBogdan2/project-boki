@@ -10541,3 +10541,4 @@ READY ext/sfx-ability-audit-13 34b2b2c4dc (no silent ability: Gil fills from his
 READY ext/sfx-enemy-ult-cue 5401040bf3 (enemy ult cue: same sound +3 dB on SFXFoe bus; keyboard ult press mirrored to other games; --sfx-remote-check ult rows for archer/mage/thief ally+rival)
 READY ext/sfx-wisp-steal 81827d818bd8d464f63b495954c5042ad414e7fa (wisp steal: steal_lost sting for owner+squad, soft pickup for thief; --wisp-steal-check asserts)
 READY ext/hit-spark-contact 774108d56e (hit spark at real contact point clamped to v95 collider; shots/melee/blasts/area/zones pass at; hit-shape 0 fail, hit-feedback 52/0)
+READY ext/region-ambience 05e476f36f (each Hollow Crown region plays its own library ambience bed, 3.5 s border crossfade, quieter in the Blight; asserted in --match-audio-check)
