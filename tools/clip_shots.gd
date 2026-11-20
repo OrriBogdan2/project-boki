@@ -1,5 +1,6 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--match]
+## [--cam-y=m] [--cam-x=m] [--fov=deg]: the eye/knee camera height, a sideways pan and a wider field of view
 ## [--turn [--turn-clip=run_f]]
 ## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
 ## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
@@ -31,6 +32,7 @@ func run(main: Node) -> void:
 	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
+	var cam_x := 0.0  # (--cam-x: pan the camera sideways, metres: a dragged hammer kept in frame)
 	var fov_over := -1.0  # (--fov: widen a camera, e.g. --match with a swung hammer in frame)
 	var cam_y := -1.0  # (--cam-y: the camera's own height, e.g. knee level, apart from the look target --at)
 	for a in OS.get_cmdline_user_args():
@@ -50,6 +52,8 @@ func run(main: Node) -> void:
 			dist = float(a.substr(7))
 		if a.begins_with("--at="):
 			at_y = float(a.substr(5))
+		if a.begins_with("--cam-x="):
+			cam_x = float(a.substr(8))
 		if a.begins_with("--fov="):
 			fov_over = float(a.substr(6))
 		if a.begins_with("--cam-y="):
@@ -95,6 +99,7 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	if fov_over > 0.0:
 		cam.fov = fov_over
+	cam.position.x += cam_x
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
 	var sync := model.get_node("Warden/Sync")
