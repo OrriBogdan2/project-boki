@@ -42,6 +42,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## abyss_danger (`content/rules/abyss_danger.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How the abyss warns you as you fall (scripts/match/abyss_fx.gd danger_depth: the red tint and vignette; scripts/match/abyss_fall_sfx.gd warn_db / warn_rate: the heartbeat warning). Depths are metres under the lowest island lip around you. Nothing shows until start_depth, so a small dip under an island's height is free; from there the danger rises smoothly (curve = share of the way to the point of no return, to the power curve) to 1 at the kill depth (Hunter.abyss_kill_y). Rising faster than the glider lift (AbyssFx.RISE_OFF) or climbing back above start_depth lets go. warn_*: the warning heartbeat starts at danger warn_from, at warn_db_min dB and warn_rate_min beats a second, and rises to warn_db_max dB and warn_rate_max at full danger. edge_from: danger where the crimson screen-edge rings start (they ramp up to full at 1). |
+| start_depth | 4 |
+| curve | 1.5 |
+| warn_from | 0.02 |
+| warn_db_min | -20 |
+| warn_db_max | -2 |
+| warn_rate_min | 1.2 |
+| warn_rate_max | 4.6 |
+| edge_from | 0.1 |
+
 ## armor (`content/rules/armor.json`)
 
 
@@ -2376,6 +2392,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | mob | {"scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | labels | {"land": "Land here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "wallkick": "Climb", "crouch": "Lookout", "glove": "Glove", "wayout": "Uplink", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
 | camps | {"shoot": {"foes": ["skitter", "skitter"], "to": 0}, "sec": {"foes": ["skitter", "skitter"], "to": 2}, "gkey": {"foes": ["skitter", "skitter"], "to": 3, "held": true}, "summon": {"foes": ["spitter"], "to": 0}, "pack": {"foes": ["skitter", "spitter"], "to": 3}, "kin": {"foes": ["skitter", "skitter", "skitter"], "to": 4, "row": true, "hp": 1.0}, "hook": {"foes": ["sentinel", "skitter"], "to": 6, "far": true}} |
+| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you. |
+| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0} |
 
 ## unstable_mix (`content/rules/unstable_mix.json`)
 
