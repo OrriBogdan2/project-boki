@@ -21,7 +21,7 @@ var blade_bone := -1
 var blade_root_bone := -1     # (the bone blade_root rides; data "root_bone", else blade_bone)
 var gun: Node3D
 var muzzle: Node3D
-var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+var hand_nodes: Array = []    # [rig hand, its bone index, its own local position]: the kits read the hands off the rig
 var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 var idle_break: WardenBreak   # the one beat this Hunter breaks a long idle with (WardenBreak), or null
@@ -89,7 +89,7 @@ func use_clips(glb: Node3D, art_name: String) -> void:
 			var nd := root.get_node_or_null(String(WardenGlb.BONES["hand." + sd])) as Node3D
 			var bi := WardenSkeleton.find(skel, "hand." + sd)
 			if nd and bi >= 0:
-				hand_nodes.append([nd, bi])
+				hand_nodes.append([nd, bi, nd.position])
 
 ## Hunter.equip rebuilds the rig's weapon and prow (a new match, a practice swap): on a skinned weapon those pieces
 ## must stay hidden, so one weapon is drawn in every mode (item 76b.5).
@@ -195,6 +195,10 @@ func _look_pose() -> void:
 ## The clips' pose, mixed with the retargeted rig while a state hands over (clips.proc_w), then the rig's hands and
 ## the Gun laid on what is shown, so kit FX leave the bodies you see.
 func _play(dt: float) -> void:
+	# (the hands go home first: the clips' hand written onto the rig last step must not ride into a procedural move,
+	# where it pulled Gil's hand.R and swordfish 0.7 m off his forearm and stretched the sleeve after them)
+	for h in hand_nodes:
+		(h[0] as Node3D).position = h[2]
 	for o in look_pose:
 		skel.set_bone_pose_position(int(o[0]), o[1])
 		skel.set_bone_pose_scale(int(o[0]), o[2])
