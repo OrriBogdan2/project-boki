@@ -10533,3 +10533,4 @@ READY ext/farm-nest-item-row 2fb4b481dec89a5bada0241c60e7631ab6e7f064 (feed menu
 READY ext/hunter-regen-breaker-1120 328f5c79a2 (Albert r2 regen candidate, DRAFT for owner pick: new Meshy g4, brown look fix, proof MP4s in gens/hunter-regen-1120/breaker/r2)
 READY ext/check-guest-host-pid 81c97f9a4cfc533d1b28ceede8a6adee0c9587ba (check guest game ends itself when its host pid is gone or after 900 s; kill -9 proof 1.0 s)
 READY ext/blocked-hit-spark b32adbb7e2 (one Juice.blocked: deflect spark in the blocker's colour + metallic tick for shield, rock, ice, wall, Shield Charge guard, Riposte guard; --barrier-hit-check asserts 3 blockers)
+READY ext/vfx-hazard-fields cf3ec31620 (hazard fields: dark outline + glow band edge, guard ring cue for a countering Boki; stills mode in terrain-hazard-reel; check extended)
