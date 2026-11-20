@@ -430,6 +430,9 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 | Pounce, dive, quake, jump, flex, reel end | no footage timing | clip = kit | same | none |
 
 ## Look and sound
+- Flashes and zones are data (`content/vfx/dredge.json`, HeroVfx, gold palette): the muzzle flash (`shot`), the hook's end and grab flares,
+  the Anchor slam (`anchor_slam`: a lit gold arc over the cone, cracked ground, a ring), the air-smash quake rings, and Broadside's charge
+  spark, fist flash and hit flash. Nothing is drawn by LDFx on a dash. The meshes below stay LDFx.
 - Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
   `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
   flash; his own right arm stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim line so no clip swings it, home down the line after), sludge drips, a dark silhouette where it runs through rock; the brass
