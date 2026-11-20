@@ -1035,9 +1035,10 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 	if String(rd.get("kind", "")) in ["count", "on_targets"]:
 		var n := int(rd.get("max", 3))
 		var have := int(round(f * n))
+		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))      # (one meter, not one panel per pip)
 		for i in n:
 			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
-			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
+			c.draw_style_box(_box(rc if i < have else Color(1, 1, 1, 0.12), 3, Color(0, 0, 0, 0), 0, true), cr)
 	else:
 		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
 		if String(rd.get("id", "")) == "heat":
