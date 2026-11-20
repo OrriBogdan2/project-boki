@@ -10481,3 +10481,4 @@ READY ext/ui-menu-small-res 8067daa485 (menu-fit-check: all Esc pages + Settings
 READY ext/farm-boki-duel-game a443b8ba666 (Fetch Cup garden contest: spec, 60 s round, Speed/Focus result, gems/joy reward, checks; garden_sim burrlet crash fix)
 READY ext/sparkle-3d-fix-1120 aee492e3d8c0aed64ca79c306007bab47585a6b8 (Sparkle ryzz 3D repair: Meshy quad remesh + Meshy weights + re-read arm joints, clip_shots TurnStep fix; art-gate FAIL on residual face/hair texture, draft)
 READY ext/vfx-ambient-motes-budget ef6ec0c9a7 (region motes pause past draw distance via ParticleCount.pace; GPU bench-fight peak 1867->1120 particles, frame time within noise)
+READY ext/hunter-regen-pip-1120 9ccdfd550f (Meeko 3D regen candidate A, draft model PR awaiting owner visual check; meshy_regions/meshy_smooth for extra bones)
