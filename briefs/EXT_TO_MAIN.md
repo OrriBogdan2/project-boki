@@ -10463,3 +10463,4 @@ READY ext/ui-notice-bullets 2d049e166a2a9ccce221c4a93ccacac8cd9fef6d (notice car
 READY ext/tut-playthrough-gate 62ef903e7cba7f529b0c7ae64cbf9cdec4c7254e (tutorial playthrough: 5/5 green, no stall; fixed hatch knock script error; 4x hatch screens ~25 s wall)
 READY ext/tut-boki-leads 87c89a117c (match tutorial: Boki/wisp runs ahead to the step goal, waits, faces you; --tutorial-check lead rows)
 READY ext/farm-personality-care 303931efdd (care moves bold/busy/gentle axes that scale nap/play/chase/cling picks; save v22 + golden; 10-day care-style rows in --garden-sim-check)
+READY ext/lace-needle-anim c19c966ae2719ce63c438d5d5aa142c724867676 (Lace needles in draw hand as animation: LMB arrow, RMB needle, Hemline fan of 5, Finishing Touch fan of 3 leaving per arrow)
