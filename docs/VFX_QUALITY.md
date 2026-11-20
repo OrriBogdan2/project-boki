@@ -241,6 +241,13 @@ Albert (bulwark), ext/vfx-albert-ivory-arcs: the LMB swing crescent, the Shield 
 his ivory (`#fff0b0`, pale gold `#e8c96a`), no longer Kael's orange. The before/after strip is
 `docs/art/vfx_rescore/bulwark_arcs_before_after.jpg` (jobq 20261111-213523-28011 before, 215537-24801 after, match zoom).
 On the scorecard of ext/vfx-rescore his row moves 24 to 25 (C 3 to 4); the aegis plates still render orange-red.
+Albert (bulwark), ext/vfx-albert-e-slab (row 8, "a flat gold box with dark cubes"; the box is his raised aegis, which
+the generic reel and the 3v3 films showed during his E): the aegis plates are a lit slab in `bulwark.json` `slab`
+(`#f6e3a8`, own light 0.3, ivory toon rim) and the top rim, ribs and boss in his ivory (`ivory`, Arch.color, light 0.9);
+the dark edge pieces, the outlines and the rivet cubes are gone, the plated shape (owner 11-03) is kept. Mending Ground's
+standing disc keeps to the ring rule: a lit ivory rim on the zone's edge, a soft falloff to 0.25 or less inside
+(`swirl` `edge` 1, was brightest mid-band). Strips at match zoom (grey = main, green = after):
+`docs/shots/vfx-albert-e-slab/{aegis,e}_before_after.jpg` (GPU jobq 20261120-031447-00628 / -032527-24137 aegis, -24307 / -26463 E). The dash dome colour is a separate item.
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
