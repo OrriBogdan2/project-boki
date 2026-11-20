@@ -10440,3 +10440,4 @@ READY ext/feel-run-turn 739c7cee21 (run turn: 13 kits flip within 1 step of the 
 READY ext/feel-hitstop-table a47744301a (hit-feel table for 13 Hunters in DASHES §5.4; flash_ms tier + Archer/Gunslinger flash, Bulwark ult shake/hold strays fixed; --impact-weight-check 7-8 asserts it)
 READY ext/vfx-number-stacking 6e6edde059 (damage numbers on one spot slide apart: trio focus 4 -> 2 over one spot, asserted in --dmg-number-check)
 READY ext/kael-clip-retime 9df0ff3d6e (Kael lunge/dash/Riposte/wave/Meteor strikes on kit hits via kael.json leads; negative lead holds frame 0; kael_anim_check wired: 8 FAIL -> 0; GPU before/after MP4)
+READY ext/mantle-heights 85512641a816c1dc7cb11e9c66c7438aeba991df (ledge census + run/jump/glide hit rows for Meeko/Vex/Albert in --cliff-mantle-check; no reach miss/snap; face-4 check false-red fixed)
