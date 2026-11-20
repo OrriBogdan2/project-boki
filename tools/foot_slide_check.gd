@@ -25,11 +25,13 @@ const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
 ## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
 ## (juggernaut, gunslinger, dolm, mage, dredge, thief: back and strafe loops on their own --fit-dirs speeds, 11-18.)
+## (rimewright 1.05: her run foot_mps 4.4 -> 5.6 at match scale read 1.28 -> 1.00, under her foot lock, 11-20.)
 const BAR := {
 	"archer": 1.75,
 	"juggernaut": 0.95,
 	"gunslinger": 1.0,
 	"bulwark": 1.35,
+	"rimewright": 1.05,
 	"ashwick": 1.4,
 	"tender": 1.05,
 	"dolm": 2.7,
