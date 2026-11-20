@@ -5,8 +5,8 @@ extends RefCounted
 const LOW_HP := 0.25          # share of max health under which the heartbeat runs
 const BEAT_S := Vector2(1.1, 0.6)   # s between beats at LOW_HP and at 0 health
 const BEAT_DB := -4.0         # dB: soft, it sits under the fight
-const TICK_DB := -2.0
 const COUNT_S := 10           # s: the countdown ticks once a second for this long before a lift shuts
+const TICK_DB := -2.0
 const TICK_PITCH := Vector2(1.0, 1.5)   # first and last tick of the countdown
 
 static var beat_in := 0.0     # s until the next beat (the local hunter's only)
@@ -23,7 +23,7 @@ static func low_hp(h: Hunter, dt: float) -> void:
 	Sfx.play("warn_heartbeat", null, BEAT_DB)
 
 ## One tick a second, rising in pitch, for the last COUNT_S seconds of an exit's timer `t`
-## (x["count"] remembers the last second ticked). UI-level for the squad that opened it, from the exit for rivals.
+## (x["count"] remembers the last second ticked). Your squad's exit ticks at UI level, a rival's from `at`.
 static func countdown(m: Match, x: Dictionary, at: Vector3, t: float) -> void:
 	var sec := ceili(t)
 	if sec > COUNT_S or sec < 1 or sec == int(x.get("count", 0)):
