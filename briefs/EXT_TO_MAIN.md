@@ -10581,3 +10581,4 @@ READY ext/merge-lane-n19h-1119 5e27659f5e (merged origin/main fff700af22; thief_
 READY ext/tester-feedback-1119 e28eee3ac8 (merged origin/main fff700af22, only conflict dancer_jug_check.gd resolved; tester-feedback-check 0 fails, --check 0; dancer-combo 3 red and dredge-combo 1 red are identical on main; health --strict style ratchet red from main's f6ce254b43 not this branch)
 READY ext/vfx-zones-remote 7cf6104d53 (merged origin/main; tender seed_field = main ember fx + branch zone key; --zone-net-check 35/35, --kit-sweep-check clean; health --strict fails only on style ratchet, same as origin/main)
 READY ext/hud-plain-words fe98355911e2eec74785c323059d9df9449f0fdf (HUD plain words: UNLOCK->"Spend point", truce lines off kill feed, DOCKS IN already gone; clutter/ability-text/level-hud checks 0 fail, health+wiki reds = main)
+READY ext/garden-toy-xp 9c211e6cc37e9097e5aca097ae1fdf6e916d4c6f (every finished toy play pays toy XP 3, toy_check asserts it)
