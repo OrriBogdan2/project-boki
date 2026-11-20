@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "cisternmander",
+	"name": "Cisternmander",
+	"theme": "storm",
+	"type2": "tide",
+	"flavor": "Giant salamander with a water-tower body.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "bucketmander",
+		"stage": 3,
+		"from": "spatewader"
+	}
+}

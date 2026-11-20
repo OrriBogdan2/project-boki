@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "bucketmander",
+	"name": "Bucketmander",
+	"theme": "storm",
+	"type2": "tide",
+	"flavor": "Salamander larva in a bucket shell.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "bucketmander",
+		"stage": 1
+	}
+}
