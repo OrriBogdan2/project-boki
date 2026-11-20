@@ -730,6 +730,11 @@ def smooth_weights(low, W, passes):
     ed = np.empty(len(low.data.edges) * 2, np.int64)
     low.data.edges.foreach_get("vertices", ed)
     ed = ed.reshape(-1, 2)
+    _, first_of, twin_of = np.unique(np.round(verts(low), 5), axis=0, return_index=True, return_inverse=True)
+    first = first_of[twin_of.ravel()]   # (a vertex split at a UV seam blends with its twin, so the seam stays shut;
+    split = np.nonzero(first != np.arange(len(W)))[0]      # a detach cut's twins differ in weight and stay apart)
+    split = split[np.abs(W[split] - W[first[split]]).sum(1) < 1e-3]
+    ed = np.concatenate([ed, np.stack([split, first[split]], 1)])
     cnt = np.bincount(ed.ravel(), minlength=len(W)).astype(float)[:, None]
     for _ in range(passes):
         acc = np.zeros_like(W)
@@ -889,7 +894,7 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0))).T))
+    gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("meshy_smooth" if meshy else "smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
