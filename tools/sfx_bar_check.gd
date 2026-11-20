@@ -1,9 +1,10 @@
 extends RefCounted
 ## --sfx-set-check section 16: a Hunter set's "bar" (content/sfx/<arch>.json, docs/AUDIO.md "Ability bar"): per
 ## ability (lmb, rmb, e, shift, r) the sound of its cast, travel, hit and end ("" where the move has no such beat).
-## Every named sound is in the set with a file and is played by the kit (a literal in scripts/arch/, the weapon's
-## shot in content/archetypes/<arch>.json, or the dash HeroSfx picks); the hit is what HeroSfx.hit_sound plays
-## for a hit of that ability's "ab"; every ability has a cast, and no two abilities of a Hunter share a hit.
+## Every named sound is in the set (or the kits' table, SfxKits.NAMES) with a file and is played by the kit (a
+## literal in scripts/arch/, the weapon's shot in content/archetypes/<arch>.json, or the dash HeroSfx picks); the
+## hit is what HeroSfx.hit_sound plays for a hit of that ability's "ab"; every ability has a cast, and no two
+## abilities of a Hunter share a hit.
 
 const BEATS := ["cast", "travel", "hit", "end"]
 
@@ -42,8 +43,8 @@ func _bar(arch: String, d: Dictionary) -> void:
 			if sname == "":
 				continue
 			have += 1
-			if not sounds.has(sname) or not Sfx.ensure(sname):
-				wrong.append("%s %s %s: not in the set or no file" % [slot, beat, sname])
+			if not (sounds.has(sname) or SfxKits.NAMES.has(sname)) or not Sfx.ensure(sname):
+				wrong.append("%s %s %s: in no set or no file" % [slot, beat, sname])
 			elif beat != "hit" and not _played(arch, sname):
 				wrong.append("%s %s %s: the kit never plays it" % [slot, beat, sname])
 		var hit := String(row.get("hit", ""))

@@ -173,7 +173,7 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 ## Ability bar (a set's `"bar"`, `tools/sfx_bar_check.gd`)
 A Hunter set may list, per ability (`lmb`, `rmb`, `e`, `shift`, `r`), the sound of its **cast**, **travel**, **hit**
 and **end** (`""` where the move has no such beat) and the `ab` its hits carry. `--sfx-set-check` section 16 holds it:
-every named sound is in the set with a file and played by the kit, every ability has a cast, the hit is what
+every named sound is in the set (or `SfxKits.NAMES`) with a file and played by the kit, every ability has a cast, the hit is what
 `HeroSfx.hit_sound` plays for that `ab`, and no two abilities of a Hunter share a hit. An ability hit plays
 `<arch>_hit_<slot>` when the Hunter has one (`HeroSfx.HIT_SLOT`: utility/rmb, k1/e, dash, ult/x/r, Tenzo's
 `rock`), else `<arch>_hit`. Tenzo and Grimble (VFX_QUALITY Snd 3) were the first; their new cues are made by
