@@ -147,7 +147,7 @@
 	"rank2": {"sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
 	"rank_next": {"sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
 	"turn": {
-		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'"},
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking'; turn rate while held: match 1280 (ext/hero-ref-footage venator_ghost 0014-0015: the shots follow a ~65 deg swing inside one 0.2 s frame)"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown"},
 		"e": {"early": 30.0, "late": "free", "source": "briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner 11-09: a strong yaw lock, the charge creeps round at 30 deg/s at most (was 90, item 144); free after the shot"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held"}
