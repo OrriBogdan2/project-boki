@@ -10394,3 +10394,8 @@ READY ext/merge-lane-n19g-1119 0a8919f4b6 (merge lane n19g: +feel-one-tuning-hom
 READY ext/name-card-wrap-1119 2840cdaa94 (name card wrap: real-flow check, wrap floor, sweep)
 READY ext/merge-lane-n19h-1119 03878d2a979bee60029e0e83c1d308d002b4938f (lane n19h: 4 old branches ported, 16 HARD; NEW-RED 0 on targeted checks)
 READY ext/vespyx-everywhere-1119 42727bf3a0ea87c151d53b944e1c5e5a2c1fe521 (Vespyx 'old model': kin portraits/hatch reveal skip match fog via Fogless; rigged coat marks wear the coat's own paint; PR via gh-outbox)
+READY ext/p06-port-1118 c65ae26758 (bulk-rebase: origin/main merged in mechanically, was 017bb55f99; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/p06-stomp-styles-1118 1a7f91c311 (bulk-rebase: origin/main merged in mechanically, was c7d99a8f95; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/hunter-edge-speckle ae7419ca0e (bulk-rebase: origin/main merged in mechanically, was 6a0ec7b402; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/vex-quill-ammo-1117 ccb3c6301d (bulk-rebase: origin/main merged in mechanically, was d984262dd4; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/parity-meeko-heals ae24a928b0 (bulk-rebase: origin/main merged in mechanically, was 5ddb8b6541; union 0 gen 1 files; the branch's own READY checks still apply)
