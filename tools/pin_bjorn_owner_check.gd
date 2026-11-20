@@ -28,12 +28,12 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 	var d := Vector2(p.x - from.x, p.z - from.z)
 	return absf(d.x * dir.y - d.y * dir.x)
 
-## The widest visible flare of the Hero VFX within `reach` m of `at` (its node: world place and width), or null.
+## The widest visible shader look of the Hero VFX within `reach` m of `at` (its node: world place and width), or null.
 func flare_near(m: Match, at: Vector3, reach: float) -> MeshInstance3D:
 	var best: MeshInstance3D = null
 	for e: Dictionary in HeroVfx.of(m).live:
 		var node: MeshInstance3D = e["node"]
-		if e["kind"] == "flare" and node.visible and node.global_position.distance_to(at) < reach \
+		if node.visible and node.global_position.distance_to(at) < reach \
 				and (best == null or node.global_basis.get_scale().x > best.global_basis.get_scale().x):
 			best = node
 	return best
@@ -303,7 +303,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, K.draw.stage_t().x + 0.05, aim)
 	P.inp["fire"] = false
 	m.step(DT)
-	var flash := flare_near(m, K.draw.bow_at(), 0.5)
+	var flash := flare_near(m, K.draw.bow_at(), 0.15)
 	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
 	ok("pin readout: the perfect release burst (data 'perfect') sits on the aim line at the bow, with no cursor star",
 		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
