@@ -10592,3 +10592,4 @@ READY ext/snack-first-60s 8d348ef4cc9977cdaa72dd6366a15c3774c7bd45 (a save's fir
 READY ext/tut-gate-playthrough e96434928c (tutorial playthrough check, match+garden, in new absolute gate list tools/gate_absolute.txt; 21 s wall)
 READY ext/farm-tut-patch-step 3c1816eadcb (base tutorial: Plant the snack patch step lit on Garden tab tile; farm-tutorial-check 0 fails; health strict OK)
 READY ext/snack-first-60s b0083f252421724eee5790e44e3cdd29e77b8a0b (first snack batch ripens in 60 s, later 480 s; old saves keep 480 s)
+READY ext/garden-xp-pace 3ac0d4ffa7 (garden XP numbers: Lv4 in 36 min garden-only, was 123; Grown 224 min, was 669)
