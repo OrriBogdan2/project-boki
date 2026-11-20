@@ -418,6 +418,7 @@ const CHECKS := {
 	"--scout-cam-shots": ["res://tools/scout_cam_check.gd", "scout_cam_check", "shots"],
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],      # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
+	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
@@ -972,13 +973,17 @@ const COVERED := {
 ## Runs the registered check named in args, if any (a flag also matches --flag=value; the bare --check only
 ## itself, so a second game's --check-child is not taken for it).
 ## Returns true when one started (Main stops there). The global random draws are seeded from the flag,
-## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run.
+## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
+## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
 			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
 			seed(hash(flag))
+			for a in args:
+				if String(a).begins_with("--rng-seed="):
+					seed(int(String(a).substr(11)))
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)
 			if e[2] == null:
