@@ -10,7 +10,8 @@ extends RefCounted
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
-const ORBIT_R := 0.6  # m from the hunter's middle
+const ORBIT_R := 0.9  # m from the hunter's middle: beside the body at the match camera, not over it
+const SIZE := 1.8  # the wisp's scale in a match: ~30 px across at the match camera, a Hunter ~100 px tall
 const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow enough to read as a shape
 
 
@@ -82,6 +83,7 @@ static func render(k: Kin) -> bool:
 		k.global_position = k.summon.streak(k.global_position)
 		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
 	k.model.rotation.y = atan2(sin(a), -cos(a))
-	k.model.scale = Vector3.ONE
+	k.model.scale = Vector3.ONE * SIZE
+	BokiWispLook.side(k.model, SideColor.of(k.m, k))
 	BokiWispLook.pose(k.model, k.m.time)
 	return true

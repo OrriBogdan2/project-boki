@@ -92,7 +92,7 @@ func _measure() -> void:
 		if not k.wisp or k.state != "shoulder" or k.owner_h == null:
 			continue
 		var c := m.cam.unproject_position(k.global_position)
-		var px := absf(m.cam.unproject_position(k.global_position + Vector3(BokiWispLook.BODY_RADIUS, 0, 0)).x - c.x)
+		var px := absf(m.cam.unproject_position(k.global_position + Vector3(BokiWispLook.BODY_RADIUS * KinWisp.SIZE, 0, 0)).x - c.x)
 		var box := Rect2(c - Vector2(px, px), Vector2(px, px) * 2.0)
 		var depth := m.cam.global_position.distance_to(k.global_position)
 		sizes.append(px * 2.0)
