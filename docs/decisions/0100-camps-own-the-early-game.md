@@ -21,7 +21,7 @@ A cleared camp paid nothing of its own: every monster rolled its own loot, and t
   roll no loot or perk orb of their own.
 - A cleared camp comes back once, one size up, 150 s later when no Hunter is within 30 m and the Blight is not
   due within 60 s, never after 7:00 and never past 85 camp monsters alive.
-- Net: the host's new `"campclr"` event carries the toast to the clearing squad's machine (Net.VERSION 0.24.18).
+- Net: the host's new `"campclr"` event carries the toast to the clearing squad's machine (Net.VERSION 0.24.19).
 
 ## Not ported from the old branch
 The 110 m drop with a held dive (main's drop is the squad rocket now), bot squads that pick camps

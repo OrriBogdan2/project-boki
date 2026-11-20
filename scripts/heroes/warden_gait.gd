@@ -22,11 +22,13 @@ extends RefCounted
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
 const MEAN_TAU := 0.8        # s: the running mean a stride or an arm swing is scaled around
-const RATE_MIN := 0.6        # x: slowest the walk and run clips play
 const RATE_MAX := 1.4        # x: fastest
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
 const BOB_M := [0.035, 0.06] # m: the hips' up and down travel at a walk and at a run
 const BOB_FIX_MAX := 0.04    # m: furthest the hips are moved off the clip's height to put the bob in step with the legs
+const RATE_MIN := 0.6        # x: slowest the walk and run clips play (while he holds a move)
+const SETTLE_RATE := 3.0     # 1/s: a stop's legs ease from their planted stride into the idle (body: loco.stop_rate)
+const SETTLE_BONES := ["thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R"]
 const SPREAD_TAU := 2.0      # s: how fast the widest leg spread seen fades (a slower stride re-learns it)
 
 var skel: Skeleton3D
@@ -45,6 +47,7 @@ var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch]
+var settle: Array = []       # [leg bone, the rotation it showed last frame]
 var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
 var run_len := 1.0           # s: of the forward run clip
 
@@ -57,6 +60,10 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 		var bi := WardenSkeleton.find(sk, b)
 		if bi >= 0:
 			legs.append([bi, sk.get_bone_pose_rotation(bi)])
+	for b in SETTLE_BONES:
+		var bi := WardenSkeleton.find(sk, b)
+		if bi >= 0:
+			settle.append([bi, sk.get_bone_pose_rotation(bi)])
 	hips = WardenSkeleton.find(sk, "hips")
 	if hips >= 0:
 		hips_rest_y = sk.get_bone_pose_position(hips).y
@@ -74,8 +81,10 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 ## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
 ## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
 ## feel it (a hasted run, up to HunterMove.speed_cap, keeps its feet planted instead of sliding at RATE_MAX).
-## (Held at a speed, `w` is the speed's share from "walk_speed" to "run_speed".)
-func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
+## (Held at a speed, `w` is the speed's share from "walk_speed" to "run_speed".) `moving` (0..1; 1 unless he is
+## stopping) is how much of the blend is out of the idle, which breathes at rate 1: the feet are those of the blend as
+## it stands, and the rate floor fades with it, so a stop keeps the legs in step with the body as he slows.
+func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> float:
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
 	var side: Array = lc.get("side_foot_mps", foot)
@@ -93,10 +102,24 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float) -> float:
 	var cycle := lerpf(walk_len, run_len, w)
 	var reach := lerpf(walk_mps * walk_len, run_mps * run_len, w)     # m a foot travels in a cycle
 	var top := RATE_MAX * maxf(1.0, spd / maxf(run_mps, 0.1))      # hasted past the run clip: ceiling grows
-	return clampf(spd * cycle / maxf(reach, 0.01), RATE_MIN, top) * run_len / cycle
+	var rate := clampf(spd * cycle / maxf(reach * moving, 0.01), RATE_MIN * moving, top)
+	return follow(rate * run_len / cycle, moving)
 
-## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
-func apply(dt: float, legs_k: float, arm_k: float) -> void:
+## The clip rate `rate` that keeps the feet planted, as much as the move owns the blend (`moving` 0..1; the idle
+## breathes at 1).
+static func follow(rate: float, moving: float) -> float:
+	return lerpf(1.0, rate, moving)
+
+## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame; `stand_k`
+## 0..1: how much the standing idle does (a stop's planted stride settles into it at SETTLE_RATE).
+func apply(dt: float, legs_k: float, arm_k: float, stand_k: float) -> void:
+	var settle_a := 1.0 - exp(-dt * SETTLE_RATE)
+	for l in settle:
+		var q := skel.get_bone_pose_rotation(l[0])
+		if stand_k > 0.0:
+			q = q.slerp((l[1] as Quaternion).slerp(q, settle_a), stand_k)
+			skel.set_bone_pose_rotation(l[0], q)
+		l[1] = q
 	legs_w = move_toward(legs_w, legs_k, FADE_RATE * dt)
 	arm_w = move_toward(arm_w, arm_k, FADE_RATE * dt)
 	var a := 1.0 - exp(-dt / MEAN_TAU)
