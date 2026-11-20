@@ -10,8 +10,8 @@ the new table.
 How a cell is read (Hunters): idle, walk, run, jump (`air.rise`), glide, land and the hit pair are the json's `loco`,
 `air`, `land` and `states.hit` clips found in the .glb; attack is any kit move mapped to a clip; dash and cast are a
 mapped kit move whose key names a dash/skate/vault (or has `"dash": true`) or an ability (words in the check); death is `states.dead` (none
-procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is a `clip` when `states.stomp` is mapped and in the glb (WardenClips plays it on the game's phase), else `proc`
-(`HunterAnim.stomp_k`); a mapped stomp clip missing from the glb is `missing` and fails. strafe, crouch and upper are the blends: the 4-way walk and run rings, the
+procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is always `proc`
+(`HunterAnim.stomp_k`, no clip anywhere). strafe, crouch and upper are the blends: the 4-way walk and run rings, the
 crouch layer, and kit moves that play on the upper body over the legs. Boki: the .glb clips idle, walk, run, attack,
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
@@ -42,7 +42,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
+| gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -124,8 +124,13 @@ Worst five, backlog-ready:
 
 ## Gaps, worst first
 
-1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
-   crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
+1. **Gil has no authored clips of his own** (empty `gil.glb` animation list). Until his Blender rig pass he borrows
+   Meeko's (`"clips_from": "pip"` in `warden_anim/gil.json`, `WardenClips._borrow`): his 17 bones are all contract
+   bones with the same rest rotations as hers, and her legs and arms are within 5% of his, so her idle, walk, run and
+   strafe rings, jump, fall, landing and hit staggers play on him by bone name (`--warden-clips-check`: no T-pose,
+   legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
+   loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
+   and death, foot bones; then drop `clips_from`.
 2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
    and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
    the move and the landing squash settles it.
