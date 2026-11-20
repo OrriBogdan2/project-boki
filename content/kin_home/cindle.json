@@ -1,0 +1,14 @@
+{
+	"id": "cindle",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/cindle.json.",
+	"work": {
+		"ember": 3,
+		"forage": 1,
+		"mend": 1
+	},
+	"shiny": {
+		"color": "#9a2a2a",
+		"belly": "#ffd9a8",
+		"glow": "#ffc23a"
+	}
+}

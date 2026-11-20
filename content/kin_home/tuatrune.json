@@ -1,0 +1,14 @@
+{
+	"id": "tuatrune",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/tuatrune.json.",
+	"shiny": {
+		"color": "#49486c",
+		"belly": "#9ac8d8",
+		"glow": "#6a96ff"
+	},
+	"work": {
+		"haul": 3,
+		"stone": 2,
+		"timber": 1
+	}
+}

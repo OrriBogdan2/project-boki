@@ -1,0 +1,14 @@
+{
+	"id": "floenatee",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/floenatee.json.",
+	"shiny": {
+		"color": "#b2888b",
+		"belly": "#ecd8da",
+		"glow": "#ffcabf"
+	},
+	"work": {
+		"frost": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}

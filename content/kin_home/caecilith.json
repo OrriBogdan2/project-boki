@@ -1,0 +1,14 @@
+{
+	"id": "caecilith",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/caecilith.json.",
+	"shiny": {
+		"color": "#313026",
+		"belly": "#76785a",
+		"glow": "#d1ff7a"
+	},
+	"work": {
+		"forage": 3,
+		"craft": 2,
+		"haul": 1
+	}
+}

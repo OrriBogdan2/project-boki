@@ -1,0 +1,15 @@
+{
+	"id": "thrumbird",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/thrumbird.json.",
+	"shiny": {
+		"color": "#ae3490",
+		"belly": "#eee8f4",
+		"glow": "#ff967f",
+		"wing": "#d06aab"
+	},
+	"work": {
+		"spark": 3,
+		"forage": 2,
+		"craft": 1
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"id": "wisplet",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/wisplet.json.",
+	"work": {
+		"frost": 2,
+		"craft": 2,
+		"ranch": 1
+	},
+	"shiny": {
+		"color": "#f2a07a",
+		"belly": "#fff0dc",
+		"glow": "#ff7ab8",
+		"wing": "#ffd36a"
+	}
+}

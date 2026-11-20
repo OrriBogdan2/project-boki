@@ -1,0 +1,14 @@
+{
+	"id": "opalisk",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/opalisk.json.",
+	"shiny": {
+		"color": "#bd55a1",
+		"belly": "#e0e8f0",
+		"glow": "#9affa9"
+	},
+	"work": {
+		"tide": 3,
+		"craft": 2,
+		"mend": 1
+	}
+}
