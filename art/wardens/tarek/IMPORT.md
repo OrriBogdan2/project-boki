@@ -1,3 +1,12 @@
+# Tarek (dolm): 11-20 regen candidate A (ext/hunter-regen-tarek-1120, draft until the owner's visual check)
+
+`tarek.glb`: a new Meshy model, not a patch of the 11-10 scan: multi-image-to-3d (meshy-7.1, A-pose) from the 11-19 turnaround
+(ta-audit-1119 tenzo r4 A_nbpro_E15), quad remesh 60k, Meshy auto-rig weights onto dolm's skeleton and clips (v95_swap
+`weights` meshy, spec `art/wardens/src/tarek_v95.json`), 49k tris. One cobalt stone arm (his left, teal runes), a full
+human right arm with a five-finger hand. `glb_prop_paint.py --near blue` puts the three eye stones on the arm's cobalt
+(were grey) and `--drop shard` takes out the five shards that orbited hand.R (his off hand). Stretch (--stretch-check
+--wardens=dolm): worst 15.06 -> 12.30, clips over 3x 60 -> 47, median clip 7.18 -> 6.77.
+
 # Tarek (dolm): import note, v95 swap of Tarek appeal3, candidate b (2026-11-11)
 
 `tarek.glb`: Tarek's v95 r2 appeal3 `cand_b.glb` (a new warm-brown face with a gentle smile and a firmer jaw, plus a
