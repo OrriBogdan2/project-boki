@@ -1,0 +1,20 @@
+{
+	"id": "howlop",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/howlop.json.",
+	"work": {
+		"forage": 1,
+		"haul": 2,
+		"spark": 3
+	},
+	"shiny": {
+		"belly": "#659c8b",
+		"color": "#558476",
+		"glow": "#87ff9f"
+	},
+	"size": {
+		"cm": 64,
+		"kg": 10.3,
+		"fit": 1.55,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

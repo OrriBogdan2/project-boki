@@ -1,0 +1,20 @@
+{
+	"id": "geodemole",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/geodemole.json.",
+	"work": {
+		"haul": 1,
+		"stone": 3,
+		"timber": 2
+	},
+	"shiny": {
+		"belly": "#a3eafc",
+		"color": "#3f5436",
+		"glow": "#c9ff6b"
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 1.17,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

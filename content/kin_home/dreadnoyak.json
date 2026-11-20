@@ -1,0 +1,20 @@
+{
+	"id": "dreadnoyak",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/dreadnoyak.json.",
+	"work": {
+		"craft": 2,
+		"frost": 3,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#e494ac",
+		"color": "#172420",
+		"glow": "#ff82a7"
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"fit": 1.71,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}
