@@ -21,7 +21,7 @@ const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not st
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
-	"gloamshell": "blob (snail foot)", "gibbelle": "blob"}
+	"gloamshell": "blob (snail foot)", "gibbelle": "blob", "glaciyak": "scan (legs ride the body)"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
@@ -43,8 +43,7 @@ const SEAM_OVER := {
 	"puddlet walk": 1.20, "burrlet walk": 1.05, "cairnback walk": 1.65, "gloamshell walk": 2.05, "kestrike walk": 1.35,
 	"kindlewren walk": 1.05, "lodestick walk": 1.15, "mossgrade walk": 1.10, "caecilith walk": 1.40,
 	"goliathite idle": 1.05, "goliathite walk": 1.45, "goliathite run": 1.25, "hoarheron idle": 1.10,
-	"hoarheron walk": 1.45, "hoarheron run": 1.25, "floenatee idle": 1.05, "floenatee walk": 1.40,
-	"floenatee run": 1.25
+	"hoarheron walk": 1.45, "hoarheron run": 1.25
 }
 const MAX_POP := 3.0          # the idle-to-walk hand-over's biggest bone jump over the steady walk's (pop())
 const SAMPLES := 48           # poses per loop
