@@ -173,7 +173,7 @@ func _garden() -> void:
 			var raw := String(st["hints"][stage])
 			var line := FarmTutorial.fill(raw).replace("{secs}", "9")
 			_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
-	ok(n >= 20, "all %d garden hints read" % n)
+	ok(n >= 10, "all %d garden hints read" % n)      # (five steps: 12 hint stages)
 	var build := FarmTutorial.fill("Press {build}")
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 

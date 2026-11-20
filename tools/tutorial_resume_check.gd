@@ -120,7 +120,8 @@ func _resume_each() -> void:
 		if tu.id() == "chest":
 			ok(m.player.chest_keys > 0, "%s: the chest key is in hand" % tag)
 		if tu.id() in Tutorial.FOE_STEPS:
-			ok(m.mobs.any(func(x): return not x.dead), "%s: the foes are there" % tag)
+			var foes: bool = m.mobs.any(func(x): return not x.dead) or not tu.camps.coming.is_empty()
+			ok(foes, "%s: the foes are there (or the first camp's marker counts down)" % tag)
 		ok(String(Save.d["tutorial"]["tut_beat"]) == beat, "%s: resuming leaves the saved beat alone" % tag)
 		m.free()
 		tried += 1

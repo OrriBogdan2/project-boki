@@ -612,6 +612,8 @@ func goal(sid: String) -> Vector3:
 			return stop(sid)
 		"fight", "shoot", "gkey", "summon", "kin":
 			var best := camps.nearest()
+			if best == null and not camps.coming.is_empty():
+				return camps.coming["at"]      # (the first camp's telegraph: the marker points where it will stand)
 			return best.pos if best else Vector3.INF
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
