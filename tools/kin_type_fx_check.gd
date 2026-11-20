@@ -1,6 +1,6 @@
 extends RefCounted
-## --kin-type-fx-check: every Boki type has its own cast accent (KinTypeFx): all 18 types covered, no two
-## share a colour or a shape, each stays inside the particle budget, and a real cast plays it.
+## --kin-type-fx-check: every Boki type has its own cast accent (KinTypeFx): each theme (KinParts.THEMES)
+## maps to a look, no two share a colour or a shape, each stays inside the particle budget, and a real cast plays it.
 ## Never touches the save.
 
 const MIN_COLOUR_GAP := 0.12     # RGB distance between two types' accent colours
@@ -24,12 +24,13 @@ func _shape(look: Dictionary) -> String:
 func run(main: Node) -> void:
 	Save.no_write = true
 	var types: Array = KinParts.THEMES.filter(func(t): return t != "none")
-	ok(types.size() == 18, "18 Boki types (%d)" % types.size())
-	ok(KinTypeFx.LOOKS.size() == types.size(), "one accent per type (%d)" % KinTypeFx.LOOKS.size())
+	var n_mapped := KinTypeFx.BY_THEME.size()
+	ok(n_mapped == types.size(), "every Boki type (theme) has a look (%d of %d)" % [n_mapped, types.size()])
+	ok(KinTypeFx.LOOKS.size() >= types.size(), "a look per type (%d)" % KinTypeFx.LOOKS.size())
 	var shapes := {}
 	var names: Array = KinTypeFx.LOOKS.keys()
 	for t: String in types:
-		var look: Dictionary = KinTypeFx.LOOKS.get(t, {})
+		var look: Dictionary = KinTypeFx.LOOKS.get(KinTypeFx.key(t), {})
 		ok(not look.is_empty(), "%s has an accent" % t)
 		if look.is_empty(): continue
 		var dots := int((look.get("dots", {}) as Dictionary).get("n", 0))
@@ -77,7 +78,7 @@ func _cast_test(main: Node) -> void:
 	ok(k != null, "the player has a Boki")
 	if k == null: return
 	var type := String(k.sp.get("type", ""))
-	ok(KinTypeFx.LOOKS.has(type), "its type '%s' has an accent" % type)
+	ok(KinTypeFx.LOOKS.has(KinTypeFx.key(type)), "its type '%s' has an accent" % type)
 	var before := m.fx.bi + m.fx.si + m.fx.rings.size()
 	k._cast("k1", k.pos + Vector3(3, 0, 0), true, k, 1.0)
 	ok(m.fx.bi + m.fx.si + m.fx.rings.size() > before, "casting an ability plays the accent")
