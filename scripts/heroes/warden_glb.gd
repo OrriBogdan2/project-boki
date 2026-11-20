@@ -587,7 +587,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
 			if slot == "void":
-				var vm := _void(src, tag in SOFT_TAGS)
+				var vm := _void(src, tag in SOFT_TAGS, (own.get("slots", {}) as Dictionary).get("void-" + tag, {}))
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
 				continue
@@ -655,14 +655,17 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			out.append(m)
 	return out
 
-## A `void` surface: the starfield over its painted colour, soft (fading out) for a smoke piece.
-static func _void(src: BaseMaterial3D, soft: bool) -> ShaderMaterial:
+## A `void` surface: the starfield over its painted colour, soft (fading out) for a smoke piece; the look's
+## "void-<tag>" sets its shader parameters (Motley's tail: violet like the art, not the paint's blue).
+static func _void(src: BaseMaterial3D, soft: bool, cfg: Dictionary) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = VOID
 	if src and src.albedo_texture:
 		m.set_shader_parameter("albedo_tex", src.albedo_texture)
 		m.set_shader_parameter("use_tex", true)
 	m.set_shader_parameter("soft", soft)
+	for k in cfg:
+		m.set_shader_parameter(k, _param(cfg[k]))
 	return m
 
 ## A Warden's glow colours from its archetype's "model_glow" {core, edge (hex), strength (the emission)}: the

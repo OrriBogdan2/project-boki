@@ -1,0 +1,314 @@
+{
+ "doc": "hunter-regen-ostra-1120 candidate A: a Meshy multi-image master (meshy-7.1, a-pose, quad remesh 60k) from the 11-19 turnaround on ostra.glb's rig re-bound at idle 0 s (glb_rebind); Meshy auto-rig weights for the arms, spine and head, then the regions (meshy_regions): below the coat on the hips, spring and void root on x_box, the box on x_box, the lid on x_boxlid. The orbiting cards and fan stay. Rebuild: glb_rebind.py ostra.glb G.glb (arms at idle 0 s); this spec with \"game\": G.glb; v95_to_game.py Motley --spec S --master M --weights meshy --tris 94000 --no-import (the head band keeps the face, ~60k in all); glb_rebind.py OUT OUT --rest-from ostra.glb. Script: /home/boki/gens/hunter-regen-1120/ostra/work/scripts/run_cand.sh.",
+ "master": "/home/boki/gens/hunter-regen-1120/ostra/raw/rmA/glb.glb",
+ "game": "art/wardens/ostra/ostra.glb",
+ "tris": 60000,
+ "max_tris": 66000,
+ "head": {
+  "centre": [
+   0.0,
+   0.08,
+   1.72
+  ],
+  "r": 0.17
+ },
+ "head_tris": 2600,
+ "tex": 4096,
+ "weights": "meshy",
+ "meshy_regions": true,
+ "meshy_smooth": 8,
+ "meshy_relax": true,
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "relax": {
+  "CUTS": 0
+ },
+ "room": {
+  "*": 0.5
+ },
+ "joints": {
+  "pelvis": [
+   0.0,
+   0.07,
+   0.8
+  ],
+  "neck": [
+   0.0,
+   0.07,
+   1.58
+  ],
+  "crown": [
+   0.0,
+   0.06,
+   1.87
+  ],
+  "shoulder.R": [
+   0.14,
+   0.05,
+   1.42
+  ],
+  "elbow.R": [
+   0.26,
+   0.1,
+   1.28
+  ],
+  "wrist.R": [
+   0.33,
+   0.15,
+   1.33
+  ],
+  "hip.R": [
+   0.06,
+   0.07,
+   0.8
+  ],
+  "knee.R": [
+   0.06,
+   0.07,
+   0.5
+  ],
+  "ankle.R": [
+   0.06,
+   0.07,
+   0.2
+  ],
+  "shoulder.L": [
+   -0.14,
+   0.05,
+   1.42
+  ],
+  "elbow.L": [
+   -0.26,
+   0.1,
+   1.28
+  ],
+  "wrist.L": [
+   -0.33,
+   0.15,
+   1.33
+  ],
+  "hip.L": [
+   -0.06,
+   0.07,
+   0.8
+  ],
+  "knee.L": [
+   -0.06,
+   0.07,
+   0.5
+  ],
+  "ankle.L": [
+   -0.06,
+   0.07,
+   0.2
+  ]
+ },
+ "regions": [
+  {
+   "bone": "hips",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    -1,
+    1.1
+   ]
+  },
+  {
+   "bone": "x_box",
+   "box": [
+    -0.5,
+    0.22,
+    -0.2,
+    0.35,
+    0.3,
+    0.72
+   ]
+  },
+  {
+   "bone": "x_box",
+   "box": [
+    -0.32,
+    0.26,
+    -0.2,
+    0.28,
+    -1,
+    0.345
+   ]
+  },
+  {
+   "bone": "x_boxlid",
+   "box": [
+    -0.05,
+    0.45,
+    -0.45,
+    0.02,
+    0.33,
+    0.66
+   ],
+   "except_boxes": [
+    [
+     -0.06,
+     0.2,
+     -0.08,
+     0.4,
+     0.3,
+     0.8
+    ]
+   ]
+  }
+ ],
+ "anchors": {
+  "anchor_grin": [
+   0.0,
+   0.2,
+   1.68
+  ],
+  "anchor_head_top": [
+   0.0,
+   0.04,
+   1.9
+  ],
+  "anchor_chest": [
+   0.0,
+   0.15,
+   1.35
+  ],
+  "anchor_spring_top": [
+   0.05,
+   0.0,
+   0.72
+  ],
+  "anchor_spring_base": [
+   0.05,
+   0.0,
+   0.33
+  ],
+  "anchor_box": [
+   -0.02,
+   0.04,
+   0.34
+  ],
+  "anchor_box_base": [
+   -0.02,
+   0.04,
+   0.0
+  ],
+  "anchor_lid": [
+   0.17,
+   -0.13,
+   0.48
+  ]
+ },
+ "slot_default": "cloth",
+ "slots": [
+  {
+   "slot": "glow-face",
+   "box": [
+    -0.19,
+    0.15,
+    0.12,
+    0.45,
+    1.56,
+    1.84
+   ],
+   "v": [
+    0,
+    0.4
+   ]
+  },
+  {
+   "slot": "glow-face",
+   "box": [
+    -0.19,
+    0.15,
+    0.12,
+    0.45,
+    1.56,
+    1.84
+   ],
+   "s": [
+    0,
+    0.4
+   ],
+   "v": [
+    0.6,
+    1
+   ]
+  },
+  {
+   "slot": "glow-face",
+   "box": [
+    -0.19,
+    0.15,
+    0.12,
+    0.45,
+    1.56,
+    1.84
+   ],
+   "h": [
+    0.7,
+    0.88
+   ],
+   "v": [
+    0.75,
+    1
+   ]
+  },
+  {
+   "slot": "leather",
+   "bone": "x_boxlid"
+  },
+  {
+   "slot": "leather",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    -1,
+    0.33
+   ]
+  },
+  {
+   "slot": "cloth-ruff",
+   "box": [
+    -0.3,
+    0.3,
+    -0.15,
+    0.4,
+    1.47,
+    1.72
+   ],
+   "s": [
+    0,
+    0.4
+   ],
+   "v": [
+    0.5,
+    1
+   ]
+  },
+  {
+   "slot": "metal",
+   "h": [
+    0.04,
+    0.18
+   ],
+   "s": [
+    0.2,
+    0.8
+   ],
+   "v": [
+    0.3,
+    1
+   ]
+  }
+ ],
+ "normal": true,
+ "uv_margin": 0.002
+}
