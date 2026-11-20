@@ -207,7 +207,7 @@
 				"desat": 0.3,
 				"far_lift": 0.2
 			},
-			"leather-eyerock": {"desat": 0.5},
+			"leather-eyerock": {"desat": 0.7, "albedo": [1.55, 1.78, 1.55]},
 			"glow": {
 				"glow": 1.8,
 				"fres": 0.0,
