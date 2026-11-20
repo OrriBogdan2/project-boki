@@ -313,3 +313,7 @@ Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep agai
 - Hammer in the hand: `anchor_hammer_grip` sits 0.15 to 0.16 m from `hand.R` at rest (the haft thickness; before 0.15 to 0.16 m), the hammer is 1.11 m long (before 1.06 m, the squared blade of the v2 model). In `lmb_throw` the hammer leaves the hand (up to 1.96 m, before 2.14 m), in `lmb_slam` it stays 0.76 to 1.78 m off the right hand's bone (before 0.87 to 1.88 m): the same clip trait in both versions, a little closer on v2.
 - Timing tables above: re-run through `--bulwark-combo-check` (`--hero-combo-check`) on the v2 clips: 304 checks (shared with the archer), 0 failures; no row moved.
 Crush: stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+
+## Guard meter and Shield Slam recut (ext/albert-guard-recut, 2026-11-20)
+
+4ec10a25d06 (Nov 8, owner 11-07) cut the invented Guard meter and the RMB Shield Slam (0.6 s stun). Merge 5bfa1ad645 (PR #97, `ext/merge-lane-d2art-1114`, Nov 16) took the old side of `content/archetypes/bulwark.json` and brought `resource.id guard` and the `slam` block back. Cut again here: no meter, no Slam, no Guard HUD; the passive is the Crushed stun only; aegis, Bash, Spin Dash and Shield Charge stay. `--bulwark-combo-check` asserts that no resource and no slam come back.
