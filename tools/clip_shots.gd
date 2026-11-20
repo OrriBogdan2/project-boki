@@ -173,8 +173,8 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 
 
 ## Standing still facing the model's yaw, as the game's Hero state has it. With no state the clips' heading reads a
-## facing of 0, so on a turned model the legs held yaw 0 while the torso turned with it (a turntable showed her
-## back below the waist in every frame; Sparkle 11-20).
+## facing of 0, so on a turned model (the default --yaw is 150) the legs held yaw 0 while the torso turned with it:
+## every shot showed the back below the waist under a front-facing torso (found on Sparkle 11-20, all Heroes had it).
 func _stand(model: Node3D) -> void:
 	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true})
 
