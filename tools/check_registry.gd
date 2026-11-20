@@ -358,6 +358,7 @@ const CHECKS := {
 	"--dash-streak-shots": ["res://tools/dash_streak_shots.gd", "dash_streak_shots", null],
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
+	"--fps-feel-check": ["res://tools/fps_feel_check.gd", "fps_feel_check", null],  # same movement at 30/60/144 fps
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
