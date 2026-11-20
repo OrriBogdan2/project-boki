@@ -329,7 +329,9 @@ def targets(arm):
     """The rig's joints for the master's: the limbs keep the master's spread (x K) and take the rig's joint heights, or with
     `spread` "rig" sit on the rig's joints."""
     head = {b.name: np.array(b.head_local, float) for b in arm.data.bones}
-    k = head["hips"][2] / S_J["pelvis"][2]
+    # (`k`: the master's scale onto the rig; default the rig's hip height over the master's pelvis. A master whose legs are
+    # much longer than the rig's (a regen from a new turnaround) sets it so its girth and head keep the live model's size)
+    k = float(SPEC.get("k") or head["hips"][2] / S_J["pelvis"][2])
 
     def on_rig(j, z, at=None):
         if at is not None and SPEC.get("spread") == "rig":
