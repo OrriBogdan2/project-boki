@@ -392,7 +392,9 @@ var wash_col := Color.WHITE
 ## else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
-	var fc := SHELL_FLASH if shell_t > 0.0 else (flash_tint if hit > 0.0 else Color.WHITE)
+	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
+	if shell_t <= 0.0 and hit > 0.0:
+		fc = flash_tint
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col
