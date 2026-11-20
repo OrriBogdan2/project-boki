@@ -81,8 +81,18 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 		if o != "": return o
 	return roll(seed_val) if rolls(opts) else "clear"
 
-## Applies a condition over the tier's base look (Look.environment) and key light.
+## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` from the
+## ambient it ends with, so the fog outside sight is lit grey, not by the ambient's colour (shaders/vis.gdshaderinc).
 static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
+	_apply(e, sun, fill, T, cond)
+	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
+
+## The ambient light's luma x energy (linear): what the fog outside sight gets back as grey for the ambient it drops.
+static func vis_amb(e: Environment) -> float:
+	var c := e.ambient_light_color.srgb_to_linear()
+	return (c.r * 0.3 + c.g * 0.59 + c.b * 0.11) * e.ambient_light_energy
+
+static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
 	var sm := e.sky.sky_material as ShaderMaterial if e.sky else null
 	var full := Look.full_renderer()
 	var cl: Array = T["clouds"]

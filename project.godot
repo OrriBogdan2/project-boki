@@ -141,6 +141,10 @@ vis_dark={
 "type": "float",
 "value": 0.7
 }
+vis_amb={
+"type": "float",
+"value": 0.4
+}
 vis_reveals={
 "type": "float",
 "value": 0.0
