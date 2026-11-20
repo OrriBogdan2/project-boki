@@ -54,6 +54,22 @@ Known residual (not fixed): death f22-37 (bent knee lying on the skirt, up to 12
 wedge at the hem of a raised thigh (crouch_f, crouch_l, mantle, skate, wall; 196 knee-level frames with a new 100+ px piece) are new black vs live; idle f105 67 px at the
 match camera. Proof: /home/boki/gens/claire-fix6-1119/.
 
+Retry 6 (11-20, job 20261119-225611-a1): weights only, on top of retry 5. The black wedge under the hem of the raised right
+thigh (crouch_idle, crouch_in/out/f; knee and close cameras) was the dark inner skirt between the legs, showing because the
+outer front-right hem (x 0.11-0.30 m, front, bind y 0.70-0.90 m, hips-led, no arm weight) followed thigh.R and lifted open.
+That hem now hands 60 % of its thigh.R weight back to hips (smooth ramp, full at the hem). Inner hem kept: moving it too opened
+the open thigh top in death. 15 points change by more than 2 %; mesh, UVs, spear, rig and clips byte-identical.
+Picked from 16 candidates rendered on the crouch + death clips at 3 cameras. Then all 69 clips (1737 frames), 4 cameras, live
+vs fixed. Count = new black at least 3 px thick (outline dashes excluded) that is more than 3 px from any live black.
+Frames with a new 40+ px piece: knee 0, eye 0, close 0 (retry 5: 100 / 100 / 100). Game camera 6 (ledge f13-16, mantle f2-4,
+max 75 px): the back-skirt crease live also has, moved a few px. Reviewer-style count (any black): 0 frames of 100+ px on every camera.
+Thick black over all frames vs live: eye -42 %, knee -49 %, close -49 %, game -15 %.
+Edges over 3x (>= 5 mm, game poses): idle 0.86 -> 0.05 %, worst clip (ledge) 1.56 -> 0.22 %, clips over 0.5 % 63 -> 0.
+Godot --stretch-check: worst 9.15 -> 5.73 (fusion), median 5.33 -> 3.35, 66 of 69 lower. Higher: walk_fl 3.33 -> 5.00,
+walk_br 4.00 -> 4.53, run_br 4.80 -> 5.01 (same on retry 5; no visible defect). All 69 still over 1.30.
+Rest pose, 4 sides, eye and knee level: 0-22 px of 640k differ (outline dashes at the glove/hem); live vs live re-render: 0.
+Proof: /home/boki/gens/claire-fix7-1119/ (4 MP4s live | fixed with clip + frame, rest sheet, review-items sheet, per-clip sheets).
+
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
 byte-identical down to the fur collar, tools/meshy/head_graft.py). It replaces the arms fix below: that fix was made for the
