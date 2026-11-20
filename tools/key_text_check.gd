@@ -113,7 +113,7 @@ func _walk(where: String, v: Variant, fill: Callable) -> int:
 
 func _tutorial() -> void:
 	var tu: Tutorial = m.tut
-	var fill := func(s: String) -> String: return tu._fill(TutorialText.fill(s, m.player))
+	var fill := func(s: String) -> String: return tu.fill(TutorialText.fill(s, m.player))
 	var n := _walk("tutorial", Content.rules("tutorial"), fill)
 	for id: String in BokiChatter.TUT_HINT:
 		for s: String in BokiChatter.TUT_HINT[id]: _line("boki hint " + id, TutorialText.fill(s, m.player))

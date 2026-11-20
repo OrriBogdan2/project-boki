@@ -10,14 +10,11 @@ extends ArchKit
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
-const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const THRUST_T := 0.03         # s after the ember when the arm is straight out (pip.json "fade"; the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
 const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
-# Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
-# (1 step of its 4 cel bands = 0.25), so a foe standing in the middle stays readable.
-const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1 (the seed's field fill is tender.json's)
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
 const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
@@ -434,7 +431,7 @@ func burst_ap_k() -> float:
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n, "motes": 0.0})
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
+	lk().burst("column", e.pos, {"col": field()["col"], "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
@@ -460,7 +457,7 @@ func _tick_burrs(dt: float) -> void:
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held else Color("ff8a6a"),
 				"a": lerpf(0.3, 0.9, k) if held else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
@@ -485,7 +482,7 @@ func field() -> Dictionary:
 	if field_look.is_empty():
 		var d := HeroVfx.data("tender")
 		field_look = (d["field"] as Dictionary).duplicate()
-		for key in ["col", "rim", "root"]:
+		for key in ["col", "rim", "vine"]:
 			field_look[key] = Color(String(d["palette"][field_look[key]]))
 	return field_look
 
@@ -602,15 +599,16 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
-	# middle shading to teal, a brighter fill, its lantern floating over the middle
+	# her leaf green (the heal colour), a wide bright edge over a faint inside (the zone rule: tender.json
+	# "hearth_disc"); thrown: a little brighter, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
 	var own := AimKit.hero_col(h)
+	var disc: Dictionary = HeroVfx.data("tender")["hearth_disc"]
 	var look_p := {
-		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
+		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": disc["fill"], "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"fill": THROWN_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": disc["thrown_fill"], "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -629,7 +627,7 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
-## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
+## Hearthlight's healing, grown by the level's ability power (LevelGrowth.ap).
 ## Healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's).
 func heal_k() -> float:
 	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
@@ -777,7 +775,7 @@ func _start_call() -> bool:
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
-	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), AimKit.hero_col(h))
 	return true
 
 

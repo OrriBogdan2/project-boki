@@ -15,7 +15,7 @@ extends RefCounted
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
 const ZOOMS := [0.6, 1.0, 1.45]      # a close-up, the usual view, sneaking (Match: 1.45 while crouched)
-const HOME_ZOOMS := [0.55, 1.2, 1.6]  # the farm: the wheel's closest, arriving home (HOME_ZOOM), the widest
+const HOME_ZOOMS := [0.55, 1.2, 1.6]  # the farm: the wheel's closest, a middle notch, the widest (arriving home)
 const HOME_STYLE := "classic"         # the style the farm's framing is measured in (home.gd HOME_ACROSS_REF)
 const SHOTS := [
 	["framing_default", 1.0, Vector2(0.5, 0.5)],

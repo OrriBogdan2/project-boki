@@ -31,6 +31,7 @@ const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade"
 const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin", "crouch", "burst", "sulk"]
 ## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
 const SHOW_CLIPS := ["strut", "pose", "bow"]
+const SPREAD := 0.5            # rad a gliding quad swings each leg out from its body
 const WING_JOINTS := ["wing1", "wing", "fwing"]
 const WING_TIPS := ["wing2", "hwing"]
 const TAIL := ["tail1", "tail2", "tail3", "tail4", "tail5", "tail6"]
@@ -488,7 +489,8 @@ func _hover(u: float) -> void:
 	wings((0.35 + 0.75 * flap) * amp, 0.15 * amp)
 	tail(0.1 * cos(beat) * amp, (-0.2 - 0.06 * flap) * amp)
 
-## Glide, a loop: wings held wide with a slow rock, nose down into the air, ears back, legs tucked, a slow bank.
+## Glide, a loop: wings held wide with a slow rock, nose down into the air, ears back, a slow bank. A quad (a Boki
+## carried through your glide, Kin.render) spreads all four legs out like a flying squirrel; a bird tucks its legs.
 func _glide(u: float) -> void:
 	var s := sin(TAU * u * float(_n))
 	move.y = 0.015 * s * amp
@@ -497,8 +499,8 @@ func _glide(u: float) -> void:
 	both("ear1", 0.0, 0.0, -0.25 * amp)
 	match plan:
 		"quad":
-			both("fleg1", 0.6 * amp)
-			both("hleg1", -0.6 * amp)
+			both("fleg1", 0.6 * amp, 0.0, SPREAD * amp)
+			both("hleg1", -0.6 * amp, 0.0, SPREAD * amp)
 		"bird":
 			both("hleg1", -0.7 * amp)
 		_:
