@@ -1114,12 +1114,13 @@ func _process(delta: float) -> void:
 	_abyss_tint(d)
 	_find_interact()
 	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	InteractGate.track(idle)
 	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
 	if carry.tick(d, interact, idle):
 		return
 	if idle and not interact.is_empty():
-		if Input.is_action_just_pressed("interact"):
+		if InteractGate.pressed():
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
