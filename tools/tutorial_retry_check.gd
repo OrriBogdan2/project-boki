@@ -97,6 +97,8 @@ func _fall(sid: String) -> void:
 	ok(tu.step == step and tu.leg() == sid, "%s: the same beat (and leg)" % tag)
 	ok(not p.downed and not p.out and p.hp >= p.max_hp - 0.01, "%s: up and healed" % tag)
 	ok(p.pos.distance_to(stop) < 0.5, "%s: back at the last stop" % tag)
+	if sid in ["gkey", "kin"]:
+		ok(stop.distance_to(tu.stop("glide")) < 0.5, "%s: the last stop is past the gaps (the glide stop)" % tag)
 	var fresh: bool = tu.t < 0.5 and tu.got == 0 and tu.hits == 0 and tu.taps == 0 and not tu.flag
 	ok(fresh, "%s: the beat starts again (t %.2f)" % [tag, tu.t])
 	ok(absf(p.xp - xp) < 1e-6, "%s: the fall pays no XP (%.2f, was %.2f)" % [tag, p.xp, xp])

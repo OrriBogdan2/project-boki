@@ -269,8 +269,8 @@ func _leg_tip() -> void:
 
 
 func _finish(sid: String) -> void:
-	if STOP_AFTER.has(sid):
-		last_stop = stop(STOP_AFTER[sid])
+	if STOP_AFTER.has(leg()):
+		last_stop = stop(STOP_AFTER[leg()])  # (the dash beat ends on its last leg's stop)
 	step += 1
 	var resumed := sid == "land" and TutorialResume.last_beat() != ""
 	if resumed:
