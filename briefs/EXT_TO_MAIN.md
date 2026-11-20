@@ -10587,3 +10587,4 @@ READY ext/vfx-wisp-read 74dba000fc4cfb3f5ca7db89eeacc0133b3584b4 (carried Boki w
 READY ext/farm-tut-patch-step b021df711d (base tutorial: Plant the snack patch step before Feed it, tile lit; check +5 steps)
 READY ext/tut-gate-playthrough 51382ef80e (--tutorial-playthrough-check now also plays the whole garden tutorial; 4x hatch speed-up + hatch knock fix cherry-picked)
 READY ext/tut-dead-air-top2 0b04654eba774e046defcfb1a046ce1c3462b750 (crouch+glove steps: quicker nag, shorter crouch hold; idle 5.8->2.7 s, 6.6->4.4 s)
+READY ext/hud-clutter-all13 f801c387bd03d6a6e605d9b4fd82a6407ee9d0ed (hud-clutter-check all 13: 6 Hunters failing -> 2 left at 58/57 budget tie, kill feed slides off the Hunter, one rank-up hint at a time, check harness fixes, HUD.md backlog)
