@@ -10604,3 +10604,4 @@ READY ext/docs-parity-stale-rows 1a2af41c49 (KIT_PARITY one top-20 table + Still
 READY ext/hunter-regen-gil-1120 a64edecbbb (Gil r3b A2 DRAFT for owner visual check: hand-off-forearm fix in warden_sync + no sleeve bar, fish clear of floor; proof gens/hunter-regen-1120/gil/r3/proof/gil_r3b_LIVE_vs_A2.mp4)
 READY ext/lost-cuts-audit 20e367c793 (lost-cuts audit: 1 lost cut re-cut (Gil Super Zeep -> Geyser name), rest of the 11-07.. cuts hold; Albert bulk 0.8 flagged)
 READY ext/knock-rows-green c92fd7a6a24 (move-feel knock_lace_04/sparkle_04/done_04 asserts follow the sweep; Knock arc doc refreshed)
+READY ext/sparkle-sable-knock-cut fcd6f69208 (Kitefall push 8->0 and Sable empowered bolt kb 3.0->0 via thief.json dash.prime_kb; KIT_PARITY, mage.md, thief.md updated)
