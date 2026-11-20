@@ -37,7 +37,7 @@ func show_danger(amount: float, beat: float) -> void:
 
 ## How deep into the abyss p is, as the tint's strength: 0 above the start depth (see danger_depth), rising
 ## smoothly to 1 at the point of no return (Hunter.abyss_kill_y). An overheated glider (no lift left) reads worse.
-## (owner 11-17: it was on/off at the lip; now it builds with depth.) Off while the glider lifts you back up.
+## Off while the glider lifts you back up.
 static func danger(p: Hunter) -> float:
 	if p == null or p.out or p.grounded or not p.over_void():
 		return 0.0

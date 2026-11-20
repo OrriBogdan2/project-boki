@@ -73,6 +73,8 @@ const CHECKS := {
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge rule and shader
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # GPU, --shots-dir=<dir>
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
+	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
+	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],  # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
@@ -302,6 +304,7 @@ const CHECKS := {
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],      # 0051 results
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],      # kill XP tick, steal stings
+	"--steal-sfx-check": ["res://tools/steal_sfx_check.gd", "steal_sfx_check", null],  # StealSfx: prize cry + reel thud
 	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],  # camp time-to-fall table
 	"--knock-reset-check": ["res://tools/knock_reset_check.gd", "knock_reset_check", null],  # docs/KNOCK_RESETS.md
 	"--mob-notice-check": ["res://tools/mob_notice_check.gd", "mob_notice_check", null],  # one cue per camp waking
@@ -333,6 +336,7 @@ const CHECKS := {
 	# seconds left and charges on the bar
 	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],
 	# charges + slot timers on the bar
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],      # docs/SPAWNS.md
@@ -372,6 +376,7 @@ const CHECKS := {
 	# a tap inside a hit-stop goes when it ends
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
 	"--mantle-press-check": ["res://tools/mantle_press_check.gd", "mantle_press_check", null],
+	"--cast-lock-buffer-check": ["res://tools/cast_lock_buffer_check.gd", "cast_lock_buffer_check", null],
 	"--cd-indicator-check": ["res://tools/cd_indicator_check.gd", "cd_indicator_check", null],      # HUD slot vs timers
 	"--cd-gate-check": ["res://tools/cd_gate_check.gd", "cd_gate_check", null],      # no cast on cooldown
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
@@ -658,6 +663,7 @@ const CHECKS := {
 	"--prompt-queue-check": ["res://tools/prompt_queue_check.gd", "prompt_queue_check", null],
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
+	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null], # real match, wild Boki models
 	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],  # combat HUD budget
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
@@ -867,8 +873,6 @@ const CHECKS := {
 	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
-	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
-	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
@@ -936,8 +940,8 @@ const CHECKS := {
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
 	"--egg-rules-check": ["res://tools/egg_rules_check.gd", "egg_rules_check", null],
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
-	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],      # the tint and warning build with depth
-	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],      # film a slow drop to death (GPU)
+	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],
+	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null], # film a slow drop (GPU)
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
