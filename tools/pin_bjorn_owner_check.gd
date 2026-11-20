@@ -47,6 +47,7 @@ func pin() -> void:
 	var lv: int = r[5]
 	var K: ArcherKit = P.ak
 	P.equip("longbow", 0)
+	Sfx.listener = P.pos          # (the looks are drawn near the camera focus only)
 	step(m, 0.3)
 	_pin_no_early_release(m, P, T, K)
 	_pin_readout(m, P, T, K)
