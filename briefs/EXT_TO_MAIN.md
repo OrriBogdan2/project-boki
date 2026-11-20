@@ -10458,3 +10458,4 @@ READY ext/ui-pick-one-click 702307686d (egg pick takes the card in one click or 
 READY ext/tut-marker-never-hidden a06ac0e2533a8ef3e292efc8a0f71a148127cdea (--tutorial-check asserts beam, edge arrow, label and distance every frame of every step with a place; 0 lost on 4 variants; archer draw-line assertion fixed)
 READY ext/lace-needle-anim a4b63c2407 (Lace needles in hand as animation: spin out of thread, leave as shot, unravel on cancel; LMB arrow, E fan of 5, R fan of 3)
 READY ext/ui-loadout-slots ca51cdad94aa29cbc4adc1ccfb6fed52fdf294e2 (5-perk limit in data, slot-count rows in --backpack-check; charms still unbuilt GAP)
+READY ext/tut-step-count 8e41b669d9 (tutorials: match 23 -> 8 beats via tut-eight-steps merge, farm 12 -> 5 steps; tutorial/farm-tutorial/text checks = main reds only, health+wiki green)
