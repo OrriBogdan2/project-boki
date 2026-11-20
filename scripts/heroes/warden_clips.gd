@@ -110,6 +110,7 @@ var force := {}              # a tool's pick ({clip, t}): skips the state (tools
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
+var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (null: no crouch)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
@@ -263,6 +264,9 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	var ring: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("loco")
 	steps = WardenSteps.new(model, tree, ring, lc.get("plants", {}), lib)
+	if d.has("crouch"):
+		var sneak: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("crouch_loco")
+		crouch_steps = WardenSteps.new(model, tree, sneak, d["crouch"].get("plants", {}), lib, "crouch_loco")
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
 	_setup_out()
@@ -792,6 +796,9 @@ func step(dt: float) -> void:
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
+	if crouch_steps:
+		var sneak_k := (1.0 - act_w) * (1.0 - air_w) * crouch_w * (1.0 - one_w) * (1.0 if _moving(s) else 0.0)
+		crouch_steps.step(sneak_k > 0.5 and bool(s.get("grounded", true)), crouch_pos)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
