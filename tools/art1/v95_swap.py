@@ -13,6 +13,7 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
     a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax
     (but `meshy_regions`: the regions of bones Meshy's rig lacks, a tail, ears, wings, still go on whole).
+    `meshy_map` {Meshy bone: "ours [ours]"} overrides MESHY for one Hunter.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -567,7 +568,8 @@ def meshy_weights(low, arm, P):
         return bone if bone in arm.data.bones else bone.replace("foot", "shin")
 
     j, bin_ = glb_add_clips.read(meshy_rig(low))
-    to = [[ours(b) for b in MESHY[j["nodes"][n]["name"]].split()] for n in j["skins"][0]["joints"]]
+    remap = {**MESHY, **SPEC.get("meshy_map", {})}     # (a spec's own: Meeko's collar on the hips, not half on the head)
+    to = [[ours(b) for b in remap[j["nodes"][n]["name"]].split()] for n in j["skins"][0]["joints"]]
     names = sorted({b for bs in to for b in bs})
     R, M = [], []
     for pr in (pr for me in j["meshes"] for pr in me["primitives"]):
