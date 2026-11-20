@@ -82,7 +82,7 @@ func _hero(main: Node, id: String) -> void:
 		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
-	soles = _soles(sk)
+	soles = sole_ends(sk)
 	var row := {}
 	var rest := _pose_at(sync, clips, sk, String(lc["idle"]), 0.0)
 	row["same_side"] = {"hand_foot": signf((rest["hand.L"] as Vector3).x) == signf((rest["foot.L"] as Vector3).x),
@@ -192,7 +192,7 @@ static func points(sk: Skeleton3D) -> Dictionary:
 ## Each foot's heel and toe: the back and front ends of the verts skinned mostly to it that sit on its sole at rest,
 ## in the foot bone's frame. A pinned sole pivots on one of them, so the slide is read there, not at the ankle
 ## (which rolls forward over a heel-to-toe stance). Empty for a side without a foot bone or verts (the ankle then).
-func _soles(sk: Skeleton3D) -> Dictionary:
+static func sole_ends(sk: Skeleton3D) -> Dictionary:
 	var pts := {"L": [], "R": []}
 	for mi in sk.find_children("*", "MeshInstance3D", true, false):
 		var skin: Skin = (mi as MeshInstance3D).skin
