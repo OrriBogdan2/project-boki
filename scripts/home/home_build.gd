@@ -1054,7 +1054,7 @@ func toggle() -> void:
 		_drop_held()
 		active = false
 		close_ui()
-		h.cam.zoom_to = clampf(h.cam.zoom_to, 0.55, 1.6)
+		h.cam.zoom_to = clampf(h.cam.zoom_to, CamWheel.near(), CamWheel.far())
 		Placement.build_view(h.cam, false)
 		h.set_build_ui(false)
 		Save.save_game()

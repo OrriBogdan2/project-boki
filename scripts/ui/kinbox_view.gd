@@ -508,6 +508,8 @@ func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	h.mouse_filter = Control.MOUSE_FILTER_PASS
 	return h
 
+const DEMO_SEED := 7700    # base of the demo roster's inborn-roll seeds (one per kin)
+
 # ------------------------------------------------------------------ tooling: --kinbox-demo[=box|lineup|card]
 ## A made-up collection for screenshots: a full farm and three pages of kin in the burrow, some of
 ## them rare. Never written to the save.
@@ -521,7 +523,7 @@ static func demo_roster() -> void:
 	first["starter"] = true
 	var mids := Mutations.ids()
 	for i in 72:
-		var r := Save.new_kin(sps[i % sps.size()])
+		var r := Save.new_kin(sps[i % sps.size()], "", DEMO_SEED + i)    # seeded: same IVs and parents every run
 		r["level"] = 1 + rng.randi() % 18
 		r["trust"] = rng.randf_range(10.0, 90.0)
 		Evo.simulate(r, rng)

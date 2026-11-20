@@ -210,3 +210,18 @@ list (it refuses unless that list is found exactly once).
 Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
 the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
 `v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.
+
+## Repaint only, 2026-11-17 (ext/motley-r3a-game): `glb_image_swap.py`
+A promote that only repaints the master (same mesh and UVs: Motley's r3 A tail) goes into the game by swapping the
+game .glb's `v95` image (`tools/art1/glb_image_swap.py`), not by a v95_to_game re-port: the re-port re-fits and
+re-weights the body (Motley 11-17: worst stretch 7.93 -> 17.80, 31 clips past 10x). The face lock in v95-promote put the
+whole live atlas back on r3 A (`cand_A_keephead.glb` is pixel-identical to the old master, smear included), so the paint
+came from `cand_A.glb`: its changed texels (2.4%, tail) composited over the live 4096 game image.
+
+## Black shards, 2026-11-18 (ext/grimble-ingame-fix-1117)
+The toon outline is an inverted hull: any triangle that shows its back to the camera draws black. The Grimble port left
+three kinds (wedges at the goo hand, spikes at both feet): floating sheets, patches wound inside-out, and the rip's
+needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface_fix.py -- IN.glb OUT.glb` flips,
+drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
+`--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
+`godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
