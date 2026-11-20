@@ -15,6 +15,7 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     (but `meshy_regions`: the regions of bones Meshy's rig lacks, a tail, ears, wings, still go on whole).
     `meshy_map` {Meshy bone: "ours [ours]"} overrides MESHY for one Hunter.
     `meshy_keep_head` [bone]: those regions skip the vertices Meshy weighs mostly to the head.
+    `meshy_drop` [rules]: the polygons whose paint (hue, saturation, value) and place (|x|, y, z box) match are deleted: Meeko's lilac wings.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -790,9 +791,8 @@ def hsv(rgb):
     return h, (mx - mn) / np.maximum(mx, 1e-6), mx
 
 
-def tri_slots(ob, imgs, top_bone, P):
-    """Each triangle's toon slot, read off its paint: `imgs` by material index (one: the atlas)."""
-    me = ob.data
+def paint_hsv(me, imgs):
+    """Each polygon's paint colour (hue, saturation, value) at its UV centre: `imgs` by material index (one: the atlas)."""
     uv = np.empty(len(me.loops) * 2, F)
     me.uv_layers["UVMap"].data.foreach_get("uv", uv)
     c = uv.reshape(-1, 3, 2).mean(1) % 1.0
@@ -808,12 +808,19 @@ def tri_slots(ob, imgs, top_bone, P):
         m = mi == k
         rgb[m] = px[np.clip((c[m, 1] * h).astype(int), 0, h - 1), np.clip((c[m, 0] * w).astype(int), 0, w - 1)]
     h, s, v = hsv(rgb)
+    return h, s, v
+
+
+def tri_slots(ob, imgs, top_bone, P):
+    """Each triangle's toon slot, read off its paint: `imgs` by material index (one: the atlas)."""
+    me = ob.data
+    h, s, v = paint_hsv(me, imgs)
     lv = np.empty(len(me.loops), np.int32)
     me.loops.foreach_get("vertex_index", lv)
     tb = top_bone[lv.reshape(-1, 3)[:, 0]]
     cen = P[lv.reshape(-1, 3)].mean(1)
-    out = np.full(len(c), SPEC["slot_default"], object)
-    done = np.zeros(len(c), bool)
+    out = np.full(len(h), SPEC["slot_default"], object)
+    done = np.zeros(len(h), bool)
     for r in SPEC["slots"]:
         m = ~done
         if "bone" in r:
@@ -827,6 +834,59 @@ def tri_slots(ob, imgs, top_bone, P):
         out[m] = r["slot"]
         done |= m
     return out
+
+
+def drop_painted(low, imgs, P, gr, rules, shard=300):
+    """Deletes the polygons whose paint and place match a rule of `rules` ({"h", "s", "v": [lo, hi], "box": [x0, x1, y0, y1, z0, z1]}),
+    and the vertices only they used; returns P and the weights `gr` without those vertices."""
+    me = low.data
+    h, s, v = paint_hsv(me, imgs)
+    lv = np.empty(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    cen = P[lv.reshape(-1, 3)].mean(1)
+    gone = np.zeros(len(h), bool)
+    for r in rules:
+        m = np.ones(len(h), bool)
+        if "box" in r:
+            x0, x1, y0, y1, z0, z1 = r["box"]
+            m &= (np.abs(cen[:, 0]) >= x0) & (np.abs(cen[:, 0]) <= x1) & (cen[:, 1] >= y0) & (cen[:, 1] <= y1) & (cen[:, 2] >= z0) & (cen[:, 2] <= z1)
+        for key, val in (("h", h), ("s", s), ("v", v)):
+            if key in r:
+                m &= (val >= r[key][0]) & (val <= r[key][1])
+        gone |= m
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bm.verts.ensure_lookup_table()
+    was = bm.verts.layers.int.new("was")      # (to_mesh may reorder: each vertex carries its old index)
+    for x in bm.verts:
+        x[was] = x.index
+    cut = {x[was] for i in np.flatnonzero(gone) for x in bm.faces[i].verts}      # (where the dropped polygons met the rest)
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in np.flatnonzero(gone)], context="FACES_ONLY")
+    bmesh.ops.delete(bm, geom=[x for x in bm.verts if not x.link_faces], context="VERTS")
+    seen, island = set(), {}
+    for x in bm.verts:     # (a wing's scraps left floating beside the body: islands of under `shard` vertices that touched them go too)
+        if x.index in seen:
+            continue
+        seen.add(x.index)
+        stack, cur = [x], []
+        while stack:
+            y = stack.pop()
+            cur.append(y)
+            for e in y.link_edges:
+                z = e.other_vert(y)
+                if z.index not in seen:
+                    seen.add(z.index)
+                    stack.append(z)
+        island[x.index] = cur
+    bmesh.ops.delete(bm, geom=[x for c in island.values() if len(c) < shard and any(x[was] in cut for x in c) for x in c],
+                     context="VERTS")
+    bm.verts.index_update()
+    keep = np.array([x[was] for x in bm.verts])
+    bm.to_mesh(me)
+    bm.free()
+    print("meshy: %d polygons and %d vertices dropped" % (gone.sum(), len(P) - len(keep)), flush=True)
+    return P[keep], {k: w[keep] for k, w in gr.items()}
 
 
 def move_anchors(arm, T, K):
@@ -879,6 +939,8 @@ def main():
                 gr[nm] = gr[nm] * ~m
             gr[bone] = gr.get(bone, np.zeros(len(P))) + m
             print("meshy: region %s takes %d vertices" % (bone, m.sum()), flush=True)
+    if SPEC.get("meshy_drop"):       # (Meeko r3: the master's own wings come off, the live Meshy wings ride on as a kept part)
+        P, gr = drop_painted(low, imgs, P, gr, SPEC["meshy_drop"])
     if meshy:       # (a forearm or hand that touches the body in the master's pose is fused to it there)
         for sd, hand in SPEC["past_wrist"].items():
             limb = {"upper_arm." + sd, "forearm." + sd, hand}

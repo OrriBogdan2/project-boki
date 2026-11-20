@@ -257,3 +257,13 @@ to rig and export:
    edge's rest spot and weights before guessing.
 8. After a new glb, delete `<art>_v95.jpg` and `.godot/imported/<art>.glb-*` before importing: Godot keeps an old
    extracted texture of the same name, and the new mesh renders with the old candidate's texture.
+9. Meeko r3 (11-20): the wings come from the live glb, not the master. Meshy cannot draw a thin see-through wing, so the gen's
+   own (opaque lilac) wings are cut off and the live Meshy wings (`cloth-v95c`, `skin-v95c`, bones `wing.L/R`) ride on as a
+   kept part: patch `keep` [pauldron.L, pauldron.R, wing.L, wing.R], `keep_mats` [cloth-v95c, skin-v95c], the game .glb the
+   LIVE one (`git checkout origin/main -- art/wardens/pip/` before the swap). `meshy_drop` [{h, s, v, box}] deletes the polygons
+   of that paint (lilac, hue .74-.89) inside a |x|/y/z box, then the scraps they leave floating (islands under 300 vertices
+   that touched them); Meeko's ears stay on the head (`meshy_keep_head` takes ear.R/L too: their boxes cut across the
+   skull top). Stretch over 57 clips, mean/worst/over 5x: LIVE 5.32/7.69/30, H4 4.79/6.62/28, r3 4.50/6.64/21. A weight floor
+   (every weight minus 0.08/0.15) made it worse (5.00/7.29, 6.63/9.95), 60 or 100 smoothing passes too (4.88/7.95, 5.57/9.15).
+   `v95_swap.py` calls Meshy's rig for the baked mesh at every swap (5 credits): seed WORK/meshy/rigged_character.glb and run
+   it by hand (`blender -b --python tools/art1/v95_swap.py -- WORK/spec.json WORK OUT.glb`) when credits are low.
