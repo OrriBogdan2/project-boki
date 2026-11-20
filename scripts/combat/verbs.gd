@@ -219,6 +219,7 @@ func add_tether(a: Ent, b: Ent, e: Dictionary, pw: float) -> void:
 
 # ------------------------------------------------------------------ traps
 func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void:
+	_cap_traps(caster, e)
 	var col := Color(String(e.get("color", "#c8ff8a")))
 	var r := float(e.get("radius", 1.2))
 	var n := Node3D.new()
@@ -235,9 +236,23 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	n.global_position = at
 	traps.append({"at": at, "r": r, "team": int(caster.team), "arm": float(e.get("arm", 0.6)), "t": float(e.get("time", 20.0)),
 		"effects": e.get("on_trigger", []), "caster": caster, "ctx": ctx, "node": n, "col": col, "reveal": float(e.get("reveal", 0.0)),
-		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null)})
+		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null), "group": String(e.get("group", ""))})
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 8, 2.0, 0.3)
 	m.sfx("click", at, -4.0, 0.9)
+
+## e.max_live (> 0): a caster keeps at most that many traps of one group (e.group, an ability id) out at
+## once; placing one more pops the oldest. 0 or missing = no limit.
+func _cap_traps(caster: Node, e: Dictionary) -> void:
+	var cap := int(e.get("max_live", 0))
+	if cap <= 0:
+		return
+	var grp := String(e.get("group", ""))
+	var mine: Array = []
+	for tr in traps:
+		if tr["caster"] == caster and String(tr.get("group", "")) == grp:
+			mine.append(tr)
+	while mine.size() >= cap:
+		_drop_trap(mine.pop_front())
 
 # ------------------------------------------------------------------ terrain
 ## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span). The ground is

@@ -28,6 +28,7 @@
 	"states": {"downed": "downed", "reviving": "revive", "stomp": "stomp", "drink": "drink", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"carry_stow": ["bow"],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_wag"},
+	"summon_call": {"call": "g_call_point_l", "recall": "g_recall_l"},
 	"cc": {"pull": 0.18, "tug_hz": 1.2, "twist": 0.08, "bow": 0.38},
 	"heart_hand": "R",
 	"procedural": ["ledge", "mantle", "base"],
