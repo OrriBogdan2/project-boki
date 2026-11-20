@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "lanceron",
+	"name": "Lanceron",
+	"theme": "frost",
+	"type2": "tempest",
+	"flavor": "Ice-armoured heron, beak an ice lance, blade feathers.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "skidlet",
+		"stage": 3,
+		"from": "hoarheron"
+	}
+}

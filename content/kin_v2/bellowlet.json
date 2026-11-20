@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "bellowlet",
+	"name": "Bellowlet",
+	"theme": "ember",
+	"flavor": "Cassowary chick, tiny squeezebox chest.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "bellowlet",
+		"stage": 1
+	}
+}
