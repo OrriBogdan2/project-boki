@@ -14,9 +14,10 @@ const TRIM_PAINT := Color("909db7")  # and of their hem band
 ## Procedural pieces that stay over the .glb: the void head (its hollow shell rides on it) and WardenGlb's own.
 const KEEP := ["Head", "Aura"]
 ## The painted egg of a head inside each model's hood, by sex as KEYS (model space at rest, m: its centre, its
-## height; measured on the .glb's faces in the hood that are neither cloak nor trim). The void head is fitted onto
-## it, so the hood frames the void face as in the art (the procedural head is about twice its size).
-const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.216, -0.11), 0.211]]
+## height; measured on the .glb's faces in the hood that are neither cloak nor trim; the male's top, hidden from the
+## front, from the game shots). The void head is fitted onto it, so the hood frames the void face as in the art
+## (the procedural head is about twice its size).
+const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
 const EGG_COVER := 1.06  # x the egg's height: the void shell just covers the painted egg
 
 
