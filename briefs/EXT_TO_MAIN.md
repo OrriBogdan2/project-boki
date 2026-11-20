@@ -10407,3 +10407,4 @@ READY ext/combat-owner-1111-verify 850110c2c3 (--owner-kit-rules-check +6 rows o
 READY ext/feel-scout-lean-hud 992a880475 (lean/far look keeps your Hunter clear of HUD groups and on screen; corners 1080p/720p HUD overlap 4562->0 px2; scout-cam + hud-clutter checks green)
 READY ext/tut-lookout-kick 3811ba0769d6d954c565dc9f8301e20ed26f1d5e (tutorial lookout rim is sheer so only a wall kick climbs it; fight check 8/8, playthrough + hud check green)
 READY ext/tut-cutscene-click-hold b9c1373647 (hatch beat + Relic put-on share the prologue HoldSkip: tap = one beat, 1 s hold = skip; HatchSkip removed; rows in hatch-check and mask-moment-check; fixes knock abort on missing EggHatch.col)
+READY ext/feel-dash-curves-d eca7222243 (Neve skate ramp 0.2->0.12 s fitted to footage, rms 6.0->4.1%; Tenzo Rock Hop curve not determinable: a leap, no push; KIT_PARITY gap 4 rows)
