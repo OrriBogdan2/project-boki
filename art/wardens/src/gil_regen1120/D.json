@@ -138,7 +138,21 @@
     -0.22,
     0,
     0.85
-   ]
+   ],
+   "meshy": true
+  },
+  {
+   "bone": "tail",
+   "box": [
+    -0.2,
+    0.2,
+    -0.2,
+    -0.05,
+    0.1,
+    0.44
+   ],
+   "why": "the tail stalk under the coat hem (meshy weights put it on the thighs: it tore into a spike when they spread)",
+   "meshy": true
   },
   {
    "bone": "head",
