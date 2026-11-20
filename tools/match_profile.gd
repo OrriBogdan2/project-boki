@@ -29,6 +29,7 @@ const AB_FRAMES := 30  # frames a side of --profile-ab runs before the other
 
 var _added := {}  # "Control"/"VFX"/"3D"/"other" -> nodes that entered the tree this frame
 var _from := {}  # script file of the nearest scripted ancestor -> 3D nodes it added this frame
+var _added_geo: Array = []  # the GeometryInstance3D nodes added this frame (their materials: "added mats")
 var _pipes := 0  # pipeline compilations so far (Forward+/Mobile; Compatibility counts none)
 var _pipes_draw := 0  # of those, the ones built at draw time (the stalls; the rest build in the background)
 var _bench = preload("res://tools/perf_bench.gd").new()  # its HUD draw hook (hud_us: the last canvas draw)
@@ -80,6 +81,8 @@ func _on_added(n: Node) -> void:
 			a = a.get_parent()
 		var by := (a.get_script() as Script).resource_path.get_file() if a and a.get_script() else "?"
 		_from[by] = int(_from.get(by, 0)) + 1
+	if n is GeometryInstance3D:
+		_added_geo.append(n)
 
 
 func _process(delta: float) -> void:
@@ -93,6 +96,13 @@ func _process(delta: float) -> void:
 		lf["gpu"] = RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
 		lf["added"] = _added.duplicate()
 		lf["from"] = _from.duplicate()
+		var w0 := Time.get_ticks_usec()
+		var mk := {}
+		for g in _added_geo:
+			if is_instance_valid(g):
+				for k in _mat_keys(g as GeometryInstance3D): mk[k] = mk.get(k, _node_path(g))
+		lf["added_mats"] = mk.keys().map(func(k): return "%s (%s)" % [k, mk[k]])
+		_walk_us += Time.get_ticks_usec() - w0  # (the report's own time, not the frame's)
 		if _bench.vp != vp_rid:
 			_bench.vp = vp_rid
 			_bench._hook_hud(m)
@@ -116,6 +126,7 @@ func _process(delta: float) -> void:
 				SimLod.force_slow = 1 - SimLod.force_slow
 	_added.clear()
 	_from.clear()
+	_added_geo.clear()
 	super._process(delta)
 
 
@@ -356,8 +367,9 @@ func _compile_lines() -> Array:
 		var cf := ", ".join(f.get("cfiles", []))
 		var nw := ", ".join((f.get("new", []) as Array).slice(0, 4))
 		var by := str(f.get("from", {}))
-		var at := [f["phase"], float(f["t"]), float(f.get("wall", 0.0)), int(f["compiles"]), cf, nw, by]
-		out.append("PROFILE   compile %-7s t=%6.2f %4.0f ms  c%d  %s  new: %s  built by: %s" % at)
+		var am := ", ".join(f.get("added_mats", []))
+		var at := [f["phase"], float(f["t"]), float(f.get("wall", 0.0)), int(f["compiles"]), cf, nw, by, am]
+		out.append("PROFILE   compile %-7s t=%6.2f %4.0f ms  c%d  %s  new: %s  built by: %s  added mats: %s" % at)
 	return out
 
 
