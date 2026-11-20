@@ -58,11 +58,13 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
 
-Regen candidate A (2026-11-20, ext/hunter-regen-vex-1120, DRAFT until the owner's visual check): a new body, not a patch
-of the 11-10 scan. Meshy multi-image-to-3d (meshy-7.1, A-pose) from the 11-19 turnaround (`v95-latest-ta-1119/vex.png`,
-4 views padded square) -> `meshy_task.py remesh --topology quad --polycount 60000` -> Meshy auto-rig weights
-(`v95_swap.py` `weights: "meshy"`, the spec from vex_v95.json with joints from Meshy's rig; its `Head` bone as our neck)
--> 45.9k triangles, 4096 texture. 7 Meshy gens: 3 kept the fused gatling (A, B, C on the sheet), 4 dropped it.
-Meshy painted the irises grey: they were tinted to the turnaround's blue on the master's own texture, irises only
-(the Meshy retexture gave blue eyes but a honeycomb freckle pattern and a smudge, so it was not used).
-Files, sheet, MP4 and numbers: ~/gens/hunter-regen-1120/vex/ (summary.txt).
+Regen r2 candidate A (2026-11-20, ext/hunter-regen-vex-1120, DRAFT until the owner's visual check): a new body, not a
+patch of the 11-10 scan. r1's A-pose body had a bulge on the right hip where the gatling rested, so r2 asks Meshy for a
+T-pose (`meshy_task.py create ... --pose t-pose`, meshy-7.1, the 4 views of the 11-19 turnaround `v95-latest-ta-1119/vex.png`):
+nothing touches the hip. 11 gens: 2 kept the gatling fused to the prosthetic forearm (A, B on the sheet), 9 dropped,
+doubled, holstered or floated it (one came back A-pose). B's gatling points across the forearm, not along it (fires sideways).
+-> `remesh --topology quad --polycount 60000` -> irises tinted to the turnaround blue (irises only) -> Meshy auto-rig
+weights (`v95_swap.py` `weights: "meshy"`; the fit puts the T-pose arms onto our rig's arms) -> 40.8k triangles, 4096 texture.
+Hair already measured darker than the jacket (L 0.45 vs 0.52, hue 95), so it was left as Meshy painted it.
+Stretch (51 clips, limit 1.3): worst live 10.16 -> 8.61, median 4.46 -> 5.32, clips over 3x 46 -> 45.
+Files, sheet, MP4 and numbers: ~/gens/hunter-regen-1120/vex/r2/ (summary.txt).
