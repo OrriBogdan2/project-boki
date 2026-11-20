@@ -184,7 +184,8 @@ func _model3d() -> void:
 
 
 func _body_shows(c: Node) -> bool:
-	return c is MeshInstance3D and (c as MeshInstance3D).visible and not String(c.name) in EmptyGlb.KEEP + WardenGlb.KEEP
+	var kept := String(c.name) in EmptyGlb.KEEP + WardenGlb.KEEP
+	return c is MeshInstance3D and (c as MeshInstance3D).visible and not kept
 
 
 func _cloth_albedo() -> Color:
