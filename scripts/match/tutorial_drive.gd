@@ -80,11 +80,11 @@ static func drive(m: Match) -> void:
 				if sid == "glide": p.inp["glide"] = true
 		"wallkick":
 			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
+			_kick_up(m, tu)
 		"crouch":
 			goto.call(dest, 0.4)
-			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
+			_kick_up(m, tu)      # (a crouch restarted at the cliff's foot climbs it first)
+			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2 and p.grounded and p.pos.y > dest.y - 0.2
 		"glove":
 			var wp := tu.ground_item()
 			if not wp.is_empty():
@@ -204,6 +204,17 @@ static func fire_key(m: Match) -> bool:
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
+
+## Below the lookout's top: jump at the cliff's foot, then again against the wall (the rim is sheer, so only the kick climbs).
+static func _kick_up(m: Match, tu: Tutorial) -> void:
+	var p := m.player
+	var top := tu.stop("crouch")
+	if p.pos.y >= top.y - 0.2:
+		return
+	if p.grounded and Vector2(top.x - p.pos.x, top.z - p.pos.z).length() < 5.4:
+		p.inp["jump"] = true
+	elif not p.grounded and p.vel.y > -1.0 and p.pos.y <= p.last_gy + WallMoves.HOP_CLIMB_CAP - 0.1:
+		p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (a hop only starts within the climb cap; above it, fall and jump again)
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
