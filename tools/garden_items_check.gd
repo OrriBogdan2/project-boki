@@ -40,6 +40,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_rules()
+	_growth()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
 	for id in GardenItems.ids().filter(GardenItems.fed):
@@ -67,6 +68,29 @@ func _rules() -> void:
 	for id in GardenItems.ids():
 		q = q or "?" in String(GardenItems.preview(rec, id)["text"])
 	ok(not q, "no preview line hides its effect behind a question mark")
+
+## Raised stats show as body size (StatBudget.growth -> Evo.dress evo_scale): none fresh, more with more points, capped.
+func _growth() -> void:
+	var rec := Save.new_kin("cindle", "Grow")
+	rec["level"] = 20
+	var fresh := StatBudget.growth(rec)
+	var kin := Models.kin(rec["species"])
+	Evo.dress(kin, rec)
+	var plain := float(kin.get_meta("evo_scale", 1.0))
+	rec["stats"] = {"power": 60, "guard": 60, "speed": 60, "focus": 60}
+	var big := StatBudget.growth(rec)
+	var kin2 := Models.kin(rec["species"])
+	Evo.dress(kin2, rec)
+	ok(fresh == 0.0 and plain == 1.0, "a fresh Boki shows no growth")
+	var most := float(StatBudget.rules()["grow_max"])
+	ok(big > 0.0 and big <= most, "a raised Boki grows, never past grow_max (%.3f)" % big)
+	ok(is_equal_approx(float(kin2.get_meta("evo_scale", 1.0)), 1.0 + big), "the model carries the growth as evo_scale")
+	# a stat bite flags look, so the farm rebuilds the model and the size shows on the spot
+	var bite := Save.new_kin("cindle", "Bite")
+	bite["level"] = 20
+	Save.d["items"]["thumpnut"] = 1
+	var res := GardenItems.use(bite, "thumpnut")
+	ok(res["ok"] and res["look"], "a stat bite flags look (the model is rebuilt at its new size)")
 
 func _samples(rec: Dictionary) -> void:
 	var who := String(rec["species"])
