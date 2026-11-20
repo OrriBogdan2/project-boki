@@ -10536,3 +10536,4 @@ READY ext/blocked-hit-spark b32adbb7e2 (one Juice.blocked: deflect spark in the 
 READY ext/vfx-hazard-fields cf3ec31620 (hazard fields: dark outline + glow band edge, guard ring cue for a countering Boki; stills mode in terrain-hazard-reel; check extended)
 READY ext/sfx-hunter-footsteps ab9fb67f1e (footsteps pitched+levelled by archetype weight class, asserted in match-audio-check)
 READY ext/p17-port-1118 7291f708e5 (P17: mob and boss Fsm + --mob-fsm-check; merged main, re-applied into lairs_fight/lairs_lock; same reds as main: lair-lock 5, blight 1, keys 5, vv_ult_check parse)
+READY ext/hit-spark-contact 2eaeae2023 (hit spark at the real contact point clamped to the target's v95 collider via HitContact; --hit-shape-check asserts Vex shot, Kael strike, Cinder zone tick)
