@@ -244,6 +244,7 @@ func _on_base() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	ok(home.hrace != null, "on: the base has the Dash")
+	ok(home.hfetch != null and is_instance_valid(home.hfetch.mat), "on: Fetch Cup's mat stands beside the Dash's post")
 	if home.hrace != null:
 		var race: BaseRace = home.hrace
 		_footing(GardenZones.start(), home, race)
