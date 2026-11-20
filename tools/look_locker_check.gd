@@ -169,9 +169,11 @@ func _model3d() -> void:
 				and w.scene_file_path.ends_with("%s.glb" % EmptyGlb.KEYS[sex]), "sex %d wears its 3D model" % sex)
 		var hollow := locker.model.find_child("Hollow", true, false) as Node3D
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
-		var tall := (WardenGlb.model_xf(locker.model, hollow) * (hollow as MeshInstance3D).get_aabb()).size.y
-		var egg: float = EmptyGlb.EGG[sex][1] * EmptyGlb.EGG_COVER
-		ok(absf(tall / egg - 1.0) < 0.1, "sex %d: the void head is the size of the hood's egg (idle moves it)" % sex)
+		# (in the head pivot's own frame, against the egg in the pivot's rest: the stance and idle move the pivot)
+		var at := (hollow.get_parent() as Node3D).transform * hollow.transform * (hollow as MeshInstance3D).get_aabb()
+		var rest: Transform3D = WardenGlb.neutral_rest(EmptyGlb.KEYS[sex])["head"]
+		var want := rest.affine_inverse() * (EmptyGlb.EGG[sex][0] as Vector3)
+		ok(at.get_center().distance_to(want) < 0.03, "sex %d: the void head sits in the hood" % sex)
 		ok(not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
 				"sex %d: the procedural body is hidden" % sex)
 	locker.pick("colour", 5)
