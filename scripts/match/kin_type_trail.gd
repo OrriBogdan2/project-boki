@@ -11,7 +11,7 @@ extends Node3D
 ## drift = random sideways m/s, grav = m/s² down (negative floats up), size = particle scale, streak =
 ## drawn as a velocity-aligned spark (shaders/spark.gdshader) instead of a soft dot.
 const GROUPS := {
-	"rise": {"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon"],
+	"rise": {"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon", "wyrm"],
 		"life": 0.9, "rise": 0.9, "drift": 0.3, "grav": -0.5, "size": 1.0, "streak": false},
 	"drip": {"types": ["water", "ice", "rock"],
 		"life": 0.5, "rise": -0.5, "drift": 0.4, "grav": 9.0, "size": 1.1, "streak": false},
