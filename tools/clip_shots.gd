@@ -54,7 +54,16 @@ func run(main: Node) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
-	model.rotation.y = deg_to_rad(yaw)
+	var audit := OS.get_cmdline_user_args().has("--audit")      # (review tree only, uncommitted)
+	var pick := 0
+	var only: Array = []
+	for a3 in OS.get_cmdline_user_args():
+		if a3.begins_with("--pick="): pick = int(a3.substr(7))
+		if a3.begins_with("--only="): only = Array(a3.substr(7).split(",", false))
+	if not audit:
+		model.rotation.y = deg_to_rad(yaw)
+	for lt in holder.find_children("*", "DirectionalLight3D", true, false):
+		_lights.append([lt, (lt as Node3D).global_transform])
 	var ring := model.get_node_or_null("TeamRing") as Node3D
 	if ring and not game_cam and not true_cam:
 		ring.visible = false
@@ -72,6 +81,8 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame       # (past the title's fade)
+	if audit:
+		await tree.create_timer(4.0).timeout       # (review tree only: the boot logo fades in real time)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
@@ -103,11 +114,23 @@ func run(main: Node) -> void:
 		for k in 8:
 			sync.call("_process", 1.0 / 30.0)
 		var n := int(ceil(length * fps)) + 1
+		var picks: Array = []
+		for k in pick:
+			picks.append(int(round((k + 0.5) / pick * (n - 1))))
 		for i in n:
 			var t := minf(float(i) / fps, length - 0.001)
 			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
-			await _grab(dir.path_join("f%03d.png" % i))
+			if pick > 0 and not picks.has(i):
+				continue
+			if audit:
+				for v in AUDIT_VIEWS:
+					if not only.is_empty() and not only.has(v[0]):
+						continue
+					_view(v)
+					await _grab(dir.path_join("f%03d_%s.png" % [i, v[0]]))
+			else:
+				await _grab(dir.path_join("f%03d.png" % i))
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
 	if OS.get_cmdline_user_args().has("--cc"):
@@ -149,6 +172,26 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 			s.erase("kmove")
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+# (review tree only, uncommitted) --audit: the model is not turned; the camera and the sun orbit it instead.
+# [name, yaw deg (180 = front), camera height, look-at height, distance, fov]; "m" = the game's match angle, fov 15
+const AUDIT_VIEWS := [
+	["e180", 180.0, 1.25, 0.9, 6.4, 30.0], ["e135", 135.0, 1.25, 0.9, 6.4, 30.0], ["e090", 90.0, 1.25, 0.9, 6.4, 30.0],
+	["e000", 0.0, 1.25, 0.9, 6.4, 30.0], ["e270", 270.0, 1.25, 0.9, 6.4, 30.0],
+	["k180", 180.0, 0.35, 0.5, 3.9, 30.0], ["k225", 225.0, 0.35, 0.5, 3.9, 30.0], ["k090", 90.0, 0.35, 0.5, 3.9, 30.0],
+	["k000", 0.0, 0.35, 0.5, 3.9, 30.0], ["k270", 270.0, 0.35, 0.5, 3.9, 30.0],
+	["m150", 150.0, 21.0, 0.8, 9.4, 15.0], ["m330", 330.0, 21.0, 0.8, 9.4, 15.0],
+]
+var _lights: Array = []
+
+func _view(v: Array) -> void:
+	cam.fov = float(v[5])
+	cam.position = Vector3(0, float(v[2]), float(v[4]))
+	cam.look_at(Vector3(0, float(v[3]), 0))
+	var orbit := Transform3D(Basis(Vector3.UP, deg_to_rad(-float(v[1]))), Vector3.ZERO)
+	cam.global_transform = orbit * cam.global_transform
+	for l in _lights:
+		(l[0] as Node3D).global_transform = orbit * (l[1] as Transform3D)
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
