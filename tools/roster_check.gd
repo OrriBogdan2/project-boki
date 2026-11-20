@@ -1,8 +1,8 @@
 extends RefCounted
-## --roster-check: the roster (docs/boki/ROSTER.md) is whole. Every species in content/kin_v2 loads through the
+## --roster-check: the roster (docs/boki/ROSTER.md) is whole. Every species in content/kin loads through the
 ## grammar (KinLib): the live ones and the data-only ones (no model yet, never spawned). There are TARGET_TOTAL
 ## with no clashing display names, every family link points at a real species one stage down the same line, each
-## live kin has home data in content/kin and draws, and any large kin with mount settings counts as rideable
+## live kin has home data in content/kin_home and draws, and any large kin with mount settings counts as rideable
 ## (DECISIONS 2026-11-08: the 4-6 cap is loosened; the ride code reads mount speed as a plain multiplier, so no
 ## minimum speed is needed). Never touches the save.
 
@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	for id in KinLib.kin_ids():
 		var k: KinSpec = KinLib.kin(id)
 		ok(Data.KIN.has(id), "%s is in Data.KIN" % id)
-		ok(FileAccess.file_exists("res://content/kin/%s.json" % id), "%s has home data" % id)
+		ok(FileAccess.file_exists("res://content/kin_home/%s.json" % id), "%s has home data" % id)
 		sizes[_size_class(k)] += 1
 		var n := Models.kin(id, Save.new_kin(id))
 		var kind := "model" if n.find_child("BokiRig", true, false) else "placeholder"
