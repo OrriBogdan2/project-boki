@@ -75,18 +75,13 @@ other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
 
-Hand split 11-19 (ext/hunter-fix-tarek-1118, replaces the weights-only pass): the scan welded the right fist into the
-sash at the hip, so every arms-up clip pulled a wing of apron and trouser after the hand. The vertices the fist shares
-with the sash/beads are duplicated (119 glb vertices; every existing vertex keeps its position, normal, UV and colour
-bytes; no triangle is deleted), so the fist and gauntlet are their own skin island; each opening is closed on both sides
-by a flat cap (70 triangles, 60,069 total) coloured from the texture just around it. Weights: the fist/gauntlet island
-keeps only arm bones plus its own hips share, smoothed inside the island; the two knuckle shells (135 verts) that touched only the sash at rest ride the sash (11-19 retry: their seam verts take the weights of the sash verts they sit on, the inside is a smooth fill, so they weld back to one skin and never float; following hand.R left them 9-24 cm off the gauntlet),
-sash and trouser strips stay on the body. Arm weight taken off body skin (right hand and the stone left arm) goes to hips
-at the sash and back to the leg bones lower down (0.6-1.0 m ramp: hips-held trousers folded black behind the knee in
-crouches); shin weight above the knee fades into the thigh; the skin round the old contact is smoothed (10 cm). Skeleton, bone names, clips, materials and textures are unchanged.
-Tools: /home/boki/gens/tarek-fix-1119k/tool (cut5.py, openhand.py, build.py, writeglb2.py, caps.py).
-Knee 11-19 (retry): the freed arm weight on the right trouser leg (rest height below 1.15 m, x > 0) is a harmonic fill from the
-untouched skin around it (Laplace over the welded mesh) instead of the 0.6-1.0 m hips/leg ramp, which had left a pale dome on the
-right knee in crouch_idle/downed. Cap vertices take the UV of the opening vertex they copy (82 of 82 matched within 3 cm; 5 cap
-triangles stay one colour). Live vertex positions, normals, UVs and colours stay byte-identical.
-Tools: job dir 20261119-181046-a1/w (shells.py, knee2.py `fixed2.glb out.glb 1.15 fill 1`, capuv.py `... 0.03`), copied to /home/boki/gens/tarek-fix-1119m/tool.
+Weights pass 11-20 (ext/hunter-fix-tarek-1118): the scan welded the right fist and both forearms into the sash and
+thighs, and the re-derived skin left 20-62% hand weight on hip/thigh/trouser skin, so every arms-up clip dragged a
+grey/black wing of apron and trouser after the hand. Only JOINTS_0/WEIGHTS_0 changed: the glb is the live v95 file
+(meshy/v95/_main/tarek_5db6f1fdd5d.glb, 59,999 tris) with every other byte identical (JSON, positions, normals, UVs,
+indices, textures). The weights are the 11-19 split-hand result (freed arm weight on body skin -> hips at the sash,
+harmonic fill from the surrounding skin on the right trouser leg, the two knuckle shells ride the sash, shin weight
+above the knee fades into the thigh), mapped back onto the unsplit live mesh by position: every seam copy already
+carried identical weights, so the 11-19 vertex split and its 70 cap triangles did nothing and were dropped (no cut,
+no new geometry). Skeleton, bone names, clips, materials and textures unchanged.
+Proof: /home/boki/gens/tarek-fix-1120 (live-vs-fixed renders of every clip, sheets, MP4, numbers in answer.md).
