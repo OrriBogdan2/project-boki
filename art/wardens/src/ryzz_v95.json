@@ -1,5 +1,5 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md). LIVE 11-20 (job 20261119-233613-a5): Meshy multi-image-to-3d (meshy-7.1, 4 views, then Meshy remesh to 60k triangles so the decimation keeps the chest print) of the owner's 11-19 turnaround pick A (ta-audit-1119/sparkle/r4) with the crop-top hem raised to the bust underside; joints re-read on v95_grid.py renders, region/slot boxes and other anchors scaled x0.946 (this master is 5% shorter in the fit frame than m4c), 3 rods (rod_1 = rod_2 = the centre rod). Before: doll pass A on the m4c frame. LIVE 11-12 evening (current.json r3/meshy1112/graft/m4c_livehead: the owner's chest fix, m4c turnaround chest body under the live head, head_graft). Before that: LIVE 11-12 (prop1111/cand_A: body6/cand_B with the bust depth squeezed to the ref; the round-2 face). Earlier: Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md). LIVE 11-20 (job 20261119-233613-a5): Meshy multi-image-to-3d (meshy-7.1, 4 views, then Meshy remesh to 60k triangles so the decimation keeps the chest print) of the owner's 11-19 turnaround pick A (ta-audit-1119/sparkle/r4) with the crop-top hem raised to the bust underside; joints re-read on v95_grid.py renders (neck 1.57: the rig's neck base sits 0.12 m over the shoulder; 1.52 stretched the torso 10% and stood her 1.19x), region/slot boxes and other anchors scaled x0.946 (this master is 5% shorter in the fit frame than m4c), 3 rods (rod_1 = rod_2 = the centre rod). Before: doll pass A on the m4c frame. LIVE 11-12 evening (current.json r3/meshy1112/graft/m4c_livehead: the owner's chest fix, m4c turnaround chest body under the live head, head_graft). Before that: LIVE 11-12 (prop1111/cand_A: body6/cand_B with the bust depth squeezed to the ref; the round-2 face). Earlier: Sparkle's v95 master (underbust variant c with the owner's round-2 face, composed into ~/meshy/v95/Sparkle/r2/final/sparkle_final.glb) onto ryzz.glb's skeleton, clips and anchors. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. move_bones is in Blender's armature space (her front -Y): the kept gum bubble up onto the new lips.",
  "master": "~/meshy/sparkle-3d-1119/sparkle_ta1119_m1_rm60k.glb",
  "game": "art/wardens/ryzz/ryzz.glb",
  "tris": 13000,
@@ -29,7 +29,7 @@
   "neck": [
    0,
    0.04,
-   1.52
+   1.57
   ],
   "crown": [
    0,

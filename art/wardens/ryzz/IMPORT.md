@@ -55,4 +55,4 @@ Meshy multi-image-to-3d (meshy-7.1, 2k geometry, 8k PBR, the 4 views of A_hem as
 (4 views, 3 views, 4 views without enhancement, front only); the 4-view one is closest. Meshy remesh to 60k triangles
 (`sparkle_ta1119_m1_rm60k.glb`) keeps the chest bolt and lace: the swap's keep_uv decimation of the 1M-triangle scan tore both.
 `v95_to_game.py Sparkle --master <rm60k>` with re-read joints (`ryzz_v95.json`; this master is 5% shorter in the fit frame)
-on main's glb: rig, 49 clips, anchors and the gum bubble kept; 40.4k triangles, one texture (`ryzz_v95.jpg`; v95b/c dropped).
+on main's glb: rig, 49 clips, anchors and the gum bubble kept; 40.4k triangles, one texture, 1.159x a medium hunter (warden-model-check, sheet 1.13x) (`ryzz_v95.jpg`; v95b/c dropped).
