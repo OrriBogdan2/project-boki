@@ -265,3 +265,13 @@ foot slides back (the clip's sweep is faster than the body).
 Motley hovers: no STEP line. `--anim-audit`'s run reading poses the model at its own scale
 but at 5.39 m/s and counts the lowest 30 % of the ankle's height as planted (late swing too), so it reads these runs
 differently: Neve 39 -> 25 %, Albert 43 -> 26 %, Lace 89 -> 75 %, Tenzo 25 -> 37 % (DEBT.md).
+
+Main's `loco.foot_lock` (Albert, Lace, Neve: the section above) landed before this merged, and the lock-off refit
+fought it: Lace's run with stride 1.1 read +23.4 cm a step and skate 8 -> 26 %, Albert's foot_mps 5.12 skate
+43 -> 54 % (bar 45), Neve's 8.51 skate 0 -> 38 % and her worst slip 1.28 -> 1.92 m/s. So those three keep main's
+data (only the scale fix moves their rate) and Neve alone was re-fit with the lock on: foot_mps 4.4 -> 5.0 -> 5.6
+read STEP -6.7 -> -5.3 -> -1.0 cm, worst slip 1.28 -> 1.12 -> 1.00, skate 0 -> 0 -> 1 %; she gets a SLIP bar
+(1.05). Kael, Vex, Tenzo, Sparkle and Sable keep main's --fit-dirs walk, back and strafe speeds with the STEP-fit
+run `foot_mps[1]`. Gil (main gave him Meeko's loco plants) now reads a STEP line: Meeko's run foot_mps 5.75 moved
+him -20.2 -> -16.6 cm and his worst slip 4.06 -> 2.65 m/s, but no rate plants clips retargeted onto gil.glb, so he
+is `STEP_OPEN` (prints OPEN, not FAIL) until his rig pass.
