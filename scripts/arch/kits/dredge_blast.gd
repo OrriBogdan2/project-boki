@@ -10,9 +10,9 @@ extends RefCounted
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
-const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated brass, wave 2 violet
+const WAVE_COL := [Color("ff9a14"), Color("ffd24a")]     # wave 1 saturated brass, wave 2 pale gold
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
-const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
+const WAVE_DARK := [Color("5a2e04"), Color("5a4a10")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
 ## Clarity (docs/COMBAT_CLARITY.md): the fan is the true area in his gold (dredge.json "color", AimKit's default) at
 ## AimKit's own low fill; nothing that only decorates may stand over the bodies inside it.
@@ -158,7 +158,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	e.hurt(dmg, h, {"src": "abil", "ab": "ult", "tags": ["ult", "slug"]})
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
 	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], HIT_GLOW, 0.1)
-	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
+	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("ffe08a"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
 ## A wave goes: a small flash at his fists, the fan's edges, a heavy thump. Nothing sweeps the fan itself:
