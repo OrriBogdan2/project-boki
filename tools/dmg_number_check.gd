@@ -2,7 +2,10 @@ extends RefCounted
 ## --dmg-number-check: the shared damage number (Fx.number). Ten ticks from one source on one target
 ## roll into one label whose value is their sum; another source or target gets its own; a crit is
 ## larger than a normal hit and never rolls into the count; bigger hits sit in bigger size tiers;
-## numbers keep off the reticle's screen area; the pool never grows. Prints DMGNUM PASS/FAIL.
+## numbers keep off the reticle's screen area; the pool never grows; in a trio focusing one dummy for
+## 3 s no more than DmgNumberTrio.MAX_OVERLAP numbers print over one spot. Prints DMGNUM PASS/FAIL.
+
+const Trio := preload("res://tools/dmg_number_trio.gd")
 
 var main: Node
 var fails := 0
@@ -27,6 +30,8 @@ func run(main_node: Node) -> void:
 	_sizes(fx)
 	_reticle(fx)
 	_pool(fx)
+	m.queue_free()
+	await _trio()
 	print("DMGNUM DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -97,3 +102,34 @@ func _pool(fx: Fx) -> void:
 	ok(fx.get_child_count() == kids, "numbers reuse the pool, no labels are created")
 	ok(_live(fx).size() <= Fx.NUM_POOL, "no more than %d live at once (%d)" % [Fx.NUM_POOL, _live(fx).size()])
 	fx.nums.clear()
+
+## Three attackers on one dummy for Trio.SECS s: the most numbers over one spot in any frame.
+func _trio() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	var fx: Fx = m.fx
+	fx.set_process(false)
+	await main.get_tree().process_frame
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
+	var s := Trio.setup(m)
+	ok((s["mates"] as Array).size() == 2, "setup: two teammates")
+	fx.nums.clear()
+	var most := 0
+	var over := 0
+	for f in int(Trio.SECS / Trio.DT):
+		Trio.hit(s, f)
+		m.step(Trio.DT)
+		fx._process(Trio.DT)
+		m.cam.snap(m.player.pos)
+		var c := Trio.overlap(fx, m.cam)
+		most = maxi(most, c)
+		over += 1 if c > Trio.MAX_OVERLAP else 0
+	ok((s["dummy"] as Hunter).hp < 1e6, "setup: the dummy took the hits")
+	ok(most <= Trio.MAX_OVERLAP, "trio focus %.0f s: at most %d numbers over one spot (%d; %d frames over)" % [
+		Trio.SECS, Trio.MAX_OVERLAP, most, over])
+	fx.nums.clear()
+	m.queue_free()

@@ -38,11 +38,12 @@ static func hold(mp: ENetMultiplayerPeer, secs: float) -> void:
 static func start(user_args: String, log_path: String) -> int:
 	return run("XDG_DATA_HOME='%s' exec '%s' --headless --path '%s' -- %s %s" % [
 		log_path.get_basename() + "_data", OS.get_executable_path(), ProjectSettings.globalize_path("res://"),
-		user_args, Watchdog.CHILD_FLAG], log_path)
+		user_args, "%s %s%d" % [Watchdog.CHILD_FLAG, Watchdog.HOST_PID_ARG, OS.get_process_id()]], log_path)
 
 ## Starts the shell command `cmd` (one that execs its program) with its output in `log_path`, and returns the
 ## program's pid, so OS.kill ends it. A watcher beside it ends it within WATCH_S of this game's end,
-## however this game ended: a check killed at its time limit leaves nothing running.
+## however this game ended. The watcher can die with this game's process group, so a second game (start) also
+## ends itself when this game's pid is gone (CheckWatchdog): a check killed at its time limit leaves nothing.
 static func run(cmd: String, log_path: String) -> int:
 	var watch := "(while kill -0 %d && kill -0 $$; do sleep %d; done; kill $$) >/dev/null 2>&1 </dev/null &" % [
 		OS.get_process_id(), WATCH_S]

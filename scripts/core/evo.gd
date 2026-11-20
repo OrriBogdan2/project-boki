@@ -388,6 +388,9 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	var forms: Array = rec["forms"]
 	var muts: Array = rec["muts"]
 	var ln := lean(rec)
+	var grown := StatBudget.growth(rec)
+	if grown > 0.0:
+		root.set_meta("evo_scale", 1.0 + grown)
 	if forms.is_empty() and muts.is_empty() and String(ln[0]) == "":
 		return
 	var body: Node3D = root.get_node("Body/Flex") if root.has_node("Body/Flex") else root.get_node("Body")
@@ -395,7 +398,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	if forms.size() > 0:
 		var last: String = forms[forms.size() - 1]
 		base = base.lerp(AFF[last]["tint"], minf(0.1 * forms.size(), 0.35))
-		root.set_meta("evo_scale", 1.0 + minf(forms.size() * 0.1, 0.6))
+		root.set_meta("evo_scale", 1.0 + grown + minf(forms.size() * 0.1, 0.6))
 	if String(ln[0]) != "":
 		base = base.lerp(Lean.face(ln[0])["tint"], LEAN_TINT * float(ln[1]))
 		if Lean.on():
