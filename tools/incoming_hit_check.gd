@@ -1,11 +1,12 @@
 extends RefCounted
 ## --incoming-hit-check [--shots-dir=<dir>]: the incoming-hit cue (IncomingHitSfx, docs/AUDIO.md). A rival hits
 ## you from 8 directions round the screen: the cue is placed on the rival and its pan (Sfx.pan_toward: the
-## spot in the camera's space, on the SFXPan bus) follows: right of you pans right, left pans left, straight up or down the
-## screen stays in the middle. Also: chip damage is quiet and a heavy hit loud; a shotgun volley in one frame is
-## one voice at the volley's level, a chip hit inside the flurry folds into it and a heavy one moves it; a real
+## spot in the camera's space, on the SFXPan bus) follows: right of you pans right, left pans left, straight
+## up or down the screen stays in the middle. Also: chip damage is quiet and a heavy hit loud; a shotgun volley
+## in one frame is one voice at the volley's level, a chip hit inside the flurry folds into it and a heavy one moves it; a real
 ## shot from 30 m plays from where it was fired after the shooter moved; your own hits, your own damage and hits
-## with no attacker play none; with a full pool it still plays. With --shots-dir (a GPU worker, jobq) it records 8 real shots from the 8
+## with no attacker play none; with a full pool it still plays.
+## With --shots-dir (a GPU worker, jobq) it records 8 real shots from the 8
 ## directions as <dir>/incoming_hit.avi with the game's own stereo mix, one INCOMINGHIT mark per hit.
 ## Never writes the save.
 

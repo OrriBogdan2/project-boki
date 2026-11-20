@@ -287,6 +287,7 @@ static func footstep(h: Hunter) -> void:
 		return
 	var surf := StepSurface.at(m, h.pos)
 	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
+	HunterFoley.step(h)
 
 
 const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)

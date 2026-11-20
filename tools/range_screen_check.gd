@@ -4,7 +4,8 @@ extends RefCounted
 ## range; RMB, E, R, dash: the largest range-like number in the slot's data; plus Cinder's flight), the Hunter
 ## stands at the camera focus (the screen's centre, feet a little below it) and the slot's end, `reach` metres
 ## out along the aim up, down, left and right on the ground, is projected through the match camera at the
-## start view (the widest wheel zoom) and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768 (the lens is vertical, so
+## start view (the widest wheel zoom) and the closest wheel zoom, at 1280x720, 1920x1080, 2560x1080 and 1024x768
+## (the lens is vertical, so
 ## 4:3 shows less width and 21:9 more). It prints one table row per slot (docs/MOVEMENT_FEEL.md, "Ability ranges
 ## on screen") with the ways whose end is off screen, and once more with the view leaning toward the end as the
 ## cursor held there makes it. Ranges are source data and stay as they are, so off-screen ends are reported, not
@@ -38,7 +39,7 @@ func run(main: Node) -> void:
 	var start := float(CamRig.RULES["zoom"]["max"])      # the view a match starts at (the widest)
 	var zooms: Array = [start, float(CamRig.RULES["zoom"]["min"])]
 	print("RANGESCREEN table | Hunter | Slot | Reach m (data key) | ways off screen, Hunter centred, per view at")
-	print("RANGESCREEN table | zoom %.1f / %.1f (1280x720, 1920x1080, 2560x1080, 1024x768) | with the lean |" % [zooms[0], zooms[1]])
+	print("RANGESCREEN table | zoom %.1f / %.1f (4 views) | with the lean |" % [zooms[0], zooms[1]])
 	for r in rows:
 		var cells: Array = []
 		for v in VIEWS:

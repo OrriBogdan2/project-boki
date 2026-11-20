@@ -42,6 +42,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## abyss_danger (`content/rules/abyss_danger.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How the abyss warns you as you fall (scripts/match/abyss_fx.gd danger_depth: the red tint and vignette; scripts/match/abyss_fall_sfx.gd warn_db / warn_rate: the heartbeat warning). Depths are metres under the lowest island lip around you. Nothing shows until start_depth, so a small dip under an island's height is free; from there the danger rises smoothly (curve = share of the way to the point of no return, to the power curve) to 1 at the kill depth (Hunter.abyss_kill_y). Rising faster than the glider lift (AbyssFx.RISE_OFF) or climbing back above start_depth lets go. warn_*: the warning heartbeat starts at danger warn_from, at warn_db_min dB and warn_rate_min beats a second, and rises to warn_db_max dB and warn_rate_max at full danger. edge_from: danger where the crimson screen-edge rings start (they ramp up to full at 1). |
+| start_depth | 4 |
+| curve | 1.5 |
+| warn_from | 0.02 |
+| warn_db_min | -20 |
+| warn_db_max | -2 |
+| warn_rate_min | 1.2 |
+| warn_rate_max | 4.6 |
+| edge_from | 0.1 |
+
 ## armor (`content/rules/armor.json`)
 
 
@@ -1102,7 +1118,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
-| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
+| first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"shelter": 1, "first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "shelter": {"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)", "locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"}, "shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.", "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1605,6 +1621,19 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 | Setting | Value |
 |---|---|
 | groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 1, "what": "the match clock under the minimap"}, "summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
+
+## hunter_foley (`content/rules/hunter_foley.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Each Hunter's quiet foley layer under its steps and dashes (MoveSfx, docs/AUDIO.md). One row per archetype: note = what makes the sound (from its final design); step_db / dash_db = that Hunter's level trim in dB (its sounds are <arch>_foley and <arch>_foley_dash, made by tools/gen_sfx_foley.py). A step's foley follows the Hunter's speed: walk_db quieter at a standstill, full level at its base run speed. Foley is carried to step_reach_m like the step itself; at most voice_cap foley sounds start per voice_window_ms across all Hunters, so a crowd of 30 stays readable. base_db: the level before the role (own/ally/enemy) and fight trims MoveSfx.level adds. |
+| base_db | -6 |
+| walk_db | -8 |
+| voice_cap | 5 |
+| voice_window_ms | 200 |
+| rows | {"dredge": {"note": "Grimble: the junk hoard on his back rattles and clinks (chests, tin, coins, a dull bell)", "step_db": 0.0, "dash_db": 0.0}, "bulwark": {"note": "Albert: barnacle armour clanks, plate on plate and shell crunch", "step_db": 0.0, "dash_db": 0.0}, "rimewright": {"note": "Neve: skate blades hiss on the ground", "step_db": 2.0, "dash_db": 0.0}, "juggernaut": {"note": "Kael: the chain at his collar and wrists", "step_db": 0.0, "dash_db": 0.0}, "ashwick": {"note": "Cinder: living-fire hair and molten seams crackle", "step_db": 0.0, "dash_db": 0.0}, "thief": {"note": "Sable: coat and buckle on steps, moth wings flutter on dashes", "step_db": -2.0, "dash_db": 2.0}, "archer": {"note": "Lace: porcelain joints click, the wooden control cross knocks", "step_db": 0.0, "dash_db": 0.0}, "dolm": {"note": "Tenzo: pebbles and the floating eye stones, a soft jade ring", "step_db": 0.0, "dash_db": 0.0}, "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0}, "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0}, "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0}, "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}, "gil": {"note": "Gil: potion vials clink in his bag, a wet slap of robe hem", "step_db": 1.0, "dash_db": 0.0}} |
 
 ## hunter_move (`content/rules/hunter_move.json`)
 
