@@ -44,7 +44,7 @@ const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics ti
 ## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
 ## ask: the slam drops 1.5 body heights in 0.08 s, the punch drives 1.1 in 0.05 s. The others are listed open.
 const MAX_JUMP := {"bulwark": 0.4, "dolm": 0.45}
-const TURN_CEIL := 1.4       # the run turn's regression ceiling (share of the run): see _gate_turns
+const TURN_CEIL := 1.25      # the run turn's regression ceiling (share of the run): see _gate_turns
 const TURN := preload("res://tools/anim_audit_turn.gd")     # the 180 stick flip at a run
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -408,8 +408,9 @@ func _gate_stops(id: String, stops: Dictionary) -> void:
 	print(line)
 
 ## A 180 stick flip at a run (anim_audit_turn.gd) should slide no more than MAX_SLIDE of the run, or than the run
-## slides on its own. No Hunter makes it yet (the loco blend trails a 0.1 s reversal: the "run turn slide" backlog
-## item), so past that it prints OPEN, and only past TURN_CEIL (today's worst plus a margin) does it FAIL.
+## slides on its own. WardenStride locks the feet through a reversal; most Hunters are still over it (the loops' own
+## run and backpedal slide, the locks let go as the clip lifts each foot), so past that it prints OPEN, and only past
+## TURN_CEIL (today's worst, archer 117% with the cursor flipped, plus a margin) does it FAIL.
 func _gate_turns(id: String, turns: Dictionary, steady: float) -> void:
 	var line := "TURNS %-10s" % id
 	for nm in turns:

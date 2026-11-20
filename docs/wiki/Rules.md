@@ -846,8 +846,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | base_joy_decay_doc | base_mode only: joy (0..100) a Boki loses each awake minute at the base (0.3x asleep, faster when hungry, grubby or worn out). A farm day is 5 minutes (care_day_s). Off base_mode Care.DECAY's 0.6 applies. |
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
-| stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
-| stat_budget_doc | Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
+| stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "grow_max": 0.12, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
+| stat_budget_doc | grow_max: extra body size at the full total_cap (StatBudget.growth, read by Evo.dress as evo_scale), 0.12 = 12% taller; it follows the square root of total/total_cap, so 60 points already show 6%. Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
 | run_payoff | {"stats_w": 0.75, "lean_w": 0.25, "carry_max": 0.15, "summon_max": 0.1} |
 | run_payoff_doc | How raising pays off on runs (RunPayoff, decision 0079). score 0..1 = stats_w x (expedition stat points / their max) + lean_w x lean strength (Evo.lean). Carry passive amounts x (1 + score x carry_max); summon window x (1 + score x summon_max). The carry passive still stops at its per-stat carry cap (KinParts.OWNER_STATS), so this never lifts a Boki past the cap a wild one has. |
 
@@ -2392,6 +2392,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | mob | {"scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | labels | {"land": "Land here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "wallkick": "Climb", "crouch": "Lookout", "glove": "Glove", "wayout": "Uplink", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
 | camps | {"shoot": {"foes": ["skitter", "skitter"], "to": 0}, "sec": {"foes": ["skitter", "skitter"], "to": 2}, "gkey": {"foes": ["skitter", "skitter"], "to": 3, "held": true}, "summon": {"foes": ["spitter"], "to": 0}, "pack": {"foes": ["skitter", "spitter"], "to": 3}, "kin": {"foes": ["skitter", "skitter", "skitter"], "to": 4, "row": true, "hp": 1.0}, "hook": {"foes": ["sentinel", "skitter"], "to": 6, "far": true}} |
+| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you. |
+| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0} |
 
 ## unstable_mix (`content/rules/unstable_mix.json`)
 
