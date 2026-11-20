@@ -27,6 +27,7 @@ func run(main_node: Node) -> void:
 	await _grimble()
 	await _brall()
 	print("TFB DONE, failures: %d" % fails)
+	main.get_tree().quit(1 if fails > 0 else 0)
 
 
 func _flat(a: Vector3, b: Vector3) -> float:
