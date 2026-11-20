@@ -106,6 +106,13 @@ static func next_r(m: Match, ahead := 1) -> float:
 		return 0.0
 	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
+## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
+static func close_in(m: Match) -> float:
+	return maxf(r("tide_start_s") - m.sess_time(), 0.0)
+
+static func close_left(m: Match) -> float:
+	return maxf(r("tide_start_s") + r("tide_close_s") - m.sess_time(), 0.0)
+
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
