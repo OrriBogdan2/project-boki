@@ -171,7 +171,8 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
-	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],      # Training Grounds Hunters = a real match's
+	# Training Grounds Hunters = a real match's
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -249,6 +250,7 @@ const CHECKS := {
 	"--sfx-voice-check": ["res://tools/sfx_voice_check.gd", "sfx_voice_check", null],  # 30-Hunter voice cap
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],  # item 103
 	"--settings-size-check": ["res://tools/settings_size_check.gd", "settings_size_check", null],      # steady panel
+	"--window-mode-check": ["res://tools/window_mode_check.gd", "window_mode_check", null],  # fullscreen start, F11
 	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # trimmed settings
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],      # Interface size slider
 	# sounds behind terrain
@@ -416,6 +418,7 @@ const CHECKS := {
 	"--scout-cam-shots": ["res://tools/scout_cam_check.gd", "scout_cam_check", "shots"],
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],      # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
+	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
@@ -447,6 +450,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
+	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # one reader for ability words
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
