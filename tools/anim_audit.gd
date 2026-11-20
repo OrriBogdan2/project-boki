@@ -126,7 +126,9 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, live)
 	row["set_off_at"] = _set_off_at(m, sync, clips)
-	var want := ph * float(row["cfg"]["walk_len"])
+	# (the walk loop plays stretched to "cycle_s", else to the run clip's cycle: WardenClips._gait_loop)
+	var loop_s := float(lc.get("cycle_s", 0.0))
+	var want := ph * (loop_s if loop_s > 0.0 else float(row["cfg"]["run_len"]))
 	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
 		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
 				want])
