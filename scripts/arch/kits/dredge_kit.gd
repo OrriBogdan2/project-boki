@@ -22,15 +22,15 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("8a5aff")       # the Deep Reach: the bruised-purple flesh of the stretched arm
-const SLUDGE := Color("4a2278")        # the purple-black drips off the arm
+const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
+const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
 const BRASS := Color("e0a040")
 const BRASS_HOT := Color("fff0b0")
 const IRON := Color("3a3f48")
-const SLUG_COL := Color("ff4fa8")      # a hot pink streak in flight
-const SLUG_CORE := Color("ffd0ec")
-const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
+const SLUG_COL := Color("ffc83a")      # a hot gold streak in flight
+const SLUG_CORE := Color("fff2d0")
+const SLUG_REST := Color("e0a018")     # a slug hanging at its stop line: solid brass, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
@@ -61,7 +61,8 @@ var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
-var trail_t := 0.0              # the next barge after-image
+var trail_t := 0.0              # the next barge contact check
+var barge_met := {}             # foes the barge has already flashed on (instance ids)
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
@@ -227,8 +228,8 @@ func _drop_holds() -> void:
 		_end_pull(false)
 	broadside.drop()
 
-## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). One aim line lies on the ground from his body out to the
+## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (gold
+## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
@@ -240,7 +241,7 @@ func _tick_gun() -> void:
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff0f6"), "alpha": 0.8, "follow": true})
+	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff4d8"), "alpha": 0.8, "follow": true})
 
 func _dress_volley() -> void:
 	play("dr_shot")
@@ -703,7 +704,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)
-	Shake.incoming_big(m, at, 0.6, h)
+	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, r, col_of(ed))
 
@@ -739,6 +740,8 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
 	_clawed_turf(dir)
 	barge_t = h.roll_t
+	barge_met = {}
+	vfx("dash", null, null, {"t": h.roll_t})       # data: the gold trail (content/vfx/dredge.json "dash")
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
@@ -788,14 +791,19 @@ func on_dash_off_ledge() -> void:
 	super()
 	stop_t = 0.0
 
-## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
+## The barge touches nobody (no hit, no knock); a foe it runs into only gets a small gold flash where they meet
+## (data "dash_hit", once per foe per shove). The trail itself is the data "dash" ribbons, no ring or burst.
 func _barge_trail(dt: float) -> void:
 	trail_t -= dt
 	if trail_t > 0.0:
 		return
 	trail_t = 0.045
-	var d2 := h.aim_dir()
-	fx.puff(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, LDFx.M_ORB, BRASS, IRON, 0.9, 0.3)
+	for f in m.foes_of(h.team):
+		if f.hittable() and not barge_met.has(f.get_instance_id()) and absf(f.pos.y - h.pos.y) < 2.0 \
+				and Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).length() < h.r + f.r + 0.3:
+			barge_met[f.get_instance_id()] = true
+			# on the foe's near edge: the ball (wider than h.r) hides a flash at the mid point
+			vfx("dash_hit", f.pos.lerp(h.pos, f.r / maxf(0.1, f.pos.distance_to(h.pos))), null, {"hit": true})
 
 func own_dash_trail() -> bool: return true
 

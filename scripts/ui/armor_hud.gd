@@ -8,7 +8,7 @@ extends RefCounted
 
 const POP := 0.5               # seconds the badge pops after a level-up
 const RADIUS := 19.0           # px: the badge at rest
-const BAR_H := 2.0             # px: the progress bar under the armour strip
+const BAR_H := 2.0             # px: the progress bar by the armour strip (above it on your own HUD)
 const TICK := 0.5              # seconds the head tick shows after armour progress grows
 const NOTE_PX := 14            # px: the first-time hint's text
 

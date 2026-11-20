@@ -5,5 +5,9 @@
  "ways_out_lead_s": 30.0,
  "_ways_out_lead_s": "the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on",
  "always": ["minimap", "clock", "counters", "vitals", "abilities", "glider", "belt", "slots", "weapon"],
- "_always": "blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen)"
+ "_always": "blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen)",
+ "newcomer_seats": [2, 3],
+ "_newcomer_seats": "the Ways Out seats (0 Lair, 1 Heart Gate, 2 Uplink, 3 Heart ring) a new player's objective line points at: the two that need no boss fight and no carried Heart (ExtractGoal)",
+ "goal_how": ["Beat the boss, then ride the lift", "Carry the Heartspark to the Gate, hold %F", "Hold %F at the outpost until the lift opens", "Stand in the Heart ring until the end"],
+ "_goal_how": "ExtractGoal: how to leave through each seat, in seat order; %F is the interact key"
 }
