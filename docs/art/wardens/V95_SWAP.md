@@ -66,6 +66,10 @@ from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, ri
   against the live model's 4.80, better in 48 of 56 clips). Leave it off for a big fused arm prop (Kael's stone arm).
 - `meshy_smooth` N (optional): N passes of `smooth_weights` over Meshy's weights (seam twins blend together, a detach
   cut's do not). Cinder 11-20 with `arm_reach`: worst clip stretch 8.11 -> 5.34 (6 passes) -> 4.71 (12).
+- `leg_smooth` N (optional, after `meshy_smooth`): N more passes on the leg rows only (vertices below the hip joint + 5 cm
+  whose weight is on hips/thigh/shin), so a thigh's hip blend spreads over more of the leg. Cinder r3 (11-20, on top of
+  `meshy_smooth` 12): worst clip stretch 5.83 -> 4.59 (60 passes) -> 4.25 (100); 150 gives 4.41 and 400 5.57 (the stretch
+  moves to the hips and shins).
 Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
 report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
 coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads

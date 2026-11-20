@@ -724,9 +724,9 @@ def detach(low, G, names):
     return W, o
 
 
-def smooth_weights(low, W, passes):
+def smooth_weights(low, W, passes, rows=None):
     """Each pass blends every vertex's weights halfway toward its neighbours' mean (not across a detach cut): wider blends
-    stretch each edge less in the clips."""
+    stretch each edge less in the clips. `rows` (a mask): only those vertices change, the rest still feed their neighbours."""
     ed = np.empty(len(low.data.edges) * 2, np.int64)
     low.data.edges.foreach_get("vertices", ed)
     ed = ed.reshape(-1, 2)
@@ -740,7 +740,8 @@ def smooth_weights(low, W, passes):
         acc = np.zeros_like(W)
         np.add.at(acc, ed[:, 0], W[ed[:, 1]])
         np.add.at(acc, ed[:, 1], W[ed[:, 0]])
-        W = np.where(cnt > 0, 0.5 * W + 0.5 * acc / np.maximum(cnt, 1), W)
+        new = np.where(cnt > 0, 0.5 * W + 0.5 * acc / np.maximum(cnt, 1), W)
+        W = new if rows is None else np.where(rows[:, None], new, W)
     return W
 
 
@@ -894,7 +895,12 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("meshy_smooth" if meshy else "smooth", 0))).T))
+    W = smooth_weights(low, W, int(SPEC.get("meshy_smooth" if meshy else "smooth", 0)))
+    if SPEC.get("leg_smooth"):      # (a thigh's hip-to-thigh blend, widened: the hips and legs turn far apart in a crouch)
+        lower = [i for i, n in enumerate(names) if n == "hips" or n.startswith(("thigh.", "shin."))]
+        rows = (P[:, 2] < S_J["hip.R"][2] + 0.05) & (W[:, lower].sum(1) > 0.95)
+        W = smooth_weights(low, W, int(SPEC["leg_smooth"]), rows)
+    gr = dict(zip(names, W.T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
