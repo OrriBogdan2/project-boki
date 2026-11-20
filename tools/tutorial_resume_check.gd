@@ -158,7 +158,7 @@ func _farm_resume() -> void:
 		lay = Save.d["layout"]
 		var kept: bool = FarmTutorial.active() and FarmTutorial.current() == want and FarmTutorial.done_count() == done
 		kept = kept and (id != "house" or not FarmHob.house_entry().is_empty())
-		kept = kept and (id != "stone" or HomeGather.has_tool("pickaxe"))
+		kept = kept and (id != "house" or HomeGather.has_tool("pickaxe"))
 		kept = kept and (id != "feed" or bool(FarmTutorial.state()["gift"]))
 		if not kept:
 			bad_at += " " + id

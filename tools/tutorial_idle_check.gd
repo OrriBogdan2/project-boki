@@ -144,7 +144,6 @@ func _farm_course() -> void:
 			ok(g.place_house(), "the house goes down as a site")
 			home._sync_fixtures()
 			_idle_farm(g, id)      # (the site is up: its "wait" hint)
-		elif id == "hammer":
 			FarmSites.finish(FarmHob.house_entry())      # (built, so the steps that wait for it open)
 		FarmTutorial.mark(id)
 	home.queue_free()

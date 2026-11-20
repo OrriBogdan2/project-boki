@@ -153,9 +153,7 @@ func _seed_goods() -> Array:
 		var ck: String = c
 		var have := "have %d" % int(Save.d.get("seeds", {}).get(c, 0))
 		goods.append(["seed:" + c, "%s seeds" % cd["name"], "Plant on a farm plot. " + String(cd["desc"]),
-			int(cd["price"]), cd["color"], func():
-				Save.add_seed(ck, 1)
-				FarmTutorial.event("buy"), have])
+			int(cd["price"]), cd["color"], func(): Save.add_seed(ck, 1), have])
 	return goods
 
 func _boki_food() -> Array:

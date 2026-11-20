@@ -273,7 +273,7 @@ func _land_swing() -> bool:
 		return false
 	paused.erase(site_u)      # the site is moving again
 	FarmSites.player_swing(h.hw, e)
-	FarmTutorial.event("swing")
+	FarmTutorial.detect()
 	h._refresh_top()
 	e = FarmSites.entry(site_u)
 	if e.is_empty() or not FarmSites.has_site(e):

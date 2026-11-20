@@ -261,7 +261,7 @@ func _tutorial_match():
 func _farm_tutorial(home) -> void:
 	_begin("farm tutorial")
 	home._close_panel()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "the farm tutorial starts by calling you to Hob")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "chop", "the farm tutorial starts at chopping a tree")
 	ok(is_instance_valid(home.guide.hint_box), "its first prompt is on screen")
 	var gems := int(Save.d["gems"])
 	var steps := 0

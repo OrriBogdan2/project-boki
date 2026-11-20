@@ -123,7 +123,6 @@ func _farm(who: String, arch: String) -> void:
 			g.place_house()
 			home._sync_fixtures()
 			rival += _farm_step(g, id)      # (the site is up: its "wait" hint)
-		elif id == "hammer":
 			FarmSites.finish(FarmHob.house_entry())
 		elif id == "crop":
 			rival += _crop_course(home, g)

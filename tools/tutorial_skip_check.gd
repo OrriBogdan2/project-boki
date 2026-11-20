@@ -217,20 +217,17 @@ func _farm(tag: String) -> void:
 		home.queue_free()
 		await _frames()
 
-## Puts the farm where a player is when step `i` comes up: the steps before it done (Hob first), their tools
-## in hand, the house down once its step is done and standing once the hammer's is.
+## Puts the farm where a player is when step `i` comes up: the steps before it done, their tools in hand,
+## the house standing once its step is done.
 func _bring_to(home, i: int) -> void:
 	var steps := FarmTutorial.steps()
 	var did: Dictionary = FarmTutorial.state()["did"]
 	var todo: Array = steps.slice(0, i).map(func(s): return String(s["id"]))
-	if String(steps[i]["id"]) != "hob":
-		todo.append("hob")      # (he calls you over first, whatever the list order)
 	for id in todo:
 		FarmTutorial.give_step_tool(String(id))
 		did[String(id)] = true
 	if did.get("house", false):
 		home.guide.place_house()
-	if did.get("hammer", false):
 		FarmHob.house_entry().erase("site")
 
 ## Clicks Skip on the goal line (not yet Yes) after checking it is on screen; true when the question shows.

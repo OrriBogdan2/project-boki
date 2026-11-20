@@ -292,3 +292,22 @@ line at each beat's start; leg lines that show later are not in the word count: 
 | main 59025f2 | 21 (23 in the list; `summon` and `pack` are the wisp Boki's) | 315 | 57.6 | 61 s |
 | this branch | 8 | 145 | 43.8 | 50 s |
 
+
+## The five farm steps (`ext/tut-step-count`, 2026-11-20)
+
+DECISIONS 2026-11-08: the farm tutorial is about five steps. `steps` in `content/rules/farm_tutorial.json` (base_mode off),
+before and after:
+
+| Before (12) | After (5) |
+|---|---|
+| `hob` (meet the builder), `axe`, `chop` | `chop` (the axe comes with it; Hob still talks when you walk up) |
+| `stone`, `house`, `hammer` | `house` (the pickaxe comes with it; the "wait" line says to hold the key at the house and that rocks give stone) |
+| `task` (a job for your Boki), `feed` | `feed` |
+| `crop` | `crop` |
+| `buy`, `sell` | none: a new save already holds seeds, and the Market, Goals rows and Hob's lines cover selling |
+| `expedition` | `expedition` |
+
+Cut to what already exists (no new hint, toast or marker): the job page is the Boki page's own dropdown (`FarmTaskGuide`
+is deleted; the Care page's Feed button is a plain primary button), the hammer is the house's "wait" line, the market
+is the Market button and the Goals rows. `FarmTutorial.skip()` still hands over the axe and the pickaxe.
+`FarmSpotlight`'s Boki cut-out (`spot: {"world": true}`) no longer has a farm step that uses it.
