@@ -73,3 +73,10 @@ Alternative not taken: the master's HD sword skinned to hand.R in place of the g
 **Restore branch (2026-11-17, ext/hunter-glb-restore-1117):** the restored e1 mesh (ca32bd97252) carried the same master swords (2440 triangles on the `*-v95c` materials, blade-shaped slabs at x 0.26..0.37). `glb_drop_mats.py kael.glb kael.glb '*-v95c'` took them out, so the restored picked Kael has one sword (the game's skinned one), like main's. Every other part, skin and the 54 clips are unchanged.
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): face-kael-1118 cand A_s2_FevHair texture-only: `python3 -I tools/art1/face_swap.py art/wardens/kael/kael.glb /home/boki/meshy/face-kael-1118/cand/A_s2_FevHair.glb /home/boki/meshy/kael-sword-1117/cand/A_keep_new.glb OUT.glb` blends the changed pixels into the embedded 4096 `v95` image (sword, rig, clips untouched). Re-run the same command on the rig-weights glb (PR #284) if it merges first.
+
+## Regen candidate A, 2026-11-20 (ext/hunter-regen-kael-1120, draft)
+
+`kael.glb` is a new Meshy body from the owner's r4b turnaround pick A ("+slightly wider" 2D pending), not the 11-10 scan
+patches: `art/wardens/src/kael_v95.json` + `tools/art1/v95_to_game.py Kael --weights meshy` (docs/art/wardens/V95_SWAP.md
+"Regen from the turnaround"). The skinned sword stays. warden_look.json `kael`: far_lift 0 and fres/top_light x0.4 (the
+bright Meshy cloth and hair bloomed at the match camera). Open: no curse-vein glow, cloak/hips stretch (see the report).
