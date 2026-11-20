@@ -7,17 +7,17 @@ extends RefCounted
 ## attack (Lace's draw and release, Kael's melee combo), the dummies stand where the kit can reach them,
 ## and the course ends at the lift.
 
-var bad := 0
-var arch := "gunslinger"
-var wisps := false
-
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
-const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack",
-		"kin", "hook", "ult"]
+const FOE_STEPS := ["fight", "shoot", "gkey", "summon", "kin"]
+const BEATS := 8               # DECISIONS 2026-11-08: about eight beats, the Boki's own one per kit
 const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
+
+var bad := 0
+var arch := "gunslinger"
+var wisps := false
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTCHECK %s %s" % ["PASS" if cond else "FAIL", what])
@@ -43,7 +43,6 @@ func run(main: Node) -> void:
 	var idle_ok := true
 	var reach := ""
 	var early_seen := false      # the summon step: the first window was called back early, and the step stayed
-	var second_seen := false     # the pack step: summoned again after the ring went bright
 	while t < MAX_RUN_T and not m.player.extracted:
 		if tu.id() == "kin" and tu.t < IDLE_E_T:
 			idle_ok = idle_ok and tu.got == 0
@@ -53,7 +52,6 @@ func run(main: Node) -> void:
 		m.step(Match.DT)
 		t += Match.DT
 		early_seen = early_seen or (tu.id() == "summon" and tu.sm.early)
-		second_seen = second_seen or (tu.id() == "pack" and tu.sm.second)
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
@@ -61,16 +59,16 @@ func run(main: Node) -> void:
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
+	ok(seen.size() == BEATS, "the course is %d beats (%s)" % [BEATS, ", ".join(seen.keys())])
 	_words(m.player, seen)
-	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
-	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
+	var teaches: Array = ["summon"] if wisps else ["gkey"]
+	var skipped: Array = ["gkey"] if wisps else ["summon"]
 	ok(teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
 			"%s steps %s ran, %s did not" % ["wisp" if wisps else "walking Boki", teaches, skipped])
 	if wisps:
 		var sk: Dictionary = seen.get("summon", {})
 		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
 		ok(early_seen, "a window called back early keeps the summon step (and says so)")
-		ok(second_seen, "the pack step waited for a second summon after the ring went bright")
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)
 	ok(reach == "", "every dummy stands where this kit can reach it" + reach)
 	print("TUTCHECK DONE %s, failures: %d" % [arch, bad])
@@ -116,13 +114,13 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 	ok(e_name != "" and e_line.contains(e_name), "the E line names %s ('%s')" % [e_name, e_line])
 	ok(String(s.get("cap", "")) == Settings.key_cap("signature"), "and shows the E key (%s)" % s.get("cap", ""))
 	var r_name := String(p.ak.rmb_def().get("name", ""))
-	var u: Dictionary = seen.get("sec", {})
+	var u: Dictionary = seen.get("fight", {})
 	var r_line := String(u.get("text", ""))
 	ok(r_name != "" and r_line.contains(r_name), "the right-click line names %s ('%s')" % [r_name, r_line])
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
 	var sh: Dictionary = seen.get("shoot", {})
 	var melee: bool = p.wpn.get("melee", false)
-	var want := "Hold to draw" if p.wpn.has("draw") else "Shoot"
+	var want := "Hold %s to draw" % Settings.key_cap("fire") if p.wpn.has("draw") else "Shoot"
 	if melee:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))

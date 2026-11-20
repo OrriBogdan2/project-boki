@@ -8,7 +8,7 @@ const MAX_WORDS := 12
 ## term -> the step id that introduces it ("" = never introduced by the tutorial, so never allowed). The Fusion
 ## step and its unlock name the Ultimate (R) and the Fusion (X) as two things.
 const JARGON := {"fuse": "pick_ult", "relic": "expedition", "kin": "", "rank": "rank", "daze": "",
-		"uplink": "uplink", "ultimate": "pick_ult"}
+		"uplink": "extract", "ultimate": "pick_ult"}
 
 var bad := 0
 var main: Node
@@ -43,6 +43,27 @@ func _steps(file: String, rows: Array, id_of: Callable, texts_of: Callable) -> v
 		for pair in texts_of.call(row):
 			_lint("%s %s %s" % [file, id, pair[0]], String(pair[1]), seen)
 
+## The beat an alt line belongs to: a leg's beat (Tutorial.leg), else the id before its "_variant".
+func _beat_of(alt_key: String) -> String:
+	if alt_key in Tutorial.GAP_STEPS:
+		return "dash"
+	if alt_key in Tutorial.EXIT_LEGS:
+		return "extract"
+	return alt_key.get_slice("_", 0)
+
+
+## The jargon introduced by the beats up to and including `beat`.
+func _intro_by(rows: Array, beat: String) -> Dictionary:
+	var seen := {}
+	for row in rows:
+		for term in JARGON:
+			if JARGON[term] == String(row[0]):
+				seen[term] = true
+		if String(row[0]) == beat:
+			break
+	return seen
+
+
 func run(m: Node) -> void:
 	main = m
 	var tut: Dictionary = Content.rules("tutorial")
@@ -52,7 +73,7 @@ func run(m: Node) -> void:
 		if detail.has(r[0]): out.append(["detail", detail[r[0]]])
 		return out)
 	for k in tut["alt"]:
-		_lint("tutorial alt %s" % k, String(tut["alt"][k]), {})
+		_lint("tutorial alt %s" % k, String(tut["alt"][k]), _intro_by(tut["steps"], _beat_of(k)))
 	_steps("farm", Content.rules("farm_tutorial")["steps"], func(r): return String(r["id"]), func(r):
 		var out := [["title", r["title"]]]
 		for h in r["hints"]:

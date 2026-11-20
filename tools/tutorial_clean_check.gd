@@ -1,8 +1,8 @@
 extends RefCounted
 ## --tutorial-clean-check: the tutorial course has nothing random on it. After the build there is no
 ## chest, and no crates, pots, shrines, wild kin or mobs are out; the world makes no spots for them
-## (the course's glove lies on the ground). Then a scripted run of the whole course: it never brings
-## any wild kin, chest or breakable. And the tutorial's cooldowns run four times
+## Then a scripted run of the whole course: it never brings any wild kin or breakable, and no chest
+## but the chest beat's own. And the tutorial's cooldowns run four times
 ## quicker, while a real match's and a training match's do not. And the tutorial, hint and kit-drill
 ## text never names a cut feature (DECISIONS 2026-11-07: Albert's Guard meter and Shield Slam, Lace's Focus
 ## and Deadeye, Neve's Chill slow, Sable's empowered Shred, Meeko's carrier shield).
@@ -88,9 +88,9 @@ func _run_course(m: Match) -> void:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
-		chests = maxi(chests, m.chests.size())
+		chests = maxi(chests, m.chests.filter(func(c: Dictionary): return not c.get("tut", false)).size())
 		extra_breaks = maxi(extra_breaks, m.breaks.size())
 		wild = maxi(wild, m.kins.filter(func(k): return k.is_wild()).size())
 	ok(m.player.extracted, "the course runs to the exit (%.0fs)" % t)
-	ok(chests == 0 and extra_breaks == 0, "no chest or breakable ever appeared")
+	ok(chests == 0 and extra_breaks == 0, "no chest but the chest beat's own, and no breakable, ever appeared")
 	ok(wild == 0, "no wild kin ever appeared (%d)" % wild)

@@ -392,9 +392,9 @@ func _tutorial() -> void:
 			TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
 		var tu: Tutorial = m.tut
-		var id := tu.id()
+		var id := tu.leg()
 		steps_seen[id] = true
-		if id == "glove" and fell_t < 0.0:
+		if id == "chest" and fell_t < 0.0:
 			fell_t = t
 			# under the abyss line (Ent: y < -40 falls out anywhere): a fall that no glide or updraft can save
 			m.player.teleport(Vector3(70.0, -41.0, 30.0))
@@ -403,8 +403,8 @@ func _tutorial() -> void:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
-		var goes_somewhere := id in ["land", "dash", "exdash", "glide", "crouch", "glove", "wayout", "uplink",
-			"defend", "extract"]
+		var goes_somewhere := id in ["land", "dash", "exdash", "glide", "chest", "wayout", "uplink", "defend",
+			"extract"]
 		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
 			no_marker += 1
 		if goes_somewhere and tu.target != Vector3.INF and tu._beams.is_empty():
@@ -419,12 +419,12 @@ func _tutorial() -> void:
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
 	ok(back_ok, "a fall into the void puts you back at the last stop")
-	var need := ["crouch", "pick_sec", "kin", "glide"].all(func(s): return steps_seen.has(s))
-	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
+	var need := ["fight", "chest", "kin", "glide"].all(func(s): return steps_seen.has(s))
+	ok(need, "the course has the fight, chest, glide and watch stops (%s)" % str(steps_seen.keys()))
 	# (wayout and uplink both point at the outpost: when the fight ends next to it, wayout can be over in a
 	# second, while the Boki is still flying back or riding your shoulder over the last gap)
 	var outpost := led.has("wayout") or led.has("uplink")
-	ok(led.has("glove") and outpost, "it leads you to (or gets to) the glove and the outpost")
+	ok(led.has("chest") and outpost, "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 
