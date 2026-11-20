@@ -515,9 +515,6 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	if layer.has("cut"):
 		e["cut"] = float(layer["cut"])
 		e["h"] = h
-	if layer.has("fly") and o.get("to") is Vector3:     # it flies to the kit's `to` over "fly" s, then hangs there
-		var to: Vector3 = o["to"] + Vector3(0, float(layer.get("y", 0.0)), 0)
-		e.merge({"from": p, "to": to, "fly": maxf(0.01, _num(layer, "fly", o))})
 	if o.get("on") is Node3D:
 		e["on"] = o["on"]
 		e["off"] = p - (o["on"] as Node3D).global_position
@@ -883,9 +880,6 @@ func _process(delta: float) -> void:
 			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
 		if e.has("follow") and is_instance_valid(e["follow"]):
 			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
-		if e.has("fly"):
-			var flown := minf(float(e["t"]) / float(e["fly"]), 1.0)
-			(e["node"] as Node3D).global_position = (e["from"] as Vector3).lerp(e["to"], flown)
 		if e.has("on") and is_instance_valid(e["on"]):
 			(e["node"] as Node3D).global_position = (e["on"] as Node3D).global_position + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:

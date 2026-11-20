@@ -14,8 +14,8 @@
 			{"p": "flare", "size": 1.2, "life": 0.08, "c": "brass", "c2": "hot"},
 			{"p": "ember", "way": "fwd", "n": 6, "speed": 6.0, "spread": 0.4, "grav": 4.0, "life": 0.18, "size": 0.05, "c": "gold", "c2": "hot"}
 		]},
-		"slug": {"net": false, "end": "slug_end", "fx": [
-			{"p": "ribbon", "size": 0.2, "tail": 0.04, "head": 0.2, "life": 2.0, "c": "gold", "c2": "hot"}
+		"slug": {"net": false, "round": false, "end": "slug_end", "fx": [
+			{"p": "ribbon", "size": 0.2, "tail": 0.05, "head": 0.3, "head_len": 1.5, "life": 2.0, "c": "gold", "c2": "hot"}
 		]},
 		"slug_end": {"net": false, "fx": [{"p": "flare", "size": 0.18, "grow": 1.0, "life": 0.3, "c": "brass", "c2": "char"}]},
 		"reel": {"net": false, "fx": [{"p": "ring", "at": "h", "ride": true, "size": 0.78, "thin": true, "life": 1.0, "c": "brass", "c2": "gold", "c3": "iron"}]},
@@ -45,10 +45,6 @@
 		"blast_wave": {"fx": [
 			{"p": "flare", "size": 1.2, "life": 0.3, "c": "w1", "c2": "w1h", "unless": "w2"},
 			{"p": "flare", "size": 1.2, "life": 0.3, "c": "w2", "c2": "w2h", "when": "w2"}
-		]},
-		"blast_slug": {"net": false, "fx": [
-			{"p": "flare", "size": 0.8, "grow": 0.5, "fly": "fly", "life": "t", "c": "w1", "c2": "w1h", "unless": "w2"},
-			{"p": "flare", "size": 0.8, "grow": 0.5, "fly": "fly", "life": "t", "c": "w2", "c2": "w2h", "when": "w2"}
 		]},
 		"blast_hit": {"net": false, "fx": [
 			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.1, "c": "w1", "c2": "w1h", "unless": "w2"},

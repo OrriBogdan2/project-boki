@@ -1,6 +1,6 @@
 class_name LDFx
 extends Node3D
-## Cinder's own effects (and Bjorn's ult scorch), pooled (one node per match, LDFx.of(m)). Every node is made once
+## Cinder's own effects (plus Bjorn's ult scorch and Grimble's Broadside slugs), pooled (one node per match, LDFx.of(m)). Every node is made once
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look). Grimble's looks
 ## are content/vfx/dredge.json (HeroVfx).
 ##
@@ -8,7 +8,7 @@ extends Node3D
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "pip", "pilot",
 ##                         "glow"; stop calling and they hide
-## - one-shots: scorch, lava
+## - one-shots: scorch, lava, volley (Grimble's Broadside slug: it flies the whole fan, which a data look can't yet)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
@@ -26,8 +26,15 @@ const M_SWIRL := 7
 const M_PIP := 9
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
+const M_DOT := 12
 const WARM_T := 0.05           # s each look of the loading screen's rehearsal (prewarm) stays up
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
+## a Broadside slug's look (LDFx.volley): its dot (half width, m), the soft halo round it, the smear
+## behind it in flight (m long and wide)
+const VOLLEY_HEAD := 0.34
+const VOLLEY_HALO := 0.8
+const VOLLEY_SMEAR := 1.1
+const VOLLEY_WIDTH := 0.55
 const CINDER_GLOW := Color("d8281a")     # Cinder Shot's glow round its flame: her palette's deep red
 const CINDER_SMOKE := Color(Color("2a100a"), 0.7)   # ... and the char its comet tail burns down to
 # Cinder Shot's orb is drawn at its shot's hit radius r (drawn = hit, docs/VFX_QUALITY.md "Scale"). Quad scale per m
@@ -68,6 +75,7 @@ func prewarm(at: Vector3) -> void:
 	var b := at + Vector3.RIGHT
 	scorch(at, 1.0, WARM_T)
 	lava(at, b, 1.0, WARM_T)
+	volley(at, b, w, w, WARM_T, WARM_T)
 	# (not the skull or the shot riders: their colours are baked in when built, so they're built in play)
 	for kind in ["swirl", "pip", "pilot", "glow"]:
 		place("warm_" + kind, kind, at, w, w)
@@ -266,6 +274,66 @@ func _flat(
 func scorch(at: Vector3, r: float, dur := 1.0, col := Color("ff7a2a"), col2 := Color("3a1a2a")) -> void:
 	_flat("scorch", M_SCORCH, at, r, col, col2, dur, randf() * TAU)
 
+## A Broadside slug's look, flown on the effect clock instead of riding its shot (the shot lives about
+## 0.2s, too short to read): a `col` orb with a `dark` core and a smear flies from `from` to `to` over `fly`,
+## then hangs there fading over `hold`, as the source's orbs do.
+func volley(from: Vector3, to: Vector3, col: Color, dark: Color, fly: float, hold: float) -> void:
+	var n := _take("volley", _build_volley)
+	for c in n.get_children():
+		var mt := (c as MeshInstance3D).material_override
+		_param(mt, "color", col)
+		_param(mt, "color2", Color(dark, 0.6) if c.name == "Trail" else dark)
+		_param(mt, "life", 0.0)
+	_param((n.get_node("Halo") as MeshInstance3D).material_override, "color2", col)
+	var e := {"node": n, "t": 0.0, "dur": fly + hold, "kind": "volley", "mat": null}
+	e.merge({"from": from, "to": to, "fly": maxf(0.01, fly), "hold": hold})
+	live.append(e)
+	_pose_volley(e, n)
+
+func _build_volley() -> Node3D:
+	var n := Node3D.new()
+	n.add_child(_rider_part("Halo", Color.WHITE, Color.WHITE, VOLLEY_HALO, 0.55))
+	var head := _mi(_quad_mesh(), _mat(M_DOT, Color.WHITE, Color.WHITE, true))
+	head.name = "Head"
+	head.scale = Vector3.ONE * VOLLEY_HEAD
+	head.sorting_offset = 0.1
+	n.add_child(head)
+	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, Color.WHITE, Color.WHITE))
+	tr.name = "Trail"
+	n.add_child(tr)
+	return n
+
+func _pose_volley(e: Dictionary, n: Node3D) -> void:
+	var t := float(e["t"])
+	var fly := float(e["fly"])
+	var from: Vector3 = e["from"]
+	var to: Vector3 = e["to"]
+	n.global_position = from.lerp(to, clampf(t / fly, 0.0, 1.0))
+	var ahead := Vector3(to.x - from.x, 0, to.z - from.z)
+	if ahead.length() > 0.05:
+		n.basis = Basis.looking_at(ahead.normalized(), Vector3.UP)
+	var fade := clampf((t - fly) / maxf(0.01, float(e["hold"])), 0.0, 1.0)
+	for c in n.get_children():
+		_param((c as MeshInstance3D).material_override, "life", fade)
+	var smear := maxf(0.01, VOLLEY_SMEAR * (1.0 - fade))
+	(n.get_node("Trail") as Node3D).scale = Vector3(VOLLEY_WIDTH, VOLLEY_WIDTH, smear)
+
+## A camera-facing puff that swells and fades (a dash's after-image): mode M_FLAME burns through the fire
+## ramp on its own, M_ORB uses col (the rim) and col2 (the centre).
+func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: float) -> void:
+	var kind := "puff%d" % mode
+	var n := _fx(kind, mode, _quad_mesh(), true)
+	n.global_position = at
+	var e := _play(n, kind, col, col2, dur, Vector3.ONE * scl, n.material_override)
+	e["grow"] = 0.6
+
+## A thin ribbon of smoke rising from `at` (camera-facing, `scl` m half-height, its foot on `at`): it wavers as it
+## climbs, breaks into streaks and fades (Dredge's stack); col its top, col2 its foot, col.a its cover.
+func wisp(at: Vector3, col: Color, col2: Color, scl: float, dur: float) -> void:
+	var n := _fx("wisp", M_SMOKE, _quad_mesh(), true)
+	n.global_position = at + Vector3(0, scl * 0.9, 0)
+	_play(n, "wisp", col, col2, dur, Vector3.ONE * scl, n.material_override)
+
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	var ln := Vector2(b.x - a.x, b.z - a.z).length()
@@ -460,7 +528,10 @@ func _process(_delta: float) -> void:
 		e["t"] = float(e["t"]) + delta
 		var u := clampf(float(e["t"]) / float(e["dur"]), 0.0, 1.0)
 		var mt: ShaderMaterial = e["mat"]
-		_param(mt, "life", u)
+		if String(e["kind"]) == "volley":
+			_pose_volley(e, n)
+		else:
+			_param(mt, "life", u)
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)

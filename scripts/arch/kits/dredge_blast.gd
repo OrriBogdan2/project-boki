@@ -11,6 +11,7 @@ extends RefCounted
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
 const WAVE_COL := [Color("ff9a14"), Color("ffd24a")]     # wave 1 saturated brass, wave 2 pale gold
+const WAVE_DARK := [Color("5a2e04"), Color("5a4a10")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
 ## Clarity (docs/COMBAT_CLARITY.md): the fan is the true area in his gold (dredge.json "color", AimKit's default) at
 ## AimKit's own low fill; nothing that only decorates may stand over the bodies inside it.
@@ -137,7 +138,7 @@ func _wave(i: int) -> void:
 		var d := dir.rotated(ang)
 		if shown:
 			var edge := at + Vector3(d.x, 0, d.y) * speed * life
-			k.vfx("blast_slug", at, d, {"to": edge, "fly": life, "t": life + SLUG_HOLD, "w2": i % 2 == 1})
+			LDFx.of(m).volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
 		var slug: Dictionary = m.shots[-1]

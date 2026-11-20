@@ -430,13 +430,13 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 | Pounce, dive, quake, jump, flex, reel end | no footage timing | clip = kit | same | none |
 
 ## Look and sound
-- Every effect is data (`content/vfx/dredge.json`, HeroVfx, his gold and brass palette; no LDFx): the muzzle flash (`shot`),
+- Every effect is data (`content/vfx/dredge.json`, HeroVfx, his gold and brass palette; only the Broadside slugs stay LDFx): the muzzle flash (`shot`),
   gold slug trails that end in a small brass flare at the stop line (`slug`, `slug_end`), the hook's end and grab flares, a
   dark sludge silhouette of the arm where it runs through rock (`arm_ghost`: an `xray` string drawn over walls), a brass ring
   at his feet while he reels (`reel`), the Anchor slam (`anchor_slam`: the falling fist, a lit gold arc over the cone, cracked
   ground, a ring), gold stun swirls over the foes it stuns (`stunned`), the air smash (`dive`: he rides a fist down over a
-  thin ring the size of the quake; `quake`: rings, flare, scorch and the fist planted), and Broadside's charge spark, its
-  slugs flown out to the fan's edge (`blast_slug`), fist flash and hit flash. Nothing is drawn on a dash but its trail.
+  thin ring the size of the quake; `quake`: rings, flare, scorch and the fist planted), and Broadside's charge spark, fist
+  flash and hit flash (its slugs, which fly the whole fan, stay `LDFx.volley`). Nothing is drawn on a dash but its trail.
   The Anchor's telegraphs (AimKit) are his palette's seafoam `anchor`.
 - His own right arm is stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim
   line so no clip swings it, home down the line after), with sludge drips; the barge tears up clods of turf where the lunge
