@@ -65,6 +65,10 @@ func thief(a) -> void:
 			K.bolts == 3 and hands.size() >= 3, "bolts %d hands %s" % [K.bolts, str(hands)])
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
+	var hv := HeroVfx.of(m)
+	A.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
+			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
+			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
 			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
@@ -858,8 +862,8 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.hold(m, P, 0.95)
 	A.step(m, 0.5)
-	var far := 7.5 * float(K.dash_feel()["dist"])       # the full fling, after the global dash feel
-	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
+	var far := float(K.rmb_def()["lunge"]["dist"][1]) * float(K.dash_feel()["dist"])  # the full fling, after the feel
+	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
