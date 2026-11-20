@@ -10514,3 +10514,4 @@ READY ext/vfx-sable-lmb cef94b99df (Sable LMB cel tracer + lit hit burst; merged
 READY ext/farm-life-seen 6449b834dd23fcfbe6bc35d9bac5a6015ebe4712 (4 Boki garden 5 min: play, nap together, friend greeting, rival squabble all seen; social act log + daytime doze/greet weights; --base-life-check asserts all four, 6/6 runs green)
 READY ext/customizer-spec 2c336ff97ed (docs/design/CUSTOMIZER.md: customizer spec, build list)
 READY ext/ui-hud-clutter-all 6abd87f6eff9f6476e05316f9a2af15e268b4499 (hud-clutter-check --all: 13 Hunters x ult/Fusion x 1920x1080/1280x720 with buff+debuff, 0 failures; no loot row for a common pickup in a fight)
+READY ext/kit-number-golden c929d118ab6 (golden TSV of 1514 kit numbers + health --strict diff, re-bless in docs/ARCHETYPES.md)
