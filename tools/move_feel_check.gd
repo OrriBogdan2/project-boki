@@ -374,6 +374,7 @@ func run(main: Node) -> void:
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	_overheat()         # after every timed row: its ~9 s of level glide would move them
 	load("res://tools/move_feel_turn.gd").new(self).run()      # every kit's 180 stick flip at a run (~30 s, late too)
+	load("res://tools/move_feel_hunters.gd").new(self).run()      # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
@@ -1345,7 +1346,7 @@ const KIT_DASH := {
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
 	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
 				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
-	"gil": {"ground": [6.0, 0.4], "air": [4.25, 0.23], "src": "ours: Ground Swim 6 m/0.4 s, air light long"},
+	"gil": {"ground": [4.5, 0.55], "air": [4.25, 0.23], "src": "owner 11-11: Ground Swim 4.5 m/0.55 s, air light long"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
