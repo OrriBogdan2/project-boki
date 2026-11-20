@@ -415,4 +415,14 @@ static func idle(k: Kin, dt: float, spd: float) -> Vector2:
 			return th.normalized() * spd * minf(1.0, th.length())
 		else:
 			return Vector2.ZERO
+	var lead := TutorialLead.goal(k)
+	# the match tutorial: it runs on ahead to the step's goal, waits, looks back
+	if lead != Vector3.INF and TutorialLead.on(k, lead, dt):
+		k.comp.lead_hold = TutorialLead.holds(k.pos, o.pos, lead)
+		if k.comp.lead_hold:
+			TutorialLead.look_back(k, dt)
+			return Vector2.ZERO
+		return steer(k, lead, dt, maxf(spd, float(TutorialLead.rules()["run_speed"])), false)
+	if k.comp:
+		k.comp.lead_hold = false
 	return steer(k, side_spot(k), dt, spd)
