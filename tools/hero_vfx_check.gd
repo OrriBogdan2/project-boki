@@ -40,7 +40,7 @@ const KIT_FILES := {
 	"mage": ["mage_"],
 	"ostra": ["ostra_"],
 	"rimewright": ["rimewright_"],
-	"tender": ["tender_"],
+	"tender": ["tender_", "care_look"],
 	"thief": ["thief_"]
 }
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -92,6 +92,7 @@ const MEEKO_HURTS := [
 ]
 const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
 const TRAIL_MIN := 0.45  # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
+const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: Kael's red keys stay out of it
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := [
 	"hurt",
@@ -126,6 +127,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+		_looks(arch)
 	var gold: Array = []
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and FileAccess.get_file_as_string("res://scripts/arch/kits/" + f).contains("ffd25a"):
@@ -243,6 +245,22 @@ func _recipes(arch: String) -> void:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 
+## Kael's black-red: his red keys and the model's crack colour stay out of orange and yellow
+## (Cinder owns fire). The Gilded Riposte's gold keys stay gold on purpose.
+func _looks(arch: String) -> void:
+	if arch != "juggernaut":
+		return
+	var pal: Dictionary = HeroVfx.data(arch)["palette"]
+	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
+	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
+			"chain_hot", "chain_hook", "haul", "haul_hot"]:
+		cols[k] = pal.get(k, "")
+	var warm: Array = []
+	for k: String in cols:
+		var c := Color(str(cols[k])) if str(cols[k]).is_valid_html_color() else Color.BLACK
+		if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
+			warm.append(k)
+	ok(warm.is_empty(), "%s: no red key is orange or yellow %s" % [arch, warm])
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
@@ -607,6 +625,13 @@ func _meeko_field() -> void:
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
 		"Meeko's root field: the burst's ring lands on the burst radius"
 	)
+	var hit: Array = d["moves"]["ember_hit"]["fx"]
+	ok(
+		hit.any(func(l): return l["p"] == "chunk") and hit.any(func(l): return l["p"] == "ember"),
+		"Meeko's Ember Cast hit: a leaf chunk-and-spark burst"
+	)
+	var call: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(call.size() == 1 and call[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
 
 
 ## Meeko's heals and hurts read apart (COMBAT_CLARITY): every heal look is her leaf green family and its motes rise,
