@@ -3,7 +3,8 @@ extends RefCounted
 ## Counts what every Hero move (content/vfx) and every shared Fx call site (scripts/) asks for, then builds a
 ## 30-Hunter match at each quality preset and adds the worst a fight can pile on top of what the world
 ## already draws: the Hero VFX cap and the full Fx burst and spark pools. Each preset must stay in budget,
-## each one down must draw fewer particles, and Ultra must draw what High draws.
+## each one down must draw fewer particles, and Ultra at least what High draws (its longer draw distance keeps
+## more of the region motes running, ParticleCount.pace).
 
 const BUDGET := 4000            # particles on screen at once, the cap
 const MOVE_MAX := 160           # particles one Hero move may ask for at once, at full amount
@@ -31,7 +32,6 @@ func run(main: Node) -> void:
 		var b: int = worst[order[i]]
 		var same: bool = a == b and order[i] == "ultra"
 		ok(a < b or same, "%s draws less than %s (%d, %d)" % [order[i - 1], order[i], a, b])
-	ok(worst["high"] == worst["ultra"], "High and Ultra draw the same (%d, %d)" % [worst["high"], worst["ultra"]])
 	print("PARTICLES %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
