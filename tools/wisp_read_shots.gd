@@ -74,7 +74,11 @@ func _fight_shots() -> void:
 			var n := SHOT_AT.size() - shots.size()
 			shots.pop_front()
 			main.get_viewport().get_texture().get_image().save_png(dir.path_join("fight_%d.png" % n))
-			print("WISPREAD shot %d at t=%.1f" % [n, t]),
+			print("WISPREAD shot %d at t=%.1f" % [n, t])
+			for k in m.kins:
+				if k.wisp and k.state == "shoulder":
+					var at := m.cam.unproject_position(k.global_position)
+					print("WISPAT %d %s team=%d %d %d" % [n, k.species, k.owner_h.team, at.x, at.y]),
 		func(_t: float): return _centre(squad_a + squad_b))
 
 ## The screen rectangle of a body `w` x `h` m standing on `feet`.
@@ -92,7 +96,8 @@ func _measure() -> void:
 		if not k.wisp or k.state != "shoulder" or k.owner_h == null:
 			continue
 		var c := m.cam.unproject_position(k.global_position)
-		var px := absf(m.cam.unproject_position(k.global_position + Vector3(BokiWispLook.BODY_RADIUS * KinWisp.SIZE, 0, 0)).x - c.x)
+		var edge := k.global_position + Vector3(BokiWispLook.BODY_RADIUS * KinWisp.SIZE, 0, 0)
+		var px := absf(m.cam.unproject_position(edge).x - c.x)
 		var box := Rect2(c - Vector2(px, px), Vector2(px, px) * 2.0)
 		var depth := m.cam.global_position.distance_to(k.global_position)
 		sizes.append(px * 2.0)
