@@ -416,6 +416,7 @@ func zedran(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
 	_guard_attacks(m, P, T, T2, home)
+	_guard_edges(m, P, T, T2, home)
 	await _recovery_exits()
 	_recovery(m, P, T, home)
 	await A.done(m)
@@ -532,6 +533,91 @@ func _guard_attacks(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -
 	A.ok("juggernaut X guard: the strike hits a foe 3.4m ahead and misses one 4.6m ahead",
 			float(near["dealt"]) > 0.0 and float(far["dealt"]) == 0.0,
 			"3.4m %.1f, 4.6m %.1f" % [near["dealt"], far["dealt"]])
+
+## The 0.65 s guard's edges (docs/heroes/juggernaut.md item 13). The source row is "0.65 s invulnerable, then the
+## strike": a hit one tick inside the guard is blocked, a hit one tick past it (the 0.1 s strike, then the 0.35 s
+## recovery) lands in full, no block counted and no +20%. Crowd control that is not a hit has no source row, so
+## main's behaviour is pinned as ours: a pull is refused only while the guard stands (Blockers.body_stops), a wall
+## slam from a knock that began before the guard loses its 10 damage to the guard but keeps its stun.
+func _guard_edges(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var d: Dictionary = P.ak.x_def()
+	var g := float(d["guard"])
+	var base := float(d["dmg"])
+	var tick: float = A.DT * 2.0
+	var inside := _guard_case(m, P, T, T2, home, "rifle", g - tick)
+	A.ok("juggernaut X guard edge: a shot %.2fs before the guard ends is blocked" % tick,
+			float(inside["in_guard"]) == 0.0, "in guard %.0f after %.0f" % [inside["in_guard"], inside["after"]])
+	var at_strike := _guard_case(m, P, T, T2, home, "stun", g + tick)
+	A.ok("juggernaut X guard edge: a hit in the strike lands in full (8 damage, the stun applies, nothing blocked)",
+			float(at_strike["in_guard"]) == 0.0 and absf(float(at_strike["after"]) - 8.0) < 0.01
+			and float(at_strike["stun"]) > 0.0 and absf(float(at_strike["dealt"]) - base) < 0.5,
+			"damage %.1f stun %.2f strike %.1f (base %.0f)" % [at_strike["after"], at_strike["stun"],
+					at_strike["dealt"], base])
+	var in_rec := _guard_case(m, P, T, T2, home, "stun", g + float(d["strike_t"]) + 0.1)
+	A.ok("juggernaut X guard edge: a hit in the recovery lands in full (8 damage, the stun applies)",
+			float(in_rec["in_guard"]) == 0.0 and absf(float(in_rec["after"]) - 8.0) < 0.01
+			and float(in_rec["stun"]) > 0.0,
+			"damage %.1f stun %.2f" % [in_rec["after"], in_rec["stun"]])
+	var shots := _guard_case(m, P, T, T2, home, "rifle", g + 0.02)
+	A.ok("juggernaut X guard edge: a stream from the strip's start to the recovery takes 3 x 6 in full",
+			absf(float(shots["after"]) - 18.0) < 0.01 and float(shots["in_guard"]) == 0.0,
+			"after %.1f" % shots["after"])
+	_guard_pulls(m, P, T2, home)
+	_guard_wall_slam(m, P, T, T2, home)
+
+## A Dredge-style pull asks Blockers.body_stops first: refused while the guard stands, allowed in the strike and the
+## recovery (no source row for pulls; ours, as main).
+func _guard_pulls(m: Match, P: Hunter, T2: Hunter, home: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	var d: Dictionary = K.x_def()
+	A.step(m, 1.5)
+	A.fresh(P)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	K.cd["x"] = 0.0
+	var t0 := m.time
+	HunterKeys.ult_pressed(P)
+	var seen := {}
+	var g := float(d["guard"])
+	for mark in [["guard", 0.3], ["strike", g + 0.05], ["recover", g + float(d["strike_t"]) + 0.1]]:
+		while m.time - t0 < float(mark[1]):
+			m.step(A.DT)
+		seen[mark[0]] = Blockers.body_stops(P, T2)
+	A.ok("juggernaut X guard edge: a pull (Grimble's reel) is refused in the guard only, not in the strike or recovery",
+			seen["guard"] and not seen["strike"] and not seen["recover"], str(seen))
+
+## A knock from before the guard that reaches a wall inside it: ours (no source row), as main: the guard takes the
+## wall's 10 damage; the slam's stun is set outside the hit and still lands.
+func _guard_wall_slam(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	A.step(m, 1.5)
+	A.fresh(P)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.hp = P.max_hp
+	P.wslam_t = 0.0
+	T.teleport(home + Vector3(-6.0, 0, -3.0))
+	var w := HeroZones.rock(m, T2, home + Vector3(3.2, 0, 0), Vector2(1, 0), "gwall", 4.0, 30.0, 999.0, false)
+	K.cd["x"] = 0.0
+	P.hurt(1.0, T2, {"src": "abil", "ab": "lmb", "kb": Vector2(14.0, 0.0), "lift": 0.5})
+	var t0 := m.time
+	HunterKeys.ult_pressed(P)
+	var slam_in_guard := false
+	var stun := 0.0
+	var wall_dmg := 0.0
+	var prev := P.wslam_t
+	while m.time - t0 < 0.9:
+		var hp0 := P.hp
+		m.step(A.DT)
+		if P.wslam_t > prev and K.riposte.guarding():
+			slam_in_guard = true
+			wall_dmg = hp0 - P.hp
+		prev = P.wslam_t
+		stun = maxf(stun, P.stun_t)
+	m.verbs.walls.erase(w)
+	A.ok("juggernaut X guard edge: a wall slam in the guard loses its damage, keeps its stun",
+			slam_in_guard and wall_dmg == 0.0 and stun > 0.4,
+			"slam in guard %s, damage %.1f, stun %.2f, cast %d" % [slam_in_guard, wall_dmg, stun, K.riposte.casts])
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:
