@@ -37,6 +37,8 @@ extends RefCounted
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
+##      (tools/ability_beat_sfx_check.gd; two short training matches)
 ## Never touches the save.
 ##  15. the creator and the clan screens: the creator's Random plays the dice, dragging you round ticks once per
 ##      notch either way, and the guild registry's Found it, Join and Leave each play their own sound once
@@ -147,6 +149,7 @@ func run(main: Node) -> void:
 	_hostile()
 	_level_cues()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	load("res://tools/ability_beat_sfx_check.gd").new().run(main, ok)
 	await _held_fire(main)
 	_hit_ticks()
 	_boss_moves()
