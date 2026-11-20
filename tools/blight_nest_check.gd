@@ -296,8 +296,7 @@ func _shriek_and_home(main: Node) -> void:
 	for h in m.hunters:
 		h.teleport(m.world.spawns[-1])
 	if pl.flat_dist(s) > 32.0:
-		s.st = "idle"
-		s.tgt = null
+		s.calm("check")
 		s.heard = Vector3.INF
 		s.idle_t = 25.0
 		bl._despawn_tick()
