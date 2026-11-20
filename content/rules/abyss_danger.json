@@ -1,0 +1,11 @@
+{
+	"_doc": "How the abyss warns you as you fall (scripts/match/abyss_fx.gd danger_depth: the red tint and vignette; scripts/match/abyss_fall_sfx.gd warn_db / warn_rate: the heartbeat warning). Depths are metres under the lowest island lip around you. Nothing shows until start_depth, so a small dip under an island's height is free; from there the danger rises smoothly (curve = share of the way to the point of no return, to the power curve) to 1 at the kill depth (Hunter.abyss_kill_y). Rising faster than the glider lift (AbyssFx.RISE_OFF) or climbing back above start_depth lets go. warn_*: the warning heartbeat starts at danger warn_from, at warn_db_min dB and warn_rate_min beats a second, and rises to warn_db_max dB and warn_rate_max at full danger. edge_from: danger where the crimson screen-edge rings start (they ramp up to full at 1).",
+	"start_depth": 4.0,
+	"curve": 1.5,
+	"warn_from": 0.02,
+	"warn_db_min": -20.0,
+	"warn_db_max": -2.0,
+	"warn_rate_min": 1.2,
+	"warn_rate_max": 4.6,
+	"edge_from": 0.1
+}
