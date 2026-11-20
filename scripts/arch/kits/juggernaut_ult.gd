@@ -185,7 +185,8 @@ func _land(d: Dictionary) -> void:
 			continue
 		if not AimMode.in_lane(from, dir, float(d["len"]), float(d["width"]), f.pos, f.r):
 			continue
-		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "kb": dir * 6.0, "crit": true}
+		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "crit": true,
+				"kb": dir * float(d.get("strike_kb", 0.0))}
 		var dealt: float = f.hurt(dmg, h, hit)
 		if dealt <= 0.0:
 			continue
@@ -209,7 +210,7 @@ func _land(d: Dictionary) -> void:
 func _impact(f: Ent, dir: Vector2) -> void:
 	var h := k.h
 	k.vfx("riposte_hit", f.pos, dir)
-	Shake.incoming_big(k.m, f.pos, 0.6, h)
+	Shake.incoming_big(k.m, f.pos, ImpactWeight.shake("heavy"), h)
 
 ## A hunter who was up and went down to the cleave, or a monster it killed: it is ready again at once.
 func _reset() -> void:

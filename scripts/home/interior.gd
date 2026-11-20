@@ -265,7 +265,8 @@ func _process(delta: float) -> void:
 		dec.tick(d)
 	else:
 		_find_interact()
-		if panel_open == "" and not Overlay.is_open() and Input.is_action_just_pressed("interact") and not interact.is_empty():
+		InteractGate.track(panel_open == "" and not Overlay.is_open())
+		if InteractGate.pressed() and not interact.is_empty():
 			_use(interact)
 
 func _move_player(d: float) -> void:

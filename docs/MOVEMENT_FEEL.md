@@ -622,7 +622,7 @@ the reference's air control is the one model in a match: the keys add accelerati
 | `juggernaut_drop` start, hang, dive, impact | zero, held, then plunged | Meteor Drop owns the body | Kael Air RMB: cursor disc |
 | `pin_ult._loose` | `vel -= aim * 2.5` | recoil, additive | Hem R: 3 empowered shots |
 | `pin_spirit.end` | zero after the snap back | teleport to the walk's entry | Hem Dash: Phase Walk |
-| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 6.8 m/.28 s |
+| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 3.4 m/.28 s (owner 11-17, was 6.8 m) |
 | `ashwick_kit._bash_impact` | bounce back off the foe | recoil, contact stop | Cinder Dash: stops on first foe |
 | `ashwick_jet._leap` | flight speed x `Loco.dash_jump_keep` | flight exit into a jump | Cinder R: fly forward |
 | `ashwick_jet._land` | speed x0.3 | grounded (not air) | Cinder R |
@@ -1257,6 +1257,21 @@ no travel of his own) must set him down below the edge.
 ## The owner's movement rules, every Hunter (`--move-rule-guard-check`)
 `tools/move_rule_guard_check.gd` drives each of the 13 Hunters with a player's keys through the rules in briefs/DECISIONS.md that kept regressing, one `RULE ok|FAIL <hunter> | <DECISIONS line> | <measured>` row each: walking (and crouched) off a rim falls; Space held from the jump never glides, a second press does; opening the glider (from a jump, a fall, at rest) adds no horizontal speed and no lift; a fresh Space press 0.03 s and 0.15 s into an air Shift has the glider open within 2 steps, and the glide after it never jumps more than 2 m/s in a step; an overheated glider climbs back to the lip from 12 m at 0.4-0.62 of the full lift; no fall (free, glided, a dive, a landing) leaves horizontal speed, and a glide steers the same opened at rest or falling 14 m/s; WASD in the air beats the old farm's exp 6/s, turns a 5 m/s backward drift within 0.2 s and keeps a sideways speed; the farm avatar as each Hunter gives the Training Area's air and glide-open trace. Reds at 0.24.6 (docs/DEBT.md): Cinder's poof, Tenzo's Rock Hop, Sparkle's wire. Rows red on main and not yet fixed print `open` (the `OPEN` list, docs/DEBT.md).
 
+Three more DECISIONS "Movement and combat feel" lines, one row per Hunter each (ext/rule-guard-more, 2026-11-20). They reuse the older audits' trials, so they can't drift from them:
+- "A hold animation never shows without the hold input": LMB, RMB, E and X tapped 1, 2, 4 steps and 0.15 s (`--hold-pose-check`'s taps). No hold clip on a frame the key is down, and none more than 0.25 s after it goes up.
+- "Dashes follow WASD by default": Shift with S, then D, held on the press, cursor 8 m ahead, the default setting. The body travels at least 1 m along the key in 0.6 s and strays less than half of that sideways.
+- "No bursts, rings or discs on dashes, landings or resets": a dash, an air dash, a soft and a hard landing and a takedown reset (`--move-fx-check`'s events) add no Fx ring, burst or big flash and no Hero-look ring, disc or burst.
+
+Rows that print `skip` (by design, not counted):
+- Archer's Heavy Shot draw (`arc_heavy_wind`) and Bulwark's guard arm (`bul_guard`) show on the RMB press, for 0.02-0.07 s on a 1-4 step tap. Both are hold-only moves (no tap move). The pose is the press's tick-0 answer (`--input-latency-check`, 3a4e33c748), and a tap drops it on the release (0.00 s past the key). Both are listed in `hold_pose_check.gd` `TAP_POSE_OPEN`, so `--hold-pose-check` (6 red rows on main a6eeb053b) agrees. The other way to fix it: start them HOLD_POSE_T into the hold, which makes RMB latency 7 ticks.
+- Dolm, Mage and Ostra: their Shift is aimed movement (rock hop, blink, swap) that goes to the cursor (`dash_dir_check.gd` `AIMED`). Measured: Dolm S -2.8 m, Mage S -6.8 m, Ostra 0 m (no swap target).
+- Bulwark's dash and air dash draw rings and bursts. They are counted as clean because the 360 Smash is an area move (`move_fx_check.gd` `AREA`; "a ground ring means gameplay").
+- Every other Hunter is ok on all three rows.
+
+FAIL rows on main a6eeb053b, from the older rule lines. These are not this change: main's own check gives `RULE DONE, failures: 14` and this branch gives the same 14.
+- "One shared movement profile for all modes": all 13 Hunters. The farm avatar's air speed after the glide press sheds faster than in the Training Area, for example 5.28 vs 5.52 m/s at 0.3 s (Archer). Rimewright's already differs at 0.2 s (5.16 vs 5.20). The farm's `home.gd` `_move_player` air step no longer matches `Hunter`'s. Owner: the feel lane.
+- "air control as REFERENCE (never overwrite air velocity)": Bulwark. In the glide out of an air Shift, one step changes by 9.75 m/s (limit 2). The cause has not been traced yet. Owner: the feel lane.
+
 ## Golden traces: nothing changes how a Hunter moves by accident
 
 `--feel-golden-check` (`tools/feel_golden_check.gd`) catches silent feel changes from any branch. Each of the 12 Hunters plays nine fixed input scripts on the real match step at 60 Hz, on a flat square with a 5-terrace wall to the east: run, stop, jump, dash tap, dash hold, wall kick, double-press glide, dive, crouch walk. Each script is 2.5 s. Position (relative to the start) and velocity are sampled every 0.1 s and stored in `content/rules/feel_golden.json`. The check replays the scripts and fails if any sample is more than 0.05 m or 0.1 m/s off. It is deterministic (fixed steps, fixed seed) and never touches the save.
@@ -1427,4 +1442,20 @@ The source data settles it (no footage of a ground reversal exists in the report
 
 Asserted per kit (`tools/move_feel_turn.gd`): zero and 95%-back within 1 step of the source rule, the same with the cursor flipped, the body 180 within 9 steps, no body turn with the cursor held. `run_turn_err_frames` <= 1, `run_turn_full_t` <= 0.22 s, `run_turn_face_t` 0.12-0.17 s.
 
-Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip): with the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The steady run before and after reads 10-22% for most Hunters (the calibration), but the turn itself slides 52-119% (held) and 35-128% (flipped): the loco blend (ease 12/s) trails a reversal that takes 0.1 s to zero. No Hunter is under `MAX_SLIDE` 25% yet, so the audit prints OPEN lines and only fails past `TURN_CEIL` 140% (today's worst, archer 119-128%, plus a margin). Backlog: "run turn slide".
+Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip; the model is fed the world velocity and its real facing, so a Hunter that twists its legs under the aim holds them as in game, and a foot counts as planted in the low 30% of its height over the steady run before the flip). With the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The loco blend (ease 12/s, 5/s as the speed falls) trails a reversal that takes 0.1 s to zero, and on its way through the idle it drags the planted foot. The fix locks the feet instead of chasing the blend (`WardenStride._turn`, no `hunter_move.json` number changed): a speed falling faster than 1.2x the walking brake (`HunterMove.brake_rate`) is the keys pushing against the run, and from there until the blend is within 0.2 of its goal (at most 0.45 s) every foot the loop puts down is held on the ground (its spot carried back along the body's velocity and round against its turn) until the loop lifts it 0.15 m (any lift once the blend has caught up), and the legs drop the twist-hold while it lasts. Before (main 2026-11-20, same audit) and after, held / flipped:
+
+| Hunter | Steady run | Held before | Held after | Flipped before | Flipped after |
+|---|---|---|---|---|---|
+| archer | 98% | 121% | 104% | 128% | 117% |
+| juggernaut | 18% | 83% | 35% | 48% | 30% |
+| gunslinger | 12% | 67% | 40% | 78% | 50% |
+| bulwark | 53% | 79% | 88% | 116% | 101% |
+| rimewright | 67% | 86% | 20% | 79% | 55% |
+| ashwick | 16% | 52% | 29% | 50% | 23% |
+| dolm | 52% | 97% | 61% | 82% | 61% |
+| mage | 25% | 92% | 57% | 69% | 29% |
+| dredge | 15% | 84% | 58% | 68% | 40% |
+| tender | 37% | 67% | 58% | 59% | 26% |
+| thief | 23% | 83% | 65% | 64% | 37% |
+
+Every Hunter but bulwark's held flip (79 to 88%) slides less; the steady run is unchanged (it bounds what any lock can do: archer's own run slides 98%). In game (`--gameplay-media --media-clip=15 --media-loco=turn --media-log`, world feet at 30 fps) gunslinger's flip went 72 to 50% (held) and 84 to 59% (flipped). No Hunter is under `MAX_SLIDE` 25% on both yet, so the audit prints OPEN lines and fails past `TURN_CEIL` 125% (today's worst, archer flipped 117%, plus a margin). Backlog: "run turn slide" (the loops' own run and backpedal slide; bulwark's held flip).

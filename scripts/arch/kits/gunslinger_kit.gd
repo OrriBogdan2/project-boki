@@ -648,7 +648,7 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
 ## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
-	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	victim.flash_t = maxf(victim.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)

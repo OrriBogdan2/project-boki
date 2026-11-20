@@ -161,6 +161,7 @@ const CHECKS := {
 	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
+	"--cinder-shift-check": ["res://tools/cinder_shift_check.gd", "cinder_shift_check", null],      # owner 11-17: one Shift, metres
 	"--aim-latency-check": ["res://tools/aim_latency_check.gd", "aim_latency_check", null],  # aim under a mouse move
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
 	"--ring-stack-shots": ["res://tools/ring_stack_shots.gd", "ring_stack_shots", null],      # GPU, --shots-dir=
@@ -174,6 +175,7 @@ const CHECKS := {
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],  # one movement model
 	# the owner's movement rules in DECISIONS, every Hunter
 	"--move-rule-guard-check": ["res://tools/move_rule_guard_check.gd", "move_rule_guard_check", null],
+	"--fps-feel-check": ["res://tools/fps_feel_check.gd", "fps_feel_check", null],      # same movement at 30/60/144 fps
 	"--fsm-check": ["res://tools/fsm_check.gd", "fsm_check", null],      # every Fsm's table (M1)
 	"--move-rate-check": ["res://tools/move_rate_check.gd", "move_rate_check", null],  # 30/60/144 fps
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],  # item 63
@@ -845,6 +847,7 @@ const CHECKS := {
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
 	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],      # --shots-dir=<dir>
+	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
@@ -864,6 +867,7 @@ const CHECKS := {
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],  # MapDetail: default vs hold
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],  # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
+	"--zone-next-shots": ["res://tools/zone_next_shots.gd", "zone_next_shots", null],  # GPU, --shots-dir=
 	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],  # --shots-dir=<dir>
 	"--map-hover-check": ["res://tools/map_hover_check.gd", "map_hover_check", null],      # MapHover
 	"--map-clear-shots": ["res://tools/map_clear_shots.gd", "map_clear_shots", null],      # --shots-dir=<dir>
@@ -936,6 +940,7 @@ const CHECKS := {
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
+	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
 	"--gil-rmb-video": ["res://tools/gil_rmb_video.gd", "gil_rmb_video", null],      # Gil RMB press + R leap-off (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],

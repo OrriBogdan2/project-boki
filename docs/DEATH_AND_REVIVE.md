@@ -109,7 +109,7 @@ All names and multipliers are placeholders.
 **Test scene:** a blue teammate bot, a red enemy bot and a green revive beacon.
 - F6 knocks yourself down.
 - Hold E for deathboxes and executes.
-- HUD shows life state, wisp %, revive % and sickness: a heart status with its seconds on the plate and the squad row, carried in the hunter snapshot (`HunterNet`, Net 0.24.19). The Hearth Lamp (belt item) sets a beacon where you stand (`Beacons.lamp`, the "bcn" "lamp" event). `--hearth-lamp-check`.
+- HUD shows life state, wisp %, revive % and sickness: a heart status with its seconds on the plate and the squad row, carried in the hunter snapshot (`HunterNet`, Net 0.24.20). The Hearth Lamp (belt item) sets a beacon where you stand (`Beacons.lamp`, the "bcn" "lamp" event). `--hearth-lamp-check`.
 
 **Headless results** (`tests/life_sim.gd`):
 
