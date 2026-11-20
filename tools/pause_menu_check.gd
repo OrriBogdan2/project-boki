@@ -44,7 +44,7 @@ func run(mn: Node) -> void:
 		await _place(p, p, always + ["Save and leave", "Inventory", "Save Files"])
 	var matches := {
 		"training": [{"training": true, "practice": true}, ["Leave", "Change Hunter"]],
-		"tutorial": [{"tutorial": true}, ["Skip the tutorial", "Change Hunter"]],
+		"tutorial": [{"tutorial": true}, ["Skip tutorial", "Change Hunter"]],
 		"arena": [Match.arena_opts("gunslinger"), ["Leave", "Change Hunter"]],
 		"match": [{"teams": 2}, ["Leave match"]],
 	}
