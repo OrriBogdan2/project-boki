@@ -28,8 +28,8 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
-const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends ("lead" -0.45 at "rate" 2.2 in
-                                       # kael.json): a longer Lunge holds it there to its stop, so the thrust lands on it
+const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends (kael.json "lead" -0.45 at
+                                       # "rate" 2.2): a longer Lunge holds it there to its stop, thrusting on the stop
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
