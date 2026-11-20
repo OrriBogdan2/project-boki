@@ -858,8 +858,8 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.hold(m, P, 0.95)
 	A.step(m, 0.5)
-	var far := 7.5 * float(K.dash_feel()["dist"])       # the full fling, after the global dash feel
-	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
+	var far := float(K.rmb_def()["lunge"]["dist"][1]) * float(K.dash_feel()["dist"])  # the full fling, after the feel
+	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
