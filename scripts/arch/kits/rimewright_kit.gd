@@ -844,7 +844,7 @@ func _detonate(at: Vector3) -> void:
 	vfx("spear_burst", at, null, {"r": rr})
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, 0.6, h)
+	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -1114,6 +1114,11 @@ func icb() -> IceBody:
 
 
 func ult_running() -> bool:
+	return not rime.is_empty()
+
+
+## The Rimelock statue roots her every frame (_rime_hold_body): her own hold, not a status.
+func holds_still() -> bool:
 	return not rime.is_empty()
 
 
