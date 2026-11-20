@@ -35,8 +35,9 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `quest_tracker.gd` (`QuestTracker`, drawn by `WaysOutHud.draw`) | Ways Out: while your squad is on a quest seat (sealed in with the Sealed Lair's boss, or charging the Uplink), a 28 px card under the strip, above the message lane: the quest in plain words, your progress (charge, or the boss's health taken off), the leading rival squad's progress on a quest seat as a thin second bar, the distance to the site. Hidden otherwise, when you are out, and while the boss bar is up. `--ways-out-hud-check` section 8 |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 2 at once (1 in a fight), the most important first, short lives (2 s at most in a fight); a small (`toast_small`) line only shows on an empty lane and is dropped in a fight; a card slides aside off your hunter (`avoid`); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check`, `--hunter-zone-check` |
+| `top_stack.gd` (`TopStack`) | the top-centre of a real match is one column: Ways Out strip, then the one-line banner (the first-match guide, else the crouch hint), then the message lane. The lane sits under the banner and holds its lines while the banner is fresh (`Tutorial.CARD_T`; URGENT passes); the guide's Boki-key line takes the Boki-key hint's place (`Match.tip_once("ability")`). Check: `--prompt-queue-check` |
 | `hunter_zone.gd` (`HunterZone`) | the screen area over your own hunter (feet to plate): floating numbers and words (`Fx`), message cards and the knock banner slide sideways out of it, plate labels fade under it (`LabelSpacing`). Nothing prints over your hunter. Check: `--hunter-zone-check`; shots: `--hunter-zone-shots` |
-| `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
+| `ops/hud-budget.json` | the combat HUD's absolute element budget (Control nodes, labels, toasts, banners, loot rows, drawn panels, total), the merge gate's "not more than today" bar. A change that adds a HUD element must raise it on purpose (owner OK). Check: `--hud-clutter-check` (`--hunter=<id>` plays one Hunter mid-cast and mid-ult with a Boki out and a teammate down; also fails if any HUD rect covers the hunter's screen box; saves a screenshot when run with a renderer) |
 | `loot_feed.gd` (`LootFeed`, one on `hud.loot`) | what you just picked up (gems, seeds, belt items, gear worn or packed off the ground): bottom right over the slot row, icon + name + count per row, the same thing again within 2 s adds to its row, at most 4 rows, each fades out by 3 s; its own pickup tick pitched by rarity, silent while the lane keeps its fight budget except Rare and up. Counts as the `loot` HUD group only while it has rows. Check: `--loot-feed-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips (the count beside them past a full row: Sable's uncapped Marks) and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it and their squad (side by side, each in their own colour) (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks, Kael's Slam window and Warchain hold, Gil's splash marks toward a Beach). No state on a foe, no tag: Lace, Albert, Tenzo, Zed and Motley have none (their payoffs are instant hits or self buffs). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
@@ -86,7 +87,10 @@ never from the kit:
 Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
 Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
 smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
-the draw cost doesn't grow with the sources. Check: `--number-looks-check`.
+the draw cost doesn't grow with the sources. Numbers on one spot keep apart (`NumSpacing`): each frame a smaller
+number printed over a bigger one (same size: the newer over the older) slides sideways just clear of it, so a focused
+target's rolled hit, tick, heal and a tick floating off never pile up; at most 3 over one spot in a trio focus.
+Checks: `--number-looks-check`, `--dmg-number-check`; shots: `--dmg-number-shots` (GPU, `dmgnum_2_trio_crop`).
 
 ## Boki HUD: decision, state, gaps
 
@@ -339,11 +343,11 @@ nearly twice the budget.
 
 **Shown before it matters** (at 0-30 s of a fresh save): the four top-right counters (squads, kills, knocks, gems, all 0), the
 "Your kit" card, the gear row (four empty dots), Q/V "Glove (empty)", the locked X box (LV 6) and R tile, belt slots 3 and 4
-(empty), the "Quick Feed" perk line, the kill feed's truce and knock lines for fights far away, the minimap's "Next train"
+(empty), the "Quick Feed" perk line, the kill feed's knock lines for fights far away (truce lines gone 11-20), the minimap's "Next train"
 label.
 
-**Jargon before it is explained:** UNLOCK (on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
-AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, DOCKS IN, SIGHT 85%, DUSK, "made a truce", "broke the truce", Quick
+**Jargon before it is explained:** ~~UNLOCK~~ (now "Spend point", on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
+AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, ~~DOCKS IN~~ (gone), SIGHT 85%, DUSK, ~~"made a truce", "broke the truce"~~ (off the feed), Quick
 Feed, "0 seeds · Box 0/3", the portrait caption "The Hired Gunslinger Medium", "went down / is out", the toast "Frostreach: ...
 hits slow you, and they shatter when they die".
 
@@ -384,9 +388,11 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
 
 ### Not fixed (suggestions, parity first)
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
-  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
+  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line.
 - `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
-- Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
+- Plain words (done 11-20): the locked-slot tag says "Spend point" (`HudSlot.POINT_TAG`, fitted to the tile width), the kill
+  feed no longer prints the truce lines (`truce.gd` keeps them in `events`; the toast for your own truce stays). "DOCKS IN" is
+  already gone from the code (the Ways Out strip replaced the dock clock).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
   title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and

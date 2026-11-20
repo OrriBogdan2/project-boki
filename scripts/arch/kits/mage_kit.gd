@@ -12,7 +12,7 @@ extends ArchKit
 
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
-const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
+const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
 const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
@@ -535,6 +535,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
+	m.sfx("mage_wire_hit", f.pos, -4.0)
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -558,6 +559,13 @@ func rmb_charge_full() -> float:
 
 func rmb_auto_t() -> float:
 	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
+
+## Holding the Storm Rod slows her by rmb.self_slow, ramping in over rmb.slow_in s (never a snap).
+func move_k() -> float:
+	if not rmb_down:
+		return 1.0
+	var rd := rmb_def()
+	return 1.0 - float(rd["self_slow"]) * clampf(rmb_t / float(rd["slow_in"]), 0.0, 1.0)
 
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
@@ -670,7 +678,9 @@ func _coil(k: float) -> void:
 	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if not done["hit"]:
 			done["hit"] = true
-			_coil_hit(f, dir, k)}))
+			_coil_hit(f, dir, k),
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
+			if e == null and not done["hit"]: m.sfx("mage_rod_fizzle", at, -5.0)}))
 	var thrown: bool = shots.size() > n0 and shots[-1]["by"] == h
 	vfx("rmb", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir, {"len": rng, "loose": not thrown})
 	if thrown:
