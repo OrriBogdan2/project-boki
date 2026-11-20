@@ -1,5 +1,78 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+## 2026-11-20b: skirt HANGS from the rig's own `skirt` bone; seam welds; no flecks (ext/hunter-fix-hem-1118, after art-gate FAIL)
+Gate (send-1120b): the hem still fanned into long strands behind a leg (f602 f604 f560 f563 f566), the skirt ran off as a
+flat slab in crouch_l/crouch_b, and specks floated by the hips. Two weight-only passes failed (2 FAIL rule), so this one changes method:
+1. Hang bone. The rig already has `skirt` (child of `hips`, contract bone) that carried no weight and whose track was an
+   identity constant in every clip. Its rotation track (same key times, nothing else) is re-keyed per clip so its down axis
+   points along normalize(down + 0.25 x mean thigh direction) in model space (clamped 75 deg from where the hips carry it,
+   one 1-2-1 smoothing pass, loops closed; faded out as the hips tip from 55 to 85 deg, so in a roll, flick or dive the
+   skirt goes with her): the skirt hangs under a leaning torso instead of riding the hips or a raised
+   thigh. No body bone, key time or clip length changes.
+2. Skin. Skirt cloth (same mask as 11-20) = 11-20 field with the thigh share x0.15, the hips share moving to `skirt`
+   from 0.97 m down to 0.65 m; verts within 2-15 cm of a leg axis blend to their own weights; hip fix above 0.98 m kept.
+3. Flecks. Since the 11-19 passes, seam copies of one vertex carried different weights, so the mesh opened in motion into ~31
+   loose flecks per frame (the gate's specks). The 27 small pieces (< 30 verts) the skin holds apart from all round them
+   now take the weights of the piece they share the most rim with (173 verts); the two 11-19 hip caps stay. (Averaging every
+   seam pair instead was tried: it ties the hanging skirt to leg skin and gives 1.04% edges over 3x, rejected.)
+4. `content/rules/warden_anim/hem.json` "upper" also takes `skirt` with `hips`, so an upper-body move hangs the skirt
+   from the hips it plays.
+Positions, UVs, normals, texture, triangles, skeleton, bone names, clip set and timing unchanged; bind pose identical.
+Open: roll and pet still show a hanging strand curtain or a strand to the ground (no clear gain over live there).
+Numbers LIVE / 11-20 FIX / NOW (every clip; ~/gens/hunter-fix-1118/reviews/hem-evidence-1120b/scripts): hem lift from
+straight down p95, median clip 41.6 / 14.7 / 3.8 deg (crouch_b 47.7 / 31.5 / 11.9, run_b 41.1 / 19.9 / 9.1, walk_b
+26.3 / 15.1 / 7.6); neighbouring-strand split p99 median 5.77 / 0.83 / 0.66 cm, max 28.8 / 5.6 / 4.9 cm; edges over 3x
+252 (0.558%) / 7 (0.015%) / 2 (0.004%); Godot --stretch-check worst 17.81 / 4.37 / 4.08 (roll); loose pieces per frame 0 / 31 / 0 (plus the two
+11-19 hip caps, which stay on the hip); skirt verts inside a leg (median clip) 17.3 / 6.8 / 11.9% (a leg that steps back
+now passes between the hanging strands instead of dragging them). Script: hem_hang.py (`WT=0.25 KT=0.15 LEG_OUT=0.15 HANG_FULL=0.65`).
+
+## 2026-11-20: skirt hem on one smooth hips->thighs field (ext/hunter-fix-hem-1118, after art-gate FAIL on match_loops.jpg)
+Gate: the 11-19 skirt still broke into long fanned strands (f602 f604 f560 f563 f566) and specks at the hip cut. Cause in
+numbers: that build bound the skirt ~90% to the thighs from waist to hem, and neighbouring strands carried different
+thigh shares (sd 0.2), so a raised thigh lifted half the hem into a horizontal fan and pulled strands apart. New method
+(not a re-weight pass): every skirt/hem vertex (cloth-v95b + skirt leather-v95b below 1.0 m, off the leg skin/boots,
+not the crossed back blades) takes its weights from one analytic field of its rest position: hips (1-T), thighs T split
+L/R by a smoothstep over x +-0.20 m; T = drop(1.0 m -> 0.5 m) x 0.55 front / 0.45 side / 0.35 back. Neighbouring strands
+therefore move as one sheet. Kept: the 11-19 hip fix (source weights above 0.98 m, blended into the field by 0.82 m;
+own weights within 2 cm of the leg/boot axis, field from 10 cm), the arm cut, the hip caps. Removed: 11 loose pieces
+(3-10 verts, 36 triangles) the 11-19 cut left at the hips (one weighted to the shoulder plate). Positions, UVs, texture,
+skeleton, bone names and all clips unchanged. Script: hem_cone.py (`0.55 0.45 0.35 profile=drop side=0.2 leg=0.02,0.10
+hip=1.0,0.82`) in ~/gens/hunter-fix-1118/reviews/hem-evidence-1120/scripts (job dir copy).
+Numbers, LIVE / 11-19 FIX / NOW (every clip, glb_relax sampling; hem_metrics.py): hem swing vs the torso p95, median clip
+84 / 46 / 22.5 deg (worst 172 / 156 / 50); neighbouring-strand split p99 5.9 / 1.21 / 0.83 cm, max 28.8 / 18.1 / 5.6 cm;
+edges over 3x 252 (0.56%) / 0 / 7 (0.015%); Godot --stretch-check worst 17.81 / 2.72 / 4.37 (roll; the skirt panel
+between the legs stretches in tucks instead of splitting). hunter_mesh_check: degenerate 0, spike edges 127 -> 128,
+far_bone 170 -> 194 (both WARN as before), glTF validator 0 errors.
+
+## 2026-11-19: hands/forearms split from the skirt, weights + vertex split (ext/hunter-fix-hem-1118, retry 11-19k)
+Restarted from main's glb (sha1 fd2a8ff1). Positions, UVs, normals, colours of every live vertex, every live triangle, the
+skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the rest pose is identical. Body mesh only:
+1. Each forearm/hand was welded to the skirt/hip skin. A min cut (unary = live arm weight, cut cost = rest edge length / live
+   stretch^2, skin/leather and arm-band cloth only; skirt and belt pouches stay on the body) gives every triangle near a
+   forearm/hand bone a side. The 196 verts shared by both sides are duplicated (same position, normal, UV, colour); the arm
+   triangles use the copy. No triangle deleted. Islands the cut would leave hanging are given to the side they touch.
+2. Weights: arm side = arm bones only (harmonic fill from clean arm verts, below the chest); body side below the chest = no arm
+   bones at all (harmonic fill from verts with no arm weight; hips, legs, skirt bone, cape); chest/shoulder keep their upper
+   arm share and lose only forearm/hand. Then three robust (Cauchy) weight relax passes over every clip (glb_relax sampling).
+3. The cut leaves closed rims; 3 of them get a hidden cap (19 extra triangles, centroid fan, one flat colour) that a ray test
+   (190 directions, none from below) shows is never seen at rest; the others stay open (a cap there would show at rest).
+4. 11-19 retry (review hem.md: black hole in the skirt at the left hip under the belt when the hand leaves it). Every skirt-side
+   rim the cut left (arm weight < 0.2; left hip 11 rims incl. 18.2 cm and 8.7 cm, right hip 2) gets a cap: rim on a disk by arc
+   length, Delaunay with interior points at >= 1.6x the median edge, harmonic 3D membrane with the rim fixed, then sunk up to
+   6 mm toward the body axis (0 at the rim) so it stays under the hand at rest, harmonic weights from the rim (hips/thigh only), one median texel of the material
+   of the skirt leather (leather-v95b: renders as the skirt mauve; a cloth texel read as a red patch), cap edge 0.05 mm inside the rim with the rim's own
+   weights. 394 verts / 577 triangles added, nothing deleted or moved. Edges over 3x stay 0 (worst 2.72), Godot stretch
+   worst 2.72 (hail), hunter_mesh_check nonmanifold 18 and spike edges 127 (both unchanged). Rest pose: at most 47 px of a
+   1024 px frame change (wrist/belt seam line, 8 views), as small as live vs the previous fix (12-45 px). Script: cap.py in ~/cj/20261119-191052-a1/work (job dir).
+Scripts: job dir split.py (FIT=0, D=0.15, LAM=4, KAP=2, GAM=3, CLOTHY=1.15, ISL=200) + capray.py (Blender BVH) + lb.py
+(PEN=cauchy CS=1 CALMW=30, T=2 / 1.6 / 1.4), all in ~/gens/hunter-fix-hem-1119c/scripts.
+Numbers vs live (welded, rest edge >= 8 mm, every clip at 0.1 s): edges over 3x 252 -> 0 of 46,445 (live 46,376; 0.54% -> 0%),
+over 10x 4 -> 0, worst 17.2x -> 2.72x, clips with an edge over 3x 53 -> 0; hunter_mesh_check stretched_tris 660 -> 1,
+far_bone_verts 586 -> 170; Godot `--stretch-check` worst 17.81 (roll) -> 2.72 (hail), every clip under 3.0,
+60 of 61 clips lower than live (g_nod 1.12 -> 1.39 at the left shoulder) (spike edges 127, floating islands 1, black texels unchanged: geometry/texture).
+Look change: the skirt no longer hangs on the arm weights, so in idle/stance/crouch it drapes as in the rest pose instead of
+being pulled toward the hands (the live drape came from the ~25% hand weight on the thigh/skirt skin that tore in bow clips).
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb` (the body6 pick, CURRENT_OVERRIDES 11-12) on main's hem.glb rig (no keep parts, so the earlier swap's mesh is dropped whole); bow, arrow and anchor_nock unchanged. Was appeal3 body b below. 13.9k tris (body 13.0k), 2048 atlas + 2048, 51 clips (pet/give/cheer gain sampled channels, same timing).
 Spec `art/wardens/src/hem_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
