@@ -1,0 +1,266 @@
+{
+ "doc": "Albert regen 11-20 (job 20261120-051729-a6), r2 (job 20261120-084348-a6): the CANDIDATE, NOT the live swap spec (v95_to_game reads breaker_v95.json). Same joints, rig and keep as breaker_regen1120.json (they fit the r2 master: same 1.79 x 1.90 m bounds). Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT with WORK/game.glb = origin/main breaker.glb, then tools/art1/glb_relax.py.",
+ "master": "~/gens/hunter-regen-1120/breaker/r2/g4_master_raw.glb",
+ "game": "art/wardens/breaker/breaker.glb",
+ "tris": 60000,
+ "max_tris": 66000,
+ "head": {
+  "centre": [
+   0.0,
+   0.06,
+   1.28
+  ],
+  "r": 0.26
+ },
+ "head_tris": 27000,
+ "head_uv": 2.0,
+ "tex": 4096,
+ "uv_margin": 0.002,
+ "emit": true,
+ "keep": [
+  "x_shield"
+ ],
+ "joints": {
+  "pelvis": [
+   0.0,
+   -0.04,
+   0.42
+  ],
+  "neck": [
+   0.0,
+   0.04,
+   1.1
+  ],
+  "crown": [
+   0.0,
+   0.06,
+   1.45
+  ],
+  "shoulder.R": [
+   0.46,
+   -0.06,
+   0.96
+  ],
+  "elbow.R": [
+   0.7,
+   -0.06,
+   0.72
+  ],
+  "wrist.R": [
+   0.75,
+   -0.02,
+   0.58
+  ],
+  "shoulder.L": [
+   -0.46,
+   -0.06,
+   0.96
+  ],
+  "elbow.L": [
+   -0.7,
+   -0.06,
+   0.72
+  ],
+  "wrist.L": [
+   -0.75,
+   -0.02,
+   0.58
+  ],
+  "hip.R": [
+   0.21,
+   -0.04,
+   0.41
+  ],
+  "knee.R": [
+   0.21,
+   0.02,
+   0.22
+  ],
+  "ankle.R": [
+   0.21,
+   0.0,
+   0.08
+  ],
+  "hip.L": [
+   -0.22,
+   -0.04,
+   0.41
+  ],
+  "knee.L": [
+   -0.22,
+   0.02,
+   0.22
+  ],
+  "ankle.L": [
+   -0.22,
+   0.0,
+   0.08
+  ]
+ },
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [],
+ "screen": {
+  "slot": "eyes-mood",
+  "centre": [
+   0.0,
+   0.25,
+   1.26
+  ],
+  "r": 0.105
+ },
+ "slots": [
+  {
+   "slot": "eyes",
+   "box": [
+    -0.13,
+    0.13,
+    0.08,
+    0.5,
+    1.08,
+    1.36
+   ],
+   "h": [
+    0.38,
+    0.65
+   ]
+  },
+  {
+   "slot": "eyes",
+   "box": [
+    -0.12,
+    0.12,
+    0.08,
+    0.5,
+    1.09,
+    1.35
+   ],
+   "v": [
+    0,
+    0.3
+   ]
+  },
+  {
+   "slot": "glow-lure",
+   "box": [
+    0.28,
+    0.47,
+    0.16,
+    0.42,
+    0.72,
+    0.97
+   ],
+   "h": [
+    0.35,
+    0.65
+   ]
+  },
+  {
+   "slot": "brass",
+   "bone": "head",
+   "h": [
+    0.0,
+    0.13
+   ],
+   "s": [
+    0.25,
+    1
+   ]
+  },
+  {
+   "slot": "brass",
+   "box": [
+    -0.12,
+    0.12,
+    0.12,
+    0.5,
+    0.73,
+    0.94
+   ],
+   "h": [
+    0.0,
+    0.16
+   ],
+   "v": [
+    0.5,
+    1
+   ]
+  },
+  {
+   "slot": "cloth",
+   "box": [
+    -9,
+    9,
+    -9,
+    -0.08,
+    1.15,
+    9
+   ],
+   "s": [
+    0,
+    0.3
+   ],
+   "v": [
+    0.55,
+    1
+   ]
+  },
+  {
+   "slot": "cloth",
+   "h": [
+    0.16,
+    0.4
+   ],
+   "s": [
+    0.25,
+    1
+   ]
+  },
+  {
+   "slot": "metal",
+   "s": [
+    0,
+    0.25
+   ],
+   "v": [
+    0.25,
+    1
+   ]
+  }
+ ],
+ "slot_default": "leather",
+ "room": {
+  "*": 0.5
+ },
+ "relax": {
+  "CUTS": 0
+ },
+ "anchors": {
+  "anchor_head_top": [
+   0.0,
+   0.06,
+   1.45
+  ],
+  "anchor_chest": [
+   0.0,
+   0.22,
+   0.86
+  ],
+  "anchor_lure": [
+   0.38,
+   0.31,
+   0.88
+  ]
+ },
+ "move_bones": {},
+ "doc_cand": "regen r2 (job 20261120-084348-a6): Meshy 7.1 multi-image (current turnaround v95-latest-ta-1119/albert, 4 views, enhance off, PBR off, task 01a1f827-519b-72aa-a7d3-26f1b29a3876), no remesh (Meshy quad remesh at 60k and 100k shredded the sails), the swap decimates to 60k tris, emission from its own cyan paint",
+ "keep_uv": true,
+ "weights": "meshy",
+ "k": 0.9,
+ "rest_rig": "bulwark",
+ "doc_rig": "11-20 deep job 20261120-064527-a4: the rig takes the art's legs (bulwark body legs 0.84, torso 1.02, neck -0.05; rest_from_rig.py), then tools/art1/glb_relax.py on the swap's glb"
+}
