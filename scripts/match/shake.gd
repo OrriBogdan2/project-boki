@@ -12,13 +12,14 @@ const RADIUS := 14.0          # m: a big hit farther from you than this is not f
 static var _started := -9.0   # match time the last shake started (the team-fight cap)
 
 ## A big hit at `at`, caused by `cause` (null = the world: a boss, a mob, a lair). `power` is 0-1.
-## Never shakes the camera of whoever caused it. Returns the strength applied (0 when none).
+## Never shakes the camera of whoever caused it (or of the owner of the Boki that did).
+## Returns the strength applied (0 when none).
 static func incoming_big(m: Node, at: Vector3, power: float, cause: Ent = null) -> float:
 	if m == null or m.get("player") == null or m.get("cam") == null:
 		return 0.0
 	var p: Ent = m.player
-	if cause != null and cause == p:
-		return 0.0
+	if cause != null and (cause == p or (cause is Kin and (cause as Kin).owner_h == p)):
+		return 0.0      # (your own Boki's moves are yours too)
 	var fall := clampf(1.0 - p.flat_dist(at) / RADIUS, 0.0, 1.0)
 	var amp := clampf(power, 0.0, 1.0) * fall * MAX_AMP * float(Settings.get_v("screen_shake"))
 	if amp <= 0.001:
