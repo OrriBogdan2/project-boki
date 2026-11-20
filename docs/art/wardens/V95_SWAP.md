@@ -225,3 +225,20 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Regen from the turnaround, 2026-11-20 (ext/hunter-regen-*-1120): a new Meshy body instead of patching the scan
+Patching weights and caps on the scanned v95 masters moved the stretch numbers but ~1% of the pixels at the game camera.
+The regen route builds a new master from the owner's latest turnaround pick, Meshy for every visible step, Blender only
+to rig and export:
+1. `sheet_crops.py` (auto, or x0/x1 + a `kill` box for a sheet's ground line) and `pad_views.py`: front, 3/4, side, back.
+2. `meshy_task.py create OUT front tq side back --texture-refs <same> --polycount 30000 --topology quad --enhance off|on`
+   (meshy-7.1, a-pose, 8k PBR; ~40 credits). Keep the variant that keeps the signature props (Sable: enhance on kept
+   the pistols, off lost them; Lace: off, on bent an arm out).
+3. `meshy_joints.py prep GEN OUT H` scales it to the spec's height; `meshy_task.py rig RIGDIR OUT --height H` (5 credits);
+   `meshy_joints.py joints OUT RIGDIR/rigged_character.glb PATCH` reads the swap `joints` and `head` off Meshy's own
+   skeleton (no hand-read grid renders; Meshy's helper icosphere is left out of the box match).
+4. `v95_to_game.py <Name> --master OUT --weights meshy --spec-patch PATCH` onto the game rig, clips and props.
+5. Proof: the glb as a variant (`art/wardens/<art>_regen/`, plus local copies of its warden_anim, look and stride
+   entries), `--regen-audit` on the GPU queue with and without `--warden-variant`: every clip x 10 times, eye level,
+   knee level, match camera, hands and feet close.
+   Run `--stretch-check` one Hunter at a time: three at once in one tree end early without a table.
