@@ -12,7 +12,7 @@
 		"spread": 0.0,
 		"range": 13.5,
 		"size": 0.22,
-		"color": "#ffbf5e",
+		"color": "#6ee07a",
 		"sfx": "tend_ember",
 		"hit": "hit_magic",
 		"fire_slow": 1.0,

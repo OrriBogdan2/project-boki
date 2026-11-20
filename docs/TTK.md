@@ -97,6 +97,21 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | dredge (Kingpin) | e | 0.162 | 0.205 | 0.79 | out |
 <!-- ttk:table -->
 
+**11-20 re-read of the eight (ext/combat-ttk-rest-eight, origin/main a1b35c78ee; re-run 11-20 on facb5c3e22f: all 42 rows the same, only Gil combo 1.07/1.00 -> 1.00/0.93 as noted below).** Albert, Sparkle, Meeko, Grimble, Neve, Tenzo, Motley and Sable, `--ttk-check` (the table above is this run: every row matches) and `--ttk-matrix-check` (cells against docs/TTK_MATRIX.md, written 11-10). Moved = more than 15% from the recorded value. No data regression found (no number disagrees with its archetype json or source), so nothing was changed.
+
+| Hunter | `--ttk-check` rows, recorded (11-09 or the 11-11 slice) -> now | Matrix row, 12 cells (now / 11-10) | Commit that moved it |
+|---|---|---|---|
+| Albert | LMB 0.72 -> 0.97; combo 0.70 / 0.84 -> 1.01 / 1.05 | 5 cells moved, median 1.12x | Window 11-12 to 11-13, ratio 0.97 by 11-13. Candidate 015f26780f (recall caught on the clip's catch key); not pinned: that commit's tree cannot run the check |
+| Sparkle | LMB 0.77 -> 1.01; combo 0.17 / 0.20 -> 0.90 / 1.04 | all 12 moved, median 1.34x | LMB 83386bb77c (11-11, damage at the source's share); combo 4b3b15186f (11-16, Kitefall back to 9; not pinned the same way) |
+| Meeko | LMB 0.68 -> 0.68 | none | unchanged |
+| Grimble | LMB 2.70 -> 1.96 | all 12 moved, median 0.52x | the tight cluster, 03a5a3844d and c08b5a31ab (11-11); 23282bb8a4 (11-18, one aim line) measured 2.11 -> 1.96 |
+| Neve | LMB 0.22 -> 0.25 (inside 15%) | 7 cells moved, median 1.24x | 5b008013f7 (11-12, a hold is one burst, then the barrage) |
+| Tenzo | LMB 1.18 -> 1.18 | none | unchanged |
+| Motley | LMB 1.91 -> 1.10; combo 2.15 / 1.74 -> 1.13 / 1.01 | all 12 moved, median 0.65x | a27412b9fa (11-11, orb 9 -> 14.5, the owner's ~15% held-fire loss kept) |
+| Sable | LMB 0.95, combo 0.86 -> same | none | unchanged |
+
+Still outside the bar and already listed above: Meeko LMB 0.68, Grimble LMB 1.96, Neve LMB 0.25; Albert and Sparkle are back inside. Notes: Gil's combo rows read 4.62 to 5.28 s between runs (his chain varies, as the method says), so they are not drift. The matrix check fails its 12 Lace cells on main (her bow never looses in its hold and tap modes: `inf`); the draw mode that fixes it is on ext/ttk-main-1116, and docs/TTK_MATRIX.md should be regenerated only once that lands, otherwise Lace's row drops out. The matrix rows of the eight are in `--ttk-matrix-check` output on that commit; the doc keeps its 11-10 values until then.
+
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
 
 | Hunter (source) | Branch | Row | 11-09 doc | origin/main | branch alone | all four merged | Source s (sv/briefs/kits.md) |
