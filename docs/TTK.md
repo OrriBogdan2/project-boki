@@ -97,7 +97,7 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | dredge (Kingpin) | e | 0.162 | 0.205 | 0.79 | out |
 <!-- ttk:table -->
 
-**11-20 re-read of the eight (ext/combat-ttk-rest-eight, origin/main a1b35c78ee).** Albert, Sparkle, Meeko, Grimble, Neve, Tenzo, Motley and Sable, `--ttk-check` (the table above is this run: every row matches) and `--ttk-matrix-check` (cells against docs/TTK_MATRIX.md, written 11-10). Moved = more than 15% from the recorded value. No data regression found (no number disagrees with its archetype json or source), so nothing was changed.
+**11-20 re-read of the eight (ext/combat-ttk-rest-eight, origin/main a1b35c78ee; re-run 11-20 on facb5c3e22f: all 42 rows the same, only Gil combo 1.07/1.00 -> 1.00/0.93 as noted below).** Albert, Sparkle, Meeko, Grimble, Neve, Tenzo, Motley and Sable, `--ttk-check` (the table above is this run: every row matches) and `--ttk-matrix-check` (cells against docs/TTK_MATRIX.md, written 11-10). Moved = more than 15% from the recorded value. No data regression found (no number disagrees with its archetype json or source), so nothing was changed.
 
 | Hunter | `--ttk-check` rows, recorded (11-09 or the 11-11 slice) -> now | Matrix row, 12 cells (now / 11-10) | Commit that moved it |
 |---|---|---|---|
