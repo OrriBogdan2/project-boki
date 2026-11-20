@@ -12,7 +12,7 @@
 - The dorsal fin on the upper back behind the collar: a ray fin, blue at the root and orange at the edge,
   rigid on hips, `skin-fin`.
 
-  B tools/meshy/gil_parts.py -- --fish-only <game gil.glb> <swordfish.glb> <out.glb> [--len 1.2] [--pitch 17]
+  B tools/meshy/gil_parts.py -- --fish-only <game gil.glb> <swordfish.glb> <out.glb> [--len 1.2] [--pitch 17] [--yaw 0]
 - A new swordfish on a game gil.glb (the regen 11-20 r2: the old one read dagger-sized): the old Swordfish mesh
   and its three FX empties go, the new fish goes on as above at --len metres (the live splash: his swordfish is
   about 0.7 of his height, ~1.2 m on the 1.7 m model), the rest of the .glb untouched (v95_swap's import and
@@ -182,7 +182,7 @@ def back_y(bvh, z, x=0.0):
     return None if loc is None else loc.y
 
 
-def swordfish(path, arm, fish_len=None, grip_at=None, bone="hand.R", pitch=17.0):
+def swordfish(path, arm, fish_len=None, grip_at=None, bone="hand.R", pitch=17.0, yaw=0.0):
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
     new = [o for o in bpy.data.objects if o not in before]
@@ -250,7 +250,9 @@ def swordfish(path, arm, fish_len=None, grip_at=None, bone="hand.R", pitch=17.0)
     if grip_at is not None:     # (--fish-only: the palm, palm() below)
         fist = grip_at
     # (--fish-only --pitch: degrees under level in the rest pose; the game's idle and thrusts raise the hand ~60-70 degrees)
-    t_long = BILL_DIR if not fish_len else Vector((0.0, math.cos(math.radians(pitch)), -math.sin(math.radians(pitch))))
+    # (--yaw: degrees the bill swings out to his right (+X) at rest; 30 carries his idle's hanging bill forward)
+    cp, sy, cy = math.cos(math.radians(pitch)), math.sin(math.radians(yaw)), math.cos(math.radians(yaw))
+    t_long = BILL_DIR if not fish_len else Vector((cp * sy, cp * cy, -math.sin(math.radians(pitch))))
     t_up = (Vector((0.0, 0.0, 1.0)) - t_long * t_long.z).normalized()
     src = Matrix((Vector(d_long), Vector(d_up), Vector(np.cross(d_long, d_up)))).transposed()
     dst = Matrix((t_long, t_up, t_long.cross(t_up))).transposed()
@@ -317,7 +319,7 @@ def palm(body):
     return Vector(c), bone
 
 
-def fish_only(game, fish_glb, out, fish_len, pitch=17.0):
+def fish_only(game, fish_glb, out, fish_len, pitch=17.0, yaw=0.0):
     """--fish-only: the game .glb's swordfish replaced (v95_swap's import_game / export settings)."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=game, bone_heuristic="BLENDER")
@@ -330,7 +332,7 @@ def fish_only(game, fish_glb, out, fish_len, pitch=17.0):
     body = max((o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("Icosphere")),
                key=lambda o: len(o.data.vertices))
     at, bone = palm(body)
-    fish = swordfish(fish_glb, arm, fish_len, at, bone, pitch)
+    fish = swordfish(fish_glb, arm, fish_len, at, bone, pitch, yaw)
     fish.data.uv_layers[0].name = "UVMap"
     objs = [o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY") and not o.name.startswith("Icosphere")]
     log("tris: " + ", ".join("%s %d" % (o.name, K.tris([o])) for o in objs if o.type == "MESH"))
@@ -349,7 +351,8 @@ def main():
     a = sys.argv[sys.argv.index("--") + 1:]
     if a[0] == "--fish-only":
         fish_only(a[1], a[2], a[3], float(a[a.index("--len") + 1]) if "--len" in a else 1.2,
-                  float(a[a.index("--pitch") + 1]) if "--pitch" in a else 17.0)
+                  float(a[a.index("--pitch") + 1]) if "--pitch" in a else 17.0,
+                  float(a[a.index("--yaw") + 1]) if "--yaw" in a else 0.0)
         return
     fit, fish_glb, out = a[0], a[1], a[2]
     bpy.ops.wm.read_factory_settings(use_empty=True)
