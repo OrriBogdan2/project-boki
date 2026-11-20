@@ -136,6 +136,15 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
    sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
+   2026-11-20 (`ext/tut-glove-stall`): the glove stall did not come back on main: 24 of 24 `--tutorial-playthrough-check`
+   runs passed, glove 5.7 to 7.3 s, no void fall in the 8 traced runs. What did stall, every time, was `--tutorial-fight-check`'s second and third
+   starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
+   `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
+   landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
+   locked there the same way. Now it resumes at `wayout`
+   (in the eight beats `wayout`, `uplink` and `defend` are legs of `extract`: `TutorialResume.OLD_BEATS` maps them to `kin`,
+   so a Continue starts the `extract` beat, and `OUTPOST_START` is gone). `--tutorial-resume-check` checks that every beat resumes past the landing
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
