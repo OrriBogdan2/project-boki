@@ -19,7 +19,7 @@ SR = 44100
 TARGET_RMS, CEIL = -19.0, -1.0   # content/rules/sfx_levels.json: category 'boki' RMS, peak ceiling
 URL = 'https://api.elevenlabs.io/v1/sound-generation?output_format=mp3_44100_128'
 
-# line id: (stage names, base-stage brief from SOUND_BRIEFS.csv, kin_v2 personality, candidate wordings)
+# line id: (stage names, base-stage brief from SOUND_BRIEFS.csv, kin personality, candidate wordings)
 LINES = {
     'vespyx': (['Vespyx', 'Vespox', 'Sabryx'], 'low cat growl with a quick tail-stinger click',
                'sly fox-scorpion bruiser, quick little hisses',
