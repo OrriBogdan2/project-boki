@@ -115,7 +115,7 @@
 		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
-		"col": "#ffd27a",
+		"col": "#7fe08a",
 		"cooldown": 11.0,
 		"time": 2.5,
 		"radius": 2.6,
