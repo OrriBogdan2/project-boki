@@ -54,7 +54,8 @@ var m: Node
 var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h; on, off}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
-var _look_rng := RandomNumberGenerator.new()   # shader seeds only: a look never draws from the global randf the sim uses
+# shader seeds only: a look never draws from the global randf the sim uses
+var _look_rng := RandomNumberGenerator.new()
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
@@ -586,7 +587,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 ## A mesh trail that follows a projectile (its node) until it is gone, hidden, or TRAIL_MAX runs out: tracers,
 ## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays. Its "end" names
 ## a move played where the trail stopped.
-func trail(h: Hunter, move: String, follow: Node3D) -> void:
+func trail(h: Hunter, move: String, follow: Node3D, o := {}) -> void:
 	var rec := _rec(h, move)
 	if rec.is_empty() or follow == null or lod_at(follow.global_position) <= 0.0:
 		return
@@ -597,7 +598,7 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 	for layer: Dictionary in rec.get("fx", []):
 		if String(layer.get("p", "")) != "ribbon":
 			continue
-		_ribbon(layer, h, {})
+		_ribbon(layer, h, o)
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)

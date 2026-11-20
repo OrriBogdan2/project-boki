@@ -33,3 +33,10 @@ A second owner frame shows a rival seen outside the wedge inside her own lit cir
 existed (`reveal_t` from shots, strikes, hits and gloves); it is now drawn: `RevealLight` lights a soft 2.0 m circle
 in `vis.gdshaderinc` round up to three seen, revealed rivals and fades it over the reveal's last 0.3 s. No new sight
 rule, no Net or save change (clients already get the reveal flag); `--vision-check` covers it.
+
+## Addendum 2026-11-18: a cone again, and grey fog
+Owner order: you see a wide cone in front, not the whole half-plane, and everything else is greyed like fog, not cyan
+(target feel: the reference game). `VIEW_COS` 0.087 -> 0.5 (170 -> 120 degrees; `VIS_COS` follows, asserted by
+`--vision-check`); the shader desaturates and dims what is out of sight instead of tinting it blue. The model, the near
+circle, the range and the reveal rules stay. Bots and the hide logic use the same cone, so a rival 60-85 degrees off
+your aim is hidden again. No Net or save change. Numbers and the angle shots: docs/specs/VISION_LOOK.md.
