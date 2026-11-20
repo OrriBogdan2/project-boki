@@ -7,25 +7,44 @@ extends RefCounted
 ## Prints one SLIP line per Hunter and direction; FAIL when a Hunter's worst slip passes its bar in BAR.
 
 const AUDIT := preload("res://tools/anim_audit.gd")
-const STEP := 0.5            # m/s between swept speeds
-const WARM_S := 2.4          # s at a speed before sampling: three of WardenGait.MEAN_TAU, so the stride has settled
-const SAMPLE_S := 6.0        # s sampled a speed: walk and run loops of unequal length drift through ~3 phase beats
-const WOBBLE := 0.2          # rad: the aim's sway (0.7 Hz) while a run-and-aim Hunter runs 90 deg off it
+const STEP := 0.5  # m/s between swept speeds
+const WARM_S := 2.4  # s at a speed before sampling: three of WardenGait.MEAN_TAU, so the stride has settled
+const SAMPLE_S := 6.0  # s sampled a speed: walk and run loops of unequal length drift through ~3 phase beats
+const WOBBLE := 0.2  # rad: the aim's sway (0.7 Hz) while a run-and-aim Hunter runs 90 deg off it
 const WOBBLE_HZ := 0.7
 const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0, 0), "r": Vector3(1, 0, 0)}
 ## m/s: the worst mean planted-foot slip each Hunter may show anywhere in the sweep, the measured worst of the
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
 ## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
-const BAR := {"archer": 1.75, "juggernaut": 0.95, "gunslinger": 1.0, "bulwark": 1.35, "ashwick": 1.4, "tender": 1.05,
-		"dolm": 2.7, "dredge": 0.95, "mage": 1.55, "thief": 1.5}
+const BAR := {
+	"archer": 1.75,
+	"juggernaut": 0.95,
+	"gunslinger": 1.0,
+	"bulwark": 1.35,
+	"ashwick": 1.4,
+	"tender": 1.05,
+	"dolm": 2.7,
+	"dredge": 0.95,
+	"mage": 1.55,
+	"thief": 1.5
+}
 ## m/s: a run-and-aim ("loco.aim_twist") Hunter running at its run speed 90 deg off an aim that sways WOBBLE: each sway
 ## across the turn-round margin swung the legs from the forward run to the back run and the feet dragged (Vex 3.30
 ## m/s with the 0.1 rad default margin, 0.97 with her "twist_hyst" 0.35; owner bug 11-15). A Hunter without a bar
 ## only prints its WOBBLE line (Lace `archer` and Cinder `ashwick` keep the default margin: open, FOOT_SLIDE.md).
 const WOBBLE_BAR := {"gunslinger": 1.0}
+## A Hunter with "loco.foot_lock" (WardenGait) runs forward from a standstill at its game speed (HunterMove.speed),
+## as the play probe's run does: the median over the frames of the slower ankle's flat speed over the ground, as a
+## share of the body's, at most this (the probe flags 0.6; owner target 11-18). SKATE_IDLE_S standing first, then
+## SKATE_RUN_S of the run read after SKATE_SETTLE_S, so a lock that is slow to catch on at the start shows.
+const SKATE_BAR := 0.45
+const SKATE_IDLE_S := 1.5
+const SKATE_SETTLE_S := 0.1
+const SKATE_RUN_S := 1.35
 
 var bad := 0
 var holder: Node3D
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -42,6 +61,7 @@ func run(main: Node) -> void:
 	print("FOOT_SLIDE_DONE ", done, " FAIL ", bad)
 	main.get_tree().quit(1 if bad > 0 or done == 0 else 0)
 
+
 ## Sweeps one Hunter; false when it has no stepping legs to measure.
 func _hero(main: Node, id: String) -> bool:
 	if id in AUDIT.NO_LEGS:
@@ -50,7 +70,7 @@ func _hero(main: Node, id: String) -> bool:
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)     # (only the fixed steps below move the clips: a real frame's dt would shift their phase)
+	sync.set_process(false)  # (only the fixed steps below move the clips: a real frame's dt would shift their phase)
 	for k in 5:
 		await main.get_tree().process_frame
 	var clips: WardenClips = sync.get("clips")
@@ -73,18 +93,43 @@ func _hero(main: Node, id: String) -> bool:
 		print("FAIL %s: no bar in BAR (measured worst %.2f m/s)" % [id, worst[0]])
 		bad += 1
 	elif worst[0] > float(BAR[id]):
-		print("FAIL %s: a planted foot slips %.2f m/s (%s at %.2f m/s), bar %.2f" % [id, worst[0], worst[1],
-				worst[2], BAR[id]])
+		print(
+			(
+				"FAIL %s: a planted foot slips %.2f m/s (%s at %.2f m/s), bar %.2f"
+				% [id, worst[0], worst[1], worst[2], BAR[id]]
+			)
+		)
 		bad += 1
+	if clips.d["loco"].has("foot_lock"):
+		var skate := _skate(m, sync, sk, HunterMove.speed(id))
+		print(
+			(
+				"SKATE %-10s %d%% of %.2f m/s (bar %d%%)"
+				% [id, round(100.0 * skate), HunterMove.speed(id), round(100.0 * SKATE_BAR)]
+			)
+		)
+		if skate > SKATE_BAR:
+			print(
+				(
+					"FAIL %s: running from a standstill the planted foot moves at %d%% of the body's speed, bar %d%%"
+					% [id, round(100.0 * skate), round(100.0 * SKATE_BAR)]
+				)
+			)
+			bad += 1
 	if clips.twist_on:
 		var wob := _slip(m, sync, clips, sk, Vector3(-run_speed, 0, 0), WOBBLE)
 		print("WOBBLE %-10s %.2f m/s (run %.2f m/s 90 deg off the aim, sway %.2f rad)" % [id, wob, run_speed, WOBBLE])
 		if WOBBLE_BAR.has(id) and wob > float(WOBBLE_BAR[id]):
-			print("FAIL %s: running 90 deg off a swaying aim a planted foot slips %.2f m/s, bar %.2f" % [id, wob,
-					WOBBLE_BAR[id]])
+			print(
+				(
+					"FAIL %s: running 90 deg off a swaying aim a planted foot slips %.2f m/s, bar %.2f"
+					% [id, wob, WOBBLE_BAR[id]]
+				)
+			)
 			bad += 1
 	m.free()
 	return true
+
 
 ## 0, every STEP, and the run speed itself.
 func _speeds(run_speed: float) -> Array:
@@ -95,6 +140,7 @@ func _speeds(run_speed: float) -> Array:
 		s += STEP
 	out.append(run_speed)
 	return out
+
 
 ## Mean flat speed of a planted foot against the ground (m/s) while the model moves at `vel`, facing -Z; with `sway`
 ## (rad) the facing swings that far either way at WOBBLE_HZ (the model stays put: the feet are read in its own frame,
@@ -129,3 +175,35 @@ func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vecto
 			total += Vector2(v.x + foot_v.x, v.z + foot_v.z).length()
 			n += 1
 	return total / maxi(n, 1)
+
+
+## The play probe's skate share (see SKATE_BAR) running forward at `spd` from a standstill; the ankles are the shins'
+## ends (FootPlant.ankle), read in the model's frame, the ground going back under them at `spd`.
+func _skate(m: Node3D, sync: Node, sk: Skeleton3D, spd: float) -> float:
+	var legs := [["thigh.L", "shin.L"], ["thigh.R", "shin.R"]].map(
+		func(p: Array) -> Array: return [WardenSkeleton.find(sk, p[0]), WardenSkeleton.find(sk, p[1])]
+	)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	for k in int(SKATE_IDLE_S / AUDIT.DT):
+		sync.call("_process", AUDIT.DT)
+	var vel := Vector3(0, 0, -spd)
+	m.set_meta(WardenClips.STATE, {"vel": vel, "face": 0.0, "grounded": true})
+	for k in int(SKATE_SETTLE_S / AUDIT.DT):
+		sync.call("_process", AUDIT.DT)
+	var shares: Array = []
+	var was: Array = []
+	for k in int(SKATE_RUN_S / AUDIT.DT):
+		sync.call("_process", AUDIT.DT)
+		var now: Array = legs.map(
+			func(l: Array) -> Vector3: return sk.global_transform * FootPlant.ankle(sk, l[0], l[1])
+		)
+		if not was.is_empty():
+			var slow := INF
+			for i in now.size():
+				var v: Vector3 = (now[i] - was[i]) / AUDIT.DT + vel
+				slow = minf(slow, Vector2(v.x, v.z).length())
+			shares.append(slow / spd)
+		was = now
+	m.set_meta(WardenClips.STATE, {})
+	shares.sort()
+	return shares[shares.size() / 2]

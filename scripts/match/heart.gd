@@ -128,6 +128,13 @@ static func in_play(layout: Dictionary, opts: Dictionary, points: Array) -> Arra
 	var inside := points.filter(func(p): return Vector2(p.x - c.x, p.z - c.y).length() <= edge)
 	return inside if not inside.is_empty() else points
 
+## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
+static func close_in(m: Match) -> float:
+	return maxf(r("tide_start_s") - m.sess_time(), 0.0)
+
+static func close_left(m: Match) -> float:
+	return maxf(r("tide_start_s") + r("tide_close_s") - m.sess_time(), 0.0)
+
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0

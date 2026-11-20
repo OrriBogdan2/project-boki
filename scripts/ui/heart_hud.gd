@@ -7,6 +7,8 @@ extends RefCounted
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so, a red pulse on every hit and the edge arrow
 ##     (the one off-screen marker, Hud._draw_waypoint) to the nearest way in.
+##   - the zone clock in the clock chip under the minimap (Hud._draw_clock_bar): "Closes in 0:30" before the tide
+##     moves, "Closing 7:12" (the time left) while it does.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
@@ -73,6 +75,17 @@ static func _outside(hud, m: Match, ht: Heart) -> bool:
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 	return true
+
+## The zone clock's words: "Closes in 0:30" before the tide moves, "Closing 7:12" (the time left) while it
+## does, empty once the ring holds (or with no Heart).
+static func zone_line(m: Match) -> String:
+	if m.heart == null or m.heart.site == Vector3.INF:
+		return ""
+	var t := Heart.close_in(m)
+	if t > 0.0:
+		return "Closes in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+	t = Heart.close_left(m)
+	return "Closing %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m

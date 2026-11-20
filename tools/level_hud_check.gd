@@ -80,7 +80,7 @@ func run(main: Node) -> void:
 	ok(P.ak.r_t <= 0.0 and float(P.ak.cd["r"]) <= 0.0, "pressing R at level 5 casts nothing")
 	ok(hud.r_lock_text(P) == "LV %d" % int(Hunter.ULT_AT[0]), "the R slot says when it opens: '%s'" % hud.r_lock_text(P))
 	P.gain_xp(float(Hunter.XP_TO[5]) - P.xp + 1.0)
-	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == "UNLOCK", "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
+	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == HudSlot.POINT_TAG, "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
 	P.level_slot("ult")
 	ok(int(P.slot_lv["ult"]) == 1 and hud.r_lock_text(P) == "", "unlocked: no lock on R any more")
 	# ---------------------------------------------------------------- 5. no XP for time or for damage
