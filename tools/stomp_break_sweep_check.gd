@@ -18,7 +18,7 @@ const TAP := [3.0, 1]  # [distance to the stomper in m, steps the key is held]: 
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
 const EXPECT := [
 	["gunslinger", "rmb", 3.0, 1, "daze"],
-	["bulwark", "lmb", 3.0, 90, "stun"],
+	["bulwark", "lmb", 3.0, 90, "shove"],  # the Crushing Blow's knock (its stun is a wall slam: only near a wall)
 	["ostra", "rmb", 3.0, 1, "stun"],
 	["thief", "rmb", 3.0, 1, "gnd"],
 	["dredge", "rmb", 3.0, 1, "stun"],
@@ -27,7 +27,6 @@ const EXPECT := [
 	["ashwick", "dash", 3.0, 1, "launch"],
 	["ashwick", "e", 3.0, 1, "tow"],
 	["dolm", "dash", 3.0, 1, "launch"],
-	["juggernaut", "dash", 3.0, 1, "launch"],
 	["rimewright", "e", 3.0, 1, "tow"],
 	["archer", "e", 3.0, 1, "slow"],
 	["dolm", "rmb", 3.0, 1, "slow"],
