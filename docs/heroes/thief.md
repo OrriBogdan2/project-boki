@@ -272,7 +272,8 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
   Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
   on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
-- Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
+- Her dashes leave her own violet after-images and a hand-and-foot trail through the flip's turn (HeroVfx data,
+  content/vfx/thief.json "dash" and "flip"), not the shared after-image. No ring or burst on a dash or a
   landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand
   it will leave from, flaring as she lands; online viewers get a small ping at that hand.
 - Presses during the Cartwheel (content/dash_flow/thief.json, docs/heroes/dash_interactions.md): every slot
