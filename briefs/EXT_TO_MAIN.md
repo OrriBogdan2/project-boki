@@ -10582,3 +10582,4 @@ READY ext/tester-feedback-1119 e28eee3ac8 (merged origin/main fff700af22, only c
 READY ext/vfx-zones-remote 7cf6104d53 (merged origin/main; tender seed_field = main ember fx + branch zone key; --zone-net-check 35/35, --kit-sweep-check clean; health --strict fails only on style ratchet, same as origin/main)
 READY ext/hud-plain-words fe98355911e2eec74785c323059d9df9449f0fdf (HUD plain words: UNLOCK->"Spend point", truce lines off kill feed, DOCKS IN already gone; clutter/ability-text/level-hud checks 0 fail, health+wiki reds = main)
 READY ext/garden-toy-xp 9c211e6cc37e9097e5aca097ae1fdf6e916d4c6f (every finished toy play pays toy XP 3, toy_check asserts it)
+READY ext/farm-tut-ends 379326e12b3866603dce9e63861b16f851e2eeba (base tutorial step 4 ends on zone wake or toy turn; banner line fits 42% strip; checks added)
