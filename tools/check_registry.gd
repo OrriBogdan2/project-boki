@@ -453,6 +453,7 @@ const CHECKS := {
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
+	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],  # slam impact hold
 	# one reader for ability words
@@ -504,8 +505,6 @@ const CHECKS := {
 	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
 	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],      # ways down, match camera
 	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],      # slip sweep
-	"--step-contacts-gen": ["res://tools/step_contacts_gen.gd", "step_contacts_gen", null],  # writes the table
-	"--step-contacts-check": ["res://tools/step_contacts_check.gd", "step_contacts_check", null],  # cue on plant
 	"--land-lean-shots": ["res://tools/land_lean_shots.gd", "land_lean_shots", null],      # landing squash, run lean
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # every Hunter in a row, true scale
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb

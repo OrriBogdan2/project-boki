@@ -109,6 +109,7 @@ var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
+var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
@@ -138,7 +139,6 @@ var start_bones: Array = []  # [bone index, rotation]: loco "start_blend" bones,
 var start_s := 0.0           # s those bones take to ease from that pose into the clips
 var start_t := 0.0           # s since he set off
 var stride: WardenStride
-var steps: WardenSteps       # the step cue from the loops' own foot plants (WardenSteps), or null
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -178,7 +178,6 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	if not c._setup(model, glb, sk, dd, lib):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
-	c.steps = WardenSteps.make(model, c.tree, WardenSteps.contacts(art_name))
 	return c
 
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
@@ -262,6 +261,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length,
 			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	var ring: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("loco")
+	steps = WardenSteps.new(model, tree, ring, lc.get("plants", {}), lib)
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
 	_setup_out()
@@ -790,8 +791,7 @@ func step(dt: float) -> void:
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
-	if steps:
-		_tick_steps(s)
+	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
@@ -1007,14 +1007,6 @@ func _loco(s: Dictionary, dt: float) -> void:
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
-
-## The step cue (WardenSteps) off the loops the legs show: the crouch walk's while crouched, else the walk and run's.
-func _tick_steps(s: Dictionary) -> void:
-	var legs_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 if _moving(s) else 0.0)
-	if crouch_w >= 0.5:
-		steps.tick("crouch_loco", crouch_pos, legs_k * (1.0 - one_w))
-	else:
-		steps.tick("loco", loco_pos, legs_k)
 
 ## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
 ## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.

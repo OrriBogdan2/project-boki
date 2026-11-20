@@ -633,7 +633,7 @@ func _ostra() -> void:
 		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
-	_quiet_float(m, P, T, home)
+	await _quiet_float(m, P, T, home)
 	_ranks(P, K)
 	# ---- every move, sound and look exists
 	var moves := [
@@ -652,6 +652,20 @@ func _ostra() -> void:
 	)
 	await done(m)
 
+## A Hunter as `arch`, rebuilt the way the game builds one (reclass, not set_arch: the footsteps ride the model's own
+## anim and its clips, which set_arch leaves as the old archetype's), and given a few frames to build its clip rig.
+func _become(h: Hunter, arch: String) -> void:
+	h.reclass(h.cls, arch)
+	for k in 5:
+		await main.get_tree().process_frame
+
+## One game tick of the clip rig: headless a tick loop runs inside one engine frame, so the Warden's Sync node
+## (which plays the clips each frame) is stepped by hand, as the game's frames would.
+func _clips(h: Hunter) -> void:
+	var sync := h.model.get_node_or_null("Warden/Sync")
+	if sync:
+		sync._process(DT)
+
 ## Source: Void's passive "floats: no footstep noise" (sv/briefs/kits.md), the footage "no footsteps"
 ## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
 ## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
@@ -664,8 +678,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 				Sfx.last_played.erase(k)
 				Sfx.recent.erase(k)
 		return n
-	var local_walk := func(arch: String) -> Array:
-		_as_hero(P, arch)
+	var local_walk := func() -> Array:
 		P.teleport(home)
 		P.vel = Vector3.ZERO
 		P.grounded = true
@@ -675,22 +688,23 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		step(m, 3.0, func():
 			Sfx.listener = P.pos      # (the camera sets it each frame; headless it stays at the origin, out of hearing)
 			P.render(DT, 1.0)
-			_clips_frame(P)
+			_clips(P)
 			w[0] += steps.call()
 			if P.grounded and Vector2(P.vel.x, P.vel.z).length() > 4.0: w[1] += 1)
 		P.inp["move"] = Vector2.ZERO
 		return w
-	var walk: Array = local_walk.call("ostra")
-	var foot: Array = local_walk.call("thief")
-	_as_hero(P, "ostra")
+	await _become(P, "ostra")
+	var walk: Array = local_walk.call()
+	await _become(P, "thief")
+	var foot: Array = local_walk.call()
+	await _become(P, "ostra")
 	P.teleport(home)
 	ok(
 		"float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step",
 		walk[0] == 0 and walk[1] >= 60 and foot[0] >= 3 and foot[1] >= 60,
 		"Motley %d steps (%d ticks walking), thief %d (%d)" % [walk[0], walk[1], foot[0], foot[1]]
 	)
-	var remote_steps := func(arch: String) -> int:
-		_as_hero(T, arch)
+	var remote_steps := func() -> int:
 		T.remote = true
 		T.teleport(P.pos + Vector3(3.0, 0, 0))
 		var n := [0]
@@ -699,32 +713,19 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 			T.grounded = true
 			Sfx.listener = P.pos
 			T.render(DT, 1.0)
-			_clips_frame(T)
+			_clips(T)
 			n[0] += steps.call()
 		T.remote = false
 		T.vel = Vector3.ZERO
 		return n[0]
-	var other: int = remote_steps.call("ostra")
-	var footed: int = remote_steps.call("thief")
+	await _become(T, "ostra")
+	var other: int = remote_steps.call()
+	await _become(T, "thief")
+	var footed: int = remote_steps.call()
 	ok(
 		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
 		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
 	)
-
-## Hunter `h` as Hero `a` in that Hero's own model (set_arch keeps the old one; the game builds the new Hero's,
-## Hunter.reclass), so its steps come from its own clips.
-func _as_hero(h: Hunter, a: String) -> void:
-	h.set_arch(a)
-	var col: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	h.set_model(Models.hunter(h.cls, col, h.wid, "", PlayerLook.neutral(), h.arch))
-	h.anim = null
-
-## The rest of a real frame after `h`'s render: its clips advance (WardenSync runs after Match), and a Hero's step
-## falls on their foot plants (WardenSteps), so a step heard there needs them moving.
-func _clips_frame(h: Hunter) -> void:
-	var sy := h.model.get_node_or_null("Warden/Sync")
-	if sy:
-		sy.call("_process", DT)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
