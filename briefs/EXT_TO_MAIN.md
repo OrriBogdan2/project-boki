@@ -10480,3 +10480,4 @@ READY ext/hunter-regen-gil-1120 ca73a8cbf8 (Gil 3D regen candidate A, DRAFT mode
 READY ext/ui-menu-small-res 8067daa485 (menu-fit-check: all Esc pages + Settings tabs at 3 sizes x text 100/150%: 152 states, 0 clipped/overlapping; no layout fix needed)
 READY ext/farm-boki-duel-game a443b8ba666 (Fetch Cup garden contest: spec, 60 s round, Speed/Focus result, gems/joy reward, checks; garden_sim burrlet crash fix)
 READY ext/sparkle-3d-fix-1120 aee492e3d8c0aed64ca79c306007bab47585a6b8 (Sparkle ryzz 3D repair: Meshy quad remesh + Meshy weights + re-read arm joints, clip_shots TurnStep fix; art-gate FAIL on residual face/hair texture, draft)
+READY ext/vfx-ambient-motes-budget ef6ec0c9a7 (region motes pause past draw distance via ParticleCount.pace; GPU bench-fight peak 1867->1120 particles, frame time within noise)
