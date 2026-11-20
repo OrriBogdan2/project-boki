@@ -1132,7 +1132,12 @@ func render(delta: float, alpha: float) -> void:
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
-	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
+	var glides := on_you and owner_h != null and owner_h.gliding and carry_style() != "mount"
+	# BokiRig: the hop clip in the air, not the run; the glide clip on your back through your glide (0.15 s blend)
+	var act := "hop" if airborne else ""
+	if glides:
+		act = "glide"
+	model.set_meta("kact", act)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
 			scan_by != null and Capture.active(scan_by), m.time - angry_since)
