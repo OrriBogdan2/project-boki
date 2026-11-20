@@ -10437,3 +10437,4 @@ READY ext/farm-minigame-fair 68db7415a89a3f4f6a14cdca41ecb2f02b1956d6 (--minigam
 READY ext/feel-warm-midmatch-shaders 8283500af3f57fed8e6d3808af16de664f629a3b (warm-up: 0 mid-match shader compiles on cold cache Forward+, was 2-5 frames; seat beacons, Boki trails, rocket, all shader files, particle keys, quality-step redraw)
 READY ext/tut-dead-air ec3a1d5de690ba05ac31508bed2decb076f960ff (slow-player dead-air check lists >8 s quiet stretches; farm hammer line counts swings 14.3 s -> 6.0 s; no stale marker after Hob talk)
 READY ext/feel-run-turn 739c7cee21 (run turn: 13 kits flip within 1 step of the source rule, asserted in --move-feel-check; turn foot slide 35-128% listed OPEN in --anim-audit; no hunter_move.json number changed)
+READY ext/feel-hitstop-table a47744301a (hit-feel table for 13 Hunters in DASHES §5.4; flash_ms tier + Archer/Gunslinger flash, Bulwark ult shake/hold strays fixed; --impact-weight-check 7-8 asserts it)
