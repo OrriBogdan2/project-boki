@@ -74,3 +74,21 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+Weights pass 11-20 (ext/hunter-fix-tarek-1118): the scan welded the right fist and both forearms into the sash and
+thighs, and the re-derived skin left 20-62% hand weight on hip/thigh/trouser skin, so every arms-up clip dragged a
+grey/black wing of apron and trouser after the hand. Only JOINTS_0/WEIGHTS_0 changed: the glb is the live v95 file
+(meshy/v95/_main/tarek_5db6f1fdd5d.glb, 59,999 tris) with every other byte identical (JSON, positions, normals, UVs,
+indices, textures). The weights are the 11-19 split-hand result (freed arm weight on body skin -> hips at the sash,
+harmonic fill from the surrounding skin on the right trouser leg, the two knuckle shells ride the sash, shin weight
+above the knee fades into the thigh), mapped back onto the unsplit live mesh by position: every seam copy already
+carried identical weights, so the 11-19 vertex split and its 70 cap triangles did nothing and were dropped (no cut,
+no new geometry). Skeleton, bone names, clips, materials and textures unchanged.
+Proof: /home/boki/gens/tarek-fix-1120-a4 (live-vs-fixed renders of every clip, sheets, MP4, numbers in answer.md).
+Left arm 11-20 (weights only, on top of the pass above): the stone left arm is joined to the body only at the armpit
+(min-cut below 1.60 m: one 41-edge ring at y 1.57-1.60), but heat weights left ~50% hips on the arm's own surface, so
+arms-up clips pulled a pale stone wedge from the inner arm to the chest. That arm region (1,551 welded verts) now rides
+upper_arm.L/forearm.L only, ramped from the armpit ring (1.58 m, unchanged) down to 1.35 m, 4 smoothing passes. Only
+JOINTS_0/WEIGHTS_0 change. Edges over 3x 0.339% -> 0.253% (left side 74 -> 31), no clip worse. Moving the shoulder plate
+(pauldron.L) onto the arm or stripping hips from stone beside the torso made other clips worse (tried, not kept).
+Proof and tools: /home/boki/gens/tarek-fix-1120 (live | branch | +left renders, cmp_leftarm_*.jpg, tool/wL2.py, port.py).
