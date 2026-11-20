@@ -49,20 +49,10 @@ const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)
 const PLANT_SCALE := 1.9
 const PLANT_LEAN := 0.25
-## the aegis wall: radius (m), half its arc (rad), height (m) and how far its top leans out (m); its chord is
-## about the wall's 4.2 m, its height 30% over the old slab's
-const AEGIS_R := 2.6
-const AEGIS_HALF := 0.92
-const AEGIS_H := 1.7
-const AEGIS_LEAN := 1.2
-const PLATE_N := 7
-## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
-## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
-const PLATE_COL := Color("f6e3a8")
-const PLATE_EDGE := Color("fff0b0")
-const PLATE_GLOW := 0.3        # the plates' own light (a block flashes over it)
-const EDGE_GLOW := 0.9
-const BROKEN_COL := Color("4a3a30")
+## the aegis wall's rest light (a block flashes over it)
+const PLATE_GLOW := AegisWall.REST_GLOW
+## the sparks a block throws are his ivory
+const PLATE_EDGE := AegisWall.IVORY
 ## s the wall takes to rise out of the ground
 const RISE_T := 0.2
 
@@ -71,10 +61,7 @@ var hammer: Node3D            # the thrown hammer
 var beacon: MeshInstance3D
 var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
-var aegis: Node3D              # the plated wall
-var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
-var plate_col := PLATE_COL
-var edge_col := PLATE_EDGE
+var aegis: AegisWall           # the translucent wall
 var aegis_hit := 0.0
 var rise_t := 0.0
 var wakes: Array[MeshInstance3D] = []
@@ -115,7 +102,10 @@ func _ready() -> void:
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Arch.color(h.arch), true))
-	_build_aegis()
+	aegis = AegisWall.new()
+	aegis.top_level = true
+	aegis.visible = false
+	add_child(aegis)
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
 		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
@@ -181,48 +171,6 @@ func _tick_chain() -> void:
 		var fix := Basis.looking_at(along, up)
 		mi.global_transform = Transform3D(fix.rotated(along, PI * 0.5 * (i % 2)) * Basis(Vector3.RIGHT, PI * 0.5), at)
 		mi.scale = Vector3(1.0, 1.0, 1.0) * clampf(a.distance_to(b) / chain.size() * 2.2, 0.5, 1.6)
-
-## The wall of lit plates, built once: two rows of plates along the arc, ribs between them, a
-## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
-## centre at the origin, the apex straight ahead (-Z).
-func _build_aegis() -> void:
-	aegis = Node3D.new()
-	aegis.top_level = true
-	aegis.visible = false
-	add_child(aegis)
-	var pal: Dictionary = HeroVfx.data("bulwark").get("palette", {})
-	plate_col = Color(String(pal.get("slab", PLATE_COL.to_html(false))))
-	edge_col = Color(String(pal.get("ivory", PLATE_EDGE.to_html(false))))
-	var plate := Models.toon(plate_col, false, PLATE_GLOW)
-	var edge := Models.toon(edge_col, false, EDGE_GLOW)
-	plate.set_shader_parameter("rim_amount", 0.6)
-	plate.set_shader_parameter("rim_color", edge_col)
-	plate_mats = [plate, edge]
-	var tilt := atan2(AEGIS_LEAN, AEGIS_H)
-	var seg := AEGIS_HALF * 2.0 / PLATE_N
-	var width := 2.0 * AEGIS_R * sin(seg * 0.5)
-	for i in PLATE_N:
-		var b := lerpf(-AEGIS_HALF, AEGIS_HALF, (float(i) + 0.5) / PLATE_N)
-		var facing := Vector3(-tilt, -b, 0.0)
-		for row in 2:
-			var y := AEGIS_H * (0.25 + 0.5 * float(row))
-			var r := AEGIS_R + AEGIS_LEAN * (y / AEGIS_H)
-			var at := Vector3(sin(b) * r, y, -cos(b) * r)
-			Models.part(aegis, Models.box(width * 0.92, AEGIS_H * 0.45, 0.16), plate, at, Vector3.ONE, facing)
-		var top_r := AEGIS_R + AEGIS_LEAN
-		var rim_at := Vector3(sin(b) * top_r, AEGIS_H + 0.05, -cos(b) * top_r)
-		Models.part(aegis, Models.box(width, 0.14, 0.34), edge, rim_at, Vector3.ONE, Vector3(0, -b, 0))
-		var rb := b - seg * 0.5
-		var rib_r := AEGIS_R + AEGIS_LEAN * 0.5
-		var rib_at := Vector3(sin(rb) * rib_r, AEGIS_H * 0.5, -cos(rb) * rib_r)
-		Models.part(aegis, Models.box(0.13, AEGIS_H * 1.02, 0.24), edge, rib_at, Vector3.ONE, Vector3(-tilt, -rb, 0))
-	var boss_r := AEGIS_R + AEGIS_LEAN * 0.5 + 0.12
-	var boss_at := Vector3(0, AEGIS_H * 0.5, -boss_r)
-	Models.part(aegis, Models.box(0.55, 0.55, 0.14), edge, boss_at, Vector3.ONE, Vector3(-tilt, 0, PI * 0.25))
-	var cross_tilt := Vector3(-tilt, 0, 0)
-	var stem_at := boss_at + Vector3(0, 0, -0.06)
-	Models.part(aegis, Models.box(0.12, 0.5, 0.1), plate, stem_at, Vector3.ONE, cross_tilt)
-	Models.part(aegis, Models.box(0.4, 0.12, 0.1), plate, stem_at + Vector3(0, 0.12, 0), Vector3.ONE, cross_tilt)
 
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
@@ -369,14 +317,11 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
 	aegis.visible = true
 	# the curve's centre sits behind the wall's midpoint so its apex is the wall line
-	var c := Vector2(mid.x, mid.y) - dir * AEGIS_R
+	var c := Vector2(mid.x, mid.y) - dir * AegisWall.R
 	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.02, c.y)
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", plate_col.lerp(BROKEN_COL, hurt * 0.65))
-	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", edge_col.lerp(BROKEN_COL, hurt * 0.65))
 	var pulse := 0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
-	var glow := PLATE_GLOW * (1.0 - hurt) + aegis_hit * 1.2 + pulse
-	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
+	aegis.set_state(hurt, PLATE_GLOW * (1.0 - hurt) + aegis_hit * 1.2 + pulse)
 
 func aegis_hide() -> void:
 	aegis.visible = false
@@ -400,7 +345,7 @@ func aegis_block(at: Vector3) -> void:
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
 	AimKit.hide(h, "aegis_push")
-	var half := Vector2(AEGIS_R * sin(AEGIS_HALF), AEGIS_H * 0.5)
+	var half := Vector2(AegisWall.R * sin(AegisWall.HALF), AegisWall.H * 0.5)
 	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
 
 # ------------------------------------------------------------------ Purify
