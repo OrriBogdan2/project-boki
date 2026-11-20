@@ -10446,3 +10446,4 @@ READY ext/combat-ttk-rest-eight c1f13e16bb0c326c02e92b47cb1d91aa462fb678 (TTK re
 READY ext/stuck-integ-f44ae5a2 5fb2049879692e93079cb9b7f62f9d268e4b8480 (supersedes: ext/merge-lane-leftover-1117 ext/stuck-integ-5d6d8248 ext/merge-lane-hunters5-1117 ext/mantle-port-a; on main a1b35c78ee; import 0 err, --check/kinbox/kael-tap/carry-boki/swim/grammar-runtime 0 fail, warden-model+mantle reds = main; needs GATE)
 READY ext/vision-fog-noblue-1120 0b3f2019d8 (Vision: neutral grey fog outside sight in every weather, no blue behind the player; PR via gh-outbox)
 READY ext/extra-shadow-warnings 91955e1803 (rename shadowing locals in 5 worst files, 0 Godot shadow warnings left there, baseline lowered)
+READY ext/clarity-4v4-shots 7047a1391db814555f984656528776f768c4f370 (combat clarity: --clarity-shots 3v3 slice fight counts what sits on each Hunter; cut glove row in fights, merge ground ring, merge name; --clarity-check element budget)
