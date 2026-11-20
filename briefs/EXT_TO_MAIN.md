@@ -10421,3 +10421,4 @@ READY ext/sfx-tenzo-grimble-bar 2738e9f30c (Tenzo+Grimble ability bar: 11 CC0 cu
 READY ext/sfx-sparkle-sable-bar d4db065a78 (Sparkle+Sable: 10 generated cues filling missing cast/travel/hit/end beats; sfx-set/strike/match-audio 0 fail)
 READY ext/anim-boki-coverage-all 8d165d85c7740236cc04b2aa50a84b2d432ed748 (anim coverage: 48 rigged Boki x 8 garden states, 0 missing, 25 on shared clip set, five worst filed)
 READY ext/anim-neve-wrist 82ea2cd4f4 (Neve right arm refit onto bones, glove on hand.R, wrist roll split into forearm; stretch rimewright 9.15->7.81; clips check no new red)
+READY ext/sfx-motley-gil-bar 958a249bcd (Motley+Gil Snd bar: Snap miss, Trade far end, seed fizzle, Gil own set wired, Tide hit, slime end; set/strike checks green)
