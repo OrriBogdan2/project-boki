@@ -91,9 +91,11 @@ func _clips() -> void:
 			var got := WardenClips.land_play(base, cls, tier)
 			var cell: Dictionary = Content.rules("land_feel")[cls][way]
 			if not bool(cell.get("clip", false)):
-				ok(float(got["dur"]) == float(base["dur"]), "%s %s %s: own land clip hold %.2f s" % [a, cls, way, got["dur"]])
+				var own := "%s %s %s: own land clip hold %.2f s" % [a, cls, way, got["dur"]]
+				ok(float(got["dur"]) == float(base["dur"]), own)
 				continue
 			var keys := float(base["dur"]) * float(base.get("rate", 1.0))
 			var same := absf(float(got["dur"]) * float(got["rate"]) - keys) < 0.001
-			ok(absf(float(got["dur"]) - float(cell["s"])) < 0.001 and same,
-					"%s %s %s: land clip held %.2f s (data %.2f), same %.2f s of keys" % [a, cls, way, got["dur"], cell["s"], keys])
+			var what := "%s %s %s: land clip held %.2f s (data %.2f), same %.2f s of keys" % [a, cls, way, got["dur"],
+					cell["s"], keys]
+			ok(absf(float(got["dur"]) - float(cell["s"])) < 0.001 and same, what)
