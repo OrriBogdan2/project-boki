@@ -22,15 +22,15 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("8a5aff")       # the Deep Reach: the bruised-purple flesh of the stretched arm
-const SLUDGE := Color("4a2278")        # the purple-black drips off the arm
+const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
+const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
 const BRASS := Color("e0a040")
 const BRASS_HOT := Color("fff0b0")
 const IRON := Color("3a3f48")
-const SLUG_COL := Color("ff4fa8")      # a hot pink streak in flight
-const SLUG_CORE := Color("ffd0ec")
-const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
+const SLUG_COL := Color("ffc83a")      # a hot gold streak in flight
+const SLUG_CORE := Color("fff2d0")
+const SLUG_REST := Color("e0a018")     # a slug hanging at its stop line: solid brass, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
@@ -227,8 +227,8 @@ func _drop_holds() -> void:
 		_end_pull(false)
 	broadside.drop()
 
-## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). One aim line lies on the ground from his body out to the
+## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (gold
+## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
@@ -240,7 +240,7 @@ func _tick_gun() -> void:
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff0f6"), "alpha": 0.8, "follow": true})
+	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff4d8"), "alpha": 0.8, "follow": true})
 
 func _dress_volley() -> void:
 	play("dr_shot")
