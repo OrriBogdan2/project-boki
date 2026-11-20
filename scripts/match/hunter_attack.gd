@@ -195,8 +195,8 @@ func tick_weapon(dt: float) -> void:
 		h.sus_n = 0
 	if not h.strike_at_end.is_empty():
 		if h.roll_t > 0.0 and not h.downed and h.stun_t <= 0.0:
-			# the lunge curves to follow your aim
-			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			# the lunge curves to follow your aim (10% a 60 Hz step, at any step)
+			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()
 		else:
 			var st: Dictionary = h.strike_at_end
 			h.strike_at_end = {}
@@ -337,17 +337,19 @@ func emit_shot() -> void:
 	if h.has_meta("zero_spread_t") and h.m.time < float(h.get_meta("zero_spread_t")):
 		spread = 0.0            # a Thief's SMG right after a Shadow Step
 		a = atan2(dir.y, dir.x)
-	var rng: float = (float(h.wpn["range"]) + rng_add) * h.shot_range_k
+	var mz: Dictionary = h.wpn.get("muzzle", {})      # a skinned gun's mouth: its slugs stop `range` from the body
+	var rng: float = (float(h.wpn["range"]) + rng_add) * h.shot_range_k - float(mz.get("fwd", 0.0))
 	h.shot_range_k = 1.0
 	var life: float = rng / spd
 	var dmg: float = float(h.wpn["dmg"]) * h.m.dmg_mult(h)
 	if h.wpn.has("nth"):
 		h.nth_n += 1
 		if h.nth_n % int(h.wpn["nth"][0]) == 0: dmg *= 1.0 + float(h.wpn["nth"][1])
-	if h.wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(h.wpn["sustain_loss"]) * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	var sus_k := 1.0 - loss * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+	dmg *= sus_k      # the string's decay; the round carries its share (a kit sizes its look by it)
 	h.sus_n += 1
-	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0))}
+	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0)), "sus_k": sus_k}
 	extra.merge(h.wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if h.wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
@@ -378,9 +380,13 @@ func emit_shot() -> void:
 		extra["pg"] = "%s_%d" % [h.nid, h.shot_n]
 		extra["pn"] = pel
 		extra["pf"] = float(h.wpn.get("pellet_floor", 1.0 / pel))
+		if not mz.is_empty():
+			extra["body_sweep"] = true
 		for i in pel:
 			var pa := a - fan * 0.5 + fan * float(i) / float(pel - 1)
 			var p0 := Vector3(h.pos.x + cos(pa) * 0.6, shot_y, h.pos.z + sin(pa) * 0.6)
+			if not mz.is_empty():
+				p0 = ShotOrigin.muzzle_at(h, mz, dir)
 			h.m.spawn_shot(h, p0, Vector2(cos(pa), sin(pa)) * spd, dmg, life, h.wpn["size"], h.wpn["color"], extra)
 	else:
 		h.m.spawn_shot(h, start, Vector2(cos(a), sin(a)) * spd, dmg, life, h.wpn["size"], h.wpn["color"], extra)

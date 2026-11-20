@@ -1,6 +1,6 @@
 # Project Boki abilities
 
-Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/hunter_abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/hunter_abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
@@ -213,7 +213,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
-- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.

@@ -11,8 +11,12 @@ extends RefCounted
 ## landing 0.9 m ahead, a punched rock, a split) keeps its own origin.
 const BODY_REACH := 0.7
 
+## A shot with `body_sweep` (a weapon whose muzzle sits further out than BODY_REACH: Grimble's blunderbuss) always
+## sweeps from the body.
 ## The point the hit sweep starts from: `at` pulled back along the flight line to the body's centre.
 static func hit_from(by: Ent, at: Vector3, v2: Vector2, x: Dictionary) -> Vector3:
+	if by != null and x.get("body_sweep", false):
+		return body(by, at)
 	if by == null or x.get("cos", false) or x.has("lob") or x.get("cos_free", false):
 		return at
 	var lead := Vector2(at.x - by.pos.x, at.z - by.pos.z)
@@ -20,6 +24,10 @@ static func hit_from(by: Ent, at: Vector3, v2: Vector2, x: Dictionary) -> Vector
 	if reach < 0.01 or reach > BODY_REACH or v2.length() < 0.01 or lead.dot(v2.normalized()) < reach * 0.9:
 		return at
 	return body(by, at)
+
+## A weapon's muzzle from its data `{"fwd": m ahead of the body along the aim, "up": m above the feet}`.
+static func muzzle_at(by: Ent, mz: Dictionary, dir: Vector2) -> Vector3:
+	return Vector3(by.pos.x + dir.x * float(mz["fwd"]), by.pos.y + float(mz["up"]), by.pos.z + dir.y * float(mz["fwd"]))
 
 ## The shooter's centre at the height of `at` (the muzzle).
 static func body(by: Ent, at: Vector3) -> Vector3:

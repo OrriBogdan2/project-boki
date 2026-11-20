@@ -5,16 +5,18 @@ extends Node
 ##   1. build-up: the music ducks and the ambience fades, the camera eases in on you, a low swell and a heartbeat
 ##   2. the Mask rises to your face in slow motion while a ghostly porcelain face flickers over yours
 ##   3. a cut to black on contact, and a hard silence
-##   4. the fallen Hunter in the black, on a grey panel of their painted art (about 5 s): their face comes up out of
-##      the dark, then a flash cuts to their pose, held with a whisper of their line while the art pushes in
+##   4. the fallen Hunter in the black, on grey panels of their painted art (4-6 s): three painted memories
+##      (Portraits.memory_frames: their past, their fall, the legend; a Hunter without them shows their face,
+##      then their pose), each pushing in and cross-fading into the next, the last held with a whisper of their line
 ##   5. the snap back: a deep impact, a ripple of light and a small camera push (no shake); with `swap` you stand
 ##      as the Hunter (Unmasked.blend) in a brief pose; their name and title on screen
 ##   6. the music comes back under a sting in the Hunter's key
 ## It plays through its own camera (the scene's own is current again after). Its text (the whisper, the name)
-## stays up for at least read_s. A click (or interact) moves on to the next beat; once a player has seen one
-## (Save.d.tutorial.mask_seen), holding it for HOLD_SKIP_S or Esc skips the rest. `done` gets the body standing
+## stays up for at least read_s. A click (or interact) moves on to the next beat, but never past the memories the
+## first time (the owner saw them go by in 1-2 s); once a player has seen one (Save.d.tutorial.mask_seen), a click
+## cuts to the last memory, and holding it for HOLD_SKIP_S or Esc skips the rest. `done` gets the body standing
 ## there at the end: the Hunter's model with `swap`, else the body you had (on the farm you stay yourself).
-## `short` is the quicker cut for a later Mask.
+## `short` is the quicker cut for a later Mask (never the first: play() runs the full beat until one has been seen).
 ##
 ##   MaskBeat.play(relic, you, func(body): ..., true)
 
@@ -28,7 +30,8 @@ const RIPPLE_S := 0.9          # s it takes
 const PANEL_IN_S := 0.6       # s the first memory frame takes to come up out of the black
 const PANEL_PUSH := 0.12       # x: how far each memory frame pushes in (eased out, slowing into the hold)
 const PANEL_DARK := 0.6        # how dark the first frame starts (it brightens over its whole length)
-const CUT_FLASH := 0.45        # alpha of the white flash on the cut to the next memory frame
+const CUT_FLASH := 0.25        # alpha of the white flash on the cut to the next memory frame
+const CROSS_S := 0.45          # s a memory frame cross-fades into the next (the earlier one fades out under it)
 const WHISPER_AT_S := 0.4      # s into the memory frames that the whisper starts
 const POSE_S := 0.6            # s: the Hunter's cast pose (HunterAnim's "ult" cast)
 const NAME_IN_S := 0.35        # s after the snap that the name comes in
@@ -57,11 +60,13 @@ var ui: CanvasLayer
 var black: ColorRect
 var white: ColorRect
 var memory: TextureRect
+var memory_prev: TextureRect   # the earlier memory frame, fading out under the next
 var whisper_line: Label
 var name_box: Control
 var skip_hint: Control
 var _times: Dictionary
 var _memory_lens: Array        # s per memory frame: the rules' lengths, stretched so the whisper can be read
+var _frames: Array[String]     # the memory frames' art, first to last (Portraits.memory_frames)
 var _reveal_s := 0.0           # s of the reveal: the rules' length, or long enough to read the name
 var _held_at := -1.0           # s (on _clock) the current click or interact went down; -1 when none is held
 var _clock := 0.0              # s since the beat began
@@ -89,7 +94,7 @@ static func play(relic: MaskRelic, who: Node3D, done: Callable, swap_body := tru
 	b.id = relic.id
 	b.body = who
 	b.swap = swap_body
-	b.short = quick
+	b.short = quick and seen()      # (the first Mask anyone puts on gets the full beat, wherever it happens)
 	b.finished.connect(done)
 	who.get_parent().add_child(b)
 	return b
@@ -101,7 +106,11 @@ static func seen() -> bool:
 func _ready() -> void:
 	_rules = Content.rules(RULES)
 	_times = _rules["short" if short else "full"]
+	_frames = Portraits.memory_frames(id)
 	var lens: Array = _times["memory_s"]
+	if lens.size() != _frames.size():      # (fewer frames than the rules plan: the same time, shared out)
+		var each := float(lens.reduce(func(a, b): return a + float(b), 0.0)) / maxi(1, _frames.size())
+		lens = _frames.map(func(_f): return each)
 	var whisper_s := WHISPER_AT_S + read_s(_whisper())
 	var stretch := maxf(1.0, whisper_s / float(lens.reduce(func(a, b): return a + float(b), 0.0)))
 	_memory_lens = lens.map(func(s): return float(s) * stretch)
@@ -114,8 +123,8 @@ func _ready() -> void:
 	_take_camera()
 	_build_ui()
 	_quiet()
-	Portraits.read_soon(Portraits.art_path(id, true))      # (the memory frames, read while the build-up plays)
-	Portraits.read_soon(Portraits.art_path(id))
+	for f in _frames:      # (the memory frames, read while the build-up plays)
+		Portraits.read_soon(f)
 	WardenGlb.fetch(id)
 	_swell = _player("mask_swell", -6.0)
 	_heart = _player("mask_heart", -2.0)
@@ -150,16 +159,13 @@ func _build_ui() -> void:
 	ui = CanvasLayer.new()
 	ui.layer = 70
 	add_child(ui)
-	memory = TextureRect.new()
-	memory.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	memory.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	memory.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	memory.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	memory.material = _memory_look()
+	var look := _memory_look()
+	memory_prev = _frame(look)
+	memory = _frame(look)
 	black = _cover(Color(0, 0, 0, 0))
 	ui.add_child(black)
+	ui.add_child(memory_prev)
 	ui.add_child(memory)
-	memory.visible = false
 	white = _cover(Color(1, 1, 1, 0))
 	ui.add_child(white)
 	whisper_line = UI.label("", 26, Color(0.92, 0.9, 0.98), UI.semi)
@@ -181,6 +187,17 @@ func _build_ui() -> void:
 		skip_hint.offset_bottom = -18
 		ui.add_child(skip_hint)
 
+## A full-screen memory frame, hidden until its turn.
+func _frame(look: ShaderMaterial) -> TextureRect:
+	var r := TextureRect.new()
+	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.material = look
+	r.visible = false
+	return r
+
 func _cover(col: Color) -> ColorRect:
 	var r := ColorRect.new()
 	r.color = col
@@ -195,12 +212,13 @@ func _memory_look() -> ShaderMaterial:
 uniform vec4 tint : source_color;
 uniform float dark = 0.0;
 void fragment() {
+	float fade = COLOR.a;
 	vec4 c = texture(TEXTURE, UV);
 	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 	vec3 col = mix(vec3(l), tint.rgb * (l * 1.4 + 0.1), 0.55);
 	float edge = smoothstep(0.75, 0.25, distance(UV, vec2(0.5)));
 	col *= mix(0.25, 1.0, edge) * (1.0 - dark);
-	COLOR = vec4(col, c.a);
+	COLOR = vec4(col, c.a * fade);
 }"""
 	var m := ShaderMaterial.new()
 	m.shader = sh
@@ -321,8 +339,8 @@ func _become_hunter() -> void:
 	body = model
 	_anim = HunterAnim.new(model)
 
-## The fallen Hunter in the black: their face brightens up out of the dark, a flash cuts to their pose, and that
-## is held with their whisper; each frame pushes in, slowing as it goes.
+## The fallen Hunter in the black: the first memory brightens up out of the dark, each cross-fades into the next
+## with a soft flash and a heartbeat, the last is held with their whisper; each frame pushes in, slowing as it goes.
 func _memories() -> void:
 	var lens: Array = _memory_lens
 	var at := 0.0
@@ -346,15 +364,24 @@ func _memories() -> void:
 		whisper_line.text = _whisper()
 		create_tween().tween_property(whisper_line, "modulate:a", 0.85, 0.5).set_trans(Tween.TRANS_SINE)
 
-## Frame i: the face first, the painted pose (the splash) last. A cut after the first comes with a flash and a beat.
+## Frame i of the memories (Portraits.memory_frames). After the first, the earlier frame fades out under the next
+## (CROSS_S), with a soft flash and a beat.
 func _show_memory(i: int) -> void:
-	var path := Portraits.art_path(id, i == _memory_lens.size() - 1)
+	var path := _frames[i]
 	var tex := Portraits.read_soon(path)
+	if i > 0:
+		memory_prev.texture = memory.texture
+		memory_prev.scale = memory.scale
+		memory_prev.pivot_offset = memory_prev.size * 0.5
+		memory_prev.visible = true
+		memory_prev.modulate.a = 1.0
+		create_tween().tween_property(memory_prev, "modulate:a", 0.0, CROSS_S)
 	memory.texture = tex if tex else load(path) as Texture2D
 	memory.visible = true
 	memory.pivot_offset = memory.size * 0.5
 	if i > 0:
-		memory.modulate.a = 1.0
+		memory.modulate.a = 0.0
+		create_tween().tween_property(memory, "modulate:a", 1.0, CROSS_S)
 		(memory.material as ShaderMaterial).set_shader_parameter("dark", 0.0)
 		white.color.a = CUT_FLASH
 		create_tween().tween_property(white, "color:a", 0.0, 0.3).set_ease(Tween.EASE_OUT)
@@ -364,6 +391,7 @@ func _show_memory(i: int) -> void:
 func _snap_back() -> void:
 	_next("reveal")
 	memory.visible = false
+	memory_prev.visible = false
 	whisper_line.visible = false
 	black.color.a = 0.0
 	white.color.a = 0.8
@@ -448,8 +476,8 @@ func _holding() -> bool:
 	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_action_pressed("interact") \
 			or Input.is_action_pressed("ui_accept")
 
-## A click: on to the next beat (the Mask's approach cuts to the black, the face to the held pose; a line of text
-## goes early).
+## A click: on to the next beat (the Mask's approach cuts to the black, the memories to the last one held; a line
+## of text goes early). The first time, the memories play through whatever is pressed (they are the point).
 func next_beat() -> void:
 	match phase:
 		"build", "rise":
@@ -457,6 +485,8 @@ func next_beat() -> void:
 		"black":
 			_next("memory")
 		"memory":
+			if not seen():
+				return
 			var hold_at := float(_memory_lens.slice(0, -1).reduce(func(a, b): return a + float(b), 0.0))
 			if t < hold_at:
 				t = hold_at
