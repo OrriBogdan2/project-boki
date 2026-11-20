@@ -120,7 +120,8 @@ static func blocked(m: Match, at: Vector3, dir: Vector3, col: Color, pitch := 1.
 	var p: Hunter = m.player
 	if p != null and Vector2(p.pos.x - at.x, p.pos.z - at.z).length() > FAR:
 		return
-	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), col.lerp(Color.WHITE, BLOCK_SPARK_WHITE), BLOCK_SPARKS, 9.0, 30.0, 0.24, 8.0, 1.2)
+	var shown := col.lerp(Color.WHITE, BLOCK_SPARK_WHITE)
+	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), shown, BLOCK_SPARKS, 9.0, 30.0, 0.24, 8.0, 1.2)
 	m.sfx(BLOCK_TICK, at, BLOCK_TICK_DB, BLOCK_TICK_PITCH * pitch)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
