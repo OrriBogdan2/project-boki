@@ -44,8 +44,8 @@ func run(main: Node) -> void:
 
 func _data() -> void:
 	var d := BokiQuirks.data()
-	ok((d.get("quirk", {}) as Dictionary).size() == 120 and (d.get("sexNote", {}) as Dictionary).size() == 18,
-		"the data file loads: 120 quirks, 18 sex notes")
+	ok((d.get("quirk", {}) as Dictionary).size() == 140 and (d.get("sexNote", {}) as Dictionary).size() == 18,
+		"the data file loads: 140 quirks, 18 sex notes")
 	var missing := Data.KIN.keys().filter(func(sp): return BokiQuirks.quirk(sp) == "")
 	ok(missing.is_empty(), "every species in the game has a quirk %s" % str(missing))
 	ok(BokiQuirks.key("basaltoad") == "rampartoad", "a species is looked up by its display name")

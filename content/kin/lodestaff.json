@@ -1,0 +1,20 @@
+{
+	"id": "lodestaff",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lodestaff.json.",
+	"work": {
+		"haul": 2,
+		"stone": 3,
+		"timber": 1
+	},
+	"shiny": {
+		"belly": "#516c46",
+		"color": "#544b36",
+		"glow": "#ffe3a3"
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.07,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

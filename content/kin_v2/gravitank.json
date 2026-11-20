@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "gravitank",
+	"name": "Gravidon",
+	"animals": [
+		"Armadillo",
+		"Orbiting stones"
+	],
+	"theme": "gravity",
+	"flavor": "Evolution of Gravadillo.",
+	"colors": {
+		"belly": "#6c6c6c",
+		"body": "#3c3c54",
+		"glow": "#c790ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "gravadillo",
+		"tail": "none",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.4,
+		"mass": 1.4,
+		"gait": {
+			"hop_rate": 5.5,
+			"hop_height": 0.06,
+			"pace": 0.82
+		}
+	},
+	"stats": {
+		"kin_damage": 5,
+		"kin_hp": 12,
+		"kin_speed": 2,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.65,
+		"curiosity": 0.4,
+		"loyalty": 0.86,
+		"temper": 0.27
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.75,
+		"caution": 0.15,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Orbit Anchor",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.9,
+			"jump": 0.9,
+			"turn": 0.7
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 7
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "rock_guard",
+	"merge": "titan",
+	"evolution": {
+		"root": "Grav",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form",
+					"pebbit_dense_plate"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "slow, heavy, loyal",
+		"syllables": [
+			"Grav",
+			"idon"
+		]
+	},
+	"egg": {
+		"name": "Gravidon Egg",
+		"temper": "Steady",
+		"desc": "Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"id": "thistlynx",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/thistlynx.json.",
+	"work": {
+		"ember": 3,
+		"forage": 1,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#a5deff",
+		"color": "#6bb8cc",
+		"glow": "#77e3ff"
+	},
+	"size": {
+		"cm": 50,
+		"kg": 8.0,
+		"fit": 1.1,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

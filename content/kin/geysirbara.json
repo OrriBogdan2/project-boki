@@ -1,0 +1,20 @@
+{
+	"id": "geysirbara",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/geysirbara.json.",
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#fca3be",
+		"color": "#54a0b4",
+		"glow": "#65efff"
+	},
+	"size": {
+		"cm": 94,
+		"kg": 135.5,
+		"fit": 2.07,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}

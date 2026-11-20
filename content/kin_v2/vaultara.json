@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "vaultara",
+	"name": "Vaultara",
+	"animals": [
+		"Tuatara",
+		"Vault door"
+	],
+	"theme": "titan",
+	"flavor": "Huge tuatara with a vault-door shell.",
+	"colors": {
+		"belly": "#848454",
+		"body": "#6c6c6c",
+		"glow": "#ffd582"
+	},
+	"look": {
+		"ears": "horn",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 4,
+		"kin_hp": 11,
+		"kin_speed": 4,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.73,
+		"curiosity": 0.33,
+		"loyalty": 0.79,
+		"temper": 0.24
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Vault Door",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "boulder_heave",
+	"auto": "rock_guard",
+	"merge": "cairn_colossus",
+	"evolution": {
+		"root": "Vaul",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "ancient, dry, protective",
+		"syllables": [
+			"Vaul",
+			"tara"
+		]
+	},
+	"egg": {
+		"name": "Vaultara Egg",
+		"temper": "Ancient",
+		"desc": "Something ancient is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

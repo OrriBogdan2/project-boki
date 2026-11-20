@@ -1,0 +1,20 @@
+{
+	"id": "mossbastion",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/mossbastion.json.",
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#8c7ec3",
+		"color": "#5d5484",
+		"glow": "#706bff"
+	},
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"fit": 1.07,
+		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	}
+}
