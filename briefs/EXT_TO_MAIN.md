@@ -10666,3 +10666,4 @@ READY ext/boki-own-clips-e 4325a435ccf1be68a99d78b2a3be3bed2a7d4374 (own clips f
 READY ext/boki-own-clips-c 8df37277ff (own clips for glomwort, goliathite)
 READY ext/boki-own-clips-g dee0d8dd5a (own clips for opalisk, orchisloth)
 READY ext/boki-own-clips-f de9b2e84c68fa33312354c3883815f054753b78a (own clips for nacrolin, nimbostrich)
+READY ext/p03-port-1118 9fae4e013b584c3b4b7b36dd3db5ae79cca55fb1 (P03 carry-out slot, PR #322: merged main bba9e9f5df; net.gd conflict -> Net 0.24.20 since main's 0.24.19 is a release bump without the slot tail; GARDEN.md keeps both; --check 0, capture/carry-boki/come-look/kin-loss/sfx-set 0 fail, match-audio same 3 reds as main (+10 new carry rows green); health --strict red only on 8 files this branch does not touch (same as main); needs regate)
