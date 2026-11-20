@@ -295,7 +295,6 @@
 		["jug_lunge_wind", 0.5, ""],
 		["jug_haul_wind", 0.3, ""],
 		["jug_meteor", 0.4, ""],
-		["jug_lunge_wind", 0.5, "jug_lunge"],
 		["jug_guard", 0.5, "glide"],
 		["jug_reel", 0.3, "jug_spin"],
 		["jug_reel", 0.3, "jug_dash"],

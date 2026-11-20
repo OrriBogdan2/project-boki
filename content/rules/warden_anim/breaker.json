@@ -250,7 +250,6 @@
 		["bul_smash_wind", 0.5, "bul_ult_wind"],
 		["bul_smash_wind", 0.5, "glide"],
 		["bul_smash_wind", 0.5, ""],
-		["bul_smash_wind", 0.5, "bul_smash"],
 		["bul_guard", 0.5, "bul_ult_wind"],
 		["bul_guard", 0.5, ""],
 		["bul_guard", 0.5, "bul_mend"],
