@@ -242,7 +242,7 @@ func _burn_hint(e: Dictionary) -> void:
 	ok(hud.lines.is_empty(), "gliding cool over the abyss: no hint")
 	h.glide_fuel = 0.0
 	m._tips()
-	var want := "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump")
+	var want := TipText.overheat_lift()
 	ok(hud.lines == [want], "first overheat over the abyss: the one line, live key cap (%s)" % str(hud.lines))
 	ok(want.length() <= 70 and not want.contains("\n"), "the line is one short line (%d chars)" % want.length())
 	ok(Save.d["tutorial"].get("overheat_lift", false), "...and it is marked seen in the save")
