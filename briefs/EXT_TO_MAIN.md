@@ -10452,3 +10452,4 @@ READY ext/stuck-integ-f44ae5a2 a8ce72698f25bd54d49b1b8c0e5f1fd6dda66c88 (superse
 READY ext/extra-shadow-warnings 123c3ae3ba (shadowing renames in home, ui, home_layout, hunter, arch_kit: godot-shadow 378 -> 258, no behaviour change)
 READY ext/ui-keycap-rebind 87002f3f2a (ability-bar-check rebind row: E to mouse 4, R to letter; bar, tooltips, tutorial show new caps)
 READY ext/cooldown-text-ranks 5c1648f86bb6a482318581998ac53ef8cee43d8c (--cooldown-text-check rows every Hunter RMB/E/dash x ranks 1-3 + air dash: JSON vs kit vs HUD/tip/card, 167 ok; ABILITIES.md rank rule names rank_cd; no text drift found, no numbers changed)
+READY ext/ui-notice-bullets 25e08e2397 (notice cards as short plain bullets; notice-length row in --tutorial-text-check)
