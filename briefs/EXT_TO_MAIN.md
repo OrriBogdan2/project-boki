@@ -10655,3 +10655,4 @@ READY ext/sfx-boki-command-chirps b0fd1e30b6 (merged origin/main ed98b5c97c; onl
 READY ext/extra-fishing-derby aa0d1e38ad (bulk-rebase: origin/main merged in mechanically, was b3dcdb4299; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-N3-1120 e20c7def49 (origin/main merged in again, 0 behind: net.gd keeps 0.24.21, warden_clips takes main's stride.turn_t reversal gate + branch loco_goal; --check 0 fail; health --strict style ratchet FAIL identical to origin/main (5 untouched files + same long lines); earlier READY 2b69c8abd7 suite 142 flags NEW-RED 0, export 885 MB still applies)
 READY ext/release-gate-pods 9bd3132ab87 (release gate: pod drain wait + --reserve + stale main-tree fix + run ledger; docs-only PR, scripts installed)
+READY ext/boki-idle-batch-a be0003c414 (Boki idles for nine species)
