@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "lanternmit",
+	"name": "Lanternmit",
+	"theme": "tide",
+	"type2": "ember",
+	"flavor": "Moves into an oil lantern.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "jarmit",
+		"stage": 2,
+		"from": "jarmit",
+		"ink": "ember"
+	}
+}

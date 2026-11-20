@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "kerchick",
+	"name": "Kerchick",
+	"theme": "tempest",
+	"type2": "tide",
+	"flavor": "Albatross chick, handkerchief wings.",
+	"data_only": true,
+	"roster": {
+		"art": "locked",
+		"line": "kerchick",
+		"stage": 1
+	}
+}
