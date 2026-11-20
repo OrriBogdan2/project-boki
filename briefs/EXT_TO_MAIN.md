@@ -10493,3 +10493,4 @@ READY ext/ui-kill-feed-ref 2c93eba570 (bulk-rebase: origin/main merged in mechan
 READY ext/p06-port-1118 1617493bbf (bulk-rebase: origin/main merged in mechanically, was c65ae26758; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/vfx-hurt-flash-v95 a29cc138da (bulk-rebase: origin/main merged in mechanically, was 2835f6d93c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/clarity-4v4-shots d1cda0f654 (bulk-rebase: origin/main merged in mechanically, was 7047a1391d; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/tut-playthrough-fps d75f1f5612afb954db59806c53b7e679bd43f628 (supersedes e7dd03dbc6: origin/main a27e3bd234 merged in, clean (the docs/TUTORIAL.md + tutorial_playthrough_check.gd conflicts no longer occur vs current main), --fps/--window/CheckClock intact; --tutorial-playthrough-check default + --fps=30/60/144 at 1280x720 all 0 failures, --check 0, health --strict OK)
