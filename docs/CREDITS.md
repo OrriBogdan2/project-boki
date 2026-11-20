@@ -22,6 +22,8 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-motley (ostra)
 - Synthesised, no samples.
+### ext/sfx-motley-gil-bar (ostra, gil)
+- Synthesised, no samples, no CC0 sources needed (`tools/gen_sfx_motley.py bar`: os_snap_fizz, os_trade_swap, os_seed_fizz; `tools/gen_sfx_gil.py bar`: gil_tide_hit, gil_slime_dry).
 
 ### ext/sfx-cinder (ashwick)
 - Synthesised, no samples.
