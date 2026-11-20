@@ -10415,3 +10415,4 @@ READY ext/vfx-zones-remote 78e69c2aeb (kit zones show on other games: Gil puddle
 READY ext/combat-grimble-reach-net 6d28b49fc0 (Net 0.24.19: Grimble Deep Reach arm shows on other games; hook ball gone; remote-anim-check reach rows ok, host 6.00 m = guest 6.00 m, +0.02/+0.11 s)
 READY ext/anim-stride-foot-slide 811967d9b3 (Hunter runs plant at match scale: loco rate at model scale + foot_mps refits, every Hunter <=2.4 cm/step vs main worst -28.6; STEP line in --foot-slide-check)
 READY ext/sfx-stomp-cues b3fdb5c5bc593171fdde419b702c298d801b8f4a (stomp wind-up/finish/crack cues in content/sfx/stomp.json, wired in Life, asserted in --sfx-set-check and --stomp-check)
+READY ext/anim-footstep-contacts 184a5ef8d5 (Hero footsteps cue on each v95 clip's own foot plants from a generated per-Hero table; --step-contacts-check 60/60 within 2 fr at 60 fps, worst 1; timer drift was up to 19 fr)
