@@ -6,6 +6,7 @@ slot and paint) and every UV of it lands on one texel of that atlas: a calm patc
 the colour) of the stone's own hue with no emission, at the stone's median brightness. The old material then goes
 with the textures, images and bytes only it used (glb_drop_mats.drop). Other parts (the eyes' glow) stay as they are.
 Run: python3 tools/art1/glb_prop_paint.py IN.glb OUT.glb --meshes eye_stone,shard --from leather-body.001 --to metal-v95
+(a Meshy regen sorts the cobalt arm into cloth-v95: --to cloth-v95 --near blue)
 """
 
 import argparse
@@ -39,8 +40,10 @@ def texel(im, uv):
     return (uv[:, 1] * h).astype(int) % h, (uv[:, 0] * w).astype(int) % w
 
 
-def pick(j, b, mat_i):
-    """The UV of a calm, unlit texel of the material's dominant hue at its median brightness, from its own faces."""
+def pick(j, b, mat_i, near=None):
+    """The UV of a calm, unlit texel of the material's dominant hue at its median brightness, from its own faces; with
+    `near` (an rgb, or "blue": the median of its blue texels, a stone arm sorted into another slot) the calm texel of
+    that hue nearest it."""
     m = j["materials"][mat_i]
     base = image(j, b, m["pbrMetallicRoughness"]["baseColorTexture"]["index"])
     emit = image(j, b, m["emissiveTexture"]["index"]) if "emissiveTexture" in m else None
@@ -54,8 +57,12 @@ def pick(j, b, mat_i):
     )
     y, x = texel(base, uv)
     col = base[y, x]
-    hue = np.median(col / np.maximum(col.sum(1, keepdims=True), 1.0), 0)  # its stone's chroma (rgb shares)
-    ok = np.abs(col / np.maximum(col.sum(1, keepdims=True), 1.0) - hue).max(1) < 0.03
+    share = col / np.maximum(col.sum(1, keepdims=True), 1.0)
+    if near == "blue":
+        near = np.median(col[col[:, 2] > col[:, :2].max(1) * 1.25], 0)
+    hue = np.median(share, 0) if near is None else near / max(near.sum(), 1.0)  # its stone's chroma (rgb shares)
+    dist = np.abs(share - hue).max(1)
+    ok = dist < (0.03 if near is None else max(0.03, np.percentile(dist, 5)))
     if emit is not None:
         ey, ex = texel(emit, uv)
         ok &= emit[ey, ex].max(1) < 12.0
@@ -65,8 +72,11 @@ def pick(j, b, mat_i):
     assert len(cand), "no unlit texel of the stone's hue"
     spread = np.array([base[y[i] - WIN : y[i] + WIN + 1, x[i] - WIN : x[i] + WIN + 1].std((0, 1)).max() for i in cand])
     calm = cand[spread <= np.percentile(spread, 20)]
-    lum = col[calm].mean(1)
-    i = calm[np.argsort(lum)[len(lum) // 2]]
+    if near is None:
+        lum = col[calm].mean(1)
+        i = calm[np.argsort(lum)[len(lum) // 2]]
+    else:
+        i = calm[np.argmin(np.abs(col[calm] - near).sum(1))]
     return ((x[i] + 0.5) / w, (y[i] + 0.5) / h), col[i]
 
 
@@ -77,11 +87,13 @@ def main():
     ap.add_argument("--meshes", required=True)
     ap.add_argument("--from", dest="old", required=True)
     ap.add_argument("--to", required=True)
+    ap.add_argument("--near", help='R,G,B or "blue": the texel of --to nearest that colour, not its median')
     a = ap.parse_args()
+    near = a.near if a.near in (None, "blue") else np.array([float(v) for v in a.near.split(",")], np.float32)
     j, b = read(a.src)
     names = [m.get("name") for m in j["materials"]]
     old, to = names.index(a.old), names.index(a.to)
-    uv, rgb = pick(j, b, to)
+    uv, rgb = pick(j, b, to, near)
     parts = [
         p
         for m in j["meshes"]
