@@ -1,6 +1,6 @@
 class_name AimNet
 extends RefCounted
-## The Net side of AimKit (docs/decisions/0061-telegraph-net.md). Remote hunters are puppets: their kits
+## The Net side of AimKit (docs/decisions/0151-telegraph-net.md). Remote hunters are puppets: their kits
 ## don't run on this game, so an `all` telegraph (a slam disc, a landing zone, a lane wind-up) used to
 ## show on its caster's screen only. Now every `all` entry of a hunter this game runs (its player, the
 ## host's bots) goes out as one event through Net, and the other games put the same resolved entry under

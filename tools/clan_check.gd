@@ -1,5 +1,5 @@
 extends RefCounted
-## --clan-check: clans, slices 1 to 3 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
+## --clan-check: clans, slices 1 to 3 (docs/specs/CLANS.md, docs/decisions/0124-clans.md), on a fake store.
 ##   1. clean_roster drops other clans' rows, unknown ranks and repeats, doubts a forged founder, clamps, caps at 24
 ##   2. founding a clan makes you its founder; joining makes you a member with a roster doc; both round-trip
 ##   3. only the founder can close the clan to newcomers; the flag reads back

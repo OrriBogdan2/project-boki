@@ -15,7 +15,7 @@ extends RefCounted
 static func data() -> Dictionary:
 	return Content.rules("merge_forms")
 
-## Fusion (X) is switched off by default (docs/decisions/0101): nothing starts one and no screen mentions it.
+## Fusion (X) is switched off by default (docs/decisions/0159): nothing starts one and no screen mentions it.
 static func enabled() -> bool:
 	return bool(data().get("fusion_enabled", false))
 
