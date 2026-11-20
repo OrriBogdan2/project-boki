@@ -33,6 +33,9 @@ const T := {
 	"brake_vs_ue_err":         ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
+	"run_turn_err_frames":     ["<=", 1.0, "frames", "[game data] a kit's 180 flip vs UE's walk: friction 1, accel 47-54"],
+	"run_turn_full_t":         ["<=", 0.22, "s", "[game data] slowest kit to 95% back (source: 0.20 s)"],
+	"run_turn_face_t":         ["~", [0.12, 0.17], "s", "[game data] cursor flipped too: yaw 1280 deg/s"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
 	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
@@ -370,6 +373,7 @@ func run(main: Node) -> void:
 	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
 	_overheat()         # after every timed row: its ~9 s of level glide would move them
+	load("res://tools/move_feel_turn.gd").new(self).run()      # every kit's 180 stick flip at a run (~30 s, late too)
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
