@@ -1,16 +1,16 @@
 {
- "doc": "hunter-regen-tarek-1120 candidate A (draft, owner visual check): Meshy multi-image-to-3d meshy-7.1 A-pose from the ta-audit-1119 tenzo r4 A_nbpro_E15 turnaround (4 views + texture refs) -> Meshy quad remesh 60k -> Meshy auto-rig weights (joints from the rig, scripts in ~/gens/hunter-regen-1120/tarek) onto dolm's skeleton and clips. Then tools/art1/glb_prop_paint.py --meshes eye_stone --drop shard --from leather-body.001 --to cloth-v95 --near blue: the eye stones cobalt like the arm, the off-hand shards out. The stone arm is his LEFT.",
- "master": "~/gens/hunter-regen-1120/tarek/raw/rmA/glb.glb",
+ "doc": "hunter-regen-tarek-1120 r2 candidate A (draft, owner visual check): Meshy multi-image-to-3d meshy-7.1 A-pose, enhance off, PBR off, from the CURRENT turnaround gens/v95-latest-ta-1119/tenzo.jpg (4 views + texture refs) -> Meshy quad remesh 60k -> Meshy auto-rig weights; joints and head read off Meshy's rig (meshy_joints.py). Then tools/art1/glb_prop_paint.py --meshes eye_stone,shard --drop shard --from leather-body.001 --to leather-v95 --near 58,78,110: the three eye stones cobalt slate, the off-hand shards out. Slots: teal runes -> glow, the cobalt stone arm and wrist cuff (hue) -> leather (matte), cream wraps and bandages -> cloth, so the skin slot's tint no longer browns them. The stone arm is his LEFT. Scripts and raw files: ~/gens/hunter-regen-1120/tarek/r2.",
+ "master": "~/gens/hunter-regen-1120/tarek/r2/raw/rmA/glb.glb",
  "game": "art/wardens/tarek/tarek.glb",
  "tris": 60000,
  "max_tris": 66000,
  "head": {
   "centre": [
    0.0,
-   0.036,
-   1.688
+   -0.005,
+   1.739
   ],
-  "r": 0.252
+  "r": 0.168
  },
  "head_tris": 27000,
  "head_uv": 2.2,
@@ -19,79 +19,79 @@
  "keep": [],
  "joints": {
   "pelvis": [
-   0.0205,
-   0.016,
-   1.1133
+   0.025,
+   0.013,
+   1.02
   ],
   "neck": [
-   0.0265,
-   0.0232,
-   1.5198
-  ],
-  "crown": [
-   0.018,
-   0.048,
-   1.8557
-  ],
-  "shoulder.R": [
-   0.2167,
-   -0.0334,
-   1.491
-  ],
-  "elbow.R": [
-   0.3475,
-   -0.0365,
-   1.2948
-  ],
-  "wrist.R": [
-   0.5151,
-   0.0601,
-   1.1108
+   0.022,
+   -0.002,
+   1.58
   ],
   "hip.R": [
-   0.1407,
-   0.016,
-   1.0065
+   0.144,
+   0.013,
+   1.019
   ],
   "knee.R": [
-   0.1963,
-   0.05,
-   0.5795
+   0.198,
+   0.067,
+   0.585
   ],
   "ankle.R": [
-   0.2208,
-   -0.0438,
-   0.138
-  ],
-  "shoulder.L": [
-   -0.1798,
-   -0.0222,
-   1.4951
-  ],
-  "elbow.L": [
-   -0.2902,
-   -0.0246,
-   1.303
-  ],
-  "wrist.L": [
-   -0.4618,
-   0.0562,
-   1.1313
+   0.222,
+   0.008,
+   0.142
   ],
   "hip.L": [
-   -0.0869,
-   0.016,
-   1.0065
+   -0.077,
+   0.013,
+   1.021
   ],
   "knee.L": [
-   -0.1348,
-   0.0379,
-   0.5795
+   -0.122,
+   0.07,
+   0.593
   ],
   "ankle.L": [
-   -0.1675,
-   -0.0184,
-   0.1339
+   -0.154,
+   0.037,
+   0.132
+  ],
+  "shoulder.R": [
+   0.206,
+   -0.011,
+   1.486
+  ],
+  "elbow.R": [
+   0.312,
+   -0.026,
+   1.293
+  ],
+  "wrist.R": [
+   0.443,
+   0.03,
+   1.113
+  ],
+  "shoulder.L": [
+   -0.183,
+   -0.014,
+   1.506
+  ],
+  "elbow.L": [
+   -0.29,
+   -0.009,
+   1.314
+  ],
+  "wrist.L": [
+   -0.446,
+   0.024,
+   1.125
+  ],
+  "crown": [
+   0.0,
+   0.03,
+   1.879
   ]
  },
  "relax": {
@@ -163,6 +163,32 @@
   }
  ],
  "slots": [
+  {
+   "slot": "glow",
+   "h": [
+    0.42,
+    0.55
+   ],
+   "s": [
+    0.3,
+    1
+   ],
+   "v": [
+    0.45,
+    1
+   ]
+  },
+  {
+   "slot": "leather",
+   "h": [
+    0.54,
+    0.72
+   ],
+   "s": [
+    0.1,
+    0.85
+   ]
+  },
   {
    "slot": "hair",
    "box": [
@@ -238,6 +264,21 @@
    ],
    "v": [
     0.8,
+    1
+   ]
+  },
+  {
+   "slot": "cloth",
+   "h": [
+    0.02,
+    0.13
+   ],
+   "s": [
+    0.12,
+    0.44
+   ],
+   "v": [
+    0.62,
     1
    ]
   }
