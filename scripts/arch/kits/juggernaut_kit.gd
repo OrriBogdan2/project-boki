@@ -909,9 +909,9 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 
-## A Slam wound up less than BUFFER ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+## A Slam wound up less than Loco.press_buffer ago: the pull takes it over as a Cinder Spin instead of waiting for it.
 func _slam_young() -> bool:
-	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= BUFFER
+	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= Loco.press_buffer
 
 ## The pull starting with a Smash pressed just before it (still down, or a young Slam): that press is the
 ## Cinder Spin (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
@@ -921,7 +921,7 @@ func spin_early() -> bool:
 		last_variant = "during_e"
 		_spin()
 		return true
-	if not rmb_down or rmb_ctx.get("air", false) or rmb_t >= BUFFER:
+	if not rmb_down or rmb_ctx.get("air", false) or rmb_t >= Loco.press_buffer:
 		return false
 	rmb_ctx["e"] = true
 	_release_rmb()
