@@ -6,18 +6,21 @@ extends RefCounted
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const FRAMES := 5
 const CATCH_SIZES := ["snack", "item", "rare"]
-const CAM_AT := Vector3(0.0, 1.5, 1.9)       # m, the camera over the spot
+const CAM_AT := Vector3(0.0, 1.5, 1.9)  # m, the camera over the spot
 const WATER := Color("2c6f9e")
 
 var main: Node
 var px := 256
 var out := ""
 
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--px="): px = int(a.substr(5))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--px="):
+			px = int(a.substr(5))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -67,6 +70,7 @@ func run(m: Node) -> void:
 	sheet_img.save_png(out.path_join("looks.png"))
 	print("GLINT_FX_SHOTS_DONE")
 	main.get_tree().quit()
+
 
 func _put(vp: SubViewport, sheet_img: Image, col: int, row: int) -> void:
 	for i in 3:

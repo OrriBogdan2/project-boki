@@ -14,7 +14,7 @@ extends PanelContainer
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
-const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
+const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Ability", "e": "Utility",
 		"x": "Ultimate", "r": "Fusion with your Boki"}
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
@@ -51,22 +51,16 @@ var _body: Control            # everything but the stage, rebuilt when the Hunte
 var _cols: HBoxContainer
 
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on R) shows once a Hunter's data has an
-## "x" entry; "r", the Boki Fusion, is always last.
+## "x" entry; "r", the Boki Fusion, is last while it is on.
 static func slots_for(hunter_id: String) -> Array:
 	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r" and s != "x")
 	if Arch.def(hunter_id).has("x"): out.append("x")
-	out.append("r")
+	if MergeForm.enabled(): out.append("r")
 	return out
 
-## A slot's name, icon, colour and plain line (KitCard's, plus the X ultimate from its own data).
+## A slot's name, icon, colour and plain line (KitCard's, which has the X ultimate too).
 static func slot_info(hunter_id: String, slot: String) -> Dictionary:
-	if slot != "x":
-		return KitCard.slot_text(hunter_id, slot)
-	var d := Arch.def(hunter_id)
-	var xd: Dictionary = d.get("x", {})
-	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")),
-			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
-			xd.get("desc", "")))}
+	return KitCard.slot_text(hunter_id, slot)
 
 ## The key a slot is on, from the player's own bindings ("auto" for the passive).
 static func key_for(slot: String) -> String:
@@ -185,6 +179,7 @@ func _rebuild_body() -> void:
 		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
 		row.set_meta("slot", slot)
 		row.mouse_entered.connect(select.bind(rows.size()))
+		AbilityCard.hover(row, id, slot)
 		rows.append(row)
 		(grid if slot in CLIP_SLOTS else lines).add_child(row)
 	# the one-line abilities fill the grid's last gap when there is one, else go under it

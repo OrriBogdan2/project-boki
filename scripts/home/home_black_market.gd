@@ -117,7 +117,7 @@ func _rare_card(e: Dictionary) -> Control:
 	if egg:
 		col = Data.KIN[BlackMarket.id_of(key)]["color"]
 		icon = "egg"
-		blurb = "Hatches a rare Boki on the Incubator"
+		blurb = "Hatches the baby of a Boki line on the Incubator"
 	elif wayseed:
 		col = Color(String(GardenZones.info(BlackMarket.id_of(key))["colour"]))
 		icon = "seed"
@@ -140,7 +140,7 @@ func _rare_card(e: Dictionary) -> Control:
 	nv.add_child(top)
 	var sub := UI.label(blurb, 12, UI.MUTED)
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(sub)
 	hr.add_child(nv)

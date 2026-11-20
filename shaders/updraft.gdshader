@@ -1,10 +1,11 @@
 shader_type spatial;
-// A column of rising air: thin streaks that climb the column, brightest at its silhouette and
+// A column of rising air: a soft body and thin streaks that climb the column, brightest at its silhouette and
 // fading out at the top and bottom, so it reads as moving air rather than a glass tube.
 render_mode unshaded, shadows_disabled, blend_add, depth_draw_never, cull_disabled, fog_disabled;
 uniform vec4 color : source_color = vec4(1.0, 0.95, 0.75, 0.35);
 uniform float speed = 0.6;
 uniform float tiles = 4.0;
+uniform float boost = 0.0;   // 0..1: the glider is riding this column
 #include "res://shaders/noise.gdshaderinc"
 void fragment() {
 	// UV.x runs around the column, UV.y from top (0) to bottom (1)
@@ -17,5 +18,7 @@ void fragment() {
 	float rim = 1.0 - abs(dot(NORMAL, VIEW));
 	float ends = smoothstep(0.05, 0.55, UV.y) * (1.0 - smoothstep(0.7, 1.0, UV.y));
 	ALBEDO = color.rgb;
-	ALPHA = color.a * ends * (streak * 0.8 + pow(rim, 4.0) * 0.1);
+	// a soft body (clearer at the middle of the silhouette than at its edge) under the streaks
+	float body = 0.2 * pow(1.0 - rim, 2.0);
+	ALPHA = color.a * ends * (streak * (0.8 + 0.8 * boost) + pow(rim, 4.0) * 0.1 + body * (1.0 + 3.0 * boost));
 }

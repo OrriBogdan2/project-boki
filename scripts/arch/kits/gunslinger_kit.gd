@@ -3,15 +3,16 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the green-fire rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a
-## foe damages and Dazes it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m, riding up
-## ramps and low ledges, and sticks where it meets a steep wall: a cone shows back toward you for its fuse,
-## then blasts, shoving everyone in it along the cone (toward you), hurting and Dazing them too. At the
-## lane's end on no foe and no wall, on the ground or in the air, it is a dud: a puff and nothing else (a
-## miss is a miss; the source's cone is wall-only). The rifle does +76% to a Dazed foe, in big gold numbers,
-## and the string doesn't decay on them. Slipstep goes where you move and you keep shooting. Longneedle:
-## stand still while the line narrows, the aim turning only so fast, then a long beam through walls. A knock
-## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
+## damages and Dazes it ("rat" Rattled in code) on the spot.
+## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
+## or on a placed wall or shield (it rides it, and drops if it goes): a cone shows
+## back toward you for its fuse, then blasts, shoving
+## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
+## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
+## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
+## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
+## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
@@ -26,9 +27,9 @@ const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats abov
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
 const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
+const BURR_R := 0.15                 # m: the coin's own radius when it meets a placed wall
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
-const HIT_HOLD := 0.3                # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
 const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
@@ -51,7 +52,6 @@ var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var duds := 0                  # Burr Charges that reached the lane's end on nothing (tests)
-var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
@@ -65,15 +65,24 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
-var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
+var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
+var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
+	last_shot = h.shot_n           # a round fired before she took the kit (another hero's) is not hers
 
 ## The world direction that reads as up the screen, so a word rides above a head.
 func screen_up() -> Vector3:
 	var cam := m.get_viewport().get_camera_3d()
 	return cam.global_basis.y if cam != null else Vector3.UP
+
+## The rehearsal builds the burr's ball: the first Burr Charge built it mid-fight (11 meshes, 8 shader compiles).
+func warm_fx(_at: Vector3) -> void:
+	if burr_pool.is_empty():
+		var n := _burr_mesh()
+		n.visible = false
+		burr_pool.append(n)
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
@@ -149,13 +158,19 @@ func teardown() -> void:
 func move_k() -> float:
 	if commit_left() > 0.0:
 		return 0.0
-	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	var k := 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
+	return k * GunslingerUlt.WINDUP_MOVE if x_wind_left() > 0.0 else k
 
 ## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
 func fire_ok() -> bool:
 	return not dry and commit_left() <= 0.0
 
-## The source's recoveries (E_RECOVER, GunslingerUlt.COMMIT): she stands, and no ability, jump or Shift goes.
+## The ult's wind-up left (s): she walks slowed; the rifle, jump, Shift and abilities all still go (a held LMB
+## string goes on through the tap, the cancel rows' "both").
+func x_wind_left() -> float:
+	return maxf(0.0, x_wind_end - float(m.time))
+
+## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
 ## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
 func commit_left() -> float:
 	return maxf(0.0, commit_end - float(m.time))
@@ -176,7 +191,7 @@ func combo_read(t: Ent) -> Dictionary:
 	if not KitStatus.rattled(t):
 		return {}
 	var bd := rmb_def()["burr"] as Dictionary
-	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
+	return {"icon": "mark_daze", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
 ## Dazed foes take +76% from the rifle (the source's +39 on 51): a crit-style big gold number.
@@ -195,14 +210,14 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 ## burst add up on it) and a pink flare on the body. Only the shooter's screen gets the number.
 func _daze_bonus_fx(t: Ent, bonus: float) -> void:
 	vfx("daze_hit", t.pos, h.dir_to(t))
-	if h.is_local() and Settings.get_v("damage_numbers"):
+	if h.is_local():
 		m.fx.number(t.pos + Vector3(0, DAZE_NUM_LIFT, 0), bonus, DAZE_PINK, true, "+")
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
-		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t))
+		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t), {"k": _faded_now()})
 	if res > 0.0:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
@@ -216,11 +231,13 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
+	m.sfx("vn_stim", h.pos, -3.0)
 	vfx("knock")                   # the rifle hand's swoosh and a lift of green fire
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a muzzle flash, a thin lime tracer riding the round (its hit is on_deal's), the shoulder kick.
+## Each round: a muzzle flash on the rifle's mouth, a lime tracer riding the round (its hit is on_deal's), the
+## shoulder kick.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -230,8 +247,10 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			vfx("shot", sd["start"], sd["vel"] as Vector2)
-			HeroVfx.of(m).trail(h, "shot_trail", sd["node"])
+			var mouth := _gun_muzzle()
+			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2, faded)
+			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -270,6 +289,18 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
+## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string is
+## past its first ten rounds. The shot, trail and hit looks (content/vfx/gunslinger.json) shrink by it ("size_k").
+func _faded(sus_k: float) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
+## The decay of the round landing now: a hit does not carry its round's sus_k, so this reads the string's count
+## (a round or two ahead at most).
+func _faded_now() -> float:
+	var rounds := float(h.wpn.get("sustain_rounds", 10))
+	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
+
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -287,7 +318,8 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true):
 			return true
-		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)),
+				{"invuln": 0.08, "feel": "long"})
 		play("gunslinger_dash_ex")
 		vfx("slide_air", null, null, {"ex": true})
 		last_dash_kind = "air"
@@ -297,8 +329,8 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "from": h.pos}
 	play("gunslinger_dash")
-	# green-fire streaks off her chest and heels and a kick of dust. No rings or discs: those mean damage or an
-	# area in this game
+	# green-fire streaks off her chest and heels; the scrape's dust trickles under her (_tick_slide). No puff,
+	# rings or discs: those mean damage or an area in this game
 	vfx("slide")
 	return true
 
@@ -347,7 +379,6 @@ func _tick_slide(dt: float) -> void:
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
-				vfx("slide_hold")
 				return
 			slide["tap"] = true
 		_skid(t, dd)
@@ -447,6 +478,7 @@ func _tick_burrs(dt: float) -> void:
 		if float(b["fuse"]) >= 0.0:
 			# stuck: blinks faster, the cone shows back toward the thrower for everyone
 			b["fuse"] = float(b["fuse"]) - dt
+			BurrRide.tick(b, m.verbs.walls, m.world, dt)
 			var k := 1.0 - float(b["fuse"]) / float(b["fuse0"])
 			if is_instance_valid(n):
 				n.global_position = b["pos"]
@@ -483,6 +515,10 @@ func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
 			return
 		var gy := ground(q).y
 		q.y = maxf(lerpf(float(b["y0"]), gy + BURR_RIDE, u * u) + 0.6 * sin(PI * u), gy + BURR_RIDE)
+		var obj: Dictionary = m.verbs.stopper(q, h.team, BURR_R)      # a shield, barricade, rink wall or rock
+		if not obj.is_empty():
+			_stick(b, at, obj)
+			return
 		var victim := _burr_victim(at, q)
 		if victim != null:
 			burrs.erase(b)
@@ -540,41 +576,37 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	_confirm_hit(victim, at, b["dir"])
 
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
-## with a dust puff): a flare and a ring round the foe, its body held lit, and for the thrower a gold hitmarker
-## and a ping.
+## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
-	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	victim.flash_t = maxf(victim.flash_t, ImpactWeight.flash_s(ImpactWeight.of_ability(h.arch, "rmb")))
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
-		m.hud.hitmarker(true)
 		m.sfx("crit", at, -2.0, 0.8)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
 	super(out)
-	for key in daze_for.keys():
-		var f := instance_from_id(key) as Ent
-		var left: float = KitStatus.rattled_left(f) if f != null else 0.0
-		if left <= 0.0:
-			daze_for.erase(key)
-		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
+	for f in m.foes_of(h.team):
+		if KitStatus.rattled(f):
+			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
 ## crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
-	daze_for[foe.get_instance_id()] = seconds
 
-## It meets a wall and sticks: the cone points back the way it came.
-func _stick(b: Dictionary, at: Vector3) -> void:
+## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides
+## that wall (BurrRide).
+func _stick(b: Dictionary, at: Vector3, on := {}) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	b["pos"] = at
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
+	if not on.is_empty():
+		BurrRide.pin(b, on, at, b["out"])
 	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
-	vfx("rmb_stick", at, b["out"])       # the miss: a small flare and a dull dust puff, nothing on a foe
+	vfx("rmb_stick", at, b["out"])       # stuck: a small flare and a dull dust puff, nothing on a foe
 
 ## The lane's end with no foe and no wall, wherever the charge is (ground or air): a miss is a miss. A small
 ## puff and a dull low thunk, no damage, no Daze, no cone.
@@ -651,7 +683,7 @@ func aim_lock() -> Vector2:
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
 	needle["t"] = float(needle["t"]) + dt
-	if h.downed or h.stun_t > 0.0 or Hex.active(h):
+	if h.downed or h.stun_t > 0.0:
 		_end_needle()
 		return
 	_turn_needle(dt)
@@ -671,14 +703,9 @@ func _tick_needle(dt: float) -> void:
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
 
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
+## The locked aim turns toward the cursor at the "turn" e row's capped deg/s: a flick can't drag it.
 func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
+	needle["dir"] = turn_lock(needle["dir"], turn_deg_s("e", "early"), dt).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:

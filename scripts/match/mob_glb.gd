@@ -2,26 +2,30 @@ class_name MobGlb
 extends Node
 ## A common monster drawn from a skinned model (art/mobs/<kind>/<kind>.glb, see docs/art/MOB_MODELS.md) instead of
 ## MobModels' primitives. The primitives' pivots stay, so mob.gd animates the monster as before; the primitives
-## are hidden and this node, beside the model, copies each pivot's motion onto the bone of the same name every
-## frame. The model's paint keeps the region's colour: its body hue band is repainted like a pack model's cloth
-## (BiomeRun.recolor_mats, meta "pack_part").
+## are hidden and this node, beside the model, copies each pivot's motion onto the bone of the same name on each
+## frame the monster was posed (Match draws far ones every 4th frame, Ent.lod_dt). The model's paint keeps the
+## region's colour: its body hue band is repainted like a pack model's cloth (BiomeRun.recolor_mats,
+## meta "pack_part"). A lair boss is a legendary Boki and keeps its own paint; its body has
+## no primitives, so each bone gets a bare pivot where it rests (BossModels.build).
 
 const PATH := "res://art/mobs/%s/%s.glb"
 ## Primitive parts that stay drawn over the model, per kind: lights the model's paint can't give.
 const KEEP := {"bomber": ["Spark"], "sentinel": ["Shards"]}
-const BAND_WIDTH := 0.05      # half-width of the repainted hue band (fraction of the colour wheel)
-const BAND_MIN_SAT := 0.3     # greys, bone whites and cream bellies below this saturation keep their paint
-const BAND_MIN_VAL := 0.55    # parts darker than this share of the body's brightness (spines, fists) keep theirs
+const BAND_WIDTH := 0.05  # half-width of the repainted hue band (fraction of the colour wheel)
+const BAND_MIN_SAT := 0.3  # greys, bone whites and cream bellies below this saturation keep their paint
+const BAND_MIN_VAL := 0.55  # parts darker than this share of the body's brightness (spines, fists) keep theirs
 
 static var _scenes := {}
 
 var _skel: Skeleton3D
 var _body: Node3D
-var _links: Array = []        # [bone, pivot, pivot rest in Body space (inverse), bone global rest]
-var _skel_rel: Transform3D    # the skeleton in Body space
+var _links: Array = []  # [bone, pivot, pivot rest in Body space (inverse), bone global rest]
+var _skel_rel: Transform3D  # the skeleton in Body space
+
 
 static func has(kind: String) -> bool:
 	return ResourceLoader.exists(PATH % [kind, kind])
+
 
 ## Swaps a MobModels body for the kind's model, if it has one. Call after the primitives are built and merged.
 static func dress(root: Node3D, kind: String) -> void:
@@ -34,10 +38,14 @@ static func dress(root: Node3D, kind: String) -> void:
 	var glb := (_scenes[kind] as PackedScene).instantiate() as Node3D
 	body.add_child(glb)
 	(root.get_meta("mats") as Array).append(_paint(glb, Data.MOBS[kind]))
+	var skel := glb.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	var f := MobGlb.new()
 	f.name = "MobGlb"
 	root.add_child(f)
-	f._link(body, glb.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D)
+	f._body = body
+	f._add_pivots(skel)
+	f._link(body, skel)
+
 
 static func _hide_primitives(body: Node3D, keep: Array) -> void:
 	var stack: Array = [body]
@@ -50,6 +58,7 @@ static func _hide_primitives(body: Node3D, keep: Array) -> void:
 		for ch in n.get_children():
 			stack.append(ch)
 
+
 ## One toon material for the whole model: its texture, the body hue band repainted to the region's colour
 ## (the Blight keep their own ash and ember paint everywhere).
 static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
@@ -59,7 +68,7 @@ static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
 	m.set_shader_parameter("sss", 0.16)
 	m.set_shader_parameter("sheen", 0.08)
 	m.set_shader_parameter("use_tex", true)
-	m.set_shader_parameter("recolor", 0.0 if md.get("blight", false) else 1.0)
+	m.set_shader_parameter("recolor", 0.0 if md.get("blight", false) or md.get("boss", false) else 1.0)
 	m.set_shader_parameter("recolor_width", BAND_WIDTH)
 	m.set_shader_parameter("recolor_min_sat", BAND_MIN_SAT)
 	m.set_shader_parameter("recolor_to", base)
@@ -76,6 +85,25 @@ static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
 		(mi as MeshInstance3D).material_override = m
 	return m
 
+
+## A bare pivot (Node3D, no turn) at the rest of each bone that has none, nested as the bones are; the root bone
+## named like the body is the body itself.
+func _add_pivots(skel: Skeleton3D) -> void:
+	var skel_rel := _rel(skel)
+	for bi in skel.get_bone_count():
+		var bone := skel.get_bone_name(bi)
+		if bone == _body.name or _body.find_child(bone, true, false):
+			continue
+		var up := skel.get_bone_parent(bi)
+		var parent: Node3D = _body
+		if up >= 0 and skel.get_bone_name(up) != _body.name:
+			parent = _body.find_child(skel.get_bone_name(up), true, false)
+		var pv := Node3D.new()
+		pv.name = bone
+		pv.position = _rel(parent).affine_inverse() * (skel_rel * skel.get_bone_global_rest(bi).origin)
+		parent.add_child(pv)
+
+
 func _link(body: Node3D, skel: Skeleton3D) -> void:
 	_body = body
 	_skel = skel
@@ -85,6 +113,7 @@ func _link(body: Node3D, skel: Skeleton3D) -> void:
 		if pv and not pv is MeshInstance3D:
 			_links.append([bi, pv, _rel(pv).affine_inverse(), skel.get_bone_global_rest(bi)])
 
+
 ## n's transform in Body space (the model may not be in the tree yet).
 func _rel(n: Node3D) -> Transform3D:
 	var xf := Transform3D.IDENTITY
@@ -93,10 +122,30 @@ func _rel(n: Node3D) -> Transform3D:
 		n = n.get_parent() as Node3D
 	return xf
 
+
 func _process(_delta: float) -> void:
-	if not _body.is_visible_in_tree():
-		return
+	var ent := get_parent().get_parent() as Ent
+	if not _body.is_visible_in_tree() or (ent and ent.lod_dt > 0.0):
+		return  # hidden, or Match skipped its pose this frame: the pivots have not moved
+	copy_pose()
+
+
+## Each linked bone onto its pivot's pose. Local poses are set against the parent's pose kept here, not read back:
+## set_bone_global_pose recomputed the dirty bones on every call (a monster's whole skeleton once per bone).
+func copy_pose() -> void:
 	var inv := _skel_rel.affine_inverse()
+	var real := {}  # bone -> its skeleton-space pose as set this frame
 	for l in _links:
-		var moved: Transform3D = _rel(l[1]) * l[2]
-		_skel.set_bone_global_pose(l[0], inv * moved * _skel_rel * l[3])
+		var bi: int = l[0]
+		var par := _real(_skel.get_bone_parent(bi), real)
+		_skel.set_bone_pose(bi, par.affine_inverse() * (inv * _rel(l[1]) * l[2] * _skel_rel * l[3]))
+		real[bi] = par * _skel.get_bone_pose(bi)
+
+
+## A bone's skeleton-space pose this frame: from real, else its parent's times its own local pose (kept in real).
+func _real(bi: int, real: Dictionary) -> Transform3D:
+	if bi < 0:
+		return Transform3D.IDENTITY
+	if not real.has(bi):
+		real[bi] = _real(_skel.get_bone_parent(bi), real) * _skel.get_bone_pose(bi)
+	return real[bi]

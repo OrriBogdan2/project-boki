@@ -55,7 +55,7 @@ static func set_moment(m: Match, id: String) -> void:
 			H.charge = Heart.r("charge_s")
 			H._force(Heart.S.READY, "charged")
 			m.hud.toast("The Heartspark is ready", Color.WHITE)
-			m.interact = {"kind": "heart", "act": "leave", "prog": 0.0, "label": "F  Leave", "col": Heart.GATE_COL}
+			m.interact = {"kind": "heart", "act": "leave", "prog": 0.0, "label": "F  Leave", "col": Heart.gate_col()}
 		"race":
 			sess = float(q["lair_open_s"]) + 5.0
 			m.hud.kit_t0 = -100.0

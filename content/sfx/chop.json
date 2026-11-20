@@ -1,0 +1,9 @@
+{
+ "group": "chop",
+ "name": "Chop and mine",
+ "script": "tools/gen_sfx_chop.py",
+ "sounds": {"axe_bite": "impact", "trunk_creak": "cast", "tree_down": "impact", "pick_strike": "impact", "rock_crack": "cast", "rock_break": "impact"},
+ "signature": [],
+ "reach": {},
+ "replaces": []
+}

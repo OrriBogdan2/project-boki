@@ -165,17 +165,21 @@ func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
 			"(j) an assist refreshes the local hunter, no heal (%.2f, hp %.1f)" % [P.dashes, P.hp])
 	ok(cues.size() == n0 + 1 and cues[-1][1] == "assist", "(j) with the assist cue (%s)" % str(cues.slice(n0)))
 
-	# (k) a 2-charge dash gains exactly one charge
-	if P.max_dashes() < 2.0: P.perks.append("secondwind")
+	# (k) a 2-charge dash gains exactly one charge (the kit's dash.charges set to 2 for it)
+	var dd: Dictionary = P.ak.dash_def() if P.ak else {}
+	var had: Variant = dd.get("charges")
+	dd["charges"] = 2
 	var v3: Hunter = foes[-3]
 	_spend(P)
 	P.dashes = 0.3
 	m.knock(v3, P, {})
 	ok(P.max_dashes() >= 2.0 and is_equal_approx(P.dashes, 1.3),
 			"(k) a %d-charge dash gains one charge (0.3 -> %.2f)" % [int(P.max_dashes()), P.dashes])
+	_second_wind(m, P, foes[-5])
+	if had == null: dd.erase("charges")
+	else: dd["charges"] = had
 
 	# (l) a hero whose dash data opts out gets nothing
-	var dd: Dictionary = P.ak.dash_def() if P.ak else {}
 	ok(P.ak != null, "(l) the local hunter has a kit")
 	dd["knock_refresh"] = false
 	_spend(P)
@@ -189,6 +193,33 @@ func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
 	m.knock(P, foes[-5], {})
 	ok(P.downed, "(m) the local hunter is down")
 	_knock_beat(m, "(m) being knocked", false)
+
+## (n) Second Wind: a hit taking `P` from 30% health or more to under it refills every dash charge, once per
+## 45 s; a hit that stays above, or one inside the 45 s, does nothing. Without the perk nothing happens.
+func _second_wind(m: Match, P: Hunter, foe: Hunter) -> void:
+	var line := P.max_hp * DashReset.SECOND_WIND_HP
+	var drop := func() -> void:
+		_spend(P)
+		P.hp = line + 1.0
+		P.hurt(30.0, foe, {"src": "test"})
+	drop.call()
+	ok(P.dashes < 0.01, "(n) no Second Wind perk: the drop under 30%% gives nothing (%.2f)" % P.dashes)
+	P.perks.append("secondwind")
+	P.second_wind_at = -INF
+	_spend(P)
+	P.hp = P.max_hp
+	P.hurt(5.0, foe, {"src": "test"})
+	ok(P.dashes < 0.01, "(n) a hit that stays over 30%% gives nothing (%.2f)" % P.dashes)
+	drop.call()
+	ok(P.hp < line and is_equal_approx(P.dashes, P.max_dashes()) and P.ex_cd == 0.0,
+			"(n) Second Wind: under 30%% (hp %.0f) refills all %d charges (%.2f)" % [P.hp, P.max_dashes(), P.dashes])
+	drop.call()
+	ok(P.dashes < 0.01, "(n) a second drop inside 45 s gives nothing (%.2f)" % P.dashes)
+	P.second_wind_at -= DashReset.SECOND_WIND_CD
+	drop.call()
+	ok(is_equal_approx(P.dashes, P.max_dashes()), "(n) 45 s later it fires again (%.2f)" % P.dashes)
+	P.perks.erase("secondwind")
+	P.hp = P.max_hp
 
 ## A knock is a short freeze and the confirm, never slow motion or a full-screen flash (one rhythm
 ## offline and online); the knocker also gets the short freeze. Clears the freeze after.

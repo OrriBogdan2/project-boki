@@ -98,7 +98,7 @@ func _build() -> void:
 	fo.item_selected.connect(func(i: int): filter = String(fo.get_item_metadata(i)); refresh())
 	fo.tooltip_text = "Show only some Boki (the rest dim; page tabs count the matches)"
 	fo.fit_to_longest_item = false
-	fo.clip_text = true
+	fo.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	fo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fo.custom_minimum_size.x = 120
 	fr.add_child(fo)
@@ -158,7 +158,7 @@ func _done(t: String) -> void:
 	if home and home.has_method("_refresh_burrow"): home._refresh_burrow()
 
 func _fail(t: String) -> void:
-	Sfx.play("ui_deny", null, -8.0)
+	UiSfx.error()
 	_say(t, UI.BAD)
 
 ## Rebuilds the farm list, the page and the side panel (the toolbar stays, so typing keeps focus).
@@ -244,7 +244,7 @@ func _build_name() -> void:
 		le.select_all.call_deferred()
 	else:
 		var t := UI.title(KinBox.page_name(page), 22, Color("e6dcff"))
-		t.clip_text = true
+		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_row.add_child(t)
 		var n := KinBox.page_kin(page).size()
@@ -307,8 +307,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	sxi.position = Vector2(0, 13)
 	stack.add_child(sxi)
 	var nm := UI.label(String(rec["name"]), 11, sp["color"].lerp(UI.INK, 0.55))
-	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.clip_text = true
+	FitLabel.shrink(nm, 6)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.position = Vector2(-2, 53)
 	nm.size = Vector2(CELL.x - 4, 16)
@@ -339,7 +338,6 @@ func _drag(rec: Dictionary, from: Control):
 	pv.position = Vector2(-28, -28)
 	from.set_drag_preview(holder)
 	sel = String(rec["uid"])
-	Sfx.play("pickup", null, -6.0)
 	return {"kin_uid": String(rec["uid"])}
 
 func _can_drop(_p, d) -> bool:
@@ -502,13 +500,15 @@ func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	h.add_child(l)
 	var dl := UI.label(txt, 12, UI.MUTED)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dl.custom_minimum_size.x = 60
 	h.add_child(dl)
 	h.tooltip_text = "%s: %s" % [nm, String(Mutations.info(id).get("desc", "Rare colours, turned round the colour wheel."))] + ("" if id == "shimmer" else " (%s)" % txt)
 	h.mouse_filter = Control.MOUSE_FILTER_PASS
 	return h
+
+const DEMO_SEED := 7700    # base of the demo roster's inborn-roll seeds (one per kin)
 
 # ------------------------------------------------------------------ tooling: --kinbox-demo[=box|lineup|card]
 ## A made-up collection for screenshots: a full farm and three pages of kin in the burrow, some of
@@ -523,7 +523,7 @@ static func demo_roster() -> void:
 	first["starter"] = true
 	var mids := Mutations.ids()
 	for i in 72:
-		var r := Save.new_kin(sps[i % sps.size()])
+		var r := Save.new_kin(sps[i % sps.size()], "", DEMO_SEED + i)    # seeded: same IVs and parents every run
 		r["level"] = 1 + rng.randi() % 18
 		r["trust"] = rng.randf_range(10.0, 90.0)
 		Evo.simulate(r, rng)

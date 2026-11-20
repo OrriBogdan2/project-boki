@@ -37,6 +37,7 @@ func _init(home) -> void:
 func build_ui() -> void:
 	if h.root_ui == null:
 		return
+	BaseCard.attach(h)
 	refresh()
 
 ## Rebuilds the card and the hint now.
@@ -55,6 +56,7 @@ func refresh() -> void:
 	_refresh_hint()
 
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
+## Coming back, the world prompt and crop label show only if the step on now has them (not the last step's).
 func set_quiet(on: bool) -> void:
 	quiet = on
 	if on:
@@ -62,6 +64,8 @@ func set_quiet(on: bool) -> void:
 	for c in [tracker, hint_box, marker, crop_lbl]:
 		if is_instance_valid(c):
 			c.visible = not on
+	if not on:
+		_update_marker(0.0)
 
 ## G: the Goals line opens into the whole list and back. False when there is no card (the tutorial runs).
 func toggle_goals() -> bool:
@@ -142,9 +146,15 @@ func _near_boki() -> bool:
 	var at: Vector3 = ke["node"].position
 	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
 
+## Where the farm's toasts start: the usual 100 px, or under the goal line (which wraps at big text sizes).
+func toast_top() -> float:
+	if not hint_visible():
+		return 100.0
+	return maxf(152.0, hint_box.rect().end.y + 8.0)
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "":
+	if id == "":      # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):
@@ -153,14 +163,8 @@ func _refresh_hint() -> void:
 	if (id == "out") != stay_shown:
 		_skip_buttons()
 	var s := FarmTutorial.hint_text(id)
-	if id == "house" and FarmTutorial.stage(id) == "wait":
+	if id in ["house", "hammer"] and not FarmHob.house_entry().is_empty():      # every swing shows on the line
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
 	var txt := s.strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
 			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)
@@ -225,9 +229,12 @@ func skip() -> void:
 		FarmTutorial.give_food()
 		if FarmTutorial.toy_spot().x == INF:
 			place_toy()
-	elif FarmHob.house_entry().is_empty():
-		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	else:
+		if FarmHob.house_entry().is_empty():
+			place_house()
+		var house := FarmHob.house_entry()
+		if FarmSites.has_site(house):
+			FarmSites.top_up(house)
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
@@ -256,20 +263,11 @@ func _place(id: String, p: Vector3) -> bool:
 		hb.active = true
 	hb.take(id)
 	var found := false
-	var sz := HomeLayout.size_of(id, 0)
-	for rad in 24:
-		for k in 24:
-			var a := float(k) / 24.0 * TAU
-			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5))
-			var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
-			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
-			if hb.fits(hb.held, cs):
-				hb.cells = cs
-				hb._check_cells()
-				found = hb.place_held()
-				break
-		if found:
-			break
+	var cs := place_cells()
+	if not cs.is_empty():
+		hb.cells = cs
+		hb._check_cells()
+		found = hb.place_held()
 	hb._drop_held()
 	hb.active = was_active
 	if not was_active:

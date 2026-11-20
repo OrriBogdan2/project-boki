@@ -5,7 +5,7 @@ extends RefCounted
 
 const SAVE_KEY := "duel_ring"
 const NEAR_M := 8.0  # m from the pad that counts as walking into the ring area
-const STAND_M := 1.3  # m from the pad centre where interact opens the ring (Match._update_training)
+const STAND_M := 1.3  # m from the pad centre where interact opens the ring (Training.update)
 const BEAM_H := 60.0  # m tall: seen from across the island
 const BEAM_COL := Color("ffb0a0", 0.32)  # the pad label's colour
 

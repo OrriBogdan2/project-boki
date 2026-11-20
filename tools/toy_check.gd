@@ -91,7 +91,9 @@ func run(m: Node) -> void:
 	home.hb.toggle()
 	ok(home.hb._tabs().has("Base"), "base_mode on: the build bar has a Base tab")
 	home.hb.cat = "Base"
-	ok(home.hb._tab_items().size() == 5, "and it offers all five toys")
+	var base_toys: Array = home.hb._tab_items().filter(
+		func(e): return HomeLayout.CATALOG.get(String(e.get("id", "")), {}).get("toy", false))
+	ok(base_toys.size() == 5, "and it offers all five toys (the Feeding bowl sits in the tab too)")
 	home.hb.toggle()
 	var speed0 := int(home.kins[0]["rec"]["stats"]["speed"]) + int(home.kins[1]["rec"]["stats"]["speed"])
 	var first_t := -1.0
@@ -151,6 +153,14 @@ func run(m: Node) -> void:
 	ok(int(rec["stats"][stat]) == Care.stat_cap(rec) and not a.has("play"), "a trained-out stat stays at its cap")
 	ok(String((a["node"] as Node3D).get_meta("pose", "")) == "" and posed,
 			"the play pose is set while playing and cleared after")
+	a["hold_t"] = 1.0      # a pat holds it still and gives it joy: a rigged Boki plays its pet clip, then lets go
+	a["joy_t"] = 0.9
+	toys.pose(a, a["node"], 0.05)
+	var petting := String((a["node"] as Node3D).get_meta("kact", ""))
+	a["hold_t"] = 0.0
+	toys.pose(a, a["node"], 0.05)
+	ok(petting == "pet" and String((a["node"] as Node3D).get_meta("kact", "")) == "",
+			"a pat plays the pet clip and lets go after (%s)" % petting)
 	home.queue_free()
 	await main.get_tree().process_frame
 	for f in FITTING:

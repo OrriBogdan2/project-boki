@@ -36,8 +36,53 @@ curve is halved, so a garden-only first form is 123 min and the runner's 76. The
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
 
+## Breeding pace (measured, nothing applied)
+
+Gap 2 of docs/GARDEN_PLAY_0246.md: the Nook wants two Grown (level 8) Boki who are friends. Printed by
+`--garden-pace-check` after the first-form line (same play model, same real Care, Game and NookRules.friends code,
+one seed, repeatable). Minutes of play. The wild visitor is the second Boki: its expected wait is
+`check_s / chance` (200 s) plus three favourite meals, counted in garden time only, so it comes in the first
+garden minutes of either player; it arrives at trust 50. The player works the starter to Grown, then the visitor.
+"With 1 run a session" = a 12 min expedition (half won, 1 knock) then 3 min of garden, over and over; the run's XP
+goes to whoever is being raised. "Friends" is the first time trust is 50 or more on both (the starter's trust
+climbs 1 a pet and 2 a meal, one of each per 12.5 s).
+
+| Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
+|---|---|---|---|---|
+| Garden-only | 5 min | 669 min (11 h) | 33 min | 1346 min (22 h) |
+| 1 expedition a session | 29 min | 320 min (5.3 h) | 108 min | 648 min (11 h) |
+
+The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
+games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
+halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
+2230 and 1266 min.
+
+The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
+Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
+friend-threshold option is listed: the threshold would change nothing.
+
+Data-only options (`breed_options` in content/rules/garden_xp.json, read by the check, not applied anywhere;
+`xp_mult` scales care, drill and the game rewards):
+
+| Option | Grown | Garden-only: Grown / first egg | 1 run a session: Grown / first egg |
+|---|---|---|---|
+| xp_x3 (every XP times 3) | 8 | 213 / 439 min | 320 / 632 min |
+| grown_5 (the Nook asks level 5) | 5 | 229 / 467 min | 125 / 243 min |
+| xp_x2_grown_6 | 6 | 165 / 345 min | 174 / 340 min |
+
+Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
+Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
 ## Base-only breeding
 
+Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
+`ItemPreviewCard` (scripts/ui/item_preview_card.gd) slides in with every change drawn as a ghost. It shows the stat
+bars with the real gain after caps, the budget and lean rings, and on a branching line the path meter (both finals
+as silhouettes, pips before and after, the verdict, and a Why? list of pip sources). For a second the Boki tries the
+change on: its new colour or the path token. While the card is up it ticks softly (`garden_item_tick`, every
+`GardenSfx.TICK_S`). Interact there gives the item, and the give plays its family's cue at the Boki (docs/AUDIO.md);
+walking away from that Boki ends the hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
+`EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
+in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 `--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.52 after a ball and a nap, trust 65); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown takes about 11 h per Boki on farm XP (667 min) and 5.3 h with runs (319 min), ratio 2.09 against `pace.grown_max_ratio` 2.2 (main's halved level curve and once-a-day care XP made both faster but the ratio wider than the first-form `max_ratio` 2.0; the Grown limit is its own number, a default taken, the alternative is to raise garden XP), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki and the Grown pace (docs/DEBT.md).
 
 ## Expedition loot into the garden
@@ -111,7 +156,7 @@ need a design call:
 3. **The second starter Hunter waits for the first finished expedition** (`ClassUnlock` bonus). It has
    no goal row now (it printed an empty one, fixed), but nothing at home ever opens it. Fine if Hunters
    are an expedition feature; say so in the Hunter picker if not.
-4. **The match tutorial comes before the garden** unless the player presses "Skip the tutorial" on the
+4. **The match tutorial comes before the garden** unless the player presses "Skip tutorial" on the
    naming card. Skipping is offered; whether the card should say "go straight to the garden" is a
    wording call.
 5. **Held Boki and the Black Market ransom** count expeditions ("sold on after your next expedition").
@@ -153,3 +198,22 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
+
+## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
+
+Every food and care input and what the player can see of it today:
+
+| Input | Changes | Seen |
+|---|---|---|
+| Meal / snack (`snacks.json`, `Care.FOODS`) | need bars, lean (`Evo.eat`) | body tint and flecks (`Evo.dress`, `Lean.mark`), journal line, chime on a new fleck |
+| Stat bites, toys, drill, loot bites (`garden_items.json`) | stats (`StatBudget`) | glint over the Boki (`StatGlint`), one tip, card number; **before this change no look on the body** |
+| Shaping items (token, sweet, rinse, aura) | path, lean, aura | preview card, ghost colour, aura (`GardenAura`) |
+| Pat, fetch, nap, chat (`care.json`) | trust, joy, xp once a kind a day | joy/trust bars, state animations |
+| Friends at the base (`BaseDrift`) | traits | journal line when a trait crosses a band |
+
+Gap closed first: raised stats now show as body size. `StatBudget.growth` = `care.json` `stat_budget.grow_max`
+(0.12) x sqrt(total points / `total_cap`), added to `evo_scale` in `Evo.dress` (60 points: 6% bigger, the full 240:
+12%; a fresh one is unchanged; it stacks with the 10% per form). A stat bite that changes the growth sets `look` in
+`GardenItems.use`, so the farm rebuilds the model (`_swap_kin_model`) and the size shows on the spot. No new HUD
+element. Check: `--garden-items-check`.
+Left for later (needs owner OK, stabilize sprint): a stat line on the Boki card, a trait word shown on the model.

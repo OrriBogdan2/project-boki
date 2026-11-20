@@ -80,7 +80,7 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 	if not can or not h.visit.is_empty():
 		pending = {}
 		return false
-	var pressed := Input.is_action_just_pressed("interact")
+	var pressed := InteractGate.pressed()
 	if carrying():
 		if pressed:
 			drop()
@@ -96,7 +96,8 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 		if held >= HOLD_S:
 			var who: Dictionary = pending
 			pending = {}
-			press_hold(who)
+			if not (h.life and h.life.hand.offer(who)):      # a snack in hand: the hold feeds it (BaseHandFeed)
+				press_hold(who)
 		return true
 	h._use({"kind": "kin", "k": pending})
 	pending = {}

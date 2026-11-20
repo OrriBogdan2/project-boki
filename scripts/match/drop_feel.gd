@@ -36,8 +36,10 @@ static func fall_vy(vy: float, sink: float, rate: float, above: float, dt: float
 		rate = maxf(rate, FLARE_RATE)
 	return lerpf(vy, goal, 1.0 - exp(-rate * dt))
 
-## Touchdown: dust, a squash and a thud (no self-shake: item 50).
+## Touchdown: dust, a squash and a thud (no self-shake: item 50; no ring: DECISIONS, no rings on landings).
 static func land(m: Match, h: Hunter) -> void:
 	m.fx.dust(h.pos, 22)
 	m.sfx("land", h.pos, -2.0, 0.8)
 	h.squash = LAND_SQUASH
+	if h == m.player and m.hud:
+		m.hud.close_map()      # boots on the ground: a map you opened on the ship gets out of the way

@@ -13,6 +13,7 @@ const LOW_FRAC := 0.25          # the ring turns red under this much of the time
 const FLASH_BODY := 0.12 + 2.0 / 60.0   # s on Ent.flash_t: full white for 2 frames, then the usual fade
 const FLASH_TAG := 0.05         # s the tag stays white after a payoff
 const SND_GAP := 0.2            # s between two payoff sounds on one body (a rifle pays off every shot)
+const SND_DB := 3.0             # dB on the chime: its file is at -20 dB RMS, this lifts it to the fire level
 const PAY_KEY := "cm_pay"       # meta on the body: match time of the last payoff
 
 ## Called by a kit when its payoff lands on `t`: the body flashes white and the combo sound plays.
@@ -22,15 +23,25 @@ static func payoff(m: Node, h: Hunter, t: Ent) -> void:
 	t.flash_t = FLASH_BODY
 	m.fx.flash(t.pos + Vector3(0, 1.1, 0), h.ak.res_col().lerp(Color.WHITE, 0.6), 1.4, 0.1)
 	if gap > SND_GAP:
-		m.sfx("combo", t.pos, -1.0, 1.15)
+		m.sfx("combo", t.pos, SND_DB, 1.15)
 
-## Draws the tag centred on `at` for `e`, if `viewer`'s kit has combo state on it.
+## Draws the tags centred on `at` for `e`: the viewer's own combo state first, then each squadmate's, side by
+## side, so only an attacker and their squad see a state (a rival's kit never reads onto your foe).
 static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -> void:
-	if viewer == null or viewer.ak == null or e == null:
+	if viewer == null or e == null:
 		return
+	var slot := 0
+	for o in (viewer.m as Match).hunters:
+		if o == viewer or (o.team == viewer.team and not o.out):
+			slot += int(_tag(c, at + Vector2(slot * (2.0 * R + 26.0), 0.0), o, e, time))
+
+## One hunter's tag on `e` (false when their kit has no state there).
+static func _tag(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -> bool:
+	if viewer.ak == null:
+		return false
 	var d: Dictionary = viewer.ak.combo_read(e)
 	if d.is_empty():
-		return
+		return false
 	at.y -= float(d.get("lift", 0.0))     # a kit with its own marker in that spot (Sparkle's Static)
 	var col: Color = viewer.ak.res_col()
 	var hot := time - float(e.get_meta(PAY_KEY, -9.0)) < FLASH_TAG
@@ -49,3 +60,4 @@ static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -
 	if lit > pips:      # uncapped stacks (Sable's Marks): the count past the full row
 		HudStyle.ctext(c, at + Vector2((pips + 1) * 0.5 * PIP_GAP + 6.0, -R - 3.0), str(lit), 11, col)
 	HudStyle.ctext(c, at + Vector2(R + 16.0, 4.0), "%.1f" % float(d["left"]), 11, ring_col)
+	return true

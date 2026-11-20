@@ -5,12 +5,12 @@ extends RefCounted
 ## peak to where the tip has slowed down; the hit must lie within CONTACT_S of one.
 ## Prints "CONTACT" lines; a move more than CONTACT_S off fails.
 
-const CONTACT_S := 0.05    # s: how far the hit may sit from the clip's own contact
+const CONTACT_S := 0.05  # s: how far the hit may sit from the clip's own contact
 const DT := 1.0 / 60.0
-const FIRST_K := 0.4       # a stroke is a tip peak at least this share of the window's fastest
-const END_K := 0.25        # the stroke is over when the tip is down to this share of its peak speed
-const MIN_STROKE := 4.0    # m/s: a clip whose tip never moves this fast has no strike stroke
-const STROKE_S := 0.35     # s: the window the strike is looked for in: the clip's start to this long after the hit
+const FIRST_K := 0.4  # a stroke is a tip peak at least this share of the window's fastest
+const END_K := 0.25  # the stroke is over when the tip is down to this share of its peak speed
+const MIN_STROKE := 4.0  # m/s: a clip whose tip never moves this fast has no strike stroke
+const STROKE_S := 0.35  # s: the window the strike is looked for in: the clip's start to this long after the hit
 ## hero id -> [[kit move, kit hit s into the move, label], ...]: LMB, RMB, a signature move
 const HITS := {
 	"gunslinger": [["gunslinger_lmb", 0.0, "LMB"], ["gunslinger_rmb", 0.0, "RMB"], ["gunslinger_x", 0.14, "X"]],
@@ -26,6 +26,7 @@ const HITS := {
 
 var bad := 0
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	var holder := Node3D.new()
@@ -34,6 +35,7 @@ func run(main: Node) -> void:
 		await _hero(holder, String(id))
 	print("CONTACT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _hero(holder: Node3D, id: String) -> void:
 	var dd := WardenClips.data(WardenGlb.art(id))
@@ -50,7 +52,7 @@ func _hero(holder: Node3D, id: String) -> void:
 		var length := clips.lib.get_animation(clip).length
 		var at := minf(float(hit[1]) + float(mv.get("lead", 0.0)), length - 0.001)
 		var track: Array = []
-		clips.force = {"clip": clip, "t": 0.0}      # (settled on its first frame: no blend from the last clip)
+		clips.force = {"clip": clip, "t": 0.0}  # (settled on its first frame: no blend from the last clip)
 		for k in 30:
 			sync.call("_process", 0.05)
 		var t := 0.0
@@ -69,13 +71,30 @@ func _hero(holder: Node3D, id: String) -> void:
 		var near := clampi(int(round(at / DT)), st[0], st[1])
 		var off: float = st[2]
 		var pass_it := off <= CONTACT_S
-		print("CONTACT %s %-5s %-16s %-14s hit %.3f s (lead %.2f), strike %.3f..%.3f s, off %.3f s, tip %.3f m "
-				% ["ok  " if pass_it else "FAIL", hit[2], hit[0], clip, at, float(mv.get("lead", 0.0)),
-				st[0] * DT, st[1] * DT, off, (track[int(round(at / DT))] as Vector3).distance_to(track[near])]
-				+ "from the strike pose, %s" % ("PASS" if off <= CONTACT_S else "FAIL"))
+		print(
+			(
+				(
+					"CONTACT %s %-5s %-16s %-14s hit %.3f s (lead %.2f), strike %.3f..%.3f s, off %.3f s, tip %.3f m "
+					% [
+						"ok  " if pass_it else "FAIL",
+						hit[2],
+						hit[0],
+						clip,
+						at,
+						float(mv.get("lead", 0.0)),
+						st[0] * DT,
+						st[1] * DT,
+						off,
+						(track[int(round(at / DT))] as Vector3).distance_to(track[near])
+					]
+				)
+				+ "from the strike pose, %s" % ("PASS" if off <= CONTACT_S else "FAIL")
+			)
+		)
 		if not pass_it:
 			bad += 1
 	m.free()
+
 
 ## The strong tip stroke nearest the hit: [first frame, last frame, seconds the hit lies off it].
 func _stroke(speed: Array, at: float) -> Array:
@@ -83,14 +102,14 @@ func _stroke(speed: Array, at: float) -> Array:
 	var top := 0.0
 	for i in range(2, last + 1):
 		top = maxf(top, float(speed[i]))
-	if top < MIN_STROKE:      # a smooth reach, no snap to measure: the pose at the hit is the contact
+	if top < MIN_STROKE:  # a smooth reach, no snap to measure: the pose at the hit is the contact
 		return [2, 2, 0.0]
-	var out := [2, 2, 99.0]      # (no stroke: the clip opens on the strike, its first frame is the contact)
+	var out := [2, 2, 99.0]  # (no stroke: the clip opens on the strike, its first frame is the contact)
 	for i in range(2, last + 1):
 		var v := float(speed[i])
 		if v < FIRST_K * top or v <= float(speed[i + 1]) or (i > 2 and v < float(speed[i - 1])):
 			continue
-		var end := i      # the stroke is over where the tip is down to END_K of its peak
+		var end := i  # the stroke is over where the tip is down to END_K of its peak
 		while end < speed.size() - 1 and float(speed[end]) > END_K * v:
 			end += 1
 		var gap := maxf(maxf(i - at / DT, at / DT - end), 0.0) * DT

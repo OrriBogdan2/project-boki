@@ -8,7 +8,7 @@ build_store   a pop into a bag: a quick bubble rise, a cloth rustle
 build_move    a soft slide that ends in a light set-down
 build_blocked a single dull knock (a muffled low tap), nothing pitched
 """
-import numpy as np
+
 import sfx_lib as S
 from sfx_lib import N, env, mix, at, lpf, bpf, noise
 from gen_sfx_ui import pluck, room, finish, jit
@@ -36,6 +36,7 @@ def thunk(body_hz, knock_lo, knock_hi, grit):
         knock = S.crack(0.05, knock_lo, knock_hi, 0.012)
         rough = grit * S.crack(0.03, 1800, 5000, 0.006)
         return finish(room(mix(low, 0.6 * knock, rough), 0.4), 2600)
+
     return make
 
 
@@ -59,14 +60,14 @@ def blocked(i):
 
 
 def main():
-    S.takes_cat('build_pick', pick, 2, 'ui')
-    S.takes_cat('build_rotate', rotate, 3, 'ui')
-    S.takes_cat('build_place_wood', thunk(120, 350, 1200, 0.0), 3, 'ui')
-    S.takes_cat('build_place_stone', thunk(85, 700, 2600, 0.5), 3, 'ui')
-    S.takes_cat('build_store', store, 2, 'ui')
-    S.takes_cat('build_move', move, 2, 'ui')
-    S.takes_cat('build_blocked', blocked, 2, 'ui')
+    S.takes_cat("build_pick", pick, 2, "ui")
+    S.takes_cat("build_rotate", rotate, 3, "ui")
+    S.takes_cat("build_place_wood", thunk(120, 350, 1200, 0.0), 3, "ui")
+    S.takes_cat("build_place_stone", thunk(85, 700, 2600, 0.5), 3, "ui")
+    S.takes_cat("build_store", store, 2, "ui")
+    S.takes_cat("build_move", move, 2, "ui")
+    S.takes_cat("build_blocked", blocked, 2, "ui")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

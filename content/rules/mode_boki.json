@@ -13,7 +13,7 @@
 			},
 			"legendary": {
 				"per_match": 0.2,
-				"per_match_doc": "Chance a match on this map spawns one legendary, picked evenly from species (owner 2026-11-09: under 30%, at most one a match). Today each boss still drops its own egg when killed; nothing rolls this yet.",
+				"per_match_doc": "Chance a match on this map spawns one legendary, picked evenly from species (owner 2026-11-09: under 30%, at most one a match). Nothing rolls this yet. Whenever a legendary or boss is beaten it gives exactly ONE egg, to one hunter picked at random from everyone inside the pit at the kill (any team); see Lairs._award_egg.",
 				"species": ["cairnback", "hivara", "zephyrak"]
 			}
 		},

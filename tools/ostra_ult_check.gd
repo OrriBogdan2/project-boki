@@ -128,7 +128,7 @@ func _catch_and_hold() -> void:
 	step(m, 1.05)
 	ok(
 		"ult open: a foe inside is caught and stunned until it closes",
-		T.stun_t > 3.2 and KitLooks.of(m).crowned(T),
+		T.stun_t > 3.2 and StatusLooks.of(m).showing(T, "stun"),
 		"stun %.2f" % T.stun_t
 	)
 	var paid := paid(P) - paid0
@@ -179,7 +179,7 @@ func _swollen_and_merge() -> void:
 	m.step(DT)
 	var dome: Dictionary = AimKit.entry(P, "x")
 	ok(
-		"ult Swollen: the well is 5.1m wide, with the pink core",
+		"ult Swollen: the well is 5.1m wide, with the light-teal core",
 		absf(W.radius - 5.1) < 0.01 and W.swollen,
 		"r %.1f" % W.radius
 	)

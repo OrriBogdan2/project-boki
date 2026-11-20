@@ -43,8 +43,6 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
 	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
-	# a visual hold scaled by the hit (the Feel tier sets it too; take the larger)
-	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
 	if target is Hunter:
 		var h := target as Hunter
 		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
@@ -97,7 +95,7 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
 		if p0 and by.team != p0.team:
-			return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
+			return [Color(col.lerp(SideColor.foe(), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
 		return [Color(col, 0.5), shot_size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
 	var vis_size := shot_size * 2.0

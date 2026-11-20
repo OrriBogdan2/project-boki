@@ -2,7 +2,8 @@ extends RefCounted
 ## --ways-out-map-ui-shots --shots-dir=<dir>: the Ways Out seats on the real maps (GPU, under xvfb with a renderer).
 ##   mini_*: the ground minimap (the smallest map) beside the Heart Gate, early and late; full_*: the full map
 ##   at 0:30, mid-match and late (dashed next ring); watching: a dead player's line over the open full map and
-##   on the HUD.
+##   on the HUD; race_*: the quest-race pips under the Lair and Uplink badges (a rival at the boss, your squad
+##   charging the uplink), on the strip and the full map.
 
 var main: Node
 var m: Match
@@ -20,6 +21,27 @@ func _grab(file: String) -> void:
 	await _frames(20)
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % file))
 	print("WAYSMAP-SHOT ", file)
+
+## A still of the states set by hand: drawn without stepping the match (a step would move the seats).
+func _still(file: String) -> void:
+	for i in 4:
+		await main.get_tree().process_frame
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % file))
+	print("WAYSMAP-SHOT ", file)
+
+## The quest-race moment: the rival squad has hurt the Sealed Lair's boss, yours has charged the Uplink.
+func _race(P: Hunter, foe: Hunter, q: Dictionary) -> void:
+	var seats: QuestSeats = m.exits.seats
+	m.sess_t0 = float(q["uplink_open_s"]) + 30.0 - m.time
+	seats.lair._force(QuestSeat.S.IN_USE, "shots", foe.team)
+	var boss: Boss = m.lairs.boss_of(seats.lair.ref)
+	boss.hp = boss.max_hp * 0.35
+	seats.uplink._force(QuestSeat.S.IN_USE, "shots", P.team)
+	seats.uplink.ref["prog"] = 0.55
+	await _still("race_1_hud")
+	m.hud.full_map.open()
+	await _still("race_2_full")
+	m.hud.full_map.close()
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -70,6 +92,7 @@ func run(main_node: Node) -> void:
 	m.hud.full_map.close()
 	H.carrier = null
 	H.early_team = foe.team
+	await _race(P, foe, q)
 	m.sess_t0 = float(q["uplink_shut_s"]) + 60.0 - m.time
 	P.out = true
 	await _grab("watching_hud")

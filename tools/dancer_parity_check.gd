@@ -11,7 +11,7 @@ const REACH_SHARE := 0.85    # ... this share of the way along its arc
 const TWIN_SWING_S := 0.3    # s: a twin-hold swing (HunterAnim's base swing time for the hold)
 const TWIST := [0.4, 0.65]   # rad: the torso turned into the throw (footage: about 30 degrees)
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (source 1280 deg/s: 0.14s)
-const RUN_KEEP := [0.66, 0.78]  # share of her run kept while she throws (footage: 77-86 px/s firing vs 113 running)
+const RUN_KEEP := [0.67, 0.75]  # share of her run kept while she throws (footage: 0.71, docs/MOVEMENT_FEEL.md)
 var A
 
 func run(a, m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
@@ -118,7 +118,7 @@ func _tracking(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	A.ok("dancer parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s)",
 			float(turn["done"]) > 0.0 and float(turn["done"]) <= TURN_180, "%.2f s" % turn["done"])
 
-## Running while she throws (aiming across her path): she keeps the source's 68-76% of her run (fire_slow 0.72).
+## Running while she throws (aiming across her path): she keeps the source's 0.71 of her run (fire_slow).
 func _running(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.teleport(home)
 	P.inp["move"] = Vector2(0, 1)
@@ -136,7 +136,7 @@ func _running(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	A.step(m, 0.4)
 	P.inp["move"] = Vector2.ZERO
 	var keep := fire_v / maxf(run_v, 0.01)
-	A.ok("dancer parity LMB: running, she throws and keeps the source's share of her run (0.66-0.78)",
+	A.ok("dancer parity LMB: running, she throws and keeps the source's share of her run (0.67-0.75)",
 			K.bolts >= b0 + 2 and keep >= RUN_KEEP[0] and keep <= RUN_KEEP[1],
 			"%.2f m/s firing vs %.2f (%.2f)" % [fire_v, run_v, keep])
 

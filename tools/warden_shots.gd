@@ -12,7 +12,7 @@ const YAWS := [PI, PI * 0.75, PI * 0.5, 0.0, -PI * 0.25]
 const YAW_NAMES := ["front", "3/4", "side", "back", "3/4 back"]
 const POSES := ["idle", "run", "attack", "cast", "ult"]
 const GAP := 1.9              # m between hunters in a strip
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 const ENLARGE := 3            # the gameplay strip enlarged this many times (nearest, so the pixels stay honest)
@@ -298,6 +298,8 @@ func _move_frames(id: String) -> Array:
 const KIT_FRAMES := {
 	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
 		["Heavy Shot", "arc_heavy", 1.42]],
+	"gil": [["thrust", "gil_thrust_1", 0.08], ["third-thrust lunge", "gil_lunge", 0.12],
+		["RMB potion toss", "gil_throw", 0.16], ["E spin", "gil_spin", 0.2], ["R wave surf", "gil_surf", 0.2]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
 		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_hop", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],

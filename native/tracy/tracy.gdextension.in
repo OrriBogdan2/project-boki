@@ -1,0 +1,6 @@
+[configuration]
+entry_symbol = "tracy_zones_init"
+compatibility_minimum = "4.5"
+
+[libraries]
+linux.x86_64 = "libtracy_zones.linux.template_release.x86_64.so"

@@ -7,6 +7,7 @@ var main: Node
 var dir := "shots"
 var n := 0
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
@@ -16,8 +17,19 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	await m.start(
+		{
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
@@ -31,10 +43,12 @@ func run(main_node: Node) -> void:
 	print("KITSHOTS %d in %s" % [n, dir])
 	main.get_tree().quit(0)
 
+
 func _run_for(m: Match, secs: float) -> void:
 	for _i in int(secs / Match.DT):
 		m.step(Match.DT)
-		await main.get_tree().process_frame      # one frame per step: the HUD fade runs on frame time
+		await main.get_tree().process_frame  # one frame per step: the HUD fade runs on frame time
+
 
 func _shot(what: String) -> void:
 	await RenderingServer.frame_post_draw

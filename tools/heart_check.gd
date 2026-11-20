@@ -4,7 +4,7 @@ extends RefCounted
 ##   1. the site and Gate, the Blight's tide and its wall, the Heart asleep until wake_s, the Heartspark
 ##      charging, taking it, the carrier's slow and reveal, dropping on down, the Gate only for the carrier, the
 ##      minor bundle, no second Heartspark, a carrier leaving by uplink drops it, the major bundle at home, "ht"
-##      requests.
+##      requests, the two once-per-save tips (Heart.tip_for: charged and free, carrying it).
 ##   2. the Gate takes the carrier's squad within gate_take_r (a downed mate too), not a mate farther off.
 ##   3. the final seat: a squad alone fills the ring, a standing rival stalls it, an empty ring drains, full
 ##      takes that squad with major pay and the islands fall end_after_final_s later.
@@ -139,9 +139,18 @@ func _early_seat(main: Node) -> void:
 	var p: Hunter = m.player
 	# ---- the tide
 	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
+	var last := Heart.last_close()
+	m.time = last - m.sess_t0
+	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale) and last == float(rl["final_s"]),
+		"the tide's last close is The Crown's ring, as the final seat opens (%.0f m)" % Heart.tide_r(m))
+	m.time = last + float(rl["end_close_s"]) * 0.5 - m.sess_t0
+	var mid := Heart.tide_r(m)
+	ok(mid < float(rl["tide_r1"]) * H.ways_scale and mid > float(rl["end_r"]) * H.ways_scale,
+		"the end phase closes on past it (%.0f m halfway)" % mid)
 	m.time = 5000.0
-	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
-		"the tide has closed to its smallest ring")
+	var fin := Heart.tide_r(m)
+	ok(is_equal_approx(fin, float(rl["end_r"]) * H.ways_scale) and fin > float(rl["final_r"]),
+		"then holds on the final circle round the Heart ring (%.0f m)" % fin)
 	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * 0.5 - m.sess_t0
 	var half := Heart.tide_r(m)
 	ok(half < float(rl["tide_r0"]) * H.ways_scale and half > float(rl["tide_r1"]) * H.ways_scale,
@@ -185,11 +194,13 @@ func _early_seat(main: Node) -> void:
 	ok(H.state == Heart.S.CHARGING, "a Heartspark starts charging when the Heart wakes")
 	_run(m, float(rl["charge_s"]) * 0.5)
 	ok(H.state == Heart.S.CHARGING and H.charge > 0.0, "still charging halfway")
+	ok(H.tip_for(p).is_empty(), "no Heartspark tip while it charges")
 	_put(m, p, H.site + Vector3(3, 0, 0))
 	_hold_f(m, p, 3.0)
 	ok(H.carrier == null, "an uncharged Heartspark can't be taken")
 	_run(m, float(rl["charge_s"]) * 0.5 + 1.0)
 	ok(H.state == Heart.S.READY, "the Heartspark is charged")
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_spark", "charged and free: the take-it tip")
 	# ---- taking it
 	_put(m, p, H.site + Vector3(6, 0, 0))
 	_hold_f(m, p, 3.0)
@@ -199,12 +210,15 @@ func _early_seat(main: Node) -> void:
 	ok(H.carrier == null, "a short hold doesn't take it")
 	_hold_f(m, p, float(rl["pickup_hold_s"]) + 0.3)
 	ok(H.state == Heart.S.CARRIED and H.carrier == p, "holding interact takes the Heartspark")
+	var other: Hunter = m.hunters.filter(func(x): return x != p)[0]
+	ok(H.tip_for(p) and H.tip_for(p)[0] == "heart_carry" and H.tip_for(other).is_empty(),
+		"the carrier gets the reach-the-Gate tip, nobody else a tip")
 	ok(is_equal_approx(float(p.get_meta("heart_slow", 0.0)), float(rl["carrier_slow"])),
 		"the carrier is slowed by %.0f%%" % (float(rl["carrier_slow"]) * 100.0))
 	p.set_meta("heart_slow", 0.0)
-	var k0 := p._chase_mod(Vector2(1, 0))
+	var k0 := p._move_mult()
 	p.set_meta("heart_slow", float(rl["carrier_slow"]))
-	ok(is_equal_approx(p._chase_mod(Vector2(1, 0)), k0 * (1.0 - float(rl["carrier_slow"]))),
+	ok(is_equal_approx(p._move_mult(), k0 * (1.0 - float(rl["carrier_slow"]))),
 		"that slow is in the move speed")
 	m.step(Match.DT)
 	ok(p.reveal_t > 0.0, "the carrier is revealed")
@@ -274,7 +288,7 @@ func _early_seat(main: Node) -> void:
 	# ---- the home half (the major bundle: egg and materials)
 	var major: Dictionary = H3.pay(m3.hunters[1], Heart.HOW_FINAL)
 	var egg_sp := String(major["egg"].get("sp", ""))
-	ok(Data.is_rare(egg_sp), "the major bundle has a rare egg (%s)" % egg_sp)
+	ok(Data.egg_pool().has(egg_sp), "the major bundle has a first-form egg (%s)" % egg_sp)
 	ok(major["goods"].has("starstone"), "...and starstone")
 	Incubator.ensure()
 	var eggs0 := Incubator.count()

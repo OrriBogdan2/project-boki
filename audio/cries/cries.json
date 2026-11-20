@@ -425,7 +425,7 @@
   },
   "Umbrink": {
    "file": "audio/cries/umbrink.wav",
-   "display_name": "Nightmink",
+   "display_name": "Umbrink",
    "line": "Ermink",
    "stage": 2,
    "stages": 2,
@@ -686,7 +686,7 @@
   },
   "Dynaboa": {
    "file": "audio/cries/dynaboa.wav",
-   "display_name": "Dynaboa",
+   "display_name": "Dynamouse",
    "line": "Jerbit",
    "stage": 3,
    "stages": 3,
@@ -2039,7 +2039,7 @@
   },
   "Oarlet": {
    "file": "audio/cries/oarlet.wav",
-   "display_name": "Oarlet",
+   "display_name": "Oarpup",
    "line": "Oarlet",
    "stage": 1,
    "stages": 3,
@@ -2952,7 +2952,7 @@
   },
   "Fawngus": {
    "file": "audio/cries/fawngus.wav",
-   "display_name": "Fawnshroom",
+   "display_name": "Fawngus",
    "line": "Fawngus",
    "stage": 1,
    "stages": 2,
@@ -3007,7 +3007,7 @@
   },
   "Pinster": {
    "file": "audio/cries/pinster.wav",
-   "display_name": "Pinster",
+   "display_name": "Rolypin",
    "line": "Pinster",
    "stage": 1,
    "stages": 2,
@@ -3033,7 +3033,7 @@
   },
   "Tiltster": {
    "file": "audio/cries/tiltster.wav",
-   "display_name": "Tiltster",
+   "display_name": "Tiltbug",
    "line": "Pinster",
    "stage": 2,
    "stages": 2,
@@ -5939,7 +5939,7 @@
   },
   "Dobsabre": {
    "file": "audio/cries/dobsabre.wav",
-   "display_name": "Dobsabre",
+   "display_name": "Sabrefly",
    "line": "Grammite",
    "stage": 2,
    "stages": 2,
@@ -6029,7 +6029,7 @@
   },
   "Olmlet": {
    "file": "audio/cries/olmlet.wav",
-   "display_name": "Olmlet",
+   "display_name": "Porcelet",
    "line": "Olmlet",
    "stage": 1,
    "stages": 3,
@@ -6507,7 +6507,7 @@
   },
   "Cairnback": {
    "file": "audio/cries/cairnback.wav",
-   "display_name": "Cairnback",
+   "display_name": "Cairnhorn",
    "line": "Cairnback",
    "stage": 1,
    "stages": 1,
@@ -6730,7 +6730,7 @@
   },
   "Luckhop": {
    "file": "audio/cries/luckhop.wav",
-   "display_name": "Luckhop",
+   "display_name": "Fortunny",
    "line": "Luckhop",
    "stage": 1,
    "stages": 1,
@@ -6759,7 +6759,7 @@
   },
   "Twinklup": {
    "file": "audio/cries/twinklup.wav",
-   "display_name": "Twinklup",
+   "display_name": "Twinkling",
    "line": "Twinklup",
    "stage": 1,
    "stages": 1,
@@ -6788,7 +6788,7 @@
   },
   "Lockwren": {
    "file": "audio/cries/lockwren.wav",
-   "display_name": "Lockwren",
+   "display_name": "Lockwing",
    "line": "Lockwren",
    "stage": 1,
    "stages": 1,
@@ -6962,7 +6962,7 @@
   },
   "Pavonazar": {
    "file": "audio/cries/pavonazar.wav",
-   "display_name": "Pavonazar",
+   "display_name": "Peacharm",
    "line": "Pavonazar",
    "stage": 1,
    "stages": 1,

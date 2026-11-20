@@ -10,7 +10,7 @@ const HUNTERS := 6
 const BOKI := 4
 const GAP := 1.9              # m between models in a row
 const WARMUP := 90            # frames before measuring: shaders compile, the first frames upload meshes
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 
@@ -52,7 +52,6 @@ func _cast(holder: Node3D, wardens: Array) -> Array:
 	var anims: Array = []
 	for i in HUNTERS:
 		var id := String(wardens[i % wardens.size()])
-		WardenGlb.set_model(id, true)
 		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		h.position = Vector3((i - (HUNTERS - 1) * 0.5) * GAP, 0, 0)
 		h.rotation.y = PI

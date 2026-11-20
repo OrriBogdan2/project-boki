@@ -40,9 +40,11 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
+	await _hint()
 	await _expired()
 	await _buffered()
 	await _badges()
+	await _payoffs()
 	await _world_plain()
 	await _split()
 	print("RECASTCUE DONE, %d checks, failures: %d" % [n, fails])
@@ -75,6 +77,9 @@ func _window(hero: String, slot: String) -> void:
 	var key := RecastCue.key_of(slot)
 	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
+	var line := RecastCue.hint_line(P.ak, slot)
+	ok("%s %s: the first-time hint reads '<KEY> again to <verb>'" % [hero, slot],
+			line.begins_with(key + " again to ") and line.length() > key.length() + 12 and line.length() <= 40, line)
 	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)) and hero == "bulwark":
 		await done(m)      # the hammer lies until called back (lmb.lie_t 0): no timer, nothing runs out
 		return
@@ -94,6 +99,25 @@ func _window(hero: String, slot: String) -> void:
 			and exp_t > 0.4 and exp_t <= RecastCue.EXPIRED_T and absf(RecastCue.EXPIRED_T - 0.6) < 0.05,
 			"exp %s %.2f after %.2fs" % [P.ak.cue.get("exp_slot", "-"), exp_t, t])
 	await done(m)
+
+## The first-time hint shows once per Hunter, in a real match only (not training, not the tutorial).
+func _hint() -> void:
+	var flag := "recast_ostra"
+	var seen: Dictionary = Save.d["tutorial"]
+	for real in [false, true]:
+		seen.erase(flag)
+		var s := setup("ostra", 6.0)
+		var m: Match = s[0]
+		var P: Hunter = s[1]
+		m.opts["training"] = not real
+		aim_at(P, s[2].pos)
+		first(m, P, "e")
+		_open(m, P, "e")
+		m.step(DT)
+		ok("ostra e: the hint is %s" % ("marked seen in a real match" if real else "held back in training"),
+				bool(seen.get(flag, false)) == real, str(seen.get(flag)))
+		await done(m)
+	seen.erase(flag)
 
 ## Dolm's dash left alone: the window runs out and the slot shows EXPIRED (never closes silently). Ostra's
 ## seed no longer runs out (it waits at full size for the recast), so a timed, non-auto window stands in.
@@ -145,7 +169,161 @@ func _badges() -> void:
 		var marks: Array = P.ak.cue.get("marks", [])
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
+		if hero == "gunslinger" and mine.size() == 1:
+			var ring := float(mine[0]["total"])
+			ok("gunslinger: the Daze badge reads KitStatus's timer", is_equal_approx(ring, 2.0), str(ring))
 		await done(m)
+
+# ------------------------------------------------------------------ the payoff sounds
+## [hero, payoff, its own sound]: Vex's rifle has none but the shared combo chime (every payoff plays it).
+const PAYOFFS := [
+	["thief", "Sable's Marks cash-in", "pay_cashin"],
+	["gunslinger", "Vex's Daze + rifle", "combo"],
+	["mage", "Sparkle's Static Blowout", "hero_blowout"],
+	["rimewright", "Neve's Chill Shatter on a knock", "rime_splinter"],
+	["ostra", "Motley's full Brimseed pop on a foe", "pay_collapse"],
+	["archer", "Lace's wall stun", "pay_called"],
+	["gil", "Gil's Beach", "pay_flashpoint"],
+	["ashwick", "Cinder's Flashover", "lw_blaze"],
+	["tender", "Meeko's full Kindle", "tend_kindled"],
+]
+
+var _before := {}
+var _heard := {}               # sound -> {n: times it started, db: its voice's volume}
+var _meter: RefCounted         # sfx_set_check's wav measure, for the level of a file
+
+## Steps `secs`, noting each sound that starts (Sfx.last_played moves) and the volume of its pool voice.
+func _listen(m: Match, secs: float, each := Callable()) -> void:
+	var t := 0.0
+	while t < secs:
+		if each.is_valid(): each.call()
+		for mb in m.mobs: mb.queue_free()
+		m.mobs.clear()
+		m.step(DT)
+		t += DT
+		_note()
+
+func _note() -> void:
+	for k in Sfx.last_played:
+		if int(Sfx.last_played[k]) == int(_before.get(k, -1)):
+			continue
+		_before[k] = Sfx.last_played[k]
+		var st = Sfx.streams.get(k)
+		var db := -99.0
+		for p in Sfx.players:
+			if p.playing and ((st is Array and p.stream in st) or (not st is Array and p.stream == st)):
+				db = maxf(db, p.volume_db)
+		var e: Dictionary = _heard.get(k, {"n": 0, "db": db})
+		e["n"] += 1
+		_heard[k] = e
+
+## File RMS (dBFS) of the quietest take of `sname`; 0 if it has no file.
+func _rms(sname: String) -> float:
+	var worst := 0.0
+	for path in _meter._takes(sname):
+		worst = minf(worst, float(_meter._measure(path)["rms"]))
+	return worst
+
+## The lowest level a payoff may have: the impact category less its tolerance (content/rules/sfx_levels.json).
+func _floor() -> float:
+	var lv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
+	return float(lv["cats"]["impact"]) - float(lv["tolerance_db"])
+
+func _payoffs() -> void:
+	_meter = load("res://tools/sfx_set_check.gd").new()
+	var lo := _floor()
+	for c in PAYOFFS:
+		var s := setup(String(c[0]), 6.0)
+		var m: Match = s[0]
+		_before = Sfx.last_played.duplicate()
+		_heard = {}
+		Sfx.listener = (s[2] as Hunter).pos      # nothing for the distance: the voice volume is the call's
+		_land(String(c[0]), s)
+		_listen(m, 1.0)
+		var snd := String(c[2])
+		var got: Dictionary = _heard.get(snd, {"n": 0, "db": -99.0})
+		var level := _rms(snd) + float(got["db"])
+		ok("%s: %s plays once" % [c[1], snd], int(got["n"]) == 1, str(_heard.keys()))
+		ok("%s: %s is audible (%.1f dB, floor %.1f)" % [c[1], snd, level, lo], level >= lo)
+		await done(m)
+	_static_payoff_fx(lo)
+
+## Every sound a kit's payoff_fx names exists and plays at the same floor (they play at 0 dB).
+func _static_payoff_fx(lo: float) -> void:
+	var rx := RegEx.create_from_string("payoff_fx\\([^\\n]*?\"([a-z]+_[a-z_0-9]+)\"")
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if not f.ends_with(".gd"): continue
+		for hit in rx.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
+			var snd := hit.get_string(1)
+			var level := _rms(snd)
+			ok("%s: payoff_fx %s has a file at the floor (%.1f dB)" % [f, snd, level], level != 0.0 and level >= lo)
+
+## Sets up and lands the one payoff of `hero` on the target `s[2]` (setup()'s array), listening as it goes.
+func _land(hero: String, s: Array) -> void:
+	var m: Match = s[0]
+	var P: Hunter = s[1]
+	var T: Hunter = s[2]
+	match hero:
+		"thief":
+			var K := P.ak as ThiefKit
+			K.add_mark(T, 2, true)
+			K.primed_on = T
+			K.on_deal(T, 10.0, {"src": "shot"})
+		"gunslinger":
+			(P.ak as GunslingerKit).daze(T, 2.0)
+			T.hurt(10.0, P, {"src": "shot"})
+		"mage":
+			var K := P.ak as MageKit
+			K.sparks[T.get_instance_id()] = {"e": T, "n": 4, "t": 3.0}
+			K._wire_hit(T, 10.0)
+		"rimewright":
+			(P.ak as RimewrightKit).add_chill(T)
+			T.hurt(20000.0, P, {"src": "shot"})      # the knock: a Shatter a beat later
+		"ostra":
+			var K := P.ak as OstraKit
+			K.use_e()
+			_listen(m, 0.5)
+			K.seed["pos"] = T.pos
+			K.seed["t"] = K.seed["grow"]
+			K.e_recast()
+		"archer":
+			_lace_pin(s)
+		"gil":
+			var K := P.ak as GilKit
+			for mk in ["a", "b", "c"]:
+				K._mark(T, mk, Color.WHITE)
+		"ashwick":
+			var K := P.ak as AshwickKit
+			K.stoke(T)
+			K.stoke(T)
+		"tender":
+			(P.ak as TenderKit).add_kindle(T, 5)
+
+## Lace's Heavy Shot, fully drawn, into a wall behind the foe: the pin.
+func _lace_pin(s: Array) -> void:
+	var m: Match = s[0]
+	var P: Hunter = s[1]
+	var T: Hunter = s[2]
+	var W: World = m.world
+	var kind: PackedByteArray = W.kind
+	var level: PackedByteArray = W.level
+	for dz in range(-3, 4):
+		for dx in range(2, 5):
+			var i: int = W.idx(int(T.pos.x) + dx, int(T.pos.z) + dz)
+			kind[i] = World.T_GROUND
+			level[i] = int(s[5]) if dx < 3 else int(s[5]) + 3
+	W.kind = kind
+	W.level = level
+	var K := P.ak as ArcherKit
+	K.ch_rmb = 2.0
+	K.cd["rmb"] = 0.0
+	var hold := func():
+		P.inp["sec_hold"] = true
+		aim_at(P, T.pos)
+	hold.call()
+	K.press_rmb()
+	_listen(m, 1.3, hold)
+	P.inp["sec_hold"] = false
 
 ## The world marker and the foe badge draw no key and no word: only a count may show (DECISIONS 2026-11-11).
 func _world_plain() -> void:

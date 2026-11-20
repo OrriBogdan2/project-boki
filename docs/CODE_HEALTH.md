@@ -205,28 +205,22 @@ where a trial `git merge-tree` against all 1078 active branches that change that
   (4e7fd6a893), and a later merge dropped it. `docs/wiki/Checks.md` still lists the check. Run on main, it fails:
   "20 of 20 clashing pairs get the Nook line and the card tag (0)". Registering it here would add a red, so it is
   allowlisted instead. Fix (Nook lane): repair `UnstableMix` tagging, then register the flag and drop the allowlist line.
-- **Entry points nobody names** (allowlisted): `tests/feel_sim.gd`, `tests/glider_gallery.tscn`,
+- **Entry points nobody names** (allowlisted): `tests/glider_gallery.tscn`,
   `tests/portrait_gallery.tscn`, `tests/net/match_probe.gd`, `tests/net/net_probe.gd`, `tools/vfx_reel/*.gd` (4).
 
 ### Duplicate systems to merge later
 
 All of these touch skip-list files (and most are in coord refs), so none was merged in this pass.
-1. **Movement and camera prototype vs the game's.** `scripts/feel/` holds its own controller and camera:
-   `HunterController` (560 lines), `TopDownCameraRig`, `FeelConfig`, `JumpPad`, `KinfallInput`, `feel_test_world`.
-   It is reached by `--feel-lab` (`tests/feel_test.tscn`) and `tests/feel_sim.gd`. The game uses `Hunter` +
-   `HunterMove` + `CamRig`; `hunter.gd` and `move_feel_check.gd` only name `FeelConfig` in comments and labels.
-   Plan: once `move_feel_check`'s targets are in `content/rules`, delete `scripts/feel/`, `tests/feel_test.tscn`,
-   `tests/feel_sim.gd` and the `--feel-lab` hook.
-2. **Ruin walls twice.** `scripts/match/ruin_walls_v1.gd` (226 lines) is kept for the `--art1` before/after view
+1. **Ruin walls twice.** `scripts/match/ruin_walls_v1.gd` (226 lines) is kept for the `--art1` before/after view
    next to `ruin_walls.gd`, and `_init` and `_exposed` are identical in both. Plan: drop the `Flora.v2()` false
    branch in `world.gd`, then delete v1. Both files are in coord refs, so the coordinator decides.
-3. **Rules loaders.** 19 files read their own `content/rules/*.json` with a private cache instead of
+2. **Rules loaders.** 19 files read their own `content/rules/*.json` with a private cache instead of
    `Content.rules(id)`: `arch_kit`, `boki_lines`, `class_unlock`, `garden_xp`, `box_revive`, `breakables`, `cam`,
    `equal`, `gear_drops`, `heart`, `hunter_move`, `key_run`, `level_growth`, `mantle_look`, `perk_orbs`,
    `weapon_path`, `wisp_look`, `hunter_viewer`, `portraits`. Plan: the same swap as `KeyBonus` for each file as it
    comes off the skip list. Check that none of them writes into its cached dict (Content shares one).
-4. **Kit FX mesh helpers.** `dj_fx.gd`, `ld_fx.gd` and `vv_fx.gd` each copy `_mi()`. `dj_fx` and `ld_fx` also copy
+3. **Kit FX mesh helpers.** `dj_fx.gd`, `ld_fx.gd` and `vv_fx.gd` each copy `_mi()`. `dj_fx` and `ld_fx` also copy
    `_quad_mesh()`, `_ribbon_mesh()` (20 identical lines) and `unplace()`. `KitMeshes.inst()` and `KitMeshes.quad()`
    already do this job. Plan: callers use `KitMeshes`, and `_ribbon_mesh` moves into `KitMeshes`.
-5. **Model finishing.** `MobModels._finish` and `PropSculpt._finish` are identical (merge statics, bake part y).
+4. **Model finishing.** `MobModels._finish` and `PropSculpt._finish` are identical (merge statics, bake part y).
    Plan: one `Models.finish(root)`.

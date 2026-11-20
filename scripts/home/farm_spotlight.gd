@@ -3,7 +3,8 @@ extends Control
 ## The tutorial spotlight: the screen darkens with a rounded cut-out round the one thing to do next (a bottom-bar
 ## button and/or a Boki in the world), the cut-out flashes a few times with the hint beside it, then the dim eases
 ## to a light vignette and the ring keeps a soft pulse until the thing is clicked. FarmGuide drives it (sync, every
-## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true}).
+## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true, "tile": build
+## entry id, "tab": its tab}). With build mode open it lights the tile (or its tab) instead of the bar button.
 ## Only the opening beat swallows mouse clicks; after it nothing here takes a click, so the target is always clickable.
 ## A placing step ("tile" in its spot: the house, the trough) is modal instead: the screen stays dark and every click
 ## outside the cut-out does nothing, through three phases: the Build button, then the piece's tile on the build bar,
@@ -115,9 +116,11 @@ static func showing() -> bool:
 static func in_beat() -> bool:
 	return showing() and _node.beat and _node.age < BEAT_S
 
-static func _free_to_show(home: Node, placing: bool) -> bool:
-	var building: bool = home.hb != null and home.hb.active and not placing
-	return home.panel_open == "" and not home.chat_open and not home.building_now and not building \
+## Nothing in the way of the spotlight: no panel, talk or build animation; build mode only for a step that lights
+## a build tile.
+static func _free_to_show(home: Node, in_build: bool) -> bool:
+	var building: bool = home.hb != null and home.hb.active
+	return home.panel_open == "" and not home.chat_open and not home.building_now and (in_build or not building) \
 			and not Overlay.is_open()
 
 ## Which part of a placing step the player is at: "hub" (build mode is off), "tile" (nothing, or the wrong piece,

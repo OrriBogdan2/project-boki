@@ -5,7 +5,7 @@
 - **Area:** combat
 
 ## Problem
-Each kit decided on its own what stops it: the Abyssal Hand stopped at Tenzo's rocks (terrain in the source), the Longneedle and Faultline went through placed walls, and Cinder's pull and Grimble's grab dragged a Kael in his guard or an Albert behind his raised shield.
+Each kit decided on its own what stops it: the Deep Reach stopped at Tenzo's rocks (terrain in the source), the Longneedle and Faultline went through placed walls, and Cinder's pull and Grimble's grab dragged a Kael in his guard or an Albert behind his raised shield.
 
 ## Options
 1. Fix each kit where it differs: small diffs, but the next kit drifts again.

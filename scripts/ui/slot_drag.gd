@@ -131,8 +131,9 @@ func _drop(to: Control) -> void:
 	var why := String(_move.call(_slots[from]["key"], _slots[to]["key"]))
 	if why != "":
 		_snap_back(from, why)
-	elif is_instance_valid(_preview):
-		_preview.queue_free()
+	else:
+		if is_instance_valid(_preview):
+			_preview.queue_free()
 
 ## A refused drop: the thing flies back to its slot and the reason shows beside it for a moment.
 func _snap_back(from: Control, why: String) -> void:

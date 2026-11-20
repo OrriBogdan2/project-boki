@@ -97,7 +97,7 @@ func _default() -> void:
 	ok(ids.size() == 5 and listed, "five quick keys are in the Controls list")
 	ok(ids.all(func(a): return InputMap.has_action(a) and Settings.slots(a) == ["", ""]), "...and all start unbound")
 	var bare: bool = KinKeys.card_lines(Color.WHITE).is_empty()
-	ok(Settings.key_cap("throw") == "G" and bare, "a new player sees only G (nothing on the kit card)")
+	ok(Settings.key_cap("throw") == "C" and bare, "a new player sees only C (nothing on the kit card)")
 
 func _bound() -> void:
 	for a in KEYS:

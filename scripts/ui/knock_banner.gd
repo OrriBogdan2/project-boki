@@ -26,6 +26,8 @@ const X_R := 9.0                         # px: half the X over the portrait
 const WORD_PX := 34
 const NAME_PX := 14
 const COUNT_PX := 20
+const BOX_HALF_W := 140.0                # px: half the banner's width, words included (it slides off your hunter)
+const BOX_BELOW := 50.0                  # px under the portrait's ring that the words and name pill reach
 const BLADE_STEPS := 16                  # points down each side of a slash blade (smooth at 1080p)
 
 static var _rules := {}
@@ -69,10 +71,17 @@ func _draw() -> void:
 		_top = minf(under_toasts, size.y * float(r["max_top_frac"]))
 	var centre := Vector2(size.x * 0.5, _top + FACE_R + RING_W - float(r["rise_px"]) * (1.0 - _fade())).round()
 	var s := _scale(r)
+	centre = slid(centre, HunterZone.rect(_hud.m))
 	draw_set_transform(centre, 0.0, Vector2.ONE * s)
 	_draw_face(float(r["back_alpha"]))
 	draw_set_transform(Vector2.ZERO)
 	_draw_words(centre, s, float(r["back_alpha"]))
+
+## `centre` moved sideways so the banner's box (words and name pill included) keeps off `zone` (your hunter).
+static func slid(centre: Vector2, zone: Rect2) -> Vector2:
+	var reach := Vector2(BOX_HALF_W, FACE_R + RING_W + BOX_BELOW)
+	var box := Rect2(centre - Vector2(reach.x, FACE_R + RING_W), reach * 2.0)
+	return centre + Vector2(HunterZone.slide(box, zone), 0.0)
 
 ## The banner numbers (content/rules/knock_banner.json), read once.
 static func rules() -> Dictionary:

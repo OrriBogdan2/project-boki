@@ -1,0 +1,20 @@
+{
+ "group": "raid",
+ "name": "Heart Raid",
+ "script": "tools/gen_sfx_raid.py",
+ "sounds": {
+  "raid_gate_tick": "cast",
+  "raid_wave_open": "cast",
+  "raid_boss_rise": "signature",
+  "raid_phase": "impact",
+  "raid_rockfall_warn": "cast"
+ },
+ "reach": {
+  "raid_gate_tick": 45,
+  "raid_boss_rise": 70,
+  "raid_phase": 45,
+  "raid_rockfall_warn": 45
+ },
+ "signature": [],
+ "replaces": []
+}

@@ -10,13 +10,11 @@ extends ArchKit
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
-const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
+const THRUST_T := 0.03         # s after the ember when the arm is straight out (pip.json "fade"; the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
-# Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
-# (1 step of its 4 cel bands = 0.25), so these keep a foe standing in the middle readable.
-const SEED_FILL := 0.8        # the seed's burst disc, drawn at a 1.0 (centre 0.23)
-const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1
+const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
+const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
 const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
@@ -24,6 +22,7 @@ const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), no
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
 var burr_n := 0
+var field_look := {}           # the Burrseed field's look from content/vfx/tender.json "field", colours resolved
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
 var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
@@ -52,6 +51,9 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
+
 ## A move that waits for the one playing to finish (passive procs never cut an ability's move).
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
@@ -76,8 +78,17 @@ func add_kindle(t: Ent, n := 1) -> void:
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
 		vfx("kindled", t.pos)
-		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
+		m.sfx("tend_kindled", t.pos, -2.0, 1.0)
 		play_soft("mm_kindled")
+		ComboMark.payoff(m, h, t)        # the Kindle payoff: full stacks, every shot now hits harder
+
+## The Kindle on `t`, for the ComboMark tag: a pip per stack; the ring is the Kindle left.
+func combo_read(t: Ent) -> Dictionary:
+	var n := kindle_on(t)
+	if n == 0:
+		return {}
+	return {"icon": "burst", "n": n, "max": int(res_def().get("max", 5)),
+			"left": float(kind[t.get_instance_id()]["left"]), "total": float(res_def().get("dur", 4.0))}
 
 func best_kindle() -> int:
 	var b := 0
@@ -216,7 +227,7 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		# the source's triggers: a stun, or damage (on_take); a root or hex holds
+		# the source's triggers: a stun, or damage (on_take); a root holds
 		if h.stun_t > 0.0:
 			drop_all(true)
 			return
@@ -334,7 +345,7 @@ func _tick_glide(dt: float) -> void:
 ## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
 ## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
-## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
+## charge; letting go does nothing. A stun or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
 func rmb_winding() -> bool: return seed_aim
 
@@ -419,8 +430,8 @@ func burst_ap_k() -> float:
 
 func _stick(e: Ent) -> void:
 	burr_n += 1
-	burrs.append({"t": e, "build": 0.0, "id": burr_n})
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
+	burrs.append({"t": e, "build": 0.0, "id": burr_n, "motes": 0.0})
+	lk().burst("column", e.pos, {"col": field()["col"], "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
@@ -442,20 +453,38 @@ func _tick_burrs(dt: float) -> void:
 			_burr_off(b)
 			continue
 		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
-		lk().keep(
-				key, "disc", t.pos,
-				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL,
-					"rim_w": 0.14, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
-		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
+		_show_field(b, key, t.pos, k, dt)
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held else Color("ff8a6a"),
 				"a": lerpf(0.3, 0.9, k) if held else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
 			_burst(t)
+
+## The root field under a stuck foe (VFX_QUALITY zone rule): a lit rim on the burst radius, a soft inside, a
+## front filling out toward the root and motes rising off the rim; its numbers are tender.json's "field".
+func _show_field(b: Dictionary, key: String, at: Vector3, k: float, dt: float) -> void:
+	var fd := field()
+	var r := burst_radius()
+	lk().keep(
+			key, "disc", at,
+			{"r": r, "col": fd["col"], "rim": fd["rim"], "fill": fd["fill"], "sweep": k, "a": fd["a"]})
+	AimKit.circle(h, key, {"at": at, "r": r, "band": fd["band"], "all": true, "col": fd["rim"]})
+	b["motes"] = float(b["motes"]) + dt
+	if float(b["motes"]) >= float(fd["motes_every"]):
+		b["motes"] = 0.0
+		vfx("seed_field", at, null, {"r": r})
+
+## tender.json's "field", its palette names turned into colours (read once).
+func field() -> Dictionary:
+	if field_look.is_empty():
+		var d := HeroVfx.data("tender")
+		field_look = (d["field"] as Dictionary).duplicate()
+		for key in ["col", "rim", "vine"]:
+			field_look[key] = Color(String(d["palette"][field_look[key]]))
+	return field_look
 
 func _burr_off(b: Dictionary) -> void:
 	var key := "burr%d" % int(b["id"])
@@ -468,8 +497,8 @@ func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	var at := t.pos
 	var rr := burst_radius()
-	var col := col_of(rmb_def())
-	# the flare: a swirl of starlight snaps out over the area, then a root beam holds on each foe
+	# the field's moment: a ring runs out to its rim; each foe it takes gets a snap of control violet and wears
+	# the root's body look (StatusLooks)
 	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
@@ -479,7 +508,7 @@ func _burst(t: Ent) -> void:
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
-		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
+		vfx("seed_root", f.pos)
 	stats["flares"] += 1
 	play_soft("mm_tug")
 
@@ -570,15 +599,16 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
-	# middle shading to teal, a brighter fill, its lantern floating over the middle
+	# her leaf green (the heal colour), a wide bright edge over a faint inside (the zone rule: tender.json
+	# "hearth_disc"); thrown: a little brighter, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
 	var own := AimKit.hero_col(h)
+	var disc: Dictionary = HeroVfx.data("tender")["hearth_disc"]
 	var look_p := {
-		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
+		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": disc["fill"], "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"fill": THROWN_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": disc["thrown_fill"], "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -597,7 +627,7 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
-## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
+## Hearthlight's healing, grown by the level's ability power (LevelGrowth.ap).
 ## Healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's).
 func heal_k() -> float:
 	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
@@ -661,6 +691,7 @@ func teardown() -> void:
 	super.teardown()
 	hearth = {}
 	hearth_call = {}
+	_call_loops_stop()
 	burrs.clear()
 	if look != null:
 		look.teardown()
@@ -738,12 +769,13 @@ func _start_call() -> bool:
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
+	_call_loops(who)
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
 	vfx("call")
 	vfx("call_land", who.pos)
-	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), AimKit.hero_col(h))
 	return true
 
 
@@ -765,6 +797,8 @@ func _tick_call(dt: float) -> void:
 		hearth_call["tick"] = float(hearth_call["tick"]) - every
 		_call_heal(who, float(xd["heal_ps"]) * every)
 	_call_look(who, dt)
+	Sfx.loop_set(_loop_key(true), h.pos)
+	Sfx.loop_set(_loop_key(false), who.pos)
 	if anim_id == "" or (anim_id != "mm_call_hold" and m.time - anim_at >= KMovesCare.length(anim_id)):
 		play("mm_call_hold")
 	if float(hearth_call["left"]) <= 0.0:
@@ -792,7 +826,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
-		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
@@ -800,6 +833,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 func _call_end(done: bool) -> void:
 	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
 	hearth_call = {}
+	_call_loops_stop()
 	for id_ in ["x", "x_pick", "x_line"]:
 		AimKit.hide(h, id_)
 	if ult_look != null:
@@ -820,6 +854,23 @@ func _call_end(done: bool) -> void:
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
+
+
+## The channel's warm loop sounds on her and, quieter, on the ally (solo: only her). It is keyed per caster,
+## so a recast never stacks a second one, and it is stopped by the call's every end (_call_end, teardown).
+func _loop_key(on_her: bool) -> String:
+	return "call%d%s" % [h.get_instance_id(), "" if on_her else "_ally"]
+
+
+func _call_loops(who: Hunter) -> void:
+	Sfx.loop_start(_loop_key(true), "tend_call_loop", h.pos, CALL_LOOP_DB)
+	if who != h:
+		Sfx.loop_start(_loop_key(false), "tend_call_loop", who.pos, CALL_LOOP_DB + CALL_LOOP_ALLY_DB)
+
+
+func _call_loops_stop() -> void:
+	Sfx.loop_stop(_loop_key(true))
+	Sfx.loop_stop(_loop_key(false))
 
 
 ## The tether snaps where everyone can see it: coral sparks at her hand and at the far end.

@@ -25,8 +25,9 @@ static func drive(m: Match, tu: DuoTutorial) -> void:
 		return
 	var pulse := fmod(m.time, 0.5) < 0.1      # a tap: pressed for a few steps every half second
 	match tu.id():
-		"meet", "revive":
-			_go(p, tu.guide.pos, 0.6)
+		"meet", "revive":      # round the blocks, as the bots walk (the guide can go down behind one)
+			var far := p.flat_dist(tu.guide) > 0.6
+			p.inp["move"] = m.bot_brain._path_dir(m, p, tu.guide.pos) if far else Vector2.ZERO
 		"slide":
 			p.inp["move"] = Vector2(cos(m.time), sin(m.time))
 			p.inp["dash"] = pulse

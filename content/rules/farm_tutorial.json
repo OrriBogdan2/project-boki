@@ -44,7 +44,7 @@
 			],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Hold {interact} at a tree to chop wood for the house."
+				"go": "HOLD {interact} at a tree to chop wood for the house."
 			},
 			"world": {
 				"go": "Chop a tree"
@@ -57,7 +57,7 @@
 			],
 			"title": "Mine rocks for the house",
 			"hints": {
-				"go": "Hold {interact} at a rock with this pickaxe to mine stone."
+				"go": "HOLD {interact} at a rock with this pickaxe to mine stone."
 			},
 			"world": {
 				"go": "Mine this rock"
@@ -84,7 +84,8 @@
 				"place": {
 					"hub": "build",
 					"tile": "house",
-					"click": "Click here"
+					"click": "Click here",
+					"tab": "Buildings"
 				}
 			}
 		},
@@ -139,7 +140,8 @@
 				"place": {
 					"hub": "build",
 					"tile": "feeder_trough",
-					"click": "Click here"
+					"click": "Click here",
+					"tab": "Buildings"
 				}
 			}
 		},
@@ -154,7 +156,7 @@
 				"patch_dry": "Press {build} and place a patch; you water it yourself.",
 				"plant": "Press {interact} at the patch to plant a seed.",
 				"water": "Press {interact} at the patch to water it.",
-				"grow": "Ripe in {secs}s: wait by the patch, then pick it.",
+				"grow": "Your seed is growing. Wait by the patch, then pick it.",
 				"pick": "It's ripe: press {interact} to pick it."
 			},
 			"world": {
@@ -284,20 +286,20 @@
 			}
 		]
 	},
-	"skip_ask": "Skip the tutorial?",
+	"skip_ask": "Skip tutorial?",
 	"done_toast": "Tutorial done! +{gems} gems",
 	"skip_label": "Skip tutorial",
 	"stay_label": "Stay",
 	"first_day": {
 		"reward_gems": 15,
 		"start_items": {"kibble": 2},
-		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).",
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later). needs_grown: the row shows only once a Boki in the roster is Grown (NookRules.GROWN_LV, level 8), because pairing needs it and a new player cannot do it on day one; a ticked row still shows.",
 		"rows": [
 			{"id": "feed", "text": "Feed your Boki"},
 			{"id": "toy", "text": "Play with a toy"},
 			{"id": "race", "text": "Run your first race"},
 			{"id": "nap", "text": "See a nap pile", "two": true},
-			{"id": "pair", "text": "Pair two Boki in the Nook", "two": true}
+			{"id": "pair", "text": "Pair two Boki in the Nook", "two": true, "needs_grown": true}
 		]
 	},
 	"tracker": {
@@ -327,5 +329,5 @@
 		"go": "Off to work!",
 		"wait": "Ready when there's work!"
 	},
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki; tile + tab: the build-bar entry to pick once build mode is open, or its tab). Each target gets its full dimmed beat once, then only a soft ring."
 }

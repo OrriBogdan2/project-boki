@@ -32,7 +32,11 @@
    "dmg": 14,
    "slow": 1.2,
    "kb": 4,
-   "color": "c9a0ff"
+   "color": "c9a0ff",
+   "sfx": "gl_blink_hit"
   }
- ]
+ ],
+ "sfx": {
+  "cast": "gl_blink"
+ }
 }

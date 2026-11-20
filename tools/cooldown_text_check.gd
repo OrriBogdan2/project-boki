@@ -58,13 +58,14 @@ func _dash(P: Hunter, hud) -> void:
 	var left := 0.5 * P.dash_regen()
 	var sh: Dictionary = DashSlot.shown.get(hud.get_instance_id(), {})
 	var pips: Array = sh.get("pips", [])
-	ok(String(sh.get("text", "")) == HudSlot.cd_text(left) and pips.size() == int(P.max_dashes()),
+	var want_pips := int(P.max_dashes()) if P.max_dashes() > 1.0 else 0     # a one-charge dash draws no discs
+	ok(String(sh.get("text", "")) == HudSlot.cd_text(left) and pips.size() == want_pips,
 		"dash empty, %.2f s to the next charge: '%s' and %d pips" % [left, sh.get("text", ""), pips.size()])
 	# the source keeps the countdown on the slot while one charge is ready
 	# and the next comes back (DASH_UI.md)
-	var lent := P.max_dashes() < 2.0
-	if lent:
-		P.perks.append("secondwind")   # a second charge, as the multi-charge dashes in the source
+	var dd: Dictionary = P.ak.dash_def()
+	var had: Variant = dd.get("charges")
+	dd["charges"] = 2                  # a second charge, as the multi-charge dashes in the source
 	ok(P.max_dashes() >= 2.0, "the dash has %d charges for the partial case" % int(P.max_dashes()))
 	if P.max_dashes() >= 2.0:
 		P.dashes = 1.5
@@ -82,8 +83,10 @@ func _dash(P: Hunter, hud) -> void:
 	pips = sh.get("pips", [])
 	ok(String(sh.get("text", "")) == "" and pips.all(func(f): return float(f) >= 1.0),
 		"dash full: no seconds, every pip full")
-	if lent:
-		P.perks.erase("secondwind")
+	if had == null:
+		dd.erase("charges")
+	else:
+		dd["charges"] = had
 	P.dashes = P.max_dashes()
 
 ## The Boki's G slot: it counts its wait down in tenths and clears when it is over.

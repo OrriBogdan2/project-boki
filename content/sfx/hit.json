@@ -1,0 +1,13 @@
+{
+ "group": "hit",
+ "name": "Hit ticks",
+ "script": "tools/gen_sfx_hits.py",
+ "sounds": {
+  "hit_gun": "fire",
+  "hit_bow": "fire",
+  "hit_blade": "fire",
+  "hit_blunt": "fire",
+  "hit_magic": "fire",
+  "hit_thrown": "fire"
+ }
+}

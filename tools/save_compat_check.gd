@@ -131,6 +131,11 @@ func _check_settings(p: String) -> void:
 		is_equal_approx(float(v["master"]), 0.5) and v["quality"] == "high" and bool(v["dash_to_cursor"]),
 		"settings.cfg keeps the values the golden was written with"
 	)
+	Settings.migrate_cam(v)
+	ok(
+		CamRig.STYLES.has(v["cam_style"]) and CamRig.FOLLOW.has(v["cam_follow"]),
+		"settings.cfg: its camera ids load as today's (%s, %s)" % [v["cam_style"], v["cam_follow"]]
+	)
 	var keys: Dictionary = v.get("keys", {})
 	ok(not keys.is_empty() and int(v.get("keys_v", 0)) == Settings.KEYS_V, "settings.cfg keeps its key bindings")
 	ok(int(cf.get_value("save", "slot", 0)) == 2, "settings.cfg keeps the last save slot")

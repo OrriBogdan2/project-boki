@@ -78,8 +78,10 @@ func _init(match_node: Match) -> void:
 		m.hud.guide_hidden = true
 	_next()
 
-## Whether this hunter can do a beat (the Boki beats need a Boki).
+## Whether this hunter can do a beat (the Boki beats need a Boki; the Fusion beat never runs in the tutorial).
 func applies(bid: String) -> bool:
+	if bid == "ult":
+		return false
 	return m.player.kin != null or bid not in ["boki", "ult"]
 
 ## The beat under way ({} once it's over).
@@ -137,7 +139,8 @@ func fill(txt: String) -> String:
 	var p := m.player
 	var key := String(cur().get("key", ""))
 	var boki := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
-	var rmb := String(p.ak.rmb_def().get("name", "right click")) if p.ak else "right click"
+	var rmb_key := Settings.key_cap("secondary")
+	var rmb := String(p.ak.rmb_def().get("name", rmb_key)) if p.ak else rmb_key
 	txt = txt.replace("%K", Settings.key_cap(key) if key != "" else "").replace("%s", boki).replace("%A", rmb)
 	txt = txt.replace("%G", guide.pname).replace("%1", foes[0].pname).replace("%2", foes[1].pname)
 	return TutorialText.fill(txt, p)

@@ -5,10 +5,11 @@ extends HFlowContainer
 ## ...). The two picks live for the session only (never in the save), the same in both places. Legendary
 ## kin stay last under every sort (KinBox.sorted does that).
 
-static var type := ""           # the type id picked, "" = every type
-static var sort := "number"     # a KinBox.SORTS key
+static var type := ""  # the type id picked, "" = every type
+static var sort := "number"  # a KinBox.SORTS key
 
 var _changed: Callable
+
 
 ## on_change runs after any pick (the owner rebuilds what it lists).
 func _init(on_change: Callable) -> void:
@@ -17,9 +18,11 @@ func _init(on_change: Callable) -> void:
 	add_theme_constant_override("v_separation", 6)
 	_build()
 
+
 ## Does a species pass the type pick?
 static func type_ok(species: String) -> bool:
 	return type == "" or DexView.type_of(species) == type
+
 
 func _build() -> void:
 	for ch in get_children():
@@ -44,11 +47,14 @@ func _build() -> void:
 		so.set_item_metadata(so.item_count - 1, s[0])
 		if s[0] == sort:
 			so.select(so.item_count - 1)
-	so.item_selected.connect(func(i: int):
-		sort = String(so.get_item_metadata(i))
-		_changed.call())
+	so.item_selected.connect(
+		func(i: int):
+			sort = String(so.get_item_metadata(i))
+			_changed.call()
+	)
 	so.tooltip_text = "The order Boki are listed in (legendaries always last)"
 	add_child(so)
+
 
 func _pick_type(t: String) -> void:
 	type = t

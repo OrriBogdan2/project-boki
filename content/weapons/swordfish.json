@@ -22,7 +22,8 @@
   "kb_influence": 0.4,
   "size": 0.18,
   "color": "#bfe6ff",
-  "sfx": "swipe",
+  "sfx": "gil_thrust",
+  "hit": "hit_blade",
   "desc": "Two quick thrusts and a longer lunge. Every thrust steps you in; the third slows.",
   "kick": 0.04
  },

@@ -11,10 +11,12 @@ const DT := 1.0 / 60.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("KINTARGET %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -30,7 +32,8 @@ func run(main: Node) -> void:
 		h.ctrl = "idle"
 	var k: Kin = null
 	for kk in m.kins:
-		if kk.owner_h != null and kk.brain != null: k = kk
+		if kk.owner_h != null and kk.brain != null:
+			k = kk
 	ok(k != null, "a Hunter's Boki with a brain to ask")
 	if k == null:
 		main.get_tree().quit(1)
@@ -49,12 +52,12 @@ func run(main: Node) -> void:
 	for i in LAYOUTS:
 		k.pos = P.pos + Vector3(rng.randf_range(-2.0, 2.0), 0.0, rng.randf_range(-2.0, 2.0))
 		k.ignore_until.clear()
-		var empty := i % 5 == 0      # nothing in range: it picks no one
+		var empty := i % 5 == 0  # nothing in range: it picks no one
 		for f in foes:
 			var a := rng.randf() * TAU
 			var d := rng.randf_range(reach * 1.1, reach * 1.6) if empty else rng.randf_range(0.5, reach * 1.6)
 			var at := k.pos + Vector3(cos(a), 0.0, sin(a)) * d
-			var up := 3.0 if rng.randf() < 0.15 else 0.0      # up a ledge: in range but not walkable to
+			var up := 3.0 if rng.randf() < 0.15 else 0.0  # up a ledge: in range but not walkable to
 			f.pos = Vector3(at.x, m.world.ground_at(at.x, at.z) + up, at.z)
 			f.prev = f.pos
 			f.stun_t = 1.0 if rng.randf() < 0.2 else 0.0
@@ -77,6 +80,7 @@ func run(main: Node) -> void:
 	print("KINTARGET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The rule in full: every filter on every foe, then the best score (ties to the earlier foe).
 func _reference(m: Match, k: Kin, foes: Array, reach: float) -> Ent:
 	var own: Hunter = k.owner_h
@@ -92,16 +96,22 @@ func _reference(m: Match, k: Kin, foes: Array, reach: float) -> Ent:
 		if d > reach or not k.walkable_to(f.pos):
 			continue
 		var s := -d
-		if f == own.last_hit_by: s += 2.0 + k.brain.loyalty * k.brain._r("guard_owner_per_loyalty", 4.0)
-		if f == k.target: s += 1.5
-		if f == focus: s += 3.0
-		if f is Hunter: s += k.brain.aggression * 1.5
+		if f == own.last_hit_by:
+			s += 2.0 + k.brain.loyalty * k.brain._r("guard_owner_per_loyalty", 4.0)
+		if f == k.target:
+			s += 1.5
+		if f == focus:
+			s += 3.0
+		if f is Hunter:
+			s += k.brain.aggression * 1.5
 		s -= own.flat_dist(f) * k.brain.loyalty * 0.25
-		if f.stun_t > 0.0 or f.root_t > 0.0: s += 1.0
+		if f.stun_t > 0.0 or f.root_t > 0.0:
+			s += 1.0
 		if s > bs:
 			bs = s
 			best = f
 	return best
+
 
 func _name(e: Ent) -> String:
 	if e == null:

@@ -53,9 +53,9 @@ func run(main: Node) -> void:
 	ok(_same_rgb(mat.get_shader_parameter("color"), col), "...in the rival's ability colour")
 	var fill := CaptureHud.scan_fill(m, k)
 	ok(not fill.is_empty() and absf(float(fill[0]) - 0.5) < 0.1, "...the fill on the Boki follows their progress")
-	ok(_fill_col(k).is_equal_approx(SideColor.FOE), "...in the foe colour")
+	ok(_fill_col(k).is_equal_approx(SideColor.foe()), "...in the foe colour")
 	rival.team = P.team
-	ok(_fill_col(k).is_equal_approx(SideColor.ALLY), "a teammate's scan fills in the ally colour")
+	ok(_fill_col(k).is_equal_approx(SideColor.ally()), "a teammate's scan fills in the ally colour")
 	rival.team = P.team + 1
 
 	Capture.on_net(m, rival, "scan_stop", "%s|0.00" % k.nid)
@@ -79,7 +79,7 @@ func run(main: Node) -> void:
 
 	rival.teleport(P.pos + Vector3(30.0, 0, 0))
 	base.begin(P)
-	ok(Capture.active(P) and _fill_col(k).is_equal_approx(SideColor.YOU), "your own scan fills in your colour")
+	ok(Capture.active(P) and _fill_col(k).is_equal_approx(SideColor.you()), "your own scan fills in your colour")
 	var mine = Capture.state(P).get("beam")
 	P.inp["dash"] = true
 	base.run_for(0.2)

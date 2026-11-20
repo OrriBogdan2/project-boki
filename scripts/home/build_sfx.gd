@@ -13,24 +13,30 @@ static var _rules := {}
 static var _knock_spot := ""
 static var _knock_ms := -100000
 
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
 	return _rules
 
+
 static func _cue(sname: String) -> void:
 	Sfx.play(sname, null, float(rules()["cue_db"]))
+
 
 static func picked() -> void:
 	if not quiet:
 		_cue("build_pick")
 
+
 static func rotated() -> void:
 	_cue("build_rotate")
+
 
 static func stored() -> void:
 	if not quiet:
 		_cue("build_store")
+
 
 ## The cue name for putting piece id down: a moved piece is set down softly, a new one thunks by its material.
 static func placed_name(id: String, moved: bool) -> String:
@@ -38,9 +44,11 @@ static func placed_name(id: String, moved: bool) -> String:
 		return "build_move"
 	return "build_place_" + ("stone" if (rules()["stone"] as Array).has(id) else "wood")
 
+
 static func placed(id: String, moved: bool) -> void:
 	if not quiet:
 		_cue(placed_name(id, moved))
+
 
 ## A dull knock for an attempt that can't be done. spot names where the ghost sits (cell and turn): trying again
 ## there within knock_quiet_s stays silent, so a held key or a drummed click doesn't repeat it.

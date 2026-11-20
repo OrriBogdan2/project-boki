@@ -30,7 +30,14 @@ const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking go
 const POSE_UNSEEN := 6
 const POSE_OFF_SCREEN := 3
 const POSE_FAR := 2
+const POSE_SLOW := 2       # frames per pose of a rival past POSE_SLOW_M while the match runs slow
+const POSE_SLOW_M := 6.0   # m (flat) from the camera's focus: nearer rivals keep every frame however slow it runs
+const SLOW_FPS := 36.0     # fps the match is slow under (two frames of 60 Hz and more a frame)
+const EASE_FPS := 50.0     # fps it is quick again over (the gap keeps the rate from flapping)
 
+static var slow := false       # the match runs slow (SLOW_FPS): rivals in view are posed every POSE_SLOW frames
+static var force_slow := -1    # checks and --match-profile's A/B: 0 never slow, 1 always, -1 the fps decides
+static var _slow_frame := -1   # the frame `slow` was last judged
 static var _n := 0             # sim steps planned (staggers the bots' slots)
 static var _hit_frame := -1    # the frame _hit_squad was filled in
 static var _hit_squad := {}    # Hunter -> true: hit one of the local player's squad (or their Boki) within HIT_CALM_S
@@ -90,8 +97,28 @@ static func pose_every(m: Match, h: Hunter) -> int:
 	if not m.cam.on_screen(h.position):
 		return POSE_OFF_SCREEN
 	var cf := m.cam.focus
-	var far := Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared() > CamRig.POSE_FAR_M * CamRig.POSE_FAR_M
-	return POSE_FAR if far else 1
+	var d2 := Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared()
+	if d2 > CamRig.POSE_FAR_M * CamRig.POSE_FAR_M:
+		return POSE_FAR
+	return POSE_SLOW if _slow() and d2 > POSE_SLOW_M * POSE_SLOW_M else 1
+
+
+## Slow frames (the last second's fps under SLOW_FPS): a rival on screen past POSE_SLOW_M from the focus, not in a fight
+## with your squad, is posed every POSE_SLOW frames until the fps is back over EASE_FPS. A PC that holds 50 fps sees no
+## change; one at 25 fps gets back most of what those rivals' clips, springs and skeletons cost (docs/MATCH_PERF.md).
+static func _slow() -> bool:
+	if force_slow >= 0:
+		return force_slow == 1
+	var f := Engine.get_process_frames()
+	if f != _slow_frame:
+		_slow_frame = f
+		judge(Engine.get_frames_per_second())
+	return slow
+
+
+## Decides `slow` from a second's fps: on under SLOW_FPS, off again over EASE_FPS.
+static func judge(fps: float) -> void:
+	slow = fps < (EASE_FPS if slow else SLOW_FPS)
 
 ## In a fight with the local player's squad: hit by one of it (or their Boki) or hit one within HIT_CALM_S, or a bot
 ## after one of it.

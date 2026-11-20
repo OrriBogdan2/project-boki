@@ -33,7 +33,7 @@ func _boki(power: int) -> Dictionary:
 	return rec
 
 func _tables() -> void:
-	ok(GardenPrizes.ids().size() == 8, "eight games: dash, shove, seek, volley, show, echo, relay, lantern")
+	ok(GardenPrizes.ids().size() == 9, "nine games: dash, shove, seek, volley, show, echo, relay, lantern, kite")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for id in GardenPrizes.ids():
@@ -135,5 +135,5 @@ func _visible() -> void:
 			"the board lists table, first-win item and cup for each game")
 	board.free()
 	var rows := GardenPrizes.rows({"game": "dash", "items": [{"kind": "snack", "id": "puffcorn"}], "first": true,
-			"round": "", "ribbon": true, "reset": false})
+			"round": "", "ribbon": true, "reset": false, "keepsake": ""})
 	ok(rows.size() == 2, "a Crown result card shows the prize and the ribbon")

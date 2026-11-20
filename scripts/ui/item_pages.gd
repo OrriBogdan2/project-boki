@@ -8,7 +8,10 @@ extends RefCounted
 const STAR := Color("f2c84a")
 const PICTURE := 40.0
 
-static func _icon(id: String) -> String:
+## The item's icon (Icons ids): its painted icon, else its family's glyph.
+static func icon_of(id: String) -> String:
+	if Icons.art("garden_" + id):
+		return "garden_" + id
 	var fam: String = GardenItems.item(id)["family"]
 	return String(GardenItems.rules()["families"].get(fam, {}).get("icon", "gem"))
 
@@ -37,7 +40,7 @@ static func tile(id: String, on_open: Callable) -> Control:
 	t.add_child(col)
 	var pic := CenterContainer.new()
 	pic.custom_minimum_size = Vector2(0, DexView.PORTRAIT + 4)
-	pic.add_child(UI.IconDot.new(_icon(id), UI.GOLD if have else Color(0.05, 0.06, 0.1, 0.92), PICTURE))
+	pic.add_child(UI.IconDot.new(icon_of(id), UI.GOLD if have else Color(0.05, 0.06, 0.1, 0.92), PICTURE))
 	col.add_child(pic)
 	if have:
 		var nl := UI.label(GardenItems.item_name(id), UI.T_SMALL, UI.INK, UI.semi)
@@ -56,7 +59,7 @@ static func detail(v: VBoxContainer, id: String) -> void:
 	stage.custom_minimum_size = Vector2(250, 290)
 	stage.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var dc := CenterContainer.new()
-	dc.add_child(UI.IconDot.new(_icon(id), UI.GOLD, 120.0))
+	dc.add_child(UI.IconDot.new(icon_of(id), UI.GOLD, 120.0))
 	stage.add_child(dc)
 	row.add_child(stage)
 	var info := UI.vbox(7)

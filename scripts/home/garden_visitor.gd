@@ -7,7 +7,7 @@ extends RefCounted
 ## list and its favourite is shown. The third favourite meal makes it ask to stay as a new Boki when the
 ## zone has room, else leave an egg in the Incubator. It arrives with footprints and a shimmer and its egg
 ## glints (VisitorArrive). The away card says who came and left.
-## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next}: a lazy key, no save bump; the rec carries
+## Save.d["visitor"] = {rec, zone, t, fed, told, notes, next, lead}: a lazy key, no save bump; the rec carries
 ## "visitor": true until it joins. The egg it leaves carries {sp, zone, day} (Incubator "visitor"): the baby's
 ## lineage["visitor"] shows it as the wild parent on the Family tab, with one memory line.
 ## Tuning: content/rules/garden_visitor.json.
@@ -19,6 +19,10 @@ static func rules() -> Dictionary:
 	return Content.rules("garden_visitor")
 
 ## The wild Boki here now ({} for none).
+## The chance a look brings a visitor in the zone you are in (higher with a Wild welcome, DecorComfort).
+static func chance() -> float:
+	return float(rules()["chance"]) * DecorComfort.value("wild", "visit", 1.0)
+
 static func rec() -> Dictionary:
 	return Save.d.get("visitor", {}).get("rec", {})
 
@@ -110,14 +114,17 @@ static func _look(h, dt: float, now: float) -> void:
 	if _look_t < float(rules()["check_s"]) or now < float(Save.d.get("visitor", {}).get("next", 0.0)):
 		return
 	_look_t = 0.0
-	if _rng.randf() >= float(rules()["chance"]):
+	if _rng.randf() >= chance():
 		return
 	var zone := GardenZones.current()
 	var sp := pick(zone, h.toys.toys().map(func(t): return t["id"]))
 	if sp == "":
 		return
 	var r := begin(zone, sp, now)
-	VisitorArrive.trail(h, h.add_kin(r, 0)["pos"], sp)
+	var k: Dictionary = h.add_kin(r, 0)
+	VisitorArrive.trail(h, k["pos"], sp)
+	GardenSfx.cue("garden_visit_in", h._kin_entry(r)["node"].position)
+	VisitorIntro.start(h, r, now)
 	var loves := Care.food_name(String(r["likes"]["food"]))
 	h._toast("A wild %s wandered into %s. It loves %s" % [_name(r), _zone_name(), loves])
 
@@ -152,8 +159,12 @@ static func _thank(h, r: Dictionary, now: float) -> void:
 		leave(h, "A wild %s left %s" % [_name(r), "a " + Incubator.egg_name(egg)], now)
 		h._toast("%s left an egg" % _name(r))
 
-## The visitor goes (its model with it when `h` has one): its line waits for the away card, the next one after gap_s.
+## The visitor goes (its model with it and its goodbye when `h` has one): its line waits for the away card, the
+## next one after gap_s.
 static func leave(h, line: String, now: float) -> void:
+	var k: Dictionary = h._kin_entry(rec()) if h != null else {}
+	if not k.is_empty():
+		GardenSfx.cue("garden_visit_out", k["node"].position)
 	_dismiss(h, rec())
 	var notes: Array = Save.d["visitor"].get("notes", [])
 	notes.append(line)

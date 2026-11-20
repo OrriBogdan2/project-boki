@@ -107,7 +107,7 @@ for sd in "RL":
     s = 1.0 if sd == "R" else -1.0
     side = smooth(-0.005, 0.03, P[:, 0] * s)
     below = smooth(-0.40, -0.50, P[:, 2]) * FUR * (1 - tail_w)
-    legs = side * below * (d1 < 0.2)
+    legs = side * below * (np.minimum(d1, d2) < 0.2)      # the paws splay off the thigh's line: the shin's counts too
     k = smooth(-0.70, -0.62, P[:, 2])                # 1: thigh, 0: shin
     f = smooth(-0.84, -0.89, P[:, 2])
     Wn["thigh." + sd] = legs * k

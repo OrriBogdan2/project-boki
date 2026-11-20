@@ -1,6 +1,6 @@
 class_name HawkSense
 extends RefCounted
-## Lace's passive, Hawk Sense (the source's injured-hunter vision): rivals under the health line (resource
+## Lace's passive, Red Thread (the source's injured-hunter vision): rivals under the health line (resource
 ## sense_hp) within sense_r are seen by her side through fog, grass and rocks (Match.can_see asks seen_by) and
 ## revealed to all (reveal_t) for as long as they stay hurt and close. On her side's screens each one also
 ## wears a glowing outline in her colour that shows through rocks and walls: the x-ray shell your squad's
@@ -52,7 +52,7 @@ static func seen_by(f: Hunter, team: int) -> bool:
 	return int(f.get_meta(TEAMS_META, 0)) & (1 << team) != 0
 
 
-## Whether `f` is under Hawk Sense right now (revealed, and outlined for Lace's side).
+## Whether `f` is under Red Thread right now (revealed, and outlined for Lace's side).
 func senses(f: Hunter) -> bool:
 	return seen.has(f)
 

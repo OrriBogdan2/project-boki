@@ -249,13 +249,13 @@ func _paths() -> void:
 	if home.yard == null:      # a farm with no training yard built: stand one up so the drill can run
 		home.yard = Models.training_yard()
 		home.add_child(home.yard)
-	home._start_drill(k, "speed")
+	home.drill.start(k, "speed")
 	for i in 60:
 		await main.get_tree().process_frame
 	ok(not home.train.is_empty() and home.verbs.act == "", "a drill is running, no cheer yet")
 	home.train["wait"] = 0.0
 	home.train["bar"].m = home.train["bar"].zone      # marker on the gold: a great press
-	home._train_hit()
+	home.drill.hit()
 	ok(home.verbs.act == "cheer", "a great drill mark plays the cheer")
 	home.verbs.act = ""
 	for i in 30:

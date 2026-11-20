@@ -5,12 +5,13 @@ extends "res://tools/clip_shots.gd"
 ## body's turn rate and the feet settle, from a fixed camera above the side on the legs; pale marks show where the
 ## feet stood. Needs a renderer.
 
-const FILM := 1.6             # s filmed from the swing's start (the heaviest step settles by ~1.45 s)
-const STEP := 0.2             # s between frames
+const FILM := 1.6  # s filmed from the swing's start (the heaviest step settles by ~1.45 s)
+const STEP := 0.2  # s between frames
 const DT := 1.0 / 60.0
-const MARK_R := 0.08          # m: the ground mark under a foot
+const MARK_R := 0.08  # m: the ground mark under a foot
 
 var sheet: Image
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -18,11 +19,14 @@ func run(main: Node) -> void:
 	var ids: Array = ["gunslinger", "juggernaut", "archer", "ashwick"]
 	frame_px = 224
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
-		await main.fade.reveal(0.01)       # (the boot logo fades out first)
+		await main.fade.reveal(0.01)  # (the boot logo fades out first)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
@@ -37,6 +41,7 @@ func run(main: Node) -> void:
 	sheet.save_jpg(out.path_join("turn_in_place.jpg"), 0.8)
 	print("TURN_SHOTS_DONE ", ids.size())
 	tree.quit()
+
 
 ## One row of the sheet: standing 0.6 s, then the 180° swing, a frame every STEP s.
 func _hunter(id: String, row: int, step_on: bool) -> void:
@@ -76,6 +81,7 @@ func _hunter(id: String, row: int, step_on: bool) -> void:
 	model.queue_free()
 	marks.queue_free()
 	await tree.process_frame
+
 
 ## A pale disc on the ground under each ankle where it stands now.
 func _marks(feet: WardenTurn, under: Node3D) -> void:

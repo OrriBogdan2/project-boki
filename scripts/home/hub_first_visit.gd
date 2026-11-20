@@ -7,12 +7,13 @@ extends RefCounted
 ## once per save (Save.d.tutorial.hub_first: marker, line), and neither shows on a skipped tutorial or
 ## with tips off. Texts and height: content/rules/garden_zones.json "hub_first".
 
-const BOB_M := 0.12        # m the marker rises and falls
-const BOB_RATE := 3.0      # rad/s of that bob
+const BOB_M := 0.12  # m the marker rises and falls
+const BOB_RATE := 3.0  # rad/s of that bob
 
-var h                      # the Home screen (the hub)
+var h  # the Home screen (the hub)
 var marker: Label3D = null
 var _t := 0.0
+
 
 func _init(home) -> void:
 	h = home
@@ -29,16 +30,23 @@ func _init(home) -> void:
 		marker.position = h.hway.node.position + Vector3(0, float(rules()["marker_h"]), 0)
 		h.add_child(marker)
 
+
 static func rules() -> Dictionary:
 	return GardenZones.rules()["hub_first"]
 
+
 ## Is beat `id` still to show: not seen, tips on, the tutorial not skipped?
 static func wanted(id: String) -> bool:
-	return Settings.get_v("tips") and not FarmTutorial.state()["skipped"] \
-			and not Save.d["tutorial"].get_or_add("hub_first", {}).has(id)
+	return (
+		Settings.get_v("tips")
+		and not FarmTutorial.state()["skipped"]
+		and not Save.d["tutorial"].get_or_add("hub_first", {}).has(id)
+	)
+
 
 static func _seen(id: String) -> void:
 	Save.d["tutorial"]["hub_first"][id] = true
+
 
 ## Per frame: the marker bobs; standing on the ring retires it for good.
 func tick(dt: float) -> void:
@@ -52,6 +60,7 @@ func tick(dt: float) -> void:
 		return
 	_t += dt
 	marker.position.y = at.y + float(rules()["marker_h"]) + sin(_t * BOB_RATE) * BOB_M
+
 
 ## The line for the first locked zone's card when the list opens (an empty array when it is not due).
 static func card_line(id: String) -> Array:

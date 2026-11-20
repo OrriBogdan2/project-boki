@@ -13,6 +13,10 @@
 	"chore_mind_doc": "s an Ember Boki sits by the egg before the egg's hatch time halves.",
 	"nap": [20.0, 40.0],
 	"nap_doc": "s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn.",
+	"spot_walk": 15.0,
+	"spot_walk_doc": "s a Boki walks to a nap spot (garden_zones.json nap) before it naps where it is.",
+	"spot_reach": 20.0,
+	"spot_reach_doc": "m: the farthest nap spot a Boki about to nap walks to; past it, or with every spot taken, it naps where it stands.",
 	"tired_at": 25.0,
 	"tired_at_doc": "energy need below which a Boki naps by day.",
 	"near": 6.0,
@@ -36,6 +40,8 @@
 	"mentor_doc": "s between a retired mentor's slow steps near the Soul Shrine (Mentor, GARDEN.md section 3).",
 	"mentor_radius": 3.0,
 	"mentor_radius_doc": "m from the Soul Shrine a mentor strolls.",
+	"new_toy": {"near": 12.0, "gather": [3.0, 6.0]},
+	"new_toy_doc": "a toy you place (BaseLife.new_toy): roaming Boki within near m on its island come to look for gather s (random in the range, the same for all) and chatter; then the most curious plays at it first.",
 	"clash": 0.55,
 	"clash_doc": "the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more.",
 	"shy": {"secs": 300.0, "edge_picks": 6},
@@ -51,10 +57,22 @@
 		"turn_s": 0.33,
 		"wait_s": 0.6,
 		"give_up_s": 9.0,
+		"happy_at": 0.5,
 		"hint_far_m": 25.0,
 		"hint_away_s": 10.0,
 		"hint_lift_px": 52.0,
 		"hint_text": "Whistle to call your partner"
 	},
-	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped; the hint_* keys are the one-time whistle line (scripts/home/whistle_hint.gd): shown once the partner has been over hint_far_m m away, or out of sight, for hint_away_s s; hint_lift_px px above the screen's bottom edge (over the key row); hint_text beside the key cap."
+	"hand": {
+		"slot_m": 0.9,
+		"arrive_m": 0.4,
+		"shy_stop_m": 3.0,
+		"shy_window_s": 60.0,
+		"give_up_s": 6.0,
+		"eat_s": 1.0,
+		"done_s": 0.8,
+		"trust": 2.0
+	},
+	"hand_doc": "feeding from your hand (scripts/home/base_hand_feed.gd): slot_m m from you where a Boki stops to eat, arrive_m m of slack on it; a shy Boki (trust under whistle.shy_trust) stops shy_stop_m m away the first time and comes the whole way when asked again within shy_window_s s; give_up_s s of walking before it drops the offer; eat_s s of eating at your hand, done_s s to enjoy it; trust points a hand-fed Boki gains.",
+	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped; the hint_* keys are the one-time whistle line (scripts/home/whistle_hint.gd): shown once the partner has been over hint_far_m m away, or out of sight, for hint_away_s s; hint_lift_px px above the screen's bottom edge (over the key row); hint_text beside the key cap. happy_at is the eagerness from which a called Boki answers happy, under it unsure."
 }

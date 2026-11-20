@@ -65,8 +65,6 @@ PLAN = {
     'pin_spirit_end': ('cast', 1, 0.7, 'a spirit form ending, a bright airy shimmer collapsing into a firm pop'),
     'pin_ult_cast': ('cast', 1, 1.0,
         'an archer calling down star power, a sustained rising celestial swell building to a resonant chime'),
-    'pin_ult_nock': ('cast', 1, 0.5,
-        'a glowing arrow nocked on a bow string, quick bright metallic click with a hum'),
     'pin_ult_beam': ('impact', 1, 0.8,
         'a piercing beam arrow ripping through the air, searing laser-like streak with a bright crack'),
     'pin_ult_final': ('impact', 1, 1.3,

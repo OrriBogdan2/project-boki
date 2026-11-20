@@ -6,10 +6,10 @@ Parity first (briefs/DECISIONS.md 2026-11-07). One test, `KnockWall` (scripts/co
 A wall is whatever stops a knocked body's walk and stands taller than a terrace step (0.85 m, the Hunter's step-up). Terrain cliffs, rocks, trees, placed barriers (Tenzo's rocks, the Rink Wall) and the train's engine stun. A tier step, a flat car deck, crates, pots, barrels, kegs and another Hunter do not. The Storm Rod alone also stuns on another Hunter.
 
 ## Sources
-- Heartpiercer: "enemies that collide with terrain are Stunned" (supervive_kits.md, Myth).
-- Valiant Strength: "knocking an enemy into a wall Stuns them"; Quake Punch: "punched into a wall"; Spike Grenade: "knocked into a wall ... Stunned" (supervive_kits.md, Oath, Tetra, Vex).
+- Heartpiercer: "enemies that collide with terrain are Stunned" (sv/briefs/kits.md, Myth).
+- Valiant Strength: "knocking an enemy into a wall Stuns them"; Quake Punch: "punched into a wall"; Spike Grenade: "knocked into a wall ... Stunned" (sv/briefs/kits.md, Oath, Tetra, Vex).
 - Voltaic Spear: "a wall or another target = Stunned" (the only source row that names bodies; bulwark.md removed foe-into-foe for the others).
-- Terraces of 0.8 m "are part of the ground, since they're walked up"; mantle ledges 1.5 m, walls 3 m (briefs/supervive-data/LAYOUT_RULES.md): a step is ground, not a wall.
+- Terraces of 0.8 m "are part of the ground, since they're walked up"; mantle ledges 1.5 m, walls 3 m (sv/briefs/LAYOUT_RULES.md): a step is ground, not a wall.
 - Crates, pots, barrels, kegs: "soft ... solid circles you're pushed round, never stood on; any hit breaks them" (LAYOUT_RULES.md): not terrain. The source has no rows for them or for the train (ours), so they follow how they move a body: the engine blocks, a deck is walked on.
 - Rocks and barriers: "a wall of three rocks" (Tetra Rockwave), "wall that pushes enemies" (Frozen Barricade): walls.
 

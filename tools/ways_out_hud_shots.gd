@@ -1,7 +1,8 @@
 extends RefCounted
 ## --ways-out-hud-shots --shots-dir=<dir>: the Ways Out strip and the Heart Gate prompt on the real HUD (GPU, under
 ## xvfb with a renderer). strip_1_locked ... strip_5_late are the strip as the match runs (full frame, so the strip
-## is seen beside the minimap and the clock); gate_prompt is the carrier at the Heart Gate.
+## is seen beside the minimap and the clock); gate_prompt is the carrier at the Heart Gate; quest_tracker is your
+## squad charging the Uplink 50 m off while a rival squad is sealed in the Sealed Lair (the tracker under the strip).
 
 var main: Node
 var m: Match
@@ -81,4 +82,37 @@ func run(main_node: Node) -> void:
 	H.hold(P, H.interact_for(P), 1.7)
 	m.interact = H.interact_for(P)
 	await _grab("gate_prompt")
+	await _tracker_shot(foe2)
 	main.get_tree().quit(0)
+
+## Your squad on the Uplink at 62%, `rival`'s squad sealed in the Sealed Lair with its boss at 70%, you 50 m from the
+## outpost. The seats are forced and the lair and outpost set to match, so the host's moves (m.step) keep them.
+func _tracker_shot(rival: Hunter) -> void:
+	var P: Hunter = m.player
+	var H: Heart = m.heart
+	var qs: QuestSeats = m.exits.seats
+	var L: Dictionary = qs.lair.ref
+	var x: Dictionary = qs.uplink_x()
+	P.inp["interact"] = false
+	m.interact = {}
+	H.carrier = null
+	H._force(Heart.S.READY, "shots")
+	m.sess_t0 = float(Heart.rules()["quest"]["uplink_open_s"]) + 10.0 - m.time
+	for l in m.lairs.list:
+		l["flown"] = []
+	if m.lairs.boss_of(L) == null:
+		L["active"] = false
+		m.lairs.activate(L)      # (run() cleared the monsters: a fresh boss)
+	var b: Boss = m.lairs.boss_of(L)
+	b.hp = b.max_hp * 0.7
+	L["state"] = "awake"
+	L["locked"] = true
+	L["lock_at"] = m.time
+	L["sealed_in"] = [rival]
+	qs.lair._force(QuestSeat.S.IN_USE, "shots", rival.team)
+	x["state"] = "charging"
+	x["team"] = P.team
+	x["prog"] = 0.62
+	qs.uplink._force(QuestSeat.S.IN_USE, "shots", P.team)
+	P.teleport(m.world.free_spot_near(x["pos"] + Vector3(50, 0, 0), [], 1.0, 0.45, 6.0))
+	await _grab("quest_tracker")

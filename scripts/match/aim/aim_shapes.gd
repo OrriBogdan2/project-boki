@@ -7,6 +7,7 @@ extends RefCounted
 const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
 const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
+const LACE_P := 0.5       # m: one cross of a laced line's two strands ("lace", Lace's own look)
 const SOFT_A := 0.25      # "soft": the inside never passes this alpha (docs/VFX_QUALITY.md, the zone rule)
 const GLOW_W := 0.3       # m: "soft": how far the lit rim glows inward
 
@@ -54,9 +55,12 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 		g.band(o, end, w0, w1, _fill(e))
 	var f := float(e["fill"])
 	if f > 0.0:
-		if not soft:
-			g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
-		g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
+		if e["lace"]:
+			_lace(g, o, o + u * l * f, lerpf(w0, w1, f * 0.5) * 0.5, lw, _rim(e))
+		else:
+			if not soft:
+				g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
+			g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
 	var tip := end + u * w1 * 0.55
 	for s in [-1.0, 1.0]:
 		g.ribbon(o + n * w0 * 0.5 * s, end + n * w1 * 0.5 * s, lw, _rim(e, 0.8), _rim(e))
@@ -123,6 +127,44 @@ static func _vee(g: AimGeo, e: Dictionary) -> void:
 	elif st >= 0.0:
 		g.star(o + u * l * st, 0.32 + 0.12 * float(e["hot"]), _hot(e), PI * 0.25)
 
+## Two strands laced across the line p0 -> p1 like a cord's criss-cross, `amp` m out each side, one cross
+## every LACE_P; the strand passing under is darker, so it reads woven. Straight pieces (two a cross per
+## strand) keep the per-frame triangle count near a plain ribbon's.
+static func _lace(g: AimGeo, p0: Vector2, p1: Vector2, amp: float, w: float, col: Color) -> void:
+	var d := p1 - p0
+	var l := d.length()
+	if l < 0.01:
+		return
+	var u := d / l
+	var n := Vector2(-u.y, u.x) * amp
+	var under := Color(col.darkened(0.45), col.a)
+	var half := LACE_P * 0.5
+	var at := 0.0
+	var side := 1.0
+	while at < l:
+		var nxt := minf(l, at + half)
+		var k := (nxt - at) / half        # the last piece may be short: it ends part way across
+		var a := p0 + u * at
+		var b := p0 + u * nxt
+		g.ribbon(a + n * side, b + n * side * (1.0 - 2.0 * k), w, col if side > 0.0 else under)
+		g.ribbon(a - n * side, b - n * side * (1.0 - 2.0 * k), w, under if side > 0.0 else col)
+		side = -side
+		at = nxt
+
+## The arc version of _lace: strands crossing between radius r0 and r1 from angle a0 to a1.
+static func _arc_lace(g: AimGeo, ctr: Vector2, r0: float, r1: float, a0: float, a1: float, w: float,
+		col: Color) -> void:
+	var rm := (r0 + r1) * 0.5
+	var steps := maxi(2, int(ceil(absf(a1 - a0) * rm / (LACE_P * 0.5))))
+	var under := Color(col.darkened(0.45), col.a)
+	for i in steps:
+		var p := Vector2.from_angle(lerpf(a0, a1, float(i) / steps))
+		var q := Vector2.from_angle(lerpf(a0, a1, float(i + 1) / steps))
+		var near := r0 if i % 2 == 0 else r1       # this step's strand runs from far to near, the other the other way
+		var far := r0 + r1 - near
+		g.ribbon(ctr + p * far, ctr + q * near, w, col)
+		g.ribbon(ctr + p * near, ctr + q * far, w, under)
+
 ## Feather barbs along a line from p0 to p1, swept back toward p0, biggest near p0 (barb_len m at the
 ## start; 0 draws none).
 static func _barbs(g: AimGeo, p0: Vector2, p1: Vector2, barb_len: float, w: float, col: Color) -> void:
@@ -142,13 +184,14 @@ static func _barbs(g: AimGeo, p0: Vector2, p1: Vector2, barb_len: float, w: floa
 static func _cone(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]
 	var l := float(e["len"]); var inner := float(e["inner"])
-	var h := deg_to_rad(float(e["deg"])) * 0.5
+	var h := deg_to_rad(float(e.get("deg_at", e["deg"]))) * 0.5      # deg_at: an eased cone's drawn width
 	var a := atan2(u.y, u.x)
 	var lw := _lw(e)
 	if bool(e.get("soft", false)):
 		_soft_cone(g, e, o, l, inner, a, h)
 	elif not e["edges"]:
-		g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
+		if not e["outline"]:
+			g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
 		g.ring(o, l, lw, _rim(e), a - h, a + h)
 		var f := float(e["fill"])
 		if f > 0.0:
@@ -179,7 +222,9 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["at"]; var r := float(e["r"])
 	var lw := _lw(e)
 	var band := float(e["band"])
-	if band > 0.0:
+	if bool(e.get("soft", false)):
+		_soft_circle(g, e, ctr, r, maxf(band, lw))
+	elif band > 0.0:
 		g.disc(ctr, r, _fill(e, 0.2))               # a thin ring, its outer edge on r, a faint tint inside
 		g.ring(ctr, r - band * 0.5, band, _rim(e))
 	else:
@@ -203,6 +248,19 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 	if pd != Vector2.ZERO:
 		g.chevron(ctr + pd * (r + 0.32), pd, 0.3, lw * 1.4, _hot(e))     # a rim chevron: which way it will throw or drag
 
+## "soft" circle: a faint inside rising toward the edge (at most SOFT_A, a fifth of that at the centre), a glow
+## stepping down inward from the rim in two flat bands (cel steps: a gradient across the ring's quads shows teeth),
+## and the lit rim itself, `w` wide with its outer edge on r: the zone reads by its edge.
+static func _soft_circle(g: AimGeo, e: Dictionary, ctr: Vector2, r: float, w: float) -> void:
+	var c: Color = e["col"]
+	var inside := minf(_fill(e, 0.45).a, SOFT_A)
+	g.disc(ctr, r, Color(c, inside * 0.2), Color(c, inside))
+	var lit := _rim(e, 0.55)
+	var gw := minf(GLOW_W, r * 0.2)
+	g.ring(ctr, r - w - gw * 0.5, gw, Color(lit, lit.a * 0.5))
+	g.ring(ctr, r - w - gw * 1.5, gw, Color(lit, lit.a * 0.2))
+	g.ring(ctr, r - w * 0.5, w, _rim(e))
+
 static func _circle_edge(g: AimGeo, e: Dictionary, ctr: Vector2, r: float, lw: float) -> void:
 	if e["dashed"]:
 		var segs := maxi(8, int(r * TAU / 0.6))
@@ -220,10 +278,13 @@ static func _arc_wall(g: AimGeo, e: Dictionary) -> void:
 	var pn := maxi(1, int(e["panels"]))
 	var gap := 0.08 / maxf(1.0, r)      # radians between panels
 	var lw := _lw(e)
+	if e["lace"]:
+		_arc_lace(g, ctr, r - th * 0.5, r + th * 0.5, a - h, a + h, lw, _rim(e))
 	for i in pn:
 		var a0 := a - h + 2.0 * h * i / pn + (gap if i > 0 else 0.0)
 		var a1 := a - h + 2.0 * h * (i + 1) / pn - (gap if i < pn - 1 else 0.0)
-		g.sector(ctr, r - th * 0.5, r + th * 0.5, a0, a1, _fill(e, 1.1), _fill(e, 0.7))
+		if not e["lace"]:
+			g.sector(ctr, r - th * 0.5, r + th * 0.5, a0, a1, _fill(e, 1.1), _fill(e, 0.7))
 		g.ring(ctr, r + th * 0.5, lw, _rim(e), a0, a1)
 		g.ring(ctr, r - th * 0.5, lw * 0.7, _rim(e, 0.6), a0, a1)
 	for s in [-1.0, 1.0]:
@@ -258,7 +319,10 @@ static func _line(g: AimGeo, e: Dictionary) -> void:
 		return
 	var w := float(e["lw"]) * (0.8 + 0.8 * float(e["hot"]))
 	var c := _hot(e, 0.75) if float(e["hot"]) > 0.0 else _rim(e, 0.85)
-	g.ribbon(o, t, w, Color(c, c.a * 0.55), c)
+	if e["lace"]:
+		_lace(g, o, t, maxf(w * 1.4, 0.06), w * 0.75, c)
+	else:
+		g.ribbon(o, t, w, Color(c, c.a * 0.55), c)
 	_barbs(g, o, t, float(e["fletch"]), w, c)
 	if e["arrow"]:
 		g.arrow(t, d.normalized(), 0.2, w * 1.2, c)

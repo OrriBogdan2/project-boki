@@ -33,7 +33,8 @@ func toys() -> Array:
 			out.append({"u": int(e["u"]), "id": String(e["id"]), "pos": HomeLayout.deco_center(e)})
 	return out
 
-## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy); true
+## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy, pet while it
+## is being scratched); true
 ## when this Boki has a rig, which poses its own body.
 func _act(k: Dictionary, n: Node3D) -> bool:
 	var act := ""
@@ -43,6 +44,8 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 		act = "munch"
 	elif play is Dictionary and play["phase"] == "play":
 		act = String(rules()["toys"].get(String(_toy(int(play["u"])).get("id", "")), {}).get("clip", ""))
+	elif float(k.get("hold_t", 0.0)) > 0.0 and float(k.get("joy_t", 0.0)) > 0.0:
+		act = "pet"          # (a pat: PetReact holds it still and gives it joy)
 	if act != "" or n.has_meta("kact_home"):
 		n.set_meta("kact", act)
 		if act != "":
@@ -98,7 +101,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
+		var kept: bool = h.life != null and h.life.saved(int(t["u"]), k)      # a new toy waits for its first try
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or kept:
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company
@@ -109,11 +113,15 @@ func pick(k: Dictionary, want := false) -> bool:
 	for u in weights:
 		roll -= float(weights[u])
 		if roll <= 0.0:
-			k["play"] = {"u": u, "phase": "go", "t": 0.0, "slot": _free_slot(u)}
-			k["t"] = 30.0
-			k.erase("stare")
+			take(k, u)
 			return true
 	return false
+
+## Sends the Boki to toy `u` (walk there, then play).
+func take(k: Dictionary, u: int) -> void:
+	k["play"] = {"u": u, "phase": "go", "t": 0.0, "slot": _free_slot(u)}
+	k["t"] = 30.0
+	k.erase("stare")
 
 ## The lowest place round a toy nobody has taken.
 func _free_slot(u: int) -> int:

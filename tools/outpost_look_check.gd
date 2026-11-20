@@ -93,7 +93,7 @@ func run(main_node: Node) -> void:
 	ok(o["state"] == "charging" and float(o["prog"]) > 0.05, "capturing: charge %d%%" % int(float(o["prog"]) * 100.0))
 	var want_glow: float = OutpostLook.CRYSTAL_GLOW * float(o["prog"])
 	ok(absf(g1 - want_glow) < 0.05, "the crystal glow follows the charge (%.2f)" % g1)
-	var team_col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	var team_col: Color = SideColor.ally()      # (the holder is the player: the squad colour)
 	var cloth_col: Color = _param(n, "Mast/Banner/Cloth", "albedo")
 	var raised := is_equal_approx(banner.position.y, OutpostLook.BANNER_HIGH)
 	ok(raised and cloth_col.is_equal_approx(team_col), "banner raised in the holder's team colour")
@@ -120,11 +120,11 @@ func run(main_node: Node) -> void:
 	var holder := Control.new()
 	main.add_child(holder)
 	holder.draw.connect(func():
-		for lit in [0.0, 0.5, 1.0]:
-			OutpostGlyph.draw(holder, Vector2(20, 20), 1.0, ExitModels.UPLINK, team_col, lit))
+		for st in ["idle", "charging", "open"]:
+			ExitMark.glyph(holder, Vector2(20, 20), 9.0, {"state": st, "prog": 0.5, "t": 5.0}, 0.0))
 	holder.queue_redraw()
 	await main.get_tree().process_frame
-	ok(true, "the minimap glyph draws neutral, charging and lit")
+	ok(true, "the map glyph draws closed, opening and open")
 	holder.queue_free()
 	m.over = true
 	m.queue_free()

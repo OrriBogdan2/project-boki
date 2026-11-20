@@ -4,7 +4,7 @@ Checks (`*_check.gd`, registered in `check_registry.gd`), shot tools (`*_shots.g
 
 ## The gate: `tools/check.sh`
 
-It runs `health.py --strict` (god-file budgets, the style ratchet), then `lint_gate.py`. That covers gdlint, gdformat (120 columns), ruff, ruff format, vulture, glTF validation, and Godot's unused-code and shadowing warnings, counted per file. Old debt sits in `lint_baseline.json` and may not grow, and a new file must be clean. See `check.sh`'s header for the flags. The suite and merge-candidate run `tools/check.sh --changed`: on top of the ratchet, every `.gd` a branch changes must be gdformat clean. This applies to branches cut after that rule landed.
+It runs `health.py --strict` (god-file budgets, the style ratchet), then `lint_gate.py`. That covers gdlint, gdformat (120 columns), ruff, ruff format, vulture, glTF validation, Godot's unused-code and shadowing warnings, and `private-ref` (no outside game's name in any tracked text file or file name; the old code comments are baselined and go down when you touch a file), counted per file. Old debt sits in `lint_baseline.json` and may not grow, and a new file must be clean. See `check.sh`'s header for the flags. The suite and merge-candidate run `tools/check.sh --changed`: on top of the ratchet, every `.gd` a branch changes must be gdformat clean. This applies to branches cut after that rule landed.
 
 ## Formatting old files in batches
 
@@ -43,6 +43,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `boki/build_boki.py`, `build_fusion.py` (blender) | Build every Boki species (and fusions) from `boki/<species>.py` into the game's .glb | `blender -b --factory-startup --python tools/boki/build_boki.py -- --no-export` |
 | `vendor_gltf.py` | Compact a CC0 glTF pack model into `art/vendor/*.glb` | `python3 tools/vendor_gltf.py src.gltf art/vendor/x.glb --anims Idle,Run` |
 | `gen_vfx_noise.py` | Bake `art/vfx/noise.png` for the hero VFX shaders | `python3 tools/gen_vfx_noise.py` |
+| `hunter_mesh_check.py` | Absolute mesh-quality gate for Hunter (`art/wardens`) and Boki (`art/kin`) GLBs: torn/spiky/degenerate triangles, floating islands, open boundary, bad skin weights, torn or crushed edges in every clip, static clips, see-through materials; PASS/WARN/FAIL + a PNG of the flagged triangles. Needs numpy (PIL for the PNG). Exit 1 on a FAIL or a new WARN vs `--base` | `python3 tools/hunter_mesh_check.py --base origin/main --changed-vs origin/main --out build/mesh` |
 
 ## Animation
 
@@ -51,6 +52,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `art1/<hero>_clips.py` (blender) | The hero's animation clips on the rig, exported into the .glb | `blender -b --python tools/art1/cinder_clips.py -- cinder.blend out.glb idle,run` |
 | `art1/anim_kit.py`, `crouchkit.py`, `fistkit.py`, `gardenkit.py` | Shared clip helpers (imported, not run) | |
 | `art1/glb_add_clips.py` | Copy clips from one .glb into another | `python3 tools/art1/glb_add_clips.py target.glb source.glb run_,idle out.glb` |
+| `art1/glb_drop_mats.py` | Drop the mesh parts on named materials (a master's own copy of a prop the game .glb carries), all else byte-identical | `python3 tools/art1/glb_drop_mats.py in.glb out.glb '*-v95c'` |
 | `boki/<species>_anim.py`, `boki_clips.py` (blender) | A Boki species' clips | built by `build_boki.py` |
 
 ## Audio
@@ -64,7 +66,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `sfx_stats.py` | Loudness and spectrum numbers for a mix pass | `python3 tools/sfx_stats.py audio --json now.json` |
 | `sfx_look.py` | Waveform and spectrogram review sheet | `python3 tools/sfx_look.py out.png audio/vn_*.wav` |
 
-After any generator: `godot --headless --import`.
+After any generator: `godot --headless --import`. Also after checking out a branch that adds a `class_name`: the class list lives in the untracked `.godot/global_script_class_cache.cfg`, and with a stale one every script naming the new class fails to compile (a two-game check then stalls with nothing in guest.log; jobq ships the tree with its `.godot`, so import before submitting).
 
 ## Build / CI
 

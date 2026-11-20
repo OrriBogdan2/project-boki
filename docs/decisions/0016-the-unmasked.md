@@ -35,7 +35,10 @@ face marks (eyes, brows, blush) are replaced by a hollow: a shell of the head dr
 (a socket with a glowing rim, a starfield seen with parallax, ghost features floating in it), a small glowing void
 on the chest where the heart is, and motes round the head. A woman's body is drawn into an hourglass with a
 flared tunic, narrower shoulders and her own stance (warden_stance.json "empty_f"); a man's is broad and square
-("empty_m"). Height scales the whole model (the hit ring keeps its size). Old face-marks looks migrate in
+("empty_m", wide-footed and chest up). Every shroud cut is tailored to the figure (`ShroudTailor.FIGURE`: in at
+her shoulders and waist, out over her hips; broad across his shoulders over lean hips), her collar and hood are
+slimmer, her face narrower and his jaw longer (`Unmasked.SEX_FACE`), and she stands about 7 cm shorter (owner
+2026-11-08: the two must read apart at a glance). Height scales the whole model (the hit ring keeps its size). Old face-marks looks migrate in
 `Unmasked.clean` (eyes -> hollow, brows -> ghost, blush -> a rose glow). The first Relic is no longer a pick
 before the egg: after you name your Boki, Vex's Relic drifts to you and you put it on (`MaskMoment`, staged by
 `MaskBeat`: build-up, the Relic rising, black and silence, memory frames of the fallen Hunter, the snap back
@@ -55,3 +58,9 @@ Relic moment).
 - **Soles**: `FootPlant.reach` gives HunterAnim the real lowest boot point so the hips drop or lift until the sole
   meets the ground, standing and walking, at every height, build and sex (`--unmasked-check` asserts 2 cm).
 - Prologue captions wrap inside 86% of the width and grow upward from the bottom, never off screen.
+
+## Update: more Ghost marks (owner, Nov 5, item 153b)
+- Ghost, the face-mark row on the void, has 12 marks: None, Eyes, Whole face, Stitched, Smile, Tears, Third eye,
+  Cracked, Runes, Many eyes, Fanged, Hollow stare (dark sockets that black out the stars). The first four keep
+  their index, so saves need no migration. Contact sheet: docs/shots/creator-empty-marks/ghost_sheet.jpg.
+- Not built yet from 153b: the ghost intensity slider and the Aura types.

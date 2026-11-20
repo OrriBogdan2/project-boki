@@ -5,7 +5,7 @@ end a summon, a kill does). Rules data: `content/rules/summon_cc.json`. Code: `S
 asked by `KitStatus.apply`. Check: `--summon-cc-check`.
 
 ## Source data
-The repo's source notes (SUPERVIVE_DATA.md, KIT_PARITY.md, docs/heroes) have nothing on how the source treats
+The repo's source notes (sv/DATA.md, KIT_PARITY.md, docs/heroes) have nothing on how the source treats
 pets or summons under crowd control. So every row below is the closest Hunter rule. If footage of a source summon
 under CC turns up, change the row, not the code path.
 
@@ -34,6 +34,11 @@ kind in the summon's `immune` list.
 - A Boki still in its wisp form is not a target, so nothing here applies to it.
 - Leash: after a knock or pull past the summon's leash the normal follow brings it back; no extra rule.
 - Hunter Wisps (downed) are not summons and keep their own rules.
+
+## What it looks like
+A summoned Boki under stun, root, slow or Daze wears the same body look as a Hunter (docs/STATUS_LOOKS.md), in the
+same colours and pace, sized to its body, so a player can see why their Boki stopped. Grounded shows nothing since
+it never lands.
 
 ## Wiring
 `SummonCc.summoned(e)` is true for a Kin with the `summoned` meta or whose `summon` (KinSummon, branch

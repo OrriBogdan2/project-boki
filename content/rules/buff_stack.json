@@ -1,0 +1,19 @@
+{
+ "_doc": "Rows of the HUD buff stack (scripts/ui/buff_stack.gd), in draw order. on: hunter (field on the Hunter), kit (field on the archetype kit, only when `arch` is the hero), buff (a kin buff in Hunter.kbuffs: amount, time left), owner (how many Boki owner passives apply). time: field holding the seconds left (draws the draining ring; it is also the active test when there is no value). value: field that must be above 0 for the row to show. stacks: show floor(value) as the count.",
+ "rows": [
+  {"id": "swift", "name": "Swift", "icon": "dash", "col": "ffd76a", "time": "haste_t"},
+  {"id": "vault", "name": "Vault", "icon": "dash", "col": "ffd76a", "on": "kit", "arch": "thief", "time": "haste_t"},
+  {"id": "cloak", "name": "Unseen", "icon": "cloak", "col": "b9c4ff", "time": "cloak_t"},
+  {"id": "crit", "name": "Critical", "icon": "burst", "col": "ffd23f", "time": "crit_t"},
+  {"id": "phase", "name": "Phase", "icon": "vanish", "col": "c9a8ff", "time": "phase_t"},
+  {"id": "guard", "name": "Guarded", "icon": "anchor", "col": "f2e6cf", "time": "guard_t"},
+  {"id": "shield", "name": "Shield", "icon": "brightshield", "col": "d8ecff", "value": "shield", "time": "shield_t"},
+  {"id": "enraged", "name": "Enraged", "icon": "haymaker", "col": "ff5a4a", "on": "kit", "arch": "juggernaut", "time": "enraged_t"},
+  {"id": "swollen", "name": "Swollen", "icon": "dome", "col": "ff9ad0", "on": "kit", "arch": "ostra", "time": "swollen_t"},
+  {"id": "fever", "name": "Fever: heals from damage", "icon": "heart", "col": "ff9a5c", "on": "kit", "arch": "gunslinger", "value": "res", "time": "res_wait", "stacks": true},
+  {"id": "kin_speed", "name": "Boki: faster", "icon": "breeze", "col": "9ae8ff", "on": "buff", "value": "move_speed"},
+  {"id": "kin_damage", "name": "Boki: more damage", "icon": "cleave", "col": "ff9a5a", "on": "buff", "value": "damage"},
+  {"id": "kin_rate", "name": "Boki: faster fire", "icon": "barrage", "col": "ffd76a", "on": "buff", "value": "fire_rate"},
+  {"id": "carry", "name": "Boki passive", "icon": "paw", "col": "8fe0a0", "on": "owner", "stacks": true}
+ ]
+}

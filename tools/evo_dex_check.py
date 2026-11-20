@@ -6,6 +6,7 @@ aliases (game ids like cindle are dex ids like vespyx). Prints missing edges (in
 game), extra edges (in the game, not the dex) and wrong parents (the game's parent differs from
 the dex's). Exit 1 on any mismatch. Usage: tools/evo_dex_check.py [dex.json] [evolve.json]
 """
+
 import json
 import sys
 from pathlib import Path
@@ -21,7 +22,7 @@ def main() -> int:
     rules = json.load(open(sys.argv[2] if len(sys.argv) > 2 else EVOLVE))
     alias = dict(dex["aliases"])
     ids = {e["id"] for e in dex["entries"]}
-    for pair in json.load(open(BRANCH_FORMS))["pairs"]:   # alternate forms of ONE dex entry
+    for pair in json.load(open(BRANCH_FORMS))["pairs"]:  # alternate forms of ONE dex entry
         main = next((alias.get(i, i) for i in pair if alias.get(i, i) in ids), pair[0])
         alias.update({i: main for i in pair})
     canon = lambda i: alias.get(i, i)  # noqa: E731

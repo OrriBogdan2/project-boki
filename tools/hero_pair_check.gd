@@ -38,6 +38,7 @@ func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
+	Sfx.listener = home          # (the camera focus the looks thin out from; no camera runs here)
 	P.set_arch(arch)
 	P.unlock_all()
 	P.lvl = 6

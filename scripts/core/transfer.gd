@@ -4,9 +4,9 @@ class_name Transfer
 ## send (with a confirm step in the UI), the other player accepts. Nobody is paid for a Boki.
 ##
 ## The record travels as a packet {id, from, from_name, to, kin (Social.clean_kin), t}; the receiver
-## builds its own Boki from it (accept). With the server (docs/EXCHANGE_SERVER.md) the backend
-## carries packets; offline there is nobody to accept, so a sent Boki waits in your outbox and can
-## be called back (the fee and the week's transfer come back with it).
+## builds its own Boki from it (accept). TransferPost carries packets and answers (the web build's
+## shared store until the exchange server, docs/EXCHANGE_SERVER.md); until the other side accepts, a
+## sent Boki waits in your outbox and can be called back (the fee and the week's transfer come back).
 ## Outbox entries: {id, rec, to, fee, t}; "sent" keeps the times of transfers this week.
 
 static func _st() -> Dictionary:
@@ -29,7 +29,7 @@ static func wait_s() -> int:
 	return left
 
 ## Sends a Boki to a named player: the fee is paid and the Boki waits for them to accept.
-## {ok, why, id, packet}.
+## {ok, why, id}; TransferPost carries it.
 static func send(uid: String, to_name: String) -> Dictionary:
 	var to := Social.say_of(to_name, "", 24).strip_edges()
 	var rec := Save.kin(uid)
@@ -60,7 +60,7 @@ static func send(uid: String, to_name: String) -> Dictionary:
 	_st()["sent"].append(int(o["t"]))
 	Save.log_event("transfer_out", rec, {"to": to})
 	Save.save_game()
-	return {"ok": true, "why": "", "id": String(o["id"]), "packet": packet(o)}
+	return {"ok": true, "why": "", "id": String(o["id"])}
 
 ## What travels to the other player: only the safe parts of the Boki.
 static func packet(o: Dictionary) -> Dictionary:

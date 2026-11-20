@@ -6,14 +6,16 @@ extends RefCounted
 
 const Check := preload("res://tools/show_ring_check.gd")
 const SIZE := Vector2i(1280, 720)
-const TIMES := [0.05, 0.25, 0.45, 0.65, 0.85, 1.05, 1.3, 1.55, 2.0, 2.6]   # s after the result
-const STRIP_SCALE := 0.5   # each frame's size in the strip
-const SETTLE := 600        # frames to wait at most for the home to finish building
+const TIMES := [0.05, 0.25, 0.45, 0.65, 0.85, 1.05, 1.3, 1.55, 2.0, 2.6]  # s after the result
+const STRIP_SCALE := 0.5  # each frame's size in the strip
+const SETTLE := 600  # frames to wait at most for the home to finish building
+
 
 func run(main: Node) -> void:
 	var dir := "shots"
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): dir = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			dir = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = SIZE
 	Save.no_write = true
@@ -38,7 +40,7 @@ func run(main: Node) -> void:
 	home._close_panel()
 	for f in 30:
 		await main.get_tree().process_frame
-	if main.get("fade") != null:   # the boot logo and ink stay up otherwise: the strip is of the game only
+	if main.get("fade") != null:  # the boot logo and ink stay up otherwise: the strip is of the game only
 		main.fade.logo.modulate.a = 0.0
 		main.fade.visible = false
 	var sr: ShowRing = home.hshow
@@ -60,7 +62,7 @@ func run(main: Node) -> void:
 		print("SHOWRINGSHOTS FAIL no marks after the show")
 		main.get_tree().quit(1)
 		return
-	mm.set_process(false)   # its clock is set per grab, so a slow renderer still shows each moment
+	mm.set_process(false)  # its clock is set per grab, so a slow renderer still shows each moment
 	for i in TIMES.size():
 		if is_instance_valid(mm):
 			mm.t = float(TIMES[i])

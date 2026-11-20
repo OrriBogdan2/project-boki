@@ -1,7 +1,7 @@
 # Project Boki menu design
 
 How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that build them. The
-in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
+in-match HUD (`scripts/ui/hud.gd`) has its own reference-style layout and isn't covered here; it
 shares the colours and fonts.
 
 **Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026). Panels are
@@ -119,11 +119,17 @@ What made the menus feel blocky, samey and hard to get through:
   Enter presses the panel's primary when nothing else has focus.
 
 - **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
-  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a lit turntable (a carved Meshy dais,
-  `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
-  that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
-  or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
-  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
+  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a turntable (a carved Meshy dais,
+  `art/look/`) in a lit set (`look_set.gd`: warm key with shadow, a rim in your glow's colour, a cool kicker, a top
+  light; a curved wall, standing stones at three depths and drifting motes behind you, blurred by the camera's soft
+  focus). Tabs Body / Hollow / Shroud / Glider: the camera swings round to each tab's shot and field of view (Body and
+  Shroud head to toe, Hollow on the face, Glider pulled back) while the rows fade in one by one. Named choices are
+  tiles with a picture of you wearing them (`look_thumbs.gd`: an offscreen stage, one picture a frame, kept by look;
+  it builds through the locker's one model maker, so any model works), colours are swatches; both try themselves on
+  while hovered and click on hover. A pick pops the model, plays a short emote, flares the rim light and rings the
+  dais. Gliders show in their rarity colour (`Gliders.rarity`). Drag or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
+  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`; of the set, tile pictures
+  and camera swings: `docs/shots/customize-v3-1119/`.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
@@ -216,3 +222,19 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
   960x540 window and Interface size at its top (1.1), and fails on anything clipped or outside the window's safe margin.
   Add a new garden panel to its `screens`.
+
+## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip tutorial / Save
+and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
+Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
+panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
+count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
+720p, 1080p and ultrawide.
+
+## Admin tools and the Test Zone (owner only)
+Admin tools (`, More > Admin tools, Mod mode, `--god`) open only for a debug build, the web artifact's owner,
+or a desktop with the owner's dev key at `user://dev.key` (SHA-256 checked against `AdminGate.KEY_SHA256`; the
+key itself is never in the repo). A release download without it has none of them. The Test Zone (top of
+Admin tools, and on the title for the owner) is the quiet sandbox map with the practice dummies; its page
+picks any Hunter, a Boki partner (searchable), spawns any monster in front of you, toggles god mode, resets
+the dummies and goes home. `--test-zone-check` holds both.

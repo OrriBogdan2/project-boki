@@ -3,7 +3,9 @@ extends RefCounted
 ## For every item on three sample Boki, preview() changes nothing, apply() does exactly the deltas preview
 ## named (and nothing else), writes one journal line, and an item that can't be used changes nothing. Also:
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
-## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
+## through Care.feed, and an old v12 save gaining the new fields. Their sounds: each fed item's family cue
+## (GardenSfx.item), a path token's pip, and the brighter chime at a Boki's evolve level (HomeChimes). Never
+## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
@@ -37,6 +39,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_rules()
+	_growth()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
 	for id in GardenItems.ids().filter(GardenItems.fed):
@@ -45,6 +48,8 @@ func run(m: Node) -> void:
 	_feeding()
 	_loot()
 	_migration()
+	await _cues()
+	_evolve_chime()
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -62,6 +67,29 @@ func _rules() -> void:
 	for id in GardenItems.ids():
 		q = q or "?" in String(GardenItems.preview(rec, id)["text"])
 	ok(not q, "no preview line hides its effect behind a question mark")
+
+## Raised stats show as body size (StatBudget.growth -> Evo.dress evo_scale): none fresh, more with more points, capped.
+func _growth() -> void:
+	var rec := Save.new_kin("cindle", "Grow")
+	rec["level"] = 20
+	var fresh := StatBudget.growth(rec)
+	var kin := Models.kin(rec["species"])
+	Evo.dress(kin, rec)
+	var plain := float(kin.get_meta("evo_scale", 1.0))
+	rec["stats"] = {"power": 60, "guard": 60, "speed": 60, "focus": 60}
+	var big := StatBudget.growth(rec)
+	var kin2 := Models.kin(rec["species"])
+	Evo.dress(kin2, rec)
+	ok(fresh == 0.0 and plain == 1.0, "a fresh Boki shows no growth")
+	var most := float(StatBudget.rules()["grow_max"])
+	ok(big > 0.0 and big <= most, "a raised Boki grows, never past grow_max (%.3f)" % big)
+	ok(is_equal_approx(float(kin2.get_meta("evo_scale", 1.0)), 1.0 + big), "the model carries the growth as evo_scale")
+	# a stat bite flags look, so the farm rebuilds the model and the size shows on the spot
+	var bite := Save.new_kin("cindle", "Bite")
+	bite["level"] = 20
+	Save.d["items"]["thumpnut"] = 1
+	var res := GardenItems.use(bite, "thumpnut")
+	ok(res["ok"] and res["look"], "a stat bite flags look (the model is rebuilt at its new size)")
 
 func _samples(rec: Dictionary) -> void:
 	var who := String(rec["species"])
@@ -256,6 +284,67 @@ func _loot_card(id: String) -> void:
 			"%s eaten at home: +%d %s, one journal line, bag empty" % [id, gain, stat])
 	ok(shown.contains(name_) and shown.contains("%s +%d (4 to %d)" % [Care.STATS[stat]["name"], gain, 4 + gain]),
 			"%s: the Boki card's journal shows the item and the change" % id)
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## The cues played since `before` (a copy of GardenSfx.heard), one entry a play.
+func _played(before: Dictionary) -> Array:
+	var out := []
+	for sname in GardenSfx.heard:
+		for i in int(GardenSfx.heard[sname]) - int(before.get(sname, 0)):
+			out.append(sname)
+	return out
+
+## Every fed item has its family's cue on file; a give plays exactly that one at the Boki, and a path token's pip
+## clicks into the meter PIP_S later.
+func _cues() -> void:
+	var pips := _heard("garden_item_pip")
+	GardenSfx.item(main, Vector3.ZERO, "keepstone")
+	ok(_heard("garden_item_token") > 0 and _heard("garden_item_pip") == pips, "Keepstone: the token cue, no pip yet")
+	await main.get_tree().create_timer(GardenSfx.PIP_S + 0.15).timeout
+	ok(_heard("garden_item_pip") == pips + 1, "...then its pip clicks into the meter %.2f s later" % GardenSfx.PIP_S)
+	var missing := []
+	var wrong := []
+	for id in GardenItems.ids().filter(GardenItems.fed):
+		var want := String(GardenSfx.ITEM.get(String(GardenItems.item(id)["effect"]["kind"]), ""))
+		if want == "" or not Sfx.ensure(want):
+			missing.append(id)
+			continue
+		var before := GardenSfx.heard.duplicate()
+		GardenSfx.item(main, Vector3.ZERO, id)
+		if _played(before) != [want]:
+			wrong.append(id)
+	ok(missing.is_empty(), "every fed item has its family's cue, on file (missing: %s)" % [missing])
+	ok(wrong.is_empty(), "a give plays one cue, its family's (wrong: %s)" % [wrong])
+
+## The brighter chime (HomeChimes "ready") once a Boki reaches its evolve level: Zapple's branching final.
+func _evolve_chime() -> void:
+	var rec := _boki("zapple", 5, "focus")
+	var due := EvoPath.level(rec)
+	rec["level"] = due - 1
+	var home := FakeHome.new()
+	home.kins = [{"rec": rec, "pos": Vector3.ZERO, "node": null}]
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	var ready := _heard("garden_chime_ready")
+	var level := _heard("garden_chime_level")
+	rec["level"] = due
+	chimes.tick(1.0)
+	var bright := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level
+	ok(bright, "Zapple reaches level %d, its evolve level: the brighter chime instead of the level one" % due)
+	rec["level"] = due + 1
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 1, "a level past it: the level chime, no second brighter one")
+	Save.d["items"]["stayleaf"] = 1
+	GardenItems.use(rec, "stayleaf")
+	rec["level"] = due + 2
+	chimes.tick(1.0)
+	var held := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level + 2
+	ok(held, "a Stayleaf holds it: no brighter chime, a level is the level chime")
+	GardenItems.take_off(rec, "stayleaf")
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 2, "the Stayleaf off: it can evolve again, the brighter chime")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")

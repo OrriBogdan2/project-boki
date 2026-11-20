@@ -57,6 +57,9 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 | Grimble (`dredge`) | 2346 | 43 | 0 | 33 | 62 | 42 | 14 | 26 | 62 |  |
 | Sable (`thief`) | 321 | 68 | 0 | 45 | 33 | 18 | 7 | 63 | 126 |  |
 | Mossy (`bulwark`) | 48 | 207 | 204 | 1 | 21 | 4 | 2 | 85 | 76 | shield charge 11, hammer throw 9, hammer recall 4, shield slam 1 |
+| Gil (`gil`) | 716 | 100 | 0 | 108 | 52 | 272 | 6 | 7 | 83 |  |
+
+**Gil (13th Hunter, 0.24.4; run on 0.24.4 main plus the fix below, seeds 3, 5, 9, 120 s).** Every column is used: the bag, the Riptide spin and spout, the Tidal Wave, Ground Swim and the glide. The check had one red on him: `rmb press` was 0, because `bot_use` pressed and released RMB in one step and no kit step saw the key down. It now sets `bot_hold["rmb"] = BOT_TAP` (0.1 s, still a tap under the 0.25 s hold) like the other kits (`gil_kit.gd`, +3). He has no hold or recast special: bots never take the held (50% further) throw, by design of the tap. Outlier, not changed: 7 dashes in 120 s, the fewest of the 13 (Ostra 12, Vex 13; Ground Swim has an 8 s cooldown, so 7 over 6 fighter-duels means the bots rarely reach for it; cause not traced). Cinder's LMB reads 1 hit because the check counts shot and primary tags, not the flame stream (fix on `ext/combat-bot-kit-use-reds`, not part of this change).
 
 ## What changed (bot code only; no kit numbers)
 
@@ -87,7 +90,23 @@ Both runs below use `--bot-kit-use=<arch>` (seeds 3, 5, 9, 120 s, both fighters 
 | Tenzo Quakefall | 25 hits / 14 slams | 35 hits / 18 slams |
 | Tenzo Stone Row | 0 rock hits / 10 rocks raised, 7 launched | 4 rock hits / 31 raised, 27 launched |
 
-The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). The audit's other claims stand: Cinder's flamethrower and Meeko's R are not in this change.
+The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). Cinder's flamethrower and Meeko's R are in the bullets above (ext/bot-kit-cinder-meeko).
+
+## The landing gate (ext/bot-kit-lands)
+
+`ext/bot-kit-use-a` reached main (11-09); `ext/bot-kit-use` and `-b` did not (named in the stuck-integ READY lines, never merged), so main kept the counting gaps above. `ext/bot-kit-lead-casts` and `ext/bot-kit-cinder-meeko` (11-11) fixed the four Hunters but were two unmerged branches; this branch carries both, and adds the gate.
+
+**Gate.** Each duel (each seed) must land every damage slot at least once in its first 90 s (`LAND_T`), not just the three seeds summed: LMB for every Hunter (a hit tagged `primary`, a `shot`, or a cast `ab:primary`, which is how Cinder's `flame` stream now counts, so the kit's `hose_hits` test counter is gone), plus `LANDS` per Hunter: Cinder Cinder Shot and Furnace Cloak (`ab:utility`, `ab:k1`), Meeko Burrseed (`ab:utility`; her R heals, so it stays an `ultimate` press), Tenzo Quakefall and Stone Row rocks (`ab:rmb`, `ab:rock`), Motley Shard Snap and Brimseed (`ab:rmb`, `ab:e`). A miss prints `KITUSE miss <arch> seed <n>: '<key>' lands no hit in 90 s (miss 1)`; one miss per slot per Hunter over the seeds is allowed (`MISS_OK`), the second turns it into `KITUSE FAIL`. Why (11-13): main's ult pass (`ULT_LOOK_S`/`ULT_EAGER_ABIL` in `bot.gd`) has Tenzo ulting 3 to 7 times in 90 s, and her rock hits per seed swing 0 to 9 with the run order (Tenzo seed 5: 9 alone, 0 or 1 after the other Hunters; Motley seed 9 Brimseed the same), so strict per-seed went red on noise. Two misses of three still catch a slot the bot never lands. The alternative, kept open: tune Tenzo and Motley so the row and Brimseed land between ults, then set `MISS_OK` back to 0.
+
+**Stone Row.** The gate failed Tenzo on seed 5 in a `--bot-kit-use=dolm` run (no rock hit in the duel; 8 rock hits over all three; one seed's RNG depends on the runs before it, so a single-Hunter run and the full run differ). Traced: the row went up 3 times in 90 s for both fighters, and after it rose the bot never punched it, because the row blocks the shot line and the shared bot brain only holds LMB with a clear shot. Now, in `dolm_kit.gd` only: while any rock stands, the bot checks every step (not only with LMB held) whether its nearest rock lines up with the foe's lead spot (the rock's own speed and range), aims the punch from that rock to the spot, and only when the foe is past the rock (a rock only flies away from her); and it raises the row whenever the foe is 3.5 to 9 m away with a shot line (was 60% of those thinks).
+
+| (seeds 3, 5, 9, 120 s, full run) | Before this branch | After |
+|---|---|---|
+| Tenzo Stone Row rock hits | 6 | 12 (each seed lands by 90 s) |
+| Tenzo Quakefall hits | 30 | 32 |
+
+Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. The one red left is Gil's `rmb press` (above), red on origin/main too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.
+
 ## Ultimate and Boki in a match
 
 The duels above count presses; they don't say whether a bot fires its ultimate when it matters or brings its Boki to a fight. `--bot-kit-use --kit-use-match` (tools/bot_ult_use.gd) plays **one seeded 10-trio match per seed (3 and 5, 300 s each, bot difficulty "medium", every Hunter a bot)** with every Hunter raised to level 6 at the start, so the ultimate is open from the first fight. It takes about 3.5 minutes a seed.
@@ -157,4 +176,4 @@ No failures. Runs differ (the bots roll unseeded random numbers), so a row can m
 - **Gil** (`gil_kit.gd`): aims the Tidal Wave at the rival (it rolled along whatever the bot was facing).
 - **Albert** (`bulwark_kit.gd`): the Faultline before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
 - **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
-- Meeko's Hearth Call is unchanged (it waits for a hurt teammate); Lace, Kael, Cinder, Neve, Sable were already on time.
+- Meeko's Hearth Call is unchanged by this pass (see ext/bot-kit-cinder-meeko above); Lace, Kael, Cinder, Neve, Sable were already on time.

@@ -17,7 +17,7 @@ const HOLD_S := 0.4            # s: how long a "hold" step wants the key down
 const DONE_S := 2.0            # s: the closing line stays up
 const GOLD := Color("f2c84a")
 const MINT := Color("8fe3c8")
-static var _again: RegEx       # "press E again" / "recast" in a slot's JSON text, compiled once
+static var _again: RegEx       # "press it again" / "recast" in a slot's JSON text, compiled once
 static var _hold: RegEx        # "hold" / "held"
 
 var m: Match

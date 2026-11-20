@@ -7,7 +7,7 @@ Local input latency is a separate job; this is only what the net adds.
 ## How it was measured
 - Two real headless games over the relay (as `--displace-net-check`): the host runs the relay in-process and
   watches; the actor connects through `tools/online_feel_proxy.py`, a userspace UDP proxy that holds every
-  packet 100 ms each way (no root here, so no netem; the proxy is the stand-in and removes nothing from the box).
+  packet 100 ms each way (no root here, so no netem; the proxy is the stand-in and removes nothing from the box). The proxy exits by itself when its parent game is gone, on SIGTERM, or after 20 min (`tools/test_online_feel_proxy.py`), so a killed or timed-out check cannot leave it holding a pipe.
 - The actor presses as Vex (gunslinger), Kael (juggernaut) and Neve (rimewright), 5 times per case. All clocks are
   this machine's wall clock, so one press is followed on both games and at the relay.
 - **Architecture note:** the relay only forwards. Each game owns its own hunter, so there is no server-confirmed
@@ -72,6 +72,10 @@ expected at 100 ms; the avoidable part was the wait for the next snapshot.
 ## Re-running
 `godot --headless -- --online-feel-check` (about 6 minutes; needs `python3` for the proxy). It fails if the game adds
 more than 60 ms to the line's delay for any press (`NET_SLACK_MS`). Before the fix 6 of the 11 measured rows failed that budget.
+The run takes ~330 s at 58 fps even pinned to one core. It picks a free relay port (`CheckChild.free_port`, proxy 100 above),
+stops pressing after 840 s (red, with an `OFEEL timing` line) and ends its helpers: the proxy gets `--parent-pid` and
+`--max-life` and logs to `user://online_feel/proxy.log`; the actor quits when the host is gone. None of them holds the
+caller's stdout, so a timed-out run leaves nothing behind.
 # Online feel: moves that carry a Hunter
 
 Abilities that move a Hunter (a pull, a swap, a launch, a knock into a wall) must look the same online as offline.
@@ -124,9 +128,12 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 | Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |
 |---|---|---|---|---|---|---|---|---|---|
+| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
+| Kael Warchain sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
+| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
 | Kael Warchain sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
-| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Grimble Deep Reach reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Motley swap dash | moved Hunter | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Motley swap dash | caster | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
@@ -252,7 +259,7 @@ scripts/match/net_smooth.gd). A steady line still draws 0.15 s behind. No sync s
 |---|---|---|---|---|---|
 | Kael Warchain self-pull | caster | 0.37 / 0.49 | 0.09 / 0.05 | -1 / 454 | x1.00 |
 | Kael Warchain sling | caster | 1.60 / 2.86 | 0.14 / 0.42 | 1 / 440 | x1.00 |
-| Grimble Abyssal Hand reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
+| Grimble Deep Reach reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
 | Motley swap dash | moved Hunter | 8.00 / 0.90 | 0.00 / 0.00 | 401 / 768 | x1.00, a teleport |
 | Motley swap dash | caster | 8.00 / 8.00 | 0.00 / 0.00 | 0 / 411 | x1.00, a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 / 8.05 | 0.00 / 0.00 | 532 / 895 | x1.00, a teleport |

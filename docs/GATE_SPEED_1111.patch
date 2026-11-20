@@ -1,0 +1,221 @@
+--- a/godot
++++ b/godot
+@@ -2,9 +2,18 @@
+ # FIFO queue for Godot runs. SLOTS defaults to cores minus 2 (leaves room for agents and git).
+ # Each run gets a fresh XDG_DATA_HOME unless GODOT_XDG is set, so no shared dev save is touched.
+ # Every run is logged to /tmp/godot-runs.log (wait, run time, exit code, cwd, args).
++# A run holds its slot only while Godot itself lives: the slot fd is closed in the child (anything Godot starts used to
++# inherit it and keep the slot after Godot was gone), TERM/INT end Godot too (they used to end only this script), and a
++# run is ended after GODOT_MAX_S (default 6 h; 0 = no limit). A Godot started by a Godot that came through here runs at
++# once, without a second slot: its parent holds one and waits for it (2026-11-11: that wait jammed all 14 slots).
+ SLOTS=${GODOT_SLOTS:-$(( $(nproc) > 3 ? $(nproc) - 2 : 1 ))}
+ SLOTDIR=/tmp/godot-slots; QDIR=/tmp/godot-queue; mkdir -p "$SLOTDIR" "$QDIR"
+ LOG=/tmp/godot-runs.log
++if [ -n "${GODOT_IN_SLOT:-}" ]; then   # (its user dir sits inside the parent's and is removed with it)
++  export XDG_DATA_HOME=${GODOT_XDG:-$(mktemp -d "${XDG_DATA_HOME:-/tmp}/nested.XXXXXX")}
++  exec /opt/godot/godot-bin "$@"
++fi
++MAX=${GODOT_MAX_S:-21600}
+ if [ -z "$GODOT_XDG" ]; then export XDG_DATA_HOME=$(mktemp -d /tmp/godot-xdg.XXXXXX); CLEAN=1; else export XDG_DATA_HOME="$GODOT_XDG"; fi
+ mkdir -p "$XDG_DATA_HOME/godot"
+ ln -sfn /opt/godot/export_templates "$XDG_DATA_HOME/godot/export_templates"
+@@ -12,7 +21,7 @@
+ TICKET="$QDIR/$(date +%s%N).$$"; : > "$TICKET"
+ cleanup() { rm -f "$TICKET"; [ -n "$CLEAN" ] && rm -rf "$XDG_DATA_HOME"; }
+ trap cleanup EXIT
+-trap 'exit 143' TERM INT
++child=""; trap '[ -n "$child" ] && { kill -TERM $child 2>/dev/null; wait $child; }; exit 143' TERM INT
+ while true; do
+   for t in "$QDIR"/*; do [ -e "$t" ] || continue; kill -0 "${t##*.}" 2>/dev/null || rm -f "$t"; done
+   if ls "$QDIR" | sort | head -n $SLOTS | grep -qx "$(basename "$TICKET")"; then
+@@ -20,7 +29,10 @@
+       exec {fd}>"$SLOTDIR/slot$s"
+       if flock -n $fd; then
+         rm -f "$TICKET"; T1=$(date +%s)
+-        /opt/godot/godot-bin "$@"; rc=$?
++        exec {in}<&0
++        ( exec {fd}>&-; export GODOT_IN_SLOT=1
++          [ "$MAX" -gt 0 ] && exec timeout -k 20 "$MAX" /opt/godot/godot-bin "$@"; exec /opt/godot/godot-bin "$@" ) <&$in {in}<&- & child=$!
++        exec {in}<&-; wait $child; rc=$?; child=""
+         T2=$(date +%s); flock -u $fd
+         printf '%s\twait=%d\trun=%d\trc=%d\tcwd=%s\targs=%s\n' "$(date +%H:%M:%S)" $((T1-T0)) $((T2-T1)) $rc "$PWD" "$*" >> "$LOG"
+         exit $rc
+--- a/suite-fast.sh
++++ b/suite-fast.sh
+@@ -24,6 +24,20 @@
+ # never cached; neither are timing/perf-sensitive flags (SUITE_NOCACHE_RE, default perf|bench|hitch|load|net-check|title-check).
+ # SUITE_CACHE_STRICT=1 additionally hashes every .gd file (any script change -> no reuse).
+ # Main-tree and merge-tree flags with identical dependencies share fingerprints, so main passes serve merge and back.
++#
++# HANG GUARD (HANG_SECS, default 120; 0 = off). A check whose log holds a SCRIPT ERROR and then stays silent HANG_SECS
++# has lost its coroutine and never reaches quit(): it is ended there instead of at the 1200 s limit. The result is the
++# red it already was (rc 143, the error counted), never retried. 66 of the 77 real timeouts in the saved suite logs
++# of 11-07..11-11 were this case (docs/GATE_SPEED_1111.md in the game repo).
++# PREFLIGHT (SUITE_PREFLIGHT=0 disables). --check runs first on the merge tree, alone. A "Parse Error" in its log that
++# main's --check does not show means every check would be red for the same reason: the suite stops there with
++# NEW-RED --check and a PREFLIGHT line in summary.txt (the other flags are listed as "notrun"). 11-11: one such
++# candidate held the box ~15 h per pass.
++# MEMORY (MEM_MIN_MB, default 3000). The box has no swap and /tmp is RAM: a flag waits (up to 10 min) while less than
++# that is available, and a check the kernel killed (rc 137) is run once more like a timeout. 11-11: capture-check
++# died of an OOM kill mid-pass at 57 of 61 GB used.
++# ORDER: the server starts the flags longest first (last server duration in durations.tsv; unknown = first), so no
++# long check starts at the end of the pass. flags.txt itself keeps its order (the workers read it bottom-up).
+ set -u
+ P=${1:-6}
+ OUT=${OUT:-/home/boki/suite-claude}; MW=${MW:-/home/boki/wt-main-claude}; GW=${GW:-/home/boki/wt-merge-claude}
+@@ -33,9 +47,18 @@
+ SC=${SUITE_CACHE_DIR:-/home/boki/suite-cache}; DUR=$SC/durations.tsv; mkdir -p $SC; export DUR
+ CHECK_MAP=${CHECK_MAP:-}; CMAP_PY=${CMAP_PY:-/home/boki/bin/check-map.py}
+ NOCACHE_RE=${SUITE_NOCACHE_RE:-perf|bench|hitch|load|net-check|title-check}
++HANG_SECS=${HANG_SECS:-120}; MEM_MIN_MB=${MEM_MIN_MB:-3000}; export HANG_SECS MEM_MIN_MB
+ CACHE_ON=0; [ "${SUITE_CACHE:-1}" != 0 ] && [ -s "$CHECK_MAP" ] && [ -f "$CMAP_PY" ] && CACHE_ON=1
+ fname() { echo "$1" | tr -c 'a-z0-9\n' _; }
+ [ -s $OUT/flags.txt ] || { { grep -ohE '"--[a-z0-9-]+-check"' $GW/tools/check_registry.gd $GW/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $OUT/flags.txt; echo "--simtest --seed=5" >> $OUT/flags.txt; }
++# COVERED: a flag whose whole run is part of other flags' runs (const COVERED in the merge tree's registry) is not
++# run; the flags that cover it are (added when a narrowed list lacks them). SUITE_COVERED=0 runs every flag.
++[ "${SUITE_COVERED:-1}" = 1 ] && sed -n '/^const COVERED/,/^}/p' $GW/tools/check_registry.gd 2>/dev/null | grep -E '^\s+"--' | while read -r line; do
++  set -- $(echo "$line" | grep -oE '"--[a-z0-9-]+"' | tr -d '"'); f=$1; shift
++  grep -qxF -- "$f" $OUT/flags.txt || continue
++  grep -vxF -- "$f" $OUT/flags.txt > $OUT/flags.tmp; mv $OUT/flags.tmp $OUT/flags.txt; echo "$f" >> $OUT/covered.txt
++  for c in "$@"; do grep -qxF -- "$c" $OUT/flags.txt || echo "$c" >> $OUT/flags.txt; done
++done
+ # ---- result cache helpers (see header) ----
+ GODOT_ID="$GODOT_BIN $($GODOT_BIN --version 2>/dev/null | head -1) $(stat -c '%s-%Y' $GODOT_BIN 2>/dev/null)"
+ fpgen() { # side tree outfile: "flag<TAB>fingerprint" for every mapped flag; empty file on any failure (= nothing cached)
+@@ -98,11 +121,17 @@
+ trap '[ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
+ run() { side=$1; flag=$2; T=$([ $side = main ] && echo $MW || echo $GW)
+   n=$(echo "$flag" | tr -c 'a-z0-9\n' _)
+-  [ -f $OUT/$side/$n.rc ] && ! grep -q "^124 " $OUT/$side/$n.rc && return   # done (timeouts are retried)
++  [ -f $OUT/$side/$n.rc ] && ! grep -qE "^(124|137) " $OUT/$side/$n.rc && return   # done (timeouts and box kills are retried)
+   if [ $side = merge ]; then (set -o noclobber; echo server > $OUT/merge/$n.claim) 2>/dev/null || return; fi
++  for i in $(seq 1 60); do [ "$(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo)" -ge $MEM_MIN_MB ] && break; sleep 10; done
+   X=$(mktemp -d /tmp/xdg.XXXX); t0=$(date +%s)
+-  (cd $T && XDG_DATA_HOME=$X timeout 1200 xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag >$OUT/$side/$n.log 2>&1)
+-  rc=$?; rm -rf $X; secs=$(( $(date +%s) - t0 )); rm -f $OUT/$side/$n.cached
++  log=$OUT/$side/$n.log; : > $log
++  (cd $T && XDG_DATA_HOME=$X exec timeout 1200 xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag >>$log 2>&1) & gp=$!
++  while [ $HANG_SECS -gt 0 ] && kill -0 $gp 2>/dev/null; do sleep 5   # timeout leads its own process group: TERM ends godot and Xvfb too
++    [ $(( $(date +%s) - $(stat -c %Y $log) )) -ge $HANG_SECS ] && grep -q 'SCRIPT ERROR' $log || continue
++    kill -TERM $gp 2>/dev/null; sleep 1; echo "[suite-fast] ended: a script error, then $HANG_SECS s without a line" >> $log; break
++  done
++  wait $gp; rc=$?; rm -rf $X; secs=$(( $(date +%s) - t0 )); rm -f $OUT/$side/$n.cached
+   echo $secs > $OUT/$side/$n.secs; printf '%s\t%s\t%s\tserver\t%s\n' "$flag" $side $secs "$(date -u +%FT%TZ)" >> $DUR
+   echo "$rc $(grep -cE 'FAIL|SCRIPT ERROR' $OUT/$side/$n.log)" > $OUT/$side/$n.rc
+   rm -f $OUT/merge/$n.claim.server; [ $side = merge ] && rm -f $OUT/merge/$n.claim
+@@ -110,26 +139,42 @@
+ export -f run
+ export SC
+ red() { local n r fc; n=$(echo "$1" | tr -c 'a-z0-9\n' _); read r fc < $OUT/merge/$n.rc 2>/dev/null || return 1; [ "$r$fc" != 00 ]; }   # local: must not clobber the caller's loop var f
++# 0. preflight (see header): a parse error on the merge tree only = stop here
++PRE=""
++if [ "${SUITE_PREFLIGHT:-1}" != 0 ]; then nice -n 10 bash -c 'run merge --check'
++  if grep -q 'SCRIPT ERROR: Parse Error' $OUT/merge/__check.log 2>/dev/null; then nice -n 10 bash -c 'run main --check'
++    grep -q 'SCRIPT ERROR: Parse Error' $OUT/main/__check.log 2>/dev/null || PRE=$(grep -A1 -m1 'SCRIPT ERROR: Parse Error' $OUT/merge/__check.log | tr -s ' \n' ' ' | cut -c1-300)
++  fi
++fi
++if [ -n "$PRE" ]; then echo "suite-fast: preflight stop: $PRE"; grep -qxF -- --check $OUT/flags.txt || echo --check >> $OUT/flags.txt
++  echo --check > $OUT/main_needed
++else
+ # 1. merge side, every flag
+-nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/flags.txt
++awk -F'\t' 'NR==FNR{if($4=="server")d[$1]=$3;next} {print (($1 in d)?d[$1]:99999) "\t" $1}' $DUR $OUT/flags.txt 2>/dev/null | sort -t$'\t' -k1,1nr -s | cut -f2- > $OUT/flags.order
++[ "$(wc -l < $OUT/flags.order)" = "$(wc -l < $OUT/flags.txt)" ] || cp $OUT/flags.txt $OUT/flags.order
++nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/flags.order
+ # wait for flags a worker still holds (max 25 min; then reclaim and run them here)
+ for i in $(seq 1 50); do ls $OUT/merge/*.claim >/dev/null 2>&1 || break; sleep 30; done
+ rm -f $OUT/merge/*.claim
+-nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/flags.txt
++nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/flags.order
+ # 2. main side, only where the merge is red (workers already ran main for their own reds)
+ : > $OUT/main_needed; while read f; do red "$f" && echo "$f" >> $OUT/main_needed; done < $OUT/flags.txt
+ cache_apply main $OUT/main_needed
+ nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run main "{}"' < $OUT/main_needed
+ cache_store
++fi
+ # 3. compare
+ cd $OUT
+ while read flag; do n=$(echo "$flag" | tr -c 'a-z0-9\n' _); mr=.; mf=.
++  [ -f merge/$n.rc ] || { echo "notrun $flag (preflight stop)"; continue; }
+   read gr gf < merge/$n.rc; gs=$([ "$gr$gf" = 00 ] && echo pass || echo red); ms=pass
+   if [ -f main/$n.rc ]; then read mr mf < main/$n.rc; [ "$mr$mf" != 00 ] && ms=red; fi
+   t=same; [ $ms = pass ] && [ $gs = red ] && t=NEW-RED; [ $ms = red ] && [ $gs = pass ] && t=FIXED
+   [ $ms = red ] && [ $gs = red ] && [ "$gf" -gt "$mf" ] 2>/dev/null && t=WORSE
++  [ -n "$PRE" ] && t=NEW-RED   # only --check ran: the parse error is the merge's own, whatever else main's --check shows
+   echo "$t $flag main=$mr/$mf merge=$gr/$gf"
+ done < flags.txt > compare.txt
+-{ echo "flags: $(wc -l < flags.txt)"; echo "NEW-RED: $(grep -c ^NEW-RED compare.txt)  WORSE: $(grep -c ^WORSE compare.txt)  FIXED: $(grep -c ^FIXED compare.txt)  red on merge: $(wc -l < main_needed)"
++{ echo "flags: $(wc -l < flags.txt)$([ -s covered.txt ] && echo " (covered by other flags, not run: $(tr '\n' ' ' < covered.txt))")"; echo "NEW-RED: $(grep -c ^NEW-RED compare.txt)  WORSE: $(grep -c ^WORSE compare.txt)  FIXED: $(grep -c ^FIXED compare.txt)  red on merge: $(wc -l < main_needed)"
+   echo "cached: $(ls merge/*.cached main/*.cached 2>/dev/null | wc -l)"
++  [ -n "$PRE" ] && echo "PREFLIGHT: parse error on the merge tree only, $(grep -c ^notrun compare.txt) checks not run: $PRE"
+   grep -E "^(NEW-RED|WORSE|FIXED)" compare.txt; echo DONE; } > summary.txt
+--- a/merge-candidate.sh
++++ b/merge-candidate.sh
+@@ -24,6 +24,15 @@
+ if [ -f ~/release-hold ] && [ $(( $(date +%s) - $(stat -c %Y ~/release-hold) )) -lt 43200 ]; then
+   echo "$(date -u +%FT%TZ) release hold ($(head -c 80 ~/release-hold)); skipped"; exit 0; fi
+ REPO=~/project-boki; WT=~/wt-mc; OUT=~/mc; EXCL=~/bin/merge-exclude.txt
++# The import (.godot, ~630 MB, minutes to build) outlives the two worktrees, which are made new every run: it is moved
++# aside before a tree is removed and moved into the new one, where --import only redoes the files that changed.
++# Built from nothing again once a week (MC_IMPORT_CACHE=0: every run).
++IC=~/mc-import-cache; ICDAYS=7
++[ -f $IC/stamp ] && [ $(( $(date +%s) - $(stat -c %Y $IC/stamp) )) -gt $((ICDAYS * 86400)) ] && rm -rf $IC
++[ "${MC_IMPORT_CACHE:-1}" = 0 ] && rm -rf $IC
++mkdir -p $IC; [ -f $IC/stamp ] || touch $IC/stamp
++drop_tree() { [ -d $1 ] || return 0; if [ -d $1/.godot ]; then rm -rf $IC/$2; mv $1/.godot $IC/$2; fi; git worktree remove --force $1; }
++back_import() { [ -d $IC/$2 ] && [ ! -e $1/.godot ] && mv $IC/$2 $1/.godot; return 0; }
+ TS=$(date -u +%Y%m%d-%H%M)
+ cd $REPO || exit 1; for i in 1 2 3 4; do gitnet fetch -q --prune origin && break; [ $i = 4 ] && { echo "$TS fetch failed x4"; exit 1; }; echo "$TS fetch retry $i"; git remote prune origin >/dev/null 2>&1; sleep $((i*20)); done
+ M=$(git rev-parse origin/main)
+@@ -48,8 +57,9 @@
+ [ -s /tmp/mc_open ] || { echo "$KEY" > ~/.mc_last; echo "$TS nothing READY"; exit 0; }
+ 
+ # 2. merge
+-[ -d $WT ] && git worktree remove --force $WT
++drop_tree $WT cand
+ git worktree add -q --detach $WT origin/main && cd $WT
++back_import $WT cand
+ git config user.name "Claude"; git config user.email "noreply@anthropic.com"
+ is_union() { case "$1" in *check_registry*|*CHECKS*|*.gitignore|docs/DEBT.md|docs/ASSET_CREDITS.md|*STATUS*.md) return 0;; esac; return 1; }
+ is_generated() { case "$1" in docs/wiki/*|*Rules.md|*.uid) return 0;; esac; return 1; }
+@@ -71,7 +81,7 @@
+ HEALTH=$(python3 tools/health.py --strict 2>&1 | tail -1)
+ 
+ # 3. suite: merge-first, shared with remote workers (boki-worker.sh) via suite-fast.sh
+-MW=${MC_MAIN_WT:-$HOME/wt-mc-main2}; cd $REPO; [ -d $MW ] && git worktree remove --force $MW; git worktree add -q --detach $MW origin/main
++MW=${MC_MAIN_WT:-$HOME/wt-mc-main2}; cd $REPO; drop_tree $MW main; git worktree add -q --detach $MW origin/main; back_import $MW main
+ S=$OUT/suite; rm -rf $S; mkdir -p $S
+ # 3-pre. affected-only scope (~/bin/check-map.py, static analysis, no Claude usage). FULL_SUITE=1 runs every flag.
+ # Any failure leaves $S/flags.txt absent, so suite-fast.sh builds the full list itself (the old behaviour).
+@@ -128,7 +138,7 @@
+ HL="Headline: NEW-RED $(grep -c ^NEW-RED $S/compare), WORSE $(grep -c ^WORSE $S/compare), FIXED $(grep -c ^FIXED $S/compare) of $(wc -l < $S/flags) checks; $(grep -c '^merged' $R) merged, $(grep -c ^SKIPPED $R) skipped; release exports $([ $RDRC -eq 0 ] && echo pass || echo FAIL); GPU jobs not finished: $GL$(grep -q "GPU perf deferred" $GP && echo " (GPU perf deferred: no GPU worker alive)")"
+ { echo "# Merge candidate $TS (built by cron, no Claude usage)"; echo; echo "$HL"; echo; echo "Base: origin/main ${M:0:8}. Health: $HEALTH"; echo "$SCOPE"; grep -h '^UNCOVERED' $S/affected.why 2>/dev/null | head -10 | sed 's/^/- /'; echo
+   echo "## Suite vs main: NEW-RED $(grep -c ^NEW-RED $S/compare), WORSE $(grep -c ^WORSE $S/compare), FIXED $(grep -c ^FIXED $S/compare) of $(wc -l < $S/flags) checks"
+-  grep -E "^(NEW-RED|WORSE|FIXED)" $S/compare | sed 's/^/- /'; echo; echo "## Branches"; sed 's/^/- /' $R
++  grep -E "^(NEW-RED|WORSE|FIXED)" $S/compare | sed 's/^/- /'; grep '^PREFLIGHT' $S/summary.txt | sed 's/^/- /'; echo; echo "## Branches"; sed 's/^/- /' $R
+   echo; echo "Exclusions: ~/bin/merge-exclude.txt on the hetzner box."; } > MERGE_REPORT.md
+ { echo; cat $GP; echo; cat $RD; } >> MERGE_REPORT.md
+ git add MERGE_REPORT.md; git commit -q -m "Merge candidate report $TS"
+--- a/w2-dispatch
++++ b/w2-dispatch
+@@ -27,7 +27,7 @@
+ one() {  # side flag remote-tree -> DIR/side/n.{rc,log}; prints red if red
+   local side=$1 flag=$2 t=$3 n; n=$(echo "$flag" | tr -c 'a-z0-9\n' _)
+   R "cd ~/w2/trees/$t && H=\$(mktemp -d) && timeout 1200 $GD -- $flag; rc=\$?; rm -rf \$H; exit \$rc" > $DIR/$side/$n.log 2>&1
+-  local rc=$?; [ $rc = 255 ] && rc=124   # ssh dropped
++  local rc=$?; [ $rc = 255 ] && { rm -f $DIR/$side/$n.log; return 1; }   # ssh dropped: no result, so the server runs the flag
+   echo "$rc $(grep -cE 'FAIL|SCRIPT ERROR' $DIR/$side/$n.log)" > $DIR/$side/$n.rc
+   read r f < $DIR/$side/$n.rc; [ "$r$f" != 00 ] && echo red; return 0
+ }
+@@ -36,8 +36,9 @@
+   [ "$(cut -d' ' -f1 /home/boki/suite-active 2>/dev/null)" = "$DIR" ] || return 1
+   [ -f $DIR/merge/$n.rc ] && return 1
+   (set -o noclobber; echo $WN > $DIR/merge/$n.claim) 2>/dev/null || return 0
+-  if [ "$(one merge "$flag" merge-tree)" = red ]; then mkdir -p $DIR/main; one main "$flag" main-tree >/dev/null; fi
+-  rm -f $DIR/merge/$n.claim
++  local res ok=0; res=$(one merge "$flag" merge-tree) || ok=1
++  if [ "$res" = red ]; then mkdir -p $DIR/main; one main "$flag" main-tree >/dev/null || ok=1; fi
++  rm -f $DIR/merge/$n.claim; [ $ok = 0 ] || { echo "$(date +%T) $WN ssh dropped on $flag: lane ends"; return 1; }
+   echo "$(date +%T) $WN did $flag: merge $(cat $DIR/merge/$n.rc)"
+ }
+ export -f one sjob

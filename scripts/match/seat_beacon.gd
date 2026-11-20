@@ -17,13 +17,13 @@ var _ring_mat: ShaderMaterial
 var _glyph: Label3D
 var _key := []                     # what the materials show now: [look, colour, hold]
 var _h := 0.0                      # the column's height now (it eases to the look's height)
-var _clock := -1
+var _tag := ""                     # the glyph's text: the countdown to the opening, or whose seat it is
 
 func _init(parent: Node3D, at: Vector3, radius: float) -> void:
 	node = Node3D.new()
 	node.position = at
 	parent.add_child(node)
-	_ring_mat = Models.ring_mat(WaysOutLook.DIM, 0.1)
+	_ring_mat = Models.ring_mat(SideColor.tone("beam_locked"), 0.1)
 	_ring_mat.set_shader_parameter("fill", FILL)
 	var ring := MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(radius * 2.2)
@@ -74,13 +74,13 @@ func show(rd: Dictionary, dt: float) -> void:
 	_beam.visible = _h > 0.05
 	_beam.scale = Vector3(1.0, maxf(_h, 0.01), 1.0)
 	_beam.position.y = _h * 0.5
-	var s := int(ceilf(float(rd["left"]))) if st == WaysOutLook.St.LOCKED else -1
-	if s != _clock:
-		_clock = s
-		_glyph.visible = s >= 0
-		_glyph.text = WaysOutLook.clock(float(s)) if s >= 0 else ""
+	var t := WaysOutLook.tag(rd)
+	if t != _tag:
+		_tag = t
+		_glyph.visible = t != ""
+		_glyph.text = t
 
 ## What it shows now: beam colour, ring colour, column height and the glyph text (the checks compare these).
 func looks() -> Array:
 	return [_beam_mat.get_shader_parameter("color"), _ring_mat.get_shader_parameter("color"), snappedf(_h, 0.1),
-		_glyph.text if _glyph.visible else ""]
+		_tag]

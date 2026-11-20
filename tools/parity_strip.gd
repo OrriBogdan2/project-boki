@@ -1,11 +1,14 @@
 extends "res://tools/combo51_shots.gd"
-## --parity-strip --hero=<id> --slot=lmb|rmb|e|x|dash --frames=a-b --shots-dir=<dir> [--hold=<s>] [--footage-dir=<dir>]
+## --parity-strip --hero=<id> --slot=lmb|rmb|e|x|dash --frames=a-b --shots-dir=<dir> [--hold=<s>] [--pillar=<m>]
+##     [--footage-dir=<dir>]
 ## PARITY FIRST: a Hunter's move in the Training Area (the Arena) at 5 fps for the move's length, against the
 ## matching footage frames, as one JPG sheet <dir>/<hero>_<slot>.jpg: ours on the top row, footage frames a..b
 ## below, the same count, each labelled with its time from the press. Frame numbers are those of
 ## briefs/hero-ref/<sheet>.md; the footage comes from
 ## `git checkout origin/ext/hero-ref-footage -- footage/<folder>` (--footage-dir: where footage/ is).
-## --hold=<s>: how long the key stays down (default: all of an LMB, a tap for the rest).
+## --hold=<s>: how long the key stays down (default: all of an LMB, a tap for the rest; a dash: how long she keeps
+## moving). --pillar=<m>: a dark rock pillar that far ahead on her line, on a rock tile she can only walk
+## through as a spirit (footage pin 0358-0366: Spirit Walk through a pillar), the dummy PAST_PILLAR beyond it.
 ## Needs a renderer (jobq --needs gpu).
 
 const FPS := 5.0                 # the footage's frame rate
@@ -15,6 +18,9 @@ const VIEW_CROP := Vector2i(480, 270)    # px of our render round the hero and t
 const AHEAD := 2.5               # m toward the dummy the crop is centred, so the shots show
 const TAP := 0.1                 # s a tapped key stays down
 const LABEL_H := 24              # px of the time strip under each tile
+const PILLAR_R := 0.6              # m: the pillar stands on one rock tile, about the footage pillar's width
+const PILLAR_TALL := 3.0           # m the pillar stands
+const PAST_PILLAR := 4.5           # m from the pillar's middle to the dummy, clear of where she stops
 const FOOTAGE := {"gunslinger": "venator_ghost", "juggernaut": "juggernaut", "archer": "pin", "mage": "vireo",
 	"bulwark": "bjorn", "dolm": "breah", "thief": "dancer", "dredge": "dredge", "ashwick": "linwick",
 	"tender": "mooshmoosh", "rimewright": "tamsin", "ostra": "ostra"}      # our id -> footage/<folder>
@@ -23,6 +29,7 @@ var slot := "lmb"
 var first_frame := 1
 var count := 1
 var hold := -1.0
+var pillar := 0.0
 var footage_dir := "res://"
 var shots: Array = []
 
@@ -36,6 +43,7 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--slot="): slot = arg.substr(7)
 		if arg.begins_with("--frames="): range_arg = arg.substr(9)
 		if arg.begins_with("--hold="): hold = float(arg.substr(7))
+		if arg.begins_with("--pillar="): pillar = float(arg.substr(9))
 		if arg.begins_with("--footage-dir="): footage_dir = arg.substr(14)
 	var ends := range_arg.split("-")
 	if ends.size() != 2 or not FOOTAGE.has(who) or not ["lmb", "rmb", "e", "x", "dash"].has(slot):
@@ -52,7 +60,10 @@ func run(main_node: Node) -> void:
 		m.hud.guide_hidden = true      # (the kit card would sit over the hero)
 	for k in P.slot_lv:
 		P.slot_lv[k] = 3
-	await _reset(6.0)
+	if pillar > 0.0:
+		_raise_pillar(home + Vector3(pillar, 0, 0))
+	Input.warp_mouse(Vector2.ONE)      # (the pointer off the field: no hover card over the dummy in the frames)
+	await _reset(pillar + PAST_PILLAR if pillar > 0.0 else 6.0)
 	await _go(count / FPS, _drive, _marks(), 1.0)
 	var out := dir.path_join("%s_%s.jpg" % [who, slot])
 	await _sheet(out)
@@ -67,6 +78,7 @@ func _marks() -> Array:
 
 ## The key for the slot, held `hold` s (an LMB: the whole move) from the first step.
 func _drive(t: float) -> void:
+	Sfx.listener = P.pos           # (the match's own step is off here: the looks' detail share follows her)
 	var held := hold
 	if held < 0.0:
 		held = count / FPS if slot == "lmb" else TAP
@@ -87,9 +99,27 @@ func _drive(t: float) -> void:
 			if _at(t, TAP):
 				P.inp["move"] = Vector2(1, 0)
 				P.do_dash()
-			elif t > TAP * 2.0:
+			elif t > maxf(held, TAP * 2.0):
 				P.inp["move"] = Vector2.ZERO
 	_aim(T.pos)
+
+## The --pillar: a rock tile at `at` (a plain walk stops at it) under a dark stone pillar.
+func _raise_pillar(at: Vector3) -> void:
+	var W: World = m.world
+	var wk: PackedByteArray = W.kind
+	wk[W.idx(int(at.x), int(at.z))] = World.T_BLOCK
+	W.kind = wk
+	var stone := CylinderMesh.new()
+	stone.top_radius = PILLAR_R
+	stone.bottom_radius = PILLAR_R
+	stone.height = PILLAR_TALL
+	var dark := StandardMaterial3D.new()
+	dark.albedo_color = Color(0.1, 0.1, 0.12)
+	var mi := MeshInstance3D.new()
+	mi.mesh = stone
+	mi.material_override = dark
+	m.add_child(mi)
+	mi.global_position = Vector3(int(at.x) + 0.5, at.y + PILLAR_TALL * 0.5, int(at.z) + 0.5)
 
 ## (one frame of ours: the centre of the view, hero in the middle)
 func _take(_kind: String, _file: String, _caption: String, _focus: Callable) -> void:

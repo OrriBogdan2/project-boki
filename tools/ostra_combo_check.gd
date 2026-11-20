@@ -72,7 +72,8 @@ func _ostra() -> void:
 	var card: Dictionary = K.d["card"]
 	ok(
 		"card: a role line and one line each for LMB, RMB, E, Shift and the passive",
-		["role", "lmb", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		["role", "rmb", "e", "dash", "passive"].all(func(k): return String(card.get(k, "")).length() > 10)
+		and not (card.get("weapons", {}) as Dictionary).is_empty()   # the LMB line is the weapon's (kit card rewrite)
 	)
 	# ---- the reticle: a thin line to the cursor all the time
 	reset.call()
@@ -96,7 +97,7 @@ func _ostra() -> void:
 	for i in 40: K.on_deal(T, 10.0, {})
 	m.step(DT)
 	ok(
-		"passive: full Swell = Swollen for 9s, wrapped in the pink sphere",
+		"passive: full Swell = Swollen for 9s, wrapped in the light-teal sphere",
 		K.is_swollen() and K.swells == 1 and absf(
 			float(K.res_def()["swollen_t"]) - 9.0
 		) < 0.01 and KitLooks.of(m).holding("os_aura"),
@@ -115,9 +116,16 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
-	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok("lmb: the orb is his own teal shard (skin) with its data trail", KitLooks.of(m).skins_live("orb") >= 1
+			and int(HeroVfx.of(m).plays.get("orb_trail", 0)) >= 1)
+	var hits0 := int(HeroVfx.of(m).plays.get("orb_hit", 0))
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
+	ok("lmb: the hit draws its impact on the foe (orb_hit)", int(HeroVfx.of(m).plays.get("orb_hit", 0)) == hits0 + 1)
+	var layers: Array = HeroVfx.data("ostra")["moves"]["orb_hit"]["fx"]
+	ok("lmb: the impact is sized by the orb's hit radius (%.2f m) and has two shard layers" % K.last_orb_r,
+		K.last_orb_r >= 0.28 and layers.filter(func(l): return l["p"] == "shard").size() >= 2
+		and layers.any(func(l): return l["p"] == "flare" and l["size"] == "r"))
 	reset.call()
 	step(m, 1.6)
 	ok(
@@ -139,6 +147,7 @@ func _ostra() -> void:
 		"item 60: the charge restarts from zero after a shot (plain again)",
 		K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
 	)
+	_zone_looks(m)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
 	reset.call()
@@ -205,7 +214,8 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5, func(): s_near[0] = maxf(s_near[0], T.stun_t))
 	var d_near := dmg(T)
-	ok("rmb: the stun shows on the dummy (stars over its head)", s_near[0] > 0.0 and KitLooks.of(m).crowned(T))
+	var starred := StatusLooks.of(m).showing(T, "stun")
+	ok("rmb: the stun shows on the dummy (stars over its head)", s_near[0] > 0.0 and starred)
 	reset.call()
 	T.teleport(home + Vector3(11.5, 0, 0))
 	aim_at(P, T.pos)
@@ -223,8 +233,13 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok("combo: Swollen Snap hits 44% harder", dmg(T) > d_near * 1.35, "plain %.1f swollen %.1f" % [d_near, dmg(T)])
-	var snap_k := float(sn["dmg"]) / float(Data.weapon_stats("tether_lantern")["dmg"])
-	ok("data: the Snap hits about 1.05x an orb (277 vs 263)", absf(snap_k - 277.0 / 263.0) < 0.03, "%.3f" % snap_k)
+	var snap_k := float(sn["dmg"]) / float(K.e_def()["dmg"])
+	ok("data: the Snap hits about 0.76x a seed (277 vs 365)", absf(snap_k - 277.0 / 365.0) < 0.02, "%.3f" % snap_k)
+	var orb_k := float(Data.weapon_stats("tether_lantern")["dmg"]) / float(sn["dmg"])
+	ok(
+		"data: an orb is the source's 263 vs 277 less the ~15% held-fire DPS the owner gave up (item 117)",
+		absf(orb_k - 263.0 / 277.0 * 0.85) < 0.03, "%.3f" % orb_k
+	)
 	ok(
 		"data: the Snap rests 10s; the Trade 9.5s; the seed 10s",
 		absf(float(sn["cooldown"] if sn.has("cooldown") else K.rmb_def()["cooldown"]) - 10.0) < 0.01 and absf(
@@ -241,7 +256,7 @@ func _ostra() -> void:
 		"data: a full orb slows 6% for 1.5s (the in-game card; the wiki's 10% is outranked)",
 		absf(slow_k - 0.06) < 0.001 and absf(slow_t - 1.5) < 0.001, "%.3f for %.2fs" % [slow_k, slow_t]
 	)
-	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -375,8 +390,8 @@ func _ostra() -> void:
 		"early %.1f late %.1f" % [early, late]
 	)
 	ok(
-		"e: a full pop is 3.5x the base 12.5 (source peak)", absf(late - 12.5 * 3.5) < 1.0,
-		"late %.2f vs %.2f" % [late, 12.5 * 3.5]
+		"e: a full pop is 3.5x the base damage (source peak)", absf(late - float(K.e_def()["dmg"]) * 3.5) < 1.0,
+		"late %.2f vs %.2f" % [late, float(K.e_def()["dmg"]) * 3.5]
 	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
@@ -489,14 +504,15 @@ func _ostra() -> void:
 	ok("data: a plain hit still lands", P.hp < plain0 - 1.0)
 	# rank 3: the growing seed burns; the pop no longer pulls (the pull is Nightwell's, on X)
 	P.slot_lv["kin"] = 3
+	var burn := float(K.e_def()["burn"])
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
 	aim_at(P, T.pos)
 	K.cast_e()
 	step(m, 1.2)
 	ok(
-		"rank 3: the growing seed burns a foe inside it, about 8 a second (250 vs a 365 bomb of 12.5)",
-		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0,
+		"rank 3: the growing seed burns a foe inside it, about 16 a second (250 vs a 365 bomb)",
+		dmg(T) / K.power("kin") > 1.34 * burn and dmg(T) / K.power("kin") < 1.71 * burn,
 		"dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
 	)
 	step(m, 4.8)
@@ -522,11 +538,11 @@ func _ostra() -> void:
 			elif K.snaps > 0: cast_k[0] = maxf(cast_k[0], K.boost_k))
 	ok(
 		"data rank 3: Snap speeds him up 11% on the cast and 22% on a hit",
-		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.move_k() - 1.215) < 0.01,
-		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.move_k()]
+		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.speed_bonus() - 0.215) < 0.01,
+		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.speed_bonus()]
 	)
 	step(m, 2.2)
-	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
+	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
 	P.slot_lv["sec"] = 1
 	# ---- data pass, Trade rank 3 (the source's tier IV): allies in his 1.5m ring as he leaves get 375 of Void's 1150
 	# health as a shield for 3s, so 32.6% of his 145 (docs/heroes/ostra.md); none at the landing or past the ring
@@ -636,7 +652,7 @@ func _ostra() -> void:
 	)
 	await done(m)
 
-## Source: Void's passive "floats: no footstep noise" (supervive_kits.md), the footage "no footsteps"
+## Source: Void's passive "floats: no footstep noise" (sv/briefs/kits.md), the footage "no footsteps"
 ## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
 ## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
 func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
@@ -760,6 +776,29 @@ func _bolt_through_terrain() -> void:
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
 ## (ostra_orb) that leaves along the aim; he turns to the cursor, so while he drifts sideways every orb
 ## leaves at it as it swings round him.
+## docs/VFX_QUALITY.md: his zones are a lit rim and a soft inside (0.25 alpha at most at the centre), in his teal.
+func _zone_looks(m: Match) -> void:
+	const CORE_A := 0.25
+	var seed := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
+	var sm := (seed.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the seed drum is clear inside, lit at its teal rim",
+		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
+	HeroZones.seed_pop(m, "zone_test")
+	var looks := KitLooks.of(m)
+	var held := (looks.hold_on("zone_dark", "dark", m, Vector3.ZERO, 1.0).get_child(0) as MeshInstance3D)
+	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 3.6)
+	var rim_orb := (well.get_node("Spin").get_children().back() as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the black orbs (Snap wind-up, Nightwell rim) have a broad lit sea-teal rim",
+		[held.material_override, rim_orb].all(func(mt: ShaderMaterial):
+			return mt.get_shader_parameter("rim") == OstraKit.SEA and float(mt.get_shader_parameter("power")) < 1.5))
+	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the open well has no floor fill, a lit rim",
+		float(fm.get_shader_parameter("fill")) == 0.0 and float(fm.get_shader_parameter("thickness")) > 0.0)
+	var dome := looks.hold_on("zone_dome", "well_dome", m, Vector3.ZERO, 3.6)
+	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the well's dome is clear at its centre",
+		float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1) <= CORE_A)
+
 func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	var seen := {}
 	for s0 in m.shots.filter(func(s): return s["by"] == P):
@@ -821,7 +860,7 @@ func _ranks(P: Hunter, K: OstraKit) -> void:
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: his ground and air dash moves are two distinct ids, his alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("ostra_"))
