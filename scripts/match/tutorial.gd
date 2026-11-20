@@ -1,10 +1,13 @@
 class_name Tutorial
 extends RefCounted
-## The first-match tutorial: a scripted course on content/maps/tutorial.json, one stop per skill (its
-## "course" table holds each stop). Match owns one of these as `tut` and calls update() every step.
-## It runs on the real run levels: you land at level 1 with one point and every ability locked; each pick
-## step unlocks one ability (only that one can take the point), a camp of monsters to use it on follows,
-## and the camp's kills pay the XP for the next level (TutorialCamps). The ultimate comes last.
+## The first-match tutorial: a scripted course on content/maps/tutorial.json, eight beats (DECISIONS 2026-11-08:
+## land, shoot, a fight with the right click, dash and glide, send your Boki, E, a chest, extract (the left click
+## first, then the right: the 11-17 playtest); its "course" table holds each stop).
+## Match owns one of these as `tut` and calls update() every step. It runs on the real run levels: you land at
+## level 1 with one point and every ability locked; a beat that uses an ability unlocks it itself (UNLOCKS), and
+## the camp's kills pay the XP for the next level (TutorialCamps). Two beats run in legs (leg()): the three gaps,
+## and the outpost's walk, uplink, hold and lift. Spending points, ranks, wall kicks, crouching and gloves are
+## first-match hints (FirstMatchGuide, ExpeditionTips), not beats.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
 ## What the player sees is drawn by TutorialHud: a panel pinned at the top-centre for each step (it pops
 ## in when the step starts), a pulse when they stall, a quiet check when a step is done; the marker (beam,
@@ -25,54 +28,32 @@ const KEYS := {
 	"land": "move",
 	"dash": "dash",
 	"exdash": "dash",
-	"crouch": "crouch",
-	"wallkick": "jump",
-	"glove": "interact",
 	"shoot": "fire",
 	"kin": "signature",
-	"sec": "secondary",
+	"fight": "secondary",
 	"gkey": "throw",
 	"summon": "summon",
-	"pack": "summon",
-	"hook": "gear1",
-	"ult": "ultimate",
-	"uplink": "interact",
-	"pick_sec": "secondary",
-	"pick_dash": "dash",
-	"pick_kin": "signature",
-	"pick_ult": "ultimate"
+	"chest": "interact",
+	"uplink": "interact"
 }
-## Which course stop a finished step leaves you at (a fall puts you back there).
-const STOP_AFTER := {
-	"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "wallkick": "crouch", "glove": "yard"
-}
+## The ability slot a beat (or leg) uses, unlocked as it starts (TutorialCamps.unlock).
+const UNLOCKS := {"dash": "dash", "kin": "kin", "fight": "sec"}
+## Which course stop a finished step (or leg) leaves you at (a fall puts you back there).
+const STOP_AFTER := {"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "chest": "yard"}
 const GAP_STEPS := ["dash", "exdash", "glide"]  # leave from the glowing pad on one island, land on the next
+## The extract beat's legs, by the outpost's state: walk there, start the uplink, hold it, take the lift.
+const EXIT_LEGS := ["wayout", "uplink", "defend", "extract"]
 ## The steps whose marker is the camp's nearest monster.
-const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
-const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
+const FOE_STEPS := ["fight", "shoot", "gkey", "summon", "kin"]
+const WALK_LEAD := ["chest", "wayout", "uplink", "extract"]
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
-const KIT_KEY := {
-	"pick_sec": "rmb",
-	"sec": "rmb",
-	"pick_dash": "dash",
-	"dash": "dash",
-	"pick_kin": "e",
-	"kin": "e",
-	"shoot": "lmb",
-	"pick_ult": "r"
-}
+const KIT_KEY := {"fight": "rmb", "dash": "dash", "kin": "e", "shoot": "lmb"}
 
 const CARD_T := 1.5  # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0  # s without progress before the panel pulses and the Boki says it once more
 const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it sooner)
-const SPOT_T := 5.0  # s the lookout shows the glove it spotted
-const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
 const DONE_T := 0.9  # s of the step-done sting
-const LOOKOUT_R := 5.0  # m from the stop: the whole top (3.6 m radius) and its rim count
-const LOOKOUT_DROP := 1.2  # m: how far under the top you may stand and still be up on it (the cliff is 2.4 m)
 const SEND_R := 5.0  # m: a Boki leap that lands this near a monster counts as sent at it
-const CROUCH_HOLD := 1.5  # s of crouching at the lookout
-const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
 const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0  # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
@@ -92,7 +73,6 @@ var card_t := 0.0  # s since the card (re)appeared
 var done_t := 0.0  # s left of the step-done check
 var flash_t := 0.0  # s the marker flashes (after a stall)
 var nag_t := 0.0  # s the panel pulses (after a stall)
-var spot_t := 0.0  # s left of "You spotted it!" and the glove beam
 var wait := 0.0
 var down_t := 0.0
 var flag := false
@@ -109,10 +89,11 @@ var kicks0 := 0
 var taps := 0  # right click: taps so far
 var held := false  # and whether it was held (kits with a hold only)
 var hits := 0  # your weapon hits on a monster this step
-var seen := {}  # what this run has used: sec, fire, dash, kick, boki, kin, glove, ult (the checks)
+var gap := 0  # the dash beat's leg: which of GAP_STEPS is next
+var _leg := ""  # the leg the plain line was last sent for
+var seen := {}  # what this run has used: sec, fire, dash, exdash, glide, boki, kin, chest (the checks)
 var camps: TutorialCamps
 var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
-var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var _course: Dictionary = {}
 var _beams: Array = []
@@ -204,14 +185,28 @@ func id() -> String:
 	return String(steps()[step][0]) if step >= 0 and step < steps().size() else ""
 
 
+## The leg of a beat that runs in legs (the gap being crossed, the outpost's state), else the beat itself.
+## The marker, the pads, the key, the line and the retry tip follow the leg.
+func leg() -> String:
+	var sid := id()
+	if sid == "dash":
+		return GAP_STEPS[mini(gap, GAP_STEPS.size() - 1)]
+	if sid != "extract":
+		return sid
+	var o := outpost()
+	if o.is_empty() or o["state"] == "open":
+		return "extract"
+	if o["state"] != "idle":
+		return "defend"
+	return "uplink" if m.exits.in_yard(o, m.player) else "wayout"
+
+
 ## Whether this hunter's kit has the thing a step teaches (the Fusion steps never run in the tutorial, flag or not).
 func applies(sid: String) -> bool:
 	match sid:
-		"pick_ult", "ult":
-			return false
 		"gkey":
 			return m.player.kin != null and not sm.active()
-		"summon", "pack":
+		"summon":
 			return sm.active()
 	return true
 
@@ -236,7 +231,6 @@ func update(dt: float) -> void:
 	done_t = maxf(0.0, done_t - dt)
 	flash_t = maxf(0.0, flash_t - dt)
 	nag_t = maxf(0.0, nag_t - dt)
-	spot_t = maxf(0.0, spot_t - dt)
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
@@ -246,13 +240,13 @@ func update(dt: float) -> void:
 	if got != got_seen:
 		got_seen = got
 		_refresh(p)  # (each move that lands is ready again at once)
-	_point(sid)
+	_point()
 	_stall(dt)
 	_props()
 	if pell:
 		pell.tick(dt)
 	if p.kin and p.kin.comp:
-		p.kin.comp.tut(sid, _lead_goal(sid))
+		p.kin.comp.tut(leg(), _lead_goal(leg()))
 	if wait > 0.0:
 		wait -= dt
 		return
@@ -260,6 +254,18 @@ func update(dt: float) -> void:
 		_finish(sid)
 	if step < steps().size():
 		_words()
+		_leg_tip()
+
+
+## A new leg's own plain line goes to the message lane once (the beat's first line went with its banner).
+func _leg_tip() -> void:
+	var lg := leg()
+	if lg == _leg:
+		return
+	var was := _leg
+	_leg = lg
+	if was != "" and Content.rules("tutorial")["detail"].has(lg) and m.hud:
+		m.hud.tip(detail)
 
 
 func _finish(sid: String) -> void:
@@ -278,6 +284,7 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
+	gap = 0
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
@@ -286,7 +293,7 @@ func _finish(sid: String) -> void:
 	_enter()
 
 
-## Test: jump to a step, with the picks of the steps skipped made as if you had (--tut-from).
+## Test: jump to a step, with the abilities of the steps skipped unlocked as if you had (--tut-from).
 func _skip_to(to: int) -> void:
 	for i in range(step, mini(to, steps().size())):
 		var sk := String(steps()[i][0])
@@ -294,11 +301,8 @@ func _skip_to(to: int) -> void:
 			last_stop = stop(STOP_AFTER[sk])
 			m.player.pos = last_stop + Vector3(0, 0.3, 0)
 			m.player.vel = Vector3.ZERO
-		var slot := TutorialCamps.pick_slot(sk)
-		if slot != "":
-			step = i
-			camps.reach(int(TutorialCamps.PICK_LVL[slot]))
-			m.player.level_slot(slot)
+		if UNLOCKS.has(sk):
+			camps.unlock(UNLOCKS[sk])
 	step = to
 
 
@@ -336,11 +340,12 @@ func _runners(p: Hunter) -> Array:
 ## Carrying on from a saved beat: back at the last stop it left you at, with what the next one needs.
 func _restore() -> void:
 	for i in step:
-		if STOP_AFTER.has(String(steps()[i][0])):
-			last_stop = stop(STOP_AFTER[String(steps()[i][0])])
+		var done_id := String(steps()[i][0])
+		if STOP_AFTER.has(done_id):
+			last_stop = stop(STOP_AFTER["glide" if done_id == "dash" else done_id])
+		if UNLOCKS.has(done_id):
+			camps.unlock(UNLOCKS[done_id])
 	_back()
-	if id() == "chest" and m.player.chest_keys == 0:
-		m.player.chest_keys = 1
 	if m.hud:
 		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
 
@@ -372,7 +377,7 @@ func retry() -> void:
 ## The one line a retry of this beat shows.
 func retry_tip() -> String:
 	var tips: Dictionary = Content.rules("tutorial")["retry"]
-	return fill(String(tips.get(id(), tips["default"])))
+	return fill(String(tips.get(leg(), tips["default"])))
 
 
 ## Back at the last stop (the camp steps bring their camp in _enter).
@@ -394,7 +399,6 @@ func _enter() -> void:
 	nag_t = 0.0
 	flash_t = 0.0
 	best_d = 1e9
-	crouch_t = 0.0
 	taps = 0
 	got = 0
 	got_seen = 0
@@ -407,28 +411,23 @@ func _enter() -> void:
 	kicks0 = int(p.stats.get("wall_kicks", 0))
 	if p.kin:
 		throws0 = p.kin.st_throws
-	var slot := TutorialCamps.pick_slot(sid)
-	if slot != "":
-		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
+	if UNLOCKS.has(sid):
+		camps.unlock(UNLOCKS[sid])  # (the beat's ability is open when it asks for it)
 	match sid:
-		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
+		"fight", "gkey", "summon", "kin", "shoot":
 			camps.spawn(sid)
-		"shoot":
-			camps.spawn(sid)  # (its camp pays no XP: the right click's camp pays level 2)
-		"glove":
-			if ground_item().is_empty():  # (a retry finds the glove still lying there)
-				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
-				m.wpicks[-1]["tut"] = true
-		"wayout":
+		"chest":
+			if tut_chest().is_empty():  # (a retry finds the chest still standing)
+				m.add_chest(stop("chest"))["tut"] = true
+			p.chest_keys = maxi(p.chest_keys, 1)  # (the key it takes: in a match, monsters carry them)
+		"extract":
 			var o := outpost()
 			if not o.is_empty():
 				m.ping(o["pos"], ExitModels.UPLINK)
 	if sid == "kin" and p.ak:
-		p.ak.cd["e"] = 0.0  # (an E pressed again on the unlock step fired at nothing: it is ready when asked for)
-	if sid == "hook" and (p.gear[0] as Dictionary).is_empty():
-		p.gear[0] = {"id": "grapple", "rar": 1}  # (skipped ahead past the glove: it is yours anyway)
-		p.refresh_gear()
+		p.ak.cd["e"] = 0.0  # (its E is ready when the line asks for it)
 	_words()
+	_leg = leg()
 	if detail != "" and m.hud:
 		m.hud.tip(detail)  # (once a step: the strip is one line, the plain words wait in the message lane)
 
@@ -465,52 +464,22 @@ func spot(dist: float, ang0: float) -> Vector3:
 
 func _is_done(sid: String, dt: float) -> bool:
 	var p := m.player
-	var near := func(r: float) -> bool: return p.grounded and _dist(stop(sid)) < r
-	var slot := TutorialCamps.pick_slot(sid)
-	if slot != "":
-		return int(p.slot_lv[slot]) > 0
 	match sid:
 		"land":
 			return not p.dropping
-		"points":
-			return t >= POINTS_T or int(p.slot_lv["sec"]) > 0
-		"sec":
+		"fight":
 			var cast := _rmb_done()
 			if cast:
 				seen["sec"] = true
 			elif camps.alive() == 0:
 				camps.spawn(sid)  # (they fell before it was used: more to use it on)
-			return cast and camps.alive() == 0  # (the camp's kills pay the XP for the next level)
+			return cast and camps.alive() == 0
 		"shoot":
 			got = camps.killed()
 			seen["fire"] = seen.get("fire", false) or hits > 0
 			return camps.alive() == 0
 		"dash":
-			flag = flag or p.roll_t > 0.0
-			seen["dash"] = seen.get("dash", false) or flag
-			return near.call(4.0) and (flag or t > 40.0)
-		"exdash":
-			# any dash started off the ground counts: kit air dashes (Vex's air slide) never set dash_is_ex
-			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
-			return flag and near.call(4.5)
-		"glide":
-			# a held glide, not a tapped one (HoldTeach): the glider stays open GLIDE_DONE_S in one go
-			seen["glide_s"] = float(seen.get("glide_s", 0.0)) + dt if p.gliding else 0.0
-			flag = flag or float(seen["glide_s"]) >= HoldTeach.GLIDE_DONE_S
-			return flag and near.call(5.0)
-		"wallkick":
-			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return on_lookout()
-		"crouch":
-			if p.crouch and on_lookout():
-				crouch_t += dt
-			if crouch_t >= CROUCH_HOLD:
-				spot_t = SPOT_T
-				m.ping(stop("pickup"), Color("dfe8f2"))
-				if m.hud:
-					m.hud.toast("A glove, across the bridge", MINT)
-				return true
-			return false
+			return _gap_done(dt)
 		"gkey":
 			if not flag and _boki_sent():
 				flag = true
@@ -519,34 +488,52 @@ func _is_done(sid: String, dt: float) -> bool:
 			return _camp_done(sid)
 		"summon":
 			return sm.summon_done(dt)
-		"pack":
-			return sm.pack_done()
 		"kin":
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
 			flag = got > 0
 			seen["kin"] = seen.get("kin", false) or flag
 			return _camp_done(sid)
-		"glove":
-			return ground_item().is_empty()
-		"hook":
-			flag = flag or float(p.gear_cd[0]) > 0.0
-			seen["glove"] = seen.get("glove", false) or flag
-			return _camp_done(sid)
-		"ult":
-			flag = flag or KinMerge.active(p)
-			seen["ult"] = seen.get("ult", false) or flag
-			return _camp_done(sid)
-		"ranks":
-			return p.skill_pts <= 0 or t >= RANK_WAIT_T
-		"wayout":
-			var o := outpost()
-			return not o.is_empty() and m.exits.in_yard(o, p)
-		"uplink":
-			var o2 := outpost()
-			return o2.is_empty() or o2["state"] != "idle"
-		"defend":
-			var o3 := outpost()
-			return o3.is_empty() or o3["state"] == "open"
+		"chest":
+			var c := tut_chest()
+			seen["chest"] = c.is_empty() or bool(c["open"])
+			return seen["chest"]
+	return false
+
+
+## The dash beat: each gap's move, then its far stop; the last gap ends the beat. got is the gaps crossed (1/3).
+func _gap_done(dt: float) -> bool:
+	var p := m.player
+	var lg := leg()
+	var near := func(r: float) -> bool: return p.grounded and _dist(stop(lg)) < r
+	var crossed := false
+	got = gap
+	match lg:
+		"dash":
+			flag = flag or p.roll_t > 0.0
+			crossed = near.call(4.0) and (flag or t > 40.0)
+		"exdash":
+			# any dash started off the ground counts: kit air dashes (Vex's air slide) never set dash_is_ex
+			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
+			crossed = flag and near.call(4.5)
+		"glide":
+			# a held glide, not a tapped one (HoldTeach): the glider stays open GLIDE_DONE_S in one go
+			seen["glide_s"] = float(seen.get("glide_s", 0.0)) + dt if p.gliding else 0.0
+			flag = flag or float(seen["glide_s"]) >= HoldTeach.GLIDE_DONE_S
+			crossed = flag and near.call(5.0)
+	if not crossed:
+		return false
+	seen[lg] = true
+	if gap >= GAP_STEPS.size() - 1:
+		return true
+	last_stop = stop(STOP_AFTER[lg])
+	gap += 1
+	got = gap
+	flag = false
+	t = 0.0
+	best_d = 1e9
+	stall_t = 0.0
+	_refresh(p)
+	m.sfx("unlock", null, -12.0)
 	return false
 
 
@@ -574,12 +561,6 @@ func _boki_sent() -> bool:
 		if k.state == "flying" and (k.fly["to"] as Vector3).distance_to(mb.pos) < SEND_R:
 			return true
 	return false
-
-
-## Standing on the lookout's top (the wall kick's goal and the scouting spot).
-func on_lookout() -> bool:
-	var p := m.player
-	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP
 
 
 ## Does this hunter's right click have a hold variant? Read from its kit; every other kit is taps only.
@@ -616,28 +597,21 @@ func outpost() -> Dictionary:
 	return outs[0] if not outs.is_empty() else {}
 
 
-## The glove on the ground that the glove step is about ({} when it is gone).
-func ground_item() -> Dictionary:
-	for wp in m.wpicks:
-		if wp.get("tut", false):
-			return wp
+## The chest the chest beat is about ({} before it stands).
+func tut_chest() -> Dictionary:
+	for c: Dictionary in m.chests:
+		if c.get("tut", false):
+			return c
 	return {}
 
 
-## What a step is about (INF for nothing): where the marker points.
+## What a step or leg is about (INF for nothing): where the marker points.
 func goal(sid: String) -> Vector3:
 	match sid:
-		"land", "dash", "exdash", "glide", "crouch":
+		"land", "dash", "exdash", "glide", "chest":
 			return stop(sid)
-		"wallkick":
-			return stop("crouch")
-		"glove":
-			var wp := ground_item()
-			return wp["pos"] if not wp.is_empty() else stop("pickup")
-		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
-			var best := camps.nearest("sentinel" if sid == "hook" else "")
-			if best == null:
-				best = camps.nearest()
+		"fight", "shoot", "gkey", "summon", "kin":
+			var best := camps.nearest()
 			return best.pos if best else Vector3.INF
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
@@ -655,14 +629,14 @@ func _lead_goal(sid: String) -> Vector3:
 
 
 ## The marker: from the first frame of a destination step to its last, monsters close by or not.
-func _point(sid: String) -> void:
+func _point() -> void:
 	target = Vector3.INF
 	label = ""
-	var at := goal(sid)
+	var at := goal(leg())
 	if at == Vector3.INF or m.player.out:
 		return
 	target = at
-	label = String(Content.rules("tutorial")["labels"].get(sid, "Monster"))
+	label = String(Content.rules("tutorial")["labels"].get(leg(), "Monster"))
 
 
 ## A stall (NAG_T without getting closer): the panel and the marker pulse and the Boki says it once
@@ -680,7 +654,7 @@ func _stall(dt: float) -> void:
 		if d < best_d - 1.0:
 			best_d = d
 			stall_t = 0.0
-	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
+	if leg() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
 		stall_t = 0.0  # (holding the circle while the capture runs is the progress)
 	if stall_t >= NAG_T and wait <= 0.0:
 		stall_t = 0.0
@@ -696,8 +670,6 @@ func _props() -> void:
 	var want: Array = []
 	if target != Vector3.INF:
 		want.append(target)
-	if spot_t > 0.0:
-		want.append(stop("pickup"))
 	while _beams.size() < want.size():
 		_beams.append(_make_beam())
 	for i in _beams.size():
@@ -708,7 +680,7 @@ func _props() -> void:
 			var wide := pulse * (1.6 if flash_t > 0.0 else 1.0)
 			b.scale = Vector3(wide, 1.0, wide)
 	for pd in _pads:
-		var on: bool = pd["id"] == id()
+		var on: bool = pd["id"] == leg()
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
 		(pd["label"] as Node3D).visible = on
 
@@ -741,29 +713,32 @@ func _words() -> void:
 	if step >= steps().size():
 		return
 	var sid := id()
+	var lg := leg()
 	var line := String(steps()[step][1])
 	var alt: Dictionary = Content.rules("tutorial")["alt"]
 	var shoot_kind := _shoot_kind() if sid == "shoot" else ""
 	if shoot_kind != "":
 		line = String(alt["shoot_" + shoot_kind])
-	elif sid == "sec" and rmb_has_hold():
-		line = String(alt["sec_hold"])
-	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
+	elif sid == "fight" and rmb_has_hold():
+		line = String(alt["fight_hold"])
+	elif sid == "summon" and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	elif lg != sid and alt.has(lg):
+		line = String(alt[lg])
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
-	elif sid == "ranks":
-		key_cap = TutorialText.rank_combo()
-	elif KEYS.has(sid):
-		key_cap = Settings.key_cap(KEYS[sid])
+	elif KEYS.has(lg):
+		key_cap = Settings.key_cap(KEYS[lg])
 	text = fill(line)
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
-	if sid == "sec" and rmb_has_hold():
+	if sid == "fight" and rmb_has_hold():
 		need = 2
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	if lg != sid and Content.rules("tutorial")["detail"].has(lg):
+		detail_key = lg
 	if sid == "summon":
 		detail_key = sm.detail_key()
 	detail = fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
@@ -831,7 +806,7 @@ func _dist(at: Vector3) -> float:
 
 ## The extra line for a faraway target: a hint to scout ahead from a crouch.
 func scout_hint() -> String:
-	if target == Vector3.INF or m.player.crouch or id() in ["land", "crouch", "wallkick"]:
+	if target == Vector3.INF or m.player.crouch or id() == "land":
 		return ""
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
@@ -840,7 +815,7 @@ func scout_hint() -> String:
 ## The world prompt label waits: while the banner is fresh, and for the whole step when the card already
 ## carries the interact key (it says the same thing; one prompt, not two).
 func prompt_quiet() -> bool:
-	return card_up() or (step >= 0 and step < steps().size() and KEYS.get(id(), "") == "interact")
+	return card_up() or (step >= 0 and step < steps().size() and KEYS.get(leg(), "") == "interact")
 
 
 ## The banner is up (the first CARD_T of a step): other popups wait their turn.

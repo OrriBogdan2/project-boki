@@ -51,16 +51,10 @@ static func drive(m: Match) -> void:
 	var goto := func(at: Vector3, r := 0.5):
 		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
 		p.inp["move"] = d.normalized() if d.length() > r else Vector2.ZERO
-	var sid := tu.id()
+	var sid := tu.leg()
 	var dest := tu.stop(sid)
 	var pad := tu.stop(sid, "pad")
 	match sid:
-		"pick_sec", "pick_dash", "pick_kin", "pick_ult":
-			var slot := TutorialCamps.pick_slot(sid)
-			if tu.t > 1.0:
-				p.level_slot(slot)       # (the key press did not take: as a click on the gold +)
-			elif tu.t > 0.4:
-				p.inp[{"sec": "sec", "dash": "dash", "kin": "sig", "ult": "ult"}[slot]] = int(m.time * 10.0) % 2 == 0
 		"dash", "exdash", "glide":
 			var to := Vector2(dest.x - p.pos.x, dest.z - p.pos.z)
 			var pd := Vector2(pad.x - p.pos.x, pad.z - p.pos.z)
@@ -78,27 +72,14 @@ static func drive(m: Match) -> void:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
 				if sid == "glide": p.inp["glide"] = true
-		"wallkick":
-			goto.call(tu.stop("crouch"), 0.4)
-			if not p.grounded and p.vel.y < 1.0 and p.pos.y < tu.stop("crouch").y - 0.2:
-				p.inp["jump"] = int(m.time * 10.0) % 2 == 0      # (again, against the cliff: the kick)
-		"crouch":
-			goto.call(dest, 0.4)
-			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
-		"glove":
-			var wp := tu.ground_item()
-			if not wp.is_empty():
-				if p.flat_dist(wp["pos"]) > 3.0:
-					_travel(m, wp["pos"])      # (across the bridge: a straight line can end against a cliff)
-				else:
-					goto.call(wp["pos"])
-				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
-		"sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult":
+		"chest":
+			if p.flat_dist(dest) > 3.0:
+				_travel(m, dest)      # (across the bridge: a straight line can end against a cliff)
+			else:
+				goto.call(dest, 1.0)
+			p.inp["interact"] = p.flat_dist(dest) < 2.2 and int(m.time * 30.0) % 2 == 0
+		"fight", "shoot", "gkey", "summon", "kin":
 			_fight(m, tu, goto)
-		"ranks":
-			for slot in ["sec", "dash", "kin"]:
-				p.level_slot(slot)
-			_acted = true
 		"wayout", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
 	var go: Vector2 = p.inp["move"]
@@ -144,42 +125,31 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
 	var sid := tu.id()
-	var best: Mob = tu.camps.nearest("sentinel" if sid == "hook" else "")
-	if best == null:
-		best = tu.camps.nearest()
-	if sid == "sec":
+	var best: Mob = tu.camps.nearest()
+	if sid == "fight":
 		_rmb(m, tu)
 	if best == null:
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
 	var reach := 1.6 if melee else 3.0
-	if sid == "hook" and not tu.flag:
-		reach = 9.0
-	elif sid == "kin" and not tu.flag:
+	if sid == "kin" and not tu.flag:
 		reach = 14.0       # (the E line reaches the row from where you stand)
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
-		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
+		"fight": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
 				_acted = true
 			p.inp["fire"] = tu.flag and fire_key(m)
-		"summon", "pack":
+		"summon":
 			_summon(m, tu)
 			p.inp["fire"] = fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 			p.inp["fire"] = tu.flag and fire_key(m)
-		"hook":
-			p.inp["gear1"] = not tu.flag and p.flat_dist(best) < 9.5 and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and fire_key(m)
-		"ult":
-			p.inp["ult"] = not tu.flag and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and fire_key(m)
-			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
 ## The Summon key: out of the wisp whenever it is ready (the first window, once, is called back early).
 static func _summon(m: Match, tu: Tutorial) -> void:
@@ -241,7 +211,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if o.is_empty():
 		return
 	var c: Vector3 = o["pos"]
-	match tu.id():
+	match tu.leg():
 		"wayout":
 			_travel(m, c)
 		"uplink":
