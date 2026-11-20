@@ -8,7 +8,7 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
-  meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
+  meshy_task.py remesh OUT_DIR (TASK_ID | model.glb) [--polycount 40000] [--topology quad]
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
 `create` defaults to Meshy's best settings (PIPELINE.md r3): meshy-7.1, no remesh (the dense mesh is the bake
@@ -156,7 +156,13 @@ def edit(o):
 
 
 def remesh(o):
-    body = {"input_task_id": o.task, "target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
+    """Remeshes a Meshy task's model, or an uploaded .glb (data URI) such as a hand-edited master, to a clean
+    target_polycount mesh; Meshy re-bakes its texture onto the new UVs."""
+    body = {"target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
+    if o.task.endswith(".glb"):
+        body["model_url"] = "data:application/octet-stream;base64," + base64.b64encode(open(o.task, "rb").read()).decode()
+    else:
+        body["input_task_id"] = o.task
     post(o.out, "remesh", body, {"source": o.task})
 
 
