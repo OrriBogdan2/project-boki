@@ -540,7 +540,7 @@ Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/im
   tier (multi-hit rule). Echoes (`repeat`) use half.
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
-- Cap: 110ms in any 0.5s per player.
+- Cap: 110ms in any 0.5s per player. Every offline global freeze (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the same budget, charged only for the time it adds to a freeze already running (`--impact-weight-check`).
 - A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
   Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than REFERENCE-era Kinfall's current max of 75ms. It's still short
@@ -563,13 +563,14 @@ flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a b
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
-Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+Your own abilities (your Boki's and your Fuse's too), dashes, landings and hits never shake or kick your
+camera: impact reads through
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
 never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
 started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
-`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
+`--shake-check` asserts it for all 12 hunters and your Boki. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 
