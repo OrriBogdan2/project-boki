@@ -7,17 +7,17 @@ extends RefCounted
 ## The model has only that cut: another cut, the hood down, a trim pattern or an accessory keeps the procedural
 ## Empty, so every shroud choice still shows.
 
-const KEYS := ["empty_f", "empty_m"]       # WardenGlb art names, by Unmasked "gender" (0 female, 1 male)
-const CUT := 0                             # Shrouds.STYLES: the Hooded Cloak, the cut the models wear
-const CLOTH_PAINT := Color("2f3245")       # the models' painted cloak colour (their atlas: median of the cloak texels)
-const TRIM_PAINT := Color("909db7")        # and of their hem band
+const KEYS := ["empty_f", "empty_m"]  # WardenGlb art names, by Unmasked "gender" (0 female, 1 male)
+const CUT := 0  # Shrouds.STYLES: the Hooded Cloak, the cut the models wear
+const CLOTH_PAINT := Color("2f3245")  # the models' painted cloak colour (their atlas: median of the cloak texels)
+const TRIM_PAINT := Color("909db7")  # and of their hem band
 ## Procedural pieces that stay over the .glb: the void head (its hollow shell rides on it) and WardenGlb's own.
 const KEEP := ["Head", "Aura"]
 ## The painted egg of a head inside each model's hood, by sex as KEYS (model space at rest, m: its centre, its
 ## height; measured on the .glb's faces in the hood that are neither cloak nor trim). The void head is fitted onto
 ## it, so the hood frames the void face as in the art (the procedural head is about twice its size).
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.216, -0.11), 0.211]]
-const EGG_COVER := 1.06                    # x the egg's height: the void shell just covers the painted egg
+const EGG_COVER := 1.06  # x the egg's height: the void shell just covers the painted egg
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
