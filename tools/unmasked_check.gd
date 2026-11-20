@@ -9,8 +9,10 @@ extends RefCounted
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
-## [sex, height, build] of the bodies that stood highest (2.1 to 2.8 cm) while EmptyGait solved a woman's legs
-## (leg node z scale 0.9) as if they were unscaled: each is its own row.
+## The slider values the feet are tested at (low, middle, high), for height and for build.
+const FRAME_STEPS := [0.0, 0.5, 1.0]
+## [sex, height step, build step] (indices into FRAME_STEPS) of the bodies that stood highest (2.1 to 2.8 cm) while
+## EmptyGait solved a woman's legs (leg node z scale 0.9) as if they were unscaled: each is its own row.
 const WORST_FEET := [[0, 2, 1], [0, 2, 2], [0, 1, 0], [0, 1, 1]]
 
 var bad := 0
@@ -67,8 +69,9 @@ func _old_looks() -> void:
 	ok(Unmasked.clean({}) == Unmasked.default_look(), "no look gives the default")
 	var old := {"race": 2, "gender": 0, "body": 2, "face": 4, "skin": 5, "outfit": 1, "hair": 3, "glider": "kite"}
 	var u := Unmasked.clean(old)
-	var want := [0, 2, 2, Unmasked.HOLLOW_FROM_EYES[4], Unmasked.GHOST_FROM_BROWS[4]]
-	var got := [u["gender"], u["build"], u["height"], u["hollow"], u["ghost"]]
+	var want := [0, EmptyFrame.OLD_STEPS[2], EmptyFrame.OLD_STEPS[2], Unmasked.HOLLOW_FROM_EYES[4],
+		Unmasked.GHOST_FROM_BROWS[4]]
+	var got := [u["gender"], u["frame"]["build"], u["frame"]["height"], u["hollow"], u["ghost"]]
 	ok(got == want and not u.has("eyes") and not u.has("brows") and not u.has("blush"),
 		"an old Stoneborn sturdy fierce look keeps sex and build, reads tall, its face a hollow (%s)" % str(got))
 	var marks_look := {"unmasked": true, "gender": 1, "eyes": 2, "brows": 1, "blush": 2, "outfit": 3, "colour": 4}
@@ -108,8 +111,8 @@ func _model(main: Node) -> void:
 	var base := _build(Unmasked.default_look())
 	var rig_ok := String(base.get_meta("race")) == "human" and String(base.get_meta("arch")) == "unmasked"
 	ok(rig_ok, "it is the human rig with no hunter's gear (arch %s)" % base.get_meta("arch"))
-	var tall := _build({"unmasked": true, "height": 2})
-	var short := _build({"unmasked": true, "height": 0})
+	var tall := _build({"unmasked": true, "frame": {"height": 1.0}})
+	var short := _build({"unmasked": true, "frame": {"height": 0.0}})
 	var tops := [_top(short), _top(base), _top(tall)]
 	ok(tops[2] > tops[1] * 1.07 and tops[1] > tops[0] * 1.07,
 		"height changes how tall the model stands, by about a tenth a step (%.2f / %.2f / %.2f m)" % tops)
@@ -167,8 +170,8 @@ func _model(main: Node) -> void:
 		and float(st["empty_f"]["pose"]["hip"]) > 3.0 * float(st["empty_m"]["pose"]["hip"])
 		and float(st["empty_m"]["gait"]["width"]) > 2.0 * float(st["empty_f"]["gait"]["width"]),
 		"and her own stance (weight on one hip, feet close); his is square and wide")
-	var slight := _build({"unmasked": true, "build": 0})
-	var sturdy := _build({"unmasked": true, "build": 2})
+	var slight := _build({"unmasked": true, "frame": {"build": 0.0}})
+	var sturdy := _build({"unmasked": true, "frame": {"build": 1.0}})
 	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
 		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(base), _width(sturdy)])
 	for n in [styled, woman, man, slight, sturdy]:
@@ -279,9 +282,10 @@ func _feet(main: Node) -> void:
 	var per := {}
 	var tree := main.get_tree()
 	for g in 2:
-		for h in Unmasked.HEIGHTS.size():
-			for b in Unmasked.BUILDS.size():
-				var m := _build({"unmasked": true, "gender": g, "height": h, "build": b})
+		for h in FRAME_STEPS.size():
+			for b in FRAME_STEPS.size():
+				var frame := {"height": FRAME_STEPS[h], "build": FRAME_STEPS[b]}
+				var m := _build({"unmasked": true, "gender": g, "frame": frame})
 				main.add_child(m)
 				var anim := HunterAnim.new(m)
 				var lows := []
@@ -304,8 +308,8 @@ func _feet(main: Node) -> void:
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
 		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
 	for body in WORST_FEET:
-		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, %s, %s: feet on the ground (%.1f cm)" % [
-			Unmasked.SEXES[body[0]], Unmasked.HEIGHTS[body[1]], Unmasked.BUILDS[body[2]], float(per[body]) * 100.0])
+		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, height %.1f, build %.1f: feet on the ground (%.1f cm)" % [
+			Unmasked.SEXES[body[0]], FRAME_STEPS[body[1]], FRAME_STEPS[body[2]], float(per[body]) * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
@@ -339,11 +343,11 @@ func _shroud() -> void:
 	ok(not wine.is_equal_approx(_coat(other)) and absf(wine.h - Unmasked.COLOURS[5].h) < 0.05,
 		"the shroud colour sets the cloth's colour")
 	var hand := cloak.find_child("Hand", true, false)
-	var hand_dark := false
+	var hand_void := false
 	for mi in hand.find_children("*", "MeshInstance3D", false, false):
-		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
-		hand_dark = hand_dark or (c is Color and (c as Color).v < 0.12)
-	ok(hand_dark, "the hands are void-dark: no skin colour on them")
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		hand_void = hand_void or mat.shader == EmptyVoid.VOID_BODY
+	ok(hand_void, "the hands are void: no skin colour on them")
 	var wrapped := _build({"unmasked": true, "shroud": 1})
 	var tatters := _build({"unmasked": true, "shroud": 2})
 	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]
