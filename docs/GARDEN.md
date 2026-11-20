@@ -212,6 +212,8 @@ Every food and care input and what the player can see of it today:
 | Friends at the base (`BaseDrift`) | traits | journal line when a trait crosses a band |
 
 Gap closed first: raised stats now show as body size. `StatBudget.growth` = `care.json` `stat_budget.grow_max`
-(0.08) x total points / `total_cap`, added to `evo_scale` in `Evo.dress` (a Boki at the full 240 points is 8% bigger;
-a fresh one is unchanged; it stacks with the 10% per form). No new HUD element. Check: `--garden-items-check`.
+(0.12) x sqrt(total points / `total_cap`), added to `evo_scale` in `Evo.dress` (60 points: 6% bigger, the full 240:
+12%; a fresh one is unchanged; it stacks with the 10% per form). A stat bite that changes the growth sets `look` in
+`GardenItems.use`, so the farm rebuilds the model (`_swap_kin_model`) and the size shows on the spot. No new HUD
+element. Check: `--garden-items-check`.
 Left for later (needs owner OK, stabilize sprint): a stat line on the Boki card, a trait word shown on the model.
