@@ -10,6 +10,9 @@ extends RefCounted
 ## sweeps per cycle at rate 1, the loco rate it plays at and its cadence, and how far a planted foot travels over the
 ## ground in one step (cm, + forward: the clip under-strides the speed, so "loco.foot_mps" is set too high); FAIL
 ## past STEP_CM.
+## --fit-dirs: also a FIT line per back, left, right and forward loop at the walk and run rings: the share of the body's
+## speed a planted foot covers (1 = planted) and the loco foot speed (m/s) that would plant it: the one WardenGait uses
+## now ("foot_mps", "back_foot_mps", "side_foot_mps") times that share. Run it twice: a clamped rate moves less.
 
 const AUDIT := preload("res://tools/anim_audit.gd")
 const STEP := 0.5  # m/s between swept speeds
@@ -22,6 +25,7 @@ const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0
 ## m/s: the worst mean planted-foot slip each Hunter may show anywhere in the sweep, the measured worst of the
 ## FOOT_SLIDE.md "after" table rounded up to 0.05 (the sweep is deterministic: no physics, fixed steps).
 ## (archer stays at 1.75: its forward loop slides 4.4 m/s on main too since its clips changed, an open item.)
+## (juggernaut, gunslinger, dolm, mage, dredge, thief: back and strafe loops on their own --fit-dirs speeds, 11-18.)
 const BAR := {
 	"archer": 1.75,
 	"juggernaut": 0.95,
@@ -30,9 +34,9 @@ const BAR := {
 	"ashwick": 1.4,
 	"tender": 1.05,
 	"dolm": 2.7,
-	"dredge": 0.95,
-	"mage": 1.55,
-	"thief": 1.5
+	"dredge": 0.75,
+	"mage": 0.95,
+	"thief": 1.1
 }
 ## m/s: a run-and-aim ("loco.aim_twist") Hunter running at its run speed 90 deg off an aim that sways WOBBLE: each sway
 ## across the turn-round margin swung the legs from the forward run to the back run and the feet dragged (Vex 3.30
@@ -59,6 +63,7 @@ const SKATE_RUN_S := 1.35
 var bad := 0
 var holder: Node3D
 var warm_s := WARM_S
+var fit := false
 
 
 func run(main: Node) -> void:
@@ -67,6 +72,7 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	var ids: Array = Arch.ORDER.duplicate()
 	for a in OS.get_cmdline_user_args():
+		fit = fit or a == "--fit-dirs"
 		if a.begins_with("--wardens="):
 			ids = Array(a.substr(10).split(",", false))
 	var done := 0
@@ -93,7 +99,7 @@ func _hero(main: Node, id: String) -> bool:
 	for dir in DIRS:
 		var cells: Array = []
 		for s in _speeds(run_speed):
-			var slip := _slip(m, sync, clips, sk, DIRS[dir] * s)
+			var slip := _slip(m, sync, clips, sk, DIRS[dir] * s).x
 			cells.append("%.2f:%.2f" % [s, slip])
 			if slip > worst[0]:
 				worst = [slip, dir, s]
@@ -127,7 +133,7 @@ func _hero(main: Node, id: String) -> bool:
 			)
 			bad += 1
 	if clips.twist_on:
-		var wob := _slip(m, sync, clips, sk, Vector3(-run_speed, 0, 0), WOBBLE)
+		var wob := _slip(m, sync, clips, sk, Vector3(-run_speed, 0, 0), WOBBLE).x
 		print("WOBBLE %-10s %.2f m/s (run %.2f m/s 90 deg off the aim, sway %.2f rad)" % [id, wob, run_speed, WOBBLE])
 		if WOBBLE_BAR.has(id) and wob > float(WOBBLE_BAR[id]):
 			print(
@@ -137,6 +143,8 @@ func _hero(main: Node, id: String) -> bool:
 				)
 			)
 			bad += 1
+	if fit:
+		_fit(id, m, sync, clips, sk)
 	m.free()
 	await _step_line(main, id)
 	return true
@@ -189,10 +197,10 @@ func _step_line(main: Node, id: String) -> void:
 		AUDIT.soles = {}
 		var st := _stance_cm(fr, spd, dir)
 		var rate := float(clips.tree.get("parameters/%s_rate/scale" % ("crouch" if md[0] == "crouch" else "loco")))
-		var fit := (spd - float(st[1])) / maxf(rate, 0.01) * clips.body_mps(1.0)
+		var key_fit := (spd - float(st[1])) / maxf(rate, 0.01) * clips.body_mps(1.0)
 		if md[0] == "walk":
-			fit *= clips.gait.run_len / clips.gait.walk_len  # (the walk loop plays on the run loop's timeline)
-		var tail := " fit %.2f" % fit
+			key_fit *= clips.gait.run_len / clips.gait.walk_len  # (the walk loop plays on the run loop's timeline)
+		var tail := " fit %.2f" % key_fit
 		if md[0] == "run":
 			var stride: float = (spd - float(st[1])) * clips.gait.run_len / maxf(rate, 0.01)  # m a foot sweeps a cycle
 			tail += " cycle %.3f s stride %.2f m" % [clips.gait.run_len, stride]
@@ -254,6 +262,28 @@ func _stance_cm(fr: Array, spd: float, dir: Vector3) -> Array:
 	return [100.0 * total / maxi(n, 1), v_sum / maxi(frames, 1), n]
 
 
+func _fit(id: String, m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D) -> void:
+	var lc: Dictionary = clips.d["loco"]
+	var fw: Array = lc.get("foot_mps", [lc.get("walk_speed", 2.2), lc.get("run_speed", 4.6)])
+	var keys := {"f": "foot_mps", "b": "back_foot_mps", "l": "side_foot_mps", "r": "side_foot_mps"}
+	for dir in DIRS:
+		var now: Array = lc.get(keys[dir], fw)
+		var cells: Array = []
+		for ring in 2:
+			var s := float(lc.get("walk_speed", 2.2)) if ring == 0 else float(lc.get("run_speed", 4.6))
+			if ring == 0:
+				_slip(m, sync, clips, sk, Vector3.ZERO)  # (run straight to walk is a let-go: WardenStride)
+			var r := _slip(m, sync, clips, sk, DIRS[dir] * s)
+			var rate := float(clips.tree.get("parameters/loco_rate/scale"))
+			cells.append(
+				(
+					"%s %.2f m/s cover %.2f rate %.2f: %.2f -> %.2f"
+					% [["walk", "run"][ring], s, r.y, rate, float(now[ring]), float(now[ring]) * r.y]
+				)
+			)
+		print("FIT %-10s %s %s  %s" % [id, dir, keys[dir], " | ".join(cells)])
+
+
 ## 0, every STEP, and the run speed itself.
 func _speeds(run_speed: float) -> Array:
 	var out: Array = []
@@ -265,14 +295,16 @@ func _speeds(run_speed: float) -> Array:
 	return out
 
 
-## Mean flat speed of a planted foot against the ground (m/s) while the model moves at `vel`, facing -Z; with `sway`
+## x: mean flat speed of a planted foot against the ground (m/s) while the model moves at `vel`, facing -Z; y: the
+## share of `vel` a planted foot moves back against it (1 = planted, under 1 the clip steps too short); with `sway`
 ## (rad) the facing swings that far either way at WOBBLE_HZ (the model stays put: the feet are read in its own frame,
 ## so each frame's velocity is turned into it).
-func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vector3, sway := 0.0) -> float:
+func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vector3, sway := 0.0) -> Vector2:
 	var got := _sample(m, sync, clips, sk, vel, sway)
 	var fr: Array = got[0]
 	var faces: Array = got[1]
 	var total := 0.0
+	var back := 0.0
 	var n := 0
 	for f in ["foot.L", "foot.R"]:
 		var lo := INF
@@ -286,8 +318,9 @@ func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vecto
 			var foot_v: Vector3 = ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * AUDIT.DT)
 			var v: Vector3 = vel.rotated(Vector3.UP, -float(faces[i]))
 			total += Vector2(v.x + foot_v.x, v.z + foot_v.z).length()
+			back -= Vector2(foot_v.x, foot_v.z).dot(Vector2(v.x, v.z)) / maxf(Vector2(v.x, v.z).length_squared(), 0.01)
 			n += 1
-	return total / maxi(n, 1)
+	return Vector2(total, back) / maxi(n, 1)
 
 
 ## [frames of AUDIT.points, the facing of each] over SAMPLE_S at `vel` after WARM_S, `dt` apart, facing -Z
