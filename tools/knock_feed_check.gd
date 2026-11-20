@@ -196,6 +196,11 @@ func _lane() -> void:
 		main.get_tree().root.size = win
 		await _frames(3)
 		m.hud.msgs.clear()      # (a card takes its widest from the screen it was made on)
+		P.hurt_at = -99.0      # (a fight keeps the lane to urgent lines: the cards here are not urgent)
+		if m.guide:
+			m.guide.line = ""      # (a fresh banner holds the lane: no card shows under it)
+		m.crouch_hint = null
+		m.hud.reticle.dealt_at = -99.0
 		m.hud.toast(WIDE_TOAST.repeat(2), Color.WHITE)
 		m.hud.toast(WIDE_TOAST.repeat(3), Color.WHITE)
 		var sz := main.get_tree().root.get_visible_rect().size
