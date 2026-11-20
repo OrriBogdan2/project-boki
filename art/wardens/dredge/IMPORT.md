@@ -71,10 +71,11 @@ stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/b
 UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
 resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.
 
-**Regen candidate A (2026-11-20, ext/hunter-regen-dredge-1120, draft until the owner looks):** owner 11-20 asked for every Hunter rebuilt from the
-turnaround. Meshy multi-image-to-3d (meshy-7.1, A-pose) from the front/side/back crops of `~/gens/v95-latest-ta-1119/grimble.png`, quad remesh
-to 60k, Meshy auto-rig weights (`v95_swap` `weights` meshy, spec `art/wardens/src/grimble_regen1120.json`). Meshy's humanoid rig has no goo-hand
-bone, so `meshy_regions` puts the goo arm below the wrist and its tip at his right foot on `hook`. The pack stays on Meshy's head/spine weights:
-moved onto `hoard`, the old lag keys flip it over his face in run_f (worst stretch 30x). The gun is on his hip, as in the turnaround (live 11-17
-pick: in the gauntlet). Worst stretch 17.2x vs live 8.5x (`--stretch-check`); raws, sheets and the numbers: `~/gens/hunter-regen-1120/dredge/`.
-`dredge_v95b.jpg` and `dredge_v95c.jpg` are no longer used by this glb.
+**Regen candidate A (2026-11-20, job 20261120-064603-a4, ext/hunter-regen-dredge-1120, draft until the owner looks):** owner 11-20 asked
+for every Hunter rebuilt from the turnaround. Meshy multi-image-to-3d (meshy-7.1, A-pose) from the front/side/back crops of
+`~/gens/v95-latest-ta-1119/grimble.png` (run H: a rerun of the first regen's run A recipe, the single goggle and one goo arm kept; 2 of 3 reruns
+doubled the goggle), quad remesh to 60k, Meshy auto-rig weights (`v95_swap` `weights` meshy, spec `art/wardens/src/grimble_regen1120.json`)
+with `meshy_smooth` 24: worst stretch (`--stretch-check`) 17.2x (first regen) -> 5.75x, live 8.52x; clips over 5x 45 -> 12, live 20; 34 of 54 clips stretch less than live.
+The goo arm below the wrist rides `hook` (boxes plus goo-coloured paint low down); the right shin and foot are pinned back on the leg.
+Open: the master fuses the goo tip to his right shin, so slabs of goo still tear off that shin in motion (needs a gen with the goo tip clear
+of the leg). The gun is on his hip, as in the turnaround (live 11-17 pick: in the gauntlet). Raws, sheets, numbers: `~/gens/hunter-regen-1120/dredge/deep/`.
