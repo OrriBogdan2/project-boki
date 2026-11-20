@@ -1,25 +1,23 @@
 extends RefCounted
-## --tutorial-retry-check: falling into the abyss in a tutorial beat starts that beat again; a down in a fight
-## keeps the tutorial's revive. A scripted run of the course (the driver, with a Boki). As each fight and gap beat
-## starts the player is dropped into the abyss (in the Boki's beats the Boki is down at the time). After it: the
-## same step begins again (counters zero, its camp back in full and unpaid), the player is up, healed and at the
-## last stop, the Boki is up, the fall paid no XP, the save is untouched and the beat's tip shows with its keys
-## drawn by Settings.key_cap. Each camp that pays a level falls after a kill and pays once: killed one by one,
-## the camp brought back pays equal shares of what was left and the last kill lands on the camp's level (or, if
-## kills before the fall had paid it already, nothing more). Then
-## the fights with nothing left to pay are knocked down: up after Tutorial.DOWN_T with the beat going on. Then the
-## course still finishes.
+## --tutorial-retry-check: falling into the abyss in a tutorial beat starts that beat again; a down in a fight keeps
+## the tutorial's revive. A scripted run of the course (the driver, with a Boki). As each fight beat and each leg of
+## the gaps beat starts the player is dropped into the abyss (in the Boki's beats the Boki is down at the time).
+## After it: the same step begins again (counters zero, its camp back in full and unpaid), the player is up, healed
+## and at the last stop, the Boki is up, the fall paid no XP, the save is untouched and the beat's tip shows with its
+## keys drawn by Settings.key_cap. Each camp that pays a level falls after a kill and pays once: killed one by one,
+## the camp brought back pays equal shares of what was left and the last kill lands on the camp's level (or, if kills
+## before the fall had paid it already, nothing more). Then the fights with nothing left to pay are knocked down: up
+## after Tutorial.DOWN_T with the beat going on. Then the course still finishes.
 
-const FIGHTS := ["sec", "shoot", "gkey", "kin", "hook"]
-const GAPS := ["dash", "exdash", "glide"]
-const BOKI_BEATS := ["gkey", "ult"]
-## The beats that finish a camp that pays a level (the shoot camp pays none), and that camp.
-const PAYS := {"sec": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
+const FIGHTS := ["fight", "shoot", "gkey", "kin"]
+const GAPS := ["dash", "exdash", "glide"]      # the dash beat's legs (Tutorial.leg)
+const BOKI_BEATS := ["gkey"]
+## The beats that finish a camp that pays a level (the shoot and kin camps pay none), and that camp.
+const PAYS := {"fight": "fight", "gkey": "gkey"}
 ## The fights knocked down: by then their camp has nothing left to pay, so a kill while down changes nothing.
-const DOWNS := ["gkey", "kin", "hook"]
+const DOWNS := ["gkey", "kin"]
 const XP_EPS := 0.05          # XP: rounding slack (the last kill of a camp adds 0.01 to tip the level)
 const TIP_WAIT := 3.0         # s for the tip to show (it waits for the banner like every message)
-const GLOVE_WAIT := 30.0      # s: the walk to the glove takes 7-14; past this the check hands it over
 
 var bad := 0
 var m: Match
@@ -46,17 +44,15 @@ func run(mn: Node) -> void:
 	tu.ack()
 	var t := 0.0
 	while t < 900.0 and not m.player.extracted:
-		var sid := tu.id()
+		var sid := tu.leg()
 		if (sid in FIGHTS or sid in GAPS) and not seen.has(sid) and not m.player.downed:
 			seen[sid] = true
 			_beat(sid)
-		if sid == "glove" and tu.t > GLOVE_WAIT and not tu.ground_item().is_empty():
-			m.player.teleport(tu.ground_item()["pos"])      # (the driver's straight walk can stick by the lookout)
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
 	var fell := _missing(FIGHTS + GAPS, seen)
-	ok(fell.is_empty(), "every fight and gap beat fell (missed %s)" % str(fell))
+	ok(fell.is_empty(), "every fight beat and gap leg fell (missed %s)" % str(fell))
 	var unpaid := _missing(PAYS.keys(), paid_once)
 	ok(unpaid.is_empty(), "every camp that pays a level fell after a kill and paid once (missed %s)" % str(unpaid))
 	var up := _missing(DOWNS, downed)
@@ -98,9 +94,11 @@ func _fall(sid: String) -> void:
 	p.teleport(Vector3(p.pos.x, p.pos.y - 60.0, p.pos.z))
 	m.on_fell(p)
 	var tag := sid + " fall"
-	ok(tu.step == step and tu.id() == sid, "%s: the same beat" % tag)
+	ok(tu.step == step and tu.leg() == sid, "%s: the same beat (and leg)" % tag)
 	ok(not p.downed and not p.out and p.hp >= p.max_hp - 0.01, "%s: up and healed" % tag)
 	ok(p.pos.distance_to(stop) < 0.5, "%s: back at the last stop" % tag)
+	if sid in ["gkey", "kin"]:
+		ok(stop.distance_to(tu.stop("glide")) < 0.5, "%s: the last stop is past the gaps (the glide stop)" % tag)
 	var fresh: bool = tu.t < 0.5 and tu.got == 0 and tu.hits == 0 and tu.taps == 0 and not tu.flag
 	ok(fresh, "%s: the beat starts again (t %.2f)" % [tag, tu.t])
 	ok(absf(p.xp - xp) < 1e-6, "%s: the fall pays no XP (%.2f, was %.2f)" % [tag, p.xp, xp])

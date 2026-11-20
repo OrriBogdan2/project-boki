@@ -1,7 +1,7 @@
 extends RefCounted
 ## --tutorial-lane-check: the tutorial's lesson is never covered, and it teaches the mouse buttons in order.
-##   1. beat order: the left click (fire) is the first thing taught, the right click (unlock, then cast)
-##      second, every other skill after; each beat's key cap is the key it teaches
+##   1. beat order: the left click (fire) is the first thing taught, the right click (the fight beat, which
+##      unlocks it) second, every other skill after; each beat's key cap is the key it teaches
 ##   2. a run of the whole course (the driver): at every step a real combo toast (the longest combo line)
 ##      is fired once the card is down; at 1280x720 and 1920x1080 no toast card on show touches the step
 ##      strip, the check mark or the hunter's own screen box
@@ -39,14 +39,14 @@ func run(mn: Node) -> void:
 # ------------------------------------------------------------------ 1. the order
 func _order() -> void:
 	var ids: Array = Tutorial.steps().map(func(s): return String(s[0]))
-	ok(ids.find("shoot") >= 0 and ids.find("shoot") < ids.find("pick_sec"), "the left click is taught before the right")
-	ok(ids.find("pick_sec") < ids.find("sec"), "the right click is unlocked, then cast")
+	ok(ids.find("shoot") >= 0 and ids.find("shoot") < ids.find("fight"), "the left click is taught before the right")
+	ok(Tutorial.UNLOCKS.get("fight", "") == "sec", "the right click's beat unlocks it")
 	var first_of := ids.filter(func(x): return Tutorial.KEYS.get(x, "") in ["fire", "secondary"])
-	ok(first_of.slice(0, 3) == ["shoot", "pick_sec", "sec"], "beats 1 and 2 are LMB then RMB (%s)" % str(first_of))
-	var after := ids.slice(ids.find("sec") + 1)
+	ok(first_of.slice(0, 2) == ["shoot", "fight"], "beats 1 and 2 are LMB then RMB (%s)" % str(first_of))
+	var after := ids.slice(ids.find("fight") + 1)
 	var later := after.filter(func(x): return Tutorial.KEYS.get(x, "") in ["fire", "secondary"])
 	ok(later.is_empty(), "nothing teaches those two keys again later (%s)" % str(later))
-	ok(Tutorial.KEYS["shoot"] == "fire" and Tutorial.KEYS["sec"] == "secondary", "each beat's key cap is its own key")
+	ok(Tutorial.KEYS["shoot"] == "fire" and Tutorial.KEYS["fight"] == "secondary", "each beat's key cap is its own key")
 	var duo: Array = Content.rules("duo_tutorial")["beats"].map(func(b): return String(b["id"]))
 	var duo_keys: Array = Content.rules("duo_tutorial")["beats"].filter(func(b): return String(b["key"]) != "")
 	var duo_first: Array = duo_keys.map(func(b): return String(b["key"])).slice(0, 2)
@@ -85,7 +85,7 @@ func _lane() -> void:
 		if tu.step == last or tu.card_up() or tu.step < 0:
 			continue
 		last = tu.step
-		if shots != "" and tu.id() in ["shoot", "sec"]:
+		if shots != "" and tu.id() in ["shoot", "fight"]:
 			await _shot(tu.id(), line)
 		for sz: Vector2 in SIZES:
 			var n := _probe(sz, line)

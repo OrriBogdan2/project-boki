@@ -87,7 +87,8 @@ func _remember() -> void:
 				wrong += " " + before
 			last = tu.step
 	ok(wrong == "", "each finished beat is in the save the moment it ends (wrong:%s)" % wrong)
-	ok(String(Save.d["tutorial"]["tut_beat"]) == "defend", "extracting ends the course (Match sets tutorial.match)")
+	var before_last := String(Tutorial.steps()[-2][0])
+	ok(String(Save.d["tutorial"]["tut_beat"]) == before_last, "extracting ends the course (Match sets tutorial.match)")
 	m.free()
 
 
@@ -113,17 +114,25 @@ func _resume_each() -> void:
 		ok(tu.step == want, "%s: carries on at '%s' (is '%s')" % [tag, String(steps[want][0]), tu.id()])
 		var stop := tu.respawn()
 		var far: bool = m.player.pos.distance_to(stop) > 6.0
-		var away_ok: bool = tu.id() in ["chest", TutorialResume.OUTPOST_START, "key", "gkey"]
+		var away_ok: bool = tu.id() in ["chest", "extract", "key", "gkey"]  # (extract: the outpost run, far off)
 		ok(not far or away_ok, "%s: back at the last stop" % tag)
 		ok(m.player.kin != null, "%s: your Boki is with you" % tag)
 		if tu.id() == "chest":
 			ok(m.player.chest_keys > 0, "%s: the chest key is in hand" % tag)
 		if tu.id() in Tutorial.FOE_STEPS:
-			ok(m.mobs.any(func(x): return not x.dead), "%s: the foes are there" % tag)
+			var foes: bool = m.mobs.any(func(x): return not x.dead) or not tu.camps.coming.is_empty()
+			ok(foes, "%s: the foes are there (or the first camp's marker counts down)" % tag)
 		ok(String(Save.d["tutorial"]["tut_beat"]) == beat, "%s: resuming leaves the saved beat alone" % tag)
 		m.free()
 		tried += 1
 	ok(tried == steps.size() - 1, "every beat was tried (%d)" % tried)
+	var old_ok := TutorialResume.OLD_BEATS.keys().all(
+		func(b): return TutorialResume.step_after(b) == TutorialResume.step_after(TutorialResume.OLD_BEATS[b])
+	)
+	var mapped := TutorialResume.OLD_BEATS.values().all(
+		func(b): return Tutorial.steps().any(func(s: Array): return String(s[0]) == b)
+	)
+	ok(old_ok and mapped, "a save from the 23-step course carries on at one of the eight beats")
 
 
 # ------------------------------------------------------------------ 4. the farm tutorial
@@ -152,7 +161,7 @@ func _farm_resume() -> void:
 		lay = Save.d["layout"]
 		var kept: bool = FarmTutorial.active() and FarmTutorial.current() == want and FarmTutorial.done_count() == done
 		kept = kept and (id != "house" or not FarmHob.house_entry().is_empty())
-		kept = kept and (id != "stone" or HomeGather.has_tool("pickaxe"))
+		kept = kept and (id != "house" or HomeGather.has_tool("pickaxe"))
 		kept = kept and (id != "feed" or bool(FarmTutorial.state()["gift"]))
 		if not kept:
 			bad_at += " " + id

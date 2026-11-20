@@ -5,7 +5,7 @@ extends RefCounted
 ## second line, key cap, scout hint, the Boki's lines), every garden tutorial hint, every first-time hint
 ## (TipText), the Training Area drill rows, the Relic pick words and the kit cards are read again.
 ## A default key that should have changed fails, and so does text built before the rebind that does not
-## refresh. The glide steps say: jump, then press again in the air.
+## refresh. The glide leg says: jump, then press again in the air.
 
 var bad := 0
 var main: Node
@@ -47,7 +47,7 @@ func run(mn: Node) -> void:
 	_rebind_everything(before)
 	for i in 2:
 		m.step(Match.DT)
-	ok(tu.id() == "glide", "the glide step is still the one showing (%s)" % tu.id())
+	ok(tu.leg() == "glide", "the glide leg is still the one showing (%s)" % tu.leg())
 	var glide_after := [tu.text, TipText.move()]
 	ok(glide_before[0] != glide_after[0], "built before the rebind, refreshed after it: the glide banner ('%s' -> '%s')"
 			% [glide_before[0], glide_after[0]])
@@ -64,8 +64,12 @@ func run(mn: Node) -> void:
 	print("TUTREBIND DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+## Opens a beat, or a leg of the dash beat (Tutorial.GAP_STEPS).
 func _open_step(tu: Tutorial, sid: String) -> void:
-	tu.step = Tutorial.steps().find_custom(func(s): return s[0] == sid)
+	var leg := Tutorial.GAP_STEPS.find(sid)
+	var beat := "dash" if leg >= 0 else sid
+	tu.step = Tutorial.steps().find_custom(func(s): return s[0] == beat)
+	tu.gap = maxi(leg, 0)
 	tu.wait = 0.0
 	tu.card_t = Tutorial.CARD_T
 	tu._words()
@@ -121,8 +125,7 @@ func _clean(line: String, where: String, digits := false, leftovers := true) -> 
 # ------------------------------------------------------------------ the match tutorial
 func _match_tutorial(m: Match, tu: Tutorial) -> void:
 	var caps_ok := true
-	for st in Tutorial.steps():
-		var sid: String = st[0]
+	for sid: String in Tutorial.steps().map(func(st: Array): return String(st[0])) + ["exdash", "glide"]:
 		_open_step(tu, sid)
 		_clean(tu.text, "tutorial '%s' banner" % sid, false)
 		if tu.detail != "":
@@ -130,10 +133,8 @@ func _match_tutorial(m: Match, tu: Tutorial) -> void:
 		var want := ""
 		if sid == "land":
 			want = Settings.move_caps()
-		elif sid == "ranks":
-			want = TutorialText.rank_combo()
-		elif Tutorial.KEYS.has(sid):
-			want = Settings.key_cap(Tutorial.KEYS[sid])
+		elif Tutorial.KEYS.has(tu.leg()):
+			want = Settings.key_cap(Tutorial.KEYS[tu.leg()])
 		if tu.key_cap != want:
 			caps_ok = false
 			print("  key cap of '%s': '%s', wanted '%s'" % [sid, tu.key_cap, want])
@@ -172,7 +173,7 @@ func _garden() -> void:
 			var raw := String(st["hints"][stage])
 			var line := FarmTutorial.fill(raw).replace("{secs}", "9")
 			_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
-	ok(n >= 20, "all %d garden hints read" % n)
+	ok(n >= 10, "all %d garden hints read" % n)      # (five steps: 12 hint stages)
 	var build := FarmTutorial.fill("Press {build}")
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 

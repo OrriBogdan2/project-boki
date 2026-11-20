@@ -1,9 +1,10 @@
 class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
-## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
-## buy a seed, sell a crop, meet Hob, head out. With base_mode on (FarmUnlocks) the four steps of
-## rules()["base"] run instead: meet your Boki, feed it, place a toy and watch it play, head out or stay.
+## on a new farm (DECISIONS 2026-11-08, five steps): chop (the axe comes with it), the house (the pickaxe
+## comes with it), feed, a crop (by the water), head out. Everything else is a hint or a Goals row.
+## With base_mode on (FarmUnlocks) the four steps of rules()["base"] run instead: meet your Boki, feed it,
+## place a toy and watch it play, head out or stay.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (the tools and food come at once, nothing is taken away)
@@ -68,8 +69,7 @@ static func done_count() -> int:
 
 
 ## Can this step be the active one yet? Its "needs" are done; the last step waits for everything;
-## "after_built" waits for the house to stand (a pinned Boki would stop building); without the
-## free_order option each step also waits for the one before it.
+## without the free_order option each step also waits for the one before it.
 static func available(id: String) -> bool:
 	var list := steps()
 	for i in list.size():
@@ -79,8 +79,6 @@ static func available(id: String) -> bool:
 		var before := list.slice(0, i)
 		if bool(def.get("needs_all", false)) or not bool(option("free_order")):
 			return before.all(func(s): return did(String(s["id"])))
-		if bool(def.get("after_built", false)) and not house_built():
-			return false
 		return (def.get("needs", []) as Array).all(func(n): return did(String(n)))
 	return false
 
@@ -116,10 +114,6 @@ static func stage(id: String) -> String:
 			return "fill" if not Econ.feeders().is_empty() else "place"
 		"crop":
 			return _crop_stage()
-		"buy", "sell":
-			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
-		"task":
-			return "page" if FarmTaskGuide.page_up() else "go"
 		"toy":
 			return "watch" if toy_spot().x != INF else "place"
 	return "go"
@@ -155,7 +149,7 @@ static func hint_text(id: String) -> String:
 
 ## One tutorial line with its {tokens} filled: keys through Settings.key_cap, the food, the house cost.
 static func fill(raw: String) -> String:
-	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
+	var txt := raw.replace("{build}", Settings.key_cap("build"))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
@@ -172,12 +166,12 @@ static func world_text(id: String) -> String:
 
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal; in the base
+## A thing happened on the farm (any event re-reads the farm for the steps that need no hook): portal; in the base
 ## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay).
 static func event(what: String) -> void:
 	if not active():
 		return
-	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
+	var ids := {"portal": "expedition"}
 	if base():
 		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out"}
 	var id := ids.get(what, "") as String
@@ -197,21 +191,11 @@ static func detect() -> void:
 		return
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
-	var stone := int(cost.get("stone", 0))
-	if HomeGather.has_tool("axe"):
-		mark("axe")
 	if FarmSites.have("wood") >= wood and wood > 0 and HoldTeach.count("chop") >= 1:  # one real hold, not taps
-		mark("axe")
 		mark("chop")
-	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") >= stone and stone > 0:
-		mark("stone")
-	if not FarmHob.house_entry().is_empty():
-		mark("axe")
+	if house_built():  # a site down is not enough: the step's "wait" line is hammering it up
 		mark("chop")
-		mark("stone")
 		mark("house")
-	if house_built():
-		mark("hammer")
 	if Econ.feeders().any(func(f): return Econ.fill(f) > 0):
 		mark("feed")
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
@@ -268,18 +252,6 @@ static func give_step_tool(id: String) -> String:
 		return ""
 	HomeGather.give_tool(tool)
 	return tool
-
-
-## The buy step: enough gems for one seed, so nobody is stuck at the stall. Returns the gems added.
-static func give_seed_gems() -> int:
-	if not bool(option("market_gems")):
-		return 0
-	var cheapest := 1000000
-	for c in Data.CROPS:
-		cheapest = mini(cheapest, int(Data.CROPS[c]["price"]))
-	var add := maxi(0, cheapest - int(Save.d["gems"]))
-	Save.d["gems"] = int(Save.d["gems"]) + add
-	return add
 
 
 ## The starter food: the base's is a typed one, so its meal shows the lean.

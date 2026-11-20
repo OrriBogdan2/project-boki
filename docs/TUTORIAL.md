@@ -130,8 +130,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 - The hatch and Boki-reveal turn hints named `A / D` as plain text; they now read the live `left`/`right` caps.
 
 ## 5. Follow-ups (not fixed)
-1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
-   `ranks` and the three gap steps are the obvious merges.
+1. Done (`ext/tut-eight-steps`, 2026-11-20): the match tutorial is eight beats; see "The eight beats" below.
 2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
@@ -142,7 +141,9 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
    starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
    `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
    landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
-   locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
+   locked there the same way. Now it resumes at `wayout`
+   (in the eight beats `wayout`, `uplink` and `defend` are legs of `extract`: `TutorialResume.OLD_BEATS` maps them to `kin`,
+   so a Continue starts the `extract` beat, and `OUTPOST_START` is gone). `--tutorial-resume-check` checks that every beat resumes past the landing
    (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
@@ -263,3 +264,66 @@ The owner's first-match playtest on the PC build, and what each fix is:
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
+
+## The eight beats (`ext/tut-eight-steps`, 2026-11-20)
+
+DECISIONS 2026-11-08 cut on the run-levels course. `content/rules/tutorial.json` `steps`, in order:
+
+| # | Beat | What it asks | Was |
+|---|---|---|---|
+| 1 | `land` | walk down to the meadow | `land` |
+| 2 | `shoot` | the left click on a camp | `shoot` |
+| 3 | `fight` | the right click on a pack of 3 (pays level 2) | `points`, `pick_sec`, `sec` |
+| 4 | `dash` | three gaps in one beat, 1/3 on the pill: dash, air dash, held glide | `pick_dash`, `dash`, `exdash`, `glide` |
+| 5 | `gkey` (or `summon` for a wisp Boki) | send your Boki at the held camp | `gkey` / `summon`, `pack` |
+| 6 | `kin` | E through the row | `pick_kin`, `kin` |
+| 7 | `chest` | open the course's one chest with the key it hands you | new (the old cut had it) |
+| 8 | `extract` | walk to the outpost, start the uplink, hold it, take the lift | `wayout`, `uplink`, `defend`, `extract` |
+
+The LMB-then-RMB order of the 11-17 playtest (`--tutorial-lane-check`) is kept, so the fight is beat 3.
+Two beats run in legs (`Tutorial.leg()`): the line, key cap, marker, pad, Boki lead and retry tip follow the gap
+being crossed or the outpost's state, and a leg's own plain line goes to the message lane once. A beat that uses
+an ability unlocks it itself (`Tutorial.UNLOCKS`, `TutorialCamps.unlock`): no pick steps, no gold ring.
+
+Cut to first-time hints that already exist (no new hint, toast or marker): spending points and ranks (the
+first-match guide's `rank` line), wall kicks (`ExpeditionTips` `wallkick`), crouching (the tutorial's own
+"crouch to scout ahead" line under the strip for a far target, and the guide's dive line), the glove (the interact
+prompt and the gear slot's key cap; there is no glove hint). The `pack` beat's "summon again when the ring is
+bright" lesson is gone; the summon beat still says when the Boki rests.
+
+A save from the 23-step course carries on at the matching new beat (`TutorialResume.OLD_BEATS`).
+
+Before / after, `--tutorial-timing-check`, gunslinger, the same driver (sim seconds of play; words = banner + plain
+line at each beat's start; leg lines that show later are not in the word count: about 55 more words in four lines):
+
+| | Beats | Words | Play s | `--tutorial-check` course |
+|---|---|---|---|---|
+| main 59025f2 | 21 (23 in the list; `summon` and `pack` are the wisp Boki's) | 315 | 57.6 | 61 s |
+| this branch | 8 | 145 | 43.8 | 50 s |
+
+
+## The five farm steps (`ext/tut-step-count`, 2026-11-20)
+
+DECISIONS 2026-11-08: the farm tutorial is about five steps. `steps` in `content/rules/farm_tutorial.json` (base_mode off),
+before and after:
+
+| Before (12) | After (5) |
+|---|---|
+| `hob` (meet the builder), `axe`, `chop` | `chop` (the axe comes with it; Hob still talks when you walk up) |
+| `stone`, `house`, `hammer` | `house` (the pickaxe comes with it; the "wait" line says to hold the key at the house and that rocks give stone) |
+| `task` (a job for your Boki), `feed` | `feed` |
+| `crop` | `crop` |
+| `buy`, `sell` | none: a new save already holds seeds, and the Market, Goals rows and Hob's lines cover selling |
+| `expedition` | `expedition` |
+
+Cut to what already exists (no new hint, toast or marker): the job page is the Boki page's own dropdown (`FarmTaskGuide`
+is deleted; the Care page's Feed button is a plain primary button), the hammer is the house's "wait" line, the market
+is the Market button and the Goals rows. `FarmTutorial.skip()` still hands over the axe and the pickaxe.
+`FarmSpotlight`'s Boki cut-out (`spot: {"world": true}`) no longer has a farm step that uses it.
+
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.

@@ -15,26 +15,28 @@ extends RefCounted
 ##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
 ##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
-const ROCK_COL := Color("c98d4a")
-const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
+const ROCK_COL := Color("4a6fb0")  # Tenzo's rocks: cobalt slate (their hit and break bursts)
+const ROCK_R := 0.5  # a rock's footprint when it asks the world if it fits
 # m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
 const ROCK_TOP := 2.2
-const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
-const STEP := 0.25                   # the walk along a cast, metres
-const ROCK_RISE_T := 0.22            # s: a rock heaving up out of the ground
-const ROCK_REACH := 0.75             # m: past a rock's top, how far above its base a punch or slam still takes it
-const SEED_A := 0.6                  # the seed globe's glass alpha...
-const SEED_BODY := 0.15              # ...and its core's share of it: 0.15 alpha at the centre, the rim carries it
+const ROCK_TH := 0.42  # m: half its depth (wider than a barrier so a body fits on top)
+const STEP := 0.25  # the walk along a cast, metres
+const ROCK_RISE_T := 0.22  # s: a rock heaving up out of the ground
+const ROCK_REACH := 0.75  # m: past a rock's top, how far above its base a punch or slam still takes it
+const SEED_A := 0.6  # the seed globe's glass alpha...
+const SEED_BODY := 0.15  # ...and its core's share of it: 0.15 alpha at the centre, the rim carries it
 
 ## Tests read what would go out over the network without a connection (--zone-check).
 static var capture := false
 static var sent: Array = []
+
 
 static func tx(m: Node, e: Array) -> void:
 	if capture:
 		sent.append(e)
 	if m.net_on:
 		m.net_event(e)
+
 
 ## Can a rock or seed sit at p? Solid ground within a step of `y`, nothing in the way, no body inside.
 static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null) -> bool:
@@ -57,9 +59,11 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null
 				return false
 	return true
 
+
 static func _under(e: Ent, p: Vector3, g: float) -> bool:
 	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15
 	return near and absf(e.pos.y - g) < 2.0
+
 
 ## Walk from `from` toward `aim` up to `reach` and return the last legal spot:
 ## {ok, pos, stopped: "" | "reach" | "wall" | "abyss", over_abyss: the aim itself is over the abyss}.
@@ -69,8 +73,11 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	var want := minf(dv.length(), reach)
 	var dir := dv.normalized() if dv.length() > 0.01 else Vector2(0, -1)
 	var out := {
-		"ok": false, "pos": from, "stopped": "reach" if dv.length() > reach else "",
-		"over_abyss": w.is_void(aim.x, aim.z), "dir": dir
+		"ok": false,
+		"pos": from,
+		"stopped": "reach" if dv.length() > reach else "",
+		"over_abyss": w.is_void(aim.x, aim.z),
+		"dir": dir
 	}
 	var k := STEP
 	var last := from
@@ -92,15 +99,24 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 		out["pos"] = last
 	return out
 
+
 # ------------------------------------------------------------------ rocks
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
 static func rock(
-	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
+	m: Node,
+	by: Ent,
+	at: Vector3,
+	dir: Vector2,
+	rid: String,
+	len_: float,
+	time_: float,
+	hp: float,
+	send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var w: Dictionary = m.verbs.add_wall(
-		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
-	)
+	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true}
+	e["color"] = "#" + ROCK_COL.to_html(false)
+	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)
 	var tall := top / ROCK_TOP
@@ -113,24 +129,39 @@ static func rock(
 	w["rid"] = rid
 	w["top"] = top
 	w["th"] = ROCK_TH
-	w["kx_end"] = func(gone: Dictionary): RockLook.crumble(m, gone)      # (broken or timed out, not launched)
+	w["kx_end"] = func(gone: Dictionary): RockLook.crumble(m, gone)  # (broken or timed out, not launched)
 	m.verbs._place_wall(w, n)
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
-	n.create_tween().tween_property(
-		n, "scale", Vector3(len_ / 1.15, tall, 1.0), ROCK_RISE_T
-	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	(
+		n
+		. create_tween()
+		. tween_property(n, "scale", Vector3(len_ / 1.15, tall, 1.0), ROCK_RISE_T)
+		. set_trans(Tween.TRANS_BACK)
+		. set_ease(Tween.EASE_OUT)
+	)
 	if is_instance_valid(old):
 		old.queue_free()
 	RockLook.rumble(m, at)
 	if send and by != null and (m.net_on or capture) and not by.remote:
 		var ev := [
-			"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
-			snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
+			"zone",
+			"rock",
+			by.nid,
+			rid,
+			m._r(at.x),
+			m._r(at.y),
+			m._r(at.z),
+			snappedf(dir.x, 0.001),
+			snappedf(dir.y, 0.001),
+			snappedf(len_, 0.01),
+			snappedf(time_, 0.1),
+			snappedf(hp, 0.1)
 		]
 		if top != ROCK_TOP:
 			ev.append(snappedf(top, 0.01))
 		tx(m, ev)
 	return w
+
 
 static func find_rock(m: Node, rid: String) -> Dictionary:
 	for w in m.verbs.walls:
@@ -138,10 +169,12 @@ static func find_rock(m: Node, rid: String) -> Dictionary:
 			return w
 	return {}
 
+
 ## Can a punch or slam at height `y` take a rock whose base is at `base_y`? From the ground, or from on top
 ## of the rock itself.
 static func rock_in_reach(base_y: float, y: float) -> bool:
 	return y - base_y < ROCK_TOP + ROCK_REACH and base_y - y < 2.0
+
 
 ## Takes a rock out of the world without the break effects (it was launched).
 static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
@@ -151,11 +184,21 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 	if send:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
+
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
 ## warn, rise: Verbs.add_bridge's crumble warning and heave-up (s; 0 = none).
 static func bridge(
-	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
-	color := "#d9b27a", warn := 0.0, rise := 0.0
+	m: Node,
+	by: Ent,
+	from: Vector3,
+	dir: Vector2,
+	len_: float,
+	width: float,
+	time_: float,
+	send := true,
+	color := "#d9b27a",
+	warn := 0.0,
+	rise := 0.0
 ) -> int:
 	var e := {"length": len_, "width": width, "time": time_, "color": color, "warn": warn, "rise": rise}
 	var n: int = m.verbs.add_bridge(by, from, dir, e)
@@ -163,27 +206,42 @@ static func bridge(
 		tx(
 			m,
 			[
-				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color,
-				snappedf(warn, 0.01), snappedf(rise, 0.01)
+				"zone",
+				"bridge",
+				by.nid,
+				m._r(from.x),
+				m._r(from.y),
+				m._r(from.z),
+				snappedf(dir.x, 0.001),
+				snappedf(dir.y, 0.001),
+				snappedf(len_, 0.1),
+				snappedf(width, 0.1),
+				snappedf(time_, 0.1),
+				color,
+				snappedf(warn, 0.01),
+				snappedf(rise, 0.01)
 			]
 		)
 	return n
+
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 ## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
 ## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
 ## teal rim ring. Ostra's own shape; no other zone looks like it.
-const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
+const SEED_R0 := 0.08  # share of full size a fresh seed starts at (a speck, never zero)
+
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:
 	return rmax * clampf(t / grow, SEED_R0, 1.0)
 
+
 ## Sets the globe to the seed's radius. The owner calls it every tick with the kit's own radius;
 ## a remote seed has no kit here, so `seed_visual(remote)` runs the same growth on a tween.
 static func seed_size(n: Node3D, r: float) -> void:
 	n.scale = Vector3.ONE * r
+
 
 static func seed_visual(
 	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
@@ -197,7 +255,7 @@ static func seed_visual(
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the teal globe reads
+	ring.mesh = Models.flat_quad(2.0)  # a thin rim at the hit edge, so the teal globe reads
 	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
@@ -211,6 +269,7 @@ static func seed_visual(
 	m.set_meta("zone_seeds", seeds)
 	return n
 
+
 ## The pop's look is the kit's (content/vfx/ostra.json seed_pop, sent to other games with it).
 static func seed_pop(m: Node, sid: String) -> void:
 	var seeds: Dictionary = m.get_meta("zone_seeds", {})
@@ -219,36 +278,58 @@ static func seed_pop(m: Node, sid: String) -> void:
 	if n != null and is_instance_valid(n):
 		n.queue_free()
 
+
 # ------------------------------------------------------------------ Net in
 static func net_in(m: Node, x: Array) -> void:
 	if x.size() < 3:
 		return
 	match String(x[1]):
 		"rock":
-			if x.size() < 12: return
+			if x.size() < 12:
+				return
 			var by: Ent = m.ents_by_id.get(String(x[2]), null)
-			if by == null or not find_rock(m, String(x[3])).is_empty(): return
+			if by == null or not find_rock(m, String(x[3])).is_empty():
+				return
 			rock(
-				m, by, Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), String(x[3]), float(x[9]), float(x[10]),
-				float(x[11]), false, float(x[12]) if x.size() > 12 else ROCK_TOP
+				m,
+				by,
+				Vector3(x[4], x[5], x[6]),
+				Vector2(x[7], x[8]),
+				String(x[3]),
+				float(x[9]),
+				float(x[10]),
+				float(x[11]),
+				false,
+				float(x[12]) if x.size() > 12 else ROCK_TOP
 			)
 		"rockgo":
 			var w := find_rock(m, String(x[2]))
 			if not w.is_empty():
 				remove_rock(m, w, false)
 		"bridge":
-			if x.size() < 11: return
+			if x.size() < 11:
+				return
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
 				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
 				var warn := float(x[12]) if x.size() > 13 else 0.0
 				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(
-					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false, tint, warn, rise
+					m,
+					by2,
+					Vector3(x[3], x[4], x[5]),
+					Vector2(x[6], x[7]),
+					float(x[8]),
+					float(x[9]),
+					float(x[10]),
+					false,
+					tint,
+					warn,
+					rise
 				)
 		"seed":
-			if x.size() < 9: return
+			if x.size() < 9:
+				return
 			var sid := String(x[3])
 			if not (m.get_meta("zone_seeds", {}) as Dictionary).has(sid):
 				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), OstraKit.TEAL, true)

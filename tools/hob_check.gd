@@ -86,9 +86,8 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and off < 12.0,
 			"Hob is a person standing by the market stall (at his spot, his clear ring apart from it) %.1f m" % off)
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
-			and not home.guide.hint_text().contains("Hob:"),
-			"the first goal: meet him (%s)" % home.guide.hint_text())
+	ok(FarmTutorial.current() == "chop" and home.guide.hint_text().contains("tree"),
+			"the first goal: chop a tree (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. the camera swing: it holds until a click
@@ -145,9 +144,9 @@ func _first_arrival() -> void:
 		if hob.chat.talking():
 			await _advance(box)
 	await _frames(3)
-	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
+	ok(not hob.chat.talking() and home.panel_open == "" and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
-	ok(FarmTutorial.current() == "axe", "the next goal is the axe")
+	ok(FarmTutorial.current() == "chop", "the next goal is chopping a tree")
 	back_s = await _wait(func(): return not look.active(), 3.0)
 	ok(not look.active() and back_s < 1.0 and hob.chat.frame(home.ppos) == home.ppos,
 			"after the last line the camera is back on you in %.2f s" % back_s)
@@ -218,7 +217,6 @@ func _skip_check() -> void:
 func _offer() -> void:
 	var hob: FarmHob = home.hob
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Mask talk before the house is down")
-	FarmTutorial.mark("axe")
 	FarmTutorial.mark("chop")
 	Work.add_mat("wood", 10)
 	Work.add_mat("stone", 6)

@@ -1,21 +1,23 @@
 extends RefCounted
 ## --tutorial-fight-check: the tutorial fight beats suit each starter (Lace's charge bow, Kael's melee,
-## Vex's gun). The test driver plays the course with each one; the fight beats (sec..hook) must
+## Vex's gun). The test driver plays the course with each one; the fight beats (shoot, gkey, kin, fight) must
 ## take FIGHT_MIN..FIGHT_MAX s without the hunter being brought down, and the first fight line
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
-## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
-## (right click, attack, dash, wall kick, Boki, E, glove), Fusion stays locked and unused (the tutorial never
-## teaches it, 11-18), and only the camps paid XP.
+## ability locked, each beat opens its own ability, every ability but the ultimate ends up unlocked
+## and used (right click, attack, dash, air dash, glide, Boki, E; the tutorial has no Fusion, so the ultimate
+## stays locked, and no point goes there), and only the camps paid XP.
+## The first camp is telegraphed: its marker and countdown show (world + minimap, CampMark) for TELEGRAPH_T
+## with no monster out, then the monsters appear on the spots the marker showed.
 
 var bad := 0
 
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
-const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook"]
-const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
+const FIGHT_STEPS := ["fight", "shoot", "gkey", "kin"]
+const USED := ["sec", "fire", "dash", "exdash", "glide", "boki", "kin", "chest"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
-const FIGHT_MIN := 12.0       # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s)
-const FIGHT_MAX := 70.0       # (six camps since 0.24.4: the bot's melee juggernaut walks to each, 52-61 s)
+const FIGHT_MIN := 8.0        # s: the fight beats together, bot-driven, per starter (four camps since the cut)
+const FIGHT_MAX := 70.0       # (four camps: the bot's melee juggernaut walks to each)
 const DAMAGE_MAX := 60.0      # hp taken over the fight beats (of 100)
 
 func ok(cond: bool, what: String) -> void:
@@ -31,7 +33,7 @@ func run(main: Node) -> void:
 
 func _play(main: Node, id: String) -> void:
 	seed(11)       # (the same run each time)
-	Save.d["tutorial"]["tut_beat"] = ""     # (each starter from the top: the last one's beat would resume this one)
+	Save.d["tutorial"].erase("tut_beat")       # (each starter from the first beat: no resume from the last run)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
@@ -49,16 +51,17 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
+	var tele := {"ticks": 0, "early": false, "spots": [], "landed": false, "on_spot": false}
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
 		texts[tu.id()] = tu.text
-		if tu.id() == "pick_sec" and not forced:
+		_watch_telegraph(m, tele)
+		if tu.id() == "shoot" and not forced:
 			forced = true
 			var p := m.player
-			var only: bool = p.can_level("sec") and not p.can_level("dash") and not p.can_level("kin")
-			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
+			ok(not p.can_level("ult"), id + ": the point can never go to the Fusion")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() in FIGHT_STEPS:
@@ -66,6 +69,12 @@ func _play(main: Node, id: String) -> void:
 			damage += maxf(0.0, hp - m.player.hp)
 			downed += 1 if m.player.out else 0
 		hp = m.player.hp
+	if fight_t > 0.0:      # (a course that stalls before any camp is red on its own lines below)
+		var want := int(TutorialCamps.TELEGRAPH_T / Match.DT)
+		var counted := "the first camp's marker counts down %.0f s" % TutorialCamps.TELEGRAPH_T
+		ok(absi(int(tele["ticks"]) - want) <= 2, "%s: %s (%d ticks)" % [id, counted, tele["ticks"]])
+		ok(not tele["early"], id + ": no monster is out while the marker counts down")
+		ok(tele["landed"] and tele["on_spot"], id + ": the monsters appear on the marked spots when it ends")
 	var tag := "%s: fight beats %.1f s, damage %.0f hp, finished %s" % [id, fight_t, damage, str(m.player.extracted)]
 	print("TUTFIGHT ", tag)
 	var hint := String(texts.get("shoot", "")).to_lower()
@@ -82,3 +91,18 @@ func _play(main: Node, id: String) -> void:
 	ok(in_range, "%s: the fight beats take %.0f-%.0f s (%.1f)" % [id, FIGHT_MIN, FIGHT_MAX, fight_t])
 	ok(downed == 0 and damage <= DAMAGE_MAX, "%s: never brought down, damage %.0f <= %.0f" % [id, damage, DAMAGE_MAX])
 	m.queue_free()
+
+## One tick of the first camp's telegraph: the marker is up on the world and the minimap's source (CampMark.pending)
+## while no monster is out; the tick it ends, the monsters stand on the spots it showed.
+func _watch_telegraph(m: Match, tele: Dictionary) -> void:
+	var cm := CampMark.pending(m)
+	var ledger: Array = m.tut.camps.ledger
+	if not cm.is_empty():
+		tele["ticks"] += 1
+		tele["spots"] = cm["spots"]
+		tele["early"] = tele["early"] or not ledger.is_empty()
+	elif tele["ticks"] > 0 and not tele["landed"]:
+		tele["landed"] = not ledger.is_empty()
+		tele["on_spot"] = ledger.size() == (tele["spots"] as Array).size()
+		for i in ledger.size():
+			tele["on_spot"] = tele["on_spot"] and (ledger[i]["mb"] as Mob).pos.distance_to(tele["spots"][i]) < 0.6

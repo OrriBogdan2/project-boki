@@ -32,17 +32,10 @@ const UI_STAGES := [
 ## Farm tutorial step -> [walks, menu picks, tool, the house's cost line that sets the swings (one swing a unit)]:
 ## what the player does beyond reading the hint.
 const FARM_ACT := {
-	"hob": [1, 0, "", ""],
-	"axe": [0, 0, "", ""],
 	"chop": [1, 0, "axe", "wood"],
-	"stone": [1, 0, "pickaxe", "stone"],
-	"house": [1, 2, "", ""],
-	"hammer": [0, 0, "hammer", "labour"],
-	"task": [0, 1, "", ""],
+	"house": [1, 2, "hammer", "labour"],
 	"feed": [1, 2, "", ""],
 	"crop": [1, 2, "", ""],
-	"buy": [1, 1, "", ""],
-	"sell": [1, 1, "", ""],
 	"expedition": [1, 0, "", ""]
 }
 

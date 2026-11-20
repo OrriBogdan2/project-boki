@@ -9,15 +9,10 @@ extends RefCounted
 ## place, the pin or the edge arrow, the label and the distance: DECISIONS, First 10 minutes); the table of
 ## frames lost per step is printed.
 
-var bad := 0
-var arch := "gunslinger"
-var wisps := false
-var rng_seed := 7               # --tutorial-seed=N: the seed for the course's random draws
-
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
-const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack",
-		"kin", "hook", "ult"]
+const FOE_STEPS := ["fight", "shoot", "gkey", "summon", "kin"]
+const BEATS := 8               # DECISIONS 2026-11-08: about eight beats, the Boki's own one per kit
 const MAX_RUN_T := 900.0       # s of game time before the course counts as stuck
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
 const LEAD_FAR := 10.0         # m: a player this far from a lead step target is where the Boki should be out ahead
@@ -27,6 +22,11 @@ const LEAD_STOP := 6.0         # m: the Boki ends a lead step this close to the 
 const LEAD_MIN_FRAMES := 60
 const SCREEN := Vector2(1920, 1080)  # px: the screen the edge arrow is laid out on
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
+
+var bad := 0
+var arch := "gunslinger"
+var wisps := false
+var rng_seed := 7               # --tutorial-seed=N: the seed for the course's random draws
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTCHECK %s %s" % ["PASS" if cond else "FAIL", what])
@@ -55,7 +55,6 @@ func run(main: Node) -> void:
 	var idle_ok := true
 	var reach := ""
 	var early_seen := false      # the summon step: the first window was called back early, and the step stayed
-	var second_seen := false     # the pack step: summoned again after the ring went bright
 	var lead := {}               # per leading step: how the Boki (or its wisp) moves to the step's target
 	var lost := {}               # step id -> frame counts the marker was missing (see _marker)
 	while t < MAX_RUN_T and not m.player.extracted:
@@ -71,7 +70,6 @@ func run(main: Node) -> void:
 		if tu.step == at_step:
 			_marker(m, lost)
 		early_seen = early_seen or (tu.id() == "summon" and tu.sm.early)
-		second_seen = second_seen or (tu.id() == "pack" and tu.sm.second)
 		if tu.step != last:
 			last = tu.step
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
@@ -79,16 +77,16 @@ func run(main: Node) -> void:
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())      # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
+	ok(seen.size() == BEATS, "the course is %d beats (%s)" % [BEATS, ", ".join(seen.keys())])
 	_words(m.player, seen)
-	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
-	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
+	var teaches: Array = ["summon"] if wisps else ["gkey"]
+	var skipped: Array = ["gkey"] if wisps else ["summon"]
 	ok(teaches.all(func(k): return seen.has(k)) and not skipped.any(func(k): return seen.has(k)),
 			"%s steps %s ran, %s did not" % ["wisp" if wisps else "walking Boki", teaches, skipped])
 	if wisps:
 		var sk: Dictionary = seen.get("summon", {})
 		ok(String(sk.get("cap", "")) == Settings.key_cap("summon"), "the summon line shows the Summon key")
 		ok(early_seen, "a window called back early keeps the summon step (and says so)")
-		ok(second_seen, "the pack step waited for a second summon after the ring went bright")
 	_lead_rows(lead)
 	_marker_rows(lost)
 	ok(idle_ok, "the E step waits for E (no progress in the first %.0fs without it)" % IDLE_E_T)
@@ -101,7 +99,7 @@ func run(main: Node) -> void:
 func _marker(m: Match, lost: Dictionary) -> void:
 	var tu: Tutorial = m.tut
 	var sid := tu.id()
-	var at := tu.goal(sid)
+	var at := tu.goal(tu.leg())    # (a beat in legs points at the leg's place: the gap being crossed, the outpost)
 	if at == Vector3.INF or m.player.out:
 		return
 	var row: Dictionary = lost.get(sid, {"frames": 0, "beam": 0, "label": 0, "arrow": 0, "edge": 0})
@@ -171,7 +169,7 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 	ok(e_name != "" and e_line.contains(e_name), "the E line names %s ('%s')" % [e_name, e_line])
 	ok(String(s.get("cap", "")) == Settings.key_cap("signature"), "and shows the E key (%s)" % s.get("cap", ""))
 	var r_name := String(p.ak.rmb_def().get("name", ""))
-	var u: Dictionary = seen.get("sec", {})
+	var u: Dictionary = seen.get("fight", {})
 	var r_line := String(u.get("text", ""))
 	ok(r_name != "" and r_line.contains(r_name), "the right-click line names %s ('%s')" % [r_name, r_line])
 	ok(String(u.get("cap", "")) == Settings.key_cap("secondary"), "and shows its key (%s)" % u.get("cap", ""))
