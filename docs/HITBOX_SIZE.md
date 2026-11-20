@@ -10,6 +10,16 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 
 **Where the impact spark spawns.** `HitContact` (`scripts/combat/hit_contact.gd`, called by `Juice._hit_point`) puts the spark at the hit's real contact point, clamped to the target's collider: inside its hurtbox circle (`Ent.r`) and between its feet and the top of its head (`Arch.hit_h`), so a tall Hunter is struck high and a small one low. A projectile or melee strike (melee strikes are short fast shots) and a blast pass the shot's point, a zone tick passes the zone's own point (low, on the ground), as `opts["at"]` of `Ent.hurt`; a direct kit `hurt` with no `at` lands on the near side at the attacker's mid-height. `--hit-shape-check` asserts a Vex shot, a Kael strike and a Cinder zone tick spark inside a 2.56 m and a 1.04 m collider.
 
+Which hit paths pass a real contact point (`at`), audited 2026-11-20. Before HitContact every path sparked at the target's origin plus a fixed 0.95 m:
+
+| Path | Kits | Contact passed |
+|---|---|---|
+| `Match._shot_apply` | every projectile and every melee strike (Vex, Kael, Albert...) | the shot's hit point |
+| `Match._boom` | blasts, grenades, explosive shots | the blast centre |
+| `Effects` `area` | data-driven bursts, slams, landings | the burst centre |
+| `Fields.tick` | zones, patches, hazards (Cinder) | the zone point, low |
+| `Effects` `cone`/`chain`, `Abilities`, direct `hurt` in `scripts/arch/kits/*` (dashes, grabs, tethers, ults) | the rest | no `at`: HitContact puts it on the near side at the attacker's mid-height, clamped to the target's collider |
+
 ## Measured hit shapes (`--hit-shape-check`)
 
 `godot --headless --path . -- --hit-shape-check` (tools/hit_shape_check.gd, about 35 s) stands each hunter on flat ground facing +X beside a grid of 70 training dummies (0.5 m apart, standard body radius 0.4 m + 0.08 m slack), fires each damaging input once aimed straight down +X (cursor 20 m out) and records which dummies lost health. Reach, width and arc below are recovered from that set: the dummy centre is corrected by its hit circle and half a grid cell, so every number is good to about +-0.5 m (and +-10 degrees of arc).
