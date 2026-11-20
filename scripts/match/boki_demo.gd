@@ -17,6 +17,7 @@ static func frame(m: Match) -> void:
 	if not m.has_meta("bdemo"):
 		m.set_meta("bdemo", true)
 		print("BOKIDEMO setup at t=%.2f" % m.time)
+		Content.rules("merge_forms")["fusion_enabled"] = true      # (the demos show Fusion)
 		ArchDemo._setup(m, P, "rmb")
 		P.ult = 0.4
 		var k0: Kin = P.kin
