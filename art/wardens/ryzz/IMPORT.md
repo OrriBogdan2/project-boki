@@ -79,3 +79,20 @@ Open after the repair (art-gate 11-20 FAIL on the owner sheet): magenta hair loc
 (the Meshy iris is magenta-violet under the warm grade), a dark patch at the left strap, and the hip hand close to the pack.
 These are in the remeshed texture, not the look: the look's magenta paint_glow off and the eye bloom off (job variants
 ryzz_g1/g2) render the same. Next step: a Meshy retexture of the face/hair region, not import work.
+
+Retexture pass (2026-11-20, ext/sparkle-3d-fix-1120, job 20261120-065702-a4): the same quad-remesh body (30k quads,
+same UVs), repainted by Meshy from the owner's 2D pick (turnaround r4 A: front, side and back crops,
+`meshy_task.py retexture ... --original-uv --texture-res 4k`, 10 credits each). Work dir `~/meshy/sparkle-fix-1120/c2/`.
+- Scale trap: a Meshy remesh/retexture .glb comes back normalised to 2 m tall. The spec's joints/regions/slots are in the doll
+  master's frame (1.85 m), so the raw file swapped 8% too tall (1.819 vs 1.684 m: arms off their bones). Fit off Meshy's
+  rig (`v95_meshy_joints.py`, 6 arm joints): x0.924, residual under 1.5 cm -> `glb_scale.py` before `v95_to_game.py`.
+- 7 runs, ranked: A front+side+back (shipped here), B the previous repair (doll 11-18 face kept), C a second
+  front+side+back run. Rejected: front only (painted the pack black), side view mirrored x2 (face bolt on the wrong
+  cheek: the 2D pick's side view shows her left cheek), one more front+side+back (more stray flecks).
+- A vs the previous repair: lavender doll eyes and freckles like the 2D pick (were magenta-red), a cleaner blue-to-pink
+  hair fade, copper pack, the neon hem at the crop top's bottom. Same mesh, rig, 49 clips, gum spot. 59,948 tris,
+  sliver 0.4%, smear 0.2% (live 14.4% / 2.1%); `ryzz_v95.jpg` re-encoded at q90 (`glb_image_swap.py`), glb 13.1 MB.
+- Still open: small magenta flecks along her right hairline (paint where hair meets skin), and `--stretch-check`
+  fails on every build incl. main's (max over clips: live 15.3, A 24.7, B 25.6; ceiling 7; worst at the hips/thighs).
+- A design-variant .glb (art/wardens/ryzz_<tag>/) imports with mesh compression on; copy the shipped .import's
+  `force_disable_compression=true` and `remove_immutable_tracks=false` before comparing variants.
