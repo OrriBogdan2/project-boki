@@ -42,5 +42,5 @@ expedition). `--boki-xp-curve-check` simulates exactly this with the game's own 
 
 ## Saves
 
-Save v21 (`Evo.migrate_xp`): saved XP is the progress inside the current level, so it keeps its share of the level
+Save v22 (`Evo.migrate_xp`): saved XP is the progress inside the current level, so it keeps its share of the level
 (`xp / (50 x min(L, 20))` of the new cost). Levels and forms are untouched; nobody loses progress or levels twice on load.

@@ -123,14 +123,14 @@ static func form_name(rec: Dictionary) -> String:
 static func rules() -> Dictionary:
 	return Content.rules("evolve")
 
-const OLD_XP_PER_LEVEL := 50       # the curve before v21: XP from level n to n + 1 was 50 x n, flat from level 20
+const OLD_XP_PER_LEVEL := 50       # the curve before v22: XP from level n to n + 1 was 50 x n, flat from level 20
 const OLD_XP_FLAT_FROM := 20
 
 ## The highest level a Boki can reach.
 static func cap() -> int:
 	return int(rules()["cap"])
 
-## Save v20 -> v21: the XP per level changed (50 x level, flat from 20, to Game.xp_need), so a saved Boki keeps
+## Save v21 -> v22: the XP per level changed (50 x level, flat from 20, to Game.xp_need), so a saved Boki keeps
 ## the same share of the way to its next level: nobody loses progress and nobody levels twice on the spot.
 static func migrate_xp(data: Dictionary) -> void:
 	var recs: Array = (data.get("roster", []) as Array).duplicate()

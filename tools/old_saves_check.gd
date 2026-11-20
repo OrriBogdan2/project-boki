@@ -82,7 +82,7 @@ func _boki_part(t: String, d: Dictionary, old: Dictionary) -> void:
 		if rec.is_empty():
 			ok(false, t + who + " is missing")
 			continue
-		# save v21 rescales XP to the new curve (same share of the level), at the level the earlier steps left
+		# save v22 rescales XP to the new curve (same share of the level), at the level the earlier steps left
 		var xp_was := {"roster": [was.duplicate(true)]}
 		xp_was["roster"][0]["level"] = rec["level"]      # (a level over the cap is clamped first)
 		Evo.migrate_xp(xp_was)
