@@ -112,7 +112,7 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 			var t0: float = m.time
 			m.set_meta(key, true)
 			h.reveal_t = maxf(h.reveal_t, time)
-			m.fx.word(h.pos + Vector3(0, 2.4, 0), "MOST WANTED", col)
+			if h == m.player and m.hud: m.hud.toast_small("MOST WANTED", col)
 			m.add_feed("%s shows themselves to everyone" % h.pname)
 			m.fields.add_kx(h, h.pos, 1.0, time, 0.2, col, func(_p, z): _banner_tick(m, h, d, z),
 				func(_p): _banner_end(m, h, d, key, t0), h, "")
@@ -178,7 +178,7 @@ static func _banner_tick(m: Node, h: Hunter, d: Dictionary, z: Dictionary) -> vo
 		by = by.owner_h
 	if by is Hunter and by.team != h.team:
 		by.gems += int(d.get("reward", 0))
-		m.fx.word(by.pos + Vector3(0, 2.4, 0), "+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
+		if by == m.player and m.hud: m.hud.toast_small("+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
 		m.add_feed("%s claims the bounty on %s" % [by.pname, h.pname])
 	m.eliminate(h, h.last_hit_by, "bounty", true)
 	z["t"] = 0.0
@@ -186,12 +186,12 @@ static func _banner_tick(m: Node, h: Hunter, d: Dictionary, z: Dictionary) -> vo
 static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: float) -> void:
 	m.remove_meta(key)
 	if h.out or h.downed or m.time - t0 < float(d.get("time", 120.0)) - 1.5:
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "FELL", Color("ff6a5a"))
+		if h == m.player and m.hud: m.hud.toast_small("FELL", Color("ff6a5a"))
 		return
 	h.reveal_t = 0.0
 	h.gems += int(d.get("reward", 0))
 	Beacons.pop(m, h.pos, h.team)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
+	if h == m.player and m.hud: m.hud.toast_small("+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
 
 static func _ward_tick(m: Node, team: int, at: Vector3, r: float) -> void:
 	for o in m.hunters:
@@ -231,7 +231,7 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 			var n := int(float(o.gems) * float(d.get("take", 0.5)))
 			o.gems -= n
 			took += n
-			m.fx.word(o.pos + Vector3(0, 2.2, 0), "-%d gems" % n, Color("d0b080"))
+			if o == m.player and m.hud: m.hud.toast_small("-%d gems" % n, Color("d0b080"))
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("d0b080"), 16, 4.0, 0.6)
 	m.sfx("throw", h.pos, -2.0, 1.4)
 	if took > 0:

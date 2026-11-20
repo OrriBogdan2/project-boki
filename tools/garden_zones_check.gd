@@ -84,7 +84,7 @@ func _keys_part() -> void:
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
 	var both := "Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals."
-	ok(ZoneCards.lock_line("glasswater") == both,
+	ok(ZoneCards.lock_line("glasswater").begins_with(both) and "Closest: " in ZoneCards.lock_line("glasswater"),
 		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
 	rec["lean"]["ice"] = float(GardenZones.rules()["lean_key"])
 	Save.d["items"][GardenZones.wayseed("glasswater")] = 1

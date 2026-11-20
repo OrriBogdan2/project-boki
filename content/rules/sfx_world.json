@@ -59,7 +59,8 @@
     "belt"
    ],
    "files": [
-    "scripts/match/utility_use.gd"
+    "scripts/match/utility_use.gd",
+    "scripts/match/utility_more.gd"
    ],
    "holes": [
     "utility_use start/drink:pickup",
@@ -68,9 +69,14 @@
     "utility_use start/smoke:cloak",
     "utility_use start/scan:ping",
     "utility_use start:skill",
-    "utility_use _pad:throw",
     "utility_use tick:heal",
-    "utility_use tick:shield"
+    "utility_use tick:shield",
+    "utility_more _pad:throw",
+    "utility_more pads:jump",
+    "utility_more _field:throw",
+    "utility_more _swap:blink",
+    "utility_more _pack_tick:heal",
+    "utility_more _pilfer:throw"
    ]
   },
   "garden games": {

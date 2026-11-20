@@ -32,15 +32,15 @@ it out (C), and adds a little of its type to your kit: each class ability has
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**X is Fuse** for every class. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
-form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
+form, see [Boki species](Boki-Species.md)). The class's own ultimate (R) is held back for now.
 
 ## Choosing
 
 Each weight class has a default: Sable (light), Vex (medium) and Kael (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
-[Arena](Arena-and-Training.md) at any time.
+[Training Grounds](Arena-and-Training.md) at any time.
 
 ## At a glance
 

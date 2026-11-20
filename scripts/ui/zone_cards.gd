@@ -99,10 +99,11 @@ static func lock_line(id: String) -> String:
 	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]]
 	if keys["seed"] and keys["lean"]:
 		return "Ready to wake."
+	var near := "" if keys["lean"] else " " + String(key_hints(id)[1])   # "Closest: Pip, Water 3 of 12."
 	if keys["seed"]:
-		return food[0].to_upper() + food.substr(1) + "."
+		return food[0].to_upper() + food.substr(1) + "." + near
 	var seed := "Find its Wayseed in a run's lair or at the trader"
-	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+	return seed + "." if keys["lean"] else seed + ", and " + food + "." + near
 
 ## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
 static func key_hints(id: String) -> Array:
