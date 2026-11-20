@@ -215,3 +215,33 @@ foot slides back (the clip's sweep is faster than the body).
 Motley hovers and Gil has no loco clips: no STEP line. `--anim-audit`'s run reading poses the model at its own scale
 but at 5.39 m/s and counts the lowest 30 % of the ankle's height as planted (late swing too), so it reads these runs
 differently: Neve 39 -> 25 %, Albert 43 -> 26 %, Lace 89 -> 75 %, Tenzo 25 -> 37 % (DEBT.md).
+
+## Walk, run, strafe and crouch per Hunter (Nov 20, ext/anim-foot-slide-13)
+
+`--foot-slide-check` prints a `GLB` line (the model and its triangles) and four `STEP` lines per Hunter: the walk ring
+at `loco.walk_speed`, the forward run, the strafe (right, at run speed) and the crouch walk (run speed times
+`sneak_speed`), each on a fresh model at the match's scale (Hunter.VIS_SCALE), settled 4.8 s and sampled 6 s. The
+number is the mean cm a planted foot travels over the ground in one stance (+ forward: the clip under-strides, so its
+key is set too high); FAIL past 5 cm. `fit` is the key's value (model scale, m/s) that would plant it. Each Hunter is fitted in
+content/rules/warden_anim/<art>.json: `foot_mps[0]` (walk), `side_foot_mps[1]` (strafe),
+`crouch.speed`, and `stride[0]` for Lace's and Cinder's walk, which sits on the rate bounds. The crouch rate now takes
+the speed at the model's scale like the run (`WardenClips.body_mps`), and its top is 2.2 (was 1.8: Lace and Kael
+needed 1.9 to 2.2). Motley hovers and Gil has no leg clips: not measured.
+
+| Hunter | Walk cm | Run cm | Strafe cm | Crouch cm | Model (game glb = v95 current.json), tris |
+|---|---|---|---|---|---|
+| Lace (`archer`) | +5.4 to +3.2 | -3.1 to +1.4 | -1.1 to +3.0 | +10.8 to +0.8 | `hem/hem.glb` 102027 |
+| Kael (`juggernaut`) | +14.2 to +3.3 | -0.7 to -0.6 | +17.2 to -0.2 | +33.2 to +0.3 | `kael/kael.glb` 112322 |
+| Vex (`gunslinger`) | -4.2 to -0.1 | -0.4 to -0.5 | +1.0 to +0.9 | +3.3 to +0.1 | `vex/vex.glb` 120190 |
+| Albert (`bulwark`) | -5.7 to -3.3 | -2.5 to -2.9 | -10.5 to +1.1 | +17.3 to +19.1 | `breaker/breaker.glb` 108541 |
+| Neve (`rimewright`) | -14.0 to +0.2 | -0.4 to -1.9 | +3.3 to -0.3 | -0.3 to +2.5 | `claire/claire.glb` 95552 |
+| Cinder (`ashwick`) | +5.4 to +3.4 | +1.9 to +1.9 | +2.5 to +2.5 | +15.3 to -0.7 | `cinder/cinder.glb` 109187 |
+| Tenzo (`dolm`) | -9.5 to -0.5 | +0.4 to +0.4 | -19.0 to -0.4 | +2.3 to +3.4 | `tarek/tarek.glb` 95626 |
+| Sparkle (`mage`) | -4.4 to +0.3 | +0.2 to +0.2 | -6.8 to +0.4 | -6.6 to -2.0 | `ryzz/ryzz.glb` 97646 |
+| Grimble (`dredge`) | -9.4 to -1.2 | +0.3 to +0.3 | -3.9 to +0.1 | -1.8 to -0.2 | `dredge/dredge.glb` 125032 |
+| Meeko (`tender`) | +15.9 to +2.3 | -0.1 to -0.1 | +1.6 to +1.6 | +3.3 to +0.3 | `pip/pip.glb` 121292 |
+| Sable (`thief`) | +4.9 to +4.9 | +1.0 to +1.0 | +26.2 to -0.8 | -7.3 to -1.7 | `sable/sable.glb` 115114 |
+
+Open: Albert's crouch walk lifts a foot ~0.3 m/s, so no rate plants it (+19 cm; `STEP_OPEN`, docs/DEBT.md). The old
+`SLIP` sweep (scale 1, between the rings) is unchanged in its set of FAILs; Meeko's worst rose 1.68 to 2.23 m/s at
+2.5 m/s forward (bar 1.05, red on main too) because his walk key now sits at the rate cap.

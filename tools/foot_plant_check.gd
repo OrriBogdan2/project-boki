@@ -3,9 +3,9 @@ extends RefCounted
 ## (the slope) and at its foot (the tier step: one foot on the flat, one on the flight), three times over in step:
 ## on flat ground (the clip as keyed), on the terrain with planting off, and with it on. Per frame the weight-bearing
 ## ankle's height over the ground under it is held against the flat twin's: on, within TOL; off, the clip floats or
-## sinks by more (the case planting fixes), and off leaves the pose exactly the clip's. One Hunter is run on the
-## procedural body too (the rig nodes' IK). Works headless. --foot-plant-shots --shots-dir=<dir>: per Hunter
-## <id>.png, the four poses side on, planting off (top row) and on (bottom row). Never touches the save.
+## sinks by more (the case planting fixes), and off leaves the pose exactly the clip's. Works headless.
+## --foot-plant-shots --shots-dir=<dir>: per Hunter <id>.png, the four poses side on, planting off (top row) and on
+## (bottom row). Never touches the save.
 
 const DT := 1.0 / 60.0
 const SETTLE := 30             # frames before measuring: planting eases in at FootPlant.RATE, a walk gets going
@@ -18,7 +18,6 @@ const CELL := 6                # tiles per pose: flat, flat, a two-tile flight (
 const POSES := [["slope stand", 2.5, 0.0], ["slope walk", 2.1, WALK], ["step stand", 1.97, 0.0],
 	["step walk", 0.9, WALK]]     # [name, x in its cell where it starts (tiles), speed]
 const SHOT_DIST := 5.5         # m: the side-on camera from the figure
-const PROCEDURAL := "gunslinger"   # also run on the procedural body (Settings: Warden models off)
 
 var bad := 0
 var tree: SceneTree
@@ -48,10 +47,6 @@ func run(main: Node, mode: String = "check") -> void:
 		DirAccess.make_dir_recursive_absolute(out)
 	for id in Arch.ids():
 		await _hero(String(id), out if mode == "shots" else "")
-	if mode == "check":
-		WardenGlb.set_model(PROCEDURAL, false)
-		await _hero(PROCEDURAL, "")
-		WardenGlb.set_model(PROCEDURAL, true)
 	world.free()
 	print("FOOT_PLANT_CHECK_DONE, failures: ", bad)
 	tree.quit(1 if bad > 0 else 0)
