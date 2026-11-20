@@ -10465,3 +10465,5 @@ READY ext/tut-boki-leads 87c89a117c (match tutorial: Boki/wisp runs ahead to the
 READY ext/farm-personality-care 303931efdd (care moves bold/busy/gentle axes that scale nap/play/chase/cling picks; save v22 + golden; 10-day care-style rows in --garden-sim-check)
 READY ext/lace-needle-anim c19c966ae2719ce63c438d5d5aa142c724867676 (Lace needles in draw hand as animation: LMB arrow, RMB needle, Hemline fan of 5, Finishing Touch fan of 3 leaving per arrow)
 READY ext/combat-free-dead-mobs 8693f218ed6141a400b85a781e2d7821d235a688 (MobReap frees dead camp monsters after their dissolve; 10 min soak 738 mobs -> 4, +34200 nodes -> +1500; --mob-reap-check)
+READY ext/rpc6-settings-pollution-1117 d2ccfdfce9 (bulk-rebase: origin/main merged in mechanically, was 2b3b22c921; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-f44ae5a2 c053109f06 (bulk-rebase: origin/main merged in mechanically, was a8ce72698f; union 0 gen 1 files; the branch's own READY checks still apply)
