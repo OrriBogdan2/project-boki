@@ -11,7 +11,8 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
     With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
-    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax.
+    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax
+    (but `meshy_regions`: the regions of bones Meshy's rig lacks, a tail, ears, wings, still go on whole).
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -865,6 +866,13 @@ def main():
     T, K = targets(arm)
     meshy = SPEC.get("weights") == "meshy"
     gr = meshy_weights(low, arm, P) if meshy else None
+    if meshy:       # (bones Meshy's humanoid rig lacks, Meeko's tail, ears and wings: their `regions` whole, as the heat path)
+        keep = set(SPEC.get("meshy_regions", []))
+        for bone, m in ((b, m) for b, m in region_masks(P) if b in keep):
+            for nm in gr:
+                gr[nm] = gr[nm] * ~m
+            gr[bone] = gr.get(bone, np.zeros(len(P))) + m
+            print("meshy: region %s takes %d vertices" % (bone, m.sum()), flush=True)
     if meshy:       # (a forearm or hand that touches the body in the master's pose is fused to it there)
         for sd, hand in SPEC["past_wrist"].items():
             limb = {"upper_arm." + sd, "forearm." + sd, hand}
