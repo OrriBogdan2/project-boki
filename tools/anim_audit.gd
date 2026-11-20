@@ -33,6 +33,12 @@ const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX)
 ## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters.
 const MAX_START_GAP := 0.25
 const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick", "dredge", "mage"]
+const TURN_DT := 1.0 / 60.0  # s: a start or stop is judged at the game's frame rate
+const TURN_LEAD_S := 0.3     # s of the gait before a stop, the steady slide it is held against
+const TURN_S := 0.4          # s after the let-go: the source is in its next pose by 0.2 s (5 fps refs)
+const PHASES := 8            # let-gos spread evenly over one stride cycle, averaged
+const WALK_MPS := 2.2        # m/s: an analog-stick walk
+const CROUCH_K := 0.55       # x run speed: the crouch walk (Hunter._move's speed while crouched)
 const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics tick) apart
 ## The attack gate: a hand moves at most this many body heights in one frame. Their strikes are keyed at 60 fps (at 30,
 ## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
@@ -108,6 +114,9 @@ func _hero(main: Node, id: String) -> void:
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
+	if not id in NO_LEGS:
+		row["stops"] = _stops(m, sync, clips, sk, id)
+		_gate_stops(id, row["stops"])
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	var jog: Dictionary = live[str(SPEEDS[1])]
