@@ -58,9 +58,9 @@ const AEGIS_LEAN := 1.2
 const PLATE_N := 7
 ## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
 ## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
-const PLATE_COL := Color("e3bf5c")
+const PLATE_COL := Color("f6e3a8")
 const PLATE_EDGE := Color("fff0b0")
-const PLATE_GLOW := 0.12       # the plates' own light (a block flashes over it)
+const PLATE_GLOW := 0.3        # the plates' own light (a block flashes over it)
 const EDGE_GLOW := 0.9
 const BROKEN_COL := Color("4a3a30")
 ## s the wall takes to rise out of the ground
