@@ -10568,3 +10568,4 @@ READY ext/vfx-meeko-c-column 7ca2ecccf45f (Meeko VFX colour C 2->3: pastel leaf/
 READY ext/anim-land-weight 115eb75f69f9e7a06dc894250f229eeb5ac2e0b6 (landing squash + glb land clip hold per weight class from land_feel.json; footage cells light jump 0.15 s, heavy slam 0.5 s; medium [est])
 READY ext/boki-hit-death-clips a97d1a4899363dbfa9ba413748c51bf6af84cde9 (no Bokidex glb has hit/death clips: starters stay KinFlinch, coverage doc + GPU hit/faint MP4s, audit compiles again)
 READY ext/lace-dash-clip 8f369d09640fac1415b3540444155f815f9b781e (Lace roll and flick marked dash kmoves: ANIM_COVERAGE hem dash proc -> clip; clips already drove the dash)
+READY ext/vfx-grimble-dash 974149c4f0 (Grimble barge: gold dash trail + contact flash from dredge.json, orange puffs gone, GPU before/after strip, row re-scored)
