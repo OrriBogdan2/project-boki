@@ -10518,3 +10518,4 @@ READY ext/kit-number-golden c929d118ab6 (golden TSV of 1514 kit numbers + health
 READY ext/combat-ttk-rest-eight e43e06aa0e8fbe1c59f792f7cce72a41c47bb2a6 (TTK re-read of the 8 non-slice Hunters, re-run on main facb5c3e22f: 42 rows unchanged, matrix drift + moving commits in docs/TTK.md, no data regression, no number changed; docs only)
 READY ext/anim-coverage-stomp 90493ebedb (--anim-coverage-check reads states.stomp, clip must exist in glb; table: all 13 hunters stomp=clip)
 READY ext/anim-coverage-stomp c8c9275d49 (--anim-coverage-check reads states.stomp, clip must exist in glb; all 13 hunters stomp=clip; health strict OK)
+READY ext/owner-kit-notes-b 82c675a05fcb4ef05767f6d9565bd8203817e43e (Deep Reach class reach: Tenzo ridge rocks + Albert shield stop it; 2 dredge check rows; dolm rock/glide-slam rows already on main)
