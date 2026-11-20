@@ -22,12 +22,16 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Kael | Slam angle 70 `[?]` | **done** `ext/parity-kael-slam-lane` 704b7636e | no line; the source is a 0.72 m lane, not a cone (hero-ref 0157, measured); ext/slice-ranges-source calls the angle not determinable without that measure: take the lane |
 | Kael | Warchain leash 24 m `[?]` | **owner** | not determinable (ext/feel-warchain-leash 68f8b9a7a, frames 0301-0366); 24 m kept |
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
+| Kael | RMB lunge 4.5 to 7.5 vs 5 flat | **done** `ext/kael-open-rows` | travels 4.5 to 5.4 m (JSON [5.3, 6.35] x0.85 feel; DECISIONS 11-11 short lunge); docs/heroes/juggernaut.md "Open rows closed, Nov 20" |
+| Kael | Riposte reset on a kill `[?]` | **done** `ext/kael-open-rows` | the data's "killing a living enemy": a hunter taken down or a monster killed (footage f99-f101 dummy); dash, pull exits: same section |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
 | Lace | RMB range 14, R range 18 / width .5 `[?]` | **owner** | not determinable (ext/parity-ranges-slice); ours stands |
 | Lace | Spirit Walk ending inside a ledge | **done** `ext/combat-lace-spirit-ledges-rebased` 40f7865d8 | ext/w0246-combat-a |
 | Lace, Sparkle, Cinder, Tenzo | Unsourced dash-flow rows (8, 5, 3 + `dash.ground.lmb`, 6) `[?]` | **owner** | no source; the kit default (`keep`, Q `fire`) stands |
 | Cinder | RMB range 14 `[?]` | **owner** | not determinable (ext/slice-ranges-source: 0133 end was the cursor) |
 | Cinder, Grimble, Sparkle | Dash curve not decoded | **done** `ext/dash-curves-c` d8e71e611 | no line |
+| Tenzo | Rock Hop dash curve | **not determinable** | the footage's only ground dash is Tetra's Landslide push (frames 0516-0518, 128.77-129.40 s): its fit drops rms from 16.4% (constant) to 7.2% of the mean, but our Rock Hop is a leap (owner item 111, x0.85 / x1.15 kept) with no push to shape; the RMB hop (0258-0259) and dash-into-dunk (0985-0997) are too small at 4 fps. `dash_feel.json` dolm: no curve (ext/feel-dash-curves-d) |
+| Neve | Skate start (held, not via dash_feel) | **done** `ext/feel-dash-curves-d` | `dash.ramp` 0.2 to 0.12 s from the 5 fps pan of skates 0283-0291 and 0236-0244 (rms 6.0% to 4.1% and 15.4% to 14.8% of the cruise; best 0.08 s needs a shorter `tm_skate_go`, whose length the anim check ties to the ramp). Cruise and stop already matched |
 | Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a |
 | Albert | RMB slam range `[?]` | **done** | goes with the Shield Slam (the source has no slam) |
 | Albert | RMB aegis/bash routing `[?]` | **done** `ext/combat-albert-aegis-input` 91c3dba10 | ext/w0246-feel (its button-up latch gave way to held-fire-resume; the aegis asserts follow) |
@@ -863,10 +867,10 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Vex | Longneedle self-recoil (`e.recoil`, on herself) | 6 | 1.56 m | Railgun: no knock on the card; about 0.5 bh (0.9 m) shove back in 0.2 s [F] | match (footage shows the recoil) | `[?]` (F: 0.9 m) |
 | Vex | Quill rifle shot (`quill_rifle.kb`) | 1.0 | nudge | Glyph Rifle: none | match (nudge) | n/a |
 | Kael | Finishing Slam (`rmb.slam.push`) | 6 | 1.56 m, 0.40 s | Execution Slam: 130 dmg, no knock on the card [D]; dummy knocked off a cliff edge, no distance (juggernaut.md 0291) [F] | `[?]` | `[?]` |
-| Kael | Chain Lunge (`rmb.lunge.push`) | 7 | 2.01 m | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | differ | n/a |
-| Kael | Haul Slam (`rmb.haul.push`) | 7 | 2.01 m | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | differ | n/a |
-| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 5, lift 2.5 / 9 | 1.55 m / 3.07 m | Flame Step: "dash attack, 49 dmg", no knock [D] | differ | n/a |
-| Kael | Gilded Riposte strike (`juggernaut_ult.gd`, 6.0 in code) | 6 | 1.56 m | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | differ | n/a |
+| Kael | Chain Lunge (`rmb.lunge.push`) | 0 (was 7) | none | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Haul Slam (`rmb.haul.push`) | 0 (was 7) | none | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 0 (was 5, lift 2.5) / 0 (was 9) | none / none (no hop either) | Flame Step: "dash attack, 49 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Gilded Riposte strike (`x.strike_kb`, was 6.0 in `juggernaut_ult.gd`) | 0 (was 6) | none | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Lace | Heavy Shot (`rmb.pin.push`, tap to full) | 8-12 | 2.52-5.12 m | Heartpiercer: "an arrow that knocks back" [D]; 2-3 bh (3.6-5.4 m) along the shot, charge not known (pin.md 0273) [F] | match | `[?]` (full charge inside F) |
 | Lace | Longbow shot (`longbow.kb`) | 3.5 | 0.62 m | Greenwood Bow: no knock [D] | differ | n/a |
 | Lace | Empowered ult shots (`x.kb`) | 4 | 0.76 m | Virideth's Fury: "greatly empowered", no knock [D] | differ | n/a |
@@ -969,7 +973,7 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
-| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 6.8 m/.28 s |
+| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
