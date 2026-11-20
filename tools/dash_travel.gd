@@ -25,6 +25,8 @@ const ENTRY_S := 0.25          # s from the travel's start: the clip may still b
 const TAIL_S := 0.1            # s before the travel's end: the recovery may begin on the curve's slow tail
 const HOLD_RATE := 20.0        # rad/s over the sim frames: past the entry the drive pose holds until the travel ends
 const AFTER_S := 0.6           # s after the travel the hand-over is watched
+const STRIKE_AT_STOP := {"juggernaut": "lunge"}  # a clip whose strike is the stop (JuggernautKit.LUNGE_COIL_T): its
+const STRIKE_S := 0.07               # fastest pose frame is within this of the travel's end at any length
 const FEET := [["foot.L", "shin.L"], ["foot.R", "shin.R"]]
 const JOINTS := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 
@@ -170,6 +172,19 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 	out.append(["the drive pose holds while it travels", hold <= HOLD_RATE,
 			"pose moved at most %.0f rad/s from %.2f s in to %.2f s before its end (limit %.0f)" % [
 					hold, ENTRY_S, TAIL_S, HOLD_RATE]])
+	var strike_clip: String = STRIKE_AT_STOP.get(arch, "")
+	if not clips.has(strike_clip):
+		strike_clip = ""
+	if strike_clip != "":
+		var fast := -1.0
+		var fast_at := t0
+		for e: Dictionary in fs:
+			if float(e["t"]) >= t0 and float(e["t"]) <= t1 + AFTER_S and _rate(e) > fast:
+				fast = _rate(e)
+				fast_at = float(e["t"])
+		out.append(["the %s strike lands on the stop" % strike_clip, absf(fast_at - t1) <= STRIKE_S,
+				"fastest pose frame %+.2f s from the travel's end (%.0f rad/s; limit %.2f)" % [
+						fast_at - t1, fast, STRIKE_S]])
 	out.append(["the dash pose hands over with the travel", ride <= ride_s,
 			"dash pose rode the run %.2f s after the travel (limit %.2f)" % [ride, ride_s]])
 	out.append(["no pop into the run", pop <= POP_RATE,
