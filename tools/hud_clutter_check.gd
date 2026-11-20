@@ -93,7 +93,8 @@ func run(main_node: Node) -> void:
 ## after the press ("fusion": the Fusion live); without one it is the plain fight. `size` (not zero) sets the
 ## window; `statuses` puts a buff and a debuff on the Hunter just before the press.
 func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots: String) -> void:
-	var tag := "" if arch == "" else "%s %s %s: " % [arch, moment, "%dx%d" % [size.x, size.y] if size.x > 0 else "-"]
+	var win := "%dx%d" % [size.x, size.y] if size.x > 0 else "-"
+	var tag := "" if arch == "" else "%s %s %s: " % [arch, moment, win]
 	scene_bad = 0
 	if size.x > 0:
 		main.get_window().size = size
