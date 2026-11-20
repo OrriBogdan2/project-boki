@@ -136,6 +136,7 @@ var start_bones: Array = []  # [bone index, rotation]: loco "start_blend" bones,
 var start_s := 0.0           # s those bones take to ease from that pose into the clips
 var start_t := 0.0           # s since he set off
 var stride: WardenStride
+var steps: WardenSteps       # the step cue from the loops' own foot plants (WardenSteps), or null
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -171,6 +172,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
+	c.steps = WardenSteps.make(model, c.tree, WardenSteps.contacts(art_name))
 	return c
 
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
@@ -726,6 +728,8 @@ func step(dt: float) -> void:
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
+	if steps:
+		_tick_steps(s)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
@@ -939,6 +943,14 @@ func _loco(s: Dictionary, dt: float) -> void:
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
+
+## The step cue (WardenSteps) off the loops the legs show: the crouch walk's while crouched, else the walk and run's.
+func _tick_steps(s: Dictionary) -> void:
+	var legs_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 if _moving(s) else 0.0)
+	if crouch_w >= 0.5:
+		steps.tick("crouch_loco", crouch_pos, legs_k * (1.0 - one_w))
+	else:
+		steps.tick("loco", loco_pos, legs_k)
 
 ## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
 ## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.

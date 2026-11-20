@@ -193,7 +193,6 @@ var wallstun := 0.0           # how long the next wall slam stuns (Haymaker make
 var wallstun_at := -9.0       # s (match time) the hit that set wallstun landed (Displace.knocked keeps it)
 var land_t := 0.0
 var ghost_t := 0.0
-var step_t := 0.0
 var moves := HunterLoco.new(self)    # owns the locomotion state (Loco.S) and the data of the move it is in
 var loco: Fsm = moves.fsm
 ## Views of the locomotion state; a write asks moves for the transition (HunterLoco).
@@ -2860,12 +2859,9 @@ func render(delta: float, alpha: float) -> void:
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard
-	if grounded and spd > 4.0 and not downed and KMovesStone.gait(arch) >= 0.5:      # (no feet, no steps: Motley)
-		step_t -= delta
-		if step_t <= 0.0:
-			step_t = 0.32
-			m.fx.dust(pos, 2)
-			Juice.footstep(self)
+	if posed and anim.stepped and grounded and spd > 4.0 and not downed:      # (on each foot plant: HunterAnim)
+		m.fx.dust(pos, 2)
+		Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
