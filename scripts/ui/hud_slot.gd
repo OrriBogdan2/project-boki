@@ -143,11 +143,14 @@ static func lock_over(H, r: Rect2) -> void:
 ## light crossing the slot left to right.
 static func lit(H, r: Rect2, col: Color, icon: String, shine: float) -> void:
 	var c: CanvasItem = H.c
-	H._rounded(r.grow(5.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3)
+	# the outer glow and the shine frame are drawn, not noted: one lit slot is one panel (the frame)
+	var glow: StyleBoxFlat = H._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3, true)
+	c.draw_style_box(glow, r.grow(5.0))
 	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col.lightened(0.25), 0.95), 2)
 	if shine <= 0.0:
 		return
-	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3)
+	var flash: StyleBoxFlat = H._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3, true)
+	c.draw_style_box(flash, r.grow(2.0))
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.27, Color(1, 1, 1, 0.7 * shine))
 	var w := r.size.x * 0.3
 	var bx := lerpf(r.position.x - w * 2.0, r.end.x + w, 1.0 - shine)

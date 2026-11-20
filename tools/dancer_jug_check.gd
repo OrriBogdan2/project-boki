@@ -13,6 +13,7 @@ const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Kael's RMB hold ends
 const STRIKES := preload("res://tools/clip_strike_check.gd")   # her clip strikes on the kit's releases (anim timing)
+const FLIP_TURN := [0.1, 0.3]   # s into her flip clips where the body turns (kmoves_dj.gd thf_vault_*)
 const DTIME := preload("res://tools/thief_anim_time_check.gd")   # her moves' start, hit and end on the move clock
 var A: AKCheck
 
@@ -167,23 +168,30 @@ func thief(a) -> void:
 	A.aim_at(P, T.pos)
 	var d0 := P.dashes
 	var rings0 := _dancer_rings(m)
+	var V := HeroVfx.of(m)
+	var played := [int(V.plays.get("dash", 0)), int(V.plays.get("flip", 0))]
+	var older := V.ribbons.duplicate()                  # trails of earlier moves (not this flip's)
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var wheel := K.anim_id
 	var pop := [0.0]           # an Array: a lambda can't assign a captured local
-	var trail := {"before": 0, "mid": 0, "after": 0}      # trail pieces laid before the turn, in it and after it
-	var laid := [K.spin.pieces]
+	var live := {"before": 0, "mid": 0, "after": 0}      # steps her flip trail (data "flip") draws, by turn phase
 	A.step(m, 0.55, func():
 		pop[0] = maxf(pop[0], K.glint_pop)
 		var at: float = m.time - K.anim_at
 		var key := "after"
-		if at < ThiefSpin.TURN_FROM: key = "before"
-		elif at < ThiefSpin.TURN_TO: key = "mid"
-		trail[key] = int(trail[key]) + K.spin.pieces - int(laid[0])
-		laid[0] = K.spin.pieces)
+		if at < FLIP_TURN[0]: key = "before"
+		elif at < FLIP_TURN[1]: key = "mid"
+		var mine := func(e): return (e["h"] == P and String(e["anchor"]) in ["hand_r", "foot_l"]
+				and not older.any(func(o): return is_same(o, e)))
+		if V.ribbons.any(mine):
+			live[key] = int(live[key]) + 1)
 	P.inp["move"] = Vector2.ZERO
-	A.ok("dancer dash: the flip leaves a trail that follows the turn, none before it starts or after it ends",
-			trail["before"] == 0 and trail["mid"] >= 6 and trail["after"] == 0, str(trail))
+	A.ok("dancer dash: her violet after-images and the flip's hand and foot trail are data (content/vfx/thief.json)",
+			int(V.plays.get("dash", 0)) == played[0] + 1 and int(V.plays.get("flip", 0)) == played[1] + 1,
+			"%s -> %s" % [played, [V.plays.get("dash", 0), V.plays.get("flip", 0)]])
+	A.ok("dancer dash: the flip leaves a trail that follows the turn, none before it starts; it fades out after",
+			live["before"] == 0 and live["mid"] >= 6, str(live))
 	A.ok("dancer dash (item 8): no ring on the cartwheel or its landing; the glint in the throwing hand flares",
 			_dancer_rings(m) == rings0 and pop[0] > 0.5 and K.glint != null and K.glint.visible
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,

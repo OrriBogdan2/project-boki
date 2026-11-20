@@ -75,12 +75,14 @@ func dancer(a) -> void:
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
 			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
+	_soft_ring(A, P, thin, 1.2)
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true, "r_off": 0.0}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
 			beat["n"] = U.beat
 			(beat["at"] as Array).append(m.time)
 			beat["pulse"] = maxf(float(beat["pulse"]), float(AimKit.entry(P, "ult").get("alpha", 0.0)))
+			beat["on_beat"] = AimKit.entry(P, "ult").duplicate()
 			beat["r_off"] = maxf(float(beat["r_off"]), absf(float(AimKit.entry(P, "ult")["r"]) - U.radius()))
 			var rim_off := absf(float(AimKit.entry(P, "ult_rim")["r"]) - U.radius() * float(d["rim"]))
 			beat["r_off"] = maxf(float(beat["r_off"]), rim_off)
@@ -95,6 +97,7 @@ func dancer(a) -> void:
 	A.ok("dancer X: a blade at each foe every 0.2s, the ring pulsing on the beat",
 			gaps.size() >= 9 and even and float(beat["pulse"]) > 1.6,
 			"%d beats, pulse %.2f" % [gaps.size(), beat["pulse"]])
+	_soft_ring(A, P, beat.get("on_beat", {}), 2.0)
 	A.ok("dancer X: she dances from the first beat on", bool(beat["danced"]))
 	A.ok("dancer X: still running at 2.3s", U.running())
 	A.step(m, 0.5)
@@ -750,3 +753,13 @@ func _recovery_exits() -> void:
 
 func _near(a: float, b: float) -> bool:
 	return absf(a - b) < 0.02
+
+## VFX_QUALITY zone rule on Encore's ring as drawn (AimShapes, not the data): her signature violet, a lit rim, the
+## centre at most AimShapes.SOFT_A, also at a beat's pulse (`alpha`).
+static func _soft_ring(A, P: Hunter, e: Dictionary, alpha: float) -> void:
+	var got: Array = load("res://tools/aimkit_check.gd").measure(e, 0.0, float(e.get("r", 0.0)) - 0.05)
+	A.ok("dancer X: the ring is a lit %s rim over a faint inside at alpha %.1f (centre %.2f <= %.2f, rim %.2f)"
+			% [AimKit.hero_col(P).to_html(false), alpha, got[0], AimShapes.SOFT_A, got[1]],
+			bool(e.get("soft", false)) and (e.get("col", Color.BLACK) as Color).is_equal_approx(AimKit.hero_col(P))
+			and float(e.get("alpha", 0.0)) >= alpha - 0.05 and got[0] > 0.0
+			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
