@@ -28,6 +28,8 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
+const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends ("lead" -0.45 at "rate" 2.2 in
+                                       # kael.json): a longer Lunge holds it there to its stop, so the thrust lands on it
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
@@ -848,6 +850,8 @@ func _lunge(k: float, perfect: bool) -> void:
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
+	if anim_id == "jug_lunge" and m.time - anim_at > LUNGE_COIL_T:
+		anim_at = m.time - LUNGE_COIL_T      # the coil holds while he travels: the thrust goes when the travel stops
 	for f in m.foes_of(h.team):
 		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
