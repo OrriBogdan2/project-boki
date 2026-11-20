@@ -10615,3 +10615,4 @@ READY ext/lace-dash-clip 3deae75ce5 (bulk-rebase: origin/main merged in mechanic
 READY ext/hunter-regen-claire-1120 4d2ec85000 (Neve r4 candidate G1: Meshy-modelled hair bow, stretch worst 5.56->4.86, >5x 5->0; draft, art-gate sheet+MP4 in ~/gens/hunter-regen-1120/claire/r4/sheets)
 READY ext/meshy-spend-guard 985cb58e95 (meshy spend guard + ledger, PR via outbox)
 READY ext/sfx-ability-audit-13 2fb17edc42 (merged origin/main; gil.json conflict resolved: main set + branch recast/thrust cues; --sfx-set-check and --check 0 failures)
+READY ext/grimble-vfx-data a046ccf25bc19406fe51853a714d877510b727b1 (Grimble flashes, zones and impacts on content/vfx/dredge.json in gold, LDFx one-shots deleted; slug/chain/arm/anchor meshes still LDFx; GPU before/after docs/shots/grimble-vfx-data)
