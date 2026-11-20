@@ -208,3 +208,21 @@ friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per
 and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
 Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
 alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
+## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
+
+Every food and care input and what the player can see of it today:
+
+| Input | Changes | Seen |
+|---|---|---|
+| Meal / snack (`snacks.json`, `Care.FOODS`) | need bars, lean (`Evo.eat`) | body tint and flecks (`Evo.dress`, `Lean.mark`), journal line, chime on a new fleck |
+| Stat bites, toys, drill, loot bites (`garden_items.json`) | stats (`StatBudget`) | glint over the Boki (`StatGlint`), one tip, card number; **before this change no look on the body** |
+| Shaping items (token, sweet, rinse, aura) | path, lean, aura | preview card, ghost colour, aura (`GardenAura`) |
+| Pat, fetch, nap, chat (`care.json`) | trust, joy, xp once a kind a day | joy/trust bars, state animations |
+| Friends at the base (`BaseDrift`) | traits | journal line when a trait crosses a band |
+
+Gap closed first: raised stats now show as body size. `StatBudget.growth` = `care.json` `stat_budget.grow_max`
+(0.12) x sqrt(total points / `total_cap`), added to `evo_scale` in `Evo.dress` (60 points: 6% bigger, the full 240:
+12%; a fresh one is unchanged; it stacks with the 10% per form). A stat bite that changes the growth sets `look` in
+`GardenItems.use`, so the farm rebuilds the model (`_swap_kin_model`) and the size shows on the spot. No new HUD
+element. Check: `--garden-items-check`.
+Left for later (needs owner OK, stabilize sprint): a stat line on the Boki card, a trait word shown on the model.
