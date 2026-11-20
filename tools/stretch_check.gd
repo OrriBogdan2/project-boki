@@ -1,5 +1,5 @@
 extends RefCounted
-## --stretch-check [--wardens=a,b] [--limit=1.3] [--step=0.125]: skins every visible mesh of each Hero's .glb through
+## --stretch-check [--wardens=a,b] [--limit=1.3] [--step=0.125] [--stretch-where]: skins every visible mesh of each Hero's .glb through
 ## every one of its clips (the game's own clip tree and Sync) and measures each triangle edge against its rest length.
 ## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
 ## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
@@ -17,6 +17,8 @@ var tree: SceneTree
 var bad := 0
 var limit := 1.3
 var step := 0.125                # s between samples of a clip
+var where := false               # --stretch-where: also print each clip's worst edge (rest points and weights)
+var worst_edge := ""             # that edge, from the last _measure
 var parts: Array = []            # per skinned mesh: {verts, bones, weights, stride, skin, edges, rest, bind_bones}
 var skel: Skeleton3D
 
@@ -28,6 +30,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(","))
 		if a.begins_with("--limit="): limit = float(a.substr(8))
 		if a.begins_with("--step="): step = float(a.substr(7))
+		if a == "--stretch-where": where = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var holder := Node3D.new()
@@ -127,7 +130,7 @@ func _clip(clips: WardenClips, nm: String) -> Array:
 			await tree.process_frame
 		var r := _measure()
 		if float(r[0]) > float(worst[0]):
-			worst = [r[0], tt, r[1]]
+			worst = [r[0], tt, r[1] + (" | " + worst_edge if where else "")]
 		t += step
 	clips.force = {}
 	return worst
@@ -179,6 +182,8 @@ func _measure() -> Array:
 			var ea := edges[e * 2]
 			var eb := edges[e * 2 + 1]
 			var ratio := pos[ea].distance_to(pos[eb]) / rest[e] / (0.5 * (grow[ea] + grow[eb]))
+			if ratio > best and where:
+				worst_edge = "%s %s" % [_vert_note(p, ea), _vert_note(p, eb)]
 			best = maxf(best, ratio)
 			if ratio > limit:
 				var key := "%s>%s" % [_main_bone(p, edges[e * 2]), _main_bone(p, edges[e * 2 + 1])]
@@ -194,6 +199,18 @@ func _worst_pairs(pairs: Dictionary) -> String:
 	for k in keys.slice(0, 3):
 		out.append("%s x%d (%.1f)" % [k, pairs[k][0], pairs[k][1]])
 	return ", ".join(out)
+
+## A vertex's rest point and bone weights: "(x,y,z){hips:0.6 thigh.L:0.4}".
+func _vert_note(p: Dictionary, v: int) -> String:
+	var stride := int(p["stride"])
+	var out := "(%.3f,%.3f,%.3f){" % [p["verts"][v].x, p["verts"][v].y, p["verts"][v].z]
+	for k in stride:
+		var wt := float((p["weights"] as PackedFloat32Array)[v * stride + k])
+		if wt > 0.0:
+			var bi := int((p["binds"] as Array)[(p["bones"] as PackedInt32Array)[v * stride + k]])
+			out += "%s:%.2f " % [skel.get_bone_name(bi) if bi >= 0 else "?", wt]
+	return out + "}"
+
 
 func _main_bone(p: Dictionary, v: int) -> String:
 	var stride := int(p["stride"])
