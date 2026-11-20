@@ -73,3 +73,15 @@ Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry6/tool/: `seg2.py c1.js
   35 clips better, 0 worse. hunter_mesh_check stretched tris 524 -> 120, no new warning.
 - Changes on purpose: in idle/stance the left hand now sits where hand.L puts it (on the hip, fingers visible) and the gold bead
   chain stays on the trousers (live dragged it with the hand); the black spike at the left hip from behind is gone.
+
+## Tearing fix 11-20 (same branch, deep pass): gun-mount junk follows the gun
+Right side: between the jacket cuff and the ammo belt the scan has blade-like leather/skin sheets (folded-back fins) and small
+junk patches that were weighted to hips/thigh.R, so every clip that moves the gun arm left them hanging at the hip (the dark
+needles above the gun in idle, the floating tan chunk at the hip in run/glide).
+Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/deep/tool/: `folds.py`, `blade.py 0.03`, `finsel.py`, `debris.py`,
+`finsplit2.py ns3.glb fin_b.npy upper_arm.R,forearm.R,hand.R,gatling,launcher out.glb`):
+- 629 fin/junk triangles (fold edges grown over big flat triangles, plus the patches that already broke off as islands).
+- Where they touch the hip skin their 256 vertices are duplicated; every fin vertex takes the weights of the nearest
+  sleeve/gun vertex (>= 95 % on the right arm chain). Nothing deleted: 60095 tris, positions, UVs, normals, colours,
+  texture, skeleton and clips as before, so the bind pose is identical (48236 -> 48492 verts).
+- The left-side retry 6 weights are kept as they were.
