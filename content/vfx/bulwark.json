@@ -34,8 +34,8 @@
 		"plant": {"fx": [{"p": "chunk", "n": 7, "way": "up", "speed": 3.2, "spread": 0.6, "grav": 14.0, "life": 0.55, "size": 0.1, "radius": 0.4, "c": "iron"},
 				{"p": "smoke", "n": 4, "way": "up", "speed": 0.9, "spread": 0.8, "grav": -0.4, "life": 0.7, "size": 0.55, "radius": 0.4, "c": "dust", "near": true}]},
 
-		"plant_beacon": {"net": false, "fx": [{"p": "ember", "y": 0.3, "shape": "disc", "radius": 0.22, "way": "up", "n": 10, "speed": 3.5, "spread": 0.08, "grav": -1.0, "drag": 0.2, "curl": 0.0, "life": 1.1, "size": 0.07, "stretch": 0.35, "c": "ivory", "c2": "hot"},
-				{"p": "star", "y": 1.2, "shape": "disc", "radius": 0.3, "way": "up", "n": 3, "speed": 1.2, "spread": 0.2, "grav": -0.6, "life": 1.2, "size": 0.12, "c": "hot", "c2": "ivory"}]},
+		"plant_beacon": {"net": false, "fx": [{"p": "ember", "y": 0.9, "shape": "disc", "radius": 0.2, "way": "up", "n": 26, "speed": 5.0, "spread": 0.05, "grav": -1.0, "drag": 0.1, "curl": 0.0, "life": 1.0, "size": 0.11, "stretch": 0.5, "c": "ivory", "c2": "hot"},
+				{"p": "star", "y": 1.6, "shape": "disc", "radius": 0.3, "way": "up", "n": 5, "speed": 1.2, "spread": 0.2, "grav": -0.6, "life": 1.2, "size": 0.12, "c": "hot", "c2": "ivory"}]},
 
 		"dash": {"net": false, "fx": [{"p": "ember", "y": 1.0, "way": "back", "n": 10, "speed": 2.0, "spread": 0.5, "grav": 1.0, "life": 0.3, "size": 0.06, "radius": 0.35, "c": "ivory", "c2": "hot"},
 				{"p": "smoke", "y": 0.15, "way": "back", "n": 4, "speed": 1.0, "spread": 0.8, "grav": -0.4, "life": 0.5, "size": 0.45, "radius": 0.4, "c": "dust", "near": true}]},
