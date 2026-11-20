@@ -227,47 +227,47 @@ func _one_cry(from: int, k: Kin, mood: String, what: String) -> void:
 ## command inside KinAck.GAP_S stays quiet; a rival's Boki is never heard, a teammate's only in earshot.
 func _acks() -> void:
 	_fresh()
-	var P := m.player
-	var k: Kin = P.kin
+	var pl := m.player
+	var k: Kin = pl.kin
 	Sfx.cue_log = []
-	Sfx.listener = P.pos
+	Sfx.listener = pl.pos
 	k.stow()
-	aim_at(P, P.pos + Vector3(7.0, 0, 0))
+	aim_at(pl, pl.pos + Vector3(7.0, 0, 0))
 	var at: int = Sfx.cue_log.size()
-	KinCommand.tap(P)
+	KinCommand.tap(pl)
 	_one_cry(at, k, "alert", "send")
 	at = Sfx.cue_log.size()
-	KinCommand.order(P, "guard")
+	KinCommand.order(pl, "guard")
 	ok(_cries(at, k.species).is_empty(), "an order right after a send stays quiet (the %.1f s gap)" % KinAck.GAP_S)
 	var moods := {"guard": "alert", "follow": "happy", "return": "happy"}
 	for id in moods:
 		m.time += KinAck.GAP_S + 0.1
 		at = Sfx.cue_log.size()
-		ok(KinCommand.order(P, id), "setup: the %s order is given" % id)
+		ok(KinCommand.order(pl, id), "setup: the %s order is given" % id)
 		_one_cry(at, k, moods[id], id)
-	k.pos = P.pos + Vector3(10.0, 0, 0)
+	k.pos = pl.pos + Vector3(10.0, 0, 0)
 	k.state = "active"
 	k.fly = {}
 	k.hold_at = Vector3.INF
 	k.cmd = "follow"
 	m.time += KinAck.GAP_S + 0.1
 	at = Sfx.cue_log.size()
-	KinCommand.tap(P)
+	KinCommand.tap(pl)
 	ok(k.state == "flying_home", "setup: a tap with the Boki away calls it back")
 	_one_cry(at, k, "happy", "recall")
-	var R := rival()
+	var rv := rival()
 	var rk := Kin.new()      # a bare Boki: KinAck reads only its match, species, record, owner, team and spot
 	rk.m = m
 	rk.species = k.species
 	rk.rec = k.rec
-	rk.owner_h = R
-	rk.team = R.team
-	rk.pos = P.pos + Vector3(40.0, 0, 0)
+	rk.owner_h = rv
+	rk.team = rv.team
+	rk.pos = pl.pos + Vector3(40.0, 0, 0)
 	m.time += KinAck.GAP_S + 0.1
 	ok(not KinAck.say(rk, "send"), "a rival's Boki is never heard")
-	rk.team = P.team
+	rk.team = pl.team
 	ok(not KinAck.say(rk, "send"), "a teammate's Boki out of earshot (40 m) is not heard")
-	rk.pos = P.pos + Vector3(8.0, 0, 0)
+	rk.pos = pl.pos + Vector3(8.0, 0, 0)
 	ok(KinAck.say(rk, "send") and not KinAck.say(rk, "recall"), "a teammate's Boki in earshot answers once, then waits")
 	rk.free()
 	Sfx.cue_log = null

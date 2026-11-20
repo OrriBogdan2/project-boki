@@ -5,14 +5,19 @@ extends RefCounted
 ## teammates close enough to be in earshot. A Boki answers at most once per GAP_S, so a spammed key stays quiet.
 ## The cry is the species' own mood voice (KinVoice) at the Boki's own pitch: no new sound family.
 
-const GAP_S := 1.2           # s of match time before the same Boki answers another command
-const VOL_DB := -8.0         # dB: under the command's own whoosh
+const GAP_S := 1.2  # s of match time before the same Boki answers another command
+const VOL_DB := -8.0  # dB: under the command's own whoosh
 
 ## The mood each command answers with: an eager call for a send, a chase or a guard, a glad one for coming home.
 const MOODS := {
-	"send": "alert", "chase": "alert", "guard": "alert",
-	"recall": "happy", "return": "happy", "follow": "happy",
+	"send": "alert",
+	"chase": "alert",
+	"guard": "alert",
+	"recall": "happy",
+	"return": "happy",
+	"follow": "happy",
 }
+
 
 ## The cry for `cmd` ("send", "recall" or a wheel order id). True if it sounded.
 static func say(k: Kin, cmd: String) -> bool:
