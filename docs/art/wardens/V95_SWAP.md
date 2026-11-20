@@ -243,3 +243,13 @@ game .glb's `v95` image (`tools/art1/glb_image_swap.py`), not by a v95_to_game r
 re-weights the body (Motley 11-17: worst stretch 7.93 -> 17.80, 31 clips past 10x). The face lock in v95-promote put the
 whole live atlas back on r3 A (`cand_A_keephead.glb` is pixel-identical to the old master, smear included), so the paint
 came from `cand_A.glb`: its changed texels (2.4%, tail) composited over the live 4096 game image.
+
+## Hunter regen from the turnaround, 2026-11-20 (Gil, ext/hunter-regen-gil-1120)
+A new Meshy master from the 11-19 turnaround (multi-image meshy-7.1, A-pose; `meshy_task.py remesh --topology quad`)
+goes in with `python3 tools/art1/v95_to_game.py Gil --weights meshy --spec <candidate>.json --work <dir> --no-import`.
+`--spec` takes the candidate's own joints and its own `master` (before 11-20 the Hunter's current master silently
+replaced it: the "candidate" was the live model re-fit). `tools/art1/v95_regen_spec.py` writes such a spec from the
+Warden's `*_v95.json` and the joints read off `v95_grid.py`'s renders; Gil's are in `art/wardens/src/gil_regen1120/`.
+With `--no-import`, run `texture_imports` (or v95_to_game without it) before committing: it sets the extracted images'
+VRAM compression. Proof shots: `--warden-shots --wardens=gil --knee` (knee_34.png). Gil's glb has no clips (his motion is
+the procedural rig's), so `--stretch-check` measures nothing for him and `--clip-shots` cannot film him.
