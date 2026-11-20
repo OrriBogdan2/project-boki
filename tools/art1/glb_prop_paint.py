@@ -59,7 +59,7 @@ def pick(j, b, mat_i, near=None):
     y, x = texel(base, uv)
     col = base[y, x]
     share = col / np.maximum(col.sum(1, keepdims=True), 1.0)
-    if near == "blue":
+    if isinstance(near, str) and near == "blue":
         near = np.median(col[col[:, 2] > col[:, :2].max(1) * 1.25], 0)
     hue = np.median(share, 0) if near is None else near / max(near.sum(), 1.0)  # its stone's chroma (rgb shares)
     dist = np.abs(share - hue).max(1)
