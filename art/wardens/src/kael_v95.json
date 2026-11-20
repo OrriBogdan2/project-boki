@@ -1,6 +1,6 @@
 {
- "doc": "hunter-regen-1120 (job 20261120-065726-a6): a new Meshy generation (meshy-7.1 multi-image, quad 30k, enhance on) from the owner-picked r4b turnaround A (gens/ta-audit-1119/kael_r4b/top3/A_o_hL_03.png), scaled to 1.93 m, joints/head/anchors from Meshy's own auto-rig (meshy_joints.py), Meshy skin weights onto juggernaut's rig (v95_to_game --weights meshy --meshy-rig ~/meshy/hunter-regen-1120/kael_r4bA/rigged_character.glb). kael.glb's own skinned sword stays. No emission map yet (emit false): the curse veins are plain paint.",
- "master": "~/meshy/hunter-regen-1120/kael_r4bA/master.glb",
+ "doc": "hunter-regen-1120 (job 20261120-083023-a1): a new Meshy generation (meshy-7.1 multi-image, quad 30k, enhance on) from the owner's r4b pick A made 5% wider (gens/ta-owed-1120/kael/top_A.png, 4 view crops in gens/hunter-regen-1120/kael/w5/crops), scaled to 1.93 m, joints/head from Meshy's own auto-rig (meshy_joints.py), Meshy skin weights onto juggernaut's rig (v95_to_game --weights meshy --meshy-rig ~/meshy/hunter-regen-1120/kael_w5N1/rigged_character.glb). meshy_smooth 6 + meshy_cloak (radius 0.16, keep 0.5): the long cloak rides mostly on the hips, so it no longer flares like a skirt in a run. kael.glb's own skinned sword stays. No emission map (emit false).",
+ "master": "~/meshy/hunter-regen-1120/kael_w5N1/master.glb",
  "game": "art/wardens/kael/kael.glb",
  "own": {
   "drop_mats": [
@@ -18,10 +18,10 @@
  "head": {
   "centre": [
    0.0,
-   0.106,
-   1.78
+   0.157,
+   1.782
   ],
-  "r": 0.156
+  "r": 0.154
  },
  "head_tris": 2600,
  "head_uv": 2.0,
@@ -38,78 +38,78 @@
  ],
  "joints": {
   "pelvis": [
-   0.003,
-   0.099,
-   1.03
+   -0.002,
+   0.12,
+   1.032
   ],
   "neck": [
-   0.006,
-   0.105,
-   1.573
+   0.005,
+   0.151,
+   1.577
   ],
   "hip.R": [
-   0.109,
-   0.099,
-   1.03
+   0.112,
+   0.12,
+   1.033
   ],
   "knee.R": [
-   0.157,
-   0.132,
-   0.615
+   0.165,
+   0.119,
+   0.628
   ],
   "ankle.R": [
-   0.199,
-   0.054,
-   0.149
+   0.202,
+   0.022,
+   0.153
   ],
   "hip.L": [
-   -0.103,
-   0.099,
+   -0.11,
+   0.12,
    1.031
   ],
   "knee.L": [
-   -0.151,
-   0.132,
+   -0.16,
+   0.119,
    0.619
   ],
   "ankle.L": [
-   -0.189,
-   0.054,
+   -0.197,
+   0.022,
    0.149
   ],
   "shoulder.R": [
-   0.203,
-   0.059,
-   1.54
+   0.211,
+   0.055,
+   1.552
   ],
   "elbow.R": [
-   0.307,
-   0.048,
-   1.323
+   0.323,
+   0.073,
+   1.331
   ],
   "wrist.R": [
-   0.465,
-   0.141,
-   1.136
+   0.49,
+   0.186,
+   1.152
   ],
   "shoulder.L": [
-   -0.197,
-   0.057,
-   1.531
+   -0.206,
+   0.051,
+   1.544
   ],
   "elbow.L": [
-   -0.301,
-   0.051,
-   1.315
+   -0.326,
+   0.074,
+   1.331
   ],
   "wrist.L": [
-   -0.459,
-   0.142,
-   1.123
+   -0.481,
+   0.17,
+   1.153
   ],
   "crown": [
    0.0,
-   0.136,
+   0.154,
    1.91
   ]
  },
@@ -403,5 +403,10 @@
   "anchor_arm_up": "upper_arm.L",
   "anchor_arm_elbow": "forearm.L",
   "anchor_arm_fore": "forearm.L"
+ },
+ "meshy_smooth": 6,
+ "meshy_cloak": {
+  "radius": 0.16,
+  "keep": 0.5
  }
 }
