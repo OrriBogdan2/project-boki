@@ -10,6 +10,7 @@ const CAST_GAP := 2.6  # s between the guest's casts (the reel and the arm's way
 const FILM_S := 12.0  # s of game time filmed (the guest starts casting as this game comes up)
 
 var frame_n := 0
+var go := false  # (the guest) this game is filming: cast
 
 
 func _init() -> void:
@@ -35,6 +36,7 @@ func _host() -> void:
 	copy.reclass(Arch.weight("dredge"), "dredge")  # the copy's body (the arch does not ride the snapshot)
 	_fresh(m.player)
 	m.player.teleport(home + STAND)
+	Net.lobby_emit("rf", {})
 	var out_frames := 0
 	var idle := 0.0  # s the copy's arm has been home (once the reel ends, this game's hunter goes back to STAND)
 	var t := 0.0
@@ -68,7 +70,9 @@ func _host() -> void:
 func _cast_loop() -> void:
 	while m == null or m.player == null:
 		await main.get_tree().create_timer(0.2).timeout
-	await main.get_tree().create_timer(1.0).timeout
+	while not go and not stop:
+		await main.get_tree().create_timer(0.1).timeout
+	await main.get_tree().create_timer(0.5).timeout
 	for i in CASTS:
 		if stop:
 			return
@@ -78,3 +82,10 @@ func _cast_loop() -> void:
 		m.player.ak.press_rmb()
 		printerr("%s guest cast %d at %s, t %.1f" % [tag, i, home + STAND, m.time])
 		await main.get_tree().create_timer(CAST_GAP).timeout
+
+
+func _on_msg(topic: String, data, from: String) -> void:
+	if topic == "rf":
+		go = true
+		return
+	super._on_msg(topic, data, from)
