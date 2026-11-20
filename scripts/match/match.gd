@@ -5394,6 +5394,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+var hunter_hints := HunterHints.new()   # the first-time lines for each fighting slot of a Hunter
 
 func _tips() -> void:
 	tips_live = false
@@ -5420,6 +5421,8 @@ func _tips() -> void:
 	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
@@ -5434,7 +5437,7 @@ func _tips() -> void:
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
 	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
