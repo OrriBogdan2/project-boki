@@ -1,12 +1,11 @@
 extends RefCounted
 ## --incoming-hit-check [--shots-dir=<dir>]: the incoming-hit cue (IncomingHitSfx, docs/AUDIO.md). A rival hits
-## you from 8 directions round the screen: the cue's placed voice sits on the rival and its pan (the voice in the
-## camera's space, as Godot pans it) follows: right of you pans right, left pans left, straight up or down the
+## you from 8 directions round the screen: the cue is placed on the rival and its pan (Sfx.pan_toward: the
+## spot in the camera's space, on the SFXPan bus) follows: right of you pans right, left pans left, straight up or down the
 ## screen stays in the middle. Also: chip damage is quiet and a heavy hit loud; a shotgun volley in one frame is
 ## one voice at the volley's level, a chip hit inside the flurry folds into it and a heavy one moves it; a real
 ## shot from 30 m plays from where it was fired after the shooter moved; your own hits, your own damage and hits
-## with no attacker play none; downed, the cue goes through the muffled world bus; on a full near lane it still
-## plays and the lane stays at its cap. With --shots-dir (a GPU worker, jobq) it records 8 real shots from the 8
+## with no attacker play none; with a full pool it still plays. With --shots-dir (a GPU worker, jobq) it records 8 real shots from the 8
 ## directions as <dir>/incoming_hit.avi with the game's own stereo mix, one INCOMINGHIT mark per hit.
 ## Never writes the save.
 
@@ -45,8 +44,7 @@ func run(main_node: Node) -> void:
 		_level_and_flurry()
 		_long_shot()
 		_none()
-		await _downed()
-		_cap()
+		_full_pool()
 	print("INCOMINGHIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -76,17 +74,16 @@ func _rig() -> void:
 	Sfx.listener = P.pos
 
 func _directions() -> void:
-	var cam := m.get_viewport().get_camera_3d()
 	var pans := []
 	for k in DIRS.size():
 		var d := _dir(k)
 		var v = _hit_from(P.pos + d * R, 20.0)
-		if not v is AudioStreamPlayer3D:
-			ok(false, "a hit from the %s plays a placed cue" % DIRS[k])
+		if v == null:
+			ok(false, "a hit from the %s plays the cue" % DIRS[k])
 			continue
-		var at: Vector3 = (v as AudioStreamPlayer3D).global_position
+		var at: Vector3 = IncomingHitSfx.cue_at()
 		var off := rad_to_deg(_flat(at - P.pos).angle_to(d))
-		var pan := (cam.global_transform.affine_inverse() * at).normalized().x
+		var pan := Sfx.pan_toward(at)
 		ok(at.distance_to(foe.pos) < 0.01 and off < 1.0 and _follows(k, pan),
 			"a hit from the %s: the cue is on the rival (%.2f deg off) and pans %+.2f" % [DIRS[k], off, pan])
 		pans.append("%s %+.2f" % [DIRS[k], pan])
@@ -135,36 +132,24 @@ func _none() -> void:
 	m.on_damage(P, null, 20.0, {"src": "blight"})
 	ok(_cues() == 0, "your own hit, your own blast and a hit with no attacker play no cue")
 
-func _downed() -> void:
-	P.downed = true
-	m.music_dir.tick(m, 0.0)
-	var near := _bus_of(_hit_from(P.pos + right * NEAR_M, 20.0))
-	var far := _bus_of(_hit_from(P.pos + right * R, 20.0))
-	var far_into := AudioServer.get_bus_send(AudioServer.get_bus_index("SFXFar"))
-	var dulled := near == "SFXWorld" and far == "SFXFar" and far_into == "SFXWorld"
-	ok(Sfx.muffle_state().fx and dulled,
-		"downed: the cue goes through the muffled world bus (near %s, far %s into %s)" % [near, far, far_into])
-	P.downed = false
-	m.music_dir.tick(m, 0.0)
-	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.1).timeout
-
-func _cap() -> void:
+## With every pool voice sounding, the cue still plays: it ranks as yours, so it takes a far rifle's voice.
+func _full_pool() -> void:
 	_hush()
-	var cap := SfxVoices.cap("SFX")
-	for i in cap + 2:
-		Sfx.last_played.clear()
-		Sfx.recent.clear()
-		Sfx.play("rifle", P.pos + up * NEAR_M, 0.0, 0.0)
-	var full := Sfx.voices_on("SFX")
+	Sfx.ensure("rifle")
+	for i in Sfx.POOL:
+		var st = Sfx.streams["rifle"]
+		Sfx.players[i].stream = st[0] if st is Array else st
+		Sfx.players[i].play()
+		Sfx.voices.rank[i] = 30.0 + float(i)      # far sounds, ranked below yours
+		Sfx.voices.sound[i] = "rifle"
+	var full := Sfx.players.filter(func(p): return p.playing).size()
 	foe.pos = P.pos + right * NEAR_M
 	m.on_damage(P, foe, 20.0, {})
-	var after := Sfx.voices_on("SFX")
-	ok(full == cap and IncomingHitSfx.voice() != null and after <= cap,
-		"a full near lane (%d of %d): the cue still plays and the lane stays at its cap (%d)" % [full, cap, after])
+	ok(full == Sfx.POOL and IncomingHitSfx.voice() != null,
+		"a full pool (%d of %d voices): the cue still plays" % [full, Sfx.POOL])
 
 ## The GPU recording (the child under the movie writer): one real shot from each of the 8 directions.
 func _reel() -> void:
-	var cam := m.get_viewport().get_camera_3d()
 	for k in DIRS.size():
 		foe.pos = P.pos + _dir(k) * R
 		await _frames(12)
@@ -177,7 +162,7 @@ func _reel() -> void:
 			await _frames(1)
 			f += 1
 		var v = IncomingHitSfx.voice()
-		var pan: float = (cam.global_transform.affine_inverse() * v.global_position).normalized().x if v else 0.0
+		var pan := Sfx.pan_toward(IncomingHitSfx.cue_at())
 		print("INCOMINGHIT mark %s frame=%d pan=%+.2f" % [DIRS[k], Engine.get_process_frames(), pan])
 		ok(v != null and _follows(k, pan), "the shot from the %s plays the cue, panned %+.2f" % [DIRS[k], pan])
 		await _frames(18)
@@ -210,20 +195,17 @@ func _hit_from(at: Vector3, dmg: float):
 	m.on_damage(P, foe, dmg, {})
 	return IncomingHitSfx.voice()
 
-func _bus_of(v) -> String:
-	return String(v.bus) if v != null else "none"
-
 func _hush() -> void:
-	for p in Sfx.voices():
+	for p in Sfx.players:
 		p.stop()
 
 func _cues() -> int:
 	var takes: Array = Sfx.streams.get(IncomingHitSfx.SOUND, [])
-	return Sfx.voices().filter(func(p): return p.playing and p.stream in takes).size()
+	return Sfx.players.filter(func(p): return p.playing and p.stream in takes).size()
 
 func _cue_at() -> Vector3:
 	var v = IncomingHitSfx.voice()
-	return (v as AudioStreamPlayer3D).global_position if v is AudioStreamPlayer3D else Vector3.INF
+	return IncomingHitSfx.cue_at() if v != null else Vector3.INF
 
 ## The pan for direction k: right of you pans right, left pans left, straight up or down stays in the middle.
 func _follows(k: int, pan: float) -> bool:

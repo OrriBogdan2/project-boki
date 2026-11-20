@@ -730,15 +730,33 @@ func play(
 	played.emit(sname, pos, vol_db, pitch)
 
 
-## Starts sname on a voice at pos (placed, so it pans) at exactly vol_db and returns the voice, or null when the
-## pool drops it. No distance falloff and no repeat gap: the caller sets the level and keeps the one voice
-## (IncomingHitSfx: a flurry of hits on you is one voice). The pool's ranking and the bus (so the downed muffle) apply.
-func play_voice(sname: String, pos, vol_db: float, pitch := 1.0) -> AudioStreamPlayer:
+## Where `at` sits across the screen, -1 (left) to 1 (right) as the camera sees it: 0 straight up or down the
+## screen, or when `at` is on top of the listener (what the SFXPan bus's panner is set to).
+func pan_toward(at: Vector3) -> float:
+	var cam := get_viewport().get_camera_3d()
+	var side := Vector2(at.x - listener.x, at.z - listener.z)
+	if cam == null or side.length() <= 1.0:
+		return 0.0
+	var right := Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
+	return clampf(side.normalized().dot(right), -1.0, 1.0)
+
+
+func _set_pan(pan: float) -> void:
+	var bus := AudioServer.get_bus_index("SFXPan")
+	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
+
+
+## Starts sname on a voice panned toward pos (SFXPan, as play_toward) at exactly vol_db and returns the voice, or
+## null when the pool drops it. No distance falloff and no repeat gap: the caller sets the level and keeps the
+## one voice (IncomingHitSfx: a flurry of hits on you is one voice). It ranks as yours (a hit on you).
+func play_voice(sname: String, pos: Vector3, vol_db: float, pitch := 1.0) -> AudioStreamPlayer:
 	if not streams.has(sname) and not _lazy(sname):
 		return null
-	var p := _voice(pos, voices.rank_of(pos, listener, true), sname)
+	var p := _voice(null, voices.rank_of(null, listener, true), sname)
 	if p == null:
 		return null
+	_set_pan(pan_toward(pos))
+	p.bus = "SFXPan"
 	p.stream = _take(sname)
 	p.volume_db = vol_db
 	p.pitch_scale = pitch
@@ -764,14 +782,8 @@ func _take(sname: String, take := -1) -> AudioStream:
 func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
 	if not streams.has(sname) and not _lazy(sname):
 		return
-	var cam := get_viewport().get_camera_3d()
 	var side := Vector2(at.x - listener.x, at.z - listener.z)
-	var pan := 0.0
-	if cam and side.length() > 1.0:
-		var right := Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
-		pan = clampf(side.normalized().dot(right), -1.0, 1.0)
-	var bus := AudioServer.get_bus_index("SFXPan")
-	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
+	_set_pan(pan_toward(at))
 	var p := _voice(null, voices.rank_of(null, listener), sname)
 	if p == null:
 		return

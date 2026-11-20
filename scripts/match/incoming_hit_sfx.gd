@@ -24,6 +24,7 @@ static var _p = null                # the cue's voice
 static var _st: AudioStream = null  # the take it plays: the voice is the cue's only while it still plays this
 static var _t0 := -1000000          # ms: when the flurry started
 static var _sum := 0.0              # the flurry's damage so far
+static var _at := Vector3.INF       # where the cue was last placed
 
 ## A hit of d on m.player (Juice.hit), from by, with the hit's options o.
 static func hit(m: Match, by: Ent, d: float, o: Dictionary) -> void:
@@ -42,6 +43,7 @@ static func hit(m: Match, by: Ent, d: float, o: Dictionary) -> void:
 		_t0 = now
 	if live:
 		_p.stop()       # the flurry stays one voice: the cue moves to this hit
+	_at = from
 	_p = Sfx.play_voice(SOUND, from, level(_sum), lerpf(1.0, HEAVY_PITCH, _weight(_sum)))
 	_st = _p.stream if _p != null else null
 
@@ -65,3 +67,7 @@ static func sounding() -> bool:
 ## The cue's voice while it sounds, else null (tooling: --incoming-hit-check).
 static func voice():
 	return _p if sounding() else null
+
+## Where the cue was last placed (tooling).
+static func cue_at() -> Vector3:
+	return _at
