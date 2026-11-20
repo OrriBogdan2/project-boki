@@ -73,3 +73,14 @@ Alternative not taken: the master's HD sword skinned to hand.R in place of the g
 **Restore branch (2026-11-17, ext/hunter-glb-restore-1117):** the restored e1 mesh (ca32bd97252) carried the same master swords (2440 triangles on the `*-v95c` materials, blade-shaped slabs at x 0.26..0.37). `glb_drop_mats.py kael.glb kael.glb '*-v95c'` took them out, so the restored picked Kael has one sword (the game's skinned one), like main's. Every other part, skin and the 54 clips are unchanged.
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): face-kael-1118 cand A_s2_FevHair texture-only: `python3 -I tools/art1/face_swap.py art/wardens/kael/kael.glb /home/boki/meshy/face-kael-1118/cand/A_s2_FevHair.glb /home/boki/meshy/kael-sword-1117/cand/A_keep_new.glb OUT.glb` blends the changed pixels into the embedded 4096 `v95` image (sword, rig, clips untouched). Re-run the same command on the rig-weights glb (PR #284) if it merges first.
+
+## hunter-regen-1120: a new Meshy generation from the turnaround (Kael)
+Master: `~/meshy/hunter-regen-1120/kael/master.glb` (meshy-7.1 multi-image from the four views of ta-fix-2d-1118/kael/A.png (owner 11-18 pick), unedited,
+enhance off; Meshy quad remesh 60k), on this .glb's skeleton, clips and props by `v95_swap.py` with `--weights meshy`;
+joints, head and anchors from Meshy's auto-rig (same method as `tools/art1/meshy_joints.py`). 52.0k tris, one 4096 paint image (`kael_v95.jpg`)
+and the curse-vein emission map (`kael_v95b.jpg`, `"emit": true`; job 060044-a1). The emission map is the vein lines on his red arms,
+drawn by `~/gens/hunter-regen-1120/a1d/kael_emit.py` (lines brighter than the local red glow orange, as on the turnaround) and
+added to the master's JSON by `a1d/glb_add_emit.py` (geometry byte-identical): `~/meshy/hunter-regen-1120/kael_emit/master.glb`.
+Rebuild: `v95_to_game.py Kael --master ~/meshy/hunter-regen-1120/kael_emit/master.glb --weights meshy
+--meshy-rig ~/meshy/hunter-regen-1120/kael_emit/meshy_rig_a6.glb` (pass `--master`: without it the live scan master is used). Godot --stretch-check, live -> this: worst 10.31 -> 5.17, median clip 6.51 -> 3.36, 64/64 -> 64/64 clips over 1.3. Proof (LIVE|NEW eye, knee and match-camera MP4s, hands
+and feet sheets): `~/gens/hunter-regen-1120/a6/media/kael/`. The face is the new generation's, not the live head.
