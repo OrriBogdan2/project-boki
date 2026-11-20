@@ -9,25 +9,25 @@ never reached a first form. Now the farm gives kin XP too: `content/rules/garden
 
 | Action | XP |
 |---|---|
-| First feed, first pat, first game of fetch of each Boki each day (`care`) | 10 each, then 0 |
+| First feed, first pat, first game of fetch of each Boki each day (`care`) | 15 each, then 0 |
 | Training yard, per point scored | 2 |
 | A played Dash, Shove, Seek or Volley (backed Boki) | 5 |
-| ...a win | 5 |
+| ...a win | 8 |
 | ...the day's first win in that game | 60 |
 
-Level n to n + 1 needs 35 x n XP, flat at 1,000 from level 20 (`curve` in the same file; `Game.xp_need`).
-So level 4 is 210 XP and level 8 is 980. Relay and Show Ring pay no XP.
+Level n to n + 1 needs 30 x n XP, flat at 600 from level 20 (`curve` in the same file; `Game.xp_need`).
+So level 4 is 180 XP and level 8 is 840. Relay and Show Ring pay no XP.
 
 Stat gains are unchanged. An expedition gives 40, +40 for a win, +10 a knock.
 
 **Measured** with `--garden-pace-check` (a fixed play model on the real Care, Game and Evo code; the
-assumptions are in the `pace` block of the rules file): time to the first form (level 4, 300 XP).
+assumptions are in the `pace` block of the rules file): time to the first form (level 4, 180 XP).
 
 | Player | Minutes |
 |---|---|
-| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 36 |
-| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 76 |
-| Ratio | 1.63 (limit 2.0, `pace.max_ratio`) |
+| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 28 |
+| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 27 |
+| Ratio | 1.02 (limit 2.0, `pace.max_ratio`) |
 
 The first tuning paid per action (feed 2, pat 1, fetch 3, 100 x level): a ratio of 1.6 at 229 and 141 min.
 The sim fit replaced it (below): care pays once a kind a day, the games carry most of the XP, and the
@@ -49,8 +49,8 @@ climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
-| Garden-only | 5 min | 224 min (3.7 h) | 33 min | 462 min (7.7 h) |
-| 1 expedition a session | 29 min | 223 min (3.7 h) | 108 min | 454 min (7.6 h) |
+| Garden-only | 5 min | 190 min (3.2 h) | 33 min | 386 min (6.4 h) |
+| 1 expedition a session | 29 min | 190 min (3.2 h) | 108 min | 389 min (6.5 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
 games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
@@ -199,4 +199,4 @@ hold, and the item stays in the bag. The card does no math of its own: it reads 
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 
-**XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 10, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 35 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 36 min (runs 76 to 43, ratio 1.63 to 0.84: the farm now pays about as well as a 12 min run, a default taken; the alternative tried, care 8 and curve 40, gave 42 min and ratio 0.71); Grown 669 to 224 min, first egg 1346 to 462 min. `tools/garden_sim.py`: Lv 8 day, home only 5 min 14 to 9, 20 min 7 to 4 (new player home20), 30 min 5 to 3. The egg is still 7.7 h of play, so a 20 min a day player breeds in about 3 weeks by the pace model's minutes (462 / 20); the sim's starter reaches Lv 8 on day 4. A week needs a lower Grown level (`breed_options` grown_5/grown_6), left unapplied.
+**XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
