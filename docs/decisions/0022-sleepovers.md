@@ -22,7 +22,7 @@ your last or your active Boki, and at most 2 are away at once. On return `Sleepo
 - a memory line and +2 trust;
 - each trait moves 10% of the way toward the host's lead Boki (species traits from the cleaned snapshot);
 - one seed of a crop growing on the host's plots (none if the plots are empty);
-- trade evolution: if the species' `content/kin/<id>.json` has `"trade_to": "<species>"` the Boki becomes that
+- trade evolution: if the species' `content/kin_home/<id>.json` has `"trade_to": "<species>"` the Boki becomes that
   species, logged as `evolved`. First pair: kilnbadger -> scaldamus.
 No reply from the friend (empty snapshot): it still comes home, with only the memory line.
 
