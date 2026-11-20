@@ -8,6 +8,7 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
+  meshy_task.py rig OUT_DIR TASK_ID [--height 1.7] [--fingers]      auto-rig, 5 credits; --fingers = include_fingers
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
@@ -84,6 +85,9 @@ def fetch(out, tid, api):
     for fmt, u in (t.get("model_urls") or {}).items():
         if fmt in ("glb", "pre_remeshed_glb") and u:
             download(u, os.path.join(out, fmt + ".glb"))
+    for name, u in (t.get("result") or {}).items():       # rigging outputs: rigged_character_glb_url ...
+        if isinstance(u, str) and u.startswith("http"):
+            download(u, os.path.join(out, name.replace("_url", "") + "." + u.split("?")[0].rsplit(".", 1)[-1]))
     for i, tex in enumerate(t.get("texture_urls") or []):
         for name, u in tex.items():
             if u:
@@ -155,6 +159,15 @@ def edit(o):
     post(o.out, "image-to-image", body, {"images": o.images})
 
 
+def rig(o):
+    """Humanoid auto-rig of a task's model (5 credits); --fingers sends include_fingers (finger bones with Mixamo
+    names on the meshyrig template; separated fingers rig best, mitten hands get fewer bones)."""
+    body = {"input_task_id": o.task, "animation_type": "biped", "height_meters": o.height}
+    if o.fingers:
+        body["include_fingers"] = True
+    post(o.out, "rigging", body, {"source": o.task})
+
+
 def remesh(o):
     body = {"input_task_id": o.task, "target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
     post(o.out, "remesh", body, {"source": o.task})
@@ -194,6 +207,11 @@ def main():
     e.add_argument("--prompt", required=True)
     e.add_argument("--model", default="nano-banana-pro")
     e.add_argument("--aspect", default="1:1")
+    g = sub.add_parser("rig")
+    g.add_argument("out")
+    g.add_argument("task")
+    g.add_argument("--height", type=float, default=1.7)
+    g.add_argument("--fingers", action="store_true", help="include_fingers=true (biped)")
     m = sub.add_parser("remesh")
     m.add_argument("out")
     m.add_argument("task")
@@ -210,6 +228,8 @@ def main():
         retexture(o)
     elif o.cmd == "edit":
         edit(o)
+    elif o.cmd == "rig":
+        rig(o)
     else:
         remesh(o)
 
