@@ -280,5 +280,5 @@ only the extreme edges: `glb_relax.py IN OUT --limit=5.0` took her to 4.9x (0/58
 - Her boots (dark red-brown paint, v ~0.3) matched neither colour rule: half fell to `slot_default` skin (the skin
   look's desat 0.6 greyed them), half to `leather` (v <= 0.28): near-black in game. A first rule `{"slot": "boots",
   "box": [..., z <= 0.235], "v": [0, 0.6]}` gives them their own slot (5,499 tris; `boots` draws as leather,
-  warden_glb.gd SLOTS) and the look tints it alone (`"boots": {"albedo": [1.4, 1.5, 1.35]}`) without lifting the
+  warden_glb.gd SLOTS) and the look tints it alone (`"boots": {"albedo": [1.3, 1.4, 1.4], "desat": 0.55}`) without lifting the
   black top, shorts and thigh-high.
