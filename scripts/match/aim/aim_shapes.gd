@@ -249,14 +249,17 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 		g.chevron(ctr + pd * (r + 0.32), pd, 0.3, lw * 1.4, _hot(e))     # a rim chevron: which way it will throw or drag
 
 ## "soft" circle: a faint inside rising toward the edge (at most SOFT_A, a fifth of that at the centre), a glow
-## fading inward from the rim, and the lit rim itself, `w` wide with its outer edge on r: the zone reads by its edge.
+## stepping down inward from the rim in two flat bands (cel steps: a gradient across the ring's quads shows teeth),
+## and the lit rim itself, `w` wide with its outer edge on r: the zone reads by its edge.
 static func _soft_circle(g: AimGeo, e: Dictionary, ctr: Vector2, r: float, w: float) -> void:
 	var c: Color = e["col"]
 	var inside := minf(_fill(e, 0.45).a, SOFT_A)
 	g.disc(ctr, r, Color(c, inside * 0.2), Color(c, inside))
 	var lit := _rim(e, 0.55)
-	g.sector(ctr, maxf(0.0, r - minf(GLOW_W * 2.0, r * 0.4)), r - w, 0.0, TAU, Color(lit, 0.0), lit)
-	g.ring(ctr, r - w * 0.5, w, _rim(e), 0.0, TAU, _rim(e, 0.8))
+	var gw := minf(GLOW_W, r * 0.2)
+	g.ring(ctr, r - w - gw * 0.5, gw, Color(lit, lit.a * 0.5))
+	g.ring(ctr, r - w - gw * 1.5, gw, Color(lit, lit.a * 0.2))
+	g.ring(ctr, r - w * 0.5, w, _rim(e))
 
 static func _circle_edge(g: AimGeo, e: Dictionary, ctr: Vector2, r: float, lw: float) -> void:
 	if e["dashed"]:

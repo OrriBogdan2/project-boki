@@ -92,10 +92,9 @@ Still open (shared, not done here):
   Done too: Meeko's seed disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the
   vortex's dark core thinned; the seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring
   since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10). Sable's X since ext/vfx-sable-data-x:
-  the pale lavender band is an AimKit `soft` circle (lanes and cones had it) in her `#9a5cff`: a lit rim glowing
-  0.6 m inward, the inside rising from 0.03-0.08 at the centre (at most 0.08 at a beat's brightest; `--dancer-combo-check`,
-  `--hero-vfx-check`, `--aimkit-check` measure it as drawn). The filled disc in the 0.2 s strip frame is the shared
-  BodyTell cast ring every Hunter gets, not hers.
+  the pale lavender band is an AimKit `soft` circle (lanes and cones had it) in her `#9a5cff`: a lit rim, two flat
+  glow bands 0.6 m inward (cel steps), the inside rising from 0.03-0.08 at the centre (at most 0.08 at a beat's
+  brightest; `--dancer-combo-check`, `--hero-vfx-check`, `--aimkit-check` measure it as drawn).
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
