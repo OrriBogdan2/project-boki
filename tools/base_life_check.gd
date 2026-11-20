@@ -142,6 +142,17 @@ func _awake_breaths(home) -> Array:
 		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
 	return Sfx.loops.keys().filter(func(key): return key in awake)
 
+## The nap part's two spot tiles (_spots_part) are open ground on center's island.
+func _nap_ground(w, center: Vector3) -> bool:
+	var cx := int(center.x)
+	var cz := int(center.z)
+	for o: Array in [[4, 0], [-4, 3]]:
+		var x: float = cx + int(o[0]) + 0.5
+		var z: float = cz + int(o[1]) + 0.5
+		if w.is_void(x, z) or w.is_block(x, z) or w.island_of(x, z) != w.island_of(center.x, center.z):
+			return false
+	return true
+
 ## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
 func _spots_part(home, center: Vector3) -> void:
 	var zone: Dictionary = GardenZones.info(GardenZones.start())
@@ -209,6 +220,10 @@ func run(m: Node) -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
+	for _i in 60:      # (the nap part puts its two spots 4 m either side: open ground here, whatever the draws before)
+		if _nap_ground(home.world, center):
+			break
+		center = home.world.random_ground(0)
 	Save.d["layout"]["deco"].append({"id": "toy_ball", "u": 990001, "px": center.x + 3.0, "pz": center.z})
 	ok(home.life.toy_spots().size() == 1, "the placed ball is the one toy the machine knows (HomeToys owns the toys)")
 	_gather(home, center)
