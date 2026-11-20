@@ -18,6 +18,7 @@ const ARMOR_FLASH_T := 0.2     # s the armour strip flashes white after it loses
 const PAIN_T := 1.2           # s a hunter's portrait wears its hurt face after a hit
 const CHEER_T := 2.5          # s it wears its excited face after a kill
 const BREAK_T := 0.45          # s of the armour-break crack
+const TIMER_MIN := 0.5         # s: a status with less left shows no seconds (per-frame holds sit under it)
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
@@ -134,14 +135,15 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
+	var hunter := e as Hunter
+	var held := hunter != null and hunter.ak != null and hunter.ak.holds_still()  # her own hold, not a root
 	if e.stun_t > 0.0: out.append(["status_stunned", BodyTell.STUN_COL, "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
+	if e.root_t > 0.0 and not held: out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
 	if KitStatus.grounded(e):
 		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
 	if KitStatus.rattled(e): out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
 	if e.slow_t > 0.0: out.append(["status_slowed", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
 	if e.burn_t > 0.0: out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
-	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
 	if hunter and hunter.shield > 0.0: out.append(["status_shielded", Color("d8ecff"), "", -1.0])
 	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
@@ -156,9 +158,14 @@ static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> 
 		c.draw_rect(r, HudStyle.SHADE)
 		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
 		Icons.draw(c, String(ic[0]), r.get_center(), tile * 0.36, ic[1])
-		if float(ic[3]) > 0.0:
+		if shows_time(float(ic[3])):
 			HudStyle.ctext(c, Vector2(r.get_center().x, r.end.y + 9.0), "%.1f" % float(ic[3]), 10, ic[1])
 		x += tile + 2.0
+
+## Does a status icon show its seconds left under it? Not with no time, nor under TIMER_MIN: a zone or hold
+## that tops its timer up every frame would sit at a stray "0.2", and a real countdown that low reads nothing.
+static func shows_time(secs: float) -> bool:
+	return secs >= TIMER_MIN
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
 static func shield_frac(h: Hunter) -> float:
