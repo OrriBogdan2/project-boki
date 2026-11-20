@@ -14,7 +14,7 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
-## Grimble's Deep Reach (Net 0.24.19): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
+## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
 ## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 

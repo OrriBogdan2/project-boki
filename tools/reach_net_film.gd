@@ -1,5 +1,5 @@
 extends "res://tools/tele_net_shots.gd"
-## --reach-net-film --shots-dir=<dir>: Grimble's Deep Reach seen from another game (Net 0.24.19). Two games over the
+## --reach-net-film --shots-dir=<dir>: Grimble's Deep Reach seen from another game (Net 0.24.20). Two games over the
 ## desktop relay (the --remote-anim-check harness): the guest (headless) plays Grimble and hooks this game's hunter
 ## CASTS times, reeling it in; this game draws every other step to <dir>/f_NNNN.png (30 fps) with the camera on
 ## both, for an MP4 (ffmpeg). Frames are kept small in memory and written after, so this game keeps real time with the
@@ -46,7 +46,7 @@ func _host() -> void:
 	var idle := 0.0  # s the copy's arm has been home (once the reel ends, this game's hunter goes back to STAND)
 	var t := 0.0
 	while t < FILM_S:
-		var wire: Variant = copy.ak.get("wire")  # (null on a build before Net 0.24.19: the before film)
+		var wire: Variant = copy.ak.get("wire")  # (null on a build before Net 0.24.20: the before film)
 		idle = idle + DT if wire == null or (wire as Array).is_empty() else 0.0
 		if idle > 0.6 and m.player.pos.distance_to(home + STAND) > 0.3:
 			_fresh(m.player)
