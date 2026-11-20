@@ -386,7 +386,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
-| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
+| No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted. Owner 11-08 (item 11) over the footage: the cast keeps his speed (80% of a run, easing off at 1.6/s; a rise of 1 m/s or more gets +2.2 m/s, a ledge rise hands over to it; `x.carry_k` and the rest); asserted (`tools/kael_tap_ult_check.gd`) |
 | Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
@@ -516,6 +516,15 @@ ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke an
 white-hot with his crimson, and gold on the Riposte and chain.
 The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
 (`jug_*`, `juggernaut_*`), played from the recipes.
+
+**Black and red (owner pick A, 11-12).** Every red effect of his reads as black with red glowing through it, as on his
+splash and turnaround, never as Cinder's orange-yellow fire: a charred base with crimson cracks, trails a black ink
+ribbon with a red hot edge (the palette's `peak`), sparks dark red into black flecks. The palette carries it (also the
+Warchain's `chain*` colours and the chain moves' `haul*`), with the model's crack colour and strength (archetype
+`model_glow` core `#c80a22`, `emit` 1.4) and his skin slot's char (warden_look `char_k`, `char_reach`, `char_col`: the
+skin round the emission cracks and the red-painted curse skin turn black, so only the cracks glow). Unchanged: the red
+cloth, the white sword, and the Gilded Riposte's gold (its name and the guard's read). tools/hero_vfx_check.gd keeps
+his palette's red keys out of orange and yellow.
 
 ## Originality
 
