@@ -10595,3 +10595,4 @@ READY ext/snack-first-60s b0083f252421724eee5790e44e3cdd29e77b8a0b (first snack 
 READY ext/garden-xp-pace 3ac0d4ffa7 (garden XP numbers: Lv4 in 36 min garden-only, was 123; Grown 224 min, was 669)
 READY ext/sfx-garden-moments 0700c42b63 (bond rank-up has its own rising chime garden_bond_up instead of garden_friends; stat gain already had garden_chime_stat; checks assert one cue per event, no unlock)
 READY ext/docs-parity-stale-rows c8d32dd0f1 (KIT_PARITY: one top-20 table, Still open list, Kael lunge/rank text/Sable curve rows closed)
+READY ext/garden-xp-pace 0bf1f8d1f5 (garden XP pace: care 15, curve 30; home 20 min/day first egg day 12->6, first form 123->28 min)
