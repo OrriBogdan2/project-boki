@@ -1,86 +1,23 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
-## 2026-11-19: tearing fix (ext/hunter-fix-claire-1118), skin weights only
-Under animation the v95 mesh tore (hand/forearm/shin weight on hip and thigh skin, 3-15x edge growth, black spikes). Only
-JOINTS_0/WEIGHTS_0 of the body mesh changed; the spear mesh, skeleton, bone names, clips, UVs, indices and textures are
-byte-identical, so the bind pose looks the same.
-Method (first pass): tools/art1/skin_relax limbs_apart + relax on the glb's own clips, every edge measured as posed length /
-(rest length + 1 cm) so short edges (under 8 mm, which glb_relax skips and where the elbow and hair spikes were) count.
-Retry (Fable review: the first pass put black blobs on the thighs in idle): the legs/hands skin primitive (skin-v95b) was
-re-weighted differently. It keeps the live thigh/shin/hips mix; only the arm bones (hand/forearm/upper_arm, 22% on the thigh
-at worst) are removed from the thigh skin and the rest renormalised, and the 7 faces the first pass had made degenerate are
-back (those holes were the black blobs). The top of the thigh (bind y 0.70-0.80 m, under the skirt hem) keeps the live
-weights, blended in, so the thigh opening stays hidden. Skirt, sleeve, shoulder and hair weights are the first pass's.
-Numbers (own numpy skinner, unique edges): share over 3x bind length at idle / run_f 0.25 / run_f 0.60 1.12 / 1.15 / 1.24 %
--> 0.18 / 0.16 / 0.14 %. (Corrected 11-19: the "triangles over 8x 245 -> 0" here was wrong; the Fable review's numpy
-skinner, no minimum edge, 61 glb clips, counts 1379 -> 102 for that pass. With Godot's 8 mm minimum edge over all 1784
-game-clip frames it is 8 -> 0.)
-Close-camera renders (30 clips, 15 fps): idle leg black px per frame live 9.9, first pass 50.4, now 12.9 (no frame over 30 px);
-frames with a 100+ px black blob over all clips live 88, first pass 84, now 74 (hip/thigh wedge gone in run, spear, stomp,
-walk, mantle; crouch band 379 -> 211 px).
-Not fixed (identical in live, not leg skin): the dark wrist cuff and glove, hand slivers, the dark patch by the shoulder in emote.
-Retry 2 (11-19, Fable review: 21 thigh points still followed hand.R, upper right thigh fatter than live): no leg-skin
-vertex keeps any arm weight now (89 -> 0). The stripped weight goes to hips at bind y >= 0.76 m (under the hem), blending to
-thigh.L/R at <= 0.68 m. Giving it all to the thigh bone (first try) opened a bigger black wedge under the right hem. Upper right
-thigh idle width 20.6 cm (live 23.3, bind 16.8). Godot --stretch-check worst 9.15 -> 5.73 (fusion), lower in all 69 clips. Known
-residual: hit_f f1-f6 shows a black wedge under the right hem, larger than live's. In live, hand-weighted thigh points hid that
-gap by accident. Weighting the thigh top to hips hides it but tears every crouch clip.
-Retry 3 (11-19, Fable review: new black under the right/back hem in crouch_l, hit_f, idle, rime_crash, skate_stop, death,
-crouch_b, walk/run): weights only again (only Body JOINTS_0/WEIGHTS_0 differ from live; positions, indices, UVs, spear,
-skeleton and clips byte-identical, no triangle deleted or split). The hem black was the thigh skin creasing under the hem
-(back faces show black), not a hole. Fix: the right thigh skin (0.45-0.91 m, leg-weighted, no arm weight) has smoothed
-hips/thigh/shin weights; the boot-top and hem seam copies that the earlier passes had split (cloth/fur vs skin at one
-position, different weights) carry one weight set again; 5 inner-thigh points move shin -> thigh. Above 1.0 m (sleeves,
-waist, the arm cut) the weights are the previous pass's, and no vertex gains arm weight. Picked by a ray-cast black-face
-check on the game's own poses for all 1784 frames, then confirmed in GPU renders (live audit harness).
-Numbers vs live: Godot --stretch-check worst 9.15 -> 5.73 (fusion), lower in 68 of 69 clips (walk_fl 3.33 -> 3.94); share
-of edges (>= 5 mm) over 3x, game poses: idle 0.82 -> 0.12 %, worst clip peak 1.38 -> 0.36 %, clips peaking over 0.5 %
-62 -> 0 of 69. GPU close cam, 1784 frames: frames with a new 100+ px black blob vs live 2 (previous pass: 164 in the
-review), frames where a live blob is gone 587; idle frames with a new 40+ px tooth 4 of 146 (previous pass 136).
-Known residual: death f23-37 at the game camera (lying down) shows a black patch at the thigh top / left hem, larger than
-live's; the left hem weights that close it open one in crouch_b instead. Proof: /home/boki/gens/claire-fix4-1119/.
-
-Retry 5 (11-19 night, Fable review 4 plus eye-level and knee-level views of every clip): weights only (Body JOINTS_0/WEIGHTS_0;
-mesh, UVs, spear, rig and clips byte-identical to live). Both legs' skin (0.28-0.88 m) is rebuilt from the live weights (arm bones
-removed) blended 80 % toward a clean ramp: shin 0 -> 1 over 0.58 -> 0.40 m (knee), hips 0 -> 1 over 0.60 -> 0.92 m (under the hem
-at 0.72 m), thigh in between. Live smeared hips ~0.35 and shin ~0.25 over mid-thigh, which pinched one thigh to half its rest radius
-and swelled the other to 2x in stance, folding the skin into black patches. Cloth with leg weight lying on that skin follows it
-(seam copies exact). Then 2-5 mm edges (under 1.15 m, no arm/spring verts) share weights (8 smoothing steps).
-Picked from 20 candidates, each rendered for all 69 clips x 3 cameras on GPU (rp1).
-Numbers vs live: Godot --stretch-check worst 9.15 -> 5.73 (fusion), 69 clips still over the 1.30 limit. Edges over 3x, game poses,
-1784 frames: edges >= 5 mm idle 0.82 -> 0.05 %, worst clip peak 1.38 -> 0.22 %. Black pixels over all frames: eye cam -22 %,
-knee cam -27 %, game cam -14 %. Rest pose, 4 sides eye and knee level: 0 px different.
-Known residual (not fixed): death f22-37 (bent knee lying on the skirt, up to 127 px at eye level, 57 px at the match camera) and a
-wedge at the hem of a raised thigh (crouch_f, crouch_l, mantle, skate, wall; 196 knee-level frames with a new 100+ px piece) are new black vs live; idle f105 67 px at the
-match camera. Proof: /home/boki/gens/claire-fix6-1119/.
-Retry 6 (11-20, job 20261119-225611-a1): weights only, on top of retry 5. The black wedge under the hem of the raised right
-thigh (crouch_idle, crouch_in/out/f; knee and close cameras) was the dark inner skirt between the legs, showing because the
-outer front-right hem (x 0.11-0.30 m, front, bind y 0.70-0.90 m, hips-led, no arm weight) followed thigh.R and lifted open.
-That hem now hands 60 % of its thigh.R weight back to hips (smooth ramp, full at the hem). Inner hem kept: moving it too opened
-the open thigh top in death. 15 points change by more than 2 %; mesh, UVs, spear, rig and clips byte-identical.
-Picked from 16 candidates rendered on the crouch + death clips at 3 cameras. Then all 69 clips (1737 frames), 4 cameras, live
-vs fixed. Count = new black at least 3 px thick (outline dashes excluded) that is more than 3 px from any live black.
-Frames with a new 40+ px piece: knee 0, eye 0, close 0 (retry 5: 100 / 100 / 100). Game camera 6 (ledge f13-16, mantle f2-4,
-max 75 px): the back-skirt crease live also has, moved a few px. Reviewer-style count (any black): 0 frames of 100+ px on every camera.
-Thick black over all frames vs live: eye -42 %, knee -49 %, close -49 %, game -15 %.
-Edges over 3x (>= 5 mm, game poses): idle 0.86 -> 0.05 %, worst clip (ledge) 1.56 -> 0.22 %, clips over 0.5 % 63 -> 0.
-Godot --stretch-check: worst 9.15 -> 5.73 (fusion), median 5.33 -> 3.35, 66 of 69 lower. Higher: walk_fl 3.33 -> 5.00,
-walk_br 4.00 -> 4.53, run_br 4.80 -> 5.01 (same on retry 5; no visible defect). All 69 still over 1.30.
-Rest pose, 4 sides, eye and knee level: 0-22 px of 640k differ (outline dashes at the glove/hem); live vs live re-render: 0.
-Proof: /home/boki/gens/claire-fix7-1119/ (4 MP4s live | fixed with clip + frame, rest sheet, review-items sheet, per-clip sheets).
-Retry 7 (11-20, deep job 20261119-235106-a4): weights only again (Body JOINTS_0/WEIGHTS_0; json, mesh, UVs, textures, spear, rig and
-clips byte-identical to live). Retry 6 still drew a new dark sliver on the front sash in every idle frame (and g_wave, glide, ledge):
-1247 waist points (y > 0.95 m, hips-led) had lost their live forearm share (up to 0.11) to hips, so the sash slid against the dress.
-Half of that share now goes to the same side's upper_arm, half stays on hips; no forearm or hand weight comes back on the torso
-(all of it on upper_arm opened a wedge under the raised arm in ledge; live weights back also worked but re-adds forearm on the waist).
-Smoothing the hard hips/thigh step on the right thigh top (it lifts walk_fl in --stretch-check) was tried and reopens the crouch hem
-(new black up to 875 px), so the step stays.
-Numbers vs live: Godot --stretch-check worst 9.15 -> 5.73 (fusion), median 5.33 -> 3.40, lower in 66 of 69 (walk_fl 3.33 -> 5.00,
-walk_br 4.00 -> 4.53, run_br 4.80 -> 5.01, same as retry 5). Edges >= 5 mm over 3x (1737 game frames): idle 0.86 -> 0.05 %,
-worst clip 1.56 -> 0.25 %. Local renders (software GL, all 1737 frames): match camera new black 40+ px 0 frames (retry 6: 7);
-close camera (1.8x) total black -30 %, idle new 40+ px 131 -> 24 frames (left: the hanging ribbon's outline, 1-2 px wide).
-Proof: /home/boki/gens/claire-fix8-1120/.
-
+## 2026-11-20: tearing fix (ext/hunter-fix-claire-1118), skin weights only (retry 8, job 20261119-224604-a3)
+Under animation the v95 mesh tore: noisy bone-heat weights (hand/forearm on hip and thigh skin, uneven hips/thigh/shin
+mixes) gave 3-10x edge growth and black folds. Only JOINTS_0/WEIGHTS_0 of the Body mesh changed (160,098 bytes): json,
+positions, indices, UVs, textures, spear, skeleton, bone names and all clips are byte-identical to live, so the rest pose
+is the same. No vertex has arm and leg weight together (live: 655).
+Method: re-derived from the LIVE weights (retries 1-7 are superseded; they are in the branch history). Per welded vertex
+(seam copies share one value) the weights were optimised over the game's own clip poses (every clip frame, dumped from
+Sync): stretch/compression of every edge, the 64 worst edges per pose, triangles turning inside out, and a pull back to
+the live weights so the look holds. Candidate bones = the vertex's own live bones and its 1-ring's; no arm bone on leg
+skin, none added where live had none; head/neck (bind y >= 1.40 m) untouched. Six runs (different seeds/terms) were
+averaged and cut to 4 influences; leg skin below 0.70 m (ramped to 0.80 m) takes the 4-run average, which kept the
+crouch knee crease thin. Scripts: /home/boki/gens/claire-fix-ens-1120/scripts/ (opt*.py, job-dir tools, not shipped).
+Numbers vs live (Godot --stretch-check): worst 9.15 -> 4.40 (ledge), median clip 5.33 -> 2.32, clips over 3.0: 69 -> 8;
+still all 69 over the 1.30 limit (fused arm/torso and leg/hem geometry; the mesh is not cut). Edges over 3x (5 mm or
+longer, game poses, 1737 frames): idle 0.86 -> 0.07 %, worst clip 1.56 -> 0.48 %, clips over 0.5 %: 63 -> 0.
+New black vs live (piece not within 3 px of live black, 800 px software-GL renders): close cam 0 frames >= 100 px,
+1 frame >= 40 px (45 px); match cam 0 >= 100 px, 13 >= 40 px (max 47, crouch knee crease); 2x lens on the 20 worst clips
+0 >= 100 px. Black pixels over all frames: close -79 %, match -55 %. Proof: /home/boki/gens/claire-fix-ens-1120/.
 
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
