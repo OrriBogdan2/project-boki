@@ -10,6 +10,7 @@ extends RefCounted
 const GEN := preload("res://tools/step_contacts_gen.gd")
 const SLACK := 2             # frames at 60 fps a cue may sit off its plant
 const EDGE := 12             # frames at either end of a sample whose plants and cues are not judged (cut stretches)
+const LOCK_KEEP := 0.4        # of the range: the lift-dip test for a foot-locked run (see _case)
 const OLD_TIMER := 0.32      # s: the running footstep timer the cue replaced
 const CASES := [["walk.f", Vector2(0, 1), "walk"], ["walk.b", Vector2(0, -1), "walk"], ["run.f", Vector2(0, 1), "run"],
 		["run.l", Vector2(-1, 0), "run"], ["crouch.f", Vector2(0, 1), "crouch"]]
@@ -50,19 +51,23 @@ func _hero(main: Node, id: String) -> void:
 		if c[2] == "crouch" and not clips.d.has("crouch"):
 			continue
 		var st := GEN.moving(c[1], float(speeds[c[2]]), c[2] == "crouch")
-		_case(WardenGlb.art(id), String(c[0]), GEN.sample(m, clips, st, clips.steps), GEN.tracked(clips) == ["hips"])
+		var lock: bool = c[2] == "run" and float((clips.d["loco"].get("foot_lock", [0.0, 0.0]) as Array)[1]) > 0.0
+		_case(WardenGlb.art(id), String(c[0]), GEN.sample(m, clips, st, clips.steps), GEN.tracked(clips) == ["hips"], lock)
 	m.free()
 
 
 ## Judges one case: each cue against its own bone's plants, each plant against the cues of that bone.
-func _case(art: String, case_name: String, got: Dictionary, hover: bool) -> void:
+## `locked`: a foot-locked run holds the planted ankle flat (WardenGait foot lock), so its height dips below the plant's
+## own low several times per stride and the plants read off it are not exact: the plants are read with a wide KEEP and
+## only the cues are judged (each must sit on a plant of its own foot), not the plants against the cues.
+func _case(art: String, case_name: String, got: Dictionary, hover: bool, locked := false) -> void:
 	var n := int(GEN.SAMPLE_S / GEN.DT)
 	var worst := 0
 	var missed := 0
 	var plants_n := 0
 	var all_plants: Array = []
 	for i in (got["ys"] as Array).size():
-		var plants := GEN.plants(got["ys"][i])
+		var plants := GEN.plants(got["ys"][i], LOCK_KEEP if locked else GEN.KEEP)
 		var own: Array = (got["cues"] as Array).filter(func(c): return int(c[1]) == (2 if hover else i))
 		var cue_frames: Array = own.map(func(c): return int(c[0]))
 		for p in plants:
@@ -70,6 +75,8 @@ func _case(art: String, case_name: String, got: Dictionary, hover: bool) -> void
 			if p < EDGE or p >= n - EDGE:
 				continue
 			plants_n += 1
+			if locked:
+				continue
 			var off := _nearest(cue_frames, p)
 			worst = maxi(worst, off)
 			missed += 1 if off > SLACK else 0

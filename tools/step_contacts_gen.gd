@@ -29,7 +29,7 @@ const WAYS := [Vector2(0, 1), Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vec
 
 ## The frames of `ys` where it reaches each of its lows: per stretch below HALF of its range whose low is within KEEP
 ## of the lowest, the first frame within REACH of that stretch's low. --step-contacts-check reads plants with it too.
-static func plants(ys: PackedFloat32Array) -> PackedInt32Array:
+static func plants(ys: PackedFloat32Array, keep := KEEP) -> PackedInt32Array:
 	var lo := INF
 	var hi := -INF
 	for y in ys:
@@ -48,7 +48,7 @@ static func plants(ys: PackedFloat32Array) -> PackedInt32Array:
 			low = minf(low, ys[j])
 			j += 1
 		for k in range(i, j):
-			if low <= lo + KEEP * (hi - lo) and ys[k] <= low + REACH * (hi - lo):
+			if low <= lo + keep * (hi - lo) and ys[k] <= low + REACH * (hi - lo):
 				out.append(k)
 				break
 		i = j
