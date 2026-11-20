@@ -44,7 +44,7 @@ func _home():
 	d["roster"].append(k)
 	k["starter"] = true
 	d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "hob_intro": true}  # (Hob's look is done)
 	Save.d = d
 	HomeLayout.ensure(Save.d)
 	var home = await main._hb_home()
