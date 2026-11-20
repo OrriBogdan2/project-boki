@@ -742,6 +742,8 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
 		holds[key]["pts"] = extra.get("pts")
+		if extra.has("at"):              # (a zone that follows something: its emitters move with it)
+			holds[key]["at"] = extra["at"]
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -779,6 +781,11 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
 	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "pts": extra.get("pts")}
+
+## (checks) whether h's hold of move is running now (asked within HOLD_LINGER).
+func holding(h: Hunter, move: String) -> bool:
+	var e: Dictionary = holds.get("%d/%s" % [h.get_instance_id(), move], {})
+	return not e.is_empty() and m.time - float(e["last"]) <= HOLD_LINGER
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
