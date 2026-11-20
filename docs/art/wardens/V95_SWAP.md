@@ -253,3 +253,7 @@ Warden's `*_v95.json` and the joints read off `v95_grid.py`'s renders; Gil's are
 With `--no-import`, run `texture_imports` (or v95_to_game without it) before committing: it sets the extracted images'
 VRAM compression. Proof shots: `--warden-shots --wardens=gil --knee` (knee_34.png). Gil's glb has no clips (his motion is
 the procedural rig's), so `--stretch-check` measures nothing for him and `--clip-shots` cannot film him.
+With `--weights meshy` only the spec's regions marked `"meshy": true` apply (11-20): Meshy's humanoid rig has no tail,
+so Gil's tail boxes (the fin and the stalk under the coat hem) are marked; a region written for bone heat (his satchel
+on the hips) would cut Meshy's right sleeve onto the hips. Candidates 11-20 round 2: E (sheet A: the grin views plus
+the turnaround's back-three-quarter for the full dorsal fin, on the branch), D (B), H (C: E's views with a fist edit).
