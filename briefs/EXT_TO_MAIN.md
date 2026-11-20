@@ -10700,3 +10700,4 @@ READY ext/sfx-hunter-footsteps e3d5d4ddf0 (bulk-rebase: origin/main merged in me
 READY ext/lace-vfx-data b2d19b4192 (bulk-rebase: origin/main merged in mechanically, was b10af892cb; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/albert-knock-rows d5519032d8 (bulk-rebase: origin/main merged in mechanically, was 9dc76b9619; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/boki-idle-batch-b 55ecae8221 (bulk-rebase: origin/main merged in mechanically, was 731324de64; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/vfx-albert-e-wall c35c5fde7c (origin/main aba9ecce9e merged; bjorn_fx.gd + VFX_QUALITY.md conflicts resolved: main's trimmed BjornFx kept, branch's translucent AegisWall kept; --check 0 fail, hero-vfx-check only the gunslinger rounds-forearm red (not Albert), health --strict reds only in files this branch doesn't touch)
