@@ -134,6 +134,11 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
+Snd, Motley and Gil (11-20, ext/sfx-motley-gil-bar, code read): 3 -> 4 each. Every ability's cast and hit are the
+Hunter's own and distinct, the Snap miss, the Trade's far end, an unpopped seed and the slime puddle's end have cues, and
+Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5: Nightwell's close,
+Riptide's spout hit and the Tide lunge's cast still have none.
+
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
 Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
 Cinder 30, Kael 29); scoring all twelve from the strips with one hand puts them 1-2 lower. Neve went down one point
