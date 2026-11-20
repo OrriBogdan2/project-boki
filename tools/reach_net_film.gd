@@ -39,7 +39,8 @@ func _host() -> void:
 	var idle := 0.0  # s the copy's arm has been home (once the reel ends, this game's hunter goes back to STAND)
 	var t := 0.0
 	while t < FILM_S:
-		idle = idle + DT if (copy.ak as DredgeKit).wire.is_empty() else 0.0
+		var wire: Variant = copy.ak.get("wire")  # (null on a build before Net 0.24.19: the before film)
+		idle = idle + DT if wire == null or (wire as Array).is_empty() else 0.0
 		if idle > 0.6 and m.player.pos.distance_to(home + STAND) > 0.3:
 			_fresh(m.player)
 			m.player.teleport(home + STAND)
