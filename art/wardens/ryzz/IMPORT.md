@@ -60,3 +60,18 @@ No-gum version (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "want TWO versions")
 `ryzz_nogum` (`content/rules/warden_look.json` `"ryzz_nogum": {"hide_bones": ["gum"]}`, no .glb of its own) is this
 same model with the `gum` bone shrunk away every frame (WardenSync), and no gum fidget (MageGum). Pick it with
 `--warden-variant=ryzz_nogum`; shipping it as the default would move `hide_bones` onto `"ryzz"`.
+
+Sparkle 3D repair (2026-11-20, ext/sparkle-3d-fix-1120, owner 11-20 "why does Sparkle look broken in game"): the same
+doll pass A model (face, smirk, gum on the lips kept), rebuilt so it no longer shreds. Causes, measured on the live glb
+with job tools (`diag.py`: sliver = 3D aspect > 12, smear = UV/3D area < 0.15x median):
+- hair strands, ragged black collar, smeared patches: the keep_uv swap decimated Meshy's triangle soup to 60k and left
+  slivers (14.4% of tris; F 0.4%) and smeared UVs (2.1%; F 0.2%). Fix in Meshy: quad remesh of the doll master
+  (`meshy_task.py remesh --topology quad`, 30k quads, 5 credits) re-textured at 4k ->
+  `/home/boki/meshy/sparkle-fix-1120/master_q30k_4k.glb`, swapped with `v95_to_game.py ryzz --weights meshy --remeshed`.
+- stretched hands: bone-heat weights plus the spec's arm joints still being the 11-12 master's (wrists 7 cm wider and
+  8 cm higher, arms 20 cm off their bones). Arm joints re-read with `tools/art1/v95_meshy_joints.py` (d065da3debd) and
+  Meshy's auto-rig weights; hand edge stretch p99 over the clips 9.7-41.7x -> 1.2-1.5x.
+- heads tall, crown to the game rig's head joint: live 7.8 -> 6.95 (2D pick 6.7; the brief's 5.1 used another head measure).
+- not causes: LOD, shader, skin binds (inverse binds = rests, 0 deg), winding (live 0.5% flipped, F 0%).
+Result: 59,948 tris, 49 clips and anchors kept, glb 12.1 MB (was 16.6), `ryzz_v95.jpg` 4k; `ryzz_v95b/c.jpg` dropped
+(the remeshed model has one texture). The gum bone stays at its lips spot (`move_bones`).
