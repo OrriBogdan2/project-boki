@@ -80,6 +80,7 @@
 		, "air_legs": true},
 		"jug_slam": {
 			"clip": "slam",
+			"fade": 0.3,
 			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
 			"blend_out": 0.45
 		},

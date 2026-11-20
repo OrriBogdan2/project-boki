@@ -33,6 +33,8 @@ const HOLD_BOUND := ["gunslinger_e"]
 ## A blend-in this short is a deliberate snap (hem.json: the release shows in full; `--clip-check` asserts it
 ## over within 0.05 s of the spawn), so the gap does not ask it longer.
 const SNAP_FADE := 0.04
+## (a blend-in may fall this far short of its gap: Kael's meteor landing keeps 0.05 s, which --slam-follow-check pins its impact frame to)
+const IN_SLACK := 0.025
 const DT60 := 1.0 / 60.0
 const DEG_MAX := 25.0           # deg: no bone turns more than this between two frames at 60 fps (a hand-over pop)
 const DEG_WARM := 90            # frames in the starting pose before a hand-over is driven (a stance settles)
@@ -110,7 +112,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 		var length := clips.lib.get_animation(clip).length
 		var up = mv.get("upper", false)
 		var fade_in := float(mv.get("fade", WardenClips.FADE))
-		var fade_out := float(mv.get("fade_out", WardenClips.FADE_LOCO))
+		# ("blend_out" hands the body back to the legs while the clip plays on: it covers the out gap as a fade_out does)
+		var fade_out := maxf(float(mv.get("fade_out", WardenClips.FADE_LOCO)), float(mv.get("blend_out", 0.0)))
 		var gaps: Array = []     # [stand in, stand out, walk in, walk out], each [m, point]
 		var full_up: bool = up is bool and up        # ("moving": upper only while he walks)
 		for mode in [[stand, full_up], [walk, full_up or up is String]]:
@@ -125,7 +128,7 @@ func _hero(id: String, dd: Dictionary) -> void:
 		print("POP %s %s | %.3f %s / %.3f %s | %.3f %s / %.3f %s | %.2f / %.2f -> %.2f / %.2f" % [id, km,
 				gaps[0][0], gaps[0][1], gaps[1][0], gaps[1][1], gaps[2][0], gaps[2][1], gaps[3][0], gaps[3][1],
 				fade_in, fade_out, need_in, need_out])
-		if (fade_in < need_in - 0.005 and fade_in > SNAP_FADE) or fade_out < need_out - 0.005:
+		if (fade_in < need_in - IN_SLACK and fade_in > SNAP_FADE) or fade_out < need_out - 0.005:
 			short.append("%s fade %.2f/%.2f" % [km, maxf(need_in, fade_in), maxf(need_out, fade_out)])
 	ok(short.is_empty(), "%s: every move's blend is as long as its cast gap asks, inside its first key and the caps "
 			% id + "(short: %s)" % str(short))
