@@ -1,5 +1,23 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+## 2026-11-20: skirt hem on one smooth hips->thighs field (ext/hunter-fix-hem-1118, after art-gate FAIL on match_loops.jpg)
+Gate: the 11-19 skirt still broke into long fanned strands (f602 f604 f560 f563 f566) and specks at the hip cut. Cause in
+numbers: that build bound the skirt ~90% to the thighs from waist to hem, and neighbouring strands carried different
+thigh shares (sd 0.2), so a raised thigh lifted half the hem into a horizontal fan and pulled strands apart. New method
+(not a re-weight pass): every skirt/hem vertex (cloth-v95b + skirt leather-v95b below 1.0 m, off the leg skin/boots,
+not the crossed back blades) takes its weights from one analytic field of its rest position: hips (1-T), thighs T split
+L/R by a smoothstep over x +-0.20 m; T = drop(1.0 m -> 0.5 m) x 0.55 front / 0.45 side / 0.35 back. Neighbouring strands
+therefore move as one sheet. Kept: the 11-19 hip fix (source weights above 0.98 m, blended into the field by 0.82 m;
+own weights within 2 cm of the leg/boot axis, field from 10 cm), the arm cut, the hip caps. Removed: 11 loose pieces
+(3-10 verts, 36 triangles) the 11-19 cut left at the hips (one weighted to the shoulder plate). Positions, UVs, texture,
+skeleton, bone names and all clips unchanged. Script: hem_cone.py (`0.55 0.45 0.35 profile=drop side=0.2 leg=0.02,0.10
+hip=1.0,0.82`) in ~/gens/hunter-fix-1118/reviews/hem-evidence-1120/scripts (job dir copy).
+Numbers, LIVE / 11-19 FIX / NOW (every clip, glb_relax sampling; hem_metrics.py): hem swing vs the torso p95, median clip
+84 / 46 / 22.5 deg (worst 172 / 156 / 50); neighbouring-strand split p99 5.9 / 1.21 / 0.83 cm, max 28.8 / 18.1 / 5.6 cm;
+edges over 3x 252 (0.56%) / 0 / 7 (0.015%); Godot --stretch-check worst 17.81 / 2.72 / 4.37 (roll; the skirt panel
+between the legs stretches in tucks instead of splitting). hunter_mesh_check: degenerate 0, spike edges 127 -> 128,
+far_bone 170 -> 194 (both WARN as before), glTF validator 0 errors.
+
 ## 2026-11-19: hands/forearms split from the skirt, weights + vertex split (ext/hunter-fix-hem-1118, retry 11-19k)
 Restarted from main's glb (sha1 fd2a8ff1). Positions, UVs, normals, colours of every live vertex, every live triangle, the
 skeleton, bone names, all 53 clips, textures, bow and arrow are unchanged; the rest pose is identical. Body mesh only:
