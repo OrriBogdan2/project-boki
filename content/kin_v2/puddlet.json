@@ -6,7 +6,6 @@
 		"Axolotl"
 	],
 	"theme": "prism",
-	"type2": "tide",
 	"flavor": "An axolotl whose frills grew into living crystal. Prismander bends light into shields and dazzling beams.",
 	"colors": {
 		"body": "#f0a6d6",
@@ -112,10 +111,5 @@
 		"temper": "Gentle",
 		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
 		"play": "Shields you and dazzles foes with bent light. Loyal, a bit of a worrier."
-	},
-	"roster": {
-		"art": "todo",
-		"line": "puddlet",
-		"stage": 1
 	}
 }

@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow._on_used)
 	for hero in Arch.ORDER:
-		var m: Match = flow._match(main, hero, 79)
+		var m: Match = flow._match(main, hero)
 		for o in m.hunters:
 			if o != flow.hunter:
 				foe = o
