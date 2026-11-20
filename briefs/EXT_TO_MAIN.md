@@ -10619,3 +10619,4 @@ READY ext/grimble-vfx-data a046ccf25bc19406fe51853a714d877510b727b1 (Grimble fla
 READY ext/kael-knock-cut 82179cc428cc (Kael Chain Lunge, Haul Slam, Flame Step, Riposte strike: ours-only knock-back dropped to 0; Riposte 6.0 moved to juggernaut.json x.strike_kb; knock table, hero doc, wiki updated)
 READY ext/kael-knock-cut c6e906ba6bc530f116548223bf2ec6536cec0e5d (Kael: Chain Lunge/Haul Slam/Flame Step/Riposte knock to 0, Riposte kb moved to juggernaut.json; combo/knock-chain/parity 0 fail, move-feel 14 = main)
 READY ext/albert-vfx-data 87652c6716b (Albert looks onto bulwark.json: beacon, dash wake, Mending Ground column+zone, aegis/block/Faultline; BjornFx keeps only hammer, whirl, aegis wall meshes)
+READY ext/hud-holdback 62bcd58e5cb57c0c294062e837bdab3bb8da83bc (HudReveal holds back spare belt slots + locked ult tiles; HudGroups counts only drawn blocks; fresh landing 9 -> 6 groups)
