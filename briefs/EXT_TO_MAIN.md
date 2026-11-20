@@ -10467,3 +10467,4 @@ READY ext/lace-needle-anim c19c966ae2719ce63c438d5d5aa142c724867676 (Lace needle
 READY ext/combat-free-dead-mobs 8693f218ed6141a400b85a781e2d7821d235a688 (MobReap frees dead camp monsters after their dissolve; 10 min soak 738 mobs -> 4, +34200 nodes -> +1500; --mob-reap-check)
 READY ext/rpc6-settings-pollution-1117 d2ccfdfce9 (bulk-rebase: origin/main merged in mechanically, was 2b3b22c921; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-f44ae5a2 c053109f06 (bulk-rebase: origin/main merged in mechanically, was a8ce72698f; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/ui-ability-bar-charges 10ae49be97 (ability-bar-check now asserts every kit and rank: dash and RMB charge counts, discs, spent dash; no bar bug found)
