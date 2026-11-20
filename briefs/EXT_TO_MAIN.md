@@ -10478,3 +10478,4 @@ READY ext/tut-boki-leads 3ee1f8b960 (merge origin/main a78edb3fd6 in, was 87c89a
 READY ext/farm-boki-duel-game e4810e9e7b843ea00bd9029a42b6b4d16eb5264c (Fetch Cup: Boki vs Boki fetch contest, Speed+Focus, 60 s round, in the garden games list; spec docs/GARDEN_GAMES.md)
 READY ext/hunter-regen-gil-1120 ca73a8cbf8 (Gil 3D regen candidate A, DRAFT model PR for owner visual check: Meshy from turnaround + live fish grin, sheet+MP4 in /home/boki/gens/hunter-regen-1120/gil/sheet)
 READY ext/ui-menu-small-res 8067daa485 (menu-fit-check: all Esc pages + Settings tabs at 3 sizes x text 100/150%: 152 states, 0 clipped/overlapping; no layout fix needed)
+READY ext/farm-boki-duel-game a443b8ba666 (Fetch Cup garden contest: spec, 60 s round, Speed/Focus result, gems/joy reward, checks; garden_sim burrlet crash fix)
