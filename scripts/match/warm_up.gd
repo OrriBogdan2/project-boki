@@ -52,6 +52,7 @@ func run(progress := Callable()) -> void:
 		break
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
 	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
+	if m.fx: KinTypeTrail.of(m.fx)     # and the Boki type trails (made when the first Boki is drawn)
 	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
@@ -201,6 +202,29 @@ func _mob_stand_ins() -> Node3D:
 				p.process_material = pm
 				p.draw_pass_1 = _fx_quad(sh)
 				holder.add_child(p)
+	# and every shader file on a quad (a particle one in an emitter): a material made only when first needed (the
+	# last-alive aura, a downed hunter's wisp, a kit's ice strip) compiled its shader mid-match. Those the match
+	# already has share their key and add nothing; a later launch's stamp skips the rest.
+	for f in DirAccess.get_files_at("res://shaders"):
+		var fn := f.trim_suffix(".remap")
+		var sh: Shader = load("res://shaders/" + fn) as Shader if fn.ends_with(".gdshader") else null
+		if sh == null:
+			continue
+		if sh.get_mode() == Shader.MODE_SPATIAL:
+			var mi := MeshInstance3D.new()
+			mi.mesh = _fx_quad(sh)
+			holder.add_child(mi)
+		elif sh.get_mode() == Shader.MODE_PARTICLES:
+			var p := GPUParticles3D.new()
+			p.amount = 1
+			p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
+			var pm := ShaderMaterial.new()
+			pm.shader = sh
+			p.process_material = pm
+			p.draw_pass_1 = QuadMesh.new()
+			holder.add_child(p)
+	# and a squad's drop rocket (built at launch, in the ride)
+	holder.add_child(DropRocket.model(Color.WHITE))
 	return holder
 
 func _fx_quad(sh: Shader) -> QuadMesh:
