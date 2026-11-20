@@ -160,6 +160,39 @@ Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN
 | practice | {"bpm": 70, "rounds": [4], "phrases": 1, "score_beats": 1} |
 | practice_doc | The first dance on a save opens with this slow phrase (these keys over the ones above): the lead hops 4 beats at 70 bpm and you answer once; no prize. Skip it with interact; round one follows either way. |
 
+## base_fetch (`content/rules/base_fetch.json`)
+
+Fetch Cup, a Boki vs Boki garden game (docs/GARDEN_GAMES.md, scripts/home/base_fetch.gd). Only with farm_build.json base_mode on. Two Boki chase a tossed seed for a 60 s round; the first back scores. Units: seconds, metres, joy and trust 0-100 points.
+
+| Setting | Value |
+|---|---|
+| round_s | 60 |
+| toss_s | 0.8 |
+| bring_s | 1.2 |
+| dist | [6.0, 10.0] |
+| dist_doc | Metres a toss flies, rolled between these each toss. |
+| pace | 5 |
+| pace_doc | Metres a second of a Boki with no Speed points and a plain mood. |
+| speed_per_point | 0.005 |
+| focus_per_point | 0.02 |
+| stats_doc | Pace = pace x (1 + Speed points x speed_per_point); half a percent a point, like the match bonus. Focus makes the fumble chance fumble / (1 + Focus points x focus_per_point). |
+| mood | [0.92, 1.08] |
+| trust_max | 1.05 |
+| wobble | 0.25 |
+| wobble_doc | Each trip's time is rolled within +-wobble, so the better Boki is likely, not certain, to win a toss. |
+| fumble | 0.5 |
+| fumble_s | 1.5 |
+| fumble_doc | Chance a Boki with no Focus points fumbles the pick-up, and the seconds a fumble costs. |
+| head_start | {"great": 0.7, "good": 0.85, "miss": 1.0} |
+| head_doc | Your one call: the backed Boki's next trip time is multiplied by this. |
+| energy | 8 |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -8 |
+| gems_win | 3 |
+| gems_ran | 1 |
+| card_s | 6 |
+
 ## base_kite (`content/rules/base_kite.json`)
 
 Kite Tow (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_kite.gd). Only with farm_build.json base_mode on, and only on Kitewind Ridge. Your Boki glides on a kite round one loop through twelve rings, steered with A and D; Speed sets the pace and a missed ring costs a second. Space flaps the kite up over the high rings; flaps are limited and updraft vents give one back. A lap is raced against a visiting kite whose stats are yours times the cup round's min_ratio (garden_prizes.json kite), so prizes, the first win of the day and the cup come with it. Units: metres, seconds, metres a second; joy is 0-100 points.
@@ -1963,7 +1996,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | Setting | Value |
 |---|---|
 | _doc | The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); node = the game's fixture on it (post, stump, basket, log), placed beside a Training post, so a game without one is not listed either; own = [rules file, key] of the zones where it stands without a Training post (a stump spot, a court); a game is listed once for every open zone it stands in (a Training post in the zone, or an own entry), whichever zone the garden shows; rule = the one line shown under the name. Each game exposes use(). |
-| games | [{"id": "race", "name": "The Dash", "member": "hrace", "node": "post", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."}, {"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "own": ["base_shove", "spots"], "rule": "Two Boki push a stump; Power against Guard decides who tips it."}, {"id": "seek", "name": "Seek", "member": "hseek", "node": "basket", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."}, {"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "own": ["base_volley", "courts"], "rule": "Bat a spark across the log; Speed and Focus win the point."}] |
+| games | [{"id": "race", "name": "The Dash", "member": "hrace", "node": "post", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."}, {"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "own": ["base_shove", "spots"], "rule": "Two Boki push a stump; Power against Guard decides who tips it."}, {"id": "seek", "name": "Seek", "member": "hseek", "node": "basket", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."}, {"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "own": ["base_volley", "courts"], "rule": "Bat a spark across the log; Speed and Focus win the point."}, {"id": "fetch", "name": "Fetch Cup", "member": "hfetch", "node": "mat", "rule": "Two Boki chase a tossed seed for a minute; Speed and Focus bring it home first."}] |
 
 ## mode_boki (`content/rules/mode_boki.json`)
 
