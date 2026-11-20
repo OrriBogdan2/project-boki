@@ -391,6 +391,19 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: a hit that leaves the hunter up resets nothing",
 			not T.downed and U.resets == resets0 and float(K.cd["x"]) > 1.0, "resets %d cd %.1f" % [U.resets - resets0,
 					float(K.cd["x"])])
+	# the data's "killing a living enemy" counts a monster too (the footage resets on a dummy kill, f99-f101)
+	A.step(m, 0.5)
+	T.teleport(home + Vector3(0, 0, 12.0))
+	P.teleport(home)
+	var mob: Ent = m.spawn_mob("skitter", home + Vector3(2.6, 0, 0))
+	mob.hp = 5.0
+	A.aim_at(P, mob.pos)
+	K.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: killing a monster with it resets it (the source's living enemy)",
+			mob.dead and U.resets == resets0 + 1 and float(K.cd["x"]) <= 0.0, "dead %s resets %d cd %.1f" % [mob.dead,
+					U.resets - resets0, float(K.cd["x"])])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
