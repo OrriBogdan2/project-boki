@@ -106,6 +106,10 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
+`kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
+badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`.
+
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
 
