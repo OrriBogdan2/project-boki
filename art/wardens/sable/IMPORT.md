@@ -4,8 +4,6 @@
 Sable keeps main's glb and v95 textures (owner-picked painted face). The train's rig-ship-1117 body (8 degenerate
 triangles vs main's 236) has other UVs, so main's face pass does not carry over; re-run `tools/art1/face_swap.py` on
 the rig-ship body to bring that body back.
-hunter3d1115/A) with the cobalt eye-stones; main's restore had put back the older pre-pick mesh.
-
 ## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
 The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
 IDLE_AUDIT section 9):
