@@ -38,7 +38,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
-  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1). The source is up and
+  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1), `fade` / `out` s the clip blends in and back to the legs (default 0.1 / 0.16; `--cast-pop-check` POPDEG, [LAND_BLEND_POPS.md](../anim_audit/LAND_BLEND_POPS.md)); `air.fade_out` s the fall and glide poses take to let go on touchdown (default 0.12). The source is up and
   moving ~0.15 s after any touchdown, so `moving` stays near 0.1. `--clip-check` measures the jump, the drop, a glide's
   end and a kerb through the clips (take-off, apex, dip, legs back, recovery: the JL rows); `--jump-land-shots --way=`
   films them at the match camera (docs/art/anim_audit/LANDING_WEIGHT.md).
