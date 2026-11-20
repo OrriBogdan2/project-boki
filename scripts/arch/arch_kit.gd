@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
@@ -180,7 +179,7 @@ func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against
 func move_k() -> float: return 1.0
 ## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
 func speed_bonus() -> float: return 0.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -265,7 +264,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -281,7 +280,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -296,7 +295,7 @@ func _r_end() -> void: pass
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
-## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+## its last Loco.press_buffer for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
 func lock_left() -> float: return 0.0
 ## A slot's body-turn rule from the kit JSON's "turn" block (the table in docs/heroes/dash_interactions.md): for
 ## the "early" window (wind-up, channel) and the "late" one (release), "free", "locked" or a cap in deg/s.
@@ -324,8 +323,17 @@ func glide_cancel() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned...). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
