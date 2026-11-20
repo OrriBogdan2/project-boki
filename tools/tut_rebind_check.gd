@@ -158,7 +158,7 @@ func _tips() -> void:
 	var lines := {"move": TipText.move(), "rings": TipText.rings(), "ability (kit)": TipText.ability(true),
 			"ability": TipText.ability(false), "bond full": TipText.bond_full("Fuse", false),
 			"bond full (next)": TipText.bond_full("Fuse", true), "send": TipText.send("Pip"), "scan": TipText.scan(),
-			"stagger": TipText.stagger("Brute")}
+			"stagger": TipText.stagger(), "down": TipText.down(), "skill": TipText.skill("Pip", "Zap")}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
 	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air"),
