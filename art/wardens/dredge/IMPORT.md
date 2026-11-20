@@ -70,3 +70,11 @@ the grip1117 master's 8k paint: grey-mauve skin, legs matched to the torso, dark
 stock wood muted; goo, gold and goggle untouched). Master `~/meshy/v95/Grimble/board1117/A/cand.glb` has grip1117's mesh and
 UVs, so only `v95` (body) and `v95c` (gun) were swapped with `tools/art1/glb_image_swap.py` (game image + resize(A) -
 resize(live) at the game size, JPEG q92); the shard/puddle fixes, rig and clips are byte-equal.
+
+**Regen candidate A (2026-11-20, ext/hunter-regen-dredge-1120, draft until the owner looks):** owner 11-20 asked for every Hunter rebuilt from the
+turnaround. Meshy multi-image-to-3d (meshy-7.1, A-pose) from the front/side/back crops of `~/gens/v95-latest-ta-1119/grimble.png`, quad remesh
+to 60k, Meshy auto-rig weights (`v95_swap` `weights` meshy, spec `art/wardens/src/grimble_regen1120.json`). Meshy's humanoid rig has no goo-hand
+bone, so `meshy_regions` puts the goo arm below the wrist and its tip at his right foot on `hook`. The pack stays on Meshy's head/spine weights:
+moved onto `hoard`, the old lag keys flip it over his face in run_f (worst stretch 30x). The gun is on his hip, as in the turnaround (live 11-17
+pick: in the gauntlet). Worst stretch 17.2x vs live 8.5x (`--stretch-check`); raws, sheets and the numbers: `~/gens/hunter-regen-1120/dredge/`.
+`dredge_v95b.jpg` and `dredge_v95c.jpg` are no longer used by this glb.
