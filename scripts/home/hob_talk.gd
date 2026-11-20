@@ -38,7 +38,7 @@ func busy() -> bool:
 
 ## The second Mask is his to offer: it's on offer, and the house is down (or there is no tutorial).
 func offer_due() -> bool:
-	return ClassUnlock.second_pending() and (not FarmTutorial.active() or FarmTutorial.did("house"))
+	return ClassUnlock.second_pending() and (not FarmTutorial.active() or not FarmHob.house_entry().is_empty())
 
 ## Starts a conversation: what he has to say now (see the file's doc).
 func start() -> void:
@@ -47,7 +47,6 @@ func start() -> void:
 	var h = hob.h
 	var first := not bool(FarmBuilder.state().get("met", false))
 	var ids := FarmBuilder.draw_up()
-	FarmTutorial.event("hob")
 	Save.save_game()
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
@@ -59,7 +58,7 @@ func start() -> void:
 		box.say(_offer_lines(), _show_offer)
 	elif first and FarmTutorial.active() and not FarmTutorial.base():      # the base tutorial is the Boki's to lead
 		box.say(rules()["intro"], box.close)
-	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
+	elif FarmTutorial.current() != "":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:
 		var lines := _blueprint_lines(ids, first)

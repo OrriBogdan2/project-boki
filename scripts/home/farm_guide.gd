@@ -22,8 +22,6 @@ var stay_shown := false      # the base's last step offers Stay beside Skip
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
-var tab_for := ""
-var tree_what := ""
 var done_t := 0.0     # s left of the "Done!" in front of the strip line
 var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
@@ -100,14 +98,6 @@ func _poll() -> void:
 		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
 		if tool != "":
 			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
-		if (cur == "buy" or cur == "sell") and cur != tab_for:
-			tab_for = cur      # the market opens on the tab the step wants
-			h.hmk.vendor_tab = "Seeds" if cur == "buy" else "Sell"
-		if cur == "buy":
-			var gave := FarmTutorial.give_seed_gems()
-			if gave > 0:
-				h._toast(String(FarmTutorial.rules()["gems_toast"]) % gave)
-				h._refresh_top()
 	var st := FarmTutorial.state()
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
@@ -284,17 +274,10 @@ func _place(id: String, p: Vector3) -> bool:
 func target(id: String) -> Vector3:
 	match id:
 		"chop":
-			return _nearest_wild("tree")
-		"stone":
-			return _nearest_wild("rock")
-		"buy", "sell":
-			var stalls := HomeLayout.fixtures(Save.d, "stall")
-			return HomeLayout.deco_center(stalls[0]) if not stalls.is_empty() else Vector3.INF
+			return _nearest_tree()
 		"house":
 			var e := FarmHob.house_entry()
 			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
-		"hammer":
-			return HomeLayout.deco_center(FarmHob.house_entry())
 		"feed":
 			var fs := Econ.feeders()
 			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
@@ -303,13 +286,11 @@ func target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task", "meet", "eat":
+		"meet", "eat":
 			var ke: Dictionary = h._kin_entry(Save.active_kin())
 			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"toy":
 			return FarmTutorial.toy_spot()
-		"hob":
-			return h.hob.pos
 		"expedition", "out":
 			return h.spots["portal"]
 	return Vector3.INF
@@ -319,17 +300,16 @@ func _water_spot() -> Vector3:
 	var c := FarmWater.nearest(Save.d, Vector2(h.ppos.x, h.ppos.z))
 	return Vector3(c.x + 0.5, 0, c.y + 0.5) if c.x >= 0 else Vector3.INF
 
-## The wild tree or boulder nearest the player (the tutorial's chop and mine markers); looked up twice a second at most.
-func _nearest_wild(what: String) -> Vector3:
-	if tree_t > t and tree_what == what:
+## The wild tree nearest the player (the tutorial's chop marker); looked up twice a second at most.
+func _nearest_tree() -> Vector3:
+	if tree_t > t:
 		return tree_at
 	tree_t = t + 0.5
-	tree_what = what
 	tree_at = Vector3.INF
 	var best := INF
 	var w: World = h.world
 	for i in h.hb.wild_t:
-		if String(h.hb.wild_t[i]) != what:
+		if String(h.hb.wild_t[i]) != "tree":
 			continue
 		var at := Vector3(int(i) % w.w + 0.5, 0, int(i) / w.w + 0.5)
 		var d := Vector2(at.x - h.ppos.x, at.z - h.ppos.z).length()

@@ -14,7 +14,6 @@ const GAP_MAX := 4.0       # s: the longest the player may be left without a pro
 const BOT_FARM_S := 6.0    # s the farm bot takes over each step before it does it
 const SLOW_WAIT_S := 5.0   # s the slow player stands still at the start of each match step
 const QUIET_MAX := 8.0     # s: the longest a slow player may go with nothing new to go on
-const HAMMER_BEAT_S := 0.8  # s one hammer swing of yours takes (farm_build.json)
 const MARKER_MOVE_M := 3.0  # m the marker has to shift to count as moving on
 const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}
 
@@ -184,8 +183,8 @@ func _farm(who: String, arch: String) -> void:
 		if id == "house":
 			g.place_house()
 			home._sync_fixtures()
-		elif id == "hammer":
-			_hammer(g)
+			rival += _farm_step(g, id)      # (the site is up: its "wait" hint)
+			FarmSites.finish(FarmHob.house_entry())
 		elif id == "crop":
 			rival += _crop_course(home, g)
 		FarmTutorial.mark(id)
@@ -225,23 +224,6 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 	return rival
 
 ## The slow player hammers the house up, one swing a beat, with the quiet clock running each tick.
-func _hammer(g: FarmGuide) -> void:
-	var e := FarmHob.house_entry()
-	for m in ["wood", "stone"]:
-		Work.add_mat(m, int(FarmSites.build_cost("house").get(m, 0)))
-	var swings := 0
-	while FarmSites.has_site(e) and swings < 100:
-		swings += 1
-		FarmSites.add_swing(e)
-		var t := 0.0
-		while t < HAMMER_BEAT_S:
-			t += 0.1
-			farm_t += 0.1
-			g.tick(0.1)
-			_calm(_farm_fresh(g, "hammer"), 0.1, "farm", farm_t)
-	ok(not FarmSites.has_site(e), "hammer: the house goes up in %d swings" % swings)
-
-
 ## Whether the farm guide shows something new this tick (the step's line, or the world marker's words or place).
 func _farm_fresh(g: FarmGuide, cur: String) -> bool:
 	var shown := "%s|%s" % [g.hint_text(), g.marker.text if is_instance_valid(g.marker) and g.marker.visible else ""]

@@ -1,31 +1,28 @@
 extends RefCounted
 ## --tutorial-playtest-check[=<arch>]: the owner's first-match playtest (11-17), played back.
-##   1. crouch: standing and crouching at the far edge of the lookout top counts, from every side; the ground at the
-##      foot of the cliff does not
+##   1. (the crouch beat is gone: crouching is a first-match hint since the eight-beat cut)
 ##   2. the Boki send: the camp stands in the open (no wall, no cliff, a clear line from the lookout), holds its
 ##      posts while nobody touches it, and a real G tap from the lookout registers the step, even for a Boki
 ##      that trusts you not at all (it never refuses in the tutorial)
-##   3. every step's final text, in order: it names its key (the real bound one), unlocks say "Press <key> to
-##      unlock <name>", the Ultimate (R) and the Fusion (X) are two keys, no Fusion step or line shows (the
-##      tutorial has none), and no text is the old jargon
+##   3. every beat's (and leg's) final text, in order: it names its key (the real bound one), the Ultimate (R) and
+##      the Fusion (X) are two keys, no Fusion step or line shows (the tutorial has none), and no text is the old
+##      jargon
 ##   4. every text fits the strip at 1280x720 and 1920x1080 beside the key cap, the arrow, the distance and the
 ##      counter, at a readable size
 ## It prints every step (TUTSTEP lines) so a reader sees what the player sees. Never touches the save.
 
 const MIN_TEXT_PX := 15  # px: the smallest type the strip may shrink a line to, at 720 p and up
-const EDGE_R := 3.3  # m from the lookout's middle: its far edge (the top is 3.6 m in radius)
 const IDLE_S := 3.0  # s the camp must stay put while nobody touches it
 const SEND_S := 9.0  # s a real tap has to register
-const CROUCH_S := 3.2  # s to hold crouch at the edge (the step wants 1.5)
 const LINE_STEP := 0.25  # m between the samples of a throw line
 const OPEN_R := 2.0  # m of level open ground round each post
-const NO_KEY := ["points", "wayout", "defend", "extract"]  # steps with nothing to press
+const NO_KEY := ["wayout", "defend", "extract"]  # legs with nothing to press
 const OLD_WORDS := ["Hit the line", "big move", "Merge with"]
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
 
 var bad := 0
 var arch := "gunslinger"
-var order: Array = []  # step ids, first seen first
+var order: Array = []  # beat and leg ids (Tutorial.leg), first seen first
 var seen := {}  # id -> {text, detail, cap, lvl, pts, ult_open}
 
 
@@ -61,10 +58,9 @@ func run(main: Node) -> void:
 	_play_to(m, "gkey")
 	m.opts["tut_test"] = false  # (the driver stops: the player's keys are this check's own)
 	_send(m)
-	_crouch(m)
 	m.opts["tut_test"] = true
 	_play_to(m, "")
-	ok(m.player.extracted, "the course still finishes after the lookout and the send")
+	ok(m.player.extracted, "the course still finishes after the send")
 	_words(m)
 	_fit()
 	print("TUTPLAY DONE %s, failures: %d" % [arch, bad])
@@ -85,7 +81,7 @@ func _play_to(m: Match, sid: String) -> void:
 ## What the step shows right now (the last frame of a step is its final text).
 func _note(m: Match) -> void:
 	var tu: Tutorial = m.tut
-	var sid := tu.id()
+	var sid := tu.leg()
 	if sid == "":
 		return
 	if not seen.has(sid):
@@ -94,45 +90,6 @@ func _note(m: Match) -> void:
 	seen[sid].merge({"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}, true)
 
 
-func _restart(m: Match, sid: String) -> void:
-	var tu: Tutorial = m.tut
-	for i in Tutorial.steps().size():
-		if String(Tutorial.steps()[i][0]) == sid:
-			tu.step = i
-	tu._enter()
-	tu.wait = 0.0
-
-
-# ------------------------------------------------------------------ 1. the lookout
-func _crouch(m: Match) -> void:
-	var tu: Tutorial = m.tut
-	var p := m.player
-	var mid := tu.stop("crouch")
-	for i in 4:
-		var dir := Vector2.from_angle(PI * 0.5 * i)
-		var at := mid + Vector3(dir.x, 0.0, dir.y) * EDGE_R
-		at.y = m.world.ground_at(at.x, at.z)
-		var on_top: bool = at.y > mid.y - 0.1
-		ok(on_top, "far-edge point %d (%.1f, %.1f) is on the lookout top" % [i, at.x, at.z])
-		_restart(m, "crouch")
-		p.teleport(at)
-		var t := 0.0
-		while t < CROUCH_S and tu.id() == "crouch":
-			p.inp["crouch"] = true
-			_note(m)
-			m.step(Match.DT)
-			t += Match.DT
-		ok(tu.id() != "crouch", "crouching at the far edge %d finishes the crouch step (%.1f s)" % [i, t])
-	var foot := tu.foe_spot("gkey", 0)
-	_restart(m, "crouch")
-	p.teleport(foot)
-	for i in int(CROUCH_S / Match.DT):
-		p.inp["crouch"] = true
-		m.step(Match.DT)
-	ok(tu.id() == "crouch", "crouching at the foot of the cliff does not count")
-
-
-# ------------------------------------------------------------------ 2. the Boki send
 func _send(m: Match) -> void:
 	var tu: Tutorial = m.tut
 	var p := m.player
@@ -200,18 +157,13 @@ func _open_ground(m: Match, tu: Tutorial, posts: Array) -> void:
 
 # ------------------------------------------------------------------ 3. the words
 func _words(_m: Match) -> void:
-	var caps := {"land": _wasd(), "ranks": TutorialText.rank_combo(), "glide": Settings.key_cap("jump")}
+	var caps := {"land": _wasd(), "glide": Settings.key_cap("jump")}
 	for sid in order:
 		var s: Dictionary = seen[sid]
 		print("TUTSTEP %2d %-9s [%s] %s  | %s" % [order.find(sid), sid, s["cap"], s["text"], s["detail"]])
 		var want: String = caps.get(sid, Settings.key_cap(String(Tutorial.KEYS.get(sid, ""))))
 		if not NO_KEY.has(sid):
 			ok(want != "" and String(s["text"]).contains(want), "%s names its key %s: '%s'" % [sid, want, s["text"]])
-		if sid.begins_with("pick_"):
-			ok(
-				String(s["text"]).begins_with("Press ") and String(s["text"]).contains(" to unlock "),
-				"%s says what to press to unlock: '%s'" % [sid, s["text"]]
-			)
 		for w in OLD_WORDS:
 			ok(not String(s["text"]).contains(w), "%s has no '%s'" % [sid, w])
 	var fuse: String = Settings.key_cap("ultimate")

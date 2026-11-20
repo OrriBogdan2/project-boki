@@ -3281,7 +3281,7 @@ func _open_kin(rec: Dictionary) -> void:
 		pb.tooltip_text = why
 	else:
 		ft.add_child(UI.button("Dress", func(): _open_wear(rec), 0, "paw"))
-		FarmTaskGuide.care_footer(v, func(): _open_feed(rec), func(): _close_panel())
+		UI.footer_primary(v, "Feed", func(): _open_feed(rec), 110, "seed")
 	# roles: quiet links on the left
 	if not partner:
 		fl.add_child(UI.ghost("Make partner", func():
