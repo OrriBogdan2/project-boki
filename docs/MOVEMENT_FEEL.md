@@ -1391,6 +1391,18 @@ Every failing row, with the drift `--feel-golden-check` printed on main before t
 
 The Drills button on the Training Area's bar (`scripts/match/move_drills.gd`) runs five timed drills, one banner line each, pass or fail: dash through three hoops; tap jump, let go, press jump again and hold it to glide 4 m; glide and dive onto a mat; wall kick up a four-terrace wall; mantle a two-terrace ledge. The best pass time per drill is kept in `Save.d["drills"]` (save v15). Pressing the button again skips to the next drill. `--move-drills-check` passes each drill with a bot input script and fails the wrong plays.
 
+## Ledge heights after Hollow Crown 2.0 (`--cliff-mantle-check` height rows, tools/mantle_heights.gd; DECISIONS: ledges always responsive)
+Census of every ledge face on both tiers. Terrace steps: 0.8 m (884), 1.6 m (1020), 2.4 m (4), 3.2 m (3772, the wall tier), 4.0-7.2 m cliffs (1606).
+Stair-flight sides: 0.4-6.8 m (466). Sheer lips: 1.6 and 3.2 m (22, not grabbable by design). Ruin walls and boulders: 3.0 m blocks (5012, walls, never climbed).
+Meeko (tender), Vex (gunslinger) and Albert (bulwark) were driven into up to 6 faces per height from a running jump, a standing jump and a glide (2.5 m out).
+Results on origin/main a1b35c78ee, unchanged by this pass:
+| Height | Run | Jump | Glide |
+|---|---|---|---|
+| 0.4-2.8 m (steps and stair sides) | 228/228 | 228/228 | 228/228 |
+| 3.2-7.2 m | 0/240 | 0/240 | 240/240 |
+- No height inside the reach window (jump apex 1.57 m + `MANTLE_REACH` 1.5 m = 3.07 m) misses. No mantle snaps: no step in the rise moves more than 0.2 m past what its speed explains. So the reach window stays as it is.
+- The 3.2 m wall tier sits 0.13 m above the window, so jumps never top it (decision 0007). Glides top every height.
+- The only red was in the check itself: `face 4 jump_30` topped 10/160 3.2 m faces. The run slid 3 tiles along the face, caught a 2.4 m stretch and walked up a flight. A top now counts only over the face's own straight stretch (`_on_face`).
 ## Run turn: the stick flipped 180 degrees at full run (`--move-feel-check` `run_turn_*`, `--anim-audit` TURNS)
 
 The source data settles it (no footage of a ground reversal exists in the reports): with keys held at or under the run, UE's walking step turns the velocity toward the keys with GroundFriction (1/s, 1.0) and adds MaxAcceleration (47-54 m/s²). The walking brake (22.2 m/s² plus friction x2) acts only with no keys or over the run, so it plays no part in a held flip. Ours (`Loco.accel_to`) has no turn friction and lands within one 60 Hz step of that rule for every kit, so no number in `content/rules/hunter_move.json` changed. The body faces the cursor, never the stick: with the cursor held ahead it does not turn (the legs backpedal); with the cursor flipped too it turns at `turn_rate` 1280 deg/s.
