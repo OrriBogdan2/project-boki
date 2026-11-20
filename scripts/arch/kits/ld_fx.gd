@@ -1,14 +1,14 @@
 class_name LDFx
 extends Node3D
-## Cinder's own effects (plus Bjorn's ult scorch and Grimble's Broadside slugs), pooled (one node per match, LDFx.of(m)). Every node is made once
-## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look). Grimble's looks
-## are content/vfx/dredge.json (HeroVfx).
+## Cinder's own effects (plus Bjorn's ult scorch and Grimble's Broadside slugs), pooled (one node per match,
+## LDFx.of(m)). Every node is made once and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader,
+## a mode per look). Grimble's other looks are content/vfx/dredge.json (HeroVfx).
 ##
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "pip", "pilot",
 ##                         "glow"; stop calling and they hide
-## - one-shots: scorch, lava, volley (Grimble's Broadside slug: it flies the whole fan, which a data look can't yet)
+## - one-shots: scorch, lava, volley (Grimble's Broadside slug: it flies the whole fan; no data look does yet)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
