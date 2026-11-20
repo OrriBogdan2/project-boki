@@ -275,3 +275,10 @@ only the extreme edges: `glb_relax.py IN OUT --limit=5.0` took her to 4.9x (0/58
   bolt and the hem line glow (0.0044 m2); the crop top stays black.
 - `godot --headless --path . -- --stretch-check ...`: without the `--` the flags are not user args and the game just
   idles at its menu (no output, timeout).
+
+### Regen round 4 (11-20, Sparkle r4): brown boots
+- Her boots (dark red-brown paint, v ~0.3) matched neither colour rule: half fell to `slot_default` skin (the skin
+  look's desat 0.6 greyed them), half to `leather` (v <= 0.28): near-black in game. A first rule `{"slot": "boots",
+  "box": [..., z <= 0.235], "v": [0, 0.6]}` gives them their own slot (5,499 tris; `boots` draws as leather,
+  warden_glb.gd SLOTS) and the look tints it alone (`"boots": {"albedo": [1.4, 1.5, 1.35]}`) without lifting the
+  black top, shorts and thigh-high.

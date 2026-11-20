@@ -45,8 +45,9 @@ const EXTRA := {
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
+## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f);
+## "boots" is leather split off by a box, so a look can tint brown boots alone (Sparkle r4: dark red-brown paint).
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "boots": 2, "fur": 5, "eyes": 0,
 	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
