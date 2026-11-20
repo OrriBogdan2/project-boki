@@ -157,6 +157,8 @@ const VOICES := [
 	"v_sentinel",
 	"v_glimmer",
 	"v_warden",
+	"v_bl_skitter",
+	"v_bl_warden",
 	"die_small",
 	"die_big",
 	"step_grass",
