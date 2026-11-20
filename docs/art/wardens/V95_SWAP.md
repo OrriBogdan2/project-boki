@@ -265,3 +265,13 @@ A kept prop on its own bone (Sparkle's gum) stays at the old face: `glb_prop_mov
 upper_arm 0.44 beside one at hips 1.0, 29.9x; `--stretch-check --stretch-where` prints each clip's worst edge). Relax
 only the extreme edges: `glb_relax.py IN OUT --limit=5.0` took her to 4.9x (0/58 clips over the 7.0 ceiling) touching
 587 of 41k vertices; the default 1.22 rewrote 27k and shredded her shawl tail. Look at the knee camera after.
+
+### Regen round 2 (11-20, Sparkle r2qb): fingers and the chest glow
+- Fingers: a 60k-quad remesh (118k tris) cut to 60k with `head_tris` (45% for the head) left the body ~33k tris and
+  fused the fingers into a 2-3 finger blob. Remesh at Meshy to 30k quads (~58k tris) and swap with `tris` = the
+  master's own count and `head_tris: 0`: the collapse is a no-op and the hands keep Meshy's fingers (58,569 tris).
+- Chest glow: the colour rule `glow` h 0.82-1.0, s >= 0.55 caught the warm-pink belly skin and whole chest triangles
+  (0.0126 m2 of `glow`, drawn as a flat magenta patch). For a regen use h 0.82-0.95, s >= 0.62, v >= 0.75: only the
+  bolt and the hem line glow (0.0044 m2); the crop top stays black.
+- `godot --headless --path . -- --stretch-check ...`: without the `--` the flags are not user args and the game just
+  idles at its menu (no output, timeout).
