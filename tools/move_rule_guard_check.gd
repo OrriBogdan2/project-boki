@@ -16,6 +16,9 @@ const RULES := {      # DECISIONS line (its date: [11-08], [11-11]; no date = "M
 	"air": "Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer",
 	"keep": "air control as REFERENCE (... never overwrite air velocity) [11-08]",
 	"profile": "One shared movement profile for all modes [11-11]",
+	"tapanim": "A hold animation never shows without the hold input.",
+	"wasd": "Dashes follow WASD by default",
+	"fx": "No bursts, rings or discs on dashes, landings or resets.",
 }
 const HIGH_UP := 25.0          # m over the ground: room for a second of falling or gliding
 const SHIFT_PRESSES := [2, 9]  # steps into an air Shift a fresh Space press lands (0.03 s, 0.15 s)
@@ -26,14 +29,26 @@ const STILL := 0.05            # m/s: horizontal speed that counts as none
 ## fresh glide press 4-11 steps. docs/DEBT.md "--move-rule-guard-check open rows".
 const OPEN := {"mage": ["shift"]}
 
+const HoldPose := preload("res://tools/hold_pose_check.gd")
+const DashDir := preload("res://tools/dash_dir_check.gd")
+const MoveFx := preload("res://tools/move_fx_check.gd")
+const TAPS := ["tap 1", "tap 2", "tap 4", "short"]      # HoldPose's taps: 1, 2, 4 steps and 0.15 s
+const DASH_WATCH := 36         # steps (0.6 s) a dash is watched after its press
+const FX_EVENTS := ["dash", "air dash", "soft landing", "hard landing", "reset"]
+
 var heat = load("res://tools/glider_heat_check.gd").new()      # its abyss climb, on this check's match
+var pose := HoldPose.new()     # its tap trials and the kit's hold clips, on its own match
+var flat := DashDir.new()      # its flat, empty patch
+var movefx := MoveFx.new()     # its dash, landing and reset events and its ring/disc/burst audit
 var traces := {}       # arch -> the Training Area air/glide vx trace, compared with the farm's at the end
 
-func row(arch: String, rule: String, cond: bool, what: String) -> void:
-	var open: bool = not cond and rule in OPEN.get(arch, [])
+## `why`: a by-design exception (the row prints "skip" with it, not counted).
+func row(arch: String, rule: String, cond: bool, what: String, why := "") -> void:
+	var open: bool = not cond and (rule in OPEN.get(arch, []) or why != "")
 	var mark := "ok  " if cond else "FAIL"
 	if open:
-		mark = "open"
+		mark = "open" if why == "" else "skip"
+		what += " (%s)" % why if why != "" else ""
 	print("RULE %s %s | %s | %s" % [mark, arch, RULES[rule], what])
 	if not cond and not open:
 		bad += 1
@@ -326,6 +341,89 @@ func _farm(main: Node) -> void:
 		row(arch, "profile", same, said)
 	hm.queue_free()
 
+## Taps every slot (LMB, RMB, E, X) as HoldPose does: no hold clip on a frame the key is down, none past its
+## recovery (HoldPose.POSE_SLACK) once it is up. A press pose by design (HoldPose.TAP_POSE_OPEN) prints "skip".
+func _tap_anim(main: Node, arch: String) -> void:
+	pose.hold_ids = pose._hold_ids(arch)
+	var over := []
+	var by_design := []
+	for slot in HoldPose.KEYS:
+		var pm: Match = pose._match(main, arch)
+		for sc in TAPS:
+			pose._ready_up(pm)
+			var seen := {}
+			pose._tap(slot)
+			for i in int(HoldPose.TAP_STEPS.get(sc, int(HoldPose.SHORT_S / Match.DT))):
+				pose._step(pm, slot, seen, HoldPose.TAP_STEPS.has(sc))
+			pose._keys(slot, false)
+			for i in int(HoldPose.WATCH_S / Match.DT):
+				pose._step(pm, "", seen)
+			for name: String in seen:
+				var slack: float = 0.0 if name.begins_with("tap ") else HoldPose.POSE_SLACK
+				var said := "%s %s: %s %.2f s" % [slot, sc, name, seen[name]]
+				if float(seen[name]) <= slack:
+					continue
+				var open_clips: Array = HoldPose.TAP_POSE_OPEN.get(arch, [])
+				var press: bool = name.begins_with("tap ") and name.trim_prefix("tap ") in open_clips
+				(by_design if press else over).append(said)
+		pm.queue_free()
+		await main.get_tree().process_frame
+	var bad_taps: Array = over + by_design
+	var why := "a hold-only move's press pose, gone on release: HoldPose.TAP_POSE_OPEN" if over.is_empty() else ""
+	row(arch, "tapanim", bad_taps.is_empty(), "LMB, RMB, E, X tapped 1, 2, 4 steps and 0.15 s (%d hold clips): %s"
+		% [pose.hold_ids.size(), "no hold clip or pose" if bad_taps.is_empty() else "; ".join(bad_taps)], why)
+
+## Shift with S (then D) held on the press step and the cursor 8 m ahead (-z), the default setting: the body
+## must travel >= 1 m along the keys in 0.6 s and stray less than half that toward the side. Aimed Shifts (a
+## grapple, a blink, a swap, a rock hop: DashDir.AIMED) go to the cursor by design.
+func _dash_wasd(main: Node, arch: String) -> void:
+	var was = Settings.get_v("dash_to_cursor")
+	Settings.set_v("dash_to_cursor", false, false)
+	var said := []
+	var good := true
+	for way: Vector2 in [Vector2(0, 1), Vector2(1, 0)]:
+		var dm: Match = flat._match(main, arch)
+		var p: Hunter = dm.player
+		p.dashes = p.max_dashes()
+		p.ex_cd = 0.0
+		p.inp["aim"] = p.pos + Vector3(0, 0.9, -8)
+		p.inp["move"] = way
+		p.inp["dash"] = true
+		var from := p.pos
+		dm.step(Match.DT)
+		p.inp["dash"] = false
+		p.inp["move"] = Vector2.ZERO
+		for i in DASH_WATCH:
+			dm.step(Match.DT)
+		var d := Vector2(p.pos.x - from.x, p.pos.z - from.z)
+		var along := d.dot(way)
+		var side := absf(d.dot(Vector2(way.y, way.x)))
+		good = good and along >= 1.0 and side <= along * 0.5
+		said.append("%s: %.1f m along, %.1f m aside" % ["S" if way.y > 0 else "D", along, side])
+		dm.queue_free()
+		await main.get_tree().process_frame
+	Settings.set_v("dash_to_cursor", was, false)
+	var why := "aimed Shift by design: --dash-dir-check AIMED" if arch in DashDir.AIMED else ""
+	row(arch, "wasd", good, "cursor ahead, Shift with a key held: " + "; ".join(said), why)
+
+## MoveFx's dash, air dash, landings and takedown reset: no new Fx ring or burst, big flash or Hero look ring,
+## disc or burst. A dash that is itself an area move (MoveFx.AREA) draws its ring: a ground ring means gameplay.
+func _move_fx(main: Node, arch: String) -> void:
+	var fm: Match = movefx.flow._match(main, arch)
+	movefx._setup(fm)
+	var said := []
+	var clean := true
+	for ev in FX_EVENTS:
+		var spawned: Array = movefx._event(fm, arch, ev)
+		var area: bool = "%s/%s" % [arch, ev] in MoveFx.AREA
+		clean = clean and (spawned.is_empty() or area)
+		if not spawned.is_empty():
+			said.append("%s %s%s" % [ev, ", ".join(spawned), " (area move)" if area else ""])
+	fm.queue_free()
+	await main.get_tree().process_frame
+	row(arch, "fx", clean, "dash, air dash, soft and hard landing, reset: "
+		+ ("nothing spawned" if said.is_empty() else "; ".join(said)))
+
 func _fmt(a: Array) -> String:
 	return " ".join(a.map(func(x): return "%.2f" % x))
 
@@ -338,6 +436,9 @@ func run(main: Node) -> void:
 		_hunter(arch)
 		m.queue_free()
 		await main.get_tree().process_frame
+		await _tap_anim(main, arch)
+		await _dash_wasd(main, arch)
+		await _move_fx(main, arch)
 	await _farm(main)
 	print("RULE DONE, failures: ", bad)
 	main.get_tree().quit()
