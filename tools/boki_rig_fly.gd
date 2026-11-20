@@ -8,6 +8,7 @@ extends RefCounted
 
 const SIM_SECS := 120.0
 const DT := 1.0 / 30.0
+const ROAM_CAP := 3.0  # x SIM_SECS: the longest _roam runs on while the fliers are still short of roaming time
 const GROUND_MAX := 3.0  # s: the longest a roaming flier may walk the ground in a row on Kitewind Ridge
 const SETTLED := 1.0  # s up and still before a hover's height counts (it climbs first)
 const PET_HOLD := 3.0  # s the farm holds a petted Boki
@@ -107,7 +108,9 @@ func _roam() -> void:
 	var walker_up := false
 	var petted := false
 	var t := 0.0
-	while t < SIM_SECS:
+	# Toy play and chores are random rolls: run on (to ROAM_CAP) until a quarter of SIM_SECS was roamed, so the
+	# up-while-roaming verdict always has its sample and never hangs on how long the toys kept them.
+	while t < SIM_SECS or (roam_s < SIM_SECS * 0.25 and t < SIM_SECS * ROAM_CAP):
 		flares += _step(fliers)
 		t += DT
 		walker_up = walker_up or walker.has("fly") or bool(walker["node"].get_meta("aloft", false))
