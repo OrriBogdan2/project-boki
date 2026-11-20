@@ -47,6 +47,22 @@ func _save_jpg(path: String) -> void:
 	tree.root.get_texture().get_image().save_jpg(path, 0.92)
 
 
+## Draws every view until the screen is no longer black before the first saved frame: a variant .glb's
+## shaders and VRAM textures can take a few frames on the GPU, and the run's first shots came out black.
+func _warm(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array) -> void:
+	var tmp := OS.get_user_data_dir().path_join("regen_audit_warm")
+	for v in VIEWS:
+		DirAccess.make_dir_recursive_absolute(tmp.path_join(v))
+	for tries in 40:
+		await _shoot(model, sk, hb, fb, tmp, 0)
+		var img := tree.root.get_texture().get_image()
+		img.resize(1, 1)
+		if img.get_pixel(0, 0).get_luminance() > 0.15:
+			print("REGEN_AUDIT warm after ", tries + 1, " passes")
+			return
+	print("REGEN_AUDIT warm: still dark after 40 passes")
+
+
 ## The body's world box (visible meshes under Warden) -> [bottom y, height].
 func _body_box(model: Node3D) -> Array:
 	var lo := 1e9
@@ -124,6 +140,7 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 	sk.reset_bone_poses()
 	for k in 10:
 		await tree.process_frame
+	await _warm(model, sk, hb, fb)
 	await _shoot(model, sk, hb, fb, dir, 0)
 	rows.append("0 rest 0.000")
 	for at in model.find_children("*", "AnimationTree", true, false):
