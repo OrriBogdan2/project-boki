@@ -11,7 +11,7 @@ extends RefCounted
 ## _drop_holds).
 
 const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
-const BLADE_TIP := Color("fff2c0")
+const BLADE_TIP := Color("e6d8ff")
 const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hits: her violet, run hot
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
