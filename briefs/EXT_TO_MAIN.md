@@ -10408,3 +10408,4 @@ READY ext/feel-scout-lean-hud 992a880475 (lean/far look keeps your Hunter clear 
 READY ext/tut-lookout-kick 3811ba0769d6d954c565dc9f8301e20ed26f1d5e (tutorial lookout rim is sheer so only a wall kick climbs it; fight check 8/8, playthrough + hud check green)
 READY ext/tut-cutscene-click-hold b9c1373647 (hatch beat + Relic put-on share the prologue HoldSkip: tap = one beat, 1 s hold = skip; HatchSkip removed; rows in hatch-check and mask-moment-check; fixes knock abort on missing EggHatch.col)
 READY ext/feel-dash-curves-d eca7222243 (Neve skate ramp 0.2->0.12 s fitted to footage, rms 6.0->4.1%; Tenzo Rock Hop curve not determinable: a leap, no push; KIT_PARITY gap 4 rows)
+READY ext/ui-hud-groups-five a64979d67 (first landing 9 -> 5 HUD groups: counters/glider ring/belt fold in until they matter; fight 11->7, Heart/race 12->8; hud-groups/reveal/clutter/belt-tips/loot-feed/ways-out checks green)
