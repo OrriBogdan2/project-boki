@@ -31,6 +31,8 @@ func run(main: Node) -> void:
 	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
+	var fov_over := -1.0  # (--fov: widen a camera, e.g. --match with a swung hammer in frame)
+	var cam_y := -1.0  # (--cam-y: the camera's own height, e.g. knee level, apart from the look target --at)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
@@ -48,6 +50,10 @@ func run(main: Node) -> void:
 			dist = float(a.substr(7))
 		if a.begins_with("--at="):
 			at_y = float(a.substr(5))
+		if a.begins_with("--fov="):
+			fov_over = float(a.substr(6))
+		if a.begins_with("--cam-y="):
+			cam_y = float(a.substr(8))
 		if a == "--turn":
 			turn = true
 		if a.begins_with("--turn-clip="):
@@ -85,8 +91,10 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, 0.8, 0))
 	else:
 		cam.fov = 30.0
-		cam.position = Vector3(0, at_y + 0.25, dist)
+		cam.position = Vector3(0, cam_y if cam_y >= 0.0 else at_y + 0.25, dist)
 		cam.look_at(Vector3(0, at_y, 0))
+	if fov_over > 0.0:
+		cam.fov = fov_over
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
 	var sync := model.get_node("Warden/Sync")
