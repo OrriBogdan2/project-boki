@@ -10598,3 +10598,4 @@ READY ext/docs-parity-stale-rows c8d32dd0f1 (KIT_PARITY: one top-20 table, Still
 READY ext/garden-xp-pace 0bf1f8d1f5 (garden XP pace: care 15, curve 30; home 20 min/day first egg day 12->6, first form 123->28 min)
 READY ext/old-names-lint 729aab9522 (retired hunter names lint in health + Mossy->Albert idle line)
 READY ext/farm-bred-look 55b05d6d70 (bred Boki wear one parent's coat pattern in the other parent's colour; hatch card lists both; golden save_v21_bred)
+READY ext/vfx-boki-type-colours b76a1df97d (10 Boki cast accents now keep their type hue; --boki-type-colour-check asserts 196 stages in palette; HERO_VFX type table)
