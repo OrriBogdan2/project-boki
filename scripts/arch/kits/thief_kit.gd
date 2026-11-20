@@ -35,7 +35,6 @@ const BOLT_TAIL := Color("7b3aff")     # the bolt's short deep-violet tail
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
-const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
 const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
@@ -51,7 +50,6 @@ var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ w
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
-var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
 var quick: ThiefQuick          # the quick bolts after a Vault
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
@@ -72,13 +70,11 @@ var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
 var vault := {}                # the Cartwheel running: {t, dur, air (the flip's look), aloft (left the ground)}
-var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
 func _setup() -> void:
 	res = 0.0
 	encore = ThiefUlt.new(self)
-	spin = ThiefSpin.new(self)
 	chain = ThiefChain.new(self)
 	quick = ThiefQuick.new()
 
@@ -288,7 +284,6 @@ func _tick(dt: float) -> void:
 	chain.tick(dt)
 	quick.tick(dt)
 	_tick_landing()
-	_tick_trail(dt)
 	_tick_wrapped(dt)
 	_tick_knife()
 	_tick_glint(dt)
@@ -536,29 +531,21 @@ func play(move: String) -> void:
 		return
 	super.play(move)
 
-## Her own after-images on every dash: cyan streaks along the ground, and the flip's spinning trail (ThiefSpin)
-## (not the shared team-colour pill).
+## Her own after-images on every dash, in her violet (content/vfx/thief.json "dash" and "flip", played by
+## _vaulted), not the shared team-colour pill.
 func own_dash_trail() -> bool:
 	return true
 
-func _tick_trail(dt: float) -> void:
-	spin.tick(GHOST, Color("e0fbff"))
-	if h.roll_t <= 0.0 or not tells_visible():
-		return
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = TRAIL_EVERY
-	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
-
-## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), its spinning trail (ThiefSpin),
+## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), its after-images and the trail its
+## hand and foot leave through the turn (data "dash", "flip"),
 ## the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
 ## she lands.
 func _vaulted(air: bool, empower: bool) -> void:
 	var dd := dash_def()
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
+	vfx("dash", null, null, {"t": h.roll_t})
+	vfx("flip")
 	var t := float(dd["time"])
 	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
