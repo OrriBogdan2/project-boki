@@ -1,13 +1,13 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-16 (owner accepted Cinder 3D option A, job 20261116-200037-a2: the r8/pick1116 Meshy rebuild with the glowing amber eyes, clean lips and a deeper bust). The master's own fused tail is cut off first (game/cut_tail_A.py, same method as the old cut_tail.py) so the game's spring tail stays. Joints read from v95_grid.py renders of A.glb.",
- "master": "~/meshy/v95/Cinder/r8/pick1116/game/A_notail.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md). DRAFT 11-20 hunter regen (job 20261120-051158-a6, candidate A): a new Meshy meshy-7.1 multi-image-to-3d (tq + side views of the owner's r5 A turnaround; front/back views are refused as NSFW), remeshed 60k quad, repainted by Meshy retexture (turnaround face crop + tq + side refs, original UVs; 11-20 r2: refs chroma x1.6 / value x0.8 so Meshy's desaturated paint lands on the ref's bronze skin, gens/hunter-regen-1120/cinder/r2/scripts/calib.py) with an emission map of the lava cracks Meshy painted (r2/scripts/cinder_emit.py, inside the UV islands only), its fused tail cut (gens/hunter-regen-1120/cinder/tools/cut_tail.py) so the game's spring tail stays; joints read by tools joints.py from the master's slices. Run: v95_to_game.py Cinder --weights meshy. Before (LIVE 11-16): v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-16 (owner accepted Cinder 3D option A, job 20261116-200037-a2: the r8/pick1116 Meshy rebuild with the glowing amber eyes, clean lips and a deeper bust). The master's own fused tail is cut off first (game/cut_tail_A.py, same method as the old cut_tail.py) so the game's spring tail stays. Joints read from v95_grid.py renders of A.glb.",
+ "master": "/home/boki/gens/hunter-regen-1120/cinder/r2/m/k9e_master.glb",
  "game": "art/wardens/cinder/cinder.glb",
  "tris": 13000,
  "head": {
   "centre": [
    0.0,
-   0.07,
-   1.68
+   0.015,
+   1.69
   ],
   "r": 0.17
  },
@@ -33,78 +33,78 @@
  "joints": {
   "pelvis": [
    0.0,
-   0.05,
+   -0.005,
    0.97
   ],
   "neck": [
    0.0,
-   0.06,
+   -0.005,
    1.54
   ],
   "crown": [
    0.0,
-   0.07,
+   0.005,
    1.82
   ],
-  "shoulder.R": [
-   0.17,
-   0.05,
-   1.43
-  ],
-  "elbow.R": [
-   0.24,
-   0.07,
-   1.25
-  ],
-  "wrist.R": [
-   0.31,
-   0.09,
-   0.97
-  ],
-  "shoulder.L": [
-   -0.17,
-   0.05,
-   1.43
-  ],
-  "elbow.L": [
-   -0.24,
-   0.07,
-   1.25
-  ],
-  "wrist.L": [
-   -0.31,
-   0.09,
-   0.97
-  ],
   "hip.R": [
-   0.12,
-   0.05,
-   0.93
+   0.106,
+   0.031,
+   0.94
   ],
   "knee.R": [
-   0.14,
-   0.05,
-   0.57
+   0.133,
+   0.029,
+   0.58
   ],
   "ankle.R": [
-   0.13,
-   0.04,
-   0.14
+   0.179,
+   0.017,
+   0.15
+  ],
+  "shoulder.R": [
+   0.16,
+   0.005,
+   1.46
+  ],
+  "elbow.R": [
+   0.258,
+   0.003,
+   1.21
+  ],
+  "wrist.R": [
+   0.411,
+   0.037,
+   1.0
   ],
   "hip.L": [
-   -0.12,
-   0.05,
-   0.93
+   -0.106,
+   0.031,
+   0.94
   ],
   "knee.L": [
-   -0.14,
-   0.05,
-   0.57
+   -0.128,
+   0.033,
+   0.58
   ],
   "ankle.L": [
-   -0.13,
-   0.04,
-   0.14
+   -0.175,
+   0.023,
+   0.15
+  ],
+  "shoulder.L": [
+   -0.16,
+   0.005,
+   1.46
+  ],
+  "elbow.L": [
+   -0.259,
+   0.007,
+   1.21
+  ],
+  "wrist.L": [
+   -0.411,
+   0.038,
+   1.0
   ]
  },
  "relax": {
@@ -264,13 +264,18 @@
  "anchors": {
   "anchor_head_top": [
    0.0,
-   0.07,
-   1.84
+   0.015,
+   1.85
   ],
   "anchor_chest": [
    0.0,
    0.2,
    1.38
   ]
- }
+ },
+ "arm_reach": [
+  0.07,
+  0.11
+ ],
+ "meshy_smooth": 12
 }
