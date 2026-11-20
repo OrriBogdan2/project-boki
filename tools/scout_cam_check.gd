@@ -131,7 +131,8 @@ func _hud_live(main: Node, m: Match) -> void:
 		for k in cam.hud_keep:
 			if (cam.hud_keep[k] as Rect2).intersects(zone):
 				hits.append("%s at %s" % [k, rel])
-	ok(hits.is_empty(), "live HUD: a full far look to each corner keeps your zone on screen and clear of it: %s" % [hits])
+	ok(hits.is_empty(), "live HUD: a full far look to each corner keeps your zone on screen and clear of it: %s"
+			% [hits])
 	cam.scout_k = 0.0
 
 ## Frames until scout_k crosses `to` with scout_on `on`, as seconds.
