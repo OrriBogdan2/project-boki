@@ -57,3 +57,10 @@ not locked. Method: a torch optimisation over 797 sampled poses of all 57 clips 
 idle/stance/walk moves. tools/stretch_check.gd (57 clips): worst 7.93 -> 3.15, median clip 6.54 -> 3.00, no clip above main, still over the 1.3 ceiling (docs/DEBT.md). Slivers
 (tri edge >2.5x and posed >4 cm, summed over clips) 18,519 -> 1,051; over 8 cm 6,763 -> 1. Calm clips move patches near the old tears
 by up to 7 cm vs main (they were the torn patches' neighbours); renders show the same look. Proof: /home/boki/gens/ostra-fix-1120/.
+
+**Seam polish (2026-11-20, retry 11-20b):** on top of the fix above, 1,173 more weight rows (15,407 of 41,044 total vs main; positions,
+index list and JSON chunk still main's) in five 6 cm patches where the arms touch the coat: right waist (the needle in g_wave/swap),
+right forearm (swap_air), both armpits, left cuff. Each patch was re-optimised over every pose of all 59 clips with the rule that no
+edge may get longer than the previous fix in any pose. tools/stretch_check.gd (59 clips): worst 7.93 -> 3.15 (unchanged), no clip above
+main. Slivers >4 cm (summed over clips) 1,059 -> 321 (main 18,699); over 8 cm 1 -> 0; idle 17 -> 3 (main 277). Proof and live-vs-fixed
+renders: /home/boki/gens/ostra-fix-1120b/.
