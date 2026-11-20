@@ -1036,9 +1036,10 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 	if String(rd.get("kind", "")) in ["count", "on_targets"]:
 		var n := int(rd.get("max", 3))
 		var have := int(round(f * n))
+		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))      # (one meter, not one panel per pip)
 		for i in n:
 			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
-			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
+			c.draw_style_box(_box(rc if i < have else Color(1, 1, 1, 0.12), 3, Color(0, 0, 0, 0), 0, true), cr)
 	else:
 		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
 		if String(rd.get("id", "")) == "heat":
@@ -1527,9 +1528,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Ability")), rdesc, ak.col_of(ak.rmb_def())])
-		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "Utility")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), AbilityText.name_of(p.arch, "e"), AbilityText.full(p.arch, "e"), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_caps("hunter_ult"), AbilityText.name_of(p.arch, "r") + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), AbilityText.full(p.arch, "r"), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
