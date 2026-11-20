@@ -77,11 +77,16 @@ func _fight_shots() -> void:
 			print("WISPREAD shot %d at t=%.1f" % [n, t])
 			for k in m.kins:
 				if k.wisp and k.state == "shoulder":
-					var at := m.cam.unproject_position(k.global_position)
+					var at := m.cam.unproject_position(k.global_position) * _px_k()
 					print("WISPAT %d %s team=%d %d %d" % [n, k.species, k.owner_h.team, at.x, at.y]),
 		func(_t: float): return _centre(squad_a + squad_b))
 
 ## The screen rectangle of a body `w` x `h` m standing on `feet`.
+## Screenshot pixels per unit of the screen coordinates the camera projects to (the window may be stretched).
+func _px_k() -> float:
+	var vp := main.get_viewport()
+	return float(vp.get_texture().get_width()) / vp.get_visible_rect().size.x
+
 func _body_rect(feet: Vector3) -> Rect2:
 	var top := m.cam.unproject_position(feet + Vector3(0, HUNTER_H, 0))
 	var bot := m.cam.unproject_position(feet)
@@ -100,7 +105,7 @@ func _measure() -> void:
 		var px := absf(m.cam.unproject_position(edge).x - c.x)
 		var box := Rect2(c - Vector2(px, px), Vector2(px, px) * 2.0)
 		var depth := m.cam.global_position.distance_to(k.global_position)
-		sizes.append(px * 2.0)
+		sizes.append(px * 2.0 * _px_k())
 		for h in m.hunters:
 			if h.out or m.cam.global_position.distance_to(h.pos + Vector3(0, 0.9, 0)) < depth:
 				continue
