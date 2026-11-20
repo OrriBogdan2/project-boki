@@ -624,7 +624,7 @@ the reference's air control is the one model in a match: the keys add accelerati
 | `juggernaut_drop` start, hang, dive, impact | zero, held, then plunged | Meteor Drop owns the body | Kael Air RMB: cursor disc |
 | `pin_ult._loose` | `vel -= aim * 2.5` | recoil, additive | Hem R: 3 empowered shots |
 | `pin_spirit.end` | zero after the snap back | teleport to the walk's entry | Hem Dash: Phase Walk |
-| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 6.8 m/.28 s |
+| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 3.4 m/.28 s (owner 11-17, was 6.8 m) |
 | `ashwick_kit._bash_impact` | bounce back off the foe | recoil, contact stop | Cinder Dash: stops on first foe |
 | `ashwick_jet._leap` | flight speed x `Loco.dash_jump_keep` | flight exit into a jump | Cinder R: fly forward |
 | `ashwick_jet._land` | speed x0.3 | grounded (not air) | Cinder R |
@@ -1445,4 +1445,20 @@ The source data settles it (no footage of a ground reversal exists in the report
 
 Asserted per kit (`tools/move_feel_turn.gd`): zero and 95%-back within 1 step of the source rule, the same with the cursor flipped, the body 180 within 9 steps, no body turn with the cursor held. `run_turn_err_frames` <= 1, `run_turn_full_t` <= 0.22 s, `run_turn_face_t` 0.12-0.17 s.
 
-Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip): with the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The steady run before and after reads 10-22% for most Hunters (the calibration), but the turn itself slides 52-119% (held) and 35-128% (flipped): the loco blend (ease 12/s) trails a reversal that takes 0.1 s to zero. No Hunter is under `MAX_SLIDE` 25% yet, so the audit prints OPEN lines and only fails past `TURN_CEIL` 140% (today's worst, archer 119-128%, plus a margin). Backlog: "run turn slide".
+Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip; the model is fed the world velocity and its real facing, so a Hunter that twists its legs under the aim holds them as in game, and a foot counts as planted in the low 30% of its height over the steady run before the flip). With the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The loco blend (ease 12/s, 5/s as the speed falls) trails a reversal that takes 0.1 s to zero, and on its way through the idle it drags the planted foot. The fix locks the feet instead of chasing the blend (`WardenStride._turn`, no `hunter_move.json` number changed): a speed falling faster than 1.2x the walking brake (`HunterMove.brake_rate`) is the keys pushing against the run, and from there until the blend is within 0.2 of its goal (at most 0.45 s) every foot the loop puts down is held on the ground (its spot carried back along the body's velocity and round against its turn) until the loop lifts it 0.15 m (any lift once the blend has caught up), and the legs drop the twist-hold while it lasts. Before (main 2026-11-20, same audit) and after, held / flipped:
+
+| Hunter | Steady run | Held before | Held after | Flipped before | Flipped after |
+|---|---|---|---|---|---|
+| archer | 98% | 121% | 104% | 128% | 117% |
+| juggernaut | 18% | 83% | 35% | 48% | 30% |
+| gunslinger | 12% | 67% | 40% | 78% | 50% |
+| bulwark | 53% | 79% | 88% | 116% | 101% |
+| rimewright | 67% | 86% | 20% | 79% | 55% |
+| ashwick | 16% | 52% | 29% | 50% | 23% |
+| dolm | 52% | 97% | 61% | 82% | 61% |
+| mage | 25% | 92% | 57% | 69% | 29% |
+| dredge | 15% | 84% | 58% | 68% | 40% |
+| tender | 37% | 67% | 58% | 59% | 26% |
+| thief | 23% | 83% | 65% | 64% | 37% |
+
+Every Hunter but bulwark's held flip (79 to 88%) slides less; the steady run is unchanged (it bounds what any lock can do: archer's own run slides 98%). In game (`--gameplay-media --media-clip=15 --media-loco=turn --media-log`, world feet at 30 fps) gunslinger's flip went 72 to 50% (held) and 84 to 59% (flipped). No Hunter is under `MAX_SLIDE` 25% on both yet, so the audit prints OPEN lines and fails past `TURN_CEIL` 125% (today's worst, archer flipped 117%, plus a margin). Backlog: "run turn slide" (the loops' own run and backpedal slide; bulwark's held flip).
