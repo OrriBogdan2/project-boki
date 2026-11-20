@@ -1,5 +1,5 @@
 {
- "doc": "hunter-regen-1120 (job 20261120-083023-a1): a new Meshy generation (meshy-7.1 multi-image, quad 30k, enhance on) from the owner's r4b pick A made 5% wider (gens/ta-owed-1120/kael/top_A.png, 4 view crops in gens/hunter-regen-1120/kael/w5/crops), scaled to 1.93 m, joints/head from Meshy's own auto-rig (meshy_joints.py), Meshy skin weights onto juggernaut's rig (v95_to_game --weights meshy --meshy-rig ~/meshy/hunter-regen-1120/kael_w5N1/rigged_character.glb). meshy_smooth 6 + meshy_cloak (radius 0.16, keep 0.5): the long cloak rides mostly on the hips, so it no longer flares like a skirt in a run. kael.glb's own skinned sword stays. No emission map (emit false).",
+ "doc": "hunter-regen-1120 (job 20261120-083023-a1): a new Meshy generation (meshy-7.1 multi-image, quad 30k, enhance on) from the owner's r4b pick A made 5% wider (gens/ta-owed-1120/kael/top_A.png, 4 view crops in gens/hunter-regen-1120/kael/w5/crops), scaled to 1.93 m, joints/head from Meshy's own auto-rig (meshy_joints.py), Meshy skin weights onto juggernaut's rig (v95_to_game --weights meshy --meshy-rig ~/meshy/hunter-regen-1120/kael_w5N1/rigged_character.glb). meshy_smooth 12 + meshy_cloak (radius 0.16, keep 0.3): the long cloak rides mostly on the hips, so it no longer flares like a skirt in a run. kael.glb's own skinned sword stays. No emission map (emit false).",
  "master": "~/meshy/hunter-regen-1120/kael_w5N1/master.glb",
  "game": "art/wardens/kael/kael.glb",
  "own": {
@@ -404,9 +404,9 @@
   "anchor_arm_elbow": "forearm.L",
   "anchor_arm_fore": "forearm.L"
  },
- "meshy_smooth": 6,
+ "meshy_smooth": 12,
  "meshy_cloak": {
   "radius": 0.16,
-  "keep": 0.5
+  "keep": 0.3
  }
 }
