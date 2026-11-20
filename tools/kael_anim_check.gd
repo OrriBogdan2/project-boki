@@ -382,9 +382,7 @@ func kit() -> void:
 	K.press_rmb()
 	A.step(m, 0.6, hs)
 	P.inp["sec_hold"] = false
-	r = _hit(m, K, T, 1.0)
-	_ev("chainlunge hit", r)
-	_strike("jug_chainlunge", r)
+	_ev("chainlunge hit", _hit(m, K, T, 1.0))
 	_ev("chainlunge stops", _until(m, K, func(): return K.lunge.is_empty(), 1.0))
 	# haul: the Lunge charging when the pull starts, the slam on the arrival
 	_fresh(m, P, K, home, T)
