@@ -188,6 +188,9 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 ## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump" (a 0.9 s hop,
 ## the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the knocked-down beat, 0..1),
 ## "t0=<s>" (the move's clock starts there: the surfacing take skips its first key, the body still under the ground).
+## --bone-dump=<file.json>: also writes every frame's skinning matrices (bone global pose x bind pose, per bind of the first
+## skinned mesh, skeleton space) with the segment label, for offline weight work (tools/art1/glb_relax.py --poses);
+## --no-grab skips the PNGs (headless: two process frames stand in for the drawn one).
 const PROC_SEGS := {
 	"gil": [["idle", "", 1.6, 0.0], ["walk", "", 1.6, 1.8], ["run", "", 1.6, 5.0], ["jump", "", 0.9, 0.0, "jump"],
 		["hit", "", 0.8, 0.0, "hit"], ["dash: Ground Swim dive", "gil_dive", 0.4, 0.0],
@@ -209,6 +212,22 @@ func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 		an.update(1.0 / 60.0, {"fired": 99.0, "face": face, "grounded": true})
 	var tsv := "label\tfirst\tframes\n"
 	var i := 0
+	var dump_path := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--bone-dump="):
+			dump_path = a.substr(12)
+	var grab := not OS.get_cmdline_user_args().has("--no-grab")
+	var dump := {"binds": [], "frames": []}
+	var dskin: Skin = null
+	var dskel: Skeleton3D = null
+	if dump_path != "":
+		for mi in model.find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).skin != null:
+				dskin = (mi as MeshInstance3D).skin
+				dskel = (mi as MeshInstance3D).get_node_or_null((mi as MeshInstance3D).skeleton) as Skeleton3D
+				break
+		for b in dskin.get_bind_count():
+			dump["binds"].append(String(dskin.get_bind_name(b)))
 	for seg in PROC_SEGS.get(id, [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0]]):
 		var n := int(round(float(seg[2]) * fps))
 		tsv += "%s\t%d\t%d\n" % [seg[0], i, n]
@@ -236,12 +255,30 @@ func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 				s["fall"] = clampf(t / float(seg[2]), 0.0, 1.0)
 				s["downed"] = true
 			an.update(1.0 / fps, s)
-			await _grab(dir.path_join("f%03d.png" % i))
+			if grab:
+				await _grab(dir.path_join("f%03d.png" % i))
+			else:
+				await tree.process_frame
+				await tree.process_frame
+			if dskin != null:
+				var mats: Array = []
+				for b in dskin.get_bind_count():
+					var bi := dskin.get_bind_bone(b)
+					if bi < 0:
+						bi = dskel.find_bone(dskin.get_bind_name(b))
+					var m := dskel.get_bone_global_pose(bi) * dskin.get_bind_pose(b)
+					mats.append([m.basis.x.x, m.basis.x.y, m.basis.x.z, m.basis.y.x, m.basis.y.y, m.basis.y.z,
+						m.basis.z.x, m.basis.z.y, m.basis.z.z, m.origin.x, m.origin.y, m.origin.z])
+				dump["frames"].append({"label": seg[0], "m": mats})
 			i += 1
 		model.position.y = base_y
 	var fa := FileAccess.open(dir.path_join("segments.tsv"), FileAccess.WRITE)
 	fa.store_string(tsv)
 	fa.close()
+	if dump_path != "":
+		var fd := FileAccess.open(dump_path, FileAccess.WRITE)
+		fd.store_string(JSON.stringify(dump))
+		fd.close()
 
 
 func _grab(path: String) -> void:
