@@ -719,8 +719,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(HomeNotices.BURROW.map(func(l): return l % (KinBox.farm_cap() if l.begins_with("The farm") else nb) if "%d" in l else l))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
