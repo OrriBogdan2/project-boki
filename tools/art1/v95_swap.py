@@ -23,6 +23,9 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
 With `keep_uv` step 1 bakes nothing: the low mesh is the master itself, decimated (`tris`) with its own UVs, materials
 and paint (each base and emission image scaled to `tex` at most), minus the `drop_mats` faces (props the game glb carries);
 the kept parts keep their old materials and atlas. tools/art/v95_to_game.py runs it for a Hunter's current master.
+`lining` [{box, h, s, v, inset}]: twins of a thin cloth shell's faces wound the other way (add_lining), so its inside draws as cloth, not
+the outline's black. `follow` {bone: leader}: after the export, the keys of a bone that the clips leave standing (Grimble's junk ball, under the root)
+ride the leader (tools/art1/glb_follow.py), so the ball does not hang in the air when the body dips.
 Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 0, the master's metres (v95_grid.py).
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
@@ -43,7 +46,9 @@ sys.path[:0] = [HERE, os.path.join(REPO, "tools", "meshy")]
 import bake_warden as BW
 import fit_warden as FW
 import glb_add_clips
+import glb_follow
 import skin_relax
+import swap_lining
 from glb_relax import accessor
 from meshkit import smooth
 from posekit import FPS
@@ -1101,6 +1106,8 @@ def main():
     else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
         print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
     BW._unfold(low)     # (the fit folds a few more over: Motley's four 10-17 cm collar shards came from here, not the collapse)
+    if SPEC.get("lining"):
+        swap_lining.add_lining(low, SPEC["lining"])
     if SPEC.get("lift_normals"):
         lift_normals(low, SPEC["lift_normals"])
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
@@ -1113,6 +1120,12 @@ def main():
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
                               export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    for follower, leader in SPEC.get("follow", {}).items():     # (the junk ball hangs in the air in a run: glb_follow.py)
+        gj, gb = glb_add_clips.read(OUT)
+        done = glb_follow.follow(gj, gb, follower, leader)
+        gj["buffers"][0]["byteLength"] = len(gb)
+        glb_add_clips.write(OUT, gj, gb)
+        print("SWAP follow: %s rides %s in %d clips" % (follower, leader, len(done)), flush=True)
     print("SWAP exported", OUT, os.path.getsize(OUT), "tris", sum(len(p.vertices) - 2 for p in me.polygons), flush=True)
 
 
