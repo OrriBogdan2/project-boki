@@ -7,7 +7,9 @@ extends RefCounted
 
 ## Beats whose state lives in the world's outpost resume at the start of that run.
 const OUTPOST_RUN := ["uplink", "defend", "extract"]
-const OUTPOST_START := "goexit"
+## (It must be a step in content/rules/tutorial.json: an unknown one resumes at step 0, the landing, and
+## landing resumes again, so the course never gets past it. --tutorial-resume-check holds it.)
+const OUTPOST_START := "wayout"
 
 
 static func opts() -> Dictionary:
