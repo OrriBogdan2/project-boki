@@ -2193,11 +2193,12 @@ func _try_ledge_grab(dt: float) -> void:
 					continue
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
-				# hopping down a terrace must not float you back up it
+				# hopping down a terrace must not float you back up it (later, only the plain reach: no tall climb)
 				# and one that shares an edge with your tile: the tile ahead along a wall isn't the wall you press
 				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
 					continue
-				var stepping_back := gz <= last_gy + World.STEP and not GlideLift.airborne_long(self)
+				var stepping_back := gz <= last_gy + World.STEP \
+						and (dz > MANTLE_REACH or not GlideLift.airborne_long(self))
 				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
 					continue
 			if d < bd and d < reach:
