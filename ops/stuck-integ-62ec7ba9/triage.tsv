@@ -59,7 +59,7 @@ ext/anim-race-beats	CONFLICT	cac7646c07	1	97	8/278	bin 0/0	docs/art/kin/RIGGED_B
 ext/anim-react-2-rebased	CONFLICT	40a96d6363	9	4	696/726	bin 0/36	art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ostra/ostra.glb
 ext/anim-react-settle-neve-tenzo	CONFLICT	e524a88b74	24	7	850/917	bin 0/24	art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ryzz/ryzz.glb
 ext/anim-release-sync-meeko-motley	CONFLICT	39dd44ed19	223	47	9939/19090	bin 169/229	answer.md art/uthana_pilot/tools/render.gd art/uthana_pilot/tools/render.sh art/uthana_pilot/tools/render.tscn
-ext/anim-remote-stomp	CONFLICT	8891e62955	14	36	958/1514	bin 0/2	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/decisions/0061-rocket-drop.md
+ext/anim-remote-stomp	CONFLICT	8891e62955	14	36	958/1514	bin 0/2	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/decisions/0143-rocket-drop.md
 ext/anim-result-poses	CONFLICT	51f4c3ebe1	1	1	247/251	bin 0/1	content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json
 ext/anim-results-stage-beats	CONFLICT	333b57982f	224	47	9841/18896	bin 169/231	answer.md art/uthana_pilot/tools/render.gd art/uthana_pilot/tools/render.sh art/uthana_pilot/tools/render.tscn
 ext/anim-revive-12	CONFLICT	58fede1c57	4	10	303/340	bin 0/10	art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/hem/hem.glb
@@ -72,12 +72,12 @@ ext/anim-stomp-batch-b	CONFLICT	3977c693cc	23	24	1844/2430	bin 0/28	art/wardens/
 ext/anim-stomp-drink-1	CONFLICT	26c04bc163	2	0	233/234	bin 0/4	art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb
 ext/anim-stomp-drink-2	CONFLICT	197cb1d635	2	2	76/78	bin 0/4	art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/pip/pip.glb art/wardens/tarek/tarek.glb
 ext/anim-stomp-drink-3	CONFLICT	fb4769a73d	2	10	235/264	bin 0/4	art/wardens/breaker/breaker.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb
-ext/anim-stomp-per-hunter	CONFLICT	1af65c7f89	13	36	1011/1588	bin 0/3	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/decisions/0061-rocket-drop.md
+ext/anim-stomp-per-hunter	CONFLICT	1af65c7f89	13	36	1011/1588	bin 0/3	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/decisions/0143-rocket-drop.md
 ext/anim-stop-on-stride	CONFLICT	cf19189311	229	48	9881/19009	bin 169/230	answer.md art/uthana_pilot/tools/render.gd art/uthana_pilot/tools/render.sh art/uthana_pilot/tools/render.tscn
 ext/anim-stop-start	CONFLICT	6e24c8d29d	6	9	255/281	bin 0/18	.github/workflows/release.yml content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/dredge.json
 ext/anim-strafe-back	CONFLICT	5f53bb1ca5	9	8	385/420	bin 0/19	.github/workflows/release.yml content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/dredge.json
 ext/anim-stretch-starters	CONFLICT	cb5714e967	6	21	211/268	bin 0/3	art/wardens/hem/IMPORT.md art/wardens/hem/hem.glb art/wardens/kael/IMPORT.md art/wardens/kael/kael.glb
-ext/anim-summon-clips	CONFLICT	db14e67b74	8	0	639/644	bin 0/0	docs/art/kin/RIGGED_BOKI.md docs/decisions/0039-boki-summon.md scripts/home/home.gd scripts/home/kin_act.gd
+ext/anim-summon-clips	CONFLICT	db14e67b74	8	0	639/644	bin 0/0	docs/art/kin/RIGGED_BOKI.md docs/decisions/0133-boki-summon.md scripts/home/home.gd scripts/home/kin_act.gd
 ext/anim-swim-reds	CONFLICT	5d6ce6ac23	214	23	14872/19563	bin 5/66	audio/archer_hit.wav audio/archer_hit.wav.import audio/archer_hit_1.wav audio/archer_hit_1.wav.import
 ext/anim-tenzo-boulder-sync	CONFLICT	25b030a6b7	217	47	9903/18825	bin 169/228	answer.md art/uthana_pilot/tools/render.gd art/uthana_pilot/tools/render.sh art/uthana_pilot/tools/render.tscn
 ext/anim-tenzo-spine-rekey	CONFLICT	1bd739d504	5	13	75/87	bin 0/1	art/wardens/tarek/tarek.glb content/archetypes/dolm.json content/rules/warden_anim/tarek.json docs/heroes/dolm.md
@@ -93,7 +93,7 @@ ext/blight-nests	CONFLICT	e15bc99b4a	3	99	31/6996	bin 0/0	scripts/core/data.gd s
 ext/body-hitbox-parity-rebased	CONFLICT	4988bb2e75	2	2	43/44	bin 0/0	art/wardens/breaker/IMPORT.md content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/gunslinger.json
 ext/body6-picks-apply	CONFLICT	4d4b045ec6	5	0	724/726	bin 1/11	art/wardens/cinder/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/cinder/cinder_atlas.jpg art/wardens/cinder/cinder_atlas.jpg.import
 ext/boki-downed-port	CONFLICT	c85c99af12	2	0	159/160	bin 0/0	docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd scripts/match/kin.gd scripts/match/kin_puppet.gd
-ext/boki-downed-pose-rebased	CONFLICT	fd0344937f	13	65	501/1463	bin 0/2	docs/BOKI_AGENCY_AUDIT.md docs/KIN_GRAMMAR.md docs/art/kin/RIGGED_BOKI.md docs/decisions/0022-boki-never-move-you.md
+ext/boki-downed-pose-rebased	CONFLICT	fd0344937f	13	65	501/1463	bin 0/2	docs/BOKI_AGENCY_AUDIT.md docs/KIN_GRAMMAR.md docs/art/kin/RIGGED_BOKI.md docs/decisions/0109-boki-never-move-you.md
 ext/boki-gait	CONFLICT	7caa9f112d	1	0	249/251	bin 0/10	content/rules/boki_gait.json docs/DEBT.md docs/art/BOKI_GAIT.md docs/art/gait/kestrike_after.png
 ext/boki-key-c-main	CONFLICT	509aea3c7f	4	0	30/30	bin 0/0	docs/ABILITIES.md docs/ARCHETYPES.md docs/SETTINGS_AUDIT.md docs/wiki/Boki.md
 ext/boki3d-lilybara	CONFLICT	6df99d443b	2	2	519/531	bin 0/4	art/kin/lilybara/lilybara.glb art/kin/lilybara/lilybara.glb.import art/kin/lilybara/lilybara_lilybara_atlas.webp art/kin/lilybara/lilybara_lilybara_atlas.webp.import
@@ -116,9 +116,9 @@ ext/checks-out-of-main	CONFLICT	26941068ca	1	31	109/159	bin 0/0	docs/DEBT.md too
 ext/checks-out-of-main-c	CONFLICT	15eb96b189	6	7	393/424	bin 0/0	docs/DEBT.md tools/base_check.gd tools/base_check.gd.uid tools/check_registry.gd
 ext/cinder-flue-clips	CONFLICT	ff8bf58d94	6	33	14/21	bin 0/0	docs/heroes/ashwick.md scripts/arch/kits/ashwick_jet.gd shaders/hero_vfx.gdshader tools/ashwick_combo_check.gd
 ext/cinder-sable-polish-rebased	CONFLICT	f3bf0403bb	3	37	10/16	bin 0/2	art/wardens/sable/sable.glb art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import content/rules/warden_look.json
-ext/clans-roles	CONFLICT	d69ae5e628	6	59	332/826	bin 0/0	docs/DEBT.md docs/decisions/0022-clans.md scripts/core/save.gd scripts/core/social.gd
-ext/clans-slice-3-tag	CONFLICT	c9b249d74e	3	68	237/749	bin 0/0	content/rules/clan_tag.json docs/DEBT.md docs/decisions/0022-clans.md docs/wiki/Rules.md
-ext/clans-weekly-board	CONFLICT	2e2d2176ba	11	62	302/796	bin 0/0	content/rules/clan_board.json docs/DEBT.md docs/decisions/0022-clans.md docs/decisions/0087-clan-board.md
+ext/clans-roles	CONFLICT	d69ae5e628	6	59	332/826	bin 0/0	docs/DEBT.md docs/decisions/0124-clans.md scripts/core/save.gd scripts/core/social.gd
+ext/clans-slice-3-tag	CONFLICT	c9b249d74e	3	68	237/749	bin 0/0	content/rules/clan_tag.json docs/DEBT.md docs/decisions/0124-clans.md docs/wiki/Rules.md
+ext/clans-weekly-board	CONFLICT	2e2d2176ba	11	62	302/796	bin 0/0	content/rules/clan_board.json docs/DEBT.md docs/decisions/0124-clans.md docs/decisions/0087-clan-board.md
 ext/clarity-1112	CONFLICT	2ef40952e4	8	0	669/675	bin 0/2	content/rules/spawn_tables.json docs/DEBT.md docs/design/CLARITY_PASS.md docs/shots/clarity-1112/busy_fight_after.png
 ext/clip-cadence-check	CONFLICT	9e3438417d	1	2	170/175	bin 0/0	content/rules/clip_cadence.json content/rules/warden_anim/breaker.json content/rules/warden_anim/hem.json content/rules/warden_anim/kael.json
 ext/combat-blight-endgame	CONFLICT	f0ab1e38f5	9	60	323/812	bin 0/0	content/rules/heart.json docs/DEBT.md docs/decisions/0051-limited-ways-out.md docs/wiki/Rules.md
@@ -148,8 +148,8 @@ ext/combat-w0246-support-reds	CONFLICT	4f1391960b	184	40	8960/15129	bin 0/30	REA
 ext/combat-zone-stage-dmg	CONFLICT	692061cfa9	4	26	1235/1689	bin 2/2	content/maps/hollowcrown.json content/rules/air_rings.json content/rules/shrink_zone.json docs/AIR_RINGS.md
 ext/combo-payoff-audit	CONFLICT	7c41d119c1	14	6	255/274	bin 0/0	docs/HUD.md docs/heroes/combo_payoffs.md scripts/arch/kits/ashwick_kit.gd scripts/arch/kits/gil_kit.gd
 ext/cooldown-gate-1111	CONFLICT	2db7e383cd	68	29	3175/4483	bin 4/4	content/archetypes/gil.json content/rules/base_echo.json content/rules/base_tumble.json content/rules/farm_builder.json
-ext/creator-empty-marks	CONFLICT	2645442616	11	7	426/460	bin 0/1	docs/decisions/0011-mantle-look.md docs/decisions/0016-the-unmasked.md docs/shots/creator-empty-marks/ghost_sheet.jpg scripts/match/unmasked.gd
-ext/creator-preview	CONFLICT	7d0f551392	1	62	263/709	bin 0/1	docs/decisions/0016-the-unmasked.md docs/shots/creator-preview/body_face_surprise.jpg scripts/match/unmasked.gd scripts/ui/creator_view.gd
+ext/creator-empty-marks	CONFLICT	2645442616	11	7	426/460	bin 0/1	docs/decisions/0011-mantle-look.md docs/decisions/0105-the-unmasked.md docs/shots/creator-empty-marks/ghost_sheet.jpg scripts/match/unmasked.gd
+ext/creator-preview	CONFLICT	7d0f551392	1	62	263/709	bin 0/1	docs/decisions/0105-the-unmasked.md docs/shots/creator-preview/body_face_surprise.jpg scripts/match/unmasked.gd scripts/ui/creator_view.gd
 ext/creator-sex-distinct-shots	CONFLICT	0e0fa57a5e	1	100	0/0	bin 0/0	
 ext/cursor-confine	CONFLICT	0610255d3f	1	0	132/132	bin 0/0	scripts/core/cursor_mode.gd scripts/core/cursor_mode.gd.uid scripts/core/settings.gd scripts/home/home.gd
 ext/damage-ratio-audit	CONFLICT	a89a84bed2	1	0	199/199	bin 0/0	content/archetypes/mage.json content/archetypes/rimewright.json docs/specs/DAMAGE_RATIOS.md docs/wiki/Class-Snowglide.md
@@ -188,7 +188,7 @@ ext/farm-greet-home	CONFLICT	ab75d56552	2	7	199/214	bin 0/0	content/rules/base_l
 ext/farm-hand-feed	CONFLICT	4869e210fa	4	5	227/241	bin 0/0	content/rules/base_life.json docs/wiki/Rules.md scripts/home/base_hand_feed.gd scripts/home/base_hand_feed.gd.uid
 ext/farm-hatch-name	CONFLICT	e78ebd1a47	2	2	206/212	bin 0/0	content/rules/kin_names.json docs/wiki/Rules.md scripts/core/kin_names.gd scripts/core/kin_names.gd.uid
 ext/farm-hazard-counter-card	CONFLICT	d71030855a	7	15	1154/1368	bin 0/4	content/maps/hollowcrown.json content/rules/boki_lines.json content/rules/terrain_hazards.json docs/MAP_REGIONS.md
-ext/farm-incubator-verify	CONFLICT	58e4a6b641	10	7	461/497	bin 0/2	content/rules/farm_tutorial.json content/rules/incubator.json docs/DEBT.md docs/decisions/0022-garden-zones.md
+ext/farm-incubator-verify	CONFLICT	58e4a6b641	10	7	461/497	bin 0/2	content/rules/farm_tutorial.json content/rules/incubator.json docs/DEBT.md docs/decisions/0120-garden-zones.md
 ext/farm-leave-match-order	CONFLICT	70012099cc	134	44	18032/32679	bin 291/464	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/farm-minkee-name	CONFLICT	e0825fd87a	135	44	17946/32585	bin 291/464	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/farm-mood-icons-rebased	CONFLICT	1942184f52	680	0	249/249	bin 0/0	scripts/home/home.gd scripts/home/kin_mood.gd scripts/home/kin_mood.gd.uid scripts/home/kin_wants.gd
@@ -218,7 +218,7 @@ ext/feel-cinder-dash-curve	CONFLICT	6793461215	1	7	35/38	bin 0/0	content/rules/d
 ext/feel-cinder-poof-cancel	CONFLICT	2f253242e5	186	39	9265/15435	bin 0/30	README.md audio/glide_open_heavy.wav audio/glide_open_heavy.wav.import audio/glide_open_heavy_1.wav
 ext/feel-dash-jump-keep	CONFLICT	600c13f973	8	3	502/521	bin 0/0	content/rules/feel_golden.json content/rules/hunter_move.json docs/DEBT.md docs/MOVEMENT_FEEL.md
 ext/feel-dash-off-ledge-rebased	CONFLICT	cfaa79523d	684	1	193/195	bin 0/0	docs/MOVEMENT_FEEL.md docs/decisions/0046-dash-off-ledge.md scripts/arch/arch_kit.gd scripts/arch/kits/breah_hop.gd
-ext/feel-dash-wall-slide-rebased	CONFLICT	5f7040e143	688	73	165/616	bin 0/0	docs/MOVEMENT_FEEL.md docs/decisions/0047-dash-wall-slide.md scripts/combat/verbs.gd scripts/match/hunter.gd
+ext/feel-dash-wall-slide-rebased	CONFLICT	5f7040e143	688	73	165/616	bin 0/0	docs/MOVEMENT_FEEL.md docs/decisions/0135-dash-wall-slide.md scripts/combat/verbs.gd scripts/match/hunter.gd
 ext/feel-dive-net	CONFLICT	d36153c14d	3	19	29/36	bin 0/0	docs/AUDIO.md docs/DEBT.md docs/MOVEMENT_FEEL.md docs/decisions/0021-glide-dive.md
 ext/feel-fire-slow-sable	CONFLICT	68bba7e851	2	15	17/20	bin 0/0	content/weapons/arc_bolts.json docs/MOVEMENT_FEEL.md docs/heroes/thief.md tools/dancer_parity_check.gd
 ext/feel-first-cast-warm-rebased	CONFLICT	e6e9db6aee	13	10	319/357	bin 1/3	art/wardens/ryzz/ryzz_atlas.jpg art/wardens/ryzz/ryzz_atlas.jpg.import art/wardens/sable/sable_atlas.jpg art/wardens/sable/sable_atlas.jpg.import
@@ -247,7 +247,7 @@ ext/feel-scout-cam	CONFLICT	880cdeb8ad	11	2	347/357	bin 0/0	content/rules/camera
 ext/feel-sparkle-wirerun-glide	CONFLICT	8550d8f687	187	39	9281/15454	bin 0/30	README.md audio/glide_open_heavy.wav audio/glide_open_heavy.wav.import audio/glide_open_heavy_1.wav
 ext/feel-step-up	CONFLICT	387615cfdf	1	1	173/175	bin 0/0	content/rules/hunter_move.json docs/MOVEMENT_FEEL.md docs/wiki/Rules.md scripts/main.gd
 ext/feel-stop-slide	CONFLICT	6798dcf2c6	9	43	600/1066	bin 0/0	content/rules/hunter_move.json docs/DEBT.md docs/MOVEMENT_FEEL.md docs/MOVEMENT_PARITY.md
-ext/feel-summon-on-g	CONFLICT	5a3186369c	7	2	1026/1052	bin 0/0	content/rules/boki_summon.json docs/MOVEMENT_FEEL.md docs/decisions/0022-relay-test-weather.md docs/decisions/0038-boki-wisp-proto.md
+ext/feel-summon-on-g	CONFLICT	5a3186369c	7	2	1026/1052	bin 0/0	content/rules/boki_summon.json docs/MOVEMENT_FEEL.md docs/decisions/0130-relay-test-weather.md docs/decisions/0038-boki-wisp-proto.md
 ext/feel-tenzo-hop-glide	CONFLICT	dd3f6246f8	188	39	9299/15484	bin 0/30	README.md audio/glide_open_heavy.wav audio/glide_open_heavy.wav.import audio/glide_open_heavy_1.wav
 ext/feel-trigger-edge	CONFLICT	06ef3f5b38	3	6	89/95	bin 0/0	content/archetypes/archer.json docs/ABILITIES.md docs/DASHES_AND_ABILITY_FEEL.md docs/wiki/Class-Red-Stitch.md
 ext/feel-ui-focus	CONFLICT	42f97347d4	3	3	316/328	bin 0/0	docs/DEBT.md scripts/home/arrival_queue.gd scripts/home/farm_chatter.gd scripts/home/farm_guide.gd
@@ -273,13 +273,13 @@ ext/fusion-states-fix	CONFLICT	098c4cf258	11	6	430/462	bin 0/0	docs/DEBT.md docs
 ext/gait-speed-port	CONFLICT	db6c6a961b	4	9	146/161	bin 0/0	content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/claire.json content/rules/warden_anim/dredge.json
 ext/gaps-juggernaut	CONFLICT	b4f362a744	1	2	42/43	bin 0/0	docs/heroes/juggernaut.md tools/dancer_jug_check.gd
 ext/garden-balance-apply	CONFLICT	2d426d36cc	4	92	149/1946	bin 0/0	content/rules/garden_sim.json docs/DEBT.md docs/GARDEN.md docs/MOVEMENT_FEEL.md
-ext/garden-bramble-dupes	CONFLICT	b83c32c936	2	7	163/177	bin 0/0	content/rules/farm_tutorial.json docs/DEBT.md docs/decisions/0022-garden-zones.md docs/decisions/0078-hub-owns-fixtures.md
+ext/garden-bramble-dupes	CONFLICT	b83c32c936	2	7	163/177	bin 0/0	content/rules/farm_tutorial.json docs/DEBT.md docs/decisions/0120-garden-zones.md docs/decisions/0078-hub-owns-fixtures.md
 ext/garden-care-prompt	CONFLICT	33f1a70b2f	206	15	13221/15682	bin 5/62	audio/archer_hit.wav audio/archer_hit.wav.import audio/archer_hit_1.wav audio/archer_hit_1.wav.import
-ext/garden-cinderstep	CONFLICT	a2bb1bcb2b	2	7	245/264	bin 0/0	content/rules/garden_zones.json content/rules/lean.json docs/decisions/0022-garden-zones.md docs/wiki/Farm-Reference.md
+ext/garden-cinderstep	CONFLICT	a2bb1bcb2b	2	7	245/264	bin 0/0	content/rules/garden_zones.json content/rules/lean.json docs/decisions/0120-garden-zones.md docs/wiki/Farm-Reference.md
 ext/garden-cinderstep-zone-rebased	CONFLICT	0c31a78388	4	91	806/9703	bin 14/29	art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb
 ext/garden-deflake	CONFLICT	2f45939b40	111	43	8855/15661	bin 211/311	README.md art/kin/burrlet/burrlet.glb art/kin/burrlet/burrlet_burrlet_atlas.webp art/kin/burrlet/burrlet_burrlet_atlas.webp.import
 ext/garden-fresh-hour	CONFLICT	949627b215	45	6	435/467	bin 0/0	docs/ONBOARDING_GARDEN_HOUR.md scripts/core/shelter.gd scripts/home/home_market.gd tools/check_registry.gd
-ext/garden-horizon	CONFLICT	02077956a8	6	32	223/332	bin 0/0	content/rules/garden_zones.json content/rules/market.json docs/decisions/0022-garden-zones.md docs/wiki/Rules.md
+ext/garden-horizon	CONFLICT	02077956a8	6	32	223/332	bin 0/0	content/rules/garden_zones.json content/rules/market.json docs/decisions/0120-garden-zones.md docs/wiki/Rules.md
 ext/garden-hub-move	CONFLICT	8fe040176d	2	52	372/780	bin 0/0	content/rules/garden_zones.json scripts/core/kinbox.gd scripts/home/base_life.gd scripts/home/garden_zones.gd
 ext/garden-hub-theme	CONFLICT	7f1ba9db43	3	48	206/401	bin 0/0	content/rules/base_volley.json content/rules/snack_patch.json docs/BASE_LIFE.md docs/wiki/Rules.md
 ext/garden-integrated-rebased	CONFLICT	ddef4d2dad	12	54	3608/7969	bin 21/41	MERGE_REPORT.md audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav
@@ -417,7 +417,7 @@ ext/perf-heart-final	CONFLICT	fc28a3056f	6	9	59/65	bin 0/0	scripts/match/bot.gd 
 ext/perf-occluder-pool-rows	CONFLICT	82526a1d05	138	44	17924/32581	bin 291/464	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/perf-owner-hw-rebased	CONFLICT	5d7a9da30e	99	7	2292/2474	bin 0/0	content/rules/tuning.json docs/DEBT.md docs/PERF.md docs/PERF_OWNER_HW.md
 ext/perf-render-presets-1108b	CONFLICT	a90208db9d	3	77	24/105	bin 0/0	scripts/core/settings.gd tools/check_registry.gd tools/perf_bench.gd tools/perf_budget_check.gd
-ext/perf-skip-proc-body	CONFLICT	dd2dd33055	7	0	348/349	bin 0/0	docs/DEBT.md docs/art/wardens/RIG_CONTRACT.md docs/decisions/0022-hollow-crown-2x.md scripts/heroes/warden_archer.gd
+ext/perf-skip-proc-body	CONFLICT	dd2dd33055	7	0	348/349	bin 0/0	docs/DEBT.md docs/art/wardens/RIG_CONTRACT.md docs/decisions/0107-hollow-crown-2x.md scripts/heroes/warden_archer.gd
 ext/perf-tracy-1112	CONFLICT	0f0d0d20ca	5	0	349/351	bin 0/0	.gitignore docs/PERF.md export_presets.cfg native/tracy/SConstruct
 ext/perf-train-0245-rebased	CONFLICT	a60a833944	84	51	2013/4173	bin 0/0	content/rules/tuning.json docs/DEBT.md docs/PERF.md docs/PERF_TRAIN.md
 ext/physics-unify-1111	CONFLICT	254f8026fc	8	0	550/552	bin 0/0	content/rules/hunter_move.json docs/MOVEMENT_FEEL.md docs/decisions/0060-one-movement-profile.md docs/wiki/Rules.md
@@ -445,7 +445,7 @@ ext/sable-vault-exit	CONFLICT	288acc3d91	6	17	55/67	bin 0/0	docs/DEBT.md docs/MO
 ext/scrapking-arm-1111	CONFLICT	4d8ee3755d	6	0	203/204	bin 0/0	art/wardens/dredge/IMPORT.md content/rules/warden_anim/dredge.json docs/DEBT.md docs/art/ANIM_QUALITY_AUDIT.md
 ext/scrapking-lmb-1111-clips	CONFLICT	dd7105b4fe	5	7	159/172	bin 0/3	content/archetypes/dredge.json content/weapons/shotgun.json docs/AIMKIT.md docs/heroes/dredge.md
 ext/scrapking-lmb-clips	CONFLICT	1cc8f5a5b0	1	100	0/0	bin 0/0	
-ext/select-loading-1111	CONFLICT	2cb8645273	6	58	328/789	bin 0/14	docs/decisions/0019-prematch-lobby.md docs/shots/select-loading-1111/after_1280x720_full.jpg docs/shots/select-loading-1111/after_1280x720_loading.jpg docs/shots/select-loading-1111/after_1280x720_locked.jpg
+ext/select-loading-1111	CONFLICT	2cb8645273	6	58	328/789	bin 0/14	docs/decisions/0106-prematch-lobby.md docs/shots/select-loading-1111/after_1280x720_full.jpg docs/shots/select-loading-1111/after_1280x720_loading.jpg docs/shots/select-loading-1111/after_1280x720_locked.jpg
 ext/series-boki-1112	CONFLICT	d439881ca2	2	98	7/522	bin 0/0	scripts/core/boki_modes.gd scripts/match/match.gd scripts/match/spawn_plan.gd tools/boki_modes_check.gd
 ext/sfx-ability-ready	CONFLICT	c3a820a284	145	50	12093/24378	bin 353/709	art/kin/cairnback/cairnback.glb art/kin/cairnback/cairnback_cairnback_normal.webp.import art/kin/gibbelle/gibbelle.glb art/kin/gibbelle/gibbelle_gibbelle_atlas.webp.import
 ext/sfx-ambience	CONFLICT	7012c20f68	1	5	252/268	bin 0/6	audio/amb_blight.ogg audio/amb_blight.ogg.import audio/amb_cliffs.ogg audio/amb_cliffs.ogg.import
@@ -555,8 +555,8 @@ ext/stuck-integ-f60f9dd7	CONFLICT	5d1901c226	53	5	1930/2040	bin 0/30	audio/hit_a
 ext/stuck-integ-f6bd2b7c	CONFLICT	217fece726	263	17	10219/12357	bin 26/182	art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb art/wardens/breaker/breaker_atlas.jpg art/wardens/breaker/breaker_atlas.jpg.import
 ext/summon-clips-port	CONFLICT	06bf511520	217	46	10085/19008	bin 169/230	answer.md art/uthana_pilot/tools/render.gd art/uthana_pilot/tools/render.sh art/uthana_pilot/tools/render.tscn
 ext/summon-kill-credit-port	CONFLICT	21062dff9e	217	14	17939/21078	bin 7/338	art/wardens/pip/pip.glb art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip_atlas.jpg.import audio/archer_foley.wav
-ext/summon-kill-credit-rebased	CONFLICT	d4988d7921	27	1	1409/1429	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
-ext/summon-pve-rules-rebased	CONFLICT	790826e76e	7	1	1230/1253	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md docs/decisions/0041-wisp-steal.md
+ext/summon-kill-credit-rebased	CONFLICT	d4988d7921	27	1	1409/1429	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
+ext/summon-pve-rules-rebased	CONFLICT	790826e76e	7	1	1230/1253	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md docs/decisions/0041-wisp-steal.md
 ext/summon-share-port	CONFLICT	f2752f3b7e	135	44	18284/32888	bin 291/464	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/supervive-impact	CONFLICT	ac32fb4656	7	8	368/401	bin 0/0	docs/DASHES_AND_ABILITY_FEEL.md docs/heroes/dash_interactions.md scripts/arch/arch_kit.gd scripts/arch/dash_flow.gd
 ext/sv-private-1112	CONFLICT	5273e37c33	11	63	1183/3205	bin 0/0	AGENTS.md CONTRIBUTING.md MERGE_REPORT.md README.md
@@ -564,7 +564,7 @@ ext/tarek-appeal	CONFLICT	a9b2763a52	2	91	10/123	bin 0/10	art/wardens/src/tarek_
 ext/teach-hold	CONFLICT	c51efc80f6	14	85	957/6805	bin 0/0	content/rules/farm_tutorial.json content/rules/tutorial.json docs/HUD.md docs/wiki/Rules.md
 ext/telegraph-drawn-hit-port	CONFLICT	347d73578f	137	44	18028/32690	bin 291/464	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/tenzo-cone-grow	CONFLICT	dafcc39dc9	1	8	41/45	bin 0/0	content/archetypes/dolm.json docs/heroes/dolm.md docs/wiki/Class-Stone-Seer.md scripts/arch/kits/dolm_kit.gd
-ext/tenzo-playtest-1108	CONFLICT	5093900f97	9	4	567/591	bin 0/1	content/archetypes/dolm.json content/rules/tuning.json docs/decisions/0061-tenzo-rock-floor-and-lob.md docs/heroes/dolm.md
+ext/tenzo-playtest-1108	CONFLICT	5093900f97	9	4	567/591	bin 0/1	content/archetypes/dolm.json content/rules/tuning.json docs/decisions/0150-tenzo-rock-floor-and-lob.md docs/heroes/dolm.md
 ext/tenzo-ridge-bursts	CONFLICT	0647b3a94c	14	17	151/184	bin 0/6	docs/heroes/dolm.md docs/shots/tenzo-ridge-bursts/boulder_strip_after.jpg docs/shots/tenzo-ridge-bursts/boulder_strip_before.jpg docs/shots/tenzo-ridge-bursts/punch_strip_after.jpg
 ext/train-rank-controls	CONFLICT	ca63952641	1	24	63/83	bin 0/0	scripts/match/practice_ranks.gd scripts/match/practice_ranks.gd.uid scripts/ui/overlay.gd tools/arena_check.gd
 ext/training-merge-1111	CONFLICT	24323f1a1d	3	11	222/251	bin 0/3	docs/DEMO_PRESETS.md docs/HUD.md docs/shots/training-merge-1111/base_entry_before_after.jpg docs/shots/training-merge-1111/loadout_after.jpg
@@ -581,7 +581,7 @@ ext/tut-context-tips-rebased	CONFLICT	332e40002d	1	0	253/255	bin 0/0	content/rul
 ext/tut-creator-first	CONFLICT	5adaa832aa	2	3	95/98	bin 0/3	docs/UI_FIRST15.md docs/ui_first15/1280x720/05_creator.jpg docs/ui_first15/1280x720/05b_creator_more.jpg docs/ui_first15/1280x720/08_hatch_name.jpg
 ext/tut-dive-hint	CONFLICT	b734bc3571	4	0	322/323	bin 0/0	content/rules/hints.json docs/decisions/0023-short-tutorials.md docs/wiki/Rules.md scripts/match/glide_dive.gd
 ext/tut-dodge-dummy-rebased	CONFLICT	4d445289ed	13	26	1814/2452	bin 19/39	audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav audio/boss_brood_tell.wav.import
-ext/tut-drop-old-farm-steps	CONFLICT	466080494c	2	31	118/173	bin 0/0	content/rules/farm_builder.json content/rules/farm_tutorial.json docs/DEBT.md docs/decisions/0011-farm-builder-tutorial.md
+ext/tut-drop-old-farm-steps	CONFLICT	466080494c	2	31	118/173	bin 0/0	content/rules/farm_builder.json content/rules/farm_tutorial.json docs/DEBT.md docs/decisions/0104-farm-builder-tutorial.md
 ext/tut-duel-hint-port	CONFLICT	10c4c1be5c	60	73	10857/41610	bin 138/144	art/wardens/breaker/IMPORT.md art/wardens/breaker/breaker.glb art/wardens/breaker/breaker_atlas.jpg art/wardens/breaker/breaker_atlas.jpg.import
 ext/tut-duel-ring-rebased	CONFLICT	03ebf7fe87	692	63	20612/56786	bin 201/293	MERGE_REPORT.md answer.md art/kin/caecilith/caecilith.glb art/kin/caecilith/caecilith_caecilith_atlas.webp.import
 ext/tut-event-hints-rebased	CONFLICT	3357abd3f2	685	65	19607/56054	bin 201/293	MERGE_REPORT.md answer.md art/kin/caecilith/caecilith.glb art/kin/caecilith/caecilith_caecilith_atlas.webp.import
@@ -618,13 +618,13 @@ ext/tut-lead-swap-hint	CONFLICT	b2ea25277f	15	51	433/891	bin 0/3	content/rules/c
 ext/tut-no-ripe-timer-1111	CONFLICT	a5bcdfb2e1	62	33	2607/3933	bin 4/4	content/archetypes/gil.json content/rules/base_echo.json content/rules/base_tumble.json content/rules/farm_builder.json
 ext/tut-retry-port	CONFLICT	0dde30f768	63	37	2609/4148	bin 4/4	content/archetypes/gil.json content/rules/base_echo.json content/rules/base_tumble.json content/rules/farm_builder.json
 ext/tut-revive-hint	CONFLICT	fd812476aa	4	0	348/348	bin 0/0	content/rules/hints.json docs/decisions/0023-short-tutorials.md docs/wiki/Rules.md scripts/core/first_time_hint.gd
-ext/tut-rocket-hint	CONFLICT	8401dc3579	2	82	122/681	bin 0/0	docs/decisions/0061-rocket-drop.md docs/wiki/Code-Map.md docs/wiki/Expeditions.md scripts/core/net.gd
+ext/tut-rocket-hint	CONFLICT	8401dc3579	2	82	122/681	bin 0/0	docs/decisions/0143-rocket-drop.md docs/wiki/Code-Map.md docs/wiki/Expeditions.md scripts/core/net.gd
 ext/tut-seat-grace-hint	CONFLICT	8442ddd914	17	35	340/529	bin 0/0	briefs/specs/LIMITED_WAY_OUTS.md content/rules/first_match_guide.json content/rules/heart.json docs/decisions/0051-limited-ways-out.md
 ext/tut-solo-words	CONFLICT	077ed6e820	17	42	963/1684	bin 0/6	content/maps/hollowcrown.json content/maps/skyreach.json content/rules/capture.json content/rules/first_match_guide.json
 ext/tut-start-here-rebased-rebased	CONFLICT	7b2abd6d29	6	81	69/380	bin 0/0	content/rules/class_unlock.json docs/wiki/Rules.md scripts/core/class_unlock.gd scripts/ui/hunter_picker.gd
 ext/tut-station-goals-rebased	CONFLICT	bab1827bb6	8	28	1591/2212	bin 19/39	audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav audio/boss_brood_tell.wav.import
 ext/tut-stomp-hints	CONFLICT	0bc64e8052	24	30	1626/2355	bin 0/8	content/maps/hollowcrown.json content/maps/skyreach.json content/rules/capture.json content/rules/first_match_guide.json
-ext/tut-summon-killed	CONFLICT	415590f72e	6	1	1126/1138	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
+ext/tut-summon-killed	CONFLICT	415590f72e	6	1	1126/1138	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
 ext/tut-summon-pad	CONFLICT	63fc130001	194	43	20801/36758	bin 295/468	art/kin/anchorhorn/anchorhorn_m3d.glb art/kin/anchorhorn/anchorhorn_m3d.glb.import art/kin/anchorhorn/anchorhorn_m3d.json art/kin/anchorhorn/anchorhorn_m3d_atlas.webp
 ext/tut-summon-station	CONFLICT	9f03935eb7	6	26	1186/1608	bin 0/0	content/maps/training.json content/rules/boki_summon.json content/rules/station_goals.json content/rules/summon_station.json
 ext/tut-wall-kick-hint	CONFLICT	3ebfed312f	4	0	345/345	bin 0/0	content/rules/hints.json docs/decisions/0023-short-tutorials.md docs/wiki/Rules.md scripts/core/first_time_hint.gd
@@ -672,12 +672,12 @@ ext/ui-mode-cards	CONFLICT	31926974de	11	2	385/393	bin 0/10	content/maps/hollowc
 ext/ui-next-form-port	CONFLICT	9527c36fcd	194	2	192/196	bin 0/3	docs/BASE_LIFE.md docs/shots/next-form/ink_1280x720.jpg docs/shots/next-form/level_1280x720.jpg docs/shots/next-form/soon_1280x720.jpg
 ext/ui-overhead-ref	CONFLICT	a5cd1090a4	7	4	780/814	bin 0/0	docs/HUD.md scripts/ui/HUD_SPEC.md scripts/ui/armor_hud.gd scripts/ui/belt_hud.gd
 ext/ui-plate-status-row	CONFLICT	ed17eb96ee	5	1	452/459	bin 0/0	docs/HUD.md docs/heroes/ashwick.md docs/heroes/gunslinger.md docs/wiki/Checks.md
-ext/ui-portal-boki-card	CONFLICT	6c59c52c14	4	2	773/796	bin 0/2	content/rules/boki_summon.json docs/decisions/0019-prematch-lobby.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
+ext/ui-portal-boki-card	CONFLICT	6c59c52c14	4	2	773/796	bin 0/2	content/rules/boki_summon.json docs/decisions/0106-prematch-lobby.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
 ext/ui-prematch-margin	CONFLICT	bf3d0d7ffb	4	98	73/5141	bin 0/5	docs/GATE_TRIAGE_0244.md docs/shots/ui-prematch-margin/1280x720_chat.jpg docs/shots/ui-prematch-margin/1280x720_locked.jpg docs/shots/ui-prematch-margin/1920x1080_chat.jpg
 ext/ui-pro-1111	CONFLICT	8af9f30583	16	3	616/639	bin 0/9	docs/HUD.md docs/UI_DESIGN.md docs/UI_STYLE.md docs/shots/ui-pro-1111/01_title.jpg
 ext/ui-raid-boss-bar-online	CONFLICT	b51dd29b77	11	85	245/1736	bin 0/0	docs/design/PVE_HEART_RAID.md scripts/core/boki_modes.gd scripts/home/heart_raid_pick.gd scripts/match/boss.gd
 ext/ui-results-first	CONFLICT	5fef4e738e	5	11	449/509	bin 0/2	docs/UI_DESIGN.md docs/shots/ui-results-plain/results_0245_1280x720.jpg docs/shots/ui-results-plain/results_0245_1920x1080.jpg scripts/ui/class_card.gd
-ext/ui-ride-pick	CONFLICT	10b43da451	4	3	718/741	bin 0/2	content/rules/boki_summon.json docs/decisions/0019-prematch-lobby.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
+ext/ui-ride-pick	CONFLICT	10b43da451	4	3	718/741	bin 0/2	content/rules/boki_summon.json docs/decisions/0106-prematch-lobby.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
 ext/ui-safe-area-one	CONFLICT	0aabee479e	4	79	69/340	bin 14/16	docs/shots/ui-safe-area-one/1280x720_prematch_locked.jpg docs/shots/ui-safe-area-one/1920x1080_prematch_chat.jpg scripts/ui/alive_counter.gd scripts/ui/hud.gd
 ext/ui-self-cc-timer	CONFLICT	b22df6bf90	2	0	75/75	bin 0/0	docs/HUD.md scripts/ui/hud_vitals.gd scripts/ui/hudref_demo.gd scripts/ui/self_cc_line.gd
 ext/ui-settings-trim	CONFLICT	789776b438	12	4	827/865	bin 0/9	docs/ARCHETYPES.md docs/MOVEMENT_FEEL.md docs/SETTINGS_AUDIT.md docs/UI_DESIGN.md
@@ -686,12 +686,12 @@ ext/ui-simplify-1111	CONFLICT	4d92923536	8	4	737/772	bin 0/24	docs/HUD.md docs/U
 ext/ui-solos-hud	CONFLICT	7237a80b1f	13	42	1279/2221	bin 0/8	content/maps/hollowcrown.json content/maps/skyreach.json docs/DEBT.md docs/HUD.md
 ext/ui-squad-killer	CONFLICT	a620b0b55b	2	89	46/459	bin 1/1	docs/HUD.md scripts/ui/downed_marks.gd scripts/ui/squad_frames.gd
 ext/ui-stale-text-pass	CONFLICT	674f9e1f53	2	6	89/95	bin 0/0	README.md content/rules/chest_keys.json content/rules/keys.json docs/decisions/0024-evolution-rules.md
-ext/ui-start-here-port	CONFLICT	30f6563d16	4	98	55/5121	bin 0/0	content/rules/class_unlock.json docs/decisions/0019-prematch-lobby.md docs/wiki/Rules.md scripts/core/class_unlock.gd
-ext/ui-stolen-wisps	CONFLICT	57a87a3356	7	25	1149/1538	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md docs/decisions/0041-wisp-steal.md
+ext/ui-start-here-port	CONFLICT	30f6563d16	4	98	55/5121	bin 0/0	content/rules/class_unlock.json docs/decisions/0106-prematch-lobby.md docs/wiki/Rules.md scripts/core/class_unlock.gd
+ext/ui-stolen-wisps	CONFLICT	57a87a3356	7	25	1149/1538	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md docs/decisions/0041-wisp-steal.md
 ext/ui-stomp-picker	CONFLICT	427ff3410f	8	18	756/922	bin 0/0	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/decisions/0061-stomp-lock.md docs/specs/DOWNED_ABILITIES.md
 ext/ui-stomp-ring	CONFLICT	3284d9ac8b	11	6	811/868	bin 0/4	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/HUD.md
 ext/ui-stomp-state	CONFLICT	b41ea1afb8	7	3	672/697	bin 0/0	content/rules/stomps.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/HUD.md
-ext/ui-summon-card	CONFLICT	107b7c8eaa	22	1	1139/1152	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
+ext/ui-summon-card	CONFLICT	107b7c8eaa	22	1	1139/1152	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
 ext/ui-tab-board-stats	CONFLICT	0befe3bf8e	5	6	287/306	bin 0/1	docs/DEBT.md docs/HUD.md docs/TAB_BOARD_PARITY.md docs/shots/tab-board/tab_board.png
 ext/ui-tab-scoreboard	CONFLICT	dce266c903	1	0	181/182	bin 0/0	docs/HUD.md scripts/ui/hud.gd scripts/ui/squad_board.gd scripts/ui/squad_board.gd.uid
 ext/ui-text-chat-rebased	CONFLICT	fe6a83505c	6	50	828/1684	bin 21/21	content/archetypes/ashwick.json content/archetypes/juggernaut.json content/archetypes/thief.json content/rules/boki_summon.json
@@ -721,7 +721,7 @@ ext/vex-dash-charge-port	CONFLICT	34ff125ad9	181	67	17275/53268	bin 134/170	READ
 ext/vex-dash-parity-rebased	CONFLICT	ad34d150d0	10	33	177/267	bin 0/0	content/vfx/gunslinger.json content/weapons/quill_rifle.json docs/ARCHETYPES.md docs/DEBT.md
 ext/vex-greenfire-1108	CONFLICT	961a8fc076	3	2	66/68	bin 0/10	content/archetypes/gunslinger.json docs/heroes/gunslinger.md docs/parity_reel/README.md docs/shots/vex-greenfire-1108/meadow_dash_before_after.jpg
 ext/vex-yawlock-1109-2248	CONFLICT	128ff87287	1	27	35/48	bin 0/0	content/archetypes/gunslinger.json docs/heroes/gunslinger.md docs/wiki/Class-Hired-Gun.md scripts/arch/arch_kit.gd
-ext/vfx-air-rings-read	CONFLICT	e55c3bb151	11	32	1170/1736	bin 0/10	content/maps/hollowcrown.json content/rules/air_rings.json docs/AIR_RINGS.md docs/decisions/0061-rocket-drop.md
+ext/vfx-air-rings-read	CONFLICT	e55c3bb151	11	32	1170/1736	bin 0/10	content/maps/hollowcrown.json content/rules/air_rings.json docs/AIR_RINGS.md docs/decisions/0143-rocket-drop.md
 ext/vfx-albert-ivory-arcs	CONFLICT	d73b95bd3c	153	95	2/42	bin 1/1	content/vfx/bulwark.json docs/heroes/bulwark.md
 ext/vfx-albert-slab	CONFLICT	f990fa9b93	8	6	153/163	bin 0/3	content/archetypes/bulwark.json content/rules/kit_parity.json content/vfx/bulwark.json docs/KIT_PARITY.md
 ext/vfx-archer-strips	CONFLICT	11d36ea982	1	100	0/0	bin 0/0	
@@ -787,8 +787,8 @@ ext/wisp-gpu-ab-rebased	CONFLICT	6f676099c2	68	46	7479/13931	bin 21/82	MERGE_REP
 ext/wisp-look-1112	CONFLICT	6daa83a689	1	48	512/1001	bin 0/0	content/rules/wisp_looks.json docs/DEATH_AND_REVIVE.md docs/DEBT.md docs/decisions/0019-downed-wisp.md
 ext/wisp-look-net	CONFLICT	4c7e3fd0e8	3	3	54/56	bin 0/0	docs/DEBT.md docs/decisions/0019-downed-wisp.md scripts/core/net.gd scripts/core/player_look.gd
 ext/wisp-merge-from-wisp-rebased	CONFLICT	8de0bb1512	13	53	3733/8107	bin 21/41	MERGE_REPORT.md audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav
-ext/wisp-passive-stack-rebased	CONFLICT	4bd4be3246	23	1	951/963	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md docs/decisions/0041-wisp-steal.md
-ext/wisp-summon-key-c	CONFLICT	6eb9d4c2d1	21	1	1079/1091	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0039-boki-summon.md
+ext/wisp-passive-stack-rebased	CONFLICT	4bd4be3246	23	1	951/963	bin 0/0	content/rules/boki_summon.json docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md docs/decisions/0041-wisp-steal.md
+ext/wisp-summon-key-c	CONFLICT	6eb9d4c2d1	21	1	1079/1091	bin 0/0	content/rules/boki_summon.json docs/decisions/0019-downed-wisp.md docs/decisions/0038-boki-wisp-proto.md docs/decisions/0133-boki-summon.md
 ext/wisp-summon-leash-rebased	CONFLICT	a671bd4179	21	53	3778/8138	bin 21/41	MERGE_REPORT.md audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav
 ext/wisp-summon-net-rebased	CONFLICT	e042499592	16	52	3923/8284	bin 21/41	MERGE_REPORT.md audio/boss_boulder.wav audio/boss_boulder.wav.import audio/boss_brood_tell.wav
 ext/women-body-1111	CONFLICT	ac1f881aab	3	0	107/107	bin 0/46	art/wardens/cinder/IMPORT.md art/wardens/cinder/cinder.glb art/wardens/hem/IMPORT.md art/wardens/hem/hem.glb

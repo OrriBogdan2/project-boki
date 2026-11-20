@@ -79,5 +79,5 @@ perf run before B-D; no change until a profile shows it.
 
 ## 5. Needs a decision note
 
-Draft: `docs/decisions/0022-vision-model.md` (proposed). It records "our fog is ours, documented, owner-tunable",
+Draft: `docs/decisions/0111-vision-model.md` (proposed). It records "our fog is ours, documented, owner-tunable",
 so later Lace and Tenzo changes do not copy invented source numbers.

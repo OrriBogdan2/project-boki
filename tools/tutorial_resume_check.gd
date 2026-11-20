@@ -1,5 +1,5 @@
 extends RefCounted
-## --tutorial-resume-check: quitting the combat tutorial part-way (docs/decisions/0022-tutorial-resume.md).
+## --tutorial-resume-check: quitting the combat tutorial part-way (docs/decisions/0115-tutorial-resume.md).
 ##   1. the save: the v11 -> v12 migration, and when Continue goes back into the tutorial
 ##   2. a full run remembers each finished beat in the save
 ##   3. quit after each beat and come back: it carries on at the next one, at the last stop, with the

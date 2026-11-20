@@ -9,7 +9,7 @@ extends RefCounted
 ## "fire" goes mid-climb, "buffer" (the default) waits for the top.
 ## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json press_buffer), is held
 ## the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
+## step the CC allows it (docs/decisions/0118-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
 ## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Nightwell cast, Kael's
 ## Riposte guard and cleave, Vex's Kitefall) is held the same way, KIT_LOCK_SLOTS (--cast-lock-buffer-check).

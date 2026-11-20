@@ -468,7 +468,7 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | lean_centre | {"temper": 0.36, "loyalty": 0.72, "curiosity": 0.55} |
 | lean_floor | 0.34 |
 | lean_min | 0.05 |
-| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin_v2, birth noise included. |
+| lean_doc | How likely a Boki is to want each move: lean_floor plus its trait minus that trait's centre, never under lean_min. The centres are set so each move is wanted a third of the time across the common species of content/kin, birth noise included. |
 | honest | [0.7, 0.5] |
 | honest_doc | Chance the tell you see is the move the other side really plans: for the side with the higher Focus, and for the other (and on equal Focus). |
 | rival_read | 0.35 |
@@ -1064,7 +1064,7 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 
 ## farm_builder (`content/rules/farm_builder.json`)
 
-Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.md). He stands by the market stall (and works at the house while it goes up); walk up and press interact to talk face to face ('talk'). Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.
+Hob Brackenridge, the farm's builder (docs/decisions/0104-farm-builder-tutorial.md). He stands by the market stall (and works at the house while it goes up); walk up and press interact to talk face to face ('talk'). Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.
 
 | Setting | Value |
 |---|---|
@@ -1298,7 +1298,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
 | arrive | {"prints": 8, "step_m": 0.9, "print_m": 0.16, "alpha": 0.45, "fade_in_s": 2.0, "hold_s": 8.0, "fade_out_s": 3.0, "shimmer_s": 3.0, "mote_s": 0.3, "motes": 3, "glint_s": 2.5} |
 | arrive_doc | How a visitor reads as a stranger (scripts/home/visitor_arrive.gd): prints footprints, step_m m apart (print_m m wide, up to alpha opaque), run from the island edge to where it stands, fade in over fade_in_s, hold hold_s and fade out over fade_out_s; a burst of motes sparks of its type colour on it every mote_s seconds for its first shimmer_s seconds; one glint every glint_s seconds on an egg it left, until the egg is hatched. |
-| groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
+| groups_doc | Species themes (content/kin theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 
 ## garden_xp (`content/rules/garden_xp.json`)
 
@@ -1320,7 +1320,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 
 ## garden_zones (`content/rules/garden_zones.json`)
 
-The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there), play (its minigames.json id, for your best on the card) and wayseed_from (where the card says the Wayseed comes from); nap: [kind, tile x, tile z] the spots a Boki about to nap walks to, one Boki on each and a friend beside it (BaseLife; a spot moves up to 3 m to open ground, so the start zone's own island keeps them; the hub and zones without an island have none). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0120-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there), play (its minigames.json id, for your best on the card) and wayseed_from (where the card says the Wayseed comes from); nap: [kind, tile x, tile z] the spots a Boki about to nap walks to, one Boki on each and a friend beside it (BaseLife; a spot moves up to 3 m to open ground, so the start zone's own island keeps them; the hub and zones without an island have none). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).
 
 | Setting | Value |
 |---|---|
@@ -1689,7 +1689,7 @@ The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hat
 |---|---|
 | doc | Where Inks come from in a match (scripts/match/ink_drops.gd, called from GearDrops.run_table). An Ink is a backpack item (Loot.ink): carry it out and it goes to your goods (Goods, content/rules/market.json 'ink_<type>'), where Boki that evolve by Ink use it (content/rules/evolve.json). Bosses drop the Ink of their kin's type; camp monsters and guards rarely drop a random one. Per expedition, Goods.on_result adds one more small chance (market.json finds.ink). |
 | inks | ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"] |
-| type_ink_doc | The 18 types (theme ids in content/kin_v2, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once. |
+| type_ink_doc | The 18 types (theme ids in content/kin, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once. |
 | type_ink | {"ember": "ember", "tide": "tide", "bloom": "bloom", "storm": "storm", "frost": "frost", "shadow": "shadow", "lunar": "lunar", "prism": "prism", "wyrm": "wyrm", "spore": "bloom", "swarm": "bloom", "venom": "shadow", "tempest": "wyrm", "titan": "ember", "stone": "frost", "echo": "storm", "gravity": "lunar", "wild": "prism"} |
 | chance_doc | Chance a kill drops one Ink, by drop table (a mob's kind, or 'boss' for a lair boss). Absent = never. A boss always drops its own. The rest are rare on purpose: an Ink is a 60-gem good and a match has about 40 small kills, so the small ones add up to roughly one Ink in ten matches; guards and the Glimmerkin are the few worth hunting for. |
 | chance | {"boss": 1.0, "warden": 0.1, "glimmer": 0.1, "brute": 0.03, "sentinel": 0.01, "spitter": 0.003, "bomber": 0.003, "skitter": 0.003} |
@@ -1938,7 +1938,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | Setting | Value |
 |---|---|
 | fusion_enabled | False |
-| fusion_enabled_doc | docs/decisions/0101: Fusion is off by default (11-18). false: the Fusion key, bots and the Boki never start a Fusion and no screen mentions it; all fusion code and content stay. true switches it back on. |
+| fusion_enabled_doc | docs/decisions/0159: Fusion is off by default (11-18). false: the Fusion key, bots and the Boki never start a Fusion and no screen mentions it; all fusion code and content stay. true switches it back on. |
 | xform_s | 0.7 |
 | xform_contact_s | 0.45 |
 | ult_lock_s | 1.5 |
@@ -2186,7 +2186,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 | Setting | Value |
 |---|---|
-| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
+| _doc | The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0138-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs the damage of its stage: the closing-circle curve in content/rules/heart.json (tide_dmg, linear between stages 0, 1, 2 and 10) as a share of the Hunter's own max health a second, so a full-health Hunter lasts as many seconds as at the source (stage 0 nudges, the last stage kills in a few seconds). |
 | length_ref | 612 |
 | map_ref | 305 |
 | final_lean | 0.55 |
@@ -2262,7 +2262,7 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 
 ## terrain_hazards (`content/rules/terrain_hazards.json`)
 
-Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
+Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0139-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). tip: the one line the HUD shows the first time a player nears that kind (HazardHint, once per save). look: the surface shader (shaders/terrain_hazard.gdshader).
 
 | Setting | Value |
 |---|---|
@@ -2420,7 +2420,7 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 
 | Setting | Value |
 |---|---|
-| doc | Diminishing returns for chained wall kicks (WallMoves, decision 0100, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high. |
+| doc | Diminishing returns for chained wall kicks (WallMoves, decision 0158, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high. |
 | curve | [1.0, 0.6, 0.3] |
 
 ## warden_look (`content/rules/warden_look.json`)
