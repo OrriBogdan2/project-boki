@@ -6,8 +6,8 @@ extends RefCounted
 ## With --shots-dir the screen is saved as name_card_<tag>_<w>x<h>.png (run it under xvfb with a renderer,
 ## --resolution 1920x1080 or 1280x720; the layout is scaled to the window, so the card is measured in its units).
 
-const MIN_WRAP_W := 200.0      # px: a wrapping line narrower than this is a column of fragments
-const MAX_WRAP_LINES := 4      # the longest sentence on the card wraps to a few lines at most
+const MIN_WRAP_W := 200.0  # px: a wrapping line narrower than this is a column of fragments
+const MAX_WRAP_LINES := 4  # the longest sentence on the card wraps to a few lines at most
 var bad := 0
 
 
@@ -31,8 +31,8 @@ func run(main: Node) -> void:
 			Settings.v["ui_scale"] = float(String(a).substr(11))
 			Settings._apply_ui_scale()
 	Save.d["look"] = Unmasked.default_look()
-	Save.d["tutorial"]["intro"] = true      # (no opening card over the screen)
-	main.fade.visible = false      # (the boot splash and ink wipes cover the screen)
+	Save.d["tutorial"]["intro"] = true  # (no opening card over the screen)
+	main.fade.visible = false  # (the boot splash and ink wipes cover the screen)
 	main.show_screen("hatch", {})
 	await main.get_tree().process_frame
 	var hatch: Node = main.current
@@ -58,7 +58,7 @@ func run(main: Node) -> void:
 	if dir != "":
 		DirAccess.make_dir_recursive_absolute(dir)
 		var img := main.get_viewport().get_texture().get_image()
-		var px := main.get_window().size      # (the window in pixels: the layout is scaled to it)
+		var px := main.get_window().size  # (the window in pixels: the layout is scaled to it)
 		img.save_png(dir.path_join("name_card_%s_%dx%d.png" % [tag, px.x, px.y]))
 	print("NAMECARD done, bad=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -68,7 +68,8 @@ func run(main: Node) -> void:
 ## the Boki's reveal card and its Name it button. (Calling _show_name by itself did not show the bug.)
 func _real_flow(main: Node, hx: Node) -> void:
 	var tree := main.get_tree()
-	for i in 4: await tree.process_frame
+	for i in 4:
+		await tree.process_frame
 	hx._looks_good()
 	hx.chosen = 0
 	hx._start_hatch()
