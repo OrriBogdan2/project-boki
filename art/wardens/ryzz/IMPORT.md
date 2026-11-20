@@ -1,5 +1,10 @@
 # Ryzz (ART-1 rebuild): how this model is made
 
+## Hands pass (2026-11-20, ext/hunter-fix-ryzz-1118, retry 6): no glb change, the bones cannot move
+Asked to move the arm/hand bone pivots into the mesh. Tried it (forearm 4.7 cm, hand 14.5 cm toward the scan's arm, rest + every clip translation key + inverse binds shifted; bind pose identical): the game refuses the file. `WardenSkeleton.mismatches` holds every bone within `REST_TOL` 1 cm of the shared rig node, so Models.hunter falls back to the procedural model ("hand.L sits 0.146 m off its rig node"). Pivots stay; the pass-4 weights (hand rides the forearm) are the fix that fits the rig. The re-pivot cut flipped arm tris only 4559/3733 -> 4022/2938 (L/R), so it would not have paid for a rig change.
+In-game renders (clip-shots, 30 fps, 768 px, eye and knee level, live vs this glb): idle, walk_b, dash, run, jump read as fingerless gloves with fingers; fall keeps a flat black glove forearm seen edge-on (glove shape, a Meshy mesh matter). Do not render with `--fps` below 30: the sash springs blow up at dt 1/6 s.
+Sheets and numbers: `/home/boki/gens/hunter-fix-ryzz-1118/v6/`.
+
 ## Tear fix pass 4 (2026-11-19, ext/hunter-fix-ryzz-1118, Fable review retry): clips back to live, hands ride the forearm, knees
 Starts from pass 3 below. Scripts, renders and numbers: `/home/boki/gens/hunter-fix-ryzz-1118/v4/` (tools/restore_clips.py, handrig.py, legfix.py).
 - Cause of the arm blades (fall, jump, rmb_hold, emote): the mage skeleton's arm hangs straight down at x=+-0.13 m, but the scan's arms angle out. The hand bone's pivot sits ~19 cm from the mesh wrist (hand verts at x=-0.34). Any hand bend or roll swings the mesh hand around a point outside it and tears the wrist into a flat black blade. The pass-3 wrist-roll re-key rolled the forearm about the same off-mesh axis.
