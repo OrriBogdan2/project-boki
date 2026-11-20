@@ -40,6 +40,7 @@ func _recs(sp: String, foods: Array, meals: int) -> Array:
 	var fed: Array = []
 	for f in foods:
 		var rec := Save.new_kin(sp, "Lean", 7)
+		Evo.ensure(rec)      # food with no affinity never does
 		for n in meals:
 			Evo.eat(rec, String(f))
 		fed.append(rec)
