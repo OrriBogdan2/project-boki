@@ -51,18 +51,22 @@ def face_paint(me):
 
 def add_lining(low, rules):
     """`lining` [{"box": [x0, x1, y0, y1, z0, z1], "h": [lo, hi] (a range may wrap: lo > hi), "s": [lo, hi], "v": [lo, hi],
-    "inset": m}]: every face whose centre is in the box and whose paint is in the ranges gets a twin, wound the other way and
+    "inset": m, "skip_bones": [prefix, ...]}]: every face whose centre is in the box and whose paint is in the ranges gets a twin, wound the other way and
     `inset` m inside it, with the same paint and weights. The toon outline is an inverted hull, so a face that shows its back
     to the camera draws black: a loincloth is a thin shell, and from behind and low the inside of its far panel showed
-    through the gap under the hem as a black hole; the twin is that inside, drawn as cloth. Its ink room is 0."""
+    through the gap under the hem as a black hole; the twin is that inside, drawn as cloth. Its ink room is 0. A rule with no
+    paint ranges lines every face in its box (but faces with a vertex led by a skip_bones bone) (Grimble's crotch: cloth faces painted skin-dark showed their backs)."""
     me = low.data
     hsv_f = face_paint(me)
     V = verts(low)
     cen = np.array([V[list(p.vertices)].mean(0) for p in me.polygons])
+    gname = {g.index: g.name for g in low.vertex_groups}
+    top = [gname[max(v.groups, key=lambda e: e.weight).group] if len(v.groups) else "" for v in me.vertices]
     bm = bmesh.new()
     bm.from_mesh(me)
     bm.faces.ensure_lookup_table()
     col = bm.verts.layers.float_color["Col"]
+    done = np.zeros(len(cen), bool)     # (a face in two rules' boxes gets one twin)
     for r in rules:
         b = r["box"]
         m = (cen[:, 0] >= b[0]) & (cen[:, 0] <= b[1]) & (cen[:, 1] >= b[2]) & (cen[:, 1] <= b[3]) & (cen[:, 2] >= b[4]) & (cen[:, 2] <= b[5])
@@ -70,6 +74,11 @@ def add_lining(low, rules):
             if key in r:
                 lo, hi = r[key]
                 m &= (hsv_f[:, i] >= lo) & (hsv_f[:, i] <= hi) if lo <= hi else (hsv_f[:, i] >= lo) | (hsv_f[:, i] <= hi)
+        if r.get("skip_bones"):     # (a face on a thigh is closed skin: its twin is never seen, and its inset pinches)
+            skip = np.array([any(top[i].startswith(b) for b in r["skip_bones"]) for i in range(len(top))])
+            m &= ~np.array([skip[list(p.vertices)].any() for p in me.polygons])
+        m &= ~done
+        done |= m
         bm.faces.ensure_lookup_table()
         faces = [bm.faces[i] for i in np.nonzero(m)[0]]
         dup = bmesh.ops.duplicate(bm, geom=faces)["geom"]

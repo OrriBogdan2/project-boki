@@ -1116,9 +1116,11 @@ def main():
         act.use_frame_range = True
         act.frame_start, act.frame_end = round(act.frame_range[0]), round(act.frame_range[1])
     select([o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")], arm)
+    # (NAME, not ACTIVE: a kept part's material reads "Col" in its node tree, and then the exporter wrote COLOR_0 as rgb
+    # for the whole mesh: the ink room in its alpha never reached the game, every vertex got the full line)
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="NAME", export_vertex_color_name="Col",
                               export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
     for follower, leader in SPEC.get("follow", {}).items():     # (the junk ball hangs in the air in a run: glb_follow.py)
         gj, gb = glb_add_clips.read(OUT)

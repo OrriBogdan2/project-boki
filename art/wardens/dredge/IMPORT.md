@@ -115,3 +115,12 @@ the clip-sheet and in-game ball: it now hugs the pack in idle, walk, run and cro
 still keyed at its old world rest point (unchanged from live). `--stretch-check` unchanged: worst 6.56 (ledge), median 3.74,
 4 clips over 5x (r3 and r4 identical; live 8.52 / 4.36 / 20). Not changed: the master's goo arm hangs out from the side
 (r2's re-pose to clear the leg) where the turnaround's hangs to the floor. Raws, logs, proof: `~/gens/hunter-regen-1120/dredge/r4/`.
+
+**Regen r5 (2026-11-20, job 20261120-174139-a1, same branch, draft; no new Meshy gens):** same master, rig and weights as r4.
+(1) *Ink room never reached the game*: the kept parts' materials read the vertex colour "Col" in their node tree, so Blender's
+exporter wrote COLOR_0 as rgb for the whole mesh and dropped its alpha (the ink room): every vertex drew the full line and r4's
+lining twins drew their own (inward) black shell. `v95_swap` now exports `export_vertex_color="NAME"` "Col" (rgba). (2) *The
+remaining black crescent under the hem from behind*: the inside of the front panel is painted skin-coloured, missed r4's paint
+rule and showed its back; a second `lining` rule lines every face in the crotch box but the thighs' own closed skin
+(`skip_bones` thigh, new key): +2544 tris (50.3k). Stretch (54 clips): worst 6.56 (ledge, = r4) / median 3.76 (r4 3.74) /
+5 clips over 5x (r4 4; revive 4.98 -> 5.23). Proof: `~/gens/hunter-regen-1120/dredge/r4/` (r5 work: `r5work/`, `r5/`).
