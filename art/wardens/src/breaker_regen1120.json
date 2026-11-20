@@ -260,5 +260,7 @@
  "doc_cand": "regen A (r6fix A, arms -24%), Meshy 7.1 enhance off, quad remesh 100k, emission from its own cyan paint",
  "keep_uv": true,
  "weights": "meshy",
- "k": 0.9
+ "k": 0.9,
+ "rest_rig": "bulwark",
+ "doc_rig": "11-20 deep job 20261120-064527-a4: the rig takes the art's legs (bulwark body legs 0.84, torso 1.02, neck -0.05; rest_from_rig.py), then tools/art1/glb_relax.py on the swap's glb"
 }
