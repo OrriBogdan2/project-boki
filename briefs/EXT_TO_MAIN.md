@@ -10561,3 +10561,4 @@ READY ext/anim-coverage-stomp 12b7dbfbff (supersedes c8c9275d49: origin/main 7ea
 READY ext/anim-land-weight 4a6c7c99f94 (landing squash depth and length per weight class in content/rules/land_feel.json, light jump 0.15 s, heavy slam 0.5 s; --land-weight-check, GPU MP4 per class)
 READY ext/boki-hit-death-clips e1eb8f706e7 (no Bokidex glb has a hit/death clip: starters stay proc KinFlinch, doc note; boki-flinch-shots --video MP4s; fixes boki_state_cover compile error)
 READY ext/anim-downed-wisp af90e244b66 (wisp-check reads every frame of the downed hand-over: 13 Hunters x idle/run/glide/ult, no bind pose, no stray mesh, never body and Wisp both missing; swap module already clean, no fix needed)
+READY ext/boki-glide-pose 997f1533c67 (carried Boki glide pose: proc glide clip via BokiHomeClips, 0.15 s blend; coverage glide col proc for burrlet/cindle/puddlet; --glide-shots --boki)
