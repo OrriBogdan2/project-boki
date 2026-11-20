@@ -25,7 +25,7 @@ const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click
 const BLOCK_TICK := "jug_ting"          # the metallic tick of a blocked hit (a bright, crisp ting)
 const BLOCK_TICK_DB := -9.0             # dB: under a real hit, it is a tick
 const BLOCK_TICK_PITCH := 1.5           # a short tick, above the ting's own pitch
-const BLOCK_SPARKS := 7                 # deflect sparks, fewer and thinner than a damage hit's
+const BLOCK_SPARKS := 8                 # deflect sparks, fewer and thinner than a damage hit's
 const BLOCK_SPARK_WHITE := 0.4          # how much of white the sparks carry over the blocker's colour
 
 ## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
@@ -120,7 +120,7 @@ static func blocked(m: Match, at: Vector3, dir: Vector3, col: Color, pitch := 1.
 	var p: Hunter = m.player
 	if p != null and Vector2(p.pos.x - at.x, p.pos.z - at.z).length() > FAR:
 		return
-	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), col.lerp(Color.WHITE, BLOCK_SPARK_WHITE), BLOCK_SPARKS, 7.0, 40.0, 0.2, 8.0, 0.8)
+	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), col.lerp(Color.WHITE, BLOCK_SPARK_WHITE), BLOCK_SPARKS, 9.0, 30.0, 0.24, 8.0, 1.2)
 	m.sfx(BLOCK_TICK, at, BLOCK_TICK_DB, BLOCK_TICK_PITCH * pitch)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
