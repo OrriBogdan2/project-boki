@@ -549,6 +549,11 @@ static func land_tier(fall_v: float, from_glide: bool) -> int:
 		return 2
 	return 1 if fall_v >= LAND_HOP_V else 0
 
+## The landing squash of a weight class for a land_tier: Vector2(depth, seconds), from content/rules/land_feel.json.
+static func land_feel(weight: String, tier: int) -> Vector2:
+	var way := (Content.rules("land_feel")[weight] as Dictionary)[["hop", "hop", "drop", "dive"][tier]] as Dictionary
+	return Vector2(float(way["depth"]), float(way["s"]))
+
 ## How long a jump still has before it lands, from the vertical speed and the height above the ground.
 static func _time_left(vy: float, h: float) -> float:
 	var up := maxf(vy, 0.0)
@@ -642,11 +647,11 @@ func update(dt: float, s: Dictionary) -> void:
 	if just_landed:
 		var fall_v := -vy_prev
 		var tier := land_tier(fall_v, glide_k > 0.5)
-		# the hop: a small dip, gone in ~0.1 s; the drop or a glide's end: a deep crouch, up again in ~0.3 s; the
-		# dive: the full crouch, up in ~0.4 s
-		var hard := 0.35 if tier == 1 else clampf(fall_v / 14.0, 0.7, 1.0)
+		# the squash's depth and length by class (content/rules/land_feel.json), the hop's dip to the dive's crouch
+		var lf := land_feel(cls, tier)
+		var hard := lf.x if tier < 2 else clampf(fall_v / 14.0, lf.x, 1.0)
 		land_k = maxf(land_k, hard) if tier > 0 else land_k
-		land_rate = [3.5, 3.5, 3.0, 2.5][tier] * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
+		land_rate = hard / lf.y
 		if trick == "ball" or (cls == "heavy" and tier >= 2):
 			slam_k = 1.0
 			slammed = true

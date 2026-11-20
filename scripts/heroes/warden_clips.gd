@@ -1000,13 +1000,29 @@ func _loco(s: Dictionary, dt: float) -> void:
 		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
-			land = d["land"]["hop" if tier == 1 else "drop"]
-			if tier == 3:
-				land = land.duplicate()
-				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
+			land = land_play(d["land"]["hop" if tier == 1 else "drop"], String(root.get_meta("cls", "medium")), tier)
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
+
+## The land clip's tier as it plays for a weight class: a footage cell of content/rules/land_feel.json ("clip")
+## holds it for the squash's own seconds, the same keys at the speed that fits them in; else the Hero's own data
+## (the dive: the drop's, DIVE_SLOW slower).
+static func land_play(base: Dictionary, cls: String, tier: int) -> Dictionary:
+	var feel := Content.rules("land_feel").get(cls, {}) as Dictionary
+	var way := feel.get(["hop", "hop", "drop", "dive"][tier], {}) as Dictionary
+	var out := base.duplicate()
+	if not bool(way.get("clip", false)):
+		if tier == 3:
+			out["rate"] = float(base.get("rate", 1.0)) * DIVE_SLOW
+		return out
+	var s := float(way["s"])
+	var k := float(base.get("dur", s)) / s
+	out["dur"] = s
+	out["rate"] = float(base.get("rate", 1.0)) * k
+	if base.has("moving"):
+		out["moving"] = minf(float(base["moving"]) / k, s)
+	return out
 
 ## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
 ## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.
