@@ -31,8 +31,6 @@ const LEAP_TOP := 0.5          # by here he is "leap_h" up (easing out)
 const LEAP_HANG := 0.8         # he hangs to here, sinking to HANG_SINK of the top, then drives down
 const HANG_SINK := 0.9
 const DRIVE_CAP := 40.0        # m/s the drive down may fall at (past the usual 12 m/s fall cap)
-const SLAM_STOP := 0.09        # s of hit-stop for him on the landing, foes or none: the weight of the slam
-const QUAKE_SHAKE := 0.8       # the shake players near the landing feel (Shake.incoming_big; never his own)
 
 var k: BulwarkKit
 var h: Hunter
@@ -256,14 +254,15 @@ func _slam() -> void:
 ## and the quake.
 func _impact(at: Vector3) -> void:
 	var m: Node = k.m
+	var stop := ImpactWeight.hold_s("heavy")       # his landing holds him a heavy hit's hit-stop, foes or none
 	if h == m.get("player") and not bool(m.get("net_on")):
-		m.freeze_frame(SLAM_STOP)
+		m.freeze_frame(stop)
 	else:
-		h.freeze_t = maxf(h.freeze_t, SLAM_STOP)
+		Feel.hold(h, stop, float(m.time))       # (within the per-body cap, like every other hold)
 	for f in k.foes_in(origin, cell_len() * 1.2):
 		if hit.has(f.get_instance_id()):
 			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})
-	Shake.incoming_big(m, at, QUAKE_SHAKE, h)
+	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)      # the players near the landing (never his own)
 	HeroVfx.of(m).play(h, "fault_land", at, dir)
 	m.sfx("bjorn_ult_quake", at, 0.0 if h.is_local() else -4.0)
 
