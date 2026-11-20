@@ -10664,3 +10664,4 @@ READY ext/boki-idle-batch-c 78ae95bb74a9c8612a16466b0dcf41e1d1af99df (Boki idles
 READY ext/boki-own-clips-d cdcf8db561 (own clips for heatherhorn, kilnbadger)
 READY ext/boki-own-clips-e 4325a435ccf1be68a99d78b2a3be3bed2a7d4374 (own clips for limpetor, moonloris)
 READY ext/boki-own-clips-c 8df37277ff (own clips for glomwort, goliathite)
+READY ext/boki-own-clips-g dee0d8dd5a (own clips for opalisk, orchisloth)
