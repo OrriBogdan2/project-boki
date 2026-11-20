@@ -10,7 +10,6 @@ const KEEP := 160
 
 static var _cache: Dictionary = {}      # look key -> SubViewport
 static var _order: Array = []
-static var _fog_shaders := {}            # shader -> it has a no_fog uniform (reads the match's sight fog)
 
 static func key(rec: Dictionary) -> String:
 	return "%s|%s|%s|%s|%s|%d|%s|%d" % [rec.get("uid", ""), rec.get("species", ""), rec.get("shimmer", false), ",".join(Mutations.of(rec)),
@@ -63,7 +62,7 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 	cam.transform = Transform3D(Basis(), look_at + Vector3(0.75, 0.32, -1.75)).looking_at(look_at + Vector3(0, -0.02, 0), Vector3.UP)
 	cam.current = true
 	holder.add_child(vp)
-	_unfog(mdl)
+	Fogless.apply(mdl)
 	_cache[k] = vp
 	_order.append(k)
 	while _order.size() > KEEP:
@@ -71,45 +70,6 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 		if _cache.has(old) and is_instance_valid(_cache[old]): (_cache[old] as Node).queue_free()
 		_cache.erase(old)
 	return vp.get_texture()
-
-## Its own world, but the match's sight fog is global: drawn in a match, the portrait was greyed out like ground out of
-## sight and cached so (Vespyx a dark teal fox in the HUD and menus, owner 11-19). Its own copies of the materials that
-## read the fog skip it; the kin in the world keep theirs.
-static func _unfog(root: Node) -> void:
-	for n in root.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		if mi.material_override:     # a primitive part (Models.part) wears one for every surface
-			var o := _unfogged(mi.material_override)
-			if o:
-				mi.material_override = o
-			continue
-		if mi.mesh == null:
-			continue
-		for si in mi.mesh.get_surface_count():
-			var m := _unfogged(mi.get_active_material(si))
-			if m:
-				mi.set_surface_override_material(si, m)
-
-## A copy of `m` (and its next passes) with no_fog on, or null when nothing in it reads the fog.
-static func _unfogged(m: Material) -> Material:
-	if not m is ShaderMaterial:
-		return null
-	var sm := m as ShaderMaterial
-	var nxt := _unfogged(sm.next_pass)
-	var fog := sm.shader != null and _reads_fog(sm.shader)
-	if not fog and nxt == null:
-		return null
-	var c := sm.duplicate() as ShaderMaterial
-	if fog:
-		c.set_shader_parameter("no_fog", true)
-	if nxt:
-		c.next_pass = nxt
-	return c
-
-static func _reads_fog(sh: Shader) -> bool:
-	if not _fog_shaders.has(sh):
-		_fog_shaders[sh] = sh.get_shader_uniform_list().any(func(u: Dictionary) -> bool: return u["name"] == "no_fog")
-	return _fog_shaders[sh]
 
 ## A picture of a kin for a menu cell: its portrait, or (headless / not ready) a soft disc in its colours.
 static func view(rec: Dictionary, tree: SceneTree, px := 56.0) -> Control:
