@@ -162,9 +162,8 @@ func arch_tip(id: String, p: Hunter) -> Array:
 		)
 	if id == "sec":
 		var rd := p.ak.res_def()
-		out.append(
-			["Passive: %s" % AbilityText.full(p.arch, "passive"), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12]
-		)
+		var col := Color(Color(String(rd.get("col", "#ffffff"))), 0.9)
+		out.append(["Passive: %s" % AbilityText.full(p.arch, "passive"), col, 12])
 	out.append(
 		[
 			(
