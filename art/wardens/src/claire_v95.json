@@ -1,5 +1,5 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md), hunter-regen-claire-1120 candidate A (draft, owner visual check): Meshy multi-image-to-3d (meshy-7.1, a-pose) of the 11-19 turnaround (gens/v95-latest-ta-1119/neve.png), quad remesh 60k (~/meshy/v95/claire/regen1120/runC_quad60k.glb), joints from Meshy's auto-rig (pelvis = hip joints - 0.045, neck = its Head bone), `meshy_reach` on. Build: v95_swap.py with weights meshy and WORK/meshy/rigged_character.glb = regen1120/runC_meshy_rig.glb (a fresh Meshy rig gives other weights). claire.glb's spear (hand.R) stays.",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md), hunter-regen-claire-1120 candidate A (draft, owner visual check): Meshy multi-image-to-3d (meshy-7.1, a-pose) of the 11-19 turnaround (gens/v95-latest-ta-1119/neve.png), quad remesh 60k (~/meshy/v95/claire/regen1120/runC_quad60k.glb), joints from Meshy's auto-rig (pelvis = hip joints - 0.045, neck = its Head bone), `meshy_reach` on, `meshy_smooth` 20 (worst stretch 12.17 -> 5.56). Build: v95_swap.py with weights meshy and WORK/meshy/rigged_character.glb = regen1120/runC_meshy_rig.glb (a fresh Meshy rig gives other weights). claire.glb's spear (hand.R) stays.",
  "master": "~/meshy/v95/claire/regen1120/runC_quad60k.glb",
  "game": "art/wardens/claire/claire.glb",
  "own": {
@@ -115,6 +115,7 @@
  },
  "spread": "rig",
  "smooth": 12,
+ "meshy_smooth": 20,
  "meshy_reach": {
   "arm": [
    0.08,
