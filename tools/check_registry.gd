@@ -256,6 +256,7 @@ const CHECKS := {
 	"--window-mode-check": ["res://tools/window_mode_check.gd", "window_mode_check", null],  # fullscreen start, F11
 	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # trimmed settings
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],      # Interface size slider
+	"--menu-fit-check": ["res://tools/menu_fit_check.gd", "menu_fit_check", null],  # Esc pages and Settings tabs fit
 	# sounds behind terrain
 	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],
 	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],
