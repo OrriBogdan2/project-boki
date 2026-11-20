@@ -2155,7 +2155,7 @@ func _try_ledge_grab(dt: float) -> void:
 				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
 					continue
 				var stepping_back := gz <= last_gy + World.STEP \
-						and (dz > MANTLE_REACH or not GlideLift.airborne_long(self))
+						and (dz > HunterFeel.mantle_reach or not GlideLift.airborne_long(self))
 				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
 					continue
 			if d < bd and d < reach:
