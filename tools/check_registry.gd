@@ -193,6 +193,7 @@ const CHECKS := {
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -384,6 +385,7 @@ const CHECKS := {
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],  # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],  # Sparkle 11-10
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],  # item 184b
+	"--turn-cost-check": ["res://tools/turn_cost_check.gd", "turn_cost_check", null],      # owner 11-11 momentum
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
@@ -634,6 +636,7 @@ const CHECKS := {
 	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	"--expedition-tips-check": ["res://tools/expedition_tips_check.gd", "expedition_tips_check", null],
 	# fight beats per starter
+	"--tut-aim-check": ["res://tools/tut_aim_check.gd", "tut_aim_check", null],  # the E step: a miss refunds
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--result-card-check": ["res://tools/result_card_check.gd", "result_card_check", null],     # the garden games' card
 	"--pause-menu-check": ["res://tools/pause_menu_check.gd", "pause_menu_check", null],     # 4 buttons, all reachable
@@ -822,6 +825,9 @@ const CHECKS := {
 	"--look-tour": ["res://tools/look_locker_check.gd", "look_locker_check", "tour"],      # --shots-dir=<dir>, GPU
 	"--glider-skin-shots": ["res://tools/glider_skin_shots.gd", "glider_skin_shots", null],
 	"--shroud-check": ["res://tools/shroud_check.gd", "shroud_check", null],
+	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],      # WispProc cues
+	"--wisp-proc-shots": ["res://tools/wisp_proc_shots.gd", "wisp_proc_shots", null],      # --shots-dir=<dir>, GPU
+	"--tutorial-wisp-check": ["res://tools/tutorial_wisp_check.gd", "tutorial_wisp_check", null],      # Boki-wisp beats
 	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
@@ -840,6 +846,8 @@ const CHECKS := {
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
+	# the Training Grounds' Summon pad; --shots-dir= (GPU) saves the card
+	"--summon-pad-check": ["res://tools/summon_pad_check.gd", "summon_pad_check", null],
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
 	"--summon-ring-check": ["res://tools/summon_ring_check.gd", "summon_ring_check", null],  # time-left ring
 	"--summon-leash-check": ["res://tools/summon_check.gd", "summon_check", null],  # (same check: the leash rows)
