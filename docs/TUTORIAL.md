@@ -320,3 +320,10 @@ Cut to what already exists (no new hint, toast or marker): the job page is the B
 is deleted; the Care page's Feed button is a plain primary button), the hammer is the house's "wait" line, the market
 is the Market button and the Goals rows. `FarmTutorial.skip()` still hands over the axe and the pickaxe.
 `FarmSpotlight`'s Boki cut-out (`spot: {"world": true}`) no longer has a farm step that uses it.
+
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
