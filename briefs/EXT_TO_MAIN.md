@@ -10612,3 +10612,4 @@ READY ext/run-turn-slide ab589ac5a6edbe8171e235771fd171b024a00437 (run turn: War
 READY ext/vfx-hurt-flash-v95 552befbe99 (bulk-rebase: origin/main merged in mechanically, was a29cc138da; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/anim-coverage-stomp 9188a04a0e (bulk-rebase: origin/main merged in mechanically, was 12b7dbfbff; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-dash-clip 3deae75ce5 (bulk-rebase: origin/main merged in mechanically, was 8f369d0964; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/hunter-regen-claire-1120 4d2ec85000 (Neve r4 candidate G1: Meshy-modelled hair bow, stretch worst 5.56->4.86, >5x 5->0; draft, art-gate sheet+MP4 in ~/gens/hunter-regen-1120/claire/r4/sheets)
