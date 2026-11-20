@@ -242,3 +242,11 @@ to rig and export:
    entries), `--regen-audit` on the GPU queue with and without `--warden-variant`: every clip x 10 times, eye level,
    knee level, match camera, hands and feet close.
    Run `--stretch-check` one Hunter at a time: three at once in one tree end early without a table.
+   `--yaws=0,90,180` repeats every sample turned that many degrees past the 3/4 view (front, side, back coverage).
+6. A clenched fist needs `--pose ""` on `create` (Tenzo r3, 2026-11-20): Meshy's A-pose mode opened his stone fist in all
+   six r2 gens; the three without it kept the turnaround's fist and the same outline (within 2.6 cm a 10 cm band). A new
+   gen still needs its own Meshy auto-rig: r2 A's rig borrowed by nearest vertex, bone heat, and r2's game weights copied
+   by position all stretched far worse than r2 (run_f 55 / 18 / 89 vs 4.8: the sash strips and the hand on the hip).
+7. An unskinned prop (Tenzo's `eye_stone`, shared by the three orbiting stones) takes a Meshy prop's own mesh and paint with
+   `python3 tools/art1/glb_prop_mesh.py IN.glb OUT.glb eye_stone PROP.glb` (no Blender): fitted to the old mesh's box, its
+   glowing faces turned where the old glow faces pointed and put on `glow-rock`, the rest on `leather-rock`.

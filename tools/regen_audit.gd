@@ -4,12 +4,15 @@ extends "res://tools/clip_shots.gd"
 ## and once with --warden-variant=<art>_<tag>; docs/art/wardens/V95_SWAP.md "Regen from the turnaround").
 ## Per hunter <dir>/<id>/<view>/f00000.jpg.. for 5 views of every sample: m (match camera: fov 8 at 23 m),
 ## e (eye level, 4 m, 3/4), n (knee level, 4 m, 3/4), h (both hands close), f (both feet close).
-## Samples: the rest pose, then `per-clip` times evenly over each clip. frames.txt: "<n> <clip> <t>".
+## Samples: the rest pose, then `per-clip` times evenly over each clip. frames.txt: "<n> <clip> <t> <yaw>".
+## [--yaws=0,90,180]: each sample again with the model turned that many degrees past the 3/4 view (default 0 only).
 ## Needs a renderer.
 
 const DT := 1.0 / 30.0
 const THREE_Q_YAW := -PI / 2.0 - 0.55
 const VIEWS := ["m", "e", "n", "h", "f"]
+
+var yaws: Array = [0.0]
 
 
 func run(main: Node) -> void:
@@ -19,6 +22,7 @@ func run(main: Node) -> void:
 	var names: Array = []
 	var per_clip := 10
 	frame_px = 768
+	yaws = [0.0]
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
@@ -30,6 +34,10 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 		if a.begins_with("--per-clip="):
 			per_clip = maxi(1, int(a.substr(11)))
+		if a.begins_with("--yaws="):
+			yaws = []
+			for y in a.substr(7).split(",", false):
+				yaws.append(float(y))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -141,8 +149,12 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 	for k in 10:
 		await tree.process_frame
 	await _warm(model, sk, hb, fb)
-	await _shoot(model, sk, hb, fb, dir, 0)
-	rows.append("0 rest 0.000")
+	var n := 0
+	for yw in yaws:
+		model.rotation.y = THREE_Q_YAW + deg_to_rad(yw)
+		await _shoot(model, sk, hb, fb, dir, n)
+		rows.append("%d rest 0.000 %d" % [n, int(yw)])
+		n += 1
 	for at in model.find_children("*", "AnimationTree", true, false):
 		(at as AnimationTree).active = true
 	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": THREE_Q_YAW, "grounded": true})
@@ -156,7 +168,6 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 		for a in clips.lib.get_animation_list():
 			names.append(String(a))
 		names.sort()  # (as Strings: StringNames do not sort by their text)
-	var n := 1
 	for nm in names:
 		if not clips.lib.has_animation(nm):
 			print("REGEN_AUDIT missing clip ", nm)
@@ -167,9 +178,11 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 			clips.force = {"clip": nm, "t": t}
 			for j in 3:
 				sync.call("_process", DT)
-			await _shoot(model, sk, hb, fb, dir, n)
-			rows.append("%d %s %.3f" % [n, nm, t])
-			n += 1
+			for yw in yaws:
+				model.rotation.y = THREE_Q_YAW + deg_to_rad(yw)
+				await _shoot(model, sk, hb, fb, dir, n)
+				rows.append("%d %s %.3f %d" % [n, nm, t, int(yw)])
+				n += 1
 	clips.force = {}
 	var f := FileAccess.open(dir.path_join("frames.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(rows) + "\n")
