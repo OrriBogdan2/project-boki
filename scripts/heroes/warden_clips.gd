@@ -57,6 +57,7 @@ const CROUCH_RATE_MIN := 0.7 # the sneak clip's slowest rate while he holds a mo
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 const SET_OFF_STILL := 0.3   # s standing before a start counts as setting off: the walk ring has faded out by then
 static var _data := {}       # art name -> its parsed file ({} when it has none)
+static var _borrowed := {}   # "clips_from" art name -> its library, copied for the borrowers (_borrow)
 
 var root: Node3D
 var skel: Skeleton3D
@@ -164,11 +165,15 @@ static func leave_t(h: Hunter) -> float:
 
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
+	if dd.is_empty():
+		return null
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
-	if dd.is_empty() or players.is_empty():
+	var own: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
+	var lib := own if own else _borrow(String(dd.get("clips_from", "")), sk)
+	if lib == null:
 		return null
 	var c := WardenClips.new()
-	if not c._setup(model, glb, sk, dd, players[0]):
+	if not c._setup(model, glb, sk, dd, lib):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
@@ -180,15 +185,43 @@ func move_len(mv: Dictionary) -> float:
 	rate *= (length / float(mv["fit"]) if mv.has("fit") else 1.0)
 	return length / rate - float(mv.get("lead", 0.0))
 
-func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
+static func _first_lib(player: AnimationPlayer) -> AnimationLibrary:
+	var names := player.get_animation_library_list()
+	return player.get_animation_library(names[0]) if not names.is_empty() else null
+
+## Data "clips_from": another Hero's art name. A .glb with no clips of its own plays that Hero's library, retargeted by
+## bone name: every v95 armature is the contract's with the same rest rotations, so the rotation tracks carry over as
+## they are; tracks on bones this skeleton lacks are dropped. Copied once per source (the clips are then cached as a
+## .glb's own are), so the source Hero's tree never sees this one's edits. Gil until his rig pass (ANIM_COVERAGE gap 1).
+static func _borrow(from: String, sk: Skeleton3D) -> AnimationLibrary:
+	if from == "":
+		return null
+	if _borrowed.has(from):
+		return _borrowed[from]
+	var ps := load("%s/%s/%s.glb" % [WardenGlb.DIR, from, from]) as PackedScene
+	var inst := ps.instantiate() if ps else null
+	var players: Array = inst.find_children("*", "AnimationPlayer", true, false) if inst else []
+	var src: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
+	var out: AnimationLibrary = null
+	if src:
+		out = AnimationLibrary.new()
+		for nm in src.get_animation_list():
+			var a := src.get_animation(nm).duplicate() as Animation
+			for i in range(a.get_track_count() - 1, -1, -1):
+				if WardenSkeleton.find(sk, String(a.track_get_path(i).get_concatenated_subnames())) < 0:
+					a.remove_track(i)
+			out.add_animation(nm, a)
+	if inst:
+		inst.free()
+	_borrowed[from] = out
+	return out
+
+func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: AnimationLibrary) -> bool:
 	root = model
 	skel = sk
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
-	var names := player.get_animation_library_list()
-	if names.is_empty():
-		return false
-	lib = player.get_animation_library(names[0])
+	lib = clips
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
