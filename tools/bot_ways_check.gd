@@ -123,6 +123,13 @@ func _ring(m: Match) -> void:
 	var h := m.player
 	h.teleport(m.world.free_spot_near(c, [], 1.0, 0.45, 6.0))
 	ok(BotWays.ring_back(m, h) == Vector3.INF, "a Hunter by the Heart has no reason to walk in")
+	ok(BotWays.path_r(m, c) == Heart.tide_r(m) and BotWays.path_r(m, c + Vector3(400.0, 0.0, 0.0)) > 399.0,
+		"a tile path leads no farther out than the ring, or than the bot already stands")
+	m.time = Heart.last_close() + Heart.r("end_close_s") - m.sess_t0
+	h.teleport(m.world.free_spot_near(c + Vector3(Heart.tide_r(m) - 2.0, 0.0, 0.0), [], 1.0, 0.45, 3.0))
+	ok(BotWays.ring_back(m, h) != Vector3.INF or h.flat_dist(c) < Heart.tide_r(m) - BotWays.knob("end_edge_m"),
+		"end phase: a bot within end_edge_m of the ring's edge walks in")
+	m.time = 400.0 - m.sess_t0
 	var edge := Heart.tide_r(m) + 3.0
 	for k in 16:
 		var a := TAU * k / 16.0

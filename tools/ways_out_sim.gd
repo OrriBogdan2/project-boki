@@ -74,6 +74,7 @@ func _match(main: Node, seed_v: int, map: String, final_n: int) -> Dictionary:
 			minute += 60.0
 			row["alive"].append(_alive(m))
 		if _alive(m) == 0:
+			_final_look(m, row)      # (the last squads fell between two looks: that settles it too)
 			break
 	_look(m, row)
 	var out := {}

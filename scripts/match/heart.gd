@@ -132,10 +132,6 @@ static func tide_dmg(stage: int) -> float:
 			break
 	return v * float(Data.CLASSES["medium"]["hp"]) / r("tide_src_hp")
 
-## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
-static func tick_dmg(m: Match) -> float:
-	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
-
 # ------------------------------------------------------------------ state
 var m: Match
 var site := Vector3.INF
@@ -289,6 +285,14 @@ func on_last_team() -> void:
 	if state != S.FINAL:
 		go(S.FINAL, "last squad")
 
+## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
+static func tick_dmg(m: Match) -> float:
+	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
+
+## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
+static func _by_blight(h: Hunter) -> bool:
+	return not is_instance_valid(h.last_hit_by) or h.last_hit_by is Blight
+
 ## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
 ## damage ("heat"): armor doesn't take it and it doesn't drain a glider. In the end phase it also wears
 ## down those it downed itself out there (a Boki's revive stops the bleed, not the Blight; Life ends them
@@ -314,10 +318,6 @@ func _tide_tick(dt: float) -> void:
 				Sfx.play("thump", null, -8.0, 0.0, 0.7)
 		elif finish and _by_blight(h):
 			h.down_hp -= d
-
-## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
-static func _by_blight(h: Hunter) -> bool:
-	return not is_instance_valid(h.last_hit_by) or h.last_hit_by is Blight
 
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:

@@ -210,6 +210,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_standing(id, dd, clips)
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
+	_summon_call(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -450,6 +451,29 @@ func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			wrong.append(e["id"])
 	ok(wrong.is_empty(), "%s: emotes play upper-body moving, full-body standing, then end (wrong %s)"
 			% [id, str(wrong)])
+
+## The summon call and recall (warden_anim "summon_call", KinSummon.anim_state): about 0.3 s each, keying only upper
+## bones, on the upper layer so he runs and aims under it; never over a kit move; nothing of it once it has ended.
+func _summon_call(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var sc: Dictionary = dd.get("summon_call", {})
+	var bad: Array = []
+	for kind in ["call", "recall"]:
+		var clip := String(sc.get(kind, ""))
+		var anim := clips.lib.get_animation(clip) if clips.lib.has_animation(clip) else null
+		if anim == null or absf(anim.length - 0.32) > 0.05 or not _keys_upper(anim, dd):
+			bad.append(kind)
+			continue
+		var s := {"call": kind, "call_t": 0.1, "vel": Vector3(0, 0, -4)}
+		var run := clips._pick(s, 0.0)
+		s["kmove"] = String((dd.get("kmoves", {}) as Dictionary).keys()[0]) if dd.has("kmoves") else ""
+		var cast := clips._pick(s, 0.0) if s["kmove"] != "" else {}
+		s.erase("kmove")
+		s["call_t"] = anim.length + 0.01
+		if run.get("clip", "") != clip or not bool(run.get("upper", false)) or cast.get("clip", "") == clip \
+				or clips._pick(s, 0.0).get("clip", "") == clip:
+			bad.append(kind)
+	ok(bad.is_empty(), "%s: summon call and recall are ~0.3 s upper-body gestures, not over a cast, then end (bad %s)"
+			% [id, str(bad)])
 
 ## The state's emote picks this clip: standing on its own layer, moving on the upper one, and not after its end.
 func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:

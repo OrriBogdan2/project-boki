@@ -270,6 +270,14 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	k.set_meta("pulse", 124)
+	k.set_meta("kstate", "attack")      # (a cast's wind-up also reads as striking)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "ability", "a cast's wind-up keeps the ability clip, not the attack")
+	k.remove_meta("kstate")
+	rig._pick_clip(0.016)
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
 	if BokiFly.flier(kin_id):
 		_air(k, rig)
 	_in_water(k, rig)

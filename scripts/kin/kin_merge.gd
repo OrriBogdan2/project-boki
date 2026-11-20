@@ -37,9 +37,12 @@ static func transforming(h: Hunter) -> bool:
 	var k = h.kin if h else null
 	return k != null and is_instance_valid(k) and (k as Kin).state == "flying_home" and bool((k as Kin).fly.get("merge", false))
 
-## Is the meter full and the slot ready (not counting where the Boki is)?
+## Is the meter full and the slot ready (not counting where the Boki is)? Never while Fusion is off
+## (MergeForm.enabled): every start (X, bots, the Boki's own call, the tutorial) goes through here.
 static func ready(h: Hunter) -> bool:
-	if h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping or active(h) or h.merge_cd > 0.0:
+	if not MergeForm.enabled() or h == null or h.ult < 1.0 or h.downed or h.out or h.riding or h.dropping:
+		return false
+	if active(h) or h.merge_cd > 0.0:
 		return false
 	return int(h.slot_lv.get("ult", 0)) > 0
 
@@ -82,6 +85,8 @@ static func press(h: Hunter) -> bool:
 
 ## Why R did nothing, for the HUD toast ("" when there is nothing to say).
 static func deny_text(h: Hunter) -> String:
+	if not MergeForm.enabled():
+		return ""
 	if active(h):
 		return (h.merge_st["kit"] as MergeKit).ult_text() if h.merge_st["kit"] != null else ""
 	if h.merge_cd > 0.0 or int(h.slot_lv.get("ult", 0)) <= 0:

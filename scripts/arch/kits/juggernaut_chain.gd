@@ -25,6 +25,7 @@ const RING_PTS := 28                # points round the ring
 const RING_W := 0.16                # m wide the ring's band
 const SNAP_T := 0.3                 # s the two broken halves whip back
 const PREVIEW_Y := 0.15             # m over his feet
+const SPIN_GRACE := 0.15            # s after a pull ends (any way) that a Smash is still the Cinder Spin
 
 var k: JuggernautKit
 var state := "ready"                # ready | throwing | hooked | pulling | arriving
@@ -47,6 +48,7 @@ var snap_t := 0.0                   # s left of the broken halves whipping back
 var snap_end := Vector3.ZERO        # where the chain's far end was when it broke
 var ring := PackedVector3Array()    # the marker ring's points, reused each step
 var arrive_t := 0.0                 # s left of the arrival window
+var pull_end_at := -9.0             # when the last pull ended (SPIN_GRACE)
 var strained := false
 var tightened := false              # the chain has hit its full length since it bit (one creak per hold)
 # (tests)
@@ -72,9 +74,10 @@ func hooked() -> bool:
 func pulling() -> bool:
 	return state == "pulling"
 
-## The pull and the short window after it: a Smash here is the Cinder Spin.
+## The pull and the short window after it (the arrival, or SPIN_GRACE after a dash or a knock ended it): a
+## Smash here is the Cinder Spin.
 func spin_window() -> bool:
-	return state == "pulling" or state == "arriving"
+	return state == "pulling" or state == "arriving" or k.m.time - pull_end_at <= SPIN_GRACE
 
 ## E pressed (the kit has checked busy()): throw, pull, or buffer a pull while the hook still flies.
 func press() -> void:
@@ -178,7 +181,8 @@ func spend() -> void:
 func _fx_id() -> String:
 	return "war%d" % k.h.get_instance_id()
 
-## E on a hooked chain: flown to the anchor (a Lunge charging becomes a Haul Slam for the arrival).
+## E on a hooked chain: flown to the anchor (a Smash pressed just before is the Cinder Spin; a Lunge charging
+## becomes a Haul Slam for the arrival).
 func pull() -> void:
 	var ed := data()
 	var h := k.h
@@ -188,7 +192,8 @@ func pull() -> void:
 	if (k.busy() and k.riposte.move_k() > 0.0) or h.root_t > 0.0:
 		_stop("stopped", false)
 		return
-	k.arm_haul()
+	if not k.spin_early():
+		k.arm_haul()
 	if target != null:
 		ComboMark.payoff(k.m, h, target)
 	var at := _anchor_now()
@@ -478,6 +483,8 @@ func _stop(how: String, arrived: bool) -> void:
 	var h := k.h
 	exits = how
 	state = "ready"
+	if how != "jump":
+		pull_end_at = k.m.time        # (a jump out is a Meteor Drop's start, not a spin)
 	if h.move_kind == "rush" and how != "dash":
 		h.roll_t = 0.0
 		# a stopped pull halts him on the ground; in the air its speed carries under air drag and the keys
