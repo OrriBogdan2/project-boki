@@ -9,6 +9,7 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
+  meshy_task.py rig OUT_DIR model.glb [--height 1.7]                                     auto-rig (skin weights)
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
 `create` defaults to Meshy's best settings (PIPELINE.md r3): meshy-7.1, no remesh (the dense mesh is the bake
@@ -93,6 +94,9 @@ def fetch(out, tid, api):
             download(u, os.path.join(out, "thumb_%s.png" % name))
     for i, u in enumerate(t.get("image_urls") or []):
         download(u, os.path.join(out, "image%d.png" % i))
+    for name, u in (t.get("result") or {}).items():  # (a rigging task: rigged_character.glb)
+        if name.endswith("_glb_url") and u:
+            download(u, os.path.join(out, name[: -len("_glb_url")] + ".glb"))
     print("done; credits", t.get("consumed_credits"), "->", out)
 
 
@@ -155,6 +159,14 @@ def edit(o):
     post(o.out, "image-to-image", body, {"images": o.images})
 
 
+def rig(o):
+    """Meshy's auto-rig of an uploaded textured humanoid .glb (data URI; <= 380k triangles, facing +Z): OUT_DIR gets
+    rigged_character.glb, the same mesh skinned to Meshy's skeleton."""
+    body = {"model_url": "data:application/octet-stream;base64," + base64.b64encode(open(o.source, "rb").read()).decode()}
+    body["height_meters"] = o.height
+    post(o.out, "rigging", body, {"source": o.source})
+
+
 def remesh(o):
     body = {"input_task_id": o.task, "target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
     post(o.out, "remesh", body, {"source": o.task})
@@ -199,6 +211,10 @@ def main():
     m.add_argument("task")
     m.add_argument("--polycount", type=int, default=40000)
     m.add_argument("--topology", default="quad")
+    g = sub.add_parser("rig")
+    g.add_argument("out")
+    g.add_argument("source", help="a .glb to upload")
+    g.add_argument("--height", type=float, default=1.7, help="the character's height (m)")
     o = ap.parse_args()
     if o.cmd == "balance":
         balance()
@@ -210,6 +226,8 @@ def main():
         retexture(o)
     elif o.cmd == "edit":
         edit(o)
+    elif o.cmd == "rig":
+        rig(o)
     else:
         remesh(o)
 
