@@ -86,8 +86,7 @@
 		"dr_quake": {
 			"clip": "quake",
 			"fade": 0.05,
-			"time": [[0, 0], [0.1, 0.33], [0.75, 0.733]],
-			"blend_out": 0.2
+			"blend_out": 0.05
 		},
 		"dr_lunge": {"dash": true, 
 			"clip": "lunge",

@@ -85,8 +85,7 @@
 			"clip": "lmb_slam",
 			"air_legs": true,
 			"fade": 0.04,
-			"time": [[0, 0.1], [0.1, 0.117], [0.5, 0.23]],
-			"blend_out": 0.38
+			"blend_out": 0.05
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -138,8 +137,7 @@
 			"clip": "x_slam",
 			"upper": "moving",
 			"fade": 0.04,
-			"time": [[0, 0.1], [0.1, 0.15], [0.6, 0.3]],
-			"blend_out": 0.4
+			"blend_out": 0.05
 		},
 		"mf_xform": {
 			"clip": "fuse"
