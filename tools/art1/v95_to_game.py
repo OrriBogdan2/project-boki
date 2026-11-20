@@ -142,6 +142,9 @@ def main():
             out,
         ],
         check=True,
+        # (one BLAS thread: after --weights meshy's in-process Meshy rig call, the threaded numpy left Blender spinning
+        # on 52 threads with no progress for 25+ min; with one thread the same swap ends in ~2.5 min, Sable 11-20)
+        env=dict(os.environ, OPENBLAS_NUM_THREADS="1", OMP_NUM_THREADS="1", MKL_NUM_THREADS="1"),
     )
     shutil.copy(out, os.path.join(REPO, spec["game"]))
     if not a.no_import:
