@@ -541,9 +541,10 @@ func _snap_release() -> void:
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	vfx("snap_hit", at)
-	vfx("snap_struck" if e != null else "snap_miss", at)      # the crown stun, or the spring sagging out
 	if e == null:
+		vfx("snap_miss", at)      # no one hit: the spring sags out of the spear
 		return
+	vfx("snap_struck", at)      # the crown stun, a look of its own so every game hears it
 	var sn: Dictionary = rmb_def()["snap"]
 	var st: Vector3 = s["start"]
 	var kd := clampf(Vector2(at.x - st.x, at.z - st.z).length() / float(sn["range"]), 0.0, 1.0)
