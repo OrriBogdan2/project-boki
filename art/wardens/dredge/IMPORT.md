@@ -1,5 +1,18 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Ball on his back at a stand (2026-11-19, ext/hunter-fix-dredge-1118):** bone `ball` hangs off `root`, and the `idle`
+and `stance` clips held it near its rest spot while `hips`/`hoard` swayed, so standing he showed the ball off his back
+(in-game probe, ball vs its rest offset from `hoard`: idle mean 0.18 m, stance 0.17 m). Only those two clips' ball
+translation/rotation keys are re-keyed so it sits at its rest offset from `hoard` (same key times and counts, in place);
+in game: idle 0.18 -> 0.03 m, stance 0.17 -> 0.04 m. Every other clip, the mesh and the weights are byte-identical.
+Not re-keyed on purpose: in game the ball still drifts off the pack in run, the forced moves and death (median over all
+clip frames 0.29 m), and that is not a key problem: dredge's "upper" layer (content/rules/warden_anim/dredge.json) plays
+`hips` and `hoard` from the move while `root` and `ball` stay on the loco clip, and WardenClips turns `root` for the
+heading, so no key in root space can follow the hoard (re-keying every clip measured worse in game: median 0.29 -> 0.40).
+The fix is the skeleton or data: `ball` under `hoard` (extra_bones + the roll clips re-keyed into hoard space), or "ball"
+in the upper list plus a hoard-relative pose in WardenClips. Re-key script: ~/gens/hunter-fix-dredge-1118/deep-1119/tools/ball_rekey.py
+in.glb out.glb [clips] (numpy only); a clip rebuild from tools/art1/grimble_clips.py brings the standing float back.
+
 **Skin weights only, tear fix (2026-11-19, ext/hunter-fix-dredge-1118, retry of the 11-18 job):** dredge.glb differs from
 the 11-17 pick only in JOINTS_0/WEIGHTS_0. Positions, indices, normals, UVs, textures, nodes, skin and all 45 clips are
 byte-identical, so the rest pose is the same and no triangle was removed. (The first 11-18 pass deleted 2,088 triangles and
