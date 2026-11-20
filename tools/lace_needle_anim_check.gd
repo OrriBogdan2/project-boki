@@ -122,12 +122,17 @@ func _finishing_touch(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	fresh(T)
 	aim_at(P, T.pos)
 	HunterKeys.ult_pressed(P)
+	m.step(DT)
+	ok("Finishing Touch: three needles fanned on the cast frame, the first leaving as the shot",
+		visible_count(K) == 3 and K.fan.needles[2].flying > 0.0,
+		"showing %d flying %.2f" % [visible_count(K), K.fan.needles[2].flying])
 	step(m, 0.3, func(): aim_at(P, T.pos))
 	ok("Finishing Touch: the first arrow left with the cast, two needles still fanned",
 		K.ult.left == 2 and visible_count(K) == 2 and K.fan.needles[2].visible == false,
 		"left %d showing %d" % [K.ult.left, visible_count(K)])
 	beam(m, P, K, T.pos)
 	step(m, 0.2, func(): aim_at(P, T.pos))
+	ok("Finishing Touch: a loosed needle is gone within LEAVE_T", not K.fan.needles[1].visible)
 	ok("Finishing Touch: one needle gone per arrow", K.ult.left == 1 and visible_count(K) == 1,
 		"left %d showing %d" % [K.ult.left, visible_count(K)])
 	beam(m, P, K, T.pos)

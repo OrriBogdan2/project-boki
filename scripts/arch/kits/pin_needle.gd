@@ -26,6 +26,8 @@ const SPIN := 12.0             # rad it turns about its shaft over the appear
 const COIL_R := 0.14           # m the thread twist's radius at the eye (x her scale and the needle's size)
 const COIL_STEP := 0.05        # m the twist advances along the needle per thread joint
 const THREAD_MIN_K := 0.45     # the thread of a small needle shrinks no further than this x the big one's
+const LEAVE_T := 0.08          # s a loosed fan needle takes to leave the hand as the shot (`loose`)
+const LEAVE_RUN := 0.9         # m it slides along its aim over LEAVE_T (x her scale)
 
 var shell: MeshInstance3D
 var shell_mat: ShaderMaterial
@@ -39,6 +41,7 @@ var size := 1.0                # the needle's length as a share of the Heavy Sho
 var lift := 0.0                # rad it points above the aim (the fan tips up)
 var grow := 0.0                # 0..1: spun out of the thread (1) or wound back into it (0)
 var leaving := false           # being wound back into thread (a cancelled hold)
+var flying := 0.0              # s left of leaving the hand as the shot (`loose`), 0 when not
 var shown: Array = []          # the thread's joints as drawn: chain blended with the twist
 var _dir := Vector3.FORWARD
 var _sc := 1.0
@@ -101,6 +104,8 @@ func hold(nock: Vector3, dir: Vector2, k: float, sc: float, dt: float) -> void:
 	if nocking:
 		grow = 0.0
 	leaving = false
+	flying = 0.0
+	flying = 0.0
 	grow = minf(1.0, grow + dt / APPEAR_T)
 	charge = k
 	var flat := Vector3(dir.x, 0, dir.y).normalized()
@@ -122,6 +127,32 @@ func fade(nock: Vector3, dt: float) -> void:
 		put_away()
 		return
 	_pose(nock, _sc, dt, false)
+
+## Loosed from the fan: it leaves the hand as the shot, sliding along its aim and thinning over LEAVE_T, so the
+## needle that just fired still shows on the shot's frame (Finishing Touch's first arrow leaves with the press). A
+## needle not yet spun out leaves at full size. `nock`, `dir`, `sc` as `hold` (where the hand is now).
+func loose(nock: Vector3, dir: Vector2, sc: float) -> void:
+	var flat := Vector3(dir.x, 0, dir.y).normalized()
+	_dir = flat * cos(lift) + Vector3.UP * sin(lift)
+	visible = true
+	leaving = false
+	grow = 1.0
+	flying = LEAVE_T
+	_sc = sc
+	eye = nock
+
+## Every step while a loosed needle leaves (`loose`); false once it's gone.
+func fly(dt: float) -> bool:
+	if flying <= 0.0:
+		return false
+	flying -= dt
+	if flying <= 0.0:
+		put_away()
+		return true
+	var k := 1.0 - flying / LEAVE_T
+	grow = 1.0 - k
+	_pose(eye + _dir * LEAVE_RUN * _sc * dt / LEAVE_T, _sc, dt, false)
+	return true
 
 ## Place the needle (eye at `nock`, along _dir) at the size `grow` gives it, and its thread.
 func _pose(nock: Vector3, sc: float, dt: float, snap: bool) -> void:
@@ -178,3 +209,4 @@ func put_away() -> void:
 	charge = 0.0
 	grow = 0.0
 	leaving = false
+	flying = 0.0

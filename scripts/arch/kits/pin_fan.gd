@@ -13,6 +13,10 @@ const CHARGE := 0.4            # how warm they glow, 0..1
 const THREAD_N := 3            # thread joints on each
 
 var needles: Array[PinNeedle] = []
+var _at := Vector3.ZERO        # the hand as of the last step (a shot between steps leaves from there)
+var _dir := Vector2.UP
+var _sc := 1.0
+var _total := 3
 
 func _init() -> void:
 	for i in MAX:
@@ -24,18 +28,24 @@ func _init() -> void:
 ## Every step: needles 0..n-1 of a fan of `total` held at `nock` along `dir` (her scale `sc`). One that was showing
 ## and is no longer wanted winds back into thread.
 func show_n(n: int, total: int, nock: Vector3, dir: Vector2, sc: float, dt: float) -> void:
+	_at = nock
+	_dir = dir
+	_sc = sc
+	_total = total
 	var side := Vector3(-dir.y, 0, dir.x)
 	for i in MAX:
 		var needle := needles[i]
 		if i >= n:
-			needle.fade(nock, dt)
+			if not needle.fly(dt):
+				needle.fade(nock, dt)
 			continue
 		var o := float(i) - float(total - 1) * 0.5
 		needle.hold(nock + side * o * FINGER * sc, dir.rotated(-o * SPREAD), CHARGE, sc, dt)
 
-## Needle `i` is loosed: it's gone.
+## Needle `i` is loosed: it leaves the hand as the shot over PinNeedle.LEAVE_T (Finishing Touch's arrows).
 func shoot(i: int) -> void:
-	needles[i].put_away()
+	var o := float(i) - float(_total - 1) * 0.5
+	needles[i].loose(_at + Vector3(-_dir.y, 0, _dir.x) * o * FINGER * _sc, _dir.rotated(-o * SPREAD), _sc)
 
 func shoot_all() -> void:
 	for needle in needles:
