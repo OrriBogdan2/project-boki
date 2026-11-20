@@ -8,7 +8,8 @@ extends RefCounted
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --backfaces: every Warden surface drawn flat, green where it faces the camera and red where it shows its back (the
-## ink draws those black; parity_reel --reel-only=backfaces at the eye and knee cameras).
+## ink draws those black; parity_reel --reel-only=backfaces at the eye and knee cameras); --by-surface: a colour a
+## surface (named in the log: which surface a tear is on).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -115,12 +116,20 @@ func run(main: Node) -> void:
 		var sh := Shader.new()
 		sh.code = "shader_type spatial; render_mode unshaded, cull_disabled; " \
 			+ "void fragment() { ALBEDO = FRONT_FACING ? vec3(0.2, 0.8, 0.2) : vec3(1.0, 0.0, 0.0); }"
-		var mt := ShaderMaterial.new()
-		mt.shader = sh
+		var tint := OS.get_cmdline_user_args().has("--by-surface")
+		var hues := 0
 		for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 			var inst := mi as MeshInstance3D
 			inst.material_overlay = null
 			for s in inst.mesh.get_surface_count():
+				var mt := ShaderMaterial.new()
+				mt.shader = sh
+				if tint:  # (--by-surface: each surface its own front colour, named in the log)
+					var c := Color.from_hsv(fmod(hues * 0.37, 1.0), 0.6, 0.9)
+					mt.shader = Shader.new()
+					mt.shader.code = sh.code.replace("vec3(0.2, 0.8, 0.2)", "vec3(%f, %f, %f)" % [c.r, c.g, c.b])
+					print("SURFACE %s/%d %s %s" % [inst.name, s, inst.mesh.surface_get_name(s), c.to_html(false)])
+					hues += 1
 				inst.set_surface_override_material(s, mt)
 	if turn:
 		var dir := out.path_join("turntable")
