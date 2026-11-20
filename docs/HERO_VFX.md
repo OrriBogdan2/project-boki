@@ -108,8 +108,14 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   weapon colour sit within 40 degrees of hue of its archetype `color` (grey, pale and dark colours are free). A colour
   that means something stays and is named in `MEANING` in `tools/hero_colour_check.gd` (heals, a shield's blue, timing
   and status cues, materials such as dust and copper), as do the moves in `EXEMPT_MOVES` (Gil's Shatter wears the broken
-  Boki's type, Meeko's heals keep gold). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
+  Boki's type). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
   kit scripts, slots and weapon) and fails on a stray. A new literal outside the family needs a `MEANING` line or a retint.
+- **Heal vs hurt (Meeko, 11-20):** a support's heals and hurts must not look alike. Meeko's heals (Hearthlight, Hearth
+  Call, the bloom, the tether) are her leaf green family with soft rising stars and pluses; her hurts (Ember Cast,
+  Kindle, Burrseed and its root field) are embers (`MEANING` `ff8c32` / `ffb45a`): short sharp streaks that fall, no
+  curl. The Hearthlight disc (`tender.json` `hearth_disc`) and the root field stay at most 0.25 alpha inside up to their
+  rim; the bloom swirls only on its rim (`thin`). `--hero-vfx-check` rows "Meeko: heals leaf green and rising, hurts
+  embers falling" and the inside-to-rim alpha rows.
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
   (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
   under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).
