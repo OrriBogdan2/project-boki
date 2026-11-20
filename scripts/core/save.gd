@@ -79,6 +79,7 @@ func fresh() -> Dictionary:
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
+		"snack_picks": 0,     # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
 		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
