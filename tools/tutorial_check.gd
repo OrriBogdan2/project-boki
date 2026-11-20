@@ -12,6 +12,7 @@ extends RefCounted
 var bad := 0
 var arch := "gunslinger"
 var wisps := false
+var rng_seed := 7               # --tutorial-seed=N: the seed for the course's random draws
 
 ## Words no kit-neutral line may use: not every first Relic has a rifle or ammo.
 const KIT_WORDS := ["ammo", "reload", "rifle", "bullet", "magazine"]
@@ -21,7 +22,9 @@ const MAX_RUN_T := 900.0       # s of game time before the course counts as stuc
 const IDLE_E_T := 3.0          # s the E step must keep waiting while E is not pressed
 const LEAD_FAR := 10.0         # m: a player this far from a lead step target is where the Boki should be out ahead
 const LEAD_STOP := 6.0         # m: the Boki ends a lead step this close to the target
-const LEAD_MIN_FRAMES := 30    # sim steps far from the target before "it runs ahead" is asked
+## sim steps far from the target before "it runs ahead" is asked: from your side at run_speed it needs
+## ~0.7 s to be 2 m ahead of a running Hunter (a shorter leg ends in a glide carry first)
+const LEAD_MIN_FRAMES := 60
 const SCREEN := Vector2(1920, 1080)  # px: the screen the edge arrow is laid out on
 const REACH_FLAT := 12.0       # m: a dummy farther than this on foot is out of reach of any kit
 
@@ -34,6 +37,9 @@ func run(main: Node) -> void:
 		if a.begins_with("--tutorial-check="):
 			arch = a.substr(17).get_slice(":", 0)
 			wisps = a.ends_with(":wisps")
+		elif a.begins_with("--tutorial-seed="):
+			rng_seed = int(a.substr(16))
+	seed(rng_seed)       # (the camps' random draws: a box-proof run; --tutorial-seed=N tries another course)
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
