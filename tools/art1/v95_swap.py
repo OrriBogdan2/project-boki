@@ -342,6 +342,11 @@ def targets(arm):
         for j, b in (("shoulder", "upper_arm"), ("elbow", "forearm"), ("wrist", "hand"), ("hip", "thigh"), ("knee", "shin")):
             t[j + "." + sd] = on_rig(j + "." + sd, head[b + "." + sd][2], head[b + "." + sd])
         t["ankle." + sd] = on_rig("ankle." + sd, S_J["ankle." + sd][2] * k, head.get("foot." + sd))
+    sd = SPEC.get("mirror_arm")     # (a master whose one arm is bent in a held pose: that arm's targets mirror the other's,
+    if sd:                          # so the fit swings it down onto the rig like the other one; its joints stay its own)
+        o = "L" if sd == "R" else "R"
+        for j in ("shoulder", "elbow", "wrist"):
+            t[j + "." + sd] = t[j + "." + o] * np.array([-1.0, 1.0, 1.0])
     return t, k
 
 

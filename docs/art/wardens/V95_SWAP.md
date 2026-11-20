@@ -12,7 +12,9 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    Read the joints (pelvis, neck, crown,
    shoulders, elbows, wrists, hips, knees, ankles), the head's centre, the rigid parts' boxes and the anchors.
 2. **Spec**: copy `art/wardens/src/grimble_v95.json` to `<name>_v95.json` and set `master`, `game`, `joints`,
-   `head`, `spread` ("rig": the limbs sit on the bones; without it they keep the master's spread), `past_wrist`
+   `head`, `spread` ("rig": the limbs sit on the bones; without it they keep the master's spread), `mirror_arm`
+   ("R"/"L": that arm is bent in a held pose; its targets mirror the other arm's, so the fit swings it onto the rig;
+   give its own joints, e.g. off Meshy's auto-rig, not the other arm's mirrored), `past_wrist`
    (the bone that takes each hand's weights: `hand.R`, or a fused weapon's bone), `regions` (boxes moved whole
    onto one bone, minus leg capsules and boxes; a later region wins), `detach` (bone pairs cut apart and capped:
    parts the scan fused that the clips swing apart), `slots` (toon slots by the paint's hue/sat/value, a bone or
