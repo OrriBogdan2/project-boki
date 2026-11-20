@@ -37,11 +37,21 @@ static func ways_out_shown(m: Match) -> bool:
 			return true
 	return false
 
+## Whether an always-on block is really drawn: the glove slots (Q/V) only with a glove worn, the counters once
+## HudReveal shows them (a fresh save: from match 4).
+static func _drawn(m: Match, p: Hunter, id: String) -> bool:
+	match id:
+		"slots":
+			return not (Gloves.worn(p, 0).is_empty() and Gloves.worn(p, 1).is_empty())
+		"counters":
+			return HudReveal.on(m, "counters")
+	return true
+
 ## The ids of the groups on screen now: the always-on blocks plus the ones that come and go.
 static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
-	var out: Array = (rules()["always"] as Array).duplicate()
+	var out: Array = (rules()["always"] as Array).filter(func(g): return _drawn(m, p, String(g)))
 	if p.perks.size() > 0:
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):

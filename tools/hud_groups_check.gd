@@ -13,7 +13,7 @@ extends RefCounted
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 9, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
+const COUNTS := {"landing": 7, "fight": 9, "heart": 10, "race": 10}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -27,6 +27,8 @@ static func make_match(main: Node) -> Match:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	Settings.set_v("hud_full", false, false)      # (a fresh save stages the HUD: HudReveal)
+	Input.action_release("scores")
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
