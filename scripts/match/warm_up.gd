@@ -146,10 +146,14 @@ func run(progress := Callable()) -> void:
 		Settings.note_benchmark(float(times[times.size() / 2]))
 		# a first launch's auto quality can step down here (shadows, MSAA, very low's unshaded draw): the game goes
 		# on, and comes back, at the new settings. The stand-ins draw once more under them, still behind the
-		# loading screen (else the first frame of play compiled the unshaded draw's shader and the pipelines for
-		# the new settings built at their first draw in play), and the stamp follows the new settings
+		# loading screen, with a new soft-dot one (FxDot's low-settings shader: the first Boki wisp of play
+		# compiled it), and the stamp follows the new settings
 		if WarmStamp.setup_id() != setup:
+			var dot := _dot_stand_in()
+			m.add_child(dot)
+			dot.position = Vector3(0, MOB_DEPTH, 0)
 			await _batches(func(_f: float) -> void: pass, {})
+			if is_instance_valid(dot): dot.queue_free()
 			WarmStamp.save(seen)
 	await DashPace.rehearse(m)
 	PerfLog.skip()
@@ -225,9 +229,20 @@ func _mob_stand_ins() -> Node3D:
 			p.process_material = pm
 			p.draw_pass_1 = QuadMesh.new()
 			holder.add_child(p)
-	# and a squad's drop rocket (built at launch, in the ride)
+	# and a squad's drop rocket (built at launch, in the ride), and the soft dot's particles
 	holder.add_child(DropRocket.model(Color.WHITE))
+	holder.add_child(_dot_stand_in())
 	return holder
+
+## Particles drawn with FxDot's material (a Boki wisp's trail): its shader is made again with other code when the
+## settings go low (Settings.lite), so after a quality step the redraw needs a new one of these.
+func _dot_stand_in() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 1
+	p.emitting = false
+	p.mesh = QuadMesh.new()
+	p.material_override = FxDot.material()
+	return p
 
 func _fx_quad(sh: Shader) -> QuadMesh:
 	var q := QuadMesh.new()
