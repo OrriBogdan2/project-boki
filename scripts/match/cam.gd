@@ -96,6 +96,7 @@ var scout_pan := Vector3.ZERO # the framing at scout_k 1, taking over from the c
 ## The HUD's drawn groups (HudScale.drawn: anchor -> viewport rect; MatchCam sets it, empty off a match): a lean
 ## stops before you (HunterZone's box, feet to the overhead plate) come within HUD_GAP of one.
 var hud_keep := {}
+var lift := 0.0               # m your feet stand above the point the view follows (it trails below you when high up)
 const HUD_GAP := 8.0          # px kept between you and a HUD group
 const HUD_STEPS := 24         # samples along the lean for the first HUD touch...
 const HUD_HALVE := 10         # ...then halved this often between the last clear one and it
@@ -185,7 +186,7 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var sp := sin(pitch)
 	var cp := cos(pitch)
 	var room := INF
-	for h in [-rise, BODY_H - rise]:      # feet and head, against the point the view aims at
+	for h in [lift - rise, lift + BODY_H - rise]:      # feet and head, against the point the view aims at
 		var deep: float = d - h * sp            # the depth there, before the lean; the lean adds s * turned.y * cp
 		room = _under(room, absf(turned.x) - turned.y * cp * wide, deep * wide)      # the side edge
 		room = _under(room, turned.y * (sp - cp * t), deep * t - h * cp)            # the top edge
@@ -194,7 +195,7 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
 	var plate := (char_lean() * Vector3(0.0, HunterZone.PLATE_UP * hunter_scale, 0.0)).rotated(Vector3.UP, -yaw)
-	plate.y -= rise
+	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)
 	var home := _box_at(0.0, plate, view, lens_at, turned)
 	var clear := 0.0
@@ -215,7 +216,7 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 ## along `turned`, in the frame `_cast_room` solves: `lens_at` is the view's distance from the point it aims at, the
 ## tangent of half its vertical lens and that across.
 func _box_at(s: float, plate: Vector3, view: Vector2, lens_at: Vector3, turned: Vector2) -> Rect2:
-	var feet := _px_at(s, Vector3(0, -rise, 0), view, lens_at, turned)
+	var feet := _px_at(s, Vector3(0, lift - rise, 0), view, lens_at, turned)
 	return HunterZone.box(_px_at(s, plate, view, lens_at, turned), feet)
 
 ## The screen px of `at` (metres from the point the view aims at: x to the right, z toward the camera) with the view
@@ -349,6 +350,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	else:
 		flat = _trail_xz(flat, Vector2(want.x, want.z), Vector2(want.x - last_want.x, want.z - last_want.z), delta)
 	last_want = want
+	lift = p.y - want.y
 	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)

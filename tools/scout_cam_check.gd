@@ -120,16 +120,18 @@ func _hud_live(main: Node, m: Match) -> void:
 	MatchCam.update(m, STEP, 1.0)
 	var cam := m.cam
 	ok(cam.hud_keep.has(HudScale.BL) and cam.hud_keep.has(HudScale.BR),
-			"in a match the lean reads the HUD's %d drawn groups" % cam.hud_keep.size())
+			"in a match the lean reads the HUD's %d drawn groups (%s)" % [cam.hud_keep.size(), cam.hud_keep.keys()])
 	var hits: Array = []
 	cam.scout_k = 1.0
 	for rel in CORNERS:
-		cam.snap(m.player.pos + cam.scout_to(rel))
+		cam.snap(m.player.pos + cam.scout_to(rel) - Vector3(0, cam.lift, 0))      # (where follow puts the view)
 		var zone := HunterZone.rect(m)
+		if not cam.get_viewport().get_visible_rect().encloses(zone):
+			hits.append("off screen %s at %s" % [zone, rel])
 		for k in cam.hud_keep:
 			if (cam.hud_keep[k] as Rect2).intersects(zone):
 				hits.append("%s at %s" % [k, rel])
-	ok(hits.is_empty(), "live HUD: a full far look to each corner keeps your zone clear of it: %s" % [hits])
+	ok(hits.is_empty(), "live HUD: a full far look to each corner keeps your zone on screen and clear of it: %s" % [hits])
 	cam.scout_k = 0.0
 
 ## Frames until scout_k crosses `to` with scout_on `on`, as seconds.
