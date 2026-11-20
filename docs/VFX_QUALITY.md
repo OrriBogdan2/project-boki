@@ -70,16 +70,17 @@ GPU 7.13 -> 7.34 ms at 2560x1440 (3D scale 0.75), 0.32 -> 0.31 ms at 640x360; ma
 both sides, script 20.0 -> 20.8 ms); hub budget ok both (frame 13.5 / 13.2 of 16.7 ms). Strips: docs/shots/vfx-soft-dots.
 (Measured before `fx_dot` took main's version; the dot shader's cost is in the row above.)
 
+Done (11-19, ext/vfx-no-generic-orange): the generic damage orange (`AbilityFx.CAT`, `Feel.CAT`, `KinRules.CAT_COLORS`) is Boki's
+and generic casts' only. `KinExec.make_cx` gives every cast whose caster is a Hunter with an archetype `hero_col` = its slot colour,
+so Kael's Searing Wave and merge casts (which built their context by hand) no longer fall through; the fall-through
+(`KinExec.generic_col`) asserts it is never a Hunter's, and `--hero-vfx-check` pins `hero_col` per Hunter next to its
+existing recorded-colour fence. `pin_draw.gd` has no `#e8483e` any more.
+
 Still open (shared, not done here):
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
   breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
-- `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
-  for Boki; check that no Hunter path reaches them.
-- `pin_draw.gd` defaults to `#e8483e`.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
-- `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
-  for Boki; check that no Hunter path reaches them.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
   rimewright, tender. The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.

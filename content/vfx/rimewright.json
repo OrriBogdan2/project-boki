@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#7fd0ff", "hot": "#effcff", "char": "#1e3a6a", "smoke": "#cfe8f6", "frost": "#bff7ef",
-		"deep": "#2f6ac0", "lilac": "#c8a8ff", "mist": "#8fb8d8",
+		"deep": "#2f6ac0", "mist": "#8fb8d8",
 		"sig": "#5fd6c4"
 	},
 	"anchors": {
@@ -99,8 +99,8 @@
 		]},
 		"wall_tell": {"fx": [
 			{"p": "shard", "y": 0.3, "n": 14, "shape": "gather", "radius": 1.0, "speed": 4.5, "life": 0.22,
-				"size": 0.07, "c": "lilac", "c2": "hot"},
-			{"p": "flare", "y": 0.3, "size": 1.0, "life": 0.25, "c": "lilac", "c2": "hot", "c3": "deep"}
+				"size": 0.07, "c": "frost", "c2": "hot"},
+			{"p": "flare", "y": 0.3, "size": 1.0, "life": 0.25, "c": "frost", "c2": "hot", "c3": "deep"}
 		]},
 		"wall_rise": {"fx": [
 			{"p": "shard", "y": 0.3, "n": 20, "shape": "disc", "radius": 1.0, "speed": 5.0, "spread": 0.35, "grav": 9.0,
