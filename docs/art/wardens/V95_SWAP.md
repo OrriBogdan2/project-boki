@@ -251,3 +251,10 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+`meshy_reach` (spec, `weights` "meshy" only, 2026-11-20 Neve regen): `{"arm": [r0, r1], "thigh": [r0, r1]}` m. Meshy's
+auto-rig gives a cropped jacket's front panels half to the arm and a flared skirt to the thighs; an arm or thigh weight on
+a vertex past r1 from that limb's bones goes to `hips`, faded from r0 (Neve: arm 0.08-0.12, thigh 0.10-0.15; her idle's
+worst stretch 19.3 -> 6.6 on run C). The joints of a fresh Meshy master can come from its own auto-rig: pelvis = the hip
+joints - 0.045 (the game rig's `hips` sit 0.04 below its thighs), neck = Meshy's `Head` bone (ours starts at the chin, not
+the collar); Meshy's `Hips` and `neck` put the pelvis at the waist and stretch the torso x1.8 onto the rig.

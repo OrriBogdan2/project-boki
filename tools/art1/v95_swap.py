@@ -612,6 +612,21 @@ def meshy_weights(low, arm, P):
         leg = names.index("thigh." + sd)
         G[:, hips] += G[:, leg] * up
         G[:, leg] *= 1 - up
+    reach = SPEC.get("meshy_reach", {})     # {"arm": [r0, r1], "thigh": [r0, r1]}: limb weight past r1 from its bones
+    for sd in "RL" if reach else ():        # goes to the hips, faded from r0 (a cropped jacket's front panels that Meshy
+        sh, el, wr = (S_J[j + "." + sd] for j in ("shoulder", "elbow", "wrist"))   # gives the arm, a flared skirt the thigh)
+        for limb, segs, bones in (("arm", [(sh, el), (el, wr), (wr, wr + 0.9 * (wr - el))], ARM),
+                                  ("thigh", [(S_J["hip." + sd], S_J["knee." + sd])], ("thigh",))):
+            if limb not in reach:
+                continue
+            r0, r1 = reach[limb]
+            d = np.min([np.linalg.norm(P - (a0 + np.clip(((P - a0) @ (a1 - a0)) / ((a1 - a0) @ (a1 - a0)), 0, 1)[:, None]
+                                            * (a1 - a0)), axis=1) for a0, a1 in segs], axis=0)
+            cols = sorted({names.index(ours(b + "." + sd)) for b in bones})
+            off = G[:, cols] * (1 - np.clip((r1 - d) / (r1 - r0), 0, 1))[:, None]
+            G[:, hips] += off.sum(1)
+            G[:, cols] -= off
+            print("meshy: %s %s weight off %d vertices past %.2f m" % (limb, sd, (off.sum(1) > 0.05).sum(), r0), flush=True)
     rigid = 0
     for piece in np.unique(lab):
         m = lab == piece
