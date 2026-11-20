@@ -33,7 +33,8 @@ const HOLD_BOUND := ["gunslinger_e"]
 ## A blend-in this short is a deliberate snap (hem.json: the release shows in full; `--clip-check` asserts it
 ## over within 0.05 s of the spawn), so the gap does not ask it longer.
 const SNAP_FADE := 0.04
-## (a blend-in may fall this far short of its gap: Kael's meteor landing keeps 0.05 s, which --slam-follow-check pins its impact frame to)
+## (a blend-in may fall this far short of its gap: Kael's meteor landing keeps 0.05 s,
+## which --slam-follow-check pins its impact frame to)
 const IN_SLACK := 0.025
 const DT60 := 1.0 / 60.0
 const DEG_MAX := 25.0           # deg: no bone turns more than this between two frames at 60 fps (a hand-over pop)
@@ -112,7 +113,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 		var length := clips.lib.get_animation(clip).length
 		var up = mv.get("upper", false)
 		var fade_in := float(mv.get("fade", WardenClips.FADE))
-		# ("blend_out" hands the body back to the legs while the clip plays on: it covers the out gap as a fade_out does)
+		# ("blend_out" hands the body back to the legs while the clip plays on:
+		# it covers the out gap as a fade_out does)
 		var fade_out := maxf(float(mv.get("fade_out", WardenClips.FADE_LOCO)), float(mv.get("blend_out", 0.0)))
 		var gaps: Array = []     # [stand in, stand out, walk in, walk out], each [m, point]
 		var full_up: bool = up is bool and up        # ("moving": upper only while he walks)
