@@ -29,7 +29,7 @@ static func fill(txt: String, h: Hunter) -> String:
 	var ult := "your Ultimate"
 	if h != null and h.ak != null:
 		nm = AbilityText.name_of(h.arch, "e")
-		ult = AbilityText.name_of(h.arch, "x")
+		ult = String(h.ak.x_def().get("name", ult))
 	return txt.replace("%X", ability_tip(h)).replace("%R", rank_combo()).replace("%N", nm) \
 			.replace("%Y", Settings.key_cap("hunter_ult")).replace("%Z", ult) \
 			.replace("%C", Settings.key_cap("crouch")).replace("%E", Settings.key_cap("signature")) \

@@ -8,6 +8,7 @@ extends RefCounted
 const CHECKS := {
 	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],  # loot, kin keeping, the Soul Shrine
 	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],  # each ability verb at a dummy rival
+	"--mines-cap-check": ["res://tools/mines_cap_check.gd", "mines_cap_check", null],  # Glintmole: max 3 live puffcaps
 	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],  # KIN_GRAMMAR 2
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
 	"--hud-vitals-shots": ["res://tools/hud_vitals_shots.gd", "hud_vitals_shots", null],      # GPU
@@ -170,6 +171,7 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
+	# Training Grounds Hunters = a real match's
 	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
@@ -248,6 +250,7 @@ const CHECKS := {
 	"--sfx-voice-check": ["res://tools/sfx_voice_check.gd", "sfx_voice_check", null],  # 30-Hunter voice cap
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],  # item 103
 	"--settings-size-check": ["res://tools/settings_size_check.gd", "settings_size_check", null],      # steady panel
+	"--window-mode-check": ["res://tools/window_mode_check.gd", "window_mode_check", null],  # fullscreen start, F11
 	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # trimmed settings
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],      # Interface size slider
 	# sounds behind terrain
@@ -446,7 +449,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
-	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # ability words
+	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # one reader for ability words
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU

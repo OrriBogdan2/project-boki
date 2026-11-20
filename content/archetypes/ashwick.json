@@ -44,7 +44,7 @@
 	"rank3": {"dash": "+5 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "the shield is 80% bigger in all"},
 	"rank2": {"sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
 	"turn": {
-		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15)"},
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags behind the aim (:15); turn rate while held: match 1280 (ext/hero-ref-footage linwick 0014-0018: the nozzle follows 45 and 90 deg swings inside one 0.2 s frame)"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown"},
 		"x": {"early": 90.0, "late": 90.0, "source": "briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 90 deg/s, x.turn_deg)"},

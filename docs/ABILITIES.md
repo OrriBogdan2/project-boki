@@ -212,7 +212,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
-- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also root.
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
