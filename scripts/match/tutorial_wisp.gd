@@ -41,6 +41,9 @@ func done(sid: String, dt: float) -> bool:
 	match sid:
 		"wisp": return tu.t >= WISP_T
 		"steal":
+			if decoy == null and tu.t < FLOAT_T:
+				_spawn_decoy()  # (no ground under you when the step opened, e.g. still falling from the hook)
+				return false
 			if decoy == null or dk == null:
 				return true
 			if KinSteal.stolen(dk) and dk.owner_h == m.player:
