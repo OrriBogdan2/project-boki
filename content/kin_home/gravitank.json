@@ -1,6 +1,6 @@
 {
 	"id": "gravitank",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gravitank.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/gravitank.json.",
 	"work": {
 		"haul": 2,
 		"stone": 3,

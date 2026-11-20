@@ -1,6 +1,6 @@
 {
 	"id": "strobolin",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/strobolin.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/strobolin.json.",
 	"work": {
 		"craft": 2,
 		"mend": 1,

@@ -1,6 +1,6 @@
 {
 	"id": "lyrewing",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lyrewing.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/lyrewing.json.",
 	"work": {
 		"craft": 1,
 		"forage": 2,

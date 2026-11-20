@@ -1,6 +1,6 @@
 {
 	"id": "vespox",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/vespox.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/vespox.json.",
 	"work": {
 		"ember": 3,
 		"forage": 1,

@@ -1,6 +1,6 @@
 {
 	"id": "marchleaf",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/marchleaf.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/marchleaf.json.",
 	"size": {
 		"cm": 32,
 		"kg": 2.5,

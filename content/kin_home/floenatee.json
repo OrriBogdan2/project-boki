@@ -1,6 +1,6 @@
 {
 	"id": "floenatee",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/floenatee.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/floenatee.json.",
 	"size": {
 		"cm": 60,
 		"kg": 30.0,

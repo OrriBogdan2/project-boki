@@ -1,6 +1,6 @@
 {
 	"id": "gloamspire",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/gloamspire.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/gloamspire.json.",
 	"work": {
 		"craft": 2,
 		"forage": 3,

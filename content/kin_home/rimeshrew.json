@@ -1,6 +1,6 @@
 {
 	"id": "rimeshrew",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/rimeshrew.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/rimeshrew.json.",
 	"size": {
 		"cm": 32,
 		"kg": 2.5,

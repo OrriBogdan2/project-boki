@@ -1,6 +1,6 @@
 {
 	"id": "sentrikat",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/sentrikat.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/sentrikat.json.",
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

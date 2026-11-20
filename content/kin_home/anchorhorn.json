@@ -1,6 +1,6 @@
 {
 	"id": "anchorhorn",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/anchorhorn.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/anchorhorn.json.",
 	"work": {
 		"haul": 2,
 		"stone": 3,

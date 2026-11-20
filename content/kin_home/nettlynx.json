@@ -1,6 +1,6 @@
 {
 	"id": "nettlynx",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/nettlynx.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/nettlynx.json.",
 	"size": {
 		"cm": 32,
 		"kg": 2.5,

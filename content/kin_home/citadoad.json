@@ -1,6 +1,6 @@
 {
 	"id": "citadoad",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/citadoad.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/citadoad.json.",
 	"work": {
 		"haul": 1,
 		"stone": 3,

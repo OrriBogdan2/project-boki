@@ -1,6 +1,6 @@
 {
 	"id": "crofthollow",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/crofthollow.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/crofthollow.json.",
 	"work": {
 		"bloom": 3,
 		"forage": 2,

@@ -1,6 +1,6 @@
 {
 	"id": "lanceron",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lanceron.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/lanceron.json.",
 	"work": {
 		"craft": 2,
 		"frost": 3,

@@ -1,6 +1,6 @@
 {
 	"id": "glintmole",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/glintmole.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/glintmole.json.",
 	"size": {
 		"cm": 32,
 		"kg": 2.5,

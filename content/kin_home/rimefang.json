@@ -1,6 +1,6 @@
 {
 	"id": "rimefang",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/rimefang.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/rimefang.json.",
 	"work": {
 		"craft": 2,
 		"frost": 3,

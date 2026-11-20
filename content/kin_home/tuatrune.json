@@ -1,6 +1,6 @@
 {
 	"id": "tuatrune",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/tuatrune.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/tuatrune.json.",
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

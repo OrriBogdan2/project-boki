@@ -1,6 +1,6 @@
 {
 	"id": "seamwyrm",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/seamwyrm.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/seamwyrm.json.",
 	"work": {
 		"craft": 2,
 		"forage": 3,

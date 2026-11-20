@@ -1,6 +1,6 @@
 {
 	"id": "wisplet",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/wisplet.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/wisplet.json.",
 	"work": {
 		"frost": 2,
 		"craft": 2,

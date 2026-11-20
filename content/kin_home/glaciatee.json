@@ -1,6 +1,6 @@
 {
 	"id": "glaciatee",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/glaciatee.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/glaciatee.json.",
 	"work": {
 		"craft": 2,
 		"frost": 3,

@@ -1,6 +1,6 @@
 {
 	"id": "basaltoad",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/basaltoad.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/basaltoad.json.",
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

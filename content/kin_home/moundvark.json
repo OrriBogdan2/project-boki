@@ -1,6 +1,6 @@
 {
 	"id": "moundvark",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/moundvark.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/moundvark.json.",
 	"size": {
 		"cm": 60,
 		"kg": 30.0,

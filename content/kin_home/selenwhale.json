@@ -1,6 +1,6 @@
 {
 	"id": "selenwhale",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/selenwhale.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/selenwhale.json.",
 	"work": {
 		"craft": 1,
 		"frost": 3,

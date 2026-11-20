@@ -1,6 +1,6 @@
 {
 	"id": "thunderstrich",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/thunderstrich.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/thunderstrich.json.",
 	"work": {
 		"haul": 1,
 		"spark": 3,

@@ -1,6 +1,6 @@
 {
 	"id": "cindle",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/cindle.json.",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/cindle.json.",
 	"work": {
 		"ember": 3,
 		"forage": 1,
