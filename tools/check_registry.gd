@@ -452,6 +452,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
+	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],  # slam impact hold
 	# one reader for ability words
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
@@ -691,6 +692,8 @@ const CHECKS := {
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
+	# where the impact spark spawns on a tall and a small target: --shots-dir=<dir> --tag=<name>, needs a renderer
+	"--hit-contact-shots": ["res://tools/hit_contact_shots.gd", "hit_contact_shots", null],
 	# the same with one dummy moved around: reach, lane and arc to 0.1 m / 3 degrees
 	"--hit-shape-fine": ["res://tools/hit_shape_fine.gd", "hit_shape_fine", null],
 	# the same inputs fired at a field of dummies with their hit circles, at the gameplay camera
