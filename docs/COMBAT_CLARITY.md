@@ -58,7 +58,7 @@ Grade: clear / unclear, worst first. "Shared" = fixed or helped by this pass; th
 | Motley (ostra) | unclear | several large violet well discs at once, no edge to tell whose (now leaning red/blue via shared telegraphs only where they go through ArchKit/AimKit); indigo vs teal signature | per-Hunter job |
 | Meeko (tender) | unclear | big gold seed rings and teal ult dome fill the ground under everyone; heals and hurts look alike | ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling; Hearthlight and root field at most 0.25 inside to the rim, the bloom a rim swirl (docs/shots/vfx-meeko-heal-hurt/) |
 | Sable (thief) | unclear | LMB hits barely show; her X discs are pale | per-Hunter job |
-| Albert (bulwark) | unclear | gold E box and the big gold ring under him read as one blob with Meeko's | per-Hunter job |
+| Albert (bulwark) | clear-ish | the gold box was his aegis: now gold plates with an ivory rim, no dark cubes; his E disc is an ivory rim with a soft centre, Meeko's rings are leaf green | `ext/vfx-albert-e-slab` (strips `docs/shots/vfx-albert-e-slab/`) |
 | Sparkle (mage) | unclear | Kitefall's range disc washes the ground pink-violet; the Storm Rod lane is a thin cyan line next to pink orbs | fixed on READY `ext/vfx-sparkle-ult-local` (disc gone, lightning pink) and `ext/vfx-sparkle-casts`, not merged |
 | Tenzo (dolm) | clear-ish | Stone Row rocks read as objects; Quakefall's slam ring is plain and the X spine's line is thin at match zoom | X: the cracks now sit on their true band (this pass); slam and the cracks' scorch on READY `ext/vfx-tenzo-data`, not merged |
 | Vex (gunslinger) | clear-ish | the lime body reads; LMB tracers are faint | per-Hunter job |
