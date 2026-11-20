@@ -22,6 +22,8 @@ uniform float far_sheen = 0.0;
 uniform float far_edge = 1.0;
 uniform float far_alpha = 1.35;
 
+#include "res://shaders/hit_flash.gdshaderinc"
+
 void fragment() {
 	vec4 t = use_tex ? texture(albedo_tex, UV) : vec4(1.0);
 	vec3 c = t.rgb * albedo.rgb;
@@ -37,7 +39,7 @@ void fragment() {
 	vec3 film = 0.5 + 0.5 * cos(6.2832 * (vec3(0.0, 0.33, 0.67) + ph));
 	c = mix(c, c * (0.55 + 0.9 * film), irid * mix(1.0, far_sheen, far_k));
 	ALBEDO = mix(c, flash_color.rgb, flash);
-	EMISSION = c * glow + flash_color.rgb * flash * 0.9;
+	EMISSION = c * glow + hit_flash_glow(c, flash_color.rgb, flash);
 	float far_a = mix(1.0, far_alpha * mix(1.0, smoothstep(0.12, 0.45, face_on), far_edge), far_k);
 	ALPHA = clamp(t.a * albedo.a * alpha_k * far_a, 0.0, 1.0);
 }
