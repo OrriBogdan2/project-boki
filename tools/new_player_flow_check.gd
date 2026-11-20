@@ -159,10 +159,13 @@ func _hatch() -> void:
 	await _press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
-	await _press(hx, "This one")
-	var chosen: int = hx.chosen
-	ok(chosen >= 0 and _button(hx, "Hatch it") != null, "choosing an egg offers 'Hatch it'")
-	await _press(hx, "Hatch it")
+	var cards: Array = hx.bottom.find_children("*", "PanelContainer", true, false).filter(
+		func(n): return (n as Control).focus_mode == Control.FOCUS_ALL)
+	ok(not cards.is_empty() and _button(hx, "Hatch it") == null, "the eggs are cards, with no confirm button")
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	(cards[0] as Control).gui_input.emit(click)
 	await _wait(func(): return hx.stage == "warm", "the egg waits for knocks")
 	await _before_act("knock")
 	for i in hx.TAPS:

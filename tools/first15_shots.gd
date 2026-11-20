@@ -101,8 +101,6 @@ func _front() -> void:
 	await _wait(1.5)
 	await _shot("hatch_eggs")
 	hx._pick(0)
-	await _wait(0.8)
-	hx._pick(0)
 	await _wait(1.5)
 	await _shot("hatch_knock")
 	hx._show_name()
