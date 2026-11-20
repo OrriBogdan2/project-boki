@@ -348,13 +348,12 @@ func _sync_fixtures() -> void:
 ## Challenge House goes up, each on open ground near the portal (move them wherever you like).
 ## Returns true if any went up.
 func _fs_arrivals() -> bool:
-	if int(Save.d.get("matches", 0)) < 1:
-		return false
+	var fought: bool = int(Save.d.get("matches", 0)) >= 1
 	var any := false
 	var put: Array = []
 	var w: World = world
 	for b in ["board", "ransom"]:
-		if HomeLayout.placed(b, _d()) or not _has_b(b):
+		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not (b == "ransom" and FarmUnlocks.base_mode())):
 			continue
 		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
 		var best := Vector2i(-1, -1); var bd := 1e9
