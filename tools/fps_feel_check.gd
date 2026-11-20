@@ -2,17 +2,17 @@ extends RefCounted
 ## --fps-feel-check: the same scripted input stepped at 1/30, 1/60 and 1/144 s must give the same movement, so a
 ## 30 fps machine plays the game a 144 fps one does. For Vex, Kael, Albert and Sable: run 1 s, jump, a dash tap,
 ## a dash hold, a 2 s glide and a standard knock. Each measure must agree across the three steps within SPREAD
-## and, where docs/SUPERVIVE_FEEL.md has a [game data] number for it, match that within SPREAD too:
+## and, where the target feel has a number for it, match that within SPREAD too:
 ##   jump apex  Hunter.JUMP_V^2 / (2 Hunter.H_GRAV)  (gravity 1470 uu/s^2, our jump speed)
 ##   glide sink HunterMove.glide_pull_vy over the glide's second second, high over the ground (GlideDownwardForce)
-## Dash and knock distances have no [game data] (dash curves not decoded). They are printed for the record but not
-## yet held (HELD): main's dash and knock model still differs per step (docs/DEBT.md "Step-size independent dashes").
+## Dash and knock distances are printed only: main's dash hand-over and knock slide still drift 3-10% with the step
+## (docs/DEBT.md), so they are not asserted yet.
 ## Prints "FPSFEEL <hero> <measure> <dt30> <dt60> <dt144> ..." rows and "FPS FEEL CHECK DONE, failures: N".
 
 const HEROES := {"gunslinger": "Vex", "juggernaut": "Kael", "bulwark": "Albert", "thief": "Sable"}
 const STEPS := [1.0 / 30.0, 1.0 / 60.0, 1.0 / 144.0]
-const HELD := ["apex_m", "sink_mps"]      # the measures that must agree across steps (dash and knock rows: DEBT)
-const SPREAD := 0.03            # largest relative difference allowed (between steps, and to a [game data] number)
+const SPREAD := 0.03            # largest relative difference allowed (between steps, and to a target-feel number)
+const ASSERTED := ["apex_m", "sink_mps"]     # the measures that must agree; the others are printed rows
 const KNOCK := 9.0              # m/s: the standard shove (Effects' push, a dash's shove_kb)
 const GLIDE_AT := 20.0          # m over the ground: well above HunterMove.glide_height, where the source pulls down
 const SETTLE_S := 1.5           # s with no keys after a dash or knock: long enough to come to rest
@@ -43,12 +43,12 @@ func run(main: Node) -> void:
 			var spread := (hi - lo) / maxf(absf(hi), 0.01)
 			var who: String = HEROES[arch]
 			print("FPSFEEL %-7s %-10s %7.3f %7.3f %7.3f  spread %4.1f%%" % [who, key, v[0], v[1], v[2], spread * 100.0])
-			if key in HELD:
+			if key in ASSERTED:
 				ok(spread <= SPREAD, "%s %s agrees across 30/60/144 fps (%.1f%%)" % [who, key, spread * 100.0])
 			var target: float = {"apex_m": apex_target, "sink_mps": HunterMove.glide_pull_vy}.get(key, 0.0)
 			if target > 0.0:
 				for x: float in v:
-					ok(absf(x / target - 1.0) <= SPREAD, "%s %s %.3f matches [game data] %.3f" % [who, key, x, target])
+					ok(absf(x / target - 1.0) <= SPREAD, "%s %s %.3f matches target-feel %.3f" % [who, key, x, target])
 	print("FPS FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
