@@ -178,3 +178,31 @@ really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfe
 | Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
 | Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
 
+
+## The run's foot lock (Nov 19, ext/foot-slide-1118)
+
+The play probe (`tools/play_probe.sh`, its `skate` number: over a 1.5 s run from a standstill, the median of the
+slower foot's flat speed over the ground as a share of the body's) flagged Albert 91 %, Lace 78 %, Neve 66 %; the
+others read 16 to 45 %. Their run clips sweep the planted foot back unevenly: Albert's at rate 1.33 goes from about
+1 m/s at touchdown to 8 m/s at lift-off, down only about a fifth of the cycle. So no playback rate fits: sweeping
+the run `foot_mps` from 2.4 to 7.0 m/s left Albert at 76 to 110 %, Lace at 40 to 105 % and Neve at 61 to 74 %.
+
+`loco.foot_lock` ([walk, run], 0..1; WardenGait) holds a foot where it came down while it is in the lowest 60 % of
+its height range, the ground under it going back at the body's speed, by the legs' two-bone IK
+(`FootPlant.reach_bones`), at most 0.6 of the leg off the clip's ankle; lifted, it eases back onto the clip in about
+0.05 s. The ground's way is the blend's, so a run-and-aim Hunter's turned legs lock true (Lace). Albert, Lace and
+Neve have it on the run only ([0, 1]); idle, walk, crouch, air and moves are untouched (it fades with the legs'
+locomotion weight). Albert's hips in idle read the same every frame before and after (480 frames, max frame step
+2.28 mm; the 85 mm travel is his idle-to-stance blend at 4 s, unchanged).
+
+| Hunter | play probe run, before | after | `--foot-slide-check` SKATE (bar 45 %) |
+|---|---|---|---|
+| Albert (`bulwark`, 5.79 m/s) | 91 % | 40 % | 35 % |
+| Lace (`archer`, 5.44 m/s) | 78 % | 27 % | 8 % |
+| Neve (`rimewright`, 5.32 m/s) | 66 % (probe job) | 9 % | 0 % |
+
+The SKATE row runs each `foot_lock` Hunter forward at `HunterMove.speed` from a standstill, as the probe does, and
+fails above 45 %. The run start is the hard part: from a standstill Albert reads 76 % with the lock's band at 30 %
+of the height range and 39 % at 60 %. Wider bands or a larger pull trade one Hunter for another (a 0.8 pull: Albert
+31 %, Lace 15 to 30 %). The forward sweep rows barely move for Albert: they read the estimated ankle (`DEBT.md`,
+foot-slide readers), which sits past his real one.

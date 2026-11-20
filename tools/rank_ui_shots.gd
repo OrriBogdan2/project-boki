@@ -16,7 +16,7 @@ func run(main_node: Node) -> void:
 	await _setup()
 	_ranks(1, {"sec": 1, "dash": 0, "kin": 3, "ult": 1}, 9)
 	await _go(0.6, Callable(), [[0.5, "bar", "rank_fresh_point",
-		"A new point: gold + on RMB, UNLOCK on locked dash, ALT+key hints, E's pips gold at max"]])
+		"A new point: gold + on RMB, 'Spend point' on locked dash, ALT+key hints, E's pips gold at max"]])
 	await _go(6.0, Callable(), [[5.9, "bar", "rank_pulse",
 		"Seconds later: the hints are gone (hover brings one back); the + and frame keep pulsing"]])
 	_ranks(0, {"sec": 2, "dash": 1, "kin": 3, "ult": 1}, 9)
