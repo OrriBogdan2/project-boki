@@ -798,6 +798,8 @@ const CHECKS := {
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
 	# 2 games, relay: kit statuses
 	"--status-net-check": ["res://tools/status_net_check.gd", "status_net_check", null],
+	# 2 games, relay: kit zones on the other game (--shots-dir=: GPU, the guest's frames)
+	"--zone-net-check": ["res://tools/zone_net_check.gd", "zone_net_check", null],
 	"--blocker-check": ["res://tools/blocker_check.gd", "hero_pair_check", null],      # docs/ABILITIES.md blockers
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
