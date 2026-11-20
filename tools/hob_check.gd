@@ -276,7 +276,8 @@ func _offer() -> void:
 	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
-	ok(tracker_off and marker_off and not home.guide.hint_box.visible
+	var line_off: bool = not is_instance_valid(home.guide.hint_box) or not home.guide.hint_box.visible
+	ok(tracker_off and marker_off and line_off
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
