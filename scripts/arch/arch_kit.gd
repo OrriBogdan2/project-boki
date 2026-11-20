@@ -137,6 +137,9 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## Is the kit holding its own hero still (Neve's Rimelock statue)? That root is the move itself, so the
+## HUD shows no ROOTED icon or timer for it (HudPlate.statuses).
+func holds_still() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
 ## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if unused)}.
 ## The base reports E while it's up and e_recastable().

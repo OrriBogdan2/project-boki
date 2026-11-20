@@ -82,7 +82,7 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender. The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -91,7 +91,10 @@ Still open (shared, not done here):
   runs from 0.45 by the rim to `DISC_FILL_A` 0.2 at the centre. Vex's discs are HeroVfx data since ext/vfx-vex-data.
   Done too: Meeko's seed disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the
   vortex's dark core thinned; the seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring
-  since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10).
+  since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10). Sable's X since ext/vfx-sable-data-x:
+  the pale lavender band is an AimKit `soft` circle (lanes and cones had it) in her `#9a5cff`: a lit rim, two flat
+  glow bands 0.6 m inward (cel steps), the inside rising from 0.03-0.08 at the centre (at most 0.08 at a beat's
+  brightest; `--dancer-combo-check`, `--hero-vfx-check`, `--aimkit-check` measure it as drawn).
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
@@ -246,6 +249,13 @@ Albert (bulwark), ext/vfx-albert-ivory-arcs: the LMB swing crescent, the Shield 
 his ivory (`#fff0b0`, pale gold `#e8c96a`), no longer Kael's orange. The before/after strip is
 `docs/art/vfx_rescore/bulwark_arcs_before_after.jpg` (jobq 20261111-213523-28011 before, 215537-24801 after, match zoom).
 On the scorecard of ext/vfx-rescore his row moves 24 to 25 (C 3 to 4); the aegis plates still render orange-red.
+Albert (bulwark), ext/vfx-albert-e-slab (row 8, "a flat gold box with dark cubes"; the box is his raised aegis, which
+the generic reel and the 3v3 films showed during his E): the aegis plates are a lit slab in `bulwark.json` `slab`
+(`#f6e3a8`, own light 0.3, ivory toon rim) and the top rim, ribs and boss in his ivory (`ivory`, Arch.color, light 0.9);
+the dark edge pieces, the outlines and the rivet cubes are gone, the plated shape (owner 11-03) is kept. Mending Ground's
+standing disc keeps to the ring rule: a lit ivory rim on the zone's edge, a soft falloff to 0.25 or less inside
+(`swirl` `edge` 1, was brightest mid-band). Strips at match zoom (grey = main, green = after):
+`docs/shots/vfx-albert-e-slab/{aegis,e}_before_after.jpg` (GPU jobq 20261120-031447-00628 / -032527-24137 aegis, -24307 / -26463 E). The dash dome colour is a separate item.
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
