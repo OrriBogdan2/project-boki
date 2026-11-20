@@ -100,13 +100,15 @@ func _hud(cam: CamRig) -> void:
 		cam.snap(p)
 		var zone := HunterZone.box(cam.unproject_position(cam.char_lean() * Vector3(0, HunterZone.PLATE_UP, 0)),
 				cam.unproject_position(Vector3.ZERO))
+		if not Rect2(Vector2.ZERO, v).encloses(zone):
+			hits.append("off screen at %s" % rel)
 		for k: String in keep:
 			if (keep[k] as Rect2).grow(CamRig.HUD_GAP - 1.0).intersects(zone):
 				hits.append("%s at %s" % [k, rel])
 		if p.length() < bare - 0.5:
 			shorter += 1
 		print("SCOUTCAM corner %s: %.1f m with the HUD, %.1f m without" % [rel, p.length(), bare])
-	ok(hits.is_empty(), "a full far look to each corner keeps you clear of the HUD's groups: %s" % [hits])
+	ok(hits.is_empty(), "a full far look to each corner keeps you on screen and clear of the HUD's groups: %s" % [hits])
 	ok(shorter >= 2, "the HUD shortens the far look into %d of 4 corners (the bottom ones at least)" % shorter)
 	cam.hud_keep = {}
 	cam.scout_k = 0.0

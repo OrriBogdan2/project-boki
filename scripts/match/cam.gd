@@ -176,7 +176,8 @@ func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
 
 ## Metres the view can lean along `dir` at that zoom with you (feet and head) still EDGE inside the screen. Each
 ## screen edge is a straight line on the ground in perspective, so every limit solves exactly: s * a <= b. Then the
-## HUD: the lean stops where your box would first come within HUD_GAP of one of its groups (hud_keep).
+## HUD: the lean stops where your box (to the plate) would first leave the screen or come within HUD_GAP of one of its
+## groups (hud_keep).
 func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var view := get_viewport().get_visible_rect().size
 	var d := dist * dist_mul * zoom * (1.0 + zoom_k)
@@ -201,10 +202,10 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	var clear := 0.0
 	for i in range(1, HUD_STEPS + 1):
 		var s := room * i / HUD_STEPS
-		if _hud_hit(_box_at(s, plate, view, lens_at, turned), home):
+		if _hud_hit(_box_at(s, plate, view, lens_at, turned), home, view):
 			for _j in HUD_HALVE:
 				var mid := (clear + s) * 0.5
-				if _hud_hit(_box_at(mid, plate, view, lens_at, turned), home):
+				if _hud_hit(_box_at(mid, plate, view, lens_at, turned), home, view):
 					s = mid
 				else:
 					clear = mid
@@ -227,8 +228,12 @@ func _px_at(s: float, at: Vector3, view: Vector2, lens_at: Vector3, turned: Vect
 	var up := at.y * cos(pitch) - z * sin(pitch)
 	return view * 0.5 * Vector2(1.0 + (at.x - s * turned.x) / (deep * lens_at.z), 1.0 - up / (deep * lens_at.y))
 
-## Does `box` come within HUD_GAP of a HUD group (one it was already under unleaned, `home`, never stops it)?
-func _hud_hit(box: Rect2, home: Rect2) -> bool:
+## Does `box` leave the `view` or come within HUD_GAP of a HUD group (one it was already under or out of unleaned,
+## `home`, never stops it)? (The screen-edge solve keeps feet and head inside; this keeps the overhead plate too.)
+func _hud_hit(box: Rect2, home: Rect2, view: Vector2) -> bool:
+	var screen := Rect2(Vector2.ZERO, view)
+	if screen.encloses(home) and not screen.encloses(box):
+		return true
 	for k in hud_keep:
 		var r: Rect2 = (hud_keep[k] as Rect2).grow(HUD_GAP)
 		if r.intersects(box) and not r.intersects(home):
