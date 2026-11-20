@@ -157,7 +157,7 @@ func _land(d: Dictionary) -> void:
 			continue
 		if not AimMode.in_lane(from, dir, float(d["len"]), float(d["width"]), f.pos, f.r):
 			continue
-		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "kb": dir * 6.0, "crit": true}
+		var hit := {"src": "abil", "ab": "ult", "tags": ["riposte"], "kb": dir * float(d.get("strike_kb", 0.0)), "crit": true}
 		var dealt: float = f.hurt(dmg, h, hit)
 		if dealt <= 0.0:
 			continue
