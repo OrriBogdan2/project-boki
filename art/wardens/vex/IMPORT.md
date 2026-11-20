@@ -1,5 +1,16 @@
 # Vex (gunslinger): import note
 
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r3 A (2026-11-20, awaiting the owner's visual check)
+Meshy multi-image meshy-7.1 `--pose t-pose` from briefs/art-refs/vex_v2/vex_v2_turnaround.jpg (front, 3/4, back; 10 gens, 1 kept:
+the gatling is her right forearm with no hand inside it, a brass mechanical left hand, no dangling bullet charm), quad remesh
+(46.2k tris in game), blue irises on the amber-iris texels only, then `tools/art1/v95_swap.py` with bone heat on joints measured
+from the T-pose mesh (no Meshy rig credits were left), the whole gun past the right elbow on forearm.R, `spread_legs` "master"
+(the rig's thigh heads sit 0.123 m out, hers 0.086 m: `spread` "rig" alone flared the thighs), the brass left forearm and hand in
+the metal slot by bone, and no kept coin (the old atlas coin read as a dark blob in her palm). Spec and every step:
+~/gens/hunter-regen-1120/vex/r3/ (work/C2/swap3/spec.json, scripts/, raw/gen_log.tsv). Stretch-check (51 clips): worst 6.69,
+median 4.64 (live 10.16 / 4.46). After swapping the glb, delete vex_v95.jpg AND its .import (keep the old uid line), or Godot
+keeps the old texture or none.
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Vex/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), the muzzles still on forearm.R (anchor_bones). Was appeal3 body b below. 13.1k tris, one 2048 atlas, 39 clips.
 Spec `art/wardens/src/vex_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
