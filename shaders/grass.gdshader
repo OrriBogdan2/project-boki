@@ -30,7 +30,7 @@ void fragment() {
 	c = vis_apply(c, vis_f);
 	ALBEDO = c;
 	AO = vis_ao(vis_f);                      // out of sight: the coloured ambient out, its grey back in (vis.gdshaderinc)
-	EMISSION += vis_ambient(c, vis_f);
+	EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

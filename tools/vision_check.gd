@@ -188,7 +188,7 @@ func _grey_fog(m: Match) -> void:
 		var light := s.substr(s.find("void light()"))
 		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") and not light.contains("* LIGHT_COLOR")
 		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
-		ok(greyed and tone_ok and s.contains("AO = vis_ao(vis_f)") and s.contains("EMISSION += vis_ambient("),
-			"%s greys its light, shadow tint and ambient outside sight" % n)
+		ok(greyed and tone_ok and s.contains("AO = vis_ao(vis_f)") and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)"),
+			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
 	var amb := RaidLook.vis_amb(m.env.environment)
 	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)

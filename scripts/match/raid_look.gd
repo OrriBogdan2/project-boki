@@ -81,11 +81,14 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 		if o != "": return o
 	return roll(seed_val) if rolls(opts) else "clear"
 
-## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` from the
-## ambient it ends with, so the fog outside sight is lit grey, not by the ambient's colour (shaders/vis.gdshaderinc).
+## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` and `vis_haze` from
+## the ambient and env fog it ends with, so the fog outside sight comes out grey under them (shaders/vis.gdshaderinc).
 static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
 	_apply(e, sun, fill, T, cond)
 	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
+	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
+	RenderingServer.global_shader_parameter_set("vis_haze", Vector4(h.r, h.g, h.b, e.fog_density if e.fog_enabled else 0.0))
+	RenderingServer.global_shader_parameter_set("vis_haze_h", Vector2(e.fog_height, e.fog_height_density if e.fog_enabled else 0.0))
 
 ## The ambient light's luma x energy (linear): what the fog outside sight gets back as grey for the ambient it drops.
 static func vis_amb(e: Environment) -> float:
