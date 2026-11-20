@@ -104,6 +104,12 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
 - **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
+- **Ability colours (DECISIONS 2026-11-08):** every Hunter's LMB / RMB / E / R / dash / passive effects, slot colours and
+  weapon colour sit within 40 degrees of hue of its archetype `color` (grey, pale and dark colours are free). A colour
+  that means something stays and is named in `MEANING` in `tools/hero_colour_check.gd` (heals, a shield's blue, timing
+  and status cues, materials such as dust and copper), as do the moves in `EXEMPT_MOVES` (Gil's Shatter wears the broken
+  Boki's type, Meeko's heals keep gold). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
+  kit scripts, slots and weapon) and fails on a stray. A new literal outside the family needs a `MEANING` line or a retint.
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
   (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
   under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).

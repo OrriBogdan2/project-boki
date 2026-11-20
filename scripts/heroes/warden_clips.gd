@@ -176,9 +176,9 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
 func move_len(mv: Dictionary) -> float:
 	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
-	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0))
-	rate *= (length / float(mv["fit"]) if mv.has("fit") else 1.0)
-	return length / rate - float(mv.get("lead", 0.0))
+	# (_move_clip's clock: clip t = (kit t x "rate" + "lead") x "scale" x the "fit" stretch)
+	var sc := float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	return (length / sc - float(mv.get("lead", 0.0))) / float(mv.get("rate", 1.0))
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
@@ -207,7 +207,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	if (d["loco"] as Dictionary).has("run_cycle"):
 		_retime_run(float(d["loco"]["run_cycle"]))
-	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
+	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
+			+ (d.get("summon_call", {}) as Dictionary).values())
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -529,6 +530,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
+	var call := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
+	var call_t := float(s.get("call_t", 99.0))
+	if lib.has_animation(call) and call_t < lib.get_animation(call).length:
+		return {"clip": call, "t": call_t, "upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
 	land_t += dt
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
@@ -603,8 +608,9 @@ static func lockin_dur(art_name: String) -> float:
 ## A keyed move's clip and time ({} once a move that does not hold has played out).
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
-	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
-	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit; under zero the first frame holds for it,
+	# since a t under zero would free-run the clip in step())
+	var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on

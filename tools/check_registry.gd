@@ -8,6 +8,7 @@ extends RefCounted
 const CHECKS := {
 	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],  # loot, kin keeping, the Soul Shrine
 	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],  # each ability verb at a dummy rival
+	"--mines-cap-check": ["res://tools/mines_cap_check.gd", "mines_cap_check", null],  # Glintmole: max 3 live puffcaps
 	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],  # KIN_GRAMMAR 2
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],  # the duel room smoke test
 	"--hud-vitals-shots": ["res://tools/hud_vitals_shots.gd", "hud_vitals_shots", null],  # GPU
@@ -170,6 +171,8 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],  # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],  # --shots-dir, --res
 	# boots, charms vs source
+	# Training Grounds Hunters = a real match's
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -247,6 +250,8 @@ const CHECKS := {
 	"--sfx-voice-check": ["res://tools/sfx_voice_check.gd", "sfx_voice_check", null],  # 30-Hunter voice cap
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],  # item 103
 	"--settings-size-check": ["res://tools/settings_size_check.gd", "settings_size_check", null],  # steady panel
+	"--settings-size-check": ["res://tools/settings_size_check.gd", "settings_size_check", null],      # steady panel
+	"--window-mode-check": ["res://tools/window_mode_check.gd", "window_mode_check", null],  # fullscreen start, F11
 	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # trimmed settings
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],  # Interface size slider
 	# sounds behind terrain
@@ -415,6 +420,10 @@ const CHECKS := {
 	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],  # wings vs body
 	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],  # --shots-dir=<dir>
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],  # no ring/disc/burst on movement
+	"--sable-wings-check": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "check"],      # wings vs body
+	"--sable-wings-shots": ["res://tools/sable_wings_shots.gd", "sable_wings_shots", "shots"],      # --shots-dir=<dir>
+	"--hunter-gpu-shots": ["res://tools/hunter_gpu_shots.gd", "hunter_gpu_shots", null],
+	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--camera-ab-shots": ["res://tools/camera_ab_shots.gd", "camera_ab_shots", null],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],  # ability text vs slot data
 	"--key-caps-check": ["res://tools/key_caps_check.gd", "key_caps_check", null],  # drawn keys follow a rebind
@@ -448,6 +457,11 @@ const CHECKS := {
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],  # R pose spans the cast lock
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],  # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],  # --shots-dir=<dir>, GPU
+	# one reader for ability words
+	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
+	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
+	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
+	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
 	# hit flinch over clips
 	"--flinch-layer-check": ["res://tools/flinch_layer_check.gd", "flinch_layer_check", null],
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],  # feet on stairs
@@ -967,13 +981,17 @@ const COVERED := {}
 ## Runs the registered check named in args, if any (a flag also matches --flag=value; the bare --check only
 ## itself, so a second game's --check-child is not taken for it).
 ## Returns true when one started (Main stops there). The global random draws are seeded from the flag,
-## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run.
+## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
+## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
 			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
 			seed(hash(flag))
+			for a in args:
+				if String(a).begins_with("--rng-seed="):
+					seed(int(String(a).substr(11)))
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)
 			if e[2] == null:
