@@ -88,8 +88,7 @@ func setup(opts: Dictionary) -> void:
 			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
-	var tut: bool = opts.get("tutorial", false) or opts.get("duo_tut", false)
-	tip = TipPick.for_loading(opts.get("blight", true), not tut)
+	tip = TipPick.for_loading(opts.get("blight", true))
 	lore = LORE[randi() % LORE.size()]
 	arch = String(opts.get("arch", Arch.of_save()))
 	splash_path = Portraits.art_path(arch, true)

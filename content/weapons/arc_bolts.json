@@ -12,7 +12,7 @@
 		"spread": 0.0,
 		"range": 8.5,
 		"size": 0.15,
-		"color": "#b07aff",
+		"color": "#ffc04a",
 		"sfx": "dj_bolt",
 		"hit": "hit_thrown",
 		"aim": "cursor",

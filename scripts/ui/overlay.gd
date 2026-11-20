@@ -21,7 +21,6 @@ var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
 var tab := "Main"
 var more_tabs := false          # the other settings tabs are showing
-var search := ""                # the settings search box (SettingsSearch); empty shows the current tab
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var bind_hot: Array = []        # [action, slot] pairs shown red while a clash waits for Swap or Keep both
@@ -31,8 +30,6 @@ var delete_armed := -1
 func _ready() -> void:
 	Game.screen_changed.connect(func(_n):
 		if page != "": close())
-	Settings.changed.connect(func(k):
-		if k == "fullscreen": _sync_fullscreen_switch())
 	layer = 50
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	root = Control.new()
@@ -109,11 +106,6 @@ func _input(event: InputEvent) -> void:
 			else: open_admin()
 			get_viewport().set_input_as_handled()
 			return
-	if page == "settings" and search != "" and event.is_action_pressed("menu"):     # Esc clears the search first
-		search = ""
-		_show_settings()
-		get_viewport().set_input_as_handled()
-		return
 	if page != "" and (event.is_action_pressed("menu") or (event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"))):
 		back()
 		get_viewport().set_input_as_handled()
@@ -226,7 +218,6 @@ func close() -> void:
 	page = ""
 	stack.clear()
 	listening = ""
-	search = ""
 	delete_armed = -1
 	UI.show_backdrop(dim, false)
 	Sfx.play("ui_close", null, -14.0)
@@ -254,7 +245,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip tutorial", "back", leave)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = _menu_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -349,26 +340,8 @@ func _show_settings() -> void:
 			more_tabs = true
 		else:
 			tab = t
-		search = ""
 		_show_settings())
-	SettingsSearch.field(v, search, func(t):
-		search = t
-		_show_settings.call_deferred())
-	if SettingsSearch.active(search):
-		SettingsSearch.fill(v, search, SETTINGS_TABS, _build_tab)
-	else:
-		_build_tab(tab, v)
-	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
-		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
-			Settings.reset_all()
-			_show_settings())))
-	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
-	UI.footer(v).add_child(done)
-	(v.get_meta("shell") as Control).set_meta("primary", done)
-
-## One settings tab's rows.
-func _build_tab(t: String, v: VBoxContainer) -> void:
-	match t:
+	match tab:
 		"Main": _tab_main(v)
 		"Gameplay": _tab_gameplay(v)
 		"Controls": _tab_controls(v)
@@ -377,14 +350,20 @@ func _build_tab(t: String, v: VBoxContainer) -> void:
 		"Video": _tab_video(v)
 		"Accessibility": _tab_access(v)
 		"Demo": _tab_demo(v)
+	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
+		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
+			Settings.reset_all()
+			_show_settings())))
+	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
+	UI.footer(v).add_child(done)
+	(v.get_meta("shell") as Control).set_meta("primary", done)
 
 ## What most players change: picture quality, window, volume. Keys are the next tab.
 func _tab_main(v: VBoxContainer) -> void:
 	_group(v, "Picture")
 	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred(),
 		"From your next expedition")
-	_toggle(v, "Fullscreen", "fullscreen", "F11 or Alt+Enter")
-	_sync_fullscreen_switch(Settings.window_is_fullscreen(), v)      # (the window as it is; the choice stays)
+	_toggle(v, "Fullscreen", "fullscreen")
 	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD")
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
@@ -443,8 +422,6 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
-	if not MergeForm.enabled():
-		named.erase("ultimate")       # (X stays reserved, but no row offers it while Fusion is off)
 	var shown := {}
 	var extra: Array = []
 	for g in groups:
@@ -457,7 +434,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			_bind_row(v, an, named[an])
 		if groups.find(g) >= BASIC_KEY_GROUPS:
 			extra.append_array(v.get_children().slice(first_extra))
-	var rest: Array = Settings.ACTIONS.filter(func(a): return named.has(String(a[0])) and not shown.has(String(a[0])))
+	var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
 	if not rest.is_empty():
 		var first_rest := v.get_child_count()
 		_group(v, "Other")
@@ -592,7 +569,6 @@ func _group(v: VBoxContainer, txt: String) -> void:
 func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxContainer:
 	var r := UI.hbox(16)
 	r.set_meta("setting", key)
-	r.set_meta("label", label_txt)      # what SettingsSearch matches
 	r.custom_minimum_size.y = 40
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -678,13 +654,6 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 				Sfx.play_sample(Settings.BUSES[key]))
 	r.add_child(sl)
 	r.add_child(pct)
-
-## F11 and Alt+Enter flip the window while Settings is open: the switch follows.
-func _sync_fullscreen_switch(on: bool = bool(Settings.get_v("fullscreen")), under: Node = root) -> void:
-	for r in under.find_children("*", "HBoxContainer", true, false):
-		if r.get_meta("setting", "") == "fullscreen":
-			for cb in r.find_children("*", "CheckButton", true, false):
-				(cb as CheckButton).set_pressed_no_signal(on)
 
 func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> void:
 	var r := _row(v, label_txt, hint, key)

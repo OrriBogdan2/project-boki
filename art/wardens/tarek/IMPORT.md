@@ -74,3 +74,14 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+**r2 A model (11-18, ext/r2a-tenzo-neve-grimble-1118):** the owner-approved `/home/boki/meshy/ta-fix-3d-1118/Tenzo/A.glb`
+is a repaint of the c01p master, not of this glb's mesh, so it is a full re-port:
+`python3 tools/art1/v95_to_game.py Tenzo --master .../Tenzo/A.glb --work DIR --no-import` (spec `art/wardens/src/tarek_v95.json`).
+60,439 tris (body 59,999), 34 joints, 50 clips, 11.1 MB (was 9.9). `tarek_v95c.jpg` is no longer used.
+The rig's arms hang straight down and its hands sit inside A's wide trousers, so bone heat hung trouser and sash cloth on
+hand/forearm bones (2,400 vertices); the spec's `off` boxes clear those bones there (weights only), see
+docs/art/wardens/V95_SWAP.md "r2 A". Stretch (`--stretch-check --wardens=dolm`): worst 15.06 -> 10.40 (x_spine),
+walk_f 4.66 -> 4.24, idle 3.65 -> 4.16, run_f 5.21 -> 6.75; without `off` the same port gave 27.35 / 9.72 / 7.69 / 13.11.
+`glb_relax.py` is not run on him: it rips the cloth (537 rips). Skin tint in content/rules/warden_look.json is neutral
+grey now (the new albedo carries the skin tone); `height_3d` in tools/warden_model_check.gd re-measured (1.19).

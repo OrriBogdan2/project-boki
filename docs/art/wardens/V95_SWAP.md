@@ -225,3 +225,22 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## r2 A models, 2026-11-18 (ext/r2a-tenzo-neve-grimble-1118)
+Three kinds of swap for the owner-approved `/home/boki/meshy/ta-fix-3d-1118/<Hunter>/A.glb`:
+- Neve: A is the live mesh with an iris edit, so only the `v95` image changes (`glb_image_swap.py`); mesh, rig, weights, clips stay.
+- Grimble: A is a new unrigged mesh: `v95_to_game.py Grimble --master A.glb`, then
+  `glb_backface_fix.py IN OUT 3 29973` (4th argument `cap_from`: the first detach-cap triangle of this port's skin; the default
+  is the 11-17 port's index), then `glb_relax.py` (108 rips).
+- Tenzo: A repaints the c01p master, not the game mesh, so a full re-port as well. No `glb_relax.py`: it rips his cloth (537 rips).
+
+Spec key `off` (v95_swap.py `place_weights`): `[{"bones": [...], "else": "bone", "box": [x0,x1,y0,y1,z0,z1], ...}]`, same
+box/`except_*`/`in_segs` fields as `regions`. In the box the listed bones hold no weight; a vertex left with none goes to
+`else`. It exists because a region also moves the fit, and here only the weights were wrong: the rig's arms hang straight
+down, Tenzo's hands sit inside his wide trousers, and bone heat hung 2,400 trouser and sash vertices on hand/forearm
+bones (relax worst edge 19.03 with them, 6.92 without). Boxes are in the fit frame (z up, soles at 0, x = -glb x).
+Before the 50-minute relax, look at the dominant bone per vertex in `fit.blend` (saved before the relax): cloth owned by
+an arm bone shows there in two minutes.
+
+GPU workers do not render the same tone (pc-MRROBOTO and mac-Naruto-Founder pale, rp1-* saturated): pair a before/after
+sheet from one worker class, or the tone difference reads as a model change.

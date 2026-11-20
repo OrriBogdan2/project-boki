@@ -14,11 +14,8 @@ static func rules() -> Dictionary:
 		_rules = parsed if parsed is Dictionary else {"words": []}
 	return _rules
 
-## Whether the player has met a term: no rule always, else its tutorial flag is set or enough expeditions are
-## played. A Fusion term is never met while Fusion is off.
+## Whether the player has met a term: no rule always, else its tutorial flag is set or enough expeditions are played.
 static func is_seen(w: Dictionary) -> bool:
-	if w.get("needs_fusion", false) and not MergeForm.enabled():
-		return false
 	var seen: Dictionary = w.get("seen", {})
 	if seen.has("tut") and not Save.d["tutorial"].get(String(seen["tut"]), false):
 		return false
