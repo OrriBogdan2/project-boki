@@ -12,6 +12,7 @@
 - The dorsal fin on the upper back behind the collar: a ray fin, blue at the root and orange at the edge,
   rigid on hips, `skin-fin`.
 
+  B tools/meshy/gil_parts.py -- --tail-only <game gil.glb> <out.glb> [bone=tail]: only the fish tail onto a body that has none
   B tools/meshy/gil_parts.py -- --fish-only <game gil.glb> <swordfish.glb> <out.glb> [--len 1.2] [--pitch 17]
 - A new swordfish on a game gil.glb (the regen 11-20 r2: the old one read dagger-sized): the old Swordfish mesh
   and its three FX empties go, the new fish goes on as above at --len metres (the live splash: his swordfish is
@@ -345,8 +346,65 @@ def fish_only(game, fish_glb, out, fish_len, pitch=17.0):
     log("wrote", out)
 
 
+def build_tail(arm, bvh, hips, knee, bone="hips"):
+    """The fish tail (tube + forked caudal fin, one mesh, `skin-tail`) from inside the coat at the hips' back down and back
+    under the hem to boot height, rigid on `bone`. Returns (tail object, ramp image)."""
+    img = ramp_image("gil_fin")
+    # the tail: from inside the coat at the hips' back, down and back under the hem to a fork at boot height
+    z0, z1, z2 = hips * 0.95, knee * 0.95, knee * 0.55
+    yb = [back_y(bvh, z) for z in (z0, z1, z2)]
+    yb = [y if y is not None else -0.12 for y in yb]
+    y0 = yb[0] + 0.07       # (root inside the body)
+    path = [(0, y0, z0), (0, yb[1] - 0.02, z1 + 0.02), (0, min(yb[1], yb[2]) - 0.10, (z1 + z2) / 2),
+            (0, min(yb[1], yb[2]) - 0.17, z2)]
+    radii = [0.06, 0.05, 0.036, 0.022]
+    tail = tube("Tail", path, radii)
+    pc = np.array(path[-1], np.float64)
+    fin_o = [pc + (0, 0.01, 0.02), pc + (0, -0.12, 0.13), pc + (0, -0.20, 0.17), pc + (0, -0.14, 0.06),
+             pc + (0, -0.11, 0.0), pc + (0, -0.15, -0.06), pc + (0, -0.21, max(-0.10, 0.02 - pc[2])),
+             pc + (0, -0.10, max(-0.06, 0.03 - pc[2])), pc + (0, 0.01, -0.02)]
+    caud = sheet("TailFin", fin_o, [pc], th=0.008)
+    mskin = flat_mat("skin-tail", img)
+    mfin = flat_mat("skin-fin", img)
+    tail.data.materials.append(mskin)
+    caud.data.materials.append(mfin)
+    with bpy.context.temp_override(active_object=tail, selected_editable_objects=[tail, caud]):
+        bpy.ops.object.join()
+    ink_colour(tail, 0.4)
+    rigid(tail, arm, bone)
+    return tail, img
+
+
+def tail_only(game, out, bone="tail"):
+    """--tail-only: the fish tail (turnaround, the live model's) added to a game .glb that has none (regen r4: Meshy's body
+    has no tail), same import and export settings as --fish-only."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.ops.import_scene.gltf(filepath=game, bone_heuristic="BLENDER")
+    ink_back()
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    body = max((o for o in bpy.data.objects if o.type == "MESH"), key=lambda o: len(o.data.vertices))
+    bvh = BVHTree.FromObject(body, bpy.context.evaluated_depsgraph_get())
+    Mw = arm.matrix_world
+    hips = (Mw @ arm.data.bones["hips"].head_local).z
+    knee = (Mw @ arm.data.bones["shin.L"].head_local).z
+    tail, _ = build_tail(arm, bvh, hips, knee, bone)
+    objs = [o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")]
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.export_scene.gltf(filepath=out, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_yup=True, export_materials="EXPORT",
+                              export_image_format="JPEG", export_jpeg_quality=92, export_extras=False, export_vertex_color="ACTIVE",
+                              export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False)
+    log("tail: %d tris, wrote %s" % (K.tris([tail]), out))
+
+
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
+    if a[0] == "--tail-only":
+        tail_only(a[1], a[2], a[3] if len(a) > 3 else "tail")
+        return
     if a[0] == "--fish-only":
         fish_only(a[1], a[2], a[3], float(a[a.index("--len") + 1]) if "--len" in a else 1.2,
                   float(a[a.index("--pitch") + 1]) if "--pitch" in a else 17.0)

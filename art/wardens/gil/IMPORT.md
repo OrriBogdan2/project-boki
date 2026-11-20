@@ -89,3 +89,17 @@ c3 picked (open grin), quad remesh 60k, then as r2:
 Body 58,545 tris + swordfish 4,048 (r2's fish, 1.2 m). Open on main's Meeko-clip animation (PR #461): the Meshy-rig
 sleeve stretches into a black bar in surfacing/thrust/E, and the fish's bill points down in idle (pitch 60 was tuned
 for the old procedural poses).
+
+## Regen 11-20 r4 candidate A (DRAFT; ext/hunter-regen-gil-1120)
+r3 failed the art-gate: stretched forearm, black sleeve bars, swordfish through the head. Same r3 c3 Meshy body (no new gen: Meshy
+balance was 3 credits); the game glb is fixed in four steps (scripts in gens/hunter-regen-1120/gil/r4/scripts, two in tools/art1):
+- Sleeves: main's hand-made right arm skins the sleeve, cuff and hand to forearm.R only; the game's hand.R matrix is not the
+  forearm's in the procedural frames (130 degrees apart in idle, run, jump), so r3's hand.R weights tore the cuff. `gil_merge_hand.py`
+  folds hand.X into forearm.X on the body (both arms), then `glb_relax.py --poses <clip_shots --bone-dump> --no-rip --lock=<arms,head>`
+  solves the rest over the game's 393 frames.
+- Fish: rigid on forearm.R (the bone the fist rides), `gil_fish_rot.py` turns it about the fist (grip 0.321,0.587,-0.317) to pitch 70 /
+  yaw 140 in rest space = bill forward and level in thrust, lunge, potion, hit, idle; no frame within 5 cm of body or head (one underground
+  surfacing frame aside). Run swings the hand back, so the bill points back there (LIVE does too).
+- Tail fin: `gil_parts.py --tail-only` adds the live model's fish tail (tube + forked fin, bone `tail`); no dorsal blade.
+- Stretch (14 moves, 393 frames, body mesh): LIVE worst 130.5x, mean of moves' worst 86.9x, edges over 3x 1.83%; r3 73.5x / 51.5x / 9.22%;
+  r4 17.5x / 12.1x / 0.69%. All 14 moves are still over the game's 1.3x (coat hem at the thighs).
