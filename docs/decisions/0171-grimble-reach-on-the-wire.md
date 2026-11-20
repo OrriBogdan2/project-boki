@@ -11,9 +11,9 @@ runs. Another player saw a plain cosmetic shot ball (the "s" event) and his arm 
 ## Options
 1. The hook's shot id plus the grabbed body on the "s" event: the copy flies smoothly, but "s" has no caster or id
    today and a remote kit does not tick, so it needs a new link from a cosmetic shot to a hunter.
-2. The reach on the hunter row (HunterNet's tagged tail): [] home, [nid] the body the reel holds, or the tip, the
-   hook's velocity and life in flight. The other game lays the arm on the held body's smoothed copy, or carries the
-   tip on along the hook's velocity (never past its life) between rows.
+2. The reach on the hunter row (HunterNet's tagged tail): [] home, [nid] the body the reel holds, or the tip in flight.
+   The other game lays the arm on the held body's smoothed copy, or chases the last tip at 1.5x the hook's speed
+   (carrying it on along the hook's velocity overshot a caught body by 0.76 m in the check: the next row says "held").
 
 ## Decision
 Option 2: one small field, no new event, and the reel (most of the reach's time) rides a body every game already

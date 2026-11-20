@@ -45,6 +45,7 @@ const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: t
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 const GRIP_UP := 0.95                  # m above a body's feet where the hand holds it
+const CHASE := 1.5                     # x the hook's speed: another game's copy of the hand catches up to his last row
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
@@ -55,8 +56,8 @@ var coil := 0.0                 # hold: the coil-back before the arm shoots out 
 var hook_sd := {}               # the hook's shot while it flies
 var arm_tip := Vector3.INF      # where his hand reaches this step (the model's WardenReach.TIP); INF: home
 var shown_tip := Vector3.INF    # the last step's arm_tip (the hunter row sends it, net_reach)
-var wire: Array = []            # another game's Grimble: his last net_reach, and its age (s)
-var wire_age := 0.0
+var wire: Array = []            # another game's Grimble: his last net_reach
+var net_tip := Vector3.INF      # ... and where his hand is shown (it chases the row's tip)
 var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
@@ -296,35 +297,32 @@ func _tick_model(_dt: float) -> void:
 	arm_tip = Vector3.INF
 
 ## The reach on the hunter row (HunterNet; Net 0.24.19), as other games don't run this kit: [] home, [nid] the body
-## the reel holds, [x, y, z, vx, vz, life] the hook in flight.
+## the reel holds, [x, y, z] the hook in flight.
 func net_reach() -> Array:
 	if not shown_tip.is_finite():
 		return []
 	if not pull.is_empty() and is_instance_valid(pull["t"]):
 		return [(pull["t"] as Ent).nid]
-	var v: Vector2 = hook_sd.get("vel", Vector2.ZERO)
-	var life := float(hook_sd.get("life", 0.0))
-	return [m._r(shown_tip.x), m._r(shown_tip.y), m._r(shown_tip.z), m._r(v.x), m._r(v.y), snappedf(life, 0.01)]
+	return [m._r(shown_tip.x), m._r(shown_tip.y), m._r(shown_tip.z)]
 
 func net_reach_in(w: Array) -> void:
 	wire = w
-	wire_age = 0.0
 
-## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy or on along the
-## hook's flight until the next row (no farther than the hook's life), so it reaches as smoothly as on his screen.
+## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy, or in flight
+## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there).
 func sound_tick(dt: float) -> void:
 	if not h.remote or h.model == null:
 		return
-	wire_age += dt
-	var tip := Vector3.INF
 	if wire.size() == 1:
 		var f: Variant = m.ents_by_id.get(String(wire[0]), null)
-		if f is Ent and not (f as Ent).dead:
-			tip = (f as Ent).pos + Vector3(0, GRIP_UP, 0)
-	elif wire.size() == 6:
-		var age := minf(wire_age, float(wire[5]))
-		tip = Vector3(wire[0], wire[1], wire[2]) + Vector3(float(wire[3]), 0.0, float(wire[4])) * age
-	h.model.set_meta(WardenReach.TIP, tip)
+		net_tip = (f as Ent).pos + Vector3(0, GRIP_UP, 0) if f is Ent and not (f as Ent).dead else Vector3.INF
+	elif wire.size() == 3:
+		var to := Vector3(wire[0], wire[1], wire[2])
+		var speed := float(rmb_def()["speed"]) * CHASE
+		net_tip = to if not net_tip.is_finite() else net_tip.move_toward(to, speed * dt)
+	else:
+		net_tip = Vector3.INF
+	h.model.set_meta(WardenReach.TIP, net_tip)
 
 # ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:
