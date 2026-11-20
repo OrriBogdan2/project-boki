@@ -129,11 +129,13 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
@@ -267,22 +269,21 @@ func _draw_parts() -> void:
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)     # (AbyssFx: ~0.55 just under the lip, 1 at the end)
-		var rate := 1.6 + red * 3.4
-		abyss_pulse += get_process_delta_time() * rate
+		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)
+		abyss_pulse += get_process_delta_time() * AbyssFallSfx.warn_rate(abyss_a)
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
-		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
-		var ek := clampf((abyss_a - 0.75) / 0.25, 0.0, 1.0)
+		# (the red wash itself is AbyssFx's shader) crimson edges build with the danger and beat with the heart
+		var ek := clampf((abyss_a - 0.1) / 0.9, 0.0, 1.0)
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		if abyss_a > 0.1 and p == m.player:
+		if p == m.player and AbyssFallSfx.warn_db(abyss_a) > -INF:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, AbyssFallSfx.warn_db(abyss_a), 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
 		if abyss_a > 0.8 and p == m.player:
@@ -1035,9 +1036,10 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 	if String(rd.get("kind", "")) in ["count", "on_targets"]:
 		var n := int(rd.get("max", 3))
 		var have := int(round(f * n))
+		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))      # (one meter, not one panel per pip)
 		for i in n:
 			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
-			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
+			c.draw_style_box(_box(rc if i < have else Color(1, 1, 1, 0.12), 3, Color(0, 0, 0, 0), 0, true), cr)
 	else:
 		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
 		if String(rd.get("id", "")) == "heat":
@@ -1382,7 +1384,7 @@ func _status_row(at: Vector2, e: Ent) -> void:
 	for ic in icons:
 		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
 		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if float(ic[3]) > 0.0:
+		if HudPlate.shows_time(float(ic[3])):
 			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
 		x += 16.0
 
@@ -1526,9 +1528,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Ability")), rdesc, ak.col_of(ak.rmb_def())])
-		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "Utility")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), AbilityText.name_of(p.arch, "e"), AbilityText.full(p.arch, "e"), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_caps("hunter_ult"), AbilityText.name_of(p.arch, "r") + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), AbilityText.full(p.arch, "r"), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -1541,7 +1543,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud and MergeForm.enabled(): lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	if p.kin:
 		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
@@ -1635,6 +1637,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
@@ -1711,7 +1714,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
-		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
 		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
