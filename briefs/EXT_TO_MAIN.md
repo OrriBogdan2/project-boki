@@ -10594,3 +10594,4 @@ READY ext/farm-tut-patch-step 3c1816eadcb (base tutorial: Plant the snack patch 
 READY ext/snack-first-60s b0083f252421724eee5790e44e3cdd29e77b8a0b (first snack batch ripens in 60 s, later 480 s; old saves keep 480 s)
 READY ext/garden-xp-pace 3ac0d4ffa7 (garden XP numbers: Lv4 in 36 min garden-only, was 123; Grown 224 min, was 669)
 READY ext/sfx-garden-moments 0700c42b63 (bond rank-up has its own rising chime garden_bond_up instead of garden_friends; stat gain already had garden_chime_stat; checks assert one cue per event, no unlock)
+READY ext/docs-parity-stale-rows c8d32dd0f1 (KIT_PARITY: one top-20 table, Still open list, Kael lunge/rank text/Sable curve rows closed)
