@@ -170,6 +170,32 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 32 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 16 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Ability cue maps: Motley and Gil (11-20, ext/sfx-motley-gil-bar)
+Which beat of each ability has its own cue (content/vfx/<arch>.json "sfx", or the kit's `m.sfx`). New this pass in
+bold; every hit is the Hunter's own file, and `--sfx-set-check` fails a move look that plays another Hunter's sound.
+
+| Hunter | Ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Motley | LMB orb | os_orb / os_orb_hot (os_prime at full) | (0.1 s flight) | ostra_hit | (the hit) |
+| Motley | RMB Shard Snap | os_snap_wind, os_snap | os_snap's 0.4 s streak (0.44 s flight) | os_snap_hit, now heard by everyone (`snap_struck`) | **os_snap_fizz** (no one hit, `snap_miss`) |
+| Motley | Shift Trade | os_swap_lob | os_swap_lob's tail | os_swap at the landing | **os_trade_swap** at the spot he left (`trade_swap`) |
+| Motley | E Brimseed | os_seed | ostra_music_box (ripe) | os_pop + ostra_spring_boing, his alone now (Gil's Zeep no longer borrows os_pop) | **os_seed_fizz** (gone unpopped, `seed_fizz`) |
+| Motley | X Nightwell | os_well | - | os_well_hum (opens) | none yet |
+| Gil | LMB thrust / lunge | gil_thrust | - | **gil_thrust_hit** (lunge: the same at 0.8 pitch + splash) | - |
+| Gil | LMB held Tide | shared swim/skewer/splash | - | **gil_tide_hit** | - |
+| Gil | RMB Grab Bag | **gil_toss** | gil_toss's tail | **gil_pop_thunder/slime/air/fire/zeep** | Slime: **gil_slime_dry** as the puddle's slow ends |
+| Gil | Shift Ground Swim | gil_dash (+ splash) | (under ground) | **gil_surface** | (the surfacing) |
+| Gil | E Riptide | **gil_spin** (each turn) | **gil_spout** | - | - |
+| Gil | X Tidal Wave | **gil_wave** | - | - | **gil_wave_land** |
+| Gil | passive Beached | **gil_beached** | | | |
+
+Gil's own set (tools/gen_sfx_gil.py, 11-11) was on file but his move looks still played stock and other Hunters'
+sounds (Kael's jug_lunge_hit and jug_ting, Grimble's dr_dive, Sparkle's mage_zap and mage_bubble_pop, Cinder's
+as_ignite, Motley's os_pop, the old Tarek kit's br_rise and br_rumble); they now play his. The new files are made by
+`python3 tools/gen_sfx_motley.py bar` and `python3 tools/gen_sfx_gil.py bar` (only those files, so the rest keep
+their noise), levelled to cast (-18) and impact (-16). Left: Nightwell's close, Riptide's spout hit and the Tide
+lunge's cast have no own cue.
+
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
 
