@@ -247,9 +247,14 @@ uniform float power = 1.0;
 uniform float spin = 3.0;
 // how far the streaks lean round (a spiral)
 uniform float twist = 0.6;
+// 0: brightest mid-band; 1: a zone disc (inner radius 0), a lit rim on the outer edge and a soft falloff to
+// nothing at the centre (the ground ring rule: rim, alpha 0.25 or less inside)
+uniform float edge = 0.0;
 """ + _LAYER_UNIFORMS + """
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
+	float rim = smoothstep(0.84, 0.95, UV.y) * (1.0 - smoothstep(0.97, 1.0, UV.y));
+	across = mix(across, max(rim, 0.25 * UV.y * UV.y), edge);
 	float sw = fract(UV.x * 6.0 - UV.y * twist + TIME * spin);
 	float streak = smoothstep(0.0, 0.5, sw) * (1.0 - smoothstep(0.5, 1.0, sw));
 	float a = pow(across, 1.1) * (0.35 + 0.65 * streak) * life * power;

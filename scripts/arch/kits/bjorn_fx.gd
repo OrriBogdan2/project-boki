@@ -11,7 +11,7 @@ extends Node3D
 ##   release
 ## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
-## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
+## - his aegis: a wall of lit plates (two rows, ribbed, a rim and a hammer boss in his ivory) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden)
@@ -56,9 +56,12 @@ const AEGIS_HALF := 0.92
 const AEGIS_H := 1.7
 const AEGIS_LEAN := 1.2
 const PLATE_N := 7
-const PLATE_COL := Color("c9953a")
-const PLATE_EDGE := Color("8a6428")
-const RIVET_COL := Color("f0d27a")
+## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
+## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
+const PLATE_COL := Color("e3bf5c")
+const PLATE_EDGE := Color("fff0b0")
+const PLATE_GLOW := 0.12       # the plates' own light (a block flashes over it)
+const EDGE_GLOW := 0.9
 const BROKEN_COL := Color("4a3a30")
 ## s the wall takes to rise out of the ground
 const RISE_T := 0.2
@@ -70,6 +73,8 @@ var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
+var plate_col := PLATE_COL
+var edge_col := PLATE_EDGE
 var aegis_hit := 0.0
 var rise_t := 0.0
 var wakes: Array[MeshInstance3D] = []
@@ -120,7 +125,9 @@ func _ready() -> void:
 		wake_life.append(0.0)
 	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
 	column.material_override.set_shader_parameter("speed", -1.2)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
+	# the zone: a lit rim on its edge, a soft falloff inside (the ground ring rule, VFX_QUALITY)
+	disc = KitMeshes.inst(self, KitMeshes.band(0.0, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
+	KitShaders.param(disc, "edge", 1.0)
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -175,7 +182,7 @@ func _tick_chain() -> void:
 		mi.global_transform = Transform3D(fix.rotated(along, PI * 0.5 * (i % 2)) * Basis(Vector3.RIGHT, PI * 0.5), at)
 		mi.scale = Vector3(1.0, 1.0, 1.0) * clampf(a.distance_to(b) / chain.size() * 2.2, 0.5, 1.6)
 
-## The wall of forged plates, built once: two rows of riveted plates along the arc, ribs between them, a
+## The wall of lit plates, built once: two rows of plates along the arc, ribs between them, a
 ## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
 ## centre at the origin, the apex straight ahead (-Z).
 func _build_aegis() -> void:
@@ -183,9 +190,13 @@ func _build_aegis() -> void:
 	aegis.top_level = true
 	aegis.visible = false
 	add_child(aegis)
-	var plate := Models.toon(PLATE_COL, true, 0.0)
-	var edge := Models.toon(PLATE_EDGE, true, 0.0)
-	var rivet := Models.toon(RIVET_COL, false, 0.2)
+	var pal: Dictionary = HeroVfx.data("bulwark").get("palette", {})
+	plate_col = Color(String(pal.get("slab", PLATE_COL.to_html(false))))
+	edge_col = Color(String(pal.get("ivory", PLATE_EDGE.to_html(false))))
+	var plate := Models.toon(plate_col, false, PLATE_GLOW)
+	var edge := Models.toon(edge_col, false, EDGE_GLOW)
+	plate.set_shader_parameter("rim_amount", 0.6)
+	plate.set_shader_parameter("rim_color", edge_col)
 	plate_mats = [plate, edge]
 	var tilt := atan2(AEGIS_LEAN, AEGIS_H)
 	var seg := AEGIS_HALF * 2.0 / PLATE_N
@@ -198,10 +209,6 @@ func _build_aegis() -> void:
 			var r := AEGIS_R + AEGIS_LEAN * (y / AEGIS_H)
 			var at := Vector3(sin(b) * r, y, -cos(b) * r)
 			Models.part(aegis, Models.box(width * 0.92, AEGIS_H * 0.45, 0.16), plate, at, Vector3.ONE, facing)
-			for cx in [-0.38, 0.38]:
-				var side := Vector3(cos(b), 0, sin(b)) * width * float(cx)
-				var out := Vector3(sin(b), 0, -cos(b)) * 0.1
-				Models.part(aegis, Models.box(0.09, 0.09, 0.07), rivet, at + side + out, Vector3.ONE, facing)
 		var top_r := AEGIS_R + AEGIS_LEAN
 		var rim_at := Vector3(sin(b) * top_r, AEGIS_H + 0.05, -cos(b) * top_r)
 		Models.part(aegis, Models.box(width, 0.14, 0.34), edge, rim_at, Vector3.ONE, Vector3(0, -b, 0))
@@ -214,8 +221,8 @@ func _build_aegis() -> void:
 	Models.part(aegis, Models.box(0.55, 0.55, 0.14), edge, boss_at, Vector3.ONE, Vector3(-tilt, 0, PI * 0.25))
 	var cross_tilt := Vector3(-tilt, 0, 0)
 	var stem_at := boss_at + Vector3(0, 0, -0.06)
-	Models.part(aegis, Models.box(0.12, 0.5, 0.1), rivet, stem_at, Vector3.ONE, cross_tilt)
-	Models.part(aegis, Models.box(0.4, 0.12, 0.1), rivet, stem_at + Vector3(0, 0.12, 0), Vector3.ONE, cross_tilt)
+	Models.part(aegis, Models.box(0.12, 0.5, 0.1), plate, stem_at, Vector3.ONE, cross_tilt)
+	Models.part(aegis, Models.box(0.4, 0.12, 0.1), plate, stem_at + Vector3(0, 0.12, 0), Vector3.ONE, cross_tilt)
 
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
@@ -365,9 +372,10 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var c := Vector2(mid.x, mid.y) - dir * AEGIS_R
 	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.02, c.y)
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", PLATE_COL.lerp(BROKEN_COL, hurt * 0.65))
-	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", PLATE_EDGE.lerp(BROKEN_COL, hurt * 0.65))
-	var glow := aegis_hit * 1.2 + (0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0)
+	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", plate_col.lerp(BROKEN_COL, hurt * 0.65))
+	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", edge_col.lerp(BROKEN_COL, hurt * 0.65))
+	var pulse := 0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
+	var glow := PLATE_GLOW * (1.0 - hurt) + aegis_hit * 1.2 + pulse
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
 
 func aegis_hide() -> void:
