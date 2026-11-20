@@ -3,9 +3,9 @@ extends RefCounted
 ## match zoom: you, a downed teammate whose Boki is beside them, two rivals and every Boki out. Writes
 ## <dir>/clarity_2v2_<palette>.png (the whole screen) and ..._crop.png (the fight), once for each Settings >
 ## Accessibility > Colour vision palette (SideColor.ORDER). Then each ClarityFight fight (a bot 3v3 of the slice Hunters
-## on the Hollow Crown): <dir>/fight<f>_<i>.png for its 10 frames and <dir>/clarity_fight.tsv, every element over or
-## within one body width of a Hunter on each frame (fight, frame, kind, what, Hunters it sits on); the ranking
-## (frames covered per element) is printed as CLARITYTOP lines.
+## on the Hollow Crown): <dir>/fight<f>_<i>.png for its 10 frames (1920x1080) and <dir>/clarity_fight.tsv, every
+## element over or within one body width of a Hunter on each frame (fight, frame, kind, what, Hunters it sits on);
+## the ranking (frames covered per element) is printed as CLARITYTOP lines.
 
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
