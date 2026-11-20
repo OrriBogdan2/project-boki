@@ -617,6 +617,7 @@ func _breah() -> void:
 		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
+	_dunk_no_knock(m, P, T, home, K, reset)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
@@ -1376,6 +1377,45 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 		step(m, DT * 8, each)
 	step(m, 1.0, each)
 	aim_at(P, far)
+
+## The Volcano slam has no push (Volcano Crusher: a centre stun and a Dunk, no knock): a grounded foe at the centre
+## stays put, and the Dunk over the abyss still adds its bonus without one.
+func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	var W: World = m.world
+	reset.call()
+	T.teleport(home + Vector3(1.0, 0, 0))
+	var at0 := T.pos
+	T.hp = 200.0
+	K._slam(0.5, true)
+	step(m, 0.6)
+	var moved := Vector2(T.pos.x - at0.x, T.pos.z - at0.z).length()
+	ok("rmb: the slam pushes nobody (stun and Dunk only, no knock)", moved < 0.05 and T.hp < 200.0, "moved %.2f m" % moved)
+	var hits := []
+	for void_under in [false, true]:
+		reset.call()
+		T.teleport(home + Vector3(1.3, 0, 0))
+		T.pos.y += 2.0
+		T.grounded = false
+		T.hp = 200.0
+		var saved := {}
+		if void_under:
+			for dx in range(-2, 3):
+				for dz in range(-2, 3):
+					var i := W.idx(int(floor(T.pos.x)) + dx, int(floor(T.pos.z)) + dz)
+					saved[i] = [W.kind[i], W.level[i]]
+					W.kind[i] = World.T_VOID
+		var dn0 := K.dunks
+		var hp0 := T.hp
+		K._slam(0.5, true)
+		hits.append([K.dunks == dn0 + 1, hp0 - T.hp, T.vel.y])
+		for i in saved:
+			W.kind[i] = saved[i][0]
+			W.level[i] = saved[i][1]
+	ok(
+		"rmb: the Dunk over the abyss still fires without the push, with its bonus",
+		hits[0][0] and hits[1][0] and hits[0][2] < -10.0 and hits[1][1] - hits[0][1] > float(K.slam_def()["dunk_void"]) * 0.8,
+		"land %.1f void %.1f" % [hits[0][1], hits[1][1]]
+	)
 
 ## What the ground does to a chain: the abyss, height, walls, the map's edge.
 func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable, reach: float) -> void:
