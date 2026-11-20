@@ -10550,3 +10550,4 @@ READY ext/farm-feed-shapes-boki 1a361e03bc (food shapes the Boki: per-type size 
 READY ext/anim-land-blend-pops c2dfa29ace (--cast-pop-check POPDEG pass: all 12 clip Hunters through land, glide exit, dash end, cast end at 60 fps; blend times + arm-swing mean fix; 12 of 13 now under 25 deg, Albert/Tenzo/Motley held at ceilings)
 READY ext/ui-button-sfx 202943053d62c6e9f42608ce675bd302450766eb (silent raw Buttons wired via UI.sfx, --ui-sfx-check fails on unhooked Button)
 READY ext/hunter-regen-gil-1120 e2a8b1d66d (Gil regen r2: new Meshy body A 59.5k tris + splash swordfish 1.2 m in the palm; DRAFT for the owner pick; GPU MP4 proof in gens/hunter-regen-1120/gil/r2/proof)
+READY ext/farm-feed-shapes-boki 17aa2e40541 (food lean now sizes the Boki: per-type size on model + card, 9 --feed-check rows; merged with main)
