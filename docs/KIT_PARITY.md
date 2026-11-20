@@ -896,8 +896,8 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Albert | Boop (`rmb.shield.boop`, a set slide) | 2.8 m at 18 m/s | 2.8 m | none on release; the bash knock-away is an augment [D, F] (bjorn.md item 9) | differ (ours, kept by bjorn.md) | n/a |
 | Sparkle | Storm Rod (`rmb.coil.push`, tap to full) | 4.4-6.6 | 0.92-1.78 m | Voltaic Spear: "knockback on first enemy hit" [D]; about 1 bh (1.8 m) on open ground, done by 0.4 s (vireo.md 0064-0066) [F] | match | `[?]` (full is inside F) |
 | Sparkle | Skycall slide (`e.slide_dist`/`slide_t`, a set slide) | 3.4 m over 1.1 s | 3.4 m | Lightning Strike: "pull or knockback" [D]; slides about 4 bh (7.2 m) over about 1 s (vireo.md 0197-0224) [F] | match | `[?]` (F: 7.2 m, ours 47%) |
-| Sparkle | Kitefall landing (`x.push`) | 8 | 2.52 m | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | differ | n/a |
-| Sable | Empowered bolt (`thief_kit.gd`, 3.0 in code) | 3 | 0.47 m | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | differ | n/a |
+| Sparkle | Kitefall landing (`x.push`, `x.lift`) | 0 (was 8, 2.52 m), lift 0 | none | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
+| Sable | Empowered bolt (`dash.prime_kb` in `thief.json`, was 3.0 in `thief_kit.gd`) | 0 (was 3, 0.47 m) | none | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
 | Sable | Arc bolt (`arc_bolts.kb`) | 0.8 | nudge | Arcslinger: none [D] | match (nudge) | n/a |
 
 **Fixed: none.** The task allowed up to three fixes where the data states a number. No knock row has a source number:
@@ -907,7 +907,7 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
 **Suggestions, not built (PARITY FIRST):**
 - Ours-only knocks the card does not list (14 rows marked **differ**): Kael's Lunge, Haul Slam, Flame Step and Riposte;
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Tenzo's slam; Grimble's
-  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
+  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall and Sable's empowered bolt (both now cut, `ext/sparkle-sable-knock-cut`, so 12 remain). Cutting
   them follows DECISIONS 2026-11-07 (ours-only riders: keep none). Lace's longbow kb 3.5 to 2.0 is the smallest change
   (it turns every arrow from a 0.62 m knock into a nudge).
 - Footage reads that are far off: Vex's wall cone (ours 4.43 m vs 6.3 m; a push near 13.5 would land about 6.3 m), Sparkle's Skycall
