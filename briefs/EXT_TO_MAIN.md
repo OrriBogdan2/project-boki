@@ -10516,3 +10516,4 @@ READY ext/customizer-spec 2c336ff97ed (docs/design/CUSTOMIZER.md: customizer spe
 READY ext/ui-hud-clutter-all 6abd87f6eff9f6476e05316f9a2af15e268b4499 (hud-clutter-check --all: 13 Hunters x ult/Fusion x 1920x1080/1280x720 with buff+debuff, 0 failures; no loot row for a common pickup in a fight)
 READY ext/kit-number-golden c929d118ab6 (golden TSV of 1514 kit numbers + health --strict diff, re-bless in docs/ARCHETYPES.md)
 READY ext/combat-ttk-rest-eight e43e06aa0e8fbe1c59f792f7cce72a41c47bb2a6 (TTK re-read of the 8 non-slice Hunters, re-run on main facb5c3e22f: 42 rows unchanged, matrix drift + moving commits in docs/TTK.md, no data regression, no number changed; docs only)
+READY ext/anim-coverage-stomp 90493ebedb (--anim-coverage-check reads states.stomp, clip must exist in glb; table: all 13 hunters stomp=clip)
