@@ -665,7 +665,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 				Sfx.recent.erase(k)
 		return n
 	var local_walk := func(arch: String) -> Array:
-		P.set_arch(arch)
+		_as_hero(P, arch)
 		P.teleport(home)
 		P.vel = Vector3.ZERO
 		P.grounded = true
@@ -682,7 +682,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		return w
 	var walk: Array = local_walk.call("ostra")
 	var foot: Array = local_walk.call("thief")
-	P.set_arch("ostra")
+	_as_hero(P, "ostra")
 	P.teleport(home)
 	ok(
 		"float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step",
@@ -690,7 +690,7 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		"Motley %d steps (%d ticks walking), thief %d (%d)" % [walk[0], walk[1], foot[0], foot[1]]
 	)
 	var remote_steps := func(arch: String) -> int:
-		T.set_arch(arch)
+		_as_hero(T, arch)
 		T.remote = true
 		T.teleport(P.pos + Vector3(3.0, 0, 0))
 		var n := [0]
@@ -710,6 +710,14 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
 		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
 	)
+
+## Hunter `h` as Hero `a` in that Hero's own model (set_arch keeps the old one; the game builds the new Hero's,
+## Hunter.reclass), so its steps come from its own clips.
+func _as_hero(h: Hunter, a: String) -> void:
+	h.set_arch(a)
+	var col: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	h.set_model(Models.hunter(h.cls, col, h.wid, "", PlayerLook.neutral(), h.arch))
+	h.anim = null
 
 ## The rest of a real frame after `h`'s render: its clips advance (WardenSync runs after Match), and a Hero's step
 ## falls on their foot plants (WardenSteps), so a step heard there needs them moving.
