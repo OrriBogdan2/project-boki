@@ -10453,3 +10453,4 @@ READY ext/extra-shadow-warnings 123c3ae3ba (shadowing renames in home, ui, home_
 READY ext/ui-keycap-rebind 87002f3f2a (ability-bar-check rebind row: E to mouse 4, R to letter; bar, tooltips, tutorial show new caps)
 READY ext/cooldown-text-ranks 5c1648f86bb6a482318581998ac53ef8cee43d8c (--cooldown-text-check rows every Hunter RMB/E/dash x ranks 1-3 + air dash: JSON vs kit vs HUD/tip/card, 167 ok; ABILITIES.md rank rule names rank_cd; no text drift found, no numbers changed)
 READY ext/ui-notice-bullets 25e08e2397 (notice cards as short plain bullets; notice-length row in --tutorial-text-check)
+READY ext/mantle-heights 984b2554e5 (bulk-rebase: origin/main merged in mechanically, was 85512641a8; union 1 gen 0 files; the branch's own READY checks still apply)
