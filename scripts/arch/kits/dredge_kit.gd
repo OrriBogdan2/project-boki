@@ -801,7 +801,8 @@ func _barge_trail(dt: float) -> void:
 		if f.hittable() and not barge_met.has(f.get_instance_id()) and absf(f.pos.y - h.pos.y) < 2.0 \
 				and Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).length() < h.r + f.r + 0.3:
 			barge_met[f.get_instance_id()] = true
-			vfx("dash_hit", h.pos.lerp(f.pos, h.r / maxf(0.1, h.r + f.r)), null, {"hit": true})
+			# on the foe's near edge: the ball (wider than h.r) hides a flash at the mid point
+			vfx("dash_hit", f.pos.lerp(h.pos, f.r / maxf(0.1, f.pos.distance_to(h.pos))), null, {"hit": true})
 
 func own_dash_trail() -> bool: return true
 

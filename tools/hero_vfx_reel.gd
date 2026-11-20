@@ -446,7 +446,7 @@ func _dredge_dash() -> void:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
 	await _go(1.8, dash, _sheet("dash", "Shift, the barge into the dummy: the gold trail, the flash where they meet",
-			[0.18, 0.22, 0.26, 0.3, 0.34, 0.4, 0.5, 0.8, 1.2]), 2.5)
+			[0.18, 0.26, 0.32, 0.36, 0.4, 0.45, 0.55, 0.8, 1.2]), 2.5)
 	await _go(GAP)
 
 ## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand
