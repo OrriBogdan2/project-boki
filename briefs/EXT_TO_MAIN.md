@@ -10572,3 +10572,4 @@ READY ext/vfx-grimble-dash 974149c4f0 (Grimble barge: gold dash trail + contact 
 READY ext/vfx-albert-e-wall ab5013549598a98c58b2735c5351912afb4af8bf (Albert aegis wall as a translucent layered pale-gold wall, 4 meshes not 31, lit rim + soft ground contact; row 8 20->25)
 READY ext/cinder-dash-clip 7468b3d2a6e827ac1a3f55e2ac592d93671dd360 (Cinder dash cell proc->clip: leap/hop flagged dash, ram lead 0.017 rate 1.0; combo-check crash fixed)
 READY ext/hud-plain-words 60ff2e8891ebbc8ddf0493ea01d531f007b8904a (R/X/RMB locked-slot tag says "Spend point"; truce lines off the kill feed; DOCKS IN already gone)
+READY ext/hud-holdback faffc716b2f8c9496cc15da1cdc1419ef2b851f1 (belt slots 3/4 + locked X/R tiles held back via HudReveal; fresh-save landing groups 9 -> 7)
