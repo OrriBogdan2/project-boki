@@ -2407,7 +2407,7 @@ func can_level(slot: String) -> bool:
 	if not TutorialCamps.lets_level(self, slot):
 		return false
 	if slot == "ult":
-		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
+		return MergeForm.enabled() and lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
 	return true
 
 func level_slot(slot: String) -> bool:
@@ -2697,6 +2697,7 @@ func _anim_state(stretch: float) -> void:
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	KinSummon.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):

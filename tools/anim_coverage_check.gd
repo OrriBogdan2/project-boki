@@ -1,12 +1,14 @@
 extends RefCounted
-## --anim-coverage-check: which animation states each Hunter and starter Boki has as an authored clip, as a
+## --anim-coverage-check: which animation states each Hunter and Boki has as an authored clip, as a
 ## procedural pose, or not at all (docs/ANIM_COVERAGE.md). Read from content/rules/warden_anim/*.json, the .glb
 ## clip lists and BokiRig. Regenerates the table between the markers in the doc; fails (and leaves the doc alone)
-## when a cell that was clip or proc goes to missing, or a row disappears.
+## when a cell that was clip or proc goes to missing, or a row disappears. The Boki garden rows (every rigged .glb)
+## are tools/anim_coverage_boki.gd.
 ## Never touches the save.
 
 const DOC := "res://docs/ANIM_COVERAGE.md"
 const Shots := preload("res://tools/boki_rig_shots.gd")
+const Garden := preload("res://tools/anim_coverage_boki.gd")
 const ANIM_DIR := "res://content/rules/warden_anim/"
 const BEGIN := "<!-- table:begin -->"
 const END := "<!-- table:end -->"
@@ -128,15 +130,23 @@ func _table(cols: Array, rows: Dictionary) -> String:
 		s += "| %s | %s |\n" % [r, " | ".join(rows[r])]
 	return s
 
-## The rows of a table body: {row name: [cells]}, header and rule lines skipped.
+## The rows of a table body: {"table/row name": [cells]}, header and rule lines skipped.
 func _parse(text: String) -> Dictionary:
 	var out := {}
+	var table := ""
 	for line in text.split("\n"):
+		if line.begins_with("### "):
+			table = line.substr(4).strip_edges()
 		var c := line.split("|")
 		if c.size() < 4 or not line.begins_with("| ") or line.begins_with("| |"):
 			continue
-		out[c[1].strip_edges()] = Array(c.slice(2, c.size() - 1)).map(func(x): return x.strip_edges())
+		out[table + "/" + c[1].strip_edges()] = Array(c.slice(2, c.size() - 1)).map(func(x): return x.strip_edges())
 	return out
+
+func _cols(key: String) -> Array:
+	if key.begins_with("Hunters/"):
+		return HUNTER_COLS
+	return Garden.COLS if key.begins_with("Boki garden") else BOKI_COLS
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -144,13 +154,18 @@ func run(main: Node) -> void:
 	for f in DirAccess.get_files_at(ANIM_DIR):
 		if f.ends_with(".json"):
 			hunters[f.get_basename()] = _hunter_row(f.get_basename())
+	var garden: Dictionary = await Garden.rows(main)    # before _boki_air takes the starters' hop clip away
 	var bokis := {}
 	for id in ["burrlet", "cindle", "puddlet"]:
 		bokis[id] = _boki_row(id)
 		await _boki_air(main, id)
 	hunters.sort()
-	var block := "%s\n### Hunters\n\n%s\n### Starter Boki\n\n%s%s" % [
-		BEGIN, _table(HUNTER_COLS, hunters), _table(BOKI_COLS, bokis), END]
+	var ranked := {}
+	for id in Garden.worst(garden):
+		ranked[id] = garden[id]
+	var block := "%s\n### Hunters\n\n%s\n### Starter Boki\n\n%s\n### Boki garden states\n\n%s\n" % [
+		BEGIN, _table(HUNTER_COLS, hunters), _table(BOKI_COLS, bokis), _table(Garden.COLS, ranked)] \
+		+ "Worst five, backlog-ready:\n\n%s%s" % [Garden.backlog(garden, 5), END]
 	var old := FileAccess.get_file_as_string(DOC)
 	var a := old.find(BEGIN)
 	var b := old.find(END)
@@ -163,7 +178,7 @@ func run(main: Node) -> void:
 			continue
 		for i in mini(before[r].size(), now[r].size()):
 			ok(not (before[r][i] != "missing" and now[r][i] == "missing"),
-				"%s: %s went from %s to missing" % [r, (HUNTER_COLS if hunters.has(r) else BOKI_COLS)[i], before[r][i]])
+				"%s: %s went from %s to missing" % [r, _cols(r)[i], before[r][i]])
 	if bad == 0 and a >= 0 and b > a:
 		var f := FileAccess.open(DOC, FileAccess.WRITE)
 		f.store_string(old.substr(0, a) + block + old.substr(b + END.length()))
