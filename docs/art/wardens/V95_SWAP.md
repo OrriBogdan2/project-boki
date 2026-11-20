@@ -261,3 +261,7 @@ old spec's `head`, `anchors` and boxes over by body region. Then `v95_to_game.py
 A kept prop on its own bone (Sparkle's gum) stays at the old face: `glb_prop_move.py` puts it on the new lips;
 `glb_anchor_set.py --rod-tips` puts Sparkle's rod blooms on her rod tips. Compare in game as a design variant
 (`art/wardens/<art>_<tag>/`, `--warden-variant=<art>_<tag>`): it plays its Warden's clips and look unless it has its own.
+`--weights meshy` skips skin_relax, and Meshy's hard weight seams tear (Sparkle's A: a chest vertex at hips 0.56 +
+upper_arm 0.44 beside one at hips 1.0, 29.9x; `--stretch-check --stretch-where` prints each clip's worst edge). Relax
+only the extreme edges: `glb_relax.py IN OUT --limit=5.0` took her to 4.9x (0/58 clips over the 7.0 ceiling) touching
+587 of 41k vertices; the default 1.22 rewrote 27k and shredded her shawl tail. Look at the knee camera after.
