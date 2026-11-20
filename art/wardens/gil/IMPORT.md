@@ -89,3 +89,26 @@ c3 picked (open grin), quad remesh 60k, then as r2:
 Body 58,545 tris + swordfish 4,048 (r2's fish, 1.2 m). Open on main's Meeko-clip animation (PR #461): the Meshy-rig
 sleeve stretches into a black bar in surfacing/thrust/E, and the fish's bill points down in idle (pitch 60 was tuned
 for the old procedural poses).
+
+## Regen 11-20 r3b candidate A2 (DRAFT, owner visual check; ext/hunter-regen-gil-1120)
+Same Meshy body as r3 A (c3: no tail, no back fin, open grin) and the same 1.2 m swordfish; no new Meshy credits.
+r3 A's black sleeve bar had two causes, both measured over the game's own frames (`clip_shots --proc --bone-dump`,
+393 frames at 30 fps over all 14 moves; skinned offline as the game does):
+- **Game code:** WardenSync wrote the clips' hand position onto the rig's Hand nodes and it rode into the next
+  HunterAnim move: from the first kmove on, hand.R/hand.L sat 0.7 m off the forearm (GPU dump), so the swordfish
+  floated (LIVE too) and the hand dragged the sleeve after it. Fixed in warden_sync.gd (hands go home each step): 0.00 m.
+- **Fit:** this body's right arm is bent forward in a held pose (Meshy's auto-rig: the right wrist 0.3 m ahead of the
+  mirrored left), but the spec mirrored the left arm's joints onto it. `r3_c3b.json`: arm joints from Meshy's auto-rig,
+  `mirror_arm` "R" (the right arm swings down onto the rig like the left).
+
+    W=gens/.../gil/r3/cand/workc_c3 (work_c3's meshy/ rig and spec with r3_c3b's joints + mirror_arm, game.glb = main's)
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- $W/spec.json $W $W/gil.glb
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only $W/gil.glb FISH.glb F.glb --len 1.2 --pitch 15 --yaw 30
+    python3 tools/art1/glb_relax.py F.glb gil.glb --poses=DUMP.json --only=Body.002 --no-rip --rigid=hand.R:0.05
+
+- Weights relaxed over the game frames (weights only, no ripped triangles; the right fist wholly on hand.R).
+  Body edges past 3x over all moves: r3 A 4.16% (worst 30.6x) -> A2 0.35% (worst 7.3x); LIVE 0.44% (17.1x) with the fix.
+- Swordfish 15 degrees under level, bill swung 30 degrees out at rest (was 60 under): under main's borrowed Meeko
+  clips the old angle drove the bill 0.4-0.55 m into the floor in walk/run. Now its lowest point is at the soles in
+  every move; bill forward share (median) idle 0.62, walk 0.32, run 0.71, thrust 0.41, lunge 0.55 (was 0.34/0.75/0.68/0.85/0.95).
+- Body 58,541 tris + swordfish 4,048.
