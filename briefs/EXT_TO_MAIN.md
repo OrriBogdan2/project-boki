@@ -10684,3 +10684,4 @@ READY ext/farm-nest-item-row 3beb4c080a (bulk-rebase: origin/main merged in mech
 READY ext/sfx-enemy-ult-cue 003b5ae05e (bulk-rebase: origin/main merged in mechanically, was 5401040bf3; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/region-ambience 3bab7da70a (bulk-rebase: origin/main merged in mechanically, was 05e476f36f; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/p03-port-1118 1c78e0df66 (bulk-rebase: origin/main merged in mechanically, was 9fae4e013b; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/kael-lmb-press e2cffa1f54fba65aab7126ede2b8d600f08ba4f4 (Kael LMB swings on the press, source frames)
