@@ -122,3 +122,13 @@ json are byte-equal to main (positions, UVs, normals, textures, skeleton, 59 cli
   no longer folds flat behind a bent knee (collapsed tris in ledge 85 -> 21).
 - Stretch-driven weight relax on welded positions (hand/forearm weight never spreads to a new vertex).
 Edges stretched >3x, mean per clip: 6.58% -> 0.31% (numpy), Blender 6.51% -> 0.31%. Scripts: ~/gens/sable-fix-1119t/scripts/.
+
+## Check 11-20 (ext/hunter-fix-sable-1118, glb unchanged from 11-19l)
+All 65 clips, 10 frames, front + back close cam, live and fixed in one Godot session: no spikes, slabs or floating bits.
+Left: (1) the pistol twirls (fusion, emote, encore, encore_dance, lmb_l/r, vault_*, exdash, knife, bola, death) roll
+`hand.*` up to 175-180 deg about the forearm, and the arm bones sit 5-9 cm off the arm mesh's centre (outside the
+sleeve), so the hand and gun swing ~17 cm around that axis and the forearm thins to a strand for those frames. No
+weight set fixes it (a 4 cm wrist blend was tried: same strand, stretch 0.31% -> 0.35%). Fix: move the arm bones into
+the arm (rig + clip retarget) or cap the hand roll in those clips. (2) mantle f4-f6: the coat rides the thighs, so
+in the tuck it fans up behind her back (no spikes); the spring/skirt/cape bones carry no weights.
+Evidence: ~/gens/sable-fix-1120/ (sable_live_vs_fixed_all_clips.mp4, sable_sheet.jpg, scripts/).
