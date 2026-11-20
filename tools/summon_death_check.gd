@@ -4,7 +4,8 @@ extends RefCounted
 ## cooldown, the wisp flies home at home_speed, its owner is revealed for reveal_s and pinged on the killer squad's
 ## minimap. A monster's kill: plain cooldown, no reveal. The owner downed: a rival's kill leaves a loose wisp
 ## where it fell, a monster's sends it home. Online: the "wkill" event pings only the killer's squad and the kin
-## snapshot shows the wisp. Prints PASS/FAIL.
+## snapshot shows the wisp. The hint: the first time your own summon is killed in a save, one hint names the
+## Summon key; never for a rival's summon, never twice, and not with tips off. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -12,12 +13,23 @@ var bad := 0
 var m: Match
 var main: Node
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 79,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -27,20 +39,24 @@ func run(main_node: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 	_frames(0.3)
 	_death()
+	_hint()
 	m.queue_free()
 	print("SUMMONDEATH %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SDEATH %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _frames(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
+
 
 ## The foe's Boki, summoned and ready to be hurt (its owner stands and stays put).
 func _summoned(f: Hunter) -> Kin:
@@ -50,8 +66,10 @@ func _summoned(f: Hunter) -> Kin:
 	_frames(0.05)
 	return k
 
+
 func _wisp_pings() -> int:
 	return m.sound_pings.filter(func(sp: Dictionary) -> bool: return sp["kind"] == "wisp").size()
+
 
 func _death() -> void:
 	var p: Hunter = m.player
@@ -63,18 +81,22 @@ func _death() -> void:
 	k.hurt(k.max_hp * 0.6, p)
 	ok(k.summon.out() and not k.wisp and not f.downed, "damage alone does not end the summon")
 	var pings := _wisp_pings()
-	k.teleport(f.pos + Vector3(12, 0, 0))          # (killed away from its owner, so there is a flight)
+	k.teleport(f.pos + Vector3(12, 0, 0))  # (killed away from its owner, so there is a flight)
 	k.hurt(k.max_hp * 5.0, p)
-	ok(k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
-		"killed by a rival: back to a wisp, with its owner")
+	ok(
+		k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
+		"killed by a rival: back to a wisp, with its owner"
+	)
 	ok(absf(k.summon.cd - base * mult) < 0.01, "...the longer cooldown (%.1f s)" % k.summon.cd)
 	ok(f.reveal_t >= float(KinSummon.rules()["reveal_s"]) - 0.01, "...its owner is revealed for reveal_s")
 	ok(_wisp_pings() == pings + 1, "...and the killer's minimap gets a ping")
 	var from := k.summon.fly_from
 	var want := Vector2(from.x - f.pos.x, from.z - f.pos.z).length() / float(KinSummon.rules()["home_speed"])
-	ok(k.summon.fly > 0.0 and want > 0.2 and absf(k.summon.fly_len - want) < 0.05,
-		"...it flies home at home_speed (%.2f s)" % k.summon.fly_len)
-	m.step(DT)      # (the sim draws the streak: KinWisp.ride sets the wisp's spot each tick)
+	ok(
+		k.summon.fly > 0.0 and want > 0.2 and absf(k.summon.fly_len - want) < 0.05,
+		"...it flies home at home_speed (%.2f s)" % k.summon.fly_len
+	)
+	m.step(DT)  # (the sim draws the streak: KinWisp.ride sets the wisp's spot each tick)
 	ok(k.global_position.distance_to(k.summon.fly_from) < 1.0, "...the streak starts where it fell")
 	_frames(k.summon.fly_len + 0.1)
 	ok(k.summon.fly == 0.0 and k.state == "shoulder", "...and ends on its owner's shoulder")
@@ -114,5 +136,47 @@ func _death() -> void:
 	var row: Array = []
 	row.resize(KinNet.KIN_AT)
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
-	ok(other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
-		"online: the snapshot shows the killed summon as a resting wisp")
+	ok(
+		other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
+		"online: the snapshot shows the killed summon as a resting wisp"
+	)
+
+
+## Hints with this text in the message lane, on show or merged into one line ("text  x2").
+func _hinted(text: String) -> int:
+	var n := 0
+	for line in m.hud.msgs.texts():
+		if line == text:
+			n += 1
+		elif line.begins_with(text):
+			n += 2
+	return n
+
+
+## The first-kill hint (KinSummon.KILLED_HINT): once per save, for the local player's own summon only.
+func _hint() -> void:
+	var p: Hunter = m.player
+	var f: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null)[0]
+	var seen: Dictionary = Save.d["tutorial"]
+	var want := KinSummon.KILLED_HINT % Settings.key_cap("summon")
+	ok(m.hud != null and Settings.key_cap("summon") != "?", "hint: the text names the Summon key (%s)" % want)
+	if m.hud == null:
+		return
+	var tips: bool = Settings.get_v("tips")
+	seen.erase("summon_killed")
+	Settings.v["tips"] = false
+	var k := _summoned(p)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(not seen.has("summon_killed") and _hinted(want) == 0, "hint: none with tips off")
+	Settings.v["tips"] = true
+	k = _summoned(f)
+	k.hurt(k.max_hp * 5.0, p)
+	ok(not seen.has("summon_killed") and _hinted(want) == 0, "hint: none when a rival's summon is killed")
+	k = _summoned(p)
+	m.hud.msgs.clear()  # (the match's own lines would keep the hint waiting for a row)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(seen.get("summon_killed", false) and _hinted(want) == 1, "hint: your summon killed, the first time: the hint")
+	k = _summoned(p)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(_hinted(want) == 1, "hint: once per save, the next kill shows no second one")
+	Settings.v["tips"] = tips

@@ -18,6 +18,8 @@ const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
 const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
+## The hint on the first own summon killed in a save (Save.d["tutorial"] "summon_killed"); %s is the Summon key.
+const KILLED_HINT := "Your Boki is a wisp again; summon it once the cooldown ends (%s)"
 
 var k: Kin
 var dur := 10.0  # s: this species' window
@@ -130,6 +132,8 @@ func killed(by: Ent) -> bool:
 	rival_t = -1e9
 	k.m.fx.burst(at + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
 	KinCommand.say(o, "%s was killed and went back to a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+	if o == k.m.player and k.m.hud and Settings.get_v("tips") and k.m.tip_once("summon_killed"):
+		k.m.hud.tip(KILLED_HINT % Settings.key_cap("summon"))
 	_back(cd_base * (float(rules()["killed_cd_mult"]) if foe else 1.0))
 	if KinSteal.stolen(k):
 		KinSteal.break_loose(k, at)  # a thief's stolen summon: loose again where it fell
