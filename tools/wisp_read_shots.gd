@@ -1,19 +1,20 @@
 extends "res://tools/gameplay_media.gd"
-## --wisp-read-shots --shots-dir=<dir> [--size=1920x1080]: can you read the Boki wisps in a fight? A 3v3 (clip 1's
-## squads, FIGHT) at the match camera with every Boki riding as a wisp (the boki_wisps setting on). Saves
-## <dir>/fight_<n>.png (SHOT_AT seconds in) and prints WISPREAD lines: for every wisp, the share of a Hunter's body
-## (a screen rectangle) it hid, its own owner's and everyone else's, and the wisps' size on screen.
+## --wisp-read-shots --shots-dir=<dir> [--size=1920x1080] [--wheel=<factor>]: can you read the Boki wisps in a fight?
+## A 3v3 (clip 1's squads, FIGHT) at the match camera with every Boki riding as a wisp (the boki_wisps setting on).
+## Saves <dir>/fight_<n>.png (SHOT_AT seconds in) and prints WISPREAD lines: the share of a Hunter's body (a screen
+## rectangle) the wisps hid, its own owner's and everyone else's, and the wisps' size on screen. The wheel factor is
+## CamWheel's: 1.6 is where a match starts (the default), 0.55 the closest.
 ## Needs a renderer (jobq --needs gpu). Never touches the save.
 
 const SHOT_AT := [1.5, 3.0, 4.5, 6.0]      # s into the fight
 const FIGHT_SECS := 6.5
 const HUNTER_H := 1.8                      # m: a Hunter's body, for its screen rectangle
 const HUNTER_W := 0.9                      # m
-const ZOOM := "--zoom="                    # the camera's zoom (1: the match's; under 1 closer, for a close-up)
+const ZOOM := "--wheel="                   # the mouse wheel's factor (CamWheel; the match starts at far, the widest)
 
 var hits := {}          # wisp owner -> summed share of other Hunters' bodies its wisp hid
 var own := {}           # ... of its own owner's body
-var zoom := 1.0
+var zoom := CamWheel.far()
 var frames := 0
 var wisps := 0
 var sizes: Array = []    # px across of every wisp every frame
@@ -63,8 +64,7 @@ func _fight_shots() -> void:
 			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	m.cam.zoom = zoom
-	m.cam.zoom_to = zoom
+	m.cam.user_zoom = zoom
 	main.get_viewport().warp_mouse(Vector2(4, 4))     # (no hover card in the frames)
 	wisps = m.kins.filter(func(k): return k.wisp).size()
 	var shots: Array = SHOT_AT.duplicate()
