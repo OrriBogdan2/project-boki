@@ -30,7 +30,8 @@ extends RefCounted
 ##  15 locomotion    --media-hunter=<id> (default gunslinger): idle, half-stick walk, run, stop, strafe both ways and
 ##                   backpedal facing east, then kite north 4 s with the aim swaying east (KITE_SWAY), on the game
 ##                   camera (--media-secs=28 for all of it); <dir>/loco_<id>.tsv logs body and feet per frame;
-##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet)
+##                   --media-log: only the TSV, headless at a fixed 1/30 s step (a variable step skews the feet);
+##                   --media-loco=turn: TURN_PLAN instead, the run turn (docs/MOVEMENT_FEEL.md, --media-secs=11)
 ##  16 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
 ##                   following: the walk speed for a before/after cut (decision 0061)
 ##  17 dash refill  Thief dashes, presses on empty, walks: each charge's quiet return cue alone
@@ -47,6 +48,11 @@ const LOCO_PLAN := [[0.0, Vector2.ZERO, "idle"], [1.0, Vector2(0.46, 0), "walk"]
 		[13.0, Vector2.ZERO, "stop"], [14.0, Vector2(0, 1), "strafe_r"], [18.0, Vector2.ZERO, "stop"],
 		[19.0, Vector2(-1, 0), "back"], [23.0, Vector2.ZERO, "stop"], [24.0, Vector2(0, -1), "kite"],
 		[28.0, Vector2.ZERO, "stop"]]
+## The run turn: run east, the stick flipped west with the aim held east (the legs backpedal), stop; run east again,
+## the stick and the aim flipped west together (the body turns round), stop. Same keys as LOCO_PLAN; "about" aims west.
+const TURN_PLAN := [[0.0, Vector2.ZERO, "idle"], [0.6, Vector2(1, 0), "run"], [2.4, Vector2(-1, 0), "back"],
+		[4.2, Vector2.ZERO, "stop"], [5.4, Vector2(1, 0), "run"], [7.2, Vector2(-1, 0), "about"],
+		[9.0, Vector2.ZERO, "stop"]]
 const KITE_SWAY := 0.2           # rad: in "kite" the aim sways this far either way at 0.7 Hz (the foot-slide WOBBLE)
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
@@ -73,6 +79,7 @@ var zoom_at := 0.0               # --media-zoom: the camera zoom every clip film
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
 var loco_id := "gunslinger"      # --media-hunter=: clip 15's Hunter
+var loco_plan: Array = LOCO_PLAN # --media-loco=turn: TURN_PLAN
 var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
@@ -95,6 +102,8 @@ func run(main_node: Node) -> void:
 			fight = arg.substr(14)
 		if arg.begins_with("--media-hunter="):
 			loco_id = arg.substr(15)
+		if arg == "--media-loco=turn":
+			loco_plan = TURN_PLAN
 		if arg.begins_with("--media-zoom="):
 			fight_zoom = float(arg.substr(13))
 		if arg.begins_with("--media-zoom="):
@@ -726,13 +735,14 @@ func _locomotion(secs: float) -> void:
 	await _go(secs, func(t: float):
 		var move := Vector2.ZERO
 		var label := "idle"
-		for k in LOCO_PLAN:
+		for k in loco_plan:
 			if t >= float(k[0]):
 				move = k[1]
 				label = k[2]
 		pl.inp["move"] = move
 		var sway := KITE_SWAY * sin(TAU * 0.7 * t) if label == "kite" else 0.0
-		pl.inp["aim"] = pl.pos + Vector3(8.0 * cos(sway), 0.9, 8.0 * sin(sway))
+		var east := -1.0 if label == "about" else 1.0
+		pl.inp["aim"] = pl.pos + Vector3(8.0 * east * cos(sway), 0.9, 8.0 * sin(sway))
 		var pts := AUDIT.points(sk)
 		var lean_inv := pl.model.global_transform.affine_inverse()     # (the game leans the model toward the camera:
 		var fl: Vector3 = pts["foot.L"]                                # a foot's height is read in its own frame)
