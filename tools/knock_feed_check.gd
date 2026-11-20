@@ -182,7 +182,7 @@ func _cap_and_fade() -> void:
 # ------------------------------------------------------------------ 4. its own lane
 func _lane() -> void:
 	m.feed.clear()
-	m.guide = null          # (a fresh guide line holds the message lane, TopStack: the widest card is measured on a free lane)
+	m.guide = null          # (a fresh guide line holds the message lane, TopStack: measure the card on a free one)
 	m.crouch_hint = null
 	var squads := _rival_squads()
 	var long_by: Hunter = squads[0][0]

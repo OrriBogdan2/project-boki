@@ -1657,8 +1657,7 @@ func _physics(dt: float) -> void:
 	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
-		# its speed per hunter (tuning.json), less what turning against your speed costs (TurnCost)
-		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)
+		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)   # tuning.json speed less the turn cost
 		if not shove.is_empty():
 			_shove_along(dt)
 		if not dash_pass.is_empty():
