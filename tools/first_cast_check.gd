@@ -3,9 +3,10 @@ extends RefCounted
 ## particles, decals, meshes and sounds made or loaded mid-fight), shader compiles aside (those are
 ## Match.warm_up's). For each of the 12 Hunters: a fresh Training Area match with that Hunter, loaded
 ## the way Main loads one (start, then warm_up), a target in front, then LMB, RMB, E, R, Shift and Q
-## (an active glove, a different one per Hunter) once each, then each twice more. A slot's spike is the
-## worst frame in the window after its first press; its first-use cost is that minus the cheaper repeat
-## window. FAIL: a first-use cost over SPIKE_MS that also sits SPIKE_MS above the median frame.
+## (an active glove, a different one per Hunter) once each, then each twice more. A bridge glove gets a
+## "span" row too, cast over a strip of abyss cut in front (the yard has none, so its Q row lays nothing).
+## A slot's spike is the worst frame in the window after its first press; its first-use cost is that minus
+## the cheaper repeat window. FAIL: a first-use cost over SPIKE_MS that also sits SPIKE_MS above the median frame.
 ## Run it on a GPU (jobq) for the drawn frames; headless it measures the script side only.
 
 const DT := 1.0 / 60.0
@@ -89,11 +90,42 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 			if pass_i == 0: first[s] = [w, _went(m), "%d pipelines; %s" % [pipes, _summary()]]
 			else: rep[s] = minf(float(rep.get(s, w)), w)
 			await _frames(m, P, T, SETTLE, "")
+	var span := []
+	if _lays_bridge(glove): span = await _span(m, P, T)
 	tree.node_added.disconnect(_made)
 	for s in SLOTS:
 		_row(ak, s, first[s][1], med, first[s][0], rep[s], first[s][2])
+	if not span.is_empty(): _row(ak, "span", span[0], med, span[1], span[2], span[3])
 	m.queue_free()
 	await tree.process_frame
+
+func _lays_bridge(glove: String) -> bool:
+	return Gear.ALL.get(glove, {}).get("effects", []).any(func(e): return String(e.get("type", "")) == "bridge")
+
+## A bridge glove only lays slabs over abyss, and the yard has none in front: a strip of it is cut between
+## the Hunter and the target, then the glove is cast PASSES times, each after the last span melted.
+## Returns [went, first, repeat, what] for a "span" row.
+func _span(m: Match, P: Hunter, T: Hunter) -> Array:
+	var w: World = m.world
+	for dx in range(2, 5):
+		for dz in range(-2, 3):
+			var tx := int(floor(P.pos.x)) + dx
+			var tz := int(floor(P.pos.z)) + dz
+			if w.inb(tx, tz): w.kind[w.idx(tx, tz)] = World.T_VOID
+	var out := ["-", 0.0, INF, ""]
+	for pass_i in PASSES:
+		made.clear()
+		var pipes := DashPace.pipelines()
+		var t: float = (await _frames(m, P, T, WINDOW, "q")).max()
+		if pass_i == 0:
+			var what := "%d pipelines; %s" % [DashPace.pipelines() - pipes, _summary()]
+			out = ["laid" if not m.verbs.terrain.is_empty() else "-", t, INF, what]
+		else:
+			out[2] = minf(float(out[2]), t)
+		for i in 30:      # until the span melts (the frost glove's lasts 7 s)
+			if m.verbs.terrain.is_empty(): break
+			await _frames(m, P, T, SETTLE, "")
+	return out
 
 func _row(ak: String, s: String, went: String, med: float, f: float, rep: float, what: String) -> void:
 	var cost := f - rep
