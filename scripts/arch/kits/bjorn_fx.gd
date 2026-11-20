@@ -27,7 +27,6 @@ const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
-var taut := false              # the rope is hauling the hammer home: drawn straight, no sag
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
 ## the whirled hammer: the 3D model's size over the one in the hand (it reads at the match camera; the procedural
 ## hammer is drawn big enough as it is), how far above the hand the circle runs (m), its tilt (rad, the head a
@@ -75,6 +74,7 @@ var plate_col: Color           # its plates and edges at full strength (the pale
 var edge_col: Color
 var broken_col: Color
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
+var taut := false              # the rope is hauling the hammer home: drawn straight, no sag
 var aegis_hit := 0.0
 var rise_t := 0.0
 var wakes: Array[MeshInstance3D] = []
