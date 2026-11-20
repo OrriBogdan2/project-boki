@@ -10640,3 +10640,6 @@ READY ext/albert-knock-rows 9dc76b961 (Albert mace throw knock cut per card; per
 READY ext/tenzo-grimble-knock-cut 78f4052c6ea0cee678348547fa49a61f59453443 (Tenzo slam knock + Grimble dash hit_kb cut; stun + abyss Dunk kept, asserted; knock table + hero docs)
 READY ext/albert-guardcut-regress 6f8aa4dbd3 (Albert Guard meter + Shield Slam cut kept; origin/main merged, 0 behind; bulwark_kit.gd doc conflict resolved: no meter/slam + main ivory Mending column. --kit-parity-check 0 fail, --check 0 fail; health --strict style ratchet FAIL identical on origin/main, 5 files none on this branch)
 READY ext/hunter-regen-claire-1120 812c707e70 (Neve r4 3D: Meshy G1 + hair slot desat fix; GPU proof in gens/hunter-regen-1120/claire/r4/deep; draft, owner visual check)
+READY ext/early-camps-bots-a3-port 58d5e2636a (bulk-rebase: origin/main merged in mechanically, was 0bd417101b; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/hudreveal-fold 58a15d65df (bulk-rebase: origin/main merged in mechanically, was 3035db634f; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/hud-holdback 9a2a0cd33c (bulk-rebase: origin/main merged in mechanically, was 62bcd58e5c; union 1 gen 0 files; the branch's own READY checks still apply)
