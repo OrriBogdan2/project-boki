@@ -19,7 +19,7 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
-##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##   soft    bool    lanes, cones and circles: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
 ##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward

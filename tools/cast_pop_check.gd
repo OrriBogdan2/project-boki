@@ -20,9 +20,10 @@ const STANCE_WAIT := 210        # frames standing still before the rest stance i
 const SETTLE := 14              # frames a forced clip takes to own the body (longest fade and crossfade)
 ## The Hunters slice this pass tuned; --cast-pop-check=<ids> checks others.
 const SLICE := ["archer", "juggernaut", "gunslinger", "ashwick"]
-## Moves whose clip hands back to the legs as the kit's movement hold lifts (tools/vex_anim_time_check.gd E and R rows):
-## a longer blend-out would keep the legs in the clip after she may walk, so theirs stays at FADE_LOCO.
-const HOLD_BOUND := ["gunslinger_e", "gunslinger_x"]
+## Moves whose clip hands back to the legs as the kit's movement hold lifts (tools/vex_anim_time_check.gd E row):
+## a longer blend-out would keep the legs in the clip after she may walk, so theirs stays at FADE_LOCO. (Her R holds
+## nothing since the owner's 11-17 playtest: its clip is upper body over walking legs.)
+const HOLD_BOUND := ["gunslinger_e"]
 ## A blend-in this short is a deliberate snap (hem.json: the release shows in full; `--clip-check` asserts it
 ## over within 0.05 s of the spawn), so the gap does not ask it longer.
 const SNAP_FADE := 0.04
