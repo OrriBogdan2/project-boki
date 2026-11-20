@@ -15,11 +15,10 @@ extends Node3D
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden)
-## - Purify: the green light column coming down over the 1 s delay, then the rings
+## - Purify: the light column (his own colour) coming down over the 1 s delay, then the rings
 
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
-const GREEN := Color("7dffb0")
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
