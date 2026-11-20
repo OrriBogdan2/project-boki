@@ -132,7 +132,7 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   and adds the worst a fight piles on (the full Fx pools and the Hero VFX cap): each preset under 4,000, each one down
   draws less, Ultra at least what High draws. The region motes over each island (`BiomeRun.decorate`) also pause
   past their draw distance (`ParticleCount.pace`, 110 m x the preset's `draw`), and paused emitters are not counted:
-  the fight's busiest moment went 1,867 -> 1,170 at High on a real GPU (jobq 11-20; the motes 957 -> 275), and the
+  the fight's busiest moment went 1,867 -> 1,120 at High on a real GPU (jobq 11-20, same worker; the motes 957 -> 140), and the
   30-Hunter check's High worst case 3,847 -> 3,100.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
