@@ -219,6 +219,7 @@ func add_tether(a: Ent, b: Ent, e: Dictionary, pw: float) -> void:
 
 # ------------------------------------------------------------------ traps
 func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void:
+	_cap_traps(caster, e)
 	var col := Color(String(e.get("color", "#c8ff8a")))
 	var r := float(e.get("radius", 1.2))
 	var n := Node3D.new()
@@ -235,9 +236,23 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	n.global_position = at
 	traps.append({"at": at, "r": r, "team": int(caster.team), "arm": float(e.get("arm", 0.6)), "t": float(e.get("time", 20.0)),
 		"effects": e.get("on_trigger", []), "caster": caster, "ctx": ctx, "node": n, "col": col, "reveal": float(e.get("reveal", 0.0)),
-		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null)})
+		"kx": e.get("kx", null), "kx_end": e.get("kx_end", null), "group": String(e.get("group", ""))})
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 8, 2.0, 0.3)
 	m.sfx("click", at, -4.0, 0.9)
+
+## e.max_live (> 0): a caster keeps at most that many traps of one group (e.group, an ability id) out at
+## once; placing one more pops the oldest. 0 or missing = no limit.
+func _cap_traps(caster: Node, e: Dictionary) -> void:
+	var cap := int(e.get("max_live", 0))
+	if cap <= 0:
+		return
+	var grp := String(e.get("group", ""))
+	var mine: Array = []
+	for tr in traps:
+		if tr["caster"] == caster and String(tr.get("group", "")) == grp:
+			mine.append(tr)
+	while mine.size() >= cap:
+		_drop_trap(mine.pop_front())
 
 # ------------------------------------------------------------------ terrain
 ## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span). The ground is
@@ -251,11 +266,9 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var lv := int(round(from.y / World.LEVEL))
 	var tiles: Array = []
 	var seen := {}
-	var n := Node3D.new()
+	var at: Array[Vector3] = []      # each slab's place (SpanLooks: built at load, not here)
 	var side := Vector2(-d.y, d.x)
 	var k := 0.6
-	var mat := Models.toon(col, true, 0.5)
-	var glass := Models.glow_mat(Color(col.lightened(0.3), 0.45))
 	while k <= length:
 		for s in range(-int(width * 2.0), int(width * 2.0) + 1):
 			var p := Vector2(from.x, from.z) + d * k + side * (float(s) * 0.25)
@@ -271,19 +284,15 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 			tiles.append([i, int(w.kind[i]), int(w.level[i])])
 			w.kind[i] = World.T_GROUND
 			w.level[i] = clampi(lv, 0, 255)
-			var slab := Models.part(n, Models.box(1.0, 0.28, 1.0), mat, Vector3(tx + 0.5, lv * World.LEVEL - 0.14, tz + 0.5))
-			slab.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			var under := Models.part(n, Models.cyl(0.45, 0.05, 0.6, 6), glass, Vector3(tx + 0.5, lv * World.LEVEL - 0.55, tz + 0.5))
-			under.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			at.append(Vector3(tx + 0.5, lv * World.LEVEL, tz + 0.5))
 		k += 0.5
 	if tiles.is_empty():
-		n.free()
 		return 0
-	m.add_child(n)
+	var n := SpanLooks.of(m).span(at, col)
 	var rise := float(e.get("rise", 0.0))
 	if rise > 0.0:
 		n.position.y = -BRIDGE_RISE_DROP
-		n.create_tween().tween_property(n, "position:y", 0.0, rise).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		SpanLooks.tween(n).tween_property(n, "position:y", 0.0, rise).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	terrain.append({
 		"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0),
 		"team": int(by.team), "warn": float(e.get("warn", 0.0)),
@@ -299,25 +308,16 @@ func _bridge_warn(tz: Dictionary, n: Node3D) -> void:
 	var a := BRIDGE_SHAKE * (0.3 + 0.7 * k * k)
 	var ph := float(m.time) * BRIDGE_SHAKE_HZ * TAU
 	n.position = Vector3(sin(ph) * a, sin(ph * 1.7 + 1.3) * a * 0.5, sin(ph * 1.3 + 2.1) * a)
-	if n.get_node_or_null("Cracks") == null:
+	if not tz.get("cracked", false):
 		_bridge_cracks(n, tz)
 	if float(m.time) - float(tz.get("puff_at", -9.0)) >= BRIDGE_PUFF_GAP:
 		tz["puff_at"] = float(m.time)
 		m.fx.dust(_bridge_mid(tz), 4 + int(6.0 * k))      # grit spilling off it, more toward the end
 
+## Two crossed cracks a slab, wide enough to read at the match camera (the span's own, hidden till now).
 func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
-	var cracks := Node3D.new()
-	cracks.name = "Cracks"
-	n.add_child(cracks)
-	var mat := Models.glow_mat(Color((tz["col"] as Color).lightened(0.85), 1.0))
-	var w: World = m.world
-	for td in tz["tiles"]:
-		var i := int(td[0])
-		var c := Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL + 0.015, i / w.w + 0.5)
-		for j in 2:      # two crossed cracks a slab, wide enough to read at the match camera
-			var crack := Models.part(cracks, Models.box(BRIDGE_CRACK_W, 0.02, 1.15), mat, c)
-			crack.rotation.y = float(i % 7) * 0.45 + j * 1.7
-			crack.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	tz["cracked"] = true
+	SpanLooks.of(m).crack(n, (tz["tiles"] as Array).map(func(td: Array) -> int: return int(td[0])))
 	m.sfx("br_crack", _bridge_mid(tz), -6.0, 0.9)
 
 ## The middle of a span (its middle tile's centre, on its top).
@@ -332,9 +332,9 @@ func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
 	m.fx.dust(at, 12)
 	m.fx.burst(at + Vector3(0, 0.2, 0), tz["col"], 14, 4.0, 0.4, -6.0, 1.3)
 	m.sfx("br_crumble", at, -3.0, 0.9)
-	var tw := n.create_tween()
+	var tw := SpanLooks.tween(n)
 	tw.tween_property(n, "position:y", -BRIDGE_FALL, BRIDGE_FALL_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.tween_callback(n.queue_free)
+	tw.tween_callback(SpanLooks.of(m).give.bind(n))
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
@@ -613,7 +613,7 @@ func tick(dt: float) -> void:
 				if float(tz["warn"]) > 0.0:
 					_bridge_crumble(tz["node"], tz)       # (reads the tiles' level: before they turn back)
 				else:
-					tz["node"].queue_free()
+					SpanLooks.of(m).give(tz["node"])
 			for td in tz["tiles"]:
 				w.kind[int(td[0])] = int(td[1])
 				w.level[int(td[0])] = int(td[2])
