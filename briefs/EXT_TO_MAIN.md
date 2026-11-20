@@ -10569,3 +10569,4 @@ READY ext/anim-land-weight 115eb75f69f9e7a06dc894250f229eeb5ac2e0b6 (landing squ
 READY ext/boki-hit-death-clips a97d1a4899363dbfa9ba413748c51bf6af84cde9 (no Bokidex glb has hit/death clips: starters stay KinFlinch, coverage doc + GPU hit/faint MP4s, audit compiles again)
 READY ext/lace-dash-clip 8f369d09640fac1415b3540444155f815f9b781e (Lace roll and flick marked dash kmoves: ANIM_COVERAGE hem dash proc -> clip; clips already drove the dash)
 READY ext/vfx-grimble-dash 974149c4f0 (Grimble barge: gold dash trail + contact flash from dredge.json, orange puffs gone, GPU before/after strip, row re-scored)
+READY ext/vfx-albert-e-wall ab5013549598a98c58b2735c5351912afb4af8bf (Albert aegis wall as a translucent layered pale-gold wall, 4 meshes not 31, lit rim + soft ground contact; row 8 20->25)
