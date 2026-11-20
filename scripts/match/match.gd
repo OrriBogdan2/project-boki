@@ -221,6 +221,7 @@ func _progress(label: String) -> void:
 func warm_up(progress := Callable()) -> void:
 	for h: Hunter in hunters.filter(func(x): return x.ak != null):
 		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
+	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -1312,9 +1313,8 @@ func use_gear(h: Hunter, slot: int) -> void:
 						tiles.append([i, int(world.level[i])])
 						world.kind[i] = World.T_GROUND
 						world.level[i] = clampi(lv, 0, 255)
-			var n := Models.gear_platform(col)
+			var n := SpanLooks.of(self).pad(col)      # (built at load: warm_up)
 			n.position = Vector3(floor(h.pos.x) + 0.5, lv * World.LEVEL, floor(h.pos.z) + 0.5)
-			add_child(n)
 			plats.append({"tiles": tiles, "t": 8.0, "node": n})
 			if h.pos.y < lv * World.LEVEL:
 				h.pos.y = lv * World.LEVEL + 0.05
@@ -1390,7 +1390,7 @@ func _update_gear_fx(dt: float) -> void:
 			for tv in pl["tiles"]:
 				world.kind[int(tv[0])] = World.T_VOID
 				world.level[int(tv[0])] = int(tv[1])
-			n.queue_free(); plats.erase(pl)
+			SpanLooks.of(self).give(n); plats.erase(pl)
 
 ## Inside a smoke cloud?
 func in_smoke(p: Vector3) -> bool:
