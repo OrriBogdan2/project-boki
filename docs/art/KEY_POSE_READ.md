@@ -35,3 +35,5 @@ Swings are eased bumps toward a model-space direction, so every other key (elbow
 
 Left for later (ideas, not parity): Kael's blade at the strike; Meeko's seed, hearth and call clips (same wings-over-hands
 problem, same tool); a fixed fade-out of the first frames in `--clip-shots` (some strips come out washed).
+
+Not applied on main: the four re-keyed clips (Meeko LMB, Cinder lance, Neve freeze, Sparkle LMB) were baked into the old glbs; main has the v95 masters, so only the tool `tools/art1/glb_key_pose.py` landed. Re-run it on the current glbs to apply them.
