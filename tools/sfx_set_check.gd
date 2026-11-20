@@ -38,6 +38,7 @@ extends RefCounted
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ## Never touches the save.
+##  16. a Hunter set's ability bar (tools/sfx_bar_check.gd): cast, travel, hit and end per ability, distinct hits
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -165,6 +166,7 @@ func run(main: Node) -> void:
 	_stomp_cues()
 	_voices()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
