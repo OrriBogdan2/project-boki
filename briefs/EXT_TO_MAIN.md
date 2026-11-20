@@ -10546,3 +10546,4 @@ READY ext/stuck-integ-4dec4626 49fb696260719f102210083c418563c72acf52c2 (main me
 READY ext/p06-port-1118 d4e715cf2c (P06 stomp feedback re-merged with main 0c762851bd: main's windup/finish/crack kept + relief chime, online stomp event Net 0.24.19, deathbox delay; --stomp-check, --stomp-net-check, --sfx-set-check, --check 0 fail, --stomp-break-sweep-check 175 rows 0 fail x2 (Bulwark pins updated for main's kit), health --strict OK)
 READY ext/kael-guard-edges 46d3d03ddacfe889a6f3c973b9a0c4d98bf1d3d4 (Kael guard edges asserted: 0.65 s window, strike/recovery hits in full, reel and wall slam pinned as ours; docs item 13 + KIT_PARITY)
 READY ext/neve-skate-dart-dmg 9586ccc0d3 (docs only: rimewright gap 6 marked closed; skating dart 2.0 and the 2x assert were already on main)
+READY ext/farm-feed-shapes-boki 1a361e03bc (food shapes the Boki: per-type size lean on model + card line, tint already by lean; --feed-check ten-meal rows; lean-shots --meals)
