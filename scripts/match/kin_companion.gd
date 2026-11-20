@@ -70,6 +70,8 @@ var guide := {}             # the tutorial step it's leading: {id, to, t, said, 
 var demo := {}              # a little demonstration it's doing: {kind, t}
 var lead_hold := false      # standing and looking back at you on a tutorial lead (arrived, or waiting for you)
 var lead_pos := Vector3.INF  # a wisp's floating spot while it leads (TutorialLead.wisp_step); INF when on your shoulder
+var lead_stall := 0.0       # s it has stood still while trying to lead (an edge or a wall on the straight way)
+var lead_off := 0.0         # s left falling in beside you after such a stall (TutorialLead.on)
 
 func _init(kin: Kin) -> void:
 	k = kin

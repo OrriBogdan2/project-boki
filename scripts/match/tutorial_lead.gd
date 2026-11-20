@@ -20,6 +20,29 @@ static func goal(k: Kin) -> Vector3:
 static func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
+## You have run past it (nearer the goal by more than 2 m): it stops leading and falls in beside you.
+static func passed(at: Vector3, you: Vector3, to: Vector3) -> bool:
+	return _flat(you, to) + 2.0 < _flat(at, to)
+
+## Does the walking Boki lead right now? Not once you have run past it (it falls in beside you), and not for
+## off_s after it stood stalled for stall_s trying to (an edge or a wall on the straight way): it rejoins you
+## along your own way and then leads again.
+static func on(k: Kin, to: Vector3, dt: float) -> bool:
+	var c := k.comp
+	c.lead_off = maxf(0.0, c.lead_off - dt)
+	if c.lead_off > 0.0 or passed(k.pos, k.owner_h.pos, to):
+		c.lead_stall = 0.0
+		return false
+	var moving := Vector2(k.vel.x, k.vel.z).length() > 0.5
+	c.lead_stall = 0.0 if moving or c.lead_hold or not k.grounded else c.lead_stall + dt
+	if c.lead_stall >= float(rules()["stall_s"]):
+		c.lead_stall = 0.0
+		c.lead_off = float(rules()["off_s"])
+		k.path = []          # (a failed search for the far goal backs off: search for the way to you now)
+		k.path_t = 0.0
+		return false
+	return true
+
 ## Stands and waits: it has arrived, or you are further behind than wait_m.
 static func holds(at: Vector3, you: Vector3, to: Vector3) -> bool:
 	return _flat(at, to) < float(rules()["stop_m"]) or _flat(at, you) > float(rules()["wait_m"])
@@ -41,7 +64,7 @@ static func wisp_step(k: Kin, dt: float) -> void:
 		return
 	if c.lead_pos == Vector3.INF:
 		c.lead_pos = o.pos
-	if to != Vector3.INF and _flat(o.pos, to) + 2.0 < _flat(c.lead_pos, to):
+	if to != Vector3.INF and passed(c.lead_pos, o.pos, to):
 		c.lead_pos = Vector3.INF       # you have run past it: it drops back onto your shoulder
 		return
 	var home := to == Vector3.INF
