@@ -24,7 +24,7 @@ const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
 const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
 const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
-const FRAME_W := 960                      # px wide, each --reel-frames frame
+const FRAME_W := 1280                     # px wide, each --reel-frames frame
 
 var only := ""
 var frame_dir := ""            # --reel-frames: where each drawn frame goes
@@ -432,6 +432,21 @@ func _dredge_hook() -> void:
 	await _go(2.4, hook, _sheet("hook",
 			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
+	await _go(GAP)
+
+## Grimble's Shift: the barge rolls into a dummy 3 m out (the generic 6 m stops short), so the gold trail
+## and the contact flash where they meet ("dash" / "dash_hit" in content/vfx/dredge.json) both draw.
+func _dredge_dash() -> void:
+	await _reset(3.0)
+	var dash := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(1.8, dash, _sheet("dash", "Shift, the barge into the dummy: the gold trail, the flash where they meet",
+			[0.18, 0.26, 0.32, 0.36, 0.4, 0.45, 0.55, 0.8, 1.2]), 2.5)
 	await _go(GAP)
 
 ## Grimble's R over a crowd (docs/COMBAT_CLARITY.md): the dummy, a Hunter and the Boki of both stand

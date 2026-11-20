@@ -129,6 +129,9 @@ func input(ev: InputEvent) -> bool:
 			return true
 		return true
 	if ev is InputEventMouseMotion and _press != Vector2.INF:
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_press = Vector2.INF      # the release went to a window over the map: the drag still ends with the button
+			return true
 		var mm := ev as InputEventMouseMotion
 		if (mm.position - _press).length() > 6.0:
 			_dragged = true

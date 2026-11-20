@@ -16,6 +16,7 @@ const PULSE_HZ := 2.5           # beats a second while it pulses
 const POP_T := 0.25             # s the strip takes to drop in on a new objective
 const GLOW_PX := 10.0           # how far the soft glow reaches past the rim at its brightest
 
+const ARROW_W := 0.53           # of the strip's height: the way-to-go arrow and its halo, side by side with the text
 const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
 const CHIME := "ui_open"        # the UI set's panel-drop sound, played once as a new objective's pulse starts
 const FIGHT_S := 3.0            # s after your last hurt that still counts as a fight (the chime ducks)
@@ -64,44 +65,64 @@ static func paint(ci: CanvasItem, font: Font, r: Rect2, line: Dictionary, age: f
 			ci.draw_style_box(halo, r.grow(grow))
 	var rim := Color(MINT, (0.5 + 0.5 * lit) * alpha)
 	ci.draw_style_box(_box(Color(PANEL, PANEL.a * alpha), r.size.y * 0.5, rim, int(2.0 + 1.5 * lit)), r)
+	var lay := layout(font, r, line)
+	var mid := r.get_center().y
+	var px := int(r.size.y * 0.5)
+	if lay.has("tail_at"):
+		_text(ci, font, lay["tail_at"], lay["tail"], px, Color(MINT, alpha))
+	if lay.has("arrow_end"):
+		_arrow(ci, Vector2(lay["arrow_end"], mid), r.size.y, line["dir"], alpha)
+	if lay.has("cap_rect"):
+		var cr: Rect2 = lay["cap_rect"]
+		ci.draw_style_box(_box(Color(0.93, 0.95, 0.98, alpha), 8, Color(0, 0, 0, 0), 0), cr)
+		var ink := Color(0.06, 0.08, 0.12, alpha)
+		_text(ci, font, lay["cap_at"], String(line["key_cap"]), px, ink, false)
+	_text(ci, font, lay["text_at"], String(line.get("text", "")), lay["text_px"], Color(GOLD, alpha))
+
+## Where everything in the strip sits (the one place its widths are worked out, so a check can read them): from the
+## right the counter and distance (tail, tail_at), the arrow (arrow_end: its right edge), from the left the key cap
+## (cap_rect, cap_at), and in the room between them the text (text_at, text_px: shrunk until it fits, never under
+## the cap, the arrow or the counter). Only the parts the line has are in it.
+static func layout(font: Font, r: Rect2, line: Dictionary) -> Dictionary:
+	var out := {}
 	var mid := r.get_center().y
 	var px := int(r.size.y * 0.5)
 	var left := r.position.x + r.size.y * 0.5
 	var right := r.end.x - r.size.y * 0.5
-	var count := String(line.get("count", ""))
-	var dist := String(line.get("dist", ""))
-	var tail := (dist + "  " + count).strip_edges()
+	var tail := (String(line.get("dist", "")) + "  " + String(line.get("count", ""))).strip_edges()
 	if tail != "":
 		var tw := font.get_string_size(tail, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-		_text(ci, font, Vector2(right - tw, mid + px * 0.36), tail, px, Color(MINT, alpha))
+		out["tail"] = tail
+		out["tail_at"] = Vector2(right - tw, mid + px * 0.36)
 		right -= tw + 10.0
-	var dir: Vector2 = line.get("dir", Vector2.ZERO)
-	if dir != Vector2.ZERO:
-		right = _arrow(ci, Vector2(right, mid), r.size.y, dir, alpha) - 8.0
+	if line.get("dir", Vector2.ZERO) != Vector2.ZERO:
+		out["arrow_end"] = right
+		right -= r.size.y * ARROW_W + 8.0
 	var cap := String(line.get("key_cap", ""))
 	if cap != "":
 		var kw := font.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
 		var cw := maxf(r.size.y * 0.7, kw + 16.0)
-		var cr := Rect2(Vector2(left, mid - r.size.y * 0.3), Vector2(cw, r.size.y * 0.6))
-		ci.draw_style_box(_box(Color(0.93, 0.95, 0.98, alpha), 8, Color(0, 0, 0, 0), 0), cr)
-		var ink := Color(0.06, 0.08, 0.12, alpha)
-		_text(ci, font, Vector2(cr.get_center().x - kw * 0.5, mid + px * 0.36), cap, px, ink, false)
+		out["cap_rect"] = Rect2(Vector2(left, mid - r.size.y * 0.3), Vector2(cw, r.size.y * 0.6))
+		out["cap_at"] = Vector2(left + cw * 0.5 - kw * 0.5, mid + px * 0.36)
 		left += cw + 12.0
 	var text := String(line.get("text", ""))
 	var tpx := px
 	while tpx > 12 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, tpx).x > right - left:
 		tpx -= 1
-	_text(ci, font, Vector2(left, mid + tpx * 0.36), text, tpx, Color(GOLD, alpha))
+	out["text_px"] = tpx
+	out["text_at"] = Vector2(left, mid + tpx * 0.36)
+	out["text_w"] = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, tpx).x
+	out["text_room"] = right - left
+	return out
 
-## The way-to-go arrow ending at `end` (right edge, row middle); returns the x where it starts.
-static func _arrow(ci: CanvasItem, end: Vector2, row: float, dir: Vector2, alpha: float) -> float:
+## The way-to-go arrow ending at `end` (right edge, row middle); it takes ARROW_W of the row's height.
+static func _arrow(ci: CanvasItem, end: Vector2, row: float, dir: Vector2, alpha: float) -> void:
 	var s := row * 0.2
 	var at := Vector2(end.x - s * 1.4, end.y)
 	var perp := Vector2(-dir.y, dir.x)
 	ci.draw_circle(at, s * 1.25, Color(MINT, 0.18 * alpha))
 	ci.draw_colored_polygon(PackedVector2Array([at + dir * s, at - dir * s * 0.6 + perp * s * 0.75,
 		at - dir * s * 0.6 - perp * s * 0.75]), Color(MINT, alpha))
-	return at.x - s * 1.25
 
 static func _box(col: Color, rad: float, border: Color, bw: int) -> StyleBoxFlat:
 	return HudStyle.box(col, int(rad), border, bw)

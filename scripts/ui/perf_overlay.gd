@@ -1,6 +1,6 @@
 class_name PerfOverlay
 extends Label
-## The frame-rate readout in the top right (Settings > Video > Frame rate). "fps" shows the frame rate;
+## The frame-rate readout in the top right (Settings > Video > Show frame rate). "fps" shows the frame rate;
 ## "full" is the performance overlay: frames per second, frame time and its 1% low,
 ## draw calls, triangles and objects drawn, nodes, and the costliest sections of the match's step
 ## (Match.prof, switched on only while this is showing). Text refreshes REFRESH_S apart; the frame

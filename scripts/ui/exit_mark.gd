@@ -65,7 +65,7 @@ static func line(m: Match, x: Dictionary) -> String:
 		"closed":
 			return "Extraction  ·  shut"
 	if m.exits.startable(x):
-		return "Extraction  ·  closed, hold its yard to open it"
+		return "Extraction  ·  closed, hold its outpost to open it"
 	if m.time < float(x["open_at"]):
 		return "Extraction  ·  opens in %s" % TrainMap.clock(float(x["open_at"]) - m.time)
 	return "Extraction  ·  closed"

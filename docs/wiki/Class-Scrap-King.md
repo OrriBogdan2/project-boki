@@ -17,7 +17,7 @@ grows with every knock.
 ## How it plays
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
-2. **Scattergun** (LMB): seven slugs in a tight fan, a shot every half second. The fan's edges show on the ground while you fire.
+2. **Scattergun** (LMB): seven slugs in one tight group, a shot every half second. One aim line shows on the ground.
 3. **Deep Reach** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
 4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
 5. **Barge** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
-| Weapon: Shotgun | Seven slugs, 6m out: wait and they fly in a tight pack, fire at once and they fan wide; rear hits hurt more. |
+| Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
 
 ### Abilities in full
 
@@ -87,7 +87,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
-| Dash (Shift) | recharge 10s -> 8.2s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 6.4s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| Dash (Shift) | recharge 10s -> 8.2s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 6.4s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge. |
 | E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).

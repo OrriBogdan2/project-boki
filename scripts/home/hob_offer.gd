@@ -5,31 +5,43 @@ extends RefCounted
 ## side, each with its portrait, name and title and a plain one-line role, and under them a loop of the Relic in
 ## focus on the training dummy: its attack, its signature ability ("signature" in the rules, else its right
 ## button) and its dash, one clip after the other (only one plays: the cards are painted portraits, so the pick
-## never stalls). Hover or click a card to look at it; "Take" picks it, `choose` opens it
-## (ClassUnlock.choose_second or choose_starters) and `done` carries on (HobTalk plays the short Relic moment).
+## never stalls). Hover a card to look at it; clicking it (or Enter on it) asks "Take Cinder?", and "Yes" picks it:
+## `choose` opens it (ClassUnlock.choose_second or choose_starters) and `done` carries on (HobTalk plays the
+## short Relic moment). "Back" (or Esc) closes the question.
 ## "Not now" lets it wait, when there is a `later` to call (the first pick has none).
 
-const CARD_W := 230.0          # px
+const CARD_W := 230.0  # px
 const FACE_PX := 110.0
-const CLIP := Vector2(300, 130)      # px: the focused Mask's ability clip
+const CLIP := Vector2(300, 130)  # px: the focused Mask's ability clip
+const ASK_FACE_PX := 56.0  # the question's small portrait
+const ASK_GAP := 28.0  # px: the question's distance from the screen's bottom edge
+const ASK_LAYER := 100  # above every panel it can be asked over
 
-var rules: Dictionary          # the farm builder's "talk" lines (title, roles, button text)
+var rules: Dictionary  # the farm builder's "talk" lines (title, roles, button text)
 var title_key: String
-var choose: Callable           # (id) -> bool: makes the pick
-var done: Callable             # (id): the pick was made
-var later: Callable            # () : "Not now" (invalid: no such button)
+var choose: Callable  # (id) -> bool: makes the pick
+var done: Callable  # (id): the pick was made
+var later: Callable  # () : "Not now" (invalid: no such button)
 var ids: Array = []
 var focus_i := 0
-var cards: Array = []          # PanelContainer per id
-var preview: Control           # holds the focused Mask's clips
-var reel: Array = []           # the focused Mask's clips (attack, signature, dash); one shows at a time
+var cards: Array = []  # PanelContainer per id
+var preview: Control  # holds the focused Mask's clips
+var reel: Array = []  # the focused Mask's clips (attack, signature, dash); one shows at a time
 var reel_i := 0
-var turn: Timer                # one loop long: moves the reel on
-var take_button: Button
+var turn: Timer  # one loop long: moves the reel on
 var root: Control
+var asking: Control  # the "Take Cinder?" question, while it is up (UI.Modal)
+var yes_button: Button
 
-func _init(offer_ids: Array, talk_rules: Dictionary, title: String, make_pick: Callable, on_done: Callable,
-		on_later := Callable()) -> void:
+
+func _init(
+	offer_ids: Array,
+	talk_rules: Dictionary,
+	title: String,
+	make_pick: Callable,
+	on_done: Callable,
+	on_later := Callable()
+) -> void:
 	ids = offer_ids
 	rules = talk_rules
 	title_key = title
@@ -37,7 +49,8 @@ func _init(offer_ids: Array, talk_rules: Dictionary, title: String, make_pick: C
 	done = on_done
 	later = on_later
 
-## The pick: the three cards, the focused Mask's clip, Take and Not now.
+
+## The pick: the three cards, the focused Mask's clip and Not now.
 func build() -> Control:
 	var v := UI.vbox(12)
 	v.set_meta("mask_offer", true)
@@ -54,19 +67,18 @@ func build() -> Control:
 	preview = CenterContainer.new()
 	preview.custom_minimum_size.y = CLIP.y + 48.0
 	v.add_child(preview)
-	var btns := UI.hbox(12)
-	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	if later.is_valid():
+		var btns := UI.hbox(12)
+		btns.alignment = BoxContainer.ALIGNMENT_CENTER
 		btns.add_child(UI.ghost(String(rules["offer_later"]), later, 160))
-	take_button = UI.primary("", func(): pick(String(ids[focus_i])), 260)
-	btns.add_child(take_button)
-	v.add_child(btns)
+		v.add_child(btns)
 	root = v
-	take_button.call_deferred("grab_focus")      # (Enter takes the Relic in focus)
+	cards[0].call_deferred("grab_focus")  # (the arrow keys move along the cards, Enter asks about one)
 	for id in ids:
-		WardenGlb.fetch(String(id))      # (their models, read off the main thread before a clip needs one)
+		WardenGlb.fetch(String(id))  # (their models, read off the main thread before a clip needs one)
 	focus(0)
 	return v
+
 
 func _card(id: String, i: int) -> PanelContainer:
 	var col := Arch.color(id)
@@ -74,10 +86,19 @@ func _card(id: String, i: int) -> PanelContainer:
 	card.custom_minimum_size.x = CARD_W
 	card.set_meta("mask_card", id)
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	card.focus_mode = Control.FOCUS_ALL
 	card.mouse_entered.connect(func(): focus(i))
-	card.gui_input.connect(func(ev):
-		if ev is InputEventMouseButton and ev.pressed and ev.double_click:
-			pick(id))
+	card.focus_entered.connect(func(): focus(i))
+	card.gui_input.connect(
+		func(ev):
+			var clicked: bool = ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT
+			var keyed: bool = (
+				not ev.is_echo() and (ev.is_action_pressed("ui_accept") or ev.is_action_pressed("interact"))
+			)
+			if clicked or keyed:
+				card.accept_event()
+				ask(id)
+	)
 	var v := UI.vbox(6)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
@@ -96,6 +117,7 @@ func _card(id: String, i: int) -> PanelContainer:
 	v.add_child(role)
 	v.add_child(ClassCard.howto_box(id, CARD_W - 24.0, 12))
 	return card
+
 
 ## Puts the focus on the i-th Mask: its card lights up and its clip plays under the cards.
 func focus(i: int) -> void:
@@ -120,7 +142,7 @@ func focus(i: int) -> void:
 	turn.timeout.connect(func(): show_clip(reel_i + 1))
 	preview.add_child(turn)
 	show_clip(0)
-	take_button.text = String(rules["offer_take"]).replace("{name}", HeroTitle.base_name(id))
+
 
 ## Shows the k-th clip of the reel from its start; the others wait (a clip not built yet keeps building).
 func show_clip(k: int) -> void:
@@ -133,6 +155,49 @@ func show_clip(k: int) -> void:
 	(reel[reel_i] as AbilityClip).restart()
 	if turn.is_inside_tree():
 		turn.start()
+
+
+## "Take Cinder?": a small question at the bottom centre (the cards stay in view), with the Relic's portrait,
+## "Yes, take Cinder" and "Back". Esc is Back (UI.Modal). Anything not on offer is not asked about.
+func ask(id: String) -> void:
+	if is_instance_valid(asking) or not ids.has(id):
+		return
+	focus(ids.find(id))
+	var name_txt := HeroTitle.base_name(id)
+	var layer := CanvasLayer.new()
+	layer.layer = ASK_LAYER
+	asking = UI.Modal.new()
+	asking.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	asking.mouse_filter = Control.MOUSE_FILTER_STOP  # (the cards behind wait while it is up)
+	asking.tree_exited.connect(layer.queue_free)
+	layer.add_child(asking)
+	var panel := UI.card(Color(UI.NIGHT, 0.98), 14)
+	panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	panel.offset_bottom = -ASK_GAP
+	UI.set_card_border(panel, Color(Arch.color(id), 0.95), 2)
+	asking.add_child(panel)
+	var row := UI.hbox(14)
+	panel.add_child(row)
+	var face := ClassCard.portrait(id, ASK_FACE_PX)
+	face.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(face)
+	var head := UI.title(String(rules["offer_ask"]).replace("{name}", name_txt), 22, UI.INK)
+	head.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(head)
+	row.add_child(UI.ghost(String(rules["offer_back"]), asking.queue_free, 100))
+	yes_button = UI.primary(String(rules["offer_yes"]).replace("{name}", name_txt), _yes.bind(id), 220)
+	row.add_child(yes_button)
+	root.add_child(layer)
+	UI.pop_in(panel)
+	yes_button.grab_focus.call_deferred()
+
+
+func _yes(id: String) -> void:
+	asking.queue_free()
+	pick(id)
+
 
 ## Takes this Relic (once; anything not on offer is refused).
 func pick(id: String) -> void:
