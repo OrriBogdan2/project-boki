@@ -10597,3 +10597,4 @@ READY ext/sfx-garden-moments 0700c42b63 (bond rank-up has its own rising chime g
 READY ext/docs-parity-stale-rows c8d32dd0f1 (KIT_PARITY: one top-20 table, Still open list, Kael lunge/rank text/Sable curve rows closed)
 READY ext/garden-xp-pace 0bf1f8d1f5 (garden XP pace: care 15, curve 30; home 20 min/day first egg day 12->6, first form 123->28 min)
 READY ext/old-names-lint 729aab9522 (retired hunter names lint in health + Mossy->Albert idle line)
+READY ext/farm-bred-look 55b05d6d70 (bred Boki wear one parent's coat pattern in the other parent's colour; hatch card lists both; golden save_v21_bred)
