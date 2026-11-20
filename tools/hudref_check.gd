@@ -663,7 +663,8 @@ func _solos() -> void:
 	var P: Hunter = m.player
 	await hud.panels.draw
 	ok(not Life.has_mates(m, P) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
-	ok(TeamBoki.shown.is_empty() and hud.mates.last.is_empty(), "solos: no squad row, Boki icon or squad watch on the left")
+	ok(TeamBoki.shown.is_empty() and hud.mates.last.is_empty(),
+		"solos: no squad row, Boki icon or squad watch on the left")
 	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
 		"solos: the vitals block is there, the base-to-a-teammate badge is not")
 	var rivals: Array = m.hunters.filter(func(x): return x != P)
