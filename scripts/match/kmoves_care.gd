@@ -345,7 +345,7 @@ const MOVES := {
 		[0.55, {}]]},
 	# Rink Wall (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
 	# to the hips and the sparkle at her feet; then both palms shoved out low and wide along the ground as the
-	# ice erupts ahead (0.27), the body driving after them, held while it starts to slide, then a settle
+	# ice erupts ahead (0.2, e.tell), the body driving after them, held while it starts to slide, then a settle
 	"tm_wall": {"keys": [
 		[0.0, {}],
 		[
@@ -357,17 +357,11 @@ const MOVES := {
 		[
 				0.2,
 				{
-					"p": -0.15, "lift": -0.17, "sq": 0.46, "fl": Vector3(0.32, -0.46, 0.3), "hw": 1.0,
-					"fr": Vector3(-0.32, -0.46, 0.3), "rw": 1.0, "wf": 1.0, "lw": 1.0,
-					"legs": [1.15, -1.75, 1.05, -1.65]}],
-		[
-				0.27,
-				{
 					"p": -0.5, "lift": -0.08, "sq": -0.2, "fl": Vector3(0.32, -0.3, -0.68), "hw": 1.0,
 					"fr": Vector3(-0.32, -0.3, -0.68), "rw": 1.0, "wf": 1.0, "lw": 1.0,
 					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.42,
+				0.35,
 				{
 					"p": -0.4, "lift": -0.06, "sq": -0.05, "fl": Vector3(0.34, -0.28, -0.6), "hw": 0.9,
 					"fr": Vector3(-0.34, -0.28, -0.6), "rw": 0.9, "wf": 0.9, "lw": 0.9,

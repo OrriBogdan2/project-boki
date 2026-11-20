@@ -44,3 +44,8 @@ static func staged(m: Match) -> bool:
 static func see(key: String) -> void:
 	if Save.d.has("hud_reveal"):
 		Save.d["hud_reveal"][key] = true
+
+## A new player in a staged match (a save under HudGroups.NEW_PLAYER_MATCHES expeditions): ExtractGoal points
+## them only at the newcomer seats.
+static func newcomer(m: Match) -> bool:
+	return staged(m) and HudGroups.new_player()

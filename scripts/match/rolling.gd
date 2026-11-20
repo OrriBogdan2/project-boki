@@ -552,11 +552,8 @@ func _update_bounties() -> void:
 			stats["bounties_posted"] += 1
 			events.append([m.sess_time(), "bounty on %s (level %d, median %.1f)" % [h.pname, h.lvl, median]])
 			m.add_feed("Bounty on %s (level %d)" % [h.pname, h.lvl])
-			if m.hud and m.player and not m.player.out:
-				if h == m.player:
-					m.hud.toast("You have a bounty on you  ·  everyone can see you on the map", Color("ffb64a"))
-				else:
-					m.hud.toast_small("Bounty on %s  ·  level %d" % [h.pname, h.lvl], Color("ffb64a"))
+			if m.hud and m.player and not m.player.out and h == m.player:
+				m.hud.toast("You have a bounty on you  ·  everyone can see you on the map", Color("ffb64a"))
 		elif has:
 			if gap < BOUNTY_GAP - 1.0:
 				h.remove_meta("bounty")      # the lobby caught up

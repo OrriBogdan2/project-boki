@@ -13,8 +13,8 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   (`""` → `in` → `on` → `out`) kept in the hunter's meta `wisp`, driven from `Hunter.render`. It reads
   `downed` and `out` only, so nothing new is replicated: remote players and bots get the Wisp from the
   state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
-- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive, the
-  hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
+- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive and the
+  revive UI are all as before. The hitbox is not: shots and areas pass through a Wisp. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Knocked-down beat (`HunterFall`, 0.4-0.5 s by weight) before the Wisp takes over: the hero staggers
@@ -61,7 +61,7 @@ hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the w
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
 
 ## Clarity pass and Boki riding the downed Hunter (owner 2026-11-11)
-Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how Supervive does this ... their
+Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how the reference does this ... their
 pets always come back to them and go into wisp form when they're downed".
 - **Marks (`DownedMarks`):** the always-on ground ring the size of the revive range is gone. A downed Hunter shows
   a compact ring hugging their Wisp in their side colour (ally or rival): the bleed-out drains round it, revive
@@ -73,7 +73,7 @@ pets always come back to them and go into wisp form when they're downed".
   theirs that is up zips back (blinks from beyond 14 m or when it can't walk there) and circles the Hunter Wisp as
   its Boki wisp (`BokiWispLook`, round = Hunter, critter = Boki). It does not fight, cast or take orders and
   can't be hit. It still pulls its Hunter up as the old kin revive did (same wait and `kin_revive_time`, bleed
-  paused meanwhile); a stomp stops the pull (as Supervive's stomp blocks self-revives). Revived: back on the
+  paused meanwhile); a stomp stops the pull (as the reference's stomp blocks self-revives). Revived: back on the
   shoulder with its old order. Dead: `KinLoss` as before. A Boki that is down itself stays down (KinDowned).
   The old guard (attacking whoever stood on the Wisp) is removed.
 - **Net:** `wisp` takes `reviving`'s slot in `Match.KIN_STATES`, so the snapshot shape is unchanged.

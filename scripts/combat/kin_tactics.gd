@@ -40,6 +40,8 @@ func chase_range() -> float:
 
 ## How far from you it will wander before coming back.
 func leash() -> float:
+	if k.summon and k.summon.out():
+		return k.summon.leash(aggression)
 	return maxf(5.0, _r("leash_base", 9.0) + aggression * _r("leash_per_aggression", 8.0) + loyalty * _r("leash_per_loyalty", -4.0))
 
 ## Below this share of its health it runs back to you.
@@ -71,6 +73,8 @@ func pick_target() -> Ent:
 			continue      # (a disguised Shrubling is not given away by its Boki)
 		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
 			continue      # it gave up on this one a moment ago (couldn't reach it)
+		if f is Mob and (f as Mob).held:
+			continue      # a tutorial dummy waits for you to send it (Mob.held)
 		near.append(f)
 	if near.is_empty():
 		return null
@@ -164,7 +168,7 @@ func cue_aim(cue: PartSpec) -> Vector3:
 				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
 		"owner_hurt":
-			if own.hp < own.max_hp * float(p["below"]) and own.regen_wait > 0.0 and randf() < 0.4 + loyalty * 0.6:
+			if own.hp < own.max_hp * float(p["below"]) and InCombat.is_in(own) and randf() < 0.4 + loyalty * 0.6:
 				return own.pos
 		"owner_under_fire":
 			# a rival is shooting you: put something between you and them

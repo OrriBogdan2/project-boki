@@ -40,14 +40,15 @@ static func watch(H) -> void:
 	_lvl_was = p.lvl
 	RankSfx.tick(p, float(m.time))
 
-## Tier pips over `r`: one per rank the slot can reach, lit up to `lv`; gold once the slot is maxed.
+## Tier pips on `r`'s bottom edge over the key pill (the source's place; charge discs take the top edge): one
+## per rank the slot can reach, lit up to `lv`; gold once the slot is maxed.
 static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
 	var c: CanvasItem = H.c
 	var tiers := int(Hunter.SLOT_MAX.get(slot, 3))
 	var maxed := lv >= tiers
 	var x0 := r.get_center().x - (tiers * PIP_W + (tiers - 1) * PIP_GAP) * 0.5
 	for i in tiers:
-		var pr := Rect2(Vector2(x0 + i * (PIP_W + PIP_GAP), r.position.y - PIP_H - 4.0), Vector2(PIP_W, PIP_H))
+		var pr := Rect2(Vector2(x0 + i * (PIP_W + PIP_GAP), r.end.y - DashSlot.PIP_Y), Vector2(PIP_W, PIP_H))
 		var lit := HudStyle.GOLD if maxed else col
 		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
 		c.draw_rect(pr, Color(lit, 0.95) if i < lv else Color(1, 1, 1, 0.16))

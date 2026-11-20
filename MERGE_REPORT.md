@@ -385,14 +385,14 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - SKIPPED  ext/anim-time-kael bfe9512d conflicts: docs/art/wardens/CLIPS.md scripts/heroes/warden_clips.gd
 - SKIPPED  ext/kit-parity-refresh-1 4791eb5c conflicts: docs/KIT_PARITY.md
 - SKIPPED  ext/split-ui be393e41 conflicts: docs/HUD.md scripts/home/home.gd scripts/home/home_black_market.gd scripts/home/home_market.gd scripts/home/home_trade.gd scripts/home/hunter_pick_row.gd scripts/social/town.gd scripts/ui/about_view.gd scripts/ui/dex_view.gd scripts/ui/hatch.gd scripts/ui/incubator_view.gd scripts/ui/kin_reveal.gd scripts/ui/overlay.gd scripts/ui/prematch_view.gd scripts/ui/ui.gd scripts/ui/work_view.gd tools/style_baseline.json
-- merged   ext/supervive-movement 161907a5
+- merged   ext/the reference-movement 161907a5
 - SKIPPED  ext/kit-parity-refresh-2 f1efc51a conflicts: docs/KIT_PARITY.md
 - SKIPPED  ext/vfx-origin-v2 53e5acdc conflicts: scripts/arch/kits/thief_kit.gd
 - SKIPPED  ext/cooldown-parity-verify 2be9877c conflicts: content/archetypes/ashwick.json content/archetypes/dredge.json content/archetypes/juggernaut.json content/archetypes/rimewright.json docs/heroes/juggernaut.md docs/heroes/thief.md
 - SKIPPED  ext/anim-mantle-2 097e8054 conflicts: art/wardens/claire/claire.glb art/wardens/dredge/dredge.glb art/wardens/hem/hem.glb art/wardens/tarek/tarek.glb tools/anim_shots.gd
 - merged   ext/lace-phasewalk-verify 728a6c83
 - SKIPPED  ext/anim-mantle-3 c55ef02e conflicts: art/wardens/breaker/breaker.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb tools/anim_shots.gd
-- SKIPPED  ext/supervive-impact ac32fb46 conflicts: scripts/heroes/warden_clips.gd scripts/match/ent.gd
+- SKIPPED  ext/the reference-impact ac32fb46 conflicts: scripts/heroes/warden_clips.gd scripts/match/ent.gd
 - merged   ext/ui-first15-audit d0e20ae4
 - SKIPPED  ext/train-rank-controls ca639526 conflicts: scripts/home/home.gd scripts/match/arena.gd scripts/ui/hud.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/farm_start_check.gd tools/wall_size_check.gd
 - SKIPPED  ext/vfx-pass b7d8bf3c conflicts: docs/heroes/bulwark.md docs/heroes/dredge.md docs/heroes/gunslinger.md docs/heroes/tender.md docs/heroes/thief.md scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/gunslinger_ult.gd scripts/arch/kits/kit_looks.gd scripts/arch/kits/mage_kit.gd scripts/arch/kits/thief_kit.gd scripts/match/hunter.gd scripts/match/match.gd tools/dancer_jug_check.gd tools/hero_combo_check.gd

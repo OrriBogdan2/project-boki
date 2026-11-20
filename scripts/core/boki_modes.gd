@@ -34,7 +34,7 @@ static func tickets(species: String) -> int:
 
 
 ## The game species of a mode with one of these rarities, met at this difficulty or easier ("" for
-## any), in Data.KIN order. Boss-egg kin (Data.is_rare) never spawn: they only hatch from their egg.
+## any), in Data.KIN order. The legendaries (Data.is_rare) never spawn here.
 static func pool(mode: String, rarities: Array, difficulty := "") -> Array:
 	var ladder: Array = rules()["modes"][mode]["difficulties"]
 	var top := ladder.size() - 1 if difficulty == "" else ladder.find(difficulty)

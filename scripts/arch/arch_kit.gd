@@ -79,7 +79,7 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
+## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
@@ -137,6 +137,9 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## Is the kit holding its own hero still (Neve's Rimelock statue)? That root is the move itself, so the
+## HUD shows no ROOTED icon or timer for it (HudPlate.statuses).
+func holds_still() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
 ## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if unused)}.
 ## The base reports E while it's up and e_recastable().
@@ -174,14 +177,19 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
+## The kit's own move-speed burst as a share of run speed; it adds to the others (HunterMove.speed_bonus).
+func speed_bonus() -> float: return 0.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true
-## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
+## The attack key, if this kit runs the weapon's attack itself (true = handled; HunterAttack.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it, kits with their
+## own hold set it.
+func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
@@ -327,7 +335,7 @@ func press_rmb() -> void:
 		return
 	if rmb_press_extra():
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -352,6 +360,14 @@ func _drop_rmb() -> void:
 	rmb_t = 0.0
 	AimKit.clear(h)
 	_rmb_dropped()
+## The RMB slot as the bar shows it (slot_info "ready": a charge, the kit's own lock-out): on cooldown the press is
+## refused before it starts anything (no hold pose, wind-up, sound or step) and the bar shows the deny.
+## Every RMB press goes through here: the player's, a bot's, DashFlow's held one and a kit's own buffer.
+func rmb_open() -> bool:
+	if bool(slot_info("sec")["ready"]):
+		return true
+	h._ab_feedback("sec", "deny")
+	return false
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -540,7 +556,7 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Shake.incoming_big(m, h.pos, 0.6, h)
+	Shake.incoming_big(m, h.pos, ImpactWeight.shake("heavy"), h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
 
@@ -771,6 +787,7 @@ func _tells(dt: float) -> void:
 		fx_t = 0.18
 		if tell != "":
 			var rc := res_col()
+			# sparks on the body only: a ground ring means gameplay, and this one landed under every dash
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
@@ -784,23 +801,19 @@ func slot_info(slot: String) -> Dictionary:
 	match slot:
 		"sec", "utility":
 			var sd := rmb_def()
-			var lines: Array = []
-			for v in ["tap", "hold", "air", "during_e", "full"]:
-				if (sd.get("variants", {}) as Dictionary).has(v):
-					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0,
 				"cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"),
 				"charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["e"]), "cd_max": float(sd.get("cooldown", 14.0)) * cd_k("kin"), "charges": 1 if float(cd["e"]) <= 0.0 else 0, "max_charges": 1, "verb": "e",
 				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t, "full": e_payoff_ready()}, true)
 		"r", "ult":
 			var sd := r_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"x":
@@ -809,7 +822,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": String(sd.get("name", "")), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
@@ -906,6 +919,10 @@ func flip_for(dir: Vector2, base: String) -> String:
 func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
+## Dash charges: the kit's dash.charges (the source hero's count) or else the class's `class_n`, plus extra_dashes().
+func dash_charges(class_n: float) -> float:
+	return float(dash_def().get("charges", class_n)) + extra_dashes()
+
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
 
@@ -1177,7 +1194,7 @@ func charge_now() -> Array:
 		return ["rmb", clampf(rmb_t / rf, 0.0, 1.0)]
 	if h.draw_t >= 0.0 and h.draw_t < 5.0:
 		return ["draw", clampf(h.draw_t / 0.9, 0.0, 1.0)]
-	var ck := h.charge_k()
+	var ck := h.atk.charge_k()
 	if ck > 0.0:
 		return ["melee", ck]
 	var dk := dash_charge()
@@ -1224,7 +1241,8 @@ func _tick_charge(dt: float) -> void:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
 		var rc := SideColor.fx(m, h, col)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
+		var reach := 1.15 * float(h.cdat.get("scale", 1.0))
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, reach, Color(rc, 0.9), SideColor.order(m, h))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)

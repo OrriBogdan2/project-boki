@@ -19,6 +19,6 @@ static func ult_pressed(h: Hunter) -> bool:
 		return false
 	return true
 
-## A press that did nothing: the X tile pulses red with the deny tick (PressDeny).
+## A press that did nothing: the X tile shakes and dims with the deny tick (PressDeny).
 static func _deny(h: Hunter) -> void:
 	h._ab_feedback("x", "deny")

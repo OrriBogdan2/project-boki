@@ -67,7 +67,7 @@ func _stream() -> void:
 	ok("anim darts: a dart every 0.15-0.2 s through the hold (footage 0009-0090)",
 			gap >= 0.15 and gap <= 0.2, "%.3f s" % gap)
 	P.inp["fire"] = false
-	# the let-go ends the burst on the large darts (supervive_kits Celeste LMB)
+	# the let-go ends the burst on the large darts (sv/briefs/kits Celeste LMB)
 	_event(m, K, "tm_dart_heavy", func(): return K.stats["heavies"] >= 1)
 	_line("tm_dart_heavy", _into(m, K, "tm_dart_heavy"), "a large dart leaves")
 	step(m, 1.0)

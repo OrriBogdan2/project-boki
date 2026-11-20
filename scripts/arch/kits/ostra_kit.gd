@@ -141,8 +141,11 @@ func move_k() -> float:
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
 	var casting := not snap.is_empty() or snap_rec > 0.0
-	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
-	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
+	return 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
+
+## Snap rank 3's burst of speed ([game data] +50 on the cast, +100 on a hit).
+func speed_bonus() -> float:
+	return boost_k if boost_t > 0.0 else 0.0
 
 ## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
 func _boost(k: float) -> void:
@@ -432,6 +435,7 @@ func _swap_end(go: bool) -> void:
 		return
 	swaps += 1
 	vfx("trade_fold", from)
+	vfx("trade_swap", from)      # the spot he left sucks in (the landing rings out: trade_arrive)
 	if rank("dash") >= 3:
 		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
@@ -536,9 +540,11 @@ func _snap_release() -> void:
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	vfx("snap_hit", at, null, {"hit": e != null})
+	vfx("snap_hit", at)
 	if e == null:
+		vfx("snap_miss", at)      # no one hit: the spring sags out of the spear
 		return
+	vfx("snap_struck", at)      # the crown stun, a look of its own so every game hears it
 	var sn: Dictionary = rmb_def()["snap"]
 	var st: Vector3 = s["start"]
 	var kd := clampf(Vector2(at.x - st.x, at.z - st.z).length() / float(sn["range"]), 0.0, 1.0)
@@ -546,7 +552,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
 ## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
@@ -664,6 +669,7 @@ func _pop(hit: bool) -> void:
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
 	if not hit:
+		vfx("seed_fizz", p)      # gone unpopped: the crank unwinds
 		return
 	pops += 1
 	play("ostra_pop")

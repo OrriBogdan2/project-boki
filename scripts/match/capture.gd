@@ -342,7 +342,7 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
 		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
-	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
+	m.fx.burst(k.pos + Vector3(0, 0.6, 0), KinTypeTrail.colour(String(k.sp.get("type", "")), col), 16, 3.5, 0.6)
 	m.fx.ring(k.pos, 1.8, Color(beam_col(h), 0.9), 0.45)      # the catch: --capture-read-check (main) keeps this ring
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()

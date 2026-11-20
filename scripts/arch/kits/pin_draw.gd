@@ -146,7 +146,7 @@ func tick() -> void:
 	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
 	var col := PinFx.THREAD
-	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
+	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.atk.can_fire():
 		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col, "lw": REST_LW, "lace": true})
 	if drawing:
 		if was < s.x and t >= s.x:

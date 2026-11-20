@@ -61,8 +61,8 @@ static func arc(t: float, running: bool, way: String) -> Dictionary:
 				vy = Hunter.JUMP_V - Hunter.H_GRAV * t
 				y = Hunter.JUMP_V * t - 0.5 * Hunter.H_GRAV * t * t
 			"glide":
-				vy = -Hunter.GLIDE_SINK
-				y = Hunter.GLIDE_SINK * (air - t)
+				vy = -HunterMove.glide_sink
+				y = HunterMove.glide_sink * (air - t)
 			_:
 				vy = -Hunter.H_GRAV * t
 				y = (DROP_H if way == "drop" else KERB_H) - 0.5 * Hunter.H_GRAV * t * t

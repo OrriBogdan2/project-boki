@@ -143,7 +143,7 @@ func _match() -> void:
 	var m := await start_match({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	ok("match: single tracks, no stems", m.music_dir.single and Sfx.layers.is_empty())
 	ok("match: exploring plays Wayfarer's Road", Sfx.music_name == "classic_calm", Sfx.music_name)
-	m.player.dmg_done += 10.0
+	m.player.combat_at = m.time      # a hit traded (InCombat; the drive music reads it)
 	tick(m, 1.5)
 	ok("match: a fight brings Steel at Dusk", Sfx.music_name == "classic_tense", Sfx.music_name)
 	if m.lairs:

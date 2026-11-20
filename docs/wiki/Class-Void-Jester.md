@@ -25,7 +25,7 @@ The jester on a spring, floating over his box. Stuns from range, drops a growing
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.4 m/s, 1 dash charge |
+| Body | 145 health, 5.39 m/s, 1 dash charge |
 | Signature weapon | Tether Lantern (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in. |
 | Silhouette | a floating jester in a three-tailed cap, his smoky tail trailing below |

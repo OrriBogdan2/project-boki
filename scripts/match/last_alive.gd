@@ -9,7 +9,7 @@ extends RefCounted
 ## your last-one-up.
 
 const SPEED := 0.08          # +8% move speed (the Hunter "move_speed" buff)
-const MEND_PER_S := 1.0      # hp/s of self-heal once REGEN_WAIT has passed without a hit
+const MEND_PER_S := 1.0      # hp/s of self-heal while out of combat (InCombat)
 const BUFF_HOLD := 0.3       # s each tick's speed buff lasts (renewed every step, gone shortly after the end)
 const NODE := "LastAura"
 const SHELL_R := 0.75        # m, the body-hugging rim (a capsule around the hunter)
@@ -77,7 +77,7 @@ static func _cue(m: Match, sname: String, vol: float) -> void:
 
 static func _lift(h: Hunter, dt: float) -> void:
 	h.add_buff("move_speed", SPEED, BUFF_HOLD)
-	if h.regen_wait <= 0.0 and h.hp < h.max_hp:
+	if not InCombat.is_in(h) and h.hp < h.max_hp:
 		h.hp = minf(h.max_hp, h.hp + MEND_PER_S * dt)
 
 ## Shows or hides the glow.

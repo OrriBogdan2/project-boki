@@ -31,8 +31,8 @@ static func flash_col(target: Ent, p: Hunter) -> Color:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
 
-## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
-## sparks fly (on through it).
+## Where on the target a hit from `by` lands (HitContact: its real contact point, clamped to its collider) and which
+## way the sparks fly (on through it).
 static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	var dir := Vector3.ZERO
 	if by != null and is_instance_valid(by) and by != target:
@@ -43,12 +43,7 @@ static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	dir.y = 0.0
 	if dir.length() < 0.01:
 		dir = Vector3(0, 0, 1)
-	dir = dir.normalized()
-	var rad := float(target.get("r")) if target.get("r") != null else 0.4
-	var hgt := 0.95 if target is Hunter else clampf(0.35 + rad, 0.5, 1.6)
-	var y := (target as Hunter).hit_y() if target is Hunter else target.pos.y
-	var at := Vector3(target.pos.x, y + hgt, target.pos.z) - dir * rad * 0.8
-	return [at, dir]
+	return [HitContact.point(target, by, o), dir.normalized()]
 
 
 static func _credit(by: Ent) -> Ent:
@@ -111,7 +106,7 @@ static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m

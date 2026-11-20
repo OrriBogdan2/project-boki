@@ -12,7 +12,7 @@ What the newer source does: a two-stage bow draw (Empowered at about 0.6-0.8 s, 
 Where the footage and our older doc disagree, the footage (the newer version) wins, except where the owner notes override it.
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
-Source vs ours per slot; [data] = the game data (supervive-data), [footage] = hero-ref/pin.md at 5 fps. Asserted in
+Source vs ours per slot; [data] = the game data (sv/briefs), [footage] = hero-ref/pin.md at 5 fps. Asserted in
 `--archer-combo-check` (`parity pin: ...`, tools/parity_pvb.gd) unless noted.
 
 | Slot | Source | Ours | Status |
@@ -39,7 +39,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | Spirit Walk cooldown 6 vs 9.5 (MED) | (b) | 9.5 s (data) |
 | Shift fx: roll ring and bursts, flick bursts (MED) | (a)+(b) | 24a34e21 (roll); the air flick's four bursts removed now |
 | Shift through raised walls (MED) | (c) | the heightmap has no passable ledge faces; recorded as an Assumption (the walk passes rocks, trees, pillars and barriers) |
-| Passive: Focus/Deadeye invented; instant full draw; knock heal (MED) | (b) partly, (c) | the knock heal (and its RUN DOWN ring and move) is gone; a full draw is the only way past the draw stages (it is spent on the arrow loosed, `Hunter.focus_draw` removed). Focus and Deadeye are now cut entirely (owner decision 2026-11-07): no meter, no +20% range, no Deadeye hit, no `pin_deadeye` move, no HUD arc; Hawk Sense stays |
+| Passive: Focus/Deadeye invented; instant full draw; knock heal (MED) | (b) partly, (c) | the knock heal (and its RUN DOWN ring and move) is gone; a full draw is the only way past the draw stages (it is spent on the arrow loosed, `Hunter.focus_draw` removed). Focus and Deadeye are now cut entirely (owner decision 2026-11-07): no meter, no +20% range, no Deadeye hit, no `pin_deadeye` move, no HUD arc; Red Thread stays |
 | LMB (-) | (a) | parity 24a34e21: cooldown 0.5 s (card) |
 | Heavy Shot wall payoff ~5x, pierce invented (MED) | (b) pierce, (c) the ratio | it stops on the first foe (asserted). PARITY FIRST (owner 2026-11-07): the wall hit is 4.94x the shot (`pin.wall_mult`, the data's 173 extra on 35), so 80 to 148 on top of 16 to 30; a full pin is 178 and takes any 124 HP light in one. Asserted (`parity lace`) |
 | RMB hold 0.5 s dead zone, auto-release (LOW) | (c) | PARITY FIRST: `rmb.hold` 0.15 s is only a tap guard; the charge counts from the press and is full at 1.1 s. Asserted (`parity lace`) |
@@ -72,7 +72,7 @@ with the commit or code and the assert in `--archer-combo-check`; owner override
 | 13 | No audio in the footage | no source | our own sounds; the per-weapon hit sound is in flight: READY ext/hit-feedback-pass d6b86ff8d |
 
 No open row is left, so nothing was built here. In flight on her files (not re-checked here): ext/lace-playtest-1108, ext/lace-dash-charges,
-ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
+ext/vfx-pass (merges ext/vfx-archer), ext/the reference-movement (`pin_spirit.gd`).
 
 ## Ranges re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage pin, 1 bh = top of the health bar to the feet = 1.8 m)
 
@@ -83,6 +83,11 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
+| Passive | always | Red Thread (foes under half health show through cover within 22 m; for her side they wear an outline in her colour drawn through rocks and walls, the squad-Boki x-ray shell, `HawkSense`) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor; let go inside `draw_min` 0.08 s (a mashed click) and nothing looses, the next press draws afresh | Weak tap shot (not isolated); a charge weapon ignores early taps (coordinator's read of the source, 2026-11-10) | Assumed to land at the cursor too; `--lmb-spam-check` |
+| Passive | always | Red Thread (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor; a short sharp orchid streak (`fire_tap`: 0.5 m wide, about 4 m long, a white-hot pointed head; Empowered and Supercharged a step wider) | Weak tap shot (not isolated) | Assumed to land at the cursor too |
+| LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
 | Passive | always | Hawk Sense (foes under half health show through cover within 22 m; for her side they wear an outline in her colour drawn through rocks and walls, the squad-Boki x-ray shell, `HawkSense`) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye were cut (owner decision 2026-11-07). The ledge climb is built (`climb_tall` in hunter_move.json: a jump into a double-high face mantles up, as for a normal ledge) |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor; a short sharp orchid streak (`fire_tap`: 0.5 m wide, about 4 m long, a white-hot pointed head; Empowered and Supercharged a step wider); let go inside `draw_min` 0.08 s (a mashed click) and nothing looses, the next press draws afresh | Weak tap shot (not isolated); a charge weapon ignores early taps (coordinator's read of the source, 2026-11-10) | Assumed to land at the cursor too; `--lmb-spam-check` |
 | LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). The reticle (owner item 55b) is a thin line to the cursor that a bright fill runs along from near Lace like a progress bar, full at Supercharged, with one small circle on the line at the next perfect point: it flashes gold from the frame the fill reaches it to the end of the perfect window, then moves on to the end of the line. Nothing else: no V, no glints, no cursor ring. At Supercharged: a body flash, a thick white line past the cursor to 16 m and a target ring | Same stages; the owner's filling line overrides the footage's V | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
@@ -113,7 +118,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 | X | Starpiercer nock (0.5 s per arrow) | 1.0 | Primal Forces is a tap buff; the empowered shots' walk isn't measured | [?] |
 
 ## Assumptions (the footage is silent; the owner can correct these)
-- Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (supervive_kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
+- Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (sv/briefs/kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
 - A Supercharged shot with no target flies its full 16 m (not a longer clamp past the cursor).
 - The quick draw after a perfect release is 1.6x until Empowered, then normal speed; the next release consumes it, perfect or not.
 - The perfect window is 0.35 s from each stage coming up (`content/rules/tuning.json`; the source's is about one footage frame, the owner asked for about 0.2 s more, 11-08).
@@ -144,26 +149,26 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 |---|---|---|---|---|
 | Stage 1 lands at the cursor, stage 2 flies past it | sheet pin.md | confirms (0117, 0168-0169) | built | `pin aim:` lines |
 | A perfect release makes the next charge faster | sheet pin.md (newer kit) | card text only | built, 1.6x to Empowered | `combo pin: perfect > ...` |
-| Perfect shots ease the self-slow of drawing | [wiki: Greenwood Bow](https://supervive.wiki.gg/wiki/Myth) | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
+| Perfect shots ease the self-slow of drawing | wiki: Greenwood Bow | not visible | built: the draw after a perfect slows you to 0.85, not 0.7 | `pin small: after a perfect...` |
 | Overdraw halves the shot | sheet pin.md | confirms (0252-0256) | built | `pin bow: overdrawn` |
-| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
-| +150 decaying move speed while inside terrain (rank IV) | in-game data, [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
-| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
-| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
-| Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
-| Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
-| Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
-| Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn | `pin small: Heavy Shot into a foe burning...` |
-| Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach: a 4-terrace wall (3.2 m vs source 3 m) by jumping into it, not 5 terraces or facing away | `combo archer: tall climb, ...` |
-| Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
-| Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
-| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 23.3 vs 18 (422 : 326), execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
+| Spirit Walk: dodge roll, then 2.8 s through walls, objects and terrain (data wins over the sheet's "not terrain") | wiki: Phase Walk, sheet | confirms (0360) | built | `combo pin: Spirit Walk passes...`, `...raised terrace wall` |
+| +150 decaying move speed while inside terrain (rank IV) | in-game data, wiki: Phase Walk | not measurable | built at rank 3: +33% (150 on the data's 455 base) inside something, fading to nothing over the walk; x1.1 elsewhere | `pin small: no extra speed inside...`, `pin rank 3: +33% inside something, fading` |
+| Walking into a wall leaves a phase orb; allies or enemies touching it also phase | wiki: Phase Walk | not shown | built: a 4 s spirit orb at the entry; anyone touching it walks as a spirit for 2.8 s | `pin small: anyone touching the orb...` |
+| Taking damage ends it; ending inside a wall costs 30 mana and teleports back | wiki, sheet | card text | built (the 30 mana has no equivalent: we have no mana, so it costs nothing) | `pin: damage ends...`, `combo pin: ... ending inside a rock` |
+| Knocking an enemy restores a dash charge | wiki: Phase Walk | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
+| Heartpiercer can be held 3 s after cast before it fires | wiki patch 20.11.24 | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
+| Short Heartpiercer charges push harder | wiki patch 20.11.24 | not shown | built: minimum push 6 -> 8 | same |
+| Into terrain: 1.2 s stun and extra damage | wiki: Heartpiercer | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
+| Knocking back a burning enemy Cremates it | wiki: Rain of Arrows, sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn | `pin small: Heavy Shot into a foe burning...` |
+| Rain of Arrows: a cone/arc wall, slow and anti-heal | wiki, sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
+| Climb double-high walls by jumping while facing them | wiki: Spectral Hunter | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach: a 4-terrace wall (3.2 m vs source 3 m) by jumping into it, not 5 terraces or facing away | `combo archer: tall climb, ...` |
+| Ult: empowered arrows need no charge, 6 s, the next 3 shots | wiki: Virideth's Fury, sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
+| Ult: pierces enemies, longer range, knocks back | wiki | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
+| Ult: the final shot hits harder and executes; shots shred armor | wiki, card text | final number not legible | built: 23.3 vs 18 (422 : 326), execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built, waits on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098) | - |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | built: rival Wisps in the wall lose `down_hp` each tick, 5 x 2.5 = 12.5 of 100 [est: the source drain is unknown]; no slow or burn on a Wisp; allies' Wisps untouched (docs/specs/DOWNED_ABILITIES.md row 2) | `pin E: a rival Wisp in the wall loses down_hp each tick...`, `... does not slow, burn or damage a Wisp` |
+| Affects wisps (downed hunters) | wiki | not shown | not built, waits on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098) | - |
+| Affects wisps (downed hunters) | wiki | not shown | built: rival Wisps in the wall lose `down_hp` each tick, 5 x 2.5 = 12.5 of 100 [est: the source drain is unknown]; no slow or burn on a Wisp; allies' Wisps untouched (docs/specs/DOWNED_ABILITIES.md row 2) | `pin E: a rival Wisp in the wall loses down_hp each tick...`, `... does not slow, burn or damage a Wisp` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -182,9 +187,9 @@ Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
-(briefs/supervive-data/supervive_kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
+(sv/briefs/kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
 archer.json (the old `cd_per_rank` and the shared steps are gone); cooldowns match the data directly (Heavy Shot 16s,
-Spirit Walk 9.5s, Hail Wall 15s). LMB and Hawk Sense have no tiers in the data and do not rank; R (Starpiercer on X) is
+Spirit Walk 9.5s, Hail Wall 15s). LMB and Red Thread have no tiers in the data and do not rank; R (Starpiercer on X) is
 decision 0022's.
 
 | Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--archer-combo-check` |
@@ -193,7 +198,7 @@ decision 0022's.
 | RMB Heavy Shot | +20% dmg, -3s / +20% dmg, -3s / more range, a wall stun gives a dash charge [D] | 13s, damage +20% | 10s, damage +40%; flies 3m farther; a wall stun gives a dash charge | `upgrade parity: Heavy Shot ...`, `Heavy Shot ranks cut 3 s ...`, `pin rank 3: a Heavy Shot wall stun ...` |
 | Shift Spirit Walk | -1s / -1s / +0.5s, +150 decaying speed inside terrain, allies get it too [D] | recharge 8.5s | 7.5s; 3.3s long, +33% inside something (fading), allies within 6m walk too | `upgrade parity: Spirit Walk ...`, `pin rank 3: Spirit Walk lasts 0.5 s longer ...`, `pin rank 3: +33% inside ...` |
 | E Hail Wall | +30% dmg, -2s / +30% dmg, -2s / -2s, +30% arc [D] | 13s, damage +30% | 9s, damage +60%; arc 120 -> 156 degrees (`e.deg_r3_k`) | `upgrade parity: Hail Wall ...`, `upgrade parity: rank 3 (tier IV) Hail Wall arc ...` |
-| Passive Hawk Sense | none [D] | - | - | - |
+| Passive Red Thread | none [D] | - | - | - |
 
 Before the source pass: Heavy Shot 13s / 10s with +15% / +30% (shared), Spirit Walk 8.1s / 6.7s (shared -15%), Hail Wall
 13.5s / 12s with +15% / +30%. This pass moved the Hail Wall's rank 3 width (1.3) from an inline number into the data and
@@ -218,7 +223,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back (no cost) | same |
 | Knock | +1 dash charge (DashReset); no kit heal (audit: the source has none) | same |
-| Rival under half health | Shown through cover (Hawk Sense) | same |
+| Rival under half health | Shown through cover (Red Thread) | same |
 | A Boki merge mid draw / Heavy Shot / Spirit Walk | Each dropped with no shot; Spirit Walk ends | same |
 | Starpiercer, then a wall pin, then three beams | The pinned foe eats every beam; lined-up foes behind it are pierced too | `--archer-combo-check` |
 | Starpiercer during Spirit Walk | Shots kept; she can roll between beams | same |
@@ -233,10 +238,10 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first ends),
 **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**. Dash rows
 (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
 d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). The 11-12 pass settled 4 of the rows it
-left unsettled (LMB draw + X stays unsettled). None of [D] (the Myth card, supervive_kits.md:71-79), [F]
+left unsettled (LMB draw + X stays unsettled). None of [D] (the Myth card, sv/briefs/kits.md:71-79), [F]
 (briefs/hero-ref/pin.md: no frame presses a second key in a draw, in the ult window or from a glider) or [W] (the Myth
 page and its patch notes, as cited above) shows those pairs, so each follows **rule**: DECISIONS 11-07 "every
 interaction is chainable", read through DashFlow's default (decision 0015: a missing row combines, the second press
@@ -247,7 +252,7 @@ key draws from an open glider (`ArcherKit.fires_in_glide`; the glide row below).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB draw (held) | RMB | not shown: [D] has no ability tags or block lists for Myth (hold to charge, release to fire, nothing on the other button); [F] shows one reticle at a time (the gold V in place of the green one, f264-269) and no press mid-draw | cancels: the RMB press drops the draw with no arrow (its pose and reticle go); a still-held LMB stays idle until the Heavy Shot looses, then draws again | **fixed, rule ours** (one bow holds one arrow; the newer press wins, the same rule as LMB -> X). Not chosen, as nothing shows them: the press ignored while drawing, or waiting for the arrow to loose | [D] supervive_kits.md Myth; [F] 0264-0269, 0494; `--archer-combo-check` (`one bow LMB>RMB: ...`, tools/pin_one_bow_check.gd) |
+| LMB draw (held) | RMB | not shown: [D] has no ability tags or block lists for Myth (hold to charge, release to fire, nothing on the other button); [F] shows one reticle at a time (the gold V in place of the green one, f264-269) and no press mid-draw | cancels: the RMB press drops the draw with no arrow (its pose and reticle go); a still-held LMB stays idle until the Heavy Shot looses, then draws again | **fixed, rule ours** (one bow holds one arrow; the newer press wins, the same rule as LMB -> X). Not chosen, as nothing shows them: the press ignored while drawing, or waiting for the arrow to loose | [D] sv/briefs/kits.md Myth; [F] 0264-0269, 0494; `--archer-combo-check` (`one bow LMB>RMB: ...`, tools/pin_one_bow_check.gd) |
 | RMB held (Heavy Shot) | LMB | not shown (as above) | cancels: the LMB press drops the hold with no shot and no charge spent (bar, needle and pose go) and the bow draws; the still-held RMB starts nothing until pressed again | **fixed, rule ours** (same row; not chosen: LMB ignored while the Heavy Shot is held) | `--archer-combo-check` (`one bow RMB>LMB: ...`) |
 | LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | both (match) | rule; [F] 0457, 0498 show no draw under the cast |
 | LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
@@ -334,7 +339,7 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 - Spirit Walk strip vs the footage: docs/shots/vfx-lace-spirit-walk (`--parity-strip --slot=dash --pillar`).
 
 ## Verification on main d255acbee (Nov 9, job 20261109-204749-a2: Lace vs Myth, PARITY FIRST)
-Read: this doc, KIT_PARITY, pin.md, supervive_kits.md (Myth, [D]), DECISIONS (owner notes win). `--archer-combo-check` 159/0, `--archetype-check` 379/0. These assert our spec, not the source, so rows below are checked by reading `archer.json`, `longbow.json`, `archer_kit.gd`, `pin_spirit.gd`. [F] = footage. Verdicts: match, differ, owner, [?].
+Read: this doc, KIT_PARITY, pin.md, sv/briefs/kits.md (Myth, [D]), DECISIONS (owner notes win). `--archer-combo-check` 159/0, `--archetype-check` 379/0. These assert our spec, not the source, so rows below are checked by reading `archer.json`, `longbow.json`, `archer_kit.gd`, `pin_spirit.gd`. [F] = footage. Verdicts: match, differ, owner, [?].
 
 | Slot | Source | Main | Verdict |
 |---|---|---|---|
@@ -346,7 +351,7 @@ Read: this doc, KIT_PARITY, pin.md, supervive_kits.md (Myth, [D]), DECISIONS (ow
 | E Rain of Arrows | arc ~120 deg at cursor distance, 4.4 s [F]; 15 s, 61 dmg/s, Slow, Anti-Heal [D] | arc 120 deg, 2-9 m, 4.4 s, cd 15, 5 per 0.5 s (10/s), slow 35%, blight | match shape and cd; DPS differs (~0.16x of the source's 61/s, kept for light HP: ext/damage-ratio-audit); slow 35% [?]; Cremate +10 is ours (ext/parity-antiheal removes it) |
 | R / X Starpiercer | 3 empowered shots, no charge, 60 s; first two 326, third 422 (1.29x) [D] | 3 shots, 6 s, cd 60, 18 / 18 / 25 (1.39x), pierce, execute under 12% | match; the final reads 1.39x against 1.29x: would be 23 (S, needs the burst-cap check re-run; the older doc quotes 1.41x from a source I could not find) |
 | Shift Spirit Walk | roll then 2.8 s through terrain incl. the raised wall, 9.5 s, 10 mana; roll toward the cursor [D]; roll 3 m / 0.27 s [F]; +5-10% [F]; rank 3 +0.5 s, +150 in terrain [D] | cd 9.5, 1 charge, roll 3.5 x 0.85 = 3.0 m in 0.24 x 1.15 = 0.28 s, walk 2.8 s x1.1, rank 3 +0.5 s and +33%; passes rocks, trees, pillars, barriers, **not ledge faces** | match on numbers and timing; **differ: ledges** (below); roll follows WASD, cursor when still: owner (movement default); mana and 30-mana snap-back cost: none, [?] |
-| Passive | injured hunters seen through fog; climbs tall ledges [D] | Hawk Sense: foes under 50% HP within 22 m; no Focus or Deadeye (cut); no ledge climb | owner (keep Hawk Sense); 50% and 22 m are ours [?]; the ledge climb differs |
+| Passive | injured hunters seen through fog; climbs tall ledges [D] | Red Thread: foes under 50% HP within 22 m; no Focus or Deadeye (cut); no ledge climb | owner (keep Red Thread); 50% and 22 m are ours [?]; the ledge climb differs |
 | Animations | [F] timing table above | every row in "Animation timing" still reads match | match on coverage; not re-measured frame by frame; `pin_deadeye` row removed (move is gone) |
 | Dash interactions | silent on casts in the roll [F] | LMB through Shift keeps the draw (owner item 51); RMB / E / X fire mid-roll; 8 rows have no source | owner; `[?]` rows listed in KIT_PARITY item 20 |
 
@@ -359,7 +364,7 @@ Read: this doc, KIT_PARITY, pin.md, supervive_kits.md (Myth, [D]), DECISIONS (ow
 **READY, touching Lace, not on main** (latest line per branch; older lines are superseded):
 - `ext/lace-phasewalk-verify` 728a6c834: ledge passage and tall climb (above).
 - `ext/lace-playtest-1108` b79ec35c5: owner items 18-20 (needle on the nock anchor, Starpiercer fires on the press with the nock deleted, perfect window 0.35 s in `tuning.json`); moves the window and nock away from the source numbers above, owner calls.
-- `ext/lace-hawk-sense` f67042371: Hawk Sense sight shared by the team, `sense_linger`; numbers stay ours.
+- `ext/lace-hawk-sense` f67042371: Red Thread sight shared by the team, `sense_linger`; numbers stay ours.
 - `ext/lace-hail-wisps` d93205aaa: Hail Wall hits Wisps.
 - `ext/parity-antiheal` 55a5d0dfc: Anti-Heal on the source's four, removes our Cremate rider.
 - `ext/vfx-lace-impact` 2199382e1: Heavy Shot impact size, Spirit Walk shell.
@@ -373,7 +378,7 @@ Read: this doc, KIT_PARITY, pin.md, supervive_kits.md (Myth, [D]), DECISIONS (ow
 4. Hail Wall damage 10/s against the source's ratio (`archer.json` `e.dmg`; S, owner: light-HP balance).
 5. Supercharged 1.15 -> 1.2 s (`longbow.json` `draw`, `arc_draw` clip, perfect-window asserts; S, owner: ranged TTK).
 6. Spirit Walk has no mana cost or 30-mana snap-back cost; roll follows WASD, not the cursor (owner default).
-7. Hawk Sense 50% / 22 m, Hail slow 35%, quick draw 1.6x, hold slow 38%: ours, not in the source [?].
+7. Red Thread 50% / 22 m, Hail slow 35%, quick draw 1.6x, hold slow 38%: ours, not in the source [?].
 
 Suggestions (ours, not built): none beyond the 0.05 s fade noted under Animation timing.
 

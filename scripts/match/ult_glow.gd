@@ -5,7 +5,7 @@ extends RefCounted
 ## set on the body's materials only when it changes. The ready state rides the "st" flags (Match._flags
 ## bit READY_BIT) so other players see it; the flash is the glow dropping when the ult goes on cooldown.
 
-const READY_BIT := 1 << 28      # in the hunter snapshot flags (bits 25-27 are StatusLooks, 15-24 taken)
+const READY_BIT := 1 << 30      # in the hunter snapshot flags (25-27 StatusLooks, 28 glide dive, 29 far look)
 const READY_LEVEL := 0.4       # glow while ready, 0..1 (1 is the cast flash)
 const RISE_PER_S := 1.0        # glow fades in over ~0.4 s
 const FADE_PER_S := 3.5        # the flash fades out over ~0.3 s

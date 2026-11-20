@@ -7,8 +7,8 @@
 	"weight": "light",
 	"color": "#d41e2e",
 	"body": {
-		"size": 1.01,
-		"hit_r": 0.392,
+		"size": 1.054,
+		"hit_r": 0.408, "hit_h": 1.85, "body_r": 0.392,
 		"head": 0.72,
 		"legs": 2.35,
 		"neck": -0.05
@@ -16,11 +16,12 @@
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"howto": ["Play: long-range bow; hold {fire} to draw, release to loose.", "Combo: {secondary} into a wall pins and stuns the foe.", "Avoid: overdrawing; past full draw the damage halves."],
 	"silhouette": "the long weapon over the shoulder",
+	"hint": {"lmb": "Hold {fire} to draw, release on the flash", "rmb": "Hold {secondary} for a Heavy Shot that pins foes to walls", "e": "Press {signature} to rain arrows in a wall at the cursor", "dash": "Press {dash} to roll, then walk through rocks as a spirit"},
 	"card": {"role_word": "Marksman", "loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "dash": "Roll, then 2.8s walking through rocks, trees and barriers.", "passive": "Rivals under half health show through cover.", "rmb": "Hold, release: a heavy arrow that knocks back and pins to walls.", "e": "Rain arrows on a wall at the cursor: damage, slow, anti-heal burn.", "x": "Your next 3 shots skip the draw and pierce; the third finishes.", "weapons": {"longbow": "Hold to draw; release on the flash for a faster next draw."}, "chips": {"rmb": ["16-30 dmg"], "e": ["5 per tick"], "x": ["18 dmg"]}},
 	"signature": "longbow",
 	"resource": {
 		"id": "hawk",
-		"name": "Hawk Sense",
+		"name": "Red Thread",
 		"max": 1,
 		"kind": "none",
 		"col": "#d8ffb0",
@@ -28,8 +29,8 @@
 		"sense_r": 22.0
 	},
 	"passive": {
-		"name": "Hawk Sense",
-		"desc": "Rivals under half health are seen through cover within 22m."
+		"name": "Red Thread",
+		"desc": "Rivals under half health are seen through cover within 22m. A jump while facing a wall up to twice your height climbs it, no extra key."
 	},
 	"dash": {
 		"id": "spirit_walk",

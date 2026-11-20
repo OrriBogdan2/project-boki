@@ -7,7 +7,7 @@ class_name Incubator
 ## the match's seconds to tick), time with the game closed does not. Two things warm them
 ## faster, and they add up: an Ember kin working the "Warm the incubator" job (HomeWork, kind
 ## "warm"), and Ember Coals from the market, stoked into the brazier (COAL_SECS of extra heat each).
-## A ready egg waits until you hatch it there (Care.hatch_rare: a rare kin, three IVs 26 or better):
+## A ready egg waits until you hatch it there (Care.hatch_rare: the first form of its line, three IVs 26 or better):
 ## Rare Eggs never hatch on their own and never go in the breeding nest.
 ##
 ## On the save:
@@ -50,6 +50,8 @@ static func ensure() -> void:
 	Save.d["incubator"] = inc
 	for e in Save.d["rare_eggs"]:
 		if not (e as Dictionary).has("id"): e["id"] = _id()
+	for e in (Save.d["rare_eggs"] as Array) + (inc["eggs"] as Array):
+		e["sp"] = Data.egg_species(String(e.get("sp", "")))      # an older save's egg of a later form or a legendary
 	for e in inc["eggs"]:
 		if not e.has("slow"):      # a cradle from before the 20-minute hatch: starts cold
 			e["heat"] = 0.0
@@ -73,14 +75,14 @@ static func migrate() -> bool:
 	if egg.is_empty() or not egg.get("rare", false):
 		return false
 	Save.d["egg"] = {}
-	(Save.d["rare_eggs"] as Array).push_front({"sp": String(egg.get("sp", "")), "boss": String(egg.get("boss", "")), "rare": true, "id": _id()})
+	(Save.d["rare_eggs"] as Array).push_front({"sp": Data.egg_species(String(egg.get("sp", ""))), "boss": String(egg.get("boss", "")), "rare": true, "id": _id()})
 	settle()
 	return true
 
-## A Rare Egg brought home: into a free cradle, or onto the shelf to wait.
+## A Rare Egg brought home: into a free cradle, or onto the shelf to wait. It holds the first form of sp's line.
 static func add(sp: String, boss := "", visitor := {}) -> Dictionary:
 	ensure()
-	var e := {"sp": sp, "boss": boss, "rare": true, "id": _id()}
+	var e := {"sp": Data.egg_species(sp), "boss": boss, "rare": true, "id": _id()}
 	if not visitor.is_empty():
 		e["visitor"] = visitor
 	(Save.d["rare_eggs"] as Array).append(e)

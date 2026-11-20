@@ -38,7 +38,7 @@ func _shoot(m: Match, P: Hunter, T: Hunter, bend := true) -> bool:
 	P.inp["aim"] = Vector3(T.pos.x, P.pos.y + 0.95, T.pos.z)
 	P.inp["aim_y"] = T.pos.y if bend else P.pos.y        # (not bent: a level shot, the aim missed the foe)
 	var hp0 := T.hp
-	P.fire()
+	P.atk.fire()
 	for i in 90:
 		P.pos = P.pos if i > 0 else P.pos
 		m.step(Match.DT)

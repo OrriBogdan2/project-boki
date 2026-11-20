@@ -67,7 +67,7 @@ func lmb(held: bool, dt: float) -> bool:
 	if left <= 0:
 		return false
 	recover = maxf(0.0, recover - dt)
-	if held and recover <= 0.0 and h.can_fire():
+	if held and recover <= 0.0 and h.atk.can_fire():
 		_loose()
 	return true
 

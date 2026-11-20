@@ -7,7 +7,7 @@ so the wiki stays in step with the game.
 
 Plain Python 3, no Godot needed. Idempotent: running it twice changes nothing the second time.
 
-Sources: content/ (archetypes, dash_flow, classes, kin_v2, kin, abilities_v2, merges_v2, evolution_v2,
+Sources: content/ (archetypes, dash_flow, classes, kin, kin_home, abilities_v2, merges_v2, evolution_v2,
 mutations, gloves, weapons, abilities, maps, biomes, combos, rules) and a few constant tables read
 straight out of the GDScript (Data.CLASSES, Data.TIERS, Life.R, Care.BONDS, HomeLayout.CATALOG...).
 Those are parsed as literals; if one stops parsing, the script says which and carries on.
@@ -194,12 +194,37 @@ def block(name, key, body):
 
 # ------------------------------------------------------------------ shared data
 ARCH = content("archetypes")
+
+def fill_ability_text(root, o):
+    """Archetype texts hold {action} (the game fills the player's own key) and {slot.field} (a number from the same JSON): the wiki shows the default keys."""
+    keys = {"dash": "Shift", "secondary": "RMB", "signature": "E", "fire": "LMB"}
+    def one(m):
+        t = m.group(1)
+        if "." not in t:
+            return keys.get(t, m.group(0))
+        v = root
+        for part in t.split("."):
+            v = v[part]
+        return ("%.2f" % v).rstrip("0").rstrip(".")
+    if isinstance(o, dict):
+        return {k: fill_ability_text(root, v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [fill_ability_text(root, v) for v in o]
+    return re.sub(r"\{([^}]+)\}", one, o) if isinstance(o, str) else o
+
+ARCH = {a: fill_ability_text(d, d) for a, d in ARCH.items()}
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
+MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
+
+
+def walk_speed(aid):
+    """A hunter's walk in m/s, as HunterMove.speed: its row (or the default) times body_scale."""
+    return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
-KIN2 = content("kin_v2")
-KIN1 = content("kin")
+KIN2 = content("kin")
+KIN1 = content("kin_home")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
 EVO = content("evolution_v2")
@@ -307,7 +332,7 @@ def gen_classes():
         block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
-            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(walk_speed(aid)), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],
@@ -384,7 +409,7 @@ def gen_boki():
         themes.setdefault(k.get("theme", "?"), []).append(k["name"])
         src = "Starter egg" if kid in starters else ("Rare Egg from %s" % egg_of[kid] if kid in egg_of else "Wild, nest eggs")
         rows.append(["[%s](#%s)" % (k["name"], slug(k["name"])), " + ".join(k.get("animals", [])), k.get("theme", "").title(), k["body"].get("size", ""), k["ai"].get("role", ""), src])
-    body = "Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its home file (`content/kin/<id>.json`). "
+    body = "Every species, read from its grammar file (`content/kin/<id>.json`) and its home file (`content/kin_home/<id>.json`). "
     body += "The id in brackets is the internal name the code and save files use.\n\n"
     body += table(["Boki", "Animals", "Type", "Size", "Fights as", "Where it comes from"], rows)
     body += "\n\n## Types\n\nA Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see " + link("Boki") + "). Types in use:\n\n"
@@ -417,7 +442,7 @@ def gen_boki():
         for p in k.get("evolution", {}).get("paths", []):
             paths.append("%s: %s" % (p["affinity"].title(), " > ".join(EVO.get(n, {}).get("name", n) for n in p["nodes"])))
         if paths: body += "\n- Evolution paths: " + "; ".join(paths)
-    page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
+    page("Boki-Species.md", "Boki species", body, ["content/kin", "content/kin_home", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
     ev = load_json(os.path.join(ROOT, "content", "rules", "evolve.json"))
@@ -496,7 +521,7 @@ def gen_gear():
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -525,7 +550,7 @@ def _terrain_hazards(hz_at):
     """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
     which Boki walks it safely."""
     R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
-    kin = content("kin_v2")
+    kin = content("kin")
     rows = []
     for kind, D in R.items():
         where = sorted({nm for k, nm in hz_at if k == kind})
@@ -577,7 +602,7 @@ def gen_maps():
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
         if m.get("legendaries"):
             chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
-            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []
@@ -659,7 +684,7 @@ def gen_farm():
             rows.append([c.get("name", cid), num(c.get("grow", "")), num(c.get("price", "")), c.get("desc", "")])
         body += "\n\n## Crops\n\nA watered plant grows a stage every %s seconds at home, and every expedition grows everything a stage.\n\n" % num(gd_const("core/data.gd", "WATER_TIME") or "?")
         body += table(["Crop", "Stages", "Seed price (gems)", "What it's for"], rows)
-    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin"])
+    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin_home"])
 
 # ------------------------------------------------------------------ controls
 def gen_controls():
@@ -712,6 +737,8 @@ def _combo_ours(row, modes, default):
         return modes[mode] + ("" if row else " (default)")
     return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
 
+HELD_FIRE_SLOTS = dict(DASH_SLOTS, dash="a dash", all="any slot")      # held_fire keys -> the pair's label
+
 def _combo_rows(hero, f):
     """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
     rows = []
@@ -730,6 +757,9 @@ def _combo_rows(hero, f):
             if move in held:
                 rows.append([hero, "hold %s through %s" % (label, name), _src(held[move]),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
+    for slot, row in f.get("held_fire", {}).items():
+        label = HELD_FIRE_SLOTS.get(slot, slot)
+        rows.append([hero, "hold LMB through %s" % label, row.get("source", ""), row.get("ours", "")])
     return rows
 
 MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
@@ -754,6 +784,27 @@ def _dash_ours(row, modes):
     if row.get("reason"):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
+
+AIR_CAST_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)")]
+AIR_CAST_H = {"keep": "keeps the jump's speed (steers as in any jump)", "slow": "slows below the jump's speed",
+              "zero": "stops", "push": "driven faster than the jump"}
+AIR_CAST_V = {"fall": "falls as from the jump", "hover": "holds the height", "rise": "rises",
+              "slow": "falls slower than the jump", "drop": "drops faster (lands early)"}
+AIR_CAST_WHEN = {"landing": "waits for the landing; in the air the jump goes on", "no": "not cast in the air (the press is dropped)"}
+
+def _air_cast_rows(hero, f):
+    """LMB, RMB, E and R cast at the top of a running jump (air_cast rows, --air-cast-check)."""
+    rows = []
+    for slot, label in AIR_CAST_SLOTS:
+        row = f.get("air_cast", {}).get(slot, {})
+        cast = row.get("cast", "air")
+        h = AIR_CAST_H.get(row.get("h"), "no row")
+        v = AIR_CAST_V.get(row.get("v"), "no row")
+        ours = AIR_CAST_WHEN[cast] if cast in AIR_CAST_WHEN else "horizontal: %s; vertical: %s" % (h, v)
+        if row.get("ours"):
+            ours += " (%s)" % row["ours"]
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
 
 TURN_SLOTS = [("lmb", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("e_recast", "E recast"), ("x", "ult (X)"),
               ("x_recast", "ult (X) recast")]
@@ -800,9 +851,6 @@ AIR_AUDIT = {
     "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
 }
 
-AIR_NAMES = {"thief": "Sable", "archer": "Hem", "mage": "Vex", "gunslinger": "Ghost", "tender": "Elluna", "rimewright": "Claire",
-             "dolm": "Tarek", "ostra": "Void", "bulwark": "Oath", "juggernaut": "Kael", "ashwick": "Cinder", "dredge": "Grimble"}
-
 def _air_audit_table():
     rows = []
     for aid in ARCH_ORDER:
@@ -814,7 +862,7 @@ def _air_audit_table():
         ground = "%s (cd %s s)" % (d.get("name", "?"), d.get("cd", "?"))
         if isinstance(dist, (int, float)) and tm:
             ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
-        rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
+        rows.append(["%s (%s)" % (ARCH.get(aid, {}).get("base_name", aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
 DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
@@ -862,7 +910,11 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n"
             "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
-            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n")
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n"
+            "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
+            "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
+            "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
@@ -872,6 +924,15 @@ def gen_dash_flow():
              "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
     body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
                   [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
+    body += ("\n\n## Cast at the top of a jump\n\nOne row per hero and slot, from `air_cast` in the same files: running, "
+             "jumping and pressing the slot at the jump's top, keys held forward. \"Ours\" is what the next 0.4 s do to the "
+             "horizontal and vertical speed against the same jump with no cast, measured headless by `--air-cast-check`, "
+             "which fails when the game stops doing it. The source's falling physics (AirControl 0.015, "
+             "sv/briefs/physics.md:46) is what \"steers as in any jump\" copies. Verdict: match "
+             "(the source settles it and ours does the same), owner (an owner call), or [?] (the source doesn't settle "
+             "it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _air_cast_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
     body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")

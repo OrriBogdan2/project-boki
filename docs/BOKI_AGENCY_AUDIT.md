@@ -5,7 +5,7 @@ takes over the controls. Boki act on foes, the world and the hunter's stats (hea
 exception is the obvious abyss rescue (Moonlift). Owner 11-08: "make sure the boki changes to not interfere
 with ur gameplay (only buff/aid it)". Decision note: [0022](decisions/0022-boki-never-move-you.md).
 
-Re-audited on main d255acbee: every kin_v2 species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
+Re-audited on main d255acbee: every kin species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
 evolution_v2 (10), the throw, carry styles and passives, and the Boki body itself. The starting point was the
 item 186 audit (briefs/BOKI_PLAYER_AUDIT.md, main 7907d9af).
 

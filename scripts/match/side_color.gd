@@ -66,6 +66,13 @@ static func mate(i: int) -> Color:
 	var cols: Array = palette()["mates"]
 	return cols[i % cols.size()]
 
+# One draw order for everything flat on the ground (a material's render_priority): ownership rings under every
+# cast, a teammate's under yours, a rival's telegraphs on top, so the thing that can hurt you is never buried.
+const ORDER_RING := -2
+const ORDER_ALLY := 0
+const ORDER_OWN := 1
+const ORDER_FOE := 3
+
 ## The colour of team `team` (and `is_you` for the viewer's own body) as seen by the viewer on `viewer_team`.
 static func of_team(viewer_team: int, team: int, is_you := false) -> Color:
 	if is_you:
@@ -94,3 +101,10 @@ static func fx(m: Node, by: Node, col: Color) -> Color:
 	if int(body.get("team")) == int(lp.get("team")):
 		return Color(col.lerp(ally(), FX_ALLY_K), col.a)
 	return Color(col.lerp(rim(), FX_FOE_K), col.a)
+
+## Where `by`'s ground look sits in the draw order (render_priority): a rival's on top, then yours, then a teammate's.
+static func order(m: Node, by: Node) -> int:
+	var c := of(m, by)
+	if c == foe():
+		return ORDER_FOE
+	return ORDER_ALLY if c == ally() else ORDER_OWN

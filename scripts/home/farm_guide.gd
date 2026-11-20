@@ -52,6 +52,7 @@ func refresh() -> void:
 	_refresh_hint()
 
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
+## Coming back, the world prompt and crop label show only if the step on now has them (not the last step's).
 func set_quiet(on: bool) -> void:
 	quiet = on
 	if on:
@@ -59,6 +60,8 @@ func set_quiet(on: bool) -> void:
 	for c in [tracker, hint_box, marker, crop_lbl]:
 		if is_instance_valid(c):
 			c.visible = not on
+	if not on:
+		_update_marker(0.0)
 
 ## G: the Goals line opens into the whole list and back. False when there is no card (the tutorial runs).
 func toggle_goals() -> bool:
@@ -156,7 +159,7 @@ func _refresh_hint() -> void:
 	if (id == "out") != stay_shown:
 		_skip_buttons()
 	var s := FarmTutorial.hint_text(id)
-	if id == "house" and FarmTutorial.stage(id) == "wait":
+	if id in ["house", "hammer"] and not FarmHob.house_entry().is_empty():      # every swing shows on the line
 		s = "%s (%s)" % [s, _site_progress()]
 	var txt := s.strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
@@ -222,9 +225,12 @@ func skip() -> void:
 		FarmTutorial.give_food()
 		if FarmTutorial.toy_spot().x == INF:
 			place_toy()
-	elif FarmHob.house_entry().is_empty():
-		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	else:
+		if FarmHob.house_entry().is_empty():
+			place_house()
+		var house := FarmHob.house_entry()
+		if FarmSites.has_site(house):
+			FarmSites.top_up(house)
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
