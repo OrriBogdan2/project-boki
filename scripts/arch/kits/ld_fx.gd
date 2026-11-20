@@ -318,22 +318,6 @@ func _pose_volley(e: Dictionary, n: Node3D) -> void:
 	var smear := maxf(0.01, VOLLEY_SMEAR * (1.0 - fade))
 	(n.get_node("Trail") as Node3D).scale = Vector3(VOLLEY_WIDTH, VOLLEY_WIDTH, smear)
 
-## A camera-facing puff that swells and fades (a dash's after-image): mode M_FLAME burns through the fire
-## ramp on its own, M_ORB uses col (the rim) and col2 (the centre).
-func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: float) -> void:
-	var kind := "puff%d" % mode
-	var n := _fx(kind, mode, _quad_mesh(), true)
-	n.global_position = at
-	var e := _play(n, kind, col, col2, dur, Vector3.ONE * scl, n.material_override)
-	e["grow"] = 0.6
-
-## A thin ribbon of smoke rising from `at` (camera-facing, `scl` m half-height, its foot on `at`): it wavers as it
-## climbs, breaks into streaks and fades (Dredge's stack); col its top, col2 its foot, col.a its cover.
-func wisp(at: Vector3, col: Color, col2: Color, scl: float, dur: float) -> void:
-	var n := _fx("wisp", M_SMOKE, _quad_mesh(), true)
-	n.global_position = at + Vector3(0, scl * 0.9, 0)
-	_play(n, "wisp", col, col2, dur, Vector3.ONE * scl, n.material_override)
-
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	var ln := Vector2(b.x - a.x, b.z - a.z).length()
