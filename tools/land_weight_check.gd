@@ -4,6 +4,8 @@ extends RefCounted
 ## down, and the squash it plays (land_k) must bottom out at the class's depth and be gone in the class's seconds
 ## (one frame either way). The source's two reads stay pinned: the light thief's jump is up again in 0.15 s, the
 ## heavy slam is the deepest squash and ~0.5 s long; and heavier never lands quicker or shallower than lighter.
+## The .glb land clip (WardenClips.land_play): on a footage cell ("clip") every Hero of the class holds it for the
+## cell's seconds and plays the same keys of it; elsewhere it keeps the Hero's own warden_anim land data.
 ## No burst, ring or disc on landing (DECISIONS): the squash is the whole of it. Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -45,6 +47,7 @@ func run(main: Node) -> void:
 				"%s: heavier never squashes shallower than lighter" % way)
 		ok(lengths["heavy" + way] >= lengths["medium" + way] and lengths["medium" + way] >= lengths["light" + way] - DT,
 				"%s: heavier never settles quicker than lighter" % way)
+	_clips()
 	print("LAND_WEIGHT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -74,3 +77,23 @@ func _land(cls: String, fall_v: float) -> Vector2:
 		frames += 1
 	m.free()
 	return Vector2(deepest + an.land_rate * DT, (frames + 1) * DT)
+
+## Every Hero with a land clip: the footage cells retime it to the class's seconds over the same keys.
+func _clips() -> void:
+	for a: String in WardenGlb.ART:
+		var land: Dictionary = WardenClips.data(String(WardenGlb.ART[a])).get("land", {})
+		if land.is_empty():
+			continue
+		var cls := Arch.weight(a)
+		for tier in [1, 2, 3]:
+			var way: String = ["hop", "hop", "drop", "dive"][tier]
+			var base: Dictionary = land["hop" if tier == 1 else "drop"]
+			var got := WardenClips.land_play(base, cls, tier)
+			var cell: Dictionary = Content.rules("land_feel")[cls][way]
+			if not bool(cell.get("clip", false)):
+				ok(float(got["dur"]) == float(base["dur"]), "%s %s %s: own land clip hold %.2f s" % [a, cls, way, got["dur"]])
+				continue
+			var keys := float(base["dur"]) * float(base.get("rate", 1.0))
+			var same := absf(float(got["dur"]) * float(got["rate"]) - keys) < 0.001
+			ok(absf(float(got["dur"]) - float(cell["s"])) < 0.001 and same,
+					"%s %s %s: land clip held %.2f s (data %.2f), same %.2f s of keys" % [a, cls, way, got["dur"], cell["s"], keys])
