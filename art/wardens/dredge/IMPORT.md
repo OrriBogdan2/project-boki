@@ -100,3 +100,18 @@ them and they drew black). `--stretch-check` unchanged from r2: worst 6.56x (led
 Still open: at a low side angle (~40 deg, knee height) a small dark gap shows between the hem and the thigh (a hollow under the cloth);
 the kept junk ball floats free of the pack in run/crouch side views (no chain); the gun is on the hip (turnaround).
 Views (front/3/4/side/back, eye+knee, head, crotch, idle/run/crouch), turntable and clip MP4s: `~/gens/hunter-regen-1120/dredge/r3/`.
+
+**Regen r4 (2026-11-20, job 20261120-143656-a6, same branch, draft; no new Meshy gens):** same master, rig and weights as r3; three of
+r3's open items fixed. (1) *Dark gap under the hem / dark patches at the back hip*: the loincloth is a thin one-sided shell and the
+toon outline is an inverted hull, so from behind and low the inside of its far panel drew black (the mesh has no hole there; the
+scan's pelvis is closed). New `v95_swap` spec key `lining`: every cloth face in a box (paint hue/value ranges) gets a twin wound
+the other way, 4 mm inside, same paint and weights, ink room 0: +1840 tris (47.8k). (2) *Junk ball floating in run/crouch*: the
+`ball` bone sat under the root and only the barge clips (lunge, lunge_out, pounce) key it, so a dipping body left it in the air. New
+spec key `follow` {ball: head} runs `tools/art1/glb_follow.py` after the export: the ball node becomes a child of `head` (the bone
+the pack's skin rides), its rest carried into that frame, the three barge clips keep their world track (keys re-expressed per
+key). The game checks a variant bone's parent against `extra_bones` in `content/rules/warden_anim/dredge.json`, so that file now
+says `"ball": "head"` (a glb and that file must change together, or the model falls back to the procedural one). The ball is also
+the clip-sheet and in-game ball: it now hugs the pack in idle, walk, run and crouch. At the first frame of a pounce the ball is
+still keyed at its old world rest point (unchanged from live). `--stretch-check` unchanged: worst 6.56 (ledge), median 3.74,
+4 clips over 5x (r3 and r4 identical; live 8.52 / 4.36 / 20). Not changed: the master's goo arm hangs out from the side
+(r2's re-pose to clear the leg) where the turnaround's hangs to the floor. Raws, logs, proof: `~/gens/hunter-regen-1120/dredge/r4/`.
