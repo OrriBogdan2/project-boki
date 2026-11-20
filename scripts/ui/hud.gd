@@ -129,6 +129,7 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
@@ -1050,7 +1051,7 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
-	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
+	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "Spend point" at level 6
 	var tw := TextCache.width(big, txt, 11)
 	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
@@ -1178,13 +1179,13 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## What the R slot says about its lock: "LV 6" until then, "Spend point" with a point to spend on it,
 ## "" once it's unlocked.
 func r_lock_text(p: Hunter) -> String:
 	if int(p.slot_lv.get("ult", 0)) > 0:
 		return ""
 	if p.can_level("ult"):
-		return "UNLOCK"
+		return HudSlot.POINT_TAG
 	if p.lvl >= int(Hunter.ULT_AT[0]):
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])
@@ -1641,6 +1642,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
