@@ -150,3 +150,15 @@ Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) tw
 top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
 charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
 boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.
+
+**The end phase (port of ext/combat-blight-endgame onto main, P17).** From the tide's last close (`Heart.last_close`, 10:00, with the
+final seat) the ring closes on from `tide_r1` to `end_r` over `end_close_s` and holds to the islands' fall. A tick ramps from the last
+stage's damage to `end_dmg_k` times it (`Heart.tick_dmg`); in the end phase the tide also wears down those the Blight downed itself
+(`_by_blight`: no attacker, or a Blight mob), never one a rival downed; every Blight but its nests leaves the final circle
+(`BlightDir._despawn_tick`). `end_r` is 28 (70 m on the 2.5x Hollow Crown): The Crown's raised Heart ground plus the feet of its three
+stairs, 50-63 m out, so the way up never lies in the Blight (20 = 50 m left squads stuck below the cliff: 3 of 8 `--final=4` seeds
+never settled). Bots: no tile path leads farther out than the ring or the bot (`BotWays.path_r`), a ring goal may search a wide window
+(`PATH_SLACK_RING` 40, 14000 steps), a detour stays inside the ring, the spark seat is gone once the Blight closes over the Gate, and
+from `bots.end_edge_m` inside the edge a bot walks in. Result, `--ways-out-sim --final=4` seeds 1-30: 30 of 30 settled within 90 s
+(0-12 s after 10:00), no Blight down in the safe ring (the sim counts a mutual wipe as settled). Left: nests inside the circle can
+still wake on noise and release Skitters (the circle's Blight count was 7-12 in two runs; no down came of it).

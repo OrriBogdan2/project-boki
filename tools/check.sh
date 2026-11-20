@@ -45,4 +45,7 @@ if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ] && [ "${1:-}" != "--n
 	fi
 	rm -f "$plist" "$pout"
 fi
+if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ]; then
+	python3 tools/warden_glb_guard.py || { echo "FAILED: hunter glbs changed outside an Art: commit"; exit 1; }
+fi
 exec "$VENV/bin/python" -I tools/lint_gate.py "$@"
