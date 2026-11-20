@@ -12,7 +12,9 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
     With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
     a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax;
-    `meshy_regions` (the `regions` format) then move the parts its humanoid rig has no bone for whole onto ours.
+    `meshy_regions` (the `regions` format) then move the parts its humanoid rig has no bone for whole onto ours,
+    `meshy_reach` {"arm"|"thigh": [r0, r1]} moves limb weight far from the limb's bones to the hips (a loincloth, a skirt),
+    and `meshy_smooth` passes and `meshy_relax` blend and relax the result as bone heat's are.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -613,6 +615,21 @@ def meshy_weights(low, arm, P):
         leg = names.index("thigh." + sd)
         G[:, hips] += G[:, leg] * up
         G[:, leg] *= 1 - up
+    reach = SPEC.get("meshy_reach", {})     # {"arm": [r0, r1], "thigh": [r0, r1]}: limb weight past r1 from its bones
+    for sd in "RL" if reach else ():        # goes to the hips, faded from r0 (a cropped jacket's front panels that Meshy
+        sh, el, wr = (S_J[j + "." + sd] for j in ("shoulder", "elbow", "wrist"))   # gives the arm, a flared skirt the thigh)
+        for limb, segs, bones in (("arm", [(sh, el), (el, wr), (wr, wr + 0.9 * (wr - el))], ARM),
+                                  ("thigh", [(S_J["hip." + sd], S_J["knee." + sd])], ("thigh",))):
+            if limb not in reach:
+                continue
+            r0, r1 = reach[limb]
+            d = np.min([np.linalg.norm(P - (a0 + np.clip(((P - a0) @ (a1 - a0)) / ((a1 - a0) @ (a1 - a0)), 0, 1)[:, None]
+                                            * (a1 - a0)), axis=1) for a0, a1 in segs], axis=0)
+            cols = sorted({names.index(ours(b + "." + sd)) for b in bones})
+            off = G[:, cols] * (1 - np.clip((r1 - d) / (r1 - r0), 0, 1))[:, None]
+            G[:, hips] += off.sum(1)
+            G[:, cols] -= off
+            print("meshy: %s %s weight off %d vertices past %.2f m" % (limb, sd, (off.sum(1) > 0.05).sum(), r0), flush=True)
     rigid = 0
     for piece in np.unique(lab):
         m = lab == piece
@@ -882,7 +899,8 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0))).T))
+    passes = int(SPEC.get("meshy_smooth", 0)) if meshy else int(SPEC.get("smooth", 0))     # (meshy_smooth: blends a region's edge)
+    gr = dict(zip(names, smooth_weights(low, W, passes).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
@@ -952,7 +970,7 @@ def main():
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "fit.blend"))      # (before the relax: for looking at the weights)
     for k, v in SPEC.get("relax", {}).items():      # e.g. {"CUTS": 0}: relax only, no cut-and-cap holes
         setattr(skin_relax, k, v)
-    if meshy:       # (Meshy's weights stay as they are)
+    if meshy and not SPEC.get("meshy_relax"):       # (Meshy's weights stay as they are; meshy_relax: relaxed like bone heat's)
         print("SWAP weights meshy: skin_relax skipped", flush=True)
     elif bpy.data.actions:
         skin_relax.relax(arm)
