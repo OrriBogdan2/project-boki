@@ -105,7 +105,7 @@ kickstarted ally), and the Faultline's `fault_slam` (the near cell), `fault_land
 dust rings are cut: no rings on a landing), `fault_cell` (each cell heaving up) and `fault_foe` (a foe thrown). All are
 `"net": false`, as the code bursts were (the lane and the ring ride their own events). Timings, hit shapes and sounds are
 unchanged. `BjornFx` keeps its pooled meshes (whirl trail, beacon, wake, the plated wall) with their colours from the
-palette (`main`, `ember`, `slab`, `ivory`), and the shared charge ring is his ivory, not gold.
+palette (`main`, `ember`, `slab`, `ivory`), and the shared charge ring is his ivory, not gold. GPU strips at match zoom, grey = main (top), border green = better, grey = no change: `docs/shots/albert-vfx-data/{throw,dash,wall,r}_before_after.jpg` (jobq 20261120-145918-29886 before, -145258-27518 after, `--hero-vfx-reel --reel-hero=bulwark`). The throw and the 360 Smash look the same (their looks were already data); the Faultline landing loses its dust rings, the wall and charge ring are ivory.
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
