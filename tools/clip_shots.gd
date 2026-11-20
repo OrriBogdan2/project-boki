@@ -185,13 +185,16 @@ func _cast(model: Node3D, sync: Node, fps: float, out: String, kmove: String, sp
 
 ## --proc: a Hunter with no keyed clips (Gil: HunterAnim poses him) played through PROC_SEGS in one take, every 1/fps s,
 ## as <dir>/proc/f###.png, and <dir>/proc/segments.tsv (label, first frame, frame count) for the captions. The rig is
-## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter.
+## run 1.5 s idle before the first frame, so frame 0 is already the posed Hunter. A segment's 5th field: "jump" (a 0.9 s hop,
+## the root raised on a parabola and the airborne state), "hit" (hit_t from 0.1 s), "fall" (the knocked-down beat, 0..1),
+## "t0=<s>" (the move's clock starts there: the surfacing take skips its first key, the body still under the ground).
 const PROC_SEGS := {
-	"gil": [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0], ["dash: Ground Swim dive", "gil_dive", 0.5, 0.0],
-		["dash: surfacing", "gil_surface", 0.55, 0.0], ["attack 1: thrust", "gil_thrust_1", 0.4, 0.0],
+	"gil": [["idle", "", 1.6, 0.0], ["walk", "", 1.6, 1.8], ["run", "", 1.6, 5.0], ["jump", "", 0.9, 0.0, "jump"],
+		["hit", "", 0.8, 0.0, "hit"], ["dash: Ground Swim dive", "gil_dive", 0.4, 0.0],
+		["dash: surfacing", "gil_surface", 0.8, 0.0, "t0=0.07"], ["attack 1: thrust", "gil_thrust_1", 0.4, 0.0],
 		["attack 2: thrust", "gil_thrust_2", 0.4, 0.0], ["attack 3: lunge", "gil_lunge", 0.6, 0.0],
 		["RMB: potion toss", "gil_throw", 0.6, 0.0], ["E: Riptide spin", "gil_spin", 1.0, 0.0],
-		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0]],
+		["R: Tidal Wave surf", "gil_surf", 1.2, 0.0], ["knocked down", "", 1.2, 0.0, "fall"]],
 }
 
 
@@ -209,14 +212,33 @@ func _proc(model: Node3D, id: String, fps: float, out: String) -> void:
 	for seg in PROC_SEGS.get(id, [["idle", "", 1.6, 0.0], ["run", "", 1.6, 5.0]]):
 		var n := int(round(float(seg[2]) * fps))
 		tsv += "%s\t%d\t%d\n" % [seg[0], i, n]
+		var extra := String(seg[4]) if seg.size() > 4 else ""
+		var t0 := float(extra.substr(3)) if extra.begins_with("t0=") else 0.0
+		var base_y := model.position.y
 		for f in n:
+			var t := float(f) / fps
 			var s := {"fired": 99.0, "face": face, "grounded": true, "vel": fwd * float(seg[3])}
 			if String(seg[1]) != "":
 				s["kmove"] = seg[1]
-				s["kmove_t"] = float(f) / fps
+				s["kmove_t"] = t0 + t
+			if extra == "jump":
+				# a hop: 0.1 s crouch, 0.6 s up and down (6 m/s take-off), 0.2 s landing
+				var a := clampf((t - 0.1) / 0.6, 0.0, 1.0)
+				var air := t > 0.1 and t < 0.7
+				s["grounded"] = not air
+				s["vel"] = Vector3(0, 6.0 * (1.0 - 2.0 * a), 0) if air else Vector3.ZERO
+				s["air_h"] = 4.0 * 0.9 * a * (1.0 - a)
+				model.position.y = base_y + float(s["air_h"])
+			elif extra == "hit":
+				s["hit_t"] = t - 0.1 if t >= 0.1 else 99.0
+				s["hit_dir"] = Vector2(0, -1)
+			elif extra == "fall":
+				s["fall"] = clampf(t / float(seg[2]), 0.0, 1.0)
+				s["downed"] = true
 			an.update(1.0 / fps, s)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+		model.position.y = base_y
 	var fa := FileAccess.open(dir.path_join("segments.tsv"), FileAccess.WRITE)
 	fa.store_string(tsv)
 	fa.close()
