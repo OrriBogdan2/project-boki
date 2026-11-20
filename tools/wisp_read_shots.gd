@@ -13,6 +13,7 @@ const HUNTER_W := 0.9                      # m
 var hits := {}          # wisp owner -> summed share of other Hunters' bodies its wisp hid
 var own := {}           # ... of its own owner's body
 var frames := 0
+var draws := 0.0         # summed draw calls per frame
 var wisps := 0
 var sizes: Array = []    # px across of every wisp every frame
 
@@ -39,8 +40,9 @@ func run(main_node: Node) -> void:
 			sum += float(v)
 		return sum / maxf(1.0, float(wisps) * float(frames))
 	sizes.sort()
-	print("WISPREAD frames=%d wisps=%d wisp_px=%.0f body_hidden: own=%.1f%% others=%.1f%% (mean per wisp per frame)" % [
-			frames, wisps, float(sizes[sizes.size() / 2]), 100.0 * avg.call(own), 100.0 * avg.call(hits)])
+	var hid := "body_hidden own=%.1f%% others=%.1f%%" % [100.0 * avg.call(own), 100.0 * avg.call(hits)]
+	print("WISPREAD frames=%d wisps=%d wisp_px=%.0f %s (mean per wisp per frame) draw_calls=%.0f" % [
+			frames, wisps, float(sizes[sizes.size() / 2]), hid, draws / maxf(1.0, float(frames))])
 	main.get_tree().quit(0)
 
 func _fight_shots() -> void:
@@ -97,11 +99,12 @@ func _body_rect(feet: Vector3) -> Rect2:
 ## than that Hunter. Your own Hunter's wisp always sits on it (shoulder height); a rival's is the real problem.
 func _measure() -> void:
 	frames += 1
+	draws += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	for k in m.kins:
 		if not k.wisp or k.state != "shoulder" or k.owner_h == null:
 			continue
 		var c := m.cam.unproject_position(k.global_position)
-		var edge: Vector3 = k.global_position + Vector3(BokiWispLook.BODY_RADIUS * KinWisp.SIZE, 0, 0)
+		var edge: Vector3 = k.global_position + Vector3(BokiWispLook.BODY_RADIUS * KinWispForm.SIZE, 0, 0)
 		var px := absf(m.cam.unproject_position(edge).x - c.x)
 		var box := Rect2(c - Vector2(px, px), Vector2(px, px) * 2.0)
 		var depth := m.cam.global_position.distance_to(k.global_position)
