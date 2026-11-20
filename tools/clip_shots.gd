@@ -103,16 +103,40 @@ func run(main: Node) -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 		model.rotation.y = deg_to_rad(yaw)
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
+	var twists: Array = [0.0]      # (review tree only) --twists=45,-85: the legs held this far behind the aim (TurnStep.lag)
+	for a4 in OS.get_cmdline_user_args():
+		if a4.begins_with("--twists="):
+			twists = []
+			for tv in a4.substr(9).split(",", false):
+				twists.append(float(tv))
+	var jobs: Array = []
 	for nm in names:
+		for tw in twists:
+			jobs.append([nm, tw])
+	for jb in jobs:
+		var nm: String = String(jb[0])
+		_twist = deg_to_rad(float(jb[1]))
+		_twist_model = model
 		var anim_name := String(nm)
 		if anim_name == "turntable" or not clips.lib.has_animation(anim_name):
 			continue
 		var dir := out.path_join(anim_name)
+		if _twist != 0.0:
+			dir = out.path_join(anim_name + ("_tp%02d" % int(jb[1]) if float(jb[1]) > 0.0 else "_tm%02d" % int(-float(jb[1]))))
 		DirAccess.make_dir_recursive_absolute(dir)
 		var length := clips.lib.get_animation(anim_name).length
 		clips.force = {"clip": anim_name, "t": 0.0}
 		for k in 8:
+			_set_twist()
 			sync.call("_process", 1.0 / 30.0)
+		if _twist != 0.0:
+			var sk: Skeleton3D = clips.skel
+			var rb := WardenSkeleton.find(sk, "root")
+			var hb := WardenSkeleton.find(sk, "hips")
+			var tb := WardenSkeleton.find(sk, "thigh.L")
+			print("TWIST_CHECK %s twist=%d root_yaw=%.1f hips_yaw=%.1f thighL_x=%.3f" % [anim_name, int(jb[1]),
+					rad_to_deg(sk.get_bone_global_pose(rb).basis.get_euler().y), rad_to_deg(sk.get_bone_global_pose(hb).basis.get_euler().y),
+					sk.get_bone_global_pose(tb).origin.x])
 		var n := int(ceil(length * fps)) + 1
 		var picks: Array = []
 		for k in pick:
@@ -120,6 +144,7 @@ func run(main: Node) -> void:
 		for i in n:
 			var t := minf(float(i) / fps, length - 0.001)
 			clips.force = {"clip": anim_name, "t": t}
+			_set_twist()
 			sync.call("_process", 1.0 / fps)
 			if pick > 0 and not picks.has(i):
 				continue
@@ -183,6 +208,20 @@ const AUDIT_VIEWS := [
 	["m150", 150.0, 21.0, 0.8, 9.4, 15.0], ["m330", 330.0, 21.0, 0.8, 9.4, 15.0],
 ]
 var _lights: Array = []
+var _twist := 0.0
+var _twist_model: Node3D
+
+## (review tree only) Standing with the aim turned: TurnStep keeps the legs `lag` behind the facing (up to STEP_AT, 90 deg).
+func _set_twist() -> void:
+	if _twist == 0.0 or _twist_model == null:
+		return
+	var ts := _twist_model.get_meta(TurnStep.META, null) as TurnStep
+	if ts == null:
+		print("TWIST_CHECK no TurnStep")
+		return
+	ts.held = false
+	ts.t = -1.0
+	ts.lag = _twist
 
 func _view(v: Array) -> void:
 	cam.fov = float(v[5])
