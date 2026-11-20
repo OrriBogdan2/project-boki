@@ -15,7 +15,7 @@ const RUN := Vector3(0, 0, -4.0)
 ## the second clip) or a longer "fade", and then drops its entry.
 const CANCEL_OPEN := {
 	"juggernaut jug_reel@0.30>jug_spin": "1.16 m, the spin's first pose is far from the reel",
-	"juggernaut jug_lunge_wind@0.50>jug_lunge": "0.79 m into the lunge (main's Kael clip retime, also red in --clip-check)",
+	"juggernaut jug_lunge_wind@0.50>jug_lunge": "0.79 m into the lunge (Kael retime; --clip-check too)",
 	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.74 m in a frame",
 	"bulwark bul_lumber@0.20>bul_ult_wind": "0.50 m into the ult wind-up",
 	"bulwark bul_throw@0.10>bul_recall": "0.70 m into the recall",
