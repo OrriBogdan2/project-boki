@@ -171,6 +171,7 @@ static func _name_tint(H, role: Color) -> Color:
 
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	TextCache.world = true      # plates hang on the world over each head: their text keeps its design size
+	SafeArea.note_as("plate", Rect2(sp - LabelClash.PLATE, LabelClash.PLATE * 2.0))
 	_draw_plate(H, sp, h, show_name)
 	TextCache.world = false
 

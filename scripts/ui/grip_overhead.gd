@@ -45,6 +45,7 @@ static func draw(hud, sp: Vector2, h) -> void:
 		return
 	var c: CanvasItem = hud.c
 	var cs := centres(sp)
+	SafeArea.note_as("grip_icons", Rect2(cs[0] - Vector2(ICON, ICON) * 0.5, Vector2(cs[2].x - cs[0].x + ICON, ICON)))
 	var items := row(h)
 	for i in 3:
 		var it: Dictionary = items[i]

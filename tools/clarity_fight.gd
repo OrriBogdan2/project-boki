@@ -63,13 +63,20 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		await main.get_tree().process_frame
 		t += DT
 		if t >= next:
+			SafeArea.seen.clear()  # the HUD's drawn marks (plates, icons, badges) are recorded for tally()
+			SafeArea.recording = true
+			m.hud.c.queue_redraw()
+			m.hud.panels.queue_redraw()
+			await main.get_tree().process_frame
+			SafeArea.recording = false
 			await on_frame.call(m, i)
 			i += 1
 			next += EVERY_S
 	return m
 
 
-## Every element over or near a Hunter this frame: [kind, what, hunter count] (kind: text, number, icon, ring, fx).
+## Every element over or near a Hunter this frame: [kind, what, hunter count] (kind: text, number, icon, ring, fx for
+## the world; hud for a HUD mark recorded by SafeArea under its group, such as "plate" or "grip_icons").
 static func tally(m: Match) -> Array:
 	var zones: Array[Rect2] = []
 	for h: Hunter in m.hunters:
@@ -81,16 +88,24 @@ static func tally(m: Match) -> Array:
 		var v := n as VisualInstance3D
 		if not v.is_visible_in_tree() or _body(v):
 			continue
-		var box := _screen(m.cam, v)
-		if not box.has_area():
-			continue
-		var on := 0
+		var on := _on(zones, _screen(m.cam, v))
+		if on > 0:
+			out.append([_kind(v), _what(v), on])
+	for g: String in SafeArea.seen:
+		for r: Rect2 in SafeArea.seen[g]:
+			var on := _on(zones, r)
+			if on > 0:
+				out.append(["hud", g, on])
+	return out
+
+
+static func _on(zones: Array[Rect2], box: Rect2) -> int:
+	var on := 0
+	if box.has_area():
 		for z in zones:
 			if z.intersects(box):
 				on += 1
-		if on > 0:
-			out.append([_kind(v), _what(v), on])
-	return out
+	return on
 
 
 static func _centre(m: Match) -> Vector3:

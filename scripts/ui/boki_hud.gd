@@ -453,6 +453,7 @@ static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
 	if sh.y > 0.0:
 		shell_bar(H, Rect2(Vector2(x0, sp.y - 18.0), Vector2(w, 6.0)), sh.x / sh.y, glow, fl2)
 	var tr := Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 3.0))
+	SafeArea.note_as("merge_form_name", Rect2(Vector2(x0, sp.y - 40.0), Vector2(w, 28.0)))
 	H.c.draw_rect(tr, Color(0.03, 0.03, 0.05, 0.8))
 	H.c.draw_rect(Rect2(tr.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.75))
 	H._ctext(Vector2(sp.x, sp.y - 28.0), "%s  %ds" % [name.to_upper(), int(ceil(left))], 11, glow, H.big)
