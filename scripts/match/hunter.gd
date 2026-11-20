@@ -1123,7 +1123,7 @@ func _shove_along(dt: float) -> void:
 		shove["hit"][f.nid] = true
 		var side := Vector2(f.pos.x - pos.x, f.pos.z - pos.z).normalized()
 		var push := (roll_dir * 0.7 + side * 0.5).normalized() * float(shove["kb"])
-		var so := {"kb": push, "lift": 2.5, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
+		var so := {"kb": push, "lift": 2.5 if float(shove["kb"]) > 0.0 else 0.0, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 

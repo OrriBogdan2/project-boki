@@ -4,7 +4,9 @@ extends RefCounted
 ## not; one right behind you is (the near circle); crouching hides you at a range a standing rival is seen from;
 ## a hiding rival (crouched, in grass) shows no plate unless revealed, downed or a teammate; a rival out past the
 ## wedge's side who shoots or is hit is seen for the reveal's time inside her own soft lit circle (RevealLight), which
-## fades out with it. Never touches the save.
+## fades out with it. Outside sight is a neutral grey fog in every weather (no blue behind you): the fog
+## colour has no tint constant, and every lit world shader greys its light, shadow tint and ambient where fogged
+## (a blue cast fails here; GPU numbers in docs/specs/VISION_LOOK.md). Never touches the save.
 
 const WEDGE_DEG := 120.0   # degrees: a wide cone in front of you
 const SIDE_IN := 50.0      # degrees off your aim: inside the cone's side (60)
@@ -16,6 +18,8 @@ const REVEAL_R := 2.0      # m: a revealed rival's lit circle (docs/specs/VISION
 const SHOT_REVEAL := 1.2   # s: a shot or a strike gives you away this long
 const HIT_REVEAL := 1.0    # s: so does being hit
 const AWAY_DEG := 130.0    # degrees off your aim: well outside the wedge
+## The lit world shaders that draw the fog: each greys its light where fogged (shaders/vis.gdshaderinc)
+const FOG_LIT := ["terrain", "grass", "flora", "wall", "wall_v1", "toon"]
 
 var bad := 0
 
@@ -40,6 +44,7 @@ func run(main: Node) -> void:
 	for h in mates: h.out = false
 	_plates(m)
 	_reveal(m)
+	_grey_fog(m)
 	m.queue_free()
 	print("VISION DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -165,3 +170,30 @@ func _reveal(m: Match) -> void:
 			ok(_lit(m, mate) == 0.0, "a teammate who shoots gets no circle")
 		return
 	ok(false, "an open spot %.0f degrees off your aim (seed 5101)" % AWAY_DEG)
+
+## No blue (or any hue) outside sight: the fog colour multiplies by greys only, and each lit world shader writes the
+## fog share for light(), greys the light colour and the cool shadow tint there, and swaps the ambient for its grey.
+func _grey_fog(m: Match) -> void:
+	var src := FileAccess.get_file_as_string("res://shaders/vis.gdshaderinc")
+	var at := src.find("vec3 vis_apply(")
+	var body := src.substr(at, src.find("\n}", at) - at)
+	var tints := 0
+	var re := RegEx.create_from_string("vec3\\(([-0-9.]+), *([-0-9.]+), *([-0-9.]+)\\)")
+	for r in re.search_all(body):
+		var x := float(r.get_string(1))
+		if not (is_equal_approx(x, float(r.get_string(2))) and is_equal_approx(x, float(r.get_string(3)))):
+			tints += 1
+	ok(at >= 0 and tints == 0 and not src.contains("VIS_COOL"),
+		"the fog colour is grey: no tint in vis_apply (%d)" % tints)
+	for n in FOG_LIT:
+		var s := FileAccess.get_file_as_string("res://shaders/%s.gdshader" % n)
+		var light := s.substr(s.find("void light()"))
+		var greyed := s.contains("vis_f = ") and light.contains("vis_grey(LIGHT_COLOR, vis_f)") \
+			and not light.contains("* LIGHT_COLOR")
+		var tone_ok := not light.contains("* tone;") and not light.contains("DIFFUSE_LIGHT += rim_color")
+		var amb_ok := s.contains("AO = vis_ao(vis_f)") \
+			and s.contains("EMISSION += vis_ambient(c, vis_f, VERTEX, INV_VIEW_MATRIX)")
+		ok(greyed and tone_ok and amb_ok,
+			"%s greys its light, shadow tint, ambient and haze outside sight" % n)
+	var amb := RaidLook.vis_amb(m.env.environment)
+	ok(amb > 0.05 and amb < 2.0, "the ambient's grey is set for the fog (vis_amb %.3f)" % amb)
