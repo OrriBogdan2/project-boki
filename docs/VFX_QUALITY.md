@@ -108,7 +108,9 @@ unchanged. Second pass (same branch): the planted hammer's beacon (`plant_beacon
 beam), the dash wake (`dash`: ivory specks and dust on his body, was gold and ember chevron bands), and Mending Ground's
 light column (`mend_fall`: ivory light falling onto the zone during its 1 s delay, was a gold beam) and standing zone
 (`mend_zone`: rising ivory specks and pluses inside AimKit's lit rim, no fill; was a second code-drawn disc) are
-`HeroVfx` holds; the end burst is `mend_burst` alone. `HeroVfx.hold` follows a moving `at` (the zone follows the hammer).
+`HeroVfx` holds; the end burst is `mend_burst` alone. Strips redone from jobq 20261120-153944-25090 (after, same before):
+`e_before_after.jpg` green (the opaque gold cone that hid him is gone), `throw` and `dash` grey (in his palette now, but the
+ray is slimmer than the old beam and the wake reads about the same). `HeroVfx.hold` follows a moving `at` (the zone follows the hammer).
 `BjornFx` keeps only the meshes that ride his hammer and shield (thrown hammer and rope, whirl trail and glint, the plated
 wall), and the shared charge ring is his ivory, not gold. GPU strips at match zoom, grey = main (top), border green = better, grey = no change: `docs/shots/albert-vfx-data/{throw,dash,wall,r}_before_after.jpg` (jobq 20261120-145918-29886 before, -145258-27518 after, `--hero-vfx-reel --reel-hero=bulwark`). The throw and the 360 Smash look the same (their looks were already data); the Faultline landing loses its dust rings, the wall and charge ring are ivory.
 ## Scorecard: before (11-08) and re-score (11-09)
