@@ -93,11 +93,13 @@ func run(mn: Node, md := "all") -> void:
 		await _ranks("tender")
 		await combos.tender()
 		await carry.tender()
+		await _combo_tag("tender")
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await _ranks("rimewright")
 		await combos.rimewright()
+		await _combo_tag("rimewright")
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
@@ -149,6 +151,12 @@ func _ranks(arch: String) -> void:
 		ok("upgrade parity: rank 3 (tier IV) Rink Wall is %d HP tougher" % int(K.e_def()["hp_rank3"]),
 				absf(hps[1] - hps[0] - float(K.e_def()["hp_rank3"]) * K.power("kin")) < 0.5, str(hps))
 	await _free(m)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd) for this kit.
+func _combo_tag(arch: String) -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, arch)
 
 func _free(m: Match) -> void:
 	m.queue_free()

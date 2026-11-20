@@ -10,7 +10,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Stone | medium | tank | Wild, nest eggs |
 | [Mycroll](#mycroll) | Hedgehog + Toadstool | Spore | small | controller | Starter egg |
 | [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
-| [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from Siegephant |
+| [Cairnhorn](#cairnhorn) | Tortoise + Ibex | Titan | large | tank | Rare Egg from Siegephant |
 | [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
@@ -78,7 +78,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Storm | Kestrike, Boltstrich, Barokat, Barrelmander |
 | Swarm | Hivara, Marchleaf, Spirevark, Murmurling |
 | Tempest | Canvastross, Zephyrak |
-| Titan | Cairnback, Lockatara |
+| Titan | Cairnhorn, Lockatara |
 | Venom | Vespyx, Nettlynx, Pipewurm |
 
 ## Rampartoad
@@ -96,9 +96,9 @@ _Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on Rampart
 | Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Basaltoad Egg: Something placid is in here. |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Mycroll
@@ -116,7 +116,7 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 | Farm work | Bloom 3, Forage 2, Ranch 1 |
 | Egg | Spore Egg: Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious > Spore Drift; Swift: Swift
@@ -141,9 +141,9 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: Zippeli
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
-## Cairnback
+## Cairnhorn
 
-_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnback's shell. Hatched from the egg Siegephant guards.
+_Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on Cairnhorn's shell. Hatched from the egg Siegephant guards.
 
 |  |  |
 |---|---|
@@ -157,9 +157,9 @@ _Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carry
 | Egg | Cairn Egg: Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. Siegephant guarded it. |
 | Rare | Hatches from the Rare Egg Siegephant drops |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Anchorbill
@@ -317,7 +317,7 @@ _Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is 
 | Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Glintmole Egg: Something shy is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -337,7 +337,7 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Gloamshell Egg: Something private is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -357,7 +357,7 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Glomwort Egg: Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -377,9 +377,9 @@ _Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a car
 | Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Goliathite Egg: Something earnest is in here. |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Crofthorn
@@ -397,9 +397,9 @@ _Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a wal
 | Farm work | Bloom 3, Forage 2, Mend 1 |
 | Egg | Heatherhorn Egg: Something gentle is in here. |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Hivara
@@ -538,9 +538,9 @@ _Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is
 | Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Limpetor Egg: Something stubborn is in here. |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Lodestick
@@ -938,7 +938,7 @@ _Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps 
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Threadwyrm Egg: Something thoughtful is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -978,9 +978,9 @@ _Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a cre
 | Farm work | Haul 3, Stone 2, Timber 1 |
 | Egg | Tuatrune Egg: Something ancient is in here. |
 
-- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
+- E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnhorn heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
+- Bond ultimate (merge): **Cairn Colossus** (8s). Cairnhorn rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Umbrathere

@@ -19,7 +19,7 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
-##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##   soft    bool    lanes, cones and circles: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
 ##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
@@ -94,12 +94,15 @@ static func vee(h: Hunter, id: String, p := {}) -> void:
 
 ## A cone (wedge) from `from` along `dir`; "edges" draws only the two edge lines (a shotgun spread), "outline"
 ## the whole rim (both edges and the far arc) with no fill.
-## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), outline (false), fill (0..1 radial front)
+## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), outline (false), fill (0..1 radial front),
+##    ease (1/s: the drawn width glides toward `deg` each frame instead of jumping; 0 = off)
 static func cone(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "cone", p)
 	e["len"] = float(p.get("len", 4.0)); e["deg"] = float(p.get("deg", 60.0)); e["inner"] = float(p.get("inner", 0.3))
 	e["edges"] = bool(p.get("edges", false)); e["outline"] = bool(p.get("outline", false))
 	e["fill"] = float(p.get("fill", -1.0))
+	if p.has("ease"):
+		e["ease"] = float(p["ease"])
 	_ray(h, e, p)
 	_put(h, id, e)
 
@@ -273,11 +276,13 @@ static func _dir(h: Hunter, p: Dictionary) -> Vector2:
 	var d: Vector2 = p.get("dir", h.aim_dir())
 	return d.normalized() if d.length() > 0.01 else h.aim_dir()
 
-## from + dir for the ray shapes, on the ground under `from`.
+## from + dir for the ray shapes, on the ground under `from`. p "follow" (no from or dir given): each frame
+## AimDraw redraws it from the drawn body toward that frame's aim, so it never trails the 60 Hz step.
 static func _ray(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	var f: Vector3 = p.get("from", h.pos)
 	e["from"] = Vector2(f.x, f.z); e["y"] = AimMode.ground(h.m, f).y
 	e["dir"] = _dir(h, p)
+	e["follow"] = bool(p.get("follow", false)) and not p.has("from") and not p.has("dir")
 
 static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	var at: Vector3

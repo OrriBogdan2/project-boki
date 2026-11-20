@@ -228,15 +228,31 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
-		_reset_riposte()
+		if _reset_riposte() and is_instance_valid(t):
+			ComboMark.payoff(m, h, t)
 
-## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked).
-func _reset_riposte() -> void:
-	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
-		return
+## The Slam then a knock: the Gilded Riposte (X) is ready again (once it is unlocked). False when it was
+## already ready or not yet unlocked.
+func _reset_riposte() -> bool:
+	if not _riposte_resettable():
+		return false
 	HeroUlt.reset(self)
 	slam_resets += 1
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	return true
+
+func _riposte_resettable() -> bool:
+	return float(cd["x"]) > 0.0 and h.lvl >= int(Hunter.ULT_AT[0])
+
+## The combo tag (ComboMark): the Warchain's hold on `t`, else the Slam's 2s window in which a knock readies X.
+func combo_read(t: Ent) -> Dictionary:
+	if warchain.hooked() and warchain.target == t:
+		return {"icon": "chain", "n": 0, "max": 0, "left": warchain.tether_t, "total": float(e_def()["time"])}
+	var window := float(rmb_def()["slam"].get("reset_t", 2.0))
+	var left: float = window - (float(m.time) - float(slam_hit.get(t.get_instance_id(), -99.0)))
+	if left <= 0.0 or not _riposte_resettable():
+		return {}
+	return {"icon": "slam", "n": 0, "max": 0, "left": left, "total": window}
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
@@ -312,6 +328,8 @@ func wave_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
 
+func lmb_holding() -> bool: return lmb_t >= 0.0
+
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
@@ -328,7 +346,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
 	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
-	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
+	if not h.atk.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
@@ -404,7 +422,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
+	h.atk.strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()
@@ -645,6 +663,10 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
+## In the air the bar shows the Meteor Drop's rest, but a Smash charge still takes the press (the ground Smash).
+func rmb_open() -> bool:
+	return (not h.grounded and ch_rmb >= 1.0) or super.rmb_open()
+
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
 ## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
 ## after) it spins at once.
@@ -667,7 +689,7 @@ func _rmb_waits() -> bool:
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
-	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
+	return (not slam_w.is_empty() and not _slam_young()) or not lunge.is_empty() or meteor.airborne()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
@@ -779,7 +801,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
-	# KinExec's cone hits this lane; hit_extra heavy: an empowered hit (ImpactWeight.of_hit: the heavy thud and a solid hold)
+	# KinExec's cone hits this lane; hit_extra heavy:
+	# an empowered hit (ImpactWeight.of_hit: the heavy thud and a solid hold)
 	var strike := {"no_floor": true, "lane_w": float(sl["width"]), "hit_extra": {"heavy": true}}
 	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
@@ -835,10 +858,11 @@ func _tick_lunge() -> void:
 			if was_chain:
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
+			var leffs: Array = [{"type": "damage", "amount": dmg}]
+			if float(ld["push"]) > 0.0:
+				leffs.append({"type": "push", "strength": float(ld["push"]), "from": "caster"})
 			var stg := stage("rmb",
-					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
-							"effects": [{"type": "damage", "amount": dmg},
-									{"type": "push", "strength": float(ld["push"]), "from": "caster"}]},
+					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0}, "effects": leffs},
 					{"hit": "add", "mod": "add"})
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
@@ -882,6 +906,24 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 
+## A Slam wound up less than BUFFER ago: the pull takes it over as a Cinder Spin instead of waiting for it.
+func _slam_young() -> bool:
+	return not slam_w.is_empty() and float(rmb_def()["windup"]) - float(slam_w["t"]) <= BUFFER
+
+## The pull starting with a Smash pressed just before it (still down, or a young Slam): that press is the
+## Cinder Spin (the spin wins over the Slam; a Smash held longer, charging, is the Haul Slam: arm_haul).
+func spin_early() -> bool:
+	if _slam_young():
+		slam_w = {}                 # (its charge is spent: the spin is that Smash)
+		last_variant = "during_e"
+		_spin()
+		return true
+	if not rmb_down or rmb_ctx.get("air", false) or rmb_t >= BUFFER:
+		return false
+	rmb_ctx["e"] = true
+	_release_rmb()
+	return true
+
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
 	if not rmb_down or rmb_ctx.get("air", false):
@@ -914,16 +956,18 @@ func _haul_land(k: float) -> void:
 	haul = {}
 	haul_slams += 1
 	var at := h.pos
+	var heffs: Array = [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()}]
+	if float(hd["push"]) > 0.0:
+		heffs.append({"type": "push", "strength": float(hd["push"])})
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
-		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
-				{"type": "push", "strength": float(hd["push"])}]})
+			"effects": heffs})
 	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
-## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
-## body while the Searing Wave charges.
+## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready and not dashing, and the
+## ring round the body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy() or KinMerge.active(h):
 		return
@@ -935,7 +979,9 @@ func _tick_tells() -> void:
 						{"at": f.pos, "r": f.r + 0.4, "col": EXEC_RED, "hot": 0.5, "lw": 0.1})
 	# the Meteor Drop's own slot (not while a Lunge charges through a jump: that release is the Lunge)
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
-	if not h.grounded and air_ready and not h.gliding and not rmb_down:
+	if h.roll_t > 0.0:
+		AimKit.hide(h, "drop_aim")          # no disc on a dash: it comes back when the dash ends
+	elif not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):

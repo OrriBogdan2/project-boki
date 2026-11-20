@@ -6,13 +6,16 @@ extends RefCounted
 ## and "MOBGLB DONE, failures: N". Never touches the save.
 
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer", "bl_skitter", "bl_warden"]
-const MAX_TRIS := 7000        # per model: one draw call, under what the primitives cost (4-9k)
+const MAX_TRIS := 7000  # per model: one draw call, under what the primitives cost (4-9k)
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MOBGLB %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	var seen := 0
@@ -23,6 +26,7 @@ func run(main: Node) -> void:
 	ok(seen > 0, "%d monsters have a model" % seen)
 	print("MOBGLB DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _one(main: Node, kind: String) -> void:
 	var root := Models.mob(kind)
@@ -59,8 +63,47 @@ func _one(main: Node, kind: String) -> void:
 	f._process(0.0)
 	var moved := not f._skel.get_bone_global_pose(l[0]).is_equal_approx(before)
 	ok(moved, "%s: turning pivot %s moves its bone" % [kind, (l[1] as Node3D).name])
+	_same_as_global_set(f, kind)
+	_held_skips(main, root, f, kind)
 	root.queue_free()
 	await main.get_tree().process_frame
+
+
+## copy_pose sets local poses once per bone; the bones must land where the old per-bone set_bone_global_pose put them.
+func _same_as_global_set(f: MobGlb, kind: String) -> void:
+	for i in f._links.size():
+		(f._links[i][1] as Node3D).rotate_y(0.25 + 0.1 * i)
+	f.copy_pose()
+	var got: Array = f._links.map(func(l): return f._skel.get_bone_global_pose(l[0]))
+	var inv := f._skel_rel.affine_inverse()
+	for l in f._links:
+		f._skel.set_bone_global_pose(l[0], inv * f._rel(l[1]) * l[2] * f._skel_rel * l[3])
+	var worst := 0.0
+	for i in f._links.size():
+		var want := f._skel.get_bone_global_pose(f._links[i][0])
+		worst = maxf(worst, (want.origin - (got[i] as Transform3D).origin).length())
+		for ax in 3:
+			worst = maxf(worst, (want.basis[ax] - (got[i] as Transform3D).basis[ax]).length())
+	ok(worst < 0.001, "%s: copy_pose matches the per-bone global set (worst %.5f)" % [kind, worst])
+
+
+## A monster Match drew no pose for this frame (Ent.lod_dt > 0, far off) keeps its bones: nothing to copy.
+func _held_skips(main: Node, root: Node3D, f: MobGlb, kind: String) -> void:
+	var ent := Ent.new()
+	main.add_child(ent)
+	root.reparent(ent, false)
+	var l: Array = f._links[0]
+	var before := f._skel.get_bone_pose(l[0])
+	(l[1] as Node3D).rotate_x(0.4)
+	ent.lod_dt = 0.016
+	f._process(0.0)
+	var held := f._skel.get_bone_pose(l[0]).is_equal_approx(before)
+	ent.lod_dt = 0.0
+	f._process(0.0)
+	var caught := not f._skel.get_bone_pose(l[0]).is_equal_approx(before)
+	ok(held and caught, "%s: a held pose copies nothing (%s), the next drawn one does (%s)" % [kind, held, caught])
+	ent.queue_free()
+
 
 func _kept(m: MeshInstance3D, body: Node3D, kind: String) -> bool:
 	for k in MobGlb.KEEP.get(kind, []):

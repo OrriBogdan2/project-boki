@@ -5,7 +5,7 @@ extends RefCounted
 ## with its countdown arc, HeartRaidGates). Reads Match.heart_raid only.
 ##   WAVES  "Wave 3 of 8  ·  next in 0:42  ·  7 monsters"   bar: waves sent
 ##          "Wave 4 out of the marks in 0:08"                (warn_s before a wave: its gates are marked)
-##   BOSS   "Bring down Blighted Cairnback"                bar: the boss's health (the boss bar shows more)
+##   BOSS   "Bring down Blighted Cairnhorn"                bar: the boss's health (the boss bar shows more)
 ##   HOLD   "Hold the Heart ring  ·  45%"                  bar: the ring's fill
 
 const SIZE := Vector2(380.0, 44.0)

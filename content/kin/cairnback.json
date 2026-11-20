@@ -2,6 +2,7 @@
 	"id": "cairnback",
 	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/cairnback.json.",
 	"rare": true,
+	"no_egg": true,
 	"boss": "colossus",
 	"size": {
 		"cm": 58,

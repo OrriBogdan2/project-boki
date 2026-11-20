@@ -31,8 +31,8 @@ static func flash_col(target: Ent, p: Hunter) -> Color:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
 
-## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
-## sparks fly (on through it).
+## Where on the target a hit from `by` lands (HitContact: its real contact point, clamped to its collider) and which
+## way the sparks fly (on through it).
 static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	var dir := Vector3.ZERO
 	if by != null and is_instance_valid(by) and by != target:
@@ -43,12 +43,7 @@ static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	dir.y = 0.0
 	if dir.length() < 0.01:
 		dir = Vector3(0, 0, 1)
-	dir = dir.normalized()
-	var rad := float(target.get("r")) if target.get("r") != null else 0.4
-	var hgt := 0.95 if target is Hunter else clampf(0.35 + rad, 0.5, 1.6)
-	var y := (target as Hunter).hit_y() if target is Hunter else target.pos.y
-	var at := Vector3(target.pos.x, y + hgt, target.pos.z) - dir * rad * 0.8
-	return [at, dir]
+	return [HitContact.point(target, by, o), dir.normalized()]
 
 
 static func _credit(by: Ent) -> Ent:
@@ -111,7 +106,7 @@ static func rival_pickup(m: Match, h: Hunter) -> void:
 	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
 
 
-## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
+## A gun going off (HunterAttack.emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
 static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var m: Match = h.m
@@ -180,7 +175,22 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 		m.freeze_frame(0.045)
 
 
-## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
+## The flash colour of a kill: the colour of the side that got it (your squad or a rival squad), as
+## the player sees it, so a steal reads on the spot. `credit` is the same Hunter Match.on_mob_dead pays.
+## The dissolving body glows in it too. No credit (a fall, the Blight) or no player to be relative to:
+## the monster's own colour, body untouched.
+static func kill_col(m: Match, mb: Mob, credit: Ent, own: Color) -> Color:
+	if not credit is Hunter or m.player == null:
+		return own
+	var col := SideColor.of_team(m.player.team, credit.team)
+	for mt in mb.mats:
+		if mt is ShaderMaterial:
+			mt.set_shader_parameter("flash_color", col)
+	return col
+
+
+## A monster dying (Match.on_mob_dead): a flash in the killer side's colour, a spray in its own,
+## a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	if m == null or m.fx == null:
 		return
@@ -192,7 +202,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,
@@ -217,7 +228,7 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 		return
 	var col: Color = b.md.get("color", Color("ffb070"))
 	var c := b.pos + Vector3(0, 1.4, 0)
-	m.fx.flash(c, Color(1, 0.96, 0.88), 2.4, 0.3)
+	m.fx.flash(c, kill_col(m, b, credit, Color(1, 0.96, 0.88)), 2.4, 0.3)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.35), 40, 15.0, 70.0, 0.7, 12.0, 2.0)
 	m.fx.spark(c, Vector3.UP, Color(1, 0.95, 0.8), 24, 9.0, 180.0, 0.5, 6.0, 1.4)
 	m.fx.ring(b.pos, 7.5, Color(col, 0.9), 0.6)

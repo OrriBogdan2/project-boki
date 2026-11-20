@@ -30,4 +30,6 @@ static func pair_why(a: Dictionary, b: Dictionary) -> String:
 	var why := can_pair(a)
 	if why == "": why = can_pair(b)
 	if why == "" and not friends(a, b): why = "%s and %s need to be friends" % [a["name"], b["name"]]
+	if why == "" and Data.no_egg(String(a["species"])) and Data.no_egg(String(b["species"])):
+		why = "%s and %s are legendary: Boki like them never come from an egg" % [a["name"], b["name"]]
 	return why

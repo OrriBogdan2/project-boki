@@ -130,19 +130,21 @@ func _tender_rescue() -> void:
 	sc.down(m, A)
 	step(m, 0.1)
 	P.hp = P.max_hp * 0.5
-	P.regen_wait = 10.0     # s, as if just hit: with her only teammate down she is the last one up, and LastAlive's
-	# self-mend (1 hp/s once regen_wait runs out) holds off, so any hp she gains below is the tether's
+	# in combat 10 s more, as if just hit: with her only teammate down she is the last one up, and LastAlive's
+	# self-mend (1 hp/s once out of combat) holds off, so any hp she gains below is the tether's
+	P.combat_at = m.time + 10.0 - InCombat.window()
 	var p_hp0 := P.hp
 	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
 	var a_down0 := A.down_hp
+	var a_hp0 := A.hp
 	sc.aim_at(P, A.pos)
 	_press(P, m)
 	ok("mm X: it can be cast on a downed teammate", not K.hearth_call.is_empty() and A.downed)
 	step(m, 2.0)
 	ok(
-		"mm X: the tether heals the downed teammate (game data: an ally or Wisp), not her",
-		A.down_hp > a_down0 + 5.0 and P.hp <= p_hp0 + 0.01, "ally %.0f -> %.0f, her %.0f -> %.0f" % [
-			a_down0, A.down_hp, p_hp0, P.hp])
+		"mm X: the tether heals the downed teammate (game data: an ally or Wisp), not her; only their bleed-out fills",
+		A.down_hp > a_down0 + 5.0 and P.hp <= p_hp0 + 0.01 and A.hp <= a_hp0 + 0.01,
+		"ally %.0f -> %.0f (hp %.0f -> %.0f), her %.0f -> %.0f" % [a_down0, A.down_hp, a_hp0, A.hp, p_hp0, P.hp])
 	step(m, 3.2)
 	var gap := P.flat_dist(A)
 	ok("mm X: at the end a downed teammate is pulled to her side and stood up", not A.downed and gap < 1.6

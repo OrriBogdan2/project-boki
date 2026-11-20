@@ -7,6 +7,8 @@ extends RefCounted
 const RUN_UP := 0.5          # s running back before the jump or the throw
 const CARRY_MIN := 0.9       # share of the throw's speed still there at the miss, and of the miss's at the landing
 const BRAKE_T := 0.3         # s on the ground after landing, keys let go (braking as after a plain jump)
+# s after the throw for the run to brake down to the brace (at body_scale the run is faster, so it takes ~0.15 s)
+const BRACE_T := 0.2
 
 var ak = null
 var ok_fn: Callable
@@ -95,10 +97,10 @@ func _ground_throw(m: Match, P: Hunter, home: Vector3) -> Dictionary:
 	_run_back(m, P, home)
 	var v_run := _hv(P)
 	ak.tap(m, P)
-	ak.step(m, 0.05)
+	ak.step(m, BRACE_T)      # he sheds his run to the brace first (the brake takes longer the faster the run)
 	var from := P.pos
-	ak.step(m, 0.25)
-	var out := {"k": P.flat_dist(from) / 0.25 / maxf(0.01, v_run), "dist": 0.0}
+	ak.step(m, 0.1)
+	var out := {"k": P.flat_dist(from) / 0.1 / maxf(0.01, v_run), "dist": 0.0}
 	while K.flying:
 		_tick(m)
 	out["dist"] = P.flat_dist(from)

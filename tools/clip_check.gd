@@ -72,8 +72,6 @@ const JL_HEAVY_OPEN := {
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
-	"ostra:idle": "x_fing seams 11-13 deg",
-	"ostra:stance": "x_fing seams 12-16 deg",
 }
 
 var bad := 0
@@ -212,6 +210,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_standing(id, dd, clips)
 	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
+	_summon_call(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -453,6 +452,29 @@ func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	ok(wrong.is_empty(), "%s: emotes play upper-body moving, full-body standing, then end (wrong %s)"
 			% [id, str(wrong)])
 
+## The summon call and recall (warden_anim "summon_call", KinSummon.anim_state): about 0.3 s each, keying only upper
+## bones, on the upper layer so he runs and aims under it; never over a kit move; nothing of it once it has ended.
+func _summon_call(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var sc: Dictionary = dd.get("summon_call", {})
+	var bad: Array = []
+	for kind in ["call", "recall"]:
+		var clip := String(sc.get(kind, ""))
+		var anim := clips.lib.get_animation(clip) if clips.lib.has_animation(clip) else null
+		if anim == null or absf(anim.length - 0.32) > 0.05 or not _keys_upper(anim, dd):
+			bad.append(kind)
+			continue
+		var s := {"call": kind, "call_t": 0.1, "vel": Vector3(0, 0, -4)}
+		var run := clips._pick(s, 0.0)
+		s["kmove"] = String((dd.get("kmoves", {}) as Dictionary).keys()[0]) if dd.has("kmoves") else ""
+		var cast := clips._pick(s, 0.0) if s["kmove"] != "" else {}
+		s.erase("kmove")
+		s["call_t"] = anim.length + 0.01
+		if run.get("clip", "") != clip or not bool(run.get("upper", false)) or cast.get("clip", "") == clip \
+				or clips._pick(s, 0.0).get("clip", "") == clip:
+			bad.append(kind)
+	ok(bad.is_empty(), "%s: summon call and recall are ~0.3 s upper-body gestures, not over a cast, then end (bad %s)"
+			% [id, str(bad)])
+
 ## The state's emote picks this clip: standing on its own layer, moving on the upper one, and not after its end.
 func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:
 	var s := {"emote": emote, "emote_t": 0.3, "vel": Vector3.ZERO}
@@ -477,14 +499,14 @@ func _keys_upper(anim: Animation, dd: Dictionary) -> bool:
 ## spring: no dip to read), a kerb plays no landing, running the legs are back within JL_FREE_S, and the body is back
 ## within the data's promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
 func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
-	var jl := preload("res://tools/jump_land_check.gd")
+	var JumpLand := preload("res://tools/jump_land_check.gd")
 	var ld: Dictionary = dd.get("land", {})
 	# (skeleton metres to world metres: the rigs are built at their own sizes and scaled to the Hunter's body)
 	var on_screen := WardenGlb.skeleton(m.get_node("Warden")).global_basis.get_scale().y
 	for running: bool in [true, false]:
 		var hop_dip := 0.0
 		for way: String in ["jump", "drop", "glide", "kerb"]:
-			var r: Dictionary = jl.measure(m, sync, clips, running, way)
+			var r: Dictionary = JumpLand.measure(m, sync, clips, running, way)
 			var tag := "%s %s" % [way, "run" if running else "still"]
 			var world_dip: float = r["dip"] * on_screen
 			print(("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f"
@@ -504,12 +526,12 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 			if not dd.has("sway"):
 				var deep := way != "jump"
 				var need := maxf(JL_DIP_M, hop_dip * JL_DEEPER) if deep else JL_HOP_DIP_M
-				ok(r["dip"] <= -need and r["dip_t"] <= jl.DIP_WINDOW,
+				ok(r["dip"] <= -need and r["dip_t"] <= JumpLand.DIP_WINDOW,
 						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
 						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
 			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
 			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
-			var promise := hold + WardenClips.FADE_LOCO + jl.DT
+			var promise := hold + WardenClips.FADE_LOCO + JumpLand.DT
 			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
 					"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
 					% [id, tag, r["back"], promise, JL_BACK_MAX])
@@ -550,6 +572,15 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := float(moves[km].get("fit", clips.lib.get_animation(String(moves[km]["clip"])).length))
+		var pts: Array = moves[km].get("time", [])
+		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
+			var on := true
+			for i in pts.size():
+				var c := float(pts[i][1])
+				on = on and c >= 0.0 and c <= clips.lib.get_animation(String(moves[km]["clip"])).length + 0.001 \
+						and (i == 0 or pts[i][0] > pts[i - 1][0])
+			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
+			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
@@ -573,6 +604,14 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if pre != "" and String(km).begins_with(pre) and not moves.has(km):
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
+	# the shared actions: a stomp clip is the game's cycle with the slam at Life's hit beat, a drink clip is the drink
+	var st: Dictionary = dd.get("states", {})
+	for k in ["stomp", "drink"]:
+		if not st.has(k):
+			continue
+		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else UtilityUse.channel("tonic", "time")
+		var dur := clips.lib.get_animation(String(st[k])).length
+		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 
 ## "upper": "moving" moves ride the upper body only while he walks and own the body standing (Tenzo: the source set).
 func _upper(id: String, dd: Dictionary, clips: WardenClips) -> void:

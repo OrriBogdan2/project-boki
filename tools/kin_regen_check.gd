@@ -1,7 +1,8 @@
 extends RefCounted
 ## --kin-regen-check: a Boki mends on its own (KinRegen, content/rules/boki_system.json "regen").
 ## It starts a match at full health; on you (Return) it wins back 6% of max health a second; out beside
-## you it waits 6s without damage, then mends 1.5%/s, and a hit restarts the wait; a downed Boki
+## you it waits out the combat window (InCombat, content/rules/combat.json), then mends 1.5%/s,
+## and a hit restarts the wait; a downed Boki
 ## never regenerates. Never touches the save.
 
 var bad := 0
@@ -47,23 +48,25 @@ func run(main: Node) -> void:
 	ok(k.mending, "(a) it shows as mending")
 	_run_for(m, 20.0)
 	ok(is_equal_approx(k.hp, k.max_hp), "(a) carried it mends to full and stops (%.1f / %.1f)" % [k.hp, k.max_hp])
-	# (b) out: nothing for 6s after damage, then 1.5%/s
+	# (b) out: nothing for the combat window after damage, then 1.5%/s
+	var wait := InCombat.window()
 	k.state = "active"; k.cmd = "follow"; k.settle = 1.0; k.target = null; k.fly = {}
 	k.pos = P.pos + Vector3(1.5, 0, 0); k.prev = k.pos
 	k.hp = k.max_hp * 0.5
+	k.hurt(0.5, foe)
 	var h0 := k.hp
-	_run_for(m, 5.0)
-	ok(absf(k.hp - h0) < 0.01, "(b) out: no mending in the first 5s after a loss (%.2f -> %.2f)" % [h0, k.hp])
-	_run_for(m, 1.5)
+	_run_for(m, wait - 0.5)
+	ok(absf(k.hp - h0) < 0.01, "(b) out: no mending before the window ends (%.2f -> %.2f)" % [h0, k.hp])
+	_run_for(m, 1.0)
 	var h1 := k.hp
 	_run_for(m, 2.0)
 	var g2 := (k.hp - h1) / k.max_hp / 2.0
-	ok(k.hp > h1 + 0.01 and absf(g2 - float(rr["out_pct_s"])) < 0.006, "(b) out: after 6s it mends %.2f%%/s (want %.1f%%)" % [g2 * 100.0, float(rr["out_pct_s"]) * 100.0])
+	ok(k.hp > h1 + 0.01 and absf(g2 - float(rr["out_pct_s"])) < 0.006, "(b) out: after the window it mends %.2f%%/s (want %.1f%%)" % [g2 * 100.0, float(rr["out_pct_s"]) * 100.0])
 	# a hit restarts the wait
 	k.hurt(3.0, foe)
 	var h2 := k.hp
 	_run_for(m, 3.0)
-	ok(absf(k.hp - h2) < 0.01, "(b) a hit restarts the 6s wait (%.2f -> %.2f after 3s)" % [h2, k.hp])
+	ok(absf(k.hp - h2) < 0.01, "(b) a hit restarts the wait (%.2f -> %.2f after 3s)" % [h2, k.hp])
 	# (c) downed: no regen at all, even long after the last hit
 	_run_for(m, 8.0)
 	KinDowned.begin(k, false)

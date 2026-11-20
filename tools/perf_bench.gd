@@ -18,6 +18,8 @@ extends RefCounted
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
+##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
+##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -47,6 +49,7 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var base_secs := 60.0
+var pipes_draw := 0      # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
 var tracy_dir := ""
@@ -56,6 +59,8 @@ var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
 var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
+var wisps := ""          # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
+const AB_WARMUP_S := 5.0 # --bench-ab: the first this many s of each run are left out of its numbers
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -69,6 +74,10 @@ func run(main_node: Node) -> void:
 		return
 	if "--bench-fight" in OS.get_cmdline_user_args():
 		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
+		_finish()
+		return
+	if "--bench-ab" in OS.get_cmdline_user_args():
+		await _ab()
 		_finish()
 		return
 	await _match()
@@ -98,6 +107,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
+		if a.begins_with("--boki-wisps="): wisps = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -117,9 +127,33 @@ func _finish() -> void:
 		if fa: fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit(1 if failed else 0)
 
-func _match() -> Array:
+func _match(part := "match") -> Array:
 	var m := await _start("match", {"teams": hunters / 2, "squad": 2, "total": hunters, "seed": 4101})
-	return await _play(m, "match", [m.player], _bring_fight, FIGHT_AT)
+	return await _play(m, part, [m.player], _bring_fight, FIGHT_AT)
+
+## --bench-ab (from ext/wisp-gpu-ab): walking pets, wisps, walking pets again, the same seed and autoplay path each
+## time in one process, so the A/B shares one GPU; the repeat shows run-order drift.
+func _ab() -> void:
+	for r in [["pets_1", "off"], ["wisps", "on"], ["pets_2", "off"]]:
+		wisps = r[1]
+		_ab_line(r[0], await _match(r[0]))
+
+## Mean, p95 and worst wall ms and draws after the warm-up, and the count of frames over 50 ms.
+func _ab_line(part: String, fl: Array) -> void:
+	var w: Array = []
+	var draws := 0.0
+	for f in fl.slice(int(fl.size() * AB_WARMUP_S / secs)):
+		w.append(float(f["wall"]))
+		draws += float(f["draws"])
+	if w.is_empty():
+		return
+	var mean := 0.0
+	for x in w: mean += x / w.size()
+	w.sort()
+	var over := w.filter(func(x): return x > 50.0).size()
+	print("BENCH AB %s boki_wisps=%s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
+		% [part, wisps, AB_WARMUP_S, w.size(), mean, w[int((w.size() - 1) * 0.95)], w[-1]]
+		+ "draws %.0f, over 50 ms: %d" % [draws / w.size(), over])
 
 ## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
 ## (the tide closed to its last ring) and the Blight clawing out just past them.
@@ -147,6 +181,8 @@ func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
 	o.merge({"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle"}, true)
 	o.merge(extra, true)
+	if wisps != "":
+		o["boki_wisps"] = wisps == "on"
 	if trios > 0 and part == "match":
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")
@@ -159,6 +195,11 @@ func _start(part: String, extra: Dictionary) -> Match:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
+	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
+	# screen, so without this the run's tail was shader compiles a player never sees mid-match
+	var warm0 := Time.get_ticks_msec()
+	await m.warm_up()
+	print("BENCH match warm-up: %d ms" % (Time.get_ticks_msec() - warm0))
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
@@ -198,9 +239,12 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 		var now := Time.get_ticks_usec()
 		fl.append(_frame(part, fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
+		# pipelines the renderer built at draw time this frame (a stall: a shader or pipeline the warm-up missed)
+		var pd := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
-				added])
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f, pipelines at draw %d), new nodes: %s" % [m.time, wall,
+				script_ms, pd - pipes_draw, added])
+		pipes_draw = pd
 		added.clear()
 		last = now
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
@@ -508,6 +552,13 @@ func _summary(part: String, fl: Array) -> void:
 	var slow := w.filter(func(x): return x > SLOW_MS).size()
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
 		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
+	# (where the slow frames fall: a warm-up tail, a first fight's new effects, or spread over the run)
+	var at: Array = []
+	for i in fl.size():
+		if float(fl[i]["wall"]) > SLOW_MS and at.size() < 60:
+			at.append("%.1f" % (i * DT))
+	print("BENCH %s frames: p50 %.1f ms, p95 %.1f ms, p99 %.1f ms; over %.0f ms at s: %s" % [part,
+		float(w[int((w.size() - 1) * 0.5)]), float(w[int((w.size() - 1) * 0.95)]), p99, SLOW_MS, " ".join(at)])
 	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
 		"render cpu %.2f ms, gpu %.2f ms"
 	print(cpu_line % [

@@ -44,6 +44,7 @@ var dunks := 0
 var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
+var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
 var leap_lands := 0            # Rock Hop chains that ended in a crash
@@ -347,6 +348,8 @@ func punch_k() -> float:
 	var ld := lmb_def()
 	return clampf((lmb_t - float(ld["tap"])) / maxf(0.05, float(ld["full"]) - float(ld["tap"])), 0.0, 1.0)
 
+func lmb_holding() -> bool: return lmb_t >= 0.0
+
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "rubble_fists":
 		return false
@@ -354,7 +357,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var pressed := held and not lmb_was
 	lmb_was = held
 	# (a merge ends the hold: letting go of it must not throw a punch mid-transformation)
-	if not h.can_fire() or KinMerge.transforming(h):
+	if not h.atk.can_fire() or KinMerge.transforming(h):
 		if lmb_t >= 0.0 and flow.pauses_hold("lmb") and not KinMerge.transforming(h):
 			# a dash whose hold row keeps the Quake Fist charge: it charges on (short of the auto punch), its
 			# lane stays up, and a release in it punches at the dash's end
@@ -373,11 +376,12 @@ func lmb_override(held: bool, dt: float) -> bool:
 			h.mel_hold = 0.0
 		return true
 	if h.ctrl != "local":
-		# a bot: punches up close, throws boulders from range
-		if held and h.fire_cd <= 0.0:
+		# a bot: sends its row at the foe the moment it lines up (the row blocks its shot line, so the bot brain
+		# may not be firing), punches up close, throws boulders from range
+		if h.fire_cd <= 0.0 and (held or not m.verbs.walls.is_empty()):
 			var tg := _bot_target()
-			if tg and (h.flat_dist(tg) < 3.0 or _row_between(tg)): _punch(0.6)
-			else: _boulder()
+			if tg and (_row_between(tg) or (held and h.flat_dist(tg) < 3.0)): _punch(0.6)
+			elif held: _boulder()
 		return true
 	if held:
 		if lmb_t < 0.0:
@@ -515,12 +519,21 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## A bot punches when its own rocks stand in line with the foe: the punch sends the row at them.
+## A bot punches when its own rocks stand in line with the foe: aimed so the nearest rock flies from
+## where it stands to where the foe will be when it gets there, the punch sends the row at them.
 func _row_between(tg: Ent) -> bool:
-	var dir := h.aim_dir()
+	var rocks := sweep_rocks(h.aim_dir())
+	if rocks.is_empty():
+		return false
+	var mid := rock_mid(rocks[0])
+	var at := BotLead.point(h, tg, 0.0, float(rock_def()["speed"]), float(rock_def()["range"]))
+	var dir := Vector2(at.x - mid.x, at.z - mid.z).normalized()
 	var pd: Dictionary = lmb_def()["punch"]
-	var lane := AimMode.in_lane(h.pos, dir, float(pd["sweep_max"]), float(pd["width"]), tg.pos, tg.r)
-	return lane and not sweep_rocks(dir).is_empty()
+	var past := h.flat_dist(at) > h.flat_dist(mid) + 0.5      # a rock only flies away from her
+	if not past or not AimMode.in_lane(h.pos, dir, float(pd["sweep_max"]), float(pd["width"]), at, tg.r):
+		return false
+	h.inp["aim"] = h.pos + Vector3(dir.x, 0.0, dir.y) * h.flat_dist(at) + Vector3(0, 0.9, 0)
+	return true
 
 ## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
 ## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
@@ -716,18 +729,16 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
-	m.later(tell, _raise_feel)
 	return true
 
+## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
 	vfx("rock_rise", p, dir)
-
-func _raise_feel() -> void:
-	if not is_instance_valid(h):
-		return
-	m.sfx("br_raise", h.pos, -1.0, 1.0)
+	if m.time != row_heard_t:
+		row_heard_t = m.time
+		m.sfx("br_raise", h.pos, -1.0, 1.0)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
@@ -737,7 +748,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.5 and dist < 9.0 and los and randf() < 0.6:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.5 and dist < 9.0 and los:
 		var ed := e_def()
 		var span := float(ed["dist"]) + float(ed["row_gap"])
 		h.inp["aim"] = BotLead.point(h, tgt, float(ed["tell"]), 0.0, span) + Vector3(0, 0.9, 0)

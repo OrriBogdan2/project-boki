@@ -85,9 +85,13 @@ def tris(ob):
     return sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
 
+SEAM_WEIGHT = 0.05  # keep_uv: a UV-seam vertex's collapse weight (1 = free; 0 holds it, and then 60k is out of reach)
+
+
 def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False):
-    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated with no UV limits
-    (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it).
+    """A welded copy of the dense mesh (Meshy splits its vertices along UV seams), decimated
+    (`keep_uv`: its materials and UVs kept, the collapse carries the UVs along, so the master's own paint fits it;
+    the UV-seam vertices collapse last (`_seam_weights`): the collapse drags a seam's UVs and tears cheeks and hair).
     With a head budget, in two passes: the body to n_tris - head_tris with the head (`head`: centre, r) held,
     then the head to head_tris with the body held (left to itself the collapse keeps ~5k of 36k on the head,
     and the monocle and the strands over the face come out jagged)."""
@@ -107,13 +111,21 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
     bpy.ops.object.select_all(action="DESELECT")
     bpy.context.view_layer.objects.active = low
     low.select_set(True)
+    seam = _seam_weights(me) if keep_uv else 1.0
     if not head or head_tris <= 0:
-        _decimate(low, n_tris / max(tris(low), 1), None)
+        group = None
+        if keep_uv:
+            group = "seam"
+            g = low.vertex_groups.new(name=group)
+            for i, w in enumerate(seam):
+                g.add([i], float(w), "REPLACE")
+        _decimate(low, n_tris / max(tris(low), 1), group)
+        low.vertex_groups.clear()
     else:
         c, r = Vector(head["centre"]), float(head["r"])
         co = np.array([v.co[:] for v in me.vertices])
         inside = np.clip((r * 1.03 - np.linalg.norm(co - np.array(c), axis=1)) / (r * 0.06), 0.0, 1.0)
-        for name, w in (("body", 1.0 - inside), ("head", inside)):
+        for name, w in (("body", (1.0 - inside) * seam), ("head", inside * seam)):
             g = low.vertex_groups.new(name=name)
             for i in np.nonzero(w > 0.0)[0]:
                 g.add([int(i)], float(w[i]), "REPLACE")
@@ -125,6 +137,24 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0, keep_uv=False)
     _unfold(low)
     log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
+
+
+def _seam_weights(me):
+    """Per vertex: SEAM_WEIGHT where its corners' UVs differ (a UV seam; the weld left one vertex there), else 1.
+    (Decimate's `delimit` = UV is for the planar mode only: in a collapse it changes nothing.)"""
+    n = len(me.loops)
+    uv = np.empty(n * 2, np.float32)
+    me.uv_layers[0].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    vi = np.empty(n, np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    lo = np.full((len(me.vertices), 2), 9e9, np.float32)
+    hi = np.full((len(me.vertices), 2), -9e9, np.float32)
+    np.minimum.at(lo, vi, uv)
+    np.maximum.at(hi, vi, uv)
+    seam = ((hi - lo) > 1e-6).any(axis=1)
+    log("seams: %d of %d verts weighted %.2f" % (seam.sum(), len(seam), SEAM_WEIGHT))
+    return np.where(seam, SEAM_WEIGHT, 1.0)
 
 
 def _unfold(ob, passes=24):

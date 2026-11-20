@@ -71,10 +71,9 @@ func _tables(rules: Dictionary, tune: Dictionary) -> void:
 
 ## Expedition solo against the files: the run is the arch's row, the jump apex is v^2/2g.
 func _anchor(got: Dictionary, rules: Dictionary) -> void:
-	var row: Dictionary = rules[ARCH]
 	mfc.ok(
-		absf(got["run"] - float(row["speed"])) < TOL,
-		"one profile: %s runs %.2f m/s = hunter_move.json %.2f" % [ARCH, got["run"], row["speed"]]
+		absf(got["run"] - HunterMove.speed(ARCH)) < TOL,
+		"one profile: %s runs %.2f m/s = its row x body_scale %.2f" % [ARCH, got["run"], HunterMove.speed(ARCH)]
 	)
 	var apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
 	mfc.ok(absf(got["apex"] - apex) < 0.15, "one profile: jump apex %.2f m ~ v^2/2g %.2f" % [got["apex"], apex])
@@ -129,15 +128,13 @@ func _match_mode(mode: String, rules: Dictionary) -> Dictionary:
 	var P: Hunter = m.player
 	if P.arch != ARCH:
 		P.reclass(Arch.weight(ARCH), ARCH)
-	var row: Dictionary = rules[ARCH]
 	var bad := []
 	for h in m.hunters:
-		var r: Dictionary = rules.get(h.arch, rules["default"])
-		if h.base_speed != float(r["speed"]) or h.ground_accel != float(r["accel"]):
+		if h.base_speed != HunterMove.speed(h.arch) or h.ground_accel != HunterMove.accel(h.arch):
 			bad.append("%s %s %.2f/%.0f" % [h.pname, h.arch, h.base_speed, h.ground_accel])
 	mfc.ok(bad.is_empty(), "one profile: %s: every hunter has its hunter_move.json row %s" % [mode, ", ".join(bad)])
 	mfc.ok(
-		P.base_speed == float(row["speed"]) and P.ground_accel == float(row["accel"]),
+		P.base_speed == HunterMove.speed(ARCH) and P.ground_accel == HunterMove.accel(ARCH),
 		"one profile: %s: the player is %s's row" % [mode, ARCH]
 	)
 	for h in m.hunters:

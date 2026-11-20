@@ -21,6 +21,7 @@ func run(mn: Node) -> void:
 	for id in ["archer", "juggernaut", "gunslinger"]:      # Lace, Kael, Vex: the guide is the same for all
 		_walk(id)
 	_mates()
+	_first_ult()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -91,9 +92,17 @@ func _walk(hunter: String) -> void:
 	ok(g.line == "", "sent: it clears")
 	_tick(1.6)
 	ok(g.id == "chest" and g.line.contains("chest"), "a chest to open: loot it (%s)" % g.line)
+	var hd := Vector2(1920, 1080)
+	ok(g.bottom(hd) > TutorialStrip.rect(hd).position.y, "the message column starts under the line's strip")
 	p.add_stat("chests")
 	_tick(0.2)
 	ok(g.line == "", "opened: it clears")
+	ok(g.bottom(hd) == 0.0, "with no line up the message column keeps its place")
+	var fnt := ThemeDB.fallback_font
+	var long_line := "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves"
+	var cut := TextCache.fit(fnt, long_line, 13, 300.0)
+	var fits := TextCache.width(fnt, cut, 13) <= 300.0 and cut.ends_with("…")
+	ok(fits and TextCache.fit(fnt, "short", 13, 300.0) == "short", "a long feed line is cut at a word (%s)" % cut)
 	var foe: Hunter = null
 	for h in m.hunters:
 		if h != p and h.team != p.team:
@@ -107,7 +116,10 @@ func _walk(hunter: String) -> void:
 	_tick(12.0)
 	ok(g.id == "" or g.id == "exit", "it clears after its time")
 	_tick(1.6)
-	ok(g.id == "exit" and g.line.contains("exit"), "then: go to an exit (%s)" % g.line)
+	var way := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	var named: bool = g.line.contains(WaysOutMap.WORDS[way]) if way >= 0 else g.line.contains("exit")
+	var exit_ok: bool = g.id == "exit" and named and not g.line.contains("%")
+	ok(exit_ok, "then: head for the way out the goal line names (%s)" % g.line)
 	var spots: Array = m.exits.spots()
 	p.pos = spots[0]
 	_tick(0.2)
@@ -174,3 +186,61 @@ func _fit() -> void:
 		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])
 		var gone := txt.contains("slip away")
 		ok(not gone, "%s is not the squad or landing line" % row[0])
+
+# ------------------------------------------------------------------ 5. the first-ready ult hint
+func _first_ult() -> void:
+	var p: Hunter = m.player
+	ok(p.ak != null, "the player is a hero with a kit")
+	if p.ak == null:
+		return
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(FirstUltHint.KEY)
+	p.downed = false
+	p.dropping = false
+	p.riding = false      # (a match now starts aboard the skyship)
+	p.lvl = int(Hunter.ULT_AT[0]) - 1
+	p.ak.cd["x"] = 0.0
+	m._tip_t = 2.0
+	m.time = 100.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "below the ult level: no hint")
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 5.0
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "cooling down: no hint")
+	p.ak.cd["x"] = 0.0
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != p and h.team != p.team:
+			foe = h
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m.time = 101.0
+	CombatBus.hit_landed.emit(p, foe, 5.0, ["primary"])
+	m.time = 101.9
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "ready 1.9 s into a fight: held back")
+	var before: int = m.hud.msgs.count()
+	m.time = 102.1
+	m._tips()
+	ok(bool(seen.get(FirstUltHint.KEY, false)), "ready 2.1 s into the fight, still being hit: shown")
+	ok(m.hud.msgs.count() == before + 1, "through the hint lane, one line")
+	var want := FirstUltHint.text(p.ak)
+	var cap := Settings.key_cap("hunter_ult")
+	ok(want.begins_with(cap + " is ready: " + String(p.ak.x_def()["name"]) + ", "), "the key cap and name (%s)" % want)
+	m._tips()
+	ok(m.hud.msgs.count() == before + 1, "once per save: no second line")
+	seen.erase(FirstUltHint.KEY)
+	m.time = 200.0
+	CombatBus.hit_landed.emit(foe, p, 5.0, ["primary"])
+	m._tips()
+	ok(not seen.has(FirstUltHint.KEY), "a new fight after a quiet spell holds it again")
+	seen[FirstUltHint.KEY] = true
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		if not f.ends_with(".json"):
+			continue
+		var json: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		var xd: Dictionary = json.get("x", {})
+		if xd.is_empty():
+			continue
+		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
+		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])

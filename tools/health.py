@@ -17,7 +17,7 @@ BUDGETS = {
     "scripts/main.gd": 2061,
     "scripts/ui/hud.gd": 2753,
     "scripts/match/models.gd": 3500,
-    "scripts/match/hunter.gd": 3500,
+    "scripts/match/hunter.gd": 2915,
     "scripts/match/world.gd": 2850,
 }
 SOFT_FILE = 800      # lines: a new file above this is flagged

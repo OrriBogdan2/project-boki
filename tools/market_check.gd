@@ -567,7 +567,7 @@ func _black_market() -> void:
 		and not BlackMarket.stock().has(e0),
 		"buying one: the gems are gone and it's out of stock until tomorrow")
 	var eggs := Incubator.count()
-	var rare_sp := String(Data.KIN.keys().filter(func(sp): return Data.is_rare(String(sp)))[0])
+	var rare_sp := String(Data.egg_pool()[0])
 	BlackMarket.stock().append({"id": "egg_test", "key": "egg:" + rare_sp,
 		"price": 420})
 	ok(BlackMarket.buy("egg_test")["ok"] and Incubator.count() == eggs + 1,

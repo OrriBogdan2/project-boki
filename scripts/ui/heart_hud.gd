@@ -58,15 +58,16 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		var a := (0.1 + 0.3 * hit) * (1.0 - i / 6.0)
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
-	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
+	var per_s := Heart.tick_dmg(m) / Heart.r("tide_tick_s")
 	if WaysHints.arrow_due(m):
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
-	var at := Vector2(sz.x * 0.5, sz.y * 0.8)
+	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
 	var vc := HudVitals.corner(hud, sz)
 	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)
 		at.y = minf(at.y, vc.y - 12.0)
+	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 

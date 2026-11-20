@@ -13,6 +13,9 @@ extends Node
 ## Settings (environment or `-- --relay --port=7777 --max=120`):
 ##   BOKI_PORT, BOKI_MAX_PLAYERS, BOKI_VERSION (required game version, default: this build's),
 ##   BOKI_DISCORD_BOT_TOKEN, BOKI_GUILD_ID, BOKI_ALLOWED_ROLES (comma-separated role ids)
+## Test weather (checks only, `--lag-ms=50 --loss=0.02`): every packet the relay sends waits lag_ms, so two
+## players see a round trip of twice that. A lost snapshot (unreliable) is dropped; a lost reliable message
+## comes one round trip late, as ENet's resend would, and holds the ones behind it (they stay in order).
 
 const CH_RELIABLE := 0
 const CH_FAST := 1
@@ -27,6 +30,12 @@ var bot_token := ""
 var guild_id := ""
 var allowed_roles: PackedStringArray = []
 var started_at := 0.0
+var lag_ms := 0               # ms each packet the relay sends is held (test weather)
+var loss := 0.0               # share of packets lost (test weather)
+var lost := 0                 # packets the weather lost so far
+var held: Array = []          # [due msec, peer id, bytes, fast], due order per peer and channel
+var reliable_due := {}        # peer id -> due msec of its last held reliable packet
+var dice := RandomNumberGenerator.new()      # the weather's own rolls (the host game's dice stay put)
 
 func _env(k: String, fallback := "") -> String:
 	var v := OS.get_environment(k)
@@ -38,6 +47,8 @@ func start(args: PackedStringArray) -> int:
 	for a in args:
 		if a.begins_with("--port="): port = int(a.substr(7))
 		if a.begins_with("--max="): max_players = int(a.substr(6))
+		if a.begins_with("--lag-ms="): lag_ms = int(a.substr(9))
+		if a.begins_with("--loss="): loss = float(a.substr(7))
 	need_version = _env("BOKI_VERSION", Net.VERSION)
 	bot_token = _env("BOKI_DISCORD_BOT_TOKEN")
 	guild_id = _env("BOKI_GUILD_ID")
@@ -60,6 +71,7 @@ func start(args: PackedStringArray) -> int:
 	return OK
 
 func _process(_dt: float) -> void:
+	_release_held()
 	# drop anyone who connected but never finished saying hello
 	var now := Time.get_unix_time_from_system()
 	for id in clients.keys():
@@ -82,8 +94,36 @@ func _online() -> int:
 	return clients.values().filter(func(c): return c["auth"]).size()
 
 func _send(id: int, d: Dictionary, fast := false) -> void:
+	var bytes := JSON.stringify(d).to_utf8_buffer()
+	if lag_ms <= 0 and loss <= 0.0:
+		_out(id, bytes, fast)
+		return
+	var due := Time.get_ticks_msec() + lag_ms
+	if dice.randf() < loss:
+		lost += 1
+		if fast:
+			return
+		due += 2 * lag_ms
+	if not fast:
+		due = maxi(due, int(reliable_due.get(id, 0)))
+		reliable_due[id] = due
+	held.append([due, id, bytes, fast])
+
+func _out(id: int, bytes: PackedByteArray, fast: bool) -> void:
 	var mode := MultiplayerPeer.TRANSFER_MODE_UNRELIABLE_ORDERED if fast else MultiplayerPeer.TRANSFER_MODE_RELIABLE
-	api.send_bytes(JSON.stringify(d).to_utf8_buffer(), id, mode, CH_FAST if fast else CH_RELIABLE)
+	api.send_bytes(bytes, id, mode, CH_FAST if fast else CH_RELIABLE)
+
+func _release_held() -> void:
+	var now := Time.get_ticks_msec()
+	var i := 0
+	while i < held.size():
+		var e: Array = held[i]
+		if int(e[0]) <= now:
+			if clients.has(e[1]):
+				_out(e[1], e[2], e[3])
+			held.remove_at(i)
+		else:
+			i += 1
 
 func _deny(id: int, why: String) -> void:
 	if clients.has(id):

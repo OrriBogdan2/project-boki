@@ -9,6 +9,8 @@
   glider_crackle  the glider catching fire (overheat): a hiss of sparks and pops
   glider_burn     loop: the overheated canopy burning, low roar with pops
   glider_fold     the canopy folding shut on landing or when you let go
+  glider_wind_*   loops: the same rushing air voiced for a skin's own material (Gliders glide_loop): leaf rustle,
+                  moth flutter, bat leather, glass shimmer, fire roar, static crackle, soft feathers, crisp paper
 Original synthesis, no samples.
 """
 import os, sys
@@ -70,6 +72,22 @@ def fold():
     return soft_in(mix(swish, at(flap, 0.05)), 1.0)
 
 
+def wind_skins():
+    """The wind loop in each skin's material; same level and gusting as glider_wind, so they swap under the speed pitch."""
+    t = np.arange(N(1.4)) / S.SR
+    glass = sum(np.sin(2 * np.pi * f * t) * (0.5 + 0.5 * np.sin(2 * np.pi * r * t)) for f, r in ((2092.86, 1.43), (2637.14, 2.14), (3135.71, 0.714)))
+    return {
+        'leaf': bpf(noise(1.4), 300, 2000) * wobble(1.4, 4, 0.3) * 0.8 + grains(1.4, 45, 1500, 5500, 0.003, 0.01, 0.2) * 0.9,
+        'moth': lpf(bpf(noise(1.4), 250, 1800), 1800) * wobble(1.4, 4, 0.2) * (0.55 + 0.9 * np.sin(2 * np.pi * 13 * t) ** 2),
+        'bat': bpf(noise(1.4), 120, 1300) * wobble(1.4, 3, 0.45) * 1.1 + lpf(noise(1.4), 280) * 0.5,
+        'glass': bpf(noise(1.4), 500, 3500) * wobble(1.4, 7, 0.2) * 0.7 + glass * 0.025,
+        'fire': bpf(noise(1.4), 100, 800) * wobble(1.4, 6, 0.4) * 1.2 + grains(1.4, 20, 500, 3000, 0.002, 0.006) * 0.9 + hpf(noise(1.4), 3000) * 0.06,
+        'static': bpf(noise(1.4), 300, 2200) * wobble(1.4, 5, 0.25) * 0.8 + grains(1.4, 16, 1500, 6500, 0.001, 0.004, 0.2),
+        'soft': lpf(bpf(noise(1.4), 200, 1500), 1500) * wobble(1.4, 3, 0.3) * 1.2,
+        'paper': bpf(noise(1.4), 600, 3600) * wobble(1.4, 6, 0.3) * 0.8 + grains(1.4, 60, 2500, 8000, 0.001, 0.003, 0.2) * 0.7,
+    }
+
+
 def build():
     S.save_cat('glider_snap', snap(), 'cast')
     S.save_loop('glider_wind', wind(), 'loop')
@@ -78,6 +96,8 @@ def build():
     S.save_cat('glider_crackle', crackle(), 'fire')
     S.save_loop('glider_burn', burn(), 'loop')
     S.save_cat('glider_fold', fold(), 'dash')
+    for name, x in wind_skins().items():
+        S.save_loop('glider_wind_' + name, x, 'loop')
 
 
 if __name__ == '__main__':

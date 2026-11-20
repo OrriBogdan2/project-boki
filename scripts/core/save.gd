@@ -8,7 +8,8 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 20
+const VERSION := 21
+const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -18,7 +19,7 @@ const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
 		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
 		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20"}
+		19: "_migrate_19_to_20", 20: "_migrate_20_to_21"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -67,7 +68,7 @@ func fresh() -> Dictionary:
 	# a new save has no kin yet: the first thing you do is pick an egg and hatch it
 	return {
 		"v": VERSION,
-		"name": "Hunter",
+		"name": UNNAMED,
 		"gems": 60,
 		"cls": "medium",
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
@@ -87,6 +88,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
+		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -255,7 +257,9 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	var n := int(d["serials"].get(sp, 0)) + 1
 	d["serials"][sp] = n
 	rec["serial"] = n
-	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, {"how": String(o["how"]), "serial": n})
+	var extra := {"how": String(o["how"]), "serial": n}
+	if rec.has("parents"): extra["bred"] = true        # an egg of two of your Boki (ClanInfo.last_deed)
+	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, extra)
 
 ## Everyone in the collection has provenance (anything that came in without it gets it now).
 func register_all() -> void:
@@ -367,6 +371,10 @@ func _migrate_19_to_20(data: Dictionary) -> void:
 	HunterStats.migrate(data)
 	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
 		data["drills"] = {}
+
+## v20 -> v21: a Hunter the save has already played gets none of its first-time hints (HunterHints).
+func _migrate_20_to_21(data: Dictionary) -> void:
+	HunterHints.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
@@ -512,6 +520,7 @@ func load_from(p: String) -> void:
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

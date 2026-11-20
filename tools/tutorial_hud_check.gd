@@ -17,8 +17,10 @@ extends RefCounted
 ##   7. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
 ##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
 ##      again; a save that has dived never sees it
-##   8. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
-##   9. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
+##   8. the first stun, root and Grounded in a real match: one hint card each (content/rules/tutorial.json
+##      "tips"), never again on the same save; a hunter's own short hold is not a root; none in the tutorial
+##   9. the closing zone's two guide lines (the first warning, outside when the wall passes): each once per profile
+##  10. the pick ring and arrow follow the slot the HUD drew (RankMarks.face) at 1280x720 and 1920x1080:
 ##      slot and arrow on screen, in the bottom row, the same rect as the slot's hover spot
 
 var bad := 0
@@ -26,6 +28,7 @@ var m: Match
 var main: Node
 
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
+const MAX_LINE := 40  # chars of a banner line (it names its key too; --tutorial-playtest-check measures the fit)
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -38,6 +41,7 @@ func run(mn: Node) -> void:
 	_course()
 	_reach()
 	_dive_hint()
+	_cc_tips()
 	_zone_lines()
 	await _pointers()
 	print("TUTHUD DONE, failures: ", bad)
@@ -144,7 +148,8 @@ func _course() -> void:
 			key_label += 1
 			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
-			toast_in_card += m.hud.msgs.texts().size()
+			# (a Boki that falls says so at once, as an URGENT line: the one kind a banner lets through)
+			toast_in_card += m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t).size()
 			bubble_in_card += m.bubbles.size()
 			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
@@ -171,7 +176,7 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > 34)
+	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
@@ -183,7 +188,7 @@ func _course() -> void:
 		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
-	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+	ok(tl.contains("send "), "the Boki step says to send it ('%s')" % tl)
 
 ## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
 ## and revive prompt get through; when the banner settles the toast shows.
@@ -330,7 +335,50 @@ func _dive_hint() -> void:
 	_glide_secs(g2, p, 5.0)
 	ok(g2.line == "", "shown once per save: not again after it ran out")
 	dm.queue_free()
-# ------------------------------------------------------------------ 8. the closing zone's two lines
+
+# ------------------------------------------------------------------ 8. the first crowd control
+func _cc_tips() -> void:
+	var tips: Dictionary = Content.rules("tutorial")["tips"]
+	for cc: String in ["stun", "root", "grounded"]:
+		Save.d["tutorial"].erase("cc_" + cc)
+	for case_name: String in ["real match", "same save again", "tutorial"]:
+		if case_name == "tutorial":
+			for cc: String in ["stun", "root", "grounded"]:
+				Save.d["tutorial"].erase("cc_" + cc)
+		if m: m.queue_free()
+		m = Match.new()
+		main.add_child(m)
+		var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
+		opts["tutorial"] = case_name == "tutorial"
+		m.start(opts)
+		m.set_process(false)
+		var p: Hunter = m.player
+		p.dropping = false
+		m._tip_t = 2.0
+		m._tips()
+		m.hud.msgs.clear()
+		p.root_t = CcTips.SELF_HOLD_S
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: a hunter's own hold shows nothing" % case_name)
+		p.root_t = 0.0
+		for cc: String in ["stun", "root", "grounded"]:
+			match cc:
+				"stun": p.stun_t = 1.0
+				"root": p.root_t = 1.0
+				"grounded": KitStatus.apply(p, "gnd", 1.5, 0.0, false)
+			m._tips()
+			var shown: bool = m.hud.msgs.count() == 1 and m.hud.msgs.texts().has(tips[cc])
+			var said := "shown" if shown else "not shown"
+			ok(shown == (case_name == "real match"), "%s: %s card %s" % [case_name, cc, said])
+			m.hud.msgs.clear()
+			m._tips()
+			ok(m.hud.msgs.count() == 0, "%s: no repeat while still %s" % [case_name, cc])
+			p.stun_t = 0.0
+			p.root_t = 0.0
+			p.set_meta("gnd_until", 0.0)
+	for cc: String in tips:
+		ok(not String(tips[cc]).contains("%") and String(tips[cc]).length() < 70, "the %s card is one short line" % cc)
+# ------------------------------------------------------------------ 9. the closing zone's two lines
 ## A real expedition with the first-match guide, every other guide line already shown, the player landed.
 func _zone_match() -> Match:
 	var zm := Match.new()

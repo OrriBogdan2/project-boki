@@ -84,6 +84,13 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+### A summoned Boki (out of the wisp)
+
+The Boki bursting out of its wisp (decision 0039) is the same `Kin` and rig, so it plays the clips above. The burst
+and the fold are `BokiWispPop`; the hit jolt is the flinch below. A burst or re-bloom is a `Kin.teleport`, which the
+rig does not read as speed (it stands, it does not run on the spot). A cast's wind-up also reads as striking
+(`kstate` attack), so while the ability clip plays the attack clip does not start over it (`--boki-rig-check`).
+
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other
@@ -305,3 +312,21 @@ body (`KinPuppet`) gets the whole nap from `KinNap`: it lies down over 0.6 s, br
 and on waking gets up in 0.4 s and stretches long and low with the front down, done by 1.1 s. Checks:
 `--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).
 | caecilith | 55% → 55% 6.0 steps/s | 57% → 57% 6.0 steps/s | 77% → 77% 6.0 steps/s | 86% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
+## Standing still: breath and fidget (`BokiIdle`, `content/rules/boki_idle.json`)
+
+Audit of the 21 idles (2026-11-09): none stood on a static pose (`--boki-idle-check` asserts the loop seam of all 21); but 12 shared the generic breath (same loop length, the torso moving a hair, an ear/claw tick every loop):
+cindle, puddlet, burrlet, glintmole, rimeshrew, pebbit, cairnback, gloamshell, hivara, mossgrade, nettlynx, zapple.
+The other 9 have a clip of their own and keep it. Nobody had anything that happens now and then.
+
+At runtime `BokiRig` asks `BokiIdle.build` (no re-export, no Blender) for two clips per model:
+- `idle`: for the 12 above it is re-timed to the species' own breath length and the torso swings deeper (`breath`
+  in the JSON: len s, amp x); `calm` keeps 20% of the ear/claw tick. The loop still ends on its first key.
+- `idle_fidget`: the same clip with a few bones moved over a window (`fidget`: at, dur, rows of [bone, axis, peak rad,
+  cycles, phase]) inside a sin envelope, so it starts and ends on the idle's pose. It is a whole number of idle loops
+  long, so going back to `idle` is seamless at any blend weight.
+
+The fidget comes every 4-9 s (`gap_s`), counted while it stands idle, only when `_state_clip` says idle: any
+action, sleep, hop, ability or attack takes over at once and restarts the count. Each fidget is picked from who the
+Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
+body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
+frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.

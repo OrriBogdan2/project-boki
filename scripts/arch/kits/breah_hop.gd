@@ -141,7 +141,7 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 func _lands(p: Vector3, g: float) -> bool:
 	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var fits: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
+	var fits: bool = m.world.occupy(p.x, p.z, h.hull_r(), maxf(g, h.pos.y), false) == 0.0
 	StoneStand.mover = asking
 	return fits
 
@@ -277,6 +277,9 @@ func _tick_air(dt: float) -> void:
 	)
 	if not h.grounded and h.pad.is_empty():
 		h.vel.y -= _pull() * dt
+		if t >= T and not bool(st.get("air", false)):
+			h.vel.x = 0.0      # the flight time is up: drop onto the aimed spot, never drift past it (a step late)
+			h.vel.z = 0.0
 	if not bool(st["rock_up"]) and t >= T - RISE_LEAD:
 		st["rock_up"] = true
 		var at: Vector3 = st["spot"]["at"]

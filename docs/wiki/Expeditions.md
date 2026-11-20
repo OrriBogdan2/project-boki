@@ -132,7 +132,7 @@ rolls which lairs are live (the rest lie dormant).
   updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
   roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
-  your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Siegephant), Zephyrak
+  your deathbox if you fall, and hatches at home in the Incubator: Cairnhorn (Siegephant), Zephyrak
   (Sarcobra) or Hivara (Calderoise).
 
 ## Getting out
@@ -151,7 +151,7 @@ you scanned to your farm.
 
 ## Down, dead and back
 
-On SUPERVIVE-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
+On reference-style rules, tuned for extraction (numbers on [Rules](Rules.md#down-death-and-revive)):
 
 - **Downed.** At 0 health you become a **wisp**: you crawl, can't be shot, and bleed out in 15 s.
   A teammate standing on you brings you back in 4 s at a quarter of your health (extra teammates make

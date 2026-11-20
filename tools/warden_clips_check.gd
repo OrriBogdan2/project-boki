@@ -8,6 +8,7 @@ extends RefCounted
 ## move ends keeps them on the legs' own layer (no snap into the stance).
 ## Never touches the save.
 
+const WardenStatesCheck := preload("res://tools/warden_states_check.gd")
 const DT := 1.0 / 60.0
 const MAX_TRIS := 80000         # weapon and shield included (RIG_CONTRACT "Budget")
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
@@ -32,8 +33,10 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	_finishers()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
+	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -186,6 +189,38 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
 
+## The shared actions (stomp, drink): a Hunter with a clip for it plays it, timed to the game's clock; one without
+## keeps the procedural pose. Motley, Albert, Sparkle and Sable (ext/anim-stomp-drink-3).
+func _finishers() -> void:
+	for id in ["ostra", "bulwark", "mage", "thief"]:
+		var art_name := WardenGlb.art(id)
+		var cfg := WardenClips.data(art_name)
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		holder.add_child(m)
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		var lib: AnimationLibrary = clips.lib
+		var sts: Dictionary = cfg["states"]
+		var proc: Array = cfg.get("procedural", [])
+		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", UtilityUse.channel("tonic", "time")]]:
+			var nm := String(sts.get(k[0], ""))
+			var has := nm != "" and lib.has_animation(nm)
+			ok(has and not k[0] in proc, "%s: a %s clip, off the procedural list" % [art_name, k[0]])
+			if has:
+				var secs := lib.get_animation(nm).length
+				var fits := absf(secs - float(k[1])) < 0.04
+				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+		# the slam is on the beat: the stomp state's phase 0.7 is the clip's 0.49 s
+		m.set_meta(WardenClips.STATE, {"stomp": 0.7, "grounded": true})
+		var pick := clips._pick({"stomp": 0.7}, 0.0)
+		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
+		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
+		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
+		var dk := clips._pick({"drink": 0.5, "vel": Vector3(2.0, 0.0, 0.0)}, 0.0)
+		var upper := bool(dk.get("upper", false))
+		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
+		ok(is_drink and upper, "%s: the drink rides the upper body on the move" % art_name)
+		m.free()
+
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
 func _companions() -> void:
@@ -250,6 +285,8 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
 	WardenMood.poke(m)
 	md.step(0.03)
 	ok(not sk.get_bone_pose_rotation(fish).is_equal_approx(calm), "a blocked hit shivers the fish")
+	if md.lure.is_empty():
+		return
 	var rest_glow := float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow"))
 	m.set_meta(WardenMood.FLARE, true)
 	md.step(1.0)

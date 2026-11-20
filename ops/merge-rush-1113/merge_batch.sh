@@ -2,13 +2,13 @@
 # merge_batch.sh LIST SKIPS : merge every "ext/<branch> <sha>" line of LIST into the current checkout, one --no-ff merge
 # each ("Merge ext/<b> <sha9> (merge rush)"). Branches already in HEAD are passed over. Conflicts only in the check
 # registry or hand-written docs are union-merged (one entry per line); conflicts in generated files (docs/wiki,
-# lint/style baselines, .import) take ours and are regenerated after the batch. Any other conflict aborts that merge
+# lint/style baselines, .import, .uid) take ours and are regenerated after the batch. Any other conflict aborts that merge
 # and appends "ext/<b> <sha> conflict: <files>" to SKIPS. rerere is off: the shared rr-cache (other sessions' resolutions,
 # autoupdate on) would otherwise turn a real conflict into a silent "clean" merge.
 set -u
 LIST=$1 SKIPS=$2
 UNION='^(tools/check_registry\.gd|docs/[^/]+\.md|docs/(heroes|art|decisions)/.*\.md)$'
-OURS='^(MERGE_REPORT\.md|docs/wiki/.*|tools/(style|lint)_baseline\.json|.*\.import)$'
+OURS='^(MERGE_REPORT\.md|docs/wiki/.*|tools/(style|lint)_baseline\.json|.*\.import|.*\.uid)$'
 while read -r b s; do
 	[ -n "$b" ] || continue
 	git merge-base --is-ancestor "$s" HEAD 2>/dev/null && continue

@@ -1,6 +1,6 @@
 # Hunter ultimates (R): cast lock against the source
 
-Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the caster cannot walk, turn, dash, glide or use other abilities. Source = the footage sheets (`briefs/hero-ref/*.md`, "Ultimate (on X)") and `briefs/supervive-data/supervive_kits.md`. Ours = the kit data and code (`content/archetypes/<id>.json` `x`, `scripts/arch/kits/`). Owner rules are kept as they are.
+Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the caster cannot walk, turn, dash, glide or use other abilities. Source = the footage sheets (`briefs/hero-ref/*.md`, "Ultimate (on X)") and `sv/briefs/kits.md`. Ours = the kit data and code (`content/archetypes/<id>.json` `x`, `scripts/arch/kits/`). Owner rules are kept as they are.
 
 | Hunter (source) | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|

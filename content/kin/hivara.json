@@ -2,6 +2,7 @@
 	"id": "hivara",
 	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/hivara.json.",
 	"rare": true,
+	"no_egg": true,
 	"boss": "brood",
 	"size": {
 		"cm": 44,

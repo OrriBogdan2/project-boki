@@ -14,7 +14,7 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 13	Blossmink	Blossmink	Ermink	2	2	c	Grass	Mystery egg	soft chitter and a breath of petals
 14	Voltmink	Voltmink	Ermink	2	2	d	Electric	Mystery egg	chitter with a snap of static
 15	Rimink	Rimink	Ermink	2	2	e	Ice	Mystery egg	chitter with ice cracking
-16	Umbrink	Nightmink	Ermink	2	2	f	Dark	Mystery egg	low chitter and an ink swish
+16	Umbrink	Umbrink	Ermink	2	2	f	Dark	Mystery egg	low chitter and an ink swish
 17	Lunink	Lunink	Ermink	2	2	g	Fairy	Mystery egg	dreamy chitter with a bell tone
 18	Prismink	Prismink	Ermink	2	2	h	Crystal	Mystery egg	chitter over a crystal glissando
 19	Wyrmink	Wyrmink	Ermink	2	2	i	Dragon	Mystery egg	chitter that deepens into a small roar
@@ -23,7 +23,7 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 22	Voltalon	Voltalon	Kestrike	3	3		Normal/Electric	Early common	raptor shriek with a thunder crack
 23	Jerbit	Jerbit	Jerbit	1	3		Electric	Early common	squeak and a spring boing
 24	Jerbolt	Jerbolt	Jerbit	2	3		Electric	Early common	chirp and a static zap
-25	Dynaboa	Dynaboa	Jerbit	3	3		Electric	Early common	rising turbine whine and a spark
+25	Dynaboa	Dynamouse	Jerbit	3	3		Electric	Early common	rising turbine whine and a spark
 26	Effigeetle	Sculptillar	Effigeetle	1	3		Rock/Bug	Early common	tiny tapping like a chisel on marble
 27	Effigoon	Effigoon	Effigeetle	2	3		Rock/Bug	Early common	stone hum from inside a shell
 28	Mortarfly	Mortarfly	Effigeetle	3	3		Rock/Bug	Early common	wide marble wing-beat and a soft chord
@@ -72,7 +72,7 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 71	Mossbastion	Mosstodon	Mossgrade	2	2		Grass/Steel	Early common	slow stone groan under moss
 72	Murmurling	Murmurling	Murmurling	1	2		Bug/Sound	Early common	starling whistle on pan pipes
 73	Murmuron	Murmuron	Murmurling	2	2		Bug/Sound	Early common	pan-pipe call that breaks into a flock of wings
-74	Oarlet	Oarlet	Oarlet	1	3		Water	Early common	otter squeak and a splash
+74	Oarlet	Oarpup	Oarlet	1	3		Water	Early common	otter squeak and a splash
 75	Oarter	Oarter	Oarlet	2	3		Water	Early common	chirp and a quick paddle stroke
 76	Galleotter	Galleotter	Oarlet	3	3		Water/Steel	Early common	bark and many oars pulling together
 77	Scoopsy	Scoopsy	Scoopsy	1	2		Ice	Early common	squeak and an ice-cream scoop
@@ -105,10 +105,10 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 104	Buckleron	Buckleron	Buckleron	1	3		Rock/Water	Mid game	small croak with a pot-lid clink
 105	Bulwartoad	Bulwartoad	Buckleron	2	3		Rock	Mid game	gruff croak and an iron clang
 106	Citadoad	Citadoad	Buckleron	3	3		Rock/Water	Mid game	heavy croak and a mace thud
-107	Fawngus	Fawnshroom	Fawngus	1	2		Spore	Mid game	gentle bleat with a spore puff
+107	Fawngus	Fawngus	Fawngus	1	2		Spore	Mid game	gentle bleat with a spore puff
 108	Hatstag	Hatstag	Fawngus	2	2		Spore/Grass	Mid game	soft bell-like call in a quiet wood
-109	Pinster	Pinster	Pinster	1	2		Steel	Mid game	ball roll and a ping
-110	Tiltster	Tiltster	Pinster	2	2		Steel	Mid game	bumper pings and a flipper slap
+109	Pinster	Rolypin	Pinster	1	2		Steel	Mid game	ball roll and a ping
+110	Tiltster	Tiltbug	Pinster	2	2		Steel	Mid game	bumper pings and a flipper slap
 111	Bastling	Bastling	Bastling	1	2		Water/Rock	Mid game	click click and a little wave
 112	Bastionpet	Crabulwark	Bastling	2	2		Water/Rock	Mid game	slow claw clack and surf
 113	Gongibbon	Gongibbon	Gongibbon	1	2		Sound	Mid game	hoot hoot then one small gong tap
@@ -212,10 +212,10 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 210	Torpecone	Torpecone	Bathilus	2	3		Psychic	Late game	ping and a fast whoosh
 211	Dreadmonite	Dreadmonite	Bathilus	3	3		Psychic/Water	Late game	deep horn call and a crashing wave
 212	Grammite	Grammite	Grammite	1	2		Bug	Late game	scratchy chirp and two blades crossing
-213	Dobsabre	Dobsabre	Grammite	2	2		Dragon/Bug	Late game	buzz and a sabre flourish
+213	Dobsabre	Sabrefly	Grammite	2	2		Dragon/Bug	Late game	buzz and a sabre flourish
 214	Gloamshell	Duskargot	Gloamshell	1	2		Dark/Fairy	Late game	slow squelch with a soft purple hum
 215	Gloamspire	Duskspire	Gloamshell	2	2		Dark/Fairy	Late game	low drone with crystal ringing
-216	Olmlet	Olmlet	Olmlet	1	3		Water/Crystal	Late game	delicate porcelain tink
+216	Olmlet	Porcelet	Olmlet	1	3		Water/Crystal	Late game	delicate porcelain tink
 217	Glazolm	Glazolm	Olmlet	2	3		Water/Crystal	Late game	flowing chime like pouring water
 218	Kintsuwyrm	Gildwyrm	Olmlet	3	3		Water/Crystal	Late game	rich bell tone with crystal ringing
 219	Malletary	Malletary	Malletary	1	1		Normal/Steel	Late game	harsh bird call and a mallet strike
@@ -232,7 +232,7 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 230	Checkmare	Checkmare	Pawnfry	3	3		Dragon/Steel	Late game	sharp neigh and a clock slap
 231	Gilabacus	Gilabacus	Gilabacus	1	1		Poison/Fairy	Late game	hiss and beads clicking
 232	Hivara	Hivara	Hivara	1	1		Bug/Steel	Late game	deep buzz like an accordion drone
-233	Cairnback	Cairnback	Cairnback	1	1		Steel/Rock	Late game	stones settling
+233	Cairnback	Cairnhorn	Cairnback	1	1		Steel/Rock	Late game	stones settling
 234	Zephyrak	Zephyrak	Zephyrak	1	1		Flying/Dragon	Late game	wind gust and a weather vane squeak
 235	Zipling	Zipling	Zipling	1	3		Dark	Pseudo-legendary	tiny zip up then a giggle
 236	Zippelith	Zipperpent	Zipling	2	3		Dark	Pseudo-legendary	long zipper pull with a hiss
@@ -240,15 +240,15 @@ dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
 238	Kitlet	Kitlet	Kitlet	1	3		Dragon	Pseudo-legendary	little roar and a kite flutter
 239	Ribbonwyrm	Ribbonwyrm	Kitlet	2	3		Dragon/Flying	Pseudo-legendary	airy cry and ribbons snapping in wind
 240	Dragonkite	Kitedrake	Kitlet	3	3		Dragon/Flying	Pseudo-legendary	proud roar over a big kite catching the wind
-241	Luckhop	Luckhop	Luckhop	1	1		Grass/Fairy	Legendary: minor	cheerful chirp and a coin ping
-242	Twinklup	Twinklup	Twinklup	1	1		Normal/Fairy	Legendary: minor	happy yip and a twinkle
-243	Lockwren	Lockwren	Lockwren	1	1		Flying/Steel	Legendary: minor	sweet tweet and a locket click
+241	Luckhop	Fortunny	Luckhop	1	1		Grass/Fairy	Legendary: minor	cheerful chirp and a coin ping
+242	Twinklup	Twinkling	Twinklup	1	1		Normal/Fairy	Legendary: minor	happy yip and a twinkle
+243	Lockwren	Lockwing	Lockwren	1	1		Flying/Steel	Legendary: minor	sweet tweet and a locket click
 244	Glacione	Clionice	Glacione	1	1		Ice/Fairy	Legendary: minor	tiny ice bell
 245	Cometail	Cometail	Cometail	1	1		Fairy/Psychic	Legendary: minor	light yip with a rising star shimmer
 246	Wayshell	Wayshell	Wayshell	1	1		Water/Psychic	Legendary: minor	deep sea call and a compass tick
 247	Pharoheron	Pharoheron	Pharoheron	1	1		Flying/Electric	Legendary: minor	long heron call and a lighthouse horn
 248	Ghoulamari	Ghoulamari	Ghoulamari	1	1		Fairy/Dark	Legendary: minor	echoing warble and a crystal hum
-249	Pavonazar	Pavonazar	Pavonazar	1	1		Fairy/Crystal	Legendary: minor	peacock cry and a fan of bells
+249	Pavonazar	Peacharm	Pavonazar	1	1		Fairy/Crystal	Legendary: minor	peacock cry and a fan of bells
 250	Calderoise	Calderoise	Calderoise	1	1		Fire/Rock	Legendary: boss	slow roar and an eruption
 251	Siegephant	Siegephant	Siegephant	1	1		Steel/Rock	Legendary: boss	trumpet and a gate crashing down
 252	Glaciammoth	Glaciammoth	Glaciammoth	1	1		Ice/Steel	Legendary: boss	ancient bellow and a glacier cracking

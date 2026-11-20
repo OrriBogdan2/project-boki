@@ -22,6 +22,10 @@ static func tick(m) -> void:
 	if mode == "" or m.player == null or m.time < 0.05:
 		return
 	var P: Hunter = m.player
+	if mode == "plates" and m.has_meta("hudref_set"):
+		# face the row every frame: the 120 degree sight cone hides plates of rivals behind you, and a headless run
+		# has no pointer to aim with (the windowed picture gets the same aim from the pointer at the bottom edge)
+		P.inp["aim"] = P.pos + Vector3(0, 0.9, 4.4)
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
@@ -136,7 +140,7 @@ static func _busy(m, P: Hunter) -> void:
 		if h != P and h.team == P.team:
 			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
 			break
-	m.hud.level_up(8, {})
+	m.hud.level_up(8)
 	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
 	m.hud.toast("Bramble Isle", Color("f2c84a"))
 	for i in 3:

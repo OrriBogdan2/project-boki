@@ -1,6 +1,6 @@
 extends RefCounted
 ## --aimkit-check: the shared aiming kit (docs/AIMKIT.md, scripts/match/aim/). The aim-mode math
-## (cursor clamped to range vs always max range, the per-shot override through Hunter._emit_shot, the
+## (cursor clamped to range vs always max range, the per-shot override through HunterAttack.emit_shot, the
 ## boom default kept), every telegraph shape shown, updated, expired and hidden, who sees what, the
 ## membership tests, pooling (no node growth over 300 frames of every shape), the cursor states (charge
 ## ring, full flare, perfect star) and the merge-start cleanup through ArchKit.drop_holds().
@@ -55,7 +55,7 @@ func _aim(P: Hunter, d: float) -> void:
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
 	var before := m.shots.size()
-	P._emit_shot()
+	P.atk.emit_shot()
 	if m.shots.size() <= before:
 		return -1.0
 	var s: Dictionary = m.shots.back()
@@ -280,26 +280,36 @@ func _unlike(a: Dictionary, b: Dictionary) -> String:
 			return "%s: %s vs %s" % [k, x, y]
 	return ""
 
-## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
+## "soft" lanes, cones and circles: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
 func _soft(P: Hunter) -> void:
 	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
 	AimKit.cone(P, "soft_cone", {"len": 4.0, "deg": 70.0, "inner": 0.0, "fill": 1.0, "soft": true, "all": true})
 	var lane := measure(AimKit.entry(P, "soft_lane"), 0.6, 1.08)
 	var cone := measure(AimKit.entry(P, "soft_cone"), 0.6, 3.98)
+	AimKit.circle(P, "soft_circle", {"r": 4.0, "band": 0.25, "alpha": 2.0, "soft": true, "all": true})
+	var circle := measure(AimKit.entry(P, "soft_circle"), 0.0, 3.9)
 	ok("soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
 			lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5)
 	ok("soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
 			cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5)
+	ok("soft circle: inside <= %.2f at the centre even at alpha 2, rim lit (%.2f / %.2f)"
+			% [AimShapes.SOFT_A, circle[0], circle[1]],
+			circle[0] > 0.0 and circle[0] <= AimShapes.SOFT_A + 0.001 and circle[1] >= 0.5)
 	AimKit.hide(P, "soft_lane")
 	AimKit.hide(P, "soft_cone")
+	AimKit.hide(P, "soft_circle")
 
 ## [the drawn alpha at the shape's centre line `at` of the way along it, the alpha `edge` m out from the
-## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone).
+## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone); for a circle,
+## [the alpha at its centre, the alpha `edge` m out from it].
 static func measure(e: Dictionary, at: float, edge: float) -> Array:
 	if e.is_empty():
 		return [-1.0, -1.0]
 	var g := AimGeo.new()
 	AimShapes.build(g, e)
+	if e["kind"] == "circle":
+		var c: Vector2 = e["at"]
+		return [alpha_at(g, c), alpha_at(g, c + Vector2(edge, 0.0))]
 	var o: Vector2 = e["from"]
 	var u: Vector2 = e["dir"]
 	var mid := o + u * float(e["len"]) * at

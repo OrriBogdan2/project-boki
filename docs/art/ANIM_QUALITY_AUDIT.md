@@ -314,7 +314,9 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
+2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights. Re-measured on
+   the v95 build (Nov 17): orb 5 % (the arms-in `FAN_IN` of Nov 11), snap 77 %. Snap now keeps the fan in at the ruff
+   (`HELD_L` in tools/art1/ostra_clips.py, `snap_wind` and `snap` re-keyed): snap 13 % sideways, free arm travel 0.57 to 0.45.
 3. No arm swing (reach 0.03).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
@@ -404,6 +406,31 @@ Sparkle's raw walk crosses her legs by frame 1; with the phase the stance opens 
 The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
 walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
 
+## Stop (let-go from a run, walk and crouch walk)
+
+The brake (HunterMove.brake) stops a let-go from a run in about 0.17 s and 0.3 m. The loco rate fell back to 1 once he
+was under `STILL` while the blend still went back to the idle, so the legs ran on the spot and a planted foot was
+dragged. The fix (WardenClips, WardenGait):
+- The clip rate follows the feet of the blend as it stands (`WardenGait.plan` with `moving`, and its floor fades with
+  the blend), so on a let-go the legs slow with the body and hold their stride.
+- `loco.stop_rate` (1/s, default 5, Cinder 12) is how fast the blend falls back, apart from the 12/s of a start. The
+  crouch walk falls back the same way.
+- Standing, the leg bones ease into the idle at 3/s (`WardenGait.SETTLE_RATE`).
+
+Measure (`--anim-audit`, STOPS lines, gated): a planted foot's mean speed against the ground over the 0.4 s after the
+let-go, the speed from the game's own brake, averaged over 8 let-gos through one stride, as a share of the gait's
+speed. A stop over `MAX_SLIDE` (25 %), or over what the gait slides on its own when that is more, fails. Run, walk and
+crouch walk, share of speed before to after (Ostra has no legs):
+
+| Hunter | stop run | stop walk | stop crouch |
+|---|---|---|---|
+| juggernaut | 30 to 12 | 37 to 20 | 48 to 20 |
+| dredge | 27 to 15 | 37 to 20 | 54 to 16 |
+| thief | 21 to 14 | 19 to 11 | 33 to 16 |
+
+Before: main at 9a269e6b40 (18 of the 33 stops over the gate). After: none. Lace and Albert pass only through their
+own steady slide (over 50 %, the open gait items below), so their stops are not a measure of the fix.
+
 ## Climb clips (mantle and ledge pull-up)
 
 Lace (`archer`), Tenzo (`dolm`), Grimble (`dredge`) and Neve (`rimewright`) have a keyed `mantle` (reach, hands plant, vault, land,
@@ -443,3 +470,19 @@ Split into backlog items per Hunter (role build):
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - Start gaps not on the gate: `rimewright` measures 0.33 now (0.06 when this page was written), `dolm` 0.25.
+
+## Mantle and ledge clips
+A ledge rise (`Hunter.lfloat`) now feeds the anim state `mantle` = how far up the face the body is (`MantleCarry.rise_k`,
+0 at the foot, 1 at the lip), so a keyed mantle clip is read at that phase and cannot lag the body; `ledge` (the float
+back up from the abyss) plays on its own clock and holds its last pose. `mage` (Sparkle), `bulwark` (Albert), `thief`
+(Sable) and `ostra` (Motley) have both clips (0.8 s mantle, 1.0 s ledge), keyed with `tools/art1/climb_clips.py` and the
+poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Blender; rerun it after any rebuild of the
+`.glb`: `python3 tools/art1/climb_clips.py <ryzz|sable|breaker|ostra>`). Sparkle scrambles with one knee up; Sable
+kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
+legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
+`--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+Motley's root stays on his hover (data `rig_root`), so his lift and lean are keyed on the hips instead (his
+`offset_bones`): the spring stretches and he rises out of the box. `--close` backs the camera off for a tall Hunter.
+Rows below are mantle then ledge for Sparkle, Sable, Albert and Motley, 8 frames each (software GL; after changing a
+`.glb`, run `godot --headless --path . --import` first or the strip shows the old clip).
+![mantle and ledge strips: Sparkle, Sable, Albert, Motley](anim_audit/climb_mantle3.jpg)

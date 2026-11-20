@@ -31,8 +31,8 @@ Runner-up: Glimmerkin (IP risk: round, yellow, long ears). Puffbomb also has IP 
 - At match zoom all 7 already separate by size and colour; the dark legs and masses carry them against the lime meadow. Keep that: every redesign keeps a large dark mass on the silhouette (spec section 4).
 - Skitter and Glimmerkin are glossy; the canon is matte. Spitter's maw is only visible from the front. Brute's pale belly is its biggest shape.
 
-## SUPERVIVE PvE study (function and readability only; no designs, names or art)
-Sources: supervive.wiki.gg/wiki/Creeps (flagged outdated by the wiki), sportskeeda.com "how to farm monsters in Supervive" and "11 beginner tips".
+## REFERENCE PvE study (function and readability only; no designs, names or art)
+Sources: reference.wiki.gg/wiki/Creeps (flagged outdated by the wiki), sportskeeda.com "how to farm monsters in the reference" and "11 beginner tips".
 - **Camps, not wanderers:** a camp is about 3 small creatures plus 1 elite, themed per biome, respawning on a timer. The camp reads as one unit from far away; the elite is the visual anchor (larger, distinct).
 - **Clear threat tiers:** small creeps, elites, biome leaders (mini-bosses), soul/major bosses. Each tier step is a clear jump in size and silhouette, so players judge a fight before committing.
 - **Stagger window:** elites and bosses periodically become weak and take big bonus damage; the cue sits on the creature and is very loud. Ours already does this (purple ring + stars, x2.5) on brute, sentinel, Glimmerkin, Watcher.

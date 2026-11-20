@@ -25,6 +25,7 @@ func _st(m: Match, i: int) -> int:
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d.erase("hud_reveal")      # the full HUD (staging is --hud-reveal-check's)
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)

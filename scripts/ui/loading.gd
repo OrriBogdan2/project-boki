@@ -73,7 +73,7 @@ func setup(opts: Dictionary) -> void:
 	if opts.get("tutorial", false):
 		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
-		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
+		title = "Training Area"; sub = "Dummies, ledges and boosters. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
@@ -88,7 +88,8 @@ func setup(opts: Dictionary) -> void:
 			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
-	tip = TipPick.for_loading(opts.get("blight", true))
+	var tut: bool = opts.get("tutorial", false) or opts.get("duo_tut", false)
+	tip = TipPick.for_loading(opts.get("blight", true), not tut)
 	lore = LORE[randi() % LORE.size()]
 	arch = String(opts.get("arch", Arch.of_save()))
 	splash_path = Portraits.art_path(arch, true)
