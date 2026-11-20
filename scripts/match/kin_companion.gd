@@ -576,6 +576,14 @@ func _ground_ok(p: Vector3, y0: float) -> bool:
 		return false
 	return absf(w.ground_at(p.x, p.z) - y0) < 0.75
 
+## Is it leading the way right now (tutorial)? On a step with a lead goal, not once you ran past it or while it
+## rejoins you after a stall (TutorialLead.on). The checks read it to know a Boki is guiding.
+func leading() -> bool:
+	var to := TutorialLead.goal(k)
+	if to == Vector3.INF or h() == null or lead_off > 0.0:
+		return false
+	return not TutorialLead.passed(k.seen_pos(), h().pos, to)
+
 # ------------------------------------------------------------------ the tutorial guide
 ## Match._update_tutorial tells it every step what the step is about.
 func tut(id: String, to: Vector3) -> void:
