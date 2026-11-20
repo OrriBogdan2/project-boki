@@ -10508,3 +10508,4 @@ READY ext/mantle-heights b950e14f1a (re-merged origin/main 32c04490c3; ability_t
 READY ext/vfx-meeko-heal-hurt b8cb9c3935 (re-merged origin/main, hero_vfx_check.gd conflict resolved; Meeko heals leaf green rising, hurts embers falling; Hearthlight/root field inside <=0.25 to rim; hero-vfx-check 417 ok vs main 413, same 1 pre-existing gunslinger FAIL)
 READY ext/sparkle-3d-fix-1120 81d2603a5b (Sparkle 3D: quad remesh + Meshy retexture from 2D pick, cand A of A/B/C; draft for owner check)
 READY ext/vfx-sable-lmb 9036f85072 (Sable LMB cel tracer + lit hit burst; merged origin/main, thief.json conflict resolved keeping main's anchors/moves + bolt_trail/bolt_hit; --dancer-combo-check 47/0 fail, --check 0 failures; health --strict only fails sfx loudness: numpy missing on w2)
+READY ext/tut-farm-skip c9aa1cf884 (Hob no longer calls a skipper over; farm tutorial check skips at each of 12 farm + 4 base steps; 3 stale assertions and wiki Rules.md fixed)
