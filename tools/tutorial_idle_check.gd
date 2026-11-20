@@ -90,7 +90,8 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 		stall = tu.stall_t
 		if tu.text == "":
 			no_text += 1
-		if has_place and not (tu.target != Vector3.INF and tu.label != "" and tu.beams_on() > 0):
+		var cleared := sid in Tutorial.FOE_STEPS and tu.camps.alive() == 0      # (the Boki felled the camp: no place left)
+		if has_place and not cleared and not (tu.target != Vector3.INF and tu.label != "" and tu.beams_on() > 0):
 			lost += 1
 	var early := tu.step != s0 or p.extracted
 	var note := "ends by itself at %.1f s" % t if early else ""
