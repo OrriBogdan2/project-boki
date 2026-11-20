@@ -10622,3 +10622,4 @@ READY ext/albert-vfx-data 87652c6716b (Albert looks onto bulwark.json: beacon, d
 READY ext/hud-holdback 62bcd58e5cb57c0c294062e837bdab3bb8da83bc (HudReveal holds back spare belt slots + locked ult tiles; HudGroups counts only drawn blocks; fresh landing 9 -> 6 groups)
 READY ext/sfx-tenzo-grimble-bar f85f9033d3 (Tenzo+Grimble ability bar, merged current main: resolved sfx_strike_check KNOWN + AUDIO/SFX_TIMING docs keeping Gil rows too; sfx-set 0 FAIL, strike rc0 0 failures, --check 0 failures; health --strict style fails only in files this branch does not touch)
 READY ext/lace-vfx-data b10af892cb07017a3f4c1f1c61e874020b831980 (Lace: perfect-release burst, Heavy Shot glint and release, Hail Wall burn and live wall, Spirit Walk shares onto content/vfx/archer.json; PinFx 553->~230 lines)
+READY ext/lace-knock-cut 673b43e50b (Lace longbow.kb 3.5 to 2.0 and ult x.kb 4 to 2.0: nudge not knock, card lists none; kit-parity 0 fail)
