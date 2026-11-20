@@ -287,6 +287,8 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 		extra["bounce"] = int(cx["wall_bounce"])      # ricochets off walls (an archetype's trick shot)
 	if cx.has("shot_crit"):
 		extra["crit"] = true
+	if cx.get("drawn", false):
+		extra["drawn"] = true      # the kit draws it (Grimble's arm): no ball, and no "s" copy for other games
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"

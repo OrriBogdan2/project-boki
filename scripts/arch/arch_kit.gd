@@ -208,7 +208,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 ## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
-## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx), and looks off the synced row
+## (Grimble's reaching arm, DredgeKit.net_reach).
 func sound_tick(_dt: float) -> void:
 	pass
 

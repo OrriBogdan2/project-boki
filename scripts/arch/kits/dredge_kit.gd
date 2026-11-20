@@ -44,6 +44,7 @@ const DRIP_T := 0.07                   # s between sludge drips off the stretche
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
+const GRIP_UP := 0.95                  # m above a body's feet where the hand holds it
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
@@ -53,6 +54,9 @@ var flying := false             # hold: the hook is in the air (from the coil-ba
 var coil := 0.0                 # hold: the coil-back before the arm shoots out (`rmb.windup`): time left
 var hook_sd := {}               # the hook's shot while it flies
 var arm_tip := Vector3.INF      # where his hand reaches this step (the model's WardenReach.TIP); INF: home
+var shown_tip := Vector3.INF    # the last step's arm_tip (the hunter row sends it, net_reach)
+var wire: Array = []            # another game's Grimble: his last net_reach, and its age (s)
+var wire_age := 0.0
 var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
@@ -288,7 +292,39 @@ func _tick_model(_dt: float) -> void:
 	if h.model:
 		h.model.set_meta(WardenReach.TIP, arm_tip)
 		coins.tick(h, m.time, tells_visible())
+	shown_tip = arm_tip
 	arm_tip = Vector3.INF
+
+## The reach on the hunter row (HunterNet; Net 0.24.19), as other games don't run this kit: [] home, [nid] the body
+## the reel holds, [x, y, z, vx, vz, life] the hook in flight.
+func net_reach() -> Array:
+	if not shown_tip.is_finite():
+		return []
+	if not pull.is_empty() and is_instance_valid(pull["t"]):
+		return [(pull["t"] as Ent).nid]
+	var v: Vector2 = hook_sd.get("vel", Vector2.ZERO)
+	var life := float(hook_sd.get("life", 0.0))
+	return [m._r(shown_tip.x), m._r(shown_tip.y), m._r(shown_tip.z), m._r(v.x), m._r(v.y), snappedf(life, 0.01)]
+
+func net_reach_in(w: Array) -> void:
+	wire = w
+	wire_age = 0.0
+
+## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy or on along the
+## hook's flight until the next row (no farther than the hook's life), so it reaches as smoothly as on his screen.
+func sound_tick(dt: float) -> void:
+	if not h.remote or h.model == null:
+		return
+	wire_age += dt
+	var tip := Vector3.INF
+	if wire.size() == 1:
+		var f: Variant = m.ents_by_id.get(String(wire[0]), null)
+		if f is Ent and not (f as Ent).dead:
+			tip = (f as Ent).pos + Vector3(0, GRIP_UP, 0)
+	elif wire.size() == 6:
+		var age := minf(wire_age, float(wire[5]))
+		tip = Vector3(wire[0], wire[1], wire[2]) + Vector3(float(wire[3]), 0.0, float(wire[4])) * age
+	h.model.set_meta(WardenReach.TIP, tip)
 
 # ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:
@@ -330,7 +366,7 @@ func _launch_hook() -> void:
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
 	var n0: int = m.shots.size()
-	run(stg, cx("rmb", "abyssal_hand", aim(), {
+	run(stg, cx("rmb", "abyssal_hand", aim(), {"drawn": true,       # the hand and the arm are drawn by the kit
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
@@ -345,10 +381,6 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
-		var sn = hook_sd.get("node")
-		if sn is Node3D and is_instance_valid(sn):
-			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
-			hook_sd["node"] = null
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
@@ -458,7 +490,7 @@ func _tick_pull(dt: float) -> void:
 	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
 	if to.length() > 0.05 and face_locked():
 		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
-	_reach(fe.pos + Vector3(0, 0.95, 0))
+	_reach(fe.pos + Vector3(0, GRIP_UP, 0))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
 			scoop.erase(w)
@@ -484,7 +516,7 @@ func _end_pull(arrived: bool) -> void:
 	var ally: bool = pull.get("ally", false)
 	var tow: Dictionary = pull.get("tow", {})
 	if is_instance_valid(f):
-		_let_go((f as Ent).pos + Vector3(0, 0.95, 0))
+		_let_go((f as Ent).pos + Vector3(0, GRIP_UP, 0))
 	hauled += int(tow.get("hauled", 0))
 	m.displace.stop(tow)
 	for rec in pull.get("scoop", []):
