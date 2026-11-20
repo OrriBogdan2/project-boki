@@ -10531,3 +10531,4 @@ READY ext/slam-follow-through-port 26431f5c14abfa113156b96534dd98fd9b945663 (mai
 READY ext/anim-foot-slide-13 1f751eac89e7d526bcf6516ba2a1333880d7f2d0 (foot slide at walk, run, strafe, crouch for all 11 legged Hunters: STEP line per mode, crouch rate at model scale, warden_anim re-fits: worst +33 cm to under 5 except Albert crouch +19 open; --foot-plant-check parses again)
 READY ext/farm-nest-item-row 2fb4b481dec89a5bada0241c60e7631ab6e7f064 (feed menu: nest items get a 'Goes in the Nook' line, asserted in --nest-items-check; GARDEN_DAY_PLAYED row G)
 READY ext/hunter-regen-breaker-1120 328f5c79a2 (Albert r2 regen candidate, DRAFT for owner pick: new Meshy g4, brown look fix, proof MP4s in gens/hunter-regen-1120/breaker/r2)
+READY ext/check-guest-host-pid 81c97f9a4cfc533d1b28ceede8a6adee0c9587ba (check guest game ends itself when its host pid is gone or after 900 s; kill -9 proof 1.0 s)
