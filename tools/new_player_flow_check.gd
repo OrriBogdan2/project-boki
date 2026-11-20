@@ -4,7 +4,7 @@ extends RefCounted
 ##   prologue (held to skip) -> hatch (card, look, egg pick, knocks, the Boki's look, naming) -> the first
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
 ##   -> Hob's second Relic -> the first expedition, played out through the Ways Out Uplink.
-## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
+## Also the skip paths: "Skip tutorial" on the naming card, and skipping the farm tutorial.
 ## The first Mask is Lace, Kael or Vex: `-- --starter=archer|juggernaut|gunslinger` picks whose (default Vex).
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
@@ -175,8 +175,8 @@ func _hatch() -> void:
 		return rv != null and rv.met, "the new Boki meets you")
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
-	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
-	_press(hx, "Learn to fight")
+	ok(_button(hx, "Skip tutorial") != null, "the naming card offers 'Skip tutorial' beside 'Tutorial'")
+	_press(hx, "Tutorial")
 	await _relic(hx)
 
 ## The starter's card on the starter pick (HobOffer), or null before it shows.
@@ -186,12 +186,20 @@ func _starter_card(hx) -> Control:
 			return c
 	return null
 
+## Takes a Relic off a pick the way a player does: clicks its card, then "Yes, take <name>" on the question.
+func _take(root: Node, card: Control, id: String) -> void:
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	card.gui_input.emit(click)
+	await tree.process_frame
+	await _press(root, "Yes, take " + HeroTitle.base_name(id))
+
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
-	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
-	_press(hx, "Take " + HeroTitle.base_name(starter))
+	await _take(hx, _starter_card(hx), starter)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -208,7 +216,7 @@ func _course_tick(_m: Match) -> void:
 
 func _tutorial_match():
 	_begin("tutorial match: load")
-	await _wait(_match_running, "'Learn to fight' opens the tutorial match")
+	await _wait(_match_running, "'Tutorial' opens the tutorial match")
 	var m: Match = main.current
 	m.set_process(false)
 	ok(bool(m.opts.get("tutorial", false)), "it is the tutorial course")
@@ -309,9 +317,9 @@ func _second_relic(home) -> void:
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
 	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
-	ok(offer.ids.size() == want and offer.take_button != null, "%d to choose from, with a Take button" % want)
+	ok(offer.ids.size() == want, "%d to choose from" % want)
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
+	await _take(chat.box, offer.cards[0], pick)
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
@@ -438,9 +446,9 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Tend the garden")
+	_press(hx, "Skip tutorial")
 	_begin("skip paths: farm")
-	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
+	await _wait(func(): return _is_screen("home.gd"), "'Skip tutorial' goes straight to the farm, no Relic first")
 	var home = main.current
 	await _wait(func(): return home.panel_host != null, "the farm builds")
 	ok(ClassUnlock.needs_starters(), "the Relic pick waits")
@@ -465,7 +473,6 @@ func _portal_relic(home) -> void:
 	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
-	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _take(home.panel_host, cards[2], "gunslinger")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

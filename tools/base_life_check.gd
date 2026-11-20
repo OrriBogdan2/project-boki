@@ -12,6 +12,7 @@ const DT := 0.25             # s per farm step (the machines tick at 10 Hz insid
 const NIGHT_AT := 480.0      # s: the last two minutes are night
 const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
 const LONGEST := 90.0        # s: no state but Nap may last longer
+const LET_GO_MIN_FRAMES := 5   # frames the breath check waits at least, however slow they run
 const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
@@ -127,8 +128,11 @@ func _nap_sounds(home) -> void:
 	# Sfx.loop_hold lets go HOLD_MS of real time after the last hold; give the frames up to LET_GO_MS to run it
 	var t0 := Time.get_ticks_msec()
 	var left := _awake_breaths(home)
-	while not left.is_empty() and Time.get_ticks_msec() - t0 < LET_GO_MS:
+	var frames := 0
+	# a loaded box can run only a frame or two in LET_GO_MS: wait for LET_GO_MS_MIN_FRAMES frames as well
+	while not left.is_empty() and (Time.get_ticks_msec() - t0 < LET_GO_MS or frames < LET_GO_MIN_FRAMES):
 		await main.get_tree().process_frame
+		frames += 1
 		left = _awake_breaths(home)
 	ok(left.is_empty(), "an awake Boki's breath lets go within %d ms (%d still on)" % [LET_GO_MS, left.size()])
 
@@ -137,6 +141,17 @@ func _awake_breaths(home) -> Array:
 	var awake: Array = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) <= 0.0) \
 		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
 	return Sfx.loops.keys().filter(func(key): return key in awake)
+
+## The nap part's two spot tiles (_spots_part) are open ground on center's island.
+func _nap_ground(w, center: Vector3) -> bool:
+	var cx := int(center.x)
+	var cz := int(center.z)
+	for o: Array in [[4, 0], [-4, 3]]:
+		var x: float = cx + int(o[0]) + 0.5
+		var z: float = cz + int(o[1]) + 0.5
+		if w.is_void(x, z) or w.is_block(x, z) or w.island_of(x, z) != w.island_of(center.x, center.z):
+			return false
+	return true
 
 ## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
 func _spots_part(home, center: Vector3) -> void:
@@ -198,9 +213,17 @@ func run(m: Node) -> void:
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
+	# The farm's own _process steps the Boki by real frame time, which varies with machine load: from here the
+	# check steps them alone (fixed DT), and draws from a stream seeded after the build frames.
+	home.set_process(false)
+	seed(11)
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
+	for _i in 60:      # (the nap part puts its two spots 4 m either side: open ground here, whatever the draws before)
+		if _nap_ground(home.world, center):
+			break
+		center = home.world.random_ground(0)
 	Save.d["layout"]["deco"].append({"id": "toy_ball", "u": 990001, "px": center.x + 3.0, "pz": center.z})
 	ok(home.life.toy_spots().size() == 1, "the placed ball is the one toy the machine knows (HomeToys owns the toys)")
 	_gather(home, center)

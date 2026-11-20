@@ -9,12 +9,15 @@ const RETRY_S := 0.5      # seconds between looks while something else is playin
 var h
 var jobs: Array[Callable] = []
 var waiting := false
+var quiet := false      # --base-demo: no arrival card opens (it would cover the Boki in a film or first shot)
 
 func _init(home) -> void:
 	h = home
 
 ## Queues a modal: open is called when it is its turn, with nothing else open.
 func add(open: Callable) -> void:
+	if quiet:
+		return
 	jobs.append(open)
 	pump()
 

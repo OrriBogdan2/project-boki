@@ -87,10 +87,10 @@ func _floor() -> void:
 	# the warning, then the crumble
 	var tz: Dictionary = m.verbs.terrain[0]
 	var node: Node3D = tz["node"]
-	var calm := node.get_node_or_null("Cracks") == null
+	var calm := not SpanLooks.cracked(node)
 	step(m, float(tz["t"]) - float(fd()["warn"]) + 0.3)
 	m.verbs.render(1.0)
-	var cracked := node.get_node_or_null("Cracks") != null
+	var cracked := SpanLooks.cracked(node)
 	var p0 := node.position
 	step(m, 0.1)
 	m.verbs.render(1.0)
