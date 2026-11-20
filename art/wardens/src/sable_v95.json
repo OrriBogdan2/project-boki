@@ -1,15 +1,15 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 22:27Z (current.json r5low4/tilt1112/cand_A: the low4 body, braid long down the back, under the prop1111/cand_B head with its solid grey/black moth eyes, mouth repainted level and calm). Her pistols now hang along the thighs and coat: `detach` cuts each hand from the hips and its thigh (fused, hand.L stretched 21x in encore and the vaults). Before: LIVE 11-12 (current.json prop1111/cand_B: body5/cand_3's head, the solid grey/black moth eyes, with the bust trim and the two moth-wing films pitched 40 deg up/back behind the coat; the films are rigid on the hips by the last region). Earlier: Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes (owner pick 11-10), ~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb, onto sable.glb's skeleton, clips and anchors. Her pistols are fused to her hands in the master: rigid on hand.R/hand.L. The long moth/bunny ears, braid, coat tails and tail feathers are rigid on the head/hips (the old spring chains stay in the rig, unweighted). Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres) read on tools/art1/v95_grid.py's renders.",
- "master": "~/meshy/v95/Sable/r5low4/tilt1112/cand_A.glb",
+ "doc": "hunter-regen-1120: a new Meshy generation from the owner-picked turnaround (meshy-7.1 multi-image, quad remesh 60k), joints/head/anchors from Meshy's auto-rig (v95_joints.py). Before: v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 22:27Z (current.json r5low4/tilt1112/cand_A: the low4 body, braid long down the back, under the prop1111/cand_B head with its solid grey/black moth eyes, mouth repainted level and calm). Her pistols now hang along the thighs and coat: `detach` cuts each hand from the hips and its thigh (fused, hand.L stretched 21x in encore and the vaults). Before: LIVE 11-12 (current.json prop1111/cand_B: body5/cand_3's head, the solid grey/black moth eyes, with the bust trim and the two moth-wing films pitched 40 deg up/back behind the coat; the films are rigid on the hips by the last region). Earlier: Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes (owner pick 11-10), ~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb, onto sable.glb's skeleton, clips and anchors. Her pistols are fused to her hands in the master: rigid on hand.R/hand.L. The long moth/bunny ears, braid, coat tails and tail feathers are rigid on the head/hips (the old spring chains stay in the rig, unweighted). Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres) read on tools/art1/v95_grid.py's renders.",
+ "master": "~/meshy/hunter-regen-1120/sable/master.glb",
  "game": "art/wardens/sable/sable.glb",
  "tris": 13000,
  "head": {
   "centre": [
    0.0,
-   0.02,
-   1.58
+   0.05,
+   1.534
   ],
-  "r": 0.15
+  "r": 0.158
  },
  "head_tris": 2600,
  "head_uv": 2.0,
@@ -17,80 +17,80 @@
  "uv_margin": 0.002,
  "keep": [],
  "joints": {
-  "pelvis": [
-   0.0,
-   0.02,
-   0.94
-  ],
   "neck": [
-   0.0,
-   0.0,
-   1.44
+   -0.012,
+   0.05,
+   1.384
   ],
   "crown": [
-   0.0,
-   0.0,
-   1.72
+   -0.039,
+   0.089,
+   1.683
   ],
   "shoulder.R": [
-   0.17,
-   0.0,
-   1.34
+   0.143,
+   -0.006,
+   1.349
   ],
   "elbow.R": [
-   0.28,
-   0.0,
-   1.11
+   0.229,
+   -0.013,
+   1.128
   ],
   "wrist.R": [
-   0.35,
-   0.0,
-   0.9
-  ],
-  "shoulder.L": [
-   -0.17,
-   0.0,
-   1.34
-  ],
-  "elbow.L": [
-   -0.29,
-   0.0,
-   1.11
-  ],
-  "wrist.L": [
-   -0.36,
-   0.0,
-   0.9
+   0.32,
+   0.036,
+   0.959
   ],
   "hip.R": [
-   0.09,
-   0.03,
-   0.92
+   0.114,
+   0.036,
+   0.935
   ],
   "knee.R": [
-   0.12,
-   0.04,
+   0.16,
+   0.023,
    0.55
   ],
   "ankle.R": [
-   0.145,
-   0.02,
-   0.13
+   0.194,
+   -0.028,
+   0.143
+  ],
+  "shoulder.L": [
+   -0.173,
+   0.017,
+   1.337
+  ],
+  "elbow.L": [
+   -0.238,
+   0.015,
+   1.136
+  ],
+  "wrist.L": [
+   -0.362,
+   0.105,
+   0.968
   ],
   "hip.L": [
-   -0.09,
-   0.03,
-   0.92
+   -0.132,
+   0.036,
+   0.934
   ],
   "knee.L": [
-   -0.12,
-   0.04,
-   0.55
+   -0.197,
+   0.045,
+   0.545
   ],
   "ankle.L": [
-   -0.145,
-   0.02,
-   0.13
+   -0.233,
+   -0.012,
+   0.146
+  ],
+  "pelvis": [
+   -0.009,
+   0.036,
+   0.955
   ]
  },
  "relax": {
@@ -100,7 +100,24 @@
   "R": "hand.R",
   "L": "hand.L"
  },
- "detach": [["hand.L", "hips"], ["hand.R", "hips"], ["hand.L", "thigh.L"], ["hand.R", "thigh.R"]],
+ "detach": [
+  [
+   "hand.L",
+   "hips"
+  ],
+  [
+   "hand.R",
+   "hips"
+  ],
+  [
+   "hand.L",
+   "thigh.L"
+  ],
+  [
+   "hand.R",
+   "thigh.R"
+  ]
+ ],
  "spread": "rig",
  "smooth": 12,
  "regions": [
@@ -126,7 +143,17 @@
     1.45
    ]
   },
-  {"bone": "hips", "box": [-0.36, 0.36, -0.7, -0.215, 0.3, 0.84]}
+  {
+   "bone": "hips",
+   "box": [
+    -0.36,
+    0.36,
+    -0.7,
+    -0.215,
+    0.3,
+    0.84
+   ]
+  }
  ],
  "slots": [
   {
@@ -286,39 +313,39 @@
  },
  "anchors": {
   "anchor_head_top": [
-   0.0,
-   0.0,
-   1.74
+   -0.039,
+   0.089,
+   1.703
   ],
   "anchor_eye_r": [
-   0.04,
-   0.12,
-   1.57
+   0.027,
+   0.167,
+   1.511
   ],
   "anchor_eye_l": [
-   -0.04,
-   0.12,
-   1.57
+   -0.051,
+   0.167,
+   1.511
   ],
   "anchor_gem": [
-   0.0,
-   0.13,
-   1.25
+   -0.012,
+   0.177,
+   1.198
   ],
   "anchor_chest": [
-   0.0,
-   0.13,
-   1.25
+   -0.012,
+   0.177,
+   1.198
   ],
   "weapon_muzzle": [
-   0.47,
-   0.21,
-   0.58
+   0.502,
+   0.189,
+   0.579
   ],
   "weapon_muzzle_l": [
-   -0.48,
-   0.2,
-   0.58
+   -0.549,
+   0.202,
+   0.574
   ]
  }
 }
