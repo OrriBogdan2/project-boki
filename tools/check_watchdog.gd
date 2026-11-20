@@ -10,6 +10,10 @@ extends Node
 const QUIET_S := 60.0        # s without a line after a script error; a check that still runs keeps printing
 const QUIET_FRAMES := 600    # and frames: on a busy box the seconds alone pass while the check still works
 const CHILD_FLAG := "--check-child"   # the user arg of a check's second game
+const HOST_PID_ARG := "--check-host-pid="   # the pid of the game that started it (CheckChild.start)
+const CHILD_CAP_S := 900.0   # s a second game lives at most: above the largest per-flag cap (479 s)
+const CHILD_LOOK_MS := 100   # ms between the guard thread's looks at its stop flag
+const CHILD_LOOK_EVERY := 10   # looks per look at the host (about once a second)
 
 ## Counts script errors and stamps every line. The engine may call it from any thread.
 class Tap extends Logger:
@@ -33,17 +37,26 @@ class Tap extends Logger:
 var tap: Tap = null
 var seen_ms := 0
 var quiet_frames := 0
+var guard: Thread = null
+var guard_stop := false
 
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	if watches(OS.get_cmdline_user_args()):
+	var args := OS.get_cmdline_user_args()
+	if watches(args):
 		tap = Tap.new()
 		OS.add_logger(tap)
+	elif CHILD_FLAG in args:
+		guard = Thread.new()
+		guard.start(_guard_child.bind(host_pid(args)))
 
 func _ready() -> void:
 	set_process(tap != null)
 
 func _exit_tree() -> void:
+	if guard != null:
+		guard_stop = true
+		guard.wait_to_finish()
 	if tap != null:
 		OS.remove_logger(tap)
 
@@ -66,3 +79,36 @@ static func watches(args: Array) -> bool:
 ## True for the flags that start a check run: --check, --simtest and every --<name>-check[=...].
 static func is_check_flag(arg: String) -> bool:
 	return arg == "--check" or arg == "--simtest" or arg.get_slice("=", 0).ends_with("-check")
+
+## The pid after --check-host-pid=, or 0 when the args have none.
+static func host_pid(args: Array) -> int:
+	for arg: String in args:
+		if arg.begins_with(HOST_PID_ARG):
+			return arg.trim_prefix(HOST_PID_ARG).to_int()
+	return 0
+
+## True while process `pid` exists and is not a zombie (a killed host not yet reaped by its parent is gone).
+static func pid_alive(pid: int) -> bool:
+	if pid <= 0:
+		return false
+	var file := FileAccess.open("/proc/%d/stat" % pid, FileAccess.READ)   # procfs reports no length: read a line
+	if file == null:
+		return false
+	return not file.get_line().rsplit(")", true, 1)[-1].strip_edges().begins_with("Z")
+
+## A check's second game must not outlive its host (the shell watcher beside it dies with the host's process
+## group on a timeout, and orphans held a box at load 78). This thread ends the game with a kill when the host
+## is gone or CHILD_CAP_S has passed; a thread, so a game whose main loop is stuck ends too.
+func _guard_child(host: int) -> void:
+	var start_ms := Time.get_ticks_msec()
+	var looks := 0
+	while not guard_stop:
+		OS.delay_msec(CHILD_LOOK_MS)
+		looks += 1
+		if looks % CHILD_LOOK_EVERY != 0:
+			continue
+		var gone := host > 0 and not pid_alive(host)
+		if gone or Time.get_ticks_msec() - start_ms > CHILD_CAP_S * 1000.0:
+			var why := "its host game ended" if gone else "second game over its %d s cap" % CHILD_CAP_S
+			print("WATCHDOG kill: %s" % why)
+			OS.kill(OS.get_process_id())
