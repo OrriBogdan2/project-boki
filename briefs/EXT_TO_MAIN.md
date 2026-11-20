@@ -10542,3 +10542,4 @@ READY ext/sfx-enemy-ult-cue 5401040bf3 (enemy ult cue: same sound +3 dB on SFXFo
 READY ext/sfx-wisp-steal 81827d818bd8d464f63b495954c5042ad414e7fa (wisp steal: steal_lost sting for owner+squad, soft pickup for thief; --wisp-steal-check asserts)
 READY ext/hit-spark-contact 774108d56e (hit spark at real contact point clamped to v95 collider; shots/melee/blasts/area/zones pass at; hit-shape 0 fail, hit-feedback 52/0)
 READY ext/region-ambience 05e476f36f (each Hollow Crown region plays its own library ambience bed, 3.5 s border crossfade, quieter in the Blight; asserted in --match-audio-check)
+READY ext/stuck-integ-4dec4626 49fb696260719f102210083c418563c72acf52c2 (main merged; only conflict content/archetypes/juggernaut.json desc: kept the carry-speed wording + main's 'or kill a monster'; --check 0 fails, --juggernaut-combo-check 312 checks 0 fails, --slam-follow-check 0 fails, health --strict OK, import 0 errors; earlier READY 1a379a0f670 checks still apply)
