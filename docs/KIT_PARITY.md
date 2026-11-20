@@ -7,11 +7,9 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 Everything else in the tables below that says open, pending or branch ready was closed on main or is an owner call; closed rows now carry their commit.
 - **Cooldowns below source** (gap 10, 0.48x to 0.85x): owner call; ext/parity-cooldowns, ext/cooldown-parity-verify and ext/grimble-parity-verify are not merged.
 - **Air control** (gap 3): owner kept real-match air control over the source 0.015.
-- **Lace Spirit Walk ending inside a ledge**: ext/combat-lace-spirit-ledges-rebased is not merged.
 - **Kael RMB into Shift turn limit** (patch 05.02.25): ext/kael-rmb-dash-turn is not merged.
-- **Albert Guard meter / Shield Slam** (gap 15): ext/parity-bulwark-guardcut is not merged.
 - **Unsourced `[?]` rows** (dash-flow rows, several RMB/R ranges, Kael tether 24 m, Warchain leash 24 m, Sable pair stun, Tenzo rock slows, Sparkle E slide): not determinable from the footage or data; ours stands.
-- Closed on 2026-11-20: Kael lunge length 4.5 to 5.4 m (`4ea2625c13`, ext/kael-lunge-length-rebased-rebased, `e738af1ca7`), Sable Cartwheel curve.
+- Closed on 2026-11-20: Lace Spirit Walk ledges (`40f7865d8`, on main), Albert guard meter / Shield Slam (`b2e942eb4`, on main), Kael lunge length 4.5 to 5.4 m (`4ea2625c13`, ext/kael-lunge-length-rebased-rebased, `e738af1ca7`), Sable Cartwheel curve.
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
 Every dash and ability charge count read against the tooltips [D]: all match but two. **Albert** had the heavy class's 2
