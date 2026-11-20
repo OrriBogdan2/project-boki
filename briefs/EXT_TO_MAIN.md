@@ -10617,3 +10617,4 @@ READY ext/meshy-spend-guard 985cb58e95 (meshy spend guard + ledger, PR via outbo
 READY ext/sfx-ability-audit-13 2fb17edc42 (merged origin/main; gil.json conflict resolved: main set + branch recast/thrust cues; --sfx-set-check and --check 0 failures)
 READY ext/grimble-vfx-data a046ccf25bc19406fe51853a714d877510b727b1 (Grimble flashes, zones and impacts on content/vfx/dredge.json in gold, LDFx one-shots deleted; slug/chain/arm/anchor meshes still LDFx; GPU before/after docs/shots/grimble-vfx-data)
 READY ext/kael-knock-cut 82179cc428cc (Kael Chain Lunge, Haul Slam, Flame Step, Riposte strike: ours-only knock-back dropped to 0; Riposte 6.0 moved to juggernaut.json x.strike_kb; knock table, hero doc, wiki updated)
+READY ext/kael-knock-cut c6e906ba6bc530f116548223bf2ec6536cec0e5d (Kael: Chain Lunge/Haul Slam/Flame Step/Riposte knock to 0, Riposte kb moved to juggernaut.json; combo/knock-chain/parity 0 fail, move-feel 14 = main)
