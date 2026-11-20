@@ -250,3 +250,8 @@ to rig and export:
 7. An unskinned prop (Tenzo's `eye_stone`, shared by the three orbiting stones) takes a Meshy prop's own mesh and paint with
    `python3 tools/art1/glb_prop_mesh.py IN.glb OUT.glb eye_stone PROP.glb` (no Blender): fitted to the old mesh's box, its
    glowing faces turned where the old glow faces pointed and put on `glow-rock`, the rest on `leather-rock`.
+8. A slot shared by two garments gets one look for both: Tenzo's maroon pants and orange sash were both `cloth`, and its
+   desat for the sash left the pants near black with red smears in game (2026-11-20). `python3 tools/art1/glb_mat_split.py
+   IN.glb OUT.glb cloth-v95 cloth-pants` (no Blender) moves the maroon triangles (texel hue, value, majority vote) to their
+   own material, and warden_look.json `slots."cloth-pants"` tunes them alone. Measure the render against the splash
+   (GPU, eye and knee level): Tenzo's pants went from value 0.33 to 0.43 at hue 0.98 (splash 0.31-0.40, hue 0.97).
