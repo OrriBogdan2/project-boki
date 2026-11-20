@@ -60,6 +60,10 @@ from Meshy's auto-rig instead (spec key `weights: "meshy"`; mesh, UVs, paint, ri
 - A forearm or hand fused to the body in the master's pose is cut free (`detach`, automatic for the `past_wrist`
   bones). `regions`, `smooth` and `relax` are not run. The spring, `skirt`, `cape` and `pauldron` bones stay in the
   rig but carry no body weight in this mode.
+- `arm_reach` `[in, out]` (m, optional): an arm's weight only within `in` of its shoulder-elbow-wrist-hand segments,
+  fading to none at `out`; the rest goes to `hips`. Meshy weights long hair hanging down the back to the arms, so an arm
+  swing tears it (Cinder 11-20: [0.07, 0.11] took ~3.8k back and hair vertices off the arms; median clip stretch 3.94
+  against the live model's 4.80, better in 48 of 56 clips). Leave it off for a big fused arm prop (Kael's stone arm).
 Sable, Tenzo, Kael and Lace are built this way (the rig bake-off against the other method, sheets in the job's
 report). Known leftovers: a braid or strap fused into the body mesh follows the arm it rests on (Sable's braid); a
 coat or skirt below the belt stays with the thighs, so it steps off the waist in a deep lean and Lace's skirt spreads

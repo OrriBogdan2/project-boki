@@ -606,6 +606,20 @@ def meshy_weights(low, arm, P):
         G[off, hips] += 1e-6
         G[off] /= G[off].sum(1, keepdims=True)
         print("meshy: arm %s weights off %d vertices not joined to it" % (sd, off.sum()), flush=True)
+    reach = SPEC.get("arm_reach")   # [in, out] m from the arm's segments: full arm weight inside, none past (the rest to hips)
+    for sd in "RL" if reach else "":    # (Meshy gives long hair hanging down the back to the arms; Cinder 11-20)
+        chain = [names.index(b) for b in {ours(a + "." + sd) for a in ARM}]
+        el, wr = S_J["elbow." + sd], S_J["wrist." + sd]
+        tip = wr + 0.6 * (wr - el)      # (the hand: the forearm's line on past the wrist)
+        h = np.clip(((P - wr) @ (tip - wr)) / ((tip - wr) @ (tip - wr)), 0, 1)
+        d = np.minimum.reduce([seg_dist(P, "shoulder." + sd, "elbow." + sd), seg_dist(P, "elbow." + sd, "wrist." + sd),
+                               np.linalg.norm(P - (wr + h[:, None] * (tip - wr)), axis=1)])
+        keep = np.clip((reach[1] - d) / (reach[1] - reach[0]), 0, 1)
+        moved = G[:, chain].sum(1) * (1 - keep)
+        G[:, chain] *= keep[:, None]
+        G[:, hips] += moved
+        print("meshy: arm %s weights off %d vertices away from it (%.0f-%.0f mm)" % (
+            sd, (moved > 0.05).sum(), reach[0] * 1000, reach[1] * 1000), flush=True)
     for sd in "RL":     # (our thighs hang from the root, not the hips: a pelvis on them stays behind when the hips turn)
         hip, knee = S_J["hip." + sd][2], S_J["knee." + sd][2]
         up = np.clip(1 + (P[:, 2] - hip) / (PELVIS_RAMP * (hip - knee)), 0, 1)
