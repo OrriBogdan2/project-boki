@@ -77,8 +77,9 @@ func _init(sk: Skeleton3D, swing: Dictionary, walk_s: float, run_s: float, keyed
 ## The loco_rate scale for speed `spd` (m/s) at `w` of the way from the walk ring to the run ring, from the "loco"
 ## data, and sets `gain` and `bob`: "stride": [walk, run] stretch of the thighs, "foot_mps": [walk, run] foot speed of
 ## the clips with it at rate 1 on the model at its own scale (m/s, tools/anim_audit.gd; the run's fitted on the
-## --foot-slide-check STEP line), "bob": [walk, run]. `spd` is at that scale too (WardenClips divides a match's out). "side_foot_mps" (optional, same shape)
-## is the strafe loops' own, mixed in by how far `pos` (the blend position, x right, y forward) points sideways. The
+## --foot-slide-check STEP line), "bob": [walk, run]. `spd` is at that scale too (WardenClips divides a match's
+## draw scale out). "side_foot_mps" (optional, same shape) is the strafe loops' own, mixed in by how far `pos` (the
+## blend position, x right, y forward) points sideways. The
 ## walk plays stretched to the run's cycle (WardenClips._gait_loop), so the blend steps as one cycle of the blended
 ## length and covers the blended stride: the rate that keeps that stride planted at this speed, clamped as the clips
 ## feel it (a hasted run, up to HunterMove.speed_cap, keeps its feet planted instead of sliding at RATE_MAX).
