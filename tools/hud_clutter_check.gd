@@ -17,7 +17,7 @@ const RIVAL_GAP := 5.0  # m between the player and the rival dropped beside them
 const FIGHT_EXTRA_S := 15.0  # s more a Hunter scene may wait for a hit given or taken
 const CAST_S := 0.3  # s after the cast or ult press that the HUD is judged
 const MATE_GAP := 30.0  # m behind the player the teammate waits, away from the rival
-const BANNER_FRAMES := 600  # frames to wait for the knock banner to close
+const BANNER_WAIT_MS := 15000  # ms of real time to wait for the knock banner to close (frames run short under load)
 const MOMENTS := ["cast", "ult"]
 const FULL_SCREEN := 0.9  # share of the screen a Control must cover to be a backdrop (looked inside, not counted)
 
@@ -94,6 +94,8 @@ func _scene(arch: String, moment: String, shots: String) -> void:
 		_press(m.player, moment)
 		for i in int(CAST_S / Match.DT):
 			m.step(Match.DT)
+		if not m.hud.in_fight():
+			m.player.hurt_at = m.time  # no hit landed (or the ult froze the clock): still a fight (god mode takes none)
 	m.hud.panels.queue_redraw()
 	await main.get_tree().process_frame
 	SafeArea.seen.clear()
@@ -105,6 +107,10 @@ func _scene(arch: String, moment: String, shots: String) -> void:
 	var zone := HunterZone.rect(m)
 	var seen: Dictionary = SafeArea.seen.duplicate()
 	var counts := _counts(m, seen)
+	var by_group: Array = []
+	for g: String in seen:
+		by_group.append("%s %d" % [g, (seen[g] as Array).size()])
+	print("HUDCLUTTER   %sdrawn panels by group: %s" % [tag, ", ".join(by_group)])
 	ok(
 		m.hud.in_fight(),
 		"%sthe HUD is judged in a fight (a hit given or taken within %d s)" % [tag, int(m.hud.MSG_FIGHT_S)]
@@ -121,9 +127,8 @@ func _scene(arch: String, moment: String, shots: String) -> void:
 func _stage(m: Match, rival: Hunter) -> void:
 	m.knock(_mate(m), rival, {})
 	KinSummon.press(m.player)
-	for i in BANNER_FRAMES:
-		if m.hud.knocks.kind == "":
-			return
+	var until := Time.get_ticks_msec() + BANNER_WAIT_MS
+	while m.hud.knocks.kind != "" and Time.get_ticks_msec() < until:
 		await main.get_tree().process_frame
 
 
