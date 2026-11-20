@@ -10613,3 +10613,4 @@ READY ext/vfx-hurt-flash-v95 552befbe99 (bulk-rebase: origin/main merged in mech
 READY ext/anim-coverage-stomp 9188a04a0e (bulk-rebase: origin/main merged in mechanically, was 12b7dbfbff; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-dash-clip 3deae75ce5 (bulk-rebase: origin/main merged in mechanically, was 8f369d0964; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hunter-regen-claire-1120 4d2ec85000 (Neve r4 candidate G1: Meshy-modelled hair bow, stretch worst 5.56->4.86, >5x 5->0; draft, art-gate sheet+MP4 in ~/gens/hunter-regen-1120/claire/r4/sheets)
+READY ext/meshy-spend-guard 985cb58e95 (meshy spend guard + ledger, PR via outbox)
