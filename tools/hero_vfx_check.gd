@@ -593,8 +593,6 @@ func _zones(main: Node) -> void:
 		"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A
 	)
 	_meeko_field()
-	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0  # the band's tint inside, at the ult's brightest beat
-	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
 
 
 ## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
@@ -1424,6 +1422,16 @@ func _sable_ring(main: Node) -> void:
 		m.step(Match.DT)
 	var half := float(AimKit.entry(P, "ult")["r"]) / reach
 	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	var drawn := AimKit.entry(P, "ult").duplicate()
+	drawn["alpha"] = 2.0  # the brightest beat
+	var got: Array = load("res://tools/aimkit_check.gd").measure(drawn, 0.0, float(drawn["r"]) - 0.05)
+	ok(
+		(drawn["col"] as Color).is_equal_approx(AimKit.hero_col(P)) and got[0] <= ZONE_CORE_A and got[1] >= 0.5,
+		(
+			"Sable's X: a lit %s rim over a faint inside (centre alpha %.2f <= %.2f at the brightest beat, rim %.2f)"
+			% [AimKit.hero_col(P).to_html(false), got[0], ZONE_CORE_A, got[1]]
+		)
+	)
 	m.step(0.3)
 	P.inp["move"] = Vector2(0, -1)
 	P.inp["dash"] = true

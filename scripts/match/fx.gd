@@ -786,6 +786,8 @@ func _process(delta: float) -> void:
 		if k > 0.75:
 			l.visible = false
 			nums.erase(n)
+	if nums.size() > 1:
+		NumSpacing.spread(nums, cam)      # numbers on one spot slide apart (docs/HUD.md)
 	for rg in rings.duplicate():
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]
