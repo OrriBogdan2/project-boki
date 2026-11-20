@@ -50,7 +50,8 @@ const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
 const PAD := 26          # inside a panel
-const WRAP_MIN_W := 200.0      # least width of a wrapping Label: ~30 characters, never a column of letters
+const WRAP_MIN_W := 120.0      # least width of a wrapping Label: ~16 characters, never a column of letters
+                               # (not more: it must fit inside the narrow fixed cards, 150 px zone and cradle cards)
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")

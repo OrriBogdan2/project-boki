@@ -27,15 +27,17 @@ func run(main: Node) -> void:
 			dir = String(a).substr(12)
 		elif String(a).begins_with("--shots-tag="):
 			tag = String(a).substr(12)
+		elif String(a).begins_with("--ui-scale="):
+			Settings.v["ui_scale"] = float(String(a).substr(11))
+			Settings._apply_ui_scale()
 	Save.d["look"] = Unmasked.default_look()
 	Save.d["tutorial"]["intro"] = true      # (no opening card over the screen)
 	main.fade.visible = false      # (the boot splash and ink wipes cover the screen)
 	main.show_screen("hatch", {})
 	await main.get_tree().process_frame
 	var hatch: Node = main.current
-	hatch.chosen = 0
-	hatch.stage = "name"
-	hatch._show_name()
+	await _real_flow(main, hatch)
+	ok(hatch.stage == "name", "the real flow reached naming (pick, knock, hatch, reveal, Name it): %s" % hatch.stage)
 	for i in 30:
 		await main.get_tree().process_frame
 	var win := main.get_viewport().get_visible_rect().size
@@ -60,6 +62,38 @@ func run(main: Node) -> void:
 		img.save_png(dir.path_join("name_card_%s_%dx%d.png" % [tag, px.x, px.y]))
 	print("NAMECARD done, bad=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The way a player gets there: the first egg, its knocks, the hatch (skipped by a key once it may be),
+## the Boki's reveal card and its Name it button. (Calling _show_name by itself did not show the bug.)
+func _real_flow(main: Node, hx: Node) -> void:
+	var tree := main.get_tree()
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	hx.chosen = 0
+	hx._start_hatch()
+	for i in hx.TAPS:
+		hx._tap_egg()
+	var frames := 0
+	while hx.reveal == null and frames < 1800:
+		if hx.skipper != null and hx.skipper.t > HatchSkip.PILL_AT + 0.2:
+			var press := InputEventKey.new()
+			press.keycode = KEY_SPACE
+			press.pressed = true
+			hx.skipper._input(press)
+		await tree.process_frame
+		frames += 1
+	var rv: KinReveal = hx.reveal
+	frames = 0
+	while rv != null and rv.name_btn.disabled and frames < 1800:
+		await tree.process_frame
+		frames += 1
+	if rv != null:
+		rv._go()
+	frames = 0
+	while hx.stage != "name" and frames < 600:
+		await tree.process_frame
+		frames += 1
 
 
 func _card(box: Node) -> Control:

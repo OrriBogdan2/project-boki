@@ -865,11 +865,11 @@ func _detail(it: Dictionary) -> Control:
 	var rn := String(Data.RARITY[Loot.rar_of(it)]["name"])
 	col.add_child(UI.label("%s %s  ·  worth %d" % [rn, Gear.slot_name(String(it.get("id", ""))).to_lower(), Loot.value(it)], 14, UI.MUTED))
 	var gl := UI.label(Loot.sub_of(it), 14, UI.INK)
-	gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(gl)
 	col.add_child(gl)
 	var gdesc := String(Gear.ALL.get(String(it["id"]), {}).get("desc", ""))
 	if gdesc != "":
-		var gd2 := UI.label(gdesc, 13, UI.MUTED); gd2.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var gd2 := UI.label(gdesc, 13, UI.MUTED); UI.wrapped(gd2)
 		col.add_child(gd2)
 	var slot := Econ.gear_slot(it)
 	var on := _in_loadout(it) != ""

@@ -636,6 +636,9 @@ func _show_name() -> void:
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
 	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
 		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	# (a wrapping Label asks for ~0 width: with no floor, a row that did not hand it room broke it one letter
+	# per line, a column running off the top of the screen; the floor holds even if the row stops expanding)
+	UI.wrapped(sex_line, 300.0)
 	sex_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sex_row.add_child(sex_line)
 	v.add_child(sex_row)
