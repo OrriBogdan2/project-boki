@@ -73,6 +73,11 @@ class SpendGuard(unittest.TestCase):
         self.submit(900)
         self.assertEqual(open(self.led).read().split("\t")[1], mt.socket.gethostname())
 
+    def test_ledger_write_failure_keeps_task(self):
+        os.environ["MESHY_LEDGER"] = os.path.join(self.tmp.name, "no", "such", "dir", "led.tsv")
+        calls, fetch = self.submit(900)
+        fetch.assert_called_once()
+
     def test_unreadable_balance_refuses(self):
         with self.assertRaises(SystemExit):
             self.submit(None)

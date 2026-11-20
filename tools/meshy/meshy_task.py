@@ -98,8 +98,11 @@ def ledger_add(api, tid, bal):
     path = os.path.expanduser(os.environ.get("MESHY_LEDGER", "~/meshy-ledger.tsv"))
     who = os.environ.get("CLAUDE_JOB_LABEL") or socket.gethostname()
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    with open(path, "a") as f:
-        f.write("\t".join((now, who.replace("\t", " "), api, str(tid), str(bal))) + "\n")
+    try:
+        with open(path, "a") as f:
+            f.write("\t".join((now, who.replace("\t", " "), api, str(tid), str(bal))) + "\n")
+    except OSError as e:  # the task is already paid for: warn, never lose the task id
+        print("meshy ledger write failed (%s): %s" % (path, e), file=sys.stderr)
 
 
 def fetch(out, tid, api):
@@ -138,8 +141,8 @@ def post(out, api, body, files):
     json.dump(rec, open(os.path.join(out, "request.json"), "w"), indent=1)
     bal = spend_guard()
     tid = call("POST", BASE + api, body)["result"]
-    ledger_add(api, tid, bal)
     print("task", tid, flush=True)
+    ledger_add(api, tid, bal)
     fetch(out, tid, api)
 
 
