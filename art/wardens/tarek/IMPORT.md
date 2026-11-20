@@ -74,3 +74,9 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+Eye-rocks (11-20): `tarek_eye_rock.glb` is one seeing-stone as a separate prop (Meshy multi-image + retexture from the
+2D prop-sheet pick, job 20261120-053503-a6; source and scripts in /home/boki/meshy/tenzo-rocks-1120/, game copy built by
+`scripts/game_prop.py`: 0.17 m tall, eye down -Z, material `leather-eyerock`, 1024 px JPEG base + eye-only emission).
+It is not baked into tarek.glb: warden_look.json `orbit_props` swaps the mesh of stone_0-2 under `orbit_stones` at
+build time (WardenOrbits.swap_props), so the orbit, bob, look-at and halos stay as they were.

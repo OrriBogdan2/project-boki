@@ -15,6 +15,25 @@ var look := Vector3.INF     # world point they watch (WardenGlb.ORBIT_LOOK), INF
 var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
 var t := 0.0
 
+## A model's own props for an orbit (warden_look "orbit_props": orbit name -> a .glb of one prop, built at
+## its in-game size and looking down -Z): every prop on that orbit wears the .glb's mesh instead of the one baked
+## into the model (Tarek's seeing-stones as the cobalt eye-rocks of his splash). Runs before the toon pass.
+static func swap_props(glb: Node, props: Dictionary) -> void:
+	for orbit in props:
+		var node := glb.find_child(String(orbit), true, false)
+		var scene := load(String(props[orbit])) as PackedScene
+		if node == null or scene == null:
+			push_warning("WardenOrbits: no %s or %s" % [orbit, props[orbit]])
+			continue
+		var src := scene.instantiate()
+		var found := src.find_children("*", "MeshInstance3D", true, false)
+		if not found.is_empty():
+			for ch in node.get_children():
+				if ch is MeshInstance3D:
+					(ch as MeshInstance3D).mesh = (found[0] as MeshInstance3D).mesh
+		src.free()
+
+
 func setup(glb: Node) -> void:
 	for n in glb.find_children(PREFIX + "*", "Node3D", true, false):
 		var nd := n as Node3D

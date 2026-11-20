@@ -215,6 +215,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.idle_break = WardenBreak.make(root, skel, arch)
 	if sync.wall:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
+	WardenOrbits.swap_props(glb, look(art(arch)).get("orbit_props", {}))
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	WardenMerge.merge_equal(glb)
