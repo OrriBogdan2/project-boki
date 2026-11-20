@@ -10590,3 +10590,4 @@ READY ext/tut-dead-air-top2 0b04654eba774e046defcfb1a046ce1c3462b750 (crouch+glo
 READY ext/hud-clutter-all13 f801c387bd03d6a6e605d9b4fd82a6407ee9d0ed (hud-clutter-check all 13: 6 Hunters failing -> 2 left at 58/57 budget tie, kill feed slides off the Hunter, one rank-up hint at a time, check harness fixes, HUD.md backlog)
 READY ext/snack-first-60s 8d348ef4cc9977cdaa72dd6366a15c3774c7bd45 (a save's first snack batch ripens in 60 s: first_grow_secs, snack_picks counter, check asserts 60/480)
 READY ext/tut-gate-playthrough e96434928c (tutorial playthrough check, match+garden, in new absolute gate list tools/gate_absolute.txt; 21 s wall)
+READY ext/farm-tut-patch-step 3c1816eadcb (base tutorial: Plant the snack patch step lit on Garden tab tile; farm-tutorial-check 0 fails; health strict OK)
