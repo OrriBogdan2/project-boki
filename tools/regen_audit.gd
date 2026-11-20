@@ -1,15 +1,19 @@
 extends "res://tools/clip_shots.gd"
-## --regen-audit --shots-dir=<dir> --wardens=a,b [--size=768] [--per-clip=10] [--clips=a,b]: a Hunter's model as the
+## --regen-audit --shots-dir=<dir> --wardens=a,b [--size=768] [--per-clip=10] [--fps=0] [--views=m,e,n,h,f] [--clips=a,b]:
+## a Hunter's model as the
 ## game plays it (Models.hunter + WardenClips), every clip in its library, for a LIVE | NEW compare (run once without
 ## and once with --warden-variant=<art>_<tag>; docs/art/wardens/V95_SWAP.md "Regen from the turnaround").
 ## Per hunter <dir>/<id>/<view>/f00000.jpg.. for 5 views of every sample: m (match camera: fov 8 at 23 m),
 ## e (eye level, 4 m, 3/4), n (knee level, 4 m, 3/4), h (both hands close), f (both feet close).
-## Samples: the rest pose, then `per-clip` times evenly over each clip. frames.txt: "<n> <clip> <t>".
+## Extra views: y0..y3, eye level from 4 sides (the 3/4 front, then 90, 180, 270 degrees round the Hunter).
+## Samples: the rest pose, then `per-clip` times evenly over each clip, or with --fps=N every 1/N s of it (a playing
+## clip for an MP4, not a few stills). frames.txt: "<n> <clip> <t>".
 ## Needs a renderer.
 
 const DT := 1.0 / 30.0
 const THREE_Q_YAW := -PI / 2.0 - 0.55
-const VIEWS := ["m", "e", "n", "h", "f"]
+var views: Array = ["m", "e", "n", "h", "f"]
+var fps := 0.0
 
 
 func run(main: Node) -> void:
@@ -28,6 +32,10 @@ func run(main: Node) -> void:
 			names = Array(a.substr(8).split(",", false))
 		if a.begins_with("--size="):
 			frame_px = int(a.substr(7))
+		if a.begins_with("--fps="):
+			fps = float(a.substr(6))
+		if a.begins_with("--views="):
+			views = Array(a.substr(8).split(",", false))
 		if a.begins_with("--per-clip="):
 			per_clip = maxi(1, int(a.substr(11)))
 	if main.get("fade") != null:
@@ -82,7 +90,7 @@ func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n:
 	var bx := _body_box(model)
 	var lo: float = float(bx[0])
 	var h := clampf(float(bx[1]), 1.2, 2.8)
-	for v in VIEWS:
+	for v in views:
 		match v:
 			"m":
 				cam.fov = 8.0
@@ -92,6 +100,11 @@ func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n:
 				cam.fov = rad_to_deg(2.0 * atan((h / 0.7) / (2.0 * 4.0)))
 				cam.position = Vector3(0, lo + h * (0.92 if v == "e" else 0.28), 4.0)
 				cam.look_at(Vector3(0, lo + h * 0.5, 0))
+			"y0", "y1", "y2", "y3":
+				cam.fov = rad_to_deg(2.0 * atan((h / 0.7) / (2.0 * 4.0)))
+				var yaw := int(v.substr(1)) * PI * 0.5
+				cam.position = Vector3(4.0 * sin(yaw), lo + h * 0.92, 4.0 * cos(yaw))
+				cam.look_at(Vector3(0, lo + h * 0.5, 0))
 			"h":
 				_close_on(sk, hb[0], hb[1], 0.16)
 			"f":
@@ -100,7 +113,7 @@ func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n:
 
 
 func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
-	for v in VIEWS:
+	for v in views:
 		DirAccess.make_dir_recursive_absolute(dir.path_join(v))
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
@@ -145,8 +158,9 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 			print("REGEN_AUDIT missing clip ", nm)
 			continue
 		var length := clips.lib.get_animation(nm).length
-		for k in per_clip:
-			var t := minf(length * (k + 0.5) / per_clip, length - 0.001)
+		var count := per_clip if fps <= 0.0 else maxi(2, ceili(length * fps))
+		for k in count:
+			var t := minf(length * (k + 0.5) / count, length - 0.001)
 			clips.force = {"clip": nm, "t": t}
 			for j in 3:
 				sync.call("_process", DT)
