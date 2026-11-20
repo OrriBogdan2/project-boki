@@ -14,6 +14,12 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
+- A kit-drawn ground zone (Gil's puddle, Meeko's seed field and Hearthlight, Motley's well) rides its move: `"life"`
+  (s), `"zone_r"` (else `"r"`), `"follow"` (an Ent it rides) and `"zone"` (a key a later beat renews it under) in `{...}`
+  send it with the event, even on a `"net": false` recipe (then only the zone draws there). Other games draw it
+  with `HeroVfxZone` (a lit rim over a soft wash, the recipe's `"zone": {"rim", "in"}` colours) for that long.
+  `--zone-net-check` asserts it host+guest; with `--shots-dir=` (GPU) the guest saves its frames
+  (docs/shots/vfx-zones-remote).
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
   ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its
