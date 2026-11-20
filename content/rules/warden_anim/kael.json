@@ -137,7 +137,7 @@
 			"clip": "chainlunge",
 			"fade_out": 0.4,
 			"rate": 2.2,
-			"lead": -0.42
+			"lead": -0.40
 		},
 		"jug_haul_wind": {
 			"clip": "haul_wind",
