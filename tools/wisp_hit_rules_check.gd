@@ -113,7 +113,8 @@ func _cast(arch: String, d: float, slot: String, mode: String) -> Dictionary:
 		var marked := not (t.get_meta("marks", {}) as Dictionary).is_empty()
 		var hooked := arch == "dredge" and slot == "rmb"      # (the hook scoops a Wisp: allowed)
 		var skycall := arch == "mage" and slot == "e"      # (Skycall launches a Wisp: --hero-combo-check pins it)
-		var walled := arch == "rimewright" and slot == "e"      # (her Rink Wall is solid: it shoves a body out of its footprint)
+		# (her Rink Wall is solid: it shoves a body out of its footprint)
+		var walled := arch == "rimewright" and slot == "e"
 		var moved := t.pos.distance_to(at) > 0.05 and not hooked and not skycall and not walled
 		for pair in [["hp", t.hp != 0.0], ["stun", t.stun_t > 0.0], ["root", t.root_t > 0.0], ["slow", t.slow_t > 0.0],
 				["burn", t.burn_t > 0.0], ["moved", moved], ["marked", marked]]:
