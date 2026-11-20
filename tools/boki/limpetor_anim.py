@@ -87,7 +87,7 @@ def heavy_hop(t):
 
 
 def clamp(t):
-    """Sleep: presses itself flat to the ground under the shell, the head pulled in, a breath so slow it hardly shows."""
+    """Sleep: presses itself flat to the ground under the shell, the head pulled in, a breath that hardly shows."""
     br = s(t, 1)
     p = {"root_at": (0, -0.03, 0), "root_sc": (1.1 + 0.01 * br, 0.8 + 0.015 * br, 1.1 + 0.01 * br)}
     add(p, "spine", rx=-0.06)
