@@ -9,7 +9,11 @@ extends RefCounted
 ##   5. a light, solid and heavy hit hold the struck body for their fixed time, a ranged one never the attacker;
 ##   6. the team-fight cap: six heavy hits on one body at once hold it no longer than the cap, and five heavy
 ##      hits on you inside the shake gap start one shake;
-##   7. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
+##   7. the hit-feel table (DASHES_AND_ABILITY_FEEL.md §5.4): in 4, the lightest hit an LMB / RMB / X lands on
+##      the dummy is its rules tier (TIER_OK lists the explained exceptions), the dummy never flashes longer than
+##      a tier's flash and your own camera never shakes; one HITFEEL row per Hunter (LMB light, RMB heavy, X ult);
+##   8. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
+##   9. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
 ##      shares that cap, and one asked while another runs costs only the time it adds.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
@@ -33,6 +37,13 @@ var dealt := {}                    # slot -> true: the slot being pressed landed
 var slot_now := ""
 var hits_n := 0                    # every damaging hit from the hunter, for the drain between slots
 var flow := preload("res://tools/dash_flow_check.gd").new()
+## The hit-feel table (7): hero -> slot -> {hold, flash, freeze, shake} peaks (s; hold and flash read after a
+## step, so the value set lies within one DT above them).
+var feel := {}
+var dummy_now: Ent = null
+var hit_tags := {}                 # the tags of the slot's hits on the dummy (what a stray row names)
+var self_hits := {}                # the tags of hits on the hunter itself during the slot
+const TABLE_SLOTS := {"lmb": "light", "rmb": "heavy", "x": "ult"}
 
 func ok(cond: bool, what: String) -> void:
 	print("IMPACT %s %s" % ["ok  " if cond else "FAIL", what])
@@ -44,6 +55,7 @@ func run(main: Node) -> void:
 	_rules()
 	_named()
 	_kit_tags()
+	_kit_literals()
 	CombatBus.hit_landed.connect(_on_hit)
 	for hero in Arch.ORDER:
 		var m: Match = flow._match(main, hero)
@@ -54,13 +66,18 @@ func run(main: Node) -> void:
 	_holds(m2)
 	_stacking(m2)
 	m2.queue_free()
+	_table()
 	print("IMPACT DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
-func _on_hit(by: Node, _t: Node, amount: float, _tags: Array) -> void:
+func _on_hit(by: Node, t: Node, amount: float, tags: Array) -> void:
 	if by != flow.hunter or amount <= 0.0:
 		return
 	hits_n += 1
+	if slot_now != "" and t == dummy_now:
+		hit_tags[",".join(tags)] = true
+	if slot_now != "" and t == flow.hunter:
+		self_hits[",".join(tags)] = true
 	if slot_now != "":
 		dealt[slot_now] = true
 
@@ -116,16 +133,120 @@ func _presses(m: Match, hero: String) -> void:
 			h.inp["dash"] = true
 		else:
 			flow._press(slot)
+		dummy_now = dummy
+		hit_tags = {}
+		self_hits = {}
+		var pair := "%s|%s" % [h.get_instance_id(), dummy.get_instance_id()]
+		var seen_t := float(Feel._pair.get(pair, [-9.0, 0])[0])
+		# per step, only on a step the hunter's own hit landed (Feel's pair record moved): the dummy's hold and
+		# flash, your freeze; your camera on every step. (The hunter's Boki hits the dummy too: those steps skip.)
+		var pk := {"hold": 0.0, "flash": 0.0, "freeze": 0.0, "shake": 0.0, "tiers": {}}
 		for i in 150:
+			m.hitstop = 0.0
+			m.cam.shake_left = 0.0
+			var mets: int = m.meteors.size()
 			m.step(Match.DT)
 			h.inp["dash"] = false
 			h.inp["fire"] = slot == "lmb" and i < LMB_HOLD
 			dummy.hp = dummy.max_hp
+			if m.meteors.size() >= mets:      # (a meteor landing near you is the world's shake, not the kit's)
+				pk["shake"] = maxf(pk["shake"], m.cam.shake_left)
+			var last: Array = Feel._pair.get(pair, [-9.0, 0])      # [time, tier index] of the last weighted hit
+			if float(last[0]) <= seen_t:
+				continue
+			seen_t = float(last[0])
+			var tw: String = ImpactWeight.TIERS[int(last[1])]
+			pk["tiers"][tw] = int(pk["tiers"].get(tw, 0)) + 1
+			pk["hold"] = maxf(pk["hold"], dummy.freeze_t)
+			pk["flash"] = maxf(pk["flash"], dummy.flash_t)
+			pk["freeze"] = maxf(pk["freeze"], m.hitstop)
+		pk["tags"] = hit_tags.keys()
+		pk["self"] = self_hits.keys()
 		slot_now = ""
+		if dealt.has(slot):
+			feel[hero] = feel.get(hero, {})
+			feel[hero][slot] = pk
+			_feel_ok(hero, slot, pk)
 		_drain(m, dummy)
 	var untiered: Array = dealt.keys().filter(func(s): return ImpactWeight.of_ability(hero, s) == "")
 	ok(dealt.has("lmb") and untiered.is_empty(),
 		"%s: damaging slots %s all have a tier, missing: %s" % [hero, dealt.keys(), untiered])
+
+## The tier whose hit-stop a peak read after a step came from (it was set at most one DT above it), or "".
+func _tier_of(peak: float) -> String:
+	for w in ImpactWeight.TIERS:
+		var s := ImpactWeight.hold_s(w)
+		if s >= peak - 0.0001 and s <= peak + Match.DT + 0.0001:
+			return w
+	return ""
+
+## 7: one slot's measured hit feel matches the tiers.
+## Table slots whose hits are not their rules tier, and why (docs/DASHES_AND_ABILITY_FEEL.md §5.4).
+const TIER_OK := {
+	"rimewright rmb": "heavy",      # the lance's detonation is a payoff (one weight heavier); its landing only slows
+	"ashwick x": "",                # the lava carpet burns and slows in ticks: no hit-stop (T0)
+	"dolm lmb": "solid",            # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
+}
+func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
+	var own := ImpactWeight.of_ability(hero, slot)
+	var seen: Array = (pk["tiers"] as Dictionary).keys()
+	var lightest := ""
+	for w in ImpactWeight.TIERS:
+		if seen.has(w):
+			lightest = w
+			break
+	var want := String(TIER_OK.get("%s %s" % [hero, slot], own))
+	print("HITDIAG %s %s own %s tiers %s hold %.0f flash %.0f freeze %.0f shake %.3f tags %s" % [hero, slot, own,
+		pk["tiers"], pk["hold"] * 1000.0, pk["flash"] * 1000.0, pk["freeze"] * 1000.0, pk["shake"], pk["tags"]])
+	if TABLE_SLOTS.has(slot) and not (pk["tags"] as Array).is_empty():
+		ok(lightest == want, "%s %s: its lightest hit on the dummy is '%s' (rules %s, want '%s'), hits %s"
+			% [hero, slot, lightest, own, want, pk["tiers"]])
+	# a landed combo payoff flashes a little longer (ComboMark.payoff, the owner's combo-clarity rule)
+	var fl := maxf(ImpactWeight.flash_s("heavy"), ComboMark.FLASH_BODY)
+	ok(pk["flash"] <= fl + 0.0001 and pk["shake"] < 0.0001,
+		"%s %s: the dummy flashes %.0f ms at most (tiers or a payoff %.0f), your own camera shakes %.3f s (want 0)"
+			% [hero, slot, pk["flash"] * 1000.0, fl * 1000.0, pk["shake"]])
+
+## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
+## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
+## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
+const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
+func _kit_literals() -> void:
+	var num := "([0-9.]+|[A-Z][A-Z_0-9]+)"      # a number or a CONSTANT
+	var rx := RegEx.create_from_string("(\\b(?!h\\.)\\w+\\.flash_t = (maxf\\(\\w+\\.flash_t, )?" + num
+		+ "|freeze_frame\\(" + num + "|freeze_t, " + num
+		+ "|Shake\\.incoming_big\\([^)]*, " + num + ", [^)]*\\))")
+	var dir := DirAccess.open("res://scripts/arch/kits")
+	var strays := []
+	for f in dir.get_files():
+		if not f.ends_with(".gd"):
+			continue
+		for hit in rx.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
+			var at := "%s:%s" % [f, hit.get_string(0)]
+			if not LITERAL_OK.has(at):
+				strays.append(at)
+	ok(strays.is_empty(), "no kit sets its own hit-stop, body flash or shake number, strays: %s" % [strays])
+
+## Prints the hit-feel table (DASHES_AND_ABILITY_FEEL.md §5.4): per Hunter, LMB / RMB / X: the tier the dummy held, its
+## hold, your freeze, the body flash, and the struck player's shake (the tier's; your own camera is asserted 0).
+func _table() -> void:
+	for hero in Arch.ORDER:
+		var cells := []
+		for slot in TABLE_SLOTS:
+			var pk: Dictionary = feel.get(hero, {}).get(slot, {})
+			var tiers: Dictionary = pk.get("tiers", {})
+			if pk.is_empty() or (pk["tags"] as Array).is_empty():
+				var named := ImpactWeight.of_ability(hero, slot)
+				cells.append("%s: no hit on the dummy (rules %s)" % [TABLE_SLOTS[slot], named])
+				continue
+			var rows := []
+			for w in tiers:
+				var ms := roundi(ImpactWeight.hold_s(w) * 1000.0)
+				rows.append("%s x%d (%d ms, flash %d ms, shake %.1f)" % [w, tiers[w], ms,
+					roundi(ImpactWeight.flash_s(w) * 1000.0), ImpactWeight.shake(w)])
+			cells.append("%s: %s (rules %s)" % [TABLE_SLOTS[slot], ", ".join(rows) if rows else "ticks only, no hold",
+				ImpactWeight.of_ability(hero, slot)])
+		print("HITFEEL %s | %s" % [hero, " | ".join(cells)])
 
 ## Steps until nothing the slot left behind hits any more, so its hits never count for the next slot.
 func _drain(m: Match, dummy: Hunter) -> void:
@@ -147,6 +268,8 @@ func _dummy(m: Match) -> Hunter:
 			o.ctrl = "idle"
 			o.teleport(h.pos + Vector3(0, 0, -3))
 			o.hp = o.max_hp
+			if o.kin is Kin:
+				(o.kin as Kin).state = "bench"      # its Boki sits out: an enemy burst near you shakes you (7)
 			return o
 	return null
 
