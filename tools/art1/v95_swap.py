@@ -11,7 +11,8 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
     With `weights` "meshy" the weights are Meshy's auto-rig of the low mesh instead, its bones mapped onto ours (MESHY):
-    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions, smoothing or relax.
+    a loose piece rides one bone whole, a hand that rests on the body is cut from it, no regions or relax; `meshy_smooth`
+    passes as `smooth` (a long cloak Meshy splits between the thighs tears in a stride without them).
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
     moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
@@ -612,6 +613,18 @@ def meshy_weights(low, arm, P):
         leg = names.index("thigh." + sd)
         G[:, hips] += G[:, leg] * up
         G[:, leg] *= 1 - up
+    cloak = SPEC.get("meshy_cloak")     # {"radius": m, "keep": share}: a long cloak Meshy hangs on the legs flares out in
+    if cloak:                           # a run; past radius (to 1.5x) from its leg's bones it keeps `keep` of that leg
+        r, keep = float(cloak["radius"]), float(cloak.get("keep", 0.25))
+        for sd in "RL":
+            d = np.minimum(seg_dist(P, "hip." + sd, "knee." + sd), seg_dist(P, "knee." + sd, "ankle." + sd))
+            f = keep + (1 - keep) * np.clip((1.5 * r - d) / (0.5 * r), 0, 1)
+            f[P[:, 2] < S_J["ankle." + sd][2] + 0.06] = 1       # (the boot reaches past radius: it stays on the leg)
+            legs = [names.index(b) for b in {ours(a + "." + sd) for a in ("thigh", "shin", "foot")} if b in names]
+            moved = G[:, legs] * (1 - f)[:, None]
+            G[:, legs] -= moved
+            G[:, hips] += moved.sum(1)
+            print("meshy: cloak %s %d vertices off the leg" % (sd, int((f < 1).sum())), flush=True)
     rigid = 0
     for piece in np.unique(lab):
         m = lab == piece
@@ -875,7 +888,7 @@ def main():
     G = np.stack([np.broadcast_to(gr[k], (len(P),)) for k in names], 1)
     W, o = detach(low, G, names)
     P = P[o]
-    gr = dict(zip(names, smooth_weights(low, W, 0 if meshy else int(SPEC.get("smooth", 0))).T))
+    gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("meshy_smooth" if meshy else "smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
