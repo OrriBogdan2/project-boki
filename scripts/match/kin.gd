@@ -270,8 +270,8 @@ func danger_at(p: Vector3) -> float:
 
 ## The owner asks it to jump into a fight. Returns "go", "hesitate" or "refuse".
 func consider_throw(p: Vector3) -> String:
-	if trust >= 90.0:
-		return "go"          # soulbound: it goes wherever you send it
+	if trust >= 90.0 or m.tut != null:
+		return "go"          # soulbound, or in the tutorial: it goes wherever you send it
 	var danger := danger_at(p)
 	var c := courage()
 	if danger > c + 1.1:

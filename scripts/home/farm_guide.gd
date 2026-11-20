@@ -222,9 +222,12 @@ func skip() -> void:
 		FarmTutorial.give_food()
 		if FarmTutorial.toy_spot().x == INF:
 			place_toy()
-	elif FarmHob.house_entry().is_empty():
-		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	else:
+		if FarmHob.house_entry().is_empty():
+			place_house()
+		var house := FarmHob.house_entry()
+		if FarmSites.has_site(house):
+			FarmSites.top_up(house)
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()

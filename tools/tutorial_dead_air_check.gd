@@ -24,6 +24,10 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+## The lane's lines but a fallen Boki's (URGENT, the one kind a banner lets through).
+func _lines(m: Match) -> Array[String]:
+	return m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t)
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -74,7 +78,7 @@ func _match(who: String, arch: String) -> void:
 		if tu.goal(tu.id()) != Vector3.INF:
 			place_steps += 1
 			_span("m_marker", not marker, Match.DT)
-		var loud: bool = m.hud != null and (not m.hud.msgs.texts().is_empty() or not m.bubbles.is_empty())
+		var loud: bool = m.hud != null and (_lines(m).size() > 0 or not m.bubbles.is_empty())
 		if tu.intro and tu.text != "" or (tu.card_up() and loud):
 			rival += 1
 	ok(m.player.extracted, "%s: the course finishes (%d steps seen)" % [tag, steps_seen.size()])
