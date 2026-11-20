@@ -10687,3 +10687,4 @@ READY ext/p03-port-1118 1c78e0df66 (bulk-rebase: origin/main merged in mechanica
 READY ext/kael-lmb-press e2cffa1f54fba65aab7126ede2b8d600f08ba4f4 (Kael LMB swings on the press, source frames)
 READY ext/extra-kin-v2-one 95e8e94846cc91388a0887f75ae7899f4e1d87e6 (SUPERSEDES 7e0f980f51: origin/main merged; main had renamed kin_v2->kin and home data->kin_home, so size block now moves content/kin_home -> content/kin (KinSpec.avg_size, Unique.base_size, gen_wiki); wiki size rows identical to main; --check 0, --grammar-check 0, --roster-check 0, --unique-check 1 FAIL (partner/second new ids) identical on origin/main, health --strict only the style-ratchet red main has)
 READY ext/ui-trim-mask-egg-text 3497cd7d8c (merged main; kin_v2->kin rename: short desc/play reapplied on content/kin; first Relic page + egg text trim)
+READY ext/boki-idle-batch-b 731324de64 (Boki idles for nine species)
