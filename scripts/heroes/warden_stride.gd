@@ -62,7 +62,7 @@ static func make(model: Node3D, sk: Skeleton3D, art_name: String) -> WardenStrid
 	var st := WardenStride.new()
 	st.root = model
 	st.skel = sk
-	st.cfg = _rules.get(art_name, _rules["default"])
+	st.cfg = _rules.get(art_name, _rules.get(art_name.get_slice("_", 0), _rules["default"]))  # a variant: its Warden's
 	st.hips = WardenSkeleton.find(sk, "hips")
 	st.head = WardenSkeleton.find(sk, "head")
 	for sd in ["L", "R"]:
