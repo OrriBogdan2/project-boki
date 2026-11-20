@@ -10511,3 +10511,4 @@ READY ext/vfx-sable-lmb 9036f85072 (Sable LMB cel tracer + lit hit burst; merged
 READY ext/tut-farm-skip c9aa1cf884 (Hob no longer calls a skipper over; farm tutorial check skips at each of 12 farm + 4 base steps; 3 stale assertions and wiki Rules.md fixed)
 READY ext/farm-bond-taper 8e2a103f5ed27bbfb607766510fadf5908c23f59 (per-day bond trust taper in garden_trust.json; grinder 7->30 min to Soulbound, balanced unchanged; --bond-pace-check)
 READY ext/vfx-sable-lmb cef94b99df (Sable LMB cel tracer + lit hit burst; merged origin/main facb5c3e22, clean; --check 0 failures, health --strict OK; --dancer-combo-check 3 fails identical on origin/main so not new)
+READY ext/farm-life-seen 6449b834dd23fcfbe6bc35d9bac5a6015ebe4712 (4 Boki garden 5 min: play, nap together, friend greeting, rival squabble all seen; social act log + daytime doze/greet weights; --base-life-check asserts all four, 6/6 runs green)
