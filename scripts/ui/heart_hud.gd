@@ -7,7 +7,8 @@ extends RefCounted
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 ##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
-##   - the zone clock in the raid row under the minimap: "Closing in 0:30" before the tide moves, then the time left.
+##   - the zone clock in the clock chip under the minimap (Hud._draw_clock_bar): "Closes in 0:30" before the tide
+##     moves, "Closing 7:12" (the time left) while it does.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
@@ -72,37 +73,16 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 
-
-## The zone clock's words: "Closing in 0:30" before the tide moves, "Closing  7:12 left" while it does,
-## empty once the ring holds (or with no Heart).
+## The zone clock's words: "Closes in 0:30" before the tide moves, "Closing 7:12" (the time left) while it
+## does, empty once the ring holds (or with no Heart).
 static func zone_line(m: Match) -> String:
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return ""
 	var t := Heart.close_in(m)
 	if t > 0.0:
-		return "Closing in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
+		return "Closes in %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60]
 	t = Heart.close_left(m)
-	return "Closing  %d:%02d left" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
-
-## The zone clock (nothing once the ring holds) in the raid row under the minimap, between the raid's name and
-## the sight read-out, right-aligned: `free` is the x range left there. It takes no height of its own (a pill of
-## its own pushed the squad column down into the Boki card at HUD size 125% and up, and held the minimap under
-## its 130% growth: --safe-area-check, --hudref-check). Too long for the room: just the time, else nothing.
-static func zone_clock(hud, row: Rect2, free: Vector2) -> void:
-	var line := zone_line(hud.m)
-	if line.is_empty():
-		return
-	var w := 10.0 + TextCache.width(hud.big, line, 10)       # (the ring mark, then the words)
-	if free.y - free.x < w:
-		line = line.replace("Closing in ", "").replace("Closing  ", "")
-		w = 10.0 + TextCache.width(hud.big, line, 10)
-		if free.y - free.x < w:
-			return
-	var x := free.y - w
-	var ring := Vector2(x + 3.5, row.position.y + row.size.y * 0.5)
-	hud.c.draw_arc(ring, 3.5, 0, TAU, 20, Heart.col(), 2.0, true)
-	hud.c.draw_arc(ring, 1.5, 0, TAU, 12, Heart.col().lightened(0.4), 1.5, true)
-	HudStyle.text(hud.c, Vector2(x + 10.0, row.position.y + 14), line, 10, HudStyle.INK, 3)
+	return "Closing %d:%02d" % [int(ceil(t)) / 60, int(ceil(t)) % 60] if t > 0.0 else ""
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
