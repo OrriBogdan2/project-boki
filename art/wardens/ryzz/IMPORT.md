@@ -55,3 +55,8 @@ grows to 1.25 in `gum`, the laugh emote and `mage_gum`). `python3 tools/art1/glb
 inverse bind and the 47 clips' gum translation keys shift with it, nothing else changes. v95_to_game keeps a fixed-offset
 `move_bones` out of re-runs, so a re-swap keeps this spot; a new face needs the same step at its lips. The lid/brow/mouth
 bones and `anchor_eye_glow` also sit at the old face's height, but no vertex is weighted to them and no look uses the anchor.
+
+No-gum version (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "want TWO versions"): the look-only design variant
+`ryzz_nogum` (`content/rules/warden_look.json` `"ryzz_nogum": {"hide_bones": ["gum"]}`, no .glb of its own) is this
+same model with the `gum` bone shrunk away every frame (WardenSync), and no gum fidget (MageGum). Pick it with
+`--warden-variant=ryzz_nogum`; shipping it as the default would move `hide_bones` onto `"ryzz"`.

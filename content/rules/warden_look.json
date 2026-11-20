@@ -55,6 +55,7 @@
 			}
 		}
 	},
+	"ryzz_nogum": {"hide_bones": ["gum"]},
 	"ryzz": {
 		"painted": {"rim_far": 0.3, "rim_far_color": [1.0, 0.3, 0.72]},
 		"slots": {
