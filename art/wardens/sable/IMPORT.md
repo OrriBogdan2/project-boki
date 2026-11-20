@@ -91,3 +91,10 @@ Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from
 
 ## Mouth-corner fix (2026-11-18, ext/sable-face-game-1118)
 Owner: the screen-left lip corner showed two endpoints. Cause: the painted lips (from the 2D edit) sat 5-6 mm below the mesh lip slit on the screen-left half (offset 57 px at the corner, 0 at the right corner at 10 px/mm in a front ortho render), so the paint ended at one point and the mesh crease at another, plus a dotted seam line and a lower-lip line that never met the right corner. Texture-only fix in the head/body albedo (`sable_v95b.jpg`; mouth region only, 7.7k texels at 4096): lip paint warped up to the mesh slit (offset removed, tapered to 0 at the right corner), lower-lip lines squeezed into each corner, paint beyond each mesh corner replaced by skin. Mesh, UVs, eyes, mole, blush and `sable_v95.jpg` untouched. Source/tools: `~/meshy/sable-lipfix-1118/`.
+
+## hunter-regen-1120: a new Meshy generation from the turnaround (Sable)
+Master: `~/meshy/hunter-regen-1120/sable/master.glb` (meshy-7.1 multi-image from the four views of briefs/art-refs/sable_v2/sable_v2_turnaround.jpg, unedited,
+enhance off; Meshy quad remesh 60k), on this .glb's skeleton, clips and props by `v95_swap.py` with `--weights meshy`;
+joints, head and anchors from Meshy's auto-rig (same method as `tools/art1/meshy_joints.py`). 38.7k tris, one 4096 paint image (`sable_v95.jpg`;
+the old second image is gone). Godot --stretch-check, live -> this: worst 23.85 -> 18.92, median clip 16.97 -> 12.75, 45/67 -> 14/67 clips over her 10.0 ceiling. Proof (LIVE|NEW eye, knee and match-camera MP4s, hands
+and feet sheets): `~/gens/hunter-regen-1120/a6/media/sable/`. The face is the new generation's, not the live head.
