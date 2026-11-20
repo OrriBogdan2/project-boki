@@ -82,7 +82,7 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender. The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -91,7 +91,11 @@ Still open (shared, not done here):
   runs from 0.45 by the rim to `DISC_FILL_A` 0.2 at the centre. Vex's discs are HeroVfx data since ext/vfx-vex-data.
   Done too: Meeko's seed disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the
   vortex's dark core thinned; the seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring
-  since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10).
+  since `5e9ea1d07`; `--dancer-combo-check` now measures its centre at 0.10). Sable's X since ext/vfx-sable-data-x:
+  the pale lavender band is an AimKit `soft` circle (lanes and cones had it) in her `#9a5cff`: a lit rim glowing
+  0.6 m inward, the inside rising from 0.03-0.08 at the centre (at most 0.08 at a beat's brightest; `--dancer-combo-check`,
+  `--hero-vfx-check`, `--aimkit-check` measure it as drawn). The filled disc in the 0.2 s strip frame is the shared
+  BodyTell cast ring every Hunter gets, not hers.
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
