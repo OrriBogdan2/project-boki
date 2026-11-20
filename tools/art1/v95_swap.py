@@ -864,6 +864,10 @@ def main():
     sole = bpy.context.scene["sole"]
     arm, old = import_game(os.path.join(WORK, "game.glb"))
     P = verts(low) * (-1, -1, 1) - (0, 0, sole)
+    if SPEC.get("rest_rig"):       # (the rig's rest changed for the new art's proportions: rest_from_rig.py)
+        import rest_from_rig
+        rest_from_rig.apply(arm, [o for o in bpy.data.objects if o.type == "MESH" and o != low and o.vertex_groups],
+                            SPEC["rest_rig"])
     T, K = targets(arm)
     meshy = SPEC.get("weights") == "meshy"
     gr = meshy_weights(low, arm, P) if meshy else None

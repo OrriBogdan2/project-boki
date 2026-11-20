@@ -251,3 +251,13 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## A regen onto a re-proportioned rig, 2026-11-20: `rest_rig`
+A regen from a new turnaround can have other proportions than the rig the clips were keyed on (Albert's legs are 2x
+his rig's): the fit squashes the art onto the old joints (stubby legs, stretched knees). Instead change the rig's
+archetype body ("legs", "torso", "neck" in content/archetypes/<id>.json), re-bake `--warden-rest-bake`, and set the
+spec's `rest_rig` to the Warden id: `tools/art1/rest_from_rig.py` moves the game .glb's rest onto the new rig rest
+before the fit (bone axes kept, so the clips' rotations hold; root keys corrected so the lower foot keeps its height),
+and the art then fits joints at its own heights. Then run `tools/art1/glb_relax.py` on the result (Albert: worst stretch
+22.6 -> 9.0 on A, 0 clips over the 9.5 ceiling; docs/decisions/0102-albert-rig-legs.md). The new rig no longer fits
+the old .glb, so the rig change and the new .glb ship together.
