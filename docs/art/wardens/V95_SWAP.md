@@ -259,3 +259,15 @@ With `--weights meshy` only the spec's regions marked `"meshy": true` apply (11-
 so Gil's tail boxes (the fin and the stalk under the coat hem) are marked; a region written for bone heat (his satchel
 on the hips) would cut Meshy's right sleeve onto the hips. Candidates 11-20 round 2: E (sheet A: the grin views plus
 the turnaround's back-three-quarter for the full dorsal fin, on the branch), D (B), H (C: E's views with a fist edit).
+Round 6 (11-20, r6 on the branch), three export-level fixes on the r5 glb (mesh, rig and the rest of the paint unchanged):
+- Ink room: the meshy-weights route left COLOR_0 alpha flat (0.50 body, 0.35 fish), so the ink shell grew half width
+  everywhere and showed as dark specks on the hat brim, hem, fins and fish. `blender -b -P tools/art1/glb_ink_room.py --
+  IN OUT 0.02` writes fit_warden's ink room into an existing glb (44% of body and 67% of fish vertices get a thinner line).
+- Open coat: hero_toon culls back faces and ignores glTF doubleSided, so looking into Gil's one-shell coat showed the
+  black inside of the ink shell (the "torn hem"). `python3 tools/art1/glb_twosided.py IN OUT cloth-v95` adds a reversed
+  copy of the cloth triangles (ink room 0): 31k -> 63k cloth tris, 95k total (cap 105.6k). Not glb_backface_fix.py: that
+  one drops sheets open on both sides, which would delete the coat.
+- Mouth: a Meshy retexture (`meshy_task.py retexture --original-uv`, the r2 grin views re-edited to the splash's
+  blue-grey lips and pink mouth) taken only on the mouth triangles (head-weighted, red in the old paint, two rings out);
+  a whole-body retexture painted belly-blue streaks on the robe front, so the rest keeps r5's paint.
+
