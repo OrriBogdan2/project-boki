@@ -52,9 +52,12 @@ const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is dow
 ## Bone -> its share of the kick: the gun arm, the support arm, the shoulder pieces (the HunterAnim PAD_FOLLOW)
 const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
+const STOP_RATE := 5.0       # 1/s: how fast the loco blend falls back as he slows ("loco.stop_rate"): 80 % by 0.2 s
+const CROUCH_RATE_MIN := 0.7 # the sneak clip's slowest rate while he holds a move
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 const SET_OFF_STILL := 0.3   # s standing before a start counts as setting off: the walk ring has faded out by then
 static var _data := {}       # art name -> its parsed file ({} when it has none)
+static var _borrowed := {}   # "clips_from" art name -> its library, copied for the borrowers (_borrow)
 
 var root: Node3D
 var skel: Skeleton3D
@@ -162,11 +165,15 @@ static func leave_t(h: Hunter) -> float:
 
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
+	if dd.is_empty():
+		return null
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
-	if dd.is_empty() or players.is_empty():
+	var own: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
+	var lib := own if own else _borrow(String(dd.get("clips_from", "")), sk)
+	if lib == null:
 		return null
 	var c := WardenClips.new()
-	if not c._setup(model, glb, sk, dd, players[0]):
+	if not c._setup(model, glb, sk, dd, lib):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
@@ -174,18 +181,47 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 ## Seconds a kit move's clip plays for: "cut" ends it, "fit" or "scale" retimes it, "lead" starts it further in.
 func move_len(mv: Dictionary) -> float:
 	var length := minf(lib.get_animation(String(mv["clip"])).length, float(mv.get("cut", 1e9)))
-	var rate := float(mv.get("rate", 1.0)) * float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
-	return length / rate - float(mv.get("lead", 0.0))
+	# (_move_clip's clock: clip t = (kit t x "rate" + "lead") x "scale" x the "fit" stretch)
+	var sc := float(mv.get("scale", 1.0)) * (length / float(mv["fit"]) if mv.has("fit") else 1.0)
+	return (length / sc - float(mv.get("lead", 0.0))) / float(mv.get("rate", 1.0))
 
-func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
+static func _first_lib(player: AnimationPlayer) -> AnimationLibrary:
+	var names := player.get_animation_library_list()
+	return player.get_animation_library(names[0]) if not names.is_empty() else null
+
+## Data "clips_from": another Hero's art name. A .glb with no clips of its own plays that Hero's library, retargeted by
+## bone name: every v95 armature is the contract's with the same rest rotations, so the rotation tracks carry over as
+## they are; tracks on bones this skeleton lacks are dropped. Copied once per source (the clips are then cached as a
+## .glb's own are), so the source Hero's tree never sees this one's edits. Gil until his rig pass (ANIM_COVERAGE gap 1).
+static func _borrow(from: String, sk: Skeleton3D) -> AnimationLibrary:
+	if from == "":
+		return null
+	if _borrowed.has(from):
+		return _borrowed[from]
+	var ps := load("%s/%s/%s.glb" % [WardenGlb.DIR, from, from]) as PackedScene
+	var inst := ps.instantiate() if ps else null
+	var players: Array = inst.find_children("*", "AnimationPlayer", true, false) if inst else []
+	var src: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
+	var out: AnimationLibrary = null
+	if src:
+		out = AnimationLibrary.new()
+		for nm in src.get_animation_list():
+			var a := src.get_animation(nm).duplicate() as Animation
+			for i in range(a.get_track_count() - 1, -1, -1):
+				if WardenSkeleton.find(sk, String(a.track_get_path(i).get_concatenated_subnames())) < 0:
+					a.remove_track(i)
+			out.add_animation(nm, a)
+	if inst:
+		inst.free()
+	_borrowed[from] = out
+	return out
+
+func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: AnimationLibrary) -> bool:
 	root = model
 	skel = sk
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
-	var names := player.get_animation_library_list()
-	if names.is_empty():
-		return false
-	lib = player.get_animation_library(names[0])
+	lib = clips
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -204,7 +240,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	if (d["loco"] as Dictionary).has("run_cycle"):
 		_retime_run(float(d["loco"]["run_cycle"]))
-	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
+	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
+			+ (d.get("summon_call", {}) as Dictionary).values())
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -526,6 +563,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
+	var call := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
+	var call_t := float(s.get("call_t", 99.0))
+	if lib.has_animation(call) and call_t < lib.get_animation(call).length:
+		return {"clip": call, "t": call_t, "upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
 	land_t += dt
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
@@ -600,8 +641,9 @@ static func lockin_dur(art_name: String) -> float:
 ## A keyed move's clip and time ({} once a move that does not hold has played out).
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
-	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
-	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit; under zero the first frame holds for it,
+	# since a t under zero would free-run the clip in step())
+	var tt := maxf(float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0)), 0.0)
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on
@@ -716,7 +758,8 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
-	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
+	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
@@ -897,11 +940,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	if twist_on:
 		goal = _aim_twist(flat, face, k)
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
+	loco_pos = _ease(loco_pos, goal, 12.0, dt)
 	_p("loco/blend_position", loco_pos)
 	var ring := _walk_ring()
-	var rate := gait.plan(spd, lc, loco_pos, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))
-	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	var out := loco_pos.length()
+	var moving := _out_of_idle(out, ring, goal.length(), spd)
+	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
@@ -948,6 +992,19 @@ func _ease_start(dt: float) -> void:
 	var k := smoothstep(0.0, start_s, start_t)
 	for b in start_bones:
 		skel.set_bone_pose_rotation(b[0], (b[1] as Quaternion).slerp(skel.get_bone_pose_rotation(b[0]), k))
+
+## A blend position eased toward `goal`: at `rate` (1/s) as he speeds up, at "loco.stop_rate" as he slows to a stand.
+func _ease(pos: Vector2, goal: Vector2, rate: float, dt: float) -> Vector2:
+	if goal.length() < pos.length():
+		rate = float(d["loco"].get("stop_rate", STOP_RATE))
+	return pos.lerp(goal, 1.0 - exp(-dt * rate))
+
+## How much of a blend is out of the idle, for the clip rate: 1 while he holds a move, 0 standing, and as much as is
+## still out (`out` over `ring`, its walk ring) while the blend falls back to `goal` as he stops.
+func _out_of_idle(out: float, ring: float, goal: float, spd: float) -> float:
+	if goal < out:
+		return minf(out / ring, 1.0)
+	return 1.0 if spd >= STILL else 0.0
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 ## Grounded ("gnd") holds it low for as long as the cords do.
@@ -998,6 +1055,8 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var speed := float(cr.get("speed", 2.4))
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
-	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
+	crouch_pos = _ease(crouch_pos, pos, 12.0, dt)
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, CROUCH_RATE_MAX) if spd >= STILL else 1.0)
+	var moving := _out_of_idle(crouch_pos.length(), 1.0, pos.length(), spd)
+	var rate := clampf(spd / maxf(speed * moving, 0.01), CROUCH_RATE_MIN * moving, CROUCH_RATE_MAX)
+	_p("crouch_rate/scale", WardenGait.follow(rate, moving))
