@@ -10419,3 +10419,4 @@ READY ext/anim-footstep-contacts 184a5ef8d5 (Hero footsteps cue on each v95 clip
 READY ext/anim-motley-flinch-rng fc752f165f8831fcf55264f8263449c8c908845a (--rng-seed=N for checks; stale Motley flinch-RNG DEBT rows dropped, fixed by cd1042d2ad; clip-check ostra flinch 0.0000 m on 20 seeds)
 READY ext/sfx-tenzo-grimble-bar 2738e9f30c (Tenzo+Grimble ability bar: 11 CC0 cues, per-ability hits rock crunch/scrap clang, boulder+hook travel loops, hook let-go + Broadside end; sfx-set 0 FAIL, strike rc0)
 READY ext/sfx-sparkle-sable-bar d4db065a78 (Sparkle+Sable: 10 generated cues filling missing cast/travel/hit/end beats; sfx-set/strike/match-audio 0 fail)
+READY ext/anim-boki-coverage-all 8d165d85c7740236cc04b2aa50a84b2d432ed748 (anim coverage: 48 rigged Boki x 8 garden states, 0 missing, 25 on shared clip set, five worst filed)
