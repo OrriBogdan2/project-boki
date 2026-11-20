@@ -10644,3 +10644,4 @@ READY ext/early-camps-bots-a3-port 58d5e2636a (bulk-rebase: origin/main merged i
 READY ext/hudreveal-fold 58a15d65df (bulk-rebase: origin/main merged in mechanically, was 3035db634f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hud-holdback 9a2a0cd33c (bulk-rebase: origin/main merged in mechanically, was 62bcd58e5c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-N3-1120 2b69c8abd7b (merge lane N3 11-20: 10 branches ported onto main; suite 142 flags NEW-RED 0, export 885 MB OK; PR via gh-outbox)
+READY ext/merge-lane-N1-1120 ebca5bdee0317b03fd2eb138c3447eadf9825ed2 (lane N1 bundle merged with current main: hud_slot/level_hud_check/tutorial_check conflicts resolved keeping main's POINT_TAG + branch's in-fight hold; import ok, --check 0 fail, level-hud 0 fail, tutorial 0 fail; health --strict red only on tools/gil_combo_check.gd history_comment, a file identical to main)
