@@ -1323,7 +1323,7 @@ func _move_player(d: float) -> void:
 			wedge_t = 0.0
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
-	air = py > gh + 0.001 or pvy > 0.0
+	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")
