@@ -10,8 +10,8 @@ the new table.
 How a cell is read (Hunters): idle, walk, run, jump (`air.rise`), glide, land and the hit pair are the json's `loco`,
 `air`, `land` and `states.hit` clips found in the .glb; attack is any kit move mapped to a clip; dash and cast are a
 mapped kit move whose key names a dash/skate/vault (or has `"dash": true`) or an ability (words in the check); death is `states.dead` (none
-procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is always `proc`
-(`HunterAnim.stomp_k`, no clip anywhere). strafe, crouch and upper are the blends: the 4-way walk and run rings, the
+procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is a `clip` when `states.stomp` is mapped and in the glb (WardenClips plays it on the game's phase), else `proc`
+(`HunterAnim.stomp_k`); a mapped stomp clip missing from the glb is `missing` and fails. strafe, crouch and upper are the blends: the 4-way walk and run rings, the
 crouch layer, and kit moves that play on the upper body over the legs. Boki: the .glb clips idle, walk, run, attack,
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
@@ -37,20 +37,20 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip | clip | clip |
+| claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip | clip | clip |
+| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
+| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 
 ### Starter Boki
 
