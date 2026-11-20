@@ -10643,3 +10643,4 @@ READY ext/hunter-regen-claire-1120 812c707e70 (Neve r4 3D: Meshy G1 + hair slot 
 READY ext/early-camps-bots-a3-port 58d5e2636a (bulk-rebase: origin/main merged in mechanically, was 0bd417101b; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/hudreveal-fold 58a15d65df (bulk-rebase: origin/main merged in mechanically, was 3035db634f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hud-holdback 9a2a0cd33c (bulk-rebase: origin/main merged in mechanically, was 62bcd58e5c; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-N3-1120 2b69c8abd7b (merge lane N3 11-20: 10 branches ported onto main; suite 142 flags NEW-RED 0, export 885 MB OK; PR via gh-outbox)
