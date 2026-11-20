@@ -4,7 +4,7 @@ extends RefCounted
 ##   - the R slot is the bond meter and always the Merge: it fills with the bond, says MERGE (SURGE with no Boki) when
 ##     ready, RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
 ##     ultimate (its name when ready, the seconds until it is)
-##   - a merged hunter wears the form's name, a draining timer and the shell bar over their head (form_overhead)
+##   - a merged hunter wears a draining timer and the shell bar over their head (form_overhead; no name: a floating word)
 ##   - C and G show where the Boki is and what it is doing: from you / from the Boki, its order (follow, guard,
 ##     chase, return), the G hold ring, DOWN with the seconds until it comes round, and whether its carried
 ##     bonuses are on you (greyed while it is out)
@@ -418,10 +418,9 @@ static func shell_flash(H, h: Hunter) -> float:
 	var t: float = H.m.time - float(h.get_meta("shell_break_at", -9.0))
 	return clampf(1.0 - t / 0.5, 0.0, 1.0)
 
-## Over a merged hunter's head, for everyone: the form's name, its draining timer, and the shell bar in the form's colour.
-## `sp` is the plate's screen anchor (the top of the health bar); it sits above the name.
+## Over a merged hunter's head, for everyone: the form's draining timer and the shell bar in the form's colour (no name:
+## the form reads from its silhouette). `sp` is the plate's screen anchor (the top of the health bar).
 static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
-	var name := ""
 	var glow := Color.WHITE
 	var left := 0.0
 	var total := 1.0
@@ -431,13 +430,11 @@ static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
 		var f: Dictionary = h.merge_st["form"]
 		if String(h.merge_st.get("phase", "")) != "live":
 			return
-		name = String(f["name"])
 		glow = f["glow"]
 		left = float(h.merge_st["t"])
 		total = float(h.merge_st["T"])
 		live = true
 	elif h.has_meta("mf_name") and float(h.get_meta("mf_left", 0.0)) > 0.0:
-		name = String(h.get_meta("mf_name"))
 		glow = h.get_meta("mf_glow", Color.WHITE)
 		left = float(h.get_meta("mf_left", 0.0))
 		total = maxf(0.1, float(h.get_meta("mf_dur", 10.0)))
@@ -453,7 +450,6 @@ static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
 	if sh.y > 0.0:
 		shell_bar(H, Rect2(Vector2(x0, sp.y - 18.0), Vector2(w, 6.0)), sh.x / sh.y, glow, fl2)
 	var tr := Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 3.0))
-	SafeArea.note_as("merge_form_name", Rect2(Vector2(x0, sp.y - 40.0), Vector2(w, 28.0)))
+	SafeArea.note_as("merge_timer", Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 12.0)))
 	H.c.draw_rect(tr, Color(0.03, 0.03, 0.05, 0.8))
 	H.c.draw_rect(Rect2(tr.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.75))
-	H._ctext(Vector2(sp.x, sp.y - 28.0), "%s  %ds" % [name.to_upper(), int(ceil(left))], 11, glow, H.big)
