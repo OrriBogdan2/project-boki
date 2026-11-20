@@ -75,3 +75,7 @@ with job tools (`diag.py`: sliver = 3D aspect > 12, smear = UV/3D area < 0.15x m
 - not causes: LOD, shader, skin binds (inverse binds = rests, 0 deg), winding (live 0.5% flipped, F 0%).
 Result: 59,948 tris, 49 clips and anchors kept, glb 12.1 MB (was 16.6), `ryzz_v95.jpg` 4k; `ryzz_v95b/c.jpg` dropped
 (the remeshed model has one texture). The gum bone stays at its lips spot (`move_bones`).
+Open after the repair (art-gate 11-20 FAIL on the owner sheet): magenta hair locks at both cheeks, eyes reading red
+(the Meshy iris is magenta-violet under the warm grade), a dark patch at the left strap, and the hip hand close to the pack.
+These are in the remeshed texture, not the look: the look's magenta paint_glow off and the eye bloom off (job variants
+ryzz_g1/g2) render the same. Next step: a Meshy retexture of the face/hair region, not import work.
