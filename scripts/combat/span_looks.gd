@@ -65,7 +65,7 @@ static func cracked(root: Node3D) -> bool:
 
 ## A tween on a span or pad that stops the one before (a rise still going when it is reused or falls).
 static func tween(n: Node3D) -> Tween:
-	var old = n.get_meta("tw", null)
+	var old = n.get_meta("tw") if n.has_meta("tw") else null
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	var tw := n.create_tween()
@@ -77,7 +77,7 @@ func give(n: Node3D) -> void:
 	if not is_instance_valid(n) or bool(n.get_meta("free", true)):
 		return
 	n.set_meta("free", true)
-	var old = n.get_meta("tw", null)
+	var old = n.get_meta("tw") if n.has_meta("tw") else null
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	n.visible = false
