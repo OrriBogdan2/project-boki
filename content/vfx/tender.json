@@ -1,6 +1,6 @@
 {
 	"palette": {
-		"smoke": "#f4e8ff", "mint": "#a8f0d0",
+		"smoke": "#f4e8ff", "char": "#5a4a7a", "mint": "#a8f0d0",
 		"leaf": "#5fdc6a", "leaf_lit": "#b4f7a8", "leaf_hot": "#efffe4",
 		"ember": "#ff8c32", "ember_lit": "#ffb45a", "ember_hot": "#fff0c8"
 	},
