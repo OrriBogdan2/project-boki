@@ -194,8 +194,6 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 				{
 				"src": "splinter",
 				"ab": "passive",
-				"slow": 1.2,
-				"slow_k": 0.3,
 				"tags": ["passive", "splinter"],
 				"payoff": true
 			}
