@@ -130,7 +130,10 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   ash, pickup motes, the ash storm, landmark and exit motes) follow them; High and Ultra are untouched. The ash storm
   follows `fx` instead of `Settings.lite()`. `--particle-budget-check` (~1 min) builds a 30-Hunter match at each preset
   and adds the worst a fight piles on (the full Fx pools and the Hero VFX cap): each preset under 4,000, each one down
-  draws less, High and Ultra draw the same.
+  draws less, Ultra at least what High draws. The region motes over each island (`BiomeRun.decorate`) also pause
+  past their draw distance (`ParticleCount.pace`, 110 m x the preset's `draw`), and paused emitters are not counted:
+  the fight's busiest moment went 1,867 -> 1,120 at High on a real GPU (jobq 11-20, same worker; the motes 957 -> 140), and the
+  30-Hunter check's High worst case 3,847 -> 3,100.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
