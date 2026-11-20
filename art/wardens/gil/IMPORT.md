@@ -124,3 +124,24 @@ WardenSync fix, so hand.R follows the forearm and main's hand-made forearm-led s
 - Tail fin back: `gil_parts.py --tail-only` adds the live model's fish tail (tube + forked fin, bone `tail`, 112 tris); no dorsal blade.
 - Stretch (14 moves x 393 frames, body mesh, fixed game code): LIVE worst 17.1x, mean of moves' worst 10.3x, edges over 3x 0.441%;
   r3 30.6x / 17.7x / 4.16%; r4 7.3x / 4.3x / 0.347%. All 14 moves are still over the game's 1.3x at the coat hem and thighs.
+
+## Regen 11-20 r5 candidate A (DRAFT; ext/hunter-regen-gil-1120)
+r4 failed the art-gate (black holes in the coat at the match camera, a ragged hem, a black shard under the hem from behind,
+no dorsal fin). r4 and r3 used r3's c3 body, whose turnaround edits had removed the dorsal fin and tail. The turnaround has both,
+so r5 goes back to r2's Meshy b5 (the 11-19 turnaround grin views: open grin, dorsal fin, tail fin, full dot pattern). No new
+Meshy gen; one new Meshy auto-rig (5 credits). Then r4's fixed chain:
+
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/gil_regen1120/r5_b5.json W W/gil.glb   (W/game.glb = main's gil.glb)
+    blender -b --factory-startup --python tools/meshy/gil_parts.py -- --fish-only W/gil.glb FISH.glb W/F.glb --len 1.2 --pitch 60 --yaw 40
+    python3 tools/art1/glb_relax.py W/F.glb W/R.glb --poses=DUMP.json --only=Body.002 --no-rip --rigid=hand.R:0.05
+    python3 tools/art1/gil_fish_rot.py W/R.glb gil.glb 0.263,0.395,-0.017 55 40
+
+- Tail and dorsal fin pinned in the meshy route (`"meshy": true` regions): tail 1,392 verts wholly on `tail` (r2 left it on
+  Meshy's thigh weights), dorsal fin 1,237 verts on `hips` (rigid on the torso, never swings behind the hat). r4's scripted
+  live tail (`gil_parts --tail-only`, gil_gil_fin.jpg) is gone.
+- Fish: r2's 1.2 m Meshy swordfish, rigid on hand.R at the fist centre, 55 degrees under level, 40 out (fish search over the
+  393 game frames). Bill forward share (median): idle 0.67, walk 0.47, run 0.57, thrusts/lunge/potion 0.89-0.93. Within
+  0.12 m of the head/hat in 4 of 393 frames (run, thrusts, lunge), where the game's pose puts the fist itself 4-8 cm from the brim.
+- Stretch, game `--stretch-check --wardens=gil` (57 clips): LIVE worst 18.17x, mean 10.89x; r5 worst 7.08x, mean 4.68x
+  (all 57 over 1.3x on both). Offline over the 393 HunterAnim frames: LIVE 17.1x / 10.3x / 0.441% edges over 3x; r5 7.1x / 5.1x / 0.445%.
+- Body 59,528 tris + swordfish 4,048.
