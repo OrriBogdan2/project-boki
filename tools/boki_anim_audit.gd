@@ -105,7 +105,11 @@ func _species(main: Node, id: String) -> void:
 	var feetless: bool = measured.min() < FEETLESS
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
-		ok(BokiRig.STRIDE[id] == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		ok(BokiRig.STRIDE.get(id, GLIDE_STRIDE) == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		k.queue_free()
+		return
+	if not id in BokiRig.STRIDE:
+		ok(false, "%s has a BokiRig.STRIDE row (measured walk %.2f run %.2f)" % [id, measured[0], measured[1]])
 		k.queue_free()
 		return
 	for i in 2:

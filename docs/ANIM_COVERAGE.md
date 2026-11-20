@@ -147,9 +147,10 @@ Worst five, backlog-ready:
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
    clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
    theirs too.
-4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+4. **23 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
-   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
+   any Boki (scaldamus and sentrikat left it 11-20), but the shared set is the same wobble on a heron, an okapi and a
+   rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
    sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
