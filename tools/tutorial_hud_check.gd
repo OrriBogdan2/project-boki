@@ -126,7 +126,7 @@ func _course() -> void:
 		var restarts0 := int(tu.get_meta("restarts", 0))
 		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
-		var pulsed := tu.step != before or int(tu.get_meta("restarts", 0)) > restarts0      # (a beat started again re-pulses: one chime)
+		var pulsed := tu.step != before or int(tu.get_meta("restarts", 0)) > restarts0  # a restarted beat: one chime
 		if TutorialStrip.chimes > chimes0:      # (the strip's own count: HUD panels drop with the same "ui_open" sound)
 			if pulsed: chimed += 1
 			else: stray += 1

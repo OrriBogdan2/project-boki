@@ -940,7 +940,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	# keeps 1)
 	var walk := float(lc.get("walk_speed", 2.2))
 	rate *= lerpf(1.0, float(lc.get("cadence", 1.0)), clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", rate)      # (main's stop fix: the rate follows the feet of the blend as it stands, no fall-back to 1)
+	_p("loco_rate/scale", rate)      # the rate follows the feet of the blend as it stands, no fall-back to 1
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0

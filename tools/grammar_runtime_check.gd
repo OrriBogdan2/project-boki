@@ -279,7 +279,8 @@ func run(main_node: Node) -> void:
 		k.brain.think_abilities(0.1)
 		if k.runner.charges("k1") < c1: used["k1"] += 1
 		if k.runner.charges("k2") < c2: used["k2"] += 1
-		_ac_run(m, BokiSwing.CAST_WIND + Match.DT)      # the wound-up cast releases; one winds up at a time, so the auto waits
+		# the wound-up cast releases; one winds up at a time, so the auto waits
+		_ac_run(m, BokiSwing.CAST_WIND + Match.DT)
 		k.runner.reset()
 		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T; k.cmd = "follow"      # (its own AI, not the Guard hold)
 	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
