@@ -114,6 +114,13 @@ func _reset(m: Match, h: Hunter, foe: Hunter, w: Hunter, dist: float) -> void:
 		m.revive_hunter(w, null)
 	for kk in [w.kin, w.kin2]:
 		if kk: (kk as Kin).dead = true
+	var hk = h.kin            # (untyped first: it may have been freed)
+	if is_instance_valid(hk) and (hk as Kin).state == "downed":
+		# the caster's own Boki, downed in an earlier trial (Fusion is off since #349, so it stays out and fights):
+		# walking past it would pick it up, and a carry eats every attack press. It stays down, out of the way.
+		if (hk as Kin).rescue_on:
+			KinDowned.stop(hk, h, "check")
+		(hk as Kin).rescue_block = 1e9
 	foe.max_hp = 1e6          # nothing a kit does may down the stomper: that is a break of its own
 	foe.hp = 1e6
 	foe.armor = 0.0
