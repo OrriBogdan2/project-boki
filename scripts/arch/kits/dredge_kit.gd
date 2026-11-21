@@ -318,6 +318,7 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
+		(hook_sd["x"] as Dictionary)["block_class"] = "reach"      # (Blockers: a placed ridge or shield stops it)
 		var sn = hook_sd.get("node")
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
