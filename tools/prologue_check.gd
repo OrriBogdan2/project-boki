@@ -11,8 +11,6 @@ const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
 const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
 	+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls."
-## a skip is over within this many seconds of game time (a slow software renderer stretches wall time, not this)
-const SKIP_MAX_S := 0.4
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
 	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
