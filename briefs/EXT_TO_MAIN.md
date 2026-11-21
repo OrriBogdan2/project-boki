@@ -10810,3 +10810,4 @@ READY ext/tenzo-hop-chain c658d89dd1bb8ffea56f38585cce64f9db7a9ea1 (Rock Hop cha
 READY ext/lint-c2-names 1c2a36b54fb0eeade914705b7cd166aa65c09d8c (C2 check tools snake_case names)
 READY ext/cinder-rmb-cast cf799afc84 (Cinder RMB cast timing to the footage)
 READY ext/ui-select-port 658e350f18 (hunter select + loading port, origin/main merged: prematch_view/DEBT conflicts resolved; --check 0 fail, --prematch-check 0, --loading-check 0; health --strict style ratchet red only on files this branch did not touch)
+READY ext/farm-tut-patch-step 719544c28f (PR #516: merged origin/main; farm-tutorial-check 2 fails vs main 5, both also red on main, NEW-RED 0)
