@@ -159,6 +159,13 @@ static func pose(wisp: Node3D, t: float) -> void:
 	body.rotation.z = -dart * DART_LEAN
 	(wisp.get_node("Trail") as Node3D).position = body.position
 
+## The edge of the body in the side colour (SideColor: you, your squad, rivals), so whose it is reads at a glance.
+## Only sets the shader parameter when the colour changes.
+static func side(wisp: Node3D, col: Color) -> void:
+	if wisp.get_meta("side", Color(0, 0, 0, 0)) != col:
+		wisp.set_meta("side", col)
+		(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("rim_col", col)
+
 ## Dim with no sparkles while its summon rests, bright when it is ready. Cheap to call every frame.
 static func dim(wisp: Node3D, resting: bool) -> void:
 	var trail := wisp.get_node("Trail") as CPUParticles3D
