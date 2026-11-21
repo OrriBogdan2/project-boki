@@ -409,7 +409,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
-	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
+	var cls := String(x.get("block_class", "pierce")) if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
 		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
