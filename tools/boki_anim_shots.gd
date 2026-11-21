@@ -6,7 +6,7 @@ extends RefCounted
 ## 1/30 s across the clip's loop wrap, played in place; "setoff": the Boki stands, then sets off at a stroll (the
 ## idle-to-walk hand-over). <dir>/<id>_<clip>_<tag>.png.
 ## --film instead: footage for an MP4, 30 frames a second, at the home's size (FARM_BOKI_SCALE): each frame is the
-## garden camera (the game's pitch, wheel all the way in, following the Boki, a crop round it) beside a side view at
+## garden camera (the game's pitch and wheel all the way in, side-on to the walk, following it, a crop round it) beside a side view at
 ## its feet over the floor bars; a stroll, a home wander and its match speed, FILM_S each.
 ## <dir>/<id>_<tag>/NNNN.png (ffmpeg -framerate 30 -i %04d.png).
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
@@ -25,7 +25,7 @@ const SEAM_PX := 224             # crop around the Boki at the garden camera, of
 const STROLL := 1.5              # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
 const FILM_S := 3.0              # s of each speed in a --film
 const FILM_PX := 540             # each half of a --film frame
-const FILM_CROP := 300           # px of the 1920x1080 garden view round the Boki, scaled up to FILM_PX
+const FILM_CROP := 240           # px of the 1920x1080 garden view round the Boki, scaled up to FILM_PX
 
 func run(main: Node) -> void:
 	var out := ""
@@ -182,10 +182,11 @@ func _film(shots: Shots, id: String, dir: String) -> void:
 			k.position.z -= float(v) * DT
 			rig._process(DT)
 			rig.advance(DT)
-			garden.position = k.position + Vector3(0, sin(pitch), cos(pitch)) * Shots.FARM_CLOSE_DIST
-			garden.rotation = Vector3(-pitch, 0, 0)
-			side.position = k.position + Vector3(3.0 * Shots.FARM_BOKI_SCALE, 0.4, 0)
-			side.look_at(k.position + Vector3(0, 0.35 * Shots.FARM_BOKI_SCALE, 0))
+			# the game's pitch, turned to see the walk across the screen (a Boki crossing the garden)
+			garden.position = k.position + Vector3(cos(pitch), sin(pitch), 0) * Shots.FARM_CLOSE_DIST
+			garden.look_at(k.position)
+			side.position = k.position + Vector3(1.9 * Shots.FARM_BOKI_SCALE, 0.25 * Shots.FARM_BOKI_SCALE, 0)
+			side.look_at(k.position + Vector3(0, 0.22 * Shots.FARM_BOKI_SCALE, 0))
 			if i < int(WARM_S / DT):
 				continue
 			for w in 3:
