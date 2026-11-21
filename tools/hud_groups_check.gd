@@ -13,8 +13,8 @@ extends RefCounted
 ##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
 ##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
 ##   5. the tutorial's HUD grows with its steps (HudReveal "tut_from"): minimap + vitals on the landing, the ability
-##      row and weapon card from the shoot step, the Boki box from the G step, the belt from the loot step, no
-##      counters; never above TUT_MAX groups
+##      row and weapon card from the shoot step, the Boki box from the G step, the belt from the loot step, no counters
+##      (it draws none); never above TUT_MAX groups
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]

@@ -34,11 +34,11 @@ static func on(m: Match, key: String) -> bool:
 	var from := int(g.get("from_match", 1))
 	return from > 0 and match_no() >= from
 
-## The tutorial's HUD grows with its steps: a group with a "tut_from" step id shows from that step on
-## ("never" = not in the tutorial); a group without one always shows.
+## The tutorial's HUD grows with its steps: a group with a "tut_from" step id shows from that step on;
+## a group without one always shows.
 static func tut_on(tu: Tutorial, key: String) -> bool:
 	var from: String = groups().get(key, {}).get("tut_from", "")
-	return from == "" or (from != "never" and tu.step >= Tutorial.step_index(from))
+	return from == "" or tu.step >= Tutorial.step_index(from)
 
 ## Whether this match stages the HUD at all.
 static func staged(m: Match) -> bool:

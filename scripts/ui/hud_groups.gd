@@ -50,7 +50,7 @@ static func on_screen(hud) -> Array:
 		out.append_array(["abilities", "weapon"])
 	if HudReveal.on(m, "summon_ring"):
 		out.append("slots")
-	if HudReveal.on(m, "counters"):
+	if not m.tut and HudReveal.on(m, "counters"):      # (the tutorial draws only its strip up top)
 		out.append("counters")
 	if glider_shown(p):
 		out.append("glider")
