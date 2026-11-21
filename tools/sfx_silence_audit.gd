@@ -68,19 +68,29 @@ func _target_class(e) -> String:
 func _at(e) -> Vector3:
 	return e.pos if e is Ent else Vector3.INF
 
-func _add(kind: String, detail: String, who, places: Array) -> void:
+## far_at: the bodies the far test looks at (default all places; a hit uses its target, as Juice.hit does).
+func _add(kind: String, detail: String, who, places: Array, far_at: Array = []) -> void:
 	var m: Match = _m
 	var mine: bool = who == m.player or places.has(m.player)
 	var ps: Array = []
 	for p in places:
 		ps.append(_at(p) if p is Ent else p)
-	var key := "%s %s [%s]" % [kind, detail, "you" if mine else "other"]
+	var fps: Array = ps
+	if not far_at.is_empty():
+		fps = far_at.map(func(p): return _at(p) if p is Ent else p)
+	var who_tag := "other"
+	if mine:
+		who_tag = "you"
+	elif _far(fps):
+		who_tag = "far"
+	var key := "%s %s [%s]" % [kind, detail, who_tag]
 	step_events.append({"key": key, "ps": ps, "mine": mine, "cues": [], "age": 0})
 
 var _m: Match
 
 func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
-	_add("hit", "%s>%s %s" % [_who(attacker), _target_class(target), ",".join(tags)], attacker, [attacker, target])
+	var detail := "%s>%s %s" % [_who(attacker), _target_class(target), ",".join(tags)]
+	_add("hit", detail, attacker, [attacker, target], [target])
 
 func _on_cast(caster: Node, id: String, slot: String) -> void:
 	_add("cast", "%s %s" % [slot, id], caster, [caster])
@@ -89,7 +99,7 @@ func _on_status(target: Node, status: String, by: Node, _t: float) -> void:
 	_add("status", "%s on %s" % [status, _who(target)], by, [target])
 
 func _on_kin(kin: Node, owner_h: Node) -> void:
-	_add("boki", "%s" % kin.get("state"), owner_h, [owner_h])
+	_add("boki", "%s" % kin.get("state"), owner_h, [owner_h, kin])     # (its cues play at the Boki, often far from you)
 
 func _poll() -> void:
 	for h: Hunter in _m.hunters:
@@ -109,13 +119,21 @@ func _poll() -> void:
 		if s["lvl"] > p["lvl"]: _add("level", who, h, [h])
 		if s["belt"] > p["belt"]: _add("pickup", who, h, [h])
 		if s["recast"] != p["recast"]: _add("recast", "%s %s" % [who, "open" if s["recast"] else "close"], h, [h])
-		if s["kin"] != p["kin"] and p["kin"] != "": _add("boki", "%s>%s" % [p["kin"], s["kin"]], h, [h])
+		if s["kin"] != p["kin"] and p["kin"] != "": _add("boki", "%s>%s" % [p["kin"], s["kin"]], h, [h, h.kin])
 		prev[id] = s
 	for x in _m.exits.list:
 		var st := String(x.get("state", ""))
 		if prev_exit.has(x["pos"]) and prev_exit[x["pos"]] != st:
 			_add("exit", "%s>%s" % [x.get("kind", "?"), st], null, [x["pos"]])
 		prev_exit[x["pos"]] = st
+
+## Every place of an event is beyond Juice.FAR from the player: Juice.hit draws and plays nothing that far
+## (and most cue reaches are shorter), so a "none" there is distance, not a missing wire. Ranked last.
+func _far(ps: Array) -> bool:
+	var p: Hunter = _m.player
+	if p == null or ps.is_empty():
+		return false
+	return ps.all(func(q): return q is Vector3 and q.is_finite() and _flat(q, p.pos) > Juice.FAR)
 
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
@@ -241,6 +259,15 @@ func _fixes() -> void:
 		if Data.MOBS[kind]["attack"] in ["none", "boss"]:
 			continue
 		ok(Sfx.ensure("v_" + String(kind).trim_prefix("bl_")), "mob %s has a wind-up voice" % kind)
+	# Lace's Heavy Shot release plays from the bow's mouth (HeroVfx "heavy_go"). In this hand-stepped match the
+	# models are not processed, so the bow anchor can lag metres behind her and its `cast secondary archer_rmb`
+	# rows read "none": the wiring is proved here instead.
+	for x: Hunter in _m.hunters:
+		if x.arch == "archer" and not x.out and x.ak != null:
+			x.ak.ch_rmb = 1.0
+			var rel := _cues_of(func(): x.ak.fire_rmb({"hold": true, "t": 1.2, "variant": ""}))
+			ok("pin_heavy" in rel, "Lace's Heavy Shot release plays its cue (%s)" % [rel])
+			break
 	var hs: Array = _m.hunters.filter(func(x): return x != _m.player and x.kin is Kin and not x.out)
 	var a: Hunter = hs[0]
 	var b: Hunter = hs[1]
@@ -313,11 +340,22 @@ func _report() -> void:
 		total += int(t["n"])
 		rows.append([k, t])
 	ok(total > 0, "%d events seen" % total)
+	var sums := {"near": [0, 0], "far": [0, 0]}     # [none, none + shared]
+	for r in rows:
+		var band := "far" if String(r[0]).ends_with("[far]") else "near"
+		sums[band][0] += int(r[1]["none"])
+		sums[band][1] += _bad(r[1])
+	var near_s := "%d none, %d none + shared" % sums["near"]
+	var far_s := "%d none, %d none + shared" % sums["far"]
+	print("SILENCE TOTAL within %.0f m of the player (you + other): %s; beyond (far): %s" % [Juice.FAR, near_s, far_s])
 	var kinds := {}
 	for r in rows:
 		kinds[String(r[0]).get_slice(" ", 0)] = true
 	ok(kinds.size() >= 5, "event kinds seen: %s" % [", ".join(kinds.keys())])
-	rows.sort_custom(func(x, y): return _bad(x[1]) > _bad(y[1]))
+	rows.sort_custom(func(x, y):
+		var fx := String(x[0]).ends_with("[far]")
+		var fy := String(y[0]).ends_with("[far]")
+		return fy if fx != fy else _bad(x[1]) > _bad(y[1]))
 	var lines: Array = []
 	for r in rows:
 		var t: Dictionary = r[1]
