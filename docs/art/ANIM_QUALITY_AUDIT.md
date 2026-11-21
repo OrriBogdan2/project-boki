@@ -137,6 +137,9 @@ body (not in the air, a crouch, or a move that owns the body):
   frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
   strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
   Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
+  Motley (both) too: he floats, so his dangling legs' spread is no beat for his body, and the pull (up to 4 cm)
+  swamped his 2.3 cm clip bob and put its lows out of step with his loop (measured on ext/anim-footstep-contacts: his hips' lows 34-107
+  frames off a loop-timed cue walking forward and back and running; 0-1 frames with the pull off).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
