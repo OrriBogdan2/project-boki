@@ -42,6 +42,23 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Hands (2026-11-21, ext/hand-flatten-fix): why fingers flattened and what protects them
+`python3 tools/art1/glb_regions.py <glb>...` reports per-region triangles (head, hand per side, forearm, weapon bones ...)
+and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 13 Hunters a hand held 0.0-11% (most
+0.4-3%) while the head held 27-58%: a uniform collapse spends the budget on the big smooth areas.
+1. **Rig** (`meshy_task.py rig OUT TASK [--no-fingers]`): sends `include_fingers`. The game skeleton stays `hand.*`
+   plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
+   Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
+   only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
+2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 6% of `tris` per hand; `bake_warden.make_low` holds the head and both
+   hand spheres (`v95_swap.hand_balls`: r = 8.5% of the height, round the wrist-to-elbow line) while the body collapses,
+   then takes each sphere to its budget alone, seam weights kept. A hand with fewer triangles than its budget keeps them.
+   `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
+3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
+   adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
+   hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
+4. **Weapons**: see the result line in the PR for what the swap does with held weapons.
+
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
 were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs

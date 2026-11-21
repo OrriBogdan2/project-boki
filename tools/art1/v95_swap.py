@@ -49,6 +49,8 @@ CAP_SIDES = 2000             # the longest opening a detach caps (edges round it
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
+HAND_R = 0.085  # a hand's ball radius, x the Warden's height (the fingers and the cuff)
+HAND_REACH = 0.05  # the ball's centre past the wrist along the forearm, x the height
 
 
 def verts(ob):
@@ -201,6 +203,21 @@ def own_images(low, tex):
         m["img"] = m["img"] or next(iter(done.values()))
 
 
+def hand_balls(sole):
+    """The spheres (the master's frame) round each hand, for the hand triangle budget (`hand_tris`): from the spec's
+    elbow and wrist joints, centred a hand's half length past the wrist along the forearm, r = HAND_R of the height."""
+    j = SPEC.get("joints", {})
+    height = j["crown"][2] if "crown" in j else 0.0
+    out = []
+    for s in ("L", "R"):
+        if "wrist." + s not in j or "elbow." + s not in j or height <= 0:
+            continue
+        w, e = np.array(j["wrist." + s], float), np.array(j["elbow." + s], float)
+        c = w + (w - e) / max(np.linalg.norm(w - e), 1e-6) * HAND_REACH * height
+        out.append({"centre": [-c[0], -c[1], c[2] + sole], "r": HAND_R * height})
+    return out
+
+
 def bake_own(high, game):
     """Step 1 with `keep_uv`: WORK/bake.blend with Low (the master decimated, its own UVs, materials and images) and Kept
     (the old parts on their old materials and atlas)."""
@@ -221,7 +238,8 @@ def bake_own(high, game):
     if hd:
         x, y, z = hd["centre"]
         hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
-    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True,
+                      hand_balls(sole), int(SPEC.get("hand_tris", 0)))
     low.data.uv_layers[0].name = "UVMap"
     own_images(low, int(SPEC.get("tex", 4096)))
     arm, old = import_game(game)
