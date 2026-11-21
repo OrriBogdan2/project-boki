@@ -21,6 +21,6 @@ existing WardenGait (stride, cadence, the loco `arm_swing` arms out). The swim i
 procedural rig (every warden_anim file lists `swim` as procedural), the model sunk `HomeWater.SINK_DEEP`.
 
 ## Consequences
-HunterNet appends `["hz", move]` to its tail; Net.VERSION 0.24.18. hunter.gd: one call in `_anim_state` and the sink
+HunterNet appends `["hz", move]` to its tail; Net.VERSION 0.24.20. hunter.gd: one call in `_anim_state` and the sink
 term on the model height. Checks: `--terrain-hazard-check`, `--clip-check`, `--remote-anim-check` rows. No save
 change. Monsters and Boki unchanged. Not ported: the shallow-water wade pose and the farm pond's feed.

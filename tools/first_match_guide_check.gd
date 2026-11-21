@@ -92,9 +92,17 @@ func _walk(hunter: String) -> void:
 	ok(g.line == "", "sent: it clears")
 	_tick(1.6)
 	ok(g.id == "chest" and g.line.contains("chest"), "a chest to open: loot it (%s)" % g.line)
+	var hd := Vector2(1920, 1080)
+	ok(g.bottom(hd) > TutorialStrip.rect(hd).position.y, "the message column starts under the line's strip")
 	p.add_stat("chests")
 	_tick(0.2)
 	ok(g.line == "", "opened: it clears")
+	ok(g.bottom(hd) == 0.0, "with no line up the message column keeps its place")
+	var fnt := ThemeDB.fallback_font
+	var long_line := "The Sealed Lair is open: Stormcrown Eyrie, first squad to finish it leaves"
+	var cut := TextCache.fit(fnt, long_line, 13, 300.0)
+	var fits := TextCache.width(fnt, cut, 13) <= 300.0 and cut.ends_with("…")
+	ok(fits and TextCache.fit(fnt, "short", 13, 300.0) == "short", "a long feed line is cut at a word (%s)" % cut)
 	var foe: Hunter = null
 	for h in m.hunters:
 		if h != p and h.team != p.team:
@@ -108,7 +116,10 @@ func _walk(hunter: String) -> void:
 	_tick(12.0)
 	ok(g.id == "" or g.id == "exit", "it clears after its time")
 	_tick(1.6)
-	ok(g.id == "exit" and g.line.contains("exit"), "then: go to an exit (%s)" % g.line)
+	var way := ExtractGoal.pick(m, HudReveal.newcomer(m))
+	var named: bool = g.line.contains(WaysOutMap.WORDS[way]) if way >= 0 else g.line.contains("exit")
+	var exit_ok: bool = g.id == "exit" and named and not g.line.contains("%")
+	ok(exit_ok, "then: head for the way out the goal line names (%s)" % g.line)
 	var spots: Array = m.exits.spots()
 	p.pos = spots[0]
 	_tick(0.2)
