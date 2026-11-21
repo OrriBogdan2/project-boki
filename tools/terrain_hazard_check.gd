@@ -8,7 +8,8 @@ extends RefCounted
 ##   ice         low grip, a push slides far             / frost: full grip, it stops short
 ##   static      the next shock hurts and stuns          / storm: no damage, no stun
 ##   bramble     slowed and scratched                    / bloom: neither
-## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
+## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), the guard ring on its
+## edge (on only for a counter), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
 ## colours from the rules, and paints without error round and square; the full map's key (MapKey) lists
@@ -188,6 +189,9 @@ func _hint(kind: String, safe: bool) -> void:
 	var filled := txt != "" and not "%" in txt
 	var label := "%s %s: the Boki says %s, a grown line, hazard named" % [kind, _who(safe), want]
 	ok(label, said.get("cat", "") == want and filled, txt)
+	var mat: ShaderMaterial = tz.areas[ai]["mat"]
+	ok("%s %s: the guard ring is %s" % [kind, _who(safe), "on" if safe else "off"],
+		is_equal_approx(float(mat.get_shader_parameter("guard")), 1.0 if safe else 0.0))
 
 # ------------------------------------------------------------------ bots
 ## A bot whose Boki can't handle lava walks round the field; one whose Boki can walks straight over it.
