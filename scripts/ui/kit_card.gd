@@ -360,6 +360,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		b.add_theme_stylebox_override("hover", lit_box)
 		b.add_theme_stylebox_override("pressed", lit_box)
 		b.pressed.connect(open_cb)
+		UI.sfx(b)
 		b.set_meta("slot", s)
 		var bv := VBoxContainer.new()
 		bv.alignment = BoxContainer.ALIGNMENT_CENTER
