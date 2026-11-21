@@ -191,7 +191,7 @@ The ranked follow-ups below still hold.
 **Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
 1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
 2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
-3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen).
+3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen). **Done in ext/ui-glider-perk-hold:** the strip (`GearPanel`'s four slots, `HudReveal` "gear") and the perk row (`HudReveal` "perks") were already not drawn without an item; `HudGroups.on_screen` still counted the strip on every frame and the perk row without the reveal rule. It now counts the strip only when `HudGroups.gear_shown` (reveal open and a slot holds gear) and the perk row only when `HudReveal.on(m, "perks")`: a fresh save's moments drop one group each (landing 9 to 8, fight 11 to 10, Heart 12 to 11, race 12 to 11; `--hud-groups-check` section 5). No new rule: HudReveal's table decides.
 4. **Q/V/X slots and the belt:** draw only the slots that hold something or are unlocked (saves 2).
 5. **Plan your drop:** fold the "This match" legend behind a key (7 to 5).
 6. **One prompt:** while a tip card shows, hold the second bar prompt ("Hold F ...") and the perk line.
@@ -247,6 +247,7 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 | Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
 
 All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
+Update (ext/ui-glider-perk-hold): the "nine" are now eight on a fresh save, the gear / glider strip is counted only once drawn: pins are 8 / 10 / 11 / 11 (the 10 above had the kit card).
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
