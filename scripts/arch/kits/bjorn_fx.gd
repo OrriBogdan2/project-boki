@@ -309,7 +309,7 @@ func _place_glint() -> void:
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
-func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
+func aegis_show(w: Dictionary, hurt: float) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd):
 		nd.visible = false
@@ -324,8 +324,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", plate_col.lerp(BROKEN_COL, hurt * 0.65))
 	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", edge_col.lerp(BROKEN_COL, hurt * 0.65))
-	var pulse := 0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
-	var glow := PLATE_GLOW * (1.0 - hurt) + aegis_hit * 1.2 + pulse
+	var glow := PLATE_GLOW * (1.0 - hurt) + aegis_hit * 1.2
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
 
 func aegis_hide() -> void:
