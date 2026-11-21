@@ -63,7 +63,9 @@ func _shots(main: Node) -> void:
 	if main.fade != null:
 		main.fade.reveal(0.01)
 	var ld: Node = load(LOADING).new()
-	ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3})
+	var opts := {"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3}
+	Prematch.deal_mates(opts)
+	ld.setup(opts)
 	main.add_child(ld)
 	ld.want = 0.6
 	ld.set_stage("graphics")
