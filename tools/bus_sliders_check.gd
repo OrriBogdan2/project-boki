@@ -21,15 +21,15 @@ func ok(what: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	var keep := ConfigFile.new()
-	var had := keep.load(Settings.PATH) == OK
+	var had := keep.load(Settings.path) == OK
 	_buses()
 	await _sliders()
 	_save_load()
 	_old_file()
 	if had:
-		keep.save(Settings.PATH)
+		keep.save(Settings.path)
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 	Settings.load_file()
 	print("BUSSLIDERS DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -123,7 +123,7 @@ func _old_file() -> void:
 	var cf := ConfigFile.new()
 	for pair in [["master", 0.6], ["music", 0.5], ["sfx", 0.4], ["ambience", 0.3], ["keys_v", Settings.KEYS_V]]:
 		cf.set_value("s", pair[0], pair[1])
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	Settings.load_file()
 	var got := [Settings.get_v("master"), Settings.get_v("music"), Settings.get_v("ambience")]
 	var want := [sqrt(0.6), sqrt(0.5), sqrt(0.3)]  # audio_v 2 moves a linear level to the slider that sounds the same

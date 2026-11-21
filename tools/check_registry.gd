@@ -993,8 +993,26 @@ const COVERED := {
 ## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
 ## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = CHECKS[flag]
+	seed(hash(flag))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
+			return flag
+	return ""
 			var e: Array = CHECKS[flag]
 			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
 			seed(hash(flag))

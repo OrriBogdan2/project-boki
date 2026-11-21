@@ -48,7 +48,7 @@ func run(main: Node) -> void:
 
 # ------------------------------------------------------------------ 1. the settings file
 func _loaded(main: Node, cf: ConfigFile) -> String:
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
 	for i in 2:
@@ -60,7 +60,7 @@ func _loaded(main: Node, cf: ConfigFile) -> String:
 
 func _settings_file(main: Node) -> void:
 	var keep := ConfigFile.new()
-	var had := keep.load(Settings.PATH) == OK
+	var had := keep.load(Settings.path) == OK
 	var old := ConfigFile.new()
 	old.set_value("s", "music", 0.42)
 	old.set_value("s", "reduce_flashes", true)
@@ -76,9 +76,9 @@ func _settings_file(main: Node) -> void:
 		got = await _loaded(main, pick)
 		ok("the '%s' pick is kept" % id, got == id)
 	if had:
-		keep.save(Settings.PATH)
+		keep.save(Settings.path)
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 
 # ------------------------------------------------------------------ 2. the palettes
 static func simulate(c: Color, mode: String) -> Color:
