@@ -255,6 +255,7 @@ const CHECKS := {
 	"--window-mode-check": ["res://tools/window_mode_check.gd", "window_mode_check", null],  # fullscreen start, F11
 	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # trimmed settings
 	"--ui-scale-check": ["res://tools/ui_scale_check.gd", "ui_scale_check", null],      # Interface size slider
+	"--menu-fit-check": ["res://tools/menu_fit_check.gd", "menu_fit_check", null],  # Esc pages and Settings tabs fit
 	# sounds behind terrain
 	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],
 	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],
@@ -301,6 +302,8 @@ const CHECKS := {
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],      # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],      # 0051 results
+	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
+	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],      # kill XP tick, steal stings
 	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],  # camp time-to-fall table
@@ -662,6 +665,7 @@ const CHECKS := {
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
 	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],  # combat HUD budget
+	"--kill-feed-shots": ["res://tools/kill_feed_shots.gd", "kill_feed_shots", null],      # GPU, --size= --shots-dir=
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
 	"--grimble-line-shots": ["res://tools/grimble_line_shots.gd", "grimble_line_shots", null],
@@ -834,6 +838,7 @@ const CHECKS := {
 	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],  # --shots-dir=<dir>
 	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],  # down/death card
 	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],      # the Boki box tags, bond %
+	"--wisp-read-shots": ["res://tools/wisp_read_shots.gd", "wisp_read_shots", null],  # --shots-dir=<dir>
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
