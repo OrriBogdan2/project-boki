@@ -140,7 +140,7 @@ defaults aren't cited, since the data names no field for these windows.
 | swoop_x / swoop_fade_s / swoop_left / swoop_hot_x (short dive, let go) | none | 2.5x / 1.5 s / 0 / 1.25x | 2.4–2.6 / 1.45–1.55 / <= 0.05 / 1.2–1.3 | [game data] SwoopSpeedTransferRatio, SwoopSpeedFadeTime; half strength overheated (decision 0095) |
 | airdash_fall_vy_keep / airdash_fall_speed (class air dash out of a 10 m fall, 12 m/s) | n/a | 0.00x / 23.0 m/s | 0–1 / reference | [?] AirDashSpeedMultiplier / AirDashSpeedClamp not decoded, not filmed (sv/FEEL.md) |
 | airdash_dive_vy_keep / _hv_keep / _speed (out of a glide dive, 32.5 m/s down) | n/a | 0.00x / 0.00x / 23.0 m/s | 0–1 / 0–1 / reference | [?] the same: ours drops the fall and the forward speed |
-| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
+| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / ~0.2 / 0.99 | <= 0.02 / >= 0.1 / >= 0.95 | owner 11-17: graded, nothing until content/rules/abyss_danger.json start_depth, full at the kill depth (--abyss-danger-check) |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
 | drop_dive_steer_t (90% of commanded) | 0.783s | 0.4s | <= 0.42s | the dive steers with every jump's air control (Loco.air_step, owner 11-08 one model; was 0.233s on its own 45 m/s² ramp) |
@@ -622,7 +622,7 @@ the reference's air control is the one model in a match: the keys add accelerati
 | `juggernaut_drop` start, hang, dive, impact | zero, held, then plunged | Meteor Drop owns the body | Kael Air RMB: cursor disc |
 | `pin_ult._loose` | `vel -= aim * 2.5` | recoil, additive | Hem R: 3 empowered shots |
 | `pin_spirit.end` | zero after the snap back | teleport to the walk's entry | Hem Dash: Phase Walk |
-| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 6.8 m/.28 s |
+| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 3.4 m/.28 s (owner 11-17, was 6.8 m) |
 | `ashwick_kit._bash_impact` | bounce back off the foe | recoil, contact stop | Cinder Dash: stops on first foe |
 | `ashwick_jet._leap` | flight speed x `Loco.dash_jump_keep` | flight exit into a jump | Cinder R: fly forward |
 | `ashwick_jet._land` | speed x0.3 | grounded (not air) | Cinder R |
@@ -1391,6 +1391,18 @@ Every failing row, with the drift `--feel-golden-check` printed on main before t
 
 The Drills button on the Training Area's bar (`scripts/match/move_drills.gd`) runs five timed drills, one banner line each, pass or fail: dash through three hoops; tap jump, let go, press jump again and hold it to glide 4 m; glide and dive onto a mat; wall kick up a four-terrace wall; mantle a two-terrace ledge. The best pass time per drill is kept in `Save.d["drills"]` (save v15). Pressing the button again skips to the next drill. `--move-drills-check` passes each drill with a bot input script and fails the wrong plays.
 
+## Ledge heights after Hollow Crown 2.0 (`--cliff-mantle-check` height rows, tools/mantle_heights.gd; DECISIONS: ledges always responsive)
+Census of every ledge face on both tiers. Terrace steps: 0.8 m (884), 1.6 m (1020), 2.4 m (4), 3.2 m (3772, the wall tier), 4.0-7.2 m cliffs (1606).
+Stair-flight sides: 0.4-6.8 m (466). Sheer lips: 1.6 and 3.2 m (22, not grabbable by design). Ruin walls and boulders: 3.0 m blocks (5012, walls, never climbed).
+Meeko (tender), Vex (gunslinger) and Albert (bulwark) were driven into up to 6 faces per height from a running jump, a standing jump and a glide (2.5 m out).
+Results on origin/main a1b35c78ee, unchanged by this pass:
+| Height | Run | Jump | Glide |
+|---|---|---|---|
+| 0.4-2.8 m (steps and stair sides) | 228/228 | 228/228 | 228/228 |
+| 3.2-7.2 m | 0/240 | 0/240 | 240/240 |
+- No height inside the reach window (jump apex 1.57 m + `MANTLE_REACH` 1.5 m = 3.07 m) misses. No mantle snaps: no step in the rise moves more than 0.2 m past what its speed explains. So the reach window stays as it is.
+- The 3.2 m wall tier sits 0.13 m above the window, so jumps never top it (decision 0007). Glides top every height.
+- The only red was in the check itself: `face 4 jump_30` topped 10/160 3.2 m faces. The run slid 3 tiles along the face, caught a 2.4 m stretch and walked up a flight. A top now counts only over the face's own straight stretch (`_on_face`).
 ## Run turn: the stick flipped 180 degrees at full run (`--move-feel-check` `run_turn_*`, `--anim-audit` TURNS)
 
 The source data settles it (no footage of a ground reversal exists in the reports): with keys held at or under the run, UE's walking step turns the velocity toward the keys with GroundFriction (1/s, 1.0) and adds MaxAcceleration (47-54 m/s²). The walking brake (22.2 m/s² plus friction x2) acts only with no keys or over the run, so it plays no part in a held flip. Ours (`Loco.accel_to`) has no turn friction and lands within one 60 Hz step of that rule for every kit, so no number in `content/rules/hunter_move.json` changed. The body faces the cursor, never the stick: with the cursor held ahead it does not turn (the legs backpedal); with the cursor flipped too it turns at `turn_rate` 1280 deg/s.
@@ -1407,4 +1419,20 @@ The source data settles it (no footage of a ground reversal exists in the report
 
 Asserted per kit (`tools/move_feel_turn.gd`): zero and 95%-back within 1 step of the source rule, the same with the cursor flipped, the body 180 within 9 steps, no body turn with the cursor held. `run_turn_err_frames` <= 1, `run_turn_full_t` <= 0.22 s, `run_turn_face_t` 0.12-0.17 s.
 
-Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip): with the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The steady run before and after reads 10-22% for most Hunters (the calibration), but the turn itself slides 52-119% (held) and 35-128% (flipped): the loco blend (ease 12/s) trails a reversal that takes 0.1 s to zero. No Hunter is under `MAX_SLIDE` 25% yet, so the audit prints OPEN lines and only fails past `TURN_CEIL` 140% (today's worst, archer 119-128%, plus a margin). Backlog: "run turn slide".
+Feet (`tools/anim_audit_turn.gd`, mean of 8 flips through the stride, the slide of a planted foot as a share of the run over the 0.4 s after the flip; the model is fed the world velocity and its real facing, so a Hunter that twists its legs under the aim holds them as in game, and a foot counts as planted in the low 30% of its height over the steady run before the flip). With the cursor held the blend leaves the run ring through the idle into the backward run (run_b); with the cursor flipped it stays on the forward run. The loco blend (ease 12/s, 5/s as the speed falls) trails a reversal that takes 0.1 s to zero, and on its way through the idle it drags the planted foot. The fix locks the feet instead of chasing the blend (`WardenStride._turn`, no `hunter_move.json` number changed): a speed falling faster than 1.2x the walking brake (`HunterMove.brake_rate`) is the keys pushing against the run, and from there until the blend is within 0.2 of its goal (at most 0.45 s) every foot the loop puts down is held on the ground (its spot carried back along the body's velocity and round against its turn) until the loop lifts it 0.15 m (any lift once the blend has caught up), and the legs drop the twist-hold while it lasts. Before (main 2026-11-20, same audit) and after, held / flipped:
+
+| Hunter | Steady run | Held before | Held after | Flipped before | Flipped after |
+|---|---|---|---|---|---|
+| archer | 98% | 121% | 104% | 128% | 117% |
+| juggernaut | 18% | 83% | 35% | 48% | 30% |
+| gunslinger | 12% | 67% | 40% | 78% | 50% |
+| bulwark | 53% | 79% | 88% | 116% | 101% |
+| rimewright | 67% | 86% | 20% | 79% | 55% |
+| ashwick | 16% | 52% | 29% | 50% | 23% |
+| dolm | 52% | 97% | 61% | 82% | 61% |
+| mage | 25% | 92% | 57% | 69% | 29% |
+| dredge | 15% | 84% | 58% | 68% | 40% |
+| tender | 37% | 67% | 58% | 59% | 26% |
+| thief | 23% | 83% | 65% | 64% | 37% |
+
+Every Hunter but bulwark's held flip (79 to 88%) slides less; the steady run is unchanged (it bounds what any lock can do: archer's own run slides 98%). In game (`--gameplay-media --media-clip=15 --media-loco=turn --media-log`, world feet at 30 fps) gunslinger's flip went 72 to 50% (held) and 84 to 59% (flipped). No Hunter is under `MAX_SLIDE` 25% on both yet, so the audit prints OPEN lines and fails past `TURN_CEIL` 125% (today's worst, archer flipped 117%, plus a margin). Backlog: "run turn slide" (the loops' own run and backpedal slide; bulwark's held flip).

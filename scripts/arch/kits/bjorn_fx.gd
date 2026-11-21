@@ -1,30 +1,18 @@
 class_name BjornFx
 extends Node3D
-## Breaker's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
-## (KitShaders): an alpha-blended body in his gold, orange and red with the glow on top, so they keep their
-## colour on bright grass.
-## - the thrown hammer (tumbling; trail, plant and catch: content/vfx/bulwark.json), planted head-down in the
-##   ground under an upright gold beacon with rising chevrons
+## Breaker's pooled meshes that follow his hammer and shield (built once when the kit starts). Every other look of
+## his is HeroVfx data (content/vfx/bulwark.json): the throw's trail, plant and catch, the planted hammer's beacon,
+## the dash wake, the swing and Slam crescents, the 360 Smash ring, the Mending Ground column, zone and burst, the
+## aegis rise and block, Faultline.
+## - the thrown hammer (tumbling) on its rope, planted head-down in the ground
 ## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a trail in
-##   his ivory (Arch.color) behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while
-##   the perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the
-##   release
-## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
-##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
+##   his ivory (Arch.color) behind its head, a glint in his colour on the head from 0.6 s that grows, burning
+##   white-hot while the perfect window is open. It never stops until he lets go: the charge motion only, the damage
+##   comes on the release
 ## - his aegis: a wall of lit plates (two rows, ribbed, a rim and a hammer boss in his ivory) leaning out
-##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
-##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
-##   hidden)
-## - Purify: the green light column coming down over the 1 s delay, then the rings
+##   toward the camera, rising out of the ground, flashing on a block, darkening as it weakens and breaking
+##   (the verbs wall underneath keeps the blocking; its plain slab is hidden)
 
-const GOLD := Color("ffc94a")
-const EMBER := Color("ff8a2a")
-const GREEN := Color("7dffb0")
-## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
-## many are pooled and how often one is left (s)
-const WAKE_T := 0.28
-const WAKE_POOL := 6
-const WAKE_EVERY := 0.06
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 var taut := false              # the rope is hauling the hammer home: drawn straight, no sag
@@ -58,8 +46,6 @@ const AEGIS_LEAN := 1.2
 const PLATE_N := 7
 ## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
 ## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
-const PLATE_COL := Color("f6e3a8")
-const PLATE_EDGE := Color("fff0b0")
 const PLATE_GLOW := 0.3        # the plates' own light (a block flashes over it)
 const EDGE_GLOW := 0.9
 const BROKEN_COL := Color("4a3a30")
@@ -68,23 +54,14 @@ const RISE_T := 0.2
 
 var h: Hunter
 var hammer: Node3D            # the thrown hammer
-var beacon: MeshInstance3D
 var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
-var plate_col := PLATE_COL
-var edge_col := PLATE_EDGE
+var plate_col: Color
+var edge_col: Color
 var aegis_hit := 0.0
 var rise_t := 0.0
-var wakes: Array[MeshInstance3D] = []
-var wake_life: Array[float] = []
-var wake_next := 0
-var wake_at := -1.0
-var column: MeshInstance3D
-var disc: MeshInstance3D
-var disc_t := 0.0
-var disc_r := 1.0
 var held := false              # the swing is being held: the hammer is whirling
 var spin := 0.0                # the whirled hammer's angle (rad), from the kit (it counts the turns on match time)
 var spin_k := 0.0              # 0..1 how far the turn rate is up (the charge)
@@ -110,24 +87,15 @@ func _ready() -> void:
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
-	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", AimKit.hero_col(h), true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Arch.color(h.arch), true))
 	_build_aegis()
-	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
-	for i in WAKE_POOL:
-		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
-		KitShaders.param(wake, "color2", GOLD)
-		KitShaders.param(wake, "twist", 0.0)
-		wakes.append(wake)
-		wake_life.append(0.0)
-	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
-	column.material_override.set_shader_parameter("speed", -1.2)
-	# the zone: a lit rim on its edge, a soft falloff inside (the ground ring rule, VFX_QUALITY)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.0, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
-	KitShaders.param(disc, "edge", 1.0)
+
+## A colour of his palette (content/vfx/bulwark.json).
+func _pal(key: String) -> Color:
+	return Color(String((HeroVfx.data(h.arch).get("palette", {}) as Dictionary).get(key, key)))
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -190,9 +158,8 @@ func _build_aegis() -> void:
 	aegis.top_level = true
 	aegis.visible = false
 	add_child(aegis)
-	var pal: Dictionary = HeroVfx.data("bulwark").get("palette", {})
-	plate_col = Color(String(pal.get("slab", PLATE_COL.to_html(false))))
-	edge_col = Color(String(pal.get("ivory", PLATE_EDGE.to_html(false))))
+	plate_col = _pal("slab")
+	edge_col = _pal("ivory")
 	var plate := Models.toon(plate_col, false, PLATE_GLOW)
 	var edge := Models.toon(edge_col, false, EDGE_GLOW)
 	plate.set_shader_parameter("rim_amount", 0.6)
@@ -232,9 +199,8 @@ func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
 	hammer.global_position = p
 	hammer.rotation = Vector3(Time.get_ticks_msec() * 0.001 * spin_rate, atan2(-dir.x, -dir.y), 0.0)
 	hammer.scale = Vector3.ONE
-	beacon.visible = false
 
-## Planted: standing head-down in the ground, leaning back along its flight, the beacon over it.
+## Planted: standing head-down in the ground, leaning back along its flight (its beacon: the kit's "plant_beacon" hold).
 func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.visible = true
 	var plant_k := h.model.scale.x if own_piece else PLANT_SCALE
@@ -243,12 +209,9 @@ func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
 	var head_drop := (own_reach if own_piece else 0.62) * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
-	beacon.visible = true
-	beacon.global_position = p
 
 func hammer_hide() -> void:
 	hammer.visible = false
-	beacon.visible = false
 
 # ------------------------------------------------------------------ the held swing
 ## While LMB is held (k = the charge 0..1): the hammer whirls round him at the kit's angle `turn` (rad); the glint
@@ -329,11 +292,11 @@ func _whirl(pv: Node3D, delta: float) -> void:
 	var head := _head_world() - centre
 	orbit_trail.scale = Vector3.ONE * Vector2(head.x, head.z).length() * ORBIT_PAST / ORBIT_OUT
 	KitShaders.param(orbit_trail, "power", ORBIT_POWER * lerpf(1.0, ORBIT_FAST, spin_k) * whirl_k)
-	_place_glint(pv)
+	_place_glint()
 
 ## The glint on the hammer head: it grows with the charge, and in the perfect window it burns bigger,
 ## whiter and pulses fast.
-func _place_glint(pv: Node3D) -> void:
+func _place_glint() -> void:
 	if not glint.visible:
 		return
 	glint.global_position = _head_world()
@@ -341,21 +304,6 @@ func _place_glint(pv: Node3D) -> void:
 	glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse * (1.35 if hot else 1.0)
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
-
-## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
-## WAKE_EVERY s).
-func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
-	var now := float(h.m.time)
-	if now - wake_at < WAKE_EVERY and now >= wake_at:
-		return
-	wake_at = now
-	var wake := wakes[wake_next]
-	wake_life[wake_next] = WAKE_T
-	wake_next = (wake_next + 1) % WAKE_POOL
-	wake.visible = true
-	wake.global_position = at + Vector3(0, 1.0 * body_scale, 0)
-	wake.rotation = Vector3(0, yaw, 0)
-	wake.scale = Vector3.ONE * body_scale
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
@@ -385,16 +333,14 @@ func aegis_hide() -> void:
 func aegis_rise(at: Vector3) -> void:
 	rise_t = RISE_T
 	aegis.scale = Vector3(1.0, 0.05, 1.0)
-	h.m.fx.dust(at, 14)
-	h.m.fx.burst(at + Vector3(0, 0.2, 0), PLATE_EDGE, 8, 3.0, 0.5, 8.0, 1.6, Vector3.UP, 40.0)
+	HeroVfx.of(h.m).play(h, "aegis_up", at, Vector2.ZERO)
 
-## A block: the whole wall flashes and gold sparks fly off its face at `at`.
+## A block: the whole wall flashes and ivory sparks fly off its face at `at` ("block").
 func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
-	h.m.fx.spark(at, out, AimKit.hero_col(h), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
-	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
+	HeroVfx.of(h.m).play(h, "block", at, Vector2(out.x, out.z).normalized())
 
 ## Broken: the shared shield break (ShieldBreak) across the wall, like every other shield.
 func aegis_break(at: Vector3) -> void:
@@ -402,37 +348,6 @@ func aegis_break(at: Vector3) -> void:
 	AimKit.hide(h, "aegis_push")
 	var half := Vector2(AEGIS_R * sin(AEGIS_HALF), AEGIS_H * 0.5)
 	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
-
-# ------------------------------------------------------------------ Purify
-## The column coming down over the delay (u 0 -> 1), then the disc's rings.
-func purify(at: Vector3, r: float, u: float) -> void:
-	if u <= 0.0:
-		var own := AimKit.hero_col(h)
-		KitShaders.param(column, "color", own)
-		KitShaders.param(disc, "color", own)
-		KitShaders.param(disc, "color2", own.lightened(0.5))
-	column.visible = u < 1.0
-	if column.visible:
-		var g := AimMode.ground(h.m, at)
-		column.global_position = g + Vector3(0, lerpf(9.0, 0.0, minf(1.0, u * 1.6)), 0)
-		column.scale = Vector3(r / 1.4, 1.0, r / 1.4) * lerpf(0.5, 1.0, u)
-		column.material_override.set_shader_parameter("power", 0.4 + 0.6 * u)
-
-## The zone standing (called every step while it lasts): the disc stays lit at a steady glow.
-func purify_hold(at: Vector3, r: float) -> void:
-	column.visible = false
-	disc.visible = true
-	disc.global_position = AimMode.ground(h.m, at) + Vector3(0, 0.07, 0)
-	disc_r = r
-	disc_t = 0.45
-
-func purify_burst(at: Vector3, r: float) -> void:
-	column.visible = false
-	disc.visible = true
-	disc.global_position = AimMode.ground(h.m, at) + Vector3(0, 0.07, 0)
-	disc_r = r
-	disc.scale = Vector3.ONE * r * 0.4
-	disc_t = 0.9
 
 func _process(_delta: float) -> void:
 	if not is_instance_valid(h) or h.m == null:
@@ -449,25 +364,6 @@ func _process(_delta: float) -> void:
 		rise_t = maxf(0.0, rise_t - delta)
 		var u := 1.0 - rise_t / RISE_T
 		aegis.scale = Vector3(1.0, lerpf(0.05, 1.0, 1.0 - pow(1.0 - u, 3.0)), 1.0)
-	if disc_t > 0.0:
-		disc_t -= delta
-		var u2 := 1.0 - disc_t / 0.9
-		disc.scale = Vector3.ONE * disc_r * lerpf(0.4, 1.0, sqrt(u2))
-		disc.material_override.set_shader_parameter("life", 1.0 - u2)
-		disc.visible = disc_t > 0.0
-	if beacon.visible:
-		_stand_beacon()
-	_tick_wakes(delta)
-
-func _tick_wakes(delta: float) -> void:
-	for i in WAKE_POOL:
-		if wake_life[i] <= 0.0:
-			continue
-		wake_life[i] -= delta
-		var life := clampf(wake_life[i] / WAKE_T, 0.0, 1.0)
-		KitShaders.param(wakes[i], "life", life)
-		wakes[i].scale = Vector3.ONE * wakes[i].scale.x * (1.0 + delta * 1.5)
-		wakes[i].visible = wake_life[i] > 0.0
 
 func _tick_hold(delta: float) -> void:
 	var pv := _pivot()
@@ -477,11 +373,3 @@ func _tick_hold(delta: float) -> void:
 		_whirl(pv, delta)
 	elif pv.transform != Transform3D.IDENTITY:
 		pv.transform = Transform3D.IDENTITY
-
-## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and
-## pulses.
-func _stand_beacon() -> void:
-	var cam := get_viewport().get_camera_3d()
-	if cam:
-		beacon.global_basis = Basis(Quaternion(Vector3.UP, cam.global_basis.y))
-	KitShaders.param(beacon, "power", 0.75 + 0.25 * sin(Time.get_ticks_msec() * 0.006))
