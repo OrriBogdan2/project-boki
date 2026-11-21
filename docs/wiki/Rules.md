@@ -2392,8 +2392,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | mob | {"scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | labels | {"land": "Land here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "wallkick": "Climb", "crouch": "Lookout", "glove": "Glove", "wayout": "Uplink", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
 | camps | {"shoot": {"foes": ["skitter", "skitter"], "to": 0}, "sec": {"foes": ["skitter", "skitter"], "to": 2}, "gkey": {"foes": ["skitter", "skitter"], "to": 3, "held": true}, "summon": {"foes": ["spitter"], "to": 0}, "pack": {"foes": ["skitter", "spitter"], "to": 3}, "kin": {"foes": ["skitter", "skitter", "skitter"], "to": 4, "row": true, "hp": 1.0}, "hook": {"foes": ["sentinel", "skitter"], "to": 6, "far": true}} |
-| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you. |
-| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0} |
+| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you, and one that stood stalled for stall_s s trying to lead (an edge or a wall on the straight way) falls in beside you for off_s s, then leads again. |
+| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0, "stall_s": 0.3, "off_s": 2.0} |
 
 ## unstable_mix (`content/rules/unstable_mix.json`)
 
