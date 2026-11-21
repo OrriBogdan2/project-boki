@@ -172,8 +172,8 @@ func _ground_compare(P: Hunter) -> void:
 	P.gear[slot] = {}
 	var at := {"kind": "weapon", "wp": {"gear": "windstep_boots", "rar": 3}}
 	ok(GroundCompare.lines(P, at).is_empty(), "ground gear for an empty slot: no compare card")
-	var coin := {"kind": "weapon", "wp": {"item": Loot.valuable("old_coin"), "val": 1}}
-	ok(GroundCompare.lines(P, coin).is_empty(), "a ground valuable: no compare card")
+	ok(GroundCompare.lines(P, {"kind": "weapon", "wp": {"item": Loot.valuable("old_coin"), "val": 1}}).is_empty(),
+		"a ground valuable: no compare card")
 	P.gear[slot] = {"id": "windstep_boots", "rar": 0}
 	var ls := GroundCompare.lines(P, at)
 	var head := String(ls[0][0]) if ls.size() > 0 else ""

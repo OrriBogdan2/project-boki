@@ -13,6 +13,16 @@ const CANONICAL_ORDER := [
 	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
 	"mage", "dredge", "tender", "thief", "ostra", "gil",
 ]
+## Canon titles, stored without "the" (newest owner lines in briefs/DECISIONS.md: 11-07 evening "Snowglide",
+## 11-08 "Ashen Kiss"). A change of title is a new owner line plus one edit here and in content/archetypes/<id>.json.
+const CANON_TITLES := {
+	"gunslinger": "Hired Gun", "juggernaut": "Unbroken", "ashwick": "Ashen Kiss", "tender": "Dawnfox",
+	"dolm": "Stone Seer", "archer": "Red Stitch", "dredge": "Scrap King", "rimewright": "Snowglide",
+	"mage": "Storm Chaser", "bulwark": "Barnacle Knight", "thief": "Silver Thief", "ostra": "Void Jester",
+	"gil": "Novice Mage",
+}
+## A name and its title joined by a dot, bullet, bar, dash or comma instead of "the" ("Neve · Snowglide").
+const DOT_JOIN := "\\s*[·•|,–—-]\\s*"
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
 const HOWTO_MAX := 64        # chars, one how-to line once its key caps are filled in (the pick cards are narrow)
@@ -50,6 +60,14 @@ func run(main: Node) -> void:
 		ok(unnamed == "The %s" % bare and blank == unnamed, "%s: unnamed reads '%s'" % [id, unnamed])
 		var title := String(data["title"])
 		ok(not title.begins_with("The ") and not title.begins_with("the "), "%s stores its title without 'the'" % id)
+		var canon := String(CANON_TITLES.get(id, "?"))
+		ok(title == canon, "%s title '%s' matches the canon list ('%s')" % [id, title, canon])
+		var base := HeroTitle.base_name(id)
+		var joined := RegEx.create_from_string("(?i)(%s%s%s|%s%s%s)" % [base, DOT_JOIN, title, title, DOT_JOIN, base])
+		var joined_in: Array = [label, Arch.label(id), Arch.name_of(id), Arch.name_of(id, true),
+				HunterViewer.display_name(id), _plain_text(data)]
+		var clean := not joined_in.any(func(t): return _bad_join(joined, String(t)))
+		ok(clean, "%s: no 'the The' and no dot join of name and title" % id)
 		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:
@@ -81,6 +99,7 @@ func _lore_check() -> void:
 		var known: bool = RELIC_STATUS.has(relic.get("status", "")) and String(relic.get("name", "")) != ""
 		ok(known, "%s has a relic with a status" % id)
 	var text := JSON.stringify(lore)
+	ok(not text.contains("the The") and not text.contains("The the"), "lore.json: no 'the The'")
 	ok(_old_name_in(text) == "", "lore.json: no old name (%s)" % _old_name_in(text))
 	ok(RegEx.create_from_string(RETIRED_TERMS).search(text) == null, "lore.json: no retired term")
 	var cinder := _plain_text(Arch.def("ashwick")) + JSON.stringify(lore["hunters"]["ashwick"])
@@ -106,6 +125,9 @@ func _howto_check(id: String) -> void:
 	if lines.size() == 3:
 		ok(String(lines[0]).begins_with("Play:") and String(lines[1]).begins_with("Combo:")
 				and String(lines[2]).begins_with("Avoid:"), "%s how-to reads Play, Combo, Avoid" % id)
+
+func _bad_join(joined: RegEx, text: String) -> bool:
+	return joined.search(text) != null or text.contains("the The") or text.contains("The the")
 
 ## The class JSON as text with the base-character fields removed: the rest is shown to players.
 func _plain_text(data: Dictionary) -> String:
