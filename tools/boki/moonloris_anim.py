@@ -2,10 +2,11 @@
 paper lantern for a belly. It moves with deliberate, hand-over-hand patience, the big-eyed head turning to look at
 everything, then strikes in a flash; when it is scared it floats up like a balloon."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, s, seq
+from boki_clips import LOOK_UP, add, c, footfall, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
+RUN_STEPS = 2      # footfalls a run loop (the walk takes one)
 LOOK = LOOK_UP * 0.5
 
 
@@ -13,11 +14,12 @@ def clamber(t, amp):
     """The loris creep: each side reaches and takes hold in turn, the body leaning over the held side and sinking a
     little, the head swinging round to look where the next hold is."""
     w = s(t, 1)
-    p = {"root_at": (0, -0.006 * amp * abs(w), 0)}
+    p = {"root_at": (0, -0.003 * amp * (1 - c(t, 2)), 0)}
     add(p, "root", rz=0.07 * amp * w, rx=0.02 * amp * s(t, 2))
     add(p, "spine", rz=-0.05 * amp * w, ry=0.08 * amp * w)
     add(p, "hips", ry=-0.1 * amp * w)
-    add(p, "head", rx=LOOK + 0.03 * amp * s(t, 2, 0.3), ry=-0.16 * amp * s(t, 1, 0.25))
+    footfall(p, t, 1, 0.12 * amp, 0.03 * amp)
+    add(p, "head", rx=LOOK + 0.03 * amp * s(t, 2, 0.3), ry=-0.16 * amp * s(t, 1, 0.33))
     return p
 
 
@@ -40,6 +42,7 @@ def run(t):
     p = clamber(t, 0.8)
     stride = s(t, 2)
     p["root_at"] = (0, 0.012 * stride, 0)
+    footfall(p, t, RUN_STEPS, 0.14, 0.04, 0.5)
     add(p, "root", rx=-0.12)
     add(p, "spine", rx=-0.1 + 0.06 * stride)
     add(p, "head", rx=-0.05)

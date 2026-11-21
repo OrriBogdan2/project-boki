@@ -2,10 +2,11 @@
 highland cow that carries a walled garden, so the back stays level and the plod is slow and stately; it sweeps its long
 horns sideways, bellows proudly with its chest out and, being stubborn, grazes whenever it likes."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, eat_ground, s, seq
+from boki_clips import LOOK_UP, add, eat_ground, footfall, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
+RUN_STEPS = 2      # footfalls a run loop (the walk takes one)
 GRAZE = -0.32       # the head dropped to the grass (rx)
 
 
@@ -16,6 +17,7 @@ def plod(t, amp):
     add(p, "root", rz=0.025 * amp * w, rx=0.015 * amp * s(t, 2, 0.5))
     add(p, "spine", ry=0.03 * amp * w, rx=-0.02 * amp * s(t, 2))
     add(p, "hips", ry=-0.03 * amp * w)
+    footfall(p, t, 1, 0.12 * amp, 0.03 * amp)
     add(p, "head", rx=LOOK_UP * 0.5 - 0.06 + 0.05 * amp * s(t, 2, 0.5), ry=-0.05 * amp * w)
     return p
 
@@ -40,6 +42,7 @@ def run(t):
     p = plod(t, 0.5)
     rock = s(t, 1)
     p["root_at"] = (0, 0.02 + 0.015 * s(t, 2), 0)
+    footfall(p, t, RUN_STEPS, 0.14, 0.04, 0.5, 0.02)
     add(p, "root", rx=-0.07 * rock)
     add(p, "spine", rx=-0.07 * rock)
     add(p, "hips", rx=0.06 * rock)
