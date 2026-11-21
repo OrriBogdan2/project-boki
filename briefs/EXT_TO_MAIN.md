@@ -10736,3 +10736,4 @@ READY ext/merge-lane-M6-1121 2acfb8d25be5f2d90c7021a7b72bed21b27a1c59 (M6 bundle
 READY ext/garden-tide-water a213479a1f (Tide Boki water the patch)
 READY ext/ui-select-port d9cf0bf58c (hunter select + loading port)
 READY ext/sfx-enemy-priority 70323493464 (rival wind-ups/ult cues duck your held fire -4 dB, same-sound cap 5, --sfx-priority-check brawl measure)
+READY ext/merge-lane-M5-1121 57bc411d89 (lane M5 bundle: 19 tut/ui/grounds/slam/ttk branches; targeted gate NEW-RED 0, export OK)
