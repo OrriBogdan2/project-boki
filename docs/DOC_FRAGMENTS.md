@@ -10,6 +10,14 @@ Each got the form that fits it:
 | `docs/wiki/Rules.md` and the other pages `tools/gen_wiki.py` writes whole | `merge=ours`, then regenerate | Never edit by hand. A clash is two renderings of the same data, so keep ours and run `python3 tools/gen_wiki.py` (CI's `gen_wiki --check` is red until you do). Needs `git config merge.ours.driver true`; without it git falls back to a normal merge. Union would keep both versions of a changed row. |
 | `docs/HUD.md`, `docs/AUDIO.md`, `docs/KIT_PARITY.md`, `docs/MOVEMENT_FEEL.md` | one fragment file per change in `docs/<NAME>.d/` | Prose and tables where a row's meaning depends on its neighbours: union would keep a stale row next to its fix. |
 
+## Merge trains and regate-bot
+
+`ops/merge-rush-1113/merge_batch.sh` is the conflict policy of regate-bot, merge-train and train-batch. It unions
+hand-written `docs/*.md` (DEBT.md included) and keeps ours for `docs/wiki/*` (regenerated after the batch). HUD, AUDIO,
+KIT_PARITY and MOVEMENT_FEEL are unioned only when both sides just added lines; when both changed the same row the merge
+is a real conflict (`ops/merge-rush-1113/merge_batch_test.sh`). Blind union had left four copies of the `hud_plate.gd` row
+in `docs/HUD.md` by 11-21; they stay until the open PRs that edit that row have merged.
+
 ## Fragments
 
 - New section, table or note for HUD, AUDIO, KIT_PARITY or MOVEMENT_FEEL: write it as `docs/<NAME>.d/<MMDD>-<topic>.md`
