@@ -42,12 +42,15 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `"streak": true` a clean tracer (hot head, tail thinning and cooling, no burn-away noise; `tail` s x the round's m/s is its length), `head` m across a bright tip on the newest point (`head_len` times as long: a pointed diamond; drawn in the trail's own mesh), `soft` a feathered glow strewn with twinkling glints and a round twinkling head instead of the hard edge |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
-| `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
+| `string` | holds only: a thin glowing line through named anchors, or through the points the kit's hold passes (`pts`) | `through`, `size`, `skip_if` (a model node that means it brings its own), `xray` (drawn over walls and rock) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor; `"here"`: the move's point `to_y` m up, a bolt out of the sky with `y`), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`); with `"thin": true` only three lit comet arcs on its rim (no fill, no core), which `grow` < 1 draws in toward the centre | `size` radius, `spin` turns/s (negative: the other way), `grow`, `thin` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `fist` | a translucent cel-shaded fist (a closed-fist mesh, knuckles down) falling onto the ground: it drops over `fall` of its `life` (a share, or an option), rests, then fades | `size` width, `drop` m it falls from, `fall`, `fwd`, `pitch` (deg, negative tips the wrist back so the knuckles face a top-down camera); `cut` (any surface): it goes if its hunter is stunned or downed before that share of its life |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
+
+A palette's optional `"peak"` (RRGGBBAA) is what the hottest part turns toward, its alpha how far (absent: halfway to
+white; Kael's: all the way to red, so a red stays red).
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,

@@ -8,7 +8,7 @@ Eggs only ever hatch the first form of a Boki line, and some Boki never come fro
   `Heart`/`HeartRaid` eggs, the Black Market, nest eggs and the Locket in `NestItems.lay`) and every egg is hatched
   through it (`Care.hatch_rare`, `Care.breed`), so an old saved egg of a later form hatches the first form too.
   `Incubator.ensure` rewrites old saved eggs once on load, and the nest egg does the same when it is read.
-- **Never from an egg.** `"no_egg": true` in `content/kin/<first form>.json` (data, not code) takes the whole line
+- **Never from an egg.** `"no_egg": true` in `content/kin_home/<first form>.json` (data, not code) takes the whole line
   out: `Data.no_egg(sp)`. Today: `cairnback`, `zephyrak`, `hivara`, the three legendaries (also the only
   `"rare": true` kin). `Data.egg_species` rerolls such an egg from `Data.egg_pool()` (first forms that may hatch)
   by rarity tickets (`BokiModes.draw`). Content has no other unique, boss-only or charm-tier Boki.
