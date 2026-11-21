@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	tree = main.get_tree()
 	verbose = OS.get_cmdline_user_args().has("--verbose")

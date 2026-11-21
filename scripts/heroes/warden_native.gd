@@ -16,6 +16,8 @@ const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their k
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
+## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
+static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
 
 var root: Node3D
@@ -41,7 +43,7 @@ static func entry(art_name: String) -> Dictionary:
 ## Whether this archetype's Hunter is switched onto Meshy's own skeleton (and its file is there).
 static func on(arch: String) -> bool:
 	var e := entry(WardenGlb.art(arch))
-	return bool(e.get("meshy_native", false)) and ResourceLoader.exists(file(arch))
+	return not contract_only and bool(e.get("meshy_native", false)) and ResourceLoader.exists(file(arch))
 
 
 ## The Meshy-skeleton .glb, beside the contract one: art/wardens/<art>/<art>_meshy.glb.
