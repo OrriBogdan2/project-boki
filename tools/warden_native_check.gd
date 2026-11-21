@@ -1,11 +1,12 @@
 extends RefCounted
 ## --warden-native-check (docs/art/wardens/MESHY_NATIVE.md): each Hunter switched onto Meshy's own skeleton
-## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no contract
-## bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it stands as
-## tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural weapon
-## puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. Every other Warden keeps the contract path.
+## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no
+## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
+## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
+## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. Every other Warden keeps
+## the contract path.
 
-const HEIGHT_TOL := 0.03       # share: the head stands this close to the contract model's head height
+const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 
 var bad := 0
@@ -55,8 +56,10 @@ func _bones(a: String) -> void:
 	var m := _model(a)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var contract := CONTRACT_BONES.filter(func(b): return WardenSkeleton.find(sk, b) >= 0)
-	ok(sk.find_bone("Hips") >= 0 and sk.find_bone("RightHand") >= 0 and contract.is_empty(),
-			"%s: Meshy's skeleton (%d bones, no contract bones %s)" % [a, sk.get_bone_count(), str(contract)])
+	ok(
+		sk.find_bone("Hips") >= 0 and sk.find_bone("RightHand") >= 0 and contract.is_empty(),
+		"%s: Meshy's skeleton (%d bones, no contract bones %s)" % [a, sk.get_bone_count(), str(contract)]
+	)
 	var head := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("Head")).origin
 	var front := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("headfront")).origin
 	var fwd := m.global_transform.basis.inverse() * (front - head)
@@ -98,7 +101,8 @@ func _states(main: Node, a: String) -> void:
 		var want := String(nat.d["clips"][c[0]])
 		ok(nat.player.current_animation == want, "%s: %s plays %s (%s)" % [a, c[0], want, nat.player.current_animation])
 	var shown := m.get_node("Rig/Torso/Aim/Gun").find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return (mi as MeshInstance3D).visible)
+		func(mi): return (mi as MeshInstance3D).visible
+	)
 	ok(shown.is_empty(), "%s: the rig's procedural weapon is hidden" % a)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	ok(gun.global_position.distance_to(nat.hand_position()) < 0.01, "%s: the aim node rides Meshy's hand" % a)

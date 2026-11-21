@@ -3,30 +3,30 @@ extends Node
 ## A Hunter drawn on Meshy's own skeleton and playing Meshy's own clips (docs/art/wardens/MESHY_NATIVE.md). Only the
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
-## onto the contract: the clips play on them as Meshy keyed them, the contract's procedural bone layers (springs,
+## onto the contract: the clips play on them as Meshy keyed them, and the contract's procedural bone layers (springs,
 ## orbits, carry, look-at, drop pose, squash) are not built. The contract's anchor empties hang on Meshy's bones as
-## BoneAttachment3D nodes (data "anchors"), and the weapon's aim node rides Meshy's hand bone. HunterAnim still runs on the hidden rig and hands over its state (WardenClips.STATE) each frame.
+## BoneAttachment3D nodes (data "anchors"), and the weapon's aim node rides Meshy's hand bone. HunterAnim still runs
+## on the hidden rig and hands over its state (WardenClips.STATE) each frame.
 
 const DATA_PATH := "res://content/rules/warden_native.json"
-const META := "meshy_native"     # root meta: this Hunter is drawn on Meshy's skeleton
-const STILL := 0.25              # m/s: below this he is standing
-const FADE := 0.15               # s: one clip into the next
-const RATE_MIN := 0.6            # the walk, run and sneak clips' slowest rate, of their keyed pace
-const RATE_MAX := 1.8            # and their fastest: a quicker stride keeps the feet nearer the ground speed
-const ATTACK_AGAIN := 0.6        # share of the attack clip after which a new hit starts it over
-const STATES := ["idle", "walk", "run", "jump", "attack", "crouch"]
+const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
+const STILL := 0.25  # m/s: below this he is standing
+const FADE := 0.15  # s: one clip into the next
+const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
+const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
+const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
-static var _data = null          # art name -> its entry (parsed once)
+static var _data = null  # art name -> its entry (parsed once)
 
 var root: Node3D
 var player: AnimationPlayer
 var d: Dictionary
 var skel: Skeleton3D
-var hand := -1                   # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
+var hand := -1  # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
 var gun: Node3D
-var built := 0                   # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
-var cur := ""                    # the game state playing ("idle", "walk", ...)
-var attack_left := 0.0           # s the attack clip still owns the body
+var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
+var cur := ""  # the game state playing ("idle", "walk", ...)
+var attack_left := 0.0  # s the attack clip still owns the body
 var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
 
 
@@ -50,25 +50,25 @@ static func file(arch: String) -> String:
 	return "%s/%s/%s_meshy.glb" % [WardenGlb.DIR, nm, nm]
 
 
-## Dresses the procedural hunter `root` (built rig-only) in its Meshy model; the rig stays as HunterAnim's state.
-static func dress(root: Node3D, arch: String, scene: PackedScene) -> void:
+## Dresses the procedural hunter `model` (built rig-only) in its Meshy model; the rig stays as HunterAnim's state.
+static func dress(model: Node3D, arch: String, scene: PackedScene) -> void:
 	var e := entry(WardenGlb.art(arch))
 	var glb := scene.instantiate() as Node3D
 	glb.name = "Warden"
-	glb.rotation.y = PI      # (Meshy faces +Z; a Hunter's model faces -Z)
+	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	glb.scale = Vector3.ONE * float(e.get("scale", 1.0))
-	root.add_child(glb)
+	model.add_child(glb)
 	var nat := WardenNative.new()
 	nat.name = "Native"
-	nat.setup(root, glb, e)
+	nat.setup(model, glb, e)
 	glb.add_child(nat)
-	root.set_meta(META, true)
+	model.set_meta(META, true)
 
 
 func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	root = model
 	d = data
-	process_priority = 10    # (after Match renders the hunters: HunterAnim.update)
+	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	var clips: Dictionary = d["clips"]
 	for st in LOOPS:
@@ -129,8 +129,12 @@ func _attacked(s: Dictionary) -> bool:
 		"cast": float(s.get("cast", INF)),
 		"recoil": float(s.get("recoil", 0.0)),
 	}
-	var hit: bool = (now["kmove"] != "" and now["kmove"] != last["kmove"]) or now["swing_n"] != last["swing_n"] \
-			or now["cast"] < last["cast"] or now["recoil"] > last["recoil"]
+	var hit: bool = (
+		(now["kmove"] != "" and now["kmove"] != last["kmove"])
+		or now["swing_n"] != last["swing_n"]
+		or now["cast"] < last["cast"]
+		or now["recoil"] > last["recoil"]
+	)
 	last = now
 	var fresh := attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
 	return hit and fresh

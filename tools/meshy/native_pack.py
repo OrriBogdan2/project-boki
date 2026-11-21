@@ -146,7 +146,9 @@ def add_clips(out, path, rename, base_names, base_parent):
                     "interpolation": s.get("interpolation", "LINEAR"),
                 }
             )
-            chans.append({"sampler": len(samps) - 1, "target": {"node": base_names[names[node]], "path": c["target"]["path"]}})
+            chans.append(
+                {"sampler": len(samps) - 1, "target": {"node": base_names[names[node]], "path": c["target"]["path"]}}
+            )
         out.js.setdefault("animations", []).append({"name": nm, "channels": chans, "samplers": samps})
         have.add(nm)
 
@@ -163,7 +165,7 @@ def in_place(out, clip, hips):
             v = np.frombuffer(out.chunks[2 * acc["bufferView"] + 1], np.float32).reshape(-1, 3).copy()
             k = np.linspace(0.0, 1.0, len(v))[:, None]
             drift = (v[-1] - v[0]) * k
-            drift[:, 1] = 0.0       # (the ground plane is X/Z: the bob stays)
+            drift[:, 1] = 0.0  # (the ground plane is X/Z: the bob stays)
             v -= drift
             out.chunks[2 * acc["bufferView"] + 1] = v.astype(np.float32).tobytes()
 

@@ -1,0 +1,34 @@
+# Hunters on Meshy's own skeleton (meshy_native)
+
+A Hunter can be drawn on the skeleton Meshy's auto-rig made, playing Meshy's own clips, instead of the 14-bone
+contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never renamed, retargeted, merged or dropped.
+
+## Switch
+`content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
+`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sparkle (ryzz),
+Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched.
+
+## What changes on the native path (scripts/heroes/warden_native.gd)
+- `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
+  procedural bone layers (springs, orbits, carry IK, look-at, drop pose, squash, flinch, wall, blink, moods) are off.
+- HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
+  idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
+  `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Size: `scale` puts Meshy's head on the contract model's head height. Hit ring and hitbox are the rig's, unchanged.
+- Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
+- Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
+  found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
+- Materials: Meshy's own PBR materials and textures (not the contract's toon slot pass).
+
+## Building the .glb
+`python3 tools/meshy/native_pack.py OUT BASE [CLIPS[=name] ...] --in-place=Crouch_Walk_with_Torch`: BASE is Meshy's
+rig (or its weight-fixed hybrid); clips from the other Meshy files are matched by node name; Meshy's animate files
+keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame. Textures are capped at 2048 px.
+
+## Checks
+`--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors);
+`--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+
+## Not on the native path (yet)
+Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
+seeing-stones turning, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
