@@ -2,11 +2,15 @@
 paper lantern for a belly. It moves with deliberate, hand-over-hand patience, the big-eyed head turning to look at
 everything, then strikes in a flash; when it is scared it floats up like a balloon."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, c, footfall, s, seq
+from boki_gait import four_legs, planted, stub_legs
+from boki_clips import LOOK_UP, add, c, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-RUN_STEPS = 2      # footfalls a run loop (the walk takes one)
+# its legs: scan_legs adds them to the file (reclip.py), from the scan's feet up to this belly height (m)
+SCAN_LEGS = {"top": 0.10}
+LEG_BONES = stub_legs()
+LEGGED = {**BONES, **LEG_BONES}
 LOOK = LOOK_UP * 0.5
 
 
@@ -18,7 +22,6 @@ def clamber(t, amp):
     add(p, "root", rz=0.07 * amp * w, rx=0.02 * amp * s(t, 2))
     add(p, "spine", rz=-0.05 * amp * w, ry=0.08 * amp * w)
     add(p, "hips", ry=-0.1 * amp * w)
-    footfall(p, t, 1, 0.12 * amp, 0.03 * amp)
     add(p, "head", rx=LOOK + 0.03 * amp * s(t, 2, 0.3), ry=-0.16 * amp * s(t, 1, 0.33))
     return p
 
@@ -42,7 +45,6 @@ def run(t):
     p = clamber(t, 0.8)
     stride = s(t, 2)
     p["root_at"] = (0, 0.012 * stride, 0)
-    footfall(p, t, RUN_STEPS, 0.14, 0.04, 0.5)
     add(p, "root", rx=-0.12)
     add(p, "spine", rx=-0.1 + 0.06 * stride)
     add(p, "head", rx=-0.05)
@@ -116,10 +118,10 @@ def pet(t):
 CLIPS = dict(glomwort_anim.CLIPS)
 CLIPS.update({
     "idle": (3.6, True, idle),
-    "walk": (1.6, True, walk),
-    "run": (0.8, True, run),
+    "walk": (1.6, True, planted(walk, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.7, reach=0.12, lift=0.04, drop=0.01)),
+    "run": (0.8, True, planted(run, LEGGED, four_legs(0.0, 0.5, 0.5), duty=0.4, reach=0.15, lift=0.05, drop=0.025)),
     "hop": (1.2, True, balloon_hop),
-    "carry": (1.6, True, carry),
+    "carry": (1.6, True, planted(carry, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.7, reach=0.12, lift=0.04, drop=0.01)),
     "pet": (2.4, True, pet),
     "attack": (1.1, False, snap),
     "ability": (1.6, False, moon_mark),

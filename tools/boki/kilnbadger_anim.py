@@ -2,11 +2,15 @@
 honey badger that stays low and swaggers like it is looking for a fight, headbutts with the red-hot anvil on its back
 ringing behind it, and bristles up and rings the whole anvil as its ability."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, eat_ground, footfall, s, seq
+from boki_gait import four_legs, planted, stub_legs
+from boki_clips import LOOK_UP, add, eat_ground, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-RUN_STEPS = 2      # footfalls a run loop (the walk takes one)
+# its legs: scan_legs adds them to the file (reclip.py), from the scan's feet up to this belly height (m)
+SCAN_LEGS = {"top": 0.09}
+LEG_BONES = stub_legs()
+LEGGED = {**BONES, **LEG_BONES}
 HEAD_LOW = -0.14    # the head carried lower than a Boki looks up from (rx): a glare from under the brow
 
 
@@ -22,7 +26,6 @@ def swagger(t, amp):
     add(p, "root", rz=0.06 * amp * w, rx=0.02 * amp * s(t, 2, 0.5))
     add(p, "spine", ry=0.08 * amp * w, rx=-0.03 * amp * s(t, 2))
     add(p, "hips", ry=-0.07 * amp * w, rz=-0.03 * amp * w)
-    footfall(p, t, 1, 0.12 * amp, 0.03 * amp)
     add(p, "head", rx=LOOK_UP * 0.6 + HEAD_LOW + 0.04 * amp * s(t, 2, 0.5), ry=-0.12 * amp * w)
     return p
 
@@ -49,7 +52,6 @@ def run(t):
     p = swagger(t, 0.5)
     stride = s(t, 1)
     p["root_at"] = (0, 0.02 + 0.015 * s(t, 2), 0)
-    footfall(p, t, RUN_STEPS, 0.14, 0.04, 0.5, 0.02)
     add(p, "root", rx=-0.08, rz=0.04 * stride)
     add(p, "spine", rx=-0.16 * stride)
     add(p, "hips", rx=0.13 * stride)
@@ -138,10 +140,10 @@ def pet(t):
 CLIPS = dict(glomwort_anim.CLIPS)
 CLIPS.update({
     "idle": (3.0, True, idle),
-    "walk": (0.8, True, walk),
-    "run": (0.44, True, run),
+    "walk": (0.8, True, planted(walk, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.6, reach=0.11, lift=0.035, drop=0.01)),
+    "run": (0.44, True, planted(run, LEGGED, four_legs(0.0, 0.5, 0.5), duty=0.35, reach=0.15, lift=0.05, drop=0.035)),
     "hop": (0.85, True, stomp_hop),
-    "carry": (0.9, True, carry),
+    "carry": (0.9, True, planted(carry, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.6, reach=0.11, lift=0.035, drop=0.01)),
     "pet": (2.0, True, pet),
     "attack": (0.8, False, headbutt),
     "ability": (1.4, False, clang),

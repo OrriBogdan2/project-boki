@@ -2,10 +2,15 @@
 riveted iron shield, stubborn as rock. It creeps on its foot with the shell rocking over it, clamps down to the ground
 when it braces and heaves the whole boulder up when it fights."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, footfall, s, seq
+from boki_gait import four_legs, planted, stub_legs
+from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
+# its legs: scan_legs adds them to the file (reclip.py), from the scan's feet up to this belly height (m)
+SCAN_LEGS = {"top": 0.10}
+LEG_BONES = stub_legs()
+LEGGED = {**BONES, **LEG_BONES}
 LOOK = LOOK_UP * 0.4
 
 
@@ -17,7 +22,6 @@ def creep(t, amp, steps=1):
     p["root_sc"] = (1 + 0.02 * amp * s(t, 2), 1 - 0.03 * amp * s(t, 2), 1 - 0.02 * amp * s(t, 2))
     add(p, "root", rz=0.09 * amp * u, rx=0.04 * amp * s(t, 2, 0.5))
     add(p, "spine", rz=-0.06 * amp * u, rx=-0.04 * amp * s(t, 2))
-    footfall(p, t, steps, 0.12 * amp if steps == 1 else 0.14, 0.03 if steps > 1 else 0.03 * amp)
     add(p, "head", rx=LOOK - 0.06 * amp, ry=-0.1 * amp * s(t, 1, 0.25))
     return p
 
@@ -108,10 +112,10 @@ def pet(t):
 CLIPS = dict(glomwort_anim.CLIPS)
 CLIPS.update({
     "idle": (3.4, True, idle),
-    "walk": (1.3, True, walk),
-    "run": (0.7, True, run),
+    "walk": (1.3, True, planted(walk, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.7, reach=0.1, lift=0.03, drop=0.01)),
+    "run": (0.7, True, planted(run, LEGGED, four_legs(0.0, 0.5, 0.5), duty=0.4, reach=0.14, lift=0.045, drop=0.015)),
     "hop": (1.0, True, heavy_hop),
-    "carry": (1.4, True, carry),
+    "carry": (1.4, True, planted(carry, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.7, reach=0.1, lift=0.03, drop=0.01)),
     "pet": (2.6, True, pet),
     "attack": (1.0, False, bash),
     "ability": (1.5, False, heave),

@@ -2,11 +2,15 @@
 highland cow that carries a walled garden, so the back stays level and the plod is slow and stately; it sweeps its long
 horns sideways, bellows proudly with its chest out and, being stubborn, grazes whenever it likes."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, eat_ground, footfall, s, seq
+from boki_gait import four_legs, planted, stub_legs
+from boki_clips import LOOK_UP, add, eat_ground, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-RUN_STEPS = 2      # footfalls a run loop (the walk takes one)
+# its legs: scan_legs adds them to the file (reclip.py), from the scan's feet up to this belly height (m)
+SCAN_LEGS = {"top": 0.09}
+LEG_BONES = stub_legs()
+LEGGED = {**BONES, **LEG_BONES}
 GRAZE = -0.32       # the head dropped to the grass (rx)
 
 
@@ -17,7 +21,6 @@ def plod(t, amp):
     add(p, "root", rz=0.025 * amp * w, rx=0.015 * amp * s(t, 2, 0.5))
     add(p, "spine", ry=0.03 * amp * w, rx=-0.02 * amp * s(t, 2))
     add(p, "hips", ry=-0.03 * amp * w)
-    footfall(p, t, 1, 0.12 * amp, 0.03 * amp)
     add(p, "head", rx=LOOK_UP * 0.5 - 0.06 + 0.05 * amp * s(t, 2, 0.5), ry=-0.05 * amp * w)
     return p
 
@@ -42,7 +45,6 @@ def run(t):
     p = plod(t, 0.5)
     rock = s(t, 1)
     p["root_at"] = (0, 0.02 + 0.015 * s(t, 2), 0)
-    footfall(p, t, RUN_STEPS, 0.14, 0.04, 0.5, 0.02)
     add(p, "root", rx=-0.07 * rock)
     add(p, "spine", rx=-0.07 * rock)
     add(p, "hips", rx=0.06 * rock)
@@ -124,10 +126,10 @@ def pet(t):
 CLIPS = dict(glomwort_anim.CLIPS)
 CLIPS.update({
     "idle": (4.0, True, idle),
-    "walk": (1.3, True, walk),
-    "run": (0.7, True, run),
+    "walk": (1.3, True, planted(walk, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.65, reach=0.11, lift=0.03, drop=0.01)),
+    "run": (0.7, True, planted(run, LEGGED, four_legs(0.0, 0.5, 0.5), duty=0.4, reach=0.14, lift=0.05, drop=0.035)),
     "hop": (1.1, True, lumber_hop),
-    "carry": (1.4, True, carry),
+    "carry": (1.4, True, planted(carry, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.65, reach=0.11, lift=0.03, drop=0.01)),
     "pet": (2.8, True, pet),
     "attack": (1.1, False, sweep),
     "ability": (1.8, False, bellow),
