@@ -10717,3 +10717,4 @@ READY ext/extra-fishing-derby 20c744038f (bulk-rebase: origin/main merged in mec
 READY ext/slam-follow-keys db9afff445 (bulk-rebase: origin/main merged in mechanically, was 2a1fe41009; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-vfx-data 7a45e9f43b (bulk-rebase: origin/main merged in mechanically, was b2d19b4192; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/p15-port-1118 e8bf6c586f (P15 port re-merged with main: garden_xp.json keeps owner curve round(18 x L^1.5) + main's pace values care 15/drill 2/play 5/win 8; garden_sim reads both curves; --check, garden pace/items/prizes/day/sfx checks 0 fail)
+READY ext/garden-toy-xp 84012b695347ee41d7b6fa693cf55d7acefa682c (main merged; toy XP 5 = a played game, care 15/drill 2 kept; toy-check + --check green)
