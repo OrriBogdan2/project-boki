@@ -10754,3 +10754,4 @@ READY ext/hudreveal-fold c907726a8b13d49cd76078eef9d11630f83b838d (origin/main m
 READY ext/hud-clutter-all13 836ae5edb3529307a291f0257035e147cac01998 (merged origin/main: kill feed already slides off the Hunter via msg_lane, one rank-up hint at a time, check harness fixes; hud-clutter-check --all 0 failures; health --strict red only on main's style ratchet, none in these files)
 READY ext/merge-lane-M1-1121 c92bf219517 (lane M1 bundle: 17 branches; anim-foot-slide-13 HARD)
 READY ext/merge-lane-M3-1121 ab8f881309077f2a8687540311ce113b7eeb4cde (merge lane M3: 16 no-PR branches, garden-toy-xp dropped NEW-RED garden-day-check; targeted suite NEW-RED 0, export 885.0 MB = main)
+READY ext/ui-first-exp-hud 5cc5c84a3d73 (first expedition HUD holds back; merged with main, conflicts resolved)
