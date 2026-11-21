@@ -287,6 +287,8 @@ const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
+const MARKS_DARK := preload("res://shaders/boki_marks.gdshader")
+const MARKS_LIGHT := preload("res://shaders/boki_marks_light.gdshader")
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
@@ -327,8 +329,8 @@ const FACES := {
 }
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
-	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "cast": "angry", "sleep": "asleep",
+	"pet": "bliss", "chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
@@ -483,6 +485,7 @@ func _ready() -> void:
 	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
 	pace = RigPace.new(get_instance_id())
 	BokiHomeClips.install(species, player, _skel)
+	BokiSwing.add_clip(player)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
@@ -601,9 +604,9 @@ func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
 	if p != _pulse:
 		_pulse = p
-		_start_shot("ability")
+		_start_shot("cast")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
-	if attacking and not _attacking and not (_shot == "ability" and _shot_left > 0.0):  # (a cast's wind-up strikes too)
+	if attacking and not _attacking and not (_shot == "cast" and _shot_left > 0.0):  # (a cast's wind-up strikes too)
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
@@ -899,7 +902,8 @@ static func _ink() -> ShaderMaterial:
 	ink.set_shader_parameter("far_thin", INK_FAR_THIN)
 	return ink
 
-## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on.
+## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on. The
+## marks wear the painted coat's own colours (dark: deeper, pale and glowing: lighter), never a flat colour over it.
 func _copy_coat() -> void:
 	var mats: Array = root.get_meta("mats", [])
 	if mats.is_empty() or _coat == null:
@@ -911,9 +915,12 @@ func _copy_coat() -> void:
 	if body.get_shader_parameter("mark_kind") == null:
 		return
 	var marks := ShaderMaterial.new()
-	marks.shader = preload("res://shaders/boki_marks.gdshader")
-	for k in ["mark_kind", "mark_color", "mark_seed", "mark_scale", "mark_amt", "mark_glow"]:
+	var dark := String(body.get_meta("mark_col", "dark")) == "dark"
+	marks.shader = MARKS_DARK if dark else MARKS_LIGHT
+	for k in ["mark_kind", "mark_seed", "mark_scale", "mark_amt"] + ([] if dark else ["mark_color", "mark_glow"]):
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
+	if not dark:
+		marks.set_shader_parameter("albedo_tex", _coat.get_shader_parameter("albedo_tex"))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
 
