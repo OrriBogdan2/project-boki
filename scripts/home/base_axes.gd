@@ -13,7 +13,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["raised"] = {"bold": 0.0, "busy": 0.0, "gentle": 0.0}
 
 
-## Save migration (v21 -> v22): every Boki in an older save gets its lean.
+## Save migration (v22 -> v23): every Boki in an older save gets its lean.
 static func migrate(data: Dictionary) -> void:
 	for rec in data.get("roster", []):
 		if typeof(rec) == TYPE_DICTIONARY and not rec.is_empty():
