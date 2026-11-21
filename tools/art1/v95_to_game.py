@@ -34,6 +34,7 @@ ART = {
 TRIS = 60000  # the body's triangles in game (RIG_CONTRACT "Budget": the v95 masters' own-paint models)
 TEX = 4096  # the largest side of each of the master's images in the .glb (px)
 HEAD_SHARE = 0.45  # the head's share of the body triangles (a 20% head band tears the face at 60k even with seam-weighted collapses)
+HAND_SHARE = 0.09  # each hand ball's share of the body triangles (a uniform collapse leaves a hand ~1%: fingers flatten to a mitten; 9% of a ball = 6-8% by bone)
 SECOND_TEX = 2048  # px: the game's size limit for a master's other images (VRAM: 4096 is 11 MB compressed, 2048 2.7 MB)
 
 
@@ -98,7 +99,9 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
-    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
+    ap.add_argument(
+        "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
+    )
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]
@@ -108,6 +111,7 @@ def main():
     spec.update(master=a.master or master(a.name), keep_uv=True, tris=tris, tex=a.tex, max_tris=int(tris * 1.1))
     if spec.get("head_tris"):
         spec["head_tris"] = int(tris * HEAD_SHARE)
+    spec["hand_tris"] = int(tris * HAND_SHARE)
     # (the current .glb already has a fixed-offset move applied: a {bone: [dx, dy, dz]} would move it twice)
     spec["move_bones"] = {b: v for b, v in spec.get("move_bones", {}).items() if isinstance(v, dict)}
     work = os.path.abspath(os.path.expanduser(a.work or "~/meshy/v95/_ingame/%s" % a.name))
