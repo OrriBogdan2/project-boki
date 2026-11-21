@@ -5,15 +5,17 @@ extends RefCounted
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
-##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
-##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
+##      The landing is at the owner's 5; the counters, glider ring and belt are folded in until they matter (rule 5).
+##      The later moments add the toasts, the prompt and the strip. The check plays a fresh save (a new player), so
 ##      the "Your kit" card is not at the landing (rule 4)
 ##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
+##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
+##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 6, "fight": 8, "heart": 9, "race": 9}      # groups, strip included where it shows
+const COUNTS := {"landing": 5, "fight": 7, "heart": 8, "race": 8}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -27,8 +29,6 @@ static func make_match(main: Node) -> Match:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	Settings.set_v("hud_full", false, false)      # (a fresh save stages the HUD: HudReveal)
-	Input.action_release("scores")
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
@@ -93,16 +93,28 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
+	# 5. what folds in until it matters
+	set_moment(m, "landing")
+	var p0: Hunter = m.player
+	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "belt") and not on_screen_has(hud, "counters"),
+		"landing: no glider ring, belt or counters")
+	p0.gliding = true
+	ok(on_screen_has(hud, "glider"), "gliding: the glider ring")
+	p0.gliding = false
+	p0.hp = p0.max_hp * 0.5
+	ok(on_screen_has(hud, "belt") and BeltHud.shown(m, p0, true), "hurt with a tonic held: the belt")
+	p0.hp = p0.max_hp
+	ok(on_screen_has(hud, "belt"), "healed again: this save keeps the belt")
+	Save.d["hud_reveal"].erase("belt")
+	Save.d["matches"] = 3
+	ok(on_screen_has(hud, "belt") and on_screen_has(hud, "counters"), "4th expedition: belt and counters back")
+	Save.d["matches"] = 0
 	# 4. what a new player's HUD holds back
 	var p: Hunter = m.player
 	set_moment(m, "landing")
 	hud.kit_t0 = m.time      # just landed: a veteran's kit card would be up
 	ok(HudGroups.new_player(), "a fresh save is a new player")
 	ok(not on_screen_has(hud, "kit"), "new player: no kit card at the landing")
-	ok(not on_screen_has(hud, "glider"), "on the ground with a cool glider: no glider group (no heat ring)")
-	p.glide_fuel = 0.5
-	ok(on_screen_has(hud, "glider"), "a glider with heat to shed: its ring is a group")
-	p.glide_fuel = 1.0
 	m.opts["training"] = true
 	ok(on_screen_has(hud, "kit"), "new player: the training room keeps the kit card")
 	m.opts["training"] = false

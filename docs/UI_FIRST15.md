@@ -241,13 +241,16 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 
 | Moment | Groups | Strip | Note |
 |---|---|---|---|
-| First landing | 6 | waits | minimap, clock, vitals, abilities, belt, weapon (was 10 on 0.24.5: the kit card, the counters, Q/V and the glider are held back or not drawn) |
-| First fight | 8 | waits | six + toasts + loot prompt |
-| Heart unlock | 9 | shows | six + toasts + Gate prompt + strip |
-| Quest-exit race | 9 | shows | six + toasts + prompt + strip |
+| First landing | 5 (was 9) | waits | minimap (its clock strip hangs under it), vitals, abilities, Boki/glove boxes, weapon |
+| First fight | 7 (was 11) | waits | five + toasts + loot prompt |
+| Heart unlock | 8 (was 12) | shows | five + toasts + Gate prompt + strip |
+| Quest-exit race | 8 (was 12) | shows | five + toasts + prompt + strip |
 
-Since ext/hud-holdback (11-20) a block counts only while it is drawn (`HudGroups._drawn`). The landing is still one over the owner's 5;
-the clock bar under the minimap is the next block to fold in (docs/HUD.md "Not fixed").
+ext/ui-hud-groups-five: the counters (the staged HUD, `HudReveal`, were already off for a fresh save but still counted), the glider ring
+(only while you glide or the meter is not full, `HudGroups.glider_shown`) and the belt (`BeltHud.shown`: from the first time a held item could be
+used, a tonic when hurt or an armor kit when the armor is down, then this save keeps it; `hud_reveal.json` "belt", always from the 4th expedition)
+fold in until they matter, and the clock counts with the minimap it hangs under. Shots before / after: `docs/ui_hud_groups_five/`.
+The fight and later moments stay over 5 by the toast lane and the prompt, which cannot fold: owner's call.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
