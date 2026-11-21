@@ -564,6 +564,15 @@ func _guard_edges(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> 
 			"after %.1f" % shots["after"])
 	_guard_pulls(m, P, T2, home)
 	_guard_wall_slam(m, P, T, T2, home)
+	_calm(P)
+
+## Rage and Enrage are state that outlives a case: the damage these cases take fills Rage, and a full bar turns the
+## Enraged roar (jug_roar) over the recovery clip of the next scenario (_recovery). Every case that hurts him ends
+## by emptying both, so the scenarios after it start as they would without these cases.
+func _calm(P: Hunter) -> void:
+	var K: JuggernautKit = P.ak
+	K.res = 0.0
+	K.enraged_t = 0.0
 
 ## A Dredge-style pull asks Blockers.body_stops first: refused while the guard stands, allowed in the strike and the
 ## recovery (no source row for pulls; ours, as main).
@@ -572,6 +581,7 @@ func _guard_pulls(m: Match, P: Hunter, T2: Hunter, home: Vector3) -> void:
 	var d: Dictionary = K.x_def()
 	A.step(m, 1.5)
 	A.fresh(P)
+	_calm(P)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	K.cd["x"] = 0.0
@@ -595,6 +605,7 @@ func _guard_wall_slam(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.hp = P.max_hp
+	_calm(P)
 	P.wslam_t = 0.0
 	T.teleport(home + Vector3(-6.0, 0, -3.0))
 	var w := HeroZones.rock(m, T2, home + Vector3(3.2, 0, 0), Vector2(1, 0), "gwall", 4.0, 30.0, 999.0, false)
