@@ -1849,6 +1849,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | far_m | 22 |
 | sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
 
+## land_feel (`content/rules/land_feel.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | How hard a Hunter's touchdown squashes (HunterAnim.land_tier picks the way down) by weight class (the 'weight' in content/archetypes). hop: a plain jump or a small step down. drop: a terrace drop or a glider let go. dive: the glide dive's plunge. depth: how far the squash goes (1 is the deepest crouch); a drop or a dive deepens with the fall speed up to 1, so theirs is the least. s: seconds from touchdown until the squash is gone. Parity first (DECISIONS 2026-11-07), source = the private footage reads. light: the thief's jump lands in a low crouch held ~0.1 s, then up in ~0.05 s (hop 0.15 s). heavy: the bulwark's slam lands in the deepest squash of the six, a crouch onto the knees, ~0.5 s in a low recovery (drop and dive: depth 1, 0.5 s). The other cells have no footage and keep the numbers the procedural landing ran before this table [est]: medium everywhere, light's drop and dive (medium's shorter by a quarter) and heavy's hop (a quarter longer than medium's). clip: a cell from the footage also holds a Hero's .glb land clip (WardenClips.land_play) for its s, playing the same keys of the clip in that time; the other cells leave the clip on the Hero's own warden_anim land data. Medium: the reads disagree and give no number (the tender's air-dash touchdown has almost no squash, the dolm's reference squashes hard on every landing, the ostra's landing is not shown), so it stays [est]. No burst, ring or disc on landing (DECISIONS). Asserted per class in --land-weight-check. |
+| light | {"hop": {"depth": 0.35, "s": 0.15, "clip": true}, "drop": {"depth": 0.7, "s": 0.24}, "dive": {"depth": 0.7, "s": 0.32}} |
+| medium | {"hop": {"depth": 0.35, "s": 0.1}, "drop": {"depth": 0.7, "s": 0.3}, "dive": {"depth": 0.7, "s": 0.4}} |
+| heavy | {"hop": {"depth": 0.35, "s": 0.125}, "drop": {"depth": 1.0, "s": 0.5, "clip": true}, "dive": {"depth": 1.0, "s": 0.5, "clip": true}} |
+
 ## lantern_match (`content/rules/lantern_match.json`)
 
 Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
