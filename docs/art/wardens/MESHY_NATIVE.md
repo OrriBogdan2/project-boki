@@ -32,7 +32,10 @@ no backpack, its drips and strands made one firm connected goo arm by a Meshy ed
   behind the clip). `"mirror": true` cuts it mirrored into the other hand (Kael: the contract holds the sword in the
   right hand, the splash in the dark-veined left one). `"tilt"` (state -> degrees about the grip, on the body's side
   axis, eased between states) keeps a long weapon off the floor in every clip: Kael idles with the splash's
-  forward-down blade and raises it upright for walk, run, jump, attack and crouch; the check pins a 2 cm gap. It takes the toon pass with the contract look's slots (metal, glow, leather).
+  forward-down blade and raises it ahead of him for walk, run, jump, attack and crouch; the check pins a 2 cm gap.
+  `"hold"` seats it by its own grip anchor in the palm (halfway from the hand bone to the `palm` bone), its
+  grip-to-muzzle line on `aim` in the idle: Grimble's blunderbuss sits in his iron fist, barrel ahead (the contract's
+  wrist pivot left it hanging behind the fist). It takes the toon pass with the contract look's slots (metal, glow, leather).
 - Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
   models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
   `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon

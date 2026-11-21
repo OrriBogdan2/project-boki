@@ -6,6 +6,9 @@ extends Node3D
 ## contract model holds it at rest; from there it turns and moves with Meshy's hand through every clip.
 ## "mirror": the contract model holds it in the other hand than the splash: cut it mirrored across the model's middle
 ## (x = 0), so the contract's right-hand grip becomes a left-hand one (Kael: sword in the dark-veined left hand).
+## "hold" {"palm": bone, "grip": [grip anchor, muzzle anchor], "aim": [x, y, z]}: seated by its own grip instead of
+## the contract's wrist: the grip anchor in the palm (halfway from Meshy's hand bone to `palm`), the grip-to-muzzle line
+## turned onto `aim` (model space, -z ahead) in the idle (Grimble's blunderbuss in his iron fist, barrel ahead).
 ## "tilt": game state -> degrees the weapon turns on the body's side axis (model x) about the grip, from its seat in
 ## the idle (+ tips it forward and up), eased over TILT_RATE as the state changes: a long weapon held off the floor
 ## in every clip (Kael's sword tip dragged in the idle and the crouch; Grimble's blunderbuss in the jump).
@@ -23,12 +26,16 @@ var hand_idle: Transform3D  # Meshy's hand bone (model space) at the start of it
 var tilts := {}  # game state -> degrees (data "tilt")
 var tilt := 0.0  # degrees now
 var tilt_to := 0.0  # degrees the state wants
-var pivot: Vector3  # the contract hand bone's rest pivot (the grip), in the weapon's own space
+var pivot: Vector3  # the grip in the weapon's own space: the contract hand bone's rest pivot, or "hold"'s grip anchor
+var palm := Vector3.ZERO  # where the grip sits in Meshy's hand bone's frame (the bone itself unless "hold")
 
 
 ## The held weapon of `model` from data `w` ({"bone": contract hand bone, "materials": [...]}), added under it;
 ## `hand_idle`: Meshy's hand bone in model space at the start of its idle. null when the contract weapon is missing.
-static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transform3D) -> WardenHeld:
+## `palm_idle`: data "hold"'s palm bone in model space at the start of the idle (unused without "hold").
+static func make(
+	model: Node3D, arch: String, w: Dictionary, hand_idle: Transform3D, palm_idle := Vector3.ZERO
+) -> WardenHeld:
 	var nm := WardenGlb.art(arch)
 	var bone := String(w.get("bone", "hand.R"))
 	var mirror := bool(w.get("mirror", false))
@@ -58,6 +65,17 @@ static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transfor
 		held.pivot.x = -held.pivot.x
 	held.hand_idle = hand_idle
 	held.seat = Transform3D(Basis.IDENTITY, hand_idle.origin - held.pivot)
+	var hold: Dictionary = w.get("hold", {})
+	var ends: Array = hold.get("grip", [])
+	if ends.size() == 2 and _anchors[nm].has(ends[0]) and _anchors[nm].has(ends[1]):
+		var root := (_anchors[nm][ends[0]] as Transform3D).origin
+		var line := (_anchors[nm][ends[1]] as Transform3D).origin - root
+		var aim := Vector3(hold.get("aim", [0.0, 0.0, -1.0])[0], hold["aim"][1], hold["aim"][2]).normalized()
+		var at := (hand_idle.origin + palm_idle) * 0.5
+		var turn := Basis(Quaternion(line.normalized(), aim))
+		held.pivot = root
+		held.seat = Transform3D(turn, at) * Transform3D(Basis.IDENTITY, -root)
+		held.palm = hand_idle.affine_inverse() * at
 	held.tilts = w.get("tilt", {})
 	held.tilt = float(held.tilts.get("idle", 0.0))
 	held.tilt_to = held.tilt
@@ -68,7 +86,7 @@ static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transfor
 
 ## The weapon's frame in the hand bone's frame, turned `deg` about the grip on the body's side axis.
 func grip_at(deg: float) -> Transform3D:
-	var about := Transform3D(Basis.IDENTITY, hand_idle.origin)
+	var about := Transform3D(Basis.IDENTITY, hand_idle * palm)
 	var turn := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(deg)), Vector3.ZERO)
 	return hand_idle.affine_inverse() * about * turn * about.affine_inverse() * seat
 

@@ -138,7 +138,8 @@ func _held(a: String, m: Node3D, nat: WardenNative) -> void:
 	if mi == null:
 		return
 	var grip := m.global_transform * held.transform * held.pivot
-	ok(grip.distance_to(nat.hand_position()) < 0.01, "%s: the weapon's grip rides Meshy's hand" % a)
+	var palm := nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.hand) * held.palm
+	ok(grip.distance_to(palm) < 0.01, "%s: the weapon's grip rides Meshy's hand (in the palm)" % a)
 	var sm := mi.get_surface_override_material(0) as ShaderMaterial
 	ok(sm != null and (m.get_meta("mats", []) as Array).has(sm), "%s: the held weapon is hero-toon shaded" % a)
 	ok(

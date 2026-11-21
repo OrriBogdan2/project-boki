@@ -77,7 +77,13 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.add_child(nat)
 	if e.has("weapon"):
 		var idle := WardenGlb.model_xf(model, nat.skel) * nat.clip_pose("idle", nat.hand)
-		nat.held = WardenHeld.make(model, arch, e["weapon"], idle)
+		var palm_bone := nat.skel.find_bone(String(e["weapon"].get("hold", {}).get("palm", "")))
+		var palm := (
+			(WardenGlb.model_xf(model, nat.skel) * nat.clip_pose("idle", palm_bone)).origin
+			if palm_bone >= 0
+			else idle.origin
+		)
+		nat.held = WardenHeld.make(model, arch, e["weapon"], idle, palm)
 		if nat.held and nat.hand >= 0:  # (a fixed socket: placed each time the clip poses the hand, never a frame late)
 			nat.skel.skeleton_updated.connect(nat._follow_held)
 	if bool(e.get("toon", true)):
