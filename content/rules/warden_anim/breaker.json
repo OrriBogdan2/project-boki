@@ -119,10 +119,6 @@
 			"clip": "guard_break",
 			"upper": true
 		},
-		"bul_armed": {
-			"clip": "guard_armed",
-			"upper": true
-		},
 		"bul_whirl": {"dash": true, 
 			"clip": "shift_whirl"
 		},
@@ -138,10 +134,6 @@
 		"bul_crush": {
 			"clip": "crush",
 			"upper": true
-		},
-		"bul_slamshield": {
-			"clip": "shield_slam",
-			"lead": 0.25
 		},
 		"bul_mend": {
 			"clip": "e_mend",
@@ -229,12 +221,10 @@
 			"bul_guard": "determined",
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
-			"bul_slamshield": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",
-			"bul_break": "sad",
-			"bul_armed": "happy"
+			"bul_break": "sad"
 		}
 	},
 	"offset_bones": [
@@ -251,5 +241,21 @@
 		"in": "crouch_in",
 		"out": "crouch_out",
 		"speed": 1.65
-	}
+	},
+	"cancels": [
+		["bul_smash_wind", 0.5, "bul_guard"],
+		["bul_smash_wind", 0.5, "bul_mend"],
+		["bul_smash_wind", 0.5, "bul_ult_wind"],
+		["bul_smash_wind", 0.5, "glide"],
+		["bul_smash_wind", 0.5, ""],
+		["bul_smash_wind", 0.5, "bul_smash"],
+		["bul_guard", 0.5, "bul_ult_wind"],
+		["bul_guard", 0.5, ""],
+		["bul_guard", 0.5, "bul_mend"],
+		["bul_ult_wind", 0.3, "stun"],
+		["bul_launch", 0.2, ""],
+		["bul_charge", 0.2, "bul_ult_wind"],
+		["bul_lumber", 0.2, "bul_ult_wind"],
+		["bul_throw", 0.1, "bul_recall"]
+	]
 }
