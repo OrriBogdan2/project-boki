@@ -162,8 +162,11 @@ static func _label(m: Match, h: Hunter, st: String) -> Array:
 
 ## Condensed, leaning text (the state label).
 static func _lean_text(c: CanvasItem, at: Vector2, s: String, col: Color) -> void:
-	c.draw_set_transform_matrix(Transform2D(Vector2(CONDENSE, 0.0), Vector2(LEAN, 1.0), at))
+	var xf := Transform2D(Vector2(CONDENSE, 0.0), Vector2(LEAN, 1.0), at)
+	c.draw_set_transform_matrix(xf)
+	TextCache.draw_xf = xf
 	HudStyle.text(c, Vector2.ZERO, s, LABEL_PX, col, 3)
+	TextCache.draw_xf = Transform2D.IDENTITY
 	c.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
