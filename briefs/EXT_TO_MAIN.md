@@ -10765,3 +10765,4 @@ READY ext/sfx-step-biomes 0920eda191 (bulk-rebase: origin/main merged in mechani
 READY ext/sfx-hunter-footsteps 15181cd9a9 (bulk-rebase: origin/main merged in mechanically, was e3d5d4ddf0; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/vfx-hurt-flash-v95 82d2c64ae0 (bulk-rebase: origin/main merged in mechanically, was 80eb79e224; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M4-1121 616a902bf3 (bulk-rebase: origin/main merged in mechanically, was 0c09266b7b; union 2 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-M5-1121 9ec68014561a971bc93170ae462a00439bbf948c (M5 bundle re-merged with main M6: ability_bar_check keeps _counts+_rebound; --check 0 fail, --ability-bar-check 205 ok 0 fail, health strict red only on main's existing style files)
