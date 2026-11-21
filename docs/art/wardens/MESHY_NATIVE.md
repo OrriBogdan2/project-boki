@@ -14,12 +14,19 @@ Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
+  pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
+  clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
+  the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
   hitbox are the rig's, unchanged.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
-- Materials: Meshy's own PBR materials and textures (not the contract's toon slot pass).
+- Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
+  models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
+  `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon
+  slot, so they shade as cloth; per-slot looks do not apply. `"toon": false` keeps Meshy's PBR.
 
 ## Building the .glb
 `python3 tools/meshy/native_pack.py OUT BASE [CLIPS[=name] ...] --in-place=Crouch_Walk_with_Torch`: BASE is Meshy's
@@ -28,7 +35,8 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 2048 px, normal and metal/roughness maps at 1024 px.
 
 ## Checks
-`--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors);
+`--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms);
 `--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
 
 ## Not on the native path (yet)

@@ -30,12 +30,18 @@ func run(main: Node) -> void:
 		var m := _model(a)
 		var is_on := WardenNative.on(a)
 		ok(
-			is_on == m.has_node("Warden/Native") and is_on == bool(m.get_meta(WardenNative.META, false)),
+			(
+				is_on == m.has_node("Warden/Native")
+				and is_on == bool(m.get_meta(WardenNative.META, false))
+			),
 			"%s: %s" % [a, "on Meshy's skeleton" if is_on else "not on the native path"]
 		)
 		if is_on:
 			native.append(a)
-			ok(not m.has_node("Warden/Sync") and not bool(m.get_meta("glb", true)), "%s: no contract sync" % a)
+			ok(
+				not m.has_node("Warden/Sync") and not bool(m.get_meta("glb", true)),
+				"%s: no contract sync" % a
+			)
 		m.free()
 	ok(not native.is_empty(), "native Hunters: %s" % str(native))
 	for a in native:
@@ -47,7 +53,9 @@ func run(main: Node) -> void:
 
 
 func _model(a: String) -> Node3D:
-	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.neutral(), a)
+	var m := Models.hunter(
+		Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.neutral(), a
+	)
 	holder.add_child(m)
 	return m
 
@@ -59,7 +67,10 @@ func _bones(a: String) -> void:
 	var contract := CONTRACT_BONES.filter(func(b): return WardenSkeleton.find(sk, b) >= 0)
 	ok(
 		sk.find_bone("Hips") >= 0 and sk.find_bone("RightHand") >= 0 and contract.is_empty(),
-		"%s: Meshy's skeleton (%d bones, no contract bones %s)" % [a, sk.get_bone_count(), str(contract)]
+		(
+			"%s: Meshy's skeleton (%d bones, no contract bones %s)"
+			% [a, sk.get_bone_count(), str(contract)]
+		)
 	)
 	var head := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("Head")).origin
 	var front := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("headfront")).origin
@@ -71,7 +82,9 @@ func _bones(a: String) -> void:
 ## The head stands where the contract model's does (the same size in game).
 func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
-	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
+	var old := (
+		(load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
+	)
 	var osk := WardenGlb.skeleton(old)
 	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
 	old.free()
@@ -79,7 +92,10 @@ func _height(a: String) -> void:
 	var glb := m.get_node("Warden") as Node3D
 	var sk := WardenGlb.skeleton(glb)
 	var got := glb.scale.y * sk.get_bone_global_rest(sk.find_bone("Head")).origin.y
-	ok(absf(got / want - 1.0) < HEIGHT_TOL, "%s: head at %.3f m, contract model's %.3f m" % [a, got, want])
+	ok(
+		absf(got / want - 1.0) < HEIGHT_TOL,
+		"%s: head at %.3f m, contract model's %.3f m" % [a, got, want]
+	)
 	m.free()
 
 
@@ -99,20 +115,78 @@ func _states(main: Node, a: String) -> void:
 		m.set_meta(WardenClips.STATE, c[1])
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
-		var want := String(nat.d["clips"][c[0]])
+		var want := String(nat.plays[c[0]])
 		var sk := nat.skel
 		var up := (
 			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
 			- sk.get_bone_global_pose(sk.find_bone("Hips")).origin.y
 		)
 		ok(up > UPRIGHT, "%s: %s stands up (head %.2f m over the hips)" % [a, c[0], up])
-		ok(nat.player.current_animation == want, "%s: %s plays %s (%s)" % [a, c[0], want, nat.player.current_animation])
+		ok(
+			nat.player.current_animation == want,
+			"%s: %s plays %s (%s)" % [a, c[0], want, nat.player.current_animation]
+		)
 	var shown := m.get_node("Rig/Torso/Aim/Gun").find_children("*", "MeshInstance3D", true, false).filter(
 		func(mi): return (mi as MeshInstance3D).visible
 	)
 	ok(shown.is_empty(), "%s: the rig's procedural weapon is hidden" % a)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
-	ok(gun.global_position.distance_to(nat.hand_position()) < 0.01, "%s: the aim node rides Meshy's hand" % a)
-	var anchors := ["anchor_head_top", "anchor_chest", "anchor_gun_R"].filter(func(an): return WardenGlb.anchor(m, an))
+	ok(
+		gun.global_position.distance_to(nat.hand_position()) < 0.01,
+		"%s: the aim node rides Meshy's hand" % a
+	)
+	var anchors := ["anchor_head_top", "anchor_chest", "anchor_gun_R"].filter(
+		func(an): return WardenGlb.anchor(m, an)
+	)
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
+	_toon(a, m)
+	_crouch_arms(a, nat)
 	m.free()
+
+
+## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").
+func _toon(a: String, m: Node3D) -> void:
+	var surfaces := 0
+	var toon := 0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		for si in (mi as MeshInstance3D).mesh.get_surface_count():
+			surfaces += 1
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			toon += int(
+				(
+					sm != null
+					and sm.shader == Models.HERO
+					and (m.get_meta("mats", []) as Array).has(sm)
+				)
+			)
+	ok(
+		surfaces > 0 and toon == surfaces,
+		"%s: hero-toon on %d of %d surfaces" % [a, toon, surfaces]
+	)
+
+
+## The crouch's arm bones play the walk's arm keys (Meshy's crouch holds a torch out); its legs keep the crouch.
+func _crouch_arms(a: String, nat: WardenNative) -> void:
+	var from := String(nat.d.get("crouch_arms_from", ""))
+	if from == "":
+		return
+	var mix := nat.player.get_animation(String(nat.plays["crouch"]))
+	var arms := nat.player.get_animation(String(nat.plays[from]))
+	var meshy := nat.player.get_animation(String(nat.d["clips"]["crouch"]))
+	var arm := NodePath(String(meshy.track_get_path(0)).get_slice(":", 0) + ":RightForeArm")
+	var leg := NodePath(String(arm).get_slice(":", 0) + ":RightLeg")
+	var rot := Animation.TYPE_ROTATION_3D
+	var mi := mix.find_track(arm, rot)
+	var ai := arms.find_track(arm, rot)
+	var same_arm: bool = (
+		mi >= 0 and ai >= 0 and mix.track_get_key_value(mi, 0) == arms.track_get_key_value(ai, 0)
+	)
+	var li := mix.find_track(leg, rot)
+	var ci := meshy.find_track(leg, rot)
+	var same_leg: bool = (
+		li >= 0 and ci >= 0 and mix.track_get_key_value(li, 0) == meshy.track_get_key_value(ci, 0)
+	)
+	ok(
+		same_arm and same_leg,
+		"%s: the crouch takes the %s's arms and keeps its own legs" % [a, from]
+	)
