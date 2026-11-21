@@ -5043,12 +5043,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
