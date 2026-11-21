@@ -951,7 +951,7 @@ charge walk, landed on main through the mc line (`rmb.lunge.walk_k` 0.8).
 | | R Starpiercer | a tap self-buff with no cast lock; "she can walk between shots" | 1.0; the empowered draws keep the LMB's 0.7 | match |
 | Cinder `ashwick` (linwick.md, 205-230 px/s at 50 px/m = 4.1-4.6 m/s, 2.3-2.6 bh/s) | LMB stream held | walks while firing, "no visible slow" (0007-0019); no px/s | 1.0 (the kit runs the lance; no `fire_slow`) | match (no slow shown); `--ashwick-combo-check` "lance audit ... at his full walk" |
 | | LMB, 0.35 s after letting go | not resolvable at 5 fps (sheet gap 12: "subtle", keep) | 0.6 (`lmb.slow_after`) | not seen; kept |
-| | RMB Cinder Shot, lane held about 0.4 s, release | "does not stop moving" (0072-0137); a quick arm thrust | 1.0 | match; asserted "cinder cast-move" |
+| | RMB Cinder Shot, the 0.4 s cast (lane on the press, bolt at its end) | "does not stop moving" (0072-0137); a quick arm thrust | 1.0 | match; asserted "cinder cast-move" |
 | | E Furnace Cloak | arms wide about 0.2 s, then the blast; walk not stated | instant on the press (owner item 11); 1.0 | match (no lock shown) |
 | | R Flue Flight | a flight: about 500 px/s (10 m/s) for 1.6 s, the ult clip 9-10 bh in 1.3-1.4 s; walks on with no landing beat | the flight carries her (12.6 m/s for 1.8 s); 1.0 on landing | n/a for a walk factor; match on landing |
 
@@ -1369,3 +1369,14 @@ Where the source lets a move touch an ally (`sv/briefs/kits.md`), the check excu
 | Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
 
 Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.
+
+## Cinder RMB: a cast, not a hold (2026-11-21)
+
+| Hero | Ability | Source (frames) | Before | Now | Status |
+|---|---|---|---|---|---|
+| Cinder (`ashwick`, Felix) | RMB Cinder Shot timing | slot on cooldown with the lane and a nozzle flash, bolt two frames later: 0073 > 0075, 0102 > 0104, 0128 > 0130 (5 fps; always two lane frames = a fixed 0.4 s) [F] | hold to aim, the bolt on the release (a tap: 2 steps); cooldown at the release | `rmb.cast` 0.4: lane, pose, palm flash and cooldown on the press, the bolt at 0.400 s whatever the button does | match |
+
+Why a cast: the lane always lasts exactly two frames, and the slot goes on cooldown when the lane first shows. Lace's
+held shot in the same source only goes on cooldown at the release. Full reading: docs/heroes/ashwick.md "RMB: cast or
+hold". Assumed `[?]`: the lane follows the aim through the cast; a stun drops the cast with the charge spent.
+
