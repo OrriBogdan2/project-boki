@@ -520,9 +520,26 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
-"semicolon": 28
+"long_line": 16,
+"semicolon": 9
+},
+"scripts/match/lairs_bots.gd": {
+"long_line": 3,
+"semicolon": 2
+},
+"scripts/match/lairs_demo.gd": {
+"long_line": 7,
+"semicolon": 6
+},
+"scripts/match/lairs_fight.gd": {
+"long_line": 7,
+"nested_ternary": 2,
+"semicolon": 3
+},
+"scripts/match/lairs_lock.gd": {
+"long_line": 16,
+"nested_ternary": 6,
+"semicolon": 8
 },
 "scripts/match/landmarks.gd": {
 "long_line": 23,

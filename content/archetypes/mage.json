@@ -66,6 +66,8 @@
 		"charges": 1,
 		"hold": 1.0,
 		"min_t": 0.33,
+		"self_slow": 0.18,
+		"slow_in": 0.3,
 		"coil": {
 			"dmg": [
 				16.0,
@@ -131,7 +133,7 @@
 		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "mage_x",
-		"col": "#ffd36a",
+		"col": "#ff8ac8",
 		"cooldown": 42.0,
 		"windup": 0.3,
 		"rise": 0.3,
@@ -143,10 +145,10 @@
 		"range": 14.4,
 		"radius": 2.7,
 		"dmg": 9.0,
-		"push": 8.0,
-		"lift": 0.4,
+		"push": 0.0,
+		"lift": 0.0,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22 and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",
@@ -166,7 +168,7 @@
 	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
-		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown; turn rate while held: match 1280 (ext/hero-ref-footage vireo 0043-0048, 0057-0062: no cursor swing in the hold)"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction"},
 		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor"},
 		"x_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown"}
