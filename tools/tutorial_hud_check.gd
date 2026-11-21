@@ -42,7 +42,7 @@ func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
 	main = mn
 	Save.no_write = true
 	var fresh: Dictionary = Save.d.duplicate(true)
