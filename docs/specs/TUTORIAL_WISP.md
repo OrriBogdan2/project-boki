@@ -63,3 +63,11 @@ A check (`--tutorial --tut-test`) must reach `extract` with `last_step` printing
 - `KinWisp.mode` returns false when `tut` is set ("never in the tutorial"); beats 2-7 need it true and the wisp shown in tutorial.
 - `Tutorial` needs the decoy and the new ids in `_is_done`, `applies`, `_enter` (as the cut steps do); `TutorialText` gets `%s`-style tokens it already has.
 - Net-neutral wiring only; the god files may not grow (AGENTS.md section 2). New logic goes in a `scripts/match/tutorial_wisp.gd`.
+
+## Built: the steal beat (ext/tut-steal-beat)
+`steal` sits right after `summon` (wisps on only: `Tutorial.applies`). `TutorialSteal` stands a held dummy Hunter
+("Rival", a Boki of another species, `ctrl` idle, never bleeds out) 6 m off; after 1 s it goes down through
+`Match.knock`, and the real `KinSteal` does the rest: wisp breaks loose, the interact prompt, the 0.6 s hold. The step
+passes 2 s after the grab; a wisp that goes home ungrabbed sends the dummy up and down again. The next step removes the
+dummy and its wisp, so the pack step's Summon key is untouched. It stops at the grab: the stolen wisp's summon is not
+taught (the closing line names the key). Added time at the check driver's pace: about 4 s; worst case per try 13 s.
