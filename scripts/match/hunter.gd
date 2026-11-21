@@ -2558,9 +2558,10 @@ func _took(d: float, _by: Ent) -> void:
 func perk_n(id: String) -> int:
 	return perks.count(id)
 
-## Can this perk still be offered to you (not at its stack limit)?
+## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
-	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
+	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
+	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
 ## armor) are updated on the spot.
@@ -2675,7 +2676,7 @@ func _anim_state(stretch: float) -> void:
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
-	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
+	StompLook.fill(self, s)      # "stomp" (the cycle's phase, -1 off) and its style
 	UtilityPose.fill(self, s)      # "drink", or "util" with "util_move"
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)

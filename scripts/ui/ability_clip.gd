@@ -42,9 +42,11 @@ var _number: Label3D
 var _hits: Array = []          # loop times the dummy is struck
 var _hit_i := 0
 var _flinch := 0.0
+var with_line := true          # false: key and name only, no sentence under them
 
-static func make(hunter_id: String, ability: String, px := Vector2(230, 130)) -> AbilityClip:
+static func make(hunter_id: String, ability: String, px := Vector2(230, 130), line := true) -> AbilityClip:
 	var c := AbilityClip.new()
+	c.with_line = line
 	c.id = hunter_id
 	c.slot = ability
 	c.stage_size = px
@@ -107,9 +109,10 @@ func _ready() -> void:
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(nm)
 	v.add_child(head)
-	var ln := UI.para(line_for(id, slot), 12, UI.MUTED)
-	ln.custom_minimum_size = Vector2(stage_size.x, 0)
-	v.add_child(ln)
+	if with_line:
+		var ln := UI.para(line_for(id, slot), 12, UI.MUTED)
+		ln.custom_minimum_size = Vector2(stage_size.x, 0)
+		v.add_child(ln)
 	t = fmod(float(hash(id + slot) % 1000) / 1000.0 * LOOP_S, LOOP_S)     # clips side by side don't beat together
 
 # ------------------------------------------------------------------ the stage
