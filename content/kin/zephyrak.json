@@ -114,5 +114,10 @@
 		"temper": "Wild",
 		"desc": "Light as a cloud and buzzing with static. Little sparks jump to your fingers. Sarcobra guarded it.",
 		"play": "Fast and electric. Spears through foes and arcs lightning."
+	},
+	"size": {
+		"cm": 42,
+		"kg": 3.2,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

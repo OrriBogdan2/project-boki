@@ -116,5 +116,10 @@
 		"temper": "Calm",
 		"desc": "Something calm is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

@@ -114,5 +114,10 @@
 		"temper": "Curious",
 		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
 		"play": "Roots foes in place with spore clouds. Notices everything, wanders off sometimes."
+	},
+	"size": {
+		"cm": 22,
+		"kg": 1.6,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }
