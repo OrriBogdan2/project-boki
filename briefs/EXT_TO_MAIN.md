@@ -10838,3 +10838,4 @@ READY ext/sfx-snack-patch d8e70b2985 (bulk-rebase: origin/main merged in mechani
 READY ext/ult-ranks-source 73036665eb (bulk-rebase: origin/main merged in mechanically, was 25ec2b492f; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/ui-select-port 03abd58c0c (bulk-rebase: origin/main merged in mechanically, was 658e350f18; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/cinder-rmb-cast 0ebacc3c9d (bulk-rebase: origin/main merged in mechanically, was 8da35b1712; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/plate-status-declutter c2a46a0798 (PR #382: merged origin/main 7e281a0d00, recast_cue.gd conflict resolved: _badge stays removed; --check 0 fails, plate-status-check 55/0, recast-cue only the 2 Ostra reds already on main; health --strict red only on inherited style-ratchet counts, same on main)
