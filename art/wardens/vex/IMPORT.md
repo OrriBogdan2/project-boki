@@ -1,5 +1,27 @@
 # Vex (gunslinger): import note
 
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r5 (2026-11-21, after the r4e art-gate FAIL, awaiting the owner's visual check)
+Part-lock: the r4 gatling (Meshy G2, bronze with stickers and chain) is kept as its own piece, Meshy-remeshed to 10000 tris (tG2);
+the body is redone. Two routes in parallel (~/gens/hunter-regen-1120/vex/r5/raw/gen_log.tsv): P1-P3, the r4 body recipe, and
+F1-F3, from the turnaround with face ref #5 as a texture ref. F3 won (blue eyes, freckles, hazard cuff, coin chain, back
+patch, softer lips) and was Meshy-remeshed to 48000 tris (tF3), then composed with tG2 (r4/scripts/compose_r4.py).
+BLACK HOLES in the jacket back came from v95_swap's own decimation (make_low collapse plus _unfold flips faces), not from
+Meshy. r5 keeps the master under budget and sets head_tris 0, so nothing is decimated (spec: r5/work/swap4/spec.json,
+56495 tris, no flipped faces in a backface render). The hair slot is widened to h 0.15-0.56. The olive jacket fell in brass
+(h 0.07-0.17): a cloth rule for the torso box now comes before brass (checked with r5/scripts/slotview.py). The textures are
+Meshy's own: no pixel recolouring. The Meshy rig is reused from swap2; a re-rig of the same mesh returned 422.
+Game look (warden_look.json "vex"):
+- The fringe at the match zoom was the ink shell (dark dashes) and rim_far (a pale green band), so Vex has no_ink on
+  cloth/leather/metal/brass/skin, rim_far 0 and far_smooth 0 (the fragmented Meshy atlas bled hair green into the
+  trouser edges).
+- The jacket was neon only in the shader: cloth far_lift 0, desat 0.3, albedo 0.82/0.82/0.7.
+- The gun alone has "metal-v95b": desat 0.2, albedo 1.05/1.1/0.95 (orange-red to copper-bronze).
+- Trousers: leather dark_lift 0.105 (0.09 is black, 0.12 grey).
+Stretch-check (51 clips): worst 7.64 (dash_ex, hips), median 4.38, 41 over 3x (r4: 8.61 / 5.32 / 45).
+Proof (GPU, jobq): r5/shots/b and r5/sheets: 6 views x 18 clips, the trait sheet vex_r5_traits.jpg, vex_r5_clips.mp4.
+STILL OPEN vs the turnaround: few lime splats and no cargo pockets on the trousers, no shoulder tally scars, no pink
+triangle back patch, a cuff without stripes, lips a shade darker, the hair messier.
+
 ## DRAFT candidate on ext/hunter-regen-vex-1120: regen r4 (2026-11-20, after the r3b art-gate FAIL, awaiting the owner's visual check)
 r3b's hip was ragged (the gun baked into the body gave a skirt shelf and a stretched flap) and the gun, trousers and hair were
 off the splash. r4: a new Meshy regen of the BODY ONLY from the turnaround (no gun on the arm, so no shelf at the hip), a
