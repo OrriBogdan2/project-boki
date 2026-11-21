@@ -784,12 +784,15 @@ func step(dt: float) -> void:
 		else:
 			_p("rate_%s/scale" % live, 1.0)
 		var back := float(want.get("blend_out", 0.0))
-		act_w = move_toward(act_w, 0.0, dt / back) if back > 0.0 else \
-				move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
-		if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
-			up_w = 0.0
-		else:
+		if back > 0.0:
+			act_w = move_toward(act_w, 0.0, dt / back)
 			up_w = move_toward(up_w, 0.0, dt / FADE)
+		else:
+			act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
+			if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
+				up_w = 0.0
+			else:
+				up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
 		# (a lock-in settles slower)

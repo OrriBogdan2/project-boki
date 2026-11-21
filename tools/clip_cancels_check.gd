@@ -15,7 +15,7 @@ const RUN := Vector3(0, 0, -4.0)
 ## the second clip) or a longer "fade", and then drops its entry.
 const CANCEL_OPEN := {
 	"juggernaut jug_reel@0.30>jug_spin": "1.16 m, the spin's first pose is far from the reel",
-	"juggernaut jug_lunge_wind@0.50>jug_lunge": "0.79 m into the lunge: its lead (-0.45) holds the first pose, far from the wind-up hold",
+	"juggernaut jug_lunge_wind@0.50>jug_lunge": "0.79 m: the lunge holds its upright frame 0 for its 0.45 s lead (Kael retime), far from the wind-up hold",
 	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.74 m in a frame",
 	"bulwark bul_lumber@0.20>bul_ult_wind": "0.50 m into the ult wind-up",
 	"dredge dr_blast@0.50>stun": "0.60 m into the stun pose",
@@ -142,9 +142,10 @@ static func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 	# (a move shorter than one source frame, cut or clip, is over and fading back before the window closes)
 	if float(mv.get("cut", 1e9)) <= SOURCE_FRAME or (mv.has("clip") and clips.move_len(mv) <= SOURCE_FRAME):
 		return true
-	# (a move with a "time" map and a "blend_out" hands the body back to the legs by itself: with its clip's end less than
-	# a frame plus the blend-out away, it never owns the body at full weight)
-	if mv.has("blend_out") and mv.has("time") and float(mv["time"][-1][0]) - SOURCE_FRAME <= float(mv["blend_out"]):
+	# (a move with a "blend_out" that is already inside it by the window's end is giving the body back to the legs
+	# as its data says: slam follow-through; with a "time" map, its last key is the clip's end)
+	if mv.has("blend_out") and (clips.move_len(mv) - SOURCE_FRAME <= float(mv["blend_out"]) \
+			or (mv.has("time") and float(mv["time"][-1][0]) - SOURCE_FRAME <= float(mv["blend_out"]))):
 		return true
 	var clips_of: Array = [_clip_of(dd, st), mv.get("alt", "")]
 	var on_up: bool = clips.up_w >= 0.999 and absf(clips.xf_u - clips.chan_u) < 0.001 and clips.cur_u in clips_of

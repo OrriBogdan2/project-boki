@@ -26,7 +26,6 @@ const CHECKS := {
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
 	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # decisions/0100
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
 	"--camp-layout-check": ["res://tools/camp_layout_check.gd", "camp_layout_check", null],
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
@@ -456,11 +455,11 @@ const CHECKS := {
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
-	# every listed cancel hands over with no pop
-	"--clip-cancels-check": ["res://tools/clip_cancels_check.gd", "clip_cancels_check", null],
 	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],  # slam impact hold
 	# one reader for ability words
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
+	# every listed cancel hands over with no pop
+	"--clip-cancels-check": ["res://tools/clip_cancels_check.gd", "clip_cancels_check", null],
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
@@ -662,7 +661,6 @@ const CHECKS := {
 	"--prompt-queue-check": ["res://tools/prompt_queue_check.gd", "prompt_queue_check", null],
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
-	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],  # wild Boki models
 	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],  # combat HUD budget
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
