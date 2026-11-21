@@ -116,5 +116,5 @@ static func migrate(data: Dictionary) -> void:
 	if not back.is_empty():
 		var names: Array = back.map(func(r): return String(r.get("name", "a Boki")))
 		var who := ", ".join(names)
-		data["market_notice"] = ("Boki aren't sold for gems any more: %s came back from the market to your farm. " % who
-			+ "Give a Boki a new home at the Shelter, or hand it to a friend.")
+		data["market_notice"] = ["Boki aren't sold for gems any more.", "Back on your farm: %s." % who,
+			"Give a Boki a new home at the Shelter, or hand it to a friend."]
