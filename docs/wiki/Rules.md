@@ -1435,6 +1435,8 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | trust | 1 |
 | trust_doc | Trust for the session when at least one glint was landed. |
 | card_s | 6 |
+| derby | {"common": 1, "rare": 3, "gems": 10, "friends": 5} |
+| derby_doc | Fishing derby: race the five casts a friend's visit snapshot kept. A landed glint scores common points, a rare one rare points; the higher total wins gems (a tie pays nothing), paid once per friend per garden day. Only friends who landed something are listed (at most `friends`). |
 
 ## glint_fishing_vfx (`content/rules/glint_fishing_vfx.json`)
 
