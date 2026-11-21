@@ -208,7 +208,7 @@ func _trial(hero: String, slot: String) -> Array:
 		if tick == HOLD:
 			Input.action_release(SLOTS[slot])
 		_no_mobs(m)
-		seed(hash(hero + slot) + tick)  # re-dealt each tick: a draw elsewhere (a monster copy arriving online) must not shift them
+		seed(hash(hero + slot) + tick)  # re-dealt each tick: a draw elsewhere (an online monster copy) can't shift them
 		m._process(DT)  # in the press's own frame, so the press is "just pressed" here
 		if first[0] < 0 and _anim_sig(m) != anim0:
 			first[0] = tick

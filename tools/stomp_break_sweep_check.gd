@@ -61,7 +61,9 @@ func run(main: Node) -> void:
 			if row[0] == hero:
 				var got := _trial(m, hero, row[1], row[2], row[3])
 				var want: Array = row[4] if row[4] is Array else [row[4]]
-				ok(want.any(func(k): return got.has(k)), "%s %s lands %s on the stomper (%s)" % [hero, row[1], " or ".join(PackedStringArray(want)), got.keys()])
+				var lands := " or ".join(PackedStringArray(want))
+				var hit := want.any(func(k): return got.has(k))
+				ok(hit, "%s %s lands %s on the stomper (%s)" % [hero, row[1], lands, got.keys()])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("STOMP BREAK SWEEP DONE, rows: %d, failures: %d" % [rows, bad])
