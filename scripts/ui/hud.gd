@@ -459,7 +459,7 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := TextCache.width(big, nm, 16) + 10.0
-		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
+		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 34.0 if (is_gear or is_tune) else 20.0))
 		if LabelClash.blocked(tag):
 			continue      # (a nameplate, bar or damage number is there: the loot name waits)
 		for tries in 4:
@@ -475,7 +475,7 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
-			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+			_ctext(sp + Vector2(0, 17), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 12, INK)
 		elif is_tune:
 			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
 			_ctext(sp, nm, 15, pd["col"], big)
@@ -610,31 +610,6 @@ func _draw_duel(sz: Vector2) -> void:
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
 var feed_top := 18.0
-## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
-## loss you caused, blue for your own side, gold for everything else.
-func _draw_feed(sz: Vector2) -> void:
-	var y := maxf(feed_top, HudStyle.safe_pad(sz).y)
-	var max_w := sz.x * (0.5 - TutorialStrip.WIDTH_FRAC * 0.5) - HudStyle.safe_pad(sz).x - 38.0
-	var mine: Array = []
-	if m.player:
-		for h in m.hunters:
-			if h.team == m.player.team: mine.append(h.pname)
-	for f in m.feed:
-		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = TextCache.fit(big, f["text"], 13, max_w)      # ends short of the top-centre strips
-		var w := TextCache.width(big, s, 13)
-		var ours := false; var first := ""
-		for nm in mine:
-			var at := s.find(String(nm))
-			if at >= 0 and (first == "" or at < s.find(first)): first = String(nm)
-		ours = first != "" and s.begins_with(first)
-		var col := Color("5fb6ff") if ours else (Color("ff6a5a") if first != "" else GOLD)
-		var br := Rect2(Vector2(sz.x - HudStyle.safe_pad(sz).x - w - 26, y), Vector2(w + 26, 24))
-		_rounded(br, Color(0.04, 0.05, 0.08, 0.82 * a), 6)
-		c.draw_rect(Rect2(br.position, Vector2(4, br.size.y)), Color(col, a))
-		_text(br.position + Vector2(14, 17), s, 13, Color(INK, a), big)
-		y += 28
-
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
@@ -1059,11 +1034,9 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
 ## overheated, when the next hit will spike you.
 func _draw_glider_heat(p: Hunter) -> void:
-	if p.dropping or p.downed or p.riding:
+	if not HudGroups.glider_shown(p):
 		return
 	var heat := 1.0 - p.glide_fuel
-	if not p.gliding and heat < 0.01:
-		return
 	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return

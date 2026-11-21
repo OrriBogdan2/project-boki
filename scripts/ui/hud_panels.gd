@@ -56,7 +56,7 @@ func _draw_panels() -> void:
 			hud._draw_lair_victory(sz, p)
 		HudScale.begin(hud, "feed", sz)
 		if HudReveal.on(m, "feed"):
-			hud._draw_feed(sz)
+			KillFeed.draw(hud, sz)
 		HudScale.begin(hud, "minimap", sz)
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
