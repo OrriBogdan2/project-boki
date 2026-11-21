@@ -19,6 +19,9 @@ extends RefCounted
 ## ally's, an ultimate's, an aim mark's or a telegraph that is only being refreshed.
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
+## And the carry cues (CarrySfx): the swap's two notes in order, a claim's lock-in, a steal heard by its owner, the
+## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
+## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
 var main: Node
 var fails := 0
@@ -78,9 +81,11 @@ func run(main_node: Node) -> void:
 	await _big_event_duck(P)
 	_tell_cues(m, P)
 	_steps(m, P)
+	await _carry(m, P)
 	await _glider(P, "yours")
 	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	await load("res://tools/match_audio_interrupts.gd").new().run(self, m, P, other)
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
@@ -432,6 +437,71 @@ func _barks(m: Match, P: Hunter) -> void:
 	ok(B.plays.size() == before, "Hunter callouts off: no bark (%s)" % [B.plays])
 	other.team = team
 	theirs.free()
+## Carry 2 in, 1 out: the swap key, a claim and a steal, through the real paths (Hunter.swap_kin, Life.take_item,
+## KinTrack.register, which every game runs for a catch online).
+func _carry(m: Match, P: Hunter) -> void:
+	var pairs := m.hunters.filter(func(x): return x != P and not x.out and x.kin and not x.kin.dead)
+	if not pairs.is_empty() and (pairs[0].kin2 == null or pairs[0].kin2.dead):
+		# main retired two Boki at the start (Match.TWO_KIN): a second one comes back out of a box (give_kin)
+		var r2: Dictionary = (pairs[0].kin.rec as Dictionary).duplicate()
+		r2["uid"] = "carry_check_2"
+		m.give_kin(pairs[0], r2)
+	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
+	if pairs.is_empty():
+		return
+	var B: Hunter = pairs[0]
+	Sfx.listener = B.pos
+	Sfx.last_played.clear()
+	B.swap_kin(true)
+	var first := Sfx.last_played.has("carry_swap_out") and not Sfx.last_played.has("carry_swap_in")
+	await main.get_tree().create_timer(CarrySfx.SWAP_GAP_S + 0.1).timeout
+	ok(first and Sfx.last_played.has("carry_swap_in") and not Sfx.last_played.has("swap"),
+			"swap: the outgoing Boki's chirp, then the incoming one's (%s)" % [Sfx.last_played.keys()])
+	var R: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var rec := {"species": P.kin.species, "uid": "carry_check", "name": "Check"}
+	Sfx.listener = P.pos
+	var got := _from_box(m, P, P, rec)
+	ok(got == ["carry_claim"], "claim: a capsule from a box of your own team locks in (%s)" % [got])
+	var wild := m.kins.filter(func(k): return is_instance_valid(k) and k.owner_h == null and not k.dead \
+			and k.lost_from == "")
+	ok(not wild.is_empty(), "setup: a wild Boki to claim")
+	if not wild.is_empty():
+		P.caught.clear()
+		Sfx.last_played.clear()
+		Capture.complete(m, P, wild[0])
+		ok(Sfx.last_played.has("carry_claim") and P.caught.size() == 1,
+				"claim: a scan that lands locks in (%s)" % [Sfx.last_played.keys()])
+	got = _from_box(m, P, R, rec)
+	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
+	Sfx.last_played.clear()
+	R.pos = P.pos + Vector3(60, 0, 0)
+	KinTrack.register(R, rec, P)
+	got = Sfx.last_played.keys()
+	ok(got == ["carry_stolen"], "steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got])
+	for d in [25.0, 40.0]:
+		R.pos = P.pos + Vector3(d, 0, 0)
+		Sfx.last_played.clear()
+		CarrySfx.stolen(m, R, B)
+		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
+		ok(Sfx.last_played.has("carry_take") == hears,
+				"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"])
+	R.pos = P.pos + Vector3(2, 0, 0)
+	Sfx.last_played.clear()
+	Sfx.recent.erase("carry_take")
+	for i in 3:
+		CarrySfx.stolen(m, R, B)
+	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
+	R.remove_meta(KinTrack.META)
+
+## Takes `rec` out of a box `dropper` left and returns the carry cues it played.
+func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
+	h.caught.clear()
+	Sfx.last_played.clear()
+	var b := {"owner": dropper, "team": dropper.team, "pos": h.pos, "gems": 0, "seeds": {}, "caught": [rec.duplicate()],
+		"node": null}
+	Life.take_item(m, h, b, {"key": "caught", "i": 0})
+	h.caught.clear()
+	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
