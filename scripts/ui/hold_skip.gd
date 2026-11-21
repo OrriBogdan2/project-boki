@@ -25,6 +25,7 @@ var held: InputEvent = null      # the press being held, until its release
 var held_s := 0.0
 var since_up := LINGER_S         # s since the last release (the hint lingers, then fades)
 var done := false
+var can_skip := true             # false: a tap still moves on, but a hold does nothing and no ring shows
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -53,13 +54,13 @@ func feed(event: InputEvent) -> bool:
 func _process(delta: float) -> void:
 	if held != null and not done:
 		held_s += delta
-		if held_s >= HOLD_S:
+		if can_skip and held_s >= HOLD_S:
 			done = true
 			held = null
 			skipped.emit()
 	else:
 		since_up += delta
-	var up := held != null or done or since_up < LINGER_S
+	var up := can_skip and (held != null or done or since_up < LINGER_S)
 	modulate.a = move_toward(modulate.a, 1.0 if up else 0.0, delta / FADE_S)
 	if modulate.a > 0.0:
 		queue_redraw()
