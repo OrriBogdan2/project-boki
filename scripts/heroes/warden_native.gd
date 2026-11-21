@@ -78,6 +78,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	if e.has("weapon"):
 		var idle := WardenGlb.model_xf(model, nat.skel) * nat.clip_pose("idle", nat.hand)
 		nat.held = WardenHeld.make(model, arch, e["weapon"], idle)
+		if nat.held and nat.hand >= 0:  # (a fixed socket: placed each time the clip poses the hand, never a frame late)
+			nat.skel.skeleton_updated.connect(nat._follow_held)
 	if bool(e.get("toon", true)):
 		var own := WardenGlb.look(WardenGlb.art(arch))
 		var mats: Array = model.get_meta("mats", [])
@@ -137,8 +139,15 @@ func _process(dt: float) -> void:
 		(f[0] as Node3D).position = (skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin)
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
-	if held and hand >= 0:
-		held.follow(WardenGlb.model_xf(root, skel) * skel.get_bone_global_pose(hand))
+	if held:
+		held.state(cur)
+		held.ease_tilt(dt)
+
+
+## The held weapon onto Meshy's hand as the skeleton takes this frame's pose (the BoneAttachment3D moment: never a
+## frame behind the clip, whatever order the player and this node process in).
+func _follow_held() -> void:
+	held.follow(WardenGlb.model_xf(root, skel) * skel.get_bone_global_pose(hand))
 
 
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
