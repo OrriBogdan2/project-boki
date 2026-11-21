@@ -91,12 +91,15 @@ func _real_load(main: Node) -> void:
 	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
+	var left := [-1.0]             # the bar as the screen leaves the tree (its last frame runs after our last sample)
 	while waited < TIMEOUT_S:
 		await tree.process_frame
 		var dt := tree.root.get_process_delta_time()
 		waited += dt
 		var ld := _screen(main)
 		if ld:
+			if left[0] < 0.0 and shown.is_empty():
+				ld.tree_exiting.connect(func() -> void: left[0] = float(ld.prog))
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
 			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
@@ -111,14 +114,17 @@ func _real_load(main: Node) -> void:
 	for i in range(1, shown.size()):
 		if shown[i][0] < shown[i - 1][0]: back += 1
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
-		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
+		# a sample is taken before that frame's _process: the step into sample i ran in frame i - 1
+		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i - 1][2] < HITCH_S:
 			jumps += 1
-			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]
+			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i - 1][2]]
 			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % at)
 	ok(back == 0, "the bar never goes backwards (%d frames did)" % back)
 	ok(want_back == 0, "the stage target never goes backwards (%d frames did)" % want_back)
 	ok(jumps == 0, "the bar never jumps more than %d%% in a normal frame (%d did)" % [int(MAX_STEP * 100.0), jumps])
 	var last: float = shown[-1][0] if not shown.is_empty() else 0.0
+	if left[0] >= 0.0:
+		last = left[0]
 	ok(last >= 0.99, "the bar is full when the screen leaves (%.2f)" % last)
 	var names := ["Building the map", "Spawning", "Preparing graphics", "Ready"]
 	var at := -1
