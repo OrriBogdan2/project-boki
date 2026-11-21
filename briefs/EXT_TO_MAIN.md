@@ -10787,3 +10787,4 @@ READY ext/merge-keeps-abilities-1117 badbb9aa9bc30a0801256c7c36f46e95f35faf19 (m
 READY ext/plate-status-declutter e165330c3ab (PR #382: merged origin/main 74364b3ad9, rimewright conflict resolved; plate-status-check 55/0, recast-cue only the 2 Ostra reds already on main)
 READY ext/farm-tut-batch-1108-deep 76572006ce3 (PR #23: merged origin/main 74364b3ad9; only wiki Rules.md conflict, regenerated; farm-place 0 fails, farm-tutorial/hob-check reds identical to main)
 READY ext/ult-ranks-source 25ec2b492f7 (PR #421: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21 with both notes; ult-rank-check 0 fails; archetype-check 4 reds identical to main)
+READY ext/vfx-zones-remote 5d2680c54eb (PR #446: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21; zone-net-check 35/0, displace-net 0 fails, gil-combo reds identical to main)
