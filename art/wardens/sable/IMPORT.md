@@ -1,5 +1,25 @@
 # Sable (thief): import note
 
+## Skin weights only, no tearing under animation (2026-11-19 retry 11-19f, ext/hunter-fix-sable-1118)
+Restarted from main's sable.glb. WEIGHTS ONLY: vertex count (51,363), positions, normals, UVs, colours, indices, textures,
+skeleton, bone names and all 59 clips are byte-identical to main; only JOINTS_0/WEIGHTS_0 change. No vertex split, no cut,
+nothing deleted. Rest pose skins to main's within 0.3 micrometre. Script: `~/gens/sable-fix-1119s/fix6.py` (v12).
+1. Forearm/hand/pistol weight stays only on the real arm surface: within 3.5-6.5 cm of the MESH arm axis (elbow -> wrist ->
+   pistol grip; the bones sit about 6 cm inside the mesh) and facing away from it, plus the pistol part.
+2. The arm/body split runs along existing UV seams (the scan has 2,734 UV charts): a chart is arm only if most of it is arm
+   surface; small charts ringed by the other side take that side (these islands were the shards left beside the waist).
+   142 positions sit on this seam (main: 348 positions with mismatched weights).
+3. Every other same-spot copy shares one weight (UV seams stay shut). Body charts get no forearm/hand weight, and none of the
+   upper arm below 1.08 m; the lost weight is refilled from neighbouring body weights. Head weight is capped below the waist.
+4. The braid (hair-v95b) was on upper_arm.R/forearm.R, so it swung out with her right arm: it now runs head (top) to hips (tip).
+5. A stretch-driven weights relax (only where an edge stretches over 2.2x in a clip pose) smooths what still pulls.
+Numbers (main -> this): edges stretched over 3x, mean per clip 6.58% -> 0.45%, worst clip 9.59% (fusion) -> 1.26% (ledge);
+copies opening over 1 cm 675 -> 176; far-bone verts 28 -> 0; hunter_mesh_check stretched tris 2626 -> 61 (collapsed tris at
+its worst frame 36 -> 85, union over all frames 252 -> 170); worst edge 354x -> 52x.
+Left: the coat still folds into a ball on her back in mantle f4-f6 (knees tucked to the chest), and a small belt flap
+shows at her left waist with both arms raised (reset, fusion).
+Proof: `~/gens/sable-fix-1119s/final/` (rest pose 4 sides, every clip live beside fixed MP4, review sheet).
+
 ## 5 s idle and 6 s stance on the live model (2026-11-18, ext/p18-port-1118)
 The live sable.glb with only its `idle` and `stance` clips replaced by the ext/idle-thief ones (tools/art1/sable_clips.py,
 IDLE_AUDIT section 9):
@@ -91,3 +111,24 @@ Texture-only: `sable_v95.jpg` (head) and `sable_v95b.jpg` (body) re-painted from
 
 ## Mouth-corner fix (2026-11-18, ext/sable-face-game-1118)
 Owner: the screen-left lip corner showed two endpoints. Cause: the painted lips (from the 2D edit) sat 5-6 mm below the mesh lip slit on the screen-left half (offset 57 px at the corner, 0 at the right corner at 10 px/mm in a front ortho render), so the paint ended at one point and the mesh crease at another, plus a dotted seam line and a lower-lip line that never met the right corner. Texture-only fix in the head/body albedo (`sable_v95b.jpg`; mouth region only, 7.7k texels at 4096): lip paint warped up to the mesh slit (offset removed, tapered to 0 at the right corner), lower-lip lines squeezed into each corner, paint beyond each mesh corner replaced by skin. Mesh, UVs, eyes, mole, blush and `sable_v95.jpg` untouched. Source/tools: `~/meshy/sable-lipfix-1118/`.
+
+## Weights-only retry 11-19l (ext/hunter-fix-sable-1118, PR #371)
+On top of the 11-19f weights (Fable review r3: sleeves re-split). Only JOINTS_0/WEIGHTS_0 change; every other buffer and the
+json are byte-equal to main (positions, UVs, normals, textures, skeleton, 59 clips). No triangle deleted, no vertex split.
+- 22 small sleeve/cuff UV charts (320 verts) that v12 had put on hips/head go back to their arm (live's weights, arm bones only);
+  24 upper-sleeve charts (433 verts) get live's weights with the head share moved to the upper arm (no sleeve on head).
+- Every same-spot vertex group carries one weight set: seams opening >1 cm 675 (live) -> 0; new cracks vs live 389 -> 0.
+- Coat cloth farther than 5-11 cm from the leg bones hands up to 60% of its shin weight to the thigh (smooth ramp), so it
+  no longer folds flat behind a bent knee (collapsed tris in ledge 85 -> 21).
+- Stretch-driven weight relax on welded positions (hand/forearm weight never spreads to a new vertex).
+Edges stretched >3x, mean per clip: 6.58% -> 0.31% (numpy), Blender 6.51% -> 0.31%. Scripts: ~/gens/sable-fix-1119t/scripts/.
+
+## Check 11-20 (ext/hunter-fix-sable-1118, glb unchanged from 11-19l)
+All 65 clips, 10 frames, front + back close cam, live and fixed in one Godot session: no spikes, slabs or floating bits.
+Left: (1) the pistol twirls (fusion, emote, encore, encore_dance, lmb_l/r, vault_*, exdash, knife, bola, death) roll
+`hand.*` up to 175-180 deg about the forearm, and the arm bones sit 5-9 cm off the arm mesh's centre (outside the
+sleeve), so the hand and gun swing ~17 cm around that axis and the forearm thins to a strand for those frames. No
+weight set fixes it (a 4 cm wrist blend was tried: same strand, stretch 0.31% -> 0.35%). Fix: move the arm bones into
+the arm (rig + clip retarget) or cap the hand roll in those clips. (2) mantle f4-f6: the coat rides the thighs, so
+in the tuck it fans up behind her back (no spikes); the spring/skirt/cape bones carry no weights.
+Evidence: ~/gens/sable-fix-1120/ (sable_live_vs_fixed_all_clips.mp4, sable_sheet.jpg, scripts/).
