@@ -10788,3 +10788,4 @@ READY ext/plate-status-declutter e165330c3ab (PR #382: merged origin/main 74364b
 READY ext/farm-tut-batch-1108-deep 76572006ce3 (PR #23: merged origin/main 74364b3ad9; only wiki Rules.md conflict, regenerated; farm-place 0 fails, farm-tutorial/hob-check reds identical to main)
 READY ext/ult-ranks-source 25ec2b492f7 (PR #421: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21 with both notes; ult-rank-check 0 fails; archetype-check 4 reds identical to main)
 READY ext/vfx-zones-remote 5d2680c54eb (PR #446: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21; zone-net-check 35/0, displace-net 0 fails, gil-combo reds identical to main)
+READY ext/merge-lane-n19g-1119 fc002f4b564 (PR #427: merged origin/main 74364b3ad9; only zone_next_shots.gd.uid add/add, took main's; minimap-check 0, archer frame 0, safe-area 4 reds identical to main)
