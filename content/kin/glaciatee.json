@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "glaciatee",
+	"name": "Glaciatee",
+	"theme": "frost",
+	"type2": "tide",
+	"flavor": "Huge manatee, walk-in ice-vault body.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "coolatee",
+		"stage": 3,
+		"from": "floenatee"
+	}
+}
