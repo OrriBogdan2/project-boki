@@ -17,9 +17,14 @@ numbers (Q1), one summon at a time (Q3), damage never ending it but death doing 
 Option 2. `content/rules/boki_summon.json` holds the role x size table (window, cooldown) and the uptime band;
 every species takes its cell (no per-species override until one is needed). Summon: the kin bursts beside you
 whole, on its normal AI and orders, leash 10 m (+-2 m by aggression), re-blooming beside you past 20 m.
-Damage never ends it; a kill turns it back into a wisp (the cooldown and what follows: decision 0044). The window ends in a 0.35 s
-shrink; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
+Damage never ends it; a kill turns it back into a wisp (the cooldown and what follows: decision 0044). The window ends in a 0.25 s
+fold; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
 a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiHud.summon_ring).
+The look both ways is BokiWispPop: the wisp swells and the Boki grows out of it, squashes on landing and opens
+its eyes last; the fold shuts the eyes, shrinks the Boki into the wisp and zips it to the shoulder. Soft light
+only: the bloom's spark burst and ground ring are gone (DECISIONS: explosions only for things that truly explode).
+The Hunter gestures with it (warden_anim "summon_call", about 0.3 s on the upper layer, KinSummon.anim_state): a
+call flung toward the burst, a recall pulled in to the chest as it folds; none on a re-bloom, while downed or after a kill.
 Carry passives: the wisp rides on the shoulder with the Return order, so its passives are on at 100 % whether
 it is a wisp or out; stolen wisps add theirs at a share (decision 0041). Stealing (0041), the killed summon (0044)
 and one rule set for PvE and PvP (0045) have their own notes.
@@ -32,3 +37,7 @@ Left out on purpose: guardian summon, kill credit (the kill-feed task), bots sum
 - The Training Grounds' Boki island has a summon pad (`SummonStation`, content/rules/summon_station.json): stand on it for the
   round-vs-critter card and the live Summon key, interact for the next of three practice Bokis with different windows.
   `--summon-station-check` covers the card, each window and cooldown, and the early send-back.
+- Cards: the Field Book species page shows `Summon N s / rest N s` from `KinSummon.times` (the same cell the summon
+  reads) and a plain line picked by `card_lines` thresholds in boki_summon.json ("Short summon, strong" / "Long summon,
+  steady") (DexView.summon_row; ported from ext/ui-summon-card 10b3b9152a; the garden card and loadout rows are left
+  out because home.gd is frozen).
