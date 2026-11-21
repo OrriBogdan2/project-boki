@@ -72,7 +72,7 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    (shot 05d). Owner: `scripts/home/home.gd:4652` `_pair_short`. *Proposal: print `NookRules.GROWN_LV` instead of a hard-coded 5.*
 6. **Breeding is about 8-15 hours of this play away.** Level 8 is 2800 XP (100 x level); pets give 1 (2 if loved) per 20 s, meals 2-5;
    182-358 XP in the hour here, so 8-15 hours, with no fetch or drills tried. The pace tool flags the same (`garden_sim.py`: home-only 5 min a
-   day reaches level 8 on day 29). Owner: `content/rules/garden_xp.json`, `scripts/home/garden_xp.gd`. *Proposal: raise `pet`/`feed` XP
+   day reaches level 8 on day 29). Owner: `content/rules/garden_xp.json`, `scripts/home/garden_xp.gd`. *Done on ext/garden-xp-pace (numbers only, see docs/GARDEN.md): garden-only level 4 now 28 min (was 123), a 20 min a day home player's first egg day 6 (was 12, `garden_sim.py`). Original proposal: raise `pet`/`feed` XP
    and give toy play and Dash laps XP so the first hour reaches level 4; the proposal block in `garden_sim.json` is the target.*
 7. **Toy play seems to give no XP.** The Boki played at the toy more than once in the hour, and the XP total is about what the pets and meals alone give (plays were not counted separately, so this is unconfirmed).
    Owner: `scripts/home/home_toys.gd` (line 197 only calls `FarmTutorial.event`). *Proposal: one
