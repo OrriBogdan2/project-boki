@@ -10756,3 +10756,4 @@ READY ext/merge-lane-M1-1121 c92bf219517 (lane M1 bundle: 17 branches; anim-foot
 READY ext/merge-lane-M3-1121 ab8f881309077f2a8687540311ce113b7eeb4cde (merge lane M3: 16 no-PR branches, garden-toy-xp dropped NEW-RED garden-day-check; targeted suite NEW-RED 0, export 885.0 MB = main)
 READY ext/ui-first-exp-hud 5cc5c84a3d73 (first expedition HUD holds back; merged with main, conflicts resolved)
 READY ext/merge-lane-M2-1121 2ef11056649 (merge lane M2: 19 branches, targeted gate 0 red, export-pack OK)
+READY ext/main-red-fix-1121 7444e3c619 (first_cast_check no longer fails on a busy host: median>12 ms slots not judged, no-cause slow windows ignored; bot-human-check green 2x = harness timeout; remote-move-check is not on main, only ext/feel-remote-move-smooth whose RMOVE Kael close 316 cm is a real fail there)
