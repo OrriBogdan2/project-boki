@@ -10746,3 +10746,4 @@ READY ext/sfx-silence-fill dd56a398766 (silence audit [far] band + Boki-place fi
 READY ext/ui-glider-perk-hold 88fd10096e (glider/perk strip held back)
 READY ext/tut-first-summon f599e08c5a (first summon hint)
 READY ext/boki-dex-port-1117 7e9364fbaf (bulk-rebase: origin/main merged in mechanically, was 735f778ce3; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/ui-first-exp-hud 68ff2a2eff62 (first expedition HUD holds back)
