@@ -10757,3 +10757,4 @@ READY ext/merge-lane-M3-1121 ab8f881309077f2a8687540311ce113b7eeb4cde (merge lan
 READY ext/ui-first-exp-hud 5cc5c84a3d73 (first expedition HUD holds back; merged with main, conflicts resolved)
 READY ext/merge-lane-M2-1121 2ef11056649 (merge lane M2: 19 branches, targeted gate 0 red, export-pack OK)
 READY ext/main-red-fix-1121 7444e3c619 (first_cast_check no longer fails on a busy host: median>12 ms slots not judged, no-cause slow windows ignored; bot-human-check green 2x = harness timeout; remote-move-check is not on main, only ext/feel-remote-move-smooth whose RMOVE Kael close 316 cm is a real fail there)
+READY ext/p04-port-1118 fbd2ef3628 (PR #329 camps; stomp-break-sweep green again: sweep pins the stomper's Boki out, 184 rows 0 failures)
