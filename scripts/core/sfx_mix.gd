@@ -10,7 +10,7 @@ extends RefCounted
 
 ## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
 const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXFar": "SFX",
-	"SFXPan": "SFX", "SFXMuffled": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
+	"SFXPan": "SFX", "SFXMuffled": "SFX", "SFXFoe": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
 ## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
