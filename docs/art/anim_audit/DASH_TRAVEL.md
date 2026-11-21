@@ -44,7 +44,9 @@ Neve 0.53 s (jerk 101), Sparkle 0.38 s; on these rules none of those rows failed
 Held slide (Vex): the slide's three-key loop (clip 0.367-0.5) is now in kit seconds at the clip's rate (`SLIDE_LOOP_FROM`/`_T`), so the drive pose holds until the slide ends and the stand-up plays after it. Before, the loop sat 25% too late, caught the stand-up and snapped back each period (194 rad/s inside a 0.72 s travel). `--dash-frames-check` has a held-slide row for Vex and a row for every dash, "the drive pose holds while it travels" (`ENTRY_S`, `TAIL_S`, `HOLD_RATE` in `tools/dash_travel.gd`). Kael's Lunge needs no hold: it travels 0.25-0.38 s and the ease-back starts at 0.37 s. Held Lunge (Kael): `jug_lunge`'s lead holds its coiled frame 0 for 0.2 s of kit time and the thrust is a one-frame snap, so a
 full or perfect Lunge into an empty lane (0.32-0.39 s) thrust early and eased back while still travelling.
 `JuggernautKit._tick_lunge` holds the clip's clock at `LUNGE_COIL_T` until the Lunge stops (its end or the hit), so the thrust
-lands on the stop at any length and the follow-through plays after it. Film: `dash_hold_kael_lunge_far_before_after.mp4`.
+lands on the stop at any length and the follow-through plays after it (`--dash-frames-check` row "the lunge strike lands
+on the stop": fastest pose frame -0.03/-0.03/-0.07 s from the travel's end on main, -0.02 on all three uses now). Perfect
+Lunge into an empty lane at the match camera, GPU jobs 20261120-231410-29435 / 20261121-005439-25549: `dash_hold_kael_lunge_far_before_after.mp4`.
 
 Not done here: Kael's enrage roar swaps a dash's clip mid-travel.
 
