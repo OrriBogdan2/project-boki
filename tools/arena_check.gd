@@ -22,6 +22,7 @@ func step(m: Match, secs: float) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Content.rules("merge_forms")["fusion_enabled"] = true      # (the cards and bots here use Fusion)
 	await _arena()
 	await _breaker_whirl()
 	await _cards()

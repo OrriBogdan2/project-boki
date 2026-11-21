@@ -10,15 +10,15 @@ extends RefCounted
 ## the fights with nothing left to pay are knocked down: up after Tutorial.DOWN_T with the beat going on. Then the
 ## course still finishes.
 
-const FIGHTS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]
+const FIGHTS := ["sec", "shoot", "gkey", "kin", "hook"]
 const GAPS := ["dash", "exdash", "glide"]
 const BOKI_BEATS := ["gkey", "ult"]
-## The beats that finish a camp, and the camp whose level they pay (shoot finishes the sec step's camp).
-const PAYS := {"shoot": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
+## The beats that finish a camp that pays a level (the shoot camp pays none), and that camp.
+const PAYS := {"sec": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
 ## The fights knocked down: by then their camp has nothing left to pay, so a kill while down changes nothing.
-const DOWNS := ["gkey", "kin", "hook", "ult"]
+const DOWNS := ["gkey", "kin", "hook"]
 const XP_EPS := 0.05          # XP: rounding slack (the last kill of a camp adds 0.01 to tip the level)
-const TIP_WAIT := 3.0         # s for the tip to show (it waits for the banner like every message)
+const TIP_WAIT := 8.0         # s for the tip to show (it waits for the banner and for a level-up card ahead of it, like every message)
 const GLOVE_WAIT := 30.0      # s: the walk to the glove takes 7-14; past this the check hands it over
 
 var bad := 0
@@ -120,6 +120,7 @@ func _tip_shows(tag: String) -> void:
 	var shown := false
 	for i in int(TIP_WAIT / Match.DT):
 		m.step(Match.DT)
+		m.hud.msgs._process(Match.DT)      # (the lane ages on frames; the check steps faster than frames, so age it by sim time)
 		if m.hud.msgs.texts().any(func(x): return x.begins_with(line)):
 			shown = true
 			break
