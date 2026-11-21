@@ -20,7 +20,7 @@ Option 2: one small field, no new event, and the reel (most of the reach's time)
 smooths. The hook is a "drawn" shot: no ball on any game, and no "s" copy.
 
 ## Consequences
-Net.VERSION 0.24.20. HunterNet tail 5 -> 7 fields; DredgeKit.net_reach / net_reach_in, its sound_tick lays the
+Net.VERSION 0.24.20. HunterNet tail 5 -> 7 fields (0.24.21, merged with the hazard move pair: 9 fields, `hz` before `rch`); DredgeKit.net_reach / net_reach_in, its sound_tick lays the
 remote arm; spawn_shot's "drawn" flag (KinExec cx "drawn"). The "s" kind 2 (pierce_terrain: Motley's orb) stays; only
 Grimble's hook, which the kit marks pierce_terrain after the send, never used it. Check: --remote-anim-check's Deep Reach rows. Film: --reach-net-film (GPU).
 Not mirrored: the arm's silhouette through rock and its sludge drips (caster's game only).
