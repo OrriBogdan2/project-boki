@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bch4rj2g1g1og"
-path="res://.godot/imported/ryzz_own_v95c.png-609fffc4fe060148ab916e757f0a446f.ctex"
+uid="uid://d3tqswlt6547s"
+path="res://.godot/imported/ryzz_own_v95b.jpg-3af406c4e687b52800762e049a6eecfe.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "30f5662246d219105922e07ace552896"
+"md5": "13d60350b5a449a6f2717e1e38e62cec"
 }
 
 [deps]
 
-source_file="res://art/wardens/ryzz_own/ryzz_own_v95c.png"
-dest_files=["res://.godot/imported/ryzz_own_v95c.png-609fffc4fe060148ab916e757f0a446f.ctex"]
+source_file="res://art/wardens/ryzz_own/ryzz_own_v95b.jpg"
+dest_files=["res://.godot/imported/ryzz_own_v95b.jpg-3af406c4e687b52800762e049a6eecfe.ctex"]
 
 [params]
 
