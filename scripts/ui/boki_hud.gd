@@ -267,7 +267,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
 		# its carried bonuses: on while it is on you, greyed while it is out beside you
 		var on := p.kin_carry_on()
-		H._ctext(Vector2(gr.get_center().x, gr.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
+		H._ctext(Vector2(gr.get_center().x, gr.position.y - 22.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
 	if down:
 		H._rounded(gr, Color(0.3, 0.02, 0.02, 0.5), 12)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.down_t))), 14, DOWN_COL, H.big)
