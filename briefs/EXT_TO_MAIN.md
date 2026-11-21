@@ -10727,3 +10727,4 @@ READY ext/albert-knock-rows fd4a53c7b5 (bulk-rebase: origin/main merged in mecha
 READY ext/tut-steal-beat 95cd09270e427013beb1d91eadb3f58e4ac33e19 (tutorial steal beat)
 READY ext/garden-second-boki 5df9998f5409 (second Boki on day one)
 READY ext/merge-lane-N2-1120 9635e916b5 (lane N2 re-merged on main (3): 12 merged + b771bcef ported; rig-ship glbs (Lace/Tenzo) kept OUT for owner check; step-smooth/dash-jump/clarity/match-audio back to main; health = main reds; export 5/5 OK 886 MB; supersedes 6a0d731841)
+READY ext/anim-neve-wrist 58928e20f6 (bulk-rebase: origin/main merged in mechanically, was 82ea2cd4f4; union 1 gen 0 files; the branch's own READY checks still apply)
