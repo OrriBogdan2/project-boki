@@ -202,3 +202,21 @@ in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `-
 ## A Boki carried home from a match (`CarryArrival`)
 
 DECISIONS 2026-11-11 "carry 2 in, 1 extra out" (the slot split itself is ext/carry-two-1111, not on main yet): a Boki you scan in a match and carry out comes home as an event. When it comes home it is an event, not a list entry: it stands at the arrival point (where you appear), up to three residents come to look (`ComeLook`, same as any new Boki), its memory gets `came home from <map> with <Hunter>` (the Hunter's base name, stored in `origin.where.hunter`), and a short card says where it came from and where it went. If the garden already has its out-cap (`KinBox.farm_cap()`) the Boki goes to the Burrow, nobody walks over, and the card says so. The pending list lives in memory only: a game closed between the results screen and the garden keeps the memory line and loses the card. No save migration (`origin.where.hunter` is read with a default). Check: `--come-look-check`.
+## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
+
+Every food and care input and what the player can see of it today:
+
+| Input | Changes | Seen |
+|---|---|---|
+| Meal / snack (`snacks.json`, `Care.FOODS`) | need bars, lean (`Evo.eat`) | body tint and flecks (`Evo.dress`, `Lean.mark`), journal line, chime on a new fleck |
+| Stat bites, toys, drill, loot bites (`garden_items.json`) | stats (`StatBudget`) | glint over the Boki (`StatGlint`), one tip, card number; **before this change no look on the body** |
+| Shaping items (token, sweet, rinse, aura) | path, lean, aura | preview card, ghost colour, aura (`GardenAura`) |
+| Pat, fetch, nap, chat (`care.json`) | trust, joy, xp once a kind a day | joy/trust bars, state animations |
+| Friends at the base (`BaseDrift`) | traits | journal line when a trait crosses a band |
+
+Gap closed first: raised stats now show as body size. `StatBudget.growth` = `care.json` `stat_budget.grow_max`
+(0.12) x sqrt(total points / `total_cap`), added to `evo_scale` in `Evo.dress` (60 points: 6% bigger, the full 240:
+12%; a fresh one is unchanged; it stacks with the 10% per form). A stat bite that changes the growth sets `look` in
+`GardenItems.use`, so the farm rebuilds the model (`_swap_kin_model`) and the size shows on the spot. No new HUD
+element. Check: `--garden-items-check`.
+Left for later (needs owner OK, stabilize sprint): a stat line on the Boki card, a trait word shown on the model.
