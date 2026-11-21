@@ -1,9 +1,10 @@
 {
  "group": "guns",
- "name": "Pickup guns",
+ "name": "Pickup guns and the minigun",
  "script": "tools/gen_sfx_guns.py",
  "sounds": {
-  "gun_smg": "fire", "gun_rifle": "fire", "gun_burst": "fire", "gun_shotgun": "heavy_fire", "gun_sniper": "heavy_fire"
+  "gun_smg": "fire", "gun_rifle": "fire", "gun_burst": "fire", "gun_shotgun": "heavy_fire", "gun_sniper": "heavy_fire",
+  "gun_minigun": "fire", "gun_minigun_spin": "cast"
  },
  "signature": []
 }
