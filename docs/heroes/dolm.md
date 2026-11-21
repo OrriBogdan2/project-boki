@@ -90,7 +90,7 @@ Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: ma
 | E allies hop the rocks by jumping (hold) | match | stone_stand.gd:35, :77, :91-93 (ally in the air); foes blocked, he walks up his own (stone_stand.gd:68-80); `rock (item 25): ...`, `hop rocks: an ally in the air hops them, a foe is stopped`. KIT_PARITY gap 14 and this file's older rows said "not built": stale, fixed here. Bots hopping at once: ext/tenzo-ally-hop (in flight) |
 | E extra row at rank 3 (source IV) | match | dolm_kit.gd:623-632 |
 | R Tetraform: tap wall, hold-drag angle, slows, 45s | differ (owner item 15: rocks only; the slow is kept) | dolm.json:47-48 (cooldown 45, slow_k 0.35), breah_spine.gd:48-75; `ult drag: ...`, `ult: the rise slows ...` |
-| R ranks (-5s, +2.5s lifetime x2) | open | our X has no ranks (dolm.json:47); not small (a rank table for the ult) |
+| R ranks (-5s, +2.5s lifetime x2) | match (0022, ext/ult-ranks-source) | dolm.json `x.per_rank` {cooldown [-5, -5], time [2.5, 2.5]}: 45s/7s -> 40s/9.5s -> 35s/12s; `--ult-rank-check` |
 | Shift Landslide: dash, launches a rock, slows, 12s, rank +1 charge and 33% | differ (owner item 111: Rock Hop, held) | dolm.json:32 (cd 12, hops 3, `slow_t` 1.5, last landing's rolling rock), breah_hop.gd:41-358; `dash: total distance...`, `data rank 3: a second charge...`, `crash: ...` |
 | Q glove | ours | no source, nothing to match |
 | Ability colour blue (owner 11-07) | open (held; in flight) | dolm.json ability cols are ochre and orange (:32, :38, :44, :47); ext/vfx-tenzo-impacts adds the blue impacts |
@@ -337,7 +337,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built as rocks, not tiles (owner, Nov 2026, reversing item 15): over the abyss the ridge's rocks are ground you can stand on while they last |
 | Tetraform can't be used to leave the arena bounds | patch 1.04 notes | no | built by placement: rocks only on legal ground (HeroZones.fits) |
 | Punched Tetraform rocks launch like any rock (Rocksweeping) | card, guide | yes | built (the punch sweep takes ult rocks); asserted |
-| Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki | no | not built: our R has no ranks |
+| Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki, source R tiers | no | built (0022): +2.5s and -5s cooldown at R ranks 2 and 3; asserted by --ult-rank-check |
 | Landslide rock shoves enemies toward the abyss (dunk setup) | footage tip "Dash -> RMB Dunk Combo" | yes (0965-1010) | built as the leap's landing crash (a shove with a lift) and the rock rolling on |
 | Rock Shardskin shield per rock fired (2.00 passive) / hitting your rocks with the punch gives a shield | patch 2.00 notes, owner's tooltip data | no | built (data pass) as the base passive: one stack per punch |
 | Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10s at rank 2 and 3 by `rank_cd.dash` in dolm.json), a second charge and the third further at rank 3 |
