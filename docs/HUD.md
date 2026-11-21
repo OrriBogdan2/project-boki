@@ -482,3 +482,9 @@ chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
 The counters follow `HudReveal` (from the 4th expedition), the glider ring shows only while gliding or the meter is not full
 (`HudGroups.glider_shown`), and the belt waits until a held item could be used, then stays for the save (`BeltHud.shown`, `hud_reveal.json`
 "belt"). The clock strip counts with the minimap it hangs under. Shots: `docs/ui_hud_groups_five/`. Keys 1-4 work while the belt is folded.
+
+## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
+The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
+that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
+levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
+Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
