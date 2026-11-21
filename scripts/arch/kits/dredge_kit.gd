@@ -22,26 +22,15 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const ARM_COL := Color("d8a030")       # the Deep Reach: the tarnished-gold flesh of the stretched arm
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
-const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs and words at it
-const BRASS := Color("e0a040")
-const BRASS_HOT := Color("fff0b0")
-const IRON := Color("3a3f48")
-const SLUG_COL := Color("ffc83a")      # a hot gold streak in flight
-const SLUG_CORE := Color("fff2d0")
-const SLUG_REST := Color("e0a018")     # a slug hanging at its stop line: solid brass, dark core
-const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
 const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
-const GHOST_THICK := 0.45              # m: the arm's silhouette where it runs through rock
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
-const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
@@ -68,8 +57,6 @@ var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
 var armor_shreds := 0           # (tests) hits that shredded armor
-var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
-var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
 var anchors := 0
@@ -86,16 +73,14 @@ var _stab_at := -9.0
 
 func _setup() -> void:
 	st["base_hp"] = h.max_hp
-	fx = LDFx.of(m)
 	broadside = DredgeBlast.new(self)
-
-func warm_fx(at: Vector3) -> void:
-	fx.prewarm(at, [float(e_def()["angle"]), float(broadside.xd()["fan_deg"])])
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
 func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
+## Seafoam, his palette's "anchor" (content/vfx/dredge.json): the Anchor's telegraph rims stand off yellow-green grass.
+func anchor_col() -> Color: return HeroVfx.of(m).color(h, "anchor")
 
 ## Is this hunter a Dredge reeling someone in? (Hunter.do_dash: Grounded doesn't stop the barge then.)
 static func reeling(hn: Hunter) -> bool:
@@ -184,7 +169,6 @@ func move_k() -> float:
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
-	fx.track()
 	if h.downed and not _down_seen:
 		_down_seen = true
 		if res > 0.0:
@@ -247,8 +231,7 @@ func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
-	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
-	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
+	vfx("shot", mz, d2)
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
@@ -260,28 +243,17 @@ func _dress_volley() -> void:
 		seen += 1
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
-		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.18))
+		if sd.get("node") is Node3D:
+			HeroVfx.of(m).trail(h, "slug", sd["node"])
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
-	var id := h.get_instance_id()
 	if not pull.is_empty():
-		# Grounded while he reels: a chain ring at his feet
-		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), BRASS, IRON, 0.95, m.time * 0.6)
+		HeroVfx.of(m).hold(h, "reel")         # grounded while he reels: a brass ring at his feet
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)
-	for s in stunned.duplicate():
-		var f = s["e"]
-		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
-			stunned.erase(s)
-			continue
-		fx.place(
-			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), ANCHOR_COL,
-			Color("1a5a6a"), 0.6
-		)
 
 ## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the Deep Reach: the model's own right arm
 ## reaches to `arm_tip` (WardenReach), so the hand that grabs is his slime hand and bone crescent.
@@ -341,7 +313,7 @@ func _launch_hook() -> void:
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
 				_let_go(at)
-				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)}))
+				vfx("hook_end", at)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
@@ -380,7 +352,7 @@ func _reach(tip: Vector3) -> void:
 	var from := _shoulder()
 	var span := _in_rock(from, tip)
 	if not span.is_empty():
-		fx.arm("arm%d" % h.get_instance_id(), span[0], span[1], SLUDGE, GHOST_THICK)
+		HeroVfx.of(m).hold(h, "arm_ghost", 0.0, {"pts": span})
 	if m.time >= drip_at:
 		drip_at = m.time + DRIP_T
 		m.fx.burst(from.lerp(tip, randf()), SLUDGE, 2, 0.4, 0.7, 10.0, 0.9, Vector3.DOWN, 40.0)
@@ -434,7 +406,7 @@ func _grab(f: Ent, ally := false) -> void:
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	fx.orb(f.pos + Vector3(0, 1.0, 0), ARM_COL, BRASS_HOT, 1.1, 0.15)
+	vfx("hook_grab", f.pos)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
@@ -562,7 +534,7 @@ func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
 		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
-		"all": true, "col": ANCHOR_COL, "alpha": 1.8, "hot": 0.5 * k
+		"all": true, "col": anchor_col(), "alpha": 1.8, "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
@@ -582,10 +554,7 @@ func _anchor() -> void:
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
-	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
-	fx.scorch(fist, 1.6, 1.4, Color("8a7a66"), Color("2a241e"))          # cracked ground under the fist
-	fx.scorch(at, float(ed["radius"]) * 0.7, 1.2, Color("6a5e50"), Color("2a241e"))
-	fx.orb(fist + Vector3(0, 0.3, 0), BRASS, BRASS_HOT, 1.2, 0.08)
+	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
 	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
 	m.later(0.06, _anchor_dust.bind(at))
@@ -601,7 +570,6 @@ func _anchor_dust(at: Vector3) -> void:
 	if not is_instance_valid(h):
 		return
 	m.fx.dust(at, 26)
-	fx.wave(ground(at), 1.8, ANCHOR_COL, 0.35, Color(IRON, 0.5))
 
 ## The Anchor's stun: +0.1s a rank, and rank 3 adds its own 0.2s.
 func _stun_t() -> float:
@@ -623,7 +591,8 @@ func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 	if GlideSpike.dunks(f, spike):
 		m.displace.spike(f, -float(spike["vy"]), h)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
-	stunned.append({"e": f, "until": m.time + stun})
+	if tells_visible():
+		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:
@@ -665,23 +634,15 @@ func _tick_dive(dt: float) -> void:
 		h, "e_land",
 		{
 			"at": land, "r": float(ed["quake_r"]), "all": true, "fill": clampf(float(dive["t"]) / 0.4, 0.0, 1.0),
-			"ticks": true, "col": ANCHOR_COL
+			"ticks": true, "col": anchor_col()
 		}
 	)
-	if tells_visible(): _dive_looks(land, float(ed["quake_r"]))
+	if tells_visible():
+		HeroVfx.of(m).hold(h, "dive", 0.0, {"at": land, "r": float(ed["quake_r"])})   # he rides a fist down
 	if h.grounded or h.pos.y - gy < 0.12 or float(dive["t"]) > 2.0:
 		var fell := maxf(float(dive["h0"]), float(dive["y0"]) - gy)
 		dive = {}
 		_quake(land, fell)
-
-## The air dive: he rides the anchor down (full size under his feet, ahead of the fall), and the landing
-## ring is a chain of brass links on the ground, solid enough to read on grass.
-func _dive_looks(land: Vector3, r: float) -> void:
-	var id := h.get_instance_id()
-	var under := h.pos - Basis(Vector3.RIGHT, LDFx.ANCHOR_LEAN) * Vector3(0, DIVE_ANCHOR_UP, 0)
-	under.y = maxf(land.y, under.y)
-	fx.place("dive_anchor%d" % id, "anchor", under, ANCHOR_COL, IRON, 1.0)
-	fx.place("dive_ring%d" % id, "chain", land + Vector3(0, 0.08, 0), BRASS, IRON, r / 0.82, m.time * 0.4)
 
 ## The air smash lands: a ring of anchor and dust round the landing, damage scaled by the height fallen.
 func _quake(at: Vector3, fell: float) -> void:
@@ -697,11 +658,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, {})      # a dive: no spike
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
-	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
-	fx.wave(at, r, ANCHOR_COL, 0.45, Color(IRON, 0.5))
-	fx.wave(at, r * 0.6, BRASS, 0.3)
-	fx.sunburst(at, r * 0.9, BRASS, BRASS_HOT, 0.35)
-	fx.scorch(at, r * 0.6, 1.2, Color("ffb040"), Color("3a3020"))
+	vfx("quake", at, d2, {"r": r})
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)
