@@ -10743,3 +10743,4 @@ READY ext/sfx-silence-fill b26a2b88cdd0994309b638e08c81c73431bd98d8 (silence fil
 READY ext/merge-lane-M3-1121 12ed40455d85ee571c799acc3959a45c38a49424 (merge lane M3: 17 no-PR branches bundled; suite vs main running, export dry-run 885.0 MB = main)
 READY ext/sfx-enemy-priority ec871236d7 (rival wind-ups duck your repeating sounds 4 dB, same-sound cap 5, brawl measure: wind-up over your sounds -4.7 -> -3.6 dB)
 READY ext/sfx-silence-fill dd56a398766 (silence audit [far] band + Boki-place fix: near-silent events main 58 -> 2; Boki side-landing settle, cc cue on slowed monsters/Boki; wiki regen)
+READY ext/ui-glider-perk-hold 88fd10096e (glider/perk strip held back)
