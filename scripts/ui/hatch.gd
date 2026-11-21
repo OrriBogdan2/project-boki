@@ -622,6 +622,7 @@ func _skip_hatch() -> void:
 
 func _show_name() -> void:
 	_clear_bottom()
+	if sub_lbl: sub_lbl.visible = false      # (the tall naming card rises over it at a bigger Text size)
 	var sp_id: String = egg_defs[chosen]["species"]
 	var sp: Dictionary = Data.KIN[sp_id]
 	var card := UI.card(UI.CARD, 16, 18)
