@@ -107,7 +107,7 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
-- **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_dash_air`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`, `<arch>_hit` (the weapon's hit on a target, `tools/gen_sfx_hero_hits.py`; played by `Match.on_damage` through `HeroSfx.hit_sound`). Wired at: the dash (`Hunter` and the Thief, Neve and Tenzo kits via `HeroSfx.dash_name`: `_dash_air` when the Hunter has no floor under it, positional for rivals; `tools/gen_sfx_dash.py` makes the air variants from the ground ones (Gil has no ground dash, so `gil_dash_air` is made whole in his water: a wet rush, bubbles, drops), and `dash_empty`, the soft tick of a Shift press with no charge, played by `PressDeny` in place of `ui_deny`; a kit's dash plays it too, through `ArchKit.travel` and the Hunter's dash), footsteps (`Juice.footstep`; a Hunter with no feet, `KMovesStone.gait` < 0.5, has no step files and holds its `<arch>_hover` loop instead while it moves, its level and pitch following its speed, `HoverHum`: Motley's soft Void hum), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
+- **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_dash_air`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`, `<arch>_hit` (the weapon's hit on a target, `tools/gen_sfx_hero_hits.py`; played by `Match.on_damage` through `HeroSfx.hit_sound`), `<arch>_miss` (a weapon round of the Hunter's own that ends on nothing, played where it died by `MissFx.shot_ended` at -8 dB; only Sparkle's `mage_miss` so far). Wired at: the dash (`Hunter` and the Thief, Neve and Tenzo kits via `HeroSfx.dash_name`: `_dash_air` when the Hunter has no floor under it, positional for rivals; `tools/gen_sfx_dash.py` makes the air variants from the ground ones (Gil has no ground dash, so `gil_dash_air` is made whole in his water: a wet rush, bubbles, drops), and `dash_empty`, the soft tick of a Shift press with no charge, played by `PressDeny` in place of `ui_deny`; a kit's dash plays it too, through `ArchKit.travel` and the Hunter's dash), footsteps (`Juice.footstep`; a Hunter with no feet, `KMovesStone.gait` < 0.5, has no step files and holds its `<arch>_hover` loop instead while it moves, its level and pitch following its speed, `HoverHum`: Motley's soft Void hum), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - Hatch sounds: `hatch_wobble`, `hatch_crack_1`, `hatch_crack_2`, `hatch_pop`, `hatch_chirp_<type>` (venom, prism, spore; other types say `kin_happy`), and the black mystery egg's own `hatch_mystery_*` (dark, hollow, a curious rising chirp). Played by `EggHatch` (`tools/gen_sfx_hatch.py`, `--hatch-sfx-check`).
 - Legendary Boki: `leg_roar` (+ `leg_roar_<theme>` where a theme has its own timbre: titan, swarm, tempest), `leg_loop`, `leg_sting`, played by `LegendPresence` (`Sfx.play_toward` pans the roar toward it on the SFXPan bus): one roar every player hears when it turns up, the loop within 40 m, the sting when it is captured or defeated.
@@ -170,6 +170,32 @@ Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistl
 
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 32 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 16 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Ability cue maps: Motley and Gil (11-20, ext/sfx-motley-gil-bar)
+Which beat of each ability has its own cue (content/vfx/<arch>.json "sfx", or the kit's `m.sfx`). New this pass in
+bold; every hit is the Hunter's own file, and `--sfx-set-check` fails a move look that plays another Hunter's sound.
+
+| Hunter | Ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Motley | LMB orb | os_orb / os_orb_hot (os_prime at full) | (0.1 s flight) | ostra_hit | (the hit) |
+| Motley | RMB Shard Snap | os_snap_wind, os_snap | os_snap's 0.4 s streak (0.44 s flight) | os_snap_hit, now heard by everyone (`snap_struck`) | **os_snap_fizz** (no one hit, `snap_miss`) |
+| Motley | Shift Trade | os_swap_lob | os_swap_lob's tail | os_swap at the landing | **os_trade_swap** at the spot he left (`trade_swap`) |
+| Motley | E Brimseed | os_seed | ostra_music_box (ripe) | os_pop + ostra_spring_boing, his alone now (Gil's Zeep no longer borrows os_pop) | **os_seed_fizz** (gone unpopped, `seed_fizz`) |
+| Motley | X Nightwell | os_well | - | os_well_hum (opens) | none yet |
+| Gil | LMB thrust / lunge | gil_thrust | - | **gil_thrust_hit** (lunge: the same at 0.8 pitch + splash) | - |
+| Gil | LMB held Tide | shared swim/skewer/splash | - | **gil_tide_hit** | - |
+| Gil | RMB Grab Bag | **gil_toss** | gil_toss's tail | **gil_pop_thunder/slime/air/fire/zeep** | Slime: **gil_slime_dry** as the puddle's slow ends |
+| Gil | Shift Ground Swim | gil_dash (+ splash) | (under ground) | **gil_surface** | (the surfacing) |
+| Gil | E Riptide | **gil_spin** (each turn) | **gil_spout** | - | - |
+| Gil | X Tidal Wave | **gil_wave** | - | - | **gil_wave_land** |
+| Gil | passive Beached | **gil_beached** | | | |
+
+Gil's own set (tools/gen_sfx_gil.py, 11-11) was on file but his move looks still played stock and other Hunters'
+sounds (Kael's jug_lunge_hit and jug_ting, Grimble's dr_dive, Sparkle's mage_zap and mage_bubble_pop, Cinder's
+as_ignite, Motley's os_pop, the old Tarek kit's br_rise and br_rumble); they now play his. The new files are made by
+`python3 tools/gen_sfx_motley.py bar` and `python3 tools/gen_sfx_gil.py bar` (only those files, so the rest keep
+their noise), levelled to cast (-18) and impact (-16). Left: Nightwell's close, Riptide's spout hit and the Tide
+lunge's cast have no own cue.
+
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
 
@@ -212,7 +238,7 @@ The world goes dull while you are down or out (`SfxMix.set_muffle`, driven by `M
 - `--sfx-voice-check`: a 30-Hunter trio brawl stays under the cap, enemies get cut, none of yours do, and far loops pause first. On main's old ring stealing the same fight cut your and your squad's sounds 608 times in 40 s.
 
 ## Footsteps (`StepReach`, `scripts/match/step_reach.gd`)
-Steps are how you hear a flank. Both layers of a Hunter's step (the plain contact step on each foot plant, `StepReach.contact`, and the surface step while running, `Juice.footstep`) go through `StepReach`: a rival's carry `RIVAL_M` (20 m) with the usual roll-off and fade to nothing at the edge, seen or not (behind a wall, in a bush); a teammate's carry as far but `MATE_DB` (-6 dB) quieter; your own play at one steady level with no distance. Crouch walking (sneaking) cuts the distance to `SNEAK_K` (40%, 8 m) instead of muting the steps. Source: the data has no footstep distance or sneak cut (only SneakSpeedMultiplier 0.5, `sv/briefs/physics.md`, and Void floats with no footstep noise, `sv/briefs/kits.md`), so 20 m and 40% are ours `[?]`. Motley's float never steps (`KMovesStone.gait`). Steps are ordinary pool voices, so the pool and stacking caps apply. `--match-audio-check` asserts: a rival heard at 15 m, not at `RIVAL_M` + 5 m, a sneaking rival not at 15 m but at 6 m, a teammate quieter, your own one level wherever the camera is.
+Steps are how you hear a flank. Both layers of a Hunter's step (the plain contact step and, running above 4 m/s, the surface step `Juice.footstep`, both on each foot plant: for a Hero the frames its walk and run loops plant a foot, `loco.plants` read by `WardenSteps`, checked by `--step-sync-check`; the procedural rig's stride otherwise; `StepReach.contact`) go through `StepReach`: a rival's carry `RIVAL_M` (20 m) with the usual roll-off and fade to nothing at the edge, seen or not (behind a wall, in a bush); a teammate's carry as far but `MATE_DB` (-6 dB) quieter; your own play at one steady level with no distance. Crouch walking (sneaking) cuts the distance to `SNEAK_K` (40%, 8 m) instead of muting the steps. Source: the data has no footstep distance or sneak cut (only SneakSpeedMultiplier 0.5, `sv/briefs/physics.md`, and Void floats with no footstep noise, `sv/briefs/kits.md`), so 20 m and 40% are ours `[?]`. Motley's float never steps (`KMovesStone.gait`). Steps are ordinary pool voices, so the pool and stacking caps apply. `--match-audio-check` asserts: a rival heard at 15 m, not at `RIVAL_M` + 5 m, a sneaking rival not at 15 m but at 6 m, a teammate quieter, your own one level wherever the camera is.
 - **Armour break** (`Juice.armor_break`, reached once per break from `Hunter.hurt`): the `armor_break` crack plays at the victim, louder for the victim than for anyone else; the attacker alone also gets a high `click` tick (push now). Hits on empty armour play nothing; a refill re-arms it. `--armor-break-sfx-check`.
 
 ## Boki cries (`audio/cries/`)
@@ -280,6 +306,24 @@ Result (the audit's "check by ear" item): **neither is an outlier, so no generat
 | median of the other ten | cast | | 0.93 | 0.52 | 13.7 |
 | median of the other ten | impact | | 0.87 | 0.87 | 16.0 |
 | median of the other ten | loop | | 1.87 | 1.67 | 15.6 |
+## Ability cues: cast, travel, hit, end (Sparkle and Sable)
+VFX_QUALITY scored both Snd 3/5 (11-19). Every ability now has its own cue for each beat it has; "-" is a beat the
+ability does not have (a 0.25-0.35 s shot's travel is the tail of its cast). New ones in bold; each hit is its own
+sound (`tools/gen_sfx_ryzz.py`, `tools/gen_sfx_sable.py`, synthesised, levelled by category).
+
+| Hunter | ability | cast | travel | hit | end |
+|---|---|---|---|---|---|
+| Sparkle | LMB Coilcaster | vv_bolt | (vv_bolt's whip) | mage_hit, mage_zap | **mage_miss** |
+| Sparkle | Wirerun | vv_surge_charge | vv_surge_go | **mage_wire_hit** | mage_bubble_pop |
+| Sparkle | Storm Rod | vv_rod_summon, vv_rod_full | vv_rod_throw | mage_rod_hit | **mage_rod_fizzle** (no hit) |
+| Sparkle | Skycall | vv_sky_place | vv_sky_count | vv_sky_strike, **mage_sky_ground** (each foe) | - |
+| Sparkle | Kitefall | vv_ult_charge | vv_ult_rise, vv_ult_hum, vv_ult_crack | vv_ult_slam | (the slam) |
+| Sable | LMB Arc Bolts | dj_bolt | - | thief_hit | dj_fizzle |
+| Sable | Vault | thief_dash | - | - | thief_cock |
+| Sable | Bola | dj_bola_whirl, dj_bola_throw | **thief_bola_bounce** (off a wall) | dj_bola_wrap, thief_bola_stun | **thief_bola_tie** (caught nobody) |
+| Sable | Shadow Knife | dj_knife_throw | **thief_knife_whisk** | thief_knife_stick, **thief_knife_ground** | dj_blink, **thief_shadow_whisk** |
+| Sable | Encore | dj_encore, dj_encore_rise | dj_encore_whirr, dj_blade | dj_encore_hit | **thief_encore_end** (not on a knock) |
+
 ## Shield sounds (`content/sfx/shield.json`, `tools/gen_sfx_shield.py`)
 `Hunter._mitigate` calls `ShieldSfx.hit` whenever a shield soaks damage: a dull `shield_<kind>_hit` while it holds, a glassy `shield_<kind>_break` when the hit takes the last of it (three takes each, pitched lower for a heavier hit). Yours plays centred, a rival's at their body (out of earshot past the usual range; the break carries 30 m). One family per material, named by `Hunter.shield_kind`, which the kit sets where it grants the shield and which clears when the shield breaks or runs out: `ward` (the default: heals, Boki shields, Gil, Motley), `cloak` (Cinder's Furnace Cloak and ram shield), `molten` (Tenzo's Molten Guard). Albert's aegis wall keeps its own `bjorn_block` / `bjorn_break`. `--match-audio-check` asserts the cue per material and the range.
 ## Rival casts (the threat layer)
