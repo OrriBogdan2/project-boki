@@ -60,3 +60,18 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
   `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).
 
 - **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.
+
+## Raised-arm tear, method test (2026-11-19, ext/hunter-fix-pip-method-1119)
+Cause: the master's arms are flat strips fused to the torso sides (no inner arm surface), so any big upper-arm lift
+shows the strip's inside as a dark-red slab beside her face and chest. Weights cannot fix missing geometry
+(ext/hunter-fix-pip-1118 looked the same as live at the match camera). Tried in order:
+- A, Meshy auto-rig (5 credits) on this body, its 24-joint weights mapped onto Pip's bones by name: the slab stays and
+  grows into a flat sheet. Rejected.
+- B, a Meshy A-pose regen: the v95 masters were already generated with `pose_mode` a-pose and her arms still came
+  out fused; a real B needs an arms-clear edited turnaround plus a full v95 swap. Not run.
+- C (this commit), no Blender, positions/UVs/skeleton/textures unchanged:
+  1. Capelet (cloth-v95b, 0.85-1.2 m): its arm weight (upper_arm, forearm, hand) moved to `hips`; its head share kept.
+  2. Motion: in call, call_hold, call_end, hearth, flare, seed_aim, seed and fusion the `upper_arm.R/.L` rotation off
+     its rest is capped at 25 deg (was up to 148 deg; idle sits near 20). Forearm and hand keys are untouched, so the
+     paw gestures stay but come from the elbow at chest height instead of a paw raised over the head. Other clips
+     (and emote, no gain) keep their keys. Scripts and sheets: ~/meshy/pip-method-1119 (methodC.py, sheets/).
