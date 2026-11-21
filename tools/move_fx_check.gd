@@ -89,8 +89,7 @@ func _snap(m: Match) -> Dictionary:
 	var vfx := HeroVfx.of(m)
 	return {"radial": m.fx.radial, "rings": m.fx.rings.size(), "fi": m.fx.fi, "plays": vfx.plays.duplicate()}
 
-## Returns what it spawned (--move-rule-guard-check reads it).
-func _event(m: Match, hero: String, ev: String) -> Array:
+func _event(m: Match, hero: String, ev: String) -> void:
 	var h: Hunter = flow.hunter
 	flow._ready_up(m)
 	h.ak.res = 0.0
@@ -112,7 +111,6 @@ func _event(m: Match, hero: String, ev: String) -> Array:
 	print("MOVEFX %-10s %-14s %s" % [hero, ev, ", ".join(spawned) if not spawned.is_empty() else "-"])
 	var area: bool = "%s/%s" % [hero, ev] in AREA
 	ok(spawned.is_empty() or area, "%s: %s spawned %s" % [hero, ev, ", ".join(spawned)])
-	return spawned
 
 ## A dash with the resource full: the full tell (ArchKit._tells) pulses no ring at the feet, which every dash would
 ## carry while the resource stays full (the parity reel caught one on Vex's slide).
