@@ -1,5 +1,28 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
+## 2026-11-20: tearing fix (ext/hunter-fix-claire-1118), skin weights only (retry 8, job 20261119-224604-a3)
+Under animation the v95 mesh tore: noisy bone-heat weights (hand/forearm on hip and thigh skin, uneven hips/thigh/shin
+mixes) gave 3-10x edge growth and black folds. Only JOINTS_0/WEIGHTS_0 of the Body mesh changed (160,098 bytes): json,
+positions, indices, UVs, textures, spear, skeleton, bone names and all clips are byte-identical to live, so the rest pose
+is the same. No vertex has arm and leg weight together (live: 655).
+Method: re-derived from the LIVE weights (retries 1-7 are superseded; they are in the branch history). Per welded vertex
+(seam copies share one value) the weights were optimised over the game's own clip poses (every clip frame, dumped from
+Sync): stretch/compression of every edge, the 64 worst edges per pose, triangles turning inside out, and a pull back to
+the live weights so the look holds. Candidate bones = the vertex's own live bones and its 1-ring's; no arm bone on leg
+skin, none added where live had none; head/neck (bind y >= 1.40 m) untouched. Six runs (different seeds/terms) were
+averaged and cut to 4 influences; leg skin below 0.70 m (ramped to 0.80 m) takes the 4-run average, which kept the
+crouch knee crease thin. Scripts: /home/boki/gens/claire-fix-ens-1120/scripts/ (opt*.py, job-dir tools, not shipped).
+Numbers vs live (Godot --stretch-check): worst 9.15 -> 4.40 (ledge), median clip 5.33 -> 2.32, clips over 3.0: 69 -> 8;
+still all 69 over the 1.30 limit (fused arm/torso and leg/hem geometry; the mesh is not cut). Edges over 3x (5 mm or
+longer, game poses, 1737 frames): idle 0.86 -> 0.07 %, worst clip 1.56 -> 0.48 %, clips over 0.5 %: 63 -> 0.
+New black vs live (piece not within 3 px of live black, 800 px software-GL renders): close cam 0 frames >= 100 px,
+1 frame >= 40 px (45 px); match cam 0 >= 100 px, 13 >= 40 px (max 47, crouch knee crease); 2x lens on the 20 worst clips
+0 >= 100 px. Black pixels over all frames: close -79 %, match -55 %. GPU (jobq, 1731 frames each, beam f0-5 left out:
+startup fade): close and match cam 0 frames with a new 40+ px piece (largest 29 / 22 px), black -69 % / -49 %.
+All edges (no length floor) over 3x: idle 1.69 -> 0.23 %, worst clip (ledge) 2.48 -> 0.80 %, clips over 0.5 %: 69 -> 7.
+Rest pose: positions/indices identical; local renders 4 sides x 2 cams differ by at most 30 px (skate glow).
+Proof: /home/boki/gens/claire-fix-ens-1120/.
+
 ## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
 claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
 byte-identical down to the fur collar, tools/meshy/head_graft.py). It replaces the arms fix below: that fix was made for the
