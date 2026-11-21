@@ -9,9 +9,8 @@ extends Node3D
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
-	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
-	"play": "Almost anything from the wilds could be in there, even a rare one,"
-		+ " and it's more likely than most to hatch a little strange.",
+	"desc": "Black as night, in an old basket. Who knows?",
+	"play": "Could be anything, even a rare one.",
 }
 
 static func starter_eggs() -> Array:
@@ -514,11 +513,12 @@ func _start_hatch() -> void:
 	hatch_t = 0.0
 	_clear_bottom()
 	title.text = "Knock on the shell"
+	sub_lbl.hide()
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var knock := "Knock on the egg: click (or press %s). Every knock wakes the Boki inside a little more, and the knocks come back."
+	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	UI.wrapped(l)
 	v.add_child(l)
