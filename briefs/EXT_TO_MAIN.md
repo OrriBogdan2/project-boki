@@ -10780,3 +10780,4 @@ READY ext/farm-tut-ends b15120959e (bulk-rebase: origin/main merged in mechanica
 READY ext/garden-free-toy-hint 11fec9e51d (bulk-rebase: origin/main merged in mechanically, was 9d0f798b0e; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/sfx-step-biomes 3157ab0d8f (bulk-rebase: origin/main merged in mechanically, was 0920eda191; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M4-1121 53e56aea91 (bulk-rebase: origin/main merged in mechanically, was 616a902bf3; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/sfx-minigun-own a20ab1355f1d703a5d1fe560a6219e3440a209f5 (minigun own sound, stock takes retired)
