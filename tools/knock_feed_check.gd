@@ -182,6 +182,8 @@ func _cap_and_fade() -> void:
 # ------------------------------------------------------------------ 4. its own lane
 func _lane() -> void:
 	m.feed.clear()
+	m.guide = null      # (no top banner: a fresh one holds the message cards back, TopStack; time is frozen here)
+	m.crouch_hint = null
 	var squads := _rival_squads()
 	var long_by: Hunter = squads[0][0]
 	var long_who: Hunter = squads[1][0]
@@ -194,6 +196,8 @@ func _lane() -> void:
 	m.add_feed(LONG_LINE)
 	for win: Vector2i in sizes:
 		main.get_tree().root.size = win
+		P.hurt_at = m.time - 60.0      # (out of any fight: a fight holds normal cards back, Hud.in_fight)
+		m.hud.reticle.dealt_at = m.time - 60.0
 		await _frames(3)
 		m.hud.msgs.clear()      # (a card takes its widest from the screen it was made on)
 		m.hud.toast(WIDE_TOAST.repeat(2), Color.WHITE)
