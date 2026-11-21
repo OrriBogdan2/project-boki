@@ -1,6 +1,6 @@
 extends RefCounted
 ## --grimble-gun-shots --shots-dir=<dir> [--warden=dredge] [--yaw=2.2] [--size=1600]: a Warden idle and mid-fire
-## (HunterAnim, the clips and the aim bones) at the match camera and at eye level, <dir>/<id>_{idle,fire}_{game,eye}.png.
+## (HunterAnim, clips and aim bones) at the match camera and at eye level, <dir>/<id>_{idle,fire}_{game,eye}.png.
 ## Proof that one gun is drawn: on the hip at rest, in the hand when firing, never both. Needs a renderer.
 
 const SETTLE := 90           # frames of HunterAnim before an idle shot
