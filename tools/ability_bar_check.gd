@@ -51,6 +51,9 @@ func run(main_node: Node) -> void:
 		await _kit(m, P, kit)
 	for kit in COUNTS:
 		await _counts(m, P, kit)
+	await _rebound(m, P)
+	m.free()
+	await _rebound_tutorial()
 	print("ABILITY BAR CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -179,3 +182,59 @@ func _spent_dash(m: Match, P: Hunter, hid: int, tag: String) -> void:
 	else:
 		ok(pips.size() == cap and absf(float(pips[0]) - 0.3) < 0.02 and rest_empty and sh.get("text", "") == text,
 			"%s: dash all spent, %d discs, first at 30%%, countdown '%s'" % [tag, cap, sh.get("text")])
+
+## E is the "signature" action (bar slot k1) and R the "hunter_ult" action (bar slot x; "ultimate" is the
+## Fusion key on slot r): E goes to mouse 4 ("M4"), R to N. The bar's pills and tooltips must follow.
+func _rebound(m: Match, P: Hunter) -> void:
+	_pick(m, P, "juggernaut", 3)
+	P.lvl = int(Hunter.ULT_AT[0])
+	var m4 := InputEventMouseButton.new()
+	m4.button_index = MOUSE_BUTTON_XBUTTON1
+	var n := InputEventKey.new()
+	n.physical_keycode = KEY_N
+	Settings.rebind("signature", m4, 0)
+	Settings.rebind("hunter_ult", n, 0)
+	ok(Settings.key_cap("signature") == "M4" and Settings.key_cap("hunter_ult") == "N",
+		"rebind: E is '%s', R is '%s'" % [Settings.key_cap("signature"), Settings.key_cap("hunter_ult")])
+	HudSlot.shown_keys.clear()
+	await _drawn(m.hud)
+	await _drawn(m.hud)
+	var bar: Dictionary = HudSlot.shown_keys
+	ok(bar.get("k1", "") == "M4", "rebind: the E slot on the bar shows '%s'" % bar.get("k1", ""))
+	ok(bar.get("x", "") == "N", "rebind: the R slot on the bar shows '%s'" % bar.get("x", ""))
+	var fuse: String = bar.get("r", "")
+	ok(fuse != "N" and fuse != "M4", "rebind: the Fusion slot keeps its own key ('%s')" % fuse)
+	for id in ["k1", "x"]:
+		var want := "M4" if id == "k1" else "N"
+		var head := String(m.hud.hover.tip_lines(id, P)[1][0])
+		ok(head.contains("  ·  %s" % want), "rebind: the %s tooltip names '%s' ('%s')" % [id, want, head])
+	for id in ["sec", "dash"]:
+		var tip: String = String(m.hud.hover.tip_lines(id, P)[1][0])
+		var own := not tip.contains("  ·  M4  ·  ") and not tip.contains("  ·  N  ·  ")
+		ok(own, "rebind: the %s tooltip keeps its own key" % id)
+
+## The tutorial's strip cap and every %E line say the new E key; no step still names "E" as a key.
+func _rebound_tutorial() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.set_process(false)
+	var tu: Tutorial = m.tut
+	var seen := 0
+	var stale := RegEx.create_from_string("(?i)\\b(?:press|hold|tap|use|with)\\s+E\\b|\\(E\\)")
+	var off: Array = []
+	for i in Tutorial.steps().size():
+		tu.step = i
+		tu._words()
+		var sid: String = tu.id()
+		if Tutorial.KEYS.get(sid, "") == "signature":
+			seen += 1
+			if tu.key_cap != "M4":
+				off.append("%s cap %s" % [sid, tu.key_cap])
+		var raw := String(Tutorial.steps()[i][1]) + String(Content.rules("tutorial")["alt"].get(sid, ""))
+		if raw.contains("%E") and not (tu.text + tu.detail).contains("M4"):
+			off.append("%s line lacks M4" % sid)
+		if stale.search(tu.text + " " + tu.detail + " " + tu.scout_hint()) != null:
+			off.append("%s names E" % sid)
+	ok(seen > 0 and off.is_empty(), "rebind: the tutorial shows M4 on %d E steps, no hard-coded E" % seen + str(off))
+	m.free()

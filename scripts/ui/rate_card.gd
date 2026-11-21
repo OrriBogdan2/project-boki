@@ -53,6 +53,7 @@ static func open(host: Control, then: Callable) -> Control:
 			b.text = str(n)
 			b.toggle_mode = true
 			b.button_group = group
+			UI.sfx(b)
 			b.custom_minimum_size = Vector2(40, 34)
 			b.toggled.connect(func(on: bool) -> void:
 				if on:
