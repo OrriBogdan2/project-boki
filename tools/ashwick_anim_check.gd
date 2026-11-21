@@ -40,7 +40,7 @@ func run() -> void:
 			kt = m.time - K.anim_at
 	ok(
 		"timing: a ram into a foe shows the struck pose on contact ([F] contact ~0.12 s)",
-		hit_at > 0.0 and hit_at < K.RAM_HIT_KEY - 0.05 and K.anim_id == "as_leap" and kt >= K.RAM_HIT_KEY - 0.001,
+		hit_at > 0.0 and hit_at < K.RAM_IMPACT_KEY - 0.05 and K.anim_id == "as_leap" and kt >= K.RAM_IMPACT_KEY - 0.001,
 		"contact %.2f s, clip at %.2f s" % [hit_at, kt]
 	)
 	# Flue Flight: flying 0.1 s after the press; the landing hands the legs back to her walk
