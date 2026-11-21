@@ -126,10 +126,12 @@ def pet(t):
 CLIPS = dict(glomwort_anim.CLIPS)
 CLIPS.update({
     "idle": (4.0, True, idle),
-    "walk": (1.3, True, planted(walk, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.65, reach=0.11, lift=0.03, drop=0.01)),
-    "run": (0.7, True, planted(run, LEGGED, four_legs(0.0, 0.5, 0.5), duty=0.4, reach=0.14, lift=0.05, drop=0.035)),
+    "walk": (1.3, True, planted(walk, LEGGED, four_legs(0.125, 0.875, 0.5),
+                                duty=0.5, reach=0.13, lift=0.03, drop=0.02)),
+    "run": (0.7, True, planted(run, LEGGED, four_legs(0.1, 0.6, 0.25), duty=0.3, reach=0.16, lift=0.05, drop=0.055)),
     "hop": (1.1, True, lumber_hop),
-    "carry": (1.4, True, planted(carry, LEGGED, four_legs(0.0, 0.75, 0.5), duty=0.65, reach=0.11, lift=0.03, drop=0.01)),
+    "carry": (1.4, True, planted(carry, LEGGED, four_legs(0.125, 0.875, 0.5),
+                                 duty=0.5, reach=0.13, lift=0.03, drop=0.02)),
     "pet": (2.8, True, pet),
     "attack": (1.1, False, sweep),
     "ability": (1.8, False, bellow),

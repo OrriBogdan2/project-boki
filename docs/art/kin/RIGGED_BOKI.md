@@ -124,6 +124,8 @@ re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python too
 it reads the built .glb back, swaps the actions for the module's `CLIPS` and exports again, for a species whose raw Meshy
 model is not at hand.
 
+11-21: Crofthorn, Anvilbrock, Buckleron and Lanterloris got legs. The borrowed Glomwort rig has none, so their scan legs rode the body and never stepped. `tools/boki/scan_legs.py` (run by `reclip.py` for a module with `SCAN_LEGS`) finds the scan's four feet on the ground, adds the shared four-legged chain (fleg1/fleg2/fpaw, hleg1/hleg2/hpaw) under spine and hips and moves each leg's vertices onto it, faded into the body's own weights at the belly (`SCAN_LEGS["top"]`). The file's bones, mesh and atlases stay as they were. Their walk, run and carry are `boki_gait.planted` on `boki_gait.stub_legs`, solved again on the file's bones (`refit`): a four-beat walk and a rotary gallop (duty 0.3, each paw a quarter step after the last, so one paw is always down). A full `build_boki.py` run would still give them no legs: run `reclip.py` after it.
+
 11-20: Mirrolin (`nacrolin`) and Boltstrich (`nimbostrich`) have their own clips (`nacrolin_anim.py`, `nimbostrich_anim.py`)
 on the borrowed Glomwort skeleton: a timid pangolin that creeps low, scurries, and curls into a ball to tumble-hop, ram and
 spin as a disco ball; a skittish ostrich that high-steps, snaps its neck at noises, sprints neck-out, pecks and rattles

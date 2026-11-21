@@ -5,6 +5,10 @@ extends RefCounted
 ## --seam=<clip>[,<clip>] instead (one per --boki id, the last repeats): one row at the garden camera, a frame each
 ## 1/30 s across the clip's loop wrap, played in place; "setoff": the Boki stands, then sets off at a stroll (the
 ## idle-to-walk hand-over). <dir>/<id>_<clip>_<tag>.png.
+## --film instead: footage for an MP4, 30 frames a second, at the home's size (FARM_BOKI_SCALE): each frame is the
+## garden camera (the game's pitch and wheel all the way in, side-on to the walk, following it, a crop round it) beside a side view at
+## its feet over the floor bars; a stroll, a home wander and its match speed, FILM_S each.
+## <dir>/<id>_<tag>/NNNN.png (ffmpeg -framerate 30 -i %04d.png).
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -19,22 +23,33 @@ const POST_COUNT := 60
 const SEAM_FRAMES := 10
 const SEAM_PX := 224             # crop around the Boki at the garden camera, of a 1920x1080 view
 const STROLL := 1.5              # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
+const FILM_S := 3.0              # s of each speed in a --film
+const FILM_PX := 540             # each half of a --film frame
+const FILM_CROP := 240           # px of the 1920x1080 garden view round the Boki, scaled up to FILM_PX
 
 func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = []
 	var tag := "after"
 	var seams: Array = []
+	var film := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--seam="): seams = Array(a.substr(7).split(",", false))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--boki="): ids = Array(a.substr(7).split(",", false))
 		if a.begins_with("--tag="): tag = a.substr(6)
+		if a == "--film": film = true
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var shots := Shots.new()
 	shots.main = main
+	if film:
+		for id in ids:
+			await _film(shots, String(id), out.path_join("%s_%s" % [id, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
 	if not seams.is_empty():
 		for i in ids.size():
 			var what := String(seams[mini(i, seams.size() - 1)])
@@ -133,3 +148,60 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		sheet.blit_rect(img, Rect2i(at, Vector2i(SEAM_PX, SEAM_PX)), Vector2i((i - lead) * SEAM_PX, 0))
 	vp.queue_free()
 	return sheet
+
+## --film: the garden camera and a side view of one Boki walking at a stroll, a wander and its match speed.
+func _film(shots: Shots, id: String, dir: String) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var vp: SubViewport = shots._stage(Vector2i(1920, 1080))
+	_posts(vp)
+	var garden := Camera3D.new()
+	vp.add_child(garden)
+	garden.make_current()
+	garden.fov = Shots.MATCH_FOV
+	var pitch := deg_to_rad(Shots.MATCH_PITCH)
+	var side_vp := SubViewport.new()      # the same world, seen from the side at the Boki's feet
+	side_vp.size = Vector2i(FILM_PX, FILM_PX)
+	side_vp.world_3d = vp.find_world_3d()
+	side_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.add_child(side_vp)
+	var side := Camera3D.new()
+	side_vp.add_child(side)
+	side.make_current()
+	side.fov = 26.0
+	var ks := KinLib.kin(id)
+	var speeds := [STROLL, WANDER, KinLib.stat_value("kin_speed", KinLib.points(ks, {}) if ks else {})]
+	var n := 0
+	for v in speeds:
+		var k := Shots.rigged_kin(id)
+		vp.add_child(k)
+		k.scale = Vector3.ONE * Shots.FARM_BOKI_SCALE
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		rig.set_process(false)
+		rig._pos_prev = k.global_position
+		for i in int(WARM_S / DT) + int(FILM_S / DT):
+			k.position.z -= float(v) * DT
+			rig._process(DT)
+			rig.advance(DT)
+			# the game's pitch, turned to see the walk across the screen (a Boki crossing the garden)
+			garden.position = k.position + Vector3(cos(pitch), sin(pitch), 0) * Shots.FARM_CLOSE_DIST
+			garden.look_at(k.position)
+			side.position = k.position + Vector3(1.9 * Shots.FARM_BOKI_SCALE, 0.25 * Shots.FARM_BOKI_SCALE, 0)
+			side.look_at(k.position + Vector3(0, 0.22 * Shots.FARM_BOKI_SCALE, 0))
+			if i < int(WARM_S / DT):
+				continue
+			for w in 3:
+				await RenderingServer.frame_post_draw
+			var g := vp.get_texture().get_image()
+			g.convert(Image.FORMAT_RGBA8)
+			var mid := Vector2i(garden.unproject_position(k.position + Vector3(0, 0.3 * Shots.FARM_BOKI_SCALE, 0)))
+			var crop := g.get_region(Rect2i(mid - Vector2i(FILM_CROP, FILM_CROP) / 2, Vector2i(FILM_CROP, FILM_CROP)))
+			crop.resize(FILM_PX, FILM_PX, Image.INTERPOLATE_LANCZOS)
+			var sd := side_vp.get_texture().get_image()
+			sd.convert(Image.FORMAT_RGBA8)
+			var frame := Image.create(FILM_PX * 2, FILM_PX, false, Image.FORMAT_RGBA8)
+			frame.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i.ZERO)
+			frame.blit_rect(sd, Rect2i(Vector2i.ZERO, sd.get_size()), Vector2i(FILM_PX, 0))
+			frame.save_png(dir.path_join("%04d.png" % n))
+			n += 1
+		k.queue_free()
+	vp.queue_free()

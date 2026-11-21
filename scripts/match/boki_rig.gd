@@ -268,10 +268,10 @@ const STRIDE := {
 	"mossgrade": [0.34, 0.93],
 	"nettlynx": [0.54, 1.03],
 	"thrumbird": [1.50, 2.90],
-	"heatherhorn": [0.15, 0.74],
-	"kilnbadger": [0.24, 1.22],
-	"limpetor": [0.15, 0.58],
-	"moonloris": [0.12, 0.67],
+	"heatherhorn": [0.20, 0.76],
+	"kilnbadger": [0.36, 1.26],
+	"limpetor": [0.24, 0.87],
+	"moonloris": [0.18, 0.98],
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.

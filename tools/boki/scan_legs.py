@@ -98,7 +98,7 @@ def add(arm, body, spec):
 
 def _weights(body, v, legs, band):
     """Each vertex low enough and near enough a leg's middle goes to that leg: paw below the ankle, the shin up to the
-    knee, the thigh above, blended across each joint; faded into its own weights over `band` above the belly and
+    knee, the thigh above, blended across each joint, faded into its own weights over `band` above the belly and
     between GRIP and FADE radii out from the middle."""
     n = len(v)
     best = np.full(n, np.inf)
