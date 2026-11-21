@@ -2,7 +2,7 @@ extends RefCounted
 ## --flinch-layer-check: a hit during each Hero's LMB hold keeps the ability clip running and adds the flinch
 ## (WardenFlinch): the clip, its weights and the legs are as without the hit; the torso leans away from the hit
 ## (front, back, left, right); a harder hit leans further; it settles back; only a stagger plays the hit clip.
-## A Hero with no keyed moves yet (Gil: borrowed clips, procedural kit) is hit from the same four sides and leans away too.
+## A Hero with no keyed moves yet (Gil: borrowed clips) is hit from the same four sides and leans away too.
 
 const LMB := {"archer": "arc_draw", "thief": "thf_lmb_r", "tender": "mm_shot_r", "gunslinger": "gunslinger_lmb",
 	"ashwick": "as_lance", "mage": "mage_lmb_l", "dolm": "breah_punch", "rimewright": "tm_spear_aim",
