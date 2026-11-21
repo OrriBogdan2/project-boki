@@ -5,8 +5,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
-`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sparkle (ryzz),
-Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched.
+`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable) only on this branch (the hybrid rig below); Sparkle and Tenzo are off here. The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
@@ -49,3 +48,11 @@ bone's place, not its turn, so the ring stays level when a clip bows the head.
 ## Not on the native path (yet)
 Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
+
+## Sable: hybrid rig (Meshy rig, scripted weight fixes)
+`art/wardens/sable/sable_meshy.glb`: 78,000 tris (master decimated BEFORE rigging, budget 80k), Meshy's 42 bones with
+fingers, untouched names and tree, Meshy's six clips. Only the weights and the coat bones' rotation keys differ from
+Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm split, coat and armpit smoothing,
+contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
+raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
+Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
