@@ -248,6 +248,7 @@ const CHECKS := {
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	# Settings > Audio sliders reach the buses
 	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
+	"--loot-open-sfx-check": ["res://tools/loot_open_sfx_check.gd", "loot_open_sfx_check", null],
 	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],  # SFX row 3
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
@@ -336,6 +337,7 @@ const CHECKS := {
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
+	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],      # status cues and loops
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	# seconds left and charges on the bar
