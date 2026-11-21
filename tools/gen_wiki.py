@@ -112,6 +112,8 @@ def gd_const(script, name):
                 if depth == 0: break
             j += 1
         txt = _strip_gd(src[i:j + 1])
+    # a long string wrapped as "..." + "..." (the line-length rule): Python reads adjacent strings as one
+    txt = re.sub(r'(?<!\\)"\s*\+\s*"', '" "', txt)
     try:
         return ast.literal_eval(txt)
     except Exception as e:
