@@ -22,7 +22,8 @@ for kind in ("OPTIX", "CUDA", "HIP", "METAL", "ONEAPI"):
             DEV = kind; break
     except Exception: pass
 if DEV == "CPU": sc.cycles.device = "CPU"
-print("RENDER DEVICE", DEV, flush=True); sc.cycles.samples = 12; sc.cycles.use_denoising = True
+print("RENDER DEVICE", DEV, flush=True)
+if DEV == "CPU" and "--allow-cpu" not in sys.argv: print("NO GPU: exit (real-GPU renders only)", flush=True); sys.exit(3); sc.cycles.samples = 12; sc.cycles.use_denoising = True
 sc.render.resolution_x = 960; sc.render.resolution_y = 1080
 sc.render.image_settings.file_format = "JPEG"; sc.render.image_settings.quality = 90
 sc.view_settings.view_transform = "Standard"
