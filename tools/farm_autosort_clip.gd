@@ -110,7 +110,8 @@ func _record() -> void:
 	var root := ProjectSettings.globalize_path("res://")
 	DirAccess.make_dir_recursive_absolute(root.path_join(dir))
 	var args := ["--path", root, "--rendering-driver", "vulkan", "--audio-driver", "Dummy", "--resolution", "1280x720"]
-	args.append_array(["--fixed-fps", str(FPS), "--write-movie", root.path_join(dir).path_join("farm_autosort.avi"), "--"])
+	var avi := root.path_join(dir).path_join("farm_autosort.avi")
+	args.append_array(["--fixed-fps", str(FPS), "--write-movie", avi, "--"])
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--fa-child")
 	var out: Array = []

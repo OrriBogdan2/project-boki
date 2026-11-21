@@ -275,13 +275,16 @@ func run(m: Node) -> void:
 	_deco(AL, "lumber_camp", 10, 10)
 	_deco(AL, "quarry", 14, 10)
 	Save.d["layout"] = AL
-	var peb := _kin("pebbit", "Rocky"); var fresh_k := _kin("burrlet", "Moss"); var mine := _kin("pebbit", "Own"); var rest := _kin("pebbit", "Nap")
+	var peb := _kin("pebbit", "Rocky")
+	var fresh_k := _kin("burrlet", "Moss")
+	var mine := _kin("pebbit", "Own")
+	var rest := _kin("pebbit", "Nap")
 	Work.assign(mine, -1)
 	Work.set_rest(rest, true)
 	Save.d["roster"] = [peb, fresh_k, mine, rest]
 	var placed := Work.autosort()
 	var top_el: String = Work.list(peb)[0][0]
-	var want := "quarry" if top_el == "stone" else ("lumber_camp" if top_el == "timber" else "")
+	var want: String = {"stone": "quarry", "timber": "lumber_camp"}.get(top_el, "")
 	var peb_st := ""
 	for st in HomeLayout.stations(Save.d):
 		if int(st["e"]["u"]) == Work.assigned(peb): peb_st = String(st["id"])
