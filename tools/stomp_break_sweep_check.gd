@@ -21,10 +21,12 @@ const TAP := [3.0, 1]          # [distance to the stomper in m, steps the key is
 ## lost from a move turns its row red.
 ## (Kael's dash and Riposte left the table when they stopped knocking, kael-knock-cut.)
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
+## (Sparkle's rod stuns only against a wall or a second foe, and whether the stomper has drifted off its wisp by
+## the time the rod lands varies with the match history, so that row pins the knock the rod always lands.)
 const EXPECT := [
 	["gunslinger", "rmb", 3.0, 1, "daze"], ["bulwark", "lmb", 3.0, 90, "knock"], ["bulwark", "x", 3.0, 1, "stun"],
 	["ostra", "rmb", 3.0, 1, "stun"], ["thief", "rmb", 3.0, 1, "gnd"], ["dredge", "rmb", 3.0, 1, "stun"],
-	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "stun"],
+	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "knock"],
 	["ashwick", "dash", 3.0, 1, "knock"], ["ashwick", "e", 3.0, 1, "tow"], ["dolm", "dash", 3.0, 1, "knock"],
 	["rimewright", "e", 3.0, 1, "tow"], ["juggernaut", "rmb", 3.0, 1, "knock"],
 	["archer", "e", 3.0, 1, "slow"], ["dolm", "rmb", 3.0, 1, "slow"], ["rimewright", "rmb", 3.0, 1, "slow"],
