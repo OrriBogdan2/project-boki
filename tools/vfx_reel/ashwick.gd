@@ -4,7 +4,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## tank jets over the carpet.
 
 func parts() -> Array:
-	return ["lmb", "hold", "rmb", "dash", "e", "r"]
+	return ["lmb", "hold", "rmb", "glow", "dash", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(4.5)
@@ -25,6 +25,16 @@ func _part_rmb() -> void:
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("rmb", "RMB: the gather, the shot and its trail, the hit on a burning foe",
 		[0.2, 0.4, 0.52, 0.58, 0.66, 0.8, 1.0, 1.4, 2.0], func(): return (P.pos + T.pos) * 0.5), 2.0)
+	await _go(GAP)
+
+func _part_glow() -> void:
+	await _reset(4.0)
+	var cast := func(t: float):
+		P.inp["sec"] = _at(t, 0.1)
+		P.inp["sec_hold"] = t > 0.1 and t < 0.95
+		_aim(T.pos)
+	await _go(1.2, cast, _sheet("glow", "RMB held, no release yet: the palm glow builds with the hold (size, heat)",
+		[0.12, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]), 1.0)
 	await _go(GAP)
 
 func _part_r() -> void:
