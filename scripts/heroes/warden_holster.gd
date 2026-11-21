@@ -3,7 +3,7 @@ extends RefCounted
 ## One gun prop for a Warden whose body carries no gun (Grimble's blunderbuss): it rides a hip socket at rest and
 ## goes to the hand while he aims or fires, so it is never on the hip and in the hand together. The prop is a mesh
 ## skinned to the weapon's own bone (warden_anim "blade" bone, e.g. "gun"); each frame, after the clips and the
-## aim, that bone is set to the hip socket, the hand socket, or between them (HunterAnim's aim_k: quick draw, slow holster).
+## aim, that bone is set to the hip socket, the hand socket, or between (HunterAnim's aim_k: quick draw, slow holster).
 ## Data (content/rules/warden_anim/<art>.json "holster"): {"hip": SOCKET, "hand": SOCKET}, SOCKET = {"bone", "pos"
 ## (m, in that bone's space), "rot" (euler rad)}.
 
@@ -27,7 +27,8 @@ static func make(model: Node3D, sk: Skeleton3D, data: Dictionary, gun_bone: Stri
 		var rot: Array = d.get("rot", [0.0, 0.0, 0.0])
 		var pos: Array = d.get("pos", [0.0, 0.0, 0.0])
 		h.sockets.append(bone)
-		h.sockets.append(Transform3D(Basis.from_euler(Vector3(rot[0], rot[1], rot[2])), Vector3(pos[0], pos[1], pos[2])))
+		var at := Basis.from_euler(Vector3(rot[0], rot[1], rot[2]))
+		h.sockets.append(Transform3D(at, Vector3(pos[0], pos[1], pos[2])))
 	return h
 
 ## One frame, after the clips posed the bones.
