@@ -449,6 +449,7 @@ const CHECKS := {
 	"--warden-model-check": ["res://tools/warden_model_check.gd", "warden_model_check", null],      # the Warden models
 	"--warden-rig-json": ["res://tools/warden_rig_json.gd", "warden_rig_json", null],      # rig for the Blender build
 	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
+	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--warden-rest-check": ["res://tools/warden_rest_check.gd", "warden_rest_check", "check"],      # baked rig rests
 	"--warden-rest-bake": ["res://tools/warden_rest_check.gd", "warden_rest_check", "bake"],
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],  # warm-up kept on disk
@@ -934,6 +935,7 @@ const CHECKS := {
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
 	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
+	"--tenzo-stone-video": ["res://tools/tenzo_stone_video.gd", "tenzo_stone_video", null],      # Tenzo E + R stone (GPU)
 	"--gil-rmb-video": ["res://tools/gil_rmb_video.gd", "gil_rmb_video", null],      # Gil RMB press + R leap-off (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
