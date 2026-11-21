@@ -10816,3 +10816,4 @@ READY ext/merge-lane-M4-1121 ed18769f936d164dfdd13b3b60315052ea006e4e (origin/ma
 READY ext/revive-sickness-lamp 00d1d89338 (PR #375: merged origin/main; HunterNet tail merged sickness+reach, 9 fields, Net 0.24.21; hearth-lamp + remote-anim checks 0 failures)
 READY ext/tut-gate-playthrough 02b996e7e1 (PR #515: merged origin/main afeb9cc4d5 [comment-only conflicts in abyss_fx.gd, check_registry.gd, loot_open_check.gd taken from main], Rules.md regenerated; tutorial-playthrough + new-player-flow + --check 0 failures)
 READY ext/merge-lane-M7-1121 dcfd661d06367f4ef6113fe74fcf3a6c4f1b77e0 (lane M7 bundle: 13 branches tutorial/HUD/SFX/kit/tools on main afeb9cc4d5; mc-gate OK, export OK, full suite not finished on overloaded host, 0 NEW-RED in the 25 flags that ran)
+READY ext/rel-fix-tutorial-glide-sign dec602ecde2 (0.24.20 blocker: glide sign moves over landing after take-off; tutorial-hud glide 720p 50%->67-68%)
