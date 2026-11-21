@@ -106,6 +106,13 @@ static func next_r(m: Match, ahead := 1) -> float:
 		return 0.0
 	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
+## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
+static func close_in(m: Match) -> float:
+	return maxf(r("tide_start_s") - m.sess_time(), 0.0)
+
+static func close_left(m: Match) -> float:
+	return maxf(r("tide_start_s") + r("tide_close_s") - m.sess_time(), 0.0)
+
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
@@ -131,10 +138,6 @@ static func tide_dmg(stage: int) -> float:
 			v = lerpf(float(a[1]), float(b[1]), float(stage - int(a[0])) / float(int(b[0]) - int(a[0])))
 			break
 	return v * float(Data.CLASSES["medium"]["hp"]) / r("tide_src_hp")
-
-## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
-static func tick_dmg(m: Match) -> float:
-	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
 
 # ------------------------------------------------------------------ state
 var m: Match
@@ -289,6 +292,14 @@ func on_last_team() -> void:
 	if state != S.FINAL:
 		go(S.FINAL, "last squad")
 
+## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
+static func tick_dmg(m: Match) -> float:
+	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
+
+## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
+static func _by_blight(h: Hunter) -> bool:
+	return not is_instance_valid(h.last_hit_by) or h.last_hit_by is Blight
+
 ## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
 ## damage ("heat"): armor doesn't take it and it doesn't drain a glider. In the end phase it also wears
 ## down those it downed itself out there (a Boki's revive stops the bleed, not the Blight; Life ends them
@@ -314,10 +325,6 @@ func _tide_tick(dt: float) -> void:
 				Sfx.play("thump", null, -8.0, 0.0, 0.7)
 		elif finish and _by_blight(h):
 			h.down_hp -= d
-
-## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
-static func _by_blight(h: Hunter) -> bool:
-	return not is_instance_valid(h.last_hit_by) or h.last_hit_by is Blight
 
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:

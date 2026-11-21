@@ -165,8 +165,8 @@ func _sim(home) -> Dictionary:
 				if not shown.has(kind) and home.life.readout().contains("Chore " + kind):
 					shown[kind] = true
 	print(home.life.readout())
-	return {"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up,
-		"last_chore": last_chore, "shown": shown}
+	return {"kinds": kinds, "starts": starts, "writes": writes, "gave_up": gave_up, "last_chore": last_chore,
+			"shown": shown}
 
 ## `who` did only chore `kind`, it ended, one journal line each time, and the readout showed it.
 func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
@@ -178,9 +178,8 @@ func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
 	var writes := int(s["writes"].get(who, 0))
 	# a chore that gives up (boxed in) writes no line: only a done one does
 	var gave_up := int(s["gave_up"].get(who, 0))
-	ok(writes == ended - gave_up,
-		"%s wrote one journal line per chore done (%d lines, %d done, %d gave up)"
-		% [who, writes, ended - gave_up, gave_up])
+	ok(writes == ended - gave_up, "%s wrote one journal line per chore done (%d lines, %d done, %d gave up)" % [who,
+			writes, ended - gave_up, gave_up])
 	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
 
 func _no_refusals(home) -> void:

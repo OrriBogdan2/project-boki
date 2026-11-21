@@ -1,0 +1,82 @@
+--- /home/boki/coord/boki-tools/merge-candidate.sh
++++ merge-candidate.sh
+@@ -265,10 +265,10 @@
+ # tree makes main red, which would hide a NEW-RED
+ # pods: reachable and idle: fewer than half their cores busy over 3 s, measured in the container's own cgroup (a RunPod
+ # container's /proc/loadavg is the HOST's load: an idle rpc5 showed 37 on 11-12)
+-PODS=""; for p in ${MC_PODS:-$(cat ~/.mc_pods 2>/dev/null || echo "rpc3:10 rpc5:10")}; do
++probe_pods() { local p l out=""; for p in "$@"; do
+   l=$(timeout 25 ssh -i $KEYF -o BatchMode=yes -o ConnectTimeout=10 ${p%%:*} 'u() { awk "/usage_usec/{print \$2}" /sys/fs/cgroup/cpu.stat; }; a=$(u); sleep 3; b=$(u); echo $(nproc) $(( (b - a) / 3000000 ))' 2>/dev/null)
+-  [ -n "$l" ] && awk -v l="$l" 'BEGIN{split(l,a," "); exit !(a[2] < a[1]/2)}' && PODS="$PODS $p"; done
+-PODS=${PODS# }
++  [ -n "$l" ] && awk -v l="$l" 'BEGIN{split(l,a," "); exit !(a[2] < a[1]/2)}' && out="$out $p"; done; echo "${out# }"; }
++PODS=$(probe_pods ${MC_PODS:-$(cat ~/.mc_pods 2>/dev/null || echo "rpc3:10 rpc5:10")})
+ # 3-plan. capacity planner (~/bin/suite-plan): estimate the server-only time (durations.tsv, minus cached passes). If no GPU
+ # worker (owner's PC/Mac) is alive, no pod is usable and the server-only run would take > 45 min, wait for one (poll hello
+ # every 2 min, up to 90 min), then run anyway; a small suite never waits. Waiting costs no CPU, only report latency.
+@@ -278,12 +278,20 @@
+ PLANWAIT=""
+ if [ -z "$PODS" ] && echo "$PLAN" | grep -q 'decision=WAIT_FOR_WORKER'; then
+   W0=$(date +%s)
+-  while [ $(( $(date +%s) - W0 )) -lt 5400 ]; do
++  # 11-18 retro (mc ran 6 h 57 m): the wait was 90 min, then every suite ran serially on the server under xvfb. Now max MC_WAIT_MAX (1800 s =
++  # 30 min); if no GPU worker took it, split the suites over the idle workers (MC_FALLBACK_WORKERS / ~/.mc_workers: ssh aliases "alias:slots",
++  # same suite-pod shard as the pods, same idle test), and only run on the server alone when none is idle.
++  while [ $(( $(date +%s) - W0 )) -lt ${MC_WAIT_MAX:-1800} ]; do
+     sleep 120
+     if python3 ~/bin/suite-plan --alive >/dev/null 2>&1; then PLANWAIT="a GPU worker came alive after $(( ($(date +%s) - W0) / 60 )) min"; break; fi
+     echo "$(date -u +%FT%TZ) suite-plan: still no worker alive ($(( ($(date +%s) - W0) / 60 )) min waited)"
+   done
+-  [ -n "$PLANWAIT" ] || PLANWAIT="no worker came alive in 90 min, ran on the server alone"
++  if [ -z "$PLANWAIT" ]; then
++    FB=$(probe_pods ${MC_FALLBACK_WORKERS:-$(cat ~/.mc_workers 2>/dev/null)} ${MC_PODS:-$(cat ~/.mc_pods 2>/dev/null || echo "rpc3:10 rpc5:10")})
++    if [ -n "$FB" ]; then PODS=$(echo $FB | tr ' ' '\n' | awk '!s[$0]++' | tr '\n' ' '); PODS=${PODS% }
++      PLANWAIT="no GPU worker in $(( ($(date +%s) - W0) / 60 )) min, split the suites over idle workers: $PODS"
++    else PLANWAIT="no GPU worker in $(( ($(date +%s) - W0) / 60 )) min and no idle worker, ran on the server alone (P=$P)"; fi
++  fi
+   echo "$(date -u +%FT%TZ) suite-plan: $PLANWAIT"
+   PLAN="$PLAN; waited: $PLANWAIT"
+ fi
+@@ -299,11 +307,27 @@
+ else
+   echo "## Real-GPU performance"$'\n\n'"GPU perf deferred: no GPU worker alive (no heartbeat from the PC or Mac in the last 5 min), so no jobs were queued. It runs on the next candidate once a worker is back." > $GP
+ fi
+-SUITE_PODS="$PODS" SUITE_PTR=$PTR CHECK_MAP=$S/check_map.json SUITE_PRIORITY=$PRIO OUT=$S GW=$WT MW=$MW bash ~/bin/suite-fast.sh $P; SFRC=$?
++# 11-18 retro: whole-run cap MC_MAX_SECS (14400 = 4 h) incl. a MC_TAIL_RESERVE (900 s) for release/report; the suite gets what is left (min 600 s).
++# suite-fast runs in its own session so the watchdog can TERM its whole group by the pid WE saved (never by name); TIMEOUT is logged and the
++# report says SUITE STOPPED (TIMEOUT) instead of the run hanging for hours.
++SBUD=$(( T0 + ${MC_MAX_SECS:-14400} - ${MC_TAIL_RESERVE:-900} - $(date +%s) )); [ $SBUD -lt 600 ] && SBUD=600
++rm -f $S/MC_TIMEOUT
++SUITE_PODS="$PODS" SUITE_PTR=$PTR CHECK_MAP=$S/check_map.json SUITE_PRIORITY=$PRIO OUT=$S GW=$WT MW=$MW setsid bash ~/bin/suite-fast.sh $P & SFPID=$!
++( SD=$(( $(date +%s) + SBUD )); while kill -0 $SFPID 2>/dev/null; do
++    if [ $(date +%s) -ge $SD ]; then
++      echo "$(date -u +%FT%TZ) TIMEOUT: merge-candidate passed its $(( ${MC_MAX_SECS:-14400} / 60 )) min cap ($(( ($(date +%s) - T0) / 60 )) min in); stopping suite-fast (pid $SFPID): $(ls $S/merge/*.rc 2>/dev/null | wc -l)/$(cat $S/flags.txt 2>/dev/null | wc -l) merge checks done"
++      # GNU timeout (run() wraps each godot in it) calls setpgid, so the group TERM misses timeout+xvfb+godot: also TERM every descendant
++      # pid of OUR saved $SFPID (collected before the group dies); timeout forwards TERM to its own group (xvfb-run, Xvfb, godot).
++      desc() { local c; for c in $(ps -o pid= --ppid $1 2>/dev/null); do echo $c; desc $c; done; }; D=$(desc $SFPID)
++      touch $S/MC_TIMEOUT; kill -TERM -- -$SFPID 2>/dev/null; [ -n "$D" ] && kill -TERM $D 2>/dev/null
++      for _i in $(seq 18); do kill -0 $SFPID 2>/dev/null || exit 0; sleep 5; done
++      kill -KILL -- -$SFPID 2>/dev/null; exit 0; fi
++    sleep 20; done ) & WDPID=$!
++wait $SFPID; SFRC=$?; wait $WDPID 2>/dev/null
+ STOP=$(grep -m1 -E '^(ENV-BROKEN|MASS-RED):' $S/summary.txt 2>/dev/null); [ -n "$STOP" ] && touch $S/compare.txt   # suite-fast stopped early
+ # 11-17: mc-0240 suite-fast got TERM after 334 min (rc 143) -> no compare.txt; the report said "NEW-RED " (blank) + grep errors. A suite
+ # that dies without results is a STOP: headline says SUITE STOPPED, never a blank/0 NEW-RED.
+-[ -z "$STOP" ] && [ ! -s $S/summary.txt ] && { STOP="SUITE-INCOMPLETE: suite-fast exited rc $SFRC$([ $SFRC = 143 ] && echo " (killed by TERM)") before writing results"; touch $S/compare.txt; echo "$(date -u +%FT%TZ) $STOP"; }
++[ -z "$STOP" ] && [ ! -s $S/summary.txt ] && { STOP="SUITE-INCOMPLETE: suite-fast exited rc $SFRC$([ $SFRC = 143 ] && echo " (killed by TERM)") before writing results"; [ -f $S/MC_TIMEOUT ] && STOP="TIMEOUT: merge-candidate hit its $(( ${MC_MAX_SECS:-14400} / 60 )) min cap, suite-fast stopped (rc $SFRC) before writing results"; touch $S/compare.txt; echo "$(date -u +%FT%TZ) $STOP"; }
+ sed -i 's/ merge=/ cand=/' $S/compare.txt; cp $S/compare.txt $S/compare; cp $S/flags.txt $S/flags
+ # (11-17, mc-compare-wire / main-reds-1113) validity check of the suite-vs-main table: rows with no real main result (main never ran the flag, or rc 124 = "no such check")
+ # are NO-BASELINE / NEW-CHECK, not NEW-RED/WORSE, and a base far behind origin/main at publish time makes the headline INVALID. Report-only: never changes compare.
+@@ -325,7 +349,11 @@
+ ph suite
+ (~/bin/release-dryrun $WT > $RD 2>&1); RDRC=$?
+ [ -s $RD ] || echo "## Release dry-run"$'\n\n'"release-dryrun produced no output (rc $RDRC)." > $RD
+-[ -n "$GPPID" ] && wait $GPPID
++if [ -n "$GPPID" ]; then   # bounded by the same cap (+15 min grace): gpu-perf-report may wait up to 2 h
++  while kill -0 $GPPID 2>/dev/null; do
++    [ $(( $(date +%s) - T0 )) -ge $(( ${MC_MAX_SECS:-14400} + 900 )) ] && { echo "$(date -u +%FT%TZ) TIMEOUT: gpu-perf-report still running at the cap, stopped (pid $GPPID)"; kill $GPPID 2>/dev/null
++      echo "## Real-GPU performance"$'\n\n'"TIMEOUT: gpu-perf-report did not finish within the merge-candidate cap." > $GP; break; }
++    sleep 20; done; wait $GPPID 2>/dev/null; fi
+ ph release+gpu
+ 
+ # 4. publish
