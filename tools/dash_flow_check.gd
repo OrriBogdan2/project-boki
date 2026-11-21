@@ -35,6 +35,8 @@ const SOURCE_ROWS := [
 ## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
 ## and one the source can't settle ("Not determinable: <why>") runs the default.
 const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes (the one press window)
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -53,6 +55,7 @@ func run(main: Node) -> void:
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
+	await _one_window(main)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -313,6 +316,80 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 			return more.call("used", "x") or more.call("cd", "x") or more.call("cast", "ultimate")
 		"q":
 			return up.call("gear")
+	return false
+
+# ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
+## Loco.press_buffer by its three uses: Gil's E made before a stun ends, Ashwick's E held past a dash's end while a
+## stun still runs (the replay meets a stun with more than the window left: refused), and Ostra's early recast before
+## her seed arms. NEAR_S early goes, FAR_S early doesn't.
+func _one_window(main: Node) -> void:
+	CombatBus.ability_used.connect(_on_used)
+	var went := {}
+	var m := _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
+	m.queue_free()
+	m = _match(main, "ashwick")       # (his ground row buffers E; Gil's fires it in the dash)
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ashwick e held past a dash's end"]] = _past_dash(m, lead)
+	m.queue_free()
+	m = _match(main, "ostra")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ostra e before the recast arms"]] = _before_recast(m, lead)
+	m.queue_free()
+	await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	for key in went:
+		ok(went[key] == (float(key[0]) < Loco.press_buffer), "one window %.2fs: %s, pressed %.2fs early: %s" % [
+				Loco.press_buffer, key[1], key[0], "went off" if went[key] else "dropped"])
+
+## E pressed as a dash sets off (held for its end), then a stun running `lead` s past that end.
+func _past_dash(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.inp["move"] = Vector2(0, -1)
+	hunter.inp["dash"] = true
+	for i in DASH_WAIT:
+		if hunter.ak.in_dash():
+			break
+		m.step(Match.DT)
+	hunter.inp["dash"] = false
+	var before := _snap()
+	_press("e")
+	while hunter.ak.dash_left() > Match.DT * 1.5:
+		m.step(Match.DT)
+	if _went_off(before, "e") or not hunter.ak.in_dash():
+		return true           # (not held to the dash's end: both leads read "went off" and one fails)
+	hunter.stun_t = lead + hunter.ak.dash_left()
+	return _goes_off(m, before, "e")
+
+func _before_stun(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.stun_t = lead
+	var before := _snap()
+	_press("e")
+	return _goes_off(m, before, "e")
+
+## Ostra's E plants the seed; E again `lead` s before it arms pops it (or not) within NEAR_S of arming.
+func _before_recast(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	var k := hunter.ak as OstraKit
+	k.use_e()
+	for i in WATCH:
+		if not k.seed.is_empty():
+			break
+		m.step(Match.DT)
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - lead:
+		m.step(Match.DT)
+	_press("e")
+	_steps(m, ceili((lead + NEAR_S) / Match.DT))
+	return k.seed.is_empty()
+
+func _goes_off(m: Match, before: Dictionary, slot: String) -> bool:
+	for i in WATCH:
+		m.step(Match.DT)
+		if _went_off(before, slot):
+			return true
 	return false
 
 # ------------------------------------------------------------------ a landing never holds a press
@@ -645,7 +722,7 @@ const SPACE_FRACS := [0.25, 0.5, 0.75]
 ## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
 ## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
 ## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
-## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+## is a lock, a press in the window's last Loco.press_buffer must act by its end (every interaction is chainable).
 func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	var where := "air" if in_air else "ground"
 	var first := _space_at(m, slot, in_air, 0)
@@ -661,7 +738,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 		var at := int(round(absi(lock) * frac))
 		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
 		cells.append(got)
-		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= Loco.press_buffer + 0.001
 		if not locked and in_buffer and got == "never":
 			right = false
 	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]

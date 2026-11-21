@@ -62,7 +62,7 @@ var over := false
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
-var feed: Array = []        # kill feed lines {text, t}
+var feed: Array = []        # kill feed rows (KnockFeed) {text, t}; a knock adds by, who, icon
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
@@ -94,7 +94,7 @@ var ult_cue := UltReadyCue.new()   # the chime when your R is back
 var barks := HunterBarks.new()     # your Hunter's voice callouts, and your squad's "Boki down"
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -387,6 +387,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
+		Shops.build(self)
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
@@ -1361,20 +1362,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
-	for gp in gpads.duplicate():
-		gp["t"] = float(gp["t"]) - dt
-		if float(gp["t"]) <= 0.0:
-			(gp["node"] as Node3D).queue_free(); gpads.erase(gp); continue
-		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(time * 6.0) * 0.06)
-		for h in hunters:
-			if h.out or h.downed or h.remote or not h.grounded:
-				continue
-			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
-				gp["cd"][h.nid] = time + 1.0
-				UtilityUse.pad_launch(h)
-				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
-				sfx("jump", h.pos, -2.0, 0.8)
+	UtilityMore.pads(self, dt)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]
@@ -1625,10 +1613,6 @@ func dmg_mult(h: Hunter) -> float:
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0, mine := false) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch, 0.0, mine)
 
-## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
-func shake(a: float, at: Vector3) -> void:
-	Shake.incoming_big(self, at, a)
-
 func direction_word(from: Vector3, to: Vector3) -> String:
 	var d := Vector2(to.x - from.x, to.z - from.z)
 	var a := rad_to_deg(atan2(d.y, d.x))
@@ -1718,7 +1702,7 @@ var feed_all: Array = []
 func add_feed(t: String) -> void:
 	feed_all.append("%d %s" % [int(time), t])
 	feed.append({"text": t, "t": 0.0})
-	if feed.size() > 5:
+	if feed.size() > KnockFeed.ROWS:
 		feed.pop_front()
 
 # ------------------------------------------------------------------ events
@@ -1788,7 +1772,7 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
@@ -1805,9 +1789,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.revive = 0.0
 	h.cloak_t = 0.0
 	h.grap = {}
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
+	var icon := KnockFeed.icon_of(by, credit, o)
 	if h == player:
 		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
@@ -1821,7 +1804,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
+		KnockFeed.add(self, credit as Hunter, h, icon)
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -1829,14 +1812,14 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
-		add_feed("%s went down" % h.pname)
+		KnockFeed.add(self, null, h, icon)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), SideColor.of(self, h), 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else ""])
+		net_event(["knock", h.nid, credit.nid if credit else "", icon])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -1844,8 +1827,10 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
+## Every offline freeze shares the player's cap (Feel.spend), charged for only the time it adds to a running one.
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, Feel.spend(player, t, time))      # every offline freeze shares the player's cap
+	var held := maxf(hitstop, 0.0)
+	hitstop = held + Feel.spend(player, maxf(0.0, t - held), time)
 
 ## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
@@ -2226,11 +2211,11 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true
 
-func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
+func on_kin_swap(h: Hunter, now_k: Kin, was: Kin) -> void:
 	kstat["swap"] += 1
 	fx.burst(h.pos + Vector3(0, 1.5, 0), now_k.sp["color"], 18, 3.5, 0.5)
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
-	sfx("swap", h.pos, -4.0)
+	CarrySfx.swap(self, h, now_k, was)
 	if h == player:
 		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
@@ -2966,7 +2951,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# at: the contact (HitContact); pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx plays a hit on you from there)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3206,7 +3192,7 @@ func _process(delta: float) -> void:
 	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
-		if f["t"] > 6.0: feed.erase(f)
+		if f["t"] > KnockFeed.LIFE_S: feed.erase(f)
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
@@ -3275,8 +3261,8 @@ func _gather_input() -> void:
 	# ability and kin swap are retired)
 	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
-		if a[0] in ["util2", "util3", "util4"] and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["util5", "util5"], ["util6", "util6"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+		if a[0] in ["util2", "util3", "util4", "util5", "util6"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if a[0] == "ultimate" and not MergeForm.enabled():
 			continue       # Fusion is off: X is reserved and does nothing
@@ -3791,7 +3777,7 @@ func step(dt: float) -> void:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
 		BaseWheel.apply_pick(player)
-		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -3858,6 +3844,7 @@ func step(dt: float) -> void:
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
+	Shops.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -4242,6 +4229,8 @@ func _update_interact(dt: float) -> void:
 				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
 					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
 					break
+		if best.is_empty() and h == player:
+			best = Shops.prompt(self, h)
 		# 5. the exits: start an uplink
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
@@ -4274,6 +4263,10 @@ func _update_interact(dt: float) -> void:
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
+			"shop":
+				if not h.swap_hold:
+					h.swap_hold = true
+					Shops.use(self, h, best)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -5128,7 +5121,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				KnockFeed.add(self, by as Hunter, who, String(x[3]) if x.size() > 3 else "")
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
@@ -5270,6 +5263,8 @@ func _net_ev(x, from: String) -> void:
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
+		"sbuy", "sgot", "sno":
+			Shops.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):

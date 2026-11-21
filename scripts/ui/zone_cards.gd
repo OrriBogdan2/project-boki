@@ -33,7 +33,11 @@ static func open(h, here: String) -> void:
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), lines, func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
+			var lock := UI.para(lock_line(id), 12, UI.MUTED)
+			# Where each key comes from, on hover: the card itself keeps one line.
+			lock.tooltip_text = "\n".join(key_hints(id))
+			lock.mouse_filter = Control.MOUSE_FILTER_PASS
+			var lines: Array = [lock]
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)
@@ -95,13 +99,23 @@ static func lock_line(id: String) -> String:
 	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]]
 	if keys["seed"] and keys["lean"]:
 		return "Ready to wake."
+	var near := "" if keys["lean"] else " " + String(key_hints(id)[1])   # "Closest: Pip, Water 3 of 12."
 	if keys["seed"]:
-		return food[0].to_upper() + food.substr(1) + "."
+		return food[0].to_upper() + food.substr(1) + "." + near
 	var seed := "Find its Wayseed in a run's lair or at the trader"
-	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+	return seed + "." if keys["lean"] else seed + ", and " + food + "." + near
 
-## An open zone's card body: its Boki with their moods, who woke it, today's game,
-## its decor effects (DecorComfort) and your best at it.
+## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
+static func key_hints(id: String) -> Array:
+	var best := GardenZones.closest(id)
+	var lean := "Feed a Boki meals of those types."
+	if not best.is_empty():
+		lean = "Closest: %s, %s %d of %d." % [best["rec"]["name"], String(best["type"]).capitalize(), int(best["lean"]),
+				int(GardenZones.rules()["lean_key"])]
+	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
+
+## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects
+## (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)

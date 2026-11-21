@@ -40,6 +40,7 @@ extends RefCounted
 ##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
 ##      (tools/ability_beat_sfx_check.gd; two short training matches)
 ## Never touches the save.
+##  16. a Hunter set's ability bar (tools/sfx_bar_check.gd): cast, travel, hit and end per ability, distinct hits
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -81,6 +82,8 @@ extends RefCounted
 ##      drops, and stops on a heal, a down or out
 ##  20. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
 ##      without taking a slot, and a need falling to urgent sulks once
+##  21. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
+##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
 ##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
 ##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
@@ -167,7 +170,9 @@ func run(main: Node) -> void:
 	_low_hp()
 	_stomp_cues()
 	_voices()
+	_carry()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -295,9 +300,10 @@ func _vfx_own() -> void:
 	ok(borrowed.is_empty() and owner_of.size() > 100, "move looks play only their Hunter's own sounds %s" % [borrowed])
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
-## files the set lists under "kit_files" (paths under scripts/arch/kits/).
+## files the set lists under "kit_files" (paths under scripts/arch/kits/). A wind-up's sound goes through
+## KitWindup.play(kit, "slot", "name", ...), so those names count too.
 func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string("\\.sfx\\(\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string("(?:\\.sfx\\(|KitWindup\\.play\\(\\w+, \"\\w+\", )\"([a-z0-9_]+)\"")
 	var silent := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)
@@ -363,6 +369,26 @@ func _garden_names() -> void:
 				silent.append(prefix + tail)
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
+
+## 10. The carry cues: on file, capped, the take carrying, and wired where the swap, claim and steal happen.
+func _carry() -> void:
+	var re := RegEx.create_from_string("\"(carry_[a-z_]+)\"")
+	var names := []
+	for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/carry_sfx.gd")):
+		if not names.has(hit.get_string(1)):
+			names.append(hit.get_string(1))
+	var wrong := names.filter(func(n): return not Sfx.ensure(n) or not Sfx.MIN_GAP.has(n))
+	ok(names.size() == 5 and wrong.is_empty(),
+			"carry: %d cues on file with a MIN_GAP (wrong: %s)" % [names.size(), wrong])
+	var reach: float = Sfx.sound_reach.get("carry_take", 0.0)
+	ok(reach > Sfx.hear_range and reach <= REACH_MAX, "carry: the thief's take carries %.0f m" % reach)
+	var calls := {"scripts/match/match.gd": "CarrySfx.swap(", "scripts/match/capture.gd": "CarrySfx.claim(",
+			"scripts/kin/kin_track.gd": "CarrySfx.stolen(", "scripts/match/life.gd": "CarrySfx.from_box("}
+	var unwired := calls.keys().filter(func(f): return not _src(f).contains(calls[f]))
+	ok(unwired.is_empty(), "carry: swap, claim, steal and deathbox paths play the cues (missing: %s)" % [unwired])
+
+static func _src(path: String) -> String:
+	return FileAccess.get_file_as_string("res://" + path)
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -573,7 +599,7 @@ func _wired() -> void:
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
 	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
 		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
-	ok(FileAccess.get_file_as_string("res://scripts/match/exits.gd").contains("WarnSfx.countdown("),
+	ok(FileAccess.get_file_as_string("res://scripts/match/exits_flow.gd").contains("WarnSfx.countdown("),
 		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
 	_warn_behaviour()
 

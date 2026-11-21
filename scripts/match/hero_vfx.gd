@@ -232,7 +232,9 @@ func tier_up(h: Hunter, tier: int) -> void:
 			"follow": h})
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
+var last_voice := -1           # the Sfx handle of the last sound a move started at once (KitWindup.keep)
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
+	last_voice = -1
 	var k := float(o.get("k", 0.0))
 	for s: Dictionary in rec.get("sfx", []):
 		if not _wanted(s, o):
@@ -246,7 +248,7 @@ func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 		if delay > 0.0:
 			m.later(delay, Sfx.play.bind(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch))
 		else:
-			Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
+			last_voice = Sfx.play(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch)
 
 static func _wanted(entry: Dictionary, o: Dictionary) -> bool:
 	if entry.has("when") and not o.get(String(entry["when"]), false):
@@ -577,6 +579,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("jag", float(layer.get("jag", 0.0)))
 	mt.set_shader_parameter("core_w", float(layer.get("core", 0.0)))
+	mt.set_shader_parameter("nose", float(layer.get("nose", 0.0)) / span.length())  # (m from A to the full width)
 	var cam := get_viewport().get_camera_3d()
 	var view := -cam.global_basis.z if cam else Vector3.DOWN
 	var side := span.cross(view).normalized()

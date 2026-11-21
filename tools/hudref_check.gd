@@ -16,6 +16,7 @@ extends RefCounted
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
+##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -138,8 +139,8 @@ func run(main_node: Node) -> void:
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
 	await _knock_banners(m, hud, P)
 	await _channel(m, hud, P)
-	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
-	var lv_ok := true
+	# ---------------------------------------------------------------- 4b. a plate is a name and a bar
+	var plain_ok := true
 	var seen := 0
 	for f in foes:
 		var fh: Hunter = f
@@ -147,26 +148,18 @@ func run(main_node: Node) -> void:
 			continue     # hidden in grass, or eliminated: no plate for anyone, by design
 		seen += 1
 		var fs := _shown(hud, fh)
-		if fs.is_empty() or int(fs.get("lvl", -1)) != fh.lvl:
-			lv_ok = false
-			print("  level not shown for %s: shown %d, is %d" % [fh.pname, int(fs.get("lvl", -1)), fh.lvl])
-	ok(lv_ok and seen >= 5, "every visible plate (%d), rivals and the downed included, shows the level" % seen)
-	# a hunter from another machine: their level comes in the snapshot, the badge updates and pulses
+		if fs.is_empty() or fs.has("lvl") or fs.has("lvl_pop"):
+			plain_ok = false
+			print("  plate of %s is missing or carries a level: %s" % [fh.pname, str(fs.keys())])
+	ok(plain_ok and seen >= 5, "every visible plate (%d), the downed too, has no level" % seen)
+	# a hunter from another machine: their level still comes in the snapshot (bounties use it)
 	var R: Hunter = foes[2]
 	R.lvl = 9
 	var row: Array = m._ser(R)
 	R.lvl = 4
 	R.remote = true
-	await main.get_tree().process_frame
-	ok(int(_shown(hud, R).get("lvl", -1)) == 4, "a remote rival's plate shows level 4")
 	m._net_apply(R, row)
 	ok(R.lvl == 9, "their snapshot carries the run level (now %d)" % R.lvl)
-	await main.get_tree().process_frame
-	var rs := _shown(hud, R)
-	var lvl_pop := float(rs.get("lvl_pop", 0.0))
-	ok(int(rs.get("lvl", -1)) == 9 and lvl_pop > 0.0, "the plate updates to 9 and the badge pulses (%.2fs)" % lvl_pop)
-	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
-	ok(float(_shown(hud, R).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 4c. plate height per hunter
 	var arch_was := P.arch
 	P.arch = "gunslinger"
@@ -217,7 +210,8 @@ func run(main_node: Node) -> void:
 	await _check_ult(P)
 	_check_safe(hud)
 	await _frames(m, hud, P)
-	await _hud_size(m)
+	await _check_wash(P)
+	await _hud_size(m)      # (last: it draws a match of its own)
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,
@@ -320,7 +314,7 @@ func _check_keys(P: Hunter) -> void:
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
-## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
 func _check_deny(P: Hunter) -> void:
 	var hud = P.m.hud
 	PressDeny.last.clear()
@@ -349,7 +343,7 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
-		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
 
@@ -491,6 +485,39 @@ func _banner_closes(kb: KnockBanner) -> void:
 		guard += 1
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
+
+## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## DamageDir.hit) weights the left edge, and a second later the wash is even again.
+func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
+	var hp_was := P.hp
+	P.hp = P.max_hp * 0.5
+	var above := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.3
+	var high := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.1
+	var low := HurtWash.strength(P)
+	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
+		% [int(HurtWash.BELOW * 100.0), high, low])
+	var foe: Hunter = P.m.hunters.filter(func(x): return x.team != P.team)[0]
+	foe.pos = P.pos + Vector3(-6.0, 0.0, 0.0)
+	hud.dmg_dir.hits.clear()
+	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.dmg_dir.hit(P.m, foe, P, 30.0)
+	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
+	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
+	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
+	ok(left > 0.9 and right == 0.0 and top < left, said)
+	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
+	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
+	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
+	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
+	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
+	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
+	P.hp = hp_was
+
 
 ## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
 func _channel(m: Match, hud, P: Hunter) -> void:

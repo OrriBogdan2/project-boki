@@ -52,10 +52,10 @@ func _text() -> void:
 	ok(not KitDrill.line("juggernaut", "e").begins_with("Try "), "a slice Hunter's line is its own text")
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
 
-## Vex's drill (DECISIONS 'Starter masks'): held fire with no reload, the launcher's knock, the still
+## Vex's drill (DECISIONS 'Starter masks'): held fire with no reload, the coin blast's knock, the still
 ## charge and recoil of the beam, the target zone, tap vs hold on the dash with fire through it.
 func _vex_lines() -> void:
-	var want := {"lmb": ["hold", "no reload", "refills"], "rmb": ["launcher", "knocks"],
+	var want := {"lmb": ["hold", "no reload", "refills"], "rmb": ["coin", "knocks"],
 			"e": ["stand still", "0.6s", "recoil"], "x": ["zone", "cursor"], "dash": ["tap", "hold", "firing"]}
 	for slot in want:
 		var text := KitDrill.line("gunslinger", slot).to_lower()
@@ -182,7 +182,7 @@ func _recast(main: Node, tree: SceneTree) -> void:
 	ok(d.reps["e"]["ph"] == "idle" and d.reps["e"]["n"] == RecastDrill.REPS, "recast: a fourth rep is not counted")
 	d.start("ostra")
 	var gate := float(k.e_def()["min_recast"])
-	rep.call(gate - ArchKit.RECAST_BUFFER * 0.6)
+	rep.call(gate - Loco.press_buffer * 0.6)
 	res = d.reps["e"]["res"]
 	ok(res == ["hit"], "recast: a press inside the buffer before the window arms is a hit")
 	d.toggle()

@@ -226,6 +226,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -695,7 +696,8 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# to the move's end: no planted stance mid-air, no snap into it on the landing)
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
-	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
+	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"),
+			"heading": bool(mv.get("heading", false)),
 			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
 			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
@@ -756,6 +758,7 @@ func step(dt: float) -> void:
 		out_fade = float(want.get("out", FADE_LOCO))
 		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		var back_u := float(want.get("blend_out", 0.0))
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
 				move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)

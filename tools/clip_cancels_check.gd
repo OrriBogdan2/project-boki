@@ -89,7 +89,10 @@ func _hero(id: String, dd: Dictionary) -> void:
 		elif float(r[0]) > worst:
 			worst = float(r[0])
 			where = what
-		if not bool(r[2]):
+		# (a move with "blend_out" hands the body back to the legs while its clip plays on: its blend in is no longer
+		# than that, a feel choice the file states, like "fade")
+		var into: Dictionary = (dd.get("kmoves", {}) as Dictionary).get(String(row[2]), {})
+		if not bool(r[2]) and float(into.get("blend_out", 0.0)) <= 0.0:
 			late.append(what)
 	ok(worst <= POP * height, "%s: %d cancels hand over with no pop (worst %.3f m, %s; limit %.3f)"
 			% [id, rows.size(), worst, where, POP * height])

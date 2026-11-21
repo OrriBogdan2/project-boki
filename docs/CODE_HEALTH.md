@@ -224,3 +224,15 @@ All of these touch skip-list files (and most are in coord refs), so none was mer
    already do this job. Plan: callers use `KitMeshes`, and `_ribbon_mesh` moves into `KitMeshes`.
 4. **Model finishing.** `MobModels._finish` and `PropSculpt._finish` are identical (merge statics, bake part y).
    Plan: one `Models.finish(root)`.
+
+## models.gd split (ext/p19-models-split-1118)
+
+`scripts/match/models.gd` was one 3304-line god file. Its code now lives in focused files by what they build:
+`models_base` (primitive meshes, materials), `models_look` (look tables, random looks), `models_hunter` (the hunter
+body), `models_face`, `models_hair`, `models_gear` (weapons, gloves), `models_kin` (Boki), `models_home` (home
+buildings and props), `models_world` (world props, monsters), `models_scenery`, `models_bake` (merged and baked
+meshes). `models.gd` stays as a forwarding facade (public functions, consts, shader vars, and the few private
+helpers other files call), so its 299 callers did not change. Calls between the parts are qualified
+(`ModelsBase.part(...)`). The new files are gdformat-clean and gdlint-clean; style debt that moved with the code is
+in `tools/style_baseline.json` under its new file. Next: migrate callers from `Models.x` to the part that owns it,
+then delete the facade (`docs/DEBT.md`).

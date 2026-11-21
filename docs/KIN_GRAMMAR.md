@@ -226,7 +226,7 @@ exist and stay within bounds.
 
 - **Library.** `KinLib` loads `res://content` through the checker once. A file with errors is skipped
   (with a warning), and so is a kin whose ability or merge was skipped: the live game only runs
-  content that passed. `Data.KIN` is built from `kin` (`KinLib.species`); `content/kin_home/<id>.json`
+  content that passed. `Data.KIN` is built from `content/kin` (`KinLib.species`); `content/kin_home/<id>.json`
   now holds only home and economy data (rare/boss egg, work elements, shiny palette).
 - **Stats.** Kin health, damage and speed are `base + points x per_point` after evolution's
   budget-neutral stat shifts (`KinLib.points`). Levels add `KinRules.LEVEL_GROWTH` (3%) per level to

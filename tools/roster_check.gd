@@ -1,7 +1,7 @@
 extends RefCounted
 ## --roster-check: the 50-species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin
 ## loads through the grammar (KinLib), there are exactly 50 with no clashing display names, each has home data
-## in content/kin, and any large kin with mount settings counts as rideable (DECISIONS 2026-11-08: the 4-6 cap is
+## in content/kin_home, and any large kin with mount settings counts as rideable (DECISIONS 2026-11-08: the 4-6 cap is
 ## loosened; the ride code reads mount speed as a plain multiplier, so no minimum speed is needed).
 ## Never touches the save.
 

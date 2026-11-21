@@ -63,8 +63,8 @@ func _setup_input() -> void:
 	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
 	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
-	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
+	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hunter's right-click ability (its variants: tap, hold, air...)
+	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the hunter's ability, Shift the hunter's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
@@ -73,6 +73,8 @@ func _setup_input() -> void:
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
+	_key("util5", [KEY_5])                    # utility belt slot 5
+	_key("util6", [KEY_6])                    # utility belt slot 6
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further

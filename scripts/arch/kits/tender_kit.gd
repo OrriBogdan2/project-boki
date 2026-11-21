@@ -784,9 +784,9 @@ func _start_call() -> bool:
 	stats["calls"] += 1
 	_call_loops(who)
 	play("mm_call")
-	m.sfx("tend_call", h.pos, -1.0, 1.0)
+	KitWindup.play(self, "x", "tend_call", -1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	vfx("call")
+	vfx("call", null, null, {"r": float(x_def()["range"])})        # the ring is the tether's reach
 	vfx("call_land", who.pos)
 	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), AimKit.hero_col(h))
 	return true
@@ -854,6 +854,7 @@ func _call_end(done: bool) -> void:
 	if not done or who == null:
 		stats["broken"] += 1
 		_call_snap(who)
+		KitWindup.broken(self, "x")
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return

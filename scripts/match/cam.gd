@@ -55,7 +55,10 @@ static var follow_rate: float = _trail["follow_rate"]   # 1/s, near you
 static var catch_decel: float = _trail["catch_decel"]   # m/s^2, the ease-in after a dash
 static var max_gap: float = _trail["max_gap"]           # m it may trail at most
 static var cut_speed: float = _trail["cut_speed"]       # m/s: faster than this is a teleport, and the view cuts
-const FOLLOW_Y := 3.5         # 1/s
+const FOLLOW_Y := 3.5         # 1/s, the view rising while you are in the air
+const FOLLOW_Y_TIGHT := 15.0  # 1/s, the view's height while you stand or it comes down: a landing settles at once
+const STAND_TOL := 0.15       # m above the standing height that still counts as standing (a step down a flight)
+const STEP_Y_SPEED := 2.4     # m/s the tight view may move at most on a step (--step-smooth-check)
 var last_want := Vector3.ZERO # the followed point last frame (the cut test)
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
@@ -274,7 +277,9 @@ func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
 	zoom_to = lerpf(SKYDIVE_ZOOM.x, SKYDIVE_ZOOM.y, clampf(alt / SKYDIVE_HIGH, 0.0, 1.0))
 	follow(p, delta, false)
 
-func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
+## Eases the view onto `p`. stand_y: the height the body stands at (HunterMove.stand_y); the view's height
+## follows that, not the body, so a jump or a fall never reads as moving forward or back on screen.
+func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
@@ -290,20 +295,32 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
 	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
 		pan = want_pan
-	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
-	# far up in the sky you stay on screen
-	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
+	# the focus sits a little below where you stand (so the ground reads), but never more than 4m below
+	# you, so even far up in the sky you stay on screen
+	var at_y := minf(p.y, stand_y)
+	var want := Vector3(p.x, maxf(maxf(at_y * 0.6, at_y - 4.0), p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# up and down follows softer, so falls and glides don't jolt the view; recording mode has its own rates
-	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
+	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
+	# never reads as sliding back on screen and a landing doesn't drift on; recording mode has its own rates
+	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y
+	var y_rate := FOLLOW_Y_TIGHT if tight else FOLLOW_Y
+	if Record.clean():
+		y_rate = float(rr[1])
+	var ky := 1.0 - exp(-y_rate * delta)
 	var flat := Vector2(base.x, base.z)
 	if Record.clean():
 		flat = flat.lerp(Vector2(want.x, want.z), 1.0 - exp(-float(rr[0]) * delta))
 	else:
 		flat = _trail_xz(flat, Vector2(want.x, want.z), Vector2(want.x - last_want.x, want.z - last_want.z), delta)
 	last_want = want
-	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
+	var ny := lerpf(base.y, want.y, ky)
+	# a step (the ground just rose, or dropped under a body still easing onto it) eases; a fall or a landing does not
+	var step_down := is_finite(stand_y) and p.y > stand_y + STAND_TOL and p.y - stand_y < 1.5
+	var step_up := is_finite(stand_y) and p.y <= stand_y + STAND_TOL and want.y > base.y
+	if tight and (step_down or step_up) and not Record.clean():
+		ny = move_toward(base.y, ny, STEP_Y_SPEED * delta)
+	base = Vector3(flat.x, ny, flat.y)
 	var lead_to := (lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX)
 	lead_v += ((lead_to - lead_off) * GLIDE_LEAD_EASE * GLIDE_LEAD_EASE - lead_v * 2.0 * GLIDE_LEAD_EASE) * delta
 	lead_off += lead_v * delta

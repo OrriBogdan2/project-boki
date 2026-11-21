@@ -22,6 +22,7 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
+const BARGE_HOLD := 0.18               # s a press inside a shove is held (main: 0.18; the shared window is 0.15)
 const SLUDGE := Color("5a4414")        # the dark-brass drips off the arm
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const FOLD_T := 0.033                  # s into the `lunge` clip where the ball is closed: a chained shove joins it here
@@ -309,6 +310,7 @@ func _launch_hook() -> void:
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			Sfx.loop_stop(_fly_key())
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
@@ -329,6 +331,7 @@ func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
+	Sfx.loop_hold(_fly_key(), "dr_reach_fly", p, -8.0, 1.0)      # the chain paying out behind the hand
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue
@@ -372,10 +375,15 @@ func _in_rock(a: Vector3, b: Vector3) -> Array:
 ## splash of sludge where it let go.
 func _let_go(tip: Vector3) -> void:
 	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+	m.sfx("dr_let_go", tip, -5.0, 1.0)
+
+func _fly_key() -> String:
+	return "reach_fly_%d" % h.get_instance_id()
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
+	Sfx.loop_stop(_fly_key())
 	if KinMerge.transforming(h) or KinMerge.active(h):
 		hook_hold = null
 		return
@@ -488,7 +496,7 @@ func cast_e() -> bool:
 	wind = float(ed["windup"])
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
-	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
 	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
 	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
@@ -507,6 +515,7 @@ func _tick_wind(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
+		KitWindup.broken(self, "e")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
 	_hop(ed, float(ed["windup"]) - wind)
@@ -549,7 +558,7 @@ func _anchor() -> void:
 	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, ed["spike"])
 	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
@@ -581,13 +590,15 @@ func _stun_t() -> float:
 func over_abyss(f: Ent) -> bool:
 	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
 
-func _slammed(f: Ent, stun: float, amt: float) -> void:
+## `spike`: the ground slam's spike block (a foe in the air is driven down); {} for the dive's landing.
+func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0, h)
+	if GlideSpike.dunks(f, spike):
+		m.displace.spike(f, -float(spike["vy"]), h)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	if tells_visible():
 		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
@@ -653,7 +664,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, {})      # a dive: no spike
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	vfx("quake", at, d2, {"r": r})
@@ -670,7 +681,7 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = Hunter.DASH_BUFFER        # held, never dropped: the next shove goes the step the gap ends
+		h.dash_buf = BARGE_HOLD              # held, never dropped: the next shove goes the step the gap ends
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()
