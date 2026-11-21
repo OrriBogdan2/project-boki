@@ -233,7 +233,10 @@ const SAME_CAP := 5  # one sound sounding in this many pool voices at once; a ri
 ## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
 var fire_duck_db := -4.0
 var _fire_duck_until := 0
-var _fire_names := {}  # held-fire sounds FireSfx has played: what the duck applies to
+var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
+const REPEAT_MS := 400  # a sound of yours started again within this is repeating (hit confirms, hurt spam): ducked too
+var _you_last := {}  # sound -> ms one of yours last started
+var _you_rep := {}  # sound -> its last start of yours was a repeat (within REPEAT_MS of the one before)
 ## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
 ## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
 ## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
@@ -717,8 +720,11 @@ func play(
 	if _same_full(sname, rk):
 		voices.cut.emit(sname, rk, &"same")
 		return
-	if rk == SfxVoices.YOU and now < _fire_duck_until and _fire_names.has(sname):
-		v += fire_duck_db
+	if rk == SfxVoices.YOU:
+		_you_rep[sname] = _fire_names.has(sname) or now - int(_you_last.get(sname, -100000)) < REPEAT_MS
+		_you_last[sname] = now
+		if now < _fire_duck_until and _you_rep[sname]:
+			v += fire_duck_db
 	var times: Array = recent.get(sname, [])
 	while not times.is_empty() and now - int(times[0]) > STACK_MS:
 		times.pop_front()
@@ -750,8 +756,9 @@ func play(
 	played.emit(sname, pos, vol_db, pitch)
 
 
-## A rival's wind-up or ult cue `cue` just started: your held fire sits fire_duck_db under it for its length,
-## the shots already sounding included.
+## A rival's wind-up or ult cue `cue` just started: your repeating sounds (held fire, and any of yours started
+## again within REPEAT_MS: hit confirms, hurt spam) sit fire_duck_db under it for its length, those already
+## sounding included.
 func priority_cue(cue: String) -> void:
 	if not ensure(cue):
 		return
@@ -761,8 +768,13 @@ func priority_cue(cue: String) -> void:
 	if already:
 		return
 	for i in POOL:
-		if players[i].playing and voices.rank[i] == SfxVoices.YOU and _fire_names.has(voices.sound[i]):
+		if players[i].playing and voices.rank[i] == SfxVoices.YOU and _you_rep.get(voices.sound[i], false):
 			players[i].volume_db += fire_duck_db
+
+
+## The dB the priority rule takes off a sound of yours `sname` that starts now (0 when no rival cue sounds).
+func priority_duck(sname: String) -> float:
+	return fire_duck_db if Time.get_ticks_msec() < _fire_duck_until and _you_rep.get(sname, false) else 0.0
 
 
 ## Marks `sname` as your held fire (FireSfx.shot), the sound priority_cue ducks.

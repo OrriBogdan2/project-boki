@@ -1,8 +1,9 @@
 extends RefCounted
 ## --sfx-priority-check: enemy wind-ups cut through your own fire (docs/AUDIO.md, enemy priority). A seeded 3v3 bot
 ## brawl at one spot (you on the Rimewright's held fire and two squadmates against three rival kits), every
-## sound that starts logged as "ms name rank dB" (rank: SfxVoices.YOU, SQUAD or metres; dB the voice's final level,
-## the duck included). `python3 tools/sfx_loudness.py --brawl <log>` mixes the log offline from the wavs and
+## sound that starts logged as "ms name rank dB duck" (rank: SfxVoices.YOU, SQUAD or metres; dB the voice's final
+## level, the duck included; duck the dB the priority rule took off it).
+## `python3 tools/sfx_loudness.py --brawl <log>` mixes the log offline from the wavs and
 ## reports each wind-up's level over the rest of the mix. Asserts the rule: a held shot of yours sounds
 ## Sfx.fire_duck_db lower while a rival's cue sounds and returns to its level after it; a rival's cue never ducks
 ## on an ally's cast; one sound never fills more than Sfx.SAME_CAP pool voices unless it is yours or a rival's cue.
@@ -138,7 +139,9 @@ func _voice_db() -> float:
 
 func _on_played(sname: String, _at: Variant, _vol_db: float, _pitch: float) -> void:
 	var i := (Sfx.next - 1 + Sfx.POOL) % Sfx.POOL
-	var line := "%d %s %.1f %.1f" % [Time.get_ticks_msec() - t0, sname, Sfx.voices.rank[i], Sfx.players[i].volume_db]
+	var now := Time.get_ticks_msec()
+	var duck := Sfx.priority_duck(sname) if Sfx.voices.rank[i] == SfxVoices.YOU else 0.0
+	var line := "%d %s %.1f %.1f %.1f" % [now - t0, sname, Sfx.voices.rank[i], Sfx.players[i].volume_db, duck]
 	log_lines.append(line)
 
 
@@ -168,3 +171,18 @@ func _duck_rule() -> void:
 	var after: float = shot.call()
 	ok(is_equal_approx(ducked - base, Sfx.fire_duck_db), "your shot sits %.1f dB under a rival's cue" % (ducked - base))
 	ok(is_equal_approx(after, base), "back at its level after the cue (%.2f s): %.1f vs %.1f" % [cue_s, after, base])
+	# a sound of yours that repeats (a hit confirm) ducks too; a one-off of yours does not
+	await main.get_tree().create_timer(0.5).timeout
+	Sfx.play("ab_hit", null, -2.0)
+	var one := _voice_db()
+	await main.get_tree().create_timer(0.1).timeout
+	Sfx.priority_cue(HostileCue.NAME)
+	Sfx.play("ab_hit", null, -2.0)
+	var rep := _voice_db()
+	await main.get_tree().create_timer(0.6).timeout
+	Sfx.priority_cue(HostileCue.NAME)
+	Sfx.play("ab_hit", null, -2.0)
+	var lone := _voice_db()
+	var d := rep - one
+	ok(is_equal_approx(d, Sfx.fire_duck_db), "a repeating hit confirm of yours ducks too: %.1f dB" % d)
+	ok(is_equal_approx(lone, one), "a one-off of yours is not ducked: %.1f vs %.1f" % [lone, one])
