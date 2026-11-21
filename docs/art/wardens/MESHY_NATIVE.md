@@ -6,7 +6,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
 `art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sparkle (ryzz),
-Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched.
+Sable (sable), Tenzo (tarek), Kael (kael: K1, cape cut to the waist) and Grimble (dredge: G3 goo, no backpack). The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
@@ -23,6 +23,11 @@ Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
+- Held weapon (data `weapon`, `scripts/heroes/warden_held.gd`): Kael's and Grimble's Meshy models were made with no
+  weapon. The live weapon is cut out of the contract `<art>.glb` (its surfaces by material, all riding one contract
+  hand bone: Kael's sword on `hand.R`, Grimble's blunderbuss in his iron fist on `hand.L`), unskinned and held rigidly
+  in Meshy's `hand` bone: in Meshy's idle it sits as the contract model holds it at rest, then it follows the hand
+  through every clip. It takes the toon pass with the contract look's slots (metal, glow, leather).
 - Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
   models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
   `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon
