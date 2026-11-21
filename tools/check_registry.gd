@@ -811,6 +811,8 @@ const CHECKS := {
 	# belt items: a move as long as the cast
 	"--utility-pose-check": ["res://tools/utility_pose_check.gd", "utility_pose_check", null],
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
+	"--ownrig-check": ["res://tools/ownrig_check.gd", "ownrig_check", null],
+	"--ownrig-shots": ["res://tools/ownrig_shots.gd", "ownrig_shots", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
 	"--look-locker-check": ["res://tools/look_locker_check.gd", "look_locker_check", "check"],      # the look locker
