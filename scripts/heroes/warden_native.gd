@@ -56,13 +56,22 @@ static func dress(model: Node3D, arch: String, scene: PackedScene) -> void:
 	var glb := scene.instantiate() as Node3D
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
-	glb.scale = Vector3.ONE * float(e.get("scale", 1.0))
 	model.add_child(glb)
+	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb))
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.setup(model, glb, e)
 	glb.add_child(nat)
 	model.set_meta(META, true)
+
+
+## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height.
+static func _fit(model: Node3D, sk: Skeleton3D) -> float:
+	var rest: Dictionary = model.get_meta("rig_rest", {})
+	var head := sk.find_bone("Head")
+	if not rest.has("head") or head < 0:
+		return 1.0
+	return (rest["head"] as Transform3D).origin.y / sk.get_bone_global_rest(head).origin.y
 
 
 func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:

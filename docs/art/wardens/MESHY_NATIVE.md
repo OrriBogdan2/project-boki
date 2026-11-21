@@ -14,7 +14,8 @@ Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack`, crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
-- Size: `scale` puts Meshy's head on the contract model's head height. Hit ring and hitbox are the rig's, unchanged.
+- Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
+  hitbox are the rig's, unchanged.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
