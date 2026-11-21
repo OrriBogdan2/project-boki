@@ -4,7 +4,8 @@ extends RefCounted
 ## reveal stage in content/rules/hud_reveal.json. A group shows from its match number ("from_match"),
 ## or once its first event has happened ("first", remembered in Save.d.hud_reveal), or while Tab
 ## (the scoreboard key) is held. The tutorial reveals by step ("tut_from"). Everything else shows outside
-## expeditions (duel, training, arena), with Settings "Show full HUD", and on saves from before the reveal (no "hud_reveal" key).
+## expeditions (duel, training, arena), with Settings "Show full HUD", and on saves from before the
+## reveal (no "hud_reveal" key).
 ##   if HudReveal.on(m, "feed"): ...       # draw the group
 ##   HudReveal.see("seat_pips")            # its first event happened: it stays from now on
 
