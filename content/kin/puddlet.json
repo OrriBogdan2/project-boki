@@ -109,7 +109,7 @@
 	"egg": {
 		"name": "Prism Egg",
 		"temper": "Gentle",
-		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
-		"play": "Shields you and dazzles foes with bent light. Loyal, a bit of a worrier."
+		"desc": "Pink, glassy. Throws little rainbows.",
+		"play": "Shields you, dazzles foes. Gentle."
 	}
 }
