@@ -10823,3 +10823,6 @@ READY ext/merge-lane-M7-1121 dc6d8f2783a8fc6818146903de3ed46b53b284b6 (lane M7 b
 READY ext/ui-tut-hud-five 32d4d45aea (bulk-rebase: origin/main merged in mechanically, was 8c1b8e4e51; union 1 gen 1 files; the branch's own READY checks still apply)
 READY ext/lint-c2-names e8ac625589d3e8d13dc9e7f87d31173fac014970 (C2 check tools snake_case names; merged main, fixed motley_reel inherited P/T rename, gdformat)
 READY ext/rel-fix-camp-clear 1ba74accac (camp-clear: looks off the sim RNG + bulwark bot swings; full camp-clear 0 fails, export OK, gate aborted host overload)
+READY ext/tut-steal-beat a0373456fe (bulk-rebase: origin/main merged in mechanically, was 95cd09270e; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/merge-lane-M5-1121 a5dc886a96 (bulk-rebase: origin/main merged in mechanically, was 18bcdaa63e; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-d1b03416 877332059f (bulk-rebase: origin/main merged in mechanically, was b1722672b5; union 0 gen 1 files; the branch's own READY checks still apply)
