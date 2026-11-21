@@ -117,11 +117,11 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			ok(got == want or at_end_same, "%s: %s%s (row: %s)" % [what, got, waited, want])
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
-func _match(main: Node, hero: String) -> Match:
+func _match(main: Node, hero: String, squad := 1) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else 1, "tier": 0, "length": 1e9,
+		"training": true, "teams": 2, "squad": maxi(squad, 2 if hero in NEEDS_ALLY else 1), "tier": 0, "length": 1e9,
 		"seed": 77, "no_drop": true,
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})

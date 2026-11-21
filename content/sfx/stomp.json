@@ -2,8 +2,8 @@
  "group": "stomp",
  "name": "Wisp stomp (Life.start_stomp / tick_stomps / end_stomp)",
  "script": "tools/gen_sfx_stomp.py",
- "sounds": {"stomp_windup": "cast", "stomp_finish": "heavy_impact", "stomp_crack": "impact"},
+ "sounds": {"stomp_windup": "cast", "stomp_finish": "heavy_impact", "stomp_crack": "impact", "stomp_relief": "cast"},
  "signature": [],
- "reach": {"stomp_finish": 40},
+ "reach": {"stomp_finish": 40, "stomp_crack": 30},
  "loops": []
 }
