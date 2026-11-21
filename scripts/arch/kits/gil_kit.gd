@@ -575,6 +575,7 @@ func _tick(dt: float) -> void:
 				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
 				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:
+			vfx("slime_dry", pd["at"])      # the slow is over: the puddle drains away
 			(pd["node"] as Node3D).queue_free()
 			puddles.erase(pd)
 		else:

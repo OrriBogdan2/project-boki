@@ -30,6 +30,7 @@ const MAX_LIVE := 420          # GPU particles alive at once across the match
 const LOD_NEAR := 20.0         # m from the camera focus: full detail
 const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
+const PEAK := Color(1.0, 1.0, 1.0, 0.5)  # a fire's hottest part: halfway to white (a palette's "peak" in its place)
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
 const HELD_LIFE := 0.85        # share of its life a held surface waits at (a pool's fade starts here)
@@ -532,6 +533,8 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
+	var peak: Variant = data(h.arch).get("palette", {}).get("peak")
+	mt.set_shader_parameter("peak", Color(String(peak)) if peak != null else PEAK)
 	mt.set_shader_parameter("seed", _look_rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
@@ -587,7 +590,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 ## A mesh trail that follows a projectile (its node) until it is gone, hidden, or TRAIL_MAX runs out: tracers,
 ## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays. Its "end" names
 ## a move played where the trail stopped.
-func trail(h: Hunter, move: String, follow: Node3D) -> void:
+func trail(h: Hunter, move: String, follow: Node3D, o := {}) -> void:
 	var rec := _rec(h, move)
 	if rec.is_empty() or follow == null or lod_at(follow.global_position) <= 0.0:
 		return
@@ -598,7 +601,7 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 	for layer: Dictionary in rec.get("fx", []):
 		if String(layer.get("p", "")) != "ribbon":
 			continue
-		_ribbon(layer, h, {})
+		_ribbon(layer, h, o)
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
@@ -737,6 +740,8 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	if holds.has(key):
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
+		if extra.has("at"):              # (a zone that follows something: its emitters move with it)
+			holds[key]["at"] = extra["at"]
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -773,6 +778,11 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
 	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at")}
+
+## (checks) whether h's hold of move is running now (asked within HOLD_LINGER).
+func holding(h: Hunter, move: String) -> bool:
+	var e: Dictionary = holds.get("%d/%s" % [h.get_instance_id(), move], {})
+	return not e.is_empty() and m.time - float(e["last"]) <= HOLD_LINGER
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
