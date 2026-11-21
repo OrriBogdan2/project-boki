@@ -575,6 +575,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 		var face := UI.frame(Reticle.swatch(id), 13, UI.INK if chosen else Color(0, 0, 0, 0), 3)
 		for state in ["normal", "hover", "pressed"]:
 			sw.add_theme_stylebox_override(state, face)
+		UI.sfx(sw)
 		sw.pressed.connect(func():
 			Settings.set_v("reticle_col", id)
 			_show_settings.call_deferred())

@@ -10,7 +10,7 @@ extends RefCounted
 ## Never touches the save file.
 
 const FIRST := ["vitals", "abilities", "beat_clock", "summon_ring", "objective"]
-const LATER := ["counters", "feed", "gear", "squad", "perks", "weather", "pace_tags", "plate_colours"]
+const LATER := ["belt", "counters", "feed", "gear", "squad", "perks", "weather", "pace_tags", "plate_colours"]
 
 var bad := 0
 
