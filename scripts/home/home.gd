@@ -719,8 +719,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(HomeNotices.burrow(KinBox.farm_cap(), nb))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
@@ -3492,11 +3491,10 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same one the title and the expedition panel open), as your expedition Hunter.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
