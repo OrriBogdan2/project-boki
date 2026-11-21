@@ -471,7 +471,7 @@ func _all() -> void:
 	)
 	ok(
 		"reel: Grimble is Grounded while he reels, the foe is stunned",
-		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
+		KitStatus.grounded(P) and T.stun_t > 0.0 and HeroVfx.of(K.m).holds.has("%d/reel" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
 	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
@@ -479,7 +479,8 @@ func _all() -> void:
 		"reel: his own arm reaches to the foe (the model's reach tip on it)",
 		reach_to.distance_to(T.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, T.pos]
 	)
-	ok("reel: in the open no through-rock silhouette is drawn", not K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	var ghost := "%d/arm_ghost" % P.get_instance_id()
+	ok("reel: in the open no through-rock silhouette is drawn", not HeroVfx.of(K.m).holds.has(ghost))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -516,6 +517,7 @@ func _all() -> void:
 	K.cd["e"] = 0.0
 	var hp0: float = ak.dmg(T)
 	var at0 := P.pos
+	Sfx.listener = P.pos           # (the camera on him, so HeroVfx draws the stun swirl)
 	P.ak.use_e()
 	ak.step(m, 0.3)
 	var early := K.anchors
@@ -531,7 +533,8 @@ func _all() -> void:
 		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
 		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
-	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
+	var swirl := HeroVfx.of(K.m).live.filter(func(e): return e.get("on") == T)
+	ok("anchor: the stunned foe shows a stun swirl", not swirl.is_empty())
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
 	# --- Barge right after the Anchor can't turn
 	reset.call()
@@ -563,7 +566,8 @@ func _all() -> void:
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
 		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
-	ok("cliff: the stretch of arm inside the cliff is drawn through it", K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	ghost = "%d/arm_ghost" % P.get_instance_id()
+	ok("cliff: the stretch of arm inside the cliff is drawn through it", HeroVfx.of(K.m).holds.has(ghost))
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
 	# a cliff face in the reel's path: the foe is hauled over it
@@ -737,13 +741,13 @@ func _all() -> void:
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
 		if AimKit.shown(P, "e_land"): land_seen = true
-		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
+		if HeroVfx.of(K.m).holds.has("%d/dive" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
 		"air smash: straight down at once", vy <= -20.0 and absf(P.pos.x - home.x) < 0.4,
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
-	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok("air smash: the landing ring shows while you fall, the fist falls with you", land_seen and anchor_seen)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]
