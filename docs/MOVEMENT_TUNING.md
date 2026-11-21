@@ -22,7 +22,7 @@ the last column; retune there, not in code.
 | Dive | -32.5 m/s at 35 m/s², steer x0.25, 3.5 m cancel, 10 s timeout | hold crouch under the glider | `GlideDive` |
 | Dash exit | hands over at no more than run speed | no dead stop; the walk, brake or air carry takes over | `physics.dash_exit_run`, `HunterMove.dash_exit` |
 | Dash shape | per-kit speed curve over the dash's own time, mean 1 | each kit keeps its distance and time; only the shape differs | `content/rules/dash_feel.json`, `ArchKit.travel` |
-| Input buffer through dashes | 0.15 s | a press during a dash still fires | `DashFlow.BUFFER_S` |
+| Input buffer through dashes | 0.15 s | a press during a dash still fires | `Loco.press_buffer` |
 
 ## Camera
 - Pitch about 65° with a ~35° vertical lens, ~23 m back: the screen shows ~28 m of ground side to side.

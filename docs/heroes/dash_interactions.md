@@ -535,7 +535,7 @@ One row per input for all heroes, read from `content/rules/mantle_press.json` by
 
 ## Press windows: how long a press is held
 
-Measured on main with `--dash-flow-check`. **Shared rule** (`DashFlow.BUFFER_S` = 0.15 s): a press made in a dash whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it waits at most 0.15 s more, then goes through the slot's own path (it casts, or answers with its deny cue). A press made in a cast lock or crowd control is held only in the lock's last 0.15 s, an earlier one is dropped (docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).
+Measured on main with `--dash-flow-check`. **Shared rule** (`Loco.press_buffer` = 0.15 s): a press made in a dash whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it waits at most 0.15 s more, then goes through the slot's own path (it casts, or answers with its deny cue). A press made in a cast lock or crowd control is held only in the lock's last 0.15 s, an earlier one is dropped (docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).
 
 `[?]` rows stay as they are. Windows that are not the shared one, each with its source line:
 

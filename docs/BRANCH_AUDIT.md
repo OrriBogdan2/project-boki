@@ -143,7 +143,7 @@ Sources (on the coordinator box): `/home/boki/coord/branch-audit-1112/` (`before
 | `ext/body-hitbox-parity` | 2026-11-08 | 1 | 12 | content/archetypes, docs/heroes, art/wardens | Hitboxes: parity pass against the source heroes' body sizes (Breaker 0.50 per DECISIONS, K |
 | `ext/telegraph-audit-b` | 2026-11-08 | 1 | 18 | scripts/arch, docs/heroes, tools/archer_bulwark_combo_check.gd | Telegraph audit B: Tenzo, Lace, Grimble, Neve draw the true hit area |
 | `ext/telegraph-audit-c` | 2026-11-08 | 4 | 19 | scripts/arch, docs/heroes, content/archetypes | Telegraphs (Motley): drop the Swollen, Trade-cast, pop and well-close rings; asserts for T |
-| `ext/dash-buffer-window` | 2026-11-08 | 3 | 17 | content/dash_flow, docs/decisions, docs/heroes | --dash-flow-check: a stun as the dash ends inside and outside DashFlow.BUFFER_S, one buffe |
+| `ext/dash-buffer-window` | 2026-11-08 | 3 | 17 | content/dash_flow, docs/decisions, docs/heroes | --dash-flow-check: a stun as the dash ends inside and outside Loco.press_buffer, one buffe |
 | `ext/heal-knock-source` | 2026-11-08 | 1 | 7 | docs/heroes, tools/ashwick_combo_check.gd, tools/dancer_jug_check.gd | Knock heals: settle each against the kit data, assert the totals with DashReset's 5% |
 | `ext/idle-ostra` | 2026-11-08 | 1 | 10 | tools/art1, art/wardens, docs/art | Motley the Void Jester: idle and stance rework (IDLE_AUDIT 6) |
 | `ext/idle-gunslinger` | 2026-11-08 | 1 | 6 | docs/art, tools/art1, art/wardens | Vex idle+stance rework: contrapposto with a soft turned-in knee, horizon scan, coin follow |
