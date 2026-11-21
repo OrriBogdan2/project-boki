@@ -11,6 +11,7 @@ var cam: CamRig
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
+var corners: Control  # root_ui's corner groups, kept to SafeArea's frame
 var panel_host: Control
 var topbar: Label
 var top_chips: HBoxContainer
@@ -135,6 +136,7 @@ var rain_k := 0.0
 var weather_t := 40.0
 var rain_next := randf() < 0.45     # what the coming weather turn brings, known ahead (FarmChatter's rain warnings)
 var ambience := HomeAmbience.new()
+var music := GardenMusic.new(self)
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
@@ -145,7 +147,6 @@ func _ready() -> void:
 	ZoneLayout.enter(GardenZones.here)
 	CursorMode.menu()
 	Sfx.play_ambience("")        # the beds of HomeAmbience take over
-	Sfx.new_track.connect(_on_new_track)
 	if not Game.last_result.is_empty():      # back from a run: the welcome-home sting, once
 		Sfx.sting("home")
 		Game.last_result = {}
@@ -719,8 +720,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(HomeNotices.burrow(KinBox.farm_cap(), nb))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
@@ -1011,32 +1011,8 @@ func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
 
 # ------------------------------------------------------------------ loop
 ## Sun, sky, lamps and the occasional rain shower.
-var _music_t := 0.0
-var music_hold := 0.0
-## The music follows where you're standing: each island has its own theme, home changes at night.
-func _update_music(d: float) -> void:
-	_music_t -= d
-	music_hold -= d
-	if _music_t > 0.0 or music_hold > 0.0:
-		return
-	_music_t = 0.5
-	var isle := world.island_id(ppos.x, ppos.z)
-	var night := sin((day_t - 0.25) * TAU) < -0.15
-	var want := "home_night" if night else "home_day"
-	if isle in ["orchard", "meadow", "summit"]:
-		want = isle
-	want = Soundtrack.track("base", want)
-	if Sfx.music_lock != "":
-		want = Sfx.music_lock
-	Sfx.play_music(want, 2.5)
-
-func _on_new_track(node_name: String) -> void:
-	if not is_inside_tree() or root_ui == null:
-		return
-	pass     # tracks join the music list in the house quietly; no popup every time a new one plays
-
 func _update_sky(d: float) -> void:
-	_update_music(d)
+	music.tick(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
 	var sun_h := sin((HomeAmbience.clock_in(GardenZones.here, day_t) - 0.25) * TAU)  # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
@@ -1114,12 +1090,13 @@ func _process(delta: float) -> void:
 	_abyss_tint(d)
 	_find_interact()
 	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	InteractGate.track(idle)
 	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
 	if carry.tick(d, interact, idle):
 		return
 	if idle and not interact.is_empty():
-		if Input.is_action_just_pressed("interact"):
+		if InteractGate.pressed():
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
@@ -1193,12 +1170,12 @@ func _keep_off_hub(c) -> void:
 	var cc := c as Control
 	var hr := hub.get_global_rect()
 	var cr := cc.get_global_rect()
-	var vw := get_viewport().get_visible_rect().size.x
+	var box := SafeArea.frame(get_viewport().get_visible_rect().size)  # (the hub's frame)
 	var room_l := hr.end.x + 12.0
-	var centred := (vw - cr.size.x) * 0.5
-	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	var centred := box.get_center().x - cr.size.x * 0.5
+	var want := centred if centred >= room_l else room_l + maxf(0.0, (box.end.x - room_l - cr.size.x) * 0.5)
 	# too wide to sit beside the hub (big text): centred over it, not pushed off the screen
-	if room_l + cr.size.x > vw - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
+	if room_l + cr.size.x > box.end.x - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
 		want = centred
 		cc.global_position.y = hr.position.y - cr.size.y - 6.0
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
@@ -1355,7 +1332,9 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -HunterMove.glide_sink, Loco.glide_catch * d)
 		else:
-			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			var vy := maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			py += 0.5 * (pvy - vy) * d       # (exact gravity, as the match's HunterMove.fall: same apex at any step)
+			pvy = vy
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
@@ -2447,6 +2426,7 @@ func _build_ui() -> void:
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
+	corners = SafeArea.framed(root_ui)  # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
 	# top left: your partner and what you have, as quiet chips on glass
 	var top := UI.glass(6, 14)
 	top.position = Vector2(16, 14)
@@ -2458,7 +2438,7 @@ func _build_ui() -> void:
 	topbar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	topbar.visible = false
 	th.add_child(topbar)
-	root_ui.add_child(top)
+	corners.add_child(top)
 	# what F (and the kin keys) do with whatever is in front of you
 	prompt_box = UI.glass(10, 16)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
@@ -2513,7 +2493,7 @@ func hub_items() -> Array:
 
 func _build_hub() -> void:
 	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
-	root_ui.add_child(hub)
+	SafeArea.framed(root_ui).add_child(hub)  # (over the menu dim, so its own frame)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
@@ -3488,11 +3468,10 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same one the title and the expedition panel open), as your expedition Hunter.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
@@ -3563,12 +3542,11 @@ func _play_evolutions() -> void:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("boki_evolve")
-	music_hold = 25.0
-	Sfx.play_music("lullaby", 1.0)
-	var tween := create_tween()
-	tween.tween_interval(0.4)
-	tween.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tween.tween_callback(func():
+	music.hold("lullaby", 25.0)
+	var tw := create_tween()
+	tw.tween_interval(0.4)
+	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
 			building_now = false
@@ -3813,7 +3791,7 @@ func _open_music() -> void:
 		v.add_child(UI.button("Let the music follow where I am", func():
 			Sfx.music_lock = ""
 			Sfx.music_name = ""
-			_music_t = 0.0
+			music.retune()
 			_open_music(), 320))
 
 # ---- visiting and the ferry

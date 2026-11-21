@@ -82,8 +82,17 @@ const TEST := {
 	}
 }
 ## docs/VFX_QUALITY.md backlog 9, the shot trails that were hairlines at match zoom: Lace's tap shots, Sparkle's bolts.
+## tender.json moves that heal, and moves that hurt (the rest, a hop and the dash, are hers and free)
+const MEEKO_HEALS := [
+	"heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land", "call_plus", "mended"
+]
+const MEEKO_HURTS := [
+	"cast", "cast_trail", "kindled", "seed_aim", "seed_cast", "seed_trail", "seed_stick", "seed_field", "seed_burst",
+	"seed_root"
+]
 const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
 const TRAIL_MIN := 0.45  # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
+const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: Kael's red keys stay out of it
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := [
 	"hurt",
@@ -118,6 +127,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+		_looks(arch)
 	var gold: Array = []
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and FileAccess.get_file_as_string("res://scripts/arch/kits/" + f).contains("ffd25a"):
@@ -235,6 +245,22 @@ func _recipes(arch: String) -> void:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 
+## Kael's black-red: his red keys and the model's crack colour stay out of orange and yellow
+## (Cinder owns fire). The Gilded Riposte's gold keys stay gold on purpose.
+func _looks(arch: String) -> void:
+	if arch != "juggernaut":
+		return
+	var pal: Dictionary = HeroVfx.data(arch)["palette"]
+	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
+	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
+			"chain_hot", "chain_hook", "haul", "haul_hot"]:
+		cols[k] = pal.get(k, "")
+	var warm: Array = []
+	for k: String in cols:
+		var c := Color(str(cols[k])) if str(cols[k]).is_valid_html_color() else Color.BLACK
+		if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
+			warm.append(k)
+	ok(warm.is_empty(), "%s: no red key is orange or yellow %s" % [arch, warm])
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
@@ -483,6 +509,26 @@ func _dolm_rocks(m: Match) -> void:
 					warm.append(kind)
 		n.free()
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
+	# the raised rocks (Stone Row, Basalt Spine) and his fists wear the arm's slate and teal: nothing red-leaning
+	var raised: Array = [RockLook.make()]
+	var fist := Node3D.new()
+	HeroArms.build(fist, "rubble_fists", null, null, null)
+	raised.append(fist)
+	var red: Array = []
+	for root: Node in raised:
+		for mi: Node in root.find_children("*", "MeshInstance3D", true, false):
+			var mat: Material = (mi as MeshInstance3D).material_override
+			var cols: Array = []
+			if mat is ShaderMaterial:
+				for p: String in ["stone", "stone_hi", "glow", "rim_col", "cap_col", "color"]:
+					cols.append((mat as ShaderMaterial).get_shader_parameter(p))
+			elif mat is StandardMaterial3D:
+				cols.append((mat as StandardMaterial3D).albedo_color)
+			for c: Variant in cols:
+				if c is Color and (c as Color).r > (c as Color).b:
+					red.append("%s %s" % [mi.name, c])
+		root.free()
+	ok(red.is_empty(), "Tenzo's raised rocks and fists: slate and teal only, no warm material %s" % [red])
 
 
 ## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers
@@ -568,34 +614,68 @@ func _zones(main: Node) -> void:
 	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
 	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
 	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
-	# care_disc: body * 1.6 at the centre, cel steps of 0.25
-	var hearth_a := TenderKit.THROWN_FILL * 0.18 * 1.6 * 1.1
-	ok(
-		roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
-		"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A
-	)
 	_meeko_field()
-	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0  # the band's tint inside, at the ult's brightest beat
-	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
+	_meeko_heal_hurt()
 
 
-## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
-## grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts) at most 0.25, and the burst's ring lands on its rim
+## Meeko's ground zones (the zone rule): care_disc's body grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts, and
+## draws at 1.6x; the whole inside up to the rim stays at most 0.25, under the Burrseed root field and under the
+## Hearthlight (on her at a 0.85, thrown at 1.1). The field wears the hurt colour; the burst's ring lands on its rim
 ## (the ring shader's band ends at 0.9 of its size).
 func _meeko_field() -> void:
 	var d := HeroVfx.data("tender")
 	var fd: Dictionary = d["field"]
-	var pal: Dictionary = d["palette"]
-	var inner_a := float(fd["fill"]) * (0.18 + 0.22 * 0.89 * 0.89) * 1.6 * float(fd["a"])
+	var hd: Dictionary = d["hearth_disc"]
+	var rim_k := (0.18 + 0.22 * 0.89 * 0.89) * 1.6
+	var inside := {
+		"root field": float(fd["fill"]) * float(fd["a"]) * rim_k,
+		"Hearthlight on her": float(hd["fill"]) * 0.85 * rim_k,
+		"Hearthlight thrown": float(hd["thrown_fill"]) * 1.1 * rim_k,
+	}
+	for what: String in inside:
+		ok(inside[what] <= ZONE_CORE_A, "Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [
+			what, ZONE_CORE_A, inside[what]])
+	var hurt := Color(String(d["palette"][fd["col"]]))
 	ok(
-		inner_a <= ZONE_CORE_A and Color(String(pal[fd["col"]])).is_equal_approx(Arch.color("tender")),
-		"Meeko's root field: leaf green, inside alpha at most %.2f to the rim (%.2f)" % [ZONE_CORE_A, inner_a]
+		not _heal_hue(hurt),
+		"Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false)
 	)
 	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
 	ok(
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
 		"Meeko's root field: the burst's ring lands on the burst radius"
 	)
+
+
+## Meeko's heals and hurts read apart (COMBAT_CLARITY): every heal look is her leaf green family and its motes rise,
+## every hurt look is another hue (embers) and its motes fall, sharp (no curl); the Hearthlight's last bloom swirls
+## only on its rim (no filled disc).
+func _meeko_heal_hurt() -> void:
+	var d := HeroVfx.data("tender")
+	var pal: Dictionary = d["palette"]
+	var bad: Array = []
+	for mv: String in d["moves"]:
+		var heal := MEEKO_HEALS.has(mv)
+		var hurt := MEEKO_HURTS.has(mv)
+		for layer: Dictionary in d["moves"][mv]["fx"]:
+			for key in ["c", "c2", "c3"]:
+				var c := Color(String(pal[layer[key]])) if layer.has(key) else Color.GRAY
+				if c.s >= 0.25 and ((heal and not _heal_hue(c)) or (hurt and _heal_hue(c))):
+					bad.append("%s.%s" % [mv, layer[key]])
+			if not HeroVfx.LOOKS.has(String(layer["p"])):
+				continue
+			var grav := float(layer.get("grav", 0.0))
+			if (heal and grav > 0.0) or (hurt and (grav <= 0.0 or float(layer.get("curl", 0.0)) > 0.0)):
+				bad.append("%s motion" % mv)
+	ok(bad.is_empty(), "Meeko: heals leaf green and rising, hurts embers falling %s" % [bad])
+	var swirl: Array = (d["moves"]["bloom"]["fx"] as Array).filter(func(l): return l["p"] == "vortex")
+	ok(swirl.all(func(l): return bool(l.get("thin", false))), "Meeko's bloom: a rim swirl, no filled disc")
+
+
+## True when `c` sits in Meeko's heal family: her leaf green's hue band in the colour check.
+func _heal_hue(c: Color) -> bool:
+	var dh := absf(c.h - Arch.color("tender").h) * 360.0
+	return minf(dh, 360.0 - dh) <= preload("res://tools/hero_colour_check.gd").FAMILY_DEG
 
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
@@ -1406,6 +1486,16 @@ func _sable_ring(main: Node) -> void:
 		m.step(Match.DT)
 	var half := float(AimKit.entry(P, "ult")["r"]) / reach
 	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	var drawn := AimKit.entry(P, "ult").duplicate()
+	drawn["alpha"] = 2.0  # the brightest beat
+	var got: Array = load("res://tools/aimkit_check.gd").measure(drawn, 0.0, float(drawn["r"]) - 0.05)
+	ok(
+		(drawn["col"] as Color).is_equal_approx(AimKit.hero_col(P)) and got[0] <= ZONE_CORE_A and got[1] >= 0.5,
+		(
+			"Sable's X: a lit %s rim over a faint inside (centre alpha %.2f <= %.2f at the brightest beat, rim %.2f)"
+			% [AimKit.hero_col(P).to_html(false), got[0], ZONE_CORE_A, got[1]]
+		)
+	)
 	m.step(0.3)
 	P.inp["move"] = Vector2(0, -1)
 	P.inp["dash"] = true
