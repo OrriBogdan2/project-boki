@@ -1096,8 +1096,10 @@ func _bulwark_combos() -> void:
 		"bjorn aim: the hammer lands at the cursor (5m) and stays planted",
 		K.throws == thr0 + 1 and String(
 			K.mace.get("st", "")
-		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
-		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
+		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and HeroVfx.of(m).holding(P, "plant_beacon")
+		and not AimKit.shown(P, "aim"),
+		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d,
+			HeroVfx.of(m).holding(P, "plant_beacon")]
 	)
 	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
 	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
@@ -1124,7 +1126,8 @@ func _bulwark_combos() -> void:
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
+			and HeroVfx.of(m).holding(P, "mend_fall"),
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)
@@ -1132,10 +1135,14 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
-	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+	ok("bjorn E: the zone ring is in his own colour, not a heal green, and the column is his ivory data (mend_fall)",
 		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
-		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
-	step(m, 5.0)
+		and HeroVfx.data("bulwark")["moves"]["mend_fall"]["fx"][0]["c"] == "ivory")
+	step(m, 1.2)
+	ok("bjorn E: the standing zone is HeroVfx data (mend_zone: rising ivory specks inside his rim, no fill)",
+		HeroVfx.of(m).holding(P, "mend_zone") and not HeroVfx.of(m).holding(P, "mend_fall"),
+		"zone %s fall %s" % [HeroVfx.of(m).holding(P, "mend_zone"), HeroVfx.of(m).holding(P, "mend_fall")])
+	step(m, 3.8)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
 	_clear_wall(m, home, lv, 3)
