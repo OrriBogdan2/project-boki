@@ -347,6 +347,7 @@ func _hint() -> void:
 	var P := m.player
 	if P == null or P.out or not P.kin is Kin:
 		return
+	_guard_cue(P)
 	var kind := _near_kind(P.pos, float(rules()["hint"]["near_m"]))
 	if kind != "" and HazardHint.say(m, self, kind):
 		hinted[kind] = m.time
@@ -356,6 +357,16 @@ func _hint() -> void:
 	hinted[kind] = m.time
 	var trig := "hazard_safe" if guards(P, kind) else "hazard_risk"
 	BokiChatter.say(m, P.kin as Kin, trig, {"%H": String(kind_def(kind)["noun"])})
+
+## The guard ring on every area the player's lead Boki counters (the shader breathes it in that Boki's glow).
+func _guard_cue(P: Hunter) -> void:
+	var glow: Color = (P.kin as Kin).sp.get("glow", Color.WHITE)
+	for A in areas:
+		var mat: ShaderMaterial = A["mat"]
+		var on := guards(P, String(A["kind"]))
+		mat.set_shader_parameter("guard", 1.0 if on else 0.0)
+		if on:
+			mat.set_shader_parameter("col_guard", glow)
 
 func _near_kind(p: Vector3, r: float) -> String:
 	for k in [0.0, 0.5, 1.0]:
