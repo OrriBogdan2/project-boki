@@ -4,11 +4,14 @@
 import sys, os, math, bpy, numpy as np
 from mathutils import Vector
 a = sys.argv[sys.argv.index("--") + 1:]; glb, out = a[0], a[1]; opt = dict(x[2:].split("=", 1) for x in a[2:] if "=" in x)
-VIEWS = opt.get("views", "game,eye,knee,face").split(","); ANIMS = opt["anims"].split(","); TAGS = opt.get("tags", "").split(","); STRIDE = opt.get("stride", "")
+VIEWS = opt.get("views", "game,eye,knee,face").split(","); ANIMS = opt.get("anims", "").split(","); TAGS = opt.get("tags", "").split(","); STRIDE = opt.get("stride", "")
 os.makedirs(out, exist_ok=True)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=glb); sc = bpy.context.scene
+for o in list(sc.objects):
+    if o.type == "MESH" and o.name.startswith("Icosphere"): bpy.data.objects.remove(o, do_unlink=True)  # helper sphere (hidden in game)
 meshes = [o for o in sc.objects if o.type == "MESH"]
+for o in [x for x in sc.objects if x.parent is None]: o.rotation_mode = "XYZ"; o.rotation_euler[2] += math.pi  # game glb faces +Y; turn to face the camera like the Meshy rig
 print("TRIS", sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in meshes), flush=True)
 def hexc(h, s=1.0): return tuple(((int(h[i:i+2], 16) / 255) ** 2.2) * s for i in (0, 2, 4)) + (1,)
 sc.render.engine = "CYCLES"; sc.cycles.device = "GPU"
