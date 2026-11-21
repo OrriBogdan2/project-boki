@@ -527,6 +527,8 @@ const CHECKS := {
 	"--look-at-check": ["res://tools/look_at_check.gd", "look_at_check", null],      # the head leads the body
 	"--look-at-shots": ["res://tools/look_at_shots.gd", "look_at_shots", null],      # --shots-dir=<dir>, GPU
 	"--cast-pop-check": ["res://tools/cast_pop_check.gd", "cast_pop_check", null],      # move blends cross their gaps
+	"--land-weight-check": ["res://tools/land_weight_check.gd", "land_weight_check", null],  # landing squash by class
+	"--land-weight-shots": ["res://tools/land_weight_shots.gd", "land_weight_shots", null],  # landing by class (GPU)
 	"--stride-check": ["res://tools/stride_check.gd", "stride_check", null],      # run start and stop
 	"--stride-shots": ["res://tools/stride_shots.gd", "stride_shots", null],      # the stop from a run, before/after
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
