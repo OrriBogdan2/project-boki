@@ -22,17 +22,21 @@ func _init(arch_check, ok_cb: Callable) -> void:
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
 
-## Clarity, each step of the waves: what LDFx is showing round him.
+## Clarity, each step of the waves: what HeroVfx is showing round him (its surface looks, by shader mode).
 func _scan_looks(K: DredgeKit) -> void:
-	for e: Dictionary in K.fx.live:
-		var kind := String(e["kind"])
-		if kind.begins_with("cres"):
+	for e: Dictionary in HeroVfx.of(K.m).live:
+		var mode := int(((e["mat"]) as ShaderMaterial).get_shader_parameter("mode"))
+		if mode == HeroVfx.MODES["sweep"]:
 			sweeps += 1
-		if kind == "sunburst_bb":
+		if mode == HeroVfx.MODES["flare"]:
 			widest_flash = maxf(widest_flash, (e["s0"] as Vector3).x)
 	for s: Dictionary in K.m.shots:
 		if s["by"] == K.h and (s["x"] as Dictionary).has("kx") and s["node"] != null:
 			plain_slugs += 1
+
+## The gun's muzzle flash in the data (the fist flash of a wave may not be bigger).
+func _gun_flash() -> float:
+	return float((HeroVfx.data("dredge")["moves"] as Dictionary)["shot"]["fx"][0]["size"])
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
 func _owed(P: Hunter) -> float:
@@ -124,7 +128,7 @@ func _charge_and_waves() -> void:
 	ok(
 		"ult clarity: no sweep over the fan, no plain sphere under a slug, a fist flash no bigger than the gun's",
 		B.waves == 2 and sweeps == 0 and plain_slugs == 0 and widest_flash > 0.0
-			and widest_flash <= DredgeBlast.MUZZLE_FLASH + 0.01,
+			and widest_flash <= _gun_flash() + 0.01,
 		"sweeps %d, plain slugs %d, widest flash %.2f m" % [sweeps, plain_slugs, widest_flash]
 	)
 	ok(
