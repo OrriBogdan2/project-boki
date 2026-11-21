@@ -1,12 +1,12 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
 ## [--at=<m> [--cam-y=<m>]] [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed
-## clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
-## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
-## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
-## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract clips or
-## a Meshy-native one), <dir>/states/f###.png every 1/fps s.
+## clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn
+## a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder
+## hit), with --cc a stun, a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run
+## (or standing, --cast-speed=0) in <dir>/cast_<kmove>/.
+## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract
+## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
