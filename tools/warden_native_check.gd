@@ -7,6 +7,7 @@ extends RefCounted
 ## the contract path.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
+const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 
 var bad := 0
@@ -99,6 +100,12 @@ func _states(main: Node, a: String) -> void:
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		var want := String(nat.d["clips"][c[0]])
+		var sk := nat.skel
+		var up := (
+			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
+			- sk.get_bone_global_pose(sk.find_bone("Hips")).origin.y
+		)
+		ok(up > UPRIGHT, "%s: %s stands up (head %.2f m over the hips)" % [a, c[0], up])
 		ok(nat.player.current_animation == want, "%s: %s plays %s (%s)" % [a, c[0], want, nat.player.current_animation])
 	var shown := m.get_node("Rig/Torso/Aim/Gun").find_children("*", "MeshInstance3D", true, false).filter(
 		func(mi): return (mi as MeshInstance3D).visible
