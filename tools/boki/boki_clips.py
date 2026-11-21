@@ -47,6 +47,21 @@ def add(pose, bone, rx=0.0, ry=0.0, rz=0.0):
     pose[bone] = (o[0] + rx, o[1] + ry, o[2] + rz)
 
 
+def footfall(p, t, cycles, surge, lift, duty=0.6, y0=0.0):
+    """The body's own footfalls on a rig with no leg bones (`boki_anim_audit` reads the two lowest unweighted lobes
+    under the body as the feet): `cycles` steps a loop. While a foot is down (`duty` of the step) the body's root
+    slides back `surge` m at one even speed, as the ground goes by under it, and stays at `y0`; in the rest of the
+    step it rises `lift` m and the root comes forward again, eased. The loop wrap sits mid-stance."""
+    u = (cycles * t + duty / 2) % 1.0
+    if u < duty:
+        z, y = surge * (u / duty - 0.5), 0.0
+    else:
+        k = (u - duty) / (1.0 - duty)
+        z, y = surge * (0.5 - ease(k)), lift * math.sin(math.pi * k)
+    o = p.get("root_at", (0, 0, 0))
+    p["root_at"] = (o[0], y0 + y, o[2] + z)
+
+
 def tail_wave(pose, phase, amp, up=0.0, side=0.0, roll=0.0, lag=0.09):
     """Sends a wave down the tail: each plate repeats the one before, a little late (follow-through)."""
     for i in range(TAIL_N):

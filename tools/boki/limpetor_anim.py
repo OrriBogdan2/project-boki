@@ -2,14 +2,14 @@
 riveted iron shield, stubborn as rock. It creeps on its foot with the shell rocking over it, clamps down to the ground
 when it braces and heaves the whole boulder up when it fights."""
 import glomwort_anim
-from boki_clips import LOOK_UP, add, s, seq
+from boki_clips import LOOK_UP, add, footfall, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
 LOOK = LOOK_UP * 0.4
 
 
-def creep(t, amp):
+def creep(t, amp, steps=1):
     """The foot ripples forward under a shell that barely moves: it rocks side to side and dips with every pulse, the
     skirt stretching and squashing under it, the head leading low."""
     u = s(t, 1)
@@ -17,6 +17,7 @@ def creep(t, amp):
     p["root_sc"] = (1 + 0.02 * amp * s(t, 2), 1 - 0.03 * amp * s(t, 2), 1 - 0.02 * amp * s(t, 2))
     add(p, "root", rz=0.09 * amp * u, rx=0.04 * amp * s(t, 2, 0.5))
     add(p, "spine", rz=-0.06 * amp * u, rx=-0.04 * amp * s(t, 2))
+    footfall(p, t, steps, 0.12 * amp if steps == 1 else 0.14, 0.03 if steps > 1 else 0.03 * amp)
     add(p, "head", rx=LOOK - 0.06 * amp, ry=-0.1 * amp * s(t, 1, 0.25))
     return p
 
@@ -37,7 +38,7 @@ def walk(t):
 
 def run(t):
     """A bulldozer's charge: shell tipped forward over the foot, the whole boulder shoving along in short pulses."""
-    p = creep(t, 1.8)
+    p = creep(t, 1.8, 2)
     add(p, "root", rx=-0.08)
     add(p, "spine", rx=-0.06)
     add(p, "head", rx=-0.06)
