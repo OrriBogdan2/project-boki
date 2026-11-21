@@ -261,8 +261,8 @@ func _cards_part(m: Node, hub) -> void:
 	var gw: Node = row.get_child(1)
 	var hint := String(HubFirstVisit.rules()["line_text"])      # main's first-visit hint rides on top of the one line
 	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
-	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
-		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
+	ok(gw_lines.size() == 4 and "Wayseed" in gw_lines[1].text and "Old Pell" in gw_lines[2].text,
+		"locked Glasswater: its name, one line of what it needs and where to get each key (%s)" % gw_lines[1].text)
 	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
 
 ## The text lines on an open zone's card.
