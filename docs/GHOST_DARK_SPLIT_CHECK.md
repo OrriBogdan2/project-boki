@@ -2,7 +2,7 @@
 
 Owner, 11-10: Shadow becomes Ghost and Dark (19 types). The list is `GHOST_DARK_SPLIT.md` (14 Ghost, 14 Dark). It names
 28 Boki by Bokidex file id; this game has 50 species with their own ids, and a species' type is its `theme` in
-`content/kin_v2/<id>.json`. Only four species had `shadow`, so only those four changed. Nothing was guessed: each
+`content/kin/<id>.json`. Only four species had `shadow`, so only those four changed. Nothing was guessed: each
 row below says which way it went and why.
 
 ## Changed (4 of 4 Shadow species)
@@ -19,12 +19,12 @@ match by file id (the list's display names Ribbrella and Duskargot differ from t
 
 ## Mismatches
 
-1. **24 listed Boki are not in this game's data** (no kin_v2 id or name): Wickapi, Chandelapi / Candelapi, Blotlet,
+1. **24 listed Boki are not in this game's data** (no kin id or name): Wickapi, Chandelapi / Candelapi, Blotlet,
    Slog, Sloggoth, Parasolth, Ghoulamari, Sarcobra, Cindermaw, Palloth, Bellowlet, Furnacowary / Furnowary (Ghost);
    Zipling, Seamwyrm, Lurklet, Snapler, Maulangler, Lodestaff / Magnestaff, Gloamspire / Duskspire, Umbrink /
    Nightmink, Howlop, Eclipsowl, Reelacine (Dark). They live in the Bokidex roster only. Nothing to do here.
 2. **Lodestick** is Dark on the list; the game has `lodestick` as **gravity**, and it never had Shadow. Left as
-   gravity. Alternative: set its theme to `dark` (one line in `content/kin_v2/lodestick.json`); that also changes
+   gravity. Alternative: set its theme to `dark` (one line in `content/kin/lodestick.json`); that also changes
    its merge style, so it is the owner's call.
 3. **Bellowlet and Furnacowary** (Fire to Ghost): not in the game. The closest game species is `cindowary`
    ("Bellowary", ember). Names differ and it is not on the list, so it stays ember. Alternative: theme `ghost`.
