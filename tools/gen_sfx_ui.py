@@ -322,6 +322,19 @@ def inv_take(i):
                            at(0.5 * pluck(NOTE['G5'] * j, 0.14, 0.035, 0.5), 0.07)), 0.3), 3200)
 
 
+def ready_e(i):
+    """E back: one soft felt tap on C6, over the ultimate's low pair (UltReadyCue)."""
+    return finish(room(pluck(NOTE['C6'], 0.2, 0.05, 0.6), 0.35), 4600)
+
+
+def broken(i):
+    """A cast broken under you (a stun in a wind-up): a dry snap and a short pluck that sags flat, over in 0.2 s."""
+    snap = bpf(noise(0.018), 2600, 5200) * env(N(0.018), 0.0008, 0.005)
+    sag = S.sweep(NOTE['E5'], NOTE['E5'] * 0.82, 0.16) * env(N(0.16), 0.002, 0.045)
+    thud = 0.35 * pluck(NOTE['C4'], 0.12, 0.03, 0.2)
+    return finish(room(mix(0.8 * snap, at(0.55 * sag, 0.012), thud), 0.25), 4200)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -362,6 +375,8 @@ def main():
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
     S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
+    S.save_cat('cast_broken', broken(0), 'ui')     # (after rank_ready: the takes above stay the same)
+    S.save_cat('ready_e', ready_e(0), 'ui')
 
 
 if __name__ == '__main__':
