@@ -10707,3 +10707,4 @@ READY ext/anim-footstep-contacts 3a9926749f (merged main aba9ecce9e, kept main's
 READY ext/grimble-vfx-data 466140401423c31bbf1c9619f51fee302619f0f5 (re-verified on rpg6, contains origin/main aba9ecce9e3: import rc 0; --check 0 failures; --hero-vfx-check 418 ok, 0 FAIL on 13 dredge rows, 1 FAIL gunslinger LMB 0.154 m = on main too (see p14-port-1118, stuck-integ-f44ae5a2); health --strict red only in 11 style-ratchet files outside this diff (abyss_fx, check_registry, move_feel_check, ...); needs GATE: suite + export dry-run not run here)
 READY ext/boki-idle-batch-a f7194f76cf7b80a10292b5aba8038b9894815034 (Boki idles for nine species)
 READY ext/boki-own-clips-h 2c957318bc (own clips for scaldamus, sentrikat)
+READY ext/merge-lane-N2-1120 6a0d731841b7874545ae665a02da3ae12bfc20e1 (merge lane N2: 14 conflicting branches resolved onto main; suite NEW-RED explained, export OK)
