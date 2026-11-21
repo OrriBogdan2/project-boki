@@ -69,7 +69,7 @@
    "say": "Your bond is full. Press %K, you and %s, together!",
    "nag": "%K! The big one! I've been waiting all day.",
    "done": "Okay, WOW. That's the good stuff.",
-   "tip": "%K  Merge with %s"},
+   "tip": "%K  Fuse with %s"},
   {"id": "finale", "need": 2, "foes": "full", "guide": "fight", "key": "",
    "say": "That's everything. Now let's win one for real!",
    "nag": "We've got this. One at a time, together.",
