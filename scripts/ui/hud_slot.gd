@@ -5,12 +5,13 @@ extends RefCounted
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
 ## pop when a press lands, one red pulse of the frame when it can't (PressDeny), a ring when it comes
 ## back, and ResetPop's swell when a reset hands it straight back. skill_slot adds
-## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
+## run levels on top: locked (padlock, "Spend point" when a point can open it, LV 6 on R), rank pips over
 ## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
 ## Hud._skill_slot call these (the Boki slots in BokiHud go through the same two, so every slot on the bar looks alike).
 ## Per-slot animation state lives on Hud (slot_fx, ready_was, ready_flash, hover_spots) and the last
 ## countdown text shown per slot on Hud.slot_text (checks read it).
 
+const POINT_TAG := "Spend point"   # the gold tag over a locked slot a skill point can open (fits the 50 px tile)
 const READY_FLASH := 0.35      # s: the ring when a slot comes back
 const DENY_T := 0.15           # s: the frame's one red pulse when a press can't go
 const POP_T := 0.3             # s: the pop when a press lands
@@ -104,7 +105,7 @@ static func charge_discs(c: CanvasItem, r: Rect2, charges: float, cap: int, col:
 		fills.append(fill)
 	return fills
 
-## A locked slot: the dimmed icon under a padlock and the key cap; "UNLOCK" in gold when a point can open it
+## A locked slot: the dimmed icon under a padlock and the key cap; "Spend point" in gold when a point can open it
 ## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
 static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
 	var c: CanvasItem = H.c
@@ -118,7 +119,8 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
 	padlock(H, r.get_center() + Vector2(0, 4), lcol)
 	if can:
-		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
+		var pt := TextCache.fit(HudStyle.BIG, POINT_TAG, 10, r.size.x + 8.0)
+		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), pt, 10, HudStyle.GOLD, 3)
 	elif tag != "":
 		var tw := TextCache.width(HudStyle.BIG, tag, 10) + 12.0
 		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))
@@ -187,7 +189,7 @@ static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
 		pts.append(ctr + d * minf(half.x / maxf(absf(d.x), 0.0001), half.y / maxf(absf(d.y), 0.0001)))
 	c.draw_colored_polygon(pts, col)
 
-## A slot with run levels: locked (padlock; UNLOCK in gold when a point can open it; R says when it
+## A slot with run levels: locked (padlock; "Spend point" in gold when a point can open it; R says when it
 ## opens), else the ability slot with RankMarks' tier pips and, while a point can go in, its gold +.
 static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float,
 		cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
