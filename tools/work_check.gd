@@ -268,6 +268,29 @@ func run(m: Node) -> void:
 	for _f in 2: await main.get_tree().process_frame
 	ok(H.panel_open == "Job Board", "... and its Kin tab")
 	H._close_panel()
+	# ---------------------------------------------------------------- 10b. auto-sort
+	var sv := Save.d
+	Save.d = Save.fresh()
+	var AL := HomeLayout.fresh()
+	_deco(AL, "lumber_camp", 10, 10)
+	_deco(AL, "quarry", 14, 10)
+	Save.d["layout"] = AL
+	var peb := _kin("pebbit", "Rocky"); var fresh_k := _kin("burrlet", "Moss"); var mine := _kin("pebbit", "Own"); var rest := _kin("pebbit", "Nap")
+	Work.assign(mine, -1)
+	Work.set_rest(rest, true)
+	Save.d["roster"] = [peb, fresh_k, mine, rest]
+	var placed := Work.autosort()
+	var top_el: String = Work.list(peb)[0][0]
+	var want := "quarry" if top_el == "stone" else ("lumber_camp" if top_el == "timber" else "")
+	var peb_st := ""
+	for st in HomeLayout.stations(Save.d):
+		if int(st["e"]["u"]) == Work.assigned(peb): peb_st = String(st["id"])
+	ok(peb_st == want, "auto-sort: Pebbit (top knack %s) lands at %s" % [top_el, want if want != "" else "no station"])
+	ok(Work.assigned(mine) < 0 and Work.assigned(rest) < 0, "auto-sort leaves a kin the owner placed or rested alone")
+	ok(Work.autosort().is_empty(), "auto-sort is idempotent (%d placed the first time)" % placed.size())
+	Work.assign(peb, -1)
+	ok(Work.autosort().is_empty() and Work.assigned(peb) < 0, "an owner's unassign sticks")
+	Save.d = sv
 	# ---------------------------------------------------------------- 11. shimmer odds
 	var rng := RandomNumberGenerator.new(); rng.seed = 99
 	var N := 2000000
