@@ -435,7 +435,8 @@ func _start(o: Dictionary) -> void:
 		spawn_plan.roll(seed_val)
 		if opts.has("live_lair"):
 			# a fixed roll for a filmed match (the Demo match): this lair is live, in place of another
-			var keep: Array = spawn_plan.of("boss").filter(func(c): return String(c["name"]) == String(opts["live_lair"]))
+			var live_name := String(opts["live_lair"])
+			var keep: Array = spawn_plan.of("boss").filter(func(c): return String(c["name"]) == live_name)
 			if not keep.is_empty() and not keep[0]["active"]:
 				var on: Array = spawn_plan.active_of("boss")
 				if not on.is_empty(): on[-1]["active"] = false
