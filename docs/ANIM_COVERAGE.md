@@ -16,10 +16,6 @@ crouch layer, and kit moves that play on the upper body over the legs. Boki: the
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
 onto its side (`Kin.render`).
-No Bokidex .glb (all 48 in `art/kin/<id>/<id>.glb`, checked 11-20) carries a hit, flinch, faint or death clip: each has the same
-13 (ability, attack, carry, chop, eat, hop, idle, mine, pet, run, sleep, tend, walk). So the starters' `hit` and `death`
-stay `proc` (`KinFlinch`, the downed topple) and nothing is mapped; when a species gets such a clip, map it in the rig
-with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --video` renders each starter's hit and faint.
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),

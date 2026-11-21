@@ -509,26 +509,6 @@ func _dolm_rocks(m: Match) -> void:
 					warm.append(kind)
 		n.free()
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
-	# the raised rocks (Stone Row, Basalt Spine) and his fists wear the arm's slate and teal: nothing red-leaning
-	var raised: Array = [RockLook.make()]
-	var fist := Node3D.new()
-	HeroArms.build(fist, "rubble_fists", null, null, null)
-	raised.append(fist)
-	var red: Array = []
-	for root: Node in raised:
-		for mi: Node in root.find_children("*", "MeshInstance3D", true, false):
-			var mat: Material = (mi as MeshInstance3D).material_override
-			var cols: Array = []
-			if mat is ShaderMaterial:
-				for p: String in ["stone", "stone_hi", "glow", "rim_col", "cap_col", "color"]:
-					cols.append((mat as ShaderMaterial).get_shader_parameter(p))
-			elif mat is StandardMaterial3D:
-				cols.append((mat as StandardMaterial3D).albedo_color)
-			for c: Variant in cols:
-				if c is Color and (c as Color).r > (c as Color).b:
-					red.append("%s %s" % [mi.name, c])
-		root.free()
-	ok(red.is_empty(), "Tenzo's raised rocks and fists: slate and teal only, no warm material %s" % [red])
 
 
 ## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers

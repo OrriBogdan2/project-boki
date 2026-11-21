@@ -298,7 +298,6 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge timing | short and fast, seen travelling, then he stops | "barge: a short, fast shove you see travel (about half way at half its time), then he stops" |
 | A run of barges | three, a short gap between | "barge: three in a row, a short gap between (a press inside the gap does nothing)" |
 | Barge into a foe | it touches nobody (no shove, no damage) | "barge: it shoves and hurts nobody (the source's Brute Dash)" |
-| Barge `hit_kb` | removed: it was dead data (never read), so the barge has no knock (ext/tenzo-grimble-knock-cut) | Brute Dash: no damage, no knock [D] |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |

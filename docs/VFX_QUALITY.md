@@ -54,7 +54,7 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 | `Fx.ring` was a thin flat band with a linear fade | `ring.gdshader` gains `wash` (inner fill) and `halo` (glow + hot core); ring alpha eases `1-k²` |
 | `Fx.flash` lasted 0.06–0.08 s (1–2 frames) and flickered | `FLASH_MIN` 0.1 s |
 | `Fx.bolt` drew flat glow boxes that popped off | segments are fading `beam`s |
-| Tenzo's kit hard-coded molten red/orange | recoloured to cobalt in `dolm_kit`, `breah_*`, `rock_look` ; the rock bodies, thrown and raised, follow in 11-21: blue slate with rune-teal cracks and rim, like his arm (`KitLooks.slate_mat`) |
+| Tenzo's kit hard-coded molten red/orange | recoloured to cobalt in `dolm_kit`, `breah_*`, `rock_look` (FX only; the rock body stays sandstone) |
 | The reel had no held-LMB part | `hold` part in `tools/hero_vfx_reel.gd` |
 | `fx_dot` particles cut hard into the ground | `FxDot.material()` is the one material: Forward+ and Mobile fade by the depth behind the dot, gl_compatibility and the Low presets by height above the ground under the burst (no depth copy); `--dot-soft-shots` (`--dot-hard` = the before look), GPU shots in `docs/shots/dot-soft/`: `glcompat_*` (Apple M5, before/after, high and low) and `forwardplus_high_after_*` (RTX 4090). GPU `--perf-bench` 60 s 1920x1080, main vs this: high draws 1003/1017, gpu 0.90/0.88 ms; low draws 881/844, gpu 1.69/0.42 ms (flat) |
 

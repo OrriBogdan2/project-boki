@@ -717,7 +717,7 @@ func cast_e() -> bool:
 		return false
 	play("breah_raise")
 	vfx("eye_flare")
-	# the tell: a cobalt flash on the ground where each rock will rise, then the rocks
+	# the tell: a red-orange flash on the ground where each rock will rise, then the rocks
 	var tell := float(ed["tell"])
 	for j in spots.size():
 		var p: Vector3 = spots[j][0]

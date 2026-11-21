@@ -46,8 +46,8 @@ func run(m: Node) -> void:
 		egg.done.connect(func(): finished[i] = true)
 		egg.start()
 		eggs.append(egg)
-	var t0 := CheckClock.own_msec()      # (not the wall clock: a loaded box left eggs at the second crack)
-	while finished.size() < cases.size() and CheckClock.own_msec() - t0 < 40000:
+	var t0 := Time.get_ticks_msec()
+	while finished.size() < cases.size() and Time.get_ticks_msec() - t0 < 40000:
 		await tree.process_frame
 	ok(finished.size() == cases.size(), "all %d eggs hatch" % cases.size())
 	var files: Array = []

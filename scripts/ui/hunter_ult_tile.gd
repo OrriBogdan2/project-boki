@@ -24,8 +24,6 @@ static func draw(H, p: Hunter, x: float, y: float, s: float, gap: float) -> floa
 	var key := Settings.key_cap("hunter_ult")
 	_track(H, _state_of(xi), float(H.m.time))
 	if state == "locked":
-		if not HudReveal.on(H.m, "ult_tiles"):
-			return x + s + gap      # held back until level 6 (the row keeps its places)
 		H.hover_spots.append([r, "x"])
 		HudSlot.locked(H, "x", r, String(xi["icon"]), xi["col"], key, false, "LV %d" % int(xi["unlock"]))
 		HudSlot.deny_pulse(H, "x", r)
