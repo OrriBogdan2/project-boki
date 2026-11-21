@@ -10711,3 +10711,4 @@ READY ext/merge-lane-N2-1120 6a0d731841b7874545ae665a02da3ae12bfc20e1 (merge lan
 READY ext/boki-idle-batch-a 9889ed4252 (bulk-rebase: origin/main merged in mechanically, was f7194f76cf; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/anim-dash-drive-hold ffc35e72231e9230afb3de71a7f2474494d96ea5 (Kael lunge + Vex slide hold drive pose)
 READY ext/vex-quill-ammo-1117 7c87e05e5a (Vex quill half damage past half a drum; No reload text restored, fixes --kit-drill-check; hero-combo/archetype reds same as main)
+READY ext/stomp-picker-sweep 09f6185647 (tg-text + sweep rows fixed, main merged)
