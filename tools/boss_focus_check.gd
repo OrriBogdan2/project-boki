@@ -34,7 +34,8 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true, "fresh_t": 0.0,
+	# (the seed picks the bot's Boki: seed 21 drew Mirrolin, whose reflect sends the player's own hits back at them)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 24, "no_drop": true, "fresh_t": 0.0,
 		"demo_kin": "cindle"})
 	m.set_process(false)
 	var P: Hunter = m.player

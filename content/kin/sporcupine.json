@@ -1,0 +1,118 @@
+{
+	"grammar": 1,
+	"id": "sporcupine",
+	"name": "Sporcupine",
+	"animals": [
+		"Porcupine",
+		"Mushroom stalks"
+	],
+	"theme": "spore",
+	"flavor": "Porcupine whose quills are mushroom stalks.",
+	"colors": {
+		"belly": "#fce4cc",
+		"body": "#b46c54",
+		"glow": "#ffb061"
+	},
+	"look": {
+		"ears": "none",
+		"body": "mycroll",
+		"tail": "none",
+		"feet": "none",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 6,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.52,
+		"curiosity": 0.69,
+		"loyalty": 0.74,
+		"temper": 0.42
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.6,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Stalk Web",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.7
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.9
+			}
+		]
+	},
+	"active": "puffcap_mines",
+	"auto": "thorn_patch",
+	"merge": "thornwake",
+	"evolution": {
+		"root": "Spor",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form",
+					"burrlet_spore_drift"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "curious, damp, mumbling",
+		"syllables": [
+			"Spor",
+			"cupine"
+		]
+	},
+	"egg": {
+		"name": "Sporcupine Egg",
+		"temper": "Curious",
+		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

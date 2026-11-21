@@ -1,0 +1,118 @@
+{
+	"grammar": 1,
+	"id": "thistlynx",
+	"name": "Thistlynx",
+	"animals": [
+		"Lynx",
+		"Thistle"
+	],
+	"theme": "venom",
+	"flavor": "Grown lynx, thistle mane, barbed ear tufts.",
+	"colors": {
+		"belly": "#ffe1a5",
+		"body": "#cc9c6c",
+		"glow": "#ffbb77"
+	},
+	"look": {
+		"ears": "horn",
+		"body": "round",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "drips"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 4,
+		"kin_hp": 5,
+		"kin_speed": 8,
+		"owner_max_hp": 3
+	},
+	"personality": {
+		"bravery": 0.76,
+		"curiosity": 0.47,
+		"loyalty": 0.58,
+		"temper": 0.71
+	},
+	"ai": {
+		"aggression": 0.8,
+		"loyalty": 0.5,
+		"caution": 0.25,
+		"role": "bruiser"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Thistle Sting",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "damage",
+					"preset": "poison",
+					"amount": 10
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"preset": "poison",
+				"amount": 12
+			}
+		]
+	},
+	"active": "stinger_hook",
+	"auto": "flare_dash",
+	"merge": "blaze_mantle",
+	"evolution": {
+		"root": "Thist",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "haughty, prickly, purring",
+		"syllables": [
+			"Thist",
+			"lynx"
+		]
+	},
+	"egg": {
+		"name": "Thistlynx Egg",
+		"temper": "Prickly",
+		"desc": "Something prickly is in here.",
+		"play": "Gets in close and hits hard."
+	}
+}

@@ -115,8 +115,15 @@ func _wake() -> void:
 	ok(nap.long == 0.0 and nap.low == 0.0 and nap.bow == 0.0, "and stands normal again by %.1f s" % KinNap.WAKE)
 	r.free()
 
-func _puppet() -> void:
+## Every species has a rig now: a primitive body is one built with the rigs switched off.
+func _primitive() -> Node3D:
+	BokiRig.enabled = false
 	var k := Models.kin(PRIMITIVE, {})
+	BokiRig.enabled = true
+	return k
+
+func _puppet() -> void:
+	var k := _primitive()
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var pup := _puppet_of(k)
@@ -245,7 +252,7 @@ func _shots() -> void:
 	gm.albedo_color = Color("7fa860")
 	ground.material_override = gm
 	vp.add_child(ground)
-	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), Models.kin(PRIMITIVE, {})]
+	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), _primitive()]
 	pair[0].position = Vector3(-0.55, 0, 0)
 	pair[1].position = Vector3(0.6, 0, 0)
 	pair[1].scale *= BIG
