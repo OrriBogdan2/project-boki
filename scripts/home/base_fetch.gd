@@ -203,6 +203,10 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "fetch"}
 
+## A round is on (GardenMusic ducks the music while it is).
+func playing() -> bool:
+	return run != null
+
 func label() -> String:
 	return "Play Fetch Cup (back %s)" % Save.active_kin().get("name", "your partner")
 
