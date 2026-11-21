@@ -87,13 +87,17 @@ one fused shell. The trouser band is now new Meshy geometry with separate legs; 
   albedo `tarek_v95p.jpg` (2048, VRAM-compressed like the other atlases).
 - Weights: bone heat (`VOX=0.008 mkweights auto` from the rig-test kit), then `tools/meshy/leg_side_weights.py` at
   ZC 0.75: below the crotch each connected leg piece takes only its own leg's bones, and no arm bones touch the band.
+- `tools/meshy/apron_follow.py` (defaults Y0 1.0, Y1 1.12): the sash apron (1,061 `cloth-v95` verts below the waist)
+  takes the IDW weights of the nearest band verts, so the new thighs do not punch through it in crouch.
 - Blender's export resamples every clip (30 to 24 fps), so all 50 live clips were spliced back byte-equal with
   `tools/art1/glb_add_clips.py` (lmb_punch and lmb_throw stay at 60 fps).
 - 60,742 tris (live 60,439), 11 materials (live 10), 50 clips, same skeleton, rest pose and anchors.
 
-Metrics (lower-body edges stretched over 5x/10x/20x, max over the clip): run_f 193/53/6 live -> 52/23/10; rmb_slam
-379/155/47 -> 96/37/24. Web triangles between the legs (rig-test t6): 219 -> 142; the run_f p99 stretch 4.5 -> 2.4.
-Most of the >20x edges left are a pre-existing live defect: hand-skin verts near x 0.2, z 0.9-1.0 weighted about
-half hand.R and half thigh.
+Metrics (job script `loc.py`, not in git; lower-body edges stretched over 5x/10x/20x, max over 6 frames), live -> new:
+run_f 193/53/6 -> 129/42/19; crouch_f 238/93/18 -> 164/46/24; crouch_idle 181/61/9 -> 199/65/20; rmb_slam
+379/155/47 -> 210/80/36. Fewer moderate stretches but more extreme ones: the >20x edges are the hand-skin verts near
+x 0.2, z 0.9-1.0 (weighted about half hand.R, half thigh) and the apron where it now spans the split legs. Web triangles
+between the legs (rig-test t6, before the apron pass): 219 -> 142.
 
-**Known gap:** the legs are still joined for a short span at the crotch (z 0.75-0.85); below that they are separate.
+**Known gaps:** the legs are still joined for a short span at the crotch (z 0.75-0.85). In deep crouch the apron's
+underside and the band still show dark patches at the crotch (the live model shows a web and hand-skin smear there).
