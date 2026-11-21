@@ -10708,3 +10708,4 @@ READY ext/grimble-vfx-data 466140401423c31bbf1c9619f51fee302619f0f5 (re-verified
 READY ext/boki-idle-batch-a f7194f76cf7b80a10292b5aba8038b9894815034 (Boki idles for nine species)
 READY ext/boki-own-clips-h 2c957318bc (own clips for scaldamus, sentrikat)
 READY ext/merge-lane-N2-1120 6a0d731841b7874545ae665a02da3ae12bfc20e1 (merge lane N2: 14 conflicting branches resolved onto main; suite NEW-RED explained, export OK)
+READY ext/boki-idle-batch-a 9889ed4252 (bulk-rebase: origin/main merged in mechanically, was f7194f76cf; union 0 gen 1 files; the branch's own READY checks still apply)
