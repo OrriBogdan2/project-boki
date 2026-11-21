@@ -218,7 +218,8 @@ func _breah() -> void:
 	P.merge_st = {}
 	P.inp["fire"] = false
 	ok(
-		"lmb: a merge keeps the hold, the release still throws the punch", K.punches == punches0 + 1 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
+		"lmb: a merge keeps the hold, the release still throws the punch",
+		K.punches == punches0 + 1 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
 		"punches %d -> %d" % [punches0, K.punches]
 	)
 	# punch into a wall: stunned, stars over the head

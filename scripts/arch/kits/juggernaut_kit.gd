@@ -343,7 +343,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# a press while a pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer and swings when it's free
+	# a press while a pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer, then swings
 	if not h.atk.can_fire() or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
