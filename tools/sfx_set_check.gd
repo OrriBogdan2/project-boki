@@ -888,8 +888,8 @@ func _glove_names(node, names: Dictionary) -> void:
 			_glove_names(v, names)
 ## 11. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
 func _garden_moments() -> void:
-	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_evolve", "garden_visit_in",
-			"garden_visit_out", "garden_season"] + GardenSfx.CUPS
+	var cues := ["garden_egg", "garden_friends", "garden_bond_up", "garden_chime_part", "garden_evolve",
+			"garden_visit_in", "garden_visit_out", "garden_season"] + GardenSfx.CUPS
 	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
 	ok(filed, "moments: all %d cues have files" % cues.size())
 	var a := {"uid": "moment_a"}
@@ -926,7 +926,7 @@ func _garden_moments() -> void:
 			"reset": false}
 	_cup_rounds(res)
 	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
-			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_friends\"",
+			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_bond_up\"",
 			"home.gd": "\"garden_evolve\"",
 			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
 	var off := []
