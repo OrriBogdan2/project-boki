@@ -156,12 +156,12 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
 		f.burn_dps = dps
 		f.burn_by = h
+	StatusSfx.ignite(f, h, float(rd()["ignite_t"]))
 	if lvl == 2 and was < 2:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
 		vfx("ablaze", f.pos)
-		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
 ## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
