@@ -6,6 +6,8 @@
 	"chance_doc": "Chance a look brings a visitor when the zone suits one: about one every three minutes in a zone that does.",
 	"residents": 2,
 	"residents_doc": "Residents of the visitor's type group a zone needs.",
+	"lone_residents": 0,
+	"lone_residents_doc": "Residents of the visitor's type group needed while you have only one Boki: none, so the first friend can come (a starter is rarely of the zone's group).",
 	"feeds": 3,
 	"feeds_doc": "Favourite meals it takes before it leaves an egg or asks to stay.",
 	"gap_s": 300.0,
