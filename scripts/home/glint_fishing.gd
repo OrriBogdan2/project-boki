@@ -415,6 +415,10 @@ func _seated() -> void:
 	who["pos"] = h.ppos + slot
 	(who["node"] as Node3D).position = who["pos"]
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press or release: true when fishing took it.
 func input(event: InputEvent) -> bool:
 	if run == null:
