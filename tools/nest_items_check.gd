@@ -16,7 +16,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func _parents(rng: RandomNumberGenerator, i: int) -> Array:
-	var kin: Array = Data.common_kin()
+	# first forms only: an egg holds its line's first form, so a later form as the Locket's wearer would not match
+	var kin: Array = Data.common_kin().filter(func(k): return Evo.base_form(k) == k)
 	var out: Array = []
 	for j in 2:
 		var r := Save.new_kin(String(kin[(i + j) % kin.size()]), "P%d%d" % [i, j])

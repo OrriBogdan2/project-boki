@@ -1,0 +1,119 @@
+{
+	"grammar": 1,
+	"id": "vespox",
+	"name": "Vespox",
+	"animals": [
+		"Fox",
+		"Scorpion"
+	],
+	"theme": "venom",
+	"flavor": "Leaner fox, bigger pincers, longer sting tail. Male locked, female redo out.",
+	"colors": {
+		"belly": "#cc9ccc",
+		"body": "#9c5484",
+		"glow": "#ff78d2"
+	},
+	"look": {
+		"ears": "none",
+		"body": "vespyx",
+		"tail": "none",
+		"feet": "none",
+		"aura": "drips"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 4,
+		"kin_hp": 5,
+		"kin_speed": 8,
+		"owner_max_hp": 3
+	},
+	"personality": {
+		"bravery": 0.77,
+		"curiosity": 0.46,
+		"loyalty": 0.53,
+		"temper": 0.69
+	},
+	"ai": {
+		"aggression": 0.8,
+		"loyalty": 0.4,
+		"caution": 0.25,
+		"role": "bruiser"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Patrol Venom",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "damage",
+					"preset": "poison",
+					"amount": 12
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"preset": "poison",
+				"amount": 15
+			}
+		]
+	},
+	"active": "stinger_hook",
+	"auto": "flare_dash",
+	"merge": "blaze_mantle",
+	"evolution": {
+		"root": "Ves",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form",
+					"cindle_barbed_tail"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "sly, restless, watchful",
+		"syllables": [
+			"Ves",
+			"pox"
+		]
+	},
+	"egg": {
+		"name": "Vespox Egg",
+		"temper": "Bold",
+		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
+		"play": "Gets in close and hits hard."
+	}
+}

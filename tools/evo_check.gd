@@ -183,21 +183,23 @@ func _next_form() -> void:
 func _art_gate() -> void:
 	var real := _kin("cindle", 60)
 	Evo.on_level(real)
-	ok(real["species"] == "cindle" and not Evo.has_art("vespox"),
-		"art gate: a level-60 Vespyx waits, Vespox has no model yet")
+	ok(real["species"] == "vespox" and Evo.has_art("vespox") and not Evo.has_art("glaivyx"),
+		"art gate: a level-60 Vespyx grows into Vespox (it has its model) and stops there, Glaivyx has none")
 	var no_art := ""
 	for id in Data.KIN:
 		if no_art == "" and not BokiRig.FRAME.has(id):
 			no_art = id
 	ok(no_art != "" and not Evo.has_art(no_art) and Evo.has_art("cindle"),
 		"art gate: a species with data but no rig framing (%s) has no art; Vespyx does" % no_art)
-	var wait := _kin("marchleaf", 60)        # Shinobant and Harvantis are data-only: Boki wait for them
+	var wait := _kin("marchleaf", 60)        # Reapant and Harvantis are data-only: Boki wait for them
 	wait["rare"] = "nightmark"
 	var to_shin := Evo.next_for(wait, "level")
+	Evo.on_level(wait)
+	var to_reap := Evo.next_for(wait, "level")
 	var ev_wait := Evo.on_level(wait)
-	ok(to_shin == "shinobant" and not Evo.has_art("shinobant") and wait["species"] == "marchleaf"
+	ok(to_shin == "shinobant" and wait["species"] == "shinobant" and to_reap == "reapant" and not Evo.has_art("reapant")
 		and String(ev_wait.get("kind", "")) != "form",
-		"art gate: a Nightmark level-60 Marchleaf waits, Shinobant has no model yet")
+		"art gate: a Nightmark level-60 Marchleaf grows into Shinobant, then waits: Reapant has no model yet")
 	var scy := {"species": "scythant", "level": 60}
 	ok(Evo.next_for(scy, "level") == "harvantis" and not Evo.has_art("harvantis")
 		and Evo.try_evolve(scy, "level").is_empty() and scy["species"] == "scythant",
@@ -209,20 +211,20 @@ func _art_gate() -> void:
 	Save.d["roster"] = [rec]
 	ok(Evo.catch_up(Save.d["roster"]).is_empty() and rec["species"] == "hivara",
 		"art gate: loading changes nothing while the art is missing")
-	_line("hivara", {"level": 8, "into": [{"id": "cindle"}]})     # the art lands
+	_line("hivara", {"level": 8, "into": [{"id": "wisplet"}]})     # the art lands
 	var evs := Evo.catch_up(Save.d["roster"])
 	var queued := (rec.get("pending_evo", []) as Array).size()
-	ok(rec["species"] == "cindle" and evs.size() == 1 and queued == 1,
+	ok(rec["species"] == "wisplet" and evs.size() == 1 and queued == 1,
 		"art gate: once the art exists it evolves on load, and home plays it")
 	Save.d["roster"] = []
 	var waits := _kin("hivara", 3)
 	_line("hivara", {"level": 8, "into": [{"id": no_art}]})
 	ok(Evo.level_form(waits) == [no_art, 8, false] and Evo.level_note(waits).ends_with("waits on its art"),
 		"art gate: the Growth card says its level-8 form waits on its art")
-	_line("hivara", {"level": 8, "into": [{"id": "cindle"}]})
-	var nm := String(Data.KIN["cindle"]["name"])
+	_line("hivara", {"level": 8, "into": [{"id": "wisplet"}]})
+	var nm := String(Data.KIN["wisplet"]["name"])
 	ok(Evo.level_note(waits) == "Evolves into %s at level 8" % nm, "art gate: with the art it names the form and level")
-	ok(Evo.level_form(_kin("pebbit", 3)).is_empty() == not Evo.rules()["lines"].has("pebbit"),
+	ok(Evo.level_form(_kin("pebbit", 3)).is_empty() == (not Evo.rules()["lines"].has("pebbit")),
 		"art gate: a species with no level line has no level form")
 
 ## The cap: levels stop at 100, and generated kin too.

@@ -292,19 +292,25 @@ func _book() -> void:
 
 # ------------------------------------------------------------------ 7b. branching finals share an entry
 func _branch_forms() -> void:
-	var pairs: Array = Content.rules("branch_forms")["pairs"]
+	var listed: Array = Content.rules("branch_forms")["pairs"]
+	var all_ids: Array = []
+	for pair in listed:
+		all_ids.append_array(pair)
+	ok(listed.size() == 4 and _uniq(all_ids) == 8, "the table lists 4 pairs of 8 different species")
+	# (a pair with a form already in the game is left alone: the check adds and removes its own stand-ins)
+	var pairs: Array = listed.filter(func(pair): return not Data.KIN.has(pair[0]) and not Data.KIN.has(pair[1]))
 	var ids: Array = []
 	for pair in pairs:
 		ids.append_array(pair)
-	ok(pairs.size() == 4 and _uniq(ids) == 8, "the table lists 4 pairs of 8 different species")
+	ok(not pairs.is_empty(), "%d pairs have no form in the game yet" % pairs.size())
 	var before: int = FieldBook.entries().size()
 	var kin_base: int = Data.KIN.size()
 	for id in ids:
 		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
 	var a: String = pairs[0][0]
 	var b: String = pairs[0][1]
-	ok(Data.KIN.size() == kin_base + 8, "8 forms are added to the game")
-	ok(FieldBook.entries().size() == before + 4, "...but they make 4 entries: 4 fewer than one per species")
+	ok(Data.KIN.size() == kin_base + ids.size(), "%d forms are added to the game" % ids.size())
+	ok(FieldBook.entries().size() == before + pairs.size(), "...but they make %d entries: one per pair" % pairs.size())
 	ok(FieldBook.entry_key(b) == a and FieldBook.forms_of(a) == [a, b], "...the pair is one entry, keyed by the first")
 	ok(DexView.number(b) == DexView.number(a), "...so both forms share one number")
 	Save.d["dex"] = {}

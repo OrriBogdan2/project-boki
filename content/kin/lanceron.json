@@ -1,0 +1,129 @@
+{
+	"grammar": 1,
+	"id": "lanceron",
+	"name": "Lanceron",
+	"animals": [
+		"Heron",
+		"Ice lance"
+	],
+	"theme": "frost",
+	"flavor": "Ice-armoured heron, beak an ice lance, blade feathers.",
+	"colors": {
+		"belly": "#ffffff",
+		"body": "#ccb4cc",
+		"glow": "#c790ff"
+	},
+	"look": {
+		"ears": "fin",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "wind"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_damage": 2,
+		"kin_hp": 8,
+		"kin_speed": 5,
+		"owner_max_hp": 2,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.59,
+		"curiosity": 0.69,
+		"loyalty": 0.69,
+		"temper": 0.34
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Lance Glide",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		},
+		"passives": [
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.8
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "thorn_patch",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Lan",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "severe, terse, proud",
+		"syllables": [
+			"Lan",
+			"ceron"
+		]
+	},
+	"egg": {
+		"name": "Lanceron Egg",
+		"temper": "Patient",
+		"desc": "Something patient is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

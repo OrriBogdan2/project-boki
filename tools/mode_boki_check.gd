@@ -82,7 +82,7 @@ func _live_part() -> void:
 	var meadow: Array = ModeBoki.offer(wild, "expedition", 0)
 	var hollow: Array = ModeBoki.offer(wild, "expedition", 2)
 	var sizes := [meadow.size(), hollow.size()]
-	ok(sizes == [18, 29], "flag on: The Meadow offers 18, The Hollow 29 %s" % [sizes])
+	ok(sizes == [18, 52], "flag on: The Meadow offers 18, The Hollow 52 %s" % [sizes])
 	_visitor_part(wild)
 	var rng := RandomNumberGenerator.new()
 	var drawn := {}

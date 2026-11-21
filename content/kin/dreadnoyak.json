@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "dreadnoyak",
+	"name": "Dreadnoyak",
+	"animals": [
+		"Yak",
+		"Icebreaker bow"
+	],
+	"theme": "frost",
+	"flavor": "Colossal black yak: skull face, swept horns, white crest, icebreaker iron hull under the chest, ice tusks curling over it.",
+	"colors": {
+		"belly": "#cce4e4",
+		"body": "#242424",
+		"glow": "#82ffff"
+	},
+	"look": {
+		"ears": "fin",
+		"body": "boulder",
+		"tail": "stub",
+		"feet": "stumps",
+		"aura": "wind"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.5,
+		"gait": {
+			"hop_rate": 6.0,
+			"hop_height": 0.08,
+			"pace": 1.0
+		}
+	},
+	"stats": {
+		"kin_damage": 4,
+		"kin_hp": 11,
+		"kin_speed": 4,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.74,
+		"curiosity": 0.46,
+		"loyalty": 0.7,
+		"temper": 0.35
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Dread Plough",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		],
+		"mount": {
+			"speed": 1.1,
+			"jump": 0.9,
+			"turn": 0.65
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "rock_guard",
+	"merge": "titan",
+	"evolution": {
+		"root": "Dread",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "gruff, steady, protective",
+		"syllables": [
+			"Dread",
+			"noyak"
+		]
+	},
+	"egg": {
+		"name": "Dreadnoyak Egg",
+		"temper": "Steady",
+		"desc": "Something steady is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

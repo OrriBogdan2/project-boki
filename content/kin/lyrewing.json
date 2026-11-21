@@ -1,0 +1,119 @@
+{
+	"grammar": 1,
+	"id": "lyrewing",
+	"name": "Lyrewing",
+	"animals": [
+		"Hummingbird",
+		"Golden harp"
+	],
+	"theme": "echo",
+	"flavor": "Lyrebird whose tail is a harp of strings.",
+	"colors": {
+		"belly": "#e4e4e4",
+		"body": "#549c6c",
+		"glow": "#ffc56e"
+	},
+	"look": {
+		"ears": "wisp",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "rings"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 7,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.39,
+		"curiosity": 0.51,
+		"loyalty": 0.78,
+		"temper": 0.1
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Lyre Hum",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "echolocate",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Lyr",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "bright, chatty, musical",
+		"syllables": [
+			"Lyr",
+			"ewing"
+		]
+	},
+	"egg": {
+		"name": "Lyrewing Egg",
+		"temper": "Bright",
+		"desc": "Something bright is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

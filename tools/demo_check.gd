@@ -51,6 +51,10 @@ func run(m: Node) -> void:
 			var p: Hunter = main.current.player
 			ok(p.arch == "mage", "%s: --hunter=mage picked" % preset)
 			if preset in ["match", "tier2"]:
+				var waited := 0.0      # (the lobby fills over frames: the rigged Boki take longer to build)
+				while main.current.hunters.size() < Data.MATCH_PLAYERS and waited < BOOT_SECS:
+					await _wait(0.25)
+					waited += 0.25
 				var n: int = main.current.hunters.size()
 				ok(n == Data.MATCH_PLAYERS, "%s: the full bot lobby (%d)" % [preset, n])
 	ok(Demo.name_in(PackedStringArray(["--demo=nope"])) == "", "an unknown preset is ignored")

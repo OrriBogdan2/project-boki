@@ -1,6 +1,6 @@
 extends "res://tools/ability_check.gd"      # shares its _ac_setup / _ac_run helpers
 ## --mines-cap-check: one Glintmole fighting a foe for 60 s must never have more than MAX_LIVE puffcap
-## mines on the ground at once (reference clarity: nothing cluttering the screen). Its own AI casts
+## mines on the ground at once (Supervive clarity: nothing cluttering the screen). Its own AI casts
 ## Puffcap Mines whenever the cooldown allows (foe stays in range, never steps on a mine), and every
 ## 60 s run prints the peak number of live traps per caster. Also checks a hunter-cast mine pair:
 ## max_live on the trap delivery drops the oldest one. Prints MINESCAP lines.

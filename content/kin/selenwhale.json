@@ -1,0 +1,115 @@
+{
+	"grammar": 1,
+	"id": "selenwhale",
+	"name": "Lunarca",
+	"animals": [
+		"Whale",
+		"Full moon"
+	],
+	"theme": "lunar",
+	"flavor": "Evolution of Lunafin.",
+	"colors": {
+		"belly": "#e4e4fc",
+		"body": "#cccce4",
+		"glow": "#89b0ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "drop",
+		"tail": "fish",
+		"feet": "none",
+		"aura": "bubbles"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 7,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.38,
+		"curiosity": 0.58,
+		"loyalty": 0.84,
+		"temper": 0.08
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Moon Tide",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Lun",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "quiet, serene, deep",
+		"syllables": [
+			"Lun",
+			"arca"
+		]
+	},
+	"egg": {
+		"name": "Lunarca Egg",
+		"temper": "Serene",
+		"desc": "Something serene is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}
