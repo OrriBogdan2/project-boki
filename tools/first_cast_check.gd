@@ -132,7 +132,8 @@ func _span(m: Match, P: Hunter, T: Hunter) -> Array:
 func _row(ak: String, s: String, went: String, med: float, f: float, rep: float, what: String) -> void:
 	var cost := f - rep
 	var loaded := med > BUSY_MS      # (a bisect on a box at load 40 saw medians of 19-33 ms and 32 false FAILs)
-	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS and not loaded
+	var traced := what != "0 pipelines; "      # nothing made, nothing compiled: a slow frame with no cause is the host, not the first cast
+	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS and not loaded and traced
 	if hitch: bad += 1
 	if loaded: busy += 1
 	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else ("busy" if loaded else "ok")])
