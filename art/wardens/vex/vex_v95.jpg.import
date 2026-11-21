@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btja1v0o27c8a"
+uid="uid://r0i3y0mgod0m"
 path.s3tc="res://.godot/imported/vex_v95.jpg-d4ba955b7171976b98d7ca0af40cd455.s3tc.ctex"
 path.etc2="res://.godot/imported/vex_v95.jpg-d4ba955b7171976b98d7ca0af40cd455.etc2.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "aaa94287c8de8951d9897891517ae988"
+"md5": "c1a3d2d62fd3d82ff1f5956422b5556a"
 }
 
 [deps]

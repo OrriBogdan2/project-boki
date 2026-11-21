@@ -1,5 +1,61 @@
 # Vex (gunslinger): import note
 
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r5 (2026-11-21, after the r4e art-gate FAIL, awaiting the owner's visual check)
+Part-lock: the r4 gatling (Meshy G2, bronze with stickers and chain) is kept as its own piece, Meshy-remeshed to 10000 tris (tG2);
+the body is redone. Two routes in parallel (~/gens/hunter-regen-1120/vex/r5/raw/gen_log.tsv): P1-P3, the r4 body recipe, and
+F1-F3, from the turnaround with face ref #5 as a texture ref. F3 won (blue eyes, freckles, hazard cuff, coin chain, back
+patch, softer lips) and was Meshy-remeshed to 48000 tris (tF3), then composed with tG2 (r4/scripts/compose_r4.py).
+BLACK HOLES in the jacket back came from v95_swap's own decimation (make_low collapse plus _unfold flips faces), not from
+Meshy. r5 keeps the master under budget and sets head_tris 0, so nothing is decimated (spec: r5/work/swap4/spec.json,
+56495 tris, no flipped faces in a backface render). The hair slot is widened to h 0.15-0.56. The olive jacket fell in brass
+(h 0.07-0.17): a cloth rule for the torso box now comes before brass (checked with r5/scripts/slotview.py). The textures are
+Meshy's own: no pixel recolouring. The Meshy rig is reused from swap2; a re-rig of the same mesh returned 422.
+Game look (warden_look.json "vex"):
+- The fringe at the match zoom was the ink shell (dark dashes) and rim_far (a pale green band), so Vex has no_ink on
+  cloth/leather/metal/brass/skin, rim_far 0 and far_smooth 0 (the fragmented Meshy atlas bled hair green into the
+  trouser edges).
+- The jacket was neon only in the shader: cloth far_lift 0, desat 0.3, albedo 0.82/0.82/0.7.
+- The gun alone has "metal-v95b": desat 0.2, albedo 1.05/1.1/0.95 (orange-red to copper-bronze).
+- Trousers: leather dark_lift 0.105 (0.09 is black, 0.12 grey).
+Stretch-check (51 clips): worst 7.64 (dash_ex, hips), median 4.38, 41 over 3x (r4: 8.61 / 5.32 / 45).
+Proof (GPU, jobq): r5/shots/b and r5/sheets: 6 views x 18 clips, the trait sheet vex_r5_traits.jpg, vex_r5_clips.mp4.
+STILL OPEN vs the turnaround: few lime splats and no cargo pockets on the trousers, no shoulder tally scars, no pink
+triangle back patch, a cuff without stripes, lips a shade darker, the hair messier.
+
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r4 (2026-11-20, after the r3b art-gate FAIL, awaiting the owner's visual check)
+r3b's hip was ragged (the gun baked into the body gave a skirt shelf and a stretched flap) and the gun, trousers and hair were
+off the splash. r4: a new Meshy regen of the BODY ONLY from the turnaround (no gun on the arm, so no shelf at the hip), a
+SEPARATE Meshy gatling (a massive arm-length gun with its ammo drum, composed on forearm.R by tools in
+~/gens/hunter-regen-1120/vex/r4/scripts/compose_r4.py), grey-brown cargo trousers with the green paint, hair toned to a darker
+emerald than the jacket (scripts/hair_tone.py, hair slot h 0.30-0.56), the left forearm and hand recoloured to brass
+(scripts/brass_arm.py), then the same v95_swap path with Meshy weights (spec: r4/work/swap/spec.json). Stretch-check (51 clips):
+worst 8.31 (glide, hips) vs r3b 8.61 and live 10.16. The only model-check FAIL is the old "stands 1.147x" one (not the glb).
+v95_swap caches the atlas bake in WORK/bake.blend: after recolouring the master, delete bake.blend or the new glb still carries the old texture.
+Delete vex_v95*.jpg AND their .import before importing the swapped glb (see r3b).
+
+r4c/r4d/r4e (same day, after the first r4 shoot): hair slot limited to head + braid (no black patch on the jacket back), grey-brown trousers
+lifted out of the black, emerald hair k 0.84. BLACK PATCHES on the jacket back in the game but not in Blender were NOT texture: the Meshy
+mesh has layered inner shells whose back faces poke through the outer jacket; the ink pass (outline.gdshader, cull_front) and double-sided
+materials draw them black. Fix in the glb (scripts in /tmp/a4 on the worker, notes in ~/gens/hunter-regen-1120/vex/r4/): rewind tris whose
+face normal opposes the vertex normals, non-hair materials doubleSided false, hide (degenerate) 391 tris that are back-facing-exposed and never
+front-exposed (BVH ray casts from 405 directions), flat normals on 2595 tris whose vertex normals disagree, pink/dark atlas blobs repainted.
+The atlas images are EMBEDDED in the glb (loose vex_v95*.jpg are unused by the game): edit the embedded image, then repack to drop stale
+bufferViews (9.8 MB). STILL OPEN: a few small black triangular shards on the upper jacket back (cause not found), no ribbed ammo-belt ring
+round the gatling drum, a flatter collar, a noisier face/hair texture than the turnaround.
+
+## DRAFT candidate on ext/hunter-regen-vex-1120: regen r3b (2026-11-20, awaiting the owner's visual check)
+Meshy multi-image meshy-7.1 `--pose t-pose` from briefs/art-refs/vex_v2/vex_v2_turnaround.jpg (front, 3/4, back; 30 gens in
+two rounds, 1 kept, C2: the gatling is her right forearm with no hand inside it, a brass mechanical left hand, no dangling
+bullet charm; the other 29 put the gun at the hip, doubled it, dropped it or hung the charm), quad remesh (46.2k tris in
+game), blue irises on the amber-iris texels only, then `tools/art1/v95_swap.py` with `weights` "meshy" (r3b: Meshy's
+auto-rig weights; r3's bone heat on joints measured from the T-pose mesh pinched the waist into a thin neck and tore the
+belt in every clip), the whole gun past the right elbow on forearm.R, `spread_legs` "master" (the rig's thigh heads sit
+0.123 m out, hers 0.086 m), the brass left forearm and hand in the metal slot by bone, and no kept coin (the old atlas coin
+read as a dark blob in her palm). Spec and every step: ~/gens/hunter-regen-1120/vex/r3/ (work/C2/swap4/spec.json, scripts/,
+raw/gen_log.tsv). Stretch-check (51 clips): worst 8.61 (dash_ex, hips), median 4.96 (r3 bone heat 6.69 / 4.64, live
+10.16 / 4.46). After swapping the glb, delete vex_v95.jpg AND its .import (keep the old uid line), or Godot keeps the old
+texture or none (r3b changed only the weights: the texture is byte-identical).
+
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
 `~/meshy/v95/Vex/r2/prop1111/cand_A.glb` (CURRENT_OVERRIDES 11-12), the muzzles still on forearm.R (anchor_bones). Was appeal3 body b below. 13.1k tris, one 2048 atlas, 39 clips.
 Spec `art/wardens/src/vex_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
@@ -57,3 +113,14 @@ then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
+
+Regen r2 candidate A (2026-11-20, ext/hunter-regen-vex-1120, DRAFT until the owner's visual check): a new body, not a
+patch of the 11-10 scan. r1's A-pose body had a bulge on the right hip where the gatling rested, so r2 asks Meshy for a
+T-pose (`meshy_task.py create ... --pose t-pose`, meshy-7.1, the 4 views of the 11-19 turnaround `v95-latest-ta-1119/vex.png`):
+nothing touches the hip. 11 gens: 2 kept the gatling fused to the prosthetic forearm (A, B on the sheet), 9 dropped,
+doubled, holstered or floated it (one came back A-pose). B's gatling points across the forearm, not along it (fires sideways).
+-> `remesh --topology quad --polycount 60000` -> irises tinted to the turnaround blue (irises only) -> Meshy auto-rig
+weights (`v95_swap.py` `weights: "meshy"`; the fit puts the T-pose arms onto our rig's arms) -> 40.8k triangles, 4096 texture.
+Hair already measured darker than the jacket (L 0.45 vs 0.52, hue 95), so it was left as Meshy painted it.
+Stretch (51 clips, limit 1.3): worst live 10.16 -> 8.61, median 4.46 -> 5.32, clips over 3x 46 -> 45.
+Files, sheet, MP4 and numbers: ~/gens/hunter-regen-1120/vex/r2/ (summary.txt).
