@@ -151,6 +151,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
+	m.sfx("stomp_windup", h.pos, -2.0)     # positional: both squads in reach hear it commit
 	if o == m.player and m.hud:
 		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
@@ -160,7 +161,7 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
 	if why == "broken":
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
+		m.sfx("stomp_crack", h.pos)
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
 ## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
@@ -210,7 +211,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 				end_stomp(m, h, "done")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-				m.sfx("crit", o.pos, -2.0, 0.7)
+				m.sfx("stomp_finish", o.pos)
 			else:
 				end_stomp(m, h, "missed")
 
