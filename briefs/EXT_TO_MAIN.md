@@ -10776,3 +10776,7 @@ READY ext/garden-toy-xp 3c23c3a1c110158191cdc337dc70c73dfe5c9785 (merge lane M3:
 READY ext/kit-parity-tidy 880013b9f9f (KIT_PARITY: merged duplicate Kael/Lace sections, one header per hero, Sable cartwheel curve marked done d7e924199)
 READY ext/tools-uid-files ac996fecf0a4 (4 missing tools .gd.uid + health.py uid check)
 READY ext/tools-uid-files 94fe2956867 (commit 4 missing .gd.uid, health.py fails on .gd without committed .uid, regenerate stale wiki Rules.md)
+READY ext/farm-tut-ends b15120959e (bulk-rebase: origin/main merged in mechanically, was 379326e12b; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/garden-free-toy-hint 11fec9e51d (bulk-rebase: origin/main merged in mechanically, was 9d0f798b0e; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/sfx-step-biomes 3157ab0d8f (bulk-rebase: origin/main merged in mechanically, was 0920eda191; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/merge-lane-M4-1121 53e56aea91 (bulk-rebase: origin/main merged in mechanically, was 616a902bf3; union 0 gen 1 files; the branch's own READY checks still apply)
