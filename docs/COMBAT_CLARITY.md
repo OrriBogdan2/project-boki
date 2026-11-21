@@ -42,6 +42,25 @@ Checked by `--clarity-check` (side edges per viewer, the side lean, the shot hal
 and off, the cast glint and ring, Boki bubbles and ability names in and out of a fight); the X band by
 `--dolm-combo-check` and `--aimkit-check`.
 
+## What sits on a Hunter (11-20, stabilize sprint: declutter only)
+`--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
+Lace / Cinder, Vex, Kael and Cinder, Lace, Vex / Lace, Cinder, Kael), 10 frames a fight, and counts every element over
+or within one body width of each Hunter's screen box (`HunterZone.rect_of`): world words, numbers, icons, rings and
+effects, and the HUD's world marks recorded through `SafeArea.note_as` (plates, the glove row, combo badges, the merge
+timer, Boki status). The Hunters' and Boki's own bodies (skinned meshes, model glows, the blob shadow) are not counted.
+Frames covered of 20 (element-Hunter pairs), headless count, before -> after:
+| element | before | after | gameplay? |
+|---|---|---|---|
+| nameplates | 20 (450) | 20 (414) | yes: health |
+| glove + Boki-type icons under other Hunters' plates (`GripOverhead`) | 20 (322) | 15 (70) | no in a fight: only the merge-ready glow stays |
+| ownership rings (`SideRings`) | 20 (240) | 20 (218) | yes |
+| your damage numbers (`Fx.number`) | 17 (137) | 17 (130) | yes, already only yours |
+| merge look's ground ring (`MergeLook`) | 13 (68) | 0 | no: cut, a ground ring means gameplay |
+| merge form's name over the head (`BokiHud.form_overhead`) | 12 (68) | 0 | no: a floating word; the timer and shell bars stay |
+| your Boki's ability name ("Stinger Hook") | 1 (3) | 1 (3) | kept (DECISIONS 11-11) |
+`--clarity-check` holds the fight to `ClarityFight.BUDGET` (element-Hunter pairs a frame): no words but your own
+Boki's ability name, no world icons, the glove row at most 6 (was 16), no merge ground ring.
+
 ## Films
 `docs/shots/combat-clarity/fight_3v3_a.mp4` (Tenzo, Sparkle, Lace vs Kael, Cinder, Vex) and `fight_3v3_b.mp4` (Meeko,
 Albert, Neve vs Grimble, Motley, Sable): the same seeded 3v3 before (left, main 272368589) and after (right), at the
