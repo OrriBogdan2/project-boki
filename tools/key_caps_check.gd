@@ -61,9 +61,9 @@ func _surfaces(S) -> void:
 	var tile := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate",
 		"x": "hunter_ult"}
 	for slot in tile:
-		var cap: String = KitCard._cap(slot)
+		var cap: String = KitCard.key_cap(slot)
 		ok(cap == S.key_cap(tile[slot]) and cap != "", "kit card %s tile reads %s" % [slot, cap])
-	ok(KitCard._cap("passive") == "", "the passive tile has no cap")
+	ok(KitCard.key_cap("passive") == "", "the passive tile has no cap")
 	var rc := {"e": "signature", "x": "hunter_ult", "dash": "dash", "lmb": "fire", "sec": "secondary"}
 	for slot in rc:
 		var cap: String = RecastCue.key_of(slot)

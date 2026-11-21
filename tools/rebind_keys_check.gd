@@ -170,7 +170,7 @@ func _loading() -> void:
 	ok("the sweep's pattern catches the old wording and not a rebound key",
 			sample.all(func(t): return stale.search(t) != null) and fine.all(func(t): return stale.search(t) == null))
 	ok("the kit card's tile caps follow the bindings",
-			TILES.keys().all(func(k): return KitCard._cap(k) == Settings.key_cap(TILES[k])))
+			TILES.keys().all(func(k): return KitCard.key_cap(k) == Settings.key_cap(TILES[k])))
 	ok("no loading tip leaves a {token} unfilled", not texts.any(func(t): return String(t).contains("{")))
 	var moved := TipPick.render("{jump} {crouch} {interact} {util1}")
 	var caps: Array = ["jump", "crouch", "interact", "util1"].map(func(a): return Settings.key_cap(a))
