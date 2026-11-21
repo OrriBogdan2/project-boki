@@ -71,11 +71,11 @@ var air_cast := false        # this play of the move has been in the air ("air_l
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
+var cur_t := -1.0            # s the live channel's clip was last seeked to (-1: it plays on its own)
 var cur_u := ""              # the clip on the live upper-body channel
 var chan_u := 0              # which upper-body channel is live, 0 or 1
 var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
-var t_act := -1.0            # s the live full-body clip was last seeked to (-1: it plays on its own)
-var t_up := 0.0              # the same for the upper-body clip
+var cur_ut := -1.0           # s the live upper-body clip was last seeked to
 var act_w := 0.0             # how much the action owns the body
 var act_out := FADE_LOCO     # s the action takes to let go of the body (longer after a lock-in pose)
 var up_w := 0.0              # how much it owns the upper body only
@@ -549,6 +549,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
 	for k in ["stomp", "drink"]:
 		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and k == "stomp" and not bool(s.get("stomp_own", true)):
+			return {"proc": true}     # a worn stomp style plays on the rig (StompLook)
 		if ph >= 0.0 and st.has(k):
 			var clip := String(st[k])
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -693,9 +695,8 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# to the move's end: no planted stance mid-air, no snap into it on the landing)
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
-	var pick := {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-			"hold": mv.has("hold_from"), "fade": float(mv.get("fade", FADE)),
-			"out": float(mv.get("fade_out", FADE_LOCO)),
+	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
+			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
 			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	# ("blend_out": s before the clip's end over which the body goes back to the legs while the clip plays on)
@@ -716,8 +717,15 @@ static func _time_map(mv: Dictionary, tt: float) -> float:
 			return lerpf(float(pts[i - 1][1]), float(pts[i][1]), k)
 	return float(pts[-1][1])
 
+## The channel a clip takes on one layer: the live one's other when the live one shows, the live one itself when it
+## is the one fading out, so a cancel inside the last fade never snaps a half-shown pose.
+static func _take(live: int, crossfade: float) -> int:
+	var shown := crossfade if live == 1 else 1.0 - crossfade
+	return 1 - live if shown >= 0.5 else live
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
+	land_t += dt          # (ticks under a move too: a landing a move covered is over, not owed)
 	var want := force
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
@@ -736,44 +744,49 @@ func step(dt: float) -> void:
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 	elif not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
-		var t_u := float(want.get("t", 0.0))
-		if _restarts(clip_u, cur_u, t_u, t_up, want):
-			chan_u = _next_channel(chan_u, xf_u)
+		var tu := float(want.get("t", 0.0))
+		if clip_u != cur_u or (tu < cur_ut - 0.001 and not bool(want.get("hold", false))):      # (or a recast)
 			cur_u = clip_u
+			chan_u = 1 - chan_u if up_w <= 0.0 else _take(chan_u, xf_u)
 			_node("anim_u" + "ab"[chan_u]).animation = clip_u
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
-		t_up = t_u
-		_p("seek_u%s/seek_request" % "ab"[chan_u], t_u)
+		cur_ut = tu
+		_p("seek_u%s/seek_request" % "ab"[chan_u], tu)
 		out_fade = float(want.get("out", FADE_LOCO))
-		# (an upper move cutting a full one starts at the full one's weight: the legs' arm swing never shows between)
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		var back_u := float(want.get("blend_out", 0.0))
-		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 \
-				else move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
+		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
+				move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
 		var tt := float(want.get("t", -1.0))
-		if _restarts(clip, cur, tt, t_act, want):
-			chan = _next_channel(chan, xf)
+		if clip != cur or (tt >= 0.0 and tt < cur_t - 0.001 and not bool(want.get("hold", false))):   # (or a recast)
 			cur = clip
+			chan = 1 - chan if act_w <= 0.0 else _take(chan, xf)
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
 			if act_w <= 0.0:
 				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
-		t_act = tt
+		cur_t = tt
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		var out_s := float(want.get("blend_out", 0.0))
-		act_w = move_toward(act_w, 0.0, dt / out_s) if out_s > 0.0 \
-				else move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
-		if act_w >= 1.0:      # (an upper move under a full one holds until that owns the body)
-			up_w = 0.0
+		var back := float(want.get("blend_out", 0.0))
+		if back > 0.0:
+			act_w = move_toward(act_w, 0.0, dt / back)
+			up_w = move_toward(up_w, 0.0, dt / FADE)
+		else:
+			act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
+			if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
+				up_w = 0.0
+			else:
+				up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
 		# (a lock-in settles slower)
@@ -816,17 +829,6 @@ func step(dt: float) -> void:
 		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
-
-## A channel takes a new clip when the clip changes, or when the same one starts over (a recast: its time goes back),
-## unless it is a hold whose loop wrapped.
-static func _restarts(clip: String, live: String, t: float, last: float, want: Dictionary) -> bool:
-	return clip != live or (t >= 0.0 and t < last - 0.001 and not bool(want.get("hold", false)))
-
-## The channel a new clip goes on: the one with less weight on screen, so a cancel inside the last fade never snaps a
-## half-shown pose. `chan` is the live channel (xf is 1 on channel 1).
-static func _next_channel(chan: int, xf: float) -> int:
-	var shown := xf if chan == 1 else 1.0 - xf
-	return 1 - chan if shown >= 0.5 else chan
 
 ## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
 func _carry(on: bool, dt: float) -> void:
@@ -1006,7 +1008,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	# (a move cast out of the glider: the glide pose holds while the move fades in over it, then goes to the fall pose
+	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
 	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
 	var owned := maxf(act_w, up_w)
 	if owned <= 0.0 or owned >= 1.0 or gliding:
@@ -1015,7 +1017,6 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
 	_p("air_pose/blend_amount", rise_w)
-	land_t += dt      # (ticks under a move too: a landing a move covered is over, not owed afterwards)
 	if not grounded:
 		if not was_air:
 			_p("rise_seek/seek_request", 0.0)
