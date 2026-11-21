@@ -79,6 +79,10 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
+	var look := WardenGlb.look(WardenGlb.art(arch))  # (the contract path's glow and far-hide, on the copied props)
+	WardenGlb._halos(model, glb, look)
+	WardenFx.bloom(model, glb, look)
+	WardenGlb._far_hide(glb, look)
 	model.set_meta(META, true)
 
 
@@ -111,6 +115,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
+	_add_contract_anchors(glb)
 	_play("idle", 1.0)
 
 
@@ -293,10 +298,33 @@ func _add_orbits(glb: Node3D) -> void:
 	orbits.setup(skel)
 
 
-## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space and the rest of the bone it
-## rides (identity for one on no bone: the ground ring) ([] if none). The contract .glb is loaded
-## (ResourceLoader keeps it) and instanced only for the copy.
-func _orbit(orb: String) -> Array:
+## The contract anchors the glow looks hang on (data "contract_anchors": anchor -> [Meshy bone, the contract bone it
+## is placed against]; Sparkle's rod tips and eye glow on her head) are copied from the contract .glb onto a
+## BoneAttachment3D of Meshy's bone, at the same place against that bone as on the contract model against its own.
+func _add_contract_anchors(glb: Node3D) -> void:
+	var want: Dictionary = d.get("contract_anchors", {})
+	var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
+	for an in want:
+		var pair: Array = want[an]
+		var src := _orbit(String(an), String(pair[1]))
+		var b := skel.find_bone(String(pair[0]))
+		if src.is_empty() or b < 0:
+			continue
+		var at := BoneAttachment3D.new()
+		at.name = "bone_%s" % an
+		at.bone_name = String(pair[0])
+		skel.add_child(at)
+		var bone := sk_m * skel.get_bone_global_rest(b)
+		var shift := bone.origin - (src[2] as Transform3D).origin
+		var nd := src[0] as Node3D
+		nd.transform = bone.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
+		at.add_child(nd)
+
+
+## The node `orb` of this Hunter's contract model (a copy), its rest in model space and the rest of the bone it rides
+## or of the contract bone `against` (identity for one on no bone: the ground ring) ([] if none). The contract .glb is
+## loaded (ResourceLoader keeps it) and instanced only for the copy.
+func _orbit(orb: String, against := "") -> Array:
 	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_id, art_id]
 	if not ResourceLoader.exists(path):
 		return []
@@ -309,7 +337,10 @@ func _orbit(orb: String) -> Array:
 		var at := nd.get_parent() as BoneAttachment3D
 		if at and csk.find_bone(at.bone_name) >= 0:
 			var bone := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name))
-			out = [nd.duplicate() as Node3D, bone * nd.transform, bone]
+			var ref := bone
+			if against != "" and csk.find_bone(against) >= 0:
+				ref = sk_m * csk.get_bone_global_rest(csk.find_bone(against))
+			out = [nd.duplicate() as Node3D, bone * nd.transform, ref]
 		elif at == null:
 			out = [nd.duplicate() as Node3D, WardenGlb.model_xf(con, nd), Transform3D.IDENTITY]
 	con.free()

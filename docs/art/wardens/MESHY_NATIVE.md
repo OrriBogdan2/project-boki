@@ -36,16 +36,25 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
-crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
-`--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
+contract anchors and their blooms, far_hide); `--warden-glb-check` counts native Hunters apart. Renders:
+`--clip-shots --warden=<arch> --states [--views=match,eye,knee] [--contract]` (`--contract`: the live contract model).
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
 Offhand (the twin hold's left piece, the fist hold's second gauntlet) stay hidden: shown, they floated beside the body
-in every frame. Props that orbit (data `orbits`: orbit node -> Meshy bone; Tenzo's three seeing-stones on `Head`) are
-copied from the contract `<art>.glb` and turned by WardenOrbits as on the contract path. Their holder follows the
-bone's place, not its turn, so the ring stays level when a clip bows the head.
+in every frame. Props that orbit (data `orbits`: orbit node -> Meshy bone) are copied from the contract `<art>.glb` and turned by
+WardenOrbits as on the contract path: Tenzo's three seeing-stones on `Head`, the shards round his stone fist on
+`LeftHand` (his one stone arm; none on the off hand) and, with bone `""`, the ground ring under his feet. Their holder
+follows the bone's place, not its turn, so the ring stays level when a clip bows the head.
+
+## Glows
+The contract path's warden_look `halos`, `bloom` and `far_hide` run on the native model too. Anchors they hang on that
+Meshy's glb lacks are copied from the contract glb (data `contract_anchors`: anchor -> [Meshy bone, the contract bone
+it is placed against]; Sparkle's eye glow and four rod-tip blooms on `Head`); the seeing-stones' halos ride the copied
+orbit. Tenzo's ring and shards stop drawing past the match distance, as on the contract model.
 
 ## Not on the native path (yet)
-Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
-ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
+Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Sparkle's
+blink, Sable's braid springs; Sable's muzzle and gem glows: her contract anchors sit on the contract pistols, not
+Meshy's); 300k-tri meshes vs the 80k contract budget.
