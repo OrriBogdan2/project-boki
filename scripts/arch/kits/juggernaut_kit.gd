@@ -370,11 +370,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 			else:
 				_slash()
 		return true
+	# the source (Brall) swings on the press and keeps the hold for the blast (heroes/juggernaut.md, LMB press):
+	# a press slashes at once and goes on timing the hold; let go inside the tap it is done (that swing was the
+	# tap), held past it the Searing Wave charges and goes on the release. A press in the cooldown swings at its end.
 	if held:
 		if lmb_t < 0.0:
 			if h.fire_cd > 0.0:
 				if pressed: lmb_buf = 0.25
 				return true
+			var fresh := pressed or lmb_buf > 0.0
+			lmb_buf = 0.0
+			if fresh: _slash()  # (it clears lmb_t: the hold is timed from here)
 			lmb_t = 0.0
 		lmb_t += dt
 		if lmb_t > float(ld["tap"]):
@@ -382,7 +388,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			_wave_preview()
 			if anim_id != "jug_wave_wind": play("jug_wave_wind")
 	elif lmb_t >= 0.0:
-		if lmb_t < float(ld["tap"]): _slash()
+		if lmb_t < float(ld["tap"]): lmb_t = -1.0     # a tap: its slash went on the press
 		else: _wave()
 	elif lmb_buf > 0.0 and h.fire_cd <= 0.0:
 		lmb_buf = 0.0
