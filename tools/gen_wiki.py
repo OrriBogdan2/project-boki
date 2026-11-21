@@ -888,10 +888,12 @@ def _dash_jump_rows(hero, f):
     return rows
 
 def _const_s(path, name):
-    """A float `const name := 0.15` in a GDScript file (the shared DashFlow window when it is an alias)."""
+    """A float `const name := 0.15` in a GDScript file, else the shared press window (tuning.json press_buffer)."""
     text = open(os.path.join(ROOT, path), encoding="utf-8").read()
     m = re.search(r"^const %s\s*:?=\s*([0-9.]+)" % name, text, re.M)
-    return float(m.group(1)) if m else _const_s("scripts/arch/dash_flow.gd", "BUFFER_S")
+    if m:
+        return float(m.group(1))
+    return float(json.load(open(os.path.join(ROOT, "content/rules/tuning.json"), encoding="utf-8"))["press_buffer"])
 
 # Measured by --dash-flow-check on main (11-20): s a buffered press went off past the dash's end (every buffer
 # row, 0.00-0.02 s), and Shift held in an ult's lock: [lock s, goes past the lock's end by s].
