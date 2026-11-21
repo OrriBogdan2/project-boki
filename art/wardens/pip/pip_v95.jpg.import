@@ -2,21 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d4jajkho4q8oa"
-path.s3tc="res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.s3tc.ctex"
-path.etc2="res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.etc2.ctex"
+uid="uid://0xbrapnl3gt4"
+path="res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "a113fe733e4875173852dd142e73adef"
+"md5": "7728d82bfe143cd2207bee3253b249dd"
 }
 
 [deps]
 
 source_file="res://art/wardens/pip/pip_v95.jpg"
-dest_files=["res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.s3tc.ctex", "res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.etc2.ctex"]
+dest_files=["res://.godot/imported/pip_v95.jpg-50d1bd45328f80557d12c7b6859aed28.ctex"]
 
 [params]
 
