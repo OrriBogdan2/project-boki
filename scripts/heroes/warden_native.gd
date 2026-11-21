@@ -36,6 +36,7 @@ var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
+var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 
 
@@ -128,6 +129,11 @@ func _process(dt: float) -> void:
 		_loco(s)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
+	for f in followers:
+		var b: int = f[1]
+		(f[0] as Node3D).position = (
+			skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin
+		)
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
 
@@ -267,8 +273,8 @@ func _chain(b: int, into: Dictionary) -> void:
 
 
 ## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
-## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a BoneAttachment3D
-## on Meshy's bone, at the same place against the head as on the contract model and at the same size in metres, and
+## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a holder that follows
+## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against the head as on the contract model and at the same size in metres, and
 ## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
 func _add_orbits(glb: Node3D) -> void:
 	var want: Dictionary = d.get("orbits", {})
@@ -283,15 +289,15 @@ func _add_orbits(glb: Node3D) -> void:
 		var b := skel.find_bone(String(want[orb]))
 		if b < 0:
 			continue
-		var at := BoneAttachment3D.new()
-		at.name = "bone_%s" % orb  # (not "orbit_*": WardenOrbits would turn the attachment)
-		at.bone_name = String(want[orb])
+		var at := Node3D.new()  # (follows the bone's place, not its turn: the orbit stays upright when he bows)
+		at.name = "bone_%s" % orb  # (not "orbit_*": WardenOrbits would turn it)
 		skel.add_child(at)
 		var nd := src[0] as Node3D
-		var bone_m := glb.transform * WardenGlb.model_xf(glb, skel) * skel.get_bone_global_rest(b)
+		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
 		var shift := head_m.origin - (src[2] as Transform3D).origin  # (Meshy's head pivot vs the contract's)
-		nd.transform = bone_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
+		nd.transform = sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
 		at.add_child(nd)
+		followers.append([at, b])
 	orbits.setup(skel)
 
 
