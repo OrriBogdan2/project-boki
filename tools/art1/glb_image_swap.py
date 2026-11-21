@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""glb_image_swap.py IN.glb IMAGE_NAME NEW.jpg OUT.glb
+"""glb_image_swap.py IN.glb IMAGE_NAME NEW.jpg OUT.glb [MATERIAL_OLD=NEW]
 Put NEW.jpg in place of the embedded image named IMAGE_NAME, touching nothing else (mesh, skin, clips, materials).
 For a repaint on the same master (same mesh and UVs: Motley's r3 tail, 11-17), where a v95_to_game re-port would
-re-fit and re-weight the body. The BIN is rebuilt with the views in order; offsets after the image shift."""
+re-fit and re-weight the body. The BIN is rebuilt with the views in order; offsets after the image shift.
+The optional MATERIAL_OLD=NEW renames a material (Meeko r3: "wing-card" -> "card-wing", the game's see-through card slot)."""
 import json
 import struct
 import sys
@@ -16,8 +17,13 @@ def load(f):
     return j, b[o + 8:o + 8 + struct.unpack("<I", b[o:o + 4])[0]]
 
 
-def main(src, name, img, out):
+def main(src, name, img, out, rename=""):
     j, binary = load(src)
+    if rename:
+        old, new_name = rename.split("=")
+        for m in j["materials"]:
+            if m["name"] == old:
+                m["name"] = new_name
     hit = [i for i in j["images"] if i.get("name") == name]
     if len(hit) != 1:
         sys.exit("glb_image_swap: %d images named %s" % (len(hit), name))
@@ -40,4 +46,4 @@ def main(src, name, img, out):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:5])
+    main(*sys.argv[1:6])

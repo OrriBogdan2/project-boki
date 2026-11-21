@@ -267,3 +267,14 @@ to rig and export:
    (every weight minus 0.08/0.15) made it worse (5.00/7.29, 6.63/9.95), 60 or 100 smoothing passes too (4.88/7.95, 5.57/9.15).
    `v95_swap.py` calls Meshy's rig for the baked mesh at every swap (5 credits): seed WORK/meshy/rigged_character.glb and run
    it by hand (`blender -b --python tools/art1/v95_swap.py -- WORK/spec.json WORK OUT.glb`) when credits are low.
+10. Meeko r3b (11-21, the art-gate failed r2/r3 on the wings and head): the master is a WINGLESS turnaround through Meshy (8 masked Gemini
+    edits removed the wings; `meshy_task.py create` x4, enhance on/off, gen 7 on = the clean one), so no wing shards or split head
+    lobes come from the gen. The wings are two cards: `wing_card_tex.py` cuts the turnaround's wings (Gemini, pure black background) into an
+    RGBA card texture, spec `wing_cards` {image, w, h, root, attach, sweep, lean} lets `v95_swap.py` skin two flat cards to wing.R/L
+    (100% one bone: a card cannot tear) under the material `card-wing` (the game's see-through card slot, content/rules/warden_look.json
+    `card`). `glb_wing_cards.py IN OUT PARAMS` re-places the cards in an exported glb in seconds (size, height, sweep), `glb_image_swap.py
+    ... MATERIAL_OLD=NEW` renames a material. The 3D look: the game's toon shader turns the Meshy paint hot pink; Meeko's look now has
+    `albedo`/`desat` on `skin`, `skin-face` and `leather` (body rose (166,69,109) like the turnaround's (159,71,110), not (252,50,110)).
+    Traps: a killed local `godot --import` leaves a half-built pip.glb cache that jobq renders as "no armature" (delete
+    `.godot/imported/pip.glb-*`); jobq done dirs are purged within hours (copy the frames out at once); `touch` the glb or delete its
+    cache entries or Godot keeps the old import; a tree without `.godot` is imported by jobq itself (one time, can time out).

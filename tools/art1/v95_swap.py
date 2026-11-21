@@ -909,6 +909,70 @@ def move_anchors(arm, T, K):
     arm.data.pose_position = "POSE"
 
 
+def wing_cards(low, arm, spec):
+    """Meeko r3: two painted see-through wing cards (spec `wing_cards`: image, w, h, root per side [x, y, z], attach (u, v of the
+    image's inner joint), lean, rows/cols) skinned whole to wing.R / wing.L, joined to the body with an alpha-blended material.
+    Meshy cannot draw a thin see-through wing, so the wing paint (an isolated Gemini cut-out of the turnaround's wings) rides on a card."""
+    import bmesh
+    c = spec
+    img = bpy.data.images.load(c["image"])
+    img.alpha_mode = "STRAIGHT"
+    m = bpy.data.materials.new("card-wing")
+    m.use_nodes = True
+    m.blend_method = "BLEND"
+    try:
+        m.surface_render_method = "BLENDED"
+    except Exception:
+        pass
+    m.use_backface_culling = False
+    b = m.node_tree.nodes["Principled BSDF"]
+    t = m.node_tree.nodes.new("ShaderNodeTexImage")
+    t.image = img
+    m.node_tree.links.new(t.outputs["Color"], b.inputs["Base Color"])
+    m.node_tree.links.new(t.outputs["Alpha"], b.inputs["Alpha"])
+    b.inputs["Roughness"].default_value = 0.5
+    objs = []
+    N, M = int(c.get("cols", 6)), int(c.get("rows", 8))
+    uw = float(c.get("u_max", 0.689))
+    au, av = c["attach"]
+    for bone, sgn in (("wing.R", 1.0), ("wing.L", -1.0)):
+        rx, ry, rz = c["root"]
+        bm = bmesh.new()
+        uvl = bm.loops.layers.uv.new("UVMap")
+        grid = {}
+        for j in range(M + 1):
+            for i in range(N + 1):
+                a, bb = i / N, j / M               # a: outer 0 .. inner 1 across the image's content, bb: top 0 .. bottom 1
+                d = (au / uw - a) * c["w"]          # outward distance from the attach point
+                z = rz + (av - bb) * c["h"]
+                x = sgn * (rx + d)
+                y = ry - c.get("sweep", 0.15) * d + c.get("lean", 0.1) * (z - rz)
+                grid[i, j] = (bm.verts.new((x, y, z)), (a * uw, 1.0 - bb))
+        for j in range(M):
+            for i in range(N):
+                vs = [grid[i, j], grid[i + 1, j], grid[i + 1, j + 1], grid[i, j + 1]]
+                if sgn > 0:
+                    vs = vs[::-1]
+                f = bm.faces.new([v for v, _ in vs])
+                for l, (_, uv) in zip(f.loops, vs):
+                    l[uvl].uv = uv
+        me = bpy.data.meshes.new("card_" + bone)
+        bm.to_mesh(me)
+        bm.free()
+        ob = bpy.data.objects.new("card_" + bone, me)
+        bpy.context.scene.collection.objects.link(ob)
+        ob.vertex_groups.new(name=bone).add(list(range(len(me.vertices))), 1.0, "REPLACE")
+        a = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+        a.data.foreach_set("color", [1.0, 1.0, 1.0, 0.7] * len(me.vertices))
+        me.materials.append(m)
+        objs.append(ob)
+    n0 = len(low.data.materials)
+    select([low] + objs, low)
+    bpy.ops.object.join()
+    mat_idx = [mm.name for mm in low.data.materials].index("card-wing") if "card-wing" in [mm.name for mm in low.data.materials] else None
+    print("SWAP wing cards: %d polygons, material slot %s" % (sum(1 for p in low.data.polygons if mat_idx is not None and p.material_index == mat_idx), mat_idx), flush=True)
+
+
 def main():
     if not os.path.exists(os.path.join(WORK, "bake.blend")):
         bake()
@@ -1011,6 +1075,9 @@ def main():
         d.ratio = (SPEC.get("max_tris", 15000) - 100) / ntri
         bpy.context.view_layer.objects.active = low
         bpy.ops.object.modifier_apply(modifier=d.name)
+    if SPEC.get("wing_cards"):
+        wing_cards(low, arm, SPEC["wing_cards"])
+        me = low.data
     for p in me.polygons:
         p.use_smooth = True
     low.name = me.name = old_name
