@@ -193,11 +193,11 @@ const CHECKS := {
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
-	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
+	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],      # the Grounds course
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
@@ -686,8 +686,9 @@ const CHECKS := {
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
 	"--prompt-queue-check": ["res://tools/prompt_queue_check.gd", "prompt_queue_check", null],
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
-	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],      # real match, wild Boki models
-	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],      # absolute combat HUD budget, nothing over the hunter
+	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],  # real match, wild Boki
+	# absolute combat HUD budget, nothing over the hunter
+	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],
 	"--kill-feed-shots": ["res://tools/kill_feed_shots.gd", "kill_feed_shots", null],      # GPU, --size= --shots-dir=
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
@@ -882,7 +883,7 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],  # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],  # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
-	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],  # only hard CC breaks a stomp
+	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
 	"--stomp-break-sweep-check": ["res://tools/stomp_break_sweep_check.gd", "stomp_break_sweep_check", null],
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],  # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
