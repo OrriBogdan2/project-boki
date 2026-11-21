@@ -31,6 +31,9 @@ edge and float back up, and dodge the strafer's shot three times.
 Open the Training Grounds from the portal's "Training Grounds" button or the farm's Esc menu. Your whole kit works there
 against dummies, with ledges and boosters, and leaving it puts you back on the farm.
 
+The first time you come near each station (the Hunter, Boki, gear, item and bot pedestal islands, and the dash
+lanes) one hint line says what it does and which key to press. Each shows once per save.
+
 A pad there is the **duel ring** (the first walk up to it names the key, with a beam over the pad). It
 offers two 1v1s:
 - **Fight a bot**: the duel room, you against one sparring bot on an empty island. Pick its Hunter,

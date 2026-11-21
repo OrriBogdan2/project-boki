@@ -1,9 +1,9 @@
 extends RefCounted
 ## --grounds-shots --shots-dir=<dir> [--perf-secs=4]: the Training Area (the --arena map) on a real GPU
 ## (jobq submit --needs gpu): a top-down overview, ground-level shots at the start, in the Training Room, on
-## each sky perch, on the time-trial course and in the Movement Fields (lane, tier steps, cliff, glide jump-off),
-## and frame-time numbers at the start, on a perch and in the fields (GROUNDSPERF lines: wall ms, GPU ms, CPU ms,
-## draws, tris, objects, nodes). Also runs on the old Arena for the before number (no stations then).
+## each sky perch and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers
+## at the start, on a perch and in the fields (GROUNDSPERF lines: wall ms, GPU ms, CPU ms, draws, tris,
+## objects, nodes). Also runs on the old Arena for the before number (no stations then).
 ## Software GL is no judge of any of this: only read the numbers from a real GPU.
 
 const DT := 1.0 / 60.0
@@ -54,12 +54,8 @@ func run(main_node: Node) -> void:
 			if s["kind"] == "arch":
 				await _perf("perch")
 		await _fields()
-		var T: TimeTrial = G.trial
-		P.teleport(T.start + (T.start - T.gates[0].at).normalized() * 3.0)      # behind the start arch
-		await _ground("trial_start")
-		P.teleport(T.pad_land)      # on the glide tower, the course below
-		await _ground("trial_tower")
-		await _perf("trial")
+		if G.trial and not G.trial.gates.is_empty():
+			await _trial(G.trial)
 	print("GROUNDSSHOTS %d in %s" % [n, dir])
 	main.get_tree().quit(0)
 
@@ -73,6 +69,30 @@ func _fields() -> void:
 		m.player.vel = Vector3.ZERO
 		await _ground("fields_" + String(what))
 	await _perf("fields")
+
+## The time trial (decision 0101): an oblique view of the course, then ground shots along it with the clock
+## running (the start arch, the dash gate, the kick tower, the pad, the pad tower's top, the finish arch).
+func _trial(t: TimeTrial) -> void:
+	var cam := Camera3D.new()
+	cam.fov = 50.0
+	cam.far = 400.0
+	m.add_child(cam)
+	cam.look_at_from_position(Vector3(78, 34, 104), Vector3(58, 2, 79))
+	cam.current = true
+	await _frames(10)
+	await _save("trial_course")
+	cam.current = false
+	m.cam.current = true
+	cam.queue_free()
+	var spots := [["start", t.start], ["dash", t.gates[1].at + Vector3(1.5, 0, 2.0)],
+		["kick", t.gates[3].at + Vector3(2.5, 0, 3.0)],
+		["pad", t.pad_at + Vector3(0, 0, 2.0)], ["padtop", t.pad_land], ["finish", t.finish + Vector3(-1.0, 0, 3.0)]]
+	for s in spots:
+		var at: Vector3 = s[1]
+		m.player.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		m.player.vel = Vector3.ZERO
+		await _ground("trial_" + String(s[0]))
+	print("TRIALSHOTS running %s gate %d / %d" % [t.running, t.next_i + 1, t.gates.size()])
 
 func _frames(k: int) -> void:
 	for i in k:

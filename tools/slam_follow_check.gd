@@ -15,9 +15,6 @@ const WHIP := 20.0             # m/s: the strike point's fastest frame while the
 const LAND_EARLY := 2          # frames the impact may land before the kit's hit (the swing reads into it)
 const LAND_LATE := 3           # frames it may land after
 const HOLD := [3, 9]           # frames the impact pose holds, at least and at most (a beat, not a freeze)
-## Open whip (docs/DEBT.md, Slam follow-through): Kael's meteor_land clip ends far from the carry, so its blend-out
-## stays above WHIP; the ceiling is the move as it played before the blend-out keys (36.8 m/s), so it may not get worse.
-const WHIP_OPEN := {"jug_meteor_land": 36.8}
 const RECOVER_OFF := 0.05      # s: the body is back on the legs within this of the kit's recover
 ## [Hero id, kit move, the move it comes out of ("" none), strike point ("tip" or a bone), the kit's hit (s)]
 const SLAMS := [
@@ -165,5 +162,4 @@ func _judge(id: String, km: String, hit: float, end_t: float, ps: Array, speeds:
 	ok(hold >= HOLD[0] and hold <= HOLD[1], "%s %s: the impact holds %d f (%d-%d)" % [id, km, hold, HOLD[0], HOLD[1]])
 	ok(absf(shown - rec) <= RECOVER_OFF,
 			"%s %s: back to the legs on the kit's recover (%.2f vs %.2f s)" % [id, km, shown, rec])
-	var cap := float(WHIP_OPEN.get(km, WHIP))
-	ok(whip <= cap, "%s %s: no whip going back to the legs (%.1f m/s, at most %.1f)" % [id, km, whip, cap])
+	ok(whip <= WHIP, "%s %s: no whip going back to the legs (%.1f m/s, at most %.1f)" % [id, km, whip, WHIP])
