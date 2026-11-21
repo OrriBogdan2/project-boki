@@ -10826,3 +10826,4 @@ READY ext/rel-fix-camp-clear 1ba74accac (camp-clear: looks off the sim RNG + bul
 READY ext/tut-steal-beat a0373456fe (bulk-rebase: origin/main merged in mechanically, was 95cd09270e; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M5-1121 a5dc886a96 (bulk-rebase: origin/main merged in mechanically, was 18bcdaa63e; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-d1b03416 877332059f (bulk-rebase: origin/main merged in mechanically, was b1722672b5; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/check-registry-split-1121 dace4601b82 (check registry split: tools/checks/<area>.gd, CheckRegistry.all(), registry_lint; full suite NEW-RED 0 in substance, export OK)
