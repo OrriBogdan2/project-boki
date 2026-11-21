@@ -120,7 +120,8 @@ static func _clip_of(dd: Dictionary, st: String) -> String:
 	if st == "stun":
 		return String(dd.get("states", {}).get("stun", ""))
 	var moves: Dictionary = dd.get("kmoves", {})
-	return String(moves[st]["clip"]) if moves.has(st) else ""
+	# (the feed stands on the ground: a move with a "ground_clip" shows that one)
+	return String(moves[st].get("ground_clip", moves[st]["clip"])) if moves.has(st) else ""
 
 ## How long step `k`'s blend may take: a source frame, or what the data declares for it (the move's "fade" in, the
 ## cut move's "fade_out" back to the legs): a longer fade is a feel choice the file states, and is held to itself.

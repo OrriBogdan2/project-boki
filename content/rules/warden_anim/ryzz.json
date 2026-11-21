@@ -83,7 +83,7 @@
 		"rmb": "L"
 	},
 	"kmoves": {
-		"mage_lmb_l": {"fade": 0.067, "clip": "lmb_l", "upper": true},
+		"mage_lmb_l": {"clip": "lmb_l", "upper": true},
 		"mage_lmb_r": {"clip": "lmb_r", "upper": true},
 		"mage_rmb_hold": {"clip": "rmb_hold", "hold_from": 0.12, "upper": true},
 		"mage_rmb": {"clip": "rmb", "upper": true},

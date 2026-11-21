@@ -19,7 +19,6 @@
 		"arm_swing": {"L": 0.5},
 		"start_phase": 0.75,
 		"start_blend": {"s": 0.3, "bones": ["upper_arm.R", "forearm.R", "hand.R"]},
-		"cadence": 1.5,
 		"side_foot_mps": [1.21, 3.02],
 		"plants": {
 			"run_b": {"L": [0.317], "R": [0.65]},
