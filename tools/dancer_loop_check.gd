@@ -121,7 +121,7 @@ func _press_in_flight(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3
 			kept and K.primed_hits == hits0 + 1 and not K.chain.waiting and P.ex_cd <= 0.0 and K.primed_t > 0.0,
 			"kept %s hits +%d ex_cd %.2f primed %.2f" % [kept, K.primed_hits - hits0, P.ex_cd, K.primed_t])
 
-## ... and if the bolt misses, the press still does what it always did.
+## ... and if the bolt misses, the press is dropped: a miss gives no extra dash (--tester-feedback-check).
 func _miss(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.inp["fire"] = false
 	A.step(m, 0.7)
@@ -140,8 +140,8 @@ func _miss(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.inp["fire"] = false
 	P.do_dash()
 	A.step(m, 0.5)
-	A.ok("dancer loop: a miss still lets the waiting press go (the long dash, with no charge)",
-			not K.chain.waiting and P.ex_cd > 0.0, "ex_cd %.2f" % P.ex_cd)
+	A.ok("dancer loop: a miss drops the waiting press: no long dash, no Vault",
+			not K.chain.waiting and P.ex_cd <= 0.0 and P.dashes < 1.0, "ex_cd %.2f dashes %.2f" % [P.ex_cd, P.dashes])
 
 ## From a jump with a charge the Vault is the ground one and spends a charge (item 183): the reset gives it back too.
 func _air_reset(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
