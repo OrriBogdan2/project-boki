@@ -167,6 +167,7 @@ func run(main: Node) -> void:
 	_low_hp()
 	_stomp_cues()
 	_voices()
+	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -498,11 +499,22 @@ func _cc_cues() -> void:
 	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
 	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
 			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	var mob := Ent.new()
+	mob.m = m
+	mob.pos = Vector3(8, 0, 0)
+	var far_mob := Ent.new()
+	far_mob.m = m
+	far_mob.pos = Vector3(30, 0, 0)
+	m.set("time", float(m.get("time")) + 1.0)
+	var on_mob := _cc_heard(mob, "slow")
+	var on_far := _cc_heard(far_mob, "slow")
+	ok(on_mob == ["cc_slow_mate"] and on_far.is_empty(),
+			"a monster or Boki slowed 8 m off plays the quiet cue; one 30 m off, nothing (%s %s)" % [on_mob, on_far])
 	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
 	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
 	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
 			"Ent.hurt and KitStatus.apply play the cues where the status lands")
-	for h in [me, mate, far_mate, rival]:
+	for h in [me, mate, far_mate, rival, mob, far_mob]:
 		h.free()
 	m.free()
 
@@ -514,7 +526,7 @@ func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
 	return h
 
 ## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
-func _cc_heard(h: Hunter, kind: String) -> Array:
+func _cc_heard(h: Ent, kind: String) -> Array:
 	for k in Sfx.last_played.keys():
 		if String(k).begins_with("cc_"):
 			Sfx.last_played.erase(k)
@@ -1553,6 +1565,29 @@ func _voices() -> void:
 	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
+
+func _boki_impacts() -> void:
+	var r := BokiImpact.rules()
+	var types: Dictionary = r.get("types", {})
+	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
+	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
+	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")
+	var kin := Kin.new()
+	var yes := [{"src": "kin", "ab": "k1"}, {"src": "kin", "ab": "zone"}]
+	var no := [{"src": "kin", "ab": "recall"}, {"src": "abil", "ab": "k1"}]
+	ok(yes.all(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "a Boki's k1 and zone hits get a type impact")
+	ok(not no.any(func(o): return BokiImpact.is_boki_ability_hit(kin, o)), "...its strike and a Hunter's do not")
+	kin.free()
+	var caps := [Sfx.IMPACT_GAP, Sfx.STACK_MAX]
+	ok(caps[0] >= 60 and caps[1] <= 4, "impacts keep their own gap (%d ms) and the stack cap (%d)" % caps)
+
+func _impact_ok(types: Dictionary, t: String) -> bool:
+	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
+
+func _type_of(id: String) -> String:
+	return String(KinLib.species(id).get("type", ""))
 
 ## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
