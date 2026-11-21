@@ -15,7 +15,6 @@ Limits: the source kit text gives a fire rate for no LMB, so "LMB DPS" has a sou
 | Vex | R | Cinderfall impact+3s burn / Napalm 203+3x59 | 42 | 27.3% | 380 | 29.6% | 0.92 |  |
 | Mossy | LMB hit | tower shield bash (source: hammer throw 192@15) | 11 | 7.1% | 192 | 8.1% | 0.88 | different weapon |
 | Mossy | LMB charged | charged bash / charged swing 522@15 | 28 | 18.2% | 522 | 22.1% | 0.82 |  |
-| Mossy | RMB shield slam / Shield Bash | slam | 18 | 11.7% | 198 | 8.4% | 1.39 |  |
 | Mossy | Dash | 360 Smash whirl / Spin Dash | 24 | 15.6% | 364 | 15.4% | 1.01 |  |
 | Mossy | R | Abyssal Breaker strike+blast / fissure 31+396 | 22 | 14.3% | 427 | 18.1% | 0.79 |  |
 | Sparkle | LMB | coilcaster bolt / Jolt | 12 | 7.8% | 90 | 7.0% | 1.11 |  |

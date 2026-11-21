@@ -305,6 +305,60 @@ def decimate(ob, max_tris):
     log("decimate: %d -> %d tris" % (tris, sum(len(p.vertices) - 2 for p in ob.data.polygons)))
 
 
+def _group_weight(ob, names):
+    """Per vertex: the largest weight in any of the vertex groups `names` (0 where none)."""
+    idx = {ob.vertex_groups[n].index for n in names if n in ob.vertex_groups}
+    w = np.zeros(len(ob.data.vertices), dtype=np.float32)
+    for i, v in enumerate(ob.data.vertices):
+        for ge in v.groups:
+            if ge.group in idx and ge.weight > w[i]:
+                w[i] = ge.weight
+    return w
+
+
+def _tris_in(ob, w):
+    """Triangles whose every vertex has weight > 0.5 in `w`."""
+    return sum(len(p.vertices) - 2 for p in ob.data.polygons if all(w[i] > 0.5 for i in p.vertices))
+
+
+def _collapse_only(ob, free, cut):
+    """Collapses `cut` triangles out of the vertices where `free` > 0.5 (the others pinned by a 0-weight group)."""
+    total = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+    vg = ob.vertex_groups.get("_dec") or ob.vertex_groups.new(name="_dec")
+    vg.remove(list(range(len(ob.data.vertices))))
+    for i in np.nonzero(free > 0.5)[0]:
+        vg.add([int(i)], 1.0, "REPLACE")
+    m = ob.modifiers.new("decr", "DECIMATE")
+    m.ratio = max(0.01, (total - cut) / total)
+    m.use_collapse_triangulate = True
+    m.delimit = {"UV"}
+    m.vertex_group = "_dec"
+    m.vertex_group_factor = 1.0
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier=m.name)
+    ob.vertex_groups.remove(ob.vertex_groups["_dec"])
+
+
+def decimate_regions(ob, max_tris, regions):
+    """OPT-IN budgeted decimate (spec "region_budget": [{"name", "groups": [vertex groups], "share": fraction of
+    max_tris}, ...], e.g. head 0.45, hands 0.08). A uniform collapse starves the hands, so each region is
+    collapsed alone down to its share (everything else pinned), then the rest down to max_tris. A region = the
+    triangles whose vertices all weigh > 0.5 in its groups. decimate() (the default) is untouched."""
+    for r in regions:
+        names = r["groups"]
+        have = _tris_in(ob, _group_weight(ob, names))
+        want = int(max_tris * r["share"])
+        if have > want:
+            _collapse_only(ob, _group_weight(ob, names), have - want)
+        log("region %s: %d -> %d tris (want %d)" % (r.get("name", names[0]), have, _tris_in(ob, _group_weight(ob, names)), want))
+    pinned = np.maximum.reduce([_group_weight(ob, r["groups"]) for r in regions])
+    rest = sum(len(p.vertices) - 2 for p in ob.data.polygons) - _tris_in(ob, pinned)
+    over = sum(len(p.vertices) - 2 for p in ob.data.polygons) - max_tris
+    if over > 0:
+        _collapse_only(ob, (pinned <= 0.5).astype(np.float32), min(over, rest - 1))
+    log("decimate_regions: %d tris (max %d)" % (sum(len(p.vertices) - 2 for p in ob.data.polygons), max_tris))
+
+
 def slot_split(ob, img, palette, glow_min, tag):
     """Each face onto the toon slot of the palette colour nearest its painted colour; one material per slot and
     texture, named "<slot>-<tag>" (the loader reads the slot before the dash), all on this piece's texture."""
@@ -3520,7 +3574,10 @@ def main():
     if head:
         _apply_armature(head)
     apply_pose(ob, fit)
-    decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
+    if spec.get("region_budget"):       # (opt-in, off by default: head/hands each get a protected share)
+        decimate_regions(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0), spec["region_budget"])
+    else:
+        decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
     if spec.get("lengthen"):
         lengthen(ob, img, spec["lengthen"])
     ob.name = "Body"
