@@ -30,10 +30,7 @@ func run(main_node: Node) -> void:
 	for id in MAPS:
 		await _map(String(id))
 	for kind in KINDS:
-		ok(
-			"%s: thrown on some map (%d)" % [kind, int(seen.get(kind, 0))],
-			int(seen.get(kind, 0)) >= PER_KIND
-		)
+		ok("%s: thrown on some map (%d)" % [kind, int(seen.get(kind, 0))], int(seen.get(kind, 0)) >= PER_KIND)
 	print("MLAND DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -84,11 +81,7 @@ func _map(id: String) -> void:
 				why = res
 		seen[kind] = int(seen.get(kind, 0)) + list.size()
 		var what := " and on the ledge" if kind in ["ledge", "high"] else ""
-		ok(
-			"%s %s: %d of %d throws end free%s" % [id, kind, good, list.size(), what],
-			good == list.size(),
-			why
-		)
+		ok("%s %s: %d of %d throws end free%s" % [id, kind, good, list.size(), what], good == list.size(), why)
 	await done(m)
 
 
@@ -132,9 +125,7 @@ func _fits(p: Vector3, r: float) -> bool:
 
 
 func _plain(x: int, z: int) -> bool:
-	return (
-		wd.inb(x, z) and wd.kind[wd.idx(x, z)] == World.T_GROUND and not wd.stairs.has(wd.idx(x, z))
-	)
+	return wd.inb(x, z) and wd.kind[wd.idx(x, z)] == World.T_GROUND and not wd.stairs.has(wd.idx(x, z))
 
 
 ## Up to PER_KIND cases of each kind, picked at random from every spot on the map that makes one:
@@ -174,11 +165,7 @@ func _spot(all: Dictionary, x: int, z: int, d: Vector2i, r: float) -> void:
 		all["ceiling"].append({"start": back, "aim": _ctr(bx, bz)})
 	elif wd.kind[b] == World.T_VOID and _fits(a, r):
 		all["rim"].append({"start": back, "aim": face})
-	elif (
-		_plain(bx, bz)
-		and _plain(bx + d.x, bz + d.y)
-		and wd.level[b] == wd.level[wd.idx(bx + d.x, bz + d.y)]
-	):
+	elif _plain(bx, bz) and _plain(bx + d.x, bz + d.y) and wd.level[b] == wd.level[wd.idx(bx + d.x, bz + d.y)]:
 		var top := _ctr(bx, bz)
 		var top2 := _ctr(bx + d.x, bz + d.y)
 		if not _fits(top2, r) or not _fits(top, r):

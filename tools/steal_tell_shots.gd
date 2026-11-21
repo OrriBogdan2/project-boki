@@ -21,12 +21,7 @@ func _grab(file: String, hp_frac: float) -> void:
 	print(
 		(
 			"STEALTELL-SHOT %s boss %.0f%% near=%s top=%s"
-			% [
-				file,
-				hp_frac * 100.0,
-				StealTell.near(m, b, m.player.team),
-				m.lairs.boss_for(m.player) == b
-			]
+			% [file, hp_frac * 100.0, StealTell.near(m, b, m.player.team), m.lairs.boss_for(m.player) == b]
 		)
 	)
 
@@ -47,9 +42,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
-		{"teams": 2, "squad": 2, "tier": 0, "seed": 21, "no_drop": true, "god": true, "length": 1e9}
-	)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "seed": 21, "no_drop": true, "god": true, "length": 1e9})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

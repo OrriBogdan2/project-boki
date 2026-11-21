@@ -18,26 +18,14 @@ const CASES := [
 	{"arch": "archer", "name": "Lace Heavy Shot", "rmb": 1.6},
 	{"arch": "rimewright", "name": "Neve darts", "fire": 0.5},
 	{"arch": "rimewright", "name": "Neve Palm Lance", "rmb": 0.6},
-	{
-		"arch": "dredge",
-		"name": "Grimble Deep Reach",
-		"rmb": 0.0,
-		"no_cover": true,
-		"ranges": [4.0, 7.0, 10.0]
-	},
+	{"arch": "dredge", "name": "Grimble Deep Reach", "rmb": 0.0, "no_cover": true, "ranges": [4.0, 7.0, 10.0]},
 	{"arch": "dredge", "name": "Grimble shotgun", "fire": 0.4, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "thief", "name": "Sparkle Shadow Knife", "e": true},
 	{"arch": "thief", "name": "Sparkle Bola", "rmb": 0.0, "ranges": [3.0, 5.0, 6.5]},
 	{"arch": "mage", "name": "Motley dash", "dash": true, "ranges": [4.0, 7.0, 9.0]},
 	{"arch": "mage", "name": "Motley Coilshot", "rmb": 1.0},
 	{"arch": "juggernaut", "name": "Kael Warchain", "e": true},
-	{
-		"arch": "juggernaut",
-		"name": "Kael Rampage",
-		"dash": true,
-		"no_cover": true,
-		"ranges": [2.0, 3.5, 5.0]
-	},
+	{"arch": "juggernaut", "name": "Kael Rampage", "dash": true, "no_cover": true, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "juggernaut", "name": "Kael wave", "fire": 0.3, "ranges": [3.0, 5.0, 7.0]},
 	{"arch": "ostra", "name": "Sable snap", "rmb": 0.0},
 	{"arch": "tender", "name": "Meeko seed", "rmb": 0.0},
@@ -78,15 +66,9 @@ func run(main_node: Node) -> void:
 func _segments() -> void:
 	var a := Vector3(0, 0, 0)
 	var b := Vector3(1.4, 0, 0)  # a 40 m/s step at 30 fps
-	ok(
-		"Swept.dist: a body between two steps is on the segment",
-		Swept.dist(Vector3(0.7, 0, 0.3), a, b) < 0.31
-	)
+	ok("Swept.dist: a body between two steps is on the segment", Swept.dist(Vector3(0.7, 0, 0.3), a, b) < 0.31)
 	ok("Swept.dist: a body beside the path is not", Swept.dist(Vector3(0.7, 0, 1.0), a, b) > 0.99)
-	ok(
-		"Swept.dist: past the end it measures to the end",
-		is_equal_approx(Swept.dist(Vector3(2.4, 0, 0), a, b), 1.0)
-	)
+	ok("Swept.dist: past the end it measures to the end", is_equal_approx(Swept.dist(Vector3(2.4, 0, 0), a, b), 1.0))
 
 
 func _arch(arch: String) -> void:
@@ -108,9 +90,7 @@ func _arch(arch: String) -> void:
 					hits += int(got)
 					line += " %.0fm@%.0f:%s" % [dist, rate, "hit" if got else "miss"]
 					await ak.done(m)
-			var label := (
-				"%s %s" % [c["name"], "blocked by thin cover" if cover else "hits a still dummy"]
-			)
+			var label := "%s %s" % [c["name"], "blocked by thin cover" if cover else "hits a still dummy"]
 			ok(label, (hits == 0) if cover else (hits == total), line)
 
 
@@ -124,9 +104,7 @@ func _block_between(m: Match, home: Vector3, dist: float) -> void:
 
 
 ## Resets the pair, casts once and steps `secs` at `dt`. True when the dummy took damage.
-func _cast(
-	m: Match, pc: Hunter, tgt: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary
-) -> bool:
+func _cast(m: Match, pc: Hunter, tgt: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary) -> bool:
 	pc.teleport(home)
 	pc.vel = Vector3.ZERO
 	tgt.teleport(home + Vector3(dist, 0, 0))

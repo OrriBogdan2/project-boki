@@ -66,9 +66,7 @@ func _setup() -> void:
 		await fade.reveal(0.01)
 	P.unlock_all()
 	home = _spot(P.pos)
-	T = m.make_hunter(
-		"T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"}
-	)
+	T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"})
 	for x in m.hunters:
 		if x != P and x != T:
 			x.teleport(home + Vector3(-30, 0, 30))
@@ -125,21 +123,11 @@ func _ledge() -> Dictionary:
 			var ok := true
 			for dx in range(-4, 1):
 				var i: int = wd.idx(x + dx, z)
-				ok = (
-					ok
-					and wd.kind[i] == World.T_GROUND
-					and int(wd.level[i]) == lv
-					and not wd.stairs.has(i)
-				)
+				ok = (ok and wd.kind[i] == World.T_GROUND and int(wd.level[i]) == lv and not wd.stairs.has(i))
 			var top := int(wd.level[wd.idx(x + 1, z)])
 			for dx in range(1, 4):
 				var j: int = wd.idx(x + dx, z)
-				ok = (
-					ok
-					and wd.kind[j] == World.T_GROUND
-					and int(wd.level[j]) == top
-					and not wd.stairs.has(j)
-				)
+				ok = (ok and wd.kind[j] == World.T_GROUND and int(wd.level[j]) == top and not wd.stairs.has(j))
 			if ok and top - lv >= LEDGE_RISE and top - lv <= LEDGE_RISE + 3:
 				var y := lv * World.LEVEL
 				return {"start": Vector3(x - 3.5, y, z + 0.5), "aim": Vector3(x + 0.8, y, z + 0.5)}
