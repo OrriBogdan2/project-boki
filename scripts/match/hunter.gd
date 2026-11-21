@@ -2557,9 +2557,10 @@ func _took(d: float, _by: Ent) -> void:
 func perk_n(id: String) -> int:
 	return perks.count(id)
 
-## Can this perk still be offered to you (not at its stack limit)?
+## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
-	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
+	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
+	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
 ## armor) are updated on the spot.
