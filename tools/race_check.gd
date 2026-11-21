@@ -220,7 +220,8 @@ func _formats() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false      # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -303,7 +304,7 @@ func _on_base() -> void:
 		ok(race.pin(rec, game) and not race.pin(rec, game + "x"), "on: only a win in this week's event game is pinned")
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -521,7 +522,7 @@ func _zone_tracks() -> void:
 			_footing(z, home, race)
 		home.queue_free()
 		await main.get_tree().process_frame
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}

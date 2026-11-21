@@ -149,6 +149,7 @@ func _run_payoff() -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # the pre-garden affinity (--lean-check: the garden)
 	_old_save_stamps()
 	var rec := _new_save()
 	rec["needs_t"] = Time.get_unix_time_from_system() - 3600.0

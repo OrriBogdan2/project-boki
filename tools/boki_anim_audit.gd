@@ -33,6 +33,7 @@ const OVER := {
 	"marchleaf walk": 0.50,
 	"marchleaf run": 0.65, "nettlynx run": 0.80, "pebbit walk": 0.30, "pebbit run": 0.70, "puddlet run": 0.70,
 	"rimeshrew run": 0.50, "wisplet run": 0.30, "caecilith walk": 0.70, "caecilith run": 0.90,
+	"lilybara walk": 0.30, "lilybara run": 0.70, "umbrathere walk": 0.40, "umbrathere run": 0.70,
 }
 ## A loop's wrap may be no rougher than the roughest moment inside the clip (seam()).
 const MAX_SEAM := 1.0

@@ -17,6 +17,7 @@ var last_step := -2
 var live_done := false
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true

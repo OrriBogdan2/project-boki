@@ -197,6 +197,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false      # base_mode is on in the shipped rules; the "off" half walks the old farm
 	var off = await main._hb_home()
 	ok(off.hvolley == null, "off: no volley log on the farm")
 	off.queue_free()
@@ -236,6 +237,6 @@ func _on_base() -> void:
 		ok(vb.run == null and is_instance_valid(vb.card), "on: the match ends with a result card (%.1f s)" % t)
 		ok(ring and flash_off, "cue: the ring shows while the seed flies and the flash dies away")
 		ok(vb.cue == null, "cue: the ring is gone when the match ends")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame

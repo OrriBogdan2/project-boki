@@ -3,11 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://suxwl8u3jhms"
-valid=false
+path.bptc="res://.godot/imported/caecilith_caecilith_eye.webp-e1c03a1fdf03b6ed4326e39080ccc162.bptc.ctex"
+path.astc="res://.godot/imported/caecilith_caecilith_eye.webp-e1c03a1fdf03b6ed4326e39080ccc162.astc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://art/kin/caecilith/caecilith_caecilith_eye.webp"
+dest_files=["res://.godot/imported/caecilith_caecilith_eye.webp-e1c03a1fdf03b6ed4326e39080ccc162.bptc.ctex", "res://.godot/imported/caecilith_caecilith_eye.webp-e1c03a1fdf03b6ed4326e39080ccc162.astc.ctex"]
 
 [params]
 

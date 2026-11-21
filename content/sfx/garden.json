@@ -24,7 +24,9 @@
   "garden_arrive_hushwood": "boki", "garden_arrive_ridge": "boki", "garden_locked": "step",
   "garden_egg": "boki", "garden_friends": "boki", "garden_chime_part": "boki", "garden_evolve": "boki",
   "garden_cup_sprout": "boki", "garden_cup_bloom": "boki", "garden_cup_crown": "boki",
-  "garden_visit_in": "boki", "garden_visit_out": "boki", "garden_season": "boki"
+  "garden_visit_in": "boki", "garden_visit_out": "boki", "garden_season": "boki",
+  "kite_flap": "step", "kite_ring": "ui", "kite_updraft": "boki", "kite_finish": "boki",
+  "lantern_flip": "ui", "lantern_match": "ui", "lantern_miss": "ui", "lantern_win": "boki"
  },
  "signature": [],
  "replaces": [],

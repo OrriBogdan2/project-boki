@@ -39,6 +39,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()

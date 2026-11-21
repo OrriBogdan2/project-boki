@@ -53,6 +53,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
 	for id in SPECIES_LIST:
 		kin_id = id
