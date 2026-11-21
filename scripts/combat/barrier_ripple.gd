@@ -69,6 +69,7 @@ func hit(at: Vector3, tan: Vector2, nrm: Vector2, col: Color, broke: bool) -> vo
 		"basis": Basis(t3, up, t3.cross(up)), "col": shown})
 	tick(0.0)
 	m.fx.flash(at + n3 * FACE_GAP, shown, flare, 0.07 + flare * 0.05)
+	Juice.blocked(m, at + n3 * FACE_GAP, n3, col)
 
 ## Verbs.tick: spreads and fades the live rings.
 func tick(dt: float) -> void:

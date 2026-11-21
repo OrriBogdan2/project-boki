@@ -54,7 +54,7 @@ const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.5
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const STOP_RATE := 5.0       # 1/s: how fast the loco blend falls back as he slows ("loco.stop_rate"): 80 % by 0.2 s
 const CROUCH_RATE_MIN := 0.7 # the sneak clip's slowest rate while he holds a move
-const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const CROUCH_RATE_MAX := 2.2 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 const SET_OFF_STILL := 0.3   # s standing before a start counts as setting off: the walk ring has faded out by then
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 static var _borrowed := {}   # "clips_from" art name -> its library, copied for the borrowers (_borrow)
@@ -110,6 +110,7 @@ var root_bi := -1            # the root bone: the heading and HunterAnim's air t
 var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var look_y := 0.0            # the model's own scale (Models.hunter's "look_scale"), read on the first move
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
 var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (null: no crouch)
@@ -586,7 +587,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
+				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -1006,7 +1008,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
-	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
+	_p("loco_rate/scale", gait.plan(body_mps(spd), lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
@@ -1014,12 +1016,17 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
-	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
+	# (data "air": {"fade_out": s}: the fall and glide poses let go of the body this slowly on touchdown, for a Hunter
+	# whose air pose is far from his landing's: `--cast-pop-check` POPDEG)
+	var air_out := float((d["air"] as Dictionary).get("fade_out", AIR_FADE))
+	var air_fade := air_out if grounded else AIR_FADE
+	var glide_fade := AIR_FADE if gliding else air_out
+	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / air_fade)
 	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
 	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
 	var owned := maxf(act_w, up_w)
 	if owned <= 0.0 or owned >= 1.0 or gliding:
-		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / glide_fade)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
@@ -1070,6 +1077,14 @@ func _out_of_idle(out: float, ring: float, goal: float, spd: float) -> float:
 	if goal < out:
 		return minf(out / ring, 1.0)
 	return 1.0 if spd >= STILL else 0.0
+
+## `spd` (m/s) as the model at its own scale would move: "foot_mps" and the crouch "speed" are read there; a match
+## draws it bigger (Hunter.VIS_SCALE, Kael's grow) and a bigger stride covers that much more ground a cycle.
+func body_mps(spd: float) -> float:
+	if look_y <= 0.0:
+		look_y = float(root.get_meta("look_scale", root.scale.y))
+	return spd * look_y / maxf(absf(root.scale.y), 0.01)
+
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 ## Grounded ("gnd") holds it low for as long as the cords do.
@@ -1123,5 +1138,5 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	crouch_pos = _ease(crouch_pos, pos, 12.0, dt)
 	_p("crouch_loco/blend_position", crouch_pos)
 	var moving := _out_of_idle(crouch_pos.length(), 1.0, pos.length(), spd)
-	var rate := clampf(spd / maxf(speed * moving, 0.01), CROUCH_RATE_MIN * moving, CROUCH_RATE_MAX)
+	var rate := clampf(body_mps(spd) / maxf(speed * moving, 0.01), CROUCH_RATE_MIN * moving, CROUCH_RATE_MAX)
 	_p("crouch_rate/scale", WardenGait.follow(rate, moving))
