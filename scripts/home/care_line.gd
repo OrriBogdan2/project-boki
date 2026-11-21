@@ -14,7 +14,9 @@ static func pairs(h: Node, k: Dictionary) -> Array:
 	var act := KinWants.action(rec, h.POND_EDGE.x > -100.0)
 	var no_food := Care.want(rec) == "food" and KinWants.best_food(rec) == ""
 	var held: bool = h.carry.k == k
-	var lift := "to let go" if held else ("to lead" if HomeCarry.mode_for(rec) == "lead" else "to pick up")
+	var lift := "to let go" if held else "to pick up"
+	if not held and HomeCarry.mode_for(rec) == "lead":
+		lift = "to lead"
 	return [
 		[Settings.key_cap("interact"), VERBS.get(act, "Pet"), act != "feed"],
 		[Settings.key_cap("interact"), "Feed (no food)" if no_food else "Feed", act == "feed"],

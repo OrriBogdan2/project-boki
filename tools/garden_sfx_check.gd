@@ -74,7 +74,7 @@ func _names() -> void:
 			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring, Relay, Kite and Lantern cue exists (%d)"
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo, Show Ring, Relay, Kite, Lantern cue exists (%d)"
 			% cues.size())
 
 func _fishing() -> void:

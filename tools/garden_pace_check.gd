@@ -204,7 +204,8 @@ func _check_rows() -> void:
 	ok(int(rec["xp"]) == 0, "a game not in the list pays no XP")
 	var c: Dictionary = r["curve"]
 	ok(Game.xp_need(1) == int(c["base"]) and Game.xp_need(4) == roundi(float(c["base"]) * pow(4.0, float(c["power"]))),
-			"Game.xp_need follows the curve round(%d x L^%s): %d at level 1, %d at level 4" % [int(c["base"]), str(c["power"]), Game.xp_need(1), Game.xp_need(4)])
+			"Game.xp_need follows the curve round(%d x L^%s): %d at Lv 1, %d at Lv 4"
+			% [int(c["base"]), str(c["power"]), Game.xp_need(1), Game.xp_need(4)])
 
 func run(m: Node) -> void:
 	Save.no_write = true
