@@ -352,6 +352,7 @@ func _fs_arrivals() -> bool:
 	var any := false
 	var put: Array = []
 	var w: World = world
+	var loop := BaseRace.loop_rect()      # the race loop stays clear
 	for b in ["board", "ransom"]:
 		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not (b == "ransom" and FarmUnlocks.base_mode())):
 			continue
@@ -362,7 +363,9 @@ func _fs_arrivals() -> bool:
 				var dd := Vector2(x - HomeLayout.LANDING.x, z - HomeLayout.LANDING.z).length()
 				if dd < 5.0 or dd > 16.0 or dd >= bd: continue
 				if not w.inb(x, z) or w.island[w.idx(x, z)] != 0: continue
-				if hb.fits(item, HomeLayout.cells_of(HomeLayout.rect_at(b, x, z, 0))): best = Vector2i(x, z); bd = dd
+				var rc := HomeLayout.rect_at(b, x, z, 0)
+				var tiles := Rect2(rc[0], rc[1], rc[2] - rc[0] + 1, rc[3] - rc[1] + 1)
+				if not tiles.intersects(loop) and hb.fits(item, HomeLayout.cells_of(rc)): best = Vector2i(x, z); bd = dd
 		if best.x >= 0:
 			HomeLayout.of(_d())["b"][b] = {"x": best.x, "z": best.y, "r": 0}
 			hb._apply_blockers()
