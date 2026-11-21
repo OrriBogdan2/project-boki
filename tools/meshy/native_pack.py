@@ -1,14 +1,15 @@
 """One game .glb for a Hunter on Meshy's own skeleton (docs/art/wardens/MESHY_NATIVE.md): Meshy's rig (or its
 weight-fixed hybrid) plus Meshy's own clips from its other files, bones untouched (no retarget, no rename).
 
-  python3 tools/meshy/native_pack.py OUT.glb BASE.glb [CLIPS.glb[=name] ...] [--in-place=clip,...] [--max-tex=2048]
+  python3 tools/meshy/native_pack.py OUT.glb BASE.glb [CLIPS.glb[=name] ...] [--in-place=clip,...] [--max-tex=2048] [--max-tex-maps=1024]
 
 - BASE keeps its nodes, skin, meshes and materials byte for byte; its own animations stay.
 - Each CLIPS file adds its animations (renamed to `name` when it has one clip), its channels matched to BASE's
   nodes by name. Meshy's animate files turn the armature +90 deg about X (Z up) where the rig is Y up: the clip
   keys of the armature's children (Hips) are carried into the rig's frame, so the pose in the world is the same.
 - --in-place: those clips' Hips drift along the ground (start to end) is taken out, so the game moves the body.
-- --max-tex: textures larger than this (px) are scaled down (JPEG q90, PNG stays PNG).
+- --max-tex: colour textures larger than this (px) are scaled down (JPEG q90, PNG stays PNG); --max-tex-maps: the
+  same for the normal and metal/roughness maps (they read at match distance only as shading).
 """
 
 import io
@@ -117,6 +118,8 @@ def add_clips(out, path, rename, base_names, base_parent):
     names = [n.get("name") for n in js["nodes"]]
     have = {a["name"] for a in out.js.get("animations", [])}
     anims = js.get("animations", [])
+    # (a joint's keys are local to its keyed parent: only children of the unkeyed armature change frame)
+    joints = {i for sk in js.get("skins", []) for i in sk["joints"]}
     for a in anims:
         nm = rename if rename and len(anims) == 1 else a["name"]
         if nm in have:
@@ -131,7 +134,7 @@ def add_clips(out, path, rename, base_names, base_parent):
             v = floats(js, bin_, s["output"])
             par = base_parent.get(base_names[names[node]])
             src_par = next((i for i, n in enumerate(js["nodes"]) if node in n.get("children", [])), None)
-            if par is not None and src_par is not None:
+            if par is not None and src_par is not None and src_par not in joints:
                 # base armature^-1 * this file's armature, onto the child's keys: same pose in the world
                 rel = qmul(node_rot(out.js["nodes"][par]) * [-1, -1, -1, 1], node_rot(js["nodes"][src_par])[None])[0]
                 if not np.allclose(rel, [0, 0, 0, 1], atol=1e-4):
@@ -170,14 +173,26 @@ def in_place(out, clip, hips):
             out.chunks[2 * acc["bufferView"] + 1] = v.astype(np.float32).tobytes()
 
 
-def shrink_textures(out, max_px):
-    for img in out.js.get("images", []):
+def colour_images(js):
+    """Images used as a material's base colour."""
+    out = set()
+    for m in js.get("materials", []):
+        t = m.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+        if t:
+            out.add(js["textures"][t["index"]]["source"])
+    return out
+
+
+def shrink_textures(out, max_px, max_maps):
+    colour = colour_images(out.js)
+    for ii, img in enumerate(out.js.get("images", [])):
+        cap = max_px if ii in colour else max_maps
         vi = img["bufferView"]
         raw = out.chunks[2 * vi + 1]
         im = Image.open(io.BytesIO(raw))
-        if max(im.size) <= max_px:
+        if max(im.size) <= cap:
             continue
-        k = max_px / max(im.size)
+        k = cap / max(im.size)
         im = im.resize((round(im.size[0] * k), round(im.size[1] * k)), Image.LANCZOS)
         buf = io.BytesIO()
         if img.get("mimeType") == "image/png":
@@ -204,7 +219,7 @@ def main(args):
         add_clips(out, path, rename, base_names, base_parent)
     for clip in filter(None, opts.get("--in-place", "").split(",")):
         in_place(out, clip, base_names["Hips"])
-    shrink_textures(out, int(opts.get("--max-tex", "2048")))
+    shrink_textures(out, int(opts.get("--max-tex", "2048")), int(opts.get("--max-tex-maps", "1024")))
     out.write(files[0])
     print(files[0], [a["name"] for a in out.js.get("animations", [])], f"{out.size / 1e6:.1f} MB bin")
 

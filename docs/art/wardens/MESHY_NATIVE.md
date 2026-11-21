@@ -24,7 +24,8 @@ Sable (sable), Tenzo (tarek). The contract `<art>.glb` stays beside it untouched
 ## Building the .glb
 `python3 tools/meshy/native_pack.py OUT BASE [CLIPS[=name] ...] --in-place=Crouch_Walk_with_Torch`: BASE is Meshy's
 rig (or its weight-fixed hybrid); clips from the other Meshy files are matched by node name; Meshy's animate files
-keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame. Textures are capped at 2048 px.
+keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame. Colour textures are capped at
+2048 px, normal and metal/roughness maps at 1024 px.
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors);
