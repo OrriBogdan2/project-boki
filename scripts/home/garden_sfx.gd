@@ -21,6 +21,7 @@ const ITEM := {"stat": "garden_item_bite", "stat_all": "garden_item_bite", "xp":
 		"token": "garden_item_token", "stay": "garden_item_lock", "sweet": "garden_item_snack",
 		"rinse": "garden_item_wash", "aura": "garden_item_aura", "loose": "garden_item_unwind",
 		"trait": "garden_item_nudge", "twin": "garden_item_nudge", "down": "garden_item_nudge"}
+const PICK_GAP_S := 0.09             # s between the crunches of a picked batch, one for each texture in it
 const CUPS := ["garden_cup_sprout", "garden_cup_bloom", "garden_cup_crown"]      # by cup round, garden_prizes.json
 
 static var heard := {}                # cue name -> times played, for the checks
@@ -77,6 +78,21 @@ static func zone_in(zone: String, from: String) -> void:
 		return
 	if String(GardenSeasons.season()["zone"]) == _zone(zone):
 		cue("garden_season", null)
+
+## The patch's batch ripened while you are in the zone: its soft chime.
+static func snack_ripe(pos) -> void:
+	cue("garden_snack_ripe", pos)
+
+## A batch picked: one crunch for each texture in it (SnackPatch.texture), a beat apart, not one per snack.
+static func snack_pick(home, pos, snacks: Array) -> void:
+	var seen: Array = []
+	for s in snacks:
+		var t := SnackPatch.texture(String(s))
+		if not seen.has(t):
+			seen.append(t)
+	for k in seen.size():
+		var bite := func(sname: String): cue(sname, pos)
+		home.get_tree().create_timer(PICK_GAP_S * k).timeout.connect(bite.bind("garden_snack_" + seen[k]))
 
 static func _zone(id: String) -> String:
 	return id if id != "" else GardenZones.start()

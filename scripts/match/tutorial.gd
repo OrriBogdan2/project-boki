@@ -21,6 +21,14 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 
+## Where a step id sits in the course (a long way off for an id that is not in it).
+static func step_index(sid: String) -> int:
+	for i in steps().size():
+		if steps()[i][0] == sid:
+			return i
+	return 1 << 20
+
+
 const KEYS := {
 	"land": "move",
 	"dash": "dash",
@@ -246,7 +254,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:

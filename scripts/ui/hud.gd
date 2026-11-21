@@ -354,6 +354,7 @@ func _draw_world_labels() -> void:
 		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))
 	_draw_exit_labels()
 	_draw_lair_labels()
+	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
@@ -683,6 +684,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
@@ -1245,7 +1247,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# 1 2 3 4: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves (GripHud); G is on the Boki
 	# card only (BokiHud), not again beside the belt
 	BeltHud.draw(self, p, r.end.x - s, y)
-	GripHud.draw(self, p, r)
+	if HudReveal.on(m, "summon_ring"):
+		GripHud.draw(self, p, r)
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
