@@ -67,10 +67,13 @@ func run(main: Node) -> void:
 	)
 	var fallback: Array = []
 	var loaded: Array = []
+	var native: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
 		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
-		if WardenGlb.has_model(a):
+		if WardenNative.on(a):
+			native.append(a)        # (on Meshy's own skeleton, not the contract: --warden-native-check)
+		elif WardenGlb.has_model(a):
 			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
 			else:
@@ -78,11 +81,12 @@ func run(main: Node) -> void:
 		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
-	ok(fallback.size() + loaded.size() == Arch.ids().size(),
-			"every Warden builds: %d from their .glb %s, %d procedural (the fallback)" % [
+	ok(fallback.size() + loaded.size() + native.size() == Arch.ids().size(),
+			"every Warden builds: %d from their .glb %s, %d procedural (the fallback), %d on Meshy's skeleton" % [
 				loaded.size(),
 				str(loaded),
-				fallback.size()
+				fallback.size(),
+				native.size()
 			])
 	ok("gunslinger" in loaded, "Vex (gunslinger) is drawn from her .glb")
 	for a in loaded:

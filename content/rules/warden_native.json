@@ -1,0 +1,15 @@
+{
+	"doc": "Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before). file: art/wardens/<art>/<art>_meshy.glb. scale: Meshy's 1.9 m model onto the contract model's head height. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides.",
+	"ryzz": {"meshy_native": true, "scale": 0.924, "hand": "RightHand",
+		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
+		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
+		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3},
+	"sable": {"meshy_native": true, "scale": 1.015, "hand": "RightHand",
+		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
+		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
+		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3},
+	"tarek": {"meshy_native": true, "scale": 1.168, "hand": "RightHand",
+		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
+		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
+		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3}
+}
