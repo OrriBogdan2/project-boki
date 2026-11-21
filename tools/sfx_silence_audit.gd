@@ -248,7 +248,7 @@ func _fixes() -> void:
 	ok("recall" in _cues_of(func(): KinFollow.leap(k, k.pos, "side")), "a Boki's own hop back plays the recall cue")
 	var ordered := _cues_of(func(): KinFollow.leap(k, k.pos, "side", true))
 	ok(not "recall" in ordered, "...but not on an ordered recall (that plays its own)")
-	ok("kin_unsure" in _cues_of(func(): KinDowned.begin(k, false)), "a Boki going down cries in its voice")
+	ok("boki_downed" in _cues_of(func(): KinDowned.begin(k, false)), "a Boki going down cries in its voice")
 	var lc: Dictionary = KinFollow.rules()["land_cues"]
 	var kgs: Array = KinFollow.rules()["land_kg"]
 	var kg := float(Unique.size_info(k.rec)["kg"])
