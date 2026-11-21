@@ -154,21 +154,15 @@ func _crouch_arms(a: String, nat: WardenNative) -> void:
 	ok(same_arm and same_leg, "%s: the crouch takes the %s's arms and keeps its own legs" % [a, from])
 
 
-## Only Meshy's model draws the body: no mesh of the hidden procedural rig (its kit props, a holster piece) shows
-## outside it, where it would float off the Meshy body in every frame.
+## Only Meshy's model draws the body: no mesh of the hidden procedural rig (its weapon, the Offhand's second gauntlet
+## or twin piece) shows, where it would float off the Meshy body in every frame. (Glow quads and the hit ring live
+## outside the rig and are not counted.)
 func _only_meshy(a: String, m: Node3D) -> void:
 	var stray: Array = []
-	for gi in m.find_children("*", "GeometryInstance3D", true, false):
-		var g := gi as GeometryInstance3D
-		if g.is_visible_in_tree() and not m.get_node("Warden").is_ancestor_of(g) and g.name != "TeamRing":
-			if not _ring(m, g):
-				stray.append(String(m.get_path_to(g)))
-	ok(stray.is_empty(), "%s: only Meshy's model draws (rig meshes showing: %s)" % [a, str(stray)])
-
-
-func _ring(m: Node3D, g: Node) -> bool:
-	var r := m.get_node_or_null("TeamRing")
-	return r != null and (r == g or r.is_ancestor_of(g))
+	for gi in m.get_node("Rig").find_children("*", "GeometryInstance3D", true, false):
+		if (gi as GeometryInstance3D).is_visible_in_tree():
+			stray.append(String(m.get_path_to(gi)))
+	ok(stray.is_empty(), "%s: no rig mesh draws beside Meshy's model (showing: %s)" % [a, str(stray)])
 
 
 ## Each data orbit (Tenzo's seeing-stones) rides its Meshy bone with all its props, round the head at the contract
