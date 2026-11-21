@@ -316,7 +316,7 @@ protection. Those belong to the archetype and weight class.
 
 > **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
-Riders today (content/kin_v2):
+Riders today (content/kin):
 
 - **Vespyx** Venom Trail: `on_pass` damage 3, poison 12, blight 3s.
 - **Gravadillo** Gravity Wake: `on_end` burst 3.5m, pull 8.
