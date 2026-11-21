@@ -55,24 +55,29 @@ func _case(m: Match, P: Hunter, mate: Hunter, arch: String, slot: String) -> voi
 	c.ok(held.any(Sfx.sounding), "%s %s: the wind-up's voice plays (%s)" % [arch, slot, held])
 	P.stun_t = 0.6
 	var t := 0.0
+	var seen := []  # every loop's own player while the stun runs (a loop that starts and stops in it is not the cast's)
 	while k.windups.has(slot) and t < 0.3:
 		m.step(Match.DT)
 		t += Match.DT
+		seen.append_array(Sfx.loops.values().map(func(l): return l["p"]))
 	c.ok(not k.windups.has(slot), "%s %s: a stun breaks the cast" % [arch, slot])
 	var took := 0  # ms of game time before the frame the voice ended in (not the box's speed)
 	var frames := 0
 	while held.any(Sfx.sounding) and frames < CUT_FRAMES:
 		await m.get_tree().process_frame
 		frames += 1
+		seen.append_array(Sfx.loops.values().map(func(l): return l["p"]))
 		if held.any(Sfx.sounding):
 			took += roundi(m.get_process_delta_time() * 1000.0)
 	var gone := not held.any(Sfx.sounding)
 	c.ok(gone and took <= CUT_MAX, "%s: the wind-up's voice ends %d ms after the break" % [arch, took])
 	c.ok(Sfx.last_played.has(KitWindup.BROKEN), "%s: the caster hears the broken tick" % arch)
 	var own := Sfx.loops.values().map(func(l): return l["p"])
+	own.append_array(seen)
 	own.append(Sfx.get("_sting_p"))  # (made once, on the first sting, never per cast)
+	own.append_array(Sfx.amb_layers.values().map(func(l): return l["p"]))  # (ambience beds: where you stand, not the cast)
 	var fresh := Sfx.get_children().filter(func(ch): return not ch in kids0 and not ch in own)
-	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d)" % [arch, fresh.size()])
+	c.ok(fresh.is_empty(), "%s: no new player for the cast or the cut (%d %s)" % [arch, fresh.size(), fresh.map(func(ch): return "%s:%s" % [ch.name, ch.get("stream").resource_path if ch.get("stream") else ""])])
 	P.inp["fire"] = false
 	mate.team = team0
 
