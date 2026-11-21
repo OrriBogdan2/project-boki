@@ -51,15 +51,20 @@ func _film() -> void:
 		hero.inp["aim"] = hero.pos + Vector3(20, 0.9, 0)
 		hero.inp["move"] = Vector2.ZERO
 	await gm._go(0.8, look, func(_t): return mid)
+	# Basalt Spine first, aimed a few metres out so the whole ridge sits in frame (not hidden behind E's rocks)
+	var ult_look := func(_t: float) -> void:
+		hero.inp["aim"] = hero.pos + Vector3(6.0, 0.9, 0)
+		hero.inp["move"] = Vector2.ZERO
+	hero.ak.cd["x"] = 0.0
+	ult_look.call(0.0)
+	HunterKeys.ult_pressed(hero)     # Basalt Spine (a tap: the ridge centres at the cursor)
+	await gm._go(3.0, ult_look, func(_t): return mid)
+	print("MEDIA_TSV rocks standing after R: %d" % m.verbs.walls.filter(func(w): return w.get("rock", false)).size())
 	for k in 2:     # Stone Row, twice: the first rises, the second a step on
 		hero.ak.cd["e"] = 0.0
 		hero.ak.use_e()
 		await gm._go(2.2, look, func(_t): return mid)
 		print("MEDIA_TSV rocks standing after E %d: %d" % [k + 1, m.verbs.walls.filter(func(w): return w.get("rock", false)).size()])
-	hero.ak.cd["x"] = 0.0
-	HunterKeys.ult_pressed(hero)     # Basalt Spine
-	await gm._go(4.5, look, func(_t): return mid)
-	print("MEDIA_TSV rocks standing after R: %d" % m.verbs.walls.filter(func(w): return w.get("rock", false)).size())
 	# the same from a close camera: the rocks and the arm side by side
 	gm._zoom(0.9)
 	await gm._go(1.5, look, func(_t): return hero.pos + Vector3(2.0, 0.8, 0))
