@@ -136,6 +136,8 @@ static func fetch_all() -> void:
 		fetch(a)
 
 static func path(arch: String) -> String:
+	if WardenNative.on(arch):
+		return WardenNative.file(arch)
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
 
@@ -188,6 +190,8 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 		# (one on the .glb's weapon, which the loader moved under the Gun: Hem's bow, Cinder's flame chamber)
 		var gun := root.get_node_or_null("Rig/Torso/Aim/Gun/" + WEAPON)
 		an = gun.find_child(anchor_name, true, false) as Node3D if gun else null
+	if an == null and root.has_node("Held"):  # (a Meshy-native Hunter's held weapon: WardenHeld)
+		an = root.get_node("Held").find_child(anchor_name, false, false) as Node3D
 	return an
 
 ## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is
@@ -199,6 +203,9 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
 	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
 	if not will_dress(arch):
+		return
+	if WardenNative.on(arch):
+		WardenNative.dress(root, arch, _scene(arch), lk)
 		return
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D
@@ -237,9 +244,10 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	WardenFx.bloom(root, glb, look(art(arch)))
 
 ## Whether a build of this Warden is drawn from its .glb (Models.hunter then drops the procedural body's
-## loose parts instead of merging meshes nobody sees). The rig check runs once per model file.
+## loose parts instead of merging meshes nobody sees). The rig check runs once per model file; a Meshy-native model
+## (WardenNative) is not on the contract and skips it.
 static func will_dress(arch: String) -> bool:
-	return not _measuring and uses_model(arch) and misfits(arch).is_empty()
+	return not _measuring and uses_model(arch) and (WardenNative.on(arch) or misfits(arch).is_empty())
 
 static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
 static func misfits(arch: String) -> Array:

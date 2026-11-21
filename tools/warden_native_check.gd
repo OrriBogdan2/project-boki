@@ -1,0 +1,204 @@
+extends RefCounted
+## --warden-native-check (docs/art/wardens/MESHY_NATIVE.md): each Hunter switched onto Meshy's own skeleton
+## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no
+## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
+## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
+## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. A Meshy model with no
+## weapon holds the contract model's as its own piece (WardenHeld). Every other Warden keeps
+## the contract path.
+
+const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
+const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
+const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
+const FLOOR_GAP := 0.02  # m: a held weapon's lowest point stays this far over the floor in every state's clip
+const SAMPLES := 12  # poses read along each state's clip for the floor gap
+const HELD_MIN := 0.3  # m: a held weapon (data "weapon") is at least this long (Grimble's blunderbuss ~0.5)
+
+var bad := 0
+var n := 0
+var holder: Node3D
+
+
+func ok(cond: bool, what: String) -> void:
+	n += 1
+	print("WARDENNATIVE %s %s" % ["ok  " if cond else "FAIL", what])
+	if not cond:
+		bad += 1
+
+
+func run(main: Node) -> void:
+	holder = Node3D.new()
+	main.add_child(holder)
+	var native: Array = []
+	for a in Arch.ids():
+		var m := _model(a)
+		var is_on := WardenNative.on(a)
+		ok(
+			is_on == m.has_node("Warden/Native") and is_on == bool(m.get_meta(WardenNative.META, false)),
+			"%s: %s" % [a, "on Meshy's skeleton" if is_on else "not on the native path"]
+		)
+		if is_on:
+			native.append(a)
+			ok(not m.has_node("Warden/Sync") and not bool(m.get_meta("glb", true)), "%s: no contract sync" % a)
+		m.free()
+	ok(not native.is_empty(), "native Hunters: %s" % str(native))
+	for a in native:
+		_bones(a)
+		_height(a)
+		await _states(main, a)
+	print("WARDENNATIVE DONE %d checks, %d failed" % [n, bad])
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+func _model(a: String) -> Node3D:
+	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.neutral(), a)
+	holder.add_child(m)
+	return m
+
+
+## Meshy's bones, as Meshy named them: none of the contract's; the model faces -Z like every Hunter.
+func _bones(a: String) -> void:
+	var m := _model(a)
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var contract := CONTRACT_BONES.filter(func(b): return WardenSkeleton.find(sk, b) >= 0)
+	ok(
+		sk.find_bone("Hips") >= 0 and sk.find_bone("RightHand") >= 0 and contract.is_empty(),
+		"%s: Meshy's skeleton (%d bones, no contract bones %s)" % [a, sk.get_bone_count(), str(contract)]
+	)
+	var head := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("Head")).origin
+	var front := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("headfront")).origin
+	var fwd := m.global_transform.basis.inverse() * (front - head)
+	ok(fwd.z < 0.0 and absf(fwd.z) > absf(fwd.x), "%s: faces -Z (head to face %s)" % [a, fwd])
+	m.free()
+
+
+## The head stands where the contract model's does (the same size in game).
+func _height(a: String) -> void:
+	var nm := WardenGlb.art(a)
+	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
+	var osk := WardenGlb.skeleton(old)
+	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
+	old.free()
+	var m := _model(a)
+	var glb := m.get_node("Warden") as Node3D
+	var sk := WardenGlb.skeleton(glb)
+	var got := glb.scale.y * sk.get_bone_global_rest(sk.find_bone("Head")).origin.y
+	ok(absf(got / want - 1.0) < HEIGHT_TOL, "%s: head at %.3f m, contract model's %.3f m" % [a, got, want])
+	m.free()
+
+
+## Each game state plays its clip; the aim node rides the hand; the rig's weapon is hidden.
+func _states(main: Node, a: String) -> void:
+	var m := _model(a)
+	var nat := m.get_node("Warden/Native") as WardenNative
+	var cases := [
+		["idle", {"grounded": true}],
+		["walk", {"grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
+		["jump", {"grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
+		["crouch", {"grounded": true, "crouch": 1.0}],
+		["attack", {"grounded": true, "swing_n": 1}],
+	]
+	for c in cases:
+		m.set_meta(WardenClips.STATE, c[1])
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		var want := String(nat.plays[c[0]])
+		var sk := nat.skel
+		var up := (
+			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
+			- sk.get_bone_global_pose(sk.find_bone("Hips")).origin.y
+		)
+		ok(up > UPRIGHT, "%s: %s stands up (head %.2f m over the hips)" % [a, c[0], up])
+		ok(nat.player.current_animation == want, "%s: %s plays %s (%s)" % [a, c[0], want, nat.player.current_animation])
+	var shown := m.get_node("Rig/Torso/Aim/Gun").find_children("*", "MeshInstance3D", true, false).filter(
+		func(mi): return (mi as MeshInstance3D).visible
+	)
+	ok(shown.is_empty(), "%s: the rig's procedural weapon is hidden" % a)
+	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
+	ok(gun.global_position.distance_to(nat.hand_position()) < 0.01, "%s: the aim node rides Meshy's hand" % a)
+	var anchors := ["anchor_head_top", "anchor_chest", "anchor_gun_R"].filter(func(an): return WardenGlb.anchor(m, an))
+	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
+	_toon(a, m)
+	_crouch_arms(a, nat)
+	if nat.d.has("weapon"):
+		_held(a, m, nat)
+	m.free()
+
+
+## A Meshy model with no weapon holds the contract model's (data "weapon") as its own piece, toon-shaded, its grip
+## (the contract hand's pivot) in Meshy's hand bone.
+func _held(a: String, m: Node3D, nat: WardenNative) -> void:
+	var held := nat.held
+	var mi := held.get_node_or_null("Weapon") as MeshInstance3D if held else null
+	var long := mi.get_aabb().get_longest_axis_size() if mi and mi.mesh else 0.0
+	ok(long > HELD_MIN, "%s: holds the contract model's weapon (%.2f m long)" % [a, long])
+	if mi == null:
+		return
+	var grip := m.global_transform * held.transform * held.pivot
+	ok(grip.distance_to(nat.hand_position()) < 0.01, "%s: the weapon's grip rides Meshy's hand" % a)
+	var sm := mi.get_surface_override_material(0) as ShaderMaterial
+	ok(sm != null and (m.get_meta("mats", []) as Array).has(sm), "%s: the held weapon is hero-toon shaded" % a)
+	ok(
+		nat.skel.skeleton_updated.is_connected(nat._follow_held),
+		"%s: the weapon sits in a fixed socket (placed as the skeleton is posed)" % a
+	)
+	var low := _lowest(nat, mi.mesh)
+	ok(low[0] > FLOOR_GAP, "%s: the weapon clears the floor in every clip (lowest %.3f m, %s)" % [a, low[0], low[1]])
+	var names: Array = nat.d["weapon"].get("anchors", [])
+	var found := names.filter(func(an): return WardenGlb.anchor(m, an) != null)
+	ok(found.size() == names.size(), "%s: the weapon's anchors ride it (%s)" % [a, str(found)])
+
+
+## The held weapon's lowest vertex over the floor (model space, y 0) along each state's clip at that state's tilt
+## (data "tilt"), and where: [m, "state t"].
+func _lowest(nat: WardenNative, mesh: Mesh) -> Array:
+	var pts := PackedVector3Array()
+	for si in mesh.get_surface_count():
+		pts.append_array(mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+	var best := [INF, ""]
+	for st in ["idle", "walk", "run", "jump", "attack", "crouch"]:
+		var nm := String(nat.plays[st])
+		var len := nat.player.get_animation(nm).length
+		nat.player.play(nm, 0.0)
+		for k in SAMPLES:
+			nat.player.seek(len * k / SAMPLES, true)
+			var xf := WardenGlb.model_xf(nat.root, nat.skel) * nat.skel.get_bone_global_pose(nat.hand)
+			xf = xf * nat.held.grip_at(float(nat.held.tilts.get(st, 0.0)))
+			for p in pts:
+				var y := (xf * p).y
+				if y < best[0]:
+					best = [y, "%s %.2fs" % [st, len * k / SAMPLES]]
+	return best
+
+
+## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").
+func _toon(a: String, m: Node3D) -> void:
+	var surfaces := 0
+	var toon := 0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		for si in (mi as MeshInstance3D).mesh.get_surface_count():
+			surfaces += 1
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			toon += int(sm != null and sm.shader == Models.HERO and (m.get_meta("mats", []) as Array).has(sm))
+	ok(surfaces > 0 and toon == surfaces, "%s: hero-toon on %d of %d surfaces" % [a, toon, surfaces])
+
+
+## The crouch's arm bones play the walk's arm keys (Meshy's crouch holds a torch out); its legs keep the crouch.
+func _crouch_arms(a: String, nat: WardenNative) -> void:
+	var from := String(nat.d.get("crouch_arms_from", ""))
+	if from == "":
+		return
+	var mix := nat.player.get_animation(String(nat.plays["crouch"]))
+	var arms := nat.player.get_animation(String(nat.plays[from]))
+	var meshy := nat.player.get_animation(String(nat.d["clips"]["crouch"]))
+	var arm := NodePath(String(meshy.track_get_path(0)).get_slice(":", 0) + ":RightForeArm")
+	var leg := NodePath(String(arm).get_slice(":", 0) + ":RightLeg")
+	var rot := Animation.TYPE_ROTATION_3D
+	var mi := mix.find_track(arm, rot)
+	var ai := arms.find_track(arm, rot)
+	var same_arm: bool = mi >= 0 and ai >= 0 and mix.track_get_key_value(mi, 0) == arms.track_get_key_value(ai, 0)
+	var li := mix.find_track(leg, rot)
+	var ci := meshy.find_track(leg, rot)
+	var same_leg: bool = li >= 0 and ci >= 0 and mix.track_get_key_value(li, 0) == meshy.track_get_key_value(ci, 0)
+	ok(same_arm and same_leg, "%s: the crouch takes the %s's arms and keeps its own legs" % [a, from])
