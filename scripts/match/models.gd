@@ -780,6 +780,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		sm.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 		hero_look(sm)
 	WardenGlb.dress(root, arch, lk)      # its 3D model, when it has one and uses it (else this procedural one)
+	if um: EmptyGlb.dress(root, appearance, lk)      # the Empty's 3D model, for the cut it has one of
 	root.set_meta("race", rid)
 	root.set_meta("cls", cls)
 	root.set_meta("arch", arch)
