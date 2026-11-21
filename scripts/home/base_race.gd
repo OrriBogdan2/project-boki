@@ -281,6 +281,10 @@ class Run:
 static func settle(run: Run) -> Dictionary:
 	var R := rules()
 	var order := run.order()
+	var pull := false           # two friends in the field: they run together (friend_pull)
+	for i in run.recs.size():
+		for j in range(i + 1, run.recs.size()):
+			pull = pull or run.friends(i, j)
 	var win: Dictionary = run.recs[order[0]]
 	var lose: Dictionary = run.recs[order[-1]]
 	for rec in run.recs:
@@ -304,8 +308,8 @@ static func settle(run: Run) -> Dictionary:
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
-	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine), backed_won)
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
+	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine, "dash"), backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull}
 
 ## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
 static func settle_solo(rec: Dictionary, grades: Array) -> int:
@@ -669,7 +673,13 @@ func _race_card(res: Dictionary, pinned: bool) -> void:
 	show_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned)
+			+ GardenPrizes.rows(res["prize"]) + pull_rows(res))
+
+## The result-card row when friends ran in the field: they pace each other, so Speed tells less (and the Crown
+## is judged on Speed, GardenPrizes.cup_stat).
+static func pull_rows(res: Dictionary) -> Array:
+	return [["Friends pull together: they run each other's pace", UI.MUTED]] if res.get("pull", false) else []
 
 ## The result-card row for a win that went on the wall (none when it did not).
 static func pin_rows(pinned: bool) -> Array:
