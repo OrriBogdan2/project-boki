@@ -10,8 +10,9 @@ extends RefCounted
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). The beat from the last knock
 ## to the Boki's card can be skipped with any key or click (HatchSkip): it lands on the same end state as
 ## waiting, shows a small "Press any key" pill after 1.5 s, and saves the same Boki. A pair's egg appearing in
-## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble.
-## Never touches the real save.
+## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble. The naming
+## line (NameStep): a suggestion from the species name, the dice, Keep, a rude name refused, skipping keeps the
+## suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
 
 const MAX_FRAMES := 6000      # (a hang guard counted in frames, not seconds)
 var bad := 0
@@ -126,6 +127,7 @@ func run(m: Node) -> void:
 		frames += 1
 	ok(named["go"], "Name it hands over to naming")
 	await _skip_row(tree, waited)
+	await _naming(tree)
 	await _first_mask(tree)
 	await _name_card(tree)
 	_parents_row(tree)
@@ -213,6 +215,52 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 
+# ---------------------------------------------------------------- the naming line (NameStep)
+func _naming(tree: SceneTree) -> void:
+	var got: Array = []
+	var step := NameStep.new("cindle")
+	step.named.connect(func(nm: String, kept: bool): got.append([nm, kept]))
+	main.add_child(step)
+	var seen := {}
+	for i in 12:
+		step.reroll()
+		seen[step.suggestion] = true
+		if not (step.box.text == step.suggestion and step.suggestion.begins_with(KinNames.root("cindle"))):
+			seen["bad"] = true
+	ok(not seen.has("bad") and seen.size() >= 3,
+		"the dice gives other names from the same root (%s)" % ", ".join(seen.keys()))
+	step.box.text = "Shitbag"
+	step.keep()
+	ok(got.is_empty() and step.note.visible and step.box.text == step.suggestion,
+		"a rude name isn't kept: a plain line says so")
+	step.box.text = "  Nib "
+	step.keep()
+	ok(got == [["Nib", true]] and not step.box.editable, "Keep keeps what you typed (%s)" % str(got))
+	step.queue_free()
+	await tree.process_frame
+	ok(got.size() == 1, "nothing more once it is kept")
+	got.clear()
+	var skipped := NameStep.new("puddlet")
+	skipped.named.connect(func(nm: String, kept: bool): got.append([nm, kept]))
+	main.add_child(skipped)
+	var offered := skipped.suggestion
+	skipped.queue_free()
+	await tree.process_frame
+	ok(got == [[offered, false]], "leaving without Keep keeps the suggestion (%s)" % str(got))
+	var rec := Save.new_kin("zapple")
+	var results: Control = load("res://scripts/ui/results.gd").new()
+	main.add_child(results)
+	results.add_child(results._first_catch_name(rec))
+	var catch_steps: Array = results.find_children("*", "VBoxContainer", true, false).filter(
+			func(c): return c is NameStep)
+	if catch_steps.size() == 1:
+		(catch_steps[0] as NameStep).box.text = "Fizz"
+		(catch_steps[0] as NameStep).keep()
+	ok(catch_steps.size() == 1 and String(rec["name"]) == "Fizz",
+		"your first catch is named on the results screen (%s)" % rec["name"])
+	results.queue_free()
+	await tree.process_frame
+
 # ---------------------------------------------------------------- 3. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
@@ -228,8 +276,28 @@ func _first_mask(tree: SceneTree) -> void:
 	hx.add_child(kin)
 	hx.kin_node = kin
 	hx.chosen = 0
-	hx._finish("cindle", "Ember", "Orri", true)
+	hx._show_name()
+	var steps: Array = hx.bottom.find_children("*", "VBoxContainer", true, false).filter(func(c): return c is NameStep)
+	var step: NameStep = steps[0] if steps.size() == 1 else NameStep.new("cindle")
+	var egg_sp := String(hx.egg_defs[0]["species"])
+	ok(steps.size() == 1 and step.box.text == step.suggestion and step.suggestion.begins_with(KinNames.root(egg_sp))
+		and Data.default_kin_name(egg_sp).begins_with(KinNames.root(egg_sp)),
+		"the first hatch suggests a name from its species' name (%s from %s)"
+		% [step.suggestion, Data.default_kin_name(egg_sp)])
+	var first_name := step.suggestion
+	hx._finish("cindle", step.chosen(), "Orri", true)
 	await tree.process_frame
+	ok(String(Save.d["roster"][0]["name"]) == first_name,
+		"heading out without typing keeps the suggestion (%s)" % Save.d["roster"][0]["name"])
+	var file := "user://hatch_check_name.json"
+	var fa := FileAccess.open(file, FileAccess.WRITE)
+	fa.store_string(JSON.stringify(Save.d))
+	fa.close()
+	var kept_d: Dictionary = Save.d
+	Save.load_from(file)
+	ok(String(Save.d["roster"][0]["name"]) == first_name, "its name comes back after save and load")
+	Save.d = kept_d
+	DirAccess.remove_absolute(file)
 	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	var offered: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
