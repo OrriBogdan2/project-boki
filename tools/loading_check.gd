@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
+## Every Hunter: a splash that loads, a tip (none about the Blight when it is off), the map's name and mode line.
 func _hunters() -> void:
 	var ids := Arch.ids()
 	ok(ids.size() >= 12, "every Hunter (%d)" % ids.size())
@@ -39,8 +39,8 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		ok(ld.tip != "" and ld.TIPS.has(ld.tip), "%s: a tip from the tip set" % ak)
-		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(ld.tip != "", "%s: a tip" % ak)
+		ok(ld.title != "" and ld.mode_line != "", "%s: the map's name and a mode line (%s)" % [ak, ld.title])
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
