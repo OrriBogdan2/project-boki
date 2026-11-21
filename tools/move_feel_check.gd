@@ -169,7 +169,8 @@ const T := {
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":         [">=", 0.1, "", "owner 11-17: the tint builds with depth (nothing for the first start_depth m, a hint at half way)"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
-	"abyss_tint_rising":       ["<=", 0.02, "", "[footage D1] off while the glider lifts you back up, even below the lip"],
+	"abyss_tint_rising":       ["<=", 0.02, "",
+		"[footage D1] off while the glider lifts you back up, even below the lip"],
 	"feather_toggle_frames":   ["<=", 1.0, "frames", "feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
@@ -1865,7 +1866,9 @@ func _ledge() -> void:
 				rising += 1
 				if bool(P.get("lfloat").get("win", false)): win_steps += 1
 				if not jumped and mode == "early" and rising == 2: jump = true; jumped = true
-				if not jumped and mode == "timed" and bool(P.get("lfloat").get("win", false)): jump = true; jumped = true
+				if not jumped and mode == "timed" and bool(P.get("lfloat").get("win", false)):
+					jump = true
+					jumped = true
 			P.inp["jump"] = jump
 			m.step(DT)
 			P.inp["jump"] = false

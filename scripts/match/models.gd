@@ -880,11 +880,13 @@ static func race_hair(n: Node3D, rid: String, style: int, m_hair: Material, hair
 						var d := Vector3(sin(a), -0.35, cos(a))
 						_spike(n, m_hair if k % 2 == 0 else light, Vector3(0, 0.8, 0.03) + Vector3(sin(a), 0, cos(a)) * 0.16, d, 0.085, 0.2)
 					for i in 3:
-						_spike(n, m_hair, _on_head((i - 1) * 0.3, 0.9, -0.45), Vector3((i - 1) * 0.3, 0.3, -1.0), 0.05, 0.13)
+						var hx := (i - 1) * 0.3
+						_spike(n, m_hair, _on_head(hx, 0.9, -0.45), Vector3(hx, 0.3, -1.0), 0.05, 0.13)
 				2:   # long fur down the back, tips lighter
 					part(n, capsule(0.17, 0.5), m_hair, Vector3(0, 0.71, 0.11), Vector3(1.3, 1.0, 0.65))
 					for i in 3:
-						_spike(n, tip, Vector3((i - 1) * 0.11, 0.5, 0.15), Vector3((i - 1) * 0.2, -1.0, 0.15), 0.07, 0.16)
+						var dx := float(i - 1)
+						_spike(n, tip, Vector3(dx * 0.11, 0.5, 0.15), Vector3(dx * 0.2, -1.0, 0.15), 0.07, 0.16)
 				3:   # brush tail: a fat fox brush of a ponytail with a white tip
 					for p in [[Vector3(0, 0.99, 0.2), 0.08], [Vector3(0, 0.92, 0.29), 0.1], [Vector3(0, 0.8, 0.34), 0.112], [Vector3(0, 0.68, 0.34), 0.095]]:
 						part(n, sphere(float(p[1])), m_hair, p[0])

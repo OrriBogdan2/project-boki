@@ -222,7 +222,8 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 ## One thing you brought home, as a little pill that pops in with a sound.
 func _chip(icon: String, txt: String, col: Color, delay: float) -> Control:
 	var c := UI.card(Color(col, 0.14), 8, 999)
-	var h := UI.hbox(7); c.add_child(h)
+	var h := UI.hbox(7)
+	c.add_child(h)
 	h.add_child(Icons.Glyph.new(icon, col.lightened(0.15), 18.0))
 	var l := UI.label(txt, UI.T_BODY, UI.INK, UI.semi); l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	h.add_child(l)

@@ -137,7 +137,7 @@ func _picker() -> void:
 	stub.post.free()
 	fake.free()
 
-const STARTED := {"race": "run", "shove": "run", "volley": "run"}
+const STARTED := {"race": "run", "shove": "run", "volley": "run", "fetch": "run"}
 
 func _garden() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
@@ -213,7 +213,8 @@ func _hub(d: Dictionary) -> void:
 	var games := MinigameHub.listed(home)
 	var pairs: Array = games.map(func(g): return "%s@%s" % [g["id"], g["zone"]])
 	var want := ["race@bramblebank", "shove@bramblebank", "shove@cinderstep", "shove@hushwood", "seek@bramblebank",
-		"seek@hushwood", "volley@bramblebank", "volley@hushwood", "race@hushwood"]
+		"seek@hushwood", "volley@bramblebank", "volley@hushwood", "race@hushwood",
+		"fetch@bramblebank", "fetch@hushwood"]
 	pairs.sort()
 	want.sort()
 	ok(pairs == want, "hub: every game of every open zone is listed with its zone (%s)" % [pairs])
