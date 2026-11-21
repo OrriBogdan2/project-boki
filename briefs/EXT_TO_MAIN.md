@@ -10822,3 +10822,4 @@ READY ext/stuck-integ-d1b03416 b1722672b56aecc3cd3b6acd7db6ec015987578b (superse
 READY ext/merge-lane-M7-1121 dc6d8f2783a8fc6818146903de3ed46b53b284b6 (lane M7 bundle re-merged onto main bdf8360171; clean merge, tenzo_stone_video .uid + wiki regen added; hud-reveal/groups/tutorial-hud/tutorial-retry green, prematch/first-cast/hero-vfx reds identical on main; health --strict red only on main style ratchet)
 READY ext/ui-tut-hud-five 32d4d45aea (bulk-rebase: origin/main merged in mechanically, was 8c1b8e4e51; union 1 gen 1 files; the branch's own READY checks still apply)
 READY ext/lint-c2-names e8ac625589d3e8d13dc9e7f87d31173fac014970 (C2 check tools snake_case names; merged main, fixed motley_reel inherited P/T rename, gdformat)
+READY ext/rel-fix-camp-clear 1ba74accac (camp-clear: looks off the sim RNG + bulwark bot swings; full camp-clear 0 fails, export OK, gate aborted host overload)
