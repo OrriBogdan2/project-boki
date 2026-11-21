@@ -10722,3 +10722,5 @@ READY ext/merge-lane-N2-1120 7f0e2c8ee8fc6ab03e2d99644d5cc1d87db3102d (origin/ma
 READY ext/garden-toy-xp c39a74448c82af25de955415ac4a38d373a8a2e5 (origin/main merged again, clean; toy XP 5; toy-check 0 failures, --check 0 failures; health --strict red only on 15 style-ratchet items identical on main)
 READY ext/p15-port-1118 b46f05bcdf (origin/main 64834576c2 merged, clean; owner curve round(18 x L^1.5) + main pace values kept; --check 0 failures; garden pace/items/prizes/day/sfx 0 fail; health --strict red only on style-ratchet items identical on main)
 READY ext/tut-goals-next b2370ec6fd (goals card fixes; garden-first-15/first-day/goals-next/new-player-flow green on main+branch)
+READY ext/hunter-edge-speckle 8fbb7c482d (bulk-rebase: origin/main merged in mechanically, was ae7419ca0e; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/albert-knock-rows fd4a53c7b5 (bulk-rebase: origin/main merged in mechanically, was d5519032d8; union 1 gen 0 files; the branch's own READY checks still apply)
