@@ -38,7 +38,6 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_idle": 1.0,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -55,7 +54,7 @@
 		"name": "Relay Step",
 		"card_range": "dist",
 		"icon": "tender_dash",
-		"col": "#ffe2a8",
+		"col": "#b4f7a8",
 		"cd": 7.0,
 		"dist": 3.15,
 		"time": 0.23,
@@ -78,7 +77,7 @@
 		"card_range": "seed.range",
 		"short": "Burr",
 		"icon": "tender_rmb",
-		"col": "#c8e07a",
+		"col": "#9ae07a",
 		"cooldown": 10.5,
 		"charges": 1,
 		"windup": 0.6,
@@ -116,7 +115,7 @@
 		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
-		"col": "#ffd27a",
+		"col": "#7fe08a",
 		"cooldown": 11.0,
 		"time": 2.5,
 		"radius": 2.6,
@@ -167,6 +166,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
 	"x": {
 		"name": "Hearth Call",
 		"card_range": "range",
@@ -178,10 +178,10 @@
 		"time": 5.0,
 		"range": 12.6,
 		"pick_r": 2.5,
-		"heal_ps": 7.0,
+		"heal_ps": 5.3,
 		"every": 0.5,
 		"land_r": 0.9,
-		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept."
+		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them about 5 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether tops up their bleed-out (five times over) instead of their health. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept."
 	},
 	"src": {
 		"lmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",

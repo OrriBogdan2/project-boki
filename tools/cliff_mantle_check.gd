@@ -33,6 +33,7 @@ var verbose := false
 var rises := 0         # tries that rose up a face (a Warden's mantle clip plays at the rise)
 var rises_full := 0    # ...that got to the lip
 var rises_back := 0    # steps the rise phase went backwards
+var heights: RefCounted     # the ledge census by height (tools/mantle_heights.gd)
 
 func ok(cond: bool, what: String) -> void:
 	print("CLIFF %s %s" % ["ok  " if cond else "FAIL", what])
@@ -42,8 +43,10 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	Save.no_write = true
 	verbose = "--verbose" in OS.get_cmdline_user_args()
+	heights = load("res://tools/mantle_heights.gd").new(self)
 	for tier in [0, 1]:
 		await _tier(main, tier)
+	heights.report()
 	var keys := stats.keys()
 	keys.sort()
 	print("CLIFF rows: topped, kept 0.6x, then means over the topped: speed in, lowest, over the lip, s")
@@ -92,6 +95,10 @@ func _tier(main: Node, tier: int) -> void:
 	for f in faces:
 		var where := "tier %d face %d terraces at %s dir %s" % [tier, f["rise"], f["a"], f["d"]]
 		ok(f.get("topped", false), "%s: someone tops it" % where)
+	var hf: Array = heights.sample()
+	print("CLIFF tier %d: %d ledges driven by height" % [tier, hf.size()])
+	for f in hf:
+		heights.drive(f)
 
 ## Only the player is in the match: no monsters, rivals or Boki to bump into.
 func _clear_others() -> void:
@@ -207,6 +214,12 @@ func _rims() -> Array:
 					arr.append({"a": a, "d": d, "rise": 0, "la": _lv(x, z)})
 	return _spread(arr)
 
+## Is tile g on the face's top row, within the straight stretch (_straight) either side of b?
+func _on_face(g: Vector2i, b: Vector2i, d: Vector2i) -> bool:
+	var o := g - b
+	return o.x * d.x + o.y * d.y == 0 and absi(o.x * d.y + o.y * d.x) <= 2
+
+
 func _void(p: Vector2i) -> bool:
 	return w.inb(p.x, p.y) and w.kind[w.idx(p.x, p.y)] == World.T_VOID
 
@@ -249,9 +262,11 @@ func _setup(f: Dictionary, mode: String, face: Vector2, mv: Vector2, top: float)
 		_reset(Vector3(p.x, top - 1.2, p.y), false)
 		h.last_gy = top
 		h.vel = Vector3(dv.x * 6.0, 0.0, dv.y * 6.0)
-	elif mode == "glide":
-		var p2 := face - mv * 5.0
-		_reset(Vector3(p2.x, top - 0.2, p2.y), false)
+	elif mode.begins_with("glide"):
+		# (glide_in: from 2.5m out, high enough over the low ground to reach the face still gliding)
+		var near := mode == "glide_in"
+		var p2 := face - mv * (2.5 if near else 5.0)
+		_reset(Vector3(p2.x, maxf(top - 0.2, gy + 0.9) if near else top - 0.2, p2.y), false)
 		h.last_gy = gy
 		h.inp["glide"] = true
 		h.inp["glide_btn"] = true
@@ -259,10 +274,11 @@ func _setup(f: Dictionary, mode: String, face: Vector2, mv: Vector2, top: float)
 		h.vel = Vector3(mv.x * 6.0, 0.0, mv.y * 6.0)
 	else:
 		# already running: 6m out head-on (a dash needs the room), else 1.6m from the face's plane
-		var out := 6.0 if mode == "dash_jump" else 1.6
+		# (stand: from rest, close in)
+		var out: float = {"dash_jump": 6.0, "stand": 0.9}.get(mode, 1.6)
 		var st := face - mv * (out / maxf(0.5, mv.dot(dv)))
 		_reset(Vector3(st.x, gy + 0.02, st.y), true)
-		h.vel = Vector3(mv.x, 0.0, mv.y) * h.base_speed
+		h.vel = Vector3(mv.x, 0.0, mv.y) * (0.0 if mode == "stand" else h.base_speed)
 		return h.grounded and absf(h.pos.y - gy) <= 0.3
 	return true
 
@@ -274,7 +290,7 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 	var d: Vector2i = f["d"]
 	var dv := Vector2(d)
 	var face := Vector2(a.x + 0.5, a.y + 0.5) + dv * 0.5
-	var top := float(f["la"] + f["rise"]) * World.LEVEL
+	var top: float = f.get("top_y", float(f["la"] + f["rise"]) * World.LEVEL)
 	var ang := 0.0
 	if mode in ["jump_0", "jump_30", "jump_60"]:
 		ang = float(mode.substr(5)) * (1.0 if (a.x + a.y) % 2 == 0 else -1.0)
@@ -286,7 +302,7 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 		return res
 	h.inp["aim"] = Vector3(face.x + mv.x * 4.0, top + 0.9, face.y + mv.y * 4.0)
 	var t := 0.0
-	var jumped := mode in ["glide", "abyss"]
+	var jumped := mode in ["glide", "glide_in", "abyss"]
 	var dashed := not mode.contains("dash")
 	var touch_t := -1.0
 	var b := a + d
@@ -305,9 +321,18 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 			h.inp["dash"] = true
 			dashed = true
 		var hv := Vector2(h.vel.x, h.vel.z).length()
+		var p0 := h.pos
+		var vy0 := h.vel.y
 		m.step(DT)
 		t += DT
 		var hv1 := Vector2(h.vel.x, h.vel.z).length()
+		# snap: a step's move past what its speed explains (a teleport onto the lip)
+		var dy := absf(h.pos.y - p0.y) - maxf(absf(vy0), absf(h.vel.y)) * DT
+		var dxz := Vector2(h.pos.x - p0.x, h.pos.z - p0.z).length() - maxf(hv, hv1) * DT
+		if not h.lfloat.is_empty() or k_was >= 0.0:      # (in the rise, or the step it ends)
+			res["snap"] = maxf(float(res.get("snap", 0.0)), maxf(dy, dxz))
+		if not h.lfloat.is_empty():
+			res["grab"] = h.lfloat["tile"]
 		var rk := h._rise_k()
 		if rk >= 0.0 and k_was >= 0.0 and rk < k_was - 0.001:
 			res["k_back"] += 1
@@ -325,7 +350,9 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 		# (over the top once the ledge rise has handed over: a rise at the suction's pace reaches the top tile a
 		# few steps before its pop and carry)
 		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0 and h.lfloat.is_empty():
-			res["top"] = true
+			# a run that slid along the face, caught a lower stretch past the straight part and walked up a flight
+			# (a 30-degree jump at a Hollow Crown 2.0 wall did) didn't top this face
+			res["top"] = mode == "abyss" or _on_face(res.get("grab", b), b, d)
 			res["vlip"] = hv1
 			res["t"] = t - touch_t
 			break

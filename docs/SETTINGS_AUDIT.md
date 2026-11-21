@@ -39,7 +39,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
-| `fullscreen` | Main | `settings.gd` | |
+| `fullscreen` | Main | `settings.gd` | exported desktop builds start fullscreen (video_v 5 reset the old `false` that never was a choice); on Windows the engine creates the window fullscreen (`project.godot` `window/size/mode.windows=3`); the Settings switch shows the window as it is but never rewrites the saved choice; F11 / Alt+Enter flip it; `--window-mode-check` (incl. real clicks on Settings at 5 window sizes) |
 | `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality` | Main (Graphics quality) | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `msaa`, `shadows` | Video > Quality | `settings.gd` | |
@@ -71,3 +71,5 @@ too, whose label holds the typed text. The hits are the rows the tabs build (no 
 it. Clicking a tab or pressing Esc clears the search (Esc with an empty box leaves Settings). `--settings-trim-check`
 covers the filter; `--settings-size-check` holds the panel's size inside the safe area at 720p and two ultrawides, with
 and without a search.
+
+`--menu-fit-check` opens every Esc page and Settings tab at 1280x720, 1920x1080 and 2560x1080 with Text size 100% and 150% (and the largest Interface size) and fails on a panel leaving the window, a control outside its panel, cut-off text or two overlapping controls. Add `--shots-dir=<dir>` under `xvfb-run` with a renderer to save every state as a png.

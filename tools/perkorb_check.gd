@@ -134,6 +134,8 @@ func _drops() -> void:
 			for k in (g.get("stats", {}) as Dictionary):
 				if not is_equal_approx(float(Data.PERKS[id]["stats"].get(k, 0.0)), float(g["stats"][k])): same = false
 			ok("perk %s has the kit's numbers" % id, same, str(g.get("stats", {})))
+	P.perks.clear()    # a hunter holds 5 perks at most (PerkOrbs.slots): start these five from an empty row
+	P.refresh_gear()
 	var cap0: int = P.pack_cap
 	var gm0 := PerkOrbs.gem_mult(P)
 	var s0: float = P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic")

@@ -137,6 +137,9 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## Is the kit holding its own hero still (Neve's Rimelock statue)? That root is the move itself, so the
+## HUD shows no ROOTED icon or timer for it (HudPlate.statuses).
+func holds_still() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
 ## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if unused)}.
 ## The base reports E while it's up and e_recastable().
@@ -208,7 +211,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 ## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
-## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx), and looks off the synced row
+## (Grimble's reaching arm, DredgeKit.net_reach).
 func sound_tick(_dt: float) -> void:
 	pass
 
@@ -553,7 +557,7 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Shake.incoming_big(m, h.pos, 0.6, h)
+	Shake.incoming_big(m, h.pos, ImpactWeight.shake("heavy"), h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
 
@@ -798,23 +802,19 @@ func slot_info(slot: String) -> Dictionary:
 	match slot:
 		"sec", "utility":
 			var sd := rmb_def()
-			var lines: Array = []
-			for v in ["tap", "hold", "air", "during_e", "full"]:
-				if (sd.get("variants", {}) as Dictionary).has(v):
-					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0,
 				"cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"),
 				"charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["e"]), "cd_max": float(sd.get("cooldown", 14.0)) * cd_k("kin"), "charges": 1 if float(cd["e"]) <= 0.0 else 0, "max_charges": 1, "verb": "e",
 				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t, "full": e_payoff_ready()}, true)
 		"r", "ult":
 			var sd := r_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"x":
@@ -823,7 +823,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": String(sd.get("name", "")), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
@@ -1095,7 +1095,7 @@ func armed_fx(slot := "sec") -> void:
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
+## A payoff landing (Flashpoint, Called Shot): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
