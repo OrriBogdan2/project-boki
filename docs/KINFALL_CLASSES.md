@@ -132,7 +132,7 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: centred on you, the cursor never moves the view (measured from the
+- Default follow is **Lean** (the target feel): centred on you, the cursor never moves the view (measured from the
   footage: docs/MOVEMENT_FEEL.md "Camera lead"). The Standard and Fully dynamic presets in Settings
   slide toward the cursor the way the source's own options do.
 - Sneaking (Ctrl) zooms the camera out to 1.45x, eased.
