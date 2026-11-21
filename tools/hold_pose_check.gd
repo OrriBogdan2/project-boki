@@ -25,11 +25,9 @@ const NOT_HELD := [
 	"ostra_swap_air", "ostra_snap_wind", "ostra_well",
 ]
 
-## Tap-pose exceptions (hero -> hold clips): the clip shows on the press on purpose and only while the key is down.
-## Archer's draw: the owner rule "the arrow nocks within 0.05 s of the press" (pin_bjorn_owner_check). Archer's
-## Heavy Shot draw and Bulwark's guard arm: hold-only moves (no tap move) whose pose is the press's tick-0 answer
-## (--input-latency-check, 3a4e33c748); a tap drops it on the release. docs/MOVEMENT_FEEL.md "owner's movement rules".
-const TAP_POSE_OPEN := {"archer": ["arc_draw", "arc_heavy_wind"], "bulwark": ["bul_guard"]}
+## Tap-pose exceptions (hero -> hold clip): the clip shows on the press on purpose, listed in the READY line.
+## Archer: the owner rule "the arrow nocks within 0.05 s of the press" (pin_bjorn_owner_check).
+const TAP_POSE_OPEN := {"archer": "arc_draw"}
 
 var reached := {}               # hold clip ids the trials brought up at all, key down or up
 var hold_ids := {}              # kmove id -> true, of the hero under test (its art file's "hold_from" moves)
@@ -129,7 +127,7 @@ func _scenario(m: Match, hero: String, slot: String, sc: String) -> void:
 		_step(m, "", seen)
 	for name in seen:
 		var what := "%s %s %s: %s up %.2f s with the key up or a tap's" % [hero, slot, sc, name, seen[name]]
-		if name.trim_prefix("tap ") in TAP_POSE_OPEN.get(hero, []) and name.begins_with("tap "):
+		if name == "tap " + TAP_POSE_OPEN.get(hero, ""):
 			continue
 		var slack := 0.0 if name.begins_with("tap ") else POSE_SLACK
 		ok(float(seen[name]) <= slack, what)
