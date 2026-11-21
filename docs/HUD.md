@@ -292,6 +292,12 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
   is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
+## Tab board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
+Holding Tab shows the squads-left count and YOUR squad only. Each hunter gets one strip, yours first with a teal outline and a gold name:
+portrait, name, alive / downed / out, kills / deaths / assists, damage, the four gear slots (`GearPanel.cell`) and the Boki (name, level
+and form, what it is doing). Rival squads show nothing but the count: no names, stats or alive state (owner 11-11; the source research
+is in docs/TAB_BOARD_PARITY.md). Assists are counted by `DashReset.takedown`. Void & Masks look (black-violet panel, teal edge, magenta count).
+
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;
@@ -482,9 +488,3 @@ chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
 The counters follow `HudReveal` (from the 4th expedition), the glider ring shows only while gliding or the meter is not full
 (`HudGroups.glider_shown`), and the belt waits until a held item could be used, then stays for the save (`BeltHud.shown`, `hud_reveal.json`
 "belt"). The clock strip counts with the minimap it hangs under. Shots: `docs/ui_hud_groups_five/`. Keys 1-4 work while the belt is folded.
-
-## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
-The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
-that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
-levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
-Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).

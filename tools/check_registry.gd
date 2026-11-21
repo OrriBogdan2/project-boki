@@ -873,6 +873,8 @@ const CHECKS := {
 	"--wisp-read-shots": ["res://tools/wisp_read_shots.gd", "wisp_read_shots", null],  # --shots-dir=<dir>
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],  # carry passives
+	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
+	"--scoreboard-shots": ["res://tools/scoreboard_shots.gd", "scoreboard_shots", null],      # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
@@ -909,7 +911,6 @@ const CHECKS := {
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2 + 3v3 counts, --shots-dir=
 	"--recast-marker-check": ["res://tools/recast_marker_check.gd", "recast_marker_check", null],
 	"--recast-marker-shots": ["res://tools/recast_marker_shots.gd", "recast_marker_shots", null],
-	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
