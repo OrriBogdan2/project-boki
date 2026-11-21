@@ -40,7 +40,7 @@ const TABLE := {
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
 const CATCH := 0.8         # m: a tag lands this close
-const GREET := 2.5         # m: friends this close greet each other
+const GREET := 4.0         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
@@ -48,10 +48,15 @@ const SPOT_AT := 0.5       # m: close enough to its nap spot to lie down
 const SPOT_SNAP := 3.0     # m a nap spot may move to the nearest open ground (a farm island is the save's own)
 const BESIDE := 0.8        # m: the least gap between a spot and the place beside it
 
+const ACT_LOG_MAX := 200   # social acts kept in the log
+
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
 var night := false
+var acts := {}             # kind (play, nap, greet, squabble) -> how many a watcher has seen
+var act_log: PackedStringArray = []      # "12s play Ash Crag", one line per social act (--base-life-check reads it)
 var _acc := 0.0
+var _clock := 0.0          # s of farm life stepped so far
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
@@ -110,9 +115,13 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.APPROACH, func(_from: int) -> bool: return _awake(k) and not _taken(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
+		m.on_enter(S.PLAY, func(_from: int) -> void: _act("play", k))
+		m.on_enter(S.PLAY_WITH, func(_from: int) -> void: _act("play", k))
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void:
 			k.erase("life_pile")
+			k.erase("life_pals")
+			k["doze_ok"] = _clock + float(R["doze_rest"])
 			k.erase("life_spot")
 			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
@@ -134,6 +143,7 @@ func step(d: float) -> void:
 		return
 	var dt := _acc
 	_acc = 0.0
+	_clock += dt
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
 	if h.day_t < _day_t:
 		BaseDrift.day(h.kins.map(func(k): return k["rec"]))
@@ -199,6 +209,9 @@ func choose(k: Dictionary) -> void:
 		_mentor(k)
 		return
 	if BaseShy.keep_to_edge(h, k):
+		return
+	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
+		_nap(k, "dozy")      # a nap for company, not only when tired: the pile forms where a friend already lies
 		return
 	var near := _near(k)
 	_greet(k, near)
@@ -308,7 +321,13 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
 			GardenFirstDay.mark("nap", h)
-			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
+			if regard(k, o, float(R["parent_weight"])) >= float(R["pile_at"]):      # rivals do not make up asleep
+				var uid := String(o["rec"]["uid"])
+				if not k.get("life_pals", {}).has(uid):
+					k["life_pals"] = k.get("life_pals", {})
+					k["life_pals"][uid] = true
+					_act("nap", k, o)
+				add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
 			BaseDuo.nap_beside(k, o, dt)
 
 ## HomeToys runs the play (walk, play, squabble, finish); the machine only shows it and lets go when it is done.
@@ -377,8 +396,8 @@ func _nap(k: Dictionary, why: String) -> void:
 	var spot := _beside_friend(k, claims)
 	if spot.is_empty() and social:
 		var best := {}
-		var top := float(R["friend_at"]) * 0.5
-		for o in _near(k, true):
+		var top := float(R["pile_at"]) if why == "dozy" else float(R["friend_at"]) * 0.5
+		for o in _near(k, true, float(R["pile_reach"])):
 			var liking := regard(k, o, float(R["parent_weight"]))
 			if (o["life"] as Fsm).is_in(S.NAP) and liking >= top:
 				top = liking
@@ -621,15 +640,23 @@ func _mate(k: Dictionary, near: Array) -> Dictionary:
 
 func _greet(k: Dictionary, near: Array) -> void:
 	var best := {}
-	var top := float(R["friend_at"])
+	var top := float(R["greet_at"])
 	for o in near:
 		var liking := regard(k, o, float(R["parent_weight"]))
 		if liking >= top and _dist(k, o) < GREET:
 			top = liking
 			best = o
-	if not best.is_empty() and randf() < 0.5:
+	if not best.is_empty() and randf() < float(R["greet_chance"]):
 		h._emote(k, "♥")
+		_act("greet", k, best)
 		note_parent(k, best, "said hello to")
+
+## Chance a roaming Boki lies down for a day nap: a little on its own, more when a Boki it gets on with lies close by.
+func _doze(k: Dictionary) -> float:
+	var top := float(R["pile_at"])
+	var pile := _near(k, true, float(R["pile_reach"])).any(func(o): return (o["life"] as Fsm).is_in(S.NAP) \
+		and regard(k, o, float(R["parent_weight"])) >= top)
+	return float(R["doze"]) + (float(R["doze_pile"]) if pile else 0.0)
 
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
 func _clash(a: Dictionary, b: Dictionary) -> bool:
@@ -638,6 +665,7 @@ func _clash(a: Dictionary, b: Dictionary) -> bool:
 
 func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))
+	_act("squabble", a, b)
 	_huff(a)
 	_huff(b)
 
@@ -648,6 +676,13 @@ func _cheer_friends() -> void:
 		if two.size() == 2 and not (HomeChimes.asleep(two[0]) or HomeChimes.asleep(two[1])):
 			GardenSfx.cue("garden_friends", (two[0]["pos"] + two[1]["pos"]) * 0.5)
 	befriended.clear()
+
+## A social act a player could see: counted by kind and logged with the farm's clock and who took part.
+func _act(kind: String, a: Dictionary, b: Dictionary = {}) -> void:
+	acts[kind] = int(acts.get(kind, 0)) + 1
+	if act_log.size() < ACT_LOG_MAX:
+		var who := String(a["rec"]["name"]) + ((" " + String(b["rec"]["name"])) if not b.is_empty() else "")
+		act_log.append("%.0fs %s %s" % [_clock, kind, who])
 
 func _huff(k: Dictionary) -> void:
 	h._emote(k, "!", true)

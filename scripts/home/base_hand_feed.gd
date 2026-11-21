@@ -90,7 +90,7 @@ func approach(k: Dictionary, m: Fsm) -> void:
 		m.go(BaseLife.S.DONE, "sniffed")
 		return
 	Econ._take_pantry(food)      # the snack leaves the pantry once, here
-	rec["trust"] = clampf(float(rec["trust"]) + float(R["trust"]), 0.0, 100.0)
+	Care.trust_add(rec, float(R["trust"]), Time.get_unix_time_from_system())
 	e["res"] = res
 	e["bit"] = _bit(k, food)
 	m.go(BaseLife.S.HAND_EAT, "eats")
