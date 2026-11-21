@@ -10813,3 +10813,4 @@ READY ext/ui-select-port 658e350f18 (hunter select + loading port, origin/main m
 READY ext/farm-tut-patch-step 719544c28f (PR #516: merged origin/main; farm-tutorial-check 2 fails vs main 5, both also red on main, NEW-RED 0)
 READY ext/hit-shape-mismatch 19496473d48983de6a392e847102234c0ea2ba5f (hit shapes match content ranges)
 READY ext/merge-lane-M4-1121 ed18769f936d164dfdd13b3b60315052ea006e4e (origin/main merged; only boki_system_check.gd conflicted: kept main acks part + lane wind_up part; --check 0 fail, --boki-system-check 0 fail; health --strict red only on main style ratchet, check_registry long_line 2 identical on main)
+READY ext/revive-sickness-lamp 00d1d89338 (PR #375: merged origin/main; HunterNet tail merged sickness+reach, 9 fields, Net 0.24.21; hearth-lamp + remote-anim checks 0 failures)
