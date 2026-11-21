@@ -211,7 +211,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 ## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
-## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx), and looks off the synced row
+## (Grimble's reaching arm, DredgeKit.net_reach).
 func sound_tick(_dt: float) -> void:
 	pass
 
@@ -714,7 +715,9 @@ static func _clamp_parts(sd: Dictionary) -> void:
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
-	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+	var slot_pow := power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot))
+	var slot_key: String = {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot)
+	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, slot_pow, slot_key, ability)
 	c["hero_col"] = Arch.color(id)
 	for k in extra:
 		c[k] = extra[k]
@@ -1152,7 +1155,8 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
 		dat.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
-		(dat.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		var mat := dat.material_override as StandardMaterial3D
+		mat.albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
 
 ## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
 static func solid_mat(c: Color) -> StandardMaterial3D:

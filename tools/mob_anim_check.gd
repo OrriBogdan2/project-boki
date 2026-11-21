@@ -131,7 +131,8 @@ func _gait(m: Match, k: String) -> void:
 		mb.render(DT, 1.0)
 	var strides := mb.anim / TAU
 	var want := spd * 30.0 * DT / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(k), 2.0))
-	ok(absf(strides - want) < 0.001, "%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want])
+	ok(absf(strides - want) < 0.001,
+		"%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want])
 	var before := mb.anim
 	mb.vel = Vector3.ZERO
 	for i in 10:
@@ -140,7 +141,8 @@ func _gait(m: Match, k: String) -> void:
 	mb.vel = Vector3(spd, 0, 0)
 	mb.hurt(1.0, P)
 	mb.render(DT, 1.0)
-	ok(MobAnim.state_of(mb) != MobAnim.DEATH and MobAnim.state_of(mb) <= MobAnim.RUN, "%s: a hit keeps the walk under the hit-react" % k)
+	ok(MobAnim.state_of(mb) != MobAnim.DEATH and MobAnim.state_of(mb) <= MobAnim.RUN,
+		"%s: a hit keeps the walk under the hit-react" % k)
 	mb.dead = true
 	mb.visible = false
 

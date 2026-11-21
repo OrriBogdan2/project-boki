@@ -298,6 +298,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge timing | short and fast, seen travelling, then he stops | "barge: a short, fast shove you see travel (about half way at half its time), then he stops" |
 | A run of barges | three, a short gap between | "barge: three in a row, a short gap between (a press inside the gap does nothing)" |
 | Barge into a foe | it touches nobody (no shove, no damage) | "barge: it shoves and hurts nobody (the source's Brute Dash)" |
+| Barge `hit_kb` | removed: it was dead data (never read), so the barge has no knock (ext/tenzo-grimble-knock-cut) | Brute Dash: no damage, no knock [D] |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
@@ -418,7 +419,9 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
 Grimble is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
 props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
-special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step
+special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived.
+Other games see his arm reach too (decision 0171): the hunter row carries the reach (`DredgeKit.net_reach`) and their copy
+of him lays the arm on it; the hook is a `"drawn"` shot, so no game shows a ball for it. The hook's shot carries `"rocks": true`, which the match's shot step
 reads to let it fly over rocks (one condition in `match.gd`). Grounded on the caster uses `KitStatus` "gnd"; `Hunter.do_dash` lets a
 reeling Grimble barge anyway (`DredgeKit.reeling`).
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),

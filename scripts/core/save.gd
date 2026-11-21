@@ -75,7 +75,6 @@ func fresh() -> Dictionary:
 		"active": "",
 		"roster": [],
 		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
-		"time_trial": {},     # Hunter id -> best time on the Training Grounds course, seconds (TimeTrial)
 		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
@@ -90,6 +89,7 @@ func fresh() -> Dictionary:
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
+		"time_trial": {},           # Hunter id -> personal best on the Training Grounds course (s)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],

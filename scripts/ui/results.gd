@@ -121,13 +121,15 @@ func show_result(r: Dictionary) -> void:
 			kept.add_child(flow)
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
-				kept.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
-					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
+				var full := "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]
+				var why := "You already have that kind out on the farm." if to_box.all(KinBox.dup_on_farm) else full
+				var names := ", ".join(to_box.map(func(k): return String(k["name"])))
+				kept.add_child(_notes(["Sent to the Boki Burrow: %s." % names, why], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		kept.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch a baby Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		kept.add_child(_notes(HomeNotices.fill(HomeNotices.EGG_HOME, "a Rare Egg" if eggs_home == 1 else "%d Rare Eggs" % eggs_home), UI.GOLD))
 	if won and not haul.is_empty():
 		var gear_head := "Gear you kept, in the gear shed"
 		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
@@ -151,7 +153,7 @@ func show_result(r: Dictionary) -> void:
 	if s.has("kin"):
 		boki.add_child(_kin_card(s, det))
 	for back in s.get("rescued", []):
-		boki.add_child(_note("You took %s back! It's home again, and it won't forget you came for it." % back["name"], UI.GOOD))
+		boki.add_child(_notes(HomeNotices.fill(HomeNotices.BACK_HOME, back["name"]), UI.GOOD))
 	# kin left behind when you went down, and where they ended up
 	var lost_news: Array = s.get("lost_news", [])
 	if not lost_news.is_empty():
@@ -171,7 +173,7 @@ func show_result(r: Dictionary) -> void:
 		if String(fe.get("kind", "")) == "stray":
 			boki.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
 	if s.get("kin_stranded", false):
-		boki.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
+		boki.add_child(_notes(HomeNotices.fill(HomeNotices.NO_BOKI_HOME, Ransom.BROKER), UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:
 		det.add_child(_note("Your vault kept %d of the gems you dropped." % int(s["vault_gems"]), UI.GOLD))
 	if s["crops_ready"] > 0:
@@ -312,9 +314,16 @@ func _details_toggle(det: Control, sc: ScrollContainer) -> Button:
 	return b
 
 func _note(txt: String, col: Color) -> Label:
-	var l := UI.label(txt, 15, col)
+	var l := UI.label(HomeNotices.bullet(txt), 15, col)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
+
+## Several short bullets under one another, one colour.
+func _notes(lines: Array, col: Color) -> VBoxContainer:
+	var box := UI.vbox(2)
+	for l in lines:
+		box.add_child(_note(String(l), col))
+	return box
 
 var shown_at := 0
 ## Enter, Space or Esc also takes you home, so you can never get stuck on this screen.
