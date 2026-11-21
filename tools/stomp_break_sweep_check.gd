@@ -19,15 +19,16 @@ const TAP := [3.0, 1]          # [distance to the stomper in m, steps the key is
 ## Casts that need another press: [arch, slot, metres, steps held, effect it must put on the stomper].
 ## They pin the CC table of docs/KIT_PARITY.md as it lands here (a launch reads as a knock), so a CC tag
 ## lost from a move turns its row red.
+## (Kael's dash and Riposte left the table when they stopped knocking, kael-knock-cut.)
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
 const EXPECT := [
 	["gunslinger", "rmb", 3.0, 1, "daze"], ["bulwark", "lmb", 3.0, 90, "knock"], ["bulwark", "x", 3.0, 1, "stun"],
 	["ostra", "rmb", 3.0, 1, "stun"], ["thief", "rmb", 3.0, 1, "gnd"], ["dredge", "rmb", 3.0, 1, "stun"],
 	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "stun"],
 	["ashwick", "dash", 3.0, 1, "knock"], ["ashwick", "e", 3.0, 1, "tow"], ["dolm", "dash", 3.0, 1, "knock"],
-	["juggernaut", "dash", 3.0, 1, "knock"], ["rimewright", "e", 3.0, 1, "tow"], ["juggernaut", "rmb", 3.0, 1, "knock"],
+	["rimewright", "e", 3.0, 1, "tow"], ["juggernaut", "rmb", 3.0, 1, "knock"],
 	["archer", "e", 3.0, 1, "slow"], ["dolm", "rmb", 3.0, 1, "slow"], ["rimewright", "rmb", 3.0, 1, "slow"],
-	["thief", "rmb", 3.0, 1, "slow"], ["juggernaut", "x", 3.0, 1, "knock"],
+	["thief", "rmb", 3.0, 1, "slow"],
 ]
 
 var bad := 0
