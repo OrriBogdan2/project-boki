@@ -451,7 +451,8 @@ func _tick_rain(dt: float) -> void:
 			if float(c["t"]) <= 0.0:
 				c["t"] = 0.32
 				c["to"] = q
-				c["from"] = q + Vector3(KitLooks.vis_rng.randf_range(-0.8, 0.8), 6.5, KitLooks.vis_rng.randf_range(-0.8, 0.8))
+				var vr := KitLooks.vis_rng
+				c["from"] = q + Vector3(vr.randf_range(-0.8, 0.8), 6.5, vr.randf_range(-0.8, 0.8))
 				c["up"] = false
 				break
 	for f in flames:
