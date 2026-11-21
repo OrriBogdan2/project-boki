@@ -103,7 +103,7 @@
 		"bul_whirl": {"clip": "shift_whirl", "strike": ["tip", "dash/whirl", "edge"], "dash": true},
 		"bul_charge": {"dash": true, "clip": "shift_charge"},
 		"bul_short": {"dash": true, "clip": "dash_short"},
-		"bul_lumber": {"clip": "dash_air", "air_clip": "dash_air", "ground_clip": "dash_short", "dash": true},
+		"bul_lumber": {"clip": "dash_air", "dash": true},
 		"bul_crush": {"clip": "crush", "upper": true},
 		"bul_mend": {"clip": "e_mend", "upper": "moving", "air_legs": true},
 		"bul_ult_wind": {"clip": "x_wind", "hold_from": 0.4},
