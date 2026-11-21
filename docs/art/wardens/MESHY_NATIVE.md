@@ -9,6 +9,11 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 Sable (sable), Tenzo (tarek), Kael (kael: K1, cape cut to the waist) and Grimble (dredge: the G3 look,
 no backpack, its drips and strands made one firm connected goo arm by a Meshy edit: kael-grimble-ingame-1121 r2_e1b_f2b). The contract `<art>.glb` stays beside it untouched.
 
+Colour: the hero-toon pass darkens and saturates a Meshy base colour a lot (a pale lilac texture reads deep violet),
+so pick a retexture by its in-game render, never Meshy's thumbnail: `--clip-shots --warden=<id> --states
+--native-file=res://<candidate>.glb` draws a candidate in place of the Hunter's own (Grimble r3: f2u, live in-game
+plum hue 293 / light 0.17 vs f2u 272 / 0.21; meshy-native-kg-r2-1121/r3).
+
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
   procedural bone layers (springs, orbits, carry IK, look-at, drop pose, squash, flinch, wall, blink, moods) are off.
