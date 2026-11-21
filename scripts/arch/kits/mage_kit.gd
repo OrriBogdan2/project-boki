@@ -417,7 +417,8 @@ func _tick_wire(dt: float) -> void:
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
 		KitWindup.broken(self, "dash")
 		return
-	if not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
+	# (not on the hold's first step: a Space pressed with the Shift is the dash_jump "same" row, it is dropped)
+	if t > dt * 1.5 and not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
 		# Space in the air hold (DECISIONS 11-08, Shift cancels into glide for every Hunter): cut, the charge stays
 		# spent as on any cut, and the press opens the glider at the drift she had
 		_end_wire(false)
