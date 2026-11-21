@@ -254,6 +254,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
+	info.add_child(summon_row(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)

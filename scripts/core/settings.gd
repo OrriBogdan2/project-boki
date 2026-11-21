@@ -10,6 +10,7 @@ const PATH := "user://settings.cfg"
 ## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
 const UI_SCALE_MIN := 0.75
 const UI_SCALE_MAX := 1.1
+const WINDOW_MODE_RETRIES := 4      # frames after startup that re-ask for the saved window mode
 const DEFAULTS := {
 	# audio
 	# (volumes: slider positions, heard as Sfx.slider_db; audio_v 2 = that curve, see _migrate_volumes)
@@ -19,7 +20,7 @@ const DEFAULTS := {
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "hud_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "hud_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -206,6 +207,8 @@ var _defaults_keys := {}
 var _dirty := false
 var _started := false       # the bindings the game ships with, for "reset"
 var _quality_basics := false
+## Exported desktop builds open fullscreen until the player picks windowed; the editor and the browser start windowed.
+var desktop_export := OS.has_feature("template") and not OS.has_feature("web")
 
 ## Renames old camera ids in a settings dictionary (CAM_IDS); unknown values are left for CamRig's fallback.
 static func migrate_cam(d: Dictionary) -> void:
@@ -234,6 +237,7 @@ func _ready() -> void:
 ## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
 func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
+	v["fullscreen"] = desktop_export
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
 		for k in DEFAULTS:
@@ -267,6 +271,10 @@ func load_file() -> ConfigFile:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if int(v.get("video_v", 4)) < 5:
+		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
+		v["fullscreen"] = desktop_export
+		v["video_v"] = 5
 	v["hud_scale"] = HudScale.setting()      # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
@@ -312,6 +320,36 @@ func apply_all() -> void:
 	for k in v:
 		apply(k)
 	_started = true
+	_hold_window_mode()
+
+## True while the window is fullscreen (the saved choice can lag it: a request the OS dropped, or Win+Down).
+static func window_is_fullscreen() -> bool:
+	var m := DisplayServer.window_get_mode()
+	return m == DisplayServer.WINDOW_MODE_FULLSCREEN or m == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+
+## Alt+Enter and F11 (and Settings > Fullscreen): flips the window as it is now and saves that as the choice.
+func toggle_fullscreen() -> void:
+	set_v("fullscreen", not window_is_fullscreen())
+
+## The window may not be up yet when the first request is made (Windows drops it): ask again for a few frames.
+func _hold_window_mode() -> void:
+	for _i in WINDOW_MODE_RETRIES:
+		await get_tree().process_frame
+		if bool(v["fullscreen"]) != window_is_fullscreen():
+			apply("fullscreen")
+
+## A windowed start bigger than the screen's usable area (a 1280x720 window on a small or scaled laptop screen)
+## would hang its bottom edge, and the buttons there, off the screen: shrink it to fit.
+func _fit_window_to_screen() -> void:
+	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var deco := DisplayServer.window_get_size_with_decorations() - DisplayServer.window_get_size()
+	if usable.size.x <= 0:
+		return      # (headless: no screen)
+	var room := usable.size - deco
+	var win := DisplayServer.window_get_size()
+	if win.x > room.x or win.y > room.y:
+		DisplayServer.window_set_size(Vector2i(mini(win.x, room.x), mini(win.y, room.y)))
+		DisplayServer.window_set_position(usable.position)
 
 ## Seconds bots leave a fresh lander alone (Bot.fresh) with Settings > Demo > "Bots leave you be after
 ## landing" on Longer.
@@ -359,6 +397,7 @@ func save() -> void:
 
 func reset_all() -> void:
 	v = DEFAULTS.duplicate(true)
+	v["fullscreen"] = desktop_export
 	for a in _defaults_keys:
 		_bind(a, _defaults_keys[a])
 	for k in v:
@@ -376,9 +415,11 @@ func apply(k: String) -> void:
 			if OS.has_feature("web") and not _started:
 				v[k] = false
 				return
-			var want := DisplayServer.WINDOW_MODE_FULLSCREEN if v[k] else DisplayServer.WINDOW_MODE_WINDOWED
-			if DisplayServer.window_get_mode() != want:
-				DisplayServer.window_set_mode(want)
+			if bool(v[k]) != window_is_fullscreen():
+				var mode := DisplayServer.WINDOW_MODE_FULLSCREEN if v[k] else DisplayServer.WINDOW_MODE_WINDOWED
+				DisplayServer.window_set_mode(mode)
+			if not v[k]:
+				_fit_window_to_screen()
 		"vsync":
 			if not OS.has_feature("web"):
 				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
@@ -511,6 +552,14 @@ func _apply_quality() -> void:
 		if (n as DirectionalLight3D).shadow_enabled: _shadow_quality(n as DirectionalLight3D)
 	for n in root.find_children("*", "WorldEnvironment", true, false):
 		if (n as WorldEnvironment).environment: _env_quality((n as WorldEnvironment).environment)
+
+func _input(event: InputEvent) -> void:
+	var k := event as InputEventKey
+	if k == null or not k.pressed or k.echo:
+		return
+	if k.keycode == KEY_F11 or (k.alt_pressed and k.keycode in [KEY_ENTER, KEY_KP_ENTER]):
+		toggle_fullscreen()
+		get_viewport().set_input_as_handled()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and bool(v.get("mute_unfocused", false)):

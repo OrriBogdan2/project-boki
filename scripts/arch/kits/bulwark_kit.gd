@@ -3,12 +3,12 @@ extends ArchKit
 ## Breaker (id bulwark, heavy): the squad's shield. docs/heroes/bulwark.md, hero sheet bjorn.md.
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
-##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
-##   call it back, hitting on the way). Hold whirls the hammer round him at arm's length, turning faster as it
-##   charges (a glint on its head from 0.6 s, no damage until he lets go); at full (1.25 s) a flash
-##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
-##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
-##   perfect swing, a leaping launch (BjornLaunch).
+##   and stays planted under a beacon of rising ivory light ("plant_beacon"), showing foes near it to your
+##   team, until you tap again to call it back, hitting on the way). Hold whirls the hammer round him at arm's
+##   length, turning faster as it charges (a glint on its head from 0.6 s, no damage until he lets go); at full
+##   (1.25 s) a flash on its head and a click open the perfect window, the whirl still going. Let go and it's a
+##   Crushing Blow: a flaming 180 degree crescent in front that steps him forward with it; let go in the window
+##   and it's the perfect swing, a leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it. Walking into it pushes
 ##   nobody; LMB with it up is the boop, a short shield thrust that shoves foes in front (BjornBoop).
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
@@ -16,7 +16,7 @@ extends ArchKit
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
 ##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
 ##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
-## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
+## - E, Mending Ground: an ivory column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
@@ -220,16 +220,16 @@ func move_k() -> float:
 		k = 0.0
 	return k
 
-## The shared charge ring at his feet burns in his gold; the hammer head carries the hand tell (BjornFx).
+## The shared charge ring at his feet burns in his own ivory; the hammer head carries the hand tell (BjornFx).
 func charge_color() -> Color:
-	return BjornFx.GOLD
+	return AimKit.hero_col(h)
 
 func charge_orb() -> bool:
 	return false
 
-## His dash after-image: a gold chevron wake instead of the shared ghost.
+## His dash after-image instead of the shared ghost: ivory specks and dust left behind on his body ("dash"; no ring).
 func dash_afterimage() -> bool:
-	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)) * body_k())
+	HeroVfx.of(m).hold(h, "dash")
 	return true
 
 ## Behind the raised shield you can't swing or throw.
@@ -632,6 +632,7 @@ func _tick_mace(dt: float) -> void:
 					m.sfx("bjorn_plant", p, -3.0)
 		"ground":
 			mace["t"] = float(mace["t"]) + dt
+			HeroVfx.of(m).hold(h, "plant_beacon", 0.0, {"at": p})
 			# it shows foes near it to your team (vision where it stands)
 			for f in foes_in(p, float(md["vision_r"]), 3.0):
 				if "reveal_t" in f: f.set("reveal_t", maxf(float(f.get("reveal_t")), 0.4))
@@ -876,7 +877,7 @@ func cast_e() -> bool:
 	play("bul_mend")
 	mend = {"pos": at, "t": float(ed["delay"]), "r": r, "zone": -1.0, "tick": 0.0}
 	e_t = float(ed["delay"]) + float(ed["time"])
-	fx.purify(at, r, 0.0)
+	HeroVfx.of(m).hold(h, "mend_fall", 0.0, {"at": at, "r": r})
 	m.sfx("bjorn_purify", at, -2.0)
 	net_ring(at, r, AimKit.hero_col(h))
 	return true
@@ -890,7 +891,7 @@ func _tick_mend(dt: float) -> void:
 	if float(mend["zone"]) < 0.0:
 		mend["t"] = float(mend["t"]) - dt
 		var u := 1.0 - clampf(float(mend["t"]) / float(ed["delay"]), 0.0, 1.0)
-		fx.purify(mend["pos"], r, u)
+		HeroVfx.of(m).hold(h, "mend_fall", u, {"at": mend["pos"], "r": r})
 		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true,
 			"col": AimKit.hero_col(h)})
 		if float(mend["t"]) <= 0.0:
@@ -900,7 +901,7 @@ func _tick_mend(dt: float) -> void:
 		return
 	mend["zone"] = float(mend["zone"]) - dt
 	mend["tick"] = float(mend["tick"]) - dt
-	fx.purify_hold(mend["pos"], r)
+	HeroVfx.of(m).hold(h, "mend_zone", 0.0, {"at": mend["pos"], "r": r})
 	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
 		"col": AimKit.hero_col(h)})
 	if float(mend["tick"]) <= 0.0:
@@ -930,12 +931,13 @@ func _mend_burst() -> void:
 	var r: float = mend["r"]
 	mend = {}
 	var heal := float(ed["heal"]) * heal_k()
+	var mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
 	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
 	for o in _allies_in(at, r):
 		if o != h and o.downed:
 			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
 			kickstarts += 1
-			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
+			HeroVfx.of(m).play(h, "mend_revive", o.pos, Vector2.ZERO)
 		elif not o.downed:
 			o.heal(heal)
 			if o == h and not wall.is_empty():
@@ -945,9 +947,7 @@ func _mend_burst() -> void:
 	if not infusion().is_empty():
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
-	fx.purify_burst(at, r)
-	m.fx.ring(at, r, AimKit.hero_col(h), 0.45)
-	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
+	HeroVfx.of(m).play(h, "mend_burst", at, Vector2.ZERO, {"r": r})
 	m.sfx("bjorn_purify_burst", at, 0.0)
 	net_ring(at, r, AimKit.hero_col(h))
 
