@@ -58,6 +58,7 @@ static var cut_speed: float = _trail["cut_speed"]       # m/s: faster than this 
 const FOLLOW_Y := 3.5         # 1/s, the view rising while you are in the air
 const FOLLOW_Y_TIGHT := 15.0  # 1/s, the view's height while you stand or it comes down: a landing settles at once
 const STAND_TOL := 0.15       # m above the standing height that still counts as standing (a step down a flight)
+const STEP_Y_SPEED := 2.4     # m/s the tight view may move at most on a step (a terrace step eases, --step-smooth-check)
 var last_want := Vector3.ZERO # the followed point last frame (the cut test)
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
@@ -313,7 +314,13 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	else:
 		flat = _trail_xz(flat, Vector2(want.x, want.z), Vector2(want.x - last_want.x, want.z - last_want.z), delta)
 	last_want = want
-	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
+	var ny := lerpf(base.y, want.y, ky)
+	# a step (the ground just rose, or dropped under a body still easing onto it) eases; a fall or a landing does not
+	var step_down := is_finite(stand_y) and p.y > stand_y + STAND_TOL and p.y - stand_y < 1.5
+	var step_up := is_finite(stand_y) and p.y <= stand_y + STAND_TOL and want.y > base.y
+	if tight and (step_down or step_up) and not Record.clean():
+		ny = move_toward(base.y, ny, STEP_Y_SPEED * delta)
+	base = Vector3(flat.x, ny, flat.y)
 	var lead_to := (lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX)
 	lead_v += ((lead_to - lead_off) * GLIDE_LEAD_EASE * GLIDE_LEAD_EASE - lead_v * 2.0 * GLIDE_LEAD_EASE) * delta
 	lead_off += lead_v * delta
