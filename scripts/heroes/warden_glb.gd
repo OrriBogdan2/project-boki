@@ -190,6 +190,8 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 		# (one on the .glb's weapon, which the loader moved under the Gun: Hem's bow, Cinder's flame chamber)
 		var gun := root.get_node_or_null("Rig/Torso/Aim/Gun/" + WEAPON)
 		an = gun.find_child(anchor_name, true, false) as Node3D if gun else null
+	if an == null and root.has_node("Held"):  # (a Meshy-native Hunter's held weapon: WardenHeld)
+		an = root.get_node("Held").find_child(anchor_name, false, false) as Node3D
 	return an
 
 ## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is

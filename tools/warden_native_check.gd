@@ -3,12 +3,14 @@ extends RefCounted
 ## (content/rules/warden_native.json) builds from its <art>_meshy.glb with Meshy's bones as Meshy named them (no
 ## contract bones, no WardenSync), its clips play for the game states (idle, walk, run, jump, attack, crouch), it
 ## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
-## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. Every other Warden keeps
+## weapon, puts the aim node on Meshy's hand and hangs the anchor empties on Meshy's bones. A Meshy model with no
+## weapon holds the contract model's as its own piece (WardenHeld). Every other Warden keeps
 ## the contract path.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
+const HELD_MIN := 0.3  # m: a held weapon (data "weapon") is at least this long (Grimble's blunderbuss ~0.5, Kael's sword)
 
 var bad := 0
 var n := 0
@@ -119,7 +121,30 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
+	if nat.d.has("weapon"):
+		_held(a, m, nat)
 	m.free()
+
+
+## A Meshy model with no weapon holds the contract model's (data "weapon") as its own piece, toon-shaded, its grip
+## (the contract hand's pivot) in Meshy's hand bone.
+func _held(a: String, m: Node3D, nat: WardenNative) -> void:
+	var held := nat.held
+	var mi := held.get_node_or_null("Weapon") as MeshInstance3D if held else null
+	var long := mi.get_aabb().get_longest_axis_size() if mi and mi.mesh else 0.0
+	ok(long > HELD_MIN, "%s: holds the contract model's weapon (%.2f m long)" % [a, long])
+	if mi == null:
+		return
+	var grip := m.global_transform * held.transform * held.pivot
+	ok(grip.distance_to(nat.hand_position()) < 0.01, "%s: the weapon's grip rides Meshy's hand" % a)
+	var sm := mi.get_surface_override_material(0) as ShaderMaterial
+	ok(
+		sm != null and (m.get_meta("mats", []) as Array).has(sm),
+		"%s: the held weapon is hero-toon shaded" % a
+	)
+	var names: Array = nat.d["weapon"].get("anchors", [])
+	var found := names.filter(func(an): return WardenGlb.anchor(m, an) != null)
+	ok(found.size() == names.size(), "%s: the weapon's anchors ride it (%s)" % [a, str(found)])
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").
