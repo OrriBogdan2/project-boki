@@ -34,7 +34,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
   `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
   (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s), `plants` (the sneak loops' foot plants, as `loco.plants`: crouch walking steps on them). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
@@ -49,20 +49,28 @@ Hero live in `tools/art1/` (Kael is the pilot).
   through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit; under zero the first frame holds that long), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `owns_land` (the move is the landing, even started in the air: the generic `land` clip does not follow it, and only a fall of `land.min_fall` after it lands again)}.
   swing of its own side's leg; `side_foot_mps` [walk, run] is the strafe loops' own foot speed, mixed in by how far the
-  move points sideways. `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
+  move points sideways, and `back_foot_mps` the back loops', by how far it points back (both fitted with
+  `--foot-slide-check --fit-dirs`). `cycle_s` (s) stretches every walk and run loop to one cycle and keeps them advancing together,
   so a blend between walk and run stays in step (`foot_mps` is then at that cycle; docs/art/FOOT_SLIDE.md,
   `--foot-slide-check`). No key: the clip plays as keyed.
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+  `plants` {clip: {"L": [s], "R": [s]}}: when each walk and run loop puts a foot down (s into the clip at rate 1); the
+  footsteps (`WardenSteps`) sound on them, from the loop nearest the ring's blend position, feet alternating through a
+  blend. `--step-sync-check` reads them off the clips (`--plants-json=<file>` writes them) and fails when a loop is
+  re-baked without them: re-read them whenever a loop changes. No key: the Hero's steps follow the procedural stride.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s), `plants` (the sneak loops' foot plants, as `loco.plants`: crouch walking steps on them). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
   Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
   the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit; under zero the first frame holds that long), `upper` (torso only: the legs keep running; `"moving"`: only while he moves), `rate` (clip seconds per kit second, default 1: a dash clip keyed with a long recovery ends with the body's travel instead of riding the run; `--dash-frames-check`, docs/art/anim_audit/DASH_TRAVEL.md), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md)) / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
+- `cancels`: [from move, cut at s, to] rows, one per second press the hero's Cancels table lists (to: a move, `""` the legs, `stun`, `glide`). `--clip-cancels-check` hands each over as the game does and asserts no pop and a blend done within one footage frame (0.2 s, or the longer `fade` / `fade_out` the file declares). Rows it found open are in its CANCEL_OPEN (docs/DEBT.md).
+  `time` [[kit s, clip s], ...] (slam follow-through, [../SLAM_FOLLOW.md](../SLAM_FOLLOW.md)): the clip's clock against the kit's, straight between the points (replaces `rate`/`lead`). A flat stretch holds the impact, a steep one skips a dead stretch, and the last point is the clip's end. `blend_out`: s before the clip's end over which the body goes back to the legs while the clip plays on, so it is back on them at the kit's recover. `--slam-follow-check` measures it.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
   `Oomph.HEAVY_FLINCH`); any other hit is `WardenFlinch`: a torso spring (front, back, left, right from `hit_dir`) added after
   the clips, so it rides over a run or a cast without stopping it. `--flinch-layer-check` holds each Hero's LMB move and hits it.
 - `recoil` {`deg`, `settle`}: every shot (the state's `fired` falling back to 0) kicks the arm bones and shoulder pieces up by `deg` degrees over whatever plays, settling in `settle` s (0.06-0.12); fast fire stacks to 1.5x. Only those bones move: the legs keep running, the shot's timing is the kit's. Vex 2 (the minigun, a shot every 0.12 s), Sable 3, Grimble 4. `--recoil-shots` films before/after strips.
 - `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
+- `cancels`: [from move, cut at s, to] rows, one per second press a hero's docs/heroes Cancels table lists (to: a move, `""` the legs, `"glide"`, `"stun"`). `--cancel-check` feeds each as the game does and asserts the cut hands over with no pop (the hand moving further in a frame than the clip's own path and than the frames either side) and the next state owns the body within one frame of the footage (0.2 s).
 - `states`: downed, reviving, stomp, drink, dead, stun, emote, hit {front, back, dur}. `stomp` and `drink` are seeked by the
   state's 0..1 phase (a stomp clip is Life's `stomp_cycle`, 0.7 s; a drink clip is the tonic's channel `time`, 1.0 s; the
   drink rides the upper body while he moves). A Hero that lists them under `procedural` instead keeps the rig's pose.
@@ -88,8 +96,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
-channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
+loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2 onto two crossfaded seek channels) > `full` (Blend2 onto two crossfaded seek
+channels), built in code from the file. A new clip, or the same one started over (a recast), takes the channel with less weight on screen, so a cancel inside the last fade never snaps a half-shown pose; an upper move cutting a full one starts at its weight, and the glide pose holds under a move cast from the glider. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
 under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).

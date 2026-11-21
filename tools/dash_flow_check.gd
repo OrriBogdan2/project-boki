@@ -35,6 +35,8 @@ const SOURCE_ROWS := [
 ## Heroes whose hold rows were all looked up in the source (docs/KIT_PARITY.md item 20): each row names its source,
 ## and one the source can't settle ("Not determinable: <why>") runs the default.
 const SOURCED_HOLDS := ["archer", "ashwick", "juggernaut"]
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes (the one press window)
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -51,9 +53,10 @@ func run(main: Node) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	ok(JuggernautKit.BUFFER == DashFlow.BUFFER_S, "juggernaut's heavy-move press window is DashFlow.BUFFER_S")
+	ok(Loco.press_buffer == 0.15, "the shared press window Loco.press_buffer is 0.15 s (Kael's too)")
 	for hero in _heroes():
 		await check_hero(main, hero)
+	await _one_window(main)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -115,15 +118,15 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			var next_step: bool = got == "buffer" and wait_s < Match.DT * 0.5
 			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""
-			var in_window := got != "buffer" or wait_s <= DashFlow.BUFFER_S + Match.DT
+			var in_window := got != "buffer" or wait_s <= Loco.press_buffer + Match.DT
 			ok((got == want or at_end_same) and in_window, "%s: %s%s (row: %s)" % [what, got, waited, want])
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
-func _match(main: Node, hero: String) -> Match:
+func _match(main: Node, hero: String, squad := 1) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else 1, "tier": 0, "length": 1e9,
+		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else squad, "tier": 0, "length": 1e9,
 		"seed": 77, "no_drop": true,
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})
@@ -315,6 +318,80 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 			return more.call("used", "x") or more.call("cd", "x") or more.call("cast", "ultimate")
 		"q":
 			return up.call("gear")
+	return false
+
+# ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
+## Loco.press_buffer by its three uses: Gil's E made before a stun ends, Ashwick's E held past a dash's end while a
+## stun still runs (the replay meets a stun with more than the window left: refused), and Ostra's early recast before
+## her seed arms. NEAR_S early goes, FAR_S early doesn't.
+func _one_window(main: Node) -> void:
+	CombatBus.ability_used.connect(_on_used)
+	var went := {}
+	var m := _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
+	m.queue_free()
+	m = _match(main, "ashwick")       # (his ground row buffers E; Gil's fires it in the dash)
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ashwick e held past a dash's end"]] = _past_dash(m, lead)
+	m.queue_free()
+	m = _match(main, "ostra")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ostra e before the recast arms"]] = _before_recast(m, lead)
+	m.queue_free()
+	await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	for key in went:
+		ok(went[key] == (float(key[0]) < Loco.press_buffer), "one window %.2fs: %s, pressed %.2fs early: %s" % [
+				Loco.press_buffer, key[1], key[0], "went off" if went[key] else "dropped"])
+
+## E pressed as a dash sets off (held for its end), then a stun running `lead` s past that end.
+func _past_dash(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.inp["move"] = Vector2(0, -1)
+	hunter.inp["dash"] = true
+	for i in DASH_WAIT:
+		if hunter.ak.in_dash():
+			break
+		m.step(Match.DT)
+	hunter.inp["dash"] = false
+	var before := _snap()
+	_press("e")
+	while hunter.ak.dash_left() > Match.DT * 1.5:
+		m.step(Match.DT)
+	if _went_off(before, "e") or not hunter.ak.in_dash():
+		return true           # (not held to the dash's end: both leads read "went off" and one fails)
+	hunter.stun_t = lead + hunter.ak.dash_left()
+	return _goes_off(m, before, "e")
+
+func _before_stun(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.stun_t = lead
+	var before := _snap()
+	_press("e")
+	return _goes_off(m, before, "e")
+
+## Ostra's E plants the seed; E again `lead` s before it arms pops it (or not) within NEAR_S of arming.
+func _before_recast(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	var k := hunter.ak as OstraKit
+	k.use_e()
+	for i in WATCH:
+		if not k.seed.is_empty():
+			break
+		m.step(Match.DT)
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - lead:
+		m.step(Match.DT)
+	_press("e")
+	_steps(m, ceili((lead + NEAR_S) / Match.DT))
+	return k.seed.is_empty()
+
+func _goes_off(m: Match, before: Dictionary, slot: String) -> bool:
+	for i in WATCH:
+		m.step(Match.DT)
+		if _went_off(before, slot):
+			return true
 	return false
 
 # ------------------------------------------------------------------ a landing never holds a press
@@ -648,7 +725,7 @@ const SPACE_FRACS := [0.25, 0.5, 0.75]
 ## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
 ## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
 ## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
-## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+## is a lock, a press in the window's last Loco.press_buffer must act by its end (every interaction is chainable).
 func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	var where := "air" if in_air else "ground"
 	var first := _space_at(m, slot, in_air, 0)
@@ -664,7 +741,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 		var at := int(round(absi(lock) * frac))
 		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
 		cells.append(got)
-		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= Loco.press_buffer + 0.001
 		if not locked and in_buffer and got == "never":
 			right = false
 	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]
@@ -672,7 +749,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 			" (row: lock)" if locked else ""])
 
 ## Shift in a cast whose into_dash row buffers it (an ult that plants its caster): pressed at 0, 25, 50 and 75
-## percent of the cast's lock, it is held to the lock's end and goes within DashFlow.BUFFER_S of it, never lost.
+## percent of the cast's lock, it is held to the lock's end and goes within Loco.press_buffer of it, never lost.
 func _shift_window(m: Match, hero: String, slot: String) -> void:
 	if String(DashFlow.into_row_of(hero, slot, "ground")["mode"]) != "buffer":
 		return
@@ -688,7 +765,7 @@ func _shift_window(m: Match, hero: String, slot: String) -> void:
 		var got := _space_at(m, slot, false, at, "dash")
 		var past := got.trim_prefix("end ").to_float() - float(lock - at) * Match.DT
 		cells.append(got if not got.begins_with("end") else "%+.2fs" % past)
-		right = right and got.begins_with("end") and past <= DashFlow.BUFFER_S + Match.DT
+		right = right and got.begins_with("end") and past <= Loco.press_buffer + Match.DT
 	ok(right, "%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)" % [
 			hero, slot, lock * Match.DT, ", ".join(cells)])
 
