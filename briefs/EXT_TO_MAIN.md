@@ -10739,3 +10739,4 @@ READY ext/sfx-enemy-priority 70323493464 (rival wind-ups/ult cues duck your held
 READY ext/merge-lane-M5-1121 57bc411d89 (lane M5 bundle: 19 tut/ui/grounds/slam/ttk branches; targeted gate NEW-RED 0, export OK)
 READY ext/ui-tut-hud-five 8c1b8e4e51 (tutorial HUD 5 groups)
 READY ext/farm-autosort a8abfca4ae8b45f260e9365fa0da59f5a574f1d4 (farm kin auto-sort to best-knack station, owner reassign sticks; rule table docs/FARM_AUTOSORT.md; clip ~/cj/20261121-075059-a1/clip/farm_autosort.mp4)
+READY ext/sfx-silence-fill b26a2b88cdd0994309b638e08c81c73431bd98d8 (silence fill: Boki side-landing settle, quiet slow/stun cue on monsters+Boki, audit check fixed; Vex/Cinder had no silent rows; backlog in docs/AUDIO.md)
