@@ -45,6 +45,7 @@ static func set_wisp(k: Kin, on: bool) -> void:
 ## A merge ended (KinMerge.end): the Boki is a wisp on its hunter's shoulder again, its summon cooldown as it was.
 static func rewisp(k: Kin) -> void:
 	set_wisp(k, true)
+	k.giant = {}  # (a mount's giant form ends with the merge: merge_out does not run for a wisp)
 	k.stow()
 	k.scale = Vector3.ONE
 
