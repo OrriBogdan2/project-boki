@@ -203,7 +203,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if not will_dress(arch):
 		return
 	if WardenNative.on(arch):
-		WardenNative.dress(root, arch, _scene(arch))
+		WardenNative.dress(root, arch, _scene(arch), lk)
 		return
 	var rest := neutral_rest(arch)
 	var glb := _scene(arch).instantiate() as Node3D

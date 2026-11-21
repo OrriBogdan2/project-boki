@@ -6,7 +6,8 @@ extends Node
 ## onto the contract: the clips play on them as Meshy keyed them, and the contract's procedural bone layers (springs,
 ## orbits, carry, look-at, drop pose, squash) are not built. The contract's anchor empties hang on Meshy's bones as
 ## BoneAttachment3D nodes (data "anchors"), and the weapon's aim node rides Meshy's hand bone. HunterAnim still runs
-## on the hidden rig and hands over its state (WardenClips.STATE) each frame.
+## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
+## pass (WardenGlb._toon: shading, ink, hit flashes) like every other Hunter's, unless data "toon" is false.
 
 const DATA_PATH := "res://content/rules/warden_native.json"
 const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
@@ -16,6 +17,8 @@ const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their k
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
+const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouch_arms_from"), added beside Meshy's
+const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
@@ -23,6 +26,7 @@ static var _data = null  # art name -> its entry (parsed once)
 var root: Node3D
 var player: AnimationPlayer
 var d: Dictionary
+var plays: Dictionary  # game state -> the clip it plays (data "clips"; the crouch can be its arms-swapped copy)
 var skel: Skeleton3D
 var hand := -1  # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
 var gun: Node3D
@@ -43,7 +47,11 @@ static func entry(art_name: String) -> Dictionary:
 ## Whether this archetype's Hunter is switched onto Meshy's own skeleton (and its file is there).
 static func on(arch: String) -> bool:
 	var e := entry(WardenGlb.art(arch))
-	return not contract_only and bool(e.get("meshy_native", false)) and ResourceLoader.exists(file(arch))
+	return (
+		not contract_only
+		and bool(e.get("meshy_native", false))
+		and ResourceLoader.exists(file(arch))
+	)
 
 
 ## The Meshy-skeleton .glb, beside the contract one: art/wardens/<art>/<art>_meshy.glb.
@@ -53,7 +61,8 @@ static func file(arch: String) -> String:
 
 
 ## Dresses the procedural hunter `model` (built rig-only) in its Meshy model; the rig stays as HunterAnim's state.
-static func dress(model: Node3D, arch: String, scene: PackedScene) -> void:
+## lk: the look Models.hunter built from (its colour picks tint the toon pass's painted slots).
+static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> void:
 	var e := entry(WardenGlb.art(arch))
 	var glb := scene.instantiate() as Node3D
 	glb.name = "Warden"
@@ -64,6 +73,11 @@ static func dress(model: Node3D, arch: String, scene: PackedScene) -> void:
 	nat.name = "Native"
 	nat.setup(model, glb, e)
 	glb.add_child(nat)
+	if bool(e.get("toon", true)):
+		var own := WardenGlb.look(WardenGlb.art(arch))
+		var mats: Array = model.get_meta("mats", [])
+		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
+		model.set_meta("mats", mats)
 	model.set_meta(META, true)
 
 
@@ -81,10 +95,12 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	d = data
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
-	var clips: Dictionary = d["clips"]
+	plays = (d["clips"] as Dictionary).duplicate()
 	for st in LOOPS:
-		player.get_animation(String(clips[st])).loop_mode = Animation.LOOP_LINEAR
+		player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	skel = WardenGlb.skeleton(glb)
+	if d.has("crouch_arms_from"):
+		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	var anchors: Dictionary = d.get("anchors", {})
 	for an in anchors:
@@ -147,7 +163,9 @@ func _attacked(s: Dictionary) -> bool:
 		or now["recoil"] > last["recoil"]
 	)
 	last = now
-	var fresh := attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
+	var fresh := (
+		attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
+	)
 	return hit and fresh
 
 
@@ -157,13 +175,13 @@ func _rate(ground: float, key: String, lo: float) -> float:
 
 
 func _clip_len(st: String) -> float:
-	return player.get_animation(String(d["clips"][st])).length
+	return player.get_animation(String(plays[st])).length
 
 
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(d["clips"][st]), FADE)
+		player.play(String(plays[st]), FADE)
 		if restart:
 			player.seek(0.0, true)
 		cur = st
@@ -178,3 +196,50 @@ func _hide_rig_weapon() -> void:
 	if id != built:
 		built = id
 		WardenGlb._skinned_weapon(root)
+
+
+## The state's clip with the arms of clip `from` (another state's), time-scaled onto it so they cycle once per loop:
+## Meshy's only crouch walks holding a torch out in front, which reads in game as the prop floating off the body.
+## The arm bones are found below Meshy's own shoulder bones (data "arm_roots"); a bone the source clip does not key
+## keeps the state clip's track. The copy is added beside Meshy's clips (its library is shared by every instance of
+## the .glb, so it is built once); returns its name.
+func _arms_swapped(st: String, from: String) -> String:
+	var base := player.get_animation(String(plays[st]))
+	var arms := player.get_animation(String(plays[from]))
+	var lib_name := player.find_animation_library(base)
+	var lib := player.get_animation_library(lib_name)
+	var nm := ARMS_CLIP % String(plays[st])
+	var full := nm if String(lib_name) == "" else "%s/%s" % [lib_name, nm]
+	if lib.has_animation(nm):
+		return full
+	var bones := {}
+	for r in d.get("arm_roots", ARM_ROOTS):
+		_chain(skel.find_bone(String(r)), bones)
+	var mix := base.duplicate(true) as Animation
+	mix.loop_mode = Animation.LOOP_LINEAR
+	var k := base.length / arms.length
+	for ti in range(mix.get_track_count() - 1, -1, -1):
+		var p := mix.track_get_path(ti)
+		var tt := mix.track_get_type(ti)
+		var si := arms.find_track(p, tt)
+		if si < 0 or not bones.has(String(p.get_concatenated_subnames())):
+			continue
+		mix.remove_track(ti)
+		var ni := mix.add_track(tt)
+		mix.track_set_path(ni, p)
+		mix.track_set_interpolation_type(ni, arms.track_get_interpolation_type(si))
+		for key in arms.track_get_key_count(si):
+			mix.track_insert_key(
+				ni, arms.track_get_key_time(si, key) * k, arms.track_get_key_value(si, key)
+			)
+	lib.add_animation(nm, mix)
+	return full
+
+
+## Bone `b` and every bone below it, by name, into `into`.
+func _chain(b: int, into: Dictionary) -> void:
+	if b < 0:
+		return
+	into[skel.get_bone_name(b)] = true
+	for c in skel.get_bone_children(b):
+		_chain(c, into)
