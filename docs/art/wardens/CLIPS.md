@@ -70,6 +70,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   the clips, so it rides over a run or a cast without stopping it. `--flinch-layer-check` holds each Hero's LMB move and hits it.
 - `recoil` {`deg`, `settle`}: every shot (the state's `fired` falling back to 0) kicks the arm bones and shoulder pieces up by `deg` degrees over whatever plays, settling in `settle` s (0.06-0.12); fast fire stacks to 1.5x. Only those bones move: the legs keep running, the shot's timing is the kit's. Vex 2 (the minigun, a shot every 0.12 s), Sable 3, Grimble 4. `--recoil-shots` films before/after strips.
 - `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
+- `cancels`: [from move, cut at s, to] rows, one per second press a hero's docs/heroes Cancels table lists (to: a move, `""` the legs, `"glide"`, `"stun"`). `--cancel-check` feeds each as the game does and asserts the cut hands over with no pop (the hand moving further in a frame than the clip's own path and than the frames either side) and the next state owns the body within one frame of the footage (0.2 s).
 - `states`: downed, reviving, stomp, drink, dead, stun, emote, hit {front, back, dur}. `stomp` and `drink` are seeked by the
   state's 0..1 phase (a stomp clip is Life's `stomp_cycle`, 0.7 s; a drink clip is the tonic's channel `time`, 1.0 s; the
   drink rides the upper body while he moves). A Hero that lists them under `procedural` instead keeps the rig's pose.
@@ -95,8 +96,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
-channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
+loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2 onto two crossfaded seek channels) > `full` (Blend2 onto two crossfaded seek
+channels), built in code from the file. A new clip, or the same one started over (a recast), takes the channel with less weight on screen, so a cancel inside the last fade never snaps a half-shown pose; an upper move cutting a full one starts at its weight, and the glide pose holds under a move cast from the glider. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
 under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
