@@ -2,7 +2,7 @@ extends RefCounted
 ## --flinch-layer-check: a hit during each Hero's LMB hold keeps the ability clip running and adds the flinch
 ## (WardenFlinch): the clip, its weights and the legs are as without the hit; the torso leans away from the hit
 ## (front, back, left, right); a harder hit leans further; it settles back; only a stagger plays the hit clip.
-## A Hero with no clips yet (Gil) flinches on HunterAnim's own spring: the same four hits lean his head away too.
+## A Hero with no keyed moves yet (Gil: borrowed clips, procedural kit) is hit from the same four sides and leans away too.
 
 const LMB := {"archer": "arc_draw", "thief": "thf_lmb_r", "tender": "mm_shot_r", "gunslinger": "gunslinger_lmb",
 	"ashwick": "as_lance", "mage": "mage_lmb_l", "dolm": "breah_punch", "rimewright": "tm_spear_aim",
@@ -83,7 +83,7 @@ func _hero(id: String, move: String) -> void:
 	for r in pair:
 		(r["m"] as Node).free()
 
-## A Hero with no clips: one model on HunterAnim's flinch, hit from each side, its head against an unhit twin's.
+## A Hero with no keyed moves: one model on its flinch, hit from each side, its head against an unhit twin's.
 func _procedural(id: String) -> void:
 	var pair: Array = []
 	for i in 2:
@@ -96,7 +96,10 @@ func _procedural(id: String) -> void:
 		sync.set_process(false)
 		pair.append({"m": m, "sync": sync, "s": s, "an": HunterAnim.new(m),
 				"sk": WardenGlb.skeleton(m.get_node("Warden"))})
-	ok((pair[0]["sync"] as Node).get("clips") == null, "%s: no clips, so HunterAnim's own flinch plays" % id)
+	# its clips (Gil borrows idle/walk/hit, no kit moves) may run under the flinch, but a keyed move belongs in LMB
+	var clips: WardenClips = (pair[0]["sync"] as Node).get("clips")
+	var keyed: Dictionary = {} if clips == null else clips.d.get("kmoves", {})
+	ok(keyed.is_empty(), "%s: no keyed moves, so no LMB row is missing" % id)
 	_steps(pair, 12)
 	var off := _gap(pair)
 	for nm in DIRS:
