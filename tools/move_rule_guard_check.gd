@@ -11,7 +11,7 @@ const RULES := {      # DECISIONS line (its date: [11-08], [11-11]; no date = "M
 	"double": "Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08]",
 	"start": "glide start adds no speed [11-08]",
 	"shift": "Shift cancels into glide instantly for every Hunter. [11-08]",
-	"heat": "An overheated glider still lifts you out of the abyss, at half strength, while it burns.",
+	"heat": "An overheated glider still lifts you out of the abyss as strongly as a cool one, while it burns.",
 	"fall": "falling never converts into horizontal momentum [11-11]",
 	"air": "Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer",
 	"keep": "air control as REFERENCE (... never overwrite air velocity) [11-08]",
@@ -171,7 +171,7 @@ func _overheat(arch: String, edge: Dictionary) -> void:
 	var full: Array = heat._climb(edge, 12.0, 1.0)
 	var hot: Array = heat._climb(edge, 12.0, 0.0)
 	var ratio := float(hot[0]) / maxf(0.01, float(full[0]))
-	row(arch, "heat", float(hot[1]) > 0.0 and ratio > 0.4 and ratio < 0.62,
+	row(arch, "heat", float(hot[1]) > 0.0 and absf(ratio - 1.0) < 0.02,
 		"12 m under the lip: overheated lift %.1f m/s = %.2f of full (%.1f), back at the lip %s"
 		% [hot[0], ratio, full[0], "in %.2f s" % hot[1] if float(hot[1]) > 0.0 else "never"])
 	h.inp["glide"] = false

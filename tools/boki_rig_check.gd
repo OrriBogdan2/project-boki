@@ -255,12 +255,29 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
 	rig._speed = 0.0
+	rig._track_speed(0.016)
+	k.global_position += Vector3(6, 0, 0)
+	k.set_meta("tp", int(k.get_meta("tp", 0)) + 1)      # (Kin.teleport: a burst, a re-bloom, a blink)
+	rig._track_speed(0.016)
+	ok(rig._speed < BokiRig.WALK_SPEED, "a teleport is not speed (%.2f m/s)" % rig._speed)
+	k.global_position += Vector3(0.5, 0, 0)
+	rig._track_speed(0.016)
+	ok(rig._speed >= BokiRig.WALK_SPEED, "a real step still is (%.2f m/s)" % rig._speed)
+	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
 	ok(rig.clip == "ability", "a cast pulse plays the ability")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	k.set_meta("pulse", 124)
+	k.set_meta("kstate", "attack")      # (a cast's wind-up also reads as striking)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "ability", "a cast's wind-up keeps the ability clip, not the attack")
+	k.remove_meta("kstate")
+	rig._pick_clip(0.016)
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
 	if BokiFly.flier(kin_id):
 		_air(k, rig)
 	_in_water(k, rig)
@@ -375,7 +392,7 @@ func _own_look(main: Node) -> void:
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var marks := rig._coat.next_pass as ShaderMaterial
-	ok(marks != null and marks.shader.resource_path.ends_with("boki_marks.gdshader"), "its coat marks are on")
+	ok(marks != null and marks.shader.resource_path.begins_with("res://shaders/boki_marks"), "its coat marks are on")
 	await _grown_parts(main)
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
 	for nm in ["Tuft", "TailTuft", "Birthmark"]:

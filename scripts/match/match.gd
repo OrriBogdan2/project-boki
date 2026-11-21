@@ -62,7 +62,7 @@ var over := false
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
-var feed: Array = []        # kill feed lines {text, t}
+var feed: Array = []        # kill feed rows (KillFeed) {text, t}; a knock or finish adds by, who, icon
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
@@ -221,6 +221,7 @@ func _progress(label: String) -> void:
 func warm_up(progress := Callable()) -> void:
 	for h: Hunter in hunters.filter(func(x): return x.ak != null):
 		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
+	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
@@ -1312,9 +1313,8 @@ func use_gear(h: Hunter, slot: int) -> void:
 						tiles.append([i, int(world.level[i])])
 						world.kind[i] = World.T_GROUND
 						world.level[i] = clampi(lv, 0, 255)
-			var n := Models.gear_platform(col)
+			var n := SpanLooks.of(self).pad(col)      # (built at load: warm_up)
 			n.position = Vector3(floor(h.pos.x) + 0.5, lv * World.LEVEL, floor(h.pos.z) + 0.5)
-			add_child(n)
 			plats.append({"tiles": tiles, "t": 8.0, "node": n})
 			if h.pos.y < lv * World.LEVEL:
 				h.pos.y = lv * World.LEVEL + 0.05
@@ -1390,7 +1390,7 @@ func _update_gear_fx(dt: float) -> void:
 			for tv in pl["tiles"]:
 				world.kind[int(tv[0])] = World.T_VOID
 				world.level[int(tv[0])] = int(tv[1])
-			n.queue_free(); plats.erase(pl)
+			SpanLooks.of(self).give(n); plats.erase(pl)
 
 ## Inside a smoke cloud?
 func in_smoke(p: Vector3) -> bool:
@@ -1718,7 +1718,7 @@ var feed_all: Array = []
 func add_feed(t: String) -> void:
 	feed_all.append("%d %s" % [int(time), t])
 	feed.append({"text": t, "t": 0.0})
-	if feed.size() > 5:
+	if feed.size() > KillFeed.ROWS:
 		feed.pop_front()
 
 # ------------------------------------------------------------------ events
@@ -1788,7 +1788,7 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
@@ -1808,6 +1808,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	var icon := KillFeed.icon_of(by, o)
+	KillFeed.knock(self, h, by, icon)
 	if h == player:
 		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
@@ -1821,22 +1823,19 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
 			_reward_moment(h.pos)
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
-	else:
-		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), SideColor.of(self, h), 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else ""])
+		net_event(["knock", h.nid, credit.nid if credit else "", icon])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -1943,7 +1942,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(h.pname, why))
+	KillFeed.out(self, h, by, why)
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
@@ -2442,7 +2441,7 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same wedge)
+const VIEW_COS := 0.5          # 120 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
@@ -2628,8 +2627,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	for s in shot_pool:
 		if not s.visible:
 			mi = s; break
-	if mi and extra.get("melee", false):
-		mi = null          # a melee strike is invisible; the swing has its own effect
+	if mi and (extra.get("melee", false) or extra.get("drawn", false)):
+		mi = null          # a melee strike is invisible (the swing has its own effect); a kit draws a "drawn" one
 	if mi:
 		mi.visible = true
 		HeroVfx.of(self).reused(mi)      # a landed round's tracer lets go of the node before the new round shows
@@ -2671,7 +2670,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
-	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
+	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not extra.get("drawn", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
 		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
@@ -2966,7 +2965,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3099,7 +3098,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
 			var f := 1.0 - 0.45 * minf(1.0, d / radius)
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
-			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f}
+			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
 			if x.has("burn"): o["burn"] = x["burn"]
 			if x.has("slow"): o["slow"] = x["slow"]
@@ -3206,7 +3205,7 @@ func _process(delta: float) -> void:
 	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
-		if f["t"] > 6.0: feed.erase(f)
+		if f["t"] > KillFeed.LIFE_S: feed.erase(f)
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
@@ -3278,6 +3277,8 @@ func _gather_input() -> void:
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
+		if a[0] == "ultimate" and not MergeForm.enabled():
+			continue       # Fusion is off: X is reserved and does nothing
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
@@ -3322,6 +3323,10 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 	if Input.is_action_just_pressed("summon") and not paused:
 		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		FocusRelease.release_all(self)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if CamWheel.input(self, event): return
@@ -3599,6 +3604,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
+		Content.rules("merge_forms")["fusion_enabled"] = true
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
@@ -5121,7 +5127,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				KillFeed.knock(self, who, by, String(x[3]) if x.size() > 3 else "")
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
@@ -5136,7 +5142,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-				add_feed(out_text(who.pname, String(x[3])))
+				KillFeed.out(self, who, by, String(x[3]))
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false
@@ -5387,6 +5393,7 @@ func tip_once(key: String) -> bool:
 	return true
 
 var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
+var hunter_hints := HunterHints.new()   # the first-time lines for each fighting slot of a Hunter
 
 func _tips() -> void:
 	tips_live = false
@@ -5405,14 +5412,16 @@ func _tips() -> void:
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
-		_tip("ability", TipText.ability(player.ak != null))
-	if player.ult >= 1.0 and player.kin:
+		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
 	CcTips.tick(self)
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
+	var hunter_tip := hunter_hints.next(self)
+	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
 	var heart_tip := heart.tip_for(player) if heart else []
@@ -5427,7 +5436,7 @@ func _tips() -> void:
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
 	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators

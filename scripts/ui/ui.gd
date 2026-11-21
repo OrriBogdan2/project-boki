@@ -178,11 +178,23 @@ const HOVER_GROW := 1.03     # a pointed-at button's scale
 const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
 	"Leave it  (Esc)": "ui_back"}
 
+const SFX_META := "btn_sfx"   # marks a Button that makes the hover and click sounds (--ui-sfx-check)
+
+## For a Button that has its own look and cannot be a Ui.button (a colour swatch, a ring cap): the same hover tick
+## and click tap, no new sounds. Skip `click` when its handler already plays its own cue.
+static func sfx(b: Button, click := true) -> Button:
+	b.set_meta(SFX_META, true)
+	b.mouse_entered.connect(func(): if not b.disabled: Sfx.play("hover", null, -14.0, 0.05))
+	if click:
+		b.pressed.connect(func(): Sfx.play("click"))
+	return b
+
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lights the neon
 ## edge and grows it 3% (UI_STYLE.md: only things you can press glow and grow); pressing sinks it a
 ## touch, in about 70 ms.
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
+	b.set_meta(SFX_META, true)
 	b.text = text
 	if cb.is_valid():
 		var snd: String = BACK_WORDS.get(text, "click")
@@ -258,8 +270,10 @@ static func icon_button(icon: String, cb: Callable, tip := "", px := 16.0) -> Bu
 	b.tooltip_text = tip
 	b.custom_minimum_size = Vector2(px + 18, px + 18)
 	b.draw.connect(func():
-		var c := b.get_theme_color("font_hover_color" if b.is_hovered() else "font_color")
-		draw_icon(b, icon, b.size * 0.5, px * 0.5, c))
+		var state := "font_color"
+		if b.disabled: state = "font_disabled_color"
+		elif b.is_hovered(): state = "font_hover_color"
+		draw_icon(b, icon, b.size * 0.5, px * 0.5, b.get_theme_color(state)))
 	b.mouse_entered.connect(b.queue_redraw); b.mouse_exited.connect(b.queue_redraw)
 	return b
 

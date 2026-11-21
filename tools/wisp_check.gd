@@ -33,6 +33,7 @@ func run(main_node: Node) -> void:
 	_teammate()
 	_boki_wisps()
 	_summon_data()
+	_dex_row()
 	_summon()
 	m.queue_free()
 	_tutorial()
@@ -430,6 +431,7 @@ func _boki_wisps() -> void:
 	ok(k.state == "shoulder" and not KinFollow.set_cmd(k, "follow"), "...it takes no throw and no order")
 	ok(k.hurt(50.0, null) == 0.0 and not k.ready_to_fight(), "...it takes no hits and casts nothing")
 	k.render(DT, 1.0)
+	ok(k.model.name == "BokiWisp", "...drawing it keeps its model (the downed-form render took it for its own node)")
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
 	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
@@ -458,6 +460,23 @@ func _summon_data() -> void:
 	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
 	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
 
+## The Field Book card's summon row shows the numbers the summon uses, with the plain line its window picks.
+func _dex_row() -> void:
+	var ids: Array = KinLib.kin_ids().filter(func(id): return Data.KIN.has(id))
+	ids.sort_custom(func(a, b): return KinSummon.times(KinLib.kin(a)).x < KinSummon.times(KinLib.kin(b)).x)
+	for spk in ["cindle", ids[0], ids[-1]]:  # Cindle plus the shortest and the longest window
+		var t := KinSummon.times(KinLib.kin(spk))
+		var row := DexView.summon_row(spk)
+		var txt := (row.find_child("SummonText", true, false) as Label).text
+		ok(txt == "Summon %d s / rest %d s" % [int(t.x), int(t.y)], "dex: %s card reads '%s'" % [spk, txt])
+		var line := (row.find_child("SummonLine", true, false) as Label).text
+		ok(line != "" and line == KinSummon.card_line(t.x), "dex: %s card line is '%s'" % [spk, line])
+		row.free()
+	var short_l := KinSummon.card_line(KinSummon.times(KinLib.kin(ids[0])).x)
+	var long_l := KinSummon.card_line(KinSummon.times(KinLib.kin(ids[-1])).x)
+	ok(short_l == "Short summon, strong" and long_l == "Long summon, steady",
+		"dex: the rules' thresholds give the shortest '%s', the longest '%s'" % [short_l, long_l])
+
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:
 	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
@@ -468,8 +487,18 @@ func _summon() -> void:
 	var s := k.summon
 	ok(Settings.key_cap("summon") != "?" and Settings.ACTIONS.any(func(a): return a[0] == "summon"),
 		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
+	var radial0: int = m.fx.radial
 	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
 		"summon: the wisp bursts into the full Boki")
+	var pop := k.get_node_or_null(KinSummon.POP) as BokiWispPop
+	ok(pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
+		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
+	pop._process(BokiWispPop.DURATION + 0.01)
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
+	var cs := {}
+	KinSummon.anim_state(p, cs)
+	ok(cs["call"] == "call" and float(cs["call_t"]) < 0.05, "...and its Hunter's call gesture starts with the burst")
+	ok(k.tp_n > 0, "...put beside its hunter by a teleport, which the rig does not read as speed (%d)" % k.tp_n)
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
 	var lsh := k.brain.leash()
 	ok(lsh >= 8.0 and lsh <= 12.0, "...on a short leash (%.1f m)" % lsh)
@@ -481,6 +510,8 @@ func _summon() -> void:
 	p.prev = p.pos
 	_frames(0.1)
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
+	KinSummon.anim_state(p, cs)
+	ok(float(cs["call_t"]) > 0.25, "...without a second call gesture (%.2f s since the burst's)" % cs["call_t"])
 	_frames(8.0 + KinSummon.SHRINK_S)
 	ok(k.wisp and k.state == "shoulder" and s.cd > 59.0 and s.cd <= 60.0,
 		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd)
@@ -493,8 +524,23 @@ func _summon() -> void:
 	ok((k.model.get_node("Trail") as CPUParticles3D).emitting, "...bright again when ready")
 	KinSummon.press(p)
 	ok(KinSummon.press(p) and s.shrink > 0.0, "summon: Summon again sends it back early")
+	k.render(DT, 1.0)
+	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
+	ok(pop != null and not pop.out and not k.model.visible, "...folding into its wisp (BokiWispPop)")
+	KinSummon.anim_state(p, cs)
+	ok(cs["call"] == "recall" and float(cs["call_t"]) < 0.05, "...and its Hunter's recall gesture starts with the fold")
 	_frames(KinSummon.SHRINK_S + 0.05)
 	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
+	s.cd = 0.0
+	p.downed = true
+	s.burst(s.dur)
+	p.downed = false
+	KinSummon.anim_state(p, cs)
+	ok(not k.wisp and float(cs["call_t"]) > 0.05,
+		"summon: a burst while the Hunter is down (the guardian) makes no gesture")
+	s.end()
+	_frames(KinSummon.SHRINK_S + 0.05)
 	s.cd = 0.0
 	KinSummon.press(p)
 	var foe: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]

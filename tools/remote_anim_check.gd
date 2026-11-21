@@ -3,7 +3,8 @@ extends "res://tools/displace_net_check.gd"
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id, or its clear) must start, and drop, the same
-## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log every change of the
+## HunterAnim move within LAG_TOL, and play nothing the host did not. CUTS: holds cancelled mid-move. Both games log
+## every change of the
 ## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
 ## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
 ## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
@@ -13,6 +14,8 @@ extends "res://tools/displace_net_check.gd"
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Every AimKit `all` telegraph the host's hunter draws in a cast must show on the guest under its copy too
 ## (AimNet, Net 0.24.6), asserted once per shape kind.
+## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
+## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -48,6 +51,8 @@ var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
 var boss_nid := ""           # the boss both games log (the guest's copy of it)
 var cone_len := 0.0          # m: the longest ground cone the watched hunter showed since the mark
+var reach := {}              # the watched hunter's arm out since the mark: {from, to (unix ms), len (m, the farthest)}
+var balls := 0               # the most plain (cosmetic) shots this game had flying at once since the mark
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
@@ -86,6 +91,7 @@ func _host() -> void:
 		ok(not tele_miss.has(kind), "telegraph %s: all %d the host drew show on the guest" % [kind, drawn],
 			"missing: %s" % str(tele_miss.get(kind, [])))
 	await _ram_retime()
+	await _reach_row(G)
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
@@ -206,6 +212,41 @@ func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> vo
 		bad += 1
 	n += 1
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
+
+## Grimble's Deep Reach on the guest: the host's Grimble hooks the guest's hunter 6 m out and reels them in.
+func _reach_row(G: Hunter) -> void:
+	var P := m.player
+	P.reclass(Arch.weight("dredge"), "dredge")
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": "dredge"})
+	await _reply()
+	await _place(G, home + Vector3(6.0, 0, 0))
+	_kit("dredge")
+	_aim(G.pos)
+	reach = {}
+	balls = 0
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	P.inp["sec_hold"] = false
+	P.ak.press_rmb()
+	await _run(SETTLE + 1.0)
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Dictionary = replies[0].get("reach", {}) if not replies.is_empty() else {}
+	var lag_in := (float(theirs.get("from", 0)) - float(reach.get("from", 0))) / 1000.0
+	var lag_out := (float(theirs.get("to", 0)) - float(reach.get("to", 0))) / 1000.0
+	var len_h := float(reach.get("len", 0.0))
+	var len_g := float(theirs.get("len", 0.0))
+	var arrived := (P.ak as DredgeKit).arrivals
+	ok(len_h > 3.0 and arrived > 0 and absf(len_g - len_h) < 0.6 and lag_in > -SKEW and lag_in < LAG_TOL
+		and absf(lag_out) < LAG_TOL, "Grimble's Deep Reach: on the guest his arm reaches and holds as on the host",
+		"host %.2f m, guest %.2f m, in +%.2f s, out %+.2f s, arrivals %d" % [len_h, len_g, lag_in, lag_out, arrived])
+	var their_balls := int(replies[0].get("balls", -1)) if not replies.is_empty() else -1
+	ok(their_balls == 0, "Grimble's Deep Reach: the guest draws no plain shot for his hook", "%d" % their_balls)
+	var out_h := int(reach.get("to", 0)) - int(reach.get("from", 0))
+	var out_g := int(theirs.get("to", 0)) - int(theirs.get("from", 0))
+	print("%s reach host %.2f m %d ms, guest %.2f m %d ms" % [tag, len_h, out_h, len_g, out_g])
 
 ## Three tiles 4 m out on the cast line (+x of the hunter), set to `kind`.
 func _rocks(kind: int) -> void:
@@ -361,9 +402,11 @@ func _on_msg(topic: String, data, from: String) -> void:
 				tele.clear()
 				last_row = ["?", "?"]
 				cone_len = 0.0
+				reach = {}
+				balls = 0
 			"log":
 				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
-				reply["tele"] = tele
+				reply.merge({"tele": tele, "reach": reach, "balls": balls})
 				Net.lobby_emit("dn_r", reply)
 		return
 	super._on_msg(topic, data, from)
@@ -390,6 +433,7 @@ func _sample() -> void:
 	for e: Dictionary in aims.entries.values():
 		if e["h"] == H and e["kind"] == "cone" and aims.live(e):
 			cone_len = maxf(cone_len, float(e["len"]))
+	_reach_sample(H)
 	if H.ak == null or H.anim == null:
 		return
 	_tele_sample(H)
@@ -406,6 +450,17 @@ func _sample() -> void:
 	if row != last_row or restart:
 		last_row = row
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+
+## Grimble's arm on the watched hunter (its model's WardenReach.TIP): when it is out and how far it reaches.
+func _reach_sample(H: Hunter) -> void:
+	balls = maxi(balls, m.shots.filter(func(s: Dictionary) -> bool: return s["x"].get("cos", false)).size())
+	var tip: Vector3 = H.model.get_meta(WardenReach.TIP, Vector3.INF) if H.model else Vector3.INF
+	if not tip.is_finite():
+		return
+	var ms := int(Time.get_unix_time_from_system() * 1000.0)
+	reach["from"] = reach.get("from", ms)
+	reach["to"] = ms
+	reach["len"] = maxf(float(reach.get("len", 0.0)), Vector2(tip.x - H.pos.x, tip.z - H.pos.z).length())
 
 ## The `all` telegraphs up under the watched hunter now (the host's own, the guest's copy's).
 func _tele_sample(h: Hunter) -> void:

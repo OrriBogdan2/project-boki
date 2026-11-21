@@ -184,6 +184,7 @@ func done(m: Match) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Content.rules("merge_forms")["fusion_enabled"] = true      # (the kits' bonded R and the controls here use Fusion)
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
@@ -609,7 +610,7 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.atk.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.atk.can_fire(), "hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
@@ -619,8 +620,8 @@ func _bulwark() -> void:
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)

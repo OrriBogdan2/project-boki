@@ -41,7 +41,7 @@ static func of(fx: Fx) -> KinTypeTrail:
 
 ## The colour of a Boki's type, `fallback` for one with none.
 static func colour(type: String, fallback: Color) -> Color:
-	var look: Dictionary = KinTypeFx.LOOKS.get(type, {})
+	var look: Dictionary = KinTypeFx.LOOKS.get(KinTypeFx.key(type), {})
 	return Color(String(look["col"])) if not look.is_empty() else fallback
 
 func _ready() -> void:
@@ -90,7 +90,7 @@ func tick(k: Kin, t: float, delta: float, quality: float) -> float:
 	t += delta
 	if t < INTERVAL / maxf(quality, 0.1):
 		return t
-	var group := String(_group_of.get(String(k.sp.get("type", "")), ""))
+	var group := String(_group_of.get(KinTypeFx.key(String(k.sp.get("type", ""))), ""))
 	var player: Hunter = k.m.player
 	if group != "" and (player == null or player.pos.distance_to(k.pos) < MAX_RANGE):
 		_emit(group, k, v)

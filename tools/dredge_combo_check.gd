@@ -409,7 +409,7 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, the spread's edge lines wide while firing, tight idle
+	# --- the scattergun: a shot every 0.5s, one aim line
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
@@ -430,42 +430,35 @@ func _all() -> void:
 		"volleys %d in 1.05s" % (K.volleys - v0)
 	)
 	ok(
-		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 34.0 and float(cone.get("deg", 0.0)) <= 45.5,
-		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
+		"gun: one aim line lies on the ground out to the slug range",
+		cone_seen and cone.get("kind") == "vee" and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3,
+		"len %.1f kind %s" % [float(cone.get("len", 0.0)), cone.get("kind", "none")]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
-	ok(
-		"gun: idle, the edge lines close in on the tight cluster",
-		AimKit.shown(P, "spread") and float(AimKit.entry(P, "spread")["deg"]) == float(P.wpn["fan_deg"])
-	)
+	ok("gun: idle, the same one aim line shows", AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
-	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
-	var wear := []
+	# --- every volley is tight, so its slugs shred armor (content gun.armor_k)
 	var armor0: float = T.armor
 	var max_armor0: float = T.max_armor
-	for bloom0 in [0.0, 9.0]:
-		reset.call()
-		T.teleport(home + Vector3(0, 0, 1.6))
-		T.max_armor = 50.0
-		T.armor = 50.0
-		var hp0: float = T.hp
-		P.wbloom = bloom0
-		P.ammo = int(P.wpn["mag"])
-		ak.aim_at(P, T.pos)
-		P.inp["fire"] = true
-		ak.step(m, 0.1)
-		P.inp["fire"] = false
-		ak.step(m, 0.5)
-		wear.append([T.max_armor - T.armor, hp0 - T.hp])
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 1.6))
+	T.max_armor = 50.0
+	T.armor = 50.0
+	var armor_hp0: float = T.hp
+	P.ammo = int(P.wpn["mag"])
+	ak.aim_at(P, T.pos)
+	P.inp["fire"] = true
+	ak.step(m, 0.1)
+	P.inp["fire"] = false
+	ak.step(m, 0.5)
+	var worn: float = 50.0 - T.armor
 	T.armor = armor0
 	T.max_armor = max_armor0
 	ok(
-		"gun: zero bloom wears armor %.0f%% faster than a spread volley" % (float(K.gun_def()["armor_k"]) * 100.0),
-		K.armor_shreds > 0 and wear[1][1] > 0.0 and wear[0][1] > 0.0
-		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
-		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
+		"gun: a volley shreds armor (+%.0f%% wear on top of the hit)" % (float(K.gun_def()["armor_k"]) * 100.0),
+		K.armor_shreds > 0 and worn > 0.0 and armor_hp0 - T.hp > 0.0,
+		"armor worn %.1f, hp %.1f, shreds %d" % [worn, armor_hp0 - T.hp, K.armor_shreds]
 	)
 	# --- Deep Reach reels a foe in
 	reset.call()
@@ -478,7 +471,7 @@ func _all() -> void:
 	)
 	ok(
 		"reel: Grimble is Grounded while he reels, the foe is stunned",
-		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
+		KitStatus.grounded(P) and T.stun_t > 0.0 and HeroVfx.of(K.m).holds.has("%d/reel" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
 	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
@@ -486,7 +479,8 @@ func _all() -> void:
 		"reel: his own arm reaches to the foe (the model's reach tip on it)",
 		reach_to.distance_to(T.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, T.pos]
 	)
-	ok("reel: in the open no through-rock silhouette is drawn", not K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	var ghost := "%d/arm_ghost" % P.get_instance_id()
+	ok("reel: in the open no through-rock silhouette is drawn", not HeroVfx.of(K.m).holds.has(ghost))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -523,6 +517,7 @@ func _all() -> void:
 	K.cd["e"] = 0.0
 	var hp0: float = ak.dmg(T)
 	var at0 := P.pos
+	Sfx.listener = P.pos           # (the camera on him, so HeroVfx draws the stun swirl)
 	P.ak.use_e()
 	ak.step(m, 0.3)
 	var early := K.anchors
@@ -538,7 +533,8 @@ func _all() -> void:
 		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
 		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
-	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
+	var swirl := HeroVfx.of(K.m).live.filter(func(e): return e.get("on") == T)
+	ok("anchor: the stunned foe shows a stun swirl", not swirl.is_empty())
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
 	# --- Barge right after the Anchor can't turn
 	reset.call()
@@ -570,7 +566,8 @@ func _all() -> void:
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
 		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
-	ok("cliff: the stretch of arm inside the cliff is drawn through it", K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	ghost = "%d/arm_ghost" % P.get_instance_id()
+	ok("cliff: the stretch of arm inside the cliff is drawn through it", HeroVfx.of(K.m).holds.has(ghost))
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
 	# a cliff face in the reel's path: the foe is hauled over it
@@ -708,13 +705,13 @@ func _all() -> void:
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
 		if AimKit.shown(P, "e_land"): land_seen = true
-		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
+		if HeroVfx.of(K.m).holds.has("%d/dive" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
 		"air smash: straight down at once", vy <= -20.0 and absf(P.pos.x - home.x) < 0.4,
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
-	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok("air smash: the landing ring shows while you fall, the fist falls with you", land_seen and anchor_seen)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]
@@ -824,29 +821,20 @@ func _all() -> void:
 		absf(held - 1.0) < 0.1 and absf(went_on - 2.0) < 0.1 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
 		"spent while held %.1f, after the gap %.1f, left %.2f went %.1f" % [held, went_on, P.dashes, P.pos.x - home.x]
 	)
-	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
+	# audit: the barge touches nobody (Brute Dash hits nobody)
 	reset.call()
 	T.teleport(home + Vector3(1.8, 0, 0))
 	T.knock_t = 0.0
 	ak.aim_at(P, T.pos)
-	P.wbloom = 10.0
-	P.idle_fire = 0.0
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
-		"barge: it shoves and hurts nobody (the source's Brute Dash), and rank 1 keeps the gun's spread",
-		ak.dmg(T) < 0.5 and T.knock_t <= 0.0 and P.wbloom > 5.0,
-		"dmg %.2f knock %.2f bloom %.1f" % [ak.dmg(T), T.knock_t, P.wbloom]
+		"barge: it shoves and hurts nobody (the source's Brute Dash)",
+		ak.dmg(T) < 0.5 and T.knock_t <= 0.0,
+		"dmg %.2f knock %.2f" % [ak.dmg(T), T.knock_t]
 	)
 	reset.call()
 	K.next_barge = -9.0
-	P.slot_lv["dash"] = 3
-	P.wbloom = 10.0
-	ak.aim_at(P, home + Vector3(9.0, 0, 0))
-	P.ak.on_dash(false)
-	ak.step(m, 0.1)
-	ok("barge rank 3: a dash resets the gun's spread", P.wbloom < 0.01, "bloom %.1f" % P.wbloom)
-	P.slot_lv["dash"] = 1
 	ak.step(m, 0.6)
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))

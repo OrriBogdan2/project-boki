@@ -20,6 +20,7 @@ Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -42,12 +43,17 @@ SPEC = json.load(open(ARGS[0]))
 WORK = os.path.expanduser(ARGS[1])
 OUT = os.path.abspath(ARGS[2])
 F = np.float32
+SECOND_TEX = 2048  # px: a master's other images (a joined prop's, emission), as v95_to_game.py imports them
 LIMBS = ("upper_arm", "forearm", "thigh", "shin")
 CAGE, RAY, MARGIN_PX = 0.008, 0.03, 16       # (m, m, px) bake_warden's defaults
 CAP_SIDES = 2000             # the longest opening a detach caps (edges round it)
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
+WEAPON = re.compile(r"^(x_)?(weapon|bow|arrow|gun|blade|sword|spear|hammer|shield|staff|lance)", re.I)
+HAND_R = 0.085  # a hand's ball radius, x the Warden's height (the fingers and the cuff)
+HAND_REACH = 0.05  # the ball's centre past the wrist along the forearm, x the height
+LIMB_R = {"hand": 0.025, "thigh": 0.06, "torso": 0.09}  # rough half thicknesses, x the height (the hand region's mask)
 
 
 def verts(ob):
@@ -104,6 +110,20 @@ def kept_parts(old, bones, mats):
     ob.data.uv_layers["UVMap"].active_render = True
     ob["slots"] = ",".join(ob.data.materials[p.material_index].name for p in ob.data.polygons)     # (whole: "flame-jet")
     return ob
+
+
+def weapon_report(old):
+    """Prints what the swap does with held weapons: the game glb's own weapon pieces (meshes and empties other than the body,
+    they stay as nodes of the export) and the faces of the old body mesh on weapon bones that `keep` does not carry (dropped:
+    the master has to bring that weapon, or the bone goes in `keep`)."""
+    pieces = sorted(o.name for o in bpy.data.objects if o is not old and o.type in ("MESH", "EMPTY") and WEAPON.match(o.name))
+    name = {g.index: g.name for g in old.vertex_groups}
+    lost = {}
+    for p in old.data.polygons:
+        top = [name[max(old.data.vertices[i].groups, key=lambda e: e.weight).group] for i in p.vertices if old.data.vertices[i].groups]
+        if top and WEAPON.match(top[0]) and top[0] not in SPEC.get("keep", []):
+            lost[top[0]] = lost.get(top[0], 0) + 1
+    print("SWAP weapons: kept nodes", pieces, "; old body faces dropped on weapon bones", lost, flush=True)
 
 
 def uv_density(ob):
@@ -176,14 +196,18 @@ def lay_kept(old, kept, body, tex, socket="Base Color"):
 
 def own_images(low, tex):
     """`keep_uv`: the master's own images, each material's base colour and emission scaled to `tex` at most and packed
-    ("v95", "v95b", ...); the material keeps their names as "img" and "emit" (none: "")."""
+    ("v95", "v95b", ...); the material keeps their names as "img" and "emit" (none: ""). The material on the most faces
+    names first, so "v95" (full size in game) is the body's paint, not a joined prop's (Grimble's gun in hand); the others
+    are stored at SECOND_TEX at most, the size the game draws them at (v95_to_game.py)."""
     done = {}
-    for m in low.data.materials:
+    faces = np.bincount([p.material_index for p in low.data.polygons], minlength=len(low.data.materials))
+    for i in sorted(range(len(low.data.materials)), key=lambda i: -faces[i]):
+        m = low.data.materials[i]
         for key, socket in (("img", "Base Color"), ("emit", "Emission Color")):
             src = BW.mat_image(m, socket)
             if src is not None and src.name not in done:
                 im = src.copy()
-                n = min(tex, max(im.size))
+                n = min(tex if not done else min(tex, SECOND_TEX), max(im.size))
                 if max(im.size) > n:
                     im.scale(n, n)
                 im.name = "v95" + ("" if not done else chr(ord("a") + len(done)))
@@ -194,6 +218,31 @@ def own_images(low, tex):
         m.node_tree.nodes.clear()       # (the full-size images go with the purge)
     for m in low.data.materials:        # (a flat-colour part, or a dropped prop's material: the body's paint)
         m["img"] = m["img"] or next(iter(done.values()))
+
+
+def hand_balls(sole):
+    """The hand regions (the master's frame) for the hand triangle budget (`hand_tris`), from the spec's joints: a ball
+    centred HAND_REACH of the height past the wrist along the forearm, r = HAND_R of the height, holding only what is
+    nearer the elbow-to-finger-tip axis' surface than the thighs' and the trunk's (a hand hanging by the hip: BW._region_weight)."""
+    j = SPEC.get("joints", {})
+    height = j["crown"][2] if "crown" in j else 0.0
+
+    def frame(p):          # fit frame -> the master's
+        return [-p[0], -p[1], p[2] + sole]
+
+    limbs = (("hip.L", "knee.L", LIMB_R["thigh"]), ("hip.R", "knee.R", LIMB_R["thigh"]), ("pelvis", "neck", LIMB_R["torso"]))
+    others = [(j[a], j[b], k * height) for a, b, k in limbs if a in j and b in j]
+    out = []
+    for s in ("L", "R"):
+        if "wrist." + s not in j or "elbow." + s not in j or height <= 0:
+            continue
+        w, e = np.array(j["wrist." + s], float), np.array(j["elbow." + s], float)
+        d = (w - e) / max(np.linalg.norm(w - e), 1e-6)
+        c = w + d * HAND_REACH * height
+        tip = w + d * 2 * HAND_REACH * height
+        out.append({"centre": frame(c), "r": HAND_R * height, "axis": [frame(e), frame(tip), LIMB_R["hand"] * height],
+                    "others": [[frame(a), frame(b), r] for a, b, r in others]})
+    return out
 
 
 def bake_own(high, game):
@@ -216,7 +265,8 @@ def bake_own(high, game):
     if hd:
         x, y, z = hd["centre"]
         hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
-    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True,
+                      hand_balls(sole), int(SPEC.get("hand_tris", 0)))
     low.data.uv_layers[0].name = "UVMap"
     own_images(low, int(SPEC.get("tex", 4096)))
     arm, old = import_game(game)
@@ -742,6 +792,7 @@ def main():
             o.data.color_attributes.remove(c)
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
+    weapon_report(old)
     bpy.data.objects.remove(old)
     for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
         if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":
