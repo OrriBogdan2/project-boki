@@ -10712,3 +10712,7 @@ READY ext/boki-idle-batch-a 9889ed4252 (bulk-rebase: origin/main merged in mecha
 READY ext/anim-dash-drive-hold ffc35e72231e9230afb3de71a7f2474494d96ea5 (Kael lunge + Vex slide hold drive pose)
 READY ext/vex-quill-ammo-1117 7c87e05e5a (Vex quill half damage past half a drum; No reload text restored, fixes --kit-drill-check; hero-combo/archetype reds same as main)
 READY ext/stomp-picker-sweep 09f6185647 (tg-text + sweep rows fixed, main merged)
+READY ext/vfx-hurt-flash-v95 80eb79e224 (bulk-rebase: origin/main merged in mechanically, was 552befbe99; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/extra-fishing-derby 20c744038f (bulk-rebase: origin/main merged in mechanically, was aa0d1e38ad; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/slam-follow-keys db9afff445 (bulk-rebase: origin/main merged in mechanically, was 2a1fe41009; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/lace-vfx-data 7a45e9f43b (bulk-rebase: origin/main merged in mechanically, was b2d19b4192; union 1 gen 0 files; the branch's own READY checks still apply)
