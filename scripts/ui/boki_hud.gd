@@ -41,7 +41,7 @@ static func squad_downed(m) -> Array:
 ##   under the square    the key cap of the Merge action (shared slot art)
 ##   above the square    the lock tag, or while merged one chip: the ultimate's unlock seconds / its name / the form
 const RING_GROW := 4.0       # px: the ring sits this far outside the slot's edge
-const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "UNLOCK" tag)
+const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "Spend point" tag)
 
 static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 	var ri := p.slot_info("r")
