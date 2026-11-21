@@ -223,7 +223,8 @@ func tick(dt: float) -> void:
 		P.gear_cd[0] = 0.0; P.gear_cd[1] = 0.0
 		P.dashes = P.max_dashes(); P.ex_cd = 0.0
 		P.sig_cd = 0.0
-		if P.ammo < int(P.wpn["mag"]) and not P.wpn.get("melee", false): P.ammo = int(P.wpn["mag"])
+		# a self-refilling drum (`refill_after`, the quill rifle) still drains: its burst rule stays testable
+		if not P.wpn.get("melee", false) and not P.wpn.has("refill_after"): P.ammo = int(P.wpn["mag"])
 	if ult_on and int(P.slot_lv.get("ult", 0)) <= 0:
 		_apply_ult()
 	if P.downed and layout == "arena":
