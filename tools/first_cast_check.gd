@@ -11,6 +11,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const SPIKE_MS := 8.0          # ms over the median frame (and over the repeat) that counts as a first-cast hitch
+const BUSY_MS := 12.0          # a median frame slower than this means the host is loaded (a quiet box is 3-8 ms): spikes are noise, not judged
 const WINDOW := 24             # frames watched after a press (shots that land, a fuse's late burst)
 const SETTLE := 60             # frames between presses: effects of the last slot die down
 const SLOTS := ["lmb", "rmb", "e", "r", "dash", "q"]
@@ -18,6 +19,7 @@ const TARGET_DIST := 6.0       # m, the dummy in front of the Hunter
 const PASSES := 3              # the first press, then repeats (the cheaper repeat is the baseline: load noise)
 
 var bad := 0
+var busy := 0                  # slots not judged: the median frame was over BUSY_MS
 var rows: Array = []
 var hit := false               # the target lost health in this window
 var made := {}                 # node kind -> how many entered the tree in this window
@@ -48,7 +50,7 @@ func run(main: Node) -> void:
 	print("FIRSTCAST %-10s %-5s %-6s %7s %7s %7s %7s" % ["hunter", "slot", "went", "median", "first", "repeat", "cost"])
 	for r in rows:
 		print("FIRSTCAST %-10s %-5s %-10s %7.1f %7.1f %7.1f %7.1f %s" % r)
-	print("FIRSTCAST DONE, %d slots, failures: %d" % [rows.size(), bad])
+	print("FIRSTCAST DONE, %d slots, failures: %d%s" % [rows.size(), bad, (", not judged (host busy, median over %.0f ms): %d" % [BUSY_MS, busy]) if busy else ""])
 	tree.quit(1 if bad > 0 else 0)
 
 func _hunter(main: Node, ak: String, glove: String) -> void:
@@ -129,9 +131,11 @@ func _span(m: Match, P: Hunter, T: Hunter) -> Array:
 
 func _row(ak: String, s: String, went: String, med: float, f: float, rep: float, what: String) -> void:
 	var cost := f - rep
-	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS
+	var loaded := med > BUSY_MS      # (a bisect on a box at load 40 saw medians of 19-33 ms and 32 false FAILs)
+	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS and not loaded
 	if hitch: bad += 1
-	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else "ok"])
+	if loaded: busy += 1
+	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else ("busy" if loaded else "ok")])
 
 ## Counts a node that entered the tree, by its kind and the nearest scripted node above it (who made it).
 func _made(n: Node) -> void:
