@@ -169,6 +169,6 @@ func run(m: Node) -> void:
 	var before_emotes := home.emotes
 	for i in 40: life._greet(k2, [ak, sk])
 	greeted = home.emotes - before_emotes
-	ok(greeted > 5 and greeted < 35, "it greets a parent about half the time, not always (%d of 40)" % greeted)
+	ok(greeted > 25, "it greets a parent it likes most of the time: greet_chance %.1f (%d of 40)" % [float(life.R["greet_chance"]), greeted])
 	print("BABYPARENTS done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
