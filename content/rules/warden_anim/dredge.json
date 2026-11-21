@@ -82,7 +82,7 @@
 			"upper": "moving",
 			"air_legs": true,
 			"strike": ["fist", "e/radius", "ground"],
-			"time": [[0, 0], [0.4, 0.4], [0.45, 0.5], [1.0, 1.0]],
+			"time": [[0, 0], [0.4, 0.32], [0.43, 0.4], [0.8, 0.8]],
 			"blend_out": 0.2
 		},
 		"dr_dive": {"clip": "dive", "hold_from": 0.12},
