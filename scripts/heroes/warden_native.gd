@@ -48,11 +48,7 @@ static func entry(art_name: String) -> Dictionary:
 ## Whether this archetype's Hunter is switched onto Meshy's own skeleton (and its file is there).
 static func on(arch: String) -> bool:
 	var e := entry(WardenGlb.art(arch))
-	return (
-		not contract_only
-		and bool(e.get("meshy_native", false))
-		and ResourceLoader.exists(file(arch))
-	)
+	return not contract_only and bool(e.get("meshy_native", false)) and ResourceLoader.exists(file(arch))
 
 
 ## The Meshy-skeleton .glb, beside the contract one: art/wardens/<art>/<art>_meshy.glb.
@@ -77,6 +73,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	if e.has("weapon"):
 		var idle := WardenGlb.model_xf(model, nat.skel) * nat.clip_pose("idle", nat.hand)
 		nat.held = WardenHeld.make(model, arch, e["weapon"], idle)
+		if nat.held and nat.hand >= 0:  # (a fixed socket: placed each time the clip poses the hand, never a frame late)
+			nat.skel.skeleton_updated.connect(nat._follow_held)
 	if bool(e.get("toon", true)):
 		var own := WardenGlb.look(WardenGlb.art(arch))
 		var mats: Array = model.get_meta("mats", [])
@@ -130,8 +128,15 @@ func _process(dt: float) -> void:
 		_loco(s)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
-	if held and hand >= 0:
-		held.follow(WardenGlb.model_xf(root, skel) * skel.get_bone_global_pose(hand))
+	if held:
+		held.state(cur)
+		held.ease_tilt(dt)
+
+
+## The held weapon onto Meshy's hand as the skeleton takes this frame's pose (the BoneAttachment3D moment: never a
+## frame behind the clip, whatever order the player and this node process in).
+func _follow_held() -> void:
+	held.follow(WardenGlb.model_xf(root, skel) * skel.get_bone_global_pose(hand))
 
 
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
@@ -202,9 +207,7 @@ func _attacked(s: Dictionary) -> bool:
 		or now["recoil"] > last["recoil"]
 	)
 	last = now
-	var fresh := (
-		attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
-	)
+	var fresh := attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
 	return hit and fresh
 
 
@@ -268,9 +271,7 @@ func _arms_swapped(st: String, from: String) -> String:
 		mix.track_set_path(ni, p)
 		mix.track_set_interpolation_type(ni, arms.track_get_interpolation_type(si))
 		for key in arms.track_get_key_count(si):
-			mix.track_insert_key(
-				ni, arms.track_get_key_time(si, key) * k, arms.track_get_key_value(si, key)
-			)
+			mix.track_insert_key(ni, arms.track_get_key_time(si, key) * k, arms.track_get_key_value(si, key))
 	lib.add_animation(nm, mix)
 	return full
 
