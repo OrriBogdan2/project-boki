@@ -76,7 +76,8 @@ func _esc(c: String) -> String:
 	return out
 
 func _rebind() -> void:
-	ok(ODD_KEYS.size() >= Settings.ACTIONS.size(), "an odd key per action (%d keys, %d actions)" % [ODD_KEYS.size(), Settings.ACTIONS.size()])
+	ok(ODD_KEYS.size() >= Settings.ACTIONS.size(), "an odd key per action (%d keys, %d actions)"
+			% [ODD_KEYS.size(), Settings.ACTIONS.size()])
 	var i := 0
 	for a in Settings.ACTIONS:
 		var ev := InputEventKey.new()
