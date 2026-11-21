@@ -99,7 +99,7 @@
 				"far_edge": 1.2
 			},
 			"cloth": {
-				"albedo": [1.0, 0.92, 1.0],
+				"albedo": [1.25, 0.98, 1.1],
 				"fres": 0.35,
 				"far_lift": 0.25,
 				"top_light": 0.4,
