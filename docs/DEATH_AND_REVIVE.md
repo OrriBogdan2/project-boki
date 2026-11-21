@@ -33,7 +33,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Looting | Press F at a box: a window lists everything in it (icon, rarity colour, "upgrade" where it beats yours). Click to take items one at a time (a glove or weapon swap leaves yours in the box); press F again to smart loot (take everything useful, leave worse gear) and always close the window, even if nothing was taken; the Smart loot button closes it only when it took something. Bots still hold F for 1s | instant | [design] |
 | Revive beacon | Several per map, shown on the minimap and full map. Teammate stands on it: brings back every dead or downed teammate at once, wherever they fell (`Beacons`). Single use. Two teams on it pauses (doesn't reset). **Loud:** while it's lit every player gets a horn, a toast with its direction, a pulsing marker on both maps and an arrow in the world, and its hum carries 120m. Online the `"bcn"` event carries lit / out / used and each game brings back its own dead | **4s** | owner (101b) |
 | Everbeacon | Unlimited uses, can't be contested | **10s** | [patch] |
-| Beacon revive | Full HP but **no loot** (your box stays where it was, so go get it), plus resurrection sickness | −25% damage for **12s** | [patch] + [design] |
+| Beacon revive | Full HP but **no loot** (your box stays where it was, so go get it), plus resurrection sickness | −25% damage and healing for **12s** | [patch] + [design] |
 
 **Why this works for extraction:**
 - Getting picked up from a wisp costs nothing.
@@ -109,7 +109,7 @@ All names and multipliers are placeholders.
 **Test scene:** a blue teammate bot, a red enemy bot and a green revive beacon.
 - F6 knocks yourself down.
 - Hold E for deathboxes and executes.
-- HUD shows life state, wisp %, revive % and sickness.
+- HUD shows life state, wisp %, revive % and sickness: a heart status with its seconds on the plate and the squad row, carried in the hunter snapshot (`HunterNet`, Net 0.24.18). The Hearth Lamp (belt item) sets a beacon where you stand (`Beacons.lamp`, the "bcn" "lamp" event). `--hearth-lamp-check`.
 
 **Headless results** (`tests/life_sim.gd`):
 
