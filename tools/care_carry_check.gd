@@ -77,10 +77,7 @@ func tender() -> void:
 	pc.hp = pc.max_hp * 0.5
 	pc.heal(20.0)
 	sc.step(m, 0.3)
-	ok(
-		"mm carry: a teammate's heal on her holds them",
-		held and CareUtil.is_carried(ally) and kit.lock_t <= 0.0
-	)
+	ok("mm carry: a teammate's heal on her holds them", held and CareUtil.is_carried(ally) and kit.lock_t <= 0.0)
 	# --- a rooted Meeko can still scoop one up (the source has no root rule)
 	pc.root_t = 2.0
 	kit.lock_t = 0.0
@@ -106,9 +103,5 @@ func tender() -> void:
 	ally.revive = 0.0
 	ally.teleport(pc.pos + Vector3(0.4, 0, 0))
 	sc.step(m, 0.8)
-	ok(
-		"mm carry: after the 4 s they can be scooped up again",
-		CareUtil.is_carried(ally),
-		"lock %.2f" % kit.lock_t
-	)
+	ok("mm carry: after the 4 s they can be scooped up again", CareUtil.is_carried(ally), "lock %.2f" % kit.lock_t)
 	m.queue_free()

@@ -30,20 +30,11 @@ func run(main: Node) -> void:
 	var pc: Hunter = m.player
 	var cc: Hunter = m.hunters.filter(func(x): return x.team == pc.team and x != pc)[0]
 	var q1: Hunter = m.hunters.filter(func(x): return x.team != pc.team)[0]
-	var rules = JSON.parse_string(
-		FileAccess.get_file_as_string("res://content/rules/steal_window.json")
-	)
+	var rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/steal_window.json"))
 	var at := StealTell.at()
 	ok(
-		(
-			rules is Dictionary
-			and is_equal_approx(at, float(rules["at"]))
-			and is_equal_approx(at, 0.25)
-		),
-		(
-			"the window opens at %.2f of max health, read from content/rules/steal_window.json"
-			% StealTell.at()
-		)
+		rules is Dictionary and is_equal_approx(at, float(rules["at"])) and is_equal_approx(at, 0.25),
+		"the window opens at %.2f of max health, read from content/rules/steal_window.json" % StealTell.at()
 	)
 	var fx: Dictionary = m.lairs.list[0]
 	m.lairs.activate(fx)
@@ -70,12 +61,7 @@ func run(main: Node) -> void:
 	var hi := StealTell.fill(b, red, 0.125)
 	ok(StealTell.open(b), "on the line: open")
 	ok(
-		(
-			lo != red
-			and absf(lo.h - red.h) > 0.08
-			and absf(lo.h - Color("e0b0ff").h) > 0.2
-			and hi != lo
-		),
+		lo != red and absf(lo.h - red.h) > 0.08 and absf(lo.h - Color("e0b0ff").h) > 0.2 and hi != lo,
 		(
 			"open, the fill is gold (hue %.2f, red %.2f) and pulses (%s -> %s)"
 			% [lo.h, red.h, lo.to_html(false), hi.to_html(false)]
@@ -110,10 +96,7 @@ func run(main: Node) -> void:
 	_spot(cc, b.pos + out * (KillXp.SHARE_R + 2.0))
 	ok(not StealTell.near(m, b, pc.team), "the squadmate steps to %.1f m: gone" % cc.flat_dist(b))
 	_spot(q1, b.pos - out * 10.0)
-	ok(
-		StealTell.near(m, b, q1.team),
-		"a rival at %.1f m: the rival squad sees it too" % q1.flat_dist(b)
-	)
+	ok(StealTell.near(m, b, q1.team), "a rival at %.1f m: the rival squad sees it too" % q1.flat_dist(b))
 	q1.out = true
 	ok(not StealTell.near(m, b, q1.team), "a Hunter out of the match doesn't count")
 	q1.out = false
@@ -126,10 +109,7 @@ func run(main: Node) -> void:
 	var inside := b.hurt(50.0, pc, {"src": "shot"})
 	ok(
 		above > 0.0 and is_equal_approx(above, inside) and b.stagger_t <= 0.0,
-		(
-			"the same 50 hit deals %.1f above the line and %.1f in the window, no reel"
-			% [above, inside]
-		)
+		"the same 50 hit deals %.1f above the line and %.1f in the window, no reel" % [above, inside]
 	)
 	print("STEALTELL done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

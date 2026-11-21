@@ -94,10 +94,7 @@ func run(main: Node) -> void:
 	)
 	b.hp = b.max_hp * 0.5
 	_run(Boss.LEASH_T - 1.5)
-	ok(
-		not b.dormant and b.phase == 1,
-		"still awake (phase %d) %.0f s after waking" % [b.phase, Boss.LEASH_T - 1.2]
-	)
+	ok(not b.dormant and b.phase == 1, "still awake (phase %d) %.0f s after waking" % [b.phase, Boss.LEASH_T - 1.2])
 	_run(2.0)
 	var home: float = Vector2(b.pos.x - c.x, b.pos.z - c.z).length()
 	ok(
@@ -106,33 +103,15 @@ func run(main: Node) -> void:
 	)
 	# 2. inside, sealed in: the phases start at Boss.PHASE_HP
 	b = _wake(fx, pc, c + out * 3.0)
-	ok(
-		not b.dormant and b.phase == 0 and fx.get("locked", false),
-		"woken from inside: sealed, phase 0"
-	)
-	ok(
-		_phase_at(b, Boss.PHASE_HP[0] + 0.01) == 0,
-		"phase 0 just above %d%% health" % int(Boss.PHASE_HP[0] * 100)
-	)
-	ok(
-		_phase_at(b, Boss.PHASE_HP[0] - 0.01) == 1,
-		"phase 1 just below %d%% health" % int(Boss.PHASE_HP[0] * 100)
-	)
-	ok(
-		_phase_at(b, Boss.PHASE_HP[1] - 0.01) == 2,
-		"phase 2 just below %d%% health" % int(Boss.PHASE_HP[1] * 100)
-	)
+	ok(not b.dormant and b.phase == 0 and fx.get("locked", false), "woken from inside: sealed, phase 0")
+	ok(_phase_at(b, Boss.PHASE_HP[0] + 0.01) == 0, "phase 0 just above %d%% health" % int(Boss.PHASE_HP[0] * 100))
+	ok(_phase_at(b, Boss.PHASE_HP[0] - 0.01) == 1, "phase 1 just below %d%% health" % int(Boss.PHASE_HP[0] * 100))
+	ok(_phase_at(b, Boss.PHASE_HP[1] - 0.01) == 2, "phase 2 just below %d%% health" % int(Boss.PHASE_HP[1] * 100))
 	# 3. a reset during the phase roar (a wipe, the seal running out) leaves a clean boss
 	ok(b.invul_t > 0.0, "the phase roar armours it (%.1f s)" % b.invul_t)
 	m.lairs.reset_boss(b)
 	ok(
-		(
-			b.dormant
-			and b.phase == 0
-			and b.invul_t == 0.0
-			and b.empty_t == 0.0
-			and not fx.get("locked", false)
-		),
+		b.dormant and b.phase == 0 and b.invul_t == 0.0 and b.empty_t == 0.0 and not fx.get("locked", false),
 		"reset mid-roar: asleep, unsealed, no armour or empty-lair time left over"
 	)
 	# 4. the last hit's squad takes the kill; the squad that dealt the damage gets nothing
@@ -153,22 +132,13 @@ func run(main: Node) -> void:
 	ok(b.dead and by == q1.pname, "the last hitter (%s) is credited the kill" % by)
 	ok(
 		is_equal_approx(q1.xp, KillXp.BOSS_XP) and is_equal_approx(q2.xp, KillXp.BOSS_XP),
-		(
-			"the last hitter and a squadmate get the %d kill XP (%.1f, %.1f)"
-			% [int(KillXp.BOSS_XP), q1.xp, q2.xp]
-		)
+		"the last hitter and a squadmate get the %d kill XP (%.1f, %.1f)" % [int(KillXp.BOSS_XP), q1.xp, q2.xp]
 	)
-	ok(
-		pc.xp == 0.0 and cc.xp == 0.0,
-		"the squad that did the damage gets none (%.1f, %.1f)" % [pc.xp, cc.xp]
-	)
+	ok(pc.xp == 0.0 and cc.xp == 0.0, "the squad that did the damage gets none (%.1f, %.1f)" % [pc.xp, cc.xp])
 	ok(
 		int(q1.stats.get("bosses", 0)) == 1 and int(pc.stats.get("bosses", 0)) == 0,
 		"the boss kill stat goes to the last hitter"
 	)
-	ok(
-		PerkOrbs.list(m).size() > orbs0,
-		"the perk-orb fan dropped (%d orbs)" % (PerkOrbs.list(m).size() - orbs0)
-	)
+	ok(PerkOrbs.list(m).size() > orbs0, "the perk-orb fan dropped (%d orbs)" % (PerkOrbs.list(m).size() - orbs0))
 	print("BOSSPARITY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
