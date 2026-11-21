@@ -127,7 +127,8 @@ const CATALOG := {
 	"house": {"name": "House", "cat": "Buildings", "gems": 90, "size": [5, 3], "block": true, "fixture": "house", "max": 1, "door": true,
 		"desc": "Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground."},
 	"crop_patch": {"name": "Crop patch", "cat": "Buildings", "gems": 30, "size": [5, 4], "fixture": "farm", "max": 0,
-		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself and grows 25% faster."},
+		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. "
+			+ "Put it within 2 tiles of water and it waters itself and grows 25% faster."},
 	"cook_pot": {"name": "Cooking pot", "cat": "Buildings", "gems": 20, "block": true, "fixture": "pot", "max": 1,
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
@@ -930,6 +931,7 @@ static func rescue_feeders(world: World) -> void:
 	for f in fs:
 		var x := float(f.get("x", 0.0)); var z := float(f.get("z", 0.0))
 		if not world.inb(int(floor(x)), int(floor(z))) or world.is_void(x, z) or world.kind[world.idx(int(floor(x)), int(floor(z)))] != World.T_GROUND:
-			var others: Array = fs.filter(func(o): return o != f).map(func(o): return Vector3(float(o.get("x", 0.0)), 0, float(o.get("z", 0.0))))
+			var others: Array = fs.filter(func(o): return o != f).map(
+				func(o): return Vector3(float(o.get("x", 0.0)), 0, float(o.get("z", 0.0))))
 			var p := world.free_spot_near(Econ.FEEDER_START, others, 2.8, 0.5, 14.0)
 			f["x"] = snappedf(p.x, 0.1); f["z"] = snappedf(p.z, 0.1)

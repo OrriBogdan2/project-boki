@@ -202,12 +202,13 @@ func _trial(hero: String, slot: String) -> Array:
 	var pools := [m.fx.bi, m.fx.si, m.fx.fi]
 	var held := HeroVfx.of(m).holds.keys()
 	var first := [-1, -1]
-	seed(hash(hero + slot))  # the same dice offline and online (Kael's charge sparks are a coin flip a tick)
+	# the same dice offline and online (Kael's charge sparks are a coin flip a tick, on the global RNG)
 	Input.action_press(SLOTS[slot])
 	for tick in WATCH:
 		if tick == HOLD:
 			Input.action_release(SLOTS[slot])
 		_no_mobs(m)
+		seed(hash(hero + slot) + tick)  # re-dealt each tick: a draw elsewhere (an online monster copy) can't shift them
 		m._process(DT)  # in the press's own frame, so the press is "just pressed" here
 		if first[0] < 0 and _anim_sig(m) != anim0:
 			first[0] = tick
