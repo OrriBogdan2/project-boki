@@ -10808,3 +10808,4 @@ READY ext/merge-lane-M1-1121 f3b9f8c47c (bulk-rebase: origin/main merged in mech
 READY ext/tut-gate-playthrough 45b81e3f80 (PR #515: merged origin/main, Rules.md regenerated, tutorial-playthrough + new-player-flow checks 0 failures)
 READY ext/tenzo-hop-chain c658d89dd1bb8ffea56f38585cce64f9db7a9ea1 (Rock Hop chain at a lip to the source)
 READY ext/lint-c2-names 1c2a36b54fb0eeade914705b7cd166aa65c09d8c (C2 check tools snake_case names)
+READY ext/cinder-rmb-cast cf799afc84 (Cinder RMB cast timing to the footage)
