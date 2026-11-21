@@ -30,6 +30,7 @@ var plays: Dictionary  # game state -> the clip it plays (data "clips"; the crou
 var skel: Skeleton3D
 var hand := -1  # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
 var gun: Node3D
+var held: WardenHeld  # the contract model's weapon as its own piece (data "weapon"), or null
 var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
@@ -73,10 +74,15 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	nat.name = "Native"
 	nat.setup(model, glb, e)
 	glb.add_child(nat)
+	if e.has("weapon"):
+		var idle := WardenGlb.model_xf(model, nat.skel) * nat.clip_pose("idle", nat.hand)
+		nat.held = WardenHeld.make(model, arch, e["weapon"], idle)
 	if bool(e.get("toon", true)):
 		var own := WardenGlb.look(WardenGlb.art(arch))
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
+		if nat.held:
+			mats.append_array(WardenGlb._toon(nat.held, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
 	model.set_meta(META, true)
 
@@ -123,11 +129,42 @@ func _process(dt: float) -> void:
 		_loco(s)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
+	if held and hand >= 0:
+		held.follow(WardenGlb.model_xf(root, skel) * skel.get_bone_global_pose(hand))
 
 
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
 func hand_position() -> Vector3:
 	return skel.global_transform * skel.get_bone_global_pose(hand).origin
+
+
+## Bone `b`'s skeleton-space pose at the start of state `st`'s clip (its keys, else the bone's rest), read off the clip:
+## the model is not in a tree yet when it is dressed, so the player cannot pose it.
+func clip_pose(st: String, b: int) -> Transform3D:
+	var anim := player.get_animation(String(plays[st]))
+	var prefix := String(anim.track_get_path(0)).get_slice(":", 0)
+	var xf := Transform3D.IDENTITY
+	var chain: Array[int] = []
+	while b >= 0:
+		chain.push_front(b)
+		b = skel.get_bone_parent(b)
+	for bi in chain:
+		var rest := skel.get_bone_rest(bi)
+		var path := NodePath("%s:%s" % [prefix, skel.get_bone_name(bi)])
+		var pos := rest.origin
+		var rot := rest.basis.get_rotation_quaternion()
+		var size := rest.basis.get_scale()
+		var ti := anim.find_track(path, Animation.TYPE_POSITION_3D)
+		if ti >= 0:
+			pos = anim.position_track_interpolate(ti, 0.0)
+		ti = anim.find_track(path, Animation.TYPE_ROTATION_3D)
+		if ti >= 0:
+			rot = anim.rotation_track_interpolate(ti, 0.0)
+		ti = anim.find_track(path, Animation.TYPE_SCALE_3D)
+		if ti >= 0:
+			size = anim.scale_track_interpolate(ti, 0.0)
+		xf = xf * Transform3D(Basis(rot) * Basis.from_scale(size), pos)
+	return xf
 
 
 ## The clip for standing, moving, crouching and the air, at a rate that follows the ground speed.
