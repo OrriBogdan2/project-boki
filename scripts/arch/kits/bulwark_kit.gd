@@ -150,7 +150,7 @@ func _tick(dt: float) -> void:
 	boop.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
-		h.dash_buf = Hunter.DASH_BUFFER
+		h.dash_buf = Loco.press_buffer
 	if not mend.is_empty():
 		_tick_mend(dt)
 
