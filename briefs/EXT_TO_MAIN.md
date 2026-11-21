@@ -10849,3 +10849,4 @@ READY ext/merge-keeps-abilities-1117 ae3be5ab4eb780afdd4a16f0a5cc03e07ece0c22 (r
 READY ext/docs-conflict-free-1121 0244da0c6a094b6d72a6a4efdbf76e5672e19042 (shared docs conflict-free: DEBT merge=union, generated wiki merge=ours, HUD/AUDIO/KIT_PARITY/MOVEMENT_FEEL fragment folders + docs/DOC_FRAGMENTS.md; train sim doc conflicts 13 -> 4; docs-only +61 lines; suite-fast partial 115/654 flags, 0 NEW-RED vs main)
 READY ext/summon-per-species 7c0e2c2924512bdd53c1ad96f1f615e7d0c21f98 (per-species summon windows)
 READY ext/docs-conflict-free-1121 49184f2c54 (PR #598: shared docs conflict-free: DEBT union + wiki ours attrs, HUD/AUDIO/KIT_PARITY/MOVEMENT_FEEL fragment folders, merge_batch unions those 4 only on pure additions)
+READY ext/vfx-sable-knife-ring ee82551875 (Sable knife ring to source size)
