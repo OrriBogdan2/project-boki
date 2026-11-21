@@ -10773,3 +10773,4 @@ READY ext/merge-lane-M5-1121 18bcdaa63ed02f143efc10bea84bd80620e0af3b (M5 bundle
 READY ext/sfx-snack-patch e5d9152b2be4d44400a59a5caea1f08ee7f3f661 (garden snack patch: soft ripe chime + per-texture pick-up crunch, 5 cues in garden set)
 READY ext/merge-lane-M3-1121 2ea6c9391884321bec64b363ac3bf25da65572ce (merge lane M3: 16 no-PR branches; save leans v22->v23; NEW-RED 0 after 1 flaky re-run, export OK 885 MB)
 READY ext/garden-toy-xp 3c23c3a1c110158191cdc337dc70c73dfe5c9785 (merge lane M3: a finished toy play pays 5 kin XP; 11 related checks pass, garden-only-pass red on main too)
+READY ext/kit-parity-tidy 880013b9f9f (KIT_PARITY: merged duplicate Kael/Lace sections, one header per hero, Sable cartwheel curve marked done d7e924199)
