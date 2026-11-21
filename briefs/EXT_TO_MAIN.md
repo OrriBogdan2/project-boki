@@ -10724,3 +10724,4 @@ READY ext/p15-port-1118 b46f05bcdf (origin/main 64834576c2 merged, clean; owner 
 READY ext/tut-goals-next b2370ec6fd (goals card fixes; garden-first-15/first-day/goals-next/new-player-flow green on main+branch)
 READY ext/hunter-edge-speckle 8fbb7c482d (bulk-rebase: origin/main merged in mechanically, was ae7419ca0e; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/albert-knock-rows fd4a53c7b5 (bulk-rebase: origin/main merged in mechanically, was d5519032d8; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/tut-steal-beat 95cd09270e427013beb1d91eadb3f58e4ac33e19 (tutorial steal beat)
