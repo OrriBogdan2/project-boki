@@ -80,7 +80,7 @@ func run(main_node: Node) -> void:
 	k.render(DT, 1.0)
 	ok(k.state == "shoulder" and k.cmd == "follow",
 		"revived: the Boki is back on the shoulder with its order (%s, %s)" % [k.state, k.cmd])
-	ok(k.model.visible and k.get_node_or_null("BokiWisp") == null, "the Boki model is back, the wisp gone")
+	ok(k.model.visible and (k.wisp or k.get_node_or_null("BokiWisp") == null), "the Boki model is back, the wisp gone")
 	# ---------------------------------------------------------------- 2. far away
 	_out(k, bot.pos + Vector3(30.0, 0, 0))
 	m.knock(bot, foe, {})

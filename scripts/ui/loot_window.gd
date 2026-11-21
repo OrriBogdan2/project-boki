@@ -288,7 +288,7 @@ func _row(icon: String, col: Color, item_name: String, tag: String, tag_col: Col
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(nm)
 	if tag != "":
-		var tl := UI.label(tag, 11, tag_col, UI.caps)
+		var tl := UI.label(tag, 12, tag_col, UI.caps)
 		tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(tl)
 	if verb != "":
