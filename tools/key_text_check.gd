@@ -21,7 +21,9 @@ const ODD_KEYS := [KEY_F13, KEY_F14, KEY_F15, KEY_F16, KEY_F17, KEY_F18, KEY_F19
 	KEY_F35, KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9,
 	KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD, KEY_INSERT,
 	KEY_HOME, KEY_END, KEY_PAGEUP, KEY_PAGEDOWN, KEY_SCROLLLOCK, KEY_PAUSE, KEY_NUMLOCK, KEY_BACKSLASH,
-	KEY_SEMICOLON, KEY_BRACKETLEFT, KEY_BRACKETRIGHT, KEY_APOSTROPHE]
+	KEY_SEMICOLON, KEY_BRACKETLEFT, KEY_BRACKETRIGHT, KEY_APOSTROPHE, KEY_MENU, KEY_PRINT, KEY_CAPSLOCK, KEY_HELP,
+	KEY_BACK, KEY_FORWARD, KEY_REFRESH, KEY_STOP, KEY_SEARCH, KEY_FAVORITES, KEY_HOMEPAGE, KEY_VOLUMEUP, KEY_VOLUMEDOWN,
+	KEY_MEDIAPLAY, KEY_MEDIASTOP, KEY_MEDIANEXT]
 ## Caps that are also everyday words or numbers: only a hit after "press", "hold", "tap", "key" or in "(A)".
 const WORDLIKE := ["A", "I", "1", "2", "3", "4"]
 ## Caps that prose spells in title case too ("Hold Shift").
@@ -74,6 +76,8 @@ func _esc(c: String) -> String:
 	return out
 
 func _rebind() -> void:
+	ok(ODD_KEYS.size() >= Settings.ACTIONS.size(), "an odd key per action (%d keys, %d actions)"
+			% [ODD_KEYS.size(), Settings.ACTIONS.size()])
 	var i := 0
 	for a in Settings.ACTIONS:
 		var ev := InputEventKey.new()
@@ -144,6 +148,7 @@ func _tips() -> void:
 	m.player.dropping = dropping
 	var shown: Array = m.hud.msgs.texts()
 	for s in shown: _line("first-time hint", s)
+	for pair: Array in TipText.all_lines(): _line("TipText " + String(pair[0]), String(pair[1]))
 	ok(shown.any(func(s): return s.contains(Settings.key_cap("dash"))), "the move hint names the rebound dash key")
 
 ## The _tip lines as written in match.gd: a key in the literal is a key nobody filled in.
@@ -155,8 +160,8 @@ func _source_tips() -> void:
 		if hit != null:
 			_line("match.gd _tip", hit.get_string(1))
 			n += 1
-	# the rest of the hints are built in TipText from Settings.key_cap, so they are covered by _tips() below
-	ok(n > 3, "match.gd _tip lines read (%d)" % n)
+	# the hints moved out of match.gd are filled by TipText from Settings.key_cap: _tips() checks them after the rebind
+	ok(TipText.all_lines().size() + n > 3, "match.gd _tip lines read (%d) + TipText lines" % n)
 
 func _farm() -> void:
 	var n := _walk("farm tutorial", FarmTutorial.rules(), FarmTutorial.fill)
