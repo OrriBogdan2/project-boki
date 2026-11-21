@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "jarmit",
+	"name": "Jarmit",
+	"theme": "tide",
+	"flavor": "Hermit crab living in a glass jar.",
+	"data_only": true,
+	"roster": {
+		"art": "locked",
+		"line": "jarmit",
+		"stage": 1
+	}
+}

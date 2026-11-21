@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "glassolotl",
+	"name": "Glassolotl",
+	"theme": "prism",
+	"type2": "tide",
+	"flavor": "Glass-bodied axolotl, prism gills.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "puddlet",
+		"stage": 2,
+		"from": "puddlet"
+	}
+}

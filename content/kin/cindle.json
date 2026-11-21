@@ -116,5 +116,10 @@
 		"temper": "Bold",
 		"desc": "Dark plum shell, green droplets. Hisses.",
 		"play": "Darts in, stings, poisons. Bold."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 1
 	}
 }
