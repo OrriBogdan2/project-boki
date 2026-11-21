@@ -115,6 +115,8 @@ func _nap_sounds(home) -> void:
 	ok(lower, "a bigger Boki breathes lower (%s)" % [by_cm.map(func(r): return "%.2f" % BokiNapSfx.pitch_of(r))])
 	var sleeper: Dictionary = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) > 0.0)[0]
 	Sfx.listener = sleeper["pos"]
+	for key in Sfx.loops.keys():      # holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
+		if String(key).begins_with("nap:"): Sfx.loop_stop(key)
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
 	ok(on.size() >= 1 and on.size() <= BokiNapSfx.MAX_HEARD,
@@ -163,6 +165,8 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
+	life.R["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
+	life.R["doze_pile"] = 0.0
 	home.day_t = 0.4
 	for k in home.kins:
 		k["nap_t"] = 0.0
