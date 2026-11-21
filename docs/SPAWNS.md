@@ -6,7 +6,7 @@ or world marker plus a countdown). This page lists every spawn path in `scripts/
 (audit of 2026-11-12, `ext/combat-spawn-audit`), what is random about it, and what the player sees
 before it appears. `--spawn-clock-check` asserts the rows marked **fixed**.
 
-Monster camps (first spawn `match.gd _spawn_mobs`, comebacks `rolling.gd _camp_respawns`) are
+Monster camps (spawn, clear bundle and the one comeback: `camps.gd`, docs/decisions/0100) are
 covered by `ext/predictable-camps-1111` (docs/CAMPS.md there) and are not repeated here.
 
 | Spawner | File:line | Random (place / time / type) | Seen before it appears | Verdict |

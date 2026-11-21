@@ -55,6 +55,7 @@
 	"procedural": ["base"],
 	"recoil": {"deg": 3.0, "settle": 0.09},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["thf_bola", 0.2, "stun"],
 		["thf_bola", 0.2, "thf_lmb_r"],
