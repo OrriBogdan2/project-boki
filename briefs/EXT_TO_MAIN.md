@@ -10785,3 +10785,4 @@ READY ext/boki-rig-fluid-1118 44ade56710bf7999078f25f6ec061f58a700552b (merged o
 READY ext/wisp-revive-polish d1b969089 (wisp clarity: ground reach circle removed, revive progress is a bar under the Wisp; before/after MP4 on GPU job 20261121-143307-01355, out dir /home/boki/cj/20261121-140550-a1/out/before_after.mp4)
 READY ext/merge-keeps-abilities-1117 badbb9aa9bc30a0801256c7c36f46e95f35faf19 (merged origin/main 74364b3ad9; bulwark charge took main's slam-free side; merge-keeps/aimkit/ashwick-combo pass; merge-form-check 1 fail same as main)
 READY ext/plate-status-declutter e165330c3ab (PR #382: merged origin/main 74364b3ad9, rimewright conflict resolved; plate-status-check 55/0, recast-cue only the 2 Ostra reds already on main)
+READY ext/farm-tut-batch-1108-deep 76572006ce3 (PR #23: merged origin/main 74364b3ad9; only wiki Rules.md conflict, regenerated; farm-place 0 fails, farm-tutorial/hob-check reds identical to main)
