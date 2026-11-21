@@ -619,6 +619,7 @@ func _draw_feed(sz: Vector2) -> void:
 	if m.player:
 		for h in m.hunters:
 			if h.team == m.player.team: mine.append(h.pname)
+	var zone := HunterZone.rect(m) if not m.feed.is_empty() else Rect2()      # a line slides aside, never over your hunter
 	for f in m.feed:
 		var a := clampf(6.0 - f["t"], 0.0, 1.0)
 		var s: String = TextCache.fit(big, f["text"], 13, max_w)      # ends short of the top-centre strips
@@ -630,6 +631,7 @@ func _draw_feed(sz: Vector2) -> void:
 		ours = first != "" and s.begins_with(first)
 		var col := Color("5fb6ff") if ours else (Color("ff6a5a") if first != "" else GOLD)
 		var br := Rect2(Vector2(sz.x - HudStyle.safe_pad(sz).x - w - 26, y), Vector2(w + 26, 24))
+		br.position.x += HunterZone.slide(br, zone)
 		_rounded(br, Color(0.04, 0.05, 0.08, 0.82 * a), 6)
 		c.draw_rect(Rect2(br.position, Vector2(4, br.size.y)), Color(col, a))
 		_text(br.position + Vector2(14, 17), s, 13, Color(INK, a), big)
