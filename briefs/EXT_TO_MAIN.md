@@ -10850,3 +10850,4 @@ READY ext/docs-conflict-free-1121 0244da0c6a094b6d72a6a4efdbf76e5672e19042 (shar
 READY ext/summon-per-species 7c0e2c2924512bdd53c1ad96f1f615e7d0c21f98 (per-species summon windows)
 READY ext/docs-conflict-free-1121 49184f2c54 (PR #598: shared docs conflict-free: DEBT union + wiki ours attrs, HUD/AUDIO/KIT_PARITY/MOVEMENT_FEEL fragment folders, merge_batch unions those 4 only on pure additions)
 READY ext/vfx-sable-knife-ring ee82551875 (Sable knife ring to source size)
+READY ext/flinch-sub-amount 87483b12ca1c6c58b2d1983569e23222c06ce39c (flinch delta subtracts first frame)
