@@ -209,6 +209,13 @@ func _travel_part(m: Node) -> void:
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
 	await _cards_part(m, hub)
+	var hints := ZoneCards.key_hints("glasswater")
+	var terms := BlackMarket.seed_terms()
+	ok("Old Pell" in hints[0] and ("%d days" % terms[0]) in hints[0] and ("%d gems" % terms[1]) in hints[0],
+		"the Wayseed line names the trader, his every-%d-days stock and %d gems: %s" % [terms[0], terms[1], hints[0]])
+	var near := GardenZones.closest("glasswater")
+	ok(not near.is_empty() and String(near["rec"]["name"]) in hints[1] and "Closest" in hints[1],
+		"the lean line names the closest Boki: %s" % hints[1])
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
