@@ -12,9 +12,9 @@ const RUN_SECS := 1.2               # s of run before the run shot
 const ZOOM_CLOSE := 0.5             # camera zoom of the closer shots
 const FACE_CAM := Vector3(0, 0.9, 3.0)   # --face: idle hunter aims toward the camera
 const RIG_STATES := [["walk", Vector2(0.46, 0)], ["run", Vector2(1, 0)], ["attack", Vector2.ZERO]]
-const RIG_LEVELS := {"eye": [1.45, 1.0, 3.6], "knee": [0.45, 0.8, 2.4]}   # camera height, look-at height, distance (m)
+const RIG_LEVELS := {"eye": [1.5, 1.0, 4.6], "knee": [0.45, 0.7, 3.2]}   # camera height, look-at height, distance (m)
 const RIG_AZ := {"f": 0.6, "b": 3.6}   # rad around the hunter from east (it faces east): in front at 35 deg, behind
-const RIG_FOV := 30.0
+const RIG_FOV := 32.0
 var face := false
 var rig_frames := false
 var cam_view := ""    # "<level>_<az>" while a rig frame is taken
@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--heroes="): heroes = Array(String(a).substr(9).split(","))
 		if String(a) == "--face": face = true
 		if String(a) == "--rig-frames": rig_frames = true
+		if String(a).begins_with("--raid="): raid = String(a).substr(7)
 		if String(a).begins_with("--set="): _add_variant(String(a).substr(6))
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 	if variants.is_empty():
@@ -118,11 +119,13 @@ func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
 
 ## The rig gate's frames of one Hunter: each state, from each level and side.
 func _rig_frames(hero: String) -> void:
+	var home: Vector3 = m.player.pos
 	for st in RIG_STATES:
 		fire = st[0] == "attack"
 		for lv in RIG_LEVELS:
 			for az in RIG_AZ:
 				cam_view = "%s_%s" % [lv, az]
+				m.player.teleport(_ground(home))     # a run would carry it off the island over four shots
 				await _take(RUN_SECS, 1.0, st[1], "%s_%s_%s.png" % [hero, st[0], cam_view])
 	fire = false
 	cam_view = ""
@@ -133,5 +136,8 @@ func _rig_cam(at: Vector3) -> void:
 	var az: float = RIG_AZ[cam_view.get_slice("_", 1)]
 	var dir := Vector3(cos(az), 0, sin(az))
 	m.cam.fov = RIG_FOV
-	m.cam.global_position = at + dir * float(lv[2]) + Vector3(0, float(lv[0]), 0)
+	m.hud.visible = false
+	var cam_at := at + dir * float(lv[2])
+	cam_at.y = m.world.ground_at(cam_at.x, cam_at.z) + float(lv[0])     # the level is over the ground at the camera
+	m.cam.global_position = cam_at
 	m.cam.look_at(at + Vector3(0, float(lv[1]), 0))

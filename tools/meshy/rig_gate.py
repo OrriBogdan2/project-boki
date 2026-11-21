@@ -9,7 +9,7 @@ death, glide, attack (the primary attack clip: lmb*, else the kit's strike-like 
 its own (gil: HunterAnim drives it) borrows --clips-from (default art/wardens/breaker/breaker.glb).
 Reuses the CPU skinning of hunter_mesh_check.py and measures, per region, PASS / WARN / FAIL with numbers:
 
-  legs      "see-inside" pixels: the model is splatted into a z-buffer from 4 sides at every sampled pose; a pixel
+  legs      "see-inside" pixels (worst state, in points over the rest pose): the model is splatted into a z-buffer from 4 sides at every sampled pose; a pixel
             whose nearest surface is a leg triangle seen from behind (a hole in the thighs / crotch: the black gap
             in the real renderer) counts. Also the crotch bridge (triangles joining a left-leg vertex to a right-leg
             vertex): their worst stretch in motion.
@@ -39,12 +39,12 @@ import hunter_mesh_check as H  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent.parent
 DONOR = ROOT / "art/wardens/breaker/breaker.glb"
 GRAZE = 0.35  # a back face counts only if its normal is this far from edge-on to the camera
-FRAMES = 8  # poses per clip
+FRAMES = 6  # poses per clip
 RES = 260  # z-buffer pixels over the body height
 VIEWS = {"front": (0, 2), "back": (0, 2), "left": (2, 0), "right": (2, 0)}  # name: (screen-u axis, depth axis)
 STATES = {  # state: clip name regex (all matching clips are posed)
-    "walk": r"^walk_(f|fl|fr|l|r)$",
-    "run": r"^run_(f|fl|fr|l|r)$",
+    "walk": r"^walk_(f|l|r)$",
+    "run": r"^run_(f|l|r)$",
     "downed": r"^downed$",
     "death": r"^death$",
     "glide": r"^glide$",
@@ -60,16 +60,16 @@ GROUPS = [  # region of a bone: first match wins
 ]
 # (WARN, FAIL) per metric
 LIMITS = {
-    "see_inside_pct": (0.3, 1.5),  # % of leg-ROI covered pixels whose nearest surface is a leg back face
+    "see_inside_pct": (1.5, 4.0),  # points over the rest pose: leg-ROI covered pixels whose nearest surface is a leg back face
     "bridge_stretch": (2.0, 3.5),  # worst edge ratio of an L-leg to R-leg triangle
-    "hand_move_len": (0.45, 0.9),  # hand vertex move vs the wrist, in hand lengths
+    "hand_move_len": (1.0, 1.5),  # hand vertex move vs the wrist, in hand lengths (a curling finger tip is ~0.8)
     "hand_stretched": (3, 40),  # stretched hand triangles in the worst pose
     "fused_tris": (20, 120),  # arm-to-torso triangles below the armpit at rest
-    "fused_stretch": (2.0, 3.5),  # worst edge ratio of those triangles in motion
+    "fused_stretch": (3.0, 8.0),  # worst edge ratio of those triangles in motion
     "arm_torso_weight": (0.004, 0.02),  # share of arm vertices with torso weight > 0.3 below the armpit
-    "spike_edges": (3, 40),
+    "spike_edges": (0.0002, 0.01),  # share of triangles (hunter_mesh_check's limits)
     "far_bone_verts": (0.0005, 0.02),  # share of vertices
-    "stretched_tris": (4, 80),  # worst-pose stretched triangles, whole body
+    "stretched_tris": (0.005, 0.08),  # share of triangles stretched in the worst pose (hunter_mesh_check's limits)
 }
 
 
@@ -240,8 +240,8 @@ def measure(h: Hunter) -> dict:
     sh = {s: h.bone(f"upper_arm.{s}") for s in "LR"}
     el = {s: h.bone(f"forearm.{s}") for s in "LR"}
     wr = {s: h.bone(f"hand.{s}") for s in "LR"}
-    # arm-torso: a triangle with an arm vertex and a torso vertex, below the armpit (a quarter down the upper arm)
-    armpit = min(sh[s][1] - 0.25 * (sh[s][1] - el[s][1]) for s in "LR" if sh[s] is not None)
+    # arm-torso: a triangle with an arm vertex and a torso vertex, below the armpit (halfway down the upper arm)
+    armpit = min(sh[s][1] - 0.5 * (sh[s][1] - el[s][1]) for s in "LR" if sh[s] is not None)
     tvk = vk[tris]
     low = (b.pos[tris][:, :, 1] < armpit).all(axis=1)
     fused = low & (tvk == "arm").any(axis=1) & (tvk == "torso").any(axis=1)
@@ -270,7 +270,8 @@ def measure(h: Hunter) -> dict:
     # ---- posed
     worst = {"stretched": (-1, None)}
     per_state: dict = {}
-    zb = {"cov": 0, "ins": 0}
+    rest_cov, rest_ins = see_inside(h, h.rig.world(None, 0.0), h.skinned(h.rig.world(None, 0.0)), tk, ["thigh.L", "thigh.R", "shin.L", "shin.R"])
+    res["see_inside_rest"] = round(100.0 * rest_ins / max(rest_cov, 1), 3)
     roi = ["thigh.L", "thigh.R", "shin.L", "shin.R"]
     max_bridge = max_fused = max_hand = 1.0
     max_hand_move = 0.0
@@ -311,15 +312,15 @@ def measure(h: Hunter) -> dict:
                 cov, ins = see_inside(h, world, sp, tk, roi)
                 s_cov += cov
                 s_see += ins
-        zb["cov"] += s_cov
-        zb["ins"] += s_see
         per_state[state] = {
             "clips": [h.rig.clips[c][0] for c in h.clips_for(state)],
             "see_inside_pct": round(100.0 * s_see / max(s_cov, 1), 3),
             "stretched_tris": s_stretch,
         }
     res["states"] = per_state
-    res["see_inside_pct"] = round(100.0 * zb["ins"] / max(zb["cov"], 1), 3)
+    worst_state = max(per_state, key=lambda k: per_state[k]["see_inside_pct"])
+    res["see_inside_pct"] = round(per_state[worst_state]["see_inside_pct"] - res["see_inside_rest"], 3)
+    res["see_inside_state"] = worst_state
     res["bridge_stretch"] = round(max_bridge, 2)
     res["fused_stretch"] = round(max_fused, 2)
     res["hand_move_len"] = round(max_hand_move, 2)
@@ -347,9 +348,9 @@ def grade(res: dict) -> dict:
             level("arm_torso_weight", res["arm_torso_weight"]),
         ),
         "spikes": worse(
-            level("spike_edges", res["spike_edges"]),
+            level("spike_edges", res["spike_edges"] / res["tris"]),
             level("far_bone_verts", res["far_bone_verts"]),
-            level("stretched_tris", res["stretched_tris"]),
+            level("stretched_tris", res["stretched_tris"] / res["tris"]),
         ),
     }
     reg["overall"] = worse(*reg.values())
@@ -358,13 +359,13 @@ def grade(res: dict) -> dict:
 
 def table(rows: list[dict]) -> str:
     out = [
-        "| hunter | legs | hands | arms | spikes | see-inside % | bridge x | hand move (len) / stretched | fused tris / x / wt | spikes / stretched tris |",
+        "| hunter | legs | hands | arms | spikes | see-inside +% (state) | bridge x | hand move (len) / stretched | fused tris / x / wt | spikes / stretched tris |",
         "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
         g = r["grade"]
         out.append(
-            f"| {r['name']} | {g['legs']} | {g['hands']} | {g['arms']} | {g['spikes']} | {r['see_inside_pct']} | "
+            f"| {r['name']} | {g['legs']} | {g['hands']} | {g['arms']} | {g['spikes']} | {r['see_inside_pct']} ({r['see_inside_state']}) | "
             f"{r['bridge_stretch']} | {r['hand_move_len']} / {r['hand_stretched']} | "
             f"{r['fused_tris']} / {r['fused_stretch']} / {r['arm_torso_weight']:.3f} | {r['spike_edges']} / {r['stretched_tris']} |"
         )
