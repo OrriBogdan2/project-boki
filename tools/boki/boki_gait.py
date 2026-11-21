@@ -147,3 +147,18 @@ def hind_legs(left, right, fold=-1.0):
     `right`; `fold` is the knee's side."""
     return [("hpaw." + sd, ph, two_bone("hleg1." + sd, "hleg2." + sd, "hpaw." + sd, fold))
             for sd, ph in (("L", left), ("R", right))]
+
+
+def stub_legs(half_w=0.06, front_z=-0.09, hind_z=0.1, hip_y=0.13):
+    """Stand-in four_legs bones (name -> head, tail, parent) for a scan on the borrowed Glomwort rig, whose real legs
+    scan_legs adds to the file: planted clips are written on these and solved again on the file's (`refit`), so
+    their reach, lift and drop are in these legs' lengths (hip to ankle 0.105 m)."""
+    out = {}
+    for sd, sx in (("L", -1.0), ("R", 1.0)):
+        for pre, z, par in (("f", front_z, "spine"), ("h", hind_z, "hips")):
+            hip, knee = (sx * half_w, hip_y, z), (sx * half_w, 0.08, z + (0.012 if pre == "h" else -0.006))
+            ankle = (sx * half_w, 0.03, z)
+            out["%sleg1.%s" % (pre, sd)] = (hip, knee, par)
+            out["%sleg2.%s" % (pre, sd)] = (knee, ankle, "%sleg1.%s" % (pre, sd))
+            out["%spaw.%s" % (pre, sd)] = (ankle, (sx * half_w, 0.012, z - 0.04), "%sleg2.%s" % (pre, sd))
+    return out
