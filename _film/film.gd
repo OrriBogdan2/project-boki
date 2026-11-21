@@ -9,6 +9,8 @@ var px := 1024
 var n := 20
 var facey := 1.62
 var clips_only := ""
+var views := ["game", "eye", "knee", "face"]
+var skel: Skeleton3D = null
 
 func _ready() -> void:
 	var a := OS.get_cmdline_user_args()
@@ -18,6 +20,7 @@ func _ready() -> void:
 		if x.begins_with("--px="): px = int(x.substr(5))
 		if x.begins_with("--facey="): facey = float(x.substr(8))
 		if x.begins_with("--clips="): clips_only = x.substr(8)
+		if x.begins_with("--views="): views = Array(x.substr(8).split(","))
 	get_window().size = Vector2i(px * 3 / 4, px)
 	get_viewport().size = Vector2i(px * 3 / 4, px)
 	_run.call_deferred(a[1].split(";"))
@@ -35,6 +38,15 @@ func _cam(cam: Camera3D, view: String) -> void:
 		"knee":
 			cam.position = Vector3(7.0 * sin(yaw), 0.45, 7.0 * cos(yaw))
 			cam.fov = rad_to_deg(2.0 * atan(1.2 / 7.0)); cam.look_at(Vector3(0, 0.95, 0))
+		"faceT", "hipsT":
+			var bn := "Head" if view == "faceT" else "Hips"
+			var t := Vector3(0, facey if view == "faceT" else 0.9, 0)
+			if skel and skel.find_bone(bn) >= 0:
+				t = skel.global_transform * skel.get_bone_global_pose(skel.find_bone(bn)).origin
+				if view == "faceT": t.y += 0.09
+			var dd := 3.0
+			cam.position = t + Vector3(dd * sin(yaw), 0.05, dd * cos(yaw))
+			cam.fov = rad_to_deg(2.0 * atan((0.22 if view == "faceT" else 0.42) / dd)); cam.look_at(t)
 		"face":
 			cam.position = Vector3(3.0 * sin(yaw), facey + 0.04, 3.0 * cos(yaw))
 			cam.fov = rad_to_deg(2.0 * atan(0.30 / 3.0)); cam.look_at(Vector3(0, facey, 0))
@@ -67,21 +79,34 @@ func _run(sets: PackedStringArray) -> void:
 			if err != OK: print("LOAD FAIL ", rel, " ", err); continue
 			var model: Node3D = doc.generate_scene(gs)
 			add_child(model)
-			var ap: AnimationPlayer = model.find_children("*", "AnimationPlayer", true, false)[0]
+			var aps := model.find_children("*", "AnimationPlayer", true, false)
+			if aps.is_empty():  # static pick (v95 current glb): one still per view
+				for view in ["game", "eye", "knee", "face"]:
+					_cam(cam, view)
+					var sdir := "%s/%s/still/%s" % [out, tag, view]
+					DirAccess.make_dir_recursive_absolute(sdir)
+					await get_tree().process_frame
+					await RenderingServer.frame_post_draw
+					get_viewport().get_texture().get_image().save_jpg("%s/f000.jpg" % sdir, 0.92)
+				model.queue_free(); await get_tree().process_frame
+				continue
+			var ap: AnimationPlayer = aps[0]
+			var sks := model.find_children("*", "Skeleton3D", true, false)
+			skel = sks[0] if not sks.is_empty() else null
 			for clip in ap.get_animation_list():
 				var an := ap.get_animation(clip); var L := an.length
 				var cname := clip.get_slice("|", 1) if clip.contains("|") else clip
 				if clips_only != "" and not (cname in clips_only.split(",")): continue
 				if rel.contains("_walk"): cname = "walk"
 				elif rel.contains("_run"): cname = "run"
-				for view in ["game", "eye", "knee", "face"]:
-					_cam(cam, view)
+				for view in views:
 					var dir := "%s/%s/%s/%s" % [out, tag, cname, view]
 					DirAccess.make_dir_recursive_absolute(dir)
 					ap.play(clip)
 					for f in n:
 						ap.seek(L * f / float(n), true)
 						await get_tree().process_frame
+						_cam(cam, view)
 						await RenderingServer.frame_post_draw
 						get_viewport().get_texture().get_image().save_jpg("%s/f%03d.jpg" % [dir, f], 0.92)
 			model.queue_free(); await get_tree().process_frame
