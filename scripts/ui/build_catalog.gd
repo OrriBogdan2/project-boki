@@ -6,7 +6,8 @@ extends PanelContainer
 ##
 ## An entry is a Dictionary: name, cb (clicked), and any of: id (picture cache key), model (Callable that builds
 ## the 3D piece for the picture), swatch (Color) or glyph (UI icon id) when there is no model, cost (materials,
-## coloured by what you have), note (small line), owned (count badge), on (held right now), off (dimmed), tip.
+## coloured by what you have), note (small line), owned (count badge), on (held right now), hl (a tutorial points at it:
+## green glow), off (dimmed), tip.
 
 const STORAGE := "Storage"
 const TILE := Vector2(124, 112)
@@ -204,7 +205,9 @@ func _empty_text() -> String:
 
 func _tile(e: Dictionary) -> Control:
 	var cb: Callable = e["cb"]
-	var tile := UI.tile_card(bool(e.get("on", false)) or (focus_uid > 0 and int(e.get("uid", 0)) == focus_uid), cb, 5)
+	var lit: bool = bool(e.get("on", false)) or (focus_uid > 0 and int(e.get("uid", 0)) == focus_uid)
+	var marked := bool(e.get("hl", false))
+	var tile := UI.tile_card(lit or marked, cb, 5, HAVE_COL if marked and not lit else UI.ACCENT)
 	tile.custom_minimum_size = TILE
 	tile.set_meta("entry", String(e.get("id", "")))
 	tile.set_meta("on", bool(e.get("on", false)))
