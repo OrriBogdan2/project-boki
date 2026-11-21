@@ -278,3 +278,9 @@ to rig and export:
     Traps: a killed local `godot --import` leaves a half-built pip.glb cache that jobq renders as "no armature" (delete
     `.godot/imported/pip.glb-*`); jobq done dirs are purged within hours (copy the frames out at once); `touch` the glb or delete its
     cache entries or Godot keeps the old import; a tree without `.godot` is imported by jobq itself (one time, can time out).
+11. Meeko r3c (11-21): r3b's tail lies along the left shin and right thigh and the swap's 30 smoothing passes mix tail with leg, so
+    downed/revive stretch tail>tail 11.9x (LIVE 7.69). `glb_weight_unmix.py IN OUT tail thigh,shin,foot --smooth 40 --rings 8` smooths
+    the full weight vectors (welded by position across seams) only over the tail/leg contact zone grown 8 rings: 57-clip stretch
+    mean/worst/over5 5.62/11.91/33 -> 4.51/6.34/17. A hard split (tail whole or leg whole, its default mode) tears the fused surface:
+    22.1/48.9; 80 passes x 12 rings over-smooths: 5.89/10.29. Body colour: the in-game rose was saturation 0.69 vs the turnaround's
+    0.54 (same value, not too dark); solved in linear light for skin `albedo` [0.86, 0.774, 0.72], `desat` 0.52.

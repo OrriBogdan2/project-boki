@@ -589,11 +589,11 @@
 		"slots": {
 			"skin": {
 				"albedo": [
-					0.78,
-					0.8,
-					0.88
+					0.86,
+					0.774,
+					0.72
 				],
-				"desat": 0.42,
+				"desat": 0.52,
 				"top_light": 0.16,
 				"fres": 0.14,
 				"far_lift": 0.06,
@@ -609,7 +609,7 @@
 				],
 				"shade": 0.9,
 				"ramp": 1.8,
-				"dark_lift": 0.1
+				"dark_lift": 0.18
 			},
 			"cloth": {
 				"far_lift": 0.15,
