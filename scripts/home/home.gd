@@ -11,6 +11,7 @@ var cam: CamRig
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
+var corners: Control  # root_ui's corner groups, kept to SafeArea's frame
 var panel_host: Control
 var topbar: Label
 var top_chips: HBoxContainer
@@ -719,8 +720,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(HomeNotices.burrow(KinBox.farm_cap(), nb))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
@@ -1194,12 +1194,12 @@ func _keep_off_hub(c) -> void:
 	var cc := c as Control
 	var hr := hub.get_global_rect()
 	var cr := cc.get_global_rect()
-	var vw := get_viewport().get_visible_rect().size.x
+	var box := SafeArea.frame(get_viewport().get_visible_rect().size)  # (the hub's frame)
 	var room_l := hr.end.x + 12.0
-	var centred := (vw - cr.size.x) * 0.5
-	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	var centred := box.get_center().x - cr.size.x * 0.5
+	var want := centred if centred >= room_l else room_l + maxf(0.0, (box.end.x - room_l - cr.size.x) * 0.5)
 	# too wide to sit beside the hub (big text): centred over it, not pushed off the screen
-	if room_l + cr.size.x > vw - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
+	if room_l + cr.size.x > box.end.x - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
 		want = centred
 		cc.global_position.y = hr.position.y - cr.size.y - 6.0
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
@@ -2450,6 +2450,7 @@ func _build_ui() -> void:
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
+	corners = SafeArea.framed(root_ui)  # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
 	# top left: your partner and what you have, as quiet chips on glass
 	var top := UI.glass(6, 14)
 	top.position = Vector2(16, 14)
@@ -2461,7 +2462,7 @@ func _build_ui() -> void:
 	topbar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	topbar.visible = false
 	th.add_child(topbar)
-	root_ui.add_child(top)
+	corners.add_child(top)
 	# what F (and the kin keys) do with whatever is in front of you
 	prompt_box = UI.glass(10, 16)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
@@ -2516,7 +2517,7 @@ func hub_items() -> Array:
 
 func _build_hub() -> void:
 	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
-	root_ui.add_child(hub)
+	SafeArea.framed(root_ui).add_child(hub)  # (over the menu dim, so its own frame)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
@@ -3491,11 +3492,10 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same one the title and the expedition panel open), as your expedition Hunter.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:

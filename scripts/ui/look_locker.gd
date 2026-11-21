@@ -520,6 +520,7 @@ func _swatch(key: String, col: Color, on: bool, val: Variant) -> Control:
 	b.add_theme_stylebox_override("focus", UI.frame(col, UI.R_PILL, UI.ACCENT_HI, 3))
 	b.pressed.connect(func(): pick(key, val))
 	b.mouse_entered.connect(func(): Sfx.play("hover", null, -14.0, 0.05))
+	b.set_meta(UI.SFX_META, true)
 	return b
 
 

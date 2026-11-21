@@ -30,6 +30,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Lace, Sparkle, Cinder, Tenzo | Unsourced dash-flow rows (8, 5, 3 + `dash.ground.lmb`, 6) `[?]` | **owner** | no source; the kit default (`keep`, Q `fire`) stands |
 | Cinder | RMB range 14 `[?]` | **owner** | not determinable (ext/slice-ranges-source: 0133 end was the cursor) |
 | Cinder, Grimble, Sparkle | Dash curve not decoded | **done** `ext/dash-curves-c` d8e71e611 | no line |
+| Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a. Back on main from 11-15 (an old branch merged in WIP checkpoint 800e366755f kept the old kit and data); cut again on `ext/albert-guardcut-regress`, and `--kit-parity-check` now fails if the meter or the slam returns |
 | Tenzo | Rock Hop dash curve | **not determinable** | the footage's only ground dash is Tetra's Landslide push (frames 0516-0518, 128.77-129.40 s): its fit drops rms from 16.4% (constant) to 7.2% of the mean, but our Rock Hop is a leap (owner item 111, x0.85 / x1.15 kept) with no push to shape; the RMB hop (0258-0259) and dash-into-dunk (0985-0997) are too small at 4 fps. `dash_feel.json` dolm: no curve (ext/feel-dash-curves-d) |
 | Neve | Skate start (held, not via dash_feel) | **done** `ext/feel-dash-curves-d` | `dash.ramp` 0.2 to 0.12 s from the 5 fps pan of skates 0283-0291 and 0236-0244 (rms 6.0% to 4.1% and 15.4% to 14.8% of the cruise; best 0.08 s needs a shorter `tm_skate_go`, whose length the anim check ties to the ramp). Cruise and stop already matched |
 | Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a |
@@ -881,9 +882,9 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Tenzo | Boulder (tap, `lmb.boulder.kb`) | 1.5 | nudge | "TAP to throw a boulder", no knock [D] | match (nudge) | n/a |
 | Tenzo | Rock hit (`rock.kb`) / rock splash (4.0 in code) | 5 / 4 | 1.15 m / 0.76 m | punched rocks are "launched", no knock on a foe they hit [D] | `[?]` | n/a |
 | Tenzo | Rock Hop hit (`dash.kb`) / shove (`dash.shove_kb`) | 8, lift 2.0 / 3.5 | 2.52 m / 0.62 m | Landslide: "launching a rock", no knock [D]; shoves the enemy out over the Abyss, no distance (breah.md 141) [F] | `[?]` | `[?]` |
-| Tenzo | Volcano slam (`rmb.slam.kb`) | 6, lift 2.0 | 1.70 m | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] | differ | n/a |
+| Tenzo | Volcano slam (no knock; `rmb.slam.kb` removed ext/tenzo-grimble-knock-cut) | none | none (centre stun, Dunk spike) | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] | match | n/a |
 | Grimble | Shotgun slug (`shotgun.kb`, per slug) | 2.2 | nudge | Scattergun: no knock [D] | match (nudge) | n/a |
-| Grimble | Dash shove (`dash.hit_kb`) | 4, lift 2.5 | 1.16 m | Brute Dash: no damage, no knock [D] | differ | n/a |
+| Grimble | Barge touches nobody (`dash.hit_kb` was dead data, removed ext/tenzo-grimble-knock-cut) | none | none | Brute Dash: no damage, no knock [D] | match | n/a |
 | Neve | Rink Wall touch (`e.push`, while the wall slides) | 5 | 1.15 m a touch; carried while it slides | Frozen Barricade: "wall that pushes enemies" [D]; pushes and carries the dummy (tamsin.md 0313, 0356) [F] | match | `[?]` |
 | Neve | Hoar fan dart (`hoar_fan.kb`) | 0.4 | nudge | Ice Darts: no knock [D] | match (nudge) | n/a |
 | Motley | Snap shards (1.0 in code) / orb (`tether_lantern.kb`) | 1.0 / 1.0 | nudge | Void Snap: stun, no knock; Gravity Orb: none [D] | match (nudge) | n/a |
@@ -900,11 +901,13 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Sable | Empowered bolt (`dash.prime_kb` in `thief.json`, was 3.0 in `thief_kit.gd`) | 0 (was 3, 0.47 m) | none | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
 | Sable | Arc bolt (`arc_bolts.kb`) | 0.8 | nudge | Arcslinger: none [D] | match (nudge) | n/a |
 
-**Fixed: none.** The task allowed up to three fixes where the data states a number. No knock row has a source number:
+**Fixed: none** (then: Tenzo's slam push and Grimble's dash shove were cut afterwards by ext/tenzo-grimble-knock-cut; the two rows above now read match, and `differ` is 12 rows). The task allowed up to three fixes where the data states a number. No knock row has a source number:
 every distance is a footage read (`[?]`), and every **differ** is a knock the card leaves out, which the card gives as
 words, not a number. So nothing changed in the kits. The table's numbers come from the `MFEEL knock sweep` lines.
 
 **Suggestions, not built (PARITY FIRST):**
+- Ours-only knocks the card does not list (14 rows marked **differ** when written; 12 now): Kael's Lunge, Haul Slam, Flame Step and Riposte;
+  Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
 - Ours-only knocks the card does not list (14 rows marked **differ**): Kael's Lunge, Haul Slam, Flame Step and Riposte;
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Tenzo's slam; Grimble's
   dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall and Sable's empowered bolt (both now cut, `ext/sparkle-sable-knock-cut`, so 12 remain). Cutting
