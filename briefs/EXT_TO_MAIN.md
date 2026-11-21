@@ -10730,3 +10730,4 @@ READY ext/merge-lane-N2-1120 9635e916b5 (lane N2 re-merged on main (3): 12 merge
 READY ext/anim-neve-wrist 58928e20f6 (bulk-rebase: origin/main merged in mechanically, was 82ea2cd4f4; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/owner-kit-notes-b 915b1aa745 (merged origin/main, resolved dredge_kit.gd conflict: main's hook-node handling + reach block_class; --dredge-combo-check 150/0 fail, --check 0 fail)
 READY ext/garden-free-toy-hint 9d0f798b0e (free toy/patch hint)
+READY ext/farm-autosort 0a9bd5f242 (farm kin auto-sort to best station; rule table docs/FARM_AUTOSORT.md; work-check 0 fails; no clip yet)
