@@ -2,7 +2,8 @@ extends RefCounted
 ## --steal-tell-check: the steal window's look (StealTell, docs/HUD.md "Steal window"). A lair boss at
 ## or under content/rules/steal_window.json "at" of its health opens the window: its bar fill turns
 ## gold, and the STEAL mark is for squads with a Hunter within KillXp.SHARE_R of it. Other monsters
-## never open it, and it changes no damage. Never touches the save.
+## never open it. A prize monster (StealReel) cries once at the line and reels on the first drop under
+## it. Never touches the save.
 
 var bad := 0
 var m: Match
@@ -100,16 +101,31 @@ func run(main: Node) -> void:
 	Q.out = true
 	ok(not StealTell.near(m, b, Q.team), "a Hunter out of the match doesn't count")
 	Q.out = false
-	# 4. looks only: a hit in the window does what the same hit does above it
+	# 4. the reel: the first drop under the line stands a prize monster open for the reel time, at normal damage
 	b.stagger_t = 0.0
+	b.win_reeled = false
 	b.hp = b.max_hp * 0.6
-	var above := b.hurt(50.0, P, {"src": "shot"})
-	b.stagger_t = 0.0
-	b.hp = b.max_hp * StealTell.at() * 0.8
-	var inside := b.hurt(50.0, P, {"src": "shot"})
+	b.hurt(50.0, P, {"src": "shot"})
+	ok(b.stagger_t <= 0.0 and not b.win_reeled, "a hit that stays above the line: no reel")
+	b.hp = b.max_hp * StealTell.at() + 10.0
+	b.hurt(50.0, P, {"src": "shot"})
 	ok(
-		above > 0.0 and is_equal_approx(above, inside) and b.stagger_t <= 0.0,
-		"the same 50 hit deals %.1f above the line and %.1f in the window, no reel" % [above, inside]
+		b.win_reeled and is_equal_approx(b.stagger_t, StealReel.reel_time()) and b.stagger_mult == 1.0,
+		"the first hit under the line reels it %.1f s at normal damage (x%.1f)" % [b.stagger_t, b.stagger_mult]
 	)
+	b.stagger_t = 0.0
+	b.hurt(50.0, P, {"src": "shot"})
+	ok(b.stagger_t <= 0.0, "the next hit in the window doesn't reel it again")
+	StealReel.tick(b)
+	ok(b.win_cried, "it has cried out for the window")
+	b.hp = b.max_hp
+	StealReel.tick(b)
+	ok(not b.win_cried and not b.win_reeled, "healed above the line: the cry and the reel rearm")
+	sk = m.spawn_mob("skitter", F["c"])
+	sk.hp = sk.max_hp * 0.2
+	sk.hurt(1.0, P, {"src": "shot"})
+	ok(sk.stagger_t <= 0.0 and not StealReel.open(sk), "a skitter in the same band: no reel (not a prize monster)")
+	m.mobs.erase(sk)
+	sk.queue_free()
 	print("STEALTELL done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

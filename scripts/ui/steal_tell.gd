@@ -5,7 +5,7 @@ extends RefCounted
 ## one burst can take it. From that line its health bar (the world bar, and the top bar for the squad
 ## in its lair) pulses gold instead of red, and while a Hunter of your squad is within KillXp.SHARE_R
 ## of it (close enough to be paid for the kill) a small STEAL mark sits by the bar. Every machine reads
-## it off the health it already sees, so nothing is synced. Looks only: no stat or damage changes.
+## it off the health it already sees, so nothing is synced. The reel is StealReel.
 
 ## The window's gold: apart from the bar's red, the stagger's lilac and the chip's white.
 const COL := Color("ffc93a")
