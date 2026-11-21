@@ -10789,3 +10789,4 @@ READY ext/farm-tut-batch-1108-deep 76572006ce3 (PR #23: merged origin/main 74364
 READY ext/ult-ranks-source 25ec2b492f7 (PR #421: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21 with both notes; ult-rank-check 0 fails; archetype-check 4 reds identical to main)
 READY ext/vfx-zones-remote 5d2680c54eb (PR #446: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21; zone-net-check 35/0, displace-net 0 fails, gil-combo reds identical to main)
 READY ext/merge-lane-n19g-1119 fc002f4b564 (PR #427: merged origin/main 74364b3ad9; only zone_next_shots.gd.uid add/add, took main's; minimap-check 0, archer frame 0, safe-area 4 reds identical to main)
+READY ext/farm-boki-xp-curve-port 3186a2023f52f366168f338ac8cba6148da73d96 (merged origin/main 74364b3ad9; kin egg text+roster blocks, dash_flow_check seed+squad; roster/boss-focus/tumble/mode-boki/egg-models/kin-type-fx pass; dash-flow 2 reds same as main)
