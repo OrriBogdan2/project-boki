@@ -106,6 +106,11 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-20: Chuggamus (`scaldamus`) and Barokat (`sentrikat`) have their own clips (`scaldamus_anim.py`, `sentrikat_anim.py`) on
+the borrowed Glomwort skeleton: the hippo-engine's two-beat piston plod, runaway-train run, cowcatcher ram and boiler
+vent; the meerkat's sentry scan, stiff brisk march, upright strike and barometer pulse, and a sleep that nods off and
+jerks awake. Re-keyed with `tools/boki/reclip.py` like the species above (mesh, skin and atlases unchanged).
+
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
 
