@@ -4,7 +4,7 @@ extends RefCounted
 ##   - the R slot is the bond meter and always the Merge: it fills with the bond, says MERGE (SURGE with no Boki) when
 ##     ready, RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
 ##     ultimate (its name when ready, the seconds until it is)
-##   - a merged hunter wears the form's name, a draining timer and the shell bar over their head (form_overhead)
+##   - a merged hunter wears a draining timer and the shell bar over their head (form_overhead; no name: a floating word)
 ##   - C and G show where the Boki is and what it is doing: from you / from the Boki, its order (follow, guard,
 ##     chase, return), the G hold ring, DOWN with the seconds until it comes round, and whether its carried
 ##     bonuses are on you (greyed while it is out)
@@ -14,6 +14,15 @@ extends RefCounted
 ## Kept out of hud.gd (a god file): hud.gd only calls these.
 
 const DOWN_COL := Color("ff7a6a")
+
+## Stolen wisp rows (stolen_wisps) above the Boki box
+const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
+const STOLEN_H := 24.0       # px: a row's height
+const STOLEN_ICON := 18.0    # px: the critter's side
+const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
+
+## What the last draw put on screen: one {"name", "passive", "state"} per row.
+static var stolen_shown: Array = []
 
 ## The downed Bokis of the local player's team (the ones their squad can rescue).
 static func squad_downed(m) -> Array:
@@ -32,7 +41,7 @@ static func squad_downed(m) -> Array:
 ##   under the square    the key cap of the Merge action (shared slot art)
 ##   above the square    the lock tag, or while merged one chip: the ultimate's unlock seconds / its name / the form
 const RING_GROW := 4.0       # px: the ring sits this far outside the slot's edge
-const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "UNLOCK" tag)
+const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "Spend point" tag)
 
 static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 	var ri := p.slot_info("r")
@@ -125,14 +134,6 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 ## The wisps you stole (KinSteal), one row each above the Boki box, up to the carry limit: the critter in its own
 ## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
 ## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
-const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
-const STOLEN_H := 24.0       # px: a row's height
-const STOLEN_ICON := 18.0    # px: the critter's side
-const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
-
-## What the last draw put on screen: one {"name", "passive", "state"} per row.
-static var stolen_shown: Array = []
-
 ## "out" / "ready" / "used": where a stolen wisp's one summon stands.
 static func stolen_state(k: Kin) -> String:
 	if k.summon != null and k.summon.out():
@@ -152,7 +153,7 @@ static func stolen_rows(h: Hunter) -> Array:
 				"passive": passive})
 	return out
 
-static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
+static func stolen_wisps(hud, p: Hunter, r: Rect2) -> void:
 	stolen_shown.clear()
 	var y := r.position.y - STOLEN_LIFT
 	for row in stolen_rows(p):
@@ -160,23 +161,23 @@ static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
 		var glow: Color = k.sp.get("glow", k.sp["color"])
 		var st := String(row["state"])
 		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
-		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
+		hud._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
 		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
-		var tex := KinPortrait.tex(k.rec, H.get_tree())
+		var tex := KinPortrait.tex(k.rec, hud.get_tree())
 		if tex != null:
-			H.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
+			hud.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
 		else:
-			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
-			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
-		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
-		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
+			hud.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
+			hud.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
+		hud.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
+		HudStyle.text(hud.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
 		if st == "ready":
-			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
+			HudStyle.key_pill(hud.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
 		else:
 			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
 			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
-			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
+			HudStyle.text(hud.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
 		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
 		y -= STOLEN_H + 3.0
 
@@ -417,10 +418,9 @@ static func shell_flash(H, h: Hunter) -> float:
 	var t: float = H.m.time - float(h.get_meta("shell_break_at", -9.0))
 	return clampf(1.0 - t / 0.5, 0.0, 1.0)
 
-## Over a merged hunter's head, for everyone: the form's name, its draining timer, and the shell bar in the form's colour.
-## `sp` is the plate's screen anchor (the top of the health bar); it sits above the name.
+## Over a merged hunter's head, for everyone: the form's draining timer and the shell bar in the form's colour (no name:
+## the form reads from its silhouette). `sp` is the plate's screen anchor (the top of the health bar).
 static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
-	var name := ""
 	var glow := Color.WHITE
 	var left := 0.0
 	var total := 1.0
@@ -430,13 +430,11 @@ static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
 		var f: Dictionary = h.merge_st["form"]
 		if String(h.merge_st.get("phase", "")) != "live":
 			return
-		name = String(f["name"])
 		glow = f["glow"]
 		left = float(h.merge_st["t"])
 		total = float(h.merge_st["T"])
 		live = true
 	elif h.has_meta("mf_name") and float(h.get_meta("mf_left", 0.0)) > 0.0:
-		name = String(h.get_meta("mf_name"))
 		glow = h.get_meta("mf_glow", Color.WHITE)
 		left = float(h.get_meta("mf_left", 0.0))
 		total = maxf(0.1, float(h.get_meta("mf_dur", 10.0)))
@@ -452,6 +450,6 @@ static func form_overhead(H, sp: Vector2, h: Hunter) -> void:
 	if sh.y > 0.0:
 		shell_bar(H, Rect2(Vector2(x0, sp.y - 18.0), Vector2(w, 6.0)), sh.x / sh.y, glow, fl2)
 	var tr := Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 3.0))
+	SafeArea.note_as("merge_timer", Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 12.0)))
 	H.c.draw_rect(tr, Color(0.03, 0.03, 0.05, 0.8))
 	H.c.draw_rect(Rect2(tr.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.75))
-	H._ctext(Vector2(sp.x, sp.y - 28.0), "%s  %ds" % [name.to_upper(), int(ceil(left))], 11, glow, H.big)

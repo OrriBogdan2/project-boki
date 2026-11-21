@@ -1,7 +1,7 @@
 {
 	"doc": "Where Inks come from in a match (scripts/match/ink_drops.gd, called from GearDrops.run_table). An Ink is a backpack item (Loot.ink): carry it out and it goes to your goods (Goods, content/rules/market.json 'ink_<type>'), where Boki that evolve by Ink use it (content/rules/evolve.json). Bosses drop the Ink of their kin's type; camp monsters and guards rarely drop a random one. Per expedition, Goods.on_result adds one more small chance (market.json finds.ink).",
 	"inks": ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"],
-	"type_ink_doc": "The 18 types (theme ids in content/kin_v2, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once.",
+	"type_ink_doc": "The 18 types (theme ids in content/kin, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once.",
 	"type_ink": {
 		"ember": "ember",
 		"tide": "tide",

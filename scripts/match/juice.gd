@@ -31,8 +31,8 @@ static func flash_col(target: Ent, p: Hunter) -> Color:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
 
-## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
-## sparks fly (on through it).
+## Where on the target a hit from `by` lands (HitContact: its real contact point, clamped to its collider) and which
+## way the sparks fly (on through it).
 static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	var dir := Vector3.ZERO
 	if by != null and is_instance_valid(by) and by != target:
@@ -43,12 +43,7 @@ static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	dir.y = 0.0
 	if dir.length() < 0.01:
 		dir = Vector3(0, 0, 1)
-	dir = dir.normalized()
-	var rad := float(target.get("r")) if target.get("r") != null else 0.4
-	var hgt := 0.95 if target is Hunter else clampf(0.35 + rad, 0.5, 1.6)
-	var y := (target as Hunter).hit_y() if target is Hunter else target.pos.y
-	var at := Vector3(target.pos.x, y + hgt, target.pos.z) - dir * rad * 0.8
-	return [at, dir]
+	return [HitContact.point(target, by, o), dir.normalized()]
 
 
 static func _credit(by: Ent) -> Ent:
@@ -65,6 +60,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var src := String(o.get("src", ""))
 	var p: Hunter = m.player
+	# a Boki's ability hit has its type's impact wherever it lands (the sound culls by distance itself)
+	var typed := _credit(by) != p and BokiImpact.play(m, by, target, o, crit, "taken" if target == p else "other")
 	if p != null and p.flat_dist(target) > FAR:
 		return
 	var hp := _hit_point(target, by, o)
@@ -103,7 +100,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
-	elif target != p and credit != p:
+
+	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.

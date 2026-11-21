@@ -115,3 +115,4 @@ static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
 	var r: Rect2 = lanes(sz)["toast"]
 	lane.top = r.position.y
 	lane.right_edge = r.end.x
+	lane.max_w = r.size.x      # (a long line wraps inside the column, never under the strip)
