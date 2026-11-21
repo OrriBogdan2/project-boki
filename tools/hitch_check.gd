@@ -186,6 +186,7 @@ func _process(_delta: float) -> void:
 		lf["draws"] = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		lf["marks"] = marks
 		lf["compiles"] = new_c
+		lf["cfiles"] = cache_changed.duplicate()
 	var k := 1
 	if fast_forward:
 		match phase:
@@ -576,8 +577,10 @@ func _median(list: Array, key: String) -> float:
 ## with a warm one a variant loads from disk instead (cheaper, still not free).
 ## A file is a shader version and grows as variants of it compile, so files and sizes both count.
 var _sizes := {}
+var cache_changed: Array = []   # the files the last _cache_count found new or grown: "<ShaderClass>/<file>"
 func _cache_count() -> int:
 	var n := 0
+	cache_changed = []
 	var stack: Array = ["user://shader_cache"]
 	while not stack.is_empty():
 		var d: String = stack.pop_back()
@@ -589,6 +592,7 @@ func _cache_count() -> int:
 			if int(_sizes.get(pth, -1)) != sz:
 				_sizes[pth] = sz
 				n += 1
+				cache_changed.append(pth.trim_prefix("user://shader_cache/").get_slice("/", 0) + "/" + f.left(16))
 		for sub in da.get_directories(): stack.append(d + "/" + sub)
 	return n
 
