@@ -34,7 +34,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
   `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
   (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s), `plants` (the sneak loops' foot plants, as `loco.plants`: crouch walking steps on them). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
@@ -57,7 +57,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   footsteps (`WardenSteps`) sound on them, from the loop nearest the ring's blend position, feet alternating through a
   blend. `--step-sync-check` reads them off the clips (`--plants-json=<file>` writes them) and fails when a loop is
   re-baked without them: re-read them whenever a loop changes. No key: the Hero's steps follow the procedural stride.
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s), `plants` (the sneak loops' foot plants, as `loco.plants`: crouch walking steps on them). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
   Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
   the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
