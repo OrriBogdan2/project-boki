@@ -178,8 +178,7 @@ const CHECKS := {
 	"--shot-size-check": ["res://tools/shot_size_check.gd", "shot_size_check", null],      # LMB projectile floor
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],      # --shots-dir, --res
 	# boots, charms vs source
-	# Training Grounds Hunters = a real match's
-	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],
+	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],  # TG = match
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -799,6 +798,7 @@ const CHECKS := {
 	"--save-safe-check": ["res://tools/save_safe_check.gd", "save_safe_check", null],      # 0061 cut-off saves
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--tele-net-shots": ["res://tools/tele_net_shots.gd", "tele_net_shots", null],     # 2 games, GPU, --shots-dir=
+	"--reach-net-film": ["res://tools/reach_net_film.gd", "reach_net_film", null],     # 2 games, GPU, --shots-dir=
 	"--glide-net-check": ["res://tools/glide_net_check.gd", "glide_net_check", null],     # 2 games, relay
 	"--sfx-remote-check": ["res://tools/sfx_remote_check.gd", "sfx_remote_check", null],     # 2 games, relay
 	# + a server, delay
@@ -832,6 +832,7 @@ const CHECKS := {
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],
 	"--wisp-hum-check": ["res://tools/wisp_hum_check.gd", "wisp_hum_check", null],      # the Hunter Wisp hum
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],  # docs/decisions/0019
+	"--stomp-style-check": ["res://tools/stomp_style_check.gd", "stomp_style_check", null],  # decision 0062
 	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],  # --shots-dir=<dir>
 	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
@@ -853,6 +854,7 @@ const CHECKS := {
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],  # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
+	"--stomp-break-sweep-check": ["res://tools/stomp_break_sweep_check.gd", "stomp_break_sweep_check", null],
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],  # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],  # --shots-dir=<dir> [--seed=N]

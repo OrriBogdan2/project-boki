@@ -2615,8 +2615,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	for s in shot_pool:
 		if not s.visible:
 			mi = s; break
-	if mi and extra.get("melee", false):
-		mi = null          # a melee strike is invisible; the swing has its own effect
+	if mi and (extra.get("melee", false) or extra.get("drawn", false)):
+		mi = null          # a melee strike is invisible (the swing has its own effect); a kit draws a "drawn" one
 	if mi:
 		mi.visible = true
 		HeroVfx.of(self).reused(mi)      # a landed round's tracer lets go of the node before the new round shows
@@ -2658,7 +2658,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
-	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
+	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not extra.get("drawn", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
 		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
