@@ -129,11 +129,12 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
-	msgs.keep_off = KnockFeed.rects()      # a wide card slides aside of the kill feed's rows (right edge)
+	msgs.keep_off = KillFeed.rects()      # a wide card slides aside of the kill feed's rows (right edge)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
 
@@ -464,7 +465,7 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := TextCache.width(big, nm, 16) + 10.0
-		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
+		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 34.0 if (is_gear or is_tune) else 20.0))
 		if LabelClash.blocked(tag):
 			continue      # (a nameplate, bar or damage number is there: the loot name waits)
 		for tries in 4:
@@ -480,7 +481,7 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
-			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+			_ctext(sp + Vector2(0, 17), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 12, INK)
 		elif is_tune:
 			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
 			_ctext(sp, nm, 15, pd["col"], big)
@@ -614,7 +615,7 @@ func _draw_duel(sz: Vector2) -> void:
 	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
-var feed_top := 18.0        # px: where the kill feed (KnockFeed) starts, under the counters and any boss bar
+var feed_top := 18.0        # px: where the kill feed (KillFeed) starts, under the counters and any boss bar
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
@@ -813,11 +814,11 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
-	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(m.length - m.time), "ISLANDS FALLING" if m.length - m.time < 30.0 else "")), 30))
-	mm_bottom = r.end.y
 	var left := m.length - m.time
-	var phase := ""; var pc := MUTED
-	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
+	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
+	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
+	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(left), phase)), 30))
+	mm_bottom = r.end.y
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := TextCache.width(big, phase, 11)
@@ -1021,7 +1022,7 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
-	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
+	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "Spend point" at level 6
 	var tw := TextCache.width(big, txt, 11)
 	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
@@ -1032,11 +1033,9 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
 ## overheated, when the next hit will spike you.
 func _draw_glider_heat(p: Hunter) -> void:
-	if p.dropping or p.downed or p.riding:
+	if not HudGroups.glider_shown(p):
 		return
 	var heat := 1.0 - p.glide_fuel
-	if not p.gliding and heat < 0.01:
-		return
 	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return
@@ -1149,13 +1148,13 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## What the R slot says about its lock: "LV 6" until then, "Spend point" with a point to spend on it,
 ## "" once it's unlocked.
 func r_lock_text(p: Hunter) -> String:
 	if int(p.slot_lv.get("ult", 0)) > 0:
 		return ""
 	if p.can_level("ult"):
-		return "UNLOCK"
+		return HudSlot.POINT_TAG
 	if p.lvl >= int(Hunter.ULT_AT[0]):
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])
@@ -1541,11 +1540,12 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - pad.x, bottom - total), Vector2(w, total))
+	var fr := SafeArea.frame(sz)  # (with the corner panels: a centred 16:9 frame on wider screens)
+	var box := Rect2(Vector2(fr.end.x - w - pad.x, bottom - total), Vector2(w, total))
 	if m.opts.get("training", false):
 		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
 		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(pad.x, pad.y + 222.0)
+		box.position = Vector2(fr.position.x + pad.x, pad.y + 222.0)
 		if total > sz.y - box.position.y - pad.y - 178.0:
 			compact = true
 			hs = []
@@ -1611,6 +1611,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}

@@ -37,6 +37,8 @@ extends RefCounted
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+##  11. Sparkle's and Sable's ability beats: each new cast/travel/hit/end cue is in its set and plays on its own event
+##      (tools/ability_beat_sfx_check.gd; two short training matches)
 ## Never touches the save.
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
@@ -144,6 +146,7 @@ func run(main: Node) -> void:
 	_hostile()
 	_level_cues()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	load("res://tools/ability_beat_sfx_check.gd").new().run(main, ok)
 	await _held_fire(main)
 	_hit_ticks()
 	_boss_moves()
@@ -495,11 +498,22 @@ func _cc_cues() -> void:
 	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
 	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
 			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	var mob := Ent.new()
+	mob.m = m
+	mob.pos = Vector3(8, 0, 0)
+	var far_mob := Ent.new()
+	far_mob.m = m
+	far_mob.pos = Vector3(30, 0, 0)
+	m.set("time", float(m.get("time")) + 1.0)
+	var on_mob := _cc_heard(mob, "slow")
+	var on_far := _cc_heard(far_mob, "slow")
+	ok(on_mob == ["cc_slow_mate"] and on_far.is_empty(),
+			"a monster or Boki slowed 8 m off plays the quiet cue; one 30 m off, nothing (%s %s)" % [on_mob, on_far])
 	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
 	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
 	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
 			"Ent.hurt and KitStatus.apply play the cues where the status lands")
-	for h in [me, mate, far_mate, rival]:
+	for h in [me, mate, far_mate, rival, mob, far_mob]:
 		h.free()
 	m.free()
 
@@ -511,7 +525,7 @@ func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
 	return h
 
 ## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
-func _cc_heard(h: Hunter, kind: String) -> Array:
+func _cc_heard(h: Ent, kind: String) -> Array:
 	for k in Sfx.last_played.keys():
 		if String(k).begins_with("cc_"):
 			Sfx.last_played.erase(k)

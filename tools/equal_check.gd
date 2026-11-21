@@ -512,6 +512,9 @@ func _gloves() -> void:
 	ok(B.skill_pts < 8 and not B.slot_lv.has("gear"),
 			"a bot spends its points on its hero's abilities (%s)" % str(B.slot_lv))
 	# the HUD: both gloves and the Boki's Merge box sit on the right (GripHud), not on the left bar
+	# (at level 6: before it the locked Merge tile is held back, HudReveal "ult_tiles")
+	var lvl0: int = P.lvl
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
 	m.hud.c.queue_redraw()
 	for i in 3: await main.get_tree().process_frame
 	var sz: Vector2 = m.hud.c.size
@@ -524,6 +527,7 @@ func _gloves() -> void:
 		if String(hs[1]) == "r" and (hs[0] as Rect2).position.x > sz.x * 0.5:
 			merge_right = true
 	ok(P.kin == null or merge_right, "the Boki box beside them is the Merge's (its key and tip: \"ultimate\")")
+	P.lvl = lvl0
 	ok(not P.slot_info("gear1").is_empty()
 			and String(P.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]),
 			"the V glove has its own slot info")

@@ -113,7 +113,7 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 | 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
 | 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
 | 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
-| 8 | Grapnel line | closed | the hook is his own model's arm stretched out (`WardenReach`, owner playtest 11-11); where it runs through rock a silhouette is drawn on top (`ld_arm.gdshader` depth test off) |
+| 8 | Grapnel line | closed | the hook is his own model's arm stretched out (`WardenReach`, owner playtest 11-11); where it runs through rock a silhouette is drawn on top (`arm_ghost`, an `xray` HeroVfx string: depth test off) |
 | 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
 | 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
 | 11 | Shotgun range and fan | closed | `shotgun.json` fan 20, bloom to 10 (30 at most; ext/combat-spread-falloff, the footage's 20 rested and 30 firing), range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
@@ -298,6 +298,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge timing | short and fast, seen travelling, then he stops | "barge: a short, fast shove you see travel (about half way at half its time), then he stops" |
 | A run of barges | three, a short gap between | "barge: three in a row, a short gap between (a press inside the gap does nothing)" |
 | Barge into a foe | it touches nobody (no shove, no damage) | "barge: it shoves and hurts nobody (the source's Brute Dash)" |
+| Barge `hit_kb` | removed: it was dead data (never read), so the barge has no knock (ext/tenzo-grimble-knock-cut) | Brute Dash: no damage, no knock [D] |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
@@ -430,13 +431,17 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 | Pounce, dive, quake, jump, flex, reel end | no footage timing | clip = kit | same | none |
 
 ## Look and sound
-- Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
-  `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
-  flash; his own right arm stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim line so no clip swings it, home down the line after), sludge drips, a dark silhouette where it runs through rock; the brass
-  and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
-  brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
-  scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
-  after-images along it.
+- Every effect is data (`content/vfx/dredge.json`, HeroVfx, his gold and brass palette; only the Broadside slugs stay LDFx): the muzzle flash (`shot`),
+  gold slug trails that end in a small brass flare at the stop line (`slug`, `slug_end`), the hook's end and grab flares, a
+  dark sludge silhouette of the arm where it runs through rock (`arm_ghost`: an `xray` string drawn over walls), a brass ring
+  at his feet while he reels (`reel`), the Anchor slam (`anchor_slam`: the falling fist, a lit gold arc over the cone, cracked
+  ground, a ring), seafoam stun swirls over the foes it stuns (`stunned`), the air smash (`dive`: he rides a fist down over a
+  thin ring the size of the quake; `quake`: rings, flare, scorch and the fist planted), and Broadside's charge spark, fist
+  flash and hit flash (its slugs, which fly the whole fan, stay `LDFx.volley`). Nothing is drawn on a dash but its trail.
+  The Anchor's telegraphs (AimKit) are his palette's seafoam `anchor`.
+- His own right arm is stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim
+  line so no clip swings it, home down the line after), with sludge drips; the barge tears up clods of turf where the lunge
+  sets off, with iron and brass after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,
@@ -454,7 +459,9 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
 Grimble is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
 props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
-special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step
+special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived.
+Other games see his arm reach too (decision 0171): the hunter row carries the reach (`DredgeKit.net_reach`) and their copy
+of him lays the arm on it; the hook is a `"drawn"` shot, so no game shows a ball for it. The hook's shot carries `"rocks": true`, which the match's shot step
 reads to let it fly over rocks (one condition in `match.gd`). Grounded on the caster uses `KitStatus` "gnd"; `Hunter.do_dash` lets a
 reeling Grimble barge anyway (`DredgeKit.reeling`).
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),
