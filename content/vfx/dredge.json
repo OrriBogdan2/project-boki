@@ -1,5 +1,5 @@
 {
-	"palette": {"main": "d89040", "hot": "fff0b0", "char": "5a3410", "gold": "ffc832"},
+	"palette": {"main": "d89040", "hot": "fff0b0", "char": "5a3410", "gold": "ffc832", "brass": "e0a040", "iron": "3a3f48", "stone": "8a7a66", "w1": "ff9a14", "w2": "ffd24a", "w1h": "fff0c0", "w2h": "ffe0a0", "arm": "d8a030", "bone": "dbccb3", "sludge": "5a4414", "anchor": "5cffd8"},
 	"anchors": {"chest": {"body": [0.0, 1.0, 0.0]}, "low": {"body": [0.0, 0.4, 0.0]}},
 	"moves": {
 		"dash": {"net": false, "fx": [
@@ -9,6 +9,46 @@
 		"dash_hit": {"net": false, "fx": [
 			{"p": "flare", "y": 2.1, "size": 1.6, "life": 0.3, "c": "gold", "c2": "hot", "when": "hit"},
 			{"p": "star", "y": 2.1, "n": 6, "speed": 3.5, "spread": 1.0, "grav": 4.0, "life": 0.3, "size": 0.08, "c": "gold", "c2": "hot", "when": "hit"}
+		]},
+		"shot": {"net": false, "fx": [
+			{"p": "flare", "size": 1.2, "life": 0.08, "c": "brass", "c2": "hot"},
+			{"p": "ember", "way": "fwd", "n": 6, "speed": 6.0, "spread": 0.4, "grav": 4.0, "life": 0.18, "size": 0.05, "c": "gold", "c2": "hot"}
+		]},
+		"slug": {"net": false, "round": false, "end": "slug_end", "fx": [
+			{"p": "ribbon", "size": 0.2, "tail": 0.05, "head": 0.3, "head_len": 1.5, "life": 2.0, "c": "gold", "c2": "hot"}
+		]},
+		"slug_end": {"net": false, "fx": [{"p": "flare", "size": 0.18, "grow": 1.0, "life": 0.3, "c": "brass", "c2": "char"}]},
+		"reel": {"net": false, "fx": [{"p": "ring", "at": "h", "ride": true, "size": 0.78, "thin": true, "life": 1.0, "c": "brass", "c2": "gold", "c3": "iron"}]},
+		"arm_ghost": {"net": false, "fx": [{"p": "string", "xray": true, "size": 0.45, "c": "sludge", "c2": "arm"}]},
+		"stunned": {"net": false, "fx": [{"p": "vortex", "y": 2.6, "size": 0.6, "life": "t", "c": "anchor", "c2": "hot", "c3": "iron"}]},
+		"dive": {"net": false, "fx": [
+			{"p": "fist", "at": "h", "ride": true, "y": -1.7, "size": 1.1, "drop": 0.0, "fall": 0.01, "life": 1.0, "c": "main", "c2": "hot", "c3": "char"},
+			{"p": "ring", "size": "r", "thin": true, "life": 1.0, "c": "brass", "c2": "gold", "c3": "iron"}
+		]},
+		"hook_end": {"net": false, "fx": [{"p": "flare", "size": 1.2, "life": 0.15, "c": "arm", "c2": "bone"}]},
+		"hook_grab": {"net": false, "fx": [{"p": "flare", "y": 1.0, "size": 2.0, "life": 0.15, "c": "arm", "c2": "hot"}]},
+		"anchor_slam": {"fx": [
+			{"p": "sweep", "y": 0.25, "size": "r", "arc": 110, "band": 0.12, "life": 0.25, "c": "gold", "c2": "hot", "c3": "iron"},
+			{"p": "scorch", "shape": "disc", "fwd": 1.1, "size": 1.6, "life": 1.4, "c": "stone", "c2": "stone", "c3": "iron"},
+			{"p": "scorch", "shape": "cone", "arc": 110, "size": "r", "size_x": 0.7, "life": 1.2, "c": "stone", "c2": "stone", "c3": "iron"},
+			{"p": "flare", "fwd": 1.1, "y": 0.3, "size": 2.2, "life": 0.08, "c": "brass", "c2": "hot"},
+			{"p": "ring", "fwd": 1.8, "size": 1.8, "life": 0.35, "delay": 0.06, "c": "gold", "c2": "hot", "c3": "iron"}
+		]},
+		"quake": {"fx": [
+			{"p": "ring", "size": "r", "life": 0.45, "c": "gold", "c2": "hot", "c3": "iron"},
+			{"p": "ring", "size": "r", "size_x": 0.6, "life": 0.3, "c": "brass", "c2": "hot", "c3": "iron"},
+			{"p": "flare", "size": "r", "size_x": 1.8, "life": 0.35, "c": "brass", "c2": "hot"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.6, "life": 1.2, "c": "gold", "c2": "brass", "c3": "iron"},
+			{"p": "fist", "fwd": 0.6, "size": 2.0, "pitch": -30, "drop": 0.0, "fall": 0.01, "life": 0.55, "c": "main", "c2": "hot", "c3": "char"}
+		]},
+		"blast_charge": {"net": false, "fx": [{"p": "flare", "size": 0.4, "size_k": 1.0, "life": 0.08, "c": "w1", "c2": "w1h"}]},
+		"blast_wave": {"fx": [
+			{"p": "flare", "size": 1.2, "life": 0.3, "c": "w1", "c2": "w1h", "unless": "w2"},
+			{"p": "flare", "size": 1.2, "life": 0.3, "c": "w2", "c2": "w2h", "when": "w2"}
+		]},
+		"blast_hit": {"net": false, "fx": [
+			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.1, "c": "w1", "c2": "w1h", "unless": "w2"},
+			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.1, "c": "w2", "c2": "w2h", "when": "w2"}
 		]},
 		"anchor_fist": {"fx": [{"p": "fist", "fwd": "r", "fwd_x": 0.55, "size": 2.4, "pitch": -30, "drop": 3.6, "life": 0.68, "fall": 0.56, "cut": 0.56, "c": "main", "c2": "hot", "c3": "char"}]}
 	}
