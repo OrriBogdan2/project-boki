@@ -17,13 +17,13 @@ static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material
 	return false
 
 ## One great basalt gauntlet, much bigger than the hand: a fist of stacked plates whose cracks glow
-## with magma (shaders/molten_rock), four knuckle studs, a thumb slab, a strapped wrist bracer and a
+## rune teal (KitLooks.slate_mat), four knuckle studs, a thumb slab, a strapped wrist bracer and a
 ## hot core at the back of the hand. The fist leads her silhouette.
 static func _fists(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
-	var rock := KitLooks.rock_mat(0.5, 2.0)
-	var rock2 := KitLooks.rock_mat(0.35, 5.0)
-	var pale := Models.toon(Color("e0bd86"), true, 0.5)
-	var seam := Models.toon(Color("ffb36a"), false, 1.6)
+	var rock := KitLooks.slate_mat(0.5, 2.0)
+	var rock2 := KitLooks.slate_mat(0.35, 5.0)
+	var pale := Models.toon(KitLooks.SLATE_CAP, true, 0.5)
+	var seam := Models.toon(KitLooks.RUNE_TEAL, false, 1.6)
 	# the fist
 	Models.part(gun, Models.box(0.27, 0.25, 0.34), rock, Vector3(0, 0, -0.2))
 	# the back plate
@@ -40,7 +40,7 @@ static func _fists(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 	Models.part(gun, Models.box(0.25, 0.016, 0.016), seam, Vector3(0, -0.02, -0.37))
 	Models.part(gun, Models.box(0.016, 0.2, 0.016), seam, Vector3(0.12, 0.0, -0.26))
 	# the hot core
-	Models.part(gun, Models.sphere(0.05, 10), Models.glow_mat(Color(1.0, 0.55, 0.15, 0.9)), Vector3(0, 0.16, -0.22))
+	Models.part(gun, Models.sphere(0.05, 10), Models.glow_mat(Color(KitLooks.RUNE_TEAL, 0.9)), Vector3(0, 0.16, -0.22))
 	# the bracer
 	Models.part(gun, Models.cyl(0.1, 0.12, 0.2, 10), m_dark, Vector3(0, 0, 0.0), Vector3.ONE, Vector3(PI / 2, 0, 0))
 	for z in [-0.06, 0.05]:
