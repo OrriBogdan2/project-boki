@@ -56,18 +56,12 @@ static func begin(group_name: String) -> void:
 static func note(r: Rect2) -> void:
 	if group != "":
 		HudScale.grow(r)
-	_record(group, r)
+	note_as(group, r)
 
 
 ## `r` under a group of its own: for widgets drawn outside the panel pass (the Ways Out strip, markers, prompts).
 ## It is recorded where it ends up: under the HUD size scale of the group being drawn (none outside the panel pass).
-## The camera's lean keeps clear of it too (HudScale.drawn).
 static func note_as(group_name: String, r: Rect2) -> void:
-	HudScale.overlay(group_name, r)
-	_record(group_name, r)
-
-
-static func _record(group_name: String, r: Rect2) -> void:
 	if recording and group_name != "":
 		if not seen.has(group_name):
 			seen[group_name] = []
