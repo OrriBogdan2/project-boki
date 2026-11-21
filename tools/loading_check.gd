@@ -25,6 +25,7 @@ func run(main: Node) -> void:
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
 	_hunters()
+	await _shots(main)
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -46,6 +47,31 @@ func _hunters() -> void:
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
 		ok(calm.tip != "" and not calm.tip.contains("Blight"), "%s: no Blight tip when the Blight is off" % ak)
 		calm.free()
+
+## With --shots-dir=<dir> [--size=WxH]: the screen for a trio mid-load, as <dir>/loading_<W>x<H>.png.
+func _shots(main: Node) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="):
+			dir = a.substr(12)
+		if a.begins_with("--size="):
+			var wh := a.substr(7).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
+	if dir == "":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	if main.fade != null:
+		main.fade.reveal(0.01)
+	var ld: Node = load(LOADING).new()
+	ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3})
+	main.add_child(ld)
+	ld.want = 0.6
+	ld.set_stage("graphics")
+	for i in 40:
+		await main.get_tree().process_frame
+	var win := main.get_window().size
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("loading_%dx%d.png" % [win.x, win.y]))
+	ld.queue_free()
 
 func _screen(main: Node) -> Node:
 	for ch in main.get_children():
