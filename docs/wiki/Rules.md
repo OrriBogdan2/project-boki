@@ -242,6 +242,8 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | chore_chance | 0.3 |
 | chore_chance_doc | chance a roaming Boki whose knack has a chore to do right now (scripts/home/base_chore.gd) does it. |
 | chore_mind | 15 |
+| chore_water | 6 |
+| chore_water_doc | s a Tide Boki stands at the dry snack patch before it is watered. |
 | chore_mind_doc | s an Ember Boki sits by the egg before the egg's hatch time halves. |
 | nap | [20.0, 40.0] |
 | nap_doc | s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn. |
@@ -2216,7 +2218,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 ## snack_patch (`content/rules/snack_patch.json`)
 
-The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed, shop or water chore.
+The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed or shop; a Tide Boki's water chore (scripts/home/base_chore.gd) speeds it up.
 
 | Setting | Value |
 |---|---|
@@ -2225,6 +2227,8 @@ The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDE
 | zone_snacks | {"bramblebank": ["kibble", "sweetbun", "sunroot", "sapjelly", "glowcap"], "glasswater": ["tidebloom", "frostdrop", "geodecandy"], "cinderstep": ["emberberry", "pebblenut", "ironcrisp", "scalepepper"], "hushwood": ["duskplum", "mindmint", "pricklepear"], "ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]} |
 | zone_snacks_doc | Each zone's snack list, the foods of its group's types (GARDEN.md 10.2): Bramblebank normal, grass, bug, spore; Glasswater water, ice, crystal; Cinderstep fire, rock, steel, dragon; Hushwood dark, psychic, poison; Kitewind (theme ridge) flying, electric, fairy, sound. Every food in lean.json is in exactly one list (--lean-snacks-check). A patch on a theme with a list grows that list; the key is the home_layout THEMES id. |
 | grow_secs | 480 |
+| water_mult | 0.7 |
+| water_mult_doc | Share of grow_secs a watered patch needs: a Tide Boki waters a dry, growing patch once per ripening and it ripens 30% sooner. |
 | grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
 | reach | 0.35 |
 | reach_doc | Tiles beyond the patch's edge from which your feet pick the snacks. |
