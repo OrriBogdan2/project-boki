@@ -1,0 +1,42 @@
+{
+	"palette": {"main": "9a5cff", "hot": "e6d8ff", "soft": "c9a0ff", "ghost": "b890ff", "flash": "e070ff", "deep": "3a1670", "slot": "b07aff", "char": "2a1450", "white": "ffffff"},
+	"anchors": {
+		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "hand": "r", "body": [0.3, 1.0, 0.3]},
+		"foot_l": {"bone": "shin.L", "off": [0.0, 0.42, 0.0], "body": [-0.12, 0.1, 0.0]},
+		"chest": {"nodes": ["anchor_chest"], "body": [0.0, 0.8, 0.0]},
+		"feet": {"nodes": ["anchor_feet"], "body": [0.0, 0.15, 0.0]}
+	},
+	"moves": {
+		"bolt_trail": {"net": false,
+			"fx": [{"p": "ribbon", "streak": true, "size": 0.42, "life": 2.0, "tail": 0.022, "c": "deep", "c2": "main", "c3": "deep"},
+				{"p": "ribbon", "streak": true, "size": 0.26, "life": 2.0, "tail": 0.02, "head": 0.36, "head_len": 1.6, "c": "main", "c2": "slot", "c3": "deep"},
+				{"p": "ribbon", "streak": true, "size": 0.1, "life": 2.0, "tail": 0.016, "c": "white", "c2": "white", "c3": "hot"}]},
+		"bolt_hit": {"net": false,
+			"fx": [{"p": "flare", "size": 0.8, "grow": 1.2, "life": 0.16, "c": "slot", "c2": "white", "c3": "deep"},
+				{"p": "sweep", "size": 0.75, "arc": 150, "tilt": 62, "lean": 40, "life": 0.22, "c": "slot", "c2": "hot", "c3": "deep"},
+				{"p": "star", "n": 2, "speed": 0.2, "spread": 1.0, "life": 0.14, "size": 0.5, "c": "hot", "c2": "white", "c3": "main"},
+				{"p": "ember", "way": "fwd", "n": 9, "speed": 6.5, "spread": 0.6, "grav": 7.0, "drag": 1.5, "life": 0.28, "size": 0.05, "stretch": 0.05, "c": "slot", "c2": "hot", "c3": "deep", "near": true}]},
+		"dash": {"net": false, "fx": [
+			{"p": "ribbon", "at": "chest", "size": 0.5, "life": "t", "tail": 0.3, "c": "ghost", "c2": "hot"},
+			{"p": "ribbon", "at": "feet", "size": 0.35, "life": "t", "tail": 0.25, "c": "main", "c2": "ghost"}
+		]},
+		"flip": {"net": false, "fx": [
+			{"p": "ribbon", "at": "hand_r", "delay": 0.1, "size": 0.32, "life": 0.2, "tail": 0.3, "c": "ghost", "c2": "hot"},
+			{"p": "ribbon", "at": "foot_l", "delay": 0.1, "size": 0.32, "life": 0.2, "tail": 0.3, "c": "main", "c2": "hot"}
+		]},
+		"encore": {"sfx": [
+			{"n": "dj_encore", "db": -2, "other": -3, "var": 0.0},
+			{"n": "dj_encore_rise", "db": -2, "other": -3, "var": 0.0}
+		]},
+		"encore_beat": {"sfx": [{"n": "dj_blade", "db": -8, "at": "h", "var": 0.07, "pitch": 1.02}], "fx": [
+			{"p": "flare", "size": 0.5, "life": 0.1, "c": "main", "c2": "hot"}
+		]},
+		"encore_hit": {"sfx": [{"n": "dj_encore_hit", "db": -10, "var": 0.12, "pitch": 1.02}], "fx": [
+			{"p": "flare", "y": 1.0, "size": 0.55, "life": 0.16, "c": "flash", "c2": "hot"}
+		]},
+		"encore_hit_rim": {"sfx": [{"n": "dj_encore_hit", "db": -10, "var": 0.12, "pitch": 0.87}], "fx": [
+			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.16, "c": "flash", "c2": "white"},
+			{"p": "star", "y": 1.0, "n": 5, "speed": 3.0, "spread": 1.0, "grav": 3.0, "life": 0.3, "size": 0.07, "c": "main", "c2": "hot", "near": true}
+		]}
+	}
+}
