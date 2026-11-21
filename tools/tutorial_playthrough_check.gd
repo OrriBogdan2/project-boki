@@ -6,6 +6,7 @@ extends "res://tools/new_player_flow_check.gd"
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
 
 const STEP_LIMIT_S := 40.0      # s of game time one step may take (the flow check's own limit is 45)
+const TIME_SCALE := 4.0         # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
 
 var step_id := ""
 var step_s := 0.0
@@ -18,10 +19,12 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	main.get_window().size = Vector2i(1280, 720)
+	Engine.time_scale = TIME_SCALE
 	await _prologue()
 	await _hatch()
 	await _tutorial_match()
 	_end()
+	Engine.time_scale = 1.0
 	print("TUTPLAY STEPS: " + ", ".join(rows))
 	print("TUTPLAY DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
