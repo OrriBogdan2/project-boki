@@ -4,11 +4,25 @@ extends Node3D
 ## Meshy's model of Kael and Grimble has no weapon, so the live weapon is cut out of the contract model's .glb (its
 ## surfaces by material), unskinned, and held rigidly in Meshy's hand bone. In Meshy's idle it sits in the hand as the
 ## contract model holds it at rest; from there it turns and moves with Meshy's hand through every clip.
+## "mirror": the contract model holds it in the other hand than the splash: cut it mirrored across the model's middle
+## (x = 0), so the contract's right-hand grip becomes a left-hand one (Kael: sword in the dark-veined left hand).
+## "tilt": game state -> degrees the weapon turns on the body's side axis (model x) about the grip, from its seat in
+## the idle (+ tips it forward and up), eased over TILT_RATE as the state changes: a long weapon held off the floor
+## in every clip (Kael's sword tip dragged in the idle and the crouch; Grimble's blunderbuss in the jump).
+
+const MIRROR := Transform3D(Vector3(-1.0, 0.0, 0.0), Vector3.UP, Vector3.BACK, Vector3.ZERO)
+
+const TILT_RATE := 900.0  # deg/s: the weapon turns to the next state's tilt (a 120-degree raise in ~0.13 s)
 
 static var _meshes := {}  # art name -> the weapon at the contract model's rest (model space), cut once a session
 static var _anchors := {}  # art name -> {anchor empty name: its rest frame (model space)} (data "anchors")
 
-var grip: Transform3D  # the weapon's frame in Meshy's hand bone's frame (model space)
+var grip: Transform3D  # the weapon's frame in Meshy's hand bone's frame (model space), at this frame's tilt
+var seat: Transform3D  # the weapon's frame (model space) on Meshy's idle hand, untilted
+var hand_idle: Transform3D  # Meshy's hand bone (model space) at the start of its idle
+var tilts := {}  # game state -> degrees (data "tilt")
+var tilt := 0.0  # degrees now
+var tilt_to := 0.0  # degrees the state wants
 var pivot: Vector3  # the contract hand bone's rest pivot (the grip), in the weapon's own space
 
 
@@ -17,9 +31,14 @@ var pivot: Vector3  # the contract hand bone's rest pivot (the grip), in the wea
 static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transform3D) -> WardenHeld:
 	var nm := WardenGlb.art(arch)
 	var bone := String(w.get("bone", "hand.R"))
+	var mirror := bool(w.get("mirror", false))
 	if not _meshes.has(nm):
 		_anchors[nm] = {}
 		_meshes[nm] = _cut(nm, w.get("materials", []), bone, w.get("anchors", []), _anchors[nm])
+		if mirror and _meshes[nm]:
+			_meshes[nm] = _mirrored(_meshes[nm])
+			for an in _anchors[nm]:
+				_anchors[nm][an] = MIRROR * (_anchors[nm][an] as Transform3D) * MIRROR
 	var rest := WardenGlb.neutral_rest(arch)
 	if _meshes[nm] == null or not rest.has(bone):
 		return null
@@ -35,11 +54,35 @@ static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transfor
 		at.transform = _anchors[nm][an]
 		held.add_child(at)
 	held.pivot = (rest[bone] as Transform3D).origin
-	held.grip = (
-		hand_idle.affine_inverse() * Transform3D(Basis.IDENTITY, hand_idle.origin - held.pivot)
-	)
+	if mirror:
+		held.pivot.x = -held.pivot.x
+	held.hand_idle = hand_idle
+	held.seat = Transform3D(Basis.IDENTITY, hand_idle.origin - held.pivot)
+	held.tilts = w.get("tilt", {})
+	held.tilt = float(held.tilts.get("idle", 0.0))
+	held.tilt_to = held.tilt
+	held.grip = held.grip_at(held.tilt)
 	model.add_child(held)
 	return held
+
+
+## The weapon's frame in the hand bone's frame, turned `deg` about the grip on the body's side axis.
+func grip_at(deg: float) -> Transform3D:
+	var about := Transform3D(Basis.IDENTITY, hand_idle.origin)
+	var turn := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(deg)), Vector3.ZERO)
+	return hand_idle.affine_inverse() * about * turn * about.affine_inverse() * seat
+
+
+## The game state now playing: the weapon eases to its tilt (data "tilt", 0 when the state has none).
+func state(st: String) -> void:
+	tilt_to = float(tilts.get(st, 0.0))
+
+
+## Eases the tilt on by `dt` s.
+func ease_tilt(dt: float) -> void:
+	if tilt != tilt_to:
+		tilt = move_toward(tilt, tilt_to, TILT_RATE * dt)
+		grip = grip_at(tilt)
 
 
 ## Placed for this frame from Meshy's hand bone (model space).
@@ -83,6 +126,26 @@ static func _cut(
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 	glb.free()
 	return out if out.get_surface_count() > 0 else null
+
+
+## `mesh` mirrored across x = 0: positions and normals flipped on x, each triangle's winding turned back.
+static func _mirrored(mesh: ArrayMesh) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arr := mesh.surface_get_arrays(si)
+		arr[Mesh.ARRAY_VERTEX] = MIRROR * (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+		if arr[Mesh.ARRAY_NORMAL] != null:
+			arr[Mesh.ARRAY_NORMAL] = MIRROR * (arr[Mesh.ARRAY_NORMAL] as PackedVector3Array)
+		if arr[Mesh.ARRAY_INDEX] != null:
+			var idx := arr[Mesh.ARRAY_INDEX] as PackedInt32Array
+			for t in range(0, idx.size() - 2, 3):
+				var k := idx[t + 1]
+				idx[t + 1] = idx[t + 2]
+				idx[t + 2] = k
+			arr[Mesh.ARRAY_INDEX] = idx
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		out.surface_set_material(si, mesh.surface_get_material(si))
+	return out
 
 
 ## A skinned vertex riding `bone` back to the model space of the contract model at rest (bone rest times its bind).

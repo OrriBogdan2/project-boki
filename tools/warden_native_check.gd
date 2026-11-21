@@ -10,6 +10,8 @@ extends RefCounted
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
+const FLOOR_GAP := 0.02  # m: a held weapon's lowest point stays this far over the floor in every state's clip
+const SAMPLES := 12  # poses read along each state's clip for the floor gap
 const HELD_MIN := 0.3  # m: a held weapon (data "weapon") is at least this long (Grimble's blunderbuss ~0.5, Kael's sword)
 
 var bad := 0
@@ -164,9 +166,40 @@ func _held(a: String, m: Node3D, nat: WardenNative) -> void:
 		sm != null and (m.get_meta("mats", []) as Array).has(sm),
 		"%s: the held weapon is hero-toon shaded" % a
 	)
+	ok(
+		nat.skel.skeleton_updated.is_connected(nat._follow_held),
+		"%s: the weapon sits in a fixed socket (placed as the skeleton is posed)" % a
+	)
+	var low := _lowest(nat, mi.mesh)
+	ok(
+		low[0] > FLOOR_GAP,
+		"%s: the weapon clears the floor in every clip (lowest %.3f m, %s)" % [a, low[0], low[1]]
+	)
 	var names: Array = nat.d["weapon"].get("anchors", [])
 	var found := names.filter(func(an): return WardenGlb.anchor(m, an) != null)
 	ok(found.size() == names.size(), "%s: the weapon's anchors ride it (%s)" % [a, str(found)])
+
+
+## The held weapon's lowest vertex over the floor (model space, y 0) along each state's clip at that state's tilt
+## (data "tilt"), and where: [m, "state t"].
+func _lowest(nat: WardenNative, mesh: Mesh) -> Array:
+	var pts := PackedVector3Array()
+	for si in mesh.get_surface_count():
+		pts.append_array(mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+	var best := [INF, ""]
+	for st in ["idle", "walk", "run", "jump", "attack", "crouch"]:
+		var nm := String(nat.plays[st])
+		var len := nat.player.get_animation(nm).length
+		nat.player.play(nm, 0.0)
+		for k in SAMPLES:
+			nat.player.seek(len * k / SAMPLES, true)
+			var xf := WardenGlb.model_xf(nat.root, nat.skel) * nat.skel.get_bone_global_pose(nat.hand)
+			xf = xf * nat.held.grip_at(float(nat.held.tilts.get(st, 0.0)))
+			for p in pts:
+				var y := (xf * p).y
+				if y < best[0]:
+					best = [y, "%s %.2fs" % [st, len * k / SAMPLES]]
+	return best
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").
