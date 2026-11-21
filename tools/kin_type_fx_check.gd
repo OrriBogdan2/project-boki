@@ -81,4 +81,8 @@ func _cast_test(main: Node) -> void:
 	ok(KinTypeFx.LOOKS.has(KinTypeFx.key(type)), "its type '%s' has an accent" % type)
 	var before := m.fx.bi + m.fx.si + m.fx.rings.size()
 	k._cast("k1", k.pos + Vector3(3, 0, 0), true, k, 1.0)
+	if k.cast_do.is_valid():       # (a rigged Boki winds up first: the accent plays on its release frame)
+		var let_go := k.cast_do
+		k.cast_do = Callable()
+		let_go.call()
 	ok(m.fx.bi + m.fx.si + m.fx.rings.size() > before, "casting an ability plays the accent")
