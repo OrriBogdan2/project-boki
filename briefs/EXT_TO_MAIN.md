@@ -10772,3 +10772,4 @@ READY ext/tut-training-stations 9b1fcdd9b24711e23d2f8ea5a8f054cc6ff3fb6b (merged
 READY ext/merge-lane-M5-1121 18bcdaa63ed02f143efc10bea84bd80620e0af3b (M5 bundle re-merged with main: one time trial, the lane's newer course kept (centred clock, finish 4 m east, real-dash gates), dup save key + check flag dropped; --check 0 fail, --ability-bar-check 0 fail, --time-trial-check 19/0, --grounds-check 25/0, health strict red only on main's existing style lines)
 READY ext/sfx-snack-patch e5d9152b2be4d44400a59a5caea1f08ee7f3f661 (garden snack patch: soft ripe chime + per-texture pick-up crunch, 5 cues in garden set)
 READY ext/merge-lane-M3-1121 2ea6c9391884321bec64b363ac3bf25da65572ce (merge lane M3: 16 no-PR branches; save leans v22->v23; NEW-RED 0 after 1 flaky re-run, export OK 885 MB)
+READY ext/garden-toy-xp 3c23c3a1c110158191cdc337dc70c73dfe5c9785 (merge lane M3: a finished toy play pays 5 kin XP; 11 related checks pass, garden-only-pass red on main too)
