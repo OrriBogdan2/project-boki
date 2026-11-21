@@ -21,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	table = JSON.parse_string(FileAccess.get_file_as_string(TABLE))
 	holder = Node3D.new()
