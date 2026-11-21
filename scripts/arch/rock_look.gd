@@ -12,7 +12,8 @@ const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
 const CRACK_A := 0.95                # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
 const CRUMBLE_T := 0.34              # s: a broken rock slumps into the ground
 const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)   # the ground cracks: the rune teal of his arm
-const RIM := 0.4
+const RIM := 0.22
+const HEAT := 0.05                  # thin teal cracks, like the runes on his arm: the stone stays slate
 const RUMBLE_GAP := 0.09             # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
 # a crag's rings going up: [share of its height, share of its base radius]
@@ -145,7 +146,7 @@ static func _crag(i: int) -> Array:
 		for v in [rings[-1][s], rings[-1][(s + 1) % SIDES], peak]:
 			st.add_vertex(v)
 	st.generate_normals()
-	var mt := KitLooks.slate_mat(0.3, float(i) * 1.7, RIM)
+	var mt := KitLooks.slate_mat(HEAT, float(i) * 1.7, RIM)
 	mt.set_shader_parameter("cap_col", KitLooks.SLATE_CAP)   # the sunlit upward faces: what the match camera sees most
 	mt.set_shader_parameter("cap", 1.0)
 	_crags[i] = [st.commit(), mt]
