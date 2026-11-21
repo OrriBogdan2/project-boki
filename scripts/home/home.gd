@@ -719,8 +719,7 @@ func _ready_rest() -> void:
 		var nb := int(Save.d["box_notice"])
 		Save.d.erase("box_notice")
 		Save.save_game()
-		_show_when_free(["The farm has room for %d Boki out at once now. Your partner, your first Boki and your closest ones stayed out; the other %d curled up in the new Boki Burrow, south of the market stall by the pond." % [KinBox.farm_cap(), nb],
-			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
+		_show_when_free(HomeNotices.burrow(KinBox.farm_cap(), nb))
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
@@ -1114,12 +1113,13 @@ func _process(delta: float) -> void:
 	_abyss_tint(d)
 	_find_interact()
 	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	InteractGate.track(idle)
 	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
 	if carry.tick(d, interact, idle):
 		return
 	if idle and not interact.is_empty():
-		if Input.is_action_just_pressed("interact"):
+		if InteractGate.pressed():
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
@@ -1355,7 +1355,9 @@ func _move_player(d: float) -> void:
 		elif gliding and pvy <= 0.0:
 			pvy = move_toward(pvy, -HunterMove.glide_sink, Loco.glide_catch * d)
 		else:
-			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			var vy := maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			py += 0.5 * (pvy - vy) * d       # (exact gravity, as the match's HunterMove.fall: same apex at any step)
+			pvy = vy
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
@@ -3107,7 +3109,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud and not compact:
+	if ud and not compact and MergeForm.enabled():
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
@@ -3488,11 +3490,10 @@ func _open_kit_card() -> void:
 func _open_loadout() -> void:
 	_open_expedition()
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same one the title and the expedition panel open), as your expedition Hunter.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
@@ -4953,7 +4954,7 @@ func _open_train(rec: Dictionary) -> void:
 		hrace.solo(rec)         # base_mode: training is a solo lap of the Dash
 		return
 	var v := _new_panel("Train %s" % rec["name"], 560)
-	v.add_child(UI.label("A short drill at the yard. Time your presses: gold is great, orange is good. Costs some energy and food; a happy Boki learns faster.", 14, UI.MUTED))
+	v.add_child(UI.label("A short drill at the Training post. Time your presses: gold is great, orange is good. Costs some energy and food; a happy Boki learns faster.", 14, UI.MUTED))
 	for s in Care.STATS:
 		var st: Dictionary = Care.STATS[s]
 		var row := UI.hbox(10)
