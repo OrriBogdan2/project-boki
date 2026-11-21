@@ -8,12 +8,6 @@ const RANGES := [4.0, 8.0, 12.0]  # m to the dummy unless a case lists its own (
 const RATES := [30.0, 144.0]
 const SECS := 2.2  # how long each cast is stepped
 const WARM := 0.5  # s of idle stepping before a cast (animations settle at the new rate)
-
-var main: Node
-var n := 0
-var fails := 0
-var ak: RefCounted
-
 ## What each case does. fire: hold LMB; rmb: hold RMB for a while (0 = tap); e: press E;
 ## dash: Shift toward the dummy; no_cover: it goes through a block by design (the hook pierces terrain,
 ## Kael mantles one), so no cover run.
@@ -24,19 +18,36 @@ const CASES := [
 	{"arch": "archer", "name": "Lace Heavy Shot", "rmb": 1.6},
 	{"arch": "rimewright", "name": "Neve darts", "fire": 0.5},
 	{"arch": "rimewright", "name": "Neve Palm Lance", "rmb": 0.6},
-	{"arch": "dredge", "name": "Grimble Deep Reach", "rmb": 0.0, "no_cover": true, "ranges": [4.0, 7.0, 10.0]},
+	{
+		"arch": "dredge",
+		"name": "Grimble Deep Reach",
+		"rmb": 0.0,
+		"no_cover": true,
+		"ranges": [4.0, 7.0, 10.0]
+	},
 	{"arch": "dredge", "name": "Grimble shotgun", "fire": 0.4, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "thief", "name": "Sparkle Shadow Knife", "e": true},
 	{"arch": "thief", "name": "Sparkle Bola", "rmb": 0.0, "ranges": [3.0, 5.0, 6.5]},
 	{"arch": "mage", "name": "Motley dash", "dash": true, "ranges": [4.0, 7.0, 9.0]},
 	{"arch": "mage", "name": "Motley Coilshot", "rmb": 1.0},
 	{"arch": "juggernaut", "name": "Kael Warchain", "e": true},
-	{"arch": "juggernaut", "name": "Kael Rampage", "dash": true, "no_cover": true, "ranges": [2.0, 3.5, 5.0]},
+	{
+		"arch": "juggernaut",
+		"name": "Kael Rampage",
+		"dash": true,
+		"no_cover": true,
+		"ranges": [2.0, 3.5, 5.0]
+	},
 	{"arch": "juggernaut", "name": "Kael wave", "fire": 0.3, "ranges": [3.0, 5.0, 7.0]},
 	{"arch": "ostra", "name": "Sable snap", "rmb": 0.0},
 	{"arch": "tender", "name": "Meeko seed", "rmb": 0.0},
 	{"arch": "ashwick", "name": "Cinder bolt", "rmb": 0.0},
 ]
+
+var main: Node
+var n := 0
+var fails := 0
+var ak: RefCounted
 
 
 func ok(label: String, cond: bool, info := "") -> void:
@@ -67,9 +78,15 @@ func run(main_node: Node) -> void:
 func _segments() -> void:
 	var a := Vector3(0, 0, 0)
 	var b := Vector3(1.4, 0, 0)  # a 40 m/s step at 30 fps
-	ok("Swept.dist: a body between two steps is on the segment", Swept.dist(Vector3(0.7, 0, 0.3), a, b) < 0.31)
+	ok(
+		"Swept.dist: a body between two steps is on the segment",
+		Swept.dist(Vector3(0.7, 0, 0.3), a, b) < 0.31
+	)
 	ok("Swept.dist: a body beside the path is not", Swept.dist(Vector3(0.7, 0, 1.0), a, b) > 0.99)
-	ok("Swept.dist: past the end it measures to the end", is_equal_approx(Swept.dist(Vector3(2.4, 0, 0), a, b), 1.0))
+	ok(
+		"Swept.dist: past the end it measures to the end",
+		is_equal_approx(Swept.dist(Vector3(2.4, 0, 0), a, b), 1.0)
+	)
 
 
 func _arch(arch: String) -> void:
@@ -91,7 +108,9 @@ func _arch(arch: String) -> void:
 					hits += int(got)
 					line += " %.0fm@%.0f:%s" % [dist, rate, "hit" if got else "miss"]
 					await ak.done(m)
-			var label := "%s %s" % [c["name"], "blocked by thin cover" if cover else "hits a still dummy"]
+			var label := (
+				"%s %s" % [c["name"], "blocked by thin cover" if cover else "hits a still dummy"]
+			)
 			ok(label, (hits == 0) if cover else (hits == total), line)
 
 
@@ -105,47 +124,49 @@ func _block_between(m: Match, home: Vector3, dist: float) -> void:
 
 
 ## Resets the pair, casts once and steps `secs` at `dt`. True when the dummy took damage.
-func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary) -> bool:
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	T.teleport(home + Vector3(dist, 0, 0))
-	T.vel = Vector3.ZERO
-	ak.fresh(T)
-	T.hp = T.max_hp
-	var K: ArchKit = P.ak
-	for k in K.cd:
-		K.cd[k] = 0.0
-	K.ch_rmb = 1.0
-	P.dashes = P.max_dashes()
-	P.ammo = 99
+func _cast(
+	m: Match, pc: Hunter, tgt: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary
+) -> bool:
+	pc.teleport(home)
+	pc.vel = Vector3.ZERO
+	tgt.teleport(home + Vector3(dist, 0, 0))
+	tgt.vel = Vector3.ZERO
+	ak.fresh(tgt)
+	tgt.hp = tgt.max_hp
+	var kit: ArchKit = pc.ak
+	for k in kit.cd:
+		kit.cd[k] = 0.0
+	kit.ch_rmb = 1.0
+	pc.dashes = pc.max_dashes()
+	pc.ammo = 99
 	m.shots.clear()
 	_idle(m, WARM, dt)
-	ak.aim_at(P, T.pos)
+	ak.aim_at(pc, tgt.pos)
 	var hold_f := float(c.get("fire", 0.0))
 	var hold_r := float(c.get("rmb", -1.0))
 	if c.get("e", false):
-		K.use_e()
+		kit.use_e()
 	elif c.get("dash", false):
-		P.inp["dash_down"] = true
-		P.do_dash()
+		pc.inp["dash_down"] = true
+		pc.do_dash()
 	elif hold_r >= 0.0:
-		P.inp["sec_hold"] = hold_r > 0.0
-		K.press_rmb()
+		pc.inp["sec_hold"] = hold_r > 0.0
+		kit.press_rmb()
 	var t := 0.0
 	while t < SECS:
-		ak.aim_at(P, T.pos)
-		P.inp["fire"] = t < hold_f
-		P.inp["sec_hold"] = hold_r > 0.0 and t < hold_r
-		P.inp["dash_down"] = c.get("dash", false)
+		ak.aim_at(pc, tgt.pos)
+		pc.inp["fire"] = t < hold_f
+		pc.inp["sec_hold"] = hold_r > 0.0 and t < hold_r
+		pc.inp["dash_down"] = c.get("dash", false)
 		for mb in m.mobs:
 			mb.queue_free()
 		m.mobs.clear()
 		m.step(dt)
-		T.vel = Vector3.ZERO
+		tgt.vel = Vector3.ZERO
 		t += dt
 	for k in ["fire", "sec_hold", "dash_down"]:
-		P.inp[k] = false
-	return T.hp < T.max_hp
+		pc.inp[k] = false
+	return tgt.hp < tgt.max_hp
 
 
 func _idle(m: Match, secs: float, dt: float) -> void:

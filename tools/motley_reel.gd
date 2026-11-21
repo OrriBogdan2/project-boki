@@ -28,9 +28,9 @@ func run(main_node: Node) -> void:
 	_build_keys()
 	frame_dir = dir.path_join("frames")
 	DirAccess.make_dir_recursive_absolute(frame_dir)
-	P.lvl = 6
-	for slot in P.slot_lv:
-		P.slot_lv[slot] = 3
+	pc.lvl = 6
+	for slot in pc.slot_lv:
+		pc.slot_lv[slot] = 3
 	for part: String in MOTLEY_PARTS:
 		if only == "" or part == only:
 			print("REEL_MARK %d %s" % [frames, part])
@@ -57,18 +57,20 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
-	P = m.player
+	pc = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	P.unlock_all()
-	home = _spot(P.pos)
-	T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"})
+	pc.unlock_all()
+	home = _spot(pc.pos)
+	tgt = m.make_hunter(
+		"T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"}
+	)
 	for x in m.hunters:
-		if x != P and x != T:
+		if x != pc and x != tgt:
 			x.teleport(home + Vector3(-30, 0, 30))
 	await _reset(7.0)
 
@@ -77,7 +79,7 @@ func _m_e() -> void:
 	await _seg(
 		"E: the seed grows, no prompt on the ground; the E slot says E AGAIN",
 		5.0,
-		func(t: float) -> void: P.inp["sig"] = _in(t, 0.2) or _in(t, 4.0)
+		func(t: float) -> void: pc.inp["sig"] = _in(t, 0.2) or _in(t, 4.0)
 	)
 
 
@@ -85,7 +87,7 @@ func _m_trade() -> void:
 	await _seg(
 		"Shift: a bigger lantern and circle (1.9 m), the dummy trades places",
 		3.2,
-		func(t: float) -> void: P.inp["dash"] = _in(t, 0.3),
+		func(t: float) -> void: pc.inp["dash"] = _in(t, 0.3),
 		8.0
 	)
 
@@ -96,38 +98,48 @@ func _m_ledge() -> void:
 	title.text = "Shift at a cliff face: he lands on top" if not c.is_empty() else "no ledge found"
 	if c.is_empty():
 		return
-	T.teleport(home + Vector3(-30, 0, -30))
+	tgt.teleport(home + Vector3(-30, 0, -30))
 	home = c["start"]
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	P.dashes = P.max_dashes()
+	pc.teleport(home)
+	pc.vel = Vector3.ZERO
+	pc.dashes = pc.max_dashes()
 	cam_at = (c["start"] + c["aim"]) * 0.5
 	_aim(c["aim"])
 	await _go(
 		4.0,
 		func(t: float) -> void:
 			_aim(c["aim"])
-			P.inp["dash"] = _in(t, 0.6)
+			pc.inp["dash"] = _in(t, 0.6)
 	)
-	print("REEL_LEDGE from y %.2f to %s" % [float(c["start"].y), str(P.pos)])
-	P.inp["move"] = Vector2.ZERO
+	print("REEL_LEDGE from y %.2f to %s" % [float(c["start"].y), str(pc.pos)])
+	pc.inp["move"] = Vector2.ZERO
 	cam_at = Vector3.ZERO
 
 
 ## A terrace edge facing +x, LEDGE_RISE+ terraces up, with 4 m of flat ground before it and room on top.
 func _ledge() -> Dictionary:
-	var W = m.world
-	for z in range(4, W.h - 4):
-		for x in range(6, W.w - 6):
-			var lv := int(W.level[W.idx(x, z)])
+	var wd = m.world
+	for z in range(4, wd.h - 4):
+		for x in range(6, wd.w - 6):
+			var lv := int(wd.level[wd.idx(x, z)])
 			var ok := true
 			for dx in range(-4, 1):
-				var i: int = W.idx(x + dx, z)
-				ok = ok and W.kind[i] == World.T_GROUND and int(W.level[i]) == lv and not W.stairs.has(i)
-			var top := int(W.level[W.idx(x + 1, z)])
+				var i: int = wd.idx(x + dx, z)
+				ok = (
+					ok
+					and wd.kind[i] == World.T_GROUND
+					and int(wd.level[i]) == lv
+					and not wd.stairs.has(i)
+				)
+			var top := int(wd.level[wd.idx(x + 1, z)])
 			for dx in range(1, 4):
-				var j: int = W.idx(x + dx, z)
-				ok = ok and W.kind[j] == World.T_GROUND and int(W.level[j]) == top and not W.stairs.has(j)
+				var j: int = wd.idx(x + dx, z)
+				ok = (
+					ok
+					and wd.kind[j] == World.T_GROUND
+					and int(wd.level[j]) == top
+					and not wd.stairs.has(j)
+				)
 			if ok and top - lv >= LEDGE_RISE and top - lv <= LEDGE_RISE + 3:
 				var y := lv * World.LEVEL
 				return {"start": Vector3(x - 3.5, y, z + 0.5), "aim": Vector3(x + 0.8, y, z + 0.5)}
