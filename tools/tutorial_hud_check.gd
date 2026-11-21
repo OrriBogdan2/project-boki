@@ -504,10 +504,12 @@ func _pointers() -> void:
 		for f in 3:
 			pm.step(Match.DT)
 		for sz: Vector2 in SIZES.slice(0, 2):
+			main.get_window().size_2d_override = Vector2i(sz)      # (the window HudPanels.tick fits itself to)
 			pm.hud.panels.size = sz
 			pm.hud.panels.queue_redraw()
 			await pm.hud.panels.draw
 			_pointer_rows(pm, slot, sz)
+	main.get_window().size_2d_override = Vector2i.ZERO
 	ok(seen.size() >= 3, "the course has pick steps for %s" % str(seen.keys()))
 	pm.queue_free()
 
