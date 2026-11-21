@@ -193,7 +193,6 @@ var wallstun := 0.0           # how long the next wall slam stuns (Haymaker make
 var wallstun_at := -9.0       # s (match time) the hit that set wallstun landed (Displace.knocked keeps it)
 var land_t := 0.0
 var ghost_t := 0.0
-var step_t := 0.0
 var moves := HunterLoco.new(self)    # owns the locomotion state (Loco.S) and the data of the move it is in
 var loco: Fsm = moves.fsm
 ## Views of the locomotion state; a write asks moves for the transition (HunterLoco).
@@ -1124,7 +1123,7 @@ func _shove_along(dt: float) -> void:
 		shove["hit"][f.nid] = true
 		var side := Vector2(f.pos.x - pos.x, f.pos.z - pos.z).normalized()
 		var push := (roll_dir * 0.7 + side * 0.5).normalized() * float(shove["kb"])
-		var so := {"kb": push, "lift": 2.5, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
+		var so := {"kb": push, "lift": 2.5 if float(shove["kb"]) > 0.0 else 0.0, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 
@@ -1744,7 +1743,7 @@ func _physics(dt: float) -> void:
 	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
-		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
+		HunterMove.fall(self, dt)
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard (a walk only: a shove still takes them over)
 	var guard: bool = ctrl == "bot" and grounded and roll_t <= 0.0 and knock_t <= 0.0 and m.time - kb_t > 0.6 \
@@ -2192,11 +2191,12 @@ func _try_ledge_grab(dt: float) -> void:
 					continue
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
-				# hopping down a terrace must not float you back up it
+				# hopping down a terrace must not float you back up it (later, only the plain reach: no tall climb)
 				# and one that shares an edge with your tile: the tile ahead along a wall isn't the wall you press
 				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
 					continue
-				var stepping_back := gz <= last_gy + World.STEP and not GlideLift.airborne_long(self)
+				var stepping_back := gz <= last_gy + World.STEP \
+						and (dz > MANTLE_REACH or not GlideLift.airborne_long(self))
 				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
 					continue
 			if d < bd and d < reach:
@@ -2697,6 +2697,7 @@ func _anim_state(stretch: float) -> void:
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
+	KinSummon.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
@@ -2838,6 +2839,9 @@ func render(delta: float, alpha: float) -> void:
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed:
 		StepReach.contact(self)
+		if grounded and spd > 4.0:     # (running: the surface's step and little puffs of dust, on the plant)
+			m.fx.dust(pos, 2)
+			Juice.footstep(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
@@ -2858,13 +2862,6 @@ func render(delta: float, alpha: float) -> void:
 			m.fx.debris(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
-	# little puffs of dust while running, and a kick of dust when you turn hard
-	if grounded and spd > 4.0 and not downed and KMovesStone.gait(arch) >= 0.5:      # (no feet, no steps: Motley)
-		step_t -= delta
-		if step_t <= 0.0:
-			step_t = 0.32
-			m.fx.dust(pos, 2)
-			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
