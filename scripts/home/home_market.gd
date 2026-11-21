@@ -90,7 +90,7 @@ func show_note(v: VBoxContainer) -> void:
 	if note == "":
 		return
 	var nl := UI.label(note, 14, note_col)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(nl)
 	v.add_child(nl)
 	note = ""
 
@@ -101,7 +101,7 @@ func _next_level(v: VBoxContainer) -> void:
 		return
 	var nxt := String(Goods.rules()["stall"]["levels"][str(lv + 1)])
 	var l := UI.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(l)
 	v.add_child(UI.spacer(4))
 	v.add_child(l)
 
