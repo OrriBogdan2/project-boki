@@ -78,8 +78,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
-| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -109,8 +107,10 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
+| limpetor | clip | clip | clip | clip | clip | clip | proc | proc |
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
+| moonloris | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
