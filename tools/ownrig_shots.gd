@@ -6,6 +6,33 @@ extends "res://tools/warden_shots.gd"
 const VIEWS := ["game", "eye", "knee", "close"]
 const N_SHEET := 6
 const FACE := PI * 0.82
+var tall_override := 0.0
+
+## A plain glb (a Meshy master) in the same stage and cameras: feet on the ground, uniformly scaled, turned like the hunters (3/4).
+func _master_shots(path: String, mscale: float, tall: float, dir: String) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var doc := GLTFDocument.new()
+	var st := GLTFState.new()
+	var err := doc.append_from_file(ProjectSettings.globalize_path(path) if path.begins_with("res://") else path, st)
+	print("OWNRIG master load ", path, " err ", err)
+	var node := doc.generate_scene(st)
+	var h := Node3D.new()
+	holder.add_child(h)
+	h.add_child(node)
+	h.scale = Vector3.ONE * mscale
+	h.rotation.y = -(PI - FACE)
+	await _settle(5, false)
+	var lo := 1e9
+	for vi in h.find_children("*", "VisualInstance3D", true, false):
+		var v := vi as VisualInstance3D
+		if not (v is Light3D):
+			lo = minf(lo, (v.global_transform * v.get_aabb()).position.y)
+	h.position.y = -lo
+	await _settle(10, false)
+	print("OWNRIG master top ", _top([h]), " tall ", tall)
+	for v in VIEWS:
+		var img := await _view(v, h, tall if tall > 0.0 else _top([h]))
+		img.save_jpg(dir.path_join("%s_0.jpg" % v), 0.92)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -13,15 +40,29 @@ func run(main: Node) -> void:
 	var wardens := ["mage", "dolm"]
 	var video := false
 	var only := ""
+	var master := ""
+	var mscale := 1.0
+	var mname := "master"
+	var tall_ov := 0.0
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): wardens = Array(a.substr(10).split(","))
 		if a == "--video": video = true
 		if a.begins_with("--only="): only = a.substr(7)
+		if a.begins_with("--master="): master = a.substr(9)
+		if a.begins_with("--master-scale="): mscale = float(a.substr(15))
+		if a.begins_with("--master-name="): mname = a.substr(14)
+		if a.begins_with("--tall="): tall_ov = float(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(1280, 1280)
 	_stage(main)
+	tall_override = tall_ov
+	if master != "":
+		await _master_shots(master, mscale, tall_ov, out.path_join(mname))
+		print("OWNRIG_SHOTS_DONE")
+		tree.quit()
+		return
 	for id in wardens:
 		await _hero_own(String(id), out.path_join(String(id)), video, only)
 	print("OWNRIG_SHOTS_DONE")
@@ -81,6 +122,8 @@ func _hero_own(id: String, dir: String, video: bool, only: String) -> void:
 	var tall := 2.0
 	await _settle(40)
 	tall = maxf(_top(row), 1.6)
+	if tall_override > 0.0:
+		tall = tall_override
 	print("OWNRIG %s height %.3f glb %s" % [id, tall, WardenGlb.path(id)])
 	for st in _states(id):
 		var nm := String(st[0])
