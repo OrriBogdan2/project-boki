@@ -67,7 +67,7 @@ static func check(now: float) -> Array:
 		if wish["done"] or rec.is_empty() or Care.need(rec, String(wish["need"])) < float(r["wish_to"]):
 			continue
 		wish["done"] = true
-		rec["trust"] = clampf(float(rec.get("trust", 0.0)) + float(r["trust"]), 0.0, 100.0)
+		Care.trust_add(rec, float(r["trust"]), Time.get_unix_time_from_system())
 		Save.add_item(String(r["item"]), int(r["item_n"]))
 		CareJournal.note(rec, "had its wish granted")
 		var item := Care.food_name(String(r["item"]))
