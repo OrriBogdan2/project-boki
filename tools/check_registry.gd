@@ -422,6 +422,8 @@ const CHECKS := {
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--mob-death-check": ["res://tools/mob_death_check.gd", "mob_death_check", null],  # dissolve, stagger, drops
 	"--mob-death-shots": ["res://tools/mob_death_shots.gd", "mob_death_shots", null],      # death strips (GPU)
+	"--mob-pose-shots": ["res://tools/mob_pose_shots.gd", "mob_pose_shots", null],      # pose strips (GPU)
+	"--mob-fight-clip": ["res://tools/mob_fight_clip.gd", "mob_fight_clip", null],      # fight frames, 60 fps (GPU)
 	"--cam-zoom-check": ["res://tools/cam_zoom_check.gd", "cam_zoom_check", "check"],
 	"--cam-zoom-shots": ["res://tools/cam_zoom_check.gd", "cam_zoom_check", "shots"],      # --shots-dir=<dir> (GPU)
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
@@ -678,6 +680,7 @@ const CHECKS := {
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
 	"--grimble-line-shots": ["res://tools/grimble_line_shots.gd", "grimble_line_shots", null],
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
+	"--empty-creator-check": ["res://tools/empty_creator_check.gd", "empty_creator_check", null],
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
 	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null], # ability cards = data
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
@@ -866,6 +869,7 @@ const CHECKS := {
 	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],
 	"--occlusion-outline-shots": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "shots"],
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],  # MapDetail: default vs hold
+	"--map-names-check": ["res://tools/map_names_check.gd", "map_names_check", null],  # full map names: no overprint
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],  # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
 	"--zone-next-shots": ["res://tools/zone_next_shots.gd", "zone_next_shots", null],  # GPU, --shots-dir=
