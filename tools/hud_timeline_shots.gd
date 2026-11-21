@@ -3,7 +3,7 @@ extends RefCounted
 ## the hunter standing at the first landing, one jpg every 10 s of game time for 90 s plus a line per
 ## shot in <dir>/timeline.txt (clock, health, level). The groups are counted from the pictures into
 ## docs/HUD.md ("First real match: the HUD over time"). --before plays the same save as a veteran
-## (`matches` at HudGroups.NEW_PLAYER_MATCHES), which draws what origin/main drew.
+## (`matches` at kit_card's from_match - 1, HudReveal), which draws what origin/main drew.
 ## Never writes the save. Run on a GPU through jobq.
 
 const SHOT_EVERY_S := 10.0      # s of game time between two shots
@@ -44,7 +44,7 @@ func run(main_node: Node) -> void:
 		Save.d["tutorial"][k] = true      # (as a save that finished the tutorial and the first farm visit)
 	tree.root.size = win
 	if before:
-		Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
+		Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1
 	await _start()
 	for k in int(SPAN_S / SHOT_EVERY_S) + 1:
 		await _shot(k)
