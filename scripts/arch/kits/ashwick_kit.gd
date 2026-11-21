@@ -81,7 +81,7 @@ func _setup() -> void:
 	jet = AshwickJet.new(self)
 
 func warm_fx(at: Vector3) -> void:
-	fx.prewarm(at, [])
+	fx.prewarm(at)
 
 func _best_char() -> float:
 	var b := 0.0
