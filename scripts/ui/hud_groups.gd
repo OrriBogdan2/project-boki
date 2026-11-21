@@ -37,11 +37,29 @@ static func ways_out_shown(m: Match) -> bool:
 			return true
 	return false
 
+## The match clock under the minimap and the top-right counters: a save's first expedition holds them back until the
+## first Ways Out beat (a seat within ways_out_lead_s of opening, open, taken or lost; or you are out) or your first
+## kill or knock (DECISIONS 2026-11-08), then they stay (HudReveal "beat_clock", remembered in the save). Through
+## HudReveal's table: from match 4 on (or Tab, Settings "Show full HUD", a tutorial or training room) they always show.
+static func clock_shown(m: Match) -> bool:
+	if HudReveal.on(m, "beat_clock"):
+		return true
+	var p: Hunter = m.player
+	var beat: bool = p != null and p.kills + p.knocks > 0
+	if not beat and m.heart != null and m.heart.site != Vector3.INF:
+		beat = ways_out_shown(m)
+	if beat:
+		HudReveal.see("beat_clock")
+		HudReveal.see("counters")
+	return beat
+
 ## The ids of the groups on screen now: the always-on blocks plus the ones that come and go.
 static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
+	if clock_shown(m):      # (HudReveal: the clock and the counters wait on a first expedition)
+		out.append_array(["clock", "counters"])
 	if p.perks.size() > 0:
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):

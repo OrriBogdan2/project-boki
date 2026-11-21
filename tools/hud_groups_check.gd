@@ -4,6 +4,7 @@ extends RefCounted
 ##   1. the Ways Out strip is deferred (a newcomer) at the landing and the first fight, and revealed once a seat
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
+##   2b. a save's first expedition holds the clock and the counters back until the first Ways Out beat or kill
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
 ##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
 ##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
@@ -13,7 +14,8 @@ extends RefCounted
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 9, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
+const COUNTS := {"landing": 7, "fight": 9, "heart": 12, "race": 12}      # groups, strip included where it shows
+const CLOCK := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # the clock and counters: first beat or kill
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -79,6 +81,8 @@ func run(main: Node) -> void:
 		print("HUDGROUPS   %s: %d groups (budget %d): %s" % [id, g.size(), HudGroups.rules()["budget"], ", ".join(g)])
 		ok(g.size() == int(COUNTS[id]), "%s: %d groups" % [id, COUNTS[id]])
 		ok(g.count("ways_out") == int(STRIP[id]), "%s: the Ways Out strip %s" % [id, "shows" if STRIP[id] else "waits"])
+		ok(g.count("clock") == int(CLOCK[id]) and g.count("counters") == int(CLOCK[id]),
+			"%s: the clock and the counters %s" % [id, "show" if CLOCK[id] else "wait"])
 		ok(g.count("prompt") <= 1, "%s: one prompt at most" % id)
 	# 1. the reveal rule
 	m.interact = {}

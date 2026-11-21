@@ -190,7 +190,7 @@ The ranked follow-ups below still hold.
 
 **Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
 1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
-2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
+2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2. **Done in ext/ui-first-exp-hud:** the strip already waited (main d839e1df777); the clock under the minimap and the counters now wait too, through HudReveal's table (`beat_clock`, `counters`: first "beat"), until a seat is within `ways_out_lead_s` of opening or your first kill/knock (`HudGroups.clock_shown`). `--hud-groups-check`: landing 9 to 7, first fight 11 to 9; Heart unlock and exit race unchanged (12). Still above 6 on the landing: glider strip, belt and slots (follow-ups 3 and 4).
 3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen).
 4. **Q/V/X slots and the belt:** draw only the slots that hold something or are unlocked (saves 2).
 5. **Plan your drop:** fold the "This match" legend behind a key (7 to 5).
