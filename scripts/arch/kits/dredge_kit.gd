@@ -343,6 +343,7 @@ func _launch_hook() -> void:
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			Sfx.loop_stop(_fly_key())
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
@@ -359,6 +360,7 @@ func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
+	Sfx.loop_hold(_fly_key(), "dr_reach_fly", p, -8.0, 1.0)      # the chain paying out behind the hand
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue
@@ -402,10 +404,15 @@ func _in_rock(a: Vector3, b: Vector3) -> Array:
 ## splash of sludge where it let go.
 func _let_go(tip: Vector3) -> void:
 	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+	m.sfx("dr_let_go", tip, -5.0, 1.0)
+
+func _fly_key() -> String:
+	return "reach_fly_%d" % h.get_instance_id()
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
+	Sfx.loop_stop(_fly_key())
 	if KinMerge.transforming(h) or KinMerge.active(h):
 		hook_hold = null
 		return
