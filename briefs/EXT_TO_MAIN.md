@@ -10783,3 +10783,4 @@ READY ext/merge-lane-M4-1121 53e56aea91 (bulk-rebase: origin/main merged in mech
 READY ext/sfx-minigun-own a20ab1355f1d703a5d1fe560a6219e3440a209f5 (minigun own sound, stock takes retired)
 READY ext/boki-rig-fluid-1118 44ade56710bf7999078f25f6ec061f58a700552b (merged origin/main 74364b3ad9, DEBT.md kept both; boki-anim-audit + sfx-remote-check pass)
 READY ext/wisp-revive-polish d1b969089 (wisp clarity: ground reach circle removed, revive progress is a bar under the Wisp; before/after MP4 on GPU job 20261121-143307-01355, out dir /home/boki/cj/20261121-140550-a1/out/before_after.mp4)
+READY ext/merge-keeps-abilities-1117 badbb9aa9bc30a0801256c7c36f46e95f35faf19 (merged origin/main 74364b3ad9; bulwark charge took main's slam-free side; merge-keeps/aimkit/ashwick-combo pass; merge-form-check 1 fail same as main)
