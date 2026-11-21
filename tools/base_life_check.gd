@@ -115,7 +115,8 @@ func _nap_sounds(home) -> void:
 	ok(lower, "a bigger Boki breathes lower (%s)" % [by_cm.map(func(r): return "%.2f" % BokiNapSfx.pitch_of(r))])
 	var sleeper: Dictionary = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) > 0.0)[0]
 	Sfx.listener = sleeper["pos"]
-	for key in Sfx.loops.keys():      # holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
+	# holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
+	for key in Sfx.loops.keys():
 		if String(key).begins_with("nap:"): Sfx.loop_stop(key)
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))

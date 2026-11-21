@@ -52,7 +52,7 @@ var training := Training.new()   # the Training Grounds checklist and the train/
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
-var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
+var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
@@ -2155,7 +2155,8 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
-	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, loot and not Camps.is_camp(mb))
+	var drops := loot and not Camps.is_camp(mb)
+	MobDrops.spill_later(self, MobDissolve.begin(self, mb), mb, credit, drops)
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
