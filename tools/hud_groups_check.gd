@@ -111,11 +111,13 @@ func run(main: Node) -> void:
 	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
 		"veteran: kit card and own numbers as before")
 	# 5. the gear / glider strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
-	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"), "veteran with no gear and no perk: neither strip")
+	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"),
+		"veteran with no gear and no perk: neither strip")
 	Save.d["matches"] = 0
 	p.gear[2] = {"id": String(Gear.ALL.keys()[0]), "rar": 0}
 	p.perks.append(String(Data.PERKS.keys()[0]))
-	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"), "new player with gear and a perk: held back (HudReveal)")
+	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"),
+		"new player with gear and a perk: held back (HudReveal)")
 	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
 	ok(on_screen_has(hud, "glider") and on_screen_has(hud, "perks"), "veteran with gear and a perk: both strips")
 	p.gear[2] = {}
