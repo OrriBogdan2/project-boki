@@ -217,7 +217,7 @@ func _skip_check() -> void:
 
 func _offer() -> void:
 	var hob: FarmHob = home.hob
-	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Mask talk before the house is down")
+	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Relic talk before the house is down")
 	FarmTutorial.mark("axe")
 	FarmTutorial.mark("chop")
 	Work.add_mat("wood", 10)
@@ -226,7 +226,11 @@ func _offer() -> void:
 	home._sync_fixtures()
 	FarmTutorial.detect()
 	await _frames(3)
-	ok(hob.chat.offer_due() and hob.node.mark.visible, "with the house down he has a '!' for you")
+	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "house down, tutorial running: no Relic yet")
+	for st in FarmTutorial.steps():
+		FarmTutorial.mark(String(st["id"]))
+	await _frames(3)
+	ok(FarmTutorial.state()["done"] and hob.chat.offer_due() and hob.node.mark.visible, "all steps done: a '!'")
 	hob.node.position = hob.pos
 	_stand_by(hob.node.position)
 	hob.talk()
@@ -272,7 +276,8 @@ func _offer() -> void:
 	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
-	ok(tracker_off and marker_off and not home.guide.hint_box.visible
+	var line_off: bool = not is_instance_valid(home.guide.hint_box) or not home.guide.hint_box.visible
+	ok(tracker_off and marker_off and line_off
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
@@ -301,9 +306,11 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
-	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
-	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+	# every step was ticked off above, so there may be no goal line or card left: when there is one it is shown again
+	var g: FarmGuide = home.guide
+	var card_ok := not is_instance_valid(g.tracker) or g.tracker.visible
+	var line_ok := not is_instance_valid(g.hint_box) or g.hint_box.visible
+	ok(card_ok and line_ok and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:

@@ -169,6 +169,20 @@ func tiles_per_page() -> int:
 	var width := get_viewport().get_visible_rect().size.x - left_pad - 16.0 - 28.0 - 2.0 * (NAV_W + 8.0)
 	return maxi(2, int(width / (TILE.x + 8.0)))
 
+## The tile for entry `id` on the open page, or null.
+func tile_of(id: String) -> Control:
+	for t in _tiles.get_children():
+		if String(t.get_meta("entry", "")) == id and not t.is_queued_for_deletion():
+			return t
+	return null
+
+## Turns to the page that holds entry `id` in the open tab (the tutorial spotlight needs its tile on screen).
+func turn_to(id: String) -> void:
+	var at := _entries().find_custom(func(e): return String(e.get("id", "")) == id)
+	if at >= 0 and at / tiles_per_page() != page:
+		page = at / tiles_per_page()
+		_fill_tiles()
+
 func _fill_tiles() -> void:
 	for old in _tiles.get_children():
 		old.queue_free()
@@ -209,6 +223,7 @@ func _tile(e: Dictionary) -> Control:
 	tile.set_meta("entry", String(e.get("id", "")))
 	tile.set_meta("on", bool(e.get("on", false)))
 	tile.tooltip_text = String(e.get("tip", ""))
+	tile.set_meta("entry", String(e.get("id", "")))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if bool(e.get("off", false)):
