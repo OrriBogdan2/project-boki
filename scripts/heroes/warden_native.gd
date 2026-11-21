@@ -295,7 +295,9 @@ func _add_orbits(glb: Node3D) -> void:
 		var nd := src[0] as Node3D
 		var sk_m := glb.transform * WardenGlb.model_xf(glb, skel)
 		var shift := head_m.origin - (src[2] as Transform3D).origin  # (Meshy's head pivot vs the contract's)
-		nd.transform = sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
+		nd.transform = (
+			sk_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
+		)
 		at.add_child(nd)
 		followers.append([at, b])
 	orbits.setup(skel)

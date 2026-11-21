@@ -142,7 +142,7 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	_only_meshy(a, m)
-	await _orbits(main, a, m, nat)
+	await _orbits(main, a, nat)
 	m.free()
 
 
@@ -200,7 +200,11 @@ func _only_meshy(a: String, m: Node3D) -> void:
 	var stray: Array = []
 	for gi in m.find_children("*", "GeometryInstance3D", true, false):
 		var g := gi as GeometryInstance3D
-		if g.is_visible_in_tree() and not m.get_node("Warden").is_ancestor_of(g) and g.name != "TeamRing":
+		if (
+			g.is_visible_in_tree()
+			and not m.get_node("Warden").is_ancestor_of(g)
+			and g.name != "TeamRing"
+		):
 			if not _ring(m, g):
 				stray.append(String(m.get_path_to(g)))
 	ok(stray.is_empty(), "%s: only Meshy's model draws (rig meshes showing: %s)" % [a, str(stray)])
@@ -213,12 +217,15 @@ func _ring(m: Node3D, g: Node) -> bool:
 
 ## Each data orbit (Tenzo's seeing-stones) rides its Meshy bone with all its props, round the head at the contract
 ## model's height, and turns over time.
-func _orbits(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 	var want: Dictionary = nat.d.get("orbits", {})
 	for orb in want:
 		var nd := nat.skel.find_child(String(orb), true, false) as Node3D
 		var props := nd.get_children().filter(func(c): return c is MeshInstance3D) if nd else []
-		var head := nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.skel.find_bone("Head")).origin
+		var head := (
+			nat.skel.global_transform
+			* nat.skel.get_bone_global_pose(nat.skel.find_bone("Head")).origin
+		)
 		var far := 0.0
 		for p in props:
 			far = maxf(far, (p as Node3D).global_position.distance_to(head))
@@ -227,7 +234,15 @@ func _orbits(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 			await main.get_tree().process_frame
 		var moved: float = props[0].global_position.distance_to(p0) if not props.is_empty() else 0.0
 		ok(
-			nd != null and props.size() >= 3 and far < 0.8 and moved > 0.0005 and nat.orbits.pivots.size() == want.size(),
-			"%s: %s rides %s (%d props, %.2f m from the head at most, moved %.3f m)"
-			% [a, orb, want[orb], props.size(), far, moved]
+			(
+				nd != null
+				and props.size() >= 3
+				and far < 0.8
+				and moved > 0.0005
+				and nat.orbits.pivots.size() == want.size()
+			),
+			(
+				"%s: %s rides %s (%d props, %.2f m from the head at most, moved %.3f m)"
+				% [a, orb, want[orb], props.size(), far, moved]
+			)
 		)

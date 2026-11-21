@@ -36,9 +36,16 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
-crouch arms);
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
 `--warden-glb-check` counts native Hunters apart. Renders: `--clip-shots --warden=<arch> --states [--match]`.
+
+## Weapons and orbit props
+Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
+Offhand (the twin hold's left piece, the fist hold's second gauntlet) stay hidden: shown, they floated beside the body
+in every frame. Props that orbit (data `orbits`: orbit node -> Meshy bone; Tenzo's three seeing-stones on `Head`) are
+copied from the contract `<art>.glb` and turned by WardenOrbits as on the contract path. Their holder follows the
+bone's place, not its turn, so the ring stays level when a clip bows the head.
 
 ## Not on the native path (yet)
 Death, stun, ledge, glide, emote and per-move clips (Meshy gave six); the contract's per-hunter extras (Tenzo's
-seeing-stones turning, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
+ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
