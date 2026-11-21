@@ -16,13 +16,19 @@ repo, chmod 600). It is never printed or written anywhere else.
 source), the Ultra geometry pass (2k on multi-image, 4k on one image), 8k textures from the meshy-7 texture
 model, PBR, A-pose. Every task posts, polls, then downloads the GLB, the texture maps, the thumbnails and a
 task.json record (id, model, settings, consumed credits) into OUT_DIR.
+
+Spend guard: every paid submit first reads the balance and refuses (exit 3) when it is below $MESHY_FLOOR
+(credits, default 400), then appends one tab-separated line (UTC time, $CLAUDE_JOB_LABEL or the hostname,
+endpoint, task id, balance before) to $MESHY_LEDGER (default ~/meshy-ledger.tsv).
 """
 import argparse
 import base64
 import json
 import os
+import socket
 import sys
 import time
+import datetime
 import urllib.error
 import urllib.request
 
@@ -69,6 +75,37 @@ def balance():
     print("balance", call("GET", BASE + "balance").get("balance"))
 
 
+def floor():
+    try:
+        return float(os.environ.get("MESHY_FLOOR", "400"))
+    except ValueError:
+        sys.exit("MESHY_FLOOR must be a number of credits, got %r" % os.environ["MESHY_FLOOR"])
+
+
+def spend_guard():
+    """Reads the balance before a paid submit; exits 3 below MESHY_FLOOR. Returns the balance."""
+    bal = call("GET", BASE + "balance").get("balance")
+    if not isinstance(bal, (int, float)):
+        sys.exit("meshy balance unreadable (%r): refusing to submit" % (bal,))
+    if bal < floor():
+        print("meshy balance %s is below MESHY_FLOOR %s: refusing to submit (set MESHY_FLOOR lower to override)"
+              % (bal, floor()), file=sys.stderr)
+        sys.exit(3)
+    return bal
+
+
+def ledger_add(api, tid, bal):
+    """One line per submit: UTC time, job label (or hostname), endpoint, task id, balance before."""
+    path = os.path.expanduser(os.environ.get("MESHY_LEDGER", "~/meshy-ledger.tsv"))
+    who = os.environ.get("CLAUDE_JOB_LABEL") or socket.gethostname()
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        with open(path, "a") as f:
+            f.write("\t".join((now, who.replace("\t", " "), api, str(tid), str(bal))) + "\n")
+    except OSError as e:  # the task is already paid for: warn, never lose the task id
+        print("meshy ledger write failed (%s): %s" % (path, e), file=sys.stderr)
+
+
 def fetch(out, tid, api):
     os.makedirs(out, exist_ok=True)
     while True:
@@ -106,8 +143,10 @@ def post(out, api, body, files):
     rec = {k: v for k, v in body.items() if not k.endswith("urls") and not k.endswith("_url")}
     rec.update(api=api, files=files)
     json.dump(rec, open(os.path.join(out, "request.json"), "w"), indent=1)
+    bal = spend_guard()
     tid = call("POST", BASE + api, body)["result"]
     print("task", tid, flush=True)
+    ledger_add(api, tid, bal)
     fetch(out, tid, api)
 
 
