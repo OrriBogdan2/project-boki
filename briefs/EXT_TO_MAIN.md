@@ -10760,3 +10760,4 @@ READY ext/main-red-fix-1121 7444e3c619 (first_cast_check no longer fails on a bu
 READY ext/p04-port-1118 fbd2ef3628 (PR #329 camps; stomp-break-sweep green again: sweep pins the stomper's Boki out, 184 rows 0 failures)
 READY ext/merge-lane-M1-1121-code 10943748af (M1 code lane: 11 non-glb branches, no .glb; mob-reap/anim-cov/boki-sys 0 fail, cast-pop 1 fail same as M1)
 READY ext/ui-first-exp-hud dcad02582dd8 (first expedition HUD holds back)
+READY ext/merge-lane-M1-1121 9bcebcd780 (lane M1 bundle, 18 branches incl. anim-foot-slide-13 partial; PR #572; export OK 885 MB; step-sync/clip/cast-pop no new red vs main)
