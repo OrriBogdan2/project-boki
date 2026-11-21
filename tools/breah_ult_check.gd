@@ -183,6 +183,10 @@ func _punch_and_bond() -> void:
 	ok("ult beats: the rocks rise from the centre outward over 0.8s", absf(spread - 0.8) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 15 rocks over 21m on open ground", n_up == 15, "rocks %d" % n_up)
+	var joined := true
+	for w in rocks(m).filter(func(w): return w.has("ult")):
+		joined = joined and ((w["node"] as Node3D).get_node(RockLook.FIN) as Node3D).visible
+	ok("spine parity: every rock wears the ridge fin that joins it to the next, one ridge not nine rocks", joined)
 	var rd := K.rock_def()
 	var shape_ok := true
 	for w in rocks(m).filter(func(w): return w.has("ult")):

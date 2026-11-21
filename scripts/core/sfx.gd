@@ -741,9 +741,12 @@ func play(
 
 ## A distant sound every player hears, panned toward `at` as seen from the camera (a legendary's roar).
 ## Quiet vol_db up close, far_db from far_m metres out (no further): it carries, it doesn't fade away.
-func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float) -> void:
+## Returns the voice it plays on, or null (IncomingHitSfx keeps one voice for a flurry).
+func play_toward(
+	sname: String, at: Vector3, vol_db: float, far_db: float, far_m: float, pitch := 1.0
+) -> AudioStreamPlayer:
 	if not streams.has(sname) and not _lazy(sname):
-		return
+		return null
 	var cam := get_viewport().get_camera_3d()
 	var side := Vector2(at.x - listener.x, at.z - listener.z)
 	var pan := 0.0
@@ -754,13 +757,14 @@ func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m
 	(AudioServer.get_bus_effect(bus, 1) as AudioEffectPanner).pan = pan
 	var p := _voice(null, voices.rank_of(null, listener), sname)
 	if p == null:
-		return
+		return null
 	p.bus = "SFXPan"
 	var st = streams[sname]
 	p.stream = _once(st[rng.randi_range(0, st.size() - 1)] if st is Array else st)
 	p.volume_db = lerpf(vol_db, far_db, clampf(side.length() / far_m, 0.0, 1.0))
-	p.pitch_scale = 1.0
+	p.pitch_scale = pitch
 	p.play()
+	return p
 
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
