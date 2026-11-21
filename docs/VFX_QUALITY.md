@@ -82,7 +82,7 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -98,6 +98,21 @@ Still open (shared, not done here):
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
+Albert (bulwark), ext/albert-vfx-data: his remaining code-drawn one-shots are `bulwark.json` moves, in his ivory and with no
+fill or ring where there was none to keep: `aegis_up` (the wall rising: dust and ivory sparks), `block` (sparks and a flare on
+the face), `mend_burst` (Mending Ground's end: one lit ring at its radius and rising motes) and `mend_revive` (the
+kickstarted ally), and the Faultline's `fault_slam` (the near cell), `fault_land` (rock, dust and the char mark; the two
+dust rings are cut: no rings on a landing), `fault_cell` (each cell heaving up) and `fault_foe` (a foe thrown). All are
+`"net": false`, as the code bursts were (the lane and the ring ride their own events). Timings, hit shapes and sounds are
+unchanged. Second pass (same branch): the planted hammer's beacon (`plant_beacon`: rising ivory streaks, was a 5 m gold
+beam), the dash wake (`dash`: ivory specks and dust on his body, was gold and ember chevron bands), and Mending Ground's
+light column (`mend_fall`: ivory light falling onto the zone during its 1 s delay, was a gold beam) and standing zone
+(`mend_zone`: rising ivory specks and pluses inside AimKit's lit rim, no fill; was a second code-drawn disc) are
+`HeroVfx` holds; the end burst is `mend_burst` alone. Strips redone from jobq 20261120-153944-25090 (after, same before):
+`e_before_after.jpg` green (the opaque gold cone that hid him is gone), `throw` and `dash` grey (in his palette now, but the
+ray is slimmer than the old beam and the wake reads about the same). `HeroVfx.hold` follows a moving `at` (the zone follows the hammer).
+`BjornFx` keeps only the meshes that ride his hammer and shield (thrown hammer and rope, whirl trail and glint, the plated
+wall), and the shared charge ring is his ivory, not gold. GPU strips at match zoom, grey = main (top), border green = better, grey = no change: `docs/shots/albert-vfx-data/{throw,dash,wall,r}_before_after.jpg` (jobq 20261120-145918-29886 before, -145258-27518 after, `--hero-vfx-reel --reel-hero=bulwark`). The throw and the 360 Smash look the same (their looks were already data); the Faultline landing loses its dust rings, the wall and charge ring are ivory.
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
