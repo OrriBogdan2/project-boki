@@ -184,9 +184,11 @@ Fixes (Goals tracker, no new screen):
 - "See a nap pile" and "Pair two Boki in the Nook" stay off the card while you have one Boki, so the
   top line is never something you cannot do. They show as soon as a second Boki is on the farm.
 
-Left open (not fixed here): a one-Boki save has no garden way to a second Boki before the market
-stall is level 2 (the Shelter), and a visitor needs a built zone. The level row covers the gap, but
-breeding stays out of reach for a while.
+Fixed (ext/garden-second-boki): on a base_mode farm the Shelter opens at market stall level 1
+(`market.json shelter.base_open_level`, `Shelter.open_level()`), so a one-Boki save can adopt a stray for
+20 gems on day one (the first farm entry gives 200). Asserted in `--garden-first-day-check`. Other farms still open it at level 2.
+Alternative not taken: a starter visitor who stays (needs a built zone and 2 residents, so it is slower and rolls on chance).
+The level row still covers the wait for breeding, which stays out of reach for a while.
 # Match tutorial: steps and hints audit (origin/main fb360f614, 2026-11-12)
 
 Owner decision 2026-11-08: the match tutorial is about 8 steps (land+move, dash+glide, shoot, E, send your Boki, a fight,
