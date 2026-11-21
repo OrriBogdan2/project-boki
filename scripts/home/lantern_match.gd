@@ -363,6 +363,7 @@ func _board_panel() -> void:
 		var ang := TAU * i / board.caps.size()
 		b.position = Vector2.ONE * UI_RING + Vector2(sin(ang), -cos(ang)) * UI_RING
 		b.pressed.connect(_pick.bind(i))
+		UI.sfx(b, false)    # _pick plays its own click
 		ring_ui.add_child(b)
 		buttons.append(b)
 	shown_ver = -1
