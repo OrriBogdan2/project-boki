@@ -10755,3 +10755,4 @@ READY ext/hud-clutter-all13 836ae5edb3529307a291f0257035e147cac01998 (merged ori
 READY ext/merge-lane-M1-1121 c92bf219517 (lane M1 bundle: 17 branches; anim-foot-slide-13 HARD)
 READY ext/merge-lane-M3-1121 ab8f881309077f2a8687540311ce113b7eeb4cde (merge lane M3: 16 no-PR branches, garden-toy-xp dropped NEW-RED garden-day-check; targeted suite NEW-RED 0, export 885.0 MB = main)
 READY ext/ui-first-exp-hud 5cc5c84a3d73 (first expedition HUD holds back; merged with main, conflicts resolved)
+READY ext/merge-lane-M2-1121 2ef11056649 (merge lane M2: 19 branches, targeted gate 0 red, export-pack OK)
