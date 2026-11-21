@@ -6,7 +6,7 @@ extends RefCounted
 const SETTLE := 90           # frames of HunterAnim before an idle shot
 const FIRE_FRAMES := 24      # frames after the trigger (fired 0 -> 0.4 s)
 const CAM_PITCH := 66.0      # degrees: the default match camera (CamRig STYLES "default")
-const CAM_DIST := 23.0       # m from the hunter
+const CAM_DIST := 6.5        # m from the hunter (the match camera is 23: the same angle, closer so he fills the frame)
 const CAM_FOV := 32.0
 const EYE_DIST := 5.2        # m, eye level close shot
 const EYE_FOV := 30.0
