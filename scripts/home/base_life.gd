@@ -583,11 +583,12 @@ static func _trait(k: Dictionary, key: String) -> float:
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
 
-## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
-## news with ComeLook).
+## The farm's own drivers have this Boki (it was called, is held or led, works, bathes, is indoors, leaping or looking
+## at news with ComeLook).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) or k.has("look") \
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.has("led") or k.get("nap_go", false) \
+		or k.has("look") \
 		or float(k.get("hold_t", 0.0)) > 0.0
 
 ## Free to roam: its machine is in Roam and none of the farm's drivers has it (a flier stays up: BokiFly).

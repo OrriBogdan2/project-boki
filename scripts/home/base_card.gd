@@ -45,6 +45,9 @@ func _process(dt: float) -> void:
 	# (DAY1_MAX HUD groups, --garden-first-day-check)
 	var zone_day1: bool = h.zone not in ["", "hub"] and GardenFirstDay.active()
 	visible = FarmUnlocks.base_mode() and h.visit.is_empty() and not zone_day1
+	if visible and h.top_chips != null:      # under the top chips' glass, which grows with the UI scale
+		var top := h.top_chips.get_parent().get_parent() as Control
+		position.y = maxf(62.0, top.position.y + top.size.y + 6.0)
 	t += dt
 	if visible and t >= REFRESH_S:
 		t = 0.0

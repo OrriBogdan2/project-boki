@@ -14,7 +14,7 @@ static func rules() -> Dictionary:
 
 ## The Boki-base cut (farm_build.json "base_mode"): the economy is hidden, nothing is deleted.
 static func base_mode() -> bool:
-	return bool(rules().get("base_mode", false))
+	return bool(rules().get("base_mode", true))
 
 ## Is the gating on for this save?
 static func gated(d: Dictionary = Save.d) -> bool:

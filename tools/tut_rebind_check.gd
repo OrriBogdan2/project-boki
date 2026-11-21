@@ -166,12 +166,16 @@ func _tips() -> void:
 
 func _garden() -> void:
 	var n := 0
-	for st in FarmTutorial.steps():
-		for stage in (st["hints"] as Dictionary):
-			n += 1
-			var raw := String(st["hints"][stage])
-			var line := FarmTutorial.fill(raw).replace("{secs}", "9")
-			_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
+	var was := FarmUnlocks.base_mode()
+	for on in [false, true]:      # the old farm's steps, then the garden base's (shipped), each filled its own way
+		FarmUnlocks.rules()["base_mode"] = on
+		for st in FarmTutorial.steps():
+			for stage in (st["hints"] as Dictionary):
+				n += 1
+				var raw := String(st["hints"][stage])
+				var line := FarmTutorial.fill(raw).replace("{secs}", "9")
+				_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
+	FarmUnlocks.rules()["base_mode"] = was
 	ok(n >= 20, "all %d garden hints read" % n)
 	var build := FarmTutorial.fill("Press {build}")
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)

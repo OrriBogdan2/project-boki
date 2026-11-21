@@ -278,7 +278,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on. The Waystone in your hub opens the next zone: bring it a Wayseed and a Boki that leans its way."},
+				"hints": {"go": "Press {interact} at the portal to head out, or Stay. The Waystone wakes a zone for a Wayseed and a Boki that leans its way."},
 				"world": {"go": "Portal"},
 				"boki": "Out there, or more play? Your call!"
 			}

@@ -259,6 +259,7 @@ func _settle() -> void:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false      # the old farm first (the shipped rules have it on)
 	var d := Save.fresh()
 	var k := _kin("zapple", "Pip", [10, 10, 10, 10])
 	k["starter"] = true

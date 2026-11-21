@@ -1,5 +1,5 @@
 """Garden minigame sounds (GARDEN.md 5, GARDEN_MODERN.md 4.2, docs/AUDIO.md): the Dash, Stump Shove, Seek, Spark
-Volley, Tumble, Echo Steps, the Show Ring and the Relay Cup. Run from tools/.
+Volley, Tumble, Echo Steps, the Show Ring, the Relay Cup, Kite Tow and Lantern Match. Run from tools/.
 
 Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Boki chirps, no hard hits.
   garden_count     a countdown tick (twice)             garden_go           the third beat, bright
@@ -46,6 +46,11 @@ The garden's moments (SFX_AUDIT row 22), each its own cue instead of the stock u
   garden_visit_out a wild visitor leaving: a two-chirp goodbye falling away and a last rustle
   garden_season    entering the zone that is in season: two plucks and a sparkle up to a short bell (D5-G5-B6)
   garden_evolve    the evolution scene's change: a rising shimmer swelling into a G major bell chord
+Kite Tow and Lantern Match (Glint Fishing has its own, gen_sfx_glint.py):
+  kite_flap        Kite Tow's Space: a cloth snap and flutter climbing   kite_ring   through a ring: swish, two plucks
+  kite_updraft     a vent refunds a flap: warm air rising and a chime     kite_finish   landing: flutter, twang, bells
+  lantern_flip     a glowcap opens with a soft rising fwip   lantern_match   two caps ring together
+  lantern_miss     two out-of-tune notes dimming and a "pff"   lantern_win    a glint round the ring, a bell, a cheer
 Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, home_chimes.gd, garden_prizes.gd
 and garden_visitor.gd.
 """
@@ -572,6 +577,93 @@ def season(i):
     return B.soft(B.room(mix(*plucks, *sparkle, bell), 0.5), 6000)
 
 
+# ---------------------------------------------------------------- kite tow
+def flutter(d, rate=22.0, lo=500, hi=2600):
+    """Cloth in the wind: band noise beaten by a fast flutter."""
+    t = S.T(d)
+    beat = 0.55 + 0.45 * np.sin(2 * np.pi * rate * t * (1 + 0.15 * np.sin(2 * np.pi * 3 * t)))
+    return bpf(noise(d), lo, hi) * beat
+
+
+def kite_flap(i):
+    """Space: the kite snaps taut and climbs, a cloth flutter over a short rising whoosh."""
+    d = 0.32
+    snap = bpf(noise(0.04), 1400, 5200) * env(N(0.04), 0.001, 0.008)
+    flap = flutter(d, 20 * j(i, 0.1)) * S.shape(d, 0.03, 0.05, 0.22) * 0.7
+    whoosh = bpf(noise(d), 600, 2000) * S.shape(d, 0.12, 0.0, 0.18) * 0.4
+    lift = 0.25 * S.sweep(380 * j(i, 0.04), 620, 0.18) * env(N(0.18), 0.01, 0.06)
+    return B.soft(mix(snap, flap, whoosh, at(lift, 0.02)), 5200)
+
+
+def kite_ring(i):
+    """Through a ring: an airy swish and two bright plucks up a fourth."""
+    swish = hpf(noise(0.22), 2200) * S.shape(0.22, 0.09, 0.0, 0.12) * 0.45
+    notes = mix(pluck(1175 * j(i, 0.015), 0.35, 0.12), at(pluck(1568 * j(i, 0.015), 0.4, 0.16), 0.07))
+    return B.soft(B.room(mix(swish, at(0.8 * notes, 0.05)), 0.35), 6500)
+
+
+def kite_updraft(i):
+    """A vent gives a flap back: warm air rising, band noise sweeping up under a soft rising tone and a chime."""
+    d = 0.9
+    n = N(d)
+    t = S.T(d)
+    fc = 350 * (4.5 ** (t / d))
+    air = np.zeros(n)
+    for k in range(0, n, N(0.05)):        # the band follows the rise in 50 ms slices
+        seg = bpf(noise(0.06), fc[k] * 0.7, fc[k] * 1.6)
+        m = min(len(seg), n - k)
+        air[k:k + m] += seg[:m] * np.hanning(len(seg))[:m]
+    air *= S.shape(d, 0.35, 0.15, 0.35)
+    rise = 0.35 * S.sweep(300 * j(i, 0.03), 720, d) * S.shape(d, 0.3, 0.1, 0.4)
+    return B.soft(B.room(mix(air, rise, at(0.4 * S.chime(1480, 0.5, 0.2), 0.55)), 0.4), 5600)
+
+
+def kite_finish(i):
+    """The kite lands at the stand: a falling flutter, a string twang and three bells, last one ringing."""
+    fall = flutter(0.5, 16, 400, 1800) * S.shape(0.5, 0.05, 0.1, 0.3) * 0.5
+    t = S.T(0.4)
+    twang = np.sin(2 * np.pi * 196 * t * (1 + 0.02 * np.exp(-t * 20))) * env(N(0.4), 0.002, 0.12) * 0.5
+    bells = [at(S.chime(f, d, dec) * 0.6, 0.25 + 0.12 * k)
+             for k, (f, d, dec) in enumerate([(784, 0.5, 0.18), (1047, 0.5, 0.18), (1568, 0.9, 0.3)])]
+    return B.soft(B.room(mix(fall, at(twang, 0.2), *bells), 0.45), 6000)
+
+
+# ---------------------------------------------------------------- lantern match
+def lantern_flip(i):
+    """A glowcap opened: a soft rising "fwip" of light and a felt tine, pitched a little apart per take."""
+    f = 660 * j(i, 0.06)
+    fwip = S.sweep(f, f * 1.5, 0.12) * env(N(0.12), 0.01, 0.04) * 0.45
+    tine = mix(at(0.7 * pluck(f * 2, 0.3, 0.1), 0.05), at(0.3 * glint(f * 4, 0.12), 0.06))
+    return B.soft(B.room(mix(fwip, tine), 0.3), 6500)
+
+
+def lantern_match(i):
+    """A pair found: both caps ring together, a major third, with a shimmer swelling under them."""
+    a = 988 * j(i, 0.01)
+    bells = mix(S.chime(a, 0.7, 0.3), at(S.chime(a * 1.26, 0.7, 0.3), 0.06))
+    shimmer = hpf(noise(0.6), 4500) * S.shape(0.6, 0.2, 0.05, 0.35) * 0.12
+    return B.soft(B.room(mix(0.6 * bells, shimmer), 0.45), 7500)
+
+
+def lantern_miss(i):
+    """Not a pair: two notes a little out of tune with each other, dimming down, and a soft "pff" as they go dark."""
+    t = S.T(0.5)
+    n = N(0.5)
+    f = 392 * j(i, 0.02)
+    dim = (np.sin(2 * np.pi * f * t * (1 - 0.06 * t)) + np.sin(2 * np.pi * f * 1.06 * t * (1 - 0.06 * t))) \
+        * env(n, 0.01, 0.16) * 0.4
+    pff = bpf(noise(0.14), 700, 2600) * S.shape(0.14, 0.02, 0.0, 0.1) * 0.35
+    return B.soft(B.room(mix(dim, at(pff, 0.32)), 0.3), 3600)
+
+
+def lantern_win(i):
+    """The ring is lit: a glint runs round all twelve caps, a bell, and the Boki cheering."""
+    fs = [784, 880, 988, 1047, 1175, 1319, 1480, 1568, 1760, 1976, 2093, 2349]
+    run = mix(*[at(glint(f * j(i, 0.01), 0.16) * (0.35 + 0.03 * k), 0.045 * k) for k, f in enumerate(fs)])
+    bell = at(0.7 * S.chime(1568, 1.0, 0.4), 0.55)
+    return B.soft(B.room(mix(run, bell, at(0.6 * B.happy(i), 0.62)), 0.5), 7500)
+
+
 def main():
     S.takes_cat('garden_count', count, 1, 'boki')
     S.takes_cat('garden_go', go, 1, 'boki')
@@ -628,6 +720,14 @@ def main():
     S.takes_cat('garden_visit_in', visit_in, 2, 'boki')
     S.takes_cat('garden_visit_out', visit_out, 1, 'boki')
     S.takes_cat('garden_season', season, 0, 'boki')
+    S.takes_cat('kite_flap', kite_flap, 2, 'step')
+    S.takes_cat('kite_ring', kite_ring, 2, 'ui')
+    S.takes_cat('kite_updraft', kite_updraft, 1, 'boki')
+    S.takes_cat('kite_finish', kite_finish, 1, 'boki')
+    S.takes_cat('lantern_flip', lantern_flip, 3, 'ui')
+    S.takes_cat('lantern_match', lantern_match, 2, 'ui')
+    S.takes_cat('lantern_miss', lantern_miss, 2, 'ui')
+    S.takes_cat('lantern_win', lantern_win, 1, 'boki')
 
 
 if __name__ == '__main__':

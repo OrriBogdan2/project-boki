@@ -161,6 +161,8 @@ func _source_tips() -> void:
 func _farm() -> void:
 	var n := _walk("farm tutorial", FarmTutorial.rules(), FarmTutorial.fill)
 	ok(n > 20, "farm tutorial lines checked (%d)" % n)
+	FarmUnlocks.rules()["base_mode"] = false      # the house step is the old farm's (shipped: the base steps)
 	var house: Dictionary = FarmTutorial.step_def("house")
+	FarmUnlocks.rules()["base_mode"] = true
 	var wait: String = FarmTutorial.fill(String(house.get("hints", {}).get("wait", "")))
 	ok(wait.contains(Settings.key_cap("interact")), "the farm house hint names the rebound use key: " + wait)

@@ -70,10 +70,11 @@ func _names() -> void:
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
 	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
 			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
-			"relay_handoff", "relay_fumble", "relay_finish"]
+			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
+			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring and Relay cue exists (%d)"
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring, Relay, Kite and Lantern cue exists (%d)"
 			% cues.size())
 
 func _fishing() -> void:

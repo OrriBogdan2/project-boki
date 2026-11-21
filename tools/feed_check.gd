@@ -93,6 +93,7 @@ static func _lean_sum(r: Dictionary) -> float:
 
 func _bowl() -> void:
 	var rules: Dictionary = Content.rules("farm_build")
+	rules["base_mode"] = false      # the old farm first (the shipped rules have it on)
 	ok(not FarmUnlocks.open(FeedBowl.ID), "bowl: hidden outside base mode")
 	rules["base_mode"] = true
 	ok(FarmUnlocks.open(FeedBowl.ID), "bowl: in base mode it can be built")
