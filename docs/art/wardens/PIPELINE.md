@@ -97,6 +97,9 @@ Sparkle's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already 
 ## Secrets
 - `MESHY_API_KEY` lives only in `~/.config/boki/secrets.env` (chmod 600) on the build box, or in the environment.
   Never in the repo, logs or shots. tools/meshy/meshy_task.py reads it and never prints it.
+- Spend guard (11-20): every paid submit reads the balance first and exits 3 below `MESHY_FLOOR` (default 400), then appends
+  `UTC time, CLAUDE_JOB_LABEL or hostname, endpoint, task id, balance before` to `$MESHY_LEDGER` (default `~/meshy-ledger.tsv`).
+  Test: `python3 tools/meshy/test_meshy_spend_guard.py`.
 
 ## The reference recipe (Vex r3c, 2026-11-04; superseded by RECIPE_95.md)
 Vex r3c is the model the owner reviews as the recipe; the others wait for his OK. Worktree on a branch of
