@@ -148,7 +148,8 @@ func _loco(s: Dictionary) -> void:
 		_play("idle", 1.0)
 
 
-## A new hit, cast or kit move this frame (state counters moved on since the last frame).
+## A new hit, cast or kit move this frame (state counters moved on since the last frame; a swing count that drops back,
+## a fresh state, is no hit).
 func _attacked(s: Dictionary) -> bool:
 	var now := {
 		"kmove": String(s.get("kmove", "")),
@@ -158,7 +159,7 @@ func _attacked(s: Dictionary) -> bool:
 	}
 	var hit: bool = (
 		(now["kmove"] != "" and now["kmove"] != last["kmove"])
-		or now["swing_n"] != last["swing_n"]
+		or now["swing_n"] > last["swing_n"]
 		or now["cast"] < last["cast"]
 		or now["recoil"] > last["recoil"]
 	)
