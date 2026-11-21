@@ -18,6 +18,7 @@ static func strip_age(m: Match) -> float:
 
 ## Lays the message lane under the banner and holds it while the banner is fresh.
 static func place(h) -> void:
+	h.msgs.max_shown = 1
 	h.msgs.one_hint = true
 	var age := strip_age(h.m)
 	var fresh := age >= 0.0 and age < Tutorial.CARD_T
