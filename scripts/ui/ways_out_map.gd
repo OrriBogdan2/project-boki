@@ -121,9 +121,10 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 		if on_map.call(pv, 8.0):
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 			if i == goal or MapDetail.holding():
-				HudStyle.ctext(hud.c, pv + Vector2(0, 22), WORDS[i], 10, HudStyle.INK, 3)      # the badge's name
+				MapNames.put(WORDS[i], pv + Vector2(0, 22), 10, HudStyle.INK, HudStyle.BIG, true, 3)      # the badge's name, off the place names
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	MapNames.flush(hud.c)      # (the boxes the place names and the train took in this draw stay taken)
 	if m.heart_raid:
 		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
@@ -142,8 +143,8 @@ static func full_map(fm) -> void:
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
 			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
-			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
-			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
+			var dy := -r - 16.0 if i == 1 else r + 30.0    # (the Gate's word sits over its glyph)
+			MapNames.put(word(i, sd[i]), pv + Vector2(0, dy), 11, color_of(sd[i]), HudStyle.BIG, true, 3)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
 # ------------------------------------------------------------------ the dead and the watching
