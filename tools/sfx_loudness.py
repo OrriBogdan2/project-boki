@@ -2,6 +2,8 @@
 
     python3 tools/sfx_loudness.py            per-category table (markdown, for docs/AUDIO.md) and the outliers
     python3 tools/sfx_loudness.py --check    exit 1 on an outlier not listed under "outliers_ok"
+    python3 tools/sfx_loudness.py --brawl <log> [--undo-duck <dB>]   each rival wind-up's level over the rest of a brawl's mix
+                                             (logs from godot -- --sfx-priority-check --brawl-out=<log>)
 
 Sounds come from content/sfx/*.json ("sounds": name -> category) and the Sfx tables (Sfx.NAMES, Sfx.VOICES,
 SfxKits.NAMES, VVSfx.NAMES); a table sound with no set gets its category from "table_cats" in
@@ -104,7 +106,74 @@ def table(levels, rows, groups, medians, outliers):
     return "\n".join(out)
 
 
+BRAWL_SR = 22050
+WINDUPS = ("hostile_cast", "ult_tag_foe")
+
+
+def wav_at(name, sr=BRAWL_SR):
+    """First take of a sound, mono, resampled to sr."""
+    files = takes(name)
+    if not files:
+        return None
+    with wave.open(files[0], "rb") as w:
+        n, ch, rate = w.getnframes(), w.getnchannels(), w.getframerate()
+        x = np.frombuffer(w.readframes(n), dtype=np.int16).astype(float) / 32768.0
+    x = x.reshape(-1, ch).mean(axis=1) if ch > 1 else x
+    return x if rate == sr else np.interp(np.arange(int(len(x) * sr / rate)) * rate / sr, np.arange(len(x)), x)
+
+
+def rms_db(x):
+    return 20 * np.log10(max(float(np.sqrt(np.mean(x * x))) if len(x) else 0.0, 1e-6))
+
+
+def brawl(path, undo_db=0.0):
+    """Mix a --sfx-priority-check log ("ms name rank dB" per sound) and measure each rival wind-up over it."""
+    ev, cache = [], {}
+    for ln in open(path, encoding="utf-8"):
+        t, name, rank, db = ln.split()
+        if name not in cache:
+            cache[name] = wav_at(name)
+        if cache[name] is not None:
+            ev.append((int(t) / 1000.0, name, float(rank), float(db)))
+    if undo_db:  # the same fight with the duck taken back off: your fire inside a wind-up's span, un-ducked
+        spans = [(t, t + len(cache[n]) / BRAWL_SR) for t, n, rk, _ in ev if rk >= 0 and n in WINDUPS]
+        ev = [(t, n, rk, db + (undo_db if rk == -2.0 and n == "rime_shard" and any(a <= t < b for a, b in spans) else 0.0))
+              for t, n, rk, db in ev]
+    total = max(t + len(cache[n]) / BRAWL_SR for t, n, _, _ in ev) + 0.1
+    own = np.zeros(int(total * BRAWL_SR)); rest = np.zeros_like(own)
+    for t, n, rk, db in ev:
+        if rk >= 0 and (n in WINDUPS or n.endswith("_ult_cue")):
+            continue
+        x, i = cache[n] * 10 ** (db / 20), int(t * BRAWL_SR)
+        tgt = own if rk == -2.0 else rest
+        tgt[i:i + len(x)] += x[:len(tgt) - i]
+    rows = []
+    for t, n, rk, db in ev:
+        if rk >= 0 and (n in WINDUPS or n.endswith("_ult_cue")):
+            x, i = cache[n] * 10 ** (db / 20), int(t * BRAWL_SR)
+            a, b = i, i + len(x)
+            rows.append((n, rms_db(x), rms_db(own[a:b]), rms_db(own[a:b] + rest[a:b])))
+    return rows
+
+
+def brawl_report(paths):
+    undo = float(paths.pop(paths.index("--undo-duck") + 1)) if "--undo-duck" in paths else 0.0
+    paths = [p for p in paths if p != "--undo-duck"]
+    for path in paths:
+        rows = brawl(path, undo)
+        m = lambda k: float(np.mean([r[k] for r in rows])) if rows else float("nan")
+        for n in sorted({r[0] for r in rows}):
+            rr = [r for r in rows if r[0] == n]
+            print("  %-22s x%-3d wind-up %.1f dB, your fire %.1f, whole mix %.1f: %+.1f dB over the mix" % (
+                n, len(rr), np.mean([r[1] for r in rr]), np.mean([r[2] for r in rr]),
+                np.mean([r[3] for r in rr]), np.mean([r[1] - r[3] for r in rr])))
+        print("%s: %d wind-ups, mean level over the mix %+.1f dB, over your fire alone %+.1f dB, buried (under the mix) %d" % (
+            os.path.basename(path), len(rows), m(1) - m(3), m(1) - m(2), sum(1 for r in rows if r[1] < r[3])))
+
+
 def main():
+    if "--brawl" in sys.argv:
+        return brawl_report(sys.argv[sys.argv.index("--brawl") + 1:])
     levels, rows, groups, medians, outliers, missing = audit()
     fresh = {n: d for n, d in outliers.items() if n not in levels["outliers_ok"]}
     stale = [n for n in levels["outliers_ok"] if n not in outliers]
