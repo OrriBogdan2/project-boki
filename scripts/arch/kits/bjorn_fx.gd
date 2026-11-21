@@ -9,9 +9,9 @@ extends Node3D
 ##   his ivory (Arch.color) behind its head, a glint in his colour on the head from 0.6 s that grows, burning
 ##   white-hot while the perfect window is open. It never stops until he lets go: the charge motion only, the damage
 ##   comes on the release
-## - his aegis: a wall of lit plates (two rows, ribbed, a rim and a hammer boss in his ivory) leaning out
-##   toward the camera, rising out of the ground, flashing on a block, darkening as it weakens and breaking
-##   (the verbs wall underneath keeps the blocking; its plain slab is hidden)
+## - his aegis: an upright, gently curved slab of lit plates (two rows, ribbed, a rim and a hammer boss in his ivory),
+##   rising out of the ground, flashing on a block, darkening as it weakens and breaking. The verbs wall underneath
+##   keeps the blocking and runs between the slab's two ends (its plain slab is hidden)
 
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
@@ -37,12 +37,8 @@ const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)
 const PLANT_SCALE := 1.9
 const PLANT_LEAN := 0.25
-## the aegis wall: radius (m), half its arc (rad), height (m) and how far its top leans out (m); its chord is
-## about the wall's 4.2 m, its height 30% over the old slab's
-const AEGIS_R := 2.6
-const AEGIS_HALF := 0.92
+## the aegis: its height (m) and the plates along its curve; its width and bow are the kit's shield data
 const AEGIS_H := 1.7
-const AEGIS_LEAN := 1.2
 const PLATE_N := 7
 ## the aegis: a lit slab, its plates in the palette's "slab" and the rim, ribs and boss lit in his own colour
 ## ("ivory", Arch.color) from content/vfx/bulwark.json; no dark edge pieces, no rivets (VFX_QUALITY row 8)
@@ -57,8 +53,11 @@ var hammer: Node3D            # the thrown hammer
 var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
 var aegis: Node3D              # the plated wall
+var aegis_r := 1.0             # m, the radius of its curve
+var aegis_half := 0.0          # rad, half its arc round the curve's centre
+var aegis_bow := 0.0           # m its two ends stand nearer him than its middle
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
-var plate_col: Color
+var plate_col: Color           # its plates and edges at full strength (the palette "slab" and "ivory")
 var edge_col: Color
 var aegis_hit := 0.0
 var rise_t := 0.0
@@ -74,10 +73,16 @@ var own_piece: Node3D         # the model's own hammer, when it has a skinned on
 var own_reach := 0.0          # m from its grip to its head's far end (neutral): it stands on that, planted
 var chain: Array = []         # the links to the thrown hammer (_build_chain)
 
-func _init(hunter: Hunter) -> void:
+## `shield` is the kit's aegis data (content/archetypes/bulwark.json rmb.shield): the slab is drawn "len" m wide
+## end to end, its ends "bow" m nearer him than its middle.
+func _init(hunter: Hunter, shield: Dictionary) -> void:
 	h = hunter
 	top_level = true
 	name = "BjornFx"
+	var half_len := float(shield["len"]) * 0.5
+	aegis_bow = float(shield["bow"])
+	aegis_r = (half_len * half_len + aegis_bow * aegis_bow) / (2.0 * aegis_bow)
+	aegis_half = asin(half_len / aegis_r)
 
 func _ready() -> void:
 	hammer = Node3D.new()
@@ -150,9 +155,9 @@ func _tick_chain() -> void:
 		mi.global_transform = Transform3D(fix.rotated(along, PI * 0.5 * (i % 2)) * Basis(Vector3.RIGHT, PI * 0.5), at)
 		mi.scale = Vector3(1.0, 1.0, 1.0) * clampf(a.distance_to(b) / chain.size() * 2.2, 0.5, 1.6)
 
-## The wall of lit plates, built once: two rows of plates along the arc, ribs between them, a
-## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
-## centre at the origin, the apex straight ahead (-Z).
+## The slab of lit plates, built once: two rows of plates along its curve, ribs between them, a rim along the top
+## and a round boss with the hammer's cross in the middle. Local space: the curve's centre at the origin, the slab's
+## middle straight ahead (-Z), its two ends at +-aegis_half.
 func _build_aegis() -> void:
 	aegis = Node3D.new()
 	aegis.top_level = true
@@ -165,31 +170,28 @@ func _build_aegis() -> void:
 	plate.set_shader_parameter("rim_amount", 0.6)
 	plate.set_shader_parameter("rim_color", edge_col)
 	plate_mats = [plate, edge]
-	var tilt := atan2(AEGIS_LEAN, AEGIS_H)
-	var seg := AEGIS_HALF * 2.0 / PLATE_N
-	var width := 2.0 * AEGIS_R * sin(seg * 0.5)
+	var seg := aegis_half * 2.0 / PLATE_N
+	var width := 2.0 * aegis_r * sin(seg * 0.5)
 	for i in PLATE_N:
-		var b := lerpf(-AEGIS_HALF, AEGIS_HALF, (float(i) + 0.5) / PLATE_N)
-		var facing := Vector3(-tilt, -b, 0.0)
-		for row in 2:
-			var y := AEGIS_H * (0.25 + 0.5 * float(row))
-			var r := AEGIS_R + AEGIS_LEAN * (y / AEGIS_H)
-			var at := Vector3(sin(b) * r, y, -cos(b) * r)
-			Models.part(aegis, Models.box(width * 0.92, AEGIS_H * 0.45, 0.16), plate, at, Vector3.ONE, facing)
-		var top_r := AEGIS_R + AEGIS_LEAN
-		var rim_at := Vector3(sin(b) * top_r, AEGIS_H + 0.05, -cos(b) * top_r)
-		Models.part(aegis, Models.box(width, 0.14, 0.34), edge, rim_at, Vector3.ONE, Vector3(0, -b, 0))
-		var rb := b - seg * 0.5
-		var rib_r := AEGIS_R + AEGIS_LEAN * 0.5
-		var rib_at := Vector3(sin(rb) * rib_r, AEGIS_H * 0.5, -cos(rb) * rib_r)
-		Models.part(aegis, Models.box(0.13, AEGIS_H * 1.02, 0.24), edge, rib_at, Vector3.ONE, Vector3(-tilt, -rb, 0))
-	var boss_r := AEGIS_R + AEGIS_LEAN * 0.5 + 0.12
-	var boss_at := Vector3(0, AEGIS_H * 0.5, -boss_r)
-	Models.part(aegis, Models.box(0.55, 0.55, 0.14), edge, boss_at, Vector3.ONE, Vector3(-tilt, 0, PI * 0.25))
-	var cross_tilt := Vector3(-tilt, 0, 0)
+		_aegis_column(lerpf(-aegis_half, aegis_half, (float(i) + 0.5) / PLATE_N), width, plate, edge)
+		var rb := lerpf(-aegis_half, aegis_half, float(i) / PLATE_N)
+		var rib_at := Vector3(sin(rb) * aegis_r, AEGIS_H * 0.5, -cos(rb) * aegis_r)
+		Models.part(aegis, Models.box(0.13, AEGIS_H * 1.02, 0.24), edge, rib_at, Vector3.ONE, Vector3(0, -rb, 0))
+	var boss_at := Vector3(0, AEGIS_H * 0.5, -aegis_r - 0.12)
+	Models.part(aegis, Models.box(0.55, 0.55, 0.14), edge, boss_at, Vector3.ONE, Vector3(0, 0, PI * 0.25))
 	var stem_at := boss_at + Vector3(0, 0, -0.06)
-	Models.part(aegis, Models.box(0.12, 0.5, 0.1), plate, stem_at, Vector3.ONE, cross_tilt)
-	Models.part(aegis, Models.box(0.4, 0.12, 0.1), plate, stem_at + Vector3(0, 0.12, 0), Vector3.ONE, cross_tilt)
+	Models.part(aegis, Models.box(0.12, 0.5, 0.1), plate, stem_at)
+	Models.part(aegis, Models.box(0.4, 0.12, 0.1), plate, stem_at + Vector3(0, 0.12, 0))
+
+## One column of the slab at angle `b` (rad) round the curve's centre: two plates and the rim above them.
+func _aegis_column(b: float, width: float, plate: Material, edge: Material) -> void:
+	var facing := Vector3(0.0, -b, 0.0)
+	var out := Vector3(sin(b), 0, -cos(b))
+	for row in 2:
+		var at := out * aegis_r + Vector3(0, AEGIS_H * (0.25 + 0.5 * float(row)), 0)
+		Models.part(aegis, Models.box(width * 0.92, AEGIS_H * 0.45, 0.16), plate, at, Vector3.ONE, facing)
+	Models.part(aegis, Models.box(width, 0.14, 0.34), edge, out * aegis_r + Vector3(0, AEGIS_H + 0.05, 0), Vector3.ONE,
+		facing)
 
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
@@ -316,8 +318,8 @@ func aegis_show(w: Dictionary, hurt: float) -> void:
 	var mid := (a + b) * 0.5
 	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
 	aegis.visible = true
-	# the curve's centre sits behind the wall's midpoint so its apex is the wall line
-	var c := Vector2(mid.x, mid.y) - dir * AEGIS_R
+	# the wall runs between the slab's two ends: the curve's centre sits behind it so both ends land on it
+	var c := mid - dir * (aegis_r - aegis_bow)
 	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.02, c.y)
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", plate_col.lerp(BROKEN_COL, hurt * 0.65))
@@ -345,7 +347,7 @@ func aegis_block(at: Vector3) -> void:
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
 	AimKit.hide(h, "aegis_push")
-	var half := Vector2(AEGIS_R * sin(AEGIS_HALF), AEGIS_H * 0.5)
+	var half := Vector2(aegis_r * sin(aegis_half), AEGIS_H * 0.5)
 	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
 
 func _process(_delta: float) -> void:
