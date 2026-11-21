@@ -4,7 +4,8 @@ extends RefCounted
 ## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens its zone's snacks
 ## (or the start garden's four and a rotating extra) and the season's snack (GardenSeasons) when that list lacks it,
 ## on a timer (content/rules/snack_patch.json), and walking over it picks them up for the pantry, to feed the lean
-## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
+## foods. Never sold, no seeds. A Tide Boki waters it (BaseChore): it then ripens faster until the next pick.
+## The timer is the deco entry's "t" (unix seconds of the last pick), the watering its "wt".
 
 const ID := "snack_patch"
 
@@ -54,11 +55,24 @@ static func entry(d: Dictionary) -> Dictionary:
 	return {}
 
 static func ripe(e: Dictionary, now: float) -> bool:
-	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs()
+	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs(e)
 
-## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort).
-static func grow_secs() -> float:
-	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0)
+## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort, and with a
+## watered patch `e`: BaseChore's Tide chore).
+static func grow_secs(e := {}) -> float:
+	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0) \
+		* (float(rules()["water_mult"]) if watered(e) else 1.0)
+
+## Watered since the last pick (the entry's "wt", unix seconds): a pick makes it dry again.
+static func watered(e: Dictionary) -> bool:
+	return e.has("wt") and e.has("t") and float(e["wt"]) >= float(e["t"])
+
+## A patch that is down, still growing and dry: what a Tide Boki walks to.
+static func dry(e: Dictionary, now: float) -> bool:
+	return not e.is_empty() and e.has("t") and not watered(e) and not ripe(e, now)
+
+static func water(e: Dictionary, now: float) -> void:
+	e["wt"] = now
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
