@@ -448,7 +448,8 @@ func _fill_squad() -> void:
 		var you: bool = m["you"]
 		v.add_child(UI.label(String(m["name"]), UI.T_BODY, UI.ACCENT_HI if you else UI.INK, UI.semi))
 		var state := "Picking..." if m == now else "Waiting"
-		v.add_child(UI.label(Arch.label(ak) if Arch.exists(ak) else state, UI.T_SMALL, UI.GOLD if m == now else UI.MUTED))
+		var shown := Arch.label(ak) if Arch.exists(ak) else state
+		v.add_child(UI.label(shown, UI.T_SMALL, UI.GOLD if m == now else UI.MUTED))
 		if not you and not bool(m["bot"]):
 			h.add_child(_mute_button(String(m["name"])))
 		squad_box.add_child(chip)

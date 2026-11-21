@@ -50,7 +50,9 @@ func setup(opts: Dictionary) -> void:
 	elif opts.get("training", false):
 		title = "Training Area"
 	else:
-		var map_id := WideLayout.MAP if opts.get("rolling", false) else String(opts.get("map", World.layout_for_tier(tier)))
+		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
+		if opts.get("rolling", false):
+			map_id = WideLayout.MAP
 		title = String(World.load_layout(map_id).get("name", Data.TIERS[tier]["name"]))
 		mode_line = _mode(opts, String(Data.TIERS[tier]["name"]))
 		party = Prematch.squad_of(opts, mine)
@@ -139,7 +141,8 @@ func _draw() -> void:
 	var a := fade
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(UI.BG, a))
 	if splash:
-		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), Portraits.region(arch, splash_path, splash.get_size(), sz), Color(1, 1, 1, a))
+		var cut := Portraits.region(arch, splash_path, splash.get_size(), sz)
+		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), cut, Color(1, 1, 1, a))
 	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.35, sz.x, sz.y * 0.65), false, Color(1, 1, 1, a))
 	var m := maxf(24.0, sz.y * MARGIN_FRAC)
 	var tw := minf(TIP_W, sz.x - 2.0 * m)
@@ -158,7 +161,8 @@ func _draw() -> void:
 	if mode_line != "":
 		_text(Vector2(m, base), mode_line, UI.semi, 16, Color(UI.TEAL, a), HORIZONTAL_ALIGNMENT_LEFT)
 		base -= 30.0
-	_text(Vector2(m, base), title, UI.big, maxi(36, int(sz.y * TITLE_FRAC)), Color(UI.INK, a), HORIZONTAL_ALIGNMENT_LEFT)
+	var title_px := maxi(36, int(sz.y * TITLE_FRAC))
+	_text(Vector2(m, base), title, UI.big, title_px, Color(UI.INK, a), HORIZONTAL_ALIGNMENT_LEFT)
 	_squad_row(Vector2(sz.x - m, br.position.y - 62.0), clampf(sz.y * FACE_FRAC, 64.0, 100.0), a)
 
 ## Your squad's portraits with their names under them, right-aligned to `p` (the names' baseline).
@@ -167,7 +171,8 @@ func _squad_row(p: Vector2, px: float, a: float) -> void:
 	var x := p.x - party.size() * px - (party.size() - 1) * gap
 	for mate in party:
 		var ak: String = mate["arch"]
-		Portraits.draw(c, Rect2(x, p.y - 20.0 - px, px, px), ak, null, Color(Arch.color(ak) if Arch.exists(ak) else UI.MUTED, a))
+		var edge: Color = Arch.color(ak) if Arch.exists(ak) else UI.MUTED
+		Portraits.draw(c, Rect2(x, p.y - 20.0 - px, px, px), ak, null, Color(edge, a))
 		var col := UI.ACCENT_HI if mate["you"] else UI.INK
 		_text(Vector2(x + px * 0.5, p.y), String(mate["name"]), UI.semi, 14, Color(col, a * 0.9))
 		x += px + gap

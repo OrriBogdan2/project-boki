@@ -312,7 +312,8 @@ func _lock_in(view: Control) -> void:
 	pm.tick(0.01)
 	ok(not pm.lock_in() and pm.my_turn(), "Lock in does nothing before a pick")
 	pm.choose("bulwark")
-	ok(pm.lock_in() and pm.squad[0]["done"] and not pm.my_turn() and pm.pick == "bulwark", "Lock in ends your turn with your pick")
+	var locked := pm.lock_in() and pm.squad[0]["done"] and not pm.my_turn() and pm.pick == "bulwark"
+	ok(locked, "Lock in ends your turn with your pick")
 	view._choose("bulwark")
 	ok(not view.lock_btn.disabled and view.lock_btn.text == "Lock in", "with a pick on your turn the button is live")
 
@@ -336,7 +337,7 @@ func _declutter(view: Control) -> void:
 		for line in ClassCard.howto_lines(ak):
 			tip_ok = tip_ok and tip.contains(String(line))
 		shut_ok = shut_ok and labels.is_empty() and lock == shut and tip_ok
-	ok(open == 2 and shut_ok, "each tile is a portrait, shut ones have a padlock, hover has stats, how to play and quest")
+	ok(open == 2 and shut_ok, "each tile is a portrait; shut ones a padlock; hover has stats, how to play, quest")
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
