@@ -23,11 +23,11 @@ static func heard(h: Hunter) -> bool:
 ## One footstep of h: yours with no distance (steady), anyone else's placed at h, out to reach(h).
 ## own_db / other_db: the sound's level for you and for a rival.
 static func play(h: Hunter, sname: String, own_db: float, other_db: float, pitch_var := 0.08) -> void:
-	Sfx.play(sname, _at(h), _level(h, own_db, other_db), pitch_var, 1.0, reach(h))
+	Sfx.play(sname, _at(h), _level(h, own_db, other_db), pitch_var, StepSurface.pitch(h), reach(h))
 
 ## A foot coming down (HunterAnim.stepped): the plain step under the surface one.
 static func contact(h: Hunter) -> void:
-	Sfx.step(_at(h), _level(h, -14.0, -20.0), reach(h))
+	Sfx.step(_at(h), _level(h, -14.0, -20.0) + StepSurface.vol_db(h, 0.0), reach(h), StepSurface.pitch(h))
 
 ## Where the step sounds from: nowhere for your own (no distance roll-off), else at h.
 static func _at(h: Hunter) -> Variant:

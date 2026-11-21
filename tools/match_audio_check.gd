@@ -87,6 +87,7 @@ func run(main_node: Node) -> void:
 	await _hover(other, "another player's")
 	other.remote = false
 	await _loudness(m)
+	_regions(m, P)
 	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
 	m.music_dir.beds.tick(m, P)
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
@@ -107,6 +108,88 @@ func run(main_node: Node) -> void:
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Region ambience (content/rules/region_ambience.json, docs/AUDIO.md): every region the layout makes has a
+## bed from the library; the bed plays in its region; crossing a border crossfades over 3-4 s; the Blight
+## quietens the place beds.
+func _regions(m: Match, P: Hunter) -> void:
+	var lay := World.load_layout("hollowcrown")
+	var rules := AmbBeds.rules()
+	var ids := []
+	var isl := {}
+	for r in lay.get("regions", []):
+		ids.append(String(r["id"]))
+		var bed := AmbBeds.bed_of_region(String(r["id"]))
+		var file := bed != "" and ResourceLoader.exists("res://audio/amb_%s.ogg" % bed)
+		ok(file, "region %s plays bed amb_%s (file there)" % [r["id"], bed])
+		for i in r["islands"]: isl[String(i)] = String(r["id"])
+	var n_reg: int = m.world.regions.size()
+	ok(ids.size() == 9 and n_reg == ids.size(), "the world has the layout's %d regions (%d)" % [ids.size(), n_reg])
+	var stale: Array = rules["beds"].keys().filter(func(k): return not k in ids)
+	ok(stale.is_empty(), "the map has no region the layout does not make %s" % str(stale))
+	var beds := AmbBeds.new()
+	var wrong := []
+	for d in lay["islands"]:
+		var rid: String = isl[String(d["id"])]
+		var at := Vector3(float(d["poi"][0]) + 0.5, 0.0, float(d["poi"][1]) + 0.5)
+		if m.world.island_of(at.x, at.z) < 0:
+			continue     # a lagoon or a hole at the point of interest: nothing to stand on
+		P.pos = at
+		var lv := beds.place_levels(m, P)
+		var top := ""
+		for b in lv:
+			if b != "water" and (top == "" or float(lv[b]) > float(lv[top])): top = b
+		if top != AmbBeds.bed_of_region(rid) or float(lv[top]) < 0.5: wrong.append("%s:%s" % [d["id"], top])
+	ok(wrong.is_empty(), "standing in each region its own bed is loudest %s" % str(wrong))
+	# the crossfade: from the Crown out to Larkhollow, the beds trade places over fade_s
+	var fade := float(rules["fade_s"])
+	ok(fade >= 3.0 and fade <= 4.0, "the border crossfade is 3-4 s (%.1f s)" % fade)
+	var a: String = AmbBeds.bed_of_region("crown")
+	var b: String = AmbBeds.bed_of_region("lark")
+	Sfx.clear_amb_layers(0.01)
+	var lark: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "lark")[0]
+	var crown: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "crown")[0]
+	P.pos = Vector3(float(crown["poi"][0]) + 0.5, 0.0, float(crown["poi"][1]) + 0.5)
+	beds.tick(m, P)
+	for i in int(fade * 8): Sfx._process(0.125)
+	var full := db_to_linear(-12.0)
+	ok(_lin(a) > 0.45 * full and _lin(b) == 0.0,
+			"Crown bed %s up, Larkhollow's %s not (%.2f / %.2f)" % [a, b, _lin(a) / full, _lin(b) / full])
+	var before := _lin(a)
+	P.pos = Vector3(float(lark["poi"][0]) + 0.5, 0.0, float(lark["poi"][1]) + 0.5)
+	beds.tick(m, P)
+	for i in int(fade * 4): Sfx._process(0.125)
+	var mid_a := _lin(a)
+	var mid_b := _lin(b)
+	ok(mid_a > 0.0 and mid_a < before and mid_b > 0.0,
+			"mid-fade both sound (%s %.2f -> %.2f, %s %.2f)" % [a, before / full, mid_a / full, b, mid_b / full])
+	for i in int(fade * 4) + 2: Sfx._process(0.125)
+	ok(not Sfx.amb_layers.has(a) and _lin(b) > 0.45 * full,
+			"after %.1f s the old bed is gone and the new one is up (%s %.2f)" % [fade, b, _lin(b) / full])
+	# the Blight: past the tide ring the place beds are quieter, at the Heart they are not
+	var own_heart := m.heart == null      # (this check's match has no clock, so no Heart: give it one for the tide)
+	if own_heart:
+		m.heart = Heart.new(m)
+		m.heart.setup(lay)
+	var t_was := m.time
+	m.time = maxf(m.time, Heart.r("tide_start_s") + 1.0 - m.sess_t0)      # the tide is up
+	if m.heart != null:
+		var site: Vector3 = m.heart.site
+		var near := Vector3(site.x, 0.0, site.z)
+		var far := near + Vector3(Heart.tide_r(m) + 60.0, 0.0, 0.0)
+		var k_in := AmbBeds.blight_share(m, near)
+		var k_out := AmbBeds.blight_share(m, far)
+		var quiet: bool = k_in == 1.0 and absf(k_out - float(rules["blight_k"])) < 0.01 and k_out < 0.5
+		ok(quiet, "in the Blight the place beds drop to %.2f of their level (%.2f at the Heart)" % [k_out, k_in])
+	else:
+		ok(false, "setup: the match has a Heart to read the Blight tide from")
+	m.time = t_was
+	if own_heart:
+		m.heart = null
+	Sfx.clear_amb_layers(0.01)
+
+func _lin(bed: String) -> float:
+	return db_to_linear((Sfx.amb_layers[bed]["p"] as AudioStreamPlayer).volume_db) if Sfx.amb_layers.has(bed) else 0.0
 
 func _ult_chime(m: Match, P: Hunter) -> void:
 	var mate: Hunter = null
@@ -196,8 +279,19 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
 	R.pos = P.pos + Vector3(40, 0, 0)
 	Sfx.last_played.clear()
+	var dbs := {}
+	var grab := func(sname: String, _at, db: float, _pitch: float): dbs[sname] = db
+	Sfx.played.connect(grab)
+	for pl in Sfx.players:
+		pl.stop()
+	var terrain: World = Sfx.occlusion.world       # the bus is the point here: open ground, nothing muffles it
+	Sfx.occlusion.world = null
 	UltCue.cast(R.ak)
+	Sfx.occlusion.world = terrain
+	var foe_voices := Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").size()
 	var heard := Sfx.last_played.has(R.arch + "_ult_cue") and Sfx.last_played.has("ult_tag_foe")
+	ok(foe_voices == 2 and dbs.get(R.arch + "_ult_cue") == UltCue.DB_FOE and dbs.get("ult_tag_foe") == UltCue.DB_FOE,
+			"a rival's ultimate cue and tag play on the SFXFoe bus at DB_FOE (%d voices)" % foe_voices)
 	ok(heard and not Sfx.last_played.has("ult_tag_ally"),
 			"a rival's ultimate 40 m away is heard, with the rival tag (%s)" % [Sfx.last_played.keys()])
 	R.pos = P.pos + Vector3(70, 0, 0)
@@ -205,9 +299,16 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(R.ak)
 	ok(Sfx.last_played.is_empty(), "...and 70 m away it is out of earshot")
 	Sfx.last_played.clear()
+	dbs.clear()
+	for pl in Sfx.players:
+		pl.stop()
 	UltCue.cast(P.ak)
+	Sfx.played.disconnect(grab)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+	ok(dbs.get("ult_tag_ally") == UltCue.DB and UltCue.DB_FOE > UltCue.DB
+			and Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").is_empty(),
+			"...at UltCue.DB, under a rival's, on the plain SFX buses")
 
 ## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
 func _buses() -> void:
@@ -358,6 +459,39 @@ func _steps(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
 	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
 			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
+	_step_weights(R, P)
+
+
+## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,
+## on the foot's contact step and the surface step both. Motley (ostra) has no steps to weigh (gait < 0.5).
+func _step_weights(R: Hunter, P: Hunter) -> void:
+	var arch0 := R.arch
+	var got := {}
+	for a in ["archer", "dolm", "ashwick"]:
+		R.arch = a
+		got[a] = [_step_params(R, P, true), _step_params(R, P, false)]
+	R.arch = arch0
+	for i in 2:
+		var l: Vector2 = got["archer"][i]
+		var md: Vector2 = got["dolm"][i]
+		var hv: Vector2 = got["ashwick"][i]
+		var what := "contact" if i == 0 else "surface"
+		ok(l.x > md.x and md.x > hv.x, "%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x])
+		ok(l.y < md.y and md.y < hv.y, "%s step level: light %.1f < medium %.1f < heavy %.1f dB" %
+				[what, l.y, md.y, hv.y])
+	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
+
+
+## (pitch scale, dB) of one step of R, 10 m from P, from the Sfx.played signal.
+func _step_params(R: Hunter, P: Hunter, contact: bool) -> Vector2:
+	var out := [Vector2.ZERO]
+	var on := func(sname: String, _at, db: float, pitch: float):
+		if sname.contains("step"):
+			out[0] = Vector2(pitch, db)
+	Sfx.played.connect(on)
+	_step_db(R, P, 10.0, contact)
+	Sfx.played.disconnect(on)
+	return out[0]
 
 ## The level (dB) of one step of h placed `d` m from P along x (h == P: where P stands), NAN when nothing played.
 ## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
@@ -407,7 +541,19 @@ func _barks(m: Match, P: Hunter) -> void:
 	Sfx.last_played.clear()
 	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
 	heard = Sfx.last_played.has(bark_of.call(P, "boki"))
-	ok(B.plays.back() == ["boki", P.nid] and heard, "your Boki down: you call it")
+	ok(B.plays.has(["boki", P.nid]) and heard, "your Boki down: you call it")
+	ok(B.plays.back() == ["alert", P.nid] and Sfx.last_played.has(HunterBarks.ALERT), "...and hear the UI alert")
+	ok(Sfx.last_played.has("boki_downed"), "...and its own cry at the spot")
+	Sfx.last_played.clear()
+	m.time += 1.0
+	var n_alerts := B.plays.count(["alert", P.nid])
+	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
+	ok(B.plays.count(["alert", P.nid]) == n_alerts and not Sfx.last_played.has(HunterBarks.ALERT),
+			"a second down 1 s later: no second alert")
+	ok(Sfx.last_played.has("boki_downed"), "...but the cry still sounds")
+	m.time += HunterBarks.ALERT_GAP_S
+	B.boki_down(m, P.kin)
+	ok(B.plays.count(["alert", P.nid]) == n_alerts + 1, "a down after the gap: the alert sounds again")
 	var voiced := func(x): return x.team != P.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
 	var other: Hunter = m.hunters.filter(voiced)[0]
 	var team := other.team
@@ -416,13 +562,17 @@ func _barks(m: Match, P: Hunter) -> void:
 	other.pos = P.pos + Vector3(40, 0, 0)
 	var before := B.plays.size()
 	B.boki_down(m, theirs)
-	ok(B.plays.size() == before, "a rival's Boki down: no call (%s)" % [B.plays])
+	ok(B.plays.size() == before, "a rival's Boki down: nothing (%s)" % [B.plays])
 	other.team = P.team
 	Sfx.last_played.clear()
 	B.boki_down(m, theirs)
-	ok(B.plays.back() == ["boki", other.nid] and Sfx.last_played.has(bark_of.call(other, "boki")),
-			"a teammate's Boki down 40 m away: the squad hears the teammate call it")
-	ok(B.plays.all(func(p): return p[0] == "boki" or p[1] == P.nid), "only \"Boki down\" is heard from another Hunter")
+	ok(B.plays.back() == ["tick", other.nid] and Sfx.last_played.has(HunterBarks.TICK), "a teammate's Boki: a tick")
+	ok(not Sfx.last_played.has(bark_of.call(other, "boki")) and not Sfx.last_played.has(HunterBarks.ALERT),
+			"...no call, no alert")
+	ok(HunterBarks.TICK_DB <= HunterBarks.ALERT_DB - 6.0, "...and the tick is well under your own alert")
+	var up := Sfx.last_played.size()
+	KinNet.on_event(m, ["kcmd", "scoop", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
+	ok(Sfx.last_played.has("boki_revive"), "your Boki back up: the soft revive cue (%d cues before)" % up)
 	Settings.v["hunter_barks"] = false
 	m.time += HunterBarks.COOLDOWN_S + 0.1
 	before = B.plays.size()

@@ -244,9 +244,7 @@ func _steer() -> void:
 			t = _nearest(mb.pos, reach)
 			if t == null:
 				continue
-			mb.tgt = t
-			if mb.st == "idle":
-				mb.st = "chase"
+			mb.aggro(t, "heart raid")
 		mb.camp = t.pos
 
 
@@ -298,7 +296,7 @@ func _spawn_boss() -> void:
 	b.max_hp = float(bd["hp"]) * tier_k * scale("boss_hp")
 	b.dmg_mult *= float(diff()["dmg"])
 	b.hp = b.max_hp
-	b.dormant = false
+	b.set_asleep(false)
 	m.add_child(b)
 	m._draw_range(b)
 	m.mobs.append(b)
@@ -313,6 +311,7 @@ func _spawn_boss() -> void:
 	_note("boss %s, %d hp" % [bd["kind"], int(b.max_hp)])
 	_broadcast()
 
+
 ## A client: the boss the host named. BossNet builds it from its lair kind, so it takes the raid's name and
 ## enrage time as the host's did (_spawn_boss); hp and max_hp come with the snapshots.
 func _find_boss() -> void:
@@ -322,6 +321,7 @@ func _find_boss() -> void:
 		bb.md["name"] = String(rules()["boss"]["name"])
 		bb.md["enrage"] = float(rules()["boss"]["enrage"])
 
+
 func _boss_down() -> void:
 	phase = P.HOLD
 	boss_down = true
@@ -330,6 +330,7 @@ func _boss_down() -> void:
 	if m.hud and m.player and not m.player.out:
 		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.col())
 	_broadcast()
+
 
 ## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client has no host
 ## lair (its boss is BossNet's copy, hp and max_hp by the snapshot), so the square comes from the rules.
