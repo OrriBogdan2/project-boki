@@ -15,7 +15,11 @@ const SIDE_GAP := 6.0  # px: a slid box stops this far off the zone, so it never
 
 ## The zone in screen px; an empty Rect2 when there is no hunter on screen to keep clear.
 static func rect(m: Match) -> Rect2:
-	var p: Hunter = m.player
+	return rect_of(m, m.player)
+
+
+## The same zone over any hunter `p` (--clarity-shots counts what sits on each one).
+static func rect_of(m: Match, p: Hunter) -> Rect2:
 	if p == null or m.cam == null or p.out or p.downed or p.riding:
 		return Rect2()
 	var up := Vector3(0, PLATE_UP * float(p.cdat["scale"]), 0)
