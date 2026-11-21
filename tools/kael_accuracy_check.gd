@@ -377,6 +377,7 @@ func pull_waits() -> void:
 	K.use_e()
 	A.step(m, 0.45)
 	A.tap(m, P)
+	A.step(m, 0.2)                  # (a press sooner than that after the tap is the Cinder Spin)
 	K.use_e()
 	var kept := W.hooked() and not K.slam_w.is_empty()
 	_until(m, func(): return K.slam_w.is_empty(), 1.0)

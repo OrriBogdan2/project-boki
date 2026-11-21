@@ -113,7 +113,7 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 | 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
 | 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
 | 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
-| 8 | Grapnel line | closed | the hook is his own model's arm stretched out (`WardenReach`, owner playtest 11-11); where it runs through rock a silhouette is drawn on top (`ld_arm.gdshader` depth test off) |
+| 8 | Grapnel line | closed | the hook is his own model's arm stretched out (`WardenReach`, owner playtest 11-11); where it runs through rock a silhouette is drawn on top (`arm_ghost`, an `xray` HeroVfx string: depth test off) |
 | 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
 | 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
 | 11 | Shotgun range and fan | closed | `shotgun.json` fan 20, bloom to 10 (30 at most; ext/combat-spread-falloff, the footage's 20 rested and 30 firing), range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
@@ -458,13 +458,17 @@ more, shorter steps than a medium, the opposite of the sheet's heavy note (run_f
 the barge covers 3.2 m (1.8 bh) against the source's 2.5-3 bh.
 
 ## Look and sound
-- Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
-  `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
-  flash; his own right arm stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim line so no clip swings it, home down the line after), sludge drips, a dark silhouette where it runs through rock; the brass
-  and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
-  brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
-  scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
-  after-images along it.
+- Every effect is data (`content/vfx/dredge.json`, HeroVfx, his gold and brass palette; only the Broadside slugs stay LDFx): the muzzle flash (`shot`),
+  gold slug trails that end in a small brass flare at the stop line (`slug`, `slug_end`), the hook's end and grab flares, a
+  dark sludge silhouette of the arm where it runs through rock (`arm_ghost`: an `xray` string drawn over walls), a brass ring
+  at his feet while he reels (`reel`), the Anchor slam (`anchor_slam`: the falling fist, a lit gold arc over the cone, cracked
+  ground, a ring), seafoam stun swirls over the foes it stuns (`stunned`), the air smash (`dive`: he rides a fist down over a
+  thin ring the size of the quake; `quake`: rings, flare, scorch and the fist planted), and Broadside's charge spark, fist
+  flash and hit flash (its slugs, which fly the whole fan, stay `LDFx.volley`). Nothing is drawn on a dash but its trail.
+  The Anchor's telegraphs (AimKit) are his palette's seafoam `anchor`.
+- His own right arm is stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim
+  line so no clip swings it, home down the line after), with sludge drips; the barge tears up clods of turf where the lunge
+  sets off, with iron and brass after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,

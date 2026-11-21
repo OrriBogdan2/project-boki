@@ -11,8 +11,8 @@ static func ability_tip(h: Hunter) -> String:
 	var cap := Settings.key_cap("signature")
 	if h == null or h.ak == null:
 		return "Press %s to use your ability." % cap
-	var nm := String(h.ak.e_def().get("name", "your ability"))
-	var body := String(h.ak.d.get("card", {}).get("e", ""))
+	var nm := AbilityText.name_of(h.arch, "e")
+	var body := AbilityText.line(h.arch, "e")
 	if body.begins_with(nm + ": "):
 		body = body.substr(nm.length() + 2)
 	if body == "":
@@ -28,7 +28,7 @@ static func fill(txt: String, h: Hunter) -> String:
 	var nm := "your ability"
 	var ult := "your Ultimate"
 	if h != null and h.ak != null:
-		nm = String(h.ak.e_def().get("name", nm))
+		nm = AbilityText.name_of(h.arch, "e")
 		ult = String(h.ak.x_def().get("name", ult))
 	return txt.replace("%X", ability_tip(h)).replace("%R", rank_combo()).replace("%N", nm) \
 			.replace("%Y", Settings.key_cap("hunter_ult")).replace("%Z", ult) \
