@@ -11,6 +11,8 @@ extends RefCounted
 ## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
 ## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
 ## Hunter callouts (HunterBarks): who hears which bark, the 6 s cooldown and the setting.
+## And the carry cues (CarrySfx): the swap's two notes in order, a claim's lock-in, a steal heard by its owner, the
+## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 ## And Motley's hover hum (no footsteps): held while he moves, swelling and rising with speed, gone when still.
 ## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
@@ -73,6 +75,7 @@ func run(main_node: Node) -> void:
 	_barks(m, P)
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
+	await _carry(m, P)
 	_buses()
 	await _muffle(m, P)
 	await _big_event_duck(P)
@@ -432,6 +435,67 @@ func _barks(m: Match, P: Hunter) -> void:
 	ok(B.plays.size() == before, "Hunter callouts off: no bark (%s)" % [B.plays])
 	other.team = team
 	theirs.free()
+
+## Carry 2 in, 1 out: the swap key, a claim and a steal, through the real paths (Hunter.swap_kin, Life.take_item,
+## KinTrack.register, which every game runs for a catch online).
+func _carry(m: Match, P: Hunter) -> void:
+	var B: Hunter = m.hunters.filter(func(x): return x != P and not x.out and x.kin)[0]
+	if B.kin2 == null:
+		m.give_kin(B, Save.new_kin(P.kin.species, "Bench"))
+	ok(B.kin2 != null, "setup: a bot carries two Boki")
+	Sfx.listener = B.pos
+	Sfx.last_played.clear()
+	B.swap_kin(true)
+	var first := Sfx.last_played.has("carry_swap_out") and not Sfx.last_played.has("carry_swap_in")
+	await main.get_tree().create_timer(CarrySfx.SWAP_GAP_S + 0.1).timeout
+	ok(first and Sfx.last_played.has("carry_swap_in") and not Sfx.last_played.has("swap"),
+			"swap: the outgoing Boki's chirp, then the incoming one's (%s)" % [Sfx.last_played.keys()])
+	var R: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var rec := {"species": P.kin.species, "uid": "carry_check", "name": "Check"}
+	Sfx.listener = P.pos
+	var got := _from_box(m, P, P, rec)
+	ok(got == ["carry_claim"], "claim: a capsule from a box of your own team locks in (%s)" % [got])
+	var wild := m.kins.filter(func(k): return is_instance_valid(k) and k.owner_h == null and not k.dead \
+			and k.lost_from == "")
+	ok(not wild.is_empty(), "setup: a wild Boki to claim")
+	if not wild.is_empty():
+		P.caught.clear()
+		Sfx.last_played.clear()
+		Capture.complete(m, P, wild[0])
+		ok(Sfx.last_played.has("carry_claim") and P.caught.size() == 1,
+				"claim: a scan that lands locks in (%s)" % [Sfx.last_played.keys()])
+	got = _from_box(m, P, R, rec)
+	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
+	Sfx.last_played.clear()
+	R.pos = P.pos + Vector3(60, 0, 0)
+	KinTrack.register(R, rec, P)
+	got = Sfx.last_played.keys()
+	ok(got == ["carry_stolen"], "steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got])
+	for d in [25.0, 55.0]:
+		R.pos = P.pos + Vector3(d, 0, 0)
+		Sfx.last_played.clear()
+		CarrySfx.stolen(m, R, B)
+		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
+		ok(Sfx.last_played.has("carry_take") == hears,
+				"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"])
+	R.pos = P.pos + Vector3(2, 0, 0)
+	Sfx.last_played.clear()
+	Sfx.recent.erase("carry_take")
+	for i in 3:
+		CarrySfx.stolen(m, R, B)
+	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
+	R.remove_meta(KinTrack.META)
+
+## Takes `rec` out of a box `dropper` left and returns the carry cues it played.
+func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
+	h.caught.clear()
+	Sfx.last_played.clear()
+	var b := {"owner": dropper, "team": dropper.team, "pos": h.pos, "gems": 0, "seeds": {}, "caught": [rec.duplicate()],
+		"node": null}
+	Life.take_item(m, h, b, {"key": "caught", "i": 0})
+	h.caught.clear()
+	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
+
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
