@@ -37,11 +37,21 @@ static func ways_out_shown(m: Match) -> bool:
 			return true
 	return false
 
+## The glider ring (Hud._draw_glider_heat) draws only while you glide or the meter is not full.
+static func glider_shown(p: Hunter) -> bool:
+	return not (p.dropping or p.downed or p.riding) and (p.gliding or p.glide_fuel < 0.99)
+
 ## The ids of the groups on screen now: the always-on blocks plus the ones that come and go.
 static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
+	if HudReveal.on(m, "counters"):
+		out.append("counters")
+	if glider_shown(p):
+		out.append("glider")
+	if BeltHud.shown(m, p):
+		out.append("belt")
 	if p.perks.size() > 0:
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):

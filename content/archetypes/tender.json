@@ -14,7 +14,7 @@
 	"weight": "medium",
 	"plate_offset": 1.85,
 	"body": {
-		"size": 0.68,
+		"size": 0.92,
 		"hit_r": 0.352, "hit_h": 1.04, "body_r": 0.34,
 		"head": 0.78,
 		"legs": 0.98,
@@ -27,6 +27,7 @@
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"howto": ["Play: support; heal with {signature}, carry the downed.", "Combo: {secondary} pins a chaser, then {dash} away.", "Avoid: duels; heal from behind your squad."],
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
+	"hint": {"lmb": "Hold {fire} to push embers; hits on foes add Kindle", "rmb": "Press {secondary}: the seed sticks to a foe and roots them", "e": "Press {signature} for a healing ring, again to throw it", "dash": "Press {dash} to hop; in the air, glide a long way"},
 	"card": {"role_word": "Medic", "loop": "Support medic: heals and carries the downed, roots whoever chases them.", "role": "Support medic: heals and carries the downed, roots whoever chases them.", "dash": "Quick hop where you move; a long floaty glide in the air.", "passive": "Run into a downed teammate to carry up to 2.", "rmb": "Seed sticks to a foe; after 2s in reach it roots them.", "e": "Healing ring on you; press again to throw it to the cursor.", "x": "Tether a teammate for 5s of healing; a downed one stands up.", "weapons": {"lantern_crook": "Hold to push embers past the cursor; hits add Kindle."}, "chips": {"rmb": ["9 hit", "32 burst"]}},
 	"signature": "lantern_crook",
 	"resource": {
@@ -37,7 +38,6 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_idle": 1.0,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -54,7 +54,7 @@
 		"name": "Relay Step",
 		"card_range": "dist",
 		"icon": "tender_dash",
-		"col": "#ffe2a8",
+		"col": "#b4f7a8",
 		"cd": 7.0,
 		"dist": 3.15,
 		"time": 0.23,
@@ -77,7 +77,7 @@
 		"card_range": "seed.range",
 		"short": "Burr",
 		"icon": "tender_rmb",
-		"col": "#c8e07a",
+		"col": "#9ae07a",
 		"cooldown": 10.5,
 		"charges": 1,
 		"windup": 0.6,
@@ -115,7 +115,7 @@
 		"again": "throw the ring to the cursor",
 		"short": "Hearth",
 		"icon": "tender_e",
-		"col": "#ffd27a",
+		"col": "#7fe08a",
 		"cooldown": 11.0,
 		"time": 2.5,
 		"radius": 2.6,
@@ -166,6 +166,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
 	"x": {
 		"name": "Hearth Call",
 		"card_range": "range",
@@ -177,10 +178,10 @@
 		"time": 5.0,
 		"range": 12.6,
 		"pick_r": 2.5,
-		"heal_ps": 7.0,
+		"heal_ps": 5.3,
 		"every": 0.5,
 		"land_r": 0.9,
-		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept."
+		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them about 5 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether tops up their bleed-out (five times over) instead of their health. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate or downed teammate inside the ring, the key does nothing and the cooldown is kept."
 	},
 	"src": {
 		"lmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",

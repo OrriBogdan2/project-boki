@@ -449,10 +449,10 @@ const SIGS := {
 	"fortify": {"name": "Fortify", "cd": 16.0, "desc": "A 60 point shield for 5s. Nothing can knock you back."},
 }
 
-## Kin species, built from the kin grammar (content/kin_v2, see KinLib.species): name, colours,
-## stats from its points, abilities, merge, carry style. content/kin/<id>.json now only holds
+## Kin species, built from the kin grammar (content/kin, see KinLib.species): name, colours,
+## stats from its points, abilities, merge, carry style. content/kin_home/<id>.json now only holds
 ## home and economy data for a species (rare/boss egg, work elements, shiny palette); a new kin
-## needs only its kin_v2 file.
+## needs only its kin file.
 var KIN := {}
 
 ## Things a kin can wear. Bought at the stall, put on from the kin's card, worn into matches too.
@@ -475,7 +475,7 @@ func _init() -> void:
 
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss).
+## (content/kin_home/<id>.json: rare, boss).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -487,7 +487,7 @@ func load_kin_content() -> void:
 			ids.append(id)
 	for id in ids:
 		var sp: Dictionary = KinLib.species(id)
-		var home: Dictionary = Content._load("kin", id)
+		var home: Dictionary = Content._load("kin_home", id)
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
@@ -499,7 +499,7 @@ func load_kin_content() -> void:
 
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
-## kin (content/kin/*.json "rare": true), the legendaries that guard the lairs.
+## kin (content/kin_home/*.json "rare": true), the legendaries that guard the lairs.
 ## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
 const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
 
@@ -513,7 +513,7 @@ func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 
 
-## True when this species' whole line never comes from an egg (content/kin/<first form>.json "no_egg": the
+## True when this species' whole line never comes from an egg (content/kin_home/<first form>.json "no_egg": the
 ## legendaries). Judged on the line's first form, so its later forms are out too.
 func no_egg(sp_id: String) -> bool:
 	return bool(KIN.get(Evo.base_form(sp_id), {}).get("no_egg", false))
@@ -543,7 +543,7 @@ func egg_species(sp_id: String, rng: RandomNumberGenerator = null) -> String:
 	return sp if sp != "" else String(pool[0])
 
 
-## What a species' egg is called ("Venom Egg"), from content/kin/<id>.json "egg".
+## What a species' egg is called ("Venom Egg"), from content/kin_home/<id>.json "egg".
 func egg_name(sp_id: String) -> String:
 	var sp: Dictionary = KIN.get(sp_id, {})
 	var e: Dictionary = sp.get("egg", {})

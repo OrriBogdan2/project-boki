@@ -3,7 +3,7 @@ extends RefCounted
 ## 50 ms after warm-up). First every Hunter alone, casting E then R at a dummy, so the particles and the nodes made
 ## by each kit are its own; then three trios of Hunters with their Boki sent out, fighting in one camp beside a
 ## monster camp, every Hunter casting E and R in waves. Run by --perf-bench --bench-fight and --perf-budget-check.
-## Particles are counted with ParticleCount (every emitting emitter, on screen or not: an upper bound).
+## Particles are counted with ParticleCount (every emitting, unpaused emitter, on screen or not: an upper bound).
 
 const ARCHS := ["ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "rimewright", "thief"]
 const CAMP := ["brute", "skitter", "spitter", "skitter", "bomber", "brute", "skitter", "spitter"]
