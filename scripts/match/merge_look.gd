@@ -1,8 +1,8 @@
 class_name MergeLook
 extends Node3D
 ## The form a merged hunter wears (MergeForm): the model itself grows into the form's silhouette (scale pops in with an
-## ease-out-back overshoot), the Boki's colour wraps it as a glow with a ground ring in the form's colour and a few motes,
-## and silhouette parts ride the torso (MergeParts). One node under the hunter while merged; other games build it from the
+## ease-out-back overshoot), the Boki's colour wraps it as a glow with a few motes, and silhouette parts ride the torso
+## (MergeParts). No ground ring: a ground ring means gameplay (docs/COMBAT_CLARITY.md). One node under the hunter while merged; other games build it from the
 ## net state (KinNet). Separation reverses it: peel() shrinks it back over PEEL_S and frees it.
 
 const NODE_NAME := "MergeLook"
@@ -14,7 +14,6 @@ static var WASH: Shader = preload("res://shaders/merge_wash.gdshader")         #
 var h: Hunter = null
 var form: Dictionary = {}
 var rec: Dictionary = {}
-var _ring: MeshInstance3D = null
 var _aura: MeshInstance3D = null
 var _box: Node3D = null
 var _t := 0.0
@@ -100,9 +99,6 @@ func build() -> void:
 		_wash_model(_model, glow)
 	_aura = Models.part(self, Models.capsule(0.62, 2.0), Models.aura_mat(glow, 0.7), Vector3(0, 1.0 * sz, 0), Vector3.ONE * sz, Vector3.ZERO, "Aura")
 	_aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_ring = Models.part(self, Models.flat_quad(float(form.get("ring", 3.0))), Models.ring_mat(Color(glow, 1.0), 0.12), Vector3(0, 0.06, 0))
-	_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_ring.top_level = true
 	var mote := CPUParticles3D.new()
 	mote.amount = 14
 	mote.lifetime = 0.9
@@ -188,9 +184,6 @@ func _process(dt: float) -> void:
 			_crack -= dt
 			pulse += 0.08 * sin(_t * 70.0)
 		_aura.scale = Vector3.ONE * sz * pulse * clampf(k, 0.0, 1.2)
-	if _ring:
-		_ring.global_position = Vector3(h.global_position.x, h.global_position.y + 0.06, h.global_position.z)
-		_ring.scale = Vector3.ONE * (1.0 + 0.07 * sin(_t * 6.0)) * clampf(k, 0.0, 1.2)
 	# the last seconds of the window: the aura and the parts flicker, faster as it runs out
 	var wl := MergeAugment.warn_left(h)
 	var on := wl <= 0.0 or fmod(_t * (6.0 + (3.0 - minf(wl, 3.0)) * 4.0), 1.0) < 0.62
