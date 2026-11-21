@@ -89,6 +89,18 @@ def main():
     print((loud.stdout or loud.stderr).rstrip())
     if loud.returncode:
         bad.append("sfx loudness (docs/AUDIO.md)")
+    tracked = set(subprocess.run(["git", "-C", ROOT, "ls-files"], capture_output=True, text=True).stdout.split("\n"))
+    def _ignored(p):  # Godot skips folders holding .gdignore, so it makes no .uid there
+        d = os.path.dirname(os.path.join(ROOT, p))
+        while len(d) > len(ROOT):
+            if os.path.exists(os.path.join(d, ".gdignore")):
+                return True
+            d = os.path.dirname(d)
+        return False
+    no_uid = [p for p in files if p + ".uid" not in tracked and not _ignored(p)]
+    if no_uid:
+        print("Scripts without a committed .uid (run godot --headless --import, git add the .gd.uid): " + ", ".join(no_uid[:10]))
+        bad.append("missing .gd.uid files")
     if bad:
         print("HEALTH FAIL: " + ", ".join(bad) + " (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)")
         if strict:
