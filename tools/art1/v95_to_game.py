@@ -99,7 +99,9 @@ def main():
     ap.add_argument("--tris", type=int)
     ap.add_argument("--tex", type=int, default=TEX)
     ap.add_argument("--work")
-    ap.add_argument("--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current")
+    ap.add_argument(
+        "--master", help="a master cut from the current one (Cinder: its fused tail off) instead of the current"
+    )
     ap.add_argument("--no-import", action="store_true")
     a = ap.parse_args()
     art = ART[a.name]

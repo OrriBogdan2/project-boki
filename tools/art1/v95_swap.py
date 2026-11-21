@@ -53,6 +53,7 @@ KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (t
 WEAPON = re.compile(r"^(x_)?(weapon|bow|arrow|gun|blade|sword|spear|hammer|shield|staff|lance)", re.I)
 HAND_R = 0.085  # a hand's ball radius, x the Warden's height (the fingers and the cuff)
 HAND_REACH = 0.05  # the ball's centre past the wrist along the forearm, x the height
+LIMB_R = {"hand": 0.025, "thigh": 0.06, "torso": 0.09}  # rough half thicknesses, x the height (the hand region's mask)
 
 
 def verts(ob):
@@ -220,17 +221,27 @@ def own_images(low, tex):
 
 
 def hand_balls(sole):
-    """The spheres (the master's frame) round each hand, for the hand triangle budget (`hand_tris`): from the spec's
-    elbow and wrist joints, centred a hand's half length past the wrist along the forearm, r = HAND_R of the height."""
+    """The hand regions (the master's frame) for the hand triangle budget (`hand_tris`), from the spec's joints: a ball
+    centred HAND_REACH of the height past the wrist along the forearm, r = HAND_R of the height, holding only what is
+    nearer the elbow-to-finger-tip axis' surface than the thighs' and the trunk's (a hand hanging by the hip: BW._region_weight)."""
     j = SPEC.get("joints", {})
     height = j["crown"][2] if "crown" in j else 0.0
+
+    def frame(p):          # fit frame -> the master's
+        return [-p[0], -p[1], p[2] + sole]
+
+    limbs = (("hip.L", "knee.L", LIMB_R["thigh"]), ("hip.R", "knee.R", LIMB_R["thigh"]), ("pelvis", "neck", LIMB_R["torso"]))
+    others = [(j[a], j[b], k * height) for a, b, k in limbs if a in j and b in j]
     out = []
     for s in ("L", "R"):
         if "wrist." + s not in j or "elbow." + s not in j or height <= 0:
             continue
         w, e = np.array(j["wrist." + s], float), np.array(j["elbow." + s], float)
-        c = w + (w - e) / max(np.linalg.norm(w - e), 1e-6) * HAND_REACH * height
-        out.append({"centre": [-c[0], -c[1], c[2] + sole], "r": HAND_R * height})
+        d = (w - e) / max(np.linalg.norm(w - e), 1e-6)
+        c = w + d * HAND_REACH * height
+        tip = w + d * 2 * HAND_REACH * height
+        out.append({"centre": frame(c), "r": HAND_R * height, "axis": [frame(e), frame(tip), LIMB_R["hand"] * height],
+                    "others": [[frame(a), frame(b), r] for a, b, r in others]})
     return out
 
 

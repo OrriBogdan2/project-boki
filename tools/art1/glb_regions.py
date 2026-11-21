@@ -64,7 +64,9 @@ def report(path):
     nodes = j["nodes"]
     rows, fingers = {}, []
     for sk in j.get("skins", []):
-        fingers += [nodes[i]["name"] for i in sk["joints"] if any(FINGER.match(t) for t in re.split(r"[._]", nodes[i]["name"]))]
+        fingers += [
+            nodes[i]["name"] for i in sk["joints"] if any(FINGER.match(t) for t in re.split(r"[._]", nodes[i]["name"]))
+        ]
     prop_tris = {}
     for nd in nodes:
         if "mesh" not in nd:
@@ -81,13 +83,21 @@ def report(path):
             wts = accessor(j, blob, pr["attributes"]["WEIGHTS_0"]).astype(np.float32)
             names = [nodes[i]["name"] for i in j["skins"][skin]["joints"]]
             dom = np.array(names, dtype=object)[joints[np.arange(len(joints)), wts.argmax(1)]]
-            cls = np.array([region_of(b) + side_of(b) if region_of(b) == "hand" else region_of(b) for b in dom], dtype=object)
+            cls = np.array(
+                [region_of(b) + side_of(b) if region_of(b) == "hand" else region_of(b) for b in dom], dtype=object
+            )
             for t in idx:
                 c = cls[t]
                 key = max(set(c), key=list(c).count)
                 rows[key] = rows.get(key, 0) + 1
     total = sum(rows.values())
-    return {"glb": path, "skinned_tris": total, "regions": rows, "props": prop_tris, "finger_bones": sorted(set(fingers))}
+    return {
+        "glb": path,
+        "skinned_tris": total,
+        "regions": rows,
+        "props": prop_tris,
+        "finger_bones": sorted(set(fingers)),
+    }
 
 
 def main():
@@ -101,8 +111,10 @@ def main():
         bad |= any(v < MIN_HAND_SHARE for v in hands.values()) or len(hands) < 2
         if "--json" not in sys.argv:
             sh = "  ".join("%s %d (%.1f%%)" % (k, v, 100.0 * v / t) for k, v in sorted(r["regions"].items()))
-            print("%s: %d skinned tris\n  %s\n  props: %s\n  finger bones: %s" % (
-                p, r["skinned_tris"], sh, r["props"] or "none", ", ".join(r["finger_bones"]) or "none"))
+            print(
+                "%s: %d skinned tris\n  %s\n  props: %s\n  finger bones: %s"
+                % (p, r["skinned_tris"], sh, r["props"] or "none", ", ".join(r["finger_bones"]) or "none")
+            )
     if "--json" in sys.argv:
         print(json.dumps(out, indent=1))
     sys.exit(1 if bad else 0)

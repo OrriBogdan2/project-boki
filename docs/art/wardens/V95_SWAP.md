@@ -53,6 +53,9 @@ and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 1
 2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 9% of `tris` per hand ball (6-8% of the triangles by dominant bone); `bake_warden.make_low` holds the head and both
    hand spheres (`v95_swap.hand_balls`: r = 8.5% of the height, round the wrist-to-elbow line) while the body collapses,
    then takes each sphere to its budget alone, seam weights kept. A hand with fewer triangles than its budget keeps them.
+   A hand sphere holds only what is nearer the forearm-to-finger-tip line than the thighs and trunk (`LIMB_R`): Cinder's,
+   Kael's and Tarek's hands hang within a sphere's reach of the thigh (11%, 4%, 7% of a thigh's surface fell inside).
+   Before/after (11-21, two dense Sparkle Meshy bodies, 1.36-1.39M tris, to 60k, head 45%): a hand 0.8-1.0% -> 8.9%.
    `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
 3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
    adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
