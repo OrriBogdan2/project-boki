@@ -74,3 +74,26 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+## Thigh web split (2026-11-21, job 20261120-233237-a4, ext/tenzo-thigh-web-1120)
+The rig-weights test (ext/rig-test-1120) found a skin web between the thighs that weights cannot fix: the v95 legs were
+one fused shell. The trouser band is now new Meshy geometry with separate legs; everything else is the live glb.
+- Meshy multi-image 3D gen `c1` (front/back/side renders of the live model, the inner thighs edited apart in 2D first).
+  Raw gens, 38-candidate log and sheet: /home/boki/gens/tenzo-thigh-web-1120/ (gen_log.tsv, candidates_sheet.jpg).
+- `tools/meshy/leg_graft.py` swaps only the trouser band (hips to boots) from the gen into the live glb. Every other
+  vertex position (face, stone arm, sash, hair, skin) is identical to live and the colours are unchanged. Bone heat
+  re-weighted only the skin that meets the band: the belly at the waist seam (y 1.1-1.34) and the feet; face, arms and
+  hair keep their weights. The new band has its own material `cloth-v95p` with
+  albedo `tarek_v95p.jpg` (2048, VRAM-compressed like the other atlases).
+- Weights: bone heat (`VOX=0.008 mkweights auto` from the rig-test kit), then `tools/meshy/leg_side_weights.py` at
+  ZC 0.75: below the crotch each connected leg piece takes only its own leg's bones, and no arm bones touch the band.
+- Blender's export resamples every clip (30 to 24 fps), so all 50 live clips were spliced back byte-equal with
+  `tools/art1/glb_add_clips.py` (lmb_punch and lmb_throw stay at 60 fps).
+- 60,742 tris (live 60,439), 11 materials (live 10), 50 clips, same skeleton, rest pose and anchors.
+
+Metrics (lower-body edges stretched over 5x/10x/20x, max over the clip): run_f 193/53/6 live -> 52/23/10; rmb_slam
+379/155/47 -> 96/37/24. Web triangles between the legs (rig-test t6): 219 -> 142; the run_f p99 stretch 4.5 -> 2.4.
+Most of the >20x edges left are a pre-existing live defect: hand-skin verts near x 0.2, z 0.9-1.0 weighted about
+half hand.R and half thigh.
+
+**Known gap:** the legs are still joined for a short span at the crotch (z 0.75-0.85); below that they are separate.
