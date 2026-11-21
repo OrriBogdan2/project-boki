@@ -664,7 +664,7 @@ const CHECKS := {
 	"--prompt-queue-check": ["res://tools/prompt_queue_check.gd", "prompt_queue_check", null],
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--hunter-zone-check": ["res://tools/hunter_zone_check.gd", "hunter_zone_check", null],
-	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],      # real match, wild Boki models
+	"--boki-world-shots": ["res://tools/boki_world_shots.gd", "boki_world_shots", null],  # real match, wild Boki models
 	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],       # Boki beside Vex, true size
 	"--hud-clutter-check": ["res://tools/hud_clutter_check.gd", "hud_clutter_check", null],  # combat HUD budget
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],

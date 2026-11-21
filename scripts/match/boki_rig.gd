@@ -806,7 +806,8 @@ func _pick_clip(dt: float) -> void:
 		_pulse = p
 		_start_shot("cast")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
-	if attacking and not _attacking and not (_shot in ["ability", "cast"] and _shot_left > 0.0):  # (a cast's wind-up strikes too)
+	# (a cast's wind-up strikes too)
+	if attacking and not _attacking and not (_shot in ["ability", "cast"] and _shot_left > 0.0):
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt

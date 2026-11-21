@@ -14,7 +14,8 @@ extends RefCounted
 const STEP := 1.0 / 60.0
 const COST_MS := 1.0           # ms per frame for 30 Boki's naps (one KinNap each in both drivers: 60 updates)
 const RIGGED := "cindle"
-const PRIMITIVE_PREF := "basaltoad"  # the primitive body to use while it has no rig; else the first species without one (_primitive)
+# the primitive body while it has no rig; else the first species without one (_primitive)
+const PRIMITIVE_PREF := "basaltoad"
 const SHOT_AT := [["awake", 0.0], ["settling", 0.3], ["asleep", 2.0], ["stretch", 0.55]]
 const BIG := 1.5               # the second Boki's scale in the shot
 
