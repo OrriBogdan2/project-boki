@@ -50,14 +50,14 @@ and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 1
    plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
    Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
    only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
-2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 6% of `tris` per hand; `bake_warden.make_low` holds the head and both
+2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 9% of `tris` per hand ball (6-8% of the triangles by dominant bone); `bake_warden.make_low` holds the head and both
    hand spheres (`v95_swap.hand_balls`: r = 8.5% of the height, round the wrist-to-elbow line) while the body collapses,
    then takes each sphere to its budget alone, seam weights kept. A hand with fewer triangles than its budget keeps them.
    `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
 3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
    adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
    hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
-4. **Weapons**: see the result line in the PR for what the swap does with held weapons.
+4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). The swap now prints that count ("SWAP weapons: ..."): list the bone in `keep` when it is not the master's own.
 
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models

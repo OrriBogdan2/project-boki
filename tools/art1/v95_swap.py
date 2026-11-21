@@ -20,6 +20,7 @@ Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -49,6 +50,7 @@ CAP_SIDES = 2000             # the longest opening a detach caps (edges round it
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
+WEAPON = re.compile(r"^(x_)?(weapon|bow|arrow|gun|blade|sword|spear|hammer|shield|staff|lance)", re.I)
 HAND_R = 0.085  # a hand's ball radius, x the Warden's height (the fingers and the cuff)
 HAND_REACH = 0.05  # the ball's centre past the wrist along the forearm, x the height
 
@@ -107,6 +109,20 @@ def kept_parts(old, bones, mats):
     ob.data.uv_layers["UVMap"].active_render = True
     ob["slots"] = ",".join(ob.data.materials[p.material_index].name for p in ob.data.polygons)     # (whole: "flame-jet")
     return ob
+
+
+def weapon_report(old):
+    """Prints what the swap does with held weapons: the game glb's own weapon pieces (meshes and empties other than the body,
+    they stay as nodes of the export) and the faces of the old body mesh on weapon bones that `keep` does not carry (dropped:
+    the master has to bring that weapon, or the bone goes in `keep`)."""
+    pieces = sorted(o.name for o in bpy.data.objects if o is not old and o.type in ("MESH", "EMPTY") and WEAPON.match(o.name))
+    name = {g.index: g.name for g in old.vertex_groups}
+    lost = {}
+    for p in old.data.polygons:
+        top = [name[max(old.data.vertices[i].groups, key=lambda e: e.weight).group] for i in p.vertices if old.data.vertices[i].groups]
+        if top and WEAPON.match(top[0]) and top[0] not in SPEC.get("keep", []):
+            lost[top[0]] = lost.get(top[0], 0) + 1
+    print("SWAP weapons: kept nodes", pieces, "; old body faces dropped on weapon bones", lost, flush=True)
 
 
 def uv_density(ob):
@@ -765,6 +781,7 @@ def main():
             o.data.color_attributes.remove(c)
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
+    weapon_report(old)
     bpy.data.objects.remove(old)
     for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
         if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":
