@@ -866,6 +866,7 @@ const CHECKS := {
 	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],
 	"--occlusion-outline-shots": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "shots"],
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],  # MapDetail: default vs hold
+	"--map-names-check": ["res://tools/map_names_check.gd", "map_names_check", null],  # full map names: no overprint
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],  # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],  # --shots-dir=<dir>
 	"--zone-next-shots": ["res://tools/zone_next_shots.gd", "zone_next_shots", null],  # GPU, --shots-dir=
