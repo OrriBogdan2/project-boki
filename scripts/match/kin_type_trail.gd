@@ -101,8 +101,10 @@ func _emit(group: String, k: Kin, v: Vector2) -> void:
 	var p: GPUParticles3D = _emitters[group]
 	var drift := float(def["drift"])
 	var back := -v.normalized() * 0.3 * k.r
-	var at := k.pos + Vector3(back.x + randf_range(-0.2, 0.2), 0.15 + randf() * 0.4, back.y + randf_range(-0.2, 0.2))
-	var vel := Vector3(randf_range(-drift, drift), float(def["rise"]), randf_range(-drift, drift))
+	var vr := KitLooks.vis_rng  # looks roll on the looks generator, never the sim RNG
+	var jit := Vector3(vr.randf_range(-0.2, 0.2), 0.15 + vr.randf() * 0.4, vr.randf_range(-0.2, 0.2))
+	var at := k.pos + Vector3(back.x, 0.0, back.y) + jit
+	var vel := Vector3(vr.randf_range(-drift, drift), float(def["rise"]), vr.randf_range(-drift, drift))
 	var col := colour(String(k.sp.get("type", "")), Color.WHITE)
 	p.emit_particle(Transform3D(Basis.IDENTITY, p.to_local(at)), vel, col, Color.WHITE,
 		GPUParticles3D.EMIT_FLAG_POSITION | GPUParticles3D.EMIT_FLAG_VELOCITY | GPUParticles3D.EMIT_FLAG_COLOR)

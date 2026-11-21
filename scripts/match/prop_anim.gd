@@ -6,7 +6,7 @@ var spin := 0.0
 var bob := 0.0
 var bob_rate := 1.6
 var base_y := 0.0
-var t := randf() * TAU
+var t := KitLooks.vis_rng.randf() * TAU  # looks roll on the looks generator, never the sim RNG
 
 static func on(n: Node3D, spin_rate: float, bob_amp := 0.0, rate := 1.6) -> void:
 	var a := PropAnim.new()
