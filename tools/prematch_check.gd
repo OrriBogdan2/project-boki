@@ -312,7 +312,7 @@ func _lock_in(view: Control) -> void:
 	pm.tick(0.01)
 	ok(not pm.lock_in() and pm.my_turn(), "Lock in does nothing before a pick")
 	pm.choose("bulwark")
-	var locked := pm.lock_in() and pm.squad[0]["done"] and not pm.my_turn() and pm.pick == "bulwark"
+	var locked: bool = pm.lock_in() and pm.squad[0]["done"] and not pm.my_turn() and pm.pick == "bulwark"
 	ok(locked, "Lock in ends your turn with your pick")
 	view._choose("bulwark")
 	ok(not view.lock_btn.disabled and view.lock_btn.text == "Lock in", "with a pick on your turn the button is live")
