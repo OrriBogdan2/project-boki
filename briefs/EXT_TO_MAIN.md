@@ -10786,3 +10786,4 @@ READY ext/wisp-revive-polish d1b969089 (wisp clarity: ground reach circle remove
 READY ext/merge-keeps-abilities-1117 badbb9aa9bc30a0801256c7c36f46e95f35faf19 (merged origin/main 74364b3ad9; bulwark charge took main's slam-free side; merge-keeps/aimkit/ashwick-combo pass; merge-form-check 1 fail same as main)
 READY ext/plate-status-declutter e165330c3ab (PR #382: merged origin/main 74364b3ad9, rimewright conflict resolved; plate-status-check 55/0, recast-cue only the 2 Ostra reds already on main)
 READY ext/farm-tut-batch-1108-deep 76572006ce3 (PR #23: merged origin/main 74364b3ad9; only wiki Rules.md conflict, regenerated; farm-place 0 fails, farm-tutorial/hob-check reds identical to main)
+READY ext/ult-ranks-source 25ec2b492f7 (PR #421: merged origin/main 74364b3ad9; net.gd VERSION conflict -> 0.24.21 with both notes; ult-rank-check 0 fails; archetype-check 4 reds identical to main)
