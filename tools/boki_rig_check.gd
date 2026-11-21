@@ -299,7 +299,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	k.set_meta("pulse", 124)
 	k.set_meta("kstate", "attack")      # (a cast's wind-up also reads as striking)
 	rig._pick_clip(0.016)
-	ok(rig.clip == "ability", "a cast's wind-up keeps the ability clip, not the attack")
+	ok(rig.clip == "cast", "a cast's wind-up keeps the cast clip, not the attack")
 	k.remove_meta("kstate")
 	rig._pick_clip(0.016)
 	rig._shot_left = 0.0
