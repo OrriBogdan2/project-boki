@@ -193,7 +193,7 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(tw.get("wobble", R["wobble"]))
+		var w := float(tw.get("wobble", R["dash_wobble"]))
 		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
