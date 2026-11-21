@@ -8,6 +8,7 @@ extends RefCounted
 ## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract
 ## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s. --contract: the contract model even for a
 ## Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level) looking at --at.
+## --native-file=res://<path>.glb: a candidate Meshy .glb drawn in place of --warden's own (art A/B in game).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -48,6 +49,7 @@ func run(main: Node) -> void:
 	var dist := 5.2
 	var at_y := 0.82
 	var cam_y := -1.0
+	var native_file := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--warden="): id = a.substr(9)
@@ -61,8 +63,11 @@ func run(main: Node) -> void:
 		if a == "--contract": WardenNative.contract_only = true  # (the contract model even where Meshy-native is on)
 		if a == "--turn": turn = true
 		if a == "--match": game_cam = true
+		if a.begins_with("--native-file="): native_file = a.substr(14)  # (a candidate Meshy .glb of --warden)
 		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
 		if a.begins_with("--ground="): ground_col = Color(a.substr(9))
+	if native_file != "":
+		WardenNative.file_override[id] = native_file
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)

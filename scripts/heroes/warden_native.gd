@@ -21,6 +21,8 @@ const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouc
 const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
+## Set by clip_shots --native-file: a candidate Meshy .glb drawn in place of the archetype's own (art A/B renders).
+static var file_override := {}  # archetype -> res:// path
 static var _data = null  # art name -> its entry (parsed once)
 
 var root: Node3D
@@ -57,6 +59,8 @@ static func on(arch: String) -> bool:
 
 ## The Meshy-skeleton .glb, beside the contract one: art/wardens/<art>/<art>_meshy.glb.
 static func file(arch: String) -> String:
+	if file_override.has(arch):
+		return String(file_override[arch])
 	var nm := WardenGlb.art(arch)
 	return "%s/%s/%s_meshy.glb" % [WardenGlb.DIR, nm, nm]
 
