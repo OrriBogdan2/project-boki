@@ -13,3 +13,7 @@ Code: `Work.autosort()` (scripts/core/work.gd), run each farm scan (once a secon
 | 7 | A station put away frees its crew (not counted as manual); they are sorted again. |
 
 Slots and elements come from `Work.ASSIGN` and the station's `work` field in `HomeLayout.CATALOG`.
+
+Check: `--work-check` (section 10b: right station, owner-placed and resting kin left alone, idempotent, an unassign sticks).
+Clip: `jobq submit --needs gpu -- --farm-autosort-clip --clip-dir=autosort_clip` films it on the work demo farm
+(`tools/farm_autosort_clip.gd`): nobody placed, then the sort, then an owner's move that the next sort keeps.
