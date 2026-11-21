@@ -10749,3 +10749,4 @@ READY ext/boki-dex-port-1117 7e9364fbaf (bulk-rebase: origin/main merged in mech
 READY ext/ui-first-exp-hud 68ff2a2eff62 (first expedition HUD holds back)
 READY ext/merge-lane-M4-1121 0c09266b7be (M4 bundle: 19 no-PR branches; 37-check subset NEW-RED 1 = base-life flake, export OK)
 READY ext/name-card-wrap-1119 e7210624ed (name card wrap: main merged in, home_econ/results conflicts resolved = main's HomeNotices.bullet + UI.wrapped; --check clean, --name-card-check bad=0)
+READY ext/hud-holdback 1c6b2a4ae5865a48e5ca099834fea12c3188305a (merged origin/main: kept main's HudGroups fold (landing 5); branch keeps belt slots 3/4 + locked X/R tiles held back via HudReveal belt_spare/ult_tiles; checks hud-reveal/hud-groups/hud-clutter/equal/ability-bar green with clean user dir)
