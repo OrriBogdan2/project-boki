@@ -48,7 +48,7 @@ func _draw_panels() -> void:
 		var sz := size
 		HudScale.pass_start()
 		HudScale.begin(hud, "top", sz)
-		if HudGroups.clock_shown(m) and HudReveal.on(m, "counters"):
+		if HudReveal.on(m, "counters"):
 			hud._draw_top(sz)
 		if p and m.lairs:
 			HudScale.begin(hud, "boss", sz)

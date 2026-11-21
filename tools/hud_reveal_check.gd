@@ -1,8 +1,8 @@
 extends RefCounted
 ## --hud-reveal-check: the staged HUD (HudReveal, content/rules/hud_reveal.json; DECISIONS 2026-11-08).
 ##   1. the table: matches 1-3 show at most 6 groups (vitals, abilities, summon ring, objective; the beat
-##      clock and counters wait for the first Ways Out beat or kill), the seat pips wait for their first open
-##      seat, everything else is from match 4
+##      clock waits for the first Ways Out beat or kill), the seat pips wait for their first open seat,
+##      everything else is from match 4
 ##   2. a fresh save at matches 1, 3 and 4: each group shows exactly when the table says
 ##   3. holding Tab shows every group; Settings "Show full HUD" too; an older save (no hud_reveal) too
 ##   4. the seat pips: hidden while every seat is locked, revealed through the real HUD on the first open
@@ -11,7 +11,7 @@ extends RefCounted
 ## Never touches the save file.
 
 const FIRST := ["vitals", "abilities", "summon_ring", "objective"]
-# (beat_clock and counters also come on the first Ways Out beat or kill, HudGroups.clock_shown)
+# (beat_clock also comes on the first Ways Out beat or kill, HudGroups.clock_shown)
 const LATER := ["beat_clock", "belt", "counters", "feed", "gear", "squad", "perks", "weather", "pace_tags",
 		"plate_colours"]
 
@@ -92,11 +92,10 @@ func run(main: Node) -> void:
 	ok(not Save.d["hud_reveal"].has("seat_pips"), "every seat locked at 0:30: no pips, nothing remembered")
 	ok(not HudGroups.clock_shown(m) and not Save.d["hud_reveal"].has("beat_clock"), "0:30, no kill: the clock waits")
 	m.player.kills = 1
-	ok(HudGroups.clock_shown(m) and HudReveal.on(m, "beat_clock") and HudReveal.on(m, "counters"),
-		"the first kill brings the clock and the counters")
+	ok(HudGroups.clock_shown(m) and HudReveal.on(m, "beat_clock") and not HudReveal.on(m, "counters"),
+		"the first kill brings the clock; the counters still wait for match 4")
 	m.player.kills = 0
 	Save.d["hud_reveal"].erase("beat_clock")
-	Save.d["hud_reveal"].erase("counters")
 	m.time = float(Heart.rules()["quest"]["lair_open_s"]) + 5.0
 	ok(int(WaysOutHud.seats(m)[0]["st"]) == WaysOutHud.St.OPEN, "the Lair seat opens")
 	m.hud.panels.queue_redraw()      # (the panels redraw at 20 Hz: draw now, not when the timer comes round)
