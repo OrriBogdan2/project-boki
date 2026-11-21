@@ -8,7 +8,8 @@ extends RefCounted
 
 const SLOT := 44.0
 const GAP := 8.0
-const SPARE_FROM := 4        # slots 5 and 6 (index 4, 5) are held back while empty (HudReveal "belt_spare"); 1-2 are pinned
+# slots 5 and 6 (index 4, 5) are held back while empty (HudReveal "belt_spare"); slots 1-2 are pinned
+const SPARE_FROM := 4
 const EMPTY_TIP := "Empty utility slot. Gadgets you find or buy fill it."
 const PINNED_TIP := "Only %s go here: find or buy some."
 
