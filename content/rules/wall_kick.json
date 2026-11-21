@@ -1,4 +1,4 @@
 {
-	"doc": "Diminishing returns for chained wall kicks (WallMoves, decision 0100, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high.",
+	"doc": "Diminishing returns for chained wall kicks (WallMoves, decision 0158, owner 11-13: a reduced move per jump). curve: the share of a kick's rise and push-off a kick keeps, by its place in the chain (kick 1, kick 2, then the last entry for every later kick). The chain is the kicks since your feet last touched the ground; landing resets it. HOP_CLIMB_CAP still stops a hop that starts too high.",
 	"curve": [1.0, 0.6, 0.3]
 }

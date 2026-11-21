@@ -1,5 +1,5 @@
 extends RefCounted
-## --egg-rules-check: eggs only ever hatch the first form of a Boki line, and the legendaries (content/kin
+## --egg-rules-check: eggs only ever hatch the first form of a Boki line, and the legendaries (content/kin_home
 ## "no_egg") never come from an egg. An evolved parent gives a first-form baby, an old save's egg of a later
 ## form hatches the first form, a legendary never turns up in a boss, Heart or old-save egg over 1000 rolls,
 ## and two legendaries get no egg, with a message. Never touches the real save.

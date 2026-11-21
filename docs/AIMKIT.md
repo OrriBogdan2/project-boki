@@ -311,7 +311,7 @@ Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace'
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
 
-## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0061-telegraph-net.md)
+## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0151-telegraph-net.md)
 
 Remote hunters are puppets: their kits run only on their owner's game. `AimNet` (scripts/match/aim/aim_net.gd)
 sends every `all` entry AimDraw is given for a hunter this game runs (the player, the host's bots) as the

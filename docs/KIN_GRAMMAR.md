@@ -226,7 +226,7 @@ exist and stay within bounds.
 
 - **Library.** `KinLib` loads `res://content` through the checker once. A file with errors is skipped
   (with a warning), and so is a kin whose ability or merge was skipped: the live game only runs
-  content that passed. `Data.KIN` is built from `kin` (`KinLib.species`); `content/kin_home/<id>.json`
+  content that passed. `Data.KIN` is built from `content/kin` (`KinLib.species`); `content/kin_home/<id>.json`
   now holds only home and economy data (rare/boss egg, work elements, shiny palette).
 - **Stats.** Kin health, damage and speed are `base + points x per_point` after evolution's
   budget-neutral stat shifts (`KinLib.points`). Levels add `KinRules.LEVEL_GROWTH` (3%) per level to
@@ -381,7 +381,7 @@ hand-coded mechanic from the reviewed list · **core** = stays in core code, not
 | rock_guard | Gravadillo, auto (owner) | wall at owner, offset 1.2, follow, 120 hp, 3 s (blocks shots, no effects) | yes |
 | prism_wall | Prismander, E | wall at aim, 4 m, 140 hp, 4.5 s → reflect (mirror) | yes |
 | refraction | Prismander, auto (owner) | burst r0 at owner → reflect on owner 1 s, shield 20 | yes |
-| puffcap_mines | Mycroll, E | trap x3 at aim (8 s, max_live 3); on_trigger: burst 1.8 → damage 8, root 1.4 (snare); zone 1.8, 3 s → damage 2 a tick, slow 0.8 | yes |
+| puffcap_mines | Mycroll, E | trap x3 at aim; on_trigger: burst 1.8 → damage 8, root 1.4 (snare); zone 1.8, 3 s → damage 2 a tick, slow 0.8 | yes |
 | thorn_patch | Mycroll, auto | zone 2.6, 4 s → damage 4 a tick, slow 0.8; cue foes_clumped | yes |
 | chain_spark | Echolop, E | beam (seek) 7 m → damage 14, stun 0.4 (jolt); chain 2 jumps; repeat (echo) | yes |
 | echolocate | Echolop, auto (owner) | burst r18 at owner → mark reveal 3 s, buff crit 1.5 s on owner (uses the big-area utility rule) | yes |
@@ -494,7 +494,6 @@ s seconds, m/s, hp, deg degrees, x a fraction or multiplier.
 |  |  | duration | 2 | 30 | 15 | s |
 |  |  | count | 1 | 3 | 1 |  |
 |  |  | spread | 0 | 3 | 1.5 | m |
-|  |  | max_live | 0 | 12 | 0 |  |
 | **wall** | a barrier that blocks enemy shots (yours pass); its effects apply to shots or foes that touch it · then: on_end | origin | caster/owner/aim |  | aim |  |
 |  |  | length | 1 | 8 | 4 | m |
 |  |  | hp | 20 | 300 | 120 | hp |

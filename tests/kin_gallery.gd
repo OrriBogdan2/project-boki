@@ -1,6 +1,6 @@
 extends Node3D
 ## Every kin species side by side, glowing as they do when they're out in a fight. Open
-## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin),
+## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin_home),
 ## or start the game with -- --kin-gallery (how GPU jobs run it).
 ## --kin-wisps: the Model Room's Boki wisps (BokiWispLook), each bouncing over its Boki, for the
 ## WISP_ROOM species; add --kin-shiny for their shiny colours. Use with --shot / --frames.
