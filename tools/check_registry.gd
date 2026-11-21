@@ -1096,6 +1096,7 @@ const CHECKS := {
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
 	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],      # the tint and warning build with depth
 	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],      # film a slow drop to death (GPU)
+	"--farm-autosort-clip": ["res://tools/farm_autosort_clip.gd", "farm_autosort_clip", null],  # GPU film
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
