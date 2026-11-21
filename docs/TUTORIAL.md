@@ -147,7 +147,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
-7. The Mask page is 83 words and the egg screen 218: the largest text blocks of the first minutes.
+7. Done: the first Relic's page shows each ability's key and name only (about 25 words, was 83); the egg cards and the knock card are one short line each, and the knock screen hides the sub line (was 218 words). The Relics screen keeps the full lines.
 # Tutorial guidance, garden only
 
 ## Garden first 15 (`--garden-first-15-check`)
