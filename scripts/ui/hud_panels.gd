@@ -68,7 +68,7 @@ func _draw_panels() -> void:
 			if HudReveal.on(m, "abilities"):
 				hud._draw_abilities(sz, p)
 			HudScale.begin(hud, "weapon", sz)
-			if HudReveal.on(m, "weapon"):
+			if HudReveal.on(m, "abilities"):
 				hud._draw_weapon(sz, p)
 			if HudReveal.on(m, "gear"):
 				HudScale.begin(hud, "gear", sz)
