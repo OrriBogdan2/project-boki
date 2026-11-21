@@ -5,12 +5,14 @@ extends RefCounted
 ## lines: the leader's "Steer with WASD" and everyone's "Jump out: <key>". After jumping out, until the glider
 ## opens: "Glider: <key> again" (DECISIONS 11-08 double press: the jump out was the first press).
 
-const LINE_Y := 96.0           # px from the top, the first line
-const LINE_GAP := 26.0         # px between lines
+const LINE_Y := 96.0  # px from the top, the first line
+const LINE_GAP := 26.0  # px between lines
+
 
 ## True while `p` rides the squad's rocket: the HUD shows only the map and the drop lines.
 static func aboard(p: Hunter) -> bool:
 	return p != null and p.rocket != null
+
 
 ## What the drop lines say for `p` right now (empty when there is nothing to say).
 static func lines(m: Match, p: Hunter) -> Array:
@@ -26,11 +28,23 @@ static func lines(m: Match, p: Hunter) -> Array:
 		return ["Glider: %s again" % jump]
 	return []
 
-static func draw(H, sz: Vector2, p: Hunter) -> void:
+
+static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	var y := LINE_Y
-	for s in lines(H.m, p):
-		H._ctext(Vector2(sz.x * 0.5, y), s, 18, H.GOLD, H.big)
+	for s in lines(hud.m, p):
+		hud._ctext(Vector2(sz.x * 0.5, y), s, 18, hud.GOLD, hud.big)
 		y += LINE_GAP
+
+
+## Where the message lane may start so its cards never cover the drop lines (`top` when there are none).
+static func lane_top(m: Match, p: Hunter, top: float) -> float:
+	if p == null or not (aboard(p) or p.dropping):
+		return top
+	var n := lines(m, p).size()
+	if n == 0:
+		return top
+	return maxf(top, LINE_Y + (n - 1) * LINE_GAP + UI.fs(18) * 0.4 + 8.0)
+
 
 ## The four move keys as bound, "WASD" by default.
 static func move_keys() -> String:
