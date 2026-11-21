@@ -3,13 +3,13 @@ extends "res://tools/clip_shots.gd"
 ## game plays it (Models.hunter + WardenClips), every clip in its library, for a LIVE | NEW compare (run once without
 ## and once with --warden-variant=<art>_<tag>; docs/art/wardens/V95_SWAP.md "Regen from the turnaround").
 ## Per hunter <dir>/<id>/<view>/f00000.jpg.. for 5 views of every sample: m (match camera: fov 8 at 23 m),
-## e (eye level, 4 m, 3/4), n (knee level, 4 m, 3/4), h (both hands close), f (both feet close).
+## e (eye level, 4 m, 3/4), n (knee level, 4 m, 3/4), h (both hands close), f (both feet close), c (face close, 3/4).
 ## Samples: the rest pose, then `per-clip` times evenly over each clip. frames.txt: "<n> <clip> <t>".
 ## Needs a renderer.
 
 const DT := 1.0 / 30.0
 const THREE_Q_YAW := -PI / 2.0 - 0.55
-const VIEWS := ["m", "e", "n", "h", "f"]
+const VIEWS := ["m", "e", "n", "h", "f", "c"]
 
 
 func run(main: Node) -> void:
@@ -77,7 +77,7 @@ func _close_on(sk: Skeleton3D, a: int, b: int, pad: float) -> void:
 	cam.look_at(mid)
 
 
-func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n: int) -> void:
+func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n: int, hd: int = -1) -> void:
 	var name := "f%05d.jpg" % n
 	var bx := _body_box(model)
 	var lo: float = float(bx[0])
@@ -96,6 +96,11 @@ func _shoot(model: Node3D, sk: Skeleton3D, hb: Array, fb: Array, dir: String, n:
 				_close_on(sk, hb[0], hb[1], 0.16)
 			"f":
 				_close_on(sk, fb[0], fb[1], 0.14)
+			"c":
+				var p := _bone_at(sk, hd) + Vector3(0, 0.08, 0) if hd >= 0 else Vector3(0, lo + h * 0.93, 0)
+				cam.fov = 30.0
+				cam.position = p + Vector3(0, 0.05, 0.75)
+				cam.look_at(p)
 		await _save_jpg(dir.path_join(v).path_join(name))
 
 
@@ -117,6 +122,7 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 	var hb := [WardenSkeleton.find(sk, "hand.R"), WardenSkeleton.find(sk, "hand.L")]
 	var foot := "foot" if WardenSkeleton.find(sk, "foot.R") >= 0 else "shin"
 	var fb := [WardenSkeleton.find(sk, foot + ".R"), WardenSkeleton.find(sk, foot + ".L")]
+	var hd := WardenSkeleton.find(sk, "head")
 	model.rotation.y = THREE_Q_YAW
 	var rows: PackedStringArray = []
 	for at in model.find_children("*", "AnimationTree", true, false):
@@ -124,7 +130,7 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 	sk.reset_bone_poses()
 	for k in 10:
 		await tree.process_frame
-	await _shoot(model, sk, hb, fb, dir, 0)
+	await _shoot(model, sk, hb, fb, dir, 0, hd)
 	rows.append("0 rest 0.000")
 	for at in model.find_children("*", "AnimationTree", true, false):
 		(at as AnimationTree).active = true
@@ -150,7 +156,7 @@ func _hunter(id: String, dir: String, names: Array, per_clip: int) -> void:
 			clips.force = {"clip": nm, "t": t}
 			for j in 3:
 				sync.call("_process", DT)
-			await _shoot(model, sk, hb, fb, dir, n)
+			await _shoot(model, sk, hb, fb, dir, n, hd)
 			rows.append("%d %s %.3f" % [n, nm, t])
 			n += 1
 	clips.force = {}
