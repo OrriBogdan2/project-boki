@@ -75,7 +75,6 @@ func fresh() -> Dictionary:
 		"active": "",
 		"roster": [],
 		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
-		"time_trial": {},     # Hunter id -> best time on the Training Grounds course, seconds (TimeTrial)
 		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},

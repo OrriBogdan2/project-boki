@@ -193,7 +193,6 @@ const CHECKS := {
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
-	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
@@ -883,7 +882,6 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],  # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],  # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
-	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],  # only hard CC breaks a stomp
 	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
 	"--stomp-break-sweep-check": ["res://tools/stomp_break_sweep_check.gd", "stomp_break_sweep_check", null],
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],  # docs/decisions/0018
