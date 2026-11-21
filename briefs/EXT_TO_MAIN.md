@@ -10731,3 +10731,4 @@ READY ext/anim-neve-wrist 58928e20f6 (bulk-rebase: origin/main merged in mechani
 READY ext/owner-kit-notes-b 915b1aa745 (merged origin/main, resolved dredge_kit.gd conflict: main's hook-node handling + reach block_class; --dredge-combo-check 150/0 fail, --check 0 fail)
 READY ext/garden-free-toy-hint 9d0f798b0e (free toy/patch hint)
 READY ext/farm-autosort 0a9bd5f242 (farm kin auto-sort to best station; rule table docs/FARM_AUTOSORT.md; work-check 0 fails; no clip yet)
+READY ext/sfx-hold-takes 776c2847e501e53006bd738e25da80fcae8dd2fe (short _hold take per held-fire weapon: gun_smg, smg/minigun, gun_rifle, vn_rifle, rime_shard; FireSfx plays them from the 2nd round, peaks under -3 dBFS)
