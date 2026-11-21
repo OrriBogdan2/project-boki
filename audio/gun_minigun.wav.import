@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://dtb6vra6vyhxu"
-path="res://.godot/imported/smg_hold_2.wav-40f539c5ad7f4e9640efc08f92f732c5.sample"
+uid="uid://b1psssxrxhsne"
+path="res://.godot/imported/gun_minigun.wav-fe277d5bfd5a5e82c1423b7b8be95f6c.sample"
 
 [deps]
 
-source_file="res://audio/smg_hold_2.wav"
-dest_files=["res://.godot/imported/smg_hold_2.wav-40f539c5ad7f4e9640efc08f92f732c5.sample"]
+source_file="res://audio/gun_minigun.wav"
+dest_files=["res://.godot/imported/gun_minigun.wav-fe277d5bfd5a5e82c1423b7b8be95f6c.sample"]
 
 [params]
 
