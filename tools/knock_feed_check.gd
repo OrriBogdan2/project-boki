@@ -1,10 +1,10 @@
 extends RefCounted
-## --knock-feed-check: the kill feed (KnockFeed) on the real HUD, headless.
+## --knock-feed-check: the kill feed (KillFeed) on the real HUD, headless (and the message cards keeping off its rows).
 ##   1. a knock's icon is the slot icon on the knocker's own bar (RMB, E, X, dash), the weapon's for a plain
-##      hit, the Boki's ability for a Boki's, KnockFeed.FALLBACK_ICON with nobody to credit
+##      hit, the Boki's ability for a Boki's, KillFeed.FALLBACK_ICON with nobody to credit
 ##   2. a knock row shows the knocker's face, that icon and the knocked Hunter's face, the names as they are (a
 ##      bot's bare tag), each side in its squad's colour; only rows with your squad in them are outlined
-##   3. at most KnockFeed.ROWS rows, newest last; each fully shown HOLD_S, then fading, gone after LIFE_S
+##   3. at most KillFeed.ROWS rows, newest last; each fully shown HOLD_S, then fading, gone after LIFE_S
 ##   4. its own lane: no row wider than LANE_W (a long name is cut, a long line wraps), and at five window sizes
 ##      a full feed sits inside the safe margin and off every other HUD group, the widest message card included
 ##   5. online: the "knock" event carries the icon; a client's row shows it, an older peer's the fallback
@@ -74,7 +74,7 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-## Redraws the HUD panels and waits for the draw (KnockFeed.shown then holds what it put up).
+## Redraws the HUD panels and waits for the draw (KillFeed.shown then holds what it put up).
 func _redraw() -> void:
 	m.hud.panels.queue_redraw()
 	await _frames(3)
@@ -98,16 +98,16 @@ func _icons() -> void:
 	var bar := {"utility": "sec", "k1": "k1", "ult": "x", "dodge": "dash"}
 	for ab: String in bar:
 		var want := String(R.slot_info(bar[ab]).get("icon", ""))
-		var got := KnockFeed.icon_of(R, R, {"src": "abil", "ab": ab})
+		var got := KillFeed.icon_of(R, {"src": "abil", "ab": ab})
 		ok(want != "" and got == want,
 				"a knock by %s's '%s' shows its %s slot icon '%s' (got '%s')" % [R.pname, ab, bar[ab], want, got])
-	ok(KnockFeed.icon_of(R, R, {"src": "shot"}) == R.wid and R.wid != "",
+	ok(KillFeed.icon_of(R, {"src": "shot"}) == R.wid and R.wid != "",
 			"a plain shot or swing shows the weapon slot's icon '%s'" % R.wid)
 	var k: Kin = P.kin
 	var boki := KinText.icon(k.runner.def_of("k1"))
-	ok(KnockFeed.icon_of(k, P, {"src": "kin", "ab": "k1"}) == boki, "a Boki's ability shows its icon '%s'" % boki)
-	ok(KnockFeed.icon_of(k, P, {"src": "kin"}) == "paw", "a Boki's plain bite shows the paw")
-	ok(KnockFeed.icon_of(null, null, {}) == KnockFeed.FALLBACK_ICON, "nobody to credit: the fallback icon")
+	ok(KillFeed.icon_of(k, {"src": "kin", "ab": "k1"}) == boki, "a Boki's ability shows its icon '%s'" % boki)
+	ok(KillFeed.icon_of(k, {"src": "kin"}) == "paw", "a Boki's plain bite shows the paw")
+	ok(KillFeed.icon_of(null, {}) == KillFeed.FALLBACK_ICON, "nobody to credit: the fallback icon")
 
 # ------------------------------------------------------------------ 2. the rows
 func _rows() -> void:
@@ -122,7 +122,7 @@ func _rows() -> void:
 	m.knock(R3, squads[0][1], {"src": "abil", "ab": "k1"})
 	m.knock(squads[1][1], null, {})
 	await _redraw()
-	var rows := KnockFeed.shown
+	var rows := KillFeed.shown
 	var all_knocks := rows.all(func(r): return r["kind"] == "knock")
 	ok(rows.size() == 4 and all_knocks, "four knocks, four knock rows (%d)" % rows.size())
 	if rows.size() < 4:
@@ -131,7 +131,7 @@ func _rows() -> void:
 	_row_is(rows[1], R2, A, R2.wid, true, "a rival knocks your teammate")
 	_row_is(rows[2], squads[0][1], R3, String(squads[0][1].slot_info("k1")["icon"]), false, "two rival squads")
 	var lone: Dictionary = rows[3]
-	ok(lone["left"] == "" and lone["right"] == squads[1][1].pname and lone["icon"] == KnockFeed.FALLBACK_ICON
+	ok(lone["left"] == "" and lone["right"] == squads[1][1].pname and lone["icon"] == KillFeed.FALLBACK_ICON
 			and lone["left_col"] == Color.TRANSPARENT and not lone["mine"],
 			"nobody credited: the icon and the knocked side only (%s)" % [lone])
 	var bare := func(n: String) -> bool: return n == "" or n == P.pname or Names.BOT.has(n)
@@ -158,26 +158,26 @@ func _cap_and_fade() -> void:
 	m.knock(squads[0][1], squads[2][1], {"src": "shot"})
 	m.knock(last, squads[2][2], {"src": "shot"})
 	await _redraw()
-	var rows := KnockFeed.shown
-	ok(m.feed.size() == KnockFeed.ROWS and rows.size() == KnockFeed.ROWS and rows[-1]["right"] == last.pname,
-			"six knocks keep the newest %d rows, the newest last (%d)" % [KnockFeed.ROWS, rows.size()])
-	m.feed[0]["t"] = KnockFeed.HOLD_S - 0.1
-	m.feed[1]["t"] = KnockFeed.HOLD_S + KnockFeed.FADE_S * 0.5
+	var rows := KillFeed.shown
+	ok(m.feed.size() == KillFeed.ROWS and rows.size() == KillFeed.ROWS and rows[-1]["right"] == last.pname,
+			"six knocks keep the newest %d rows, the newest last (%d)" % [KillFeed.ROWS, rows.size()])
+	m.feed[0]["t"] = KillFeed.HOLD_S - 0.1
+	m.feed[1]["t"] = KillFeed.HOLD_S + KillFeed.FADE_S * 0.5
 	await _redraw()
-	rows = KnockFeed.shown
+	rows = KillFeed.shown
 	var a0 := float(rows[0]["a"])
 	var a1 := float(rows[1]["a"])
 	ok(a0 == 1.0 and a1 > 0.0 and a1 < 1.0,
-			"fully shown for %.1f s, then fading (%.2f, %.2f)" % [KnockFeed.HOLD_S, a0, a1])
-	m.feed[0]["t"] = KnockFeed.LIFE_S - 0.0001
+			"fully shown for %.1f s, then fading (%.2f, %.2f)" % [KillFeed.HOLD_S, a0, a1])
+	m.feed[0]["t"] = KillFeed.LIFE_S - 0.0001
 	m.hitstop = 0.0      # (the knocks' freeze frame holds the match's clocks, the feed's too)
 	m.set_process(true)
 	for i in 30:
-		if m.feed.size() < KnockFeed.ROWS:
+		if m.feed.size() < KillFeed.ROWS:
 			break
 		await _frames(1)
 	m.set_process(false)
-	ok(m.feed.size() == KnockFeed.ROWS - 1, "gone after %.1f s (%d left)" % [KnockFeed.LIFE_S, m.feed.size()])
+	ok(m.feed.size() == KillFeed.ROWS - 1, "gone after %.1f s (%d left)" % [KillFeed.LIFE_S, m.feed.size()])
 
 # ------------------------------------------------------------------ 4. its own lane
 func _lane() -> void:
@@ -188,9 +188,9 @@ func _lane() -> void:
 	var names := [long_by.pname, long_who.pname]
 	long_by.pname = LONG_NAME
 	long_who.pname = LONG_NAME + "_Too"
-	KnockFeed.add(m, long_by, long_who, "skypierce")
-	KnockFeed.add(m, P, long_who, "snare")
-	KnockFeed.add(m, long_by, _ally(), "quake")
+	KillFeed.knock(m, long_who, long_by, "skypierce")
+	KillFeed.knock(m, long_who, P, "snare")
+	KillFeed.knock(m, _ally(), long_by, "quake")
 	m.add_feed(LONG_LINE)
 	for win: Vector2i in sizes:
 		main.get_tree().root.size = win
@@ -206,15 +206,15 @@ func _lane() -> void:
 		var groups := SafeArea.seen.duplicate()
 		groups["toasts"] = m.hud.msgs.rects()
 		var clash := SafeArea.problems(groups, sz).filter(func(p: String): return p.contains("feed"))
-		var rows := KnockFeed.shown
+		var rows := KillFeed.shown
 		var widest := 0.0
 		for r: Dictionary in rows:
 			widest = maxf(widest, (r["rect"] as Rect2).size.x)
 		var tag := "%dx%d (logical %s)" % [win.x, win.y, sz]
-		ok(rows.size() == 4 and widest <= KnockFeed.LANE_W and String(rows[0]["left"]).ends_with(KnockFeed.ELLIPSIS),
+		ok(rows.size() == 4 and widest <= KillFeed.LANE_W and String(rows[0]["left"]).ends_with(KillFeed.ELLIPSIS),
 				"%s: four rows, none wider than %d px, long names cut (widest %.0f, '%s')"
-				% [tag, KnockFeed.LANE_W, widest, rows[0]["left"]])
-		ok(rows[3]["kind"] == "text" and (rows[3]["rect"] as Rect2).size.y > KnockFeed.TEXT_H,
+				% [tag, KillFeed.LANE_W, widest, rows[0]["left"]])
+		ok(rows[3]["kind"] == "text" and (rows[3]["rect"] as Rect2).size.y > KillFeed.TEXT_H,
 				"%s: a long line wraps inside the lane" % tag)
 		var card_w := 0.0
 		for t: Rect2 in groups["toasts"]:
@@ -247,7 +247,7 @@ func _online() -> void:
 	m._net_ev(["knock", older.nid, by.nid], "peer")
 	ok(m.feed.size() == 3 and m.feed[1]["icon"] == "barrage" and m.feed[1]["by"] == by and m.feed[1]["who"] == heard,
 			"a client's row shows the icon it was sent")
-	ok(m.feed.size() == 3 and m.feed[2]["icon"] == KnockFeed.FALLBACK_ICON,
+	ok(m.feed.size() == 3 and m.feed[2]["icon"] == KillFeed.FALLBACK_ICON,
 			"an older peer's event (no icon): the fallback")
 
 # ------------------------------------------------------------------ shots
@@ -276,13 +276,13 @@ func _shots() -> void:
 		var tag := "%dx%d" % [win.x, win.y]
 		img.save_png(shots.path_join(tag + "_screen.png"))
 		_save_lane(img, sz, tag)
-		var drawn := KnockFeed.shown.map(func(r): return [r["left"], r["icon"], r["right"]])
+		var drawn := KillFeed.shown.map(func(r): return [r["left"], r["icon"], r["right"]])
 		ok(drawn.size() == 4, "%s: four rows up (%s)" % [tag, drawn])
 
 ## The lane cut out of the screen and blown up to twice its logical size.
 func _save_lane(img: Image, sz: Vector2, tag: String) -> void:
 	var lane := Rect2()
-	for r: Dictionary in KnockFeed.shown:
+	for r: Dictionary in KillFeed.shown:
 		lane = r["rect"] if lane.size == Vector2.ZERO else lane.merge(r["rect"])
 	lane = lane.grow(8.0)
 	var k := Vector2(img.get_size()) / sz

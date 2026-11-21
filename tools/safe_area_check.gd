@@ -132,8 +132,8 @@ func _hud() -> void:
 	m.set_process(false)
 	main.current = m      # (the pause menu reads its options; the next screen frees it)
 	var rivals: Array = m.hunters.filter(func(h): return h.team != m.player.team)
-	KnockFeed.add(m, m.player, rivals[0], "snare")      # (a full feed: two knock rows and two lines)
-	KnockFeed.add(m, rivals[1], rivals[2], "quake")
+	KillFeed.knock(m, rivals[0], m.player, "snare")      # (a full feed: two knock rows and two lines)
+	KillFeed.knock(m, rivals[2], rivals[1], "quake")
 	for line in ["Team 3 is out", "Ember revived Pip"]:
 		m.add_feed(line)
 	m.hud.toast("Picked up a long-range rifle", Color.WHITE)
