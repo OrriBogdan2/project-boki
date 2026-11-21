@@ -1393,7 +1393,7 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 	aim_at(P, far)
 
 ## The Volcano slam has no push (Volcano Crusher: a centre stun and a Dunk, no knock): a grounded foe at the centre
-## stays put, and the tap slam's Dunk over the abyss still fires without one (no abyss bonus in the spike design).
+## stays put, and the Dunk over the abyss still adds its bonus without one.
 func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var W: World = m.world
 	reset.call()
@@ -1421,7 +1421,7 @@ func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, 
 					W.kind[i] = World.T_VOID
 		var dn0 := K.dunks
 		var hp0 := T.hp
-		K._slam(0.0, false)  # the tap slam: the only slam that spikes (a hop or dive is a leap, docs/SPIKE_SLAM.md)
+		K._slam(0.5, true)
 		hits.append([K.dunks == dn0 + 1, hp0 - T.hp, T.vel.y])
 		for i in saved:
 			W.kind[i] = saved[i][0]

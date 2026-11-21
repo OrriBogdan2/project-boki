@@ -613,8 +613,7 @@ func _all() -> void:
 	m.verbs.walls.erase(rock)
 	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
 	reset.call()
-	var al_home := home + Vector3(4.0, 0, 0)
-	var AL: Hunter = m.make_hunter("AL", T.team, "heavy", "Albert", "idle", {}, al_home, {"arch": "bulwark"})
+	var AL: Hunter = m.make_hunter("AL", T.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"})
 	AL.set_arch("bulwark")
 	AL.max_hp = 1e9
 	AL.hp = AL.max_hp

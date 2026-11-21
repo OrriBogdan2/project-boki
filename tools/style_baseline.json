@@ -174,9 +174,6 @@
 "scripts/feel/feel_config.gd": {
 "long_line": 2
 },
-"scripts/heroes/warden_clips.gd": {
-"long_line": 1
-},
 "scripts/home/econ_models.gd": {
 "long_line": 17,
 "nested_ternary": 1,
@@ -403,11 +400,9 @@
 "semicolon": 9
 },
 "scripts/match/exits.gd": {
-"long_line": 5,
-"semicolon": 4
-},
-"scripts/match/exits_flow.gd": {
-"nested_ternary": 1
+"long_line": 10,
+"nested_ternary": 1,
+"semicolon": 11
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -432,9 +427,6 @@
 "scripts/match/hand_layout.gd": {
 "long_line": 5,
 "semicolon": 5
-},
-"scripts/match/heart.gd": {
-"long_line": 1
 },
 "scripts/match/hero_gear.gd": {
 "long_line": 63,
@@ -540,7 +532,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 186,
+"long_line": 184,
 "nested_ternary": 15,
 "semicolon": 124
 },
@@ -561,7 +553,7 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 259,
+"long_line": 258,
 "nested_ternary": 10,
 "semicolon": 250
 },
@@ -773,7 +765,7 @@
 "scripts/ui/results.gd": {
 "long_line": 25,
 "nested_ternary": 5,
-"semicolon": 29
+"semicolon": 28
 },
 "scripts/ui/scenery.gd": {
 "long_line": 8,
@@ -837,8 +829,6 @@
 "semicolon": 21
 },
 "tools/ashwick_combo_check.gd": {
-"history_comment": 2,
-"long_line": 1,
 "semicolon": 9
 },
 "tools/balloon_check.gd": {
@@ -869,23 +859,8 @@
 "long_line": 29,
 "semicolon": 9
 },
-"tools/care_combo_check.gd": {
-"history_comment": 1
-},
-"tools/carry_boki_check.gd": {
-"long_line": 1
-},
 "tools/check.gd": {
 "semicolon": 1
-},
-"tools/check_registry.gd": {
-"long_line": 2
-},
-"tools/cinder_shift_check.gd": {
-"history_comment": 2
-},
-"tools/clip_cancels_check.gd": {
-"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 1
@@ -931,18 +906,12 @@
 "long_line": 6,
 "semicolon": 12
 },
-"tools/garden_items_check.gd": {
-"long_line": 1
-},
 "tools/gear_check.gd": {
 "long_line": 23,
 "semicolon": 1
 },
 "tools/glide_reach.gd": {
 "semicolon": 7
-},
-"tools/glider_heat_check.gd": {
-"long_line": 1
 },
 "tools/grammar_runtime_check.gd": {
 "long_line": 39,
@@ -1029,8 +998,8 @@
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
-"history_comment": 2,
-"long_line": 31,
+"history_comment": 1,
+"long_line": 29,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
@@ -1042,9 +1011,6 @@
 "nested_ternary": 1,
 "semicolon": 23
 },
-"tools/online_displace_check.gd": {
-"long_line": 1
-},
 "tools/pack_ui_check.gd": {
 "long_line": 14,
 "semicolon": 7
@@ -1052,9 +1018,6 @@
 "tools/perkorb_check.gd": {
 "long_line": 25,
 "semicolon": 2
-},
-"tools/pin_bjorn_owner_check.gd": {
-"long_line": 1
 },
 "tools/polish_check.gd": {
 "long_line": 4,
@@ -1068,9 +1031,6 @@
 "long_line": 20,
 "semicolon": 5
 },
-"tools/recast_cue_check.gd": {
-"history_comment": 1
-},
 "tools/revive_check.gd": {
 "long_line": 11,
 "semicolon": 25
@@ -1082,9 +1042,6 @@
 "tools/speaktest.gd": {
 "long_line": 1,
 "semicolon": 1
-},
-"tools/stomp_break_sweep_check.gd": {
-"long_line": 2
 },
 "tools/support_check.gd": {
 "long_line": 14,
@@ -1111,15 +1068,9 @@
 "nested_ternary": 1,
 "semicolon": 27
 },
-"tools/tutorial_retry_check.gd": {
-"long_line": 2
-},
 "tools/unique_check.gd": {
 "long_line": 49,
 "semicolon": 41
-},
-"tools/vfx_reel/tender.gd": {
-"long_line": 1
 },
 "tools/wallhug_check.gd": {
 "long_line": 5,

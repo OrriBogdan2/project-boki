@@ -292,12 +292,6 @@ rival can steal a boss. The counterplay needs a readable line, drawn by `scripts
 - Read off the health every machine already sees: nothing synced. The reel on the first drop under the line
   is `StealReel` (docs/CAMPS.md). Camp Chiefs join when the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
-## Tab board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
-Holding Tab shows the squads-left count and YOUR squad only. Each hunter gets one strip, yours first with a teal outline and a gold name:
-portrait, name, alive / downed / out, kills / deaths / assists, damage, the four gear slots (`GearPanel.cell`) and the Boki (name, level
-and form, what it is doing). Rival squads show nothing but the count: no names, stats or alive state (owner 11-11; the source research
-is in docs/TAB_BOARD_PARITY.md). Assists are counted by `DashReset.takedown`. Void & Masks look (black-violet panel, teal edge, magenta count).
-
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;

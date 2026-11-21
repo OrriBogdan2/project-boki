@@ -3,8 +3,7 @@ extends "res://tools/mob_pose_shots.gd"
 ## taking three hits and dying, as the game draws it (jobq --needs gpu). One frame dir per monster,
 ## <dir>/<kind>/NNNNN.jpg, or <dir>/group/ with --group (all at once).
 ## Run on the fixed step so the clip plays at 60 fps:
-##   godot --rendering-driver opengl3 --resolution 1280x720 --fixed-fps 60 --path . \
-##     -- --mob-fight-clip --shots-dir=<dir>
+##   godot --rendering-driver opengl3 --resolution 1280x720 --fixed-fps 60 --path . -- --mob-fight-clip --shots-dir=<dir>
 ## then ffmpeg -framerate 60 -i <dir>/<kind>/%05d.jpg <kind>.mp4. Old vs new: run it on both trees and hstack the clips.
 
 const CLIP_W := 960               # px, the frame around the fight
