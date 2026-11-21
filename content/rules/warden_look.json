@@ -1429,12 +1429,12 @@
 				"rim_amount": 0.15,
 				"far_lift": 0.1,
 				"sheen": 0.0,
-				"shade": 0.95,
-				"desat": 0.62,
+				"shade": 0.9,
+				"desat": 0.48,
 				"albedo": [
-					1.02,
-					0.98,
-					0.96
+					0.93,
+					0.86,
+					0.82
 				],
 				"light_neutral": 1.0,
 				"rim_far": 0.0
@@ -1447,9 +1447,9 @@
 				"far_lift": 0.12,
 				"desat": 0.3,
 				"albedo": [
-					1.25,
-					1.15,
-					1.1
+					1.0,
+					0.93,
+					0.98
 				]
 			},
 			"cloth-accent": {
