@@ -82,7 +82,7 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx`, `breah_*`).
+  rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
@@ -98,6 +98,29 @@ Still open (shared, not done here):
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
 
+Albert (bulwark), ext/albert-vfx-data: his remaining code-drawn one-shots are `bulwark.json` moves, in his ivory and with no
+fill or ring where there was none to keep: `aegis_up` (the wall rising: dust and ivory sparks), `block` (sparks and a flare on
+the face), `mend_burst` (Mending Ground's end: one lit ring at its radius and rising motes) and `mend_revive` (the
+kickstarted ally), and the Faultline's `fault_slam` (the near cell), `fault_land` (rock, dust and the char mark; the two
+dust rings are cut: no rings on a landing), `fault_cell` (each cell heaving up) and `fault_foe` (a foe thrown). All are
+`"net": false`, as the code bursts were (the lane and the ring ride their own events). Timings, hit shapes and sounds are
+unchanged. Second pass (same branch): the planted hammer's beacon (`plant_beacon`: rising ivory streaks, was a 5 m gold
+beam), the dash wake (`dash`: ivory specks and dust on his body, was gold and ember chevron bands), and Mending Ground's
+light column (`mend_fall`: ivory light falling onto the zone during its 1 s delay, was a gold beam) and standing zone
+(`mend_zone`: rising ivory specks and pluses inside AimKit's lit rim, no fill; was a second code-drawn disc) are
+`HeroVfx` holds; the end burst is `mend_burst` alone. Strips redone from jobq 20261120-153944-25090 (after, same before):
+`e_before_after.jpg` green (the opaque gold cone that hid him is gone), `throw` and `dash` grey (in his palette now, but the
+ray is slimmer than the old beam and the wake reads about the same). `HeroVfx.hold` follows a moving `at` (the zone follows the hammer).
+`BjornFx` keeps only the meshes that ride his hammer and shield (thrown hammer and rope, whirl trail and glint, the aegis
+wall: translucent since ext/vfx-albert-e-wall), and the shared charge ring is his ivory, not gold. GPU strips at match zoom, grey = main (top), border green = better, grey = no change: `docs/shots/albert-vfx-data/{throw,dash,wall,r}_before_after.jpg` (jobq 20261120-145918-29886 before, -145258-27518 after, `--hero-vfx-reel --reel-hero=bulwark`). The throw and the 360 Smash look the same (their looks were already data); the Faultline landing loses its dust rings, the wall and charge ring are ivory.
+Albert (bulwark), ext/vfx-albert-e-wall (row 8 again: the slab boxes were still reading as flat orange chunks on yellow
+ground): the aegis is `scripts/arch/kits/aegis_wall.gd` + `shaders/aegis_wall.gdshader`, four meshes (was 31 boxes, so
+27 fewer draw calls): an outer translucent sheet in the palette `slab` pale gold (deeper low down, amber seams between
+the 7 plates, a hammer cross), a brighter inner sheet a hand inside it, a lit ivory rim bar along the top and a soft
+gold ground contact that fades out along the foot and at the ends. Both faces draw alike (`cull_disabled`), so it reads
+from behind too (not shot). Shape, size, rise, block flash, hurt tint and break are as before; no hit or timing change.
+Strip at match zoom (grey = main, green = after): `docs/shots/vfx-albert-e-wall/aegis_before_after.jpg` (GPU jobq
+20261120-113804-24869 before, 20261120-120528-04629 after; `--hero-vfx-reel --reel-hero=bulwark --reel-only=shield`).
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
 carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
@@ -187,7 +210,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
 | 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 22 | re-scored 11-11 (ext/vfx-sparkle-ult-local, was 20): the lightning body is pink-white on the hot pink core (no cyan left in `mage_*.gd`, her ability colours and the coilcaster rounds in content are pink); Kitefall draws only the range ring, no 14 m violet dome (the screen-wide purple), the look stays at the ring and the landing spot; strips: `--hero-vfx-reel --reel-hero=mage` jobq 20261111-154346-29635 (before, main) / 20261111-154229-09126 (after), queued, NOT seen yet |
 | 10 | Neve | rimewright | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | reads well (shards, shatter burst). Done (ext/vfx-neve-ice-path): the skate's ice path was up to 24 pooled flat untextured boxes (a node and material each); now one MultiMesh strip (`IceStrip`, `shaders/ice_strip.gdshader`): cel-lit pale ice, a faint frost rim, a lighter facet step, a ragged cel fade at the tail; same plate size, form-in, spacing, 24-plate length and 3 s life. Left: the plates are still laid flat (no relief on slopes) |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: hold-blade glow (the ground clipping is done: soft edges above) |
+| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Palm glow while Cinder Shot is held done 11-20 (`palm_charge`: flare size, heat and a white-hot bloom build with the hold; `docs/shots/vfx-cinder-blade-glow/strip.png`, top before, bottom after); no polish left (the ground clipping is done: soft edges above) |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Done (ext/sfx-kael-slash-edge): the LMB slash sound has a hard edge (snap, short shing, chop) on its contact at 0.08 s, 4-6 dB over the swish like the cleave's cut and about 4 dB under it in game; same 0.42 s, still on the press (was the swish alone, loudest at 0.22-0.27 s); the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish). Done (ext/vfx-kael-smash-lane): the Slam lane (4.3 x 0.72 m) and the Lunge lane are AimKit "soft" shapes in his #ff3a2a, drawn = hit (`docs/art/vfx_rescore/juggernaut_{lunge,slam}_before_after.jpg`) |
 | 13 | Gil | gil | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 26 | scored 11-11 (ext/vfx-gil-bar, his reel `tools/vfx_reel/gil.gd`): every look is `content/vfx/gil.json` + keyed poses (`kmoves_gil.gd`); the slime puddle is a lit rim for exactly its slow. Under the bar: RMB Air and Super Zeep breaks are opaque smoke puffs; the held RMB landing ring re-fires every 0.1 s |
 
