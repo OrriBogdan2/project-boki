@@ -22,12 +22,6 @@ static func on_screen(hud) -> Array:
 		out.append("glider")
 	if BeltHud.shown(m, p):
 		out.append("belt")
-	if HudReveal.on(m, "counters"):
-		out.append("counters")
-	if glider_shown(p):
-		out.append("glider")
-	if BeltHud.shown(m, p):
-		out.append("belt")
 	if p.perks.size() > 0:
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):
