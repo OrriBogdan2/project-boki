@@ -165,17 +165,20 @@ func _only_meshy(a: String, m: Node3D) -> void:
 	ok(stray.is_empty(), "%s: no rig mesh draws beside Meshy's model (showing: %s)" % [a, str(stray)])
 
 
-## Each data orbit (Tenzo's seeing-stones) rides its Meshy bone with all its props, round the head at the contract
-## model's height, and turns over time.
+## Each data orbit (Tenzo's seeing-stones round the head, shards round the stone fist, ring on the ground) rides its
+## Meshy bone with all its props, near that bone (the ground ring: at the feet), and turns over time.
 func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 	var want: Dictionary = nat.d.get("orbits", {})
 	for orb in want:
 		var nd := nat.skel.find_child(String(orb), true, false) as Node3D
 		var props := nd.get_children().filter(func(c): return c is MeshInstance3D) if nd else []
-		var head := nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.skel.find_bone("Head")).origin
+		var b := nat.skel.find_bone(String(want[orb]))
+		var at := nat.root.global_position
+		if b >= 0:
+			at = nat.skel.global_transform * nat.skel.get_bone_global_pose(b).origin
 		var far := 0.0
 		for p in props:
-			far = maxf(far, (p as Node3D).global_position.distance_to(head))
+			far = maxf(far, (p as Node3D).global_position.distance_to(at))
 		var p0: Vector3 = props[0].global_position if not props.is_empty() else Vector3.ZERO
 		for k in 10:
 			await main.get_tree().process_frame
@@ -183,13 +186,13 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 		ok(
 			(
 				nd != null
-				and props.size() >= 3
-				and far < 0.8
+				and not props.is_empty()
+				and far < (0.8 if b >= 0 else 0.15)
 				and moved > 0.0005
 				and nat.orbits.pivots.size() == want.size()
 			),
 			(
-				"%s: %s rides %s (%d props, %.2f m from the head at most, moved %.3f m)"
-				% [a, orb, want[orb], props.size(), far, moved]
+				"%s: %s rides %s (%d props, %.2f m from it at most, moved %.3f m)"
+				% [a, orb, want[orb] if b >= 0 else "the ground", props.size(), far, moved]
 			)
 		)
