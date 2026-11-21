@@ -5,8 +5,8 @@ extends RefCounted
 ## under the tiles the picked Hunter's mastery goals, your glider, your Wisp (WispPick) and your stomp
 ## (StompPick). On the right the Hunter viewer (HunterViewer) and what you can do with it: play it, hold to
 ## unlock it (HoldUnlock, then the reveal), or the challenge it still needs. Rules and numbers:
-## content/rules/class_unlock.json, logic: ClassUnlock. (Internal names keep "class": the file, the save key and
-## the ids.)
+## content/rules/class_unlock.json, logic: ClassUnlock. (Internal names keep "class": the file, the save
+## key and the ids.)
 
 const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]

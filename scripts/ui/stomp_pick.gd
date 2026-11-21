@@ -24,29 +24,28 @@ static func make(hunter_id: String, on_change: Callable) -> Control:
 	v.add_child(flow)
 	flow.add_child(card(hunter_id, "", on_change))
 	for id in StompLook.rules()["styles"]:
-		if StompLook.style(String(id)).has("cost"):
+		if StompLook.for_sale(String(id)):
 			flow.add_child(card(hunter_id, String(id), on_change))
 	return v
 
 ## One stomp ("" = the Hunter's own): preview over a choice button, or over its name and a Buy button.
 static func card(hunter_id: String, id: String, on_change: Callable) -> Control:
-	var shown := id if id != "" else StompLook.default_for(hunter_id)
-	var st := StompLook.style(shown)
+	var st := StompLook.style(id)
 	var c := UI.vbox(2)
 	c.set_meta("stomp", id)
-	c.add_child(preview(hunter_id, shown))
+	c.add_child(preview(hunter_id, id))
 	if id == "" or StompLook.owned(id):
-		var b := UI.choice(String(st["name"]), id == StompLook.equipped(), func(): _wear(id, on_change), 0)
+		var b := UI.choice("Own stomp" if id == "" else String(st["name"]), id == StompLook.equipped(),
+				func(): _wear(id, on_change), 0)
 		b.tooltip_text = String(st.get("desc", "This Hunter's own stomp."))
 		c.add_child(b)
 		return c
 	var cost := int(st["cost"])
+	var gems := int(Save.d.get("gems", 0))
 	c.add_child(UI.label(String(st["name"]), UI.T_SMALL, UI.MUTED))
 	var buy := UI.button("Buy  ·  %d gems" % cost, func(): _buy(id, on_change), 0, "gem")
-	buy.disabled = int(Save.d.get("gems", 0)) < cost
-	buy.tooltip_text = String(st.get("desc", ""))
-	if buy.disabled:
-		buy.tooltip_text += "\nYou have %d gems." % int(Save.d.get("gems", 0))
+	buy.disabled = gems < cost
+	buy.tooltip_text = String(st.get("desc", "")) + ("\nYou have %d gems." % gems if buy.disabled else "")
 	c.add_child(buy)
 	return c
 
@@ -91,7 +90,7 @@ static func preview(hunter_id: String, style_id: String) -> SubViewportContainer
 	vp.add_child(Stage.new(hunter_id, style_id, cam))
 	return c
 
-## Builds the Hunter when PreviewBuild gives it a turn, then plays the stomp: one stomp, a pause.
+## Builds the Hunter when PreviewBuild gives it a turn, then plays the stomp: the lock's length, a pause.
 class Stage extends Node3D:
 	var hunter_id: String
 	var style_id: String
@@ -112,9 +111,19 @@ class Stage extends Node3D:
 			var model := PreviewBuild.model(hunter_id)
 			add_child(model)
 			anim = HunterAnim.new(model)
-			var s := model.scale.y
-			cam.transform = Transform3D(Basis(), CAM_FROM * s).looking_at(Vector3(0, CAM_AT * s, 0), Vector3.UP)
-		t = fmod(t + minf(dt, 0.1), Life.R["stomp_time"] + PAUSE)
-		var cycles: float = t / Life.R["stomp_cycle"] if t < Life.R["stomp_time"] else -1.0
-		anim.update(minf(dt, 0.1), {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(hunter_id),
-				"stomp": cycles, "stomp_style": style_id})
+			var sc := model.scale.y
+			cam.transform = Transform3D(Basis(), CAM_FROM * sc).looking_at(Vector3(0, CAM_AT * sc, 0), Vector3.UP)
+		anim.update(minf(dt, 0.1), state(minf(dt, 0.1)))
+
+	## The anim state at the stage's clock, which it advances by `dt`.
+	func state(dt: float) -> Dictionary:
+		var len: float = Life.R["stomp_time"]
+		var cyc: float = Life.R["stomp_cycle"]
+		t = fmod(t + dt, len + PAUSE)
+		var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(hunter_id), "stomp": -1.0}
+		if t < len:
+			s["stomp"] = fmod(t, cyc) / cyc
+			s["stomp_n"] = int(t / cyc)
+			s["stomp_style"] = style_id if style_id != "" else StompLook.default_for(hunter_id)
+			s["stomp_own"] = style_id == ""
+		return s

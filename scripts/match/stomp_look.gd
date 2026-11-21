@@ -1,14 +1,14 @@
 class_name StompLook
 extends RefCounted
-## How a stomp looks: the stomp styles in content/rules/stomps.json and the "stomp" cosmetic slot.
-## Each Hunter has its own default style (always owned); other styles are bought with gems and worn in
-## the slot (Save.d["look"]["stomp"], "" = your Hunter's own; Save.d["stomps"] lists the bought ones). A style only
-## changes the body: every style keeps the stomp's timing (Life.R). HunterAnim blends the pose below in while a
-## stomp runs. Old saves have neither key: nothing bought, wearing your own. Only the local player's stomp shows
-## its worn style; every other Hunter stomps in its own default.
+## How a stomp looks: the styles in content/rules/stomps.json and the "stomp" cosmetic slot
+## (docs/decisions/0062-stomp-styles.md). A Hunter with a stomp clip stomps with it; a rig without one
+## uses its Hunter's own style ("hunter" in the data) or the base stomp. A style bought with gems and
+## worn (Save.d["look"]["stomp"], "" = your Hunter's own) plays on the rig instead, for your Hunter only:
+## the wire carries no style, so other games show a remote stomper's own stomp. Old saves have neither
+## key; both read as "nothing bought, wearing your own" (no migration). Timing stays Life's.
 
 const RULES_PATH := "res://content/rules/stomps.json"
-const SLAM := 0.7      # where in one stomp cycle (0..1) the foot lands
+const SLAM := 0.7      # the part of a stomp cycle the foot is up and coming down (Life.R stomp_cycle)
 
 static var _rules := {}
 static var _styles := {}      # id -> the style with every key filled in from "base"
@@ -29,22 +29,18 @@ static func style(id: String) -> Dictionary:
 	rules()
 	return _styles.get(id, _styles[""])
 
-## The style a Hunter's own stomp uses ("" if the data has none for its archetype).
+## The style a Hunter's own stomp uses on a rig without a clip ("" = the base stomp).
 static func default_for(arch: String) -> String:
 	for id in rules()["styles"]:
 		if String(rules()["styles"][id].get("hunter", "")) == arch:
 			return id
 	return ""
 
-## The style this Hunter stomps with: the local player's worn one, else its Hunter's own.
-static func style_id(h: Hunter) -> String:
-	var worn := equipped()
-	return worn if h.is_local() and worn != "" else default_for(h.arch)
+static func for_sale(id: String) -> bool:
+	return (rules()["styles"] as Dictionary).has(id) and rules()["styles"][id].has("cost")
 
 static func owned(id: String) -> bool:
-	if not (rules()["styles"] as Dictionary).has(id):
-		return false
-	return rules()["styles"][id].has("hunter") or (Save.d.get("stomps", []) as Array).has(id)
+	return for_sale(id) and (Save.d.get("stomps", []) as Array).has(id)
 
 ## The worn style id, "" for your Hunter's own.
 static func equipped() -> String:
@@ -71,49 +67,56 @@ static func buy(id: String) -> bool:
 	Save.d["stomps"].append(id)
 	return true
 
-## HunterAnim's stomp input for a Hunter: "stomp" is the foot cycles so far
-## (the fraction is the phase), -1 when not stomping.
+## The anim state of a stomp: "stomp" (the cycle's phase, -1 off), "stomp_n" (which cycle), "stomp_style"
+## and "stomp_own" (false: a worn style, so a Hunter's stomp clip gives way to the rig's pose).
 static func fill(h: Hunter, s: Dictionary) -> void:
 	if h.stomp.is_empty():
 		s["stomp"] = -1.0
 		return
-	s["stomp"] = float(h.stomp["t"]) / Life.R["stomp_cycle"]
-	s["stomp_style"] = style_id(h)
+	var t := float(h.stomp["t"])
+	var cyc: float = Life.R["stomp_cycle"]
+	s["stomp"] = fmod(t, cyc) / cyc
+	s["stomp_n"] = int(t / cyc)
+	var worn := equipped() if h.is_local() else ""
+	s["stomp_style"] = worn if worn != "" else default_for(h.arch)
+	s["stomp_own"] = worn == ""
 
 # ------------------------------------------------------------------ the pose
 ## How far the lifted foot is up at a cycle phase (0..1): up and back down by SLAM.
-static func _up(ph: float) -> float:
-	return sin(ph / SLAM * PI) if ph < SLAM else 0.0
+static func up(ph: float) -> float:
+	return sin(clampf(ph, 0.0, 1.0) / SLAM * PI) if ph < SLAM else 0.0
 
-## Leg angles, Vector4(hip_l, knee_l, hip_r, knee_r), at `cycles` foot cycles into the stomp ("alt" swaps feet).
-static func legs(st: Dictionary, cycles: float) -> Vector4:
-	var up := _up(fposmod(cycles, 1.0))
+## Leg angles, Vector4(hip_l, knee_l, hip_r, knee_r), at a cycle phase of cycle n.
+static func legs(st: Dictionary, ph: float, n: int) -> Vector4:
+	var u := up(ph)
 	var crouch := float(st["crouch"])
 	if st["foot"] == "both":
-		var hip := 0.5 * float(st["lift"]) * up + crouch * 0.6 + 0.1
-		var knee := 0.6 * float(st["knee"]) * up - 0.2 - crouch * 0.9
+		var hip := 0.5 * float(st["lift"]) * u + crouch * 0.6 + 0.1
+		var knee := 0.6 * float(st["knee"]) * u - 0.2 - crouch * 0.9
 		return Vector4(hip, knee, hip, knee)
-	var lift_hip := float(st["lift"]) * up - 0.05
-	var lift_knee := float(st["knee"]) * up - 0.1
-	var stand_hip := 0.2 + crouch * 0.6
-	var stand_knee := -0.4 - crouch * 0.9
-	if st["foot"] == "r" or (st["foot"] == "alt" and int(cycles) % 2 == 0):
-		return Vector4(stand_hip, stand_knee, lift_hip, lift_knee)
-	return Vector4(lift_hip, lift_knee, stand_hip, stand_knee)
+	var lift := Vector2(float(st["lift"]) * u - 0.05, float(st["knee"]) * u - 0.1)
+	var stand := Vector2(0.2 + crouch * 0.6, -0.4 - crouch * 0.9)
+	if st["foot"] == "r" or (st["foot"] == "alt" and n % 2 == 0):
+		return Vector4(stand.x, stand.y, lift.x, lift.y)
+	return Vector4(lift.x, lift.y, stand.x, stand.y)
 
-## Forward lean in radians.
-static func lean(st: Dictionary) -> float:
-	return float(st["lean"]) + float(st["crouch"]) * 0.1
+## The body: Vector3(forward lean, shoulder turn, rise in metres).
+static func body(st: Dictionary, ph: float) -> Vector3:
+	var u := up(ph)
+	var crouch := float(st["crouch"])
+	return Vector3(float(st["lean"]) + crouch * 0.1, float(st["twist"]) * u, float(st["hop"]) * u - crouch * 0.12)
 
-## Where a hand goes, from its shoulder (side -1 left, 1 right); Vector3.INF leaves it be.
-static func hand(st: Dictionary, cycles: float, sh: Vector3, side: float) -> Vector3:
-	var up := _up(fposmod(cycles, 1.0))
+## Where a hand goes from its shoulder (side -1 left, 1 right); Vector3.INF leaves it on the weapon.
+static func hand(st: Dictionary, ph: float, sh: Vector3, side: float) -> Vector3:
+	var u := up(ph)
 	var off := Vector3.INF
 	match String(st["arms"]):
-		"out": if side < 0.0: off = Vector3(-0.32, -0.15, -0.05)
+		"out":
+			if side < 0.0:
+				off = Vector3(-0.32, -0.15, -0.05)
 		"wide": off = Vector3(-0.32, -0.15, -0.05)
-		"up": off = Vector3(-0.1, -0.3, -0.3).lerp(Vector3(-0.05, 0.42, -0.1), up)
-		"fists": off = Vector3(-0.12, -0.6, -0.4).lerp(Vector3(-0.1, 0.1, -0.25), up)
+		"up": off = Vector3(-0.1, -0.3, -0.3).lerp(Vector3(-0.05, 0.42, -0.1), u)
+		"fists": off = Vector3(-0.12, -0.6, -0.4).lerp(Vector3(-0.1, 0.1, -0.25), u)
 		"hips": off = Vector3(-0.14, -0.42, 0.06)
 	if off == Vector3.INF:
 		return off
