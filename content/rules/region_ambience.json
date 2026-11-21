@@ -1,0 +1,16 @@
+{
+ "_doc": "Which ambience bed each Hollow Crown region plays (scripts/match/amb_beds.gd, docs/AUDIO.md 'Region ambience'). beds: region id (content/maps/hollowcrown.json regions[].id, made by tools/make_hollowcrown.py) -> the loop audio/amb_<bed>.ogg, all from the existing library. fade_s: how long a bed takes to go from silent to full, so crossing a border is a crossfade of that length (3-4 s). blight_k: the bed's level (x) at 40 m or more past the tide ring, inside the Blight, where amb_blight's rumble takes over; it falls from 1 at the ring.",
+ "fade_s": 3.5,
+ "blight_k": 0.4,
+ "beds": {
+  "crown": "zone_hub",
+  "frostgate": "zone_glasswater",
+  "cinder": "zone_cinderstep",
+  "storm": "cliffs",
+  "thorn": "zone_hushwood",
+  "lark": "meadow",
+  "highwatch": "zone_ridge",
+  "duskmoor": "ruins",
+  "saltmere": "pond"
+ }
+}
