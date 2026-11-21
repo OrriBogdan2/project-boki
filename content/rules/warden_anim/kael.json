@@ -46,7 +46,8 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.22
+		"speed": 1.22,
+		"plants": {"crouch_b": {"L": [0.317], "R": [0.65]}, "crouch_f": {"L": [0.317], "R": [0.65]}, "crouch_l": {"L": [0.317], "R": [0.65]}, "crouch_r": {"L": [0.317], "R": [0.65]}}
 	},
 	"air": {
 		"rise": "jump",
