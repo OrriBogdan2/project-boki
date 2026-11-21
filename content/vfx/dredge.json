@@ -1,7 +1,15 @@
 {
-	"palette": {"main": "d89040", "hot": "fff0b0", "char": "5a3410"},
-	"anchors": {},
+	"palette": {"main": "d89040", "hot": "fff0b0", "char": "5a3410", "gold": "ffc832"},
+	"anchors": {"chest": {"body": [0.0, 1.0, 0.0]}, "low": {"body": [0.0, 0.4, 0.0]}},
 	"moves": {
+		"dash": {"net": false, "fx": [
+			{"p": "ribbon", "at": "chest", "size": 0.9, "life": "t", "tail": 0.22, "c": "gold", "c2": "hot"},
+			{"p": "ribbon", "at": "low", "size": 0.5, "life": "t", "tail": 0.3, "c": "main", "c2": "gold"}
+		]},
+		"dash_hit": {"net": false, "fx": [
+			{"p": "flare", "y": 2.1, "size": 1.6, "life": 0.3, "c": "gold", "c2": "hot", "when": "hit"},
+			{"p": "star", "y": 2.1, "n": 6, "speed": 3.5, "spread": 1.0, "grav": 4.0, "life": 0.3, "size": 0.08, "c": "gold", "c2": "hot", "when": "hit"}
+		]},
 		"anchor_fist": {"fx": [{"p": "fist", "fwd": "r", "fwd_x": 0.55, "size": 2.4, "pitch": -30, "drop": 3.6, "life": 0.68, "fall": 0.56, "cut": 0.56, "c": "main", "c2": "hot", "c3": "char"}]}
 	}
 }
