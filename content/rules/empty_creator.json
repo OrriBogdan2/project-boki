@@ -1,0 +1,10 @@
+{
+	"_doc": "The Empty's frame (scripts/match/empty_frame.gd, docs/CHARACTER_CREATOR.md): each body slider 0..1 maps onto [lo, hi] for the body's sex (f / m), a factor on the shape. Shoulder and hip ranges do not overlap between the sexes, so a woman always reads narrower on top and wider below than any man, and no slider leaves the range the outfits are built for.",
+	"frame": {
+		"height": {"label": "Height", "f": [0.88, 1.05], "m": [0.9, 1.1]},
+		"build": {"label": "Build", "f": [0.84, 1.06], "m": [0.86, 1.14]},
+		"shoulders": {"label": "Shoulders", "f": [0.8, 0.92], "m": [1.04, 1.16]},
+		"hips": {"label": "Hips", "f": [1.1, 1.26], "m": [0.92, 1.02]},
+		"head": {"label": "Head size", "f": [0.9, 1.0], "m": [0.94, 1.06]}
+	}
+}
