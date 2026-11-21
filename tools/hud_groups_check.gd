@@ -5,15 +5,18 @@ extends RefCounted
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
-##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
-##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
+##      The landing is at the owner's 5; the counters, glider ring and belt are folded in until they matter (rule 5).
+##      The later moments add the toasts, the prompt and the strip. The check plays a fresh save (a new player), so
 ##      the "Your kit" card is not at the landing (rule 4)
 ##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
+##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
+##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
+##   6. the gear strip and the perk row count only once drawn (HudReveal "gear" / "perks", then an item held)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 8, "fight": 10, "heart": 11, "race": 11}      # groups, strip included where it shows
+const COUNTS := {"landing": 5, "fight": 7, "heart": 8, "race": 8}      # groups, strip included where it shows
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -91,6 +94,22 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
+	# 5. what folds in until it matters
+	set_moment(m, "landing")
+	var p0: Hunter = m.player
+	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "belt") and not on_screen_has(hud, "counters"),
+		"landing: no glider ring, belt or counters")
+	p0.gliding = true
+	ok(on_screen_has(hud, "glider"), "gliding: the glider ring")
+	p0.gliding = false
+	p0.hp = p0.max_hp * 0.5
+	ok(on_screen_has(hud, "belt") and BeltHud.shown(m, p0, true), "hurt with a tonic held: the belt")
+	p0.hp = p0.max_hp
+	ok(on_screen_has(hud, "belt"), "healed again: this save keeps the belt")
+	Save.d["hud_reveal"].erase("belt")
+	Save.d["matches"] = 3
+	ok(on_screen_has(hud, "belt") and on_screen_has(hud, "counters"), "4th expedition: belt and counters back")
+	Save.d["matches"] = 0
 	# 4. what a new player's HUD holds back
 	var p: Hunter = m.player
 	set_moment(m, "landing")
@@ -110,19 +129,20 @@ func run(main: Node) -> void:
 	ok(not HudGroups.new_player(), "a save with %d expeditions is not new" % HudGroups.NEW_PLAYER_MATCHES)
 	ok(on_screen_has(hud, "kit") and HudGroups.own_numbers_shown(p, false),
 		"veteran: kit card and own numbers as before")
-	# 5. the gear / glider strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
-	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"),
+	# 6. the gear strip and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item)
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
 		"veteran with no gear and no perk: neither strip")
 	Save.d["matches"] = 0
 	p.gear[2] = {"id": String(Gear.ALL.keys()[0]), "rar": 0}
 	p.perks.append(String(Data.PERKS.keys()[0]))
-	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"),
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"),
 		"new player with gear and a perk: held back (HudReveal)")
 	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES
-	ok(on_screen_has(hud, "glider") and on_screen_has(hud, "perks"), "veteran with gear and a perk: both strips")
+	ok(on_screen_has(hud, "gear") and on_screen_has(hud, "perks"),
+		"veteran with gear and a perk: both strips")
 	p.gear[2] = {}
 	p.perks.clear()
-	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "perks"), "back to nothing held: neither strip")
+	ok(not on_screen_has(hud, "gear") and not on_screen_has(hud, "perks"), "back to nothing held: neither strip")
 	for i in 3:
 		await main.get_tree().process_frame      # the real HUD draws the veteran's own-numbers row too
 	Save.d["matches"] = 0

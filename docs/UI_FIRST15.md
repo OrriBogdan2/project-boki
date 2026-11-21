@@ -241,13 +241,17 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 
 | Moment | Groups | Strip | Note |
 |---|---|---|---|
-| First landing | 10 | waits | nine always-on blocks + the button card |
-| First fight | 11 | waits | nine + toasts + loot prompt |
-| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
-| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+| First landing | 5 (was 9) | waits | minimap (its clock strip hangs under it), vitals, abilities, Boki/glove boxes, weapon |
+| First fight | 7 (was 11) | waits | five + toasts + loot prompt |
+| Heart unlock | 8 (was 12) | shows | five + toasts + Gate prompt + strip |
+| Quest-exit race | 8 (was 12) | shows | five + toasts + prompt + strip |
 
-All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
-Update (ext/ui-glider-perk-hold): the "nine" are now eight on a fresh save, the gear / glider strip is counted only once drawn: pins are 8 / 10 / 11 / 11 (the 10 above had the kit card).
+ext/ui-hud-groups-five: the counters (the staged HUD, `HudReveal`, were already off for a fresh save but still counted), the glider ring
+(only while you glide or the meter is not full, `HudGroups.glider_shown`) and the belt (`BeltHud.shown`: from the first time a held item could be
+used, a tonic when hurt or an armor kit when the armor is down, then this save keeps it; `hud_reveal.json` "belt", always from the 4th expedition)
+fold in until they matter, and the clock counts with the minimap it hangs under. Shots before / after: `docs/ui_hud_groups_five/`.
+The fight and later moments stay over 5 by the toast lane and the prompt, which cannot fold: owner's call.
+Update (ext/ui-glider-perk-hold): the gear strip (GearPanel's four slots, group id "gear") and the perk row are counted only once drawn (HudReveal "gear" / "perks", then an item held), so a fresh save's pins stay 5 / 7 / 8 / 8; a veteran with gear and a perk counts them.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
