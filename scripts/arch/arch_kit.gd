@@ -211,7 +211,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 
 # ------------------------------------------------------------------ per step
 ## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
-## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx), and looks off the synced row
+## (Grimble's reaching arm, DredgeKit.net_reach).
 func sound_tick(_dt: float) -> void:
 	pass
 
@@ -556,7 +557,7 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Shake.incoming_big(m, h.pos, 0.6, h)
+	Shake.incoming_big(m, h.pos, ImpactWeight.shake("heavy"), h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
 
@@ -1094,7 +1095,7 @@ func armed_fx(slot := "sec") -> void:
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
+## A payoff landing (Flashpoint, Called Shot): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).

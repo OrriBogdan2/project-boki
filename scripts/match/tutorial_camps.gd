@@ -86,12 +86,14 @@ func add(sid: String, kinds: Array) -> void:
 	count += kinds.size()
 	var camp_hp: float = Content.rules("tutorial")["mob"]["camp_hp"]
 	var ang := randf() * TAU
+	var line: Array = row(kinds.size(), ang) if c.get("row", false) else []
 	for i in kinds.size():
 		var at := Vector3.INF
 		if c.get("held", false):
 			at = tu.foe_spot(sid, i)       # (fixed posts in the open, clear of every cliff: they never wander off)
 		elif c.get("row", false):
-			at = tu.spot(ROW_FROM + i * ROW_STEP, ang)       # (one behind the other, to line up)
+			# (one behind the other, to line up)
+			at = line[i] if i < line.size() else tu.spot(ROW_FROM + i * ROW_STEP, ang)
 		elif c.get("far", false):
 			at = tu.spot(8.5 - i * 3.0, ang + i * 0.7)
 		else:
@@ -101,6 +103,29 @@ func add(sid: String, kinds: Array) -> void:
 			tu.tank(mb, float(c.get("hp", camp_hp)))
 			mb.held = bool(c.get("held", false))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
+
+## A row camp's spots, one behind the other on ONE line out from the player: the first direction (from `ang`, the
+## way Tutorial.spot turns) where the whole row stands on the player's island clear of edges, at full distance
+## or, failing that, pulled in. Empty if no line fits (each monster then finds its own spot). Placing them one by
+## one let a monster near an edge fall back to a shorter distance, so the row bunched up and the spawn push
+## shoved one onto the next island.
+func row(n: int, ang: float) -> Array:
+	var w := tu.m.world
+	var p := tu.m.player
+	var isl := w.island_of(p.pos.x, p.pos.z)
+	for i in 24:
+		var a := ang + i * 0.52
+		for d0 in [ROW_FROM, ROW_FROM * 0.7, ROW_FROM * 0.5]:
+			var out: Array = []
+			for j in n:
+				var x: float = p.pos.x + cos(a) * (d0 + j * ROW_STEP)
+				var z: float = p.pos.z + sin(a) * (d0 + j * ROW_STEP)
+				if w.island_of(x, z) != isl or w.is_block(x, z) or w.edge_dist(int(x), int(z), 2) < 2:
+					break
+				out.append(Vector3(floor(x) + 0.5, w.ground_at(x, z), floor(z) + 0.5))
+			if out.size() == n:
+				return out
+	return []
 
 ## The send is in: the camp's held monsters wake (the Boki and they go at each other).
 func release() -> void:
