@@ -13,7 +13,7 @@
   ["send", "Send %s at a monster: tap %T", 20.0],
   ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0],
   ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0],
-  ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0],
+  ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5.5 s; moving or taking damage cancels it.", 14.0],
   ["blight", "The Blight is closing in: time to wrap up", 12.0],
   ["exit", "Head for the %X badge on your map: %H", 40.0],
   ["dive", "Gliding: hold %C to dive", 12.0]
