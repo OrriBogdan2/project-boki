@@ -61,7 +61,7 @@ func _shots(main: Node) -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(dir)
 	if main.fade != null:
-		main.fade.reveal(0.01)
+		await main.fade.reveal(0.01)
 	var ld: Node = load(LOADING).new()
 	var opts := {"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3}
 	Prematch.deal_mates(opts)
