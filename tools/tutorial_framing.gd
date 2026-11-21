@@ -46,7 +46,8 @@ func judge(arch: String, ok: Callable) -> void:
 		if sid in Tutorial.WALK_LEAD:
 			ok.call(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
 		else:
-			ok.call(share >= (GLIDE_SHARE if sid == "glide" else ON_SHARE), "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, pct])
+			var need := GLIDE_SHARE if sid == "glide" else ON_SHARE
+			ok.call(share >= need, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, pct])
 		if not px.is_empty():
 			ok.call(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
 
