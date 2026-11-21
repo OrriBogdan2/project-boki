@@ -68,7 +68,7 @@ static func preview_lines(a: Dictionary, b: Dictionary) -> Array:
 	if threads() > 0:
 		out.append("%d of %d gifts from parents (%s)" % [p["inherit"], Care.IV_KEYS.size(), item_of("gifts")["name"]])
 	if p["species"] != "":
-		var kind: String = Data.KIN[p["species"]]["name"]
+		var kind: String = Data.KIN[Data.egg_species(String(p["species"]))]["name"]      # (an egg is its line's first form)
 		out.append("It will be a %s (%s on %s)" % [kind, item_of("species")["name"], wearer("species", a, b)["name"]])
 	var hf: Dictionary = p["habit_from"]
 	if not hf.is_empty():
