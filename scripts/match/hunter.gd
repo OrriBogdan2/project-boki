@@ -1727,13 +1727,13 @@ func _physics(dt: float) -> void:
 		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
 	elif gliding and in_current:
 		pass   # the current sets the height
-	elif gliding and not dropping and below_lip:      # overheated: still lifts, at half strength, while it burns
+	elif gliding and not dropping and below_lip:
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else HunterMove.overheat_lift)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else HunterMove.glide_sink)
+		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else HunterMove.glide_sink
 		if dropping:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 		elif glide_dive.on:
@@ -1742,7 +1742,7 @@ func _physics(dt: float) -> void:
 			vel.y = glide_lift.fall_vy(self, sink, dt)     # pulled down high up, caught, swooping on a level-out
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
 			# so you can cross until the heat runs out
-			if over_void() and glide_fuel > 0.001 and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
+			if over_void() and vel.y < 0.0 and pos.y + vel.y * dt < lip_y:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
