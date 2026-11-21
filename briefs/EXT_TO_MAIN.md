@@ -10852,3 +10852,4 @@ READY ext/docs-conflict-free-1121 49184f2c54 (PR #598: shared docs conflict-free
 READY ext/vfx-sable-knife-ring ee82551875 (Sable knife ring to source size)
 READY ext/flinch-sub-amount 87483b12ca1c6c58b2d1983569e23222c06ce39c (flinch delta subtracts first frame)
 READY ext/flinch-sub-amount c79040a2a3f17991eb4455e4f767080f771c1b59 (flinch delta subtracts first frame)
+READY ext/merge-lane-M7-1121 c30ffcbf6615b7e1cf4de2e0f81f24e3fa38e433 (lane M7 bundle PR #588: 12 branches + main 0b967858b9; last gate reds fixed; replaces ce45abf)
