@@ -177,7 +177,7 @@ func _top_bar() -> Control:
 ## Where your pick stands, over the splash, above its name: it holds its place before your first pick.
 func _build_stage(parent: Control) -> void:
 	stage_slot = Control.new()
-	stage_slot.custom_minimum_size = STAGE_PX
+	stage_slot.custom_minimum_size.x = STAGE_PX.x
 	stage_slot.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	parent.add_child(stage_slot)
 
@@ -424,6 +424,8 @@ func _stage_pick() -> void:
 	if stage == null:
 		stage = HunterViewer.make_stage(pm.pick, STAGE_PX)
 		stage_slot.add_child(stage)
+		stage.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)      # grows up from the name
+		stage.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	else:
 		stage.set_hunter(pm.pick)
 	stage.play_lockin()

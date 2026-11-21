@@ -296,7 +296,7 @@ func _hero(view: Control) -> void:
 	var card: Control = view.grid.get_children().filter(func(c): return c.get_meta("arch") == other)[0]
 	card.mouse_entered.emit()
 	var hovered: String = view.shown_hunter()
-	var named := view.hero_name.text == HeroTitle.base_name(other) and view.hero_art.ak == other
+	var named: bool = view.hero_name.text == HeroTitle.base_name(other) and view.hero_art.ak == other
 	card.mouse_exited.emit()
 	var back: String = view.shown_hunter()
 	var want_ak: String = pick if pick != "" else Arch.of_save()
