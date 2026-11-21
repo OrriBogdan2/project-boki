@@ -550,6 +550,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
 	for k in ["stomp", "drink"]:
 		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and k == "stomp" and not bool(s.get("stomp_own", true)):
+			return {"proc": true}     # a worn stomp style plays on the rig (StompLook)
 		if ph >= 0.0 and st.has(k):
 			var clip := String(st[k])
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -694,8 +696,7 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# to the move's end: no planted stance mid-air, no snap into it on the landing)
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
-	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"),
-			"heading": bool(mv.get("heading", false)),
+	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
 			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
 			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
@@ -754,6 +755,7 @@ func step(dt: float) -> void:
 		cur_ut = tu
 		_p("seek_u%s/seek_request" % "ab"[chan_u], tu)
 		out_fade = float(want.get("out", FADE_LOCO))
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		var back_u := float(want.get("blend_out", 0.0))
 		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
@@ -778,12 +780,15 @@ func step(dt: float) -> void:
 		else:
 			_p("rate_%s/scale" % live, 1.0)
 		var back := float(want.get("blend_out", 0.0))
-		act_w = move_toward(act_w, 0.0, dt / back) if back > 0.0 else \
-				move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
-		if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
-			up_w = 0.0
-		else:
+		if back > 0.0:
+			act_w = move_toward(act_w, 0.0, dt / back)
 			up_w = move_toward(up_w, 0.0, dt / FADE)
+		else:
+			act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
+			if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
+				up_w = 0.0
+			else:
+				up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
 		# (a lock-in settles slower)
