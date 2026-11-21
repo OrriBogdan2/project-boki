@@ -93,12 +93,8 @@ func follow(hand: Transform3D) -> void:
 ## The contract .glb's surfaces whose material is in `keep`, posed at rest in model space with no skin (their
 ## vertices all ride `bone`); the weapon's anchor empties named in `names` (its bloom and FX points) into `anchors`,
 ## at rest in model space the same way.
-static func _cut(
-	nm: String, keep: Array, bone: String, names: Array, anchors: Dictionary
-) -> ArrayMesh:
-	var glb := (
-		(load("%s/%s/%s.glb" % [WardenGlb.DIR, nm, nm]) as PackedScene).instantiate() as Node3D
-	)
+static func _cut(nm: String, keep: Array, bone: String, names: Array, anchors: Dictionary) -> ArrayMesh:
+	var glb := (load("%s/%s/%s.glb" % [WardenGlb.DIR, nm, nm]) as PackedScene).instantiate() as Node3D
 	var sk := WardenGlb.skeleton(glb)
 	for an in names:
 		var e := glb.find_child(String(an), true, false) as Node3D
@@ -156,7 +152,5 @@ static func _to_rest(glb: Node3D, mi: MeshInstance3D, bone: String) -> Transform
 	var bi := WardenSkeleton.find(sk, bone)
 	for b in mi.skin.get_bind_count():
 		if mi.skin.get_bind_name(b) == bone or (bi >= 0 and mi.skin.get_bind_bone(b) == bi):
-			return (
-				WardenGlb.model_xf(glb, sk) * sk.get_bone_global_rest(bi) * mi.skin.get_bind_pose(b)
-			)
+			return WardenGlb.model_xf(glb, sk) * sk.get_bone_global_rest(bi) * mi.skin.get_bind_pose(b)
 	return WardenGlb.model_xf(glb, mi)

@@ -1,12 +1,12 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
-## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
-## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
-## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
-## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract clips or
-## a Meshy-native one), <dir>/states/f###.png every 1/fps s.
+## [--at=<m> [--cam-y=<m>]] [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed
+## clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn
+## a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder
+## hit), with --cc a stun, a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run
+## (or standing, --cast-speed=0) in <dir>/cast_<kmove>/.
+## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract
+## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -39,6 +39,7 @@ func run(main: Node) -> void:
 	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
+	var cam_y := NAN  # m: the camera's height (--cam-y; default 0.25 over the point it looks at): a knee-level view
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--warden="): id = a.substr(9)
@@ -48,6 +49,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--yaw="): yaw = float(a.substr(6))
 		if a.begins_with("--dist="): dist = float(a.substr(7))
 		if a.begins_with("--at="): at_y = float(a.substr(5))
+		if a.begins_with("--cam-y="): cam_y = float(a.substr(8))
 		if a == "--turn": turn = true
 		if a == "--match": game_cam = true
 		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
@@ -79,7 +81,7 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, 0.8, 0))
 	else:
 		cam.fov = 30.0
-		cam.position = Vector3(0, at_y + 0.25, dist)
+		cam.position = Vector3(0, at_y + 0.25 if is_nan(cam_y) else cam_y, dist)
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame       # (past the title's fade)

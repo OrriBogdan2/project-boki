@@ -48,11 +48,7 @@ static func entry(art_name: String) -> Dictionary:
 ## Whether this archetype's Hunter is switched onto Meshy's own skeleton (and its file is there).
 static func on(arch: String) -> bool:
 	var e := entry(WardenGlb.art(arch))
-	return (
-		not contract_only
-		and bool(e.get("meshy_native", false))
-		and ResourceLoader.exists(file(arch))
-	)
+	return not contract_only and bool(e.get("meshy_native", false)) and ResourceLoader.exists(file(arch))
 
 
 ## The Meshy-skeleton .glb, beside the contract one: art/wardens/<art>/<art>_meshy.glb.
@@ -211,9 +207,7 @@ func _attacked(s: Dictionary) -> bool:
 		or now["recoil"] > last["recoil"]
 	)
 	last = now
-	var fresh := (
-		attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
-	)
+	var fresh := attack_left <= _clip_len("attack") * (1.0 - ATTACK_AGAIN) / float(d.get("attack_rate", 1.0))
 	return hit and fresh
 
 
@@ -277,9 +271,7 @@ func _arms_swapped(st: String, from: String) -> String:
 		mix.track_set_path(ni, p)
 		mix.track_set_interpolation_type(ni, arms.track_get_interpolation_type(si))
 		for key in arms.track_get_key_count(si):
-			mix.track_insert_key(
-				ni, arms.track_get_key_time(si, key) * k, arms.track_get_key_value(si, key)
-			)
+			mix.track_insert_key(ni, arms.track_get_key_time(si, key) * k, arms.track_get_key_value(si, key))
 	lib.add_animation(nm, mix)
 	return full
 
