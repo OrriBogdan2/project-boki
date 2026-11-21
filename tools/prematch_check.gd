@@ -370,8 +370,8 @@ func _lockin(main: Node) -> void:
 		var clips: WardenClips = sync.get("clips") if sync != null else null
 		var lk: Dictionary = WardenClips.data(art).get("lockin", {})
 		var clip := String(lk.get("clip", ""))
-		if clips == null:      # no clips in its .glb yet (Gil): no pose to pick, it stands on its posed idle
-			ok(lk.is_empty(), "%s: a model without clips names no lock-in" % ak)
+		if clips == null or lk.is_empty():      # no lock-in pose (Gil borrows Meeko's clips): it stands on its idle
+			ok(lk.is_empty(), "%s: a model without a lock-in pose names none" % ak)
 			continue
 		var has_clip := clips != null and clips.lib.has_animation(clip)
 		ok(has_clip, "%s: lock-in clip '%s' is in its model" % [ak, clip])
