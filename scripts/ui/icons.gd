@@ -423,6 +423,16 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			for i in 6:
 				var a := TAU * i / 6.0
 				L.call([[cos(a) * 0.35, sin(a) * 0.35], [cos(a) * 0.8, sin(a) * 0.8]])
+		# ---- the kill feed (KillFeed): a stomp, a bleed-out, a monster's claws
+		"stomp":
+			L.call([[0.0, -0.75], [0.0, 0.15]])
+			F.call([[-0.45, 0.0], [0.45, 0.0], [0.0, 0.55]])
+			L.call([[-0.75, 0.8], [0.75, 0.8]])
+		"bleed":
+			F.call([[0.0, -0.8], [0.45, 0.05], [0.42, 0.45], [0.0, 0.8], [-0.42, 0.45], [-0.45, 0.05]])
+		"claw":
+			for dx in [-0.45, 0.0, 0.45]:
+				L.call([[dx - 0.2, -0.7], [dx + 0.2, 0.7]])
 		_:
 			O.call(0.0, 0.0, 0.4)
 
