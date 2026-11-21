@@ -19,7 +19,7 @@ const TEXT_H := 24.0           # px: a one-line text row's height
 const TEXT_BASE := 17.0        # px from a text row's top to its first baseline
 const BASELINE := 5.0          # px below a face row's middle where its names sit
 const NAME_PX := HudStyle.PLATE_NAME_FS      # font px for names and lines: the overhead plates'
-const NAME_W := 84.0           # px: a longer name is cut with an ellipsis
+const NAME_W := 78.0           # px: a longer name is cut with an ellipsis (two, plus a row's 124 px, fit LANE_W)
 const FACE_R := 11.5           # px: a face disc's radius (the squad frames' killer disc)
 const RIM := 2.0               # px: the ring around a face, in its squad's colour
 const ICON_W := 26.0           # px: the icon's cell between the faces
@@ -41,7 +41,8 @@ const FINISH_ICON := {"finished": "stomp", "executed": "stomp", "knocked out": "
 const SLOT_OF := {"utility": "sec", "rmb": "sec", "k1": "k1", "e": "k1", "ult": "x", "ultimate": "x", "x": "x",
 		"dodge": "dash"}
 
-static var shown: Array[Dictionary] = []     # what the last draw put up, top to bottom (--kill-feed-check reads it)
+static var shown: Array[Dictionary] = []     # what the last draw put up, top to bottom (--knock-feed-check reads it)
+static var _screen: Array[Rect2] = []   # the same rows in screen px (rects())
 static var _fitted := {}                     # name -> the name cut to NAME_W
 
 ## The icon of what landed a knock: the slot's icon on the knocker's own bar, the weapon's for a plain hit, the
@@ -93,9 +94,19 @@ static func _src(by: Ent, from: Hunter) -> String:
 		return ""
 	return "Blight" if by is Blight else String(by.kind).capitalize().replace("_", " ")
 
+## Nothing drawn this frame (the feed is held back).
+static func clear() -> void:
+	shown.clear()
+	_screen.clear()
+
+## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf).
+static func rects() -> Array[Rect2]:
+	return _screen.duplicate()
+
 ## Draws the feed down from Hud.feed_top at the safe margin's right edge, oldest on top.
 static func draw(H, sz: Vector2) -> void:
 	shown.clear()
+	_screen.clear()
 	var pad := HudStyle.safe_pad(sz)
 	var y: float = maxf(H.feed_top, pad.y)
 	for f: Dictionary in H.m.feed:
@@ -103,6 +114,7 @@ static func draw(H, sz: Vector2) -> void:
 		var right := sz.x - pad.x
 		var row := _face_row(H, f, right, y, a) if is_instance_valid(f.get("who")) else _text_row(H, f, right, y, a)
 		shown.append(row)
+		_screen.append(HudScale.xf * (row["rect"] as Rect2))
 		y = (row["rect"] as Rect2).end.y + GAP
 
 ## [bar] knocker (name, face) | icon | victim (face, name) [bar]. With no knocker face the monster's name, or

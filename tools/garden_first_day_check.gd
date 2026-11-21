@@ -5,7 +5,7 @@ extends RefCounted
 ##      hidden when done
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
-##      Boki in the Nook, and the list finishes by itself
+##      Boki in the hub's Nook (the base has none of its own), and the list finishes by itself
 ##   5. a fresh base_mode save with one Boki gets a second one at once: the Shelter is open at market stall level 1 and
 ##      a stray costs less than the first-entry gems, so the three lines that need company (race, nap, pair) can be done
 ##   6. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one

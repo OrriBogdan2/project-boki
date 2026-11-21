@@ -573,7 +573,11 @@ func _wired() -> void:
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
 	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
 		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
-	ok(FileAccess.get_file_as_string("res://scripts/match/exits.gd").contains("WarnSfx.countdown("),
+	var lift_src := (  # the lift loop moved from exits.gd to exits_flow.gd
+		FileAccess.get_file_as_string("res://scripts/match/exits.gd")
+		+ FileAccess.get_file_as_string("res://scripts/match/exits_flow.gd")
+	)
+	ok(lift_src.contains("WarnSfx.countdown("),
 		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
 	_warn_behaviour()
 

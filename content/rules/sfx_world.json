@@ -59,7 +59,8 @@
     "belt"
    ],
    "files": [
-    "scripts/match/utility_use.gd"
+    "scripts/match/utility_use.gd",
+    "scripts/match/utility_more.gd"
    ],
    "holes": [
     "utility_use start/drink:pickup",
@@ -68,9 +69,14 @@
     "utility_use start/smoke:cloak",
     "utility_use start/scan:ping",
     "utility_use start:skill",
-    "utility_use _pad:throw",
     "utility_use tick:heal",
-    "utility_use tick:shield"
+    "utility_use tick:shield",
+    "utility_more _pad:throw",
+    "utility_more pads:jump",
+    "utility_more _field:throw",
+    "utility_more _swap:blink",
+    "utility_more _pack_tick:heal",
+    "utility_more _pilfer:throw"
    ]
   },
   "garden games": {
@@ -94,6 +100,7 @@
     "scripts/match/heart.gd",
     "scripts/match/heart_sfx.gd",
     "scripts/match/exits.gd",
+    "scripts/match/exits_flow.gd",
     "scripts/match/quest_seat.gd",
     "scripts/match/quest_seats.gd",
     "scripts/match/seat_beacon.gd"
@@ -101,8 +108,8 @@
    "holes": [
     "heart _force:portal",
     "heart _tide_tick:thump",
-    "exits _tick_outpost/open:thump",
-    "exits _waves:thump",
+    "exits_flow _tick_outpost/open:thump",
+    "exits_flow _waves:thump",
     "quest_seat _force:horn",
     "quest_seats _reseal:boom"
    ]
