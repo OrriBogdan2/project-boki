@@ -29,8 +29,10 @@ const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 ## its ground colours win over the theme's unless own_ground; style: the Flora set its props use (Flora.STYLES).
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
-	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
-	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
+	"autumn": {"name": "Autumn", "gems": 120, "region": 1,
+			"top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
+	"snow": {"name": "Snow", "gems": 160, "region": 2,
+			"top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
 	# a zone's own ground (ZoneLayout): never for sale, it has no gems
 	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
