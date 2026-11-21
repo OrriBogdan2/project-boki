@@ -243,6 +243,10 @@ func _kick() -> void:
 	var at: Vector3 = spot["at"]
 	var T := float(st["T"])
 	var feet := Vector3(at.x, float(spot["feet"]), at.z)
+	# Down off a lip the hop still springs up: aimed no lower than a rock top's drop, it arcs as on the flat (a
+	# straight throw at the low ground would start downward, back into the terrace he stands on), and once the
+	# flight time is up he drops the rest onto the spot (_tick_air), so he leaves the lip mid-hop.
+	feet.y = maxf(feet.y, h.pos.y - float(d["hop_top"]))
 	h.launch_to(feet, T)
 	if not h.pad.is_empty():
 		h.pad["ledge"] = true          # up onto a ledge: a sure arc, and a press in it must not break it
@@ -311,6 +315,8 @@ func _touchdown() -> void:
 	h.vel.z = 0.0
 	var run := _skid_room(dir)
 	st["skid_T"] = float(d["skid_t"]) * run / float(d["skid"])
+	if _skid_drops(dir, run):
+		st["skid_T"] = minf(float(st["skid_T"]), run / h.base_speed)      # off a lip at least at run speed
 	k._lunge(run, float(st["skid_T"]), dir)
 
 ## How far the skid can run: on ground it stops short of an edge, so a chain never slides him off one.
@@ -324,6 +330,18 @@ func _skid_room(dir: Vector2) -> float:
 			return run
 		run -= 0.05
 	return 0.0
+
+## Does the skid's line run off a terrace lip (the terrain a step or more under the terrain he is on; his rock
+## under him is not the measure)?
+func _skid_drops(dir: Vector2, run: float) -> bool:
+	var g0: float = m.world.ground_at(h.pos.x, h.pos.z)
+	var d := 0.1
+	while d <= run + h.r:
+		var q := h.pos + Vector3(dir.x, 0, dir.y) * d
+		if m.world.ground_at(q.x, q.z) < g0 - World.STEP:
+			return true
+		d += 0.1
+	return false
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt

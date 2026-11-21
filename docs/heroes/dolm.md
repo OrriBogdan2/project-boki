@@ -85,6 +85,7 @@ Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: ma
 | RMB Volcano Crusher: hold, centre stun, jump to leap, dunk, 11s | match | dolm.json:38 (cooldown 11), breah_slam.gd:105-111 (jump leap), :205-215 (core stun, dunk); `audit tarek: cooldowns`, `rmb: jump while charging...`, `rmb: a foe in the air is dunked` |
 | RMB charge time (source 1.0-1.5s; ours 0.2 tap window + 0.25) | differ (owner item 61) | dolm.json:38 `slam.time` |
 | RMB out of a glide (hold) | match | breah_slam.gd:131-137 folds the glider, dolm_kit.gd:243-260 plunges at the glider's dive speed; `glide slam: ...` |
+| RMB Volcano slam push | none: the centre stuns (0.5-1.2 s), a foe in the air is dunked (+40%, +20 over the abyss, spiked down); no knock (`rmb.slam.kb` removed, ext/tenzo-grimble-knock-cut; KIT_PARITY Knock distances) | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] |
 | RMB reset on a knock or kill | match to the card (no reset; the guide sheet says reset) | owner data and item 14; `data: a slam that knocks does not reset Quakefall` |
 | E Rockwave: 3 rocks, ground only, 12.5s | match | dolm.json:44 (cooldown 12.5), dolm_kit.gd:100-103 (no room in the air), :623-673 |
 | E allies hop the rocks by jumping (hold) | match | stone_stand.gd:35, :77, :91-93 (ally in the air); foes blocked, he walks up his own (stone_stand.gd:68-80); `rock (item 25): ...`, `hop rocks: an ally in the air hops them, a foe is stopped`. KIT_PARITY gap 14 and this file's older rows said "not built": stale, fixed here. Bots hopping at once: ext/tenzo-ally-hop (in flight) |
@@ -260,8 +261,9 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   only if ground lies on that line within the reach of the hops left. So a gap he can finish is crossed, and open abyss is
   not: the hop pulls back to the last solid ground. Out on a void rock with no press, the chain ends there: the rock crumbles and he
   falls or glides. Off the map's grid nothing is ground, so a chain can't leave it.
-- **Rough ground:** a hop up a terrace (up to 2.5m) uses the shared sure arc over the lip; drops take the same hop time; a wall in reach pulls the
-  spot back; no spot at all ends the chain where he is, with the crash.
+- **Rough ground:** a hop up a terrace (up to 2.5m) uses the shared sure arc over the lip; a hop down a lip springs up as on the flat (aimed no lower
+  than a rock top, 0.6m) and once its hop time is up he drops the rest onto the spot, so he leaves the lip mid-hop; a skid that would
+  run off a lip goes at least at run speed (`--move-feel-check` ledge_dash dolm rows); a wall in reach pulls the spot back; no spot at all ends the chain where he is, with the crash.
 - **Other moves:** RMB let go mid-hop: the slam lands with that hop and the chain ends there (crash and slam, as the old leap). Opening the
   glider, being downed or a merge drops the chain with no crash. Bots ride the whole chain.
 - **Space in a hop's flight (DECISIONS 11-08, Shift cancels into glide instantly for every Hunter):** the hop lets go on the press
