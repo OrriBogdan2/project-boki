@@ -31,6 +31,9 @@ const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
 const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds her hand up off the aim (as_cloak: wide to 0.26)
+const GLOW_RAMP := 0.5                # s of an RMB hold for the palm glow to reach full size and heat
+const GLOW_STEP := 0.05               # s between two palm glow puffs (each lives ~0.14 s: they overlap)
+const GLOW_HOT := 0.7                 # hold fraction where a white-hot bloom joins the glow
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -52,6 +55,7 @@ var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
+var glow_t := 0.0                # the hold time (s) of the last palm glow puff while Cinder Shot is held
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
@@ -81,7 +85,7 @@ func _setup() -> void:
 	jet = AshwickJet.new(self)
 
 func warm_fx(at: Vector3) -> void:
-	fx.prewarm(at, [])
+	fx.prewarm(at)
 
 func _best_char() -> float:
 	var b := 0.0
@@ -447,6 +451,14 @@ func _stream_looks() -> void:
 		vfx("lance_lick", ground(live[0]["p"]))
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
+## Her palms glow while Cinder Shot is held: puffs at the hold fraction (size, heat), a white-hot bloom near full.
+func _palm_glow(t: float) -> void:
+	if t >= glow_t and t - glow_t < GLOW_STEP:
+		return          # (t restarts from 0 on a new hold: glow_t is then ahead of it)
+	glow_t = t
+	var k := clampf((t - float(rmb_def().get("hold", 0.0))) / GLOW_RAMP, 0.0, 1.0)
+	vfx("palm_charge", null, null, {"k": k, "hot": k >= GLOW_HOT})
+
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
 ## drawn back.
 func rmb_hold_tick(t: float) -> void:
@@ -456,6 +468,7 @@ func rmb_hold_tick(t: float) -> void:
 		aiming = true
 	if not jet.running(): play_hold("as_aim", t)       # (flying, the flight pose stays)
 	HeroVfx.of(m).hold(h, "shot_aim")
+	_palm_glow(t)
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
