@@ -129,10 +129,13 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
@@ -266,22 +269,21 @@ func _draw_parts() -> void:
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
 	if abyss_a > 0.005:
-		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)     # (AbyssFx: ~0.55 just under the lip, 1 at the end)
-		var rate := 1.6 + red * 3.4
-		abyss_pulse += get_process_delta_time() * rate
+		var red := clampf((abyss_a - 0.55) / 0.45, 0.0, 1.0)
+		abyss_pulse += get_process_delta_time() * AbyssFallSfx.warn_rate(abyss_a)
 		var pulse := pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0)
-		# (the magenta wash itself is AbyssFx's shader) near the end, crimson edges beat with the heart
-		var ek := clampf((abyss_a - 0.75) / 0.25, 0.0, 1.0)
+		# (the red wash itself is AbyssFx's shader) crimson edges build with the danger and beat with the heart
+		var ek := clampf((abyss_a - 0.1) / 0.9, 0.0, 1.0)
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		if abyss_a > 0.1 and p == m.player:
+		if p == m.player and AbyssFallSfx.warn_db(abyss_a) > -INF:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
-				Sfx.play("thump", null, -12.0 + abyss_a * 14.0, 0.0, 0.7 + red * 0.15)
+				Sfx.play("thump", null, AbyssFallSfx.warn_db(abyss_a), 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
 					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
 		if abyss_a > 0.8 and p == m.player:
@@ -612,13 +614,14 @@ var feed_top := 18.0
 ## loss you caused, blue for your own side, gold for everything else.
 func _draw_feed(sz: Vector2) -> void:
 	var y := maxf(feed_top, HudStyle.safe_pad(sz).y)
+	var max_w := sz.x * (0.5 - TutorialStrip.WIDTH_FRAC * 0.5) - HudStyle.safe_pad(sz).x - 38.0
 	var mine: Array = []
 	if m.player:
 		for h in m.hunters:
 			if h.team == m.player.team: mine.append(h.pname)
 	for f in m.feed:
 		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = f["text"]
+		var s: String = TextCache.fit(big, f["text"], 13, max_w)      # ends short of the top-centre strips
 		var w := TextCache.width(big, s, 13)
 		var ours := false; var first := ""
 		for nm in mine:
@@ -829,11 +832,11 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	WaysOutHud.draw(self)
-	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(m.length - m.time), "ISLANDS FALLING" if m.length - m.time < 30.0 else "")), 30))
-	mm_bottom = r.end.y
 	var left := m.length - m.time
-	var phase := ""; var pc := MUTED
-	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
+	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
+	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
+	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(left), phase)), 30))
+	mm_bottom = r.end.y
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := TextCache.width(big, phase, 11)
@@ -1033,16 +1036,17 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 	if String(rd.get("kind", "")) in ["count", "on_targets"]:
 		var n := int(rd.get("max", 3))
 		var have := int(round(f * n))
+		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))      # (one meter, not one panel per pip)
 		for i in n:
 			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
-			_rounded(cr, rc if i < have else Color(1, 1, 1, 0.12), 3)
+			c.draw_style_box(_box(rc if i < have else Color(1, 1, 1, 0.12), 3, Color(0, 0, 0, 0), 0, true), cr)
 	else:
 		_bar(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)), f, rc)
 		if String(rd.get("id", "")) == "heat":
 			var ov := float(rd.get("over", 70.0)) / float(rd.get("max", 100.0))
 			c.draw_rect(Rect2(Vector2(bx + bw * ov, y), Vector2(2, 11)), Color(1, 1, 1, 0.6))
 	var txt := k.res_text()
-	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "UNLOCK" at level 6
+	# right-aligned to the health bar's end: just after the bar it ran into the R slot's "Spend point" at level 6
 	var tw := TextCache.width(big, txt, 11)
 	_text(Vector2(maxf(bx + bw + 6, x0 + w - tw), y + 10), txt, 11, rc if k.tell == "full" else INK, big)
 	if k.tell == "full":
@@ -1170,13 +1174,13 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
+## What the R slot says about its lock: "LV 6" until then, "Spend point" with a point to spend on it,
 ## "" once it's unlocked.
 func r_lock_text(p: Hunter) -> String:
 	if int(p.slot_lv.get("ult", 0)) > 0:
 		return ""
 	if p.can_level("ult"):
-		return "UNLOCK"
+		return HudSlot.POINT_TAG
 	if p.lvl >= int(Hunter.ULT_AT[0]):
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])
@@ -1263,20 +1267,12 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		var aw := TextCache.width(big, str(p.ammo), 28)
 		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
 	# the row of small slots above the weapon card
-	var s := 44.0; var gap := 8.0
+	var s := 44.0
 	var y := r.position.y - s - 22.0
-	var x := r.end.x - s
-	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
-	x = BeltHud.draw(self, p, x, y)
+	# 1 2 3 4: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves (GripHud); G is on the Boki
+	# card only (BokiHud), not again beside the belt
+	BeltHud.draw(self, p, r.end.x - s, y)
 	GripHud.draw(self, p, r)
-	# C: throw / recall your kin
-	if k:
-		var kc: Color = Data.KIN[k.species]["color"]
-		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
-		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
-		x -= s + gap
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
@@ -1350,7 +1346,8 @@ func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
 		fallback = portrait_grey(h) if state == "dead" else portrait(h)
 	var hurt := plates.flash_of(h) if state == "" else 0.0
 	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
-	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
+	var mood := plates.mood_of(h, low) if state == "" else ""
+	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time, false, mood)
 
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
@@ -1387,7 +1384,7 @@ func _status_row(at: Vector2, e: Ent) -> void:
 	for ic in icons:
 		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
 		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if float(ic[3]) > 0.0:
+		if HudPlate.shows_time(float(ic[3])):
 			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
 		x += 16.0
 
@@ -1531,9 +1528,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Ability")), rdesc, ak.col_of(ak.rmb_def())])
-		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "Utility")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), AbilityText.name_of(p.arch, "e"), AbilityText.full(p.arch, "e"), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_caps("hunter_ult"), AbilityText.name_of(p.arch, "r") + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), AbilityText.full(p.arch, "r"), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
@@ -1546,7 +1543,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud and MergeForm.enabled(): lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	if p.kin:
 		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
@@ -1640,6 +1637,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
@@ -1716,7 +1714,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
-		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		var tip := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
 		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 

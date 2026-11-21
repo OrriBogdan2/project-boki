@@ -9,6 +9,8 @@ const DT := 1.0 / 60.0
 var A: AKCheck
 var beats := {}            # clip -> {len, cock, peak, settle, v (speed per frame)}
 var leads := {}            # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
+var maps := {}             # clip -> its "time" map ([[kit s, clip s]...]; replaces rate/lead/scale)
+var speeds := {}           # clip -> [its "rate", its "scale"] (clip s per kit s, before and after the lead)
 var shown := {}            # kit anim_ids seen in a row
 var lane := 0              # each kit row on a fresh strip of ground (a Searing Wave's fire stays)
 var run_steps := 0         # footfalls in one loop of the forward run clip
@@ -59,6 +61,9 @@ func clips() -> void:
 			v.append(pts[i].distance_to(pts[i - 1]) / DT)
 		beats[km] = _beats(v, length, pts)
 		leads[km] = float(mv.get("lead", 0.0))
+		if mv.has("time"):
+			maps[km] = mv["time"]
+		speeds[km] = [float(mv.get("rate", 1.0)), float(mv.get("scale", 1.0))]
 		if km == "jug_lunge_wind":
 			wind_still = float(mv["hold_from"])
 		beats[km]["p0"] = pts[0]
@@ -183,13 +188,26 @@ func _hit(m: Match, K: JuggernautKit, T: Hunter, limit: float, each := Callable(
 func _ev(what: String, r: Array) -> void:
 	print("EVENT %-22s at %.3f into %s (%.2f s after the press)" % [what, r[0], r[1], r[2]])
 
-## The clip's strike frame (its fastest blade frame, less the lead) sits on the kit's hit, within 0.04 s (a 30 fps key).
+## A clip time on the kit's move clock (WardenClips._move_clip: clip t = (kit t x rate + lead) x scale).
+func _kit_t(km: String, clip_t: float) -> float:
+	if maps.has(km):      # a "time" map: the kit second whose clip second it is (the map's inverse)
+		var pts: Array = maps[km]
+		for i in range(1, pts.size()):
+			if clip_t <= float(pts[i][1]):
+				return lerpf(float(pts[i - 1][0]), float(pts[i][0]),
+						inverse_lerp(float(pts[i - 1][1]), float(pts[i][1]), clip_t))
+		return float(pts[-1][0])
+	var rs: Array = speeds.get(km, [1.0, 1.0])
+	return (clip_t / float(rs[1]) - float(leads.get(km, 0.0))) / float(rs[0])
+
+## The clip's strike frame (its fastest blade frame, on the kit's clock) sits on the kit's hit, within 0.04 s
+## (a 30 fps key).
 func _strike(km: String, r: Array) -> void:
 	var b: Dictionary = beats.get(km, {})
-	var at := float(b.get("peak", -1.0)) - float(leads.get(km, 0.0))
+	var at := _kit_t(km, float(b.get("peak", -1.0)))
 	A.ok("kael anim: %s strike frame on the kit's hit" % km, r[0] >= 0.0 and r[1] == km and absf(at - r[0]) <= 0.04,
-			"clip %.2f - lead %.2f = %.2f vs kit %.3f into %s" % [b.get("peak", -1.0), leads.get(km, 0.0), at, r[0],
-			r[1]])
+			"clip %.2f (lead %.2f, rate/scale %s) = %.3f vs kit %.3f into %s" % [b.get("peak", -1.0),
+			leads.get(km, 0.0), str(speeds.get(km, [])), at, r[0], r[1]])
 
 ## A held pose shows only under the hold input.
 func _hold(km: String, held: bool, what: String) -> void:
@@ -207,8 +225,9 @@ func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> vo
 	A.step(m, 1.2, go)
 	var cl := P.model.get_node("Warden/Sync").get("clips") as WardenClips
 	var spd := Vector2(P.vel.x, P.vel.z).length()
-	# (headless, the visual never poses: feed the clips the run the kit just made)
-	cl._loco({"vel": P.vel, "face": P.face}, DT)
+	# (headless, the visual never poses: feed the clips the run the kit just made, for a second so the blend settles)
+	for i in 60:
+		cl._loco({"vel": P.vel, "face": P.face}, DT)
 	var rate := float(cl.tree.get("parameters/loco_rate/scale"))
 	var length := cl.lib.get_animation(String(cl.d["loco"]["run"]["f"])).length
 	var per_s := rate * run_steps / length
@@ -316,10 +335,10 @@ func kit() -> void:
 	for f in ["dive", "recover"]:
 		print("EVENT meteor %-15s at %.3f into %s" % [f, ph.get(f, [-1.0, "?"])[0], ph.get(f, [-1.0, "?"])[1]])
 	var dv: Array = ph.get("dive", [-1.0, "?"])
-	var dive_clip := float(beats["jug_meteor"]["peak"]) - float(leads["jug_meteor"])
+	var dive_clip := _kit_t("jug_meteor", float(beats["jug_meteor"]["peak"]))
 	A.ok("kael anim: jug_meteor's dive starts on the kit's dive (the hang is the held pose)",
 			dv[1] == "jug_meteor" and absf(float(dv[0]) - dive_clip) <= 0.04,
-			"kit dive at %.3f, clip %.2f - lead %.2f" % [dv[0], beats["jug_meteor"]["peak"], leads["jug_meteor"]])
+			"kit dive at %.3f, clip %.2f on the kit clock %.3f" % [dv[0], beats["jug_meteor"]["peak"], dive_clip])
 	_ev("meteor free", _until(m, K, func(): return K.meteor.phase == "", 1.0))
 	# dash (Rampage)
 	_fresh(m, P, K, home, T)
@@ -403,7 +422,8 @@ func kit() -> void:
 	_ev("riposte strikes", guard)
 	r = _hit(m, K, T, 0.5)
 	_ev("riposte hit", r)
-	_strike("jug_riposte", r)
+	# (the kit hands the body to jug_ult_recover on the hit's own frame: the hit is r[2] s into the strike)
+	_strike("jug_riposte", [r[2], "jug_riposte"])
 	var done := _until(m, K, func(): return not K.riposte.running(), 1.0)
 	_ev("riposte done", done)
 	# guard .65 / strike .1 / recover .35 (the source's Retaliation), each within a 60 Hz step and a half
@@ -412,10 +432,10 @@ func kit() -> void:
 	for row in phases:
 		A.ok("kael anim: riposte %s runs %.2f s" % [row[0], row[2]], absf(float(row[1]) - float(row[2])) <= 0.025,
 				"%.3f s" % row[1])
-	var rl := float(beats["jug_riposte"]["len"]) - float(leads["jug_riposte"])
-	# (its tail past the hand-off plays out under the blend back to the legs)
-	A.ok("kael anim: jug_riposte ends within the hand-off blend",
-			float(done[0]) <= rl and rl - float(done[0]) <= WardenClips.FADE_LOCO,
-			"clip %.2f vs kit %.3f" % [rl, done[0]])
+	var rl := _kit_t("jug_ult_recover", float(beats["jug_ult_recover"]["len"]))
+	# (the recover is jug_ult_recover's own clip; its tail past the hand-off plays out under the blend to the legs)
+	A.ok("kael anim: jug_ult_recover ends within the hand-off blend",
+			float(done[2]) <= rl + A.DT * 0.5 and rl - float(done[2]) <= WardenClips.FADE_LOCO,
+			"clip %.2f vs kit %.3f" % [rl, done[2]])
 	_run(m, P, K, home, T)
 	A.done(m)

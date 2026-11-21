@@ -113,8 +113,8 @@ static func key_hints(id: String) -> Array:
 				int(GardenZones.rules()["lean_key"])]
 	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
 
-## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects
-## (DecorComfort) and your best at it.
+## An open zone's card body: its Boki with their moods, who woke it, today's game,
+## its decor effects (DecorComfort) and your best at it.
 static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)
