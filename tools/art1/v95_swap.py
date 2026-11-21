@@ -566,6 +566,47 @@ def partners(bone, bones):
     return (out & set(bones)) - {bone}
 
 
+def absorb_crumbs(bm, lab, cuts, crumb_faces):
+    """Before a detach cuts: each patch of faces on one bone that is under `crumb_faces` (spec `absorb_crumbs`, e.g. 400) and borders a bone it would be cut
+    from takes its neighbours' bone instead (most shared edges wins), until none is left. A region box or capsule edge
+    runs through thin goo strands and cloth tatters, so a detach used to cut slivers and single strand tips off onto the
+    wrong bone: ragged rims at rest and loose shards flying with the leg in the clips (Grimble's crescent, 11-19).
+    Grimble 11-19 with 400: the shin/knee shards went (islands 168 -> 62, open edges 34 -> 20 body heights) but the throw
+    clip gained long stretched strands (run_f worst 29x -> 72x): off by default until the webs are solved."""
+    for _ in range(8):
+        seen, moved = set(), 0
+        for f0 in bm.faces:
+            if f0 in seen:
+                continue
+            patch, stack = [], [f0]
+            seen.add(f0)
+            while stack:
+                f = stack.pop()
+                patch.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g not in seen and lab[g] == lab[f0]:
+                            seen.add(g)
+                            stack.append(g)
+            if len(patch) >= crumb_faces:
+                continue
+            border = {}
+            for f in patch:
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if lab[g] != lab[f0]:
+                            border[lab[g]] = border.get(lab[g], 0) + 1
+            if not any(b in cuts[lab[f0]] for b in border):
+                continue
+            new = max(border, key=border.get)
+            for f in patch:
+                lab[f] = new
+            moved += len(patch)
+        print("detach: %d crumb faces moved to their neighbours' bone" % moved, flush=True)
+        if not moved:
+            break
+
+
 def detach(low, G, names):
     """Cuts the faces of each `detach` bone pair apart ("*": any other bone) and caps both openings: a scan fuses the gun to
     the belt, the pack to the shoulders, the hook's crescent to the shin, and those bones swing apart in the clips. Each
@@ -582,6 +623,8 @@ def detach(low, G, names):
     for f in bm.faces:
         votes = [dom[v.index] for v in f.verts]
         lab[f] = max(set(votes), key=votes.count)
+    if SPEC.get("absorb_crumbs"):     # (opt-in: Grimble 11-19 lost the shin shards but gained stretched webs in throw)
+        absorb_crumbs(bm, lab, cuts, int(SPEC["absorb_crumbs"]))
     cut = [e for e in bm.edges if len(e.link_faces) == 2 and lab[e.link_faces[1]] in cuts[lab[e.link_faces[0]]]]
     ends = {v.index for e in cut for v in e.verts}
     bmesh.ops.split_edges(bm, edges=cut)
