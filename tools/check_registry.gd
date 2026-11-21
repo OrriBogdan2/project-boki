@@ -999,7 +999,11 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	if flag == "":
 		return false
 	var e: Array = CHECKS[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
 	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
 	var c = load(String(e[0])).new()
 	main.set_meta(String(e[1]), c)
 	if e[2] == null:
@@ -1015,17 +1019,3 @@ static func flag_in(args: PackedStringArray) -> String:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			return flag
 	return ""
-			var e: Array = CHECKS[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
