@@ -38,7 +38,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
-| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip | clip | clip |
+| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
@@ -51,14 +51,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
 | vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 
 ### Starter Boki
 
