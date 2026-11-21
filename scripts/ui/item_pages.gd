@@ -84,6 +84,6 @@ static func detail(v: VBoxContainer, id: String) -> void:
 		ul.add_child(UI.label("Not used yet.", UI.T_SMALL, UI.MUTED))
 	for u in uses:
 		var line := UI.label("%s: %s" % [u["boki"], u["text"]], UI.T_SMALL, UI.INK)
-		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(line)
 		ul.add_child(line)
 	info.add_child(ul)

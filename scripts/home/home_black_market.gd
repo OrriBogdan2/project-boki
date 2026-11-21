@@ -172,7 +172,7 @@ func _lost_card(L: Dictionary) -> Control:
 	v.add_child(_head(L, rec, sp, rival_side))
 	if said.has(uid):
 		var sl := UI.label("%s: \"%s\"" % [L["holder"] if rival_side else Ransom.BROKER, said[uid]], 14, UI.INK)
-		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		UI.wrapped(sl)
 		v.add_child(sl)
 	var pay_first := not rival_side and int(Save.d["gems"]) >= int(L["ask"])
 	var main_b := _pay_button(L) if pay_first else _offer_button(L)
