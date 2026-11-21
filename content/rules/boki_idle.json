@@ -905,6 +905,768 @@
 				]
 			}
 		},
+		"kilnbadger": {
+			"fidget": {
+				"note": "anvil headbutt: a grumpy lunge at nothing, the anvil rings",
+				"at": 0.3,
+				"dur": 1.3,
+				"rows": [
+					[
+						"spine",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.5,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.1,
+						0,
+						0
+					],
+					[
+						"root",
+						"z",
+						0.03,
+						6,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 2.2,
+				"amp": 1.8
+			}
+		},
+		"lilybara": {
+			"fidget": {
+				"note": "bath sigh: head sinks, ears droop, sprout tail sways",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						0,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.1,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.06,
+						0,
+						0
+					],
+					[
+						"ear1.*",
+						"z",
+						-0.4,
+						0,
+						0
+					],
+					[
+						"tail*",
+						"y",
+						0.35,
+						1,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 2.2,
+				"calm": true
+			}
+		},
+		"limpetor": {
+			"fidget": {
+				"note": "clamp-grind: the shell turns on the ground, the head stays put",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"root",
+						"y",
+						0.25,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						-0.25,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.05,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.8,
+				"amp": 1.4
+			}
+		},
+		"moonloris": {
+			"fidget": {
+				"note": "sleepy nod: head sinks, jerks awake, drifts down again",
+				"at": 0.3,
+				"dur": 2.2,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.5,
+						1.5,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.15,
+						1.5,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.06,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 4.0,
+				"amp": 1.6
+			}
+		},
+		"moundvark": {
+			"fidget": {
+				"note": "listens to the spire: head turns back to it, nose twitching",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.55,
+						0,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.08,
+						5,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.1,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.2,
+				"amp": 1.6
+			}
+		},
+		"murmurling": {
+			"fidget": {
+				"note": "mimic: cocks its head, then bobs twice to a footstep it heard",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.35,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.2,
+						2,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.08,
+						2,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 1.6,
+				"amp": 2.0
+			}
+		},
+		"nacrolin": {
+			"fidget": {
+				"note": "half-curl: head tucks, back rounds, a timid tremble, then a peek",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.55,
+						0,
+						0
+					],
+					[
+						"neck",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.25,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.15,
+						0,
+						0
+					],
+					[
+						"root",
+						"z",
+						0.05,
+						6,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 2.4,
+				"amp": 1.5
+			}
+		},
+		"nimbostrich": {
+			"fidget": {
+				"note": "impatient jitter: two darting looks and a fast rock on its toes",
+				"at": 0.3,
+				"dur": 1.2,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.45,
+						2,
+						0
+					],
+					[
+						"neck",
+						"y",
+						0.18,
+						2,
+						0.05
+					],
+					[
+						"root",
+						"x",
+						0.06,
+						6,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.08,
+						6,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 1.6,
+				"amp": 1.8
+			}
+		},
+		"opalisk": {
+			"fidget": {
+				"note": "show-off then startle: chest out, chin up, then a flinch at its own bubble",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"spine",
+						"x",
+						0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						0.4,
+						1,
+						0
+					],
+					[
+						"neck",
+						"x",
+						0.1,
+						1,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.2,
+						2,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 1.9,
+				"amp": 2.2
+			}
+		},
+		"orchisloth": {
+			"fidget": {
+				"note": "drowsy droop: the head sinks slow to one side, back bows, a lazy sway",
+				"at": 0.4,
+				"dur": 2.6,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.4,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.5,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.15,
+						0,
+						0
+					],
+					[
+						"hips",
+						"z",
+						0.1,
+						1,
+						0
+					],
+					[
+						"part_antennae",
+						"z",
+						0.4,
+						2,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 4.6,
+				"amp": 2.8,
+				"calm": true
+			}
+		},
+		"scaldamus": {
+			"fidget": {
+				"note": "boiler yawn: chest swells, head rears, the belly rattles as steam lets go",
+				"at": 0.3,
+				"dur": 1.9,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.55,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.15,
+						0,
+						0
+					],
+					[
+						"hips",
+						"z",
+						0.05,
+						8,
+						0
+					],
+					[
+						"part_crest",
+						"x",
+						0.4,
+						6,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 3.2,
+				"calm": true
+			}
+		},
+		"sentrikat": {
+			"fidget": {
+				"note": "lookout scan: stretches tall, head snaps left then right, reports",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.7,
+						1,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.18,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.08,
+						0,
+						0
+					],
+					[
+						"part_antennae",
+						"z",
+						0.3,
+						3,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 2.2,
+				"amp": 2.0,
+				"calm": true
+			}
+		},
+		"spatewader": {
+			"fidget": {
+				"note": "puddle wallow: the body rolls side to side, head dips toward the water",
+				"at": 0.3,
+				"dur": 2.2,
+				"rows": [
+					[
+						"hips",
+						"z",
+						0.15,
+						1,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.22,
+						1,
+						0.25
+					],
+					[
+						"head",
+						"x",
+						-0.3,
+						0,
+						0
+					],
+					[
+						"part_fins",
+						"z",
+						0.5,
+						3,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.8,
+				"amp": 2.6,
+				"calm": true
+			}
+		},
+		"squalltross": {
+			"fidget": {
+				"note": "horizon squint: chest up, head turns to far water, the patched sails ruffle",
+				"at": 0.3,
+				"dur": 2.0,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.35,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						-0.55,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.1,
+						0,
+						0
+					],
+					[
+						"part_wings",
+						"z",
+						0.6,
+						4,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.2,
+				"amp": 2.2,
+				"calm": true
+			}
+		},
+		"threadwyrm": {
+			"fidget": {
+				"note": "knot loosening: one slow S-wave rolls down the rope body",
+				"at": 0.3,
+				"dur": 2.4,
+				"rows": [
+					[
+						"hips",
+						"y",
+						0.25,
+						1,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.3,
+						1,
+						0.25
+					],
+					[
+						"head",
+						"y",
+						0.35,
+						1,
+						0.5
+					]
+				]
+			},
+			"breath": {
+				"len": 4.2,
+				"amp": 3.0,
+				"calm": true
+			}
+		},
+		"tuatrune": {
+			"fidget": {
+				"note": "keyhole squint: the head tilts and turns slowly to watch you, then a dry little nod",
+				"at": 0.3,
+				"dur": 2.2,
+				"rows": [
+					[
+						"head",
+						"z",
+						0.35,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.12,
+						2,
+						0.25
+					],
+					[
+						"part_third_eye",
+						"z",
+						0.5,
+						2,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 4.4,
+				"amp": 2.4,
+				"calm": true
+			}
+		},
+		"umbrathere": {
+			"fidget": {
+				"note": "umbrella shake-out: the canopy rattles, arms draw in to shelter, head bows",
+				"at": 0.3,
+				"dur": 2.1,
+				"rows": [
+					[
+						"canopy",
+						"z",
+						0.12,
+						6,
+						0
+					],
+					[
+						"arm1.*",
+						"x",
+						0.5,
+						0,
+						0
+					],
+					[
+						"arm2.*",
+						"x",
+						0.4,
+						0,
+						0.1
+					],
+					[
+						"head",
+						"x",
+						-0.3,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.1,
+						0,
+						0
+					],
+					[
+						"tail*",
+						"y",
+						0.3,
+						1.5,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 4.0,
+				"amp": 3.0,
+				"calm": true
+			}
+		},
+		"velvorm": {
+			"fidget": {
+				"note": "pounce wiggle: crouches low, back end wiggles, the nozzle face twitches",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"hips",
+						"y",
+						0.25,
+						4,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.25,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.1,
+						3,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 2.4,
+				"amp": 2.4,
+				"calm": true
+			}
+		},
 		"caecilith": {
 			"fidget": {
 				"note": "sly glance: the head lifts and peeks left then right, a zip of a wriggle runs down the serpent chain",

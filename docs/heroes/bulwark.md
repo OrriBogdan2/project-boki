@@ -66,7 +66,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | LMB hold: damage ratio (data 2.7x vs ours 3-5.5x) | MED | (c) | The data's "up to 522" at level 15 matches the footage's SHORT hold (521, 0116-0118); the full hold showed 976 (0146). So 522 is the base, not a cap; ours keeps 3x-5.5x |
 | LMB hold: auto-swing at full + 0.4 s | LOW | (b) | Players now hold until they let go (the sheet shows a 2.6 s hold); bots keep their own timer. `bjorn #49 window: held past it nothing goes off by itself` |
 | LMB tap: throw / recall | - | (a) | Matches; the throw now leaves the hand after one frame of wind-up (e625aa8e) |
-| Passive: the hammer's knock doesn't Crush | MED | (b) | `_mace_hit` arms the knock window; `bjorn audit: the thrown hammer knocking a foe into a wall Crushes it` |
+| Passive: the hammer's knock doesn't Crush | MED | (b) | superseded: the throw has no knock (`ext/albert-knock-rows`, KIT_PARITY "Knock distances"), so it has nothing to Crush with; `bjorn audit: the thrown hammer has no knock: a foe at a wall isn't Crushed by it` |
 | Passive: foe-into-foe Crush invented | MED | (b) | Removed (data: walls only); `bjorn audit: a blow that knocks a foe into another foe ... doesn't Crush` |
 | Passive: 8 damage on a Crush | MED | (c) | The stun rides a hit (Ent.hurt ignores a 0-damage hit); 8 is small. Kept, ours |
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
@@ -88,6 +88,8 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
+| Passive | knock into wall/foe | Crushed: stun 0.5 and 8 damage when any knock of his (Crushing Blow of any charge, 360 Smash, Shield Charge, Shield Slam) drives a foe into a wall; no heal. Guard from blocking (1 per 2 damage blocked, max 100, drains 5 a second after 3 s unblocked; 50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit: the code checks terrain only, though the JSON desc and a kit comment still say "another foe"). Guard stays our own loop |
+| Passive | knock into wall/foe | Crushed: stun 1.0 and 8 damage when any knock of his (Crushing Blow of any charge, 360 Smash, Shield Charge, Shield Slam) drives a foe into a wall; no heal. Guard from blocking (50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). Guard stays our own loop |
 | Passive | knock into wall/foe | Crushed: stun 0.5 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge) drives a foe into a wall; no heal. Guard from blocking (1 per 2 damage blocked, max 100, drains 5 a second after 3 s unblocked; 50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit: the code checks terrain only, though the JSON desc and a kit comment still say "another foe"). Guard stays our own loop |
 | Passive | knock into wall/foe | Crushed: stun 1.0 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge) drives a foe into a wall; no heal. Guard from blocking (50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). Guard stays our own loop |
 | LMB | tap | War hammer thrown to the cursor (clamped to 9 m, at least 2.5 m), 24 m/s, through foes (12); stays planted (head-down in the ground under an upright gold beacon ray with rising chevrons, your team sees foes within 4.5 m) until called back | Lands at the cursor, stays until recalled | Matches; no auto-return |
@@ -176,6 +178,51 @@ Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, t
 - His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
 - Nameplate at 2.74 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+the kit data, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than that can't be seen, and
+each ability's frames are a separate stretch of the clip, so no pair is shown back to back), [W] the wiki page
+linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours was first read on
+d255acbee (cancel-matrix-b, 11-09) and re-read on main 11-19 (cancel-matrix-land): where main's code changed since,
+the row says so and the newest code wins. **Unsettled** means no frame, card line or wiki line shows the pair: ours
+stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no shared cast lock), except
+that every press is ignored, not buffered, while stunned or downed, and the attack key does nothing from a glide
+(`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB tap, throw | LMB | "a recall lockout time of 0.25 seconds" | the press is not a recall in the first 0.25 s; it **waits** 0.15 s (`RECAST_BUFFER`) and recalls if the lockout ends inside that, else it is dropped (**was: ignored, no buffer**, since the 11-08 two-step rule) | match (the buffer is ours) | [W] patch 20.11.24; `bulwark_kit.gd` `lmb_override` (`buffer_recast("lmb")`); `bjorn small: a recall in the first 0.25 s is ignored` |
+| Hammer out (planted or flying) | LMB tap | "PRESS to throw hammer, reactivate to recall" | recalls (not while it is already coming back) | match | [D]; [F] 0028-0031, 0406-0426 |
+| Hammer out | LMB held | the data gives no hold-with-hammer-out rule | the press recalls; the swing cannot charge while the hammer is out, a button still down starts the charge once it is caught | unsettled | |
+| LMB held (charge, from 0.2 s) | RMB | not shown | **cancels** the charge (no swing, the button must come up first); the aegis rises 0.1 s later | unsettled | [F] 0102-0145 hold, 0179+ shield: separate stretches; `_drop_holds` |
+| LMB held | E | not shown | **cancels** the charge, Mending Ground goes | unsettled | |
+| LMB held | X | not shown | **cancels** the charge, he plants for Faultline | unsettled | `_start_ult` -> `_drop_holds` |
+| LMB held | jump | not shown | the charge goes on through the jump and swings where he lets go | owner | #51, content/dash_flow `hold.lmb`; `bjorn #51 hold > jump` |
+| LMB held | glide, stun, launch, hard knock, mantle | not shown | **cancels** the charge with no swing; a button still down starts a fresh hold once he is free | ours | `_hold_interrupted`; the Shift / jump row above |
+| Swing (release step, then the 0.61 s recovery) | LMB | "~0.4 s recovery", no word on presses | waits only while the button is held: the charge starts when the recovery ends; a tap that is let go inside it is dropped | unsettled | [F] 0146-0149; `smash_rate` |
+| Swing recovery | RMB, E, X | not shown | both: each goes at once | unsettled | |
+| Swing, spin (Shift) wind-down | glide | "winddown frames where Oath can't immediately enter a glider state" | shut for 0.3 s | match (the length is ours: the patch gives no number) | [W] patch 05.02.25; `WINDDOWN`; `bjorn small: wind-down after the slam` |
+| RMB held (aegis up) | LMB | not shown | the **boop**: a short shield thrust that shoves foes, no damage, its own cooldown; never a swing, throw or recall (**was: ignored**) | ours | `BjornBoop.press` from `lmb_override`; the RMB row above |
+| RMB held | E | "only heals shield if shield is active" (Regen Field) | both: Mending Ground goes, the aegis stays and is mended | match (the patch implies the cast with the shield up) | [W] patch 11.12.24 |
+| RMB held | X | not shown | the aegis comes down, he plants | unsettled | `_drop_holds` -> `_lower` |
+| RMB held, 0.1 s cast | LMB | "0.15 s" (card) | a throw pressed before the aegis is up goes; after that it is the boop | unsettled | [F] 0179 |
+| E (1 s column, 4 s zone) | any | tap, no lock shown | instant: nothing is held; LMB, RMB, X all go | unsettled | [F] 0412-0421 |
+| X Faultline wind-up (0.4 s) and slam (planted to 0.6 s) | LMB | "planted for the wind-up and slam only (f25-f31, ~0.6 s)" | ignored (not buffered) | match | [F] ult f25-f31; owner #48; `lmb_override` (`ult.planted()`) |
+| X wind-up and plant | RMB | not shown | denied (the aegis does not rise) | unsettled | `press_rmb` (`ult.planted()` denies) |
+| X wind-up | E | not shown | both: the zone goes, the wind-up runs on | unsettled | |
+| X wind-up and plant | jump | not shown (planted) | **ignored**: the walk is zeroed and an upward speed is cut every step while planted (**was: a jump rose straight up**, the contradiction B flagged) | match (our own "planted" rule now holds) | `BjornUlt.tick`; dash_flow `into_jump.x` |
+| X plant | Shift | not shown | **waits**: the dash goes when the plant ends | ours | `dash_after_plant`; [dash_interactions.md](dash_interactions.md) |
+| X after the slam (fissure running) | any | "he shifts position: he's free to move" | free: LMB, RMB, E and jump all go | match | [F] ult f31-f49; owner #48 |
+| X wind-up | stun | not shown | interrupts it, cooldown back (`refund`) | ours | Assumptions above; `BjornUlt._interrupt` |
+
+Fixes made by this port: none to code. Two rows changed since the first pass because main's code did: a press in the
+recall lockout now waits 0.15 s, and LMB behind the aegis is the boop. Suggestions (not built): whether a raised
+aegis should block the recall, and whether a hold with the hammer out should wait for the catch, need a frame or the
+owner. Unsettled rows for a follow-up: the 11 marked above.
+
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
@@ -193,7 +240,7 @@ Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, t
 | Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | wiki: Spin Dash | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
 | Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, wiki: Shield Bash | not shown | built: Shield Charge on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
 | The charged swing: damage and knockback, no stun of its own | in-game data ("up to 522 dmg + Knockback") | knock, debris trail, no label in the open (0146-0151) | built: the 0.4 s full-charge stun removed | `combo bulwark: a full Crushing Blow in the open knocks, no stun` |
-| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, wiki: Valiant Strength | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
+| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, wiki: Valiant Strength | confirms the stun (0171) | built: any Crushing Blow (the thrown and recalled hammer carry no knock), the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
 | Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, wiki: Regen Field | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Mending Ground is a zone`, `bjorn small: Mending Ground doesn't repair a broken aegis` |
 | Allied wisps hit by the burst begin to resurrect | wiki: Regen Field | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
 | Ult: a fissure that travels forward from him | wiki: Abyssalbreaker, sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
