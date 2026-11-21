@@ -846,8 +846,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | base_joy_decay_doc | base_mode only: joy (0..100) a Boki loses each awake minute at the base (0.3x asleep, faster when hungry, grubby or worn out). A farm day is 5 minutes (care_day_s). Off base_mode Care.DECAY's 0.6 applies. |
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
-| stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
-| stat_budget_doc | Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
+| stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "grow_max": 0.12, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
+| stat_budget_doc | grow_max: extra body size at the full total_cap (StatBudget.growth, read by Evo.dress as evo_scale), 0.12 = 12% taller; it follows the square root of total/total_cap, so 60 points already show 6%. Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
 | run_payoff | {"stats_w": 0.75, "lean_w": 0.25, "carry_max": 0.15, "summon_max": 0.1} |
 | run_payoff_doc | How raising pays off on runs (RunPayoff, decision 0079). score 0..1 = stats_w x (expedition stat points / their max) + lean_w x lean strength (Evo.lean). Carry passive amounts x (1 + score x carry_max); summon window x (1 + score x summon_max). The carry passive still stops at its per-stat carry cap (KinParts.OWNER_STATS), so this never lifts a Boki past the cap a wild one has. |
 
@@ -1271,11 +1271,11 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | toy_doc | assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there. |
 | toys | ["speed", "power", "focus", "guard", "focus"] |
 | toys_doc | toys.json: ball, post, tub, stone, dig: the stat each trains; a Boki picks one at random. |
-| line | burrlet |
+| line | sporcupine |
 | line_doc | The path meter tracked: Sporcupine to Amanitusk (Power) or Ringrove (Guard), both ends in reach of the built games. |
 | families_extra | {"bramble_honey": "lean", "cinderbrittle": "lean", "glassdew": "lean", "hush_truffle": "lean", "twinbun": "personality", "dare_pepper": "personality", "lullwort_tea": "personality", "peekbox": "personality", "glowmoss_sprig": "looks", "cup_ribbon": "looks"} |
 | families_extra_doc | Families of catalogue items not yet in garden_items.json (brief 1.2). |
-| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
+| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home20": {"name": "home only, 20 min", "minutes": 20, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
 | players_doc | minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them). |
 | fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
 
@@ -1324,15 +1324,15 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | Setting | Value |
 |---|---|
 | _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace and Balance). scripts/home/garden_xp.gd reads it, tools/garden_sim.py fits it. care: a kin's first feed, first pat and first game of fetch each day pay it once. drill_per_point: per training point. games: the garden games that pay (GardenPrizes.settle): play for a played game, win for a win, first_win for the day's first win in that game; the Boki you backed gets it. curve: XP from level n to n + 1 is per_level x n, flat from level flat_from on (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock) to the lead Boki. The pace assumptions are what tools/garden_pace_check.gd models; session_min and base_sessions are how long one sitting is and how many a base-only player gets to their first baby; grown_max_ratio is the same slowness limit as max_ratio but to Grown, not the first form (tools/base_breed_check.gd). |
-| care | 5 |
-| drill_per_point | 1 |
+| care | 15 |
+| drill_per_point | 2 |
 | breed_options_doc | DATA ONLY, NOT APPLIED (docs/GARDEN.md Breeding pace): what tools/garden_pace_check.gd prints a second table for. xp_mult scales every XP above (care, drill, games), grown_lv is the level the Nook asks for (now Care.STAGES Grown, 8). Pick one by editing the real values. |
 | breed_options | [{"id": "xp_x3", "xp_mult": 3.0, "grown_lv": 8}, {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5}, {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}] |
 | games | ["dash", "shove", "seek", "volley", "kite"] |
-| play | 3 |
-| win | 5 |
+| play | 5 |
+| win | 8 |
 | first_win | 60 |
-| curve | {"per_level": 50, "flat_from": 20} |
+| curve | {"per_level": 30, "flat_from": 20} |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0, "grown_max_ratio": 2.2, "session_min": 45, "base_sessions": 2} |
 
 ## garden_zones (`content/rules/garden_zones.json`)
@@ -2392,8 +2392,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | mob | {"scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | labels | {"land": "Land here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "wallkick": "Climb", "crouch": "Lookout", "glove": "Glove", "wayout": "Uplink", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
 | camps | {"shoot": {"foes": ["skitter", "skitter"], "to": 0}, "sec": {"foes": ["skitter", "skitter"], "to": 2}, "gkey": {"foes": ["skitter", "skitter"], "to": 3, "held": true}, "summon": {"foes": ["spitter"], "to": 0}, "pack": {"foes": ["skitter", "spitter"], "to": 3}, "kin": {"foes": ["skitter", "skitter", "skitter"], "to": 4, "row": true, "hp": 1.0}, "hook": {"foes": ["sentinel", "skitter"], "to": 6, "far": true}} |
-| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you. |
-| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0} |
+| lead_doc | Your Boki leads on the steps with a lead goal (TutorialLead): it runs ahead to the goal, waits when you are more than wait_m behind, stops stop_m from it and looks back at you. It sprints at run_speed m/s (a wisp floats at wisp_speed) so it can be ahead of a running Hunter; a Boki you have passed just falls in beside you, and one that stood stalled for stall_s s trying to lead (an edge or a wall on the straight way) falls in beside you for off_s s, then leads again. |
+| lead | {"wait_m": 8.0, "stop_m": 2.5, "run_speed": 11.0, "wisp_speed": 14.0, "stall_s": 0.3, "off_s": 2.0} |
 
 ## unstable_mix (`content/rules/unstable_mix.json`)
 
