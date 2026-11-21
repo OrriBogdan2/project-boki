@@ -268,3 +268,4 @@ Each line: the debt, why it matters, and the fix. Remove the line when it's fixe
   wind-ups through `m.sfx` are only heard there, but Kael's Finishing Slam tell sound comes from HeroVfx data
   (`slam_tell`), which other players' games also play (the `hvfx` fx); there it rings out uncut. A fix sends a cut
   over the fx topic (a new fx kind: ship it with a Net.VERSION bump).
+- Tutorial framing (tools/tutorial_framing.gd, ext/p07-port-1118): the glide step's sign is on screen about 49-51% of the step on main's tut-wide-cam, under the 60% every other step meets, so the check holds the glide step to 45% (GLIDE_SHARE). Fix: frame the glide pad sign longer, then use ON_SHARE for it too.

@@ -106,9 +106,12 @@ func _own_boki(main: Node) -> void:
 	ok(m.cam.shake_amp <= 0.0, "your Boki's landing strike shakes you at %.3f" % m.cam.shake_amp)
 	for owner_h in [h, null]:
 		_still(m)
+		var was_owner = k.owner_h
+		k.owner_h = owner_h      # (the wild one has no owner: Shake skips a Boki that is yours)
 		var cx := KinExec.make_cx(m, k, k, owner_h, h.pos + Vector3(6, 0, 0), 1.0, "q", "boulder_heave")
 		KinExec.cast(KinLib.ability("boulder_heave"), cx)
 		_steps(m, 90)
+		k.owner_h = was_owner
 		if owner_h:
 			ok(m.cam.shake_amp <= 0.0, "your Boki's Boulder Heave blast shakes you at %.3f" % m.cam.shake_amp)
 		else:
