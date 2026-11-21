@@ -6,7 +6,8 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
 `art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sparkle (ryzz),
-Sable (sable), Tenzo (tarek), Kael (kael: K1, cape cut to the waist) and Grimble (dredge: G3 goo, no backpack). The contract `<art>.glb` stays beside it untouched.
+Sable (sable), Tenzo (tarek), Kael (kael: K1, cape cut to the waist) and Grimble (dredge: the G3 look,
+no backpack, its drips and strands made one firm connected goo arm by a Meshy edit: kael-grimble-ingame-1121 r2_e1b_f2b). The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
