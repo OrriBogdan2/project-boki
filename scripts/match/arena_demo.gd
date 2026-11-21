@@ -70,7 +70,7 @@ const ANIM_DEMO := {
 	"pin_ult_loose": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.1, 1.25]],
 	"pin_ult_final": ["archer", "longbow", [0.8, 0.86, 0.92, 1.0, 1.08, 1.25]],
 	"bul_ult_wind": ["bulwark", "tower_shield", [0.5, 0.58, 0.66, 0.76, 0.86]],
-	"bul_ult_slam": ["bulwark", "tower_shield", [0.86, 0.91, 1.2, 1.5, 1.8]],
+	"bul_ult_slam": ["bulwark", "tower_shield", [0.86, 0.94, 0.97, 1.02, 1.2, 1.5]],
 	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
 	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
 	"bul_break": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.68, 0.85, 1.1]],

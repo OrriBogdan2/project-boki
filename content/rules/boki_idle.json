@@ -904,6 +904,11 @@
 					]
 				]
 			}
-		}
+		},
+		"caecilith": {"fidget": {"note": "tail ripple: a slow wave runs down its body", "at": 0.3, "dur": 1.6, "rows": [["tail*", "y", 0.45, 1.5, 0.3], ["spine", "y", 0.12, 1.5, 0], ["head", "x", -0.2, 1, 0]]}},
+		"floenatee": {"fidget": {"note": "float roll: it rocks side to side as if on water", "at": 0.3, "dur": 1.8, "rows": [["spine", "z", 0.18, 1, 0], ["lobe*", "x", 0.3, 2, 0.25], ["head", "z", -0.15, 1, 0]]}},
+		"gibbelle": {"fidget": {"note": "curious tilt: the head cocks one way, then the other", "at": 0.3, "dur": 1.5, "rows": [["head", "z", 0.35, 2, 0], ["puff*", "y", 0.25, 2, 0], ["neck", "x", -0.1, 1, 0]]}},
+		"goliathite": {"fidget": {"note": "heave: a big slow breath that lifts its whole back", "at": 0.3, "dur": 1.9, "rows": [["spine", "x", -0.2, 1, 0], ["head", "x", 0.18, 1, 0.2], ["lobe*", "z", 0.2, 1, 0]]}},
+		"hoarheron": {"fidget": {"note": "head bob: it pecks the air twice", "at": 0.3, "dur": 1.4, "rows": [["neck", "x", 0.3, 2, 0], ["head", "x", 0.25, 2, 0.1], ["puff*", "x", -0.15, 2, 0]]}}
 	}
 }

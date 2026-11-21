@@ -23,7 +23,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
    draw reaches Empowered 60% faster. Hold more than 0.5s past Supercharged and the arrow is
    **overdrawn**: half damage.
 3. **Hold RMB** for a Heavy Shot (a gold V and a gold bar grow from the bow) and let go to loose it: it
-   pierces and, driven into a wall, stuns (PINNED). One charge, a long cooldown; a tap does nothing.
+   pierces and, driven into a wall, stuns (PINNED). One charge, a long cooldown; a tap looses it uncharged.
 4. Heavy Shots that hit build **Focus**. At 100 your next shot is Supercharged at once with
    more range, and if it hits a rooted or stunned foe it's a **Deadeye**: a gold crit for +18.
 5. **Hail Wall** (E): arrows rain for 4.4s on a curved wall around you at the cursor distance; it slows

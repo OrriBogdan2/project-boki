@@ -1,6 +1,7 @@
 """Review renders of an ART-1 Hunter from its .blend (Cycles, CPU): a turntable and clip strips, lit softly like the toon shader.
   blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR turn [px]
-  blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR clip <action> [frames] [px] [az] [gif]"""
+  blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR clip <action> [frames] [px] [az] [gif]
+  blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR sheet <action,...> [px] [name] [az]   (six frames per clip)"""
 import math
 import os
 import subprocess
@@ -79,7 +80,7 @@ if MODE in ("clip", "sheet"):
     sc.render.resolution_x = sc.render.resolution_y = px
     sc.cycles.samples = 6
 
-    def fr(act, name, n=None, az=205, el=22, r=2.5, c=(0, 0.1, 0.8)):
+    def fr(act, name, n=None, az=int(a[5]) if len(a) > 5 else 205, el=22, r=2.5, c=(0, 0.1, 0.8)):
         arm.animation_data.action = bpy.data.actions[act]
         slot = arm.animation_data.action.slots
         if len(slot):

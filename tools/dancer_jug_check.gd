@@ -21,11 +21,14 @@ var A: AKCheck
 func run(main_node: Node, who := "all") -> void:
 	A = AKCheck.new()
 	A.main = main_node
+	var handoff := load("res://tools/prop_handoff_check.gd")
 	if who in ["all", "thief"]:
 		await thief(A)
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
+		await handoff.new(A, A.ok).run("thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
+		await handoff.new(A, A.ok).run("juggernaut")
 		await HOLD.kael(A)
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "juggernaut")
 	await combos(A)
@@ -395,12 +398,12 @@ func thief(a) -> void:
 	await _dancer_dash_flow(m, P, K, T, home)
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
+	DTIME.new(A).run(m, P, K, T, home)
 	DTIMING.new().run(A, m, K)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
 	STRIKES.new().run(A, A.main, "thief", {"thf_lmb_r": 0.0, "thf_lmb_l": 0.0, "thf_primed": 0.0,
 			"thf_bola": float(K.rmb_def()["bola"]["cast"]), "thf_knife": ThiefKit.KNIFE_RELEASE_S},
 			{"thf_bola": 0.2})        # (the bolas are raised overhead in the first frames; the sling is the throw)
-	DTIME.new(A).run(m, P, K, T, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
