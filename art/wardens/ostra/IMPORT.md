@@ -45,3 +45,22 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 **Shard Snap's free arm (2026-11-17, port of ext/ostra-gait-rebased):** `snap_wind` and `snap` hold the fan in at the ruff (`HELD_L`), re-keyed on this glb's rig
 (`ostra_anim.py -- snap_wind,snap --from`) and copied in with `glb_add_clips.py ... snap_wind,snap --hold-moved-rest` (nothing held). The old branch's
 bounding walk and run were not ported: main's tread gait (Nov 11) stays.
+
+**Skin stretch fix (2026-11-20, ext/hunter-fix-ostra-1118, retry 11-20):** the v95 scan has the sleeves fused to the coat and the coat
+fused to the box rim, and the re-derived weights are noisy there (forearm weight on the shoulder puff, upper-arm weight on the cuff,
+box/hips 0.5/0.5 rim rows next to 1.0 rows), so clips pull single triangles into long dark slivers. Only `Body` JOINTS_0/WEIGHTS_0 rows of
+15,364 of 41,044 vertices changed; every other byte is main's (JSON chunk, positions, index list, UVs, rig, bone names, clips, materials,
+Fan/cards; no triangle removed). Head/face rows are main's. Unlike 11-19g, the cuff ring (hand.*) and the box rim (x_box/x_boxlid) are
+not locked. Method: a torch optimisation over 797 sampled poses of all 57 clips (Godot pose dump) of the weights of every vertex within
+3 rings of a visible sliver, with a weight-smoothness term (so neighbours never get unrelated weights), penalties on visible slivers
+(edge >2.5x and >1.2 cm), hard rules (no clip's worst edge above main's, no new spike >3x and >2 cm, no new sliver >4 cm), and a cap on
+idle/stance/walk moves. tools/stretch_check.gd (57 clips): worst 7.93 -> 3.15, median clip 6.54 -> 3.00, no clip above main, still over the 1.3 ceiling (docs/DEBT.md). Slivers
+(tri edge >2.5x and posed >4 cm, summed over clips) 18,519 -> 1,051; over 8 cm 6,763 -> 1. Calm clips move patches near the old tears
+by up to 7 cm vs main (they were the torn patches' neighbours); renders show the same look. Proof: /home/boki/gens/ostra-fix-1120/.
+
+**Seam polish (2026-11-20, retry 11-20b):** on top of the fix above, 1,173 more weight rows (15,407 of 41,044 total vs main; positions,
+index list and JSON chunk still main's) in five 6 cm patches where the arms touch the coat: right waist (the needle in g_wave/swap),
+right forearm (swap_air), both armpits, left cuff. Each patch was re-optimised over every pose of all 59 clips with the rule that no
+edge may get longer than the previous fix in any pose. tools/stretch_check.gd (59 clips): worst 7.93 -> 3.15 (unchanged), no clip above
+main. Slivers >4 cm (summed over clips) 1,059 -> 321 (main 18,699); over 8 cm 1 -> 0; idle 17 -> 3 (main 277). Proof and live-vs-fixed
+renders: /home/boki/gens/ostra-fix-1120b/.
