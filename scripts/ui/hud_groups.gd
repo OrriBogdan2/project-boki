@@ -46,8 +46,9 @@ static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
-	if HudReveal.on(m, "counters"):
-		out.append("counters")
+	for g in ["abilities", "weapon", "slots", "counters"]:
+		if HudReveal.on(m, g):
+			out.append(g)
 	if glider_shown(p):
 		out.append("glider")
 	if BeltHud.shown(m, p):
