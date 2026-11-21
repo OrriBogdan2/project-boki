@@ -26,14 +26,17 @@ static var _data = null  # art name -> its entry (parsed once)
 var root: Node3D
 var player: AnimationPlayer
 var d: Dictionary
+var art_id := ""  # the Hunter's art (its contract .glb carries the orbit props)
 var plays: Dictionary  # game state -> the clip it plays (data "clips"; the crouch can be its arms-swapped copy)
 var skel: Skeleton3D
 var hand := -1  # Meshy's weapon-hand bone (data "hand"): the rig's Gun follows it
 var gun: Node3D
 var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
+var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
+var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -71,6 +74,7 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb))
 	var nat := WardenNative.new()
 	nat.name = "Native"
+	nat.art_id = WardenGlb.art(arch)
 	nat.setup(model, glb, e)
 	glb.add_child(nat)
 	if bool(e.get("toon", true)):
@@ -109,6 +113,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		at.bone_name = String(anchors[an])
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+	_add_orbits(glb)
 	_play("idle", 1.0)
 
 
@@ -123,6 +128,8 @@ func _process(dt: float) -> void:
 		_loco(s)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
+	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
+	orbits.step(dt)
 
 
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
@@ -189,14 +196,27 @@ func _play(st: String, rate: float, restart := false) -> void:
 	player.speed_scale = rate
 
 
-## Meshy's model carries its weapon in the mesh: the rig's procedural weapon stays hidden, even after a re-equip.
+## Meshy's model carries its weapons in the mesh (Sable's two pistols, Tenzo's one stone arm): the rig's procedural
+## weapon stays hidden, even after a re-equip, and so does HunterAnim's Offhand (the twin weapon's left piece, the
+## fist hold's second gauntlet), which would float beside the Meshy body in every frame.
 func _hide_rig_weapon() -> void:
-	if gun == null or gun.get_child_count() == 0:
+	if gun == null:
 		return
-	var id := gun.get_child(gun.get_child_count() - 1).get_instance_id()
-	if id != built:
-		built = id
+	var off := gun.get_parent().get_node_or_null("Offhand") as Node3D
+	var id := 0
+	if gun.get_child_count() > 0:
+		id = gun.get_child(gun.get_child_count() - 1).get_instance_id()
+	var off_id := off.get_instance_id() if off else 0
+	if id == built and off_id == built_off:
+		return
+	built = id
+	built_off = off_id
+	if id != 0:
 		WardenGlb._skinned_weapon(root)
+	if off:
+		for mi in off.find_children("*", "GeometryInstance3D", true, false):
+			(mi as GeometryInstance3D).visible = false
+			mi.set_meta("glb_hidden", true)
 
 
 ## The state's clip with the arms of clip `from` (another state's), time-scaled onto it so they cycle once per loop:
@@ -244,3 +264,52 @@ func _chain(b: int, into: Dictionary) -> void:
 	into[skel.get_bone_name(b)] = true
 	for c in skel.get_bone_children(b):
 		_chain(c, into)
+
+
+## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
+## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a BoneAttachment3D
+## on Meshy's bone, at the same place against the head as on the contract model and at the same size in metres, and
+## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
+func _add_orbits(glb: Node3D) -> void:
+	var want: Dictionary = d.get("orbits", {})
+	if want.is_empty():
+		return
+	var head_m := glb.transform * WardenGlb.model_xf(glb, skel)
+	head_m = head_m * skel.get_bone_global_rest(skel.find_bone("Head"))
+	for orb in want:
+		var src := _orbit(String(orb))
+		if src.is_empty():
+			continue
+		var b := skel.find_bone(String(want[orb]))
+		if b < 0:
+			continue
+		var at := BoneAttachment3D.new()
+		at.name = "bone_%s" % orb  # (not "orbit_*": WardenOrbits would turn the attachment)
+		at.bone_name = String(want[orb])
+		skel.add_child(at)
+		var nd := src[0] as Node3D
+		var bone_m := glb.transform * WardenGlb.model_xf(glb, skel) * skel.get_bone_global_rest(b)
+		var shift := head_m.origin - (src[2] as Transform3D).origin  # (Meshy's head pivot vs the contract's)
+		nd.transform = bone_m.affine_inverse() * Transform3D(Basis.IDENTITY, shift) * (src[1] as Transform3D)
+		at.add_child(nd)
+	orbits.setup(skel)
+
+
+## The orbit node `orb` of this Hunter's contract model (a copy), its rest in model space and the contract head's ([]
+## if none). The contract .glb is loaded (ResourceLoader keeps it) and instanced only for the copy.
+func _orbit(orb: String) -> Array:
+	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_id, art_id]
+	if not ResourceLoader.exists(path):
+		return []
+	var out: Array = []
+	var con := (load(path) as PackedScene).instantiate() as Node3D
+	var csk := WardenGlb.skeleton(con)
+	var nd := con.find_child(orb, true, false) as Node3D
+	var at := nd.get_parent() as BoneAttachment3D if nd else null
+	if csk and at and csk.find_bone(at.bone_name) >= 0:
+		var sk_m := WardenGlb.model_xf(con, csk)
+		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
+		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
+		out = [nd.duplicate() as Node3D, rest, head]
+	con.free()
+	return out
