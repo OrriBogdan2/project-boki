@@ -225,3 +225,62 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Regen from the turnaround, 2026-11-20 (ext/hunter-regen-*-1120): a new Meshy body instead of patching the scan
+Patching weights and caps on the scanned v95 masters moved the stretch numbers but ~1% of the pixels at the game camera.
+The regen route builds a new master from the owner's latest turnaround pick, Meshy for every visible step, Blender only
+to rig and export:
+1. `sheet_crops.py` (auto, or x0/x1 + a `kill` box for a sheet's ground line) and `pad_views.py`: front, 3/4, side, back.
+2. `meshy_task.py create OUT front tq side back --texture-refs <same> --polycount 30000 --topology quad --enhance off|on`
+   (meshy-7.1, a-pose, 8k PBR; ~40 credits). Keep the variant that keeps the signature props (Sable: enhance on kept
+   the pistols, off lost them; Lace: off, on bent an arm out).
+3. `meshy_joints.py prep GEN OUT H` scales it to the spec's height; `meshy_task.py rig RIGDIR OUT --height H` (5 credits);
+   `meshy_joints.py joints OUT RIGDIR/rigged_character.glb PATCH` reads the swap `joints` and `head` off Meshy's own
+   skeleton (no hand-read grid renders; Meshy's helper icosphere is left out of the box match).
+4. `v95_to_game.py <Name> --master OUT --weights meshy --spec-patch PATCH` onto the game rig, clips and props.
+5. Proof: the glb as a variant (`art/wardens/<art>_regen/`, plus local copies of its warden_anim, look and stride
+   entries), `--regen-audit` on the GPU queue with and without `--warden-variant`: every clip x 10 times, eye level,
+   knee level, match camera, hands and feet close.
+   Run `--stretch-check` one Hunter at a time: three at once in one tree end early without a table.
+6. A Hunter with bones Meshy's humanoid rig lacks (Meeko: tail, ears, wings): with `weights` "meshy" the spec's
+   `regions` are skipped, so her tail went to hips and shin.L. List those bones in the patch's `meshy_regions` (their
+   regions go on whole) and add `meshy_smooth` passes over the seams (Meeko 11-20, stretch mean/worst LIVE 5.32/7.69:
+   regions alone 24.4/59.4, smooth 6 7.05/15.8, 12 5.50/11.7, 20 4.58/8.89). A spec region that sat on the old
+   master's satchel can land on the new one's hand or thigh: drop it (Meshy's weights carry a satchel).
+7. Meeko r2 (11-20): a region box can reach past its part. Her wing boxes took the back of her head (head 0.7 /
+   wing 0.3), so every wing flap tore the head: shot_r worst 8.89, head>head x2930. `meshy_keep_head` [bones] leaves
+   those regions off the vertices Meshy weighs mostly to the head (shot_r 8.89 -> 5.26). The tail base sat on both
+   thighs at the crotch: widen the tail region's `except_segs` (thigh 0.17, shin 0.13) and smooth 30 passes. Stretch
+   mean/worst over 57 clips: LIVE 5.32/7.69, old A 4.58/8.89, new gen H plain 5.78/8.44, smooth 30 5.19/7.96, wide
+   except 5.22/7.90, both 4.79/6.62. `meshy_map` {Meshy bone: ours} remaps one Hunter's Meshy bones (neck on hips
+   alone did nothing for Meeko). `--stretch-check` names the worst bone pairs, not where they sit; print the worst
+   edge's rest spot and weights before guessing.
+8. After a new glb, delete `<art>_v95.jpg` and `.godot/imported/<art>.glb-*` before importing: Godot keeps an old
+   extracted texture of the same name, and the new mesh renders with the old candidate's texture.
+9. Meeko r3 (11-20): the wings come from the live glb, not the master. Meshy cannot draw a thin see-through wing, so the gen's
+   own (opaque lilac) wings are cut off and the live Meshy wings (`cloth-v95c`, `skin-v95c`, bones `wing.L/R`) ride on as a
+   kept part: patch `keep` [pauldron.L, pauldron.R, wing.L, wing.R], `keep_mats` [cloth-v95c, skin-v95c], the game .glb the
+   LIVE one (`git checkout origin/main -- art/wardens/pip/` before the swap). `meshy_drop` [{h, s, v, box}] deletes the polygons
+   of that paint (lilac, hue .74-.89) inside a |x|/y/z box, then the scraps they leave floating (islands under 300 vertices
+   that touched them); Meeko's ears stay on the head (`meshy_keep_head` takes ear.R/L too: their boxes cut across the
+   skull top). Stretch over 57 clips, mean/worst/over 5x: LIVE 5.32/7.69/30, H4 4.79/6.62/28, r3 4.50/6.64/21. A weight floor
+   (every weight minus 0.08/0.15) made it worse (5.00/7.29, 6.63/9.95), 60 or 100 smoothing passes too (4.88/7.95, 5.57/9.15).
+   `v95_swap.py` calls Meshy's rig for the baked mesh at every swap (5 credits): seed WORK/meshy/rigged_character.glb and run
+   it by hand (`blender -b --python tools/art1/v95_swap.py -- WORK/spec.json WORK OUT.glb`) when credits are low.
+10. Meeko r3b (11-21, the art-gate failed r2/r3 on the wings and head): the master is a WINGLESS turnaround through Meshy (8 masked Gemini
+    edits removed the wings; `meshy_task.py create` x4, enhance on/off, gen 7 on = the clean one), so no wing shards or split head
+    lobes come from the gen. The wings are two cards: `wing_card_tex.py` cuts the turnaround's wings (Gemini, pure black background) into an
+    RGBA card texture, spec `wing_cards` {image, w, h, root, attach, sweep, lean} lets `v95_swap.py` skin two flat cards to wing.R/L
+    (100% one bone: a card cannot tear) under the material `card-wing` (the game's see-through card slot, content/rules/warden_look.json
+    `card`). `glb_wing_cards.py IN OUT PARAMS` re-places the cards in an exported glb in seconds (size, height, sweep), `glb_image_swap.py
+    ... MATERIAL_OLD=NEW` renames a material. The 3D look: the game's toon shader turns the Meshy paint hot pink; Meeko's look now has
+    `albedo`/`desat` on `skin`, `skin-face` and `leather` (body rose (166,69,109) like the turnaround's (159,71,110), not (252,50,110)).
+    Traps: a killed local `godot --import` leaves a half-built pip.glb cache that jobq renders as "no armature" (delete
+    `.godot/imported/pip.glb-*`); jobq done dirs are purged within hours (copy the frames out at once); `touch` the glb or delete its
+    cache entries or Godot keeps the old import; a tree without `.godot` is imported by jobq itself (one time, can time out).
+11. Meeko r3c (11-21): r3b's tail lies along the left shin and right thigh and the swap's 30 smoothing passes mix tail with leg, so
+    downed/revive stretch tail>tail 11.9x (LIVE 7.69). `glb_weight_unmix.py IN OUT tail thigh,shin,foot --smooth 40 --rings 8` smooths
+    the full weight vectors (welded by position across seams) only over the tail/leg contact zone grown 8 rings: 57-clip stretch
+    mean/worst/over5 5.62/11.91/33 -> 4.51/6.34/17. A hard split (tail whole or leg whole, its default mode) tears the fused surface:
+    22.1/48.9; 80 passes x 12 rings over-smooths: 5.89/10.29. Body colour: the in-game rose was saturation 0.69 vs the turnaround's
+    0.54 (same value, not too dark); solved in linear light for skin `albedo` [0.86, 0.774, 0.72], `desat` 0.52.

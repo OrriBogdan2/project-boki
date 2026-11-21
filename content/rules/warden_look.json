@@ -588,6 +588,12 @@
 		},
 		"slots": {
 			"skin": {
+				"albedo": [
+					0.86,
+					0.774,
+					0.72
+				],
+				"desat": 0.52,
 				"top_light": 0.16,
 				"fres": 0.14,
 				"far_lift": 0.06,
@@ -603,13 +609,19 @@
 				],
 				"shade": 0.9,
 				"ramp": 1.8,
-				"dark_lift": 0.1
+				"dark_lift": 0.18
 			},
 			"cloth": {
 				"far_lift": 0.15,
 				"fres": 0.18
 			},
 			"leather": {
+				"albedo": [
+					0.9,
+					0.82,
+					0.7
+				],
+				"desat": 0.3,
 				"far_lift": 0.15
 			},
 			"brass": {
@@ -630,9 +642,9 @@
 					0.7
 				],
 				"albedo": [
-					1.0,
-					0.86,
-					0.86
+					0.98,
+					0.98,
+					1.0
 				],
 				"alpha_k": 1.25,
 				"far_alpha": 1.9,
@@ -645,10 +657,11 @@
 				"sss": 0.1,
 				"shade": 0.93,
 				"albedo": [
-					0.98,
-					1.0,
-					1.0
+					0.82,
+					0.84,
+					0.9
 				],
+				"desat": 0.35,
 				"ramp": 1.5,
 				"dark_lift": 0.12,
 				"rim_amount": 0.15
