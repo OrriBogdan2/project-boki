@@ -23,6 +23,7 @@ from scipy.signal import butter, sosfilt
 SR = 44100
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'audio')
 rng = np.random.default_rng(2611)
+AFTER_STOCK_GUNS = 174970364646005975897635881146416788037  # rng position once the retired stock guns had drawn
 
 
 def N(d): return int(SR * d)
@@ -146,40 +147,13 @@ def takes(name, fn, n=3, **kw):
 
 def build():
     # ============================================================== guns
-    def smg(i):
-        d = 0.32
-        body = kick(300 + 12 * i, 120, d, 0.008, 0.022, 2.4) * 0.5
-        snap = crack(d, 900, 5000 + 300 * i, 0.012) * 2.6
-        mid = crack(d, 250, 900, 0.02) * 2.0
-        return mix(click(0.003, 3000, 10000) * 1.6, body, snap, mid, reflections(tail(0.25, 2200, 0.05) * 0.9))
-    takes('smg', smg, rms_db=-19)
+    # The stock smg, rifle, shotgun and sniper shots are gone (the pickup guns play gun_*, tools/gen_sfx_guns.py).
+    # Their random draws are skipped to the stream position they left, so every sound after them stays the same take.
+    pinned = rng.bit_generator.state
+    pinned['state']['state'] = AFTER_STOCK_GUNS
+    rng.bit_generator.state = pinned
 
-    def rifle(i):
-        d = 0.6
-        body = kick(240 + 10 * i, 85, d, 0.012, 0.04, 2.8) * 0.6
-        snap = crack(d, 800, 5500 + 200 * i, 0.016) * 2.8
-        low = crack(d, 180, 800, 0.035) * 2.2
-        return mix(click(0.004, 2800, 11000) * 1.8, body, snap, low, reflections(tail(0.45, 1800, 0.09) * 1.1))
-    takes('rifle', rifle, rms_db=-18)
-
-    def shotgun(i):
-        d = 0.95
-        body = kick(190 + 8 * i, 60, d, 0.02, 0.07, 3.2) * 0.75
-        blast = crack(d, 250, 4200, 0.05) * 3.2
-        return mix(click(0.005, 2200, 10000) * 2.0, body, blast, sub(70, 40, d, 0.1) * 0.4,
-                   reflections(tail(0.8, 1500, 0.16) * 1.4, ((0.06, 0.35, 1400), (0.11, 0.25, 1000), (0.18, 0.15, 800), (0.27, 0.08, 600))))
-    takes('shotgun', shotgun, 2, rms_db=-16)
-
-    def sniper(i):
-        d = 1.5
-        crk = mix(click(0.003, 4000, 14000) * 2.5, crack(d, 1500, 9000, 0.01) * 3.0, crack(d, 300, 1500, 0.04) * 2.0)
-        body = kick(220, 55, d, 0.015, 0.09, 3.0) * 0.7
-        # the long roll of the report off distant islands, and a faint rising whine of the round
-        roll = reflections(tail(1.3, 1400, 0.32, 0.01) * 1.4, ((0.09, 0.4, 900), (0.21, 0.3, 700), (0.36, 0.22, 500), (0.55, 0.12, 400)))
-        return mix(crk, body, sub(64, 36, d, 0.16) * 0.45, roll)
-    takes('sniper', sniper, 1, rms_db=-16)
-
-    # the shotgun stays "thump" for things that borrow it (heavy bumps, the Feel damage layer)
+    # "thump" is the old shotgun's low whomp, kept for things that borrow it (heavy bumps, the Feel damage layer)
     save('thump', mix(kick(170, 60, 0.45, 0.02, 0.07, 2.6) * 0.8, crack(0.45, 200, 1800, 0.04) * 2.4, sub(60, 40, 0.45, 0.08) * 0.35), rms_db=-19)
 
     def boom(i):
