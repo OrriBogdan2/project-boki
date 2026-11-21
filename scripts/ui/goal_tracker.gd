@@ -39,6 +39,9 @@ static func lines() -> Array:
 	picked.sort_custom(func(a, b):
 		if bool(a["ready"]) != bool(b["ready"]):
 			return bool(a["ready"])
+		var a_done: bool = int(a["have"]) >= int(a["need"])      # ticked lines (first day) never crowd out open goals
+		if a_done != (int(b["have"]) >= int(b["need"])):
+			return not a_done
 		if a["source"] != b["source"]:
 			return SOURCE_ORDER.find(a["source"]) < SOURCE_ORDER.find(b["source"])
 		return order.find(a) < order.find(b))
