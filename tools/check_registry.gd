@@ -936,6 +936,7 @@ const CHECKS := {
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
 	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
+	"--tenzo-stone-video": ["res://tools/tenzo_stone_video.gd", "tenzo_stone_video", null],      # Tenzo E + R stone (GPU)
 	"--gil-rmb-video": ["res://tools/gil_rmb_video.gd", "gil_rmb_video", null],      # Gil RMB press + R leap-off (GPU)
 	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
@@ -954,8 +955,8 @@ const CHECKS := {
 	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
 	"--egg-rules-check": ["res://tools/egg_rules_check.gd", "egg_rules_check", null],
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
-	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],      # the tint and warning build with depth
-	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],      # film a slow drop to death (GPU)
+	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],  # tint grows with depth
+	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],  # film a fatal drop (GPU)
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
