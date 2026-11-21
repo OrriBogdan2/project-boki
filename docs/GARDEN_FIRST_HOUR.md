@@ -85,7 +85,7 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    in the Garden tab at 0 gems and is not mentioned by any step, yet it is the only food source that keeps the Boki fed and leans it toward
    a zone. Owner: `content/rules/farm_tutorial.json base steps`, `scripts/home/farm_task_guide.gd`. *Proposal: add a "Plant the snack
    patch" step before "Feed it".*
-10. **The tutorial never ends on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
+10. **(fixed on ext/farm-tut-ends) The tutorial never ended on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
     the 4/4 counter. Owner: `scripts/home/farm_tutorial.gd` `event` ("stay" is a button press only), banner width in
     `scripts/ui/`. *Proposal: finish the step when the first zone wakes or after the toy ticks, and wrap the banner text.*
 11. **`base_mode` ships off.** On `main` a fresh save gets the full farm (chop, mine, build a house) and the garden tutorial is not shown at all;
