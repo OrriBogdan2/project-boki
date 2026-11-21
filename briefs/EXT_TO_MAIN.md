@@ -10761,3 +10761,7 @@ READY ext/p04-port-1118 fbd2ef3628 (PR #329 camps; stomp-break-sweep green again
 READY ext/merge-lane-M1-1121-code 10943748af (M1 code lane: 11 non-glb branches, no .glb; mob-reap/anim-cov/boki-sys 0 fail, cast-pop 1 fail same as M1)
 READY ext/ui-first-exp-hud dcad02582dd8 (first expedition HUD holds back)
 READY ext/merge-lane-M1-1121 9bcebcd780 (lane M1 bundle, 18 branches incl. anim-foot-slide-13 partial; PR #572; export OK 885 MB; step-sync/clip/cast-pop no new red vs main)
+READY ext/sfx-step-biomes 0920eda191 (bulk-rebase: origin/main merged in mechanically, was fc1953471c; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/sfx-hunter-footsteps 15181cd9a9 (bulk-rebase: origin/main merged in mechanically, was e3d5d4ddf0; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/vfx-hurt-flash-v95 82d2c64ae0 (bulk-rebase: origin/main merged in mechanically, was 80eb79e224; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-lane-M4-1121 616a902bf3 (bulk-rebase: origin/main merged in mechanically, was 0c09266b7b; union 2 gen 0 files; the branch's own READY checks still apply)
