@@ -62,7 +62,7 @@ var over := false
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
-var feed: Array = []        # kill feed lines {text, t}
+var feed: Array = []        # kill feed rows (KillFeed) {text, t}; a knock or finish adds by, who, icon
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
@@ -1718,7 +1718,7 @@ var feed_all: Array = []
 func add_feed(t: String) -> void:
 	feed_all.append("%d %s" % [int(time), t])
 	feed.append({"text": t, "t": 0.0})
-	if feed.size() > 5:
+	if feed.size() > KillFeed.ROWS:
 		feed.pop_front()
 
 # ------------------------------------------------------------------ events
@@ -1788,7 +1788,7 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
@@ -1808,6 +1808,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	var icon := KillFeed.icon_of(by, o)
+	KillFeed.knock(self, h, by, icon)
 	if h == player:
 		if ktip: ktip.on_knock()
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
@@ -1821,22 +1823,19 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
 			_reward_moment(h.pos)
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
-	else:
-		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), SideColor.of(self, h), 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else ""])
+		net_event(["knock", h.nid, credit.nid if credit else "", icon])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -1943,7 +1942,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(h.pname, why))
+	KillFeed.out(self, h, by, why)
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
@@ -2628,8 +2627,8 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	for s in shot_pool:
 		if not s.visible:
 			mi = s; break
-	if mi and extra.get("melee", false):
-		mi = null          # a melee strike is invisible; the swing has its own effect
+	if mi and (extra.get("melee", false) or extra.get("drawn", false)):
+		mi = null          # a melee strike is invisible (the swing has its own effect); a kit draws a "drawn" one
 	if mi:
 		mi.visible = true
 		HeroVfx.of(self).reused(mi)      # a landed round's tracer lets go of the node before the new round shows
@@ -2671,7 +2670,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if extra.has("deco") or extra.get("rope", false):
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
-	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
+	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not extra.get("drawn", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
 		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
@@ -3207,7 +3206,7 @@ func _process(delta: float) -> void:
 	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
-		if f["t"] > 6.0: feed.erase(f)
+		if f["t"] > KillFeed.LIFE_S: feed.erase(f)
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
@@ -5129,7 +5128,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				KillFeed.knock(self, who, by, String(x[3]) if x.size() > 3 else "")
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
@@ -5144,7 +5143,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-				add_feed(out_text(who.pname, String(x[3])))
+				KillFeed.out(self, who, by, String(x[3]))
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false
