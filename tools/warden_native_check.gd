@@ -164,6 +164,9 @@ func _held(a: String, m: Node3D, nat: WardenNative) -> void:
 		sm != null and (m.get_meta("mats", []) as Array).has(sm),
 		"%s: the held weapon is hero-toon shaded" % a
 	)
+	var names: Array = nat.d["weapon"].get("anchors", [])
+	var found := names.filter(func(an): return WardenGlb.anchor(m, an) != null)
+	ok(found.size() == names.size(), "%s: the weapon's anchors ride it (%s)" % [a, str(found)])
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats").

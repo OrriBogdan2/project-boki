@@ -83,6 +83,7 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		if nat.held:
 			mats.append_array(WardenGlb._toon(nat.held, lk, MantleLook.warden(arch), own, arch))
+			WardenFx.bloom(model, nat.held, own)  # (the look's blooms on the weapon's anchors: Kael's blade)
 		model.set_meta("mats", mats)
 	model.set_meta(META, true)
 

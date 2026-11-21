@@ -6,6 +6,7 @@ extends Node3D
 ## contract model holds it at rest; from there it turns and moves with Meshy's hand through every clip.
 
 static var _meshes := {}  # art name -> the weapon at the contract model's rest (model space), cut once a session
+static var _anchors := {}  # art name -> {anchor empty name: its rest frame (model space)} (data "anchors")
 
 var grip: Transform3D  # the weapon's frame in Meshy's hand bone's frame (model space)
 var pivot: Vector3  # the contract hand bone's rest pivot (the grip), in the weapon's own space
@@ -17,7 +18,8 @@ static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transfor
 	var nm := WardenGlb.art(arch)
 	var bone := String(w.get("bone", "hand.R"))
 	if not _meshes.has(nm):
-		_meshes[nm] = _cut(nm, w.get("materials", []), bone)
+		_anchors[nm] = {}
+		_meshes[nm] = _cut(nm, w.get("materials", []), bone, w.get("anchors", []), _anchors[nm])
 	var rest := WardenGlb.neutral_rest(arch)
 	if _meshes[nm] == null or not rest.has(bone):
 		return null
@@ -27,6 +29,11 @@ static func make(model: Node3D, arch: String, w: Dictionary, hand_idle: Transfor
 	mi.name = "Weapon"
 	mi.mesh = _meshes[nm]
 	held.add_child(mi)
+	for an in _anchors[nm]:
+		var at := Node3D.new()
+		at.name = String(an)
+		at.transform = _anchors[nm][an]
+		held.add_child(at)
 	held.pivot = (rest[bone] as Transform3D).origin
 	held.grip = (
 		hand_idle.affine_inverse() * Transform3D(Basis.IDENTITY, hand_idle.origin - held.pivot)
@@ -41,11 +48,21 @@ func follow(hand: Transform3D) -> void:
 
 
 ## The contract .glb's surfaces whose material is in `keep`, posed at rest in model space with no skin (their
-## vertices all ride `bone`).
-static func _cut(nm: String, keep: Array, bone: String) -> ArrayMesh:
+## vertices all ride `bone`); the weapon's anchor empties named in `names` (its bloom and FX points) into `anchors`,
+## at rest in model space the same way.
+static func _cut(
+	nm: String, keep: Array, bone: String, names: Array, anchors: Dictionary
+) -> ArrayMesh:
 	var glb := (
 		(load("%s/%s/%s.glb" % [WardenGlb.DIR, nm, nm]) as PackedScene).instantiate() as Node3D
 	)
+	var sk := WardenGlb.skeleton(glb)
+	for an in names:
+		var e := glb.find_child(String(an), true, false) as Node3D
+		var att := e.get_parent() as BoneAttachment3D if e else null
+		if att and sk:
+			var at_rest := sk.get_bone_global_rest(sk.find_bone(att.bone_name))
+			anchors[an] = WardenGlb.model_xf(glb, sk) * at_rest * e.transform
 	var out := ArrayMesh.new()
 	for node in glb.find_children("*", "MeshInstance3D", true, false):
 		var mi := node as MeshInstance3D
