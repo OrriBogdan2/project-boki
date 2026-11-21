@@ -10805,3 +10805,4 @@ READY ext/hudreveal-fold 35ff77b3f7 (bulk-rebase: origin/main merged in mechanic
 READY ext/merge-lane-M2-1121 43175f944d (bulk-rebase: origin/main merged in mechanically, was 2ef1105664; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M1-1121-code 79bbbbb26d (bulk-rebase: origin/main merged in mechanically, was 61a0bb2ac3; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-M1-1121 f3b9f8c47c (bulk-rebase: origin/main merged in mechanically, was 4a4801671e; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/tut-gate-playthrough 45b81e3f80 (PR #515: merged origin/main, Rules.md regenerated, tutorial-playthrough + new-player-flow checks 0 failures)
