@@ -1057,11 +1057,9 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
 ## overheated, when the next hit will spike you.
 func _draw_glider_heat(p: Hunter) -> void:
-	if p.dropping or p.downed or p.riding:
+	if not HudGroups.glider_shown(p):
 		return
 	var heat := 1.0 - p.glide_fuel
-	if not p.gliding and heat < 0.01:
-		return
 	var at := _head(p, 2.25 * float(p.cdat["scale"]))
 	if m.cam.is_position_behind(at):
 		return
