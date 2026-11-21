@@ -536,7 +536,7 @@ _Mole + Split geode_ (`geodemole`). Geodemole has grown heavy enough to sit up o
 | Farm work | Haul 1, Stone 3, Timber 2 |
 | Egg | Geodemole Egg: Something shy is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -696,7 +696,7 @@ _Garden snail + Dark crystal spire_ (`gloamspire`). Evolution of Duskargot.
 | Farm work | Craft 2, Forage 3, Haul 1 |
 | Egg | Duskspire Egg: Something private is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -736,7 +736,7 @@ _Slime mold + Rainbow layers_ (`glomworth`). Evolution of Glomwort.
 | Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Glombulus Egg: Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -1597,7 +1597,7 @@ _Porcupine + Mushroom stalks_ (`sporcupine`). Porcupine whose quills are mushroo
 | Farm work | Bloom 3, Forage 2, Ranch 1 |
 | Egg | Sporcupine Egg: Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here. |
 
-- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
+- E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Never more than three out at once. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious > Spore Drift; Swift: Swift
