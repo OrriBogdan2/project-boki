@@ -6,12 +6,14 @@ extends RefCounted
 ## (an active glove, a different one per Hunter) once each, then each twice more. A bridge glove gets a
 ## "span" row too, cast over a strip of abyss cut in front (the yard has none, so its Q row lays nothing).
 ## A slot's spike is the worst frame in the window after its first press; its first-use cost is that minus
-## the cheaper repeat window. FAIL: a first-use cost over SPIKE_MS that also sits SPIKE_MS above the median frame.
+## the cheaper repeat window. FAIL: a first-use cost over max(SPIKE_MS, NOISE_X medians) that also sits that far above
+## the median frame, in a window that made a node or compiled a pipeline.
 ## Run it on a GPU (jobq) for the drawn frames; headless it measures the script side only.
 
 const DT := 1.0 / 60.0
 const SPIKE_MS := 8.0          # ms over the median frame (and over the repeat) that counts as a first-cast hitch
-const BUSY_MS := 12.0          # a median frame slower than this means the host is loaded (a quiet box is 3-8 ms): spikes are noise, not judged
+const NOISE_X := 3.0           # a first-use cost must also be over NOISE_X medians: load noise scales with the frame (w2 quiet: median 10-14 ms,
+                               # noise up to 1.1x; a bisect at load 40: median 19-33 ms, noise up to 2.0x); real hitches were 183-260 ms
 const WINDOW := 24             # frames watched after a press (shots that land, a fuse's late burst)
 const SETTLE := 60             # frames between presses: effects of the last slot die down
 const SLOTS := ["lmb", "rmb", "e", "r", "dash", "q"]
@@ -19,7 +21,6 @@ const TARGET_DIST := 6.0       # m, the dummy in front of the Hunter
 const PASSES := 3              # the first press, then repeats (the cheaper repeat is the baseline: load noise)
 
 var bad := 0
-var busy := 0                  # slots not judged: the median frame was over BUSY_MS
 var rows: Array = []
 var hit := false               # the target lost health in this window
 var made := {}                 # node kind -> how many entered the tree in this window
@@ -50,7 +51,7 @@ func run(main: Node) -> void:
 	print("FIRSTCAST %-10s %-5s %-6s %7s %7s %7s %7s" % ["hunter", "slot", "went", "median", "first", "repeat", "cost"])
 	for r in rows:
 		print("FIRSTCAST %-10s %-5s %-10s %7.1f %7.1f %7.1f %7.1f %s" % r)
-	print("FIRSTCAST DONE, %d slots, failures: %d%s" % [rows.size(), bad, (", not judged (host busy, median over %.0f ms): %d" % [BUSY_MS, busy]) if busy else ""])
+	print("FIRSTCAST DONE, %d slots, failures: %d" % [rows.size(), bad])
 	tree.quit(1 if bad > 0 else 0)
 
 func _hunter(main: Node, ak: String, glove: String) -> void:
@@ -131,12 +132,11 @@ func _span(m: Match, P: Hunter, T: Hunter) -> Array:
 
 func _row(ak: String, s: String, went: String, med: float, f: float, rep: float, what: String) -> void:
 	var cost := f - rep
-	var loaded := med > BUSY_MS      # (a bisect on a box at load 40 saw medians of 19-33 ms and 32 false FAILs)
+	var over := maxf(SPIKE_MS, NOISE_X * med)      # (a bisect on a box at load 40, flat SPIKE_MS: 32 false FAILs)
 	var traced := what != "0 pipelines; "      # nothing made, nothing compiled: a slow frame with no cause is the host, not the first cast
-	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS and not loaded and traced
+	var hitch := cost > over and f - med > over and traced
 	if hitch: bad += 1
-	if loaded: busy += 1
-	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else ("busy" if loaded else "ok")])
+	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else "ok"])
 
 ## Counts a node that entered the tree, by its kind and the nearest scripted node above it (who made it).
 func _made(n: Node) -> void:
