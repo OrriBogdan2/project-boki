@@ -253,6 +253,9 @@ func _release(n: Dictionary) -> void:
 		_send(n)
 		return
 	var p: Vector3 = n["pos"]
+	if Heart.end_phase(m) and Heart.tide_out(m, p) <= 0.0:
+		_send(n)
+		return      # (the end phase: nothing comes up inside the final circle; the stock stays)
 	var near := 0
 	for b in m.mobs:
 		if b is Blight and not b.dead and b.mkind == "bl_skitter" and b.flat_dist(p) < rule("area_r"):

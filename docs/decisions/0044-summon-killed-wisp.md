@@ -21,6 +21,7 @@ Option 2, in `KinSummon.killed(by)` (replaces the old `knocked()`; `Kin.go_down`
   hunter snapshot) plus a minimap ping for the killer's squad; owner downed or dead: `KinSteal.break_loose` where it fell.
 - Monster, fall or no killer: plain cooldown, goes home even if the owner is down (`back_home`), no reveal.
 - A thief's stolen summon killed: loose again where it fell, anyone may grab it.
+- Every kill plays `boki_downed` once where it fell (one that goes loose: as it breaks loose, in `KinSteal`).
 Damage alone never ends the window (unchanged).
 
 ## Consequences

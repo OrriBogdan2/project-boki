@@ -1,0 +1,122 @@
+{
+	"grammar": 1,
+	"id": "murmuron",
+	"name": "Murmuron",
+	"animals": [
+		"Starling",
+		"Pan-pipes"
+	],
+	"theme": "swarm",
+	"flavor": "Murmuron, art-lane design.",
+	"colors": {
+		"belly": "#9c6c54",
+		"body": "#3c243c",
+		"glow": "#ffa578"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 3,
+		"kin_hp": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.79,
+		"curiosity": 0.73,
+		"loyalty": 0.51,
+		"temper": 0.53
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Piper Flock",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.0
+			}
+		]
+	},
+	"active": "hive_swarm",
+	"auto": "echolocate",
+	"merge": "hive_crown",
+	"evolution": {
+		"root": "Mur",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "chattering, sociable, echoing",
+		"syllables": [
+			"Mur",
+			"muron"
+		]
+	},
+	"egg": {
+		"name": "Murmuron Egg",
+		"temper": "Sociable",
+		"desc": "Something sociable is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

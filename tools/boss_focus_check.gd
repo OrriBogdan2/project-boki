@@ -54,15 +54,20 @@ func run(main: Node) -> void:
 	var boss: Boss = m.lairs.boss_of(F)
 	var side := Vector3(-F["out"].y, 0, F["out"].x)
 	var outside: Vector3 = F["gate_c"] + Vector3(F["out"].x, 0, F["out"].y) * 6.0
-	_spot(P, outside + side * 2.5)
-	_spot(B, outside - side * 2.5)
+	# (4 m apart: inside even a low-aggro bot's reach, 8 m x 0.6 = 4.8 m; its difficulty is a random draw)
+	_spot(P, outside + side * 2.0)
+	_spot(B, outside - side * 2.0)
 	# ---- 1. the control: outside the lair, the player is fair game
 	var went := false
 	for i in int(2.0 / Match.DT):
+		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
+		# draw that camp spawns shift, and from behind a player 4 m away is outside the view cone)
+		P.reveal_t = 1.0
 		_step()
 		if B.ai["tgt"] == P: went = true
+	P.reveal_t = 0.0
 	ok(boss.dormant and m.lairs.boss_fight(B).is_empty() and went,
-		"outside the lair, boss asleep: the bot goes for the player 5 m away")
+		"outside the lair, boss asleep: the bot goes for the player 4 m away")
 	# ---- 2. sealed in: the boss only (a hit from before the seal doesn't count)
 	B.hurt(2.0, P, {"src": "shot"})
 	# (off the bot's line to the boss: a shot through the boss would hit the player)

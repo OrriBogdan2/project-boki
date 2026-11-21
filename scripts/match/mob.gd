@@ -13,6 +13,8 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
+var cried := false  # its quarter-health cry has played here (StealSfx)
+var reel_heard := false  # it was reeling last frame here, so the reel thud plays once a stagger (StealSfx)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
@@ -208,6 +210,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealSfx.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
@@ -522,7 +525,8 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()
 	var moving := spd > 0.3
-	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
+	if moving:
+		anim += spd * delta * TAU / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(mkind), 2.0))
 	var body: Node3D = model.get_node("Body")
 	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
