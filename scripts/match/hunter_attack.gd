@@ -195,8 +195,8 @@ func tick_weapon(dt: float) -> void:
 		h.sus_n = 0
 	if not h.strike_at_end.is_empty():
 		if h.roll_t > 0.0 and not h.downed and h.stun_t <= 0.0:
-			# the lunge curves to follow your aim
-			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			# the lunge curves to follow your aim (10% a 60 Hz step, at any step)
+			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()
 		else:
 			var st: Dictionary = h.strike_at_end
 			h.strike_at_end = {}
@@ -345,10 +345,11 @@ func emit_shot() -> void:
 	if h.wpn.has("nth"):
 		h.nth_n += 1
 		if h.nth_n % int(h.wpn["nth"][0]) == 0: dmg *= 1.0 + float(h.wpn["nth"][1])
-	if h.wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(h.wpn["sustain_loss"]) * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	var sus_k := 1.0 - loss * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+	dmg *= sus_k      # the string's decay; the round carries its share (a kit sizes its look by it)
 	h.sus_n += 1
-	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0))}
+	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0)), "sus_k": sus_k}
 	extra.merge(h.wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if h.wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
