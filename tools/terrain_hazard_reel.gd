@@ -3,12 +3,14 @@ extends RefCounted
 ## Crown, once with a Boki that doesn't counter it (Vespyx) and once with one that does. Each clip walks
 ## the hunter in from outside, holds still in the middle (burns, shocks, breath, slide) and walks out the
 ## far side, at the match camera with the HUD on. Frames go to <dir>/<kind>_<with|without>/%05d.jpg at
-## 30 fps; ffmpeg makes the MP4s. Needs a renderer (jobq --needs gpu). Never writes the save.
+## 30 fps; ffmpeg makes the MP4s. With --stills: two PNGs per clip (see _stills). GPU (jobq --needs gpu). No save.
 
 const STEP := 1.0 / 60.0          # s per match step; two make one 30 fps frame
 const FRAME_W := 960              # px wide per saved frame
 const LEAD := 5.0                 # m outside the area the walk starts
 const HOLD := 3.0                 # s standing in the middle
+const STILL_OUT := 2.5            # m outside the edge for the --stills edge shot
+const STILL_IN := 2.0             # m inside the edge for the --stills in-field shot
 const PLAIN := "cindle"
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
 	"bramble": "heatherhorn"}
@@ -29,6 +31,14 @@ func run(main_node: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	await _build(PLAIN)
+	if OS.get_cmdline_user_args().has("--stills"):
+		await _stills(false)
+		for kind in COUNTER:
+			await _build(COUNTER[kind])
+			await _stills(true, kind)
+		print("HAZARD_STILLS_DONE in %s" % dir)
+		main.get_tree().quit(0)
+		return
 	for kind in COUNTER:
 		await _clip(kind, false)
 	for kind in COUNTER:
@@ -58,7 +68,8 @@ func _start(c: Vector2, along: Vector2, half: float) -> Vector2:
 				return p
 	return c
 
-func _clip(kind: String, safe: bool) -> void:
+## The walk for a kind's first area: {A, start, along (unit, toward the area), half (m), lead (m to its edge)}.
+func _approach(kind: String) -> Dictionary:
 	var ai := -1
 	for i in tz.areas.size():
 		if tz.areas[i]["kind"] == kind and ai < 0: ai = i
@@ -74,12 +85,51 @@ func _clip(kind: String, safe: bool) -> void:
 	var half := ((hi - lo) * along).length() * 0.5
 	var start := _start(Vector2(c.x, c.z), along, half)
 	along = (Vector2(c.x, c.z) - start).normalized()
-	var lead := start.distance_to(Vector2(c.x, c.z)) - half
-	P.teleport(Vector3(start.x, m.world.ground_at(start.x, start.y), start.y))
+	return {"A": A, "start": start, "along": along, "half": half,
+		"lead": start.distance_to(Vector2(c.x, c.z)) - half}
+
+func _put(at: Vector2) -> void:
+	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.y), at.y))
 	P.hp = P.max_hp
 	for k in ["burn_t", "slow_t", "slow_k", "stun_t", "haste_t"]: P.set(k, 0.0)
 	tz.state.clear()
 	tz.hinted.clear()
+
+## --stills: per kind, standing STILL_OUT m outside the area's edge and STILL_IN m inside it, at the match camera
+## (<dir>/<kind>_<with|without>_<edge|in>.png): can you tell where the field starts, and does a counter show?
+func _stills(safe: bool, only := "") -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	for kind in COUNTER:
+		if only != "" and kind != only:
+			continue
+		var W := _approach(kind)
+		var start: Vector2 = W["start"]
+		var along: Vector2 = W["along"]
+		var edge: Vector2 = start + along * (float(W["lead"]) - STILL_OUT)
+		for spot in [["edge", edge], ["in", edge + along * (STILL_OUT + STILL_IN)]]:
+			_put(spot[1])
+			for _i in 90:
+				for mb in m.mobs: mb.queue_free()
+				m.mobs.clear()
+				m.step(STEP)
+				m.cam.snap(P.pos)
+				for h in m.hunters:
+					h.render(STEP, 1.0)
+				if _i % 30 == 29: await main.get_tree().process_frame
+			await main.get_tree().process_frame
+			var img := main.get_viewport().get_texture().get_image()
+			if img:
+				img.save_png(dir.path_join("%s_%s_%s.png" % [kind, "with" if safe else "without", spot[0]]))
+		print("HAZARD_STILL %s %s" % [kind, "with" if safe else "without"])
+
+func _clip(kind: String, safe: bool) -> void:
+	var W := _approach(kind)
+	var A: Dictionary = W["A"]
+	var start: Vector2 = W["start"]
+	var along: Vector2 = W["along"]
+	var half: float = W["half"]
+	var lead: float = W["lead"]
+	_put(start)
 	var out := dir.path_join("%s_%s" % [kind, "with" if safe else "without"])
 	DirAccess.make_dir_recursive_absolute(out)
 	var boki := String(Data.KIN[(P.kin as Kin).species]["name"])
