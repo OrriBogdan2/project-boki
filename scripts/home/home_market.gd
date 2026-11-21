@@ -36,13 +36,15 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 
 ## The stall level a tab opens at.
 static func tab_level(tab_name: String) -> int:
+	if tab_name == "Shelter":
+		return Shelter.open_level()
 	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
 
 ## The tabs this stall's level opens.
 func tabs() -> Array:
 	var lv := Stalls.level()
 	var no_exchange := FarmUnlocks.base_mode()
-	var out := TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
+	var out := TABS.filter(func(t): return tab_level(String(t[0])) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
 	if not out.has("Shelter") and not TransferPost.inbox.is_empty():
 		out.append("Shelter")      # a Boki handed to you waits there, at any stall level
