@@ -164,6 +164,7 @@ static func _marker(H: Node, sp: Vector2, w: Dictionary, col: Color) -> void:
 	var beat := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) * (0.024 if hot else 0.012))
 	var frac := clampf(float(w["left"]) / maxf(0.05, float(w["total"])), 0.0, 1.0)
 	var tint := HOT if hot else col
+	SafeArea.note_as("recast_marker", Rect2(sp - Vector2(26.0, 26.0), Vector2(52.0, 52.0)))
 	if not armed:
 		tint = DIM
 	c.draw_circle(sp, 21.0 + 5.0 * beat, Color(tint, 0.18 + 0.2 * beat))
