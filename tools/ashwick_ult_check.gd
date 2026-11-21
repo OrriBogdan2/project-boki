@@ -147,7 +147,7 @@ func _flight() -> void:
 		ak.step(m, Match.DT)
 		fall += Match.DT
 	var land_len := float(HunterAnim.km_def("lw_land")["keys"][-1][0])
-	var min_fall := float(WardenClips.data("cinder")["land"]["min_fall"])
+	var min_fall := 0.25      # s: the old land.min_fall (f7df59df07 dropped the key; the drop clip owns the rest)
 	ok("ult landing: she touches down within a short fall of the landing move (no generic land clip after it)",
 			P.grounded and fall - land_len < min_fall,
 			"down after %.2fs, the move %.2fs, min_fall %.2f" % [fall, land_len, min_fall])
