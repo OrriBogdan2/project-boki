@@ -74,11 +74,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 |---|---|---|---|---|---|---|---|---|
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
 | gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
-| glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -96,6 +93,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -106,6 +104,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| glomwort | clip | clip | clip | clip | clip | clip | proc | proc |
+| goliathite | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -125,9 +125,9 @@ Worst five, backlog-ready:
 
 - [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki heatherhorn (No. 19): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
 <!-- table:end -->
 
 ## Gaps, worst first
@@ -155,9 +155,9 @@ Worst five, backlog-ready:
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
    clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
    theirs too.
-4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+4. **23 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
-   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
-   whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
+   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. Glomwort (its clips re-targeted
+   onto the scan, which has no lobes or puffballs to move) and goliathite now play their own. Eat and
    sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
