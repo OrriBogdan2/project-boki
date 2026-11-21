@@ -3,13 +3,22 @@ extends "res://tools/gameplay_media.gd"
 ## under the match camera, as <dir>/<hero>_<shot>.png: match (idle, the camera's default zoom), zoom (idle, closer)
 ## and run (moving, closer). Needs a renderer (jobq --needs gpu). --face: idle hunters aim at the camera;
 ## --raid=day (RaidLook) shoots in the overcast day instead of the clear evening.
+## --rig-frames: instead, the rig gate's frames (tools/meshy/rig_gate.py): walk, run and the primary attack, each from
+## eye level and knee level, in front (a 3/4 view) and behind, as <hero>_<state>_<eye|knee>_<f|b>.png.
 
 const SIZE := Vector2i(1600, 900)   # px of each shot
 const SETTLE := 1.5                 # s of idle before a shot
 const RUN_SECS := 1.2               # s of run before the run shot
 const ZOOM_CLOSE := 0.5             # camera zoom of the closer shots
 const FACE_CAM := Vector3(0, 0.9, 3.0)   # --face: idle hunter aims toward the camera
+const RIG_STATES := [["walk", Vector2(0.46, 0)], ["run", Vector2(1, 0)], ["attack", Vector2.ZERO]]
+const RIG_LEVELS := {"eye": [1.45, 1.0, 3.6], "knee": [0.45, 0.8, 2.4]}   # camera height, look-at height, distance (m)
+const RIG_AZ := {"f": 0.6, "b": 3.6}   # rad around the hunter from east (it faces east): in front at 35 deg, behind
+const RIG_FOV := 30.0
 var face := false
+var rig_frames := false
+var cam_view := ""    # "<level>_<az>" while a rig frame is taken
+var fire := false
 var variants: Array = []    # --set=<name>:<param>=<v>,... shader overrides; shots <hero>_<name>_<shot>
 
 func run(main_node: Node) -> void:
@@ -18,6 +27,7 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--heroes="): heroes = Array(String(a).substr(9).split(","))
 		if String(a) == "--face": face = true
+		if String(a) == "--rig-frames": rig_frames = true
 		if String(a).begins_with("--set="): _add_variant(String(a).substr(6))
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 	if variants.is_empty():
@@ -35,6 +45,9 @@ func run(main_node: Node) -> void:
 			m.player.teleport(_ground(m.player.pos))
 			_apply(v[1])
 			var tag: String = hero if v[0] == "" else "%s_%s" % [hero, v[0]]
+			if rig_frames:
+				await _rig_frames(hero)
+				continue
 			await _take(SETTLE, 1.0, Vector2.ZERO, "%s_match.png" % tag)
 			await _take(SETTLE, ZOOM_CLOSE, Vector2.ZERO, "%s_zoom.png" % tag)
 			await _take(RUN_SECS, ZOOM_CLOSE, Vector2(1, 0.4).normalized(), "%s_run.png" % tag)
@@ -89,11 +102,36 @@ func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
 		P.inp["move"] = move
 		if face and move == Vector2.ZERO:
 			P.inp["aim"] = P.pos + FACE_CAM
+		P.inp["fire"] = fire
+		if fire:
+			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
 		for _i in 2:
 			m.step(STEP)
 		m.cam.follow(P.pos, FRAME, false)
+		if cam_view != "":
+			_rig_cam(P.pos)
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
 		t += FRAME
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+
+## The rig gate's frames of one Hunter: each state, from each level and side.
+func _rig_frames(hero: String) -> void:
+	for st in RIG_STATES:
+		fire = st[0] == "attack"
+		for lv in RIG_LEVELS:
+			for az in RIG_AZ:
+				cam_view = "%s_%s" % [lv, az]
+				await _take(RUN_SECS, 1.0, st[1], "%s_%s_%s.png" % [hero, st[0], cam_view])
+	fire = false
+	cam_view = ""
+
+## Puts the camera at the current rig frame's level and side, looking at the Hunter.
+func _rig_cam(at: Vector3) -> void:
+	var lv: Array = RIG_LEVELS[cam_view.get_slice("_", 0)]
+	var az: float = RIG_AZ[cam_view.get_slice("_", 1)]
+	var dir := Vector3(cos(az), 0, sin(az))
+	m.cam.fov = RIG_FOV
+	m.cam.global_position = at + dir * float(lv[2]) + Vector3(0, float(lv[0]), 0)
+	m.cam.look_at(at + Vector3(0, float(lv[1]), 0))
