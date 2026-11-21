@@ -84,7 +84,7 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
-  rimewright, tender, thief (Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
+  rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
