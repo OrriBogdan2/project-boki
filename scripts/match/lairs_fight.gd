@@ -13,10 +13,7 @@ func wake(L: Dictionary, by: Ent) -> void:
 	var b: Boss = ls.boss_of(L)
 	if b == null or not is_instance_valid(b) or b.dead or not b.dormant:
 		return
-	b.dormant = false
-	b.awake_t = 0.0
-	b.next_cd = 1.6
-	b.st = "chase"
+	b.wake("lair")
 	L["state"] = "awake"
 	L["woke_at"] = m.time
 	var lbl: Label3D = L["nodes"]["label"]
@@ -45,18 +42,7 @@ func _music(on: bool) -> void:
 ## The lair emptied: the boss settles back to sleep in the middle and heals up.
 func reset_boss(b: Boss) -> void:
 	var L: Dictionary = b.lair
-	b._clear_attack()
-	b.dormant = true
-	b.phase = 0
-	b.enraged = false
-	b.awake_t = 0.0
-	b.invul_t = 0.0      # (a reset during a phase roar must not carry its armour into the next fight)
-	b.empty_t = 0.0      # (nor the empty-lair clock: woken from outside again, it would sleep at once)
-	b.tgt = null
-	b.st = "idle"
-	b.stag_open = 0.0
-	b.pos = Vector3(float(L["c"].x), b.pos.y, float(L["c"].z)); b.prev = b.pos
-	b.hp = b.max_hp      # it heals up while it sleeps
+	b.fall_asleep("lair reset")
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
 	L["adds"] = []
@@ -86,9 +72,8 @@ func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
 		return
 	var a := m.spawn_mob(kind, at)
 	a.camp = L["c"]
-	a.st = "chase"
 	var b: Boss = ls.boss_of(L)
-	if b and is_instance_valid(b): a.tgt = b.tgt
+	a.aggro(b.tgt if b and is_instance_valid(b) else null, "brood")
 	L["adds"].append(a)
 
 ## Every monster death passes through here: bosses, ward stones, guards.
