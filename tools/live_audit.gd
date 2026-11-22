@@ -121,6 +121,9 @@ func _hunter(id: String, dir: String) -> void:
 	var gp := model.find_child("DredgeGun", true, false) as Node3D
 	if gp:
 		print("LIVE_AUDIT_GUN ", id, " at ", gp.position, " scale ", gp.scale, " hand ", poser.skel.get_bone_global_rest(poser.hand).origin)
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var bb := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+		print("LIVE_AUDIT_MESH ", model.get_path_to(mi), " vis ", (mi as MeshInstance3D).is_visible_in_tree(), " centre ", bb.get_center(), " size ", bb.size)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
 	for clip in (["idle", "run", "attack"] if seq else CLIPS):
 		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
