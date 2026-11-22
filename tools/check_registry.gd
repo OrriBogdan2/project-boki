@@ -315,7 +315,6 @@ const CHECKS := {
 	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],  # camp time-to-fall table
 	"--knock-reset-check": ["res://tools/knock_reset_check.gd", "knock_reset_check", null],  # docs/KNOCK_RESETS.md
 	"--mob-notice-check": ["res://tools/mob_notice_check.gd", "mob_notice_check", null],  # one cue per camp waking
-	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
@@ -1027,11 +1026,16 @@ const COVERED := {
 ## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run; --rng-seed=N seeds them
 ## from N instead, to prove a check does not lean on one stream (a branch that adds a draw shifts every later one).
 static func run(main: Node, args: PackedStringArray) -> bool:
+	var checks := all()
+	if not _dupes.is_empty():
+		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
+		main.get_tree().quit(1)
+		return true
 	var flag := flag_in(args)
 	if flag == "":
 		return false
-	var e: Array = CHECKS[flag]
-	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
 	seed(hash(flag))
 	for a in args:
 		if String(a).begins_with("--rng-seed="):
@@ -1045,32 +1049,13 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	return true
 
 
-## The first registered check flag on the command line, "" if none (Settings uses it too).
+## The first registered check flag on the command line (legacy CHECKS plus tools/checks/*.gd), "" if none
+## (Settings uses it too, to keep a check's settings in a per-run file).
 static func flag_in(args: PackedStringArray) -> String:
-	for flag in CHECKS:
-	var checks := all()
-	if not _dupes.is_empty():
-		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
-		main.get_tree().quit(1)
-		return true
-	for flag in checks:
+	for flag in all():
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
 			return flag
 	return ""
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true      # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
 
 
 static var _merged: Dictionary = {}
