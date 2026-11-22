@@ -215,10 +215,10 @@ static func _cracks(n: Node3D) -> void:
 	n.add_child(cracks)
 	for i in 7:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
-		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
+		var len_v := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(CRACK_COL),
-			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
+			cracks, Models.box(0.035, 0.012, len_v), KitLooks.shade_mat(CRACK_COL),
+			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
