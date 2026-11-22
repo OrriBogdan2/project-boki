@@ -191,7 +191,7 @@ func _turn(dt: float, vel: Vector3, face: float, clips: WardenClips) -> void:
 			var ends := _leg_ends(legs[i])
 			var hip: Vector3 = inv * (skel.global_transform * (ends[0] as Vector3))
 			var leg := (ends[0] as Vector3).distance_to(ends[1]) * 2.0
-			var up := TURN_UP_M if open else TURN_DOWN_M     # (once the blend has caught up, any lift lets go)
+			var up := TURN_UP_M if open else TURN_DOWN_M  # (once the blend has caught up, any lift lets go)
 			if at.y > turn_floor + up or hip.distance_to(turn_at[i]) > leg * TURN_REACH or turn_t > TURN_HOLD_S:
 				turn_lock[i] = false
 		elif open and at.y < turn_floor + TURN_DOWN_M and float(turn_w[i]) <= 0.0:

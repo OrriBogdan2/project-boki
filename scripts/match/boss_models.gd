@@ -13,6 +13,21 @@ class_name BossModels
 ## Every model has root > "Body", like the other monsters, and lists its materials in meta "mats" so
 ## hits flash it.
 
+# ------------------------------------------------------------------ Stormcoil, the Sky Serpent
+## The head is the body ("Body"); the coils are separate nodes in meta "segs" (top level, placed along
+## the path the head flew by Boss.render).
+const SERPENT_SEGS := 16
+
+## The seal braced across a lair's gate (LairBreach breaks it down): a wall of dressed stone blocks in
+## three columns and four rows ("B<row><col>", row 0 at the bottom), two iron bands, the lair's sigil
+## glowing on its face, and behind it a "Core" of light that shows where blocks have fallen. The
+## "Crack1".."Crack3" groups are the hairline cracks each stage opens. All of it sits under "Slab", off
+## the mob's "Body" (which the monster code leans on every hit: a wall shouldn't rock like a skitter).
+## Local -z faces the portcullis; the lair's colour comes from LairBreach (the seal is one kind for all).
+const SEAL_W := 3.0  # m across: the gate's three-tile gap
+const SEAL_H := 2.9  # m tall, up to the lintel
+const SEAL_Z := -0.55  # m from the monster's spot to the slab's middle, toward the bars
+
 
 static func build(kind: String) -> Node3D:
 	if kind != "ward" and kind != "gate" and Assets.on() and MobGlb.has(kind):
@@ -125,12 +140,6 @@ static func _scale_of(n: Node3D) -> float:
 		s *= (c as Node3D).scale.x
 		c = c.get_parent()
 	return s
-
-
-# ------------------------------------------------------------------ Stormcoil, the Sky Serpent
-## The head is the body ("Body"); the coils are separate nodes in meta "segs" (top level, placed along
-## the path the head flew by Boss.render).
-const SERPENT_SEGS := 16
 
 
 static func serpent() -> Node3D:
@@ -521,17 +530,6 @@ static func dome(half: float, col: Color) -> Node3D:
 	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(rim)
 	return root
-
-
-## The seal braced across a lair's gate (LairBreach breaks it down): a wall of dressed stone blocks in
-## three columns and four rows ("B<row><col>", row 0 at the bottom), two iron bands, the lair's sigil
-## glowing on its face, and behind it a "Core" of light that shows where blocks have fallen. The
-## "Crack1".."Crack3" groups are the hairline cracks each stage opens. All of it sits under "Slab", off
-## the mob's "Body" (which the monster code leans on every hit: a wall shouldn't rock like a skitter).
-## Local -z faces the portcullis; the lair's colour comes from LairBreach (the seal is one kind for all).
-const SEAL_W := 3.0  # m across: the gate's three-tile gap
-const SEAL_H := 2.9  # m tall, up to the lintel
-const SEAL_Z := -0.55  # m from the monster's spot to the slab's middle, toward the bars
 
 
 static func gate_seal() -> Node3D:

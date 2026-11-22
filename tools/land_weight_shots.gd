@@ -8,18 +8,21 @@ extends "res://tools/clip_shots.gd"
 
 const DT := 1.0 / 30.0
 const PICKS := {"light": "thief", "medium": "ostra", "heavy": "juggernaut"}
-const CAM_DIST := 5.0           # m: the match camera is 23 m out; in this close the squash reads
-const CAM_PITCH := 25.0         # deg down to the Hunter
-const RUN_UP := 0.4          # s of standing before the jump
-const TAIL := 0.9            # s on the ground after the landing
+const CAM_DIST := 5.0  # m: the match camera is 23 m out; in this close the squash reads
+const CAM_PITCH := 25.0  # deg down to the Hunter
+const RUN_UP := 0.4  # s of standing before the jump
+const TAIL := 0.9  # s on the ground after the landing
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	frame_px = 480
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -32,6 +35,7 @@ func run(main: Node) -> void:
 			await _hunter(String(PICKS[cls]), out.path_join(way).path_join(cls), way)
 	print("LAND_WEIGHT_SHOTS_DONE")
 	tree.quit()
+
 
 func _hunter(id: String, dir: String, way: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)

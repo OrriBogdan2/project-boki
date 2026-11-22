@@ -6,17 +6,53 @@ ways down (--variant drop_run, glide_still...) show the touchdown alone: the fra
 
     python3 tools/jump_land_strip.py <shots-dir> <out.jpg> [--variant run|still|<way>_run|<way>_still] [--label text]
 """
+
 import argparse, json, os, sys
 from PIL import Image, ImageDraw
 
-KEYS = [("run", "t", -1), ("off", "t", 1), ("off", "t", 2), ("off", "t", 4), ("apex", "a", 0), ("fall", "a", 5),
-        ("pre", "l", -1), ("land", "l", 0), ("", "l", 2), ("", "l", 4), ("", "l", 6), ("", "l", 9), ("", "l", 12),
-        ("", "l", 15)]
-LAND_KEYS = [("pre", "l", -1), ("land", "l", 0), ("", "l", 1), ("", "l", 2), ("", "l", 3), ("", "l", 4), ("", "l", 6),
-             ("", "l", 9), ("", "l", 12), ("", "l", 15)]
-ORDER = ["gunslinger", "bulwark", "mage", "juggernaut", "archer", "rimewright", "dredge", "tender", "ashwick",
-         "dolm", "ostra", "thief"]
-CROP_W, CROP_UP, CROP_DOWN, SCALE = 110, 150, 60, 1     # px round the Hunter's feet in a 720 px frame
+KEYS = [
+    ("run", "t", -1),
+    ("off", "t", 1),
+    ("off", "t", 2),
+    ("off", "t", 4),
+    ("apex", "a", 0),
+    ("fall", "a", 5),
+    ("pre", "l", -1),
+    ("land", "l", 0),
+    ("", "l", 2),
+    ("", "l", 4),
+    ("", "l", 6),
+    ("", "l", 9),
+    ("", "l", 12),
+    ("", "l", 15),
+]
+LAND_KEYS = [
+    ("pre", "l", -1),
+    ("land", "l", 0),
+    ("", "l", 1),
+    ("", "l", 2),
+    ("", "l", 3),
+    ("", "l", 4),
+    ("", "l", 6),
+    ("", "l", 9),
+    ("", "l", 12),
+    ("", "l", 15),
+]
+ORDER = [
+    "gunslinger",
+    "bulwark",
+    "mage",
+    "juggernaut",
+    "archer",
+    "rimewright",
+    "dredge",
+    "tender",
+    "ashwick",
+    "dolm",
+    "ostra",
+    "thief",
+]
+CROP_W, CROP_UP, CROP_DOWN, SCALE = 110, 150, 60, 1  # px round the Hunter's feet in a 720 px frame
 
 
 def cell(frame_dir, i, size):
@@ -30,8 +66,10 @@ def cell(frame_dir, i, size):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("shots"); ap.add_argument("out")
-    ap.add_argument("--variant", default="run"); ap.add_argument("--label", default="")
+    ap.add_argument("shots")
+    ap.add_argument("out")
+    ap.add_argument("--variant", default="run")
+    ap.add_argument("--label", default="")
     a = ap.parse_args()
     cw, ch = CROP_W * 2 * SCALE, (CROP_UP + CROP_DOWN) * SCALE
     ids = [i for i in ORDER if os.path.isdir(os.path.join(a.shots, i, a.variant))]
@@ -55,8 +93,11 @@ def main():
             x = pad + c * cw
             sheet.paste(cell(fd, i, (cw, ch)), (x, y))
             tag = name if name else ""
-            d.text((x + 3, y + ch - 14), "%s%+d" % (tag or {"t": "off", "a": "apex", "l": "land"}[k], off)
-                   if off else (name or k), fill=(255, 240, 160))
+            d.text(
+                (x + 3, y + ch - 14),
+                "%s%+d" % (tag or {"t": "off", "a": "apex", "l": "land"}[k], off) if off else (name or k),
+                fill=(255, 240, 160),
+            )
     sheet.save(a.out, quality=78)
     print("wrote", a.out, sheet.size)
 

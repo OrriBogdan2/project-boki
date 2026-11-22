@@ -5,4 +5,9 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--remote-anim-1-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "1"],
+	"--remote-anim-2-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "2"],
+	"--remote-anim-3-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "3"],
+	"--remote-anim-rest-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "rest"],
+	"--remote-anim-guest": ["res://tools/remote_anim_check.gd", "remote_anim_check", ""],  # its guest game
 }

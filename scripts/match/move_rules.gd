@@ -7,8 +7,10 @@ extends RefCounted
 
 static var _data: Dictionary = _load()
 
+
 static func data() -> Dictionary:
 	return _data
+
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))

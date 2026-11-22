@@ -77,7 +77,8 @@ func _on_added(n: Node) -> void:
 		# who built it: the nearest ancestor with a script (a compile frame's report names it)
 		var a: Node = n.get_parent()
 		for i in 6:
-			if a == null or a.get_script() != null: break
+			if a == null or a.get_script() != null:
+				break
 			a = a.get_parent()
 		var by := (a.get_script() as Script).resource_path.get_file() if a and a.get_script() else "?"
 		_from[by] = int(_from.get(by, 0)) + 1
@@ -100,7 +101,8 @@ func _process(delta: float) -> void:
 		var mk := {}
 		for g in _added_geo:
 			if is_instance_valid(g):
-				for k in _mat_keys(g as GeometryInstance3D): mk[k] = mk.get(k, _node_path(g))
+				for k in _mat_keys(g as GeometryInstance3D):
+					mk[k] = mk.get(k, _node_path(g))
 		lf["added_mats"] = mk.keys().map(func(k): return "%s (%s)" % [k, mk[k]])
 		_walk_us += Time.get_ticks_usec() - w0  # (the report's own time, not the frame's)
 		if _bench.vp != vp_rid:
@@ -359,8 +361,10 @@ func _compile_lines() -> Array:
 	var fl: Array = frames.filter(func(f): return int(f.get("compiles", 0)) > 0)
 	var n := 0
 	var pd := 0
-	for f in frames: pd += int(f.get("pipes_draw", 0))
-	for f in fl: n += int(f["compiles"])
+	for f in frames:
+		pd += int(f.get("pipes_draw", 0))
+	for f in fl:
+		n += int(f["compiles"])
 	var head := "PROFILE in-match shader compiles %d in %d frames, pipelines built at draw %d"
 	var out: Array = [head % [n, fl.size(), pd]]
 	for f in fl.slice(0, 20):

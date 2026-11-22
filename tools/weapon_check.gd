@@ -38,14 +38,14 @@ func run(main: Node) -> void:
 					}
 				)
 				m.set_process(false)
-				var P: Hunter = m.player
-				var T: Hunter = null
+				var p: Hunter = m.player
+				var t_v: Hunter = null
 				var home := Vector3.ZERO
 				# find flat open ground for both
 				for tries in 400:
 					# the training island first; long sightlines may need the open ground elsewhere
 					var at: Vector3 = (
-						m.world.random_ground(m.world.island_of(P.pos.x, P.pos.z))
+						m.world.random_ground(m.world.island_of(p.pos.x, p.pos.z))
 						if tries < 200
 						else m.world.random_ground()
 					)
@@ -57,46 +57,46 @@ func run(main: Node) -> void:
 							ok = false
 					if ok:
 						home = at
-						P.teleport(at)
-						T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, to)
+						p.teleport(at)
+						t_v = m.make_hunter("T", 5, "medium", "Target", "idle", {}, to)
 						break
-				if T == null:
+				if t_v == null:
 					print("WCHECK %s: no spot" % wid)
 					m.queue_free()
 					continue
-				T.max_hp = 100000.0
-				T.hp = T.max_hp
-				T.armor = 0.0
-				T.max_armor = 0.0
+				t_v.max_hp = 100000.0
+				t_v.hp = t_v.max_hp
+				t_v.armor = 0.0
+				t_v.max_armor = 0.0
 				for mb in m.mobs:
 					mb.queue_free()
 				m.mobs.clear()
 				var t := 0.0
 				var dur := 6.0
 				while t < dur:
-					T.teleport(P.pos + Vector3(dist, 0, 0))
-					T.vel = Vector3.ZERO
-					P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
-					P.inp["aim_y"] = T.pos.y
+					t_v.teleport(p.pos + Vector3(dist, 0, 0))
+					t_v.vel = Vector3.ZERO
+					p.inp["aim"] = t_v.pos + Vector3(0, 0.9, 0)
+					p.inp["aim_y"] = t_v.pos.y
 					if mode == "tap":
-						P.inp["fire"] = int(t / 0.05) % 2 == 0
+						p.inp["fire"] = int(t / 0.05) % 2 == 0
 					elif mode == "charge":
 						# hold until the charge is full, then let go for a moment
-						if P.inp["fire"] and P.atk.charge_k() >= 1.0:
-							P.inp["fire"] = false
-							P.set_meta("rel", 0.5)
-						elif not P.inp["fire"]:
-							P.set_meta("rel", float(P.get_meta("rel", 0.0)) - Match.DT)
-							if float(P.get_meta("rel", 0.0)) <= 0.0:
-								P.inp["fire"] = true
-								P.teleport(home)
-								P.vel = Vector3.ZERO  # lunges carry you off the test strip
+						if p.inp["fire"] and p.atk.charge_k() >= 1.0:
+							p.inp["fire"] = false
+							p.set_meta("rel", 0.5)
+						elif not p.inp["fire"]:
+							p.set_meta("rel", float(p.get_meta("rel", 0.0)) - Match.DT)
+							if float(p.get_meta("rel", 0.0)) <= 0.0:
+								p.inp["fire"] = true
+								p.teleport(home)
+								p.vel = Vector3.ZERO  # lunges carry you off the test strip
 					else:
-						P.inp["fire"] = true
+						p.inp["fire"] = true
 					m.mobs.clear()
 					m.step(Match.DT)
 					t += Match.DT
-				var dealt := T.max_hp - T.hp
+				var dealt := t_v.max_hp - t_v.hp
 				print(
 					(
 						"WCHECK %-12s %-6s dist %4.1f  dps %6.1f  (%d in %ds)"

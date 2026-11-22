@@ -6,16 +6,17 @@ extends RefCounted
 ## A new player (HudReveal.newcomer) is only pointed at the seats in hud_groups.json "newcomer_seats" and gets this
 ## line in place of the four-seat strip. Reads WaysOutHud.seats and WaysOutMap.sites; draws with HudStyle.
 
-const H := 28.0           # px: the pill's height (the QuestTracker card's slot)
-const PAD := 12.0         # px inside the pill, left and right
-const BADGE_R := 8.0      # px: the seat's map badge, so the line and the map read as the same thing
-const GAP := 10.0         # px between the badge, the status and the how
+const H := 28.0  # px: the pill's height (the QuestTracker card's slot)
+const PAD := 12.0  # px inside the pill, left and right
+const BADGE_R := 8.0  # px: the seat's map badge, so the line and the map read as the same thing
+const GAP := 10.0  # px between the badge, the status and the how
+
 
 ## The seat index the line points at, or -1 when no seat is on offer.
 static func pick(m: Match, newcomer: bool) -> int:
 	var sd := WaysOutHud.seats(m)
 	var at := WaysOutMap.sites(m)
-	var allowed: Array = HudGroups.rules()["newcomer_seats"]      # (JSON numbers are floats)
+	var allowed: Array = HudGroups.rules()["newcomer_seats"]  # (JSON numbers are floats)
 	var best := -1
 	var best_k := INF
 	for i in 4:
@@ -28,6 +29,7 @@ static func pick(m: Match, newcomer: bool) -> int:
 			best_k = k
 	return best
 
+
 ## "Uplink opens 4:12" or "Uplink open · 140 m".
 static func status(m: Match, i: int, s: Dictionary) -> String:
 	var name: String = WaysOutMap.WORDS[i]
@@ -36,8 +38,10 @@ static func status(m: Match, i: int, s: Dictionary) -> String:
 		return "%s opens %d:%02d" % [name, t / 60, t % 60]
 	return "%s open · %d m" % [name, int(m.player.flat_dist(WaysOutMap.sites(m)[i]))]
 
+
 static func how(i: int) -> String:
 	return String(HudGroups.rules()["goal_how"][i]).replace("%F", Settings.key_cap("interact"))
+
 
 ## Is the line drawn now? Not while your squad is on a quest seat (its own card), you are out, or a raid has its
 ## own strip.
@@ -46,6 +50,7 @@ static func shown(m: Match) -> bool:
 	if p == null or p.out or p.extracted or m.heart_raid or not HudGroups.ways_out_shown(m):
 		return false
 	return QuestTracker.seat_of(m, p.team) == null
+
 
 ## Draws the pill centred at the top, y = `top`. `dim` fades it back (the strip's slot under it keeps its place).
 static func draw(hud, top: float, newcomer: bool) -> void:

@@ -233,7 +233,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
 		Save.add_item(item, 1)
-		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
+		h._toast("%s dug up a %s" % [rec["name"], String(Care.foods_v[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
 	if h.life and gained > 0:
 		h.life.sfx.toy_done(rec, k["pos"])

@@ -188,8 +188,10 @@ func _audit_one(tag: String, panel: Control, pr: Rect2, c: Control) -> void:
 		ok(pr.grow(SLACK).encloses(r), "%s: %s at %s is outside its panel %s" % [tag, what, r, pr])
 	else:
 		var sr := sc.get_global_rect()
-		ok(r.position.x >= sr.position.x - SLACK and r.end.x <= sr.end.x + SLACK,
-			"%s: %s at %s sticks out sideways from its list %s" % [tag, what, r, sr])
+		ok(
+			r.position.x >= sr.position.x - SLACK and r.end.x <= sr.end.x + SLACK,
+			"%s: %s at %s sticks out sideways from its list %s" % [tag, what, r, sr]
+		)
 	var cut := _text_cut(c)
 	ok(cut == "", "%s: %s text cut off: %s" % [tag, what, cut])
 
@@ -240,8 +242,13 @@ func _audit_overlaps(tag: String, leaves: Array[Control]) -> void:
 				continue
 			var x := seen[i].intersection(seen[j])
 			if x.size.x > OVERLAP and x.size.y > OVERLAP:
-				ok(false, "%s: %s '%s' overlaps %s '%s' by %s" % [tag, a.get_class(), _text_of(a).left(20),
-					b.get_class(), _text_of(b).left(20), x.size])
+				ok(
+					false,
+					(
+						"%s: %s '%s' overlaps %s '%s' by %s"
+						% [tag, a.get_class(), _text_of(a).left(20), b.get_class(), _text_of(b).left(20), x.size]
+					)
+				)
 
 
 ## The part of a control that can be seen: what a scroll list around it does not cut off.
