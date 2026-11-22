@@ -10926,3 +10926,4 @@ READY ext/anim-dash-mark-cinder-lace 863ef01e0c0 (Cinder ram/poof + Lace roll/fl
 READY ext/ui-results-boki-line a882ed986c7d1bbfc2d251b472517be1aa9139a0 (results show Boki XP and bond)
 READY ext/vfx-gil-smoke-ring 2b6d46558d365ab25d924e8761475b88c8e25d24 (Gil RMB/Zeep looks cleaned up)
 READY ext/sfx-overheat-lift-row bbad8835ec45f4c722af38ea90a18d0038f3c90e (overheated glider lift cue row green)
+READY ext/sfx-overheat-lift-row 2fc957841de4c94ae48fc3f6a6c0ba6a5efc93bf (overheated glider lift cue row green)
