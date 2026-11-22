@@ -75,6 +75,6 @@ func _care_row(m: Node, P: Hunter, at: Vector3) -> CareLook:
 	var C := CareLook.new(m, P)
 	C.burst("spikes", at + Vector3(-4.0, 0, 0), {"col": Color("8ae6ff"), "r": 1.4, "dur": HELD_S})
 	C.burst("shell", at + Vector3(-1.8, 0, 0), {"col": Color("8ae6ff"), "r": 1.3, "dur": HELD_S})
-	C.keep("frost", "frost", at + Vector3(0.2, 0, 0), {"r": 1.3})
+	C.keep("shards", "shards", at + Vector3(0.2, 0, 0), {"n": 5, "r": 1.3})
 	C.keep("wall", "wall", at, {"a": Vector2(at.x + 1.8, at.z), "b": Vector2(at.x + 5.0, at.z), "y": at.y})
 	return C
