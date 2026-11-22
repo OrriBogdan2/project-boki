@@ -38,7 +38,9 @@ func _emit(h: Hunter) -> float:
 func _cast_w(h: Hunter) -> float:
 	var sync: Node = WardenGlb.layers(h.model)
 	var c: WardenClips = sync.get("clips")
-	return c.up_w + c.act_w if c else (1.0 if sync.get("cur") == "attack" else 0.0)
+	if c:
+		return c.up_w + c.act_w
+	return 1.0 if sync.get("cur") == "attack" else 0.0
 
 func run(main: Node) -> void:
 	Save.no_write = true

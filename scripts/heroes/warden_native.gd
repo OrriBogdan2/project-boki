@@ -127,6 +127,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
 	_copy_anchors(glb)
+	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
 	_play("idle", 1.0)
 
 
@@ -134,7 +135,10 @@ func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
-	if _attacked(s):
+	var xt := float(s.get("extract_t", -1.0))
+	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
+		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
+	elif _attacked(s):
 		attack_left = _clip_len("attack") / float(d.get("attack_rate", 1.0))
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
 	elif attack_left <= 0.0:
@@ -142,7 +146,7 @@ func _process(dt: float) -> void:
 	player.advance(dt)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
-		opener.busy = attack_left > 0.0
+		opener.busy = String(s.get("kmove", "")) != ""  # (as clips.busy: a kit move drops the open reach)
 		opener.step(dt, 1.0)
 	if flinch:
 		flinch.step(dt)
@@ -306,7 +310,8 @@ func _chain(b: int, into: Dictionary) -> void:
 
 ## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
 ## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a holder that follows
-## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against the head as on the contract model and at the same size in metres, and
+## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against
+## the head as on the contract model and at the same size in metres, and
 ## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
 func _add_orbits(glb: Node3D) -> void:
 	var want: Dictionary = d.get("orbits", {})

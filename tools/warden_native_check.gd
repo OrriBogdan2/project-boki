@@ -56,7 +56,8 @@ func _model(a: String) -> Node3D:
 func _bones(a: String) -> void:
 	var m := _model(a)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var contract := CONTRACT_BONES.filter(func(b): return WardenSkeleton.find(sk, b) >= 0)
+	# (own: a bone named as the contract names it, not WardenSkeleton.find's Meshy stand-in)
+	var contract := CONTRACT_BONES.filter(func(b): return WardenSkeleton.own(sk, b) >= 0)
 	ok(
 		sk.find_bone("Hips") >= 0 and sk.find_bone("RightHand") >= 0 and contract.is_empty(),
 		"%s: Meshy's skeleton (%d bones, no contract bones %s)" % [a, sk.get_bone_count(), str(contract)]
