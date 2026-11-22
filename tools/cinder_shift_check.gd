@@ -1,5 +1,5 @@
 extends "res://tools/move_feel_check.gd"
-## --cinder-shift-check (owner playtest 11-17: "Cinder's Shift is too fast and goes about 2x as far as it should"):
+## --cinder-shift-check (playtest: "Cinder's Shift is too fast and goes about 2x as far as it should"):
 ## one Cinder Shift measured in the real match step with W held, as a player holds it. The Soot Ram on the ground
 ## and the poof in the air each go the ram's 3.4 m (docs/heroes/ashwick.md; the poof was 6.8 m at 24 m/s), within
 ## 5%, and a Shift in a running jump adds no more than the ram's length to where he lands (it added 7.7 m).
@@ -7,7 +7,7 @@ extends "res://tools/move_feel_check.gd"
 
 const TOL := 0.05  # share of the target distance
 const GROUND := [3.4, 0.33]  # [footage] Felix's ram, m and s
-const AIR := [3.4, 0.28]  # owner 11-17: the ram's length (was 6.8 m); the lw_hop clip's 0.28 s kept
+const AIR := [3.4, 0.28]  # the ram's length (it was 6.8 m); the lw_hop clip's 0.28 s kept
 const PEAK_MAX := 18.0  # m/s: the ram's own fitted peak (17.3); the poof was 24.3
 
 
