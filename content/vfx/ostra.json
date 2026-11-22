@@ -96,7 +96,7 @@
 			{"p": "flare", "y": 0.6, "size": 1.8, "grow": 1.2, "life": 0.14, "c": "main", "c2": "hot", "c3": "char"},
 			{"p": "ring", "size": "r", "life": 0.3, "c": "main", "c2": "hot", "c3": "char"}
 		]},
-		"well_close": {"fx": [
+		"well_close": {"sfx": [{"n": "os_well_close", "db": -3}], "fx": [
 			{"p": "vortex", "size": "r", "size_x": 0.5, "spin": 2.0, "grow": 0.2, "life": 0.35, "c": "main", "c2": "hot",
 				"c3": "char"},
 			{"p": "smoke", "y": 0.3, "shape": "gather", "radius": 1.6, "n": 3, "speed": 3.0, "life": 0.4, "size": 0.25,
