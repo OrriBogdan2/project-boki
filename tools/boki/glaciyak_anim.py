@@ -1,6 +1,6 @@
-"""Glaciyak's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a yak that lumbers, with
-its head low and its weight rolling from shoulder to shoulder, ploughs into things with its prow horns and rears up
-to slam the ground."""
+"""Glaciyak's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a yak that lumbers,
+with its head low and its weight rolling from shoulder to shoulder, ploughs into things with its prow horns and rears
+up to slam the ground."""
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
