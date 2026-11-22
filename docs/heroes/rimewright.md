@@ -115,7 +115,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | Damaging abilities Chill for 4s; a Chilled foe knocked or a Chilled creep killed Shatters after a short delay | wiki | yes (Shatter) | yes | "knocking a Chilled foe Shatters them after a beat" |
 | 8 dart hits on one target trigger Shatter | wiki | yes (0068) | yes | "8 darts on one foe Shatter them" |
 | Darts are semi-homing, curving toward the cursor side | wiki, footage | yes | yes | "darts come out slowly ... bowed", "the bowed darts curve back onto the foe" |
-| Darts hit harder while skating | wiki (2x), footage (1.6x); not in the tooltip data | yes | removed in the data pass (straight beams, normal damage) | "darts while skating are straight beams at normal damage" |
+| Darts hit harder while skating | wiki (2x), footage (1.6x); not in the tooltip data | yes | 2x (wiki), `dash.skate_dart_dmg_k`; the footage's 1.6x not used | "darts while skating are straight beams at double damage" |
 | Hold to skate in your direction, release to stop, early release refunds part of the cooldown | wiki | yes | yes | "Shift held starts a skate", "letting go stops ... refunds" |
 | Skating carries on over a ledge | footage (0199) | yes | yes | "she skates on over a ledge" |
 | The spear: closer hits slow more, far hits deal more | wiki | no | replaced by the slow zone (footage) | (see Assumptions) |
