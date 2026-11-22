@@ -9,38 +9,43 @@ extends RefCounted
 ## alone while it comes. Home only: a match never reads the whistle action (G owns
 ## the Boki there). Tuning: content/rules/base_life.json "whistle".
 
-var h                       # the home (home.gd)
-var R: Dictionary           # base_life.json "whistle"
-var held := -1.0            # s the key has been down, -1 when it is up or the hold call is made
-var hint: WhistleHint       # the one-time nudge to use the key (whistle_hint.gd)
-var _other: Dictionary = {}   # the Boki a long hold will call
-var _answering: Array = []    # the Boki in their answer beat (k["answer"] = {t, beat, sulky})
-
-const PERK_FADE := 0.06       # s the perk takes to rise, and to fall at the end of the beat
-const PERK_TILT := -0.14      # rad, nose up (KinPuppet "alert")
-const PERK_TALL := 0.08       # share the body stretches up
-const SULK_TILT := 0.1        # rad, nose down
-const HEAD_LEAD := 0.45       # share of the turn to you the front takes ahead of the body (rad per rad, up to HEAD_MAX)
-const HEAD_MAX := 1.2         # rad
+const PERK_FADE := 0.06  # s the perk takes to rise, and to fall at the end of the beat
+const PERK_TILT := -0.14  # rad, nose up (KinPuppet "alert")
+const PERK_TALL := 0.08  # share the body stretches up
+const SULK_TILT := 0.1  # rad, nose down
+const HEAD_LEAD := 0.45  # share of the turn to you the front takes ahead of the body (rad per rad, up to HEAD_MAX)
+const HEAD_MAX := 1.2  # rad
 
 const TAP := "garden_whistle_tap"
 const HOLD := "garden_whistle_hold"
-const ANSWER_DB := -12.0      # dB: a Boki's answer sits under the whistle
+const ANSWER_DB := -12.0  # dB: a Boki's answer sits under the whistle
+
+var h  # the home (home.gd)
+var r: Dictionary  # base_life.json "whistle"
+var held := -1.0  # s the key has been down, -1 when it is up or the hold call is made
+var hint: WhistleHint  # the one-time nudge to use the key (whistle_hint.gd)
+
+var _other: Dictionary = {}  # the Boki a long hold will call
+var _answering: Array = []  # the Boki in their answer beat (k["answer"] = {t, beat, sulky})
+
 
 func _init(home, rules: Dictionary) -> void:
 	h = home
-	R = rules["whistle"]
+	r = rules["whistle"]
 	hint = WhistleHint.new(self)
 	Sfx.streams[TAP] = Synth.whistle()
 	Sfx.streams[HOLD] = Synth.whistle(true)
+
 
 ## How readily a Boki answers, 0 to 1: trust counts most, then its overall condition.
 func eagerness(rec: Dictionary) -> float:
 	return clampf(float(rec["trust"]) * 0.006 + Care.condition(rec) * 0.004, 0.0, 1.0)
 
+
 ## A sulky Boki (glum, or it does not trust you yet) only looks over.
 func sulky(rec: Dictionary) -> bool:
-	return Care.need(rec, "joy") < float(R["sulky_joy"]) or float(rec["trust"]) < float(R["shy_trust"])
+	return Care.need(rec, "joy") < float(r["sulky_joy"]) or float(rec["trust"]) < float(r["shy_trust"])
+
 
 ## The key went down: the partner is called now, the nearest other Boki if it stays down.
 func press() -> void:
@@ -51,9 +56,11 @@ func press() -> void:
 	_call(mine, 0.4)
 	_other = _nearest(mine)
 
+
 func release() -> void:
 	held = -1.0
 	_other = {}
+
 
 ## Called every frame by BaseLife.step.
 func step(d: float) -> void:
@@ -62,17 +69,19 @@ func step(d: float) -> void:
 	if held < 0.0:
 		return
 	held += d
-	if held >= float(R["hold_s"]):
+	if held >= float(r["hold_s"]):
 		held = -1.0
 		GardenSfx.cue(HOLD, h.ppos)
 		_call(_other, 0.4 + PI)
 		_other = {}
+
 
 func partner() -> Dictionary:
 	for k in h.kins:
 		if k["rec"]["uid"] == Save.d.get("active", ""):
 			return k
 	return {}
+
 
 ## The closest Boki to you that is free to come and is not the partner.
 func _nearest(mine: Dictionary) -> Dictionary:
@@ -87,8 +96,10 @@ func _nearest(mine: Dictionary) -> Dictionary:
 			best_d = d
 	return best
 
+
 static func _busy(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("fetch") or k.has("bath") or k.has("leap")
+
 
 func _call(k: Dictionary, angle: float) -> void:
 	if k.is_empty() or _busy(k):
@@ -98,15 +109,15 @@ func _call(k: Dictionary, angle: float) -> void:
 	var sulk := sulky(rec)
 	if sulk and (float(k.get("nap_t", 0.0)) > 0.0 or k.has("indoors")):
 		return
-	k["call_slot"] = Vector3(cos(angle), 0, sin(angle)) * float(R["slot_m"])
-	k["call_pace"] = float(R["sulky_pace"]) if sulk else lerpf(float(R["pace"][0]), float(R["pace"][1]), eagerness(rec))
+	k["call_slot"] = Vector3(cos(angle), 0, sin(angle)) * float(r["slot_m"])
+	k["call_pace"] = float(r["sulky_pace"]) if sulk else lerpf(float(r["pace"][0]), float(r["pace"][1]), eagerness(rec))
 	if k.has("indoors"):
 		h._house_alert([k])
 		return
 	k["nap_t"] = 0.0
 	for key in ["nap_go", "nap_go_t", "going_in"]:
 		k.erase(key)
-	k["called_t"] = float(R["give_up_s"])
+	k["called_t"] = float(r["give_up_s"])
 	h._emote(k, "…" if sulk else "!")
 	if not asleep:
 		_answer(k, _answer_cue(rec, sulk))
@@ -117,24 +128,27 @@ func _call(k: Dictionary, angle: float) -> void:
 	else:
 		_start_answer(k, sulk)
 
+
 ## The answer beat: the Boki stops where it stands and holds (hold_t) while it perks up, or, sulky, droops and waits.
 ## It lasts perk_s plus up to turn_s for the turn to face you, so a Boki already facing you loses only perk_s.
 func _start_answer(k: Dictionary, sulk: bool) -> void:
 	var n := k["node"] as Node3D
-	var beat := float(R["wait_s"]) if sulk else float(R["perk_s"]) + float(R["turn_s"]) * absf(_turn_to_you(k)) / PI
+	var beat := float(r["wait_s"]) if sulk else float(r["perk_s"]) + float(r["turn_s"]) * absf(_turn_to_you(k)) / PI
 	k["answer"] = {"t": 0.0, "beat": beat, "sulky": sulk}
 	k["hold_t"] = beat
 	k["vel"] = Vector3.ZERO
-	k["q_on"] = 0.0      # a habit in progress would fight the pose
+	k["q_on"] = 0.0  # a habit in progress would fight the pose
 	n.set_meta("pose", "whine" if sulk else "alert")
 	n.set_meta("face", "sad" if sulk else "cheer")
 	if not _answering.has(k):
 		_answering.append(k)
 
+
 ## Radians from where the Boki faces to the direction of you, -PI to PI.
 func _turn_to_you(k: Dictionary) -> float:
 	var to := Vector2(h.ppos.x - k["pos"].x, h.ppos.z - k["pos"].z)
 	return wrapf(atan2(-to.x, -to.y) - (k["node"] as Node3D).rotation.y, -PI, PI)
+
 
 ## Every frame: the perk (or droop) and the front's turn toward you, then back to rest when the beat is over.
 func _pose_answers(d: float) -> void:
@@ -160,11 +174,13 @@ func _pose_answers(d: float) -> void:
 		body.rotation = Vector3(amp * (SULK_TILT if sulk else PERK_TILT), head, 0.0)
 		body.scale = Vector3(1.0, 1.0 + (0.0 if sulk else amp * PERK_TALL), 1.0)
 
+
 ## Which voice answers: a grumble when sulky, else happy or unsure by eagerness.
 func _answer_cue(rec: Dictionary, sulk: bool) -> String:
 	if sulk:
 		return "garden_sulk_" + GardenSfx.size_word(rec)
-	return KinVoice.cue(rec["species"], "happy" if eagerness(rec) >= float(R["happy_at"]) else "unsure")
+	return KinVoice.cue(rec["species"], "happy" if eagerness(rec) >= float(r["happy_at"]) else "unsure")
+
 
 ## The called Boki's voice at its own spot, in its own pitch.
 func _answer(k: Dictionary, sname: String) -> void:

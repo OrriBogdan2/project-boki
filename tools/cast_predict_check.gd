@@ -20,7 +20,6 @@ const WATCH := 45  # ticks watched after the press (0.75 s)
 const SETTLE := 60  # ticks between presses, so the last move's looks are over
 const WARDENS := ["gunslinger", "juggernaut", "archer", "ashwick"]  # Vex, Kael, Lace, Cinder
 const NEAR := 6.0  # m: a look this close to the pressing Hunter is theirs (the other one stands 9 m off)
-const FRESH := 0.05  # s: a HeroVfx look this young started this tick
 const SLOTS := {"lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate", "dash": "dash"}
 
 var main: Node
@@ -201,18 +200,19 @@ func _trial(hero: String, slot: String) -> Array:
 	var anim0 := _anim_sig(m)
 	var pools := [m.fx.bi, m.fx.si, m.fx.fi]
 	var held := HeroVfx.of(m).holds.keys()
+	var seen := {}  # node ids of the HeroVfx looks running, a look not in it started this tick
+	_new_vfx(m, pools, held, seen)
 	var first := [-1, -1]
-	# the same dice offline and online (Kael's charge sparks are a coin flip a tick, on the global RNG)
 	Input.action_press(SLOTS[slot])
 	for tick in WATCH:
 		if tick == HOLD:
 			Input.action_release(SLOTS[slot])
 		_no_mobs(m)
-		seed(hash(hero + slot) + tick)  # re-dealt each tick: a draw elsewhere (an online monster copy) can't shift them
+		seed(hash(hero + slot) + tick)  # the same dice offline and online (Kael's charge sparks flip a coin a tick)
 		m._process(DT)  # in the press's own frame, so the press is "just pressed" here
 		if first[0] < 0 and _anim_sig(m) != anim0:
 			first[0] = tick
-		if _new_vfx(m, pools, held) and first[1] < 0:
+		if _new_vfx(m, pools, held, seen) and first[1] < 0:
 			first[1] = tick
 		await main.get_tree().process_frame
 	Input.action_release(SLOTS[slot])
@@ -257,7 +257,7 @@ func _anim_sig(m: Match) -> Array:
 ## A look started this tick at the pressing Hunter (within NEAR): a shared burst, spark or flash (muzzle
 ## flashes, impacts), or a HeroVfx layer, trail or new hold of theirs. `pools` is the Fx pool cursors seen last,
 ## `held` the holds running before the press (Lace's bow string idles all the time).
-func _new_vfx(m: Match, pools: Array, held: Array) -> bool:
+func _new_vfx(m: Match, pools: Array, held: Array, seen: Dictionary) -> bool:
 	var hunter := m.player
 	var fx := m.fx
 	var got := false
@@ -270,10 +270,17 @@ func _new_vfx(m: Match, pools: Array, held: Array) -> bool:
 			i = (i + 1) % nodes[k].size()
 		pools[k] = now[k]
 	var hv := HeroVfx.of(m)
+	var running := {}
 	for e: Dictionary in hv.live + hv.motes:
-		got = got or (float(e["t"]) < FRESH and (e["node"] as Node3D).global_position.distance_to(hunter.pos) < NEAR)
+		var id: int = (e["node"] as Node3D).get_instance_id()
+		got = got or (not seen.has(id) and (e["node"] as Node3D).global_position.distance_to(hunter.pos) < NEAR)
+		running[id] = true
 	for e: Dictionary in hv.ribbons:
-		got = got or (e["h"] == hunter and float(e["t"]) < FRESH)
+		var id: int = (e["node"] as Node3D).get_instance_id()
+		got = got or (e["h"] == hunter and not seen.has(id))
+		running[id] = true
+	seen.clear()
+	seen.merge(running)
 	for key in hv.holds:
 		got = got or (hv.holds[key]["h"] == hunter and key not in held)
 	return got
