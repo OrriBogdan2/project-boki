@@ -5,4 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # FARM_LOOP: bond pace, taper
 }

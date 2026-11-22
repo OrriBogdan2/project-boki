@@ -5,4 +5,6 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],      # fixed camps and their XP
 }

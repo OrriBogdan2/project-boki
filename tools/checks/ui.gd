@@ -5,4 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],  # 0022 ult ranks
 }

@@ -5,4 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--boki-type-colour-check": ["res://tools/boki_type_colour_check.gd", "boki_type_colour_check", null],
 }

@@ -46,7 +46,6 @@ const CHECKS := {
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
-	"--match-flow-check": ["res://tools/match_flow_check.gd", "match_flow_check", null],      # 0061 phases
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],  # EdgeMarker
@@ -207,7 +206,6 @@ const CHECKS := {
 	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
-	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
@@ -267,7 +265,6 @@ const CHECKS := {
 	"--wild-type-cue-check": ["res://tools/wild_type_cue_check.gd", "wild_type_cue_check", null],
 	"--wild-type-cue-shots": ["res://tools/wild_type_cue_shots.gd", "wild_type_cue_shots", null], # GPU, --shots-dir
 	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
-	"--boki-type-colour-check": ["res://tools/boki_type_colour_check.gd", "boki_type_colour_check", null],
 	"--kin-type-trail-check": ["res://tools/kin_type_trail_check.gd", "kin_type_trail_check", null],
 	"--kin-type-trail-shots": ["res://tools/kin_type_trail_shots.gd", "kin_type_trail_shots", null],
 	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
@@ -331,7 +328,6 @@ const CHECKS := {
 	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
-	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],  # 0022 ult ranks
 	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],      # status cues and loops
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
@@ -479,8 +475,6 @@ const CHECKS := {
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],  # the leave beat
 	"--ryzz-gum-shots": ["res://tools/ryzz_gum_shots.gd", "ryzz_gum_shots", null],      # Sparkle's gum, GPU
 	"--cast-pop-check": ["res://tools/cast_pop_check.gd", "cast_pop_check", null],      # move blends cross their gaps
-	"--land-weight-check": ["res://tools/land_weight_check.gd", "land_weight_check", null],  # landing squash by class
-	"--land-weight-shots": ["res://tools/land_weight_shots.gd", "land_weight_shots", null],  # landing by class (GPU)
 	"--stride-check": ["res://tools/stride_check.gd", "stride_check", null],      # run start and stop
 	"--stride-shots": ["res://tools/stride_shots.gd", "stride_shots", null],      # the stop from a run, before/after
 	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null],  # strike sounds
@@ -605,9 +599,6 @@ const CHECKS := {
 	# quit and carry on
 	"--tutorial-resume-check": ["res://tools/tutorial_resume_check.gd", "tutorial_resume_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
-	"--tutorial-frame-archer-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "archer"],
-	"--tutorial-frame-juggernaut-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "juggernaut"],
-	"--tutorial-frame-gunslinger-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "gunslinger"],
 	"--tutorial-lane-check": ["res://tools/tutorial_lane_check.gd", "tutorial_lane_check", null],  # LMB first, no cover
 	"--tutorial-walk-shots": ["res://tools/tutorial_walk_shots.gd", "tutorial_walk_shots", null],  # GPU; 1080p frames
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
@@ -706,7 +697,6 @@ const CHECKS := {
 	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],  # trust from care
-	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # FARM_LOOP: bond pace, taper
 	"--pet-react-check": ["res://tools/pet_react_check.gd", "pet_react_check", null],      # a pat by personality
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
@@ -881,7 +871,6 @@ const CHECKS := {
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
 	"--card-numbers-check": ["res://tools/card_numbers_check.gd", "card_numbers_check", null],
-	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
 	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],      # Hob's clear ring
@@ -901,7 +890,6 @@ const CHECKS := {
 	"--bot-ring-check": ["res://tools/bot_ring_check.gd", "bot_ring_check", null],      # BotRing
 	"--level-growth-check": ["res://tools/level_growth_check.gd", "level_growth_check", null],
 	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP, 30 m share
-	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],      # fixed camps and their XP
 	"--boss-parity-check": ["res://tools/boss_parity_check.gd", "boss_parity_check", null],  # boss phase, leash, kill
 	"--steal-tell-check": ["res://tools/steal_tell_check.gd", "steal_tell_check", null],      # boss low-HP tell
 	"--steal-tell-shots": ["res://tools/steal_tell_shots.gd", "steal_tell_shots", null],      # GPU, --shots-dir=

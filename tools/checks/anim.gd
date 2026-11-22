@@ -5,4 +5,6 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--land-weight-check": ["res://tools/land_weight_check.gd", "land_weight_check", null],  # landing squash by class
+	"--land-weight-shots": ["res://tools/land_weight_shots.gd", "land_weight_shots", null],  # landing by class (GPU)
 }

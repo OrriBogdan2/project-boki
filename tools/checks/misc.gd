@@ -5,5 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--match-flow-check": ["res://tools/match_flow_check.gd", "match_flow_check", null],      # 0061 phases
+	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 }
