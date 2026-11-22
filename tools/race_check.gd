@@ -52,6 +52,7 @@ func run(m: Node) -> void:
 	_twists()
 	_formats()
 	_courses()
+	_vent_stretch()
 	await _zone_tracks()
 	_beats_keep_order()
 	await _on_base()
@@ -495,6 +496,38 @@ func _courses() -> void:
 			ok(r.over() and r.t < MAX_S, "%s: a %s runs it to the line (%.1f s)" % [z, plan, r.t])
 	GardenZones.here = ""
 	ok(shapes.size() == zones.size(), "no two zones share a course")
+
+## The ridge track runs through an updraft vent (ZoneVents): its first vent stands on the stretch that names it, a
+## winged runner is quicker there (vent_mult) than the same stats on the ground, and nobody else is.
+func _vent_stretch() -> void:
+	var R: Dictionary = BaseRace.rules()
+	GardenZones.here = "ridge"
+	var c: Array = BaseRace.course("ridge")
+	var vents := ZoneVents.spots("ridge")
+	var s: int = c.map(func(x): return x.has("vent")).find(true)
+	var named := s >= 0 and int(c[s]["vent"]) < vents.size()
+	ok(named, "ridge: a stretch of the track names one of its %d vents" % vents.size())
+	var line := Vector3(BaseRace.post_spot()[0], 0.0, BaseRace.post_spot()[1]) + BaseRace.LOOP_OFF
+	var pts := BaseRace.path(c, s)
+	var gap: float = INF
+	for i in range(1, pts.size()):
+		var v: Vector3 = vents[int(c[s]["vent"])] - line
+		var a := pts[i - 1]
+		var b := pts[i]
+		var t := clampf((Vector2(v.x, v.z) - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		gap = minf(gap, (a + (b - a) * t).distance_to(Vector2(v.x, v.z)))
+	ok(gap <= BaseRace.TRACK_W * 0.5, "ridge: the vent stands on the track (%.2f m off its line)" % gap)
+	var wings: String = Data.KIN.keys().filter(func(sp): return BaseRace.winged({"species": sp}))[0]
+	var walker: String = Data.KIN.keys().filter(func(sp): return not BaseRace.winged({"species": sp}))[0]
+	var flier := _kin(wings, "Wing", 10, 60.0)
+	var ground := _kin(walker, "Foot", 10, 60.0)
+	var other: int = c.find_custom(func(x): return x["kind"] == "straight" and not x.has("vent"))
+	var lift := BaseRace.stretch_pace(flier, s) / BaseRace.stretch_pace(flier, other)
+	lift *= float(c[other]["mult"]) / float(c[s]["mult"])
+	ok(is_equal_approx(lift, float(R["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
+	ok(is_equal_approx(BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
+			float(c[s]["mult"]) / float(c[other]["mult"])), "ridge: a runner without wings gets no lift")
+	GardenZones.here = ""
 
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.
