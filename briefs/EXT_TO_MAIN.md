@@ -10910,3 +10910,4 @@ READY ext/combat-gil-bot-grabbag 9e51e9542027d22c39458bfa7c84d5789a104479 (Gil b
 READY ext/farm-boki-react-loot 6c321924338629a131ef2409c7b01ad975bf346b (Boki react to brought-home items)
 READY ext/ui-settings-descriptions aa39655f85 (settings descriptions)
 READY ext/anim-boki-back-curl-blend 4b9484f4d6cf5cedffa42e5524a130b67219eb80 (Boki back-curl blends without a snap)
+READY ext/combat-stolen-wisp-extract e45d0a8cb0 (stolen-wisp extraction verified end to end)
