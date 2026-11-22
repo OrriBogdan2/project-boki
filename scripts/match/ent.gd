@@ -32,6 +32,7 @@ var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
 var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
+var net_dead_t := -1.0         # (a remote Boki) when its caught event landed: older snapshots are stale
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0

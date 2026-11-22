@@ -94,6 +94,7 @@ const EMIT_FLICKER := 0.55     # and how much it crackles
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_MIN_PX := 0.4         # no line thinner than this many drawn pixels: it broke into specks (min_px)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
@@ -143,7 +144,8 @@ static func path(arch: String) -> String:
 ## another design of the same Warden, built on the same rig and kept beside the shipped model so the two can be
 ## compared in game (art/wardens/<art>_<tag>/<art>_<tag>.glb, e.g. vex_r3b): `--warden-variant=vex_r3b`
 ## (comma-separated for several) picks it for the session. A variant whose file is missing falls back to the
-## shipped model.
+## shipped model. A look-only variant has no .glb but an entry in warden_look.json with "hide_bones": the shipped
+## model with those bones shrunk away (hidden_bones; `--warden-variant=ryzz_nogum`: Sparkle without her gum).
 static func art(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
 	var v := variant(nm)
@@ -158,6 +160,11 @@ static func variant(nm: String) -> String:
 				for v in String(a).get_slice("=", 1).split(",", false):
 					_variants[v.get_slice("_", 0)] = v
 	return String((_variants as Dictionary).get(nm, ""))
+
+## The bones the picked look-only variant of an art name hides (WardenSync shrinks them every frame); [] for none.
+static func hidden_bones(nm: String) -> Array:
+	var v := variant(nm)
+	return look(v).get("hide_bones", []) if v != "" else []
 
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
@@ -706,6 +713,7 @@ static func _painted_ink() -> ShaderMaterial:
 		_ink.set_shader_parameter("width", INK_WIDTH)
 		_ink.set_shader_parameter("ink_mask", true)
 		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+		_ink.set_shader_parameter("min_px", INK_MIN_PX)
 	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
