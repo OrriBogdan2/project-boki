@@ -175,11 +175,11 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 		return null
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
 	var own: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
-	var lib := own if own else _borrow(String(dd.get("clips_from", "")), sk)
-	if lib == null:
+	var lib_v := own if own else _borrow(String(dd.get("clips_from", "")), sk)
+	if lib_v == null:
 		return null
 	var c := WardenClips.new()
-	if not c._setup(model, glb, sk, dd, lib):
+	if not c._setup(model, glb, sk, dd, lib_v):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
@@ -325,8 +325,8 @@ func _out(dt: float) -> void:
 			skel.set_bone_pose_scale(b[0], b[1])
 		elif not out:
 			skel.set_bone_pose_scale(b[0], b[1] * k)
-	var busy := act_w > 0.5 or up_w > 0.5
-	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
+	var busy_v := act_w > 0.5 or up_w > 0.5
+	out_w = move_toward(out_w, 1.0 if out and not busy_v else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:
 		for b in out_pose:
 			var bi := int(b[0])
@@ -576,10 +576,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
-	var call := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
+	var call_v := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
 	var call_t := float(s.get("call_t", 99.0))
-	if lib.has_animation(call) and call_t < lib.get_animation(call).length:
-		return {"clip": call, "t": call_t, "upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
+	if lib.has_animation(call_v) and call_t < lib.get_animation(call_v).length:
+		return {"clip": call_v, "t": call_t,
+				"upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
 	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)
@@ -700,10 +701,12 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# to the move's end: no planted stance mid-air, no snap into it on the landing)
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
-	var pick := {"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
+	var pick := {
+			"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
 			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
-			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))
+	}
 	# ("blend_out": s before the clip's end over which the body goes back to the legs while the clip plays on)
 	var back := float(mv.get("blend_out", 0.0))
 	if back > 0.0 and left <= back:
@@ -965,13 +968,17 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 ## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
 ## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 func _air_tilt() -> void:
-	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
-	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+	air_tilt(root, skel, root_bi)
+
+## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip posed it.
+static func air_tilt(model: Node3D, sk: Skeleton3D, bi: int) -> void:
+	var q: Quaternion = model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
 		return
 	var b := Basis(q)
-	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
-	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
-	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
+	var to_skel := sk.global_transform.affine_inverse() * model.global_transform
+	var turn_v := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	sk.set_bone_global_pose(bi, turn_v * sk.get_bone_global_pose(bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = _vel(s)
@@ -1046,8 +1053,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 ## holds it for the squash's own seconds, the same keys at the speed that fits them in; else the Hero's own data
 ## (the dive: the drop's, DIVE_SLOW slower).
 static func land_play(base: Dictionary, cls: String, tier: int) -> Dictionary:
-	var feel := Content.rules("land_feel").get(cls, {}) as Dictionary
-	var way := feel.get(["hop", "hop", "drop", "dive"][tier], {}) as Dictionary
+	var feel_v := Content.rules("land_feel").get(cls, {}) as Dictionary
+	var way := feel_v.get(["hop", "hop", "drop", "dive"][tier], {}) as Dictionary
 	var out := base.duplicate()
 	if not bool(way.get("clip", false)):
 		if tier == 3:

@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 | Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
 | Passive: Crushed | Knocking a foe into a wall or another foe stuns it. |
 | Dash: 360 Smash | Short dash ending in a spinning hit; with aegis up, Shield Charge. |
-| RMB: Aegis | Hold to block shots from the front; with it up, dash is a Shield Charge. |
+| RMB: Aegis | Hold to block shots from the front; your dash key becomes Shield Charge. |
 | E: Mending Ground | Healing zone around your hammer for 4s, ending in a burst. |
 | Hunter ultimate: Faultline | Plant and slam: the ground erupts down a lane, throwing foes up. |
 | Weapon: War Hammer & Aegis | Tap throws the hammer, tap again recalls; hold to spin and slam. |

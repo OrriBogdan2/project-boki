@@ -18,27 +18,46 @@ extends RefCounted
 const GROUND_COL := Color("e0a03a")
 const RATTLE_COL := Color("ffb36a")
 const TAG_COL := {"ign": Color("ff8a2a"), "chl": Color("9fe0ff"), "sta": Color("ff7fd0"), "mrk": Color("ffd24a")}
-const TAG_TOP := 2.9           # m above the feet where the stack pips ring the body
+const TAG_TOP := 2.9  # m above the feet where the stack pips ring the body
+
 
 static func rattled(e: Ent) -> bool:
-	return e != null and is_instance_valid(e) and e.has_meta("rat_until") and e.m != null and float(e.m.time) < float(e.get_meta("rat_until"))
+	return (
+		e != null
+		and is_instance_valid(e)
+		and e.has_meta("rat_until")
+		and e.m != null
+		and float(e.m.time) < float(e.get_meta("rat_until"))
+	)
+
 
 static func rattled_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("rat_until")) - float(e.m.time)) if rattled(e) else 0.0
+
 
 ## The length of the Daze last put on `e` (the badge's ring), never less than what is left.
 static func rattled_total(e: Ent) -> float:
 	return maxf(rattled_left(e), float(e.get_meta("rat_for", 0.0)))
 
+
 static func clear_rattled(e: Ent) -> void:
 	if e != null and is_instance_valid(e) and e.has_meta("rat_until"):
 		e.set_meta("rat_until", 0.0)
 
+
 static func grounded(e: Ent) -> bool:
-	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
+	return (
+		e != null
+		and is_instance_valid(e)
+		and e.has_meta("gnd_until")
+		and e.m != null
+		and float(e.m.time) < float(e.get_meta("gnd_until"))
+	)
+
 
 static func grounded_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
+
 
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
 ## body belongs to one of them. `toast`: the player's toast reads this (what Grounded takes away from a Dredge
@@ -52,7 +71,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 	if m == null:
 		return
 	if kind == "gnd":
-		e.set_meta("gnd_by", by)      # the look's colour: the caster's when the kit names it (StatusLooks)
+		e.set_meta("gnd_by", by)  # the look's colour: the caster's when the kit names it (StatusLooks)
 	if e.remote:
 		if send and m.get("net_on"):
 			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01), by])
@@ -89,11 +108,13 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.slow_t = maxf(e.slow_t, secs)
 			if not was_d:
 				_show(e, kind, secs)
-				if secs >= CcSfx.MIN_SLOW_S: CcSfx.play(e, "slow")
+				if secs >= CcSfx.MIN_SLOW_S:
+					CcSfx.play(e, "slow")
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
 			_show(e, kind, secs)
+
 
 ## A remote body's own game runs the rule, so here only the time left is kept, for the plate's timer.
 static func _note_remote(e: Ent, kind: String, secs: float) -> void:
@@ -105,6 +126,7 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 	elif kind == "dsr":
 		e.slow_t = maxf(e.slow_t, secs)
 
+
 ## What everyone sees: the body look (StatusLooks: cords round the legs, a ring over the head) for its
 ## length, and a word as it lands (no ground ring: that means gameplay).
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
@@ -115,17 +137,20 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	match kind:
 		"gnd":
 			_look(e, "gnd", secs)
-			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
+			if e == m.get("player") and m.hud and toast != "":
+				m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			_look(e, "daze", secs)
 		"dsr":
 			_look(e, "slow", secs)
+
 
 ## The body look for what this game can't read off the body's own timers: a body another game owns, or one
 ## that isn't a Hunter (StatusLooks reads a local Hunter's timers itself, so a status cut short ends there).
 static func _look(e: Ent, st: String, secs: float) -> void:
 	if e.remote or not (e is Hunter):
 		StatusLooks.of(e.m).put(e, st, secs)
+
 
 ## A tag's stacks on `e`'s own game, summed over its casters (each caster's stack is its own, as the
 ## caster's game keeps them: Sable's meta marks per dancer, Cinder's ignites per kit), and the seconds the
@@ -137,6 +162,7 @@ static func tag_left(e: Ent, kind: String, by := "") -> float:
 			best = maxf(best, float(_tags(e, kind)[c]["until"]) - float(e.m.time))
 	return maxf(0.0, best)
 
+
 static func tag_n(e: Ent, kind: String, by := "") -> int:
 	var n := 0
 	var all := _tags(e, kind)
@@ -145,17 +171,23 @@ static func tag_n(e: Ent, kind: String, by := "") -> int:
 			n += int(all[c]["n"])
 	return n
 
+
 ## meta "tag_<kind>" {caster nid: {n, until}}
 static func _tags(e: Ent, kind: String) -> Dictionary:
 	return e.get_meta("tag_" + kind, {}) if e != null and is_instance_valid(e) else {}
 
+
 ## The most stacks one caster's game lets a caster keep of `kind` (0: no cap; Sable's Marks have none).
 static func tag_cap(kind: String) -> int:
 	match kind:
-		"ign": return 2                   # AshwickKit.stoke: Ablaze, Flashover
-		"chl": return 1
-		"sta": return int(Arch.def("mage").get("resource", {}).get("max", 4))
+		"ign":
+			return 2  # AshwickKit.stoke: Ablaze, Flashover
+		"chl":
+			return 1
+		"sta":
+			return int(Arch.def("mage").get("resource", {}).get("max", 4))
 	return 0
+
 
 ## Keeps one caster's stack on the body that owns it (capped as the caster's game caps it) and rings the
 ## pips round it, one row per caster, until the last one runs out.
@@ -170,6 +202,7 @@ static func _tag(e: Ent, kind: String, secs: float, n: int, by: String) -> void:
 		all[by] = {"n": n, "until": float(e.m.time) + secs}
 	e.set_meta("tag_" + kind, all)
 	_prune(e, kind)
+
 
 static func _tag_look(e: Ent, kind: String) -> void:
 	var old := e.get_node_or_null("Tag_" + kind)
@@ -202,14 +235,19 @@ static func _tag_look(e: Ent, kind: String) -> void:
 	# the next stack to run out redraws the pips (or clears them with the last one)
 	var next := last
 	for c in all:
-		if float(all[c]["until"]) > now: next = minf(next, float(all[c]["until"]))
-	var rid := ring.get_instance_id()          # ids, not the nodes: either may be freed by then
+		if float(all[c]["until"]) > now:
+			next = minf(next, float(all[c]["until"]))
+	var rid := ring.get_instance_id()  # ids, not the nodes: either may be freed by then
 	var eid := e.get_instance_id()
-	e.m.later(next - now + 0.01, func():
-		var r := instance_from_id(rid) as Node
-		var body := instance_from_id(eid) as Ent
-		if r != null and body != null and r.get_parent() == body and r.name == "Tag_" + kind:
-			_prune(body, kind))
+	e.m.later(
+		next - now + 0.01,
+		func():
+			var r := instance_from_id(rid) as Node
+			var body := instance_from_id(eid) as Ent
+			if r != null and body != null and r.get_parent() == body and r.name == "Tag_" + kind:
+				_prune(body, kind)
+	)
+
 
 static func _prune(e: Ent, kind: String) -> void:
 	var all := _tags(e, kind).duplicate()
@@ -221,6 +259,7 @@ static func _prune(e: Ent, kind: String) -> void:
 	else:
 		e.set_meta("tag_" + kind, all)
 	_tag_look(e, kind)
+
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:

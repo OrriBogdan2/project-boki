@@ -9,17 +9,19 @@ extends RefCounted
 ## No burst, ring or disc on landing (DECISIONS): the squash is the whole of it. Never touches the save.
 
 const DT := 1.0 / 60.0
-const FALLS := {"hop": 6.8, "drop": 9.4, "dive": 25.0}     # m/s down at touchdown: a jump, a 3 m drop, a dive
-const FRAMES_TOL := 1.5                                    # frames the squash may be off its seconds
+const FALLS := {"hop": 6.8, "drop": 9.4, "dive": 25.0}  # m/s down at touchdown: a jump, a 3 m drop, a dive
+const FRAMES_TOL := 1.5  # frames the squash may be off its seconds
 const CLASSES := ["light", "medium", "heavy"]
 
 var bad := 0
 var holder: Node3D
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LAND %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -39,17 +41,27 @@ func run(main: Node) -> void:
 			depths[cls + way] = got.x
 	var light_hop := HunterAnim.land_feel("light", 1)
 	ok(absf(light_hop.y - 0.15) < 0.001, "light jump: up again in 0.15 s (source: crouch + rise)")
-	ok(HunterAnim.land_feel("heavy", 2).x == 1.0 and absf(HunterAnim.land_feel("heavy", 2).y - 0.5) < 0.001,
-			"heavy drop: the deepest squash, 0.5 s (source: the slam's recovery)")
+	ok(
+		HunterAnim.land_feel("heavy", 2).x == 1.0 and absf(HunterAnim.land_feel("heavy", 2).y - 0.5) < 0.001,
+		"heavy drop: the deepest squash, 0.5 s (source: the slam's recovery)"
+	)
 	ok(HunterAnim.land_feel("heavy", 3) == HunterAnim.land_feel("heavy", 2), "heavy dive lands like its drop")
 	for way: String in ["drop", "dive"]:
-		ok(depths["heavy" + way] >= depths["medium" + way] and depths["medium" + way] >= depths["light" + way],
-				"%s: heavier never squashes shallower than lighter" % way)
-		ok(lengths["heavy" + way] >= lengths["medium" + way] and lengths["medium" + way] >= lengths["light" + way] - DT,
-				"%s: heavier never settles quicker than lighter" % way)
+		ok(
+			depths["heavy" + way] >= depths["medium" + way] and depths["medium" + way] >= depths["light" + way],
+			"%s: heavier never squashes shallower than lighter" % way
+		)
+		ok(
+			(
+				lengths["heavy" + way] >= lengths["medium" + way]
+				and lengths["medium" + way] >= lengths["light" + way] - DT
+			),
+			"%s: heavier never settles quicker than lighter" % way
+		)
 	_clips()
 	print("LAND_WEIGHT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Vector2(deepest land_k, seconds until it is gone) for one class touching down at fall_v m/s.
 func _land(cls: String, fall_v: float) -> Vector2:
@@ -70,13 +82,14 @@ func _land(cls: String, fall_v: float) -> Vector2:
 		an.update(DT, air)
 	var deepest := 0.0
 	var frames := 0
-	an.update(DT, ground)      # (the touchdown frame: the squash starts and takes its first step)
+	an.update(DT, ground)  # (the touchdown frame: the squash starts and takes its first step)
 	while an.land_k > 0.0 and frames < 120:
 		deepest = maxf(deepest, an.land_k)
 		an.update(DT, ground)
 		frames += 1
 	m.free()
 	return Vector2(deepest + an.land_rate * DT, (frames + 1) * DT)
+
 
 ## Every Hero with a land clip: the footage cells retime it to the class's seconds over the same keys.
 func _clips() -> void:
@@ -96,6 +109,8 @@ func _clips() -> void:
 				continue
 			var keys := float(base["dur"]) * float(base.get("rate", 1.0))
 			var same := absf(float(got["dur"]) * float(got["rate"]) - keys) < 0.001
-			var what := "%s %s %s: land clip held %.2f s (data %.2f), same %.2f s of keys" % [a, cls, way, got["dur"],
-					cell["s"], keys]
+			var what := (
+				"%s %s %s: land clip held %.2f s (data %.2f), same %.2f s of keys"
+				% [a, cls, way, got["dur"], cell["s"], keys]
+			)
 			ok(absf(float(got["dur"]) - float(cell["s"])) < 0.001 and same, what)

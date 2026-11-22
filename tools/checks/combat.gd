@@ -5,5 +5,5 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
-	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],      # Vex: one dash, no charge pips
+	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],  # Vex: one dash, no charge pips
 }
