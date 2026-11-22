@@ -173,14 +173,15 @@ static func world_text(id: String) -> String:
 
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal; in the base
-## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay).
+## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal. In the base
+## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay), wake (a zone
+## woke) and played (a Boki finished a toy turn): the last two end "head out or stay" for a player who plays on.
 static func event(what: String) -> void:
 	if not active():
 		return
 	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
 	if base():
-		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out"}
+		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out", "wake": "out", "played": "out"}
 	var id := ids.get(what, "") as String
 	detect()
 	if id != "" and available(id):
