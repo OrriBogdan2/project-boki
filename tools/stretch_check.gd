@@ -4,8 +4,9 @@ extends RefCounted
 ## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
 ## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
 ## the ratio is divided by it. A Hero in CEILING is held at its ceiling instead of the limit. Prints one line per clip
-## and a table per Hero. The registry splits the roster into four flags (--stretch-<n>-check) so each stays
-## under the gate's 300 s cap; a shard's arg is its comma list of Heroes. Never touches the save.
+## and a table per Hero. The registry splits the roster into seven flags (--stretch-<n>-check, ~120 clips each:
+## 3-4 Heroes took 280-360 s on a loaded box, over the gate's 300 s cap); a shard's arg is its comma list of Heroes.
+## Never touches the save.
 
 const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain links) say nothing about stretch
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
