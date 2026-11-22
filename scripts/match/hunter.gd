@@ -964,7 +964,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
-const DASH_BUFFER := 0.18
 const DASH_KEEP := 0.5        # s: a press inside a dash this short waits for its end (a longer lock drops it)
 
 func do_dash() -> void:
@@ -979,7 +978,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
+		dash_buf = Loco.press_buffer + (minf(ak.dash_left(), DASH_KEEP) if ak else 0.0)  # fire as it ends
 		return
 	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1502,7 +1501,6 @@ func sim(dt: float) -> void:
 	AirLimits.fold_at_touchdown(self, dt)
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
-	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
 	gate_ranks()
@@ -1565,6 +1563,7 @@ func sim(dt: float) -> void:
 	inp["kin_ab"] = false
 	for k in PRESS_KEYS:
 		inp[k] = false
+	FireTap.stepped(self)
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
@@ -2558,9 +2557,10 @@ func _took(d: float, _by: Ent) -> void:
 func perk_n(id: String) -> int:
 	return perks.count(id)
 
-## Can this perk still be offered to you (not at its stack limit)?
+## Can this perk still be offered to you (a free perk slot, not at its stack limit)?
 func perk_open(id: String) -> bool:
-	return perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1)) and WeaponUps.fits(self, id)
+	var below_max := perk_n(id) < int(Data.PERKS.get(id, {}).get("max", 1))
+	return perks.size() < PerkOrbs.slots() and below_max and WeaponUps.fits(self, id)
 
 ## Takes a perk for the rest of the expedition. Stats that are worked out once (health, glider,
 ## armor) are updated on the spot.
@@ -2675,7 +2675,7 @@ func _anim_state(stretch: float) -> void:
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
-	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
+	StompLook.fill(self, s)      # "stomp" (the cycle's phase, -1 off) and its style
 	UtilityPose.fill(self, s)      # "drink", or "util" with "util_move"
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)

@@ -5,7 +5,7 @@ extends Control
 ## of a new one; at most MAX_ROWS rows (a new one pushes the oldest out); each row fades after LIFE.
 ## Pickups used to toast into the message lane (MsgLane) and all play the one pickup sound; this keeps
 ## them out of the lane and gives each row its own tick, pitched by rarity. While the lane keeps to its
-## fight budget (`fight`, set by Hud like MsgLane.fight) only rare things tick.
+## fight budget (`fight`, set by Hud like MsgLane.fight) only rare things tick and show a row.
 
 const MERGE_S := 2.0       # s: the same thing again within this adds to its row
 const MAX_ROWS := 4        # rows on show at most
@@ -52,10 +52,9 @@ static func ground(m: Match, h, p: Dictionary, gems: int) -> void:
 
 ## One pickup: a row, or `n` more on the row of the same name if it came within MERGE_S.
 func add(icon: String, nm: String, n: int, col: Color, rar := 0) -> void:
-	if n <= 0:
-		return
-	if audible(fight, rar):
-		Sfx.play("pickup", null, TICK_DB, 0.03, 1.0 + TICK_PITCH * rar)
+	if n <= 0 or not audible(fight, rar):
+		return      # (a common pickup in a fight shows no row and makes no tick: the gem count and the pack have it)
+	Sfx.play("pickup", null, TICK_DB, 0.03, 1.0 + TICK_PITCH * rar)
 	for r in rows:
 		if r["name"] == nm and float(r["t"]) < MERGE_S:
 			r["n"] = int(r["n"]) + n
@@ -65,7 +64,7 @@ func add(icon: String, nm: String, n: int, col: Color, rar := 0) -> void:
 	if rows.size() > MAX_ROWS:
 		rows.pop_front()
 
-## Does a pickup of rarity `rar` tick? Always, except in a fight, where only rare things do.
+## Does a pickup of rarity `rar` tick (and show a row)? Always, except in a fight, where only rare things do.
 static func audible(in_fight: bool, rar: int) -> bool:
 	return not in_fight or rar >= RARE
 
