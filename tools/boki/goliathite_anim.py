@@ -1,6 +1,7 @@
 """Goliathite's (Effigeetle) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a
 cart-sized goliath beetle in a marble face. Earnest and gentle, so it plods with its weight rocking side to side, shoves
 rather than strikes, and holds its head up proud. The shell splits down the nose when it flies you over a gap."""
+
 import boki_clips
 import glomwort_anim
 from boki_clips import LOOK_UP, add, c, s, seq
@@ -109,14 +110,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.4, True, idle),
-    "walk": (1.1, True, walk),
-    "run": (0.62, True, run),
-    "hop": (1.1, True, heavy_hop),
-    "carry": (1.2, True, carry),
-    "pet": (2.4, True, pet),
-    "attack": (1.0, False, shove),
-    "ability": (1.5, False, split_open),
-    "sleep": (4.2, True, settle),
-})
+CLIPS.update(
+    {
+        "idle": (3.4, True, idle),
+        "walk": (1.1, True, walk),
+        "run": (0.62, True, run),
+        "hop": (1.1, True, heavy_hop),
+        "carry": (1.2, True, carry),
+        "pet": (2.4, True, pet),
+        "attack": (1.0, False, shove),
+        "ability": (1.5, False, split_open),
+        "sleep": (4.2, True, settle),
+    }
+)
