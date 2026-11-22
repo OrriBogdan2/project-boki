@@ -14,11 +14,6 @@ static func move() -> String:
 	)
 
 
-## How to glide: jump, then press jump again in the air and hold it (HoldTeach: a held glide).
-static func glide_how() -> String:
-	return "jump, then press %s again in the air and hold to glide" % Settings.key_cap("jump")
-
-
 static func rings() -> String:
 	return "Glide through the glowing rings for a burst of speed"
 
