@@ -312,7 +312,6 @@ func _aim_cue() -> void:
 	cue.aim(land, clampf(run.state_t / float(run.r_x["toss_s"]), 0.0, 1.0), run.head != "")
 
 
-
 ## Where the seed is, relative to the mat: in the air on the toss, on the ground while chased, in the
 ## winner's mouth coming home.
 func _seed_at() -> Vector3:
