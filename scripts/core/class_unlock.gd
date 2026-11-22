@@ -275,6 +275,15 @@ static func status(id: String) -> String:
 		return "progress"
 	return "locked"
 
+## The one plain line on a locked Hunter at home: the second Hunter waits for the first finished
+## expedition (said outright, a garden-only player has no other hint); the rest show their challenge.
+static func locked_line(id: String) -> String:
+	if is_open(id):
+		return ""
+	if is_bonus(id):
+		return "Finish an expedition to choose your second Hunter"
+	return challenge_text(id)
+
 ## What it takes, in one line with its counter, for a locked Hunter's card.
 static func requirement(id: String) -> String:
 	if is_open(id):
@@ -291,7 +300,7 @@ static func requirement(id: String) -> String:
 	var gp := challenge_progress(id)
 	var line := "%s (%d/%d)" % [challenge_text(id), int(gp["have"]), int(gp["need"])]
 	if open_ids().size() < open_needed(id):
-		line += ", once %d Relics are open" % open_needed(id)
+		line += "  ·  after %d Relics" % open_needed(id)
 	return line
 
 ## Unlocks a ready Hunter (the end of the hold). Returns false if it isn't ready.
