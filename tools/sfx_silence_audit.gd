@@ -105,7 +105,12 @@ func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
 
 
 func _on_cast(caster: Node, id: String, slot: String) -> void:
-	_add("cast", "%s %s" % [slot, id], caster, [caster])
+	var places: Array = [caster]
+	# Lace's Heavy Shot cues play at the bow's mouth (HeroVfx "heavy_go" at bow_root). Models are not processed in
+	# this hand-stepped match, so that anchor can sit metres off her: it is part of the cast's place.
+	if caster is Hunter and caster.arch == "archer":
+		places.append(HeroVfx.of(_m).anchor_pos(caster, "bow_root"))
+	_add("cast", "%s %s" % [slot, id], caster, places)
 
 
 func _on_status(target: Node, status: String, by: Node, _t: float) -> void:
@@ -306,8 +311,8 @@ func _fixes() -> void:
 			continue
 		ok(Sfx.ensure("v_" + String(kind).trim_prefix("bl_")), "mob %s has a wind-up voice" % kind)
 	# Lace's Heavy Shot release plays from the bow's mouth (HeroVfx "heavy_go"). In this hand-stepped match the
-	# models are not processed, so the bow anchor can lag metres behind her and its `cast secondary archer_rmb`
-	# rows read "none": the wiring is proved here instead.
+	# models are not processed, so the bow anchor can lag metres behind her (`_on_cast` now counts the bow anchor
+	# as the cast's place, so its `cast secondary archer_rmb` rows pair); the wiring is also proved here.
 	for x: Hunter in _m.hunters:
 		if x.arch == "archer" and not x.out and x.ak != null:
 			x.ak.ch_rmb = 1.0
