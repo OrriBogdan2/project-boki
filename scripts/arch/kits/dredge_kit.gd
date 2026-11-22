@@ -228,7 +228,7 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -350,6 +350,7 @@ func _launch_hook() -> void:
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			Sfx.loop_stop(_fly_key())
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
@@ -366,6 +367,7 @@ func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
+	Sfx.loop_hold(_fly_key(), "dr_reach_fly", p, -8.0, 1.0)      # the chain paying out behind the hand
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue
@@ -409,13 +411,15 @@ func _in_rock(a: Vector3, b: Vector3) -> Array:
 ## splash of sludge where it let go.
 func _let_go(tip: Vector3) -> void:
 	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+	m.sfx("dr_let_go", tip, -5.0, 1.0)
+
+func _fly_key() -> String:
+	return "reach_fly_%d" % h.get_instance_id()
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
-	if KinMerge.transforming(h) or KinMerge.active(h):
-		hook_hold = null
-		return
+	Sfx.loop_stop(_fly_key())
 	var rdf := rmb_def()
 	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
@@ -736,7 +740,8 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = Hunter.DASH_BUFFER        # held, never dropped: the next shove goes the step the gap ends
+		# held, never dropped: the next shove goes the step the gap ends (the shared window alone is shorter)
+		h.dash_buf = maxf(Loco.press_buffer, next_barge - m.time + CHAIN_GRACE)
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()

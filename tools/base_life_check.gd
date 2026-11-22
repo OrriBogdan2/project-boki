@@ -50,7 +50,7 @@ func _gather(home, at: Vector3) -> void:
 ## The rivalry beat (BaseRival, garden_sim.json rivalry): rivals passing close turn, huff and walk on, once a
 ## cooldown, and never play tag; a pair that is not rivals does nothing.
 func _rival_beat(home) -> void:
-	var R: Dictionary = BaseRival.rules()
+	var r: Dictionary = BaseRival.rules()
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
 	var c: Dictionary = home.kins[2]
@@ -64,8 +64,8 @@ func _rival_beat(home) -> void:
 	var mid: Vector2 = home.world.islands[maxi(home.world.island_of(a["pos"].x, a["pos"].z), 0)]["c"]
 	a["pos"] = home.world.free_spot_near(Vector3(mid.x, 0, mid.y), [], 0.8)
 	(a["node"] as Node3D).position = a["pos"]
-	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
-	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
+	b["pos"] = a["pos"] + Vector3(float(r["pass_m"]) * 0.5, 0, 0)
+	c["pos"] = a["pos"] + Vector3(-float(r["pass_m"]) * 0.5, 0, 0)
 	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
 	BaseLife.add_bond(a["rec"], c["rec"], 0.0 - BaseLife.bond(a["rec"], c["rec"]))
 	var heard := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
@@ -75,24 +75,76 @@ func _rival_beat(home) -> void:
 	var fb: Fsm = b["life"]
 	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
 	ok(fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
-		"rivals passing within %.1f m both turn to each other (React)" % float(R["pass_m"]))
+		"rivals passing within %.1f m both turn to each other (React)" % float(r["pass_m"]))
 	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
 	var after := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
 		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
 	ok(after == heard + 2, "each huffs through the garden SFX (%d cues)" % (after - heard))
 	ok((c["life"] as Fsm).is_in(BaseLife.S.ROAM), "a Boki that is not a rival is left alone")
 	var gap := BaseLife._dist(a, b)
-	for i in int(float(R["beat_s"]) / 0.1) + 2:
+	for i in int(float(r["beat_s"]) / 0.1) + 2:
 		home.life.step(0.1)
-	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"), 
-		"the beat ends in %.1f s" % float(R["beat_s"]))
+	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"),
+		"the beat ends in %.1f s" % float(r["beat_s"]))
 	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
 	home.life.step(0.2)
-	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(R["cooldown_s"]))
+	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(r["cooldown_s"]))
 	for k in [a, b]:
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
 	home.life._tag(a, b)
 	ok(not fa.is_in(BaseLife.S.PLAY_WITH) and not fb.is_in(BaseLife.S.PLAY_WITH), "rivals never play tag together")
+
+## Free play sounds (PlaySfx): a tag starts, a catch, a cheer when it runs out, a huff for a squabble; each once, quiet,
+## and a zone plays at most MAX_CUES of them inside WINDOW_S however many Boki play.
+func _play_sounds(home) -> void:
+	var life: BaseLife = home.life
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	life.sfx = PlaySfx.new()
+	for k in [a, b]:
+		k["rec"]["traits"]["temper"] = 0.0      # no squabble by chance
+		k.erase("life_at")
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	BaseLife.add_bond(a["rec"], b["rec"], 0.5 - BaseLife.bond(a["rec"], b["rec"]))
+	b["pos"] = a["pos"] + Vector3(0.5, 0, 0)
+	var gos := _cues("garden_go")
+	life._tag(a, b)
+	ok(_cues("garden_go") == gos + 1 and (a["life"] as Fsm).is_in(BaseLife.S.PLAY_WITH),
+			"a tag starting plays one go cue")
+	life.sfx.tick(PlaySfx.WINDOW_S)
+	var scuffs := _cues("tumble_push")
+	life._tag_tick(a, a["life"])
+	ok(_cues("tumble_push") == scuffs + 1 and b.get("life_it", false),
+			"a catch plays one scuff and passes the chase on")
+	life.sfx.tick(PlaySfx.WINDOW_S)
+	a["life_for"] = 0.0
+	var cheers := _cues("garden_cheer_good")
+	life._tag_tick(a, a["life"])
+	life._tag_tick(b, b["life"])
+	ok(_cues("garden_cheer_good") == cheers + 1, "a game of tag running out plays one cheer, not one per Boki")
+	life.sfx.tick(PlaySfx.WINDOW_S)
+	var huffs := _cues("garden_sulk_small") + _cues("garden_sulk_medium") + _cues("garden_sulk_large")
+	life._squabble(a, b)
+	var after := _cues("garden_sulk_small") + _cues("garden_sulk_medium") + _cues("garden_sulk_large")
+	ok(after == huffs + 1, "a squabble plays one huff in the Boki's size (%d)" % (after - huffs))
+	life.sfx.tick(PlaySfx.WINDOW_S)
+	var was := life.sfx.dropped
+	var played := _cues("garden_go")
+	for i in 10:
+		life.sfx.tag_start(a["rec"], a["pos"])
+	ok(_cues("garden_go") - played == PlaySfx.MAX_CUES and life.sfx.dropped - was == 10 - PlaySfx.MAX_CUES,
+		"ten Boki starting at once play %d cues in a zone window, the rest held back" % PlaySfx.MAX_CUES)
+	var here := GardenZones.here
+	GardenZones.here = "other_zone"
+	life.sfx.tag_start(a["rec"], a["pos"])
+	GardenZones.here = here
+	ok(_cues("garden_go") - played == PlaySfx.MAX_CUES + 1, "another zone has its own allowance")
+	life.sfx.tick(PlaySfx.WINDOW_S)
+	life.sfx.tag_start(a["rec"], a["pos"])
+	ok(_cues("garden_go") - played == PlaySfx.MAX_CUES + 2, "the allowance comes back once the window has passed")
+
+func _cues(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
 
 ## BokiNapSfx: of 30 Boki asleep around you only the nearest few breathe, within the loop's reach; a bigger
 ## Boki breathes lower; the night's sleepers breathe near you, and at dawn they yawn and the woken ones' loops let go.
@@ -282,6 +334,7 @@ func run(m: Node) -> void:
 	await _nap_sounds(home)
 	_spots_part(home, center)
 	_rival_beat(home)
+	_play_sounds(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

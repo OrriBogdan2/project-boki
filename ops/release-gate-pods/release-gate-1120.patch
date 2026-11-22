@@ -1,0 +1,52 @@
+--- release-gate.sh.orig	2026-11-20 20:28:48.029198596 +0000
++++ release-gate.sh	2026-11-20 20:29:55.160583226 +0000
+@@ -2,7 +2,12 @@
+ # release-gate.sh BRANCH: fast release-only gate (owner 11-08: ship 0.24.3 by noon EST).
+ # wt-merge-claude := origin/main + BRANCH; FULL suite (every flag) into ~/suite-claude vs a fresh main tree;
+ # release-dryrun in parallel. Prints the NEW-RED/WORSE list and the dry-run verdict. Ship after with ship-release.sh.
+-set -u; B=${1:?branch}; REPO=/home/boki/project-boki; WT=/home/boki/wt-merge-claude; MW=/home/boki/wt-rel-main; S=/home/boki/suite-claude
++set -u; T0=$(date +%s)
++# 11-20 PRE-RESERVE: "release-gate.sh --reserve MIN" (cron, ~2 h before a planned train) holds ~/cj/release-pods.lock with a sleep pid for MIN
++# minutes, so PR gates already on the release pods finish and no new one lands there; the gate itself then finds them idle (it rewrites the lock).
++if [ "${1:-}" = --reserve ]; then L=/home/boki/cj/release-pods.lock; kill -0 "$(head -1 $L 2>/dev/null)" 2>/dev/null && { echo "lock held by $(head -1 $L)"; exit 0; }
++  nohup sleep $(( ${2:-120} * 60 )) >/dev/null 2>&1 & echo "$!" > $L; tr '\n' ' ' < /home/boki/.release_pods | sed 's/ *$//' >> $L; echo >> $L; echo "reserved $(sed -n 2p $L) for ${2:-120} min (pid $(head -1 $L))"; exit 0; fi
++B=${1:?branch}; REPO=/home/boki/project-boki; WT=/home/boki/wt-merge-claude; MW=/home/boki/wt-rel-main; S=/home/boki/suite-claude
+ export PATH=/home/boki/bin:/home/boki/.local/bin:/usr/local/bin:/usr/bin:/bin
+ cd $REPO && gitnet fetch -q origin main "$B" || { echo "FAIL fetch"; exit 1; }
+ # 11-19: reserve ~/.release_pods for this gate from now (the 20 min import below lets PR gates already on them finish): regate-bot places no
+@@ -13,7 +18,10 @@
+ [ -z "$(git status --porcelain | grep -v "^?? .*\.uid$")" ] || { echo "FAIL: $WT dirty"; exit 1; }  # untracked Godot .uid files are regenerated, not dirt
+ git checkout -q --detach origin/main && git merge -q --no-edit "origin/$B" || { git merge --abort; echo "FAIL merge"; exit 1; }
+ echo "tree: $(git log -1 --format=%h) = main + $B"
+-cd $REPO; [ -d $MW ] && git worktree remove --force $MW; [ -L $MW ] && [ ! -e $MW ] && rm $MW; git worktree prune; git worktree add -q --detach $MW origin/main
++# 11-20: ~/wt-rel-main was a symlink on 11-19 ("failed to delete ... Not a directory"): worktree remove failed, worktree add failed
++# silently and the main side ran on whatever old tree the link pointed at. A link is now always removed (never its target) and a failed add stops the gate.
++cd $REPO; if [ -L $MW ]; then rm -f $MW; elif [ -d $MW ]; then git worktree remove --force $MW; fi; git worktree prune
++git worktree add -q --detach $MW origin/main && [ "$(git -C $MW rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "FAIL: main tree $MW not at origin/main"; exit 1; }
+ for t in $WT $MW; do timeout 900 godot --headless --path $t --import >/dev/null 2>&1; done
+ rm -rf $S; mkdir -p $S; rm -f /home/boki/coord/release-eta.txt
+ (release-dryrun $WT > $S/release.md 2>&1; echo "rc=$?" >> $S/release.md) & RD=$!
+@@ -25,13 +33,22 @@
+ grep -q SUITE_CACHE_REUSE /home/boki/bin/suite-fast.sh && [ -x /home/boki/bin/merge-first-ready ] && [ -x /home/boki/bin/suite-eta ] || { echo "FAIL: install suite-fast.sh, suite-eta, merge-first-ready first"; exit 1; }
+ # 11-19 DEDICATED RELEASE PODS: ~/.release_pods ("rpg1:8 rpg2:8 rpg3:8"; 64 GB per pod, ~5 GB per Godot run) run with SUITE_POD_CONFIRM=1 (a red-red pod result is a verdict, so the server
+ # does not rerun every pod red). Only pods idle in their own cgroup (<half the cores busy; cgroup v1 pods rpg1/2/4 have no cpu.stat, so cpuacct.usage) join. None idle: ~/.mc_pods as before.
+-KEYF=/home/boki/.ssh/boki_s2_deploy; RP=""
++# 11-20 DRAIN WAIT: the lock stops new PR gates on the release pods, but a PR gate already there runs on (~1-2 h), so the one-shot check
++# found 1 of 3 idle on 11-19 22:18Z and 11-20 01:33Z (rpg3 only) and 2 of 3 at 16:4xZ. Re-check every 2 min for up to RELEASE_POD_WAIT
++# s (default 900) until every pod is idle, then run with the idle ones (the 11-19 3-pod gate: 2h29m; 1-pod gates 2h38m-3h09m).
++KEYF=/home/boki/.ssh/boki_s2_deploy; RP=""; W0=$(date +%s)
++while :; do RP=""
+ for p in $(cat /home/boki/.release_pods 2>/dev/null); do
+   l=$(timeout 25 ssh -i $KEYF -o BatchMode=yes -o ConnectTimeout=10 ${p%%:*} 'u() { if [ -r /sys/fs/cgroup/cpu.stat ]; then awk "/usage_usec/{print \$2}" /sys/fs/cgroup/cpu.stat; else echo $(( $(cat /sys/fs/cgroup/cpuacct/cpuacct.usage) / 1000 )); fi; }; a=$(u); sleep 3; b=$(u); echo $(nproc) $(( (b - a) / 3000000 ))' 2>/dev/null)
+   [ -n "$l" ] && awk -v l="$l" 'BEGIN{split(l,a," "); exit !(a[2] < a[1]/2)}' && RP="$RP $p"; done
++[ "$(echo $RP | wc -w)" -ge "$(wc -w < /home/boki/.release_pods 2>/dev/null || echo 0)" ] && break
++[ $(( $(date +%s) - W0 )) -ge ${RELEASE_POD_WAIT:-900} ] && break; echo "release pods idle:${RP:- none}, waiting for the rest ($(( $(date +%s) - W0 ))s)"; sleep 120; done
+ RP=${RP# }; echo "release pods: ${RP:-none idle, using ~/.mc_pods}"
+ SUITE_PODS=${RP:-$(cat /home/boki/.mc_pods 2>/dev/null)}; export SUITE_PODS; [ -n "$RP" ] && export SUITE_POD_CONFIRM=1
+ CHECK_MAP=$S/check_map.json SUITE_CACHE_REUSE=${RELEASE_CACHE:-0} SUITE_ETA_FILE=/home/boki/coord/release-eta.txt SUITE_PRIORITY=2 OUT=$S GW=$WT MW=$MW bash /home/boki/bin/suite-fast.sh 8 > $S/suite.log 2>&1
+ wait $RD
++# 11-20 RUN LEDGER (gate wall time before/after, for the coordinator to quote): start end minutes tree pods NEW-RED main-skipped
++NR=$(grep -c ^NEW-RED $S/compare.txt 2>/dev/null); MS=$(wc -l < $S/main_same 2>/dev/null)
++printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(date -u -d @$T0 +%FT%TZ)" "$(date -u +%FT%TZ)" $(( ($(date +%s) - T0) / 60 )) "$(git -C $WT log -1 --format=%h) $B" "${RP:-mc_pods}" "${NR:-?}" "${MS:-0}/$(wc -l < $S/main_needed 2>/dev/null)" >> /home/boki/coord/release-gate-runs.tsv
+ echo "== suite"; head -3 $S/summary.txt; grep -E "^(NEW-RED|WORSE)" $S/summary.txt | head -30
+ echo "== dry-run"; grep -iE "pass|fail|rc=" $S/release.md | tail -5

@@ -4,6 +4,7 @@ Blender writes a zero tangent on triangles whose UVs collapse. Those vertices ge
 their normal, so the model looks the same and tools/lint_gate.py stays clean.
     python3 tools/boki/glb_tangents.py art/kin/<id>/<id>.glb ...
 """
+
 import json
 import struct
 import sys
@@ -43,7 +44,7 @@ def fix(path):
                 struct.pack_into("<4f", buf, t_off + i * t_str, v[0] / ln, v[1] / ln, v[2] / ln, sign)
                 fixed += 1
     if fixed:
-        out = raw[: bin_at] + bytes(buf) + raw[bin_at + len(buf) :]
+        out = raw[:bin_at] + bytes(buf) + raw[bin_at + len(buf) :]
         with open(path, "wb") as f:
             f.write(out)
     return fixed
