@@ -50,7 +50,7 @@ func open(root: Control, skip: Callable) -> void:
 
 ## The line for the run's state.
 func sync(run: BaseTumble.Run) -> void:
-	var moves: Dictionary = run.R["moves"]
+	var moves: Dictionary = run.r_x["moves"]
 	var theirs: String = run.recs[1]["name"]
 	match run.state:
 		"intro":

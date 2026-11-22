@@ -54,7 +54,7 @@ func watch() -> void:
 		return
 	var shrine: Vector3 = soak.home.lots["shrine"]["at"]
 	var d := Vector2(elder["pos"].x - shrine.x, elder["pos"].z - shrine.z).length()
-	var close: bool = d < 4.0 + float(soak.home.life.R["mentor_radius"])
+	var close: bool = d < 4.0 + float(soak.home.life.r_v["mentor_radius"])
 	if close and arrived == 0:
 		arrived = 1
 	elif arrived > 0:

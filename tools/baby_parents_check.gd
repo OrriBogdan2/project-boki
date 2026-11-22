@@ -108,7 +108,7 @@ func run(m: Node) -> void:
 	# ---- base life: a young Boki leans toward its parents
 	var home := StubHome.new()
 	var life := BaseLife.new(home)
-	var w := float(life.R["parent_weight"])
+	var w := float(life.r_v["parent_weight"])
 	var kid := Care.breed(a, b, rng)
 	kid["level"] = 1
 	var stranger := _kin("burrlet", "Sam", 8)
@@ -118,7 +118,7 @@ func run(m: Node) -> void:
 	ok(liked > BaseLife.regard({"rec": kid}, {"rec": stranger}, w), "a parent weighs more than a stranger")
 	kid["bonds"] = {a["uid"]: -0.9}
 	liked = BaseLife.regard({"rec": kid}, {"rec": a}, w)
-	ok(liked < float(life.R["friend_at"]), "a weight, not a rule: a parent it fell out with is not greeted")
+	ok(liked < float(life.r_v["friend_at"]), "a weight, not a rule: a parent it fell out with is not greeted")
 	kid.erase("bonds")
 	var kk := _entry(home, life, kid, 0.0)
 	var ak := _entry(home, life, a, 1.0)

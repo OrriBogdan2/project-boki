@@ -19,7 +19,7 @@ func tick(d: float) -> void:
 	if pill or not _eligible():
 		return
 	_away = _away + d if _apart() else 0.0
-	if _away >= float(w.R["hint_away_s"]):
+	if _away >= float(w.r["hint_away_s"]):
 		_show()
 
 
@@ -45,7 +45,7 @@ func _apart() -> bool:
 	var k := w.partner()
 	var at: Vector3 = k["pos"]
 	var gap := Vector2(at.x - w.h.ppos.x, at.z - w.h.ppos.z).length()
-	if gap > float(w.R["hint_far_m"]) or k.has("indoors"):
+	if gap > float(w.r["hint_far_m"]) or k.has("indoors"):
 		return true
 	var cam: Camera3D = w.h.cam
 	var spot := (k["node"] as Node3D).global_position + Vector3(0, 0.45, 0)
@@ -57,11 +57,11 @@ func _show() -> void:
 	Save.d["tutorial"]["whistle_hint"] = true
 	pill = UI.glass(6, 12)
 	pill.name = "WhistleHint"
-	var line := [[Settings.key_cap("whistle"), String(w.R["hint_text"])]]
+	var line := [[Settings.key_cap("whistle"), String(w.r["hint_text"])]]
 	pill.add_child(UI.key_hints(line, 14, Color(1, 1, 1, 0.9)))
 	w.h.root_ui.add_child(pill)
 	Record.hide_in_clean(pill)
-	var lift := int(w.R["hint_lift_px"])
+	var lift := int(w.r["hint_lift_px"])
 	pill.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, lift)
 	pill.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	pill.grow_vertical = Control.GROW_DIRECTION_BEGIN

@@ -35,7 +35,7 @@ func run(m: Node) -> void:
 	ok(secs < LOAD_SECS, "ready in %.1f s (under %.0f)" % [secs, LOAD_SECS])
 	ok(FarmUnlocks.base_mode() and home.life != null, "base_mode on: the farm runs BaseLife")
 	ok(home.kins.size() == 4 and recs.size() == 4, "4 Boki (%d on the farm)" % home.kins.size())
-	var R: Dictionary = home.life.R
+	var R: Dictionary = home.life.r_v
 	var pip := _by_name(recs, "Pip")
 	var moss := _by_name(recs, "Moss")
 	var ash := _by_name(recs, "Ash")

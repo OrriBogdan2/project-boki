@@ -39,7 +39,7 @@ var low := 0.0
 
 func _init(check) -> void:
 	c = check
-	p = check.P
+	p = check.p_v
 
 
 func run() -> void:

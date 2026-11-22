@@ -217,7 +217,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 ## Two Boki at one toy change their bond by base_life.json's `key` (base life on only).
 func _bond(k: Dictionary, o: Dictionary, key: String) -> void:
 	if h.life:
-		h.life.add_bond(k["rec"], o["rec"], float(h.life.R[key]))
+		h.life.add_bond(k["rec"], o["rec"], float(h.life.r_v[key]))
 
 func _temper(k: Dictionary) -> float:
 	return float(k["rec"]["traits"].get("temper", 0.5))

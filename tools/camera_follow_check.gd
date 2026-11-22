@@ -62,7 +62,7 @@ func run(mn: Node, mode: String) -> void:
 	mf = load("res://tools/move_feel_check.gd").new()
 	mf.m = m
 	mf.w = m.world
-	mf.P = P
+	mf.p_v = P
 	flat = mf._flat_spot(10.0)
 	m.acc = 0.0
 	m.paused = false

@@ -18,7 +18,7 @@ var p: Hunter
 
 func _init(check) -> void:
 	c = check
-	p = check.P
+	p = check.p_v
 
 
 ## UE's CalcVelocity along one axis, keys held the other way at full stick: [steps to zero, steps to 95% back].
