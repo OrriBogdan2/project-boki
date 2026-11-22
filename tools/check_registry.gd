@@ -481,6 +481,7 @@ const CHECKS := {
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],  # feet on stairs
 	"--warden-blink-check": ["res://tools/warden_blink_check.gd", "warden_blink_check", "check"],      # eyelid blink
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
+	"--ryzz-gum-shots": ["res://tools/ryzz_gum_shots.gd", "ryzz_gum_shots", null],      # Sparkle's gum, GPU
 	"--flinch-layer-shots": ["res://tools/flinch_layer_shots.gd", "flinch_layer_shots", null],      # the strip (GPU)
 	"--contact-check": ["res://tools/contact_check.gd", "contact_check", null],      # v95 swaps: hit vs contact pose
 	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],      # Tenzo's feet on his rocks
@@ -951,6 +952,8 @@ const CHECKS := {
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker
 	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],      # aim pitch: the pose
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
+	"--holster-check": ["res://tools/holster_check.gd", "holster_check", null],  # gun hip/hand
+	"--grimble-gun-shots": ["res://tools/grimble_gun_shots.gd", "grimble_gun_shots", null],  # gun hip/hand (GPU)
 	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable (same check)
 	"--rocket-drop-video": ["res://tools/rocket_drop_video.gd", "rocket_drop_video", null],      # the rocket drop (GPU)
 	"--cinder-shift-video": ["res://tools/cinder_shift_video.gd", "cinder_shift_video", null],  # Cinder Shift, before/after (GPU)
@@ -975,6 +978,7 @@ const CHECKS := {
 	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
 	"--abyss-danger-check": ["res://tools/abyss_danger_check.gd", "abyss_danger_check", null],  # tint grows with depth
 	"--abyss-danger-clip": ["res://tools/abyss_danger_clip.gd", "abyss_danger_clip", null],  # film a fatal drop (GPU)
+	"--farm-autosort-clip": ["res://tools/farm_autosort_clip.gd", "farm_autosort_clip", null],  # GPU film
 	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
