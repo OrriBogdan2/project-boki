@@ -1,18 +1,22 @@
 class_name Reticle
 extends RefCounted
 ## The aiming reticle at the cursor, in the player's own style (Settings > Gameplay > Reticle): shape,
-## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs,
-## with a centre dot. The HUD draws it first; the aim states (ammo ring, charge arcs, the hit tick and the
-## AimKit cursor states on their own layer) always draw on top of it.
-## One instance per HUD also owns the hit tick (`new(match)`, `tick`, `draw_tick`): see below.
+## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs with a
+## centre dot; the ring opens with weapon bloom, and on a hit it flashes. With the "hunter" colour (the
+## default) the ring stays pale and the dot and the aim arcs take the Hunter's own accent (Arch.color).
+## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit tick and the AimKit
+## cursor states on their own layer) draw on top of it. Every number is in content/rules/tuning.json "reticle".
+## One instance per HUD also owns the hit tick's state (`new(match)`, `tick`): see below.
 
 ## Shape id -> its name in Settings.
 const SHAPES := [
 	["default", "Default"], ["dot", "Dot"], ["circle", "Small circle"], ["cross", "Cross"],
 	["circle_dot", "Circle and dot"],
 ]
-## Colour id -> [its name in Settings, the colour]. "yellow" is the high-visibility one.
+## Colour id -> [its name in Settings, the colour]. "hunter" is a pale ring with the Hunter's accent on the dot
+## and arcs (draw's `accent`); "yellow" is the high-visibility one.
 const COLORS := {
+	"hunter": ["Hunter colour", Color("f4f1e6")],
 	"white": ["White", Color("f4f1e6")],
 	"yellow": ["High-vis yellow", Color("e4ff1f")],
 	"cyan": ["Cyan", Color("4fe3ff")],
@@ -20,31 +24,14 @@ const COLORS := {
 	"green": ["Green", Color("63ff7f")],
 	"red": ["Red", Color("ff4a3d")],
 }
-const RING_R := 6.0        # px at size 1: the ring's radius (the old cross reached 13 px out)
-const DOT_R := 1.4         # px at size 1: the centre dot
-const LINE_W := 1.4        # px at size 1: ring and cross stroke
-const CROSS_LEN := 5.0     # px at size 1: each arm of the cross
-const CROSS_GAP := 3.0     # px at size 1: the cross's open centre
-const EDGE_W := 1.2        # px: the outline's width on each side of a stroke
-const EDGE_A := 0.6        # the outline's opacity (times the reticle's own)
-const ARC_GAP := 0.32      # rad: each of the default ring's four breaks
-## The HUD's aim states round the reticle (px from the cursor), kept tight so the whole reads small:
-const CHARGE_R := 13.0     # a charge, warm-up or spin-up arc
-const AMMO_R := 16.0       # the ammo left, a thin arc below
-const RES_R := 22.0        # the archetype resource, an arc above
-## The hit tick: your own landed hit snaps four short strokes out of the reticle in your Hunter's colour
-## (AimKit.hero_col, the colour of its ability aim); a hit that knocks a Hunter down draws them longer
-## and heavier with a ring. The hero-ref footage shows no reticle confirm, so the look is ours.
-const TICK_S := 0.09       # s a normal tick shows
-const KNOCK_S := 0.12      # s the knock tick shows (the cap for any tick)
-const TICK_IN := 7.0       # px from the cursor where each stroke starts
-const TICK_LEN := 6.0      # px a normal stroke reaches past TICK_IN at its start, half that as it ends
-const KNOCK_LEN := 10.0    # px the same for a knock
-const DIAG := [Vector2(0.7071, 0.7071), Vector2(-0.7071, 0.7071), Vector2(0.7071, -0.7071), Vector2(-0.7071, -0.7071)]
+const TUNING_PATH := "res://content/rules/tuning.json"
+static var _tune: Dictionary = {}
 
 var m: Match
-var tick_t := 0.0          # s left on the tick showing
-var tick_knock := false
+var tick_t := 0.0          # s left on the hit tick showing (ReticleHud draws it)
+var tick_knock := false    # the hit knocked a Hunter down: the strong tick
+var tick_crit := false     # it was a crit (gold)
+var tick_armor := false    # it landed on armour (pale)
 var ticks := 0             # ticks raised (read by --hit-marker-check)
 var dealt_at := -9.0       # match time your last hit (or your Boki's) landed
 
@@ -68,29 +55,54 @@ func _on_hit(by: Node, target: Node, amount: float, tags: Array) -> void:
 		return
 	var e := target as Ent
 	# (a remote body's hp drops on its owner's game: this hit knocks it if it covers what's left)
-	tick_knock = target is Hunter and not (target as Hunter).downed and e.hp <= (amount if e.remote else 0.0)
-	tick_t = KNOCK_S if tick_knock else TICK_S
+	raise(target is Hunter and not (target as Hunter).downed and e.hp <= (amount if e.remote else 0.0))
+
+## Starts one tick (`knock`: the strong one). The match then says what kind of hit it was (`flavour`).
+func raise(knock: bool) -> void:
+	tick_knock = knock
+	tick_crit = false
+	tick_armor = false
+	tick_t = t("hit_knock_s") if knock else t("hit_s")
 	ticks += 1
+
+## The hit that raised the tick was a crit and/or on armour (Match.on_damage, on_armor_break). Never starts a tick.
+func flavour(crit: bool, armor: bool) -> void:
+	tick_crit = tick_crit or crit
+	tick_armor = tick_armor or armor
 
 func tick(delta: float) -> void:
 	tick_t = maxf(0.0, tick_t - delta)
 
-## The tick round the reticle at `at`, dark-edged so it reads over bright effects.
-func draw_tick(c: CanvasItem, at: Vector2) -> void:
-	if tick_t <= 0.0:
-		return
-	var k := tick_t / (KNOCK_S if tick_knock else TICK_S)
-	var col := AimKit.hero_col(m.player)
-	var reach := TICK_IN + (KNOCK_LEN if tick_knock else TICK_LEN) * (0.5 + 0.5 * k)
-	var w := 3.0 if tick_knock else 2.0
-	var a := minf(1.0, k * 2.5)
-	for d in DIAG:
-		c.draw_line(at + d * TICK_IN, at + d * reach, Color(0.05, 0.03, 0.08, 0.6 * a), w + 2.0)
-		c.draw_line(at + d * TICK_IN, at + d * reach, Color(col, a), w)
-	if tick_knock:
-		c.draw_arc(at, reach + 3.0, 0.0, TAU, 28, Color(col.lerp(Color.WHITE, 0.5), a), 2.0, true)
+## 1 -> 0 over the tick showing (0 when none).
+func tick_k() -> float:
+	return clampf(tick_t / t("hit_knock_s" if tick_knock else "hit_s"), 0.0, 1.0)
 
-## The style in effect: {shape, k (size factor), col (with the opacity), outline}.
+## The reticle's numbers (tuning.json "reticle"), read once.
+static func tune() -> Dictionary:
+	if _tune.is_empty():
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(TUNING_PATH))
+		_tune = (parsed as Dictionary).get("reticle", {}) if typeof(parsed) == TYPE_DICTIONARY else {}
+	return _tune
+
+## One tuning number.
+static func t(key: String) -> float:
+	return float(tune()[key])
+
+## One tuning colour (a hex string).
+static func tc(key: String) -> Color:
+	return Color(String(tune()[key]))
+
+## The accent for the dot and the aim arcs of a Hunter: its own colour for the "hunter" setting, else the chosen colour.
+static func accent(arch_id: String) -> Color:
+	if Settings.get_v("reticle_col") == "hunter":
+		return Arch.color(arch_id)
+	return (style()["col"] as Color)
+
+## The swatch colour of a colour id in Settings; "hunter" shows the colour of the Hunter you play.
+static func swatch(id: String) -> Color:
+	return Arch.color(String(Save.d.get("arch", ""))) if id == "hunter" else COLORS[id][1]
+
+## The style in effect: {shape, k (size factor), col (with the opacity), outline, hunter (the accent colour mode)}.
 static func style() -> Dictionary:
 	var col_id := String(Settings.get_v("reticle_col"))
 	var col: Color = (COLORS.get(col_id, COLORS["white"]) as Array)[1]
@@ -100,36 +112,41 @@ static func style() -> Dictionary:
 		"k": clampf(float(Settings.get_v("reticle_size")), 0.5, 2.0),
 		"col": col,
 		"outline": bool(Settings.get_v("reticle_outline")),
+		"hunter": col_id == "hunter",
 	}
 
-## Draws the reticle at `at` on `c`. `spread` (px) opens the ring or cross with weapon bloom.
-static func draw(c: CanvasItem, at: Vector2, spread := 0.0) -> void:
+## Draws the reticle at `at` on `c`. `spread` (px) opens the ring or cross with weapon bloom; `accent` is the
+## Hunter's colour (used when the colour setting is "hunter"); `flash` (alpha = strength) tints the ring on a hit.
+static func draw(c: CanvasItem, at: Vector2, spread := 0.0, accent := Color.WHITE, flash := Color(0, 0, 0, 0)) -> void:
 	var st := style()
 	var k := float(st["k"])
 	var col: Color = st["col"]
+	var dot_col := Color(accent, col.a) if st["hunter"] else col
 	var shape := String(st["shape"])
-	var ring := RING_R * k + spread
+	var ring := t("ring_r") * k + minf(spread, t("spread_max"))
 	var has_dot := shape in ["default", "dot", "circle_dot"]
-	var dot := DOT_R * k * (1.6 if shape == "dot" else 1.0)
+	var dot := t("dot_r") * k * (1.6 if shape == "dot" else 1.0)
+	var line_w := t("line_w") * k
 	if bool(st["outline"]):
-		var edge := Color(0, 0, 0, EDGE_A * col.a)
-		_shape(c, at, shape, ring, k, edge, LINE_W * k + EDGE_W * 2.0)
+		var edge := Color(0, 0, 0, t("edge_a") * col.a)
+		_shape(c, at, shape, ring, k, edge, line_w + t("edge_w") * 2.0)
 		if has_dot:
-			c.draw_circle(at, dot + EDGE_W, edge)
-	_shape(c, at, shape, ring, k, col, LINE_W * k)
+			c.draw_circle(at, dot + t("edge_w"), edge)
+	_shape(c, at, shape, ring, k, col.lerp(Color(flash, col.a), flash.a), line_w)
 	if has_dot:
-		c.draw_circle(at, dot, col)
+		c.draw_circle(at, dot * (1.0 + flash.a * 0.6), dot_col)
 
 ## The strokes of a shape (no dot): a broken ring, a full ring or a cross.
 static func _shape(c: CanvasItem, at: Vector2, shape: String, ring: float, k: float, col: Color, width: float) -> void:
 	match shape:
 		"default":
+			var gap := t("arc_gap_rad")
 			for i in 4:
-				var a0 := PI * 0.5 * i + ARC_GAP * 0.5
-				c.draw_arc(at, ring, a0, a0 + PI * 0.5 - ARC_GAP, 8, col, width, true)
+				var a0 := PI * 0.5 * i + gap * 0.5
+				c.draw_arc(at, ring, a0, a0 + PI * 0.5 - gap, 8, col, width, true)
 		"circle", "circle_dot":
 			c.draw_arc(at, ring, 0.0, TAU, 28, col, width, true)
 		"cross":
-			var gap := CROSS_GAP * k + (ring - RING_R * k)
+			var open := t("cross_gap") * k + (ring - t("ring_r") * k)
 			for d in [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP]:
-				c.draw_line(at + d * gap, at + d * (gap + CROSS_LEN * k), col, width, true)
+				c.draw_line(at + d * open, at + d * (open + t("cross_len") * k), col, width, true)
