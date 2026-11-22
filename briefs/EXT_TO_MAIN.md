@@ -10855,3 +10855,4 @@ READY ext/flinch-sub-amount c79040a2a3f17991eb4455e4f767080f771c1b59 (flinch del
 READY ext/merge-lane-M7-1121 c30ffcbf6615b7e1cf4de2e0f81f24e3fa38e433 (lane M7 bundle PR #588: 12 branches + main 0b967858b9; last gate reds fixed; replaces ce45abf)
 READY ext/sfx-pickup-silent f3a4aa68116663226654a7bf70dd2727a17f5e00 (every pickup plays its cue)
 READY ext/remote-smooth-flake-1118 0cbd2f880c (remote-smooth-check flake: NetSmooth hold + deterministic line)
+READY ext/hunter-tex-2k 4d0102a49b573918052cb7f96c49e31a2579ae9e (hunter 4K->2K textures, pack -96 MB, size_limit + warden_tex_guard; merged main, size_budget resolved)
