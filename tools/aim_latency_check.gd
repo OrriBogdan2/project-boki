@@ -9,15 +9,12 @@ extends RefCounted
 ## Prints "AIMLAG <case> <key> = <value>  allow <= N  ok|FAIL" per measure and
 ## "AIM LATENCY CHECK DONE, failures: N" at the end.
 
-var bad := 0
-var m: Match
-var P: Hunter
-var root: Window
-const TOL_PX := 0.5          # px: an aim point this close to where the cursor projects counts as under it
-const SETTLE_FRAMES := 90    # frames with the mouse still before a move, so the camera is at rest
-const STATIC_PX := 40.0      # px (canvas): a move that stays inside the camera's cursor dead zone (CamRig.FOLLOW)
-const PAN_PX := 400.0        # px (canvas): a move that makes the view lean after the cursor
-const WATCH := 6             # frames measured after a move
+const TOL_PX := 0.5  # px: an aim point this close to where the cursor projects counts as under it
+const SETTLE_FRAMES := 90  # frames with the mouse still before a move, so the camera is at rest
+const STATIC_PX := 40.0  # px (canvas): a move that stays inside the camera's cursor dead zone (CamRig.follow_v)
+const PAN_PX := 400.0  # px (canvas): a move that makes the view lean after the cursor
+const WATCH := 6  # frames measured after a move
+
 ## [case, refresh rate Hz, window px, the user's UI scale (Settings ui_scale)]
 const CASES := [
 	["60hz_720p", 60, Vector2i(1280, 720), 1.0],
@@ -25,6 +22,12 @@ const CASES := [
 	["60hz_4k_ui1.5", 60, Vector2i(3840, 2160), 1.5],
 	["144hz_4k_ui1.5", 144, Vector2i(3840, 2160), 1.5],
 ]
+
+var bad := 0
+var m: Match
+var p: Hunter
+var root: Window
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -34,24 +37,27 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	p = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		if h != P:
+		if h != p:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	if P.kin: (P.kin as Kin).stow()
-	P.ctrl = "local"
-	P.teleport(m.world.spawns[0])
-	P.vel = Vector3.ZERO
+	if p.kin:
+		(p.kin as Kin).stow()
+	p.ctrl = "local"
+	p.teleport(m.world.spawns[0])
+	p.vel = Vector3.ZERO
 	m.paused = false
 	for c in CASES:
 		_case(String(c[0]), int(c[1]), c[2], float(c[3]))
 	print("AIM LATENCY CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
 
 func _case(label: String, hz: int, win: Vector2i, ui: float) -> void:
 	root.size = win
@@ -59,22 +65,26 @@ func _case(label: String, hz: int, win: Vector2i, ui: float) -> void:
 	Settings.apply("ui_scale")
 	var cs := root.content_scale_factor
 	var dt := 1.0 / hz
-	var allow := int(floor(hz / 60.0))        # frames in one physics tick
-	var centre := Vector2(win) * 0.5 / cs      # canvas px
+	var allow := int(floor(hz / 60.0))  # frames in one physics tick
+	var centre := Vector2(win) * 0.5 / cs  # canvas px
 	print("AIMLAG %s window %s content scale %.3f canvas %s" % [label, str(win), cs, str(root.get_visible_rect().size)])
 	_mouse(centre, cs)
-	for i in SETTLE_FRAMES: m._process(dt)
+	for i in SETTLE_FRAMES:
+		m._process(dt)
 	# a small move: the view stays put, so this is the cursor-to-aim path alone
 	var r := _watch(centre + Vector2(STATIC_PX, 0), cs, dt)
 	_rec(label, "reticle_frames", r["reticle"], allow)
 	_rec(label, "aim_frames", r["aim"], allow)
-	for i in SETTLE_FRAMES: m._process(dt)
+	for i in SETTLE_FRAMES:
+		m._process(dt)
 	# a big move: the camera leans after the cursor for a while; the aim must keep up with the view
 	r = _watch(centre + Vector2(PAN_PX, 0), cs, dt)
 	_rec(label, "aim_frames_panning", r["stale"], allow)
 	print("AIMLAG %s aim_vs_cursor_px_panning = %.2f px on the move's frame" % [label, r["gap0"]])
 	_mouse(centre, cs)
-	for i in SETTLE_FRAMES: m._process(dt)
+	for i in SETTLE_FRAMES:
+		m._process(dt)
+
 
 ## Moves the mouse to `to` (canvas px) the way the OS does: an event, flushed before the frame reads it.
 func _mouse(to: Vector2, cs: float) -> void:
@@ -83,6 +93,7 @@ func _mouse(to: Vector2, cs: float) -> void:
 	ev.global_position = ev.position
 	Input.parse_input_event(ev)
 	Input.flush_buffered_events()
+
 
 ## Moves the mouse, then steps WATCH frames: {reticle: first frame the HUD's crosshair draws under the cursor,
 ## aim: first frame the aim point projects onto the cursor through the camera as drawn that frame,
@@ -100,7 +111,7 @@ func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 		var gap_now := _gap(m.cam.global_transform)
 		var gap_prev := _gap(before)
 		if k == 0:
-			out["gap0"] = m.cam.unproject_position(P.inp["aim"]).distance_to(mouse)
+			out["gap0"] = m.cam.unproject_position(p.inp["aim"]).distance_to(mouse)
 		if out["aim"] == 99 and gap_now <= TOL_PX:
 			out["aim"] = k
 		var stale := 99
@@ -111,18 +122,21 @@ func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 		out["stale"] = maxi(int(out["stale"]), stale)
 	return out
 
+
 ## px between the aim point and where the cursor lands on the aim's own plane (Match._mouse_aim: the
 ## height it resolved, aim_y + 0.95, lifted to the shooter's height), seen through the camera at `cam_tf`.
 func _gap(cam_tf: Transform3D) -> float:
 	var now: Transform3D = m.cam.global_transform
 	m.cam.global_transform = cam_tf
 	var e: Vector3 = m.cam.mouse_on_plane(m.aim_y + 0.95)
-	var aim: Vector3 = P.inp["aim"]
+	var aim: Vector3 = p.inp["aim"]
 	var gap := m.cam.unproject_position(Vector3(e.x, aim.y, e.z)).distance_to(m.cam.unproject_position(aim))
 	m.cam.global_transform = now
 	return gap
 
+
 func _rec(case_name: String, key: String, frames: int, allow: int) -> void:
 	var ok := frames <= allow
 	print("AIMLAG %-16s %-26s = %2d frames  allow <= %d  %s" % [case_name, key, frames, allow, "ok" if ok else "FAIL"])
-	if not ok: bad += 1
+	if not ok:
+		bad += 1

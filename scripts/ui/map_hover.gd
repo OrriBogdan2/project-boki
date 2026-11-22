@@ -4,27 +4,34 @@ extends RefCounted
 ## line ("Hollow Outpost / Extraction · opens in 1:20"). Every marker kind the full map draws is listed in
 ## pick(), nearest marker to the cursor wins, exits first on a tie. One instance lives in FullMap.
 
-const DWELL_S := 0.6      # s the cursor rests on one marker before its card shows
-const REACH := 12.0       # px from a marker's centre that still counts as on it
+const DWELL_S := 0.6  # s the cursor rests on one marker before its card shows
+const REACH := 12.0  # px from a marker's centre that still counts as on it
 const TIP_FS := 12
 const NAME_FS := 14
 const CARD := Color(0.09, 0.1, 0.15, 0.96)
 const RIM := Color(1, 1, 1, 0.14)
 const SHRINE_LINE := "Hold the key to pray: heal, a blessing and a perk"
-const SPAWN_LINE := {"unknown": "Might be here: scout it to find out", "active": "Here this match",
-	"empty": "Nothing here this match", "taken": "Already taken"}
+const SPAWN_LINE := {
+	"unknown": "Might be here: scout it to find out",
+	"active": "Here this match",
+	"empty": "Nothing here this match",
+	"taken": "Already taken"
+}
 
-var _id := ""             # what the cursor is on now ("" none)
-var _since_ms := 0        # when it came to rest on `_id`
-var _mp := Vector2.ZERO   # pick(): the cursor
-var _best := INF          # pick(): the distance of the best marker so far
-var hit := {}             # pick(): {id, pv, title, line, col} of it, or {}
+var hit := {}  # pick(): {id, pv, title, line, col} of it, or {}
+
+var _id := ""  # what the cursor is on now ("" none)
+var _since_ms := 0  # when it came to rest on `_id`
+var _mp := Vector2.ZERO  # pick(): the cursor
+var _best := INF  # pick(): the distance of the best marker so far
+
 
 func draw(fm: FullMap) -> void:
 	_mp = fm.hud.c.get_local_mouse_position()
 	pick(fm, _mp)
 	if rest(hit.get("id", ""), Time.get_ticks_msec()):
 		_card(fm)
+
 
 ## The cursor is on marker `id` ("" none) at `now_ms`: has it rested there long enough for the card?
 func rest(id: String, now_ms: int) -> bool:
@@ -33,6 +40,7 @@ func rest(id: String, now_ms: int) -> bool:
 		_since_ms = now_ms
 	return id != "" and now_ms - _since_ms >= int(DWELL_S * 1000.0)
 
+
 func _near(pv: Vector2, reach := REACH) -> bool:
 	var d := pv.distance_to(_mp)
 	if d > reach or d >= _best:
@@ -40,8 +48,10 @@ func _near(pv: Vector2, reach := REACH) -> bool:
 	_best = d
 	return true
 
+
 func _found(id: String, pv: Vector2, title: String, line: String, col: Color) -> void:
 	hit = {"id": id, "pv": pv, "title": title, "line": line, "col": col}
+
 
 ## The marker under `mp` (screen px) into `hit`, or {}.
 func pick(fm: FullMap, mp: Vector2) -> void:
@@ -60,11 +70,13 @@ func pick(fm: FullMap, mp: Vector2) -> void:
 	_places(fm, m)
 	_hot_zone(fm, m)
 
+
 func _exits(fm: FullMap, m: Match) -> void:
 	for x in m.exits.list:
 		var pv := fm.to_screen(x["pos"])
 		if _near(pv, REACH + 4.0):
 			_found("exit " + String(x["name"]), pv, String(x["name"]), ExitMark.line(m, x), ExitMark.color(x))
+
 
 func _seats(fm: FullMap, m: Match) -> void:
 	if m.heart == null:
@@ -80,6 +92,7 @@ func _seats(fm: FullMap, m: Match) -> void:
 			if int(sd[i]["st"]) == WaysOutHud.St.LOCKED:
 				tail = "opens in " + tail
 			_found("seat %d" % i, pv, String(WaysOutMap.WORDS[i]), "Way out  ·  " + tail, WaysOutMap.color_of(sd[i]))
+
 
 func _people(fm: FullMap, m: Match) -> void:
 	var p: Hunter = m.player
@@ -99,6 +112,7 @@ func _people(fm: FullMap, m: Match) -> void:
 			var col := Color(k.sp.get("glow", k.sp["color"]))
 			_found("boki", kv, String(k.sp.get("name", "Your Boki")), "Your Boki", col)
 
+
 func _who(h: Hunter, me: Hunter) -> String:
 	if h == me:
 		return "You"
@@ -106,10 +120,12 @@ func _who(h: Hunter, me: Hunter) -> String:
 		return "Your squad"
 	return "Rival  ·  bounty on them" if h.has_meta("bounty") else "Rival"
 
+
 func _beacon_line(bc: Dictionary) -> String:
 	if bc["used"]:
 		return "Used"
 	return "Lit: bring your squad back" if bc["lit"] else "Light it to bring your squad back"
+
 
 func _spawns(fm: FullMap, m: Match) -> void:
 	var sp: SpawnPlan = m.spawn_plan
@@ -125,6 +141,7 @@ func _spawns(fm: FullMap, m: Match) -> void:
 			var line: String = SPAWN_LINE[sp.state_for(cnd, m.player.team)]
 			_found("spawn %d" % cnd["pos"].x, pv, nm, line, def.get("col", Color.WHITE))
 
+
 ## Shrines, lairs, beacons, boxes, the sky train, the ships and pings.
 func _things(fm: FullMap, m: Match) -> void:
 	for sh in m.shrines:
@@ -132,11 +149,11 @@ func _things(fm: FullMap, m: Match) -> void:
 		if _near(pv):
 			_found("shrine", pv, "Shrine", "Used" if sh["used"] else SHRINE_LINE, Color("9ff0c4"))
 	if m.lairs:
-		for L in m.lairs.list:
-			var pv := fm.to_screen(L["c"])
+		for l in m.lairs.list:
+			var pv := fm.to_screen(l["c"])
 			if _near(pv, REACH + 4.0):
-				var nm := String(L["name"])
-				_found("lair " + nm, pv, nm, "Boss lair  ·  %s" % String(L["state"]), Lairs.color_of(L))
+				var nm := String(l["name"])
+				_found("lair " + nm, pv, nm, "Boss lair  ·  %s" % String(l["state"]), Lairs.color_of(l))
 	for bc in m.beacons:
 		var pv := fm.to_screen(bc["pos"])
 		if _near(pv):
@@ -166,6 +183,7 @@ func _things(fm: FullMap, m: Match) -> void:
 			var by := "From %s" % (pg["by"] as Hunter).pname if pg.has("by") else "A marked spot"
 			_found("ping", pv, "Ping", by, pg["col"])
 
+
 ## The named places: perches and chokepoints (and an island's name).
 func _places(fm: FullMap, m: Match) -> void:
 	for lb in m.world.labels:
@@ -181,14 +199,16 @@ func _places(fm: FullMap, m: Match) -> void:
 				line = "Chokepoint  ·  a narrow way through"
 			_found("place " + String(lb["name"]), pv, String(lb["name"]), line, FullMap.INK)
 
+
 ## The hot zone is an area, so it only answers when nothing else is under the cursor.
 func _hot_zone(fm: FullMap, m: Match) -> void:
 	if not hit.is_empty() or m.biomes == null:
 		return
-	for I in m.biomes.hot.zone:
-		if fm.to_screen(I["c"]).distance_to(_mp) < float(I["r"]) * fm.k():
+	for i in m.biomes.hot.zone:
+		if fm.to_screen(i["c"]).distance_to(_mp) < float(i["r"]) * fm.k():
 			_found("hot", _mp, "Hot zone", "Better loot here, and more rivals", HotZone.COL)
 			return
+
 
 func _card(fm: FullMap) -> void:
 	var hud = fm.hud

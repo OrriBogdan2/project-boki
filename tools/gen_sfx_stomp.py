@@ -8,6 +8,7 @@ Our own sounds, numpy only, own random stream. All three play at a position, so 
                  squeezed out under the foot (a falling tone choked off).
   stomp_crack  : ~0.5 s, hard CC breaks the stomp: a bright crack and a short rising ring as the wisp is let go.
 """
+
 import numpy as np
 import sfx_lib as S
 from sfx_lib import N, env, mix, at, lpf, hpf, bpf, noise
@@ -18,9 +19,9 @@ S.reseed(6162)
 def windup():
     d = 0.7
     n = N(d)
-    swell = np.linspace(0.2, 1.0, n) ** 1.5 * S.shape(d, 0.03, d - 0.1, 0.07)    # louder to the end, a soft cut
+    swell = np.linspace(0.2, 1.0, n) ** 1.5 * S.shape(d, 0.03, d - 0.1, 0.07)  # louder to the end, a soft cut
     rise = S.sweep(70, 210, d, curve=1.6) * swell * 0.7
-    grind = bpf(noise(d), 180, 900) * swell ** 1.5 * 0.35
+    grind = bpf(noise(d), 180, 900) * swell**1.5 * 0.35
     scuff = bpf(noise(0.12), 300, 2400) * env(N(0.12), 0.01, 0.05) * 0.4
     lift = at(S.sweep(400, 900, 0.25) * S.shape(0.25, 0.15, 0.04, 0.06), 0.42) * 0.25
     return lpf(mix(rise, grind, scuff, lift), 6000)
@@ -41,7 +42,7 @@ def crack():
     return hpf(mix(snap, glass, lift), 200)
 
 
-if __name__ == '__main__':
-    S.save_cat('stomp_windup', windup(), 'cast')
-    S.save_cat('stomp_finish', finish(), 'heavy_impact')
-    S.save_cat('stomp_crack', crack(), 'impact')
+if __name__ == "__main__":
+    S.save_cat("stomp_windup", windup(), "cast")
+    S.save_cat("stomp_finish", finish(), "heavy_impact")
+    S.save_cat("stomp_crack", crack(), "impact")

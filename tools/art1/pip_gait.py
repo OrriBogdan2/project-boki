@@ -9,6 +9,7 @@ by step phase, so her carry and personality stay hand-keyed; the root keeps its 
   python3 tools/art1/glb_add_clips.py art/wardens/pip/pip.glb OUT.glb \
       walk_f,walk_b,walk_l,walk_r,run_f,run_b,run_l,run_r
 A second run on the shipped GLB starts from these clips' upper body, which is the old one, so it bakes the same."""
+
 import math
 import sys
 
@@ -16,10 +17,10 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Quaternion, Vector
 
-SRC, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
-SIZE = 0.68         # game metres per model metre (content/archetypes/tender.json body size)
-FPS = 48            # keys per second (pip.glb.import bakes at this rate too): a run stance is 0.08 s
-CONTACT = 0.006     # model m: a sole vert this close to the floor is planted
+SRC, OUT = sys.argv[sys.argv.index("--") + 1 :][:2]
+SIZE = 0.68  # game metres per model metre (content/archetypes/tender.json body size)
+FPS = 48  # keys per second (pip.glb.import bakes at this rate too): a run stance is 0.08 s
+CONTACT = 0.006  # model m: a sole vert this close to the floor is planted
 TAU = math.tau
 # s for a left + right pair, every loop: WardenClips' BlendSpace2D (synced by pip.json loco.cycle_s) blends a
 # ring's loops at a diagonal and the walk ring into the run ring between their speeds, and only loops of one length
@@ -32,10 +33,12 @@ PERIOD = 0.34
 # only feet that strike, roll and lift together stay down in the blend (--foot-slide-check: unequal duties put one
 # foot in the air while the other is planted, 3.5 m/s slips at 3.5 m/s).
 GAITS = {
-    "walk": dict(speed=2.2, duty=0.25, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=5.0,
-                   heel_up=35.0, push=0.55),
-    "run": dict(speed=4.55, duty=0.25, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=5.0,
-                  heel_up=35.0, push=0.55),
+    "walk": dict(
+        speed=2.2, duty=0.25, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=5.0, heel_up=35.0, push=0.55
+    ),
+    "run": dict(
+        speed=4.55, duty=0.25, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=5.0, heel_up=35.0, push=0.55
+    ),
 }
 # A swing leaves and meets the floor at the floor's speed (x the move speed at its ends): a slower foot near the floor
 # reads as a slide in the audits' 30 % band
@@ -82,12 +85,14 @@ def verts(idx):
 
 def foot_idx(side):
     g = body.vertex_groups["foot." + side].index
-    return np.array([v.index for v in body.data.vertices if any(e.group == g and e.weight > 0.5 for e in v.groups)], int)
+    return np.array(
+        [v.index for v in body.data.vertices if any(e.group == g and e.weight > 0.5 for e in v.groups)], int
+    )
 
 
 FOOT = {s: foot_idx(s) for s in "LR"}
 layer.update()
-SOLE = {}           # per side: the ankle's rest place, and the heel and toe ends of the sole from it (m, along y)
+SOLE = {}  # per side: the ankle's rest place, and the heel and toe ends of the sole from it (m, along y)
 for s in "LR":
     co = verts(FOOT[s])
     low = co[co[:, 2] < co[:, 2].min() + 0.01]
@@ -155,10 +160,10 @@ def foot_path(g, side, ph, off):
         return Vector((ankle.x, ankle.y, 0.0)) + d * (front - travel * u) + off, pitch * d.y, True
     s = (ph - duty) / (1 - duty)
     m0 = m1 = -SWING_ENDS * v * (1 - duty) * period
-    h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
+    h = (2 * s**3 - 3 * s * s + 1, s**3 - 2 * s * s + s, -2 * s**3 + 3 * s * s, s**3 - s * s)
     y = h[0] * (front - travel) + h[1] * m0 + h[2] * front + h[3] * m1
     pitch = -g["heel_up"] + (g["heel_up"] + g["toe_up"]) * smooth(0.1, 0.9, s)
-    lift = g["lift"] * math.sin(s ** 0.75 * math.pi) ** 0.9
+    lift = g["lift"] * math.sin(s**0.75 * math.pi) ** 0.9
     return Vector((ankle.x, ankle.y, lift)) + d * y + off * (1 - smooth(0.0, 0.6, s)), pitch * d.y, False
 
 
@@ -209,7 +214,7 @@ def pose(g, key, ph, feet):
             flat, pitch, planted = foot_path(g, side, (ph + start) % 1.0, was["off"])
             ankle, turn = place_foot(side, flat, pitch)
             miss, ext = leg_ik(side, ankle, turn)
-            for _ in range(2):                           # the sole on the floor from the skinned verts: no hover, no sink
+            for _ in range(2):  # the sole on the floor from the skinned verts: no hover, no sink
                 low = float(verts(FOOT[side])[:, 2].min())
                 if planted or low < 0:
                     ankle.z -= low
@@ -218,7 +223,7 @@ def pose(g, key, ph, feet):
             both = (now[:, 2] < CONTACT) & (was["co"][:, 2] < CONTACT) if planted and was["planted"] else None
             if both is None or not both.any() or turn_no == 4:
                 break
-            slip = (now[both, :2] - was["co"][both, :2]).mean(0)     # the lock: the planted patch moves with the floor
+            slip = (now[both, :2] - was["co"][both, :2]).mean(0)  # the lock: the planted patch moves with the floor
             was["off"] -= Vector((slip[0] - step.x, slip[1] - step.y, 0.0))
         was.update(co=now, planted=planted, miss=miss, ext=ext)
 
@@ -227,7 +232,7 @@ def bake(name, g):
     n = int(round(g["period"] * FPS))
     old = old_keys(name, n)
     feet = {s: dict(co=verts(FOOT[s]), planted=False, off=Vector()) for s in "LR"}
-    for _lap in range(2):                                # twice round: the first lap hands each swing its start
+    for _lap in range(2):  # twice round: the first lap hands each swing its start
         keys, soles, miss, ext = [], [], 0.0, [0.0, 0.0]
         for k in range(n):
             pose(g, old[k], k / n, feet)
@@ -253,24 +258,40 @@ def bake(name, g):
             pb.location = key[pb.name][0]
             pb.keyframe_insert("location", frame=k)
     speeds = []
-    for s in "LR":                                       # the floor's speed under each planted sole, key to key
+    for s in "LR":  # the floor's speed under each planted sole, key to key
         for k in range(n):
             (p0, v0), (p1, v1) = soles[k][s], soles[(k + 1) % n][s]
             both = (v0[:, 2] < CONTACT) & (v1[:, 2] < CONTACT)
             if p0 and p1 and both.any():
                 speeds.append(float(np.linalg.norm((v1[both, :2] - v0[both, :2]).mean(0))) * FPS * SIZE)
     sp = np.array(speeds)
-    print("GAIT %s %d keys %.3f s, %.2f steps/s, step %.2f m; planted sole %.2f m/s (%.2f to %.2f, loco %.2f); "
-          "leg reach %.3f planted %.3f in the air, ankle miss %.4f m" % (
-              name, n + 1, g["period"], 2 / g["period"], g["speed"] * g["period"] / 2, np.median(sp), sp.min(),
-              sp.max(), g["speed"], ext[0], ext[1], miss))
+    print(
+        "GAIT %s %d keys %.3f s, %.2f steps/s, step %.2f m; planted sole %.2f m/s (%.2f to %.2f, loco %.2f); "
+        "leg reach %.3f planted %.3f in the air, ankle miss %.4f m"
+        % (
+            name,
+            n + 1,
+            g["period"],
+            2 / g["period"],
+            g["speed"] * g["period"] / 2,
+            np.median(sp),
+            sp.min(),
+            sp.max(),
+            g["speed"],
+            ext[0],
+            ext[1],
+            miss,
+        )
+    )
 
 
 for gait_name, gait in GAITS.items():
     for tag, (heading, share) in HEADINGS.items():
         h = math.radians(heading)
-        bake("%s_%s" % (gait_name, tag), dict(gait, d=Vector((-math.sin(h), math.cos(h), 0.0)),
-                                               period=PERIOD, duty=gait["duty"] * share))
+        bake(
+            "%s_%s" % (gait_name, tag),
+            dict(gait, d=Vector((-math.sin(h), math.cos(h), 0.0)), period=PERIOD, duty=gait["duty"] * share),
+        )
 arm.animation_data.action = None
 for ac in list(bpy.data.actions):
     if ac.name.rsplit("_", 1)[0] not in GAITS:

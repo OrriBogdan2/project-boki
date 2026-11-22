@@ -4,6 +4,7 @@ strike). The swing eases in and out over [t0, t1] and is written onto the bone's
 the twist and everything else the clip keyed stay. Every bone of a clip is keyed at the same times.
 Run: python3 tools/art1/glb_key_pose.py <glb> <clip> <bone> <end> <t0> <peak> <t1> <dx,dy,dz> [<bone> <end> ...same args...]
 Directions are glTF model space: +Y up, -Z the Hero's front, +X its right. Several swings may follow one another."""
+
 import sys
 
 import numpy as np
@@ -15,8 +16,14 @@ from glb_add_clips import read, write  # noqa: E402
 def qmul(a, b):
     x1, y1, z1, w1 = a
     x2, y2, z2, w2 = b
-    return np.array([w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2, w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
-            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2, w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2])
+    return np.array(
+        [
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+        ]
+    )
 
 
 def qinv(q):
@@ -49,15 +56,25 @@ class Clip:
         self.rot, self.pos = {}, {}
         for ch in anim["channels"]:
             s = anim["samplers"][ch["sampler"]]
-            where = self.rot if ch["target"]["path"] == "rotation" else self.pos if ch["target"]["path"] == "translation" else None
+            where = (
+                self.rot
+                if ch["target"]["path"] == "rotation"
+                else self.pos
+                if ch["target"]["path"] == "translation"
+                else None
+            )
             if where is not None:
-                where[ch["target"]["node"]] = (offset(j, s["input"]), offset(j, s["output"]), j["accessors"][s["output"]]["count"])
+                where[ch["target"]["node"]] = (
+                    offset(j, s["input"]),
+                    offset(j, s["output"]),
+                    j["accessors"][s["output"]]["count"],
+                )
 
     def get(self, table, node, k, size, rest):
         if node not in table:
             return np.array(self.nodes[node].get(rest, [0, 0, 0, 1][:size]), float)
         o = table[node][1] + 4 * size * k
-        return np.frombuffer(bytes(self.b[o:o + 4 * size]), "<f4").astype(float)
+        return np.frombuffer(bytes(self.b[o : o + 4 * size]), "<f4").astype(float)
 
     def world(self, node, k):
         """(rotation, position) of a node in model space at key k."""
@@ -71,7 +88,7 @@ class Clip:
     def swing(self, bone, end, t0, peak, t1, direction):
         node = self.names[bone]
         toff, voff, count = self.rot[node]
-        times = np.frombuffer(bytes(self.b[toff:toff + 4 * count]), "<f4")
+        times = np.frombuffer(bytes(self.b[toff : toff + 4 * count]), "<f4")
         d = np.asarray(direction, float) / np.linalg.norm(direction)
         for k in range(count):
             w = ease(float(times[k]), t0, peak, t1)
@@ -87,7 +104,7 @@ class Clip:
             half = np.arctan2(sin, float(v @ d)) * w / 2.0
             delta = np.append(axis / sin * np.sin(half), np.cos(half))
             q = qmul(qmul(qmul(qinv(pq), delta), pq), self.get(self.rot, node, k, 4, "rotation"))
-            self.b[voff + 16 * k:voff + 16 * k + 16] = (q / np.linalg.norm(q)).astype("<f4").tobytes()
+            self.b[voff + 16 * k : voff + 16 * k + 16] = (q / np.linalg.norm(q)).astype("<f4").tobytes()
 
 
 if __name__ == "__main__":
@@ -96,6 +113,6 @@ if __name__ == "__main__":
     j, b = read(glb)
     c = Clip(j, b, clip)
     for i in range(0, len(rest), 6):
-        bone, end, t0, peak, t1, direction = rest[i:i + 6]
+        bone, end, t0, peak, t1, direction = rest[i : i + 6]
         c.swing(bone, end, float(t0), float(peak), float(t1), [float(x) for x in direction.split(",")])
     write(glb, j, b)

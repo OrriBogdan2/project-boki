@@ -166,7 +166,11 @@ func _tide() -> void:
 		"k %.2f anim %s" % [K.tide_k(), K.anim_id])
 	var before := dmg(T)
 	P.inp["fire"] = false
+	Sfx.cue_log = []
 	step(m, 0.5)
+	ok("Tide Lunge: the release plays its own cast cue (gil_tide_lunge)",
+		Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "gil_tide_lunge"))
+	Sfx.cue_log = null
 	var td: Dictionary = K.lmb_def()["tide"]
 	ok("Tide Lunge: let go, he drives about 5 m down the line", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5,
 		"%.2f m" % (P.pos.x - x0))
@@ -337,7 +341,7 @@ func _swim() -> void:
 		top["y"] = maxf(top["y"], T.pos.y - y0))
 	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
 	var dd := K.dash_def()
-	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash (owner 11-11)",
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
 		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he bursts back out (gil_surface) and nothing holds him under after",
 		top["out"] and K.anim_id != "gil_dive" and int(HeroVfx.of(m).plays.get("surface", 0)) > 0)
@@ -361,7 +365,11 @@ func _riptide() -> void:
 		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
+	Sfx.cue_log = []
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
+	ok("Riptide recast: the spout's hit plays its own cue (gil_spout_hit)",
+		Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "gil_spout_hit"))
+	Sfx.cue_log = null
 	ok("Riptide recast: the waterspout runs down the line and knocks up 1 s", top["stun"] >= 0.9 and dmg(T) > 0.0,
 		"stun %.2f" % top["stun"])
 	_reset(7.0)
@@ -403,20 +411,20 @@ func _wave() -> void:
 
 ## Owner 11-11: the ult pushed him the wrong way. Cast while running another way (back, or sideways), he surfs the
 ## wave's own line toward the cursor, the whole 14 m, and stays on it.
-func _wave_way(run: Vector2) -> void:
+func _wave_way(run_v: Vector2) -> void:
 	_reset(6.0)
 	P.lvl = 6
 	K.cd["x"] = 0.0
-	P.inp["move"] = run
+	P.inp["move"] = run_v
 	var p0 := P.pos
 	var aim := P.aim_dir()
 	K.cast_ult()
-	step(m, 1.1, func(): P.inp["move"] = run)
+	step(m, 1.1, func(): P.inp["move"] = run_v)
 	P.inp["move"] = Vector2.ZERO
 	var moved := P.pos - p0
 	var along := Vector2(moved.x, moved.z).dot(aim)
 	var off := absf(Vector2(moved.x, moved.z).cross(aim))
-	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
+	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run_v), along > 10.0 and off < 1.0,
 		"along %.2f off-line %.2f" % [along, off])
 	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
 		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)
@@ -711,11 +719,11 @@ func _leap_off() -> void:
 		P.roll_t <= 0.0 and P.inv_t <= 0.12 and P.stun_t <= 0.0 and not P.grounded or P.vel.y > 0.0)
 	var x1 := P.pos
 	step(m, 0.7)
-	var run := Vector2(x1.x - p0.x, x1.z - p0.z).length()
+	var run_v := Vector2(x1.x - p0.x, x1.z - p0.z).length()
 	var carry := Vector2(P.pos.x - x1.x, P.pos.z - x1.z).length()
 	ok("leap off: he stopped riding (4 m of the 14 at 0.3 s, a short run-out after), back on the ground",
-		run < 6.5 and P.grounded and carry < 8.0,
-		"%.2f m by then, +%.2f m after, grounded %s" % [run, carry, str(P.grounded)])
+		run_v < 6.5 and P.grounded and carry < 8.0,
+		"%.2f m by then, +%.2f m after, grounded %s" % [run_v, carry, str(P.grounded)])
 	ok("leap off: the 90 s cooldown stands, no second wave, R does nothing more",
 		float(K.cd["x"]) > 85.0 and not HunterKeys.ult_pressed(P) and K.wave.is_empty())
 	K.ch_rmb = 2.0

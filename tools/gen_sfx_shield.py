@@ -9,19 +9,20 @@ One family per shield material (Hunter.shield_kind, played by ShieldSfx):
 Each name has takes (_1.._3); every file is levelled to the impact category (docs/AUDIO.md).
 Original synthesis, no samples.
 """
+
 import os, sys
-import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, grains
+from sfx_lib import N, noise, lpf, env, mix, at, kick, click, crack, grains
 
 S.reseed(5206)
 
 # material: (thunk body f0, f1, thunk noise lowpass Hz, pane partials in Hz, ember/grit grain rate per s)
 MATERIALS = {
-    'ward': (230, 105, 900, (3100, 4700, 6300), 0),
-    'cloak': (190, 90, 700, (2400, 3500, 5100), 90),
-    'molten': (140, 58, 520, (1500, 2300, 3700), 40),
+    "ward": (230, 105, 900, (3100, 4700, 6300), 0),
+    "cloak": (190, 90, 700, (2400, 3500, 5100), 90),
+    "molten": (140, 58, 520, (1500, 2300, 3700), 40),
 }
 
 
@@ -50,10 +51,10 @@ def shatter(kind, i):
 
 def build():
     for kind in MATERIALS:
-        S.takes_cat('shield_%s_hit' % kind, lambda i, k=kind: block(k, i), 3, 'impact')
-        S.takes_cat('shield_%s_break' % kind, lambda i, k=kind: shatter(k, i), 3, 'impact')
+        S.takes_cat("shield_%s_hit" % kind, lambda i, k=kind: block(k, i), 3, "impact")
+        S.takes_cat("shield_%s_break" % kind, lambda i, k=kind: shatter(k, i), 3, "impact")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()
-    print('gen_sfx_shield: done')
+    print("gen_sfx_shield: done")

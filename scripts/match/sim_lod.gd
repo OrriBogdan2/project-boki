@@ -86,7 +86,7 @@ static func kin_dt(k: Kin, dt: float) -> float:
 
 ## Frames per pose of a Hunter's model (HunterAnim, and a Hero's clips, springs and skeleton: WardenGlb.Sync): every
 ## frame for the local player's squad and anyone in a fight with it; else POSE_UNSEEN when hidden by sight,
-## POSE_OFF_SCREEN off screen and POSE_FAR on screen past CamRig.POSE_FAR_M from the focus (a small figure at the wide
+## POSE_OFF_SCREEN off screen and POSE_FAR on screen past CamRig.pose_far_m from the focus (a small figure at the wide
 ## camera; at zoom 1 that is off screen). Hunter.render staggers the frames and catches up the skipped time.
 static func pose_every(m: Match, h: Hunter) -> int:
 	var me := m.player
@@ -98,7 +98,7 @@ static func pose_every(m: Match, h: Hunter) -> int:
 		return POSE_OFF_SCREEN
 	var cf := m.cam.focus
 	var d2 := Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared()
-	if d2 > CamRig.POSE_FAR_M * CamRig.POSE_FAR_M:
+	if d2 > CamRig.pose_far_m * CamRig.pose_far_m:
 		return POSE_FAR
 	return POSE_SLOW if _slow() and d2 > POSE_SLOW_M * POSE_SLOW_M else 1
 

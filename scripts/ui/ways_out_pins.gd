@@ -9,15 +9,16 @@ extends RefCounted
 ## gets a crimson bar on that edge, heavier as it nears. Canvas draws only; once on screen the world looks
 ## (SeatBeacon, BlightWall) carry the read.
 
-const REACH_M := 90.0      # m: locked seats farther off are left to the minimap's edge arrows
-const WALL_M := 70.0       # m: the Blight's wall closer than this gets its bar
-const BADGE_R := 12.0      # px, a pin's badge
-const BEAM_W := 5.0        # px, the beam over an open or used seat's badge...
-const BEAM_H := 24.0       # ...and its height
-const TOP := 0.30          # of the screen height: pins stay under the message lane at the top centre
-const FS := 17             # px, a pin's line
+const REACH_M := 90.0  # m: locked seats farther off are left to the minimap's edge arrows
+const WALL_M := 70.0  # m: the Blight's wall closer than this gets its bar
+const BADGE_R := 12.0  # px, a pin's badge
+const BEAM_W := 5.0  # px, the beam over an open or used seat's badge...
+const BEAM_H := 24.0  # ...and its height
+const TOP := 0.30  # of the screen height: pins stay under the message lane at the top centre
+const FS := 17  # px, a pin's line
 
-static var _boxes: Array[Rect2] = []    # this frame's pins with their lines (for _place)
+static var _boxes: Array[Rect2] = []  # this frame's pins with their lines (for _place)
+
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
@@ -54,23 +55,26 @@ static func draw(hud) -> void:
 		c.draw_line(e - side * 34.0, e + side * 34.0, SideColor.tone("tide"), w)
 		_label(c, e, wd, txt, SideColor.tone("tide_next"))
 
+
 ## The screen direction of seat `i`'s pin, or ZERO for none: the seat is gone (taken, lost), on screen, locked and
 ## farther than REACH_M, or it is the Heart ring still locked while the Gate is to be had. `sd` is WaysOutHud.seats.
 static func seat_dir(m: Match, sz: Vector2, i: int, sd: Array, at: Vector3) -> Vector2:
 	var st := int(sd[i]["st"])
 	if at == Vector3.INF or st > WaysOutHud.St.USE:
 		return Vector2.ZERO
-	var ring_waits := i == 3 and int(sd[1]["st"]) <= WaysOutHud.St.USE      # (the Gate is still to be had)
+	var ring_waits := i == 3 and int(sd[1]["st"]) <= WaysOutHud.St.USE  # (the Gate is still to be had)
 	if st == WaysOutHud.St.LOCKED and (ring_waits or m.player.flat_dist(at) > REACH_M):
 		return Vector2.ZERO
 	return MarkerDir.off_dir(m.cam, sz, at, m.player.pos)
 
+
 ## Metres from the player in to the Blight's wall, or -1: no ring yet, or the player is out past it (HeartHud
 ## tints the screen there).
 static func wall_gap(m: Match) -> float:
-	var tr := Heart.tide_r(m)
-	var d := tr - m.player.flat_dist(m.heart.site)
-	return d if tr > 0.0 and d >= 0.0 else -1.0
+	var trap := Heart.tide_r(m)
+	var d := trap - m.player.flat_dist(m.heart.site)
+	return d if trap > 0.0 and d >= 0.0 else -1.0
+
 
 ## The screen direction of the wall's bar, or ZERO for none (no wall within WALL_M, or its nearest stretch is on
 ## screen and draws itself).
@@ -83,11 +87,13 @@ static func wall_dir(m: Match, sz: Vector2) -> Vector2:
 	out = out.normalized() * d
 	return MarkerDir.off_dir(m.cam, sz, p + Vector3(out.x, 0.0, out.y), p)
 
+
 ## An open or used seat's pin carries the world look's tall beam over its badge (a locked one is the stub: none).
 static func _beam(c: Control, e: Vector2, col: Color) -> void:
 	var r := Rect2(e.x - BEAM_W * 0.5, e.y - BADGE_R - 3.0 - BEAM_H, BEAM_W, BEAM_H)
 	c.draw_rect(r.grow(2.0), Color(0, 0, 0, 0.6))
 	c.draw_rect(r, col)
+
 
 ## Where a pin with a `w` px line sits: on the arrow box's edge toward `dir`, under the message lane, slid along the
 ## edge past the pins already drawn so no two overlap.
@@ -105,6 +111,7 @@ static func _place(sz: Vector2, dir: Vector2, w: float) -> Vector2:
 	_boxes.append(_box(e, dir, w))
 	return e
 
+
 ## The screen box a pin takes: its beam, badge and line (laid out as _label lays it).
 static func _box(e: Vector2, dir: Vector2, w: float) -> Rect2:
 	var top := e.y - BADGE_R - 3.0 - BEAM_H
@@ -113,6 +120,7 @@ static func _box(e: Vector2, dir: Vector2, w: float) -> Rect2:
 		return Rect2(x, top, BADGE_R * 2.0 + 8.0 + w, e.y + BADGE_R - top)
 	var hw := maxf(w * 0.5, BADGE_R)
 	return Rect2(e.x - hw, top, hw * 2.0, e.y + BADGE_R + 24.0 - top)
+
 
 ## A pin's line: beside its badge on the screen side at the left and right edges, under it at the top and bottom
 ## (the beam stands over it).

@@ -5,14 +5,17 @@ extends RefCounted
 
 var fails := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PROF %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	Prof.begin("check")
 	Prof.end()
-	Prof.end()      # (nothing open: ignored)
+	Prof.end()  # (nothing open: ignored)
 	Prof.frame()
 	ok(Prof.on == ClassDB.class_exists(&"TracyProfiler"), "Prof.on follows the extension class")
 	var presets := FileAccess.get_file_as_string("res://export_presets.cfg")
@@ -22,11 +25,12 @@ func run(main_node: Node) -> void:
 	print("PROF DONE, failures: %d" % fails)
 	main_node.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _report() -> void:
 	var rows := ["name,src_file,src_line,ns_since_start,exec_time_ns,thread,value"]
-	rows.append("warmup,gdscript,0,0,90000000,1,")        # inside the dropped warm-up
+	rows.append("warmup,gdscript,0,0,90000000,1,")  # inside the dropped warm-up
 	for i in 20:
-		rows.append("slow,gdscript,0,%d,%d,1," % [4000000000 + i * 1000, (i + 1) * 1000000])   # 1..20 ms
+		rows.append("slow,gdscript,0,%d,%d,1," % [4000000000 + i * 1000, (i + 1) * 1000000])  # 1..20 ms
 		rows.append("fast,gdscript,0,%d,1000000,1," % [4000000000 + i * 1000])
 	var csv := OS.get_cache_dir().path_join("prof_check.csv")
 	FileAccess.open(csv, FileAccess.WRITE).store_string("\n".join(rows) + "\n")

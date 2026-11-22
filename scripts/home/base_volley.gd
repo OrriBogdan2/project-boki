@@ -33,20 +33,20 @@ static func rules() -> Dictionary:
 
 ## How well a Boki gets under the seed and reads it, before the hitter's: 1.0 for no points and a plain mood.
 static func strength(rec: Dictionary) -> float:
-	var R := rules()
+	var r_v := rules()
 	var st: Dictionary = rec.get("stats", {})
-	var s := (1.0 + float(st.get("speed", 0)) * float(R["speed_per_point"])) \
-			* (1.0 + float(st.get("focus", 0)) * float(R["focus_per_point"]))
-	var mood: Array = R["mood"]
+	var s := (1.0 + float(st.get("speed", 0)) * float(r_v["speed_per_point"])) \
+			* (1.0 + float(st.get("focus", 0)) * float(r_v["focus_per_point"]))
+	var mood: Array = r_v["mood"]
 	s *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
-	s *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+	s *= lerpf(1.0, float(r_v["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
 	return s
 
 ## The chance recv returns a seed hit by hitter, before any spike.
 static func p_return(recv: Dictionary, hitter: Dictionary) -> float:
-	var R := rules()
-	return clampf(float(R["base_return"]) * strength(recv) / strength(hitter),
-			float(R["min_return"]), float(R["max_return"]))
+	var r_v := rules()
+	return clampf(float(r_v["base_return"]) * strength(recv) / strength(hitter),
+			float(r_v["min_return"]), float(r_v["max_return"]))
 
 ## a's chance over b's to take a point from a level start: above 0.5 the expected winner is a.
 static func expected(a: Dictionary, b: Dictionary) -> float:
@@ -59,7 +59,7 @@ class Run:
 	enum S { SERVE, FLIGHT, POINT, DONE }
 	const TABLE := {S.SERVE: [S.FLIGHT], S.FLIGHT: [S.POINT], S.POINT: [S.SERVE, S.DONE], S.DONE: []}
 
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array                 # two records
 	var backed := 0                 # index in recs: the Boki you back
 	var rng: RandomNumberGenerator
@@ -82,8 +82,8 @@ class Run:
 	var to_win: int                 # points that win it: the rules', or this week's format
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
-		R = BaseVolley.rules()
-		to_win = int(tw.get("to_win", R["to_win"]))
+		r_x = BaseVolley.rules()
+		to_win = int(tw.get("to_win", r_x["to_win"]))
 		recs = pair
 		backed = back
 		rng = r
@@ -118,7 +118,7 @@ class Run:
 		state_t += dt
 		match state:
 			S.SERVE:
-				if state_t >= float(R["serve_s"]):
+				if state_t >= float(r_x["serve_s"]):
 					rally = 0
 					_hit(server)
 					go(S.FLIGHT)
@@ -127,22 +127,22 @@ class Run:
 				if fly_t <= 0.0:
 					_arrive()
 			S.POINT:
-				if state_t >= float(R["point_s"]):
+				if state_t >= float(r_x["point_s"]):
 					go(S.DONE if _finished() else S.SERVE)
 
 	func _finished() -> bool:
-		return maxi(score[0], score[1]) >= to_win or t >= float(R["max_s"])
+		return maxi(score[0], score[1]) >= to_win or t >= float(r_x["max_s"])
 
 	## side hits the seed to the other side; your call makes the backed Boki's hit a spike.
 	func _hit(side: int) -> void:
 		hitter = side
 		to = 1 - side
 		hard = 1.0
-		fly_total = float(R["fly_s"])
+		fly_total = float(r_x["fly_s"])
 		if side == backed and spike != "":
-			hard = float(R["spike"][spike])
+			hard = float(r_x["spike"][spike])
 			if hard < 1.0:
-				fly_total = float(R["spike_fly_s"])
+				fly_total = float(r_x["spike_fly_s"])
 			spike = ""
 		fly_t = fly_total
 		rally += 1
@@ -160,20 +160,20 @@ class Run:
 
 ## Pays out a finished match: joy, trust, a memory each, energy and gems. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	var wp: int = run.score[run.winner()]
 	var lp: int = run.score[1 - run.winner()]
 	MinigameHub.record("volley", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(R["win_trust"]))
+	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(r_v["win_trust"]))
 	Save.remember(lose, "volley", "lost Spark Volley to %s, %d to %d" % [win["name"], lp, wp])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("volley", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "score": [wp, lp], "prize": prize}
@@ -203,12 +203,12 @@ func place() -> void:
 	if is_instance_valid(log_node):
 		log_node.queue_free()
 	log_node = null
-	var C := court()
-	if C.is_empty() and h.YARD_AT.x < -100.0:
+	var c := court()
+	if c.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	log_node = Node3D.new()
 	log_node.name = "VolleyLog"
-	log_node.position = h.YARD_AT + LOG_OFF if C.is_empty() else Vector3(C["at"][0], 0.0, C["at"][1])
+	log_node.position = h.YARD_AT + LOG_OFF if c.is_empty() else Vector3(c["at"][0], 0.0, c["at"][1])
 	h.add_child(log_node)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -234,10 +234,10 @@ func place() -> void:
 
 ## A miss over a court's shallows: the seed drops in and throws up water at the side that missed.
 func _splash(side: int) -> void:
-	var C := court()
-	if not C.is_empty():
+	var c := court()
+	if not c.is_empty():
 		var at := log_node.position + Vector3(0, 0.1, _side_z(side, 0.9))
-		h.fx.burst(at, Color(String(C["splash"])), 14, 2.2, 0.5, 6.0)
+		h.fx.burst(at, Color(String(c["splash"])), 14, 2.2, 0.5, 6.0)
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(log_node):
@@ -271,6 +271,10 @@ func use() -> void:
 	cue = GardenCues.VolleyCue.new(h)
 	_place()
 	GardenSfx.countdown(h, log_node.position)
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:

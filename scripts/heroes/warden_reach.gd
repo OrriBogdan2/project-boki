@@ -7,17 +7,18 @@ extends RefCounted
 ## line whatever the body plays (no flailing); it eases in from the clip's wind-up and back to the clips after.
 ## Data "reach": {"bones": [upper arm, forearm, hand], "grip": m from the hand joint to the middle of what it grips}.
 
-const TIP := "reach_tip"     # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
-const IN_RATE := 14.0        # 1/s: the arm takes the aim line (0.07 s out of the wind-up)
-const OUT_RATE := 9.0        # 1/s: and gives it back to the clips (0.11 s)
-const GIRTH := 1.6          # x: the forearm's thickness once stretched to 3x and more (a long reach is no string)
-const RETRACT := 70.0        # skeleton units (m at size 1)/s: the hand comes home down the line (full reach 0.13 s)
+const TIP := "reach_tip"  # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
+const IN_RATE := 14.0  # 1/s: the arm takes the aim line (0.07 s out of the wind-up)
+const OUT_RATE := 9.0  # 1/s: and gives it back to the clips (0.11 s)
+const GIRTH := 1.6  # x: the forearm's thickness once stretched to 3x and more (a long reach is no string)
+const RETRACT := 70.0  # skeleton units (m at size 1)/s: the hand comes home down the line (full reach 0.13 s)
 
 var skel: Skeleton3D
-var bones: Array = []        # [upper arm, forearm, hand] bone indices
-var grip := 0.0              # m: wrist to the middle of the hand's grip
-var w := 0.0                 # how much the reach owns the arm
-var tip := Vector3.INF       # the last tip, in skeleton space (kept while the arm eases home)
+var bones: Array = []  # [upper arm, forearm, hand] bone indices
+var grip := 0.0  # m: wrist to the middle of the hand's grip
+var w := 0.0  # how much the reach owns the arm
+var tip := Vector3.INF  # the last tip, in skeleton space (kept while the arm eases home)
+
 
 ## Null when the data has no "reach".
 static func make(sk: Skeleton3D, d: Dictionary) -> WardenReach:
@@ -32,6 +33,7 @@ static func make(sk: Skeleton3D, d: Dictionary) -> WardenReach:
 		return null
 	r.grip = float(rd["grip"])
 	return r
+
 
 ## After the clips. `world_tip`: the root's TIP meta (INF when the arm is home). Let go, the hand comes back down the
 ## line at RETRACT, then the arm eases back into the clips.
@@ -68,6 +70,7 @@ func apply(dt: float, world_tip: Vector3) -> void:
 	_lay(bones[0], now[0], shoulder, dir, 1.0)
 	_lay(bones[1], now[1], elbow, dir, stretch)
 	_lay(bones[2], now[2], elbow + dir * fore_len * stretch, dir, 1.0)
+
 
 ## Bone `bi` (the clip's pose `now`) laid at `at` along `dir` (its +Y), turned the shortest way so it keeps the
 ## clip's roll, `stretch` along its length (and thicker with it); mixed over the clip's pose by `w`.

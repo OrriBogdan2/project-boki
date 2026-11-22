@@ -84,7 +84,7 @@ func _hero(main: Node, id: String) -> void:
 		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
-	soles = _soles(sk)
+	soles = sole_ends(sk)
 	var row := {}
 	var rest := _pose_at(sync, clips, sk, String(lc["idle"]), 0.0)
 	row["same_side"] = {"hand_foot": signf((rest["hand.L"] as Vector3).x) == signf((rest["foot.L"] as Vector3).x),
@@ -92,21 +92,21 @@ func _hero(main: Node, id: String) -> void:
 	row["height"] = _height(sync, clips, sk, String(lc["idle"]))
 	var hgt: float = row["height"]
 	var walk := String(lc["walk"]["f"])
-	var run := String(lc["run"]["f"])
+	var run_v := String(lc["run"]["f"])
 	row["cfg"] = {"walk_speed": lc.get("walk_speed"), "run_speed": lc.get("run_speed"),
-			"walk_len": clips.lib.get_animation(walk).length, "run_len": clips.lib.get_animation(run).length}
+			"walk_len": clips.lib.get_animation(walk).length, "run_len": clips.lib.get_animation(run_v).length}
 	var live := {}
 	for s in SPEEDS:
 		live[str(s)] = _gait(m, sync, clips, sk, s)
 	row["live"] = live
 	row["seam"] = {}
-	for nm in [walk, run, String(lc["idle"])]:
+	for nm in [walk, run_v, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
 	var ph := float(lc.get("start_phase", 0.0))
 	row["pop"] = {"idle_walk": _start_gap(sync, clips, sk, String(lc["idle"]), walk, ph, hgt),
-			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run, ph, hgt),
+			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run_v, ph, hgt),
 			"idle_walk_best": _best_start(sync, clips, sk, String(lc["idle"]), walk, hgt),
-			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
+			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run_v)}
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:
@@ -199,7 +199,7 @@ static func points(sk: Skeleton3D) -> Dictionary:
 ## Each foot's heel and toe: the back and front ends of the verts skinned mostly to it that sit on its sole at rest,
 ## in the foot bone's frame. A pinned sole pivots on one of them, so the slide is read there, not at the ankle
 ## (which rolls forward over a heel-to-toe stance). Empty for a side without a foot bone or verts (the ankle then).
-func _soles(sk: Skeleton3D) -> Dictionary:
+static func sole_ends(sk: Skeleton3D) -> Dictionary:
 	var pts := {"L": [], "R": []}
 	for mi in sk.find_children("*", "MeshInstance3D", true, false):
 		var skin: Skin = (mi as MeshInstance3D).skin
@@ -310,9 +310,9 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 
 ## The gaits a Hunter stops in: name -> {mps, crouch}. Run is his full stick (hunter_move.json).
 static func gaits(id: String) -> Dictionary:
-	var run := HunterMove.speed(id)
-	return {"run": {"mps": run, "crouch": 0.0}, "walk": {"mps": WALK_MPS, "crouch": 0.0},
-			"crouch": {"mps": run * CROUCH_K, "crouch": 1.0}}
+	var run_v := HunterMove.speed(id)
+	return {"run": {"mps": run_v, "crouch": 0.0}, "walk": {"mps": WALK_MPS, "crouch": 0.0},
+			"crouch": {"mps": run_v * CROUCH_K, "crouch": 1.0}}
 
 ## His ground speed frame by frame after a let-go from `mps`, under the game's own walking brake.
 static func stop_speed(mps: float, n: int, dt: float) -> PackedFloat32Array:

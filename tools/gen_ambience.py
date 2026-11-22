@@ -121,7 +121,7 @@ def bell(f0, secs, decay):
 
 
 def meadow(seconds=28.0):
-    n = int(SR * (seconds + 2.0)); t = np.arange(n) / SR
+    n = int(SR * (seconds + 2.0)); _t = np.arange(n) / SR
     breeze = stereo(lambda n: lpf(rng.standard_normal(n), 650) * slow(n, 0.15, 0.3, 1.0) * 1.4, n)
     rustle = stereo(lambda n: bpf(rng.standard_normal(n), 2200, 6500) * slow(n, 0.35, 0.0, 1.0) ** 3 * 0.35, n)
     out = breeze + rustle

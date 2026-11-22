@@ -44,8 +44,8 @@ static func night_type(rec: Dictionary) -> bool:
 
 ## m/s: from Focus.
 static func speed(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["speed"]) * (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["speed_per_focus"]))
+	var r := rules()
+	return float(r["speed"]) * (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(r["speed_per_focus"]))
 
 
 ## Does the hunt run by the night rules: it is night, or this zone's sky never leaves dusk?
@@ -55,17 +55,17 @@ static func is_dark(day_t: float) -> bool:
 
 ## The chance a sniff points the right way: Focus, curiosity, and the night for night types.
 static func right_p(rec: Dictionary, night: bool) -> float:
-	var R := rules()
-	var p := float(R["right"]) + float(rec.get("stats", {}).get("focus", 0)) * float(R["right_per_focus"])
-	p += (float(rec.get("traits", {}).get("curiosity", 0.5)) - 0.5) * float(R["curiosity_gain"])
+	var r := rules()
+	var p := float(r["right"]) + float(rec.get("stats", {}).get("focus", 0)) * float(r["right_per_focus"])
+	p += (float(rec.get("traits", {}).get("curiosity", 0.5)) - 0.5) * float(r["curiosity_gain"])
 	if night and night_type(rec):
-		p += float(R["night_right"])
-	return clampf(p, float(R["right_min"]), float(R["right_max"]))
+		p += float(r["night_right"])
+	return clampf(p, float(r["right_min"]), float(r["right_max"]))
 
 
 ## The hunt itself: two hunters on the ground plane (x, z in metres) after a scent.
 class Hunt:
-	var R: Dictionary
+	var r_v: Dictionary
 	var recs: Array  # two records: a (index 0) and b (index 1)
 	var item: Vector2  # where the scent is hidden
 	var pos: Array = []  # each hunter's position
@@ -81,7 +81,7 @@ class Hunt:
 	func _init(
 		pair: Array, starts: Array, at: Vector2, is_night: bool, r: RandomNumberGenerator, walk := Callable()
 	) -> void:
-		R = BaseSeek.rules()
+		r_v = BaseSeek.rules()
 		recs = pair
 		item = at
 		night = is_night
@@ -98,7 +98,7 @@ class Hunt:
 		return BaseRace.bond(recs[0], recs[1]) <= float(BaseRace.rules()["rival_at"])
 
 	func over() -> bool:
-		return found >= 0 or t >= float(R["max_s"])
+		return found >= 0 or t >= float(r_v["max_s"])
 
 	## 0 or 1: who found it, else who is nearer (a on a dead level).
 	func winner() -> int:
@@ -107,19 +107,19 @@ class Hunt:
 		return 0 if pos[0].distance_to(item) <= pos[1].distance_to(item) else 1
 
 	func _sniff(i: int) -> void:
-		sniff_t[i] = float(R["sniff_s"])
+		sniff_t[i] = float(r_v["sniff_s"])
 		var p := BaseSeek.right_p(recs[i], night)
 		if friends() and right[1 - i]:
-			p = minf(p + float(R["friend_share"]), float(R["right_max"]))
+			p = minf(p + float(r_v["friend_share"]), float(r_v["right_max"]))
 		right[i] = rng.randf() < p
-		var aim: float = (item - pos[i]).angle() + rng.randf_range(-float(R["aim"]), float(R["aim"]))
+		var aim: float = (item - pos[i]).angle() + rng.randf_range(-float(r_v["aim"]), float(r_v["aim"]))
 		head[i] = Vector2.from_angle(aim if right[i] else rng.randf_range(0.0, TAU))
 
 	func step(dt: float) -> void:
 		t += dt
 		var rate: Array = [BaseSeek.speed(recs[0]), BaseSeek.speed(recs[1])]
-		if rivals() and pos[0].distance_to(pos[1]) < float(R["rival_near"]):
-			rate[0 if rate[0] < rate[1] else 1] *= float(R["rival_slow"])
+		if rivals() and pos[0].distance_to(pos[1]) < float(r_v["rival_near"]):
+			rate[0 if rate[0] < rate[1] else 1] *= float(r_v["rival_slow"])
 		for i in 2:
 			sniff_t[i] -= dt
 			if sniff_t[i] <= 0.0:
@@ -130,7 +130,7 @@ class Hunt:
 			else:
 				sniff_t[i] = 0.0  # blocked: sniff again at once
 		var best := -1
-		var best_d := float(R["find_r"])
+		var best_d := float(r_v["find_r"])
 		for i in 2:
 			var d: float = pos[i].distance_to(item)
 			if d < best_d:
@@ -141,22 +141,22 @@ class Hunt:
 
 ## Pays out a finished hunt: joy, trust, memories, energy, gems, bonds. Returns what the card shows.
 static func settle(hunt: Hunt) -> Dictionary:
-	var R := rules()
+	var r := rules()
 	var win: Dictionary = hunt.recs[hunt.winner()]
 	var lose: Dictionary = hunt.recs[1 - hunt.winner()]
 	var friends := hunt.friends()
 	for rec in hunt.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
+		Care.change(rec, "energy", -float(r["energy"]))
+	Care.change(win, "joy", float(r["win_joy"]))
+	Care.change(lose, "joy", float(r["lose_joy"]) * (float(r["friend_sulk"]) if friends else 1.0))
 	MinigameHub.record("seek", String(win["name"]))  # best Boki on the title's picker
-	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
+	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(r["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
 	BaseRace.nudge_bond(win, lose, step)
-	Save.d["gems"] = int(Save.d["gems"]) + int(R["gems"])
+	Save.d["gems"] = int(Save.d["gems"]) + int(r["gems"])
 	var prize := GardenPrizes.settle("seek", win, lose, true)
-	return {"win": win, "lose": lose, "gems": int(R["gems"]), "friends": friends, "prize": prize}
+	return {"win": win, "lose": lose, "gems": int(r["gems"]), "friends": friends, "prize": prize}
 
 
 # ------------------------------------------------------------------ on the base
@@ -286,6 +286,10 @@ func _walkable(p: Vector2) -> bool:
 func _ground(p: Vector2) -> float:
 	var g: float = h._ground_h(p.x, p.y)
 	return g if g > -50.0 else 0.0
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return state == S.CARRY or state == S.HUNT
 
 
 ## True when the hunt took the key (menu calls it off, or puts the scent back).

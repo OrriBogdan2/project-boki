@@ -10,23 +10,28 @@ extends RefCounted
 ##      bright on a clean pass and dull on a fumble
 ##   4. Show Ring: each round's score pops on the frame the round ends with the score the judges gave (the
 ##      Trick round ended by its third press, the others by time), and both totals with the Bond score
+##   5. Fetch Cup: the landing ring sits on the seed's landing spot through each toss and is gone once it is
+##      chased
 ## No cue spawns on any other frame. Never touches the real save.
 
-const DT := 1.0 / 30.0           # s per step: one frame of the clips
-const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
-const NEAR := 0.05               # m a cue may sit from where it belongs
-const TELLS := 2                 # tells watched: every bout has two (depth 3, at most 2 steps a push)
-const LEFT_OUT := 2              # the answer beat (of the first phrase) the player leaves out
-const MAX_S := 240.0             # s of game time any game may take
+const DT := 1.0 / 30.0  # s per step: one frame of the clips
+const SETTLE_FRAMES := 600  # frames to wait at most for the home to finish building
+const NEAR := 0.05  # m a cue may sit from where it belongs
+const TELLS := 2  # tells watched: every bout has two (depth 3, at most 2 steps a push)
+const LEFT_OUT := 2  # the answer beat (of the first phrase) the player leaves out
+const TOSSES := 3  # tosses watched in Fetch Cup
+const MAX_S := 240.0  # s of game time any game may take
 
 var bad := 0
 var main: Node
 var home
 
+
 func ok(cond: bool, what: String) -> void:
 	print("GGVFX %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -36,9 +41,11 @@ func run(m: Node) -> void:
 	_tumble()
 	_relay()
 	_show()
+	_fetch()
 	FarmUnlocks.rules()["base_mode"] = false
 	print("GGVFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## The base with three rested Boki of three types out.
 func _stage() -> void:
@@ -68,15 +75,19 @@ func _stage() -> void:
 	for k in home.kins:
 		k.erase("indoors")
 
+
 static func near(a: Vector3, b: Vector3) -> bool:
 	return a.distance_to(b) <= NEAR
+
 
 ## Freed, or freed at the end of this frame.
 static func gone(n: Node) -> bool:
 	return not is_instance_valid(n) or n.is_queued_for_deletion()
 
+
 static func same(a: Color, b: Color) -> bool:
 	return a.is_equal_approx(b)
+
 
 func _echo() -> void:
 	var es: EchoSteps = home.hecho
@@ -86,7 +97,7 @@ func _echo() -> void:
 	var you := GardenCues.type_colour(es.dancers[EchoSteps.YOU]["rec"])
 	var lead := GardenCues.type_colour(es.dancers[EchoSteps.RIVAL]["rec"])
 	var n := {"lead": 0, "pulse": 0, "hit": 0, "miss": 0, "wrong": 0}
-	var skipped := -1                  # grid beat left out
+	var skipped := -1  # grid beat left out
 	var now := 0.0
 	while r.round_i == 0 and now < MAX_S:
 		now += DT
@@ -105,8 +116,12 @@ func _echo() -> void:
 			break
 		var b := floori(now / r.beat_s)
 		var i := b - r.first
-		var on_beat := now - DT < r.at(b) and i >= 0 and i < r.pattern.size() \
-				and (r.state == EchoSteps.Run.S.CALL or r.state == EchoSteps.Run.S.ANSWER)
+		var on_beat := (
+			now - DT < r.at(b)
+			and i >= 0
+			and i < r.pattern.size()
+			and (r.state == EchoSteps.Run.S.CALL or r.state == EchoSteps.Run.S.ANSWER)
+		)
 		var lit: int = cue.beats.spawns - was[0]
 		var pulsed: int = cue.pulses.spawns - was[1]
 		var flashed: int = cue.flashes.spawns - was[2]
@@ -146,6 +161,7 @@ func _echo() -> void:
 	es._end(false)
 	ok(es.cue == null and gone(cue.root), "echo: the cues go with the dance")
 
+
 func _tumble() -> void:
 	var tb: BaseTumble = home.htumble
 	tb.use()
@@ -179,12 +195,15 @@ func _tumble() -> void:
 			if cue.shown != "" or cue.icons.values().any(func(n): return n.visible):
 				wrong += 1
 	ok(spans.size() >= TELLS, "tumble: %d tells watched" % spans.size())
-	ok(spans.all(func(s): return absf(s - tell_s) <= DT + 0.001),
-			"tumble: each icon showed for the tell's %.1f s to a frame %s" % [tell_s, str(spans)])
+	ok(
+		spans.all(func(s): return absf(s - tell_s) <= DT + 0.001),
+		"tumble: each icon showed for the tell's %.1f s to a frame %s" % [tell_s, str(spans)]
+	)
 	ok(wrong == 0, "tumble: the tell's move over the rival in its colour, alpha = its honesty (%d off)" % wrong)
 	if tb.run != null:
 		tb._end(false)
 	ok(tb.cue == null and gone(cue.root), "tumble: the icon goes with the bout")
+
 
 func _relay() -> void:
 	var rl: BaseRelay = home.hrace.relay
@@ -226,6 +245,7 @@ func _relay() -> void:
 	ok(wrong == 0, "relay: batons over their runners, each hand-off burst on its frame at the taker (%d off)" % wrong)
 	ok(rl.run == null and rl.cue == null and gone(cue.root), "relay: the batons go with the race")
 
+
 ## [position, colour] of the `count` rings spawned last.
 static func _newest(b: GardenCues.Bursts, count: int) -> Array:
 	var out: Array = []
@@ -234,11 +254,13 @@ static func _newest(b: GardenCues.Bursts, count: int) -> Array:
 		out.append([b.nodes[slot].position, b.tone[slot]])
 	return out
 
+
 func _press(game) -> void:
 	var ev := InputEventAction.new()
 	ev.action = "interact"
 	ev.pressed = true
 	game.input(ev)
+
 
 func _show() -> void:
 	var sr: ShowRing = home.hshow
@@ -270,8 +292,11 @@ func _show() -> void:
 				want = ["Trick %.1f" % ShowRing.trick(shown, r.grades)]
 			ShowRing.Run.Phase.BOND:
 				var s := r.scores()
-				want = ["Bond %.1f" % ShowRing.bond(shown, r.calls), "%.1f" % float(s[0]["total"]),
-						"%.1f" % float(s[1]["total"])]
+				want = [
+					"Bond %.1f" % ShowRing.bond(shown, r.calls),
+					"%.1f" % float(s[0]["total"]),
+					"%.1f" % float(s[1]["total"])
+				]
 		var texts: Array = cue.labels.map(func(l): return l.text)
 		if cue.spawns - popped != want.size() or not want.all(func(w): return texts.has(w)):
 			wrong += 1
@@ -280,3 +305,28 @@ func _show() -> void:
 	ok(wrong == 0, "show: each round's score popped on the frame it ended, the totals with the Bond (%d off)" % wrong)
 	sr._end(false)
 	ok(sr.cue == null and gone(cue.root), "show: the pops go with the show")
+
+
+func _fetch() -> void:
+	var fb: BaseFetch = home.hfetch
+	fb.use()
+	var tossed := 0
+	var wrong := 0
+	var t := 0.0
+	while fb.run != null and tossed < TOSSES and t < MAX_S:
+		fb.tick(DT)
+		t += DT
+		var ring: MeshInstance3D = fb.cue.landing
+		if fb.run.state == BaseFetch.Run.S.TOSS:
+			tossed += 1 if fb.run.state_t < DT * 1.5 else 0
+			var land: Vector3 = fb.mat.position + Vector3(0, 0.05, fb.run.dist)
+			if not ring.visible or Vector2(ring.position.x - land.x, ring.position.z - land.z).length() > NEAR:
+				wrong += 1
+		elif ring.visible:
+			wrong += 1
+	ok(
+		tossed == TOSSES and wrong == 0,
+		"fetch: the ring marks the landing spot on %d tosses, never off a toss (%d off)" % [tossed, wrong]
+	)
+	fb._end(false)
+	ok(fb.cue == null, "fetch: the ring goes with the round")
