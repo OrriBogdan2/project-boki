@@ -22,6 +22,7 @@ const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chai
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
 static var _data = null  # art name -> its entry (parsed once)
+static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
 
 var root: Node3D
 var player: AnimationPlayer
@@ -46,7 +47,6 @@ var wall: WardenWall
 var opener: WardenOpen
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var mouth: Array = []  # [Meshy bone, offset in it]: the copied weapon_muzzle, where the Gun's Muzzle sits each frame
-static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -423,7 +423,7 @@ static func _contract_anchors(art_name: String) -> Array:
 	var con := (load(path) as PackedScene).instantiate() as Node3D
 	var csk := WardenGlb.skeleton(con)
 	var sk_m := WardenGlb.model_xf(con, csk) if csk else Transform3D.IDENTITY
-	for nd in (con.find_children("*", "Node3D", true, false) if csk else []):
+	for nd in con.find_children("*", "Node3D", true, false) if csk else []:
 		var nm := String(nd.name)
 		if nd is MeshInstance3D or not (nm.begins_with("anchor_") or nm.begins_with("weapon_muzzle")):
 			continue
