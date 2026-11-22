@@ -292,7 +292,7 @@ func _tick(dt: float) -> void:
 ## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
-	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
+	if not h.is_local() or h.wid != "arc_bolts" or busy():
 		AimKit.hide(h, "aim_glow")
 		return
 	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
@@ -362,8 +362,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:
@@ -423,7 +421,7 @@ func _bolt() -> void:
 		chain.bolt_thrown(float(sd["life"]))
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
-		x["kb"] = 3.0
+		x["kb"] = float(dash_def().get("prime_kb", 0.0))      # 0: the card has no knock
 		x["heavy"] = true          # the empowered hit's own thud and hold (ImpactWeight.of_hit)
 		fx().ride(sd, "chakram_big", Color("c9a8ff"), EMP_PALE, 3.4, 0.7)
 		fx().star(muzzle, EMP_PALE, 0.9, 0.16)

@@ -320,7 +320,7 @@ func _check_keys(P: Hunter) -> void:
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
-## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
 func _check_deny(P: Hunter) -> void:
 	var hud = P.m.hud
 	PressDeny.last.clear()
@@ -349,7 +349,7 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
-		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
 
@@ -596,13 +596,15 @@ func _hud_size(demo: Match) -> void:
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
 	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
+	var had_obj = Save.d["tutorial"].get(FirstObjective.KEY)
+	# A save past its first expedition: the objective card (--first-objective-check) would crowd the minimap.
+	Save.d["tutorial"][FirstObjective.KEY] = true
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
 	m.set_process(false)
 	var hud = m.hud
-	for line in ["Kael knocked Ryzz down", "Team 3 is out", "Ember revived Pip"]:
-		m.feed.append({"text": line, "t": 0.0})
+	await _kill_feed(m)
 	hud.toast("Picked up a long-range rifle", Color.WHITE)
 	hud.toast("Armor cracked: it held one more hit", Color.WHITE)
 	for win: Vector2i in HUD_SIZES:
@@ -642,7 +644,49 @@ func _hud_size(demo: Match) -> void:
 						"%s: 130%% draws the minimap bigger (held to the room above the bottom block)" % tag)
 	Settings.v["hud_scale"] = keep
 	Settings.set_v("hud_full", false, false)
+	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
+	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
+
+## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the
+## icon of what did it, a text plate for the rest; at most four, yours outlined, fading, and seen again in the
+## margin at every size by _hud_size.
+func _kill_feed(m: Match) -> void:
+	var me: Hunter = m.player
+	var mate: Hunter = m.hunters.filter(func(x): return x != me and x.team == me.team)[0]
+	var foes: Array = m.hunters.filter(func(x): return x.team != me.team)
+	var kin: Kin = me.kin
+	KillFeed.knock(m, foes[0], me, "dash")
+	KillFeed.out(m, foes[1], me, "finished")
+	m.add_feed("Team 3 is out")
+	var plain: bool = m.feed[0].has("who") and m.feed[1].has("who") and not m.feed[2].has("who")
+	ok(m.feed.size() == 3 and plain, "a knock and a finish are rows; a plain line stays text")
+	m.feed.clear()
+	KillFeed.knock(m, foes[0], me, "dash")
+	KillFeed.knock(m, foes[1], kin, KillFeed.icon_of(kin, {}))
+	KillFeed.out(m, foes[2], null, "bled out")
+	var blight := Blight.new()
+	KillFeed.knock(m, mate, blight, KillFeed.icon_of(blight, {}))
+	blight.free()
+	ok(m.feed.size() == KillFeed.ROWS, "the feed holds %d lines at most (%d)" % [KillFeed.ROWS, m.feed.size()])
+	for i in 3:
+		m.hud.panels.queue_redraw()
+		await main.get_tree().process_frame
+	var rows: Array = KillFeed.shown
+	var kinds: Array = rows.map(func(r): return "%s:%s" % [r["kind"], r.get("icon", "")])
+	ok(kinds.size() == 4 and kinds[0] == "knock:dash" and kinds[1] == "knock:paw" and kinds[2] == "finish:bleed"
+		and kinds[3] == "knock:claw", "rows: a knock, a Boki's, a bleed-out, the Blight's (%s)" % str(kinds))
+	ok(rows[1]["boki"] and rows[1]["left"] == me.pname, "a Boki's knock shows its owner and the paw")
+	ok(rows[3]["src"] == "Blight" and rows[3]["left"] == "Blight", "the Blight's row has no Hunter: its name stands in")
+	ok(rows[0]["mine"] and rows[1]["mine"] and not rows[2]["mine"], "only rows with your squad in them are outlined")
+	m.feed[0]["t"] = KillFeed.HOLD_S + KillFeed.FADE_S * 0.5
+	m.hud.panels.queue_redraw()
+	await main.get_tree().process_frame
+	var a: float = KillFeed.shown[0]["a"]
+	ok(KillFeed.shown[1]["a"] == 1.0 and a > 0.0 and a < 1.0, "a row holds, then fades (alpha %.2f)" % a)
+	m.feed[0]["t"] = 0.0
+	m.feed.append({"text": "Team 3 is out", "t": 0.0})
+	m.feed.pop_front()
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

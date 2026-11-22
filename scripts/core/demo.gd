@@ -46,6 +46,7 @@ static func save(preset: String) -> Dictionary:
 	d["gems"] = 1200
 	d["matches"] = 12
 	d["extracts"] = 9      # the Hollow opens at 5 extractions
+	d["tutorial"]["first_objective"] = true      # (the first-expedition objective is for new players too)
 	d["first_guide"] = 99  # the first-match guide lines (FirstMatchGuide) are for new players, not for filming
 	d["classes"] = ClassUnlock.legacy()
 	d["tools"] = HomeGather.TOOLS.keys()
@@ -70,8 +71,7 @@ static func open(main: Node, preset: String, args: PackedStringArray) -> void:
 		"match":
 			main.show_screen("match", _as_hunter(Match.demo_opts(), hunter))
 		"training":
-			main.show_screen("match", _as_hunter({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0,
-				"length": 1e9, "seed": 4242, "no_drop": true}, hunter))
+			main.show_screen("match", _as_hunter(Match.arena_opts(), hunter))
 		"tier2":
 			var o := Match.demo_opts()
 			o["tier"] = HOLLOW_TIER
