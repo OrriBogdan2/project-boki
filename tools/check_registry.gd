@@ -95,6 +95,7 @@ const CHECKS := {
 	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
 	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
 	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--merge-keeps-check": ["res://tools/merge_keeps_check.gd", "merge_keeps_check", null],
 	"--fusion-off-check": ["res://tools/fusion_off_check.gd", "fusion_off_check", null],  # 0101
 	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
