@@ -67,13 +67,10 @@ func run(main: Node) -> void:
 	)
 	var fallback: Array = []
 	var loaded: Array = []
-	var native: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
 		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
-		if WardenNative.on(a):
-			native.append(a)        # (on Meshy's own skeleton, not the contract: --warden-native-check)
-		elif WardenGlb.has_model(a):
+		if WardenGlb.has_model(a):
 			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
 			else:
@@ -81,12 +78,11 @@ func run(main: Node) -> void:
 		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
-	ok(fallback.size() + loaded.size() + native.size() == Arch.ids().size(),
-			"every Warden builds: %d from their .glb %s, %d procedural (the fallback), %d on Meshy's skeleton" % [
+	ok(fallback.size() + loaded.size() == Arch.ids().size(),
+			"every Warden builds: %d from their .glb %s, %d procedural (the fallback)" % [
 				loaded.size(),
 				str(loaded),
-				fallback.size(),
-				native.size()
+				fallback.size()
 			])
 	ok("gunslinger" in loaded, "Vex (gunslinger) is drawn from her .glb")
 	for a in loaded:
@@ -103,8 +99,7 @@ func run(main: Node) -> void:
 		_own_look(a)
 		_white_hair(a)
 		await _halo(main, a)
-	if "dolm" in loaded:      # (Tenzo on Meshy's skeleton: his stones are in the mesh, no orbit bones)
-		_stones_look()
+	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()

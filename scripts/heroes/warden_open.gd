@@ -29,8 +29,7 @@ const RUMMAGE := 0.025           # m: the hands' stir on the lid while he holds
 const RUMMAGE_HZ := 2.2
 const KNEES := 0.5               # 0..1: how much of the dip goes on the knees rather than the back
 
-var clips: WardenClips           # (null on Meshy's skeleton: `busy` stands in for clips.busy)
-var busy := false                # a Meshy-native model's attack clip owns the body (WardenNative)
+var clips: WardenClips
 var skel: Skeleton3D
 var root: Node3D
 var w := 0.0                     # how much of the layer is on (the check reads it)
@@ -44,16 +43,10 @@ var layered: Array = []          # bone indices the layer moves
 var lid_w := Vector3.INF         # the lid last held (world): the way back still faces it
 
 static func make(c: WardenClips) -> WardenOpen:
-	var o := make_on(c.root, c.skel)
-	if o:
-		o.clips = c
-	return o
-
-## The layer on any skeleton whose bones WardenSkeleton.find knows (the contract's, or Meshy's own: WardenNative,
-## which sets `busy` each frame); null when one is missing.
-static func make_on(model: Node3D, sk: Skeleton3D) -> WardenOpen:
 	var o := WardenOpen.new()
-	o.root = model
+	var sk := c.skel
+	o.clips = c
+	o.root = c.root
 	o.skel = sk
 	for nm in ["root", "hips", "thigh.L", "thigh.R", "shin.L", "shin.R", "upper_arm.L", "upper_arm.R",
 			"forearm.L", "forearm.R", "hand.L", "hand.R"]:
@@ -127,7 +120,7 @@ func step(dt: float, on: float) -> void:
 ## landing): the pose goes this frame.
 func cancelled(s: Dictionary) -> bool:
 	var v: Vector3 = s.get("vel", Vector3.ZERO)
-	return (clips.busy if clips else busy) or Vector2(v.x, v.z).length() >= STILL or bool(s.get("rolling", false)) \
+	return clips.busy or Vector2(v.x, v.z).length() >= STILL or bool(s.get("rolling", false)) \
 			or float(s.get("cast", 99.0)) < CAST_S or float(s.get("hit_t", 99.0)) < HIT_S \
 			or not bool(s.get("grounded", true))
 

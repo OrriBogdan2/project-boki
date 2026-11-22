@@ -51,11 +51,10 @@ func _hero(id: String) -> bool:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
-	var sync := WardenGlb.layers(m)
+	var sync := m.get_node_or_null("Warden/Sync")
 	var op: WardenOpen = sync.get("opener") if sync else null
 	if op == null:
-		ok(sync == null or (sync.get("clips") == null and sync.get("plays") == null),
-				"%s: plays clips, so wears the open layer" % id)
+		ok(sync == null or sync.get("clips") == null, "%s: plays clips, so wears the open layer" % id)
 		m.free()
 		return false
 	sync.set_process(false)
@@ -121,7 +120,7 @@ func _live(main: Node) -> void:
 	var m: Match = r[0]
 	var p: Hunter = r[1]
 	var home: Vector3 = r[4]
-	var sync := WardenGlb.layers(p.model)
+	var sync := p.model.get_node_or_null("Warden/Sync")
 	var op: WardenOpen = sync.get("opener") if sync else null
 	ok(op != null, "live: Kael wears the open layer in a match")
 	if op == null:
@@ -232,7 +231,7 @@ func _strip(main: Node, out: String) -> void:
 		box.position = m.position + CHEST_AT
 		box.rotation.y = 0.3
 		holder.add_child(box)
-		var sync := WardenGlb.layers(m)
+		var sync := m.get_node("Warden/Sync")
 		sync.set_process(false)
 		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "act": "", "act_at": Vector3.INF}
 		m.set_meta(WardenClips.STATE, s)

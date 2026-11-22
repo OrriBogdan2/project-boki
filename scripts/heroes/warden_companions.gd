@@ -15,8 +15,6 @@ extends RefCounted
 ##   "list": [{"id", "surfaces": [material names], "at": [x, y, z] the part's centre at rest, "phase_deg" (0 = her
 ##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
 ## Cosmetic only; nothing here touches a kit (the FX empties on the sun follow it, so a shot leaves the sun).
-## On Meshy's own skeleton (WardenNative) `frame` takes the data's contract skeleton space onto that skeleton's (its
-## units and its turn under the model), and each part's centre is the middle of its own surfaces there.
 
 const PREFIX := "Companion_"   # node name of each cut-out part
 const SNAP := 1.5      # m: a centre further than this from where it should be (a respawn) jumps there
@@ -31,7 +29,7 @@ class Part:
 	var bob_period := 2.7
 	var bob_phase := 0.0
 	var bone := -1                    # the bone its anchors were on
-	var anchors: Array = []           # [empty, its rest position relative to the part's centre, the bone it rides]
+	var anchors: Array = []           # [empty, its rest position relative to the part's centre]
 	var pos := Vector3.ZERO           # last placed (skeleton space)
 
 var skel: Skeleton3D
@@ -40,12 +38,11 @@ var parts: Array = []
 var centre_bone := -1
 var centre_off := Vector3.ZERO      # circle centre minus the bone's rest origin
 var centre := Vector3.ZERO          # the eased centre (world)
-var axes := Basis.IDENTITY          # the data's skeleton axes on this skeleton (`frame`'s basis)
 var primed := false
 var t := 0.0
 
 ## Cuts the companions out of `glb`'s body mesh when `data` has them; returns the live helper or null.
-static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Transform3D.IDENTITY) -> WardenCompanions:
+static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary) -> WardenCompanions:
 	var dd: Dictionary = data.get("companions", {})
 	if dd.is_empty() or sk == null:
 		return null
@@ -64,19 +61,19 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Trans
 	if body == null:
 		push_warning("WardenCompanions: no body mesh carries the companions' surfaces")
 		return null
-	var cut := _cut_for(body, dd, frame)
+	var cut := _cut_for(body, dd)
 	if cut.is_empty():
 		return null
 	var wc := WardenCompanions.new()
 	wc.skel = sk
 	wc.d = dd
-	wc.axes = frame.basis
 	body.mesh = cut["body"]
 	for p in dd["list"]:
 		var part := Part.new()
 		part.id = String(p["id"])
 		var pc := (cut["parts"] as Dictionary)[part.id] as Array
-		part.rest = pc[1]
+		var at: Array = p["at"]
+		part.rest = Vector3(at[0], at[1], at[2])
 		part.node = MeshInstance3D.new()
 		part.node.name = PREFIX + part.id
 		part.node.mesh = pc[0]
@@ -89,20 +86,18 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary, frame := Trans
 		part.bone = WardenSkeleton.find(sk, String(p.get("bone", "")))
 		for an in p.get("anchors", []):
 			var nd := glb.find_child(String(an), true, false) as Node3D
-			var holder := nd.get_parent() as BoneAttachment3D if nd else null
-			var bi := sk.find_bone(holder.bone_name) if holder else part.bone
-			if nd and bi >= 0:
-				var at_rest := sk.get_bone_global_rest(bi) * nd.position
-				part.anchors.append([nd, at_rest - part.rest, bi])
+			if nd and part.bone >= 0:
+				var at_rest := sk.get_bone_global_rest(part.bone) * nd.position
+				part.anchors.append([nd, at_rest - part.rest])
 		wc.parts.append(part)
 	var c: Array = dd.get("at", [0, 1, 0])
 	wc.centre_bone = WardenSkeleton.find(sk, String(dd.get("bone", "hips")))
 	var origin := sk.get_bone_global_rest(wc.centre_bone).origin if wc.centre_bone >= 0 else Vector3.ZERO
-	wc.centre_off = frame * Vector3(c[0], c[1], c[2]) - origin
+	wc.centre_off = Vector3(c[0], c[1], c[2]) - origin
 	return wc
 
 ## The body mesh without the companions' surfaces and one unskinned mesh per companion, cut once per .glb.
-static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -> Dictionary:
+static func _cut_for(body: MeshInstance3D, dd: Dictionary) -> Dictionary:
 	var src := body.mesh as ArrayMesh
 	if src == null:
 		return {}
@@ -119,9 +114,7 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 	for p in dd["list"]:
 		var am := ArrayMesh.new()
 		var at: Array = p["at"]
-		var centre := frame * Vector3(at[0], at[1], at[2])
-		if frame != Transform3D.IDENTITY:
-			centre = _middle(src, names, p["surfaces"], centre)
+		var centre := Vector3(at[0], at[1], at[2])
 		for nm in p["surfaces"]:
 			var si := names.find(String(nm))
 			if si < 0:
@@ -145,24 +138,11 @@ static func _cut_for(body: MeshInstance3D, dd: Dictionary, frame: Transform3D) -
 	_cut[key] = out
 	return out
 
-## The middle of the surfaces `surfs` of `src` (their bounds' centre), or `or_else` when it has none of them.
-static func _middle(src: ArrayMesh, names: Array, surfs: Array, or_else: Vector3) -> Vector3:
-	var box := AABB()
-	var any := false
-	for nm in surfs:
-		var si := names.find(String(nm))
-		if si < 0:
-			continue
-		for v: Vector3 in src.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
-			box = box.expand(v) if any else AABB(v, Vector3.ZERO)
-			any = true
-	return box.get_center() if any else or_else
-
 ## The circle's point at angle `a` (0 = her right, through her front for dir 1) about `c` (skeleton space), with the
 ## vertical bob `bob_y`.
 func spot(c: Vector3, a: float, bob_y: float) -> Vector3:
 	var r: Array = d.get("radius", [0.5, 0.4])
-	return c + axes * Vector3(float(r[0]) * cos(a), bob_y, -float(r[1]) * sin(a))
+	return c + Vector3(float(r[0]) * cos(a), bob_y, -float(r[1]) * sin(a))
 
 func angle(p: Part, time: float) -> float:
 	var w: Array = d.get("wobble", [0.0, 1.0])
@@ -206,9 +186,9 @@ func step(dt: float) -> void:
 			bas = Basis.looking_at(Vector3(cos(a), 0.0, -sin(a)), Vector3.UP) * roll
 		else:
 			bas = Basis(Vector3.UP, sway * sin(TAU * t / (1.7 * float(d.get("period", 4.0))) + part.bob_phase)) * roll
-		var turn := axes.orthonormalized()
-		part.node.transform = Transform3D(turn * bas * turn.inverse(), part.pos)
+		part.node.transform = Transform3D(bas, part.pos)
 		# (the empties the sun carries sit on a bone: put them where that bone must hold them to land on the sun)
-		for an in part.anchors:
-			var inv := skel.get_bone_global_pose(int(an[2])).affine_inverse()
-			(an[0] as Node3D).position = inv * (part.pos + (an[1] as Vector3))
+		if part.bone >= 0 and not part.anchors.is_empty():
+			var inv := skel.get_bone_global_pose(part.bone).affine_inverse()
+			for an in part.anchors:
+				(an[0] as Node3D).position = inv * (part.pos + (an[1] as Vector3))
