@@ -321,6 +321,12 @@ func _fixes() -> void:
 	ok("recall" in _cues_of(func(): KinFollow.leap(k, k.pos, "side")), "a Boki's own hop back plays the recall cue")
 	var ordered := _cues_of(func(): KinFollow.leap(k, k.pos, "side", true))
 	ok(not "recall" in ordered, "...but not on an ordered recall (that plays its own)")
+	k.state = "active"       # the Boki leaving the fight to fly back to its owner (active>flying_home): Kin.recall
+	k.fly = {}
+	k.target = null
+	var left := _cues_of(func(): k.recall())
+	var flew := k.state == "flying_home" and "recall" in left
+	ok(flew, "an ordered recall (active>flying_home) plays the Boki's recall cue (%s)" % [left])
 	ok("boki_downed" in _cues_of(func(): KinDowned.begin(k, false)), "a Boki going down cries in its voice")
 	var lc: Dictionary = KinFollow.rules()["land_cues"]
 	var kgs: Array = KinFollow.rules()["land_kg"]
