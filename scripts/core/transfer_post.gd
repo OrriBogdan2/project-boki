@@ -13,8 +13,8 @@ class_name TransferPost
 const PACKETS := "transfers"
 const ANSWERS := "transfer_answers"
 
-static var inbox: Array = []       # Boki waiting for you to accept: {doc, p} with p cleaned (clean)
-static var _busy := false          # a sync or an answer in flight
+static var inbox: Array = []  # Boki waiting for you to accept: {doc, p} with p cleaned (clean)
+static var _busy := false  # a sync or an answer in flight
 
 
 ## On coming home: settles answered transfers, posts the ones not on the store yet and fetches what
@@ -25,15 +25,24 @@ static func sync(cb: Callable) -> void:
 		return
 	_busy = true
 	var lines: Array = []
-	Social.query(ANSWERS, [["to", "==", Social.me]], "", "asc", 40, func(answers: Array):
-		Social.each(Transfer.outbox().duplicate(), func(o: Dictionary, next: Callable):
-			_step(o, answers, lines, next),
-		func():
-			var waiting := Transfer.outbox().map(func(o): return String(o["id"]))
-			for a in answers:           # answers to transfers that are settled or called back
-				if not waiting.has(Social.txt_of(a["data"].get("tid"))):
-					Social.del_doc(ANSWERS + "/" + String(a["id"]))
-			_fetch(lines, cb)))
+	Social.query(
+		ANSWERS,
+		[["to", "==", Social.me]],
+		"",
+		"asc",
+		40,
+		func(answers: Array):
+			Social.each(
+				Transfer.outbox().duplicate(),
+				func(o: Dictionary, next: Callable): _step(o, answers, lines, next),
+				func():
+					var waiting := Transfer.outbox().map(func(o): return String(o["id"]))
+					for a in answers:  # answers to transfers that are settled or called back
+						if not waiting.has(Social.txt_of(a["data"].get("tid"))):
+							Social.del_doc(ANSWERS + "/" + String(a["id"]))
+					_fetch(lines, cb)
+			)
+	)
 
 
 ## Answers a Boki handed to you: yes takes it in (Transfer.accept), no sends it home. cb gets
@@ -49,23 +58,33 @@ static func answer(doc: String, yes: bool, cb: Callable) -> void:
 	var done := func(r: Dictionary):
 		_busy = false
 		cb.call(r)
-	Social.claim(PACKETS + "/" + doc, func(raw: Dictionary):
-		var p := clean(raw)
-		if p.is_empty():
-			inbox = inbox.filter(func(e): return e["doc"] != doc)
-			done.call({"ok": false, "why": "It was called back"})
-			return
-		var reply := {"to": p["by"], "tid": p["id"], "yes": yes, "t": MarketSave.now()}
-		Social.add_doc(ANSWERS, reply, func(aid: String):
-			if aid == "":
-				done.call({"ok": false, "why": "The town store isn't answering"})
-				return
-			Social.del_doc(PACKETS + "/" + doc, func(gone: bool):
-				if not gone:
-					done.call({"ok": false, "why": "The town store isn't answering"})
-					return
+	Social.claim(
+		PACKETS + "/" + doc,
+		func(raw: Dictionary):
+			var p := clean(raw)
+			if p.is_empty():
 				inbox = inbox.filter(func(e): return e["doc"] != doc)
-				done.call(Transfer.accept(p) if yes else {"ok": true, "why": ""}))))
+				done.call({"ok": false, "why": "It was called back"})
+				return
+			var reply := {"to": p["by"], "tid": p["id"], "yes": yes, "t": MarketSave.now()}
+			Social.add_doc(
+				ANSWERS,
+				reply,
+				func(aid: String):
+					if aid == "":
+						done.call({"ok": false, "why": "The town store isn't answering"})
+						return
+					Social.del_doc(
+						PACKETS + "/" + doc,
+						func(gone: bool):
+							if not gone:
+								done.call({"ok": false, "why": "The town store isn't answering"})
+								return
+							inbox = inbox.filter(func(e): return e["doc"] != doc)
+							done.call(Transfer.accept(p) if yes else {"ok": true, "why": ""})
+					)
+			)
+	)
 
 
 ## Calls back a Boki you sent: only while its packet is still unanswered on the store. cb gets {ok, why}.
@@ -83,18 +102,41 @@ static func recall(id: String, cb: Callable) -> void:
 		_busy = false
 		cb.call(r)
 	var path := _path(id)
-	Social.get_doc(path, func(still: Dictionary):
-		if still.is_empty():
-			Social.query(ANSWERS, [["to", "==", Social.me], ["tid", "==", id]], "", "asc", 1, func(rows: Array):
-				done.call(Transfer.recall(id) if rows.is_empty()
-					else {"ok": false, "why": "They already answered: it settles when you next come home"}))
-			return
-		Social.claim(path, func(held: Dictionary):
-			if held.is_empty():
-				done.call({"ok": false, "why": "They're answering right now: try again in a moment"})
+	Social.get_doc(
+		path,
+		func(still: Dictionary):
+			if still.is_empty():
+				Social.query(
+					ANSWERS,
+					[["to", "==", Social.me], ["tid", "==", id]],
+					"",
+					"asc",
+					1,
+					func(rows: Array):
+						done.call(
+							(
+								Transfer.recall(id)
+								if rows.is_empty()
+								else {"ok": false, "why": "They already answered: it settles when you next come home"}
+							)
+						)
+				)
 				return
-			Social.del_doc(path, func(gone: bool):
-				done.call(Transfer.recall(id) if gone else {"ok": false, "why": "The town store isn't answering"}))))
+			Social.claim(
+				path,
+				func(held: Dictionary):
+					if held.is_empty():
+						done.call({"ok": false, "why": "They're answering right now: try again in a moment"})
+						return
+					Social.del_doc(
+						path,
+						func(gone: bool):
+							done.call(
+								Transfer.recall(id) if gone else {"ok": false, "why": "The town store isn't answering"}
+							)
+					)
+			)
+	)
 
 
 ## A packet read from the store (written by another player, so untrusted). {} if it can't be used.
@@ -104,8 +146,13 @@ static func clean(raw: Dictionary) -> Dictionary:
 	var id := Social.txt_of(raw.get("id"))
 	if kin.is_empty() or by == "" or by == Social.me or id == "":
 		return {}
-	return {"id": id, "by": by, "from_name": Social.say_of(raw.get("from_name")), "kin": kin,
-		"t": Social.int_of(raw.get("t"))}
+	return {
+		"id": id,
+		"by": by,
+		"from_name": Social.say_of(raw.get("from_name")),
+		"kin": kin,
+		"t": Social.int_of(raw.get("t"))
+	}
 
 
 static func _path(id: String) -> String:
@@ -116,41 +163,62 @@ static func _path(id: String) -> String:
 static func _step(o: Dictionary, answers: Array, lines: Array, next: Callable) -> void:
 	var id := String(o["id"])
 	var nm := String(o["rec"].get("name", "A Boki"))
-	Social.get_doc(_path(id), func(still: Dictionary):
-		if not still.is_empty():
-			next.call()        # still waiting for them
-			return
-		var mine := answers.filter(func(a): return Social.txt_of(a["data"].get("tid")) == id)
-		if not mine.is_empty():
-			if mine[0]["data"].get("yes") == true:
-				Transfer.delivered(id)
-				lines.append("%s accepted %s. It's theirs now." % [o["to"], nm])
-			elif Transfer.recall(id)["ok"]:
-				lines.append("%s couldn't take %s: it came home, and the fee came back." % [o["to"], nm])
-			next.call()
-			return
-		Social.query("profiles", [["name", "==", String(o["to"])]], "", "asc", 1, func(rows: Array):
-			if rows.is_empty() or rows[0]["id"] == Social.me:
-				next.call()    # nobody by that name has a farm here yet: it waits
+	Social.get_doc(
+		_path(id),
+		func(still: Dictionary):
+			if not still.is_empty():
+				next.call()  # still waiting for them
 				return
-			var doc := Transfer.packet(o)
-			doc["by"] = Social.me
-			doc["for"] = String(rows[0]["id"])
-			Social.set_doc(_path(id), doc, func(_ok: bool): next.call())))
+			var mine := answers.filter(func(a): return Social.txt_of(a["data"].get("tid")) == id)
+			if not mine.is_empty():
+				if mine[0]["data"].get("yes") == true:
+					Transfer.delivered(id)
+					lines.append("%s accepted %s. It's theirs now." % [o["to"], nm])
+				elif Transfer.recall(id)["ok"]:
+					lines.append("%s couldn't take %s: it came home, and the fee came back." % [o["to"], nm])
+				next.call()
+				return
+			Social.query(
+				"profiles",
+				[["name", "==", String(o["to"])]],
+				"",
+				"asc",
+				1,
+				func(rows: Array):
+					if rows.is_empty() or rows[0]["id"] == Social.me:
+						next.call()  # nobody by that name has a farm here yet: it waits
+						return
+					var doc := Transfer.packet(o)
+					doc["by"] = Social.me
+					doc["for"] = String(rows[0]["id"])
+					Social.set_doc(_path(id), doc, func(_ok: bool): next.call())
+			)
+	)
 
 
 ## Fetches the Boki handed to you; a line for each one that's new this session.
 static func _fetch(lines: Array, cb: Callable) -> void:
-	Social.query(PACKETS, [["for", "==", Social.me]], "", "asc", 20, func(rows: Array):
-		var seen := inbox.map(func(e): return e["doc"])
-		inbox = []
-		for r in rows:
-			var p := clean(r["data"])
-			if p.is_empty():
-				continue
-			inbox.append({"doc": r["id"], "p": p})
-			if not seen.has(r["id"]):
-				lines.append("%s wants to hand you %s: accept or refuse it at the market stall's Shelter."
-					% [p["from_name"], p["kin"]["name"]])
-		_busy = false
-		cb.call(lines))
+	Social.query(
+		PACKETS,
+		[["for", "==", Social.me]],
+		"",
+		"asc",
+		20,
+		func(rows: Array):
+			var seen := inbox.map(func(e): return e["doc"])
+			inbox = []
+			for r in rows:
+				var p := clean(r["data"])
+				if p.is_empty():
+					continue
+				inbox.append({"doc": r["id"], "p": p})
+				if not seen.has(r["id"]):
+					lines.append(
+						(
+							"%s wants to hand you %s: accept or refuse it at the market stall's Shelter."
+							% [p["from_name"], p["kin"]["name"]]
+						)
+					)
+			_busy = false
+			cb.call(lines)
+	)

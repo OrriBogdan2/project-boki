@@ -3,13 +3,14 @@
 dropped, and the Hero's clip script runs on it as on WORK/<hero>_art1.blend. Take the clips you changed back into the
 game .glb with glb_add_clips.py (everything else stays byte for byte).
 Run: blender -b --factory-startup --python tools/art1/glb_rebake.py -- GAME.glb CLIPS.py OUT.blend OUT.glb"""
+
 import os
 import runpy
 import sys
 
 import bpy
 
-game, script, out_blend, out_glb = sys.argv[sys.argv.index("--") + 1:][:4]
+game, script, out_blend, out_glb = sys.argv[sys.argv.index("--") + 1 :][:4]
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=game, bone_heuristic="BLENDER")
 next(o for o in bpy.data.objects if o.type == "ARMATURE").name = "Armature"

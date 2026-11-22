@@ -9,13 +9,14 @@ extends RefCounted
 ##   fallout  the point of no return; Match.on_fell plays it for the one who fell, a remote hunter's
 ##            copy plays it here when its owner reports them out
 
+enum Phase { IDLE, FALLING, CAUGHT }
+
 const FALL_VY := -2.0  # m/s: falling at least this fast under the lip means a fall (whoosh)
 const CATCH_VY := 0.5  # m/s: climbing faster than this under a gliding hunter means the lift has them
 const WHOOSH_DB := -4.0
 const CATCH_DB := -2.0
 const STRAIN_DB := -9.0
 const FALLOUT_DB := -2.0
-enum Phase { IDLE, FALLING, CAUGHT }
 
 var _phase := Phase.IDLE
 var _deep := false  # last step: under the lip in the air (a remote hunter's fall-out follows it)

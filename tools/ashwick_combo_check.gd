@@ -426,23 +426,45 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 2, hz + dz)] = lv
-	# --- Cinder Shot: hold shows the full fixed lane, release fires; it always flies its max range
+	# --- Cinder Shot: a cast (footage f0073-f0075): the press shows the full fixed lane and starts the cooldown, the
+	# cinder leaves rmb.cast later whatever the button does; it always flies its max range
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var max_r := float(K.rmb_def()["range"])
+	var cast_s := float(K.rmb_def()["cast"])
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
-	P.inp["sec_hold"] = true
+	var shots0: int = m.shots.size()
 	P.ak.press_rmb()
-	ak.step(m, 0.3, func(): P.inp["sec_hold"] = true; ak.aim_at(P, home + Vector3(2.0, 0, 0)))
+	ok(
+		"cinder cast: the press puts the slot on cooldown and shows the lane (footage f0073)",
+		float(K.cd["rmb"]) > 0.0 and K.ch_rmb < 1.0 and K.aiming and AimKit.shown(P, "rmb"),
+		"cd %.2f ch %.1f aiming %s" % [float(K.cd["rmb"]), K.ch_rmb, K.aiming]
+	)
+	var left_at := -1.0
+	var tc := 0.0
+	while tc < cast_s + 0.2:
+		ak.step(m, Match.DT, func(): ak.aim_at(P, home + Vector3(2.0, 0, 0)))
+		tc += Match.DT
+		if left_at < 0.0 and m.shots.size() > shots0: left_at = tc
+	ok(
+		"cinder cast: the cinder leaves %.2f s after the press, button let go at once (f0075)" % cast_s,
+		absf(left_at - cast_s) <= 1.5 * Match.DT, "left at %.3f s" % left_at
+	)
+	ak.step(m, 1.0)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ak.aim_at(P, home + Vector3(2.0, 0, 0))
+	P.ak.press_rmb()
+	ak.step(m, 0.3, func(): ak.aim_at(P, home + Vector3(2.0, 0, 0)))
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
-		"cinder: holding shows the aim lane at its full fixed length (cursor at 2 m)",
+		"cinder: the cast shows the aim lane at its full fixed length (cursor at 2 m)",
 		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
 	ok(
-		"cinder cast-move: her full walk while the lane is held (footage: the source does not stop moving)",
+		"cinder cast-move: her full walk while the lane shows (footage: the source does not stop moving)",
 		K.aiming and is_equal_approx(K.move_k(), 1.0),
 		"move_k %.2f after_t %.2f" % [K.move_k(), K.after_t]
 	)
@@ -451,7 +473,6 @@ func _all() -> void:
 		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
 		"width %.2f" % float(lane.get("width", 0.0))
 	)
-	P.inp["sec_hold"] = false
 	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
 	var near_d := Vector2((e1[0] as Vector3).x - home.x, (e1[0] as Vector3).z - home.z).length()
@@ -464,7 +485,7 @@ func _all() -> void:
 	ak.aim_at(P, home + Vector3(20.0, 0, 0))
 	var old_ribbons: Array = HeroVfx.of(m).ribbons.duplicate()      # the miss's, untouched by m.step
 	ak.tap(m, P)
-	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
+	ak.step(m, cast_s + 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
 	_orb_look(K, m, old_ribbons)
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
@@ -475,7 +496,7 @@ func _all() -> void:
 	)
 	reset.call()
 	ak.tap(m, P)
-	ak.step(m, 0.8)
+	ak.step(m, cast_s + 0.8)
 	ok(
 		"cinder: a hit sets the foe Ablaze", K.burning(T) == 1 and ak.dmg(T) >= 10.0,
 		"burning %d took %.0f" % [K.burning(T), ak.dmg(T)]
@@ -492,7 +513,7 @@ func _all() -> void:
 	K.ch_rmb = 1.0
 	ak.aim_at(P, T.pos)
 	ak.tap(m, P)
-	ak.step(m, 0.8)
+	ak.step(m, cast_s + 0.8)
 	ok(
 		"cinder: more on an Ablaze foe (ignite_bonus)", ak.dmg(T) >= cinder_cold * (k1 - 0.04),
 		"hot %.1f cold %.1f" % [ak.dmg(T), cinder_cold]
@@ -504,7 +525,7 @@ func _all() -> void:
 	var sp0: int = K.spreads
 	ak.aim_at(P, T.pos)
 	ak.tap(m, P)
-	ak.step(m, 0.8)
+	ak.step(m, cast_s + 0.8)
 	ok(
 		"combo: lance burn > Cinder Shot = upgrade + spread",
 		K.burning(T) == 2 and K.burning(T2) >= 1 and K.spreads == sp0 + 1, "T %d T2 %d" % [K.burning(T), K.burning(T2)]
@@ -577,7 +598,7 @@ func _all() -> void:
 		P.pos.x - home.x > d1 + ram_d * 0.8 and P.dashes < 0.5,
 		"first %.1f both %.1f charges %.2f" % [d1, P.pos.x - home.x, P.dashes]
 	)
-	# the air poof: the ram's length (owner playtest 11-17: it went twice as far, too fast), a share of its speed kept
+	# the air poof: the ram's length (the old one went twice as far, too fast), a share of its speed kept
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
@@ -599,7 +620,7 @@ func _all() -> void:
 	var poof_d := P.pos.x - home.x
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-		"air poof: about the ground ram's length (owner 11-17: it was over twice it), a share of its speed kept after it",
+		"air poof: about the ground ram's length (never over twice it), a share of its speed kept after it",
 		poof_d < ram_d * 1.5 and poof_d > ram_d * 0.9 and poof_t < 0.35 and kept > 5.0 and kept < 12.5,
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)

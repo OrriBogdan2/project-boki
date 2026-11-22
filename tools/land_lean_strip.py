@@ -4,12 +4,27 @@ each run, the frames round the run start, the stop, the jump's (or leap's) landi
 
     python3 tools/land_lean_strip.py <before-dir> <after-dir> <out.jpg> [--ids a,b]
 """
+
 import argparse, json, os, sys
 from PIL import Image, ImageDraw
 
-KEYS = [("start", 0), ("start", 2), ("start", 4), ("stop", 0), ("stop", 3), ("stop", 6), ("land", -1), ("land", 1),
-        ("land", 3), ("land", 6), ("glide_land", -1), ("glide_land", 1), ("glide_land", 3), ("glide_land", 6)]
-CROP = 0.62                  # share of the frame kept round its centre
+KEYS = [
+    ("start", 0),
+    ("start", 2),
+    ("start", 4),
+    ("stop", 0),
+    ("stop", 3),
+    ("stop", 6),
+    ("land", -1),
+    ("land", 1),
+    ("land", 3),
+    ("land", 6),
+    ("glide_land", -1),
+    ("glide_land", 1),
+    ("glide_land", 3),
+    ("glide_land", 6),
+]
+CROP = 0.62  # share of the frame kept round its centre
 
 
 def cell(path, size):
@@ -21,9 +36,14 @@ def cell(path, size):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("before"); ap.add_argument("after"); ap.add_argument("out"); ap.add_argument("--ids", default="")
+    ap.add_argument("before")
+    ap.add_argument("after")
+    ap.add_argument("out")
+    ap.add_argument("--ids", default="")
     a = ap.parse_args()
-    ids = a.ids.split(",") if a.ids else sorted(d for d in os.listdir(a.after) if os.path.isdir(os.path.join(a.after, d)))
+    ids = (
+        a.ids.split(",") if a.ids else sorted(d for d in os.listdir(a.after) if os.path.isdir(os.path.join(a.after, d)))
+    )
     if not ids:
         sys.exit("no frames under %s" % a.after)
     cw = 120

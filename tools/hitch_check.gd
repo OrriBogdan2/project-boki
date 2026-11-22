@@ -231,7 +231,7 @@ func _set_phase(p: String) -> void:
 	phase_t = 0.0
 
 func _next_phase() -> void:
-	var P: Hunter = m.player
+	var p_v: Hunter = m.player
 	match phase:
 		"first":
 			if phase_t >= 0.25:
@@ -239,9 +239,9 @@ func _next_phase() -> void:
 		"planning":
 			if not (m.skydrop and m.skydrop.planning): _set_phase("ride")
 		"ride":
-			if not P.riding: _set_phase("drop")
+			if not p_v.riding: _set_phase("drop")
 		"drop":
-			if not P.dropping:
+			if not p_v.dropping:
 				_set_phase("land")
 				landed_at = m.time
 		"land":
@@ -258,14 +258,14 @@ func _next_phase() -> void:
 ## model mid-play compiled its materials then, unless the warm-up built one (WarmUp._mob_stand_ins).
 var _pack_done := false
 func _bring_pack() -> void:
-	var P: Hunter = m.player
+	var p_v: Hunter = m.player
 	var kinds: Array = []
 	for k in Data.MOBS:
 		if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
 			kinds.append(k)
 	for i in kinds.size():
 		var a := TAU * i / kinds.size()
-		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
+		var at: Vector3 = m.world.free_spot_near(p_v.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(kinds[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	print("HITCH pack: %d mobs (%s) at t=%.2f" % [kinds.size(), ",".join(kinds), m.time])
 

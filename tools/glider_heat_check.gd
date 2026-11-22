@@ -6,7 +6,8 @@ extends "res://tools/abyss_check.gd"
 ## (decision 0022), and the other heat rows in hunter_move.json (heat_doc) do what they say: a real glide
 ## press 8 m deep spends the footage's quarter to a third of the bar, an overheated glider flies
 ## at overheat_speed (only slower sideways: its height and heading match a cool glide held on the same keys)
-## and burns overheat_burn of your health a second in 20-damage ticks. Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## and burns overheat_burn of your health a second in 20-damage ticks.
+## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
 const GLIDE_RUN_UP := 30.0     # m above the lane the overheat glide starts

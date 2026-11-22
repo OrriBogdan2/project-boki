@@ -5,18 +5,25 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HATCHSFX %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 ## An egg that records the sound names it asks for.
-class EggSpy extends EggHatch:
+class EggSpy:
+	extends EggHatch
 	var heard: Array = []
+
 	func _init(sp_id: String, fx_ref: Fx, mystery_egg := false) -> void:
 		super(sp_id, fx_ref, 0.32, 0.42, 1.0, {"species": sp_id})
 		kind = "mystery" if mystery_egg else ""
+
 	func _sfx(n: String, _vol := 0.0, _pitch := 1.0) -> void:
 		heard.append(n)
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -36,7 +43,8 @@ func run(m: Node) -> void:
 		["puddlet", false, "hatch_chirp_prism"],
 		["burrlet", false, "hatch_chirp_spore"],
 		["zapple", true, "hatch_mystery_chirp"],
-		["pebbit", false, "kin_happy"]]
+		["pebbit", false, "kin_happy"]
+	]
 	var eggs: Array = []
 	var finished := {}
 	for i in cases.size():
@@ -46,7 +54,7 @@ func run(m: Node) -> void:
 		egg.done.connect(func(): finished[i] = true)
 		egg.start()
 		eggs.append(egg)
-	var t0 := CheckClock.own_msec()      # (not the wall clock: a loaded box left eggs at the second crack)
+	var t0 := CheckClock.own_msec()  # (not the wall clock: a loaded box left eggs at the second crack)
 	while finished.size() < cases.size() and CheckClock.own_msec() - t0 < 40000:
 		await tree.process_frame
 	ok(finished.size() == cases.size(), "all %d eggs hatch" % cases.size())
@@ -55,8 +63,10 @@ func run(m: Node) -> void:
 		var tag: String = "%s%s" % [cases[i][0], " (mystery)" if cases[i][1] else ""]
 		var heard: Array = eggs[i].heard.filter(func(n): return n.begins_with("hatch_") or n == "kin_happy")
 		var pre := "hatch_mystery_" if cases[i][1] else "hatch_"
-		ok(heard.count(pre + "crack_1") == 1 and heard.count(pre + "crack_2") == 1 and heard.count(pre + "pop") == 1,
-			"%s: first crack, bigger crack and pop once each" % tag)
+		ok(
+			heard.count(pre + "crack_1") == 1 and heard.count(pre + "crack_2") == 1 and heard.count(pre + "pop") == 1,
+			"%s: first crack, bigger crack and pop once each" % tag
+		)
 		ok(heard.count(cases[i][2]) == 1, "%s: its first chirp %s once" % [tag, cases[i][2]])
 		ok(heard.count(pre + "wobble") >= 2, "%s: wobble ticks (%d)" % [tag, heard.count(pre + "wobble")])
 		var order := heard.filter(func(n): return n != pre + "wobble")
@@ -68,7 +78,8 @@ func run(m: Node) -> void:
 		files.append_array(heard)
 	var seen := {}
 	for n in files:
-		if seen.has(n): continue
+		if seen.has(n):
+			continue
 		seen[n] = true
 		ok(FileAccess.file_exists("res://audio/%s.wav" % n), "%s exists" % n)
 	holder.queue_free()

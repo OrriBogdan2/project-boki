@@ -8,26 +8,43 @@ extends RefCounted
 
 const Cov := preload("res://tools/anim_coverage_check.gd")
 const DT := 1.0 / 60.0
-const STATES := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp",
-	"strafe", "crouch", "upper"]
-const MOVE_FRAMES := 45        # frames a held state is sampled over
-const MOVE_MAX_S := 1.2        # s: the longest a kit move is sampled for
-const T_POSE_RAD := 0.035      # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
-const FROZEN_RAD := 0.03       # rad (1.7 deg): the legs turn less than this over a walk, run or strafe: frozen
+const STATES := [
+	"idle",
+	"walk",
+	"run",
+	"attack",
+	"hit",
+	"death",
+	"jump",
+	"land",
+	"glide",
+	"dash",
+	"cast",
+	"stomp",
+	"strafe",
+	"crouch",
+	"upper"
+]
+const MOVE_FRAMES := 45  # frames a held state is sampled over
+const MOVE_MAX_S := 1.2  # s: the longest a kit move is sampled for
+const T_POSE_RAD := 0.035  # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
+const FROZEN_RAD := 0.03  # rad (1.7 deg): the legs turn less than this over a walk, run or strafe: frozen
 const LOCO_LEGS := ["walk", "run", "strafe"]
 ## Motley has no legs: he hovers on his spring, so his walk and run turn the hips.
 const LEGLESS := ["ostra"]
-const RUN_V := 4.8             # m/s (the run in warden_clips_check)
+const RUN_V := 4.8  # m/s (the run in warden_clips_check)
 
 var bad := 0
 var verbose := false
-var idle_pose := {}      # bone -> its local rotation in the standing idle
+var idle_pose := {}  # bone -> its local rotation in the standing idle
+
 
 func run(holder: Node3D) -> int:
 	verbose = OS.get_cmdline_user_args().has("--verbose-states")
 	for id in Arch.ORDER:
 		_hunter(holder, String(id))
 	return bad
+
 
 func _hunter(holder: Node3D, id: String) -> void:
 	var art := WardenGlb.art(id)
@@ -40,8 +57,10 @@ func _hunter(holder: Node3D, id: String) -> void:
 	idle_pose.clear()
 	for st in STATES:
 		var r := _state(an, sync, sk, art, st)
-		var line := "%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f" % [art, st, rad_to_deg(r["rest"]),
-				rad_to_deg(r["idle"]), rad_to_deg(r["moved"])]
+		var line := (
+			"%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f"
+			% [art, st, rad_to_deg(r["rest"]), rad_to_deg(r["idle"]), rad_to_deg(r["moved"])]
+		)
 		if r["rest"] < T_POSE_RAD:
 			notes.append("%s T-pose" % st)
 		if st != "idle" and r["idle"] < T_POSE_RAD:
@@ -55,11 +74,22 @@ func _hunter(holder: Node3D, id: String) -> void:
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count() if mesh else 0:
 			tris += mesh.surface_get_array_index_len(si) / 3
-	print("CLIPS %s %s: %d tris, %s, %d clips, 15 states driven%s" % ["ok  " if notes.is_empty() else "FAIL", art,
-			tris, WardenGlb.DIR + "/%s/%s.glb" % [art, art], sync.clips.lib.get_animation_list().size() if sync.clips
-			else 0, "" if notes.is_empty() else ": " + "; ".join(notes)])
+	print(
+		(
+			"CLIPS %s %s: %d tris, %s, %d clips, 15 states driven%s"
+			% [
+				"ok  " if notes.is_empty() else "FAIL",
+				art,
+				tris,
+				WardenGlb.DIR + "/%s/%s.glb" % [art, art],
+				sync.clips.lib.get_animation_list().size() if sync.clips else 0,
+				"" if notes.is_empty() else ": " + "; ".join(notes)
+			]
+		)
+	)
 	bad += 0 if notes.is_empty() else 1
 	m.free()
+
 
 ## Retarget: every track of every clip names a bone of the skeleton; the walk and run clips key each limb bone.
 func _bind(clips: WardenClips, sk: Skeleton3D) -> Array:
@@ -91,6 +121,7 @@ func _bind(clips: WardenClips, sk: Skeleton3D) -> Array:
 				notes.append("clip %s keys no %s" % [nm, b])
 	return notes
 
+
 ## One state, driven from the standing idle: how far the pose turns from the rest pose, from the idle pose, and how far
 ## the moving bones (the legs; a hovering Hunter's hips) turn over the state, in rad.
 func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, st: String) -> Dictionary:
@@ -116,6 +147,7 @@ func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, s
 				out["moved"] = maxf(out["moved"], q.angle_to(first[b]))
 	play(an, sync, base, 30)
 	return out
+
 
 ## The state dicts of one state, a frame each: a held state's dict repeated, a kit move's clock stepped.
 func frames(an: HunterAnim, sync: WardenGlb.Sync, art: String, st: String, base: Dictionary) -> Array:
@@ -149,15 +181,19 @@ func frames(an: HunterAnim, sync: WardenGlb.Sync, art: String, st: String, base:
 		out.append(s)
 	return out
 
+
 func _move_frames(art: String, st: String, s: Dictionary) -> Array:
 	var moves: Dictionary = WardenClips.data(art).get("kmoves", {})
 	var pick := ""
 	for k in moves:
 		var dash := RegEx.create_from_string(Cov.DASH_RE).search(String(k)) != null
 		var cast := RegEx.create_from_string(Cov.CAST_RE).search(String(k)) != null
-		if (st == "dash" and dash) or (st == "cast" and cast and not dash) \
-				or (st == "upper" and (moves[k] as Dictionary).has("upper")) \
-				or (st == "attack" and not dash and not cast and k != "mf_xform"):
+		if (
+			(st == "dash" and dash)
+			or (st == "cast" and cast and not dash)
+			or (st == "upper" and (moves[k] as Dictionary).has("upper"))
+			or (st == "attack" and not dash and not cast and k != "mf_xform")
+		):
 			pick = String(k)
 			break
 	var out: Array = []
@@ -170,6 +206,7 @@ func _move_frames(art: String, st: String, s: Dictionary) -> Array:
 		f["kmove_t"] = minf(i * DT, MOVE_MAX_S)
 		out.append(f)
 	return out
+
 
 func play(an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

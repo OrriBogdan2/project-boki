@@ -9,9 +9,10 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
-const BAKED := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend"]
-const MOVE_M := 0.002              # m a bone must shift over a clip to count as moving (rotations: Check.T_POSE rad)
+const BAKED := [
+	"idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"
+]
+const MOVE_M := 0.002  # m a bone must shift over a clip to count as moving (rotations: Check.T_POSE rad)
 const KEYS := ["kstate", "kwork", "kact", "kdown", "happy", "dazed"]
 const ROWS := [
 	{"s": "idle", "at": "home, garden, match", "want": "idle", "expect": "idle"},
@@ -53,12 +54,14 @@ const ROWS := [
 ]
 
 var bad := 0
-var _seen := {}                    # states whose table line is printed
+var _seen := {}  # states whose table line is printed
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BOKICOVER %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 ## One species through every row; its clips are then checked for a T-pose.
 func species(main: Node, id: String) -> void:
@@ -79,6 +82,7 @@ func species(main: Node, id: String) -> void:
 	for clip: String in used:
 		ok(_moves(rig, clip), "%s: %s leaves the bind pose and moves" % [id, clip])
 	k.queue_free()
+
 
 ## The clip the rig picks for `row`, after the game's metas for it are set.
 func _play(k: Node3D, rig: BokiRig, row: Dictionary) -> String:
@@ -101,11 +105,12 @@ func _play(k: Node3D, rig: BokiRig, row: Dictionary) -> String:
 		k.remove_meta("kburst")
 	return clip
 
+
 ## False for a clip that never leaves the bind pose (a T-pose) or holds one pose (frozen). A one-shot may start and
 ## end on the bind pose, so only the farthest sampled frame counts.
 func _moves(rig: BokiRig, clip: String) -> bool:
 	var skel := rig.skeleton()
-	rig.clip = ""                      # play it afresh, so no fade from the clip before blends in
+	rig.clip = ""  # play it afresh, so no fade from the clip before blends in
 	rig.set_clip(clip, 0.0)
 	var length := rig.player.get_animation(clip).length
 	var far := 0.0
@@ -125,11 +130,13 @@ func _moves(rig: BokiRig, clip: String) -> bool:
 				spread = maxf(spread, maxf(q.angle_to(first[b]), at.distance_to(first_at[b]) / MOVE_M * Check.T_POSE))
 	return far >= Check.T_POSE and spread >= Check.T_POSE
 
+
 func _flinches(k: Node3D, rig: BokiRig) -> bool:
 	KinFlinch.hit(k, Vector3(0, 0, 1), 0.3, 1.0)
 	rig._flinch.update(rig.root, 0.05)
 	rig._keep_flex(0.05)
 	return rig.flex.rotation.length() > 0.001 or not rig.flex.scale.is_equal_approx(Vector3.ONE)
+
 
 ## The table line, once per state (a row asserts the same clip for every species).
 func _row(row: Dictionary) -> void:
