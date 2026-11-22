@@ -10902,3 +10902,6 @@ READY ext/spawn-at-muzzle 597314d8c7 (shots drawn from each hunter hand/weapon v
 READY ext/anim-boki-back-curl-blend 1d0a21f166835a1060392cf59536003aefa30dc8 (Boki back-curl blends without a snap)
 READY ext/anim-boki-own-clips-sttv c5a15b55c615eb0af7516510cd1b28591cb36b12 (own clips for squalltross, threadwyrm, tuatrune, velvorm)
 READY ext/anim-boki-own-clips-mms a7014d270dba230ebcf9028c4bee0ded05be17a1 (own clips for moundvark, murmurling, spatewader)
+READY ext/feel-buffer-table b934d4abac (bulk-rebase: origin/main merged in mechanically, was c523074241; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/summon-per-species 824412aa98 (bulk-rebase: origin/main merged in mechanically, was 7c0e2c2924; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-1afe8a57 e869c30854 (bulk-rebase: origin/main merged in mechanically, was 710225a52a; union 0 gen 1 files; the branch's own READY checks still apply)
