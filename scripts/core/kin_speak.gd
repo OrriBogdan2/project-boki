@@ -98,7 +98,7 @@ static func say(rec: Dictionary, feel: String, act_key := "", salt := -1) -> Str
 	if salt < 0: salt = randi()
 	var s := babble(rec["species"], feel, salt)
 	if act_key != "" and ACTS.has(act_key):
-		s += " " + about(rec, _pick(ACTS[act_key], salt / 3))
+		s += " " + about(rec, _pick(ACTS[act_key], int(salt / 3.0)))
 	return s
 
 ## Answers something you said, at the kin's level of speech. Fluent kin use KinBrain.
@@ -155,7 +155,7 @@ static func reply(rec: Dictionary, text: String) -> String:
 		var mem: Array = rec.get("memory", [])
 		var m := String(mem[-1]["text"]).trim_prefix("you ") if mem.size() > 0 else "farm"
 		var line := fill(rec["species"], _pick(SIMPLE.get(key, SIMPLE["chat"]), salt), rec).replace("{M}", " ".join(m.split(" ").slice(0, 4)))
-		return line + (" " + about(rec, _pick(ACTS[act], salt / 7)) if salt % 3 == 0 else "")
+		return line + (" " + about(rec, _pick(ACTS[act], int(salt / 7.0))) if salt % 3 == 0 else "")
 	var s := babble(rec["species"], feel, salt)
 	if stage == 1:
 		var w: String = WORDS.get(key, WORDS.get(intent, ""))
@@ -163,4 +163,4 @@ static func reply(rec: Dictionary, text: String) -> String:
 			var p := _parts(rec["species"])
 			var punct := "?" if feel == "question" else ("..." if feel in ["sad", "sleepy"] else "!")
 			s = "%s ...%s%s %s!" % [s, w, punct, p["A"]]
-	return s + " " + about(rec, _pick(ACTS.get(act, ACTS["listen"]), salt / 5))
+	return s + " " + about(rec, _pick(ACTS.get(act, ACTS["listen"]), int(salt / 5.0)))

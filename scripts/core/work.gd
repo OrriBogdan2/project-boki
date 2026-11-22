@@ -360,7 +360,7 @@ static func catch_up(now := -1.0) -> Array:
 		var n := mini(int(floor(acc)), int(cfg["cap"]))
 		st["acc"] = acc - floor(acc) if n < int(cfg["cap"]) else 0.0
 		if cfg.has("wood"):
-			n = mini(n, mat("wood") / int(cfg["wood"]))
+			n = mini(n, int(mat("wood") / float(int(cfg["wood"]))))
 		if n <= 0: continue
 		var what := ""
 		match String(cfg["out"]):

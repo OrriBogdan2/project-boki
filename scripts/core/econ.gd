@@ -273,7 +273,7 @@ static func self_fills(f: Dictionary) -> bool:
 
 ## A self-filling feeder below half tops itself up from the pantry. Returns how many it took.
 static func auto_refill(f: Dictionary) -> int:
-	if not self_fills(f) or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
+	if not self_fills(f) or not f.get("auto", true) or fill(f) > int(int(fdef(f)["cap"]) / 2.0):
 		return 0
 	var got := 0
 	while room_in(f) > 0:
