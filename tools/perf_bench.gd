@@ -275,10 +275,12 @@ func _start(part: String, extra: Dictionary) -> Match:
 		worst[stage] = maxf(float(worst.get(stage, 0.0)), ms)
 		if ms > 100.0 and loading:
 			# what the build did in it: its steps (PerfLog marks) and the slice point that ended it
-			var marks: Array = PerfLog.between(now - int(ms * 1000.0), now).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])
-			var ended: Array = PerfLog.slices.filter(func(sl): return int(sl[0]) > now - int(ms * 1000.0) and int(sl[0]) <= now)
-			print("BENCH %s slow load frame: %.0f ms in %s; steps: %s; slice: %s" % [part, ms, stage, ", ".join(marks),
-					", ".join(ended.map(func(sl): return "%.0f ms at %s" % [float(sl[1]), String(sl[2])]))])
+			var since := now - int(ms * 1000.0)
+			var marks: Array = PerfLog.between(since, now).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])
+			var ended: Array = PerfLog.slices.filter(func(sl): return int(sl[0]) > since and int(sl[0]) <= now)
+			var slices: Array = ended.map(func(sl): return "%.0f ms at %s" % [float(sl[1]), String(sl[2])])
+			var line := "BENCH %s slow load frame: %.0f ms in %s; steps: %s; slice: %s"
+			print(line % [part, ms, stage, ", ".join(marks), ", ".join(slices)])
 		var cur = main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
