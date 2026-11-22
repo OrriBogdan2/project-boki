@@ -100,6 +100,7 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 					neck[i] = true
 					W.islands[owner]["cells"].append(Vector2i(x, z))
 		st_y.append(maxi(pier_lv, 0) * W.LEVEL)
+		await W._slice()      # under the loading screen: a frame now and then (item 33)
 		if names.size() > st_s.size() - 1:
 			W.labels.append({"name": String(names[st_s.size() - 1]), "pos": Vector3(on.x, 0, on.y), "kind": "rail"})
 	# the deck height round the loop: level with the pier at the stops, under anything in the way
@@ -121,6 +122,7 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 					if W.inb(x, z) and W.kind[W.idx(x, z)] != W.T_VOID and W.level[W.idx(x, z)] < 6 and Vector2(x + 0.5, z + 0.5).distance_to(q) < 2.9:
 						blocked = true
 		if blocked: dive.append(k)
+		if k % 64 == 63: await W._slice()
 	# ramps: the deck never changes height faster than the dive over ~8 tiles; it climbs to a raised
 	# pier first, then dips under the bridges
 	var slope := absf(W.TRAIN_DIVE) / 8.0 * W.TRAIN_STEP
@@ -139,13 +141,16 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 	var pts := PackedVector3Array(); pts.resize(n)
 	for k in n:
 		pts[k] = Vector3(line[k].x, y[k], line[k].y)
-	W.train_route = {"pts": pts, "len": loop, "stations": st_s, "names": names, "spec": T, "near": _near_table(W, line)}
+	await W._slice()
+	var near_tab: Dictionary = await _near_table(W, line)
+	W.train_route = {"pts": pts, "len": loop, "stations": st_s, "names": names, "spec": T, "near": near_tab}
 
 ## Tile index -> nearest sample, for every tile within NEAR_R of the track (every other sample is plenty).
 static func _near_table(W: World, line: Array) -> Dictionary:
 	var best := {}
 	var rr := int(ceil(NEAR_R))
 	for k in range(0, line.size(), 2):
+		if k % 32 == 0: await W._slice()      # under the loading screen: a frame now and then (item 33)
 		var q: Vector2 = line[k]
 		for z in range(int(q.y) - rr, int(q.y) + rr + 1):
 			for x in range(int(q.x) - rr, int(q.x) + rr + 1):

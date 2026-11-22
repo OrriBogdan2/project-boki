@@ -114,11 +114,12 @@ func setup() -> void:
 			1: n = 1 if rng.randf() < 0.8 else 0
 			_: n = 1 if rng.randf() < 0.22 * raid_k else 0
 		for _i in n:
+			await m._slice()      # under the loading screen: a Warden a frame (item 33)
 			var at := _warden_spot(ii)
 			if at != Vector3.INF:
 				var b := spawn("bl_warden", at, level_here(at))
 				wardens.append(b)
-	nests.populate()
+	await nests.populate()
 
 ## An island's danger 0 (outer) .. 2 (core): the hand map says; a generated one goes by region_k.
 func island_danger(ii: int) -> int:

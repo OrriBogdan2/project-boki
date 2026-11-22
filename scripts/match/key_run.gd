@@ -58,9 +58,11 @@ func setup() -> void:
 	rng.seed = int(m.seed_val) * int(rules()["keys"]["seed_mul"]) + int(rules()["keys"]["seed_add"])
 	bonus_rng.seed = int(m.seed_val) * int(rules()["keys"]["seed_mul"]) + int(KeyBonus.rules()["seed_add"])
 	build_patches()
+	await m._slice()      # under the loading screen: a frame now and then (item 33)
 	_count_chests()
 	_count_mobs()
-	spawn_shrublings()
+	await spawn_shrublings()
+	await m._slice()
 	assign_carriers()
 
 # ------------------------------------------------------------------ the map's cover
@@ -140,6 +142,7 @@ func spawn_shrublings() -> void:
 	var want := rng.randi_range(int(sr["count"][0]), int(sr["count"][1]))
 	var spots := _shrub_spots()
 	for _i in want:
+		await m._slice()      # (each builds its model)
 		var pick := _pick_spot(spots)
 		if pick.is_empty():
 			break

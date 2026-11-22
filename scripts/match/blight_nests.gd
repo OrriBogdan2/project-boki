@@ -89,6 +89,7 @@ func _spot(ii: int, r: RandomNumberGenerator, gap: float) -> Vector3:
 ## The host puts the nest bodies down.
 func populate() -> void:
 	for n in list:
+		await m._slice()      # under the loading screen: a nest a frame (item 33)
 		_grow(n)
 
 

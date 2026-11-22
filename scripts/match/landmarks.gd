@@ -16,6 +16,7 @@ func _init(world: Node) -> void:
 
 func build(parent: Node3D) -> void:
 	for ii in W.islands.size():
+		await W._slice()      # under the loading screen: a landmark a frame at most (item 33)
 		var I: Dictionary = W.islands[ii]
 		var role := String(I.get("role", ""))
 		# an island's own "landmark" (from the map) overrides the biome's kind; "" means none

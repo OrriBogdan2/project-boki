@@ -209,6 +209,7 @@ func _mesh(vv: PackedVector3Array, nn: PackedVector3Array, cc: PackedColorArray,
 func height_texture() -> ImageTexture:
 	var img := Image.create(w, h, false, Image.FORMAT_RG8)
 	for z in h:
+		if z % 16 == 0: await W._slice()      # under the loading screen: a frame now and then (item 33)
 		for x in w:
 			var lv := v(x, z)
 			# rocks, trees and walls darken the ground at their feet (buildings and other set pieces

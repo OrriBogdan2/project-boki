@@ -44,24 +44,37 @@ func run(progress := Callable()) -> void:
 	# single frame takes every compile at once.
 	# a Boki makes its daze stars the first time it's dazed: one makes them now (hidden until then),
 	# so their material is among the stand-ins
+	# (each piece a slice: together they were one 160-320 ms "Preparing graphics" frame, item 33)
+	var tb := Time.get_ticks_usec()
 	for k in m.kins:
 		for pn in (k as Node).find_children("*", "Node", true, false):
 			if pn is KinPuppet and pn.get("stars") == null and pn.get("body") != null:
 				pn.call("_make_stars")
 				break
 		break
+	tb = await _breathe(tb)
+	if not m.is_inside_tree(): return
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
 	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
+	tb = await _breathe(tb)
+	if not m.is_inside_tree(): return
 	if m.fx: KinTypeTrail.of(m.fx)     # and the Boki type trails (made when the first Boki is drawn)
+	tb = await _breathe(tb)
+	if not m.is_inside_tree(): return
 	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
-	var mob_warm := _mob_stand_ins()
+	tb = await _breathe(tb)
+	if not m.is_inside_tree(): return
+	var mob_warm: Node3D = await _mob_stand_ins()
+	if not m.is_inside_tree(): return
 	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
+	PerfLog.mark("warm.stand_ins")
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
+	PerfLog.mark("warm.batches")
 	if is_instance_valid(aim_warm): aim_warm.queue_free()
 	mob_warm.queue_free()
 	if not batched:
@@ -103,6 +116,7 @@ func run(progress := Callable()) -> void:
 		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
 	HeroVfx.of(m).prewarm_end()
 	var t_views := Time.get_ticks_msec()
+	PerfLog.mark("warm.views")
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
@@ -158,6 +172,16 @@ func run(progress := Callable()) -> void:
 	await DashPace.rehearse(m)
 	PerfLog.skip()
 
+## Inside warm_up's own CPU work under the loading screen: lets a frame draw once the work has had the CPU for
+## PerfLog.SLICE_MS since `t0` (usec); returns the time the work goes on from. The --hitch-trace names the call.
+func _breathe(t0: int) -> int:
+	if Time.get_ticks_usec() - t0 <= int(PerfLog.SLICE_MS * 1000.0):
+		return t0
+	PerfLog.wait_begin()
+	await m.get_tree().process_frame
+	PerfLog.wait_end()
+	return Time.get_ticks_usec()
+
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
 ## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
 ## where a GPU compiles a shader), down to BATCH_MIN. Only how many frames the warm-up takes depends
@@ -181,15 +205,27 @@ func _mob_stand_ins() -> Node3D:
 	holder.name = "WarmMobs"
 	m.add_child(holder)
 	holder.position = Vector3(0, MOB_DEPTH, 0)
+	# built a slice at a time (a mob model is 10-40 ms; all of them in one frame was a 260-320 ms
+	# "Preparing graphics" frame, item 33)
+	var t0 := Time.get_ticks_usec()
 	for k in Data.MOBS:
 		var md: Dictionary = Data.MOBS[k]
 		if have.has(k) or md.get("boss", false) or md.get("ward", false):
 			continue
+		t0 = await _breathe(t0)
+		if not m.is_inside_tree() or not is_instance_valid(holder):
+			return holder
 		holder.add_child(Models.mob(k))
+	t0 = await _breathe(t0)
+	if not m.is_inside_tree() or not is_instance_valid(holder):
+		return holder
 	# and the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
 	# ride, a 200 ms frame; CareLook, HeroVfx a second after landing); DJFx draws its own (DashPace.rehearse).
 	# A library's particle shaders run in an emitter drawn with each of its spatial shaders.
 	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx]:
+		t0 = await _breathe(t0)
+		if not m.is_inside_tree() or not is_instance_valid(holder):
+			return holder
 		var spatial: Array[Shader] = []
 		var particles: Array[Shader] = []
 		for v in lib.get_script_constant_map().values():
@@ -212,6 +248,9 @@ func _mob_stand_ins() -> Node3D:
 	# last-alive aura, a downed hunter's wisp, a kit's ice strip) compiled its shader mid-match. Those the match
 	# already has share their key and add nothing; a later launch's stamp skips the rest.
 	for f in DirAccess.get_files_at("res://shaders"):
+		t0 = await _breathe(t0)
+		if not m.is_inside_tree() or not is_instance_valid(holder):
+			return holder
 		var fn := f.trim_suffix(".remap")
 		var sh: Shader = load("res://shaders/" + fn) as Shader if fn.ends_with(".gdshader") else null
 		if sh == null:
@@ -321,15 +360,22 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		for k in batch.size():
 			if not is_instance_valid(batch[k]):
 				continue
+			# (a big batch's stand-ins are made over a few frames, hidden; they show together below)
+			t0 = await _breathe(t0)
+			if not m.is_inside_tree():
+				return false
 			var px := _proxy(batch[k])
 			if px == null:
 				continue
+			px.visible = false
 			m.add_child(px)
 			_to_layer(px)
 			var gx := (float(k % cols) / maxf(1.0, cols - 1) - 0.5) * 2.4
 			var gy := (float(k / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
 			px.global_transform = Transform3D(cb.scaled(Vector3.ONE * 0.04), front + cb.x * gx + cb.y * gy)
 			pxs.append(px)
+		for px in pxs: (px as Node3D).visible = true
+		t0 = Time.get_ticks_usec()
 		var worst := 0.0
 		# two frames under each light setup (with one, a variant or two still slips through to the
 		# ride: --hitch-check from a cold shader cache)
