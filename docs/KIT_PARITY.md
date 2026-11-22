@@ -1,5 +1,7 @@
 # Kit parity audit: 12 Hunters against the source (main 7907d9afe, 2026-11-07; re-audit on ext/release-integ-0244c 23cc281bd, 2026-11-11; slice 0.24.5 mark on ext/integ-ways-out-0245 5d37d4833, 2026-11-11); 0.24.5 re-read on ext/release-integ-0245 272368589, 2026-11-11
 
+New sections go in `docs/KIT_PARITY.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
@@ -22,12 +24,15 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Kael | Slam angle 70 `[?]` | **done** `ext/parity-kael-slam-lane` 704b7636e | no line; the source is a 0.72 m lane, not a cone (hero-ref 0157, measured); ext/slice-ranges-source calls the angle not determinable without that measure: take the lane |
 | Kael | Warchain leash 24 m `[?]` | **owner** | not determinable (ext/feel-warchain-leash 68f8b9a7a, frames 0301-0366); 24 m kept |
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
+| Kael | RMB lunge 4.5 to 7.5 vs 5 flat | **done** `ext/kael-open-rows` | travels 4.5 to 5.4 m (JSON [5.3, 6.35] x0.85 feel; DECISIONS 11-11 short lunge); docs/heroes/juggernaut.md "Open rows closed, Nov 20" |
+| Kael | Riposte reset on a kill `[?]` | **done** `ext/kael-open-rows` | the data's "killing a living enemy": a hunter taken down or a monster killed (footage f99-f101 dummy); dash, pull exits: same section |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
 | Lace | RMB range 14, R range 18 / width .5 `[?]` | **owner** | not determinable (ext/parity-ranges-slice); ours stands |
 | Lace | Spirit Walk ending inside a ledge | **done** `ext/combat-lace-spirit-ledges-rebased` 40f7865d8 | ext/w0246-combat-a |
 | Lace, Sparkle, Cinder, Tenzo | Unsourced dash-flow rows (8, 5, 3 + `dash.ground.lmb`, 6) `[?]` | **owner** | no source; the kit default (`keep`, Q `fire`) stands |
 | Cinder | RMB range 14 `[?]` | **owner** | not determinable (ext/slice-ranges-source: 0133 end was the cursor) |
 | Cinder, Grimble, Sparkle | Dash curve not decoded | **done** `ext/dash-curves-c` d8e71e611 | no line |
+| Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a. Back on main from 11-15 (an old branch merged in WIP checkpoint 800e366755f kept the old kit and data); cut again on `ext/albert-guardcut-regress`, and `--kit-parity-check` now fails if the meter or the slam returns |
 | Tenzo | Rock Hop dash curve | **not determinable** | the footage's only ground dash is Tetra's Landslide push (frames 0516-0518, 128.77-129.40 s): its fit drops rms from 16.4% (constant) to 7.2% of the mean, but our Rock Hop is a leap (owner item 111, x0.85 / x1.15 kept) with no push to shape; the RMB hop (0258-0259) and dash-into-dunk (0985-0997) are too small at 4 fps. `dash_feel.json` dolm: no curve (ext/feel-dash-curves-d) |
 | Neve | Skate start (held, not via dash_feel) | **done** `ext/feel-dash-curves-d` | `dash.ramp` 0.2 to 0.12 s from the 5 fps pan of skates 0283-0291 and 0236-0244 (rms 6.0% to 4.1% and 15.4% to 14.8% of the cruise; best 0.08 s needs a shorter `tm_skate_go`, whose length the anim check ties to the ramp). Cruise and stop already matched |
 | Albert | Guard meter, Shield Slam and its .6 stun (gap 15) | **done** `ext/parity-bulwark-guardcut` b2e942eb4 (via ext/albert-parity-verify) | ext/w0246-combat-a |
@@ -120,7 +125,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 - **Glove band:** gloves must not outshine the kits' E. `--glove-band-check` holds every glove at every rarity to the 12 E abilities' maximum for damage per cooldown second (4.38), CC seconds per cast (4.4) and travel metres per cast (14). Launch gloves keep their numbers in content `launch` (m/s, m). Gust's forward launch went 9 to 7.5 m/s (15.9 to 13.3 m, over Thief's 14 m blink-to-knife before).
 - **Keys:** R = hunter ult (JSON slot `x`), X = Fuse, G = Boki (owner).
 - **Run speed, ground accel, gravity, fall cap:** match [D]. **Stopping, air control, dash carry:** differ, see gaps 2 to 4 (re-audit 11-11: stopping and carry **done**, air control **owner**).
-- **Buffer:** `DashFlow.BUFFER_S` 0.15 s past a dash's end; the data gives no window.
+- **Buffer:** `Loco.press_buffer` (tuning.json) 0.15 s past a dash's end; the data gives no window.
 - **Cooldowns below** read ours / source level 1 [D].
 
 **0.24.4 recheck (2026-11-12, main 88b06b9e7, slice Vex, Zedran = Kael, Hem = Lace, Cinder).** The last column of the four Hunter tables and of the Kael, Lace, Vex and Cinder rows in the ranges table says `still done`, `closed` (done since the audit), `changed` (an owner change) or `regressed`. Read from `content/` and the kit code, not played in `--arena` (no row needed eyes; Hem's ledge walk, gap 8, stays open unplayed). Combo checks gunslinger 126, juggernaut 210, archer 167, ashwick 125 PASS, 0 FAIL; `--kit-parity-check`, `--dash-flow-check`, `--move-feel-check` 0 failures. `--ttk-check` is the known red tracking bar (22 rows FAIL, 11 of them slice; ours / source: Vex LMB 3.25, combo max 0.78; Kael LMB 0.65, combo 0.55 and 0.59; Cinder LMB 0.78 and 0.74, combo 0.76 and 0.61; Hem passes). Not re-read against the source this time: CC numbers (Zedran's Meteor Drop ring slow 40% is gone with the down slam, 0a97eddab), the felt-dash and health tables (weight classes 124/145/193 unchanged).
@@ -217,9 +222,8 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] · **open** |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), cast 2-3 bh away | radius match; range not determinable: cast only on a near dummy, the clamp is never reached |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), no slam in the kit | aegis match; slam not determinable: the source has no slam (its only knock is the Empower Shield Bash augment, unmeasured), and DECISIONS 2026-11-07 cuts the Shield Slam (left to the owner). Clips: oath (bjorn) 0282-0361, one augmented hit at 0309 with no reach or cone recorded |
+| Albert | RMB aegis, slam | 6.0 wide, 1.6 out, bowed 0.55 (blocks the 141 deg it spans), 2.6 at 100 | slab 129-133 px = 3.3 bh wide (6.0), middle 0.9 bh out, ends 0.3 bh back (re-measured, docs/heroes/bulwark.md gap 8), bash not seen | aegis match; slam [?] |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] · **open** |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] · **open** |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
@@ -550,7 +554,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | RMB | Shot, delayed Root, 11.5 s [D] | Hop form, windup 1.0, cd 10.5 | differ `[?]` motion |
 | LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion |
-| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours · **open** (branch ready: ext/parity-no-riders-meeko) |
+| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4; tap 6.75 m, after a 1 s pause the ember is bigger (x1.5) and flies 1.25x further (owner 11-17) | owner call; the footage's 13.5 m is halved on purpose |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Hop form, windup 1.0, cd 10.5; roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it | differ `[?]` motion · **owner** (11-10) |
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, no self factor | match |
@@ -568,7 +572,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 ### Meeko heals: amounts, ticks, reach (ext/parity-meeko-heals, 2026-11-19)
 
-PARITY FIRST (DECISIONS 2026-11-07). Source: `briefs/supervive-data/supervive_kits.md` (Elluna, [D]), `briefs/hero-ref/mooshmoosh.md` (footage [F] and the thebackdash fine print, [D]), both on origin/ext/agent-briefs; the x5 Wisp factor is the wiki row in "Small mechanics" in docs/heroes/tender.md. Source health converts at 154/1285 (our / source mean Hunter health, docs/TTK.md). `[?]` = no number in the data; the footage shows no hurt ally (mooshmoosh.md:104, :211, :245), so these stay ours.
+PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the briefs branch` (Elluna, [D]), `briefs/hero-ref/mooshmoosh.md` (footage [F] and the thebackdash fine print, [D]), both on origin/ext/agent-briefs; the x5 Wisp factor is the wiki row in "Small mechanics" in docs/heroes/tender.md. Source health converts at 154/1285 (our / source mean Hunter health, docs/TTK.md). `[?]` = no number in the data; the footage shows no hurt ally (mooshmoosh.md:104, :211, :245), so these stay ours.
 
 | Heal | What | Source | Ours (tender.json) | Verdict |
 |---|---|---|---|---|
@@ -865,13 +869,13 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Vex | Longneedle self-recoil (`e.recoil`, on herself) | 6 | 1.56 m | Railgun: no knock on the card; about 0.5 bh (0.9 m) shove back in 0.2 s [F] | match (footage shows the recoil) | `[?]` (F: 0.9 m) |
 | Vex | Quill rifle shot (`quill_rifle.kb`) | 1.0 | nudge | Glyph Rifle: none | match (nudge) | n/a |
 | Kael | Finishing Slam (`rmb.slam.push`) | 6 | 1.56 m, 0.40 s | Execution Slam: 130 dmg, no knock on the card [D]; dummy knocked off a cliff edge, no distance (juggernaut.md 0291) [F] | `[?]` | `[?]` |
-| Kael | Chain Lunge (`rmb.lunge.push`) | 7 | 2.01 m | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | differ | n/a |
-| Kael | Haul Slam (`rmb.haul.push`) | 7 | 2.01 m | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | differ | n/a |
-| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 5, lift 2.5 / 9 | 1.55 m / 3.07 m | Flame Step: "dash attack, 49 dmg", no knock [D] | differ | n/a |
-| Kael | Gilded Riposte strike (`juggernaut_ult.gd`, 6.0 in code) | 6 | 1.56 m | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | differ | n/a |
+| Kael | Chain Lunge (`rmb.lunge.push`) | 0 (was 7) | none | Fiery Lunge: "dash attack, 84 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Haul Slam (`rmb.haul.push`) | 0 (was 7) | none | Scorching Spin: "99 dmg + Anti-Heal", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 0 (was 5, lift 2.5) / 0 (was 9) | none / none (no hop either) | Flame Step: "dash attack, 49 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
+| Kael | Gilded Riposte strike (`x.strike_kb`, was 6.0 in `juggernaut_ult.gd`) | 0 (was 6) | none | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Lace | Heavy Shot (`rmb.pin.push`, tap to full) | 8-12 | 2.52-5.12 m | Heartpiercer: "an arrow that knocks back" [D]; 2-3 bh (3.6-5.4 m) along the shot, charge not known (pin.md 0273) [F] | match | `[?]` (full charge inside F) |
-| Lace | Longbow shot (`longbow.kb`) | 3.5 | 0.62 m | Greenwood Bow: no knock [D] | differ | n/a |
-| Lace | Empowered ult shots (`x.kb`) | 4 | 0.76 m | Virideth's Fury: "greatly empowered", no knock [D] | differ | n/a |
+| Lace | Longbow shot (`longbow.kb`) | 2.0 (was 3.5, `ext/lace-knock-cut`) | nudge | Greenwood Bow: no knock [D] | match (nudge) | n/a |
+| Lace | Empowered ult shots (`x.kb`) | 2.0 (was 4, `ext/lace-knock-cut`) | nudge | Virideth's Fury: "greatly empowered", no knock [D] | match (nudge) | n/a |
 | Cinder | Spark Leap hit (`dash.kb`) | 7 | 2.01 m | Pyro Pounce: "dmg + knockback" [D]; no read of the target's flight [F] | match | `[?]` |
 | Cinder | Spark Leap self-recoil (`dash.recoil`, a set speed, not a knock) | 3.5 m/s | not run through the knock curve | about 1 bh (1.8 m) back in 0.1 s (linwick.md) [F] | match (footage) | `[?]` |
 | Meeko | none (lantern shot `lantern_crook.kb`) | 1.0 | nudge | Elluna: no knock in the kit [D] | match | n/a |
@@ -879,9 +883,9 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Tenzo | Boulder (tap, `lmb.boulder.kb`) | 1.5 | nudge | "TAP to throw a boulder", no knock [D] | match (nudge) | n/a |
 | Tenzo | Rock hit (`rock.kb`) / rock splash (4.0 in code) | 5 / 4 | 1.15 m / 0.76 m | punched rocks are "launched", no knock on a foe they hit [D] | `[?]` | n/a |
 | Tenzo | Rock Hop hit (`dash.kb`) / shove (`dash.shove_kb`) | 8, lift 2.0 / 3.5 | 2.52 m / 0.62 m | Landslide: "launching a rock", no knock [D]; shoves the enemy out over the Abyss, no distance (breah.md 141) [F] | `[?]` | `[?]` |
-| Tenzo | Volcano slam (`rmb.slam.kb`) | 6, lift 2.0 | 1.70 m | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] | differ | n/a |
+| Tenzo | Volcano slam (no knock; `rmb.slam.kb` removed ext/tenzo-grimble-knock-cut) | none | none (centre stun, Dunk spike) | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] | match | n/a |
 | Grimble | Shotgun slug (`shotgun.kb`, per slug) | 2.2 | nudge | Scattergun: no knock [D] | match (nudge) | n/a |
-| Grimble | Dash shove (`dash.hit_kb`) | 4, lift 2.5 | 1.16 m | Brute Dash: no damage, no knock [D] | differ | n/a |
+| Grimble | Barge touches nobody (`dash.hit_kb` was dead data, removed ext/tenzo-grimble-knock-cut) | none | none | Brute Dash: no damage, no knock [D] | match | n/a |
 | Neve | Rink Wall touch (`e.push`, while the wall slides) | 5 | 1.15 m a touch; carried while it slides | Frozen Barricade: "wall that pushes enemies" [D]; pushes and carries the dummy (tamsin.md 0313, 0356) [F] | match | `[?]` |
 | Neve | Hoar fan dart (`hoar_fan.kb`) | 0.4 | nudge | Ice Darts: no knock [D] | match (nudge) | n/a |
 | Motley | Snap shards (1.0 in code) / orb (`tether_lantern.kb`) | 1.0 / 1.0 | nudge | Void Snap: stun, no knock; Gravity Orb: none [D] | match (nudge) | n/a |
@@ -894,18 +898,20 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Albert | Boop (`rmb.shield.boop`, a set slide) | 2.8 m at 18 m/s | 2.8 m | none on release; the bash knock-away is an augment [D, F] (bjorn.md item 9) | differ (ours, kept by bjorn.md) | n/a |
 | Sparkle | Storm Rod (`rmb.coil.push`, tap to full) | 4.4-6.6 | 0.92-1.78 m | Voltaic Spear: "knockback on first enemy hit" [D]; about 1 bh (1.8 m) on open ground, done by 0.4 s (vireo.md 0064-0066) [F] | match | `[?]` (full is inside F) |
 | Sparkle | Skycall slide (`e.slide_dist`/`slide_t`, a set slide) | 3.4 m over 1.1 s | 3.4 m | Lightning Strike: "pull or knockback" [D]; slides about 4 bh (7.2 m) over about 1 s (vireo.md 0197-0224) [F] | match | `[?]` (F: 7.2 m, ours 47%) |
-| Sparkle | Kitefall landing (`x.push`) | 8 | 2.52 m | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | differ | n/a |
-| Sable | Empowered bolt (`thief_kit.gd`, 3.0 in code) | 3 | 0.47 m | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | differ | n/a |
+| Sparkle | Kitefall landing (`x.push`, `x.lift`) | 0 (was 8, 2.52 m), lift 0 | none | Thunderstorm: "72 dmg + 1 Static", no knock on the card [D] (a pre-1.0 site says Knockback) | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
+| Sable | Empowered bolt (`dash.prime_kb` in `thief.json`, was 3.0 in `thief_kit.gd`) | 0 (was 3, 0.47 m) | none | Quickflip's empowered Arcslinger: "+214 dmg", no knock [D] | match (cut, `ext/sparkle-sable-knock-cut`) | n/a |
 | Sable | Arc bolt (`arc_bolts.kb`) | 0.8 | nudge | Arcslinger: none [D] | match (nudge) | n/a |
 
-**Fixed: none.** The task allowed up to three fixes where the data states a number. No knock row has a source number:
+**Fixed: none** (then: Tenzo's slam push and Grimble's dash shove were cut afterwards by ext/tenzo-grimble-knock-cut; the two rows above now read match, and `differ` is 12 rows). The task allowed up to three fixes where the data states a number. No knock row has a source number:
 every distance is a footage read (`[?]`), and every **differ** is a knock the card leaves out, which the card gives as
 words, not a number. So nothing changed in the kits. The table's numbers come from the `MFEEL knock sweep` lines.
 
 **Suggestions, not built (PARITY FIRST):**
+- Ours-only knocks the card does not list (14 rows marked **differ** when written; 12 now): Kael's Lunge, Haul Slam, Flame Step and Riposte;
+  Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
 - Ours-only knocks the card does not list (14 rows marked **differ**): Kael's Lunge, Haul Slam, Flame Step and Riposte;
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Tenzo's slam; Grimble's
-  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
+  dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall and Sable's empowered bolt (both now cut, `ext/sparkle-sable-knock-cut`, so 12 remain). Cutting
   them follows DECISIONS 2026-11-07 (ours-only riders: keep none). Lace's longbow kb 3.5 to 2.0 is the smallest change
   (it turns every arrow from a 0.62 m knock into a nudge).
 - Footage reads that are far off: Vex's wall cone (ours 4.43 m vs 6.3 m; a push near 13.5 would land about 6.3 m), Sparkle's Skycall
@@ -946,7 +952,7 @@ charge walk, landed on main through the mc line (`rmb.lunge.walk_k` 0.8).
 | | R Starpiercer | a tap self-buff with no cast lock; "she can walk between shots" | 1.0; the empowered draws keep the LMB's 0.7 | match |
 | Cinder `ashwick` (linwick.md, 205-230 px/s at 50 px/m = 4.1-4.6 m/s, 2.3-2.6 bh/s) | LMB stream held | walks while firing, "no visible slow" (0007-0019); no px/s | 1.0 (the kit runs the lance; no `fire_slow`) | match (no slow shown); `--ashwick-combo-check` "lance audit ... at his full walk" |
 | | LMB, 0.35 s after letting go | not resolvable at 5 fps (sheet gap 12: "subtle", keep) | 0.6 (`lmb.slow_after`) | not seen; kept |
-| | RMB Cinder Shot, lane held about 0.4 s, release | "does not stop moving" (0072-0137); a quick arm thrust | 1.0 | match; asserted "cinder cast-move" |
+| | RMB Cinder Shot, the 0.4 s cast (lane on the press, bolt at its end) | "does not stop moving" (0072-0137); a quick arm thrust | 1.0 | match; asserted "cinder cast-move" |
 | | E Furnace Cloak | arms wide about 0.2 s, then the blast; walk not stated | instant on the press (owner item 11); 1.0 | match (no lock shown) |
 | | R Flue Flight | a flight: about 500 px/s (10 m/s) for 1.6 s, the ult clip 9-10 bh in 1.3-1.4 s; walks on with no landing beat | the flight carries her (12.6 m/s for 1.8 s); 1.0 on landing | n/a for a walk factor; match on landing |
 
@@ -971,7 +977,7 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
-| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 6.8 m/.28 s |
+| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
@@ -1364,3 +1370,14 @@ Where the source lets a move touch an ally (`sv/briefs/kits.md`), the check excu
 | Tenzo's rocks | "allies can hop over friendly walls" (owner-decided) | allies hop; not a move |
 
 Not in the source, kept: Tenzo's Basalt Spine never raises a rock inside a body, so anyone on the line (ally included) steps to their side of it. That is a collision fix, not a status; the check allows a move there and nothing else. A dash or lunge that runs into a teammate shoves it like any two bodies (`Match._separate`); the check ignores that sideways shove but still fails on any status or tow. No leak was found in the kits, so no gameplay code changed.
+
+## Cinder RMB: a cast, not a hold (2026-11-21)
+
+| Hero | Ability | Source (frames) | Before | Now | Status |
+|---|---|---|---|---|---|
+| Cinder (`ashwick`, Felix) | RMB Cinder Shot timing | slot on cooldown with the lane and a nozzle flash, bolt two frames later: 0073 > 0075, 0102 > 0104, 0128 > 0130 (5 fps; always two lane frames = a fixed 0.4 s) [F] | hold to aim, the bolt on the release (a tap: 2 steps); cooldown at the release | `rmb.cast` 0.4: lane, pose, palm flash and cooldown on the press, the bolt at 0.400 s whatever the button does | match |
+
+Why a cast: the lane always lasts exactly two frames, and the slot goes on cooldown when the lane first shows. Lace's
+held shot in the same source only goes on cooldown at the release. Full reading: docs/heroes/ashwick.md "RMB: cast or
+hold". Assumed `[?]`: the lane follows the aim through the cast; a stun drops the cast with the charge spent.
+

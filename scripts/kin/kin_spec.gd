@@ -1,6 +1,6 @@
 class_name KinSpec
 extends RefCounted
-## A kin species in the grammar (content/kin_v2/<id>.json, docs/KIN_GRAMMAR.md): the animals it's
+## A kin species in the grammar (content/kin/<id>.json, docs/KIN_GRAMMAR.md): the animals it's
 ## based on, its body and looks, a stat profile that spends exactly KinParts.STAT_BUDGET points,
 ## personality and AI weights, how it's carried, what its throw does, its slots
 ## (active on E, an optional auto active, the merge) and its evolution paths.
