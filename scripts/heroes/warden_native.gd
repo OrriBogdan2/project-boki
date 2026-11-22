@@ -310,7 +310,8 @@ func _chain(b: int, into: Dictionary) -> void:
 
 ## The contract model's orbits (data "orbits": orbit node -> Meshy bone; Tenzo's three seeing-stones round his head)
 ## are separate props, not in Meshy's mesh: each is copied from the Hunter's contract .glb onto a holder that follows
-## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against the head as on the contract model and at the same size in metres, and
+## Meshy's bone's place (not its turn, so the ring stays level when the clip bows the head), at the same place against
+## the head as on the contract model and at the same size in metres, and
 ## WardenOrbits turns it as on the contract path (circling, bobbing, the eyes turning to what the kit watches).
 func _add_orbits(glb: Node3D) -> void:
 	var want: Dictionary = d.get("orbits", {})
