@@ -29,6 +29,7 @@ static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now :
 	if rate >= HELD_RATE or Sfx.take_count(sname) < 2:
 		Sfx.play(sname, pos, vol_db)
 		return
+	Sfx.mark_fire(sname)
 	var e: Dictionary = _who.get(who, {})
 	var ends: Array = e.get("ends", [])
 	while not ends.is_empty() and int(ends[0]) <= now:
