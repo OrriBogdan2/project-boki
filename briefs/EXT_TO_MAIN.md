@@ -10921,3 +10921,4 @@ READY ext/vfx-gil-smoke-ring 1424d218647472ea2e4a461f389346512f2d28eb (Gil RMB/Z
 READY ext/vfx-quality-rescore-1122 aa2e022a33 (VFX_QUALITY re-scored on main)
 READY ext/farm-hub-draws 5c34c27cdbeafd9fae3e07baeab787674684b99b (garden hub under 350 draws)
 READY ext/anim-dash-mark-cinder-lace 6d45528b17ce09e431c14608dc660d0632e5542f (cinder+hem dash marks, ANIM_COVERAGE cells proc->clip)
+READY ext/ui-garden-sizes 19139c04a (garden screens fit 720p to ultrawide)
