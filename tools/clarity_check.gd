@@ -88,7 +88,7 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
 	_cc_plate(m, foes[0], foes[1])
 	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
-	_cc_self(m, P)
+	_cc_self(m, p)
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
@@ -301,26 +301,26 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 
 ## Slowed, then rooted, then stunned on top: the line puts stun first and root before Slow, each bar
 ## starts full and shrinks with time, and the line is empty once it's over.
-func _cc_self(m: Match, P: Hunter) -> void:
-	P.stun_t = 0.0      # (the plate section above can leave you slowed)
-	P.root_t = 0.0
-	P.slow_t = 0.0
-	ok(SelfCcLine.entries(P).is_empty(), "you're free: no CC line")
-	P.slow_t = 3.0
-	P.root_t = 2.0
-	P.stun_t = 1.0
-	var words: Array = SelfCcLine.entries(P).map(func(x): return x[0])
+func _cc_self(m: Match, p: Hunter) -> void:
+	p.stun_t = 0.0      # (the plate section above can leave you slowed)
+	p.root_t = 0.0
+	p.slow_t = 0.0
+	ok(SelfCcLine.entries(p).is_empty(), "you're free: no CC line")
+	p.slow_t = 3.0
+	p.root_t = 2.0
+	p.stun_t = 1.0
+	var words: Array = SelfCcLine.entries(p).map(func(x): return x[0])
 	ok(words == ["STUNNED", "ROOTED", "SLOWED"], "worst first: %s" % [words])
-	var full := float(SelfCcLine.entries(P)[0][3])
+	var full := float(SelfCcLine.entries(p)[0][3])
 	_run(m, 0.5)
-	var e: Array = SelfCcLine.entries(P)
+	var e: Array = SelfCcLine.entries(p)
 	var shrunk: bool = e.size() == 3 and float(e[0][3]) > 0.4 and float(e[0][3]) < 0.6
 	ok(full > 0.99 and shrunk, "the stun bar starts full and shrinks (%.2f after 0.5 s of 1 s)" % [e[0][3]])
-	ok(_same(e[0][1], _icon(P, "status_stunned")[0][1]), "the line uses the plate's stun colour")
-	P.stun_t = 0.0
-	P.root_t = 0.0
-	P.slow_t = 0.0
-	ok(SelfCcLine.entries(P).is_empty(), "all over: the line is gone")
+	ok(_same(e[0][1], _icon(p, "status_stunned")[0][1]), "the line uses the plate's stun colour")
+	p.stun_t = 0.0
+	p.root_t = 0.0
+	p.slow_t = 0.0
+	ok(SelfCcLine.entries(p).is_empty(), "all over: the line is gone")
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)

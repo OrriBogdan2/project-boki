@@ -533,7 +533,7 @@ func kit_lines(lines: Array, k: Kin) -> void:
 
 ## the world hover card stays shut while recording, until the cursor rests 0.4 s, and all through a fight
 func world_tip_waits() -> bool:
-	return Record.clean() or _wh_still < 0.4 or H.in_fight()
+	return Record.clean() or _wh_still < 0.4 or h_v.in_fight()
 
 
 func draw_world_tip(sz: Vector2, p: Hunter) -> void:
