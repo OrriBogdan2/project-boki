@@ -17,6 +17,7 @@ const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.
 const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
+var seq := false
 var native := false
 
 func run(main: Node) -> void:
@@ -29,6 +30,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--seq": seq = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -117,10 +119,14 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in CLIPS:
-		var yaw := SIDE_YAW if clip == "run" and not close else THREE_Q_YAW
+	for clip in (["idle", "run", "attack"] if seq else CLIPS):
+		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
+		if seq:
+			times = []
+			for q in int({"idle": 1.5, "run": 1.6, "attack": 1.2}[clip] * 30.0):
+				times.append(q * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
 		model.set_meta(WardenClips.STATE, s)
