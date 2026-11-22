@@ -11,7 +11,7 @@ extends RefCounted
 
 const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (not your run)
 const MAX_STEP_W := 0.5    # the curl pose weight's biggest one-frame step
-const CAM_OFF := Vector3(-2.2, 2.2, -3.4)   # m: the film's camera from between you and your Boki
+const CAM_OFF := Vector3(-2.6, 2.0, -3.6)   # m: the film's camera from you (the same in a before and an after)
 const MAX_FRAMES := 400   # steps: a glide that never lands stops the dump here
 const DEFAULT := ["pebbit", "goliathite"]   # two big forms: the lightest (1.4) and a heaviest (2.0)
 
@@ -161,7 +161,7 @@ func _dump(main: Node, id: String) -> void:
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
-			await _grab(P, k, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
+			await _grab(P, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
 		f += 1
 		t = f * Match.DT
 	print("CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d"
@@ -175,9 +175,9 @@ func _dump(main: Node, id: String) -> void:
 		% [id, MAX_STEP_W, top["w"]])
 
 
-## A frame from a fixed spot behind and beside your run, high over the grass, on you and your Boki.
-func _grab(P: Hunter, k: Kin, path: String) -> void:
-	var at := (P.model.global_position + Vector3(0, 1.0, 0)).lerp(k.global_position, 0.7)
+## A frame from a fixed spot beside your run, over the grass, on you (your Boki within 1.7 m).
+func _grab(P: Hunter, path: String) -> void:
+	var at := P.model.global_position + Vector3(0, 0.9, 0)
 	cam.global_position = at + CAM_OFF
 	cam.look_at(at)
 	await RenderingServer.frame_post_draw
