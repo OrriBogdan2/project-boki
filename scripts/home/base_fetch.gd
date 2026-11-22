@@ -236,8 +236,7 @@ func use() -> void:
 	_place()
 	GardenSfx.countdown(h, mat.position)
 
-
-## True while a round is on (GardenMusic ducks the music for it, as for every other base game).
+## True while a round is on (GardenMusic ducks the music for it).
 func playing() -> bool:
 	return run != null
 
