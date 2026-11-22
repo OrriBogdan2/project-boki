@@ -143,10 +143,6 @@
 			{"p": "flare", "y": 1.0, "size": 1.8, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"},
 			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
-		"grounded": {"net": false, "fx": [
-			{"p": "ring", "y": 0.5, "size": 0.6, "life": "t", "c": "main", "c2": "hot", "c3": "deep"},
-			{"p": "ring", "y": 1.1, "size": 0.6, "life": "t", "c": "core", "c2": "hot", "c3": "deep"}
-		]},
 
 		"x": {"fx": [
 			{"p": "bolt", "y": 7.0, "to": "here", "to_y": 0.3, "jag": 0.5, "size": 0.7, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
