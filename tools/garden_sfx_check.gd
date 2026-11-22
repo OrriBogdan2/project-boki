@@ -220,6 +220,8 @@ func _games() -> void:
 			break
 		await main.get_tree().process_frame
 	home._close_panel()
+	home.life.r_v["doze"] = 0.0  # a random company doze would take a Boki off the games
+	home.life.r_v["doze_pile"] = 0.0
 	for k in home.kins:
 		k.erase("indoors")
 	GardenSfx.heard.clear()
