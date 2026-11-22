@@ -161,4 +161,5 @@ func _add_kin(m: Dictionary, at: Vector3) -> void:
 	k.rotation.y = PI - out * TURN_IN
 	k.set_meta("happy", true)
 	_w3.add_child(k)
+	Fogless.apply(k)
 	_kins.append(k)

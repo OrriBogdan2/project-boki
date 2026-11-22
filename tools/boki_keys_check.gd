@@ -145,6 +145,11 @@ func _summon() -> void:
 	var tapped: bool = bool(k.fly.get("sic", false)) or k.state == "flying"
 	ok(sent and tapped, "the summon key sends the Boki out like a G tap (key %s, tap %s)" % [sent, tapped])
 	_run(0.5)
+	# a Boki mid-cast (wound up, or dashing) can't be called off it: let the skill finish, then call it back
+	var waited := 0.0
+	while (k.cast_do.is_valid() or bool(k.fly.get("rush", false))) and waited < 2.0:
+		_run(0.05)
+		waited += 0.05
 	_press(["kin_summon"])
 	_run(0.3)
 	var home: bool = k.state in ["returning", "shoulder"] or not KinCommand.is_away(P, k)

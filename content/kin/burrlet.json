@@ -112,7 +112,7 @@
 	"egg": {
 		"name": "Spore Egg",
 		"temper": "Curious",
-		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
-		"play": "Roots foes in place with spore clouds. Notices everything, wanders off sometimes."
+		"desc": "Soft, earthy, dusted with spores.",
+		"play": "Roots foes with spores. Curious."
 	}
 }

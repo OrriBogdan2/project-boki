@@ -84,7 +84,6 @@ static func _tick_move(A: Arena, w: String, t: float, dt: float) -> float:
 	if not full and spec.size() > 3: zoom = float(spec[3])
 	if t < 0.05:
 		Engine.time_scale = DEMO_TIME_SCALE
-		_warm_looks(m, D.pos)
 		if P.arch != String(spec[0]) or P.wid != String(spec[1]): A.set_arch(String(spec[0]), String(spec[1]))
 		A.set_kin("")
 		P.teleport(D.pos + Vector3(-4.0, 0, 0))
@@ -201,14 +200,6 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 				var K := P.ak as AshwickKit
 				K.stoke(D)
 				K.stoke(D)
-
-## Shows each effect shader once, tiny, before the move, so their first-use compile hitch can't jump the clock
-## of the frames that matter.
-static func _warm_looks(m: Node, at: Vector3) -> void:
-	var fx := LDFx.of(m)
-	fx.anchor_drop(at, 0.0, 0.05)
-	fx.orb(at, Color.BLACK, Color.BLACK, 0.01, 0.05)
-	fx.wave(at, 0.01, Color.BLACK, 0.05)
 
 ## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
 ## so the Deep Reach has to fly over it and drag the dummy back across it.
