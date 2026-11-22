@@ -2,7 +2,7 @@
 swordfish, throwing whatever bottle comes out of the bag, swimming through the ground.
 
     cd tools && python3 gen_sfx_gil.py      (then: python3 gen_sfx_dash.py, godot --headless --import)
-    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit and gil_slime_dry)
+    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit, gil_slime_dry, gil_spout_hit, gil_tide_lunge)
 
 Signatures: the swordfish thrust (gil_thrust) and the Beached flop (gil_beached). Everything is water,
 glass and a small wet body: thin blade swishes with a fin flick, glass that breaks five ways (one per
@@ -325,11 +325,34 @@ def slime_dry():
     return S.pad(mix(suck, gulp, last), 0.8)
 
 
+def spout_hit():
+    """A waterspout catching a foe: the column punches up under it (a wet slap, a rising rush as it lifts),
+    then bursts into spray and bubbles (lighter and brighter than the Tide's thump, which drives forward)."""
+    d = 0.7
+    slap = mix(wet_slap(0.2, 250, 2200) * 0.9, kick(140, 60, 0.3, 0.01, 0.06, 1.8) * 0.5)
+    lift = sweep_noise(0.45, 300, 2200, 0.4) * shape(0.45, 0.03, 0.15, 0.27) * 0.8
+    burst = at(spray(0.45, 2500, 9000, 0.14) * 0.6, 0.12)
+    return S.pad(mix(slap, at(lift, 0.02), burst, at(bubbles(0.4, 6, 350, 900, 0.25), 0.15)), d)
+
+
+def tide_lunge():
+    """Riptide Lunge leaves (LMB held, released): a small water wall shoved aside as the bill streaks forward,
+    a thin blade zing rising with it and spray trailing (his dash's dive, but a thrust, not a plunge)."""
+    d = 0.5
+    shove = mix(lpf(noise(0.14), 1200) * env(N(0.14), 0.004, 0.04) * 1.2, kick(170, 70, 0.18, 0.01, 0.04, 1.6) * 0.5)
+    rush = sweep_noise(0.34, 500, 3000, 0.35) * shape(0.34, 0.02, 0.1, 0.22) * 0.9
+    zing = at(S.sweep(1500, 3200, 0.2) * env(N(0.2), 0.004, 0.08) * 0.12, 0.03)
+    return soft_in(mix(shove, at(rush, 0.02), zing, at(spray(0.3, 2200, 8000, 0.08) * 0.4, 0.05)))
+
+
 def build_bar():
     """Only the bar pass's files (a full run re-rolls every other file's noise)."""
     S.reseed(5154)
     S.save_cat('gil_tide_hit', tide_hit(), 'impact')
     S.save_cat('gil_slime_dry', slime_dry(), 'cast')
+    S.reseed(5155)
+    S.save_cat('gil_spout_hit', spout_hit(), 'impact')
+    S.save_cat('gil_tide_lunge', tide_lunge(), 'dash')
 
 
 if __name__ == '__main__':

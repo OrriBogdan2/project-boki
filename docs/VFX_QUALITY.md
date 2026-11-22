@@ -149,15 +149,16 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
-| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
+| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
 
 Snd, Motley and Gil (11-20, ext/sfx-motley-gil-bar, code read): 3 -> 4 each. Every ability's cast and hit are the
 Hunter's own and distinct, the Snap miss, the Trade's far end, an unpopped seed and the slime puddle's end have cues, and
-Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5: Nightwell's close,
-Riptide's spout hit and the Tide lunge's cast still have none.
+Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5 then: Nightwell's
+close, Riptide's spout hit and the Tide lunge's cast had none. Filled 11-21 (ext/sfx-motley-last-three: os_well_close,
+gil_spout_hit, gil_tide_lunge; the last two are Gil's), so Snd is 5 for both, pending the owner's ear.
 
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
 Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
@@ -212,7 +213,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 10 | Neve | rimewright | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | reads well (shards, shatter burst). Done (ext/vfx-neve-ice-path): the skate's ice path was up to 24 pooled flat untextured boxes (a node and material each); now one MultiMesh strip (`IceStrip`, `shaders/ice_strip.gdshader`): cel-lit pale ice, a faint frost rim, a lighter facet step, a ragged cel fade at the tail; same plate size, form-in, spacing, 24-plate length and 3 s life. Left: the plates are still laid flat (no relief on slopes) |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Palm glow while Cinder Shot is held done 11-20 (`palm_charge`: flare size, heat and a white-hot bloom build with the hold; `docs/shots/vfx-cinder-blade-glow/strip.png`, top before, bottom after); no polish left (the ground clipping is done: soft edges above) |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Done (ext/sfx-kael-slash-edge): the LMB slash sound has a hard edge (snap, short shing, chop) on its contact at 0.08 s, 4-6 dB over the swish like the cleave's cut and about 4 dB under it in game; same 0.42 s, still on the press (was the swish alone, loudest at 0.22-0.27 s); the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish). Done (ext/vfx-kael-smash-lane): the Slam lane (4.3 x 0.72 m) and the Lunge lane are AimKit "soft" shapes in his #ff3a2a, drawn = hit (`docs/art/vfx_rescore/juggernaut_{lunge,slam}_before_after.jpg`) |
-| 13 | Gil | gil | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 26 | scored 11-11 (ext/vfx-gil-bar, his reel `tools/vfx_reel/gil.gd`): every look is `content/vfx/gil.json` + keyed poses (`kmoves_gil.gd`); the slime puddle is a lit rim for exactly its slow. Under the bar: RMB Air and Super Zeep breaks are opaque smoke puffs; the held RMB landing ring re-fires every 0.1 s |
+| 13 | Gil | gil | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 26 | scored 11-11 (ext/vfx-gil-bar, his reel `tools/vfx_reel/gil.gd`): every look is `content/vfx/gil.json` + keyed poses (`kmoves_gil.gd`); the slime puddle is a lit rim for exactly its slow. smoke fix 11-22 (ext/vfx-gil-smoke-ring, `docs/shots/vfx-gil-smoke-ring/bag_before_after.jpg`, GPU reel jobs 20261122-061030-31119 before, 20261122-061635-27429 after): the Air and Super Zeep breaks' smoke is a lit blue puff (`mark` over `wave`, `gain` 0.25 so alpha is 0.25 at most, fewer and smaller), the Air vortex and the Zeep flash read through it. Left: the held RMB landing ring was not reproduced in code: RMB is one press per throw, its circle is one AimKit entry per throw refreshed each step (the 0.1 s is AimDraw.KEEP, the refresh window), and its tell sound fires once on the first step, so no recipe `once` was needed (re-checked on the GPU `rmb` strip: one circle per throw, filling to the break, gone 0.1 s after it); score not changed here |
 
 Lace's row is scored from her strips (before `vfxq-before-archer`, job 20261108-180332-30891; after
 `vfxq-after-archer-2`, job 20261108-213129-03140); the pair is on branch `ext/vfx-archer-strips` (not for merge). Her
@@ -309,7 +310,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered (11-20, ext/vfx-meeko-heal-hurt: heals leaf green rising, hurts embers falling, Hearthlight / root field inside at most 0.25 to the rim, bloom a rim swirl; not re-scored) |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
 | Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
-| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
+| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded fixed 11-22 (ext/vfx-sparkle-grounded): two thin pink binding rings round the target, one dashed, seen by all (`MageSky._tick_bound`, the Bola's look without a filled disc), and the shared cords and arrow in the caster's colour (`KitStatus` meta `gnd_by` from the `kst` caster nid, `StatusLooks._tint`; Bola and Warchain stay amber); before/after `docs/shots/vfx-sparkle-grounded/grounded_before_after.jpg` |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
@@ -354,3 +355,51 @@ train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; 
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
+
+## Foe telegraphs audit (ext/combat-foe-telegraphs, 2026-11-20)
+Stabilize sprint, combat clarity: does a rival see a cue before each hit, in the rival's colour, for the whole wind-up?
+Measured headless on a flat strip with a rival dummy 4 m ahead (every slot of the 13 kits cast once; first/last tick an
+AimKit entry with `all` is up, first damage, the HeroVfx moments played, the colour a rival's view draws). The ground
+cue is AimKit's (`all`: a rival's is leaned 45% toward `SideColor.rim()` #ff2d55, hue 349 deg); the body cue is the
+kit's `content/vfx/<arch>.json` moment, which stays in the Hunter's palette (a ground ring there would mean gameplay:
+none added). Delayed-hit lead, no gap and rival lean stay asserted by `--telegraph-lead-check` (64 checks, 0 failed).
+Strips from `--hero-vfx-reel`: `docs/shots/combat-foe-telegraphs/` (own view, match camera, xvfb opengl3).
+
+| Ability | Wind-up to hit (s) | Ground cue a rival sees (s up) | Rival-view hue | Body cue (vfx json) | Verdict |
+|---|---|---|---|---|---|
+| Kael Finishing Slam (RMB) | 0.67 | lane 0.08-0.65 | 357 | `slam_tell` ribbon, `slam_wind` held | ok |
+| Kael Lunge (RMB hold) | 2.0 charge, hit 2.18 | none: the lane is his own aim lane (no `all`) | | `lunge_charge` held 0.32-2.03, red, whine | body cue only (see below) |
+| Kael Gilded Riposte (X) | 0.65 guard, hit 0.77 | lane 0.02-0.63 | 20 | `guard_tell` gold | ok |
+| Kael Meteor Drop | 0.22 | circle to the hit | | `drop_tell` sound | ok (kept short, TELEGRAPH_LEAD.md) |
+| Albert Faultline (X) | first hit 0.42 | lane 0.02-1.57 | 9 | none needed | ok |
+| Albert charged swing (LMB hold) | hold, perfect at 0.8 | none: the whirling hammer and its glint (BjornFx) are the tell | | `charge` held, `full` flash | ok, body only |
+| Tenzo Stone Row ridge (E) | 0.20 | `e_tell` discs 0.00-0.20 | 279 | `row_tell` scorch 0.9 | ok on lead; hue is violet (see below) |
+| Tenzo Quakefall (RMB hold) | 1.37 | ring 0.22-1.35 | 282 | `slam_charge` held | ok |
+| Tenzo Basalt Spine (X) | 0.25 | cracks 0.03-0.22 | 279 | `spine_crack` | ok |
+| Sparkle Skycall (E) | 0.82 | ring 0.02-0.90 | 335 | `e` | ok |
+| Sparkle Eye of the Storm (X) | 2.53 | ring 0.02-2.42, landing mark 2.32-2.52 | 335 | `x_ring` held | ok |
+| Motley Nightwell (X) | 1.02 | dome 0.02-0.98 | 349 | `well_open` | ok |
+| Motley Brimseed (E) | recast | disc up the whole cast | 347 | | ok |
+| Neve Ice Spear (RMB) | zone 1.8 from the landing | disc 0.32-2.10 | 347 | `spear_burst` | ok |
+| Neve Rime Wall (E) | 0.50 | lane 0.00-0.48 | 344 | `wall_tell` 0.25 flash | ok |
+| Meeko Burrseed (RMB) | 0.70 | disc 0.70-2.68 | 18 | `seed_field` | ok |
+| Sable Shiv ult (X) | 0.55 | rings 0.02-2.40 | 318 | | ok |
+| Lace Hail Wall (E) | 0.38 | arc 0.00-0.35 | 352 | | ok |
+| Vex Rail Cone (E) | 0.63 | cone 0.02-0.62 | 34 | `e_charge` held, lime | ok |
+| Vex Nuke (X) | 1.62 | disc 0.02-1.60 | 33 | `x_cast`, `x_shell` | ok |
+| Grimble Anchor Slam (E) | 0.38 | ring 0.02-0.37 | 25 | `anchor_fist` | ok |
+| Grimble fan (X) | 1.17 | fan 0.02-1.97 | 20 | | ok |
+| Gil potions, Tidal Wave | flight / ride | circle or lane from the throw | 345-350 | | ok |
+| Cinder | none: Furnace Cloak fires on the press | ring 0.00-0.17 | 7 | `cloak_gather` | no delayed hit |
+
+Result: every telegraphed ability with a ground cue has it up from the press to the hit with no gap, and every wind-up
+with a body cue holds it (a `H:` hold) for the whole wind-up. No `content/vfx` stray was found, so no data file changed.
+Left for the owner (each needs a code or design change, not a json fix, and adds a foe-visible element):
+- Kael's Lunge lane is private: a rival sees the red embers and hears the whine for 2 s but no lane. Showing it to
+  rivals is a new foe element (the drawn lane is already in his crimson, `docs/shots/combat-foe-telegraphs/juggernaut_lunge.jpg`).
+- The rival lean is one global share (`SideColor.FX_FOE_K` 0.45), so a rival sees Tenzo's cobalt as violet (hue 280),
+  and Vex, Meeko, Grimble and Kael's X as orange (18-34). Reads as hostile by its rim and ground order, but not red.
+  Raising the share is a policy change for every Hunter.
+Pre-existing reds on main at 0b0b680df2, not from this branch: `--hero-vfx-check` 1 failed (Vex LMB rounds 0.154 m
+from the forearm, limit 0.15 m); `tools/health.py --strict` style ratchet (hud_hover.gd, ability_text_check.gd,
+check_registry.gd long lines).

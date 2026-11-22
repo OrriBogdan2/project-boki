@@ -1,5 +1,7 @@
 extends RefCounted
-## --xp-cue-check: the monster-kill cues (KillCues, hooked into Match.on_mob_dead). One soft tick per kill
+## --xp-cue-check: the three progress cues apart: kill XP (xp_tick), armour tier-up (armor_up_own), level-up
+## (level_up), each its own sound so you hear which one happened. The monster-kill cues (KillCues, hooked
+## into Match.on_mob_dead): one soft tick per kill
 ## share for the local hunter (the killer, or a squadmate within SHARE_RADIUS), nothing on plain hits or
 ## for a squadmate out of range; the steal sting only on a contested last hit (another squad did more
 ## damage), in two variants (you stole it, you were robbed), heard by those two squads only; the files
@@ -21,7 +23,13 @@ func _cues(tick: int, won: int, lost: int, what: String) -> void:
 	ok(got == [tick, won, lost], "%s (tick, won, lost: %s)" % [what, str(got)])
 
 func _clear_heard() -> void:
-	for n in ["xp_tick", "steal_won", "steal_lost"]:
+	_clear_heard_of(["xp_tick", "steal_won", "steal_lost"])
+
+func _trio(names: Array) -> Array:
+	return names.map(func(n): return _heard(n))
+
+func _clear_heard_of(names: Array) -> void:
+	for n in names:
 		Sfx.recent.erase(n)
 		Sfx.last_played.erase(n)
 
@@ -133,6 +141,27 @@ func run(main: Node) -> void:
 	for n in ["xp_tick", "steal_won", "steal_lost"]:
 		var there: bool = FileAccess.file_exists("res://audio/%s.wav" % n) and ui["sounds"].has(n)
 		ok(there, "(k) %s: file and UI set entry" % n)
+
+	# (l) kill XP, armour tier-up and level-up are three different sounds, each heard alone for your own hunter
+	var trio := ["xp_tick", "armor_up_own", "level_up"]
+	var sizes := {}
+	for n in trio:
+		sizes[FileAccess.get_file_as_bytes("res://audio/%s.wav" % n).size()] = true
+	ok(sizes.size() == trio.size(), "(l) the three cue files differ (sizes %s)" % str(sizes.keys()))
+	_clear_heard_of(trio)
+	P.armor_gain(100000.0)
+	m._armor_up(P)
+	ok(_trio(trio) == [0, 1, 0], "(l) armour tier-up: only armor_up_own")
+	_clear_heard_of(trio)
+	P.gain_xp(100000.0)
+	ok(_trio(trio) == [0, 0, 1], "(l) level-up: only level_up")
+	_clear_heard_of(trio)
+	mob = m.spawn_mob("skitter", at)
+	mob.max_hp = 40.0
+	mob.hp = 40.0
+	mob.hurt(40.0, P, {})
+	_drop(mob)
+	ok(_heard("xp_tick") == 1 and _heard("level_up") == 0, "(l) a kill with no tier or level change: only xp_tick")
 
 	m.queue_free()
 	print("XPCUE DONE, failures: %d" % bad)
