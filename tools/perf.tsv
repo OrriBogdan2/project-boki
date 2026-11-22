@@ -1,0 +1,4 @@
+key	p99_ms	note
+nvidia geforce rtx 4090|amd ryzen 9 7950x|medium|1920x1080	86.5	fight 3v3 (--bench-fight), 1,440 frames; focus baseline 81.0 (1122), this check 86.5
+nvidia geforce rtx 4090|amd epyc 7k62|medium|1920x1080	158.0	same fight, slower CPU (rp1 workers): 148.2, 149.4, 158.2, 161.8, 167.1 in five runs, median 158
+apple m5|apple m5|medium|1920x1080	94.3	same fight on the mac GPU worker (mac-Naruto-Founder), one run 1122 (jobq 20261122-104817-18638)

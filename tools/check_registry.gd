@@ -1014,6 +1014,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"fight-p99-gpu": "--fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
