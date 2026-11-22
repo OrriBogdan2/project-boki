@@ -67,6 +67,11 @@
 			{"p": "ember", "at": "nozzle", "n": 2, "n_k": 3.0, "shape": "gather", "radius": 0.4, "speed": 2.0, "life": 0.2,
 				"size": 0.05, "c": "hot", "c2": "white", "c3": "main"}
 		]},
+		"shot_cast": {"fx": [
+			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 0.7, "grow": 1.3, "life": 0.16, "c": "red", "c2": "white", "c3": "flame"},
+			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 10, "shape": "gather", "radius": 0.5, "speed": 2.4, "life": 0.22,
+				"size": 0.06, "c": "flame", "c2": "white", "c3": "red"}
+		]},
 		"shot": {"fx": [
 			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 1.1, "grow": 1.3, "life": 0.14, "c": "flame", "c2": "white", "c3": "red"},
 			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 14, "way": "fwd", "speed": 7.0, "spread": 0.3, "life": 0.3,
