@@ -67,10 +67,13 @@ func run(main: Node) -> void:
 	)
 	var fallback: Array = []
 	var loaded: Array = []
+	var native: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
 		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
-		if WardenGlb.has_model(a):
+		if WardenNative.on(a):
+			native.append(a)        # (on Meshy's own skeleton, not the contract: --warden-native-check)
+		elif WardenGlb.has_model(a):
 			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
 			else:
@@ -78,11 +81,12 @@ func run(main: Node) -> void:
 		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
-	ok(fallback.size() + loaded.size() == Arch.ids().size(),
-			"every Warden builds: %d from their .glb %s, %d procedural (the fallback)" % [
+	ok(fallback.size() + loaded.size() + native.size() == Arch.ids().size(),
+			"every Warden builds: %d from their .glb %s, %d procedural (the fallback), %d on Meshy's skeleton" % [
 				loaded.size(),
 				str(loaded),
-				fallback.size()
+				fallback.size(),
+				native.size()
 			])
 	ok("gunslinger" in loaded, "Vex (gunslinger) is drawn from her .glb")
 	for a in loaded:
@@ -99,7 +103,8 @@ func run(main: Node) -> void:
 		_own_look(a)
 		_white_hair(a)
 		await _halo(main, a)
-	_stones_look()
+	if "dolm" in loaded:      # (Tenzo on Meshy's skeleton: his stones are in the mesh, no orbit bones)
+		_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -594,12 +599,12 @@ func _weapon(a: String) -> void:
 ## A .glb shield (Breaker's prow) rides the left hand's Shield node in place of the procedural one.
 func _shield(a: String) -> void:
 	var m := _model(a)
-	var holder := m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
-	var sh := holder.get_node_or_null(WardenGlb.SHIELD) as MeshInstance3D if holder else null
+	var holder_v := m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
+	var sh := holder_v.get_node_or_null(WardenGlb.SHIELD) as MeshInstance3D if holder_v else null
 	if sh == null:
 		m.free()
 		return
-	var shown := holder.find_children("*", "MeshInstance3D", true, false).filter(
+	var shown := holder_v.find_children("*", "MeshInstance3D", true, false).filter(
 			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != sh)
 	ok(shown.is_empty() and sh.transform.is_equal_approx(Transform3D.IDENTITY),
 			"%s holds its own shield on the left hand's Shield node (procedural parts left %s)"
@@ -650,7 +655,7 @@ func _body_meshes(m: Node) -> Array:
 ## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
 ## the same ink as a pass (it would draw twice).
 func _ink_shells(m: Node, a: String) -> void:
-	var bad: Array = []
+	var bad_v: Array = []
 	var shells := WardenMerge.inks(m)
 	for shell: MeshInstance3D in shells:
 		var body := shell.get_parent() as MeshInstance3D
@@ -659,10 +664,10 @@ func _ink_shells(m: Node, a: String) -> void:
 				func(si): return body.get_active_material(si).next_pass == ink)
 		if ink == null or ink.shader != Models.OUTLINE or not _same_skin(shell.skin, body.skin) or twice \
 				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
-			bad.append(shell.name)
-	ok(bad.is_empty(),
+			bad_v.append(shell.name)
+	ok(bad_v.is_empty(),
 			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
-			% [a, shells.size(), str(bad)])
+			% [a, shells.size(), str(bad_v)])
 
 ## Two skins with the same bind poses (WardenBulk thins each mesh's skin as its own copy, the ink shell's too).
 func _same_skin(a: Skin, b: Skin) -> bool:

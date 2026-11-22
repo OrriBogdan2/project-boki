@@ -6,17 +6,20 @@ extends RefCounted
 ## (the suite's xvfb + opengl3): under --headless (a worker without a display) it reports SKIP and passes.
 
 const SIZE := Vector2i(320, 240)
-const CAM_OFF := Vector3(0, 27.0, 17.5)      # m: the match camera's height and pull-back (Cam.HEIGHT, BACK)
-const FOV := 16.0                            # degrees: framed tight on the hunter and the tree
-const KEEP := 0.75                           # share of a blocking tree's pixels that must stay solid
+const CAM_OFF := Vector3(0, 27.0, 17.5)  # m: the match camera's height and pull-back (Cam.HEIGHT, BACK)
+const FOV := 16.0  # degrees: framed tight on the hunter and the tree
+const KEEP := 0.75  # share of a blocking tree's pixels that must stay solid
 
 var fails := 0
 var vp: SubViewport
 var cam: Camera3D
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SEETHROUGH %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main: Node) -> void:
 	if DisplayServer.get_name() == "headless":
@@ -38,9 +41,11 @@ func run(main: Node) -> void:
 	vp.queue_free()
 	_done(main)
 
+
 func _done(main: Node) -> void:
 	print("SEETHROUGH DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## A small world of its own: plain blue sky, a sun, the camera on the hunter at the origin and a red
 ## box standing in for the hunter.
@@ -75,13 +80,14 @@ func _stage(main: Node) -> void:
 	body.position = Vector3(0, 0.85, 0)
 	vp.add_child(body)
 
+
 ## [tree pixels with see-through off, pixels that change when it's on, red pixels that show only when on]
 ## for a tree at `at` (the hunter at the origin).
 func _case(at: Vector3) -> Array:
 	var tree := MeshInstance3D.new()
 	tree.mesh = Flora.mesh("tree", "meadow", 0)
 	var mat := Flora.material("tree").duplicate() as ShaderMaterial
-	mat.set_shader_parameter("sway", 0.0)       # still, so the two frames match where nothing thins
+	mat.set_shader_parameter("sway", 0.0)  # still, so the two frames match where nothing thins
 	mat.set_shader_parameter("flutter", 0.0)
 	tree.material_override = mat
 	tree.position = at
@@ -101,18 +107,24 @@ func _case(at: Vector3) -> Array:
 			var a := solid.get_pixel(x, y)
 			var b := seen.get_pixel(x, y)
 			var is_tree := not _near(a, sky) and not _red(a)
-			if is_tree: tree_px += 1
-			if not _near(a, b): changed += 1
-			if is_tree and _red(b): through += 1
+			if is_tree:
+				tree_px += 1
+			if not _near(a, b):
+				changed += 1
+			if is_tree and _red(b):
+				through += 1
 	return [tree_px, changed, through]
+
 
 func _frame() -> Image:
 	for i in 3:
 		await RenderingServer.frame_post_draw
 	return vp.get_texture().get_image()
 
+
 func _near(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.02
+
 
 func _red(c: Color) -> bool:
 	return c.r > 0.7 and c.g < 0.3 and c.b < 0.3
