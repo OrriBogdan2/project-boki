@@ -32,8 +32,10 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		var p: Array = parts[cb]
 		var onto := _onto(skel, to_m, p[3], deg_to_rad(float((d.get("tilt", {}) as Dictionary).get(cb, 0.0))))
 		var nb := WardenSkeleton.find(skel, cb)
-		if nb < 0:  # (a bone Meshy has no match for, Grimble's hoard: it rides the limb it hangs off)
-			nb = WardenSkeleton.find(skel, String(p[3][0]))
+		if nb < 0:  # (a bone Meshy has no match for, Grimble's hoard: it rides the limb it hangs off, kept upright
+			nb = WardenSkeleton.find(skel, String(p[3][0]))  # (a torso's short Hips -> Spine02 line would swing it)
+			if nb >= 0:
+				onto = Transform3D(Basis.IDENTITY, (to_m * skel.get_bone_global_rest(nb)).origin - (p[3][1] as Vector3))
 		if nb < 0 or onto.basis.determinant() == 0.0:
 			continue
 		var at := BoneAttachment3D.new()
