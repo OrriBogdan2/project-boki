@@ -10954,3 +10954,4 @@ READY ext/merge-lane-N2-1122 161d9da79ac5f67d055de156f8276111060bb4d3 (merge lan
 READY ext/gate-style-ratchet 68353d90d456528994b92505b0f31eb782f430e3 (regate-run runs the style ratchet via tools/style_gate.sh)
 READY ext/vfx-sparkle-bolt d047e63b3b498f0ae140fa903138477210897c39 (Sparkle LMB bolt: wide hot-pink streak + white core, short tail; merged origin/main; hero-vfx-check Sparkle rule updated; hero-vfx-check 1 red = gunslinger forearm 0.154 m, untouched here)
 READY ext/tut-garden-toy-free 927e2278d6f8580413d0bf9e432d873fc86e7cc2 (garden toy step no longer waits on Feed)
+READY ext/bench-fight-p99-gate d8affd8d97c (--fight-p99-check: --bench-fight p99 vs tools/perf.tsv, +10% fails, GPU_HOST fight-p99-gpu; in tools/checks/misc.gd)
