@@ -94,7 +94,9 @@ func run(main: Node) -> void:
 		+ ", nor do it or its Boki hit them")
 	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
 	# ---- 3. the player starts it inside the seal: the bot fights back
-	_spot(P, m.lairs._floor_spot(F, B.pos + side * 3.0, 0.0))      # (within a provoked bot's reach)
+	# beside the bot, inside its near sense: the scripted hit has no shot to reveal where it came from, and a
+	# bot only turns on a rival it can see (its sight wedge faces the boss; 11-21)
+	_spot(P, m.lairs._floor_spot(F, B.pos - side * (Match.NEAR_SENSE * 0.8), 0.0))
 	B.hurt(2.0, P, {"src": "shot"})
 	var turned := false
 	for i in int(TURN_T / Match.DT):

@@ -9,6 +9,11 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 	"Mossy", "Hem", "Flame Queen", "Undying Queen"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
+## The five words DECISIONS "Identity and Masks" retires; every content/**/*.json text field is scanned for them.
+const FIVE_RETIRED := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|merging|unmasked)\\b"
+## Not player text: notes for developers, ids, file names (keys), and lowercase id values ("mantle", "warden").
+const DEV_KEY := "(?i)(^_.*|.*notes?|.*doc|desc|why|reason|src|source|file|path|clip|states|procedural|ids?|no_carry)$"
+const ID_VALUE := "^[a-z0-9_./:-]+$"
 const CANONICAL_ORDER := [
 	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
 	"mage", "dredge", "tender", "thief", "ostra", "gil",
@@ -80,6 +85,7 @@ func run(main: Node) -> void:
 				"%s shows as '%s', with no gender line" % [id, shown_name])
 		_howto_check(id)
 	_lore_check()
+	_retired_words_check()
 	_results_name_line(main)
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -107,6 +113,41 @@ func _lore_check() -> void:
 	ok(banned.search(cinder) == null, "Cinder: no goggles, tank or hose")
 	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
 	ok(not meeko.replace("lantern_crook", "").to_lower().contains("lantern"), "Meeko: no lantern (her weapon id aside)")
+
+## Every player-facing string in content/**/*.json: none of the five retired words (ids and dev notes are skipped).
+func _retired_words_check() -> void:
+	var hits: Array = []
+	var re := RegEx.create_from_string(FIVE_RETIRED)
+	var dev := RegEx.create_from_string(DEV_KEY)
+	var idv := RegEx.create_from_string(ID_VALUE)
+	var files: Array = []
+	_json_files("res://content", files)
+	for f in files:
+		var data = JSON.parse_string(FileAccess.get_file_as_string(f))
+		_retired_walk(data, f, "", re, dev, idv, hits)
+	for h in hits:
+		print("HEROTITLE retired word: ", h)
+	ok(hits.is_empty(), "content json: no retired word in player text (%d)" % hits.size())
+
+func _json_files(dir: String, out: Array) -> void:
+	for d in DirAccess.get_directories_at(dir):
+		_json_files(dir + "/" + d, out)
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".json"):
+			out.append(dir + "/" + f)
+
+func _retired_walk(v: Variant, f: String, key: String, re: RegEx, dev: RegEx, idv: RegEx, hits: Array) -> void:
+	if v is Dictionary:
+		for k in v:
+			if dev.search(String(k)) == null:
+				_retired_walk(v[k], f, String(k), re, dev, idv, hits)
+	elif v is Array:
+		for x in v:
+			_retired_walk(x, f, key, re, dev, idv, hits)
+	elif v is String:
+		var t := String(v)
+		if idv.search(t) == null and not t.begins_with("res://") and re.search(t) != null:
+			hits.append("%s [%s]: %s" % [f, key, t.left(80)])
 
 ## The three how-to lines (what you do, the combo to learn first, what to avoid): short, with key caps from
 ## Settings.key_cap and no typed key names.
