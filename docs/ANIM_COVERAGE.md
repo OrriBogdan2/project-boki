@@ -147,12 +147,15 @@ Worst five, backlog-ready:
 
    | Boki (mass) | | curl-on (glider opens) | curl-off (landing) | biggest pose-weight step |
    |---|---|---|---|---|
-   | pebbit (1.4) | before | 3.135 m in 1 frame (f046) | 2.267 m in 1 frame (f101) | 1.00 |
-   | pebbit (1.4) | after | 0.117 m max a frame | 0.084 m max a frame | 0.04 |
-   | goliathite (2.0) | before | 3.135 m in 1 frame (f046) | 2.267 m in 1 frame (f101) | 1.00 |
-   | goliathite (2.0) | after | 0.117 m max a frame | 0.084 m max a frame | 0.04 |
+   | pebbit (1.4) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | pebbit (1.4) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
+   | goliathite (2.0) | before | 3.136 m in 1 frame (f046) | 2.293 m in 1 frame (f101) | 1.00 |
+   | goliathite (2.0) | after | 0.119 m max a frame | 0.101 m max a frame | 0.04 |
 
-   (The same numbers for both: the seat and the flank do not depend on the species. Limits: 0.15 m, 0.5.)
+   (The same numbers for both, on the GPU runner and headless: the seat and the flank do not depend on the species.
+   Limits: 0.15 m, 0.5. The check's biggest step after the fix, 0.144 m at f101, is the landing frame itself, with the
+   Boki still fully seated: your shown torso drops that far as the glider closes. That is the Hunter's land blend,
+   not the curl.)
    The dash is `proc` too: `KinFlinch.dash` leans the body into the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
    (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
