@@ -13,7 +13,7 @@
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
 		"walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk",
 		"orbits": {"orbit_stones": "Head"}},
-	"dredge": {"meshy_native": true, "toon": false, "size": 0.93, "hand": "LeftHand",
+	"dredge": {"meshy_native": true, "toon": false, "size": 1.03, "hand": "LeftHand",
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "LeftHand"},
 		"props": {"hoard": ["leather-v95", "brass-v95"]}, "shift": {"hoard": [0.0, -0.3, -0.05]},
 		"holster": {"glb": "res://art/wardens/dredge/dredge_gun.glb",
