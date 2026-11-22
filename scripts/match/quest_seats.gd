@@ -297,4 +297,4 @@ func may_start(x: Dictionary) -> bool:
 
 func _cap(s: float) -> String:
 	s = maxf(0.0, s)
-	return "%d:%02d" % [int(s) / 60, int(s) % 60]
+	return "%d:%02d" % [int(int(s) / 60.0), int(s) % 60]

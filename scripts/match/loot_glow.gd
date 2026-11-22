@@ -68,7 +68,7 @@ static func _res(r: int) -> Dictionary:
 	halo.radius = float(look["halo_r"])
 	halo.height = halo.radius * 2.0
 	halo.radial_segments = SEGMENTS
-	halo.rings = SEGMENTS / 2
+	halo.rings = int(SEGMENTS / 2.0)
 	var res := {"halo": halo, "halo_mat": Models.glow_mat(Color(col, float(look["halo_a"])))}
 	if float(look["pillar_h"]) > 0.0:
 		var pillar := CylinderMesh.new()

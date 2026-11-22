@@ -59,7 +59,7 @@ static func cap(m: Match) -> int:
 	for o in m.hunters:
 		teams[o.team] = true
 	var bots := teams.keys().filter(func(t): return bot_squad(m, t)).size()
-	return mini(int(knob("early_seats_cap_max")), bots / int(knob("early_seats_cap_per_bot_squads")))
+	return mini(int(knob("early_seats_cap_max")), int(bots / float(int(knob("early_seats_cap_per_bot_squads")))))
 
 
 ## The squad on (or out by) each early seat, -1 for none: [lair, spark, uplink].

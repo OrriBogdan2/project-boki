@@ -54,7 +54,7 @@ static func smothered(m: Match, p: Vector3) -> bool:
 
 static func clock(s: float) -> String:
 	var n := int(ceilf(maxf(s, 0.0)))
-	return "%d:%02d" % [n / 60, n % 60]
+	return "%d:%02d" % [int(n / 60.0), n % 60]
 
 # ------------------------------------------------------------------ readings of the four seats
 ## The Heart's early seat, drawn at the Gate: locked until the Heartspark is charged, open while it is out to

@@ -425,8 +425,8 @@ static func _crop(m: Match, img: Image, side_px := 0) -> Image:
 	var side := 360 if close() else 240
 	if side_px > 0:
 		side = side_px
-	var x0 := clampi(int(c.x) - side / 2, 0, img.get_width() - side)
-	var y0 := clampi(int(c.y) - side / 2, 0, img.get_height() - side)
+	var x0 := clampi(int(c.x) - int(side / 2.0), 0, img.get_width() - side)
+	var y0 := clampi(int(c.y) - int(side / 2.0), 0, img.get_height() - side)
 	var crop := img.get_region(Rect2i(x0, y0, side, side))
 	crop.resize(360, 360)
 	return crop

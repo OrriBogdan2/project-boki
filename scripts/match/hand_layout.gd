@@ -20,8 +20,8 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 	var at := Vector2i(int(R["at"][0]), int(R["at"][1]))
 	for k in (lv1 - lv0) * run:
 		var stair := k % run == 0
-		var lv := lv0 + k / run + (0 if stair else 1)
-		for s in range(-(wd / 2), wd - wd / 2):
+		var lv := lv0 + int(k / float(run)) + (0 if stair else 1)
+		for s in range(-(int(wd / 2.0)), wd - int(wd / 2.0)):
 			var q := at + d * k + side * s
 			if not w.inb(q.x, q.y) or w.kind[w.idx(q.x, q.y)] == World.T_VOID:
 				continue

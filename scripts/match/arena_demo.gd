@@ -587,7 +587,7 @@ static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 	var wide := S
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--strip-w="): wide = maxi(S, int(String(a).substr(10)))
-	var r := Rect2i(Vector2i(int(c.x) - S / 2, int(c.y) - S / 2), Vector2i(wide, S))
+	var r := Rect2i(Vector2i(int(c.x) - int(S / 2.0), int(c.y) - int(S / 2.0)), Vector2i(wide, S))
 	r.position.x = clampi(r.position.x, 0, img.get_width() - wide)
 	r.position.y = clampi(r.position.y, 0, img.get_height() - S)
 	var frames: Array = A.get_meta("strip", [])
@@ -607,7 +607,7 @@ static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 		var at := Vector2i(0, i * (S + 4)) if down else Vector2i(i * (wide + 4), 0)
 		out.blit_rect(f, Rect2i(Vector2i.ZERO, Vector2i(wide, S)), at)
 	if out.get_width() > STRIP_MAX_W:
-		out.resize(STRIP_MAX_W, out.get_height() * STRIP_MAX_W / out.get_width(), Image.INTERPOLATE_LANCZOS)
+		out.resize(STRIP_MAX_W, int(out.get_height() * STRIP_MAX_W / float(out.get_width())), Image.INTERPOLATE_LANCZOS)
 	var path := shot_path()
 	if path != "":
 		out.save_png(path)

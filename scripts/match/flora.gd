@@ -411,7 +411,7 @@ static func _pine(b: MB, style: String, variant: int, r: RandomNumberGenerator) 
 
 ## One tier of a pine: a cone whose rim droops into scallops, closed underneath, snow on top.
 static func _bough(b: MB, at: Vector3, rad: float, hgt: float, pal: Array, snow: Array, ht: float, seed: float, lobes: int) -> void:
-	lobes = clampi(lobes / 2, 5, 8)
+	lobes = clampi(int(lobes / 2.0), 5, 8)
 	var seg := lobes * 4
 	var rings := 5
 	var base := b.v.size()

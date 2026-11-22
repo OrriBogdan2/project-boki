@@ -77,11 +77,11 @@ func build_patches() -> void:
 		seen[bi] = true
 		while not q.is_empty():
 			var cur: int = q.pop_back()
-			tiles.append(Vector2i(cur % w.w, cur / w.w))
+			tiles.append(Vector2i(cur % w.w, int(cur / float(w.w))))
 			for dz in [-1, 0, 1]:
 				for dx in [-1, 0, 1]:
 					var nx: int = cur % w.w + dx
-					var nz: int = cur / w.w + dz
+					var nz: int = int(cur / float(w.w)) + dz
 					if not w.inb(nx, nz):
 						continue
 					var ni := w.idx(nx, nz)

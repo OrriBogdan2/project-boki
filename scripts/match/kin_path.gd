@@ -115,7 +115,7 @@ static func _push(heap: Array, item: Array) -> void:
 	heap.append(item)
 	var i := heap.size() - 1
 	while i > 0:
-		var up := (i - 1) / 2
+		var up := int((i - 1) / 2.0)
 		if float(heap[up][0]) <= float(heap[i][0]):
 			break
 		var t = heap[up]

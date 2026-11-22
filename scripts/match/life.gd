@@ -48,7 +48,7 @@ static func box_value(b: Dictionary) -> int:
 	v += (b["caught"] as Array).size() * 15
 	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
-		v += Loot.value(c["it"]) / 2
+		v += int(Loot.value(c["it"]) / 2.0)
 	return v
 
 static func box_color(b: Dictionary) -> Color:
