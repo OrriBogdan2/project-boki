@@ -5,9 +5,12 @@ extends RefCounted
 ## to user://settings.cfg, so it runs itself again in a child game on a throwaway XDG_DATA_HOME: the player's (or a
 ## gate box's) settings file is never touched (rpc6, 11-16: sfx=0.0 and ult_ready_cue=false left behind).
 
+const CHILD := "--ui-sfx-child"
+
 var main: Node
 var fails := 0
 var n := 0
+
 
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1
@@ -15,7 +18,6 @@ func ok(what: String, cond: bool, info := "") -> void:
 	if not cond:
 		fails += 1
 
-const CHILD := "--ui-sfx-child"
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -37,8 +39,10 @@ func run(main_node: Node) -> void:
 	_walk("pause", Overlay.root)
 	Overlay.close()
 	_tabs_and_throttle()
+	_scan_raw_buttons()
 	print("UISFX DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## Runs this same check again as a child game with its own user dir (CheckChild), shows its output, and returns
 ## its exit code. The child ends with this game, however it ends.
@@ -52,14 +56,19 @@ func _in_temp_user_dir() -> int:
 	OS.execute("/bin/rm", ["-rf", log_path, log_path.get_basename() + "_data"])
 	return rc
 
+
 func _heard(trigger: Callable) -> bool:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
 	trigger.call()
 	return not Sfx.last_played.is_empty()
 
+
 func _walk(where: String, root: Node) -> void:
 	for c in root.find_children("*", "Control", true, false):
+		if c is Button and c.is_visible_in_tree() and c.get_class() == "Button":
+			var hooked: bool = c.has_meta(UI.SFX_META) or c.has_meta("snd") or c.has_meta(UiSfx.META)
+			ok("%s: button '%s' has a sound hook" % [where, c.text], hooked)
 		if c is Slider:
 			var s: Slider = c
 			var before := s.value
@@ -75,6 +84,7 @@ func _walk(where: String, root: Node) -> void:
 			var ob: OptionButton = c
 			var pick := func(): ob.item_selected.emit(0)
 			ok("%s: dropdown sounds" % where, ob.item_count == 0 or _heard(pick))
+
 
 func _tabs_and_throttle() -> void:
 	var t := UI.tabs(["A", "B"], "A", func(_n): pass)
@@ -93,3 +103,31 @@ func _tabs_and_throttle() -> void:
 	ok("slider ticks are throttled", ticks == 1, str(ticks))
 	t.queue_free()
 	s.queue_free()
+
+
+## Every raw Button.new() in the game code (any panel, visible or not yet opened) must be given the hover and click
+## sounds within a few lines: UI.sfx(b), UI.SFX_META, or a "snd" meta. Ui.button already does.
+func _scan_raw_buttons() -> void:
+	var files: Array = []
+	_collect("res://scripts", files)
+	for f in files:
+		var lines := FileAccess.get_file_as_string(f).split("\n")
+		for i in lines.size():
+			var l: String = lines[i]
+			if not (" Button.new()" in l or "(Button.new()" in l) or l.strip_edges().begins_with("#"):
+				continue
+			if f == "res://scripts/ui/ui.gd" and "var b := Button.new()" in l:
+				continue  # Ui.button itself
+			var near := "\n".join(lines.slice(i, mini(i + 30, lines.size())))
+			ok(
+				"raw Button.new() %s:%d has a sound hook" % [f.get_file(), i + 1],
+				"UI.sfx(" in near or "SFX_META" in near or '"snd"' in near
+			)
+
+
+func _collect(dir: String, out: Array) -> void:
+	for d in DirAccess.get_directories_at(dir):
+		_collect(dir + "/" + d, out)
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".gd"):
+			out.append(dir + "/" + f)
