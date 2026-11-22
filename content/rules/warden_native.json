@@ -15,7 +15,6 @@
 		"orbits": {"orbit_stones": "Head"}},
 	"dredge": {"meshy_native": true, "size": 1.03, "hand": "LeftHand",
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "LeftHand"},
-		"bones": {"hoard": "Spine02"}, "props": {"hoard": ["leather-v95", "brass-v95"]}, "shift": {"hoard": [0.0, -0.3, -0.05]},
 		"holster": {"glb": "res://art/wardens/dredge/dredge_gun.glb",
 			"hip": {"bone": "Hips", "pos": [-0.17, -0.02, -0.05], "muzzle": [0, -0.97, -0.25], "up": [0, 0.25, -0.97]},
 			"hand": {"bone": "LeftHand", "pos": [0.04, -0.075, 0.02], "muzzle": [0.45, -0.86, 0.24], "up": [0, 0, -1]}},
