@@ -1,5 +1,6 @@
 extends RefCounted
-## --garden-hud-groups [--shots-dir=<dir>]: the garden's screen on day 1 and day 5, in the hub and in two zones.
+## --garden-hud-groups [--shots-dir=<dir>] [--size=WxH, default 1280x720]: the garden's screen on day 1 and day 5,
+## in the hub and in two zones.
 ## For each of the six screens it prints the cards that open on arrival and the HUD groups on show (a group = a
 ## separately placed block the player has to scan: a visible child of the home's UI, with a size), then the signs
 ## in view. Day 1 must stay at DAY1_MAX groups (asserted by --garden-first-day-check). With --shots-dir it also
@@ -16,6 +17,7 @@ const DAY5_JOURNAL := ["ate a snack", "won a race", "napped in the pile", "made 
 
 var main: Node
 var dir := ""
+var win := Vector2i(1280, 720)      # the window: --size=WxH
 
 ## The save for a day: day 1 is the fresh save with its first-day list running; day 5 has the list paid, four Boki
 ## with a few journal lines, the zones open and today's wishes drawn.
@@ -55,17 +57,20 @@ static func make_save(day: int, zone: String) -> void:
 		d["away_seen"] = now - 7200.0      # last here two hours ago: the arrival has a journal to read
 		GardenWishes.today(now)
 
-## The visible blocks of the home's UI (its root and the layer around it): their first words and rect.
+## The visible blocks of the home's UI (its root and the layer around it) that count as a group, as Controls.
+static func blocks_of(home: Node) -> Array:
+	var kids: Array = home.root_ui.get_children() + home.ui.get_children().filter(func(n): return n != home.root_ui)
+	return kids.filter(func(c): return c is HomeDashSlot and c.visible or c is Control and _is_block(c))
+
+## A shown control with a size between a sliver and a full-width dim.
+static func _is_block(c: Control) -> bool:
+	var wh := c.get_global_rect().size
+	return c.is_visible_in_tree() and c.modulate.a > 0.05 and wh.x > MIN_PX and wh.y > MIN_PX and wh.x < FULL_PX
+
+## The visible blocks of the home's UI: their first words and rect.
 static func groups_of(home: Node) -> Array:
-	var out: Array = []
-	for c in home.root_ui.get_children() + home.ui.get_children().filter(func(n): return n != home.root_ui):
-		if c is HomeDashSlot and c.visible:      # drawn across the whole screen: the slot itself is the group
-			out.append("Dash slot")
-		elif c is Control and c.is_visible_in_tree() and c.modulate.a > 0.05 \
-				and c.get_global_rect().size.x > MIN_PX and c.get_global_rect().size.y > MIN_PX \
-				and c.get_global_rect().size.x < FULL_PX:
-			out.append("%s: %s" % [_what(c), c.get_global_rect()])
-	return out
+	return blocks_of(home).map(
+			func(c): return "Dash slot" if c is HomeDashSlot else "%s: %s" % [_what(c), c.get_global_rect()])
 
 ## A short name for a block: its first words.
 static func _what(c: Control) -> String:
@@ -132,10 +137,13 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			win = Vector2i(int(wh[0]), int(wh[1]))
 	if dir != "":
 		DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	main.get_tree().root.size = Vector2i(1280, 720)
+	main.get_tree().root.size = win
 	await _frames(10)
 	for day in [1, 5]:
 		for zone in [""] + ZONES:
