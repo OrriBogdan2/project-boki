@@ -21,23 +21,23 @@ const DISC_GAP := 1.0          # px between two charge discs
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
 static var shown_pips := {}    # slot id -> the fill (0..1) of each charge pip last drawn (checks read it)
 
-## Moves the per-slot animation state of host `hud` on by `delta` s: presses age out, "ready" rings fade.
-static func decay(hud, delta: float) -> void:
-	for id in hud.slot_fx.keys():
-		hud.slot_fx[id]["t"] = float(hud.slot_fx[id]["t"]) + delta
-		if float(hud.slot_fx[id]["t"]) > ResetPop.LEN: hud.slot_fx.erase(id)
-	for id in hud.ready_flash.keys():
-		hud.ready_flash[id] = float(hud.ready_flash[id]) - delta
-		if float(hud.ready_flash[id]) <= 0.0: hud.ready_flash.erase(id)
+## Moves the per-slot animation state of host `H` on by `delta` s: presses age out, "ready" rings fade.
+static func decay(h, delta: float) -> void:
+	for id in h.slot_fx.keys():
+		h.slot_fx[id]["t"] = float(h.slot_fx[id]["t"]) + delta
+		if float(h.slot_fx[id]["t"]) > ResetPop.LEN: h.slot_fx.erase(id)
+	for id in h.ready_flash.keys():
+		h.ready_flash[id] = float(h.ready_flash[id]) - delta
+		if float(h.ready_flash[id]) <= 0.0: h.ready_flash.erase(id)
 
 ## The countdown as shown: whole seconds from 1s up, tenths under it.
 static func cd_text(secs: float) -> String:
 	return str(int(ceil(secs))) if secs >= 1.0 else "%.1f" % secs
 
-static func ab_slot(hud, id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float,
+static func ab_slot(h, id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float,
 		cd_secs: float, ready: bool, charges := -1.0, max_ch := 0, label := "") -> void:
-	var c: CanvasItem = hud.c
-	var sfx_d: Dictionary = hud.slot_fx.get(id, {})
+	var c: CanvasItem = h.c
+	var sfx_d: Dictionary = h.slot_fx.get(id, {})
 	var pop := 0.0
 	if not sfx_d.is_empty():
 		var ft := float(sfx_d["t"])
@@ -47,17 +47,17 @@ static func ab_slot(hud, id: String, rect: Rect2, icon: String, key: String, col
 			pop = clampf(1.0 - ft / POP_T, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
 	var ctr := rect.get_center()
-	hud.hover_spots.append([rect, id])
-	var was: bool = hud.ready_was.get(id, true)
+	h.hover_spots.append([rect, id])
+	var was: bool = h.ready_was.get(id, true)
 	if ready and not was:
-		hud.ready_flash[id] = READY_FLASH
-	hud.ready_was[id] = ready
+		h.ready_flash[id] = READY_FLASH
+	h.ready_was[id] = ready
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready
 	var frame_state := "cooling" if cooling else "off"
 	HudStyle.slot_frame(c, rect, col, "ready" if ready else frame_state)
 	var icol: Color = col if ready else Color(col.lerp(HudStyle.MUTED, 0.65), 0.45)
 	Icons.draw(c, icon, ctr + Vector2(0, -2), rect.size.x * 0.27, icol)
-	hud.slot_text.erase(id)
+	h.slot_text.erase(id)
 	if cd_frac > 0.0:
 		# a charge coming back while another is ready: a light sweep, so it never reads as locked
 		var shade := 0.22 if ready else 0.62
@@ -68,21 +68,21 @@ static func ab_slot(hud, id: String, rect: Rect2, icon: String, key: String, col
 			var fs := int(rect.size.x * (0.46 if t.length() < 3 else 0.38))
 			var tcol := HudStyle.INK if cd_secs >= 1.0 else HudStyle.COOLING
 			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, tcol, 6)
-			hud.slot_text[id] = t
+			h.slot_text[id] = t
 	if max_ch > 1:
 		shown_pips[id] = charge_discs(c, rect, charges, max_ch, col)
 	if label != "":
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
 	shown_keys[id] = key
 	if key != "": HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y), key, col if ready else HudStyle.MUTED)
-	deny_pulse(hud, id, rect)
+	deny_pulse(h, id, rect)
 	if pop > 0.0:
 		var pop_edge := Color(col.lerp(Color.WHITE, 0.5), pop)
-		hud._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, pop_edge, 3)
-	var fl := float(hud.ready_flash.get(id, 0.0))
+		h._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, pop_edge, 3)
+	var fl := float(h.ready_flash.get(id, 0.0))
 	if fl > 0.0:
 		var k := 1.0 - fl / READY_FLASH
-		hud._rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col, 1.0 - k), 3)
+		h._rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col, 1.0 - k), 3)
 	if sfx_d.get("kind", "") == "reset":
 		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
 
@@ -107,17 +107,17 @@ static func charge_discs(c: CanvasItem, r: Rect2, charges: float, cap: int, col:
 
 ## A locked slot: the dimmed icon under a padlock and the key cap; "Spend point" in gold when a point can open it
 ## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
-static func locked(hud, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
-	var c: CanvasItem = hud.c
-	var pulse := 0.5 + 0.5 * sin(float(hud.m.time) * 5.0)
+static func locked(h, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
+	var c: CanvasItem = h.c
+	var pulse := 0.5 + 0.5 * sin(float(h.m.time) * 5.0)
 	HudStyle.slot_frame(c, r, HudStyle.GOLD, "ready" if can else "off")
 	if can:
 		var glow := Color(1.0, 0.82, 0.48, 0.25 + 0.4 * pulse)
-		hud._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
+		h._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
 	var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
-	padlock(hud, r.get_center() + Vector2(0, 4), lcol)
+	padlock(h, r.get_center() + Vector2(0, 4), lcol)
 	if can:
 		# (at a bigger Text size the word grows down into the slot, not up into the resource bar's name)
 		var base := r.position.y - 2.0 + (UI.fs(10) - 10)      # (just clear of the resource bar's label above the slot)
@@ -126,34 +126,34 @@ static func locked(hud, id: String, r: Rect2, icon: String, col: Color, key: Str
 	elif tag != "":
 		var tw := TextCache.width(HudStyle.BIG, tag, 10) + 12.0
 		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))
-		hud._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
+		h._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)
 		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
 
 ## The padlock every locked slot shows, its body centred on `at`.
-static func padlock(hud, at: Vector2, col: Color) -> void:
-	hud.c.draw_arc(at + Vector2(0, -6), 5.0, PI, TAU, 12, col, 2.0, true)
-	hud._rounded(Rect2(at + Vector2(-7, -6), Vector2(14, 11)), col, 3)
+static func padlock(h, at: Vector2, col: Color) -> void:
+	h.c.draw_arc(at + Vector2(0, -6), 5.0, PI, TAU, 12, col, 2.0, true)
+	h._rounded(Rect2(at + Vector2(-7, -6), Vector2(14, 11)), col, 3)
 
 ## Over an ab_slot drawn not ready: off cooldown but it can't be cast now (stunned, downed, merged).
 ## A dark veil and the padlock, so it never reads as ready or as cooling.
-static func lock_over(hud, r: Rect2) -> void:
-	hud._rounded(r.grow(-2.0), Color(0.0, 0.0, 0.02, 0.5), HudStyle.SLOT_RAD - 1)
-	padlock(hud, r.get_center() + Vector2(0, 4), Color(HudStyle.INK, 0.9))
+static func lock_over(h, r: Rect2) -> void:
+	h._rounded(r.grow(-2.0), Color(0.0, 0.0, 0.02, 0.5), HudStyle.SLOT_RAD - 1)
+	padlock(h, r.get_center() + Vector2(0, 4), Color(HudStyle.INK, 0.9))
 
 ## Over an ab_slot drawn ready: the ultimate's lit frame (a bright rim and a soft halo in the slot colour,
 ## steady), and while `shine` runs 1 -> 0 after it comes back a white edge, a brightened icon and a band of
 ## light crossing the slot left to right.
-static func lit(hud, r: Rect2, col: Color, icon: String, shine: float) -> void:
-	var c: CanvasItem = hud.c
+static func lit(h, r: Rect2, col: Color, icon: String, shine: float) -> void:
+	var c: CanvasItem = h.c
 	# the outer glow and the shine frame are drawn, not noted: one lit slot is one panel (the frame)
-	var glow: StyleBoxFlat = hud._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3, true)
+	var glow: StyleBoxFlat = h._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3, true)
 	c.draw_style_box(glow, r.grow(5.0))
-	hud._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col.lightened(0.25), 0.95), 2)
+	h._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col.lightened(0.25), 0.95), 2)
 	if shine <= 0.0:
 		return
-	var flash: StyleBoxFlat = hud._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3, true)
+	var flash: StyleBoxFlat = h._box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3, true)
 	c.draw_style_box(flash, r.grow(2.0))
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.27, Color(1, 1, 1, 0.7 * shine))
 	var w := r.size.x * 0.3
@@ -167,12 +167,12 @@ static func lit(hud, r: Rect2, col: Color, icon: String, shine: float) -> void:
 		c.draw_colored_polygon(part, Color(1, 1, 1, 0.4 * shine))
 
 ## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
-static func deny_pulse(hud, id: String, r: Rect2) -> void:
-	var fx: Dictionary = hud.slot_fx.get(id, {})
+static func deny_pulse(h, id: String, r: Rect2) -> void:
+	var fx: Dictionary = h.slot_fx.get(id, {})
 	if fx.get("kind", "") != "deny" or float(fx["t"]) >= DENY_T:
 		return
 	var k := sin(PI * float(fx["t"]) / DENY_T)
-	hud._rounded(r.grow(3.0 * k), Color(0.9, 0.15, 0.1, 0.22 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, k), 3)
+	h._rounded(r.grow(3.0 * k), Color(0.9, 0.15, 0.1, 0.22 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, k), 3)
 
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
@@ -193,22 +193,22 @@ static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
 
 ## A slot with run levels: locked (padlock; "Spend point" in gold when a point can open it; R says when it
 ## opens), else the ability slot with RankMarks' tier pips and, while a point can go in, its gold +.
-static func skill_slot(hud, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float,
+static func skill_slot(h, slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float,
 		cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
-	var p: Hunter = hud.m.player
+	var p: Hunter = h.m.player
 	var lv := int(p.slot_lv.get(slot, 1))
 	var can := p.can_level(slot)
 	RankMarks.note_face(slot, r)
 	if lv <= 0:
-		hud.hover_spots.append([r, id])
+		h.hover_spots.append([r, id])
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
-		locked(hud, id, r, icon, col, key, can, hud.r_lock_text(p) if slot == "ult" else "")
-		deny_pulse(hud, id, r)
+		locked(h, id, r, icon, col, key, can, h.r_lock_text(p) if slot == "ult" else "")
+		deny_pulse(h, id, r)
 		if can:
-			RankMarks.beam(hud, r, slot)
+			RankMarks.beam(h, r, slot)
 			RankMarks.mark(slot, r)
 		return
-	ab_slot(hud, id, r, icon, key, col, cdf, cds, ready, ch, mx)
-	RankMarks.pips(hud, r, slot, lv, col)
+	ab_slot(h, id, r, icon, key, col, cdf, cds, ready, ch, mx)
+	RankMarks.pips(h, r, slot, lv, col)
 	if can:
-		RankMarks.plus(hud, r, id, slot, key)
+		RankMarks.plus(h, r, id, slot, key)

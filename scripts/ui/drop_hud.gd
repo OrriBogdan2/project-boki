@@ -29,10 +29,10 @@ static func lines(m: Match, p: Hunter) -> Array:
 	return []
 
 
-static func draw(hud, sz: Vector2, p: Hunter) -> void:
+static func draw(h, sz: Vector2, p: Hunter) -> void:
 	var y := LINE_Y
-	for s in lines(hud.m, p):
-		hud._ctext(Vector2(sz.x * 0.5, y), s, 18, hud.GOLD, hud.big)
+	for s in lines(h.m, p):
+		h._ctext(Vector2(sz.x * 0.5, y), s, 18, h.GOLD, h.big)
 		y += LINE_GAP
 
 
