@@ -14,7 +14,7 @@ static var shaped := 0         # lines shaped so far (checks and the probe read 
 static var seen: Array = []    # --keys-check: every string drawn while `recording`
 static var recording := false
 static var seen_at: Array = []  # --ui-text-probe-check: [text, window rect, item] drawn while `recording`
-static var draw_xf := Transform2D.IDENTITY  # the item's draw_set_transform_matrix of the caller (condensed, leaning text), for seen_at only
+static var draw_xf := Transform2D.IDENTITY  # the caller's draw transform (condensed, leaning text); seen_at only
 
 static func line(font: Font, s: String, design_fs: int) -> TextLine:
 	var fs := design_fs if world else UI.fs(design_fs)      # Settings > Text size

@@ -11,9 +11,15 @@ extends RefCounted
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 const BIG_TEXT := 1.5  # Settings text size of the extra pass, at the first window size (the biggest choice)
 const SETTLE_S := 0.6  # seconds a screen gets to build and fade in before it is scanned
-## [scene, node path prefix, rule] of a hit another branch is fixing; delete the entry when it merges.
-## The naming column of hatch.gd (ext/name-it-vertical-1117).
-const KNOWN := [["hatch_name", "Main/", "narrow"], ["hatch_name", "Main/", "outside"]]
+## [scene, node path prefix, rule, text prefix (optional)] of a known, filed hit; delete the entry when fixed.
+## The naming column of hatch.gd (ext/name-it-vertical-1117); three drop plan map region names (docs/DEBT.md).
+const KNOWN := [
+	["hatch_name", "Main/", "narrow"],
+	["hatch_name", "Main/", "outside"],
+	["match_plan", "Main/", "overlap", "drawn: THE CROWN"],
+	["match_plan", "Main/", "overlap", "drawn: LARKHOLLOW"],
+	["match_plan", "Main/", "overlap", "drawn: CROWN SHARD"],
+]
 
 var main: Node
 var tree: SceneTree
@@ -402,5 +408,6 @@ func _finish() -> void:
 func _known(r: Dictionary) -> bool:
 	for k: Array in KNOWN:
 		if k[0] == r["scene"] and String(r["path"]).begins_with(k[1]) and k[2] == r["rule"]:
-			return true
+			if k.size() < 4 or String(r["text"]).begins_with(k[3]):
+				return true
 	return false
