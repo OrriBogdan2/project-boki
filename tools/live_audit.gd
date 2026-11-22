@@ -1,5 +1,5 @@
 extends "res://tools/clip_shots.gd"
-## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close]: audit render of Hunters as the game plays
+## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close] [--seq: idle, run, attack, hit at 30 fps]: audit render of Hunters as the game plays
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
@@ -128,14 +128,14 @@ func _hunter(id: String, dir: String) -> void:
 		var bb := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
 		print("LIVE_AUDIT_MESH ", model.get_path_to(mi), " vis ", (mi as MeshInstance3D).is_visible_in_tree(), " centre ", bb.get_center(), " size ", bb.size)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in (["idle", "run", "attack"] if seq else CLIPS):
+	for clip in (["idle", "run", "attack", "hit"] if seq else CLIPS):
 		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
 		model.rotation.y = yaw
 		model.set_meta(WardenHolster.DRAW, 1.0 if clip == "attack" else 0.0)  # (HunterAnim's aim_k: the gun in hand while he fires)
 		var times: Array = SAMPLES[clip]
 		if seq:
 			times = []
-			for q in int({"idle": 1.5, "run": 1.6, "attack": 1.2}[clip] * 30.0):
+			for q in int({"idle": 1.5, "run": 1.6, "attack": 1.2, "hit": 1.0}[clip] * 30.0):
 				times.append(q * DT)
 		# settle: the pre-state (standing, or running for a hit/jump) for 25 frames, then the clip's own state
 		var s := _state(id, "idle" if clip != "dash" else "run", yaw, 0.0)
