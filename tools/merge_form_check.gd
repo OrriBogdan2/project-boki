@@ -272,11 +272,11 @@ func _aug() -> void:
 			slams += 1
 			ok(i % 3 == 2, "Heavy Star's slam rides attack %d (every 3rd)" % (i + 1))
 	ok(slams == 2, "...two slams in six attacks (%d)" % slams)
-	# the Boki ability is blocked, orders are inert
+	# the Boki ability still goes off (cast through you), orders are inert
 	var cu := int(P.used.get("kin_ab", 0))
 	P.inp["kin_ab"] = true
 	run_for(0.1)
-	ok(int(P.used.get("kin_ab", 0)) == cu and P.kin.runner.is_ready("k1"), "its ability is off while merged")
+	ok(int(P.used.get("kin_ab", 0)) == cu + 1 and not P.kin.runner.is_ready("k1"), "its ability goes off merged")
 	ok(not KinCommand.order(P, "guard") and KinMerge.active(P), "orders do nothing while merged (your Boki is part of you)")
 	# RMB add-on: the form's effect list at your spot, hurting and slowing a close foe
 	var Rt := foe(P.pos + Vector3(2.5, 0, 0))

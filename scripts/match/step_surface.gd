@@ -11,8 +11,9 @@ extends RefCounted
 ## A Hunter's own "<arch>_step_<surface>" wins when it has one. docs/AUDIO.md lists each region.
 
 const RULES := "step_biomes"
-const SHARED := ["water", "metal"]     # surfaces with steps per weight class, not per Hunter
-const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}     # dB on those steps: heavier boots carry more
+const SHARED := ["water", "metal"]  # surfaces with steps per weight class, not per Hunter
+const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}  # dB on those steps: heavier boots carry more
+
 
 ## The surface under `pos` in match `m`.
 static func at(m: Match, pos: Vector3) -> String:
@@ -30,10 +31,12 @@ static func at(m: Match, pos: Vector3) -> String:
 		return "stone"
 	return for_style(w.style_at(i))
 
+
 ## The step set a bare ground tile of biome `style` plays (content/rules/step_biomes.json): grass for an unknown one.
 static func for_style(style: String) -> String:
 	var r: Dictionary = Content.rules(RULES)
 	return String(r["styles"].get(style, r["default"]))
+
 
 ## The sound for `surf` underfoot of `h`: its own set when it has one, else the shared one.
 static func cue(h: Hunter, surf: String) -> String:
@@ -42,9 +45,11 @@ static func cue(h: Hunter, surf: String) -> String:
 		shared += "_" + weight_of(h.arch)
 	return HeroSfx.of(h, "step_" + surf, shared)
 
+
 ## The step's volume: `base` dB, plus the weight class's on the shared surfaces.
 static func vol_db(h: Hunter, surf: String, base: float) -> float:
 	return base + (float(WEIGHT_DB[weight_of(h.arch)]) if surf in SHARED else 0.0)
+
 
 static func weight_of(arch: String) -> String:
 	var wt := Arch.weight(arch)
