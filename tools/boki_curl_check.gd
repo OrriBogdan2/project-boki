@@ -7,10 +7,11 @@ extends RefCounted
 ## 0 on its feet, 1 curled), then a CURL_SUMMARY line per Boki with the biggest one-frame step of each.
 ## FAIL: a step over MAX_STEP_M or MAX_STEP_W, or it never curled up or never came back down.
 ## --curl-snap: the old draw for a before/after, the ease skipped (curl set to its end every frame); no FAIL lines.
-## --shots-dir=<dir> [--size=480]: also <dir>/<boki>/f000.png... at 30 fps from behind your left shoulder (a renderer).
+## --shots-dir=<dir> [--size=480]: also <dir>/<boki>/f000.png... at 30 fps from a fixed side spot (a renderer).
 
 const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (not your run)
 const MAX_STEP_W := 0.5    # the curl pose weight's biggest one-frame step
+const CAM_OFF := Vector3(-4.5, 4.0, -6.5)   # m: the film's camera from between you and your Boki
 const MAX_FRAMES := 400   # steps: a glide that never lands stops the dump here
 const DEFAULT := ["pebbit", "goliathite"]   # two big forms: the lightest (1.4) and a heaviest (2.0)
 
@@ -160,7 +161,7 @@ func _dump(main: Node, id: String) -> void:
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
-			await _grab(P, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
+			await _grab(P, k, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
 		f += 1
 		t = f * Match.DT
 	print("CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d"
@@ -174,11 +175,10 @@ func _dump(main: Node, id: String) -> void:
 		% [id, MAX_STEP_W, top["w"]])
 
 
-## A frame from behind your left shoulder, 6 m out, on you and your Boki.
-func _grab(P: Hunter, path: String) -> void:
-	var at := P.model.global_position + Vector3(0, 1.2, 0)
-	var y := P.model.global_rotation.y + deg_to_rad(150.0)
-	cam.global_position = at + Vector3(-sin(y) * 6.0, 2.2, -cos(y) * 6.0)
+## A frame from a fixed spot behind and beside your run, high over the grass, on you and your Boki.
+func _grab(P: Hunter, k: Kin, path: String) -> void:
+	var at := (P.model.global_position + Vector3(0, 1.0, 0)).lerp(k.global_position, 0.5)
+	cam.global_position = at + CAM_OFF
 	cam.look_at(at)
 	await RenderingServer.frame_post_draw
 	main_tree.root.get_texture().get_image().save_png(path)
