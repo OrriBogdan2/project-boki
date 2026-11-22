@@ -10914,3 +10914,4 @@ READY ext/combat-stolen-wisp-extract e45d0a8cb0 (stolen-wisp extraction verified
 READY ext/feel-move-review-1122 4f44fe23958c52ac75a697dfbb56b1352e15ff31 (movement review pass on main)
 READY ext/combat-gil-bot-grabbag 65c798379b18cbd846b7d9c8184d1c0e4b96ddc2 (Gil bot uses Grab Bag)
 READY ext/ui-pick-countdown-verify caf1f6c617d (pick countdown verified at four sizes)
+READY ext/combat-hitbox-zero-rows 765cb1e0300dee55f24e1ec788d22d7272e5acb0 (hit shapes measured for the zero-hit rows)
