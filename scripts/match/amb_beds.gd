@@ -15,17 +15,22 @@ extends RefCounted
 ## Beds this adds (audio/amb_<name>.ogg); --sfx-set-check asserts the files exist.
 const BEDS := ["meadow", "cliffs", "water", "gust", "rain", "blight"]
 const BED_OF_STYLE := {
-	"meadow": "meadow", "bloom": "meadow",
-	"frost": "cliffs", "ember": "cliffs", "storm": "cliffs", "gloom": "cliffs",
+	"meadow": "meadow",
+	"bloom": "meadow",
+	"frost": "cliffs",
+	"ember": "cliffs",
+	"storm": "cliffs",
+	"gloom": "cliffs",
 }
 const WATER_ISLANDS := ["saltmere"]
-const RING_R := 7.0               # m: how far round you the ring of samples reaches
+const RING_R := 7.0  # m: how far round you the ring of samples reaches
 const RING_N := 8
-const CENTRE_W := 2.0             # the spot you stand on counts twice
-const COLLAPSE_RAMP := 90.0       # s before the islands fall that the rumble starts to climb
+const CENTRE_W := 2.0  # the spot you stand on counts twice
+const COLLAPSE_RAMP := 90.0  # s before the islands fall that the rumble starts to climb
 ## Bed level 0..1 per raid condition (Sfx.amb_layer scales 1 to the ambience's full level).
 const GUST := {"clear": 0.2, "day": 0.2, "dusk": 0.35, "night": 0.5, "ash": 1.0, "fog": 0.2}
 const RAIN := {"clear": 0.0, "day": 0.0, "dusk": 0.45, "night": 0.0, "ash": 0.0, "fog": 0.3}
+
 
 func tick(m: Match, p: Hunter) -> void:
 	var w: World = m.world
@@ -45,9 +50,12 @@ func tick(m: Match, p: Hunter) -> void:
 		if ii < 0 or ii >= w.islands.size():
 			continue
 		var bed := String(BED_OF_STYLE.get(w.style_at(w.idx(int(floorf(x)), int(floorf(z)))), ""))
-		if bed == "meadow": meadow += wt
-		elif bed == "cliffs": cliffs += wt
-		if String((w.islands[ii] as Dictionary).get("id", "")) in WATER_ISLANDS: water += wt
+		if bed == "meadow":
+			meadow += wt
+		elif bed == "cliffs":
+			cliffs += wt
+		if String((w.islands[ii] as Dictionary).get("id", "")) in WATER_ISLANDS:
+			water += wt
 	var total := RING_N + CENTRE_W
 	Sfx.amb_layer("meadow", meadow / total)
 	Sfx.amb_layer("cliffs", cliffs / total)
@@ -55,6 +63,7 @@ func tick(m: Match, p: Hunter) -> void:
 	Sfx.amb_layer("gust", float(GUST.get(m.raid, 0.0)))
 	Sfx.amb_layer("rain", float(RAIN.get(m.raid, 0.0)))
 	Sfx.amb_layer("blight", rumble(m, p))
+
 
 ## 0..1: the Blight's strength here against its top, or the fall of the islands, whichever is nearer.
 func rumble(m: Match, p: Hunter) -> float:
