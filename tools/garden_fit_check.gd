@@ -15,6 +15,7 @@ const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector
 		[Vector2i(3440, 1440), 1.0], [Vector2i(960, 540), 1.0], [Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
 const SAFE_MIN := 16.0       # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
 const HUD_SAFE := 8.0        # px (logical), the least gap from a HUD block to the window's edge
+const HOST_FRAC := 0.9       # a block this share of the window wide is a host or a dim, not a HUD group
 const OVERLAP := 3.0         # px two HUD blocks may share
 const SLACK := 1.5           # px a control may stick out of its panel (rounding of the torn frames)
 const SETTLE := 8            # frames for a panel and its scroll to size themselves
@@ -65,6 +66,8 @@ func run(m: Node) -> void:
 		main.get_window().size = px
 		await _frames(SETTLE)
 		var size_tag := "%dx%d%s" % [px.x, px.y, "" if user_scale == 1.0 else "_ui%s" % user_scale]
+		home._close_panel()      # an arrival card still open
+		await _frames(SETTLE)      # the splash lifts, the HUD lays itself out for the new size
 		_scan_hud(size_tag + "_hud")
 		_shot(size_tag + "_hud")
 		for id in screens:
@@ -76,7 +79,7 @@ func run(m: Node) -> void:
 			await _frames(2)
 		home.hb.toggle()      # the build bar
 		await _frames(SETTLE)
-		_scan_in(size_tag + "_build_bar", home.hb.bar)
+		_scan_in(size_tag + "_build_bar", home.hb.bar, HUD_SAFE)
 		_shot(size_tag + "_build_bar")
 		home.hb.toggle()
 		await _frames(2)
@@ -132,12 +135,13 @@ func _scan(tag: String) -> void:
 	ok(not panels.is_empty(), "%s: opens a panel" % tag)
 	if panels.is_empty():
 		return
-	_scan_in(tag, panels[-1])
+	_scan_in(tag, panels[-1], SAFE_MIN)
 
 ## The HUD's blocks: inside the safe frame, no two overlapping, no text cut short.
 func _scan_hud(tag: String) -> void:
 	var win := Rect2(Vector2.ZERO, home.get_viewport().get_visible_rect().size)
-	var blocks: Array = HudGroups.blocks_of(home).filter(func(c): return not c is HomeDashSlot)
+	var blocks: Array = HudGroups.blocks_of(home).filter(
+			func(c): return not c is HomeDashSlot and c.get_global_rect().size.x < win.size.x * HOST_FRAC)
 	ok(not blocks.is_empty(), "%s: the HUD has blocks" % tag)
 	var out: Array = blocks.filter(func(c): return not win.grow(-HUD_SAFE + 1.0).encloses(c.get_global_rect()))
 	ok(out.is_empty(), "%s: HUD blocks inside the safe frame (%d: %s)" % [tag, out.size(),
@@ -149,6 +153,10 @@ func _scan_hud(tag: String) -> void:
 			if both.size.x > OVERLAP and both.size.y > OVERLAP:
 				touching.append("%s x %s" % [blocks[i].name, blocks[j].name])
 	ok(touching.is_empty(), "%s: no two HUD blocks overlap (%d: %s)" % [tag, touching.size(), touching.slice(0, 3)])
+	var padded: Array = blocks.filter(func(c): return c is PanelContainer
+			and c.size.y > c.get_combined_minimum_size().y + SLACK)
+	ok(padded.is_empty(), "%s: no HUD card taller than its content (%d: %s)" % [tag, padded.size(),
+			padded.slice(0, 3).map(func(c): return "%s %s vs %s" % [c.name, c.size.y, c.get_combined_minimum_size().y])])
 	var cut: Array = []
 	for c in blocks:
 		cut.append_array(c.find_children("*", "Control", true, false).filter(_cut_short))
@@ -157,10 +165,10 @@ func _scan_hud(tag: String) -> void:
 	ok(cut.is_empty(), "%s: no HUD text cut short (%d: %s)" % [tag, cut.size(), cut.slice(0, 3).map(func(c): return c.text)])
 
 ## Checks one panel (or bar) against the window and its own frame.
-func _scan_in(tag: String, panel: Control) -> void:
+func _scan_in(tag: String, panel: Control, safe: float) -> void:
 	var win := Rect2(Vector2.ZERO, panel.get_viewport_rect().size)
 	var frame := panel.get_global_rect()
-	ok(win.grow(-SAFE_MIN + 1.0).encloses(frame), "%s: panel %s inside the window %s" % [tag, frame, win.size])
+	ok(win.grow(-safe + 1.0).encloses(frame), "%s: panel %s inside the window %s" % [tag, frame, win.size])
 	var stray: Array = []
 	for c: Control in panel.find_children("*", "Control", true, false):
 		if not c.is_visible_in_tree() or c.size.x <= 0.0 or c.size.y <= 0.0:
