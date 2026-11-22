@@ -77,13 +77,14 @@ func _walk() -> void:
 		ok(not "usion" in tu.text.to_lower() + tu.detail.to_lower(), "%s: no Fusion in '%s'" % [sid, tu.text])
 		ok(not sid in ["pick_ult", "ult"], "%s is not a Fusion step" % sid)
 		ok(_clear(), "%s: the lane clears the strip, the check mark and the hunter" % sid)
-		var lanes := TutorialHud.lanes(m.hud.c.size)
-		var safe := HudStyle.safe_rect(m.hud.c.size)
+		var hud_sz := SafeArea.frame(m.get_viewport().get_visible_rect().size).size  # (the HUD frame)
+		var lanes := TutorialHud.lanes(hud_sz)
+		var safe := HudStyle.safe_rect(hud_sz)
 		ok(
 			safe.grow(1.0).encloses(lanes["banner"]) and safe.grow(1.0).encloses(lanes["check"]),
 			"%s: the strip and check mark are in the safe frame" % sid
 		)
-		_sign(sid, safe)
+		_sign(sid, safe, lanes["banner"])
 		shots += 1
 		_save("match_%02d_%s" % [shots, sid])
 	ok(shots >= Tutorial.steps().size() - 2, "the whole course ran (%d steps shot)" % shots)
@@ -142,7 +143,7 @@ func _garden() -> void:
 
 
 ## A gap step's sign, as drawn (nudged by its offset): inside the safe frame, clear of the HUD blocks and the strip.
-func _sign(sid: String, safe: Rect2) -> void:
+func _sign(sid: String, safe: Rect2, strip: Rect2) -> void:
 	var lab := m.tut.pad_sign(sid)
 	if lab == null or not lab.visible or m.cam.is_position_behind(lab.global_position):
 		return
@@ -155,11 +156,11 @@ func _sign(sid: String, safe: Rect2) -> void:
 	var hit := ""
 	for k in cam.hud_keep:
 		if box.intersects(cam.hud_keep[k]):
-			hit = str(k)
-	if box.intersects(TutorialStrip.rect(m.hud.c.size)):
+			hit = "%s %s" % [k, cam.hud_keep[k]]
+	if box.intersects(strip):
 		hit = "strip"
 	var fits := safe.grow(1.0).encloses(box) and hit == ""
-	ok(fits, "%s: the sign %s is in the safe frame, clear of the HUD (%s)" % [sid, box, hit])
+	ok(fits, "%s: the sign %s is in the safe frame %s, clear of the HUD (%s)" % [sid, box, safe, hit])
 
 
 ## The strip, the goals tracker and the skip row, whichever show, inside the safe frame (window pixels).
