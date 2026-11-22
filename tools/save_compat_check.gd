@@ -133,7 +133,7 @@ func _check_settings(p: String) -> void:
 	)
 	Settings.migrate_cam(v)
 	ok(
-		CamRig.STYLES.has(v["cam_style"]) and CamRig.FOLLOW.has(v["cam_follow"]),
+		CamRig.styles.has(v["cam_style"]) and CamRig.follow_v.has(v["cam_follow"]),
 		"settings.cfg: its camera ids load as today's (%s, %s)" % [v["cam_style"], v["cam_follow"]]
 	)
 	var keys: Dictionary = v.get("keys", {})
