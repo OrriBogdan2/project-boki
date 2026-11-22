@@ -10894,3 +10894,4 @@ READY ext/vfx-grimble-wedges 85ea6a3751 (bulk-rebase: origin/main merged in mech
 READY ext/tenzo-press-windup 1b35f8ec64b (Tenzo press wind-up to the source)
 READY ext/glide-cruise-scale 7ab61ca691b4c2b9e32efad57cde858fb34ccbae (glide cruise follows body_scale)
 READY ext/mage-blink-glide de30c5c847309a4e426af6bc526c7d87548aa50d (Sparkle air blink cancels into glide)
+READY ext/neve-land-press b53f5b0328605cee4abce49cbbd838639b944e5b (Neve LMB fires during landing absorb)
