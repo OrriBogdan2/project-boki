@@ -2628,6 +2628,21 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | gil | {"painted": {"far_lift": 0.0}} |
 | pip | {"painted": {"rim_far": 0.12, "rim_far_color": [1.0, 0.72, 0.82], "emit": 0.8, "emit_flicker": 0.0, "far_emit": 0.0}, "slots": {"skin": {"top_light": 0.16, "fres": 0.14, "far_lift": 0.06, "light_tint": [1.0, 0.98, 1.0], "shadow_tint": [0.98, 0.88, 0.9], "shade": 0.9, "ramp": 1.8, "dark_lift": 0.1}, "cloth": {"far_lift": 0.15, "fres": 0.18}, "leather": {"far_lift": 0.15}, "brass": {"fres": 0.5, "fres_tint": 0.8, "far_lift": 0.2}, "glow": {"glow": 1.15}, "card": {"sheen": 0.5, "glow": 0.9, "irid": 0.12, "sheen_color": [1.0, 0.82, 0.7], "albedo": [1.0, 0.86, 0.86], "alpha_k": 1.25, "far_alpha": 1.9, "far_edge": 0.6}, "skin-face": {"fres": 0.03, "top_light": 0.1, "far_lift": 0.1, "sss": 0.1, "shade": 0.93, "albedo": [0.98, 1.0, 1.0], "ramp": 1.5, "dark_lift": 0.12, "rim_amount": 0.15}}, "lights": [{"anchor": "anchor_hang_lantern", "colour": [1.0, 0.74, 0.36], "energy": 1.2, "range": 1.6}], "halos": [{"anchor": "anchor_hang_lantern", "color": [1.0, 0.8, 0.44], "strength": 2.4, "px": 7.0, "near_d": 7.0, "far_d": 14.0}, {"anchor": "anchor_flower", "color": [1.0, 0.86, 0.6], "strength": 1.2, "px": 3.0, "near_d": 7.0, "far_d": 14.0}, {"anchor": "anchor_tail_tip", "color": [1.0, 0.88, 0.6], "strength": 0.8, "px": 3.5, "near_d": 7.0, "far_d": 14.0}], "ink": {"far_thin": 1.0, "color": [0.62, 0.36, 0.42]}} |
 
+## warden_native (`content/rules/warden_native.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Hunters drawn on Meshy's own skeleton and clips (scripts/heroes/warden_native.gd, docs/art/wardens/MESHY_NATIVE.md), keyed by art name. meshy_native: the switch (off = the contract model as before; Albert, Cinder, Meeko, Vex are listed off until their <art>_meshy.glb is packed and picked). Size: Meshy's head bone onto the rig's head pivot (WardenNative._fit). file: art/wardens/<art>/<art>_meshy.glb. clips: game state -> Meshy clip. walk_mps/run_mps/crouch_mps: m/s ground speed each loop plays at rate 1; run_from: m/s where the walk hands to the run; attack_rate, jump_rate: play rate of those one-shots. hand: Meshy's bone the weapon's aim node rides. anchors: anchor empty -> the Meshy bone it rides. crouch_arms_from: the crouch plays that state's clip on the arms (the bones below arm_roots, default LeftShoulder and RightShoulder): Meshy's crouch holds a torch out. toon (default true): the game's hero-toon pass on the surfaces. orbits: orbit node of the contract .glb -> the Meshy bone it rides (the props are copied from <art>.glb and turn as on the contract path: Tenzo's seeing-stones). |
+| ryzz | {"meshy_native": false} |
+| sable | {"meshy_native": true, "hand": "RightHand", "anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"}, "clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"}, "walk_mps": 1.4, "run_mps": 4.6, "crouch_mps": 1.4, "run_from": 3.0, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"} |
+| tarek | {"meshy_native": false} |
+| breaker | {"meshy_native": false} |
+| cinder | {"meshy_native": false} |
+| pip | {"meshy_native": false} |
+| vex | {"meshy_native": false} |
+
 ## warden_rest (`content/rules/warden_rest.json`)
 
 
