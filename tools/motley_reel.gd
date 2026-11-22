@@ -116,18 +116,18 @@ func _m_ledge() -> void:
 
 ## A terrace edge facing +x, LEDGE_RISE+ terraces up, with 4 m of flat ground before it and room on top.
 func _ledge() -> Dictionary:
-	var W = m.world
-	for z in range(4, W.h - 4):
-		for x in range(6, W.w - 6):
-			var lv := int(W.level[W.idx(x, z)])
+	var wd = m.world
+	for z in range(4, wd.h - 4):
+		for x in range(6, wd.w - 6):
+			var lv := int(wd.level[wd.idx(x, z)])
 			var ok := true
 			for dx in range(-4, 1):
-				var i: int = W.idx(x + dx, z)
-				ok = ok and W.kind[i] == World.T_GROUND and int(W.level[i]) == lv and not W.stairs.has(i)
-			var top := int(W.level[W.idx(x + 1, z)])
+				var i: int = wd.idx(x + dx, z)
+				ok = (ok and wd.kind[i] == World.T_GROUND and int(wd.level[i]) == lv and not wd.stairs.has(i))
+			var top := int(wd.level[wd.idx(x + 1, z)])
 			for dx in range(1, 4):
-				var j: int = W.idx(x + dx, z)
-				ok = ok and W.kind[j] == World.T_GROUND and int(W.level[j]) == top and not W.stairs.has(j)
+				var j: int = wd.idx(x + dx, z)
+				ok = (ok and wd.kind[j] == World.T_GROUND and int(wd.level[j]) == top and not wd.stairs.has(j))
 			if ok and top - lv >= LEDGE_RISE and top - lv <= LEDGE_RISE + 3:
 				var y := lv * World.LEVEL
 				return {"start": Vector3(x - 3.5, y, z + 0.5), "aim": Vector3(x + 0.8, y, z + 0.5)}
