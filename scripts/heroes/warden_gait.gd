@@ -24,7 +24,7 @@ extends RefCounted
 ##    onto the clip. For run clips whose planted foot sweeps back unevenly, which no playback rate keeps planted
 ##    (Albert, Lace, Neve). The ground's way is the blend's (`pos`), so a run-and-aim's turned legs lock true.
 ##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
-##    the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
+##    the foot lock lets go, the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -127,7 +127,7 @@ func plan(spd: float, lc: Dictionary, pos: Vector2, w: float, moving := 1.0) -> 
 	var run_mps := lerpf(float(foot[1]), float(side[1]), side_k) + (float(back[1]) - float(foot[1])) * back_k
 	gain = lerpf(float(stride[0]), float(stride[1]), w) * lerpf(1.0, float(ice.get("stride", 1.0)), ice_w)
 	var fl: Array = lc.get("foot_lock", [0.0, 0.0])
-	lock = lerpf(float(fl[0]), float(fl[1]), w)
+	lock = lerpf(float(fl[0]), float(fl[1]), w) * (1.0 - ice_w)      # (no footing, nothing to plant)
 	ground_v = Vector3(pos.x, 0.0, -pos.y).normalized() * spd
 	var b: Array = lc.get("bob", [1.0, 1.0])
 	bob = lerpf(float(b[0]), float(b[1]), w)
