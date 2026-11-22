@@ -6,7 +6,7 @@ extends Ent
 ## Three separate pieces talk through CombatBus signals and plain calls:
 ##   this body (movement, states, visuals), KinTactics (who to chase, when to use an ability by
 ##   itself) and a KinRunner holding its two grammar abilities (k1 = the active on E, k2 = the auto
-##   active it casts itself) from content/kin_v2. KinExec runs them from their parts; KinMerge runs
+##   active it casts itself) from content/kin. KinExec runs them from their parts; KinMerge runs
 ##   its bond ultimate. How it's carried (shoulder, perch or mount) comes from its KinSpec.
 
 var species := "cindle"
@@ -30,6 +30,8 @@ var atk_cd := 0.0
 var lunge_t := 0.0
 var strike_t := 0.0               # s until the bite under way lands (0: none)
 var strike_at: Ent = null         # who it lands on
+var cast_t := 0.0                 # s until a wound-up cast lets go (BokiSwing.CAST_WIND), 0: none
+var cast_do := Callable()         # what lets go then
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
@@ -89,7 +91,7 @@ var st_skills := 0
 var cd_mult := 1.0
 var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
-var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
+var ks: KinSpec = null            # its species in the grammar (content/kin)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
 var melee_n := 0                  # its own melee hits, for "on_hit" triggers
 var low_fired := {}               # on_low_hp triggers already fired this dip
@@ -399,7 +401,7 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 ## Boki never moves you (DECISIONS 2026-11-06). A from:owner ability always works on its hunter.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
-	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
+	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot) or cast_do.is_valid():
 		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
@@ -439,6 +441,8 @@ func effective(slot: String) -> AbilitySpec:
 	var rank := owner_h.ability_level("kin") if owner_h else 1
 	return KinLib.effective(runner.def_of(slot), slot, ks, rec, rank, KinMerge.patch(owner_h, slot) if owner_h else {})
 
+## Starts a cast and pays for it. A rigged Boki casting for itself plays its cast clip first and lets go on the
+## clip's release frame; knocked out of the fight in the wind-up, the skill is lost.
 func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array = []) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
@@ -447,6 +451,17 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	runner.spend(slot, rank)
 	if def.bond_cost > 0.0 and owner_h:
 		owner_h.ult = maxf(0.0, owner_h.ult - def.bond_cost)
+	if model:
+		model.set_meta("pulse", Time.get_ticks_msec())
+	if caster == self and state == "active" and BokiRig.has(species):
+		cast_t = BokiSwing.CAST_WIND
+		cast_do = _release.bind(slot, p, auto, caster, pw, chain)
+	else:
+		_release(slot, p, auto, caster, pw, chain)
+
+func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
+	var def := runner.def_of(slot)
+	var rank := owner_h.ability_level("kin") if owner_h else 1
 	var dd := Vector2(p.x - pos.x, p.z - pos.z)
 	if dd.length() > 0.1 and caster == self:
 		face = atan2(-dd.x, -dd.y)
@@ -455,8 +470,6 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	CombatBus.ability_used.emit(caster, def.id, slot)
 	if not unseen:
 		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
-	if model:
-		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
 	m.sfx(KinLib.cue_of(String(sp.get("type", ""))), pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
@@ -474,7 +487,7 @@ func fire_trigger(type: String, ev := {}) -> bool:
 			continue
 		if (ev.get("chain", []) as Array).has(def.id):
 			continue          # no ability triggers itself
-		if not slot_open(slot) or not runner.is_ready(slot):
+		if not slot_open(slot) or not runner.is_ready(slot) or cast_do.is_valid():
 			continue
 		match type:
 			"on_hit":
@@ -631,6 +644,13 @@ func sim(dt: float) -> void:
 		strike_t -= dt
 		if strike_t <= 0.0:
 			_land_strike()
+	if cast_do.is_valid():
+		cast_t -= dt
+		if cast_t <= 0.0:
+			var let_go := cast_do
+			cast_do = Callable()
+			if ready_to_fight():
+				let_go.call()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
@@ -700,6 +720,8 @@ func bubble_at() -> Vector3:
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
+		if wisp and comp and comp.lead_pos != Vector3.INF:
+			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
@@ -948,7 +970,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
 	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
-		hv = Vector2.ZERO
+		hv = _edge_slide(hv)
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
@@ -956,6 +978,16 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 		last_safe = pos
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
+
+## Walking into an edge: it slides along it (the smallest turn, up to square, that keeps ground ahead) instead of
+## standing there pressing at the void until the stuck watch hops it back.
+func _edge_slide(hv: Vector2) -> Vector2:
+	for a: float in [0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.57, -1.57]:
+		var d := hv.rotated(a)
+		var p := Vector2(pos.x, pos.z) + d.normalized() * (r + 0.25)
+		if not m.world.is_void(p.x, p.y):
+			return d * maxf(cos(a), 0.5)
+	return Vector2.ZERO
 
 func _sim_return(dt: float) -> void:
 	if owner_h == null or owner_h.out:
@@ -1132,7 +1164,12 @@ func render(delta: float, alpha: float) -> void:
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
-	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
+	var glides := on_you and owner_h != null and owner_h.gliding and carry_style() != "mount"
+	# BokiRig: the hop clip in the air, not the run; the glide clip on your back through your glide (0.15 s blend)
+	var act := "hop" if airborne else ""
+	if glides:
+		act = "glide"
+	model.set_meta("kact", act)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
 			scan_by != null and Capture.active(scan_by), m.time - angry_since)

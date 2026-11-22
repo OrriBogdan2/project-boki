@@ -1,6 +1,6 @@
 class_name Work
 ## Kin at work on the farm. Every kin has a few work elements, its natural knacks for farm jobs,
-## each at a level from 1 to 4 (content/kin/<id>.json "work": {"ember": 3, "forage": 1}). Farm kin
+## each at a level from 1 to 4 (content/kin_home/<id>.json "work": {"ember": 3, "forage": 1}). Farm kin
 ## pick up jobs on their own: the best-suited kin takes each job (level x the job's priority, less
 ## for a long walk), walks there, works for a while (faster at higher levels) and leaves what it
 ## made in your stores. Hungry or worn-out kin stop to eat and nap; one pushed too hard (a High
@@ -23,18 +23,18 @@ class_name Work
 ##   Save.d["work"]["seen"]  the last time the farm was looked at (unix seconds), for catch_up
 
 const ELEMENTS := {
-	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes Boki kibble), and warms the Incubator's Rare Egg twice as fast."},
-	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops so they grow."},
-	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds in empty plots and tends growing crops along."},
-	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Cranks the Spark Mill: a powered farm works half again as fast."},
-	"craft": {"name": "Craft", "col": Color("e0a868"), "job": "Crafting", "desc": "Turns wood and stone into scrap at the Workbench."},
-	"forage": {"name": "Forage", "col": Color("f0c04a"), "job": "Harvesting", "desc": "Picks ripe crops into your pantry."},
-	"timber": {"name": "Timber", "col": Color("b0784a"), "job": "Lumbering", "desc": "Fells the wild trees round a Lumber Camp and splits its logs into wood."},
-	"stone": {"name": "Stone", "col": Color("a8b0c4"), "job": "Mining", "desc": "Breaks the boulders round a Quarry and mines its rock into stone."},
-	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: fresh food fills Boki up 15% more."},
-	"haul": {"name": "Haul", "col": Color("c6a4ff"), "job": "Hauling", "desc": "Carries logs and stone to the Storage Chest, and food to feeders that run low."},
-	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up tired, glum or hungry Boki, and brews tonics at the Infirmary."},
-	"ranch": {"name": "Ranch", "col": Color("ffcf9a"), "job": "Ranching", "desc": "Lounges in the Ranch Pen and makes things: glowcaps, sweet buns, kibble."},
+	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Fires the Hearth Oven and warms Rare Eggs."},
+	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops."},
+	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds and tends crops."},
+	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Powers the Spark Mill: the farm works faster."},
+	"craft": {"name": "Craft", "col": Color("e0a868"), "job": "Crafting", "desc": "Turns wood and stone into scrap."},
+	"forage": {"name": "Forage", "col": Color("f0c04a"), "job": "Harvesting", "desc": "Picks ripe crops."},
+	"timber": {"name": "Timber", "col": Color("b0784a"), "job": "Lumbering", "desc": "Cuts trees at a Lumber Camp into wood."},
+	"stone": {"name": "Stone", "col": Color("a8b0c4"), "job": "Mining", "desc": "Mines boulders at a Quarry into stone."},
+	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: food fills more."},
+	"haul": {"name": "Haul", "col": Color("c6a4ff"), "job": "Hauling", "desc": "Carries wood, stone and feeder food."},
+	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up Boki and brews tonics."},
+	"ranch": {"name": "Ranch", "col": Color("ffcf9a"), "job": "Ranching", "desc": "Makes glowcaps, buns and kibble in the Ranch Pen."},
 }
 const ORDER := ["tide", "bloom", "forage", "ember", "timber", "stone", "craft", "spark", "frost", "haul", "mend", "ranch"]
 const MAX_LV := 4
@@ -82,7 +82,7 @@ static func base(species: String) -> Dictionary:
 	if _base.has(species):
 		return _base[species]
 	var out := {}
-	var j: Dictionary = Content._load("kin", species)
+	var j: Dictionary = Content._load("kin_home", species)
 	var raw = j.get("work", FALLBACK.get(species, null))
 	if typeof(raw) == TYPE_DICTIONARY:
 		for el in raw:
@@ -181,11 +181,13 @@ static func pin(rec: Dictionary) -> String:
 	return String(rec.get("work_pin", ""))
 
 static func set_pin(rec: Dictionary, el: String) -> void:
+	rec["work_manual"] = true
 	if el == "" or not ELEMENTS.has(el): rec.erase("work_pin")
 	else: rec["work_pin"] = el
 	rec.erase("work_rest")
 
 static func set_rest(rec: Dictionary, on: bool) -> void:
+	rec["work_manual"] = true
 	if on:
 		rec["work_rest"] = true
 		rec.erase("work_pin")
@@ -268,13 +270,46 @@ const AWAY_MIN := 30.0
 static func assigned(rec: Dictionary) -> int:
 	return int(rec.get("work_at", -1))
 
-static func assign(rec: Dictionary, u: int) -> void:
+## `manual` marks the owner's own choice: auto-sort then leaves that kin alone.
+static func assign(rec: Dictionary, u: int, manual := true) -> void:
+	if manual: rec["work_manual"] = true
 	if u < 0: rec.erase("work_at")
 	else:
 		rec["work_at"] = u
 		rec.erase("build_at")      # (a site assignment: FarmSites)
 		rec.erase("work_rest")
 		rec.erase("work_pin")
+
+## Auto-sort: a kin the owner never placed (rec["work_manual"]) goes to the free station slot
+## that suits its best knack: only stations of an element at its top level, so a level-1 knack
+## never beats a level-3 one. Strongest kin choose first; ties go to the roster order and the
+## layout order. The owner can reassign or unassign any time (that sets "work_manual").
+## Returns [[kin name, station id]] for what it just placed.
+static func autosort() -> Array:
+	var stations := HomeLayout.stations(Save.d)
+	var free := {}
+	for s in stations:
+		var cfg: Dictionary = ASSIGN.get(String(s["id"]), {})
+		if cfg.is_empty(): continue
+		var u := int(s["e"]["u"])
+		free[u] = int(cfg["slots"]) - crew(u).size()
+	var cands: Array = []
+	for r in Save.d.get("roster", []):
+		if typeof(r) != TYPE_DICTIONARY or r.get("work_manual", false) or assigned(r) >= 0: continue
+		if not can_work(r) or pin(r) != "" or r.has("build_at"): continue
+		cands.append(r)
+	cands.sort_custom(func(a, b): return int(list(a)[0][1]) > int(list(b)[0][1]))
+	var out: Array = []
+	for r in cands:
+		var top := int(list(r)[0][1])
+		for s in stations:
+			var u := int(s["e"]["u"])
+			if int(free.get(u, 0)) > 0 and level(r, String(s["el"])) == top:
+				assign(r, u, false)
+				free[u] -= 1
+				out.append([String(r["name"]), String(s["id"])])
+				break
+	return out
 
 ## The kin assigned to a station (deco uid), from the roster.
 static func crew(u: int) -> Array:

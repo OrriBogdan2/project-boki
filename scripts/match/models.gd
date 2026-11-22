@@ -633,7 +633,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	if um:
 		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
 		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
-		lk["build"] = float(Unmasked.BUILD_WIDTH[int(Unmasked.clean(appearance)["build"])])
+		lk["build"] = EmptyFrame.factor(Unmasked.clean(appearance), "build")
 		lk["skin_col"] = Unmasked.VOID_SKIN
 		race = Unmasked.race(appearance)
 		arch = "unmasked"
@@ -792,6 +792,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var bulk := WardenBulk.apply(root, float(body.get("bulk", 1.0)))     # (a .glb Warden thins its skin instead)
 	var look_k := rs * ck * size_k * float(lk["height"])
 	root.scale = bulk * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.set_meta("look_scale", root.scale.y)     # WardenClips: a match's draw scale over this is a longer stride
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
 	ring.scale = Vector3.ONE / bulk * ring_k
@@ -1677,8 +1678,8 @@ static func gear_pad(col: Color) -> Node3D:
 static func gear_platform(col: Color) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(1.6, 1.3, 0.24, 24), toon(Color("e8dcc0")), Vector3(0, -0.12, 0))
-	part(root, cyl(1.62, 1.62, 0.06, 24), toon(col, false, 0.7), Vector3(0, 0.0, 0))
-	var g := part(root, cyl(1.0, 0.2, 0.7, 18), glow_mat(Color(col, 0.35)), Vector3(0, -0.6, 0))
+	part(root, cyl(1.62, 1.62, 0.06, 24), toon(col, false, 0.7), Vector3(0, 0.0, 0), Vector3.ONE, Vector3.ZERO, "Rim")
+	var g := part(root, cyl(1.0, 0.2, 0.7, 18), glow_mat(Color(col, 0.35)), Vector3(0, -0.6, 0), Vector3.ONE, Vector3.ZERO, "Glow")
 	g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 

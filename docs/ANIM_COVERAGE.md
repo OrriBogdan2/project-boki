@@ -16,6 +16,10 @@ crouch layer, and kit moves that play on the upper body over the legs. Boki: the
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
 species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
 onto its side (`Kin.render`).
+No Bokidex .glb (all 48 in `art/kin/<id>/<id>.glb`, checked 11-20) carries a hit, flinch, faint or death clip: each has the same
+13 (ability, attack, carry, chop, eat, hop, idle, mine, pet, run, sleep, tend, walk). So the starters' `hit` and `death`
+stay `proc` (`KinFlinch`, the downed topple) and nothing is mapped; when a species gets such a clip, map it in the rig
+with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --video` renders each starter's hit and faint.
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),
@@ -42,7 +46,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
+| gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
@@ -56,9 +60,9 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
 
 ### Boki garden states
 
@@ -124,11 +128,19 @@ Worst five, backlog-ready:
 
 ## Gaps, worst first
 
-1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
-   crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
-2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
-   and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
-   the move and the landing squash settles it.
+1. **Gil has no authored clips of his own** (empty `gil.glb` animation list). Until his Blender rig pass he borrows
+   Meeko's (`"clips_from": "pip"` in `warden_anim/gil.json`, `WardenClips._borrow`): his 17 bones are all contract
+   bones with the same rest rotations as hers, and her legs and arms are within 5% of his, so her idle, walk, run and
+   strafe rings, jump, fall, landing and hit staggers play on him by bone name (`--warden-clips-check`: no T-pose,
+   legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
+   loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
+   and death, foot bones; then drop `clips_from`.
+2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
+   .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
+   species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`_ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form still curls into a ball on your back.
+   The dash is `proc` too: `KinFlinch.dash` leans the body into the move and the landing squash settles it.
 3. **Hunter dash is `proc` for Gil only.** Albert (`shift_whirl`, `shift_charge`, `dash_short`, `dash_air`), Grimble
    (`lunge`, `lunge_out`, `pounce`), Motley (`swap_aim`, `swap`, `swap_air`) and Meeko (`skip`, `float`) already play a
    hand-keyed clip on their v95 .glb for the whole dash, with none of the procedural pose under it (`--dash-frames-check

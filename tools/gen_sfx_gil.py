@@ -2,6 +2,7 @@
 swordfish, throwing whatever bottle comes out of the bag, swimming through the ground.
 
     cd tools && python3 gen_sfx_gil.py      (then: python3 gen_sfx_dash.py, godot --headless --import)
+    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit, gil_slime_dry, gil_spout_hit, gil_tide_lunge)
 
 Signatures: the swordfish thrust (gil_thrust) and the Beached flop (gil_beached). Everything is water,
 glass and a small wet body: thin blade swishes with a fin flick, glass that breaks five ways (one per
@@ -305,6 +306,55 @@ def build():
     S.save_cat('gil_death', death(), 'grunt')
 
 
+# ------------------------------------------------------------------ the bar pass (11-20): Tide's hit, the slime's end
+def tide_hit():
+    """Riptide Lunge lands (LMB held): the bill drives in behind a wall of water, a heavy wet thump and surf
+    running off (lower and fuller than a thrust's tock, so the two hits never sound alike)."""
+    tip = mix(click(0.004, 2200, 7000) * 1.0, crack(0.16, 600, 3800, 0.02) * 1.6)
+    body = mix(wet_slap(0.22, 200, 1800) * 0.9, kick(150, 55, 0.45, 0.012, 0.08, 2.2) * 0.8)
+    surf = at(lpf(noise(0.45), 2400) * env(N(0.45), 0.004, 0.14) * 0.8, 0.015)
+    return mix(tip, body, surf, at(spray(0.35, 2200, 8000, 0.12) * 0.5, 0.02), at(bubbles(0.4, 5, 300, 700, 0.25), 0.1))
+
+
+def slime_dry():
+    """The slime puddle drying up: a slow sticky suck draining away, the last fat bubbles popping slower."""
+    suck = lpf(noise(0.6), 700) * slow(0.6, 18, 0.8) * shape(0.6, 0.06, 0.1, 0.4) * 1.1
+    gulp = at(S.sweep(220, 90, 0.3) * env(N(0.3), 0.02, 0.12) * 0.25, 0.25)
+    pops = ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))      # (Hz, s, gain): slower and lower
+    last = mix(*[at(bubble(f, 0.09, 1.3) * g, t0) for f, t0, g in pops])
+    return S.pad(mix(suck, gulp, last), 0.8)
+
+
+def spout_hit():
+    """A waterspout catching a foe: the column punches up under it (a wet slap, a rising rush as it lifts),
+    then bursts into spray and bubbles (lighter and brighter than the Tide's thump, which drives forward)."""
+    d = 0.7
+    slap = mix(wet_slap(0.2, 250, 2200) * 0.9, kick(140, 60, 0.3, 0.01, 0.06, 1.8) * 0.5)
+    lift = sweep_noise(0.45, 300, 2200, 0.4) * shape(0.45, 0.03, 0.15, 0.27) * 0.8
+    burst = at(spray(0.45, 2500, 9000, 0.14) * 0.6, 0.12)
+    return S.pad(mix(slap, at(lift, 0.02), burst, at(bubbles(0.4, 6, 350, 900, 0.25), 0.15)), d)
+
+
+def tide_lunge():
+    """Riptide Lunge leaves (LMB held, released): a small water wall shoved aside as the bill streaks forward,
+    a thin blade zing rising with it and spray trailing (his dash's dive, but a thrust, not a plunge)."""
+    d = 0.5
+    shove = mix(lpf(noise(0.14), 1200) * env(N(0.14), 0.004, 0.04) * 1.2, kick(170, 70, 0.18, 0.01, 0.04, 1.6) * 0.5)
+    rush = sweep_noise(0.34, 500, 3000, 0.35) * shape(0.34, 0.02, 0.1, 0.22) * 0.9
+    zing = at(S.sweep(1500, 3200, 0.2) * env(N(0.2), 0.004, 0.08) * 0.12, 0.03)
+    return soft_in(mix(shove, at(rush, 0.02), zing, at(spray(0.3, 2200, 8000, 0.08) * 0.4, 0.05)))
+
+
+def build_bar():
+    """Only the bar pass's files (a full run re-rolls every other file's noise)."""
+    S.reseed(5154)
+    S.save_cat('gil_tide_hit', tide_hit(), 'impact')
+    S.save_cat('gil_slime_dry', slime_dry(), 'cast')
+    S.reseed(5155)
+    S.save_cat('gil_spout_hit', spout_hit(), 'impact')
+    S.save_cat('gil_tide_lunge', tide_lunge(), 'dash')
+
+
 if __name__ == '__main__':
-    build()
+    build_bar() if sys.argv[1:] == ['bar'] else build()
     print('gen_sfx_gil: done')

@@ -42,6 +42,26 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Hands (2026-11-21, ext/hand-flatten-fix): why fingers flattened and what protects them
+`python3 tools/art1/glb_regions.py <glb>...` reports per-region triangles (head, hand per side, forearm, weapon bones ...)
+and finger bones of a game .glb (exit 1 when a hand holds under 6%). On main's 13 Hunters a hand held 0.0-11% (most
+0.4-3%) while the head held 27-58%: a uniform collapse spends the budget on the big smooth areas.
+1. **Rig** (`meshy_task.py rig OUT TASK [--no-fingers]`): sends `include_fingers`. The game skeleton stays `hand.*`
+   plus the Warden's own extra bones (RIG_CONTRACT: more bones are fine and follow their parent; Hem, Sparkle, Albert and
+   Motley already carry finger chains). No per-finger chain is added for the rest: no clip moves a finger, so a chain
+   only costs skin_relax time. Meshy's finger joints are a reference for where a chain would go.
+2. **Decimate**: `v95_to_game.py` sets `hand_tris` = 9% of `tris` per hand ball (6-8% of the triangles by dominant bone); `bake_warden.make_low` holds the head and both
+   hand spheres (`v95_swap.hand_balls`: r = 8.5% of the height, round the wrist-to-elbow line) while the body collapses,
+   then takes each sphere to its budget alone, seam weights kept. A hand with fewer triangles than its budget keeps them.
+   A hand sphere holds only what is nearer the forearm-to-finger-tip line than the thighs and trunk (`LIMB_R`): Cinder's,
+   Kael's and Tarek's hands hang within a sphere's reach of the thigh (11%, 4%, 7% of a thigh's surface fell inside).
+   Before/after (11-21, two dense Sparkle Meshy bodies, 1.36-1.39M tris, to 60k, head 45%): a hand 0.8-1.0% -> 8.9%.
+   `fit_warden.py`'s `region_budget` (opt-in spec key) does the same for the non-keep_uv fit.
+3. **Geometry**: multi-image tasks cap at 2k; `meshy_task.py create OUT front.png side.png ... --detail-image front.png`
+   adds a single-image 4k task into `OUT/detail` (the hand and head shapes a 2k mesh smooths). Compare the two, take the
+   hands/head shapes you like into a body pass; a detail pass is not a replacement body (one view, no back).
+4. **Weapons**: the game .glb's weapon pieces (Hem's bow and arrow, Albert's hammer: meshes and empties of their own) are re-imported and exported with the swap; Hem's bow, 896 triangles, comes through unchanged. What a swap does lose: faces of the old body mesh on a weapon bone that `keep` does not list (Grimble's `gun`). The swap now prints that count ("SWAP weapons: ..."): list the bone in `keep` when it is not the master's own.
+
 ## Own paint, 2026-11-15 (ext/hunter-ingame-fix-1115): the masters as they are, one command a Hunter
 The owner (11-15): the v95 masters are far better than the game models, put them in as they are. The game models
 were rebuilt by step 1 above: a 13k remesh, new UVs and a Cycles bake of the paint into one 2048 atlas, which blurs
@@ -225,3 +245,10 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Torn right foot, 2026-11-18 (ext/grimble-ingame-fix-1117)
+Cutting the floor puddle took the Meshy faces of Grimble's right foot with it: below the knee his right leg was a fan of
+shards that tore in every clip (the stretch check cannot see it; Blender renders of idle, run_f, throw, lunge and
+death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
+dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
+paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).
