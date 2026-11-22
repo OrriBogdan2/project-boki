@@ -7,15 +7,32 @@ extends RefCounted
 const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 ## Not rows on the settings tabs: version markers, the auto-detected preset, the per-hunter model switches
 ## (Video, one row per modelled hunter), the bot level (Admin tools) and the held-panel sizes.
-const NOT_ROWS := ["keys", "keys_v", "keys2_v", "keys3_v", "keys4_v", "keys5_v", "keys6_v", "video_v",
-		"quality_found", "warden_models", "bot_diff", "audio_v", "keys7_v", "hold_done"]
+const NOT_ROWS := [
+	"keys",
+	"keys_v",
+	"keys2_v",
+	"keys3_v",
+	"keys4_v",
+	"keys5_v",
+	"keys6_v",
+	"video_v",
+	"quality_found",
+	"warden_models",
+	"bot_diff",
+	"audio_v",
+	"keys7_v",
+	"hold_done"
+]
 
 var bad := 0
 var tree: SceneTree
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TRIM %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _open(tab: String) -> void:
 	Overlay.tab = tab
@@ -23,12 +40,15 @@ func _open(tab: String) -> void:
 	await tree.process_frame
 	await tree.process_frame
 
+
 func _rows() -> Array:
 	var rows := Overlay.root.find_children("*", "HBoxContainer", true, false)
 	return rows.filter(func(r): return String(r.get_meta("setting", "")) != "")
 
+
 func _row_keys() -> Array:
 	return _rows().map(func(r): return String(r.get_meta("setting")))
+
 
 func _row_of(key: String) -> Control:
 	for r in _rows():
@@ -36,9 +56,11 @@ func _row_of(key: String) -> Control:
 			return r
 	return null
 
+
 ## Every row of the page, with or without a setting (the name box and the sound tester have none).
 func _all_rows() -> Array:
 	return Overlay.root.find_children("*", "HBoxContainer", true, false).filter(func(r): return r.has_meta("label"))
+
 
 ## The fixed description line at the bottom of the settings panel.
 func _help_line() -> Label:
@@ -47,8 +69,10 @@ func _help_line() -> Label:
 			return n.get_meta("help")
 	return null
 
+
 func _takes_focus(c: Control) -> bool:
 	return c.focus_mode != Control.FOCUS_NONE
+
 
 ## Rows with no description, one over 79 characters, or with a key token left unfilled; and rows whose line
 ## does not show when hovered or focused.
@@ -74,6 +98,7 @@ func _help_problems() -> Array:
 			bad_rows.append(id + " (does not show)")
 	return bad_rows
 
+
 func _tab_names() -> Array:
 	var names: Array = []
 	for b in Overlay.root.find_children("*", "Button", true, false):
@@ -81,10 +106,12 @@ func _tab_names() -> Array:
 			names.append(b.text)
 	return names
 
+
 func _saved(key: String):
 	var cf := ConfigFile.new()
 	cf.load(Settings.PATH)
 	return cf.get_value("s", key)
+
 
 ## Changes a row the way a player would, and returns false if nothing about it moved.
 func _drive(key: String) -> bool:
@@ -100,7 +127,7 @@ func _drive(key: String) -> bool:
 	elif not sl.is_empty():
 		var s: HSlider = sl[0]
 		s.value = s.min_value if absf(s.value - s.min_value) > 0.01 else s.max_value
-		Settings.save()          # a slider writes when the drag ends
+		Settings.save()  # a slider writes when the drag ends
 	elif not ob.is_empty():
 		var o: OptionButton = ob[0]
 		o.select(0 if o.selected != 0 else o.item_count - 1)
@@ -112,6 +139,7 @@ func _drive(key: String) -> bool:
 	await tree.process_frame
 	return Settings.get_v(key) != before
 
+
 ## Types into the settings search box the way a player does, then lets the page rebuild.
 func _type(q: String) -> void:
 	var le := Overlay.root.find_children("*", "LineEdit", true, false)[0] as LineEdit
@@ -120,11 +148,13 @@ func _type(q: String) -> void:
 	await tree.process_frame
 	await tree.process_frame
 
+
 ## The tab tag beside a search hit ("" when the row has none).
 func _tag_of(key: String) -> String:
 	var row := _row_of(key)
 	var tag := row.find_child(SettingsSearch.TAG, true, false) if row != null else null
 	return "" if tag == null else (tag as Label).text
+
 
 func _search(shot: String) -> void:
 	Overlay.more_tabs = false
@@ -172,11 +202,13 @@ func _search(shot: String) -> void:
 	Overlay._input(esc)
 	ok(Overlay.page == "", "Esc with an empty box leaves Settings")
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): shot = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			shot = a.substr(12)
 	if main.fade:
 		main.fade.reveal(0.05)
 		await tree.create_timer(0.35).timeout
@@ -258,7 +290,7 @@ func run(main: Node) -> void:
 	var lost: Array = []
 	for k in Settings.DEFAULTS:
 		if String(k).ends_with("_v"):
-			continue          # migration step markers
+			continue  # migration step markers
 		if later.get_v(k) != Settings.get_v(k):
 			lost.append(k)
 	tree.root.remove_child(later)

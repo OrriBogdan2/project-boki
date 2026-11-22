@@ -671,13 +671,13 @@ func _clips(h: Hunter) -> void:
 ## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
 func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var steps := func() -> int:
-		var n := 0
+		var n_v := 0
 		for k in Sfx.last_played.keys():
 			if String(k).contains("step_"):
-				n += 1
+				n_v += 1
 				Sfx.last_played.erase(k)
 				Sfx.recent.erase(k)
-		return n
+		return n_v
 	var local_walk := func() -> Array:
 		P.teleport(home)
 		P.vel = Vector3.ZERO
@@ -707,17 +707,17 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var remote_steps := func() -> int:
 		T.remote = true
 		T.teleport(P.pos + Vector3(3.0, 0, 0))
-		var n := [0]
+		var n_v := [0]
 		for i in int(3.0 / DT):
 			T.vel = Vector3(5.0, 0, 0)
 			T.grounded = true
 			Sfx.listener = P.pos
 			T.render(DT, 1.0)
 			_clips(T)
-			n[0] += steps.call()
+			n_v[0] += steps.call()
 		T.remote = false
 		T.vel = Vector3.ZERO
-		return n[0]
+		return n_v[0]
 	await _become(T, "ostra")
 	var other: int = remote_steps.call()
 	await _become(T, "thief")
@@ -797,9 +797,9 @@ func _bolt_through_terrain() -> void:
 ## docs/VFX_QUALITY.md: his zones are a lit rim and a soft inside (0.25 alpha at most at the centre), in his teal.
 func _zone_looks(m: Match) -> void:
 	const CORE_A := 0.25
-	var seed := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
-	var sm := (seed.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
-	ok("zones: the seed drum is clear inside, lit at its teal rim",
+	var seed_v := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
+	var sm := (seed_v.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the seed globe is clear inside, lit at its teal rim",
 		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
 	HeroZones.seed_pop(m, "zone_test")
 	var looks := KitLooks.of(m)
@@ -1067,7 +1067,11 @@ func _air_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 		K.cd["x"] = 0.0
 		ok("air %s: the well opens at the cursor on the floor" % how, K.cast_ult() and absf(K.well.center.y - gy) < 0.1)
 		K._drop_holds()
+		Sfx.cue_log = []
 		K.well._close()
+		ok("air %s: Nightwell's close plays its own cue (os_well_close)" % how,
+			Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "os_well_close"))
+		Sfx.cue_log = null
 	P.gliding = false
 	step(m, 0.5)
 

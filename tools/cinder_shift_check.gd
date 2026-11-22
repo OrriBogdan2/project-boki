@@ -1,5 +1,5 @@
 extends "res://tools/move_feel_check.gd"
-## --cinder-shift-check (owner playtest 11-17: "Cinder's Shift is too fast and goes about 2x as far as it should"):
+## --cinder-shift-check (playtest: "Cinder's Shift is too fast and goes about 2x as far as it should"):
 ## one Cinder Shift measured in the real match step with W held, as a player holds it. The Soot Ram on the ground
 ## and the poof in the air each go the ram's 3.4 m (docs/heroes/ashwick.md; the poof was 6.8 m at 24 m/s), within
 ## 5%, and a Shift in a running jump adds no more than the ram's length to where he lands (it added 7.7 m).
@@ -7,13 +7,13 @@ extends "res://tools/move_feel_check.gd"
 
 const TOL := 0.05  # share of the target distance
 const GROUND := [3.4, 0.33]  # [footage] Felix's ram, m and s
-const AIR := [3.4, 0.28]  # owner 11-17: the ram's length (was 6.8 m); the lw_hop clip's 0.28 s kept
+const AIR := [3.4, 0.28]  # the ram's length (it was 6.8 m); the lw_hop clip's 0.28 s kept
 const PEAK_MAX := 18.0  # m/s: the ram's own fitted peak (17.3); the poof was 24.3
 
 
 func run(main: Node) -> void:
 	_begin(main)
-	P.reclass(Arch.weight("ashwick"), "ashwick")
+	p_v.reclass(Arch.weight("ashwick"), "ashwick")
 	_one("ground", false, GROUND)
 	_one("air", true, AIR)
 	var plain := _jump_land(false)
@@ -34,20 +34,20 @@ func run(main: Node) -> void:
 func _one(tag: String, air: bool, want: Array) -> void:
 	_steps(30)
 	_reset(flat + Vector3(-4.0, 6.0 if air else 0.0, 0), not air)
-	P.inp["move"] = Vector2(1, 0)
+	p_v.inp["move"] = Vector2(1, 0)
 	_steps(1 if air else 20)  # up to run speed (the air one straight from the hover)
-	P.inp["dash"] = true
+	p_v.inp["dash"] = true
 	var dash_m := 0.0
 	var dash_t := 0.0
 	var peak := 0.0
 	for i in 60:
-		var before := Vector2(P.pos.x, P.pos.z)
-		var left := minf(P.roll_t, DT)
+		var before := Vector2(p_v.pos.x, p_v.pos.z)
+		var left := minf(p_v.roll_t, DT)
 		m.step(DT)
-		P.inp["dash"] = false
-		var step := Vector2(P.pos.x, P.pos.z).distance_to(before)
-		if P.roll_t > 0.0 or i == 0:
-			peak = maxf(peak, _hv(P).length())
+		p_v.inp["dash"] = false
+		var step := Vector2(p_v.pos.x, p_v.pos.z).distance_to(before)
+		if p_v.roll_t > 0.0 or i == 0:
+			peak = maxf(peak, _hv(p_v).length())
 			dash_m += step
 			dash_t += DT
 			continue
@@ -69,14 +69,14 @@ func _one(tag: String, air: bool, want: Array) -> void:
 func _jump_land(shift: bool) -> float:
 	_steps(30)
 	_reset(flat + Vector3(-6.0, 0, 0))
-	P.inp["move"] = Vector2(1, 0)
+	p_v.inp["move"] = Vector2(1, 0)
 	_steps(20)
-	var p0 := Vector2(P.pos.x, P.pos.z)
-	P.inp["jump"] = true
+	var p0 := Vector2(p_v.pos.x, p_v.pos.z)
+	p_v.inp["jump"] = true
 	for i in 240:
 		m.step(DT)
-		P.inp["jump"] = false
-		P.inp["dash"] = shift and i == 12
-		if i > 3 and P.grounded:
+		p_v.inp["jump"] = false
+		p_v.inp["dash"] = shift and i == 12
+		if i > 3 and p_v.grounded:
 			break
-	return Vector2(P.pos.x, P.pos.z).distance_to(p0)
+	return Vector2(p_v.pos.x, p_v.pos.z).distance_to(p0)

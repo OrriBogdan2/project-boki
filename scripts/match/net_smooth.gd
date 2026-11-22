@@ -95,6 +95,13 @@ func follow(e: Ent, now: float) -> void:
 	if jumped:
 		e.prev = e.pos
 		jumped = false
+	elif e.vel.length_squared() > 1.0:
+		# the curve can swing past a snapshot (a knock that lands) or a run-on guess can be pulled back: the
+		# body waits for the true path to catch up rather than step against its own way
+		var way := e.vel.normalized()
+		var back := (e.pos - e.prev).dot(way)
+		if back < 0.0:
+			e.pos -= way * back
 
 ## Where the body is drawn when the owner's clock reads `rt`: before the first snapshot, on it; past the last,
 ## run on along its velocity for RUN_ON at most (at_guess says so); between two, on the curve.
