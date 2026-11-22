@@ -8,4 +8,5 @@ const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--cliff-mantle-meadow-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 0],
 	"--cliff-mantle-dusk-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 1],
+	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 }
