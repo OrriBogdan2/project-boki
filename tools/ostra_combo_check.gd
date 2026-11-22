@@ -1067,7 +1067,11 @@ func _air_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 		K.cd["x"] = 0.0
 		ok("air %s: the well opens at the cursor on the floor" % how, K.cast_ult() and absf(K.well.center.y - gy) < 0.1)
 		K._drop_holds()
+		Sfx.cue_log = []
 		K.well._close()
+		ok("air %s: Nightwell's close plays its own cue (os_well_close)" % how,
+			Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "os_well_close"))
+		Sfx.cue_log = null
 	P.gliding = false
 	step(m, 0.5)
 
