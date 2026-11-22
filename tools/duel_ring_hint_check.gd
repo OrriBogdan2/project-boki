@@ -4,8 +4,7 @@ extends RefCounted
 ## the save remembers it. Standing on the pad ends the beam; the pad opens the ring's two choices. A new
 ## match on the same save: no hint.
 
-# the Training Grounds the farm Esc menu opens (Home._start_training): the one with the duel pad
-const GROUNDS := {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242}
+# The match is the Training Grounds the farm Esc menu, the title and the expedition panel all open (Match.arena_opts).
 
 var main: Node
 var bad := 0
@@ -62,6 +61,6 @@ func run(mn: Node) -> void:
 func _match() -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(GROUNDS)
+	await m.start(Match.arena_opts())
 	m.set_process(false)
 	return m

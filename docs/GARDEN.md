@@ -9,25 +9,25 @@ never reached a first form. Now the farm gives kin XP too: `content/rules/garden
 
 | Action | XP |
 |---|---|
-| First feed, first pat, first game of fetch of each Boki each day (`care`) | 5 each, then 0 |
-| Training yard, per point scored | 1 |
-| A played Dash, Shove, Seek or Volley (backed Boki) | 3 |
-| ...a win | 5 |
+| First feed, first pat, first game of fetch of each Boki each day (`care`) | 15 each, then 0 |
+| Training yard, per point scored | 2 |
+| A played Dash, Shove, Seek or Volley (backed Boki) | 5 |
+| ...a win | 8 |
 | ...the day's first win in that game | 60 |
 
-Level n to n + 1 needs 50 x n XP, flat at 1,000 from level 20 (`curve` in the same file; `Game.xp_need`).
-So level 4 is 300 XP and level 8 is 1,400. Relay and Show Ring pay no XP.
+Level n to n + 1 needs 30 x n XP, flat at 600 from level 20 (`curve` in the same file; `Game.xp_need`).
+So level 4 is 180 XP and level 8 is 840. Relay and Show Ring pay no XP.
 
 Stat gains are unchanged. An expedition gives 40, +40 for a win, +10 a knock.
 
 **Measured** with `--garden-pace-check` (a fixed play model on the real Care, Game and Evo code; the
-assumptions are in the `pace` block of the rules file): time to the first form (level 4, 300 XP).
+assumptions are in the `pace` block of the rules file): time to the first form (level 4, 180 XP).
 
 | Player | Minutes |
 |---|---|
-| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 123 |
-| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 76 |
-| Ratio | 1.63 (limit 2.0, `pace.max_ratio`) |
+| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 28 |
+| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 27 |
+| Ratio | 1.02 (limit 2.0, `pace.max_ratio`) |
 
 The first tuning paid per action (feed 2, pat 1, fetch 3, 100 x level): a ratio of 1.6 at 229 and 141 min.
 The sim fit replaced it (below): care pays once a kind a day, the games carry most of the XP, and the
@@ -49,8 +49,8 @@ climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
-| Garden-only | 5 min | 669 min (11 h) | 33 min | 1346 min (22 h) |
-| 1 expedition a session | 29 min | 320 min (5.3 h) | 108 min | 648 min (11 h) |
+| Garden-only | 5 min | 190 min (3.2 h) | 33 min | 386 min (6.4 h) |
+| 1 expedition a session | 29 min | 190 min (3.2 h) | 108 min | 389 min (6.5 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
 games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
@@ -154,8 +154,10 @@ need a design call:
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
    `unlock` and `mastery` rows while the save has no match; or show them as "away" rows. Default: keep.
 3. **The second starter Hunter waits for the first finished expedition** (`ClassUnlock` bonus). It has
-   no goal row now (it printed an empty one, fixed), but nothing at home ever opens it. Fine if Hunters
-   are an expedition feature; say so in the Hunter picker if not.
+   no goal row now (it printed an empty one, fixed), and nothing at home opens it (rule kept). The Hunter
+   picker now says so: each waiting tile and the viewer under it show "Finish an expedition to choose
+   your second Hunter" (`ClassUnlock.locked_line`; challenge Hunters show their challenge). Open: whether
+   a garden-only player should ever get it without an expedition.
 4. **The match tutorial comes before the garden** unless the player presses "Skip tutorial" on the
    naming card. Skipping is offered; whether the card should say "go straight to the garden" is a
    wording call.
@@ -199,6 +201,16 @@ hold, and the item stays in the bag. The card does no math of its own: it reads 
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 
+## Fishing derby
+`scripts/home/fishing_derby.gd`: at the Glint Fishing rock (when the shared store answers) you choose to fish alone or race
+a friend's stored catch. Every finished session keeps its points per cast in your save (`fish_last`: a landed glint 1, a
+rare 3), `Social.profile_doc` puts them in your visit snapshot, and `clean_island` bounds them on the way in, so a derby
+needs no new snapshot or store doc and no extraction: a garden-only player can play it. Your five casts against the
+friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per friend per garden day (`fish_paid`),
+and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
+Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
+alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
+**XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
 ## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
 
 Every food and care input and what the player can see of it today:

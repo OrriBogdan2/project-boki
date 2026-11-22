@@ -97,7 +97,7 @@ func tick(dt: float) -> void:
 		return
 	var h := k.h
 	t += dt
-	if airborne() and (h.downed or h.stun_t > 0.0 or KinMerge.active(h)):
+	if airborne() and (h.downed or h.stun_t > 0.0):
 		cancel()
 		return
 	match phase:

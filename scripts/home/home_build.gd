@@ -2071,6 +2071,7 @@ func _extras() -> Array:
 			var face := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
 			for state in ["normal", "hover", "pressed"]:
 				sw.add_theme_stylebox_override(state, face)
+			UI.sfx(sw, false)
 			sw.pressed.connect(func():
 				Sfx.play("click")
 				set_colour(pick))
