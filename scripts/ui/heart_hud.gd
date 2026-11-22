@@ -66,7 +66,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
 	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
-	var vc := HudVitals.corner(hud, sz)
+	var vc: Vector2 = HudVitals.corner(hud, hud.panels.size) + hud.panels.position  # (in the panels' frame)
 	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)
 		at.y = minf(at.y, vc.y - 12.0)
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
@@ -115,17 +115,17 @@ static func full_map(fm) -> void:
 	_tide(c, m, fm.to_screen, func(pv: Vector2, pad: float) -> bool: return area.grow(-pad).has_point(pv), 2.5)
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
-		gate_glyph(c, gv, 7.0, ht.carrier != null)      # (named by WaysOutMap's "Heart Gate <state>" over it)
+		gate_glyph(c, gv, 7.0, ht.carrier != null)
+		fm.label("Heart Gate", gv + Vector2(0, 18), 11, Heart.gate_col())
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
-		MapNames.put(_word(ht), hv + Vector2(0, -20), 12, Heart.col(), fm.hud.big, true)
+		fm.label_near(_word(ht), hv + Vector2(0, -20), 12, Heart.col(), -1.0)
 	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
-			var who := "%s  ·  Heartspark" % ht.carrier.pname
-			MapNames.put(who, cv + Vector2(0, -16), 12, Heart.col(), fm.hud.big, true)
+			fm.label_near("%s  ·  Heartspark" % ht.carrier.pname, cv + Vector2(0, -16), 12, Heart.col(), -1.0)
 
 static func _word(ht: Heart) -> String:
 	match ht.state:

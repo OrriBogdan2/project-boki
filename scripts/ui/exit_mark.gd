@@ -127,7 +127,6 @@ static func pill(fm: FullMap, at: Vector2, txt: String, col: Color) -> void:
 	var w := TextCache.width(HudStyle.BIG, txt, 11) + 12.0
 	var box := Rect2(at + Vector2(-w * 0.5, -10.0), Vector2(w, 16.0))
 	fm.hud._rounded(box, Color(0.04, 0.05, 0.08, 0.9), 8, Color(col, 0.7), 1)
-	MapNames.claim(box)
 	HudStyle.ctext(fm.hud.c, at + Vector2(0, 2.0), txt, 11, col, 3)
 
 

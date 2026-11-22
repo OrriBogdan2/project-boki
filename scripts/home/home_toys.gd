@@ -200,6 +200,8 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 		k["huff_t"] = HUFF_SECS
 		Care.change(k["rec"], "joy", -3.0)
 		_bond(k, others[0], "bond_squabble")      # a squabble over a toy builds rivalry (BaseLife)
+		if h.life:
+			h.life.sfx.squabble(k["rec"], k["pos"])
 		_stop(k)
 		k["t"] = float(R["sulk_secs"])
 		return
@@ -233,6 +235,8 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 		Save.add_item(item, 1)
 		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	if h.life and gained > 0:
+		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)

@@ -30,5 +30,5 @@ Findings of the 11-17 audit (PR #247, shots in docs/shots/ui-vertical-audit/):
 | pick, relics | "Start here" stamp over the hunter names | overlap | 150% text | fixed (`ClassCard.add_start_chip`) |
 | match HUD (drop) | a message card over "Jump out: <key>" | overlap (drawn) | all | fixed (`DropHud.lane_top`) |
 | minimap | place names over each other and the train's line | overlap (drawn) | all | fixed (`MapNames`) |
-| drop plan / full map | region names over halt names, Ways Out timers, exit pills, hot zone, the jump pill; "Heart Gate" twice | overlap (drawn) | all, most at 150% | fixed (`MapNames`, 11 rows) |
+| drop plan / full map | region names over halt names, Ways Out timers, exit pills, hot zone, the jump pill; "Heart Gate" twice | overlap (drawn) | all, most at 150% | fixed (`FullMap.label`, main's port; 11 rows) |
 | match HUD | the class resource name under a slot's UNLOCK | overlap (drawn) | 150% text | fixed (`HudSlot.locked`) |

@@ -1,11 +1,11 @@
 class_name MapNames
 extends RefCounted
-## The words on a map (the minimap and the full map) never print over each other. A map draw calls begin(),
-## queues each word with put() (and reserves the boxes of pills it draws itself with claim()), then flush()
+## The words on the minimap never print over each other (the full map's are FullMap.label's). A draw calls begin(),
+## queues each word with put(), then flush()
 ## draws them: the `force` words first (live readouts: a halt's "Next train", a Way Out's timer, the region
 ## names), each moved a line or two up or down (or aside) inside the map when its box is taken, then the rest in
 ## order, each skipped when its box would overlap. The boxes are the shaped text's own (TextCache), Text size in.
-## A map draws one at a time (the minimap, the full map), so the queue is static.
+## Only the minimap draws through it, so the queue is static.
 
 const PAD := 3.0  # px kept clear on each side of a word
 const NUDGE_LINES := [0.0, 1.0, -1.0, 2.0, -2.0, 3.0, -3.0]  # box heights a forced word may move ...
@@ -20,11 +20,6 @@ static func begin(room: Rect2) -> void:
 	_queue.clear()
 	_taken.clear()
 	_room = room
-
-
-## Keeps the words off a box the map draws itself (a pill with its own text).
-static func claim(r: Rect2) -> void:
-	_taken.append(r)
 
 
 ## A word centred on x at baseline `at.y` (as HudStyle.ctext).
