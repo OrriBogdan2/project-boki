@@ -7,7 +7,7 @@ extends RefCounted
 
 var bad := 0
 var m: Match
-var P: Hunter
+var p: Hunter
 var foe: Hunter
 
 
@@ -38,7 +38,7 @@ func _case(what: String, want: bool, act: Callable) -> void:
 	_calm()
 	act.call()
 	_step()
-	ok(InCombat.is_in(P) == want, "%s: %s" % [what, "in combat" if want else "stays calm"])
+	ok(InCombat.is_in(p) == want, "%s: %s" % [what, "in combat" if want else "stays calm"])
 
 
 func run(main: Node) -> void:
@@ -54,36 +54,36 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
-	P = m.player
+	p = m.player
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != P and o.team != P.team and foe == null:
+		if o != p and o.team != p.team and foe == null:
 			foe = o
 	for o in m.hunters:
-		if o != P:
+		if o != p:
 			o.teleport(m.world.random_ground())
-	var k: Kin = P.kin
+	var k: Kin = p.kin
 	k.state = "active"
 	k.cmd = "follow"
 	k.settle = 1.0
 	k.target = null
-	k.pos = P.pos + Vector3(1.5, 0, 0)
+	k.pos = p.pos + Vector3(1.5, 0, 0)
 	k.prev = k.pos
-	var mob := m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
+	var mob := m.spawn_mob("skitter", p.pos + Vector3(3, 0, 0))
 	ok(InCombat.window() > 0.0, "the window is a row in content/rules/combat.json (%.1f s)" % InCombat.window())
-	_case("you hit a foe", true, func(): foe.hurt(5.0, P))
-	_case("a foe hits you", true, func(): P.hurt(5.0, foe))
-	_case("you hit a monster", true, func(): mob.hurt(1.0, P))
-	_case("a monster hits you", true, func(): P.hurt(5.0, mob, {"src": "mob"}))
-	_case("Blight hits you", true, func(): P.hurt(5.0, null, {"src": "blight"}))
+	_case("you hit a foe", true, func(): foe.hurt(5.0, p))
+	_case("a foe hits you", true, func(): p.hurt(5.0, foe))
+	_case("you hit a monster", true, func(): mob.hurt(1.0, p))
+	_case("a monster hits you", true, func(): p.hurt(5.0, mob, {"src": "mob"}))
+	_case("Blight hits you", true, func(): p.hurt(5.0, null, {"src": "blight"}))
 	_case("your Boki is hit", true, func(): k.hurt(3.0, foe))
 	_case("your Boki hits a foe", true, func(): foe.hurt(3.0, k))
 	_case("a foe hits another team's Hunter, not you", false, func(): foe.hurt(3.0, mob))
-	P.hp = P.max_hp * 0.5
-	_case("healing", false, func(): P.heal(10.0))
-	_case("a fall", false, func(): P.hurt(5.0, null, {"src": "fall"}))
-	_case("a wall slam", false, func(): P.hurt(5.0, foe, {"src": "wall"}))
-	_case("damage to yourself", false, func(): P.hurt(5.0, P))
+	p.hp = p.max_hp * 0.5
+	_case("healing", false, func(): p.heal(10.0))
+	_case("a fall", false, func(): p.hurt(5.0, null, {"src": "fall"}))
+	_case("a wall slam", false, func(): p.hurt(5.0, foe, {"src": "wall"}))
+	_case("damage to yourself", false, func(): p.hurt(5.0, p))
 	_calm()
 	_same_frame()
 	print("INCOMBAT DONE, failures: ", bad)
@@ -92,22 +92,22 @@ func run(main: Node) -> void:
 
 ## Shield refill, drive music and the Boki's think, frame by frame from a hit until the window ends.
 func _same_frame() -> void:
-	P.kin_bonus = {"owner_shield": 40.0}
-	P.kin_shield = 0.0
-	var k: Kin = P.kin
+	p.kin_bonus = {"owner_shield": 40.0}
+	p.kin_shield = 0.0
+	var k: Kin = p.kin
 	k.disengaged = false
 	var md: MusicDir = m.music_dir
-	foe.hurt(5.0, P)
+	foe.hurt(5.0, p)
 	var first := {"shield": -1, "music": -1, "boki": -1}
 	var window_frames := int(round(InCombat.window() / Match.DT))
 	for i in window_frames + 30:
-		var shield0 := P.kin_shield
+		var shield0 := p.kin_shield
 		k.hp = k.max_hp
 		k.target = null
-		k.pos = P.pos + Vector3(1.5, 0, 0)
+		k.pos = p.pos + Vector3(1.5, 0, 0)
 		_step()
 		md.tick(m, Match.DT)
-		var calm := {"shield": P.kin_shield > shield0, "music": md.goal < 1.0, "boki": k.think_t > 0.0}
+		var calm := {"shield": p.kin_shield > shield0, "music": md.goal < 1.0, "boki": k.think_t > 0.0}
 		for key in first:
 			if i == 0:
 				ok(not calm[key], "%s is on the frame of the hit" % key)
