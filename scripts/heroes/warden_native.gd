@@ -214,6 +214,12 @@ func _loco(s: Dictionary) -> void:
 	var ground := Vector2(vel.x, vel.z).length()
 	if bool(s.get("dead", false)):
 		_play("idle", 0.0)
+	elif _hit(s):
+		_play("hit", float(d.get("hit_rate", 1.0)))
+	elif plays.has("dash") and bool(s.get("rolling", false)):
+		_play("dash", float(d.get("dash_rate", 1.0)))
+	elif plays.has("glide") and (bool(s.get("gliding", false)) or bool(s.get("diving", false))):
+		_play("glide", 1.0)
 	elif not bool(s.get("grounded", true)):
 		_play("jump", float(d.get("jump_rate", 1.0)))
 	elif float(s.get("crouch", 0.0)) > 0.5:
@@ -224,6 +230,15 @@ func _loco(s: Dictionary) -> void:
 		_play("walk", _rate(ground, "walk_mps", RATE_MIN))
 	else:
 		_play("idle", 1.0)
+
+
+## A hit still flinching (data "hit_s" seconds from the hit, from a hit of at least "hit_min_k"; the stagger's weight
+## by default), when the Hunter has a hit clip. It plays over the walk and run, as the contract's hit clip does.
+func _hit(s: Dictionary) -> bool:
+	if not plays.has("hit"):
+		return false
+	var min_k := float(d.get("hit_min_k", Oomph.HEAVY_FLINCH))
+	return float(s.get("hit_t", INF)) < float(d.get("hit_s", 0.7)) and float(s.get("hit_k", 1.0)) >= min_k
 
 
 ## A new hit, cast or kit move this frame (state counters moved on since the last frame; a swing count that drops back,
