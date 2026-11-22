@@ -155,12 +155,14 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 		for c: Control in lp._drag._slots:
 			var key: Dictionary = lp._drag._slots[c]["key"]
 			var r := SlotDrag._rect(c)
-			var up := c.get_parent().get_parent() as ScrollContainer
-			var pane := SlotDrag._rect(up) if up != null else pc.get_global_rect()
-			var reach: bool = pane.encloses(r) or (up != null and key["inv"] == "pack")      # (a long list scrolls)
-			if c.mouse_filter == Control.MOUSE_FILTER_IGNORE or not reach or not _on_screen(vs, _mid(c)):
+			var whole: bool = pc.get_global_rect().encloses(r) and _on_screen(vs, _mid(c))
+			if c.mouse_filter == Control.MOUSE_FILTER_IGNORE or not (whole or key["inv"] == "pack"):
 				stray.append("%s %d at %s" % [key["inv"], key["i"], r])
 			slots[key["inv"]] += 1
+		var list := lp._drag._slots.keys().filter(func(c): return lp._drag._slots[c]["key"]["inv"] == "pack")
+		var pane := SlotDrag._rect(list[0].get_parent().get_parent() as Control)      # (a long list scrolls)
+		var listed: bool = pc.get_global_rect().encloses(pane) and _on_screen(vs, pane.end)
+		ok(listed, "%s: the backpack list %s is on screen" % [tag, pane])
 		ok(slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
 			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)])
 		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
