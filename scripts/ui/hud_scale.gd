@@ -24,6 +24,12 @@ static var _anchor := TL
 static var _hover_from := 0
 static var _ext := {}      # anchor -> the unscaled rect its groups covered in the last pass
 static var _next := {}
+## anchor -> the screen rect its groups covered in the last pass, as drawn (scaled), and widget group -> the rect it
+## covered since the pass before (SafeArea.note_as, drawn every frame): the room the camera's lean keeps you out of
+## (CamRig.hud_keep)
+static var drawn := {}
+static var _next_drawn := {}
+static var _overlays := {}
 
 static func setting() -> float:
 	return clampf(float(Settings.get_v("hud_scale")), MIN, MAX)
@@ -53,15 +59,26 @@ static func close(hud) -> void:
 
 static func pass_start() -> void:
 	_next.clear()
+	_next_drawn.clear()
 	_hover_from = 0
 	xf = Transform2D.IDENTITY
 
 static func pass_end() -> void:
 	_ext = _next.duplicate()
+	drawn = _next_drawn.duplicate()
+	drawn.merge(_overlays)
+	_overlays.clear()
 
 ## A rect the current group drew (unscaled).
 static func grow(r: Rect2) -> void:
 	_next[_anchor] = (_next[_anchor] as Rect2).merge(r) if _next.has(_anchor) else r
+	var on := xf * r
+	_next_drawn[_anchor] = (_next_drawn[_anchor] as Rect2).merge(on) if _next_drawn.has(_anchor) else on
+
+## A rect a widget outside the panels drew (SafeArea.note_as), as drawn.
+static func overlay(group: String, r: Rect2) -> void:
+	var on := xf * r
+	_overlays[group] = (_overlays[group] as Rect2).merge(on) if _overlays.has(group) else on
 
 # Things drawn outside the panels that keep clear of them (message lane, edge markers, the Blight line) give
 # way by the setting's growth (never below 100%: shrinking leaves room).

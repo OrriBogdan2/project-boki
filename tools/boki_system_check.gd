@@ -758,3 +758,18 @@ func _net() -> void:
 		Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0,
 		"the net version moved for the new snapshot shape (%s)" % Net.VERSION
 	)
+	_stale_snapshot()
+
+## BUGHUNT_1111 item 6: a snapshot sent before the kill but landing after it must not stand the Boki up.
+func _stale_snapshot() -> void:
+	var pair := _wire()
+	var rk: Kin = _remote(pair)[1]
+	var snap: Array = pair[1]
+	m.time = 10.0
+	m._net_ev(["caught", "r_k", "nobody", {}, ""], "host")
+	ok(rk.dead and rk.net_dead_t == 10.0, "ghost: the caught event takes the Boki off a guest")
+	m.time = 10.2
+	m._net_apply(rk, snap, 9.8)
+	ok(rk.dead, "...an older snapshot (sent at 9.8) leaves it gone")
+	m._net_apply(rk, snap, 10.5)
+	ok(not rk.dead, "...a newer one (sent at 10.5, it was set free) stands it up again")
