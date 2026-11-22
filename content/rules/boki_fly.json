@@ -7,5 +7,13 @@
 	"sink": 1.4,
 	"flare_s": 0.4,
 	"gap_lead": 0.5,
+	"vent_r": 1.0,
+	"vent_r_doc": "m from an updraft vent (ZoneVents) within which a flier is over it.",
+	"vent_h": 3.0,
+	"vent_h_doc": "m over the ground a flier rises to over a vent; off it, it glides back down at sink to a fresh height.",
+	"vent_climb": 4.0,
+	"vent_climb_doc": "m/s a flier rises over a vent (the usual climb is slower).",
+	"vent_pull": 0.3,
+	"vent_pull_doc": "Chance (0..1) that a roaming flier's next goal is a vent instead of any open ground.",
 	"gap_lead_doc": "s: a flier takes off this long before it reaches a bridge at its pace, so it is up over the gap."
 }

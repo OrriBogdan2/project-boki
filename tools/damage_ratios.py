@@ -121,7 +121,6 @@ def rows():
         )
     )
     A_(("Mossy", "LMB charged", "charged bash / charged swing 522@15", W["tower_shield"]["charged_dmg"], 522, 1, ""))
-    A_(("Mossy", "RMB shield slam / Shield Bash", "slam", b["rmb"]["slam"]["dmg"], 198, 1, ""))
     A_(("Mossy", "Dash", "360 Smash whirl / Spin Dash", b["dash"]["whirl_dmg"], 364, 1, ""))
     A_(
         (

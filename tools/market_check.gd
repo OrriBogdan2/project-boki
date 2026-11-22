@@ -721,7 +721,7 @@ func _migration() -> void:
 	ok(not old.has("pens") and old["listings"].has("def") and not old["listings"].has("abc"),
 		"the pens are gone; seed listings stay")
 	ok(typeof(old["market"]) == TYPE_DICTIONARY and typeof(old["goods"]) == TYPE_DICTIONARY
-		and String(old.get("market_notice", "")).contains("Listed"),
+		and str(old.get("market_notice", "")).contains("Listed"),
 		"the market gets its defaults, and a one-time notice says who came home")
 	# a round trip through the file keeps everything open
 	_save()

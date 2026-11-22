@@ -173,15 +173,23 @@ func _breed_table(pace: Dictionary) -> void:
 			print(row % ([o["id"], o["grown_lv"], who] + at))
 	for k in XP_KEYS: r[k] = saved[k]
 
+## All the XP a kin holds, counting the levels it spent (two feeds can be a level up: xp drops back).
+func _earned(rec: Dictionary) -> int:
+	var t := int(rec["xp"])
+	for lv in range(1, int(rec["level"])):
+		t += Game.xp_need(lv)
+	return t
+
 ## The live rows: care pays once a kind a day, the four games pay play / win / first win, the curve.
 func _check_rows() -> void:
 	var rec := _kin()
 	var care := int(GardenXp.rules()["care"])
+	var base := _earned(rec)
 	GardenXp.give(rec, "feed", 0, 100.0)
 	GardenXp.give(rec, "feed", 0, 200.0)
-	ok(int(rec["xp"]) == care, "a second feed the same day pays nothing (%d xp)" % int(rec["xp"]))
+	ok(_earned(rec) - base == care, "a second feed the same day pays nothing (%d xp)" % (_earned(rec) - base))
 	GardenXp.give(rec, "feed", 0, 90000.0)
-	ok(int(rec["xp"]) == 2 * care, "the next day's first feed pays again (%d xp)" % int(rec["xp"]))
+	ok(_earned(rec) - base == 2 * care, "the next day's first feed pays again (%d xp)" % (_earned(rec) - base))
 	rec["xp"] = 0
 	rec["level"] = 10      # high enough that no row levels it up
 	var r: Dictionary = GardenXp.rules()

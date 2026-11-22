@@ -11,13 +11,10 @@ extends RefCounted
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
 const WAVE_COL := [Color("ff9a14"), Color("ffd24a")]     # wave 1 saturated brass, wave 2 pale gold
-const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
 const WAVE_DARK := [Color("5a2e04"), Color("5a4a10")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
 ## Clarity (docs/COMBAT_CLARITY.md): the fan is the true area in his gold (dredge.json "color", AimKit's default) at
 ## AimKit's own low fill; nothing that only decorates may stand over the bodies inside it.
-const MUZZLE_FLASH := 0.6           # m: a wave's flash at his fists (the scattergun's own size), marks the wave going
-const HIT_GLOW := 0.4               # m: the glow where a slug strikes a body, small enough to leave the body readable
 ## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
 ## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
 const SLUG_HOLD := 0.35
@@ -92,6 +89,7 @@ func tick(dt: float) -> void:
 		_wave(fired)
 	if int(blast["fired"]) >= n and t >= charge + float(x["gap"]) * (n - 1) + RECOVER:
 		blast = {}
+		m.sfx("dr_blast_end", h.pos, -4.0, 1.0)          # the spent brass rattling down: it is over
 
 ## Interrupted: nothing more fires. Stopped before the first wave, it comes back soon (the counterplay).
 func _stop() -> void:
@@ -115,7 +113,7 @@ func _charge_looks(kc: float) -> void:
 	var hand_l := _hand(-1.0)
 	var hand_r := _hand(1.0)
 	m.fx.bolt(hand_l, hand_r + Vector3(0, randf_range(-0.2, 0.2), 0), Color(WAVE_COL[1], 0.9))
-	k.fx.orb((hand_l + hand_r) * 0.5, WAVE_COL[0], WAVE_CORE[0], 0.2 + 0.2 * kc, 0.08)
+	k.vfx("blast_charge", (hand_l + hand_r) * 0.5, null, {"k": kc})
 
 func _hand(side: float) -> Vector3:
 	var d2: Vector2 = blast["dir"]
@@ -141,7 +139,7 @@ func _wave(i: int) -> void:
 		var d := dir.rotated(ang)
 		if shown:
 			var edge := at + Vector3(d.x, 0, d.y) * speed * life
-			k.fx.volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
+			LDFx.of(m).volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
 		var slug: Dictionary = m.shots[-1]
@@ -157,7 +155,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	last_wave_hits[wave] = int(last_wave_hits[wave]) + 1
 	e.hurt(dmg, h, {"src": "abil", "ab": "ult", "tags": ["ult", "slug"]})
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
-	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], HIT_GLOW, 0.1)
+	k.vfx("blast_hit", e.pos, null, {"w2": wave % 2 == 1})
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("ffe08a"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
@@ -165,7 +163,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 ## the slugs show the wave, and the bodies in it stay in view.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	var x := xd()
-	k.fx.sunburst(at, MUZZLE_FLASH, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
+	k.vfx("blast_wave", at, dir, {"w2": i % 2 == 1})
 	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
 		"all": true, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
