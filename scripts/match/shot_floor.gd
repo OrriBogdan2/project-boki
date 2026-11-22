@@ -8,7 +8,7 @@ extends RefCounted
 
 const MIN_CORE_PX := 6.0      # px across the white core, at REF_H, default camera, at the farthest point in view
 const REF_H := 720.0          # px: the screen height the floor is measured at (more pixels read larger)
-const STYLE := "default"    # the default camera preset (CamRig.STYLES)
+const STYLE := "default"    # the default camera preset (CamRig.styles)
 const RIM_K := 1.8            # the rim's radius as a share of the core's
 const FOE_RIM := Color("ff5a3a", 0.9)      # what can hurt you (the same tint Oomph.shot_look gives a foe's shot)
 const FRIEND_RIM := Color("7fe8ff", 0.6)   # your side's shots: cool and softer, so they never hide an incoming one
@@ -29,12 +29,12 @@ static func floor_r() -> float:
 
 ## Screen pixels per metre at view depth `depth` (metres) on a screen `h_px` tall, default camera.
 static func px_per_m(depth: float, h_px: float) -> float:
-	return h_px * 0.5 / (depth * tan(deg_to_rad(float(CamRig.STYLES[STYLE]["fov"])) * 0.5))
+	return h_px * 0.5 / (depth * tan(deg_to_rad(float(CamRig.styles[STYLE]["fov"])) * 0.5))
 
 ## View depth, metres, of the floor under the top edge of the default view: the farthest a shot can be
 ## on screen (the camera sits "rise" + dist * sin(pitch) above its focus, CamRig._apply).
 static func far_depth() -> float:
-	var st: Dictionary = CamRig.STYLES[STYLE]
+	var st: Dictionary = CamRig.styles[STYLE]
 	var half := deg_to_rad(float(st["fov"])) * 0.5
 	var pitch := deg_to_rad(float(st["pitch"]))
 	var high := float(st.get("rise", 0.0)) + float(st["dist"]) * sin(pitch)

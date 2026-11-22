@@ -6,6 +6,7 @@ idle clip's first pose, so a weapon or hook riding a hand stays in it. Hero twea
 Run: python3 tools/art1/glb_climb_clips.py <hero art id> [out.glb]   (hem, tarek, dredge, claire; art/wardens/<id>/<id>.glb)
 Timing (content/rules/warden_anim/<id>.json "climb"): the mantle clip plays with the ledge rise up to MANTLE_RISE s (the hands
 meet the lip when the body does), then runs on in time; the ledge clip hangs to LEDGE_HOLD s, then pulls up."""
+
 import copy
 import math
 import struct
@@ -17,11 +18,27 @@ from glb_add_clips import read, write
 FPS = 30
 MANTLE_RISE = 0.28
 LEDGE_HOLD = 0.30
-LIMBS = {"upper_arm.L": ("forearm.L", -1), "forearm.L": ("hand.L", -1), "upper_arm.R": ("forearm.R", 1), "forearm.R": ("hand.R", 1),
-         "thigh.L": ("shin.L", -1), "shin.L": ("foot.L", -1), "thigh.R": ("shin.R", 1), "shin.R": ("foot.R", 1)}
-KEY_LIMB = {"uL": "upper_arm.L", "fL": "forearm.L", "uR": "upper_arm.R", "fR": "forearm.R",
-            "tL": "thigh.L", "sL": "shin.L", "tR": "thigh.R", "sR": "shin.R"}
-ARM_OUT = 14.0     # degrees an arm stands out of the body's line when the pose gives none
+LIMBS = {
+    "upper_arm.L": ("forearm.L", -1),
+    "forearm.L": ("hand.L", -1),
+    "upper_arm.R": ("forearm.R", 1),
+    "forearm.R": ("hand.R", 1),
+    "thigh.L": ("shin.L", -1),
+    "shin.L": ("foot.L", -1),
+    "thigh.R": ("shin.R", 1),
+    "shin.R": ("foot.R", 1),
+}
+KEY_LIMB = {
+    "uL": "upper_arm.L",
+    "fL": "forearm.L",
+    "uR": "upper_arm.R",
+    "fR": "forearm.R",
+    "tL": "thigh.L",
+    "sL": "shin.L",
+    "tR": "thigh.R",
+    "sR": "shin.R",
+}
+ARM_OUT = 14.0  # degrees an arm stands out of the body's line when the pose gives none
 
 
 def pose(**kw):
@@ -30,42 +47,196 @@ def pose(**kw):
 
 def keys_mantle():
     return [
-        (0.00, pose(lean=8, head=18, hip=(0, 0, 0), uL=(150, 14), fL=(165, 10), uR=(150, 14), fR=(165, 10),
-                    tL=(45, 3), sL=(-20, 3), tR=(-5, 3), sR=(-30, 3))),
-        (0.12, pose(lean=22, head=22, hip=(0, -0.05, -0.08), uL=(70, 20), fL=(165, 12), uR=(70, 20), fR=(165, 12),
-                    tL=(85, 3), sL=(-10, 3), tR=(20, 3), sR=(-40, 3))),
-        (MANTLE_RISE, pose(lean=30, head=25, hip=(0, -0.02, -0.12), uL=(30, 22), fL=(5, 18), uR=(30, 22), fR=(5, 18),
-                           tL=(100, 4), sL=(0, 4), tR=(30, 3), sR=(-50, 3))),
-        (0.42, pose(lean=22, head=12, hip=(0, 0.05, -0.08), uL=(-5, 25), fL=(-15, 20), uR=(-5, 25), fR=(-15, 20),
-                    tL=(-10, 3), sL=(-45, 3), tR=(75, 3), sR=(-15, 3))),
-        (0.56, pose(lean=14, head=5, hip=(0, -0.07, -0.04), uL=(25, 40), fL=(50, 35), uR=(25, 40), fR=(50, 35),
-                    tL=(-15, 3), sL=(-40, 3), tR=(35, 3), sR=(-30, 3))),
-        (0.72, pose(lean=8, head=0, hip=(0, 0, 0), uL=(-25, 8), fL=(70, 5), uR=(35, 8), fR=(80, 5),
-                    tL=(-30, 3), sL=(-45, 3), tR=(35, 3), sR=(-35, 3))),
+        (
+            0.00,
+            pose(
+                lean=8,
+                head=18,
+                hip=(0, 0, 0),
+                uL=(150, 14),
+                fL=(165, 10),
+                uR=(150, 14),
+                fR=(165, 10),
+                tL=(45, 3),
+                sL=(-20, 3),
+                tR=(-5, 3),
+                sR=(-30, 3),
+            ),
+        ),
+        (
+            0.12,
+            pose(
+                lean=22,
+                head=22,
+                hip=(0, -0.05, -0.08),
+                uL=(70, 20),
+                fL=(165, 12),
+                uR=(70, 20),
+                fR=(165, 12),
+                tL=(85, 3),
+                sL=(-10, 3),
+                tR=(20, 3),
+                sR=(-40, 3),
+            ),
+        ),
+        (
+            MANTLE_RISE,
+            pose(
+                lean=30,
+                head=25,
+                hip=(0, -0.02, -0.12),
+                uL=(30, 22),
+                fL=(5, 18),
+                uR=(30, 22),
+                fR=(5, 18),
+                tL=(100, 4),
+                sL=(0, 4),
+                tR=(30, 3),
+                sR=(-50, 3),
+            ),
+        ),
+        (
+            0.42,
+            pose(
+                lean=22,
+                head=12,
+                hip=(0, 0.05, -0.08),
+                uL=(-5, 25),
+                fL=(-15, 20),
+                uR=(-5, 25),
+                fR=(-15, 20),
+                tL=(-10, 3),
+                sL=(-45, 3),
+                tR=(75, 3),
+                sR=(-15, 3),
+            ),
+        ),
+        (
+            0.56,
+            pose(
+                lean=14,
+                head=5,
+                hip=(0, -0.07, -0.04),
+                uL=(25, 40),
+                fL=(50, 35),
+                uR=(25, 40),
+                fR=(50, 35),
+                tL=(-15, 3),
+                sL=(-40, 3),
+                tR=(35, 3),
+                sR=(-30, 3),
+            ),
+        ),
+        (
+            0.72,
+            pose(
+                lean=8,
+                head=0,
+                hip=(0, 0, 0),
+                uL=(-25, 8),
+                fL=(70, 5),
+                uR=(35, 8),
+                fR=(80, 5),
+                tL=(-30, 3),
+                sL=(-45, 3),
+                tR=(35, 3),
+                sR=(-35, 3),
+            ),
+        ),
     ]
 
 
 def keys_ledge():
     return [
-        (0.00, pose(lean=3, head=20, hip=(0, 0, 0), uL=(170, 12), fL=(175, 8), uR=(170, 12), fR=(175, 8),
-                    tL=(10, 3), sL=(-20, 3), tR=(-5, 3), sR=(-15, 3))),
-        (LEDGE_HOLD, pose(lean=3, head=20, hip=(0, 0.01, 0), uL=(170, 12), fL=(175, 8), uR=(170, 12), fR=(175, 8),
-                          tL=(-5, 3), sL=(-25, 3), tR=(8, 3), sR=(-18, 3))),
-        (0.55, pose(lean=20, head=22, hip=(0, -0.06, -0.10), uL=(110, 16), fL=(165, 12), uR=(110, 16), fR=(165, 12),
-                    tL=(60, 3), sL=(-15, 3), tR=(0, 3), sR=(-30, 3))),
-        (0.75, pose(lean=28, head=18, hip=(0, -0.03, -0.12), uL=(35, 20), fL=(5, 16), uR=(35, 20), fR=(5, 16),
-                    tL=(95, 3), sL=(0, 3), tR=(25, 3), sR=(-45, 3))),
-        (0.90, pose(lean=12, head=6, hip=(0, 0, -0.03), uL=(10, 12), fL=(45, 10), uR=(10, 12), fR=(45, 10),
-                    tL=(10, 3), sL=(-20, 3), tR=(-5, 3), sR=(-15, 3))),
+        (
+            0.00,
+            pose(
+                lean=3,
+                head=20,
+                hip=(0, 0, 0),
+                uL=(170, 12),
+                fL=(175, 8),
+                uR=(170, 12),
+                fR=(175, 8),
+                tL=(10, 3),
+                sL=(-20, 3),
+                tR=(-5, 3),
+                sR=(-15, 3),
+            ),
+        ),
+        (
+            LEDGE_HOLD,
+            pose(
+                lean=3,
+                head=20,
+                hip=(0, 0.01, 0),
+                uL=(170, 12),
+                fL=(175, 8),
+                uR=(170, 12),
+                fR=(175, 8),
+                tL=(-5, 3),
+                sL=(-25, 3),
+                tR=(8, 3),
+                sR=(-18, 3),
+            ),
+        ),
+        (
+            0.55,
+            pose(
+                lean=20,
+                head=22,
+                hip=(0, -0.06, -0.10),
+                uL=(110, 16),
+                fL=(165, 12),
+                uR=(110, 16),
+                fR=(165, 12),
+                tL=(60, 3),
+                sL=(-15, 3),
+                tR=(0, 3),
+                sR=(-30, 3),
+            ),
+        ),
+        (
+            0.75,
+            pose(
+                lean=28,
+                head=18,
+                hip=(0, -0.03, -0.12),
+                uL=(35, 20),
+                fL=(5, 16),
+                uR=(35, 20),
+                fR=(5, 16),
+                tL=(95, 3),
+                sL=(0, 3),
+                tR=(25, 3),
+                sR=(-45, 3),
+            ),
+        ),
+        (
+            0.90,
+            pose(
+                lean=12,
+                head=6,
+                hip=(0, 0, -0.03),
+                uL=(10, 12),
+                fL=(45, 10),
+                uR=(10, 12),
+                fR=(45, 10),
+                tL=(10, 3),
+                sL=(-20, 3),
+                tR=(-5, 3),
+                sR=(-15, 3),
+            ),
+        ),
     ]
 
 
 # per Hunter: [clip, key time, pose entries] replaced on the shared keys (lean_mul scales every lean)
 TWEAKS = {
-    "tarek": {"lean_mul": 0.8, "arm_out": 10},                      # Tenzo: heavy rock arms, upright, wide
-    "hem": {"lean_mul": 1.15, "tuck": 8},                           # Lace: light, knees tucked higher; the bow rides her left hand
-    "dredge": {"lean_mul": 0.9, "hook_arm": True},                  # Grimble: the right arm is the hook, straight, the lip takes it
-    "claire": {"lean_mul": 1.0, "skate_trail": True},               # Neve: the skates trail straight behind, no heel scuffs
+    "tarek": {"lean_mul": 0.8, "arm_out": 10},  # Tenzo: heavy rock arms, upright, wide
+    "hem": {"lean_mul": 1.15, "tuck": 8},  # Lace: light, knees tucked higher; the bow rides her left hand
+    "dredge": {"lean_mul": 0.9, "hook_arm": True},  # Grimble: the right arm is the hook, straight, the lip takes it
+    "claire": {"lean_mul": 1.0, "skate_trail": True},  # Neve: the skates trail straight behind, no heel scuffs
 }
 
 
@@ -80,7 +251,7 @@ def tweak(clip, art):
             p["tL"] = (p["tL"][0] + t["tuck"] * (p["tL"][0] > 30), p["tL"][1])
             p["tR"] = (p["tR"][0] + t["tuck"] * (p["tR"][0] > 30), p["tR"][1])
         if t.get("hook_arm"):
-            p["fR"] = (p["uR"][0] + (p["fR"][0] - p["uR"][0]) * 0.35, p["fR"][1])      # (the hook arm hardly bends)
+            p["fR"] = (p["uR"][0] + (p["fR"][0] - p["uR"][0]) * 0.35, p["fR"][1])  # (the hook arm hardly bends)
         if t.get("skate_trail"):
             p["sL"] = (p["sL"][0] * 0.5 if p["sL"][0] < 0 else p["sL"][0], p["sL"][1])
             p["sR"] = (p["sR"][0] * 0.5 if p["sR"][0] < 0 else p["sR"][0], p["sR"][1])
@@ -91,8 +262,12 @@ def tweak(clip, art):
 def qmul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
-    return (aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
-            aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz)
+    return (
+        aw * bx + ax * bw + ay * bz - az * by,
+        aw * by - ax * bz + ay * bw + az * bx,
+        aw * bz + ax * by - ay * bx + az * bw,
+        aw * bw - ax * bx - ay * by - az * bz,
+    )
 
 
 def qinv(a):
@@ -174,7 +349,7 @@ class Rig:
         bv = self.j["bufferViews"][a["bufferView"]]
         off = bv.get("byteOffset", 0) + a.get("byteOffset", 0)
         w = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[a["type"]]
-        return struct.unpack("<%df" % (a["count"] * w), bytes(self.b[off:off + a["count"] * w * 4])), w
+        return struct.unpack("<%df" % (a["count"] * w), bytes(self.b[off : off + a["count"] * w * 4])), w
 
     def _sample_idle(self):
         """Every track of the idle clip at its first key: {(node, path): value}."""
@@ -202,7 +377,9 @@ class Rig:
         out[(hips, "rotation")] = qmul(qinv(pg), qmul(lean, qmul(pg, hq)))
         new_g[hips] = qmul(pg, out[(hips, "rotation")])
         i = self.id["head"]
-        out[(i, "rotation")] = qmul(qinv(new_g.get(self.parent[i], self.rest_g[self.parent[i]])), qmul(qx(p["head"]), self.rest_g[i]))
+        out[(i, "rotation")] = qmul(
+            qinv(new_g.get(self.parent[i], self.rest_g[self.parent[i]])), qmul(qx(p["head"]), self.rest_g[i])
+        )
         order = ["upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R", "thigh.L", "shin.L", "thigh.R", "shin.R"]
         for name in order:
             i = self.id[name]
@@ -239,11 +416,13 @@ def bake(rig, keys, art, name):
         mix = {}
         for k in pa:
             va, vb = pa[k], pb[k]
-            mix[k] = va + (vb - va) * u if isinstance(va, (int, float)) else tuple(x + (y - x) * u for x, y in zip(va, vb))
+            mix[k] = (
+                va + (vb - va) * u if isinstance(va, (int, float)) else tuple(x + (y - x) * u for x, y in zip(va, vb))
+            )
         for tgt, v in rig.solve(mix).items():
             tracks.setdefault(tgt, []).append(v)
     for tgt in tracks:
-        if tgt[1] == "rotation":      # (keep the neighbours in the same hemisphere so they blend the short way)
+        if tgt[1] == "rotation":  # (keep the neighbours in the same hemisphere so they blend the short way)
             vs = tracks[tgt]
             for i in range(1, len(vs)):
                 if sum(x * y for x, y in zip(vs[i - 1], vs[i])) < 0:

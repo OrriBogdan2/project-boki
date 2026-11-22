@@ -3,6 +3,7 @@ extends RefCounted
 ## What a slain monster leaves behind. It spills out when the dissolve is mostly gone
 ## (MobDissolve.begin says when), so the body reads first and the loot after.
 
+
 ## Spills after `delay` s. The lambda holds ids, not the nodes: a mob (or its killer) freed in the meantime
 ## would make a captured node error when it runs.
 static func spill_later(m: Match, delay: float, mb: Mob, credit: Ent, loot: bool) -> void:
@@ -10,20 +11,22 @@ static func spill_later(m: Match, delay: float, mb: Mob, credit: Ent, loot: bool
 	var cid := credit.get_instance_id() if credit else 0
 	m.later(delay, func(): spill(m, instance_from_id(mid) as Mob, instance_from_id(cid) as Ent, loot))
 
+
 ## Everything `mb` leaves where it fell: a carried chest key and the big ones' perk orbs always, and when
 ## `loot` (not in the void, not its own blast) gems, armor, gear tunings, valuables and seeds.
 static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
 	if not is_instance_valid(mb):
 		return
 	if not is_instance_valid(credit):
-		credit = null      # (whoever landed it left during the dissolve)
+		credit = null  # (whoever landed it left during the dissolve)
 	KeyCarry.on_mob_dead(m, mb)
 	var big_one: bool = mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote
 	if big_one and (mb.mkind == "warden" or m.rng.randf() < 0.5):
 		var tier_s := "boss" if mb.mkind == "warden" else "brute"
-		PerkOrbs.drop(m, tier_s, mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
+		PerkOrbs.drop(m, tier_s, mb.pos, 0, credit as Hunter)  # the Warden: a fan of three
 	if loot:
 		_loot(m, mb, credit)
+
 
 static func _loot(m: Match, mb: Mob, credit: Ent) -> void:
 	var at := mb.pos
@@ -49,7 +52,8 @@ static func _loot(m: Match, mb: Mob, credit: Ent) -> void:
 	if mb.mkind == "bl_warden":
 		# a Warden's lamp holds something worth the risk: armor, often a tonic
 		m.drop("armor", at + Vector3(0, 0.6, 0), 25)
-		if m.rng.randf() < 0.4: m.drop("tonic", at + Vector3(0.4, 0.6, 0), 1)
+		if m.rng.randf() < 0.4:
+			m.drop("tonic", at + Vector3(0.4, 0.6, 0), 1)
 	var seed_odds := 0.12
 	if mb.mkind == "brute":
 		seed_odds = 0.35

@@ -28,9 +28,9 @@ class FxSpy extends Fx:
 	var got_rings := 0
 	func _ready() -> void:
 		pass
-	func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
+	func burst(_at: Vector3, col: Color, amount := 14, _speed := 4.0, _life := 0.5, _grav := 12.0, _size := 1.0, _dir := Vector3.UP, _spread := 180.0) -> void:
 		got_bursts.append([col, amount])
-	func ring(at: Vector3, radius: float, col: Color, dur := 0.35, _order := 0) -> void:
+	func ring(_at: Vector3, _radius: float, _col: Color, _dur := 0.35, _order := 0) -> void:
 		got_rings += 1
 
 func run(m: Node) -> void:

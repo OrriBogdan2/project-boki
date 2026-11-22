@@ -37,6 +37,21 @@ static func ways_out_shown(m: Match) -> bool:
 			return true
 	return false
 
+## The clock/status strip under the minimap: a save's first expeditions hold it back until the first Ways Out beat (a
+## seat within ways_out_lead_s of opening, open, taken or lost; or you are out) or your first kill or knock
+## (DECISIONS 2026-11-08), then it stays (HudReveal "beat_clock", remembered in the save). Through HudReveal's table:
+## from match 4 on (or Tab, Settings "Show full HUD", a tutorial or training room) it always shows.
+static func clock_shown(m: Match) -> bool:
+	if HudReveal.on(m, "beat_clock"):
+		return true
+	var p: Hunter = m.player
+	var beat: bool = p != null and p.kills + p.knocks > 0
+	if not beat and m.heart != null and m.heart.site != Vector3.INF:
+		beat = ways_out_shown(m)
+	if beat:
+		HudReveal.see("beat_clock")
+	return beat
+
 ## The glider ring (Hud._draw_glider_heat) draws only while you glide or the meter is not full.
 static func glider_shown(p: Hunter) -> bool:
 	return not (p.dropping or p.downed or p.riding) and (p.gliding or p.glide_fuel < 0.99)

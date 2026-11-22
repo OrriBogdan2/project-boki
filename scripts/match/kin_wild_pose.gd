@@ -4,7 +4,8 @@ extends RefCounted
 ## when something hits it (alert), then runs (whine, a timid one) or charges (growl); knocked out (dazed) it
 ## slumps and sways; while a Hunter scans it (scan) it is lifted and held. Wander is just the walk clip.
 
-const NOTICE_S := 0.35        # s the startle lasts after the first hit, before it bolts or charges
+const NOTICE_S := 0.35  # s the startle lasts after the first hit, before it bolts or charges
+
 
 ## `since_hit`: s since it first got angry; `timid`: it runs away rather than fights.
 static func pose(state: String, angry: bool, timid: bool, scanning: bool, since_hit: float) -> String:
