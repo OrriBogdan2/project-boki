@@ -6,7 +6,7 @@ extends Ent
 ## Three separate pieces talk through CombatBus signals and plain calls:
 ##   this body (movement, states, visuals), KinTactics (who to chase, when to use an ability by
 ##   itself) and a KinRunner holding its two grammar abilities (k1 = the active on E, k2 = the auto
-##   active it casts itself) from content/kin_v2. KinExec runs them from their parts; KinMerge runs
+##   active it casts itself) from content/kin. KinExec runs them from their parts; KinMerge runs
 ##   its bond ultimate. How it's carried (shoulder, perch or mount) comes from its KinSpec.
 
 var species := "cindle"
@@ -30,6 +30,8 @@ var atk_cd := 0.0
 var lunge_t := 0.0
 var strike_t := 0.0               # s until the bite under way lands (0: none)
 var strike_at: Ent = null         # who it lands on
+var cast_t := 0.0                 # s until a wound-up cast lets go (BokiSwing.CAST_WIND), 0: none
+var cast_do := Callable()         # what lets go then
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
@@ -46,6 +48,8 @@ var path_searches := 0          # A* searches it has run (a check counts them)
 var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
 var guard_side := 1.0             # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
 var beside := false               # ...and it is at that flank now (state "shoulder", not on you)
+var curl := 0.0                   # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
+var curl_rel := Vector3.ZERO      # where it was last drawn off you, from your model (KinCurl's hop starts there)
 var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
 var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
 var gap_v := false
@@ -89,7 +93,7 @@ var st_skills := 0
 var cd_mult := 1.0
 var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
-var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
+var ks: KinSpec = null            # its species in the grammar (content/kin)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
 var melee_n := 0                  # its own melee hits, for "on_hit" triggers
 var low_fired := {}               # on_low_hp triggers already fired this dip
@@ -399,7 +403,7 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 ## Boki never moves you (DECISIONS 2026-11-06). A from:owner ability always works on its hunter.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
-	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
+	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot) or cast_do.is_valid():
 		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
@@ -439,6 +443,8 @@ func effective(slot: String) -> AbilitySpec:
 	var rank := owner_h.ability_level("kin") if owner_h else 1
 	return KinLib.effective(runner.def_of(slot), slot, ks, rec, rank, KinMerge.patch(owner_h, slot) if owner_h else {})
 
+## Starts a cast and pays for it. A rigged Boki casting for itself plays its cast clip first and lets go on the
+## clip's release frame; knocked out of the fight in the wind-up, the skill is lost.
 func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array = []) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
@@ -447,6 +453,17 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	runner.spend(slot, rank)
 	if def.bond_cost > 0.0 and owner_h:
 		owner_h.ult = maxf(0.0, owner_h.ult - def.bond_cost)
+	if model:
+		model.set_meta("pulse", Time.get_ticks_msec())
+	if caster == self and state == "active" and BokiRig.has(species):
+		cast_t = BokiSwing.CAST_WIND
+		cast_do = _release.bind(slot, p, auto, caster, pw, chain)
+	else:
+		_release(slot, p, auto, caster, pw, chain)
+
+func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
+	var def := runner.def_of(slot)
+	var rank := owner_h.ability_level("kin") if owner_h else 1
 	var dd := Vector2(p.x - pos.x, p.z - pos.z)
 	if dd.length() > 0.1 and caster == self:
 		face = atan2(-dd.x, -dd.y)
@@ -455,8 +472,6 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	CombatBus.ability_used.emit(caster, def.id, slot)
 	if not unseen:
 		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
-	if model:
-		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
 	m.sfx(KinLib.cue_of(String(sp.get("type", ""))), pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
@@ -474,7 +489,7 @@ func fire_trigger(type: String, ev := {}) -> bool:
 			continue
 		if (ev.get("chain", []) as Array).has(def.id):
 			continue          # no ability triggers itself
-		if not slot_open(slot) or not runner.is_ready(slot):
+		if not slot_open(slot) or not runner.is_ready(slot) or cast_do.is_valid():
 			continue
 		match type:
 			"on_hit":
@@ -631,6 +646,13 @@ func sim(dt: float) -> void:
 		strike_t -= dt
 		if strike_t <= 0.0:
 			_land_strike()
+	if cast_do.is_valid():
+		cast_t -= dt
+		if cast_t <= 0.0:
+			var let_go := cast_do
+			cast_do = Callable()
+			if ready_to_fight():
+				let_go.call()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
@@ -700,6 +722,8 @@ func bubble_at() -> Vector3:
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
+		if wisp and comp and comp.lead_pos != Vector3.INF:
+			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
@@ -948,7 +972,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	# don't walk off edges on purpose
 	var ahead := Vector2(pos.x, pos.z) + hv.normalized() * (r + 0.25)
 	if grounded and hv.length() <= run_cap and wish.length() > 0.1 and m.world.is_void(ahead.x, ahead.y):
-		hv = Vector2.ZERO
+		hv = _edge_slide(hv)
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
@@ -956,6 +980,16 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 		last_safe = pos
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
+
+## Walking into an edge: it slides along it (the smallest turn, up to square, that keeps ground ahead) instead of
+## standing there pressing at the void until the stuck watch hops it back.
+func _edge_slide(hv: Vector2) -> Vector2:
+	for a: float in [0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.57, -1.57]:
+		var d := hv.rotated(a)
+		var p := Vector2(pos.x, pos.z) + d.normalized() * (r + 0.25)
+		if not m.world.is_void(p.x, p.y):
+			return d * maxf(cos(a), 0.5)
+	return Vector2.ZERO
 
 func _sim_return(dt: float) -> void:
 	if owner_h == null or owner_h.out:
@@ -1147,19 +1181,20 @@ func render(delta: float, alpha: float) -> void:
 		_render_mount(delta, body)       # the giant Fusion form is ridden; carried over a glide it curls up on your back below
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
-		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var ball := carry_style() == "mount"
-		var torso := WardenGlb.shown_torso(owner_h.model)
-		global_position = torso * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.basis = _ride_basis()
-		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
+		if carry_style() == "mount":
+			KinCurl.back(self, body, delta)       # a mount curled up into a ball on your back while you glide
+			return
+		# perched on the pack
+		global_position = WardenGlb.shown_torso(owner_h.model) * Vector3(0, 0.92, 0.3)
+		model.basis = ride_basis()
+		model.scale = Vector3.ONE * lerpf(0.75, 0.62, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
-		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
+		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05)
 		return
 	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
 		global_position = WardenGlb.shown_torso(owner_h.model) * sh.position
-		model.basis = _ride_basis()
+		model.basis = ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		# now and then it peeks out past its hunter's head, or nuzzles in against it
@@ -1178,7 +1213,7 @@ func render(delta: float, alpha: float) -> void:
 			body.position.y += absf(sin(m.time * 11.0)) * 0.12
 		return
 	var gs := 1.0
-	model.scale = Vector3.ONE * 0.95 * float(model.get_meta("evo_scale", 1.0)) * gs
+	model.scale = Vector3.ONE * KinCurl.GROUND_SCALE * float(model.get_meta("evo_scale", 1.0)) * gs
 	model.rotation.y = face
 	var moving := Vector2(vel.x, vel.z).length() > 0.5
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
@@ -1197,13 +1232,14 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)
+	KinCurl.ground(self, body, delta)      # down off your back to your flank: eased
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
 
 ## Riding on you, it faces your way and leans with your body in the air (HunterAnim.AIR_TILT: the glider's bank, the
 ## dive's pitch); its seat is on the body you see (WardenGlb.shown_torso).
-func _ride_basis() -> Basis:
+func ride_basis() -> Basis:
 	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
 	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
 

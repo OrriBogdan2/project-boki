@@ -20,6 +20,7 @@ Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -49,6 +50,10 @@ CAP_SIDES = 2000             # the longest opening a detach caps (edges round it
 BODY = ("hips", "head", "upper_arm.R", "upper_arm.L", "forearm.R", "forearm.L", "hand.R", "hand.L", "thigh.R", "thigh.L", "shin.R",
         "shin.L", "foot.R", "foot.L")        # the bones bone heat weighs
 KEPT_DENSITY = 0.5           # the kept parts' texels per metre, x the body's (the junk ball hides in the sack at rest)
+WEAPON = re.compile(r"^(x_)?(weapon|bow|arrow|gun|blade|sword|spear|hammer|shield|staff|lance)", re.I)
+HAND_R = 0.085  # a hand's ball radius, x the Warden's height (the fingers and the cuff)
+HAND_REACH = 0.05  # the ball's centre past the wrist along the forearm, x the height
+LIMB_R = {"hand": 0.025, "thigh": 0.06, "torso": 0.09}  # rough half thicknesses, x the height (the hand region's mask)
 
 
 def verts(ob):
@@ -107,6 +112,20 @@ def kept_parts(old, bones, mats):
     return ob
 
 
+def weapon_report(old):
+    """Prints what the swap does with held weapons: the game glb's own weapon pieces (meshes and empties other than the body,
+    they stay as nodes of the export) and the faces of the old body mesh on weapon bones that `keep` does not carry (dropped:
+    the master has to bring that weapon, or the bone goes in `keep`)."""
+    pieces = sorted(o.name for o in bpy.data.objects if o is not old and o.type in ("MESH", "EMPTY") and WEAPON.match(o.name))
+    name = {g.index: g.name for g in old.vertex_groups}
+    lost = {}
+    for p in old.data.polygons:
+        top = [name[max(old.data.vertices[i].groups, key=lambda e: e.weight).group] for i in p.vertices if old.data.vertices[i].groups]
+        if top and WEAPON.match(top[0]) and top[0] not in SPEC.get("keep", []):
+            lost[top[0]] = lost.get(top[0], 0) + 1
+    print("SWAP weapons: kept nodes", pieces, "; old body faces dropped on weapon bones", lost, flush=True)
+
+
 def uv_density(ob):
     """UV area per 3D area."""
     me = ob.data
@@ -138,6 +157,22 @@ def fill_misses(body, steps):
         new = hole & (cnt > 0)
         rgb[new] = acc[new] / cnt[new][:, None]
         hole &= ~new
+
+
+def paint_emit(body):
+    """`emit_paint` {h, s, v}: a master with no emission map that paints its glow (Albert i1's cyan cracks): those texels of
+    the baked atlas (hue/sat/value ranges, as `slots`), the rest black, as the game's emissive texture."""
+    r = SPEC["emit_paint"]
+    flat = body.reshape(-1, 4)
+    h, s, v = hsv(flat[:, :3])
+    m = np.ones(len(flat), bool)
+    for key, val in (("h", h), ("s", s), ("v", v)):
+        if key in r:
+            m &= (val >= r[key][0]) & (val <= r[key][1])
+    out = np.zeros_like(flat)
+    out[m] = flat[m]
+    print("emit_paint", int(m.sum()), "glow texels", flush=True)
+    return out.reshape(body.shape)
 
 
 def lay_kept(old, kept, body, tex, socket="Base Color"):
@@ -201,6 +236,31 @@ def own_images(low, tex):
         m["img"] = m["img"] or next(iter(done.values()))
 
 
+def hand_balls(sole):
+    """The hand regions (the master's frame) for the hand triangle budget (`hand_tris`), from the spec's joints: a ball
+    centred HAND_REACH of the height past the wrist along the forearm, r = HAND_R of the height, holding only what is
+    nearer the elbow-to-finger-tip axis' surface than the thighs' and the trunk's (a hand hanging by the hip: BW._region_weight)."""
+    j = SPEC.get("joints", {})
+    height = j["crown"][2] if "crown" in j else 0.0
+
+    def frame(p):          # fit frame -> the master's
+        return [-p[0], -p[1], p[2] + sole]
+
+    limbs = (("hip.L", "knee.L", LIMB_R["thigh"]), ("hip.R", "knee.R", LIMB_R["thigh"]), ("pelvis", "neck", LIMB_R["torso"]))
+    others = [(j[a], j[b], k * height) for a, b, k in limbs if a in j and b in j]
+    out = []
+    for s in ("L", "R"):
+        if "wrist." + s not in j or "elbow." + s not in j or height <= 0:
+            continue
+        w, e = np.array(j["wrist." + s], float), np.array(j["elbow." + s], float)
+        d = (w - e) / max(np.linalg.norm(w - e), 1e-6)
+        c = w + d * HAND_REACH * height
+        tip = w + d * 2 * HAND_REACH * height
+        out.append({"centre": frame(c), "r": HAND_R * height, "axis": [frame(e), frame(tip), LIMB_R["hand"] * height],
+                    "others": [[frame(a), frame(b), r] for a, b, r in others]})
+    return out
+
+
 def bake_own(high, game):
     """Step 1 with `keep_uv`: WORK/bake.blend with Low (the master decimated, its own UVs, materials and images) and Kept
     (the old parts on their old materials and atlas)."""
@@ -221,7 +281,8 @@ def bake_own(high, game):
     if hd:
         x, y, z = hd["centre"]
         hd = {"centre": [-x, -y, z + sole], "r": hd["r"]}
-    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True)
+    low = BW.make_low(high, int(SPEC["tris"]), int(SPEC.get("floater_verts", 60)), hd, int(SPEC.get("head_tris", 0)), True,
+                      hand_balls(sole), int(SPEC.get("hand_tris", 0)))
     low.data.uv_layers[0].name = "UVMap"
     own_images(low, int(SPEC.get("tex", 4096)))
     arm, old = import_game(game)
@@ -275,14 +336,19 @@ def bake():
         layers.append(("emit", "Emission Color", src))
     for name, socket, src in layers:
         low.data.materials.clear()
-        img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
-        body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
+        if socket is None:      # `emit_paint`: no bake, the atlas's glow texels
+            img, body = bpy.data.images.new("emit_paint", tex, tex, alpha=False), paint_emit(src)
+        else:
+            img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
+            body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
         if name == "atlas":     # (not the emission map, where black is no glow)
             fill_misses(body, max(32, tex // 64))
-        if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
+        if kept.data.polygons and socket:  # the kept parts: the old image on their new UVs, laid over the body's
             lay_kept(old, kept, body, tex, socket)
         body[..., 3] = 1
         img.pixels = body.ravel()
+        if name == "atlas" and SPEC.get("emit_paint"):
+            layers.append(("emit", None, body))
         if name in bpy.data.images:     # (the game glb's own image of that name: Cinder's "atlas" and "emit")
             bpy.data.images[name].name = name + "-game"
         img.name = name
@@ -685,6 +751,27 @@ def tri_slots(ob, imgs, top_bone, P):
     return out
 
 
+def screen_uvs(low, slots, P):
+    """`screen` {slot, centre, r}: that slot's triangles (Albert's porthole glass) get their own UVs, the disc of radius r round
+    the centre (master points) on 0..1, his right at u 1 and up at v 1, for shaders/warden_mood.gdshader to draw the face on
+    (lost from this file in a merge before the 11-11 clean1 swap: the face drew on atlas UVs)."""
+    scr = SPEC.get("screen")
+    if not scr:
+        return
+    me = low.data
+    c, r = np.array(scr["centre"], float), float(scr["r"])
+    lv = np.empty(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    uv = np.empty(len(me.loops) * 2, F)
+    me.uv_layers["UVMap"].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    sel = np.repeat(np.asarray(slots) == scr["slot"], 3)
+    q = P[lv[sel]] - c
+    uv[sel] = np.stack([0.5 + q[:, 0] / (2 * r), 0.5 + q[:, 2] / (2 * r)], 1)
+    me.uv_layers["UVMap"].data.foreach_set("uv", uv.ravel())
+    print("SWAP screen", int(sel.sum() // 3), "triangles", flush=True)
+
+
 def move_anchors(arm, T, K):
     """The spec's anchors, through the fit (their own segment weights), in the rest pose; `anchor_bones` {anchor: bone} moves
     one onto another bone (Kael's arm blooms onto the master's cursed left arm)."""
@@ -732,8 +819,10 @@ def main():
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept, T, K)
+    raw = tri_slots(low, imgs, top, P)
+    screen_uvs(low, raw, P)
     tags = [own[min(i, len(own) - 1)]["img"] for i in np.array([p.material_index for p in low.data.polygons])] if own else []
-    slots = [s + "-" + (tags[i] if own else "atlas") for i, s in enumerate(tri_slots(low, imgs, top, P))]
+    slots = [s + "-" + (tags[i] if own else "atlas") for i, s in enumerate(raw)]
     kept_slots = kept["slots"].split(",") if kept["slots"] else []
     slots += kept_slots
     room = SPEC.get("room", {})
@@ -747,6 +836,7 @@ def main():
             o.data.color_attributes.remove(c)
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
+    weapon_report(old)
     bpy.data.objects.remove(old)
     for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
         if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":
@@ -758,7 +848,7 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
-    emit = bpy.data.images.get("emit") if SPEC.get("emit") else None     # (not the game glb's own "emit")
+    emit = bpy.data.images.get("emit") if SPEC.get("emit") or SPEC.get("emit_paint") else None     # (not the game glb's own "emit")
     me.materials.clear()
     for s in names:
         if own and s in kept_slots:     # (keep_uv: a kept part keeps its old material and atlas)

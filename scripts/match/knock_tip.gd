@@ -8,12 +8,14 @@ extends RefCounted
 const SAVE_KEY := "knock_tip"
 
 var m: Match
-var shown := false            # this match has had its card
-var _taken := {}              # source -> damage the player took lately
-var _last_t := -1000.0        # match time of the last hit on the player
+var shown := false  # this match has had its card
+var _taken := {}  # source -> damage the player took lately
+var _last_t := -1000.0  # match time of the last hit on the player
+
 
 static func rules() -> Dictionary:
 	return Content.rules("knock_tip")
+
 
 ## The card for a match inside the first-match guide (a save's first two Extractions) while the save has
 ## showings left, else null.
@@ -24,8 +26,10 @@ static func for_match(mt: Match, guide: FirstMatchGuide) -> KnockTip:
 	k.m = mt
 	return k
 
+
 static func _count() -> int:
 	return int((Save.d["tutorial"] as Dictionary).get(SAVE_KEY, 0))
+
 
 ## Which rules "sources" row a hit on the player counts under.
 func source_of(by: Ent, o: Dictionary) -> String:
@@ -40,6 +44,7 @@ func source_of(by: Ent, o: Dictionary) -> String:
 		return "monster"
 	return "other"
 
+
 ## A hit on the player: tallied by source; a long quiet since the last hit starts the count over.
 func note(by: Ent, d: float, o: Dictionary) -> void:
 	if m.time - _last_t > float(rules()["gap"]):
@@ -47,6 +52,7 @@ func note(by: Ent, d: float, o: Dictionary) -> void:
 	_last_t = m.time
 	var key := source_of(by, o)
 	_taken[key] = float(_taken.get(key, 0.0)) + d
+
 
 ## The most damage taken lately: a "sources" key.
 func top() -> String:
@@ -58,6 +64,7 @@ func top() -> String:
 			best = key
 	return best
 
+
 ## The two-line card text for a source.
 static func card(key: String) -> String:
 	var row: Array = rules()["sources"][key]
@@ -65,6 +72,7 @@ static func card(key: String) -> String:
 	for act in ["dash", "throw", "glide"]:
 		tip = tip.replace("{%s}" % act, Settings.key_cap(act))
 	return "That was mostly %s.\n%s" % [row[0], tip]
+
 
 ## The player went down: the card, once per match and twice per save, unless tips are off.
 func on_knock() -> void:
