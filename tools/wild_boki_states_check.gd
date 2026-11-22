@@ -93,8 +93,10 @@ func _species(main: Node, id: String) -> void:
 	ok(rig.clip == "run" and is_equal_approx(rig.player.speed_scale, 0.7), "%s lifted by the scan: legs kick" % label)
 	ok(rig.flex.scale.y > 1.1, "%s lifted by the scan: stretched up" % label)
 
+	# (at rest BokiIdle may be mid-fidget: its idle_fidget clip is the same standing idle)
 	_hold(rig, k, "", SETTLE_S)
-	ok(absf(rig.flex.scale.y - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and rig.clip == "idle",
+	var idle := rig.clip in ["idle", BokiIdle.FIDGET]
+	ok(absf(rig.flex.scale.y - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and idle,
 		"%s back to rest when the pose ends" % label)
 	k.queue_free()
 	await main.get_tree().process_frame

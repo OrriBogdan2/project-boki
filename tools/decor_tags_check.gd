@@ -22,6 +22,7 @@ func run(m: Node) -> void:
 	_tree = m.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d["snack_picks"] = 1  # past the first batch: tests steady grow_secs
 	HomeLayout.ensure(Save.d)
 	GardenZones.here = GardenZones.start()
 	_tags_part()
