@@ -99,7 +99,7 @@ static func clear() -> void:
 	shown.clear()
 	_screen.clear()
 
-## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf).
+## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf, on the canvas at SafeArea.origin).
 static func rects() -> Array[Rect2]:
 	return _screen.duplicate()
 
@@ -114,7 +114,9 @@ static func draw(H, sz: Vector2) -> void:
 		var right := sz.x - pad.x
 		var row := _face_row(H, f, right, y, a) if is_instance_valid(f.get("who")) else _text_row(H, f, right, y, a)
 		shown.append(row)
-		_screen.append(HudScale.xf * (row["rect"] as Rect2))
+		var on: Rect2 = HudScale.xf * (row["rect"] as Rect2)
+		on.position += SafeArea.origin      # (on 21:9 and wider the HUD canvas sits in a centred 16:9 frame)
+		_screen.append(on)
 		y = (row["rect"] as Rect2).end.y + GAP
 
 ## [bar] knocker (name, face) | icon | victim (face, name) [bar]. With no knocker face the monster's name, or
