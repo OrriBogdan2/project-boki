@@ -13,14 +13,23 @@ const COLS := ["idle", "walk", "run", "attack", "cast", "hop", "eat", "sleep"]
 ## The clip the game plays for each state (BokiRig._state_clip): a cheer or leap is hop, eating at a feeder is munch
 ## (HomeToys._act), a garden nap is settle, nap, wake (BokiRig._lying), of which the nap is held. The munch and the
 ## nap are the species' eat and sleep clips (BokiHomeClips) when those pass the test, so the table reads them.
-const PLAYS := {"idle": "idle", "walk": "walk", "run": "run", "attack": "attack", "cast": "ability", "hop": "hop",
-	"eat": "eat", "sleep": "sleep"}
-const FALLBACK := ["eat", "sleep"]    # a clip that fails the test: BokiHomeClips builds the munch and nap instead
+const PLAYS := {
+	"idle": "idle",
+	"walk": "walk",
+	"run": "run",
+	"attack": "attack",
+	"cast": "ability",
+	"hop": "hop",
+	"eat": "eat",
+	"sleep": "sleep"
+}
+const FALLBACK := ["eat", "sleep"]  # a clip that fails the test: BokiHomeClips builds the munch and nap instead
+
 
 ## {species: [cells]} for every rigged species with a .glb, plus {"_sig": ...} kept out of the rows.
 static func rows(main: Node) -> Dictionary:
-	var sigs := {}                    # "clip|signature" -> species with that motion
-	var stats := {}                   # species -> {state: [present, motion, from_idle, sig]}
+	var sigs := {}  # "clip|signature" -> species with that motion
+	var stats := {}  # species -> {state: [present, motion, from_idle, sig]}
 	var ids: Array = BokiRig.FRAME.keys()
 	ids.sort()
 	for id in ids:
@@ -46,13 +55,18 @@ static func rows(main: Node) -> Dictionary:
 	return out
 
 static func _passes(state: String, st: Array) -> bool:
-	return st[0] and (state == "sleep" or float(st[1]) >= BokiClipCover.STILL_DEG) \
-			and (state == "idle" or st[2])
+	return (
+		st[0]
+		and (state == "sleep" or float(st[1]) >= BokiClipCover.STILL_DEG)
+		and (state == "idle" or st[2])
+	)
+
 
 static func _cell(state: String, st: Array, sigs: Dictionary) -> String:
 	if not _passes(state, st):
 		return "proc" if state in FALLBACK else "missing"
 	return "shared" if int(sigs.get("%s|%s" % [PLAYS[state], st[3]], 0)) > 1 else "clip"
+
 
 ## state -> [has the clip, deg its bones turn over it, leaves the idle pose, motion signature].
 static func _states(player: AnimationPlayer) -> Dictionary:
@@ -80,21 +94,24 @@ static func _sig(smp: Dictionary) -> String:
 			s += ",%d" % roundi(rad_to_deg((q as Quaternion).angle_to(smp[b][0])))
 	return str(s.hash())
 
+
 ## Species, worst first: most `missing` cells, then most `shared`, then the lowest Field Book number (met first).
-static func worst(rows: Dictionary) -> Array:
-	var ids: Array = rows.keys()
-	ids.sort_custom(func(a, b): return _rank(rows[a], a) < _rank(rows[b], b))
+static func worst(rows_v: Dictionary) -> Array:
+	var ids: Array = rows_v.keys()
+	ids.sort_custom(func(a, b): return _rank(rows_v[a], a) < _rank(rows_v[b], b))
 	return ids
+
 
 static func _rank(row: Array, id: String) -> String:
 	var dex := FieldBook.number(id)
 	return "%02d%02d%03d%s" % [99 - row.count("missing"), 99 - row.count("shared"), dex if dex > 0 else 999, id]
 
+
 ## Backlog-ready lines for the n worst species.
-static func backlog(rows: Dictionary, n: int) -> String:
+static func backlog(rows_v: Dictionary, n: int) -> String:
 	var s := ""
-	for id in worst(rows).slice(0, n):
-		var row: Array = rows[id]
+	for id in worst(rows_v).slice(0, n):
+		var row: Array = rows_v[id]
 		var miss: Array = []
 		var shared: Array = []
 		for i in COLS.size():
@@ -104,7 +121,11 @@ static func backlog(rows: Dictionary, n: int) -> String:
 				shared.append(COLS[i])
 		var miss_s := ", ".join(miss) if miss else "none"
 		var shared_s := ", ".join(shared) if shared else "none"
-		s += "- [anim] Boki %s (No. %d): %d missing (%s), %d on the shared clip set (%s); author its own clips in " % [
-			id, FieldBook.number(id), miss.size(), miss_s, shared.size(), shared_s] \
+		s += (
+			(
+				"- [anim] Boki %s (No. %d): %d missing (%s), %d on the shared clip set (%s); author its own clips in "
+				% [id, FieldBook.number(id), miss.size(), miss_s, shared.size(), shared_s]
+			)
 			+ "tools/boki/%s_anim.py, rebuild the .glb, rerun --anim-coverage-check\n" % id
+		)
 	return s

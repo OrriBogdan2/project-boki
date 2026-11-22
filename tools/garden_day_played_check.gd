@@ -250,8 +250,10 @@ func _dash_and_cup(bb) -> void:
 	var stage := GardenPrizes.stage(pip, "dash")
 	# rivals 1.1x as fast are beaten about one race in four: the Crown (3 in a row) is a streak, so the beat
 	# asks for the cup to have moved on (Speed is what it compares); the Crown itself is in --garden-prizes-check
-	ok(crowned or progressed, "the Dash cup moves on Speed (%d of %d races won, crowned %s, stage %d)"
-			% [wins, races, crowned, stage])
+	ok(
+		crowned or progressed,
+		"the Dash cup moves on Speed (%d of %d races won, crowned %s, stage %d)" % [wins, races, crowned, stage]
+	)
 	if not crowned:
 		note("no Crown in %d races (Pip fast, rivals %.2fx the Speed): Pip won %d" % [races, FOE_RATIO, wins])
 	await _grab("after_dash")
@@ -367,7 +369,7 @@ func _away(cs) -> void:
 	Save.d["away_seen"] = float(Save.d.get("away_seen", Time.get_unix_time_from_system())) - AWAY_S
 	var marks: Dictionary = Save.d.get("away_zone", {})
 	for id in marks:
-		marks[id] = float(marks[id]) - AWAY_S      # each zone's own last-arrival mark goes back too
+		marks[id] = float(marks[id]) - AWAY_S  # each zone's own last-arrival mark goes back too
 	var n: int = (Save.d["roster"] as Array).size()
 	Game.goto("home", {"zone": "bramblebank"})
 	var bb = await _arrived(cs)
@@ -383,10 +385,14 @@ func _away(cs) -> void:
 	ok("starv" not in text.to_lower() and "lost" not in text.to_lower(), "the card never says lost or starved")
 	# row H: two zones open, the lines sit under zone names, and the shared mark does not starve the other zone
 	var head := text.find("Bramblebank")
-	ok(head >= 0 and "Moss saved you" not in text,
-		"the Bramblebank card has its own zone name and no gift from Moss, who lives in Cinderstep")
-	ok(head < 0 or text.find("saved you a snack") < 0 or text.find("saved you a snack") > head,
-		"the gifts sit under the zone name")
+	ok(
+		head >= 0 and "Moss saved you" not in text,
+		"the Bramblebank card has its own zone name and no gift from Moss, who lives in Cinderstep"
+	)
+	ok(
+		head < 0 or text.find("saved you a snack") < 0 or text.find("saved you a snack") > head,
+		"the gifts sit under the zone name"
+	)
 	var bb_trained := "trained" in text.substr(maxi(0, head))
 	ok((Save.d["roster"] as Array).size() == n, "nobody left the roster during the gap")
 	var worst := 100.0
@@ -413,7 +419,9 @@ func _away_cinderstep(bb, bb_trained: bool) -> void:
 	print("GDAY cinderstep card: ", text.substr(maxi(0, text.find("While you were away")), 900))
 	var head := text.find("Cinderstep")
 	var trained := text.find("Moss trained")
-	ok(trained >= 0 and head >= 0 and head < trained,
-		"Moss trains at Cinderstep's toys on that zone's first arrival, under its name")
+	ok(
+		trained >= 0 and head >= 0 and head < trained,
+		"Moss trains at Cinderstep's toys on that zone's first arrival, under its name"
+	)
 	note("Bramblebank card trained anyone: %s" % str(bb_trained))
 	cs._close_panel()
