@@ -324,7 +324,7 @@ func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
 func _bridge_mid(tz: Dictionary) -> Vector3:
 	var w: World = m.world
 	var i := int(tz["tiles"][tz["tiles"].size() / 2][0])
-	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, i / w.w + 0.5)
+	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, int(i / float(w.w)) + 0.5)
 
 ## A crumble-warned span ends: its slabs drop into the abyss in a spray of dust.
 func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
