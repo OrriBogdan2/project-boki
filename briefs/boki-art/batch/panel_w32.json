@@ -1,0 +1,1170 @@
+[
+{
+"id": "c_bladypus_w31",
+"pick": 4,
+"avg": 7.6,
+"seats": [
+7.6,
+7.3,
+7.9
+],
+"decision": "new",
+"fixes": [
+"Restyle as a chunky big-headed cartoon platypus mid-dash with the spine as one smooth red fin ridge edged in steel, no separate tools, no drips",
+"New prompt: keep Pocketpus's big glossy eyes and grin on a stylised long body, the spine a smooth fin of fused blades from the hide (no saw, hook or opener), no hang hole, no drip",
+"Redo stylised and chunkier with Pocketpus's round face, the blades as smooth hide fins."
+],
+"veto": []
+},
+{
+"id": "c_bullsfrog_w31",
+"pick": 4,
+"avg": 7.9,
+"seats": [
+8.0,
+8.1,
+7.6
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 4, make the tongue a short pink tongue with a small barbed tip and round the body more",
+"EDIT: run 4, slim it to a sleeker poison-dart-frog build and make the tongue a fleshy barb, not a steel arrowhead",
+"EDIT: run 3, make the tongue a pink tongue with a soft barb tip and put the frog mid-hop."
+],
+"veto": []
+},
+{
+"id": "c_cetorgan_e_w31",
+"pick": 3,
+"avg": 8.23,
+"seats": [
+8.2,
+8.2,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, recolour the pipes to the hide blue-grey and shorten the arch",
+"EDIT: run 3, tint the pipes the same blue-grey as the hide with darker mouths so they read as grown ribs",
+"EDIT: run 3, ridge the skin up into the pipe bases and make the eye a touch bigger."
+],
+"veto": []
+},
+{
+"id": "c_chimelop_w31",
+"pick": 3,
+"avg": 7.6,
+"seats": [
+7.5,
+7.5,
+7.8
+],
+"decision": "new",
+"fixes": [
+"Remove all gold rings, make a chunky big-headed hare braced wide on thick hind legs with chest out and the bell ears flared",
+"New prompt: a stylised big-headed hare braced up on its hind legs, chest out, ears flared wide; no rings around the body, at most a faint arc off the ears",
+"Redo braced upright-on-haunches hare with no rings, tail bell grown from fur."
+],
+"veto": [
+"gold echo rings around the body read as effects/hoops"
+]
+},
+{
+"id": "c_clinkpede_n",
+"pick": 3,
+"avg": 7.9,
+"seats": [
+7.7,
+7.5,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"Give the head cap a big round face with large glossy eyes and a cheeky tilt, soften the caps into chubby body segments that only keep the crimp edge",
+"New prompt: make the head cap much bigger, with large glossy eyes and a face that dents the cap, and the segments soft domed shell that only echo caps",
+"Ship run 3."
+],
+"veto": []
+},
+{
+"id": "c_glaciammoth_n",
+"pick": 2,
+"avg": 7.9,
+"seats": [
+7.9,
+7.6,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"Stylise it: a huge chunky faceted block body, short pillar legs, oversized domed head with a readable tired face, fewer bigger facets",
+"New prompt: push the banquet-sculpture idea (bold chisel planes, a few huge carved locks, steel tusks dominant), with a stylised big head and a surprising twist beyond 'made of ice'",
+"Push a warmer, more expressive face and bolder sculpted locks so it is more than an ice statue."
+],
+"veto": []
+},
+{
+"id": "c_glazolm_w31",
+"pick": 1,
+"avg": 7.87,
+"seats": [
+8.1,
+7.4,
+8.1
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, melt the lid into a smooth domed back ridge and lengthen the tail so it reads salamander",
+"EDIT: run 3, show the full tail inside the frame and enlarge the head and milky eyes about 15 percent with a gentle smile",
+"EDIT: run 1, blend the lid into a low back ridge and lift one foreleg mid-stride."
+],
+"veto": []
+},
+{
+"id": "c_grammite_n",
+"pick": 4,
+"avg": 8.1,
+"seats": [
+8.4,
+7.9,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 4, make the gill tufts matte amber with no glow and show the six stubby legs",
+"EDIT: run 2, make the head about 15 percent bigger and give the body a slight bounce lift off the ground",
+"EDIT: run 1, turn the gill glow into matte amber tufts."
+],
+"veto": []
+},
+{
+"id": "c_hydrangor_n",
+"pick": 2,
+"avg": 8.13,
+"seats": [
+8.0,
+7.9,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"Make the body bold smooth clipped topiary planes (geometric hedge shapes), bigger readable faces, blooms as clipped round patches",
+"New prompt: smooth clipped topiary geometry (rounded barrel body, ball-clipped neck segments, crisp hedge-spike ridge), with the hydrangea in fewer, bigger patches",
+"Ship run 2."
+],
+"veto": []
+},
+{
+"id": "c_loafhopper_w31",
+"pick": 2,
+"avg": 7.3,
+"seats": [
+7.5,
+7.1,
+7.3
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 2, rear it up on thick crust-segment hind legs, remove the stub legs under the belly",
+"New prompt: rear it up tall on thick crust-segment hind legs with the crust wings flared as a baguette crest, exactly six legs",
+"Redo as a rearing katydid on thick crust legs with the loaf as its own body."
+],
+"veto": []
+},
+{
+"id": "c_malletary_n",
+"pick": 1,
+"avg": 7.73,
+"seats": [
+8.2,
+7.5,
+7.5
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, remove the rivets and plate seams so the iron flows as one smooth cast skin from feathers to sole",
+"EDIT: run 4, drop the rivets and plate seams so feathers fade smoothly into iron scales from belly to sole",
+"Redo with the iron fused as thick scaled legs rising into the feathers with no seam, smaller flatter feet."
+],
+"veto": []
+},
+{
+"id": "c_maracoil_w31",
+"pick": 3,
+"avg": 8.17,
+"seats": [
+8.2,
+8.1,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, shorten the tongue and enlarge the head about 10 percent",
+"EDIT: run 3, blend the maraca stems seamlessly into the tail tip with no band, and make the tongue the baby's pink",
+"EDIT: run 3, give it Rattlebub's rounder head and bigger friendly eyes."
+],
+"veto": []
+},
+{
+"id": "c_morelkin_n",
+"pick": 2,
+"avg": 8.0,
+"seats": [
+8.4,
+7.6,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, shorten the trunk into a stubby tapir snout and give the ears more tapir roundness",
+"EDIT: run 4, taper the back and head up into a rounded morel cone so the silhouette itself says morel",
+"Ship run 1."
+],
+"veto": []
+},
+{
+"id": "c_nymphane_n",
+"pick": 1,
+"avg": 7.77,
+"seats": [
+8.0,
+7.7,
+7.6
+],
+"decision": "new",
+"fixes": [
+"Make it a squat nymph with a visible segmented abdomen and a sinister hooded stare, the rosebud panes only on the wing pads, the chin plate as hinged chitin not metal",
+"New prompt: a longer, tapered nymph body (head, thorax, abdomen with the three tail paddles clear) with the glass petals only on the wing pads, and the chin plate the same rose glass",
+"Redo with a longer nymph body, visible abdomen and gills, the glass petals only on the wing pads."
+],
+"veto": []
+},
+{
+"id": "c_reelacine_n",
+"pick": 2,
+"avg": 7.93,
+"seats": [
+7.6,
+7.9,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, push the sepia film tones a bit more and make the stripe bands on the jaw crisper",
+"EDIT: run 2, make the jaws the same sepia hide with the stripes painted through the skin and round the clapper ends into a muzzle shape",
+"EDIT: run 2, round the jaw edges into the head and warm up the sepia so the face pops."
+],
+"veto": []
+},
+{
+"id": "c_sarcobra_n",
+"pick": 3,
+"avg": 8.27,
+"seats": [
+8.4,
+8.0,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, enlarge the head and the gold eyes about 15 percent so it carries the house style",
+"EDIT: run 3, give it a bigger, more stylised head with large gold eyes and the kohl sweep so it reads as a Boki legendary, not a museum emblem",
+"Ship run 1."
+],
+"veto": []
+},
+{
+"id": "c_sundormouse_w31",
+"pick": 3,
+"avg": 7.9,
+"seats": [
+7.9,
+7.9,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, raise it onto braced straight forelegs with the chest lifted and head high, back swirl kept tall",
+"EDIT: run 3, plant it square on all four legs with chest raised and head up, and enlarge the head about 10 percent",
+"Redo the final braced wide and upright on chunky legs, swirl flowing into the cone."
+],
+"veto": []
+},
+{
+"id": "c_tootle_n",
+"pick": 2,
+"avg": 8.27,
+"seats": [
+8.3,
+8.1,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, remove the sound arcs and puff the cheeks mid-hum with a bigger smile",
+"EDIT: run 2, remove the sound arcs and give the frill a soft scalloped skin edge so it clearly grows from the neck",
+"EDIT: run 2, remove the sound ridges."
+],
+"veto": []
+},
+{
+"id": "c_torpecone_n",
+"pick": 2,
+"avg": 8.1,
+"seats": [
+8.0,
+8.3,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"Give it a living body: a soft rounded nose-head with the porthole eye and a grinning beak, fins that flex like flippers, and no foam",
+"EDIT: run 2, centre the porthole eye on the rounded nose and cut the foam to a small wake",
+"EDIT: run 1, remove the foam and centre the single porthole eye in the nose like Bathilus."
+],
+"veto": []
+},
+{
+"id": "ta_prismander_a",
+"pick": 1,
+"avg": 7.17,
+"seats": [
+6.8,
+7.3,
+7.4
+],
+"decision": "new",
+"fixes": [
+"Re-run the turnaround with explicit one row of four same-size views in the concept's low four-legged stance",
+"Redo: four views in one row, all in the concept's low four-legged stance, no duplicate row",
+"Re-render as one row with all four views in the low four-legged concept stance."
+],
+"veto": [
+"run 2 ghost duplicate rows; run 1 not one row and front view upright",
+"run 2 ghost duplicate rows; run 1 front/back views stand upright"
+]
+},
+{
+"id": "amanitusk_e_w31",
+"pick": 1,
+"avg": 7.17,
+"seats": [
+7.1,
+7.2,
+7.2
+],
+"decision": "new",
+"fixes": [
+"Re-run: the whole skull built from layered amanita plates as a ram head with tusks growing from the gills, stylised face, flat #E8E8EE.",
+"New prompt: build the skull itself as layered amanita plates forming a battering ram, tusks growing from the gills, a stylised face, flat #E8E8EE background.",
+"Re-run the head as overlapping amanita plates forming a blunt ram skull with tusks from the gills, braced wide and low."
+],
+"veto": []
+},
+{
+"id": "arcestrel_e_w31",
+"pick": 4,
+"avg": 6.93,
+"seats": [
+6.7,
+7.1,
+7.0
+],
+"decision": "new",
+"fixes": [
+"Re-run as a new prompt: Arcestrel in a banking glide, wings swept back as broad copper vanes, head and eyes 25 percent bigger.",
+"New prompt: Arcestrel in a banking glide with its broad copper vane wings swept back, head and eyes 25 percent bigger, stylised.",
+"Re-run as a banking glide with wings swept back in all four views, never perched."
+],
+"veto": []
+},
+{
+"id": "blossmink_e_w31",
+"pick": 2,
+"avg": 7.63,
+"seats": [
+7.3,
+7.6,
+8.0
+],
+"decision": "new",
+"fixes": [
+"Re-run: Ermink's ivory face mask and belly, whole body low in all views, a few clean moss clumps with flowers, black ink-tipped claws.",
+"New prompt: grow Ermink's ink-brush tail into a blossoming branch and keep the ivory mask, belly and ink claws, in the low lounging log pose.",
+"EDIT: run 2, lay the 3/4 view flat like the side view with chin on paws."
+],
+"veto": []
+},
+{
+"id": "briarlynx_e_w31",
+"pick": 1,
+"avg": 7.4,
+"seats": [
+7.2,
+7.6,
+7.4
+],
+"decision": "new",
+"fixes": [
+"Re-run as a new prompt with huge serrated briar-leaf ears, half as many bigger thorns, a bigger stylised head and a wide braced stance.",
+"New prompt: a stylised, big-headed lynx braced wide and low with huge briar-leaf ears, a few big thorns, flat #E8E8EE background.",
+"Re-run with the ears replaced by large serrated briar leaves with black tufts and a bigger rounder head."
+],
+"veto": []
+},
+{
+"id": "buckleron_r2_w31",
+"pick": 2,
+"avg": 7.9,
+"seats": [
+8.1,
+7.5,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 2, give the face a livelier expression; relayout into one row.",
+"EDIT: run 3, show more of the snail body and foot under the shell and dim the crack glow to a rust colour.",
+"EDIT: run 2, soften the remaining plate seams on the back view; relayout to one row."
+],
+"veto": []
+},
+{
+"id": "flarmink_e_w31",
+"pick": 2,
+"avg": 6.87,
+"seats": [
+7.2,
+6.8,
+6.6
+],
+"decision": "new",
+"fixes": [
+"Re-run with the flame tail laid flat and straight back level with the spine in every view.",
+"New prompt: the lava mink stretched flat in a racing streak, flame tail streaming level with the spine, no duplicate legs.",
+"Re-run (not an edit) as a long mink stretched flat mid-sprint, flame tail straight back, clean single legs."
+],
+"veto": [
+"faded duplicate legs still in runs 1-3",
+"ghost/faded duplicate legs in every run"
+]
+},
+{
+"id": "galleotter_r_w31",
+"pick": 4,
+"avg": 7.57,
+"seats": [
+6.4,
+8.0,
+8.3
+],
+"decision": "new",
+"fixes": [
+"Re-run with no separate hull: a huge braced otter whose fur hardens into plank scales with no rim, snout as a ram prow, tougher face.",
+"EDIT: run 4, raise it onto braced forelegs with the chest up and prow high, so the final looks big and planted.",
+"EDIT: run 4, brace the front legs wide and lift the chest and head so it looms; relayout to one row."
+],
+"veto": [
+"hull reads as a worn boat shell or saddle with a rim, not grown from the body"
+]
+},
+{
+"id": "glaciatee_r_w31",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.0,
+8.1,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1, set the background to flat #E8E8EE.",
+"EDIT: run 1, set the background to flat #E8E8EE.",
+"EDIT: run 1, set the background to flat #E8E8EE."
+],
+"veto": []
+},
+{
+"id": "scythant_r_w31",
+"pick": 3,
+"avg": 8.0,
+"seats": [
+8.2,
+8.1,
+7.7
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 3, thicken all legs into short stubby limbs and fatten the thorax.",
+"EDIT: run 3, thicken all the legs into chunky stubby limbs.",
+"EDIT: run 3, thicken all legs into short stubby limbs and set it in a low forward stalk."
+],
+"veto": []
+},
+{
+"id": "chandelapi_card2",
+"pick": 2,
+"avg": 8.17,
+"seats": [
+8.2,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, plant the legs wider and lift the head and neck high so the candelabrum towers",
+"EDIT: run 2, add the purple-black flame wisps at the hooves and tail from the sheet and give it a head tilt toward the viewer.",
+"EDIT: run 2, paint the far legs in the same dark okapi colours as the near legs so nothing looks faded."
+],
+"veto": []
+},
+{
+"id": "eclipsowl_card2",
+"pick": 2,
+"avg": 8.1,
+"seats": [
+7.9,
+7.9,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, restore the sheet's glowing gold eclipse eyes",
+"New card: Eclipsowl perched on the floor, wings half-folded showing the moon spots, eclipse face turned to the viewer with its golden glowing eyes.",
+"Ship run 2 (recrop if needed)."
+],
+"veto": []
+},
+{
+"id": "forgebrock_card2",
+"pick": 1,
+"avg": 7.7,
+"seats": [
+8.1,
+7.6,
+7.4
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, drop both block fists to the floor in a wide braced four-leg stance",
+"New card: Forgebrock planted on all fours in a braced wide stance, anvil fists on the floor, head turned to the viewer with a cocky grin.",
+"New prompt: Forgebrock planted on all four legs, braced wide with heavy anvil paws on the floor, head turned to the viewer with a cocky grin."
+],
+"veto": [
+"run 2 upright boxer pose",
+"upright person pose: both runs rear on hind legs in a boxing guard; the sheet is a quadruped"
+]
+},
+{
+"id": "galleotter_card2",
+"pick": 1,
+"avg": 8.13,
+"seats": [
+8.1,
+8.1,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, make the barrel staves grow out of the fur at the edges, no band",
+"EDIT: run 1, soften the snarl into a confident grin and turn the head a little more to the viewer.",
+"EDIT: run 1, soften the face into a cocky grin with bigger glossy eyes."
+],
+"veto": []
+},
+{
+"id": "gongrowl_card2",
+"pick": 1,
+"avg": 8.4,
+"seats": [
+8.5,
+8.3,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"none",
+"EDIT: run 1, turn the roar into a cocky open-mouth grin with big glossy eyes.",
+"Ship run 1, or EDIT: close the mouth into a proud grin."
+],
+"veto": [
+"run 2 upright chest-out person pose"
+]
+},
+{
+"id": "jibbatross_r_w31",
+"pick": 3,
+"avg": 7.3,
+"seats": [
+7.5,
+7.2,
+7.2
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 3, replace the wing clamps and spars with canvas feather-membrane grown from the arm, enlarge head and hooked beak 30 percent with a cocky scowl",
+"Settle the stage first, then a heavy-fronted big-headed albatross with a huge hooked beak whose primaries ARE furled sail cloth, no clamps, spars or hooks, in a gliding/striding middle pose.",
+"New prompt: a heavier big-headed middle albatross in a low forward waddle-stride with canvas wings half-folded against the body, no bands or clamps, clearly not Canvastross's spread-wing pose."
+],
+"veto": [
+"joint clamps still read strapped/worn"
+]
+},
+{
+"id": "lashyx_card2",
+"pick": 1,
+"avg": 6.87,
+"seats": [
+7.0,
+6.6,
+7.0
+],
+"decision": "new",
+"fixes": [
+"New prompt: braced wide and low on the scythe forelimbs with the tail arched high overhead, keep the armoured head plate",
+"New card: Lashyx low on all fours in a crouched stalk, scorpion tail arched over, scythe forelimbs on the floor, head turned to the viewer.",
+"New prompt: Lashyx low on all fours in a stalking crouch, scorpion tail arched overhead, head turned to the viewer with a sly smile."
+],
+"veto": [
+"upright person-like stance (standing on hind legs, arms raised)",
+"upright on hind legs like a person",
+"upright person pose: stands on hind legs with arms raised; sheet is a low quadruped"
+]
+},
+{
+"id": "lockatara_r_w31",
+"pick": 1,
+"avg": 7.37,
+"seats": [
+7.3,
+7.4,
+7.4
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, low prowling stride with one forefoot raised and head forward, one low shackle ridge identical in all four views",
+"EDIT: run 1, put it in a low prowling stride with one front foot raised and head forward, and make the shackle the same low ridged arch in all four views.",
+"EDIT: run 1, redraw the side and 3/4 views with the same low shackle ridge as the front view, and put all four views in a low prowling stride with one front foot raised."
+],
+"veto": []
+},
+{
+"id": "murmurling_f_e_w31",
+"pick": 1,
+"avg": 7.3,
+"seats": [
+7.0,
+7.4,
+7.5
+],
+"decision": "new",
+"fixes": [
+"New prompt: chubby round big-headed cartoon songbird whose own tail feathers taper into slim hollow reed quills, open singing beak",
+"New prompt: chubby round big-headed songbird whose own tail feathers taper into slim hollow reed quills, keep the crest and starry plumage.",
+"EDIT: run 1, make the body round and chubby and the head about 40 percent bigger with a cartoon face, keeping the slim reed-quill tail."
+],
+"veto": []
+},
+{
+"id": "puffamus_card2",
+"pick": 1,
+"avg": 8.03,
+"seats": [
+7.8,
+8.2,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, turn the chimney into a stubby smokestack grown from the skull and grow the iron plates out of the hide with no band",
+"EDIT: run 1, shrink the steam puffs to a small wisp from the chimney.",
+"EDIT: run 1, shrink the steam to two small puffs."
+],
+"veto": []
+},
+{
+"id": "relic_kael_w31",
+"pick": 1,
+"avg": 6.17,
+"seats": [
+6.0,
+6.5,
+6.0
+],
+"decision": "new",
+"fixes": [
+"New prompt (not an edit): big 3/4 view of two heavy cuffs joined by exactly four chunky links, last link snapped, small views copied from it",
+"Not an edit: draw the big 3/4 view from scratch as two heavy cuffs joined by exactly four chunky links, the fourth snapped open, and copy it into the small views.",
+"New generation, not an edit: one big 3/4 view of two heavy cuffs joined by exactly four chunky links with the fourth snapped open, plus small front, side and close-up views copied from it."
+],
+"veto": []
+},
+{
+"id": "rimink_r_w31",
+"pick": 1,
+"avg": 7.37,
+"seats": [
+7.1,
+7.5,
+7.5
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised big-headed Rimink in a tall high-shouldered prowl, long legs, head high, glossy Ermink eyes, one row of four",
+"EDIT: run 1, raise it into a tall high-shouldered prowl on long legs, head held high, with the front and 3/4 views in the same pose, one row.",
+"EDIT: run 1, redraw the front and 3/4 views in the same prowl as the side view, raise the shoulders and head for a tall prowl, and keep four views in one row."
+],
+"veto": []
+},
+{
+"id": "sporcupine_card2",
+"pick": 1,
+"avg": 8.2,
+"seats": [
+8.4,
+7.9,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"none",
+"Hold the card until the Sporcupine sheet gets shorter, quill-fused caps; then reuse run 1's pose.",
+"Ship run 1 as canon match."
+],
+"veto": []
+},
+{
+"id": "terrarimit_e_w31",
+"pick": 1,
+"avg": 7.3,
+"seats": [
+7.2,
+7.4,
+7.3
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, break the dome into cracked glass plates that form the carapace with plants between them, one claw twice the other, scale up to fill the frame",
+"EDIT: run 1, turn the dome into cracked glass carapace plates with the garden growing between them, make the right claw twice the size of the left, and scale the views up.",
+"New prompt: crab whose own carapace is cracked glass plates with moss and flowers growing between them, one claw twice the size of the other, big stalk eyes and a kind face, filling the frame in one row."
+],
+"veto": []
+},
+{
+"id": "tidalisk_card2",
+"pick": 1,
+"avg": 8.1,
+"seats": [
+8.3,
+8.2,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, drop the front claws lower so it rears like a reptile lunging, not standing",
+"EDIT: run 1, bring the front feet down into a wide braced four-legged stance.",
+"EDIT: run 1, restore the ring-loop tail tip exactly as on the sheet."
+],
+"veto": []
+},
+{
+"id": "voltalon_r_w31",
+"pick": 3,
+"avg": 7.57,
+"seats": [
+7.5,
+7.6,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 3, put it in a low wide braced crouch with the anvil-cloud wings spread wide in all four views including the back, bigger stylised head",
+"EDIT: run 3, put it in a low wide braced crouch with the anvil-cloud wings spread wide in all four views including the back.",
+"EDIT: run 3, add the anvil-cloud wings to the back view and lower the body into a wide braced crouch with the wings spread sideways."
+],
+"veto": []
+},
+{
+"id": "barokat_card2",
+"pick": 1,
+"avg": 7.77,
+"seats": [
+7.8,
+7.7,
+7.8
+],
+"decision": "new",
+"fixes": [
+"Sink the barometer dial into the belly with paws at its sides, not on it, and turn the body to 30 degrees.",
+"Set the dial flush in the belly fur with the paws down at the sides and grow the cloud from the head tuft.",
+"EDIT: run 1, move both paws down to the sides and set the dial flush into the belly fur."
+],
+"veto": [
+"barometer still held in the paws"
+]
+},
+{
+"id": "bellowary_card2",
+"pick": 1,
+"avg": 8.27,
+"seats": [
+8.3,
+8.3,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"Keep run 1.",
+"EDIT: blend the casque base into the blue head skin so it grows from the skull.",
+"EDIT: run 2, put it in a mid-stride step with one leg lifted and the head turned more to the viewer."
+],
+"veto": []
+},
+{
+"id": "boltstrich_card2",
+"pick": 2,
+"avg": 7.77,
+"seats": [
+8.2,
+7.0,
+8.1
+],
+"decision": "new",
+"fixes": [
+"Keep run 2.",
+"EDIT: run 2, turn the neck copper into flush vein lines under the skin.",
+"EDIT: run 2, turn the neck wraps into copper vein markings under the skin and give it a running stride."
+],
+"veto": []
+},
+{
+"id": "buckleron_card2",
+"pick": 1,
+"avg": 7.83,
+"seats": [
+8.1,
+7.8,
+7.6
+],
+"decision": "new",
+"fixes": [
+"Keep run 1.",
+"Grow the cone from the back skin with no band or rivets, barnacles bridging skin and shell.",
+"Ship run 2."
+],
+"veto": []
+},
+{
+"id": "canvastross_card2",
+"pick": 2,
+"avg": 7.5,
+"seats": [
+7.7,
+7.3,
+7.5
+],
+"decision": "new",
+"fixes": [
+"Only the two canvas sail wings on mast spars, no feathered wings, spread wide and planted.",
+"Sails ARE the only wings (spars as wing bones, no rings), standing braced wide and grand on the ground.",
+"New prompt: the canvas sails ARE the only wings, spar bones growing from the shoulders with no rings, no feathered wings, gliding in 3/4 view."
+],
+"veto": [
+"strapped: the sail spars are clamped on with rings over separate feathered wings"
+]
+},
+{
+"id": "chuggamus_card2",
+"pick": 1,
+"avg": 8.1,
+"seats": [
+7.9,
+8.0,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"Rear up or brace wide with the chimney blasting so the final stands differently from Puffamus.",
+"Make the grille the hippo's own teeth and let the hide flow into the plates at every seam.",
+"EDIT: run 1, merge the grille into the lips as fused tooth bars."
+],
+"veto": []
+},
+{
+"id": "frigatee_card2",
+"pick": 2,
+"avg": 8.17,
+"seats": [
+8.2,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: add the small brass latch on the side of the ice dome.",
+"EDIT: run 2, let the frost creep from the cap down into the skin so it grows from the body.",
+"EDIT: run 2, lift it into a gliding swim pose with flippers spread."
+],
+"veto": []
+},
+{
+"id": "gloamshell_card2",
+"pick": 1,
+"avg": 8.23,
+"seats": [
+8.1,
+8.1,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"EDIT: remove the purple flame wisps around the shell.",
+"EDIT: run 2, restore the sheet's closed happy eyes and little fangs.",
+"Ship run 1."
+],
+"veto": []
+},
+{
+"id": "glomwort_card2",
+"pick": 2,
+"avg": 8.2,
+"seats": [
+8.0,
+8.1,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"Keep run 1.",
+"EDIT: run 2, turn the green foot slime into mossy toe pads.",
+"EDIT: run 2, turn the green toe slime into mossy pads."
+],
+"veto": []
+},
+{
+"id": "gravadillo_card2",
+"pick": 1,
+"avg": 7.87,
+"seats": [
+7.9,
+7.7,
+8.0
+],
+"decision": "new",
+"fixes": [
+"Turn to 30 degrees with the head toward the viewer and a cocky head tilt.",
+"Turn the body to 30 degrees with the face toward the viewer so both eyes and the horn read.",
+"EDIT: run 1, turn the head and front of the body toward the viewer so both eyes show."
+],
+"veto": []
+},
+{
+"id": "hivara_card2",
+"pick": 2,
+"avg": 7.6,
+"seats": [
+7.5,
+7.4,
+7.9
+],
+"decision": "new",
+"fixes": [
+"Keep the sheet's slender mantis-wasp body and raptorial arms, just restyled.",
+"Keep the sheet's slim mantis-wasp body, honeycomb abdomen and two wing pairs, only enlarge the head and eyes.",
+"New prompt: keep the sheet's slim honeycomb abdomen, mantis forelegs and two wing pairs, only enlarge the head and eyes."
+],
+"veto": []
+},
+{
+"id": "lockatara_card2",
+"pick": 1,
+"avg": 8.27,
+"seats": [
+8.1,
+8.2,
+8.5
+],
+"decision": "edit",
+"fixes": [
+"Keep run 1.",
+"EDIT: run 1, make the shackle roots grow from the shoulder skin and brighten the runes.",
+"Ship run 1."
+],
+"veto": []
+},
+{
+"id": "murmurling_card2",
+"pick": 2,
+"avg": 8.03,
+"seats": [
+8.0,
+7.8,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"Bigger glossy canon eyes and a rounder stylised body, head turned toward the viewer.",
+"Rounder toy-like starling with a bigger head, pipes clearly growing from the tail base, green-blue iridescence.",
+"EDIT: run 2, enlarge the head and round the body for a toy-like read."
+],
+"veto": []
+},
+{
+"id": "dragonkite_card2",
+"pick": 1,
+"avg": 7.47,
+"seats": [
+7.6,
+7.4,
+7.4
+],
+"decision": "new",
+"fixes": [
+"Redraw it hovering in the air with the long serpentine body coiling below, as on the sheet, so it differs from Kitlet's grounded stance",
+"Re-prompt: keep the sheet's floating serpentine body with tiny arms, rearing up big in the air with wings fully spread wide like a kite, tail streaming below.",
+"New prompt: keep the sheet's floating serpentine body with coiled tail, rearing tall in the air with wings spread."
+],
+"veto": []
+},
+{
+"id": "flarmink_card2",
+"pick": 1,
+"avg": 8.0,
+"seats": [
+8.3,
+7.9,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, stretch it into a low forward racing lean with the flame tail streaming behind",
+"Re-prompt: low racing streak, body stretched long mid-dash at 30 degrees, torch tail streaming behind, cocky toothy grin.",
+"New prompt: mid-dash racing streak, body stretched low and long, flame tail trailing."
+],
+"veto": []
+},
+{
+"id": "kitlet_card2",
+"pick": 1,
+"avg": 7.77,
+"seats": [
+8.0,
+7.6,
+7.7
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, make it a round compact baby bobbing in the air with the ribbon tail curled below, as on the sheet",
+"Re-prompt: keep the sheet's round floating body, tiny arms tucked, bouncing in the air with a big open-mouth grin, tail with cream bows curling below.",
+"New prompt: keep the sheet's round floating baby with coiled bow tail, bouncing in the air."
+],
+"veto": []
+},
+{
+"id": "pawnfry_card2",
+"pick": 1,
+"avg": 7.97,
+"seats": [
+7.9,
+8.0,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, restore the sheet's furrowed brows and frown so it reads grumpy",
+"EDIT: on run 1, restore the sheet's furrowed brows and pouting frown, keeping everything else.",
+"EDIT: give run 1 the sheet's grumpy furrowed brow and frown."
+],
+"veto": []
+},
+{
+"id": "prowyak_card2",
+"pick": 2,
+"avg": 6.63,
+"seats": [
+6.8,
+6.8,
+6.3
+],
+"decision": "new",
+"fixes": [
+"Restore the dark plough-prow shield on the face exactly as on the sheet, with the curled horns and no extra horn",
+"Re-prompt stating the huge dark wooden ship's-prow plate covering the whole face and forehead, curved horns at its sides, must stay, seen in gentle 3/4 with the prow toward the viewer.",
+"New prompt: keep the dark wedge prow blade covering the front of the face exactly as in the sheet."
+],
+"veto": [
+"signature part missing (prow shield)",
+"signature part missing: the dark ship's-prow face plate is gone in both runs (redesigned into a plain yak/ram)",
+"design mismatch: signature prow blade on the face missing"
+]
+},
+{
+"id": "selenfin_card2",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.2,
+7.8,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, turn the head more toward the viewer and restore the small surprised 'o' mouth",
+"Re-prompt: body turned about 30 degrees toward the viewer so both bulging eyes and the front of the face show, tilted slightly upward as if hovering, keeping its surprised little 'o' mouth.",
+"EDIT: angle run 1 about 30 degrees toward the viewer so both eyes show."
+],
+"veto": []
+},
+{
+"id": "skateron_card2",
+"pick": 1,
+"avg": 8.23,
+"seats": [
+7.9,
+8.4,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, fold the wings closer to the body as on the sheet",
+"EDIT: on run 1, fold the far wing closer to the body so only one wing opens for balance.",
+"Ship run 1; keep wings half-folded in future renders to stay distinct from Lanceron."
+],
+"veto": []
+},
+{
+"id": "snuffapi_card2",
+"pick": 1,
+"avg": 8.27,
+"seats": [
+8.5,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, keep the flames but trim the smoke wisps",
+"EDIT: on run 1, add back the dark purple smoke wisps trailing from the neck ridge and tail tip as on the sheet.",
+"Ship run 1."
+],
+"veto": []
+},
+{
+"id": "umbrathere_card2",
+"pick": 1,
+"avg": 7.73,
+"seats": [
+7.7,
+7.3,
+8.2
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 2, raise it into a looming rear with arms lifted so the bone-wing membranes spread as on the sheet",
+"Re-prompt: arms raised high as the bone-fingered bat wings with membranes down to the hips, looming wide at 30 degrees, no extra wings.",
+"Ship run 1 or EDIT: raise one clawed arm as in the sheet."
+],
+"veto": []
+}
+]

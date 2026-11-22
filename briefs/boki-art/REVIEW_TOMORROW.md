@@ -1,0 +1,62 @@
+# Owner review queue (made while you slept)
+Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alternatives here. Each row: what is live now, and the other options with their file paths (batch/out/). Swap any by saying "use X for Y".
+
+
+**FIRST THING (needs your OK): the Bokidex artifact is at its 512-file limit.** Replacing existing images still works, but brand-new Boki (Lodestaff's turn, Voltalon's new turn and anything new) can't be added until the coordinator prunes stale or superseded files. Pruning is irreversible, so it is waiting for you. Reply "ok prune old Bokidex files" to the coordinator.
+
+| Boki | Live / queued pick | Why unsure | Alternatives |
+|---|---|---|---|
+| Chandelapi | f3_1 (8.6) queued | You asked if it was really the final form; f3 is still a candelabra okapi-serpent | f1 7.2, f2 7.1; earlier m2_2 (p79) |
+| Glaivyx | p79 pick (g8_2) stays live | New h1/h3 are still scorpion-tailed with short legs; long-legged h4/h5 generating | c_glaivyx_h1_3 8.5, h3_4 8.6, o1_4 8.3; h4/h5 pending |
+| Effigoon | p79 pick (c1_3) stays live | Redo f1-f3 all have faces; faceless cocoon g1/g2 generating | f2_2 8.3 (lion face), f1_4 8.0 |
+| Cisternmander | current sheet stays | z1 still has lightning arcs; no-lightning y1/y2 generating | z1_3 8.1, b1-b3 |
+| Eclipsowl | d2_2 (8.4) queued | You said none were there yet; d2 is the closest to a darker, more epic Lunowl | d4_4 7.8, d1_1 7.6 |
+| Ringrove | y1_2 (8.1) queued | Kept the back you liked; face less "old beaver"? check | y3_3 7.9, y2_2 7.6; p79 r6_4 |
+| Reapant | p79 n4_2 stays live | Taller ninja redos t1-t3 scored low | t3_1 7.6, t1_2 7.4 |
+| Galleotter | none queued | Best 7.8, below the bar | g1_4 7.8, g2_2 7.8 |
+| Scythant | none queued | Best 7.8, below the bar | n3_4 7.8, n2_3 7.5 |
+| Glassolotl | v3 stays live until g1-g3 passes | Owner 04:52 again: different face AND angle/pose from Prismander; f1-f3 kept the same view | g1-g3 generating (side leap, rearing, top-down swim); f2_3 7.7 |
+| Gongrowl | current stays | Bigger/scarier redo best 7.7 | z1_2 7.7 |
+| Flarmink, Rippmink, Rimink, Prismink | current stays until a new direction passes | Your 04:44 note: need more differentiation | m1-m3 each, generating |
+| Vespox | current recolour stays until a v1-v3 direction passes | Your 04:52 note: too close to Vespyx | v1-v3 generating |
+| Names | 13 renames proposed in NAME_CHANGES.md (e.g. Thunderstrich -> Thundrich, Terrasloth -> Pangolith, Umbrathere -> Ribbrella, Selenwhale -> Lunarca) | Your 04:54 go-ahead; veto any you dislike | old names kept as aliases |
+| Prismink | m3_3 crystal-lion mink (8.5) -> sheet/card/portrait queued | Your 04:44 note: more differentiation | m2_2 8.2 (crystal-sail dragon-mink), m1_1 7.8 |
+| Rimink | m3_1 tall elegant ice stoat (8.6) queued | same | m1_3 8.1 (shaggy wolverine) |
+| Rippmink | m2_1 eel-mink (8.5) queued | same | m1_2 7.8 (wave-crest sea serpent), m3_2 7.7 |
+| Flarmink | m2_4 bonfire-tail badger stoat (8.0) queued | same; m1 failed | m3_1 7.8 (matchstick-ear fox) |
+| Effigoon | g2_4 faceless hanging cocoon (8.2) queued | faceless, as you asked | g1_2 8.0 (riveted capsule, has amber port-holes) |
+| Glaivyx | h4_1 long-legged blade-tail fox (8.2) queued | longer, taller legs, less scorpion | h5_1 8.1 (cream plume-tail version) |
+| Cisternmander | y2_1 mossy pond-back salamander (7.9) queued, no lightning | Just under the bar, but it fixes your note | y1_3 7.8 (stone cistern + spout) |
+| Vespox | v2_3 shell-hood prowler with pincers (8.6) queued | distinct from Vespyx | v1_1 7.9 (chitin jackal), v3_2 7.6 |
+| New evolutions | Moatpole (baby -> Rampartoad), Moundlet (baby -> Spirevark), Murmuron (Murmurling -> final), Spanglin (baby -> Mirrolin) generating | Your "1-stage should be a minority" rule; names are mine | 3 directions each |
+| Terrasloth vs Mirrolin | Both are pangolins now (you chose pangolin for Terrasloth; Mirrolin was already a disco-ball pangolin) | Two pangolins on the roster | keep both, or redo Mirrolin as another animal (e.g. armadillo is taken by Gravadillo; maybe a hedgehog or a chameleon) |
+| Lodestick | still no art | single, no art at all | needs a first design |
+| Glassolotl | g1_1 (8.5): faces right, mid-leap, new cocky grin, longer body leading into the cobra -> sheet/card/portrait queued | Your "different face and angle" note | g3_4 8.3 (top-down S-swim, toothy grin) |
+| Vespyx / Mycroll extra angles | Vespyx lying down (tail around, venom bead showing) and Mycroll tipped over: saved as EXTRA angles (cards/Vespyx_lying.jpg, cards/Mycroll_tipped.jpg + portraits); main cards unchanged | Unsure whether you wanted them as the main card | say "make it main" to swap |
+| Lodestick (first art) | e1_1 dark twig stick insect with lodestone flakes, purple eyes (8.3) -> sheet/card/portrait queued | Never had art; my design | e2_1 7.6 came out spider-like (rejected) |
+| Moatpole (new baby of Rampartoad) | e2_2 squishy toadlet with a little castle-wall back (8.5) | Name and design are mine | e3_2 8.5 (toadlet in a cracked stone pot) |
+| Moundlet (new baby of Spirevark) | e1_4 aardvark pup with clay-mound backpack (8.4) | same | e3_2 8.5 (pup hugging a clay mound) |
+| Murmuron (new final of Murmurling) | e2_2 dark flock-starling with brass pan-pipe collar (8.2), the gnarly surprise final | same | e3_1 8.4 (tall heron-starling with a pan-pipe tail fan) |
+| Spanglin (new baby of Mirrolin) | e1_2 pangolin pup curled into a disco ball (8.5) | same | e3_3 8.5 (pink pup with a few mirror tiles) |
+| Gongrowl | q2_2 huge scarred gorilla with bronze gong chest (8.0) queued | Bigger/scarier as you asked; replaces the small monkey card | q1_3 7.8 |
+| Galleotter | q1_4 sea-serpent otter whose body is a galley with sail + oars (8.5) queued | Big surprise final; the old one was a cute otter on a boat | q2_2 8.2 (burly standing otter with sail fin); old card |
+| Chandelapi | q1_1 regal okapi stag with a simple 3-candle antler crown (7.5) queued, under the bar | Fixes your "busy, should be majestic" note; the live one is the okapi-serpent | q2_2 7.4; live okapi-serpent; earlier m2_2 |
+| Reapant | fresh ninja-ant concepts w1-w3 (indigo/plum/black) generating | q1/q2 copied the old green leafy look | live card stays until one passes |
+| Line audit | 29 lines flagged against your rules (LINE_AUDIT.md); the 8 worst same-body finals are being redesigned (wave97) | My judgement of what breaks your rules | per-line directions in LINE_AUDIT.md |
+| Chuggamus | x1_4 locomotive hippo on piston wheels (8.4) queued | Line audit: final was the same boiler hippo | x2_1 8.0 |
+| Furnacowary | x1_1 squat forge-golem bird with furnace chest (8.1) queued | Your old note: Bellowary/Furnacowary looked the same | x2_4 7.6 |
+| Geysirbara | x1_2 capybara sunk into a terraced geyser-volcano (8.6) queued | Same-body final | x2_1 7.5 |
+| Seamwyrm | x1_2 unzipped horror serpent (8.7) queued | Final was Zippelith with horns | x2_4 8.4 (stitched dragon with needle tail) |
+| Voltalon | x1_2 stalking thunder raptor (8.2) queued | Final looked like Kestrike again | x2_4 7.2 |
+| Lodestaff (new final of Lodestick) | e2_1 tall dark mantis-like lodestone staff insect (8.2) queued | Planned evolution, now has art | e1_1 7.6 |
+| Reapant | live stays; best new ninja ant w2_2 (7.3) is plum with a scarf but stands like a person | Owner wanted taller/cooler ninja; this breaks the "no person-like pose" rule | c_reapant_w2_2 in batch/out |
+| Vaultara / Dreadnoyak / Forgebrock | live stays; audit redos scored 7.0-7.8 | not clearly better | x1/x2 in batch/out; more tries queued |
+| Galleotter | Bokidex keeps your earlier approved gen hero (coordinator rule); the new sea-serpent card/portrait are filed in the repo | Which do you want as Galleotter? | say 'use the serpent' to switch |
+| Audit batch 2 picks (all queued, 8.2-8.6) | Dragonkite (lacquered paper-sail dragon), Dreadnoyak (icicle-coat mammoth), Geodemole (geode beast mid-dig), Lanternmit (long-legged lantern crab), Reapant (six-legged plum ninja ant), Skateron (racing glide), Sporcupine (toadstool-quill porcupine), Stormit (storm-tower spider crab), Terrarimit (rooted garden crab), Vaultara (vault-door lizard) | Line audit: these stages were the previous body scaled up | old cards kept in git history; concepts in batch/out (c_<name>_x*) |
+| Forgebrock | live stays | audit redos peaked at 7.8 | c_forgebrock_x2_3, x3_3 |
+| Gloamspire | x1_4 gnarly crystal slug-spire in a shadow pool (7.9) queued | Line audit: weak final; just under the bar but clearly better | live card |
+| Selenwhale (Lunarca) | x1_4 vast cratered moon-whale (8.0) queued | Line audit: weak final | live card |
+| Embrook | live (your call: old Pyrraven art became Embrook) | Line audit says it is Kindlewren made taller, standing still (not a fundamental change, and middle stage should be in motion); I did not override your call | audit direction in LINE_AUDIT.md: lean hopping ember-crow mid-leap |
+| Dragonkite sheet | best of 3 tries (7.8) used, with ghost tail fragments cropped off the bottom, so it matches the new card | Below the bar; consistent set beats mixed old/new | old sheet saved as evolutions/Dragonkite_old.jpg |
+| Selenwhale card/portrait | the approved concept (c_selenwhale_x1_4) is used as the card and portrait for now, matching the new sheet; a cleaner card is retrying | Two card attempts scored 7.0-7.8 | old card in git history |
+| Flarmink alt | matchstick-ear fox (c_flarmink_m3_1) | Owner likes this design for some other Boki | idea bank |
