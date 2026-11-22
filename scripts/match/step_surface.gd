@@ -10,8 +10,8 @@ extends RefCounted
 ## farm's shallow ponds (HomeWater): match maps have none.
 ## A Hunter's own "<arch>_step_<surface>" wins when it has one. docs/AUDIO.md lists each region.
 
-const SHARED := ["water", "metal"]     # surfaces with steps per weight class, not per Hunter
-const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}     # dB on every step: heavier boots carry more
+const SHARED := ["water", "metal"]  # surfaces with steps per weight class, not per Hunter
+const WEIGHT_DB := {"light": -1.5, "medium": 0.0, "heavy": 1.5}  # dB on every step: heavier boots carry more
 const WEIGHT_PITCH := {"light": 1.1, "medium": 1.0, "heavy": 0.88}  # pitch scale on every step: heavier is lower
 
 ## The surface under `pos` in match `m`.
@@ -30,6 +30,7 @@ static func at(m: Match, pos: Vector3) -> String:
 		return "stone"
 	return "snow" if w.style_at(i) == "frost" else "grass"
 
+
 ## The sound for `surf` underfoot of `h`: its own set when it has one, else the shared one.
 static func cue(h: Hunter, surf: String) -> String:
 	var shared := "step_" + surf
@@ -44,6 +45,7 @@ static func vol_db(h: Hunter, base: float) -> float:
 ## The step's pitch scale for h's weight class (light higher, heavy lower).
 static func pitch(h: Hunter) -> float:
 	return float(WEIGHT_PITCH[weight_of(h.arch)])
+
 
 static func weight_of(arch: String) -> String:
 	var wt := Arch.weight(arch)
