@@ -32,7 +32,7 @@ w("The old class dashes and weapon RMBs below are kept as data (the verbs return
 w("## Ranks\n")
 w("Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:\n")
 w("- damage +15% (`Effects.level_k`)")
-w("- cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster")
+w("- cooldown: a hero's own `rank_cd` row in `content/archetypes/<id>.json` (RMB `sec`, E `kin`, Shift `dash`, `air`), read by `ArchKit.cd_k` / `dash_k`; with no row, 10% shorter (RMB, Q via `Hunter.rank_cd_k`, E) and Shift dashes recharge 15% faster")
 w("- each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%")
 w("- kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds")
 w("- the merge at rank 2 lasts 30% longer and its effects hit 15% harder")
