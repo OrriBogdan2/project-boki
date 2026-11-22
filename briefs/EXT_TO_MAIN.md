@@ -10998,3 +10998,4 @@ READY ext/stuck-integ-5f7f820f 01f004e677 (restores 64 check flags the mc-base d
 READY ext/extra-load-stall d4200d1bc (map build stall removed)
 READY ext/feel-move-review-1122 942af67633 (origin/main merged in; only conflict hunter_move.json doc: main's glide_cruise text + branch's speed_cap wording; --check 0 failures; --move-feel-check 8 fails vs main 10+; health --strict red on style ratchet same as main)
 READY ext/extra-load-stall 65d0d2c208186150ca52f4f04c574b1efa71c5e0 (map build stall removed)
+READY ext/blocked-hit-spark 7f9b4f38ef (re-merged origin/main: one Juice.blocked deflect spark in the blocker colour + metallic tick for shield, rock, ice, wall, Shield Charge guard, Riposte guard; --barrier-hit-check 25 checks 0 failures, --check 0 failures, health --strict OK)
