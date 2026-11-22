@@ -39,6 +39,9 @@ func _init() -> void:
 	body = UI.vbox(4)
 	add_child(body)
 	visible = false
+	# a panel only grows by itself: a wrapped line measured before its label has a width (or while the window
+	# is resized) leaves the card tall for good, so it goes back to its content whenever that shrinks
+	minimum_size_changed.connect(reset_size, CONNECT_DEFERRED)
 
 func _process(dt: float) -> void:
 	# day 1 in a garden zone: the Goals line carries the first-day step, so the card stays in the hub
