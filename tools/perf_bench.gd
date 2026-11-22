@@ -18,6 +18,8 @@ extends RefCounted
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
+##   [--bench-loading]  each match part builds behind the loading screen, as a player's does (its load line then
+##   covers the sliced build and the warm-up; without it, autoplay builds the match in one frame)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
@@ -59,6 +61,7 @@ var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
 var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
+var loading := false     # --bench-loading: match parts build behind the loading screen (main.gd "probe")
 var wisps := ""          # --boki-wisps=on|off: the match opts' boki_wisps ("": the setting decides)
 const AB_WARMUP_S := 5.0 # --bench-ab: the first this many s of each run are left out of its numbers
 var rows := PackedStringArray()
@@ -108,6 +111,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
 		if a.begins_with("--boki-wisps="): wisps = a.substr(13)
+		if a == "--bench-loading": loading = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -185,6 +189,8 @@ func _start(part: String, extra: Dictionary) -> Match:
 		o["boki_wisps"] = wisps == "on"
 	if trios > 0 and part == "match":
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
+	if loading:
+		o["probe"] = true
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	var load0 := Time.get_ticks_usec()
@@ -192,19 +198,24 @@ func _start(part: String, extra: Dictionary) -> Match:
 	var m: Match = null
 	var longest := 0.0    # ms: the longest frame from goto to the built match (DEBT item 33: no load frame over 100)
 	var slow := 0
+	var worst := {}       # loading screen stage -> its longest frame (ms)
 	var t := load0
 	while m == null:
+		var ld: Object = main.get("_ld")
+		var stage := String(ld.get("stage_label")) if is_instance_valid(ld) else "-"
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		var ms := (now - t) / 1000.0
 		t = now
 		longest = maxf(longest, ms)
 		slow += 1 if ms > 100.0 else 0
+		worst[stage] = maxf(float(worst.get(stage, 0.0)), ms)
 		var cur = main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
-	print("BENCH %s load: %.0f ms, longest frame %.0f ms, %d frames over 100 ms"
-			% [part, (Time.get_ticks_usec() - load0) / 1000.0, longest, slow])
+	print("BENCH %s load: %.0f ms, longest frame %.0f ms, %d frames over 100 ms; longest by stage: %s"
+			% [part, (Time.get_ticks_usec() - load0) / 1000.0, longest, slow,
+			", ".join(worst.keys().map(func(k): return "%s %.0f" % [k, worst[k]]))])
 	m.set_process(false)
 	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
 	# screen, so without this the run's tail was shader compiles a player never sees mid-match
