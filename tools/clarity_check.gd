@@ -8,7 +8,6 @@ extends RefCounted
 ## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
 ## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
-## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only.
 ## Your own crowd control shows as a line under your vitals, worst first.
 
 const ClarityFight := preload("res://tools/clarity_fight.gd")
@@ -88,11 +87,11 @@ func run(main: Node) -> void:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
 	_cc_plate(m, foes[0], foes[1])
+	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
+	_cc_self(m, P)
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
-	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
-	_cc_self(m, P)
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
