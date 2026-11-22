@@ -10948,3 +10948,4 @@ READY ext/tutorial-wall-kick-step 9fde8142f215181ba9eac3e2aea99e2b9ccb6111 (wall
 READY ext/tut-sizes-playthrough 394516685eb6cd36ededdcf2b3fd1e9038e57786 (tutorials fit 720p to ultrawide)
 READY ext/anim-stun-knock-v95 36098d4deb3 (stun/knock poses on v95)
 READY ext/tut-text-audit ed2865d295 (tutorial and hint text audit)
+READY ext/vfx-sparkle-bolt adc6e97295 (Sparkle LMB bolt readable)
