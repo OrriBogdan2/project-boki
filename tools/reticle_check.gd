@@ -50,7 +50,7 @@ func run(main: Node) -> void:
 	for key in want:
 		Settings.set_v(key, want[key])
 	var cf := ConfigFile.new()
-	ok(cf.load(Settings.PATH) == OK, "the settings file exists")
+	ok(cf.load(Settings.path) == OK, "the settings file exists")
 	var saved := true
 	for key in want:
 		saved = saved and cf.get_value("s", key, null) == want[key]
