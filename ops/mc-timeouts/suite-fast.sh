@@ -72,7 +72,7 @@ fname() { echo "$1" | tr -c 'a-z0-9\n' _; }
 # A log matching NOTRUN_RE is rerun here like rc 126/127, a leftover is ignored by compare and counted in summary.txt.
 NOTRUN_RE='Unable to create DisplayServer|X11 Display is not available'; export NOTRUN_RE
 notrun() { grep -qsE "$NOTRUN_RE" $OUT/$1/$2.log; }; export -f notrun
-[ -s $OUT/flags.txt ] || { { grep -ohE '"--[a-z0-9-]+-check"' $GW/tools/check_registry.gd $GW/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $OUT/flags.txt; echo "--simtest --seed=5" >> $OUT/flags.txt; }
+[ -s $OUT/flags.txt ] || { { grep -ohE '"--[a-z0-9-]+-check"' $GW/tools/check_registry.gd $GW/tools/checks/*.gd $GW/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $OUT/flags.txt; echo "--simtest --seed=5" >> $OUT/flags.txt; }
 # ---- result cache helpers (see header) ----
 GODOT_ID="$GODOT_BIN $($GODOT_BIN --version 2>/dev/null | head -1) $(stat -c '%s-%Y' $GODOT_BIN 2>/dev/null)"
 fpgen() { # side tree outfile: "flag<TAB>fingerprint" for every mapped flag; empty file on any failure (= nothing cached)

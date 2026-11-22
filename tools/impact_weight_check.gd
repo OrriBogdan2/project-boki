@@ -18,37 +18,68 @@ extends RefCounted
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
-const FOOTAGE_BOUND_MS := 100      # one 10 fps frame: the reference footage never holds longer
+const FOOTAGE_BOUND_MS := 100  # one 10 fps frame: the reference footage never holds longer
+
 ## Steps with no hit from the hunter before the next slot, so a zone left behind has run out.
 const QUIET_STEPS := 90
+
 ## Steps LMB is held: a spooling stream (Ashwick: 0.2 s spool, then 3 m at 16 m/s) needs ~0.4 s to reach the dummy.
 const LMB_HOLD := 45
-const DRAIN_MAX := 900             # steps at most spent waiting for it
+const DRAIN_MAX := 900  # steps at most spent waiting for it
+
 ## Kit file name prefix -> the Hunter whose code it is (a Hunter's ult or dash can live in its own file).
 const FILE_HERO := {
-	"archer": "archer", "pin": "archer", "ashwick": "ashwick", "bjorn": "bulwark", "breah": "dolm",
-	"bulwark": "bulwark", "dolm": "dolm", "dredge": "dredge", "gil": "gil", "gunslinger": "gunslinger",
+	"archer": "archer",
+	"pin": "archer",
+	"ashwick": "ashwick",
+	"bjorn": "bulwark",
+	"breah": "dolm",
+	"bulwark": "bulwark",
+	"dolm": "dolm",
+	"dredge": "dredge",
+	"gil": "gil",
+	"gunslinger": "gunslinger",
 	"juggernaut": "juggernaut",
-	"mage": "mage", "ostra": "ostra", "rimewright": "rimewright", "tender": "tender", "thief": "thief",
+	"mage": "mage",
+	"ostra": "ostra",
+	"rimewright": "rimewright",
+	"tender": "tender",
+	"thief": "thief",
+}
+const TABLE_SLOTS := {"lmb": "light", "rmb": "heavy", "x": "ult"}
+
+## 7: one slot's measured hit feel matches the tiers.
+## Table slots whose hits are not their rules tier, and why (docs/DASHES_AND_ABILITY_FEEL.md §5.4).
+const TIER_OK := {
+	"rimewright rmb": "heavy",  # the lance's detonation is a payoff (one weight heavier); its landing only slows
+	"ashwick x": "",  # the lava carpet burns and slows in ticks: no hit-stop (T0)
+	"dolm lmb": "solid",  # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
 }
 
+## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
+## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
+## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
+const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
+
 var bad := 0
-var dealt := {}                    # slot -> true: the slot being pressed landed damage
+var dealt := {}  # slot -> true: the slot being pressed landed damage
 var slot_now := ""
-var hits_n := 0                    # every damaging hit from the hunter, for the drain between slots
+var hits_n := 0  # every damaging hit from the hunter, for the drain between slots
 var flow := preload("res://tools/dash_flow_check.gd").new()
+
 ## The hit-feel table (7): hero -> slot -> {hold, flash, freeze, shake} peaks (s; hold and flash read after a
 ## step, so the value set lies within one DT above them).
 var feel := {}
 var dummy_now: Ent = null
-var hit_tags := {}                 # the tags of the slot's hits on the dummy (what a stray row names)
-var self_hits := {}                # the tags of hits on the hunter itself during the slot
-const TABLE_SLOTS := {"lmb": "light", "rmb": "heavy", "x": "ult"}
+var hit_tags := {}  # the tags of the slot's hits on the dummy (what a stray row names)
+var self_hits := {}  # the tags of hits on the hunter itself during the slot
+
 
 func ok(cond: bool, what: String) -> void:
 	print("IMPACT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -70,6 +101,7 @@ func run(main: Node) -> void:
 	print("IMPACT DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 func _on_hit(by: Node, t: Node, amount: float, tags: Array) -> void:
 	if by != flow.hunter or amount <= 0.0:
 		return
@@ -81,31 +113,40 @@ func _on_hit(by: Node, t: Node, amount: float, tags: Array) -> void:
 	if slot_now != "":
 		dealt[slot_now] = true
 
+
 func _rules() -> void:
 	var tiers: Dictionary = ImpactWeight.rules["tiers"]
 	ok(tiers.keys() == ImpactWeight.TIERS, "three tiers: %s" % ", ".join(tiers.keys()))
 	var ms := ImpactWeight.TIERS.map(func(w): return int(tiers[w]["hitstop_ms"]))
 	var sh := ImpactWeight.TIERS.map(func(w): return float(tiers[w]["shake"]))
-	ok(ms[0] < ms[1] and ms[1] < ms[2] and sh[0] <= sh[1] and sh[1] < sh[2],
-		"each tier holds and shakes more than the last: %s ms, shake %s" % [ms, sh])
-	ok(ms[2] < FOOTAGE_BOUND_MS and ms[2] <= ImpactWeight.cap("hitstop_ms"),
-		"heavy %d ms is under the footage bound and the cap" % ms[2])
+	ok(
+		ms[0] < ms[1] and ms[1] < ms[2] and sh[0] <= sh[1] and sh[1] < sh[2],
+		"each tier holds and shakes more than the last: %s ms, shake %s" % [ms, sh]
+	)
+	ok(
+		ms[2] < FOOTAGE_BOUND_MS and ms[2] <= ImpactWeight.cap("hitstop_ms"),
+		"heavy %d ms is under the footage bound and the cap" % ms[2]
+	)
 	ok(not bool(tiers["light"]["attacker"]), "a light poke never holds the one who threw it")
+
 
 func _named() -> void:
 	var hunters: Dictionary = ImpactWeight.rules["hunters"]
 	for hero in Arch.ORDER:
 		var row: Dictionary = hunters.get(hero, {})
 		var odd: Array = row.keys().filter(func(a): return not ImpactWeight.TIERS.has(String(row[a])))
-		ok(row.has("lmb") and row.has("x") and odd.is_empty(),
-			"%s: LMB %s, ult %s, not a tier: %s" % [hero, row.get("lmb", "-"), row.get("x", "-"), odd])
+		ok(
+			row.has("lmb") and row.has("x") and odd.is_empty(),
+			"%s: LMB %s, ult %s, not a tier: %s" % [hero, row.get("lmb", "-"), row.get("x", "-"), odd]
+		)
 	var n := Arch.ORDER.size()
 	ok(hunters.size() == n, "the rules name %d Hunters (there are %d)" % [hunters.size(), n])
+
 
 ## Every "ab" literal in a Hunter's kit files: the ability it resolves to has a tier.
 func _kit_tags() -> void:
 	var dir := DirAccess.open("res://scripts/arch/kits")
-	var rx := RegEx.create_from_string("\"ab\": \"(\\w+)\"")
+	var rx := RegEx.create_from_string('"ab": "(\\w+)"')
 	var missing := []
 	var seen := 0
 	for f in dir.get_files():
@@ -119,6 +160,7 @@ func _kit_tags() -> void:
 				missing.append("%s %s (%s)" % [hero, ab, f])
 	ok(seen > 40 and missing.is_empty(), "%d kit hit tags all have a tier, missing: %s" % [seen, missing])
 
+
 func _presses(m: Match, hero: String) -> void:
 	var h: Hunter = flow.hunter
 	dealt = {}
@@ -126,7 +168,7 @@ func _presses(m: Match, hero: String) -> void:
 		flow._ready_up(m)
 		var dummy := _dummy(m)
 		if flow.ally and slot != "x":
-			h.inp["aim"] = dummy.pos + Vector3(0, 0.9, 0)      # _ready_up aims a NEEDS_ALLY hero at its teammate
+			h.inp["aim"] = dummy.pos + Vector3(0, 0.9, 0)  # _ready_up aims a NEEDS_ALLY hero at its teammate
 		slot_now = slot
 		if slot == "dash":
 			h.inp["move"] = Vector2(0, -1)
@@ -149,9 +191,9 @@ func _presses(m: Match, hero: String) -> void:
 			h.inp["dash"] = false
 			h.inp["fire"] = slot == "lmb" and i < LMB_HOLD
 			dummy.hp = dummy.max_hp
-			if m.meteors.size() >= mets:      # (a meteor landing near you is the world's shake, not the kit's)
+			if m.meteors.size() >= mets:  # (a meteor landing near you is the world's shake, not the kit's)
 				pk["shake"] = maxf(pk["shake"], m.cam.shake_left)
-			var last: Array = Feel._pair.get(pair, [-9.0, 0])      # [time, tier index] of the last weighted hit
+			var last: Array = Feel._pair.get(pair, [-9.0, 0])  # [time, tier index] of the last weighted hit
 			if float(last[0]) <= seen_t:
 				continue
 			seen_t = float(last[0])
@@ -169,8 +211,11 @@ func _presses(m: Match, hero: String) -> void:
 			_feel_ok(hero, slot, pk)
 		_drain(m, dummy)
 	var untiered: Array = dealt.keys().filter(func(s): return ImpactWeight.of_ability(hero, s) == "")
-	ok(dealt.has("lmb") and untiered.is_empty(),
-		"%s: damaging slots %s all have a tier, missing: %s" % [hero, dealt.keys(), untiered])
+	ok(
+		dealt.has("lmb") and untiered.is_empty(),
+		"%s: damaging slots %s all have a tier, missing: %s" % [hero, dealt.keys(), untiered]
+	)
+
 
 ## The tier whose hit-stop a peak read after a step came from (it was set at most one DT above it), or "".
 func _tier_of(peak: float) -> String:
@@ -180,13 +225,7 @@ func _tier_of(peak: float) -> String:
 			return w
 	return ""
 
-## 7: one slot's measured hit feel matches the tiers.
-## Table slots whose hits are not their rules tier, and why (docs/DASHES_AND_ABILITY_FEEL.md §5.4).
-const TIER_OK := {
-	"rimewright rmb": "heavy",      # the lance's detonation is a payoff (one weight heavier); its landing only slows
-	"ashwick x": "",                # the lava carpet burns and slows in ticks: no hit-stop (T0)
-	"dolm lmb": "solid",            # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
-}
+
 func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
 	var own := ImpactWeight.of_ability(hero, slot)
 	var seen: Array = (pk["tiers"] as Dictionary).keys()
@@ -196,26 +235,56 @@ func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
 			lightest = w
 			break
 	var want := String(TIER_OK.get("%s %s" % [hero, slot], own))
-	print("HITDIAG %s %s own %s tiers %s hold %.0f flash %.0f freeze %.0f shake %.3f tags %s" % [hero, slot, own,
-		pk["tiers"], pk["hold"] * 1000.0, pk["flash"] * 1000.0, pk["freeze"] * 1000.0, pk["shake"], pk["tags"]])
+	print(
+		(
+			"HITDIAG %s %s own %s tiers %s hold %.0f flash %.0f freeze %.0f shake %.3f tags %s"
+			% [
+				hero,
+				slot,
+				own,
+				pk["tiers"],
+				pk["hold"] * 1000.0,
+				pk["flash"] * 1000.0,
+				pk["freeze"] * 1000.0,
+				pk["shake"],
+				pk["tags"]
+			]
+		)
+	)
 	if TABLE_SLOTS.has(slot) and not (pk["tags"] as Array).is_empty():
-		ok(lightest == want, "%s %s: its lightest hit on the dummy is '%s' (rules %s, want '%s'), hits %s"
-			% [hero, slot, lightest, own, want, pk["tiers"]])
+		ok(
+			lightest == want,
+			(
+				"%s %s: its lightest hit on the dummy is '%s' (rules %s, want '%s'), hits %s"
+				% [hero, slot, lightest, own, want, pk["tiers"]]
+			)
+		)
 	# a landed combo payoff flashes a little longer (ComboMark.payoff, the owner's combo-clarity rule)
 	var fl := maxf(ImpactWeight.flash_s("heavy"), ComboMark.FLASH_BODY)
-	ok(pk["flash"] <= fl + 0.0001 and pk["shake"] < 0.0001,
-		"%s %s: the dummy flashes %.0f ms at most (tiers or a payoff %.0f), your own camera shakes %.3f s (want 0)"
-			% [hero, slot, pk["flash"] * 1000.0, fl * 1000.0, pk["shake"]])
+	ok(
+		pk["flash"] <= fl + 0.0001 and pk["shake"] < 0.0001,
+		(
+			"%s %s: the dummy flashes %.0f ms at most (tiers or a payoff %.0f), your own camera shakes %.3f s (want 0)"
+			% [hero, slot, pk["flash"] * 1000.0, fl * 1000.0, pk["shake"]]
+		)
+	)
 
-## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
-## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
-## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
-const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
+
 func _kit_literals() -> void:
-	var num := "([0-9.]+|[A-Z][A-Z_0-9]+)"      # a number or a CONSTANT
-	var rx := RegEx.create_from_string("(\\b(?!h\\.)\\w+\\.flash_t = (maxf\\(\\w+\\.flash_t, )?" + num
-		+ "|freeze_frame\\(" + num + "|freeze_t, " + num
-		+ "|Shake\\.incoming_big\\([^)]*, " + num + ", [^)]*\\))")
+	var num := "([0-9.]+|[A-Z][A-Z_0-9]+)"  # a number or a CONSTANT
+	var rx := RegEx.create_from_string(
+		(
+			"(\\b(?!h\\.)\\w+\\.flash_t = (maxf\\(\\w+\\.flash_t, )?"
+			+ num
+			+ "|freeze_frame\\("
+			+ num
+			+ "|freeze_t, "
+			+ num
+			+ "|Shake\\.incoming_big\\([^)]*, "
+			+ num
+			+ ", [^)]*\\))"
+		)
+	)
 	var dir := DirAccess.open("res://scripts/arch/kits")
 	var strays := []
 	for f in dir.get_files():
@@ -226,6 +295,7 @@ func _kit_literals() -> void:
 			if not LITERAL_OK.has(at):
 				strays.append(at)
 	ok(strays.is_empty(), "no kit sets its own hit-stop, body flash or shake number, strays: %s" % [strays])
+
 
 ## Prints the hit-feel table (DASHES_AND_ABILITY_FEEL.md §5.4): per Hunter, LMB / RMB / X: the tier the dummy held, its
 ## hold, your freeze, the body flash, and the struck player's shake (the tier's; your own camera is asserted 0).
@@ -242,11 +312,24 @@ func _table() -> void:
 			var rows := []
 			for w in tiers:
 				var ms := roundi(ImpactWeight.hold_s(w) * 1000.0)
-				rows.append("%s x%d (%d ms, flash %d ms, shake %.1f)" % [w, tiers[w], ms,
-					roundi(ImpactWeight.flash_s(w) * 1000.0), ImpactWeight.shake(w)])
-			cells.append("%s: %s (rules %s)" % [TABLE_SLOTS[slot], ", ".join(rows) if rows else "ticks only, no hold",
-				ImpactWeight.of_ability(hero, slot)])
+				rows.append(
+					(
+						"%s x%d (%d ms, flash %d ms, shake %.1f)"
+						% [w, tiers[w], ms, roundi(ImpactWeight.flash_s(w) * 1000.0), ImpactWeight.shake(w)]
+					)
+				)
+			cells.append(
+				(
+					"%s: %s (rules %s)"
+					% [
+						TABLE_SLOTS[slot],
+						", ".join(rows) if rows else "ticks only, no hold",
+						ImpactWeight.of_ability(hero, slot)
+					]
+				)
+			)
 		print("HITFEEL %s | %s" % [hero, " | ".join(cells)])
+
 
 ## Steps until nothing the slot left behind hits any more, so its hits never count for the next slot.
 func _drain(m: Match, dummy: Hunter) -> void:
@@ -260,18 +343,20 @@ func _drain(m: Match, dummy: Hunter) -> void:
 		if quiet >= QUIET_STEPS:
 			return
 
+
 ## A bot standing still 3 m north of the hunter, where the presses aim (in reach of a melee LMB).
 func _dummy(m: Match) -> Hunter:
 	var h: Hunter = flow.hunter
 	for o in m.hunters:
-		if o.team != h.team:      # a NEEDS_ALLY hero's squad mate is no target
+		if o.team != h.team:  # a NEEDS_ALLY hero's squad mate is no target
 			o.ctrl = "idle"
 			o.teleport(h.pos + Vector3(0, 0, -3))
 			o.hp = o.max_hp
 			if o.kin is Kin:
-				(o.kin as Kin).state = "bench"      # its Boki sits out: an enemy burst near you shakes you (7)
+				(o.kin as Kin).state = "bench"  # its Boki sits out: an enemy burst near you shakes you (7)
 			return o
 	return null
+
 
 ## The struck body's hold per tier, between two bodies away from the player (the player's own hits use the
 ## global freeze), 10 m apart so every hit is ranged.
@@ -279,18 +364,25 @@ func _holds(m: Match) -> void:
 	var a := _body("archer", Vector3(40, 0, 40))
 	var t := _body("", Vector3(50, 0, 40))
 	var row := {
-		"light": {"src": "shot"}, "solid": {"src": "abil", "ab": "utility"}, "heavy": {"src": "abil", "ab": "ult"},
+		"light": {"src": "shot"},
+		"solid": {"src": "abil", "ab": "utility"},
+		"heavy": {"src": "abil", "ab": "ult"},
 	}
 	for w in ImpactWeight.TIERS:
-		m.time += 1.0                     # (out of the last hit's repeat window and cap)
+		m.time += 1.0  # (out of the last hit's repeat window and cap)
 		a.freeze_t = 0.0
 		t.freeze_t = 0.0
 		var got := Feel.hitstop(m, a, t, 5.0, row[w])
-		ok(got == w and is_equal_approx(t.freeze_t, ImpactWeight.hold_s(w)) and a.freeze_t == 0.0,
-			"a ranged %s hit holds the body %.0f ms, the shooter 0 (got %s, %.0f / %.0f ms)"
-				% [w, ImpactWeight.hold_s(w) * 1000.0, got, t.freeze_t * 1000.0, a.freeze_t * 1000.0])
+		ok(
+			got == w and is_equal_approx(t.freeze_t, ImpactWeight.hold_s(w)) and a.freeze_t == 0.0,
+			(
+				"a ranged %s hit holds the body %.0f ms, the shooter 0 (got %s, %.0f / %.0f ms)"
+				% [w, ImpactWeight.hold_s(w) * 1000.0, got, t.freeze_t * 1000.0, a.freeze_t * 1000.0]
+			)
+		)
 	a.free()
 	t.free()
+
 
 func _stacking(m: Match) -> void:
 	var cap_s := ImpactWeight.cap("hitstop_ms") / 1000.0
@@ -306,8 +398,13 @@ func _stacking(m: Match) -> void:
 		Feel.hitstop(m, f, t, 30.0, {"src": "abil", "ab": "ult"})
 		held += t.freeze_t
 		m.time += 0.05
-	ok(held <= cap_s + 0.0001, "six heavy hits on one body in %.2f s hold it %.0f ms in all (cap %d)"
-		% [m.time - start, held * 1000.0, int(cap_s * 1000.0)])
+	ok(
+		held <= cap_s + 0.0001,
+		(
+			"six heavy hits on one body in %.2f s hold it %.0f ms in all (cap %d)"
+			% [m.time - start, held * 1000.0, int(cap_s * 1000.0)]
+		)
+	)
 	# five heavy hits on you from enemies inside one gap: one shake starts, and your game holds no longer than the cap
 	Settings.v["screen_shake"] = 1.0
 	var p: Hunter = m.player
@@ -321,11 +418,14 @@ func _stacking(m: Match) -> void:
 		f.pos = p.pos + Vector3(4, 0, 0)
 		var before: float = m.cam.shake_left
 		Feel.hitstop(m, f, p, 30.0, {"src": "abil", "ab": "ult"})
-		if m.cam.shake_left > before + 0.0001: starts += 1
+		if m.cam.shake_left > before + 0.0001:
+			starts += 1
 		m.time += 0.06
 	ok(starts == 1, "five heavy hits on you in 0.3 s start %d shake (want 1)" % starts)
-	ok(m.hitstop <= cap_s + 0.0001,
-		"and hold your game %.0f ms at most (cap %d)" % [m.hitstop * 1000.0, int(cap_s * 1000.0)])
+	ok(
+		m.hitstop <= cap_s + 0.0001,
+		"and hold your game %.0f ms at most (cap %d)" % [m.hitstop * 1000.0, int(cap_s * 1000.0)]
+	)
 	Settings.v["screen_shake"] = Settings.DEFAULTS["screen_shake"]
 	_freezes(m, cap_s)
 	for f in foes:

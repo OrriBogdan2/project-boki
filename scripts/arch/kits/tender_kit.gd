@@ -34,7 +34,6 @@ var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
 const BOT_CALL_SAFE := 3.0      # m: a bot starts Hearth Call on a teammate only with no rival Hunter this close
-const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Hearth Call on herself below this HP share
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
@@ -460,9 +459,9 @@ func _tick_burrs(dt: float) -> void:
 		var t: Ent = tv if is_instance_valid(tv) else null
 		var key := "burr%d" % int(b["id"])
 		var gone := t == null or t.dead
-		var held := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
-		b["build"] = float(b["build"]) + (dt if held else -dt * float(sd["unwind"]))
-		if gone or (float(b["build"]) <= 0.0 and not held):
+		var held_v := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
+		b["build"] = float(b["build"]) + (dt if held_v else -dt * float(sd["unwind"]))
+		if gone or (float(b["build"]) <= 0.0 and not held_v):
 			_burr_off(b)
 			continue
 		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
@@ -470,8 +469,8 @@ func _tick_burrs(dt: float) -> void:
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
-				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held else Color("ff8a6a"),
-				"a": lerpf(0.3, 0.9, k) if held else 0.25})
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": field()["vine"] if held_v else Color("ff8a6a"),
+				"a": lerpf(0.3, 0.9, k) if held_v else 0.25})
 		if k >= 1.0:
 			_burr_off(b)
 			_burst(t)
@@ -493,10 +492,10 @@ func _show_field(b: Dictionary, key: String, at: Vector3, k: float, dt: float) -
 ## tender.json's "field", its palette names turned into colours (read once).
 func field() -> Dictionary:
 	if field_look.is_empty():
-		var d := HeroVfx.data("tender")
-		field_look = (d["field"] as Dictionary).duplicate()
+		var dd := HeroVfx.data("tender")
+		field_look = (dd["field"] as Dictionary).duplicate()
 		for key in ["col", "rim", "vine"]:
-			field_look[key] = Color(String(d["palette"][field_look[key]]))
+			field_look[key] = Color(String(dd["palette"][field_look[key]]))
 	return field_look
 
 func _burr_off(b: Dictionary) -> void:
@@ -963,17 +962,13 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["dash"] = true
 
 
-## A bot calls a downed or badly hurt teammate home when it can and no rival is on top of her; with no
-## teammate in the match (a duel) it lights the tether on herself once hurt, as the player's key does.
+## A bot calls a downed or badly hurt teammate home when it can and no rival is on top of her. Alone (a
+## duel) it never presses: Hearth Call needs an ally in reach and refuses a self cast.
 func _bot_call() -> void:
 	if not hearth_call.is_empty() or not _x_ready():
 		return
-	var mates := CareUtil.mates(m, h)
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
 		if (o.downed or o.hp < o.max_hp * 0.35) and not _foes_near(BOT_CALL_SAFE):
 			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
 			HunterKeys.ult_pressed(h)
 			return
-	if mates.is_empty() and h.hp < h.max_hp * BOT_SELF_CALL_HP:
-		h.inp["aim"] = h.pos
-		HunterKeys.ult_pressed(h)

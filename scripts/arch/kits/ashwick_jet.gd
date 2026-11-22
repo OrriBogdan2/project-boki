@@ -231,8 +231,8 @@ func _land() -> void:
 # ------------------------------------------------------------------ the carpet
 ## One carpet piece from a to b, only where both ends are over ground (never over the abyss).
 func _lay(a: Vector3, b: Vector3) -> void:
-	var W = m.world
-	if W.ground_at(a.x, a.z) <= World.VOID + 1.0 or W.ground_at(b.x, b.z) <= World.VOID + 1.0:
+	var w = m.world
+	if w.ground_at(a.x, a.z) <= World.VOID + 1.0 or w.ground_at(b.x, b.z) <= World.VOID + 1.0:
 		void_skips += 1
 		return
 	var x := xd()

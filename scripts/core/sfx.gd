@@ -188,6 +188,7 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
+	"hostile_cast": 100,
 	"tell_foe": 120,
 	"keg_fuse": 80,
 	"keg_blast": 100,
@@ -226,7 +227,6 @@ const MIN_GAP := {
 	"steal_won": 400,
 	"steal_lost": 400,
 	"training_dummy_hit": 70,
-	"hostile_cast": 100,
 	"armor_up": 120,
 	"boki_downed": 150,
 	"boki_revive": 300,
@@ -248,7 +248,7 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff, sized to the match view (SUPERVIVE camera, ~37 m across, so ~18.5 m to the side edge): what you
+## Distance falloff, sized to the match view (the target camera, ~37 m across, so ~18.5 m to the side edge): what you
 ## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
 ## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
 ## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
@@ -546,7 +546,8 @@ func match_voices() -> int:
 		if not nm in MATCH_BEDS:
 			own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
+		var voice := c is AudioStreamPlayer or c is AudioStreamPlayer3D
+		if voice and c.playing and not c in players and not c in music and c != amb and not c in own:
 			n += 1  # also a stem or bed or loop still fading out
 	return n
 
@@ -716,7 +717,8 @@ func play_sample(bus_name: String) -> void:
 	p.play()
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter (returns a handle for cut, -1 when nothing played). reach: metres this call carries (0: the sound's own
+## burst of the same sound is capped and stacked quieter (returns a handle for cut, -1 when nothing played).
+## reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
 ## round-robins them), else a random one that isn't the last.
