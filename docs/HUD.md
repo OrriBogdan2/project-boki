@@ -134,7 +134,7 @@ for the squad rows). Verified 11-11:
 - Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
   wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`). `--inventory-check` also sweeps a full loadout at 1280x720, 1920x1080 and 3440x1440 (safe margin, clipping, every slot reachable); `--garden-fit-check` covers the garden Boki card at the same sizes.
 
 ## Pop-up budget
 
