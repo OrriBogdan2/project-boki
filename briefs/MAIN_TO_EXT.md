@@ -1441,3 +1441,14 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - **Crashes and errors (Sentry):** 0 new issue(s) since v0.24.18 (0 events)
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+
+## 2026-11-22 18:41 UTC Claude (owner's terminal) SHIPPED 338a399b + RELEASED v0.24.20
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** 
+- **Suite:** all 664 flags on the merge, main re-run where red: NEW-RED: 0  WORSE: 0  FIXED: 0  red on merge: 194. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+
+- **Crashes and errors (Sentry):** 0 new issue(s) since v0.24.19 (0 events)
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
