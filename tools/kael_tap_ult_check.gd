@@ -5,158 +5,188 @@ extends RefCounted
 ## Runs inside --juggernaut-combo-check (tools/zedran_feel_check.gd). A is tools/archetype_check.gd.
 
 const AKCheck := preload("res://tools/archetype_check.gd")
-var A: AKCheck
+var a_v: AKCheck
 var m: Match
-var P: Hunter
-var T: Hunter
-var T2: Hunter
-var K: JuggernautKit
+var p: Hunter
+var t: Hunter
+var t2: Hunter
+var k: JuggernautKit
 var home: Vector3
 
+
 func run(a) -> void:
-	A = a
-	var r := A.setup("juggernaut", 20.0, "", true)
+	a_v = a
+	var r := a_v.setup("juggernaut", 20.0, "", true)
 	m = r[0]
-	P = r[1]
-	T = r[2]
-	T2 = r[3]
+	p = r[1]
+	t = r[2]
+	t2 = r[3]
 	home = r[4]
-	K = P.ak
+	k = p.ak
 	aim_after_hook()
 	ult_momentum()
 	ult_rise()
 	tether_break()
-	await A.done(m)
+	await a_v.done(m)
+
 
 func _fresh() -> void:
-	A.step(m, 0.7)
-	K.warchain.snap(true)
-	K.riposte.drop()
-	K.lunge = {}
-	A.step(m, 0.1)
-	P.teleport(home)
-	P.vel = Vector3.ZERO
+	a_v.step(m, 0.7)
+	k.warchain.snap(true)
+	k.riposte.drop()
+	k.lunge = {}
+	a_v.step(m, 0.1)
+	p.teleport(home)
+	p.vel = Vector3.ZERO
 	for s in ["e", "rmb", "x", "air"]:
-		K.cd[s] = 0.0
-	K.ch_rmb = float(K.rmb_charges())
-	for f in [T, T2]:
-		A.fresh(f)
-		f.teleport(home + Vector3(0, 0, 9.0 if f == T else -9.0))     # parked off the strip's middle
-	m.step(A.DT)
+		k.cd[s] = 0.0
+	k.ch_rmb = float(k.rmb_charges())
+	for f in [t, t2]:
+		a_v.fresh(f)
+		f.teleport(home + Vector3(0, 0, 9.0 if f == t else -9.0))  # parked off the strip's middle
+	m.step(a_v.DT)
+
 
 func _hook(at: Vector3) -> void:
-	T.teleport(at)
-	A.aim_at(P, at)
-	K.use_e()
-	A.step(m, 0.4)
-	K.warchain.tether_t = 5.0
+	t.teleport(at)
+	a_v.aim_at(p, at)
+	k.use_e()
+	a_v.step(m, 0.4)
+	k.warchain.tether_t = 5.0
+
 
 func aim_after_hook() -> void:
 	for off in [Vector3(0, 0, -2.5), Vector3(-2.5, 0, 0)]:
 		_fresh()
 		_hook(home + Vector3(6.0, 0, 0))
-		T2.teleport(home + off)
-		A.aim_at(P, T2.pos)
-		A.tap(m, P)
-		A.step(m, float(K.rmb_def()["windup"]) + 0.1)
-		A.ok("jug item 11: hooked east, a tap aimed %.0f deg off the chain strikes there; the chain holds"
-				% rad_to_deg(Vector2(1, 0).angle_to(Vector2(off.x, off.z))),
-				A.dmg(T2) >= 20.0 and K.warchain.hooked(), "took %.0f hooked %s" % [A.dmg(T2), K.warchain.hooked()])
+		t2.teleport(home + off)
+		a_v.aim_at(p, t2.pos)
+		a_v.tap(m, p)
+		a_v.step(m, float(k.rmb_def()["windup"]) + 0.1)
+		a_v.ok(
+			(
+				"jug item 11: hooked east, a tap aimed %.0f deg off the chain strikes there; the chain holds"
+				% rad_to_deg(Vector2(1, 0).angle_to(Vector2(off.x, off.z)))
+			),
+			a_v.dmg(t2) >= 20.0 and k.warchain.hooked(),
+			"took %.0f hooked %s" % [a_v.dmg(t2), k.warchain.hooked()]
+		)
+
 
 func ult_momentum() -> void:
-	var xd := K.x_def()
+	var xd := k.x_def()
 	_fresh()
-	P.vel = Vector3(6.0, 0, 0)
-	K.riposte.start()
-	var sp := Vector2(P.vel.x, P.vel.z).length()
-	A.ok("jug X keeps momentum: the run carries into the guard", absf(sp - 6.0 * float(xd["carry_k"])) < 0.1,
-			"before %s after %s" % [K.riposte.vel_before, K.riposte.vel_after])
-	var p0 := P.pos
-	A.step(m, 0.1)
-	A.ok("jug X keeps momentum: still moving 0.1s into the guard", Vector2(P.vel.x, P.vel.z).length() > 1.0
-			and P.pos.x - p0.x > 0.2, "moved %.2f" % (P.pos.x - p0.x))
-	K.riposte.drop()
+	p.vel = Vector3(6.0, 0, 0)
+	k.riposte.start()
+	var sp := Vector2(p.vel.x, p.vel.z).length()
+	a_v.ok(
+		"jug X keeps momentum: the run carries into the guard",
+		absf(sp - 6.0 * float(xd["carry_k"])) < 0.1,
+		"before %s after %s" % [k.riposte.vel_before, k.riposte.vel_after]
+	)
+	var p0 := p.pos
+	a_v.step(m, 0.1)
+	a_v.ok(
+		"jug X keeps momentum: still moving 0.1s into the guard",
+		Vector2(p.vel.x, p.vel.z).length() > 1.0 and p.pos.x - p0.x > 0.2,
+		"moved %.2f" % (p.pos.x - p0.x)
+	)
+	k.riposte.drop()
 	# E in the guard: the pull takes his motion over from the carry
 	_fresh()
 	_hook(home + Vector3(8.0, 0, 0))
-	P.vel = Vector3(0, 0, 6.0)
-	K.riposte.start()
-	K.use_e()
-	A.ok("jug X: E in the guard pulls him in, the carry handed to the pull",
-			K.warchain.pulling() and K.riposte.st.get("carry", Vector2.ONE) == Vector2.ZERO)
+	p.vel = Vector3(0, 0, 6.0)
+	k.riposte.start()
+	k.use_e()
+	a_v.ok(
+		"jug X: E in the guard pulls him in, the carry handed to the pull",
+		k.warchain.pulling() and k.riposte.st.get("carry", Vector2.ONE) == Vector2.ZERO
+	)
+
 
 ## His height off a jump at its top, `ult`: cast three steps into it (still rising fast).
 func _jump_peak(ult: bool) -> float:
 	_fresh()
-	var y0 := P.pos.y
-	P.inp["jump"] = true
-	m.step(A.DT)
-	P.inp["jump"] = false
-	A.step(m, A.DT * 2.0)
+	var y0 := p.pos.y
+	p.inp["jump"] = true
+	m.step(a_v.DT)
+	p.inp["jump"] = false
+	a_v.step(m, a_v.DT * 2.0)
 	if ult:
-		K.riposte.start()
+		k.riposte.start()
 	var peak := y0
 	for i in 50:
-		m.step(A.DT)
-		peak = maxf(peak, P.pos.y)
-	K.riposte.drop()
+		m.step(a_v.DT)
+		peak = maxf(peak, p.pos.y)
+	k.riposte.drop()
 	return peak - y0
+
 
 ## Cast rising, the lift takes him higher than the plain jump; cast in a ledge rise (up a two-terrace block
 ## carved on the strip), the rise hands over to the lift instead of rewriting his climb.
 func ult_rise() -> void:
-	var xd := K.x_def()
+	var xd := k.x_def()
 	var plain := _jump_peak(false)
 	var lifted := _jump_peak(true)
-	A.ok("jug X keeps momentum: cast rising from a jump, the lift takes him higher", lifted - plain > 0.3,
-			"peak %.2f m, the plain jump's %.2f" % [lifted, plain])
-	var W: World = m.world
+	a_v.ok(
+		"jug X keeps momentum: cast rising from a jump, the lift takes him higher",
+		lifted - plain > 0.3,
+		"peak %.2f m, the plain jump's %.2f" % [lifted, plain]
+	)
+	var w: World = m.world
 	var x0 := int(floor(home.x))
 	var z0 := int(floor(home.z))
-	var lv := int(W.level[W.idx(x0, z0)])
+	var lv := int(w.level[w.idx(x0, z0)])
 	var carved := []
 	for dz in range(-2, 3):
 		for dx in range(3, 6):
-			var ci := W.idx(x0 + dx, z0 + dz)
-			carved.append([ci, W.level[ci]])
-			W.level[ci] = lv + 2
+			var ci := w.idx(x0 + dx, z0 + dz)
+			carved.append([ci, w.level[ci]])
+			w.level[ci] = lv + 2
 	_fresh()
-	P.teleport(Vector3(x0 + 3.0 - P.r - 0.6, home.y, home.z))     # (move_feel_check's start off the face)
+	p.teleport(Vector3(x0 + 3.0 - p.r - 0.6, home.y, home.z))  # (move_feel_check's start off the face)
 	var climbing := false
 	for i in 60:
-		P.inp["move"] = Vector2(1, 0)
-		P.inp["jump"] = i == 2
-		m.step(A.DT)
-		climbing = not P.lfloat.is_empty() and P.vel.y >= float(xd["rise_min"])
-		if climbing: break
-	P.inp["move"] = Vector2.ZERO
-	P.inp["jump"] = false
-	var y0 := P.pos.y
-	K.riposte.start()
-	A.step(m, 0.15)
-	A.ok("jug X mid-mantle: the ledge rise hands over to the lift", climbing and P.lfloat.is_empty()
-			and P.pos.y - y0 > 0.3, "climbing %s, rose %.2f vy %.2f" % [climbing, P.pos.y - y0, P.vel.y])
-	K.riposte.drop()
+		p.inp["move"] = Vector2(1, 0)
+		p.inp["jump"] = i == 2
+		m.step(a_v.DT)
+		climbing = not p.lfloat.is_empty() and p.vel.y >= float(xd["rise_min"])
+		if climbing:
+			break
+	p.inp["move"] = Vector2.ZERO
+	p.inp["jump"] = false
+	var y0 := p.pos.y
+	k.riposte.start()
+	a_v.step(m, 0.15)
+	a_v.ok(
+		"jug X mid-mantle: the ledge rise hands over to the lift",
+		climbing and p.lfloat.is_empty() and p.pos.y - y0 > 0.3,
+		"climbing %s, rose %.2f vy %.2f" % [climbing, p.pos.y - y0, p.vel.y]
+	)
+	k.riposte.drop()
 	for c in carved:
-		W.level[c[0]] = c[1]
+		w.level[c[0]] = c[1]
+
 
 ## The chain hooked 20 m off: a Lunge sideways stays inside 24 m and keeps it; one backward carries him past
 ## the length and breaks it: no clamp, no snap back. Walking back holds taut (zedran_feel_check).
 func tether_break() -> void:
 	_fresh()
 	_hook(home + Vector3(6.0, 0, 0))
-	T.teleport(home + Vector3(20.0, 0, 0))
-	A.aim_at(P, home + Vector3(0, 0, -6.0))
-	K._lunge(1.0, false)
-	A.step(m, 0.4)
-	var kept := K.warchain.hooked()
-	K.lunge = {}
-	P.vel = Vector3.ZERO
-	var b0 := K.warchain.breaks
-	A.ok("jug item 11: a Lunge sideways within the chain's length keeps it", kept, "dist %.1f" % P.flat_dist(T))
-	A.aim_at(P, P.pos + Vector3(-6.0, 0, 0))
-	K._lunge(1.0, false)
-	A.step(m, 0.6)
-	A.ok("jug item 11: a Lunge backward past the chain's length breaks it",
-			not K.warchain.hooked() and K.warchain.breaks == b0 + 1, "breaks %d dist %.1f" % [K.warchain.breaks - b0,
-			P.flat_dist(T)])
+	t.teleport(home + Vector3(20.0, 0, 0))
+	a_v.aim_at(p, home + Vector3(0, 0, -6.0))
+	k._lunge(1.0, false)
+	a_v.step(m, 0.4)
+	var kept := k.warchain.hooked()
+	k.lunge = {}
+	p.vel = Vector3.ZERO
+	var b0 := k.warchain.breaks
+	a_v.ok("jug item 11: a Lunge sideways within the chain's length keeps it", kept, "dist %.1f" % p.flat_dist(t))
+	a_v.aim_at(p, p.pos + Vector3(-6.0, 0, 0))
+	k._lunge(1.0, false)
+	a_v.step(m, 0.6)
+	a_v.ok(
+		"jug item 11: a Lunge backward past the chain's length breaks it",
+		not k.warchain.hooked() and k.warchain.breaks == b0 + 1,
+		"breaks %d dist %.1f" % [k.warchain.breaks - b0, p.flat_dist(t)]
+	)

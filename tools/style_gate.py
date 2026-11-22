@@ -9,6 +9,7 @@ candidate's tools/style_baseline.json is ignored, so a PR cannot let new problem
 New files start at 0. Prints every worse file/rule and exits 1; exits 0 when there are none.
 The lint rules are the ones next to this script (run main's copy so a PR cannot change them for itself).
 """
+
 import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
