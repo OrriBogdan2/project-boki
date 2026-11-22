@@ -38,6 +38,13 @@ var attack_left := 0.0  # s the attack clip still owns the body
 var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
+## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
+## flinch, the wall kick's plant and push, the open channel's reach. Null when a bone is missing.
+var flinch: WardenFlinch
+var wall: WardenWall
+var opener: WardenOpen
+var mouth: Array = []  # [Meshy bone, offset in it]: the copied weapon_muzzle, where the Gun's Muzzle sits each frame
+static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -100,6 +107,13 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	for st in LOOPS:
 		player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	skel = WardenGlb.skeleton(glb)
+	# (the clips advance in _process, then the layers go on top: WardenSync's order)
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	if d.has("bones"):
+		skel.set_meta(WardenSkeleton.BONE_MAP, d["bones"])
+	flinch = WardenFlinch.make(model, skel)
+	wall = WardenWall.make(model, skel)
+	opener = WardenOpen.make_on(model, skel)
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
@@ -111,6 +125,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
+	_copy_anchors(glb)
 	_play("idle", 1.0)
 
 
@@ -123,8 +138,20 @@ func _process(dt: float) -> void:
 		_play("attack", float(d.get("attack_rate", 1.0)), true)
 	elif attack_left <= 0.0:
 		_loco(s)
+	player.advance(dt)
+	if opener:
+		opener.busy = attack_left > 0.0
+		opener.step(dt, 1.0)
+	if flinch:
+		flinch.step(dt)
+	if wall:
+		wall.step(dt)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
+		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
+		if mz and not mouth.is_empty():  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
+			var on := skel.get_bone_global_pose(int(mouth[0])) * (mouth[1] as Transform3D)
+			mz.global_position = skel.global_transform * on.origin
 	for f in followers:
 		var b: int = f[1]
 		(f[0] as Node3D).position = (skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin)
@@ -307,5 +334,74 @@ func _orbit(orb: String) -> Array:
 		var rest := sk_m * csk.get_bone_global_rest(csk.find_bone(at.bone_name)) * nd.transform
 		var head := sk_m * csk.get_bone_global_rest(WardenSkeleton.find(csk, "head"))
 		out = [nd.duplicate() as Node3D, rest, head]
+	con.free()
+	return out
+
+
+## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
+## tail tip and heel jets) that data "anchors" does not place. Each rides the Meshy bone that plays its contract bone's
+## part (WardenSkeleton.find), at the same offset from that bone's head as on the contract model; one on a bone Meshy
+## has no stand-in for (a tail, a spring chain) rides the Meshy bone nearest where it sits on the contract model.
+func _copy_anchors(glb: Node3D) -> void:
+	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	var inv := to_m.affine_inverse()
+	var have: Dictionary = d.get("anchors", {})
+	for a: Array in _contract_anchors(art_id):
+		if have.has(a[0]) or skel.find_child(String(a[0]), true, false) != null:
+			continue
+		var place: Transform3D = a[2]
+		var nb := WardenSkeleton.find(skel, String(a[1]))
+		if nb >= 0:
+			place.origin += (to_m * skel.get_bone_global_rest(nb)).origin - (a[3] as Vector3)
+		else:
+			nb = _nearest(inv * place.origin)
+		var at := BoneAttachment3D.new()
+		at.name = "bone_%s" % a[0]
+		at.bone_name = skel.get_bone_name(nb)
+		skel.add_child(at)
+		var e := Node3D.new()
+		e.name = String(a[0])
+		e.transform = skel.get_bone_global_rest(nb).affine_inverse() * inv * place
+		at.add_child(e)
+		if e.name == WardenGlb.WEAPON_MUZZLE:
+			mouth = [nb, e.transform]
+
+
+## The bone whose rest head is nearest `p` (skeleton space).
+func _nearest(p: Vector3) -> int:
+	var best := 0
+	for b in skel.get_bone_count():
+		if skel.get_bone_global_rest(b).origin.distance_to(p) < skel.get_bone_global_rest(best).origin.distance_to(p):
+			best = b
+	return best
+
+
+## The anchor empties of the art's contract .glb (read once per art): [name, contract bone it rides, its model-space
+## rest, that bone's head (model space)].
+static func _contract_anchors(art_name: String) -> Array:
+	if _anchors.has(art_name):
+		return _anchors[art_name]
+	var out: Array = []
+	_anchors[art_name] = out
+	var path := "%s/%s/%s.glb" % [WardenGlb.DIR, art_name, art_name]
+	if not ResourceLoader.exists(path):
+		return out
+	var con := (load(path) as PackedScene).instantiate() as Node3D
+	var csk := WardenGlb.skeleton(con)
+	var sk_m := WardenGlb.model_xf(con, csk) if csk else Transform3D.IDENTITY
+	for nd in (con.find_children("*", "Node3D", true, false) if csk else []):
+		var nm := String(nd.name)
+		if nd is MeshInstance3D or not (nm.begins_with("anchor_") or nm.begins_with("weapon_muzzle")):
+			continue
+		var xf := Transform3D.IDENTITY
+		var n: Node = nd
+		while n is Node3D and not (n is BoneAttachment3D):
+			xf = (n as Node3D).transform * xf
+			n = n.get_parent()
+		var cb := csk.find_bone((n as BoneAttachment3D).bone_name) if n is BoneAttachment3D else -1
+		if cb < 0:
+			continue
+		var bone_m := sk_m * csk.get_bone_global_rest(cb)
+		out.append([nm, csk.get_bone_name(cb), bone_m * xf, bone_m.origin])
 	con.free()
 	return out
