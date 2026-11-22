@@ -41,6 +41,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for arch in Arch.ORDER:
 		await _hunter(main, String(arch))
 	print("BANK DONE, failures: ", bad)
