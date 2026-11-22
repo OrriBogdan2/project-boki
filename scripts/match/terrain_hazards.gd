@@ -318,6 +318,7 @@ func _tier() -> float:
 
 
 func _slow(h: Hunter, k: float) -> void:
+	CcSfx.zone_slow(h)
 	h.slow_t = maxf(h.slow_t, 0.15)
 	h.slow_k = maxf(h.slow_k, k)
 
