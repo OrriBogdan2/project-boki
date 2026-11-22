@@ -35,3 +35,7 @@ hunter goes out in a risky match) it turns back into the walking Boki and the lo
   untouched. R while summoned leaps it in: the window ends and its one cooldown starts at the press (held during the
   leap). E (C with an archetype) from a wisp is the carried rule at the carried power; a dash, leap or blink ability
   waits for the summon (`KinCommand.c_deny_text` says so), and the order wheel stays shut. `--wisp-check` covers it.
+- Read at the match camera (2026-11-20, `--wisp-read-shots`, docs/shots/wisp-read/): a carried wisp's ring is hidden, so its
+  rim takes the side colour (SideColor: you, squad, rival; one instance uniform, set when the colour changes), it is drawn
+  at the downed form's 1.5x (about 37 px against 25) and orbits at 0.8 m. Same mesh, material and sparkles: draw calls are
+  unchanged (762 before and after).
