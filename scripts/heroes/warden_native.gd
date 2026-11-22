@@ -409,10 +409,11 @@ func _orbit(orb: String) -> Array:
 
 ## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
 ## tail tip and heel jets, Kael's blade tip) that data "anchors" does not place. Each rides the Meshy bone that plays
-## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find: a
-## blade bone's hand), in that bone's own frame at the same distance in metres (the bone frames, not the model, carry
-## it over: Meshy's rest is a T-pose, the contract's arms hang). One with no such bone (a tail spring off the hips is
-## still found through the hips; a loose one) rides the Meshy bone nearest where it sits on the contract model.
+## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find).
+## On its own bone's stand-in it keeps that bone's frame at the same distance in metres (the bone frames, not the
+## model, carry it over: Meshy's rest is a T-pose, the contract's arms hang); on a parent's (a tail spring, a
+## pauldron: the torso, whose rest the two models share) or on the nearest bone (a loose one) it keeps where it sits
+## on the contract model.
 func _copy_anchors(glb: Node3D) -> void:
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	var inv := to_m.affine_inverse()
@@ -431,6 +432,7 @@ func _copy_anchors(glb: Node3D) -> void:
 				break
 		if nb < 0:
 			nb = _nearest(inv * (a[2] as Transform3D).origin)
+		if nb >= 0 and WardenSkeleton.find(skel, String(a[1][0][0])) != nb:  # (on a parent: where it sits on the model)
 			local = skel.get_bone_global_rest(nb).affine_inverse() * inv * (a[2] as Transform3D)
 		var at := BoneAttachment3D.new()
 		at.name = "bone_%s" % a[0]
