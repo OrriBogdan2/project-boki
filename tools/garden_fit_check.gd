@@ -105,11 +105,14 @@ func _dress_save() -> void:
 	Save.d.erase("wishes")
 	Save.d["showcase"] = [{"name": "Pennyroyal the Wandering", "date": "day 12", "twist": "Low-gravity gust week"}]
 
+## The wishes card (it rides on the arrival card: the same lines, on a panel of its own, once per size).
 func _wishes() -> void:
 	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
-	var w := GardenWishes.today(Time.get_unix_time_from_system())
-	ok(not w["list"].is_empty(), "the wishes card has wishes")
-	GardenWishes.fill(v, w)
+	GardenWishes.today(Time.get_unix_time_from_system())["seen"] = false
+	var lines := GardenWishes.card_lines()
+	ok(not lines.is_empty(), "the wishes card has wishes")
+	for l in lines:
+		v.add_child(UI.label(HomeNotices.bullet(String(l)), 15))
 
 func _nook() -> void:
 	home.nook_pick = [Save.d["roster"][0]["uid"], Save.d["roster"][1]["uid"]]
