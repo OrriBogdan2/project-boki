@@ -3,8 +3,9 @@ extends RefCounted
 ## The in-match cursor reticle with its aim states (the HUD owns one): the Reticle ring that opens with bloom,
 ## the archetype's resource arc, the charge / warm-up / spin-up arc or the ammo arc round it, the
 ## full-charge flare, and the hit tick (thin strokes off the ring, longer with a pulse ring on a crit or a
-## knock, gold on a crit, pale on armour, with a ring flash). The tick's state is the HUD's Reticle. Thin strokes, a dark edge under every one, the Hunter's accent on the dot
-## and arcs. Numbers: content/rules/tuning.json "reticle". The AimKit cursor states are AimReticle.
+## knock, gold on a crit, pale on armour, with a ring flash). The tick's state is the HUD's Reticle. Thin strokes,
+## a dark edge under every one, the Hunter's accent on the dot and arcs. Numbers: content/rules/tuning.json
+## "reticle". The AimKit cursor states are AimReticle.
 
 var rt: Reticle               # the hit tick's state (the HUD's)
 var pin := Vector2.INF        # review tools: draw here (HUD canvas px) instead of at the mouse
