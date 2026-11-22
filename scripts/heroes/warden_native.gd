@@ -38,7 +38,8 @@ var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
-var last := {}  # the state counters last frame (kmove, swing_n, cast, recoil); empty until the first frame
+## The state counters last frame; cast -1: none read yet (the first frame's seconds since a cast is no new cast)
+var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -231,9 +232,8 @@ func _attacked(s: Dictionary) -> bool:
 		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
 		"recoil": float(s.get("recoil", 0.0)),
 	}
-	if last.is_empty():  # (the first frame only sets the counters: a model built mid-match does not swing)
-		last = now
-		return false
+	if float(last["cast"]) < 0.0:
+		last["cast"] = now["cast"]
 	var hit: bool = (
 		(now["kmove"] != "" and now["kmove"] != last["kmove"])
 		or now["swing_n"] > last["swing_n"]
