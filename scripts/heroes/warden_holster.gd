@@ -7,12 +7,13 @@ extends RefCounted
 ## Data (content/rules/warden_anim/<art>.json "holster"): {"hip": SOCKET, "hand": SOCKET}, SOCKET = {"bone", "pos"
 ## (m, in that bone's space), "rot" (euler rad)}.
 
-const DRAW := "gun_draw"      # model meta: 0 on the hip, 1 in the hand (HunterAnim.aim_k)
+const DRAW := "gun_draw"  # model meta: 0 on the hip, 1 in the hand (HunterAnim.aim_k)
 
 var root: Node3D
 var skel: Skeleton3D
 var gun := -1
-var sockets: Array = []        # [hip bone, hip offset, hand bone, hand offset]
+var sockets: Array = []  # [hip bone, hip offset, hand bone, hand offset]
+
 
 static func make(model: Node3D, sk: Skeleton3D, data: Dictionary, gun_bone: String) -> WardenHolster:
 	var h := WardenHolster.new()
@@ -30,6 +31,7 @@ static func make(model: Node3D, sk: Skeleton3D, data: Dictionary, gun_bone: Stri
 		var at := Basis.from_euler(Vector3(rot[0], rot[1], rot[2]))
 		h.sockets.append(Transform3D(at, Vector3(pos[0], pos[1], pos[2])))
 	return h
+
 
 ## One frame, after the clips posed the bones.
 func step() -> void:
