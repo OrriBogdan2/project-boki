@@ -12,7 +12,7 @@ static func rules() -> Dictionary:
 
 ## Seasons since 1970: one per `weeks` weeks of BaseRace's week number (default this week).
 static func number(week := -1) -> int:
-	return (week if week >= 0 else BaseRace.week_now()) / int(rules()["weeks"])
+	return int((week if week >= 0 else BaseRace.week_now()) / float(int(rules()["weeks"])))
 
 
 ## The season on for a week number (default this week): a garden_seasons.json seasons entry.

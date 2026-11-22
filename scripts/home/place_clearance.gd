@@ -47,7 +47,7 @@ static func free_trapped(h) -> int:
 		for i in seen.size():
 			if seen[i] != 1 or w.kind[i] != World.T_GROUND:
 				continue
-			var tile := Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+			var tile := Vector3(i % w.w + 0.5, 0, int(i / float(w.w)) + 0.5)
 			var d := Vector2(tile.x - at.x, tile.z - at.z).length_squared()
 			if d < best_d:
 				best = tile

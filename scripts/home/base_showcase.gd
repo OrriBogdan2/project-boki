@@ -32,8 +32,8 @@ static func snap(vp: Viewport, cam: Camera3D, at: Vector3) -> String:
 	if img == null:
 		return ""
 	var c := cam.unproject_position(at)
-	var x := clampi(int(c.x) - CROP / 2, 0, maxi(0, img.get_width() - CROP))
-	var y := clampi(int(c.y) - CROP / 2, 0, maxi(0, img.get_height() - CROP))
+	var x := clampi(int(c.x) - int(CROP / 2.0), 0, maxi(0, img.get_width() - CROP))
+	var y := clampi(int(c.y) - int(CROP / 2.0), 0, maxi(0, img.get_height() - CROP))
 	var part := img.get_region(Rect2i(x, y, CROP, CROP))
 	part.resize(IMG, IMG, Image.INTERPOLATE_LANCZOS)
 	return Marshalls.raw_to_base64(part.save_png_to_buffer())
@@ -69,7 +69,7 @@ static func build(pos: Vector3, wall: Array) -> Node3D:
 	for i in mini(wall.size(), MAX):
 		var e: Dictionary = wall[i]
 		var cx := (i % COLS - (COLS - 1) * 0.5) * (FRAME + GAP)
-		var cy := h - GAP - FRAME * 0.5 - (i / COLS) * (FRAME + GAP) + 0.3
+		var cy := h - GAP - FRAME * 0.5 - (int(i / float(COLS))) * (FRAME + GAP) + 0.3
 		var tex := texture(String(e.get("img", "")))
 		var paper := Color("e8dcc0") if tex == null else Color.WHITE
 		n.add_child(_quad(Vector2(FRAME, FRAME), paper, tex, Vector3(cx, cy, 0.01)))

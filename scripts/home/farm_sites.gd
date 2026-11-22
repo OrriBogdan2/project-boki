@@ -187,7 +187,7 @@ static func add_swing(e: Dictionary, n := 1) -> bool:
 # ------------------------------------------------------------------ materials, a quarter at a time
 ## The swing a quarter starts at: quarter k (0-based) begins after this many swings.
 static func step_start(need: int, k: int) -> int:
-	return need * k / STEPS
+	return int(need * k / float(STEPS))
 
 ## How many quarters the next swing needs paid: every quarter that has begun by now.
 static func steps_due(s: Dictionary) -> int:
@@ -201,7 +201,7 @@ static func steps_due(s: Dictionary) -> int:
 static func step_share(cost: Dictionary, k: int) -> Dictionary:
 	var out := {}
 	for m in cost:
-		var n := int(cost[m]) * (k + 1) / STEPS - int(cost[m]) * k / STEPS
+		var n := int(int(cost[m]) * (k + 1) / float(STEPS)) - int(int(cost[m]) * k / float(STEPS))
 		if n > 0: out[m] = n
 	return out
 
