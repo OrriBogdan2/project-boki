@@ -207,7 +207,7 @@ static func on_hands(arrays: Array, head: Dictionary, piece: Array[int]) -> Dict
 	var pos: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
 	var wts: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
-	var per := bones.size() / pos.size()
+	var per := int(bones.size() / float(pos.size()))
 	var tied := {}
 	var reach := {}
 	for v in pos.size():

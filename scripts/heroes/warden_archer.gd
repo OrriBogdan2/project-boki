@@ -191,7 +191,7 @@ static func _quiver(c: Dictionary, m: Dictionary) -> void:
 	Models.part(t, Models.lathe(Models.smooth_curve(profile, 2), 16, "wa_quiver"), m["dark"], qb, Vector3.ONE, qr)
 	Models.part(t, Models.cyl(0.078, 0.078, 0.024, 16), m["steel"], qb + b * Vector3(0, 0.19, 0), Vector3.ONE, qr)
 	for k in 5:
-		var off := Vector3((k % 3) * 0.035 - 0.035, 0.0, (k / 3) * 0.035 - 0.017)
+		var off := Vector3((k % 3) * 0.035 - 0.035, 0.0, (int(k / 3.0)) * 0.035 - 0.017)
 		Models.part(
 			t,
 			Models.cyl(0.006, 0.006, 0.26, 4),
