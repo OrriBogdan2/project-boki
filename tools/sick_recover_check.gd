@@ -10,9 +10,12 @@ const STEP_S := 60.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SICK %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -36,6 +39,7 @@ func run(m: Node) -> void:
 	print("SICK DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A kin left alone for NEGLECT_DAYS, asserting it never dies and does reach sick.
 func _neglected(nm: String) -> Dictionary:
 	var r := Save.new_kin("cindle", nm)
@@ -55,18 +59,20 @@ func _neglected(nm: String) -> Dictionary:
 	ok(sick_seen and stage == "sick" and Care.ailing(r), "...it got sick, and stays sick (stage %s)" % stage)
 	return r
 
+
 ## Seconds of care until the kin is fully well (0 if never within the limit): one meal, then kept
 ## half full; rest: asleep the whole time; friend: another Boki close the whole time.
 func _care(r: Dictionary, rest: bool, friend: bool) -> float:
 	var t := 0.0
 	Care.feed(r, "sweetbun")
 	while t < CARE_LIMIT_S:
-		Care.change(r, "food", maxf(0.0, 50.0 - Care.need(r, "food")))      # stays fed without more meals
+		Care.change(r, "food", maxf(0.0, 50.0 - Care.need(r, "food")))  # stays fed without more meals
 		Care.tick(r, STEP_S, rest, false, friend)
 		t += STEP_S
 		if Care.starve_stage(r) == "" and not r.has("starve"):
 			return t
 	return 0.0
+
 
 ## The farm's friend test: only a Boki close by, outdoors, counts, and only for an ailing one.
 func _friend(r: Dictionary) -> void:
@@ -74,17 +80,30 @@ func _friend(r: Dictionary) -> void:
 	var near := {"rec": Save.new_kin("cindle", "Pal"), "pos": Vector3(1.0, 0.0, 0.0)}
 	var far := {"rec": near["rec"], "pos": Vector3(FarmChatter.FRIEND_R + 1.0, 0.0, 0.0)}
 	var inside := {"rec": near["rec"], "pos": near["pos"], "indoors": true}
-	ok(KinAiling.friend_near([k, near], k) and not KinAiling.friend_near([k, far], k)
-			and not KinAiling.friend_near([k, inside], k), "a friend counts only when close and outdoors")
+	ok(
+		(
+			KinAiling.friend_near([k, near], k)
+			and not KinAiling.friend_near([k, far], k)
+			and not KinAiling.friend_near([k, inside], k)
+		),
+		"a friend counts only when close and outdoors"
+	)
 	ok(not KinAiling.friend_near([near, k], near), "...and only for a weak or sick Boki")
+
 
 ## The look: a sick Boki walks slower, leans forward and hops low; well again, it straightens and perks up.
 func _look(r: Dictionary) -> void:
 	var weak := r.duplicate(true)
 	weak["starve"] = Care.STARVE["weak"] * 3600.0 + 1.0
-	var P: Dictionary = Content.rules("care")["ailing_pace"]
-	ok(Care.pace(r) == float(P["sick"]) and Care.pace(weak) == float(P["weak"])
-			and Care.pace(Save.new_kin("cindle", "Fine")) == 1.0, "care.json ailing_pace: sick < weak < well")
+	var p: Dictionary = Content.rules("care")["ailing_pace"]
+	ok(
+		(
+			Care.pace(r) == float(p["sick"])
+			and Care.pace(weak) == float(p["weak"])
+			and Care.pace(Save.new_kin("cindle", "Fine")) == 1.0
+		),
+		"care.json ailing_pace: sick < weak < well"
+	)
 	var n := Node3D.new()
 	var body := Node3D.new()
 	body.name = "Body"
@@ -99,6 +118,7 @@ func _look(r: Dictionary) -> void:
 		KinAiling.pose(k, n, 1.0 / 60.0)
 	ok(body.rotation.x == 0.0 and not k.has("droop"), "...well again, it stands straight")
 	n.free()
+
 
 func _medicine(r: Dictionary) -> void:
 	r["likes"]["hates"] = "kibble"

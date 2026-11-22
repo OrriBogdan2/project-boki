@@ -33,6 +33,8 @@ const GHOST_STEP := 0.4                # m between the samples that find the str
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
+const GRIP_UP := 0.95                  # m above a body's feet where the hand holds it
+const CHASE := 1.5                     # x the hook's speed: another game's copy of the hand catches up to his last row
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
@@ -42,6 +44,9 @@ var flying := false             # hold: the hook is in the air (from the coil-ba
 var coil := 0.0                 # hold: the coil-back before the arm shoots out (`rmb.windup`): time left
 var hook_sd := {}               # the hook's shot while it flies
 var arm_tip := Vector3.INF      # where his hand reaches this step (the model's WardenReach.TIP); INF: home
+var shown_tip := Vector3.INF    # the last step's arm_tip (the hunter row sends it, net_reach)
+var wire: Array = []            # another game's Grimble: his last net_reach
+var net_tip := Vector3.INF      # ... and where his hand is shown (it chases the row's tip)
 var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
@@ -216,7 +221,7 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -261,7 +266,36 @@ func _tick_model(_dt: float) -> void:
 	if h.model:
 		h.model.set_meta(WardenReach.TIP, arm_tip)
 		coins.tick(h, m.time, tells_visible())
+	shown_tip = arm_tip
 	arm_tip = Vector3.INF
+
+## The reach on the hunter row (HunterNet; Net 0.24.20), as other games don't run this kit: [] home, [nid] the body
+## the reel holds, [x, y, z] the hook in flight.
+func net_reach() -> Array:
+	if not shown_tip.is_finite():
+		return []
+	if not pull.is_empty() and is_instance_valid(pull["t"]):
+		return [(pull["t"] as Ent).nid]
+	return [m._r(shown_tip.x), m._r(shown_tip.y), m._r(shown_tip.z)]
+
+func net_reach_in(w: Array) -> void:
+	wire = w
+
+## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy, or in flight
+## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there).
+func sound_tick(dt: float) -> void:
+	if not h.remote or h.model == null:
+		return
+	if wire.size() == 1:
+		var f: Variant = m.ents_by_id.get(String(wire[0]), null)
+		net_tip = (f as Ent).pos + Vector3(0, GRIP_UP, 0) if f is Ent and not (f as Ent).dead else Vector3.INF
+	elif wire.size() == 3:
+		var to := Vector3(wire[0], wire[1], wire[2])
+		var speed := float(rmb_def()["speed"]) * CHASE
+		net_tip = to if not net_tip.is_finite() else net_tip.move_toward(to, speed * dt)
+	else:
+		net_tip = Vector3.INF
+	h.model.set_meta(WardenReach.TIP, net_tip)
 
 # ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:
@@ -303,12 +337,13 @@ func _launch_hook() -> void:
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
 	var n0: int = m.shots.size()
-	run(stg, cx("rmb", "abyssal_hand", aim(), {
+	run(stg, cx("rmb", "abyssal_hand", aim(), {"drawn": true,       # the hand and the arm are drawn by the kit
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			Sfx.loop_stop(_fly_key())
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
@@ -318,10 +353,6 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
-		var sn = hook_sd.get("node")
-		if sn is Node3D and is_instance_valid(sn):
-			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
-			hook_sd["node"] = null
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
@@ -329,6 +360,7 @@ func _tick_hook() -> void:
 	if hook_sd.is_empty():
 		return
 	var p: Vector3 = hook_sd["pos"]
+	Sfx.loop_hold(_fly_key(), "dr_reach_fly", p, -8.0, 1.0)      # the chain paying out behind the hand
 	for o in m.hunters:
 		if o == h or not is_instance_valid(o) or o.dead or o.out or absf(o.pos.y + 0.9 - p.y) > 1.6:
 			continue
@@ -372,13 +404,15 @@ func _in_rock(a: Vector3, b: Vector3) -> Array:
 ## splash of sludge where it let go.
 func _let_go(tip: Vector3) -> void:
 	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+	m.sfx("dr_let_go", tip, -5.0, 1.0)
+
+func _fly_key() -> String:
+	return "reach_fly_%d" % h.get_instance_id()
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
-	if KinMerge.transforming(h) or KinMerge.active(h):
-		hook_hold = null
-		return
+	Sfx.loop_stop(_fly_key())
 	var rdf := rmb_def()
 	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
@@ -431,7 +465,7 @@ func _tick_pull(dt: float) -> void:
 	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
 	if to.length() > 0.05 and face_locked():
 		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
-	_reach(fe.pos + Vector3(0, 0.95, 0))
+	_reach(fe.pos + Vector3(0, GRIP_UP, 0))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
 			scoop.erase(w)
@@ -457,7 +491,7 @@ func _end_pull(arrived: bool) -> void:
 	var ally: bool = pull.get("ally", false)
 	var tow: Dictionary = pull.get("tow", {})
 	if is_instance_valid(f):
-		_let_go((f as Ent).pos + Vector3(0, 0.95, 0))
+		_let_go((f as Ent).pos + Vector3(0, GRIP_UP, 0))
 	hauled += int(tow.get("hauled", 0))
 	m.displace.stop(tow)
 	for rec in pull.get("scoop", []):
@@ -670,7 +704,8 @@ func _quake(at: Vector3, fell: float) -> void:
 ## barge arrives, the smash rides the pounce and drops from where it ends, the fan follows him.
 func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
-		h.dash_buf = Hunter.DASH_BUFFER        # held, never dropped: the next shove goes the step the gap ends
+		# held, never dropped: the next shove goes the step the gap ends (the shared window alone is shorter)
+		h.dash_buf = maxf(Loco.press_buffer, next_barge - m.time + CHAIN_GRACE)
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()

@@ -53,6 +53,7 @@ static func _status(c: Control, m: Match, k: Kin, col: Color) -> void:
 	if id == "" or m.cam.is_position_behind(at3):
 		return
 	var at := m.cam.unproject_position(at3)
+	SafeArea.note_as("boki_status", Rect2(at - Vector2.ONE * (ICON_S + 5.0), Vector2.ONE * (ICON_S + 5.0) * 2.0))
 	c.draw_circle(at, ICON_S + 5.0, Color(0.03, 0.04, 0.07, 0.8))
 	c.draw_arc(at, ICON_S + 5.0, 0.0, TAU, 24, col, 2.0, true)
 	Icons.draw(c, id, at, ICON_S, col.lerp(Color.WHITE, 0.35))
