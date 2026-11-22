@@ -3551,10 +3551,10 @@ func _play_evolutions() -> void:
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("boki_evolve")
 	music.hold("lullaby", 25.0)
-	var tw := create_tween()
-	tw.tween_interval(0.4)
-	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.tween_callback(func():
+	var tw_v := create_tween()
+	tw_v.tween_interval(0.4)
+	tw_v.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw_v.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
 			building_now = false
@@ -4900,9 +4900,9 @@ func _open_feed(rec: Dictionary) -> void:
 		row.add_child(info)
 		row.add_child(UI.button("Feed", func(): _care_feed(rec, f), 100))
 		v.add_child(row)
-	for f in Care.FOODS:
+	for f in Care.foods_v:
 		var n := int(Save.d["items"].get(f, 0))
-		if n > 0: row_for.call(f, n, Care.FOODS[f]["desc"])
+		if n > 0: row_for.call(f, n, Care.foods_v[f]["desc"])
 	for f in Data.CROPS:
 		var n := int(Save.d["crops"].get(f, 0))
 		if n > 0:
