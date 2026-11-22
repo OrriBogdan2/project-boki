@@ -56,23 +56,23 @@ func _tap(action: String, delta: float) -> void:
 
 
 func _at() -> Vector3:
-	return Vector3(hm.ppos.x, hm.py, hm.ppos.z) if hm else P.pos
+	return Vector3(hm.ppos.x, hm.py, hm.ppos.z) if hm else p_v.pos
 
 
 func _vy() -> float:
-	return hm.pvy if hm else P.vel.y
+	return hm.pvy if hm else p_v.vel.y
 
 
 func _speed() -> float:
-	return Vector2(hm.pvel.x, hm.pvel.z).length() if hm else _hv(P).length()
+	return Vector2(hm.pvel.x, hm.pvel.z).length() if hm else _hv(p_v).length()
 
 
 func _floor_y() -> float:
-	return hm._ground_h(hm.ppos.x, hm.ppos.z) if hm else P.ground()
+	return hm._ground_h(hm.ppos.x, hm.ppos.z) if hm else p_v.ground()
 
 
 func _dashing() -> bool:
-	return hm.dash_t > 0.0 if hm else P.roll_t > 0.0
+	return hm.dash_t > 0.0 if hm else p_v.roll_t > 0.0
 
 
 func _in_air() -> bool:
@@ -102,7 +102,7 @@ func _lift(up: float) -> void:
 	if hm:
 		hm.py += up
 	else:
-		P.pos.y += up
+		p_v.pos.y += up
 
 
 func _run_stop(fps: int) -> void:
@@ -130,7 +130,7 @@ func _hunter_stops(fps: int) -> void:
 		if hm:
 			Save.d["arch"] = speeds[v][0]
 		else:
-			P.base_speed = v
+			p_v.base_speed = v
 		Input.action_press("right")
 		await _frames(0.5, delta)
 		Input.action_release("right")
@@ -140,7 +140,7 @@ func _hunter_stops(fps: int) -> void:
 	if hm:
 		Save.d["arch"] = arch_was
 	else:
-		HunterMove.apply(P)
+		HunterMove.apply(p_v)
 
 
 func _jump_arc(fps: int) -> void:

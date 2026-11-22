@@ -5,6 +5,7 @@ extends RefCounted
 
 var main: Node
 
+
 func _grab(dir: String, lane: Rect2) -> void:
 	for i in 12:
 		await main.get_tree().process_frame
@@ -15,6 +16,7 @@ func _grab(dir: String, lane: Rect2) -> void:
 	crop.resize(crop.get_width() * 2, crop.get_height() * 2, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(tag + "_lane.png"))
 	print("KILLFEED-SHOT ", dir.path_join(tag))
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -29,12 +31,23 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Save.d.erase("hud_reveal")
-	Settings.set_v("hud_full", true, false)      # (every HUD group: the staged HUD hides the feed early)
+	Settings.set_v("hud_full", true, false)  # (every HUD group: the staged HUD hides the feed early)
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "god": true,
-		"length": 1e9, "demo_kin": "cindle"})
+	await m.start(
+		{
+			"teams": 4,
+			"squad": 3,
+			"tier": 0,
+			"seed": 77,
+			"no_drop": true,
+			"autoplay": true,
+			"god": true,
+			"length": 1e9,
+			"demo_kin": "cindle"
+		}
+	)
 	m.set_process(false)
 	if main.fade != null:
 		await main.fade.reveal(0.01)
@@ -47,7 +60,7 @@ func run(main_node: Node) -> void:
 	KillFeed.knock(m, foes[1], me.kin, KillFeed.icon_of(me.kin, {"ab": "k1"}))
 	KillFeed.out(m, foes[2], foes[3], "finished")
 	KillFeed.knock(m, mate, blight, KillFeed.icon_of(blight, {}))
-	for i in 150:      # (the painted faces are cut on a worker: a few seconds of frames)
+	for i in 150:  # (the painted faces are cut on a worker: a few seconds of frames)
 		m.hud.panels.queue_redraw()
 		await main.get_tree().process_frame
 	var lane := Rect2()
