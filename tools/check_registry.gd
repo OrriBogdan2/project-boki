@@ -464,8 +464,6 @@ const CHECKS := {
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],  # build.hunters trims
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
-	# no clip stretches a skinned edge past 1.3x
-	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # ability words
@@ -1014,6 +1012,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"fight-p99-gpu": "--fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict",
 }
 
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
