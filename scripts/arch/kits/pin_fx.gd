@@ -231,7 +231,7 @@ func fletch_burst(at: Vector3, across: float, col: Color, hold: float, fade: flo
 	KitShaders.param(n, "color", col)
 	KitShaders.param(n, "ring", ring)
 	KitShaders.param(n, "leaves", leaves)
-	KitShaders.param(n, "rot", randf() * TAU)
+	KitShaders.param(n, "rot", KitLooks.vis_rng.randf() * TAU)
 	KitShaders.param(n, "power", 1.6)
 	b["t"] = 0.0
 	b["dur"] = hold + fade
@@ -343,7 +343,7 @@ func lob(at: Vector3, dir: Vector2) -> void:
 	for c in streaks:
 		if float(c["t"]) > 0.0:
 			continue
-		var spread := Vector3(randf_range(-0.6, 0.6), 0, randf_range(-0.6, 0.6))
+		var spread := Vector3(KitLooks.vis_rng.randf_range(-0.6, 0.6), 0, KitLooks.vis_rng.randf_range(-0.6, 0.6))
 		c["t"] = 0.32
 		c["from"] = at
 		c["to"] = at + Vector3(dir.x * 2.0, 5.5, dir.y * 2.0) + spread
@@ -445,13 +445,14 @@ func _tick_rain(dt: float) -> void:
 		rain["every"] = 0.035
 		var yaw := atan2(-(rain["dir"] as Vector2).x, -(rain["dir"] as Vector2).y)
 		var half := deg_to_rad(float(rain["deg"])) * 0.5
-		var depth := float(rain["radius"]) + randf_range(-0.45, 0.45)
-		var q := _arc_pt(rain["center"], yaw, depth, randf_range(-half, half))
+		var depth := float(rain["radius"]) + KitLooks.vis_rng.randf_range(-0.45, 0.45)
+		var q := _arc_pt(rain["center"], yaw, depth, KitLooks.vis_rng.randf_range(-half, half))
 		for c in streaks:
 			if float(c["t"]) <= 0.0:
 				c["t"] = 0.32
 				c["to"] = q
-				c["from"] = q + Vector3(randf_range(-0.8, 0.8), 6.5, randf_range(-0.8, 0.8))
+				var vr := KitLooks.vis_rng
+				c["from"] = q + Vector3(vr.randf_range(-0.8, 0.8), 6.5, vr.randf_range(-0.8, 0.8))
 				c["up"] = false
 				break
 	for f in flames:
