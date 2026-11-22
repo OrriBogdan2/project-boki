@@ -69,7 +69,7 @@ const IV_INHERIT_MAX := 5
 ## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
 const IV_RARE_HIGH := 3
 const IV_RARE_FLOOR := 26
-const IV_EXPLAIN := "IVs are what a Boki is born with: 0 to 31 a stat, fixed for life, passed down when Boki breed. 31 is up to 10% better than 0."
+const IV_EXPLAIN := "IVs: born-with stats from 0 to 31, passed on to eggs."
 
 const BONDS := [
 	[0.0, "Wary", "Might refuse a risky throw."],
@@ -96,7 +96,7 @@ const STALL_FOODS := {
 		"desc": "A bun that hums."},
 }
 ## Every prepared food: the stall's plus the type snacks of content/rules/snacks.json (coloured by their type's tint).
-static var FOODS: Dictionary = _foods()
+static var foods_v: Dictionary = _foods()
 
 static func _foods() -> Dictionary:
 	var all := STALL_FOODS.duplicate()
@@ -127,7 +127,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["stats"] = {"power": 0, "guard": 0, "speed": 0, "focus": 0}
 	if not rec.has("likes"):
 		var r := RandomNumberGenerator.new(); r.seed = hash(String(rec.get("uid", "x")) + "likes")
-		var foods: Array = Data.CROPS.keys() + FOODS.keys()
+		var foods: Array = Data.CROPS.keys() + foods_v.keys()
 		var love: String = foods[r.randi() % foods.size()]
 		var hate: String = love
 		while hate == love:
@@ -287,10 +287,10 @@ static func ailing(rec: Dictionary) -> bool:
 
 ## How fast it gets about (care.json ailing_pace): 1.0 well, slower weak, slower still sick.
 static func pace(rec: Dictionary) -> float:
-	var P: Dictionary = Content.rules("care").get("ailing_pace", {})
+	var p: Dictionary = Content.rules("care").get("ailing_pace", {})
 	var h := starve_h(rec)
-	if h >= STARVE["sick"]: return float(P.get("sick", 0.5))
-	return float(P.get("weak", 0.7)) if h >= STARVE["weak"] else 1.0
+	if h >= STARVE["sick"]: return float(p.get("sick", 0.5))
+	return float(p.get("weak", 0.7)) if h >= STARVE["weak"] else 1.0
 
 ## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
 ## a Boki left alone for weeks still recovers with a few meals and a day of care.
@@ -434,12 +434,12 @@ static func speech(rec: Dictionary) -> int:
 
 static func food_name(f: String) -> String:
 	if Data.CROPS.has(f): return String(Data.CROPS[f]["name"])
-	if FOODS.has(f): return String(FOODS[f]["name"])
+	if foods_v.has(f): return String(foods_v[f]["name"])
 	return f
 
 static func food_col(f: String) -> Color:
 	if Data.CROPS.has(f): return Data.CROPS[f]["color"]
-	if FOODS.has(f): return FOODS[f]["col"]
+	if foods_v.has(f): return foods_v[f]["col"]
 	return Color.WHITE
 
 ## Learns something about the kin. Returns true the first time.
@@ -467,9 +467,9 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		return out
 	var fill := 28.0
 	var joy := 6.0
-	if FOODS.has(f):
-		fill = float(FOODS[f]["food"]); joy = float(FOODS[f].get("joy", 0.0))
-		change(rec, "energy", float(FOODS[f].get("energy", 0.0)))
+	if foods_v.has(f):
+		fill = float(foods_v[f]["food"]); joy = float(foods_v[f].get("joy", 0.0))
+		change(rec, "energy", float(foods_v[f].get("energy", 0.0)))
 	if out["love"]:
 		joy += 22.0
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too

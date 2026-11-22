@@ -177,7 +177,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var lead := float(leads[mode])
 	var speed := h.base_speed
 	if mode == "glide":
-		speed = Hunter.GLIDE_SPEED
+		speed = HunterMove.glide_cruise
 	elif mode.begins_with("fly"):
 		speed = fly_speed
 	var hit := face - n * (h.r + 0.05)

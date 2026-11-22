@@ -31,18 +31,18 @@ static func rules() -> Dictionary:
 
 ## Look, part by part (joy, clean, lean, parts, aura, keepsakes): points that add up to 10 at most.
 static func look(rec: Dictionary) -> Dictionary:
-	var L: Dictionary = rules()["look"]
+	var l: Dictionary = rules()["look"]
 	var levels := 0
 	for m in rec.get("muts", []):
 		levels += int(m["lv"])
 	var aura := String(rec.get("aura", "")) != ""
 	return {
-		"joy": float(L["joy"]) * Care.need(rec, "joy") / 100.0,
-		"clean": float(L["clean"]) * Care.need(rec, "clean") / 100.0,
-		"lean": float(L["lean"]) * _lean_share(rec),
-		"parts": minf(float(L["parts"]), float(levels)),
-		"aura": float(L["aura"]) if aura else 0.0,
-		"keepsakes": minf(float(L["keepsakes"]), float(rec.get("ribbons", {}).size())),
+		"joy": float(l["joy"]) * Care.need(rec, "joy") / 100.0,
+		"clean": float(l["clean"]) * Care.need(rec, "clean") / 100.0,
+		"lean": float(l["lean"]) * _lean_share(rec),
+		"parts": minf(float(l["parts"]), float(levels)),
+		"aura": float(l["aura"]) if aura else 0.0,
+		"keepsakes": minf(float(l["keepsakes"]), float(rec.get("ribbons", {}).size())),
 	}
 
 ## 1 at a full lean, 0.5 at half or more, else 0.
@@ -71,19 +71,19 @@ static func trick_of(rec: Dictionary) -> Dictionary:
 
 ## Trick points: the three presses' grades plus a little for the trick's stat.
 static func trick(rec: Dictionary, grades: Array) -> float:
-	var R := rules()
+	var r := rules()
 	var pts := 0.0
 	for g in grades:
-		pts += float(R["press"][g])
+		pts += float(r["press"][g])
 	var stat := float(rec["stats"].get(best_stat(rec), 0))
-	return pts + minf(1.0, stat * float(R["stat_per_point"]))
+	return pts + minf(1.0, stat * float(r["stat_per_point"]))
 
 ## How far a lure pulls it off the walk (0..1) before your call: trust and loyalty shrink it.
 static func pull(rec: Dictionary, lure: Dictionary) -> float:
-	var R := rules()
+	var r := rules()
 	var trust := float(rec.get("trust", 0.0)) / 100.0
 	var loyal := float(rec.get("traits", {}).get("loyalty", 0.5))
-	var shrink := trust * float(R["trust_shrink"]) + loyal * float(R["loyal_shrink"])
+	var shrink := trust * float(r["trust_shrink"]) + loyal * float(r["loyal_shrink"])
 	return float(lure["pull"]) * maxf(0.0, 1.0 - shrink)
 
 ## How far it strays at a lure after a call graded `grade` (great, good or miss).
@@ -100,10 +100,10 @@ static func bond(rec: Dictionary, calls: Array) -> float:
 
 ## A call `off` seconds from the moment it is level with a lure.
 static func call_grade(off: float) -> String:
-	var R := rules()
-	if absf(off) <= float(R["call_great"]):
+	var r := rules()
+	if absf(off) <= float(r["call_great"]):
 		return "great"
-	return "good" if absf(off) <= float(R["call_good"]) else "miss"
+	return "good" if absf(off) <= float(r["call_good"]) else "miss"
 
 ## The three tastes the judges post in a given week.
 static func tastes(week: int) -> Array:
@@ -114,11 +114,11 @@ static func tastes(week: int) -> Array:
 	return out
 
 static func fits(rec: Dictionary, taste: Dictionary) -> bool:
-	var R := rules()
+	var r := rules()
 	if String(taste["kind"]) == "trait":
-		return float(rec.get("traits", {}).get(taste["id"], 0.0)) >= float(R["taste_trait"])
+		return float(rec.get("traits", {}).get(taste["id"], 0.0)) >= float(r["taste_trait"])
 	var ln := Evo.lean(rec)
-	return String(ln[0]) == String(taste["id"]) and float(ln[1]) >= float(R["half_lean"])
+	return String(ln[0]) == String(taste["id"]) and float(ln[1]) >= float(r["half_lean"])
 
 ## The bench: retired mentors in the roster first, then the stand-in judges, three in all.
 static func judges(roster: Array) -> Array:
@@ -160,7 +160,7 @@ static func score(rec: Dictionary, grades: Array, calls: Array, week: int) -> Di
 ## The show itself, stepped in time: Look, Trick, Bond, then the judges.
 class Run:
 	enum Phase { LOOK, TRICK, BOND, JUDGE, DONE }
-	var R: Dictionary
+	var r_v: Dictionary
 	var recs: Array                 # two records: a (index 0) and b (index 1)
 	var backed := 0                 # index in recs: the Boki you show
 	var week := 0
@@ -172,11 +172,11 @@ class Run:
 	var paid := false               # settle has paid this show
 
 	func _init(pair: Array, back: int, week_no: int) -> void:
-		R = ShowRing.rules()
+		r_v = ShowRing.rules()
 		recs = pair
 		backed = back
 		week = week_no
-		calls.resize((R["lures"] as Array).size())
+		calls.resize((r_v["lures"] as Array).size())
 		calls.fill("")
 
 	func over() -> bool:
@@ -192,14 +192,14 @@ class Run:
 
 	## s into the walk at which it is level with lure i.
 	func lure_t(i: int) -> float:
-		return float(R["lures"][i]["at"]) * float(R["walk_s"])
+		return float(r_v["lures"][i]["at"]) * float(r_v["walk_s"])
 
 	## Your call during the walk: graded against the nearest lure not yet called. Returns its index or -1.
 	func call_out() -> int:
 		if phase != Phase.BOND:
 			return -1
 		for i in calls.size():
-			if calls[i] == "" and absf(t - lure_t(i)) <= float(R["call_good"]):
+			if calls[i] == "" and absf(t - lure_t(i)) <= float(r_v["call_good"]):
 				calls[i] = ShowRing.call_grade(t - lure_t(i))
 				return i
 		return -1
@@ -209,21 +209,21 @@ class Run:
 		total_t += dt
 		match phase:
 			Phase.LOOK:
-				if t >= float(R["look_s"]):
+				if t >= float(r_v["look_s"]):
 					_next()
 			Phase.TRICK:
-				if t >= float(R["trick_s"]):
+				if t >= float(r_v["trick_s"]):
 					while grades.size() < ShowRing.TRICK_PRESSES:
 						grades.append("miss")
 					_next()
 			Phase.BOND:
 				for i in calls.size():
-					if calls[i] == "" and t > lure_t(i) + float(R["call_good"]):
+					if calls[i] == "" and t > lure_t(i) + float(r_v["call_good"]):
 						calls[i] = "miss"
-				if t >= float(R["walk_s"]):
+				if t >= float(r_v["walk_s"]):
 					_next()
 			Phase.JUDGE:
-				if t >= float(R["judge_s"]):
+				if t >= float(r_v["judge_s"]):
 					_next()
 
 	func _next() -> void:
@@ -265,17 +265,17 @@ static func settle(run: Run) -> Dictionary:
 	if run.paid:
 		return {}
 	run.paid = true
-	var R := rules()
+	var r := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
-	Save.remember(win, "show", "won the Show Ring over %s" % lose["name"], float(R["win_trust"]))
+		Care.change(rec, "energy", -float(r["energy"]))
+	Care.change(win, "joy", float(r["win_joy"]))
+	Care.change(lose, "joy", float(r["lose_joy"]))
+	Save.remember(win, "show", "won the Show Ring over %s" % lose["name"], float(r["win_trust"]))
 	Save.remember(lose, "show", "came second to %s in the Show Ring" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r["gems_win"]) if backed_won else int(r["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("show", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
 	var scores := run.scores()
@@ -377,6 +377,10 @@ func use() -> void:
 
 func _shown() -> Dictionary:
 	return pair[run.backed]
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A press: true when the show took it.
 func input(event: InputEvent) -> bool:
