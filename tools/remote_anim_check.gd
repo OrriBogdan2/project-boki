@@ -17,8 +17,8 @@ extends "res://tools/displace_net_check.gd"
 ## Grimble's Deep Reach (Net 0.24.20): the host's Grimble hooks the guest's hunter and reels them in; on the guest his
 ## arm (the model's WardenReach.TIP) reaches out, as far, within a snapshot of the host's, and no plain shot flies.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts. The registry splits the run into four flags
-## (--remote-anim-<n>-check, under the gate's 300 s cap; the shard's arg is its comma list of Hunters, or "rest" for the
-## bosses, the re-time and Grimble's reach); the guest is started with --remote-anim-guest.
+## (tools/checks/net.gd: --remote-anim-1/2/3-check cast a third of ARCHS each, --remote-anim-rest-check the bosses, the
+## re-time and Grimble's reach; each under the gate's 300 s cap); the guest is started with --remote-anim-guest.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -28,7 +28,8 @@ const SETTLE := 1.6          # s after the release for the move to play out and 
 const HOLD := 0.8            # s a held key stays down
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
-const REST := "rest"         # the shard that is not a list of Hunters
+const REST := "rest"         # the shard with the bosses, the re-time and the reach row (no Hunter casts)
+const SHARDS := 3            # Hunter shards "1".."3": each casts its third of ARCHS
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const BOSSES := {"colossus": "slam", "serpent": "dash", "brood": "spit"}      # the attack each plays
 const BOSS_LOOPS := ["idle", "walk", "stagger", "sleep"]      # (not compared: the copy's gait may differ a step)
@@ -73,8 +74,10 @@ func _init() -> void:
 
 func run(main_node: Node, shard := "") -> void:
 	if shard != "":
-		archs = [] if shard == REST else shard.split(",")
 		rest = shard == REST
+		var n := ARCHS.size()
+		var i := int(shard) - 1
+		archs = [] if rest else ARCHS.slice(ceili(i * n / float(SHARDS)), ceili((i + 1) * n / float(SHARDS)))
 	main_node.get_tree().process_frame.connect(_sample)
 	await super.run(main_node)
 
