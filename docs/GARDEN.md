@@ -153,8 +153,10 @@ need a design call:
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
    `unlock` and `mastery` rows while the save has no match; or show them as "away" rows. Default: keep.
 3. **The second starter Hunter waits for the first finished expedition** (`ClassUnlock` bonus). It has
-   no goal row now (it printed an empty one, fixed), but nothing at home ever opens it. Fine if Hunters
-   are an expedition feature; say so in the Hunter picker if not.
+   no goal row now (it printed an empty one, fixed), and nothing at home opens it (rule kept). The Hunter
+   picker now says so: each waiting tile and the viewer under it show "Finish an expedition to choose
+   your second Hunter" (`ClassUnlock.locked_line`; challenge Hunters show their challenge). Open: whether
+   a garden-only player should ever get it without an expedition.
 4. **The match tutorial comes before the garden** unless the player presses "Skip tutorial" on the
    naming card. Skipping is offered; whether the card should say "go straight to the garden" is a
    wording call.
@@ -198,6 +200,15 @@ hold, and the item stays in the bag. The card does no math of its own: it reads 
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 
+## Fishing derby
+`scripts/home/fishing_derby.gd`: at the Glint Fishing rock (when the shared store answers) you choose to fish alone or race
+a friend's stored catch. Every finished session keeps its points per cast in your save (`fish_last`: a landed glint 1, a
+rare 3), `Social.profile_doc` puts them in your visit snapshot, and `clean_island` bounds them on the way in, so a derby
+needs no new snapshot or store doc and no extraction: a garden-only player can play it. Your five casts against the
+friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per friend per garden day (`fish_paid`),
+and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
+Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
+alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
 **XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
 ## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
 

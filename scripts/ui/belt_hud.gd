@@ -7,6 +7,7 @@ extends RefCounted
 
 const SLOT := 44.0
 const GAP := 8.0
+const SPARE_FROM := 2        # slots 3 and 4 (index 2, 3) are held back while empty (HudReveal "belt_spare")
 const EMPTY_TIP := "Empty utility slot. Tonics, armor kits and gadgets you find or buy fill it."
 
 ## Staged HUD (HudReveal "belt"): the belt stays folded away until a held item could be used (a tonic when
@@ -30,6 +31,9 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 		var r := Rect2(Vector2(x, y), Vector2(SLOT, SLOT))
 		var key: String = UtilityBelt.KEYS[k]
 		var s: Dictionary = p.belt[k]
+		if s.is_empty() and k >= SPARE_FROM and not HudReveal.on(hud.m, "belt_spare"):
+			x -= SLOT + GAP      # slots 3 and 4 wait until something is in them (the others keep their places)
+			continue
 		if s.is_empty():
 			hud.hover_spots.append([r, key])
 			HudStyle.slot_frame(c, r, HudStyle.MUTED, "off")

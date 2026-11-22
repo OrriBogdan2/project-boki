@@ -26,9 +26,12 @@ func tick(dt: float) -> void:
 		wait = IDLE_EVERY
 
 
-## Blows and pops it, unless a move of hers is playing. True when it started.
+## Blows and pops it, unless a move of hers is playing or her model has no gum (look-only variant ryzz_nogum).
+## True when it started.
 func blow() -> bool:
 	var h := kit.h
+	if WardenGlb.hidden_bones(String(WardenGlb.ART["mage"])).has("gum"):
+		return false
 	if h == null or not is_instance_valid(h) or h.dead or h.downed:
 		return false
 	if kit.anim_id != "" and kit.m.time - kit.anim_at < QUIET:

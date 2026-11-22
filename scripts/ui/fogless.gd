@@ -6,7 +6,8 @@ extends RefCounted
 ## the reveal, owner 11-19), and a portrait was cached that way. apply() gives the model its own copies of the
 ## materials that read the fog, with no_fog on; the kin and Hunters in the match keep theirs.
 
-static var _fog_shaders := {}            # shader -> it has a no_fog uniform
+static var _fog_shaders := {}  # shader -> it has a no_fog uniform
+
 
 ## Once `root` is ready (a rigged Boki dresses its coat in _ready), its fog-reading materials become fogless copies.
 static func apply(root: Node) -> void:
@@ -15,7 +16,7 @@ static func apply(root: Node) -> void:
 		return
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if mi.material_override:     # a primitive part (Models.part) wears one for every surface
+		if mi.material_override:  # a primitive part (Models.part) wears one for every surface
 			var o := _unfogged(mi.material_override)
 			if o:
 				mi.material_override = o
@@ -26,6 +27,7 @@ static func apply(root: Node) -> void:
 			var m := _unfogged(mi.get_active_material(si))
 			if m:
 				mi.set_surface_override_material(si, m)
+
 
 ## A copy of `m` (and its next passes) with no_fog on, or null when nothing in it reads the fog.
 static func _unfogged(m: Material) -> Material:
@@ -42,6 +44,7 @@ static func _unfogged(m: Material) -> Material:
 	if nxt:
 		c.next_pass = nxt
 	return c
+
 
 static func _reads_fog(sh: Shader) -> bool:
 	if not _fog_shaders.has(sh):

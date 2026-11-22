@@ -6,6 +6,7 @@ by "v95c", sat in the body mesh beside the game's skinned sword: three swords, t
 bones).
 Run: python3 tools/art1/glb_drop_mats.py in.glb out.glb <material>[,<material>...]
 A name ending in * is a prefix, a name starting with * a suffix ("*-v95c")."""
+
 import sys
 
 from glb_add_clips import prune, read, write
@@ -84,8 +85,10 @@ def main():
     if not names:
         sys.exit("glb_drop_mats: no material matches %s" % pats)
     write(dst, j, prune(j, bin_))
-    print("glb_drop_mats: dropped %d triangles on %s (%d nodes); images left %s" % (
-        tris, names, nodes, [im.get("name") for im in j.get("images", [])]))
+    print(
+        "glb_drop_mats: dropped %d triangles on %s (%d nodes); images left %s"
+        % (tris, names, nodes, [im.get("name") for im in j.get("images", [])])
+    )
 
 
 if __name__ == "__main__":
