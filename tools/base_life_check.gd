@@ -31,8 +31,11 @@ func _new_save() -> Array:
 	var calm := 0.1
 	var specs := [["cindle", "Ash", hot], ["basaltoad", "Crag", hot],
 		["burrlet", "Moss", calm], ["zapple", "Pip", calm]]
-	for spec in specs:
-		var rec := Save.new_kin(spec[0], spec[1])
+	seed(7)      # the same four Boki every run: traits, IVs and DNA from these dice, not from the run before
+	for i in specs.size():
+		var spec: Array = specs[i]
+		var rec := Save.new_kin(spec[0], spec[1], 700 + i)
+		rec["uid"] = "bl%d" % i       # new_id is clock-based; bonds are keyed by uid
 		rec["traits"]["temper"] = spec[2]
 		recs.append(rec)
 	recs[0]["starter"] = true
