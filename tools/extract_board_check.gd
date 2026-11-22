@@ -54,7 +54,6 @@ func _beat(m: Match, h: Hunter, tag := "") -> Array:
 	return [shown, seen]
 
 func run(main: Node) -> void:
-	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):

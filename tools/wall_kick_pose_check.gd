@@ -21,7 +21,6 @@ var main_node: Node
 var cam: Camera3D
 
 func run(main: Node) -> void:
-	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main_node = main
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
