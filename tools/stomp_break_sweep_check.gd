@@ -22,11 +22,11 @@ const TAP := [3.0, 1]          # [distance to the stomper in m, steps the key is
 ## (Kael's dash and Riposte left the table when they stopped knocking, kael-knock-cut.)
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
 ## (Sparkle's rod stuns only against a wall or a second foe, and whether the stomper has drifted off its wisp by
-## the time the rod lands varies with the match history, so that row pins the knock the rod always lands.)
+## the time the rod lands varies with the match history, so that row pins the rod's knock or its stun: a rod thrown at a wall lands the stun, a clear lane the knock.)
 const EXPECT := [
 	["gunslinger", "rmb", 3.0, 1, "daze"], ["bulwark", "lmb", 3.0, 90, "knock"], ["bulwark", "x", 3.0, 1, "stun"],
 	["ostra", "rmb", 3.0, 1, "stun"], ["thief", "rmb", 3.0, 1, "gnd"], ["dredge", "rmb", 3.0, 1, "stun"],
-	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "knock"],
+	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "knock|stun"],
 	["ashwick", "dash", 3.0, 1, "knock"], ["ashwick", "e", 3.0, 1, "tow"], ["dolm", "dash", 3.0, 1, "knock"],
 	["rimewright", "e", 3.0, 1, "tow"], ["juggernaut", "rmb", 3.0, 1, "knock"],
 	["archer", "e", 3.0, 1, "slow"], ["dolm", "rmb", 3.0, 1, "slow"], ["rimewright", "rmb", 3.0, 1, "slow"],
@@ -58,7 +58,7 @@ func run(main: Node) -> void:
 		for row in EXPECT:
 			if row[0] == hero:
 				var got := _trial(m, hero, row[1], row[2], row[3])
-				ok(got.has(row[4]), "%s %s lands %s on the stomper (%s)" % [hero, row[1], row[4], got.keys()])
+				ok(Array(String(row[4]).split("|")).any(func(k): return got.has(k)), "%s %s lands %s on the stomper (%s)" % [hero, row[1], row[4], got.keys()])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("STOMP BREAK SWEEP DONE, rows: %d, failures: %d" % [rows, bad])

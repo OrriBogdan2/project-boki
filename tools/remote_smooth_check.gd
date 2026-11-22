@@ -40,12 +40,13 @@ class LagRelay extends RelayServer:
 	var wire: Array = []          # [due msec, peer id, message, fast]
 	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
 	var dropped := 0
+	var one_way := ONE_WAY_MS     # ms: this line's one-way time (the move check sets it)
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
 		if fast and rng.randf() < LOSS:
 			dropped += 1
 			return
-		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
+		var due := Time.get_ticks_msec() + one_way + rng.randi_range(-JITTER_MS, JITTER_MS)
 		due = maxi(due, int(last_due.get(id, 0)))
 		last_due[id] = due
 		wire.append([due, id, d, fast])
@@ -74,9 +75,12 @@ var stalls: Array = []         # [wall s, s]: frames over the 0.1 s clamp, the m
 var guest_stalls: Array = []   # the guest's, written with its record
 var guest_pid := 0
 var dir := ""
+var tag := "RSMOOTH"           # the prefix of every line (the move check reuses this harness)
+var flag := "--remote-smooth-check"   # the check's own flag; the guest runs it with =guest
+var one_way_ms := ONE_WAY_MS
 
 func ok(cond: bool, what: String, info := "") -> void:
-	print("RSMOOTH %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
+	print("%s %s %s  %s" % [tag, "ok  " if cond else "FAIL", what, info])
 	if not cond: bad += 1
 
 func run(main_node: Node) -> void:
@@ -88,8 +92,9 @@ func run(main_node: Node) -> void:
 	dn.main = main
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--remote-smooth-check=guest": guest = true
+		if a == flag + "=guest": guest = true
 		if a.begins_with("--rs-port="): dn.port = int(a.substr(10))
+		if a.begins_with("--rs-ms="): one_way_ms = int(a.substr(8))
 		if a.begins_with("--rs-dir="): dir = a.substr(9)      # the guest writes its record where the host reads it
 	if dir == "":
 		dir = ProjectSettings.globalize_path("user://remote_smooth")
@@ -106,12 +111,13 @@ func _host() -> void:
 	RenderingServer.render_loop_enabled = false
 	var relay := LagRelay.new()
 	relay.rng.seed = 80
+	relay.one_way = one_way_ms
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
-	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d '--rs-dir=%s'" % [dn.port, dir],
+	guest_pid = CheckChild.start("%s=guest --rs-port=%d '--rs-dir=%s'" % [flag, dn.port, dir],
 			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -233,7 +239,7 @@ func _finish() -> void:
 	await main.get_tree().create_timer(1.0).timeout
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
-	print("RSMOOTH DONE, failures: ", bad)
+	print(tag + " DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 # ------------------------------------------------------------------ the numbers
@@ -285,9 +291,9 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			if tv.length() > 1.0 and step.dot(tv.normalized()) < -0.01: r["backsteps"] += 1
 			if off > OFF_PATH: r["overshoot"] += 1
 			r["max_off"] = maxf(r["max_off"], off)
-	print("RSMOOTH line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
-		ONE_WAY_MS, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
-	print("RSMOOTH load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
+	print(tag + " line: %d ms +-%d ms one way, %.0f%% loss (%d snapshots lost); drawn %.0f ms behind" % [
+		one_way_ms, JITTER_MS, LOSS * 100.0, lost, lag * 1000.0])
+	print(tag + " load: frames over 0.1 s cost the host's match clock %.0f ms, the guest's %.0f ms (not the line)" % [
 		_stalled(stalls, w0, w1) * 1000.0, _stalled(guest_stalls, w0 + lag, w1 + lag) * 1000.0])
 	for ph in phases:
 		var r: Dictionary = tot[ph]
@@ -365,7 +371,7 @@ static func _off_path(truth: Array, j: int, q: Vector3) -> float:
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
 	if not await dn._connect():
-		print("RSMOOTH guest: no relay")
+		print(tag + " guest: no relay")
 		main.get_tree().quit(1)
 		return
 	var t0 := Time.get_ticks_msec()
