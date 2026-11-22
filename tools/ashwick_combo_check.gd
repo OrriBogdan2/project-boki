@@ -577,7 +577,7 @@ func _all() -> void:
 		P.pos.x - home.x > d1 + ram_d * 0.8 and P.dashes < 0.5,
 		"first %.1f both %.1f charges %.2f" % [d1, P.pos.x - home.x, P.dashes]
 	)
-	# the air poof: long and fast, and he keeps a share of the speed after it
+	# the air poof: the ram's length (owner playtest 11-17: it went twice as far, too fast), a share of its speed kept
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
@@ -589,8 +589,8 @@ func _all() -> void:
 	rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(true)
 	ok(
-		"air poof: 6.8 m in 0.28 s, scaled once (not twice)",
-		absf(P.roll_t - 0.28) < 0.005 and absf(P.roll_speed * P.roll_t - 6.8) < 0.1,
+		"air poof: 3.4 m in 0.28 s, scaled once (not twice)",
+		absf(P.roll_t - 0.28) < 0.005 and absf(P.roll_speed * P.roll_t - 3.4) < 0.1,
 		"%.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t]
 	)
 	var poof_move: String = K.anim_id
@@ -599,8 +599,8 @@ func _all() -> void:
 	var poof_d := P.pos.x - home.x
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-		"air poof: launches him far and fast (over twice the ground dash), momentum kept after it",
-		poof_d > ram_d * 2.0 and poof_t < 0.35 and kept > 8.0,
+		"air poof: about the ground ram's length (owner 11-17: it was over twice it), a share of its speed kept after it",
+		poof_d < ram_d * 1.5 and poof_d > ram_d * 0.9 and poof_t < 0.35 and kept > 5.0 and kept < 12.5,
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
 	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
@@ -764,7 +764,7 @@ func _all() -> void:
 		"passive: Char falls off all at once after 5s", K.char_of(T2) == 0.0 and K.burning(T) == 0,
 		"char %.1f" % K.char_of(T2)
 	)
-	# --- a Boki merge drops every hold: the hose, the cloak's ring
+	# --- a Boki merge keeps every hold (decision 0100): the hose keeps burning
 	reset.call()
 	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
 	ok(
@@ -778,8 +778,8 @@ func _all() -> void:
 	P.inp["fire"] = false
 	ak.step(m, 0.3)
 	ok(
-		"merge hold: linwick's lance is dropped, no fire mid-merge",
-		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.mel_hold == 0.0,
+		"merge hold: linwick's lance keeps burning through the merge (decision 0100)",
+		K.flame_ticks > ft,
 		"held %s puffs %d ticks +%d" % [K.was_held, K.hose.puffs.size(), K.flame_ticks - ft]
 	)
 	KinMerge.end(P, "test")

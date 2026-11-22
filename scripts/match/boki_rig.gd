@@ -18,7 +18,7 @@ const PATH := "res://art/kin/%s/%s.glb"
 const FRAME := {
 	"nimbostrich": {"head": Vector3(0, 0.354, -0.124), "top": 0.496, "carry": Vector3(0, 0.566, 0.0561),
 		"ear_tip": Vector3(0.0162, 0.496, 0.0508), "tail_tip": Vector3(0, 0.26, 0.163),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.275,
 		"marks": {"left flank": Vector3(-0.0298, 0.267, 0.0348), "right flank": Vector3(0.0298, 0.267, 0.0348),
 			"back": Vector3(0, 0.372, 0.088), "chest": Vector3(0, 0.248, -0.111)}},
 	"velvorm": {"head": Vector3(0, 0.354, -0.327), "top": 0.496, "carry": Vector3(0, 0.566, 0.141),
@@ -27,83 +27,83 @@ const FRAME := {
 			"back": Vector3(0, 0.372, 0.224), "chest": Vector3(0, 0.248, -0.294)}},
 	"tuatrune": {"head": Vector3(0, 0.354, -0.206), "top": 0.496, "carry": Vector3(0, 0.566, 0.0898),
 		"ear_tip": Vector3(0.0267, 0.496, 0.0811), "tail_tip": Vector3(0, 0.26, 0.265),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.166,
 		"marks": {"left flank": Vector3(-0.0492, 0.267, 0.0548), "right flank": Vector3(0.0492, 0.267, 0.0548),
 			"back": Vector3(0, 0.372, 0.142), "chest": Vector3(0, 0.248, -0.185)}},
-	"threadwyrm": {"head": Vector3(0, 0.354, -0.11), "top": 0.496, "carry": Vector3(0, 0.566, 0.0478),
-		"ear_tip": Vector3(0.0507, 0.496, 0.0432), "tail_tip": Vector3(0, 0.26, 0.141),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0935, 0.267, 0.0292), "right flank": Vector3(0.0935, 0.267, 0.0292),
-			"back": Vector3(0, 0.372, 0.0757), "chest": Vector3(0, 0.248, -0.0987)}},
+	"threadwyrm": {"head": Vector3(0, 0.357, -0.0958), "top": 0.464, "carry": Vector3(0, 0.517, 0.0491),
+		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
+		"tail_tip": Vector3(0, 0.264, 0.146), "tip_bone": "hips", "hip": 0.184,
+		"marks": {"left flank": Vector3(-0.149, 0.27, 0.0298), "right flank": Vector3(0.149, 0.27, 0.0298),
+			"back": Vector3(0, 0.37, 0.0781), "chest": Vector3(0, 0.25, -0.0862)}},
 	"squalltross": {"head": Vector3(0, 0.354, -0.1), "top": 0.496, "carry": Vector3(0, 0.566, 0.0435),
 		"ear_tip": Vector3(0.0359, 0.496, 0.0393), "tail_tip": Vector3(0, 0.26, 0.129),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.165,
 		"marks": {"left flank": Vector3(-0.0662, 0.267, 0.0265), "right flank": Vector3(0.0662, 0.267, 0.0265),
 			"back": Vector3(0, 0.372, 0.069), "chest": Vector3(0, 0.248, -0.0901)}},
 	"spatewader": {"head": Vector3(0, 0.354, -0.204), "top": 0.496, "carry": Vector3(0, 0.566, 0.089),
-		"ear_tip": Vector3(0.03, 0.496, 0.0803), "tail_tip": Vector3(0, 0.26, 0.263), "tip_bone": "hips", "hip": 0.184,
+		"ear_tip": Vector3(0.03, 0.496, 0.0803), "tail_tip": Vector3(0, 0.26, 0.263), "tip_bone": "hips", "hip": 0.165,
 		"marks": {"left flank": Vector3(-0.0554, 0.267, 0.0543), "right flank": Vector3(0.0554, 0.267, 0.0543),
 			"back": Vector3(0, 0.372, 0.141), "chest": Vector3(0, 0.248, -0.183)}},
 	"sentrikat": {"head": Vector3(0, 0.354, -0.0838), "top": 0.496, "carry": Vector3(0, 0.566, 0.0362),
 		"ear_tip": Vector3(0.0322, 0.496, 0.0327), "tail_tip": Vector3(0, 0.26, 0.107),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.192,
 		"marks": {"left flank": Vector3(-0.0594, 0.267, 0.022), "right flank": Vector3(0.0594, 0.267, 0.022),
 			"back": Vector3(0, 0.372, 0.0574), "chest": Vector3(0, 0.248, -0.0753)}},
 	"scaldamus": {"head": Vector3(0, 0.354, -0.219), "top": 0.496, "carry": Vector3(0, 0.566, 0.096),
 		"ear_tip": Vector3(0.0333, 0.496, 0.0867), "tail_tip": Vector3(0, 0.26, 0.283),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.22,
 		"marks": {"left flank": Vector3(-0.0615, 0.267, 0.0588), "right flank": Vector3(0.0615, 0.267, 0.0588),
 			"back": Vector3(0, 0.372, 0.152), "chest": Vector3(0, 0.248, -0.196)}},
 	"orchisloth": {"head": Vector3(0, 0.354, -0.0996), "top": 0.496, "carry": Vector3(0, 0.566, 0.0431),
 		"ear_tip": Vector3(0.0244, 0.496, 0.0389), "tail_tip": Vector3(0, 0.26, 0.128),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.193,
 		"marks": {"left flank": Vector3(-0.0451, 0.267, 0.0263), "right flank": Vector3(0.0451, 0.267, 0.0263),
 			"back": Vector3(0, 0.372, 0.0684), "chest": Vector3(0, 0.248, -0.0896)}},
 	"opalisk": {"head": Vector3(0, 0.354, -0.189), "top": 0.496, "carry": Vector3(0, 0.566, 0.0819),
 		"ear_tip": Vector3(0.0334, 0.496, 0.0739), "tail_tip": Vector3(0, 0.26, 0.242),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.164,
 		"marks": {"left flank": Vector3(-0.0617, 0.267, 0.0499), "right flank": Vector3(0.0617, 0.267, 0.0499),
 			"back": Vector3(0, 0.372, 0.13), "chest": Vector3(0, 0.248, -0.17)}},
 	"nacrolin": {"head": Vector3(0, 0.354, -0.0972), "top": 0.496, "carry": Vector3(0, 0.566, 0.0403),
-		"ear_tip": Vector3(0.038, 0.496, 0.0362), "tail_tip": Vector3(0, 0.26, 0.122), "tip_bone": "hips", "hip": 0.184,
+		"ear_tip": Vector3(0.038, 0.496, 0.0362), "tail_tip": Vector3(0, 0.26, 0.122), "tip_bone": "hips", "hip": 0.193,
 		"marks": {"left flank": Vector3(-0.0701, 0.267, 0.024), "right flank": Vector3(0.0701, 0.267, 0.024),
 			"back": Vector3(0, 0.372, 0.0646), "chest": Vector3(0, 0.248, -0.0875)}},
 	"murmurling": {"head": Vector3(0, 0.354, -0.122), "top": 0.496, "carry": Vector3(0, 0.566, 0.0509),
 		"ear_tip": Vector3(0.0196, 0.496, 0.0458), "tail_tip": Vector3(0, 0.26, 0.153),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.165,
 		"marks": {"left flank": Vector3(-0.0362, 0.267, 0.0305), "right flank": Vector3(0.0362, 0.267, 0.0305),
 			"back": Vector3(0, 0.372, 0.0814), "chest": Vector3(0, 0.248, -0.11)}},
 	"moundvark": {"head": Vector3(0, 0.354, -0.163), "top": 0.496, "carry": Vector3(0, 0.566, 0.0677),
-		"ear_tip": Vector3(0.022, 0.496, 0.0609), "tail_tip": Vector3(0, 0.26, 0.205), "tip_bone": "hips", "hip": 0.184,
+		"ear_tip": Vector3(0.022, 0.496, 0.0609), "tail_tip": Vector3(0, 0.26, 0.205), "tip_bone": "hips", "hip": 0.193,
 		"marks": {"left flank": Vector3(-0.0406, 0.267, 0.0404), "right flank": Vector3(0.0406, 0.267, 0.0404),
 			"back": Vector3(0, 0.372, 0.109), "chest": Vector3(0, 0.248, -0.147)}},
 	"moonloris": {"head": Vector3(0, 0.354, -0.325), "top": 0.496, "carry": Vector3(0, 0.566, 0.141),
-		"ear_tip": Vector3(0.0522, 0.496, 0.127), "tail_tip": Vector3(0, 0.26, 0.417), "tip_bone": "hips", "hip": 0.184,
+		"ear_tip": Vector3(0.0522, 0.496, 0.127), "tail_tip": Vector3(0, 0.26, 0.417), "tip_bone": "hips", "hip": 0.192,
 		"marks": {"left flank": Vector3(-0.0962, 0.267, 0.0858), "right flank": Vector3(0.0962, 0.267, 0.0858),
 			"back": Vector3(0, 0.372, 0.223), "chest": Vector3(0, 0.248, -0.292)}},
 	"limpetor": {"head": Vector3(0, 0.354, -0.177), "top": 0.496, "carry": Vector3(0, 0.566, 0.0753),
 		"ear_tip": Vector3(0.0463, 0.496, 0.0679), "tail_tip": Vector3(0, 0.26, 0.225),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.165,
 		"marks": {"left flank": Vector3(-0.0853, 0.267, 0.0455), "right flank": Vector3(0.0853, 0.267, 0.0455),
 			"back": Vector3(0, 0.372, 0.12), "chest": Vector3(0, 0.248, -0.159)}},
 	"kilnbadger": {"head": Vector3(0, 0.354, -0.165), "top": 0.496, "carry": Vector3(0, 0.566, 0.0713),
 		"ear_tip": Vector3(0.0236, 0.496, 0.0643), "tail_tip": Vector3(0, 0.26, 0.212),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.193,
 		"marks": {"left flank": Vector3(-0.0435, 0.267, 0.0433), "right flank": Vector3(0.0435, 0.267, 0.0433),
 			"back": Vector3(0, 0.372, 0.113), "chest": Vector3(0, 0.248, -0.149)}},
 	"heatherhorn": {"head": Vector3(0, 0.354, -0.179), "top": 0.496, "carry": Vector3(0, 0.566, 0.0782),
 		"ear_tip": Vector3(0.0355, 0.496, 0.0706), "tail_tip": Vector3(0, 0.26, 0.231),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.232,
 		"marks": {"left flank": Vector3(-0.0654, 0.267, 0.0477), "right flank": Vector3(0.0654, 0.267, 0.0477),
 			"back": Vector3(0, 0.372, 0.124), "chest": Vector3(0, 0.248, -0.161)}},
 	"glaciyak": {"head": Vector3(0, 0.354, -0.2), "top": 0.496, "carry": Vector3(0, 0.566, 0.0867),
 		"ear_tip": Vector3(0.0366, 0.496, 0.0782), "tail_tip": Vector3(0, 0.26, 0.257),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.232,
 		"marks": {"left flank": Vector3(-0.0674, 0.267, 0.0527), "right flank": Vector3(0.0674, 0.267, 0.0527),
 			"back": Vector3(0, 0.372, 0.137), "chest": Vector3(0, 0.248, -0.18)}},
 	"duskapi": {"head": Vector3(0, 0.354, -0.114), "top": 0.496, "carry": Vector3(0, 0.566, 0.049),
 		"ear_tip": Vector3(0.0121, 0.496, 0.0442), "tail_tip": Vector3(0, 0.26, 0.146),
-		"tip_bone": "hips", "hip": 0.184,
+		"tip_bone": "hips", "hip": 0.232,
 		"marks": {"left flank": Vector3(-0.0224, 0.267, 0.0297), "right flank": Vector3(0.0224, 0.267, 0.0297),
 			"back": Vector3(0, 0.372, 0.0778), "chest": Vector3(0, 0.248, -0.103)}},
 	"casquebill": {"head": Vector3(0, 0.354, -0.155), "top": 0.496, "carry": Vector3(0, 0.566, 0.0666),
@@ -111,45 +111,46 @@ const FRAME := {
 		"tip_bone": "hips", "hip": 0.184,
 		"marks": {"left flank": Vector3(-0.0602, 0.267, 0.0404), "right flank": Vector3(0.0602, 0.267, 0.0404),
 			"back": Vector3(0, 0.372, 0.106), "chest": Vector3(0, 0.248, -0.139)}},
-	"cindle": {"head": Vector3(0, 0.496, -0.368), "top": 0.754, "carry": Vector3(0, 0.312, -0.368),
-		"ear_tip": Vector3(0.23, 0.839, -0.128), "tail_tip": Vector3(-0.285, 0.61, 0.085), "tip_bone": "tail7",
-		"hip": 0.22,
-		"marks": {"left flank": Vector3(-0.173, 0.253, -0.0168), "right flank": Vector3(0.173, 0.253, -0.0168),
-			"back": Vector3(0, 0.355, -0.0104), "chest": Vector3(0, 0.235, -0.206)}},
-	"puddlet": {"head": Vector3(0, 0.241, -0.262), "top": 0.411, "carry": Vector3(0, 0.408, -0.0279),
-		"ear_tip": Vector3(0.232, 0.423, -0.135), "tail_tip": Vector3(-0.262, 0.037, -0.11), "tip_bone": "tail5",
-		"hip": 0.111,
-		"marks": {"left flank": Vector3(-0.0585, 0.158, -0.0279), "right flank": Vector3(0.0585, 0.158, -0.0279),
-			"back": Vector3(0, 0.241, -0.0279), "chest": Vector3(0, 0.119, -0.141)}},
-	"burrlet": {"head": Vector3(0, 0.202, -0.244), "top": 0.396, "carry": Vector3(0, 0.504, -0.0146),
-		"ear_tip": Vector3(0.14, 0.404, -0.139), "tail_tip": Vector3(0, 0.292, 0.311), "tip_bone": "tail2",
-		"hip": 0.0959,
-		"marks": {"left flank": Vector3(-0.248, 0.159, 0.022), "right flank": Vector3(0.248, 0.159, 0.022),
-			"back": Vector3(0, 0.458, 0.022), "chest": Vector3(0, 0.14, -0.166)}},
-	"glintmole": {"head": Vector3(0, 0.248, -0.198), "top": 0.338, "carry": Vector3(0, 0.453, 0.0523),
-		"ear_tip": Vector3(0.117, 0.314, -0.0794), "tail_tip": Vector3(0, 0.182, 0.302),
-		"tip_bone": "tail2", "hip": 0.134,
-		"marks": {"left flank": Vector3(-0.194, 0.2, 0.0852), "right flank": Vector3(0.194, 0.2, 0.0852),
-			"back": Vector3(0, 0.308, 0.191), "chest": Vector3(0, 0.17, -0.125)}},
-	"rimeshrew": {"head": Vector3(0, 0.29, -0.32), "top": 0.43, "carry": Vector3(0, 0.5, 0.05),
-		"ear_tip": Vector3(0.11, 0.43, -0.16), "tail_tip": Vector3(0, 0.345, 0.59), "tip_bone": "tail5", "hip": 0.13,
-		"marks": {"left flank": Vector3(-0.145, 0.22, 0.08), "right flank": Vector3(0.145, 0.22, 0.08),
-			"back": Vector3(0, 0.33, 0.12), "chest": Vector3(0, 0.17, -0.16)}},
+	"cindle": {"head": Vector3(0, 0.427, -0.272), "top": 0.631, "carry": Vector3(0, 0.314, -0.272),
+		"ear_tip": Vector3(0.105, 0.72, -0.0899),
+		"tail_tip": Vector3(0, 0.66, 0.223), "tip_bone": "tail7", "hip": 0.253,
+		"marks": {"left flank": Vector3(-0.0554, 0.276, 0.0305), "right flank": Vector3(0.0554, 0.276, 0.0305),
+			"back": Vector3(0, 0.34, 0.0375), "chest": Vector3(0, 0.265, -0.149)}},
+	"puddlet": {"head": Vector3(0, 0.209, -0.261), "top": 0.286, "carry": Vector3(0, 0.271, -0.0591),
+		"ear_tip": Vector3(0.165, 0.343, -0.16), "tail_tip": Vector3(0, 0.23, 0.275), "tip_bone": "tail5", "hip": 0.127,
+		"marks": {"left flank": Vector3(-0.0549, 0.158, -0.0591), "right flank": Vector3(0.0549, 0.158, -0.0591),
+			"back": Vector3(0, 0.209, -0.0591), "chest": Vector3(0, 0.132, -0.164)}},
+	"burrlet": {"head": Vector3(2.64e-17, 0.204, -0.141), "top": 0.276, "carry": Vector3(2.64e-17, 0.349, -0.0104),
+		"ear_tip": Vector3(0.0725, 0.282, -0.0758),
+		"tail_tip": Vector3(2.64e-17, 0.235, 0.162), "tip_bone": "tail2", "hip": 0.115,
+		"marks": {"left flank": Vector3(-0.102, 0.162, 0.00685), "right flank": Vector3(0.102, 0.162, 0.00685),
+			"back": Vector3(2.64e-17, 0.318, 0.00685), "chest": Vector3(2.64e-17, 0.141, -0.0964)}},
+	"glintmole": {"head": Vector3(-2.64e-17, 0.248, -0.149), "top": 0.338, "carry": Vector3(-2.64e-17, 0.453, 0.039),
+		"ear_tip": Vector3(0.0969, 0.314, -0.0599),
+		"tail_tip": Vector3(-2.64e-17, 0.182, 0.227), "tip_bone": "tail2", "hip": 0.134,
+		"marks": {"left flank": Vector3(-0.161, 0.2, 0.0637), "right flank": Vector3(0.161, 0.2, 0.0637),
+			"back": Vector3(-2.64e-17, 0.308, 0.143), "chest": Vector3(-2.64e-17, 0.17, -0.0944)}},
+	"rimeshrew": {"head": Vector3(0, 0.277, -0.222), "top": 0.378, "carry": Vector3(0, 0.429, -0.0152),
+		"ear_tip": Vector3(0.0758, 0.378, -0.133),
+		"tail_tip": Vector3(0, 0.317, 0.287), "tip_bone": "tail5", "hip": 0.162,
+		"marks": {"left flank": Vector3(-0.1, 0.227, 0.00157), "right flank": Vector3(0.1, 0.227, 0.00157),
+			"back": Vector3(0, 0.306, 0.0239), "chest": Vector3(0, 0.191, -0.133)}},
 	"zephyrak": {"head": Vector3(0, 0.248, -0.0989), "top": 0.341, "carry": Vector3(0, 0.248, 0.00952),
 		"ear_tip": Vector3(0.0786, 0.284, -0.0313), "tail_tip": Vector3(0, 0.159, 0.0824),
 		"tip_bone": "tail6", "hip": 0.00954,
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.0235, 0.114, 0.00811), "right flank": Vector3(0.0235, 0.114, 0.00811),
 			"back": Vector3(0, 0.171, 0.00811), "chest": Vector3(0, 0.115, -0.0235)}},
-	"pebbit": {"head": Vector3(0, 0.192, -0.278), "top": 0.475, "carry": Vector3(0, 0.488, 0.0113),
-		"ear_tip": Vector3(0.117, 0.387, -0.217), "tail_tip": Vector3(0, 0.0311, 0.485), "tip_bone": "tail4",
-		"hip": 0.0819,
-		"marks": {"left flank": Vector3(-0.236, 0.177, -0.0075), "right flank": Vector3(0.236, 0.177, -0.0075),
-			"back": Vector3(0, 0.438, 0.0113), "chest": Vector3(0, 0.0983, -0.186)}},
-	"cairnback": {"head": Vector3(0, 0.234, -0.244), "top": 0.72, "carry": Vector3(0, 0.73, 0.05),
-		"ear_tip": Vector3(0.221, 0.257, -0.21), "tail_tip": Vector3(0, 0.091, 0.28), "tip_bone": "tail2", "hip": 0.146,
-		"marks": {"left flank": Vector3(-0.216, 0.221, -0.041), "right flank": Vector3(0.216, 0.221, -0.041),
-			"back": Vector3(0, 0.483, 0.095), "chest": Vector3(0, 0.182, -0.191)}},
+	"pebbit": {"head": Vector3(0, 0.259, -0.305), "top": 0.404, "carry": Vector3(0, 0.417, 0.0363),
+		"ear_tip": Vector3(0.0807, 0.359, -0.209),
+		"tail_tip": Vector3(0, 0.107, 0.356), "tip_bone": "tail4", "hip": 0.166,
+		"marks": {"left flank": Vector3(-0.158, 0.25, 0.0215), "right flank": Vector3(0.158, 0.25, 0.0215),
+			"back": Vector3(0, 0.385, 0.0363), "chest": Vector3(0, 0.186, -0.157)}},
+	"cairnback": {"head": Vector3(0, 0.415, -0.398), "top": 0.641, "carry": Vector3(0, 0.563, 0.306),
+		"ear_tip": Vector3(0.301, 0.454, -0.239),
+		"tail_tip": Vector3(0, 0.236, 0.471), "tip_bone": "tail2", "hip": 0.284,
+		"marks": {"left flank": Vector3(-0.295, 0.38, 0.102), "right flank": Vector3(0.295, 0.38, 0.102),
+			"back": Vector3(0, 0.546, 0.295), "chest": Vector3(0, 0.319, -0.182)}},
 	"wisplet": {"head": Vector3(0, 0.273, -0.0785), "top": 0.378, "carry": Vector3(0, 0.399, -0.021), "hip": 0.115,
 		"ear_tip": Vector3(0.0806, 0.391, -0.0257), "tail_tip": Vector3(0, 0.101, 0.0515), "tip_bone": "tail1",
 		"marks": {"left flank": Vector3(-0.0712, 0.157, -0.0079), "right flank": Vector3(0.0712, 0.157, -0.0079),
@@ -159,16 +160,17 @@ const FRAME := {
 		"tip_bone": "tail2", "hip": 0.147,
 		"marks": {"left flank": Vector3(-0.0547, 0.193, -0.0551), "right flank": Vector3(0.0547, 0.193, -0.0551),
 			"back": Vector3(0, 0.229, 0.129), "chest": Vector3(0, 0.249, -0.204)}},
-	"selenfin": {"head": Vector3(0, 0.363, -0.317), "top": 0.527, "carry": Vector3(0, 0.609, 0.00123),
-		"ear_tip": Vector3(0.178, 0.259, -0.0734), "tail_tip": Vector3(0, 0.363, 0.417), "tip_bone": "tail3", "hip": 0,
+	"selenfin": {"head": Vector3(0, 0.466, -0.295), "top": 0.609, "carry": Vector3(0, 0.68, -0.0306),
+		"ear_tip": Vector3(0.181, 0.342, -0.0903),
+		"tail_tip": Vector3(0, 0.466, 0.302), "tip_bone": "tail3", "hip": 0.0211,
 		"hover": true,
-		"marks": {"left flank": Vector3(-0.146, 0.302, 0.0225), "right flank": Vector3(0.146, 0.302, 0.0225),
-			"back": Vector3(0, 0.434, 0.00123), "chest": Vector3(0, 0.237, -0.169)}},
-	"zapple": {"head": Vector3(0, 0.476, -0.291), "top": 0.641, "carry": Vector3(0, 0.467, -0.0107),
-		"ear_tip": Vector3(0.238, 0.855, -0.145), "tail_tip": Vector3(0, 0.329, 0.285), "tip_bone": "tail2",
-		"hip": 0.231,
-		"marks": {"left flank": Vector3(-0.347, 0.22, -0.00154), "right flank": Vector3(0.347, 0.22, -0.00154),
-			"back": Vector3(0, 0.37, -0.0107), "chest": Vector3(0, 0.231, -0.184)}},
+		"marks": {"left flank": Vector3(-0.0856, 0.395, -0.0135), "right flank": Vector3(0.0856, 0.395, -0.0135),
+			"back": Vector3(0, 0.529, -0.0306), "chest": Vector3(0, 0.315, -0.167)}},
+	"zapple": {"head": Vector3(0, 0.432, -0.191), "top": 0.559, "carry": Vector3(0, 0.425, 0.0504),
+		"ear_tip": Vector3(0.0882, 0.753, -0.0429),
+		"tail_tip": Vector3(0, 0.324, 0.2), "tip_bone": "tail2", "hip": 0.261,
+		"marks": {"left flank": Vector3(-0.108, 0.253, 0.0568), "right flank": Vector3(0.108, 0.253, 0.0568),
+			"back": Vector3(0, 0.35, 0.0504), "chest": Vector3(0, 0.261, -0.0893)}},
 	"hivara": {"head": Vector3(0, 0.272, -0.125), "top": 0.361, "carry": Vector3(0, 0.189, -0.112),
 		"ear_tip": Vector3(0.057, 0.423, -0.112), "tail_tip": Vector3(0, 0.158, 0.123),
 		"tip_bone": "tail2", "hip": 0.137,
@@ -196,14 +198,15 @@ const FRAME := {
 		"ear_tip": Vector3(0.155, 0.365, -0.05), "tail_tip": Vector3(0, 0.1, 0.17), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.16, 0.15, 0.02), "right flank": Vector3(0.16, 0.15, 0.02),
 			"back": Vector3(0, 0.25, 0.16), "chest": Vector3(0, 0.24, -0.12)}},
-	"glomwort": {"head": Vector3(0, 0.256, -0.249), "top": 0.468, "carry": Vector3(0, 0.574, 0.0773),
-		"ear_tip": Vector3(0.0716, 0.468, 0.0677), "tail_tip": Vector3(0, 0.115, 0.271), "tip_bone": "hips", "hip": 0,
-		"marks": {"left flank": Vector3(-0.132, 0.125, 0.0387), "right flank": Vector3(0.132, 0.125, 0.0387),
-			"back": Vector3(0, 0.283, 0.135), "chest": Vector3(0, 0.0961, -0.226)}},
-	"kestrike": {"head": Vector3(0, 0.4, -0.246), "top": 0.5, "carry": Vector3(0, 0.435, 0.07), "hip": 0.084,
-		"ear_tip": Vector3(0.09, 0.47, -0.04), "tail_tip": Vector3(0, 0.07, 0.24), "tip_bone": "tail2",
-		"marks": {"left flank": Vector3(-0.174, 0.151, -0.083), "right flank": Vector3(0.174, 0.151, -0.083),
-			"back": Vector3(0, 0.253, 0.025), "chest": Vector3(0, 0.238, -0.197)}},
+	"glomwort": {"head": Vector3(0, 0.35, -0.111), "top": 0.454, "carry": Vector3(0, 0.507, 0.0572),
+		"ear_tip": Vector3(0.0326, 0.454, 0.0516),
+		"tail_tip": Vector3(0, 0.258, 0.169), "tip_bone": "hips", "hip": 0.18,
+		"marks": {"left flank": Vector3(-0.0805, 0.265, 0.0348), "right flank": Vector3(0.0805, 0.265, 0.0348),
+			"back": Vector3(0, 0.363, 0.0907), "chest": Vector3(0, 0.245, -0.0993)}},
+	"kestrike": {"head": Vector3(0, 0.423, -0.209), "top": 0.525, "carry": Vector3(0, 0.454, 0.0842), "hip": 0.146,
+		"ear_tip": Vector3(0.0891, 0.509, 0.0565), "tail_tip": Vector3(0, 0.104, 0.225), "tip_bone": "tail2",
+		"marks": {"left flank": Vector3(-0.0818, 0.178, -0.016), "right flank": Vector3(0.0818, 0.178, -0.016),
+			"back": Vector3(0, 0.296, 0.0573), "chest": Vector3(0, 0.276, -0.156)}},
 	"kindlewren": {"head": Vector3(0, 0.275, -0.205), "top": 0.391, "carry": Vector3(0, 0.414, -0.0703), "hip": 0.113,
 		"ear_tip": Vector3(0.0121, 0.4, -0.0905), "tail_tip": Vector3(0, 0.327, 0.15), "tip_bone": "tail2",
 		"marks": {"left flank": Vector3(-0.0737, 0.13, -0.0554), "right flank": Vector3(0.0737, 0.13, -0.0554),
@@ -246,32 +249,49 @@ const FRAME := {
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.81, 1.48],
-	"puddlet": [0.58, 1.15],
-	"burrlet": [0.52, 1.00],
-	"glintmole": [0.49, 1.04],
+	"puddlet": [0.48, 0.93],
+	"burrlet": [0.45, 0.92],
+	"glintmole": [0.31, 0.62],
 	"rimeshrew": [0.49, 1.15],
 	"zephyrak": [1.50, 2.90],
-	"pebbit": [0.50, 1.09],
+	"pebbit": [0.26, 0.59],
 	"cairnback": [0.30, 1.04],
-	"wisplet": [0.63, 1.32],
+	"wisplet": [0.31, 0.73],
 	"gloamshell": [1.50, 2.90],
 	"selenfin": [1.50, 2.90],
-	"zapple": [0.86, 1.70],
-	"hivara": [0.64, 1.44],
-	"caecilith": [0.15, 0.38],
+	"zapple": [1.02, 1.97],
+	"hivara": [0.34, 0.76],
 	"glomwort": [1.50, 2.90],
 	"kestrike": [0.33, 0.70],
-	"kindlewren": [0.89, 1.70],
+	"kindlewren": [0.49, 0.88],
 	"lodestick": [0.46, 1.62],
 	"marchleaf": [0.53, 2.05],
-	"mossgrade": [0.34, 0.93],
-	"nettlynx": [0.54, 1.03],
+	"mossgrade": [0.34, 0.87],
+	"nettlynx": [0.31, 0.60],
 	"thrumbird": [1.50, 2.90],
+	"duskapi": [0.36, 1.43],
+	"glaciyak": [0.35, 1.43],
+	"heatherhorn": [0.35, 1.43],
+	"kilnbadger": [0.34, 1.41],
+	"moundvark": [0.34, 1.41],
+	"tuatrune": [0.33, 1.35],
+	"moonloris": [0.35, 1.41],
+	"scaldamus": [0.34, 1.36],
+	"spatewader": [0.32, 1.34],
+	"orchisloth": [0.33, 1.35],
+	"limpetor": [0.30, 1.25],
+	"opalisk": [0.30, 1.24],
+	"nimbostrich": [0.30, 1.22],
+	"sentrikat": [0.34, 1.33],
+	"nacrolin": [0.34, 1.34],
+	"murmurling": [0.29, 1.17],
+	"squalltross": [0.29, 1.17],
 }
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
 const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14            # s between body clips
+const GLIDE_FADE := 0.15      # s into and out of a carried glide pose (Kin.render's kact glide)
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
 const GAIT_FADE := {"thrumbird": 0.45}
@@ -286,6 +306,8 @@ const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
+const MARKS_DARK := preload("res://shaders/boki_marks.gdshader")
+const MARKS_LIGHT := preload("res://shaders/boki_marks_light.gdshader")
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
@@ -326,8 +348,8 @@ const FACES := {
 }
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
-	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "cast": "angry", "sleep": "asleep",
+	"pet": "bliss", "chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
@@ -482,6 +504,7 @@ func _ready() -> void:
 	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
 	pace = RigPace.new(get_instance_id())
 	BokiHomeClips.install(species, player, _skel)
+	BokiSwing.add_clip(player)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
@@ -600,9 +623,9 @@ func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
 	if p != _pulse:
 		_pulse = p
-		_start_shot("ability")
+		_start_shot("cast")
 	var attacking := String(root.get_meta("kstate", "")) == "attack"
-	if attacking and not _attacking:
+	if attacking and not _attacking and not (_shot == "cast" and _shot_left > 0.0):  # (a cast's wind-up strikes too)
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
@@ -628,7 +651,12 @@ func _pick_clip(dt: float) -> void:
 		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
-	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
+	var fade := FADE
+	if "glide" in [want, clip]:
+		fade = GLIDE_FADE
+	elif want in GAITS and clip in GAITS:
+		fade = gait_fade()
+	set_clip(want, fade)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
 	if want in NAP_CLIPS:
 		player.speed_scale /= _nap.slow
@@ -893,7 +921,8 @@ static func _ink() -> ShaderMaterial:
 	ink.set_shader_parameter("far_thin", INK_FAR_THIN)
 	return ink
 
-## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on.
+## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on. The
+## marks wear the painted coat's own colours (dark: deeper, pale and glowing: lighter), never a flat colour over it.
 func _copy_coat() -> void:
 	var mats: Array = root.get_meta("mats", [])
 	if mats.is_empty() or _coat == null:
@@ -905,9 +934,12 @@ func _copy_coat() -> void:
 	if body.get_shader_parameter("mark_kind") == null:
 		return
 	var marks := ShaderMaterial.new()
-	marks.shader = preload("res://shaders/boki_marks.gdshader")
-	for k in ["mark_kind", "mark_color", "mark_seed", "mark_scale", "mark_amt", "mark_glow"]:
+	var dark := String(body.get_meta("mark_col", "dark")) == "dark"
+	marks.shader = MARKS_DARK if dark else MARKS_LIGHT
+	for k in ["mark_kind", "mark_seed", "mark_scale", "mark_amt"] + ([] if dark else ["mark_color", "mark_glow"]):
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
+	if not dark:
+		marks.set_shader_parameter("albedo_tex", _coat.get_shader_parameter("albedo_tex"))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
 

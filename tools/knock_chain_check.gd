@@ -4,7 +4,7 @@ extends RefCounted
 ## (the distance it covers matches the same knock on a standing body), it ends a reel, and it can wall-stun
 ## even right after an earlier wall slam. Three pairs from the kits' own numbers, through the real hit path
 ## (Hunter.hurt with the kit's kb and lift) and the real reel (Displace.tow with Grimble's params):
-##   Kael's Haul Slam (rmb.haul.push) -> Albert's Shield Charge shove (dash.charge_kb, lift 2.5)
+##   Kael's Finishing Slam (rmb.slam.push) -> Albert's Shield Charge shove (dash.charge_kb, lift 2.5)
 ##   Grimble's Abyssal Hand reel (rmb pull_speed/gap/pull_max) -> Sparkle's full Storm Rod (rmb.coil.push[1])
 ##   Vex's Burr Charge (rmb.burr.push, lift 2) -> Vex's Burr Charge
 ## Each pair runs twice: on open ground (distance after the second knock vs that knock alone) and with a
@@ -41,7 +41,7 @@ func run(main_node: Node) -> void:
 	var open := home + Vector3(2.5, 0, -8.5)
 	var walled := home + Vector3(10.5, 0, 3.5)
 	_wall(m.world, walled)
-	var kael := float(Arch.def("juggernaut")["rmb"]["haul"]["push"])
+	var kael := float(Arch.def("juggernaut")["rmb"]["slam"]["push"])
 	var albert := float(Arch.def("bulwark")["dash"]["charge_kb"])
 	var sparkle := float((Arch.def("mage")["rmb"]["coil"]["push"] as Array)[1])
 	var vex := float(Arch.def("gunslinger")["rmb"]["burr"]["push"])
@@ -51,7 +51,7 @@ func run(main_node: Node) -> void:
 		"swing": DredgeKit.SWING, "stun": 0.2}
 	var side := Vector2(0, 1)      # every second knock goes +z (toward the wall on the walled strip)
 	var pairs := [
-		["Kael Haul Slam -> Albert Shield Charge", _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5)],
+		["Kael Finishing Slam -> Albert Shield Charge", _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5)],
 		["Grimble reel -> Sparkle Storm Rod", reel, _hit(side * sparkle, -1.0)],
 		["Vex Burr Charge -> Vex Burr Charge", _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0)],
 	]
