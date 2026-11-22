@@ -1,5 +1,7 @@
 # Kit parity audit: 12 Hunters against the source (main 7907d9afe, 2026-11-07; re-audit on ext/release-integ-0244c 23cc281bd, 2026-11-11; slice 0.24.5 mark on ext/integ-ways-out-0245 5d37d4833, 2026-11-11); 0.24.5 re-read on ext/release-integ-0245 272368589, 2026-11-11
 
+New sections go in `docs/KIT_PARITY.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
@@ -123,7 +125,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 - **Glove band:** gloves must not outshine the kits' E. `--glove-band-check` holds every glove at every rarity to the 12 E abilities' maximum for damage per cooldown second (4.38), CC seconds per cast (4.4) and travel metres per cast (14). Launch gloves keep their numbers in content `launch` (m/s, m). Gust's forward launch went 9 to 7.5 m/s (15.9 to 13.3 m, over Thief's 14 m blink-to-knife before).
 - **Keys:** R = hunter ult (JSON slot `x`), X = Fuse, G = Boki (owner).
 - **Run speed, ground accel, gravity, fall cap:** match [D]. **Stopping, air control, dash carry:** differ, see gaps 2 to 4 (re-audit 11-11: stopping and carry **done**, air control **owner**).
-- **Buffer:** `DashFlow.BUFFER_S` 0.15 s past a dash's end; the data gives no window.
+- **Buffer:** `Loco.press_buffer` (tuning.json) 0.15 s past a dash's end; the data gives no window.
 - **Cooldowns below** read ours / source level 1 [D].
 
 **0.24.4 recheck (2026-11-12, main 88b06b9e7, slice Vex, Zedran = Kael, Hem = Lace, Cinder).** The last column of the four Hunter tables and of the Kael, Lace, Vex and Cinder rows in the ranges table says `still done`, `closed` (done since the audit), `changed` (an owner change) or `regressed`. Read from `content/` and the kit code, not played in `--arena` (no row needed eyes; Hem's ledge walk, gap 8, stays open unplayed). Combo checks gunslinger 126, juggernaut 210, archer 167, ashwick 125 PASS, 0 FAIL; `--kit-parity-check`, `--dash-flow-check`, `--move-feel-check` 0 failures. `--ttk-check` is the known red tracking bar (22 rows FAIL, 11 of them slice; ours / source: Vex LMB 3.25, combo max 0.78; Kael LMB 0.65, combo 0.55 and 0.59; Cinder LMB 0.78 and 0.74, combo 0.76 and 0.61; Hem passes). Not re-read against the source this time: CC numbers (Zedran's Meteor Drop ring slow 40% is gone with the down slam, 0a97eddab), the felt-dash and health tables (weight classes 124/145/193 unchanged).
@@ -873,8 +875,8 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 0 (was 5, lift 2.5) / 0 (was 9) | none / none (no hop either) | Flame Step: "dash attack, 49 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Kael | Gilded Riposte strike (`x.strike_kb`, was 6.0 in `juggernaut_ult.gd`) | 0 (was 6) | none | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Lace | Heavy Shot (`rmb.pin.push`, tap to full) | 8-12 | 2.52-5.12 m | Heartpiercer: "an arrow that knocks back" [D]; 2-3 bh (3.6-5.4 m) along the shot, charge not known (pin.md 0273) [F] | match | `[?]` (full charge inside F) |
-| Lace | Longbow shot (`longbow.kb`) | 3.5 | 0.62 m | Greenwood Bow: no knock [D] | differ | n/a |
-| Lace | Empowered ult shots (`x.kb`) | 4 | 0.76 m | Virideth's Fury: "greatly empowered", no knock [D] | differ | n/a |
+| Lace | Longbow shot (`longbow.kb`) | 2.0 (was 3.5, `ext/lace-knock-cut`) | nudge | Greenwood Bow: no knock [D] | match (nudge) | n/a |
+| Lace | Empowered ult shots (`x.kb`) | 2.0 (was 4, `ext/lace-knock-cut`) | nudge | Virideth's Fury: "greatly empowered", no knock [D] | match (nudge) | n/a |
 | Cinder | Spark Leap hit (`dash.kb`) | 7 | 2.01 m | Pyro Pounce: "dmg + knockback" [D]; no read of the target's flight [F] | match | `[?]` |
 | Cinder | Spark Leap self-recoil (`dash.recoil`, a set speed, not a knock) | 3.5 m/s | not run through the knock curve | about 1 bh (1.8 m) back in 0.1 s (linwick.md) [F] | match (footage) | `[?]` |
 | Meeko | none (lantern shot `lantern_crook.kb`) | 1.0 | nudge | Elluna: no knock in the kit [D] | match | n/a |
