@@ -30,7 +30,7 @@
 				"size": 0.08, "c": "ember", "c2": "ember_hot"}
 		]},
 		"ember_hit": {"net": false, "fx": [
-			{"p": "chunk", "y": 0.1, "way": "back", "lift": 0.6, "n": 8, "speed": 4.5, "spread": 0.6, "grav": 14.0, "drag": 0.3, "life": 0.55, "size": 0.09, "radius": 0.3, "c": "leaf", "c3": "char"},
+			{"p": "chunk", "y": 0.1, "way": "back", "lift": 0.6, "n": 8, "speed": 4.5, "spread": 0.6, "grav": 14.0, "drag": 0.3, "life": 0.55, "size": 0.09, "radius": 0.3, "c": "leaf"},
 			{"p": "ember", "y": 0.1, "way": "back", "lift": 0.5, "n": 14, "speed": 6.0, "spread": 0.7, "grav": 6.0, "life": 0.45, "size": 0.05, "radius": 0.3, "c": "ember", "c2": "ember_hot"}
 		]},
 		"cast_trail": {"fx": [
