@@ -22,15 +22,32 @@ from pathlib import Path
 
 from regate_common import REPO, STATE_DIR, git, is_ancestor, now, run
 
-SUITE_SPEED = next((p for p in (os.environ.get("SUITE_SPEED", ""), str(Path(__file__).resolve().parent / "suite_speed.py"),
-                                "/home/boki/coord/boki-tools/suite-speed/suite_speed.py", "/home/boki/coord/boki-tools/suite_speed.py")
-                    if p and Path(p).is_file()), "")
+SUITE_SPEED = next(
+    (
+        p
+        for p in (
+            os.environ.get("SUITE_SPEED", ""),
+            str(Path(__file__).resolve().parent / "suite_speed.py"),
+            "/home/boki/coord/boki-tools/suite-speed/suite_speed.py",
+            "/home/boki/coord/boki-tools/suite_speed.py",
+        )
+        if p and Path(p).is_file()
+    ),
+    "",
+)
 CACHE = STATE_DIR / "cache"
 # suite_speed's INERT (files no check reads); kept in sync by hand, test_regate_carry checks it against the engine copy
-INERT = re.compile(r"^(docs|briefs|ops|\.github|blender|art_src)/|\.(md|txt|import|uid)$|^[^/]+\.md$|^export_presets\.cfg$")
+INERT = re.compile(
+    r"^(docs|briefs|ops|\.github|blender|art_src)/|\.(md|txt|import|uid)$|^[^/]+\.md$|^export_presets\.cfg$"
+)
 LAST = {}  # carry_check's last X (checks that see main's delta), for replay's old-rule column
-ENV = {**os.environ, "GIT_AUTHOR_NAME": "regate-bot", "GIT_COMMITTER_NAME": "regate-bot",
-       "GIT_AUTHOR_EMAIL": "regate-bot@localhost", "GIT_COMMITTER_EMAIL": "regate-bot@localhost"}
+ENV = {
+    **os.environ,
+    "GIT_AUTHOR_NAME": "regate-bot",
+    "GIT_COMMITTER_NAME": "regate-bot",
+    "GIT_AUTHOR_EMAIL": "regate-bot@localhost",
+    "GIT_COMMITTER_EMAIL": "regate-bot@localhost",
+}
 
 
 def merge_tree(a, b):
@@ -72,13 +89,21 @@ def merge_unmerged(env, tmp):
         fs = []
         for st in "213":
             f = tmp / f"s{st}"
-            f.write_bytes(subprocess.run(["git", "-C", REPO, "cat-file", "blob", sv[st][1]], capture_output=True).stdout)
+            f.write_bytes(
+                subprocess.run(["git", "-C", REPO, "cat-file", "blob", sv[st][1]], capture_output=True).stdout
+            )
             fs.append(str(f))
         if run(["git", "-C", REPO, "merge-file", "-q", *fs])[0]:  # merges into fs[0] (ours); rc != 0 = conflicts
             return False
         rc, sha, _ = run(["git", "-C", REPO, "hash-object", "-w", fs[0]])
-        if rc or run(["git", "-C", REPO, "update-index", "--force-remove", "--", path], env=env)[0] or \
-                run(["git", "-C", REPO, "update-index", "--add", "--cacheinfo", f"{sv['2'][0]},{sha.strip()},{path}"], env=env)[0]:
+        if (
+            rc
+            or run(["git", "-C", REPO, "update-index", "--force-remove", "--", path], env=env)[0]
+            or run(
+                ["git", "-C", REPO, "update-index", "--add", "--cacheinfo", f"{sv['2'][0]},{sha.strip()},{path}"],
+                env=env,
+            )[0]
+        ):
             return False
     return True
 
@@ -147,7 +172,11 @@ def carry_check(head, gated, main):
     hit = sorted(set(x) & set(y))
     if hit:
         return False, f"{len(hit)} checks read both sides (e.g. {hit[0]})", None
-    return True, f"no overlap ({len(pr)} PR files, {len(mn)} main files; {len(x)} checks see main, {len(y)} see the PR, 0 both)", commit
+    return (
+        True,
+        f"no overlap ({len(pr)} PR files, {len(mn)} main files; {len(x)} checks see main, {len(y)} see the PR, 0 both)",
+        commit,
+    )
 
 
 # ---- suite result cache
@@ -174,7 +203,9 @@ def cache_put(ct, mt, result, **info):
     if result != "GREEN":
         return
     CACHE.mkdir(parents=True, exist_ok=True)
-    (CACHE / f"{cache_key(ct, mt)}.json").write_text(json.dumps(dict(result=result, cand=ct, main=mt, at=now(), **info)))
+    (CACHE / f"{cache_key(ct, mt)}.json").write_text(
+        json.dumps(dict(result=result, cand=ct, main=mt, at=now(), **info))
+    )
 
 
 # ---- train
@@ -206,7 +237,9 @@ def replay(runs_dir):
             continue
         n, br, head, gated, main = m.groups()
         res = (re.search(r"result: ([A-Z]+)", log) or [None, "none"])[1]
-        mins = float((re.search(r"result: \w+(?: \w+)? \((\d+) min\)", log) or re.search(r"wall ([\d.]+) min", log) or [0, 0])[1])
+        mins = float(
+            (re.search(r"result: \w+(?: \w+)? \((\d+) min\)", log) or re.search(r"wall ([\d.]+) min", log) or [0, 0])[1]
+        )
         head, gated, main = (git("rev-parse", "--verify", "-q", f"{x}^{{commit}}") for x in (head, gated, main))
         if not (head and gated and main):
             rows.append(dict(run=d.name, pr=n, res=res, mins=mins, why="sha not in repo"))
@@ -228,6 +261,7 @@ def replay(runs_dir):
 
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["replay"])
     ap.add_argument("--runs", default=str(STATE_DIR / "runs"))
@@ -235,10 +269,14 @@ if __name__ == "__main__":
     rows = replay(a.runs)
     for r in rows:
         tag = "CARRY" if r.get("new") else ("CACHE" if r.get("cache") else "-")
-        print(f"{r['run'][:28]:28} {r['res']:8} {r['mins']:4.0f}m old={'Y' if r.get('old') else 'n'} new={tag:5} {r['why'][:90]}")
+        print(
+            f"{r['run'][:28]:28} {r['res']:8} {r['mins']:4.0f}m old={'Y' if r.get('old') else 'n'} new={tag:5} {r['why'][:90]}"
+        )
     saved = [r for r in rows if r.get("new") or r.get("cache")]
     wrong = [r for r in saved if r["res"] == "RED"]
-    print(f"replay: {len(rows)} runs, stale {sum(1 for r in rows if r.get('stale'))}, old rule carries "
-          f"{sum(1 for r in rows if r.get('old'))}, new rule carries {sum(1 for r in rows if r.get('new'))}, cache hits "
-          f"{sum(1 for r in rows if r.get('cache'))}; saved {len(saved)} runs / {sum(r['mins'] for r in saved):.0f} wall-min; "
-          f"carried-but-RED {len(wrong)} {' '.join(r['run'] for r in wrong)}")
+    print(
+        f"replay: {len(rows)} runs, stale {sum(1 for r in rows if r.get('stale'))}, old rule carries "
+        f"{sum(1 for r in rows if r.get('old'))}, new rule carries {sum(1 for r in rows if r.get('new'))}, cache hits "
+        f"{sum(1 for r in rows if r.get('cache'))}; saved {len(saved)} runs / {sum(r['mins'] for r in saved):.0f} wall-min; "
+        f"carried-but-RED {len(wrong)} {' '.join(r['run'] for r in wrong)}"
+    )
