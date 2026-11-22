@@ -42,7 +42,6 @@ const SLOT_OF := {"utility": "sec", "rmb": "sec", "k1": "k1", "e": "k1", "ult": 
 		"dodge": "dash"}
 
 static var shown: Array[Dictionary] = []     # what the last draw put up, top to bottom (--kill-feed-check reads it)
-static var _screen: Array[Rect2] = []        # the same rows in screen px (rects())
 static var _fitted := {}                     # name -> the name cut to NAME_W
 
 ## The icon of what landed a knock: the slot's icon on the knocker's own bar, the weapon's for a plain hit, the
@@ -94,19 +93,9 @@ static func _src(by: Ent, from: Hunter) -> String:
 		return ""
 	return "Blight" if by is Blight else String(by.kind).capitalize().replace("_", " ")
 
-## Nothing drawn this frame (the feed is held back).
-static func clear() -> void:
-	shown.clear()
-	_screen.clear()
-
-## The rows drawn last frame, in screen px (MsgLane keeps its cards off them; the rows are drawn under HudScale.xf).
-static func rects() -> Array[Rect2]:
-	return _screen.duplicate()
-
 ## Draws the feed down from Hud.feed_top at the safe margin's right edge, oldest on top.
 static func draw(H, sz: Vector2) -> void:
 	shown.clear()
-	_screen.clear()
 	var pad := HudStyle.safe_pad(sz)
 	var y: float = maxf(H.feed_top, pad.y)
 	for f: Dictionary in H.m.feed:
@@ -114,7 +103,6 @@ static func draw(H, sz: Vector2) -> void:
 		var right := sz.x - pad.x
 		var row := _face_row(H, f, right, y, a) if is_instance_valid(f.get("who")) else _text_row(H, f, right, y, a)
 		shown.append(row)
-		_screen.append(HudScale.xf * (row["rect"] as Rect2))
 		y = (row["rect"] as Rect2).end.y + GAP
 
 ## [bar] knocker (name, face) | icon | victim (face, name) [bar]. With no knocker face the monster's name, or
