@@ -93,8 +93,10 @@ func _tick_bound(dt: float) -> void:
 		var e := f as Ent
 		var col := AimKit.hero_col(kit.h)
 		var r := e.r + 0.35 + 0.08 * sin(kit.m.time * 10.0)
-		AimKit.circle(kit.h, "gnd%d" % key, {"at": e.pos, "r": r, "col": col, "all": true, "lw": 0.1, "alpha": 1.4})
-		AimKit.circle(kit.h, "gnd2%d" % key, {"at": e.pos, "r": r * 0.7, "col": col, "all": true, "dashed": true})
+		# thin bands (no filled disc under the body: a flat disc read as a generic damage mark), the inner one dashed
+		AimKit.circle(kit.h, "gnd%d" % key, {"at": e.pos, "r": r, "col": col, "all": true, "band": 0.12, "alpha": 1.3})
+		AimKit.circle(kit.h, "gnd2%d" % key,
+				{"at": e.pos, "r": r * 0.7, "col": col, "all": true, "band": 0.09, "dashed": true, "alpha": 1.3})
 
 ## E let go (or the hold ran out): the vector is fixed here for good.
 func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:

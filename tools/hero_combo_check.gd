@@ -512,8 +512,8 @@ func _mage() -> void:
 	var pink := AimKit.hero_col(P).to_html(false)
 	var ring_ok := not ring.is_empty() and not ring2.is_empty() and bool(ring2.get("dashed", false))
 	var ring_col := (ring.get("col", Color.BLACK) as Color).to_html(false)
-	ring_ok = ring_ok and bool(ring.get("all", false)) and ring_col == pink
-	ok("Skycall's Grounded: two pink binding rings (one dashed, seen by all); pink cords and arrow, no amber disc",
+	ring_ok = ring_ok and bool(ring.get("all", false)) and ring_col == pink and float(ring.get("band", 0.0)) > 0.0
+	ok("Skycall's Grounded: two thin pink binding rings (one dashed, seen by all, no fill); pink cords and arrow, no amber disc",
 			ring_ok and String(cords.get("tint", "")) == pink,
 			"rings %s/%s tint %s" % [not ring.is_empty(), not ring2.is_empty(), cords.get("tint", "-")])
 	ac.step(m, 0.9)
