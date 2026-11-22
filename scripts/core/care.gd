@@ -680,6 +680,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	baby["gifts"] = Parentage.gifts(a, b, baby, _inherit_habits(baby, a, b, rng))
+	baby["gifts"].merge(Unique.bred_coat(baby, a, b, maxi(int(baby["gifts"]["species"]), 0)))
 	if UnstableMix.unstable(a, b): UnstableMix.mark(baby)
 	var lean := head_start(a, b)
 	if not lean.is_empty(): baby["lean"] = lean
