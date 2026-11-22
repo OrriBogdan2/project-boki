@@ -10934,3 +10934,4 @@ READY ext/farm-tut-ends 971f645ae011aae777f948858a3b8fdcfd105ccd (supersedes 90c
 READY ext/vfx-ground-ring-audit a3ffed486c782308439d625477219db279bea77d (decorative ground rings cut in 11 kits)
 READY ext/tut-hint-once 046bc7e291 (first-time hints show once per save)
 READY ext/sfx-boki-fly-home-cue b0918222e8 (Boki fly-home cue)
+READY ext/vfx-sable-rmb-e-data ff554d8bda (Sable RMB/E on HeroVfx data)
