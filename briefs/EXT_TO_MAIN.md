@@ -10983,3 +10983,4 @@ READY ext/merge-lane-N2-1122 cfb62e3cea (bulk-rebase: origin/main merged in mech
 READY ext/sfx-snack-patch 033e5bbd41 (merged origin/main; only snack_patch_check.gd conflicted, kept main's _first_batch plus the branch's _textures; --snack-patch-check 0 fail, --garden-sfx-check 0 fail, --check 0 fail; health --strict fails only on main's style-ratchet rows, none in this branch's files)
 READY ext/feel-cc-reread-1122 56bd4bb839bae9ba6dfad6b25a635b23262dd53e (CC table re-read)
 READY ext/garden-tide-water 95a6f83d21d (merged origin/main, resolved snack_patch.gd: grow_secs(e) keeps main's first_grow_secs rule plus water_mult; --chore-check 0 fail, --snack-patch-check 0 fail, --check 0 fail; health --strict fails only on other files' style ratchet + numpy missing on w2)
+READY ext/cinder-dash-clip 498f09accd32e53b98f6cc17da0fd32102138019 (Cinder dash proc->clip, merged with main; combo-check 3 fails same as main)
