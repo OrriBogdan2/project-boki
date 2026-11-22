@@ -154,7 +154,7 @@ static func _biggest_cluster(idx: Array) -> Array:
 
 ## The kit's JSON numbers for the driver's rows (the far edge of the footprint, its width, the arc).
 static func content(c: Object, a: String, kind: String) -> Dictionary:
-	var ak: Object = c.P.ak
+	var ak: Object = c.p.ak
 	var key := a + ":" + kind
 	var o := {"reach": 0.0, "width": 0.0, "arc": 0.0}
 	match key:
@@ -184,7 +184,7 @@ static func content(c: Object, a: String, kind: String) -> Dictionary:
 			var sd: Dictionary = ak.rmb_def()["seed"]
 			o = {"reach": float(sd["burst_r"]), "width": 2.0 * float(sd["burst_r"]), "arc": 0.0}
 		"archer:lmb":
-			o = {"reach": float(c.P.wpn["range"]), "width": 2.0 * float(c.P.wpn["size"]), "arc": 0.0}
+			o = {"reach": float(c.p.wpn["range"]), "width": 2.0 * float(c.p.wpn["size"]), "arc": 0.0}
 		"archer:e":
 			var he: Dictionary = ak.e_def()
 			var far := float(he["reach"]) + float(he["width"]) * 0.5

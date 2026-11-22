@@ -19,7 +19,7 @@ const ARC_KEYS := ["deg", "arc", "angle"]
 
 var bad := 0
 var m: Match
-var P: Hunter
+var p: Hunter
 var home: Vector3
 var dummies: Array = []
 var n_dummies := NX * NZ
@@ -93,7 +93,7 @@ func _spawn(main: Node) -> void:
 	ac.main = main
 	var r: Array = ac.setup("mage", 30.0)
 	m = r[0]
-	P = r[1]
+	p = r[1]
 	home = r[4]
 	(r[2] as Hunter).teleport(home + Vector3(-6.0, 0, -8.0))      # the setup's own target: out of the grid
 	for i in n_dummies:
@@ -117,15 +117,15 @@ func _probe(arch: String, kind: String, hold: float, secs: float, park := false,
 		m.step(0.002 if t == 0.0 else step_dt)      # (a tiny first step: a bullet is seen before a dummy eats it)
 		t += step_dt
 		for s in m.shots:
-			if s["by"] == P and s["x"].get("melee", false): swing_seen = true
-			if s["by"] == P and not s["x"].get("melee", false) and not s.has("hs_seen"):
+			if s["by"] == p and s["x"].get("melee", false): swing_seen = true
+			if s["by"] == p and not s["x"].get("melee", false) and not s.has("hs_seen"):
 				s["hs_seen"] = true
 				shot_seen.append([_shot_reach(s), float(s["r"])])
 		if parked and not shot_seen.is_empty(): break
 		for i in _took_damage(): hit[i] = true
 		_clear_mobs()
 		if layout != "grid": _pin()
-		if kind == "rmb_hold" and t >= hold: P.inp["sec_hold"] = false
+		if kind == "rmb_hold" and t >= hold: p.inp["sec_hold"] = false
 	_release()
 	return hit.keys()
 
@@ -142,18 +142,18 @@ func _shot_reach(s: Dictionary) -> float:
 ## The hero as `arch` at home, aimed down +X at full ult and charges, the dummies in their slots.
 func _prep(arch: String) -> void:
 	HeroVfx.of(m).ribbons.clear()      # (a trail still following the old model would read a freed node)
-	P.reclass(Arch.weight(arch), arch)
-	P.unlock_all()
-	P.lvl = 6
-	P.slot_lv["ult"] = 1
-	P.ult = 1.0
-	P.dashes = P.max_dashes()
-	P.hp = P.max_hp
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	P.dash_pass = {}      # (a dash cut short keeps what it did to foes in its way, for the next hero)
-	P.inp["aim"] = home + Vector3(aim_d, 0.9, 0)
-	P.inp["aim_y"] = home.y
+	p.reclass(Arch.weight(arch), arch)
+	p.unlock_all()
+	p.lvl = 6
+	p.slot_lv["ult"] = 1
+	p.ult = 1.0
+	p.dashes = p.max_dashes()
+	p.hp = p.max_hp
+	p.teleport(home)
+	p.vel = Vector3.ZERO
+	p.dash_pass = {}      # (a dash cut short keeps what it did to foes in its way, for the next hero)
+	p.inp["aim"] = home + Vector3(aim_d, 0.9, 0)
+	p.inp["aim_y"] = home.y
 	m.shots.clear()
 	m.zones.clear()
 	m.fields.list.clear()      # (an ult's patch or wall from the last input)
@@ -169,29 +169,29 @@ func _prep(arch: String) -> void:
 ## One step of input for `kind` `t` seconds into it (`first`: the press itself).
 func _press(kind: String, hold: float, t: float, first: bool) -> void:
 	var held := t < hold
-	P.inp["fire"] = (kind == "lmb" and first) or (kind in ["lmb_hold", "x_fire"] and held)
-	P.inp["sec_hold"] = kind == "rmb_hold" and held
-	P.inp["dash_down"] = (kind == "dash" and first) or (kind == "dash_hold" and held)
-	P.fire_cd = 0.0 if first else P.fire_cd
+	p.inp["fire"] = (kind == "lmb" and first) or (kind in ["lmb_hold", "x_fire"] and held)
+	p.inp["sec_hold"] = kind == "rmb_hold" and held
+	p.inp["dash_down"] = (kind == "dash" and first) or (kind == "dash_hold" and held)
+	p.fire_cd = 0.0 if first else p.fire_cd
 	if first:
 		match kind:
-			"rmb", "rmb_hold": P.ak.press_rmb()
-			"e": P.ak.use_e()
-			"x", "x_fire": P.ak.cast_ult()
-			"dash", "dash_hold": P.do_dash()
+			"rmb", "rmb_hold": p.ak.press_rmb()
+			"e": p.ak.use_e()
+			"x", "x_fire": p.ak.cast_ult()
+			"dash", "dash_hold": p.do_dash()
 
 ## A second press of the same input (a recast, the follow-up strike): `again` = [seconds in, input].
 func _again(kind: String) -> void:
 	match kind:
-		"e": P.ak.use_e()
-		"x": P.ak.cast_ult()
-		"rmb": P.ak.press_rmb()
-		"dash": P.do_dash()
+		"e": p.ak.use_e()
+		"x": p.ak.cast_ult()
+		"rmb": p.ak.press_rmb()
+		"dash": p.do_dash()
 
 func _release() -> void:
-	P.inp["fire"] = false
-	P.inp["dash_down"] = false
-	P.inp["sec_hold"] = false
+	p.inp["fire"] = false
+	p.inp["dash_down"] = false
+	p.inp["sec_hold"] = false
 
 ## {reach, width, arc, n}: reach to the far edge of what was hit (m), the widest lane across the
 ## aim line (m) and the angle the hits spread over (degrees). Centres are corrected by the dummy's
@@ -237,15 +237,15 @@ func _top(d: Dictionary, keys: Array) -> float:
 ## plain number read the field the kit hits with (`shot`: a projectile that bursts on the first dummy, measured
 ## on a clear lane instead).
 func _content(kind: String) -> Dictionary:
-	var o := _content_kit(P.arch, kind)
+	var o := _content_kit(p.arch, kind)
 	if not o.is_empty(): return o
 	var d: Dictionary
 	match kind:
-		"lmb", "lmb_hold": d = P.wpn
-		"rmb", "rmb_hold": d = P.ak.rmb_def()
-		"e": d = P.ak.e_def()
-		"x", "x_fire": d = P.ak.x_def()
-		_: d = P.ak.dash_def()
+		"lmb", "lmb_hold": d = p.wpn
+		"rmb", "rmb_hold": d = p.ak.rmb_def()
+		"e": d = p.ak.e_def()
+		"x", "x_fire": d = p.ak.x_def()
+		_: d = p.ak.dash_def()
 	return {"reach": _top(d, REACH_KEYS), "width": _top(d, WIDTH_KEYS), "arc": _top(d, ARC_KEYS)}
 
 ## "reach +23%" for every content number that is more than TOL off; "~" marks one within the 0.5 m grid (a
@@ -265,17 +265,17 @@ func _flags(meas: Dictionary, cont: Dictionary) -> String:
 			out.append("%s%s %+.0f%%" % [tag, k, (v - c) / c * 100.0])
 	return ", ".join(out)
 
-func _has(arch: String, kind: String) -> bool:
+func _has(_arch: String, kind: String) -> bool:
 	match kind:
-		"rmb_hold": return float(P.ak.rmb_def().get("hold", 0.0)) > 0.0
-		"dash_hold": return float(P.ak.dash_def().get("hold", 0.0)) > 0.0
-		"x": return not P.ak.x_def().is_empty()
-		"lmb_hold": return P.wpn.has("charge_time") or P.wpn.has("draw")
+		"rmb_hold": return float(p.ak.rmb_def().get("hold", 0.0)) > 0.0
+		"dash_hold": return float(p.ak.dash_def().get("hold", 0.0)) > 0.0
+		"x": return not p.ak.x_def().is_empty()
+		"lmb_hold": return p.wpn.has("charge_time") or p.wpn.has("draw")
 	return true
 
 func _secs_for(kind: String, hold: float) -> float:
 	match kind:
-		"e": return 3.0 if P.arch == "rimewright" else 1.2      # (Rink Wall slides about 4 m/s: give it the grid)
+		"e": return 3.0 if p.arch == "rimewright" else 1.2      # (Rink Wall slides about 4 m/s: give it the grid)
 		"x": return 1.5
 		"lmb": return 0.5
 		"rmb", "rmb_hold": return maxf(hold + 0.5, 0.6) + _flight_s()
@@ -283,17 +283,17 @@ func _secs_for(kind: String, hold: float) -> float:
 
 ## Seconds a thrown RMB (Gil's flask) spends in the air before it lands: its flight plus the flight per metre.
 func _flight_s() -> float:
-	var rd := P.ak.rmb_def()
+	var rd := p.ak.rmb_def()
 	var far := float(rd.get("range", 0.0)) * float(rd.get("hold_range", 1.0))
 	return float(rd.get("flight", 0.0)) + float(rd.get("flight_per_m", 0.0)) * far
 
 func _hold_for(kind: String) -> float:
 	match kind:
-		"lmb_hold": return maxf(float(P.wpn.get("charge_time", 0.0)), 1.1 if P.wpn.has("draw") else 0.6) + 0.15
+		"lmb_hold": return maxf(float(p.wpn.get("charge_time", 0.0)), 1.1 if p.wpn.has("draw") else 0.6) + 0.15
 		"rmb_hold":
-			var rd := P.ak.rmb_def()
+			var rd := p.ak.rmb_def()
 			return maxf(float(rd.get("full_t", 0.0)), float(rd.get("hold", 0.3)) + 0.5) + 0.1
-		"dash_hold": return float(P.ak.dash_def().get("hold", 0.6)) + 0.05
+		"dash_hold": return float(p.ak.dash_def().get("hold", 0.6)) + 0.05
 	return 0.0
 
 ## Where the spark of a hit on `tgt` spawned: the impact flash nearest its body, within 1.5 s of `kind` being
@@ -307,7 +307,7 @@ func _spark_at(arch: String, kind: String, tgt: Hunter, put_zone := false) -> Ve
 	tgt.vel = Vector3.ZERO
 	if put_zone:
 		var patch := {"radius": 2.0, "dmg": 5.0, "every": 0.2, "time": 3.0, "color": "#ff7a30"}
-		m.fields.add(P, tgt.pos, patch, {"slot": "zone"}, 1.0)
+		m.fields.add(p, tgt.pos, patch, {"slot": "zone"}, 1.0)
 	var t := 0.0
 	while t < 1.5:
 		m.fx.flashes.clear()
@@ -419,7 +419,7 @@ func run(main: Node) -> void:
 	for a in Arch.ids():
 		if only != "" and not (a in only.split(",")): continue
 		var hits := 0
-		P.reclass(Arch.weight(a), a)
+		p.reclass(Arch.weight(a), a)
 		for kind in ["lmb", "lmb_hold", "rmb", "rmb_hold", "e", "x", "dash", "dash_hold"]:
 			if not _has(a, kind): continue
 			var key: String = a + ":" + kind
@@ -444,32 +444,32 @@ func run(main: Node) -> void:
 
 ## Content for the inputs whose JSON number is not the hit's own size (docs/HITBOX_SIZE.md, "Mismatches over 10%").
 func _content_kit(a: String, kind: String) -> Dictionary:
-	var L: Dictionary = P.ak.lmb_def()
+	var l: Dictionary = p.ak.lmb_def()
 	match a + ":" + kind:
 		"juggernaut:lmb":      # the kit's sword (lmb.reach / arc), not greatsword.json's range 3.4 / arc 160
-			return {"reach": float(L["reach"]), "width": 0.0, "arc": float(L["arc"])}
+			return {"reach": float(l["reach"]), "width": 0.0, "arc": float(l["arc"])}
 		"juggernaut:lmb_hold":      # Searing Wave at full charge
-			var wave_w := 2.0 * float(L["wave_size"][1])
-			return {"reach": float(L["wave_range"][1]), "width": wave_w, "arc": 0.0, "shot": true}
+			var wave_w := 2.0 * float(l["wave_size"][1])
+			return {"reach": float(l["wave_range"][1]), "width": wave_w, "arc": 0.0, "shot": true}
 		"juggernaut:dash":      # the dash and the tip burst at its end
-			var dd := P.ak.dash_def()
+			var dd := p.ak.dash_def()
 			return {"reach": float(dd["dist"]) + float(dd["tip_r"]), "width": 0.0, "arc": 0.0}
 		"gunslinger:e":      # JSON `width` is the half-width of the beam
-			return {"reach": float(P.ak.e_def()["range"]), "width": 2.0 * float(P.ak.e_def()["width"]), "arc": 0.0}
+			return {"reach": float(p.ak.e_def()["range"]), "width": 2.0 * float(p.ak.e_def()["width"]), "arc": 0.0}
 		"bulwark:lmb":      # the hammer throw: flies throw_range and sweeps 0.9 m round its path
-			return {"reach": float(L["throw_range"]) + 0.9, "width": 1.8, "arc": 0.0}
+			return {"reach": float(l["throw_range"]) + 0.9, "width": 1.8, "arc": 0.0}
 		"bulwark:lmb_hold":      # Crushing Blow
-			return {"reach": float(L["smash_reach"]), "width": 0.0, "arc": float(L["smash_arc"])}
+			return {"reach": float(l["smash_reach"]), "width": 0.0, "arc": float(l["smash_arc"])}
 		"dolm:lmb":
-			var b: Dictionary = L["boulder"]
+			var b: Dictionary = l["boulder"]
 			return {"reach": float(b["range"]), "width": 2.0 * float(b["size"]), "arc": 0.0, "shot": true}
 		"dolm:lmb_hold":      # the punch lane, from where she stands at the release (the step comes after)
-			var pu: Dictionary = L["punch"]
+			var pu: Dictionary = l["punch"]
 			return {"reach": float(pu["len"]), "width": float(pu["width"]), "arc": 0.0}
 		"rimewright:e":      # the wall erupts `reach` ahead and slides up to `travel` toward the cursor
-			var ed := P.ak.e_def()
+			var ed := p.ak.e_def()
 			return {"reach": float(ed["reach"]) + float(ed["travel"]), "width": 0.0, "arc": 0.0}
 		"mage:dash", "mage:dash_hold":      # Wirerun hurts what the body crosses, padded by width + 0.6
-			var wd := P.ak.dash_def()
-			return {"reach": float(wd["dist"][1]), "width": float(wd["width"]) + 0.6 + 2.0 * P.r, "arc": 0.0}
+			var wd := p.ak.dash_def()
+			return {"reach": float(wd["dist"][1]), "width": float(wd["width"]) + 0.6 + 2.0 * p.r, "arc": 0.0}
 	return {}
