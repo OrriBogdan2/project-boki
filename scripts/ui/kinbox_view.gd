@@ -11,11 +11,13 @@ const COLS := 6
 const CELL := Vector2(68, 76)
 const FARM_COLS := 2
 
+const DEMO_SEED := 7700  # base of the demo roster's inborn-roll seeds (one per kin)
+
 static var page := 0
 static var query := ""
 static var filter := "all"
 static var sel := ""
-static var confirm := ""            # uid waiting on "release?"
+static var confirm := ""  # uid waiting on "release?"
 static var renaming := false
 
 var home: Node = null
@@ -28,7 +30,9 @@ var page_lbl: Label
 var name_row: HBoxContainer
 var detail: VBoxContainer
 var msg: Label
+
 var _msg_t := 0
+
 
 static func open(h: Node) -> KinBoxView:
 	KinBox.ensure()
@@ -37,8 +41,10 @@ static func open(h: Node) -> KinBoxView:
 	kv._build()
 	return kv
 
+
 func _tree() -> SceneTree:
 	return home.get_tree() if home and home.is_inside_tree() else null
+
 
 func _build() -> void:
 	v = home._new_panel("Boki Burrow", 1090, true)
@@ -59,17 +65,36 @@ func _build() -> void:
 	name_row = UI.hbox(6)
 	bc.add_child(name_row)
 	var ph := UI.hbox(4)
-	ph.add_child(UI.button("‹", func(): page = (page - 1 + KinBox.PAGES) % KinBox.PAGES; renaming = false; refresh(), 34))
+	ph.add_child(
+		UI.button(
+			"‹",
+			func():
+				page = (page - 1 + KinBox.PAGES) % KinBox.PAGES
+				renaming = false
+				refresh(),
+			34
+		)
+	)
 	tabs = UI.hbox(3)
 	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ph.add_child(tabs)
-	ph.add_child(UI.button("›", func(): page = (page + 1) % KinBox.PAGES; renaming = false; refresh(), 34))
+	ph.add_child(
+		UI.button(
+			"›",
+			func():
+				page = (page + 1) % KinBox.PAGES
+				renaming = false
+				refresh(),
+			34
+		)
+	)
 	bc.add_child(ph)
 	var gc := UI.card(Color(UI.NIGHT, 0.9), 8, 12)
 	UI.set_card_border(gc, Color(Color("bfa6ff"), 0.25), 1)
 	grid = GridContainer.new()
 	grid.columns = COLS
-	grid.add_theme_constant_override("h_separation", 5); grid.add_theme_constant_override("v_separation", 5)
+	grid.add_theme_constant_override("h_separation", 5)
+	grid.add_theme_constant_override("v_separation", 5)
 	gc.add_child(grid)
 	bc.add_child(gc)
 	# the right side: find and sort, then the kin you picked
@@ -81,21 +106,37 @@ func _build() -> void:
 	search.placeholder_text = "Search a name or kind"
 	search.text = query
 	search.clear_button_enabled = true
-	search.text_changed.connect(func(t: String): query = t; refresh())
+	search.text_changed.connect(
+		func(t: String):
+			query = t
+			refresh()
+	)
 	rc.add_child(search)
 	var fr := UI.hbox(6)
 	var fo := OptionButton.new()
-	var fopts: Array = [["all", "All Boki"], ["special", "Any rare"], ["shimmer", "Shimmering"], ["mutated", "Any mutation"]]
-	for mid in Mutations.ids(): fopts.append([mid, Mutations.name_of(mid)])
-	for el in Work.ORDER: fopts.append(["el:" + el, "Works: %s" % Work.name_of(el)])
+	var fopts: Array = [
+		["all", "All Boki"], ["special", "Any rare"], ["shimmer", "Shimmering"], ["mutated", "Any mutation"]
+	]
+	for mid in Mutations.ids():
+		fopts.append([mid, Mutations.name_of(mid)])
+	for el in Work.ORDER:
+		fopts.append(["el:" + el, "Works: %s" % Work.name_of(el)])
 	for spk in Data.KIN:
-		if not Data.KIN[spk].get("rare", false) or (Save.d["roster"] as Array).any(func(r): return String(r["species"]) == spk):
+		if (
+			not Data.KIN[spk].get("rare", false)
+			or (Save.d["roster"] as Array).any(func(r): return String(r["species"]) == spk)
+		):
 			fopts.append([spk, String(Data.KIN[spk]["name"])])
 	for i in fopts.size():
 		fo.add_item(String(fopts[i][1]), i)
 		fo.set_item_metadata(i, fopts[i][0])
-		if String(fopts[i][0]) == filter: fo.select(i)
-	fo.item_selected.connect(func(i: int): filter = String(fo.get_item_metadata(i)); refresh())
+		if String(fopts[i][0]) == filter:
+			fo.select(i)
+	fo.item_selected.connect(
+		func(i: int):
+			filter = String(fo.get_item_metadata(i))
+			refresh()
+	)
 	fo.tooltip_text = "Show only some Boki"
 	fo.fit_to_longest_item = false
 	fo.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -105,16 +146,22 @@ func _build() -> void:
 	rc.add_child(fr)
 	rc.add_child(KinFilter.new(refresh))
 	var sr := UI.hbox(6)
-	var sb := UI.button("Sort this box", func():
-		KinBox.sort_page(page, KinFilter.sort)
-		_done("Sorted %s by %s" % [KinBox.page_name(page), _sort_name()]))
+	var sb := UI.button(
+		"Sort this box",
+		func():
+			KinBox.sort_page(page, KinFilter.sort)
+			_done("Sorted %s by %s" % [KinBox.page_name(page), _sort_name()])
+	)
 	sb.tooltip_text = "Sort this page in that order"
 	sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sb)
-	var sa := UI.button("Sort every box", func():
-		KinBox.sort_all(KinFilter.sort)
-		page = 0
-		_done("Every box sorted by %s, from the first page" % _sort_name()))
+	var sa := UI.button(
+		"Sort every box",
+		func():
+			KinBox.sort_all(KinFilter.sort)
+			page = 0
+			_done("Every box sorted by %s, from the first page" % _sort_name())
+	)
 	sa.tooltip_text = "Sort every box in that order"
 	sa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sa)
@@ -129,16 +176,20 @@ func _build() -> void:
 	detail = UI.vbox(6)
 	dc.add_child(detail)
 	rc.add_child(dc)
-	summary = msg      # (the old summary line now lives in the farm and box headers)
+	summary = msg  # (the old summary line now lives in the farm and box headers)
 	refresh()
+
 
 func _sort_name() -> String:
 	for s in KinBox.SORTS:
-		if String(s[0]) == KinFilter.sort: return String(s[1]).to_lower()
+		if String(s[0]) == KinFilter.sort:
+			return String(s[1]).to_lower()
 	return KinFilter.sort
 
+
 func _say(t: String, col := UI.GOLD) -> void:
-	if not is_instance_valid(msg): return
+	if not is_instance_valid(msg):
+		return
 	msg.text = t
 	msg.visible = t != ""
 	msg.add_theme_color_override("font_color", col)
@@ -146,20 +197,29 @@ func _say(t: String, col := UI.GOLD) -> void:
 	var mine := _msg_t
 	var tr := _tree()
 	if tr:
-		tr.create_timer(5.0).timeout.connect(func():
-			if mine == _msg_t and is_instance_valid(msg): msg.text = ""; msg.visible = false)
+		tr.create_timer(5.0).timeout.connect(
+			func():
+				if mine == _msg_t and is_instance_valid(msg):
+					msg.text = ""
+					msg.visible = false
+		)
+
 
 func _done(t: String) -> void:
 	Save.save_game()
 	Sfx.play("click")
 	refresh()
 	_say(t)
-	if home and home.has_method("_spawn_kin"): home._spawn_kin()
-	if home and home.has_method("_refresh_burrow"): home._refresh_burrow()
+	if home and home.has_method("_spawn_kin"):
+		home._spawn_kin()
+	if home and home.has_method("_refresh_burrow"):
+		home._refresh_burrow()
+
 
 func _fail(t: String) -> void:
 	UiSfx.error()
 	_say(t, UI.BAD)
+
 
 ## Rebuilds the farm list, the page and the side panel (the toolbar stays, so typing keeps focus).
 func refresh() -> void:
@@ -167,46 +227,62 @@ func refresh() -> void:
 		return
 	var fk := KinBox.farm()
 	var bk := KinBox.boxed()
-	if not sel.is_empty() and Save.kin(sel).is_empty(): sel = ""
+	if not sel.is_empty() and Save.kin(sel).is_empty():
+		sel = ""
 	_build_farm(fk)
 	_build_tabs(bk)
 	_build_name()
-	for ch in grid.get_children(): ch.queue_free()
+	for ch in grid.get_children():
+		ch.queue_free()
 	for i in KinBox.PAGE:
 		var slot := page * KinBox.PAGE + i
 		grid.add_child(_cell(KinBox.at(slot), "box", slot))
 	_build_detail()
 
+
 func _build_farm(fk: Array) -> void:
-	for ch in farm_box.get_children(): ch.queue_free()
+	for ch in farm_box.get_children():
+		ch.queue_free()
 	var hd := UI.section("On the farm  %d/%d" % [fk.size(), KinBox.farm_cap()], UI.GOOD)
 	farm_box.add_child(hd)
-	var fg := GridContainer.new(); fg.columns = FARM_COLS
-	fg.add_theme_constant_override("h_separation", 6); fg.add_theme_constant_override("v_separation", 6)
+	var fg := GridContainer.new()
+	fg.columns = FARM_COLS
+	fg.add_theme_constant_override("h_separation", 6)
+	fg.add_theme_constant_override("v_separation", 6)
 	farm_box.add_child(fg)
 	var a := str(Save.d.get("active", ""))
 	var ordered := fk.duplicate()
 	ordered.sort_custom(func(x, y): return (0 if String(x["uid"]) == a else 1) < (0 if String(y["uid"]) == a else 1))
-	for r in ordered: fg.add_child(_cell(r, "farm", -1))
-	for i in maxi(0, KinBox.farm_cap() - fk.size()): fg.add_child(_cell({}, "farm", -1))
+	for r in ordered:
+		fg.add_child(_cell(r, "farm", -1))
+	for i in maxi(0, KinBox.farm_cap() - fk.size()):
+		fg.add_child(_cell({}, "farm", -1))
 	var cost := KinBox.expand_cost()
 	if cost >= 0:
 		var nxt: int = KinBox.farm_caps()[KinBox.farm_lvl() + 1]
-		var eb := UI.button("Expand: room for %d\n%d gems" % [nxt, cost], func():
-			var why := KinBox.expand()
-			if why != "": _fail(why)
-			else:
-				Sfx.play("unlock")
-				_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
-				if home and home.has_method("_refresh_top"): home._refresh_top(), FARM_COLS * CELL.x + 6)
+		var eb := UI.button(
+			"Expand: room for %d\n%d gems" % [nxt, cost],
+			func():
+				var why := KinBox.expand()
+				if why != "":
+					_fail(why)
+				else:
+					Sfx.play("unlock")
+					_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
+					if home and home.has_method("_refresh_top"):
+						home._refresh_top(),
+			FARM_COLS * CELL.x + 6
+		)
 		eb.tooltip_text = "A Boki Cottage expansion: +2 Boki out on the farm"
 		eb.disabled = int(Save.d["gems"]) < cost and not Game.modding()
 		farm_box.add_child(eb)
 	else:
 		farm_box.add_child(UI.label("The cottages are\nas big as they get.", 12, UI.MUTED))
 
+
 func _build_tabs(bk: Array) -> void:
-	for ch in tabs.get_children(): ch.queue_free()
+	for ch in tabs.get_children():
+		ch.queue_free()
 	for p in KinBox.PAGES:
 		var n := bk.filter(func(r): return KinBox.page_of(r) == p).size()
 		var hits := 0
@@ -214,21 +290,38 @@ func _build_tabs(bk: Array) -> void:
 			hits = bk.filter(func(r): return KinBox.page_of(r) == p and _match(r)).size()
 		var pp: int = p
 		var t := "%d" % (p + 1) + ("·%d" % hits if hits > 0 else "")
-		var b := UI.choice(t, p == page, func(): page = pp; renaming = false; refresh())
+		var b := UI.choice(
+			t,
+			p == page,
+			func():
+				page = pp
+				renaming = false
+				refresh()
+		)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size.x = 0
 		b.tooltip_text = "%s: %d Boki%s" % [KinBox.page_name(p), n, (", %d match" % hits) if hits > 0 else ""]
-		if hits > 0: b.add_theme_color_override("font_color", UI.GOLD)
-		elif n == 0: b.modulate = Color(1, 1, 1, 0.6)
+		if hits > 0:
+			b.add_theme_color_override("font_color", UI.GOLD)
+		elif n == 0:
+			b.modulate = Color(1, 1, 1, 0.6)
 		var target: int = p
-		b.set_drag_forwarding(Callable(), _can_drop, func(_pos, d):
-			var free := KinBox.free_slot({}, target)
-			if free < 0 or int(free / float(KinBox.PAGE)) != target: _fail("%s is full" % KinBox.page_name(target)); return
-			_drop_on(d, "box", null, free))
+		b.set_drag_forwarding(
+			Callable(),
+			_can_drop,
+			func(_pos, d):
+				var free := KinBox.free_slot({}, target)
+				if free < 0 or int(free / float(KinBox.PAGE)) != target:
+					_fail("%s is full" % KinBox.page_name(target))
+					return
+				_drop_on(d, "box", null, free)
+		)
 		tabs.add_child(b)
 
+
 func _build_name() -> void:
-	for ch in name_row.get_children(): ch.queue_free()
+	for ch in name_row.get_children():
+		ch.queue_free()
 	if renaming:
 		var le := LineEdit.new()
 		le.text = KinBox.page_name(page)
@@ -236,7 +329,10 @@ func _build_name() -> void:
 		le.custom_minimum_size = Vector2(240, 0)
 		le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var commit := func(t: String):
-			KinBox.rename(page, t); renaming = false; Save.save_game(); refresh()
+			KinBox.rename(page, t)
+			renaming = false
+			Save.save_game()
+			refresh()
 		le.text_submitted.connect(commit)
 		name_row.add_child(le)
 		name_row.add_child(UI.primary("Save", func(): commit.call(le.text), 70))
@@ -252,14 +348,23 @@ func _build_name() -> void:
 		cl.tooltip_text = "Boki on this page, and in the whole burrow (room for %d)" % KinBox.capacity()
 		cl.mouse_filter = Control.MOUSE_FILTER_PASS
 		name_row.add_child(cl)
-		var rb := UI.button("Rename", func(): renaming = true; refresh(), 76)
+		var rb := UI.button(
+			"Rename",
+			func():
+				renaming = true
+				refresh(),
+			76
+		)
 		name_row.add_child(rb)
+
 
 func _searching() -> bool:
 	return query.strip_edges() != "" or (filter != "all" and filter != "") or KinFilter.type != ""
 
+
 func _match(rec: Dictionary) -> bool:
 	return KinBox.matches(rec, query, filter) and KinFilter.type_ok(String(rec["species"]))
+
 
 ## One cell: a kin (or an empty place) on the farm or in a box cell.
 func _cell(rec: Dictionary, where: String, slot: int) -> Control:
@@ -269,7 +374,8 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	var empty := rec.is_empty()
 	var picked := not empty and String(rec["uid"]) == sel
 	var bg := Color(0.13, 0.14, 0.2, 1.0) if not empty else Color(0.1, 0.1, 0.15, 0.55)
-	if where == "farm" and empty: bg = Color(0.12, 0.17, 0.13, 0.5)
+	if where == "farm" and empty:
+		bg = Color(0.12, 0.17, 0.13, 0.5)
 	# no rarity frames: a rare Boki looks rare in its own picture (docs/POSITIONING.md)
 	var edge := Color(1, 1, 1, 0.05 if empty else 0.08)
 	if picked:
@@ -279,7 +385,8 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	if empty:
 		if where == "farm":
 			var l := UI.label("free", 12, Color(UI.GOOD, 0.5))
-			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			c.add_child(l)
 		return c
 	var sp: Dictionary = Data.KIN[rec["species"]]
@@ -295,7 +402,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	lv.add_theme_constant_override("outline_size", 4)
 	lv.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	stack.add_child(lv)
-	var wic := WorkView.icons(rec, 12.0, 3)       # its work elements, best first
+	var wic := WorkView.icons(rec, 12.0, 3)  # its work elements, best first
 	wic.position = Vector2(CELL.x - 20, 14)
 	stack.add_child(wic)
 	if String(rec["uid"]) == str(Save.d.get("active", "")):
@@ -314,18 +421,30 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	if _searching() and not _match(rec):
 		c.modulate = Color(1, 1, 1, 0.22)
 	var tags := Mutations.tags(rec)
-	c.tooltip_text = "%s the %s%s  ·  Lv %d%s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "",
-		Evo.form_name(rec), int(rec.get("level", 1)), "  ·  partner" if String(rec["uid"]) == str(Save.d.get("active", "")) else ""]
+	c.tooltip_text = (
+		"%s the %s%s  ·  Lv %d%s"
+		% [
+			rec["name"],
+			(" ".join(tags) + " ") if not tags.is_empty() else "",
+			Evo.form_name(rec),
+			int(rec.get("level", 1)),
+			"  ·  partner" if String(rec["uid"]) == str(Save.d.get("active", "")) else ""
+		]
+	)
 	var r: Dictionary = rec
-	c.gui_input.connect(func(e: InputEvent):
-		if e is InputEventMouseButton and e.pressed:
-			if e.button_index == MOUSE_BUTTON_RIGHT or (e.button_index == MOUSE_BUTTON_LEFT and e.double_click):
-				_quick(r)
-			elif e.button_index == MOUSE_BUTTON_LEFT:
-				sel = String(r["uid"]); confirm = ""
-				Sfx.play("hover", null, -6.0)
-				refresh())
+	c.gui_input.connect(
+		func(e: InputEvent):
+			if e is InputEventMouseButton and e.pressed:
+				if e.button_index == MOUSE_BUTTON_RIGHT or (e.button_index == MOUSE_BUTTON_LEFT and e.double_click):
+					_quick(r)
+				elif e.button_index == MOUSE_BUTTON_LEFT:
+					sel = String(r["uid"])
+					confirm = ""
+					Sfx.play("hover", null, -6.0)
+					refresh()
+	)
 	return c
+
 
 func _drag(rec: Dictionary, from: Control):
 	if rec.is_empty():
@@ -339,50 +458,75 @@ func _drag(rec: Dictionary, from: Control):
 	sel = String(rec["uid"])
 	return {"kin_uid": String(rec["uid"])}
 
+
 func _can_drop(_p, d) -> bool:
 	return typeof(d) == TYPE_DICTIONARY and d.has("kin_uid")
+
 
 ## A kin dropped somewhere: onto the farm, an empty box cell, or another kin (they swap).
 func _drop_on(d: Dictionary, where: String, onto, slot := -1) -> void:
 	var rec := Save.kin(String(d.get("kin_uid", "")))
-	if rec.is_empty(): return
+	if rec.is_empty():
+		return
 	var why := ""
 	var other: Dictionary = onto if typeof(onto) == TYPE_DICTIONARY else {}
-	if other == rec: return
+	if other == rec:
+		return
 	if where == "farm":
-		if not KinBox.is_boxed(rec): return        # farm to farm: nothing to do
+		if not KinBox.is_boxed(rec):
+			return  # farm to farm: nothing to do
 		if not other.is_empty() and not KinBox.is_boxed(other):
 			why = KinBox.swap(other, rec)
-			if why == "": _done("%s came out, %s went to sleep in the burrow" % [rec["name"], other["name"]]); return
+			if why == "":
+				_done("%s came out, %s went to sleep in the burrow" % [rec["name"], other["name"]])
+				return
 		else:
 			why = KinBox.to_farm(rec)
-			if why == "": _done("%s is out on the farm" % rec["name"]); return
+			if why == "":
+				_done("%s is out on the farm" % rec["name"])
+				return
 	else:
 		why = KinBox.to_box(rec, slot)
 		if why == "":
-			_done(("%s and %s traded places" % [rec["name"], other["name"]]) if not other.is_empty() else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))])
+			_done(
+				(
+					("%s and %s traded places" % [rec["name"], other["name"]])
+					if not other.is_empty()
+					else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))]
+				)
+			)
 			return
 	_fail(why)
+
 
 ## Right click / double click: straight across to the other side.
 func _quick(rec: Dictionary) -> void:
 	sel = String(rec["uid"])
 	if KinBox.is_boxed(rec):
 		var why := KinBox.to_farm(rec)
-		if why == "": _done("%s is out on the farm" % rec["name"])
-		else: _fail(why)
+		if why == "":
+			_done("%s is out on the farm" % rec["name"])
+		else:
+			_fail(why)
 	else:
 		var why := KinBox.to_box(rec, KinBox.free_slot({}, page))
-		if why == "": _done("%s went to sleep in %s" % [rec["name"], KinBox.page_name(KinBox.page_of(rec))])
-		else: _fail(why)
+		if why == "":
+			_done("%s went to sleep in %s" % [rec["name"], KinBox.page_name(KinBox.page_of(rec))])
+		else:
+			_fail(why)
+
 
 # ------------------------------------------------------------------ the side panel
 func _build_detail() -> void:
-	for ch in detail.get_children(): ch.queue_free()
+	for ch in detail.get_children():
+		ch.queue_free()
 	var rec := Save.kin(sel)
 	if rec.is_empty():
 		detail.add_child(UI.section("The Boki Burrow"))
-		for t in ["Boki here sleep safe: no food, no care.", "Click one to see it. Drag to move it; right click sends it across."]:
+		for t in [
+			"Boki here sleep safe: no food, no care.",
+			"Click one to see it. Drag to move it; right click sends it across."
+		]:
 			var l := UI.para(t, 13)
 			l.custom_minimum_size.x = 270
 			detail.add_child(l)
@@ -398,10 +542,16 @@ func _build_detail() -> void:
 	nrow.add_child(nl)
 	nrow.add_child(UI.sex_icon(rec, 16.0))
 	tv.add_child(nrow)
-	tv.add_child(UI.label("Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK))
+	tv.add_child(
+		UI.label(
+			"Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK
+		)
+	)
 	var where := KinBox.went_text(rec) if KinBox.is_boxed(rec) else "Out on the farm"
-	if String(rec["uid"]) == str(Save.d.get("active", "")): where = "Your partner, on the farm"
-	if KinIndoors.status(rec) != "": where = KinIndoors.status(rec)
+	if String(rec["uid"]) == str(Save.d.get("active", "")):
+		where = "Your partner, on the farm"
+	if KinIndoors.status(rec) != "":
+		where = KinIndoors.status(rec)
 	tv.add_child(UI.label(where, 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.GOOD))
 	top.add_child(tv)
 	detail.add_child(top)
@@ -419,7 +569,9 @@ func _build_detail() -> void:
 	if float(rec.get("got_t", 0.0)) > 0.0:
 		var dt := Time.get_datetime_dict_from_unix_time(int(rec["got_t"]))
 		joined = "  ·  joined %d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
-	detail.add_child(UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6")))
+	detail.add_child(
+		UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6"))
+	)
 	var duo := BaseDuo.best_friend(rec)
 	if not duo.is_empty():
 		var dr := UI.hbox(2)
@@ -428,66 +580,135 @@ func _build_detail() -> void:
 		dr.add_child(UI.label("  Duo with %s" % duo["name"], 12, Color("ffb3c6")))
 		detail.add_child(dr)
 	detail.add_child(WorkView.chips(rec, 18.0))
-	detail.add_child(IvView.mini(rec, 18.0))      # its IVs, with the numbers on hover
-	AboutView.block(rec, detail, true)            # its size, coat, eyes, habit, serial and origin
-	var cond := ("Asleep, needs on hold (%s)" % Care.condition_name(rec).to_lower()) if KinBox.is_boxed(rec) else Care.condition_name(rec)
-	if rec.has("parents"): cond += "  ·  child of %s and %s" % [rec["parents"][0], rec["parents"][1]]
+	detail.add_child(IvView.mini(rec, 18.0))  # its IVs, with the numbers on hover
+	AboutView.block(rec, detail, true)  # its size, coat, eyes, habit, serial and origin
+	var cond := (
+		("Asleep, needs on hold (%s)" % Care.condition_name(rec).to_lower())
+		if KinBox.is_boxed(rec)
+		else Care.condition_name(rec)
+	)
+	if rec.has("parents"):
+		cond += "  ·  child of %s and %s" % [rec["parents"][0], rec["parents"][1]]
 	var cl := UI.label(cond, 12, UI.MUTED)
 	cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cl.custom_minimum_size.x = 280
 	detail.add_child(cl)
 	var btns := HFlowContainer.new()
-	btns.add_theme_constant_override("h_separation", 6); btns.add_theme_constant_override("v_separation", 6)
+	btns.add_theme_constant_override("h_separation", 6)
+	btns.add_theme_constant_override("v_separation", 6)
 	var r: Dictionary = rec
 	if KinBox.is_boxed(rec):
-		var fb := UI.primary("Send to farm", func():
-			var why := KinBox.to_farm(r)
-			if why == "": _done("%s is out on the farm" % r["name"])
-			else: _fail(why), 130)
+		var fb := UI.primary(
+			"Send to farm",
+			func():
+				var why := KinBox.to_farm(r)
+				if why == "":
+					_done("%s is out on the farm" % r["name"])
+				else:
+					_fail(why),
+			130
+		)
 		btns.add_child(fb)
 	else:
-		var bb := UI.button("Put in burrow", func():
-			var why := KinBox.to_box(r, KinBox.free_slot({}, page))
-			if why == "": _done("%s went to sleep in %s" % [r["name"], KinBox.page_name(KinBox.page_of(r))])
-			else: _fail(why), 130)
+		var bb := UI.button(
+			"Put in burrow",
+			func():
+				var why := KinBox.to_box(r, KinBox.free_slot({}, page))
+				if why == "":
+					_done("%s went to sleep in %s" % [r["name"], KinBox.page_name(KinBox.page_of(r))])
+				else:
+					_fail(why),
+			130
+		)
 		bb.disabled = KinBox.pinned(rec) != ""
 		bb.tooltip_text = KinBox.pinned(rec)
 		btns.add_child(bb)
-	btns.add_child(UI.button("Details", func():
-		if home and home.has_method("_open_kin"): home._open_kin(r), 90))
+	btns.add_child(
+		UI.button(
+			"Details",
+			func():
+				if home and home.has_method("_open_kin"):
+					home._open_kin(r),
+			90
+		)
+	)
 	if String(rec["uid"]) != str(Save.d.get("active", "")):
-		btns.add_child(UI.button("Make partner", func():
-			var swapped := KinBox.bring_out(r)
-			if Save.d.get("active2", "") == r["uid"]: Save.d["active2"] = Save.d.get("active", "")
-			Save.d["active"] = r["uid"]
-			_done("%s is your partner%s" % [r["name"], (" (%s went to the burrow to make room)" % swapped["name"]) if not swapped.is_empty() else ""]), 120))
+		btns.add_child(
+			UI.button(
+				"Make partner",
+				func():
+					var swapped := KinBox.bring_out(r)
+					if Save.d.get("active2", "") == r["uid"]:
+						Save.d["active2"] = Save.d.get("active", "")
+					Save.d["active"] = r["uid"]
+					_done(
+						(
+							"%s is your partner%s"
+							% [
+								r["name"],
+								(
+									(" (%s went to the burrow to make room)" % swapped["name"])
+									if not swapped.is_empty()
+									else ""
+								)
+							]
+						)
+					),
+				120
+			)
+		)
 	if confirm == String(rec["uid"]):
 		var cr := UI.vbox(6)
-		var rcl := UI.label("Let %s go for good? It goes back to the wild and won't come back." % rec["name"], 13, UI.BAD)
+		var rcl := UI.label(
+			"Let %s go for good? It goes back to the wild and won't come back." % rec["name"], 13, UI.BAD
+		)
 		rcl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		rcl.custom_minimum_size.x = 260
 		cr.add_child(rcl)
 		var yr := UI.hbox(6)
-		yr.add_child(UI.button("Yes, release", func():
-			var nm := String(r["name"])
-			var why := KinBox.release(r)
-			confirm = ""
-			if why == "":
-				sel = ""
-				_done("%s went back to the wild. Goodbye, %s" % [nm, nm])
-			else: _fail(why), 130))
-		yr.add_child(UI.button("Keep it", func(): confirm = ""; refresh(), 90))
+		yr.add_child(
+			UI.button(
+				"Yes, release",
+				func():
+					var nm := String(r["name"])
+					var why := KinBox.release(r)
+					confirm = ""
+					if why == "":
+						sel = ""
+						_done("%s went back to the wild. Goodbye, %s" % [nm, nm])
+					else:
+						_fail(why),
+				130
+			)
+		)
+		yr.add_child(
+			UI.button(
+				"Keep it",
+				func():
+					confirm = ""
+					refresh(),
+				90
+			)
+		)
 		cr.add_child(yr)
 		detail.add_child(btns)
 		detail.add_child(cr)
 		return
-	var rel := UI.button("Release", func(): confirm = String(r["uid"]); refresh(), 90)
+	var rel := UI.button(
+		"Release",
+		func():
+			confirm = String(r["uid"])
+			refresh(),
+		90
+	)
 	var rwhy := KinBox.pinned(rec)
-	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1: rwhy = "It's your only Boki"
+	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1:
+		rwhy = "It's your only Boki"
 	rel.disabled = rwhy != ""
 	rel.tooltip_text = rwhy if rwhy != "" else "Let it go back to the wild"
 	btns.add_child(rel)
 	detail.add_child(btns)
+
 
 func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	var h := UI.hbox(6)
@@ -500,32 +721,41 @@ func _rare_row(id: String, nm: String, txt: String, col: Color) -> Control:
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dl.custom_minimum_size.x = 60
 	h.add_child(dl)
-	h.tooltip_text = "%s: %s" % [nm, String(Mutations.info(id).get("desc", "Rare colours, turned round the colour wheel."))] + ("" if id == "shimmer" else " (%s)" % txt)
+	h.tooltip_text = (
+		"%s: %s" % [nm, String(Mutations.info(id).get("desc", "Rare colours, turned round the colour wheel."))]
+		+ ("" if id == "shimmer" else " (%s)" % txt)
+	)
 	h.mouse_filter = Control.MOUSE_FILTER_PASS
 	return h
 
-const DEMO_SEED := 7700    # base of the demo roster's inborn-roll seeds (one per kin)
 
 # ------------------------------------------------------------------ tooling: --kinbox-demo[=box|lineup|card]
 ## A made-up collection for screenshots: a full farm and three pages of kin in the burrow, some of
 ## them rare. Never written to the save.
 static func demo_roster() -> void:
 	Save.no_write = true
-	var rng := RandomNumberGenerator.new(); rng.seed = 77
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
 	var sps: Array = Data.KIN.keys().filter(func(k): return not Data.KIN[k].get("rare", false))
 	var first: Dictionary = Save.active_kin()
 	if first.is_empty():
-		first = Save.new_kin(sps[0], "Pip"); Save.d["roster"].append(first); Save.d["active"] = first["uid"]
+		first = Save.new_kin(sps[0], "Pip")
+		Save.d["roster"].append(first)
+		Save.d["active"] = first["uid"]
 	first["starter"] = true
 	var mids := Mutations.ids()
 	for i in 72:
-		var r := Save.new_kin(sps[i % sps.size()], "", DEMO_SEED + i)    # seeded: same IVs and parents every run
+		var r := Save.new_kin(sps[i % sps.size()], "", DEMO_SEED + i)  # seeded: same IVs and parents every run
 		r["level"] = 1 + rng.randi() % 18
 		r["trust"] = rng.randf_range(10.0, 90.0)
 		Evo.simulate(r, rng)
-		if i % 5 == 0: r["mutations"] = [mids[(int(i / 5.0)) % mids.size()]]
-		if i % 13 == 3: r["shimmer"] = true
-		if i == 20: r["mutations"] = ["giant", "starmarked"]; r["shimmer"] = true
+		if i % 5 == 0:
+			r["mutations"] = [mids[(int(i / 5.0)) % mids.size()]]
+		if i % 13 == 3:
+			r["shimmer"] = true
+		if i == 20:
+			r["mutations"] = ["giant", "starmarked"]
+			r["shimmer"] = true
 		r["got_t"] = Time.get_unix_time_from_system() - (72 - i) * 3600.0
 		Save.d["roster"].append(r)
 		KinBox.route_new(r)
@@ -534,16 +764,19 @@ static func demo_roster() -> void:
 	Save.d["tutorial"]["home"] = true
 	Save.d["tutorial"]["day1_done"] = true
 
+
 static func demo_show(h: Node, which: String) -> void:
 	match which:
 		"lineup":
 			var base: Vector3 = h.ppos + Vector3(-5.2, 0, -1.6)
 			var list: Array = [["", false], ["", true]]
-			for mid in Mutations.ids(): list.append([mid, false])
+			for mid in Mutations.ids():
+				list.append([mid, false])
 			for i in list.size():
 				var r := Save.new_kin("puddlet" if i % 2 == 0 else "cindle", "Demo")
 				r["level"] = 6
-				if String(list[i][0]) != "": r["mutations"] = [list[i][0]]
+				if String(list[i][0]) != "":
+					r["mutations"] = [list[i][0]]
 				r["shimmer"] = list[i][1]
 				var n := Models.kin(String(r["species"]), r)
 				n.position = base + Vector3((i % 6) * 2.0, 0, (int(i / 6.0)) * 2.4)
@@ -552,12 +785,17 @@ static func demo_show(h: Node, which: String) -> void:
 				h.add_child(n)
 				var lb := Label3D.new()
 				lb.text = "plain" if i == 0 else ("Shimmer" if i == 1 else Mutations.name_of(String(list[i][0])))
-				lb.font = UI.big; lb.font_size = 44; lb.pixel_size = 0.007; lb.outline_size = 12
+				lb.font = UI.big
+				lb.font_size = 44
+				lb.pixel_size = 0.007
+				lb.outline_size = 12
 				lb.modulate = Color.WHITE
-				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lb.no_depth_test = true
+				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+				lb.no_depth_test = true
 				lb.position = n.position + Vector3(0, 1.75, 0.3)
 				h.add_child(lb)
-			h.cam.zoom_to = 0.62; h.cam.zoom = 0.62
+			h.cam.zoom_to = 0.62
+			h.cam.zoom = 0.62
 			h.cam.snap(base + Vector3(5.0, 0, 1.4))
 			h.ppos = base + Vector3(5.0, 0, 4.6)
 		"unique":
@@ -579,20 +817,27 @@ static func demo_show(h: Node, which: String) -> void:
 				var si := Unique.size_info(r)
 				var lb := Label3D.new()
 				lb.text = "%s  %d cm\n%s" % [si["tag"], int(round(float(si["cm"]))), Unique.MARK_INFO[mk[i]]["name"]]
-				lb.font = UI.big; lb.font_size = 34; lb.pixel_size = 0.006; lb.outline_size = 10
-				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lb.no_depth_test = true
+				lb.font = UI.big
+				lb.font_size = 34
+				lb.pixel_size = 0.006
+				lb.outline_size = 10
+				lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+				lb.no_depth_test = true
 				lb.position = n.position + Vector3(0, 1.75, 0.3)
 				h.add_child(lb)
 			h.ppos = base2 + Vector3(5.1, 0, -1.0)
 			h.player.position = h.ppos
 			h.player.visible = false
-			h.cam.zoom_to = 0.47; h.cam.zoom = 0.47
+			h.cam.zoom_to = 0.47
+			h.cam.zoom = 0.47
 			h.cam.snap(h.ppos)
 		"card":
 			var pick: Dictionary = {}
 			for r in Save.d["roster"]:
-				if (r.get("mutations", []) as Array).size() >= 2: pick = r
-			if pick.is_empty(): pick = Save.active_kin()
+				if (r.get("mutations", []) as Array).size() >= 2:
+					pick = r
+			if pick.is_empty():
+				pick = Save.active_kin()
 			h._open_kin(pick)
 		"none":
 			pass
@@ -600,7 +845,11 @@ static func demo_show(h: Node, which: String) -> void:
 			page = 0
 			sel = ""
 			for r in Save.d["roster"]:
-				if r.get("shimmer", false) and not Mutations.of(r).is_empty(): sel = String(r["uid"])
-			if which.begins_with("page"): page = clampi(int(which.substr(4)) - 1, 0, KinBox.PAGES - 1)
-			if which == "search": query = "a"; filter = "mutated"
+				if r.get("shimmer", false) and not Mutations.of(r).is_empty():
+					sel = String(r["uid"])
+			if which.begins_with("page"):
+				page = clampi(int(which.substr(4)) - 1, 0, KinBox.PAGES - 1)
+			if which == "search":
+				query = "a"
+				filter = "mutated"
 			h._open_burrow()

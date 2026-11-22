@@ -77,9 +77,9 @@ func _windup(m: Match, k: String) -> void:
 	var md: Dictionary = Data.MOBS[k]
 	if not MobAnim.state_needed(k, MobAnim.WINDUP):
 		return
-	var P: Hunter = m.player
-	var mb := m.spawn_mob(k, P.pos + Vector3(2.0, 0, 0))
-	mb.tgt = P
+	var p: Hunter = m.player
+	var mb := m.spawn_mob(k, p.pos + Vector3(2.0, 0, 0))
+	mb.tgt = p
 	mb.cd = 0.0
 	mb.engaged = true
 	mb._begin_attack()
@@ -111,8 +111,8 @@ func _windup(m: Match, k: String) -> void:
 ## The legs follow the ground: a walking monster's gait advances one stride per STRIDE_M walked whatever its
 ## speed, stands still when it stops, and a hit shows on the body without leaving the walk.
 func _gait(m: Match, k: String) -> void:
-	var P: Hunter = m.player
-	var mb := m.spawn_mob(k, P.pos + Vector3(6.0, 0, 0))
+	var p: Hunter = m.player
+	var mb := m.spawn_mob(k, p.pos + Vector3(6.0, 0, 0))
 	mb.tgt = null
 	mb.st = "idle"
 	var spd := maxf(float(Data.MOBS[k].get("speed", 3.0)), 1.0)
@@ -122,21 +122,27 @@ func _gait(m: Match, k: String) -> void:
 		mb.render(DT, 1.0)
 	var strides := mb.anim / TAU
 	var want := spd * 30.0 * DT / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(k), 2.0))
-	ok(absf(strides - want) < 0.001, "%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want])
+	ok(
+		absf(strides - want) < 0.001,
+		"%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want]
+	)
 	var before := mb.anim
 	mb.vel = Vector3.ZERO
 	for i in 10:
 		mb.render(DT, 1.0)
 	ok(is_equal_approx(mb.anim, before), "%s: the gait stands still when the monster stops" % k)
 	mb.vel = Vector3(spd, 0, 0)
-	mb.hurt(1.0, P)
+	mb.hurt(1.0, p)
 	mb.render(DT, 1.0)
-	ok(MobAnim.state_of(mb) != MobAnim.DEATH and MobAnim.state_of(mb) <= MobAnim.RUN, "%s: a hit keeps the walk under the hit-react" % k)
+	ok(
+		MobAnim.state_of(mb) != MobAnim.DEATH and MobAnim.state_of(mb) <= MobAnim.RUN,
+		"%s: a hit keeps the walk under the hit-react" % k
+	)
 	mb.dead = true
 	mb.visible = false
 
 ## How far the first wind-up track's pivot is from where its key says it should be, as a share of that track's travel.
-func _follow(mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
+func _follow(_mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
 	var tr: Array = rig.def["states"][MobAnim.WINDUP][0]
 	var tg: PackedInt32Array = tr[0]
 	var slot := int(tg[0] / float(MobAnim.STRIDE))
@@ -157,12 +163,12 @@ func _follow(mb: Mob, rig: MobAnim.Rig, phase: float) -> float:
 
 ## 30 monsters of every kind in every state, posed 300 frames: the mean cost of one frame's poses.
 func _perf(m: Match) -> void:
-	var P: Hunter = m.player
-	m.cam.focus = P.pos
+	var p: Hunter = m.player
+	m.cam.focus = p.pos
 	var crowd: Array = []
 	for i in 30:
 		var k: String = KINDS[i % KINDS.size()]
-		var mb := m.spawn_mob(k, P.pos + Vector3(2.0 + (i % 6) * 1.5, 0, (int(i / 6.0)) * 1.5))
+		var mb := m.spawn_mob(k, p.pos + Vector3(2.0 + (i % 6) * 1.5, 0, (int(i / 6.0)) * 1.5))
 		match i % 6:
 			1:
 				mb.vel = Vector3(2.0, 0, 0)

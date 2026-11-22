@@ -9,16 +9,18 @@ extends RefCounted
 
 const RUNS := 200
 const DT := 1.0 / 30.0
-const SEAT_TOL := 0.12               # the raised Boki's win share may differ by this between seats
+const SEAT_TOL := 0.12  # the raised Boki's win share may differ by this between seats
 const STAT := {"race": ["speed"], "shove": ["power"], "seek": ["focus"], "volley": ["speed", "focus"]}
 
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FAIR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -28,6 +30,7 @@ func run(m: Node) -> void:
 		_game(game)
 	print("FAIR DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _kin(game: String, points: int, species := "zapple") -> Dictionary:
 	var k := Save.new_kin(species, "K")
@@ -41,10 +44,11 @@ func _kin(game: String, points: int, species := "zapple") -> Dictionary:
 	k["trust"] = 50.0
 	return k
 
+
 ## One played game; returns the winning side (0 or 1).
-func _play(game: String, a: Dictionary, b: Dictionary, seed_: int) -> int:
+func _play(game: String, a: Dictionary, b: Dictionary, seed_v: int) -> int:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = seed_v
 	match game:
 		"race":
 			var r := BaseRace.Run.new([a, b], 0, rng)
@@ -68,6 +72,7 @@ func _play(game: String, a: Dictionary, b: Dictionary, seed_: int) -> int:
 				r.step(DT)
 			return r.winner()
 
+
 ## Share of RUNS won by the pts_hi Boki sitting on side hi_seat.
 func _share(game: String, hi: int, lo: int, hi_seat: int) -> float:
 	var wins := 0
@@ -79,6 +84,7 @@ func _share(game: String, hi: int, lo: int, hi_seat: int) -> float:
 			wins += 1
 	return float(wins) / RUNS
 
+
 func _game(game: String) -> void:
 	var matched := _share(game, 10, 10, 0)
 	var p10 := _share(game, 10, 0, 0)
@@ -89,7 +95,14 @@ func _game(game: String) -> void:
 	print(row % [game, matched * 100, p10 * 100, p20 * 100, p20_seat1 * 100, RUNS])
 	ok(matched >= 0.40 and matched <= 0.60, "%s: matched pair, side 0 wins %.0f%% (40 to 60)" % [game, matched * 100])
 	ok(p10 > 0.55, "%s: +10 raised points win clearly more than half (%.0f%%)" % [game, p10 * 100])
-	ok(p20 > p10 and p20 < 0.98, "%s: +20 wins more than +10, not a certainty (%.0f%% > %.0f%%, under 98)"
-			% [game, p20 * 100, p10 * 100])
-	ok(absf(p20 - p20_seat1) <= SEAT_TOL, "%s: the raised Boki's seat moves its share under %.0f points (%+.0f)"
-			% [game, SEAT_TOL * 100, (p20_seat1 - p20) * 100])
+	ok(
+		p20 > p10 and p20 < 0.98,
+		"%s: +20 wins more than +10, not a certainty (%.0f%% > %.0f%%, under 98)" % [game, p20 * 100, p10 * 100]
+	)
+	ok(
+		absf(p20 - p20_seat1) <= SEAT_TOL,
+		(
+			"%s: the raised Boki's seat moves its share under %.0f points (%+.0f)"
+			% [game, SEAT_TOL * 100, (p20_seat1 - p20) * 100]
+		)
+	)

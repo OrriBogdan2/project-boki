@@ -16,7 +16,7 @@ const READ_AT := [0.25, 0.5, 0.9]   # progress points shot
 
 var main: Node
 var m: Match
-var P: Hunter
+var p_v: Hunter
 var dir := ""
 var home := Vector3.ZERO
 var lines: Array = []
@@ -43,7 +43,7 @@ func _setup() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	P = m.player
+	p_v = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -55,14 +55,14 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	home = _roomy()
-	P.teleport(home)
+	p_v.teleport(home)
 	var away := m.world.random_ground()
 	for k in 500:
 		if away.distance_to(home) > 45.0:
 			break
 		away = m.world.random_ground()
 	for h in m.hunters:
-		if h != P:
+		if h != p_v:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
 	await _go(0.5)
 
@@ -81,20 +81,20 @@ func _roomy() -> Vector3:
 	return m.world.random_ground()
 
 func _mate() -> Hunter:
-	return m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
+	return m.hunters.filter(func(x): return x.team == p_v.team and x != p_v)[0]
 
 func _rival() -> Hunter:
-	return m.hunters.filter(func(x): return x.team != P.team)[0]
+	return m.hunters.filter(func(x): return x.team != p_v.team)[0]
 
 func _boxes() -> void:
-	var B := _mate()
-	var E := _rival()
-	B.teleport(home + Vector3(2.5, 0, -1.0))
-	E.teleport(home + Vector3(-2.5, 0, -1.0))
+	var b := _mate()
+	var e := _rival()
+	b.teleport(home + Vector3(2.5, 0, -1.0))
+	e.teleport(home + Vector3(-2.5, 0, -1.0))
 	await _go(0.2)
-	m.eliminate(B, null, "finished")
-	m.eliminate(E, null, "finished")
-	P.inp["aim"] = home + Vector3(0, 0.9, -4)
+	m.eliminate(b, null, "finished")
+	m.eliminate(e, null, "finished")
+	p_v.inp["aim"] = home + Vector3(0, 0.9, -4)
 	await _go(1.0)
 	_take("boxes_world", "A teammate's box (left: their squad colour, face, name, soul timer) and a rival's (red)")
 	_crop_take("boxes_minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the teammate's box in their colour"
@@ -110,22 +110,22 @@ func _boxes() -> void:
 ## A teammate brings the fallen one back while you watch from READ_M away at match zoom: the tether, the core and
 ## the rings at three points of the channel.
 func _ring() -> void:
-	var B := _mate()
-	var C: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P and x != B)[0]
-	var b := Life.box_of(m, B)
-	C.teleport(b["pos"] + Vector3(0.6, 0, 0.4))
-	P.teleport(_watch_spot(b["pos"]))
-	P.inp["aim"] = b["pos"]
+	var b_v := _mate()
+	var c: Hunter = m.hunters.filter(func(x): return x.team == p_v.team and x != p_v and x != b_v)[0]
+	var b := Life.box_of(m, b_v)
+	c.teleport(b["pos"] + Vector3(0.6, 0, 0.4))
+	p_v.teleport(_watch_spot(b["pos"]))
+	p_v.inp["aim"] = b["pos"]
 	m.hud.guide_hidden = true       # the opening kit card would cover the box at the screen's edge
-	C.inp["interact"] = true
+	c.inp["interact"] = true
 	var done := 0.0
 	for at in READ_AT:
-		await _go(BoxRevive.time_for(B) * (float(at) - done))
+		await _go(BoxRevive.time_for(b_v) * (float(at) - done))
 		done = float(at)
-		var what := "Watching from %d m: %s bringing %s back at %d%%" % [roundi(P.pos.distance_to(b["pos"])), C.pname,
-			B.pname, int(at * 100.0)]
+		var what := "Watching from %d m: %s bringing %s back at %d%%" % [roundi(p_v.pos.distance_to(b["pos"])), c.pname,
+			b_v.pname, int(at * 100.0)]
 		_take("revive_read_%d" % int(at * 100.0), what + ": the tether, the soul's core filling, the rings")
-	C.inp["interact"] = false
+	c.inp["interact"] = false
 	await _go(0.2)
 
 ## Solid ground READ_M from the box, near its height, so you stand and watch rather than fall (INF if none).
@@ -142,7 +142,7 @@ func _watch_spot(at: Vector3) -> Vector3:
 
 func _beacon() -> void:
 	var bc: Dictionary = m.beacons[0]
-	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team and not x.out)
+	var rivals: Array = m.hunters.filter(func(x): return x.team != p_v.team and not x.out)
 	(rivals[0] as Hunter).teleport(bc["pos"])
 	await _go(0.15)          # (the toast lives 1.8 s of real time, and frames are slow here)
 	_take("beacon_notice", "A rival lights a beacon far away: the toast with the direction, the edge arrow with the"
@@ -157,7 +157,7 @@ func _go(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(P.pos)
+		m.cam.snap(p_v.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame

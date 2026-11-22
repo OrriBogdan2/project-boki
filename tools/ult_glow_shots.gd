@@ -3,11 +3,12 @@ extends RefCounted
 ## you with yours ready too, then the moment after your cast (the flash), then the flash faded. Each is the full
 ## frame and a 3x crop round you. Never touches the save.
 
-const CROP := Vector2i(220, 160)     # px round the player, scaled 3x
+const CROP := Vector2i(220, 160)  # px round the player, scaled 3x
 
 var main: Node
 var m: Match
 var dir := "user://shots"
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -18,8 +19,19 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true,
-		"cls": Arch.weight("ashwick"), "arch": "ashwick", "weapon": Arch.signature("ashwick")})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"seed": 4242,
+			"no_drop": true,
+			"cls": Arch.weight("ashwick"),
+			"arch": "ashwick",
+			"weapon": Arch.signature("ashwick")
+		}
+	)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -28,20 +40,21 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	var P := m.player
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var p := m.player
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	foe.ctrl = "idle"
 	foe.set_arch("thief")
-	foe.teleport(m.world.free_spot_near(P.pos + Vector3(2.5, 0, -1.0), [], 1.0, 0.5, 8.0))
+	foe.teleport(m.world.free_spot_near(p.pos + Vector3(2.5, 0, -1.0), [], 1.0, 0.5, 8.0))
 	foe.reveal_t = 60.0
-	for h in [P, foe]:
+	for h in [p, foe]:
 		h.lvl = int(Hunter.ULT_AT[0])
 		h.ak.cd["x"] = 0.0
 	await _shot("1_ready")
-	P.ak.cd["x"] = 30.0
+	p.ak.cd["x"] = 30.0
 	await _shot("2_cast_flash", 2)
 	await _shot("3_after", 60)
 	main.get_tree().quit(0)
+
 
 func _shot(tag: String, frames := 40) -> void:
 	var vp := main.get_viewport()

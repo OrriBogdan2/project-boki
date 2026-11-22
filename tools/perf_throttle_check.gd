@@ -83,39 +83,39 @@ func _spawn_sight() -> void:
 ## World.los reads each tile once (three lookups a sample before); World.tile_kind is one read. On random
 ## lines over the real map both agree with the plain per-sample reading of the same rule.
 func _sight_lines() -> void:
-	var W: World = m.world
-	ok(W.dyn_walls.is_empty(), "setup: no ability walls up (the plain rule below reads terrain only)")
+	var w_v: World = m.world
+	ok(w_v.dyn_walls.is_empty(), "setup: no ability walls up (the plain rule below reads terrain only)")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var bad := 0
 	for i in 400:
-		var a := Vector3(rng.randf_range(0.0, W.w), 0.0, rng.randf_range(0.0, W.h))
+		var a := Vector3(rng.randf_range(0.0, w_v.w), 0.0, rng.randf_range(0.0, w_v.h))
 		var b := a + Vector3(rng.randf_range(-12.0, 12.0), 0.0, rng.randf_range(-12.0, 12.0))
 		var y := rng.randf_range(0.5, 2.0)
-		if not W.is_void(a.x, a.z):
-			y += W.ground_at(a.x, a.z)
-		if W.los(a, b, y) != _plain_los(W, a, b, y):
+		if not w_v.is_void(a.x, a.z):
+			y += w_v.ground_at(a.x, a.z)
+		if w_v.los(a, b, y) != _plain_los(w_v, a, b, y):
 			bad += 1
 		var plain := World.T_GROUND
-		if W.is_block(b.x, b.z):
+		if w_v.is_block(b.x, b.z):
 			plain = World.T_BLOCK
-		elif W.is_void(b.x, b.z):
+		elif w_v.is_void(b.x, b.z):
 			plain = World.T_VOID
-		if W.tile_kind(b.x, b.z) != plain:
+		if w_v.tile_kind(b.x, b.z) != plain:
 			bad += 1
 	ok(bad == 0, "los and tile_kind agree with the plain per-sample reading on 400 random lines (%d differ)" % bad)
 
 ## The sight rule as World.los stated it before, a fresh read of every sample.
-func _plain_los(W: World, a: Vector3, b: Vector3, y: float) -> bool:
+func _plain_los(w: World, a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t
 		var pz := a.z + d.y * t
-		if W.is_block(px, pz) and W.ground_at(px, pz) + World.BLOCK_H > y:
+		if w.is_block(px, pz) and w.ground_at(px, pz) + World.BLOCK_H > y:
 			return false
-		if W.ground_at(px, pz) > y + 0.2:
+		if w.ground_at(px, pz) > y + 0.2:
 			return false
 	return true
 
@@ -267,54 +267,54 @@ func _pose_rates() -> void:
 	for h in m.hunters:
 		if h.ctrl == "bot":
 			b = h
-	var P: Hunter = m.player
-	m.cam.focus = P.pos
+	var p: Hunter = m.player
+	m.cam.focus = p.pos
 	m.cam.zoom = Match.RIDE_CAM_DIST / m.cam.dist
 	m.cam.chase = 1.0
 	m.cam._apply(Vector3.ZERO)
 	var far_at := Vector3.INF
 	for i in 36:
-		var at := P.pos + Vector3(CamRig.POSE_FAR_M + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
+		var at := p.pos + Vector3(CamRig.pose_far_m + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
 		if m.cam.on_screen(at):
 			far_at = at
 			break
-	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % CamRig.POSE_FAR_M)
+	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % CamRig.pose_far_m)
 	b.ai["tgt"] = null
 	b.hurt_at = -9.0
-	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	b.teleport(p.pos + Vector3(4.0, 0, 0))
 	ok(SimLod.pose_every(m, b) == 1, "a rival near the player is posed every frame")
 	b.teleport(far_at)
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_FAR, "far on screen at the wide view: every %d frames" % SimLod.POSE_FAR)
 	b.unseen = true
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_UNSEEN, "hidden by sight: every %d frames" % SimLod.POSE_UNSEEN)
 	b.unseen = false
-	b.ai["tgt"] = P
+	b.ai["tgt"] = p
 	ok(SimLod.pose_every(m, b) == 1, "far but after the player: every frame")
 	b.ai["tgt"] = null
-	b.last_hit_by = P
+	b.last_hit_by = p
 	b.hurt_at = m.time
 	ok(SimLod.pose_every(m, b) == 1, "far but just hit by the player: every frame")
 	b.last_hit_by = null
 	b.hurt_at = -9.0
-	P.last_hit_by = b
-	P.hurt_at = m.time
+	p.last_hit_by = b
+	p.hurt_at = m.time
 	await main.get_tree().process_frame      # (who hit the squad is gathered once a frame)
 	ok(SimLod.pose_every(m, b) == 1, "far but just hit the player: every frame")
-	P.hurt_at = -9.0
+	p.hurt_at = -9.0
 	await main.get_tree().process_frame
 	var team := b.team
-	b.team = P.team
+	b.team = p.team
 	ok(SimLod.pose_every(m, b) == 1, "the player's squad: every frame")
 	b.team = team
 	var off := Vector3(SimLod.POSE_SLOW_M + 1.5, 0, 0)
 	SimLod.force_slow = 1
-	b.teleport(P.pos + off)
+	b.teleport(p.pos + off)
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_SLOW,
 		"the match slow: a rival %.1f m off is posed every %d frames" % [off.x, SimLod.POSE_SLOW])
-	b.teleport(P.pos + Vector3(4.0, 0, 0))
+	b.teleport(p.pos + Vector3(4.0, 0, 0))
 	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival within %.0f m every frame" % SimLod.POSE_SLOW_M)
-	b.teleport(P.pos + off)
-	b.ai["tgt"] = P
+	b.teleport(p.pos + off)
+	b.ai["tgt"] = p
 	ok(SimLod.pose_every(m, b) == 1, "the match slow: a rival after the player every frame")
 	b.ai["tgt"] = null
 	SimLod.force_slow = 0
@@ -329,7 +329,7 @@ func _pose_rates() -> void:
 	ok(not SimLod.slow, "over %.0f fps it is quick again" % SimLod.EASE_FPS)
 	SimLod.judge(45.0)
 	ok(not SimLod.slow, "quick until the fps is under %.0f" % SimLod.SLOW_FPS)
-	b.teleport(P.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
+	b.teleport(p.pos + m.cam.global_transform.basis.x * 150.0)      # (square to the side of the view)
 	ok(SimLod.pose_every(m, b) == SimLod.POSE_OFF_SCREEN, "off screen: every %d frames" % SimLod.POSE_OFF_SCREEN)
 	var held := false
 	for i in SimLod.POSE_UNSEEN:
@@ -591,22 +591,22 @@ func _shadows() -> void:
 	kn.free()
 
 func _plates() -> void:
-	var H = m.hud
-	ok(H != null, "setup: the HUD")
-	if H == null:
+	var h = m.hud
+	ok(h != null, "setup: the HUD")
+	if h == null:
 		return
-	H.visible = true
-	H.process_mode = Node.PROCESS_MODE_INHERIT
-	var P: Hunter = m.player
-	var rivals: Array = m.hunters.filter(func(x): return x != P)
+	h.visible = true
+	h.process_mode = Node.PROCESS_MODE_INHERIT
+	var p: Hunter = m.player
+	var rivals: Array = m.hunters.filter(func(x): return x != p)
 	ok(rivals.size() >= 1, "setup: a rival")
 	if rivals.is_empty():
 		return
 	var r: Hunter = rivals[0]
 	r.unseen = false
 	# near and on screen: laid out
-	r.teleport(P.pos + Vector3(3.0, 0, 0))
-	m.cam.snap(P.pos)
+	r.teleport(p.pos + Vector3(3.0, 0, 0))
+	m.cam.snap(p.pos)
 	m._process(0.0)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
@@ -617,18 +617,18 @@ func _plates() -> void:
 	var spots := [["past %.0f m" % LabelCull.FAR_M, Vector3(LabelCull.FAR_M + 25.0, 0, 0)],
 		["off screen", Vector3.ZERO]]
 	for where in spots:
-		var at: Vector3 = P.pos + where[1]
+		var at: Vector3 = p.pos + where[1]
 		if where[0] == "off screen":
 			# inside FAR_M but beyond the screen's edge (and the slack)
-			var rect: Rect2 = (H.c as CanvasItem).get_viewport_rect().grow(LabelCull.EDGE_PX)
+			var rect: Rect2 = (h.c as CanvasItem).get_viewport_rect().grow(LabelCull.EDGE_PX)
 			for d in range(8, int(LabelCull.FAR_M) - 2, 2):
-				var tp := P.pos + Vector3(d, 0, 0)
+				var tp := p.pos + Vector3(d, 0, 0)
 				if not rect.has_point(m.cam.unproject_position(tp + Vector3(0, 2.3, 0))):
 					at = tp
 					break
-			ok(at != P.pos, "setup: a spot off screen within %.0f m" % LabelCull.FAR_M)
+			ok(at != p.pos, "setup: a spot off screen within %.0f m" % LabelCull.FAR_M)
 		r.teleport(at)
-		m.cam.snap(P.pos)
+		m.cam.snap(p.pos)
 		m._process(0.0)
 		await main.get_tree().process_frame
 		var mark := Engine.get_process_frames()
