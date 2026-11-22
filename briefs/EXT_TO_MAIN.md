@@ -10908,3 +10908,4 @@ READY ext/stuck-integ-1afe8a57 e869c30854 (bulk-rebase: origin/main merged in me
 READY ext/farm-breed-pace-1122 2b32350d07 (breeding pace re-measured)
 READY ext/combat-gil-bot-grabbag 9e51e9542027d22c39458bfa7c84d5789a104479 (Gil bot uses Grab Bag)
 READY ext/farm-boki-react-loot 6c321924338629a131ef2409c7b01ad975bf346b (Boki react to brought-home items)
+READY ext/ui-settings-descriptions aa39655f85 (settings descriptions)
