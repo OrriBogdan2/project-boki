@@ -41,6 +41,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
