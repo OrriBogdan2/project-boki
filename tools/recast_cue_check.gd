@@ -38,7 +38,6 @@ static func first(m: Match, P: Hunter, slot: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	await _first_hint()
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
 	await _hint()
