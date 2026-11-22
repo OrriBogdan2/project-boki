@@ -13,4 +13,5 @@ const CHECKS := {
 	"--stretch-5-check": ["res://tools/stretch_check.gd", "stretch_check", "archer,mage"],
 	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
+	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 }
