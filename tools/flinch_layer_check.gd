@@ -123,7 +123,8 @@ func _native(id: String, move: String, pair: Array) -> void:
 	var hit: Dictionary = pair[0]
 	var ctl: Dictionary = pair[1]
 	_frames(pair, 12)
-	ok(hit["sync"].get("cur") == "attack", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, hit["sync"].get("cur")])
+	var cur: String = hit["sync"].get("cur")
+	ok(cur == "attack", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])
 	var off := _gap(pair)
 	var legs0 := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
 	var peaks := {}
