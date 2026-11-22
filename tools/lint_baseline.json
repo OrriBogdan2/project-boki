@@ -898,7 +898,7 @@
   "tools/hud_timeline_shots.gd": 1,
   "tools/hudref_check.gd": 1,
   "tools/hunter_colour_gap_check.gd": 1,
-  "tools/hunter_gpu_bench.gd": 1,
+  "tools/perf/hunter_gpu.gd": 1,
   "tools/idle_shots.gd": 1,
   "tools/incubator_check.gd": 1,
   "tools/ink_preview_check.gd": 1,
