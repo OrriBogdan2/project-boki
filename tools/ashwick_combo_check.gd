@@ -785,7 +785,7 @@ func _all() -> void:
 		"passive: Char falls off all at once after 5s", K.char_of(T2) == 0.0 and K.burning(T) == 0,
 		"char %.1f" % K.char_of(T2)
 	)
-	# --- a Boki merge drops every hold: the hose, the cloak's ring
+	# --- a Boki merge keeps every hold (decision 0100): the hose keeps burning
 	reset.call()
 	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
 	ok(
@@ -799,8 +799,8 @@ func _all() -> void:
 	P.inp["fire"] = false
 	ak.step(m, 0.3)
 	ok(
-		"merge hold: linwick's lance is dropped, no fire mid-merge",
-		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.mel_hold == 0.0,
+		"merge hold: linwick's lance keeps burning through the merge (decision 0100)",
+		K.flame_ticks > ft,
 		"held %s puffs %d ticks +%d" % [K.was_held, K.hose.puffs.size(), K.flame_ticks - ft]
 	)
 	KinMerge.end(P, "test")

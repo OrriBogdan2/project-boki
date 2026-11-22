@@ -47,29 +47,29 @@ func run(main_node: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var P: Hunter = m.player
-	var C: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
-	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var pc: Hunter = m.player
+	var cc: Hunter = m.hunters.filter(func(x): return x.team == pc.team and x != pc)[0]
+	var q1: Hunter = m.hunters.filter(func(x): return x.team != pc.team)[0]
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-	var F: Dictionary = m.lairs.list[0]
-	m.lairs.activate(F)
-	for g in F["guards"]:
+	var fx: Dictionary = m.lairs.list[0]
+	m.lairs.activate(fx)
+	for g in fx["guards"]:
 		if is_instance_valid(g):
 			g.dead = true
-	m.lairs.open(F, Q, "dial")
-	b = F["boss_mob"]
-	var out := Vector3(F["out"].x, 0, F["out"].y)
-	var c: Vector3 = F["c"]
-	_spot(C, c + out * 6.0)
-	_spot(Q, c - out * 6.0)
-	_spot(P, c + out * 20.0)
+	m.lairs.open(fx, q1, "dial")
+	b = fx["boss_mob"]
+	var out := Vector3(fx["out"].x, 0, fx["out"].y)
+	var c: Vector3 = fx["c"]
+	_spot(cc, c + out * 6.0)
+	_spot(q1, c - out * 6.0)
+	_spot(pc, c + out * 20.0)
 	await _grab("steal_1_above", 0.6)
 	await _grab("steal_2_window_near", StealTell.at())
-	_spot(C, c + out * (KillXp.SHARE_R + 8.0))
-	_spot(P, c + out * (KillXp.SHARE_R + 4.0))
+	_spot(cc, c + out * (KillXp.SHARE_R + 8.0))
+	_spot(pc, c + out * (KillXp.SHARE_R + 4.0))
 	await _grab("steal_3_window_far", StealTell.at())
-	_spot(P, c + out * 4.0)
+	_spot(pc, c + out * 4.0)
 	await _grab("steal_4_top_bar", StealTell.at())
 	main.get_tree().quit(0)
