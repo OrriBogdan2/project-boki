@@ -12,6 +12,8 @@ extends RefCounted
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
+##   3b. F (the interact key) closes the chat and does not open it again: the closing press is not read as a new
+##      talk, even held for a few frames; a fresh press after letting go talks to him again
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ##   6. real work: after Skip tutorial the house site goes up while Hob hammers (a swing every swing_s: the bar and
 ##      the walls move, the materials are spent) and is done in bounded time; with no materials he does not
@@ -44,6 +46,7 @@ func run(m: Node) -> void:
 		main.fade.reveal(0.05)
 	main.get_tree().root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for)
 	await _first_arrival()
+	await _f_close()
 	await _offer()
 	await _later_and_legacy()
 	await _skip_check()
@@ -156,6 +159,47 @@ func _first_arrival() -> void:
 	home._close_panel()
 	await _frames(2)
 	ok(not hob.chat.talking(), "Esc ends the talk")
+
+## F at the end of the chat closes it for good: the same press must not reach the world and talk to him again.
+func _f_close() -> void:
+	var hob: FarmHob = home.hob
+	hob.node.position = hob.pos
+	_stand_by(hob.node.position)
+	await _wait(func(): return String(home.interact.get("kind", "")) == "hob", 8.0)
+	ok(not hob.chat.talking() and String(home.interact.get("kind", "")) == "hob", "next to him, F would talk")
+	await _tap_f(3)
+	ok(hob.chat.talking(), "F opens the chat")
+	var closes := [0]
+	hob.chat.box.closed.connect(func(): closes[0] += 1)
+	var presses := 0
+	while closes[0] == 0 and presses < 8:
+		presses += 1
+		await _wait(func(): return not hob.chat.box.frozen, 3.0)
+		await _tap_f(3)
+	ok(closes[0] == 1 and not hob.chat.talking() and home.panel_open == "",
+			"F, line by line, closes the chat (%d presses, closed %d x)" % [presses, closes[0]])
+	var reopened := false
+	for i in 12:
+		await _frames(1)
+		reopened = reopened or hob.chat.talking()
+	ok(not reopened, "the closing F does not open the chat again, even though it was held for 3 frames")
+	await _tap_f(3)
+	ok(hob.chat.talking(), "a fresh F after letting go talks to him again")
+	hob.chat.box.close()
+	await _frames(3)
+
+## One F press across frames: down, held `held` frames, up, two frames of nothing.
+func _tap_f(held: int) -> void:
+	_f(true)
+	await _frames(held)
+	_f(false)
+	await _frames(2)
+
+func _f(down: bool) -> void:
+	var ev := InputEventAction.new()
+	ev.action = "interact"
+	ev.pressed = down
+	Input.parse_input_event(ev)
 
 ## A press held for a second skips the pan and every later one.
 func _skip_check() -> void:

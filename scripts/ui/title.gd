@@ -195,6 +195,7 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
+	b.set_meta(UI.SFX_META, true)
 	b.pressed.connect(func(): Sfx.play("click"); cb.call())
 	b.focus_entered.connect(func(): Sfx.play("hover", null, -12.0, 0.05))
 	_lit_on_focus(b, "MenuItem")

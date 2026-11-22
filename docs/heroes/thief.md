@@ -56,6 +56,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add a flat 1.3 each, as the source's +16 a stack |
 | Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
 | Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s; code removed) | 2 Marks (the owner's spec: the empowered hit stacks faster; MAIN_TO_EXT 03:20); Shred gone (not in the source) |
+| Empowered knock | none: "+214 dmg" only [D, KIT_PARITY] | none: `dash.prime_kb` 0 (was a hard-coded 3.0 in `thief_kit.gd`, a 0.47 m shove) | `ext/sparkle-sable-knock-cut` |
 | Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
 | The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
 | Auto rate | 0.45s [footage card] | 0.45s | unchanged |
@@ -473,7 +474,7 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 | LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
 | Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
 | RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
-| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_RELEASE_S`) / 0.08 / 0.47 | matches; asserted |
 | E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
 | Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
 | Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |

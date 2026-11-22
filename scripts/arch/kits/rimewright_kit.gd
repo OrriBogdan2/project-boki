@@ -13,6 +13,9 @@ extends ArchKit
 ## (HeroVfx) for the moments, CareLook and UltLook for the bodies (darts, spear, wall, zone, rink, shells);
 ## moves: KMovesCare "tm_".
 
+const SHARD_FADE := 0.4        # s at the end of FAN_HOLD over which the foe's ice shards fade out
+const CARVE_IN := 6.0          # 1/s: how fast the skate's turn rate builds toward the keys (a 0.17 s lean-in)
+const CARVE_AIM := 2.0         # 1/s of turn rate per radian still to turn: the carve eases out onto the keys' line
 var chill := {}                # target instance id -> {t: Ent, left: float}
 var fan_hits := {}             # target instance id -> {n: int, left: float, t: Ent}
 const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hit
@@ -49,7 +52,7 @@ var rime := {}                 # Rimelock running: {t, at, creak, carry, face}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
-var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
+var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last Loco.press_buffer
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -105,6 +108,7 @@ func add_chill(t: Ent) -> void:
 	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
+		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
 ## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
 func combo_read(t: Ent) -> Dictionary:
@@ -220,16 +224,13 @@ func _tick(dt: float) -> void:
 		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
 			fan_hits.erase(key)
 			continue
-		# the frost glow on the foe grows with each dart toward the Shatter (others see it; you, the FAN badge)
-		if h.is_local():
-			continue
-		var n := int(e2["n"])
+		# each dart sticks a shard of ice in the foe: the more shards, the nearer the Shatter (no overhead badge)
+		var foe: Ent = tv2
 		lk().keep(
-			"frost%d" % key,
-			"frost",
-			(tv2 as Node3D).global_position,
-			{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0}
-		)
+				"shards%d" % key, "shards", foe.global_position,
+				{
+					"n": int(e2["n"]), "pop": FAN_HOLD - float(e2["left"]), "r": clampf(foe.r / 0.4, 0.8, 2.5),
+					"a": clampf(float(e2["left"]) / SHARD_FADE, 0.0, 1.0)})
 	_tick_darts(dt)
 	_tick_throw(dt)
 	_tick_rinkrun(dt)
@@ -518,18 +519,20 @@ func _tick_rinkrun(dt: float) -> void:
 	if stop:
 		_rinkrun_end()
 		return
-	# steer toward the move keys: she carves a curve (a set turn rate, so the skate keeps its flow), and
+	# steer toward the move keys like a skater: the push-off line holds, the
+	# turn rate builds over CARVE_IN and tops out low (dash.steer), so she carves wide instead of snapping round;
 	# a hard carve throws ice off the outside edge
 	var mv: Vector2 = h.inp["move"]
 	var cur: Vector2 = rinkrun["dir"]
-	var steer := float(dd.get("steer", 3.6))
-	var turn := 0.0
+	var steer := float(dd.get("steer", 1.6))
+	var want := 0.0
 	if mv.length() > 0.1:
-		turn = clampf(cur.angle_to(mv.normalized()), -steer * dt, steer * dt)
-		cur = cur.rotated(turn)
+		want = clampf(cur.angle_to(mv.normalized()) * CARVE_AIM, -steer, steer)
+	var rate := lerpf(float(rinkrun.get("rate", 0.0)), want, 1.0 - exp(-CARVE_IN * dt))
+	rinkrun["rate"] = rate
+	cur = cur.rotated(rate * dt)
 	rinkrun["dir"] = cur
-	rinkrun["rate"] = turn / maxf(dt, 0.001)      # rad/s: the carve scrape (RimeSkateSfx) follows it
-	_edge_spray(cur, float(rinkrun["rate"]), dt)
+	_edge_spray(cur, rate, dt)      # rinkrun["rate"] (rad/s) also drives the carve scrape (RimeSkateSfx)
 	h.roll_dir = cur
 	# full speed within `ramp` s of the push-off; out of Rimelock it starts at full speed (or the speed she
 	# had) and holds it CARRY_T before easing to the skate's own
@@ -621,8 +624,9 @@ func _rinkrun_end(into_rime := false) -> void:
 		return
 	h.roll_t = 0.0
 	if h.grounded:
-		h.vel.x *= 0.3
-		h.vel.z *= 0.3
+		# she glides out of it (the ground brake takes over from here: about 1 m), no dead stop
+		h.vel.x = h.roll_dir.x * h.roll_speed * float(dd.get("slide_out", 0.7))
+		h.vel.z = h.roll_dir.y * h.roll_speed * float(dd.get("slide_out", 0.7))
 	else:
 		# ended in the air: she keeps the skate's speed the way any air dash does (Loco's air drag bleeds it)
 		h.vel.x = h.roll_dir.x * h.roll_speed
@@ -844,7 +848,7 @@ func _detonate(at: Vector3) -> void:
 	vfx("spear_burst", at, null, {"r": rr})
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, 0.6, h)
+	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -954,22 +958,9 @@ func recast_window() -> Dictionary:
 			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
 	return {}
 
-
-## RecastCue's badges: Chill (a knock on it Shatters) and the Fan stacks toward the burst.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var pd: Dictionary = d["passive"]
-	for key in chill:
-		var c: Dictionary = chill[key]
-		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), true))
-	for key in fan_hits:
-		var f: Dictionary = fan_hits[key]
-		if is_instance_valid(f["t"]):
-			var n := int(f["n"])
-			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, full))
-
+## No overhead badges for her: the shards stuck in the foe are the one read.
+func combo_marks(_out: Array) -> void:
+	pass
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
@@ -1300,7 +1291,7 @@ func _rime_crash(k: float) -> void:
 
 
 ## After the burst she settles for x.recover s (footage f57 -> f61, the tm_rime_crash clip's length): no walking
-## or casts. A press in its last DashFlow.BUFFER_S goes as it ends; an earlier one is refused. Shift skates out.
+## or casts. A press in its last Loco.press_buffer goes as it ends; an earlier one is refused. Shift skates out.
 func recovering() -> bool:
 	return recover_until > 0.0 and m.time < recover_until
 
@@ -1318,7 +1309,7 @@ func gate_inputs() -> void:
 			h.inp[key] = true
 		recover_buf.clear()
 		return
-	var buffering: bool = recover_until - m.time <= DashFlow.BUFFER_S
+	var buffering: bool = recover_until - m.time <= Loco.press_buffer
 	for key in RECOVER_KEYS:
 		if not h.inp.get(key, false):
 			continue
