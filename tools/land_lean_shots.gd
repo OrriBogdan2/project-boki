@@ -6,16 +6,17 @@ extends "res://tools/clip_shots.gd"
 ## frame for frame. tools/land_lean_strip.py lays two runs side by side. Needs a renderer.
 
 const DT := 1.0 / 30.0
-const STAND := 0.3          # s still before each move
-const RUN := 0.6            # s of running before the stop
-const TAIL := 0.6           # s on the ground after the stop or a landing
-const STOP_T := 0.17        # s a let-go from a run takes to stop (HunterMove "brake" note)
-const GLIDE_T := 0.5        # s of gliding at the canopy's sink before the ground
-const LEAP_H := 1.6         # m: a Boki's grammar leap (Kin.start_leap's default height and time)
+const STAND := 0.3  # s still before each move
+const RUN := 0.6  # s of running before the stop
+const TAIL := 0.6  # s on the ground after the stop or a landing
+const STOP_T := 0.17  # s a let-go from a run takes to stop (HunterMove "brake" note)
+const GLIDE_T := 0.5  # s of gliding at the canopy's sink before the ground
+const LEAP_H := 1.6  # m: a Boki's grammar leap (Kin.start_leap's default height and time)
 const LEAP_T := 0.45
-const BOKI_RUN := 5.0       # m/s: a Boki keeping up with its Hunter
+const BOKI_RUN := 5.0  # m/s: a Boki keeping up with its Hunter
 
 var key := {}
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -24,9 +25,12 @@ func run(main: Node) -> void:
 	var boki: Array = ["cindle", "puddlet", "pebbit"]
 	frame_px = 480
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--boki="): boki = Array(a.substr(7).split(",", false))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--boki="):
+			boki = Array(a.substr(7).split(",", false))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -40,16 +44,22 @@ func run(main: Node) -> void:
 	print("LAND_LEAN_SHOTS_DONE")
 	tree.quit()
 
+
 func _side(at_y: float, dist: float) -> void:
 	cam.fov = 30.0
 	cam.position = Vector3(dist, at_y + dist * 0.12, 0.0)
 	cam.look_at(Vector3(0, at_y, 0))
 
+
 ## Ground speed t s into the routine (a run at `accel`, a let-go over STOP_T), the events noted in `key` as they pass.
 ## The jump starts at the time it returns as "jump".
 func _plan(t: float, spd: float, accel: float, air: float) -> Dictionary:
-	var marks := [["start", STAND], ["stop", STAND + RUN], ["jump", STAND * 2.0 + RUN + TAIL],
-		["land", STAND * 2.0 + RUN + TAIL + air]]
+	var marks := [
+		["start", STAND],
+		["stop", STAND + RUN],
+		["jump", STAND * 2.0 + RUN + TAIL],
+		["land", STAND * 2.0 + RUN + TAIL + air]
+	]
 	for m in marks:
 		if not key.has(m[0]) and t >= float(m[1]) - 0.001:
 			key[m[0]] = int(round(t / DT))
@@ -59,6 +69,7 @@ func _plan(t: float, spd: float, accel: float, air: float) -> Dictionary:
 	elif t >= STAND + RUN:
 		v = maxf(0.0, spd * (1.0 - (t - STAND - RUN) / STOP_T))
 	return {"v": v, "jump": float(marks[2][1])}
+
 
 func _hunter(id: String, dir: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -104,6 +115,7 @@ func _hunter(id: String, dir: String) -> void:
 	model.queue_free()
 	await tree.process_frame
 
+
 func _boki(id: String, dir: String) -> void:
 	var k: Node3D = load("res://tools/boki_rig_shots.gd").rigged_kin(id)
 	holder.add_child(k)
@@ -126,7 +138,7 @@ func _boki(id: String, dir: String) -> void:
 		var y := 4.0 * LEAP_H * u * (1.0 - u) if u > 0.0 and u < 1.0 else 0.0
 		x -= float(p["v"]) * DT
 		k.global_position = start + Vector3(0, y, x)
-		cam.position.z = x          # the camera keeps on it
+		cam.position.z = x  # the camera keeps on it
 		rig._process(DT)
 		rig.player.advance(DT)
 		await _grab(dir.path_join("f%03d.png" % i))
@@ -135,6 +147,7 @@ func _boki(id: String, dir: String) -> void:
 	_key(dir)
 	k.queue_free()
 	await tree.process_frame
+
 
 func _key(dir: String) -> void:
 	key["fps"] = 30
