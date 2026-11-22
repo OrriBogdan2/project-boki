@@ -69,7 +69,7 @@ const SEAM_OVER := {
 	"lodestick run": 1.06, "marchleaf walk": 1.45, "moonloris walk": 1.42, "mossgrade walk": 1.07,
 	"moundvark walk": 1.44, "murmurling walk": 1.46, "nacrolin walk": 1.46, "nimbostrich walk": 1.47,
 	"opalisk walk": 1.45, "orchisloth walk": 1.45, "puddlet walk": 1.18, "scaldamus walk": 1.41,
-	"sentrikat walk": 1.46, "spatewader walk": 1.47, "squalltross walk": 1.46, "tuatrune walk": 1.46,
+	"sentrikat walk": 1.46, "spatewader walk": 1.47, "squalltross walk": 1.50, "tuatrune walk": 1.57,
 	"lilybara idle": 1.15, "lilybara run": 1.77, "lilybara walk": 1.20, "umbrathere run": 1.94,
 	"umbrathere walk": 1.82
 }
