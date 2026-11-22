@@ -5,11 +5,13 @@ extends RefCounted
 var main: Node
 var dir := "docs/shots/farm-hazard-counter-card"
 
+
 func _shot(shot_name: String) -> void:
 	await main.get_tree().create_timer(1.0).timeout
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, shot_name])
 	print("HSHOT %s" % shot_name)
+
 
 func run(m: Node) -> void:
 	main = m

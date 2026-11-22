@@ -4,6 +4,17 @@ extends RefCounted
 ## pose) and a perk-up when it is well again. The cures themselves are Care's
 ## (RECOVER_*, Care.tick, Care.feed).
 
+## Forward lean of the body, radians: weak, sick (0 when well).
+const DROOP_WEAK := 0.15
+const DROOP_SICK := 0.30
+
+## How fast the body eases to its lean, per second.
+const DROOP_RATE := 4.0
+
+## A hop is this much smaller while it is ailing.
+const HOP_SCALE := 0.4
+
+
 ## A friend is another Boki this close (FarmChatter.FRIEND_R): it keeps a sick one company and speeds the cure.
 static func friend_near(kins: Array, k: Dictionary) -> bool:
 	if not Care.ailing(k["rec"]):
@@ -13,13 +24,6 @@ static func friend_near(kins: Array, k: Dictionary) -> bool:
 			return true
 	return false
 
-## Forward lean of the body, radians: weak, sick (0 when well).
-const DROOP_WEAK := 0.15
-const DROOP_SICK := 0.30
-## How fast the body eases to its lean, per second.
-const DROOP_RATE := 4.0
-## A hop is this much smaller while it is ailing.
-const HOP_SCALE := 0.4
 
 ## Every frame, after the walk bob: lean forward and hop less while ailing, ease back upright when well.
 static func pose(k: Dictionary, n: Node3D, d: float) -> void:
@@ -38,6 +42,7 @@ static func pose(k: Dictionary, n: Node3D, d: float) -> void:
 	if lean == 0.0 and absf(body.rotation.x) < 0.01:
 		body.rotation.x = 0.0
 		k.erase("droop")
+
 
 ## It just got well: a happy bounce, a heart and a sparkle (the body straightens in pose()).
 static func perk_up(h, k: Dictionary) -> void:

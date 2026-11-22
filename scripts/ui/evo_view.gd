@@ -4,6 +4,7 @@ extends RefCounted
 ## and one plain line on what evolving takes, read through Evo.next_way. Only forms with art count:
 ## a Boki never evolves into a form that has no model yet.
 
+
 ## Adds the block to `parent`. A Boki with no next form ready gets the line alone.
 static func next_block(rec: Dictionary, parent: VBoxContainer) -> void:
 	var nf := next_form(rec)
@@ -11,7 +12,7 @@ static func next_block(rec: Dictionary, parent: VBoxContainer) -> void:
 	parent.add_child(UI.label(String(nf["line"]), UI.T_HEAD, UI.INK, UI.big))
 	if not nf.has("goal"):
 		return
-	var row := UI.hbox(10)       # laid out like the card's other bar rows: 92 px label, bar, 64 px value
+	var row := UI.hbox(10)  # laid out like the card's other bar rows: 92 px label, bar, 64 px value
 	var level_label := UI.label("Lv %d" % int(rec["level"]), UI.T_SMALL, UI.MUTED)
 	level_label.custom_minimum_size.x = 92.0
 	row.add_child(level_label)
@@ -23,6 +24,7 @@ static func next_block(rec: Dictionary, parent: VBoxContainer) -> void:
 	goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(goal_label)
 	parent.add_child(row)
+
 
 ## What the block shows: {"line"} and, while a form with art is ahead, "goal" (the level the bar fills
 ## to: its evolve level, or the next level when an Ink or a trade decides) and "frac" (0..1 of the XP).
@@ -45,12 +47,14 @@ static func next_form(rec: Dictionary) -> Dictionary:
 			return {"line": "This is its last form"}
 	return {"line": line, "goal": goal, "frac": _xp_share(rec, lv, goal)}
 
+
 ## "a Tide Ink" when one Ink works, "an Ink" when the Ink's type picks the form.
 static func _ink_words(inks: Array) -> String:
 	if inks.size() > 1:
 		return "an Ink"
 	var ink_name := Goods.name_of("good:" + String(inks[0]))
 	return ("an " if "AEIOU".contains(ink_name.left(1)) else "a ") + ink_name
+
 
 ## The share of the XP from level `start_lv` to level `goal` it has earned (full once it is there).
 static func _xp_share(rec: Dictionary, start_lv: int, goal: int) -> float:

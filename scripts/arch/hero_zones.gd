@@ -98,8 +98,9 @@ static func rock(
 	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
 	top := ROCK_TOP
 ) -> Dictionary:
-	var e := {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true,
-			"color": "#" + ROCK_COL.to_html(false)}
+	var e := {
+		"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#" + ROCK_COL.to_html(false)
+	}
 	var w: Dictionary = m.verbs.add_wall(by, at, dir, e, 1.0)
 	var old: Node3D = w["node"]
 	var n := RockLook.take(m)

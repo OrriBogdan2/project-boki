@@ -25,15 +25,15 @@ const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", 
 const RUN_OUT := 18.0          # s a window left alone gets to close (Brimseed: 6.5s grow + 10s at full, the longest)
 
 ## The first step of `slot` (also the shots' way in: tools/recast_cue_shots.gd).
-static func first(m: Match, P: Hunter, slot: String) -> void:
+static func first(m: Match, p: Hunter, slot: String) -> void:
 	match slot:
-		"e": P.ak.use_e()
-		"x": P.ak.cast_ult()
-		"dash": P.do_dash()
+		"e": p.ak.use_e()
+		"x": p.ak.cast_ult()
+		"dash": p.do_dash()
 		"lmb":
-			P.inp["fire"] = true
+			p.inp["fire"] = true
 			m.step(DT)
-			P.inp["fire"] = false
+			p.inp["fire"] = false
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -51,10 +51,10 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 ## Steps until the kit reports `slot`'s window (or WAIT runs out); returns it ({} if it never opened).
-func _open(m: Match, P: Hunter, slot: String) -> Dictionary:
+func _open(m: Match, p: Hunter, slot: String) -> Dictionary:
 	var t := 0.0
 	while t < WAIT:
-		var w := P.ak.recast_window()
+		var w := p.ak.recast_window()
 		if String(w.get("slot", "")) == slot:
 			return w
 		m.step(DT)
@@ -64,22 +64,22 @@ func _open(m: Match, P: Hunter, slot: String) -> Dictionary:
 func _window(hero: String, slot: String) -> void:
 	var s := setup(hero, 6.0)
 	var m: Match = s[0]
-	var P: Hunter = s[1]
-	aim_at(P, (s[2] as Hunter).pos)
-	first(m, P, slot)
-	var w := _open(m, P, slot)
+	var p: Hunter = s[1]
+	aim_at(p, (s[2] as Hunter).pos)
+	first(m, p, slot)
+	var w := _open(m, p, slot)
 	var at = w.get("at")
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
 	var placed := at is Vector3 and (at as Vector3).is_finite()
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
-	var verb := RecastHint.verb(P.ak, slot)
+	var verb := RecastHint.verb(p.ak, slot)
 	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != RecastHint.FALLBACK_VERB, verb)
 	m.step(DT)
-	var cw: Dictionary = P.ak.cue.get("w", {})
+	var cw: Dictionary = p.ak.cue.get("w", {})
 	var key := RecastCue.key_of(slot)
 	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
-	var line := RecastCue.hint_line(P.ak, slot)
+	var line := RecastCue.hint_line(p.ak, slot)
 	ok("%s %s: the first-time hint reads '<KEY> again to <verb>'" % [hero, slot],
 			line.begins_with(key + " again to ") and line.length() > key.length() + 12 and line.length() <= 40, line)
 	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)) and hero == "bulwark":
@@ -89,17 +89,17 @@ func _window(hero: String, slot: String) -> void:
 	var ticks := 0
 	var exp_t := 0.0
 	var t := 0.0
-	while t < RUN_OUT and String(P.ak.recast_window().get("slot", "")) == slot:
-		ticks = maxi(ticks, int(P.ak.cue.get("tick", 0)))
+	while t < RUN_OUT and String(p.ak.recast_window().get("slot", "")) == slot:
+		ticks = maxi(ticks, int(p.ak.cue.get("tick", 0)))
 		m.step(DT)
 		t += DT
 	m.step(DT)
-	ticks = maxi(ticks, int(P.ak.cue.get("tick", 0)))
-	exp_t = float(P.ak.cue.get("exp_t", 0.0))
+	ticks = maxi(ticks, int(p.ak.cue.get("tick", 0)))
+	exp_t = float(p.ak.cue.get("exp_t", 0.0))
 	ok("%s %s: the warning ticks play before it closes" % [hero, slot], ticks >= 1, "ticks %d" % ticks)
-	ok("%s %s: unused, the slot shows EXPIRED ~0.6s" % [hero, slot], String(P.ak.cue.get("exp_slot", "")) == slot
+	ok("%s %s: unused, the slot shows EXPIRED ~0.6s" % [hero, slot], String(p.ak.cue.get("exp_slot", "")) == slot
 			and exp_t > 0.4 and exp_t <= RecastCue.EXPIRED_T and absf(RecastCue.EXPIRED_T - 0.6) < 0.05,
-			"exp %s %.2f after %.2fs" % [P.ak.cue.get("exp_slot", "-"), exp_t, t])
+			"exp %s %.2f after %.2fs" % [p.ak.cue.get("exp_slot", "-"), exp_t, t])
 	await done(m)
 
 ## The first-time hint shows once per Hunter, in a real match only (not training, not the tutorial).
@@ -110,11 +110,11 @@ func _hint() -> void:
 		seen.erase(flag)
 		var s := setup("ostra", 6.0)
 		var m: Match = s[0]
-		var P: Hunter = s[1]
+		var p: Hunter = s[1]
 		m.opts["training"] = not real
-		aim_at(P, s[2].pos)
-		first(m, P, "e")
-		_open(m, P, "e")
+		aim_at(p, s[2].pos)
+		first(m, p, "e")
+		_open(m, p, "e")
 		m.step(DT)
 		ok("ostra e: the hint is %s" % ("marked seen in a real match" if real else "held back in training"),
 				bool(seen.get(flag, false)) == real, str(seen.get(flag)))
@@ -126,33 +126,33 @@ func _hint() -> void:
 func _expired() -> void:
 	var s := setup("dolm", 6.0)
 	var m: Match = s[0]
-	var P: Hunter = s[1]
-	aim_at(P, s[2].pos)
-	first(m, P, "dash")
-	var w := _open(m, P, "dash")
+	var p: Hunter = s[1]
+	aim_at(p, s[2].pos)
+	first(m, p, "dash")
+	var w := _open(m, p, "dash")
 	step(m, float(w.get("left", 0.0)) + 0.3)
-	ok("dolm dash: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "dash"
-			and float(P.ak.cue.get("exp_t", 0.0)) > 0.0, str(P.ak.cue.get("exp_slot", "")))
+	ok("dolm dash: an unused window shows EXPIRED", String(p.ak.cue.get("exp_slot", "")) == "dash"
+			and float(p.ak.cue.get("exp_t", 0.0)) > 0.0, str(p.ak.cue.get("exp_slot", "")))
 	await done(m)
 
 ## Ostra's E again 0.1s before the 0.3s minimum: buffered, the seed pops the moment the recast arms.
 func _buffered() -> void:
 	var s := setup("ostra", 6.0)
 	var m: Match = s[0]
-	var P: Hunter = s[1]
-	var K := P.ak as OstraKit
-	aim_at(P, s[2].pos)
-	P.ak.use_e()
-	var w := _open(m, P, "e")
+	var p: Hunter = s[1]
+	var k := p.ak as OstraKit
+	aim_at(p, s[2].pos)
+	p.ak.use_e()
+	var w := _open(m, p, "e")
 	ok("ostra e: no world marker on the seed, the slot still pulses",
 			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
-	var min_t := float(K.e_def()["min_recast"])
-	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - Loco.press_buffer * 0.6:
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - Loco.press_buffer * 0.6:
 		m.step(DT)
-	P.ak.use_e()
-	var held := not K.seed.is_empty()
+	p.ak.use_e()
+	var held := not k.seed.is_empty()
 	step(m, Loco.press_buffer)
-	var popped := K.seed.is_empty()
+	var popped := k.seed.is_empty()
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
 
@@ -161,15 +161,15 @@ func _badges() -> void:
 	for hero in ["thief", "gunslinger", "mage"]:
 		var s := setup(hero, 6.0)
 		var m: Match = s[0]
-		var P: Hunter = s[1]
-		var T: Hunter = s[2]
+		var p: Hunter = s[1]
+		var t: Hunter = s[2]
 		match hero:
-			"thief": (P.ak as ThiefKit).add_mark(T, 2, true)
-			"gunslinger": (P.ak as GunslingerKit).daze(T, 2.0)
-			"mage": (P.ak as MageKit).sparks[T.get_instance_id()] = {"e": T, "n": 2, "t": 3.0}
+			"thief": (p.ak as ThiefKit).add_mark(t, 2, true)
+			"gunslinger": (p.ak as GunslingerKit).daze(t, 2.0)
+			"mage": (p.ak as MageKit).sparks[t.get_instance_id()] = {"e": t, "n": 2, "t": 3.0}
 		m.step(DT)
-		var marks: Array = P.ak.cue.get("marks", [])
-		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
+		var marks: Array = p.ak.cue.get("marks", [])
+		var mine := marks.filter(func(mk): return mk["e"] == t and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
 		if hero == "gunslinger" and mine.size() == 1:
 			var ring := float(mine[0]["total"])
@@ -263,89 +263,89 @@ func _static_payoff_fx(lo: float) -> void:
 ## Sets up and lands the one payoff of `hero` on the target `s[2]` (setup()'s array), listening as it goes.
 func _land(hero: String, s: Array) -> void:
 	var m: Match = s[0]
-	var P: Hunter = s[1]
-	var T: Hunter = s[2]
+	var p: Hunter = s[1]
+	var t: Hunter = s[2]
 	match hero:
 		"thief":
-			var K := P.ak as ThiefKit
-			K.add_mark(T, 2, true)
-			K.primed_on = T
-			K.on_deal(T, 10.0, {"src": "shot"})
+			var k := p.ak as ThiefKit
+			k.add_mark(t, 2, true)
+			k.primed_on = t
+			k.on_deal(t, 10.0, {"src": "shot"})
 		"gunslinger":
-			(P.ak as GunslingerKit).daze(T, 2.0)
-			T.hurt(10.0, P, {"src": "shot"})
+			(p.ak as GunslingerKit).daze(t, 2.0)
+			t.hurt(10.0, p, {"src": "shot"})
 		"mage":
-			var K := P.ak as MageKit
-			K.sparks[T.get_instance_id()] = {"e": T, "n": 4, "t": 3.0}
-			K._wire_hit(T, 10.0)
+			var k := p.ak as MageKit
+			k.sparks[t.get_instance_id()] = {"e": t, "n": 4, "t": 3.0}
+			k._wire_hit(t, 10.0)
 		"rimewright":
-			(P.ak as RimewrightKit).add_chill(T)
-			T.hurt(20000.0, P, {"src": "shot"})      # the knock: a Shatter a beat later
+			(p.ak as RimewrightKit).add_chill(t)
+			t.hurt(20000.0, p, {"src": "shot"})      # the knock: a Shatter a beat later
 		"ostra":
-			var K := P.ak as OstraKit
-			K.use_e()
+			var k := p.ak as OstraKit
+			k.use_e()
 			_listen(m, 0.5)
-			K.seed["pos"] = T.pos
-			K.seed["t"] = K.seed["grow"]
-			K.e_recast()
+			k.seed["pos"] = t.pos
+			k.seed["t"] = k.seed["grow"]
+			k.e_recast()
 		"archer":
 			_lace_pin(s)
 		"gil":
-			var K := P.ak as GilKit
+			var k := p.ak as GilKit
 			for mk in ["a", "b", "c"]:
-				K._mark(T, mk, Color.WHITE)
+				k._mark(t, mk, Color.WHITE)
 		"ashwick":
-			var K := P.ak as AshwickKit
-			K.stoke(T)
-			K.stoke(T)
+			var k := p.ak as AshwickKit
+			k.stoke(t)
+			k.stoke(t)
 		"tender":
-			(P.ak as TenderKit).add_kindle(T, 5)
+			(p.ak as TenderKit).add_kindle(t, 5)
 
 ## Lace's Heavy Shot, fully drawn, into a wall behind the foe: the pin.
 func _lace_pin(s: Array) -> void:
 	var m: Match = s[0]
-	var P: Hunter = s[1]
-	var T: Hunter = s[2]
-	var W: World = m.world
-	var kind: PackedByteArray = W.kind
-	var level: PackedByteArray = W.level
+	var p: Hunter = s[1]
+	var t: Hunter = s[2]
+	var w: World = m.world
+	var kind: PackedByteArray = w.kind
+	var level: PackedByteArray = w.level
 	for dz in range(-3, 4):
 		for dx in range(2, 5):
-			var i: int = W.idx(int(T.pos.x) + dx, int(T.pos.z) + dz)
+			var i: int = w.idx(int(t.pos.x) + dx, int(t.pos.z) + dz)
 			kind[i] = World.T_GROUND
 			level[i] = int(s[5]) if dx < 3 else int(s[5]) + 3
-	W.kind = kind
-	W.level = level
-	var K := P.ak as ArcherKit
-	K.ch_rmb = 2.0
-	K.cd["rmb"] = 0.0
-	var hold := func():
-		P.inp["sec_hold"] = true
-		aim_at(P, T.pos)
-	hold.call()
-	K.press_rmb()
-	_listen(m, 1.3, hold)
-	P.inp["sec_hold"] = false
+	w.kind = kind
+	w.level = level
+	var k := p.ak as ArcherKit
+	k.ch_rmb = 2.0
+	k.cd["rmb"] = 0.0
+	var hold_v := func():
+		p.inp["sec_hold"] = true
+		aim_at(p, t.pos)
+	hold_v.call()
+	k.press_rmb()
+	_listen(m, 1.3, hold_v)
+	p.inp["sec_hold"] = false
 
 ## The world marker and the foe badge draw no key and no word: only a count may show (DECISIONS 2026-11-11).
 func _world_plain() -> void:
-	var H := StubHud.new()
-	main.add_child(H)
-	H.add_child(H.c)
+	var h := StubHud.new()
+	main.add_child(h)
+	h.add_child(h.c)
 	var open := RecastCue.window("e", 2.0, 3.0, Vector3.ZERO)
 	var late := RecastCue.window("e", 0.3, 3.0, Vector3.ZERO, false)
 	var mk := RecastCue.mark(null, 0, 2.0, 3.0, false)
 	var counted := RecastCue.mark(null, 3, 2.0, 3.0, true)
-	H.c.draw.connect(func():
-		RecastCue._marker(H, Vector2(50, 50), open, Color.WHITE)
-		RecastCue._marker(H, Vector2(50, 50), late, Color.WHITE)
-		RecastCue._badge(H, Vector2(100, 50), mk, Color.WHITE)
-		RecastCue._badge(H, Vector2(100, 50), counted, Color.WHITE))
-	H.c.queue_redraw()
+	h.c.draw.connect(func():
+		RecastCue._marker(h, Vector2(50, 50), open, Color.WHITE)
+		RecastCue._marker(h, Vector2(50, 50), late, Color.WHITE)
+		RecastCue._badge(h, Vector2(100, 50), mk, Color.WHITE)
+		RecastCue._badge(h, Vector2(100, 50), counted, Color.WHITE))
+	h.c.queue_redraw()
 	for i in 3:
 		await main.get_tree().process_frame
-	ok("world marker and badge: no key letter, no word (only the count 3)", H.texts == ["3"], str(H.texts))
-	H.queue_free()
+	ok("world marker and badge: no key letter, no word (only the count 3)", h.texts == ["3"], str(h.texts))
+	h.queue_free()
 
 ## On the owner's screen the badge carries the foe's state, so the kit's world copy of it hides there: Sable's Mark
 ## pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body stay). Seen by
@@ -355,27 +355,27 @@ func _split() -> void:
 	for hero in ["thief", "mage"]:
 		var s := setup(hero, 6.0)
 		var m: Match = s[0]
-		var P: Hunter = s[1]
-		var T: Hunter = s[2]
-		var key := T.get_instance_id()
+		var p: Hunter = s[1]
+		var t: Hunter = s[2]
+		var key := t.get_instance_id()
 		match hero:
-			"thief": (P.ak as ThiefKit).add_mark(T, 3, true)
-			"mage": (P.ak as MageKit).sparks[key] = {"e": T, "n": int(P.ak.res_def()["max"]), "t": 3.0}
+			"thief": (p.ak as ThiefKit).add_mark(t, 3, true)
+			"mage": (p.ak as MageKit).sparks[key] = {"e": t, "n": int(p.ak.res_def()["max"]), "t": 3.0}
 		m.step(DT)
-		var badge := (P.ak.cue.get("marks", []) as Array).any(func(mk): return mk["e"] == T)
-		ok("%s: the owner reads the foe's badge, the kit's world copy hides" % hero, badge and not _world_art(m, P, T),
-				"badge %s art %s" % [badge, _world_art(m, P, T)])
-		P.ctrl = "idle"
+		var badge := (p.ak.cue.get("marks", []) as Array).any(func(mk): return mk["e"] == t)
+		ok("%s: the owner reads the foe's badge, the kit's world copy hides" % hero, badge and not _world_art(m, p, t),
+				"badge %s art %s" % [badge, _world_art(m, p, t)])
+		p.ctrl = "idle"
 		m.step(DT)
-		ok("%s: anyone else sees the kit's world art on the foe" % hero, _world_art(m, P, T))
+		ok("%s: anyone else sees the kit's world art on the foe" % hero, _world_art(m, p, t))
 		await done(m)
 
 ## Whether the kit's own state art on T shows this step.
-func _world_art(m: Match, P: Hunter, T: Hunter) -> bool:
-	var key := T.get_instance_id()
-	match P.arch:
+func _world_art(m: Match, p: Hunter, t: Hunter) -> bool:
+	var key := t.get_instance_id()
+	match p.arch:
 		"thief":
-			var pip: Dictionary = (P.ak as ThiefKit).pips.get(key, {})
+			var pip: Dictionary = (p.ak as ThiefKit).pips.get(key, {})
 			return not pip.is_empty() and (pip["node"] as Node3D).visible
 		"mage":
 			var mk: Dictionary = VVFx.of(m).markers.get("vs%d" % key, {})

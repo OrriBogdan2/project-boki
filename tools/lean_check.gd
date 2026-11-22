@@ -30,7 +30,7 @@ func _parts(root: Node3D) -> Array:
 func _data() -> void:
 	var types: Dictionary = Lean.rules()["types"]
 	ok(types.size() == 18, "18 types (%d)" % types.size())
-	var foods: Array = Data.CROPS.keys() + Care.FOODS.keys()
+	var foods: Array = Data.CROPS.keys() + Care.foods_v.keys()
 	var typed: Dictionary = Lean.rules()["foods"]
 	var untyped := foods.filter(func(f): return not types.has(String(typed.get(f, ""))))
 	ok(untyped.is_empty(), "every food has a type (%d foods; untyped: %s)" % [foods.size(), untyped])
