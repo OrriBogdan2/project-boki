@@ -11,438 +11,1514 @@ extends Node
 ## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
+
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
 ## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
 ## light, no sheen).
 const FRAME := {
-	"pipeworth": {"head": Vector3(0, 0.357, -0.105), "top": 0.464, "carry": Vector3(0, 0.517, 0.054),
-		"ear_tip": Vector3(0.0162, 0.464, 0.0487), "tail_tip": Vector3(0, 0.264, 0.16),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0399, 0.27, 0.0328), "right flank": Vector3(0.0399, 0.27, 0.0328),
-			"back": Vector3(0, 0.37, 0.0858), "chest": Vector3(0, 0.25, -0.0943)}},
-	"barostorm": {"head": Vector3(0, 0.357, -0.149), "top": 0.464, "carry": Vector3(0, 0.517, 0.0765),
-		"ear_tip": Vector3(0.026, 0.464, 0.0689), "tail_tip": Vector3(0, 0.264, 0.227),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0644, 0.27, 0.0463), "right flank": Vector3(0.0644, 0.27, 0.0463),
-			"back": Vector3(0, 0.37, 0.122), "chest": Vector3(0, 0.25, -0.134)}},
-	"selenwhale": {"head": Vector3(0, 0.357, -0.142), "top": 0.464, "carry": Vector3(0, 0.517, 0.0725),
-		"ear_tip": Vector3(0.029, 0.464, 0.0654), "tail_tip": Vector3(0, 0.264, 0.215),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0716, 0.27, 0.0439), "right flank": Vector3(0.0716, 0.27, 0.0439),
-			"back": Vector3(0, 0.37, 0.115), "chest": Vector3(0, 0.25, -0.127)}},
-	"rimefang": {"head": Vector3(0, 0.357, -0.145), "top": 0.464, "carry": Vector3(0, 0.517, 0.0741),
-		"ear_tip": Vector3(0.0306, 0.464, 0.0668), "tail_tip": Vector3(0, 0.264, 0.22),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0755, 0.27, 0.0449), "right flank": Vector3(0.0755, 0.27, 0.0449),
-			"back": Vector3(0, 0.37, 0.118), "chest": Vector3(0, 0.25, -0.13)}},
-	"strobolin": {"head": Vector3(0, 0.357, -0.0715), "top": 0.464, "carry": Vector3(0, 0.517, 0.0372),
-		"ear_tip": Vector3(0.0251, 0.464, 0.0335), "tail_tip": Vector3(0, 0.264, 0.11),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.062, 0.27, 0.0227), "right flank": Vector3(0.062, 0.27, 0.0227),
-			"back": Vector3(0, 0.37, 0.0589), "chest": Vector3(0, 0.25, -0.0643)}},
-	"murmuron": {"head": Vector3(0, 0.357, -0.0828), "top": 0.464, "carry": Vector3(0, 0.517, 0.0403),
-		"ear_tip": Vector3(0.0448, 0.464, 0.0362), "tail_tip": Vector3(0, 0.264, 0.122),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.111, 0.27, 0.0239), "right flank": Vector3(0.111, 0.27, 0.0239),
-			"back": Vector3(0, 0.37, 0.065), "chest": Vector3(0, 0.25, -0.0746)}},
-	"mossbastion": {"head": Vector3(0, 0.357, -0.159), "top": 0.464, "carry": Vector3(0, 0.517, 0.0813),
-		"ear_tip": Vector3(0.0511, 0.464, 0.0733), "tail_tip": Vector3(0, 0.264, 0.241),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.126, 0.27, 0.0494), "right flank": Vector3(0.126, 0.27, 0.0494),
-			"back": Vector3(0, 0.37, 0.129), "chest": Vector3(0, 0.25, -0.143)}},
-	"lanternlong": {"head": Vector3(0, 0.357, -0.0619), "top": 0.464, "carry": Vector3(0, 0.517, 0.0316),
-		"ear_tip": Vector3(0.0138, 0.464, 0.0285), "tail_tip": Vector3(0, 0.264, 0.0939),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0341, 0.27, 0.0191), "right flank": Vector3(0.0341, 0.27, 0.0191),
-			"back": Vector3(0, 0.37, 0.0503), "chest": Vector3(0, 0.25, -0.0557)}},
-	"lodestaff": {"head": Vector3(0, 0.357, -0.0973), "top": 0.464, "carry": Vector3(0, 0.517, 0.0496),
-		"ear_tip": Vector3(0.0363, 0.464, 0.0447), "tail_tip": Vector3(0, 0.264, 0.148),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0897, 0.27, 0.03), "right flank": Vector3(0.0897, 0.27, 0.03),
-			"back": Vector3(0, 0.37, 0.079), "chest": Vector3(0, 0.25, -0.0875)}},
-	"citadoad": {"head": Vector3(0, 0.357, -0.154), "top": 0.464, "carry": Vector3(0, 0.517, 0.0793),
-		"ear_tip": Vector3(0.0403, 0.464, 0.0715), "tail_tip": Vector3(0, 0.264, 0.235),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0996, 0.27, 0.0481), "right flank": Vector3(0.0996, 0.27, 0.0481),
-			"back": Vector3(0, 0.37, 0.126), "chest": Vector3(0, 0.25, -0.139)}},
-	"crofthollow": {"head": Vector3(0, 0.357, -0.135), "top": 0.464, "carry": Vector3(0, 0.517, 0.0687),
-		"ear_tip": Vector3(0.0332, 0.464, 0.062), "tail_tip": Vector3(0, 0.264, 0.204),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0819, 0.27, 0.0416), "right flank": Vector3(0.0819, 0.27, 0.0416),
-			"back": Vector3(0, 0.37, 0.109), "chest": Vector3(0, 0.25, -0.121)}},
-	"effigoon": {"head": Vector3(0, 0.357, -0.0735), "top": 0.464, "carry": Vector3(0, 0.517, 0.0386),
-		"ear_tip": Vector3(0.021, 0.464, 0.0349), "tail_tip": Vector3(0, 0.264, 0.113),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0519, 0.27, 0.0236), "right flank": Vector3(0.0519, 0.27, 0.0236),
-			"back": Vector3(0, 0.37, 0.061), "chest": Vector3(0, 0.25, -0.066)}},
-	"glomworth": {"head": Vector3(0, 0.357, -0.129), "top": 0.464, "carry": Vector3(0, 0.517, 0.0643),
-		"ear_tip": Vector3(0.0557, 0.464, 0.0579), "tail_tip": Vector3(0, 0.264, 0.193),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.138, 0.27, 0.0386), "right flank": Vector3(0.138, 0.27, 0.0386),
-			"back": Vector3(0, 0.37, 0.103), "chest": Vector3(0, 0.25, -0.116)}},
-	"gloamspire": {"head": Vector3(0, 0.357, -0.0895), "top": 0.464, "carry": Vector3(0, 0.517, 0.0438),
-		"ear_tip": Vector3(0.0215, 0.464, 0.0394), "tail_tip": Vector3(0, 0.264, 0.133),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0532, 0.27, 0.0261), "right flank": Vector3(0.0532, 0.27, 0.0261),
-			"back": Vector3(0, 0.37, 0.0705), "chest": Vector3(0, 0.25, -0.0806)}},
-	"anchorhorn": {"head": Vector3(0, 0.357, -0.281), "top": 0.464, "carry": Vector3(0, 0.517, 0.144),
-		"ear_tip": Vector3(0.0868, 0.464, 0.13), "tail_tip": Vector3(0, 0.264, 0.427), "tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.214, 0.27, 0.0871), "right flank": Vector3(0.214, 0.27, 0.0871),
-			"back": Vector3(0, 0.37, 0.229), "chest": Vector3(0, 0.25, -0.253)}},
-	"gravitank": {"head": Vector3(0, 0.357, -0.151), "top": 0.464, "carry": Vector3(0, 0.517, 0.0768),
-		"ear_tip": Vector3(0.0418, 0.464, 0.0692), "tail_tip": Vector3(0, 0.264, 0.228),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.103, 0.27, 0.0464), "right flank": Vector3(0.103, 0.27, 0.0464),
-			"back": Vector3(0, 0.37, 0.122), "chest": Vector3(0, 0.25, -0.135)}},
-	"vaultara": {"head": Vector3(0, 0.357, -0.19), "top": 0.464, "carry": Vector3(0, 0.517, 0.0967),
-		"ear_tip": Vector3(0.0347, 0.464, 0.0872), "tail_tip": Vector3(0, 0.264, 0.288),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0857, 0.27, 0.0585), "right flank": Vector3(0.0857, 0.27, 0.0585),
-			"back": Vector3(0, 0.37, 0.154), "chest": Vector3(0, 0.25, -0.171)}},
-	"gongrowl": {"head": Vector3(0, 0.357, -0.0719), "top": 0.464, "carry": Vector3(0, 0.517, 0.0331),
-		"ear_tip": Vector3(0.0346, 0.464, 0.0296), "tail_tip": Vector3(0, 0.264, 0.103),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0856, 0.27, 0.0191), "right flank": Vector3(0.0856, 0.27, 0.0191),
-			"back": Vector3(0, 0.37, 0.0541), "chest": Vector3(0, 0.25, -0.0649)}},
-	"howlop": {"head": Vector3(0, 0.357, -0.13), "top": 0.464, "carry": Vector3(0, 0.517, 0.0641),
-		"ear_tip": Vector3(0.0564, 0.464, 0.0576), "tail_tip": Vector3(0, 0.264, 0.193),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.139, 0.27, 0.0383), "right flank": Vector3(0.139, 0.27, 0.0383),
-			"back": Vector3(0, 0.37, 0.103), "chest": Vector3(0, 0.25, -0.117)}},
-	"eclipsowl": {"head": Vector3(2.64e-17, 0.357, -0.126), "top": 0.464, "carry": Vector3(2.64e-17, 0.517, 0.0643),
-		"ear_tip": Vector3(0.0327, 0.464, 0.058), "tail_tip": Vector3(2.64e-17, 0.264, 0.191),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0807, 0.27, 0.0389), "right flank": Vector3(0.0807, 0.27, 0.0389),
-			"back": Vector3(2.64e-17, 0.37, 0.102), "chest": Vector3(2.64e-17, 0.25, -0.113)}},
-	"lyrewing": {"head": Vector3(0, 0.357, -0.0775), "top": 0.464, "carry": Vector3(0, 0.517, 0.0356),
-		"ear_tip": Vector3(0.0488, 0.464, 0.0319), "tail_tip": Vector3(0, 0.264, 0.111),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.12, 0.27, 0.0205), "right flank": Vector3(0.12, 0.27, 0.0205),
-			"back": Vector3(0, 0.37, 0.0583), "chest": Vector3(0, 0.25, -0.07)}},
-	"thistlynx": {"head": Vector3(0, 0.357, -0.0967), "top": 0.464, "carry": Vector3(0, 0.517, 0.0501),
-		"ear_tip": Vector3(0.0282, 0.464, 0.0452), "tail_tip": Vector3(0, 0.264, 0.148),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0698, 0.27, 0.0305), "right flank": Vector3(0.0698, 0.27, 0.0305),
-			"back": Vector3(0, 0.37, 0.0794), "chest": Vector3(0, 0.25, -0.0869)}},
-	"scythant": {"head": Vector3(0, 0.357, -0.151), "top": 0.464, "carry": Vector3(0, 0.517, 0.0772),
-		"ear_tip": Vector3(0.031, 0.464, 0.0696), "tail_tip": Vector3(0, 0.264, 0.229),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0766, 0.27, 0.0467), "right flank": Vector3(0.0766, 0.27, 0.0467),
-			"back": Vector3(0, 0.37, 0.123), "chest": Vector3(0, 0.25, -0.136)}},
-	"shinobant": {"head": Vector3(0, 0.357, -0.119), "top": 0.464, "carry": Vector3(0, 0.517, 0.0585),
-		"ear_tip": Vector3(0.0523, 0.464, 0.0526), "tail_tip": Vector3(0, 0.264, 0.177),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.129, 0.27, 0.0348), "right flank": Vector3(0.129, 0.27, 0.0348),
-			"back": Vector3(0, 0.37, 0.0941), "chest": Vector3(0, 0.25, -0.107)}},
-	"arcestrel": {"head": Vector3(-1.32e-17, 0.357, -0.105), "top": 0.464, "carry": Vector3(-1.32e-17, 0.517, 0.0565),
-		"ear_tip": Vector3(0.0209, 0.464, 0.0511), "tail_tip": Vector3(-1.32e-17, 0.264, 0.164),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0516, 0.27, 0.0349), "right flank": Vector3(0.0516, 0.27, 0.0349),
-			"back": Vector3(-1.32e-17, 0.37, 0.0888), "chest": Vector3(-1.32e-17, 0.25, -0.0943)}},
-	"tidalisk": {"head": Vector3(0, 0.357, -0.113), "top": 0.464, "carry": Vector3(0, 0.517, 0.0575),
-		"ear_tip": Vector3(0.0401, 0.464, 0.0518), "tail_tip": Vector3(0, 0.264, 0.171),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0991, 0.27, 0.0348), "right flank": Vector3(0.0991, 0.27, 0.0348),
-			"back": Vector3(0, 0.37, 0.0915), "chest": Vector3(0, 0.25, -0.101)}},
-	"forgebrock": {"head": Vector3(0, 0.357, -0.106), "top": 0.464, "carry": Vector3(0, 0.517, 0.0365),
-		"ear_tip": Vector3(0.0457, 0.464, 0.0318), "tail_tip": Vector3(0, 0.264, 0.132),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.113, 0.27, 0.0175), "right flank": Vector3(0.113, 0.27, 0.0175),
-			"back": Vector3(0, 0.37, 0.0651), "chest": Vector3(0, 0.25, -0.0968)}},
-	"cisternmander": {"head": Vector3(0, 0.357, -0.225), "top": 0.464, "carry": Vector3(0, 0.517, 0.115),
-		"ear_tip": Vector3(0.0555, 0.464, 0.103), "tail_tip": Vector3(0, 0.264, 0.341),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.137, 0.27, 0.0695), "right flank": Vector3(0.137, 0.27, 0.0695),
-			"back": Vector3(0, 0.37, 0.183), "chest": Vector3(0, 0.25, -0.202)}},
-	"thunderstrich": {"head": Vector3(0, 0.357, -0.0819), "top": 0.464, "carry": Vector3(0, 0.517, 0.0422),
-		"ear_tip": Vector3(0.0299, 0.464, 0.0381), "tail_tip": Vector3(0, 0.264, 0.125),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0739, 0.27, 0.0257), "right flank": Vector3(0.0739, 0.27, 0.0257),
-			"back": Vector3(0, 0.37, 0.0671), "chest": Vector3(0, 0.25, -0.0736)}},
-	"glaciatee": {"head": Vector3(0, 0.357, -0.103), "top": 0.464, "carry": Vector3(0, 0.517, 0.0538),
-		"ear_tip": Vector3(0.0389, 0.464, 0.0486), "tail_tip": Vector3(0, 0.264, 0.158),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0961, 0.27, 0.033), "right flank": Vector3(0.0961, 0.27, 0.033),
-			"back": Vector3(0, 0.37, 0.0851), "chest": Vector3(0, 0.25, -0.0921)}},
-	"dreadnoyak": {"head": Vector3(0, 0.357, -0.213), "top": 0.464, "carry": Vector3(0, 0.517, 0.109),
-		"ear_tip": Vector3(0.0354, 0.464, 0.0984), "tail_tip": Vector3(0, 0.264, 0.324),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0875, 0.27, 0.0662), "right flank": Vector3(0.0875, 0.27, 0.0662),
-			"back": Vector3(0, 0.37, 0.174), "chest": Vector3(0, 0.25, -0.192)}},
-	"geysirbara": {"head": Vector3(0, 0.357, -0.102), "top": 0.464, "carry": Vector3(0, 0.517, 0.0521),
-		"ear_tip": Vector3(0.04, 0.464, 0.0469), "tail_tip": Vector3(0, 0.264, 0.155), "tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0988, 0.27, 0.0315), "right flank": Vector3(0.0988, 0.27, 0.0315),
-			"back": Vector3(0, 0.37, 0.0829), "chest": Vector3(0, 0.25, -0.0918)}},
-	"embrook": {"head": Vector3(-1.32e-17, 0.357, -0.103), "top": 0.464, "carry": Vector3(-1.32e-17, 0.517, 0.0525),
-		"ear_tip": Vector3(0.0217, 0.464, 0.0473), "tail_tip": Vector3(-1.32e-17, 0.264, 0.156),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0537, 0.27, 0.0318), "right flank": Vector3(0.0537, 0.27, 0.0318),
-			"back": Vector3(-1.32e-17, 0.37, 0.0835), "chest": Vector3(-1.32e-17, 0.25, -0.0924)}},
-	"geodemole": {"head": Vector3(0, 0.357, -0.0961), "top": 0.464, "carry": Vector3(0, 0.517, 0.051),
-		"ear_tip": Vector3(0.0325, 0.464, 0.0461), "tail_tip": Vector3(0, 0.264, 0.149),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0802, 0.27, 0.0314), "right flank": Vector3(0.0802, 0.27, 0.0314),
-			"back": Vector3(0, 0.37, 0.0804), "chest": Vector3(0, 0.25, -0.0863)}},
-	"seamwyrm": {"head": Vector3(0, 0.357, -0.0857), "top": 0.464, "carry": Vector3(0, 0.517, 0.0465),
-		"ear_tip": Vector3(0.0341, 0.464, 0.0421), "tail_tip": Vector3(0, 0.264, 0.135),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0843, 0.27, 0.0289), "right flank": Vector3(0.0843, 0.27, 0.0289),
-			"back": Vector3(0, 0.37, 0.073), "chest": Vector3(0, 0.25, -0.0769)}},
-	"lanceron": {"head": Vector3(0, 0.357, -0.0764), "top": 0.464, "carry": Vector3(0, 0.517, 0.039),
-		"ear_tip": Vector3(0.0197, 0.464, 0.0351), "tail_tip": Vector3(0, 0.264, 0.116),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0486, 0.27, 0.0236), "right flank": Vector3(0.0486, 0.27, 0.0236),
-			"back": Vector3(0, 0.37, 0.062), "chest": Vector3(0, 0.25, -0.0687)}},
-	"glassolotl": {"head": Vector3(0, 0.357, -0.0763), "top": 0.464, "carry": Vector3(0, 0.517, 0.0394),
-		"ear_tip": Vector3(0.0237, 0.464, 0.0355), "tail_tip": Vector3(0, 0.264, 0.116),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0587, 0.27, 0.0239), "right flank": Vector3(0.0587, 0.27, 0.0239),
-			"back": Vector3(0, 0.37, 0.0625), "chest": Vector3(0, 0.25, -0.0686)}},
-	"vespox": {"head": Vector3(0, 0.357, -0.0955), "top": 0.464, "carry": Vector3(0, 0.517, 0.0489),
-		"ear_tip": Vector3(0.0165, 0.464, 0.0441), "tail_tip": Vector3(0, 0.264, 0.145),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0409, 0.27, 0.0296), "right flank": Vector3(0.0409, 0.27, 0.0296),
-			"back": Vector3(0, 0.37, 0.0778), "chest": Vector3(0, 0.25, -0.0859)}},
-	"sporcupine": {"head": Vector3(0, 0.357, -0.124), "top": 0.464, "carry": Vector3(0, 0.517, 0.0631),
-		"ear_tip": Vector3(0.0211, 0.464, 0.0568), "tail_tip": Vector3(0, 0.264, 0.188),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.052, 0.27, 0.0381), "right flank": Vector3(0.052, 0.27, 0.0381),
-			"back": Vector3(0, 0.37, 0.1), "chest": Vector3(0, 0.25, -0.111)}},
-	"basaltoad": {"head": Vector3(0, 0.357, -0.224), "top": 0.464, "carry": Vector3(0, 0.517, 0.114),
-		"ear_tip": Vector3(0.0698, 0.464, 0.103), "tail_tip": Vector3(0, 0.264, 0.34), "tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.172, 0.27, 0.0691), "right flank": Vector3(0.172, 0.27, 0.0691),
-			"back": Vector3(0, 0.37, 0.182), "chest": Vector3(0, 0.25, -0.201)}},
-	"nimbostrich": {"head": Vector3(0, 0.354, -0.124), "top": 0.496, "carry": Vector3(0, 0.566, 0.0561),
-		"ear_tip": Vector3(0.0162, 0.496, 0.0508), "tail_tip": Vector3(0, 0.26, 0.163),
-		"tip_bone": "hips", "hip": 0.275,
-		"marks": {"left flank": Vector3(-0.0298, 0.267, 0.0348), "right flank": Vector3(0.0298, 0.267, 0.0348),
-			"back": Vector3(0, 0.372, 0.088), "chest": Vector3(0, 0.248, -0.111)}},
-	"velvorm": {"head": Vector3(0, 0.354, -0.327), "top": 0.496, "carry": Vector3(0, 0.566, 0.141),
-		"ear_tip": Vector3(0.0412, 0.496, 0.128), "tail_tip": Vector3(0, 0.26, 0.419), "tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.076, 0.267, 0.086), "right flank": Vector3(0.076, 0.267, 0.086),
-			"back": Vector3(0, 0.372, 0.224), "chest": Vector3(0, 0.248, -0.294)}},
-	"tuatrune": {"head": Vector3(0, 0.354, -0.206), "top": 0.496, "carry": Vector3(0, 0.566, 0.0898),
-		"ear_tip": Vector3(0.0267, 0.496, 0.0811), "tail_tip": Vector3(0, 0.26, 0.265),
-		"tip_bone": "hips", "hip": 0.166,
-		"marks": {"left flank": Vector3(-0.0492, 0.267, 0.0548), "right flank": Vector3(0.0492, 0.267, 0.0548),
-			"back": Vector3(0, 0.372, 0.142), "chest": Vector3(0, 0.248, -0.185)}},
-	"threadwyrm": {"head": Vector3(0, 0.357, -0.0958), "top": 0.464, "carry": Vector3(0, 0.517, 0.0491),
+	"pipeworth":
+	{
+		"head": Vector3(0, 0.357, -0.105),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.054),
+		"ear_tip": Vector3(0.0162, 0.464, 0.0487),
+		"tail_tip": Vector3(0, 0.264, 0.16),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0399, 0.27, 0.0328),
+			"right flank": Vector3(0.0399, 0.27, 0.0328),
+			"back": Vector3(0, 0.37, 0.0858),
+			"chest": Vector3(0, 0.25, -0.0943)
+		}
+	},
+	"barostorm":
+	{
+		"head": Vector3(0, 0.357, -0.149),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0765),
+		"ear_tip": Vector3(0.026, 0.464, 0.0689),
+		"tail_tip": Vector3(0, 0.264, 0.227),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0644, 0.27, 0.0463),
+			"right flank": Vector3(0.0644, 0.27, 0.0463),
+			"back": Vector3(0, 0.37, 0.122),
+			"chest": Vector3(0, 0.25, -0.134)
+		}
+	},
+	"selenwhale":
+	{
+		"head": Vector3(0, 0.357, -0.142),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0725),
+		"ear_tip": Vector3(0.029, 0.464, 0.0654),
+		"tail_tip": Vector3(0, 0.264, 0.215),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0716, 0.27, 0.0439),
+			"right flank": Vector3(0.0716, 0.27, 0.0439),
+			"back": Vector3(0, 0.37, 0.115),
+			"chest": Vector3(0, 0.25, -0.127)
+		}
+	},
+	"rimefang":
+	{
+		"head": Vector3(0, 0.357, -0.145),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0741),
+		"ear_tip": Vector3(0.0306, 0.464, 0.0668),
+		"tail_tip": Vector3(0, 0.264, 0.22),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0755, 0.27, 0.0449),
+			"right flank": Vector3(0.0755, 0.27, 0.0449),
+			"back": Vector3(0, 0.37, 0.118),
+			"chest": Vector3(0, 0.25, -0.13)
+		}
+	},
+	"strobolin":
+	{
+		"head": Vector3(0, 0.357, -0.0715),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0372),
+		"ear_tip": Vector3(0.0251, 0.464, 0.0335),
+		"tail_tip": Vector3(0, 0.264, 0.11),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.062, 0.27, 0.0227),
+			"right flank": Vector3(0.062, 0.27, 0.0227),
+			"back": Vector3(0, 0.37, 0.0589),
+			"chest": Vector3(0, 0.25, -0.0643)
+		}
+	},
+	"murmuron":
+	{
+		"head": Vector3(0, 0.357, -0.0828),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0403),
+		"ear_tip": Vector3(0.0448, 0.464, 0.0362),
+		"tail_tip": Vector3(0, 0.264, 0.122),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.111, 0.27, 0.0239),
+			"right flank": Vector3(0.111, 0.27, 0.0239),
+			"back": Vector3(0, 0.37, 0.065),
+			"chest": Vector3(0, 0.25, -0.0746)
+		}
+	},
+	"mossbastion":
+	{
+		"head": Vector3(0, 0.357, -0.159),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0813),
+		"ear_tip": Vector3(0.0511, 0.464, 0.0733),
+		"tail_tip": Vector3(0, 0.264, 0.241),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.126, 0.27, 0.0494),
+			"right flank": Vector3(0.126, 0.27, 0.0494),
+			"back": Vector3(0, 0.37, 0.129),
+			"chest": Vector3(0, 0.25, -0.143)
+		}
+	},
+	"lanternlong":
+	{
+		"head": Vector3(0, 0.357, -0.0619),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0316),
+		"ear_tip": Vector3(0.0138, 0.464, 0.0285),
+		"tail_tip": Vector3(0, 0.264, 0.0939),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0341, 0.27, 0.0191),
+			"right flank": Vector3(0.0341, 0.27, 0.0191),
+			"back": Vector3(0, 0.37, 0.0503),
+			"chest": Vector3(0, 0.25, -0.0557)
+		}
+	},
+	"lodestaff":
+	{
+		"head": Vector3(0, 0.357, -0.0973),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0496),
+		"ear_tip": Vector3(0.0363, 0.464, 0.0447),
+		"tail_tip": Vector3(0, 0.264, 0.148),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0897, 0.27, 0.03),
+			"right flank": Vector3(0.0897, 0.27, 0.03),
+			"back": Vector3(0, 0.37, 0.079),
+			"chest": Vector3(0, 0.25, -0.0875)
+		}
+	},
+	"citadoad":
+	{
+		"head": Vector3(0, 0.357, -0.154),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0793),
+		"ear_tip": Vector3(0.0403, 0.464, 0.0715),
+		"tail_tip": Vector3(0, 0.264, 0.235),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0996, 0.27, 0.0481),
+			"right flank": Vector3(0.0996, 0.27, 0.0481),
+			"back": Vector3(0, 0.37, 0.126),
+			"chest": Vector3(0, 0.25, -0.139)
+		}
+	},
+	"crofthollow":
+	{
+		"head": Vector3(0, 0.357, -0.135),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0687),
+		"ear_tip": Vector3(0.0332, 0.464, 0.062),
+		"tail_tip": Vector3(0, 0.264, 0.204),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0819, 0.27, 0.0416),
+			"right flank": Vector3(0.0819, 0.27, 0.0416),
+			"back": Vector3(0, 0.37, 0.109),
+			"chest": Vector3(0, 0.25, -0.121)
+		}
+	},
+	"effigoon":
+	{
+		"head": Vector3(0, 0.357, -0.0735),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0386),
+		"ear_tip": Vector3(0.021, 0.464, 0.0349),
+		"tail_tip": Vector3(0, 0.264, 0.113),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0519, 0.27, 0.0236),
+			"right flank": Vector3(0.0519, 0.27, 0.0236),
+			"back": Vector3(0, 0.37, 0.061),
+			"chest": Vector3(0, 0.25, -0.066)
+		}
+	},
+	"glomworth":
+	{
+		"head": Vector3(0, 0.357, -0.129),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0643),
+		"ear_tip": Vector3(0.0557, 0.464, 0.0579),
+		"tail_tip": Vector3(0, 0.264, 0.193),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.138, 0.27, 0.0386),
+			"right flank": Vector3(0.138, 0.27, 0.0386),
+			"back": Vector3(0, 0.37, 0.103),
+			"chest": Vector3(0, 0.25, -0.116)
+		}
+	},
+	"gloamspire":
+	{
+		"head": Vector3(0, 0.357, -0.0895),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0438),
+		"ear_tip": Vector3(0.0215, 0.464, 0.0394),
+		"tail_tip": Vector3(0, 0.264, 0.133),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0532, 0.27, 0.0261),
+			"right flank": Vector3(0.0532, 0.27, 0.0261),
+			"back": Vector3(0, 0.37, 0.0705),
+			"chest": Vector3(0, 0.25, -0.0806)
+		}
+	},
+	"anchorhorn":
+	{
+		"head": Vector3(0, 0.357, -0.281),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.144),
+		"ear_tip": Vector3(0.0868, 0.464, 0.13),
+		"tail_tip": Vector3(0, 0.264, 0.427),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.214, 0.27, 0.0871),
+			"right flank": Vector3(0.214, 0.27, 0.0871),
+			"back": Vector3(0, 0.37, 0.229),
+			"chest": Vector3(0, 0.25, -0.253)
+		}
+	},
+	"gravitank":
+	{
+		"head": Vector3(0, 0.357, -0.151),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0768),
+		"ear_tip": Vector3(0.0418, 0.464, 0.0692),
+		"tail_tip": Vector3(0, 0.264, 0.228),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.103, 0.27, 0.0464),
+			"right flank": Vector3(0.103, 0.27, 0.0464),
+			"back": Vector3(0, 0.37, 0.122),
+			"chest": Vector3(0, 0.25, -0.135)
+		}
+	},
+	"vaultara":
+	{
+		"head": Vector3(0, 0.357, -0.19),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0967),
+		"ear_tip": Vector3(0.0347, 0.464, 0.0872),
+		"tail_tip": Vector3(0, 0.264, 0.288),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0857, 0.27, 0.0585),
+			"right flank": Vector3(0.0857, 0.27, 0.0585),
+			"back": Vector3(0, 0.37, 0.154),
+			"chest": Vector3(0, 0.25, -0.171)
+		}
+	},
+	"gongrowl":
+	{
+		"head": Vector3(0, 0.357, -0.0719),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0331),
+		"ear_tip": Vector3(0.0346, 0.464, 0.0296),
+		"tail_tip": Vector3(0, 0.264, 0.103),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0856, 0.27, 0.0191),
+			"right flank": Vector3(0.0856, 0.27, 0.0191),
+			"back": Vector3(0, 0.37, 0.0541),
+			"chest": Vector3(0, 0.25, -0.0649)
+		}
+	},
+	"howlop":
+	{
+		"head": Vector3(0, 0.357, -0.13),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0641),
+		"ear_tip": Vector3(0.0564, 0.464, 0.0576),
+		"tail_tip": Vector3(0, 0.264, 0.193),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.139, 0.27, 0.0383),
+			"right flank": Vector3(0.139, 0.27, 0.0383),
+			"back": Vector3(0, 0.37, 0.103),
+			"chest": Vector3(0, 0.25, -0.117)
+		}
+	},
+	"eclipsowl":
+	{
+		"head": Vector3(2.64e-17, 0.357, -0.126),
+		"top": 0.464,
+		"carry": Vector3(2.64e-17, 0.517, 0.0643),
+		"ear_tip": Vector3(0.0327, 0.464, 0.058),
+		"tail_tip": Vector3(2.64e-17, 0.264, 0.191),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0807, 0.27, 0.0389),
+			"right flank": Vector3(0.0807, 0.27, 0.0389),
+			"back": Vector3(2.64e-17, 0.37, 0.102),
+			"chest": Vector3(2.64e-17, 0.25, -0.113)
+		}
+	},
+	"lyrewing":
+	{
+		"head": Vector3(0, 0.357, -0.0775),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0356),
+		"ear_tip": Vector3(0.0488, 0.464, 0.0319),
+		"tail_tip": Vector3(0, 0.264, 0.111),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.12, 0.27, 0.0205),
+			"right flank": Vector3(0.12, 0.27, 0.0205),
+			"back": Vector3(0, 0.37, 0.0583),
+			"chest": Vector3(0, 0.25, -0.07)
+		}
+	},
+	"thistlynx":
+	{
+		"head": Vector3(0, 0.357, -0.0967),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0501),
+		"ear_tip": Vector3(0.0282, 0.464, 0.0452),
+		"tail_tip": Vector3(0, 0.264, 0.148),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0698, 0.27, 0.0305),
+			"right flank": Vector3(0.0698, 0.27, 0.0305),
+			"back": Vector3(0, 0.37, 0.0794),
+			"chest": Vector3(0, 0.25, -0.0869)
+		}
+	},
+	"scythant":
+	{
+		"head": Vector3(0, 0.357, -0.151),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0772),
+		"ear_tip": Vector3(0.031, 0.464, 0.0696),
+		"tail_tip": Vector3(0, 0.264, 0.229),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0766, 0.27, 0.0467),
+			"right flank": Vector3(0.0766, 0.27, 0.0467),
+			"back": Vector3(0, 0.37, 0.123),
+			"chest": Vector3(0, 0.25, -0.136)
+		}
+	},
+	"shinobant":
+	{
+		"head": Vector3(0, 0.357, -0.119),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0585),
+		"ear_tip": Vector3(0.0523, 0.464, 0.0526),
+		"tail_tip": Vector3(0, 0.264, 0.177),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.129, 0.27, 0.0348),
+			"right flank": Vector3(0.129, 0.27, 0.0348),
+			"back": Vector3(0, 0.37, 0.0941),
+			"chest": Vector3(0, 0.25, -0.107)
+		}
+	},
+	"arcestrel":
+	{
+		"head": Vector3(-1.32e-17, 0.357, -0.105),
+		"top": 0.464,
+		"carry": Vector3(-1.32e-17, 0.517, 0.0565),
+		"ear_tip": Vector3(0.0209, 0.464, 0.0511),
+		"tail_tip": Vector3(-1.32e-17, 0.264, 0.164),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0516, 0.27, 0.0349),
+			"right flank": Vector3(0.0516, 0.27, 0.0349),
+			"back": Vector3(-1.32e-17, 0.37, 0.0888),
+			"chest": Vector3(-1.32e-17, 0.25, -0.0943)
+		}
+	},
+	"tidalisk":
+	{
+		"head": Vector3(0, 0.357, -0.113),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0575),
+		"ear_tip": Vector3(0.0401, 0.464, 0.0518),
+		"tail_tip": Vector3(0, 0.264, 0.171),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0991, 0.27, 0.0348),
+			"right flank": Vector3(0.0991, 0.27, 0.0348),
+			"back": Vector3(0, 0.37, 0.0915),
+			"chest": Vector3(0, 0.25, -0.101)
+		}
+	},
+	"forgebrock":
+	{
+		"head": Vector3(0, 0.357, -0.106),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0365),
+		"ear_tip": Vector3(0.0457, 0.464, 0.0318),
+		"tail_tip": Vector3(0, 0.264, 0.132),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.113, 0.27, 0.0175),
+			"right flank": Vector3(0.113, 0.27, 0.0175),
+			"back": Vector3(0, 0.37, 0.0651),
+			"chest": Vector3(0, 0.25, -0.0968)
+		}
+	},
+	"cisternmander":
+	{
+		"head": Vector3(0, 0.357, -0.225),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.115),
+		"ear_tip": Vector3(0.0555, 0.464, 0.103),
+		"tail_tip": Vector3(0, 0.264, 0.341),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.137, 0.27, 0.0695),
+			"right flank": Vector3(0.137, 0.27, 0.0695),
+			"back": Vector3(0, 0.37, 0.183),
+			"chest": Vector3(0, 0.25, -0.202)
+		}
+	},
+	"thunderstrich":
+	{
+		"head": Vector3(0, 0.357, -0.0819),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0422),
+		"ear_tip": Vector3(0.0299, 0.464, 0.0381),
+		"tail_tip": Vector3(0, 0.264, 0.125),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0739, 0.27, 0.0257),
+			"right flank": Vector3(0.0739, 0.27, 0.0257),
+			"back": Vector3(0, 0.37, 0.0671),
+			"chest": Vector3(0, 0.25, -0.0736)
+		}
+	},
+	"glaciatee":
+	{
+		"head": Vector3(0, 0.357, -0.103),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0538),
+		"ear_tip": Vector3(0.0389, 0.464, 0.0486),
+		"tail_tip": Vector3(0, 0.264, 0.158),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0961, 0.27, 0.033),
+			"right flank": Vector3(0.0961, 0.27, 0.033),
+			"back": Vector3(0, 0.37, 0.0851),
+			"chest": Vector3(0, 0.25, -0.0921)
+		}
+	},
+	"dreadnoyak":
+	{
+		"head": Vector3(0, 0.357, -0.213),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.109),
+		"ear_tip": Vector3(0.0354, 0.464, 0.0984),
+		"tail_tip": Vector3(0, 0.264, 0.324),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0875, 0.27, 0.0662),
+			"right flank": Vector3(0.0875, 0.27, 0.0662),
+			"back": Vector3(0, 0.37, 0.174),
+			"chest": Vector3(0, 0.25, -0.192)
+		}
+	},
+	"geysirbara":
+	{
+		"head": Vector3(0, 0.357, -0.102),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0521),
+		"ear_tip": Vector3(0.04, 0.464, 0.0469),
+		"tail_tip": Vector3(0, 0.264, 0.155),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0988, 0.27, 0.0315),
+			"right flank": Vector3(0.0988, 0.27, 0.0315),
+			"back": Vector3(0, 0.37, 0.0829),
+			"chest": Vector3(0, 0.25, -0.0918)
+		}
+	},
+	"embrook":
+	{
+		"head": Vector3(-1.32e-17, 0.357, -0.103),
+		"top": 0.464,
+		"carry": Vector3(-1.32e-17, 0.517, 0.0525),
+		"ear_tip": Vector3(0.0217, 0.464, 0.0473),
+		"tail_tip": Vector3(-1.32e-17, 0.264, 0.156),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0537, 0.27, 0.0318),
+			"right flank": Vector3(0.0537, 0.27, 0.0318),
+			"back": Vector3(-1.32e-17, 0.37, 0.0835),
+			"chest": Vector3(-1.32e-17, 0.25, -0.0924)
+		}
+	},
+	"geodemole":
+	{
+		"head": Vector3(0, 0.357, -0.0961),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.051),
+		"ear_tip": Vector3(0.0325, 0.464, 0.0461),
+		"tail_tip": Vector3(0, 0.264, 0.149),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0802, 0.27, 0.0314),
+			"right flank": Vector3(0.0802, 0.27, 0.0314),
+			"back": Vector3(0, 0.37, 0.0804),
+			"chest": Vector3(0, 0.25, -0.0863)
+		}
+	},
+	"seamwyrm":
+	{
+		"head": Vector3(0, 0.357, -0.0857),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0465),
+		"ear_tip": Vector3(0.0341, 0.464, 0.0421),
+		"tail_tip": Vector3(0, 0.264, 0.135),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0843, 0.27, 0.0289),
+			"right flank": Vector3(0.0843, 0.27, 0.0289),
+			"back": Vector3(0, 0.37, 0.073),
+			"chest": Vector3(0, 0.25, -0.0769)
+		}
+	},
+	"lanceron":
+	{
+		"head": Vector3(0, 0.357, -0.0764),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.039),
+		"ear_tip": Vector3(0.0197, 0.464, 0.0351),
+		"tail_tip": Vector3(0, 0.264, 0.116),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0486, 0.27, 0.0236),
+			"right flank": Vector3(0.0486, 0.27, 0.0236),
+			"back": Vector3(0, 0.37, 0.062),
+			"chest": Vector3(0, 0.25, -0.0687)
+		}
+	},
+	"glassolotl":
+	{
+		"head": Vector3(0, 0.357, -0.0763),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0394),
+		"ear_tip": Vector3(0.0237, 0.464, 0.0355),
+		"tail_tip": Vector3(0, 0.264, 0.116),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0587, 0.27, 0.0239),
+			"right flank": Vector3(0.0587, 0.27, 0.0239),
+			"back": Vector3(0, 0.37, 0.0625),
+			"chest": Vector3(0, 0.25, -0.0686)
+		}
+	},
+	"vespox":
+	{
+		"head": Vector3(0, 0.357, -0.0955),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0489),
+		"ear_tip": Vector3(0.0165, 0.464, 0.0441),
+		"tail_tip": Vector3(0, 0.264, 0.145),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0409, 0.27, 0.0296),
+			"right flank": Vector3(0.0409, 0.27, 0.0296),
+			"back": Vector3(0, 0.37, 0.0778),
+			"chest": Vector3(0, 0.25, -0.0859)
+		}
+	},
+	"sporcupine":
+	{
+		"head": Vector3(0, 0.357, -0.124),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0631),
+		"ear_tip": Vector3(0.0211, 0.464, 0.0568),
+		"tail_tip": Vector3(0, 0.264, 0.188),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.052, 0.27, 0.0381),
+			"right flank": Vector3(0.052, 0.27, 0.0381),
+			"back": Vector3(0, 0.37, 0.1),
+			"chest": Vector3(0, 0.25, -0.111)
+		}
+	},
+	"basaltoad":
+	{
+		"head": Vector3(0, 0.357, -0.224),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.114),
+		"ear_tip": Vector3(0.0698, 0.464, 0.103),
+		"tail_tip": Vector3(0, 0.264, 0.34),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.172, 0.27, 0.0691),
+			"right flank": Vector3(0.172, 0.27, 0.0691),
+			"back": Vector3(0, 0.37, 0.182),
+			"chest": Vector3(0, 0.25, -0.201)
+		}
+	},
+	"nimbostrich":
+	{
+		"head": Vector3(0, 0.354, -0.124),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0561),
+		"ear_tip": Vector3(0.0162, 0.496, 0.0508),
+		"tail_tip": Vector3(0, 0.26, 0.163),
+		"tip_bone": "hips",
+		"hip": 0.275,
+		"marks":
+		{
+			"left flank": Vector3(-0.0298, 0.267, 0.0348),
+			"right flank": Vector3(0.0298, 0.267, 0.0348),
+			"back": Vector3(0, 0.372, 0.088),
+			"chest": Vector3(0, 0.248, -0.111)
+		}
+	},
+	"velvorm":
+	{
+		"head": Vector3(0, 0.354, -0.327),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.141),
+		"ear_tip": Vector3(0.0412, 0.496, 0.128),
+		"tail_tip": Vector3(0, 0.26, 0.419),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.076, 0.267, 0.086),
+			"right flank": Vector3(0.076, 0.267, 0.086),
+			"back": Vector3(0, 0.372, 0.224),
+			"chest": Vector3(0, 0.248, -0.294)
+		}
+	},
+	"tuatrune":
+	{
+		"head": Vector3(0, 0.354, -0.206),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0898),
+		"ear_tip": Vector3(0.0267, 0.496, 0.0811),
+		"tail_tip": Vector3(0, 0.26, 0.265),
+		"tip_bone": "hips",
+		"hip": 0.166,
+		"marks":
+		{
+			"left flank": Vector3(-0.0492, 0.267, 0.0548),
+			"right flank": Vector3(0.0492, 0.267, 0.0548),
+			"back": Vector3(0, 0.372, 0.142),
+			"chest": Vector3(0, 0.248, -0.185)
+		}
+	},
+	"threadwyrm":
+	{
+		"head": Vector3(0, 0.357, -0.0958),
+		"top": 0.464,
+		"carry": Vector3(0, 0.517, 0.0491),
 		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
-		"tail_tip": Vector3(0, 0.264, 0.146), "tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.149, 0.27, 0.0298), "right flank": Vector3(0.149, 0.27, 0.0298),
-			"back": Vector3(0, 0.37, 0.0781), "chest": Vector3(0, 0.25, -0.0862)}},
-	"squalltross": {"head": Vector3(0, 0.354, -0.1), "top": 0.496, "carry": Vector3(0, 0.566, 0.0435),
-		"ear_tip": Vector3(0.0359, 0.496, 0.0393), "tail_tip": Vector3(0, 0.26, 0.129),
-		"tip_bone": "hips", "hip": 0.165,
-		"marks": {"left flank": Vector3(-0.0662, 0.267, 0.0265), "right flank": Vector3(0.0662, 0.267, 0.0265),
-			"back": Vector3(0, 0.372, 0.069), "chest": Vector3(0, 0.248, -0.0901)}},
-	"spatewader": {"head": Vector3(0, 0.354, -0.204), "top": 0.496, "carry": Vector3(0, 0.566, 0.089),
-		"ear_tip": Vector3(0.03, 0.496, 0.0803), "tail_tip": Vector3(0, 0.26, 0.263), "tip_bone": "hips", "hip": 0.165,
-		"marks": {"left flank": Vector3(-0.0554, 0.267, 0.0543), "right flank": Vector3(0.0554, 0.267, 0.0543),
-			"back": Vector3(0, 0.372, 0.141), "chest": Vector3(0, 0.248, -0.183)}},
-	"sentrikat": {"head": Vector3(0, 0.354, -0.0838), "top": 0.496, "carry": Vector3(0, 0.566, 0.0362),
-		"ear_tip": Vector3(0.0322, 0.496, 0.0327), "tail_tip": Vector3(0, 0.26, 0.107),
-		"tip_bone": "hips", "hip": 0.192,
-		"marks": {"left flank": Vector3(-0.0594, 0.267, 0.022), "right flank": Vector3(0.0594, 0.267, 0.022),
-			"back": Vector3(0, 0.372, 0.0574), "chest": Vector3(0, 0.248, -0.0753)}},
-	"scaldamus": {"head": Vector3(0, 0.354, -0.219), "top": 0.496, "carry": Vector3(0, 0.566, 0.096),
-		"ear_tip": Vector3(0.0333, 0.496, 0.0867), "tail_tip": Vector3(0, 0.26, 0.283),
-		"tip_bone": "hips", "hip": 0.22,
-		"marks": {"left flank": Vector3(-0.0615, 0.267, 0.0588), "right flank": Vector3(0.0615, 0.267, 0.0588),
-			"back": Vector3(0, 0.372, 0.152), "chest": Vector3(0, 0.248, -0.196)}},
-	"orchisloth": {"head": Vector3(0, 0.354, -0.0996), "top": 0.496, "carry": Vector3(0, 0.566, 0.0431),
-		"ear_tip": Vector3(0.0244, 0.496, 0.0389), "tail_tip": Vector3(0, 0.26, 0.128),
-		"tip_bone": "hips", "hip": 0.193,
-		"marks": {"left flank": Vector3(-0.0451, 0.267, 0.0263), "right flank": Vector3(0.0451, 0.267, 0.0263),
-			"back": Vector3(0, 0.372, 0.0684), "chest": Vector3(0, 0.248, -0.0896)}},
-	"opalisk": {"head": Vector3(0, 0.354, -0.189), "top": 0.496, "carry": Vector3(0, 0.566, 0.0819),
-		"ear_tip": Vector3(0.0334, 0.496, 0.0739), "tail_tip": Vector3(0, 0.26, 0.242),
-		"tip_bone": "hips", "hip": 0.164,
-		"marks": {"left flank": Vector3(-0.0617, 0.267, 0.0499), "right flank": Vector3(0.0617, 0.267, 0.0499),
-			"back": Vector3(0, 0.372, 0.13), "chest": Vector3(0, 0.248, -0.17)}},
-	"nacrolin": {"head": Vector3(0, 0.354, -0.0972), "top": 0.496, "carry": Vector3(0, 0.566, 0.0403),
-		"ear_tip": Vector3(0.038, 0.496, 0.0362), "tail_tip": Vector3(0, 0.26, 0.122), "tip_bone": "hips", "hip": 0.193,
-		"marks": {"left flank": Vector3(-0.0701, 0.267, 0.024), "right flank": Vector3(0.0701, 0.267, 0.024),
-			"back": Vector3(0, 0.372, 0.0646), "chest": Vector3(0, 0.248, -0.0875)}},
-	"murmurling": {"head": Vector3(0, 0.354, -0.122), "top": 0.496, "carry": Vector3(0, 0.566, 0.0509),
-		"ear_tip": Vector3(0.0196, 0.496, 0.0458), "tail_tip": Vector3(0, 0.26, 0.153),
-		"tip_bone": "hips", "hip": 0.165,
-		"marks": {"left flank": Vector3(-0.0362, 0.267, 0.0305), "right flank": Vector3(0.0362, 0.267, 0.0305),
-			"back": Vector3(0, 0.372, 0.0814), "chest": Vector3(0, 0.248, -0.11)}},
-	"moundvark": {"head": Vector3(0, 0.354, -0.163), "top": 0.496, "carry": Vector3(0, 0.566, 0.0677),
-		"ear_tip": Vector3(0.022, 0.496, 0.0609), "tail_tip": Vector3(0, 0.26, 0.205), "tip_bone": "hips", "hip": 0.193,
-		"marks": {"left flank": Vector3(-0.0406, 0.267, 0.0404), "right flank": Vector3(0.0406, 0.267, 0.0404),
-			"back": Vector3(0, 0.372, 0.109), "chest": Vector3(0, 0.248, -0.147)}},
-	"moonloris": {"head": Vector3(0, 0.354, -0.325), "top": 0.496, "carry": Vector3(0, 0.566, 0.141),
-		"ear_tip": Vector3(0.0522, 0.496, 0.127), "tail_tip": Vector3(0, 0.26, 0.417), "tip_bone": "hips", "hip": 0.192,
-		"marks": {"left flank": Vector3(-0.0962, 0.267, 0.0858), "right flank": Vector3(0.0962, 0.267, 0.0858),
-			"back": Vector3(0, 0.372, 0.223), "chest": Vector3(0, 0.248, -0.292)}},
-	"limpetor": {"head": Vector3(0, 0.354, -0.177), "top": 0.496, "carry": Vector3(0, 0.566, 0.0753),
-		"ear_tip": Vector3(0.0463, 0.496, 0.0679), "tail_tip": Vector3(0, 0.26, 0.225),
-		"tip_bone": "hips", "hip": 0.165,
-		"marks": {"left flank": Vector3(-0.0853, 0.267, 0.0455), "right flank": Vector3(0.0853, 0.267, 0.0455),
-			"back": Vector3(0, 0.372, 0.12), "chest": Vector3(0, 0.248, -0.159)}},
-	"kilnbadger": {"head": Vector3(0, 0.354, -0.165), "top": 0.496, "carry": Vector3(0, 0.566, 0.0713),
-		"ear_tip": Vector3(0.0236, 0.496, 0.0643), "tail_tip": Vector3(0, 0.26, 0.212),
-		"tip_bone": "hips", "hip": 0.193,
-		"marks": {"left flank": Vector3(-0.0435, 0.267, 0.0433), "right flank": Vector3(0.0435, 0.267, 0.0433),
-			"back": Vector3(0, 0.372, 0.113), "chest": Vector3(0, 0.248, -0.149)}},
-	"heatherhorn": {"head": Vector3(0, 0.354, -0.179), "top": 0.496, "carry": Vector3(0, 0.566, 0.0782),
-		"ear_tip": Vector3(0.0355, 0.496, 0.0706), "tail_tip": Vector3(0, 0.26, 0.231),
-		"tip_bone": "hips", "hip": 0.232,
-		"marks": {"left flank": Vector3(-0.0654, 0.267, 0.0477), "right flank": Vector3(0.0654, 0.267, 0.0477),
-			"back": Vector3(0, 0.372, 0.124), "chest": Vector3(0, 0.248, -0.161)}},
-	"glaciyak": {"head": Vector3(0, 0.354, -0.2), "top": 0.496, "carry": Vector3(0, 0.566, 0.0867),
-		"ear_tip": Vector3(0.0366, 0.496, 0.0782), "tail_tip": Vector3(0, 0.26, 0.257),
-		"tip_bone": "hips", "hip": 0.232,
-		"marks": {"left flank": Vector3(-0.0674, 0.267, 0.0527), "right flank": Vector3(0.0674, 0.267, 0.0527),
-			"back": Vector3(0, 0.372, 0.137), "chest": Vector3(0, 0.248, -0.18)}},
-	"duskapi": {"head": Vector3(0, 0.354, -0.114), "top": 0.496, "carry": Vector3(0, 0.566, 0.049),
-		"ear_tip": Vector3(0.0121, 0.496, 0.0442), "tail_tip": Vector3(0, 0.26, 0.146),
-		"tip_bone": "hips", "hip": 0.232,
-		"marks": {"left flank": Vector3(-0.0224, 0.267, 0.0297), "right flank": Vector3(0.0224, 0.267, 0.0297),
-			"back": Vector3(0, 0.372, 0.0778), "chest": Vector3(0, 0.248, -0.103)}},
-	"casquebill": {"head": Vector3(0, 0.354, -0.155), "top": 0.496, "carry": Vector3(0, 0.566, 0.0666),
-		"ear_tip": Vector3(0.0327, 0.496, 0.0601), "tail_tip": Vector3(0, 0.26, 0.198),
-		"tip_bone": "hips", "hip": 0.184,
-		"marks": {"left flank": Vector3(-0.0602, 0.267, 0.0404), "right flank": Vector3(0.0602, 0.267, 0.0404),
-			"back": Vector3(0, 0.372, 0.106), "chest": Vector3(0, 0.248, -0.139)}},
-	"cindle": {"head": Vector3(0, 0.427, -0.272), "top": 0.631, "carry": Vector3(0, 0.314, -0.272),
+		"tail_tip": Vector3(0, 0.264, 0.146),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.149, 0.27, 0.0298),
+			"right flank": Vector3(0.149, 0.27, 0.0298),
+			"back": Vector3(0, 0.37, 0.0781),
+			"chest": Vector3(0, 0.25, -0.0862)
+		}
+	},
+	"squalltross":
+	{
+		"head": Vector3(0, 0.354, -0.1),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0435),
+		"ear_tip": Vector3(0.0359, 0.496, 0.0393),
+		"tail_tip": Vector3(0, 0.26, 0.129),
+		"tip_bone": "hips",
+		"hip": 0.165,
+		"marks":
+		{
+			"left flank": Vector3(-0.0662, 0.267, 0.0265),
+			"right flank": Vector3(0.0662, 0.267, 0.0265),
+			"back": Vector3(0, 0.372, 0.069),
+			"chest": Vector3(0, 0.248, -0.0901)
+		}
+	},
+	"spatewader":
+	{
+		"head": Vector3(0, 0.354, -0.204),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.089),
+		"ear_tip": Vector3(0.03, 0.496, 0.0803),
+		"tail_tip": Vector3(0, 0.26, 0.263),
+		"tip_bone": "hips",
+		"hip": 0.165,
+		"marks":
+		{
+			"left flank": Vector3(-0.0554, 0.267, 0.0543),
+			"right flank": Vector3(0.0554, 0.267, 0.0543),
+			"back": Vector3(0, 0.372, 0.141),
+			"chest": Vector3(0, 0.248, -0.183)
+		}
+	},
+	"sentrikat":
+	{
+		"head": Vector3(0, 0.354, -0.0838),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0362),
+		"ear_tip": Vector3(0.0322, 0.496, 0.0327),
+		"tail_tip": Vector3(0, 0.26, 0.107),
+		"tip_bone": "hips",
+		"hip": 0.192,
+		"marks":
+		{
+			"left flank": Vector3(-0.0594, 0.267, 0.022),
+			"right flank": Vector3(0.0594, 0.267, 0.022),
+			"back": Vector3(0, 0.372, 0.0574),
+			"chest": Vector3(0, 0.248, -0.0753)
+		}
+	},
+	"scaldamus":
+	{
+		"head": Vector3(0, 0.354, -0.219),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.096),
+		"ear_tip": Vector3(0.0333, 0.496, 0.0867),
+		"tail_tip": Vector3(0, 0.26, 0.283),
+		"tip_bone": "hips",
+		"hip": 0.22,
+		"marks":
+		{
+			"left flank": Vector3(-0.0615, 0.267, 0.0588),
+			"right flank": Vector3(0.0615, 0.267, 0.0588),
+			"back": Vector3(0, 0.372, 0.152),
+			"chest": Vector3(0, 0.248, -0.196)
+		}
+	},
+	"orchisloth":
+	{
+		"head": Vector3(0, 0.354, -0.0996),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0431),
+		"ear_tip": Vector3(0.0244, 0.496, 0.0389),
+		"tail_tip": Vector3(0, 0.26, 0.128),
+		"tip_bone": "hips",
+		"hip": 0.193,
+		"marks":
+		{
+			"left flank": Vector3(-0.0451, 0.267, 0.0263),
+			"right flank": Vector3(0.0451, 0.267, 0.0263),
+			"back": Vector3(0, 0.372, 0.0684),
+			"chest": Vector3(0, 0.248, -0.0896)
+		}
+	},
+	"opalisk":
+	{
+		"head": Vector3(0, 0.354, -0.189),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0819),
+		"ear_tip": Vector3(0.0334, 0.496, 0.0739),
+		"tail_tip": Vector3(0, 0.26, 0.242),
+		"tip_bone": "hips",
+		"hip": 0.164,
+		"marks":
+		{
+			"left flank": Vector3(-0.0617, 0.267, 0.0499),
+			"right flank": Vector3(0.0617, 0.267, 0.0499),
+			"back": Vector3(0, 0.372, 0.13),
+			"chest": Vector3(0, 0.248, -0.17)
+		}
+	},
+	"nacrolin":
+	{
+		"head": Vector3(0, 0.354, -0.0972),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0403),
+		"ear_tip": Vector3(0.038, 0.496, 0.0362),
+		"tail_tip": Vector3(0, 0.26, 0.122),
+		"tip_bone": "hips",
+		"hip": 0.193,
+		"marks":
+		{
+			"left flank": Vector3(-0.0701, 0.267, 0.024),
+			"right flank": Vector3(0.0701, 0.267, 0.024),
+			"back": Vector3(0, 0.372, 0.0646),
+			"chest": Vector3(0, 0.248, -0.0875)
+		}
+	},
+	"murmurling":
+	{
+		"head": Vector3(0, 0.354, -0.122),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0509),
+		"ear_tip": Vector3(0.0196, 0.496, 0.0458),
+		"tail_tip": Vector3(0, 0.26, 0.153),
+		"tip_bone": "hips",
+		"hip": 0.165,
+		"marks":
+		{
+			"left flank": Vector3(-0.0362, 0.267, 0.0305),
+			"right flank": Vector3(0.0362, 0.267, 0.0305),
+			"back": Vector3(0, 0.372, 0.0814),
+			"chest": Vector3(0, 0.248, -0.11)
+		}
+	},
+	"moundvark":
+	{
+		"head": Vector3(0, 0.354, -0.163),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0677),
+		"ear_tip": Vector3(0.022, 0.496, 0.0609),
+		"tail_tip": Vector3(0, 0.26, 0.205),
+		"tip_bone": "hips",
+		"hip": 0.193,
+		"marks":
+		{
+			"left flank": Vector3(-0.0406, 0.267, 0.0404),
+			"right flank": Vector3(0.0406, 0.267, 0.0404),
+			"back": Vector3(0, 0.372, 0.109),
+			"chest": Vector3(0, 0.248, -0.147)
+		}
+	},
+	"moonloris":
+	{
+		"head": Vector3(0, 0.354, -0.325),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.141),
+		"ear_tip": Vector3(0.0522, 0.496, 0.127),
+		"tail_tip": Vector3(0, 0.26, 0.417),
+		"tip_bone": "hips",
+		"hip": 0.192,
+		"marks":
+		{
+			"left flank": Vector3(-0.0962, 0.267, 0.0858),
+			"right flank": Vector3(0.0962, 0.267, 0.0858),
+			"back": Vector3(0, 0.372, 0.223),
+			"chest": Vector3(0, 0.248, -0.292)
+		}
+	},
+	"limpetor":
+	{
+		"head": Vector3(0, 0.354, -0.177),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0753),
+		"ear_tip": Vector3(0.0463, 0.496, 0.0679),
+		"tail_tip": Vector3(0, 0.26, 0.225),
+		"tip_bone": "hips",
+		"hip": 0.165,
+		"marks":
+		{
+			"left flank": Vector3(-0.0853, 0.267, 0.0455),
+			"right flank": Vector3(0.0853, 0.267, 0.0455),
+			"back": Vector3(0, 0.372, 0.12),
+			"chest": Vector3(0, 0.248, -0.159)
+		}
+	},
+	"kilnbadger":
+	{
+		"head": Vector3(0, 0.354, -0.165),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0713),
+		"ear_tip": Vector3(0.0236, 0.496, 0.0643),
+		"tail_tip": Vector3(0, 0.26, 0.212),
+		"tip_bone": "hips",
+		"hip": 0.193,
+		"marks":
+		{
+			"left flank": Vector3(-0.0435, 0.267, 0.0433),
+			"right flank": Vector3(0.0435, 0.267, 0.0433),
+			"back": Vector3(0, 0.372, 0.113),
+			"chest": Vector3(0, 0.248, -0.149)
+		}
+	},
+	"heatherhorn":
+	{
+		"head": Vector3(0, 0.354, -0.179),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0782),
+		"ear_tip": Vector3(0.0355, 0.496, 0.0706),
+		"tail_tip": Vector3(0, 0.26, 0.231),
+		"tip_bone": "hips",
+		"hip": 0.232,
+		"marks":
+		{
+			"left flank": Vector3(-0.0654, 0.267, 0.0477),
+			"right flank": Vector3(0.0654, 0.267, 0.0477),
+			"back": Vector3(0, 0.372, 0.124),
+			"chest": Vector3(0, 0.248, -0.161)
+		}
+	},
+	"glaciyak":
+	{
+		"head": Vector3(0, 0.354, -0.2),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0867),
+		"ear_tip": Vector3(0.0366, 0.496, 0.0782),
+		"tail_tip": Vector3(0, 0.26, 0.257),
+		"tip_bone": "hips",
+		"hip": 0.232,
+		"marks":
+		{
+			"left flank": Vector3(-0.0674, 0.267, 0.0527),
+			"right flank": Vector3(0.0674, 0.267, 0.0527),
+			"back": Vector3(0, 0.372, 0.137),
+			"chest": Vector3(0, 0.248, -0.18)
+		}
+	},
+	"duskapi":
+	{
+		"head": Vector3(0, 0.354, -0.114),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.049),
+		"ear_tip": Vector3(0.0121, 0.496, 0.0442),
+		"tail_tip": Vector3(0, 0.26, 0.146),
+		"tip_bone": "hips",
+		"hip": 0.232,
+		"marks":
+		{
+			"left flank": Vector3(-0.0224, 0.267, 0.0297),
+			"right flank": Vector3(0.0224, 0.267, 0.0297),
+			"back": Vector3(0, 0.372, 0.0778),
+			"chest": Vector3(0, 0.248, -0.103)
+		}
+	},
+	"casquebill":
+	{
+		"head": Vector3(0, 0.354, -0.155),
+		"top": 0.496,
+		"carry": Vector3(0, 0.566, 0.0666),
+		"ear_tip": Vector3(0.0327, 0.496, 0.0601),
+		"tail_tip": Vector3(0, 0.26, 0.198),
+		"tip_bone": "hips",
+		"hip": 0.184,
+		"marks":
+		{
+			"left flank": Vector3(-0.0602, 0.267, 0.0404),
+			"right flank": Vector3(0.0602, 0.267, 0.0404),
+			"back": Vector3(0, 0.372, 0.106),
+			"chest": Vector3(0, 0.248, -0.139)
+		}
+	},
+	"cindle":
+	{
+		"head": Vector3(0, 0.427, -0.272),
+		"top": 0.631,
+		"carry": Vector3(0, 0.314, -0.272),
 		"ear_tip": Vector3(0.105, 0.72, -0.0899),
-		"tail_tip": Vector3(0, 0.66, 0.223), "tip_bone": "tail7", "hip": 0.253,
-		"marks": {"left flank": Vector3(-0.0554, 0.276, 0.0305), "right flank": Vector3(0.0554, 0.276, 0.0305),
-			"back": Vector3(0, 0.34, 0.0375), "chest": Vector3(0, 0.265, -0.149)}},
-	"puddlet": {"head": Vector3(0, 0.209, -0.261), "top": 0.286, "carry": Vector3(0, 0.271, -0.0591),
-		"ear_tip": Vector3(0.165, 0.343, -0.16), "tail_tip": Vector3(0, 0.23, 0.275), "tip_bone": "tail5", "hip": 0.127,
-		"marks": {"left flank": Vector3(-0.0549, 0.158, -0.0591), "right flank": Vector3(0.0549, 0.158, -0.0591),
-			"back": Vector3(0, 0.209, -0.0591), "chest": Vector3(0, 0.132, -0.164)}},
-	"burrlet": {"head": Vector3(2.64e-17, 0.204, -0.141), "top": 0.276, "carry": Vector3(2.64e-17, 0.349, -0.0104),
+		"tail_tip": Vector3(0, 0.66, 0.223),
+		"tip_bone": "tail7",
+		"hip": 0.253,
+		"marks":
+		{
+			"left flank": Vector3(-0.0554, 0.276, 0.0305),
+			"right flank": Vector3(0.0554, 0.276, 0.0305),
+			"back": Vector3(0, 0.34, 0.0375),
+			"chest": Vector3(0, 0.265, -0.149)
+		}
+	},
+	"puddlet":
+	{
+		"head": Vector3(0, 0.209, -0.261),
+		"top": 0.286,
+		"carry": Vector3(0, 0.271, -0.0591),
+		"ear_tip": Vector3(0.165, 0.343, -0.16),
+		"tail_tip": Vector3(0, 0.23, 0.275),
+		"tip_bone": "tail5",
+		"hip": 0.127,
+		"marks":
+		{
+			"left flank": Vector3(-0.0549, 0.158, -0.0591),
+			"right flank": Vector3(0.0549, 0.158, -0.0591),
+			"back": Vector3(0, 0.209, -0.0591),
+			"chest": Vector3(0, 0.132, -0.164)
+		}
+	},
+	"burrlet":
+	{
+		"head": Vector3(2.64e-17, 0.204, -0.141),
+		"top": 0.276,
+		"carry": Vector3(2.64e-17, 0.349, -0.0104),
 		"ear_tip": Vector3(0.0725, 0.282, -0.0758),
-		"tail_tip": Vector3(2.64e-17, 0.235, 0.162), "tip_bone": "tail2", "hip": 0.115,
-		"marks": {"left flank": Vector3(-0.102, 0.162, 0.00685), "right flank": Vector3(0.102, 0.162, 0.00685),
-			"back": Vector3(2.64e-17, 0.318, 0.00685), "chest": Vector3(2.64e-17, 0.141, -0.0964)}},
-	"glintmole": {"head": Vector3(-2.64e-17, 0.248, -0.149), "top": 0.338, "carry": Vector3(-2.64e-17, 0.453, 0.039),
+		"tail_tip": Vector3(2.64e-17, 0.235, 0.162),
+		"tip_bone": "tail2",
+		"hip": 0.115,
+		"marks":
+		{
+			"left flank": Vector3(-0.102, 0.162, 0.00685),
+			"right flank": Vector3(0.102, 0.162, 0.00685),
+			"back": Vector3(2.64e-17, 0.318, 0.00685),
+			"chest": Vector3(2.64e-17, 0.141, -0.0964)
+		}
+	},
+	"glintmole":
+	{
+		"head": Vector3(-2.64e-17, 0.248, -0.149),
+		"top": 0.338,
+		"carry": Vector3(-2.64e-17, 0.453, 0.039),
 		"ear_tip": Vector3(0.0969, 0.314, -0.0599),
-		"tail_tip": Vector3(-2.64e-17, 0.182, 0.227), "tip_bone": "tail2", "hip": 0.134,
-		"marks": {"left flank": Vector3(-0.161, 0.2, 0.0637), "right flank": Vector3(0.161, 0.2, 0.0637),
-			"back": Vector3(-2.64e-17, 0.308, 0.143), "chest": Vector3(-2.64e-17, 0.17, -0.0944)}},
-	"rimeshrew": {"head": Vector3(0, 0.277, -0.222), "top": 0.378, "carry": Vector3(0, 0.429, -0.0152),
+		"tail_tip": Vector3(-2.64e-17, 0.182, 0.227),
+		"tip_bone": "tail2",
+		"hip": 0.134,
+		"marks":
+		{
+			"left flank": Vector3(-0.161, 0.2, 0.0637),
+			"right flank": Vector3(0.161, 0.2, 0.0637),
+			"back": Vector3(-2.64e-17, 0.308, 0.143),
+			"chest": Vector3(-2.64e-17, 0.17, -0.0944)
+		}
+	},
+	"rimeshrew":
+	{
+		"head": Vector3(0, 0.277, -0.222),
+		"top": 0.378,
+		"carry": Vector3(0, 0.429, -0.0152),
 		"ear_tip": Vector3(0.0758, 0.378, -0.133),
-		"tail_tip": Vector3(0, 0.317, 0.287), "tip_bone": "tail5", "hip": 0.162,
-		"marks": {"left flank": Vector3(-0.1, 0.227, 0.00157), "right flank": Vector3(0.1, 0.227, 0.00157),
-			"back": Vector3(0, 0.306, 0.0239), "chest": Vector3(0, 0.191, -0.133)}},
-	"zephyrak": {"head": Vector3(0, 0.248, -0.0989), "top": 0.341, "carry": Vector3(0, 0.248, 0.00952),
-		"ear_tip": Vector3(0.0786, 0.284, -0.0313), "tail_tip": Vector3(0, 0.159, 0.0824),
-		"tip_bone": "tail6", "hip": 0.00954,
+		"tail_tip": Vector3(0, 0.317, 0.287),
+		"tip_bone": "tail5",
+		"hip": 0.162,
+		"marks":
+		{
+			"left flank": Vector3(-0.1, 0.227, 0.00157),
+			"right flank": Vector3(0.1, 0.227, 0.00157),
+			"back": Vector3(0, 0.306, 0.0239),
+			"chest": Vector3(0, 0.191, -0.133)
+		}
+	},
+	"zephyrak":
+	{
+		"head": Vector3(0, 0.248, -0.0989),
+		"top": 0.341,
+		"carry": Vector3(0, 0.248, 0.00952),
+		"ear_tip": Vector3(0.0786, 0.284, -0.0313),
+		"tail_tip": Vector3(0, 0.159, 0.0824),
+		"tip_bone": "tail6",
+		"hip": 0.00954,
 		"hover": true,
-		"marks": {"left flank": Vector3(-0.0235, 0.114, 0.00811), "right flank": Vector3(0.0235, 0.114, 0.00811),
-			"back": Vector3(0, 0.171, 0.00811), "chest": Vector3(0, 0.115, -0.0235)}},
-	"pebbit": {"head": Vector3(0, 0.259, -0.305), "top": 0.404, "carry": Vector3(0, 0.417, 0.0363),
+		"marks":
+		{
+			"left flank": Vector3(-0.0235, 0.114, 0.00811),
+			"right flank": Vector3(0.0235, 0.114, 0.00811),
+			"back": Vector3(0, 0.171, 0.00811),
+			"chest": Vector3(0, 0.115, -0.0235)
+		}
+	},
+	"pebbit":
+	{
+		"head": Vector3(0, 0.259, -0.305),
+		"top": 0.404,
+		"carry": Vector3(0, 0.417, 0.0363),
 		"ear_tip": Vector3(0.0807, 0.359, -0.209),
-		"tail_tip": Vector3(0, 0.107, 0.356), "tip_bone": "tail4", "hip": 0.166,
-		"marks": {"left flank": Vector3(-0.158, 0.25, 0.0215), "right flank": Vector3(0.158, 0.25, 0.0215),
-			"back": Vector3(0, 0.385, 0.0363), "chest": Vector3(0, 0.186, -0.157)}},
-	"cairnback": {"head": Vector3(0, 0.415, -0.398), "top": 0.641, "carry": Vector3(0, 0.563, 0.306),
+		"tail_tip": Vector3(0, 0.107, 0.356),
+		"tip_bone": "tail4",
+		"hip": 0.166,
+		"marks":
+		{
+			"left flank": Vector3(-0.158, 0.25, 0.0215),
+			"right flank": Vector3(0.158, 0.25, 0.0215),
+			"back": Vector3(0, 0.385, 0.0363),
+			"chest": Vector3(0, 0.186, -0.157)
+		}
+	},
+	"cairnback":
+	{
+		"head": Vector3(0, 0.415, -0.398),
+		"top": 0.641,
+		"carry": Vector3(0, 0.563, 0.306),
 		"ear_tip": Vector3(0.301, 0.454, -0.239),
-		"tail_tip": Vector3(0, 0.236, 0.471), "tip_bone": "tail2", "hip": 0.284,
-		"marks": {"left flank": Vector3(-0.295, 0.38, 0.102), "right flank": Vector3(0.295, 0.38, 0.102),
-			"back": Vector3(0, 0.546, 0.295), "chest": Vector3(0, 0.319, -0.182)}},
-	"wisplet": {"head": Vector3(0, 0.273, -0.0785), "top": 0.378, "carry": Vector3(0, 0.399, -0.021), "hip": 0.115,
-		"ear_tip": Vector3(0.0806, 0.391, -0.0257), "tail_tip": Vector3(0, 0.101, 0.0515), "tip_bone": "tail1",
-		"marks": {"left flank": Vector3(-0.0712, 0.157, -0.0079), "right flank": Vector3(0.0712, 0.157, -0.0079),
-			"back": Vector3(0, 0.199, 0.0313), "chest": Vector3(0, 0.173, -0.0602)}},
-	"gloamshell": {"head": Vector3(0, 0.315, -0.233), "top": 0.453, "carry": Vector3(0, 0.432, 0.034),
-		"ear_tip": Vector3(0.031, 0.432, -0.198), "tail_tip": Vector3(0, 0.168, 0.224),
-		"tip_bone": "tail2", "hip": 0.147,
-		"marks": {"left flank": Vector3(-0.0547, 0.193, -0.0551), "right flank": Vector3(0.0547, 0.193, -0.0551),
-			"back": Vector3(0, 0.229, 0.129), "chest": Vector3(0, 0.249, -0.204)}},
-	"selenfin": {"head": Vector3(0, 0.466, -0.295), "top": 0.609, "carry": Vector3(0, 0.68, -0.0306),
+		"tail_tip": Vector3(0, 0.236, 0.471),
+		"tip_bone": "tail2",
+		"hip": 0.284,
+		"marks":
+		{
+			"left flank": Vector3(-0.295, 0.38, 0.102),
+			"right flank": Vector3(0.295, 0.38, 0.102),
+			"back": Vector3(0, 0.546, 0.295),
+			"chest": Vector3(0, 0.319, -0.182)
+		}
+	},
+	"wisplet":
+	{
+		"head": Vector3(0, 0.273, -0.0785),
+		"top": 0.378,
+		"carry": Vector3(0, 0.399, -0.021),
+		"hip": 0.115,
+		"ear_tip": Vector3(0.0806, 0.391, -0.0257),
+		"tail_tip": Vector3(0, 0.101, 0.0515),
+		"tip_bone": "tail1",
+		"marks":
+		{
+			"left flank": Vector3(-0.0712, 0.157, -0.0079),
+			"right flank": Vector3(0.0712, 0.157, -0.0079),
+			"back": Vector3(0, 0.199, 0.0313),
+			"chest": Vector3(0, 0.173, -0.0602)
+		}
+	},
+	"gloamshell":
+	{
+		"head": Vector3(0, 0.315, -0.233),
+		"top": 0.453,
+		"carry": Vector3(0, 0.432, 0.034),
+		"ear_tip": Vector3(0.031, 0.432, -0.198),
+		"tail_tip": Vector3(0, 0.168, 0.224),
+		"tip_bone": "tail2",
+		"hip": 0.147,
+		"marks":
+		{
+			"left flank": Vector3(-0.0547, 0.193, -0.0551),
+			"right flank": Vector3(0.0547, 0.193, -0.0551),
+			"back": Vector3(0, 0.229, 0.129),
+			"chest": Vector3(0, 0.249, -0.204)
+		}
+	},
+	"selenfin":
+	{
+		"head": Vector3(0, 0.466, -0.295),
+		"top": 0.609,
+		"carry": Vector3(0, 0.68, -0.0306),
 		"ear_tip": Vector3(0.181, 0.342, -0.0903),
-		"tail_tip": Vector3(0, 0.466, 0.302), "tip_bone": "tail3", "hip": 0.0211,
+		"tail_tip": Vector3(0, 0.466, 0.302),
+		"tip_bone": "tail3",
+		"hip": 0.0211,
 		"hover": true,
-		"marks": {"left flank": Vector3(-0.0856, 0.395, -0.0135), "right flank": Vector3(0.0856, 0.395, -0.0135),
-			"back": Vector3(0, 0.529, -0.0306), "chest": Vector3(0, 0.315, -0.167)}},
-	"zapple": {"head": Vector3(0, 0.432, -0.191), "top": 0.559, "carry": Vector3(0, 0.425, 0.0504),
+		"marks":
+		{
+			"left flank": Vector3(-0.0856, 0.395, -0.0135),
+			"right flank": Vector3(0.0856, 0.395, -0.0135),
+			"back": Vector3(0, 0.529, -0.0306),
+			"chest": Vector3(0, 0.315, -0.167)
+		}
+	},
+	"zapple":
+	{
+		"head": Vector3(0, 0.432, -0.191),
+		"top": 0.559,
+		"carry": Vector3(0, 0.425, 0.0504),
 		"ear_tip": Vector3(0.0882, 0.753, -0.0429),
-		"tail_tip": Vector3(0, 0.324, 0.2), "tip_bone": "tail2", "hip": 0.261,
-		"marks": {"left flank": Vector3(-0.108, 0.253, 0.0568), "right flank": Vector3(0.108, 0.253, 0.0568),
-			"back": Vector3(0, 0.35, 0.0504), "chest": Vector3(0, 0.261, -0.0893)}},
-	"hivara": {"head": Vector3(0, 0.272, -0.125), "top": 0.361, "carry": Vector3(0, 0.189, -0.112),
-		"ear_tip": Vector3(0.057, 0.423, -0.112), "tail_tip": Vector3(0, 0.158, 0.123),
-		"tip_bone": "tail2", "hip": 0.137,
-		"marks": {"left flank": Vector3(-0.0516, 0.184, 0.039), "right flank": Vector3(0.0516, 0.184, 0.039),
-			"back": Vector3(0, 0.252, 0.0424), "chest": Vector3(0, 0.174, -0.0582)}},
-	"caecilith": {"head": Vector3(0, 0.328, -0.146), "top": 0.381, "carry": Vector3(0, 0.152, 0.0473),
-		"ear_tip": Vector3(0.0413, 0.369, -0.0734), "tail_tip": Vector3(0, 0.067, 0.126),
-		"tip_bone": "tail6", "hip": 0.0509,
+		"tail_tip": Vector3(0, 0.324, 0.2),
+		"tip_bone": "tail2",
+		"hip": 0.261,
+		"marks":
+		{
+			"left flank": Vector3(-0.108, 0.253, 0.0568),
+			"right flank": Vector3(0.108, 0.253, 0.0568),
+			"back": Vector3(0, 0.35, 0.0504),
+			"chest": Vector3(0, 0.261, -0.0893)
+		}
+	},
+	"hivara":
+	{
+		"head": Vector3(0, 0.272, -0.125),
+		"top": 0.361,
+		"carry": Vector3(0, 0.189, -0.112),
+		"ear_tip": Vector3(0.057, 0.423, -0.112),
+		"tail_tip": Vector3(0, 0.158, 0.123),
+		"tip_bone": "tail2",
+		"hip": 0.137,
+		"marks":
+		{
+			"left flank": Vector3(-0.0516, 0.184, 0.039),
+			"right flank": Vector3(0.0516, 0.184, 0.039),
+			"back": Vector3(0, 0.252, 0.0424),
+			"chest": Vector3(0, 0.174, -0.0582)
+		}
+	},
+	"caecilith":
+	{
+		"head": Vector3(0, 0.328, -0.146),
+		"top": 0.381,
+		"carry": Vector3(0, 0.152, 0.0473),
+		"ear_tip": Vector3(0.0413, 0.369, -0.0734),
+		"tail_tip": Vector3(0, 0.067, 0.126),
+		"tip_bone": "tail6",
+		"hip": 0.0509,
 		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
-		"marks": {"left flank": Vector3(-0.063, 0.185, -0.0712), "right flank": Vector3(0.063, 0.185, -0.0712),
-			"back": Vector3(0, 0.212, -0.0186), "chest": Vector3(0, 0.185, -0.123)}},
-	"goliathite": {"head": Vector3(0, 0.5, -0.33), "top": 0.668, "carry": Vector3(0, 0.795, 0.147),
-		"ear_tip": Vector3(0.085, 0.668, 0.129), "tail_tip": Vector3(0, 0.191, 0.515), "tip_bone": "hips", "hip": 0,
-		"marks": {"left flank": Vector3(-0.21, 0.207, 0.0736), "right flank": Vector3(0.21, 0.207, 0.0736),
-			"back": Vector3(0, 0.445, 0.258), "chest": Vector3(0, 0.159, -0.368)}},
-	"hoarheron": {"head": Vector3(0, 0.384, -0.44), "top": 0.62, "carry": Vector3(0, 0.739, 0.16),
-		"ear_tip": Vector3(0.0722, 0.62, 0.14), "tail_tip": Vector3(0, 0.177, 0.56), "tip_bone": "hips", "hip": 0,
-		"marks": {"left flank": Vector3(-0.178, 0.192, 0.08), "right flank": Vector3(0.178, 0.192, 0.08),
-			"back": Vector3(0, 0.414, 0.28), "chest": Vector3(0, 0.148, -0.4)}},
-	"floenatee": {"head": Vector3(0, 0.56, -0.42), "top": 0.7, "carry": Vector3(0, 0.72, -0.05),
-		"ear_tip": Vector3(0.06, 0.7, -0.36), "tail_tip": Vector3(0, 0.08, 0.5), "tip_bone": "hips", "hip": 0,
-		"marks": {"left flank": Vector3(-0.18, 0.25, 0.0), "right flank": Vector3(0.18, 0.25, 0.0),
-			"back": Vector3(0, 0.46, 0.08), "chest": Vector3(0, 0.3, -0.44)}},
-	"gibbelle": {"head": Vector3(0, 0.37, -0.15), "top": 0.52, "carry": Vector3(0, 0.6, 0.03),
-		"ear_tip": Vector3(0.155, 0.365, -0.05), "tail_tip": Vector3(0, 0.1, 0.17), "tip_bone": "hips", "hip": 0.0,
-		"marks": {"left flank": Vector3(-0.16, 0.15, 0.02), "right flank": Vector3(0.16, 0.15, 0.02),
-			"back": Vector3(0, 0.25, 0.16), "chest": Vector3(0, 0.24, -0.12)}},
-	"glomwort": {"head": Vector3(0, 0.35, -0.111), "top": 0.454, "carry": Vector3(0, 0.507, 0.0572),
+		"marks":
+		{
+			"left flank": Vector3(-0.063, 0.185, -0.0712),
+			"right flank": Vector3(0.063, 0.185, -0.0712),
+			"back": Vector3(0, 0.212, -0.0186),
+			"chest": Vector3(0, 0.185, -0.123)
+		}
+	},
+	"goliathite":
+	{
+		"head": Vector3(0, 0.5, -0.33),
+		"top": 0.668,
+		"carry": Vector3(0, 0.795, 0.147),
+		"ear_tip": Vector3(0.085, 0.668, 0.129),
+		"tail_tip": Vector3(0, 0.191, 0.515),
+		"tip_bone": "hips",
+		"hip": 0,
+		"marks":
+		{
+			"left flank": Vector3(-0.21, 0.207, 0.0736),
+			"right flank": Vector3(0.21, 0.207, 0.0736),
+			"back": Vector3(0, 0.445, 0.258),
+			"chest": Vector3(0, 0.159, -0.368)
+		}
+	},
+	"hoarheron":
+	{
+		"head": Vector3(0, 0.384, -0.44),
+		"top": 0.62,
+		"carry": Vector3(0, 0.739, 0.16),
+		"ear_tip": Vector3(0.0722, 0.62, 0.14),
+		"tail_tip": Vector3(0, 0.177, 0.56),
+		"tip_bone": "hips",
+		"hip": 0,
+		"marks":
+		{
+			"left flank": Vector3(-0.178, 0.192, 0.08),
+			"right flank": Vector3(0.178, 0.192, 0.08),
+			"back": Vector3(0, 0.414, 0.28),
+			"chest": Vector3(0, 0.148, -0.4)
+		}
+	},
+	"floenatee":
+	{
+		"head": Vector3(0, 0.56, -0.42),
+		"top": 0.7,
+		"carry": Vector3(0, 0.72, -0.05),
+		"ear_tip": Vector3(0.06, 0.7, -0.36),
+		"tail_tip": Vector3(0, 0.08, 0.5),
+		"tip_bone": "hips",
+		"hip": 0,
+		"marks":
+		{
+			"left flank": Vector3(-0.18, 0.25, 0.0),
+			"right flank": Vector3(0.18, 0.25, 0.0),
+			"back": Vector3(0, 0.46, 0.08),
+			"chest": Vector3(0, 0.3, -0.44)
+		}
+	},
+	"gibbelle":
+	{
+		"head": Vector3(0, 0.37, -0.15),
+		"top": 0.52,
+		"carry": Vector3(0, 0.6, 0.03),
+		"ear_tip": Vector3(0.155, 0.365, -0.05),
+		"tail_tip": Vector3(0, 0.1, 0.17),
+		"tip_bone": "hips",
+		"hip": 0.0,
+		"marks":
+		{
+			"left flank": Vector3(-0.16, 0.15, 0.02),
+			"right flank": Vector3(0.16, 0.15, 0.02),
+			"back": Vector3(0, 0.25, 0.16),
+			"chest": Vector3(0, 0.24, -0.12)
+		}
+	},
+	"glomwort":
+	{
+		"head": Vector3(0, 0.35, -0.111),
+		"top": 0.454,
+		"carry": Vector3(0, 0.507, 0.0572),
 		"ear_tip": Vector3(0.0326, 0.454, 0.0516),
-		"tail_tip": Vector3(0, 0.258, 0.169), "tip_bone": "hips", "hip": 0.18,
-		"marks": {"left flank": Vector3(-0.0805, 0.265, 0.0348), "right flank": Vector3(0.0805, 0.265, 0.0348),
-			"back": Vector3(0, 0.363, 0.0907), "chest": Vector3(0, 0.245, -0.0993)}},
-	"kestrike": {"head": Vector3(0, 0.423, -0.209), "top": 0.525, "carry": Vector3(0, 0.454, 0.0842), "hip": 0.146,
-		"ear_tip": Vector3(0.0891, 0.509, 0.0565), "tail_tip": Vector3(0, 0.104, 0.225), "tip_bone": "tail2",
-		"marks": {"left flank": Vector3(-0.0818, 0.178, -0.016), "right flank": Vector3(0.0818, 0.178, -0.016),
-			"back": Vector3(0, 0.296, 0.0573), "chest": Vector3(0, 0.276, -0.156)}},
-	"kindlewren": {"head": Vector3(0, 0.275, -0.205), "top": 0.391, "carry": Vector3(0, 0.414, -0.0703), "hip": 0.113,
-		"ear_tip": Vector3(0.0121, 0.4, -0.0905), "tail_tip": Vector3(0, 0.327, 0.15), "tip_bone": "tail2",
-		"marks": {"left flank": Vector3(-0.0737, 0.13, -0.0554), "right flank": Vector3(0.0737, 0.13, -0.0554),
-			"back": Vector3(0, 0.235, 0.0342), "chest": Vector3(0, 0.171, -0.171)}},
-	"lodestick": {"head": Vector3(0, 0.259, -0.155), "top": 0.331, "carry": Vector3(0, 0.247, 0.00695),
-		"ear_tip": Vector3(0.0659, 0.414, -0.151), "tail_tip": Vector3(0, 0.214, 0.16),
-		"tip_bone": "tail3", "hip": 0.157,
-		"marks": {"left flank": Vector3(-0.0166, 0.163, 0.0154), "right flank": Vector3(0.0166, 0.163, 0.0154),
-			"back": Vector3(0, 0.193, 0.0154), "chest": Vector3(0, 0.144, -0.0416)}},
-	"marchleaf": {"head": Vector3(0, 0.186, -0.222), "top": 0.236, "carry": Vector3(0, 0.215, 0.00115),
-		"ear_tip": Vector3(0.135, 0.294, -0.24), "tail_tip": Vector3(0, 0.161, 0.0662),
-		"tip_bone": "tail1", "hip": 0.103,
-		"marks": {"left flank": Vector3(-0.0855, 0.14, 0.00579), "right flank": Vector3(0.0855, 0.14, 0.00579),
-			"back": Vector3(0, 0.186, 0.00115), "chest": Vector3(0, 0.119, -0.129)}},
-	"mossgrade": {"head": Vector3(0, 0.239, -0.237), "top": 0.325, "carry": Vector3(0, 0.386, 0.0459),
-		"ear_tip": Vector3(0.0936, 0.319, -0.133), "tail_tip": Vector3(0, 0.197, 0.232),
-		"tip_bone": "hips", "hip": 0.123,
-		"marks": {"left flank": Vector3(-0.154, 0.209, 0.0459), "right flank": Vector3(0.154, 0.209, 0.0459),
-			"back": Vector3(0, 0.288, 0.172), "chest": Vector3(0, 0.154, -0.155)}},
-	"nettlynx": {"head": Vector3(0, 0.24, -0.134), "top": 0.319, "carry": Vector3(0, 0.325, 0.0146),
-		"ear_tip": Vector3(0.109, 0.411, -0.0629), "tail_tip": Vector3(0, 0.264, 0.124),
-		"tip_bone": "tail3", "hip": 0.143,
-		"marks": {"left flank": Vector3(-0.0869, 0.183, 0.0166), "right flank": Vector3(0.0869, 0.183, 0.0166),
-			"back": Vector3(0, 0.251, 0.0347), "chest": Vector3(0, 0.171, -0.0738)}},
-	"thrumbird": {"head": Vector3(0, 0.557, -0.0858), "top": 0.631, "carry": Vector3(0, 0.192, -0.019),
-		"ear_tip": Vector3(0.0119, 0.411, 0.0451), "tail_tip": Vector3(0, 0.126, 0.0954),
-		"tip_bone": "tail1", "hip": 0.118,
+		"tail_tip": Vector3(0, 0.258, 0.169),
+		"tip_bone": "hips",
+		"hip": 0.18,
+		"marks":
+		{
+			"left flank": Vector3(-0.0805, 0.265, 0.0348),
+			"right flank": Vector3(0.0805, 0.265, 0.0348),
+			"back": Vector3(0, 0.363, 0.0907),
+			"chest": Vector3(0, 0.245, -0.0993)
+		}
+	},
+	"kestrike":
+	{
+		"head": Vector3(0, 0.423, -0.209),
+		"top": 0.525,
+		"carry": Vector3(0, 0.454, 0.0842),
+		"hip": 0.146,
+		"ear_tip": Vector3(0.0891, 0.509, 0.0565),
+		"tail_tip": Vector3(0, 0.104, 0.225),
+		"tip_bone": "tail2",
+		"marks":
+		{
+			"left flank": Vector3(-0.0818, 0.178, -0.016),
+			"right flank": Vector3(0.0818, 0.178, -0.016),
+			"back": Vector3(0, 0.296, 0.0573),
+			"chest": Vector3(0, 0.276, -0.156)
+		}
+	},
+	"kindlewren":
+	{
+		"head": Vector3(0, 0.275, -0.205),
+		"top": 0.391,
+		"carry": Vector3(0, 0.414, -0.0703),
+		"hip": 0.113,
+		"ear_tip": Vector3(0.0121, 0.4, -0.0905),
+		"tail_tip": Vector3(0, 0.327, 0.15),
+		"tip_bone": "tail2",
+		"marks":
+		{
+			"left flank": Vector3(-0.0737, 0.13, -0.0554),
+			"right flank": Vector3(0.0737, 0.13, -0.0554),
+			"back": Vector3(0, 0.235, 0.0342),
+			"chest": Vector3(0, 0.171, -0.171)
+		}
+	},
+	"lodestick":
+	{
+		"head": Vector3(0, 0.259, -0.155),
+		"top": 0.331,
+		"carry": Vector3(0, 0.247, 0.00695),
+		"ear_tip": Vector3(0.0659, 0.414, -0.151),
+		"tail_tip": Vector3(0, 0.214, 0.16),
+		"tip_bone": "tail3",
+		"hip": 0.157,
+		"marks":
+		{
+			"left flank": Vector3(-0.0166, 0.163, 0.0154),
+			"right flank": Vector3(0.0166, 0.163, 0.0154),
+			"back": Vector3(0, 0.193, 0.0154),
+			"chest": Vector3(0, 0.144, -0.0416)
+		}
+	},
+	"marchleaf":
+	{
+		"head": Vector3(0, 0.186, -0.222),
+		"top": 0.236,
+		"carry": Vector3(0, 0.215, 0.00115),
+		"ear_tip": Vector3(0.135, 0.294, -0.24),
+		"tail_tip": Vector3(0, 0.161, 0.0662),
+		"tip_bone": "tail1",
+		"hip": 0.103,
+		"marks":
+		{
+			"left flank": Vector3(-0.0855, 0.14, 0.00579),
+			"right flank": Vector3(0.0855, 0.14, 0.00579),
+			"back": Vector3(0, 0.186, 0.00115),
+			"chest": Vector3(0, 0.119, -0.129)
+		}
+	},
+	"mossgrade":
+	{
+		"head": Vector3(0, 0.239, -0.237),
+		"top": 0.325,
+		"carry": Vector3(0, 0.386, 0.0459),
+		"ear_tip": Vector3(0.0936, 0.319, -0.133),
+		"tail_tip": Vector3(0, 0.197, 0.232),
+		"tip_bone": "hips",
+		"hip": 0.123,
+		"marks":
+		{
+			"left flank": Vector3(-0.154, 0.209, 0.0459),
+			"right flank": Vector3(0.154, 0.209, 0.0459),
+			"back": Vector3(0, 0.288, 0.172),
+			"chest": Vector3(0, 0.154, -0.155)
+		}
+	},
+	"nettlynx":
+	{
+		"head": Vector3(0, 0.24, -0.134),
+		"top": 0.319,
+		"carry": Vector3(0, 0.325, 0.0146),
+		"ear_tip": Vector3(0.109, 0.411, -0.0629),
+		"tail_tip": Vector3(0, 0.264, 0.124),
+		"tip_bone": "tail3",
+		"hip": 0.143,
+		"marks":
+		{
+			"left flank": Vector3(-0.0869, 0.183, 0.0166),
+			"right flank": Vector3(0.0869, 0.183, 0.0166),
+			"back": Vector3(0, 0.251, 0.0347),
+			"chest": Vector3(0, 0.171, -0.0738)
+		}
+	},
+	"thrumbird":
+	{
+		"head": Vector3(0, 0.557, -0.0858),
+		"top": 0.631,
+		"carry": Vector3(0, 0.192, -0.019),
+		"ear_tip": Vector3(0.0119, 0.411, 0.0451),
+		"tail_tip": Vector3(0, 0.126, 0.0954),
+		"tip_bone": "tail1",
+		"hip": 0.118,
 		"hover": true,
-		"marks": {"left flank": Vector3(-0.0367, 0.167, 0.0125), "right flank": Vector3(0.0367, 0.167, 0.0125),
-			"back": Vector3(0, 0.228, 0.0125), "chest": Vector3(0, 0.204, -0.0622)}},
-	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
-		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
-		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
-			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
-	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
-		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
-		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
-			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
+		"marks":
+		{
+			"left flank": Vector3(-0.0367, 0.167, 0.0125),
+			"right flank": Vector3(0.0367, 0.167, 0.0125),
+			"back": Vector3(0, 0.228, 0.0125),
+			"chest": Vector3(0, 0.204, -0.0622)
+		}
+	},
+	"lilybara":
+	{
+		"head": Vector3(0, 0.40, -0.34),
+		"top": 0.6,
+		"carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23),
+		"tail_tip": Vector3(0, 0.295, 0.5),
+		"tip_bone": "tail2",
+		"hip": 0.17,
+		"marks":
+		{
+			"left flank": Vector3(-0.25, 0.27, 0.1),
+			"right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14),
+			"chest": Vector3(0, 0.27, -0.22)
+		}
+	},
+	"umbrathere":
+	{
+		"head": Vector3(0, 0.466, -0.157),
+		"top": 0.76,
+		"carry": Vector3(0, 0.28, -0.19),
+		"hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157),
+		"tail_tip": Vector3(0.124, 0.029, 0.304),
+		"tip_bone": "tail3",
+		"marks":
+		{
+			"left flank": Vector3(-0.16, 0.24, 0.0),
+			"right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15),
+			"chest": Vector3(0, 0.29, -0.14)
+		}
+	},
 }
+
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.81, 1.48],
@@ -486,52 +1562,87 @@ const STRIDE := {
 	"murmurling": [0.29, 1.17],
 	"squalltross": [0.29, 1.17],
 }
+
 ## s into the attack clip at speed 1 where the bite or pincers connect, per species (its forms wear the same clip).
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
 const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
-const FADE := 0.14            # s between body clips
-const GLIDE_FADE := 0.15      # s into and out of a carried glide pose (Kin.render's kact glide)
+const FADE := 0.14  # s between body clips
+const GLIDE_FADE := 0.15  # s into and out of a carried glide pose (Kin.render's kact glide)
+
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
 ## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
 const GAIT_FADE := {"thrumbird": 0.45}
 const GAITS := ["idle", "walk", "run"]
-const FACE_RATE := 14.0       # 1/s the expression eases at
-const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and being written)
-const LOOK_SNAP := 0.0005     # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
-const WALK_SPEED := 0.5       # m/s: below this it stands
-const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
-const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
-const INK_WIDTH := 0.0011     # the outline per metre of camera distance
+const FACE_RATE := 14.0  # 1/s the expression eases at
+const FACE_SNAP := 0.002  # blend weight: this close to its goal, a face shape stops easing (and being written)
+const LOOK_SNAP := 0.0005  # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
+const WALK_SPEED := 0.5  # m/s: below this it stands
+const RUN_SPEED := 2.2  # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
+const MAX_CADENCE := 6.0  # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
+const INK_WIDTH := 0.0011  # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
+
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
 const MARKS_DARK := preload("res://shaders/boki_marks.gdshader")
 const MARKS_LIGHT := preload("res://shaders/boki_marks_light.gdshader")
-const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
+const EYE_VALUE := 0.86  # iris brightness: the eye is the first thing read on a small face
+
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
+
 ## The ground shadow of a Boki that hovers or has flown: its size (m, across and along it) and darkness, and how
 ## far off the ground it lies (m) so it never fights the ground for depth.
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const EAR_TWITCH := 0.3       # rad an ear flicks asleep
+const EAR_TWITCH := 0.3  # rad an ear flicks asleep
+
 ## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
 ## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
 const SWIM_LINE := 0.5
-const PLANT_GAITS := ["walk", "run"]      # the clips whose paws BokiPlant keeps planted
-const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
+const PLANT_GAITS := ["walk", "run"]  # the clips whose paws BokiPlant keeps planted
+const OWN_BODY := [
+	"chop",
+	"mine",
+	"carry",
+	"tend",
+	"settle",
+	"nap",
+	"wake",
+	"munch",
+	"nudge",
+	"climb",
+	"splash",
+	"swim",
+	"paddle",
+	"rush",
+	"brace",
+	"dodge",
+	"stonehop",
+	"spin",
+	"strut",
+	"pose",
+	"bow",
+	"hover",
+	"glide",
+	"flare"
+]
+
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
-const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
+const LAND_SQUASH := 0.16  # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
+
 ## The nap clips (BokiHomeClips), played slower by a bigger Boki (KinNap.slow).
 const NAP_CLIPS := ["settle", "nap", "wake"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+
 ## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
 const STRUT_CADENCE := 1.25
+
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
+
 ## Blend shapes each expression pushes.
 const FACES := {
 	"neutral": {},
@@ -545,22 +1656,57 @@ const FACES := {
 	"asleep": {"closed": 1.0, "m_o": 0.22},
 	"chew": {"m_chomp": 1.0},
 }
+
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "cast": "angry", "sleep": "asleep",
-	"pet": "bliss", "chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
+	"run": "cheer",
+	"hop": "happy",
+	"attack": "angry",
+	"ability": "angry",
+	"cast": "angry",
+	"sleep": "asleep",
+	"pet": "bliss",
+	"chop": "focus",
+	"mine": "focus",
+	"carry": "cheer",
+	"tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
-	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]],
+	"nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
-	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy", "swim": "cheer", "paddle": "focus",
-	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
-	"strut": "cheer", "pose": "cheer", "bow": "cheer",
-	"crouch": "focus", "burst": "cheer", "sulk": "sad",
-	"glide": "cheer", "flare": "focus",
+	"munch": "chew",
+	"nudge": "cheer",
+	"climb": "focus",
+	"splash": "happy",
+	"swim": "cheer",
+	"paddle": "focus",
+	"rush": "angry",
+	"brace": "focus",
+	"dodge": "cheer",
+	"stonehop": "happy",
+	"spin": "happy",
+	"strut": "cheer",
+	"pose": "cheer",
+	"bow": "cheer",
+	"crouch": "focus",
+	"burst": "cheer",
+	"sulk": "sad",
+	"glide": "cheer",
+	"flare": "focus",
 }
+
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
-	"alert": "focus", "dazed": "sleepy", "scan": "sad"}
+const POSE_FACE := {
+	"growl": "angry",
+	"guard": "focus",
+	"whine": "sad",
+	"nudge": "sad",
+	"comfort": "happy",
+	"alert": "focus",
+	"dazed": "sleepy",
+	"scan": "sad"
+}
+
 ## Pose layers: lean (rad, forward), squat (0..1 of its height, negative stands tall), sway (rad, side to side),
 ## shiver (rad); `clip` and `rate` replace the idle, walk and run clips and their speed (a lifted Boki kicks).
 const LAYER := {
@@ -570,45 +1716,57 @@ const LAYER := {
 	"dazed": {"lean": 0.3, "squat": 0.12, "sway": 0.2, "clip": "idle", "rate": 0.4},
 	"scan": {"lean": -0.15, "squat": -0.2, "shiver": 0.03, "clip": "run", "rate": 0.7},
 }
+
 ## How far each body plan (KinPuppet.BODY) takes the lean and the sway: a flyer or serpent has no spine to tip.
-const BODY_FEEL := {"quad": Vector2(1.0, 1.0), "biped": Vector2(1.0, 1.0), "flyer": Vector2(0.6, 1.4),
-	"serpent": Vector2(0.5, 1.6), "blob": Vector2(0.5, 1.0)}
-const CHASE_POSES := ["growl", "whine"]   # moving at all in these is a run: a charge or a bolt
-const LAYER_RATE := 9.0       # 1/s the layer eases in and out at
-const SWAY_RATE := 4.0        # rad/s of the knocked-out sway
-const SHIVER_RATE := 45.0     # rad/s
+const BODY_FEEL := {
+	"quad": Vector2(1.0, 1.0),
+	"biped": Vector2(1.0, 1.0),
+	"flyer": Vector2(0.6, 1.4),
+	"serpent": Vector2(0.5, 1.6),
+	"blob": Vector2(0.5, 1.0)
+}
+const CHASE_POSES := ["growl", "whine"]  # moving at all in these is a run: a charge or a bolt
+const LAYER_RATE := 9.0  # 1/s the layer eases in and out at
+const SWAY_RATE := 4.0  # rad/s of the knocked-out sway
+const SHIVER_RATE := 45.0  # rad/s
 
 static var enabled := true
+
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
 static var normal_k := 1.0
+static var _shadow_mat: StandardMaterial3D
+
+static var _ear_bones := {}  # species -> its ear bones keyed in the sleep clip
+static var _scenes := {}  # path -> PackedScene, kept so a species' next build doesn't read it again
 
 var species := ""
-var manual := false            # tools pose it by hand: set_clip, seek and set_face, nothing automatic
+var manual := false  # tools pose it by hand: set_clip, seek and set_face, nothing automatic
 var root: Node3D
 var flex: Node3D
 var model: Node3D
 var player: AnimationPlayer
-var _skel: Skeleton3D
-var pace: RigPace              # how often the seen rig (clip, skeleton, face) steps
+var pace: RigPace  # how often the seen rig (clip, skeleton, face) steps
 var face: MeshInstance3D
 var eye_mat: ShaderMaterial
 var clip := ""
-var _shapes := {}              # blend shape name -> index
-var _now := {}                 # blend shape name -> weight
+
+var _skel: Skeleton3D
+var _shapes := {}  # blend shape name -> index
+var _now := {}  # blend shape name -> weight
 var _want := {}
 var _face_name := "neutral"
 var _flex_y := 0.0
-var _pos_prev := Vector3.INF      # (INF: not measured yet)
-var _tp := 0                  # the Kin's last teleport count seen (Kin.teleport)
+var _pos_prev := Vector3.INF  # (INF: not measured yet)
+var _tp := 0  # the Kin's last teleport count seen (Kin.teleport)
 var _speed := 0.0
-var _land := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
+var _land := LandLean.new()  # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
-var _shot_rate := 1.0          # the speed the shot plays at
+var _shot_rate := 1.0  # the speed the shot plays at
 var _attacking := false
 var _asleep := false
-var _aloft := false             # a flier in the air (BokiFly's "aloft" meta)
+var _aloft := false  # a flier in the air (BokiFly's "aloft" meta)
 var _layer := {"lean": 0.0, "squat": 0.0, "sway": 0.0, "shiver": 0.0}
 var _layer_t := 0.0
 var _feel := Vector2.ONE
@@ -618,28 +1776,30 @@ var _look_t := 1.0
 var _look := Vector2.ZERO
 var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
-var _idle := BokiIdle.new()    # its breathing loop's fidgets, see BokiIdle
+var _idle := BokiIdle.new()  # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
-var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
-var _swimmer := false          # a Water type: swims level rather than paddling
+var _water := 0.0  # m of water over its feet this frame (the root's "kwater", taken each frame)
+var _swimmer := false  # a Water type: swims level rather than paddling
 var _nap: KinNap
-var _ears := PackedInt32Array()     # ear bones the sleep clip keys, twitched on top of it asleep
-var _plants := {}              # gait clip -> BokiPlant
-var _gait := ""                # the gait whose paws are planted: it eases out after the clip moves on
-var _gait_at := 0.0            # s into it
+var _ears := PackedInt32Array()  # ear bones the sleep clip keys, twitched on top of it asleep
+var _plants := {}  # gait clip -> BokiPlant
+var _gait := ""  # the gait whose paws are planted: it eases out after the clip moves on
+var _gait_at := 0.0  # s into it
 var _gait_rate := 1.0
-var _gait_w := 0.0             # how far the planted timing is blended in
-static var _shadow_mat: StandardMaterial3D
+var _gait_w := 0.0  # how far the planted timing is blended in
+
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
+
 ## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
 static func swimmer(kin_id: String) -> bool:
 	return (BokiWade.rules()["swim"] as Array).has(BokiLines.element_of(kin_id))
+
 
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
@@ -648,18 +1808,21 @@ static func fetch_common() -> void:
 		return
 	for sp in Data.common_kin():
 		var p := PATH % [sp, sp]
-		if has(String(sp)) and not _scenes.has(p) \
-				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		if (
+			has(String(sp))
+			and not _scenes.has(p)
+			and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		):
 			BackgroundWork.request(p)
 
-static var _ear_bones := {}    # species -> its ear bones keyed in the sleep clip
-static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
+
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
 	if not _scenes.has(p):
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
 		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
 	return _scenes[p] as PackedScene
+
 
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
@@ -671,6 +1834,7 @@ static func work_clip(k: Dictionary) -> String:
 	if String(job["phase"]) != "work":
 		return ""
 	return String(WORK_KINDS.get(String(job["kind"]), "tend"))
+
 
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
@@ -689,8 +1853,9 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	flex_node.add_child(rig)
 	return FRAME[kin_id]
 
+
 func _ready() -> void:
-	process_priority = 10          # after KinPuppet: this rig poses Flex itself
+	process_priority = 10  # after KinPuppet: this rig poses Flex itself
 	flex = get_parent() as Node3D
 	root = flex.get_parent().get_parent() as Node3D
 	_flex_y = flex.position.y
@@ -720,21 +1885,25 @@ func _ready() -> void:
 	_idle.rest(_rng)
 	set_clip("idle")
 
+
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
 func advance(dt: float) -> void:
 	player.advance(dt)
-	_twitch_ears()         # (over the clip's pose, before the skeleton takes it)
+	_twitch_ears()  # (over the clip's pose, before the skeleton takes it)
 	_plant_feet(dt)
 	_skel.advance(dt)
+
 
 ## The model's skeleton.
 func skeleton() -> Skeleton3D:
 	return model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 
+
 ## The expression right now: one of FACES.
 func set_face(which: String) -> void:
 	_face_name = which
 	_want = FACES.get(which, {})
+
 
 ## Plays a body clip by name, crossfading from the last one.
 func set_clip(which: String, fade := FADE) -> void:
@@ -743,6 +1912,7 @@ func set_clip(which: String, fade := FADE) -> void:
 	clip = which
 	player.play(which, fade)
 
+
 ## Tools: holds the body at `at` (s) of the current clip and the face fully on its expression.
 func seek(at: float) -> void:
 	player.seek(at, true)
@@ -750,6 +1920,7 @@ func seek(at: float) -> void:
 	for s in _shapes:
 		_now[s] = float(_want.get(s, 0.0))
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
+
 
 func _process(dt: float) -> void:
 	if dt <= 0.0:
@@ -762,7 +1933,7 @@ func _process(dt: float) -> void:
 	_flinch.update(root, dt)
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
-		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
+		root.remove_meta("kwater")  # set again by whatever moves it through water next frame
 	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
@@ -770,6 +1941,7 @@ func _process(dt: float) -> void:
 	if t > 0.0:
 		_face_step(t)
 		advance(t)
+
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll, the jolt
 ## of a hit (KinFlinch) and a landing's squash with a lean as it starts and stops (LandLean) stay.
@@ -780,22 +1952,30 @@ func _keep_flex(dt: float) -> void:
 	var squat: float = _layer["squat"]
 	var swing := _layer_t * SWAY_RATE
 	var sway := float(_layer["sway"])
-	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) - _land.lean + cos(swing) * sway * 0.4, 0.0,
-		sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
+	flex.rotation = (
+		_flinch.rot
+		+ Vector3(
+			-float(_layer["lean"]) - _land.lean + cos(swing) * sway * 0.4,
+			0.0,
+			sin(swing) * sway + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"])
+		)
+	)
 	var wide := _flinch.wide * (1.0 + squat * 0.5)
-	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide) \
+	flex.scale = (
+		Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
 		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
+	)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
-		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
+		body.rotation = Vector3.ZERO  # home's work poses swing Body: here the clip does the swinging
 	if clip == "carry":
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
 	var lift := float(root.get_meta("lift", 0.0))
 	if lift > 0.0 and _shadow == null:
-		_shadow = _ground_shadow(flex)           # a flier's first time up: from now on its shadow marks the ground
+		_shadow = _ground_shadow(flex)  # a flier's first time up: from now on its shadow marks the ground
 	var afloat := _float_lift()
 	model.position.y = 0.0
 	if clip in OWN_HEIGHT or afloat > 0.0:
@@ -805,18 +1985,20 @@ func _keep_flex(dt: float) -> void:
 		_shadow.global_position.y = root.global_position.y - lift + _water + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
-		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
+		model.global_basis = cam.char_lean() * flex.global_basis  # toward the camera, like the Hunters: faces read
+
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
 	var tp := int(root.get_meta("tp", 0))
 	if _pos_prev == Vector3.INF or tp != _tp:
-		_tp = tp          # put somewhere (burst, re-bloom, blink, swap): not a run, so the speed stays as it was
+		_tp = tp  # put somewhere (burst, re-bloom, blink, swap): not a run, so the speed stays as it was
 		_pos_prev = gp
 		return
-	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt      # rising or sinking is no stride
+	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt  # rising or sinking is no stride
 	_pos_prev = gp
 	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+
 
 func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
@@ -830,7 +2012,7 @@ func _pick_clip(dt: float) -> void:
 	_attacking = attacking
 	_shot_left -= dt
 	var asleep := _lying()
-	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
+	_nap.update(root, asleep, dt)  # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
@@ -841,14 +2023,14 @@ func _pick_clip(dt: float) -> void:
 		if not aloft:
 			_start_shot("flare")
 		elif _shot == "flare":
-			_shot_left = 0.0          # up again before the flare is done
+			_shot_left = 0.0  # up again before the flare is done
 	var feel: Dictionary = LAYER.get(String(root.get_meta("pose", "")), {})
 	_step_layer(feel, dt)
 	var want := _state_clip()
 	if want in GAITS and feel.has("clip"):
 		want = feel["clip"]
 	if want == "idle":
-		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
+		want = _idle.step(dt, player, clip, _rng)  # a fidget now and then, never over an action
 	else:
 		_idle.rest(_rng)
 	var fade := FADE
@@ -866,15 +2048,18 @@ func _pick_clip(dt: float) -> void:
 	if want not in ["run", "walk", "carry", "strut"]:
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
-			* model.global_basis.z.length())
+	var stride: float = (
+		(STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0] * model.global_basis.z.length()
+	)
 	var quick := STRUT_CADENCE if want == "strut" else 1.0
-	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	var burst := float(root.get_meta("kburst", 1.0))  # the Relay Cup's launch: the legs go faster for a moment
 	player.speed_scale = clampf(quick * _speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
+
 
 ## s the rig takes to hand one gait over to another.
 func gait_fade() -> float:
 	return GAIT_FADE.get(species, FADE)
+
 
 ## Plants the walk's or run's paws (BokiPlant), easing in after the clip starts and out after it ends.
 func _plant_feet(dt: float) -> void:
@@ -890,9 +2075,11 @@ func _plant_feet(dt: float) -> void:
 	if _gait_w > 0.0:
 		plant(_gait, _gait_at, _gait_rate, _gait_w)
 
+
 ## Poses `gait`'s legs at `at` s into it, playing at `rate` x, with the paws planted at this Boki's speed and size.
 func plant(gait: String, at: float, rate: float, weight := 1.0) -> void:
 	(_plants[gait] as BokiPlant).pose(_skel, at, rate, _speed, model.global_basis.z.length(), weight)
+
 
 ## Eases the pose layer toward what the pose asks (zero for none); lean and sway scale with the body plan.
 func _step_layer(feel: Dictionary, dt: float) -> void:
@@ -906,11 +2093,13 @@ func _step_layer(feel: Dictionary, dt: float) -> void:
 		var want := float(feel.get(key, 0.0)) * mult
 		_layer[key] = lerpf(float(_layer[key]), want, 1.0 - exp(-LAYER_RATE * dt))
 
+
 ## Plays a one-off clip, at `rate` times its speed.
 func _start_shot(which: String, rate := 1.0) -> void:
 	_shot = which
 	_shot_rate = rate
 	_shot_left = player.get_animation(which).length / rate * (_nap.slow if which in NAP_CLIPS else 1.0)
+
 
 ## The root ear bones the nap clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
 ## sets them every frame, so a twitch on top never builds up.
@@ -919,14 +2108,20 @@ func _keyed_ears() -> PackedInt32Array:
 	var anim := player.get_animation("nap")
 	for i in anim.get_track_count():
 		var bone := _skel.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
-		if bone >= 0 and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D and _is_ear(bone) \
-				and not _is_ear(_skel.get_bone_parent(bone)):
+		if (
+			bone >= 0
+			and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D
+			and _is_ear(bone)
+			and not _is_ear(_skel.get_bone_parent(bone))
+		):
 			out.append(bone)
 	return out
+
 
 func _is_ear(bone: int) -> bool:
 	var bone_name := _skel.get_bone_name(bone) if bone >= 0 else ""
 	return bone_name.begins_with("ear") and not bone_name.begins_with("ear_")
+
 
 ## Asleep, an ear flicks now and then (KinNap.twitch), on top of the nap clip's pose.
 func _twitch_ears() -> void:
@@ -936,15 +2131,17 @@ func _twitch_ears() -> void:
 	for b in _ears:
 		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
 
+
 ## Asleep at home (kstate) or fainted in a match (kdown): no clip of its own, so it settles down, naps and wakes.
 func _lying() -> bool:
 	return String(root.get_meta("kstate", "")) == "sleep" or bool(root.get_meta("kdown", false))
+
 
 func _state_clip() -> String:
 	if _aloft:
 		return "glide" if _speed >= WALK_SPEED else "hover"
 	if _shot == "flare" and _shot_left > 0.0:
-		return _shot          # it touches down before it does what it came down for
+		return _shot  # it touches down before it does what it came down for
 	var swim := _swim_clip()
 	if swim != "":
 		return swim
@@ -955,7 +2152,7 @@ func _state_clip() -> String:
 		return work
 	var act := String(root.get_meta("kact", ""))
 	if act == "hop" and not player.has_animation("hop"):
-		return "run"          # a Boki in the air (Kin.render) without a hop clip runs through it
+		return "run"  # a Boki in the air (Kin.render) without a hop clip runs through it
 	if act != "":
 		return act
 	if _shot_left > 0.0:
@@ -966,21 +2163,25 @@ func _state_clip() -> String:
 		return "run"
 	return "walk" if _speed >= WALK_SPEED else "idle"
 
+
 ## "swim" or "paddle" while the water is deeper than SWIM_LINE of its height, else "".
 func _swim_clip() -> String:
 	if _water <= _afloat() or FRAME[species].get("hover", false):
 		return ""
 	return "swim" if _swimmer else "paddle"
 
+
 ## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
 func _afloat() -> float:
 	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+
 
 ## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
 func _float_lift() -> float:
 	if FRAME[species].get("hover", false):
 		return _water
 	return maxf(0.0, _water - _afloat())
+
 
 func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
@@ -1004,6 +2205,7 @@ func _clip_face() -> String:
 		return String(cf)
 	return "neutral"
 
+
 func _face_step(dt: float) -> void:
 	set_face(_clip_face())
 	_blink_t -= dt
@@ -1021,7 +2223,7 @@ func _face_step(dt: float) -> void:
 		var w := lerpf(was, goal, k if s != "blink" else 1.0)
 		if absf(w - goal) < FACE_SNAP:
 			w = goal
-		if w != was:       # an unchanged weight isn't written: the face mesh is only re-deformed while it moves
+		if w != was:  # an unchanged weight isn't written: the face mesh is only re-deformed while it moves
 			_now[s] = w
 			face.set_blend_shape_value(int(_shapes[s]), w)
 	_look_t -= dt
@@ -1033,6 +2235,7 @@ func _face_step(dt: float) -> void:
 		if _look.distance_to(_look_to) < LOOK_SNAP:
 			_look = _look_to
 		eye_mat.set_shader_parameter("look", _look)
+
 
 ## Wears the game's materials: the painted atlas under the Boki toon light, the glow and the eye in its own colours.
 func _dress(c: Dictionary, mats: Array) -> void:
@@ -1048,6 +2251,7 @@ func _dress(c: Dictionary, mats: Array) -> void:
 				_now[nm] = 0.0
 		for si in inst.mesh.get_surface_count():
 			inst.set_surface_override_material(si, _material_for(inst.mesh.surface_get_material(si), c, mats))
+
 
 func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	var id := String(src.resource_name)
@@ -1082,6 +2286,7 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	mats.append(m)
 	return m
 
+
 ## A painted part that glows: its own colours, shifted with the species' glow (a shimmer's caps).
 func _lit_material(src: Material, c: Dictionary) -> Material:
 	var m := Models.toon(Color.WHITE, false, 0.55)
@@ -1091,6 +2296,7 @@ func _lit_material(src: Material, c: Dictionary) -> Material:
 	var now := (c["glow"] as ShaderMaterial).get_shader_parameter("albedo") as Color
 	m.set_shader_parameter("albedo", _tint(now, base))
 	return m
+
 
 ## A soft dark oval on the ground under `flex`: what keeps a floating body reading as standing there.
 static func _ground_shadow(flex_node: Node3D) -> MeshInstance3D:
@@ -1109,10 +2315,12 @@ static func _ground_shadow(flex_node: Node3D) -> MeshInstance3D:
 		_shadow_mat.albedo_color = Color(0, 0, 0, SHADOW_ALPHA)
 	var plane := PlaneMesh.new()
 	plane.size = SHADOW_SIZE
-	var shadow := Models.part(flex_node, plane, _shadow_mat, Vector3(0, SHADOW_LIFT, 0), Vector3.ONE, Vector3.ZERO,
-		"GroundShadow")
+	var shadow := Models.part(
+		flex_node, plane, _shadow_mat, Vector3(0, SHADOW_LIFT, 0), Vector3.ONE, Vector3.ZERO, "GroundShadow"
+	)
 	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return shadow
+
 
 static func _ink() -> ShaderMaterial:
 	var ink := ShaderMaterial.new()
@@ -1120,6 +2328,7 @@ static func _ink() -> ShaderMaterial:
 	ink.set_shader_parameter("width", INK_WIDTH)
 	ink.set_shader_parameter("far_thin", INK_FAR_THIN)
 	return ink
+
 
 ## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on. The
 ## marks wear the painted coat's own colours (dark: deeper, pale and glowing: lighter), never a flat colour over it.
@@ -1142,6 +2351,7 @@ func _copy_coat() -> void:
 		marks.set_shader_parameter("albedo_tex", _coat.get_shader_parameter("albedo_tex"))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
+
 
 ## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
 static func _tint(now: Color, base: Color) -> Color:

@@ -83,8 +83,17 @@ def triage(n: str, main: str, env: dict, tmp: str) -> list[str]:
     own = git("rev-list", "--no-merges", "--count", f"{main}..{head}").stdout.strip()
     behind = git("rev-list", "--count", f"{head}..{main}").stdout.strip()
     date = git("log", "-1", "--format=%cs", head).stdout.strip()
-    return [f"#{n}", date, f"{own} own", f"{len(kinds)} files", f"in-main {count['in-main']}",
-            f"clean {count['clean']}", f"lines {found}/{total}", f"conflict {len(bad_files)}:{bad}", f"behind {behind}"]
+    return [
+        f"#{n}",
+        date,
+        f"{own} own",
+        f"{len(kinds)} files",
+        f"in-main {count['in-main']}",
+        f"clean {count['clean']}",
+        f"lines {found}/{total}",
+        f"conflict {len(bad_files)}:{bad}",
+        f"behind {behind}",
+    ]
 
 
 def main() -> None:

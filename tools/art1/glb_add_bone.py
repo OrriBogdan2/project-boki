@@ -6,6 +6,7 @@ Run: python3 tools/art1/glb_add_bone.py <target.glb> <source.glb> <bone> [out.gl
 --zone is in Blender's frame (Z up, metres: the glTF y). Weight ramps up from z0, down to z1 and in from |x| = xh, each
 over fade (0.08 for z, 0.05 for x), times the parent's weight: the shape of ostra_anim.rib_cage.
 A vertex with no free influence slot gives up its smallest other one (back to the parent) if that one is smaller."""
+
 import struct
 import sys
 
@@ -45,6 +46,7 @@ def zone_w(z0, z1, xh, fz=0.08, fx=0.05):
     def f(x, z):
         c = lambda v: min(max(v, 0.0), 1.0)
         return c((z - z0) / fz) * c((z1 - z) / fz) * c((xh - abs(x)) / fx)
+
     return f
 
 
@@ -66,14 +68,14 @@ def add_bone(tj, tb, sj, sb, bone, weight, clips):
     for sk in skins:
         pj = sk["joints"].index(tn[pname])
         a, off = view(tj, sk["inverseBindMatrices"])
-        col = struct.unpack_from("<16f", tb, off + 64 * pj)           # column-major
+        col = struct.unpack_from("<16f", tb, off + 64 * pj)  # column-major
         ibm_p = [[col[c * 4 + r] for c in range(4)] for r in range(4)]
         loc = mat(node.get("translation", (0, 0, 0)), node.get("rotation", (0, 0, 0, 1)))
         ibm = mul(inv_rigid(loc), ibm_p)
         flat = [ibm[r][c] for c in range(4) for r in range(4)]
         tb.extend(b"\0" * (-len(tb) % 4))
         tj["bufferViews"].append({"buffer": 0, "byteOffset": len(tb), "byteLength": 64 * (a["count"] + 1)})
-        tb.extend(tb[off:off + 64 * a["count"]])
+        tb.extend(tb[off : off + 64 * a["count"]])
         tb.extend(struct.pack("<16f", *flat))
         sk["inverseBindMatrices"] = len(tj["accessors"])
         ibv = len(tj["bufferViews"]) - 1
@@ -105,7 +107,7 @@ def add_bone(tj, tb, sj, sb, bone, weight, clips):
                     if k is None:
                         continue
                     x, y, z = struct.unpack_from("<3f", tb, po + 12 * v)
-                    w = weight(x, y) * wt[k]          # glTF y is Blender's z
+                    w = weight(x, y) * wt[k]  # glTF y is Blender's z
                     if w <= 0.001:
                         continue
                     free = next((s for s in range(4) if wt[s] == 0), None)
@@ -140,7 +142,7 @@ def add_bone(tj, tb, sj, sb, bone, weight, clips):
                 o, n = bv.get("byteOffset", 0) + a.get("byteOffset", 0), bv["byteLength"] - a.get("byteOffset", 0)
                 tb.extend(b"\0" * (-len(tb) % 4))
                 tj["bufferViews"].append({"buffer": 0, "byteOffset": len(tb), "byteLength": n})
-                tb.extend(sb[o:o + n])
+                tb.extend(sb[o : o + n])
                 a["bufferView"], a["byteOffset"] = len(tj["bufferViews"]) - 1, 0
                 tj["accessors"].append(a)
                 acc.append(len(tj["accessors"]) - 1)
