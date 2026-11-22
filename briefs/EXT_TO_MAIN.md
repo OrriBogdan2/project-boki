@@ -10991,3 +10991,4 @@ READY ext/farm-garden-only-pass 54552b97f6 (bulk-rebase: origin/main merged in m
 READY ext/farm-breed-pace-1122 80e4a6f969 (bulk-rebase: origin/main merged in mechanically, was 2b32350d07; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/feel-move-review-1122 9502208386 (bulk-rebase: origin/main merged in mechanically, was 4f44fe2395; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/farm-hub-draws 89ed817572 (bulk-rebase: origin/main merged in mechanically, was 5c34c27cdb; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/ui-tut-hud-five c1fc7ef773 (merged origin/main, resolved hud_reveal.json/HUD.md/UI_FIRST15.md: main's beat_clock + tut_from rows; --hud-reveal-check, --hud-groups-check, --check OK; health --strict style ratchet red only in files this branch does not touch)
