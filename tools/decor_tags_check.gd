@@ -5,23 +5,30 @@ extends RefCounted
 ## card lists it by name, and removing one switches it off again. A built zone counts its own pieces.
 ## Data only, no Home; never touches the real save.
 
-const DECOR_CATS := ["Garden", "Lights", "Furniture", "Statues"]     # the catalog tabs that hold decorations
-const THREE := {"cosy": ["rug", "kin_bed", "bench"], "bright": ["lantern", "lamp_post", "flowers"],
-	"wild": ["bush", "tree", "pine"], "quiet": ["pillar", "kin_statue", "fountain"]}
+const DECOR_CATS := ["Garden", "Lights", "Furniture", "Statues"]  # the catalog tabs that hold decorations
+const THREE := {
+	"cosy": ["rug", "kin_bed", "bench"],
+	"bright": ["lantern", "lamp_post", "flowers"],
+	"wild": ["bush", "tree", "pine"],
+	"quiet": ["pillar", "kin_statue", "fountain"]
+}
 
 var bad := 0
+
+var _tree: SceneTree
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DECOR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
-var _tree: SceneTree
 
 func run(m: Node) -> void:
 	_tree = m.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d["snack_picks"] = 1  # past the first batch: tests steady grow_secs
 	HomeLayout.ensure(Save.d)
 	GardenZones.here = GardenZones.start()
 	_tags_part()
@@ -31,6 +38,7 @@ func run(m: Node) -> void:
 	_built_zone_part()
 	print("DECOR DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _tags_part() -> void:
 	var known: Array = DecorComfort.rules()["effects"].keys()
@@ -43,13 +51,15 @@ func _tags_part() -> void:
 		var named := String(fx.get("name", "")) != "" and String(fx.get("does", "")) != ""
 		ok(named, "%s effect has a name and a line" % tag)
 
+
 ## Only the given pieces on the start zone's island (the fresh layout's untagged pieces stay).
 func _set_deco(ids: Array) -> void:
-	var L: Dictionary = Save.d["layout"]
-	var deco: Array = (L["deco"] as Array).filter(func(e): return DecorComfort.tag_of(String(e["id"])) == "")
+	var l: Dictionary = Save.d["layout"]
+	var deco: Array = (l["deco"] as Array).filter(func(e): return DecorComfort.tag_of(String(e["id"])) == "")
 	for id in ids:
-		deco.append({"id": id, "x": 4 + deco.size(), "z": 4, "r": 0, "u": HomeLayout._next_uid(L)})
-	L["deco"] = deco
+		deco.append({"id": id, "x": 4 + deco.size(), "z": 4, "r": 0, "u": HomeLayout._next_uid(l)})
+	l["deco"] = deco
+
 
 func _card_has(zone: String, tag: String) -> bool:
 	var title := String(DecorComfort.rules()["effects"][tag]["name"])
@@ -58,6 +68,7 @@ func _card_has(zone: String, tag: String) -> bool:
 		found = found or (l as Label).text.begins_with(title + ":")
 		l.free()
 	return found
+
 
 func _switch_part(tag: String) -> void:
 	var three: Array = THREE[tag]
@@ -72,6 +83,7 @@ func _switch_part(tag: String) -> void:
 	ok(not DecorComfort.on(tag), "%s: removing one switches it off" % tag)
 	ok(not _card_has(start, tag), "%s: the card no longer lists it" % tag)
 
+
 ## Each effect's number reaches the system it changes, and only while it is on.
 func _hooks_part() -> void:
 	var fx: Dictionary = DecorComfort.rules()["effects"]
@@ -84,11 +96,14 @@ func _hooks_part() -> void:
 	ok(DecorComfort.value("quiet", "clash", 1.0) == 1.0, "quiet off: squabbles at the rules' chance")
 	_set_deco(THREE["bright"] + THREE["wild"] + THREE["cosy"] + THREE["quiet"])
 	ok(DecorComfort.active(GardenZones.start()).size() == 4, "all four tags three times: four effects on")
-	ok(is_equal_approx(SnackPatch.grow_secs(), grow * float(fx["bright"]["grow"])) and SnackPatch.grow_secs() < grow,
-		"bright on: the patch ripens faster")
+	ok(
+		is_equal_approx(SnackPatch.grow_secs(), grow * float(fx["bright"]["grow"])) and SnackPatch.grow_secs() < grow,
+		"bright on: the patch ripens faster"
+	)
 	ok(GardenVisitor.chance() > chance, "wild on: visitors come more often")
 	ok(DecorComfort.value("cosy", "nap_joy", 0.0) > 0.0, "cosy on: naps restore joy")
 	ok(DecorComfort.value("quiet", "clash", 1.0) < 1.0, "quiet on: fewer squabbles")
+
 
 ## A built zone counts its own fixed pieces, not the start zone's island.
 func _built_zone_part() -> void:

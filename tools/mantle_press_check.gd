@@ -8,20 +8,22 @@ extends RefCounted
 ## only those heroes. Never touches the save. Prints "MPRESS ok|FAIL ..." and "MPRESS DONE, failures: N".
 
 const INPUTS := ["lmb", "rmb", "e", "x", "dash", "jump"]
-const START_BELOW := 1.35       # m under the top, in the air against the face (as --mantle-check's fling)
-const PRESS_ON := 2             # the step of the rise the press is made on (early: most of the rise to go)
-const WATCH := 90               # steps after the press that we watch for it to go off and for the top
-const LEDGE_UP := 2             # terraces: a 1.6 m ledge, a jump's mantle
-const AIM_ON := 2.0             # m past the face the aim sits, on top of the ledge (where you'd aim climbing it)
+const START_BELOW := 1.35  # m under the top, in the air against the face (as --mantle-check's fling)
+const PRESS_ON := 2  # the step of the rise the press is made on (early: most of the rise to go)
+const WATCH := 90  # steps after the press that we watch for it to go off and for the top
+const LEDGE_UP := 2  # terraces: a 1.6 m ledge, a jump's mantle
+const AIM_ON := 2.0  # m past the face the aim sits, on top of the ledge (where you'd aim climbing it)
 
 var bad := 0
 var skipped := 0
 var flow = preload("res://tools/dash_flow_check.gd").new()
 
+
 func ok(cond: bool, what: String) -> void:
 	print("MPRESS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -40,12 +42,14 @@ func run(main: Node) -> void:
 	print("MPRESS DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
 
+
 ## Every hero, or the ones named in --mantle-press-check=<id>,<id>.
 func _heroes() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--mantle-press-check=") and arg.length() > 21:
 			return arg.get_slice("=", 1).split(",")
 	return Arch.ORDER
+
 
 ## Raises a 1.6 m ledge just east of home on the flat training patch; returns where the face is and its top.
 func _ledge(m: Match) -> Dictionary:
@@ -59,6 +63,7 @@ func _ledge(m: Match) -> Dictionary:
 			w.level[w.idx(cx + dx, cz + dz)] = lv + LEDGE_UP
 	return {"x": cx + 3.0, "z": cz + 0.5, "top": (lv + LEDGE_UP) * World.LEVEL}
 
+
 func _input(m: Match, hero: String, input: String, ledge: Dictionary) -> void:
 	var row := DashFlow.mantle_row(input)
 	var want := DashFlow.mantle_mode(input)
@@ -69,8 +74,14 @@ func _input(m: Match, hero: String, input: String, ledge: Dictionary) -> void:
 		print("MPRESS skip %s %s: it doesn't go off in the air without a mantle either" % [hero, input])
 		return
 	var got := _trial(m, input, ledge)
-	ok(got[0] == want and got[1], "%s mantle -> %s: %s, %s (row: %s)" % [hero, input, got[0],
-			"topped the ledge" if got[1] else "never reached the top", want])
+	ok(
+		got[0] == want and got[1],
+		(
+			"%s mantle -> %s: %s, %s (row: %s)"
+			% [hero, input, got[0], "topped the ledge" if got[1] else "never reached the top", want]
+		)
+	)
+
 
 ## One press in one rise: ["fire" (went off in the rise), "buffer" (went off once it was over) or "lost", whether
 ## the hunter got to the top].
@@ -81,7 +92,7 @@ func _trial(m: Match, input: String, ledge: Dictionary) -> Array:
 	h.teleport(Vector3(float(ledge["x"]) - h.r - 0.05, top - START_BELOW, float(ledge["z"])))
 	h.vel = Vector3.ZERO
 	h.grounded = false
-	h.inp["aim"] = Vector3(float(ledge["x"]) + AIM_ON, top + 0.9, float(ledge["z"]))     # (an aimed dash goes up there)
+	h.inp["aim"] = Vector3(float(ledge["x"]) + AIM_ON, top + 0.9, float(ledge["z"]))  # (an aimed dash goes up there)
 	var rising := 0
 	var before := {}
 	var got := "lost"
@@ -95,7 +106,7 @@ func _trial(m: Match, input: String, ledge: Dictionary) -> Array:
 			before = _snap(h)
 			_press(h, input)
 		m.step(Match.DT)
-		h.inp["fire"] = false        # LMB is a tap: one step down
+		h.inp["fire"] = false  # LMB is a tap: one step down
 		topped = topped or h.pos.y >= top - 0.02
 		if not before.is_empty() and got == "lost" and _went_off(h, before, input, in_rise, top):
 			got = "fire" if in_rise else "buffer"
@@ -103,16 +114,19 @@ func _trial(m: Match, input: String, ledge: Dictionary) -> Array:
 			break
 	return [got, topped]
 
+
 func _press(h: Hunter, input: String) -> void:
 	if input in DashFlow.MANTLE_MOVES:
 		h.inp[input] = true
 	else:
 		flow._press(input)
 
+
 func _snap(h: Hunter) -> Dictionary:
 	var s: Dictionary = flow._snap()
 	s["dash_at"] = h.ak.dash_press_at
 	return s
+
 
 ## Did the press go off this step? A dash reached the kit; a jump flung (the rise ended under the top) or, buffered,
 ## took off from the ground; the slots by --dash-flow-check's probe.

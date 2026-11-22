@@ -16,8 +16,10 @@ loop for the two long ones. Written to audio/st_*.wav.
 Original synthesis, no samples. Each is short and sits under the combat sounds (the game plays it at a
 lower volume still); the loops are seamless (sfx_lib.save_loop).
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
 from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, ring, grains
@@ -32,8 +34,10 @@ def ignite_loop():
 
 
 def chill():
-    return mix(ring([1760, 2349, 3520], 0.5, [0.22, 0.17, 0.1], [1.0, 0.6, 0.35]),
-               hpf(noise(0.3), 5000) * env(N(0.3), 0.02, 0.07) * 0.5)
+    return mix(
+        ring([1760, 2349, 3520], 0.5, [0.22, 0.17, 0.1], [1.0, 0.6, 0.35]),
+        hpf(noise(0.3), 5000) * env(N(0.3), 0.02, 0.07) * 0.5,
+    )
 
 
 def static_loop():
@@ -54,30 +58,50 @@ def stun():
 
 
 def root():
-    return mix(S.creak(0.3, 110, 70, 0.7, 1800) * 0.8, kick(90, 50, 0.2, 0.05, 0.06, 1.6), lpf(noise(0.2), 500) * env(N(0.2), 0.005, 0.05) * 0.5)
+    return mix(
+        S.creak(0.3, 110, 70, 0.7, 1800) * 0.8,
+        kick(90, 50, 0.2, 0.05, 0.06, 1.6),
+        lpf(noise(0.2), 500) * env(N(0.2), 0.005, 0.05) * 0.5,
+    )
 
 
 def ground():
-    return mix(ring([520, 780, 1040], 0.35, [0.12, 0.09, 0.06], [1.0, 0.5, 0.3]), at(S.rattle(0.25, 45, 2500, 6000, 0.4, 0.09), 0.03) * 0.6)
+    return mix(
+        ring([520, 780, 1040], 0.35, [0.12, 0.09, 0.06], [1.0, 0.5, 0.3]),
+        at(S.rattle(0.25, 45, 2500, 6000, 0.4, 0.09), 0.03) * 0.6,
+    )
 
 
 def daze():
-    return mix(S.sweep(880, 700, 0.18, 'sin') * env(N(0.18), 0.01, 0.12), at(S.sweep(660, 440, 0.3, 'sin') * env(N(0.3), 0.01, 0.2), 0.16))
+    return mix(
+        S.sweep(880, 700, 0.18, "sin") * env(N(0.18), 0.01, 0.12),
+        at(S.sweep(660, 440, 0.3, "sin") * env(N(0.3), 0.01, 0.2), 0.16),
+    )
 
 
 def antiheal():
-    return mix(ring([1320, 1334], 0.4, [0.2, 0.2], [1.0, 0.9]), at(ring([990, 1004], 0.45, [0.25, 0.25], [0.8, 0.8]), 0.12),
-               lpf(noise(0.4), 600) * env(N(0.4), 0.05, 0.15) * 0.25)
+    return mix(
+        ring([1320, 1334], 0.4, [0.2, 0.2], [1.0, 0.9]),
+        at(ring([990, 1004], 0.45, [0.25, 0.25], [0.8, 0.8]), 0.12),
+        lpf(noise(0.4), 600) * env(N(0.4), 0.05, 0.15) * 0.25,
+    )
 
 
 def build():
-    for name, fn in (('chill', chill), ('slow', slow), ('stun', stun),
-                     ('root', root), ('ground', ground), ('daze', daze), ('antiheal', antiheal)):
-        S.save_cat('st_' + name, fn(), 'cast')
-    S.save_loop('st_ignite_loop', ignite_loop(), 'loop')
-    S.save_loop('st_static_loop', static_loop(), 'loop')
+    for name, fn in (
+        ("chill", chill),
+        ("slow", slow),
+        ("stun", stun),
+        ("root", root),
+        ("ground", ground),
+        ("daze", daze),
+        ("antiheal", antiheal),
+    ):
+        S.save_cat("st_" + name, fn(), "cast")
+    S.save_loop("st_ignite_loop", ignite_loop(), "loop")
+    S.save_loop("st_static_loop", static_loop(), "loop")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()
-    print('gen_status_sfx: done')
+    print("gen_status_sfx: done")

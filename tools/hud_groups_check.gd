@@ -4,6 +4,7 @@ extends RefCounted
 ##   1. the Ways Out strip is deferred (a newcomer) at the landing and the first fight, and revealed once a seat
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
+##   2b. a save's first expedition holds the clock/status strip back until the first Ways Out beat or kill
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
 ##      The landing is at the owner's 5; the counters, glider ring and belt are folded in until they matter (rule 5).
 ##      The later moments add the toasts, the prompt and the strip. The check plays a fresh save (a new player), so
@@ -16,6 +17,7 @@ extends RefCounted
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
 const COUNTS := {"landing": 5, "fight": 7, "heart": 8, "race": 8}      # groups, strip included where it shows
+const CLOCK := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # the clock strip: first beat or kill
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -81,6 +83,8 @@ func run(main: Node) -> void:
 		print("HUDGROUPS   %s: %d groups (budget %d): %s" % [id, g.size(), HudGroups.rules()["budget"], ", ".join(g)])
 		ok(g.size() == int(COUNTS[id]), "%s: %d groups" % [id, COUNTS[id]])
 		ok(g.count("ways_out") == int(STRIP[id]), "%s: the Ways Out strip %s" % [id, "shows" if STRIP[id] else "waits"])
+		ok(HudGroups.clock_shown(m) == bool(CLOCK[id]),
+			"%s: the clock strip %s" % [id, "shows" if CLOCK[id] else "waits"])
 		ok(g.count("prompt") <= 1, "%s: one prompt at most" % id)
 	# 1. the reveal rule
 	m.interact = {}
@@ -93,7 +97,8 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
-	# 5. what folds in until it matters
+	# 5. what folds in until it matters (the beats above made the save remember the clock)
+	Save.d["hud_reveal"].erase("beat_clock")
 	set_moment(m, "landing")
 	var p0: Hunter = m.player
 	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "belt") and not on_screen_has(hud, "counters"),

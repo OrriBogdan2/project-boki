@@ -185,7 +185,7 @@ static func take_prefetched(path: String) -> Resource:
 		if r != null:
 			return r
 	return load(path)
-## Roughly how long each step takes (ms, measured with --perf-probe), for the loading bar.
+## Roughly how long each step takes (ms, measured with --perf-bench --bench-probe), for the loading bar.
 const STAGE_MS := {"build.generate": 250, "world.terrain": 450, "world.roots": 40, "world.scatter_plan": 350, "world.scatter_batches": 250,
 	"world.walls": 650, "world.grass": 450, "world.sky": 60, "world.landmarks": 120, "world.air": 20, "build.systems": 40, "build.pads_exits": 80,
 	"build.hunters": 250, "build.mobs": 200, "build.chests": 60, "build.spawns": 200, "build.hud": 150, "build.finish": 30}
@@ -225,7 +225,7 @@ func warm_up(progress := Callable()) -> void:
 	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
 
-## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
+## Tooling (--perf-bench --bench-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
 var _prof_t := 0
@@ -1457,7 +1457,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
+			var spd := minf(maxf(hv.length(), HunterMove.glide_cruise) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
