@@ -5,7 +5,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
-`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable) only on this branch (the hybrid rig below); Sparkle and Tenzo are off here. The contract `<art>.glb` stays beside it untouched.
+`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable, the hybrid rig below) and the six hunters packed by `tools/meshy/native_hunters` (Sparkle ryzz, Tenzo tarek, Cinder cinder, Kael kael, Motley ostra, Meeko pip). Gil is off: his only rigged file is a Tripo skeleton, not Meshy's. The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync, so the contract's
@@ -56,3 +56,11 @@ Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm 
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+
+## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
+Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
+decimates the mesh in Blender (`decimate.py`: material by material, head and face kept at 35%, UV seams kept, 80k tris),
+grafts it back into the rigged file by material name (`graft.py`: Meshy's node tree, skeleton, skin joints and clips stay
+as Meshy made them; only the vertex data is replaced) and packs it with `native_pack.py` (2048 atlas, 1024 maps). The
+Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
+Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
