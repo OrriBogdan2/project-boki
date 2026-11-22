@@ -627,10 +627,10 @@ func _all() -> void:
 		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
 		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
 	)
-	for w in m.verbs.walls.duplicate():
-		if w.get("by") == AL:
-			m.verbs.walls.erase(w)
-			if is_instance_valid(w.get("node")): (w["node"] as Node).queue_free()
+	for pw in m.verbs.walls.duplicate():
+		if pw.get("by") == AL:
+			m.verbs.walls.erase(pw)
+			if is_instance_valid(pw.get("node")): (pw["node"] as Node).queue_free()
 	AL.queue_free()
 	m.hunters.erase(AL)
 	m.step(ak.DT)
