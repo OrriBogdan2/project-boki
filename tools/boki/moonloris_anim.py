@@ -1,6 +1,7 @@
 """Moonloris's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a slow loris with a
 paper lantern for a belly. It moves with deliberate, hand-over-hand patience, the big-eyed head turning to look at
 everything, then strikes in a flash; when it is scared it floats up like a balloon."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -111,14 +112,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.6, True, idle),
-    "walk": (1.6, True, walk),
-    "run": (0.8, True, run),
-    "hop": (1.2, True, balloon_hop),
-    "carry": (1.6, True, carry),
-    "pet": (2.4, True, pet),
-    "attack": (1.1, False, snap),
-    "ability": (1.6, False, moon_mark),
-    "sleep": (4.4, True, curl_up),
-})
+CLIPS.update(
+    {
+        "idle": (3.6, True, idle),
+        "walk": (1.6, True, walk),
+        "run": (0.8, True, run),
+        "hop": (1.2, True, balloon_hop),
+        "carry": (1.6, True, carry),
+        "pet": (2.4, True, pet),
+        "attack": (1.1, False, snap),
+        "ability": (1.6, False, moon_mark),
+        "sleep": (4.4, True, curl_up),
+    }
+)

@@ -1,6 +1,7 @@
 """Limpetor's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a giant limpet under a
 riveted iron shield, stubborn as rock. It creeps on its foot with the shell rocking over it, clamps down to the ground
 when it braces and heaves the whole boulder up when it fights."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -105,14 +106,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.4, True, idle),
-    "walk": (1.3, True, walk),
-    "run": (0.7, True, run),
-    "hop": (1.0, True, heavy_hop),
-    "carry": (1.4, True, carry),
-    "pet": (2.6, True, pet),
-    "attack": (1.0, False, bash),
-    "ability": (1.5, False, heave),
-    "sleep": (4.4, True, clamp),
-})
+CLIPS.update(
+    {
+        "idle": (3.4, True, idle),
+        "walk": (1.3, True, walk),
+        "run": (0.7, True, run),
+        "hop": (1.0, True, heavy_hop),
+        "carry": (1.4, True, carry),
+        "pet": (2.6, True, pet),
+        "attack": (1.0, False, bash),
+        "ability": (1.5, False, heave),
+        "sleep": (4.4, True, clamp),
+    }
+)
