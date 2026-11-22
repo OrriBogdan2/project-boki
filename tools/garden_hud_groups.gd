@@ -1,5 +1,6 @@
 extends RefCounted
-## --garden-hud-groups [--shots-dir=<dir>] [--size=WxH, default 1280x720]: the garden's screen on day 1 and day 5, in the hub and in two zones.
+## --garden-hud-groups [--shots-dir=<dir>] [--size=WxH, default 1280x720]: the garden's screen on day 1 and day 5,
+## in the hub and in two zones.
 ## For each of the six screens it prints the cards that open on arrival and the HUD groups on show (a group = a
 ## separately placed block the player has to scan: a visible child of the home's UI, with a size), then the signs
 ## in view. Day 1 must stay at DAY1_MAX groups (asserted by --garden-first-day-check). With --shots-dir it also
@@ -68,7 +69,8 @@ static func _is_block(c: Control) -> bool:
 
 ## The visible blocks of the home's UI: their first words and rect.
 static func groups_of(home: Node) -> Array:
-	return blocks_of(home).map(func(c): return "Dash slot" if c is HomeDashSlot else "%s: %s" % [_what(c), c.get_global_rect()])
+	return blocks_of(home).map(
+			func(c): return "Dash slot" if c is HomeDashSlot else "%s: %s" % [_what(c), c.get_global_rect()])
 
 ## A short name for a block: its first words.
 static func _what(c: Control) -> String:

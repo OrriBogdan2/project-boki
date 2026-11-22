@@ -12,7 +12,8 @@ extends RefCounted
 const SettingsScript := preload("res://scripts/core/settings.gd")
 const HudGroups := preload("res://tools/garden_hud_groups.gd")
 const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
-		[Vector2i(3440, 1440), 1.0], [Vector2i(960, 540), 1.0], [Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
+		[Vector2i(3440, 1440), 1.0], [Vector2i(960, 540), 1.0],
+		[Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
 const SAFE_MIN := 16.0       # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
 const HUD_SAFE := 8.0        # px (logical), the least gap from a HUD block to the window's edge
 const HOST_FRAC := 0.9       # a block this share of the window wide is a host or a dim, not a HUD group
@@ -155,14 +156,16 @@ func _scan_hud(tag: String) -> void:
 				touching.append("%s x %s" % [blocks[i].name, blocks[j].name])
 	ok(touching.is_empty(), "%s: no two HUD blocks overlap (%d: %s)" % [tag, touching.size(), touching.slice(0, 3)])
 	var padded: Array = blocks.filter(func(c): return c is PanelContainer and _padded(c))
-	ok(padded.is_empty(), "%s: no HUD card taller than its content (%d: %s)" % [tag, padded.size(),
-			padded.slice(0, 3).map(func(c): return "%s %s vs %s" % [c.name, c.size.y, c.get_combined_minimum_size().y])])
+	var tall := padded.slice(0, 3).map(
+			func(c): return "%s %s vs %s" % [c.name, c.size.y, c.get_combined_minimum_size().y])
+	ok(padded.is_empty(), "%s: no HUD card taller than its content (%d: %s)" % [tag, padded.size(), tall])
 	var cut: Array = []
 	for c in blocks:
 		cut.append_array(c.find_children("*", "Control", true, false).filter(_cut_short))
 		if c is Label or c is Button:
 			cut.append_array([c].filter(_cut_short))
-	ok(cut.is_empty(), "%s: no HUD text cut short (%d: %s)" % [tag, cut.size(), cut.slice(0, 3).map(func(c): return c.text)])
+	var words := cut.slice(0, 3).map(func(c): return c.text)
+	ok(cut.is_empty(), "%s: no HUD text cut short (%d: %s)" % [tag, cut.size(), words])
 
 ## A card whose height is more than its content needs (a panel grows by itself but never shrinks back).
 func _padded(c: Control) -> bool:
