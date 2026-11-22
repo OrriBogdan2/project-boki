@@ -298,8 +298,8 @@ func _draw() -> void:
 
 ## Your squad's portraits and names, top left: who you are dropping with.
 func _squad_row(r: Rect2, a: float) -> void:
-	if party.is_empty():
-		return
+	if party.size() < 2:
+		return      # (solos: nobody to drop with)
 	var left := HORIZONTAL_ALIGNMENT_LEFT
 	_text(Vector2(r.position.x, r.position.y - 6.0), "YOUR SQUAD", UI.caps, 12, Color(UI.GOLD, a), 2, left)
 	var x := r.position.x
