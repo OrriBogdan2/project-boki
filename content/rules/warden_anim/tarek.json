@@ -162,7 +162,8 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"base"
+		"base",
+		"swim"
 	],
 	"upper": [
 		"hips",
