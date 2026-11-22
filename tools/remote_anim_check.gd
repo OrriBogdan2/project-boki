@@ -178,7 +178,8 @@ func _hazard_moves() -> void:
 		_fresh(host_h)
 		host_h.teleport(spots[kind])
 		await _run(0.8)
-		var mine := [bool(host_h.anim_s.get("swim", false)), not (host_h.anim_s.get("footing", {}) as Dictionary).is_empty()]
+		var footing := host_h.anim_s.get("footing", {}) as Dictionary
+		var mine := [bool(host_h.anim_s.get("swim", false)), not footing.is_empty()]
 		replies.clear()
 		Net.lobby_emit("ra", {"c": "hz"})
 		await _reply()

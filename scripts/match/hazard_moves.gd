@@ -15,7 +15,7 @@ const META := "hazard_move"  # a remote hunter's move from its snapshot
 static func of(h: Hunter) -> int:
 	if h.remote:
 		return int(h.get_meta(META, NONE))
-	if not h.grounded or h.downed or h.out or h.mounted():
+	if h.m == null or not h.grounded or h.downed or h.out or h.mounted():
 		return NONE
 	var tz := TerrainHazards.of(h.m)
 	if tz and tz.in_deep(h.pos):
