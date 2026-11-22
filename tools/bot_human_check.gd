@@ -31,8 +31,12 @@ var n := {}                     # counters
 var log_left := 30
 var st := {}                    # hunter -> its state between samples
 var teams := 10
-var wall_ms := 900000           # the run stops and reports after this much real time (a loaded server is slow)
-var t0_ms := 0
+## The run stops and reports (limits skipped) after this much real time since the engine started, boot included:
+## under the gate's 450 s cap for this check (flag_timeouts.tsv), so a loaded host cuts it here instead of the
+## gate killing it as a red timeout (it was 900 s, past the cap: 12 of 13 gate runs on rpc8 died at the cap on
+## main and on the branch alike). An idle host finishes the whole expedition in about 270 s.
+var wall_ms := 400000
+var t0_ms := 0                  # ms the wall clock counts from (0 = engine start)
 var cut := false                # the wall clock ended a run before its match time was up
 var plain := false              # --bh-plain: bots without squad play or retreats (BotSquad.on), to compare
 
@@ -55,7 +59,6 @@ func run(main: Node) -> void:
 		if a == "--bh-plain":
 			plain = true
 			strict = false
-	t0_ms = Time.get_ticks_msec()
 	for sd in seeds:
 		_expedition(main, int(sd), diff, secs)
 	var bad := _report(diff, seeds.size())
