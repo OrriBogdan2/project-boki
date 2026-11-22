@@ -48,8 +48,8 @@ func run(main: Node, what: String) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _style(cam: CamRig) -> void:
-	var src: Dictionary = CamRig.RULES["source"]
-	var st: Dictionary = CamRig.RULES["styles"]["default"]
+	var src: Dictionary = CamRig.rules["source"]
+	var st: Dictionary = CamRig.rules["styles"]["default"]
 	cam.use_style("default")
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
 			and is_equal_approx(cam.lens, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
@@ -63,7 +63,7 @@ func _style(cam: CamRig) -> void:
 			% [feet, str(src["feet_below_pct"])])
 
 func _lean(cam: CamRig) -> void:
-	var fm: Array = CamRig.FOLLOW["lean"]
+	var fm: Array = CamRig.follow_v["lean"]
 	var deadzone := float(fm[0])
 	ok(cam.lean_to(Vector3(deadzone * 0.9, 0, 0)) == Vector3.ZERO, "no lean inside the %.1f m deadzone" % deadzone)
 	for z in ZOOMS:
@@ -84,7 +84,7 @@ func _lean(cam: CamRig) -> void:
 	cam.zoom = 1.0
 
 func _source_style(cam: CamRig) -> void:
-	var src: Dictionary = CamRig.RULES["source"]
+	var src: Dictionary = CamRig.rules["source"]
 	ok(Settings.DEFAULTS["cam_style"] != "source_scale", "source_scale is off by default (the Settings camera is %s)"
 			% Settings.DEFAULTS["cam_style"])
 	cam.use_style("source_scale")
