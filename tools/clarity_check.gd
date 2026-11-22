@@ -8,6 +8,7 @@ extends RefCounted
 ## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
 ## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
+## Your own crowd control shows as a line under your vitals, worst first.
 
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
@@ -86,6 +87,8 @@ func run(main: Node) -> void:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
 	_cc_plate(m, foes[0], foes[1])
+	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
+	_cc_self(m, P)
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
@@ -294,6 +297,30 @@ func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	m.on_kin_ability(mine, mine.runner.def_of("k1"), false)
 	ok(words.call() == w0 + 1, "your own Boki casting: its name floats")
 	mine.stow()
+
+
+## Slowed, then rooted, then stunned on top: the line puts stun first and root before Slow, each bar
+## starts full and shrinks with time, and the line is empty once it's over.
+func _cc_self(m: Match, P: Hunter) -> void:
+	P.stun_t = 0.0      # (the plate section above can leave you slowed)
+	P.root_t = 0.0
+	P.slow_t = 0.0
+	ok(SelfCcLine.entries(P).is_empty(), "you're free: no CC line")
+	P.slow_t = 3.0
+	P.root_t = 2.0
+	P.stun_t = 1.0
+	var words: Array = SelfCcLine.entries(P).map(func(x): return x[0])
+	ok(words == ["STUNNED", "ROOTED", "SLOWED"], "worst first: %s" % [words])
+	var full := float(SelfCcLine.entries(P)[0][3])
+	_run(m, 0.5)
+	var e: Array = SelfCcLine.entries(P)
+	var shrunk: bool = e.size() == 3 and float(e[0][3]) > 0.4 and float(e[0][3]) < 0.6
+	ok(full > 0.99 and shrunk, "the stun bar starts full and shrinks (%.2f after 0.5 s of 1 s)" % [e[0][3]])
+	ok(_same(e[0][1], _icon(P, "status_stunned")[0][1]), "the line uses the plate's stun colour")
+	P.stun_t = 0.0
+	P.root_t = 0.0
+	P.slow_t = 0.0
+	ok(SelfCcLine.entries(P).is_empty(), "all over: the line is gone")
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)

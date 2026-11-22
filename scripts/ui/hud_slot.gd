@@ -119,8 +119,9 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
 	padlock(H, r.get_center() + Vector2(0, 4), lcol)
 	if can:
-		var pt := TextCache.fit(HudStyle.BIG, POINT_TAG, 10, r.size.x + 8.0)
-		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), pt, 10, HudStyle.GOLD, 3)
+		if not H.in_fight():      # the gold glow says it; the word waits for a quiet moment
+			var pt := TextCache.fit(HudStyle.BIG, POINT_TAG, 10, r.size.x + 8.0)
+			HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), pt, 10, HudStyle.GOLD, 3)
 	elif tag != "":
 		var tw := TextCache.width(HudStyle.BIG, tag, 10) + 12.0
 		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 14), Vector2(tw, 14))

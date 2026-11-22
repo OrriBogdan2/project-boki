@@ -24,7 +24,7 @@ a boss with `ink` in its def gives its Ink to the killer, and an extracted run f
 
 ## Consequences
 - Save v12: `Evo.migrate` keeps levels (over 100 come down to 100) and forms, adds `was`, and
-  freezes the old generated form name ("Cindfang") in `form_name` until the Boki evolves.
+  freezes the old generated form name ("Vesfang") in `form_name` until the Boki evolves.
 - Today no line can evolve: every target lacks data or a model. Lines start as art lands.
 - No line uses trade yet (the owner named none); the condition works and is tested.
 - Inks have no use button yet (`Evo.use_ink` is the API); it needs Ermink and Jarmit in data.
