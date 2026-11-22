@@ -539,9 +539,9 @@ func _rope_snaps(p: Vector3) -> bool:
 	var far := Vector2(h.pos.x - p.x, h.pos.z - p.z).length() > float(rd.get("max_len", 14.0))
 	return far or m.time - throw_at > float(rd.get("max_t", 6.0))
 
-func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
-	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
-	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
+func _mace_hit(f: Ent, dmg: float, _dir: Vector2) -> void:
+	# no knock: the card's Magnetic Hammer throw is damage only (KIT_PARITY "Knock distances"), so nothing to Crush with
+	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "melee": true})
 	m.sfx("bulwark_hammer_clang", f.pos, -4.0)
 
 func _tick_mace(dt: float) -> void:

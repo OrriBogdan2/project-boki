@@ -899,8 +899,8 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Neve | Hoar fan dart (`hoar_fan.kb`) | 0.4 | nudge | Ice Darts: no knock [D] | match (nudge) | n/a |
 | Motley | Snap shards (1.0 in code) / orb (`tether_lantern.kb`) | 1.0 / 1.0 | nudge | Void Snap: stun, no knock; Gravity Orb: none [D] | match (nudge) | n/a |
 | Albert | Crushing Blow (`lmb.smash_kb`, tap to full) | 5-13 | 1.15-5.86 m | "HOLD to charge a swing, up to 522 dmg + Knockback" [D]; 2-3 bh (3.6-5.4 m) along the swing (bjorn.md 0148-0151) [F] | match | `[?]` (full 5.86 m is 0.5 m past F) |
-| Albert | Crushing Blow, perfect release (`perfect.kb_k` 1.4) | 18.2 | 9.11 m | no perfect release on the card [D] | differ (ours) | n/a |
-| Albert | Mace throw hit (3.0 in code) | 3 | 0.47 m | Magnetic Hammer throw: "192 dmg", no knock [D] | differ | n/a |
+| Albert | Crushing Blow, perfect release (`perfect.kb_k` 1.4) | 18.2 | 9.11 m | no perfect release on the card [D] | owner (OR#49: "bigger knockback" on the timed release, `docs/heroes/bulwark.md`) | n/a |
+| Albert | Mace throw hit (no knock) | none | none | Magnetic Hammer throw: "192 dmg", no knock [D] | match (knock removed, `ext/albert-knock-rows`) | n/a |
 | Albert | Shield Charge (`dash.charge_kb`) | 11, lift 2.5 | 4.43 m | Shield Bash: "knock enemies back" [D]; one augmented hit, no distance (bjorn.md 0309) [F] | match | `[?]` |
 | Albert | Whirl (`dash.whirl_kb`) | 7 | 2.01 m | Spin Dash: "knockback around you" [D]; no distance [F] | match | `[?]` |
 | Albert | Shield Slam (`rmb.slam.push`) | 12 | 5.12 m | none: no slam in the kit [D] | differ (gap 15, `ext/parity-bulwark-guardcut`) | n/a |
@@ -920,6 +920,7 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall; Sable's empowered bolt. Cutting
 - Ours-only knocks the card does not list (14 rows marked **differ**): Kael's Lunge, Haul Slam, Flame Step and Riposte;
   Lace's longbow shot (3.5 is over `KNOCK_MIN`, so every arrow is a 0.62 m knock) and ult shots; Tenzo's slam; Grimble's
+  dash; Albert's perfect release (kept: owner OR#49), Shield Slam and boop (the mace throw's knock was cut, `ext/albert-knock-rows`); Sparkle's Kitefall; Sable's empowered bolt. Cutting
   dash; Albert's mace throw, perfect release, Shield Slam and boop; Sparkle's Kitefall and Sable's empowered bolt (both now cut, `ext/sparkle-sable-knock-cut`, so 12 remain). Cutting
   them follows DECISIONS 2026-11-07 (ours-only riders: keep none). Lace's longbow kb 3.5 to 2.0 is the smallest change
   (it turns every arrow from a 0.62 m knock into a nudge).
