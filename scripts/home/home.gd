@@ -1502,7 +1502,7 @@ func _move_kin(d: float) -> void:
 				# everyone has a favourite corner of the farm they drift back to
 				k["goal"] = _haunt(k, here) + Vector3(randf_range(-1.6, 1.6), 0, randf_range(-1.6, 1.6))
 			else:
-				k["goal"] = world.random_ground(maxi(here, 0))
+				k["goal"] = ZoneVents.goal(k, world.random_ground(maxi(here, 0)))
 			if randf() < 0.3 * float(pers.get("chatty", 1.0)):
 				_emote(k, "♥" if trust > 65.0 else ("?" if trust < 30.0 else "★"))
 		if k.has("fetch"):
@@ -4612,6 +4612,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.spacer(4))
 		dv.add_child(UI.label("%s is picked. Pick one more." % Save.kin(String(nook_pick[0]))["name"], UI.T_SMALL, UI.ACCENT_HI))
 	ClanLoanPanel.side_rows(dv, _open_nook)
+	ClanChatPanel.side_rows(dv)
 
 func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
