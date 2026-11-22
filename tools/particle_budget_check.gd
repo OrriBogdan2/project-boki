@@ -6,18 +6,20 @@ extends RefCounted
 ## each one down must draw fewer particles, and Ultra at least what High draws (its longer draw distance keeps
 ## more of the region motes running, ParticleCount.pace).
 
-const BUDGET := 4000            # particles on screen at once, the cap
-const MOVE_MAX := 160           # particles one Hero move may ask for at once, at full amount
-const STEPS := 90               # sim steps before the count, so the lairs, raid fx and pickups are out
+const BUDGET := 4000  # particles on screen at once, the cap
+const MOVE_MAX := 160  # particles one Hero move may ask for at once, at full amount
+const STEPS := 90  # sim steps before the count, so the lairs, raid fx and pickups are out
 
 var bad := 0
-var max_burst := 0       # the largest literal amounts asked of Fx.burst and Fx.spark
+var max_burst := 0  # the largest literal amounts asked of Fx.burst and Fx.spark
 var max_spark := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("PARTICLES %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -35,6 +37,7 @@ func run(main: Node) -> void:
 	print("PARTICLES %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## What each Hero move asks for: the particle layers' amounts (a layer never gets more than its pool node holds).
 func _moves() -> void:
 	var rows: Array = []
@@ -49,6 +52,7 @@ func _moves() -> void:
 	var top := ", ".join(rows.slice(0, 8).map(func(r): return "%s %d" % [r[1], r[0]]))
 	print("PARTICLES Hero moves, most first: " + top)
 	ok(rows[0][0] <= MOVE_MAX, "no Hero move asks for more than %d (%s %d)" % [MOVE_MAX, rows[0][1], rows[0][0]])
+
 
 ## The shared Fx calls in the scripts: burst(at, col, amount) and spark(at, dir, col, amount), literal amounts only.
 func _sites() -> void:
@@ -68,9 +72,14 @@ func _sites() -> void:
 					max_spark = maxi(max_spark, n)
 	var ks := by_file.keys()
 	ks.sort_custom(func(a, b): return by_file[a] > by_file[b])
-	print("PARTICLES Fx amounts asked for per file, most first: " + ", ".join(ks.slice(0, 8).map(
-		func(k): return "%s %d" % [k, by_file[k]])))
+	print(
+		(
+			"PARTICLES Fx amounts asked for per file, most first: "
+			+ ", ".join(ks.slice(0, 8).map(func(k): return "%s %d" % [k, by_file[k]]))
+		)
+	)
 	print("PARTICLES largest literal amounts: burst %d, spark %d" % [max_burst, max_spark])
+
 
 func _scripts(dir: String) -> Array:
 	var out: Array = []
@@ -80,6 +89,7 @@ func _scripts(dir: String) -> Array:
 	for d in DirAccess.get_directories_at(dir):
 		out.append_array(_scripts(dir.path_join(d)))
 	return out
+
 
 ## The top-level arguments of the call whose "(" ends at `from`.
 func _args(src: String, from: int) -> PackedStringArray:
@@ -101,20 +111,33 @@ func _args(src: String, from: int) -> PackedStringArray:
 		out[i] = out[i].strip_edges()
 	return out
 
+
 ## 30 Hunters at one preset: what is drawn now, plus the Hero VFX cap and the full Fx pools.
 func _preset(main: Node, id: String) -> int:
 	Settings.v["quality"] = id
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 10, "squad": 3, "total": 30, "seed": 4101, "no_drop": true, "god": true, "raid": "ash",
-		"arch": "juggernaut", "cls": Arch.weight("juggernaut"), "weapon": Arch.signature("juggernaut")})
+	m.start(
+		{
+			"teams": 10,
+			"squad": 3,
+			"total": 30,
+			"seed": 4101,
+			"no_drop": true,
+			"god": true,
+			"raid": "ash",
+			"arch": "juggernaut",
+			"cls": Arch.weight("juggernaut"),
+			"weapon": Arch.signature("juggernaut")
+		}
+	)
 	m.set_process(false)
 	for i in STEPS:
 		m.step(1.0 / 60.0)
 	var by := ParticleCount.by_owner(m)
 	for k in by.keys():
 		if k.begins_with("Fx/"):
-			by.erase(k)        # the Fx pools are counted in full below, not as they happen to be playing
+			by.erase(k)  # the Fx pools are counted in full below, not as they happen to be playing
 	var now := ParticleCount.total(by)
 	var bursts: int = m.fx.bursts.size() * maxi(3, int(round(max_burst * m.fx.particles)))
 	var spark_k := clampf(m.fx.particles / Fx.PARTICLES, 0.4, 1.0)
@@ -123,8 +146,12 @@ func _preset(main: Node, id: String) -> int:
 	var worst := now + bursts + sparks + cap
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("PARTICLES %s: drawn %d (%s), + Fx pools %d + sparks %d + Hero VFX cap %d = %d" % [id, now,
-		", ".join(ks.slice(0, 4).map(func(k): return "%s %d" % [k, by[k]])), bursts, sparks, cap, worst])
+	print(
+		(
+			"PARTICLES %s: drawn %d (%s), + Fx pools %d + sparks %d + Hero VFX cap %d = %d"
+			% [id, now, ", ".join(ks.slice(0, 4).map(func(k): return "%s %d" % [k, by[k]])), bursts, sparks, cap, worst]
+		)
+	)
 	ok(worst <= BUDGET, "%s: the worst fight moment (%d) is under %d" % [id, worst, BUDGET])
 	m.queue_free()
 	await main.get_tree().process_frame

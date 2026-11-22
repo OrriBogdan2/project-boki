@@ -2,13 +2,12 @@
 Personality: cocky, light, all hip and wrist; hands-free: every attack is a finger gun with both thumbs up, she blows the smoke off after the good ones.
 Hands: G and LP are the wrists; BE/LBE are (index finger direction, thumb direction).
 Run: blender -b --python tools/art1/ryzz_clips.py -- <ryzz.blend> <out.glb> [clip,clip]"""
-import sys, os, math, json
+import sys, os, math
 import bpy
-import numpy as np
 from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from posekit import Clip, FnClip, Solver, bake, add_breath, ang_dir as D, at, eul, lerp, FPS, frame_of, BREATH_AXES
+from posekit import Clip, FnClip, Solver, bake, add_breath, ang_dir as D, lerp, FPS, frame_of, BREATH_AXES
 import ryzz_pieces as K
 import crouchkit
 
@@ -382,7 +381,7 @@ def extras(P):
         g = P.get("gun" + side, 0.0)
         c1 = 1.45 * g + 0.15
         c2 = 1.55 * g + 0.1
-        sg = -1.0 if side == "R" else 1.0
+        _sg = -1.0 if side == "R" else 1.0
         out["curl." + side] = (Quaternion((0, 0, 1), 0) @ Quaternion((0, 1, 0), 0) @ Quaternion((1, 0, 0), 0), None)
         out["curl." + side] = (Quaternion(CURL_AX[side], c1), None)
         out["curl2." + side] = (Quaternion(CURL_AX[side], c2), None)
@@ -390,7 +389,7 @@ def extras(P):
         out["index2." + side] = (Quaternion(CURL_AX[side], 0.1 - 0.1 * g), None)
         out["thumb." + side] = (Quaternion(CURL_AX[side], -0.55 * g), None)
     out["skirt"] = (Quaternion((1, 0, 0), 0.35 * P.get("skirt", 0.0)), None)
-    k = max(0.02, P.get("gum", 1.0))
+    _k = max(0.02, P.get("gum", 1.0))
     out["gum"] = (None, None)
     return out
 

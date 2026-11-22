@@ -65,5 +65,7 @@
 	"joy_doc": "Joy your Boki gets for each glint landed.",
 	"trust": 1.0,
 	"trust_doc": "Trust for the session when at least one glint was landed.",
-	"card_s": 6.0
+	"card_s": 6.0,
+	"derby": {"common": 1, "rare": 3, "gems": 10, "friends": 5},
+	"derby_doc": "Fishing derby: race the five casts a friend's visit snapshot kept. A landed glint scores common points, a rare one rare points; the higher total wins gems (a tie pays nothing), paid once per friend per garden day. Only friends who landed something are listed (at most `friends`)."
 }
