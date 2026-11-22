@@ -258,3 +258,10 @@ rest and 5% in idle; no lost tris or clips; no new open edges). Open the `<id>_r
 in the fix, blue = only in live, yellow = black, magenta = looking into the shell) and look at them. The check is unlit and
 front/side only: an in-engine shadow wedge (pip hit_f, 11-19) still needs the in-game shot.
 
+
+## Torn right foot, 2026-11-18 (ext/grimble-ingame-fix-1117)
+Cutting the floor puddle took the Meshy faces of Grimble's right foot with it: below the knee his right leg was a fan of
+shards that tore in every clip (the stretch check cannot see it; Blender renders of idle, run_f, throw, lunge and
+death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
+dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
+paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).

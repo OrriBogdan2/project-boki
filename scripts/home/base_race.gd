@@ -145,6 +145,8 @@ static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 		"jump":
 			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
 			p *= lerpf(1.0, float(R["glide"]), g)
+	if s.has("vent") and winged(rec):
+		p *= float(R["vent_mult"])
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -193,7 +195,7 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(tw.get("wobble", R["wobble"]))
+		var w := float(tw.get("wobble", R["dash_wobble"]))
 		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
@@ -524,6 +526,10 @@ func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
 	bar.lbl.text = "Cheer for %s  ·  mark %d of 3%s" % [who, mini(run.cheered + 1, 3), last]
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null or relay.run != null
+
 ## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
 	if relay.input(event):
@@ -595,7 +601,12 @@ func _place_runners() -> void:
 		runners[i]["pos"] = p
 		if winged(runners[i]["rec"]):
 			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
-			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
+			var vent: bool = st[s].has("vent")
+			var gap: bool = String(st[s]["kind"]) == "jump" or vent      # it glides the gap or rides a vent
+			n.set_meta("aloft", gap and BokiFly.glides(left))
+			if vent:
+				var f := clampf(into / float(st[s]["len"]), 0.0, 1.0)
+				n.position.y += float(BokiFly.rules()["vent_h"]) * sin(PI * f)
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:

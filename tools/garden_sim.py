@@ -57,9 +57,11 @@ def live_rules(sim):
     else:
         items = fb["items"]
     paths = load("evo_paths.json")
-    # evo_paths.json now keys lines by live species: the sim's own line (Burrlet) stays on its fallback copy
-    live = paths and paths["lines"].get(sim["line"])
-    line = dict(live, pips=paths["pips"]) if live else fb["line"]
+    # the sim's line can leave evo_paths.json (burrlet did); fall back to the frozen copy then
+    if paths and sim["line"] in paths.get("lines", {}):
+        line = dict(paths["lines"][sim["line"]], pips=paths["pips"])
+    else:
+        line = fb["line"]
     toys = load("toys.json") or {}
     joy = {"gain": toys.get("joy_gain", 10.0), "below": toys.get("joy_below", 85.0)}
     gems_win = (load("base_race.json") or {}).get("gems_win", sim["gems_win"])
