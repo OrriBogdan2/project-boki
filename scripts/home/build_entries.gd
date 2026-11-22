@@ -45,6 +45,7 @@ func catalog_entry(id: String, cb: Callable) -> Dictionary:
 		e["model"] = model_of(id)
 		if int(c.get("scrap", 0)) > 0 and int(hb.L()["inv"].get(id, 0)) == 0:
 			e["note"] = "+ %d scrap" % int(c["scrap"])
+	e["hl"] = FarmTutorial.marks().has(id)
 	if int(e["owned"]) > 0:
 		e["note"] = "from storage"
 		e["off"] = false
