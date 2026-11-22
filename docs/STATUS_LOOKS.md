@@ -14,7 +14,7 @@ hit's stagger (Oomph: a 0.28 s slow that is the hit's own feel) shows no slow lo
 | stun | stars on a dark disc | over the head | fast spin | yellow |
 | Daze | ring of crystals | high over the head | wobble | orange (Vex) |
 | root | thorns | driven in round the feet, leaning over them | strain | violet (Meeko) |
-| Grounded | cords and a down arrow | round the legs, arrow over the head | counter-turning, arrow stamps | amber (Bola) |
+| Grounded | cords and a down arrow | round the legs, arrow over the head | counter-turning, arrow stamps | amber (Bola); the caster's colour when the kit names it (`KitStatus.apply` `by`: Sparkle's Skycall, pink) |
 | slow | rings | knees to the ankles | slide down and tighten | lavender |
 | Chill | ice shell, crystals | whole body | still | ice blue (Neve) |
 | burning | flame tongues | up the body | flicker | orange/yellow (Cinder) |
