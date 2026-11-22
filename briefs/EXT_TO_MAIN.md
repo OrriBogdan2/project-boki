@@ -10917,3 +10917,4 @@ READY ext/ui-pick-countdown-verify caf1f6c617d (pick countdown verified at four 
 READY ext/combat-hitbox-zero-rows 765cb1e0300dee55f24e1ec788d22d7272e5acb0 (hit shapes measured for the zero-hit rows)
 READY ext/anim-boki-eat-sleep-clips 991d7786b6 (Boki eat/sleep use baked clips)
 READY ext/anim-boki-starter-glide 149872f6e9d58b34aac5b4228db0d335e8292c13 (starter Boki glide clips)
+READY ext/vfx-gil-smoke-ring 1424d218647472ea2e4a461f389346512f2d28eb (Gil RMB/Zeep looks cleaned up)
