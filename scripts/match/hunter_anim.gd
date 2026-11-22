@@ -549,6 +549,11 @@ static func land_tier(fall_v: float, from_glide: bool) -> int:
 		return 2
 	return 1 if fall_v >= LAND_HOP_V else 0
 
+## The landing squash of a weight class for a land_tier: Vector2(depth, seconds), from content/rules/land_feel.json.
+static func land_feel(weight: String, tier: int) -> Vector2:
+	var way := (Content.rules("land_feel")[weight] as Dictionary)[["hop", "hop", "drop", "dive"][tier]] as Dictionary
+	return Vector2(float(way["depth"]), float(way["s"]))
+
 ## How long a jump still has before it lands, from the vertical speed and the height above the ground.
 static func _time_left(vy: float, h: float) -> float:
 	var up := maxf(vy, 0.0)
@@ -644,11 +649,11 @@ func update(dt: float, s: Dictionary) -> void:
 	if just_landed:
 		var fall_v := -vy_prev
 		var tier := land_tier(fall_v, glide_k > 0.5)
-		# the hop: a small dip, gone in ~0.1 s; the drop or a glide's end: a deep crouch, up again in ~0.3 s; the
-		# dive: the full crouch, up in ~0.4 s
-		var hard := 0.35 if tier == 1 else clampf(fall_v / 14.0, 0.7, 1.0)
+		# the squash's depth and length by class (content/rules/land_feel.json), the hop's dip to the dive's crouch
+		var lf := land_feel(cls, tier)
+		var hard := lf.x if tier < 2 else clampf(fall_v / 14.0, lf.x, 1.0)
 		land_k = maxf(land_k, hard) if tier > 0 else land_k
-		land_rate = [3.5, 3.5, 3.0, 2.5][tier] * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
+		land_rate = hard / lf.y
 		if trick == "ball" or (cls == "heavy" and tier >= 2):
 			slam_k = 1.0
 			slammed = true
@@ -1378,6 +1383,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	# aiming or relaxed: guns come up when you fire, and drop to a carry a little after
 	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
+	model.set_meta(WardenHolster.DRAW, aim_k)
 	var want_carry := 1.0 if r1 > 0.55 and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
