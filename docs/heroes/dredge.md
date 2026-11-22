@@ -298,6 +298,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge timing | short and fast, seen travelling, then he stops | "barge: a short, fast shove you see travel (about half way at half its time), then he stops" |
 | A run of barges | three, a short gap between | "barge: three in a row, a short gap between (a press inside the gap does nothing)" |
 | Barge into a foe | it touches nobody (no shove, no damage) | "barge: it shoves and hurts nobody (the source's Brute Dash)" |
+| Barge `hit_kb` | removed: it was dead data (never read), so the barge has no knock (ext/tenzo-grimble-knock-cut) | Brute Dash: no damage, no knock [D] |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
 | Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
@@ -356,46 +357,6 @@ held height while it is out), so X now goes through the flight like E and the gu
 second RMB stays refused because the first one's cooldown is already running. No frame shows a press during the throw: if
 footage ever shows the throw refusing casts, the rows flip back. The other rows the source speaks to (the reel's lock, the
 ult's planted charge, the glider) already matched; the open rows have no source line. Suggestion only, not built: the Anchor's wind-up
-could refuse the gun if a clip shows him firing mid-slam (the sheet's frames 0221-0236 show no shot). In flight: ext/grimble-parity-verify
-(cooldowns), ext/grimble-hook-arm-v2-rebased and the stretch branches touch the arm's look, not these rules.
-
-## Cancels (ability to ability)
-
-What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
-ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-sv/briefs/kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
-or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
-ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
-so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
-held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
-free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
-hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
-
-| First (phase) | Second | Source | Ours | Verdict | Evidence |
-|---|---|---|---|---|---|
-| Deep Reach reel (to the arrival, up to 3 s) | LMB tap or hold | [W] only the dash and the air dash work while it pulls | gun locked (`can_shoot`); a held LMB fires the frame the reel ends, a tap is lost | match | `reel: the gun is locked`; [W]; [F] dredge.md:241 (open question) |
-| reel | RMB, E, X | as above | each refused (the deny buzz); the reel runs on | match | `reel: a second Deep Reach is denied`, `E is denied while reeling`; `ult` row below |
-| reel | jump, glide | [W] as above; [F] 0127 "GROUNDED" on the caster | Grounded for the whole reel: no jump, no glider | match | dash_flow `into_jump.rmb` lock; `KitStatus` "gnd"; item 31 |
-| Deep Reach, arm out (flight to the miss, up to 11.5 m) | LMB | not shown (the reel is the only listed lock) | both: a volley goes (probed) | unsettled | [F] dredge.md:77 "the video doesn't test this" |
-| arm out | E | not shown | both: the Anchor winds up (probed) | unsettled; RMB and X are refused here, E and LMB are not | `cast_e` has no `flying` test, `fire_rmb` and `cast_ult` have |
-| arm out | X, RMB again | not shown | refused | unsettled | probed |
-| arm out | jump | owner item 31: height held from the throw | no jump from the throw to the miss or the end of the reel | match (owner) | dash_flow `into_jump.rmb` |
-| Anchor Drop wind-up (0.38 s, planted) and its recovery (to about 1.0 s) | LMB | not shown; [F] 0221-0236 is one beat, no second press | both: a volley goes (probed); he walks at 70% in the wind-up | unsettled | [F] dredge.md:111-124 |
-| Anchor wind-up | E again, RMB, X | not shown (no recast on the card) | each refused, the wind-up runs on (probed) | unsettled | `cast_e`, `fire_rmb`, `cast_ult` gate on `wind` |
-| Anchor wind-up | jump | not shown | goes (no `cast_locked`); the wind-up runs on | unsettled | item 51 row check: `every slot casts mid-jump and a jump or Shift moves him out of it` |
-| Air Anchor smash (a straight drop) | glide | owner bug-26 pattern: the glider wins; [W] has no slam-then-glide | a fresh glide press ends the smash with no hit; a key already held does not | match (owner) | `_glide_wins` (17eb00ec1) |
-| air smash | LMB, RMB, X | not shown | gun and X refused; RMB refused (`dive`) | unsettled | `can_shoot`, `fire_rmb` |
-| Brass Broadside (1.1 s charge, two waves, 0.6 s apart) | LMB, RMB, E | [F] ult f22-f43: planted, nothing else shown; owner item 36: a slow walk | all refused until both waves are out; he walks at 30% then 20% | match (owner and footage) | `ult: RMB and E are locked while it runs`; the gun is locked in `can_shoot` |
-| Broadside | X again | [F] one press fires both waves (not tap and recast) | ignored (no recast) | match | `HeroUlt.press`, `ult_recast` default false |
-| Broadside charge | stun | not shown | stops it, back in 8 s; a stun between the waves stops the second | unsettled (ours) | `ult: a stun in the charge stops it, back in 8s` |
-| any wind-up, reel or charge | R (Merge) | not in the source (our rule) | dropped, nothing fires, no landing | ours | `merge hold: dredge's reel ... Anchor wind-up ... Broadside` |
-
-Fixes made: none. Every row that the source speaks to (the reel's lock, the ult's planted charge, the glider) already matches;
-the open rows have no source line. Suggestions only, not built: (1) the arm in flight lets E and the gun through but not RMB
-or X, an odd split: a frame of a press during the throw would settle which way the source goes; (2) the Anchor's wind-up
 could refuse the gun if a clip shows him firing mid-slam (the sheet's frames 0221-0236 show no shot). In flight: ext/grimble-parity-verify
 (cooldowns), ext/grimble-hook-arm-v2-rebased and the stretch branches touch the arm's look, not these rules.
 
@@ -458,7 +419,9 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
 Grimble is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
 props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
-special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step
+special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived.
+Other games see his arm reach too (decision 0171): the hunter row carries the reach (`DredgeKit.net_reach`) and their copy
+of him lays the arm on it; the hook is a `"drawn"` shot, so no game shows a ball for it. The hook's shot carries `"rocks": true`, which the match's shot step
 reads to let it fly over rocks (one condition in `match.gd`). Grounded on the caster uses `KitStatus` "gnd"; `Hunter.do_dash` lets a
 reeling Grimble barge anyway (`DredgeKit.reeling`).
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),
@@ -476,3 +439,15 @@ Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep agai
 - Hook = right arm: `anchor_hook_tip` rides `hand.R` at a fixed 0.79 m in `shot` (before 0.76 m, the v2 model is 1.04x), and leaves the hand only in `throw` (0.42 to 0.83 m), where the hook flies on the chain. No drift.
 - Blunderbuss: it hangs on the `gun` bone at the root, not in a hand, in both versions (nearest the left hand in `shot` 0.17 m, idle 0.44 m; before 0.15 and 0.38 m, the gun is 0.45 m long now, 0.40 before). Unchanged ratio; for the owner to judge against the sheet.
 - Timing tables above: re-run through `--dredge-combo-check` on the v2 clips: 95 checks, 0 failures; no row moved.
+
+## One gun (owner rule 11-21)
+His blunderbuss may ride his waist, but he draws it to shoot and it is never drawn twice (hip and hand together).
+- **Audit (main, 7e281a0d00):** the live `dredge.glb` has the gun baked into the body mesh, rigid on `hand.L` (`skinned_weapon`), so it is always
+  in the fist, idle and firing; the procedural Gun node draws no mesh (`--grimble-gun-shots`: `gun_node_visible_meshes=[]`) and the hip is empty.
+  Never twice today, but never holstered either. The 11-21 turnaround body (G3 pick, `rigbo-trim-1121`) bakes the gun at the hip, so it
+  must not be rigged as is.
+- **Mechanism:** `WardenHolster` (`content/rules/warden_anim/<art>.json` `"holster": {"hip": SOCKET, "hand": SOCKET}`, SOCKET = `bone`,
+  `pos` m, `rot` rad) sets the weapon's own bone (`blade.bone`, `gun`) after the clips and aim: on the hip socket at `aim_k` 0, in the
+  hand socket at 1, between them in the draw (`HunterAnim.aim_k`: 14/s up, 3/s down, so a quick draw and a slow holster). The prop is a mesh
+  skinned 100% to that bone; `weapon_muzzle` and `anchor_gun_root` empties ride it. No data = nothing happens. Proof: `--holster-check`.
+- **Switch-on:** needs the rigged body with no gun in its mesh plus the prop (files and the rule are in the Grimble rigger brief).

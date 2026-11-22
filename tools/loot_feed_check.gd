@@ -58,6 +58,13 @@ func _rows() -> void:
 	ok(LootFeed.audible(false, 0), "4. out of a fight a common pickup ticks")
 	ok(not LootFeed.audible(true, LootFeed.RARE - 1), "4. in a fight a common pickup is silent")
 	ok(LootFeed.audible(true, LootFeed.RARE), "4. in a fight a rare one still ticks")
+	f = LootFeed.new()
+	f.fight = true
+	f.add("gem", "Gems", 5, Color.GOLD)
+	ok(f.rows.is_empty(), "4. in a fight a common pickup shows no row")
+	f.add("anvil", "Rare thing", 1, Color.WHITE, LootFeed.RARE)
+	ok(f.rows.size() == 1, "4. in a fight a rare one still has its row")
+	f.free()
 
 func _pickups(m: Match) -> void:
 	var p: Hunter = m.player
