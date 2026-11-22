@@ -195,6 +195,7 @@ func run(m: Node) -> void:
 	var heard: Array = []
 	var log_cue := func(n, _at, _db, _p): heard.append(n)
 	Sfx.played.connect(log_cue)
+	k["busy"] = false      # the fetch trains above can leave it mid-game; this tick is about the rank
 	var bond_cues := int(GardenSfx.heard.get("garden_bond_up", 0))
 	KinBondMoment.tick(home)
 	Sfx.played.disconnect(log_cue)
