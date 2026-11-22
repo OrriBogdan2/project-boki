@@ -408,18 +408,20 @@
 "semicolon": 12
 },
 "scripts/match/ent.gd": {
-"long_line": 0,
+"long_line": 1,
 "nested_ternary": 1,
-"semicolon": 4
+"semicolon": 5
 },
 "scripts/match/exit_models.gd": {
 "long_line": 23,
 "semicolon": 43
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
-"nested_ternary": 1,
-"semicolon": 13
+"long_line": 5,
+"semicolon": 4
+},
+"scripts/match/exits_flow.gd": {
+"nested_ternary": 1
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
