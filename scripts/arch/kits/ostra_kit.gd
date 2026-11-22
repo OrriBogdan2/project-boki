@@ -86,7 +86,6 @@ func lock_left() -> float: return well.lock_left()
 func can_shoot() -> bool: return not well.locked and super.can_shoot()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
-func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
 ## RecastCue: "WAIT" on the E slot through the 0.3s minimum (a press there is buffered).
 ## No world marker (the owner wants less pop-up UI): the seed's own ring and the E slot carry it.
