@@ -336,7 +336,7 @@ func slam(c: float, at_feet: bool) -> void:
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
 		var air := GlideSpike.dunks(f, spike)
-		var o := {"src": "abil", "ab": "rmb", "heavy": true}  # no knock: the card has a centre stun and a spike, no push
+		var o := {"src": "abil", "ab": "rmb", "heavy": true}  # no knock: the card has a stun and a spike
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)
 			o["dr"] = true

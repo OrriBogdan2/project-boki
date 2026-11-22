@@ -126,7 +126,7 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 			unplanted += 1 if P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01 else 0
 		was = P.position.y
 		if grounded and P.position.y - P.pos.y > GAP:
-			edge = false          # the drawn body still eases down that drop (StepSmooth); FootPlant takes over below GAP
+			edge = false  # the drawn body still eases down that drop (StepSmooth); FootPlant takes over below GAP
 			continue
 		if not grounded:
 			if edge and not seen.is_empty():

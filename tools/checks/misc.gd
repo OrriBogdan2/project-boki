@@ -6,4 +6,6 @@ extends RefCounted
 
 const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
+	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],  # fall parity
+	"--range-screen-check": ["res://tools/range_screen_check.gd", "range_screen_check", null],  # ranges on screen
 }
