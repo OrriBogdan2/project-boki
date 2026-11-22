@@ -22,9 +22,9 @@ const SHIFT_PRESSES := [2, 9]  # steps into an air Shift a fresh Space press lan
 const AT_ONCE := 2             # steps: "instantly" = the glider is open on the press step or the next one
 const JOLT := 2.0              # m/s in one step: the glide's own bleed sheds up to ~1.5 (Kael's 30 m/s), a snap more
 const STILL := 0.05            # m/s: horizontal speed that counts as none
-## Rows red on main when the check was ported (2026-11-17), printed "open", not counted: Mage's air blink holds a
-## fresh glide press 4-11 steps. docs/DEBT.md "--move-rule-guard-check open rows".
-const OPEN := {"mage": ["shift"]}
+## Rows red on main, printed "open", not counted (docs/DEBT.md "--move-rule-guard-check open rows"): none now.
+## Mage's air blink (2026-11-17: a press held 4-11 steps) opens the glider on the press (MageKit.glide_cancel).
+const OPEN := {}
 
 var heat = load("res://tools/glider_heat_check.gd").new()      # its abyss climb, on this check's match
 var traces := {}       # arch -> the Training Area air/glide vx trace, compared with the farm's at the end
