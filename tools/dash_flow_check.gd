@@ -53,7 +53,6 @@ func run(main: Node) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	ok(JuggernautKit.BUFFER == DashFlow.BUFFER_S, "juggernaut's heavy-move press window is DashFlow.BUFFER_S")
 	for hero in _heroes():
 		await check_hero(main, hero)
 	await _one_window(main)
@@ -118,7 +117,7 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			var next_step: bool = got == "buffer" and wait_s < Match.DT * 0.5
 			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""
-			var in_window := got != "buffer" or wait_s <= DashFlow.BUFFER_S + Match.DT
+			var in_window := got != "buffer" or wait_s <= Loco.press_buffer + Match.DT
 			ok((got == want or at_end_same) and in_window, "%s: %s%s (row: %s)" % [what, got, waited, want])
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
@@ -749,7 +748,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 			" (row: lock)" if locked else ""])
 
 ## Shift in a cast whose into_dash row buffers it (an ult that plants its caster): pressed at 0, 25, 50 and 75
-## percent of the cast's lock, it is held to the lock's end and goes within DashFlow.BUFFER_S of it, never lost.
+## percent of the cast's lock, it is held to the lock's end and goes within Loco.press_buffer of it, never lost.
 func _shift_window(m: Match, hero: String, slot: String) -> void:
 	if String(DashFlow.into_row_of(hero, slot, "ground")["mode"]) != "buffer":
 		return
@@ -765,7 +764,7 @@ func _shift_window(m: Match, hero: String, slot: String) -> void:
 		var got := _space_at(m, slot, false, at, "dash")
 		var past := got.trim_prefix("end ").to_float() - float(lock - at) * Match.DT
 		cells.append(got if not got.begins_with("end") else "%+.2fs" % past)
-		right = right and got.begins_with("end") and past <= DashFlow.BUFFER_S + Match.DT
+		right = right and got.begins_with("end") and past <= Loco.press_buffer + Match.DT
 	ok(right, "%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)" % [
 			hero, slot, lock * Match.DT, ", ".join(cells)])
 

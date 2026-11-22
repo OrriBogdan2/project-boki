@@ -887,7 +887,11 @@ def _const_s(path, name):
     """A float `const name := 0.15` in a GDScript file (the shared DashFlow window when it is an alias)."""
     text = open(os.path.join(ROOT, path), encoding="utf-8").read()
     m = re.search(r"^const %s\s*:?=\s*([0-9.]+)" % name, text, re.M)
-    return float(m.group(1)) if m else _const_s("scripts/arch/dash_flow.gd", "BUFFER_S")
+    return float(m.group(1)) if m else _press_buffer()
+
+def _press_buffer():
+    """The one press window every kit shares (Loco.press_buffer, content/rules/tuning.json)."""
+    return float(load_json(os.path.join(ROOT, "content", "rules", "tuning.json"))["press_buffer"])
 
 # Measured by --dash-flow-check on main (11-20): s a buffered press went off past the dash's end (every buffer
 # row, 0.00-0.02 s), and Shift held in an ult's lock: [lock s, goes past the lock's end by s].
@@ -924,7 +928,7 @@ def _buffer_rows(flows):
 def gen_buffer_windows(flows):
     """The press-window section of dash_interactions.md: the shared rule, the kit windows that are not it, and
     every buffer row against its source (--dash-flow-check asserts the numbers)."""
-    shared = _const_s("scripts/arch/dash_flow.gd", "BUFFER_S")
+    shared = _press_buffer()
     jump = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))["physics"]["jump_buffer_s"]
     kit_rows = [
         ["Gil, LMB in a thrust's recovery", _const_s("scripts/arch/kits/gil_kit.gd", "BUFFER"),
@@ -944,7 +948,7 @@ def gen_buffer_windows(flows):
          "`--dash-flow-check` asserts it.", "fixed: the shared window"],
     ]
     body = ("\n\n## Press windows: how long a press is held\n\n"
-            "Measured on main with `--dash-flow-check`. **Shared rule** (`DashFlow.BUFFER_S` = %.2f s): a press made in a dash "
+            "Measured on main with `--dash-flow-check`. **Shared rule** (`Loco.press_buffer` = %.2f s): a press made in a dash "
             "whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it "
             "waits at most %.2f s more, then goes through the slot's own path (it casts, or answers with its deny cue). A "
             "press made in a cast lock or crowd control is held only in the lock's last %.2f s, an earlier one is dropped "

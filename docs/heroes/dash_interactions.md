@@ -535,14 +535,14 @@ One row per input for all heroes, read from `content/rules/mantle_press.json` by
 
 ## Press windows: how long a press is held
 
-Measured on main with `--dash-flow-check`. **Shared rule** (`DashFlow.BUFFER_S` = 0.15 s): a press made in a dash whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it waits at most 0.15 s more, then goes through the slot's own path (it casts, or answers with its deny cue). A press made in a cast lock or crowd control is held only in the lock's last 0.15 s, an earlier one is dropped (docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).
+Measured on main with `--dash-flow-check`. **Shared rule** (`Loco.press_buffer` = 0.15 s): a press made in a dash whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it waits at most 0.15 s more, then goes through the slot's own path (it casts, or answers with its deny cue). A press made in a cast lock or crowd control is held only in the lock's last 0.15 s, an earlier one is dropped (docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).
 
 `[?]` rows stay as they are. Windows that are not the shared one, each with its source line:
 
 | Press | Window (s) | Source | Verdict |
 |---|---|---|---|
 | Gil, LMB in a thrust's recovery | 0.20 | Owner 11-11 (Gil's real thrusts, docs/heroes/gil.md): the next thrust goes when the click's window opens. | owner, kept |
-| Shift in a Shift dash, a grapple or a pad flight | 0.18 | [?] ours, no source (docs/CHAIN_SWEEP.md): a tail past the dash's end, on top of the dash left (at most 0.5 s). It only matters when the dash is still refused at the end, so it is kept. | [?] kept |
+| Shift in a Shift dash, a grapple or a pad flight | 0.15 | [?] ours, no source (docs/CHAIN_SWEEP.md): a tail past the dash's end, on top of the dash left (at most 0.5 s). It only matters when the dash is still refused at the end, so it is kept. | [?] kept |
 | Jump press before a landing | 0.12 | [?] ours: the movement data's jump fields are encrypted (docs/MOVEMENT_FEEL.md, jump buffer row); `--move-feel-check` asserts 0.10 s lands a jump and 0.15 s does not. | [?] kept |
 | Recast press before its window | 0.15 | Owner 11-08 two-step abilities (docs/INPUT_MODES.md). | same as the shared window |
 | Kael, a slash or Smash in a heavy move or the ult's guard | 0.15 | It was 0.12 s with no source ("ours, no footage", docs/heroes/juggernaut.md); now the shared window, `--dash-flow-check` asserts it. | fixed: the shared window |
