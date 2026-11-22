@@ -8,14 +8,14 @@ extends Node3D
 
 const STREAK_SHADER := preload("res://shaders/wind.gdshader")
 const UPDRAFT_SHADER := preload("res://shaders/updraft.gdshader")
-const STREAKS_PER_M := 0.8      # cards per metre of road at fx 1.0
+const STREAKS_PER_M := 0.8  # cards per metre of road at fx 1.0
 const MIN_STREAKS := 6
 const MAX_STREAKS := 48
-const LANE := Vector2(1.1, 1.5)     # m: how far a card strays above/below and beside the road's axis
-const SPEEDS := Vector2(10.0, 14.0)     # m/s: a card's slide (a glider on the road is carried at 14)
-const RING_R := 1.9      # m: the same as the road's catch radius (World.wind_at)
-const FADE_IN := 4.0     # 1/s: how fast a current's look strengthens when you enter it (and eases off)
-const PLAIN_AIR := Color(1.0, 0.95, 0.75, 0.35)     # an updraft's own tint (a lair's or a boss's is passed in)
+const LANE := Vector2(1.1, 1.5)  # m: how far a card strays above/below and beside the road's axis
+const SPEEDS := Vector2(10.0, 14.0)  # m/s: a card's slide (a glider on the road is carried at 14)
+const RING_R := 1.9  # m: the same as the road's catch radius (World.wind_at)
+const FADE_IN := 4.0  # 1/s: how fast a current's look strengthens when you enter it (and eases off)
+const PLAIN_AIR := Color(1.0, 0.95, 0.75, 0.35)  # an updraft's own tint (a lair's or a boss's is passed in)
 
 var rider: Hunter = null
 var _road_mats: Array[ShaderMaterial] = []
@@ -24,6 +24,7 @@ var _road_boost: Array[float] = []
 var _column_mats: Array[ShaderMaterial] = []
 var _column_boost: Array[float] = []
 var _world: World
+
 
 ## Builds a node per current in the world's data. fx is the preset's particle/streak amount (0..1).
 func build(w: World, fx: float) -> void:
@@ -40,6 +41,7 @@ func build(w: World, fx: float) -> void:
 		_column_mats.append(col.get_node("Column").material_override)
 		_column_boost.append(0.0)
 
+
 func _add_road(i: int, wd: Dictionary, fx: float) -> void:
 	var a: Vector3 = wd["a"]
 	var d: Vector3 = wd["b"] - a
@@ -48,7 +50,7 @@ func _add_road(i: int, wd: Dictionary, fx: float) -> void:
 	var side := fwd.cross(Vector3.UP).normalized()
 	var road := Node3D.new()
 	road.name = "Road%d" % i
-	road.transform = Transform3D(Basis(fwd, side.cross(fwd), side), a)     # x along the road, so (span, 0, 0) is b
+	road.transform = Transform3D(Basis(fwd, side.cross(fwd), side), a)  # x along the road, so (span, 0, 0) is b
 	add_child(road)
 	var mat := ShaderMaterial.new()
 	mat.shader = STREAK_SHADER
@@ -70,7 +72,7 @@ func _add_road(i: int, wd: Dictionary, fx: float) -> void:
 	streaks.name = "Streaks"
 	streaks.multimesh = mm
 	streaks.material_override = mat
-	streaks.custom_aabb = AABB(Vector3(-3, -3, -3), Vector3(span + 6.0, 6, 6))     # (the shader moves the cards)
+	streaks.custom_aabb = AABB(Vector3(-3, -3, -3), Vector3(span + 6.0, 6, 6))  # (the shader moves the cards)
 	streaks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	road.add_child(streaks)
 	var ring_mat := Models.glow_mat(Color(0.75, 0.95, 1.0, 0.45))
@@ -84,13 +86,14 @@ func _add_road(i: int, wd: Dictionary, fx: float) -> void:
 		mi.name = "Ring%d" % end
 		mi.mesh = ring
 		mi.material_override = ring_mat
-		var axis_x := Basis(Vector3.BACK, Vector3.RIGHT, Vector3.UP)     # (the torus stands on its y axis)
+		var axis_x := Basis(Vector3.BACK, Vector3.RIGHT, Vector3.UP)  # (the torus stands on its y axis)
 		mi.transform = Transform3D(axis_x, Vector3(span * end, 0, 0))
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		road.add_child(mi)
 	_road_mats.append(mat)
 	_road_rings.append(ring_mat)
 	_road_boost.append(0.0)
+
 
 ## A column of rising air (the updraft shader, plus motes climbing it), from y0 up to y1 in the node's
 ## own space. Island-edge updrafts and a lair's escape updraft both use it. fx scales the motes.
@@ -130,6 +133,7 @@ static func updraft_visual(r: float, y0: float, y1: float, tint := PLAIN_AIR, fx
 	root.add_child(p)
 	return root
 
+
 func _process(dt: float) -> void:
 	if rider == null:
 		var mt := _world.get_parent() as Match
@@ -149,9 +153,11 @@ func _process(dt: float) -> void:
 	_ease(_road_boost, wi, dt, _road_mats, _road_rings)
 	_ease(_column_boost, ci, dt, _column_mats)
 
+
 ## Eases each current's boost toward 1 for the one being ridden (idx) and 0 for the rest, writing it to the shaders.
-func _ease(boosts: Array[float], idx: int, dt: float, mats: Array[ShaderMaterial],
-		rings: Array[ShaderMaterial] = []) -> void:
+func _ease(
+	boosts: Array[float], idx: int, dt: float, mats: Array[ShaderMaterial], rings: Array[ShaderMaterial] = []
+) -> void:
 	for i in boosts.size():
 		var want := 1.0 if i == idx else 0.0
 		if boosts[i] == want:

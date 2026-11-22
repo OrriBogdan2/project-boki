@@ -12,32 +12,40 @@ extends RefCounted
 
 const FIRST := ["vitals", "abilities", "summon_ring", "objective"]
 # (beat_clock also comes on the first Ways Out beat or kill, HudGroups.clock_shown)
-const LATER := ["beat_clock", "belt", "counters", "feed", "gear", "squad", "perks", "weather", "pace_tags",
-		"plate_colours"]
+const LATER := [
+	"beat_clock", "belt", "counters", "feed", "gear", "squad", "perks", "weather", "pace_tags", "plate_colours"
+]
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HUDREVEAL %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _match(main: Node, opts: Dictionary) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true,
-		"heart": true, "god": true}
+	var o := {
+		"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true, "heart": true, "god": true
+	}
 	o.merge(opts, true)
 	m.start(o)
 	for h in m.hunters:
 		h.ctrl = "idle"
 	return m
 
+
 func _shown(m: Match) -> Array:
 	return HudReveal.groups().keys().filter(func(k): return HudReveal.on(m, k))
+
 
 func _frames(main: Node, n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -54,8 +62,10 @@ func run(main: Node) -> void:
 	ok(first == want, "matches 1-3 show %s" % ", ".join(first))
 	ok(first.size() <= 6, "%d groups at the start (about 5, DECISIONS 11-08)" % first.size())
 	var pips: Dictionary = g["seat_pips"]
-	ok(int(pips.get("from_match", 1)) == 0 and String(pips.get("first", "")) == "seat_open",
-		"the seat pips wait for the first open seat")
+	ok(
+		int(pips.get("from_match", 1)) == 0 and String(pips.get("first", "")) == "seat_open",
+		"the seat pips wait for the first open seat"
+	)
 	ok(LATER.all(func(k): return int(g.get(k, {}).get("from_match", 0)) == 4), "the rest is from match 4")
 	# ---------------------------------------------------------------- 2. a fresh save at matches 1, 3, 4
 	var m := _match(main, {})
@@ -69,10 +79,12 @@ func run(main: Node) -> void:
 		ok(HudReveal.match_no() == n and shown == expect, "match %d shows %s" % [n, ", ".join(shown)])
 	ok(not HudReveal.on(m, "seat_pips"), "match 4: the seat pips still wait for an open seat")
 	var clk: Dictionary = g["beat_clock"]
-	ok(int(clk.get("from_match", 1)) == 4 and String(clk.get("first", "")) == "beat",
-		"the clock waits for the first beat")
-	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a
-	# slot or a level, never a match number: hidden at match 1 and 4 alike, shown with Tab
+	ok(
+		int(clk.get("from_match", 1)) == 4 and String(clk.get("first", "")) == "beat",
+		"the clock waits for the first beat"
+	)
+	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a slot or
+	# a level, never a match number: hidden at match 1 and 4 alike, shown with Tab
 	for k in ["belt_spare", "ult_tiles"]:
 		ok(int(g[k].get("from_match", 1)) == 0 and not HudReveal.on(m, k), "%s waits for its slot or level" % k)
 	Input.action_press("scores")
@@ -99,24 +111,30 @@ func run(main: Node) -> void:
 	ok(not Save.d["hud_reveal"].has("seat_pips"), "every seat locked at 0:30: no pips, nothing remembered")
 	ok(not HudGroups.clock_shown(m) and not Save.d["hud_reveal"].has("beat_clock"), "0:30, no kill: the clock waits")
 	m.player.kills = 1
-	ok(HudGroups.clock_shown(m) and HudReveal.on(m, "beat_clock") and not HudReveal.on(m, "counters"),
-		"the first kill brings the clock; the counters still wait for match 4")
+	ok(
+		HudGroups.clock_shown(m) and HudReveal.on(m, "beat_clock") and not HudReveal.on(m, "counters"),
+		"the first kill brings the clock; the counters still wait for match 4"
+	)
 	m.player.kills = 0
 	Save.d["hud_reveal"].erase("beat_clock")
 	m.time = float(Heart.rules()["quest"]["lair_open_s"]) + 5.0
 	ok(int(WaysOutHud.seats(m)[0]["st"]) == WaysOutHud.St.OPEN, "the Lair seat opens")
-	m.hud.panels.queue_redraw()      # (the panels redraw at 20 Hz: draw now, not when the timer comes round)
+	m.hud.panels.queue_redraw()  # (the panels redraw at 20 Hz: draw now, not when the timer comes round)
 	await _frames(main, 3)
-	ok(Save.d["hud_reveal"].get("seat_pips", false) and HudReveal.on(m, "seat_pips"),
-		"the first open seat reveals the pips")
+	ok(
+		Save.d["hud_reveal"].get("seat_pips", false) and HudReveal.on(m, "seat_pips"),
+		"the first open seat reveals the pips"
+	)
 	ok(Save.d["hud_reveal"].get("beat_clock", false), "the first Ways Out beat reveals the clock")
 	m.queue_free()
 	await _frames(main, 2)
 	Save.d["matches"] = 1
 	m = _match(main, {})
 	m.time = 30.0
-	ok(HudReveal.on(m, "seat_pips") and not HudReveal.on(m, "feed"),
-		"match 2: the save remembers the pips, the feed still waits")
+	ok(
+		HudReveal.on(m, "seat_pips") and not HudReveal.on(m, "feed"),
+		"match 2: the save remembers the pips, the feed still waits"
+	)
 	await _frames(main, 4)
 	ok(true, "the real HUD draws match 2 staged without a script error")
 	m.queue_free()

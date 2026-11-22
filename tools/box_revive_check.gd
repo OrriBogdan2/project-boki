@@ -60,12 +60,12 @@ func _roomy() -> Vector3:
 	return m.world.random_ground()
 
 ## Holds interact at a box until the owner is back or the time runs out; returns the seconds taken.
-func _channel(C: Hunter, B: Hunter, cap: float) -> float:
-	C.inp["interact"] = true
+func _channel(c: Hunter, b: Hunter, cap: float) -> float:
+	c.inp["interact"] = true
 	var t0 := m.time
-	while B.out and m.time - t0 < cap:
+	while b.out and m.time - t0 < cap:
 		_run(Match.DT)
-	C.inp["interact"] = false
+	c.inp["interact"] = false
 	_run(Match.DT * 2.0)
 	return m.time - t0
 
@@ -85,107 +85,107 @@ func run(main: Node) -> void:
 		h.lives = 1
 	var mine: Array = m.hunters.filter(func(x): return x.team == m.player.team)
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != m.player.team)[0]
-	var A: Hunter = mine[0]
-	var B: Hunter = mine[1]
-	var C: Hunter = mine[2]
+	var a: Hunter = mine[0]
+	var b: Hunter = mine[1]
+	var c: Hunter = mine[2]
 	var home := _roomy()
 	for h in m.hunters:
-		if h.team != A.team: _spot(h, m.world.random_ground())
+		if h.team != a.team: _spot(h, m.world.random_ground())
 	_spot(foe, home + Vector3(30, 0, 0))
-	_spot(A, home + Vector3(-6, 0, 0))
-	_spot(C, home)
+	_spot(a, home + Vector3(-6, 0, 0))
+	_spot(c, home)
 	ok(m.beacons.size() >= 3, "several beacons on the map (%d)" % m.beacons.size())
-	_box_revive(B, C)
-	_hits(B, C, foe)
-	_moves(B, C)
-	_remote(B, C)
-	_beacon(A, B, C, foe)
-	_bot(B, C, home)
+	_box_revive(b, c)
+	_hits(b, c, foe)
+	_moves(b, c)
+	_remote(b, c)
+	_beacon(a, b, c, foe)
+	_bot(b, c, home)
 	print("BOX REVIVE CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
-func _box_revive(B: Hunter, C: Hunter) -> void:
-	var home := C.pos
-	_spot(B, home + Vector3(3, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	ok(B.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
-	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(B) - 7.5) < 0.01,
-		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(B))
+func _box_revive(b: Hunter, c: Hunter) -> void:
+	var home := c.pos
+	_spot(b, home + Vector3(3, 0, 0))
+	m.eliminate(b, null, "finished")
+	var bx := Life.box_of(m, b)
+	ok(b.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
+	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(b) - 7.5) < 0.01,
+		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(b))
 	var stand := float(Life.R["box_revive_hp"])
 	ok(stand == float(Life.R["revive_hp"]) and stand >= 0.12 and stand <= 0.35,
 		"revived Hunters stand up with %d%% (same as a Wisp revive; per-tick heal band 12-35%%)" % int(stand * 100.0))
 	var ring: Node = (bx["node"] as Node).get_node_or_null("OwnerRing")
-	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(B), "an ally box wears its owner's squad colour")
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
+	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(b), "an ally box wears its owner's squad colour")
+	_spot(c, bx["pos"] + Vector3(0.4, 0, 0))
 	var t0 := m.time
-	C.inp["interact"] = true
-	_run(BoxRevive.time_for(B) * 0.5)
+	c.inp["interact"] = true
+	_run(BoxRevive.time_for(b) * 0.5)
 	var hum := String(bx.get("hum_key", ""))
-	ok(C.box_reviving() and hum != "" and Sfx.loop_on(hum), "mid-channel: kneeling over the box, and it hums")
+	ok(c.box_reviving() and hum != "" and Sfx.loop_on(hum), "mid-channel: kneeling over the box, and it hums")
 	var prog := float(bx.get("rev_prog", 0.0))
 	ok(absf(prog - 0.5) < 0.05, "the progress ring reads half way (%.2f)" % prog)
-	_reads(bx, C, prog, "mid-channel")
-	C.inp["fire"] = true
+	_reads(bx, c, prog, "mid-channel")
+	c.inp["fire"] = true
 	_run(Match.DT)
-	ok(not C.inp["fire"] and C.box_reviving(), "no firing while channelling, and the channel goes on")
-	_channel(C, B, 10.0)
+	ok(not c.inp["fire"] and c.box_reviving(), "no firing while channelling, and the channel goes on")
+	_channel(c, b, 10.0)
 	var took := m.time - t0 - Match.DT * 2.0
-	ok(not B.out and absf(took - 7.5) < 0.15, "the teammate is back after %.2fs (want 7.5s)" % took)
-	ok(B.pos.distance_to(bx["pos"]) < 3.0, "back at their box (%.1fm away)" % B.pos.distance_to(bx["pos"]))
-	var k: Kin = B.kin
-	ok(k != null and not k.dead and k.state == "active" and k.flat_dist(B) < 3.0, "their Boki is back at their side")
+	ok(not b.out and absf(took - 7.5) < 0.15, "the teammate is back after %.2fs (want 7.5s)" % took)
+	ok(b.pos.distance_to(bx["pos"]) < 3.0, "back at their box (%.1fm away)" % b.pos.distance_to(bx["pos"]))
+	var k: Kin = b.kin
+	ok(k != null and not k.dead and k.state == "active" and k.flat_dist(b) < 3.0, "their Boki is back at their side")
 	ok(not Sfx.loop_on(hum), "the hum stops once it's done")
 	ok(_cleared(bx), "the tether and core are gone once it's done")
 	ok(m.get_node_or_null("SoulRise") != null, "the soul rises off the box on completion")
 
-func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
-	var second := BoxRevive.time_for(B)
+func _hits(b: Hunter, c: Hunter, foe: Hunter) -> void:
+	var second := BoxRevive.time_for(b)
 	ok(absf(second - 7.5 / 0.75) < 0.05, "the second box revive of a Hunter is slower (%.2fs)" % second)
-	_calm(C)
-	var h0 := C.hp
-	C.hurt(10.0, foe, {"src": "abil"})
-	var plain := h0 - C.hp
-	_spot(B, C.pos + Vector3(2.5, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	_calm(C)
-	C.inp["interact"] = true
+	_calm(c)
+	var h0 := c.hp
+	c.hurt(10.0, foe, {"src": "abil"})
+	var plain := h0 - c.hp
+	_spot(b, c.pos + Vector3(2.5, 0, 0))
+	m.eliminate(b, null, "finished")
+	var bx := Life.box_of(m, b)
+	_spot(c, bx["pos"] + Vector3(0.4, 0, 0))
+	_calm(c)
+	c.inp["interact"] = true
 	_run(1.5)
-	ok(C.box_reviving() and C.box_t > 1.0, "channelling again")
-	var h1 := C.hp
-	C.hurt(10.0, foe, {"src": "abil"})
-	var while_rev := h1 - C.hp
+	ok(c.box_reviving() and c.box_t > 1.0, "channelling again")
+	var h1 := c.hp
+	c.hurt(10.0, foe, {"src": "abil"})
+	var while_rev := h1 - c.hp
 	ok(plain > 0.0 and absf(while_rev / plain - Hunter.CONSUME_VULN) < 0.02,
 		"a hit while channelling does %.2fx (the tonic's %.2fx)" % [while_rev / maxf(plain, 0.001),
 		Hunter.CONSUME_VULN])
 	_run(Match.DT)
-	ok(C.box_t == 0.0 and B.out, "and the hit breaks the channel")
+	ok(c.box_t == 0.0 and b.out, "and the hit breaks the channel")
 	_run(0.2)
 	ok(_cleared(bx), "the tether and core clear on the interrupt")
 	_run(1.0)
-	ok(C.box_t == 0.0 and not C.box_reviving(), "holding on does nothing until interact is pressed again")
-	C.inp["interact"] = false
+	ok(c.box_t == 0.0 and not c.box_reviving(), "holding on does nothing until interact is pressed again")
+	c.inp["interact"] = false
 	_run(Match.DT * 2.0)
-	var need := BoxRevive.time_for(B)
-	var took := _channel(C, B, 15.0) - Match.DT * 2.0
-	ok(not B.out and absf(took - need) < 0.15,
+	var need := BoxRevive.time_for(b)
+	var took := _channel(c, b, 15.0) - Match.DT * 2.0
+	ok(not b.out and absf(took - need) < 0.15,
 		"pressed again it starts over and takes the full %.1fs (%.2fs)" % [need, took])
 
-func _moves(B: Hunter, C: Hunter) -> void:
-	_spot(B, C.pos + Vector3(2.5, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	C.inp["interact"] = true
+func _moves(b: Hunter, c: Hunter) -> void:
+	_spot(b, c.pos + Vector3(2.5, 0, 0))
+	m.eliminate(b, null, "finished")
+	var bx := Life.box_of(m, b)
+	_spot(c, bx["pos"] + Vector3(0.4, 0, 0))
+	c.inp["interact"] = true
 	_run(1.0)
-	ok(C.box_reviving(), "channelling a third time")
-	C.inp["move"] = Vector2(1, 0)
+	ok(c.box_reviving(), "channelling a third time")
+	c.inp["move"] = Vector2(1, 0)
 	_run(Match.DT * 2.0)
-	ok(C.box_t == 0.0 and not C.box_reviving() and B.out, "walking breaks the channel")
-	C.inp["move"] = Vector2.ZERO
-	C.inp["interact"] = false
+	ok(c.box_t == 0.0 and not c.box_reviving() and b.out, "walking breaks the channel")
+	c.inp["move"] = Vector2.ZERO
+	c.inp["interact"] = false
 	_run(Match.DT * 2.0)
 
 ## The tether runs from the reviver to the soul in their side colour; the core is sized by the progress.
@@ -208,26 +208,26 @@ func _cleared(bx: Dictionary) -> bool:
 	return not bx.has("tether_node") and (core == null or not core.visible)
 
 ## Online: a remote teammate's channel only arrives as the "revive" hold in their flags.
-func _remote(B: Hunter, C: Hunter) -> void:
-	var bx := Life.box_of(m, B)
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	C.remote = true
+func _remote(b: Hunter, c: Hunter) -> void:
+	var bx := Life.box_of(m, b)
+	_spot(c, bx["pos"] + Vector3(0.4, 0, 0))
+	c.remote = true
 	var t := 0.0
-	var need := BoxRevive.time_for(B) * 0.4
+	var need := BoxRevive.time_for(b) * 0.4
 	while t < need:
-		C.set_hold("revive", 0.3)
+		c.set_hold("revive", 0.3)
 		_run(Match.DT)
 		t += Match.DT
 	var prog := float(bx.get("rev_prog", 0.0))
-	ok(absf(prog - 0.4) < 0.05 and bx.get("rev_by") == C, "remote: the synced hold times the revive (%.2f)" % prog)
-	_reads(bx, C, prog, "remote")
+	ok(absf(prog - 0.4) < 0.05 and bx.get("rev_by") == c, "remote: the synced hold times the revive (%.2f)" % prog)
+	_reads(bx, c, prog, "remote")
 	_run(0.5)
-	ok(_cleared(bx) and B.out, "remote: tether and core clear when the hold stops")
-	C.remote = false
+	ok(_cleared(bx) and b.out, "remote: tether and core clear when the hold stops")
+	c.remote = false
 
-func _beacon(A: Hunter, B: Hunter, C: Hunter, foe: Hunter) -> void:
-	m.eliminate(C, null, "finished")
-	ok(B.out and C.out and not A.out, "two of the squad are dead")
+func _beacon(a: Hunter, b: Hunter, c: Hunter, foe: Hunter) -> void:
+	m.eliminate(c, null, "finished")
+	ok(b.out and c.out and not a.out, "two of the squad are dead")
 	var bc: Dictionary = m.beacons[0]
 	var i := 0
 	var key := "beacon0"
@@ -237,67 +237,67 @@ func _beacon(A: Hunter, B: Hunter, C: Hunter, foe: Hunter) -> void:
 	Beacons.net_in(m, ["bcn", i, foe.team, "out"])
 	ok(not bc["lit"] and not Sfx.loop_on(key), "and \"out\" puts it out")
 	# every player is told: a teammate's view and a rival's
-	for viewer in [A, foe]:
+	for viewer in [a, foe]:
 		m.player = viewer
 		m.hud.msgs.clear()
-		_spot(A, bc["pos"])
+		_spot(a, bc["pos"])
 		_run(Match.DT * 2.0)
 		var told: bool = m.hud.msgs.texts().any(func(t): return t.contains("eacon"))
-		var side := "ally" if viewer.team == A.team else "rival"
+		var side := "ally" if viewer.team == a.team else "rival"
 		ok(bc["lit"] and told, "%s (%s) gets the beacon notice" % [viewer.pname, side])
-		_spot(A, bc["pos"] + Vector3(12, 0, 0))
+		_spot(a, bc["pos"] + Vector3(12, 0, 0))
 		_run(Match.DT * 2.0)
-	m.player = A
+	m.player = a
 	ok(not bc["lit"], "stepping off puts it out")
-	_spot(A, bc["pos"])
+	_spot(a, bc["pos"])
 	_run(Match.DT * 3.0)
 	var reach := float(Sfx.loops.get(key, {}).get("reach", 0.0))
 	ok(Sfx.loop_on(key) and absf(reach - float(BoxRevive.rules()["beacon_hear_m"])) < 0.1,
 		"while it's lit its hum carries %.0fm" % reach)
 	ok(m.pings.any(func(p): return p["pos"] == bc["pos"]), "and it's marked on everyone's map")
 	var t0 := m.time
-	while (B.out or C.out) and m.time - t0 < Beacons.time_s() + 2.0:
+	while (b.out or c.out) and m.time - t0 < Beacons.time_s() + 2.0:
 		_run(Match.DT)
 	var took := m.time - t0
-	ok(not B.out and not C.out and absf(took - Beacons.time_s()) < 0.3,
+	ok(not b.out and not c.out and absf(took - Beacons.time_s()) < 0.3,
 		"the beacon brings back both dead teammates at once after %.1fs (want %.1fs)" % [took, Beacons.time_s()])
 	ok(bc["used"] and not bc["lit"] and not Sfx.loop_on(key), "single use, and quiet again")
-	ok(B.sick_t > 0.0 and C.sick_t > 0.0, "with resurrection sickness")
+	ok(b.sick_t > 0.0 and c.sick_t > 0.0, "with resurrection sickness")
 	# a "used" event from another game brings back the dead Hunters this game owns
 	var bc2: Dictionary = m.beacons[1]
-	m.eliminate(B, null, "finished")
-	Beacons.net_in(m, ["bcn", 1, B.team, "used"])
-	ok(not B.out and bc2["used"], "a \"used\" event brings back this game's dead teammates")
+	m.eliminate(b, null, "finished")
+	Beacons.net_in(m, ["bcn", 1, b.team, "used"])
+	ok(not b.out and bc2["used"], "a \"used\" event brings back this game's dead teammates")
 
-func _bot(B: Hunter, C: Hunter, home: Vector3) -> void:
+func _bot(b: Hunter, c: Hunter, home: Vector3) -> void:
 	for h in m.hunters:
-		if h.team != B.team:
+		if h.team != b.team:
 			var far := m.world.random_ground()
 			for k in 200:
 				if far.distance_to(home) > 70.0: break
 				far = m.world.random_ground()
 			_spot(h, far)
-	_calm(C)
-	_spot(B, home)
-	_spot(C, home + Vector3(6, 0, 2))
+	_calm(c)
+	_spot(b, home)
+	_spot(c, home + Vector3(6, 0, 2))
 	_run(0.5)
-	m.eliminate(B, null, "finished")
-	C.ctrl = "bot"
-	C.ai = m.bot_brain.new_mind(m.rng, 0.6, m.bot_cfg)
+	m.eliminate(b, null, "finished")
+	c.ctrl = "bot"
+	c.ai = m.bot_brain.new_mind(m.rng, 0.6, m.bot_cfg)
 	var t0 := m.time
-	while B.out and m.time - t0 < 30.0:
+	while b.out and m.time - t0 < 30.0:
 		_run(Match.DT)
-	ok(not B.out, "a bot walks to the box and brings its teammate back (%.1fs incl. the walk)" % (m.time - t0))
+	ok(not b.out, "a bot walks to the box and brings its teammate back (%.1fs incl. the walk)" % (m.time - t0))
 	# the soul has left the box: the bot heads for a beacon instead
 	var unused: Array = m.beacons.filter(func(bc): return not bc["used"])
-	_spot(C, unused[0]["pos"] + Vector3(8, 0, 0))
-	_spot(B, C.pos)
+	_spot(c, unused[0]["pos"] + Vector3(8, 0, 0))
+	_spot(b, c.pos)
 	_run(0.3)
-	m.eliminate(B, null, "finished")
-	Life.box_of(m, B)["soul_until"] = 0.0
+	m.eliminate(b, null, "finished")
+	Life.box_of(m, b)["soul_until"] = 0.0
 	t0 = m.time
-	while B.out and m.time - t0 < 40.0:
+	while b.out and m.time - t0 < 40.0:
 		_run(Match.DT)
-	C.ctrl = "idle"
-	ok(not B.out and B.sick_t > 0.0,
+	c.ctrl = "idle"
+	ok(not b.out and b.sick_t > 0.0,
 		"with the soul gone a bot lights a beacon instead (%.1fs incl. the walk)" % (m.time - t0))
