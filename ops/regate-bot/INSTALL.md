@@ -1,5 +1,10 @@
 # regate-bot: install on hetzner (built on rpc7, which has no gh, no ssh to hetzner, no boki-install / cron-add)
 
+> **STALE SNAPSHOT (11-22): do not install from this dir.** These files are the 11-14 first version (regate-bot here:
+> 575 lines). The live master is `/home/boki/coord/boki-tools/regate-bot` (1727+ lines: flake re-runs, gate slots,
+> carry, trains), installed with `infra-review regate-bot <candidate>` then `boki-install boki-tools/regate-bot`.
+> Copying these files over it would silently drop a week of fixes. Patch the live master, not this copy.
+
 Files (this dir, copied back to hetzner at /home/boki/meshy/regate-bot-1114/regate-bot/):
 - `regate-bot` (hetzner cron): finds GATE GREEN PRs that main left behind, re-gates one at a time on a worker, posts the result.
 - `regate-run` (runs on the worker over ssh; rsynced to worker:/home/boki/regate-bot/ on every start): merge main in, import, gate, push.
