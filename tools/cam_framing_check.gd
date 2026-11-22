@@ -4,7 +4,7 @@ extends RefCounted
 ##   1. the default style takes its numbers from content/rules/camera.json and sits inside the source's
 ##      bands there: pitch, lens, and your feet a little below the screen's centre
 ##   2. the source_scale test style (off by default) shows the source's ground across and scales Hunters; the
-##      home keeps the Supervive view under it
+##      home keeps the default view under it
 ##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
 ##   4. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
@@ -96,7 +96,7 @@ func _source_style(cam: CamRig) -> void:
 	Settings.set_v("cam_style", "source_scale", false)
 	cam.apply_settings()
 	ok(cam.style_id == "default" and is_equal_approx(cam.hunter_scale, 1.0),
-			"the home keeps the Supervive view under source_scale")
+			"the home keeps the default view under source_scale")
 	Settings.set_v("cam_style", was, false)
 	cam.use_style("default")
 
