@@ -5,17 +5,19 @@ extends RefCounted
 ## the way to its next level. The save is never written.
 
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const FIRST_LEVEL := 5           # the level the starters evolve at (evolve.json)
-const SESSION_RUNS := 4          # expeditions in two hours (about 30 min each with the garden between)
-const SESSION_KNOCKS := 2        # knocks per expedition
+const FIRST_LEVEL := 5  # the level the starters evolve at (evolve.json)
+const SESSION_RUNS := 4  # expeditions in two hours (about 30 min each with the garden between)
+const SESSION_KNOCKS := 2  # knocks per expedition
 
 var bad := 0
+
 
 ## Prints an XPC ok or FAIL line and counts failures.
 func ok(cond: bool, what: String) -> void:
 	print("XPC %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 ## Runs the check and quits with 1 on any failure.
 func run(main: Node) -> void:
@@ -28,6 +30,7 @@ func run(main: Node) -> void:
 	Save.d = old
 	print("XPC %s (%d failed)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## The formula, a few values, and every level costing more than the one before.
 func _curve() -> void:
@@ -42,6 +45,7 @@ func _curve() -> void:
 		rising = rising and Game.xp_need(lv + 1) > Game.xp_need(lv)
 	ok(rising, "curve: every level costs more than the one before (1 to %d)" % Evo.cap())
 
+
 ## Two hours of expeditions (lost, won, lost, won; 2 knocks each): a starter reaches Lv 5 and evolves, and
 ## it is not ready after one expedition.
 func _session() -> void:
@@ -55,8 +59,11 @@ func _session() -> void:
 		Evo.ensure(rec)
 		for i in SESSION_RUNS:
 			Game.add_xp(rec, 40 + (40 if i % 2 == 1 else 0) + SESSION_KNOCKS * 10, {})
-		ok(int(line["level"]) == FIRST_LEVEL and int(rec["level"]) >= FIRST_LEVEL,
-			"session: %s evolves at Lv %d and is Lv %d after 2 h" % [sp, int(line["level"]), int(rec["level"])])
+		ok(
+			int(line["level"]) == FIRST_LEVEL and int(rec["level"]) >= FIRST_LEVEL,
+			"session: %s evolves at Lv %d and is Lv %d after 2 h" % [sp, int(line["level"]), int(rec["level"])]
+		)
+
 
 ## v20 -> v21: a Boki keeps its share of the way to the next level; levels and 0 XP stay put.
 func _migrate() -> void:
@@ -68,6 +75,8 @@ func _migrate() -> void:
 	ok(Save.migrate(data) and int(data["v"]) == Save.VERSION, "migrate: a v20 save upgrades to v%d" % Save.VERSION)
 	var want := roundi(0.5 * Game.xp_need(4))
 	var kept: bool = int(half["level"]) == 4 and int(fresh["level"]) == 10 and int(fresh["xp"]) == 0
-	ok(absi(int(half["xp"]) - want) <= 1 and kept,
-		"migrate: Lv 4 with 100 of 200 XP now has %d of %d, levels unchanged" % [int(half["xp"]), Game.xp_need(4)])
+	ok(
+		absi(int(half["xp"]) - want) <= 1 and kept,
+		"migrate: Lv 4 with 100 of 200 XP now has %d of %d, levels unchanged" % [int(half["xp"]), Game.xp_need(4)]
+	)
 	ok(int(lost["xp"]) < Game.xp_need(2), "migrate: a lost Boki's XP stays under its level cost (%d)" % int(lost["xp"]))
