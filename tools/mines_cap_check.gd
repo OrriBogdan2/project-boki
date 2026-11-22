@@ -1,6 +1,6 @@
-extends "res://tools/ability_check.gd"      # shares its _ac_setup / _ac_run helpers
+extends "res://tools/ability_check.gd"  # shares its _ac_setup / _ac_run helpers
 ## --mines-cap-check: one Glintmole fighting a foe for 60 s must never have more than MAX_LIVE puffcap
-## mines on the ground at once (reference clarity: nothing cluttering the screen). Its own AI casts
+## mines on the ground at once (the target's clarity: nothing cluttering the screen). Its own AI casts
 ## Puffcap Mines whenever the cooldown allows (foe stays in range, never steps on a mine), and every
 ## 60 s run prints the peak number of live traps per caster. Also checks a hunter-cast mine pair:
 ## max_live on the trap delivery drops the oldest one. Prints MINESCAP lines.
@@ -20,8 +20,8 @@ func _mc(name: String, ok: bool, info := "") -> void:
 ## Live traps per caster right now: caster -> count.
 func _mc_live(m: Match) -> Dictionary:
 	var out := {}
-	for tr in m.verbs.traps:
-		out[tr["caster"]] = int(out.get(tr["caster"], 0)) + 1
+	for trap in m.verbs.traps:
+		out[trap["caster"]] = int(out.get(trap["caster"], 0)) + 1
 	return out
 
 
@@ -32,18 +32,18 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var r := _ac_setup(5.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	m.opts["training"] = false      # training recharges a Boki's cooldowns 3x; a real match does not
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
+	m.opts["training"] = false  # training recharges a Boki's cooldowns 3x; a real match does not
 	var rec := Save.new_kin("glintmole")
 	rec["trust"] = 95.0
-	var k := m.give_kin(P, rec)
+	var k := m.give_kin(p, rec)
 	k.stow()
 	k.settle = 1.0
-	P.merge_cd = 0.0
-	P.slot_lv["kin"] = 1      # the Boki's own ability is unlocked
+	p.merge_cd = 0.0
+	p.slot_lv["kin"] = 1  # the Boki's own ability is unlocked
 	k.runner.reset()
-	k.teleport(P.pos + Vector3(1.0, 0, 0))
+	k.teleport(p.pos + Vector3(1.0, 0, 0))
 	k.state = "active"
 	k.cmd = "follow"
 	k.fly = {}
@@ -51,7 +51,7 @@ func run(main_node: Node) -> void:
 	k.grounded = true
 	var def: AbilitySpec = k.runner.def_of("k1")
 	_mc("glintmole's E is puffcap mines", def != null and def.id == "puffcap_mines")
-	for rate in [1.0, 3.0]:      # 3.0 = the training ground's recharge, or a high Boki rank
+	for rate in [1.0, 3.0]:  # 3.0 = the training ground's recharge, or a high Boki rank
 		k.runner.reset()
 		k.runner.rate = rate
 		m.verbs.clear()
@@ -60,11 +60,11 @@ func run(main_node: Node) -> void:
 		var last_ready := true
 		var t := 0.0
 		while t < FIGHT_SECS:
-			T.hp = T.max_hp
-			T.teleport(P.pos + Vector3(5.0, 0, 0))     # stays in cue range; never walks onto a mine
-			T.vel = Vector3.ZERO
-			k.state = "active"      # keep it out and on the foe
-			k.target = T
+			t_v.hp = t_v.max_hp
+			t_v.teleport(p.pos + Vector3(5.0, 0, 0))  # stays in cue range; never walks onto a mine
+			t_v.vel = Vector3.ZERO
+			k.state = "active"  # keep it out and on the foe
+			k.target = t_v
 			for mb in m.mobs:
 				mb.queue_free()
 			m.mobs.clear()

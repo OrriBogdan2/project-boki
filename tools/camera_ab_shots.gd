@@ -9,26 +9,34 @@ extends "res://tools/gameplay_media.gd"
 ## Needs a renderer (jobq --needs gpu).
 
 const STYLES := ["default", "source_scale"]
-const SIZE := Vector2i(1280, 720)   # px of each shot
-const FIGHT_SECS := 2.0             # s of fight before the open-ground shot
-const SQUAD_SECS := 2.5             # s of fight before the squads shot
-const GLIDE_SECS := 1.4             # s after the run-off before the glide shot
-const RUN_MAX := 6.0                # s the run to the edge may take before the glide shot is given up on
-const SQUAD_GAP := 12.0             # m between the three squads' centres
-const EDGE_RUN := 6.0               # m of run-up to the edge the glide starts from
-const RIVALS := [["archer", "wisplet"], ["bulwark", "burrlet"], ["mage", "puddlet"], ["juggernaut", "pebbit"],
-		["gunslinger", "zapple"]]
+const SIZE := Vector2i(1280, 720)  # px of each shot
+const FIGHT_SECS := 2.0  # s of fight before the open-ground shot
+const SQUAD_SECS := 2.5  # s of fight before the squads shot
+const GLIDE_SECS := 1.4  # s after the run-off before the glide shot
+const RUN_MAX := 6.0  # s the run to the edge may take before the glide shot is given up on
+const SQUAD_GAP := 12.0  # m between the three squads' centres
+const EDGE_RUN := 6.0  # m of run-up to the edge the glide starts from
+const RIVALS := [
+	["archer", "wisplet"],
+	["bulwark", "burrlet"],
+	["mage", "puddlet"],
+	["juggernaut", "pebbit"],
+	["gunslinger", "zapple"]
+]
 
 var hero := "gunslinger"
-var pool: Array = []         # the rivals, parked (out) between shots
+var pool: Array = []  # the rivals, parked (out) between shots
 var used := 0
-var home := Vector3.ZERO     # open ground the fights are staged on (the glide leaves the hero over the abyss)
+var home := Vector3.ZERO  # open ground the fights are staged on (the glide leaves the hero over the abyss)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--hero="): hero = String(a).substr(7)
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--hero="):
+			hero = String(a).substr(7)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	main.get_window().size = SIZE
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
@@ -37,7 +45,7 @@ func run(main_node: Node) -> void:
 		if m:
 			m.queue_free()
 			pool.clear()
-		await _start(hero, "cindle")      # a match each: the fights leave burns and slows on the hero
+		await _start(hero, "cindle")  # a match each: the fights leave burns and slows on the hero
 		m.player.ctrl = "bot"
 		m.player.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 		home = _ground(m.player.pos)
@@ -48,11 +56,13 @@ func run(main_node: Node) -> void:
 	print("CAMERAAB %s in %s" % [hero, dir])
 	main.get_tree().quit(0)
 
+
 ## The style under test, set the way the Settings do (the Hunters' models are refitted on their next render).
 func _style(id: String) -> void:
 	Settings.set_v("cam_style", id, false)
 	m.cam_style = id
 	m.cam.use_style(id)
+
 
 ## The next unused rival, put on `team` at `at` and back in the fight.
 func _rival(team: int, at: Vector3) -> Hunter:
@@ -69,41 +79,44 @@ func _rival(team: int, at: Vector3) -> Hunter:
 	h.teleport(_ground(at))
 	return h
 
+
 ## Steps `secs` of the match as Match runs a frame (the camera follows the hero, the zoom eases), then saves the shot.
 func _take(secs: float, file: String, each: Callable, until := Callable()) -> void:
-	var P := m.player
+	var p := m.player
 	var t := 0.0
 	m.cam.zoom = 1.0
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	while t < secs and not (until.is_valid() and until.call(t)):
 		_purge()
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
-		m.cam.zoom_to = 1.25 if P.gliding else 1.0
+		m.cam.zoom_to = 1.25 if p.gliding else 1.0
 		m.cam.lead_vel = m.cam_lead_vel()
-		m.cam.follow(P.pos, FRAME, false)
+		m.cam.follow(p.pos, FRAME, false)
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
 		t += FRAME
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
-	var east := m.cam.unproject_position(P.pos + Vector3(10, 0, 0)) - m.cam.unproject_position(P.pos)
+	var east := m.cam.unproject_position(p.pos + Vector3(10, 0, 0)) - m.cam.unproject_position(p.pos)
 	print("CAMERAAB shot %s: 10 m of ground is %.0f px across" % [file, east.x])
+
 
 ## The rivals are parked (out), the hero set down at `at` with full health.
 func _clear(at: Vector3) -> void:
 	for h in pool:
 		h.out = true
 	used = 0
-	var P := m.player
-	P.teleport(at)
-	P.vel = Vector3.ZERO
-	P.hp = P.max_hp
-	P.out = false
-	P.downed = false
-	P.stun_t = 0.0
-	P.root_t = 0.0
+	var p := m.player
+	p.teleport(at)
+	p.vel = Vector3.ZERO
+	p.hp = p.max_hp
+	p.out = false
+	p.downed = false
+	p.stun_t = 0.0
+	p.root_t = 0.0
+
 
 func _fight_shot(style: String) -> void:
 	var base := home
@@ -112,6 +125,7 @@ func _fight_shot(style: String) -> void:
 	var mine: Array = [m.player]
 	await _take(FIGHT_SECS, "%s_fight_%s.png" % [hero, style], func(t: float): _assist(t, mine, [foe]))
 
+
 func _squads_shot(style: String) -> void:
 	var base := home
 	_clear(base)
@@ -119,11 +133,17 @@ func _squads_shot(style: String) -> void:
 	var squads: Array = [mine]
 	for k in 2:
 		var c := base + Vector3(SQUAD_GAP, 0, 0).rotated(Vector3.UP, TAU * (k + 1) / 3.0)
-		squads.append([_rival(k + 1, c), _rival(k + 1, c + Vector3(1.4, 0, 1.6)),
-				_rival(k + 1, c + Vector3(1.4, 0, -1.6))])
-	await _take(SQUAD_SECS, "%s_squads_%s.png" % [hero, style], func(t: float):
-		for s in squads.size():
-			_assist(t, squads[s], squads[(s + 1) % squads.size()]))
+		squads.append(
+			[_rival(k + 1, c), _rival(k + 1, c + Vector3(1.4, 0, 1.6)), _rival(k + 1, c + Vector3(1.4, 0, -1.6))]
+		)
+	await _take(
+		SQUAD_SECS,
+		"%s_squads_%s.png" % [hero, style],
+		func(t: float):
+			for s in squads.size():
+				_assist(t, squads[s], squads[(s + 1) % squads.size()])
+	)
+
 
 ## A ground tile with void next to it (and EDGE_RUN m of ground behind it): [the tile, the direction to the void].
 func _edge() -> Array:
@@ -141,8 +161,9 @@ func _edge() -> Array:
 						return [Vector2i(x, z), d]
 	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1)]
 
+
 func _glide_shot(style: String) -> void:
-	var P := m.player
+	var p := m.player
 	var e := _edge()
 	var d := Vector3(e[1].x, 0, e[1].y)
 	var tile: Vector2i = e[0]
@@ -150,15 +171,19 @@ func _glide_shot(style: String) -> void:
 	_clear(edge_at - d * EDGE_RUN)
 	var foe := _rival(1, edge_at - d * (EDGE_RUN + 3.0))
 	foe.ctrl = "idle"
-	P.ctrl = "idle"
-	var left := [-1.0]      # the time the hero left the ground
-	await _take(RUN_MAX, "%s_glide_%s.png" % [hero, style], func(t: float):
-		if left[0] < 0.0 and not P.grounded:
-			left[0] = t
-		P.inp["move"] = Vector2(d.x, d.z)
-		P.inp["glide_press_only"] = true
-		P.inp["glide"] = left[0] >= 0.0
-		P.inp["glide_btn"] = left[0] >= 0.0,
-		func(t: float): return left[0] >= 0.0 and t - left[0] >= GLIDE_SECS)
-	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(P.gliding), P.pos.y])
-	P.ctrl = "bot"
+	p.ctrl = "idle"
+	var left := [-1.0]  # the time the hero left the ground
+	await _take(
+		RUN_MAX,
+		"%s_glide_%s.png" % [hero, style],
+		func(t: float):
+			if left[0] < 0.0 and not p.grounded:
+				left[0] = t
+			p.inp["move"] = Vector2(d.x, d.z)
+			p.inp["glide_press_only"] = true
+			p.inp["glide"] = left[0] >= 0.0
+			p.inp["glide_btn"] = left[0] >= 0.0,
+		func(t: float): return left[0] >= 0.0 and t - left[0] >= GLIDE_SECS
+	)
+	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(p.gliding), p.pos.y])
+	p.ctrl = "bot"
