@@ -1,7 +1,7 @@
 extends RefCounted
 ## --glide-reach: how far a glide carries over open void (no ground anywhere near), at the same height
 ## as the ground you left: a plain held glide, a feathered glide (tap off/on) and a dash into a glide.
-## Used to size the glide gaps on authored maps (docs/MAPS.md). Prints "GREACH <kind> = <metres>".
+## Used to size the glide gaps on authored maps (docs/MAP_REGIONS.md). Prints "GREACH <kind> = <metres>".
 const DT := Match.DT
 var m: Match
 var h: Hunter
