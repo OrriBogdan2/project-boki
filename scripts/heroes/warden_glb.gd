@@ -146,7 +146,8 @@ static func path(arch: String) -> String:
 ## another design of the same Warden, built on the same rig and kept beside the shipped model so the two can be
 ## compared in game (art/wardens/<art>_<tag>/<art>_<tag>.glb, e.g. vex_r3b): `--warden-variant=vex_r3b`
 ## (comma-separated for several) picks it for the session. A variant whose file is missing falls back to the
-## shipped model.
+## shipped model. A look-only variant has no .glb but an entry in warden_look.json with "hide_bones": the shipped
+## model with those bones shrunk away (hidden_bones; `--warden-variant=ryzz_nogum`: Sparkle without her gum).
 static func art(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
 	var v := variant(nm)
@@ -161,6 +162,11 @@ static func variant(nm: String) -> String:
 				for v in String(a).get_slice("=", 1).split(",", false):
 					_variants[v.get_slice("_", 0)] = v
 	return String((_variants as Dictionary).get(nm, ""))
+
+## The bones the picked look-only variant of an art name hides (WardenSync shrinks them every frame); [] for none.
+static func hidden_bones(nm: String) -> Array:
+	var v := variant(nm)
+	return look(v).get("hide_bones", []) if v != "" else []
 
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
