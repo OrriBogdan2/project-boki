@@ -18,6 +18,8 @@ const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var seq := false
+var grip := false     # --grip: the gun hand up close, one shot a sample (grip strip)
+var hand_at := Vector3.ZERO
 var native := false
 
 func run(main: Node) -> void:
@@ -31,6 +33,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
 		if a == "--seq": seq = true
+		if a == "--grip": grip = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -148,6 +151,7 @@ func _hunter(id: String, dir: String) -> void:
 			model.set_meta(WardenClips.STATE, s)
 			poser.call("_process", DT)
 			if want < times.size() and t + DT * 0.5 >= float(times[want]):
+				hand_at = poser.skel.global_transform * poser.skel.get_bone_global_pose(poser.hand).origin
 				await _shoot(model, dir, "%s_%d" % [clip, want], bx)
 				marks.append("%s %d t=%.3f state=%s" % [clip, want, t, str(s)])
 				want += 1
@@ -158,7 +162,14 @@ func _hunter(id: String, dir: String) -> void:
 	model.queue_free()
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
-	if close:
+	if grip:  # the gun hand up close (fov 30, 1.1 m off, from the front three-quarter): does the fist hold the gun?
+		cam.fov = 30.0
+		cam.position = hand_at + Vector3(0.35, 0.25, 1.0)
+		cam.look_at(hand_at)
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tree.root.get_texture().get_image().save_jpg(dir.path_join(name + "_grip.jpg"), 0.93)
+	elif close:
 		for knee in [false, true]:
 			_close_cam(bx, knee)
 			await RenderingServer.frame_post_draw
