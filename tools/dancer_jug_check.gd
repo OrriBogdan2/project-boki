@@ -13,6 +13,21 @@ const DTIMING := preload("res://tools/dancer_timing_check.gd")  # her animation 
 const DLOOP := preload("res://tools/dancer_loop_check.gd")  # the Vault loop and the Bola's slow (item 53)
 const HOLD := preload("res://tools/hold_release_check.gd")  # how Kael's RMB hold ends
 const STRIKES := preload("res://tools/clip_strike_check.gd")  # her clip strikes on the kit's releases (anim timing)
+## The Silver Thief's keyed moves (KMovesDJ): each has a sample at 0.1 s.
+const MOVES := [
+	"thf_lmb_r",
+	"thf_lmb_l",
+	"thf_primed",
+	"thf_vault_r",
+	"thf_vault_l",
+	"thf_bola",
+	"thf_knife",
+	"thf_arrive",
+	"thf_encore",
+	"thf_encore_dance",
+	"thf_exdash",
+	"thf_land"
+]
 const FLIP_TURN := [0.1, 0.3]  # s into her flip clips where the body turns (kmoves_dj.gd thf_vault_*)
 const DTIME := preload("res://tools/thief_anim_time_check.gd")  # her moves' start, hit and end on the move clock
 var a_x: AKCheck
@@ -59,9 +74,7 @@ func thief(a) -> void:
 	)
 	a_x.ok(
 		"dancer: her moves are keyed (KMovesDJ)",
-		["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife", "thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"].all(
-			func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()
-		)
+		MOVES.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
 	)
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	p_v.fire_cd = 0.0
