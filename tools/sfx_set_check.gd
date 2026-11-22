@@ -42,6 +42,7 @@ extends RefCounted
 ## Never touches the save.
 ##  15. the creator and the clan screens: the creator's Random plays the dice, dragging you round ticks once per
 ##      notch either way, and the guild registry's Found it, Join and Leave each play their own sound once
+##  16. a Hunter set's ability bar (tools/sfx_bar_check.gd): cast, travel, hit and end per ability, distinct hits
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -89,37 +90,50 @@ extends RefCounted
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
-const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
-const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const REACH_MIN := 5.0  # m: below this a sound would not carry past its own source
+const REACH_MAX := 80.0  # m: past this a sound would carry over most of the island
 const STONE_BREAK := "br_crumble"  # the Gate Seal's crumble (LairBreach): stone props reuse that one take
-const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
-const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
-const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
-const HELD_S := 3.0            # s of held fire per sound
-const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle
+const FALL_TOL_S := 0.05  # s: how far a fall cue may differ from the fall it sounds under
+const SEAM_MAX := 0.05  # the jump at a loop's seam, as a share of full scale
+const INV_UNDER_DB := 10.0  # dB: an inventory cue sits at least this far under the quietest hit or shot
+const HELD_S := 3.0  # s of held fire per sound
+const HELD_STEP_MS := 80  # ms a round: the source cadence of Vex's rifle
 const UNDER_COMBAT_DB := 10.0  # dB: the rank-ready cue as played sits at least this far under a weapon shot ("fire")
-const READY_SECS := 0.5        # s: the new-point chime's audible length at most
+const READY_SECS := 0.5  # s: the new-point chime's audible length at most
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
-const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
+const STEP_VOL := -13.0  # dB: the player's own step in Juice.footstep
 
 ## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
 const WIRED := {
-	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
+	"warn_heartbeat": ["match/warn_sfx.gd"],
+	"warn_tick": ["match/warn_sfx.gd"],
 	"blight_rumble": ["match/blight.gd", "match/blight_nests.gd"],
 	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
-	"boki_fuse_end": ["match/merge_xform.gd"], "boki_fuse_tired": ["match/merge_xform.gd"],
+	"boki_fuse_end": ["match/merge_xform.gd"],
+	"boki_fuse_tired": ["match/merge_xform.gd"],
 	"boki_unfuse": ["match/merge_xform.gd"],
-	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+	"boki_eat": ["home/home.gd"],
+	"boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
 }
+
+## 11. Meeko's channel loop, one training match per end path.
+const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
+const FRAME := 1.0 / 60.0
+
+## The stomp's cues (DECISIONS 2026-11-11): its own set, played once at a position (no `mine`, so both squads in
+## reach hear it) where Life starts it, finishes the wisp and loses it to hard CC; the wind-up rises.
+const STOMP_CUES := {"stomp_windup": "h.pos, -2.0)", "stomp_finish": "o.pos)", "stomp_crack": "h.pos)"}
 
 var bad := 0
 var levels := {}
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SFXSET %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	levels = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
@@ -173,14 +187,17 @@ func run(main: Node) -> void:
 	_boki_impacts()
 	_boki_fly_home()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
 func _ambience() -> void:
 	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
 		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
+
 
 func _boki_cues() -> void:
 	var missing := []
@@ -197,6 +214,7 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -226,6 +244,7 @@ func _check_set(path: String) -> void:
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
 
+
 ## 11. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
 ## species on a shared cue fails, an unknown one falls back.
 func _boki_voices(sounds: Dictionary) -> void:
@@ -249,6 +268,7 @@ func _boki_voices(sounds: Dictionary) -> void:
 		fell.append(KinVoice.cue("no_such_species", mood))
 	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
+
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
 	var floats := KMovesStone.gait(arch) < 0.5
@@ -258,8 +278,10 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	ok(missing.is_empty(), "%s: voice, dash and %s (missing %s)" % [arch, moves, missing])
 	if floats:
 		var steps := SURFACES.filter(func(s): return not _takes("%s_step_%s" % [arch, s]).is_empty())
-		ok(steps.is_empty() and d.get("loops", []).has(arch + "_hover"),
-			"%s: no feet, so no step files (%s) and %s_hover is a loop" % [arch, steps, arch])
+		ok(
+			steps.is_empty() and d.get("loops", []).has(arch + "_hover"),
+			"%s: no feet, so no step files (%s) and %s_hover is a loop" % [arch, steps, arch]
+		)
 	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
@@ -267,7 +289,7 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var wid := Arch.signature(arch)
 	var wdef: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/%s.json" % wid))
 	var wsfx := String((wdef["primary"] as Dictionary).get("sfx", ""))
-	wsfx = String(Arch.def(arch).get("lmb", {}).get("sfx", wsfx))      # the archetype's own sound over a shared gun's
+	wsfx = String(Arch.def(arch).get("lmb", {}).get("sfx", wsfx))  # the archetype's own sound over a shared gun's
 	ok(sounds.has(wsfx), "%s: signature weapon %s plays its own %s, not a stock sound" % [arch, wid, wsfx])
 	var h := Hunter.new()
 	h.arch = arch
@@ -279,6 +301,7 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var want := kinds.map(func(kind): return "%s_%s" % [arch, kind])
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
+
 
 ## 3. A Hunter's move looks (content/vfx/<arch>.json) never play another Hunter's own sound, so every Hunter's hits
 ## sound like its own (Gil's slime once borrowed Sparkle's bubble pop, his Super Zeep Motley's seed pop).
@@ -299,10 +322,11 @@ func _vfx_own() -> void:
 					borrowed.append("%s %s: %s (%s)" % [arch, mv, s["n"], who])
 	ok(borrowed.is_empty() and owner_of.size() > 100, "move looks play only their Hunter's own sounds %s" % [borrowed])
 
+
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
 ## files the set lists under "kit_files" (paths under scripts/arch/kits/).
 func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string("\\.sfx\\(\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string('\\.sfx\\("([a-z0-9_]+)"')
 	var silent := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)
@@ -314,6 +338,7 @@ func _kit_names(arch: String, extra: Array) -> void:
 			if not Sfx.ensure(sname) and not silent.has(sname):
 				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
+
 
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:
@@ -342,25 +367,43 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
 
+
 ## The garden minigames play literal names (garden_ ones, and any name handed to GardenSfx.cue): a typo would
 ## play silence.
 func _garden_names() -> void:
-	var re := RegEx.create_from_string("\"((?:garden|glint)_[a-z0-9_]+)\"|cue\\(\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string('"((?:garden|glint)_[a-z0-9_]+)"|cue\\("([a-z0-9_]+)"')
 	var seen := []
 	var silent := []
-	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "base_tumble.gd", "echo_steps.gd",
-			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd", "egg_sfx.gd", "glint_sfx.gd"]:
+	for f in [
+		"base_race.gd",
+		"base_shove.gd",
+		"base_seek.gd",
+		"base_volley.gd",
+		"base_tumble.gd",
+		"echo_steps.gd",
+		"show_ring.gd",
+		"base_relay.gd",
+		"garden_sfx.gd",
+		"home_chimes.gd",
+		"egg_sfx.gd",
+		"glint_sfx.gd"
+	]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
 			var sname := hit.get_string(1) + hit.get_string(2)
-			if sname.ends_with("_"):          # a prefix, completed below
+			if sname.ends_with("_"):  # a prefix, completed below
 				continue
 			seen.append(sname)
 			if not Sfx.ensure(sname):
 				silent.append(sname)
 	var sizes: Array = GardenSfx.SIZE.values()
-	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes,
-			"tumble_clash_": BaseTumble.rules()["moves"].keys(),
-			"garden_chime_": HomeChimes.KINDS, "glint_catch_": ["small", "medium", "large"]}
+	var prefixed := {
+		"garden_cheer_": GardenSfx.GRADE.values(),
+		"garden_win_": sizes,
+		"garden_sulk_": sizes,
+		"tumble_clash_": BaseTumble.rules()["moves"].keys(),
+		"garden_chime_": HomeChimes.KINDS,
+		"glint_catch_": ["small", "medium", "large"]
+	}
 	for prefix in prefixed:
 		for tail in prefixed[prefix]:
 			seen.append(prefix + tail)
@@ -368,6 +411,7 @@ func _garden_names() -> void:
 				silent.append(prefix + tail)
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
+
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -381,19 +425,22 @@ func _ult_cues() -> void:
 		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
 		if not (Sfx.ensure(sname) and carries):
 			wrong.append("%s %.0f m" % [sname, reach])
-	ok(names.size() == Arch.ids().size() + 2 and wrong.is_empty(),
-			"%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	ok(
+		names.size() == Arch.ids().size() + 2 and wrong.is_empty(),
+		"%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong]
+	)
 	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
 	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
-	var wired := press.contains("UltCue.cast(k)") and cue.contains("\"ucast\"")
-	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
+	var wired := press.contains("UltCue.cast(k)") and cue.contains('"ucast"')
+	wired = wired and match_src.contains('"ucast": UltCue.net_in')
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
 	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
 	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
 	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to the aim telegraph")
+
 
 ## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
 ## it carries past hearing range, and the kit plays it where the shell will land.
@@ -405,7 +452,8 @@ func _nuke_fall() -> void:
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
-	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
+	ok(ult.contains('m.sfx("vn_nuke_fall", at'), "the kit plays vn_nuke_fall at the landing point on the cast")
+
 
 ## 11. A rival's cast is heard as a threat; yours and your allies' are not.
 func _hostile() -> void:
@@ -425,8 +473,10 @@ func _hostile() -> void:
 		if HostileCue.starts_threat(h, "kin") and (k.r_def().is_empty() or r_n == 1) and quiet:
 			once.append(arch)
 	h.ak = null
-	ok(once.size() == Arch.ids().size(),
-			"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once])
+	ok(
+		once.size() == Arch.ids().size(),
+		"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once]
+	)
 	var you := Hunter.new()
 	you.team = 1
 	Sfx.listener = Vector3.ZERO
@@ -448,8 +498,9 @@ func _hostile() -> void:
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
 	var used := hunter_src.contains("HostileCue.on_used(self, slot)")
 	var x := cue_src.contains("HostileCue.play(m.player, h)")
-	var net := match_src.contains("\"hcast\": HostileCue.net_in")
+	var net := match_src.contains('"hcast": HostileCue.net_in')
 	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
+
 
 ## 9. Levelling up has its own cues, each called from one place, for the local Hunter only.
 func _level_cues() -> void:
@@ -463,8 +514,12 @@ func _level_cues() -> void:
 	ok(pitched, "every ranked slot has its own confirm pitch")
 	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
 	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
-	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl)\n\t\t\tLevelSfx"),
-			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
+	ok(
+		local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl)\n\t\t\tLevelSfx"),
+		"Hunter plays the rise and the rank cue once each, inside the is_local gates"
+	)
+
+
 ## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
 func _cc_cues() -> void:
 	var stub := GDScript.new()
@@ -494,15 +549,25 @@ func _cc_cues() -> void:
 	var stacked := _cc_heard(me, "root")
 	m.set("time", float(m.get("time")) + CcSfx.CAP_S)
 	var later := _cc_heard(me, "slow")
-	ok(first.size() == 1 and stacked.is_empty() and later.size() == 1, "stacked CC plays once: a root 0.1 s after "
-			+ "a stun is silent, a slow %.1f s later plays (%s %s %s)" % [CcSfx.CAP_S, first, stacked, later])
+	ok(
+		first.size() == 1 and stacked.is_empty() and later.size() == 1,
+		(
+			"stacked CC plays once: a root 0.1 s after "
+			+ "a stun is silent, a slow %.1f s later plays (%s %s %s)" % [CcSfx.CAP_S, first, stacked, later]
+		)
+	)
 	var all := {"stun": 1.0, "root": 1.0, "slow": 1.0}
 	var pick := CcSfx.fresh_on_hit(me, all)
 	var nudge := CcSfx.fresh_on_hit(me, {"slow": 0.2})
 	me.stun_t = 1.0
 	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
-	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
-			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	ok(
+		pick == "stun" and nudge == "" and refresh == "",
+		(
+			"a hit with stun, root and slow plays the stun; "
+			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh]
+		)
+	)
 	var mob := Ent.new()
 	mob.m = m
 	mob.pos = Vector3(8, 0, 0)
@@ -512,15 +577,20 @@ func _cc_cues() -> void:
 	m.set("time", float(m.get("time")) + 1.0)
 	var on_mob := _cc_heard(mob, "slow")
 	var on_far := _cc_heard(far_mob, "slow")
-	ok(on_mob == ["cc_slow_mate"] and on_far.is_empty(),
-			"a monster or Boki slowed 8 m off plays the quiet cue; one 30 m off, nothing (%s %s)" % [on_mob, on_far])
+	ok(
+		on_mob == ["cc_slow_mate"] and on_far.is_empty(),
+		"a monster or Boki slowed 8 m off plays the quiet cue; one 30 m off, nothing (%s %s)" % [on_mob, on_far]
+	)
 	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
 	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
-	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
-			"Ent.hurt and KitStatus.apply play the cues where the status lands")
+	ok(
+		ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
+		"Ent.hurt and KitStatus.apply play the cues where the status lands"
+	)
 	for h in [me, mate, far_mate, rival, mob, far_mob]:
 		h.free()
 	m.free()
+
 
 func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
 	var h := Hunter.new()
@@ -528,6 +598,7 @@ func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
 	h.team = team
 	h.pos = at
 	return h
+
 
 ## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
 func _cc_heard(h: Ent, kind: String) -> Array:
@@ -538,9 +609,11 @@ func _cc_heard(h: Ent, kind: String) -> Array:
 	CcSfx.play(h, kind)
 	return Sfx.last_played.keys().filter(func(k): return String(k).begins_with("cc_"))
 
+
 func _rms(sname: String) -> float:
 	var takes := _takes(sname)
 	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
+
 
 ## 11. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
 func _fusion_cues() -> void:
@@ -557,8 +630,10 @@ func _fusion_cues() -> void:
 	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
 		if not Sfx.ensure(c):
 			missing.append(c)
-	ok(missing.is_empty() and cues.size() >= 16,
-		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+	ok(
+		missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing]
+	)
 	# every form names its own cast, travel and hit (MergeSfx), each on file and none shared with another form
 	var named := {}
 	var silent := []
@@ -568,8 +643,11 @@ func _fusion_cues() -> void:
 			named[sname] = true
 			if sname == "" or not Sfx.ensure(sname):
 				silent.append("%s %s" % [f.get_basename(), kind])
-	ok(silent.is_empty() and named.size() == files.size() * 3,
-		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent])
+	ok(
+		silent.is_empty() and named.size() == files.size() * 3,
+		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent]
+	)
+
 
 ## 7. Each sound in WIRED is in a set and its script(s) play it by name; the warning thresholds are sane.
 func _wired() -> void:
@@ -587,11 +665,21 @@ func _wired() -> void:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
-	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 10,
-		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s")
-	ok(FileAccess.get_file_as_string("res://scripts/match/exits_flow.gd").contains("WarnSfx.countdown("),
-		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)")
+	ok(
+		(
+			WarnSfx.LOW_HP > 0.0
+			and WarnSfx.LOW_HP <= 0.3
+			and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x
+			and WarnSfx.COUNT_S == 10
+		),
+		"the heartbeat is under 30% health, quicker as health falls; the lift countdown is the last 10 s"
+	)
+	ok(
+		FileAccess.get_file_as_string("res://scripts/match/exits_flow.gd").contains("WarnSfx.countdown("),
+		"the open uplink lift ticks its last 10 s (WarnSfx.countdown)"
+	)
 	_warn_behaviour()
+
 
 ## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
 func _warn_behaviour() -> void:
@@ -608,6 +696,7 @@ func _warn_behaviour() -> void:
 	WarnSfx.beat_in = 0.0
 	ok(seen == [false, true, false, false], "heartbeat only when hurt and up (full, 20 pct, downed, 0: %s)" % [seen])
 
+
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()
@@ -615,6 +704,7 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
 
 ## 7. Every Hunter's dash has an air variant listed in dash.json that HeroSfx picks with no floor under it, and the
 ## no-charge tick exists.
@@ -637,9 +727,13 @@ func _dash_air() -> void:
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 	var slot_src := FileAccess.get_file_as_string("res://scripts/ui/dash_slot.gd")
-	ok(Sfx.ensure(DashSlot.REFILL_SOUND) and slot_src.contains("Sfx.play(REFILL_SOUND"),
-		"the dash refill cue (%s) exists and DashSlot plays it when a charge returns" % DashSlot.REFILL_SOUND)
+	ok(
+		Sfx.ensure(DashSlot.REFILL_SOUND) and slot_src.contains("Sfx.play(REFILL_SOUND"),
+		"the dash refill cue (%s) exists and DashSlot plays it when a charge returns" % DashSlot.REFILL_SOUND
+	)
 	ok(Sfx.ensure("dash_ground") and Sfx.ensure("dash_air"), "the shared dash_ground and dash_air exist")
+
+
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:
@@ -692,8 +786,10 @@ func _garden() -> void:
 		match_heard = match_heard or Sfx.amb_name == "match" or Sfx.amb_layers.has("match")
 		for n in Sfx.amb_layers:
 			off_bus += 0 if (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience" else 1
-		if t > 60.0 and t < 90.0: pond_near = maxf(pond_near, float(h.levels.get("pond", 0.0)))
-		if t > 180.0 and t < 200.0: pond_far = maxf(pond_far, float(h.levels.get("pond", 0.0)))
+		if t > 60.0 and t < 90.0:
+			pond_near = maxf(pond_near, float(h.levels.get("pond", 0.0)))
+		if t > 180.0 and t < 200.0:
+			pond_far = maxf(pond_far, float(h.levels.get("pond", 0.0)))
 	ok(peak == HomeAmbience.MAX_LOOPS, "garden: %d loops at most at once (peak %d)" % [HomeAmbience.MAX_LOOPS, peak])
 	ok(absf(fade_len - HomeAmbience.BED_FADE_S) <= 1.0, "garden: a new day part fades in over 20 s (%.1f)" % fade_len)
 	ok(pond_near >= 0.99 and pond_far == 0.0, "garden: pond up by water %.2f, off far %.2f" % [pond_near, pond_far])
@@ -703,9 +799,10 @@ func _garden() -> void:
 	for f in DirAccess.get_files_at("res://scripts/home"):
 		if f.ends_with(".gd"):
 			src += FileAccess.get_file_as_string("res://scripts/home/" + f)
-	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
+	var asks_match := src.contains("amb_match") or src.contains('play_ambience("match")')
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
+
 
 ## Does calling play() make the named sound start (it stamps Sfx.last_played)?
 func _plays(sname: String, act: Callable) -> bool:
@@ -713,62 +810,92 @@ func _plays(sname: String, act: Callable) -> bool:
 	act.call()
 	return Sfx.last_played.has(sname)
 
-## 11. Meeko's channel loop, one training match per end path.
-const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
-const FRAME := 1.0 / 60.0
 
 func _call_loop(main: Node) -> void:
 	for path in END_PATHS:
 		var m := Match.new()
 		main.add_child(m)
-		m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-			"cls": Arch.weight("tender"), "arch": "tender", "weapon": Arch.signature("tender")})
+		m.start(
+			{
+				"training": true,
+				"teams": 1,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 4242,
+				"no_drop": true,
+				"cls": Arch.weight("tender"),
+				"arch": "tender",
+				"weapon": Arch.signature("tender")
+			}
+		)
 		m.set_process(false)
-		var P: Hunter = m.player
-		P.set_arch("tender")
-		P.lvl = 6
-		var mate_at := P.pos + Vector3(-2.5, 0, 1.5)
-		var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, mate_at, {"arch": "none"})
-		var K: TenderKit = P.ak
-		P.inp["aim"] = A.pos
-		HunterKeys.ult_pressed(P)
+		var p: Hunter = m.player
+		p.set_arch("tender")
+		p.lvl = 6
+		var mate_at := p.pos + Vector3(-2.5, 0, 1.5)
+		var a_v: Hunter = m.make_hunter("A", p.team, "medium", "Ally", "idle", {}, mate_at, {"arch": "none"})
+		var k_v: TenderKit = p.ak
+		p.inp["aim"] = a_v.pos
+		HunterKeys.ult_pressed(p)
 		m.step(FRAME)
-		var key := "call%d" % P.get_instance_id()
-		var up := not K.hearth_call.is_empty() and Sfx.loop_on(key) and Sfx.loop_on(key + "_ally")
+		var key := "call%d" % p.get_instance_id()
+		var up := not k_v.hearth_call.is_empty() and Sfx.loop_on(key) and Sfx.loop_on(key + "_ally")
 		ok(up, "channel loop (%s): it sounds on her and the ally once the call starts" % path)
 		if up:
 			var quieter := float(Sfx.loops[key]["vol"]) > float(Sfx.loops[key + "_ally"]["vol"])
 			ok(quieter, "channel loop (%s): the ally's is quieter" % path)
-			HunterKeys.ult_pressed(P)
+			HunterKeys.ult_pressed(p)
 			m.step(FRAME)
 			var n := Sfx.loops.keys().filter(func(k): return String(k).begins_with(key)).size()
 			ok(n == 2, "channel loop (%s): X again does not stack a second loop (%d)" % [path, n])
 		match path:
-			"ally out of reach": A.teleport(P.pos + Vector3(-30.0, 0, 0))
-			"stun": P.stun_t = 0.5
-			"knock": m.knock(P, null, {})
-			"dead": m.eliminate(P, null, "test", true)
-			"ally dead": A.out = true
-			"merge": K.drop_holds()
+			"ally out of reach":
+				a_v.teleport(p.pos + Vector3(-30.0, 0, 0))
+			"stun":
+				p.stun_t = 0.5
+			"knock":
+				m.knock(p, null, {})
+			"dead":
+				m.eliminate(p, null, "test", true)
+			"ally dead":
+				a_v.out = true
+			"merge":
+				k_v.drop_holds()
 		var frames := 0
-		while not K.hearth_call.is_empty() and frames < 600:
+		while not k_v.hearth_call.is_empty() and frames < 600:
 			m.step(FRAME)
 			frames += 1
-		ok(frames < 600 and not Sfx.loop_on(key) and not Sfx.loop_on(key + "_ally"),
-			"channel loop (%s): both loops are gone the frame the channel ends (%d frames in)" % [path, frames])
+		ok(
+			frames < 600 and not Sfx.loop_on(key) and not Sfx.loop_on(key + "_ally"),
+			"channel loop (%s): both loops are gone the frame the channel ends (%d frames in)" % [path, frames]
+		)
 		m.queue_free()
 		await main.get_tree().process_frame
 
+
 ## 10. The build and decorate cues.
 func _build_cues() -> void:
-	var names := ["build_pick", "build_rotate", "build_place_wood", "build_place_stone", "build_store",
-			"build_move", "build_blocked"]
+	var names := [
+		"build_pick",
+		"build_rotate",
+		"build_place_wood",
+		"build_place_stone",
+		"build_store",
+		"build_move",
+		"build_blocked"
+	]
 	var silent := names.filter(func(n): return not Sfx.ensure(n))
 	ok(silent.is_empty(), "build cues: %d sounds exist (silent: %s)" % [names.size(), silent])
-	var made := [BuildSfx.placed_name("fence", false), BuildSfx.placed_name("stone_wall", false),
-			BuildSfx.placed_name("stone_wall", true)]
-	ok(made == ["build_place_wood", "build_place_stone", "build_move"],
-			"build cues: wood or stone by material, a move is its own (%s)" % [made])
+	var made := [
+		BuildSfx.placed_name("fence", false),
+		BuildSfx.placed_name("stone_wall", false),
+		BuildSfx.placed_name("stone_wall", true)
+	]
+	ok(
+		made == ["build_place_wood", "build_place_stone", "build_move"],
+		"build cues: wood or stone by material, a move is its own (%s)" % [made]
+	)
 	var stone_ids: Array = BuildSfx.rules()["stone"]
 	var unknown := stone_ids.filter(func(i): return not HomeLayout.CATALOG.has(i))
 	ok(unknown.is_empty(), "build cues: every stone piece is in the catalog (unknown: %s)" % [unknown])
@@ -776,8 +903,11 @@ func _build_cues() -> void:
 	var spots := [knock.call("check_a"), knock.call("check_a"), knock.call("check_b"), knock.call("check_b")]
 	ok(spots == [true, false, true, false], "build cues: one knock per attempt, then silent on that spot %s" % [spots])
 	BuildSfx.quiet = true
-	var hushed := [_plays("build_pick", BuildSfx.picked), _plays("build_store", BuildSfx.stored),
-			_plays("build_rotate", BuildSfx.rotated)]
+	var hushed := [
+		_plays("build_pick", BuildSfx.picked),
+		_plays("build_store", BuildSfx.stored),
+		_plays("build_rotate", BuildSfx.rotated)
+	]
 	BuildSfx.quiet = false
 	ok(hushed == [false, false, true], "build cues: quiet mutes pick and store, not the turn %s" % [hushed])
 	var wired := []
@@ -789,14 +919,17 @@ func _build_cues() -> void:
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
 
+
 ## 11. The tutorial strip's new-objective chime: a sound of the UI set, with its two levels in the table.
 func _strip_chime() -> void:
 	var ui: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))["sounds"]
 	var has_it: bool = ui.has(TutorialStrip.CHIME) and Sfx.ensure(TutorialStrip.CHIME)
 	ok(has_it, "strip chime: %s is in the UI set and has its file" % TutorialStrip.CHIME)
 	var cue: Dictionary = levels.get("cue_db", {})
-	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
-			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
+	ok(
+		cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
+		"strip chime: sfx_levels has the calm and the ducked level %s" % [cue]
+	)
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
 
@@ -804,22 +937,34 @@ func _strip_chime() -> void:
 func _rarity_stings() -> void:
 	var rare: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
 	var common: String = Data.common_kin()[0]
-	var tiers := [RaritySting.tier(common, {}), RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
-			RaritySting.tier(common, {"shimmer": true})]
+	var tiers := [
+		RaritySting.tier(common, {}),
+		RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
+		RaritySting.tier(common, {"shimmer": true})
+	]
 	ok(tiers == [0, 1, 2], "rarity tiers: common 0, a rare species 1, a shimmer 2 %s" % [tiers])
 	var names: Array = RaritySting.NAMES.slice(1)
 	var quiet := RaritySting.DB.slice(1).all(func(db): return db < 0.0) and RaritySting.DB[1] <= RaritySting.DB[2]
 	ok(names.all(func(n): return Sfx.ensure(n)) and quiet, "rarity stings exist, under the scan chime %s" % [names])
-	var src := {"scripts/match/music_dir.gd": "stings.tick(", "scripts/match/capture.gd": "RaritySting.claim(",
-			"scripts/ui/egg_hatch.gd": "RaritySting.play("}
+	var src := {
+		"scripts/match/music_dir.gd": "stings.tick(",
+		"scripts/match/capture.gd": "RaritySting.claim(",
+		"scripts/ui/egg_hatch.gd": "RaritySting.play("
+	}
 	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
 	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
 	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
 
+
 ## 12. The inventory cues.
 func _inv_cues() -> void:
-	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
-			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}
+	var cues := {
+		"inv_grab": InvSfx.grab,
+		"inv_drop": InvSfx.drop,
+		"inv_equip": InvSfx.equip,
+		"inv_swap": InvSfx.swap,
+		"inv_take": InvSfx.take
+	}
 	var silent := cues.keys().filter(func(n): return not Sfx.ensure(n))
 	ok(silent.is_empty(), "inventory cues: %d sounds exist (silent: %s)" % [cues.size(), silent])
 	var mute := cues.keys().filter(func(n): return not _plays(n, cues[n]))
@@ -828,8 +973,12 @@ func _inv_cues() -> void:
 	var cue_db := float(cats["ui"]) + InvSfx.CUE_DB
 	var fight_db := minf(float(cats["fire"]), float(cats["impact"]))
 	ok(cue_db <= fight_db - INV_UNDER_DB, "inventory cues: %.0f dB, under a hit or shot (%.0f dB)" % [cue_db, fight_db])
-	var wiring := {"scripts/ui/loadout_panel.gd": ["drop()", "equip()"], "scripts/ui/slot_drag.gd": ["grab()"],
-			"scripts/match/loot_full.gd": ["swap()"], "scripts/match/life.gd": ["swap()", "take()"]}
+	var wiring := {
+		"scripts/ui/loadout_panel.gd": ["drop()", "equip()"],
+		"scripts/ui/slot_drag.gd": ["grab()"],
+		"scripts/match/loot_full.gd": ["swap()"],
+		"scripts/match/life.gd": ["swap()", "take()"]
+	}
 	var missing := []
 	for f in wiring:
 		var src := FileAccess.get_file_as_string("res://" + f)
@@ -840,6 +989,8 @@ func _inv_cues() -> void:
 	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
 	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
 	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
+
+
 ## 11. The props you smash and the chests you open play their own sounds, never a shared stand-in.
 func _breakables() -> void:
 	var set_src := FileAccess.get_file_as_string("res://content/sfx/breakables.json")
@@ -860,13 +1011,19 @@ func _breakables() -> void:
 			continue
 		var secs := _length(String(ex["fuse_sound"]))
 		var mine := own.has(String(ex["fuse_sound"])) and own.has(String(ex["blast_sound"]))
-		ok(mine and absf(secs - float(ex["fuse"])) < 0.01,
-				"%s: its own fuse hiss (%.2f s for a %.2f s fuse) and blast" % [kind_s, secs, ex["fuse"]])
+		ok(
+			mine and absf(secs - float(ex["fuse"])) < 0.01,
+			"%s: its own fuse hiss (%.2f s for a %.2f s fuse) and blast" % [kind_s, secs, ex["fuse"]]
+		)
 	var lids: Array = ChestLoot.R()["creak"]
 	var odd := lids.filter(func(s): return not own.has(s) or lids.count(s) > 1)
 	var ends: bool = ChestLoot.creak(0) == lids[0] and ChestLoot.creak(lids.size() + 2) == lids[-1]
-	ok(lids.size() >= 2 and odd.is_empty() and ends,
-			"%d chest tiers open with their own lid creak, the last for richer (wrong: %s)" % [lids.size(), odd])
+	ok(
+		lids.size() >= 2 and odd.is_empty() and ends,
+		"%d chest tiers open with their own lid creak, the last for richer (wrong: %s)" % [lids.size(), odd]
+	)
+
+
 ## 7. Every sound a glove names in its content (cast, an effect's "sfx" / "hit_sfx") exists, and at least the
 ## first four gloves (Blink, Barrier, Hook, Rocket) have their own.
 func _gloves() -> void:
@@ -883,6 +1040,7 @@ func _gloves() -> void:
 	var have_first: bool = first.all(func(id): return own.has(id))
 	ok(have_first, "gloves: Blink, Barrier, Hook and Rocket have their own sounds (%d do)" % own.size())
 
+
 func _glove_names(node, names: Dictionary) -> void:
 	if node is Dictionary:
 		for k in node:
@@ -893,10 +1051,22 @@ func _glove_names(node, names: Dictionary) -> void:
 	elif node is Array:
 		for v in node:
 			_glove_names(v, names)
+
+
 ## 11. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
 func _garden_moments() -> void:
-	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_evolve", "garden_visit_in",
-			"garden_visit_out", "garden_season"] + GardenSfx.CUPS
+	var cues := (
+		[
+			"garden_egg",
+			"garden_friends",
+			"garden_chime_part",
+			"garden_evolve",
+			"garden_visit_in",
+			"garden_visit_out",
+			"garden_season"
+		]
+		+ GardenSfx.CUPS
+	)
 	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
 	ok(filed, "moments: all %d cues have files" % cues.size())
 	var a := {"uid": "moment_a"}
@@ -905,19 +1075,23 @@ func _garden_moments() -> void:
 	var step := float(Content.rules("base_life")["friend_at"]) * 0.6
 	for i in 3:
 		BaseLife.add_bond(a, b, step)
-	ok(BaseLife.befriended == [["moment_a", "moment_b"]], "moments: friends once, as the bond reaches friend_at %s"
-			% [BaseLife.befriended])
+	ok(
+		BaseLife.befriended == [["moment_a", "moment_b"]],
+		"moments: friends once, as the bond reaches friend_at %s" % [BaseLife.befriended]
+	)
 	BaseLife.befriended.clear()
 	var build: Dictionary = FarmUnlocks.rules()
 	var was_base: bool = build["base_mode"]
-	build["base_mode"] = true                   # leans only show on the Boki base
+	build["base_mode"] = true  # leans only show on the Boki base
 	var rec := Save.new_kin("zapple", "Moment")
 	var tinted: Array = Lean.rules()["types"].keys().filter(func(t): return Lean.rules()["types"][t].has("tint"))
 	rec["lean"] = {tinted[0]: Evo.LEAN_FULL * 0.2}
 	var one := Lean.flecks(rec)
 	rec["lean"][tinted[0]] = Evo.LEAN_FULL
-	ok((one == 1 and Lean.flecks(rec) == int(Lean.rules()["marks"])),
-			"moments: a lean shows one fleck from its first meal, all at full (%d)" % one)
+	ok(
+		one == 1 and Lean.flecks(rec) == int(Lean.rules()["marks"]),
+		"moments: a lean shows one fleck from its first meal, all at full (%d)" % one
+	)
 	var home := {"kins": [{"rec": rec, "pos": Vector3.ZERO}]}
 	var chimes := HomeChimes.new(home)
 	chimes.tick(1.0)
@@ -926,29 +1100,38 @@ func _garden_moments() -> void:
 	rec["lean"][tinted[0]] = Evo.LEAN_FULL
 	var before := int(GardenSfx.heard.get("garden_chime_part", 0))
 	chimes.tick(1.0)
-	ok(int(GardenSfx.heard.get("garden_chime_part", 0)) == before + 1,
-			"moments: a lean that shows more flecks chimes garden_chime_part once")
+	ok(
+		int(GardenSfx.heard.get("garden_chime_part", 0)) == before + 1,
+		"moments: a lean that shows more flecks chimes garden_chime_part once"
+	)
 	build["base_mode"] = was_base
-	var res := {"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false,
-			"reset": false}
+	var res := {
+		"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false, "reset": false
+	}
 	_cup_rounds(res)
-	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
-			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_friends\"",
-			"home.gd": "\"garden_evolve\"",
-			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
+	var sites := {
+		"base_life.gd": '"garden_friends"',
+		"home_incubator.gd": '"garden_egg"',
+		"garden_prizes.gd": "GardenSfx.cup(",
+		"kin_bond_moment.gd": '"garden_friends"',
+		"home.gd": '"garden_evolve"',
+		"garden_visitor.gd": '"garden_visit_out"',
+		"garden_sfx.gd": '"garden_season"'
+	}
 	var off := []
 	for f in sites:
 		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
 		if not src.contains(sites[f]):
 			off.append(f)
-		elif f != "home.gd" and src.contains("Sfx.play(\"unlock\""):
+		elif f != "home.gd" and src.contains('Sfx.play("unlock"'):
 			off.append(f + " unlock")
 	for fn in ["func _make_egg(", "func _play_evolutions("]:
 		var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
 		var body := src.substr(src.find(fn), src.find("\nfunc ", src.find(fn) + 1) - src.find(fn))
-		if body.contains("\"unlock\""):
+		if body.contains('"unlock"'):
 			off.append(fn)
 	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
+
 
 ## Each cup round's card plays its own fanfare once (Sprout, Bloom, Crown); a card with no round none.
 func _cup_rounds(res: Dictionary) -> void:
@@ -964,13 +1147,26 @@ func _cup_rounds(res: Dictionary) -> void:
 		each = each and int(GardenSfx.heard.get(GardenSfx.CUPS[i], 0)) == before[i] + 1
 	ok(each, "moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none")
 
+
 ## 11. Encore's whirr is held at Sable: off while the ring grows, on after, riding with her through a dash,
 ## and stopped in the frame the ring ends (ThiefUlt.tick/drop, Sfx.loop_hold).
 func _encore_loop(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-			"cls": Arch.weight("thief"), "arch": "thief", "weapon": Arch.signature("thief")})
+	m.start(
+		{
+			"training": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"cls": Arch.weight("thief"),
+			"arch": "thief",
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	var p: Hunter = m.player
 	p.lvl = 6
@@ -1010,11 +1206,11 @@ func _run(m: Match, secs: float) -> void:
 
 ## 11. Held fire at the source cadence, by the plain one-shot path (before) and by FireSfx (after).
 func _held_fire(main: Node) -> void:
-	var sounds := {}       # shot sound -> weapon
+	var sounds := {}  # shot sound -> weapon
 	for f in DirAccess.get_files_at("res://content/weapons"):
 		var w: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/" + f))
 		var p: Dictionary = w["primary"]
-		if float(p["rate"]) < FireSfx.HELD_RATE or w["id"] == "hoar_fan":      # (hoar_fan: Neve's darts go held)
+		if float(p["rate"]) < FireSfx.HELD_RATE or w["id"] == "hoar_fan":  # (hoar_fan: Neve's darts go held)
 			sounds[String(p["sfx"])] = w["id"]
 	ok(sounds.size() >= 4, "held-fire weapons found: %s" % str(sounds.values()))
 	for sname in sounds:
@@ -1022,19 +1218,25 @@ func _held_fire(main: Node) -> void:
 		await main.get_tree().create_timer(1.0).timeout
 		var after: Dictionary = await _hold(main, sname, true)
 		var takes: Array = after["takes"]
-		var run := takes.slice(1)
+		var run_v := takes.slice(1)
 		var repeats := 0
-		for i in range(1, run.size()):
-			repeats += 1 if run[i] == run[i - 1] else 0
-		var shown := "%s (%s) %.0f s at %d ms: voices %d plain -> %d held, cap %d" % [
-			sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
+		for i in range(1, run_v.size()):
+			repeats += 1 if run_v[i] == run_v[i - 1] else 0
+		var shown := (
+			"%s (%s) %.0f s at %d ms: voices %d plain -> %d held, cap %d"
+			% [sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
+		)
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
-		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run.has(0)
-		var others := _distinct(run)
+		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run_v.has(0)
+		var others := _distinct(run_v)
 		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
-		ok(opens and repeats == 0 and others >= want_others,
-			"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)" % [
-				sname, others, str(takes.slice(0, 8))])
+		ok(
+			opens and repeats == 0 and others >= want_others,
+			(
+				"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)"
+				% [sname, others, str(takes.slice(0, 8))]
+			)
+		)
 		await main.get_tree().create_timer(1.0).timeout
 
 
@@ -1049,7 +1251,7 @@ func _distinct(a: Array) -> int:
 ## shot that sounded (FireSfx drops some), shots: rounds fired}.
 func _hold(main: Node, sname: String, held: bool) -> Dictionary:
 	for voice in Sfx.players:
-		voice.stop()          # the earlier sections' sounds are still ringing in the shared pool
+		voice.stop()  # the earlier sections' sounds are still ringing in the shared pool
 	var peak := 0
 	var shots := 0
 	var takes := []
@@ -1091,7 +1293,7 @@ func _steps(main: Node) -> void:
 		spots["metal"] = deck
 	var plank: Vector3 = spots.get("grass", Vector3.ZERO)
 	for surf in ["grass", "stone", "snow", "metal", "wood"]:
-		if surf == "wood":      # last: lays a plank tile on the grass one
+		if surf == "wood":  # last: lays a plank tile on the grass one
 			m.world.bridge[m.world.idx(int(plank.x), int(plank.z))] = true
 			ok(StepSurface.at(m, plank) == "wood", "a plank bridge tile is wood")
 			spots["wood"] = plank
@@ -1107,7 +1309,7 @@ func _steps(main: Node) -> void:
 
 ## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
 ## shared steps get quieter to heavier, and the sound has its takes loaded.
-func _step_on(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
+func _step_on(_m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 	var arch0 := h.arch
 	var vols := []
 	for cls in WEIGHT_ARCH:
@@ -1122,8 +1324,10 @@ func _step_on(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
 	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
-	ok(spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
-			"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols])
+	ok(
+		spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
+		"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols]
+	)
 	h.arch = arch0
 
 
@@ -1148,8 +1352,10 @@ func _rank_cues() -> void:
 	var fire := float(levels["cats"]["fire"])
 	var takes := _takes("rank_ready")
 	var played := RankSfx.DB_READY + (float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0)
-	ok(ui.has("rank_ready") and not takes.is_empty() and played <= fire - UNDER_COMBAT_DB,
-		"rank_ready is a ui sound playing at %.1f dBFS, %.1f dB under a weapon shot" % [played, fire - played])
+	ok(
+		ui.has("rank_ready") and not takes.is_empty() and played <= fire - UNDER_COMBAT_DB,
+		"rank_ready is a ui sound playing at %.1f dBFS, %.1f dB under a weapon shot" % [played, fire - played]
+	)
 	var secs := _audible_secs("res://audio/rank_ready.wav")
 	ok(secs > 0.0 and secs <= READY_SECS, "the new-point chime is short (%.2f s)" % secs)
 
@@ -1182,8 +1388,10 @@ func _barks() -> void:
 			if HeroSfx.of(h, "call_" + kind, "") != "%s_call_%s" % [arch, kind]:
 				missing.append("%s_call_%s" % [arch, kind])
 	h.free()
-	ok(voiced.size() == 13 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
-			voiced.size(), HunterBarks.KINDS.size(), missing])
+	ok(
+		voiced.size() == 13 and missing.is_empty(),
+		"%d Hunters with a voice have all %d callouts (missing %s)" % [voiced.size(), HunterBarks.KINDS.size(), missing]
+	)
 	var far := voiced.filter(func(a): return float(Sfx.sound_reach.get("%s_call_boki" % a, 0.0)) <= Sfx.hear_range)
 	ok(far.is_empty(), "the squad's Boki-down call carries past %d m (short: %s)" % [int(Sfx.hear_range), far])
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
@@ -1200,16 +1408,18 @@ func _training() -> void:
 	var shared := FileAccess.get_file_as_string("res://scripts/core/sfx.gd")
 	var off := []
 	for c in TrainingSfx.CUES:
-		if not (d["sounds"] as Dictionary).has(c) or _takes(c).is_empty() or shared.contains("\"%s\"," % c):
+		if not (d["sounds"] as Dictionary).has(c) or _takes(c).is_empty() or shared.contains('"%s",' % c):
 			off.append(c)
-	ok(off.is_empty(), "training: %d cues of its own set, each with its own file (off: %s)"
-			% [TrainingSfx.CUES.size(), off])
+	ok(
+		off.is_empty(),
+		"training: %d cues of its own set, each with its own file (off: %s)" % [TrainingSfx.CUES.size(), off]
+	)
 	var arena := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
 	var duel := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
 	var wired := arena.contains("cue(TrainingSfx.RESET)") and arena.contains("cue(TrainingSfx.DUMMY_HIT")
 	wired = wired and arena.contains("cue(TrainingSfx.BOT_SPAWN") and duel.contains("cue(TrainingSfx.BOT_SPAWN")
 	wired = wired and duel.contains("TrainingSfx.count_start()") and duel.contains("TrainingSfx.count_in(")
-	var borrowed := arena.contains("m.sfx(\"revive\"") or duel.contains("m.sfx(\"revive\"")
+	var borrowed := arena.contains('m.sfx("revive"') or duel.contains('m.sfx("revive"')
 	ok(wired and not borrowed, "training: the stations and the duel ring play their own cues, not the shared revive")
 	TrainingSfx.heard.clear()
 	TrainingSfx.count_start()
@@ -1220,7 +1430,8 @@ func _training() -> void:
 	var heard := [int(TrainingSfx.heard.get(TrainingSfx.COUNT, 0)), int(TrainingSfx.heard.get(TrainingSfx.HORN, 0))]
 	ok(heard == [3, 1], "training: the duel ring counts 3-2-1 and sounds the horn once %s" % [heard])
 	var missing := [TrainingSfx.WIND, TrainingSfx.ISLAND].filter(
-			func(b): return not ResourceLoader.exists("res://audio/amb_%s.ogg" % b))
+		func(b): return not ResourceLoader.exists("res://audio/amb_%s.ogg" % b)
+	)
 	ok(missing.is_empty(), "training: both beds have their file %s" % [missing])
 	var w := World.new()
 	w.generate(4242, 64, 7)
@@ -1244,7 +1455,7 @@ func _training() -> void:
 	ok(on_bus, "training: both beds play on the Ambience bus %s" % [Sfx.amb_layers.keys()])
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
 	var music := FileAccess.get_file_as_string("res://scripts/match/music_dir.gd")
-	var own := match_src.contains("Sfx.play_ambience(\"\" if o.get(\"training\", false) else \"match\")")
+	var own := match_src.contains('Sfx.play_ambience("" if o.get("training", false) else "match")')
 	own = own and music.contains("training.ambience(w, p)\n\t\treturn\n\tvar voids")
 	var none_borrowed := not (Sfx.amb_layers.has("abyss") or Sfx.amb_layers.has("ruins") or Sfx.amb_name == "match")
 	ok(own and none_borrowed, "training: never the match's wind, abyss or ruins beds")
@@ -1252,16 +1463,20 @@ func _training() -> void:
 	w.free()
 	Sfx.clear_amb_layers(0.0)
 
+
 ## 18. Pick-one panels have no confirm button, so a take plays the UI confirm family once (UI.pick_taken).
 func _pick_taken() -> void:
 	ok(Sfx.ensure("ui_confirm") and not _takes("ui_confirm").is_empty(), "pick taken: the confirm family has takes")
-	ok(_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
-			"pick taken: UI.pick_taken plays ui_confirm, not the hover tick")
+	ok(
+		_plays("ui_confirm", func(): UI.pick_taken()) and not Sfx.last_played.has("hover"),
+		"pick taken: UI.pick_taken plays ui_confirm, not the hover tick"
+	)
 	var unwired := []
 	for f in ["ui/hatch.gd", "home/hob_offer.gd"]:
 		if not FileAccess.get_file_as_string("res://scripts/" + f).contains("UI.pick_taken("):
 			unwired.append(f)
 	ok(unwired.is_empty(), "pick taken: egg pick and Relic pick call it (missing %s)" % [unwired])
+
 
 ## 6. Every sound UiSfx plays by name (Sfx.play) has a file, so a typo never plays silence.
 func _ui_cues() -> void:
@@ -1276,6 +1491,7 @@ func _ui_cues() -> void:
 			missing.append(n)
 	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
+
 func _takes(sname: String) -> Array:
 	var out := []
 	var paths: Array = ["res://audio/%s.wav" % sname]
@@ -1285,6 +1501,7 @@ func _takes(sname: String) -> Array:
 		if FileAccess.file_exists(p):
 			out.append(p)
 	return out
+
 
 ## Peak and RMS (dBFS) of a 16-bit PCM wav; RMS over samples above 2% of the peak, as tools/sfx_lib.py levels.
 func _measure(path: String) -> Dictionary:
@@ -1303,11 +1520,13 @@ func _measure(path: String) -> Dictionary:
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
 
+
 ## A 16-bit mono wav's length in seconds (the sample rate from its header).
 func _length(sname: String) -> float:
 	var path := "res://audio/%s.wav" % sname
 	var rate := FileAccess.get_file_as_bytes(path).decode_u32(24)
 	return _data(path).size() / 2.0 / maxf(1.0, rate)
+
 
 ## The 16-bit PCM samples of a wav file (its "data" chunk).
 func _data(path: String) -> PackedByteArray:
@@ -1321,12 +1540,15 @@ func _data(path: String) -> PackedByteArray:
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
 
+
 ## 11. The farm's chop and mine: the set has the axe and pick in several takes, and every sound HomeGather
 ## plays by literal name exists (the old stand-ins, break_wood / armor_hit / thump, are not used there).
 func _chop_mine() -> void:
-	ok(_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
-			"chop: the axe bite and pick strike come in 3 takes")
-	var re := RegEx.create_from_string("Sfx\\.play\\(\"([a-z0-9_]+)\"")
+	ok(
+		_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
+		"chop: the axe bite and pick strike come in 3 takes"
+	)
+	var re := RegEx.create_from_string('Sfx\\.play\\("([a-z0-9_]+)"')
 	var src := FileAccess.get_file_as_string("res://scripts/home/home_gather.gd")
 	var played := []
 	for hit in re.search_all(src):
@@ -1335,8 +1557,11 @@ func _chop_mine() -> void:
 	ok(silent.is_empty(), "chop: every sound HomeGather plays exists (silent: %s)" % [silent])
 	var own := ["axe_bite", "trunk_creak", "tree_down", "pick_strike", "rock_crack", "rock_break"]
 	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
-	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
-			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
+	ok(
+		wired and not src.contains("break_wood") and not src.contains("armor_hit"),
+		"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins"
+	)
+
 
 ## 11. One hit tick per weapon family; each Hunter's weapon names one; ability hits keep the shared tick.
 func _hit_ticks() -> void:
@@ -1365,6 +1590,8 @@ func _hit_ticks() -> void:
 	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
 	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
 	h.free()
+
+
 ## The menus (UiSfx, Ui.button), walked tab by tab: Settings, the inventory and the Field Book. Every
 ## tab plays the tab sound; a slider ticks once for a burst of steps; a toggle sounds higher turning on
 ## than off; a dropdown sounds; a Field Book tile sounds when pointed at and when picked, and its page's
@@ -1376,7 +1603,7 @@ func _menus(main: Node) -> void:
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
-	Overlay.more_tabs = true          # (every tab, not just Main and Controls)
+	Overlay.more_tabs = true  # (every tab, not just Main and Controls)
 	Overlay.open_settings()
 	for t in Overlay.SETTINGS_TABS:
 		await _settle(main)
@@ -1384,8 +1611,10 @@ func _menus(main: Node) -> void:
 			off.append("tab %s silent" % t)
 		await _settle(main)
 		_walk("settings > " + t, seen, off)
-	var said := "settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off," % [
-		Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"]]
+	var said := (
+		"settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off,"
+		% [Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"]]
+	)
 	var all_found: bool = seen.values().all(func(n): return n > 0)
 	ok(off.is_empty() and all_found, "%s %d dropdowns sound %s" % [said, seen["dropdown"], off])
 	Overlay.close()
@@ -1405,6 +1634,7 @@ func _menus(main: Node) -> void:
 	await _field_book(main)
 	Overlay.close()
 
+
 ## The Field Book tab is open: its met Boki's tile, then that Boki's page and the way back.
 func _field_book(main: Node) -> void:
 	var tile: Control = null
@@ -1421,9 +1651,17 @@ func _field_book(main: Node) -> void:
 	var opened := Overlay.page == "dex"
 	var back: Button = Overlay.root.find_child("Close", true, false)
 	var went_back := back != null and _heard("click", back.pressed.emit) > 0.0 and Overlay.page == "inventory"
-	ok(pointed and picked and opened and went_back,
-		"field book: a tile sounds pointed at (%s) and picked (%s), its page opens (%s), Back sounds and returns (%s)"
-		% [pointed, picked, opened, went_back])
+	ok(
+		pointed and picked and opened and went_back,
+		(
+			(
+				"field book: a tile sounds pointed at (%s) and picked (%s), "
+				+ "its page opens (%s), Back sounds and returns (%s)"
+			)
+			% [pointed, picked, opened, went_back]
+		)
+	)
+
 
 ## Presses the tab named `t` in the open menu; true when it played the tab sound.
 func _press_tab(t: String) -> bool:
@@ -1432,9 +1670,11 @@ func _press_tab(t: String) -> bool:
 			return _heard("ui_tab", b.pressed.emit) > 0.0
 	return false
 
+
 ## One frame, so the page a menu just replaced is gone before the next look.
 func _settle(main: Node) -> void:
 	await main.get_tree().process_frame
+
 
 ## Moves every slider, toggle and dropdown in the open menu and back, counting each in `seen`; what
 ## stayed silent (or ticked twice in a burst, or sounded no higher on than off) goes in `off`.
@@ -1444,7 +1684,7 @@ func _walk(where: String, seen: Dictionary, off: Array) -> void:
 			var s: Slider = c
 			var was := s.value
 			var ticked := _heard("hover", func(): s.value = s.max_value if was < s.max_value else s.min_value) > 0.0
-			var again := _heard("hover", func(): s.value = was) > 0.0       # inside SLIDER_GAP_MS
+			var again := _heard("hover", func(): s.value = was) > 0.0  # inside SLIDER_GAP_MS
 			seen["slider"] += 1
 			if not ticked or again:
 				off.append("%s: slider %s" % [where, "silent" if not ticked else "ticks every step"])
@@ -1464,6 +1704,7 @@ func _walk(where: String, seen: Dictionary, off: Array) -> void:
 			if _heard("ui_tab", func(): ob.item_selected.emit(ob.selected)) <= 0.0:
 				off.append("%s: dropdown silent" % where)
 
+
 ## Runs `act` with every sound's repeat gap cleared: the pitch `sname` played at, or 0 when it was silent.
 func _heard(sname: String, act: Callable) -> float:
 	Sfx.last_played.clear()
@@ -1473,9 +1714,6 @@ func _heard(sname: String, act: Callable) -> float:
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
 
-## The stomp's cues (DECISIONS 2026-11-11): its own set, played once at a position (no `mine`, so both squads in
-## reach hear it) where Life starts it, finishes the wisp and loses it to hard CC; the wind-up rises.
-const STOMP_CUES := {"stomp_windup": "h.pos, -2.0)", "stomp_finish": "o.pos)", "stomp_crack": "h.pos)"}
 
 func _stomp_cues() -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/stomp.json"))
@@ -1486,8 +1724,10 @@ func _stomp_cues() -> void:
 			off.append(sname + " (no set or file)")
 		elif src.count('m.sfx("%s", %s' % [sname, STOMP_CUES[sname]]) != 1:
 			off.append(sname + " not played once at its spot in life.gd")
-	ok(off.is_empty() and not src.contains('"whoosh"') and not src.contains('"crit"'),
-			"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off])
+	ok(
+		off.is_empty() and not src.contains('"whoosh"') and not src.contains('"crit"'),
+		"stomp: wind-up, finish and crack are in their set and played positionally by Life %s" % [off]
+	)
 	var data := _data("res://audio/stomp_windup.wav")
 	var half := data.size() / 4
 	var e := [0.0, 0.0]
@@ -1495,6 +1735,7 @@ func _stomp_cues() -> void:
 		e[int(k >= half)] += pow(data.decode_s16(k * 2) / 32768.0, 2)
 	var gain := 10.0 * log(e[1] / maxf(e[0], 1e-9)) / log(10.0)
 	ok(e[1] > e[0] * 1.5, "stomp: the wind-up rises (second half %.1f dB over the first)" % gain)
+
 
 ## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
 func _boss_moves() -> void:
@@ -1512,6 +1753,7 @@ func _boss_moves() -> void:
 	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
 	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
 	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
+
 
 ## 7. The heartbeat: silent at the line, beating just under it (the first beat at once), faster the lower the
 ## share, and silent again on a heal over the line, a down or out. Beats counted over 10 s of 60 fps frames.
@@ -1532,6 +1774,7 @@ func _low_hp() -> void:
 	var wav := "res://audio/%s.wav" % LowHpCue.SOUND
 	var on: bool = Settings.DEFAULTS["low_hp_pulse"]
 	ok(on and FileAccess.file_exists(wav), "heartbeat: on by default, sound on file")
+
 
 func _beats(cue: LowHpCue, s: float, secs: float) -> int:
 	var n := 0
@@ -1570,11 +1813,15 @@ func _voices() -> void:
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
 
+
 func _boki_impacts() -> void:
 	var r := BokiImpact.rules()
 	var types: Dictionary = r.get("types", {})
-	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
-	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var bad_v := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(
+		types.size() == 19 and bad_v.is_empty(),
+		"each of the 19 types has impact ki_<type> on its cast set %s" % [bad_v]
+	)
 	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
 	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
 	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")
@@ -1602,13 +1849,15 @@ func _boki_fly_home() -> void:
 func _impact_ok(types: Dictionary, t: String) -> bool:
 	return String(types.get(t, "")) == "ki_" + t and not _takes("k_" + t).is_empty() and Sfx.ensure("ki_" + t)
 
+
 func _type_of(id: String) -> String:
 	return String(KinLib.species(id).get("type", ""))
 
-## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
+
+## 10. What you can see you can hear: the cue at the side edge of the reference view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
 func _falloff() -> void:
-	var edge := CamRig.style_across("supervive") * 0.5
+	var edge := CamRig.style_across("default") * 0.5
 	var was: Vector3 = Sfx.listener
 	Sfx.listener = Vector3.ZERO
 	var at_edge := Sfx._distance_db(Vector3(edge, 0, 0))
@@ -1621,21 +1870,28 @@ func _falloff() -> void:
 	ok(off < at_edge - 4.0 and not is_nan(off), "...one 10 m off screen is still there but quieter (%.1f dB)" % off)
 	ok(is_nan(gone), "...and past ~30 m it is silent")
 
+
 ## 15. The creator and the clan screens (the screens need a whole hatch or town, so their buttons are read from source).
 func _creator_clans() -> void:
 	Sfx.last_played.clear()
 	var acc := LookLocker.turn_notch(0.0, LookLocker.TURN_NOTCH * 0.5)
 	var quiet := Sfx.last_played.is_empty()
 	acc = LookLocker.turn_notch(acc, -LookLocker.TURN_NOTCH * 0.6)
-	ok(quiet and Sfx.last_played.keys() == ["ui_turn"] and acc < LookLocker.TURN_NOTCH * 0.2,
-		"dragging you round ticks once per notch, either way")
+	ok(
+		quiet and Sfx.last_played.keys() == ["ui_turn"] and acc < LookLocker.TURN_NOTCH * 0.2,
+		"dragging you round ticks once per notch, either way"
+	)
 	var locker_src := FileAccess.get_file_as_string("res://scripts/ui/look_locker.gd")
-	ok(locker_src.contains('UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice")'),
-		"the creator's Random plays the dice")
+	ok(
+		locker_src.contains('UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice")'),
+		"the creator's Random plays the dice"
+	)
 	var town_src := FileAccess.get_file_as_string("res://scripts/social/town.gd")
 	var once := true
 	for cue in ["ui_clan_found", "ui_clan_join"]:
 		once = once and town_src.count('Sfx.play("%s")' % cue) == 1
 	var leave_at := town_src.find('UI.button("Leave the guild"')
-	ok(once and town_src.find('"ui_clan_leave"', leave_at) > leave_at and not town_src.contains('Sfx.play("unlock")'),
-		"clan found, join and leave each play their own sound once")
+	ok(
+		once and town_src.find('"ui_clan_leave"', leave_at) > leave_at and not town_src.contains('Sfx.play("unlock")'),
+		"clan found, join and leave each play their own sound once"
+	)

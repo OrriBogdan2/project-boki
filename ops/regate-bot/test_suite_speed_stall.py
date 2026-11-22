@@ -1,9 +1,9 @@
 """Stall watchdog + bounded reaper of suite_speed.py (11-14: regate #57/#59 hung 155 min inside a run's cleanup).
 Run: python3 ops/regate-bot/test_suite_speed_stall.py"""
+
 import importlib.util
 import os
 import subprocess
-import sys
 import tempfile
 import time
 import types
@@ -17,9 +17,20 @@ spec.loader.exec_module(ss)
 
 
 def gate(out, jobs=2, stall_min=0.05):
-    a = types.SimpleNamespace(main=out, merge=out, out=out, jobs=jobs, stall_min=stall_min, godot="godot", timeout=5,
-                              godot_args="", alert_file=str(Path(out) / "ALERT"), main_lazy=False, no_cache=True,
-                              timeout_strikes=2)
+    a = types.SimpleNamespace(
+        main=out,
+        merge=out,
+        out=out,
+        jobs=jobs,
+        stall_min=stall_min,
+        godot="godot",
+        timeout=5,
+        godot_args="",
+        alert_file=str(Path(out) / "ALERT"),
+        main_lazy=False,
+        no_cache=True,
+        timeout_strikes=2,
+    )
     return ss.Gate(a)
 
 
@@ -35,7 +46,9 @@ class StallTest(unittest.TestCase):
             g = gate(d)
             ss.run_flag = lambda godot, tree, flag, timeout, extra, on_start=None: (
                 {"flag": flag, "rc": 0, "secs": 0.1, "verdict": "green", "mismatch": False, "log": "ok"}
-                if flag == "--fast" else time.sleep(600))
+                if flag == "--fast"
+                else time.sleep(600)
+            )
             t0 = time.time()
             with self.assertRaises(ss.GateStalled):
                 g.run_many([("merge", d, "--fast"), ("merge", d, "--hangs")], "body-x")
@@ -48,7 +61,9 @@ class StallTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             g = gate(d)
             ss.run_flag = lambda godot, tree, flag, timeout, extra, on_start=None: (
-                time.sleep(0.2) or {"flag": flag, "rc": 0, "secs": 0.2, "verdict": "green", "mismatch": False, "log": "ok"})
+                time.sleep(0.2)
+                or {"flag": flag, "rc": 0, "secs": 0.2, "verdict": "green", "mismatch": False, "log": "ok"}
+            )
             g.run_many([("merge", d, f"--f{i}") for i in range(10)], "x")
             self.assertEqual(len(g.res["merge"]), 10)
 
@@ -65,7 +80,9 @@ class StallTest(unittest.TestCase):
 
     def test_run_flag_with_a_stub_engine_and_helper_left_behind(self):
         with tempfile.TemporaryDirectory() as d:
-            stub = Path(d) / "godot"  # "engine" that leaves a setsid'd helper holding its env, then runs past the timeout
+            stub = (
+                Path(d) / "godot"
+            )  # "engine" that leaves a setsid'd helper holding its env, then runs past the timeout
             stub.write_text("#!/bin/sh\nsetsid sleep 300 &\nsleep 60\n")
             stub.chmod(0o755)
             t0 = time.time()
@@ -76,8 +93,12 @@ class StallTest(unittest.TestCase):
             time.sleep(0.5)
             left = subprocess.run(["pgrep", "-f", "^sleep 300$"], capture_output=True, text=True).stdout.split()
             for pid in left:  # only ours: the helper carries this run's XDG_DATA_HOME; none may have survived the run
-                self.assertNotIn(f"suite-", Path(f"/proc/{pid}/environ").read_text(errors="ignore")
-                                 if Path(f"/proc/{pid}/environ").exists() else "")
+                self.assertNotIn(
+                    "suite-",
+                    Path(f"/proc/{pid}/environ").read_text(errors="ignore")
+                    if Path(f"/proc/{pid}/environ").exists()
+                    else "",
+                )
 
 
 if __name__ == "__main__":
