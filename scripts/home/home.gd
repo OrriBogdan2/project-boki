@@ -61,6 +61,7 @@ var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base
 var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode only
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
 var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base_mode only
+var hfetch: BaseFetch = null    # Fetch Cup's toss mat (base_fetch.gd), base_mode only
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
@@ -191,6 +192,7 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
+		hfetch = BaseFetch.new(self)
 		hfish = GlintFishing.new(self)
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
@@ -198,7 +200,7 @@ func _ready() -> void:
 		hlantern = LanternMatch.new(self)
 		hkite = BaseKite.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern, hkite]
+		games = [hrace, hshove, hseek, hvolley, hfetch, htumble, hecho, hshow, hfish, hlantern, hkite]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -724,6 +726,7 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
+		MasterySeep.maybe_show(self)     # the first mastery feature on you, explained once
 	if not visit.is_empty() and not play_hub:     # (the hub counts as a visit; the picker opens there too)
 		ClanBase.draw(self, world, kins, visit.get("clan_base", {}))
 	elif play_hub:
@@ -2264,6 +2267,7 @@ func _label_for(it: Dictionary) -> String:
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
+		"fetch": return hfetch.label()
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
 		"show": return hshow.label()
@@ -2310,6 +2314,7 @@ func _use(it: Dictionary) -> void:
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
+		"fetch": hfetch.use()
 		"tumble": htumble.use()
 		"echo": hecho.use()
 		"show": hshow.use()
@@ -2862,7 +2867,7 @@ func _open_challenges() -> void:
 	var v := _new_panel("Challenge House", 800)
 	var is_ready := Progress.ready_to_claim()
 	var donec: int = Save.d.get("challenges", []).size()
-	UI.subtitle(v, "Goals with rewards. Finished ones are claimed here, and some open new goods at the market.")
+	UI.subtitle(v, "Claim rewards for finished goals. Some open new goods at the market.")
 	UI.head_extra(v).add_child(UI.chip("check", "%d/%d" % [donec, Progress.CHALLENGES.size()], UI.GOOD, "Challenges done"))
 	if is_ready.size() > 0:
 		UI.head_extra(v).add_child(UI.tag("%d to claim" % is_ready.size(), UI.GOLD))
@@ -3190,7 +3195,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
 			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
 			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
-			c2.add_child(UI.para("Feed it, play with it and talk to it to find out more.", 12, UI.FAINT))
+			if known.size() < 3: c2.add_child(UI.para("Feed it and play with it to find out.", 12, UI.FAINT))
 			JournalCard.add(rec, c2)
 			c2.add_child(UI.spacer(2))
 			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
@@ -3543,10 +3548,10 @@ func _play_evolutions() -> void:
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("boki_evolve")
 	music.hold("lullaby", 25.0)
-	var tween := create_tween()
-	tween.tween_interval(0.4)
-	tween.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tween.tween_callback(func():
+	var tw := create_tween()
+	tw.tween_interval(0.4)
+	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
 			building_now = false
@@ -3765,7 +3770,7 @@ func _refresh_player_model() -> void:
 func _open_music() -> void:
 	var v := _new_panel("Music", 560)
 	var have: Array = Save.d.get("music", [])
-	v.add_child(UI.label("%d of %d tracks found. Pick one to play it here, or let the music follow where you are." % [have.size(), Data.MUSIC.size()], 14, UI.MUTED))
+	UI.subtitle(v, "%d of %d tracks found" % [have.size(), Data.MUSIC.size()])
 	for id in Data.MUSIC:
 		var md: Dictionary = Data.MUSIC[id]
 		var row := UI.hbox(10)
@@ -3783,9 +3788,8 @@ func _open_music() -> void:
 			b.disabled = playing
 			row.add_child(b)
 		else:
-			var hl := UI.label(String(md["hint"]), 13, UI.MUTED)
-			hl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			row.add_child(hl)
+			nl.tooltip_text = String(md["hint"])     # where to find it, on hover
+			nl.mouse_filter = Control.MOUSE_FILTER_PASS
 		v.add_child(row)
 	if Sfx.music_lock != "":
 		v.add_child(UI.button("Let the music follow where I am", func():
@@ -4395,8 +4399,8 @@ func _open_nook() -> void:
 	if nook_view != "" and Save.kin(nook_view).is_empty(): nook_view = ""
 	var roster: Array = (Save.d["roster"] as Array).duplicate()
 	var ready_n := roster.filter(func(o): return _can_pair(o) == "").size()
-	UI.subtitle(v, ("There's a %s in the nest. It hatches after your next expedition, or in about ten minutes at home." % _egg_label()) if egg_in
-		else "Pick two Boki who are close. They leave an egg that mixes their personalities and takes some of their IVs.")
+	UI.subtitle(v, ("A %s is in the nest. It hatches after your next expedition." % _egg_label()) if egg_in
+		else "Pair two Boki who are close: they leave an egg.")
 	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Boki who can pair now: Grown and rested"))
 	# picked first, then the ready ones, then the rest; higher levels first
 	var rank := func(o) -> int: return 0 if nook_pick.has(o["uid"]) else (1 if _can_pair(o) == "" else 2)
@@ -4499,9 +4503,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	mi.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	st.add_child(mi)
 	tv.add_child(st)
-	var tags := Mutations.tags(o)
-	t.tooltip_text = "%s the %s%s  ·  Lv %d\n%s\nIVs %d/155 (%s)" % [o["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(o), int(o.get("level", 1)),
-		"Ready to pair" if why == "" else why, Care.iv_total(o), Care.iv_grade(o)[0]]
+	t.tooltip_text = "Ready to pair" if why == "" else why      # (name, level and IVs are on the tile)
 	return t
 
 ## The side panel for one kin: who it is, then its IVs as a chart, rows and the judge's word.
@@ -4606,21 +4608,14 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 ## The side panel before you've picked: what the Nook is for, and what IVs are.
 func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	dv.add_child(UI.section("How it works"))
-	if egg_in:
-		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
-	else:
-		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. Eggs always hatch the first form of a Boki line, and legendary Boki never come from eggs. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+	dv.add_child(UI.para("The nest is taken until the egg hatches." if egg_in
+		else "Pick two ready Boki: Grown, friends and rested. Eggs hatch a line's first form, never a legendary.", UI.T_SMALL, UI.INK))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
-	dv.add_child(UI.para("An egg takes 3 of its 5 IVs from its parents (each from one of them at random) and rolls the other 2 fresh. Rare Eggs from boss lairs always have 3 high ones.", UI.T_SMALL, UI.MUTED))
 	if nook_pick.size() == 1:
-		var r := Save.kin(String(nook_pick[0]))
 		dv.add_child(UI.spacer(4))
-		dv.add_child(UI.label("%s is picked. Pick one more." % r["name"], UI.T_SMALL, UI.ACCENT_HI))
-	elif not egg_in:
-		dv.add_child(UI.spacer(4))
-		dv.add_child(UI.label("Click a Boki to see its IVs, then pick two.", UI.T_SMALL, UI.ACCENT_HI))
+		dv.add_child(UI.label("%s is picked. Pick one more." % Save.kin(String(nook_pick[0]))["name"], UI.T_SMALL, UI.ACCENT_HI))
 	ClanLoanPanel.side_rows(dv, _open_nook)
 	ClanChatPanel.side_rows(dv)
 
@@ -4932,7 +4927,7 @@ func _open_train(rec: Dictionary) -> void:
 		hrace.solo(rec)         # base_mode: training is a solo lap of the Dash
 		return
 	var v := _new_panel("Train %s" % rec["name"], 560)
-	v.add_child(UI.label("A short drill at the Training post. Time your presses: gold is great, orange is good. Costs some energy and food; a happy Boki learns faster.", 14, UI.MUTED))
+	UI.subtitle(v, "Time your presses: gold is great, orange is good.")
 	for s in Care.STATS:
 		var st: Dictionary = Care.STATS[s]
 		var row := UI.hbox(10)
@@ -4945,7 +4940,7 @@ func _open_train(rec: Dictionary) -> void:
 		b.disabled = int(rec["stats"][s]) >= Care.stat_cap(rec)
 		row.add_child(b)
 		v.add_child(row)
-	v.add_child(UI.label("Energy %d  ·  Full %d" % [int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
+	v.add_child(UI.label("Each drill uses energy and food  ·  Energy %d  ·  Full %d" % [int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
 
 # ---- kin as individuals: personal space, turns to talk, and a personality in how they move
 

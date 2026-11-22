@@ -156,8 +156,9 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 
 Snd, Motley and Gil (11-20, ext/sfx-motley-gil-bar, code read): 3 -> 4 each. Every ability's cast and hit are the
 Hunter's own and distinct, the Snap miss, the Trade's far end, an unpopped seed and the slime puddle's end have cues, and
-Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5: Nightwell's close,
-Riptide's spout hit and the Tide lunge's cast still have none.
+Gil's move looks play his own set instead of other Hunters' sounds (cue maps in docs/AUDIO.md). Not 5 then: Nightwell's
+close, Riptide's spout hit and the Tide lunge's cast had none. Filled 11-21 (ext/sfx-motley-last-three: os_well_close,
+gil_spout_hit, gil_tide_lunge; the last two are Gil's), so Snd is 5 for both, pending the owner's ear.
 
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
 Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
@@ -354,3 +355,51 @@ train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; 
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
+
+## Foe telegraphs audit (ext/combat-foe-telegraphs, 2026-11-20)
+Stabilize sprint, combat clarity: does a rival see a cue before each hit, in the rival's colour, for the whole wind-up?
+Measured headless on a flat strip with a rival dummy 4 m ahead (every slot of the 13 kits cast once; first/last tick an
+AimKit entry with `all` is up, first damage, the HeroVfx moments played, the colour a rival's view draws). The ground
+cue is AimKit's (`all`: a rival's is leaned 45% toward `SideColor.rim()` #ff2d55, hue 349 deg); the body cue is the
+kit's `content/vfx/<arch>.json` moment, which stays in the Hunter's palette (a ground ring there would mean gameplay:
+none added). Delayed-hit lead, no gap and rival lean stay asserted by `--telegraph-lead-check` (64 checks, 0 failed).
+Strips from `--hero-vfx-reel`: `docs/shots/combat-foe-telegraphs/` (own view, match camera, xvfb opengl3).
+
+| Ability | Wind-up to hit (s) | Ground cue a rival sees (s up) | Rival-view hue | Body cue (vfx json) | Verdict |
+|---|---|---|---|---|---|
+| Kael Finishing Slam (RMB) | 0.67 | lane 0.08-0.65 | 357 | `slam_tell` ribbon, `slam_wind` held | ok |
+| Kael Lunge (RMB hold) | 2.0 charge, hit 2.18 | none: the lane is his own aim lane (no `all`) | | `lunge_charge` held 0.32-2.03, red, whine | body cue only (see below) |
+| Kael Gilded Riposte (X) | 0.65 guard, hit 0.77 | lane 0.02-0.63 | 20 | `guard_tell` gold | ok |
+| Kael Meteor Drop | 0.22 | circle to the hit | | `drop_tell` sound | ok (kept short, TELEGRAPH_LEAD.md) |
+| Albert Faultline (X) | first hit 0.42 | lane 0.02-1.57 | 9 | none needed | ok |
+| Albert charged swing (LMB hold) | hold, perfect at 0.8 | none: the whirling hammer and its glint (BjornFx) are the tell | | `charge` held, `full` flash | ok, body only |
+| Tenzo Stone Row ridge (E) | 0.20 | `e_tell` discs 0.00-0.20 | 279 | `row_tell` scorch 0.9 | ok on lead; hue is violet (see below) |
+| Tenzo Quakefall (RMB hold) | 1.37 | ring 0.22-1.35 | 282 | `slam_charge` held | ok |
+| Tenzo Basalt Spine (X) | 0.25 | cracks 0.03-0.22 | 279 | `spine_crack` | ok |
+| Sparkle Skycall (E) | 0.82 | ring 0.02-0.90 | 335 | `e` | ok |
+| Sparkle Eye of the Storm (X) | 2.53 | ring 0.02-2.42, landing mark 2.32-2.52 | 335 | `x_ring` held | ok |
+| Motley Nightwell (X) | 1.02 | dome 0.02-0.98 | 349 | `well_open` | ok |
+| Motley Brimseed (E) | recast | disc up the whole cast | 347 | | ok |
+| Neve Ice Spear (RMB) | zone 1.8 from the landing | disc 0.32-2.10 | 347 | `spear_burst` | ok |
+| Neve Rime Wall (E) | 0.50 | lane 0.00-0.48 | 344 | `wall_tell` 0.25 flash | ok |
+| Meeko Burrseed (RMB) | 0.70 | disc 0.70-2.68 | 18 | `seed_field` | ok |
+| Sable Shiv ult (X) | 0.55 | rings 0.02-2.40 | 318 | | ok |
+| Lace Hail Wall (E) | 0.38 | arc 0.00-0.35 | 352 | | ok |
+| Vex Rail Cone (E) | 0.63 | cone 0.02-0.62 | 34 | `e_charge` held, lime | ok |
+| Vex Nuke (X) | 1.62 | disc 0.02-1.60 | 33 | `x_cast`, `x_shell` | ok |
+| Grimble Anchor Slam (E) | 0.38 | ring 0.02-0.37 | 25 | `anchor_fist` | ok |
+| Grimble fan (X) | 1.17 | fan 0.02-1.97 | 20 | | ok |
+| Gil potions, Tidal Wave | flight / ride | circle or lane from the throw | 345-350 | | ok |
+| Cinder | none: Furnace Cloak fires on the press | ring 0.00-0.17 | 7 | `cloak_gather` | no delayed hit |
+
+Result: every telegraphed ability with a ground cue has it up from the press to the hit with no gap, and every wind-up
+with a body cue holds it (a `H:` hold) for the whole wind-up. No `content/vfx` stray was found, so no data file changed.
+Left for the owner (each needs a code or design change, not a json fix, and adds a foe-visible element):
+- Kael's Lunge lane is private: a rival sees the red embers and hears the whine for 2 s but no lane. Showing it to
+  rivals is a new foe element (the drawn lane is already in his crimson, `docs/shots/combat-foe-telegraphs/juggernaut_lunge.jpg`).
+- The rival lean is one global share (`SideColor.FX_FOE_K` 0.45), so a rival sees Tenzo's cobalt as violet (hue 280),
+  and Vex, Meeko, Grimble and Kael's X as orange (18-34). Reads as hostile by its rim and ground order, but not red.
+  Raising the share is a policy change for every Hunter.
+Pre-existing reds on main at 0b0b680df2, not from this branch: `--hero-vfx-check` 1 failed (Vex LMB rounds 0.154 m
+from the forearm, limit 0.15 m); `tools/health.py --strict` style ratchet (hud_hover.gd, ability_text_check.gd,
+check_registry.gd long lines).

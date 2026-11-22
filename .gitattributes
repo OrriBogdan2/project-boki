@@ -43,3 +43,19 @@
 *.bin binary
 *.zip binary
 *.pck binary
+
+# Shared docs that many PRs touch (docs/DOC_FRAGMENTS.md has the reasoning)
+# DEBT.md is a flat list of one-line entries in no order: a clash keeps both sides.
+docs/DEBT.md merge=union
+# Pages written whole by tools/gen_wiki.py: on a clash keep our side (merge.ours.driver true), then run tools/gen_wiki.py.
+docs/wiki/Rules.md merge=ours
+docs/wiki/Boki-Species.md merge=ours
+docs/wiki/Boki-Growth.md merge=ours
+docs/wiki/Class-*.md merge=ours
+docs/wiki/Classes.md merge=ours
+docs/wiki/Controls.md merge=ours
+docs/wiki/Farm-Reference.md merge=ours
+docs/wiki/Gloves.md merge=ours
+docs/wiki/Lore.md merge=ours
+docs/wiki/Maps.md merge=ours
+docs/wiki/Weapons.md merge=ours

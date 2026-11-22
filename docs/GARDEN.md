@@ -154,8 +154,10 @@ need a design call:
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
    `unlock` and `mastery` rows while the save has no match; or show them as "away" rows. Default: keep.
 3. **The second starter Hunter waits for the first finished expedition** (`ClassUnlock` bonus). It has
-   no goal row now (it printed an empty one, fixed), but nothing at home ever opens it. Fine if Hunters
-   are an expedition feature; say so in the Hunter picker if not.
+   no goal row now (it printed an empty one, fixed), and nothing at home opens it (rule kept). The Hunter
+   picker now says so: each waiting tile and the viewer under it show "Finish an expedition to choose
+   your second Hunter" (`ClassUnlock.locked_line`; challenge Hunters show their challenge). Open: whether
+   a garden-only player should ever get it without an expedition.
 4. **The match tutorial comes before the garden** unless the player presses "Skip tutorial" on the
    naming card. Skipping is offered; whether the card should say "go straight to the garden" is a
    wording call.
