@@ -8,16 +8,19 @@ extends "res://tools/archer_bulwark_combo_check.gd"
 var rows: Array = []
 var peaks := {}
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	main_node.set_meta("cc_measure_check", self)
 	await _walls()
 	var kits: Array[Callable] = [
-		_vex, _kael, _lace, _cinder, _meeko, _tenzo, _grimble, _neve, _motley, _albert, _sparkle, _sable, _gil]
+		_vex, _kael, _lace, _cinder, _meeko, _tenzo, _grimble, _neve, _motley, _albert, _sparkle, _sable, _gil
+	]
 	for kit in kits:
 		await kit.call()
 	print("CCM DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 ## Reads the dummy's CC every frame for `secs` and keeps the highest of each; `each` runs first every frame.
 func _watch(m: Match, T: Hunter, secs: float, each := Callable(), caster: Hunter = null) -> Dictionary:
@@ -27,12 +30,12 @@ func _watch(m: Match, T: Hunter, secs: float, each := Callable(), caster: Hunter
 		if each.is_valid():
 			each.call()
 		m.step(DT)
-		Oomph.render_hit(T, DT)        # the stagger clock (Hunter.render runs it, and a headless run draws nothing)
+		Oomph.render_hit(T, DT)  # the stagger clock (Hunter.render runs it, and a headless run draws nothing)
 		t += DT
 		pk["stun"] = maxf(pk["stun"], T.stun_t)
 		pk["root"] = maxf(pk["root"], T.root_t)
 		var stagger := is_equal_approx(T.slow_k, Oomph.STAGGER_SLOW) and T.slow_t <= Oomph.STAGGER_T + 0.02
-		if not stagger and T.slow_t > 0.0:      # (the hit stagger's own short slow is no rider)
+		if not stagger and T.slow_t > 0.0:  # (the hit stagger's own short slow is no rider)
 			pk["slow"] = maxf(pk["slow"], T.slow_t)
 			pk["slow_k"] = maxf(pk["slow_k"], T.slow_k)
 		if caster != null:
@@ -40,6 +43,7 @@ func _watch(m: Match, T: Hunter, secs: float, each := Callable(), caster: Hunter
 		pk["gnd"] = maxf(pk["gnd"], KitStatus.grounded_left(T))
 		pk["rat"] = maxf(pk["rat"], KitStatus.rattled_left(T))
 	return pk
+
 
 ## Compares a measured peak with what the table says (tolerance: a frame and a half).
 func _row(who: String, what: String, pk: Dictionary, want: Dictionary, landed := true) -> void:
@@ -60,6 +64,7 @@ func _row(who: String, what: String, pk: Dictionary, want: Dictionary, landed :=
 	print("CCM %-9s %-44s%s" % [who, what, line])
 	ok("cc %s: %s" % [who, what], good, "want %s" % str(want))
 
+
 ## A fresh strip, the dummy `d` m ahead, aim on it; returns [m, P, T, K, home, lv].
 func _kit(arch: String, d := 2.2, second := false) -> Array:
 	var r := setup(arch, d, "", second)
@@ -69,6 +74,7 @@ func _kit(arch: String, d := 2.2, second := false) -> Array:
 		if P.slot_lv.has(s):
 			P.slot_lv[s] = maxi(1, int(P.slot_lv[s]))
 	return [r[0], P, r[2], K, r[4], r[5], r[3]]
+
 
 func _reset(m: Match, P: Hunter, T: Hunter, home: Vector3, d: float) -> void:
 	P.teleport(home)
@@ -86,7 +92,9 @@ func _reset(m: Match, P: Hunter, T: Hunter, home: Vector3, d: float) -> void:
 	T.teleport(home + Vector3(d, 0, 0))
 	aim_at(P, T.pos)
 
-const WALLS := preload("res://tools/wall_stun_check.gd")      # its probes: each kit's own wall hit, a cliff behind
+
+const WALLS := preload("res://tools/wall_stun_check.gd")  # its probes: each kit's own wall hit, a cliff behind
+
 
 ## Each kit's wall hit into a cliff (the kit's own number), and a plain knock (the body slam every kit shares).
 func _walls() -> void:
@@ -102,17 +110,22 @@ func _walls() -> void:
 		undo.call()
 		var got := {"stun": rec["stun"]}
 		var want := {"stun": WALL_NAMES[src][2]}
-		if src == "gunslinger":            # the Daze it was left with, plus the frames the probe ran on
+		if src == "gunslinger":  # the Daze it was left with, plus the frames the probe ran on
 			got["rat"] = KitStatus.rattled_left(T) + float(WALLS.FRAMES) * DT
 			want["rat"] = 2.0
 		_row(String(WALL_NAMES[src][0]), String(WALL_NAMES[src][1]), got, want)
 		await done(r[0])
 
+
 const WALL_NAMES := {
-	"archer": ["Lace", "Heartpiercer into a wall", 1.2], "bulwark": ["Albert", "knock into a wall (Crush)", 1.0],
-	"gunslinger": ["Vex", "Burr cone into a wall", 0.9], "dolm": ["Tenzo", "Quake Punch into a wall", 0.9],
-	"mage": ["Sparkle", "Storm Rod into a wall", 0.8], "knock": ["any", "plain knock into a wall", 0.9],
+	"archer": ["Lace", "Heartpiercer into a wall", 1.2],
+	"bulwark": ["Albert", "knock into a wall (Crush)", 1.0],
+	"gunslinger": ["Vex", "Burr cone into a wall", 0.9],
+	"dolm": ["Tenzo", "Quake Punch into a wall", 0.9],
+	"mage": ["Sparkle", "Storm Rod into a wall", 0.8],
+	"knock": ["any", "plain knock into a wall", 0.9],
 }
+
 
 # ------------------------------------------------------------------ one kit a function
 func _vex() -> void:
@@ -122,13 +135,14 @@ func _vex() -> void:
 	var T: Hunter = r[2]
 	var home: Vector3 = r[4]
 	_reset(m, P, T, home, 4.0)
-	tap(m, P)                                    # Burr Charge
+	tap(m, P)  # Burr Charge
 	_row("Vex", "Burr Charge cone", _watch(m, T, 2.5), {"rat": 1.4})
 	_reset(m, P, T, home, 4.0)
 	P.ult = 1.0
 	P.ak.cast_ult()
 	_row("Vex", "Cinderfall zone", _watch(m, T, 3.0), {"slow": 0.6, "slow_k": 0.3})
 	await done(m)
+
 
 func _kael() -> void:
 	var r := _kit("juggernaut")
@@ -163,15 +177,21 @@ func _kael() -> void:
 	P.ak.press_rmb()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.ak.use_e()
-	_row("Kael", "Haul Slam (E, hold RMB, E)", _watch(m, T, 1.5, func(): P.inp["sec_hold"] = true), {},
-			K.haul_slams == 1 and dmg(T) > 0.0)
+	_row(
+		"Kael",
+		"Haul Slam (E, hold RMB, E)",
+		_watch(m, T, 1.5, func(): P.inp["sec_hold"] = true),
+		{},
+		K.haul_slams == 1 and dmg(T) > 0.0
+	)
 	P.inp["sec_hold"] = false
 	_reset(m, P, T, home, 3.0)
-	P.inp["fire"] = true                          # Searing Wave: LMB held, then let go
+	P.inp["fire"] = true  # Searing Wave: LMB held, then let go
 	step(m, 1.2, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	_row("Kael", "Fireblast wave", _watch(m, T, 1.5), {}, K.waves >= 1 and dmg(T) > 0.0)
 	await done(m)
+
 
 func _lace() -> void:
 	var r := _kit("archer")
@@ -184,6 +204,7 @@ func _lace() -> void:
 	_row("Lace", "Rain of Arrows", _watch(m, T, 3.0), {"slow": 0.8, "slow_k": 0.35})
 	await done(m)
 
+
 func _cinder() -> void:
 	var r := _kit("ashwick")
 	var m: Match = r[0]
@@ -191,13 +212,14 @@ func _cinder() -> void:
 	var T: Hunter = r[2]
 	var home: Vector3 = r[4]
 	_reset(m, P, T, home, 5.0)
-	tap(m, P)                                     # Cinder Shot
+	tap(m, P)  # Cinder Shot
 	_row("Cinder", "Cinder Shot", _watch(m, T, 3.0), {"slow": 1.5, "slow_k": 0.3})
 	_reset(m, P, T, home, 5.0)
 	P.ult = 1.0
 	P.ak.cast_ult()
 	_row("Cinder", "Flue Flight carpet", _watch(m, T, 4.0), {"slow": 0.5, "slow_k": 0.3})
 	await done(m)
+
 
 func _meeko() -> void:
 	var r := _kit("tender")
@@ -214,6 +236,7 @@ func _meeko() -> void:
 	_row("Meeko", "Burrseed, rank 3", _watch(m, T, 5.0), {"root": 1.4})
 	await done(m)
 
+
 func _tenzo() -> void:
 	var r := _kit("dolm")
 	var m: Match = r[0]
@@ -224,7 +247,7 @@ func _tenzo() -> void:
 	tap(m, P)
 	_row("Tenzo", "Volcano slam centre, tap", _watch(m, T, 2.0), {"stun": 0.5})
 	_reset(m, P, T, home, 2.2)
-	hold(m, P, 0.7)                               # the charge is full at 0.45 s
+	hold(m, P, 0.7)  # the charge is full at 0.45 s
 	_row("Tenzo", "Volcano slam centre, full charge", _watch(m, T, 2.0), {"stun": 1.2})
 	_reset(m, P, T, home, 3.0)
 	P.ult = 1.0
@@ -234,6 +257,7 @@ func _tenzo() -> void:
 	P.do_dash()
 	_row("Tenzo", "Rock Hop", _watch(m, T, 3.0), {"slow": 1.5, "slow_k": 0.3})
 	await done(m)
+
 
 func _grimble() -> void:
 	var r := _kit("dredge")
@@ -253,6 +277,7 @@ func _grimble() -> void:
 	tap(m, P)
 	_row("Grimble", "Hook reel", _watch(m, T, 3.0, Callable(), P), {"stun": 0.2, "self_gnd": [0.5, 3.0]})
 	await done(m)
+
 
 func _neve() -> void:
 	var r := _kit("rimewright")
@@ -277,6 +302,7 @@ func _neve() -> void:
 	_row("Neve", "Shatter splinter", _watch(m, T, 2.0), {"slow": 1.2, "slow_k": 0.3})
 	await done(m)
 
+
 func _motley() -> void:
 	var r := _kit("ostra")
 	var m: Match = r[0]
@@ -295,6 +321,7 @@ func _motley() -> void:
 	P.ak.cast_ult()
 	_row("Motley", "Nightwell", _watch(m, T, 4.0), {"stun": 3.5})
 	await done(m)
+
 
 func _albert() -> void:
 	var r := _kit("bulwark")
@@ -317,6 +344,7 @@ func _albert() -> void:
 	_row("Albert", "Faultline lane", _watch(m, T, 2.5), {"stun": 0.5, "slow": 1.5, "slow_k": 0.5})
 	await done(m)
 
+
 func _sparkle() -> void:
 	var r := _kit("mage")
 	var m: Match = r[0]
@@ -328,15 +356,16 @@ func _sparkle() -> void:
 	_row("Sparkle", "Skycall", _watch(m, T, 2.5), {"gnd": 1.5})
 	await done(m)
 
+
 func _sable() -> void:
 	var r := _kit("thief", 4.0, true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
 	var home: Vector3 = r[4]
-	r[6].teleport(home + Vector3(0, 0, 8.0))       # the second dummy waits off to the side
+	r[6].teleport(home + Vector3(0, 0, 8.0))  # the second dummy waits off to the side
 	_reset(m, P, T, home, 4.0)
-	tap(m, P)                                    # Bola
+	tap(m, P)  # Bola
 	_row("Sable", "Bola, one foe", _watch(m, T, 2.5), {"gnd": 1.5, "slow": 1.5, "slow_k": 0.3})
 	var T2: Hunter = r[6]
 	var pairs0: int = P.ak.bola_pairs
@@ -345,8 +374,13 @@ func _sable() -> void:
 	KitStatus.clear_rattled(T2)
 	T2.teleport(T.pos + Vector3(1.2, 0, 0))
 	tap(m, P)
-	_row("Sable", "Bola, a pair", _watch(m, T, 2.5), {"gnd": 1.5, "slow": 1.5, "slow_k": 0.3, "stun": 0.9},
-			P.ak.bola_pairs == pairs0 + 1)
+	_row(
+		"Sable",
+		"Bola, a pair",
+		_watch(m, T, 2.5),
+		{"gnd": 1.5, "slow": 1.5, "slow_k": 0.3, "stun": 0.9},
+		P.ak.bola_pairs == pairs0 + 1
+	)
 	_wall_at(m, home, r[5], 5)
 	T2.teleport(home + Vector3(0, 0, 8.0))
 	_reset(m, P, T, home, 4.0)
@@ -358,6 +392,7 @@ func _sable() -> void:
 	_row("Sable", "Shadow Knife", _watch(m, T, 3.5), {"slow": 2.5, "slow_k": 0.5})
 	await done(m)
 
+
 func _gil() -> void:
 	var r := _kit("gil")
 	var m: Match = r[0]
@@ -366,7 +401,7 @@ func _gil() -> void:
 	var home: Vector3 = r[4]
 	_reset(m, P, T, home, 2.2)
 	var K: GilKit = P.ak
-	K.third_until = m.time + 5.0                  # the third thrust's hits slow
+	K.third_until = m.time + 5.0  # the third thrust's hits slow
 	P.inp["fire"] = true
 	var thrust := _watch(m, T, 1.5, func(): P.inp["fire"] = true)
 	_row("Gil", "third thrust", thrust, {"slow": 0.5, "slow_k": 0.3}, dmg(T) > 0.0)

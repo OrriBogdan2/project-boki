@@ -87,12 +87,20 @@ const MEEKO_HEALS := [
 	"heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land", "call_plus", "mended"
 ]
 const MEEKO_HURTS := [
-	"cast", "cast_trail", "kindled", "seed_aim", "seed_cast", "seed_trail", "seed_stick", "seed_field", "seed_burst",
+	"cast",
+	"cast_trail",
+	"kindled",
+	"seed_aim",
+	"seed_cast",
+	"seed_trail",
+	"seed_stick",
+	"seed_field",
+	"seed_burst",
 	"seed_root"
 ]
 const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
 const TRAIL_MIN := 0.45  # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
-const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: Kael's red keys stay out of it
+const FIRE_HUE := Vector2(0.04, 0.2)  # hue (0..1) of orange through yellow: Kael's red keys stay out of it
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := [
 	"hurt",
@@ -245,6 +253,7 @@ func _recipes(arch: String) -> void:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 
+
 ## Kael's black-red: his red keys and the model's crack colour stay out of orange and yellow
 ## (Cinder owns fire). The Gilded Riposte's gold keys stay gold on purpose.
 func _looks(arch: String) -> void:
@@ -252,8 +261,21 @@ func _looks(arch: String) -> void:
 		return
 	var pal: Dictionary = HeroVfx.data(arch)["palette"]
 	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
-	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
-			"chain_hot", "chain_hook", "haul", "haul_hot"]:
+	for k: String in [
+		"main",
+		"hot",
+		"char",
+		"smoke",
+		"red",
+		"wave",
+		"peak",
+		"chain",
+		"chain_iron",
+		"chain_hot",
+		"chain_hook",
+		"haul",
+		"haul_hot"
+	]:
 		cols[k] = pal.get(k, "")
 	var warm: Array = []
 	for k: String in cols:
@@ -261,6 +283,7 @@ func _looks(arch: String) -> void:
 		if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
 			warm.append(k)
 	ok(warm.is_empty(), "%s: no red key is orange or yellow %s" % [arch, warm])
+
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
@@ -389,6 +412,7 @@ func _lean() -> void:
 	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
 	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
 
+
 ## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
 ## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
 func _armour(m: Match, p: Hunter) -> void:
@@ -416,6 +440,7 @@ func _armour(m: Match, p: Hunter) -> void:
 	plates._watch(foe, 0.016)
 	ok(plates.armor_flash_of(foe) > 0.5, "the armour strip flashes as it loses some")
 	foe.hp = 0.0
+
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, v: HeroVfx, p: Hunter) -> void:
@@ -633,13 +658,12 @@ func _meeko_field() -> void:
 		"Hearthlight thrown": float(hd["thrown_fill"]) * 1.1 * rim_k,
 	}
 	for what: String in inside:
-		ok(inside[what] <= ZONE_CORE_A, "Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [
-			what, ZONE_CORE_A, inside[what]])
+		ok(
+			inside[what] <= ZONE_CORE_A,
+			"Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [what, ZONE_CORE_A, inside[what]]
+		)
 	var hurt := Color(String(d["palette"][fd["col"]]))
-	ok(
-		not _heal_hue(hurt),
-		"Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false)
-	)
+	ok(not _heal_hue(hurt), "Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false))
 	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
 	ok(
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,

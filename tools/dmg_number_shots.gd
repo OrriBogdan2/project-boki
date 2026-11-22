@@ -13,7 +13,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const Trio := preload("res://tools/dmg_number_trio.gd")
-const TICK_EVERY := 15     # frames: a quarter second
+const TICK_EVERY := 15  # frames: a quarter second
 
 var main: Node
 var m: Match
@@ -21,6 +21,7 @@ var P: Hunter
 var fx: Fx
 var dir := ""
 var foes: Array = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -45,6 +46,7 @@ func run(main_node: Node) -> void:
 	cap.close()
 	print("DMGNUMSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
 
 func _setup() -> void:
 	m = Match.new()
@@ -77,12 +79,14 @@ func _setup() -> void:
 	var cam := main.get_viewport().get_camera_3d()
 	main.get_viewport().warp_mouse(cam.unproject_position(foes[0].pos + Vector3(0, 1.5, 0)))
 
+
 func _tick(f: int) -> void:
 	for h in foes:
 		h.hurt(6.0, P, {"src": "abil", "tags": ["ult", "cinder_zone"]})
 	if f == 60:
 		foes[1].hurt(40.0, P, {"src": "shot", "crit": true})
 		foes[2].hurt(240.0, P, {"src": "shot"})
+
 
 func _frame() -> void:
 	m.step(DT)
@@ -92,9 +96,11 @@ func _frame() -> void:
 		h.render(DT, 1.0)
 	await main.get_tree().process_frame
 
+
 func _take(file: String, lines: Array, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])
+
 
 ## One hit of every kind, two stills (a: plain, armour, crit, empowered, shield; b: shell, heal, hurt, plain, shield).
 func _kinds(lines: Array) -> void:
@@ -116,12 +122,15 @@ func _kinds(lines: Array) -> void:
 			var k: String = sv[1][i]
 			var h: Hunter = foes[i]
 			match k:
-				"hit": h.hurt(30.0, P, {"src": "shot"})
+				"hit":
+					h.hurt(30.0, P, {"src": "shot"})
 				"armour":
 					h.armor = 200.0
 					h.hurt(30.0, P, {"src": "shot"})
-				"crit": h.hurt(30.0, P, {"src": "shot", "crit": true})
-				"empowered": h.hurt(30.0, P, {"src": "shot", "heavy": true})
+				"crit":
+					h.hurt(30.0, P, {"src": "shot", "crit": true})
+				"empowered":
+					h.hurt(30.0, P, {"src": "shot", "heavy": true})
 				"shield":
 					h.shield = 200.0
 					h.shield_t = 30.0
@@ -129,16 +138,18 @@ func _kinds(lines: Array) -> void:
 				"shell":
 					h.merge_st = {"shell": 200.0, "shell_max": 200.0, "form": {"glow": Color.RED}}
 					h.hurt(30.0, P, {"src": "shot"})
-					h.merge_st = {}          # (only the hit needs the shell: a bare dict would trip the merge's step)
+					h.merge_st = {}  # (only the hit needs the shell: a bare dict would trip the merge's step)
 				"heal":
 					h.hp = 900000.0
 					fx.healed(h, 30.0)
-				"hurt": P.hurt(30.0, h, {"src": "shot"})
+				"hurt":
+					P.hurt(30.0, h, {"src": "shot"})
 		for f in 24:
 			await _frame()
 		_take("dmgnum_3_kinds_" + String(sv[0]), lines, "One hit of every kind: " + ", ".join(sv[1]))
 		for f in 60:
 			await _frame()
+
 
 ## The trio-focus case: three attackers on one dummy for Trio.SECS s, the frame after your ability hit
 ## shot whole and cropped round the dummy.
@@ -173,5 +184,9 @@ func _trio(lines: Array) -> void:
 			r = r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 			img.get_region(r).save_png(dir.path_join("dmgnum_2_trio_crop.png"))
 			lines.append("dmgnum_2_trio_crop.png: The dummy's numbers, cropped")
-	print("DMGNUMSHOTS trio max overlap %d (limit %d), per-second max %s" % [most, Trio.MAX_OVERLAP,
-		[per.slice(0, 60).max(), per.slice(60, 120).max(), per.slice(120, 180).max()]])
+	print(
+		(
+			"DMGNUMSHOTS trio max overlap %d (limit %d), per-second max %s"
+			% [most, Trio.MAX_OVERLAP, [per.slice(0, 60).max(), per.slice(60, 120).max(), per.slice(120, 180).max()]]
+		)
+	)

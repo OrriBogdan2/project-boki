@@ -12,10 +12,12 @@ const PERKS := ["quickhands", "secondwind", "featherfall", "scavenger", "toughsk
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("INVENTORY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -35,12 +37,18 @@ func run(main: Node) -> void:
 	print("INVENTORY CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _dress(p: Hunter) -> void:
-	p.gear = [{"id": "power_core", "rar": 2}, {"id": "frost", "rar": 1}, {"id": "quilted_coat", "rar": 1},
-		{"id": "boots", "rar": 1}]
+	p.gear = [
+		{"id": "power_core", "rar": 2},
+		{"id": "frost", "rar": 1},
+		{"id": "quilted_coat", "rar": 1},
+		{"id": "boots", "rar": 1}
+	]
 	p.refresh_gear()
 	p.pack_cap = 6
 	p.pack = []
+
 
 func _compare(p: Hunter) -> void:
 	var vest := Loot.gear("vest", 3)
@@ -50,24 +58,35 @@ func _compare(p: Hunter) -> void:
 	var core := GearCompare.changes(Loot.gear("power_core", 3), p.gear[0])
 	ok(core == [["+4% damage", true]], "a better rarity of your glove: %s" % [core])
 	var blink := GearCompare.changes(Loot.gear("blink", 2), p.gear[1])
-	ok(blink.has(["-7s cooldown", true]) and blink.has(["-4% faster abilities", false]),
-		"glove: cooldown and a lost stat: %s" % [blink])
+	ok(
+		blink.has(["-7s cooldown", true]) and blink.has(["-4% faster abilities", false]),
+		"glove: cooldown and a lost stat: %s" % [blink]
+	)
 	ok(GearCompare.changes(vest, {}).size() == 1, "into an empty slot every stat is new")
 	var lines := InvText.compare(p, vest)
-	ok(lines.any(func(l): return l[0] == "+28 armor" and l[1] == InvText.GOOD)
-		and lines.any(func(l): return l[0] == "-22 health" and l[1] == InvText.BAD),
-		"the card colours them green and red")
+	ok(
+		(
+			lines.any(func(l): return l[0] == "+28 armor" and l[1] == InvText.GOOD)
+			and lines.any(func(l): return l[0] == "-22 health" and l[1] == InvText.BAD)
+		),
+		"the card colours them green and red"
+	)
+
 
 func _moves(m: Match, p: Hunter) -> void:
 	p.pack = [Loot.gear("blink", 2), Loot.gear("vest", 3)]
 	Pack.use_from_pack(m, p, 0, 1)
 	ok(p.gear[1]["id"] == "blink" and p.gear[0]["id"] == "power_core", "equip into the chosen glove slot")
-	ok(p.pack.size() == 2 and p.pack.any(func(it): return it["id"] == "frost"),
-		"the glove it replaced goes to the pack")
+	ok(
+		p.pack.size() == 2 and p.pack.any(func(it): return it["id"] == "frost"),
+		"the glove it replaced goes to the pack"
+	)
 	var vi := p.pack.find_custom(func(it): return it["id"] == "vest")
 	Pack.use_from_pack(m, p, vi, 0)
-	ok(p.gear[2]["id"] == "vest" and p.gear[0]["id"] == "power_core",
-		"armor dragged to a glove slot still goes on as armor")
+	ok(
+		p.gear[2]["id"] == "vest" and p.gear[0]["id"] == "power_core",
+		"armor dragged to a glove slot still goes on as armor"
+	)
 	ok(p.max_armor >= 40.0, "armor stat follows the swap (%.0f)" % p.max_armor)
 	var g0: Dictionary = p.gear[0]
 	var g1: Dictionary = p.gear[1]
@@ -77,8 +96,10 @@ func _moves(m: Match, p: Hunter) -> void:
 	ok(swapped and p.gear_cd[1] == 5.0 and p.gear_cd[0] == 0.0, "gloves swap, cooldowns with them")
 	var armor_before := p.max_armor
 	var packed := p.pack.size()
-	ok(Pack.take_off(m, p, 2) and p.gear[2].is_empty() and p.pack.size() == packed + 1,
-		"take off: slot empty, piece in the pack")
+	ok(
+		Pack.take_off(m, p, 2) and p.gear[2].is_empty() and p.pack.size() == packed + 1,
+		"take off: slot empty, piece in the pack"
+	)
 	ok(p.max_armor < armor_before, "armor stat drops when the piece comes off")
 	p.pack_cap = p.pack.size()
 	ok(not Pack.take_off(m, p, 3) and not (p.gear[3] as Dictionary).is_empty(), "no room: nothing comes off")
@@ -88,6 +109,7 @@ func _moves(m: Match, p: Hunter) -> void:
 	var held := p.pack.size()
 	Pack.drop_from_pack(m, p, 0)
 	ok(p.pack.size() == held - 1 and m.wpicks.size() == ground + 2, "drop from the pack: it lies on the ground")
+
 
 func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	_dress(p)
@@ -126,6 +148,7 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	m.hud.close_pack()
 	await _beside(main, m, p, q)
 
+
 ## The full loadout window at each of SIZES: where it sits, what clips, and each slot's reach.
 func _sizes(main: Node, m: Match, p: Hunter) -> void:
 	for win: Vector2i in SIZES:
@@ -135,8 +158,14 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 		p.perks = PERKS.duplicate()
 		for id in ["medkit", "smoke", "stim", "tonic"]:
 			UtilityBelt.grant(p, id, 2)
-		p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1),
-			Loot.valuable("kin_idol"), Loot.valuable("sky_pearl"), Loot.valuable("old_coin")]
+		p.pack = [
+			Loot.gear("vest", 3),
+			Loot.gear("blink", 2),
+			Loot.gear("windstep_boots", 1),
+			Loot.valuable("kin_idol"),
+			Loot.valuable("sky_pearl"),
+			Loot.valuable("old_coin")
+		]
 		p.refresh_gear()
 		m.hud.close_pack()
 		m.hud.toggle_pack()
@@ -160,11 +189,13 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 				stray.append("%s %d at %s" % [key["inv"], key["i"], r])
 			slots[key["inv"]] += 1
 		var list := lp._drag._slots.keys().filter(func(c): return lp._drag._slots[c]["key"]["inv"] == "pack")
-		var pane := SlotDrag._rect(list[0].get_parent().get_parent() as Control)      # (a long list scrolls)
+		var pane := SlotDrag._rect(list[0].get_parent().get_parent() as Control)  # (a long list scrolls)
 		var listed: bool = pc.get_global_rect().encloses(pane) and _on_screen(vs, pane.end)
 		ok(listed, "%s: the backpack list %s is on screen" % [tag, pane])
-		ok(slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
-			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)])
+		ok(
+			slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
+			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)]
+		)
 		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
 		var shown := orbs.get_child_count()
 		ok(shown == PERKS.size(), "%s: all %d perk orbs show (%d)" % [tag, PERKS.size(), shown])
@@ -172,8 +203,10 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 	main.get_tree().root.size = SIZES[0]
 	await _frames(main, 2)
 
+
 func _on_screen(vs: Vector2, at: Vector2) -> bool:
 	return Rect2(Vector2.ZERO, vs).has_point(at)
+
 
 func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.valuable("old_coin")])
@@ -182,9 +215,12 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	m.hud.open_loot(bx)
 	await _frames(main, 4)
 	var texts := _texts(m.hud.loot_panel)
-	ok(not m.hud.pack_open() and texts.has("WORN") and texts.has(Loot.name_of(p.pack[0])),
-		"looting: one window, what you wear marked in place above your backpack (no second inventory window)")
+	ok(
+		not m.hud.pack_open() and texts.has("WORN") and texts.has(Loot.name_of(p.pack[0])),
+		"looting: one window, what you wear marked in place above your backpack (no second inventory window)"
+	)
 	m.hud.close_loot()
+
 
 ## Press, hold and move (SlotDrag) with real input: the mouse drags armor on, a refused drop snaps back
 ## with a hint, a still hold swaps the gloves, the pad holds A to swap two belt slots, a tap moves nothing.
@@ -192,11 +228,15 @@ func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
 	var vp := main.get_viewport()
 	Sfx.last_played.clear()
 	await _mouse_drag(main, _slot(lp, "pack", 0), _slot(lp, "worn", 2))
-	ok(p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
-		"mouse: press, move and release the vest on the armor slot wears it")
+	ok(
+		p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
+		"mouse: press, move and release the vest on the armor slot wears it"
+	)
 	var heard := Sfx.last_played
-	ok(heard.has("inv_grab") and heard.has("inv_equip") and not heard.has("click"),
-		"the drag sounds: a grab as the vest lifts, one equip cue when the armor slot takes it (InvSfx)")
+	ok(
+		heard.has("inv_grab") and heard.has("inv_equip") and not heard.has("click"),
+		"the drag sounds: a grab as the vest lifts, one equip cue when the armor slot takes it (InvSfx)"
+	)
 	lp = await _reopen(main, m)
 	var idol := p.pack.find_custom(func(it): return it.get("id", "") == "kin_idol")
 	var before := str(p.pack) + str(p.gear)
@@ -204,13 +244,17 @@ func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
 	await _mouse_drag(main, _slot(lp, "pack", idol), _slot(lp, "worn", 0))
 	ok(not Sfx.last_played.has("inv_drop") and not Sfx.last_played.has("inv_equip"), "a refused drop is silent")
 	var hints := lp.find_children("drag_hint", "", true, false)
-	ok(str(p.pack) + str(p.gear) == before and hints.size() == 1 and _texts(hints[0]).has("Only gear is worn"),
-		"treasure on a glove slot: nothing moves, it snaps back with a hint")
+	ok(
+		str(p.pack) + str(p.gear) == before and hints.size() == 1 and _texts(hints[0]).has("Only gear is worn"),
+		"treasure on a glove slot: nothing moves, it snaps back with a hint"
+	)
 	var row := _slot(lp, "pack", 0)
 	var list := row.get_parent().get_parent() as ScrollContainer
 	var below := Vector2(_mid(row).x, SlotDrag._rect(list).end.y + 4.0)
-	ok(SlotDrag._unclipped(row, _mid(row)) and not SlotDrag._unclipped(row, below),
-		"a point the pack list scrolls out of view picks up nothing")
+	ok(
+		SlotDrag._unclipped(row, _mid(row)) and not SlotDrag._unclipped(row, below),
+		"a point the pack list scrolls out of view picks up nothing"
+	)
 	var g0: Dictionary = p.gear[0]
 	var g1: Dictionary = p.gear[1]
 	_mouse(vp, true, _mid(_slot(lp, "worn", 0)))
@@ -233,6 +277,7 @@ func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
 	_pad(vp, false)
 	ok(UtilityBelt.slot_of(p, "medkit") == to and p.belt[k] == other, "pad: hold A, move, release swaps two belt slots")
 
+
 ## The control the drag knows as slot {inv, i}.
 func _slot(lp: LoadoutPanel, inv: String, i: int) -> Control:
 	for c in lp._drag._slots:
@@ -241,8 +286,10 @@ func _slot(lp: LoadoutPanel, inv: String, i: int) -> Control:
 			return c
 	return null
 
+
 func _mid(c: Control) -> Vector2:
 	return SlotDrag._rect(c).get_center()
+
 
 func _mouse_drag(main: Node, from: Control, to: Control) -> void:
 	var vp := main.get_viewport()
@@ -255,6 +302,7 @@ func _mouse_drag(main: Node, from: Control, to: Control) -> void:
 	_mouse(vp, false, _mid(to))
 	await _frames(main, 1)
 
+
 func _mouse(vp: Viewport, down: bool, at: Vector2) -> void:
 	var ev := InputEventMouseButton.new()
 	ev.button_index = MOUSE_BUTTON_LEFT
@@ -262,11 +310,13 @@ func _mouse(vp: Viewport, down: bool, at: Vector2) -> void:
 	ev.position = at
 	vp.push_input(ev, true)
 
+
 func _pad(vp: Viewport, down: bool) -> void:
 	var ev := InputEventJoypadButton.new()
 	ev.button_index = JOY_BUTTON_A
 	ev.pressed = down
 	vp.push_input(ev, true)
+
 
 func _reopen(main: Node, m: Match) -> LoadoutPanel:
 	m.hud.close_pack()
@@ -274,17 +324,20 @@ func _reopen(main: Node, m: Match) -> LoadoutPanel:
 	await _frames(main, 3)
 	return m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)[0]
 
+
 func _key(code: Key) -> InputEventKey:
 	var ev := InputEventKey.new()
 	ev.keycode = code
 	ev.pressed = true
 	return ev
 
+
 func _texts(root: Node) -> Array:
 	var out: Array = []
 	for l in root.find_children("*", "Label", true, false):
 		out.append((l as Label).text)
 	return out
+
 
 func _frames(main: Node, k: int) -> void:
 	for i in k:

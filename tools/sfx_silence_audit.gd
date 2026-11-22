@@ -321,7 +321,7 @@ func _fixes() -> void:
 	ok("recall" in _cues_of(func(): KinFollow.leap(k, k.pos, "side")), "a Boki's own hop back plays the recall cue")
 	var ordered := _cues_of(func(): KinFollow.leap(k, k.pos, "side", true))
 	ok(not "recall" in ordered, "...but not on an ordered recall (that plays its own)")
-	k.state = "active"       # the Boki leaving the fight to fly back to its owner (active>flying_home): Kin.recall
+	k.state = "active"  # the Boki leaving the fight to fly back to its owner (active>flying_home): Kin.recall
 	k.fly = {}
 	k.target = null
 	var left := _cues_of(func(): k.recall())
