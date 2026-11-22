@@ -328,18 +328,15 @@ func slam(c: float, at_feet: bool) -> void:
 	var gained := false
 	var spike: Dictionary = {} if at_feet else s["spike"]      # only the tap slam: a hop or dive is a leap
 	for f in k.foes_in(at, r, 3.2):
-		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
-		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
 		var air := GlideSpike.dunks(f, spike)
-		var o := {"src": "abil", "ab": "rmb", "kb": away * float(s["kb"]), "lift": 2.0, "heavy": true}
+		var o := {"src": "abil", "ab": "rmb", "heavy": true}  # no knock: the card has a centre stun and a spike, no push
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)
 			o["dr"] = true
 		if air:
 			d2 *= 1.0 + float(spike["bonus"])
-			o.erase("lift")
 			k.dunks += 1
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 			k.vfx("dunk", f.pos)

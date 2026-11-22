@@ -208,7 +208,7 @@ func _breah() -> void:
 		p_held == 0 and K.punches == p0 + 1 and K.boulders == b0, "held %d punches %d boulders %d" % [p_held,
 			K.punches - p0, K.boulders - b0]
 	)
-	# a merge mid-hold ends it
+	# a merge mid-hold no longer ends it (docs/decisions/0100): letting go afterwards still throws the punch
 	reset.call()
 	P.inp["fire"] = true
 	step(m, 0.95, func(): P.inp["fire"] = true)
@@ -218,7 +218,8 @@ func _breah() -> void:
 	P.merge_st = {}
 	P.inp["fire"] = false
 	ok(
-		"lmb: a merge ends the hold with no punch", K.punches == punches0 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
+		"lmb: a merge keeps the hold, the release still throws the punch",
+		K.punches == punches0 + 1 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
 		"punches %d -> %d" % [punches0, K.punches]
 	)
 	# punch into a wall: stunned, stars over the head
@@ -363,6 +364,12 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var first := K.launches - l0
+	var recovery := P.fire_cd
+	ok(
+		"cancel: the punch's recovery is the card's 0.6 s, the boulder's",
+		recovery > 0.5 and recovery <= 0.6 and float(ld["punch"]["rate"]) == float(ld["boulder"]["rate"]),
+		"fire_cd %.2f punch %.2f boulder %.2f" % [recovery, float(ld["punch"]["rate"]), float(ld["boulder"]["rate"])]
+	)
 	step(m, 0.3)
 	ok(
 		"combo: a punch along a row launches every rock in a stream",
@@ -625,6 +632,7 @@ func _breah() -> void:
 			ok("rmb spike: the dive landing does not spike a foe in the air (a dive)",
 				K.dunks == dn0 and T.vel.y > -10.0 and took > 0.0,
 				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
+	_dunk_no_knock(m, P, T, home, K, reset)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
@@ -1384,6 +1392,19 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 		step(m, DT * 8, each)
 	step(m, 1.0, each)
 	aim_at(P, far)
+
+## The Volcano slam has no push (Volcano Crusher: a centre stun and a spike, no knock): a grounded foe at the centre
+## stays put. (The abyss extra of the old Dunk is gone: the tap slam's spike has none, docs/SPIKE_SLAM.md.)
+func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	T.teleport(home + Vector3(1.0, 0, 0))
+	var at0 := T.pos
+	T.hp = 200.0
+	K._slam(0.5, true)
+	step(m, 0.6)
+	var moved := Vector2(T.pos.x - at0.x, T.pos.z - at0.z).length()
+	var still := moved < 0.05 and T.hp < 200.0
+	ok("rmb: the slam pushes nobody (stun and spike only, no knock)", still, "moved %.2f m" % moved)
 
 ## What the ground does to a chain: the abyss, height, walls, the map's edge.
 func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable, reach: float) -> void:

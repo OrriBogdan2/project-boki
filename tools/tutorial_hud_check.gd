@@ -504,10 +504,12 @@ func _pointers() -> void:
 		for f in 3:
 			pm.step(Match.DT)
 		for sz: Vector2 in SIZES.slice(0, 2):
+			main.get_window().size_2d_override = Vector2i(sz)      # (the window HudPanels.tick fits itself to)
 			pm.hud.panels.size = sz
 			pm.hud.panels.queue_redraw()
 			await pm.hud.panels.draw
 			_pointer_rows(pm, slot, sz)
+	main.get_window().size_2d_override = Vector2i.ZERO
 	ok(seen.size() >= 3, "the course has pick steps for %s" % str(seen.keys()))
 	pm.queue_free()
 
@@ -573,11 +575,11 @@ func _framing(arch: String) -> void:
 	ok(fm.player.extracted, arch + ": the framing run finishes the course")
 	fm.queue_free()
 
-## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's pad
-## (you leave from it), else the step's goal.
+## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's sign
+## (over the pad you leave from; the glide's moves over the landing once you are off), else the step's goal.
 func _act_at(tu: Tutorial, sid: String) -> Vector3:
 	if sid in Tutorial.GAP_STEPS and tu.pad_sign(sid) != null:
-		return tu.stop(sid, "pad")
+		return tu.sign_spot(sid)
 	return tu.goal(sid)
 
 ## The thing itself, when there is one to measure (the ground stops have none).

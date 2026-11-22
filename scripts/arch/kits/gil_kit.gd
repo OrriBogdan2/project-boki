@@ -96,7 +96,7 @@ func slot_info(slot: String) -> Dictionary:
 ## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
 ## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
 func lmb_override(held: bool, dt: float) -> bool:
-	if h.wid != "swordfish" or KinMerge.active(h):
+	if h.wid != "swordfish":
 		_drop_tide()
 		return false
 	var pressed := held and not lmb_was
