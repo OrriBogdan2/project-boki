@@ -49,7 +49,9 @@ func _clips(h: Hunter) -> Object:
 	var sync := WardenGlb.layers(h.model)
 	if sync == null:
 		return null
-	return sync.get("clips") if sync.get("clips") != null else (sync if sync.get("plays") != null else null)
+	if sync.get("clips") != null:
+		return sync.get("clips")
+	return sync if sync.get("plays") != null else null
 
 func _hero(id: String) -> void:
 	var m := Match.new()
@@ -84,7 +86,8 @@ func _hero(id: String) -> void:
 	_take(H, P)
 	await _step(m, SETTLE_S, watch)
 	var mote: Vector3 = P.model.get_meta(WardenCarry.MOTE, Vector3.INF)
-	ok(float(clips.get("heart_w")) >= 1.0 and mote != Vector3.INF, "%s: the carrier shows the layer and a held mote" % id)
+	ok(float(clips.get("heart_w")) >= 1.0 and mote != Vector3.INF,
+			"%s: the carrier shows the layer and a held mote" % id)
 	var side := String(WardenClips.data(OWN_MODELS[id]).get("heart_hand", "L"))
 	var hand := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
 	ok(hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y), "%s: the %s hand holds the mote (%.2f m)"
