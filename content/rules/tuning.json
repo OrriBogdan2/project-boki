@@ -18,14 +18,6 @@
 		"jump_hold": "Not determinable: a key hold is not visible on screen. Owner: fixed jump, Space held never opens the glider.",
 		"air_dash": "Per Hunter (AirDashSpeedMultiplier/Clamp encrypted): Shiv ~1.7x ground (8.4 m / 0.95 s, dancer.md 303.8-304.5 s, 0129-0134), carried to the landing; Elluna 11-15 m / 0.8-1.1 s (mooshmoosh.md 731.1/706.8/735.9/745.1 s) = tender dash.air; Kingpin card 'further', air_k 1.35 est; the other nine: Not determinable, no air dash in their clips."
 	},
-	"kael": {
-		"_note": "Kael (juggernaut). Ult: the Gilded Riposte keeps his momentum.",
-		"ult_carry_k": 0.8,
-		"ult_carry_decay_per_s": 1.6,
-		"ult_up_min_mps": 1.0,
-		"ult_up_bonus_mps": 2.2,
-		"chain_lunge_deg": 25.0
-	},
 	"lace": {
 		"_note": "Lace's bow feel (PinDraw), owner 11-08: perfect_window_s = how long after a draw stage comes up a release is still perfect (the source's is about 0.15 s; the owner asked for about 0.2 s more); perfect_glow_rim / perfect_glow_col = the toon rim amount and hex colour on her body and bow while the window is open; perfect_payoff_rim / perfect_payoff_s = the stronger rim and its length in s on a perfect release.",
 		"perfect_window_s": 0.35,

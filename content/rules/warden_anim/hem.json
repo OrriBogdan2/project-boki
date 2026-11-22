@@ -1,8 +1,6 @@
 {
 	"doc": "Ravel's (id hem) hand-keyed clips (art/wardens/hem/hem.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The bow is skinned on bow (hand.L); the nocked arrow is the separate piece on the arrow bone, standing in the spool quiver while it is not on the string.",
-	"blink": {
-		"turn": {"lid.R": [0.0, -0.92, 0.0], "lid.L": [0.0, 0.92, 0.0]}
-	},
+	"blink": {"turn": {"lid.R": [0.0, -0.92, 0.0], "lid.L": [0.0, 0.92, 0.0]}},
 	"skinned_weapon": true,
 	"extra_bones": {
 		"foot.L": "shin.L",
@@ -80,7 +78,7 @@
 		"arc_heavy_wind": {"clip": "heavy_wind", "hold_from": 1.1, "upper": "moving", "fade": 0.2, "fade_out": 0.4, "air_legs": true},
 		"arc_heavy": {"clip": "heavy", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"arc_hail": {"clip": "hail", "upper": true, "fade": 0.12, "fade_out": 0.31},
-		"pin_roll": {"clip": "roll", "heading": true, "turn_max": 3.2, "fade_out": 0.4},
+		"pin_roll": {"clip": "roll", "heading": true, "turn_max": 3.2, "fade_out": 0.4, "dash": true},
 		"pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true, "fade": 0.2, "fade_out": 0.4},
 		"pin_flick": {
 			"clip": "flick",
@@ -88,7 +86,8 @@
 			"turn_max": 3.2,
 			"fade_out": 0.4,
 			"air_clip": "flick",
-			"ground_clip": "roll"
+			"ground_clip": "roll",
+			"dash": true
 		},
 		"pin_ult_loose": {"clip": "ult_loose", "upper": true, "fade_out": 0.4},
 		"pin_ult_final": {"clip": "ult_final", "upper": true, "fade_out": 0.31},
@@ -122,7 +121,33 @@
 	"cc": {"pull": 0.18, "tug_hz": 1.2, "twist": 0.08, "bow": 0.38},
 	"heart_hand": "R",
 	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"pauldron.L",
+		"pauldron.R",
+		"fing_a1.R",
+		"fing_a2.R",
+		"fing_b1.R",
+		"fing_b2.R",
+		"thumb1.R",
+		"thumb2.R",
+		"bow",
+		"bow_t",
+		"bow_b",
+		"bow_s",
+		"arrow",
+		"brow.L",
+		"brow.R",
+		"lid.L",
+		"lid.R"
+	],
 	"cancels": [
 		["arc_draw", 0.6, ""],
 		["arc_heavy_wind", 0.5, ""],

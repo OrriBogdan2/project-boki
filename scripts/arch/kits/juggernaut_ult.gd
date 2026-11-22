@@ -24,7 +24,7 @@ var blocked := 0                       # hits blocked over the run
 var resets := 0                        # knocks that made it ready again
 var last_dealt := 0.0
 var last_healed := 0.0
-var vel_before := Vector3.ZERO      # (debug readout) his velocity at the cast, before and after the ult touched it
+var vel_before := Vector3.ZERO      # (readout) his velocity at the cast, before and after the guard took it
 var vel_after := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
@@ -65,18 +65,19 @@ func start() -> void:
 	_show_glow(true)
 	k.vfx("guard_tell")
 
-## Casting keeps his motion: a share of the horizontal run carries into the guard (bleeding off over time), and an
-## upward speed already there (jump, launch, mantle) gets a bonus instead of being zeroed. Numbers: tuning "kael".
+## The cast keeps his motion: x.carry_k of his run goes on into the guard, easing off at
+## x.carry_decay per s, and an upward speed of x.rise_min m/s or more (a jump, a launch, a ledge rise) gets
+## x.rise_bonus m/s on top instead of being zeroed.
 func _keep_momentum() -> void:
 	var h := k.h
-	var tn := Tuning.of("kael")
+	var d := data()
 	vel_before = h.vel
-	var carry := Vector2(h.vel.x, h.vel.z) * float(tn["ult_carry_k"])
+	var carry := Vector2(h.vel.x, h.vel.z) * float(d["carry_k"])
 	st["carry"] = carry
 	h.vel.x = carry.x
 	h.vel.z = carry.y
-	if h.vel.y >= float(tn["ult_up_min_mps"]):
-		h.vel.y += float(tn["ult_up_bonus_mps"])
+	if h.vel.y >= float(d["rise_min"]):
+		h.vel.y += float(d["rise_bonus"])
 		h.lfloat = {}               # mid-mantle: the ledge rise rewrites vel.y each tick; the boost takes over
 		st["rising"] = true
 	vel_after = h.vel
@@ -85,6 +86,7 @@ func _keep_momentum() -> void:
 ## takes it as the cleave lands.
 func pull_through() -> void:
 	if guarding():
+		st["carry"] = Vector2.ZERO        # the pull takes his motion over from the cast's carry
 		k.warchain.pull()
 		k.play("jug_guard")
 	else:
@@ -119,14 +121,15 @@ func tick(dt: float) -> void:
 			elif not h.grounded:
 				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
 
-## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
+## The guard: planted (no jumping off either; the speed it was cast at carries on), the strip ahead follows the
+## aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary, dt: float) -> void:
 	var h := k.h
-	if h.vel.y > 0.0 and not st.get("rising", false):
+	if h.vel.y > 0.0 and not st.has("rising"):
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
 	var carry: Vector2 = st["carry"]
 	if carry.length() > 0.05:
-		carry *= maxf(0.0, 1.0 - float(Tuning.of("kael")["ult_carry_decay_per_s"]) * dt)
+		carry *= maxf(0.0, 1.0 - float(d["carry_decay"]) * dt)
 		st["carry"] = carry
 		h.vel.x = carry.x
 		h.vel.z = carry.y

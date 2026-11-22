@@ -48,6 +48,8 @@ var path_searches := 0          # A* searches it has run (a check counts them)
 var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
 var guard_side := 1.0             # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
 var beside := false               # ...and it is at that flank now (state "shoulder", not on you)
+var curl := 0.0                   # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
+var curl_rel := Vector3.ZERO      # where it was last drawn off you, from your model (KinCurl's hop starts there)
 var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
 var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
 var gap_v := false
@@ -1179,19 +1181,20 @@ func render(delta: float, alpha: float) -> void:
 		_render_mount(delta, body)       # the giant Fusion form is ridden; carried over a glide it curls up on your back below
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
-		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var ball := carry_style() == "mount"
-		var torso := WardenGlb.shown_torso(owner_h.model)
-		global_position = torso * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.basis = _ride_basis()
-		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
+		if carry_style() == "mount":
+			KinCurl.back(self, body, delta)       # a mount curled up into a ball on your back while you glide
+			return
+		# perched on the pack
+		global_position = WardenGlb.shown_torso(owner_h.model) * Vector3(0, 0.92, 0.3)
+		model.basis = ride_basis()
+		model.scale = Vector3.ONE * lerpf(0.75, 0.62, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
-		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
+		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05)
 		return
 	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
 		global_position = WardenGlb.shown_torso(owner_h.model) * sh.position
-		model.basis = _ride_basis()
+		model.basis = ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		# now and then it peeks out past its hunter's head, or nuzzles in against it
@@ -1210,7 +1213,7 @@ func render(delta: float, alpha: float) -> void:
 			body.position.y += absf(sin(m.time * 11.0)) * 0.12
 		return
 	var gs := 1.0
-	model.scale = Vector3.ONE * 0.95 * float(model.get_meta("evo_scale", 1.0)) * gs
+	model.scale = Vector3.ONE * KinCurl.GROUND_SCALE * float(model.get_meta("evo_scale", 1.0)) * gs
 	model.rotation.y = face
 	var moving := Vector2(vel.x, vel.z).length() > 0.5
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
@@ -1229,13 +1232,14 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)
+	KinCurl.ground(self, body, delta)      # down off your back to your flank: eased
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
 
 ## Riding on you, it faces your way and leans with your body in the air (HunterAnim.AIR_TILT: the glider's bank, the
 ## dive's pitch); its seat is on the body you see (WardenGlb.shown_torso).
-func _ride_basis() -> Basis:
+func ride_basis() -> Basis:
 	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
 	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
 

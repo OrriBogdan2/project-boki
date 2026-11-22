@@ -304,7 +304,7 @@ func _tick_hooked(dt: float) -> void:
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
 	if stretch > 1.0 and not k.lunge.is_empty():
-		snap()                      # a Lunge aimed away carried him past the length: the chain breaks (no clamp)
+		snap()                      # a Lunge carried him past the length: it breaks, no clamp
 		return
 	if stretch > 1.0:
 		_hold_taut(most)

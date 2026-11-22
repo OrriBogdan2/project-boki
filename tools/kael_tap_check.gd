@@ -15,7 +15,6 @@ func run(main_node: Node, _who := "") -> void:
 	var tgt: Hunter = r[2]
 	var home: Vector3 = r[4]
 	var kt: JuggernautKit = pl.ak
-	var tn := Tuning.of("kael")
 	# RMB aim is live during E: wind up, throw E, turn 90 deg: the strike goes where the cursor is at the blow
 	chk.fresh(tgt)
 	tgt.teleport(home + Vector3(2.5, 0, 0))
@@ -60,7 +59,7 @@ func run(main_node: Node, _who := "") -> void:
 	var sp := Vector2(pl.vel.x, pl.vel.z).length()
 	chk.ok(
 		"kael ult keeps horizontal momentum",
-		absf(sp - 6.0 * float(tn["ult_carry_k"])) < 0.1,
+		absf(sp - 6.0 * float(kt.riposte.data()["carry_k"])) < 0.1,
 		"before %s after %s" % [kt.riposte.vel_before, kt.riposte.vel_after]
 	)
 	chk.step(m, 0.1)
@@ -70,7 +69,7 @@ func run(main_node: Node, _who := "") -> void:
 	kt.riposte.start()
 	chk.ok(
 		"kael ult adds a vertical bonus on upward speed",
-		absf(pl.vel.y - (3.0 + float(tn["ult_up_bonus_mps"]))) < 0.05,
+		absf(pl.vel.y - (3.0 + float(kt.riposte.data()["rise_bonus"]))) < 0.05,
 		"vy %.2f" % pl.vel.y
 	)
 	kt.riposte.drop()

@@ -1,8 +1,6 @@
 {
 	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd).",
-	"blink": {
-		"turn": {"lid.R": [1.3, 0.0, 0.0], "lid.L": [1.3, 0.0, 0.0]}
-	},
+	"blink": {"turn": {"lid.R": [1.3, 0.0, 0.0], "lid.L": [1.3, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"carry_fwd": 0.7,
 	"extra_bones": {
@@ -80,9 +78,10 @@
 			"turn_max": 3.2,
 			"fade_out": 0.4,
 			"rate": 1.6,
-			"strike": ["front", "ram", "edge"]
+			"strike": ["front", "ram", "edge"],
+			"dash": true
 		},
-		"lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2, "fade_out": 0.4, "air_clip": "hop"},
+		"lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2, "fade_out": 0.4, "air_clip": "hop", "dash": true},
 		"as_cloak": {"clip": "cloak", "fade_out": 0.4, "air_legs": true, "upper": "moving"},
 		"lw_stoke": {"clip": "stoke", "upper": true, "fade_out": 0.4},
 		"lw_jet": {"clip": "jet", "hold_from": 0.22, "fade_out": 0.4},
@@ -116,7 +115,26 @@
 	"summon_call": {"call": "g_call_fling_r", "recall": "g_recall_r"},
 	"cc": {"pull": 0.16, "tug_hz": 1.1, "twist": 0.1, "bow": 0.3},
 	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "x_breath"],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"fingers.L",
+		"thumb.L",
+		"fingers.R",
+		"thumb.R",
+		"brow.L",
+		"brow.R",
+		"lid.L",
+		"lid.R",
+		"jaw",
+		"x_breath"
+	],
 	"cancels": [
 		["as_lance", 0.6, "lw_jet"],
 		["lw_jet", 0.6, "lw_land"],
