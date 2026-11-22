@@ -379,3 +379,6 @@ Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, 
 | Clips | Footage poses | every `tm_*` kit move has a clip in `claire.json`, 0 fails | match |
 
 Shatter slow (K:138): closed `f6c93c7a59`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.
+
+## Tester note 11-19
+LMB homing is weaker: the darts bend only onto a foe within 2.4 m of the cursor (was 3.5 m), at 7 rad/s (was 12), and no longer steer onto any foe ahead of them (the 9 m / 75 degree free acquire is gone); otherwise they curve to the cursor point. `--tester-feedback-check`.
