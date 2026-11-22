@@ -152,6 +152,7 @@ func run(m: Node) -> void:
 	for i in rolls: life._greet(k2, [ak, sk])
 	greeted = home.emotes - before_emotes
 	var want := float(life.R["greet_chance"]) * rolls      # base_life.json greet_chance: a chance, not a certainty
-	ok(greeted > want * 0.8 and greeted < rolls, "it greets a parent at greet_chance, not always (%d of %d)" % [greeted, rolls])
+	ok(greeted > want * 0.8 and greeted < rolls,
+			"it greets a parent at greet_chance, not always (%d of %d)" % [greeted, rolls])
 	print("BABYPARENTS done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)

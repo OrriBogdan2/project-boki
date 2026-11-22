@@ -391,7 +391,7 @@ func _steps(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
 			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
-	_step_weights(R, p_v)
+	_step_weights(r, p)
 
 
 ## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,

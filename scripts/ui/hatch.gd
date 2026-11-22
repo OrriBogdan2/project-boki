@@ -12,6 +12,9 @@ const MYSTERY := {
 	"desc": "Black as night, in an old basket. Who knows?",
 	"play": "Could be anything, even a rare one.",
 }
+var skipper: CanvasLayer     # holds the hatch beat's HoldSkip ring (freed once the Boki's card is up)
+const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
+var hold_skip: HoldSkip      # a tap moves the hatch on a beat, a hold skips to the card
 
 static func starter_eggs() -> Array:
 	var out: Array = []
@@ -36,8 +39,6 @@ var stage := "intro"          # intro (the card) | create (yourself) | pick (egg
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
-var skipper: CanvasLayer     # holds the hatch beat's HoldSkip ring (freed once the Boki's card is up)
-var hold_skip: HoldSkip      # a tap moves the hatch on a beat, a hold skips to the card
 var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
@@ -482,7 +483,6 @@ func _pick(i: int) -> void:
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
-const SKIP_ARM_S := 0.5   # s into the hatch before a tap counts (the last knock's own click must not skip the egg)
 const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
 	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
 var taps := 0

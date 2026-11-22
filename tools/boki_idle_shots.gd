@@ -184,8 +184,21 @@ func _record() -> void:
 	f.store_string("[display]\n\nwindow/size/viewport_width=%s\nwindow/size/viewport_height=%s\n\n" % [wh[0], wh[1]])
 	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.95\n")
 	f.close()
-	var args := ["--path", root, "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--resolution", FILM_RES,
-		"--fixed-fps", str(FILM_FPS), "--write-movie", out.path_join("idle_film.avi"), "--"]
+	var args := [
+		"--path",
+		root,
+		"--rendering-driver",
+		"opengl3",
+		"--audio-driver",
+		"Dummy",
+		"--resolution",
+		FILM_RES,
+		"--fixed-fps",
+		str(FILM_FPS),
+		"--write-movie",
+		out.path_join("idle_film.avi"),
+		"--"
+	]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--film-child")
 	var res: Array = []

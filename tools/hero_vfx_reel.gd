@@ -250,10 +250,10 @@ func _juggernaut_wave() -> void:
 
 func _juggernaut_slam() -> void:
 	await _reset(3.2)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var slam := func(t: float):
 		if _at(t, 0.1):
-			K.press_rmb()
+			k_v.press_rmb()
 		_aim(T.pos)
 	await _go(2.5, slam, _sheet("slam",
 			"RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning "
@@ -263,11 +263,11 @@ func _juggernaut_slam() -> void:
 
 func _juggernaut_lunge() -> void:
 	await _reset(7.0)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var lunge := func(t: float):
 		if _at(t, 0.1):
 			P.inp["sec_hold"] = true
-			K.press_rmb()
+			k_v.press_rmb()
 		if t >= 1.25:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
@@ -281,13 +281,13 @@ func _juggernaut_lunge() -> void:
 ## (the coil holds to the stop, then the thrust; JuggernautKit.LUNGE_COIL_T).
 func _juggernaut_lunge_far() -> void:
 	await _reset(3.0, 6.0)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var far := P.pos + Vector3(12.0, 0, 0)
-	var go := 0.1 + K.rmb_charge_full() + 0.05
+	var go := 0.1 + k_v.rmb_charge_full() + 0.05
 	var lunge := func(t: float):
 		if _at(t, 0.1):
 			P.inp["sec_hold"] = true
-			K.press_rmb()
+			k_v.press_rmb()
 		if t >= go:
 			P.inp["sec_hold"] = false
 		_aim(far)
@@ -310,11 +310,11 @@ func _gunslinger_dash() -> void:
 
 func _juggernaut_drop() -> void:
 	await _reset(2.4)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var drop := func(t: float):
 		P.inp["jump"] = t < DT
 		if _at(t, 0.3):
-			K.press_rmb()
+			k_v.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
 			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
@@ -339,16 +339,16 @@ func _juggernaut_dash() -> void:
 
 func _juggernaut_e() -> void:
 	await _reset(10.0)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var chain := func(t: float):
 		if _at(t, 0.1):
-			K.use_e()
+			k_v.use_e()
 		if _at(t, 1.2):
-			K.use_e()
+			k_v.use_e()
 		P.inp["move"] = Vector2(-1, 0) if t > 0.5 and t < 1.2 else Vector2.ZERO
 		_aim(T.pos)
 	var on_action := func() -> Vector3:
-		var at_foe: bool = K.warchain.state == "hooked"
+		var at_foe: bool = k_v.warchain.state == "hooked"
 		return (T.position if at_foe else P.position) + Vector3(0, 0.9, 0)
 	await _go(2.6, chain, _sheet("e",
 			"E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the "
@@ -358,14 +358,14 @@ func _juggernaut_e() -> void:
 
 func _juggernaut_spin() -> void:
 	await _reset(9.0)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var spin := func(t: float):
 		if _at(t, 0.1):
-			K.use_e()
+			k_v.use_e()
 		if _at(t, 0.55):
-			K.use_e()
+			k_v.use_e()
 		if _at(t, 0.8):
-			K.press_rmb()
+			k_v.press_rmb()
 		_aim(T.pos)
 	await _go(2.0, spin, _sheet("spin",
 			"Smash in the Warchain's pull, Cinder Spin: the full arc, the low wall of flame, the "
@@ -375,13 +375,13 @@ func _juggernaut_spin() -> void:
 
 func _juggernaut_r() -> void:
 	await _reset(3.0)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var ult := func(t: float):
 		if _at(t, 0.1):
-			K.cd["x"] = 0.0
-			K.cast_ult()
+			k_v.cd["x"] = 0.0
+			k_v.cast_ult()
 		if _at(t, 0.4):
-			K.riposte.block(T, {})
+			k_v.riposte.block(T, {})
 		_aim(T.pos)
 	await _go(2.7, ult, _sheet("r",
 			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
@@ -391,15 +391,15 @@ func _juggernaut_r() -> void:
 
 func _juggernaut_rage() -> void:
 	await _reset(3.3)
-	var K: JuggernautKit = P.ak
+	var k_v: JuggernautKit = P.ak
 	var rage := func(t: float):
 		if _at(t, 0.1):
-			K.gain_rage(K.res_max())
+			k_v.gain_rage(k_v.res_max())
 		P.inp["fire"] = t > 0.8 and fmod(t, 0.5) < DT * 2.0
 		_aim(T.pos)
 	await _go(2.4, rage, _sheet("rage", "Enraged: the flare as Rage fills, the body burning, slashes keeping it fed",
 			[0.13, 0.2, 0.3, 0.6, 0.86, 1.0, 1.4, 1.9, 2.3]), 1.5)
-	K.enraged_t = 0.0
+	k_v.enraged_t = 0.0
 	await _go(GAP)
 
 ## The sounds with no key of their own: footsteps by surface, the hurt grunts and the downed grunt.
@@ -455,10 +455,10 @@ func _archer_lmb() -> void:
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
 func _dredge_hook() -> void:
 	await _reset(8.0)
-	var K: DredgeKit = P.ak
+	var k_v: DredgeKit = P.ak
 	var hook := func(t: float):
 		if _at(t, 0.1):
-			K.press_rmb()
+			k_v.press_rmb()
 		_aim(T.pos)
 	await _go(2.4, hook, _sheet("hook",
 			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
@@ -528,11 +528,11 @@ func _archer_super() -> void:
 
 func _archer_heavy() -> void:
 	await _reset(8.0)
-	var K: ArcherKit = P.ak
+	var k_v: ArcherKit = P.ak
 	var heavy := func(t: float):
 		if _at(t, 0.1):
 			P.inp["sec_hold"] = true
-			K.press_rmb()
+			k_v.press_rmb()
 		if t >= 1.3:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
@@ -558,11 +558,11 @@ func _archer_dash() -> void:
 
 func _archer_e() -> void:
 	await _reset(7.0)
-	var K: ArcherKit = P.ak
+	var k_v: ArcherKit = P.ak
 	var hail := func(t: float):
 		if _at(t, 0.1):
-			K.cd["e"] = 0.0
-			K.cast_e()
+			k_v.cd["e"] = 0.0
+			k_v.cast_e()
 		_aim(T.pos)
 	await _go(5.4, hail, _sheet("e",
 			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, her red "
@@ -572,11 +572,11 @@ func _archer_e() -> void:
 
 func _archer_r() -> void:
 	await _reset(9.0)
-	var K: ArcherKit = P.ak
+	var k_v: ArcherKit = P.ak
 	var ult := func(t: float):
 		if _at(t, 0.1):
-			K.cd["x"] = 0.0
-			K.cast_ult()
+			k_v.cd["x"] = 0.0
+			k_v.cast_ult()
 		P.inp["fire"] = t > 1.2 and t < 1.26 or t > 2.3 and t < 2.36
 		_aim(T.pos)
 	await _go(4.6, ult, _sheet("r",

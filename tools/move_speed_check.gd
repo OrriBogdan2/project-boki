@@ -63,7 +63,7 @@ func _data_run(arch: String, rules: Dictionary) -> float:
 ## share (crouch). Also fails when the hunter's base_speed is not the data's run speed.
 func _gait(arch: String) -> void:
 	var rules: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RULES))
-	var run := _data_run(arch, rules)
+	var gait_run := _data_run(arch, rules)
 	var sneak := float(rules["physics"]["sneak_speed"])
 	var opts := {
 		"teams": 10,
@@ -83,21 +83,21 @@ func _gait(arch: String) -> void:
 	for mb in mt.mobs:
 		mb.queue_free()
 	mt.mobs.clear()
-	var P: Hunter = mt.player
+	var p_v: Hunter = mt.player
 	for h in mt.hunters:
-		if h != P:
+		if h != p_v:
 			h.teleport(h.pos + Vector3(0, 0, 80))
-	var start := flat_lane(mt.world, P.pos, GAIT_LANE)
-	ok(absf(P.base_speed - run) <= 0.001, "gait %-11s base_speed = %.3f m/s  data %.3f" % [arch, P.base_speed, run])
+	var start := flat_lane(mt.world, p_v.pos, GAIT_LANE)
+	ok(absf(p_v.base_speed - gait_run) <= 0.001, "gait %-11s base_speed = %.3f m/s  data %.3f" % [arch, p_v.base_speed, gait_run])
 	var rows := [
-		["run", 1.0, false, run], ["walk", WALK_TILT, false, run * WALK_TILT], ["crouch", 1.0, true, run * sneak]
+		["run", 1.0, false, gait_run], ["walk", WALK_TILT, false, gait_run * WALK_TILT], ["crouch", 1.0, true, gait_run * sneak]
 	]
 	for row in rows:
-		P.teleport(start)
-		P.vel = Vector3.ZERO
+		p_v.teleport(start)
+		p_v.vel = Vector3.ZERO
 		if row[2]:
 			Input.action_press("crouch")
-		var v := _median_walk(func() -> Vector3: return P.pos, func() -> void: mt._process(DT), GAIT_S, row[1])
+		var v := _median_walk(func() -> Vector3: return p_v.pos, func() -> void: mt._process(DT), GAIT_S, row[1])
 		Input.action_release("crouch")
 		var want: float = row[3]
 		ok(absf(v - want) <= TOL, "gait %-11s %-6s = %.2f m/s  data %.2f" % [arch, row[0], v, want])

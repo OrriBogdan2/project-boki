@@ -246,6 +246,8 @@ const BLAST_PEAK_DB := -6.0
 const NEAR := 5.5
 const SPREAD := 8.0
 const FAR := 19.0
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
+
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
@@ -259,8 +261,6 @@ var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loop
 ## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
 ## that has ended, its voice gone on to another, cuts nothing.
 var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
-var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
-const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
@@ -281,6 +281,7 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var mix: SfxMix
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
 
 
 func _ready() -> void:

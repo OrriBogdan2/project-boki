@@ -751,10 +751,10 @@ func _greet(k: Dictionary, near: Array) -> void:
 ## Chance a roaming Boki lies down for a day nap: a little on its own, more when a Boki it gets on with lies close by.
 func _doze(k: Dictionary) -> float:
 	var top := float(r_v["pile_at"])
-	var pile := _near(k, true, float(r_v["pile_reach"])).any(
+	var near_pile := _near(k, true, float(r_v["pile_reach"])).any(
 		func(o): return (o["life"] as Fsm).is_in(S.NAP) and regard(k, o, float(r_v["parent_weight"])) >= top
 	)
-	return float(r_v["doze"]) + (float(r_v["doze_pile"]) if pile else 0.0)
+	return float(r_v["doze"]) + (float(r_v["doze_pile"]) if near_pile else 0.0)
 
 
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
