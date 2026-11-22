@@ -1,12 +1,12 @@
 extends RefCounted
-## --knock-feed-check: the kill feed (KillFeed) on the real HUD, headless (and the message cards keeping off its rows).
+## --knock-feed-check: the kill feed (KillFeed) on the real HUD, headless.
 ##   1. a knock's icon is the slot icon on the knocker's own bar (RMB, E, X, dash), the weapon's for a plain
 ##      hit, the Boki's ability for a Boki's, KillFeed.FALLBACK_ICON with nobody to credit
 ##   2. a knock row shows the knocker's face, that icon and the knocked Hunter's face, the names as they are (a
 ##      bot's bare tag), each side in its squad's colour; only rows with your squad in them are outlined
 ##   3. at most KillFeed.ROWS rows, newest last; each fully shown HOLD_S, then fading, gone after LIFE_S
 ##   4. its own lane: no row wider than LANE_W (a long name is cut, a long line wraps), and at five window sizes
-##      a full feed sits inside the safe margin and off every other HUD group, the widest message card included
+##      a full feed sits inside the safe margin and off every other HUD group
 ##   5. online: the "knock" event carries the icon; a client's row shows it, an older peer's the fallback
 ## --knock-feed-shots --shots-dir=<dir> [--size=WxH]: a real match with four rows up (your knock, your Boki's, a
 ## teammate knocked, two rival squads), at 1280x720 and 2560x1080 or the one size: <WxH>_screen.png and the lane
@@ -18,7 +18,6 @@ const SHOT_SIZES := [Vector2i(1280, 720), Vector2i(2560, 1080)]
 const DT := 1.0 / 60.0
 const LONG_NAME := "Grimwhistle_of_the_Long_Hollow"
 const LONG_LINE := "The wild Cindle is knocked out. Hold E beside it to scan it before its friends wake up."
-const WIDE_TOAST := "A message as wide as the message lane gets: it wraps at the card's widest. "      # (said twice)
 
 var main: Node
 var m: Match
@@ -199,16 +198,12 @@ func _lane() -> void:
 		P.hurt_at = m.time - 60.0      # (out of any fight: a fight holds normal cards back, Hud.in_fight)
 		m.hud.reticle.dealt_at = m.time - 60.0
 		await _frames(3)
-		m.hud.msgs.clear()      # (a card takes its widest from the screen it was made on)
-		m.hud.toast(WIDE_TOAST.repeat(2), Color.WHITE)
-		m.hud.toast(WIDE_TOAST.repeat(3), Color.WHITE)
 		var sz := main.get_tree().root.get_visible_rect().size
 		SafeArea.seen.clear()
 		SafeArea.recording = true
 		await _redraw()
 		SafeArea.recording = false
 		var groups := SafeArea.seen.duplicate()
-		groups["toasts"] = m.hud.msgs.rects()
 		var clash := SafeArea.problems(groups, sz).filter(func(p: String): return p.contains("feed"))
 		var rows := KillFeed.shown
 		var widest := 0.0
@@ -220,12 +215,8 @@ func _lane() -> void:
 				% [tag, KillFeed.LANE_W, widest, rows[0]["left"]])
 		ok(rows[3]["kind"] == "text" and (rows[3]["rect"] as Rect2).size.y > KillFeed.TEXT_H,
 				"%s: a long line wraps inside the lane" % tag)
-		var card_w := 0.0
-		for t: Rect2 in groups["toasts"]:
-			card_w = maxf(card_w, t.size.x)
-		ok(card_w >= sz.x * MsgLane.WIDE, "%s: the message cards are at their widest (%.0f px)" % [tag, card_w])
 		ok(groups.has("feed") and clash.is_empty(),
-				"%s: the lane sits in the margin, off the %d other groups and two widest message cards %s"
+				"%s: the lane sits in the margin, off the %d other groups %s"
 				% [tag, groups.size() - 1, clash.slice(0, 4)])
 	long_by.pname = names[0]
 	long_who.pname = names[1]

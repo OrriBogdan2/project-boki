@@ -105,6 +105,8 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "blight_flask", 1)
 	foe.teleport(P.pos + Vector3(4.0, 0, 0))
+	foe.teleport(Vector3(foe.pos.x, foe.ground(), foe.pos.z))      # (P still hovers where the banner test downed it)
+	foe.vel = Vector3.ZERO
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "blight_flask"), "a Blight Flask is thrown")
 	_steps(m, 2.5, foe)
