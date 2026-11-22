@@ -17,7 +17,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
 | Match systems (lairs, exits, Blight, weather, sessions) | one file per system in `scripts/match/`, wired into `Match` by a few calls |
 | Farm/home systems | one file per system in `scripts/home/` (like `home_build.gd`, `home_work.gd`) |
 | HUD widgets | `scripts/ui/` |
-| Checks and test tools | `tools/<name>_check.gd`, registered in the check registry (never inline in `main.gd`) |
+| Checks and test tools | `tools/<name>_check.gd`, registered with ONE line in the area file `tools/checks/<area>.gd` (combat, farm, ui, anim, vfx, sfx, tutorial, boki, net, misc; entry format: `"--x-check": ["res://tools/x_check.gd", "x_check", null],`). Never inline in `main.gd`, never in `tools/check_registry.gd`: that legacy file only shrinks (`tools/registry_lint.py`, run by `tools/health.py --strict`, fails a branch that adds an entry to it). Look flags up with `CheckRegistry.all()` / `get_entry(flag)`, never `CheckRegistry.CHECKS`; a flag in two files fails `--registry-check`. A new area file must be added to `CheckRegistry._areas()` |
 | Networking | only through `scripts/core/net.gd` |
 
 **God files are frozen.** `match.gd`, `home.gd`, `main.gd`, `hud.gd`, `hunter.gd`, `models.gd` and `world.gd` may not grow:
@@ -62,6 +62,7 @@ Read this before changing code. The goal: every change leaves the codebase as ea
   - `docs/wiki` (run `tools/gen_wiki.py` if data changed)
   - the system's doc in `docs/`
   - `docs/DEBT.md` if you knowingly left debt
+  - Shared docs (HUD, AUDIO, KIT_PARITY, MOVEMENT_FEEL, DEBT, wiki/Rules.md) clash less if you follow `docs/DOC_FRAGMENTS.md`: new sections go in a `docs/<NAME>.d/` file, never hand-edit a generated wiki page.
 - Run `python3 tools/health.py --strict`. It must pass: god-file budgets and the style ratchet (`tools/style_lint.py`: no file may get worse; fix what you touch and lock it in with `--update`).
 - Run `tools/check.sh` (health + style + the lint ratchet: gdlint, gdformat, ruff, vulture, glTF validation of every `.glb`, Godot unused-code and shadowing warnings). Old debt is in `tools/lint_baseline.json` and may not grow; new files must be clean (`gdformat --line-length 120`, `ruff format`). After cleaning a file up, `tools/check.sh --update` lowers its count. `pre-commit install` runs it on staged files.
 - Report: what changed, which files, the checks run and their results, and any debt you left (with the `docs/DEBT.md` entry).
