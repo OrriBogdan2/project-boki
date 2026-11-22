@@ -2,8 +2,10 @@ extends RefCounted
 ## --drop-merge-check: fewer, bigger drops (DropMerge). Part 1: a cluster of gem and seed drops becomes
 ## one pile of each kind with the same totals, a far drop and other kinds stay apart, a pile is bigger the
 ## more it holds and never past the cap, picking it up gives exactly the total, and a collected gem node
-## is reused by the next drop. Part 2 is an audit: 30 bots for 5 and 10 minutes, what lies on the ground
-## (pickups, gear/loot pickups, deathboxes). Never touches the save.
+## is reused by the next drop. Part 2 is an audit: 30 bots, what lies on the ground (pickups, gear/loot
+## pickups, deathboxes). --drop-merge-check (the gate) audits the first 5 minutes; --drop-merge-audit (not a
+## -check flag, so not in the gate: it would hit the gate's 300 s cap) runs all 10 and skips part 1.
+## Never touches the save.
 
 var main: Node
 var fails := 0
@@ -13,13 +15,14 @@ func ok(what: String, cond: bool, info := "") -> void:
 	if not cond:
 		fails += 1
 
-func run(main_node: Node) -> void:
+func run(main_node: Node, part := "gate") -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	await _piles()
-	await _audit()
+	if part == "gate":
+		await _piles()
+	await _audit([5] if part == "gate" else [5, 10])
 	print("DROPMERGE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -81,10 +84,10 @@ func _piles() -> void:
 		reuse == node and node.visible and is_equal_approx(node.scale.x, 1.0))
 	m.queue_free()
 
-func _audit() -> void:
+func _audit(minutes: Array) -> void:
 	var m := await _match(15, 2, 41)
 	var bots := m.hunters.size() - 1
-	for minute in [5, 10]:
+	for minute in minutes:
 		while m.time < minute * 60.0:
 			m.step(Match.DT)
 		var gems := 0
@@ -93,5 +96,5 @@ func _audit() -> void:
 				gems += int(p["v"])
 		print("DROPMERGE audit %2d min, %d bots+you: pickups %d (gem value %d), gear/loot %d, deathboxes %d" % [
 			minute, bots, m.pickups.size(), gems, m.wpicks.size(), m.boxes.size()])
-	ok("the 30-bot match ran 10 minutes", m.time >= 600.0)
+	ok("the 30-bot match ran %d minutes" % minutes[-1], m.time >= minutes[-1] * 60.0)
 	m.queue_free()
