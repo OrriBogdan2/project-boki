@@ -6,13 +6,14 @@ extends "res://tools/clip_shots.gd"
 ## first); --true-cam: the game's own camera (23 m out at 66 deg, fov 32) so a stun reads as it does in a match.
 
 const StatesCheck := preload("res://tools/warden_states_check.gd")
-const SHOT_FRAME := 24     # the frame of a state's run that is shown (a hit and a landing show an earlier one)
+const SHOT_FRAME := 24  # the frame of a state's run that is shown (a hit and a landing show an earlier one)
 const EARLY_FRAME := 6
 const SETTLE_FRAMES := 20  # frames a new model gets to load before it is driven
-const SHOT_YAW := 150.0    # deg: the three-quarter view
-const SHOT_DIST := 5.6     # m
-const SHOT_AT_Y := 0.8     # m: the height the camera looks at
-const CC_CELLS := {"stun": [10, 30], "rooted": [10, 30], "knock": [0, 9, 18, 27]}   # frames shown of each
+const SHOT_YAW := 150.0  # deg: the three-quarter view
+const SHOT_DIST := 5.6  # m
+const SHOT_AT_Y := 0.8  # m: the height the camera looks at
+const CC_CELLS := {"stun": [10, 30], "rooted": [10, 30], "knock": [0, 9, 18, 27]}  # frames shown of each
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -28,7 +29,7 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-		main.fade.visible = false     # (the boot's cover and logo can come back over a late frame)
+		main.fade.visible = false  # (the boot's cover and logo can come back over a late frame)
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
@@ -42,6 +43,7 @@ func run(main: Node) -> void:
 		await _hunter(String(id), out, cc)
 	print("WARDEN_STATES_SHOTS_DONE ", ids.size())
 	tree.quit()
+
 
 func _hunter(id: String, out: String, cc: bool) -> void:
 	var art := WardenGlb.art(id)
@@ -73,6 +75,7 @@ func _hunter(id: String, out: String, cc: bool) -> void:
 		await _grab(out.path_join(art).path_join(st + ".png"))
 		chk.play(an, sync, base, 30)
 	model.queue_free()
+
 
 ## The idle, then the cells of each CC state (CC_CELLS): <dir>/<art>/idle.png, <state>_<frame>.png.
 func _cc_cells(an: HunterAnim, sync: WardenGlb.Sync, chk: RefCounted, art: String, out: String) -> void:

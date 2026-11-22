@@ -4,10 +4,11 @@ extends RefCounted
 ## ink.png with a test line in the loaded rules standing in for a next form that has art. Run with a
 ## real renderer and --resolution 1280x720. Never touches the real save. Prints "NFSHOT <name>".
 
-const TEST_INTO := "pebbit"       # any species with art: the line names the level or the Ink, never the form
+const TEST_INTO := "pebbit"  # any species with art: the line names the level or the Ink, never the form
 
 var main: Node
 var dir := ""
+
 
 func run(m: Node) -> void:
 	main = m
@@ -42,6 +43,7 @@ func run(m: Node) -> void:
 	lines["cindle"] = own
 	print("NFSHOT DONE")
 	main.get_tree().quit()
+
 
 ## Opens the card on the Growth tab, lets it settle and saves <dir>/<shot_name>.png.
 func _shot(home: Node, rec: Dictionary, shot_name: String) -> void:

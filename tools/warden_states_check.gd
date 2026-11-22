@@ -9,34 +9,51 @@ extends RefCounted
 
 const Cov := preload("res://tools/anim_coverage_check.gd")
 const DT := 1.0 / 60.0
-const STATES := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land", "glide", "dash", "cast", "stomp",
-	"strafe", "crouch", "upper"]
+const STATES := [
+	"idle",
+	"walk",
+	"run",
+	"attack",
+	"hit",
+	"death",
+	"jump",
+	"land",
+	"glide",
+	"dash",
+	"cast",
+	"stomp",
+	"strafe",
+	"crouch",
+	"upper"
+]
 ## The crowd-control looks: a stun's sway, a root's strain and the knocked-down beat's fall (0..1 through HunterFall).
 const CC_STATES := ["stun", "rooted", "knock"]
-const KNOCK_FRAMES := 28       # frames of the knocked-down beat (0.45 s at 60 fps)
-const GROUND_TOL := 0.1        # m: a stunned or rooted Hunter's soles stay this close to where they stand in the idle
-const LIE_MAX := 0.30          # m: a knock ending this far over the idle's soles is said (KNOCK-HEIGHT)
-const LIE_SINK := 0.20         # m: ... or this far under them (bone origins sit inside the body: a hint)
-const MOVE_FRAMES := 45        # frames a held state is sampled over
-const MOVE_MAX_S := 1.2        # s: the longest a kit move is sampled for
-const T_POSE_RAD := 0.035      # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
-const FROZEN_RAD := 0.03       # rad (1.7 deg): the legs turn less than this over a walk, run or strafe: frozen
+const KNOCK_FRAMES := 28  # frames of the knocked-down beat (0.45 s at 60 fps)
+const GROUND_TOL := 0.1  # m: a stunned or rooted Hunter's soles stay this close to where they stand in the idle
+const LIE_MAX := 0.30  # m: a knock ending this far over the idle's soles is said (KNOCK-HEIGHT)
+const LIE_SINK := 0.20  # m: ... or this far under them (bone origins sit inside the body: a hint)
+const MOVE_FRAMES := 45  # frames a held state is sampled over
+const MOVE_MAX_S := 1.2  # s: the longest a kit move is sampled for
+const T_POSE_RAD := 0.035  # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
+const FROZEN_RAD := 0.03  # rad (1.7 deg): the legs turn less than this over a walk, run or strafe: frozen
 const LOCO_LEGS := ["walk", "run", "strafe"]
 ## Motley has no legs: he hovers on his spring, so his walk and run turn the hips.
 const LEGLESS := ["ostra"]
-const RUN_V := 4.8             # m/s (the run in warden_clips_check)
+const RUN_V := 4.8  # m/s (the run in warden_clips_check)
 
 var bad := 0
 var verbose := false
-var idle_pose := {}      # bone -> its local rotation in the standing idle
-var soles := {}          # leg bone -> the sole point in that bone's rest frame
-var idle_low := 0.0      # m: the soles' height in the standing idle (the ground, as far as this model's soles go)
+var idle_pose := {}  # bone -> its local rotation in the standing idle
+var soles := {}  # leg bone -> the sole point in that bone's rest frame
+var idle_low := 0.0  # m: the soles' height in the standing idle (the ground, as far as this model's soles go)
+
 
 func run(holder: Node3D) -> int:
 	verbose = OS.get_cmdline_user_args().has("--verbose-states")
 	for id in Arch.ORDER:
 		_hunter(holder, String(id))
 	return bad
+
 
 func _hunter(holder: Node3D, id: String) -> void:
 	var art := WardenGlb.art(id)
@@ -50,16 +67,24 @@ func _hunter(holder: Node3D, id: String) -> void:
 	_find_soles(m, sk)
 	for st in STATES + CC_STATES:
 		var r := _state(an, sync, sk, art, st)
-		var line := "%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f, lowest %.2f m up" % [art, st,
-				rad_to_deg(r["rest"]), rad_to_deg(r["idle"]), rad_to_deg(r["moved"]), r["low"] - idle_low]
+		var line := (
+			"%s %s: %.1f deg off rest, %.1f off idle, movers turn %.1f, lowest %.2f m up"
+			% [art, st, rad_to_deg(r["rest"]), rad_to_deg(r["idle"]), rad_to_deg(r["moved"]), r["low"] - idle_low]
+		)
 		if st == "idle":
 			idle_low = r["low"]
 		var off: float = r["low"] - idle_low
 		if st in ["stun", "rooted"] and absf(off) > GROUND_TOL:
 			notes.append("%s soles %.2f m off the ground" % [st, off])
-		if st == "knock" and (off < -LIE_SINK or off > LIE_MAX):      # the clip's height, not a mapping: said only
-			print("KNOCK-HEIGHT ", art, ": the knocked-down beat ends %.2f m %s the idle's soles (clip)" % [
-					absf(off), "above" if off > 0.0 else "below"])
+		if st == "knock" and (off < -LIE_SINK or off > LIE_MAX):  # the clip's height, not a mapping: said only
+			print(
+				"KNOCK-HEIGHT ",
+				art,
+				(
+					": the knocked-down beat ends %.2f m %s the idle's soles (clip)"
+					% [absf(off), "above" if off > 0.0 else "below"]
+				)
+			)
 		if r["rest"] < T_POSE_RAD:
 			notes.append("%s T-pose" % st)
 		if st != "idle" and r["idle"] < T_POSE_RAD:
@@ -73,11 +98,23 @@ func _hunter(holder: Node3D, id: String) -> void:
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count() if mesh else 0:
 			tris += mesh.surface_get_array_index_len(si) / 3
-	print("CLIPS %s %s: %d tris, %s, %d clips, %d states driven%s" % ["ok  " if notes.is_empty() else "FAIL", art,
-			tris, WardenGlb.DIR + "/%s/%s.glb" % [art, art], sync.clips.lib.get_animation_list().size() if sync.clips
-			else 0, STATES.size() + CC_STATES.size(), "" if notes.is_empty() else ": " + "; ".join(notes)])
+	print(
+		(
+			"CLIPS %s %s: %d tris, %s, %d clips, %d states driven%s"
+			% [
+				"ok  " if notes.is_empty() else "FAIL",
+				art,
+				tris,
+				WardenGlb.DIR + "/%s/%s.glb" % [art, art],
+				sync.clips.lib.get_animation_list().size() if sync.clips else 0,
+				STATES.size() + CC_STATES.size(),
+				"" if notes.is_empty() else ": " + "; ".join(notes)
+			]
+		)
+	)
 	bad += 0 if notes.is_empty() else 1
 	m.free()
+
 
 ## Retarget: every track of every clip names a bone of the skeleton; the walk and run clips key each limb bone.
 func _bind(clips: WardenClips, sk: Skeleton3D) -> Array:
@@ -109,6 +146,7 @@ func _bind(clips: WardenClips, sk: Skeleton3D) -> Array:
 				notes.append("clip %s keys no %s" % [nm, b])
 	return notes
 
+
 ## One state, driven from the standing idle: how far the pose turns from the rest pose, from the idle pose, and how far
 ## the moving bones (the legs; a hovering Hunter's hips) turn over the state, in rad.
 func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, st: String) -> Dictionary:
@@ -136,6 +174,7 @@ func _state(an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, art: String, s
 	play(an, sync, base, 30)
 	return out
 
+
 ## The lowest sole's height over the ground (a lying body: also the lowest bone), m. `lowest` of the soles
 ## stands for the foot that carries him; a stagger may lift the other.
 func _lowest(sk: Skeleton3D, lying: bool) -> float:
@@ -149,6 +188,7 @@ func _lowest(sk: Skeleton3D, lying: bool) -> float:
 			low = minf(low, (sk.global_transform * sk.get_bone_global_pose(bi).origin).y)
 	return low
 
+
 ## The soles: the model's lowest point at rest, as a point in each shin's rest frame.
 func _find_soles(m: Node3D, sk: Skeleton3D) -> void:
 	var sole_y := INF
@@ -159,6 +199,7 @@ func _find_soles(m: Node3D, sk: Skeleton3D) -> void:
 	for b in ["shin.L", "shin.R"]:
 		var rest := sk.global_transform * sk.get_bone_global_rest(WardenSkeleton.find(sk, b))
 		soles[b] = rest.affine_inverse() * Vector3(rest.origin.x, sole_y, rest.origin.z)
+
 
 ## The state dicts of one state, a frame each: a held state's dict repeated, a kit move's clock stepped.
 func frames(an: HunterAnim, sync: WardenGlb.Sync, art: String, st: String, base: Dictionary) -> Array:
@@ -203,15 +244,19 @@ func frames(an: HunterAnim, sync: WardenGlb.Sync, art: String, st: String, base:
 		out.append(s)
 	return out
 
+
 func _move_frames(art: String, st: String, s: Dictionary) -> Array:
 	var moves: Dictionary = WardenClips.data(art).get("kmoves", {})
 	var pick := ""
 	for k in moves:
 		var dash := RegEx.create_from_string(Cov.DASH_RE).search(String(k)) != null
 		var cast := RegEx.create_from_string(Cov.CAST_RE).search(String(k)) != null
-		if (st == "dash" and dash) or (st == "cast" and cast and not dash) \
-				or (st == "upper" and (moves[k] as Dictionary).has("upper")) \
-				or (st == "attack" and not dash and not cast and k != "mf_xform"):
+		if (
+			(st == "dash" and dash)
+			or (st == "cast" and cast and not dash)
+			or (st == "upper" and (moves[k] as Dictionary).has("upper"))
+			or (st == "attack" and not dash and not cast and k != "mf_xform")
+		):
 			pick = String(k)
 			break
 	var out: Array = []
@@ -224,6 +269,7 @@ func _move_frames(art: String, st: String, s: Dictionary) -> Array:
 		f["kmove_t"] = minf(i * DT, MOVE_MAX_S)
 		out.append(f)
 	return out
+
 
 func play(an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
