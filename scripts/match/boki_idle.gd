@@ -157,11 +157,11 @@ static func _bones(skel: Skeleton3D, pattern: String) -> Array:
 
 
 ## A rotation track's local value every KEY_STEP (`rest` where the clip has none).
-static func _sample(anim: Animation, track: int, rest: Quaternion) -> Array:
+static func _sample(anim: Animation, track: int, rest_v: Quaternion) -> Array:
 	var out := []
 	for s in ceili(anim.length / KEY_STEP) + 1:
 		var at := minf(s * KEY_STEP, anim.length)
-		out.append(anim.rotation_track_interpolate(track, at) if anim.track_get_key_count(track) > 0 else rest)
+		out.append(anim.rotation_track_interpolate(track, at) if anim.track_get_key_count(track) > 0 else rest_v)
 	return out
 
 

@@ -96,11 +96,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	# crossing to another island on a glide route: run off the edge, jump, open the glider at the
 	# top of the jump and steer for the landing (through any rings on the way)
 	if a.has("cross"):
-		var L: Dictionary = a["cross"]
-		var land: Vector3 = L["land"]
+		var l: Dictionary = a["cross"]
+		var land: Vector3 = l["land"]
 		var tol := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		a["cross_t"] = float(a.get("cross_t", 12.0)) - dt
-		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(L["to"])) or float(a["cross_t"]) <= 0.0:
+		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(l["to"])) or float(a["cross_t"]) <= 0.0:
 			a.erase("cross"); a.erase("cross_t"); a.erase("take_stall")
 		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's
 		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
@@ -123,7 +123,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		# (only heading for the landing: reaching the take-off spot from the landing's side and jumping on that
 		# momentum dropped the bot back on its own island, and it hopped there until the crossing timed out)
-		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6 \
+		elif h.grounded and h.flat_dist(l["take"]) < 0.9 and h.glide_fuel > 0.6 \
 				and Vector2(h.vel.x, h.vel.z).dot(tol) >= 0.0:
 			inp["move"] = tol.normalized()
 			inp["jump"] = true
@@ -131,7 +131,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		else:
 			a["cross_go"] = false
-			_take_stall(m, h, a, L, dt)
+			_take_stall(m, h, a, l, dt)
 	# a downed squadmate comes first: go and pick them up unless a rival is right on top of us
 	var rv := _revive_plan(m, h)
 	if not rv.is_empty() and rv.has("danger"):
@@ -407,8 +407,8 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	var dead := a.get("tgt") == null and absf(wrapf(want - cur, -PI, PI)) < AIM_DEAD
 	if dv.length() >= AIM_NEAR and not dead:
 		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
-	var L := maxf(dv.length(), 1.0)
-	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
+	var l := maxf(dv.length(), 1.0)
+	inp["aim"] = Vector3(h.pos.x + cos(cur) * l, aim3.y, h.pos.z + sin(cur) * l)
 
 ## The line-of-sight test (3 traces and 24 ground samples) once per LOS_RECHECK_S on the same target,
 ## or at once on a new one: a 10 Hz look is all the trigger needs, every step was most of a bot's fight.
@@ -649,7 +649,7 @@ func ability_aim(m: Match, h: Hunter, def: AbilityDef, tgt: Ent) -> Vector3:
 
 ## The kin's E when it fits the moment (read from the ability's cue), and the bond ultimate (R,
 ## the merge) once it's full. (The kin uses its auto active on its own; this is the hunter asking.)
-func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
+func _use_sig(_m: Match, h: Hunter, tgt: Ent) -> void:
 	var k: Kin = h.kin
 	if k == null or not k.ready_to_fight() or tgt == null:
 		return
@@ -1116,9 +1116,9 @@ const TAKE_STALL_S := 3.0      # s at the take-off spot without jumping before i
 ## A bot that hangs about a crossing's take-off spot without ever jumping (too little glide fuel, or
 ## it keeps running past the spot away from the landing and back) gives the goal up after a few
 ## seconds instead of circling there until the crossing's own timer ran out and was set again.
-func _take_stall(m: Match, h: Hunter, a: Dictionary, L: Dictionary, dt: float) -> void:
+func _take_stall(m: Match, h: Hunter, a: Dictionary, l: Dictionary, dt: float) -> void:
 	var t: float = float(a.get("take_stall", 0.0))
-	if h.grounded and h.flat_dist(L["take"]) < TAKE_R:
+	if h.grounded and h.flat_dist(l["take"]) < TAKE_R:
 		t += dt
 	else:
 		t = maxf(0.0, t - dt * 0.5)
@@ -1145,16 +1145,16 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
-	var W: World = m.world
+	var w: World = m.world
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
-		if W.tile_kind(p.x, p.y) != World.T_GROUND:
+		if w.tile_kind(p.x, p.y) != World.T_GROUND:
 			return false
-		if W.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
+		if w.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
 			return false
-		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
+		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
 		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
 		if TerrainHazards.avoid(m, h, p.x, p.y):
@@ -1185,7 +1185,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := fa
 ## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
 ## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres.
 func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float, max_steps: int) -> Array:
-	var W: World = m.world
+	var w: World = m.world
 	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
 	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
 	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
@@ -1196,18 +1196,18 @@ func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, ca
 	while q.size() > 0 and steps < max_steps:
 		steps += 1
 		var cur: Vector2i = q.pop_front()
-		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and W.is_block(b.x + 0.5, b.y + 0.5)):
+		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and w.is_block(b.x + 0.5, b.y + 0.5)):
 			b = cur
 			found = true
 			break
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var nx: Vector2i = cur + dv
-			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not W.inb(nx.x, nx.y):
+			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not w.inb(nx.x, nx.y):
 				continue
-			var i := W.idx(nx.x, nx.y)
-			if W.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
+			var i := w.idx(nx.x, nx.y)
+			if w.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
 				continue
-			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			if absf(w.ground_at(nx.x + 0.5, nx.y + 0.5) - w.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
 			if h and TerrainHazards.avoid(m, h, nx.x + 0.5, nx.y + 0.5):
 				continue

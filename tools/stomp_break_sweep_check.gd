@@ -11,25 +11,37 @@ extends RefCounted
 ## target, a delayed stun) are listed in docs/KIT_PARITY.md, not pinned here. SWEEP_ONLY=<arch> runs one Hunter.
 ## Reuses the dash-flow check's training match. Never touches the save.
 
-const WATCH := 130             # steps watched after the press (2.2 s: under the 2.4 s stomp, so none finishes)
+const WATCH := 130  # steps watched after the press (2.2 s: under the 2.4 s stomp, so none finishes)
 const SEED := 77
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
 const HARD := ["stun", "root", "gnd", "knock", "tow"]
-const TAP := [3.0, 1]          # [distance to the stomper in m, steps the key is held]: every slot is cast like this
+const TAP := [3.0, 1]  # [distance to the stomper in m, steps the key is held]: every slot is cast like this
 ## Casts that need another press: [arch, slot, metres, steps held, effect it must put on the stomper].
 ## They pin the CC table of docs/KIT_PARITY.md as it lands here (a launch reads as a knock), so a CC tag
 ## lost from a move turns its row red.
 ## (Kael's dash and Riposte left the table when they stopped knocking, kael-knock-cut.)
 ## (The Daze and slow rows are soft: the sweep asserts they never break the stomp.)
 ## (Sparkle's rod stuns only against a wall or a second foe, and whether the stomper has drifted off its wisp by
-## the time the rod lands varies with the match history, so that row pins the rod's knock or its stun: a rod thrown at a wall lands the stun, a clear lane the knock.)
+## the time the rod lands varies with the match history, so that row pins the rod's knock or its stun: a rod thrown at
+## a wall lands the stun, a clear lane the knock.)
 const EXPECT := [
-	["gunslinger", "rmb", 3.0, 1, "daze"], ["bulwark", "lmb", 3.0, 90, "knock"], ["bulwark", "x", 3.0, 1, "stun"],
-	["ostra", "rmb", 3.0, 1, "stun"], ["thief", "rmb", 3.0, 1, "gnd"], ["dredge", "rmb", 3.0, 1, "stun"],
-	["dredge", "e", 3.0, 1, "stun"], ["mage", "e", 3.0, 1, "gnd"], ["mage", "rmb", 3.0, 1, "knock|stun"],
-	["ashwick", "dash", 3.0, 1, "knock"], ["ashwick", "e", 3.0, 1, "tow"], ["dolm", "dash", 3.0, 1, "knock"],
-	["rimewright", "e", 3.0, 1, "tow"], ["juggernaut", "rmb", 3.0, 1, "knock"],
-	["archer", "e", 3.0, 1, "slow"], ["dolm", "rmb", 3.0, 1, "slow"], ["rimewright", "rmb", 3.0, 1, "slow"],
+	["gunslinger", "rmb", 3.0, 1, "daze"],
+	["bulwark", "lmb", 3.0, 90, "knock"],
+	["bulwark", "x", 3.0, 1, "stun"],
+	["ostra", "rmb", 3.0, 1, "stun"],
+	["thief", "rmb", 3.0, 1, "gnd"],
+	["dredge", "rmb", 3.0, 1, "stun"],
+	["dredge", "e", 3.0, 1, "stun"],
+	["mage", "e", 3.0, 1, "gnd"],
+	["mage", "rmb", 3.0, 1, "knock|stun"],
+	["ashwick", "dash", 3.0, 1, "knock"],
+	["ashwick", "e", 3.0, 1, "tow"],
+	["dolm", "dash", 3.0, 1, "knock"],
+	["rimewright", "e", 3.0, 1, "tow"],
+	["juggernaut", "rmb", 3.0, 1, "knock"],
+	["archer", "e", 3.0, 1, "slow"],
+	["dolm", "rmb", 3.0, 1, "slow"],
+	["rimewright", "rmb", 3.0, 1, "slow"],
 	["thief", "rmb", 3.0, 1, "slow"],
 ]
 
@@ -37,11 +49,13 @@ var bad := 0
 var rows := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
+
 func ok(cond: bool, what: String) -> void:
 	rows += 1
 	if not cond:
 		bad += 1
 		print("SWEEP FAIL %s" % what)
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -51,23 +65,28 @@ func run(main: Node) -> void:
 		if not only.is_empty() and not only.has(hero):
 			continue
 		var m: Match = flow._match(main, hero, 2)
-		if m.biomes: m.biomes.hazards.clear()      # a lightning rod's stun would break stomps (see stomp_check.gd)
+		if m.biomes:
+			m.biomes.hazards.clear()  # a lightning rod's stun would break stomps (see stomp_check.gd)
 		for slot in SLOTS:
 			var seen := _trial(m, hero, slot, TAP[0], TAP[1])
 			print("SWEEP %s %s: %s" % [hero, slot, seen.keys()])
 		for row in EXPECT:
 			if row[0] == hero:
 				var got := _trial(m, hero, row[1], row[2], row[3])
-				ok(Array(String(row[4]).split("|")).any(func(k): return got.has(k)), "%s %s lands %s on the stomper (%s)" % [hero, row[1], row[4], got.keys()])
+				ok(
+					Array(String(row[4]).split("|")).any(func(k): return got.has(k)),
+					"%s %s lands %s on the stomper (%s)" % [hero, row[1], row[4], got.keys()]
+				)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("STOMP BREAK SWEEP DONE, rows: %d, failures: %d" % [rows, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## One cast of `slot` at a stomping bot; the rule is asserted on what it did.
 func _trial(m: Match, hero: String, slot: String, dist: float, held: int) -> Dictionary:
 	var h: Hunter = flow.hunter
-	m.rng.seed = SEED       # the kits' random draws (a spread, a coin flip) are the same every run
+	m.rng.seed = SEED  # the kits' random draws (a spread, a coin flip) are the same every run
 	seed(SEED)
 	flow._ready_up(m)
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != h.team)[0]
@@ -96,6 +115,7 @@ func _trial(m: Match, hero: String, slot: String, dist: float, held: int) -> Dic
 	Life.end_stomp(m, foe, "gone")
 	return seen
 
+
 func _hold(slot: String) -> void:
 	var h: Hunter = flow.hunter
 	if slot == "dash":
@@ -103,10 +123,12 @@ func _hold(slot: String) -> void:
 	else:
 		flow._press(slot)
 
+
 func _release() -> void:
 	var h: Hunter = flow.hunter
 	for k in ["fire", "sec", "sig", "dash", "gear1"]:
 		h.inp[k] = false
+
 
 ## The stomper at `dist` m in front of the caster with a fresh wisp beside it, no CC left from the last cast.
 func _reset(m: Match, h: Hunter, foe: Hunter, w: Hunter, dist: float) -> void:
@@ -118,15 +140,16 @@ func _reset(m: Match, h: Hunter, foe: Hunter, w: Hunter, dist: float) -> void:
 	# (the stomper's and the wisp's Boki are out too: the stomper's carry passive, a knockback resist of 0.5 on some
 	# species, halves every push and would turn on or off with the species the match dealt the bot)
 	for kk in [w.kin, w.kin2, foe.kin, foe.kin2]:
-		if is_instance_valid(kk): (kk as Kin).dead = true
-	var hk = h.kin            # (untyped first: it may have been freed)
+		if is_instance_valid(kk):
+			(kk as Kin).dead = true
+	var hk = h.kin  # (untyped first: it may have been freed)
 	if is_instance_valid(hk) and (hk as Kin).state == "downed":
 		# the caster's own Boki, downed in an earlier trial (Fusion is off since #349, so it stays out and fights):
 		# walking past it would pick it up, and a carry eats every attack press. It stays down, out of the way.
 		if (hk as Kin).rescue_on:
 			KinDowned.stop(hk, h, "check")
 		(hk as Kin).rescue_block = 1e9
-	foe.max_hp = 1e6          # nothing a kit does may down the stomper: that is a break of its own
+	foe.max_hp = 1e6  # nothing a kit does may down the stomper: that is a break of its own
 	foe.hp = 1e6
 	foe.armor = 0.0
 	foe.shield = 0.0
@@ -143,11 +166,17 @@ func _reset(m: Match, h: Hunter, foe: Hunter, w: Hunter, dist: float) -> void:
 	foe.vel = Vector3.ZERO
 	m.knock(w, foe, {})
 
+
 func _note(m: Match, foe: Hunter, seen: Dictionary) -> void:
 	var now := {
-		"stun": foe.stun_t > 0.0, "root": foe.root_t > Life.STOMP_ROOT + 0.001, "gnd": KitStatus.grounded(foe),
-		"daze": KitStatus.rattled(foe), "slow": foe.slow_t > 0.0, "knock": m.time - foe.kb_t < 0.08,
-		"tow": not m.displace.towing(foe).is_empty(), "dmg": foe.hp < foe.max_hp - 0.5,
+		"stun": foe.stun_t > 0.0,
+		"root": foe.root_t > Life.STOMP_ROOT + 0.001,
+		"gnd": KitStatus.grounded(foe),
+		"daze": KitStatus.rattled(foe),
+		"slow": foe.slow_t > 0.0,
+		"knock": m.time - foe.kb_t < 0.08,
+		"tow": not m.displace.towing(foe).is_empty(),
+		"dmg": foe.hp < foe.max_hp - 0.5,
 	}
 	for k in now:
 		if now[k]:

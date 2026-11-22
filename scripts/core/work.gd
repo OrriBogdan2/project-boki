@@ -181,11 +181,13 @@ static func pin(rec: Dictionary) -> String:
 	return String(rec.get("work_pin", ""))
 
 static func set_pin(rec: Dictionary, el: String) -> void:
+	rec["work_manual"] = true
 	if el == "" or not ELEMENTS.has(el): rec.erase("work_pin")
 	else: rec["work_pin"] = el
 	rec.erase("work_rest")
 
 static func set_rest(rec: Dictionary, on: bool) -> void:
+	rec["work_manual"] = true
 	if on:
 		rec["work_rest"] = true
 		rec.erase("work_pin")
@@ -268,13 +270,46 @@ const AWAY_MIN := 30.0
 static func assigned(rec: Dictionary) -> int:
 	return int(rec.get("work_at", -1))
 
-static func assign(rec: Dictionary, u: int) -> void:
+## `manual` marks the owner's own choice: auto-sort then leaves that kin alone.
+static func assign(rec: Dictionary, u: int, manual := true) -> void:
+	if manual: rec["work_manual"] = true
 	if u < 0: rec.erase("work_at")
 	else:
 		rec["work_at"] = u
 		rec.erase("build_at")      # (a site assignment: FarmSites)
 		rec.erase("work_rest")
 		rec.erase("work_pin")
+
+## Auto-sort: a kin the owner never placed (rec["work_manual"]) goes to the free station slot
+## that suits its best knack: only stations of an element at its top level, so a level-1 knack
+## never beats a level-3 one. Strongest kin choose first; ties go to the roster order and the
+## layout order. The owner can reassign or unassign any time (that sets "work_manual").
+## Returns [[kin name, station id]] for what it just placed.
+static func autosort() -> Array:
+	var stations := HomeLayout.stations(Save.d)
+	var free := {}
+	for s in stations:
+		var cfg: Dictionary = ASSIGN.get(String(s["id"]), {})
+		if cfg.is_empty(): continue
+		var u := int(s["e"]["u"])
+		free[u] = int(cfg["slots"]) - crew(u).size()
+	var cands: Array = []
+	for r in Save.d.get("roster", []):
+		if typeof(r) != TYPE_DICTIONARY or r.get("work_manual", false) or assigned(r) >= 0: continue
+		if not can_work(r) or pin(r) != "" or r.has("build_at"): continue
+		cands.append(r)
+	cands.sort_custom(func(a, b): return int(list(a)[0][1]) > int(list(b)[0][1]))
+	var out: Array = []
+	for r in cands:
+		var top := int(list(r)[0][1])
+		for s in stations:
+			var u := int(s["e"]["u"])
+			if int(free.get(u, 0)) > 0 and level(r, String(s["el"])) == top:
+				assign(r, u, false)
+				free[u] -= 1
+				out.append([String(r["name"]), String(s["id"])])
+				break
+	return out
 
 ## The kin assigned to a station (deco uid), from the roster.
 static func crew(u: int) -> Array:
