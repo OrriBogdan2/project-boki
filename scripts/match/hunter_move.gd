@@ -21,7 +21,6 @@ static var abyss_slow_from: float = _phys["abyss_slow_from"]
 static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
-static var glide_accel: float = _phys["glide_accel"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
@@ -46,7 +45,11 @@ static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
-static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
+## m/s, the glide cruise every hunter shares (MaxGlide), at body scale so a run into a glide keeps the source's ratio
+static var glide_cruise: float = _phys["glide_cruise"] * body_scale
+## m/s^2, the glider's pull toward where you steer at or under cruise, scaled with the cruise so a turn takes as long
+static var glide_accel: float = _phys["glide_accel"] * body_scale
 
 static func rules() -> Dictionary:
 	return _rules

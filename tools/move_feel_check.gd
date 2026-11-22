@@ -131,7 +131,7 @@ const T := {
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
-	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
+	"glide_speed":             ["~", [5.22, 6.38], "m/s", "[game data] MaxGlide 500 uu/s x body_scale 1.16 +-10%"],
 	"glide_sink":              ["~", [1.38, 1.42], "m/s", "hunter_move.json glide_sink (ours: no footage to count)"],
 	"glide_overheat_s":        ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
 	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
@@ -152,7 +152,7 @@ const T := {
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[owner 11-13] the glide carries the dash"],
 	"dashglide_2s_speed":      ["~", [7.0, 9.0], "m/s", "[owner 11-13] still fast, bleeding back"],
-	"dashglide_3s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] back toward cruise"],
+	"dashglide_3s_over":       ["<=", 1.5, "m/s", "[owner 11-08 item 9] back toward cruise: 3 s on, this over it"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
@@ -377,6 +377,7 @@ func run(main: Node) -> void:
 	load("res://tools/move_feel_hunters.gd").new(self).run()      # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
+	_vault_exit()       # after the abyss rows too: an empowered bolt before them moves abyss_lift_t (docs/DEBT.md)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -668,7 +669,7 @@ func _landing_carry() -> void:
 		if c == "glide":     # opened in the air at glide speed, then let go
 			P.air_t = 1.0
 			P.gliding = true
-			P.vel.x = Hunter.GLIDE_SPEED
+			P.vel.x = HunterMove.glide_cruise
 			P.inp["glide"] = true
 			m.step(DT)
 			P.inp["glide"] = false
@@ -706,7 +707,7 @@ func _glide() -> void:
 	rec("glide_start_vy", -P.vel.y)
 	var ga := HunterMove.glide_accel
 	var gv := HunterMove.glide_start_vy
-	ok(is_equal_approx(ga, 16.25), "glide_accel = GlideTargetXYForce 162,500 / Mass 100 (%s)" % ga)
+	ok(is_equal_approx(ga, 16.25 * HunterMove.body_scale), "glide_accel = 162,500 / Mass 100 x body_scale (%s)" % ga)
 	ok(is_equal_approx(gv, 0.85), "glide_start_vy = GlideStartFallSpeedMin 85 uu/s (%s)" % gv)
 	# hold Space from the jump press
 	_reset(flat)
@@ -960,7 +961,7 @@ func _dash_glide() -> void:
 	rec("dashglide_open_speed", open_v)
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
-	rec("dashglide_3s_speed", v3)
+	rec("dashglide_3s_over", v3 - HunterMove.glide_cruise)
 	P.set_arch(kit_was)
 
 # ---------------------------------------------------------------- the walking brake against UE's own
@@ -997,8 +998,8 @@ static func ue_band(v0: float) -> Vector2:
 ## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
 static func run_speeds() -> Dictionary:
 	var out := {}
-	for id in HunterMove.rules():
-		var row = HunterMove.rules()[id]
+	for id in MoveRules.data():
+		var row = MoveRules.data()[id]
 		if row is Dictionary and row.has("speed"):
 			var v := float(row["speed"])
 			out[v] = out.get(v, []) + [id]
@@ -1760,7 +1761,7 @@ func _feather() -> void:
 		P.last_gy = lip
 		P.air_t = 1.0
 		P.gliding = true
-		P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+		P.vel = Vector3(-HunterMove.glide_cruise, 0.0, 0.0)
 		var x0 := P.pos.x
 		var holding := true
 		for i in 60 * 60:
@@ -1798,7 +1799,7 @@ func _feather() -> void:
 	P.last_gy = lip
 	P.air_t = 1.0
 	P.gliding = true
-	P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+	P.vel = Vector3(-HunterMove.glide_cruise, 0.0, 0.0)
 	P.inp["glide_press_only"] = true
 	var open_x := 0.0
 	for i in 60 + 60:
@@ -1941,7 +1942,7 @@ func _ledge_run(wl: Dictionary, mode: String) -> Dictionary:
 		_reset(Vector3(st.x, top - 0.3 + 0.6 * HunterMove.glide_sink, st.y), false)
 		P.last_gy = wl["low"]
 		P.gliding = true
-		P.vel = Vector3(n.x, 0.0, n.y) * Hunter.GLIDE_SPEED
+		P.vel = Vector3(n.x, 0.0, n.y) * HunterMove.glide_cruise
 	else:
 		# running in from half a metre back (a jump at the face from a standstill catches it too, at ~2 m/s)
 		var st := at - n * 0.5
@@ -2044,10 +2045,10 @@ func _glide_wall_hit(mid: Vector2, n: Vector2, t: Vector2, y: float, deg: float)
 	P.gliding = true
 	P.inp["glide"] = true
 	P.inp["move"] = dir
-	P.vel = Vector3(dir.x * Hunter.GLIDE_SPEED, 0.0, dir.y * Hunter.GLIDE_SPEED)
-	var into0 := Hunter.GLIDE_SPEED * cos(deg_to_rad(deg))
+	P.vel = Vector3(dir.x * HunterMove.glide_cruise, 0.0, dir.y * HunterMove.glide_cruise)
+	var into0 := HunterMove.glide_cruise * cos(deg_to_rad(deg))
 	var r := {"hit": false, "open": true, "into": 0.0, "out": 0.0, "tan": 0.0, "slow": 99.0, "flips": 0,
-		"tan0": Hunter.GLIDE_SPEED * sin(deg_to_rad(deg))}
+		"tan0": HunterMove.glide_cruise * sin(deg_to_rad(deg))}
 	var since := 0           # frames since the hit
 	var last_sign := 0.0
 	for i in 120:
@@ -2335,7 +2336,7 @@ func _screen_scale() -> void:
 	_source_scale(cam, vh, hfov)
 
 ## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
-## source's ground across and its Hunter size together, then back to the default style. The MFEEL source
+## source's ground across and its Hunter size together, then back to the Supervive style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	cam.use_style("source_scale")
