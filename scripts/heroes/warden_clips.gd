@@ -968,13 +968,17 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 ## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
 ## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 func _air_tilt() -> void:
-	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
-	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+	air_tilt(root, skel, root_bi)
+
+## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip posed it.
+static func air_tilt(model: Node3D, sk: Skeleton3D, bi: int) -> void:
+	var q: Quaternion = model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
 		return
 	var b := Basis(q)
-	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var to_skel := sk.global_transform.affine_inverse() * model.global_transform
 	var turn_v := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
-	skel.set_bone_global_pose(root_bi, turn_v * skel.get_bone_global_pose(root_bi))
+	sk.set_bone_global_pose(bi, turn_v * sk.get_bone_global_pose(bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = _vel(s)
