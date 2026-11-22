@@ -333,6 +333,7 @@ func _tick_scar(dt: float) -> void:
 		if not f.hittable() or absf(f.pos.y - a.y) > 1.5:
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
+			CcSfx.zone_slow(f)
 			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow
 			f.slow_t = maxf(f.slow_t, 0.25)
 	scar["fx"] = float(scar["fx"]) - dt
