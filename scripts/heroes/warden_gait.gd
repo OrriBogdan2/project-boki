@@ -61,7 +61,8 @@ var legs_w := 0.0
 var arm_w := 0.0
 var legs: Array = []         # [bone index, running mean rotation]
 var feet: Array = []         # [thigh, shin, leg length, lock offset, last clip ankle, lowest, highest, down]
-var arms: Array = []         # [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+# [upper arm, its parent, same-side thigh, hand, gain, arm mean pitch, thigh mean pitch, out sign]
+var arms: Array = []
 var settle: Array = []       # [leg bone, the rotation it showed last frame]
 var walk_len := 1.0          # s: one cycle of the forward walk clip at rate 1
 var run_len := 1.0           # s: of the forward run clip

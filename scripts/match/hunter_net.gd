@@ -17,7 +17,8 @@ const TAIL := 9                # fields: TAG, level, CHAN_TAG, target, left, REA
 static func extra(h: Hunter) -> Array:
 	var ch := ChannelBar.read(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
-	return [TAG, h.lvl, CHAN_TAG, ch[0], snappedf(maxf(0.0, ch[1]), 0.05), REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	var left := snappedf(maxf(0.0, ch[1]), 0.05)
+	return [TAG, h.lvl, CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
 
 static func apply(h: Hunter, it: Array) -> void:
 	var i := it.size() - TAIL
