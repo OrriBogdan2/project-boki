@@ -225,10 +225,10 @@ func _snags(m: Match) -> void:
 		if w.kind[i] != World.T_BLOCK:
 			continue
 		var hgt := World.BLOCK_H
-		if hgt > World.STEP and hgt < Hunter.MANTLE_REACH:
+		if hgt > World.STEP and hgt < HunterFeel.mantle_reach:
 			n += 1
 	ok(n == 0, "no colliding prop between step (%.2f m) and mantle (%.2f m) height: %d" % [
-		World.STEP, Hunter.MANTLE_REACH, n])
+		World.STEP, HunterFeel.mantle_reach, n])
 
 func run(main: Node) -> void:
 	Save.no_write = true
