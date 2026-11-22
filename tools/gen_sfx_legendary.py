@@ -9,7 +9,7 @@ leg_sting       the short sting when it is captured or defeated
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, env, mix, at, lpf, hpf, bpf, noise
+from sfx_lib import N, mix, lpf, bpf, noise
 
 S.reseed(8113)
 ROAR_D = 2.4

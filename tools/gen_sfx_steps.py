@@ -9,7 +9,7 @@ The Hunters have no steps of their own on these surfaces yet, so StepSurface fal
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, T, env, mix, at, bpf, noise
 from sfx_combat import kick, click, crack, ring, grains
 
 S.reseed(5871)

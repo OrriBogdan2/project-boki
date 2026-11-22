@@ -16,7 +16,7 @@ loops written with gen_ambience's helpers. Needs numpy, scipy and ffmpeg.
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, env, mix, at, lpf, hpf, bpf, noise
+from sfx_lib import N, env, mix, at, lpf, bpf, noise
 import gen_ambience as A
 
 S.reseed(7311)
@@ -36,7 +36,7 @@ def count(i):
 def horn(i):
     d = 0.9
     t = S.T(d)
-    n = N(d)
+    _n = N(d)
     f = 233.0 * (1.0 + 0.02 * np.minimum(t / 0.06, 1.0))
     ph = 2 * np.pi * np.cumsum(f) / S.SR
     tone = sum(a * np.sin(k * ph) for k, a in ((1, 1.0), (2, 0.6), (3, 0.42), (4, 0.25), (5, 0.14)))

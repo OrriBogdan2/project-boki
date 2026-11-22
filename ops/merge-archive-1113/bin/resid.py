@@ -1,4 +1,4 @@
-import json, subprocess, re
+import json, subprocess
 from multiprocessing import Pool
 
 R = "/home/boki/cj/20261113-173508-a3/tree"

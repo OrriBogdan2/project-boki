@@ -11,11 +11,10 @@ Original synthesis, no samples.
 """
 
 import os, sys
-import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, grains
+from sfx_lib import N, noise, lpf, env, mix, at, kick, click, crack, grains
 
 S.reseed(5206)
 

@@ -10,7 +10,7 @@ Original synthesis, no samples; same soft palette as gen_sfx_ui.py.
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, T, mix, at, lpf
 
 S.reseed(5120)
 LOOP_S = 1.2  # s: both loops; every hum partial is a whole number of cycles in it so the seam is clean

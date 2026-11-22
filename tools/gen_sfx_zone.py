@@ -14,7 +14,7 @@ countdown). All our own synthesis:
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, mix, at, lpf, bpf
+from sfx_lib import T, mix, at, lpf, bpf
 
 S.reseed(2611)
 

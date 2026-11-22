@@ -12,7 +12,7 @@ import sys
 
 import bpy
 import numpy as np
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Matrix, Vector
 
 SRC, OUT = sys.argv[sys.argv.index("--") + 1 :][:2]
 SIZE = 2.0  # game metres per model metre (content/archetypes/bulwark.json body size)

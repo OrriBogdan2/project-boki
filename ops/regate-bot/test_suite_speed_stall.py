@@ -4,7 +4,6 @@ Run: python3 ops/regate-bot/test_suite_speed_stall.py"""
 import importlib.util
 import os
 import subprocess
-import sys
 import tempfile
 import time
 import types
@@ -95,7 +94,7 @@ class StallTest(unittest.TestCase):
             left = subprocess.run(["pgrep", "-f", "^sleep 300$"], capture_output=True, text=True).stdout.split()
             for pid in left:  # only ours: the helper carries this run's XDG_DATA_HOME; none may have survived the run
                 self.assertNotIn(
-                    f"suite-",
+                    "suite-",
                     Path(f"/proc/{pid}/environ").read_text(errors="ignore")
                     if Path(f"/proc/{pid}/environ").exists()
                     else "",

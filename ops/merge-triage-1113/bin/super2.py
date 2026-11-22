@@ -1,3 +1,4 @@
+# ruff: noqa: F821  (S and fam come from the exec() below)
 import json, re, subprocess, collections
 
 exec(open("/tmp/mt/bin/super.py").read().split("fams=collections")[0].split("def contained")[0])

@@ -5,7 +5,6 @@ low sine that falls in pitch, a quiet second harmonic so small speakers still ca
 pat of the chest wall. It is felt more than heard. Three takes, each a hair different in pitch and timing.
 """
 
-import numpy as np
 import sfx_lib as S
 from sfx_lib import N, env, mix, at, lpf, noise
 

@@ -1,4 +1,4 @@
-import re, sys, json
+import re, json
 
 batches = {}
 cur = None

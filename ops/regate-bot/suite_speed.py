@@ -17,7 +17,6 @@ import os
 import re
 import shutil
 import signal
-import statistics
 import subprocess
 import sys
 import faulthandler

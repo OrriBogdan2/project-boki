@@ -1,4 +1,4 @@
-import json, subprocess, re
+import json, subprocess
 
 c = json.load(open("/tmp/mt/final.json"))
 S = json.load(open("/tmp/mt/scan.json"))

@@ -2,7 +2,7 @@
 """One-off: writes the `src` note of each content/archetypes/*.json from docs/KIT_PARITY.md rows.
 Tags: [D] data card, [F] footage, [O] owner note, ours, [?] not stated."""
 
-import json, re, sys
+import json, re
 
 rows = {}
 hero = None

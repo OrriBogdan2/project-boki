@@ -1,4 +1,4 @@
-import json, re, collections, time
+import json, re, collections
 
 S = json.load(open("/tmp/mt/scan.json"))
 d = json.load(open("/tmp/mt/super.json"))

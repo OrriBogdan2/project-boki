@@ -10,7 +10,7 @@ ring of inharmonic plate partials, and a bright ting where it lands. Juice sets 
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf
+from sfx_lib import N, env, mix, at, lpf
 
 S.reseed(5307)
 F0, F1 = 520.0, 780.0  # Hz: the glide's start and end (a fifth up); the tier then shifts it by pitch_scale

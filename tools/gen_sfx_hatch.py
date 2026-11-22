@@ -8,7 +8,7 @@ upward question for a chirp. All at the Boki loudness (content/rules/sfx_levels.
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, env, mix, at, lpf
 
 S.reseed(8113)
 

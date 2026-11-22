@@ -80,7 +80,7 @@ const T := {
 	"slow_end_0p3s": ["~", [0.99, 1.01], "x", "[game data] and holds there"],
 	"haste_land_0p1s": ["~", [0.99, 1.01], "x", "[game data] a haste lands as a Slow ends: MaxAcceleration"],
 	"haste_end_0p1s": ["~", [0.99, 1.01], "x", "[game data] and ends as a Slow lands: the walking brake"],
-	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
+	# the fitted ground dash curves (docs/ feel doc "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
 	"dash_curve_gunslinger_peak_u": ["~", [0.04, 0.18], "", "[footage] Ghost slide peaks 0.04-0.06s into 0.47s"],
 	"dash_curve_gunslinger_peak_k": ["~", [1.65, 1.9], "x", "[footage] Ghost peak 18.4 m/s, mean 10.2 (fit 1.81)"],
@@ -154,7 +154,7 @@ const T := {
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames": ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
-	# decoded and no footage shows such a dash (docs/SUPERVIVE_FEEL.md), so these rows only print what ours does
+	# decoded and no footage shows such a dash (docs/ feel doc), so these rows only print what ours does
 	"airdash_fall_vy_keep": ["~", [0.0, 1.0], "x", "[?] share of a 10 m fall's speed (12 m/s) the dash keeps"],
 	"airdash_fall_speed": [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
 	"airdash_dive_vy_keep": ["~", [0.0, 1.0], "x", "[?] share of a glide dive's fall speed the dash keeps"],
@@ -354,7 +354,7 @@ const MOVE_DASH := [
 
 ## A dash pressed standing still (no move keys) goes toward the cursor for every Hunter, never the way the
 ## body faces: the cursor-aimed sources (Oath, Tetra, Kingpin, Brall, Felix, Void, Joule; Myth tested in
-## supervive_kits.md) do; the move-direction ones (Shiv, Elluna, Celeste, Ghost) were never filmed standing
+## reference kit notes) do; the move-direction ones (Shiv, Elluna, Celeste, Ghost) were never filmed standing
 ## (briefs/hero-ref, rows marked [?]), so they keep the shared rule (ArchKit.dash_dir). Shift is held
 ## STAND_HOLD so the hold kits (Swap, Wirerun, Skate, Slide) release too.
 const STAND_HOLD := 18  # frames (0.3 s) Shift is held down
@@ -2781,7 +2781,7 @@ func _screen_scale() -> void:
 
 
 ## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
-## source's ground across and its Hunter size together, then back to the Supervive style. The MFEEL source
+## source's ground across and its Hunter size together, then back to the reference style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
 func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 	cam.use_style("source_scale")

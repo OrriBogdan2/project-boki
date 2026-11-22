@@ -10,7 +10,7 @@ PARAMS.json: s (scale new->live), auto (align), rects {"L":[u0,v0,u1,v1],"R":..}
 
 import sys, json, math, os
 import bpy, bmesh, numpy as np
-from mathutils import Vector, Matrix
+from mathutils import Matrix
 
 
 def load_glb(path):

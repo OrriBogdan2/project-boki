@@ -1,4 +1,4 @@
-import json, os
+import json
 
 heads = {}
 for l in open("/tmp/ma/dheads.txt"):

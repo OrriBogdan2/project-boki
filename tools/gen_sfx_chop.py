@@ -10,7 +10,7 @@ rock_break   the boulder giving way: a crack, a rumble and rubble settling
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise
+from sfx_lib import N, mix, at
 
 S.reseed(3302)
 

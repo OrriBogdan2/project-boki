@@ -15,7 +15,6 @@ still layer on top in Juice. Each is levelled to the old `hit` tick (-18 dB RMS)
 """
 
 import os, sys
-import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S

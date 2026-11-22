@@ -7,7 +7,7 @@ content/gear/<id>.json under "sfx"; Effects, Verbs and Match.use_gear read them 
 
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf, bpf, noise, kick, crack, sub, sat
+from sfx_lib import N, env, mix, at, lpf, bpf, noise, kick, crack
 
 S.reseed(5151)
 
@@ -20,7 +20,7 @@ def jit(i, spread=0.03):
 def swish(d, f0, f1, width=0.5, a=0.03):
     """Air moving past: band noise whose centre glides from f0 to f1."""
     n = N(d)
-    u = np.linspace(0, 1, n)
+    _u = np.linspace(0, 1, n)
     out = np.zeros(n)
     k = 6
     for s in range(k):

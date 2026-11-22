@@ -63,7 +63,7 @@ L = []
 for nm, bs, imp, hd, carried, hot in out:
     L.append(
         f"\n### {nm}: {len(bs)} merges (+{carried} stacked branches carried), avg impact {imp:.1f}/10, avg hard {hd:.1f}/10"
-        + (f"; god-file conflicts: " + ", ".join(f"{f.split('/')[-1]} x{n}" for f, n in hot) if hot else "")
+        + ("; god-file conflicts: " + ", ".join(f"{f.split('/')[-1]} x{n}" for f, n in hot) if hot else "")
     )
     L.append("")
     for b in bs:

@@ -16,7 +16,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, grains, shape, soft_in
+from sfx_lib import N, T, noise, lpf, bpf, env, mix, at, kick, click, crack, sub, grains, shape, soft_in
 
 S.reseed(5153)
 
@@ -87,7 +87,7 @@ def wet_slap(d=0.16, lo=300, hi=2600):
 # ------------------------------------------------------------------ LMB: Fencer (the swordfish)
 def thrust(i):
     """A rapier thrust: a thin fast swish with a fin flick off the swordfish's tail."""
-    d = 0.24
+    _d = 0.24
     swish = sweep_noise(0.16, 2200 + 200 * i, 5200, 0.3) * shape(0.16, 0.025, 0.03, 0.1) * 1.2
     zing = S.sweep(3100 + 140 * i, 4200, 0.1) * env(N(0.1), 0.004, 0.03) * 0.06
     flick = at(bpf(noise(0.05), 700, 2400) * env(N(0.05), 0.002, 0.012) * 0.5, 0.11)
@@ -96,7 +96,7 @@ def thrust(i):
 
 def thrust_hit():
     """The swordfish's bill lands: a pointed tock, a short wet stab and a few drops."""
-    d = 0.3
+    _d = 0.3
     tip = mix(click(0.003, 3000, 9000) * 1.2, crack(0.12, 900, 5000, 0.014) * 1.5)
     stab = mix(
         kick(260, 120, 0.18, 0.01, 0.03, 2.0) * 0.6, bpf(noise(0.1), 500, 2200) * env(N(0.1), 0.002, 0.025) * 0.8
@@ -107,7 +107,7 @@ def thrust_hit():
 # ------------------------------------------------------------------ RMB: Grab Bag
 def toss(i):
     """A bottle out of the bag: glass knocking in the bag, then the bottle flung end over end."""
-    d = 0.4
+    _d = 0.4
     knock = mix(
         S.chime(1900 + 120 * i, 0.12, 0.04, ((1.0, 1.0), (2.7, 0.4))) * 0.5,
         at(S.chime(2300 + 90 * i, 0.1, 0.03, ((1.0, 1.0), (2.9, 0.3))) * 0.35, 0.03),
@@ -154,7 +154,7 @@ def pop_fire():
 
 def pop_zeep():
     """Super Zeep (the rare one): a fizzing fuse, then a big frothy blast and a fountain of bubbles."""
-    d = 1.1
+    _d = 1.1
     fizz = S.hiss(0.12, 3000, 9000, 0.02, 0.05) * 0.4
     blast = mix(
         click(0.005, 1800, 7000) * 1.1,
@@ -177,7 +177,7 @@ def beached():
 # ------------------------------------------------------------------ Shift: Ground Swim
 def dash(i):
     """Diving into the ground: an earthy splash, and the fin rushing off under the surface."""
-    d = 0.45
+    _d = 0.45
     dive = mix(
         lpf(noise(0.18), 1400) * env(N(0.18), 0.004, 0.05) * 1.4, kick(160 + 10 * i, 70, 0.2, 0.02, 0.04, 1.5) * 0.5
     )
@@ -188,7 +188,7 @@ def dash(i):
 
 def surface():
     """Bursting up out of the ground: a deep plop, a column of spray, foes thrown up."""
-    d = 0.7
+    _d = 0.7
     plop = mix(kick(140, 50, 0.4, 0.03, 0.08, 2.4) * 0.8, sub(70, 40, 0.4, 0.08) * 0.35)
     up = sweep_noise(0.4, 500, 3200, 0.4) * shape(0.4, 0.01, 0.06, 0.3) * 1.1
     return mix(plop, up, at(spray(0.55, 2500, 9000, 0.18) * 0.8, 0.02), at(bubbles(0.5, 6, 300, 900, 0.35), 0.05))
@@ -350,7 +350,7 @@ def spout_hit():
 def tide_lunge():
     """Riptide Lunge leaves (LMB held, released): a small water wall shoved aside as the bill streaks forward,
     a thin blade zing rising with it and spray trailing (his dash's dive, but a thrust, not a plunge)."""
-    d = 0.5
+    _d = 0.5
     shove = mix(lpf(noise(0.14), 1200) * env(N(0.14), 0.004, 0.04) * 1.2, kick(170, 70, 0.18, 0.01, 0.04, 1.6) * 0.5)
     rush = sweep_noise(0.34, 500, 3000, 0.35) * shape(0.34, 0.02, 0.1, 0.22) * 0.9
     zing = at(S.sweep(1500, 3200, 0.2) * env(N(0.2), 0.004, 0.08) * 0.12, 0.03)

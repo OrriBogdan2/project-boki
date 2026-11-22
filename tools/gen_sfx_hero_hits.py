@@ -13,7 +13,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, tail, ring, grains
+from sfx_lib import N, noise, lpf, hpf, env, mix, at, kick, click, crack, tail, ring, grains
 
 S.reseed(9604)
 P = [1.0, 1.06, 0.95, 1.1]  # each take's pitch
