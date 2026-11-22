@@ -526,7 +526,10 @@ func _channel(m: Match, hud, P: Hunter) -> void:
 	m._net_apply(M, row)
 	await hud.panels.draw
 	ok(ChannelBar.shown.has(M.nid), "another machine: the snapshot's target and seconds left bring it back")
-	m._net_apply(M, row.slice(0, row.size() - 2) + ["", 0.0])
+	var chan := row.find(HunterNet.CHAN_TAG)
+	row[chan + 1] = ""
+	row[chan + 2] = 0.0
+	m._net_apply(M, row)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
 	ChannelBar.store(M, P.nid, 0.05)
