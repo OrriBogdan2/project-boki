@@ -3,9 +3,10 @@ names BokiPlant, BokiDna and BokiHomePoses already read on nettlynx and cairnbac
 on its game glb. The model, its other clips and the face stay as they are; only the leg region's skin weights move to
 the new bones.
 
-  blender -b --factory-startup --python tools/boki/auto_legs.py -- <species> [top=0.42] [reach=1.0] [legs=2]
+  blender -b --factory-startup --python tools/boki/auto_legs.py -- <species> [top=0.42] [reach=1.0] [legs=2] [hold=hips]
 
-top: the belly's height as a share of the body's; reach: a multiple of the default stride.
+top: the belly's height as a share of the body's; reach: a multiple of the default stride; hold: bones (comma list)
+whose rotation walk and run keep at rest.
 """
 
 import math
@@ -178,8 +179,9 @@ def stride_at(u, duty, half, lift):
     return h00 * -half + h10 * v + h01 * half + h11 * v, lift * math.sin(math.pi * s) ** 0.4
 
 
-def animate(arm, top, gaits):
-    """gaits: {clip: (duty, half stride, lift, body drop, bob)}, all but the duty in belly heights `top`."""
+def animate(arm, top, gaits, hold=()):
+    """gaits: {clip: (duty, half stride, lift, body drop, bob)}, all but the duty in belly heights `top`. hold: bones
+    whose rotation the gait clips keep at rest (a species' own walk that sways the hips the legs hang from)."""
     sign = {n: 1.0 if arm.data.bones[n].matrix_local.to_3x3().col[0][0] >= 0 else -1.0 for n in NEW}
     up = arm.data.bones["root"].matrix_local.to_3x3().inverted() @ Vector((0, 0, 1))
     knee, ankle = top * 0.5, top * ANKLE
@@ -209,6 +211,8 @@ def animate(arm, top, gaits):
                     "root",
                 )
                 set_curve(act, 'pose.bones["root"].scale', idx, frames, [1.0] * len(frames), "root")
+            for bone in hold:
+                quat_curves(act, bone, frames, [0.0] * len(frames))
         for i, (pre, side) in enumerate(LEGS):
             phase = 0.0 if (pre == "f") == (side == ".L") else 0.5  # a trot: the diagonal pair together
             if len(LEGS) == 2:
@@ -252,7 +256,7 @@ def main():
     for pb in arm.pose.bones:
         pb.rotation_mode = "QUATERNION"
     gaits = {n: (g[0], g[1] * scale, *g[2:]) for n, g in GAITS.items()}
-    animate(arm, top, gaits)
+    animate(arm, top, gaits, [b for b in opt.get("hold", "").split(",") if b])
     boki_rig.export(path, tangents=True)
     glb_tangents.fix(path)
     print("LEGS built", species)
