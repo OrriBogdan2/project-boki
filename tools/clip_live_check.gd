@@ -46,6 +46,7 @@ func _shown(h: Hunter) -> int:
 	return n
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	a_v = load("res://tools/archetype_check.gd").new()
 	a_v.main = main
