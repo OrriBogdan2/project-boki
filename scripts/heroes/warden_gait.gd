@@ -24,7 +24,8 @@ extends RefCounted
 ##    onto the clip. For run clips whose planted foot sweeps back unevenly, which no playback rate keeps planted
 ##    (Albert, Lace, Neve). The ground's way is the blend's (`pos`), so a run-and-aim's turned legs lock true.
 ##  - with no footing (state "footing", HazardMoves on ice: the hazard's "moves" data) the stride shortens by "stride",
-##    the foot lock lets go, the clip quickens by "cadence" and the free arms (those in "arm_swing") lift "arms_out" rad out from the side.
+##    the foot lock lets go, the clip quickens by "cadence" and the free arms (those in "arm_swing") lift
+##    "arms_out" rad out from the side.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
