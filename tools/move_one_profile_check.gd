@@ -43,7 +43,7 @@ func _tables(rules: Dictionary, tune: Dictionary) -> void:
 		(
 			HunterMove.brake_decel == float(p["brake"])
 			and HunterMove.brake_friction == float(p["ground_friction"]) * float(p["braking_friction_factor"])
-			and HunterMove.glide_accel == float(p["glide_accel"])
+			and HunterMove.glide_accel == float(p["glide_accel"]) * HunterMove.body_scale
 			and HunterMove.dive_vy == float(p["dive_vy"])
 		),
 		"one profile: HunterMove holds hunter_move.json physics (brake, friction, glide_accel, dive_vy)"
@@ -78,8 +78,8 @@ func _anchor(got: Dictionary, rules: Dictionary) -> void:
 	var apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
 	mfc.ok(absf(got["apex"] - apex) < 0.15, "one profile: jump apex %.2f m ~ v^2/2g %.2f" % [got["apex"], apex])
 	mfc.ok(
-		absf(got["glide_v"] - Hunter.GLIDE_SPEED) < 0.3,
-		"one profile: glide cruise %.2f m/s ~ %.1f" % [got["glide_v"], Hunter.GLIDE_SPEED]
+		absf(got["glide_v"] - HunterMove.glide_cruise) < 0.3,
+		"one profile: glide cruise %.2f m/s ~ %.1f" % [got["glide_v"], HunterMove.glide_cruise]
 	)
 
 
