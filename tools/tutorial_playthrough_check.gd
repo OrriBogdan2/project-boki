@@ -10,8 +10,8 @@ extends "res://tools/new_player_flow_check.gd"
 ## Also the Mask line (lore.json mask_line, DECISIONS 'Identity and Masks'): on screen once, when the first Relic
 ## waits by your face, and on no other screen of the run.
 
-const STEP_LIMIT_S := 40.0      # s of game time one step may take (the flow check's own limit is 45)
-const TIME_SCALE := 4.0         # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
+const TIME_SCALE := 4.0  # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
 
 var step_id := ""
 var step_s := 0.0
@@ -19,6 +19,7 @@ var rows: Array = []
 var stalled := false
 var line_seen := 0
 var last_time := -1.0
+
 
 func run(m: Node) -> void:
 	main = m
@@ -48,6 +49,7 @@ func run(m: Node) -> void:
 	print("TUTPLAY DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
 
+
 ## The garden tutorial, start to finish, with --tutorial-dead-air-check's farm player (a fresh save with the starter
 ## hatched, every Hob step shown and done, the house hammered up, the crop planted, watered and picked). Its checks
 ## (no step without a hint or marker for over its GAP_MAX, no two prompts at once, every step reached its end) count
@@ -58,6 +60,7 @@ func _garden() -> void:
 	await da._farm("Lace", "archer")
 	ok(da.bad == 0, "the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad)
 	print("TUTPLAY garden steps %d, done %s" % [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)])
+
 
 ## One call per sim step (or drawn frame) of the course: closes a step's row when the next one starts, and ends
 ## the run at once on a step that outlasts its limit (the course would otherwise run on to the whole-course cap).
@@ -80,15 +83,18 @@ func _course_tick(m: Match) -> void:
 		print("TUTPLAY DONE, failures: %d" % bad)
 		tree.quit(1)
 
+
 func _close_step() -> void:
 	if step_id == "":
 		return
 	print("TUTPLAY step %s %.1f" % [step_id, step_s])
 	rows.append("%s %.1f" % [step_id, step_s])
 
+
 ## The Mask line is shown only at the put-on prompt: one label there, none on any other screen.
 func _before_act(what: String) -> void:
 	_count_line(what, 1 if what == "put the Relic on" else 0)
+
 
 func _count_line(where: String, want: int) -> void:
 	var line := String(Content.rules("lore")["mask_line"])
@@ -96,6 +102,7 @@ func _count_line(where: String, want: int) -> void:
 	var n := _labels_with(tree.root, line)
 	line_seen += n
 	ok(n == want, "the Mask line shows %d time(s) before '%s', want %d" % [n, where, want])
+
 
 func _labels_with(node: Node, text: String) -> int:
 	var n := 1 if node is Label and (node as Label).text == text and (node as Label).is_visible_in_tree() else 0

@@ -30,9 +30,10 @@ var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
 var hints: GroundsHints = null  # the first-time line for each station
 var prompt: Label = null
+var trial: TimeTrial = null  # the time-trial course on the open floor
+
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
-var trial: TimeTrial = null   # the time-trial course on the open floor
 
 
 ## The map's "grounds" block ({} when this isn't the Training Grounds).

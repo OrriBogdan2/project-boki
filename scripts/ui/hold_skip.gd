@@ -14,29 +14,31 @@ extends Control
 signal tapped
 signal skipped
 
-const HOLD_S := 1.0        # s held to skip it all
-const TAP_S := 0.35        # s: let go sooner and it was a tap; let go later (but short of HOLD_S) and nothing happens
-const LINGER_S := 1.5      # s the hint stays up after letting go
-const HINT_AT := 4.0       # s of watching with no press before the hint shows by itself
-const HINT_S := 6.0        # s that unprompted hint stays up (a press takes over)
-const FADE_S := 0.25       # s for the hint to fade in or out
-const RING_R := 11.0       # px: the ring's radius
-const RING_W := 3.0        # px: its line width
+const HOLD_S := 1.0  # s held to skip it all
+const TAP_S := 0.35  # s: let go sooner and it was a tap; let go later (but short of HOLD_S) and nothing happens
+const LINGER_S := 1.5  # s the hint stays up after letting go
+const HINT_AT := 4.0  # s of watching with no press before the hint shows by itself
+const HINT_S := 6.0  # s that unprompted hint stays up (a press takes over)
+const FADE_S := 0.25  # s for the hint to fade in or out
+const RING_R := 11.0  # px: the ring's radius
+const RING_W := 3.0  # px: its line width
 const TEXT := "Hold to skip"
 const TEXT_SIZE := 13
 
-var held: InputEvent = null      # the press being held, until its release
+var held: InputEvent = null  # the press being held, until its release
 var held_s := 0.0
-var since_up := LINGER_S         # s since the last release (the hint lingers, then fades)
-var watched_s := 0.0             # s since this was added
-var pressed_once := false        # any press seen: the hint is then the press's own
+var since_up := LINGER_S  # s since the last release (the hint lingers, then fades)
+var watched_s := 0.0  # s since this was added
+var pressed_once := false  # any press seen: the hint is then the press's own
 var done := false
-var can_skip := true             # false: a tap still moves on, but a hold does nothing and no ring shows
+var can_skip := true  # false: a tap still moves on, but a hold does nothing and no ring shows
+
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(RING_R * 2.0 + 110.0, RING_R * 2.0 + 8.0)
 	modulate.a = 0.0
+
 
 ## Takes a press or release of a key, mouse button or pad button; true when it used the event.
 func feed(event: InputEvent) -> bool:
@@ -58,6 +60,7 @@ func feed(event: InputEvent) -> bool:
 		tapped.emit()
 	return true
 
+
 func _process(delta: float) -> void:
 	watched_s += delta
 	if held != null and not done:
@@ -70,10 +73,11 @@ func _process(delta: float) -> void:
 		since_up += delta
 	var up := can_skip and (held != null or done or since_up < LINGER_S)
 	if can_skip and not pressed_once and watched_s >= HINT_AT and watched_s < HINT_AT + HINT_S:
-		up = true      # (nothing pressed yet: say what ends it)
+		up = true  # (nothing pressed yet: say what ends it)
 	modulate.a = move_toward(modulate.a, 1.0 if up else 0.0, delta / FADE_S)
 	if modulate.a > 0.0:
 		queue_redraw()
+
 
 func _draw() -> void:
 	var c := Vector2(RING_R + 2.0, size.y * 0.5)
@@ -87,5 +91,12 @@ func _draw() -> void:
 	if k > 0.0:
 		draw_arc(c, RING_R, -PI / 2.0, -PI / 2.0 + TAU * k, 32, UI.ACCENT, RING_W + 0.5, true)
 	var f: Font = UI.semi if UI.semi else UI.body
-	draw_string(f, Vector2(c.x + RING_R + 10.0, c.y + TEXT_SIZE * 0.35), TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1,
-		TEXT_SIZE, Color(1, 1, 1, 0.8))
+	draw_string(
+		f,
+		Vector2(c.x + RING_R + 10.0, c.y + TEXT_SIZE * 0.35),
+		TEXT,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		TEXT_SIZE,
+		Color(1, 1, 1, 0.8)
+	)

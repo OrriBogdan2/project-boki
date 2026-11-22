@@ -138,28 +138,28 @@ func run(main: Node) -> void:
 	preload("res://tools/hero_colour_check.gd").new().run(ok)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	Sfx.listener = P.pos
-	_anchors(V, P)
-	_lod(V, P)
-	_budget(V, P)
-	await _holds(main, m, V, P)
-	_view(m, V, P)
+	var p: Hunter = m.player
+	var v := HeroVfx.of(m)
+	Sfx.listener = p.pos
+	_anchors(v, p)
+	_lod(v, p)
+	_budget(v, p)
+	await _holds(main, m, v, p)
+	_view(m, v, p)
 	_lean()
-	_kit(m, V, P)
-	_motley_trade(m, P)
+	_kit(m, v, p)
+	_motley_trade(m, p)
 	_dolm_rocks(m)
-	_armour(m, P)
-	_net(m, V, P)
-	_statuses(m, P)
-	_boki_statuses(m, P)
-	_tier_up(m, V, P)
+	_armour(m, p)
+	_net(m, v, p)
+	_statuses(m, p)
+	_boki_statuses(m, p)
+	_tier_up(m, v, p)
 	_zones(main)
 	_soft_edges(m)
-	await _core_kinds(main, m, V, P)
-	_shot_trails(m, V, P)
-	await _lisette(main, V)
+	await _core_kinds(main, m, v, p)
+	_shot_trails(m, v, p)
+	await _lisette(main, v)
 	await _vex_core(main)
 	await _scarf(main)
 	await _rime_ends(main)
@@ -269,108 +269,108 @@ func _sound_exists(sname: String) -> bool:
 
 
 ## Model node, then the Gun, then the body. Works on today's model and on one with the named anchors.
-func _anchors(V: HeroVfx, P: Hunter) -> void:
-	var gun: Node3D = P.model.get_node("Rig/Torso/Aim/Gun")
+func _anchors(v: HeroVfx, p: Hunter) -> void:
+	var gun: Node3D = p.model.get_node("Rig/Torso/Aim/Gun")
 	var a: Dictionary = HeroVfx.data("juggernaut")["anchors"]["blade_tip"]
 	var via_gun: Vector3 = gun.global_transform * Vector3(a["gun"][0], a["gun"][1], a["gun"][2])
-	var had_node: bool = WardenGlb.anchor(P.model, "weapon_muzzle") != null
-	var tip := V.anchor_pos(P, "blade_tip")
+	var had_node: bool = WardenGlb.anchor(p.model, "weapon_muzzle") != null
+	var tip := v.anchor_pos(p, "blade_tip")
 	ok(had_node or tip.distance_to(via_gun) < 0.001, "blade_tip uses the Gun's space on a model without the anchor")
 	var fake := Node3D.new()
 	fake.name = "anchor_blade_tip"
-	var host: Node = P.model.get_node_or_null("Warden")
+	var host: Node = p.model.get_node_or_null("Warden")
 	if host != null:
 		host.add_child(fake)
-		fake.global_position = P.pos + Vector3(1, 2, 3)
-		V._anchors.clear()
-		var seen := V.anchor_pos(P, "blade_tip")
+		fake.global_position = p.pos + Vector3(1, 2, 3)
+		v._anchors.clear()
+		var seen := v.anchor_pos(p, "blade_tip")
 		ok(seen.distance_to(fake.global_position) < 0.001, "a model's own anchor_blade_tip wins")
 		host.remove_child(fake)
-		V._anchors.clear()
+		v._anchors.clear()
 	fake.free()
-	var keep := P.model
-	P.model = null
-	var body := V.anchor_pos(P, "chest")
-	ok(body.distance_to(P.pos + Vector3(0, 1.15, 0)) < 0.2, "no model at all: the body offset still places it")
-	P.model = keep
+	var keep := p.model
+	p.model = null
+	var body := v.anchor_pos(p, "chest")
+	ok(body.distance_to(p.pos + Vector3(0, 1.15, 0)) < 0.2, "no model at all: the body offset still places it")
+	p.model = keep
 
 
-func _visible_nodes(V: HeroVfx) -> int:
+func _visible_nodes(v: HeroVfx) -> int:
 	var n := 0
-	for kind: String in V.pools:
-		for node in V.pools[kind]:
+	for kind: String in v.pools:
+		for node in v.pools[kind]:
 			if (node as Node3D).visible:
 				n += 1
 	return n
 
 
-func _clear(V: HeroVfx) -> void:
-	for kind: String in V.pools:
-		for node in V.pools[kind]:
+func _clear(v: HeroVfx) -> void:
+	for kind: String in v.pools:
+		for node in v.pools[kind]:
 			(node as Node3D).visible = false
-	V.live.clear()
-	V.motes.clear()
-	V.ribbons.clear()
-	V.live_n = 0
+	v.live.clear()
+	v.motes.clear()
+	v.ribbons.clear()
+	v.live_n = 0
 
 
-func _lod(V: HeroVfx, P: Hunter) -> void:
+func _lod(v: HeroVfx, p: Hunter) -> void:
 	var o := {"r": 2.6, "core": 1.2}
-	_clear(V)
-	V.play(P, "drop_hit", P.pos, Vector2.RIGHT, o)
-	var near_n := V.live_n
-	var near_nodes := _visible_nodes(V)
-	_clear(V)
-	var mid := P.pos + Vector3(HeroVfx.LOD_NEAR + 4.0, 0, 0)
-	V.play(P, "drop_hit", mid, Vector2.RIGHT, o)
+	_clear(v)
+	v.play(p, "drop_hit", p.pos, Vector2.RIGHT, o)
+	var near_n := v.live_n
+	var near_nodes := _visible_nodes(v)
+	_clear(v)
+	var mid := p.pos + Vector3(HeroVfx.LOD_NEAR + 4.0, 0, 0)
+	v.play(p, "drop_hit", mid, Vector2.RIGHT, o)
 	ok(
-		V.live_n > 0 and V.live_n <= near_n * HeroVfx.LOD_MID_K + 1 and _visible_nodes(V) < near_nodes,
-		"past LOD_NEAR: the near layers drop, the rest thin (%d -> %d particles)" % [near_n, V.live_n]
+		v.live_n > 0 and v.live_n <= near_n * HeroVfx.LOD_MID_K + 1 and _visible_nodes(v) < near_nodes,
+		"past LOD_NEAR: the near layers drop, the rest thin (%d -> %d particles)" % [near_n, v.live_n]
 	)
-	_clear(V)
-	V.play(P, "drop_hit", P.pos + Vector3(HeroVfx.LOD_FAR + 4.0, 0, 0), Vector2.RIGHT, o)
-	ok(V.live_n == 0 and _visible_nodes(V) == 0, "past LOD_FAR: nothing is drawn")
+	_clear(v)
+	v.play(p, "drop_hit", p.pos + Vector3(HeroVfx.LOD_FAR + 4.0, 0, 0), Vector2.RIGHT, o)
+	ok(v.live_n == 0 and _visible_nodes(v) == 0, "past LOD_FAR: nothing is drawn")
 
 
 ## The worst case: every big move at once, many times over.
-func _budget(V: HeroVfx, P: Hunter) -> void:
-	_clear(V)
+func _budget(v: HeroVfx, p: Hunter) -> void:
+	_clear(v)
 	for i in 40:
 		for mv in ["drop_hit", "slam_hit", "wave_fire", "riposte_land", "spin", "haul_hit"]:
-			V.play(P, mv, P.pos, Vector2.RIGHT, {"r": 2.6, "core": 1.2, "len": 8.0, "w": 2.0})
-	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up stays at the live cap (%d <= %d)" % [V.live_n, HeroVfx.MAX_LIVE])
+			v.play(p, mv, p.pos, Vector2.RIGHT, {"r": 2.6, "core": 1.2, "len": 8.0, "w": 2.0})
+	ok(v.live_n <= HeroVfx.MAX_LIVE, "a pile-up stays at the live cap (%d <= %d)" % [v.live_n, HeroVfx.MAX_LIVE])
 	var capped := true
-	for kind: String in V.pools:
-		capped = capped and (V.pools[kind] as Array).size() <= int(HeroVfx.POOL[kind])
+	for kind: String in v.pools:
+		capped = capped and (v.pools[kind] as Array).size() <= int(HeroVfx.POOL[kind])
 	ok(capped, "every pool stays within its cap")
-	var made := V.made
+	var made := v.made
 	for i in 10:
-		V.play(P, "drop_hit", P.pos, Vector2.RIGHT, {"r": 2.6, "core": 1.2})
-	ok(V.made == made, "a warm pool makes no new nodes")
-	_clear(V)
+		v.play(p, "drop_hit", p.pos, Vector2.RIGHT, {"r": 2.6, "core": 1.2})
+	ok(v.made == made, "a warm pool makes no new nodes")
+	_clear(v)
 
 
-func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
-	V.hold(P, "enraged")
-	ok(V.holds.size() == 1 and V.live_n > 0, "a hold starts emitting")
-	var n0 := V.live_n
-	V.hold(P, "enraged")
-	ok(V.live_n == n0, "asking again keeps the one emitter")
+func _holds(main: Node, m: Match, v: HeroVfx, p: Hunter) -> void:
+	v.hold(p, "enraged")
+	ok(v.holds.size() == 1 and v.live_n > 0, "a hold starts emitting")
+	var n0 := v.live_n
+	v.hold(p, "enraged")
+	ok(v.live_n == n0, "asking again keeps the one emitter")
 	m.time += HeroVfx.HOLD_LINGER + 0.1
-	V._tick_holds()
-	ok(V.holds.is_empty(), "the asks stop: the hold ends by itself")
+	v._tick_holds()
+	ok(v.holds.is_empty(), "the asks stop: the hold ends by itself")
 	await main.get_tree().process_frame
-	_clear(V)
+	_clear(v)
 
 
-func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
-	ok(is_equal_approx(V.view_k(P), 1.0), "your own effects at full")
+func _view(m: Match, v: HeroVfx, p: Hunter) -> void:
+	ok(is_equal_approx(v.view_k(p), 1.0), "your own effects at full")
 	var keep: Hunter = m.player
 	var none := {"arch": "none"}
-	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, P.pos + Vector3(3, 0, 0), none)
-	var foe: Hunter = m.make_hunter("B", P.team + 1, "medium", "Foe", "idle", {}, P.pos + Vector3(-3, 0, 0), none)
-	ok(is_equal_approx(V.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K")
-	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
+	var ally: Hunter = m.make_hunter("A", p.team, "medium", "Ally", "idle", {}, p.pos + Vector3(3, 0, 0), none)
+	var foe: Hunter = m.make_hunter("B", p.team + 1, "medium", "Foe", "idle", {}, p.pos + Vector3(-3, 0, 0), none)
+	ok(is_equal_approx(v.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K")
+	ok(is_equal_approx(v.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
 
@@ -393,20 +393,20 @@ func _lean() -> void:
 
 ## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
 ## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
-func _armour(m: Match, P: Hunter) -> void:
-	var at := P.pos + Vector3(-4, 0, 0)
-	var foe: Hunter = m.make_hunter("A", P.team + 1, "medium", "Foe", "idle", {}, at, {"arch": "none"})
-	foe.hurt(5.0, P, {})
+func _armour(m: Match, p: Hunter) -> void:
+	var at := p.pos + Vector3(-4, 0, 0)
+	var foe: Hunter = m.make_hunter("A", p.team + 1, "medium", "Foe", "idle", {}, at, {"arch": "none"})
+	foe.hurt(5.0, p, {})
 	ok(foe.armor > 0.5 and foe.shell_t > 0.0, "a hit on the armour flashes the body shell-coloured")
 	foe.tick_status(Juice.SHELL_FLASH_T + 0.01)
 	foe.armor = 0.0
-	foe.hurt(5.0, P, {})
+	foe.hurt(5.0, p, {})
 	ok(foe.shell_t <= 0.0 and foe.flash_t > 0.0, "a hit on health flashes white")
 	foe.armor = 1.0
 	foe.shell_t = 0.0
 	var radial0: int = m.fx.radial
 	var rings0: int = m.fx.rings.size()
-	foe.hurt(60.0, P, {})
+	foe.hurt(60.0, p, {})
 	var held := foe.shell_t > Juice.SHELL_FLASH_T and foe.flash_t > Juice.SHELL_FLASH_T
 	ok(foe.armor <= 0.0 and held, "the break holds the shell flash on the body")
 	ok(m.fx.radial == radial0 and m.fx.rings.size() == rings0, "no ring and no burst with it")
@@ -420,12 +420,12 @@ func _armour(m: Match, P: Hunter) -> void:
 	foe.hp = 0.0
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
-func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
-	var K: JuggernautKit = P.ak
-	V.plays.clear()
+func _kit(m: Match, v: HeroVfx, p: Hunter) -> void:
+	var k: JuggernautKit = p.ak
+	v.plays.clear()
 	var rings0: int = m.fx.rings.size()
-	K._slam()
-	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
+	k._slam()
+	ok(int(v.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
 
@@ -451,7 +451,7 @@ func _mat_cols(n: Node, out: Array) -> void:
 		_mat_cols(c, out)
 
 
-func _motley_trade(m: Match, P: Hunter) -> void:
+func _motley_trade(m: Match, p: Hunter) -> void:
 	var sea := Color("2ee6c0")
 	ok(
 		OstraKit.TRADE_EDGE.is_equal_approx(sea),
@@ -475,14 +475,14 @@ func _motley_trade(m: Match, P: Hunter) -> void:
 	var looks := KitLooks.of(m)
 	for kind: String in ["star", "aura"]:
 		var cols: Array = []
-		_mat_cols(looks.hold_on("chk_" + kind, kind, P, P.pos), cols)
+		_mat_cols(looks.hold_on("chk_" + kind, kind, p, p.pos), cols)
 		looks.release("chk_" + kind)
-		var bad: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
+		var bad_v: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
 		ok(
-			cols.size() >= 3 and bad.is_empty(),
+			cols.size() >= 3 and bad_v.is_empty(),
 			(
 				"Motley %s: every colour is teal or neutral (%d, off %s)"
-				% ["Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad]
+				% ["Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad_v]
 			)
 		)
 	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Nightwell: the Swollen core is teal, not pink")
@@ -540,25 +540,25 @@ func _dolm_rocks(m: Match) -> void:
 func _vex_tracer(main: Node) -> void:
 	var m: Match = flow._match(main, "gunslinger")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	V.plays.clear()
-	P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
-	P.inp["aim_y"] = P.pos.y
-	P.inp["fire"] = true
+	var p: Hunter = m.player
+	var v := HeroVfx.of(m)
+	v.plays.clear()
+	p.inp["aim"] = p.pos + Vector3(8.0, 0.9, 0.0)
+	p.inp["aim_y"] = p.pos.y
+	p.inp["fire"] = true
 	var bare := 0  # steps a live round had no full tracer riding it
 	var born := {}  # round sid -> the step it was first seen
 	var thin := 0.0
 	var lit := 0  # steps a tracer rode a round whose stock glow still showed
-	var spd := float(P.wpn["speed"])
+	var spd := float(p.wpn["speed"])
 	for i in 150:
 		m.step(1.0 / 60.0)
 		m.render_shots(1.0)
-		V._process(1.0 / 60.0)
+		v._process(1.0 / 60.0)
 		for sd: Dictionary in m.get("shots"):
-			if sd["by"] != P or (sd["x"] as Dictionary).has("src") or not is_instance_valid(sd["node"]):
+			if sd["by"] != p or (sd["x"] as Dictionary).has("src") or not is_instance_valid(sd["node"]):
 				continue
-			var mine: Array = V.ribbons.filter(func(e: Dictionary): return e["follow"] == sd["node"])
+			var mine: Array = v.ribbons.filter(func(e: Dictionary): return e["follow"] == sd["node"])
 			if not born.has(sd["sid"]):
 				born[sd["sid"]] = i
 				if born.size() == 1:
@@ -576,16 +576,16 @@ func _vex_tracer(main: Node) -> void:
 			var orb := (sd["node"] as MeshInstance3D).material_override as ShaderMaterial
 			if not mine.is_empty() and (orb.get_shader_parameter("color") as Color).a > 0.0:
 				lit += 1
-	P.inp["fire"] = false
+	p.inp["fire"] = false
 	ok(born.size() >= 15, "a held string fires its rounds (%d)" % born.size())
 	ok(bare == 0, "every live round has a tracer riding it, drawn 2-4.5 m long (%d bare)" % bare)
 	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
 	ok(lit == 0, "the tracer is the whole round: the stock glow is dark under it (%d lit)" % lit)
-	var flashes := int(V.plays.get("shot", 0))
-	var tracers := int(V.plays.get("shot_trail", 0))
+	var flashes := int(v.plays.get("shot", 0))
+	var tracers := int(v.plays.get("shot_trail", 0))
 	ok(flashes >= born.size(), "a muzzle flash for every round (%d of %d)" % [flashes, born.size()])
 	ok(tracers >= born.size(), "a tracer for every round (%d of %d)" % [tracers, born.size()])
-	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
+	var spark: Array = (v._rec(p, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
 	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
 
 
@@ -655,7 +655,7 @@ func _meeko_field() -> void:
 func _meeko_heal_hurt() -> void:
 	var d := HeroVfx.data("tender")
 	var pal: Dictionary = d["palette"]
-	var bad: Array = []
+	var bad_v: Array = []
 	for mv: String in d["moves"]:
 		var heal := MEEKO_HEALS.has(mv)
 		var hurt := MEEKO_HURTS.has(mv)
@@ -663,13 +663,13 @@ func _meeko_heal_hurt() -> void:
 			for key in ["c", "c2", "c3"]:
 				var c := Color(String(pal[layer[key]])) if layer.has(key) else Color.GRAY
 				if c.s >= 0.25 and ((heal and not _heal_hue(c)) or (hurt and _heal_hue(c))):
-					bad.append("%s.%s" % [mv, layer[key]])
+					bad_v.append("%s.%s" % [mv, layer[key]])
 			if not HeroVfx.LOOKS.has(String(layer["p"])):
 				continue
 			var grav := float(layer.get("grav", 0.0))
 			if (heal and grav > 0.0) or (hurt and (grav <= 0.0 or float(layer.get("curl", 0.0)) > 0.0)):
-				bad.append("%s motion" % mv)
-	ok(bad.is_empty(), "Meeko: heals leaf green and rising, hurts embers falling %s" % [bad])
+				bad_v.append("%s motion" % mv)
+	ok(bad_v.is_empty(), "Meeko: heals leaf green and rising, hurts embers falling %s" % [bad_v])
 	var swirl: Array = (d["moves"]["bloom"]["fx"] as Array).filter(func(l): return l["p"] == "vortex")
 	ok(swirl.all(func(l): return bool(l.get("thin", false))), "Meeko's bloom: a rim swirl, no filled disc")
 
@@ -681,26 +681,26 @@ func _heal_hue(c: Color) -> bool:
 
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
-func _lisette(main: Node, V0: HeroVfx) -> void:
+func _lisette(main: Node, v0: HeroVfx) -> void:
 	var m: Match = flow._match(main, "archer")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	ok(V != V0, "a new match has its own pools")
-	Sfx.listener = P.pos
-	var K: ArcherKit = P.ak
-	K.fx._plant(P.pos + Vector3(3, 0, 0), Vector2(1, 0), "arrow")
-	ok(int(V.plays.get("needle_stuck", 0)) == 1, "a missed needle leaves its thread")
-	var last: Dictionary = V.live.filter(func(e): return (e["node"] as Node3D).visible)[0]
+	var p: Hunter = m.player
+	var v := HeroVfx.of(m)
+	ok(v != v0, "a new match has its own pools")
+	Sfx.listener = p.pos
+	var k: ArcherKit = p.ak
+	k.fx._plant(p.pos + Vector3(3, 0, 0), Vector2(1, 0), "arrow")
+	ok(int(v.plays.get("needle_stuck", 0)) == 1, "a missed needle leaves its thread")
+	var last: Dictionary = v.live.filter(func(e): return (e["node"] as Node3D).visible)[0]
 	ok(is_equal_approx(float(last["dur"]), PinFx.SPENT_T), "the thread lasts as long as the needle")
 	ok(is_equal_approx(PinFx.HEAVY_SCALE, 6.0), "the Heavy Shot stays big")
-	V.hold(P, "string_idle")
-	var key := "%d/string_idle" % P.get_instance_id()
-	var wanted: int = 0 if V._model_has(P, "halo_bow_mid") else 1
-	ok((V.holds[key]["layers"] as Array).size() == wanted, "the string shows unless the model brings its own")
-	var hip := V.anchor_pos(P, "nock")
+	v.hold(p, "string_idle")
+	var key := "%d/string_idle" % p.get_instance_id()
+	var wanted: int = 0 if v._model_has(p, "halo_bow_mid") else 1
+	ok((v.holds[key]["layers"] as Array).size() == wanted, "the string shows unless the model brings its own")
+	var hip := v.anchor_pos(p, "nock")
 	ok(
-		hip.distance_to(K.hand_pos(true)) < 0.001 or WardenGlb.anchor(P.model, "anchor_nock") != null,
+		hip.distance_to(k.hand_pos(true)) < 0.001 or WardenGlb.anchor(p.model, "anchor_nock") != null,
 		"nock: the model's anchor, else the drawing hand"
 	)
 
@@ -710,20 +710,20 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 func _vex_core(main: Node) -> void:
 	var m: Match = flow._match(main, "gunslinger")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var U: GunslingerUlt = (P.ak as GunslingerKit).ult
-	var want := float(P.ak.x_def()["core_r"])
+	var p: Hunter = m.player
+	var u: GunslingerUlt = (p.ak as GunslingerKit).ult
+	var want := float(p.ak.x_def()["core_r"])
 	for rank in range(1, int(Hunter.SLOT_MAX["ult"]) + 1):
-		P.lvl = int(Hunter.ULT_AT[rank - 1])
-		P.slot_lv["ult"] = rank
-		U.cast()
-		U.tick(0.4)
-		var ring := AimKit.entry(P, "xc%d" % U.casts)
-		var fill := float(AimKit.entry(P, "x%d" % U.casts).get("fill", -1.0))
+		p.lvl = int(Hunter.ULT_AT[rank - 1])
+		p.slot_lv["ult"] = rank
+		u.cast()
+		u.tick(0.4)
+		var ring := AimKit.entry(p, "xc%d" % u.casts)
+		var fill := float(AimKit.entry(p, "x%d" % u.casts).get("fill", -1.0))
 		ok(
 			(
 				is_equal_approx(float(ring.get("r", 0.0)), want)
-				and is_equal_approx(U.core_r(), want)
+				and is_equal_approx(u.core_r(), want)
 				and bool(ring.get("all", false))
 				and fill > 0.0
 				and is_equal_approx(float(ring.get("fill", 0.0)), fill)
@@ -733,27 +733,27 @@ func _vex_core(main: Node) -> void:
 				% [rank, want]
 			)
 		)
-		U.clear()
+		u.clear()
 
 
 ## The shared kinds on a synthetic recipe set (the real files are done with): every layer kind plays and a pile-up
 ## stays capped; a bone anchor follows the hand; prewarm builds one of every kind and hides them; a stream held along
 ## the aim turns with it; a projectile's trail follows its node and runs out when it is gone.
-func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
-	HeroVfx.set_data(P.arch, TEST)
-	V._anchors.clear()
-	_clear(V)
-	V.play(P, "all", P.pos, Vector2.RIGHT)
+func _core_kinds(main: Node, m: Match, v: HeroVfx, p: Hunter) -> void:
+	HeroVfx.set_data(p.arch, TEST)
+	v._anchors.clear()
+	_clear(v)
+	v.play(p, "all", p.pos, Vector2.RIGHT)
 	# (- 1: the tier-up sheen is drawn by HeroVfx.tier_up, never by a recipe layer)
-	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
+	ok(_visible_nodes(v) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
 	for i in 40:
-		V.play(P, "all", P.pos, Vector2.RIGHT)
-	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
-	_clear(V)
-	V.play(P, "ring", P.pos, Vector2.RIGHT)
-	V.play(P, "all", P.pos, Vector2.RIGHT)
-	var arcs := [V._arc(360.0), V._arc(120.0)]
-	var sweeps := V.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
+		v.play(p, "all", p.pos, Vector2.RIGHT)
+	ok(v.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % v.live_n)
+	_clear(v)
+	v.play(p, "ring", p.pos, Vector2.RIGHT)
+	v.play(p, "all", p.pos, Vector2.RIGHT)
+	var arcs := [v._arc(360.0), v._arc(120.0)]
+	var sweeps := v.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
 	var got := sweeps.map(
 		func(e):
 			return [
@@ -771,45 +771,45 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 		),
 		"a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper %s" % [got]
 	)
-	_clear(V)
-	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
-	var palm := V.anchor_pos(P, "palm")
+	_clear(v)
+	var sk := WardenGlb.skeleton(p.model.get_node_or_null("Warden"))
+	var palm := v.anchor_pos(p, "palm")
 	if sk != null:
 		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand.R"))
 		var want := sk.global_transform * (pose * Vector3(0.0, 0.05, 0.0))
 		ok(palm.distance_to(want) < 0.001, "a bone anchor follows the model's hand.R")
 	else:
-		ok(palm.distance_to(P.pos) < 1.6, "a bone anchor on a model without a skeleton falls back to the body")
-	V.prewarm(P.pos)
-	ok(V._warming.size() == HeroVfx.POOL.size(), "prewarm holds up one node of every kind (%d)" % V._warming.size())
-	V.prewarm_end()
-	ok(_visible_nodes(V) == 0 and V._warming.is_empty(), "and they are hidden again")
-	P.inp["aim"] = P.pos + Vector3(4, 0, 0)
-	V.hold(P, "stream")
-	P.inp["aim"] = P.pos + Vector3(0, 0, 4)
-	V._tick_holds()
-	var lay: Dictionary = V.holds.values()[0]["layers"][0]
+		ok(palm.distance_to(p.pos) < 1.6, "a bone anchor on a model without a skeleton falls back to the body")
+	v.prewarm(p.pos)
+	ok(v._warming.size() == HeroVfx.POOL.size(), "prewarm holds up one node of every kind (%d)" % v._warming.size())
+	v.prewarm_end()
+	ok(_visible_nodes(v) == 0 and v._warming.is_empty(), "and they are hidden again")
+	p.inp["aim"] = p.pos + Vector3(4, 0, 0)
+	v.hold(p, "stream")
+	p.inp["aim"] = p.pos + Vector3(0, 0, 4)
+	v._tick_holds()
+	var lay: Dictionary = v.holds.values()[0]["layers"][0]
 	var way: Vector3 = (lay["node"].process_material as ShaderMaterial).get_shader_parameter("dir")
 	ok(way.distance_to(Vector3(0, 0, 1)) < 0.01, "a stream held along the aim turns with it (%s)" % way)
 	m.time += HeroVfx.HOLD_LINGER + 0.1
-	V._tick_holds()
-	_clear(V)
+	v._tick_holds()
+	_clear(v)
 	var shot := Node3D.new()
 	m.add_child(shot)
-	shot.global_position = P.pos + Vector3(0, 1, 0)
-	V.trail(P, "shot", shot)
-	ok(V.ribbons.size() == 1, "a projectile gets its trail")
+	shot.global_position = p.pos + Vector3(0, 1, 0)
+	v.trail(p, "shot", shot)
+	ok(v.ribbons.size() == 1, "a projectile gets its trail")
 	for i in 4:  # (ticked by hand: on a loaded box a frame's delta can outlast the tail)
 		shot.global_position += Vector3(0.5, 0, 0)
-		V._tick_ribbon(V.ribbons[0], 0.02)
-	ok((V.ribbons[0]["pts"] as Array).size() >= 3, "the trail follows the projectile")
+		v._tick_ribbon(v.ribbons[0], 0.02)
+	ok((v.ribbons[0]["pts"] as Array).size() >= 3, "the trail follows the projectile")
 	shot.visible = false
 	for i in 30:
 		await main.get_tree().process_frame
-	ok(V.ribbons.is_empty(), "the projectile ends: its tail runs out")
+	ok(v.ribbons.is_empty(), "the projectile ends: its tail runs out")
 	shot.queue_free()
-	_clear(V)
-	HeroVfx.set_data(P.arch, {})
+	_clear(v)
+	HeroVfx.set_data(p.arch, {})
 
 
 ## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
@@ -817,7 +817,7 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 ## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
 ## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
 ## round stays hidden (Oomph.hide_orb).
-func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
+func _shot_trails(m: Match, v: HeroVfx, p: Hunter) -> void:
 	var reach := {}
 	for arch: String in SHOT_TRAILS:
 		var lay := _ribbon_of(arch, SHOT_TRAILS[arch])
@@ -833,7 +833,7 @@ func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
 			col.is_equal_approx(Arch.color(arch)),
 			"%s: the trail is the Hunter's colour (#%s)" % [arch, col.to_html(false)]
 		)
-		ok(head * 0.5 <= float(shot["size"]) + P.hit_radius(), "%s: the head fits the circle its shot hits in" % arch)
+		ok(head * 0.5 <= float(shot["size"]) + p.hit_radius(), "%s: the head fits the circle its shot hits in" % arch)
 	var tap := _ribbon_of("archer", "fire_tap")
 	var bolt := _ribbon_of("mage", "lmb_trail")
 	ok(
@@ -848,36 +848,36 @@ func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
 	var shot := Node3D.new()
 	m.add_child(shot)
-	shot.global_position = P.pos + Vector3(0, 1, 0)
-	_clear(V)
-	_shoot(V, P, "mage", shot)
-	var node: Node3D = V.ribbons[0]["node"]
-	_clear(V)
-	_shoot(V, P, "archer", shot)
-	var e: Dictionary = V.ribbons[0]
+	shot.global_position = p.pos + Vector3(0, 1, 0)
+	_clear(v)
+	_shoot(v, p, "mage", shot)
+	var node: Node3D = v.ribbons[0]["node"]
+	_clear(v)
+	_shoot(v, p, "archer", shot)
+	var e: Dictionary = v.ribbons[0]
 	ok(
 		e["node"] == node and not (e["mat"] as ShaderMaterial).get_shader_parameter("soft"),
 		"a pooled trail Sparkle used comes back hard-edged for Lace"
 	)
 	for i in 4:  # (by hand, as above)
 		shot.global_position += Vector3(1.0, 0, 0)
-		V._tick_ribbon(e, 0.016)
+		v._tick_ribbon(e, 0.016)
 	var ahead := (e["node"] as MeshInstance3D).mesh.get_aabb().end.x - shot.global_position.x
 	var tip := float(tap["head"]) * float(tap["head_len"]) * 0.5
 	ok(absf(ahead - tip) < 0.01, "the head is in the trail's own mesh, its tip %.2f m ahead of the shot" % ahead)
 	for i in HeroVfx.POOL["ribbon"]:
-		_shoot(V, P, "archer", shot)
-	var made := V.made
+		_shoot(v, p, "archer", shot)
+	var made := v.made
 	for i in 24:
-		_shoot(V, P, "archer" if i % 2 == 0 else "mage", shot)
+		_shoot(v, p, "archer" if i % 2 == 0 else "mage", shot)
 	ok(
-		V.made == made and V.ribbons.size() <= int(HeroVfx.POOL["ribbon"]),
-		"a volley of 24 draws on the ribbon pool: no new node (%d running)" % V.ribbons.size()
+		v.made == made and v.ribbons.size() <= int(HeroVfx.POOL["ribbon"]),
+		"a volley of 24 draws on the ribbon pool: no new node (%d running)" % v.ribbons.size()
 	)
 	shot.queue_free()
-	_clear(V)
-	HeroVfx.set_data(P.arch, {})
-	m.spawn_shot(P, P.pos + Vector3(0, 1, 0), Vector2(30, 0), 0.0, 0.5, 0.18, Color.WHITE)
+	_clear(v)
+	HeroVfx.set_data(p.arch, {})
+	m.spawn_shot(p, p.pos + Vector3(0, 1, 0), Vector2(30, 0), 0.0, 0.5, 0.18, Color.WHITE)
 	var drawn: Dictionary = m.shots[-1]
 	Oomph.hide_orb(drawn)
 	m.render_shots(1.0)
@@ -888,9 +888,9 @@ func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
 
 
 ## One shot trail as `arch`'s (its recipes stand in for the test Hunter's own).
-func _shoot(V: HeroVfx, P: Hunter, arch: String, shot: Node3D) -> void:
-	HeroVfx.set_data(P.arch, HeroVfx.data(arch))
-	V.trail(P, SHOT_TRAILS[arch], shot)
+func _shoot(v: HeroVfx, p: Hunter, arch: String, shot: Node3D) -> void:
+	HeroVfx.set_data(p.arch, HeroVfx.data(arch))
+	v.trail(p, SHOT_TRAILS[arch], shot)
 
 
 func _ribbon_of(arch: String, move: String) -> Dictionary:
@@ -900,41 +900,41 @@ func _ribbon_of(arch: String, move: String) -> Dictionary:
 	return {}
 
 
-func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
-	V.plays.clear()
-	m.ents_by_id[P.nid] = P
-	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
-	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+func _net(m: Match, v: HeroVfx, p: Hunter) -> void:
+	v.plays.clear()
+	m.ents_by_id[p.nid] = p
+	v.net_in(["fx", "hvfx", p.nid, "spin", p.pos.x, p.pos.y, p.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
+	ok(int(v.plays.get("spin", 0)) == 1, "a move arrives from another game")
 
 
 ## The armour tier-up sheen: one per tier-up (the real path, Match._armor_up), coloured by the new tier, climbing the
 ## body for SHEEN_LIFE; a break and a gain that stays inside the tier draw none; another game's tier-up arrives too.
-func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
-	_clear(V)
-	V.plays.clear()
+func _tier_up(m: Match, v: HeroVfx, p: Hunter) -> void:
+	_clear(v)
+	v.plays.clear()
 	var sheens := func() -> Array:
-		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
-	P.armor_xp = 0.0
-	P.armor_tier = 0
-	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
-	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
+		return (v.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	p.armor_xp = 0.0
+	p.armor_tier = 0
+	ok(p.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
+	ok(sheens.call().is_empty() and int(v.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
 	for tier in range(1, Hunter.ARMOR_TIERS.size()):
-		_clear(V)
-		V.plays.clear()
-		P.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - P.armor_xp)
-		m._armor_up(P)
+		_clear(v)
+		v.plays.clear()
+		p.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - p.armor_xp)
+		m._armor_up(p)
 		var made: Array = sheens.call()
-		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
+		ok(made.size() == 1 and int(v.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
 		var col := Color.BLACK
 		if made.size() == 1:
 			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
 		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
-	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
-	_clear(V)
-	V.plays.clear()
-	m.on_armor_break(P, null)
-	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
-	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
+	ok(v.live.size() == 1 and is_equal_approx(float(v.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
+	_clear(v)
+	v.plays.clear()
+	m.on_armor_break(p, null)
+	ok(sheens.call().is_empty() and int(v.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
+	v.net_in(["fx", "hvfx", p.nid, "armor_up", p.pos.x, p.pos.y, p.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
 	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")
 
 
@@ -944,63 +944,63 @@ func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
 func _scarf(main: Node) -> void:
 	var m: Match = flow._match(main, "rimewright")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	Sfx.listener = P.pos
-	var S := V.scarves
+	var p: Hunter = m.player
+	var v_v := HeroVfx.of(m)
+	Sfx.listener = p.pos
+	var s := v_v.scarves
 	var was: Variant = Settings.v.get("quality", "auto")
 	Settings.v["quality"] = "high"
-	S.tick(1.0 / 60.0)
-	ok(S.wearers.size() == 1 and S.wearers[0].h == P and S.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
-	var w: HeroScarf.Wearer = S.wearers[0]
+	s.tick(1.0 / 60.0)
+	ok(s.wearers.size() == 1 and s.wearers[0].h == p and s.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
+	var w: HeroScarf.Wearer = s.wearers[0]
 	var a: Dictionary = HeroVfx.data("rimewright")["anchors"]["scarf"]
-	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
-	var neck := V.anchor_pos(P, "scarf")
+	var sk := WardenGlb.skeleton(p.model.get_node_or_null("Warden"))
+	var neck := v_v.anchor_pos(p, "scarf")
 	if sk != null:
 		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
 		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
 		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
 	ok(
-		neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8,
-		"the scarf anchor sits at her neck (%.2f m up)" % (neck.y - P.pos.y)
+		neck.y > p.pos.y + 1.0 and neck.y < p.pos.y + 1.8,
+		"the scarf anchor sits at her neck (%.2f m up)" % (neck.y - p.pos.y)
 	)
 	for i in 90:
-		S.tick(1.0 / 60.0)
+		s.tick(1.0 / 60.0)
 	var ln := float(w.cfg["len"])
-	var back := P.model.global_basis.z.normalized()
+	var back := p.model.global_basis.z.normalized()
 	for tail: HeroScarf.Tail in w.tails:
 		var mesh := tail.node.mesh as ImmediateMesh
 		ok(tail.node.visible and mesh.get_surface_count() == 1, "a tail is one ribbon mesh, drawn")
 		var drop := tail.pts[0].y - tail.pts[-1].y
 		ok(drop > ln * 0.7, "at rest a tail hangs (tip %.2f m under its root)" % drop)
 		ok((tail.pts[-1] - tail.pts[0]).dot(back) > 0.0, "and hangs behind her, not through her")
-	ok(S.made == 2, "one mesh per tail (%d)" % S.made)
+	ok(s.made == 2, "one mesh per tail (%d)" % s.made)
 	var step := Vector3(6.0, 0.0, 0.0) / 60.0
 	for i in 60:
-		P.model.global_position += step
-		S.tick(1.0 / 60.0)
-	var roots := S.roots(w)
+		p.model.global_position += step
+		s.tick(1.0 / 60.0)
+	var roots := s.roots(w)
 	for j in 2:
 		var tail: HeroScarf.Tail = w.tails[j]
 		ok(tail.pts[0].distance_to(roots[j]) < 0.001, "a tail's root follows the anchor as she moves")
 		var trail := tail.pts[0].x - tail.pts[-1].x
 		ok(trail > ln * 0.4, "running at 6 m/s it streams behind her (%.2f m back)" % trail)
-	Sfx.listener = P.pos + Vector3(HeroVfx.LOD_FAR * 2.0, 0.0, 0.0)
-	S.tick(1.0 / 60.0)
+	Sfx.listener = p.pos + Vector3(HeroVfx.LOD_FAR * 2.0, 0.0, 0.0)
+	s.tick(1.0 / 60.0)
 	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible), "your own scarf shows past the LOD listener")
-	Sfx.listener = P.pos
+	Sfx.listener = p.pos
 	Settings.v["quality"] = HeroScarf.OFF_PRESET
-	S.tick(1.0 / 60.0)
+	s.tick(1.0 / 60.0)
 	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")
 	Settings.v["quality"] = "high"
-	S.tick(1.0 / 60.0)
-	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
+	s.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and s.made == 2, "back on, the same meshes")
 	Settings.v["quality"] = was
-	S.prewarm(P.pos)
-	S.prewarm_end()
-	S.prewarm(P.pos)
-	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
-	S.prewarm_end()
+	s.prewarm(p.pos)
+	s.prewarm_end()
+	s.prewarm(p.pos)
+	ok(s.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
+	s.prewarm_end()
 
 
 ## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
@@ -1009,34 +1009,34 @@ func _scarf(main: Node) -> void:
 func _slam_fill(main: Node) -> void:
 	var m: Match = flow._match(main, "bulwark")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var K: BulwarkKit = P.ak
-	var xd: Dictionary = K.d["x"]
+	var p: Hunter = m.player
+	var k: BulwarkKit = p.ak
+	var xd: Dictionary = k.d["x"]
 	var windup0: float = xd["windup"]
-	P.lvl = 6
+	p.lvl = 6
 	for rank in [1, 2, 3, 0]:
 		xd["windup"] = 0.6 if rank == 0 else windup0
-		for slot: String in P.slot_lv:
-			P.slot_lv[slot] = maxi(rank, 1)
-		K.cd["x"] = 0.0
-		K.ult.cast()
+		for slot: String in p.slot_lv:
+			p.slot_lv[slot] = maxi(rank, 1)
+		k.cd["x"] = 0.0
+		k.ult.cast()
 		var t_full := -1.0
 		var t_slam := -1.0
 		var t := 0.0
-		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
+		while k.ult.phase != "" and t < 2.0 and t_slam < 0.0:
 			m.step(DT_FILL)
 			t += DT_FILL
-			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 1.0:
+			if t_full < 0.0 and float(AimKit.entry(p, "x").get("fill", 0.0)) >= 1.0:
 				t_full = t
-			if K.ult.slams > 0:
+			if k.ult.slams > 0:
 				t_slam = t
 		var label := (
 			"rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [maxi(rank, 1), xd["windup"], t_full, t_slam]
 		)
 		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and t_full == t_slam, label)
-		K.ult.slams = 0
-		K.ult.phase = ""
-		K.ult._hide_lane()
+		k.ult.slams = 0
+		k.ult.phase = ""
+		k.ult._hide_lane()
 	xd["windup"] = windup0
 	m.queue_free()
 
@@ -1046,45 +1046,45 @@ func _slam_fill(main: Node) -> void:
 func _rime_ends(main: Node) -> void:
 	var m: Match = flow._match(main, "rimewright")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var V := HeroVfx.of(m)
-	var K: RimewrightKit = P.ak
-	var hold := float(K.x_def()["hold"])
-	var late := hold - float(K.x_def()["late"]) * 0.5
+	var p: Hunter = m.player
+	var v := HeroVfx.of(m)
+	var k: RimewrightKit = p.ak
+	var hold := float(k.x_def()["hold"])
+	var late := hold - float(k.x_def()["late"]) * 0.5
 	for path: Array in [["X early", 1.0, "x"], ["X late", late, "x"], ["Shift", 1.0, "dash"], ["time up", hold, ""]]:
-		V.plays.clear()
-		K._start_rime()
-		K.rime["t"] = float(path[1]) - 0.001
+		v.plays.clear()
+		k._start_rime()
+		k.rime["t"] = float(path[1]) - 0.001
 		match String(path[2]):
 			"x":
-				K.ult_recast()
+				k.ult_recast()
 			"dash":
-				P.inp["dash"] = true
-				K._tick_rime(0.01)
-				P.inp["dash"] = false
+				p.inp["dash"] = true
+				k._tick_rime(0.01)
+				p.inp["dash"] = false
 			_:
-				K._tick_rime(0.01)
+				k._tick_rime(0.01)
 		var want := "rime_melt" if path[2] == "" else "rime_break"
 		var not_want := "rime_break" if path[2] == "" else "rime_melt"
 		ok(
-			K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
+			k.rime.is_empty() and int(v.plays.get(want, 0)) == 1 and not v.plays.has(not_want),
 			"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want]
 		)
 	for mv: String in ["rime_break", "rime_melt"]:
 		var best := INF
 		for i in 5:
 			var t0 := Time.get_ticks_usec()
-			V.play(P, mv, P.pos, Vector2.RIGHT)
+			v.play(p, mv, p.pos, Vector2.RIGHT)
 			best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
 		ok(best < END_MS, "%s spawns in %.3f ms (< %.1f)" % [mv, best, END_MS])
 	for i in 20:
-		V.play(P, "rime_break", P.pos, Vector2.RIGHT)
-		V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
-	var made := V.made
-	V.play(P, "rime_break", P.pos, Vector2.RIGHT)
-	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
-	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
-	_clear(V)
+		v.play(p, "rime_break", p.pos, Vector2.RIGHT)
+		v.play(p, "rime_melt", p.pos, Vector2.RIGHT)
+	var made := v.made
+	v.play(p, "rime_break", p.pos, Vector2.RIGHT)
+	v.play(p, "rime_melt", p.pos, Vector2.RIGHT)
+	ok(v.made == made and v.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
+	_clear(v)
 	m.queue_free()
 
 
@@ -1114,76 +1114,76 @@ const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a 
 
 
 ## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
-func _set_status(m: Match, F: Hunter, st: String, on: bool) -> void:
+func _set_status(m: Match, f: Hunter, st: String, on: bool) -> void:
 	var t := 1.5 if on else 0.0
 	match st:
 		"stun":
-			F.stun_t = t
+			f.stun_t = t
 		"root":
-			F.root_t = t
+			f.root_t = t
 		"slow":
-			F.slow_t = t
+			f.slow_t = t
 		"burn":
-			F.burn_t = t
+			f.burn_t = t
 		"antiheal":
-			F.blight_t = t
+			f.blight_t = t
 		"sick":
-			F.sick_t = t
+			f.sick_t = t
 		"gnd":
-			F.set_meta("gnd_until", m.time + t)
+			f.set_meta("gnd_until", m.time + t)
 		"daze":
-			F.set_meta("rat_until", m.time + t)
+			f.set_meta("rat_until", m.time + t)
 		"chill", "static":
 			if on:
-				StatusLooks.of(m).keep(F, st)
+				StatusLooks.of(m).keep(f, st)
 			else:
 				m.time += StatusLooks.KEEP + 0.01
 
 
-func _statuses(m: Match, P: Hunter) -> void:
-	var L := StatusLooks.of(m)
+func _statuses(m: Match, p: Hunter) -> void:
+	var l := StatusLooks.of(m)
 	var rules := StatusLooks.rules()
-	var F: Hunter = null
+	var f: Hunter = null
 	for h: Hunter in m.hunters:
-		if h != P:
-			F = h
-	F.teleport(P.pos + Vector3(3.0, 0, 0))
-	Sfx.listener = P.pos
+		if h != p:
+			f = h
+	f.teleport(p.pos + Vector3(3.0, 0, 0))
+	Sfx.listener = p.pos
 	ok(STATUSES.all(func(st): return rules.has(st)), "status looks: every plain status has data")
 	var looks := {}
 	for st: String in STATUSES:
-		_set_status(m, F, st, true)
-		var up := L.showing(F, st)
-		var rig: Node3D = (L.rigs.get("%d/%s" % [F.get_instance_id(), st], {}) as Dictionary).get("n")
+		_set_status(m, f, st, true)
+		var up := l.showing(f, st)
+		var rig: Node3D = (l.rigs.get("%d/%s" % [f.get_instance_id(), st], {}) as Dictionary).get("n")
 		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
-		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
+		ok(up and not l.showing(p, st), "status %s: its look comes up on that body only" % st)
 		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
 		if st == "gnd":
 			ok(rig.find_child("Arrow", true, false) != null, "status gnd: a down arrow over the head")
 		looks[String(rules[st]["look"])] = true
-		_set_status(m, F, st, false)
-		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)
+		_set_status(m, f, st, false)
+		ok(not l.showing(f, st), "status %s: the look goes when it ends" % st)
 	ok(looks.size() == STATUSES.size(), "status looks: each status has a look of its own (%d)" % looks.size())
-	var made := L.made
+	var made := l.made
 	for st: String in STATUSES:
-		_set_status(m, F, st, true)
+		_set_status(m, f, st, true)
 	ok(
-		STATUSES.all(func(st): return L.showing(F, st)) and L.made == made,
-		"status looks: all at once on one body, from the pool (built %d)" % L.made
+		STATUSES.all(func(st): return l.showing(f, st)) and l.made == made,
+		"status looks: all at once on one body, from the pool (built %d)" % l.made
 	)
 	for st: String in STATUSES:
-		_set_status(m, F, st, false)
-	L.from_hit(F, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
+		_set_status(m, f, st, false)
+	l.from_hit(f, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
 	ok(
-		L.showing(F, "stun") and L.showing(F, "burn") and L.showing(F, "antiheal"),
+		l.showing(f, "stun") and l.showing(f, "burn") and l.showing(f, "antiheal"),
 		"status looks: a hit sent to another game's body shows what it carries here"
 	)
 	m.time += 2.1
-	ok(not L.showing(F, "stun") and not L.showing(F, "burn"), "status looks: ... until that status would end")
-	F.stun_t = 1.0
-	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
-	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
-	F.stun_t = 0.0
+	ok(not l.showing(f, "stun") and not l.showing(f, "burn"), "status looks: ... until that status would end")
+	f.stun_t = 1.0
+	f.teleport(p.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
+	ok(not l.showing(f, "stun"), "status looks: nothing draws past LOD_FAR")
+	f.stun_t = 0.0
 
 
 ## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
@@ -1191,17 +1191,17 @@ func _statuses(m: Match, P: Hunter) -> void:
 const BOKI_CC := ["stun", "root", "slow", "daze"]
 
 
-func _boki_statuses(m: Match, P: Hunter) -> void:
-	var L := StatusLooks.of(m)
-	var F: Hunter = null
+func _boki_statuses(m: Match, p: Hunter) -> void:
+	var l := StatusLooks.of(m)
+	var f: Hunter = null
 	for h: Hunter in m.hunters:
-		if h != P:
-			F = h
-	var k := m.give_kin(F, Save.new_kin("zapple", "Pip"))
+		if h != p:
+			f = h
+	var k := m.give_kin(f, Save.new_kin("zapple", "Pip"))
 	k.state = "active"
 	k.set_meta("summoned", true)
-	k.teleport(P.pos + Vector3(-3.0, 0, 0))
-	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	k.teleport(p.pos + Vector3(-3.0, 0, 0))
+	f.teleport(p.pos + Vector3(3.0, 0, 0))
 	k.render(1.0 / 60.0, 1.0)
 	var kk := StatusLooks.body_k(k)
 	ok(
@@ -1210,23 +1210,23 @@ func _boki_statuses(m: Match, P: Hunter) -> void:
 	)
 	for st: String in BOKI_CC:
 		_put_cc(m, k, st, true)
-		_put_cc(m, F, st, true)
-		L.tick(0.0)
-		var kr: Dictionary = L.rigs.get("%d/%s" % [k.get_instance_id(), st], {})
-		var fr: Dictionary = L.rigs.get("%d/%s" % [F.get_instance_id(), st], {})
-		ok(L.showing(k, st) and L.showing(F, st), "boki status %s: the look comes up on the summoned Boki" % st)
+		_put_cc(m, f, st, true)
+		l.tick(0.0)
+		var kr: Dictionary = l.rigs.get("%d/%s" % [k.get_instance_id(), st], {})
+		var fr: Dictionary = l.rigs.get("%d/%s" % [f.get_instance_id(), st], {})
+		ok(l.showing(k, st) and l.showing(f, st), "boki status %s: the look comes up on the summoned Boki" % st)
 		if kr.is_empty() or fr.is_empty():
 			continue
 		ok(_mats(kr["n"]) == _mats(fr["n"]), "boki status %s: in the Hunter's colours" % st)
 		for i in 3:
-			L.tick(0.25)
+			l.tick(0.25)
 		ok(is_equal_approx(float(kr["t"]), float(fr["t"])), "boki status %s: at the Hunter's pace" % st)
 		var y := float(StatusLooks.rules()[st].get("y", 0.0))
 		var body: Node3D = (kr["n"] as Node3D).get_child(0)
 		if y > 0.0:
 			var up := body.global_position.y - k.pos.y
 			var head := k.model.scale.y * StatusLooks.KIN_TALL  # (a Boki's size varies: measured from its head)
-			var hunter_up: float = (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y
+			var hunter_up: float = (fr["n"] as Node3D).get_child(0).global_position.y - f.pos.y
 			ok(
 				up > head and up < head + 0.6,
 				(
@@ -1241,8 +1241,8 @@ func _boki_statuses(m: Match, P: Hunter) -> void:
 				"boki status %s: round its squat body (%.2f across, %.2f up)" % [st, n.scale.x, n.scale.y]
 			)
 		_put_cc(m, k, st, false)
-		_put_cc(m, F, st, false)
-		ok(not L.showing(k, st), "boki status %s: the look goes when it ends" % st)
+		_put_cc(m, f, st, false)
+		ok(not l.showing(k, st), "boki status %s: the look goes when it ends" % st)
 	k.stun_t = 1.0
 	k.render(1.0 / 60.0, 1.0)
 	ok(
@@ -1251,20 +1251,20 @@ func _boki_statuses(m: Match, P: Hunter) -> void:
 	)
 	k.stun_t = 0.0
 	KitStatus.apply(k, "gnd", 3.0)
-	ok(not L.showing(k, "gnd"), "boki status: Grounded does not land on a summoned Boki, so no cords")
+	ok(not l.showing(k, "gnd"), "boki status: Grounded does not land on a summoned Boki, so no cords")
 	k.remote = true
-	L.from_hit(k, {"stun": 0.5, "root": 0.5})
+	l.from_hit(k, {"stun": 0.5, "root": 0.5})
 	KitStatus.apply(k, "rat", 1.0, 0.0, false)
 	ok(
-		L.showing(k, "stun") and L.showing(k, "root") and L.showing(k, "daze"),
+		l.showing(k, "stun") and l.showing(k, "root") and l.showing(k, "daze"),
 		"boki status: another game's summoned Boki shows the CC it is sent"
 	)
 	m.time += 1.1
-	ok(not L.showing(k, "stun") and not L.showing(k, "daze"), "boki status: ... until it would end")
+	ok(not l.showing(k, "stun") and not l.showing(k, "daze"), "boki status: ... until it would end")
 	k.remote = false
 	m.kins.erase(k)
 	m.ents_by_id.erase(k.nid)
-	F.kin = null
+	f.kin = null
 	k.queue_free()
 
 
@@ -1306,38 +1306,38 @@ func _rocket(main: Node) -> void:
 	var was: Variant = Settings.v.get("quality", "auto")
 	Settings.v["quality"] = "high"
 	var m := _rocket_match(main)
-	var V := HeroVfx.of(m)
-	var P: Hunter = m.player
-	m.ship_jump(P)
-	var r: DropRocket = P.rocket
-	var e: Dictionary = V.ribbons[-1] if not V.ribbons.is_empty() else {}
+	var v_v := HeroVfx.of(m)
+	var p: Hunter = m.player
+	m.ship_jump(p)
+	var r: DropRocket = p.rocket
+	var e: Dictionary = v_v.ribbons[-1] if not v_v.ribbons.is_empty() else {}
 	var nozzle: Node3D = e.get("follow")
 	ok(r != null and nozzle != null and nozzle.get_parent() == r.node, "the launch starts a trail from the nozzle")
 	if nozzle == null:
 		return
-	var col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	var col: Color = Data.TEAM_COLORS[p.team % Data.TEAM_COLORS.size()]
 	ok(
 		(e["mat"] as ShaderMaterial).get_shader_parameter("col") == col and float(e["width"]) <= DropRocket.TRAIL_W,
 		"the trail is in the squad colour and thin (%.2f m)" % float(e["width"])
 	)
-	_ride(m, V, ROCKET_RIDE)
+	_ride(m, v_v, ROCKET_RIDE)
 	var pts: Array = e["pts"]
 	var up: Vector3 = HeroVfx._at(pts[-1]) - HeroVfx._at(pts[0])
 	ok(HeroVfx._at(pts[0]).distance_to(nozzle.global_position) < 0.01, "its head rides the nozzle")
 	ok(up.y > 0.0 and up.length() >= ROCKET_TRAIL_M, "it streams up behind the dive (%.1f m)" % up.length())
 	_rocket_out(m, r)
-	var high_dots := _rocket_land(m, V, r)
+	var high_dots := _rocket_land(m, v_v, r)
 	await main.get_tree().process_frame
-	_ride(m, V, DropRocket.TRAIL_S + 0.1)
+	_ride(m, v_v, DropRocket.TRAIL_S + 0.1)
 	ok(not (e["node"] as Node3D).visible, "the trail runs out after the landing, back to the pool")
-	_streaks(V)
+	_streaks(v_v)
 	m.queue_free()
 	Settings.v["quality"] = DropRocket.TRAIL_OFF
 	m = _rocket_match(main)
-	V = HeroVfx.of(m)
+	v_v = HeroVfx.of(m)
 	m.ship_jump(m.player)
 	r = m.player.rocket
-	ok(r != null and V.ribbons.is_empty(), "no trail at the very-low preset")
+	ok(r != null and v_v.ribbons.is_empty(), "no trail at the very-low preset")
 	for h: Hunter in r.riders:
 		h.remote = true  # another game flew it down: its riders' flags say they landed with it
 		h.riding = false
@@ -1371,10 +1371,10 @@ func _rocket_match(main: Node) -> Match:
 
 
 ## Match steps with the looks' frames between them (the tree isn't running frames here).
-func _ride(m: Match, V: HeroVfx, secs: float) -> void:
+func _ride(m: Match, v: HeroVfx, secs: float) -> void:
 	for i in maxi(1, int(round(secs / Match.DT))):
 		m.step(Match.DT)
-		V._process(Match.DT)
+		v._process(Match.DT)
 
 
 ## Jumping out, here and as another game's flags: a small puff where they let go, no ring and no burst.
@@ -1406,10 +1406,10 @@ func _rocket_out(m: Match, r: DropRocket) -> void:
 
 ## The rocket comes down: dust settles round it, low and slow, and no ring or burst from it or the riders'
 ## touchdowns. Returns the dust's dots.
-func _rocket_land(m: Match, V: HeroVfx, r: DropRocket) -> int:
+func _rocket_land(m: Match, v: HeroVfx, r: DropRocket) -> int:
 	var t := 0.0
 	while t < ROCKET_CAP_S and r.pos.y - m.world.ground_at(r.pos.x, r.pos.z) > ROCKET_ALONE_M:
-		_ride(m, V, Match.DT)
+		_ride(m, v, Match.DT)
 		t += Match.DT
 	var radial0 := m.fx.radial
 	while t < ROCKET_CAP_S and not r.done:
@@ -1436,40 +1436,40 @@ func _settles(fx: Fx) -> Array:
 
 ## A streak keeps a point a step, not a frame, so it is as long at 30 fps as at 144; a later one reuses a pooled
 ## ribbon; a pile of them stays within the pool.
-func _streaks(V: HeroVfx) -> void:
-	var made := V.made
-	var slow := _streak_span(V, 30.0)
-	ok(V.made == made, "a later trail reuses the pooled ribbon (no new node)")
-	var fast := _streak_span(V, 144.0)
+func _streaks(v: HeroVfx) -> void:
+	var made := v.made
+	var slow := _streak_span(v, 30.0)
+	ok(v.made == made, "a later trail reuses the pooled ribbon (no new node)")
+	var fast := _streak_span(v, 144.0)
 	ok(absf(fast - slow) < slow * 0.15, "as long at 144 fps as at 30 (%.1f m, %.1f m)" % [fast, slow])
 	var dots: Array = []
 	for i in STREAK_PILE:
 		var dot := Node3D.new()
-		V.add_child(dot)
+		v.add_child(dot)
 		dots.append(dot)
-		V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+		v.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
 	ok(
-		(V.pools["ribbon"] as Array).size() <= int(HeroVfx.POOL["ribbon"]),
-		"%d trails at once stay in the pool (%d)" % [STREAK_PILE, (V.pools["ribbon"] as Array).size()]
+		(v.pools["ribbon"] as Array).size() <= int(HeroVfx.POOL["ribbon"]),
+		"%d trails at once stay in the pool (%d)" % [STREAK_PILE, (v.pools["ribbon"] as Array).size()]
 	)
 	for dot: Node3D in dots:
 		dot.queue_free()
-	_clear(V)
+	_clear(v)
 
 
 ## How long a streak behind a node diving at the rocket's speed is after a second at `fps`.
-func _streak_span(V: HeroVfx, fps: float) -> float:
+func _streak_span(v: HeroVfx, fps: float) -> float:
 	var dot := Node3D.new()
-	V.add_child(dot)
-	V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
-	var e: Dictionary = V.ribbons[-1]
+	v.add_child(dot)
+	v.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+	var e: Dictionary = v.ribbons[-1]
 	for i in int(fps):
 		dot.global_position += Vector3.DOWN * DropRocket.FALL / fps
-		V._process(1.0 / fps)
+		v._process(1.0 / fps)
 	var pts: Array = e["pts"]
 	var span := HeroVfx._at(pts[-1]).distance_to(HeroVfx._at(pts[0]))
 	dot.queue_free()
-	_clear(V)
+	_clear(v)
 	return span
 
 
@@ -1502,46 +1502,46 @@ func _decor_rings() -> void:
 func _sable_ring(main: Node) -> void:
 	var m: Match = flow._match(main, "thief")
 	await main.get_tree().process_frame
-	var P: Hunter = m.player
-	var U: ThiefUlt = (P.ak as ThiefKit).encore
-	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
-	P.ak.cd["x"] = 0.0
-	HunterKeys.ult_pressed(P)
-	var reach := float(U.data()["reach"])
-	while float(U.st["t"]) < 0.2 - 0.5 * Match.DT:
+	var p: Hunter = m.player
+	var u: ThiefUlt = (p.ak as ThiefKit).encore
+	p.lvl = maxi(p.lvl, int(Hunter.ULT_AT[0]))
+	p.ak.cd["x"] = 0.0
+	HunterKeys.ult_pressed(p)
+	var reach := float(u.data()["reach"])
+	while float(u.st["t"]) < 0.2 - 0.5 * Match.DT:
 		m.step(Match.DT)
-	var half := float(AimKit.entry(P, "ult")["r"]) / reach
+	var half := float(AimKit.entry(p, "ult")["r"]) / reach
 	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
-	var drawn := AimKit.entry(P, "ult").duplicate()
+	var drawn := AimKit.entry(p, "ult").duplicate()
 	drawn["alpha"] = 2.0  # the brightest beat
 	var got: Array = load("res://tools/aimkit_check.gd").measure(drawn, 0.0, float(drawn["r"]) - 0.05)
 	ok(
-		(drawn["col"] as Color).is_equal_approx(AimKit.hero_col(P)) and got[0] <= ZONE_CORE_A and got[1] >= 0.5,
+		(drawn["col"] as Color).is_equal_approx(AimKit.hero_col(p)) and got[0] <= ZONE_CORE_A and got[1] >= 0.5,
 		(
 			"Sable's X: a lit %s rim over a faint inside (centre alpha %.2f <= %.2f at the brightest beat, rim %.2f)"
-			% [AimKit.hero_col(P).to_html(false), got[0], ZONE_CORE_A, got[1]]
+			% [AimKit.hero_col(p).to_html(false), got[0], ZONE_CORE_A, got[1]]
 		)
 	)
 	m.step(0.3)
-	P.inp["move"] = Vector2(0, -1)
-	P.inp["dash"] = true
+	p.inp["move"] = Vector2(0, -1)
+	p.inp["dash"] = true
 	var worst := 0.0
-	var from := P.pos
+	var from := p.pos
 	for i in 40:
 		m.step(Match.DT)
-		var ring: Vector2 = AimKit.entry(P, "ult")["at"]
+		var ring: Vector2 = AimKit.entry(p, "ult")["at"]
 		var orbit := Vector3.ZERO
 		for j in ThiefUlt.ORBITERS:
-			orbit += ((U.k.fx().placed["enc_orb%d" % j] as Dictionary)["node"] as Node3D).global_position
+			orbit += ((u.k.fx().placed["enc_orb%d" % j] as Dictionary)["node"] as Node3D).global_position
 		orbit /= float(ThiefUlt.ORBITERS)
 		worst = maxf(
 			worst,
 			maxf(
-				ring.distance_to(Vector2(P.pos.x, P.pos.z)),
-				Vector2(orbit.x, orbit.z).distance_to(Vector2(P.pos.x, P.pos.z))
+				ring.distance_to(Vector2(p.pos.x, p.pos.z)),
+				Vector2(orbit.x, orbit.z).distance_to(Vector2(p.pos.x, p.pos.z))
 			)
 		)
 	ok(
-		P.pos.distance_to(from) > 3.0 and worst < 0.1,
+		p.pos.distance_to(from) > 3.0 and worst < 0.1,
 		"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst
 	)

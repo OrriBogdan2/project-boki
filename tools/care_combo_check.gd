@@ -1705,7 +1705,7 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
-	# no overhead badge for her (owner 11-11): the shards on this foe are the read
+	# no overhead badge for her: the shards on this foe are the read
 	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
 			"tm passive: the ice shards in the foe count the stacks (no badge for her, owner 11-11)",

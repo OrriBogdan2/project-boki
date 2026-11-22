@@ -83,7 +83,7 @@ func rate() -> float:
 ## Hunter._loose asks once per arrow: where it goes (h.shot_aim) and its damage factor.
 func bonus(t: float) -> float:
 	var s := stage_t()
-	var pt := perfect_t()
+	var _pt := perfect_t()
 	loosed_at = k.m.time
 	quick = false
 	quick_used = false
