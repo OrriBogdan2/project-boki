@@ -268,7 +268,8 @@ static func uses_model(arch: String) -> bool:
 
 
 ## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
-## through the retarget; a Meshy-native model's torso bone, WardenNative); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+## through the retarget; a Meshy-native model's torso bone, WardenNative); else the rig's own. A Boki riding on you
+## sits on it (Kin), so it keeps its seat on that body.
 static func shown_torso(model: Node3D) -> Transform3D:
 	var torso := model.get_node(^"Rig/Torso") as Node3D
 	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
@@ -277,6 +278,7 @@ static func shown_torso(model: Node3D) -> Transform3D:
 		if nat:
 			return nat.shown_torso()
 	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
 
 ## The node that lays the procedural layers (flinch, wall kick, open reach) over a dressed Hunter's clips: the contract
 ## model's Sync (WardenSync), or a Meshy-native model's Native (WardenNative, docs/art/wardens/MESHY_NATIVE.md); null on
@@ -287,6 +289,7 @@ static func layers(model: Node) -> Node:
 		return null
 	var s := w.get_node_or_null(^"Sync")
 	return s if s else w.get_node_or_null(^"Native")
+
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:

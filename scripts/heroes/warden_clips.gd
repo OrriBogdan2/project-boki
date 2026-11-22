@@ -970,7 +970,7 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 func _air_tilt() -> void:
 	air_tilt(root, skel, root_bi)
 
-## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip set the pose.
+## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip posed it.
 static func air_tilt(model: Node3D, sk: Skeleton3D, bi: int) -> void:
 	var q: Quaternion = model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
 	if bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
