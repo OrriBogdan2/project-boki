@@ -13,9 +13,12 @@ const GROUPS := preload("res://tools/hud_groups_check.gd")
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOOTFEED %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	_rows()
@@ -25,6 +28,7 @@ func run(main: Node) -> void:
 	m.queue_free()
 	print("LOOTFEED DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
+
 
 func _rows() -> void:
 	var f := LootFeed.new()
@@ -66,6 +70,7 @@ func _rows() -> void:
 	ok(f.rows.size() == 1, "4. in a fight a rare one still has its row")
 	f.free()
 
+
 func _pickups(m: Match) -> void:
 	var p: Hunter = m.player
 	var feed: LootFeed = m.hud.loot
@@ -84,6 +89,7 @@ func _pickups(m: Match) -> void:
 	UtilityBelt.pickup(bot, "tonic", 1)
 	ok(feed.rows.size() == 3, "5. a bot's pickup is not in your feed")
 	feed.rows.clear()
+
 
 func _groups(m: Match, main: Node) -> void:
 	var feed: LootFeed = m.hud.loot

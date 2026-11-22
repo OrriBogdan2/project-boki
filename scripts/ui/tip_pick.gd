@@ -46,12 +46,14 @@ static func note_run(r: Dictionary) -> void:
 		return
 	last = triggers(r.get("stats", {}), r.get("used", {}), String(r.get("why", "")), float(r.get("time", 0.0)))
 
+
 ## A tip's text by id, with its keys filled in (the in-match hints read their line from the table).
 static func text(id: String) -> String:
 	for t in rules()["tips"]:
 		if t["id"] == id:
 			return render(String(t["text"]))
 	return ""
+
 
 ## The tip for the loading screen. blight: false drops the tips that talk about the Blight; fusion: false
 ## drops the Fusion tips (the tutorials never mention Fusion, whatever the flag says).
@@ -72,18 +74,19 @@ static func for_downed(p: Hunter, time: float, blight: bool, fusion := true) -> 
 static func pick(trig: Array, blight := true, fusion := true) -> String:
 	var seen: Array = Save.d["tutorial"].get("tips_seen", [])
 	var pool: Array = (rules()["tips"] as Array).filter(
-		func(t): return (
-			(blight or not String(t["text"]).contains("Blight"))
-			and ((fusion and MergeForm.enabled()) or not t.get("needs_fusion", false))
-		)
+		func(t):
+			return (
+				(blight or not String(t["text"]).contains("Blight"))
+				and ((fusion and MergeForm.enabled()) or not t.get("needs_fusion", false))
+			)
 	)
 	var fresh := pool.filter(func(t): return not seen.has(t["id"]))
 	if fresh.is_empty():
 		seen = []
 		fresh = pool
 	var chosen: Dictionary = fresh[randi() % fresh.size()]
-	for tr in trig:
-		var hit := fresh.filter(func(t): return t.get("when", "") == tr)
+	for trap in trig:
+		var hit := fresh.filter(func(t): return t.get("when", "") == trap)
 		if not hit.is_empty():
 			chosen = hit[0]
 			break

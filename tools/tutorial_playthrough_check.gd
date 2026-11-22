@@ -5,13 +5,14 @@ extends "res://tools/new_player_flow_check.gd"
 ## the results). Prints one "TUTPLAY step <id> <seconds>" row per step. The screens before and after the course
 ## are --new-player-flow-check's, so a stall there fails too. Seconds are game time, the same on any box.
 
-const STEP_LIMIT_S := 40.0      # s of game time one step may take (the flow check's own limit is 45)
-const TIME_SCALE := 4.0         # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
+const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
+const TIME_SCALE := 4.0  # the hatch and Relic screens wait out real-time tweens (33 s); game time is unchanged
 
 var step_id := ""
 var step_s := 0.0
 var rows: Array = []
 var stalled := false
+
 
 func run(m: Node) -> void:
 	main = m
@@ -31,6 +32,7 @@ func run(m: Node) -> void:
 	print("TUTPLAY DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
 
+
 ## The garden tutorial, start to finish, with --tutorial-dead-air-check's farm player (a fresh save with the starter
 ## hatched, every Hob step shown and done, the house hammered up, the crop planted, watered and picked). Its checks
 ## (no step without a hint or marker for over its GAP_MAX, no two prompts at once, every step reached its end) count
@@ -41,6 +43,7 @@ func _garden() -> void:
 	await da._farm("Lace", "archer")
 	ok(da.bad == 0, "the garden tutorial plays to its end with no stall (%d dead-air failures)" % da.bad)
 	print("TUTPLAY garden steps %d, done %s" % [FarmTutorial.steps().size(), FarmTutorial.state().get("done", false)])
+
 
 ## One call per sim step of the course: closes a step's row when the next one starts, and ends the run at once on a
 ## step that outlasts its limit (the course would otherwise run on to the flow check's whole-course cap).
@@ -60,6 +63,7 @@ func _course_tick(m: Match) -> void:
 		print("TUTPLAY STEPS: " + ", ".join(rows))
 		print("TUTPLAY DONE, failures: %d" % bad)
 		tree.quit(1)
+
 
 func _close_step() -> void:
 	if step_id == "":
