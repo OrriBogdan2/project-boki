@@ -153,8 +153,7 @@ func _scan_hud(tag: String) -> void:
 			if both.size.x > OVERLAP and both.size.y > OVERLAP:
 				touching.append("%s x %s" % [blocks[i].name, blocks[j].name])
 	ok(touching.is_empty(), "%s: no two HUD blocks overlap (%d: %s)" % [tag, touching.size(), touching.slice(0, 3)])
-	var padded: Array = blocks.filter(func(c): return c is PanelContainer
-			and c.size.y > c.get_combined_minimum_size().y + SLACK)
+	var padded: Array = blocks.filter(func(c): return c is PanelContainer and _padded(c))
 	ok(padded.is_empty(), "%s: no HUD card taller than its content (%d: %s)" % [tag, padded.size(),
 			padded.slice(0, 3).map(func(c): return "%s %s vs %s" % [c.name, c.size.y, c.get_combined_minimum_size().y])])
 	var cut: Array = []
@@ -163,6 +162,10 @@ func _scan_hud(tag: String) -> void:
 		if c is Label or c is Button:
 			cut.append_array([c].filter(_cut_short))
 	ok(cut.is_empty(), "%s: no HUD text cut short (%d: %s)" % [tag, cut.size(), cut.slice(0, 3).map(func(c): return c.text)])
+
+## A card whose height is more than its content needs (a panel grows by itself but never shrinks back).
+func _padded(c: Control) -> bool:
+	return c.size.y > c.get_combined_minimum_size().y + SLACK
 
 ## Checks one panel (or bar) against the window and its own frame.
 func _scan_in(tag: String, panel: Control, safe: float) -> void:
