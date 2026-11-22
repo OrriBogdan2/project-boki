@@ -2,10 +2,11 @@ class_name HomeClasses
 extends RefCounted
 ## The Hunters screen on the farm (J or the Hunters button; docs/decisions/0005). On the left every
 ## Hunter as a small tile: open, ready to unlock, in progress or locked, with its challenge's progress;
-## under the tiles the picked Hunter's mastery goals, your glider and your Wisp (WispPick). On the right the
-## Hunter viewer (HunterViewer) and what you can do with it: play it, hold to unlock it (HoldUnlock, then the reveal),
-## or the challenge it still needs. Rules and numbers: content/rules/class_unlock.json, logic:
-## ClassUnlock. (Internal names keep "class": the file, the save key and the ids.)
+## under the tiles the picked Hunter's mastery goals, your glider, your Wisp (WispPick) and your stomp
+## (StompPick). On the right the Hunter viewer (HunterViewer) and what you can do with it: play it, hold to
+## unlock it (HoldUnlock, then the reveal), or the challenge it still needs. Rules and numbers:
+## content/rules/class_unlock.json, logic: ClassUnlock. (Internal names keep "class": the file, the save
+## key and the ids.)
 
 const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
@@ -34,8 +35,7 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_sel", sel)
 	home.set_meta("hero_hover", sel)          # (K opens its kit card)
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
-	UI.subtitle(v, "Who you play. Every Hunter opens with its own challenge, then hold to unlock it. "
-			+ "K: the full kit card.")
+	UI.subtitle(v, "Pick who you play. Finish a Hunter's challenge, then hold it to unlock.")
 	v.add_child(HunterStats.tab_row(home, TITLE))
 	var cols := UI.hbox(16)
 	v.add_child(cols)
@@ -80,6 +80,7 @@ static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
 	details.add_child(ClassCard.mastery_list(id, left_w(home)))
 	details.add_child(_glider_pick(home, id))
 	details.add_child(WispPick.make(func(): open(home, id)))
+	details.add_child(StompPick.make(id, func(): open(home, id)))
 	acts.add_child(_actions(home, id, viewer))
 
 ## Every Hunter: ready ones first, then open, in progress and locked; each group in the usual order.
@@ -122,13 +123,17 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 		"open":
 			if cur: c.add_child(UI.label("Playing", 11, UI.GOOD, UI.semi))      # (other open Hunters: just the name)
 		"ready": c.add_child(UI.label("Hold to unlock", 11, ClassCard.GOAL_COL, UI.semi))
+		_ when ClassUnlock.is_bonus(id):      # (waits for the first expedition: one wrapped line says so)
+			var wl := UI.label(ClassUnlock.locked_line(id), 11, UI.FAINT)
+			wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			wl.set_meta("locked_line", id)
+			c.add_child(wl)
 		_:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
 					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
-			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, tile_w(home) - 56.0, 5.0)
-			gb.set_meta("tile_bar", id)
-			c.add_child(gb)
+			if st == "progress":      # (no empty bar on a tile that hasn't started)
+				c.add_child(UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, tile_w(home) - 56.0, 5.0))
 	card.tooltip_text = ClassCard.kit_tip(id)
 	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
@@ -158,6 +163,12 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 			var wl := UI.label("Challenge done: %s" % ClassUnlock.challenge_text(id), 12, UI.MUTED)
 			wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			box.add_child(wl)
+		_ when ClassUnlock.is_bonus(id):
+			var ll := UI.para(ClassUnlock.locked_line(id), 13, UI.INK)
+			ll.custom_minimum_size.x = 300.0
+			ll.set_meta("locked_line", id)
+			ll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			box.add_child(ll)
 		_:
 			var gb := ClassCard.challenge_block(id, 300.0)
 			gb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

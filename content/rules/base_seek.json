@@ -6,7 +6,7 @@
 	"sniff_s": 1.5,
 	"sniff_doc": "Every sniff_s seconds a Boki stops and sniffs the air; it then picks a heading for the next sniff_s seconds.",
 	"right": 0.35,
-	"right_per_focus": 0.006,
+	"right_per_focus": 0.01,
 	"curiosity_gain": 0.3,
 	"right_doc": "Chance a sniff finds the right way: right + Focus points * right_per_focus + (curiosity - 0.5) * curiosity_gain (curiosity is the 0-1 trait, 0.5 when unset), kept within right_min..right_max. A wrong sniff sets off in a random direction.",
 	"right_min": 0.05,

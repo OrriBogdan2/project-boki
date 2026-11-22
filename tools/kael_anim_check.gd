@@ -233,8 +233,10 @@ func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> vo
 	var per_s := rate * run_steps / length
 	print("RUN at %.2f m/s: clip rate %.2f, %.2f footfalls/s (%.2f Hz stride)" % [spd, rate, per_s, per_s * 0.5])
 	var foot: Array = cl.d["loco"].get("foot_mps", [1.0, 1.0])
+	# (foot_mps is at the model's own scale: a match draws Kael bigger, so the gait layer divides that out)
+	var body_k := float(cl.root.get_meta("look_scale", cl.root.scale.y)) / absf(cl.root.scale.y)
 	A.ok("kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
-			absf(rate - spd / float(foot[1])) <= 0.05 and per_s >= 3.0,
+			absf(rate - spd * body_k / float(foot[1])) <= 0.05 and per_s >= 3.0,
 			"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd])
 	P.inp["move"] = Vector2.ZERO
 

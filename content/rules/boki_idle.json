@@ -904,6 +904,368 @@
 					]
 				]
 			}
+		},
+		"caecilith": {
+			"fidget": {
+				"note": "sly glance: the head lifts and peeks left then right, a zip of a wriggle runs down the serpent chain",
+				"at": 0.3,
+				"dur": 1.7,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.55,
+						1,
+						0
+					],
+					[
+						"neck",
+						"x",
+						0.15,
+						0,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.1,
+						1,
+						0.25
+					],
+					[
+						"tail*",
+						"y",
+						0.7,
+						3,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 2.0
+			}
+		},
+		"casquebill": {
+			"fidget": {
+				"note": "bill clack: the head snaps down four times, disagreeing, chest drawn up",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						4,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.07,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						-0.03,
+						4,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 3.8,
+				"amp": 1.8
+			}
+		},
+		"duskapi": {
+			"fidget": {
+				"note": "shy look-over: the head peeks left then right and ducks, graceful and ready to vanish",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.5,
+						1,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.15,
+						0,
+						0
+					],
+					[
+						"spine",
+						"y",
+						0.14,
+						1,
+						0.1
+					],
+					[
+						"hips",
+						"y",
+						-0.05,
+						1,
+						0.1
+					]
+				]
+			},
+			"breath": {
+				"len": 3.0,
+				"amp": 2.2
+			}
+		},
+		"floenatee": {
+			"fidget": {
+				"note": "low hum: the head lifts to sing, the whole body rolls slow and rumbles through the boots",
+				"at": 0.3,
+				"dur": 1.9,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.25,
+						0,
+						0
+					],
+					[
+						"root",
+						"z",
+						0.07,
+						2,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.05,
+						6,
+						0
+					],
+					[
+						"hips",
+						"z",
+						-0.05,
+						2,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 4.6,
+				"amp": 3.0
+			}
+		},
+		"gibbelle": {
+			"fidget": {
+				"note": "bell swing: the belly bell rocks like a clapper, head thrown back to sing",
+				"at": 0.3,
+				"dur": 1.5,
+				"rows": [
+					[
+						"hips",
+						"z",
+						0.2,
+						2,
+						0
+					],
+					[
+						"spine",
+						"z",
+						-0.14,
+						2,
+						0.25
+					],
+					[
+						"head",
+						"x",
+						0.3,
+						0,
+						0
+					],
+					[
+						"head",
+						"z",
+						0.12,
+						2,
+						0.5
+					]
+				]
+			},
+			"breath": {
+				"len": 2.4,
+				"amp": 2.4
+			}
+		},
+		"glaciyak": {
+			"fidget": {
+				"note": "frost snort: two heavy snorts, head bobbing and the shoulders heaving",
+				"at": 0.3,
+				"dur": 1.4,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.3,
+						2,
+						0
+					],
+					[
+						"spine",
+						"x",
+						0.08,
+						2,
+						0.1
+					],
+					[
+						"hips",
+						"x",
+						-0.04,
+						2,
+						0.2
+					],
+					[
+						"head",
+						"y",
+						0.08,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 4.0,
+				"amp": 3.0
+			}
+		},
+		"goliathite": {
+			"fidget": {
+				"note": "face polish: it leans in and rubs the marble face side to side, proud",
+				"at": 0.3,
+				"dur": 1.8,
+				"rows": [
+					[
+						"head",
+						"y",
+						0.28,
+						3,
+						0
+					],
+					[
+						"head",
+						"x",
+						-0.2,
+						0,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.1,
+						0,
+						0
+					],
+					[
+						"root",
+						"x",
+						-0.03,
+						3,
+						0.25
+					]
+				]
+			},
+			"breath": {
+				"len": 5.0,
+				"amp": 2.0
+			}
+		},
+		"heatherhorn": {
+			"fidget": {
+				"note": "graze: the head drops to the grass and chews, the shoulders settle",
+				"at": 0.3,
+				"dur": 1.9,
+				"rows": [
+					[
+						"head",
+						"x",
+						-0.55,
+						0,
+						0
+					],
+					[
+						"head",
+						"y",
+						0.08,
+						6,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.12,
+						0,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.04,
+						0,
+						0
+					]
+				]
+			},
+			"breath": {
+				"len": 3.6,
+				"amp": 2.4
+			}
+		},
+		"hoarheron": {
+			"fidget": {
+				"note": "ice-pick strike: it draws the head back, still, then jabs down; the body leans in",
+				"at": 0.3,
+				"dur": 1.6,
+				"rows": [
+					[
+						"head",
+						"x",
+						0.38,
+						1,
+						0
+					],
+					[
+						"spine",
+						"x",
+						-0.1,
+						1,
+						0
+					],
+					[
+						"hips",
+						"x",
+						0.04,
+						1,
+						0.5
+					]
+				]
+			},
+			"breath": {
+				"len": 4.4,
+				"amp": 1.4
+			}
 		}
 	}
 }

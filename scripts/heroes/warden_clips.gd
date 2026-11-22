@@ -110,8 +110,10 @@ var root_bi := -1            # the root bone: the heading and HunterAnim's air t
 var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var look_y := 0.0            # the model's own scale (Models.hunter's "look_scale"), read on the first move
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
+var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (null: no crouch)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
@@ -265,6 +267,9 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	var ring: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("loco")
 	steps = WardenSteps.new(model, tree, ring, lc.get("plants", {}), lib)
+	if d.has("crouch"):
+		var sneak: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("crouch_loco")
+		crouch_steps = WardenSteps.new(model, tree, sneak, d["crouch"].get("plants", {}), lib, "crouch_loco")
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
 	_setup_out()
@@ -549,6 +554,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
 	for k in ["stomp", "drink"]:
 		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and k == "stomp" and not bool(s.get("stomp_own", true)):
+			return {"proc": true}     # a worn stomp style plays on the rig (StompLook)
 		if ph >= 0.0 and st.has(k):
 			var clip := String(st[k])
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -810,6 +817,9 @@ func step(dt: float) -> void:
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
+	if crouch_steps:
+		var sneak_k := (1.0 - act_w) * (1.0 - air_w) * crouch_w * (1.0 - one_w) * (1.0 if _moving(s) else 0.0)
+		crouch_steps.step(sneak_k > 0.5 and bool(s.get("grounded", true)), crouch_pos)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
@@ -997,7 +1007,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
-	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
+	# ("foot_mps" is read on the model at its own scale; a match draws it bigger (Hunter.VIS_SCALE, Kael's grow),
+	# and a bigger stride covers that much more ground a cycle, so the rate takes the speed at the model's scale)
+	if look_y <= 0.0:
+		look_y = float(root.get_meta("look_scale", root.scale.y))
+	var body_mps := spd * look_y / maxf(absf(root.scale.y), 0.01)
+	_p("loco_rate/scale", gait.plan(body_mps, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
