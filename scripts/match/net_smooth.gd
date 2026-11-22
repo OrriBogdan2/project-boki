@@ -89,6 +89,13 @@ func follow(e: Ent, now: float) -> void:
 	if jumped:
 		e.prev = e.pos
 		jumped = false
+	elif e.vel.length_squared() > 1.0:
+		# the curve can swing past a snapshot (a knock that lands) or a run-on guess can be pulled back: the
+		# body waits for the true path to catch up rather than step against its own way
+		var way := e.vel.normalized()
+		var back := (e.pos - e.prev).dot(way)
+		if back < 0.0:
+			e.pos -= way * back
 
 ## m/s along the move `d` between two snapshots that is still motion: SNAP_SPEED, or twice the faster speed
 ## the two report along it (a move that speeds up from rest or lands hard between them covers up to that).
