@@ -14,7 +14,7 @@ const PREFIX := "prop_"  # MeshInstance3D name: prop_<contract bone> ("jet.0" ->
 const EASE := 10.0  # 1/s: how fast a part eases to its stretch
 
 static var _cut := {}  # "art bones" -> {"sk_m": contract skeleton -> its model, "parts": {bone: [mesh, rest, anchors,
-	# line]}}
+# line]}}
 
 var nodes: Array = []  # the parts (MeshInstance3D) riding Meshy's bones
 var stretch: Dictionary = {}
@@ -145,8 +145,11 @@ static func contract(art: String, want := {}) -> Dictionary:
 		if apar < 0:
 			continue
 		var rest := sk_m * csk.get_bone_global_rest(bi)
-		var line := [_native_name(csk, ab), (sk_m * csk.get_bone_global_rest(ab)).origin,
-			(sk_m * csk.get_bone_global_rest(apar)).origin]
+		var line := [
+			_native_name(csk, ab),
+			(sk_m * csk.get_bone_global_rest(ab)).origin,
+			(sk_m * csk.get_bone_global_rest(apar)).origin
+		]
 		parts[cb] = [mesh, rest, _anchors(con, csk, bi), line]
 	out["parts"] = parts
 	con.free()
