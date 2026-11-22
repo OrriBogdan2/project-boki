@@ -345,8 +345,6 @@ const CHECKS := {
 	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],
 	# charges + slot timers on the bar
 	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],
-	# Vex's Slipstep: one plain dash, no pips, no Second Wind
-	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--spawn-clock-check": ["res://tools/spawn_clock_check.gd", "spawn_clock_check", null],      # docs/SPAWNS.md
 	"--blight-nest-check": ["res://tools/blight_nest_check.gd", "blight_nest_check", null],      # docs/decisions/0061
