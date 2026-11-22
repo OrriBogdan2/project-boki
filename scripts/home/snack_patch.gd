@@ -58,9 +58,13 @@ static func ripe(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs(e)
 
 ## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort, and with a
-## watered patch `e`: BaseChore's Tide chore).
+## watered patch `e`: BaseChore's Tide chore). A save's first batch (Save.d snack_picks 0, the starter gift) takes
+## first_grow_secs; saves without the counter are not new.
 static func grow_secs(e := {}) -> float:
-	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0) \
+	var base := float(rules()["grow_secs"])
+	if int(Save.d.get("snack_picks", 1)) <= 0:
+		base = minf(base, float(rules()["first_grow_secs"]))
+	return base * DecorComfort.value("bright", "grow", 1.0) \
 		* (float(rules()["water_mult"]) if watered(e) else 1.0)
 
 ## Watered since the last pick (the entry's "wt", unix seconds): a pick makes it dry again.
@@ -88,6 +92,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
+	d["snack_picks"] = int(d.get("snack_picks", 1)) + 1
 	var got: Array = snacks(d, now).duplicate()
 	var more := extra(d, e, now)
 	if more != "":
@@ -97,7 +102,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 		shelve(d, String(s))
 	return got
 
-## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.FOODS) have their own stores.
+## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.foods_v) have their own stores.
 static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
 	store[snack] = int(store.get(snack, 0)) + n

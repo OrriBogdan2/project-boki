@@ -11,16 +11,17 @@ extends RefCounted
 ##   row, Sfx.STACK_DB under the first);
 ## - one emitter keeps at most VOICES takes sounding; a shot that would be the next one is dropped, so a long
 ##   hold costs VOICES pool voices per Hunter whatever the rate (a squad of four: 12, the SFX bus budget).
-const HELD_RATE := 0.15       # s a round: under this a weapon is held fire (content/weapons/*.json primary.rate)
-const BURST_GAP_S := 0.3      # s of quiet that ends a burst
-const VOICES := 3             # takes of one emitter sounding at once
-const JITTER_DB := 1.0        # dB: the volume of the other shots varies by up to this much either way
+const HELD_RATE := 0.15  # s a round: under this a weapon is held fire (content/weapons/*.json primary.rate)
+const BURST_GAP_S := 0.3  # s of quiet that ends a burst
+const VOICES := 3  # takes of one emitter sounding at once
+const JITTER_DB := 1.0  # dB: the volume of the other shots varies by up to this much either way
 const HOLD_SUFFIX := "_hold"  # a weapon's short hold take is `<shot sound>_hold` (+ `_1`..`_4`)
-const HOLD_DB := 1.0          # dB the hold takes sit under the first shot (the full takes sit Sfx.STACK_DB under)
-const END_PAD_S := 0.06       # s a pool voice keeps playing past its file (the mixer's buffer)
-const JITTER_PITCH := 0.03    # the pitch of the other shots varies by up to this share either way
+const HOLD_DB := 1.0  # dB the hold takes sit under the first shot (the full takes sit Sfx.STACK_DB under)
+const END_PAD_S := 0.06  # s a pool voice keeps playing past its file (the mixer's buffer)
+const JITTER_PITCH := 0.03  # the pitch of the other shots varies by up to this share either way
 
-static var _who := {}         # emitter id -> {"last": ms, "rr": next take, "ends": [ms each live take ends]}
+static var _who := {}  # emitter id -> {"last": ms, "rr": next take, "ends": [ms each live take ends]}
+
 
 ## One round of `sname` from emitter `who` (a Hunter's instance id) at `pos`. `rate` is the weapon's s a round;
 ## `now` is the clock in ms (the check passes its own).
@@ -47,9 +48,9 @@ static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now :
 	ends.append(now + int((Sfx.take_len(snd, take) * (1.0 + JITTER_PITCH) + END_PAD_S) * 1000.0))
 	var next := rr
 	if held:
-		next = (rr + 1) % n          # the hold takes are all for the rest of the burst, take 0 included
+		next = (rr + 1) % n  # the hold takes are all for the rest of the burst, take 0 included
 	elif not first:
-		next = 1 + rr % (n - 1)      # full takes: past the first one, which is the opening crack
+		next = 1 + rr % (n - 1)  # full takes: past the first one, which is the opening crack
 	_who[who] = {"last": now, "rr": next, "ends": ends}
 	if _who.size() > 32:
 		_prune(now)
@@ -59,6 +60,7 @@ static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now :
 		var jitter := Sfx.rng.randf_range(-JITTER_DB, JITTER_DB)
 		var under := HOLD_DB if held else Sfx.STACK_DB
 		Sfx.play(snd, pos, vol_db - under + jitter, JITTER_PITCH, 1.0, 0.0, false, take)
+
 
 static func _prune(now: int) -> void:
 	for id in _who.keys():

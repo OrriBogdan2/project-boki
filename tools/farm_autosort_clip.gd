@@ -21,10 +21,10 @@ func run(main_node: Node) -> void:
 		return
 	Save.no_write = true
 	Save.d = HomeWork.demo_save()
-	var L: Dictionary = Save.d["layout"]
+	var l: Dictionary = Save.d["layout"]
 	for s in [["seed_garden", 49, 33], ["kiln", 49, 37]]:  # all four sortable stations on show
-		L["uid"] = int(L["uid"]) + 1
-		(L["deco"] as Array).append({"u": L["uid"], "id": s[0], "x": s[1], "z": s[2], "r": 0})
+		l["uid"] = int(l["uid"]) + 1
+		(l["deco"] as Array).append({"u": l["uid"], "id": s[0], "x": s[1], "z": s[2], "r": 0})
 	for r in Save.d["roster"]:
 		r["work_manual"] = true  # held back for the "before" part
 		print("FACLIP kin %s top=%s" % [r["name"], Work.list(r)[0]])

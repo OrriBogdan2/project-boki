@@ -13,9 +13,12 @@ var bad := 0
 var m: Match
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FOBJ %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -27,6 +30,7 @@ func run(mn: Node) -> void:
 	print("FOBJ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _gate() -> void:
 	Save.d = Save.fresh()
 	var o := {"teams": 2, "squad": 1}
@@ -37,14 +41,17 @@ func _gate() -> void:
 	FirstObjective.migrate(old)
 	var young := {"tutorial": {}, "extracts": 0}
 	FirstObjective.migrate(young)
-	ok(old["tutorial"].get(FirstObjective.KEY, false) and not young["tutorial"].has(FirstObjective.KEY),
-			"a save that has got out is not taught; one that has not is")
+	ok(
+		old["tutorial"].get(FirstObjective.KEY, false) and not young["tutorial"].has(FirstObjective.KEY),
+		"a save that has got out is not taught; one that has not is"
+	)
 	Save.d["tutorial"][FirstObjective.KEY] = true
 	ok(FirstObjective.for_match(null, o) == null, "once done, no match has it")
 	Save.d = Save.fresh()
 	Save.d["stats"]["caught"] = 1
 	var caught := FirstObjective.for_match(null, o)
 	ok(caught != null and caught._captured, "a save that has caught a Boki starts at leave")
+
 
 func _fresh() -> void:
 	if m:
@@ -53,8 +60,19 @@ func _fresh() -> void:
 	Save.d["tutorial"]["move"] = true
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "weapon": "rifle",
-			"cls": "medium", "demo_kin": "cindle"})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4243,
+			"no_drop": true,
+			"weapon": "rifle",
+			"cls": "medium",
+			"demo_kin": "cindle"
+		}
+	)
 	m.set_process(false)
 	m.player.riding = false
 	for mb in m.mobs:
@@ -71,20 +89,23 @@ func _fresh() -> void:
 	for i in 10:
 		m.step(Match.DT)
 
+
 func _wild(dx: float, dazed := false) -> Kin:
 	var at: Vector3 = m.player.pos + Vector3(dx, 0, 0)
 	var k := m.spawn_wild(Save.new_kin("puddlet", "", 77), Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), dazed)
 	return k
+
 
 ## Lets the objective look at the world once.
 func _look() -> void:
 	m.objective._look = 0.0
 	m.objective.tick(Match.DT)
 
+
 func _walk() -> void:
 	_fresh()
 	var o := m.objective
-	var P := m.player
+	var p := m.player
 	ok(o != null and o.step == "find", "a fresh expedition starts on find")
 	ok(o.text() == "Find a wild Boki" and o.target_pos() == Vector3.INF, "no wild Boki yet: the line, no pin")
 	var far := _wild(60.0)
@@ -92,26 +113,30 @@ func _walk() -> void:
 	ok(o.step == "find" and o.target == far, "a wild Boki far off: find")
 	ok(o.target_pos().is_equal_approx(far.pos), "the pin is on it")
 	ok(o.label() == "Wild Boki" and o.ticked == "", "the pin says what it is")
-	P.teleport(far.pos - Vector3(10.0, 0, 0))
+	p.teleport(far.pos - Vector3(10.0, 0, 0))
 	_look()
-	ok(o.step == "knock" and o.text() == "Knock it out" and o.ticked == "Found a wild Boki" and o.ticked_t > 0.0,
-			"close to it: knock it out, find ticked (%s)" % o.text())
-	P.teleport(far.pos - Vector3(22.0, 0, 0))
+	ok(
+		o.step == "knock" and o.text() == "Knock it out" and o.ticked == "Found a wild Boki" and o.ticked_t > 0.0,
+		"close to it: knock it out, find ticked (%s)" % o.text()
+	)
+	p.teleport(far.pos - Vector3(22.0, 0, 0))
 	_look()
 	ok(o.step == "knock", "a little farther: it does not flip back at once")
 	far.state = "dazed"
 	_look()
-	ok(o.step == "scan" and o.text().contains(Settings.key_cap("interact")) and o.text().begins_with("Scan"),
-			"knocked out: scan it, with the interact key (%s)" % o.text())
+	ok(
+		o.step == "scan" and o.text().contains(Settings.key_cap("interact")) and o.text().begins_with("Scan"),
+		"knocked out: scan it, with the interact key (%s)" % o.text()
+	)
 	far.state = "wild"
-	P.teleport(far.pos - Vector3(60.0, 0, 0))
+	p.teleport(far.pos - Vector3(60.0, 0, 0))
 	var ticks := o.ticked_t
 	_look()
 	ok(o.step == "find" and o.ticked_t <= ticks, "it woke and ran: back to find, nothing ticked")
 	far.state = "dazed"
-	P.teleport(far.pos - Vector3(3.0, 0, 0))
+	p.teleport(far.pos - Vector3(3.0, 0, 0))
 	_look()
-	P.caught.append({"uid": "x", "species": "puddlet"})
+	p.caught.append({"uid": "x", "species": "puddlet"})
 	_look()
 	ok(o.step == "leave" and o.ticked.begins_with("Scanned"), "a capsule in the box: leave, scan ticked")
 	far.dead = true
@@ -120,7 +145,7 @@ func _walk() -> void:
 	var near_a := _wild(5.0)
 	var near_b := _wild(40.0)
 	m.objective._captured = false
-	P.caught.clear()
+	p.caught.clear()
 	_look()
 	ok(o.target == near_a, "two wild Boki: the nearer one is named")
 	near_b.state = "dazed"
@@ -128,10 +153,11 @@ func _walk() -> void:
 	ok(o.target == near_b and o.step == "scan", "a knocked-out one far off leads the pin (someone else's knock)")
 	_fit()
 
+
 func _leave() -> void:
 	_fresh()
 	var o := m.objective
-	var P := m.player
+	var p := m.player
 	o._captured = true
 	_look()
 	var x := o.exit_spot()
@@ -142,17 +168,19 @@ func _leave() -> void:
 	var wait := o.text()
 	ok(wait.begins_with("Go to the outpost") and wait.contains("1:30"), "not awake yet: its wake time (%s)" % wait)
 	x["open_at"] = 0.0
-	P.teleport(x["pos"] + Vector3(30.0, 0, 0))
+	p.teleport(x["pos"] + Vector3(30.0, 0, 0))
 	ok(o.text() == "Go to the outpost", "awake and far: go there")
-	P.teleport(x["pos"] + Vector3(2.0, 0, 0))
-	ok(o.text().begins_with("Start the uplink") and o.text().contains(Settings.key_cap("interact")),
-			"in the yard: start the uplink (%s)" % o.text())
+	p.teleport(x["pos"] + Vector3(2.0, 0, 0))
+	ok(
+		o.text().begins_with("Start the uplink") and o.text().contains(Settings.key_cap("interact")),
+		"in the yard: start the uplink (%s)" % o.text()
+	)
 	x["state"] = "charging"
-	x["team"] = P.team
+	x["team"] = p.team
 	x["contested"] = false
 	x["prog"] = 0.42
 	ok(o.text() == "Hold the yard: uplink 42%" and o.exit_pinned(), "charging, in the yard: hold it (%s)" % o.text())
-	P.teleport(x["pos"] + Vector3(30.0, 0, 0))
+	p.teleport(x["pos"] + Vector3(30.0, 0, 0))
 	ok(o.text() == "Get back in the outpost yard", "charging, you out of the yard: get back in")
 	x["contested"] = true
 	ok(o.text() == "Clear the yard of rivals", "a rival in the yard: clear it")
@@ -161,26 +189,28 @@ func _leave() -> void:
 	ok(o.text() == "Step into the lift" and o.exit_pinned(), "the lift is open: step into it")
 	_fit()
 
+
 func _finish() -> void:
 	_fresh()
-	var P := m.player
+	var p := m.player
 	m.objective._captured = true
 	_look()
 	ok(not Save.d["tutorial"].get(FirstObjective.KEY, false), "not saved while still on the island")
-	P.out = true
+	p.out = true
 	m.objective.tick(Match.DT)
 	ok(not Save.d["tutorial"].get(FirstObjective.KEY, false), "dying does not finish it")
-	P.out = false
-	P.extracted = true
+	p.out = false
+	p.extracted = true
 	m.objective.tick(Match.DT)
 	ok(Save.d["tutorial"].get(FirstObjective.KEY, false), "getting out saves it")
 	ok(FirstObjective.for_match(null, {"teams": 2}) == null, "the next expedition does not have it")
+
 
 ## Every line fits the card.
 func _fit() -> void:
 	var o := m.objective
 	var worst := 0.0
-	o.exit_spot()["open_at"] = 0.0      # (these matches run for ever: the wake time is judged below, as 10:00)
+	o.exit_spot()["open_at"] = 0.0  # (these matches run for ever: the wake time is judged below, as 10:00)
 	for id in ["find", "knock", "scan", "leave"]:
 		o.step = id
 		worst = maxf(worst, TextCache.width(m.hud.big, o.text(), ObjectiveTracker.LINE_PX - 2))
@@ -188,5 +218,7 @@ func _fit() -> void:
 		var t := String(FirstObjective.rules()["leave"][k])
 		t = t.replace("%F", "F").replace("%d", "100").replace("%s", "10:00")
 		worst = maxf(worst, TextCache.width(m.hud.big, t, ObjectiveTracker.LINE_PX - 2))
-	ok(worst <= ObjectiveTracker.TEXT_W,
-			"every line fits the card at its smaller size (%.0f of %.0f px)" % [worst, ObjectiveTracker.TEXT_W])
+	ok(
+		worst <= ObjectiveTracker.TEXT_W,
+		"every line fits the card at its smaller size (%.0f of %.0f px)" % [worst, ObjectiveTracker.TEXT_W]
+	)

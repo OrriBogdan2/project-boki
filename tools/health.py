@@ -101,6 +101,10 @@ def main():
     if no_uid:
         print("Scripts without a committed .uid (run godot --headless --import, git add the .gd.uid): " + ", ".join(no_uid[:10]))
         bad.append("missing .gd.uid files")
+    reg = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "registry_lint.py")], capture_output=True, text=True)
+    print((reg.stdout or reg.stderr).rstrip())
+    if reg.returncode:
+        bad.append("check registry (tools/checks/, AGENTS.md section 2)")
     if bad:
         print("HEALTH FAIL: " + ", ".join(bad) + " (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)")
         if strict:
