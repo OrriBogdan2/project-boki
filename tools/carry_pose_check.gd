@@ -22,6 +22,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m_main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = m_main
 	Save.no_write = true
 	Save.d = Save.fresh()
