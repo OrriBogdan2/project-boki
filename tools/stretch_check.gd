@@ -1,6 +1,7 @@
 extends RefCounted
-## --stretch-<n>-check [--wardens=a,b] [--limit=1.3] [--step=0.125]: skins every visible mesh of each Hero's .glb through
-## every one of its clips (the game's own clip tree and Sync) and measures each triangle edge against its rest length.
+## --stretch-<n>-check [--wardens=a,b] [--limit=1.3] [--step=0.125]: skins every visible mesh of each Hero's
+## .glb through every one of its clips (the game's own clip tree and Sync) and measures each triangle edge against
+## its rest length.
 ## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
 ## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
 ## the ratio is divided by it. A Hero in CEILING is held at its ceiling instead of the limit. Prints one line per clip
@@ -12,8 +13,9 @@ const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain li
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
 const DT := 1.0 / 30.0
 ## Worst ratio a Hero may reach (docs/DEBT.md "Skin stretch"): its shipped glb's worst, measured and rounded up to
-## the next 0.5, so a worse glb fails. Every Hero is held at one: none is under the 1.3 limit yet (linear-blend creases at
-## knees, elbows, crotch). Measured 11-22 on main aa543f4cf3 (the worst clip on each line). Lower one when its glb improves.
+## the next 0.5, so a worse glb fails. Every Hero is held at one: none is under the 1.3 limit yet (linear-blend
+## creases at knees, elbows, crotch). Measured 11-22 on main aa543f4cf3 (the worst clip on each line). Lower one
+## when its glb improves.
 const CEILING := {
 	"bulwark": 11.0,     # 10.53 x_wind
 	"archer": 18.0,      # 17.81 roll
