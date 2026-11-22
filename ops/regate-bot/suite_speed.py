@@ -48,7 +48,7 @@ GAME_EXT = re.compile(
 # ---------------------------------------------------------------- flags
 def suite_flags(tree):
     tree = Path(tree)
-    reg = (tree / "tools/check_registry.gd").read_text()
+    reg = merge_areas((tree / "tools/check_registry.gd").read_text(), [f.read_text() for f in sorted(tree.glob("tools/checks/*.gd"))])
     block = reg.split("const CHECKS := {", 1)[1].split("\n}", 1)[0]
     flags = re.findall(r'^\s*"(--[a-z0-9-]+-check)":', block, re.M)
     main = (tree / "scripts/main.gd").read_text()
@@ -251,6 +251,25 @@ def closure(start, edges):
     return seen
 
 
+AREA_FILE = re.compile(r"^tools/checks/[a-z0-9_]+\.gd$")
+
+
+def merge_areas(reg, area_texts):
+    """The registry text with the CHECKS rows of every tools/checks/<area>.gd (new checks live there) added to its block."""
+    rows = ""
+    for t in area_texts:
+        if "const CHECKS := {" in t:
+            rows += t.split("const CHECKS := {", 1)[1].split("\n}", 1)[0]
+    return reg.replace("const CHECKS := {", "const CHECKS := {" + rows, 1) if rows else reg
+
+
+def merged_registry(tree, rev):
+    """check_registry.gd at rev (a git rev) with the tools/checks/*.gd rows merged in."""
+    areas = [f for f in git(tree, "ls-tree", "--name-only", rev, "tools/checks/").splitlines() if AREA_FILE.match(f)]
+    got = read_rev(tree, rev, ["tools/check_registry.gd"] + areas)
+    return merge_areas(got.get("tools/check_registry.gd", ""), [got[a] for a in areas if a in got])
+
+
 def registry_entries(text):
     block = text.split("const CHECKS := {", 1)[1].split("\n}", 1)[0]
     rows = re.finditer(r'^\s*"(--[a-z0-9-]+)":.*$', block, re.M)
@@ -266,7 +285,7 @@ def strip_checks(text):
 def check_inputs(tree, rev, edges):
     """{flag: set of repo paths the check reads}: the closure of its tool script, or of the tool main.gd loads
     next to an inline flag (main.gd's own closure is the whole game, so it is not followed)."""
-    reg, main = read_rev(tree, rev, ["tools/check_registry.gd", "scripts/main.gd"]).values()
+    reg, main = merged_registry(tree, rev), read_rev(tree, rev, ["scripts/main.gd"]).get("scripts/main.gd", "")
     script = {f: re.search(r'"res://([^"]+)"', e).group(1) for f, e in registry_entries(reg).items() if "res://" in e}
     out = {}
     block = reg.split("const CHECKS := {", 1)[1].split("\n}", 1)[0]
@@ -304,15 +323,14 @@ def select(tree, base, head="HEAD"):
     edges, texts = dep_index(tree, head)
     inputs = check_inputs(tree, head, edges)
     picked = set()
-    reg = [c for c in game if c == "tools/check_registry.gd"]
+    reg = [c for c in game if c == "tools/check_registry.gd" or AREA_FILE.match(c)]
     if reg:  # only the entries that changed, unless the dispatcher itself did
-        rp = "tools/check_registry.gd"
-        old, new = (read_rev(tree, r, [rp]).get(rp, "") for r in (base, head))
+        old, new = (merged_registry(tree, r) for r in (base, head))
         if strip_checks(old) != strip_checks(new):
             return None, "tools/check_registry.gd changed outside CHECKS"
         eo, en = registry_entries(old), registry_entries(new)
         picked |= {f for f in en if eo.get(f) != en[f] and f in inputs}
-        game.remove("tools/check_registry.gd")
+        game = [c for c in game if c not in reg]
     shared = [c for c in game if c in SHARED]
     if shared:
         return None, "shared file changed: " + ", ".join(shared[:3])
