@@ -54,7 +54,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Red Thread | Spirit Walk | Heavy Shot | Hail Wall | none yet |
 | [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none yet |
 | [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none yet |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none yet |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none yet |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none yet |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none yet |
 | [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none yet |

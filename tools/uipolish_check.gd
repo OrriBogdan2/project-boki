@@ -12,6 +12,7 @@ extends RefCounted
 ##      of each GPU bench crash and read as its cause)
 ##   7. closing (PanelClose): Esc closes the top panel only, a right click outside closes it, and the
 ##      game never sees the click that closed it (real key and mouse events through Input)
+##   8. a sentence label wraps and takes its row's width (else it collapses to one letter per line)
 
 ## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its item rows
 ## (LootHold, split out of hud.gd) and reserved files.
@@ -43,10 +44,24 @@ func run(main_node: Node) -> void:
 	await _migration()
 	_static_styles(src)
 	_theme_builds_clean()
+	_sentences_wrap()
 	await _screens()
 	await _closing(main.current)
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+
+func _sentences_wrap() -> void:
+	var line := UI.label("Needs a Soul Ember (found in vaults and on Watchers)")
+	var para := UI.para("short")
+	var word := UI.label("Wood")
+	var wraps := func(l: Label) -> bool:
+		return l.autowrap_mode != TextServer.AUTOWRAP_OFF and l.size_flags_horizontal == Control.SIZE_EXPAND_FILL
+	ok("a sentence label wraps and expands", wraps.call(line))
+	ok("para wraps and expands", wraps.call(para))
+	ok("a short label stays on one line", word.autowrap_mode == TextServer.AUTOWRAP_OFF)
+	for l in [line, para, word]:
+		l.free()
 
 
 ## Counts the engine errors logged while it is added (OS.add_logger).

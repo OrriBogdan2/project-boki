@@ -101,6 +101,7 @@
     "scripts/match/heart_sfx.gd",
     "scripts/match/exits.gd",
     "scripts/match/exits_flow.gd",
+    "scripts/match/exits_look.gd",
     "scripts/match/quest_seat.gd",
     "scripts/match/quest_seats.gd",
     "scripts/match/seat_beacon.gd"

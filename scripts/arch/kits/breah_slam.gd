@@ -326,12 +326,10 @@ func slam(c: float, at_feet: bool) -> void:
 	m.sfx("br_slam", at, 0.0, 1.0)
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):
-		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
-		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
 		var air := f is Hunter and (not (f as Hunter).grounded or (f as Hunter).gliding)
-		var o := {"src": "abil", "ab": "rmb", "kb": away * float(s["kb"]), "lift": 2.0, "heavy": true}
+		var o := {"src": "abil", "ab": "rmb", "heavy": true}  # no knock: the card has a centre stun and a dunk, no push
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)
 			o["dr"] = true
@@ -339,7 +337,6 @@ func slam(c: float, at_feet: bool) -> void:
 			d2 *= 1.0 + float(s["dunk_k"])
 			if m.world.is_void(f.pos.x, f.pos.z):
 				d2 += float(s["dunk_void"])
-			o.erase("lift")
 			k.dunks += 1
 			k.vfx("dunk", f.pos)
 		f.hurt(d2, h, o)
