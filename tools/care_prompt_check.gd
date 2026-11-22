@@ -58,7 +58,7 @@ func run(main: Node) -> void:
 	home._find_interact()
 	line = _shown(home)
 	ok(line == ["Pet", "~Feed (no food)", "Play", "to pick up"], "hungry with no food: Feed greyed (%s)" % [line])
-	Save.d["items"][String(Care.FOODS.keys()[0])] = 2
+	Save.d["items"][String(Care.foods_v.keys()[0])] = 2
 	home._find_interact()
 	line = _shown(home)
 	ok(line == ["~Pet", "Feed", "Play", "to pick up"], "with food it lights Feed (%s)" % [line])
