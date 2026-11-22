@@ -94,6 +94,7 @@ const EMIT_FLICKER := 0.55     # and how much it crackles
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_MIN_PX := 0.4         # no line thinner than this many drawn pixels: it broke into specks (min_px)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
@@ -174,6 +175,16 @@ static func shown_torso(model: Node3D) -> Transform3D:
 	var torso := model.get_node(^"Rig/Torso") as Node3D
 	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
 	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
+## The node that lays the procedural layers (flinch, wall kick, open reach) over a dressed Hunter's clips: the contract
+## model's Sync (WardenSync), or a Meshy-native model's Native (WardenNative, docs/art/wardens/MESHY_NATIVE.md); null on
+## a procedural model. Both carry `flinch`, `wall` and `opener`; only Sync carries `clips` (WardenClips).
+static func layers(model: Node) -> Node:
+	var w := model.get_node_or_null(^"Warden") if model else null
+	if w == null:
+		return null
+	var s := w.get_node_or_null(^"Sync")
+	return s if s else w.get_node_or_null(^"Native")
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
@@ -712,6 +723,7 @@ static func _painted_ink() -> ShaderMaterial:
 		_ink.set_shader_parameter("width", INK_WIDTH)
 		_ink.set_shader_parameter("ink_mask", true)
 		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+		_ink.set_shader_parameter("min_px", INK_MIN_PX)
 	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).

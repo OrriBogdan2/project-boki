@@ -38,8 +38,8 @@ func _hero(id: String, move: String) -> void:
 		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		m.set_meta("anim_seed", 1)
 		holder.add_child(m)
-		var sync := m.get_node_or_null("Warden/Sync")
-		if sync == null or sync.get("clips") == null or sync.get("flinch") == null:
+		var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
+		if sync == null or (sync.get("clips") == null and sync.get("plays") == null) or sync.get("flinch") == null:
 			ok(false, "%s: wears clips and a flinch layer" % id)
 			return
 		sync.set_process(false)
@@ -50,6 +50,9 @@ func _hero(id: String, move: String) -> void:
 	var hit: Dictionary = pair[0]
 	var ctl: Dictionary = pair[1]
 	var clips: WardenClips = hit["clips"]
+	if clips == null:
+		_native(id, move, pair)
+		return
 	# a cut clip (Vex's rifle) replays each shot
 	var hold := minf(HOLD_T, clips.move_len(clips.d["kmoves"][move]) * 0.5)
 	for p: Dictionary in pair:
@@ -88,7 +91,9 @@ func _gap(pair: Array) -> Vector3:
 	var h: Array = []
 	for r in pair:
 		var sk: Skeleton3D = r["sk"]
-		h.append(sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin)
+		# (in the model's frame: Meshy's skeleton is turned and scaled under the model, the contract's is not)
+		var to_m := (r["m"] as Node3D).global_transform.affine_inverse() * sk.global_transform
+		h.append(to_m * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin)
 	return (h[0] as Vector3) - (h[1] as Vector3)
 
 func _frames(pair: Array, n: int) -> void:
@@ -111,3 +116,32 @@ func _hit(pair: Array, push: Vector2, k: float, want: Vector3, off: Vector3) -> 
 		peak = maxf(peak, (_gap(pair) - off).dot(want))
 	s["hit_t"] = 99.0
 	return peak
+
+## The same test on Meshy's own skeleton (WardenNative): the LMB hold plays Meshy's attack clip, and a hit leaves
+## the clip the unhit twin plays (its state, clip and time) while the torso leans; legs, settling and stagger as above.
+func _native(id: String, move: String, pair: Array) -> void:
+	var hit: Dictionary = pair[0]
+	var ctl: Dictionary = pair[1]
+	_frames(pair, 12)
+	var cur: String = hit["sync"].get("cur")
+	ok(cur == "attack", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])
+	var off := _gap(pair)
+	var legs0 := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
+	var peaks := {}
+	for nm in DIRS:
+		peaks[nm] = _hit(pair, DIRS[nm][0], 1.0, DIRS[nm][1], off)
+		ok(_clip(hit) == _clip(ctl), "%s: %s hit: the clip keeps running (%s vs %s)" % [id, nm, _clip(hit), _clip(ctl)])
+		ok(peaks[nm] >= LEAN_M, "%s: %s hit leans the torso away (%.3f m)" % [id, nm, peaks[nm]])
+		var legs := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
+		ok(absf(legs - legs0) < LEG_RAD, "%s: %s hit: the legs hold the clip" % [id, nm])
+		_frames(pair, 14)
+		ok((_gap(pair) - off).length() < 0.005, "%s: settles after the %s hit" % [id, nm])
+	var heavy := _hit(pair, DIRS["front"][0], Oomph.HEAVY_FLINCH, DIRS["front"][1], off)
+	ok(heavy > peaks["front"] * 1.5, "%s: a stagger leans further (%.3f m vs %.3f)" % [id, heavy, peaks["front"]])
+	for r in pair:
+		(r["m"] as Node).free()
+
+## A Meshy-native model's state, clip and time into it (to 10 ms).
+func _clip(r: Dictionary) -> String:
+	var p: AnimationPlayer = r["sync"].get("player")
+	return "%s %s %.2f" % [r["sync"].get("cur"), p.current_animation, p.current_animation_position]

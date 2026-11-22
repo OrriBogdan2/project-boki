@@ -47,7 +47,7 @@ func _hero(main: Node, holder: Node3D, arch: String) -> void:
 	if sk == null:
 		m.free()
 		return
-	var sync := w.get_node("Sync") as WardenGlb.Sync
+	var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
 	var an := HunterAnim.new(m)
 	var worst := {}
 	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
@@ -63,7 +63,7 @@ func _hero(main: Node, holder: Node3D, arch: String) -> void:
 		var s2 := st.duplicate()
 		s2.merge(pose, true)
 		an.update(DT, s2)
-		sync._process(DT)
+		sync.call("_process", DT)
 		await main.get_tree().process_frame      # the anchor empties ride their bones from the next frame
 		for row: Array in EMITTERS[arch]:
 			var d := _off_bone(m, sk, arch, row, verts[row[2]])

@@ -114,13 +114,15 @@ func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	return got
 
 
-## The prologue is watched through (nobody knows yet that a key skips it): its shots' own durations.
+## The prologue is watched through (its seconds are the story's): its shots' own durations. Its wait is only the stretch
+## before "Hold to skip" shows by itself (HoldSkip.HINT_AT); after that the player can end it.
 func _prologue_watched() -> void:
 	var s := 0.0
 	for shot in main.current.shots:
 		s += float(shot["dur"])
 	stage_read += s
-	stage_worst = maxf(stage_worst, s)  # (a key skips it, but nothing says so)
+	# (the wait with no way out on screen: HoldSkip shows the hint after that)
+	stage_worst = maxf(stage_worst, minf(s, HoldSkip.HINT_AT))
 
 
 ## Words on the screen that were not read yet (labels, not buttons).
@@ -165,7 +167,10 @@ func _do_step(id: String) -> void:
 	super._do_step(id)
 
 
-func _skiff(m: Match) -> void:
+## The first expedition's exit at human pace: the ship and the drop (sim), the walk to the Uplink (est), the wait for
+## the seat to open (sim), then holding the console, holding the yard and the lift (sim).
+## Replaces the base check's walk.
+func _ways_out(m: Match) -> void:
 	var P: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -173,7 +178,7 @@ func _skiff(m: Match) -> void:
 	var jump_at: float = float(P.ai.get("jump_at", 0.0))
 	var t := 0.0
 	while (P.riding or P.dropping or not P.grounded) and t < DROP_S:
-		P.inp["jump"] = P.riding and t > jump_at and int(t * 20.0) % 2 == 0
+		P.inp["jump"] = P.riding and P.rocket == null and t > jump_at and int(t * 20.0) % 2 == 0
 		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
 		m.step(Match.DT)
 		t += Match.DT
@@ -189,13 +194,13 @@ func _skiff(m: Match) -> void:
 		ride,
 		"on the ship until the jump (%.0f s), then the fall" % jump_at
 	)
-	var d: Dictionary = m.exits.of_kind("dock")[0]
-	var dock: Vector3 = d["pos"]
-	var walk := Vector2(dock.x - P.pos.x, dock.z - P.pos.z).length() * DETOUR / P.base_speed
-	var open_at: float = float(d["open_at"])
+	var x: Dictionary = m.exits.uplink_x()
+	var up: Vector3 = x["pos"]
+	var walk := Vector2(up.x - P.pos.x, up.z - P.pos.z).length() * DETOUR / P.base_speed
+	var open_at: float = float(x["open_at"])
 	var wait := maxf(0.0, open_at - (t + walk))
 	_row(
-		"expedition: walk to the skiff",
+		"expedition: walk to the Uplink",
 		"est",
 		walk,
 		0.0,
@@ -204,43 +209,69 @@ func _skiff(m: Match) -> void:
 		"straight line x %.1f at run speed %.1f m/s" % [DETOUR, P.base_speed]
 	)
 	_row(
-		"expedition: wait for the skiff to open",
+		"expedition: wait for the Uplink to open",
 		"sim",
 		wait,
 		0.0,
 		wait,
 		wait,
-		"opens at %.0f s; free to loot meanwhile" % open_at
+		"opens at %.0f s; free to loot or fight meanwhile" % open_at
 	)
 	P.max_hp = 5000.0
 	P.hp = P.max_hp
-	while m.time < open_at + 1.0 and not P.out:
-		P.teleport(dock + Vector3(0.3, 0, 0.3))
-		P.hp = P.max_hp
-		m.step(Match.DT)
+	m.time = open_at + 1.0
+	P.teleport(up + Vector3(0.6, 0, 0.6))
 	var t0 := m.time
 	for i in int(2.5 / Match.DT):
 		P.inp["interact"] = true
 		m.step(Match.DT)
 	P.inp["interact"] = false
-	while d["state"] in ["called", "boarding"] and m.time - t0 < 120.0:
-		P.teleport(d["berth"])
+	_row(
+		"expedition: hold the console",
+		"sim",
+		m.time - t0,
+		0.0,
+		0.0,
+		0.0,
+		"hold interact 2.5 s (the console takes %.1f s)" % Exits.START_HOLD
+	)
+	t0 = m.time
+	while x["state"] == "charging" and m.time - t0 < 120.0:
+		P.teleport(up + Vector3(0.6, 0, 0.6))
+		P.hp = P.max_hp
+		for h in m.hunters:
+			if h.team != P.team and m.exits.in_yard(x, h):
+				h.teleport(m.world.random_ground())
+		m.step(Match.DT)
+	var charge := m.time - t0
+	_row(
+		"expedition: hold the yard",
+		"sim",
+		charge,
+		0.0,
+		0.0,
+		0.0,
+		"the yard charge (UPLINK_T %.0f s alone); waves every %.0f s" % [Exits.UPLINK_T, Exits.WAVE_EVERY]
+	)
+	t0 = m.time
+	while not P.extracted and m.time - t0 < 150.0:
+		P.teleport(x["pos"])
 		P.hp = P.max_hp
 		m.step(Match.DT)
-	var board := m.time - t0
+	var lift := m.time - t0
 	_row(
-		"expedition: call and board the skiff",
+		"expedition: the lift",
 		"sim",
-		board,
+		lift,
 		0.0,
-		board - 2.5,
-		board - 2.5,
-		"hold interact 2.5 s, then Exits.CALL_T and BOARD_T"
+		lift,
+		lift,
+		"stand in the light until it takes you (Exits.LIFT_T %.0f s)" % Exits.LIFT_T
 	)
-	ok(P.extracted, "the skiff takes you out")
+	ok(P.extracted, "the lift takes you out")
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
-	_press(main.current, "Back to the farm")
+	await _press(main.current, "Back to the farm")
 	await _wait(func(): return _is_screen("home.gd"), "back on the farm")
 	_end()
 

@@ -26,7 +26,7 @@ func _frame(m: Match, h: Hunter) -> void:
 	if shots != "":
 		m.cam.snap(h.pos)
 	h.render(DT, 1.0)
-	var sync: Node = h.model.get_node("Warden/Sync")
+	var sync: Node = WardenGlb.layers(h.model)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
 	sync.set_process(false)
 	if h.visible:
 		sync.call("_process", DT)
@@ -48,7 +48,7 @@ func _beat(m: Match, h: Hunter, tag := "") -> Array:
 		if not h.visible:
 			break
 		shown = m.time - t0
-		var c := (h.model.get_node("Warden/Sync").get("clips") as WardenClips).cur
+		var c := _cur(h)
 		if c != "":
 			seen[c] = true
 	return [shown, seen]
@@ -69,14 +69,14 @@ func run(main: Node) -> void:
 		var P: Hunter = r[1]
 		for f in 10:
 			_frame(m, P)
-		var clips: WardenClips = P.model.get_node("Warden/Sync").get("clips")
-		if clips == null:
+		var sync: Node = WardenGlb.layers(P.model)
+		if sync == null or (sync.get("clips") == null and sync.get("plays") == null):
 			ok(false, "%s wears hand-keyed clips" % arch)
 			continue
 		ok(P.visible, "%s is on screen before extracting" % arch)
 		var res: Array = await _beat(m, P, arch if shots != "" and arch in SHOT_ARCHS else "")
 		var seen: Dictionary = res[1]
-		ok(seen.has(clips.d["crouch"]["in"]) and seen.has(clips.d["air"]["rise"]),
+		ok(seen.has(_beat_clip(P, "dip")) and seen.has(_beat_clip(P, "rise")),
 				"%s plays its dip and take-off (%s)" % [arch, seen.keys()])
 		ok(res[0] >= 0.6 and res[0] <= 0.8, "%s stays on screen %.2f s, then hides" % [arch, res[0]])
 		ok(not P.visible and P.extracted, "%s is hidden after the beat" % arch)
@@ -84,9 +84,22 @@ func run(main: Node) -> void:
 		for f in 10:
 			_frame(m, T)
 		var rt: Array = await _beat(m, T)
-		var rise: String = (T.model.get_node("Warden/Sync").get("clips") as WardenClips).d["air"]["rise"]
+		var rise := _beat_clip(T, "rise")
 		ok(rt[0] >= 0.6 and rt[0] <= 0.8 and (rt[1] as Dictionary).has(rise),
 				"%s: a copy told by the extract event shows the same beat (%.2f s)" % [arch, rt[0]])
 		m.queue_free()
 	print("EXTRACT_BOARD_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The clip playing: the hand-keyed clip's name, or on Meshy's own skeleton (WardenNative) the game state it plays.
+func _cur(h: Hunter) -> String:
+	var sync: Node = WardenGlb.layers(h.model)
+	var clips: WardenClips = sync.get("clips")
+	return clips.cur if clips else String(sync.get("cur"))
+
+## The beat's dip ("dip") or take-off ("rise"): the Hero's crouch-in and air-rise clips, or Meshy's crouch and jump.
+func _beat_clip(h: Hunter, part: String) -> String:
+	var clips: WardenClips = WardenGlb.layers(h.model).get("clips")
+	if clips == null:
+		return "crouch" if part == "dip" else "jump"
+	return String(clips.d["crouch"]["in"]) if part == "dip" else String(clips.d["air"]["rise"])
