@@ -9,7 +9,6 @@ same Hunter (one command), e.g. after the rig-weights PR lands:
 import argparse
 import io
 import os
-import struct
 import sys
 import tempfile
 

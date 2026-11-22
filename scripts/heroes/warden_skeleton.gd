@@ -160,7 +160,7 @@ static func mismatches(sk: Skeleton3D, rest: Dictionary, extra := {}) -> Array:
 
 
 ## The ankle in the skeleton's space: the shin's first child bone (the foot), or a thigh's length down the shin.
-static func ankle(sk: Skeleton3D, thigh: int, shin: int) -> Vector3:
+static func ankle(sk: Skeleton3D, _thigh: int, shin: int) -> Vector3:
 	var kids := sk.get_bone_children(shin)
 	var tip := Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
 	if not kids.is_empty():
@@ -178,9 +178,9 @@ static func reach_bones(sk: Skeleton3D, thigh: int, shin: int, tgt: Vector3) -> 
 	var fp := sk.get_bone_global_pose(foot) if foot >= 0 else Transform3D.IDENTITY
 	var hip := tp.origin
 	var knee := sp.origin
-	var ankle := WardenSkeleton.ankle(sk, thigh, shin)
+	var ankle_v := WardenSkeleton.ankle(sk, thigh, shin)
 	var upper := hip.distance_to(knee)
-	var lower := knee.distance_to(ankle)
+	var lower := knee.distance_to(ankle_v)
 	var to := tgt - hip
 	var span := clampf(to.length(), absf(upper - lower) + 0.001, upper + lower - 0.001)
 	var dir := to.normalized()
@@ -192,7 +192,7 @@ static func reach_bones(sk: Skeleton3D, thigh: int, shin: int, tgt: Vector3) -> 
 	var knee_to := hip + dir * (upper * ca) + side * (upper * sqrt(1.0 - ca * ca))
 	var turn_t := Basis(Quaternion((knee - hip).normalized(), (knee_to - hip).normalized()))
 	sk.set_bone_global_pose(thigh, Transform3D(turn_t * tp.basis, hip))
-	var shin_dir := turn_t * (ankle - knee)
+	var shin_dir := turn_t * (ankle_v - knee)
 	var turn_s := Basis(Quaternion(shin_dir.normalized(), (hip + dir * span - knee_to).normalized()))
 	sk.set_bone_global_pose(shin, Transform3D(turn_s * turn_t * sp.basis, knee_to))
 	if foot >= 0:

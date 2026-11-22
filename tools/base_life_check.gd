@@ -13,6 +13,7 @@ const NIGHT_AT := 480.0      # s: the last two minutes are night
 const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
 const LONGEST := 90.0        # s: no state but Nap may last longer
 const LET_GO_MIN_FRAMES := 5   # frames the breath check waits at least, however slow they run
+const ISLAND_SEED := 11      # the farm-start island: a random one moved the nap spots and what the walk runs into
 const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
@@ -30,8 +31,11 @@ func _new_save() -> Array:
 	var calm := 0.1
 	var specs := [["cindle", "Ash", hot], ["basaltoad", "Crag", hot],
 		["burrlet", "Moss", calm], ["zapple", "Pip", calm]]
-	for spec in specs:
-		var rec := Save.new_kin(spec[0], spec[1])
+	seed(7)      # the same four Boki every run: traits, IVs and DNA from these dice, not from the run before
+	for i in specs.size():
+		var spec: Array = specs[i]
+		var rec := Save.new_kin(spec[0], spec[1], 700 + i)
+		rec["uid"] = "bl%d" % i       # new_id is clock-based; bonds are keyed by uid
 		rec["traits"]["temper"] = spec[2]
 		recs.append(rec)
 	recs[0]["starter"] = true
@@ -39,18 +43,21 @@ func _new_save() -> Array:
 	d["active"] = recs[0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	Save.d = d
+	HomeLayout.new_fs(d, ISLAND_SEED)
 	HomeLayout.ensure(d)
 	return recs
 
 func _gather(home, at: Vector3) -> void:
-	for k in home.kins:
-		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
+	for i in home.kins.size():  # on a fixed 2 m grid: the global dice give another spread every run, even seeded
+		var k: Dictionary = home.kins[i]
+		var grid := Vector3(float(i % 2) * 2.0 - 1.0, 0, floorf(i * 0.5) * 2.0 - 1.0)
+		k["pos"] = home.world.free_spot_near(at + grid, [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 
 ## The rivalry beat (BaseRival, garden_sim.json rivalry): rivals passing close turn, huff and walk on, once a
 ## cooldown, and never play tag; a pair that is not rivals does nothing.
 func _rival_beat(home) -> void:
-	var R: Dictionary = BaseRival.rules()
+	var r: Dictionary = BaseRival.rules()
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
 	var c: Dictionary = home.kins[2]
@@ -64,8 +71,8 @@ func _rival_beat(home) -> void:
 	var mid: Vector2 = home.world.islands[maxi(home.world.island_of(a["pos"].x, a["pos"].z), 0)]["c"]
 	a["pos"] = home.world.free_spot_near(Vector3(mid.x, 0, mid.y), [], 0.8)
 	(a["node"] as Node3D).position = a["pos"]
-	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
-	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
+	b["pos"] = a["pos"] + Vector3(float(r["pass_m"]) * 0.5, 0, 0)
+	c["pos"] = a["pos"] + Vector3(-float(r["pass_m"]) * 0.5, 0, 0)
 	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
 	BaseLife.add_bond(a["rec"], c["rec"], 0.0 - BaseLife.bond(a["rec"], c["rec"]))
 	var heard := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
@@ -75,20 +82,20 @@ func _rival_beat(home) -> void:
 	var fb: Fsm = b["life"]
 	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
 	ok(fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
-		"rivals passing within %.1f m both turn to each other (React)" % float(R["pass_m"]))
+		"rivals passing within %.1f m both turn to each other (React)" % float(r["pass_m"]))
 	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
 	var after := int(GardenSfx.heard.get("garden_sulk_small", 0)) + int(GardenSfx.heard.get("garden_sulk_medium", 0)) \
 		+ int(GardenSfx.heard.get("garden_sulk_large", 0))
 	ok(after == heard + 2, "each huffs through the garden SFX (%d cues)" % (after - heard))
 	ok((c["life"] as Fsm).is_in(BaseLife.S.ROAM), "a Boki that is not a rival is left alone")
 	var gap := BaseLife._dist(a, b)
-	for i in int(float(R["beat_s"]) / 0.1) + 2:
+	for i in int(float(r["beat_s"]) / 0.1) + 2:
 		home.life.step(0.1)
-	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"), 
-		"the beat ends in %.1f s" % float(R["beat_s"]))
+	ok(fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"),
+		"the beat ends in %.1f s" % float(r["beat_s"]))
 	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
 	home.life.step(0.2)
-	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(R["cooldown_s"]))
+	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(r["cooldown_s"]))
 	for k in [a, b]:
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
 	home.life._tag(a, b)
@@ -164,6 +171,9 @@ func _nap_sounds(home) -> void:
 		lower = lower and BokiNapSfx.pitch_of(by_cm[i + 1]) <= BokiNapSfx.pitch_of(by_cm[i])
 	ok(lower, "a bigger Boki breathes lower (%s)" % [by_cm.map(func(r): return "%.2f" % BokiNapSfx.pitch_of(r))])
 	var sleeper: Dictionary = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) > 0.0)[0]
+	for key in Sfx.loops.keys():  # the sim's loops still held (HOLD_MS of real time) are not tonight's sleepers
+		if String(key).begins_with("nap:"):
+			Sfx.loop_stop(key)
 	Sfx.listener = sleeper["pos"]
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
@@ -178,11 +188,11 @@ func _nap_sounds(home) -> void:
 			break
 	ok(Sfx.last_played.has(BokiNapSfx.YAWN), "a Boki waking at dawn yawns")
 	# Sfx.loop_hold lets go HOLD_MS of real time after the last hold; give the frames up to LET_GO_MS to run it
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	var left := _awake_breaths(home)
 	var frames := 0
 	# a loaded box can run only a frame or two in LET_GO_MS: wait for LET_GO_MS_MIN_FRAMES frames as well
-	while not left.is_empty() and (Time.get_ticks_msec() - t0 < LET_GO_MS or frames < LET_GO_MIN_FRAMES):
+	while not left.is_empty() and (CheckClock.own_msec() - t0 < LET_GO_MS or frames < LET_GO_MIN_FRAMES):
 		await main.get_tree().process_frame
 		frames += 1
 		left = _awake_breaths(home)
@@ -213,6 +223,7 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
+	seed(11)
 	home.day_t = 0.4
 	for k in home.kins:
 		k["nap_t"] = 0.0
@@ -221,6 +232,12 @@ func _spots_part(home, center: Vector3) -> void:
 		Care.need(k["rec"], "joy")
 		k["rec"]["needs"]["joy"] = 90.0
 	_gather(home, center)
+	# each starts a step from its place: how far from it a Boki lies down varies with the walk, and so did this row
+	var starts := [Vector3(cx + 3.0, 0, cz + 0.5), Vector3(cx + 3.0, 0, cz + 1.5), Vector3(cx - 2.5, 0, cz + 3.5)]
+	for n in starts.size():
+		var k: Dictionary = home.kins[n]
+		k["pos"] = home.world.free_spot_near(starts[n], [], 0.8)
+		(k["node"] as Node3D).position = k["pos"]
 	var keys: Array = home.kins.map(func(k): return k["rec"].keys())
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
