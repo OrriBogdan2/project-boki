@@ -7,12 +7,13 @@ ring of inharmonic plate partials, and a bright ting where it lands. Juice sets 
   armor_up     : ~0.4 s, what everyone nearby hears (positional).
   armor_up_own : ~0.55 s, your own Hunter's: the same rise with an octave-up shimmer and a low plate thump.
 """
+
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, env, mix, at, lpf
+from sfx_lib import N, env, mix, at, lpf
 
 S.reseed(5307)
-F0, F1 = 520.0, 780.0        # Hz: the glide's start and end (a fifth up); the tier then shifts it by pitch_scale
+F0, F1 = 520.0, 780.0  # Hz: the glide's start and end (a fifth up); the tier then shifts it by pitch_scale
 
 
 def glide(d, f0, f1):
@@ -34,6 +35,6 @@ def rise(d, own):
     return lpf(x, 9000)
 
 
-if __name__ == '__main__':
-    S.save_cat('armor_up', rise(0.4, False), 'cast')
-    S.save_cat('armor_up_own', rise(0.55, True), 'impact')
+if __name__ == "__main__":
+    S.save_cat("armor_up", rise(0.4, False), "cast")
+    S.save_cat("armor_up_own", rise(0.55, True), "impact")

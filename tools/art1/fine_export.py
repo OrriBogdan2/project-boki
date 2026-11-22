@@ -2,6 +2,7 @@
 crosses the body in a frame or two; at 30 fps the bones' slerp between two keys swings the hand off its path). The glTF
 exporter samples bones at whole scene frames, so those clips go out in a second export at their own rate and are spliced
 into the .glb by name (glb_add_clips.py). In the .blend they play at the scene's rate (slower)."""
+
 import os
 
 import bpy

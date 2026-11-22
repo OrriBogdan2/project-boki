@@ -5,6 +5,7 @@ through that fit, the registrations in boki_rig_check.gd, then the build into ar
 
   python3 tools/boki/auto_port.py <id>=<model.glb> ...      (a species once only: its FRAME row moves through the fit)
 """
+
 import os
 import re
 import subprocess
@@ -34,11 +35,16 @@ def row_of(text, species):
 
 def first_row(species):
     """The species' FRAME row as its primitive rig first had it in full (its own coordinates, before a scan's fit moved it)."""
-    log = subprocess.run(["git", "log", "--reverse", "--format=%h", "--", "scripts/match/boki_rig.gd"], cwd=REPO,
-                         capture_output=True, text=True).stdout.split()
+    log = subprocess.run(
+        ["git", "log", "--reverse", "--format=%h", "--", "scripts/match/boki_rig.gd"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    ).stdout.split()
     for commit in log:
-        text = subprocess.run(["git", "show", commit + ":scripts/match/boki_rig.gd"], cwd=REPO, capture_output=True,
-                              text=True).stdout
+        text = subprocess.run(
+            ["git", "show", commit + ":scripts/match/boki_rig.gd"], cwd=REPO, capture_output=True, text=True
+        ).stdout
         row = row_of(text, species)
         if row is not None and '"marks"' in row.group(0):
             return row.group(0)
@@ -49,13 +55,21 @@ def frame(species):
     text = open(RIG).read()
     proxy = proxy_of(species)
     start = first_row(species if proxy != "glomwort" or species == "glomwort" else "glomwort")
-    start = start.replace('"%s"' % (species if proxy != "glomwort" or species == "glomwort" else "glomwort"), '"%s"' % species, 1)
+    start = start.replace(
+        '"%s"' % (species if proxy != "glomwort" or species == "glomwort" else "glomwort"), '"%s"' % species, 1
+    )
     if row_of(text, species) is None:
         text = text.replace("const FRAME := {\n", "const FRAME := {\n" + start, 1)
     else:
         text = text.replace(row_of(text, species).group(0), start, 1)
     open(RIG, "w").write(text)
-    out = blender(os.path.join(TOOLS, "build_boki.py"), "--", "--species=" + species, "--no-export", "--fit-sheet=%s/fit_%s.png" % (SHEETS, species))
+    out = blender(
+        os.path.join(TOOLS, "build_boki.py"),
+        "--",
+        "--species=" + species,
+        "--no-export",
+        "--fit-sheet=%s/fit_%s.png" % (SHEETS, species),
+    )
     moved = out.split("FRAME row through the fit:\n", 1)[1].split("\nBlender", 1)[0].rstrip("\n") + "\n"
     text = open(RIG).read()
     open(RIG, "w").write(text.replace(row_of(text, species).group(0), moved, 1))
@@ -63,7 +77,11 @@ def frame(species):
 
 def check_lists(species):
     text = open(CHECK).read()
-    text = text.replace('"floenatee"]', '"floenatee", "%s"]' % species, 1) if '"%s"' % species not in text.split("const MAX_TRIS")[0] else text
+    text = (
+        text.replace('"floenatee"]', '"floenatee", "%s"]' % species, 1)
+        if '"%s"' % species not in text.split("const MAX_TRIS")[0]
+        else text
+    )
     if '"%s": MESHY_TRIS' % species not in text:
         text = text.replace('"selenfin": MESHY_TRIS}', '"selenfin": MESHY_TRIS, "%s": MESHY_TRIS}' % species, 1)
     open(CHECK, "w").write(text)
@@ -73,10 +91,20 @@ def main(pairs):
     for pair in pairs:
         species, glb = pair.split("=")
         try:
-            print(species, re.search(r"EXT.*", blender(os.path.join(TOOLS, "boki_prep.py"), "--", species, glb)).group(0), flush=True)
+            print(
+                species,
+                re.search(r"EXT.*", blender(os.path.join(TOOLS, "boki_prep.py"), "--", species, glb)).group(0),
+                flush=True,
+            )
             frame(species)
             blender(os.path.join(TOOLS, "build_boki.py"), "--", "--species=" + species)
-            print(species, "built", os.path.getsize(os.path.join(REPO, "art/kin", species, species + ".glb")) // 1024, "KB", flush=True)
+            print(
+                species,
+                "built",
+                os.path.getsize(os.path.join(REPO, "art/kin", species, species + ".glb")) // 1024,
+                "KB",
+                flush=True,
+            )
             check_lists(species)
         except Exception as e:  # one species failing leaves the rest to go on
             print(species, "FAILED", repr(e)[:150], flush=True)

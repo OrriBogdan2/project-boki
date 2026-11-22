@@ -6,9 +6,9 @@ extends RefCounted
 ## --overflow-shots --shots-dir=<dir>: the same run with a real renderer, one PNG a panel (<dir>/<panel>.png).
 
 const WIN := Vector2i(1280, 720)
-const TEXT_K := 1.5      # the biggest Text size (Settings.TEXT_SIZES)
-const CARD_TABS := ["Care", "Training", "Growth", "Family", "About"]      # a Boki card's tabs (Home._open_kin)
-const OVERLAP_PX := 3.0      # two labels share at least this much in both directions
+const TEXT_K := 1.5  # the biggest Text size (Settings.TEXT_SIZES)
+const CARD_TABS := ["Care", "Training", "Growth", "Family", "About"]  # a Boki card's tabs (Home._open_kin)
+const OVERLAP_PX := 3.0  # two labels share at least this much in both directions
 
 var main: Node
 var home
@@ -19,10 +19,12 @@ var rare: Dictionary
 var pair: Array
 var win_sz := Vector2.ZERO
 
+
 func ok(cond: bool, what: String) -> void:
 	print("OVERFLOW %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(mn: Node, mode: String) -> void:
 	main = mn
@@ -50,9 +52,11 @@ func run(mn: Node, mode: String) -> void:
 	print("OVERFLOW DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
+
 
 ## A full farm with a sprig, a rare kin and a pair for the Nook (Home._nest_demo), every zone awake.
 func _stage() -> void:
@@ -66,6 +70,7 @@ func _stage() -> void:
 		Save.d["zones"][id] = {"open": true}
 	await _frames(2)
 
+
 ## Five Rare Eggs in the cradles and two on the shelf (as Home._nest_demo "incub" does).
 func _eggs() -> void:
 	Save.d["incubator"] = {}
@@ -78,11 +83,23 @@ func _eggs() -> void:
 	for e in Incubator.eggs():
 		e["heat"] = Incubator.need() * (1.0 - 0.2 * float(int(e["slot"]) % 5))
 
+
 ## [panel name, where it opens: "home" (the farm's panel) or "overlay"]. _open() builds each by its name.
 func _panels() -> Array:
 	var out: Array = []
-	for n in ["nook_pair", "nook_grid", "nook_kin", "nook_rare", "nook_incubator_empty", "nook_incubator_eggs",
-			"burrow", "feed", "zone_cards", "games_board", "prizes"]:
+	for n in [
+		"nook_pair",
+		"nook_grid",
+		"nook_kin",
+		"nook_rare",
+		"nook_incubator_empty",
+		"nook_incubator_eggs",
+		"burrow",
+		"feed",
+		"zone_cards",
+		"games_board",
+		"prizes"
+	]:
 		out.append([n, "home"])
 	out.append(["field_book", "overlay"])
 	for t: String in CARD_TABS:
@@ -90,6 +107,7 @@ func _panels() -> Array:
 	for id: String in GardenItems.ids():
 		out.append(["item_" + id, "overlay"])
 	return out
+
 
 func _open(pname: String) -> void:
 	home.nook_view = ""
@@ -133,6 +151,7 @@ func _open(pname: String) -> void:
 			else:
 				Overlay.open_dex(pname.substr(5))
 
+
 func _show(pname: String, where: String) -> void:
 	home._close_panel()
 	_open(pname)
@@ -150,6 +169,7 @@ func _show(pname: String, where: String) -> void:
 		Overlay.close()
 	else:
 		home._close_panel()
+
 
 ## Labels that sit on top of each other, or outside the window. Labels inside a ScrollContainer are not
 ## measured: the scroll keeps them in reach.
@@ -172,6 +192,7 @@ static func overlaps(root: Node, sz: Vector2) -> Array:
 				bad_ones.append("overlap '%s' / '%s'" % [a.text.left(18), b.text.left(18)])
 	return bad_ones
 
+
 ## One-line labels that elide ("...") because they do not fit: the words are lost on screen. A label whose
 ## tooltip is its whole text (a compact card line) can still be read.
 static func trimmed(root: Node) -> Array:
@@ -186,6 +207,7 @@ static func trimmed(root: Node) -> Array:
 			out.append("trimmed '%s'" % l.text.left(24))
 	return out
 
+
 ## True when a parent row's hover tooltip holds the label's whole text (the burrow's mutation perk line
 ## trims by design and its row tooltip spells it out). Which perk the demo Boki rolls is random, so
 ## without this the check failed on some runs only.
@@ -196,6 +218,7 @@ static func _row_tip_has(l: Label, root: Node) -> bool:
 			return true
 		p = p.get_parent()
 	return false
+
 
 static func _scrolled(c: Control, root: Node) -> bool:
 	var p := c.get_parent()

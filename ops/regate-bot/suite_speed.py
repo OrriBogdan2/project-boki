@@ -17,7 +17,6 @@ import os
 import re
 import shutil
 import signal
-import statistics
 import subprocess
 import sys
 import faulthandler
@@ -48,7 +47,9 @@ GAME_EXT = re.compile(
 # ---------------------------------------------------------------- flags
 def suite_flags(tree):
     tree = Path(tree)
-    reg = merge_areas((tree / "tools/check_registry.gd").read_text(), [f.read_text() for f in sorted(tree.glob("tools/checks/*.gd"))])
+    reg = merge_areas(
+        (tree / "tools/check_registry.gd").read_text(), [f.read_text() for f in sorted(tree.glob("tools/checks/*.gd"))]
+    )
     block = reg.split("const CHECKS := {", 1)[1].split("\n}", 1)[0]
     flags = re.findall(r'^\s*"(--[a-z0-9-]+-check)":', block, re.M)
     main = (tree / "scripts/main.gd").read_text()
@@ -168,7 +169,9 @@ def load_note():
     b = own_busy_pct()
     k, c = my_cores(), os.cpu_count() or 1
     host = f" (host has {c})" if c != k else ""
-    return f"load1 {os.getloadavg()[0]:.0f} on {k} usable CPUs{host}" + (f", this pod's own CPUs {b:.0f}% busy" if b is not None else "")
+    return f"load1 {os.getloadavg()[0]:.0f} on {k} usable CPUs{host}" + (
+        f", this pod's own CPUs {b:.0f}% busy" if b is not None else ""
+    )
 
 
 def mem_avail_gb():
@@ -448,14 +451,24 @@ def run_flag(godot, tree, flag, timeout, extra, on_start=None):
     # carries this run's own XDG_DATA_HOME (inherited env = exactly this check's leftovers, nothing else).
     try:
         with open(f"{tmp}/out.log", "w+", errors="replace") as fh:
-            p = subprocess.Popen(cmd, cwd=tree, env=env, stdin=subprocess.DEVNULL, stdout=fh, stderr=subprocess.STDOUT,
-                                 start_new_session=True)
+            p = subprocess.Popen(
+                cmd,
+                cwd=tree,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                stdout=fh,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+            )
             if on_start:
                 on_start(p.pid, mark)
             try:
                 rc = p.wait(timeout + 30)
             except subprocess.TimeoutExpired:
-                rc, note = 124, f"\nSUITE-SPEED: engine still running {timeout + 30}s after start, killed (hard timeout)\n"
+                rc, note = (
+                    124,
+                    f"\nSUITE-SPEED: engine still running {timeout + 30}s after start, killed (hard timeout)\n",
+                )
             try:
                 os.killpg(p.pid, signal.SIGKILL)  # whatever is left in the run's own session goes too
             except OSError:
@@ -581,9 +594,16 @@ class Gate:
                     side, tree, flag = heapq.heappop(q)[2]
                     state["busy"] += 1
                 follow = None
-                with mem_lock:  # 11-14: w2 lost its whole user session (tmux + 2 jobs) at --jobs 12 on 30 GB; wait for RAM
+                with (
+                    mem_lock
+                ):  # 11-14: w2 lost its whole user session (tmux + 2 jobs) at --jobs 12 on 30 GB; wait for RAM
                     t0 = time.time()
-                    while state["running"] > 0 and mem_avail_gb() < MIN_MEM_GB and time.time() - t0 < 600 and not self.abort.is_set():
+                    while (
+                        state["running"] > 0
+                        and mem_avail_gb() < MIN_MEM_GB
+                        and time.time() - t0 < 600
+                        and not self.abort.is_set()
+                    ):
                         time.sleep(2)
                     time.sleep(0.5)
                     with cv:
@@ -622,9 +642,13 @@ class Gate:
         self.abort.set()
         now = time.time()
         open_runs = sorted(self.active.values(), key=lambda v: v[4])
-        who = ", ".join(f"{sd}:{fl} {now - st:.0f}s" for sd, fl, _pid, _m, st in open_runs[:6]) or "none (workers idle?)"
-        why = (f"STALLED: no run finished for {limit / 60:.0f} min in the {label} phase ({len(self.res['merge'])} merge +"
-               f" {len(self.res['main'])} main done, {queued} queued, {state['busy']} busy); open runs: {who}")
+        who = (
+            ", ".join(f"{sd}:{fl} {now - st:.0f}s" for sd, fl, _pid, _m, st in open_runs[:6]) or "none (workers idle?)"
+        )
+        why = (
+            f"STALLED: no run finished for {limit / 60:.0f} min in the {label} phase ({len(self.res['merge'])} merge +"
+            f" {len(self.res['main'])} main done, {queued} queued, {state['busy']} busy); open runs: {who}"
+        )
         try:
             with open(self.out / "stall.txt", "w") as fh:
                 fh.write(why + "\n\n== python threads ==\n")
@@ -632,14 +656,35 @@ class Gate:
                 faulthandler.dump_traceback(file=fh, all_threads=True)
                 fh.write("\n== processes in D state / open runs' sessions ==\n")
                 fh.flush()
-                ps = subprocess.run(["ps", "-eo", "pid,ppid,pgid,sid,stat,wchan:24,etimes,cmd", "--sort=-etimes"],
-                                    capture_output=True, text=True, timeout=20).stdout.splitlines()
+                ps = subprocess.run(
+                    ["ps", "-eo", "pid,ppid,pgid,sid,stat,wchan:24,etimes,cmd", "--sort=-etimes"],
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                ).stdout.splitlines()
                 sids = {str(v[2]) for v in open_runs}
-                fh.write("\n".join(ln[:230] for ln in ps[:1] + [x for x in ps[1:] if (x.split() + ["", "", "", "", ""])[4].startswith("D")
-                                                                or (x.split() + [""] * 4)[3] in sids])[:20000] + "\n")
+                fh.write(
+                    "\n".join(
+                        ln[:230]
+                        for ln in ps[:1]
+                        + [
+                            x
+                            for x in ps[1:]
+                            if (x.split() + ["", "", "", "", ""])[4].startswith("D")
+                            or (x.split() + [""] * 4)[3] in sids
+                        ]
+                    )[:20000]
+                    + "\n"
+                )
         except (OSError, subprocess.SubprocessError, ValueError):
             pass
-        for sd, fl, pid, mark, _st in open_runs:  # the hung runs' own sessions and leftovers go; nobody else's processes
+        for (
+            sd,
+            fl,
+            pid,
+            mark,
+            _st,
+        ) in open_runs:  # the hung runs' own sessions and leftovers go; nobody else's processes
             try:
                 os.killpg(pid, signal.SIGKILL)
             except OSError:
@@ -691,6 +736,7 @@ class Gate:
         """Mid-run guard: stop when most paired runs are red on both trees, or most merge runs are red at all."""
         with self.lock:
             both = [f for f in self.res["merge"] if f in self.res["main"] and not self.res["main"][f].get("cached")]
+
             # 11-16: a check killed by the timeout (rc 124/137) says nothing about the tree, only that the box is loaded
             # (rpc4 load 90 on 32 cores: 19/24 "red on both" were all 300 s timeouts). Count real reds only.
             def to(r):
@@ -719,14 +765,20 @@ class Gate:
         if self.abort.is_set():
             return
         if self.a.timeout_max > 0 and len(tof) >= self.a.timeout_max:
-            self.env_broken(f"HOST-OVERLOADED: {len(tof)} flags hit the {self.a.timeout} s per-flag timeout (limit {self.a.timeout_max}; "
-                            f"{load_note()}): not a tree problem, retry on another host")
+            self.env_broken(
+                f"HOST-OVERLOADED: {len(tof)} flags hit the {self.a.timeout} s per-flag timeout (limit {self.a.timeout_max}; "
+                f"{load_note()}): not a tree problem, retry on another host"
+            )
         elif self.over_since and nowt - self.over_since >= self.a.load_min * 60:
-            self.env_broken(f"HOST-OVERLOADED: {load_note()}, load1/cpu_count = {ratio:.1f}x (limit {lm:g}x) "
-                            f"for {(nowt - self.over_since) / 60:.0f} min, {len(tof)} timeouts so far: not a tree problem, retry on another host")
+            self.env_broken(
+                f"HOST-OVERLOADED: {load_note()}, load1/cpu_count = {ratio:.1f}x (limit {lm:g}x) "
+                f"for {(nowt - self.over_since) / 60:.0f} min, {len(tof)} timeouts so far: not a tree problem, retry on another host"
+            )
         elif len(mg) >= lo and ntimeout / len(mg) >= frac:
-            self.env_broken(f"HOST-OVERLOADED: {ntimeout}/{len(mg)} merge-tree checks hit the {self.a.timeout} s timeout "
-                            f"({load_note()}): retry when the box is quiet, not a tree problem")
+            self.env_broken(
+                f"HOST-OVERLOADED: {ntimeout}/{len(mg)} merge-tree checks hit the {self.a.timeout} s timeout "
+                f"({load_note()}): retry when the box is quiet, not a tree problem"
+            )
         elif n >= lo and len(red) / n >= frac:
             self.env_broken(f"mass red: {len(red)}/{n} flags red on BOTH trees")
         elif len(mg) >= lo and mred / len(mg) >= frac:
@@ -780,7 +832,9 @@ class Gate:
                 flags = [f for f in flags if f in set(picked)]
                 scope = f"selected {len(flags)}"
         absolute = self.absolute = [f for f in absolute_flags(a.merge) if f in set(suite_flags(a.merge))]
-        flags += [f for f in absolute if f not in flags]  # absolute checks run on every gate, whatever --flags/--select-base picked
+        flags += [
+            f for f in absolute if f not in flags
+        ]  # absolute checks run on every gate, whatever --flags/--select-base picked
         if a.order == "lpt":
             flags = order_flags(flags, hist)
         if not a.no_canary and not self.canary(flags):
@@ -818,7 +872,9 @@ class Gate:
         m, g = self.res["main"], self.res["merge"]
         new_red = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "green"]
         # absolute checks (tools/gate_absolute.txt): red on merge fails the gate even when main is red or not run
-        abs_red = [f for f in getattr(self, "absolute", []) if g.get(f, {}).get("verdict") == "red" and f not in new_red]
+        abs_red = [
+            f for f in getattr(self, "absolute", []) if g.get(f, {}).get("verdict") == "red" and f not in new_red
+        ]
         fixed = [f for f in flags if g.get(f, {}).get("verdict") == "green" and m.get(f, {}).get("verdict") == "red"]
         both = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "red"]
         mf = getattr(self, "main_flags", set())
@@ -842,7 +898,9 @@ class Gate:
         mism = [f"{s}:{f}" for s in ("main", "merge") for f, r in self.res[s].items() if r.get("mismatch")]
         tos = sorted(f for f, r in m.items() if r.get("cached") and r.get("timeout_strikes"))
         if tos:
-            lines.append(f"main timeouts from cache (timed out in {self.a.timeout_strikes}+ gates) {len(tos)}: {' '.join(tos)}")
+            lines.append(
+                f"main timeouts from cache (timed out in {self.a.timeout_strikes}+ gates) {len(tos)}: {' '.join(tos)}"
+            )
         if mism:
             lines.append(f"RC-MISMATCH {len(mism)}: {' '.join(mism)}")
         with open(self.out / "summary.txt", "a") as fh:
@@ -893,24 +951,45 @@ def main(argv=None):
     p.add_argument("--out", required=True)
     p.add_argument("--jobs", type=int, default=8, help="parallel godot runs in total")
     p.add_argument("--timeout", type=int, default=300)
-    p.add_argument("--stall-min", type=float, default=20,
-                   help="stop with exit 4 and a reason when no run finishes for this many minutes (0: off)")
+    p.add_argument(
+        "--stall-min",
+        type=float,
+        default=20,
+        help="stop with exit 4 and a reason when no run finishes for this many minutes (0: off)",
+    )
     p.add_argument("--godot", default="godot")
     p.add_argument("--godot-args", default="", help="extra engine args, part of the cache key")
     p.add_argument("--history", default=os.path.expanduser("~/.cache/boki-suite/history.tsv"))
     p.add_argument("--cache-dir", default=os.path.expanduser("~/.cache/boki-suite/main"))
     p.add_argument("--no-cache", action="store_true")
-    p.add_argument("--timeout-strikes", type=int, default=2,
-                   help="cache a main-side timeout as red after this many finished gates in a row timed out (0: never)")
-    p.add_argument("--main-lazy", action="store_true",
-                   help="run the main side only for flags red on merge (a merge green cannot be NEW-RED);"
-                   " 'fixed' then lists only flags whose main red is known (cache or run)")
+    p.add_argument(
+        "--timeout-strikes",
+        type=int,
+        default=2,
+        help="cache a main-side timeout as red after this many finished gates in a row timed out (0: never)",
+    )
+    p.add_argument(
+        "--main-lazy",
+        action="store_true",
+        help="run the main side only for flags red on merge (a merge green cannot be NEW-RED);"
+        " 'fixed' then lists only flags whose main red is known (cache or run)",
+    )
     p.add_argument("--order", choices=("lpt", "registry"), default="lpt")
     p.add_argument("--canary", default="", help="comma list of known-stable flags (canary.txt)")
     p.add_argument("--canary-frac", type=float, default=0.5, help="ENV-BROKEN when this share is red on both")
     p.add_argument("--no-canary", action="store_true")
-    p.add_argument("--timeout-max", type=int, default=15, help="ENV-BROKEN (HOST-OVERLOADED) when this many flags hit --timeout (0: off)")
-    p.add_argument("--load-max", type=float, default=2.0, help="HOST-OVERLOADED when load1/cores stays above this for --load-min (0: off)")
+    p.add_argument(
+        "--timeout-max",
+        type=int,
+        default=15,
+        help="ENV-BROKEN (HOST-OVERLOADED) when this many flags hit --timeout (0: off)",
+    )
+    p.add_argument(
+        "--load-max",
+        type=float,
+        default=2.0,
+        help="HOST-OVERLOADED when load1/cores stays above this for --load-min (0: off)",
+    )
     p.add_argument("--load-min", type=float, default=10, help="minutes load1/cores must stay above --load-max")
     p.add_argument("--massred-min", type=int, default=24)
     p.add_argument("--massred-frac", type=float, default=0.6)
@@ -940,8 +1019,10 @@ def main(argv=None):
         secs = {f: pct(v, 0.5) for f, v in hist.items()}
         lpt = order_flags(flags, hist)
         given, longest = simulate(flags, secs, a.jobs), simulate(lpt, secs, a.jobs)
-        print(f"jobs={a.jobs}: given order {given / 60:.1f} min, longest-first {longest / 60:.1f} min,"
-              f" floor {sum(secs.get(f, DEFAULT_SECS) for f in flags) / a.jobs / 60:.1f} min")
+        print(
+            f"jobs={a.jobs}: given order {given / 60:.1f} min, longest-first {longest / 60:.1f} min,"
+            f" floor {sum(secs.get(f, DEFAULT_SECS) for f in flags) / a.jobs / 60:.1f} min"
+        )
     elif a.cmd in ("cache-get", "cache-put"):
         c = Cache(a.cache_dir, a.tree, a.godot, a.godot_args.split())
         if a.cmd == "cache-get":  # hit: prints rc on line 1 then the log tail, exit 0; miss: exit 1

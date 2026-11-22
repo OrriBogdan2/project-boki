@@ -41,8 +41,9 @@ func _fresh(opts := {}) -> void:
 	o.merge(opts, true)
 	m.start(o)
 	m.set_process(false)
-	m.player.riding = false      # landed: a match starts aboard the skyship, where the tips are quiet
-	for mb in m.mobs: mb.queue_free()
+	m.player.riding = false  # landed: a match starts aboard the skyship, where the tips are quiet
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		if h.team != m.player.team:
@@ -87,7 +88,7 @@ func _run_for(secs: float) -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
-	Settings.v["tips"] = true      # the host's settings file may have tips off
+	Settings.v["tips"] = true  # the host's settings file may have tips off
 	_hint()
 	_marker_and_rebind()
 	_fails()
@@ -98,10 +99,10 @@ func run(mn: Node) -> void:
 
 func _hint() -> void:
 	_fresh()
-	var P := m.player
+	var p := m.player
 	var live := _wild("puddlet", 2.0, false)
 	_tips()
-	ok(not _flag() and not P.has_meta("fc"), "a Boki on its feet gets no hint")
+	ok(not _flag() and not p.has_meta("fc"), "a Boki on its feet gets no hint")
 	live.queue_free()
 	m.kins.erase(live)
 	var k := _wild("cindle", 2.0)
@@ -116,7 +117,7 @@ func _hint() -> void:
 	var far := _wild("puddlet", 40.0)
 	m.player.teleport(far.pos + Vector3(1.5, 0, 0))
 	_tips()
-	ok(not FirstCapture.marked(P, far), "a second capturable Boki gets no hint and no marker")
+	ok(not FirstCapture.marked(p, far), "a second capturable Boki gets no hint and no marker")
 	_fresh({"tutorial": true})
 	_wild("cindle", 2.0)
 	_tips()
@@ -125,24 +126,24 @@ func _hint() -> void:
 
 func _marker_and_rebind() -> void:
 	_fresh()
-	var P := m.player
+	var p := m.player
 	var k := _wild("cindle", 2.0)
 	_tips()
-	ok(FirstCapture.marked(P, k), "the marker is on that Boki")
-	P.inp["interact"] = true
+	ok(FirstCapture.marked(p, k), "the marker is on that Boki")
+	p.inp["interact"] = true
 	_run_for(0.6)
 	_tips()
-	P.inp["interact"] = false
-	ok(Capture.active(P) and not FirstCapture.marked(P, k), "...and goes once the scan starts")
+	p.inp["interact"] = false
+	ok(Capture.active(p) and not FirstCapture.marked(p, k), "...and goes once the scan starts")
 	_fresh()
-	P = m.player
+	p = m.player
 	k = _wild("cindle", 2.0)
 	_tips()
-	P.teleport(k.pos - Vector3(float(Capture.rules()["range"]) + 1.0, 0, 0))
+	p.teleport(k.pos - Vector3(float(Capture.rules()["range"]) + 1.0, 0, 0))
 	_tips()
-	P.teleport(k.pos)
+	p.teleport(k.pos)
 	_tips()
-	ok(not FirstCapture.marked(P, k), "...and goes for good when you walk out of range")
+	ok(not FirstCapture.marked(p, k), "...and goes for good when you walk out of range")
 	var old: String = Settings.key_cap("interact")
 	var evs := InputMap.action_get_events("interact")
 	InputMap.action_erase_events("interact")
@@ -158,31 +159,31 @@ func _marker_and_rebind() -> void:
 func _fails() -> void:
 	for why in ["far", "dash", "cc", "gone"]:
 		_fresh()
-		var P := m.player
+		var p := m.player
 		var k := _wild("cindle", 2.0)
 		_tips()
-		P.inp["interact"] = true
+		p.inp["interact"] = true
 		_run_for(0.6)
-		P.inp["interact"] = false
+		p.inp["interact"] = false
 		m.hud.msgs.clear()
 		match why:
 			"far":
-				k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))
+				k.teleport(p.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))
 			"dash":
-				P.inp["dash"] = true
+				p.inp["dash"] = true
 			"cc":
-				P.stun_t = 1.0
+				p.stun_t = 1.0
 			"gone":
 				k.dead = true
 		_run_for(0.3)
-		P.inp["dash"] = false
+		p.inp["dash"] = false
 		var word: String = {"far": "Too far", "dash": "You dashed", "cc": "knocked you out", "gone": "got away"}[why]
 		var generic := _shown("Scan interrupted") or _shown("Scan cancelled")
-		ok(_shown(word) and not P.has_meta("fc") and not generic, "failing by '%s' says so once (\"%s\")" % [why, word])
+		ok(_shown(word) and not p.has_meta("fc") and not generic, "failing by '%s' says so once (\"%s\")" % [why, word])
 	_fresh()
-	var P2 := m.player
+	var p2 := m.player
 	_wild("cindle", 2.0)
-	ok(not FirstCapture.fail(m, P2, "dash"), "no hint behind it: the generic line is used")
+	ok(not FirstCapture.fail(m, p2, "dash"), "no hint behind it: the generic line is used")
 
 
 func _migration() -> void:

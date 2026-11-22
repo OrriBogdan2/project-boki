@@ -50,8 +50,8 @@ static func _stat(rec: Dictionary, s: String) -> float:
 
 ## Chance one glint is rare: doubled for a Boki whose leading lean is Water.
 static func rare_chance(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["rare"]) * (float(R["water_rare"]) if Evo.lean(rec)[0] == "water" else 1.0)
+	var r_v := rules()
+	return float(r_v["rare"]) * (float(r_v["water_rare"]) if Evo.lean(rec)[0] == "water" else 1.0)
 
 ## A list entry can bite only once what it pays exists (an item id in the catalog, a food in Data.CROPS).
 static func can_bite(e: Dictionary) -> bool:
@@ -106,7 +106,7 @@ class Run:
 			S.SHOW: [S.AIM, S.DONE], S.DONE: []}
 	const JOLT_K := 0.4             # a jolt moves the tension by pull times this at once
 
-	var R: Dictionary
+	var r_x: Dictionary
 	var rec: Dictionary             # your Boki
 	var rng: RandomNumberGenerator
 	var sign_list: Array            # today's common catches
@@ -129,7 +129,7 @@ class Run:
 	var casts: Array = []           # one {how, catch} a cast: how = caught, miss, early, late or slip
 
 	func _init(who: Dictionary, day: int, r: RandomNumberGenerator) -> void:
-		R = GlintFishing.rules()
+		r_x = GlintFishing.rules()
 		rec = who
 		rng = r
 		sign_list = GlintFishing.biting(day)
@@ -150,8 +150,8 @@ class Run:
 
 	## m out from the rock the cast lands if you let go now: it swings near_m to far_m and back.
 	func reach() -> float:
-		var u := pingpong(swing / float(R["swing_s"]), 1.0)
-		return lerpf(float(R["near_m"]), float(R["far_m"]), u)
+		var u := pingpong(swing / float(r_x["swing_s"]), 1.0)
+		return lerpf(float(r_x["near_m"]), float(r_x["far_m"]), u)
 
 	## True while your Boki's ears are up (the bite is coming, or here).
 	func ears() -> bool:
@@ -192,13 +192,13 @@ class Run:
 						_hook()
 					else:
 						_end_cast("early")
-				elif state_t > bite_t + float(R["late_s"]):
+				elif state_t > bite_t + float(r_x["late_s"]):
 					_end_cast("late")
 			S.REEL:
 				_reel(dt, hold)
 			S.SHOW:
-				if state_t >= float(R["show_s"]):
-					if casts.size() >= int(R["casts"]) or t >= float(R["max_s"]):
+				if state_t >= float(r_x["show_s"]):
+					if casts.size() >= int(r_x["casts"]) or t >= float(r_x["max_s"]):
 						go(S.DONE)
 					else:
 						_lay_glints()
@@ -209,15 +209,15 @@ class Run:
 		glints = []
 		swing = 0.0
 		hooked = -1
-		var n := int(R["glints"])
-		var near := float(R["near_m"])
-		var stretch := (float(R["far_m"]) - near) / n
-		var aim := float(R["aim_m"])
+		var n := int(r_x["glints"])
+		var near := float(r_x["near_m"])
+		var stretch := (float(r_x["far_m"]) - near) / n
+		var aim := float(r_x["aim_m"])
 		var rare_list := GlintFishing.rares()
 		for i in n:
 			var rare := not rare_list.is_empty() and rng.randf() < GlintFishing.rare_chance(rec)
 			var d := near + stretch * i + rng.randf_range(aim * 0.5, maxf(aim * 0.5, stretch - aim * 0.5))
-			var side := rng.randf_range(-1.0, 1.0) * float(R["spread_m"])
+			var side := rng.randf_range(-1.0, 1.0) * float(r_x["spread_m"])
 			var c := GlintFishing.pick(rare_list if rare else sign_list, rng)
 			glints.append({"d": d, "side": side, "rare": rare, "catch": c})
 
@@ -226,13 +226,13 @@ class Run:
 		var best := -1
 		for i in glints.size():
 			var off := absf(float(glints[i]["d"]) - d)
-			if off <= float(R["aim_m"]) and (best < 0 or off < absf(float(glints[best]["d"]) - d)):
+			if off <= float(r_x["aim_m"]) and (best < 0 or off < absf(float(glints[best]["d"]) - d)):
 				best = i
 		if best < 0:
 			_end_cast("miss")
 			return
 		hooked = best
-		var w: Array = R["wait_s"]
+		var w: Array = r_x["wait_s"]
 		bite_t = rng.randf_range(float(w[0]), float(w[1]))
 		go(S.WAIT)
 
@@ -244,32 +244,32 @@ class Run:
 		go(S.REEL)
 
 	func _swell() -> void:
-		var s: Array = R["pull_s"]
+		var s: Array = r_x["pull_s"]
 		swell_t = 0.0
 		swell_len = rng.randf_range(float(s[0]), float(s[1]))
 		pull_dir = -1.0 if rng.randf() < 0.5 else 1.0
-		if rng.randf() < float(R["jolt"]):
+		if rng.randf() < float(r_x["jolt"]):
 			tension = clampf(tension + pull_dir * _pull() * JOLT_K, 0.0, 1.0)
 
 	## Tension per second the glint drags at the top of a swell.
 	func _pull() -> float:
-		var k := float(R["rare_pull"]) if glints[hooked]["rare"] else 1.0
-		return float(R["pull"]) * k
+		var k := float(r_x["rare_pull"]) if glints[hooked]["rare"] else 1.0
+		return float(r_x["pull"]) * k
 
 	func _reel(dt: float, hold: bool) -> void:
 		swell_t += dt
 		if swell_t >= swell_len:
 			_swell()
 		var drag := pull_dir * _pull() * sin(PI * swell_t / swell_len)
-		tension = clampf(tension + (float(R["rise"]) if hold else -float(R["fall"])) * dt + drag * dt, 0.0, 1.0)
+		tension = clampf(tension + (float(r_x["rise"]) if hold else -float(r_x["fall"])) * dt + drag * dt, 0.0, 1.0)
 		if absf(tension - 0.5) <= half_band():
 			in_band_t += dt
 			slip_t = 0.0
 		else:
 			slip_t += dt
-		if in_band_t >= float(R["land_s"]):
+		if in_band_t >= float(r_x["land_s"]):
 			_end_cast("caught")
-		elif slip_t >= float(R["slip_s"]):
+		elif slip_t >= float(r_x["slip_s"]):
 			_end_cast("slip")
 
 	func _end_cast(how: String) -> void:
@@ -279,13 +279,13 @@ class Run:
 
 ## Pays out a finished session: banks each catch, joy for each and trust if any, energy, a memory line.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var got := run.caught()
 	for e in got:
 		GardenPrizes.bank(e)
-	Care.change(run.rec, "energy", -float(R["energy"]))
-	Care.change(run.rec, "joy", float(R["joy"]) * got.size())
-	var trust := float(R["trust"]) if not got.is_empty() else 0.0
+	Care.change(run.rec, "energy", -float(r_v["energy"]))
+	Care.change(run.rec, "joy", float(r_v["joy"]) * got.size())
+	var trust := float(r_v["trust"]) if not got.is_empty() else 0.0
 	FishingDerby.record(run)
 	Save.remember(run.rec, "fishing", "landed %d of %d glints off the rock" % [got.size(), run.casts.size()], trust)
 	return {"got": got, "casts": run.casts.size()}

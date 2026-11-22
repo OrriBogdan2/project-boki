@@ -57,15 +57,15 @@ func _film() -> void:
 		hero.inp["move"] = Vector2.ZERO
 	hero.ak.cd["x"] = 0.0
 	ult_look.call(0.0)
-	HunterKeys.ult_pressed(hero)     # Basalt Spine (a tap: the ridge centres at the cursor)
+	HunterKeys.ult_pressed(hero)  # Basalt Spine (a tap: the ridge centres at the cursor)
 	await gm._go(3.0, ult_look, func(_t): return mid)
 	print("MEDIA_TSV rocks standing after R: %d" % m.verbs.walls.filter(func(w): return w.get("rock", false)).size())
-	for k in 2:     # Stone Row, twice: the first rises, the second a step on
+	for k in 2:  # Stone Row, twice: the first rises, the second a step on
 		hero.ak.cd["e"] = 0.0
 		hero.ak.use_e()
 		await gm._go(2.2, look, func(_t): return mid)
-		var rocks: Array = m.verbs.walls.filter(func(w): return w.get("rock", false))
-		print("MEDIA_TSV rocks standing after E %d: %d" % [k + 1, rocks.size()])
+		var rocks: int = m.verbs.walls.filter(func(w): return w.get("rock", false)).size()
+		print("MEDIA_TSV rocks standing after E %d: %d" % [k + 1, rocks])
 	# the same from a close camera: the rocks and the arm side by side
 	gm._zoom(0.9)
 	await gm._go(1.5, look, func(_t): return hero.pos + Vector3(2.0, 0.8, 0))

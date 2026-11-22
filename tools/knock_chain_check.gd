@@ -38,8 +38,8 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	var r: Array = ak.setup("dredge", 6.0, "", false)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p_v: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[4]
 	var open := home + Vector3(2.5, 0, -8.5)
 	var walled := home + Vector3(10.5, 0, 3.5)
@@ -49,19 +49,25 @@ func run(main_node: Node) -> void:
 	var sparkle := float((Arch.def("mage")["rmb"]["coil"]["push"] as Array)[1])
 	var vex := float(Arch.def("gunslinger")["rmb"]["burr"]["push"])
 	var rd: Dictionary = Arch.def("dredge")["rmb"]
-	var reel_gap := P.r + T.r + float(rd["stop_gap"])
-	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": reel_gap, "dur": float(rd["pull_max"]),
-		"swing": DredgeKit.SWING, "stun": 0.2}
-	var side := Vector2(0, 1)      # every second knock goes +z (toward the wall on the walled strip)
+	var reel_gap := p_v.r + t.r + float(rd["stop_gap"])
+	var reel := {
+		"mode": "haul",
+		"spd": float(rd["pull_speed"]),
+		"gap": reel_gap,
+		"dur": float(rd["pull_max"]),
+		"swing": DredgeKit.SWING,
+		"stun": 0.2
+	}
+	var side := Vector2(0, 1)  # every second knock goes +z (toward the wall on the walled strip)
 	var pairs := [
 		["Kael Finishing Slam -> Albert Shield Charge", _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5)],
 		["Grimble reel -> Sparkle Storm Rod", reel, _hit(side * sparkle, -1.0)],
 		["Vex Burr Charge -> Vex Burr Charge", _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0)],
 	]
 	for p in pairs:
-		var solo: Vector3 = await _solo(m, P, T, open, p[2])
-		var chain: Dictionary = await _chain(m, P, T, open, p[1], p[2])
-		var into: Dictionary = await _chain(m, P, T, walled, p[1], p[2])
+		var solo: Vector3 = await _solo(m, p_v, t, open, p[2])
+		var chain: Dictionary = await _chain(m, p_v, t, open, p[1], p[2])
+		var into: Dictionary = await _chain(m, p_v, t, walled, p[1], p[2])
 		var want: Vector2 = p[2]["kb"]
 		ok(
 			"%s: right after it, the speed is the newer knock's" % p[0],
@@ -95,9 +101,9 @@ func run(main_node: Node) -> void:
 				into["stun"]
 			]
 		)
-	await _reel_takes_over(m, P, T, open, reel, _hit(side * sparkle, -1.0))
-	await _lockout(m, P, T, walled, _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0))
-	await _stale_wallstun(m, P, T, walled, _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5))
+	await _reel_takes_over(m, p_v, t, open, reel, _hit(side * sparkle, -1.0))
+	await _lockout(m, p_v, t, walled, _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0))
+	await _stale_wallstun(m, p_v, t, walled, _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5))
 	print("KNOCKCHAIN TABLE | pair | after 2nd knock (m) | 2nd knock alone (m) | 1st knock's carry (m) | wall stun |")
 	for w in rows:
 		print(
@@ -120,81 +126,81 @@ static func _hit(kb: Vector2, lift: float) -> Dictionary:
 
 ## Wall A: a column 2 m along +x of the walled spot; wall B: a row 1 m along +z (the second knocks' way: close
 ## enough that Sparkle's 9 m/s rod still meets it over the 8 m/s wall-slam speed).
-func _wall(W: World, at: Vector3) -> void:
-	var wk: PackedByteArray = W.kind
+func _wall(w: World, at: Vector3) -> void:
+	var wk: PackedByteArray = w.kind
 	var ax := int(floor(at.x)) + 2
 	var bz := int(floor(at.z)) + 1
 	for d in range(-3, 4):
-		wk[W.idx(ax, int(floor(at.z)) + d)] = World.T_BLOCK
-		wk[W.idx(int(floor(at.x)) + d - 2, bz)] = World.T_BLOCK
-	W.kind = wk
+		wk[w.idx(ax, int(floor(at.z)) + d)] = World.T_BLOCK
+		wk[w.idx(int(floor(at.x)) + d - 2, bz)] = World.T_BLOCK
+	w.kind = wk
 
 
-func _place(m: Match, P: Hunter, T: Hunter, at: Vector3) -> void:
-	ak.fresh(T)
-	T.wallstun = 0.0
-	T.wslam_t = 0.0
-	T.teleport(at)
-	P.teleport(at + Vector3(-6.0, 0, 0))
-	P.vel = Vector3.ZERO
+func _place(m: Match, p: Hunter, t: Hunter, at: Vector3) -> void:
+	ak.fresh(t)
+	t.wallstun = 0.0
+	t.wslam_t = 0.0
+	t.teleport(at)
+	p.teleport(at + Vector3(-6.0, 0, 0))
+	p.vel = Vector3.ZERO
 	ak.step(m, 0.3)
-	ak.fresh(T)
+	ak.fresh(t)
 
 
 ## Starts a knock or a reel: a hit through Hunter.hurt, or a tow through Displace.
-func _apply(m: Match, P: Hunter, T: Hunter, what: Dictionary) -> Dictionary:
+func _apply(m: Match, p: Hunter, t: Hunter, what: Dictionary) -> Dictionary:
 	if what.has("mode"):
-		return m.displace.tow(T, P, what.duplicate())
-	T.hurt(1.0, P, what.duplicate())
+		return m.displace.tow(t, p, what.duplicate())
+	t.hurt(1.0, p, what.duplicate())
 	return {}
 
 
-func _solo(m: Match, P: Hunter, T: Hunter, at: Vector3, second: Dictionary) -> Vector3:
-	_place(m, P, T, at)
-	var from := T.pos
-	_apply(m, P, T, second)
+func _solo(m: Match, p: Hunter, t: Hunter, at: Vector3, second: Dictionary) -> Vector3:
+	_place(m, p, t, at)
+	var from := t.pos
+	_apply(m, p, t, second)
 	ak.step(m, SETTLE)
-	return T.pos - from
+	return t.pos - from
 
 
 ## The first knock, MID s of flight, the second; what the second did from there.
-func _chain(m: Match, P: Hunter, T: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> Dictionary:
-	_place(m, P, T, at)
-	var tow := _apply(m, P, T, first)
+func _chain(m: Match, p: Hunter, t: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> Dictionary:
+	_place(m, p, t, at)
+	var tow := _apply(m, p, t, first)
 	ak.step(m, MID)
-	var from := T.pos
-	_apply(m, P, T, second)
-	var out := {"v": Vector2(T.vel.x, T.vel.z), "tow_end": String(tow.get("end", "")), "slams": 0, "stun": 0.0}
-	await _watch(m, T, out)
-	out["moved"] = T.pos - from
+	var from := t.pos
+	_apply(m, p, t, second)
+	var out := {"v": Vector2(t.vel.x, t.vel.z), "tow_end": String(tow.get("end", "")), "slams": 0, "stun": 0.0}
+	await _watch(m, t, out)
+	out["moved"] = t.pos - from
 	return out
 
 
 ## Steps SETTLE s, counting wall slams (wslam_t rising) and the longest stun.
-func _watch(m: Match, T: Hunter, out: Dictionary) -> void:
-	var prev := T.wslam_t
+func _watch(m: Match, t_v: Hunter, out: Dictionary) -> void:
+	var prev := t_v.wslam_t
 	var t := 0.0
 	while t < SETTLE:
 		m.step(DT)
 		t += DT
-		if T.wslam_t > prev:
+		if t_v.wslam_t > prev:
 			out["slams"] = int(out["slams"]) + 1
-		prev = T.wslam_t
-		out["stun"] = maxf(float(out["stun"]), T.stun_t)
+		prev = t_v.wslam_t
+		out["stun"] = maxf(float(out["stun"]), t_v.stun_t)
 	await main.get_tree().process_frame
 
 
 ## The other order: a reel starting on a knocked body takes over its flight.
-func _reel_takes_over(m: Match, P: Hunter, T: Hunter, at: Vector3, reel: Dictionary, knock: Dictionary) -> void:
-	_place(m, P, T, at)
-	_apply(m, P, T, knock)
+func _reel_takes_over(m: Match, p: Hunter, t: Hunter, at: Vector3, reel: Dictionary, knock: Dictionary) -> void:
+	_place(m, p, t, at)
+	_apply(m, p, t, knock)
 	ak.step(m, 0.05)
-	var tow := _apply(m, P, T, reel)
-	var v := Vector2(T.vel.x, T.vel.z)
+	var tow := _apply(m, p, t, reel)
+	var v := Vector2(t.vel.x, t.vel.z)
 	ok(
 		"Sparkle Storm Rod -> Grimble reel: the reel takes over the knock's flight",
-		v.length() < 0.01 and T.knock_t == 0.0,
-		"v %.2f knock_t %.2f" % [v.length(), T.knock_t]
+		v.length() < 0.01 and t.knock_t == 0.0,
+		"v %.2f knock_t %.2f" % [v.length(), t.knock_t]
 	)
 	ak.step(m, float(reel["dur"]))
 	ok(
@@ -205,21 +211,21 @@ func _reel_takes_over(m: Match, P: Hunter, T: Hunter, at: Vector3, reel: Diction
 
 
 ## Two Vex knocks, the first into wall A (a slam), the second 0.4 s later into wall B: no slam lockout.
-func _lockout(m: Match, P: Hunter, T: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
-	_place(m, P, T, at)
+func _lockout(m: Match, p: Hunter, t_v: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
+	_place(m, p, t_v, at)
 	var out := {"slams": 0, "stun": 0.0}
-	_apply(m, P, T, first)
-	var prev := T.wslam_t
+	_apply(m, p, t_v, first)
+	var prev := t_v.wslam_t
 	var t := 0.0
 	while t < 0.4:
 		m.step(DT)
 		t += DT
-		if T.wslam_t > prev:
+		if t_v.wslam_t > prev:
 			out["slams"] = int(out["slams"]) + 1
-		prev = T.wslam_t
+		prev = t_v.wslam_t
 	var first_slams := int(out["slams"])
-	_apply(m, P, T, second)
-	await _watch(m, T, out)
+	_apply(m, p, t_v, second)
+	await _watch(m, t_v, out)
 	ok(
 		"Vex -> Vex, both into walls: each knock wall-stuns (no lockout after the first slam)",
 		first_slams == 1 and int(out["slams"]) == 2,
@@ -228,10 +234,10 @@ func _lockout(m: Match, P: Hunter, T: Hunter, at: Vector3, first: Dictionary, se
 
 
 ## A first knock carrying a longer wall stun (Shoulder Charge's 1.2 s) doesn't lend it to the second.
-func _stale_wallstun(m: Match, P: Hunter, T: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
+func _stale_wallstun(m: Match, p: Hunter, t: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
 	var long := first.duplicate()
 	long["wallstun"] = 1.2
-	var out: Dictionary = await _chain(m, P, T, at, long, second)
+	var out: Dictionary = await _chain(m, p, t, at, long, second)
 	ok(
 		"a first knock's longer wall stun is the first knock's: the second's slam stuns the base 0.9 s",
 		int(out["slams"]) >= 1 and absf(float(out["stun"]) - 0.9) < 0.05,

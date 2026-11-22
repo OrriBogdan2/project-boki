@@ -5,13 +5,14 @@ extends RefCounted
 ## first HOLD_S s of damage: a fight starts at the first hit the player takes or deals after QUIET_S s of none.
 
 const KEY := "hero_ult"
-const HOLD_S := 2.0       # s from a fight's first hit before the hint may show
-const QUIET_S := 4.0      # s without a hit that end a fight
-const LINE_MAX := 60      # chars of the ability text the hint keeps
+const HOLD_S := 2.0  # s from a fight's first hit before the hint may show
+const QUIET_S := 4.0  # s without a hit that end a fight
+const LINE_MAX := 60  # chars of the ability text the hint keeps
 
 var _m: Match = null
 var _hit_at := -99.0
 var _fight_at := -99.0
+
 
 ## Called from Match._tips each frame once tips run.
 func tick(m: Match) -> void:
@@ -27,6 +28,7 @@ func tick(m: Match) -> void:
 		return
 	m._tip(KEY, text(p.ak))
 
+
 func _on_hit(by: Node, target: Node, _amount: float, _tags: Array) -> void:
 	var p := _m.player
 	if p == null or (by != p and target != p):
@@ -35,11 +37,13 @@ func _on_hit(by: Node, target: Node, _amount: float, _tags: Array) -> void:
 		_fight_at = _m.time
 	_hit_at = _m.time
 
+
 ## The hint for a kit's ult: its key cap, its name and the first sentence of its text, cut to LINE_MAX.
 static func text(k: ArchKit) -> String:
 	var xd := k.x_def()
 	var line := short_line(String(xd.get("desc", "")))
 	return "%s is ready: %s, %s" % [Settings.key_cap("hunter_ult"), String(xd.get("name", "")), line]
+
 
 static func short_line(desc: String) -> String:
 	var line := desc.get_slice(". ", 0).trim_suffix(".")

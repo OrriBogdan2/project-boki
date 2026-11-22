@@ -16,7 +16,7 @@ const NO_LEGS := ["ostra"]      # rides his box: no legs to plant, his clips key
 ## whole-body show): full-body in the air.
 const LEGS_MOVES := ["jug_meteor", "lw_jump", "breah_dive", "breah_crouch", "dr_jump", "dr_dive", "mf_xform"]
 
-var A
+var a_v
 var bad := 0
 
 func ok(cond: bool, what: String) -> void:
@@ -48,54 +48,54 @@ func _shown(h: Hunter) -> int:
 func run(main: Node) -> void:
 	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
-	A = load("res://tools/archetype_check.gd").new()
-	A.main = main
-	var r: Array = A.setup("juggernaut", 11.0, "", true)
+	a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
+	var r: Array = a_v.setup("juggernaut", 11.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[4]
 	for f in 10:
-		_frame(m, [P])
+		_frame(m, [p])
 	if WardenClips.data("kael").is_empty():
 		# (a branch without Kael's art: no clip data means he plays on the procedural rig, and that has to hold too)
-		ok(_clips(P) == null, "no clip data for Kael: he plays procedurally")
+		ok(_clips(p) == null, "no clip data for Kael: he plays procedurally")
 		print("CLIP_LIVE_DONE, failures: ", bad)
 		main.get_tree().quit(1 if bad > 0 else 0)
 		return
-	ok(_clips(P) != null, "Kael wears his clips in a match")
-	ok(_shown(P) == 0, "one weapon drawn (%d procedural pieces)" % _shown(P))
-	P.equip(P.wid)
+	ok(_clips(p) != null, "Kael wears his clips in a match")
+	ok(_shown(p) == 0, "one weapon drawn (%d procedural pieces)" % _shown(p))
+	p.equip(p.wid)
 	for f in 4:
-		_frame(m, [P])
-	ok(_shown(P) == 0, "one weapon after an equip (%d procedural pieces)" % _shown(P))
+		_frame(m, [p])
+	ok(_shown(p) == 0, "one weapon after an equip (%d procedural pieces)" % _shown(p))
 	# the Warchain, thrown at a foe off to the side, then hauled while he looks and steers past it
-	var K: JuggernautKit = P.ak
-	T.teleport(home + Vector3(10.0, 0, 0))
-	A.aim_at(P, T.pos)
-	K.warchain.press()
+	var k: JuggernautKit = p.ak
+	t.teleport(home + Vector3(10.0, 0, 0))
+	a_v.aim_at(p, t.pos)
+	k.warchain.press()
 	var seen := {}
 	var lean_worst := 0.0
 	var off_chain := 0.0
 	var reel_frames := 0
 	for f in 240:
-		if K.warchain.hooked() and f > 40:
-			A.aim_at(P, P.pos + Vector3(4.0, 0, 5.0))
-			P.inp["move"] = Vector2(0.6, 0.8)
-			K.warchain.press()
-		_frame(m, [P])
-		var c := _clips(P)
+		if k.warchain.hooked() and f > 40:
+			a_v.aim_at(p, p.pos + Vector3(4.0, 0, 5.0))
+			p.inp["move"] = Vector2(0.6, 0.8)
+			k.warchain.press()
+		_frame(m, [p])
+		var c := _clips(p)
 		seen[c.cur] = true
-		var fast := Vector2(P.vel.x, P.vel.z).length() > 4.0
-		if c.cur == "reel" and c.act_w >= 1.0 and K.warchain.pulling() and fast:
-			var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+		var fast := Vector2(p.vel.x, p.vel.z).length() > 4.0
+		if c.cur == "reel" and c.act_w >= 1.0 and k.warchain.pulling() and fast:
+			var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
 			var bi := sk.find_bone("hips")
 			var turn := sk.get_bone_global_pose(bi).basis * sk.get_bone_global_rest(bi).basis.inverse()
 			# (in the model's own frame: the match camera leans every model toward itself)
 			var up := (turn * Vector3.UP).normalized()
-			var head := atan2(-P.vel.x, -P.vel.z)
-			var line := atan2(-(T.pos.x - P.pos.x), -(T.pos.z - P.pos.z))
-			lean_worst = maxf(lean_worst, absf(wrapf(atan2(-up.x, -up.z) + P.face - head, -PI, PI)))
+			var head := atan2(-p.vel.x, -p.vel.z)
+			var line := atan2(-(t.pos.x - p.pos.x), -(t.pos.z - p.pos.z))
+			lean_worst = maxf(lean_worst, absf(wrapf(atan2(-up.x, -up.z) + p.face - head, -PI, PI)))
 			off_chain = maxf(off_chain, absf(wrapf(head - line, -PI, PI)))
 			reel_frames += 1
 	print("LIVE clips seen: ", seen.keys())
@@ -105,51 +105,51 @@ func run(main: Node) -> void:
 			% [lean_worst, reel_frames])
 	print("LIVE heading up to %.2f rad off the chain" % off_chain)
 	# crowd control through the Hunter's own timers and KitStatus: each shows on his clips while it runs
-	K.warchain.snap()
-	K.warchain.state = "ready"
-	K.anim_id = ""
-	P.inp["move"] = Vector2.ZERO
+	k.warchain.snap()
+	k.warchain.state = "ready"
+	k.anim_id = ""
+	p.inp["move"] = Vector2.ZERO
 	# (the haul can carry him off an edge: he falls, respawns and lands, and the land clip would cover the root's
 	# strain, so wait until he stands and his landing is over)
-	var land_dur := float((_clips(P).d.get("land", {}) as Dictionary).get("dur", 0.0))
+	var land_dur := float((_clips(p).d.get("land", {}) as Dictionary).get("dur", 0.0))
 	for f in 300:
-		_frame(m, [P])
-		if f >= 60 and bool(P.anim_s.get("grounded", false)) and _clips(P).land_t > land_dur + WardenClips.FADE:
+		_frame(m, [p])
+		if f >= 60 and bool(p.anim_s.get("grounded", false)) and _clips(p).land_t > land_dur + WardenClips.FADE:
 			break
-	P.stun_t = 0.5
+	p.stun_t = 0.5
 	for f in 12:
-		_frame(m, [P])
-	ok(_clips(P).cur == "stun" and _clips(P).act_w >= 1.0, "a stun plays his stun clip (%s)" % _clips(P).cur)
-	P.stun_t = 0.0
-	P.root_t = 0.5
+		_frame(m, [p])
+	ok(_clips(p).cur == "stun" and _clips(p).act_w >= 1.0, "a stun plays his stun clip (%s)" % _clips(p).cur)
+	p.stun_t = 0.0
+	p.root_t = 0.5
 	for f in 12:
-		_frame(m, [P])
-	ok(_clips(P).cc.root_w >= 1.0, "a root strains his torso (%.2f)" % _clips(P).cc.root_w)
-	P.root_t = 0.0
-	KitStatus.apply(P, "gnd", 0.5, 0.0, false)
+		_frame(m, [p])
+	ok(_clips(p).cc.root_w >= 1.0, "a root strains his torso (%.2f)" % _clips(p).cc.root_w)
+	p.root_t = 0.0
+	KitStatus.apply(p, "gnd", 0.5, 0.0, false)
 	for f in 12:
-		_frame(m, [P])
-	ok(_clips(P).crouch_w >= 1.0 and _clips(P).cc.gnd_w >= 1.0, "Grounded drops him into the crouch (%.2f)"
-			% _clips(P).crouch_w)
+		_frame(m, [p])
+	ok(_clips(p).crouch_w >= 1.0 and _clips(p).cc.gnd_w >= 1.0, "Grounded drops him into the crouch (%.2f)"
+			% _clips(p).crouch_w)
 	for f in 40:
-		_frame(m, [P])
-	ok(_clips(P).crouch_w <= 0.0 and _clips(P).cc.root_w <= 0.0 and _clips(P).act_w <= 0.0, "all three let go")
+		_frame(m, [p])
+	ok(_clips(p).crouch_w <= 0.0 and _clips(p).cc.root_w <= 0.0 and _clips(p).act_w <= 0.0, "all three let go")
 	# a knock-out
-	P.lives = 1
+	p.lives = 1
 	for f in 30:
-		_frame(m, [P])
-	m.eliminate(P, T, "finished")
+		_frame(m, [p])
+	m.eliminate(p, t, "finished")
 	var dead_seen := false
 	var was_visible := false
 	for f in 60:
-		_frame(m, [P])
-		dead_seen = dead_seen or _clips(P).cur == "death"
-		was_visible = was_visible or P.visible
+		_frame(m, [p])
+		dead_seen = dead_seen or _clips(p).cur == "death"
+		was_visible = was_visible or p.visible
 	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip (clip %s, visible %s)"
 			% [dead_seen, was_visible])
 	for f in 60:
-		_frame(m, [P])
-	ok(not P.visible, "after the clip he is gone")
+		_frame(m, [p])
+	ok(not p.visible, "after the clip he is gone")
 	m.queue_free()
 	await _air_casts(main)
 	print("CLIP_LIVE_DONE, failures: ", bad)
@@ -158,9 +158,9 @@ func run(main: Node) -> void:
 ## Each Hunter's keys pressed in the air: which moves stand planted there (full body over the fall), and whether one
 ## that lands mid-move snaps into its stance.
 func _air_casts(main: Node) -> void:
-	var L = load("res://tools/air_limits_check.gd").new()
+	var l = load("res://tools/air_limits_check.gd").new()
 	for arch in Arch.ORDER.filter(func(a): return not a in NO_LEGS):
-		var m: Match = L._match(main, arch)
+		var m: Match = l._match(main, arch)
 		var h: Hunter = m.player
 		var home := h.pos
 		var planted := {}
@@ -168,12 +168,12 @@ func _air_casts(main: Node) -> void:
 		for mode in ["jump", "fall"]:
 			for key in AIR_KEYS:
 				for hold in AIR_HOLDS:
-					L._clear(h)
+					l._clear(h)
 					h.teleport(home)
 					h.vel = Vector3.ZERO
 					for i in 60:
 						_frame(m, [h])
-					L._ready_all(h)
+					l._ready_all(h)
 					if mode == "jump":
 						h.inp["jump"] = true
 						for i in 8:

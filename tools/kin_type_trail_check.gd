@@ -6,9 +6,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("KINTRAIL %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -27,6 +30,7 @@ func run(main: Node) -> void:
 	print("KINTRAIL DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _match_test(main: Node) -> void:
 	var d := Save.fresh()
 	var rec := Save.new_kin("zapple", "Pip")
@@ -40,7 +44,8 @@ func _match_test(main: Node) -> void:
 	m.set_process(false)
 	var k: Kin = m.player.kin
 	ok(k != null, "the player has a Boki")
-	if k == null: return
+	if k == null:
+		return
 	var trail := KinTypeTrail.of(m.fx)
 	ok(KinTypeTrail.of(m.fx) == trail, "one trail node serves every Boki")
 	var emitters := trail.get_children().filter(func(c): return c is GPUParticles3D)
