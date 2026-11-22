@@ -55,17 +55,19 @@ static func make_save(day: int, zone: String) -> void:
 		d["away_seen"] = now - 7200.0      # last here two hours ago: the arrival has a journal to read
 		GardenWishes.today(now)
 
-## The visible blocks of the home's UI (its root and the layer around it): their first words and rect.
+## The visible blocks of the home's UI (its root and the layer around it) that count as a group, as Controls.
+static func blocks_of(home: Node) -> Array:
+	var kids: Array = home.root_ui.get_children() + home.ui.get_children().filter(func(n): return n != home.root_ui)
+	return kids.filter(func(c): return c is HomeDashSlot and c.visible or c is Control and _is_block(c))
+
+## A shown control with a size between a sliver and a full-width dim.
+static func _is_block(c: Control) -> bool:
+	var wh := c.get_global_rect().size
+	return c.is_visible_in_tree() and c.modulate.a > 0.05 and wh.x > MIN_PX and wh.y > MIN_PX and wh.x < FULL_PX
+
+## The visible blocks of the home's UI: their first words and rect.
 static func groups_of(home: Node) -> Array:
-	var out: Array = []
-	for c in home.root_ui.get_children() + home.ui.get_children().filter(func(n): return n != home.root_ui):
-		if c is HomeDashSlot and c.visible:      # drawn across the whole screen: the slot itself is the group
-			out.append("Dash slot")
-		elif c is Control and c.is_visible_in_tree() and c.modulate.a > 0.05 \
-				and c.get_global_rect().size.x > MIN_PX and c.get_global_rect().size.y > MIN_PX \
-				and c.get_global_rect().size.x < FULL_PX:
-			out.append("%s: %s" % [_what(c), c.get_global_rect()])
-	return out
+	return blocks_of(home).map(func(c): return "Dash slot" if c is HomeDashSlot else "%s: %s" % [_what(c), c.get_global_rect()])
 
 ## A short name for a block: its first words.
 static func _what(c: Control) -> String:
