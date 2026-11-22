@@ -151,6 +151,7 @@ defaults aren't cited, since the data names no field for these windows.
 | drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
+| land squash by weight class (`content/rules/land_feel.json`, `--land-weight-check`) | light jump up in ~0.15 s (low crouch 0.1 s, up 0.05 s); heavy slam the deepest squash, ~0.5 s of low recovery | light hop 0.15 s, drop 0.24 s; medium hop 0.1 s, drop 0.3 s; heavy drop and dive depth 1, 0.5 s | measured per class: bottoms out at the data's depth, gone within a frame of its seconds | the footage cells also hold the .glb land clip for their seconds (WardenClips.land_play); medium and the other cells have no footage: the numbers the shared squash ran before [est]; no burst, ring or disc |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
 | e2e_render_frames (key to model moving) | 2 | 1 | <= 1 | no interpolation lag |
 | render_lag_m (model behind sim at a run) | 0.083m | 0.000m | <= 0.03m | |
