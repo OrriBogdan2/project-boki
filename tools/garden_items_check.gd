@@ -118,7 +118,11 @@ func _samples(rec: Dictionary) -> void:
 			if not moved.has("stats." + s):
 				exact = exact and int(probe["stats"][s]) == int(rec["stats"][s])
 		ok(exact, "%s on %s: apply does exactly the preview (%s)" % [id, who, pv["text"]])
-		var named := lines.size() == jn + 1 and CareJournal.text(lines.back()).contains(GardenItems.item_name(id))
+		# a level-up the item causes (xp) adds its own evolution line (a mutation) next to the item's one
+		var fresh: Array = lines.slice(jn).filter(
+			func(l): return CareJournal.text(l).contains(GardenItems.item_name(id))
+		)
+		var named: bool = fresh.size() == 1 and (lines.size() == jn + 1 or pv["deltas"].has("level"))
 		ok(named, "%s on %s: one journal line names it" % [id, who])
 
 func _tokens_and_stay() -> void:

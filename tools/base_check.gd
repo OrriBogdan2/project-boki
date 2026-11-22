@@ -67,6 +67,9 @@ func run(main: Node) -> void:
 		main.get_tree().quit(1)
 		return
 	mate.ctrl = "idle"  # the landing is measured beside the mate, not where a wandering mate strolls off to
+	for h in m.hunters:
+		if h.team != p.team:
+			h.ctrl = "idle"  # the rivals stand down: a rival's shot mid-channel cancels it (step 5 scripts that hit)
 	_still(m, p, 0.5)
 	# 1-2: the wheel opens on hold; the dead zone cancels
 	Input.action_press("base")

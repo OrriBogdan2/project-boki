@@ -196,6 +196,7 @@ func _swatch(key: String, i: int, col: Color) -> Button:
 	for st in ["normal", "hover", "pressed", "focus"]:
 		b.add_theme_stylebox_override(st, UI.frame(col, UI.R_SMALL, edge, 3 if on else 1))
 	b.set_meta("swatch", "%s:%d" % [key, i])
+	UI.sfx(b, false)
 	b.pressed.connect(func():
 		Sfx.play("hover", null, -6.0)
 		look[key] = i
