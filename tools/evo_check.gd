@@ -276,11 +276,11 @@ func _art_gate() -> void:
 		Evo.catch_up(Save.d["roster"]).is_empty() and rec["species"] == "hivara",
 		"art gate: loading changes nothing while the art is missing"
 	)
-	_line("hivara", {"level": 8, "into": [{"id": "cindle"}]})  # the art lands
+	_line("hivara", {"level": 8, "into": [{"id": "wisplet"}]})  # the art lands
 	var evs := Evo.catch_up(Save.d["roster"])
 	var queued := (rec.get("pending_evo", []) as Array).size()
 	ok(
-		rec["species"] == "cindle" and evs.size() == 1 and queued == 1,
+		rec["species"] == "wisplet" and evs.size() == 1 and queued == 1,
 		"art gate: once the art exists it evolves on load, and home plays it"
 	)
 	Save.d["roster"] = []
@@ -290,8 +290,8 @@ func _art_gate() -> void:
 		Evo.level_form(waits) == [no_art, 8, false] and Evo.level_note(waits).ends_with("waits on its art"),
 		"art gate: the Growth card says its level-8 form waits on its art"
 	)
-	_line("hivara", {"level": 8, "into": [{"id": "cindle"}]})
-	var nm := String(Data.KIN["cindle"]["name"])
+	_line("hivara", {"level": 8, "into": [{"id": "wisplet"}]})
+	var nm := String(Data.KIN["wisplet"]["name"])
 	ok(Evo.level_note(waits) == "Evolves into %s at level 8" % nm, "art gate: with the art it names the form and level")
 	var has_line: bool = Evo.rules()["lines"].has("pebbit")
 	ok(

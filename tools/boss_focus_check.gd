@@ -80,11 +80,11 @@ func run(main: Node) -> void:
 	for i in int(2.0 / Match.DT):
 		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
 		# draw that camp spawns shift, and from behind a player 4 m away is outside the view cone)
-		P.reveal_t = 1.0
+		p.reveal_t = 1.0
 		_step()
 		if b.ai["tgt"] == p:
 			went = true
-	P.reveal_t = 0.0
+	p.reveal_t = 0.0
 	ok(
 		boss.dormant and m.lairs.boss_fight(b).is_empty() and went,
 		"outside the lair, boss asleep: the bot goes for the player 4 m away"
