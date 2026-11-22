@@ -89,6 +89,7 @@ func tick(dt: float) -> void:
 		_wave(fired)
 	if int(blast["fired"]) >= n and t >= charge + float(x["gap"]) * (n - 1) + RECOVER:
 		blast = {}
+		m.sfx("dr_blast_end", h.pos, -4.0, 1.0)          # the spent brass rattling down: it is over
 
 ## Interrupted: nothing more fires. Stopped before the first wave, it comes back soon (the counterplay).
 func _stop() -> void:
