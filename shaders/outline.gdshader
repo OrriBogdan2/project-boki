@@ -40,6 +40,7 @@ const float INK_ROOM = 0.02;
 uniform float min_px = 0.0;
 global uniform float ink_px_h;
 varying float far_d;
+varying float ink_a;
 varying float line_px;
 void vertex() {
 	float d = -(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z;
@@ -49,6 +50,7 @@ void vertex() {
 	float px = PROJECTION_MATRIX[3][3] > 0.5 ? 2.0 / (abs(PROJECTION_MATRIX[1][1]) * 720.0)
 		: 2.0 * d / (abs(PROJECTION_MATRIX[1][1]) * 720.0);
 	far_d = px * 1255.3;
+	ink_a = COLOR.a;
 	float w = clamp(d * width, 0.0042, 0.034);
 	if (glow_shell) {
 		w = glow_px * px * smoothstep(glow_near, glow_far, far_d);
@@ -66,6 +68,8 @@ void fragment() {
 		if (far_d < glow_near) { discard; }
 		ALBEDO = min(texture(glow_tex, UV).rgb * glow_col.rgb * glow_k, vec3(1.0));
 	} else {
+		// ink room 0 = no line there: the shell's back face would otherwise show black on a folded thin part (the fin)
+		if (ink_mask && ink_a < 0.004) { discard; }
 		if (far_cut > 0.0 && smoothstep(8.0, 18.0, far_d) >= far_cut) { discard; }
 		if (line_px < min_px) { discard; }
 		ALBEDO = mix(mix(shell_from.rgb, color.rgb, min(shell, 1.0)), vec3(1.0), max(shell - 1.0, 0.0));
