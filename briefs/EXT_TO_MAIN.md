@@ -10880,3 +10880,4 @@ READY ext/boki-own-clips-c 48166c5692606f9b8c8f5cc70f537af3bb43e2d8 (own clips f
 READY ext/farm-tut-ends 90c769dec7 (bulk-rebase: origin/main merged in mechanically, was b15120959e; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/garden-free-toy-hint 750591056e (bulk-rebase: origin/main merged in mechanically, was 11fec9e51d; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/snack-first-60s 86270b4b4c (bulk-rebase: origin/main merged in mechanically, was b58ba57d6d; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/p04-port-1118 b34e514a6a (PR #329 camps: origin/main ee1aced08d merged, 1 conflict tools/steal_tell_check.gd kept main's snake_case names + the reel steps; camps/steal-tell/stomp-break-sweep (184 rows) 0 fail; health --strict red only on style debt already on main)
