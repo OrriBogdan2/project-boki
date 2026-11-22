@@ -509,7 +509,7 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 		not K.wall.is_empty() and absf(T.pos.x - x0) < 0.05 and K.boop.boops == 0,
 		"moved %.2f boops %d" % [T.pos.x - x0, K.boop.boops])
 	ok("bjorn shield: no push chevron in front of the raised wall", not AimKit.shown(P, "aegis_push"))
-	ok("bjorn shield: the wall is drawn in layers (sheet, inner sheet, rim, ground contact: not a flat slab) and bigger",
+	ok("bjorn shield: the wall is drawn in layers (sheet, inner sheet, rim, ground contact, not a flat slab), bigger",
 		K.fx.aegis.get_child_count() >= 4 and AegisWall.H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
 		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), AegisWall.H])
 	# LMB with the aegis held: the boop

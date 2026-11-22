@@ -57,7 +57,7 @@ func run(main: Node) -> void:
 		}
 	)
 	m.set_process(false)
-	var tu: Tutorial = m.tut
+	var _tu: Tutorial = m.tut
 	_play_to(m, "gkey")
 	m.opts["tut_test"] = false  # (the driver stops: the player's keys are this check's own)
 	_send(m)

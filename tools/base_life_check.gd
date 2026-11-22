@@ -55,7 +55,7 @@ func _gather(home, at: Vector3) -> void:
 ## The rivalry beat (BaseRival, garden_sim.json rivalry): rivals passing close turn, huff and walk on, once a
 ## cooldown, and never play tag; a pair that is not rivals does nothing.
 func _rival_beat(home) -> void:
-	var R: Dictionary = BaseRival.rules()
+	var r: Dictionary = BaseRival.rules()
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
 	var c: Dictionary = home.kins[2]
@@ -69,8 +69,8 @@ func _rival_beat(home) -> void:
 	var mid: Vector2 = home.world.islands[maxi(home.world.island_of(a["pos"].x, a["pos"].z), 0)]["c"]
 	a["pos"] = home.world.free_spot_near(Vector3(mid.x, 0, mid.y), [], 0.8)
 	(a["node"] as Node3D).position = a["pos"]
-	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
-	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
+	b["pos"] = a["pos"] + Vector3(float(r["pass_m"]) * 0.5, 0, 0)
+	c["pos"] = a["pos"] + Vector3(-float(r["pass_m"]) * 0.5, 0, 0)
 	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
 	BaseLife.add_bond(a["rec"], c["rec"], 0.0 - BaseLife.bond(a["rec"], c["rec"]))
 	var heard := (
@@ -84,7 +84,7 @@ func _rival_beat(home) -> void:
 	var facing := is_same(a["life_at"], b) and is_same(b["life_at"], a)
 	ok(
 		fa.is_in(BaseLife.S.REACT) and fb.is_in(BaseLife.S.REACT) and facing,
-		"rivals passing within %.1f m both turn to each other (React)" % float(R["pass_m"])
+		"rivals passing within %.1f m both turn to each other (React)" % float(r["pass_m"])
 	)
 	ok(float(a["huff_t"]) > 0.0 and float(b["huff_t"]) > 0.0, "both play the growl clip")
 	var after := (
@@ -95,15 +95,15 @@ func _rival_beat(home) -> void:
 	ok(after == heard + 2, "each huffs through the garden SFX (%d cues)" % (after - heard))
 	ok((c["life"] as Fsm).is_in(BaseLife.S.ROAM), "a Boki that is not a rival is left alone")
 	var gap := BaseLife._dist(a, b)
-	for i in int(float(R["beat_s"]) / 0.1) + 2:
+	for i in int(float(r["beat_s"]) / 0.1) + 2:
 		home.life.step(0.1)
 	ok(
 		fa.is_in(BaseLife.S.ROAM) and fb.is_in(BaseLife.S.ROAM) and not a.has("life_rival"),
-		"the beat ends in %.1f s" % float(R["beat_s"])
+		"the beat ends in %.1f s" % float(r["beat_s"])
 	)
 	ok(Vector2(a["goal"].x - b["pos"].x, a["goal"].z - b["pos"].z).length() > gap, "it walks on, away from the other")
 	home.life.step(0.2)
-	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(R["cooldown_s"]))
+	ok(not fa.is_in(BaseLife.S.REACT), "no repeat inside the cooldown (%.0f s)" % float(r["cooldown_s"]))
 	for k in [a, b]:
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
 	home.life._tag(a, b)
@@ -262,7 +262,7 @@ func _spots_part(home, center: Vector3) -> void:
 	)
 	ok(not sc.is_empty() and sc["i"] != sa.get("i") and int(sc["slot"]) == 0, "a third Boki takes the other spot")
 	var t := 0.0
-	while t < float(life.R["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
+	while t < float(life.r["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
 		home._move_kin(DT)
 		t += DT
 	var on := [a, b, c].filter(
@@ -287,15 +287,15 @@ func _spots_part(home, center: Vector3) -> void:
 func _axes_part(home) -> void:
 	var R := Content.rules("base_axes")
 	var rows := {}
-	for style in R["styles"]:
+	for style in r["styles"]:
 		var rec := Save.new_kin("burrlet", style)
 		for day in 10:
-			for kind in R["styles"][style]:
+			for kind in r["styles"][style]:
 				BaseAxes.care(rec, kind)
 		rows[style] = rec
-		var scales: Array = R["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
+		var scales: Array = r["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
 		print("BASELIFE axes %-8s %s %s" % [style, rec["raised"], ", ".join(scales)])
-	var cap := float(R["cap"])
+	var cap := float(r["cap"])
 	ok(rows["none"]["raised"].values().all(func(v): return v == 0.0), "no care leaves every axis at 0")
 	ok(
 		rows.values().all(func(r): return r["raised"].values().all(func(v): return absf(v) <= cap + 0.0001)),
@@ -414,8 +414,8 @@ func run(m: Node) -> void:
 		for j in range(i + 1, recs.size()):
 			var b := BaseLife.bond(recs[i], recs[j])
 			symmetric = symmetric and is_equal_approx(b, BaseLife.bond(recs[j], recs[i]))
-			friends += 1 if b >= float(home.life.R["friend_at"]) else 0
-			rivals += 1 if b <= float(home.life.R["rival_at"]) else 0
+			friends += 1 if b >= float(home.life.r["friend_at"]) else 0
+			rivals += 1 if b <= float(home.life.r["rival_at"]) else 0
 	ok(friends >= 1, "at least one friend pair formed (%d)" % friends)
 	ok(rivals >= 1, "at least one rival pair formed (%d)" % rivals)
 	ok(symmetric, "every bond is the same both ways")

@@ -26,8 +26,8 @@ static var _hint_pass := -1    # the HudPanels.draws pass that already shows its
 
 ## Once a panel redraw, before the ability row (HudPanels): a newly earned point starts the ALT+key hint
 ## and queues its chime (RankSfx), which plays once it's due.
-static func watch(H) -> void:
-	var m: Match = H.m
+static func watch(h) -> void:
+	var m: Match = h.m
 	var p: Hunter = m.player
 	if m.get_instance_id() != _match_id:
 		_match_id = m.get_instance_id()
@@ -43,8 +43,8 @@ static func watch(H) -> void:
 
 ## Tier pips on `r`'s bottom edge over the key pill (the source's place; charge discs take the top edge): one
 ## per rank the slot can reach, lit up to `lv`; gold once the slot is maxed.
-static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
-	var c: CanvasItem = H.c
+static func pips(h, r: Rect2, slot: String, lv: int, col: Color) -> void:
+	var c: CanvasItem = h.c
 	var tiers := int(Hunter.SLOT_MAX.get(slot, 3))
 	var maxed := lv >= tiers
 	var x0 := r.get_center().x - (tiers * PIP_W + (tiers - 1) * PIP_GAP) * 0.5
@@ -56,13 +56,13 @@ static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
 
 ## A quiet light column rising from a slot that can rank, until a point goes in. It breathes slowly
 ## and stays inside the slot's width, so it never reads as a burst over the Hunter.
-static func beam(H, r: Rect2, slot: String) -> void:
-	var a := BEAM_A * (0.75 + 0.25 * sin(float(H.m.time) * 2.5))
+static func beam(h, r: Rect2, slot: String) -> void:
+	var a := BEAM_A * (0.75 + 0.25 * sin(float(h.m.time) * 2.5))
 	var top := r.position.y - BEAM_H
 	var base := Color(1.0, 0.82, 0.48, a)
 	var clear := Color(base, 0.0)
 	var edge := r.grow_individual(-6.0, 0.0, -6.0, 0.0)
-	H.c.draw_polygon(PackedVector2Array([edge.position, Vector2(edge.end.x, edge.position.y),
+	h.c.draw_polygon(PackedVector2Array([edge.position, Vector2(edge.end.x, edge.position.y),
 		Vector2(edge.end.x, top), Vector2(edge.position.x, top)]), PackedColorArray([base, base, clear, clear]))
 	beams[slot] = HudPanels.draws
 
@@ -72,17 +72,17 @@ static func beam_on(slot: String) -> bool:
 
 ## The spend-a-point marks on a slot that can rank now: the pulsing frame, the "+" (recorded in
 ## plus_spots for clicks) and the ALT+key hint while it's fresh or hovered.
-static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
-	var c: CanvasItem = H.c
-	var t: float = H.m.time
+static func plus(h, r: Rect2, id: String, slot: String, key: String) -> void:
+	var c: CanvasItem = h.c
+	var t: float = h.m.time
 	var pulse := 0.5 + 0.5 * sin(t * 5.0)
-	beam(H, r, slot)
+	beam(h, r, slot)
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
-	H._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
+	h._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
 	var fresh := t < _hint_until and _hint_pass != HudPanels.draws
-	if H.hover_id == id or fresh:
+	if h.hover_id == id or fresh:
 		if fresh: _hint_pass = HudPanels.draws
-		_hint(H, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
+		_hint(h, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
 	var cp := Vector2(r.end.x - 3.0, r.position.y + 3.0)
 	var rad := PLUS_R + pulse * 1.5
 	c.draw_circle(cp, rad + 1.5, HudStyle.SHADE_EDGE)
@@ -115,8 +115,8 @@ static func face(slot: String) -> Rect2:
 	return s[0]
 
 ## The ALT+key hint on a dark pill, so it reads over the bars and labels above the slot.
-static func _hint(H, at: Vector2, text: String) -> void:
+static func _hint(h, at: Vector2, text: String) -> void:
 	var w := HudStyle.BIG.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0
 	var pill := Rect2(Vector2(at.x - w * 0.5, at.y - 13.0), Vector2(w, 17.0))
-	H._rounded(pill, HudStyle.KEY_BG, 6, Color(HudStyle.GOLD, 0.8), 1)
-	HudStyle.ctext(H.c, Vector2(at.x, pill.end.y - 4.0), text, 12, HudStyle.GOLD, 0)
+	h._rounded(pill, HudStyle.KEY_BG, 6, Color(HudStyle.GOLD, 0.8), 1)
+	HudStyle.ctext(h.c, Vector2(at.x, pill.end.y - 4.0), text, 12, HudStyle.GOLD, 0)
