@@ -719,7 +719,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, _sz: Vector2) -> void:
+func _side(c: Control, sz: Vector2) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
