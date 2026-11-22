@@ -287,7 +287,7 @@ and rerun `--mob-damage-check`.
 
 ## 12. Camp clear pacing (PvE, measured)
 
-`--camp-clear-check` puts each of the 12 Hunters (bot-driven, normal kit use, no Boki summon) against a fresh camp at level 1 and level 5. Skitter camp = 2 Skitters, spitter camp = Spitter + Skitter, brute camp = Brute + Skitter + Puffbomb (the game's own comps). Each trial puts the hunter back on its landing spot and lets it rest 3 s. The camp spawns alerted, 6 m away on the same level and in line of sight, so the time is the fight, not the bot's walk. A cell is the median of 5 trials: time to clear / damage taken (hp). Seed 4242:
+`--camp-clear-<camp>-<level>-check` (six flags, one per camp and level, each over all 12 Hunters; under the gate's 300 s cap) puts each of the 12 Hunters (bot-driven, normal kit use, no Boki summon) against a fresh camp at level 1 and level 5. Skitter camp = 2 Skitters, spitter camp = Spitter + Skitter, brute camp = Brute + Skitter + Puffbomb (the game's own comps). Each trial puts the hunter back on its landing spot and lets it rest 3 s. The camp spawns alerted, 6 m away on the same level and in line of sight, so the time is the fight, not the bot's walk. A cell is the median of 5 trials: time to clear / damage taken (hp). Seed 4242:
 
 | Hunter | ski L1 | spi L1 | bru L1 | ski L5 | spi L5 | bru L5 |
 |---|---|---|---|---|---|---|
@@ -314,6 +314,8 @@ skitter@5: slowest 8.1s vs fastest 1.8s (4.47x)
 spitter@5: slowest 19.4s vs fastest 2.3s (8.37x)
 brute@5:   slowest 22.6s vs fastest 1.9s (12.00x)
 ```
+
+After the split into one flag per camp and level (2026-11-22) each cell is seeded by its own name, so the dice no longer depend on the order the cells run in. Spreads then: skitter@1 12.5x, spitter@1 8.4x, brute@1 5.7x, skitter@5 6.0x, spitter@5 3.3x, brute@5 5.7x (all under the 14x ratchet).
 
 **Findings.** `sv/briefs` has no creature hp or damage, so there is nothing to compare against. The proposed band is slowest no more than 1.6x the fastest. It is **not met**, and mob numbers can't meet it: with Skitter, Spitter, Brute and Puffbomb hp all doubled, the spread is still 4.7x to 7.2x. The gap is how the bots use the slow kits:
 - Bulwark's tap throws the hammer, which has to come back.
