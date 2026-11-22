@@ -10955,3 +10955,6 @@ READY ext/gate-style-ratchet 68353d90d456528994b92505b0f31eb782f430e3 (regate-ru
 READY ext/vfx-sparkle-bolt d047e63b3b498f0ae140fa903138477210897c39 (Sparkle LMB bolt: wide hot-pink streak + white core, short tail; merged origin/main; hero-vfx-check Sparkle rule updated; hero-vfx-check 1 red = gunslinger forearm 0.154 m, untouched here)
 READY ext/tut-garden-toy-free 927e2278d6f8580413d0bf9e432d873fc86e7cc2 (garden toy step no longer waits on Feed)
 READY ext/bench-fight-p99-gate d8affd8d97c (--fight-p99-check: --bench-fight p99 vs tools/perf.tsv, +10% fails, GPU_HOST fight-p99-gpu; in tools/checks/misc.gd)
+READY ext/rpc6-settings-pollution-1117 5a941c9790 (bulk-rebase: origin/main merged in mechanically, was d2ccfdfce9; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/spawn-at-muzzle 21b03d04eb (bulk-rebase: origin/main merged in mechanically, was 597314d8c7; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-1afe8a57 8a237b35e1 (bulk-rebase: origin/main merged in mechanically, was e869c30854; union 1 gen 0 files; the branch's own READY checks still apply)
