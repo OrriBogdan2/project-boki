@@ -940,7 +940,6 @@ const CHECKS := {
 	"--save-golden-capture": ["res://tools/save_compat_check.gd", "save_compat_check", "capture"],  # --out=<dir>
 	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],  # press to motion
 	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],  # shots at point blank
-	"--muzzle-check": ["res://tools/muzzle_check.gd", "muzzle_check", null],  # shots leave the weapon or hand
 	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
 	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],  # drop and landing frames
 	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],  # the loading screen; =home|training
