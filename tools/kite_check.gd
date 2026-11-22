@@ -22,17 +22,19 @@ extends RefCounted
 ## Never touches the real save.
 
 const SEEDS := 8
-const DT := 1.0 / 30.0           # s per step
-const MAX_S := 300.0             # s: a lap still flying after this is stuck
-const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
+const DT := 1.0 / 30.0  # s per step
+const MAX_S := 300.0  # s: a lap still flying after this is stuck
+const SETTLE_FRAMES := 600  # frames to wait at most for the home to finish building
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("KITE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -52,6 +54,7 @@ func run(m: Node) -> void:
 	print("KITE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _kin(speed: int, guard := 25) -> Dictionary:
 	var k := Save.new_kin("zapple", "Pip")
 	k["level"] = 5
@@ -62,14 +65,15 @@ func _kin(speed: int, guard := 25) -> Dictionary:
 	k["needs"]["joy"] = 50.0
 	return k
 
+
 ## A lap on seed sd. steer: true steers and flaps for the next ring like a player would (and for a vent
 ## first when vents), false holds still.
 func _lap(sd: int, speed: int, steer: bool, guard := 25, vents := true) -> BaseKite.Run:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = sd
 	var r := BaseKite.Run.new(_kin(speed, guard), rng)
-	var R := BaseKite.rules()
-	var peak_s := float(R["flap_v"]) / float(R["lift_g"])      # s from a flap to its top
+	var r_v := BaseKite.rules()
+	var peak_s := float(r_v["flap_v"]) / float(r_v["lift_g"])  # s from a flap to its top
 	while not r.over() and r.t < MAX_S:
 		var aim := 0.0
 		if steer and r.next < r.rings.size():
@@ -80,17 +84,19 @@ func _lap(sd: int, speed: int, steer: bool, guard := 25, vents := true) -> BaseK
 				to = float(v["off"])
 			aim = clampf((to - r.off) * 3.0, -1.0, 1.0)
 			var ahead := (r.ring_at(r.next) - r.s) / r.speed
-			var low := r.lift < float(R["high_lift"]) * 0.5 and r.climb <= 0.0
+			var low := r.lift < float(r_v["high_lift"]) * 0.5 and r.climb <= 0.0
 			if r.high[r.next] and low and ahead <= peak_s:
 				r.flap()
 		r.step(DT, aim)
 	return r
+
 
 func _next_vent(r: BaseKite.Run) -> Dictionary:
 	for v in r.vents:
 		if not v["used"]:
 			return v
 	return {}
+
 
 func _seeded() -> void:
 	var finished := 0
@@ -101,10 +107,13 @@ func _seeded() -> void:
 	ok(finished == SEEDS, "seeded laps finish with all twelve rings passed: %d of %d" % [finished, SEEDS])
 	var a := _lap(77, 20, true)
 	var b := _lap(77, 20, true)
-	ok(a.rings == b.rings and is_equal_approx(a.time(), b.time()),
-			"one seed flies the same rings to the same time (%.2f s, %.2f s)" % [a.time(), b.time()])
+	ok(
+		a.rings == b.rings and is_equal_approx(a.time(), b.time()),
+		"one seed flies the same rings to the same time (%.2f s, %.2f s)" % [a.time(), b.time()]
+	)
 	var c := _lap(78, 20, true)
 	ok(a.rings != c.rings, "another seed lays other rings")
+
 
 func _speed() -> void:
 	for sp in [0, 60]:
@@ -118,38 +127,60 @@ func _speed() -> void:
 	ok(fast.time() < slow.time(), "Speed 40 lands sooner than Speed 0: %.2f s < %.2f s" % [fast.time(), slow.time()])
 	var lap := TAU * float(BaseKite.rules()["loop_r"])
 	var pace := BaseKite.pace(_kin(0))
-	ok(is_equal_approx(slow.t, lap / pace),
-			"a lap flies lap / pace: %.2f s for %.1f m at %.2f m/s" % [slow.t, lap, pace])
+	ok(
+		is_equal_approx(slow.t, lap / pace),
+		"a lap flies lap / pace: %.2f s for %.1f m at %.2f m/s" % [slow.t, lap, pace]
+	)
+
 
 func _misses() -> void:
 	var clean := _lap(9, 20, true)
 	var still := _lap(9, 20, false)
 	var each := float(BaseKite.rules()["miss_s"])
-	ok(clean.misses == 0 and still.misses > 0,
-			"no steering misses rings: %d of 12 (steered: %d)" % [still.misses, clean.misses])
-	ok(is_equal_approx(still.time(), clean.time() + still.misses * each),
+	ok(
+		clean.misses == 0 and still.misses > 0,
+		"no steering misses rings: %d of 12 (steered: %d)" % [still.misses, clean.misses]
+	)
+	ok(
+		is_equal_approx(still.time(), clean.time() + still.misses * each),
+		(
 			"each miss adds %.0f s: %.2f s vs clean %.2f s with %d misses"
-			% [each, still.time(), clean.time(), still.misses])
+			% [each, still.time(), clean.time(), still.misses]
+		)
+	)
+
 
 func _settle() -> void:
-	var R := BaseKite.rules()
+	var r_v := BaseKite.rules()
 	for steer in [true, false]:
 		var rec := _kin(20)
 		Save.d["gems"] = 0
 		var res := BaseKite.settle(_lap(11, 20, steer), rec, BaseKite.rival(rec))
-		var gems := int(R["gems_clean"]) if steer else int(R["gems"])
-		ok(Care.need(rec, "energy") < 90.0 and Care.need(rec, "joy") > 50.0 and int(Save.d["gems"]) == gems
-				and res["gems"] == gems, "settled %s lap: energy %.0f, joy %.0f, +%d gems"
-				% ["clean" if steer else "missed", Care.need(rec, "energy"), Care.need(rec, "joy"), res["gems"]])
+		var gems := int(r_v["gems_clean"]) if steer else int(r_v["gems"])
+		ok(
+			(
+				Care.need(rec, "energy") < 90.0
+				and Care.need(rec, "joy") > 50.0
+				and int(Save.d["gems"]) == gems
+				and res["gems"] == gems
+			),
+			(
+				"settled %s lap: energy %.0f, joy %.0f, +%d gems"
+				% ["clean" if steer else "missed", Care.need(rec, "energy"), Care.need(rec, "joy"), res["gems"]]
+			)
+		)
+
 
 func _flaps() -> void:
-	var R := BaseKite.rules()
+	var r_v := BaseKite.rules()
 	var want := {0: 3, 24: 3, 25: 4, 60: 5, 100: 7}
 	var got := {}
 	for g in want:
 		got[g] = BaseKite.flaps(_kin(0, g))
-	ok(got == want and int(R["flaps"]) == 3 and int(R["guard_per_flap"]) == 25,
-			"flaps by Guard (3, +1 per 25): %s" % str(got))
+	ok(
+		got == want and int(r_v["flaps"]) == 3 and int(r_v["guard_per_flap"]) == 25,
+		"flaps by Guard (3, +1 per 25): %s" % str(got)
+	)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	var r := BaseKite.Run.new(_kin(0, 50), rng)
@@ -159,8 +190,10 @@ func _flaps() -> void:
 	for i in 90:
 		r.step(DT, 0.0)
 		top = maxf(top, r.lift)
-	ok(r.flaps == 4 and top > float(R["high_lift"]) and r.lift == 0.0,
-			"a flap climbs %.2f m (high rings %.2f m up) and the tow line brings it back to 0" % [top, R["high_lift"]])
+	ok(
+		r.flaps == 4 and top > float(r_v["high_lift"]) and r.lift == 0.0,
+		"a flap climbs %.2f m (high rings %.2f m up) and the tow line brings it back to 0" % [top, r_v["high_lift"]]
+	)
 	while r.flaps > 0:
 		r.flap()
 	ok(not r.flap(), "no flaps left: Space does nothing")
@@ -170,15 +203,18 @@ func _flaps() -> void:
 		var c := _lap(3000 + sd, 0, false)
 		highs += c.high.count(true)
 		first_high = first_high or c.high[0]
-	ok(highs == SEEDS * int(R["high"]) and not first_high,
-			"%d high rings a lap, never the first (%d over %d seeds)" % [R["high"], highs, SEEDS])
+	ok(
+		highs == SEEDS * int(r_v["high"]) and not first_high,
+		"%d high rings a lap, never the first (%d over %d seeds)" % [r_v["high"], highs, SEEDS]
+	)
+
 
 func _vents() -> void:
-	var R := BaseKite.rules()
+	var r_v := BaseKite.rules()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4
 	var r := BaseKite.Run.new(_kin(0, 0), rng)
-	ok(r.vents.size() == int(R["vents"]), "%d vents on the loop" % r.vents.size())
+	ok(r.vents.size() == int(r_v["vents"]), "%d vents on the loop" % r.vents.size())
 	var v: Dictionary = r.vents[0]
 	r.s = float(v["s"]) - 0.01
 	r.off = float(v["off"])
@@ -194,7 +230,7 @@ func _vents() -> void:
 	var u: Dictionary = wide.vents[0]
 	wide.flap()
 	wide.s = float(u["s"]) - 0.01
-	wide.off = float(u["off"]) + float(R["vent_r"]) + 0.3
+	wide.off = float(u["off"]) + float(r_v["vent_r"]) + 0.3
 	wide.step(DT, 0.0)
 	ok(wide.flaps == 2 and wide.refunds == 0, "passing wide of a vent: no flap back (%d)" % wide.flaps)
 	var with_v := 0
@@ -206,11 +242,14 @@ func _vents() -> void:
 		with_v += a.hits
 		without += b.hits
 		refunds += a.refunds
-	ok(refunds == SEEDS * int(R["vents"]) and with_v > without,
-			"Guard 0: taking the vents gives %d flaps back and %d rings vs %d without" % [refunds, with_v, without])
+	ok(
+		refunds == SEEDS * int(r_v["vents"]) and with_v > without,
+		"Guard 0: taking the vents gives %d flaps back and %d rings vs %d without" % [refunds, with_v, without]
+	)
+
 
 func _rival() -> void:
-	var R := BaseKite.rules()
+	var r_v := BaseKite.rules()
 	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
 	var rec := _kin(37, 13)
 	rec["stats"]["power"] = 9
@@ -226,23 +265,28 @@ func _rival() -> void:
 		if match_data and strong and foe["uid"] != rec["uid"]:
 			good += 1
 	ok(good == rounds.size(), "the rival is your stats x min_ratio for each of %d cup rounds" % rounds.size())
-	var lap := TAU * float(R["loop_r"])
+	var lap := TAU * float(r_v["loop_r"])
 	var foe := BaseKite.rival(rec)
-	var par := lap / BaseKite.pace(foe) + float(R["rival_misses"]) * float(R["miss_s"])
-	ok(is_equal_approx(BaseKite.rival_time(foe, lap), par),
-			"the rival's time: lap / its pace + %d misses (%.1f s)" % [R["rival_misses"], par])
+	var par := lap / BaseKite.pace(foe) + float(r_v["rival_misses"]) * float(r_v["miss_s"])
+	ok(
+		is_equal_approx(BaseKite.rival_time(foe, lap), par),
+		"the rival's time: lap / its pace + %d misses (%.1f s)" % [r_v["rival_misses"], par]
+	)
 	Save.d["cups"] = {}
+
 
 ## Laps settled at a fixed time against the rival rival() picks: prizes, first win, XP, the cup.
 func _cup() -> void:
-	var XP := GardenXp.rules()
+	var xp := GardenXp.rules()
 	var now := 1000.0 * 86400.0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	var table: Array = GardenPrizes.game("kite")["table"]
 	var ids := table.map(func(e): return e["id"])
-	ok(ids == ["zipseed", "windfloss"] and GardenItems.item_name("windfloss") == "Windfloss",
-			"the kite prize table is Zipseed and Windfloss: %s" % str(ids))
+	ok(
+		ids == ["zipseed", "windfloss"] and GardenItems.item_name("windfloss") == "Windfloss",
+		"the kite prize table is Zipseed and Windfloss: %s" % str(ids)
+	)
 	Save.d = Save.fresh()
 	Save.d["items"] = {}
 	var rec := _kin(30, 25)
@@ -254,20 +298,29 @@ func _cup() -> void:
 		steps.append(res["prize"]["round"])
 		xps.append(res["xp"])
 		first = first or (i == 0 and res["prize"]["first"])
-	var win := int(XP["win"])
-	ok(steps == ["Sprout", "Bloom", "Crown"] and GardenPrizes.ribbon_count(rec, "kite") == 1,
-			"three won laps: %s and the Kite Tow Cup Ribbon" % str(steps))
-	ok(first and xps == [int(XP["first_win"]), win, win],
-			"XP: %d for the first win of the day, then %d a win: %s" % [XP["first_win"], win, str(xps)])
+	var win := int(xp["win"])
+	ok(
+		steps == ["Sprout", "Bloom", "Crown"] and GardenPrizes.ribbon_count(rec, "kite") == 1,
+		"three won laps: %s and the Kite Tow Cup Ribbon" % str(steps)
+	)
+	ok(
+		first and xps == [int(xp["first_win"]), win, win],
+		"XP: %d for the first win of the day, then %d a win: %s" % [xp["first_win"], win, str(xps)]
+	)
 	var bag: Dictionary = Save.d["items"]
-	ok(int(bag.get("zipseed", 0)) >= 1 and int(bag.get("galeribbon", 0)) == 1,
-			"prizes banked: first-win Zipseed and the Galeribbon cup prize %s" % str(bag))
+	ok(
+		int(bag.get("zipseed", 0)) >= 1 and int(bag.get("galeribbon", 0)) == 1,
+		"prizes banked: first-win Zipseed and the Galeribbon cup prize %s" % str(bag)
+	)
 	var next_week := now + 8.0 * 86400.0
 	GardenPrizes.settle("kite", rec, BaseKite.rival(rec), true, next_week, rng)
 	var lost := BaseKite.settle(_lap(6, 30, false), rec, BaseKite.rival(rec), next_week + 1.0, rng)
-	ok(not lost["won"] and lost["xp"] == int(XP["play"]) and lost["prize"]["reset"],
-			"a lost lap: %d play XP and the cup starts over" % lost["xp"])
+	ok(
+		not lost["won"] and lost["xp"] == int(xp["play"]) and lost["prize"]["reset"],
+		"a lost lap: %d play XP and the cup starts over" % lost["xp"]
+	)
 	Save.d = Save.fresh()
+
 
 ## Bot hands for the stand's flight (Input steers in game): odd rings flown straight through, even ones
 ## missed wide, and over each vent while a flap is spent.
@@ -281,8 +334,10 @@ func _hands(r: BaseKite.Run) -> void:
 		r.off = float(r.rings[r.next]) + (0.0 if r.next % 2 == 1 else float(BaseKite.rules()["max_off"]))
 	r.vel = 0.0
 
+
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 ## The flight's sounds (garden_sfx.gd), once per event: a flap per Space, an updraft per flap a vent gave back,
 ## a ring chime per ring passed, the crowd's "aww" per ring missed, one landing, a fanfare only on a win.
@@ -297,6 +352,7 @@ func _sounds(r: BaseKite.Run, foe: Dictionary, flapped: int) -> void:
 		if String(k).begins_with("garden_win_"):
 			wins += int(GardenSfx.heard[k])
 	ok(_heard("kite_finish") == 1 and wins == (1 if won else 0), "sound: one landing, a fanfare only on a win")
+
 
 ## Three Boki on a stock farm (a Training post) whose island has the given theme.
 func _on_base(theme: String) -> void:
@@ -333,8 +389,10 @@ func _on_base(theme: String) -> void:
 				k.erase("indoors")
 			GardenSfx.heard.clear()
 			kt.use()
-			ok(kt.flying() and kt.hoops.size() == 12 and kt.flier["rec"] == Save.active_kin(),
-					"ridge: your partner takes off with twelve rings up")
+			ok(
+				kt.flying() and kt.hoops.size() == 12 and kt.flier["rec"] == Save.active_kin(),
+				"ridge: your partner takes off with twelve rings up"
+			)
 			var r: BaseKite.Run = kt.run
 			var foe: Dictionary = kt.foe
 			var flapped := 0
@@ -348,12 +406,15 @@ func _on_base(theme: String) -> void:
 					flapped += 1
 				kt.tick(0.05)
 				t += 0.05
-			ok(not kt.flying() and is_instance_valid(kt.card) and kt.hoops.is_empty(),
-					"ridge: the lap lands on a result card (%.1f s)" % t)
+			ok(
+				not kt.flying() and is_instance_valid(kt.card) and kt.hoops.is_empty(),
+				"ridge: the lap lands on a result card (%.1f s)" % t
+			)
 			_sounds(r, foe, flapped)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
 
 ## Kitewind Ridge as a zone (ZoneLayout builds it from garden_zones.json): its Training post carries the stand.
 func _on_zone() -> void:
@@ -372,8 +433,12 @@ func _on_zone() -> void:
 		await main.get_tree().process_frame
 		t += main.get_process_delta_time()
 		var cur = Game.main.current
-		if is_instance_valid(cur) and cur.get("hkite") != null and cur.get("root_ui") != null \
-				and not Game.main.fade.covered:
+		if (
+			is_instance_valid(cur)
+			and cur.get("hkite") != null
+			and cur.get("root_ui") != null
+			and not Game.main.fade.covered
+		):
 			home = cur
 	var kt: BaseKite = home.hkite if home != null else null
 	ok(kt != null and is_instance_valid(kt.stand), "ridge zone: the kite stand is up")

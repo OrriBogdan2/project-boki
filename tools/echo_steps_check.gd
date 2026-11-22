@@ -71,9 +71,9 @@ func _species(sound: bool) -> String:
 ## Plays a whole dance: in your turns you press offset s after each beat (on the stone it asks for, or
 ## the next one with wrong), except the beats skip(run, i) leaves out.
 func _dance(you: Dictionary, rival: Dictionary, offset: float, skip := Callable(), wrong := false,
-		seed_ := 7) -> EchoSteps.Run:
+		seed_v := 7) -> EchoSteps.Run:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = seed_v
 	return _play(EchoSteps.Run.new(you, rival, rng), offset, skip, wrong)
 
 func _play(r: EchoSteps.Run, offset: float, skip := Callable(), wrong := false) -> EchoSteps.Run:
@@ -94,26 +94,26 @@ func _play(r: EchoSteps.Run, offset: float, skip := Callable(), wrong := false) 
 
 ## Beats you are judged on in a dance, and the score of a dance with every one of them hit.
 func _your_beats() -> int:
-	var R := EchoSteps.rules()
+	var r_v := EchoSteps.rules()
 	var n := 0
-	for b in R["rounds"]:
-		n += int(b) * int(R["phrases"])
+	for b in r_v["rounds"]:
+		n += int(b) * int(r_v["phrases"])
 	return n
 
 func _perfect_score(n: int) -> int:
-	var R := EchoSteps.rules()
+	var r_v := EchoSteps.rules()
 	var total := 0
 	for k in n:
-		total += int(R["hit_pts"]) + int(R["streak_pts"]) * mini(k, int(R["streak_cap"]))
+		total += int(r_v["hit_pts"]) + int(r_v["streak_pts"]) * mini(k, int(r_v["streak_cap"]))
 	return total
 
 func _length() -> void:
-	var R := EchoSteps.rules()
+	var r_v := EchoSteps.rules()
 	var r := _dance(_kin(_species(false), "Pip", 0, 0.0), {}, 0.0)
 	var beats := 0
-	for b in R["rounds"]:
-		beats += int(R["count_in"]) + int(R["phrases"]) * (2 * int(b) + int(R["gap"])) + int(R["score_beats"])
-	var want := (beats - 0.5) * 60.0 / float(R["bpm"])
+	for b in r_v["rounds"]:
+		beats += int(r_v["count_in"]) + int(r_v["phrases"]) * (2 * int(b) + int(r_v["gap"])) + int(r_v["score_beats"])
+	var want := (beats - 0.5) * 60.0 / float(r_v["bpm"])
 	ok(is_equal_approx(r.end_t, want), "length: the dance ends at %.1f s (rules add up to %.1f s)" % [r.end_t, want])
 	var about := r.end_t >= LEN_LOW and r.end_t <= LEN_HIGH
 	ok(about, "length: about 90 s (%.1f s, %d to %d)" % [r.end_t, LEN_LOW, LEN_HIGH])
@@ -129,9 +129,9 @@ func _perfect() -> void:
 
 func _late() -> void:
 	var n := _your_beats()
-	var R := EchoSteps.rules()
-	var w0 := float(R["window_ms"][0]) / 1000.0
-	var w1 := float(R["window_ms"][1]) / 1000.0
+	var r_v := EchoSteps.rules()
+	var w0 := float(r_v["window_ms"][0]) / 1000.0
+	var w1 := float(r_v["window_ms"][1]) / 1000.0
 	var plain := _kin(_species(false), "Pip", 0, 0.0)
 	var sharp := _kin(_species(false), "Pip", 100, 0.0)
 	var inside := _dance(plain, {}, w0 - EDGE)
@@ -205,18 +205,18 @@ func _machine() -> void:
 		r.step(t)
 		if order.is_empty() or order[-1] != r.state:
 			order.append(r.state)
-	var S := EchoSteps.Run.S
+	var s_v := EchoSteps.Run.S
 	var phrases := int(EchoSteps.rules()["phrases"])
 	var rounds := (EchoSteps.rules()["rounds"] as Array).size()
 	var want: Array = []
 	for i in rounds:
 		for p in phrases:
-			want.append_array([S.CALL, S.ANSWER])
-		want.append(S.SCORE)
-	want.append(S.RESULT)
+			want.append_array([s_v.CALL, s_v.ANSWER])
+		want.append(s_v.SCORE)
+	want.append(s_v.RESULT)
 	ok(order == want, "machine: %d phases in order, call, answer, score, result" % want.size())
 	ok(r.refused == 0, "machine: no move refused (%d)" % r.refused)
-	ok(not r.go(S.CALL) and r.refused == 1, "machine: RESULT goes nowhere, the move is refused and counted")
+	ok(not r.go(s_v.CALL) and r.refused == 1, "machine: RESULT goes nowhere, the move is refused and counted")
 
 func _settle() -> void:
 	Save.d = Save.fresh()
@@ -244,10 +244,10 @@ func _settle() -> void:
 			"settle: a poor solo (10 of 40) pays the small gems")
 
 func _practice() -> void:
-	var R := EchoSteps.rules()
+	var r_v := EchoSteps.rules()
 	var r := EchoSteps.Run.new(_kin(_species(false), "Pip", 0, 0.0), {}, RandomNumberGenerator.new(), true)
-	ok(r.practice and r.beat_s > 60.0 / float(R["bpm"]) and r.pattern.size() == 4 and not r.you_lead(),
-			"practice: 4 beats at %.0f bpm (the dance %d), the lead calls" % [60.0 / r.beat_s, int(R["bpm"])])
+	ok(r.practice and r.beat_s > 60.0 / float(r_v["bpm"]) and r.pattern.size() == 4 and not r.you_lead(),
+			"practice: 4 beats at %.0f bpm (the dance %d), the lead calls" % [60.0 / r.beat_s, int(r_v["bpm"])])
 	_play(r, 0.0)
 	ok(r.over() and r.hits[0] == 4 and r.beats[0] == 4 and r.refused == 0,
 			"practice: perfect presses hit %d of %d, then it is over" % [r.hits[0], r.beats[0]])

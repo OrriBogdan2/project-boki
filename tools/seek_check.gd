@@ -116,8 +116,8 @@ func _night() -> void:
 	var plain := _kin(_species("stone"), "Plain", 10)
 	ok(HomeWork.is_night(NIGHT_T) and not HomeWork.is_night(DAY_T), "the day clock tells night from noon")
 	ok(BaseSeek.night_type(spore) and not BaseSeek.night_type(plain), "Spore is a night type, Stone is not")
-	var by_day := float(_wins(spore, plain, NIGHT_ROUNDS)) / NIGHT_ROUNDS
-	var by_night := float(_wins(spore, plain, NIGHT_ROUNDS, true)) / NIGHT_ROUNDS
+	var _by_day := float(_wins(spore, plain, NIGHT_ROUNDS)) / NIGHT_ROUNDS
+	var _by_night := float(_wins(spore, plain, NIGHT_ROUNDS, true)) / NIGHT_ROUNDS
 	var was := GardenZones.here
 	GardenZones.here = "hushwood"
 	var dark_zone := BaseSeek.is_dark(DAY_T)

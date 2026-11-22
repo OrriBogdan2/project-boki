@@ -165,8 +165,8 @@ func _seed_goods() -> Array:
 
 func _boki_food() -> Array:
 	var goods: Array = []
-	for f in Care.FOODS:
-		var fd: Dictionary = Care.FOODS[f]
+	for f in Care.foods_v:
+		var fd: Dictionary = Care.foods_v[f]
 		var fk: String = f
 		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
 		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
