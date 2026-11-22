@@ -42,6 +42,7 @@ extends RefCounted
 ## Never touches the save.
 ##  15. the creator and the clan screens: the creator's Random plays the dice, dragging you round ticks once per
 ##      notch either way, and the guild registry's Found it, Join and Leave each play their own sound once
+##  16. a Hunter set's ability bar (tools/sfx_bar_check.gd): cast, travel, hit and end per ability, distinct hits
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
@@ -185,6 +186,7 @@ func run(main: Node) -> void:
 	_voices()
 	_boki_impacts()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
+	preload("res://tools/sfx_bar_check.gd").new().run(ok)
 	_falloff()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

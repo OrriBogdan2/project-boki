@@ -447,7 +447,7 @@ func _overheat_glide(secs: float) -> void:
 		h.grounded = false
 		h.air_t = 1.0
 		h.gliding = true
-		h.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+		h.vel = Vector3(HunterMove.glide_cruise, 0, 0)
 	_zoom(0.55)
 	still_at = secs * 0.6
 	_mark("glide")
@@ -780,7 +780,7 @@ func _dive_feather(secs: float) -> void:
 	pl.grounded = false
 	pl.air_t = 1.0
 	pl.gliding = true
-	pl.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+	pl.vel = Vector3(HunterMove.glide_cruise, 0, 0)
 	_zoom(0.55)
 	_mark("start")
 	await _go(

@@ -38,3 +38,10 @@ Walking goes from 4.45–4.85 to 5.16–5.63 m/s (455 uu/s hunters: 5.28). Glide
 under the walk: the source's glide is 1.1x its run, so the glide owners should scale cruise by `body_scale`
 too (noted for ext/glide-smooth-1111). The match camera shows ~23 m across, while the source's CameraDistance is
 55 m (~36–40 m across in the hero-ref footage scale); that is a separate camera question. No Net or save change.
+
+Follow-up 2026-11-22 (ext/glide-cruise-scale): the glide cruise (`physics.glide_cruise`, MaxGlide 5.0 m/s) and the
+glide steer force (`glide_accel`) are scaled by `body_scale` too, in one place (`HunterMove.glide_cruise`,
+`HunterMove.glide_accel`; `Hunter.GLIDE_SPEED` is gone). Cruise is 5.8 m/s, so a run into a glide keeps the
+source's MaxGlide-to-MoveSpeed ratio (1.03-1.12x) instead of slowing down, and the force scales with it so a glide
+turn and reversal keep the source's times. The match, the farm and indoors read the same value. The camera is
+unchanged (owner call).

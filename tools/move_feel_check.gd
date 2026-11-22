@@ -128,7 +128,7 @@ const T := {
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t": ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy": ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
-	"glide_speed": ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
+	"glide_speed": ["~", [5.22, 6.38], "m/s", "[game data] MaxGlide 500 uu/s x body_scale 1.16 +-10%"],
 	"glide_sink": ["~", [1.38, 1.42], "m/s", "hunter_move.json glide_sink (ours: no footage to count)"],
 	"glide_overheat_s": ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
 	"glide_turn90_t": ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
@@ -140,7 +140,7 @@ const T := {
 	"dive_vy_t": ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio": ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h": ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
-	"sneak_speed": ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run speed"],
+	"sneak_speed": ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run_v speed"],
 	"dive_timeout_s": ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"swoop_x": ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
 	"swoop_fade_s": ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
@@ -150,7 +150,7 @@ const T := {
 	[">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed": [">=", 10.5, "m/s", "[owner 11-13] the glide carries the dash"],
 	"dashglide_2s_speed": ["~", [7.0, 9.0], "m/s", "[owner 11-13] still fast, bleeding back"],
-	"dashglide_3s_speed": ["<=", 6.5, "m/s", "[owner 11-08 item 9] back toward cruise"],
+	"dashglide_3s_over": ["<=", 1.5, "m/s", "[owner 11-08 item 9] back toward cruise: 3 s on, this over it"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames": ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
 	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
@@ -927,7 +927,7 @@ func _landing_carry() -> void:
 		if c == "glide":  # opened in the air at glide speed, then let go
 			p_v.air_t = 1.0
 			p_v.gliding = true
-			p_v.vel.x = Hunter.GLIDE_SPEED
+			p_v.vel.x = HunterMove.glide_cruise
 			p_v.inp["glide"] = true
 			m.step(DT)
 			p_v.inp["glide"] = false
@@ -971,7 +971,7 @@ func _glide() -> void:
 	rec("glide_start_vy", -p_v.vel.y)
 	var ga := HunterMove.glide_accel
 	var gv := HunterMove.glide_start_vy
-	ok(is_equal_approx(ga, 16.25), "glide_accel = GlideTargetXYForce 162,500 / Mass 100 (%s)" % ga)
+	ok(is_equal_approx(ga, 16.25 * HunterMove.body_scale), "glide_accel = 162,500 / Mass 100 x body_scale (%s)" % ga)
 	ok(is_equal_approx(gv, 0.85), "glide_start_vy = GlideStartFallSpeedMin 85 uu/s (%s)" % gv)
 	# hold Space from the jump press
 	_reset(flat)
@@ -1271,7 +1271,7 @@ func _dash_glide() -> void:
 	rec("dashglide_open_speed", open_v)
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
-	rec("dashglide_3s_speed", v3)
+	rec("dashglide_3s_over", v3 - HunterMove.glide_cruise)
 	p_v.set_arch(kit_was)
 
 
@@ -2083,7 +2083,7 @@ func _feather() -> void:
 		p_v.last_gy = lip
 		p_v.air_t = 1.0
 		p_v.gliding = true
-		p_v.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+		p_v.vel = Vector3(-HunterMove.glide_cruise, 0.0, 0.0)
 		var x0 := p_v.pos.x
 		var holding := true
 		for i in 60 * 60:
@@ -2126,7 +2126,7 @@ func _feather() -> void:
 	p_v.last_gy = lip
 	p_v.air_t = 1.0
 	p_v.gliding = true
-	p_v.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+	p_v.vel = Vector3(-HunterMove.glide_cruise, 0.0, 0.0)
 	p_v.inp["glide_press_only"] = true
 	var open_x := 0.0
 	for i in 60 + 60:
@@ -2325,7 +2325,7 @@ func _ledge_run(wl: Dictionary, mode: String) -> Dictionary:
 		_reset(Vector3(st.x, top - 0.3 + 0.6 * HunterMove.glide_sink, st.y), false)
 		p_v.last_gy = wl["low"]
 		p_v.gliding = true
-		p_v.vel = Vector3(n.x, 0.0, n.y) * Hunter.GLIDE_SPEED
+		p_v.vel = Vector3(n.x, 0.0, n.y) * HunterMove.glide_cruise
 	else:
 		# running in from half a metre back (a jump at the face from a standstill catches it too, at ~2 m/s)
 		var st := at - n * 0.5
@@ -2422,8 +2422,8 @@ func _glide_wall_hit(mid: Vector2, n: Vector2, t: Vector2, y: float, deg: float)
 	p_v.gliding = true
 	p_v.inp["glide"] = true
 	p_v.inp["move"] = dir
-	p_v.vel = Vector3(dir.x * Hunter.GLIDE_SPEED, 0.0, dir.y * Hunter.GLIDE_SPEED)
-	var into0 := Hunter.GLIDE_SPEED * cos(deg_to_rad(deg))
+	p_v.vel = Vector3(dir.x * HunterMove.glide_cruise, 0.0, dir.y * HunterMove.glide_cruise)
+	var into0 := HunterMove.glide_cruise * cos(deg_to_rad(deg))
 	var r := {
 		"hit": false,
 		"open": true,
@@ -2432,7 +2432,7 @@ func _glide_wall_hit(mid: Vector2, n: Vector2, t: Vector2, y: float, deg: float)
 		"tan": 0.0,
 		"slow": 99.0,
 		"flips": 0,
-		"tan0": Hunter.GLIDE_SPEED * sin(deg_to_rad(deg))
+		"tan0": HunterMove.glide_cruise * sin(deg_to_rad(deg))
 	}
 	var since := 0  # frames since the hit
 	var last_sign := 0.0
