@@ -49,6 +49,7 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
+	var placed := false
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -61,6 +62,13 @@ func _play(main: Node, id: String) -> void:
 			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
+		if tu.id() == "wallkick" and not placed:
+			placed = true       # (up on the lookout with no kick: the step waits; the bot walks off and kicks up)
+			m.player.pos = tu.stop("crouch")
+			m.player.vel = Vector3.ZERO
+			for i in 15:
+				m.step(Match.DT)
+			ok(tu.id() == "wallkick", id + ": on the lookout with no wall kick, the Climb step is still open")
 		if tu.id() in FIGHT_STEPS:
 			fight_t += Match.DT
 			damage += maxf(0.0, hp - m.player.hp)
