@@ -46,6 +46,7 @@ var wall: WardenWall
 var opener: WardenOpen
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
+var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
@@ -79,7 +80,7 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb))
+	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))  # (data "size": x the head-pivot fit)
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
@@ -133,6 +134,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	_add_orbits(glb)
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	props = WardenProps.carry(art_id, skel, to_m, d)
+	gunprop = WardenGunProp.make(model, skel, to_m, d.get("holster", {}))
 	_copy_anchors(glb)
 	var c_xf: Transform3D = WardenProps.contract(art_id).get("sk_m", Transform3D.IDENTITY)
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
@@ -163,6 +165,8 @@ func _process(dt: float) -> void:
 	if wall:
 		wall.step(dt)
 	props.step(dt, String(s.get("kmove", "")))
+	if gunprop:
+		gunprop.step()
 	if companions:
 		companions.step(dt)
 	if gun and gun.is_inside_tree() and hand >= 0:
