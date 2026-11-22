@@ -93,7 +93,7 @@ func scorch(at: Vector3, radius: float) -> void:
 		(mi.get_meta("fade") as Tween).kill()
 	mat.albedo_color = Color(1, 1, 1, 1)
 	mi.scale = Vector3.ONE * radius
-	mi.rotation.y = randf() * TAU
+	mi.rotation.y = KitLooks.vis_rng.randf() * TAU
 	mi.global_position = at + Vector3(0, 0.05, 0)
 	mi.visible = true
 	var tw := mi.create_tween()
