@@ -6,7 +6,7 @@
 		{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}},
 		{"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}},
 		{"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}},
-		{"term": "Summon", "line": "Your Boki wisp bursts into the full Boki for a short time, then shrinks back.", "seen": {"tut": "hatched"}},
+		{"term": "Summon", "line": "Perks while it rides with you. Summon it for a few seconds: none while it is out.", "seen": {"tut": "hatched"}},
 		{"term": "Extract", "line": "Leave the expedition with what you carry. Only extracted loot comes home.", "seen": {"tut": "hatched"}},
 		{"term": "Wisp", "line": "A downed Hunter pops into a round glowing Wisp, until a friend revives them.", "seen": {"matches": 1}},
 		{"term": "Fusion", "line": "A Hunter fused with their Boki. It needs a full bond meter.", "seen": {"matches": 1}, "needs_fusion": true},
