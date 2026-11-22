@@ -764,6 +764,7 @@ const CHECKS := {
 	"--relay-cup-check": ["res://tools/relay_cup_check.gd", "relay_cup_check", null],  # GARDEN_MODERN 4.2
 	"--shove-check": ["res://tools/shove_check.gd", "shove_check", null],  # the Stump Shove, GARDEN.md 5.2
 	"--tumble-check": ["res://tools/tumble_check.gd", "tumble_check", null],  # Tumble, GARDEN_MODERN.md 4.2
+	"--minigame-fair-check": ["res://tools/minigame_fair_check.gd", "minigame_fair_check", null],
 	"--seek-check": ["res://tools/seek_check.gd", "seek_check", null],  # Seek, GARDEN.md 5.3
 	"--tut-first-games-check": ["res://tools/tut_first_games_check.gd", "tut_first_games_check", null],  # FirstRound
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
