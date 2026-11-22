@@ -90,7 +90,7 @@ func _timing() -> void:
 		slower += (float(m.done_t[0]) - float(g.done_t[0])) / SEEDS
 		if g.won() and not m.won():
 			flips += 1
-	ok(wins["great"] >= wins["miss"] + SEEDS / 3,
+	ok(wins["great"] >= wins["miss"] + int(SEEDS / 3.0),
 			"even teams: great hand-offs win %d of %d, no presses win %d" % [wins["great"], SEEDS, wins["miss"]])
 	ok(slower > 0.8, "no presses run %.2f s slower on average" % slower)
 	ok(flips > 0, "hand-off timing flips the result on %d seeds" % flips)

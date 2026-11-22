@@ -55,7 +55,7 @@ func run(main_node: Node) -> void:
 		await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
 	img.save_png(dir.path_join("melee_stack.png"))
-	var c := img.get_size() / 2
+	var c := Vector2i(Vector2(img.get_size()) / 2.0)
 	var rg := Rect2i(c - Vector2i(320, 180), Vector2i(640, 360))
 	var crop := img.get_region(rg)
 	crop.resize(1280, 720, Image.INTERPOLATE_LANCZOS)

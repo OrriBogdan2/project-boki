@@ -254,4 +254,4 @@ func _pass(ok: bool) -> String:
 	return "PASS" if ok else "MISS"
 
 func _clock(t: float) -> String:
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]

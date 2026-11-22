@@ -59,7 +59,7 @@ func run(main_node: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	home._move_player(0.001)
-	var hb := Rect2i(sz.x / 2 - 200, sz.y - 190, 400, 190)
+	var hb := Rect2i(int(sz.x / 2.0) - 200, sz.y - 190, 400, 190)
 	home.dash.charges = float(home._dodge()["charges"])
 	await _grab("home_2_charges", hb)
 	home.dash.charges = 1.45

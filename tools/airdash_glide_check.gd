@@ -82,7 +82,7 @@ func _air_dash(m: Match, when: String, base := {}) -> Dictionary:
 	hunter.do_dash()
 	var press := 9999
 	if when == "mid":
-		press = (int(base["dash_0"]) + int(base["dash_f"]) + 1) / 2
+		press = int((int(base["dash_0"]) + int(base["dash_f"]) + 1) / 2.0)
 	elif when != "none":
 		press = int(base["dash_f"]) + (1 if when == "after" else LATE)
 	var r := {"dash_0": -1, "dash_f": -1, "exit": 0.0, "press": press, "open": -1, "open_v": 0.0, "worst": 0.0}

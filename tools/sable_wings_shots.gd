@@ -88,7 +88,7 @@ func _measure(h: Node3D) -> Array:
 			var we: PackedFloat32Array = ar[Mesh.ARRAY_WEIGHTS]
 			if bo.is_empty():
 				continue
-			var k := bo.size() / v.size()
+			var k := int(bo.size() / float(v.size()))
 			var wing := nm.begins_with("card-wing")
 			for vi in v.size():
 				var p := Vector3.ZERO

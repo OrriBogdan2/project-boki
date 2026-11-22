@@ -50,7 +50,7 @@ func _models() -> void:
 		var b := cup.mesh.get_aabb()
 		var tris := 0
 		for mi in [cap, cup]:
-			tris += (mi.mesh as ArrayMesh).surface_get_array_index_len(0) / 3
+			tris += int((mi.mesh as ArrayMesh).surface_get_array_index_len(0) / 3.0)
 		var tex: Texture2D = EggModels.material(kind).get_shader_parameter("albedo_tex")
 		var px := tex.get_width() if tex else 0
 		var shape := absf(b.position.y) < FIT and absf(a.end.y - 1.0) < FIT and absf(a.position.y - 0.5) < FIT \

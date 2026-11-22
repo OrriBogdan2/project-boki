@@ -81,7 +81,7 @@ func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool)
 	for k in SETTLE:
 		sync.call("_process", DT)
 	var steps := int((LAYER_AT + LAYER_ON + TAIL) / DT)
-	var film_step := maxi(steps / FILM_FRAMES, 1)
+	var film_step := maxi(int(steps / float(FILM_FRAMES)), 1)
 	if dir != "":
 		DirAccess.make_dir_recursive_absolute(dir)
 	var rec: Array = []
@@ -101,8 +101,8 @@ func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool)
 		for b in ["hand.R", "hand.L", "head"]:
 			f["pts"].append(_at(sk, b))
 		rec.append(f)
-		if dir != "" and i % film_step == 0 and i / film_step < FILM_FRAMES:
-			await _grab(dir.path_join("f%03d.png" % (i / film_step)))
+		if dir != "" and i % film_step == 0 and int(i / float(film_step)) < FILM_FRAMES:
+			await _grab(dir.path_join("f%03d.png" % (int(i / float(film_step)))))
 	m.free()
 	return rec
 

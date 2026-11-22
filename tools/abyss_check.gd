@@ -518,7 +518,7 @@ func _home(main: Node) -> void:
 					if did_climb: grabbed_deep += 1
 					if back: lost += 1
 					lost_low = maxf(lost_low, top - low)
-	var near_n := n * 2 / 3
+	var near_n := int(n * 2 / 3.0)
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
 	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
 	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)

@@ -65,7 +65,7 @@ func _host() -> void:
 		var sorted := lags.duplicate()
 		sorted.sort()
 		# median: one loaded-box hitch does not decide it
-		med[mode] = (sorted[DROPS / 2 - 1] + sorted[DROPS / 2]) / 2.0
+		med[mode] = (sorted[int(DROPS / 2.0) - 1] + sorted[int(DROPS / 2.0)]) / 2.0
 		print("%s %s: guest open frames after the press %s; host copy lag (s) %s" % [tag, mode, frames, lags])
 		ok(frames.max() <= (1 if mode == "btn" else 99) and frames.min() >= 1,
 			"%s: the guest's own glider opens mid-fall (button: on the press step)" % mode, str(frames))

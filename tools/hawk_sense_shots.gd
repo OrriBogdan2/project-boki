@@ -63,7 +63,9 @@ func run(main_node: Node) -> void:
 				/ main.get_viewport().get_visible_rect().size
 			)
 		)
-		var crop := img.get_region(Rect2i(c - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size())))
+		var crop := img.get_region(
+			Rect2i(c - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+		)
 		crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_LANCZOS)
 		crop.save_png(dir.path_join("hawk_%s_zoom.png" % label))
 	main.get_tree().quit(0)

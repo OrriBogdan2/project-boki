@@ -54,7 +54,7 @@ func run(m: Node) -> void:
 	var cam := Camera3D.new()
 	gw.add_child(cam)
 	cam.make_current()
-	var strip := Image.create(px * FRAMES, px * 9 / 16, false, Image.FORMAT_RGBA8)
+	var strip := Image.create(px * FRAMES, int(px * 9 / 16.0), false, Image.FORMAT_RGBA8)
 	await _frame(strip, 0, cam, n)
 	var fish_run: GlintFishing.Run = gf.run
 	fish_run.hooked = 0
@@ -88,8 +88,8 @@ func _frame(strip: Image, i: int, cam: Camera3D, n: Node3D, hop := false) -> voi
 			best = y
 			var img: Image = main.get_viewport().get_texture().get_image()
 			img.convert(Image.FORMAT_RGBA8)
-			img.resize(px, px * 9 / 16)
-			strip.blit_rect(img, Rect2i(0, 0, px, px * 9 / 16), Vector2i(i * px, 0))
+			img.resize(px, int(px * 9 / 16.0))
+			strip.blit_rect(img, Rect2i(0, 0, px, int(px * 9 / 16.0)), Vector2i(i * px, 0))
 
 
 func _wait_home():

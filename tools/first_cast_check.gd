@@ -78,7 +78,7 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 		await _frames(m, P, T, SETTLE * 2, "")
 	var times: Array = await _frames(m, P, T, SETTLE * 2, "")
 	times.sort()
-	var med: float = times[times.size() / 2]
+	var med: float = times[int(times.size() / 2.0)]
 	var first := {}
 	var rep := {}
 	tree.node_added.connect(_made)

@@ -41,7 +41,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func _slot(i: int) -> Vector3:
-	return home + Vector3(1.0 + (i / NZ) * GRID, 0.0, (i % NZ) * GRID)
+	return home + Vector3(1.0 + (int(i / float(NZ))) * GRID, 0.0, (i % NZ) * GRID)
 
 func _clear_dummies() -> void:
 	for i in dummies.size():

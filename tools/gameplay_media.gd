@@ -467,7 +467,7 @@ func _forest(secs: float) -> void:
 	back.reverse()
 	path.append_array(back)
 	P.teleport(_ground(path[0] + BEHIND))
-	_mark("walk trees=%d style=%s" % [path.size() / 2, style])
+	_mark("walk trees=%d style=%s" % [int(path.size() / 2.0), style])
 	var next := [0]
 	await _go(secs, func(_t: float) -> void:
 		var goal: Vector3 = path[next[0] % path.size()] + BEHIND

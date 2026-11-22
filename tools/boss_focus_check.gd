@@ -87,7 +87,7 @@ func run(main: Node) -> void:
 	ok(on_p == 0 and not hit_p and P.kin != null, "%.0f s of boss fight: past its next think" % FIGHT_T
 		+ " the bot never targets the player (%d ticks; the player's Boki hit it)" % on_p
 		+ ", nor do it or its Boki hit them")
-	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
+	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (int(100 * on_boss / float(maxi(1, n)))))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	_spot(P, m.lairs._floor_spot(F, B.pos + side * 3.0, 0.0))      # (within a provoked bot's reach)
 	B.hurt(2.0, P, {"src": "shot"})

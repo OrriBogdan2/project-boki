@@ -48,7 +48,7 @@ func run(main_node: Node) -> void:
 
 ## Where the i-th Hunter stands in the two-row lineup (row 0 behind, row 1 in front).
 func _spot(i: int, n: int) -> Vector3:
-	var row := i / PER_ROW
+	var row := int(i / float(PER_ROW))
 	var in_row := mini(PER_ROW, n - row * PER_ROW)
 	return Vector3((i % PER_ROW - (in_row - 1) * 0.5) * GAP, 0.0, (row - 0.5) * ROW_GAP)
 
@@ -81,7 +81,7 @@ func _neutral() -> void:
 	for i in n:
 		var glb := (load(WardenGlb.path(Arch.ORDER[i])) as PackedScene).instantiate() as Node3D
 		stage.add_child(glb)
-		glb.position = Vector3(_spot(i, n).x, 2.4 * (1 - i / PER_ROW), 0.0)
+		glb.position = Vector3(_spot(i, n).x, 2.4 * (1 - int(i / float(PER_ROW))), 0.0)
 		glb.rotation.y = PI
 	var cam := Camera3D.new()
 	cam.fov = 40.0
@@ -111,13 +111,15 @@ func _select() -> void:
 	var px := Vector2i(1920, 1080)
 	var sheet := Image.create(px.x, px.y, false, Image.FORMAT_RGBA8)
 	sheet.fill(Color(0.06, 0.05, 0.09))
-	var cell := Vector2i(px.x / PER_ROW, px.y / 2)
+	var cell := Vector2i(int(px.x / float(PER_ROW)), int(px.y / 2.0))
 	for i in views.size():
 		var img: Image = (views[i] as HunterViewer).vp.get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
 		var k := minf(float(cell.x) / img.get_width(), float(cell.y) / img.get_height())
 		img.resize(int(img.get_width() * k), int(img.get_height() * k), Image.INTERPOLATE_LANCZOS)
-		var at := Vector2i((i % PER_ROW) * cell.x + (cell.x - img.get_width()) / 2, (i / PER_ROW) * cell.y)
+		var at := Vector2i(
+			(i % PER_ROW) * cell.x + int((cell.x - img.get_width()) / 2.0), (int(i / float(PER_ROW))) * cell.y
+		)
 		sheet.blend_rect(img, Rect2i(Vector2i.ZERO, img.get_size()), at)
 	sheet.save_png(dir.path_join("select.png"))
 	print("HUNTER-TINT-SHOT select.png")

@@ -88,7 +88,7 @@ func _number_size(t: Ent) -> int:
 func _budget() -> void:
 	var targets: Array = []
 	for i in FIGHT:
-		var at := P.pos + Vector3(float(i % 6) * 1.5 - 4.0, 0, 3.0 + float(i / 6) * 1.5)
+		var at := P.pos + Vector3(float(i % 6) * 1.5 - 4.0, 0, 3.0 + float(int(i / 6.0)) * 1.5)
 		var h := _foe(at)
 		targets.append(h)
 		if i % 2 == 0:

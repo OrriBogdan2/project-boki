@@ -76,7 +76,7 @@ func _strip(main: Node, hero: String) -> Image:
 func _crop(main: Node, h: Hunter) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
 	var c := main.get_viewport().get_camera_3d().unproject_position(h.position + Vector3(0, 0.9, 0))
-	var corner := Vector2i(int(c.x) - CROP.x / 2, int(c.y) - CROP.y / 2)
+	var corner := Vector2i(int(c.x) - int(CROP.x / 2.0), int(c.y) - int(CROP.y / 2.0))
 	var rg := Rect2i(corner, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
 	crop.resize(int(CROP.x * ZOOM), int(CROP.y * ZOOM), Image.INTERPOLATE_BILINEAR)

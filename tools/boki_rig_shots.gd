@@ -155,7 +155,7 @@ func _turntable() -> void:
 ## The contact sheet: <dir>/sheet_<view>.png, a cell a species (its name on it), SHEET_COLS to a row, from the front
 ## three-quarters and the side, standing (idle), as the game builds it.
 func _sheet(ids: PackedStringArray) -> void:
-	var rows := (ids.size() + SHEET_COLS - 1) / SHEET_COLS
+	var rows := int((ids.size() + SHEET_COLS - 1) / float(SHEET_COLS))
 	for view in SHEET_YAWS.size():
 		var sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
 		var dex_sheet := Image.create(px * SHEET_COLS, px * rows, false, Image.FORMAT_RGBA8)
@@ -167,7 +167,7 @@ func _sheet(ids: PackedStringArray) -> void:
 			cam.look_at(Vector3(0, 0.42, 0))
 			var tag := Label.new()
 			tag.text = species
-			tag.add_theme_font_size_override("font_size", px / 16)
+			tag.add_theme_font_size_override("font_size", int(px / 16.0))
 			vp.add_child(tag)
 			var kr := _kin(vp)
 			await RenderingServer.frame_post_draw
@@ -175,7 +175,7 @@ func _sheet(ids: PackedStringArray) -> void:
 			(kr[0] as Node3D).rotation.y = SHEET_YAWS[view]
 			var img: Image = await _grab(vp)
 			img.convert(Image.FORMAT_RGBA8)
-			var at := Vector2i(n % SHEET_COLS * px, n / SHEET_COLS * px)
+			var at := Vector2i(n % SHEET_COLS * px, int(n / float(SHEET_COLS)) * px)
 			sheet.blit_rect(img, Rect2i(0, 0, px, px), at)
 			if dex_dir != "":
 				var dex := _dex_model(species, _height(kr[1] as BokiRig))

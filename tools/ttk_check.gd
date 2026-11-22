@@ -121,7 +121,7 @@ func _median_src(label: String) -> float:
 	if times.is_empty():
 		return -1.0
 	times.sort()
-	var mid := times.size() / 2
+	var mid := int(times.size() / 2.0)
 	return times[mid] if times.size() % 2 == 1 else (times[mid - 1] + times[mid]) / 2.0
 
 func _src_hp(hero: Array) -> float:

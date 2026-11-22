@@ -114,7 +114,7 @@ func run(m: Node) -> void:
 	var kms := _mean_sd(kz)
 	ok(absf(kms.x - 1.2) < 0.08 and absf(kms.y - 0.82) < 0.06, "big parents have big young (mean z %.2f, sd %.2f; 0.4 of each parent plus noise)" % [kms.x, kms.y])
 	ok(_mean_sd(kl).x > 1.06, "long-legged parents have long-legged young (%.3f)" % _mean_sd(kl).x)
-	ok(float(violet) / 3000.0 > 0.86 and float(stripes) / 3000.0 > 0.86, "eye colour and coat pass on (%d%% / %d%%)" % [violet * 100 / 3000, stripes * 100 / 3000])
+	ok(float(violet) / 3000.0 > 0.86 and float(stripes) / 3000.0 > 0.86, "eye colour and coat pass on (%d%% / %d%%)" % [int(violet * 100 / 3000.0), int(stripes * 100 / 3000.0)])
 	ok(new_seed, "each egg's marks are placed by its own seed: never a copy of a parent's")
 	ok(Unique.inherit(pa, pb, 42) == Unique.inherit(pa, pb, 42), "the same parents and egg seed give the same young")
 	var brng := RandomNumberGenerator.new(); brng.seed = 9

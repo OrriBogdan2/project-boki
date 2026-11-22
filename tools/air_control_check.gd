@@ -253,7 +253,7 @@ func _jump_shift_reach() -> void:
 	h.reclass(cls0, "")
 	print("ACHECK note reach m (jump > Shift / Shift > jump): %s" % ", ".join(lines))
 	others.sort()
-	var median: float = others[others.size() / 2]
+	var median: float = others[int(others.size() / 2.0)]
 	ok(sable <= median * SABLE_REACH_K, "Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m"
 		% [sable, SABLE_REACH_K, median])
 

@@ -77,7 +77,7 @@ func _hits() -> void:
 func _save(img: Image, file: String) -> void:
 	img.save_png(dir.path_join(file + ".png"))
 	var c := Vector2i(Vector2(img.get_size()) * AT)
-	var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+	var crop := img.get_region(Rect2i(c - Vector2i(Vector2(CROP) / 2.0), CROP))
 	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(file + "_zoom.png"))
 

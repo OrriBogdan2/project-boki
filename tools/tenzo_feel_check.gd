@@ -68,7 +68,7 @@ func _floor() -> void:
 	var tiles: Array = m.verbs.terrain[0]["tiles"]
 	var edge_z := -INF
 	for td in tiles:
-		edge_z = maxf(edge_z, float(int(td[0]) / m.world.w) + 1.0)
+		edge_z = maxf(edge_z, float(int(int(td[0]) / float(m.world.w))) + 1.0)
 	T.teleport(Vector3(P.pos.x, g - 0.6, edge_z + T.r + 0.15))
 	T.grounded = false
 	T.vel = Vector3.ZERO
@@ -202,7 +202,7 @@ func _hop() -> void:
 	var n_ := path.size()
 	var early := 0.0
 	var late := 0.0
-	for i in n_ / 5:
+	for i in int(n_ / 5.0):
 		early += float(path[i + 1])
 		late += float(path[n_ - 2 - i])
 	ok(

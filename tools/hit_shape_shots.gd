@@ -15,7 +15,7 @@ var axis_row := false            # a dummy stands on the aim line (an area move;
 func _slot(i: int) -> Vector3:
 	var z: float = ROWS[i % ROWS.size()]
 	if z == 0.0 and not axis_row: return home + Vector3(-6.0, 0.0, 6.0)
-	return home + Vector3(GAP * float(1 + i / ROWS.size()), 0.0, z)
+	return home + Vector3(GAP * float(1 + int(i / float(ROWS.size()))), 0.0, z)
 
 func run(main: Node) -> void:
 	var dir := ""

@@ -226,7 +226,7 @@ func _mesh_bounds(m: MeshInstance3D) -> AABB:
 		var weights := PackedFloat32Array()
 		if arr[Mesh.ARRAY_WEIGHTS] != null:
 			weights = arr[Mesh.ARRAY_WEIGHTS]
-		var per := bones.size() / maxi(verts.size(), 1)
+		var per := int(bones.size() / float(maxi(verts.size(), 1)))
 		for v in verts.size():
 			var pos := Vector3.ZERO
 			if per > 0 and weights.size() >= bones.size():

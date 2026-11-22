@@ -84,7 +84,7 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		if sync:
 			sync._process(Match.DT)
 		if step % EVERY == 0:
-			var i := step / EVERY
+			var i := int(step / float(EVERY))
 			var on := "gl=%d dv=%d" % [int(h.gliding), int(h.plunging())]
 			if boki != "":
 				var k: Kin = h.kin

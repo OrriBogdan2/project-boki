@@ -50,14 +50,14 @@ func _step_to(w: World, x: int, z: int, d: Vector2i) -> int:
 ## [tile, direction to the neighbour, tile the other hunter stands on].
 func _find(test: Callable) -> Array:
 	var w := m.world
-	for r in range(0, w.w / 2 - 3):
-		for z in range(w.h / 2 - r, w.h / 2 + r + 1):
-			for x in range(w.w / 2 - r, w.w / 2 + r + 1):
+	for r in range(0, int(w.w / 2.0) - 3):
+		for z in range(int(w.h / 2.0) - r, int(w.h / 2.0) + r + 1):
+			for x in range(int(w.w / 2.0) - r, int(w.w / 2.0) + r + 1):
 				if w.kind[w.idx(x, z)] != World.T_GROUND or not w.roomy(x, z): continue
 				for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
 					if w.inb(x + d.x, z + d.y) and test.call(x, z, d):
 						return [Vector2i(x, z), d, Vector2i(x, z) - d * 3]
-	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
+	return [Vector2i(int(w.w / 2.0), int(w.h / 2.0)), Vector2i(0, 1), Vector2i(int(w.w / 2.0), int(w.h / 2.0) - 3)]
 
 func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire := Vector2i.ZERO) -> void:
 	var w := m.world

@@ -127,9 +127,9 @@ func _tris(n: Node) -> int:
 			var arr: Array = mesh.surface_get_arrays(i)
 			var idx: Variant = arr[Mesh.ARRAY_INDEX]
 			if idx != null:
-				total += (idx as PackedInt32Array).size() / 3
+				total += int((idx as PackedInt32Array).size() / 3.0)
 			else:
-				total += (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+				total += int((arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3.0)
 	return total
 
 func _whole_weights(skin: ShroudSkin) -> bool:

@@ -12,7 +12,7 @@ func _grab(m: Match, file: String, frames := 4) -> void:
 		await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
 	var sz := img.get_size()
-	var crop := img.get_region(Rect2i(0, sz.y - sz.y / 4, sz.x / 3, sz.y / 4))
+	var crop := img.get_region(Rect2i(0, sz.y - int(sz.y / 4.0), int(sz.x / 3.0), int(sz.y / 4.0)))
 	crop.save_png(dir.path_join("xp_%s_%dp.png" % [file, sz.y]))
 	print("XPSHOT ", file, " ", sz, " lvl ", m.player.lvl, " xp ", m.player.xp)
 

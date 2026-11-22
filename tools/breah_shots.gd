@@ -70,7 +70,7 @@ func _save_strip(file: String) -> void:
 	out.fill(Color(0.05, 0.05, 0.07))
 	for i in frames.size():
 		var fr: Image = frames[i]
-		var at := Vector2i((i % GRID_COLS) * (w + 4), (i / GRID_COLS) * (hh + 4))
+		var at := Vector2i((i % GRID_COLS) * (w + 4), (int(i / float(GRID_COLS))) * (hh + 4))
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
 

@@ -62,7 +62,9 @@ func _host() -> void:
 		if int(round(t / DT)) % 2 == 0:
 			var img := main.get_viewport().get_texture().get_image()
 			if img != null:
-				img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+				img.resize(
+					FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR
+				)
 				frames.append(img)
 	for i in frames.size():
 		frames[i].save_png(shots_dir.path_join("f_%04d.png" % i))

@@ -333,7 +333,7 @@ func _sheer() -> void:
 	var sheer_keys: Array = w.sheer.keys()
 	for trial in 12:
 		var i: int = sheer_keys[(trial * 37) % sheer_keys.size()]
-		var gx := float(i % w.w) + 0.5; var gz := float(i / w.w) + 0.5
+		var gx := float(i % w.w) + 0.5; var gz := float(int(i / float(w.w))) + 0.5
 		var dir := Vector2.ZERO
 		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 			if w.is_void(gx + d.x, gz + d.y): dir = d; break

@@ -181,4 +181,4 @@ func _gathering(what: String, shot_name: String, caption: String) -> void:
 
 func _tile_at(tile: int) -> Vector3:
 	var w: World = home.world
-	return Vector3(tile % w.w + 0.5, 0, tile / w.w + 0.5)
+	return Vector3(tile % w.w + 0.5, 0, int(tile / float(w.w)) + 0.5)

@@ -227,7 +227,7 @@ func _exchange_book() -> void:
 func _exchange_clock() -> void:
 	_started_save()
 	var t := Time.get_datetime_dict_from_system()
-	var today := int(Time.get_unix_time_from_datetime_dict(t) / 86400)
+	var today := int(Time.get_unix_time_from_datetime_dict(t) / 86400.0)
 	var ahead := Exchange.DAYS_AHEAD
 	ok(Exchange.anchored_day(100, 90, 100) == 100 and Exchange.anchored_day(100, 130, 100) == 100 + ahead
 		and Exchange.anchored_day(-1, 50, 50) == 50,

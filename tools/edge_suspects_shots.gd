@@ -239,7 +239,7 @@ func _tris(model: Node) -> int:
 			var idx: Variant = arr[Mesh.ARRAY_INDEX]
 			var count: int = (idx as PackedInt32Array).size() if idx != null \
 					else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-			n += count / 3
+			n += int(count / 3.0)
 	return n
 
 func _glb(arch: String) -> String:

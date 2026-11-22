@@ -231,7 +231,7 @@ func common(hero: String, sc: String, ss: Array, meas: Dictionary) -> void:
 		)
 	if not skate.is_empty():
 		skate.sort()
-		meas["foot_slip"] = snappedf(skate[skate.size() / 2], 0.01)
+		meas["foot_slip"] = snappedf(skate[int(skate.size() / 2.0)], 0.01)
 	if tpose >= 3:
 		flag(hero, sc, "tpose", "%d frames with the skeleton at its rest pose" % tpose)
 	if idle_mv >= 12:

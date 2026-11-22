@@ -208,10 +208,10 @@ func _sheet() -> void:
 	var w: int = shots[0].get_width() / THUMB
 	var hh: int = shots[0].get_height() / THUMB
 	var cols := DISTS.size()
-	var sheet := Image.create(w * cols, hh * (shots.size() / cols), false, Image.FORMAT_RGB8)
+	var sheet := Image.create(w * cols, hh * (int(shots.size() / float(cols))), false, Image.FORMAT_RGB8)
 	for i in shots.size():
 		var img: Image = shots[i]
 		img.convert(Image.FORMAT_RGB8)
 		img.resize(w, hh, Image.INTERPOLATE_LANCZOS)
-		sheet.blit_rect(img, Rect2i(0, 0, w, hh), Vector2i((i % cols) * w, (i / cols) * hh))
+		sheet.blit_rect(img, Rect2i(0, 0, w, hh), Vector2i((i % cols) * w, (int(i / float(cols))) * hh))
 	sheet.save_jpg(dir.path_join("sheet_%s.jpg" % Settings.quality()), 0.85)

@@ -63,7 +63,7 @@ func _hunter(id: String, row: int, step_on: bool) -> void:
 	var face := 0.0
 	var t := -0.6
 	var i := 0
-	while i < sheet.get_width() / frame_px:
+	while i < int(sheet.get_width() / float(frame_px)):
 		if t > 0.0:
 			face = minf(face + HunterMove.turn_rate * DT, PI)
 		elif t + DT > 0.0 and feet:

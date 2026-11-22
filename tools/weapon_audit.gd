@@ -193,8 +193,8 @@ func _audit(id: String, out: String) -> Dictionary:
 	cam.position = Vector3(0, tall * 0.5, maxf(tall * 0.56, wide * 1.45) / tan(deg_to_rad(15.0)))
 	cam.rotation = Vector3(-0.0, 0, 0)
 	var img := await _grab()
-	var w := img.get_height() * 3 / 4
-	var body := img.get_region(Rect2i((img.get_width() - w) / 2, 0, w, img.get_height()))
+	var w := int(img.get_height() * 3 / 4.0)
+	var body := img.get_region(Rect2i(int((img.get_width() - w) / 2.0), 0, w, img.get_height()))
 	body.save_png(out.path_join("ingame_%s.png" % id))
 	# the weapon, close
 	var side := Vector3(focus.x, 0, focus.z).normalized() * 0.8 + Vector3(0, 0.25, 0.6)
@@ -202,7 +202,7 @@ func _audit(id: String, out: String) -> Dictionary:
 	cam.look_at(focus)
 	var wimg := await _grab()
 	var w2 := wimg.get_height()
-	var wc := wimg.get_region(Rect2i((wimg.get_width() - w2) / 2, 0, w2, w2))
+	var wc := wimg.get_region(Rect2i(int((wimg.get_width() - w2) / 2.0), 0, w2, w2))
 	wc.save_png(out.path_join("weapon_%s.png" % id))
 	# the match camera, true pixels
 	var p := deg_to_rad(CAM_PITCH)
@@ -239,7 +239,7 @@ func _put(sheet: Image, im: Image, at: Rect2i, nearest := false) -> void:
 	var k := minf(float(at.size.x) / i.get_width(), float(at.size.y) / i.get_height())
 	var sz := Vector2i(maxi(int(i.get_width() * k), 1), maxi(int(i.get_height() * k), 1))
 	i.resize(sz.x, sz.y, Image.INTERPOLATE_NEAREST if nearest else Image.INTERPOLATE_LANCZOS)
-	sheet.blit_rect(i, Rect2i(Vector2i.ZERO, sz), at.position + (at.size - sz) / 2)
+	sheet.blit_rect(i, Rect2i(Vector2i.ZERO, sz), at.position + Vector2i(Vector2((at.size - sz)) / 2.0))
 
 func _compose(cells: Dictionary, wardens: Array, out: String) -> void:
 	await tree.process_frame
@@ -255,7 +255,7 @@ func _compose(cells: Dictionary, wardens: Array, out: String) -> void:
 	var hdr := 44
 	for n in wardens.size():
 		var id: String = wardens[n]
-		var o := Vector2i((n % cols) * CW, (n / cols) * CH)
+		var o := Vector2i((n % cols) * CW, (int(n / float(cols))) * CH)
 		var c: Dictionary = cells[id]
 		var sp: Array = REFS[id]
 		_put(sheet, _load_ref(sp[0]), Rect2i(o + Vector2i(6, hdr), Vector2i(300, CH - hdr - 6)))

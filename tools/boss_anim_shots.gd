@@ -68,9 +68,9 @@ func _tick() -> void:
 		return
 	var img := main.get_viewport().get_texture().get_image()
 	var c := Vector2i(m.cam.unproject_position(reel_b.pos + Vector3(0, 1.4, 0)))
-	var x := clampi(c.x - REEL.x / 2, 0, maxi(0, img.get_width() - REEL.x))
-	var y := clampi(c.y - REEL.y / 2, 0, maxi(0, img.get_height() - REEL.y))
-	img.get_region(Rect2i(x, y, REEL.x, REEL.y)).save_jpg(reel_dir.path_join("%05d.jpg" % (reel_n / 2)), 0.9)
+	var x := clampi(c.x - int(REEL.x / 2.0), 0, maxi(0, img.get_width() - REEL.x))
+	var y := clampi(c.y - int(REEL.y / 2.0), 0, maxi(0, img.get_height() - REEL.y))
+	img.get_region(Rect2i(x, y, REEL.x, REEL.y)).save_jpg(reel_dir.path_join("%05d.jpg" % (int(reel_n / 2.0))), 0.9)
 
 
 ## Waits until `secs` after `t0` on match time, then crops the boss out of the screen into column `col` of row `row`.
@@ -81,8 +81,8 @@ func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) ->
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
 	var c := Vector2i(m.cam.unproject_position(b.pos + Vector3(0, 1.4, 0)))
-	var x := clampi(c.x - CROP / 2, 0, img.get_width() - CROP)
-	var y := clampi(c.y - CROP / 2, 0, img.get_height() - CROP)
+	var x := clampi(c.x - int(CROP / 2.0), 0, img.get_width() - CROP)
+	var y := clampi(c.y - int(CROP / 2.0), 0, img.get_height() - CROP)
 	strip.blit_rect(img, Rect2i(x, y, CROP, CROP), Vector2i(col * CROP, row * CROP))
 
 

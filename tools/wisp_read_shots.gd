@@ -42,7 +42,7 @@ func run(main_node: Node) -> void:
 	sizes.sort()
 	var hid := "body_hidden own=%.1f%% others=%.1f%%" % [100.0 * avg.call(own), 100.0 * avg.call(hits)]
 	print("WISPREAD frames=%d wisps=%d wisp_px=%.0f %s (mean per wisp per frame) draw_calls=%.0f" % [
-			frames, wisps, float(sizes[sizes.size() / 2]), hid, draws / maxf(1.0, float(frames))])
+			frames, wisps, float(sizes[int(sizes.size() / 2.0)]), hid, draws / maxf(1.0, float(frames))])
 	main.get_tree().quit(0)
 
 func _fight_shots() -> void:

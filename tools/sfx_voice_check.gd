@@ -134,7 +134,7 @@ func _brawl() -> Match:
 	var at := m.player.pos
 	for i in range(3, Data.MATCH_PLAYERS):
 		var arch: String = archs[i % archs.size()]
-		m.make_bot(i / 3, at, [], {"name": Arch.name_of(arch, true), "arch": arch})
+		m.make_bot(int(i / 3.0), at, [], {"name": Arch.name_of(arch, true), "arch": arch})
 	for h: Hunter in m.hunters:
 		var ang := TAU * float(h.team) / 10.0 + 0.3 * float(m.hunters.find(h) % 3)
 		var spot := at if h.team == 0 else at + Vector3(cos(ang), 0, sin(ang)) * RING_M

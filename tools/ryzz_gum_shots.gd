@@ -125,8 +125,8 @@ func _state(st: String) -> void:
 		cam.position = c + dir * 3.2
 		cam.look_at(c)
 		var img := await _grab()
-		var m := (img.get_height() - CROP) / 2
-		img.get_region(Rect2i((img.get_width() - CROP) / 2, m, CROP, CROP)).save_png(
+		var m := int((img.get_height() - CROP) / 2.0)
+		img.get_region(Rect2i(int((img.get_width() - CROP) / 2.0), m, CROP, CROP)).save_png(
 			out.path_join("%s_%s_%s.png" % [tag, st, v]))
 	if st == "idle" or st == "run":
 		var p := deg_to_rad(GAME_PITCH)

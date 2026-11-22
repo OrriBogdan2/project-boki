@@ -232,7 +232,7 @@ func run(m: Node) -> void:
 		line.append("tier %d %.2f%% (expect ~%.2f%%)" % [t, hit * 100.0 / W, e * 100.0])
 		ok(absf(hit / float(W) - e) < e * 0.15 + 0.002, "wild kin mutated in tier %d: %.2f%%" % [t, hit * 100.0 / W])
 	var rh := 0
-	for _j in W / 4:
+	for _j in int(W / 4.0):
 		var wr := {}
 		Mutations.roll_wild(wr, rng, 0, true)
 		if wr.has("mutations"): rh += 1
