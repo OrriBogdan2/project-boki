@@ -89,9 +89,9 @@ func _init() -> void:
 func run(main_node: Node, shard := "") -> void:
 	if shard != "":
 		rest = shard == REST
-		var n := ARCHS.size()
+		var n_v := ARCHS.size()
 		var i := int(shard) - 1
-		archs = [] if rest else ARCHS.slice(ceili(i * n / float(SHARDS)), ceili((i + 1) * n / float(SHARDS)))
+		archs = [] if rest else ARCHS.slice(ceili(i * n_v / float(SHARDS)), ceili((i + 1) * n_v / float(SHARDS)))
 	main_node.get_tree().process_frame.connect(_sample)
 	await super.run(main_node)
 

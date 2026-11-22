@@ -9,7 +9,8 @@ extends RefCounted
 const BEATS := ["cast", "travel", "hit", "end"]
 
 var ok: Callable
-var src := ""                  # every script under scripts/arch/, and the archetype files, for the literal names
+var src := ""  # every script under scripts/arch/, and the archetype files, for the literal names
+
 
 func run(check_ok: Callable) -> void:
 	ok = check_ok
@@ -25,6 +26,7 @@ func run(check_ok: Callable) -> void:
 			_bar(String(d["group"]), d)
 			sets += 1
 	ok.call(sets >= 2, "ability bar: %d Hunter sets list one (Tenzo, Grimble at least)" % sets)
+
 
 func _bar(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -61,8 +63,10 @@ func _bar(arch: String, d: Dictionary) -> void:
 	var what := "ability bar %s: %d beats sounded, %d distinct hits %s" % [arch, have, hits.size(), wrong]
 	ok.call(wrong.is_empty(), what)
 
+
 func _played(arch: String, sname: String) -> bool:
-	return sname == arch + "_dash" or src.contains("\"%s\"" % sname)
+	return sname == arch + "_dash" or src.contains('"%s"' % sname)
+
 
 func _read_dir(dir: String) -> void:
 	for f in DirAccess.get_files_at(dir):
