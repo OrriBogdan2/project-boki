@@ -54,7 +54,7 @@ func _bots_break(L: Dictionary, crew: Array, limit: float) -> float:
 		h.lvl = maxi(h.lvl, 8)
 		h.ai["boss_hunt"] = true
 		_spot(h, LairBreach.stand(L) + out * 5.0 + side * (i - 1) * 1.5)
-	keep = crew
+	keep = crew + [m.player]      # (the parked player too: dead, they leave a revive beacon that pulls a timed bot off the seal)
 	var seal: Mob = m.lairs.breach.seal_of(L)
 	var t0 := -1.0
 	var t := 0.0
@@ -168,4 +168,4 @@ func run(main: Node) -> void:
 		"three bots break the Eyrie's in %.0f s (at most %.0f%% of one bot's)" % [squad, SQUAD_K * 100.0])
 	m.over = true
 	print("BREACH ", "PASS" if bad == 0 else "FAIL (%d)" % bad)
-	main.get_tree().quit()
+	main.get_tree().quit(1 if bad > 0 else 0)
