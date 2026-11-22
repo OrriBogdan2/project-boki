@@ -42,10 +42,21 @@ static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	if sname != "":
 		m.sfx(sname, h.pos, vol_db)
 
-## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
+## An ability hit's "ab" -> the slot its own hit sound is named for (`<arch>_hit_<slot>`): the cx slots
+## (utility, k1, ult) and the kits' own (rmb, e, x, dash; Tenzo's "rock", a punched or raised rock).
+const HIT_SLOT := {"utility": "rmb", "rmb": "rmb", "k1": "e", "e": "e", "dash": "dash", "ult": "r", "x": "r",
+	"r": "r", "rock": "rock"}
+
+## The sound a hit by `by` makes on its target (Match.on_damage, your hits): an ability's own hit when the Hunter
+## has one (`<arch>_hit_<slot>`, HIT_SLOT; tools/gen_sfx_ability_bar.py), else the Hunter's own weapon hit
 ## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
 static func hit_sound(by: Ent, o := {}) -> String:
 	if not by is Hunter:
 		return "hit"
 	var h := by as Hunter
+	var slot := String(HIT_SLOT.get(String(o.get("ab", "")), ""))
+	if slot != "" and String(o.get("src", "")) != "shot":
+		var own := of(h, "hit_" + slot, "")
+		if own != "":
+			return own
 	return of(h, "hit", hit_tick(h, o))
