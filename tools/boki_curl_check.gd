@@ -1,15 +1,15 @@
 extends RefCounted
-## --boki-curl-check [--curl-boki=a,b]: a big Boki on the Return order guarding at your side (docs/BOKI_AGENCY_AUDIT.md)
-## through a run, a jump, a glide off the jump and the landing, rendered every 60 Hz step. It curls up on your back while
-## you glide and goes back to its flank when you land (KinCurl eases both ways). Prints one CURL_FRAME line a frame:
-## its root (the Kin node) against your spot on the ground (your x and z, the ground's height: it stays on the ground
-## when you jump), and its curl pose weight (body pitch / KinCurl.BALL_PITCH, 0 on its feet,
-## 1 curled), then a CURL_SUMMARY line per Boki with the biggest one-frame step of each. FAIL: a step over
-## MAX_STEP_M or MAX_STEP_W, or it never curled up or never came back down.
+## --boki-curl-check [--curl-boki=a,b]: a big Boki on the Return order guarding at your side
+## (docs/BOKI_AGENCY_AUDIT.md) through a run, a jump, a glide off the jump and the landing, rendered every 60 Hz step.
+## It curls up on your back while you glide and goes back to its flank when you land (KinCurl eases both ways).
+## Prints one CURL_FRAME line a frame: its root (the Kin node) against your spot on the ground (your x and z, the
+## ground's height: it stays on the ground when you jump), and its curl pose weight (body pitch / KinCurl.BALL_PITCH,
+## 0 on its feet, 1 curled), then a CURL_SUMMARY line per Boki with the biggest one-frame step of each.
+## FAIL: a step over MAX_STEP_M or MAX_STEP_W, or it never curled up or never came back down.
 ## --curl-snap: the old draw for a before/after, the ease skipped (curl set to its end every frame); no FAIL lines.
 ## --shots-dir=<dir> [--size=480]: also <dir>/<boki>/f000.png... at 30 fps from behind your left shoulder (a renderer).
 
-const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (your run is not its jump)
+const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (not your run)
 const MAX_STEP_W := 0.5    # the curl pose weight's biggest one-frame step
 const MAX_FRAMES := 400   # steps: a glide that never lands stops the dump here
 const DEFAULT := ["pebbit", "goliathite"]   # two big forms: the lightest (1.4) and a heaviest (2.0)
@@ -138,22 +138,31 @@ func _dump(main: Node, id: String) -> void:
 			top["on"] = f
 		if k.beside and top["on"] >= 0 and top["off"] < 0:
 			top["off"] = f
-		var ph := "run" if f < 30 else ("jump" if not P.gliding and landed_t < 0.0 else ("glide" if P.gliding else "land"))
-		print("CURL_FRAME %s f%03d %-5s up=%.2f beside=%d rel=(%5.2f %5.2f %5.2f) step=%.3f w=%.2f dw=%.2f scale=%.2f" % [
-			id, f, ph, P.pos.y - m.world.ground_at(P.pos.x, P.pos.z), int(k.beside), rel.x, rel.y, rel.z, dm, w, dw, k.model.scale.x])
+		var ph := "jump"
+		if f < 30:
+			ph = "run"
+		elif P.gliding:
+			ph = "glide"
+		elif landed_t >= 0.0:
+			ph = "land"
+		var up := P.pos.y - m.world.ground_at(P.pos.x, P.pos.z)
+		print("CURL_FRAME %s f%03d %-5s up=%.2f beside=%d rel=(%5.2f %5.2f %5.2f) step=%.3f w=%.2f dw=%.2f scale=%.2f"
+			% [id, f, ph, up, int(k.beside), rel.x, rel.y, rel.z, dm, w, dw, k.model.scale.x])
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
 			await _grab(P, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
 		f += 1
 		t = f * Match.DT
-	print("CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d" % [
-		id, f, top["on"], top["off"], top["m"], top["mf"], top["w"], top["wf"]])
+	print("CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d"
+		% [id, f, top["on"], top["off"], top["m"], top["mf"], top["w"], top["wf"]])
 	if snap:
 		return
-	ok(top["on"] >= 0 and top["off"] > top["on"], "%s: it curls onto your back in the glide and back off on landing" % id)
-	ok(top["m"] <= MAX_STEP_M, "%s: no one-frame jump in its root over %.2f m (biggest %.3f m)" % [id, MAX_STEP_M, top["m"]])
-	ok(top["w"] <= MAX_STEP_W, "%s: no one-frame jump in its curl over %.1f (biggest %.2f)" % [id, MAX_STEP_W, top["w"]])
+	ok(top["on"] >= 0 and top["off"] > top["on"], "%s: it curls onto your back in the glide, off on landing" % id)
+	ok(top["m"] <= MAX_STEP_M, "%s: no one-frame jump in its root over %.2f m (biggest %.3f m)"
+		% [id, MAX_STEP_M, top["m"]])
+	ok(top["w"] <= MAX_STEP_W, "%s: no one-frame jump in its curl over %.1f (biggest %.2f)"
+		% [id, MAX_STEP_W, top["w"]])
 
 
 ## A frame from behind your left shoulder, 6 m out, on you and your Boki.
