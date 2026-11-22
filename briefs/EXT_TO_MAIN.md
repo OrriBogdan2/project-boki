@@ -10965,3 +10965,4 @@ READY ext/lace-vfx-data 36c1042ddb (origin/main merged; pin_fx.gd conflict resol
 READY ext/extra-clan-feed e53350f7166 (clan feed spec)
 READY ext/tutorial-mask-line 65a3e49267 (Mask line at first portal)
 READY ext/owner-notes-assert-a b25868cb5e (owner kit notes part 1)
+READY ext/feel-dash-turn-rule 666f68ef64 (dash facing rows)
