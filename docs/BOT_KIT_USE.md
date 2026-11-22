@@ -70,7 +70,7 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), every Hunter's dash and glide.
 - **Cinder** (`ashwick_kit.gd`, `bot.gd`): the "1 LMB hit" in the Before table was mostly a counting gap: the hose's hits are tagged `flame`, which the check never counted as LMB, so it now reads the kit's `hose_hits` counter (887 ticks with the old bot). The bot also stood at 5.5 to 7 m against a 6.1 m stream, so many held ticks fell short. A kit hook `ArchKit.bot_reach()` (0 = the weapon's range) lets Cinder say her stream ends at 5.7 m: the shared bot brain closes in until the foe is inside it (preferred gap 4.2 m) and holds LMB only within it. Standing closer also puts foes in the 4.5 m Furnace Cloak more often (the existing E rule: cast when a foe is under 4 m; cloak pull 49 to 55). LMB 991 to 1216 over the same seeds.
 - **Meeko** (`tender_kit.gd`): `_bot_call` casts Hearth Call (R) on a downed teammate, or one under 35% HP, in the 11.6 m reach once no rival Hunter is within 3 m of her; with no teammate in the match (a duel) it lights the tether on herself below 70% HP, as the player's key does in solo play (R 0 to 5). The check no longer skips Meeko's ultimate. The teammate path has no duel to exercise it; `--tender-combo-check` covers the tether.
-- Open: Gil (`gil`) is new in this table's check and fails `rmb press` (0 presses; its Grab Bag is never raised by the bot). Not in this pass.
+- Gil (`gil`): `rmb press` was 0 in the first run of this table (the bot pressed and released RMB inside one step); it holds the key `BOT_TAP` now, see the Gil bot section below.
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
 
 ## Lead casts: Motley and Tenzo (ext/bot-kit-lead-casts)
@@ -105,7 +105,7 @@ The Snap did not change: the bots' general aim already leads the target by the w
 | Tenzo Stone Row rock hits | 6 | 12 (each seed lands by 90 s) |
 | Tenzo Quakefall hits | 30 | 32 |
 
-Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. The one red left is Gil's `rmb press` (above), red on origin/main too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.
+Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.
 
 ## Ultimate and Boki in a match
 
@@ -177,3 +177,20 @@ No failures. Runs differ (the bots roll unseeded random numbers), so a row can m
 - **Albert** (`bulwark_kit.gd`): the Faultline before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
 - **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
 - Meeko's Hearth Call is unchanged by this pass (see ext/bot-kit-cinder-meeko above); Lace, Kael, Cinder, Neve, Sable were already on time.
+
+## Gil's Grab Bag (ext/combat-gil-bot-grabbag)
+
+The "Open" line this replaced said the bot never raises Gil's Grab Bag. That was true of the first run and is not true of main: `gil_kit.gd bot_use` has thrown the potion since the `BOT_TAP` fix (`bot_hold["rmb"] = BOT_TAP`, then `press_rmb()`, when a charge is ready, there is a line of sight and the rival is within the bag's 8 m plus 1 m). The Grab Bag throws at the cursor and has no self effect (docs/heroes/gil.md), so there is nothing to throw at himself when hurt. No code was added.
+
+`--bot-kit-use` on origin/main 0a0db9747c (seeds 3, 5, 9, 120 s, both fighters counted; the bots roll random numbers, so a count moves between runs):
+
+| Gil (`gil`) | RMB presses | RMB holds | RMB hits (`utility`) |
+|---|---|---|---|
+| First run of the table (bot pressed and released in one step) | 0 | 0 | |
+| After the `BOT_TAP` fix (table above) | 100 | 0 | 108 |
+| origin/main 0a0db9747c, `--bot-kit-use=gil` | 158 | 0 | 108 |
+| origin/main 0a0db9747c, full `--bot-kit-use` | 117 | 0 | 82 |
+
+Other kits in the full run keep their rows (RMB presses 134 Lace, 159 Kael, 70 Vex, 172 Mossy, 47 Neve, 61 Cinder, 38 Tenzo, 34 Sparkle, 31 Grimble, 54 Meeko, 89 Sable, 36 Motley).
+
+**New red, not Gil's:** on 0a0db9747c the check fails `never uses 'ultimate'` for 12 of the 13 Hunters (only Motley casts one, once). The duel fighters stay at level 1 (the ult needs level 6, `Hunter.ULT_AT`), so `HeroUlt.ready` is never true in the 120 s. Cause not traced; the fix belongs in the check or the duel's XP, not in a kit.
