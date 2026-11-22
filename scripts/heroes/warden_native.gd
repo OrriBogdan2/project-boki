@@ -43,6 +43,7 @@ var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's se
 var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
+var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var mouth: Array = []  # [Meshy bone, offset in it]: the copied weapon_muzzle, where the Gun's Muzzle sits each frame
 static var _anchors := {}  # art -> the contract model's anchor empties: [name, contract bone, model xf, bone head]
 
@@ -139,6 +140,7 @@ func _process(dt: float) -> void:
 	elif attack_left <= 0.0:
 		_loco(s)
 	player.advance(dt)
+	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0
 		opener.step(dt, 1.0)
@@ -157,6 +159,19 @@ func _process(dt: float) -> void:
 		(f[0] as Node3D).position = (skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin)
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
+
+
+## The Heartspark carry on Meshy's arms (WardenClips._heart's layer): the off hand (the Hero's clip data "heart_hand")
+## holds the mote at the chest while the legs and the other arm play on; it lets go for the attack clip.
+func _heart(on: bool, dt: float) -> void:
+	heart_w = move_toward(heart_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if heart_w <= 0.0:
+		root.remove_meta(WardenCarry.MOTE)
+		return
+	var cd := WardenClips.data(art_id)
+	var fwd := float(d.get("carry_fwd", cd.get("carry_fwd", WardenCarry.REACH_FWD)))
+	var side := String(d.get("heart_hand", cd.get("heart_hand", "L")))
+	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, side, fwd))
 
 
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
