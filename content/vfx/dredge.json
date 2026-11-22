@@ -18,7 +18,6 @@
 			{"p": "ribbon", "size": 0.2, "tail": 0.05, "head": 0.3, "head_len": 1.5, "life": 2.0, "c": "gold", "c2": "hot"}
 		]},
 		"slug_end": {"net": false, "fx": [{"p": "flare", "size": 0.18, "grow": 1.0, "life": 0.3, "c": "brass", "c2": "char"}]},
-		"reel": {"net": false, "fx": [{"p": "ring", "at": "h", "ride": true, "size": 0.78, "thin": true, "life": 1.0, "c": "brass", "c2": "gold", "c3": "iron"}]},
 		"arm_ghost": {"net": false, "fx": [{"p": "string", "xray": true, "size": 0.45, "c": "sludge", "c2": "arm"}]},
 		"stunned": {"net": false, "fx": [{"p": "vortex", "y": 2.6, "size": 0.6, "life": "t", "c": "anchor", "c2": "hot", "c3": "iron"}]},
 		"dive": {"net": false, "fx": [
@@ -31,12 +30,10 @@
 			{"p": "sweep", "y": 0.25, "size": "r", "arc": 110, "band": 0.12, "life": 0.25, "c": "gold", "c2": "hot", "c3": "iron"},
 			{"p": "scorch", "shape": "disc", "fwd": 1.1, "size": 1.6, "life": 1.4, "c": "stone", "c2": "stone", "c3": "iron"},
 			{"p": "scorch", "shape": "cone", "arc": 110, "size": "r", "size_x": 0.7, "life": 1.2, "c": "stone", "c2": "stone", "c3": "iron"},
-			{"p": "flare", "fwd": 1.1, "y": 0.3, "size": 2.2, "life": 0.08, "c": "brass", "c2": "hot"},
-			{"p": "ring", "fwd": 1.8, "size": 1.8, "life": 0.35, "delay": 0.06, "c": "gold", "c2": "hot", "c3": "iron"}
+			{"p": "flare", "fwd": 1.1, "y": 0.3, "size": 2.2, "life": 0.08, "c": "brass", "c2": "hot"}
 		]},
 		"quake": {"fx": [
 			{"p": "ring", "size": "r", "life": 0.45, "c": "gold", "c2": "hot", "c3": "iron"},
-			{"p": "ring", "size": "r", "size_x": 0.6, "life": 0.3, "c": "brass", "c2": "hot", "c3": "iron"},
 			{"p": "flare", "size": "r", "size_x": 1.8, "life": 0.35, "c": "brass", "c2": "hot"},
 			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.6, "life": 1.2, "c": "gold", "c2": "brass", "c3": "iron"},
 			{"p": "fist", "fwd": 0.6, "size": 2.0, "pitch": -30, "drop": 0.0, "fall": 0.01, "life": 0.55, "c": "main", "c2": "hot", "c3": "char"}

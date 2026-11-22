@@ -470,8 +470,8 @@ func _all() -> void:
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
 	ok(
-		"reel: Grimble is Grounded while he reels, the foe is stunned",
-		KitStatus.grounded(P) and T.stun_t > 0.0 and HeroVfx.of(K.m).holds.has("%d/reel" % P.get_instance_id()),
+		"reel: Grimble is Grounded while he reels, the foe is stunned, no ring at his feet (not an area)",
+		KitStatus.grounded(P) and T.stun_t > 0.0 and not HeroVfx.of(K.m).holds.has("%d/reel" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
 	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
