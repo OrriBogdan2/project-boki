@@ -44,6 +44,7 @@ var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
+var objective: FirstObjective = null   # the first expedition's "next step" (pin + card)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
@@ -295,6 +296,7 @@ func _start(o: Dictionary) -> void:
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
 	ktip = KnockTip.for_match(self, guide)
+	objective = FirstObjective.for_match(self, o)
 	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -1454,7 +1456,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
+			var spd := minf(maxf(hv.length(), HunterMove.glide_cruise) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
@@ -3841,6 +3843,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	MobReap.tick(self)
 	if blight: blight.tick(dt)
 	_prof("mobs")
 	Prof.begin("physics")
@@ -3927,6 +3930,7 @@ func step(dt: float) -> void:
 		training.update(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if objective: objective.tick(dt)
 	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
@@ -4995,6 +4999,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
+			if k.dead and t_owner >= 0.0 and t_owner <= k.net_dead_t:
+				return       # snapshots (unreliable) can land after the kill event (reliable): one sent before the kill is stale
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
@@ -5276,6 +5282,7 @@ func _net_ev(x, from: String) -> void:
 			if k:
 				k.dead = true
 				k.visible = false
+				k.net_dead_t = time
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)

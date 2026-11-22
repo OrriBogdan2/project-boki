@@ -72,5 +72,5 @@ collision read it, so the farm's one jump-and-mantle (`Home._mantle`, reach 1.5 
 edge back down. No second climbing system. A Boki stays on the ground: it walks round blocks on the same tile
 grid (`HomeBuild.refresh_grid` after every placement); one set down on a block (dropped from up there, or there
 when the layout changes) is stepped off by `HomeCarry.drop` / `Home.unstick`, and you are not pushed off a block you
-climbed. The wild trees and rocks of the meadow stay 3 m walls. Check: `--farm-climb-blocks-check`. Not built: Boki
+climbed. The wild trees and rocks of the meadow stay 3 m walls. Check: `--farm-climb-blocks-check` places every solid catalog piece (32; heights 1.2 m, bench/tub/warm stone 0.5 m), climbs it as the Empty, and walks a small, medium and large Boki past it (Boki size does not change the walk). Not built: Boki
 walking onto blocks (Boki have no height on the farm; say so if you want it).
