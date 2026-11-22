@@ -101,8 +101,8 @@ static func climbs_tall(h: Hunter) -> bool:
 
 ## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
-static func brake_rate(speed: float) -> float:
-	return brake_friction * speed + brake_decel
+static func brake_rate(speed_v: float) -> float:
+	return brake_friction * speed_v + brake_decel
 
 ## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
 ## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
@@ -183,9 +183,9 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 
 ## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
 ## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
-static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
+static func push(hv: Vector2, dir: Vector2, speed_v: float) -> Vector2:
 	var along := hv.dot(dir)
-	return hv + dir * (maxf(along, speed) - along)
+	return hv + dir * (maxf(along, speed_v) - along)
 
 ## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
 ## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
