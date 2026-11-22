@@ -6,12 +6,24 @@ after it (30 fps), cropped round the Hunter.
 
     python3 tools/air_cast_strip.py <shots-dir> <out-dir>      (one <out-dir>/<id>.jpg per Hunter filmed)
 """
+
 import json, os, sys
 from PIL import Image, ImageDraw
 
-KEYS = [("press", "p", -1), ("", "p", 2), ("", "p", 4), ("", "p", 7), ("", "p", 10), ("", "p", 14),
-        ("pre", "l", -1), ("land", "l", 0), ("", "l", 3), ("", "l", 6), ("", "l", 10)]
-CROP_W, CROP_TOP, CROP_BOTTOM = 150, 0.06, 0.9       # px half-width round the centre; top and bottom as frame parts
+KEYS = [
+    ("press", "p", -1),
+    ("", "p", 2),
+    ("", "p", 4),
+    ("", "p", 7),
+    ("", "p", 10),
+    ("", "p", 14),
+    ("pre", "l", -1),
+    ("land", "l", 0),
+    ("", "l", 3),
+    ("", "l", 6),
+    ("", "l", 10),
+]
+CROP_W, CROP_TOP, CROP_BOTTOM = 150, 0.06, 0.9  # px half-width round the centre; top and bottom as frame parts
 
 
 def cell(frame_dir, i, size):
@@ -31,8 +43,12 @@ def strip(hdir, out):
         fd = os.path.join(hdir, variant)
         key = json.load(open(os.path.join(fd, "key.json")))
         if r == 0:
-            d.text((4, 4), "%s: %s pressed on the way up a standing jump (before: planted legs; after: fall legs)"
-                   % (os.path.basename(hdir), key["move"]), fill=(230, 230, 230))
+            d.text(
+                (4, 4),
+                "%s: %s pressed on the way up a standing jump (before: planted legs; after: fall legs)"
+                % (os.path.basename(hdir), key["move"]),
+                fill=(230, 230, 230),
+            )
         base = {"p": key["press"], "l": key["land"]}
         y = head + r * ch
         d.text((4, y + 4), variant, fill=(230, 230, 230))
@@ -43,8 +59,11 @@ def strip(hdir, out):
             x = pad + c * cw
             sheet.paste(cell(fd, i, (cw, ch)), (x, y))
             tag = name or ("press" if k == "p" else "land")
-            d.text((x + 3, y + ch - 14), "%s%+d" % (tag, off) if off else tag,
-                   fill=(255, 160, 140) if i >= key["end"] else (255, 240, 160))
+            d.text(
+                (x + 3, y + ch - 14),
+                "%s%+d" % (tag, off) if off else tag,
+                fill=(255, 160, 140) if i >= key["end"] else (255, 240, 160),
+            )
     sheet.save(out, quality=80)
     print("wrote", out, sheet.size)
 

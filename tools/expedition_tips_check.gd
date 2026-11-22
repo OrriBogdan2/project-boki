@@ -28,10 +28,10 @@ func run(main: Node) -> void:
 	p.stats.erase("mobs")
 	ok(m.heart != null and ExpeditionTips.next(m).is_empty(), "a fresh match: no tip before anything happens")
 	m.time = 200.0
-	var tr := Heart.tide_r(m)
-	p.pos = m.heart.site + Vector3(maxf(tr - ExpeditionTips.BLIGHT_M - 8.0, 0.0), 0, 0)
-	ok(tr > 0.0 and ExpeditionTips.next(m).is_empty(), "the ring is closing but its edge is far: no Blight tip")
-	p.pos = m.heart.site + Vector3(tr - ExpeditionTips.BLIGHT_M + 5.0, 0, 0)
+	var trap := Heart.tide_r(m)
+	p.pos = m.heart.site + Vector3(maxf(trap - ExpeditionTips.BLIGHT_M - 8.0, 0.0), 0, 0)
+	ok(trap > 0.0 and ExpeditionTips.next(m).is_empty(), "the ring is closing but its edge is far: no Blight tip")
+	p.pos = m.heart.site + Vector3(trap - ExpeditionTips.BLIGHT_M + 5.0, 0, 0)
 	ok(_due(m) == "blight", "the ring's edge within %d m: the Blight tip" % int(ExpeditionTips.BLIGHT_M))
 	m._tip("blight", ExpeditionTips.next(m)[1])
 	ok(Save.d["tutorial"].get("blight", false) and ExpeditionTips.next(m).is_empty(), "shown once, then never")
@@ -61,8 +61,10 @@ func _wall_rows(m: Match, p: Hunter) -> void:
 	ok(_due(m) == "", "on the ground by a wall: no wall-kick tip")
 	p.grounded = false
 	p.last_gy = p.pos.y
-	ok(_due(m) == "wallkick" and String(ExpeditionTips.next(m)[1]).contains(Settings.key_cap("jump")),
-		"in the air against a kickable wall: the wall-kick tip with the jump key")
+	ok(
+		_due(m) == "wallkick" and String(ExpeditionTips.next(m)[1]).contains(Settings.key_cap("jump")),
+		"in the air against a kickable wall: the wall-kick tip with the jump key"
+	)
 	p.stats["wall_kicks"] = 1
 	ok(_due(m) == "" and Save.d["tutorial"].get("wallkick", false), "kicked on your own: marked seen, never shown")
 	p.stats.erase("wall_kicks")

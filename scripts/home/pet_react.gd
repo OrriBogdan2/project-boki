@@ -6,24 +6,28 @@ extends RefCounted
 ## mood icon, and pays joy and trust, at most `cap` times a farm day so spamming does nothing.
 ## A shy Boki's first pat only makes it flinch; its second, soon after, is the one it leans into.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("pet_react")
+
 
 ## "shy", "proud", "playful" or "sleepy", from its traits.
 static func kind(rec: Dictionary) -> String:
 	var r := rules()
-	var tr: Dictionary = rec.get("traits", {})
-	if float(tr.get("bravery", 0.5)) < float(r["shy_bravery"]):
+	var trap: Dictionary = rec.get("traits", {})
+	if float(trap.get("bravery", 0.5)) < float(r["shy_bravery"]):
 		return "shy"
-	if float(tr.get("temper", 0.5)) > float(r["proud_temper"]):
+	if float(trap.get("temper", 0.5)) > float(r["proud_temper"]):
 		return "proud"
-	return "playful" if float(tr.get("curiosity", 0.5)) >= float(r["playful_curiosity"]) else "sleepy"
+	return "playful" if float(trap.get("curiosity", 0.5)) >= float(r["playful_curiosity"]) else "sleepy"
+
 
 ## Pats it has paid for in this farm day (the window restarts with the care days).
 static func pats_today(rec: Dictionary) -> int:
 	if Care.care_day(rec, "pet_win"):
 		rec["pet_n"] = 0
 	return int(rec.get("pet_n", 0))
+
 
 ## Pats the Boki k (a farm or room entry): plays the beat and, when `reward` is on, pays it (a
 ## visit pays nothing and never runs out). Returns
@@ -54,21 +58,22 @@ static func pet(h, k: Dictionary, reward := true) -> Dictionary:
 	_beat(h, k, kd, spec, first_shy, can or not reward)
 	return out
 
+
 ## The clip and icon for one pat: `first_shy` is the flinch, `paid` is false once it has had enough.
 static func _beat(h, k: Dictionary, kd: String, spec: Dictionary, first_shy: bool, paid: bool) -> void:
 	var n: Node3D = k["node"]
 	var pos: Vector3 = k["pos"]
 	var hold := float(spec["hold_s"])
 	if kd != "sleepy" and float(k.get("nap_t", 0.0)) > 0.0:
-		k["nap_t"] = 0.01      # a gentle pat wakes it up
+		k["nap_t"] = 0.01  # a gentle pat wakes it up
 	h.verbs.play("pat", n)
 	k["t"] = hold
 	k["goal"] = pos
 	k["hold_t"] = hold
 	if not paid and not first_shy:
 		if kd == "proud":
-			_walk_off(h, n, k)      # one pat is all it allows
-		return      # otherwise it has had enough for today: it only looks at you
+			_walk_off(h, n, k)  # one pat is all it allows
+		return  # otherwise it has had enough for today: it only looks at you
 	k["joy_t"] = 0.9 if kd != "playful" else hold
 	var icon := String(spec["icon"])
 	if first_shy:
@@ -81,12 +86,16 @@ static func _beat(h, k: Dictionary, kd: String, spec: Dictionary, first_shy: boo
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), null, -4.0, 0.12, pitch)
 	_icon(n, icon)
 	match kd:
-		"playful": _roll(n, float(spec["roll_s"]))
+		"playful":
+			_roll(n, float(spec["roll_s"]))
 		"shy":
 			if not first_shy:
 				_pose(n, "comfort", hold)
-		"proud": _walk_off(h, n, k)
-		"sleepy": _doze(k, float(spec["nap_s"]))
+		"proud":
+			_walk_off(h, n, k)
+		"sleepy":
+			_doze(k, float(spec["nap_s"]))
+
 
 ## It rolls onto its back and over again (the body turns once about its length).
 static func _roll(n: Node3D, secs: float) -> void:
@@ -97,12 +106,14 @@ static func _roll(n: Node3D, secs: float) -> void:
 	tw.tween_property(body, "rotation:z", TAU, secs).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_callback(func(): body.rotation.z = 0.0)
 
+
 ## A puppet pose (KinPuppet: "flinch", "comfort") for `secs`.
 static func _pose(n: Node3D, pose: String, secs: float) -> void:
 	n.set_meta("pose", pose)
 	var tw := n.create_tween()
 	tw.tween_interval(secs)
 	tw.tween_callback(func(): n.set_meta("pose", ""))
+
 
 ## Stands tall for a beat, then strolls off away from you.
 static func _walk_off(h, n: Node3D, k: Dictionary) -> void:
@@ -113,15 +124,18 @@ static func _walk_off(h, n: Node3D, k: Dictionary) -> void:
 	tw.tween_interval(float(k["hold_t"]))
 	tw.tween_callback(func(): _go(k, to))
 
+
 static func _go(k: Dictionary, to: Vector3) -> void:
 	k["goal"] = to
 	k["t"] = 3.0
+
 
 ## It purrs and drops into a short nap (the farm's own nap; a room has none, so it only settles).
 static func _doze(k: Dictionary, secs: float) -> void:
 	k["nap_t"] = maxf(float(k.get("nap_t", 0.0)), secs)
 	k["slept"] = 0.0
 	k["z_t"] = 0.5
+
 
 ## The mood icon: floats up over its head for a moment.
 static func _icon(n: Node3D, text: String) -> void:
