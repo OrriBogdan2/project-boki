@@ -145,7 +145,8 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 		var vs := pc.get_viewport_rect().size
 		var tag := "%dx%d (logical %s)" % [win.x, win.y, vs]
 		var safe := HudStyle.safe_rect(vs).grow(0.5)
-		ok(safe.encloses(pc.get_global_rect()), "%s: the window %s sits inside the safe margin %s" % [tag, pc.get_global_rect(), safe])
+		var rect := pc.get_global_rect()
+		ok(safe.encloses(rect), "%s: the window %s sits inside the safe margin %s" % [tag, rect, safe])
 		var clipped := SafeArea.clipped(pc)
 		ok(clipped.is_empty(), "%s: no text clipped %s" % [tag, clipped.slice(0, 4)])
 		var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
@@ -161,9 +162,10 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 				stray.append("%s %d at %s" % [key["inv"], key["i"], r])
 			slots[key["inv"]] += 1
 		ok(slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
-			"%s: 4 worn, 4 belt, %d pack slots all on screen and clickable %s" % [tag, slots["pack"], stray.slice(0, 3)])
+			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)])
 		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
-		ok(orbs.get_child_count() == PERKS.size(), "%s: all %d perk orbs show (%d)" % [tag, PERKS.size(), orbs.get_child_count()])
+		var shown := orbs.get_child_count()
+		ok(shown == PERKS.size(), "%s: all %d perk orbs show (%d)" % [tag, PERKS.size(), shown])
 	m.hud.close_pack()
 	main.get_tree().root.size = SIZES[0]
 	await _frames(main, 2)
