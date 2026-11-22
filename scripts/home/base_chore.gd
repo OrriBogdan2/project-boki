@@ -2,16 +2,17 @@ class_name BaseChore
 extends RefCounted
 ## The Chore state of base life (GARDEN.md section 4): a work knack (scripts/core/work.gd) becomes something a Boki
 ## does because of who it is, not a Job Board. Ember minds the egg in the Nook (the rest of its home hatch time
-## halves, once per egg), Mend cheers up a glum friend (joy up) and Haul fetches the ball back to the toy spot.
-## Watering waits for the snack patch. Save: Save.d["egg"]["minded"] is an optional key, no migration.
+## halves, once per egg), Mend cheers up a glum friend (joy up) and Haul fetches the ball back to the toy spot,
+## Tide waters a dry snack patch (it ripens sooner). Save: Save.d["egg"]["minded"] is an optional key, no migration.
 ## BaseLife runs this from its machine: k["life_chore"] = {kind, ...}.
 ## Each chore ends with one journal line on the Boki, in the shape CareJournal.note writes (rec["journal"]).
 
-const KINDS := {"ember": "mind", "mend": "cheer", "haul": "fetch"}      # knack -> chore
+const KINDS := {"ember": "mind", "mend": "cheer", "haul": "fetch", "tide": "water"}      # knack -> chore
 const GLUM_AT := 40.0       # joy need below which a Boki counts as glum
 const CHEER_JOY := 18.0     # joy a cheered-up Boki gains
 const CHEER_BOND := 0.05    # added to both Boki's bond when one cheers the other up
 const AT_EGG := 1.8         # m: a Boki this close to the egg is minding it (the egg sits 1 m inside the Nook)
+const AT_PATCH := 1.8       # m: close enough to the patch's centre to water it (the patch is 2 m wide)
 const AT_BALL := 0.6        # m: close enough to pick up or put down the ball
 const BALL_FAR := 4.5       # m: how far from the toy spot the ball lies
 const HATCH_CUT := 0.5      # share of the egg's remaining home hatch time that is left after minding
@@ -19,7 +20,7 @@ const STALL_S := 8.0        # s a walking Boki may go without getting STALL_GAIN
 const STALL_GAIN := 0.5     # m nearer its goal that count as getting somewhere
 const JOURNAL_KEEP := 20    # lines kept per Boki (CareJournal.KEEP)
 
-## The chore this Boki would do now ("" for none): its best knack among Ember, Mend and Haul whose chore can run.
+## The chore this Boki would do now ("" for none): its best knack among Ember, Mend, Haul and Tide whose chore can run.
 static func pick(life: BaseLife, k: Dictionary) -> String:
 	for kn in Work.list(k["rec"]):
 		var kind := String(KINDS.get(kn[0], ""))
@@ -38,6 +39,11 @@ static func can_do(life: BaseLife, k: Dictionary, kind: String) -> bool:
 			return not glum(life, k).is_empty()
 		"fetch":
 			return not life.toy_spots().is_empty()
+		"water":
+			var at := _patch_at()
+			var now := Time.get_unix_time_from_system()
+			return FarmUnlocks.base_mode() and SnackPatch.dry(SnackPatch.entry(Save.d), now) \
+				and life.h.world.island_of(k["pos"].x, k["pos"].z) == life.h.world.island_of(at.x, at.z)
 	return false
 
 ## Starts the chosen chore: where it is going and what it carries.
@@ -46,6 +52,8 @@ static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
 	match kind:
 		"mind":
 			k["goal"] = life.h.nest.position
+		"water":
+			k["goal"] = _patch_at()
 		"cheer":
 			c["to"] = glum(life, k)
 		"fetch":
@@ -61,6 +69,7 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 		"mind": done = _mind(life, k, m, dt)
 		"cheer": done = _cheer(life, k, c)
 		"fetch": done = _fetch(life, k, c)
+		"water": done = _water(life, k, m, dt)
 	if done or KinAvoid.shut(k) or m.since >= float(life.R["max"]["chore"]) or _stalled(k, c, m.since):
 		m.go(BaseLife.S.ROAM, "%s done" % c["kind"] if done else "%s gave up" % c["kind"])
 
@@ -114,6 +123,30 @@ static func _mind(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
 	_note(k, "minded the egg: it hatches sooner")
 	life.h._emote(k, "♥")
 	return true
+
+## Walks to the patch, stands over it for chore_water s, then waters it. Gives up (done, no line) if it was watered
+## or picked meanwhile.
+static func _water(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
+	var e := SnackPatch.entry(Save.d)
+	if not SnackPatch.dry(e, Time.get_unix_time_from_system()):
+		return true
+	var at := _patch_at()
+	k["goal"] = at
+	if Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() > AT_PATCH:
+		return false
+	k["hop"] = float(k.get("hop", 0.0)) + dt * 4.0       # splashing
+	if m.since < float(life.R["chore_water"]):
+		return false
+	SnackPatch.water(e, Time.get_unix_time_from_system())
+	life.h.fx.burst(at + Vector3(0, 0.5, 0), Color("4ab0ff"), 8, 1.2, 0.4)
+	life.h._emote(k, "♪")
+	_note(k, "watered the snack patch: it ripens sooner")
+	return true
+
+## Where the patch is (its centre), or far away when none is down.
+static func _patch_at() -> Vector3:
+	var e := SnackPatch.entry(Save.d)
+	return HomeLayout.deco_center(e) if not e.is_empty() else Vector3(-9999, 0, -9999)
 
 static func _cheer(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 	var to: Dictionary = c["to"]
