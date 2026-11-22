@@ -2,6 +2,9 @@ class_name WardenFx
 extends RefCounted
 ## A model's smoke and bloom off its held weapon (warden_look.json), split out of WardenGlb.
 
+static var _puff_tex: Texture2D
+
+
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
 ## fade, in world space so they trail behind a swing.
@@ -77,6 +80,7 @@ static func smoke(root: Node3D, own: Dictionary) -> void:
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	(at_anchor if at_anchor else weapon).add_child(p)
 
+
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
 ## color [r, g, b, a], size (m), count (along the weapon's length, or from the anchor to the anchor `to`
 ## on the same bone: a skinned blade; from `from` of it), depth_test}): additive
@@ -126,11 +130,12 @@ static func bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				follow.name = "BloomFollow"
 				follow.update_scale = false
 				follow.update_rotation = false
-				if to:      # (both ride one bone: the step between them is fixed in the anchor's frame)
+				if to:  # (both ride one bone: the step between them is fixed in the anchor's frame)
 					var step := (a.transform.affine_inverse() * to.transform).origin
 					follow.position = step * lerpf(float(b.get("from", 0.0)), 1.0, (j + 0.5) / n)
 				a.add_child(follow)
 				follow.remote_path = follow.get_path_to(q)
+
 
 static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -141,10 +146,10 @@ static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = at
-	mi.set_meta("glb_hidden", true)      # (kept out of the model's own bounds, like the hidden procedural parts)
+	mi.set_meta("glb_hidden", true)  # (kept out of the model's own bounds, like the hidden procedural parts)
 	return mi
 
-static var _puff_tex: Texture2D
+
 ## A soft round puff (a radial fall-off), made once.
 static func _puff() -> Texture2D:
 	if _puff_tex == null:

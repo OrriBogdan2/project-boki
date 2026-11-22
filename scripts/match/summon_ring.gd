@@ -8,15 +8,16 @@ extends RefCounted
 ## it started with is the most seen (KinSummon.win), so no new sync.
 
 const NAME := "SummonRing"
-const PAD_M := 0.35          # m the ring's diameter exceeds the Boki's team ring
-const THICKNESS := 0.05      # fraction of the radius the band takes
-const LIFT_M := 0.03         # m above the ground: under the team ring (0.06) and the telegraphs
-const OWN_A := 0.9           # alpha of a summon that is its rider's own
-const STOLEN_A := 0.45       # alpha of a stolen summon
-const WARN_S := 2.0          # s left when the ring starts to flicker
-const FLICKER_HZ := 6.0      # flickers per second in the warning
-const FLICKER_LOW := 0.25    # x alpha at the dark half of a flicker
-const PRIORITY := -2         # material render priority: under the team ring and the marks
+const PAD_M := 0.35  # m the ring's diameter exceeds the Boki's team ring
+const THICKNESS := 0.05  # fraction of the radius the band takes
+const LIFT_M := 0.03  # m above the ground: under the team ring (0.06) and the telegraphs
+const OWN_A := 0.9  # alpha of a summon that is its rider's own
+const STOLEN_A := 0.45  # alpha of a stolen summon
+const WARN_S := 2.0  # s left when the ring starts to flicker
+const FLICKER_HZ := 6.0  # flickers per second in the warning
+const FLICKER_LOW := 0.25  # x alpha at the dark half of a flicker
+const PRIORITY := -2  # material render priority: under the team ring and the marks
+
 
 ## Every frame, on every Boki (Kin.render): draws the ring while its window runs, frees it otherwise.
 static func tick(k: Kin) -> void:
@@ -45,6 +46,7 @@ static func tick(k: Kin) -> void:
 	var mat := ring.material_override as ShaderMaterial
 	mat.set_shader_parameter("color", Color(SideColor.of(k.m, k), a))
 	mat.set_shader_parameter("arc", clampf(s.left / s.win, 0.0, 1.0))
+
 
 static func _make() -> MeshInstance3D:
 	var ring := MeshInstance3D.new()
