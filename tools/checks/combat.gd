@@ -5,5 +5,10 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# one walk speed, run/walk/crouch gaits per Hunter (3 shards keep each under the gate's 300 s cap)
+	"--move-speed-1-check":
+	["res://tools/move_speed_check.gd", "move_speed_check", "archer,ashwick,bulwark,dolm,dredge"],
+	"--move-speed-2-check": ["res://tools/move_speed_check.gd", "move_speed_check", "gil,gunslinger,juggernaut,mage"],
+	"--move-speed-3-check": ["res://tools/move_speed_check.gd", "move_speed_check", "ostra,rimewright,tender,thief"],
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 }
