@@ -1,6 +1,6 @@
 extends RefCounted
 ## --vex-dash-check: Vex's Slipstep is one dash with one cooldown, not a charge dash. Her
-## max_dashes() is 1, the dash slot draws no charge pips, and a
+## max_dashes() is 1, the Second Wind perk gives her nothing, the dash slot draws no charge pips, and a
 ## kill still refills her dash. Other hunters keep their charges. Never touches the save.
 
 var bad := 0
@@ -39,9 +39,15 @@ func run(main: Node) -> void:
 			o.ctrl = "idle"
 			o.teleport(vex.pos + Vector3(40, 0, 40))
 	ok(vex.max_dashes() == 1.0, "Vex max_dashes() is %s" % vex.max_dashes())
+	vex.perks.append("secondwind")
+	ok(vex.max_dashes() == 1.0, "Second Wind leaves Vex at %s" % vex.max_dashes())
+	ok(not vex.perk_open("secondwind"), "Second Wind is not offered to Vex")
+	vex.perks.clear()
 	vex.unlock_all()
 	vex.dashes = 0.0
 	await main.get_tree().process_frame
+	var info := vex.slot_info("dash")
+	ok(int(info["max_charges"]) == 0, "Vex dash slot reports max_charges %s" % info["max_charges"])
 	vex.dashes = 1.0
 	await m.hud.panels.draw
 	var hid: int = m.hud.get_instance_id()
