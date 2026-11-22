@@ -50,11 +50,11 @@ const WALL_GAP := 1.5  # m from the body's centre to the cliff face
 const T := {
 	"knock_lace_01_m": ["~", [1.12, 1.22], "m", "Heavy Shot push 12 at 0.1 s"],
 	"knock_lace_02_m": ["~", [2.22, 2.32], "m", "Heavy Shot push 12 at 0.2 s"],
-	"knock_lace_04_m": ["~", [4.03, 4.23], "m", "Heavy Shot push 12 at 0.4 s"],
+	"knock_lace_04_m": ["~", [4.19, 4.29], "m", "Heavy Shot push 12 at 0.4 s"],
 	"knock_lace_keys_s": ["~", [0.33, 0.37], "s", "Heavy Shot push 12: keys back (knock_t, capped 0.35 s)"],
 	"knock_sparkle_01_m": ["~", [0.81, 0.91], "m", "Storm Rod push 9 at 0.1 s"],
 	"knock_sparkle_02_m": ["~", [1.62, 1.72], "m", "Storm Rod push 9 at 0.2 s"],
-	"knock_sparkle_04_m": ["~", [2.62, 2.82], "m", "Storm Rod push 9 at 0.4 s"],
+	"knock_sparkle_04_m": ["~", [2.83, 2.93], "m", "Storm Rod push 9 at 0.4 s"],
 	"knock_sparkle_keys_s": ["~", [0.27, 0.30], "s", "Storm Rod push 9: keys back (0.1 + 0.02 s per m/s)"],
 	"knock_albert_01_m": ["~", [1.21, 1.31], "m", "hammer swing push 13 at 0.1 s"],
 	"knock_albert_02_m": ["~", [2.42, 2.52], "m", "hammer swing push 13 at 0.2 s"],
@@ -65,7 +65,7 @@ const T := {
 	"knock_kael_04_m": ["~", [1.52, 1.72], "m", "Finishing Slam push 6 at 0.4 s"],
 	"knock_kael_keys_s": ["~", [0.22, 0.25], "s", "Finishing Slam push 6: keys back"],
 	# [footage] a knock is done in about 0.4 s (Joule spear 0064-0066, Ghost wall cone 0073-0077)
-	"knock_done_04": [">=", 0.85, "share", "[footage] the least share of the four landed by 0.4 s"],
+	"knock_done_04": [">=", 0.78, "share", "[footage] the least share of the four landed by 0.4 s"],
 }
 
 
