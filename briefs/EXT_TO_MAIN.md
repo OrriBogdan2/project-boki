@@ -10986,3 +10986,4 @@ READY ext/garden-tide-water 95a6f83d21d (merged origin/main, resolved snack_patc
 READY ext/cinder-dash-clip 498f09accd32e53b98f6cc17da0fd32102138019 (Cinder dash proc->clip, merged with main; combo-check 3 fails same as main)
 READY ext/tut-text-audit 70bce048d5fa4ac8a503fa27bfe674a7465cfd3e (tutorial and hint text audit; origin/main merged in, 3 conflicts resolved; --check, --key-text-check, --tut-rebind-check, --tut-first-capture-check 0 fails)
 READY ext/stuck-integ-5f7f820f 4973992b52 (supersedes: ext/fix-ghost-shot-sfx-1113 ext/vfx-grimble-wedges ext/sv-private-1112 ext/parity-ttk-cinder-neve ext/fix-vex-walk-1115; base mc-20261122-0220 + origin/main cc36e78ec9; --check 0 fail, --kit-parity-check 0 fail; ttk/hero-vfx red as main, sfx-set NEW-RED carried from mc base; 583 others not mergeable: triage-5f7f820f.md)
+READY ext/tutorial-match-eight 3369aab0a0f6330e963556bc2c821e7694df8b4f (match tutorial step count)
