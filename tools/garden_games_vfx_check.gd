@@ -10,6 +10,8 @@ extends RefCounted
 ##      bright on a clean pass and dull on a fumble
 ##   4. Show Ring: each round's score pops on the frame the round ends with the score the judges gave (the
 ##      Trick round ended by its third press, the others by time), and both totals with the Bond score
+##   5. Fetch Cup: the landing ring sits on the seed's landing spot through each toss and is gone once it is
+##      chased
 ## No cue spawns on any other frame. Never touches the real save.
 
 const DT := 1.0 / 30.0           # s per step: one frame of the clips
@@ -17,6 +19,7 @@ const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish
 const NEAR := 0.05               # m a cue may sit from where it belongs
 const TELLS := 2                 # tells watched: every bout has two (depth 3, at most 2 steps a push)
 const LEFT_OUT := 2              # the answer beat (of the first phrase) the player leaves out
+const TOSSES := 3                # tosses watched in Fetch Cup
 const MAX_S := 240.0             # s of game time any game may take
 
 var bad := 0
@@ -36,6 +39,7 @@ func run(m: Node) -> void:
 	_tumble()
 	_relay()
 	_show()
+	_fetch()
 	FarmUnlocks.rules()["base_mode"] = false
 	print("GGVFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -280,3 +284,25 @@ func _show() -> void:
 	ok(wrong == 0, "show: each round's score popped on the frame it ended, the totals with the Bond (%d off)" % wrong)
 	sr._end(false)
 	ok(sr.cue == null and gone(cue.root), "show: the pops go with the show")
+
+func _fetch() -> void:
+	var fb: BaseFetch = home.hfetch
+	fb.use()
+	var tossed := 0
+	var wrong := 0
+	var t := 0.0
+	while fb.run != null and tossed < TOSSES and t < MAX_S:
+		fb.tick(DT)
+		t += DT
+		var ring: MeshInstance3D = fb.cue.landing
+		if fb.run.state == BaseFetch.Run.S.TOSS:
+			tossed += 1 if fb.run.state_t < DT * 1.5 else 0
+			var land: Vector3 = fb.mat.position + Vector3(0, 0.05, fb.run.dist)
+			if not ring.visible or Vector2(ring.position.x - land.x, ring.position.z - land.z).length() > NEAR:
+				wrong += 1
+		elif ring.visible:
+			wrong += 1
+	ok(tossed == TOSSES and wrong == 0, "fetch: the ring marks the landing spot on %d tosses, never off a toss (%d off)"
+			% [tossed, wrong])
+	fb._end(false)
+	ok(fb.cue == null, "fetch: the ring goes with the round")
