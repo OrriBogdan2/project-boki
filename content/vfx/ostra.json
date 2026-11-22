@@ -2,6 +2,7 @@
 	"palette": {
 		"main": "#2ee6c0", "pale": "#7fe0d0", "hot": "#eafffa", "char": "#06221e", "smoke": "#3a5c58"
 	},
+	"fire_from": {"lmb": "hand", "rmb": "hand"},
 	"anchors": {
 		"hand": {"nodes": ["anchor_orb"], "bone": "hand.R", "off": [0.0, 0.1, 0.0], "body": [0.3, 1.15, 0.4]},
 		"chest": {"nodes": ["anchor_chest"], "bone": "hips", "off": [0.0, 0.4, 0.0], "body": [0.0, 1.0, 0.0]},

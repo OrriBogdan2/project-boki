@@ -1,6 +1,9 @@
 {
 	"palette": {"main": "9a5cff", "hot": "e6d8ff", "soft": "c9a0ff", "ghost": "b890ff", "flash": "e070ff", "deep": "3a1670", "slot": "b07aff", "char": "2a1450", "white": "ffffff"},
+	"fire_from": {"e": "hand_r"},
 	"anchors": {
+		"gun_r": {"nodes": ["weapon_muzzle"], "bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.28, 0.95, 0.6]},
+		"gun_l": {"nodes": ["weapon_muzzle_l"], "bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.28, 0.95, 0.6]},
 		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "hand": "r", "body": [0.3, 1.0, 0.3]},
 		"foot_l": {"bone": "shin.L", "off": [0.0, 0.42, 0.0], "body": [-0.12, 0.1, 0.0]},
 		"chest": {"nodes": ["anchor_chest"], "body": [0.0, 0.8, 0.0]},

@@ -4,6 +4,7 @@
 		"char": "#1a1420", "rose": "#ff7ac0", "violet": "#3a1c8c", "dusk": "#4a1050", "dust": "#d1ccb8",
 		"soot": "#8a8478", "gold": "#ffc23a"
 	},
+	"fire_from": {"lmb": "finger_r", "rmb": "finger_r"},
 	"anchors": {
 		"hand_l": {"bone": "hand.L", "hand": "l", "body": [-0.25, 1.1, 0.3]},
 		"hand_r": {"bone": "hand.R", "hand": "r", "body": [0.25, 1.1, 0.3]},

@@ -4,6 +4,7 @@
 		"deep": "#2f6ac0", "mist": "#8fb8d8",
 		"sig": "#5fd6c4"
 	},
+	"fire_from": {"lmb": "hand"},
 	"anchors": {
 		"hand": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "gun": [0.0, 0.0, -0.2], "body": [0.25, 1.0, 0.45]},
 		"palms": {"bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [0.0, 1.05, 0.65]},

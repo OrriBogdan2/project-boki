@@ -3,6 +3,7 @@
 		"main": "#b8f03c", "fire": "#5dff45", "hot": "#eaffa8", "white": "#fbffe6", "deep": "#4f8a12", "char": "#1c2a0e",
 		"smoke": "#d4dcc4", "soot": "#8a947e", "dust": "#a89878", "daze": "#ff4fb0"
 	},
+	"fire_from": {"lmb": "muzzle"},
 	"anchors": {
 		"muzzle": {"nodes": ["weapon_muzzle"], "body": [0.0, 1.1, 0.9]},
 		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.25, 1.1, 0.3]},

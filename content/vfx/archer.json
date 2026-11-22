@@ -1,5 +1,6 @@
 {
 	"palette": {"main": "d41e2e", "hot": "ffe4d6", "char": "2e0608", "smoke": "3c1c1e", "thread": "d41e2e", "silver": "dfe6f0", "steel": "8fa0b4", "white": "ffffff", "gold": "ffc02a", "deep": "7a0c14"},
+	"fire_from": {"lmb": "bow_root"},
 	"anchors": {
 		"nock": {"nodes": ["anchor_nock"], "hand": "r", "body": [0.25, 1.2, 0.3]},
 		"bow_root": {"nodes": ["anchor_bow_root", "weapon_muzzle"], "hand": "l", "body": [-0.2, 1.15, 0.5]},
