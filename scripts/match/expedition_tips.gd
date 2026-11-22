@@ -15,8 +15,8 @@ const KEG_M := 8.0  # a powder keg this close (m) brings the keg tip (only kegs 
 static func next(m: Match) -> Array:
 	var p := m.player
 	var seen: Dictionary = Save.d["tutorial"]
-	var tr := Heart.tide_r(m)
-	var near := tr > 0.0 and m.heart.site != Vector3.INF and p.flat_dist(m.heart.site) > tr - BLIGHT_M
+	var trap := Heart.tide_r(m)
+	var near := trap > 0.0 and m.heart.site != Vector3.INF and p.flat_dist(m.heart.site) > trap - BLIGHT_M
 	if not seen.has("blight") and near:
 		return ["blight", "The Blight is closing. Move toward the Heart."]
 	if not seen.has("camp") and int(p.stats.get("mobs", 0)) > 0:
@@ -24,12 +24,12 @@ static func next(m: Match) -> Array:
 	if not seen.has("deathbox") and not m.interact.is_empty() and m.interact["kind"] == "loot":
 		var cap := Settings.key_cap("interact")
 		return ["deathbox", "A fallen Hunter's deathbox: press %s to take their gear" % cap]
-	if not seen.has("keg") and m.interact.is_empty() and _keg_near(m, p):   # one prompt at a time
+	if not seen.has("keg") and m.interact.is_empty() and _keg_near(m, p):  # one prompt at a time
 		var fire := Settings.key_cap("fire")
 		return ["keg", "Crates, pots and barrels break in one hit. Only kegs explode: hit one from afar (%s)." % fire]
 	if not seen.has("wallkick"):
 		if int(p.stats.get("wall_kicks", 0)) > 0:
-			seen["wallkick"] = true      # it found the kick on its own: nothing to teach
+			seen["wallkick"] = true  # it found the kick on its own: nothing to teach
 		elif _at_kick_wall(p) and not (m.hud and m.hud.in_fight()):
 			return ["wallkick", "Press %s again against the wall to kick off" % Settings.key_cap("jump")]
 	return []
