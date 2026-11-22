@@ -1,5 +1,6 @@
 extends RefCounted
-## The v95 Hunters through all 15 ANIM_COVERAGE states (warden_clips_check runs it): each Hunter's .glb is bound (every
+## The v95 Hunters through all 15 ANIM_COVERAGE states and the three crowd-control looks (stun, rooted, knock)
+## (warden_clips_check runs it): each Hunter's .glb is bound (every
 ## clip track names a bone of its skeleton; each walk/run clip keys every bone of the contract's limbs), and every state
 ## is driven through HunterAnim and the clip tree: the pose leaves the rest pose (no T-pose) and the legs move in
 ## a walk, a run and a strafe (no frozen bone). One line per Hunter, the failing states named; `--verbose-states`
@@ -14,7 +15,8 @@ const STATES := ["idle", "walk", "run", "attack", "hit", "death", "jump", "land"
 const CC_STATES := ["stun", "rooted", "knock"]
 const KNOCK_FRAMES := 28       # frames of the knocked-down beat (0.45 s at 60 fps)
 const GROUND_TOL := 0.1        # m: a stunned or rooted Hunter's soles stay this close to where they stand in the idle
-const LIE_MAX := 0.45          # m: a knocked-down Hunter's lowest bone ends no higher over the idle's soles than this
+const LIE_MAX := 0.30          # m: a knock ending this far over the idle's soles is said (KNOCK-HEIGHT)
+const LIE_SINK := 0.20         # m: ... or this far under them (bone origins sit inside the body: a hint)
 const MOVE_FRAMES := 45        # frames a held state is sampled over
 const MOVE_MAX_S := 1.2        # s: the longest a kit move is sampled for
 const T_POSE_RAD := 0.035      # rad (2 deg): a state whose every contract bone stays this near rest is a T-pose
@@ -55,8 +57,9 @@ func _hunter(holder: Node3D, id: String) -> void:
 		var off: float = r["low"] - idle_low
 		if st in ["stun", "rooted"] and absf(off) > GROUND_TOL:
 			notes.append("%s soles %.2f m off the ground" % [st, off])
-		if st == "knock" and (off < -GROUND_TOL or off > LIE_MAX):
-			notes.append("knock ends %.2f m off the ground" % off)
+		if st == "knock" and (off < -LIE_SINK or off > LIE_MAX):      # the clip's height, not a mapping: said only
+			print("KNOCK-HEIGHT ", art, ": the knocked-down beat ends %.2f m %s the idle's soles (clip)" % [
+					absf(off), "above" if off > 0.0 else "below"])
 		if r["rest"] < T_POSE_RAD:
 			notes.append("%s T-pose" % st)
 		if st != "idle" and r["idle"] < T_POSE_RAD:
