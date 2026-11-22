@@ -44,6 +44,7 @@ var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
+var objective: FirstObjective = null   # the first expedition's "next step" (pin + card)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var ktip: KnockTip = null           # the first-knock card, in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
@@ -295,6 +296,7 @@ func _start(o: Dictionary) -> void:
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
 	ktip = KnockTip.for_match(self, guide)
+	objective = FirstObjective.for_match(self, o)
 	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -366,6 +368,7 @@ func _start(o: Dictionary) -> void:
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
 	recap = DeathRecap.new(self)         # the down/death card
 	add_child(recap)
+	add_child(StatusSfx.new(self))        # status cues and loops
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -1453,7 +1456,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
+			var spd := minf(maxf(hv.length(), HunterMove.glide_cruise) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
@@ -1771,7 +1774,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		if not BokiImpact.play(self, by, target, o, crit, "you"):
+			sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
@@ -3839,6 +3843,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	MobReap.tick(self)
 	if blight: blight.tick(dt)
 	_prof("mobs")
 	Prof.begin("physics")
@@ -3869,6 +3874,7 @@ func step(dt: float) -> void:
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
 	BoxRevive.mirror_remote(self, dt)
+	loot_sfx.sweep()
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -3924,6 +3930,7 @@ func step(dt: float) -> void:
 		training.update(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if objective: objective.tick(dt)
 	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
@@ -4086,6 +4093,7 @@ func _update_dex(dt: float) -> void:
 ## breaks or completes. Rivals who hear it get a sound ping on the minimap; bots come to look.
 const HUM_RANGE := 30.0
 const HUM_DB := 2.0
+var loot_sfx := LootOpenSfx.new()     # the sound of a chest or deathbox opening
 var box_hums := {}             # hum key -> its box, while that box's revive hum is playing
 var _hum_seq := 0
 func _update_box_hums() -> void:
@@ -4101,9 +4109,9 @@ func _update_box_hums() -> void:
 			if not box_hums.has(key):
 				box_hums[key] = b
 				Sfx.loop_start(key, "revive_hum", b["pos"], HUM_DB, HUM_RANGE)
-				_box_ray(b, true)
+				BoxReviveFx.ray(self, b, true)
 			Sfx.loop_set(key, b["pos"], 0.8 + 0.55 * prog)
-			_box_ray_tick(b, prog)
+			BoxReviveFx.ray_tick(self, b, prog)
 			BoxReviveFx.place(self, b, prog)
 			if int(time * 2.0) != int((time - DT) * 2.0):
 				note_sound(b.get("rev_by"), b["pos"], "revive")
@@ -4115,49 +4123,8 @@ func _box_hum_stop(b: Dictionary) -> void:
 	if key != "":
 		box_hums.erase(key)
 		Sfx.loop_stop(key)
-	_box_ray(b, false)
+	BoxReviveFx.ray(self, b, false)
 	BoxReviveFx.clear(b)
-
-## The soft column of light and the ring on the ground over a box while it's being revived.
-func _box_ray(b: Dictionary, on: bool) -> void:
-	var n = b.get("ray_node")
-	if on and (n == null or not is_instance_valid(n)):
-		var root := Node3D.new()
-		root.name = "BoxRay"
-		add_child(root)
-		root.position = b["pos"]
-		var col := MeshInstance3D.new()
-		col.mesh = Models.cyl(0.55, 0.85, 7.0, 20)
-		col.position = Vector3(0, 3.5, 0)
-		col.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.18))
-		col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		col.name = "Col"
-		root.add_child(col)
-		var ring := MeshInstance3D.new()
-		ring.mesh = Models.cyl(1.6, 1.6, 0.04, 32)
-		ring.position = Vector3(0, 0.06, 0)
-		ring.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.3))
-		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		ring.name = "Ring"
-		root.add_child(ring)
-		b["ray_node"] = root
-	elif not on and n != null and is_instance_valid(n):
-		(n as Node).queue_free()
-		b.erase("ray_node")
-
-func _box_ray_tick(b: Dictionary, prog: float) -> void:
-	var n = b.get("ray_node")
-	if n == null or not is_instance_valid(n):
-		return
-	var pulse := 0.5 + 0.5 * sin(time * (5.0 + prog * 7.0))
-	var col: MeshInstance3D = (n as Node3D).get_node("Col")
-	var ring: MeshInstance3D = (n as Node3D).get_node("Ring")
-	(col.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse))
-	col.scale = Vector3(1.0 + 0.15 * pulse, 0.6 + 0.4 * prog, 1.0 + 0.15 * pulse)
-	col.position.y = 3.5 * col.scale.y
-	var rs := 1.0 - 0.55 * prog
-	ring.scale = Vector3(rs, 1.0, rs)
-	(ring.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.25 + 0.3 * pulse))
 
 func _update_interact(dt: float) -> void:
 	for h in hunters:
@@ -4283,13 +4250,16 @@ func _update_interact(dt: float) -> void:
 						hud.close_loot()      # the second press always leaves the window, even with nothing taken
 					else:
 						hud.open_loot(b0)
+						loot_sfx.done(b0, LootOpenSfx.box_rar(b0))
 			"boxrev":
 				BoxRevive.hold(self, h, best["box"], dt)
 			"loot":
 				h.set_hold("loot")
+				loot_sfx.hold("box", best["box"])
 				h.box_t = 0.0 if time - h.hurt_at < 0.1 else h.box_t + dt     # a hit starts the loot over
 				if h.box_t >= Life.R["loot_time"]:
 					h.box_t = 0.0
+					loot_sfx.done(best["box"], LootOpenSfx.box_rar(best["box"]))
 					Life.loot_box(self, h, best["box"])
 			"catch":
 				Capture.hold(self, h, best["ent"], dt)
@@ -4297,6 +4267,7 @@ func _update_interact(dt: float) -> void:
 				var c: Dictionary = best["chest"]
 				if not KeyChest.keyed(h, c):
 					h.set_hold("chest")
+					loot_sfx.hold("chest", c)
 					c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0 or KeyChest.keyed(h, c):      # a key opens it on the press
 					_open_chest(h, c)
@@ -5028,6 +4999,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
+			if k.dead and t_owner >= 0.0 and t_owner <= k.net_dead_t:
+				return       # snapshots (unreliable) can land after the kill event (reliable): one sent before the kill is stale
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
@@ -5309,6 +5282,7 @@ func _net_ev(x, from: String) -> void:
 			if k:
 				k.dead = true
 				k.visible = false
+				k.net_dead_t = time
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)

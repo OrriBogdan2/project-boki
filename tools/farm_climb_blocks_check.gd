@@ -1,8 +1,13 @@
 extends RefCounted
 ## --farm-climb-blocks-check: every placed block on the farm is climbable (HomeLayout.CLIMB_TOP / "top"), through
 ## the one step-up and mantle the farm already has, and a Boki never ends up stuck on one.
-##   - one of each kind (fence, wall, hedge, bench, chest, tree, pillar, workbench, house) is topped by a running
-##     jump head-on, and from the top you walk off it back onto the meadow;
+##   - every solid piece of the build catalog (HomeLayout.CATALOG: block, not a water brush) is placed alone and
+##     topped by the Empty in a running jump head-on, then you walk off it back onto the meadow; its height is
+##     printed (FCLIMBBLK pieces: id height). A piece nobody can top fails, and so does a solid piece without
+##     an entry here (a new one is covered by itself);
+##   - a small, medium and large Boki (Unique size XS / M / XL) is steered across the meadow past each piece to
+##     its far side and never ends up on one (Boki have no height on the farm: they walk round, see
+##     docs/FARM_LOOP.md), and a walk-over piece (rug, flowers, bed) is not a block at all;
 ##   - every tile the layout blocks stands you at its top (buildings and decorations alike);
 ##   - after placing a wall across its way a Boki still gets to the far side (the grid is rebuilt), round it,
 ##     and never stands on a block;
@@ -14,7 +19,7 @@ const RUN_UP := 1.1  # m from the face the run starts
 const JUMP_AT := 6  # frame of the run-up the jump is pressed on (0.1 s in)
 const TRIAL_S := 2.0  # s a climb may take
 const WALK_OFF_S := 0.8  # s walking off the top
-const KINDS := ["fence", "stone_wall", "hedge", "bench", "storage_chest", "tree", "pillar", "workbench", "house"]
+const BOKI_SIZES := {"small": -2.4, "medium": 0.0, "large": 2.4}  # Unique "size" rolls: XS, M, XL
 const SPOT := Vector2i(30, 30)  # tile the blocks are tried from (open meadow on every seed's island)
 const WALK_S := 20.0  # s a Boki may take to walk round a wall
 const BOKI_SPEED := 2.4  # m/s, a wandering Boki's pace (Home._move_kin)
@@ -47,8 +52,16 @@ func run(main: Node) -> void:
 	hm.set_process(false)
 	var c := _open_spot(hm)
 	ok(c.x >= 0, "an open 9x9 patch of meadow to place on (%s)" % str(c))
-	for id in KINDS:
+	var solid: Array = HomeLayout.CATALOG.keys().filter(_solid_piece)
+	ok(solid.size() >= 30, "%d solid pieces in the catalog to climb" % solid.size())
+	var heights := []
+	for id in solid:
+		heights.append("%s %.1f" % [id, HomeLayout.top_of(String(id))])
 		await _kind(hm, String(id), c)
+	print("FCLIMBBLK pieces: " + ", ".join(heights))
+	for id in HomeLayout.CATALOG:
+		if not solid.has(id) and not HomeLayout.CATALOG[id].has("brush") and not HomeLayout.blocks(String(id)):
+			_walk_over(hm, String(id), c)
 	_all_blocked(hm)
 	await _boki(hm, c)
 	hm.queue_free()
@@ -81,6 +94,19 @@ func _put(hm, id: String, at: Vector2i) -> Dictionary:
 	return e
 
 
+## A piece that stands solid on the ground (not a brush: ponds and rivers are water you wade).
+func _solid_piece(id: String) -> bool:
+	return HomeLayout.blocks(id) and not HomeLayout.CATALOG[id].has("brush")
+
+
+## A piece with no "block" is walked over: no tile of it is a wall.
+func _walk_over(hm, id: String, c: Vector2i) -> void:
+	var e := _put(hm, id, c)
+	var open := HomeLayout.deco_cells(e).all(func(t): return not hm.world.is_block(t.x + 0.5, t.y + 0.5))
+	ok(open, "%s: a walk-over piece, no wall on its tiles" % id)
+	_clear_deco(hm)
+
+
 func _stands_at(w: World, t: Vector2i, top: float) -> bool:
 	return w.is_stand_block(t.x + 0.5, t.y + 0.5) and is_equal_approx(w.ground_at(t.x + 0.5, t.y + 0.5), top)
 
@@ -100,6 +126,12 @@ func _kind(hm, id: String, c: Vector2i) -> void:
 	var at := Vector2(c.x - RUN_UP + 0.5 - 0.5, c.y + 0.5)  # heading east into the west face
 	ok(await _climb(hm, at, top), "%s: a running jump tops it (%.1f m)" % [id, top])
 	ok(await _walk_off(hm, Vector2(c.x + 0.5, c.y + 0.5)), "%s: from the top you walk off onto the meadow" % id)
+	var sz := HomeLayout.size_of(id, 0)
+	for nm in BOKI_SIZES:
+		_boki_size(hm, hm.kins[0], BOKI_SIZES[nm])
+		var far := Vector3(c.x + sz.x + 1.5, 0, c.y + 0.5)
+		var res := _walk(hm, Vector3(c.x - 2.5, 0, c.y + 0.5), far)
+		ok(res[0], "%s: a %s Boki walks past it in %.1f s, never on it" % [id, nm, res[1]])
 	_clear_deco(hm)
 
 
@@ -170,16 +202,20 @@ func _all_blocked(hm) -> void:
 	ok(lay["deco"] is Array, "layout read")
 
 
-## A Boki gets round a wall to the far side; one set down on a block is stepped off it.
-func _boki(hm, c: Vector2i) -> void:
+## Gives a Boki a size (a Unique roll): its tag and hitbox follow, its walk must not.
+func _boki_size(_hm, kin: Dictionary, z: float) -> void:
+	var dna := Unique.roll(7)
+	dna["size"] = z
+	kin["rec"]["dna"] = dna
+
+
+## A Boki steered from `from` to `goal` on the grid: [reached, seconds, was it ever on a block].
+func _walk(hm, from: Vector3, goal: Vector3) -> Array:
 	var w: World = hm.world
-	for z in range(c.y - 3, c.y + 4):
-		_put(hm, "stone_wall", Vector2i(c.x, z))
 	var kin: Dictionary = hm.kins[0]
-	var from := Vector3(c.x - 2.5, 0, c.y + 0.5)
-	var goal := Vector3(c.x + 3.5, 0, c.y + 0.5)
 	kin["pos"] = from
 	kin["vel"] = Vector3.ZERO
+	kin.erase("path")
 	var n := 0
 	var on_block := false
 	while n < int(WALK_S / DT) and Vector2(kin["pos"].x - goal.x, kin["pos"].z - goal.z).length() > 0.5:
@@ -193,10 +229,17 @@ func _boki(hm, c: Vector2i) -> void:
 		kin["pos"] = pos
 		on_block = on_block or w.is_block(pos.x, pos.z)
 		n += 1
-	ok(
-		Vector2(kin["pos"].x - goal.x, kin["pos"].z - goal.z).length() <= 0.5 and not on_block,
-		"a Boki walks round a 7-tile wall to the far side in %.1f s, never on a block" % (n * DT)
-	)
+	var reached: bool = Vector2(kin["pos"].x - goal.x, kin["pos"].z - goal.z).length() <= 0.5
+	return [reached and not on_block, n * DT, on_block]
+
+
+## A Boki gets round a wall to the far side; one set down on a block is stepped off it.
+func _boki(hm, c: Vector2i) -> void:
+	var w: World = hm.world
+	for z in range(c.y - 3, c.y + 4):
+		_put(hm, "stone_wall", Vector2i(c.x, z))
+	var res := _walk(hm, Vector3(c.x - 2.5, 0, c.y + 0.5), Vector3(c.x + 3.5, 0, c.y + 0.5))
+	ok(res[0], "a Boki walks round a 7-tile wall to the far side in %.1f s, never on a block" % res[1])
 	# set down on top: the player drops it from up there
 	var top_tile := Vector2(c.x + 0.5, c.y + 0.5)
 	hm.ppos = Vector3(top_tile.x, w.ground_at(top_tile.x, top_tile.y), top_tile.y)

@@ -1,7 +1,7 @@
 """The pickup guns' shots (docs/AUDIO.md, briefs/SFX_AUDIT.md row 3). Run from tools/: python3 gen_sfx_guns.py
 
 The five guns a hunter without a Hunter kit carries (content/weapons smg, rifle, burst_rifle, shotgun,
-sniper) and the heavy's minigun each get their own shot, told apart by three things at once:
+sniper) each get their own shot, told apart by three things at once:
   body   the pitch and weight of the kick under the crack (a light pop up to a deep boom),
   tail   how long the report hangs and how dark it is (dry and short up to a long roll off the islands),
   pitch  where the crack's noise band sits (a high snap down to a broad, low blast).
@@ -11,6 +11,7 @@ sharpest crack, a deep body and a long rolling report. Minigun: a dry, brassy ti
 the barrels' spin-up (0.7 s, matching content/weapons/minigun.json spin_up): a motor whine climbing under
 ratchet clicks that speed up until they blur. Original synthesis, no samples.
 """
+
 import numpy as np
 import sfx_lib as S
 from sfx_lib import SR, N, T, noise, lpf, mix, at, kick, click, crack, sub, tail, reflections, ring
@@ -47,7 +48,13 @@ def shotgun(i):
     body = kick(150 + 8 * i, 48, d, 0.025, 0.09, 3.4) * 0.8
     blast = crack(d, 150, 3200, 0.06) * 3.4
     taps = ((0.05, 0.4, 1200), (0.1, 0.3, 900), (0.17, 0.2, 700), (0.26, 0.1, 500))
-    return mix(click(0.006, 1800, 8000) * 2.0, body, blast, sub(62, 36, d, 0.12) * 0.5, reflections(tail(0.85, 1200, 0.2) * 1.5, taps))
+    return mix(
+        click(0.006, 1800, 8000) * 2.0,
+        body,
+        blast,
+        sub(62, 36, d, 0.12) * 0.5,
+        reflections(tail(0.85, 1200, 0.2) * 1.5, taps),
+    )
 
 
 def sniper(i):
@@ -77,17 +84,17 @@ def minigun_spin():
     when = 0.0
     while when < d:
         c = click(0.004, 1800, 7000, 0.0016) * 0.9
-        out[N(when):N(when) + len(c)] += c[:len(out) - N(when)]
+        out[N(when) : N(when) + len(c)] += c[: len(out) - N(when)]
         when += 1.0 / (6 + 34 * (when / d) ** 1.4)
-    out[:N(d)] += whine * 0.7 + lpf(noise(d), 1800) * (t / d) ** 2 * 0.25
+    out[: N(d)] += whine * 0.7 + lpf(noise(d), 1800) * (t / d) ** 2 * 0.25
     return out
 
 
-S.takes_cat('gun_smg', smg, 2, 'fire')
-S.takes_cat('gun_rifle', rifle, 2, 'fire')
-S.takes_cat('gun_burst', burst, 2, 'fire')
-S.takes_cat('gun_shotgun', shotgun, 2, 'heavy_fire')
-S.takes_cat('gun_sniper', sniper, 1, 'heavy_fire')
-S.takes_cat('gun_minigun', minigun, 3, 'fire')
-S.save_cat('gun_minigun_spin', minigun_spin(), 'cast')
-print('pickup gun and minigun shots written')
+S.takes_cat("gun_smg", smg, 2, "fire")
+S.takes_cat("gun_rifle", rifle, 2, "fire")
+S.takes_cat("gun_burst", burst, 2, "fire")
+S.takes_cat("gun_shotgun", shotgun, 2, "heavy_fire")
+S.takes_cat("gun_sniper", sniper, 1, "heavy_fire")
+S.takes_cat("gun_minigun", minigun, 3, "fire")
+S.save_cat("gun_minigun_spin", minigun_spin(), "cast")
+print("pickup gun and minigun shots written")

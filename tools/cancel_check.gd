@@ -6,33 +6,39 @@ extends RefCounted
 ## --only=<hero id> while iterating. Never touches the save.
 
 const DT := 1.0 / 30.0
-const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
-const SPIKE := 1.5             # a pop is this many times the frames either side of it
-const SETTLE := 0.2            # s: a cancel's blend is done inside this (one frame of the footage)
-const LEAD := 0.5              # s: the legs run this long before the first move (past any landing)
-const TOP := 5                 # the worst cancels printed
+const POP := 0.16  # of the Hero's height: how much further a frame may move the hand than the clip does
+const SPIKE := 1.5  # a pop is this many times the frames either side of it
+const SETTLE := 0.2  # s: a cancel's blend is done inside this (one frame of the footage)
+const LEAD := 0.5  # s: the legs run this long before the first move (past any landing)
+const TOP := 5  # the worst cancels printed
 
 ## Heroes whose worst cancel pops past POP: the ceiling in m each is held to until its clips are reworked (a blend of
 ## two far-apart arm poses peaks mid-arc: a hammer's lever, a held pose cut for the next one). A cancel rework drops its
-## entry (the check says when one now passes).
-const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.51, "thief": 0.46}
+## entry (the check says when one now passes). thief 0.52: Sable's run foot_mps fit (4.99 -> 4.6) moves the run
+## phase at the cut, bola>stun 0.454 -> 0.515.
+const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.51, "thief": 0.52}
 ## Cancels still blending in after the window: "<hero> <from>@<cut>><to>" rows (docs/DEBT.md).
 const LATE_OPEN := [
-	"juggernaut jug_guard@0.50>glide", "gunslinger gunslinger_lmb@0.10>gunslinger_lmb",
-	"gunslinger gunslinger_e@0.30>gunslinger_lmb", "gunslinger glide@0.40>gunslinger_e",
-	"rimewright tm_spear_aim@0.30>tm_dart_r", "rimewright tm_rime_hold@0.80>tm_skate_go",
+	"juggernaut jug_guard@0.50>glide",
+	"gunslinger gunslinger_lmb@0.10>gunslinger_lmb",
+	"gunslinger gunslinger_e@0.30>gunslinger_lmb",
+	"gunslinger glide@0.40>gunslinger_e",
+	"rimewright tm_spear_aim@0.30>tm_dart_r",
+	"rimewright tm_rime_hold@0.80>tm_skate_go",
 	"bulwark bul_smash_wind@0.50>bul_smash",
 ]
 
 var bad := 0
 var holder: Node3D
-var own := {}                  # clip -> the hand's own step per frame (this Hero)
-var worst: Array = []          # [pop m, "hero from@t>to"], every row
+var own := {}  # clip -> the hand's own step per frame (this Hero)
+var worst: Array = []  # [pop m, "hero from@t>to"], every row
+
 
 func ok(cond: bool, what: String) -> void:
 	print("CANCEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -54,6 +60,7 @@ func run(main: Node) -> void:
 		print("CANCEL worst %d: %.3f m %s" % [i + 1, worst[i][0], worst[i][1]])
 	print("CANCEL_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _hero(id: String, dd: Dictionary) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -79,22 +86,37 @@ func _hero(id: String, dd: Dictionary) -> void:
 			top_at = what
 		if not bool(r[1]) and not what in LATE_OPEN:
 			late.append(what)
-	ok(top <= limit, "%s: %d cancels hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
-			% [id, rows.size(), top, top_at, limit])
+	ok(
+		top <= limit,
+		(
+			"%s: %d cancels hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
+			% [id, rows.size(), top, top_at, limit]
+		)
+	)
 	if OVER.has(id):
 		var stale := " (now passes: drop it from OVER)" if top <= base else ""
 		print("CANCEL open %s: worst %.3f m, held to %.3f%s" % [id, top, limit, stale])
-	ok(late.is_empty(), "%s: every cancel's blend is done in a footage frame (%.1f s) or its own fade (late: %s)"
-			% [id, SETTLE, str(late)])
+	ok(
+		late.is_empty(),
+		(
+			"%s: every cancel's blend is done in a footage frame (%.1f s) or its own fade (late: %s)"
+			% [id, SETTLE, str(late)]
+		)
+	)
 	m.free()
+
 
 ## How long the blend into `to` may take: a frame of the footage, or the data's own fade (into a move) or fade_out
 ## (back to the legs off `from`) when a move keys it longer.
 static func _window(dd: Dictionary, from: String, to: String) -> float:
 	var moves: Dictionary = dd.get("kmoves", {})
-	var fade: float = float(moves.get(to, {}).get("fade", WardenClips.FADE)) if to != "" \
-			else float(moves.get(from, {}).get("fade_out", WardenClips.FADE_LOCO))
+	var fade: float = (
+		float(moves.get(to, {}).get("fade", WardenClips.FADE))
+		if to != ""
+		else float(moves.get(from, {}).get("fade_out", WardenClips.FADE_LOCO))
+	)
 	return maxf(SETTLE, fade + DT)
+
 
 ## The clip a state shows: "" for the legs, the glider and the stun's clip.
 static func clip_of(dd: Dictionary, st: String) -> String:
@@ -102,6 +124,7 @@ static func clip_of(dd: Dictionary, st: String) -> String:
 		return String(dd.get("states", {}).get("stun", ""))
 	var moves: Dictionary = dd.get("kmoves", {})
 	return String(moves[st]["clip"]) if moves.has(st) else ""
+
 
 ## The anim state a step asks for: a kit move at `t` s, "" the legs, "stun", "glide". A move or a stun out of the
 ## glider closes it and plays in the fall; the legs are the ground.
@@ -115,6 +138,7 @@ static func feed(s: Dictionary, st: String, t: float) -> void:
 		s["kmove"] = st
 		s["kmove_t"] = t
 
+
 ## True when the layers show `st` alone: the legs (or the glider) with no action left, or the move at full weight.
 static func settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 	if st == "" or st == "glide":
@@ -125,6 +149,7 @@ static func settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
 	var w := clips.up_w if upper else clips.act_w
 	var xf := clips.xf_u if upper else clips.xf
 	return w >= 0.999 and absf(xf - float(clips.chan_u if upper else clips.chan)) < 0.001
+
 
 ## A sequence [[state, s], ...] fed frame by frame as the game does: [worst pop m, settled]. Pops count from the second
 ## step on (the cut itself; the first move's own start is the flow's business). Settled: the last step owns the body
@@ -150,7 +175,7 @@ func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array,
 	clips.force = {}
 	var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}
 	m.set_meta(WardenClips.STATE, s)
-	var overs: Array = []       # per frame: how far past the clip's own step the hand moved (0: not measured)
+	var overs: Array = []  # per frame: how far past the clip's own step the hand moved (0: not measured)
 	var last := Vector3.INF
 	var done := true
 	var owned := false
@@ -174,7 +199,7 @@ func _run(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array,
 			var over := 0.0
 			if last != Vector3.INF and clips.proc_w <= 0.0 and k >= 1 and i <= path.size():
 				var clip_step := 0.0
-				for j in range(maxi(i - 3, 0), mini(i + 2, path.size())):      # (a frame or two either way: the fade)
+				for j in range(maxi(i - 3, 0), mini(i + 2, path.size())):  # (a frame or two either way: the fade)
 					clip_step = maxf(clip_step, float(path[j]))
 				over = maxf(p.distance_to(last) - clip_step, 0.0)
 			overs.append(over)

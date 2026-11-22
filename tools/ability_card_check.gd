@@ -9,17 +9,21 @@ extends RefCounted
 ##      Tab over the HUD's ability row puts it up with the kit's live name and cooldown, and letting go drops it
 ## With --shots-dir=<dir> (xvfb, via jobq --needs gpu): relic, kit_card and hud PNGs, each with a card up.
 
+## The two-step abilities: who, which slot (counted from the data's "again" phrases).
+const TWO_STEP := 8
+
 var main: Node
 var fails := 0
 var n := 0
-var shots := ""      # --shots-dir=<dir> (needs a renderer): relic, kit_card and hud PNGs
-## The two-step abilities: who, which slot (counted from the data's "again" phrases).
-const TWO_STEP := 8
+var shots := ""  # --shots-dir=<dir> (needs a renderer): relic, kit_card and hud PNGs
+
 
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("CARDCHECK %-62s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -27,7 +31,7 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			shots = String(a).substr(12)
 	if shots != "" and main.fade != null:
-		main.fade.reveal(0.05)      # (the boot splash would cover the screenshots)
+		main.fade.reveal(0.05)  # (the boot splash would cover the screenshots)
 	Save.no_write = true
 	_numbers()
 	await _widget()
@@ -35,12 +39,14 @@ func run(main_node: Node) -> void:
 	print("CARDCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
+
 ## The number a dotted path names in a slot's data, read here on its own (not through AbilityCard).
 func _data_at(sd: Dictionary, path: String) -> float:
 	var node: Variant = sd
 	for part in path.split("."):
 		node = node[part]
 	return float(node)
+
 
 func _numbers() -> void:
 	var again_n := 0
@@ -77,6 +83,7 @@ func _numbers() -> void:
 	ok("%d abilities are two-step, each says 'Press <key> again to'" % TWO_STEP, again_n == TWO_STEP, str(again_n))
 	ok("at least 12 Hunters (all are checked)", Arch.ids().size() >= 12)
 
+
 func _widget() -> void:
 	var tree := main.get_tree()
 	var layer := CanvasLayer.new()
@@ -94,19 +101,24 @@ func _widget() -> void:
 			layer.add_child(card)
 			await tree.process_frame
 			var txt := _text_of(card)
-			if not (txt.contains(String(base["name"])) and txt.contains(AbilityCard.numbers(base))
-					and card.size.x >= AbilityCard.WIDTH - 1.0):
+			if not (
+				txt.contains(String(base["name"]))
+				and txt.contains(AbilityCard.numbers(base))
+				and card.size.x >= AbilityCard.WIDTH - 1.0
+			):
 				all_built = false
 			card.queue_free()
 	ok("the HUD's live card (rank 1) shows the same numbers as the menus' card", live_ok)
 	ok("every card builds in a tree and shows its name and numbers", all_built)
 	layer.queue_free()
 
+
 func _text_of(node: Node) -> String:
 	var out := String(node.text) if node is Label else ""
 	for ch in node.get_children():
 		out += "\n" + _text_of(ch)
 	return out
+
 
 func _shot(file: String, frames := 12) -> void:
 	if shots == "":
@@ -116,6 +128,7 @@ func _shot(file: String, frames := 12) -> void:
 	await RenderingServer.frame_post_draw
 	main.get_tree().root.get_texture().get_image().save_png("%s/%s.png" % [shots, file])
 
+
 ## The controls under `node` that show a card for `slot`.
 func _rows(node: Node, slot: String, out: Array) -> Array:
 	if node is Control and node.get_meta("card_slot", "") == slot:
@@ -124,6 +137,7 @@ func _rows(node: Node, slot: String, out: Array) -> Array:
 		_rows(ch, slot, out)
 	return out
 
+
 func _cards_under(node: Node) -> Array:
 	var out: Array = []
 	if node is AbilityCard:
@@ -131,6 +145,7 @@ func _cards_under(node: Node) -> Array:
 	for ch in node.get_children():
 		out.append_array(_cards_under(ch))
 	return out
+
 
 ## The menus: a mouse on the E row puts its card up (the data's numbers) and off it takes it down.
 func _menu_hover(host: Node, shot: String, label: String, arch: String) -> void:
@@ -145,12 +160,15 @@ func _menu_hover(host: Node, shot: String, label: String, arch: String) -> void:
 		await tree.process_frame
 	var up := _cards_under(row)
 	var want := AbilityCard.facts_for(arch, "e")
-	ok("%s: hovering E puts one card up with the data's numbers" % label, up.size() == 1
-			and up[0].facts["cooldown"] == want["cooldown"] and up[0].facts["name"] == want["name"])
+	ok(
+		"%s: hovering E puts one card up with the data's numbers" % label,
+		up.size() == 1 and up[0].facts["cooldown"] == want["cooldown"] and up[0].facts["name"] == want["name"]
+	)
 	await _shot(shot)
 	row.mouse_exited.emit()
 	await tree.process_frame
 	ok("%s: the card goes when the mouse leaves" % label, _cards_under(row).is_empty())
+
 
 func _hover_and_shots() -> void:
 	var tree := main.get_tree()
@@ -178,14 +196,26 @@ func _hover_and_shots() -> void:
 	layer.queue_free()
 	await _hud_hover()
 
+
 ## In a match: Tab held over the E slot shows the card with the kit's live numbers; not held, no card. With
 ## --hover=k1 on the command line (the HUD's pointing hook) the HUD's own draw pass does it, else the call is direct.
 func _hud_hover() -> void:
 	var tree := main.get_tree()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
-			"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	for i in 20:
 		await tree.process_frame
 	var hud = m.hud
@@ -203,14 +233,23 @@ func _hud_hover() -> void:
 		ok("Tab held on E: the card shows", AbilityCard.on_hud(hud.c, "k1", spot, p))
 	else:
 		for i in 4:
-			await tree.process_frame      # (the HUD's own pass puts it up; a direct call is dropped by its next one)
+			await tree.process_frame  # (the HUD's own pass puts it up; a direct call is dropped by its next one)
 	var up: Array = shown.call()
-	ok("Tab held on E: one card with the kit's live name and cooldown", up.size() == 1
+	ok(
+		"Tab held on E: one card with the kit's live name and cooldown",
+		(
+			up.size() == 1
 			and up[0].facts["name"] == String(live["name"])
-			and up[0].facts["cooldown"] == float(live["cd_max"]), str(live["name"]))
+			and up[0].facts["cooldown"] == float(live["cd_max"])
+		),
+		str(live["name"])
+	)
 	var data_cd := float(Arch.def("thief")["e"]["cooldown"])
-	ok("the live cooldown is the data's at rank 1", p.ability_level("k1") == 1
-			and is_equal_approx(float(live["cd_max"]), data_cd), "%s vs %s" % [live["cd_max"], data_cd])
+	ok(
+		"the live cooldown is the data's at rank 1",
+		p.ability_level("k1") == 1 and is_equal_approx(float(live["cd_max"]), data_cd),
+		"%s vs %s" % [live["cd_max"], data_cd]
+	)
 	await _shot("hud")
 	Input.action_release("scores")
 	for i in 3:
