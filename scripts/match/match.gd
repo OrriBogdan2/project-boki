@@ -3841,6 +3841,7 @@ func step(dt: float) -> void:
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
+	MobReap.tick(self)
 	if blight: blight.tick(dt)
 	_prof("mobs")
 	Prof.begin("physics")
