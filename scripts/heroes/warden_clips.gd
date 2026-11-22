@@ -619,7 +619,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var call_v := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
 	var call_t := float(s.get("call_t", 99.0))
 	if lib.has_animation(call_v) and call_t < lib.get_animation(call_v).length:
-		return {"clip": call_v, "t": call_t, "upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
+		# (KinSummon's call/recall: arms only, legs and aim carry on)
+		return {"clip": call_v, "t": call_t, "upper": true}
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
 	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)

@@ -691,7 +691,8 @@ func _archer_super() -> void:
 		_sheet(
 			"super",
 			(
-				"LMB held to Supercharged: the ready ring, the release (the gold perfect burst stays), the long thread, "
+				"LMB held to Supercharged: the ready ring, the release (the gold perfect burst stays), "
+				+ "the long thread, "
 				+ "the silver crack on the dummy"
 			),
 			[0.6, 1.1, 1.5, 1.58, 1.64, 1.72, 1.85, 2.2, 2.7]
@@ -717,7 +718,8 @@ func _archer_heavy() -> void:
 		_sheet(
 			"heavy",
 			(
-				"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle leaving the bow (HEAVY_SCALE) "
+				"RMB Heavy Shot: the bar (AimKit) and thread gathering, "
+				+ "the big red needle leaving the bow (HEAVY_SCALE) "
 				+ "with its thick thread, the shove; nothing left behind"
 			),
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]
