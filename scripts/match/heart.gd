@@ -494,7 +494,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			return {"kind": "heart", "act": "leave", "need": gneed, "col": gate_col(),
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
 				"label": "Hold %s: leave now, small reward" % key}
-		return {"kind": "heart", "col": gate_col(), "label": "The Heart Gate only opens for the Heartspark's bearer"}
+		return {"kind": "heart", "col": gate_col(), "label": "The Heart Gate only opens for the Hunter holding the Heartspark"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
 	var say := ""
