@@ -187,13 +187,24 @@ func _start(part: String, extra: Dictionary) -> Match:
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
+	var load0 := Time.get_ticks_usec()
 	Game.goto("match", o)
 	var m: Match = null
+	var longest := 0.0    # ms: the longest frame from goto to the built match (DEBT item 33: no load frame over 100)
+	var slow := 0
+	var t := load0
 	while m == null:
 		await main.get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		var ms := (now - t) / 1000.0
+		t = now
+		longest = maxf(longest, ms)
+		slow += 1 if ms > 100.0 else 0
 		var cur = main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
+	print("BENCH %s load: %.0f ms, longest frame %.0f ms, %d frames over 100 ms"
+			% [part, (Time.get_ticks_usec() - load0) / 1000.0, longest, slow])
 	m.set_process(false)
 	# play draws everything once behind the loading screen (Match.warm_up) before the drop; "autoplay" skips that
 	# screen, so without this the run's tail was shader compiles a player never sees mid-match
