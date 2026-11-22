@@ -678,6 +678,7 @@ func guard_stack() -> void:
 	h.shield_kind = "molten"
 	m.sfx("br_raise", h.pos, SHARD_DB, 1.3)     # Shardskin: a stack of stone plating
 	vfx("guard_up")
+	h.shield_kind = "molten"
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
