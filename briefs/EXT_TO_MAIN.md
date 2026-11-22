@@ -10987,3 +10987,7 @@ READY ext/cinder-dash-clip 498f09accd32e53b98f6cc17da0fd32102138019 (Cinder dash
 READY ext/tut-text-audit 70bce048d5fa4ac8a503fa27bfe674a7465cfd3e (tutorial and hint text audit; origin/main merged in, 3 conflicts resolved; --check, --key-text-check, --tut-rebind-check, --tut-first-capture-check 0 fails)
 READY ext/stuck-integ-5f7f820f 4973992b52 (supersedes: ext/fix-ghost-shot-sfx-1113 ext/vfx-grimble-wedges ext/sv-private-1112 ext/parity-ttk-cinder-neve ext/fix-vex-walk-1115; base mc-20261122-0220 + origin/main cc36e78ec9; --check 0 fail, --kit-parity-check 0 fail; ttk/hero-vfx red as main, sfx-set NEW-RED carried from mc base; 583 others not mergeable: triage-5f7f820f.md)
 READY ext/tutorial-match-eight 3369aab0a0f6330e963556bc2c821e7694df8b4f (match tutorial step count)
+READY ext/farm-garden-only-pass 54552b97f6 (bulk-rebase: origin/main merged in mechanically, was 9a3e69c43e; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/farm-breed-pace-1122 80e4a6f969 (bulk-rebase: origin/main merged in mechanically, was 2b32350d07; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/feel-move-review-1122 9502208386 (bulk-rebase: origin/main merged in mechanically, was 4f44fe2395; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/farm-hub-draws 89ed817572 (bulk-rebase: origin/main merged in mechanically, was 5c34c27cdb; union 0 gen 1 files; the branch's own READY checks still apply)
