@@ -50,6 +50,12 @@ func run(progress := Callable()) -> void:
 	var vp := m.get_viewport()
 	var had_3d := vp.disable_3d
 	vp.disable_3d = true
+	# the build's last frame renders the Hud's map paint (MapPaint, a 2048 px bake, ~50-80 ms of GPU on an M5):
+	# the first stand-ins wait a frame rather than land on top of it (a 126-140 ms frame)
+	await m.get_tree().process_frame
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	var tb := Time.get_ticks_usec()
 	for k in m.kins:
 		for pn in (k as Node).find_children("*", "Node", true, false):
