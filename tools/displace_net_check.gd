@@ -650,9 +650,19 @@ func _run(secs: float) -> void:
 				if not mb is Boss:
 					mb.queue_free()
 					m.mobs.erase(mb)
+			_drop_kin()
 			m.step(DT)
 			_stepped()
 		await main.get_tree().process_frame
+
+## No Boki about, wild or a hunter's: one wandering into a spot would push whoever stands there.
+func _drop_kin() -> void:
+	for k in m.kins.duplicate():
+		if k.owner_h and k.owner_h.kin == k:
+			k.owner_h.kin = null
+		k.dead = true
+		m.kins.erase(k)
+		k.queue_free()
 
 ## After each match step: the host's mirror of the watched tow, and the longest stun seen.
 func _stepped() -> void:
