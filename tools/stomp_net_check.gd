@@ -35,44 +35,44 @@ func _host() -> void:
 	wisp_h.lives = 1
 	m.knock(wisp_h, pl, {})
 	pl.teleport(at + Vector3(0.6, 0, 0))
-	var seen := await _see(0.4)
+	var saw := await _see(0.4)
 	for i in 10:
-		if seen.get("wisp", false) and seen["down"]:
+		if saw.get("wisp", false) and saw["down"]:
 			break
-		seen = await _see(0.5)  # (the wisp is a late spawn: the guest builds its copy from the snapshots)
+		saw = await _see(0.5)  # (the wisp is a late spawn: the guest builds its copy from the snapshots)
 	ok(
-		seen.get("wisp", false) and seen["down"] and not seen["stomp"],
+		saw.get("wisp", false) and saw["down"] and not saw["stomp"],
 		"before it the wisp is down and nobody stomps",
-		str(seen)
+		str(saw)
 	)
 	Life.start_stomp(m, pl, wisp_h)
-	seen = await _see(SEE_S)
-	ok(seen["stomp"], "the guest's copy of the stomper is stomping", str(seen))
+	saw = await _see(SEE_S)
+	ok(saw["stomp"], "the guest's copy of the stomper is stomping", str(saw))
 	ok(
-		seen["k"] > POSE_K and seen["beat"] >= 0.0,
-		"...and plays the stomp pose (k %.2f, beat %.2f)" % [seen["k"], seen["beat"]]
+		saw["k"] > POSE_K and saw["beat"] >= 0.0,
+		"...and plays the stomp pose (k %.2f, beat %.2f)" % [saw["k"], saw["beat"]]
 	)
 	pl.hurt(5.0, wisp_h, {"stun": 0.6})
-	seen = await _see(SEE_S)
+	saw = await _see(SEE_S)
 	ok(
-		pl.stomp.is_empty() and not seen["stomp"],
+		pl.stomp.is_empty() and not saw["stomp"],
 		"a stun on the stomper cuts the stomp on the guest's copy too",
-		str(seen)
+		str(saw)
 	)
 	ok(
-		seen["k"] < GONE_K and seen["down"] and not seen["out"],
-		"the pose eases out (k %.2f) and the wisp lives on the guest" % seen["k"],
-		str(seen)
+		saw["k"] < GONE_K and saw["down"] and not saw["out"],
+		"the pose eases out (k %.2f) and the wisp lives on the guest" % saw["k"],
+		str(saw)
 	)
 	await _run(0.8)  # (the stun runs out)
 	Life.start_stomp(m, pl, wisp_h)
-	seen = await _see(Life.R["stomp_time"] * 0.5)
-	ok(seen["stomp"] and not seen["out"], "a second stomp is on the guest halfway, the wisp still down", str(seen))
-	seen = await _see(Life.R["stomp_time"] * 0.5 + 0.3)
+	saw = await _see(Life.R["stomp_time"] * 0.5)
+	ok(saw["stomp"] and not saw["out"], "a second stomp is on the guest halfway, the wisp still down", str(saw))
+	saw = await _see(Life.R["stomp_time"] * 0.5 + 0.3)
 	ok(
-		not seen["stomp"] and seen["out"] and wisp_h.out,
+		not saw["stomp"] and saw["out"] and wisp_h.out,
 		"left alone it ends and the wisp is executed on the guest too",
-		str(seen)
+		str(saw)
 	)
 	_finish()
 
@@ -96,17 +96,17 @@ func _on_msg(topic: String, data, from: String) -> void:
 
 ## The guest's copy of the stomper (the host's hunter) and of the wisp ("B"), as they look now.
 func _look() -> Dictionary:
-	var seen: Hunter = m.player
+	var st_copy: Hunter = m.player
 	for h in m.hunters:
 		if h.remote and h.nid.begins_with("P"):
-			seen = h
+			st_copy = h
 	for i in EASE_FRAMES:
-		seen.render(DT, 1.0)  # (Match's own render pass is off in the checks)
+		st_copy.render(DT, 1.0)  # (Match's own render pass is off in the checks)
 	var wisp_h := m.ents_by_id.get("B", null) as Hunter
 	var out := {
-		"stomp": not seen.stomp.is_empty(),
-		"k": seen.anim.stomp_k,
-		"beat": seen.anim_s.get("stomp", -1.0),
+		"stomp": not st_copy.stomp.is_empty(),
+		"k": st_copy.anim.stomp_k,
+		"beat": st_copy.anim_s.get("stomp", -1.0),
 		"wisp": wisp_h != null
 	}
 	if wisp_h:

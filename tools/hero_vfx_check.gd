@@ -650,8 +650,8 @@ func _meeko_field() -> void:
 		hit.any(func(l): return l["p"] == "chunk") and hit.any(func(l): return l["p"] == "ember"),
 		"Meeko's Ember Cast hit: a leaf chunk-and-spark burst"
 	)
-	var call: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
-	ok(call.size() == 1 and call[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
+	var call_fx: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(call_fx.size() == 1 and call_fx[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
 
 
 ## Meeko's heals and hurts read apart (COMBAT_CLARITY): every heal look is her leaf green family and its motes rise,

@@ -576,7 +576,7 @@ func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
 		"node": null}
 	Life.take_item(m, h, b, {"key": "caught", "i": 0})
 	h.caught.clear()
-	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
+	return Sfx.last_played.keys().filter(func(nm): return String(nm).begins_with("carry_"))
 
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
