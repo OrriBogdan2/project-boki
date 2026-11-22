@@ -7,8 +7,8 @@
  },
  "quiet": ["points", "pick_sec", "pick_dash", "pick_kin", "pick_ult", "exdash", "wallkick", "crouch", "pack", "glove", "hook", "ranks", "wayout", "uplink", "defend", "ult"],
  "hint": {
-  "points": "One ability point per level: spend it to unlock a move",
-  "pick_sec": "Unlocked %A (%K): your right-click move",
+  "points": "1 ability point per level",
+  "pick_sec": "Unlocked %A (%K)",
   "pick_dash": "Level 2: unlocked %A (%K)",
   "pick_kin": "Level 3: unlocked %A (%K)",
   "pick_ult": "Unlocked %A (%K)"

@@ -305,6 +305,8 @@ func _finish(sid: String) -> void:
 		wait = 0.6
 		done_t = DONE_T
 		m.sfx("unlock", null, -9.0)
+	elif TutorialHints.settles(sid):
+		wait = 0.6  # (the Boki gets its lead on the next leg: no banner, no sting, only the pause)
 	if resumed:
 		_restore()
 	_enter()
@@ -390,6 +392,7 @@ func retry() -> void:
 	_back()
 	_enter()
 	if m.hud:
+		m.hud.msgs.clear()  # (a hint step does not clear the lane when it starts: the retry line leads)
 		m.hud.toast(retry_tip(), MINT)
 
 

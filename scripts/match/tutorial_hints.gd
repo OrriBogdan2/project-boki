@@ -44,3 +44,9 @@ static func auto_pick(tu: Tutorial, sid: String) -> void:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "" and quiet(sid):
 		tu.m.player.level_slot(slot)
+
+
+## A hint step on the course keeps the short pause after it (a pick too: the next leg starts a beat later, as it did
+## when the key was pressed). Only the pure-reading steps (points, ranks) pass at once.
+static func settles(sid: String) -> bool:
+	return sid not in ["points", "ranks"]
