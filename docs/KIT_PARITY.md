@@ -1,5 +1,7 @@
 # Kit parity audit: 12 Hunters against the source (main 7907d9afe, 2026-11-07; re-audit on ext/release-integ-0244c 23cc281bd, 2026-11-11; slice 0.24.5 mark on ext/integ-ways-out-0245 5d37d4833, 2026-11-11); 0.24.5 re-read on ext/release-integ-0245 272368589, 2026-11-11
 
+New sections go in `docs/KIT_PARITY.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2). Read-only for the first audit; the ranges table below changed four numbers (data only).
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
@@ -873,8 +875,8 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Kael | Flame Step shove (`dash.hit_kb`) / blade tip (`dash.tip_kb`) | 0 (was 5, lift 2.5) / 0 (was 9) | none / none (no hop either) | Flame Step: "dash attack, 49 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Kael | Gilded Riposte strike (`x.strike_kb`, was 6.0 in `juggernaut_ult.gd`) | 0 (was 6) | none | Volcanic Rebuke: "strike back for 230 dmg", no knock [D] | match (no knock; ext/kael-knock-cut) | n/a |
 | Lace | Heavy Shot (`rmb.pin.push`, tap to full) | 8-12 | 2.52-5.12 m | Heartpiercer: "an arrow that knocks back" [D]; 2-3 bh (3.6-5.4 m) along the shot, charge not known (pin.md 0273) [F] | match | `[?]` (full charge inside F) |
-| Lace | Longbow shot (`longbow.kb`) | 3.5 | 0.62 m | Greenwood Bow: no knock [D] | differ | n/a |
-| Lace | Empowered ult shots (`x.kb`) | 4 | 0.76 m | Virideth's Fury: "greatly empowered", no knock [D] | differ | n/a |
+| Lace | Longbow shot (`longbow.kb`) | 2.0 (was 3.5, `ext/lace-knock-cut`) | nudge | Greenwood Bow: no knock [D] | match (nudge) | n/a |
+| Lace | Empowered ult shots (`x.kb`) | 2.0 (was 4, `ext/lace-knock-cut`) | nudge | Virideth's Fury: "greatly empowered", no knock [D] | match (nudge) | n/a |
 | Cinder | Spark Leap hit (`dash.kb`) | 7 | 2.01 m | Pyro Pounce: "dmg + knockback" [D]; no read of the target's flight [F] | match | `[?]` |
 | Cinder | Spark Leap self-recoil (`dash.recoil`, a set speed, not a knock) | 3.5 m/s | not run through the knock curve | about 1 bh (1.8 m) back in 0.1 s (linwick.md) [F] | match (footage) | `[?]` |
 | Meeko | none (lantern shot `lantern_crook.kb`) | 1.0 | nudge | Elluna: no knock in the kit [D] | match | n/a |
