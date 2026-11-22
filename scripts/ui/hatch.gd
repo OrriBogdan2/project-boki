@@ -4,14 +4,13 @@ extends Node3D
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
-## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
+## Names, tempers and blurbs come from each species' "egg" block in content/kin_home/<id>.json, so every
 ## egg is named for its element (Venom Egg, ...).
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const MYSTERY := {
 	"species": "mystery", "name": "Mystery Egg", "temper": "???",
-	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
-	"play": "Almost anything from the wilds could be in there, even a rare one,"
-		+ " and it's more likely than most to hatch a little strange.",
+	"desc": "Black as night, in an old basket. Who knows?",
+	"play": "Could be anything, even a rare one.",
 }
 
 static func starter_eggs() -> Array:
@@ -501,7 +500,7 @@ func _tap_egg() -> void:
 	# a new crack each time, and a few flakes of shell
 	var base := 8 + taps * 3
 	wegg._crack(base, base + 2 + int(k * 2.0))
-	fx.burst(holder.position + Vector3(0, 0.5, 0), wegg.col.lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
+	fx.burst(holder.position + Vector3(0, 0.5, 0), EggModels.TINT[wegg.kind].lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
@@ -514,11 +513,12 @@ func _start_hatch() -> void:
 	hatch_t = 0.0
 	_clear_bottom()
 	title.text = "Knock on the shell"
+	sub_lbl.hide()
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var knock := "Knock on the egg: click (or press %s). Every knock wakes the Boki inside a little more, and the knocks come back."
+	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
@@ -670,24 +670,30 @@ func _show_name() -> void:
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
-	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, ye.text, false)))
-	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, ye.text, true)))
+	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, ne.text, ye.text, true), true))
+	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, ne.text, ye.text, false), false))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Tend the garden"
+	# Enter in either box is the same as "Skip tutorial"
 	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
 
-## One of the two equal ways on from the naming card: a button and a line under it, one click.
-func _path_card(label: String, line: String, go: Callable) -> Control:
+## One of the two ways on from the naming card: a button and a line under it, one click.
+## The main way is bright; the other is a flat grey button.
+func _path_card(label: String, line: String, go: Callable, main_way: bool) -> Control:
 	var c := UI.vbox(6)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c.add_child(UI.primary(label, go, 240))
+	if main_way:
+		c.add_child(UI.primary(label, go, 240))
+	else:
+		var b := UI.button(label, go, 240)
+		b.flat = true
+		c.add_child(b)
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
 

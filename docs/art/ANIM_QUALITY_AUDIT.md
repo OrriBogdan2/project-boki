@@ -29,12 +29,12 @@ Every kind now has the table below; `check` runs on all of it.
 | state | what plays | phase |
 |---|---|---|
 | idle | slow breathing / sway per kind, jaw chew, ear twitch, crystal spin | loop (`IDLE_S`, offset per monster) |
-| walk | skitter tripod, brute stride and arm counter-swing, spitter root hop, puffbomb and glimmer bounds | gait distance (`Mob.anim`) |
+| walk | skitter tripod, brute stride and arm counter-swing, spitter root hop, puffbomb and glimmer bounds | gait distance: one stride per `MobAnim.STRIDE_M` walked (`Mob.anim`), so the feet match the ground at any speed |
 | run | the walk at 1.4x amplitude (above 3.6 m/s) | same |
 | wind-up | gather, coil, raise, inflate, spin up | `MobAnim.windup_k`: **the same fraction the ground telegraph fills with** |
 | strike | the blow and its follow-through (jaw snap and leap, spit recoil, slam and heave, crystal kick) | blow + recovery, `RECOVER_S` |
 | stagger | slack legs / drooping leaves and ears / bowed brute / dimmed crystal | loop, 2 s |
-| flinch | a 0.12 s recoil along the hit flash | `FLASH_S` |
+| flinch | the hit-react, layered over idle, walk and run for `FLINCH_S` (0.22 s) after each hit, so a hit never drops the gait; it blends in at `HIT_RATE` | `FLINCH_S` |
 | death | per kind: legs curl, bulb wilts, brute topples, puff bursts, crystal cracks out, ears droop | `DEATH_S` (0.32 s) |
 
 The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_telegraph`) and `MobAnim.phase_of` all use
@@ -46,6 +46,8 @@ The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_te
 at least 0.02 and loops that close; every pivot named exists in the model; the wind-up fraction equals the telegraph's
 shader progress on every frame, lasts the data's `windup` seconds to within one frame, and the first pivot sits on its
 key at the end; 30 monsters pose in under 0.5 ms a frame (0.21 ms measured, 300 frames, headless).
+
+`--mob-anim-check` also walks each kind 30 frames and checks the gait advanced by distance (not time), stands still when the monster stops, and that a hit keeps the walk. `--mob-fight-clip` (GPU, `jobq submit --needs gpu`) records each kind chasing the player, taking three hits and dying, 60 fps; run it on two trees and `hstack` the frames for an old-vs-new MP4. It also checks the shared wind-up lean survives MobAnim (rotation masks are per axis, so a Body `ry` track no longer pulls the x lean and z shiver back to rest: skitter/spitter lean 0.04 -> 0.20 rad).
 
 `--perf-bench` (30 s match, jobq rp1, software GL so wall time is noise; script numbers compare): match script avg
 24.2 ms before, 21.4 ms after (p99 49.9 / 44.2 ms); step section `mobs` 3.17 ms before, 3.04 ms after. No regression;
@@ -137,6 +139,9 @@ body (not in the air, a crouch, or a move that owns the body):
   frame the stance ankle is within 3 cm of rest on 11 of 13 Hunters; Hem (archer) sits 12-14 cm up (walk, run,
   strafe: an open item for its clips). `loco.bob_fix` [walk, run] (default 1) is 0 where a clip is already in step:
   Hem (both), Pip and Sable (run), which the pull only roughened (hip noise 4-9 mm on the branch, 2-4 on main).
+  Motley (both) too: he floats, so his dangling legs' spread is no beat for his body, and the pull (up to 4 cm)
+  swamped his 2.3 cm clip bob and put its lows out of step with his loop (measured on ext/anim-footstep-contacts: his hips' lows 34-107
+  frames off a loop-timed cue walking forward and back and running; 0-1 frames with the pull off).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -405,6 +410,31 @@ Sparkle's raw walk crosses her legs by frame 1; with the phase the stance opens 
 
 The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
 walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
+
+## Stop (let-go from a run, walk and crouch walk)
+
+The brake (HunterMove.brake) stops a let-go from a run in about 0.17 s and 0.3 m. The loco rate fell back to 1 once he
+was under `STILL` while the blend still went back to the idle, so the legs ran on the spot and a planted foot was
+dragged. The fix (WardenClips, WardenGait):
+- The clip rate follows the feet of the blend as it stands (`WardenGait.plan` with `moving`, and its floor fades with
+  the blend), so on a let-go the legs slow with the body and hold their stride.
+- `loco.stop_rate` (1/s, default 5, Cinder 12) is how fast the blend falls back, apart from the 12/s of a start. The
+  crouch walk falls back the same way.
+- Standing, the leg bones ease into the idle at 3/s (`WardenGait.SETTLE_RATE`).
+
+Measure (`--anim-audit`, STOPS lines, gated): a planted foot's mean speed against the ground over the 0.4 s after the
+let-go, the speed from the game's own brake, averaged over 8 let-gos through one stride, as a share of the gait's
+speed. A stop over `MAX_SLIDE` (25 %), or over what the gait slides on its own when that is more, fails. Run, walk and
+crouch walk, share of speed before to after (Ostra has no legs):
+
+| Hunter | stop run | stop walk | stop crouch |
+|---|---|---|---|
+| juggernaut | 30 to 12 | 37 to 20 | 48 to 20 |
+| dredge | 27 to 15 | 37 to 20 | 54 to 16 |
+| thief | 21 to 14 | 19 to 11 | 33 to 16 |
+
+Before: main at 9a269e6b40 (18 of the 33 stops over the gate). After: none. Lace and Albert pass only through their
+own steady slide (over 50 %, the open gait items below), so their stops are not a measure of the fix.
 
 ## Climb clips (mantle and ledge pull-up)
 

@@ -27,7 +27,7 @@
 			]},
 		"ridge": {"name": "Ridge track", "note": "Up the ridge stair, along the top, a gust gap, and a long run down the far side.", "stretches": [
 				{"kind": "climb", "mult": 0.65, "pts": [[2.4, -1], [4.4, -2.6]]},
-				{"kind": "straight", "mult": 1, "pts": [[6, -2.6], [8.2, -1.8], [9.4, -3.2]]},
+				{"kind": "straight", "mult": 1, "vent": 0, "pts": [[6, -2.6], [8.2, -1.8], [9.4, -3.2]]},
 				{"kind": "jump", "mult": 0.9, "pts": [[9.4, -5.4], [8.2, -6.8]]},
 				{"kind": "straight", "mult": 1.15, "pts": [[5.4, -5.2], [2.4, -2.8], [0.4, -1], [0, 0]]}
 			]}
@@ -49,6 +49,8 @@
 	"swim_per_tide_doc": "The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist.",
 	"glide": 1.45,
 	"glide_doc": "The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it.",
+	"vent_mult": 1.3,
+	"vent_mult_doc": "A stretch with a \"vent\" (the index of an updraft vent in the zone's garden_zones.json build vents, standing on the track; the ridge top): a winged runner rides it up at this times the pace (ZoneVents).",
 	"wobble": 0.1,
 	"wobble_doc": "Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win.",
 	"cheer": {"great": 1.15, "good": 1.07, "miss": 1.0},

@@ -18,6 +18,7 @@ var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
+var held := false  # a tutorial dummy: it stands at its camp and notices nobody until something hurts it
 var team_hit := {}  # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var noticed_at := -INF  # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
@@ -110,6 +111,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0:
 		calm_t = 0.0
+		held = false
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
@@ -236,14 +238,14 @@ func sim(dt: float) -> void:
 	var wish := Vector2.ZERO
 	match st:
 		"idle":
-			if randf() < dt * 2.0:
+			if randf() < dt * 2.0 and not held:
 				tgt = _find_target()
 				if tgt:
 					st = "chase"
 					MobNotice.woke(self)
 			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
 				var a := randf() * TAU
-				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+				var q := camp + Vector3(cos(a), 0, sin(a)) * (0.0 if held else randf_range(0.5, 3.0))
 				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 					wander = q
 			if wander != Vector3.INF:
@@ -520,7 +522,8 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()
 	var moving := spd > 0.3
-	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
+	if moving:
+		anim += spd * delta * TAU / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(mkind), 2.0))
 	var body: Node3D = model.get_node("Body")
 	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
