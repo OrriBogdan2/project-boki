@@ -59,7 +59,7 @@ func fall_vy(h: Hunter, usual: float, dt: float) -> float:
 		var cut := minf(built, caught - vy)
 		built = minf(built - cut, maxf(0.0, -caught - usual))
 		var gain := cut * Loco.glide_swoop * (1.0 if h.glide_fuel > 0.001 else 0.5)
-		swoop = minf(swoop + gain, Loco.glide_max - Hunter.GLIDE_SPEED)     # a cruise glide tops out at the max
+		swoop = minf(swoop + gain, Loco.glide_max - HunterMove.glide_cruise)     # a cruise glide tops out at the max
 		_swoop_drain = swoop / Loco.glide_swoop_fade
 		return caught
 	return build(h, maxf(vy - Hunter.GLIDE_GRAV * gravity_scale() * dt, -sink_vy), usual)

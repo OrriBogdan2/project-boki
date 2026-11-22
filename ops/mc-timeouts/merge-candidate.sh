@@ -133,7 +133,7 @@ import_ok() { import_tree "$1" || { echo "$TS import of $1 failed (rc $?), no ga
 prep_wt $MW; (import_tree $MW) & MWIMP=$!
 prep_wt $WT || { echo "$TS cannot prepare $WT"; exit 1; }
 cd $WT; git config user.name "Claude"; git config user.email "noreply@anthropic.com"
-is_union() { case "$1" in *check_registry*|*CHECKS*|*.gitignore|docs/DEBT.md|docs/ASSET_CREDITS.md|*STATUS*.md) return 0;; esac; return 1; }
+is_union() { case "$1" in *check_registry*|tools/checks/*.gd|*CHECKS*|*.gitignore|docs/DEBT.md|docs/ASSET_CREDITS.md|*STATUS*.md) return 0;; esac; return 1; }
 is_generated() { case "$1" in docs/wiki/*|*Rules.md|*.uid) return 0;; esac; return 1; }
 R=$OUT/report.txt; : > $R
 declare -A CCC=() DROP=()   # conflict cache by branch: "sha mainsha epoch kind files,"; DROP: branches dropped by the gate
@@ -273,7 +273,7 @@ PODS=$(probe_pods ${MC_PODS:-$(cat ~/.mc_pods 2>/dev/null || echo "rpc3:10 rpc5:
 # worker (owner's PC/Mac) is alive, no pod is usable and the server-only run would take > 45 min, wait for one (poll hello
 # every 2 min, up to 90 min), then run anyway; a small suite never waits. Waiting costs no CPU, only report latency.
 PLANF=$S/flags.txt
-if [ ! -s $PLANF ]; then PLANF=$S/flags.plan; { grep -ohE '"--[a-z0-9-]+-check"' $WT/tools/check_registry.gd $WT/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $PLANF; echo "--simtest --seed=5" >> $PLANF; fi
+if [ ! -s $PLANF ]; then PLANF=$S/flags.plan; { grep -ohE '"--[a-z0-9-]+-check"' $WT/tools/check_registry.gd $WT/tools/checks/*.gd $WT/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $PLANF; echo "--simtest --seed=5" >> $PLANF; fi
 PLAN=$(python3 ~/bin/suite-plan --flags $PLANF --map $S/check_map.json --tree $WT 2>&1 | tail -1); echo "$(date -u +%FT%TZ) $PLAN"
 PLANWAIT=""
 if [ -z "$PODS" ] && echo "$PLAN" | grep -q 'decision=WAIT_FOR_WORKER'; then
@@ -336,7 +336,7 @@ if [ -z "$STOP" ]; then
   ( cd $S; : > mcc.main; : > mcc.cand
     while IFS= read -r f; do n=$(echo "$f" | tr -c 'a-z0-9\n' _)
       [ -f merge/$n.rc ] && echo "$f $(cat merge/$n.rc)" >> mcc.cand; [ -f main/$n.rc ] && echo "$f $(cat main/$n.rc)" >> mcc.main; done < flags.txt
-    { grep -ohE '"--[a-z0-9-]+-check"' $MW/tools/check_registry.gd $MW/scripts/main.gd | tr -d '"'; echo --check; echo "--simtest --seed=5"; } | sort -u > mcc.baseflags
+    { grep -ohE '"--[a-z0-9-]+-check"' $MW/tools/check_registry.gd $MW/tools/checks/*.gd $MW/scripts/main.gd | tr -d '"'; echo --check; echo "--simtest --seed=5"; } | sort -u > mcc.baseflags
     gitnet fetch -q origin main >/dev/null 2>&1 || true
     python3 ~/bin/mc-compare.py table mcc.main mcc.cand mcc.baseflags $(git -C $WT rev-list --count $M..origin/main 2>/dev/null) > mcc.txt 2>mcc.err ) || true
   [ -s $S/mcc.txt ] && MCC="Compare check (mc-compare): $(sed -n 1p $S/mcc.txt); $(sed -n 2p $S/mcc.txt)"
