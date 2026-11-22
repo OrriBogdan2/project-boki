@@ -410,7 +410,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 		(sd["node"] as Node3D).visible = false
 	riders.append({"node": n, "sd": sd, "kind": kind, "spin": rng.randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
-	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
+	_pose(n, kind, ShotOrigin.drawn(sd, sd["pos"]), sd["vel"], trail, width, 0.0)
 	return n
 
 ## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
@@ -576,7 +576,8 @@ func _process(delta: float) -> void:
 			continue
 		r["spin"] = float(r["spin"]) + delta * 9.0
 		r["last"] = sd["pos"]
-		_pose(n, String(r["kind"]), sd["pos"], sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
+		var at := ShotOrigin.drawn(sd, sd["pos"])      # out of the blade it left
+		_pose(n, String(r["kind"]), at, sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:

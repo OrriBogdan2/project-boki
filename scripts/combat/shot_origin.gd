@@ -10,6 +10,9 @@ extends RefCounted
 ## Covers every kit's muzzle (0.6 m) and melee strike (0.25 m); a launch point placed further out (a rock
 ## landing 0.9 m ahead, a punched rock, a split) keeps its own origin.
 const BODY_REACH := 0.7
+## m of flight over which a shot drawn from a hand or a weapon's mouth eases onto its flight line.
+const JOIN := 1.2
+
 
 ## A shot with `body_sweep` (a weapon whose muzzle sits further out than BODY_REACH: Grimble's blunderbuss) always
 ## sweeps from the body.
@@ -25,17 +28,21 @@ static func hit_from(by: Ent, at: Vector3, v2: Vector2, x: Dictionary) -> Vector
 		return at
 	return body(by, at)
 
+
 ## A weapon's muzzle from its data `{"fwd": m ahead of the body along the aim, "up": m above the feet}`.
 static func muzzle_at(by: Ent, mz: Dictionary, dir: Vector2) -> Vector3:
 	return Vector3(by.pos.x + dir.x * float(mz["fwd"]), by.pos.y + float(mz["up"]), by.pos.z + dir.y * float(mz["fwd"]))
+
 
 ## The shooter's centre at the height of `at` (the muzzle).
 static func body(by: Ent, at: Vector3) -> Vector3:
 	return Vector3(by.pos.x, at.y, by.pos.z)
 
+
 ## The flight time added so a shot pulled back to the body still reaches as far as the kit asked.
 static func extra_life(at: Vector3, from: Vector3, v2: Vector2) -> float:
 	return Vector2(at.x - from.x, at.z - from.z).length() / maxf(0.01, v2.length())
+
 
 ## The launch velocity for a slowing shot (`decel`, Grimble's slugs) pulled back to the body: fast enough to still
 ## stop where the kit asked, `range` past the muzzle, not 0.6 m short of it.
@@ -46,13 +53,26 @@ static func keep_reach(at: Vector3, from: Vector3, v2: Vector2, x: Dictionary) -
 	return v2.normalized() * sqrt(v2.length_squared() + 2.0 * float(x["decel"]) * lead)
 
 
-## Where to draw shot `s` whose swept point is `p`: never behind its muzzle (once past it, as swept).
+## A Hunter's `slot` shot is drawn from the model point its hero data names under "fire_from"
+## (content/vfx/<arch>.json, a HeroVfx anchor: the bow, the gun's mouth, the throwing hand): `extra["hand"]`.
+static func draw_from(extra: Dictionary, by: Ent, slot: String) -> void:
+	var h := by as Hunter
+	if h == null:
+		return
+	var an := String((HeroVfx.data(h.arch).get("fire_from", {}) as Dictionary).get(slot, ""))
+	if an != "":
+		extra["hand"] = HeroVfx.of(h.m).anchor_pos(h, an)
+
+
+## Where to draw shot `s` whose swept point is `p`: out of its muzzle (a weapon's mouth or the hand it left), easing
+## onto the swept line over its first JOIN m, so it is never drawn behind the muzzle.
 static func drawn(s: Dictionary, p: Vector3) -> Vector3:
 	if not s.has("muzzle"):
 		return p
 	var mz: Vector3 = s["muzzle"]
 	var st: Vector3 = s["start"]
-	if Vector2(p.x - st.x, p.z - st.z).length_squared() >= Vector2(mz.x - st.x, mz.z - st.z).length_squared():
+	var k := 1.0 - Vector2(p.x - st.x, p.z - st.z).length() / JOIN
+	if k <= 0.0:
 		s.erase("muzzle")
 		return p
-	return Vector3(mz.x, p.y, mz.z)
+	return p + (mz - st) * k
