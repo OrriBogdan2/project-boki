@@ -10,6 +10,7 @@ class_name Unique
 ##   hue, sat, val           a small shift of the species palette
 ##   mark, mark_col, mark_seed   a coat pattern (spots, stripes, patches, freckles or plain), its
 ##            colour, and the seed that places it: two kin never wear the same marks
+##   accent   a bred baby only: the pattern's colour as a hex string, its other parent's body colour
 ##   eye      eye colour (or the species' classic colour)
 ##   ears, tailv   shape variants for the ear/horn group and the tail
 ##   quirk    an idle habit (KinPuppet plays it)
@@ -54,6 +55,8 @@ const VOICE_SD := 0.07
 const COAT_TAKE := 0.45        # a parent's chance to pass on its coat pattern, colour and eyes (the rest roll fresh)
 const VOICE_MIN := 0.82
 const VOICE_MAX := 1.2
+const ACCENT_AMT := 0.75       # how strongly a bred baby's accent shows in its marks (the coat's own: about 0.5)
+const ACCENT_MIN := 0.12       # least RGB distance from the baby's body for a parent's colour to show as accent
 const FAV_FILL := 1.15         # a favourite food fills this much more (Care.feed)
 
 ## [id, weight]
@@ -212,6 +215,30 @@ static func inherit(a: Dictionary, b: Dictionary, child_seed: int) -> Dictionary
 	elif q < 0.5: d["quirk"] = db["quirk"]
 	d["from"] = [int(da.get("seed", 0)), int(db.get("seed", 0))]
 	return d
+
+## A bred baby's coat shows one trait from each parent: the pattern from the parent that gave its kind (from the
+## other if that one is plain; freckles if both are), in the other parent's body colour (dna["accent"]; none if
+## that colour is too close to the baby's own). Returns who gave what, {"pattern": i, "accent": i}, for the gifts.
+static func bred_coat(baby: Dictionary, a: Dictionary, b: Dictionary, kind_from: int) -> Dictionary:
+	var pair := [a, b]
+	var d: Dictionary = baby["dna"]
+	var given := {}
+	for i in [kind_from, 1 - kind_from]:
+		var mark := String(of(pair[i]).get("mark", "plain"))
+		if mark != "plain":
+			d["mark"] = mark
+			given["pattern"] = i
+			break
+	if not given.has("pattern"):
+		d["mark"] = "freckles"
+	var other: Dictionary = pair[1 - kind_from]
+	var accent := tint(Shiny.body(other), of(other))
+	var own := tint(Shiny.body(baby), d)
+	var gap := Vector3(accent.r - own.r, accent.g - own.g, accent.b - own.b).length()
+	if gap >= ACCENT_MIN:
+		d["accent"] = accent.to_html(false)
+		given["accent"] = 1 - kind_from
+	return given
 
 ## The look inherit() rolls around for these two: their size, build, proportions and colour shifts
 ## averaged the same way, with no noise and a plain coat ({} when either has no rolls).
@@ -397,6 +424,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		match String(d.get("mark_col", "dark")):
 			"light": mc = body_c.lerp(_albedo(mats[1]) if mats.size() > 1 else Color.WHITE, 0.6).lightened(0.25)
 			"glow": mc = (sp.get("glow", body_c) as Color)
+		if d.has("accent"): mc = Color(String(d["accent"]))      # a bred baby: its other parent's colour
 		var r := RandomNumberGenerator.new(); r.seed = int(d.get("mark_seed", 0))
 		var m0 := mats[0] as ShaderMaterial
 		m0.set_shader_parameter("mark_kind", int(mi["k"]))
@@ -406,6 +434,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		m0.set_shader_parameter("mark_scale", float(mi["scale"]) * r.randf_range(0.85, 1.2))
 		m0.set_shader_parameter("mark_amt", clampf(float(mi["amt"]) + r.randf_range(-0.12, 0.12), 0.2, 0.8))
 		if String(d.get("mark_col", "")) == "glow": m0.set_shader_parameter("mark_glow", 0.6)
+		if d.has("accent"): m0.set_shader_parameter("mark_amt", ACCENT_AMT)
 	if flex:
 		_proportions(flex, d, String(rec.get("species", "")))
 		_variants(flex, d, mats)
