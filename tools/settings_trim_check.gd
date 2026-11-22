@@ -57,6 +57,48 @@ func _row_of(key: String) -> Control:
 	return null
 
 
+## Every row of the page, with or without a setting (the name box and the sound tester have none).
+func _all_rows() -> Array:
+	return Overlay.root.find_children("*", "HBoxContainer", true, false).filter(func(r): return r.has_meta("label"))
+
+
+## The fixed description line at the bottom of the settings panel.
+func _help_line() -> Label:
+	for n in Overlay.host.get_children():
+		if n.has_meta("help"):
+			return n.get_meta("help")
+	return null
+
+
+func _takes_focus(c: Control) -> bool:
+	return c.focus_mode != Control.FOCUS_NONE
+
+
+## Rows with no description, one over 79 characters, or with a key token left unfilled; and rows whose line
+## does not show when hovered or focused.
+func _help_problems() -> Array:
+	var bad_rows: Array = []
+	var help := _help_line()
+	for r in _all_rows():
+		var id := String(r.get_meta("label"))
+		var text := SettingsHelp.line(String(r.get_meta("setting")), id)
+		if text == "" or text.length() > 79 or text.contains("{"):
+			bad_rows.append(id)
+			continue
+		help.text = ""
+		r.mouse_entered.emit()
+		var hovered: bool = help.text == text
+		help.text = ""
+		var focusable: Array = r.find_children("*", "Control", true, false).filter(_takes_focus)
+		var focused: bool = focusable.is_empty()
+		if not focused:
+			focusable[0].focus_entered.emit()
+			focused = help.text == text
+		if not hovered or not focused:
+			bad_rows.append(id + " (does not show)")
+	return bad_rows
+
+
 func _tab_names() -> Array:
 	var names: Array = []
 	for b in Overlay.root.find_children("*", "Button", true, false):
@@ -214,10 +256,16 @@ func run(main: Node) -> void:
 	var reached := {}
 	var moved: Array = []
 	var unsaved: Array = []
+	var helpless: Array = []
 	for t in Overlay.SETTINGS_TABS:
 		await _open(t)
 		if shot != "" and t != "Main" and t != "Controls":
 			tree.root.get_texture().get_image().save_png(shot + "/trim_%s.png" % t.to_lower())
+		if shot != "" and (t == "Main" or t == "Video"):
+			_row_of("quality" if t == "Main" else "shadows").mouse_entered.emit()
+			await tree.process_frame
+			tree.root.get_texture().get_image().save_png(shot + "/trim_help_%s.png" % t.to_lower())
+		helpless.append_array(_help_problems().map(func(x): return "%s/%s" % [t, x]))
 		for key in _row_keys():
 			reached[key] = true
 			if key.begins_with("bind:"):
@@ -238,6 +286,7 @@ func run(main: Node) -> void:
 	ok(missing.is_empty(), "every setting and key bind has a row (missing: %s)" % str(missing))
 	ok(moved.is_empty(), "every row changes its setting (stuck: %s)" % str(moved))
 	ok(unsaved.is_empty(), "and the new value is in settings.cfg (not saved: %s)" % str(unsaved))
+	ok(helpless.is_empty(), "every option has a short line, shown on hover and focus (%s)" % str(helpless))
 	# a fresh load keeps every saved value
 	var later = load("res://scripts/core/settings.gd").new()
 	tree.root.add_child(later)
