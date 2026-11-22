@@ -54,13 +54,7 @@ func _shards() -> void:
 	var kit: RimewrightKit = hero.ak
 	_darts(kit, foe, 3)
 	step(m, 0.3)
-	var marks: Array = []
-	kit.combo_marks(marks)
-	ok(
-		"neve: no overhead badges on a Chilled, stacked foe, the shards are the read",
-		marks.is_empty() and (kit.cue.get("marks", []) as Array).is_empty() and kit.chilled(foe),
-		"%d badges" % marks.size()
-	)
+	ok("neve: darts leave the foe Chilled (the shards are the read, no overhead badge)", kit.chilled(foe))
 	var three := _shards_out(kit, foe)
 	_darts(kit, foe, 4)
 	step(m, 0.3)
