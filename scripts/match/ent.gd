@@ -32,6 +32,7 @@ var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
 var net_cc := 0               # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
+var net_dead_t := -1.0         # (a remote Boki) when its caught event landed: older snapshots are stale
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
@@ -184,9 +185,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0)))
-		burn_dps = maxf(burn_dps, float(opts["burn"]))
-		burn_by = by
+		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
@@ -195,6 +194,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
+		StatusSfx.cue(self, "antiheal", by, blight_t)
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true

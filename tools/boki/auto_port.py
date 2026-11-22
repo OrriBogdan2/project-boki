@@ -15,7 +15,7 @@ BLENDER = os.path.expanduser("~/tools/blender-4.5.15-linux-x64/blender")
 TOOLS = os.path.join(REPO, "tools", "boki")
 RIG = os.path.join(REPO, "scripts", "match", "boki_rig.gd")
 CHECK = os.path.join(REPO, "tools", "boki_rig_check.gd")
-SHEETS = os.path.expanduser("~/cj/20261116-203744-a2/w")
+SHEETS = os.environ.get("SHEETS", os.path.expanduser("~/cj/20261116-203744-a2/w"))
 
 
 def blender(*args):
@@ -32,12 +32,29 @@ def row_of(text, species):
     return re.search(r'\t"%s": \{.*?\}\},\n' % species, text, re.S)
 
 
+def first_row(species):
+    """The species' FRAME row as its primitive rig first had it in full (its own coordinates, before a scan's fit moved it)."""
+    log = subprocess.run(["git", "log", "--reverse", "--format=%h", "--", "scripts/match/boki_rig.gd"], cwd=REPO,
+                         capture_output=True, text=True).stdout.split()
+    for commit in log:
+        text = subprocess.run(["git", "show", commit + ":scripts/match/boki_rig.gd"], cwd=REPO, capture_output=True,
+                              text=True).stdout
+        row = row_of(text, species)
+        if row is not None and '"marks"' in row.group(0):
+            return row.group(0)
+
+
 def frame(species):
+    """The FRAME row: the proxy's own first row (never one an older scan's fit already moved), then through this fit."""
     text = open(RIG).read()
-    if row_of(text, species) is None:  # a new id starts on its proxy species' row
-        proxy = row_of(text, proxy_of(species)).group(0)
-        text = text.replace("const FRAME := {\n", "const FRAME := {\n" + proxy.replace('"%s"' % proxy_of(species), '"%s"' % species, 1), 1)
-        open(RIG, "w").write(text)
+    proxy = proxy_of(species)
+    start = first_row(species if proxy != "glomwort" or species == "glomwort" else "glomwort")
+    start = start.replace('"%s"' % (species if proxy != "glomwort" or species == "glomwort" else "glomwort"), '"%s"' % species, 1)
+    if row_of(text, species) is None:
+        text = text.replace("const FRAME := {\n", "const FRAME := {\n" + start, 1)
+    else:
+        text = text.replace(row_of(text, species).group(0), start, 1)
+    open(RIG, "w").write(text)
     out = blender(os.path.join(TOOLS, "build_boki.py"), "--", "--species=" + species, "--no-export", "--fit-sheet=%s/fit_%s.png" % (SHEETS, species))
     moved = out.split("FRAME row through the fit:\n", 1)[1].split("\nBlender", 1)[0].rstrip("\n") + "\n"
     text = open(RIG).read()
