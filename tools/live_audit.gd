@@ -1,5 +1,5 @@
 extends "res://tools/clip_shots.gd"
-## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close]: audit render of Hunters as the game plays
+## --live-audit --shots-dir=<dir> [--wardens=a,b] [--size=1024] [--close|--grip]: audit render of Hunters as the game plays
 ## them (Models.hunter + the model's pose node), scratch-tree version of the e28953f4e4f harness. Per hunter and
 ## clip (idle, run, dash, jump, attack, hit) three frames: <dir>/<id>/<clip>_<k>.jpg on the match camera (fov 8, 66
 ## deg); with --close the same poses from eye height and knee height: <clip>_<k>_eye.jpg, <clip>_<k>_knee.jpg.
@@ -18,6 +18,7 @@ const CLIPS := ["idle", "run", "dash", "jump", "attack", "hit"]
 
 var close := false
 var seq := false
+var grip := false  # --grip: the gun and the hand it rides, six frames (idle, run, jump, attack x3): <clip>_<k>_grip.jpg
 var native := false
 
 func run(main: Node) -> void:
@@ -31,6 +32,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
 		if a == "--seq": seq = true
+		if a == "--grip": grip = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -125,11 +127,13 @@ func _hunter(id: String, dir: String) -> void:
 		var bb := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
 		print("LIVE_AUDIT_MESH ", model.get_path_to(mi), " vis ", (mi as MeshInstance3D).is_visible_in_tree(), " centre ", bb.get_center(), " size ", bb.size)
 	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in (["idle", "run", "attack"] if seq else CLIPS):
+	for clip in (["idle", "run", "attack"] if seq else (["idle", "run", "jump", "attack"] if grip else CLIPS)):
 		var yaw := SIDE_YAW if clip == "run" and not close and not seq else THREE_Q_YAW
 		model.rotation.y = yaw
 		model.set_meta(WardenHolster.DRAW, 1.0 if clip == "attack" else 0.0)  # (HunterAnim's aim_k: the gun in hand while he fires)
 		var times: Array = SAMPLES[clip]
+		if grip and clip != "attack":
+			times = [times[-1] if clip == "run" else times[1]]
 		if seq:
 			times = []
 			for q in int({"idle": 1.5, "run": 1.6, "attack": 1.2}[clip] * 30.0):
@@ -158,6 +162,17 @@ func _hunter(id: String, dir: String) -> void:
 	model.queue_free()
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
+	if grip:
+		var gun := model.find_child("DredgeGun", true, false) as Node3D
+		if gun:
+			var at := gun.global_position
+			cam.fov = 30.0
+			cam.position = at + Vector3(0.5, 0.15, 1.7)
+			cam.look_at(at)
+			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_post_draw
+			tree.root.get_texture().get_image().save_jpg(dir.path_join(name + "_grip.jpg"), 0.93)
+		return
 	if close:
 		for knee in [false, true]:
 			_close_cam(bx, knee)
