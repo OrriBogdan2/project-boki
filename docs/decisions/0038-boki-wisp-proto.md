@@ -26,3 +26,7 @@ Alternative noted: keep the kin's ability/merge castable from the wisp; left for
 - `scripts/match/kin_wisp.gd` (new), a few lines in kin.gd, kin_follow.gd, kin_net.gd, settings, overlay.
 - Net.VERSION 0.24.14: the kin snapshot gains index 24, 1 when it rides as a wisp; other games swap the model.
 - `--summon-check` covers it; `--perf-bench --bench-hunters=30 [--boki-wisps]` measures it.
+- Read at the match camera (2026-11-20, `--wisp-read-shots`, docs/shots/wisp-read/): a carried wisp's ring is hidden, so its
+  rim takes the side colour (SideColor: you, squad, rival; one instance uniform, set when the colour changes), it is drawn
+  at the downed form's 1.5x (about 37 px against 25) and orbits at 0.8 m. Same mesh, material and sparkles: draw calls are
+  unchanged (762 before and after).
