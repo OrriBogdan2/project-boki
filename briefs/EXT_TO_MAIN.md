@@ -10893,3 +10893,4 @@ READY ext/kael-arms-lore-1118 7755f8188f6cf6eed5d7945c8aa70438e99f94b2 (Kael arm
 READY ext/vfx-grimble-wedges 85ea6a3751 (bulk-rebase: origin/main merged in mechanically, was 25e311c250; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/tenzo-press-windup 1b35f8ec64b (Tenzo press wind-up to the source)
 READY ext/glide-cruise-scale 7ab61ca691b4c2b9e32efad57cde858fb34ccbae (glide cruise follows body_scale)
+READY ext/mage-blink-glide de30c5c847309a4e426af6bc526c7d87548aa50d (Sparkle air blink cancels into glide)
