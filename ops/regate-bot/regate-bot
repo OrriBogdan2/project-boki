@@ -70,6 +70,38 @@ def merge_first():
 
 FIRST_RE = re.compile(r"ext/(merge-batch-|merge-lane-|merge-auto-|integ-|mc-integ-|mc-demo-)")  # 11-15: merge-week lanes too  # branches the bot may gate with no earlier GATE GREEN
 
+PAIR_MAX_TRIES = int(os.environ.get("REGATE_PAIR_MAX_TRIES", 2))
+
+
+def pair_seen(st, n, head, main, comments):
+    """-> why-text when this exact (PR head, main) pair was already gated, else ''. 11-22: re-gates of the same head on the
+    same main were pure duplicate work (focus baseline: 70 gate-h in 3 days). Source 1: state['pairs'] (recorded when a gate
+    result is collected: GREEN/RED/CONFLICT = a verdict, ERROR/timeout = a try, PAIR_MAX_TRIES tries then stop). Source 2:
+    our own '[regate-bot pr= head= main=]' tags in the PR's comments (covers gates before this state existed)."""
+    p = st.get("pairs", {}).get(str(n)) or {}
+    if p.get("head") == head and p.get("main") == main:
+        if p.get("verdict") in ("GREEN", "RED", "CONFLICT"):
+            return f"head {head[:10]} + main {main[:10]} was already gated ({p['verdict']}): no duplicate gate"
+        if p.get("tries", 0) >= PAIR_MAX_TRIES:
+            return f"head {head[:10]} + main {main[:10]} already tried {p['tries']}x ({p.get('verdict')}): no duplicate gate"
+    for c in comments:
+        for m in MARK_RE.finditer(c["body"]):
+            if int(m.group(1)) == n and head.startswith(m.group(2)) and main.startswith(m.group(3)):
+                return f"head {head[:10]} + main {main[:10]} already carries a regate-bot comment for this pair: no duplicate gate"
+    return ""
+
+
+def note_pair(st, f, word):
+    """Record a collected gate result for the (head, main) pair of in-flight entry f. MOVED (head changed under the run)
+    never gated that pair, so it is not counted."""
+    if f.get("train") or word == "MOVED":
+        return
+    pairs = st.setdefault("pairs", {})
+    old = pairs.get(str(f["pr"])) or {}
+    same = old.get("head") == f["head"] and old.get("main") == f["main"]
+    pairs[str(f["pr"])] = dict(head=f["head"], main=f["main"], verdict=word, at=now(), tries=(old.get("tries", 0) if same else 0) + 1)
+
+
 def scan(gh, st):
     """-> (main sha, [row]) where row = dict(pr, branch, head, gated, kind, verdict, why, created).
     kind: "stale" (only merge commits since the green: re-gate) or "ungated" (non-merge commits after the green)."""
@@ -118,6 +150,10 @@ def scan(gh, st):
             continue
         if not behind and gated == head:
             row["why"] = f"GATE GREEN {short} is the head and contains main: merge-ready-watch's case"
+            continue
+        dup = pair_seen(st, n, head, main, cs)
+        if dup:
+            row["why"] = dup
             continue
         # not behind + gated != head: main was merged in after the green (a bulk rebase, a driver job) and nobody
         # gated the new head, so merge-ready-watch can never take it: regate-run gates the head as it is (no push)
@@ -377,6 +413,7 @@ def step_one(gh, st, f, main_now):
             if age > GATE_MAX_MIN:
                 log("timeout", n, f"no result after {age:.0f} min on {f['worker']} ({f['out']}): {kill_run(f)}; released, 60 min cooldown")
                 st["cooldown"][str(n)] = now() + 3600
+                note_pair(st, f, "TIMEOUT")
                 return False
             print(f"#{n}: gating on {f['worker']} for {age:.0f} min")
             return True
@@ -384,6 +421,8 @@ def step_one(gh, st, f, main_now):
         log("result", n, f"{res[:300]} ({age:.0f} min, {f['worker']})")
         if f.get("train"):
             return train_done(st, f, word, res)
+        if not args.dry and not (word == "ERROR" and "HOST-OVERLOADED" in res):
+            note_pair(st, f, word)
         if word == "GREEN" and f.get("ckey"):
             rc.cache_put(*f["ckey"], "GREEN", pr=n, sha=res.split()[1] if len(res.split()) > 1 else "")
         if word in ("GREEN", "RED", "CONFLICT") and comment.strip():
