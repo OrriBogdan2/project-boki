@@ -17,7 +17,8 @@ const TAIL := 9  # fields: TAG, level, SICK_TAG, sick seconds, CHAN_TAG, target,
 static func extra(h: Hunter) -> Array:
 	var ch := ChannelBar.read(h)
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
-	return [TAG, h.lvl, SICK_TAG, snappedf(h.sick_t, 0.1), CHAN_TAG, ch[0], snappedf(maxf(0.0, ch[1]), 0.05), REACH_TAG, reach]
+	var left := snappedf(maxf(0.0, ch[1]), 0.05)
+	return [TAG, h.lvl, SICK_TAG, snappedf(h.sick_t, 0.1), CHAN_TAG, ch[0], left, REACH_TAG, reach]
 
 
 static func apply(h: Hunter, it: Array) -> void:
