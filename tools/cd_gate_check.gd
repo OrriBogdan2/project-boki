@@ -46,7 +46,7 @@ func _trial(m: Match, hero: String, slot: String) -> void:
 	h.inp["aim"] = h.pos + ahead
 	foe.teleport(h.pos + ahead)
 	for kin in m.kins.duplicate():
-		if kin.owner_h != h:      # (a rival or wild Boki walking up would shove you, and a bite is damage the press did not do)
+		if kin.owner_h != h:      # (a rival or wild Boki walking up would shove or bite you)
 			kin.dead = true
 			m.kins.erase(kin)
 			kin.queue_free()
