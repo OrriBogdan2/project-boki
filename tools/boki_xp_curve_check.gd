@@ -50,7 +50,7 @@ func _session() -> void:
 		var early := Save.new_kin(sp)
 		Evo.ensure(early)
 		Game.add_xp(early, 40 + SESSION_KNOCKS * 10, {})
-		ok(Evo.next_for(early, "level") == "", "session: %s is not ready after one expedition (Lv %d)" % [sp, early["level"]])
+		ok(Evo.next_for(early, "level") == "", "session: %s not ready after one run (Lv %d)" % [sp, early["level"]])
 		var rec := Save.new_kin(sp)
 		Evo.ensure(rec)
 		for i in SESSION_RUNS:
@@ -70,4 +70,4 @@ func _migrate() -> void:
 	var kept: bool = int(half["level"]) == 4 and int(fresh["level"]) == 10 and int(fresh["xp"]) == 0
 	ok(absi(int(half["xp"]) - want) <= 1 and kept,
 		"migrate: Lv 4 with 100 of 200 XP now has %d of %d, levels unchanged" % [int(half["xp"]), Game.xp_need(4)])
-	ok(int(lost["xp"]) < Game.xp_need(2), "migrate: a lost Boki's XP stays under its level's cost (%d)" % int(lost["xp"]))
+	ok(int(lost["xp"]) < Game.xp_need(2), "migrate: a lost Boki's XP stays under its level cost (%d)" % int(lost["xp"]))

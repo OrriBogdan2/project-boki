@@ -132,7 +132,7 @@ const CHECKS := {
 	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--wade-check": ["res://tools/wade_check.gd", "wade_check", null],  # GARDEN.md 4 Boki wading
 	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
-	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],      # the care line over a Boki
+	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],  # care line
 	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],  # no natural death
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
@@ -188,7 +188,7 @@ const CHECKS := {
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
-	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],  # child
 	# first press after a panel closes
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],
 	"--move-drills-check": ["res://tools/move_drills_check.gd", "move_drills_check", null],
@@ -910,7 +910,7 @@ const CHECKS := {
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
-	"--boki-xp-curve-check": ["res://tools/boki_xp_curve_check.gd", "boki_xp_curve_check", null],  # XP curve, 2 h of play
+	"--boki-xp-curve-check": ["res://tools/boki_xp_curve_check.gd", "boki_xp_curve_check", null],  # XP curve
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],  # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],  # also --shots-dir=
 	# tutorial and hint text names keys only through Settings.key_cap

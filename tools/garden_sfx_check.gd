@@ -99,8 +99,7 @@ func _names() -> void:
 			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring, Relay, Kite and Lantern cue exists (%d)"
-			% cues.size())
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every garden game cue exists (%d)" % cues.size())
 
 func _fishing() -> void:
 	var rec := _kin("zapple", "Pip")
