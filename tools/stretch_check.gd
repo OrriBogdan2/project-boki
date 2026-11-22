@@ -4,7 +4,8 @@ extends RefCounted
 ## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
 ## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
 ## the ratio is divided by it. A Hero in CEILING is held at its ceiling instead of the limit. Prints one line per clip
-## and a table per Hero. Never touches the save.
+## and a table per Hero. The registry splits the roster into four flags (--stretch-<n>-check) so each stays
+## under the gate's 300 s cap; a shard's arg is its comma list of Heroes. Never touches the save.
 
 const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain links) say nothing about stretch
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
@@ -20,10 +21,10 @@ var step := 0.125                # s between samples of a clip
 var parts: Array = []            # per skinned mesh: {verts, bones, weights, stride, skin, edges, rest, bind_bones}
 var skel: Skeleton3D
 
-func run(main: Node) -> void:
+func run(main: Node, shard := "") -> void:
 	Save.no_write = true
 	tree = main.get_tree()
-	var ids: Array = WardenGlb.ART.keys()
+	var ids: Array = Array(shard.split(",")) if shard != "" else WardenGlb.ART.keys()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(","))
 		if a.begins_with("--limit="): limit = float(a.substr(8))

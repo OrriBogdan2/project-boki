@@ -465,7 +465,10 @@ const CHECKS := {
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
 	# no clip stretches a skinned edge past 1.3x
-	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
+	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,archer,juggernaut"],
+	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "gunslinger,ostra,mage"],
+	"--stretch-3-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,thief,rimewright"],
+	"--stretch-4-check": ["res://tools/stretch_check.gd", "stretch_check", "ashwick,tender,dredge,gil"],
 	"--step-sync-check": ["res://tools/step_sync_check.gd", "step_sync_check", null],  # steps on loop plants
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],  # hand-keyed clips, weapon on the bone
 	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],  # ability words
