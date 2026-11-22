@@ -82,7 +82,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
-| nimbostrich | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
 | spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -91,6 +90,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| opalisk | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -107,7 +108,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
-| opalisk | clip | clip | clip | clip | clip | clip | proc | proc |
 | orchisloth | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
