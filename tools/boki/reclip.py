@@ -1,8 +1,8 @@
 """Re-keys the clips of a built Boki .glb from its species' skeleton and clips module and writes it back, the body,
 face, skin and atlases as they are. For a scanned species whose raw Meshy model is not at hand (`build_boki.py`
-needs it for the bake): the .glb is read back into Blender, its actions are replaced by the module's CLIPS, it is
-exported again. A file that `auto_legs.py` gave real legs keeps its leg bones and its walk and run (the planted-paw trot): only the
-other clips are re-keyed, with the legs at rest as auto_legs keys them.
+needs it for the bake): the .glb is read back into Blender, its actions are replaced by the module's CLIPS, it
+is exported again. A file that `auto_legs.py` gave real legs keeps its leg bones and its walk and run (the
+planted-paw trot): only the other clips are re-keyed, with the legs at rest as auto_legs keys them.
 
   blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>
 """
