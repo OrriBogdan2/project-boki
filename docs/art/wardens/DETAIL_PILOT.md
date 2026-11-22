@@ -76,7 +76,7 @@ Sheets in `detail_pilot/`, each shipped | normal | 25k | 40k, one worker (RTX 40
   Meshy texture. It is now the roughest thing on both models, more than the polygons.
 
 ## What it costs to draw
-`--hunter-gpu-bench` (`tools/hunter_gpu_bench.gd`): six Hunters (three of each) and four Boki in idle at the match
+`--perf-bench --bench-hunter-gpu` (`tools/perf/hunter_gpu.gd`): six Hunters (three of each) and four Boki in idle at the match
 camera, 1280×720, quality medium, no frame cap; all tiers in one process on one machine.
 
 | Machine | | shipped | normal | 25k | 40k |

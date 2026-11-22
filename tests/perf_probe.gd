@@ -1,9 +1,9 @@
 extends Node
-## Tooling (--perf-probe): plays one scripted expedition the way a player gets it (loading screen,
+## Tooling (--perf-bench --bench-probe): plays one scripted expedition the way a player gets it (loading screen,
 ## planning map, skyship ride, the jump and glide down, landing, a look at the full map, a fight)
 ## and logs per phase: wall frame time, script time, draw calls, objects, primitives, memory, and the
 ## worst hitches with the build steps (PerfLog marks) that ran inside them.
-##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-probe
+##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench --bench-probe
 ##   [--probe-out=/path/report.txt] [--probe-quick] [--probe-squad=3] [--probe-teams=40] [--quality=high]
 ## A software-rendered GPU makes wall time mostly raster time, so read the CPU columns (script,
 ## render submit) and the counts; wall time is still where hitches show.

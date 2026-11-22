@@ -1,7 +1,7 @@
 class_name PerfLog
 extends RefCounted
 ## Cheap timing marks for the heavy one-off steps (building a match, the world's meshes, the map
-## bake). Always on: a handful of marks per match. --perf-probe reads them to say what a hitch was,
+## bake). Always on: a handful of marks per match. --perf-bench --bench-probe reads them to say what a hitch was,
 ## and -- --perf-log prints each step's time as it finishes.
 
 static var marks: Array = []      # [usec, label, ms the step took]

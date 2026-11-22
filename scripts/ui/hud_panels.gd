@@ -10,7 +10,7 @@ extends Control
 const REDRAW_HZ := 20.0      # panel redraws per second
 var hud: Node
 var _t := 0.0
-var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-probe, --perf-bench)
+var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-bench)
 static var draws := 0        # panel redraws so far; RankMarks keeps a "+" only while the latest one drew it
 
 static func make(h: Node) -> HudPanels:

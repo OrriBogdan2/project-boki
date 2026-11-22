@@ -27,6 +27,11 @@ shipped game at the cost of a static call each. Zones, per `Match` frame: `bots`
 `vfx_render`, `camera`, `hud_tick`, `hud_draw`. `Prof.frame()` in `Match._process` marks the frame. A new zone is two
 lines around straight-line code (an early `return` between them would leave the zone open).
 
+## One harness
+`--perf-bench` is the only perf entry point. Its flags pick the part: none (the fixed load), `--tracy=<dir>`,
+`--bench-fight`, `--bench-ab`, `--bench-probe` (a scripted expedition, loading screen to fight, per phase:
+`tests/perf_probe.gd`) and `--bench-hunter-gpu` (Hunter model draw cost: `tools/perf/hunter_gpu.gd`).
+
 ## Capture (headless, real GPU)
 ```
 jobq submit --needs gpu --only rp1-0 --tree <tree> --out bench -- --perf-bench --bench-secs=30 --bench-view=1920x1080 --quality=medium --tracy=bench

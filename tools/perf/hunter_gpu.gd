@@ -1,10 +1,11 @@
 extends RefCounted
-## --hunter-gpu-bench [--wardens=gunslinger,ashwick] [--tiers=n,25k,40k] [--bench-secs=8]: what the Hunter models
-## cost to draw. Six Hunters (the list, repeated) and four Boki play their idle at the match camera under the
-## game's light; one line per round with the mean GPU and CPU render time per frame, the frame time with no cap,
+## --perf-bench --bench-hunter-gpu [--wardens=gunslinger,ashwick] [--tiers=n,25k,40k] [--bench-secs=8]: what the
+## Hunter models cost to draw. Six Hunters (the list, repeated) and four Boki play their idle at the match
+## camera under the game's light; one line per round with the mean GPU and CPU render time per frame, the frame
+## time with no cap,
 ## draws and triangles. The first round is the shipped models; each tier is a round with the design variants
 ## art/wardens/<art>_<tier>/ (the detail pilot's 25k and 40k meshes), so one run compares them on one machine.
-## Needs a real GPU:  jobq submit --tree . --needs gpu -- --hunter-gpu-bench --tiers=n,25k,40k
+## Needs a real GPU:  jobq submit --tree . --needs gpu -- --perf-bench --bench-hunter-gpu --tiers=n,25k,40k
 
 const HUNTERS := 6
 const BOKI := 4
