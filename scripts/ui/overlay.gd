@@ -376,14 +376,10 @@ func open_controls() -> void:
 	var psc = Game.main.screen_node() if ctx == "match" and Game.main else null
 	var hero: String = psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save()
 	ControlsCard.fill(v, hero)
-	UI.footer_left(v).add_child(
-		UI.ghost(
-			"Change keys",
-			func():
-				tab = "Controls"
-				open_settings()
-		)
-	)
+	var change_keys := func():
+		tab = "Controls"
+		open_settings()
+	UI.footer_left(v).add_child(UI.ghost("Change keys", change_keys))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 
@@ -514,21 +510,17 @@ func _show_settings() -> void:
 		SettingsSearch.fill(v, search, SETTINGS_TABS, _build_tab)
 	else:
 		_build_tab(tab, v)
-	UI.footer_left(v).add_child(
-		UI.ghost(
-			"Reset to defaults",
+	var cb_516 := func():
+		UI.confirm(
+			root,
+			"Reset every setting?",
+			"Volume, video, gameplay and every key binding go back to how the game ships.",
+			"Reset",
 			func():
-				UI.confirm(
-					root,
-					"Reset every setting?",
-					"Volume, video, gameplay and every key binding go back to how the game ships.",
-					"Reset",
-					func():
-						Settings.reset_all()
-						_show_settings()
-				)
+				Settings.reset_all()
+				_show_settings()
 		)
-	)
+	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", cb_516))
 	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
 	UI.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
@@ -1367,16 +1359,12 @@ func open_admin() -> void:
 	var cur_d := String(Settings.get_v("bot_diff"))
 	for dk in ["auto"] + Data.BOT_ORDER:
 		var dkey: String = dk
+		var cb_1370 := func():
+			Settings.set_v("bot_diff", dkey)
+			Sfx.play("pickup")
+			open_admin()
 		drow.add_child(
-			UI.choice(
-				"Auto" if dkey == "auto" else String(Data.BOT_DIFF[dkey]["name"]),
-				dkey == cur_d,
-				func():
-					Settings.set_v("bot_diff", dkey)
-					Sfx.play("pickup")
-					open_admin(),
-				104
-			)
+			UI.choice("Auto" if dkey == "auto" else String(Data.BOT_DIFF[dkey]["name"]), dkey == cur_d, cb_1370, 104)
 		)
 	v.add_child(drow)
 	var dnote := "Auto: Meadow bots are Easy, Dusk Isles Medium, the Hollow Hard, one step up once you've extracted a lot."
@@ -1531,24 +1519,14 @@ func open_spawn_kin() -> void:
 	mrow.add_child(UI.label("Mutation:", 13, UI.MUTED))
 	for mid in [""] + Mutations.ids():
 		var mk: String = mid
-		mrow.add_child(
-			UI.choice(
-				"none" if mk == "" else Mutations.name_of(mk),
-				admin_mut == mk,
-				func():
-					admin_mut = mk
-					open_spawn_kin()
-			)
-		)
-	mrow.add_child(
-		UI.choice(
-			"Shimmer",
-			admin_shimmer,
-			func():
-				admin_shimmer = not admin_shimmer
-				open_spawn_kin()
-		)
-	)
+		var cb_1534 := func():
+			admin_mut = mk
+			open_spawn_kin()
+		mrow.add_child(UI.choice("none" if mk == "" else Mutations.name_of(mk), admin_mut == mk, cb_1534))
+	var cb_1543 := func():
+		admin_shimmer = not admin_shimmer
+		open_spawn_kin()
+	mrow.add_child(UI.choice("Shimmer", admin_shimmer, cb_1543))
 	v.add_child(mrow)
 	var grid := GridContainer.new()
 	grid.columns = 3

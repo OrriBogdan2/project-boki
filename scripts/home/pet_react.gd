@@ -14,12 +14,12 @@ static func rules() -> Dictionary:
 ## "shy", "proud", "playful" or "sleepy", from its traits.
 static func kind(rec: Dictionary) -> String:
 	var r := rules()
-	var tr: Dictionary = rec.get("traits", {})
-	if float(tr.get("bravery", 0.5)) < float(r["shy_bravery"]):
+	var trap: Dictionary = rec.get("traits", {})
+	if float(trap.get("bravery", 0.5)) < float(r["shy_bravery"]):
 		return "shy"
-	if float(tr.get("temper", 0.5)) > float(r["proud_temper"]):
+	if float(trap.get("temper", 0.5)) > float(r["proud_temper"]):
 		return "proud"
-	return "playful" if float(tr.get("curiosity", 0.5)) >= float(r["playful_curiosity"]) else "sleepy"
+	return "playful" if float(trap.get("curiosity", 0.5)) >= float(r["playful_curiosity"]) else "sleepy"
 
 
 ## Pats it has paid for in this farm day (the window restarts with the care days).

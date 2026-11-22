@@ -89,7 +89,7 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 	var dash: Dictionary = d.get("dash", {})
 	var e: Dictionary = d.get("e", {})
 	var x: Dictionary = d.get("x", {})
-	var seed: Dictionary = d.get("rmb", {}).get("seed", {})
+	var seed_v: Dictionary = d.get("rmb", {}).get("seed", {})
 	var pin: Dictionary = d.get("rmb", {}).get("pin", {})
 	match a:
 		"archer":
@@ -111,7 +111,7 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 		"mage":  # a returned run charges in reset_charge of the hold
 			return {"nums": [float(dash["hold"]) * float(dash["reset_charge"])]}
 		"tender":  # the rank 3 burst is r3_k times the radius
-			return {"nums": [float(seed["burst_r"]) * float(seed["r3_k"])]}
+			return {"nums": [float(seed_v["burst_r"]) * float(seed_v["r3_k"])]}
 		"thief":  # after the Vault the bolts leave quick_k of the weapon's rate apart (main's card)
 			var src := FileAccess.get_file_as_string("res://content/weapons/arc_bolts.json")
 			var bolts: Dictionary = JSON.parse_string(src)

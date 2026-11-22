@@ -8,10 +8,10 @@ extends RefCounted
 
 
 ## The sound a form names for `kind`, or "" (no form, or a form without one).
-static func name_of(form_id: String, kind: String) -> String:
-	if form_id == "":
+static func name_of(form_id_v: String, kind: String) -> String:
+	if form_id_v == "":
 		return ""
-	return String((Content.merge_form(form_id).get("sound", {}) as Dictionary).get(kind, ""))
+	return String((Content.merge_form(form_id_v).get("sound", {}) as Dictionary).get(kind, ""))
 
 
 ## The merged hunter's form id: from the merge on its own game, from the snapshot (KinNet) on the others.

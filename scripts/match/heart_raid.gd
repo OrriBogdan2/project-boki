@@ -67,8 +67,8 @@ static func on(o: Dictionary) -> bool:
 
 
 ## The match options of a raid for a squad of `squad` (1 = truly solo) at a difficulty (rules "difficulty").
-static func opts(squad: int, difficulty := "normal") -> Dictionary:
-	var d := difficulty if rules()["difficulty"].has(difficulty) else "normal"
+static func opts(squad: int, difficulty_v := "normal") -> Dictionary:
+	var d := difficulty_v if rules()["difficulty"].has(difficulty_v) else "normal"
 	return {"heart_raid": true, "teams": 1, "squad": clampi(squad, 1, 4), "length": r("match_s"), "raid_diff": d}
 
 
@@ -83,18 +83,18 @@ static func difficulties() -> Array:
 	return BokiModes.rules()["modes"][MODE]["difficulties"]
 
 
-static func diff_name(difficulty: String) -> String:
-	return String(rules()["difficulty"][difficulty]["name"])
+static func diff_name(difficulty_v: String) -> String:
+	return String(rules()["difficulty"][difficulty_v]["name"])
 
 
 ## The raid's Boki at a difficulty: its lines of boki_modes.json open there, as their game species, or (while a
 ## line has no kin yet) its stand-in (rules "stand_ins"). Draw from it with BokiModes.draw (rarity tickets).
-static func boki(difficulty: String) -> Array:
+static func boki(difficulty_v: String) -> Array:
 	var ladder := difficulties()
 	var lines: Dictionary = BokiModes.rules()["lines"]
-	var out := BokiModes.pool(MODE, ["common", "rare", "very_rare"], difficulty)
+	var out := BokiModes.pool(MODE, ["common", "rare", "very_rare"], difficulty_v)
 	for line in rules()["stand_ins"]:
-		if not line.begins_with("_") and ladder.find(lines[line]["min_difficulty"]) <= ladder.find(difficulty):
+		if not line.begins_with("_") and ladder.find(lines[line]["min_difficulty"]) <= ladder.find(difficulty_v):
 			out.append(String(rules()["stand_ins"][line]))
 	return out
 

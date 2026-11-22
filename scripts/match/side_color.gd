@@ -128,8 +128,8 @@ static func of(m: Node, e: Node) -> Color:
 	if e is Kin and (e as Kin).owner_h != null:
 		body = (e as Kin).owner_h
 	var team := int(body.get("team")) if body else -1
-	var viewer := int(lp.get("team")) if lp else -1
-	return of_team(viewer, team, lp != null and body == lp)
+	var viewer_v := int(lp.get("team")) if lp else -1
+	return of_team(viewer_v, team, lp != null and body == lp)
 
 
 ## The colour `by`'s ability look `col` (a ground area, a telegraph, a shot's halo) takes for the local player: yours

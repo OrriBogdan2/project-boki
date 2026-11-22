@@ -278,28 +278,28 @@ class Run:
 		return kind
 
 ## Pays out a finished dance: joy, trust, memories, energy and gems. Returns what the card shows.
-static func settle(run: Run) -> Dictionary:
+static func settle(run_v: Run) -> Dictionary:
 	var r_v := rules()
-	var you: Dictionary = run.recs[YOU]
-	for rec in run.recs:
+	var you: Dictionary = run_v.recs[YOU]
+	for rec in run_v.recs:
 		if not rec.is_empty():
 			Care.change(rec, "energy", -float(r_v["energy"]))
-	var res := {"score": run.score, "best": run.best[YOU]}
-	if run.versus:
-		var win: Dictionary = run.recs[run.winner()]
-		var lose: Dictionary = run.recs[1 - run.winner()]
+	var res := {"score": run_v.score, "best": run_v.best[YOU]}
+	if run_v.versus:
+		var win: Dictionary = run_v.recs[run_v.winner()]
+		var lose: Dictionary = run_v.recs[1 - run_v.winner()]
 		Care.change(win, "joy", float(r_v["win_joy"]))
 		Care.change(lose, "joy", float(r_v["lose_joy"]))
 		Save.remember(win, "echo", "out-danced %s at Echo Steps" % lose["name"], float(r_v["win_trust"]))
 		Save.remember(lose, "echo", "lost Echo Steps to %s" % win["name"])
 		res.merge({"win": win, "lose": lose, "good": win == you})
-		res["prize"] = GardenPrizes.settle("echo", you, run.recs[RIVAL], win == you)
+		res["prize"] = GardenPrizes.settle("echo", you, run_v.recs[RIVAL], win == you)
 	else:
-		var good := float(run.hits[YOU]) >= float(r_v["solo_good"]) * float(run.beats[YOU])
+		var good := float(run_v.hits[YOU]) >= float(r_v["solo_good"]) * float(run_v.beats[YOU])
 		if good:
 			Care.change(you, "joy", float(r_v["win_joy"]))
 		var trust := float(r_v["win_trust"]) if good else 0.0
-		Save.remember(you, "echo", "danced Echo Steps for %d points" % run.score[YOU], trust)
+		Save.remember(you, "echo", "danced Echo Steps for %d points" % run_v.score[YOU], trust)
 		res["good"] = good
 		res["prize"] = GardenPrizes.settle("echo", you, {"stats": {}}, good)
 	res["gems"] = int(r_v["gems_win"]) if res["good"] else int(r_v["gems_ran"])
@@ -695,13 +695,13 @@ func _end(finished: bool) -> void:
 
 func _card(res: Dictionary, before: Array) -> void:
 	var you: Dictionary = dancers[YOU]["rec"]
-	var place := "%s danced: %d points" % [you["name"], res["score"][YOU]]
+	var place_v := "%s danced: %d points" % [you["name"], res["score"][YOU]]
 	if res.has("win"):
 		var won := YOU if res["win"] == you else RIVAL
-		place = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
+		place_v = "%s wins, %d points to %d" % [res["win"]["name"], res["score"][won], res["score"][1 - won]]
 	if is_instance_valid(card):
 		card.queue_free()
-	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place, "before": before,
+	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place_v, "before": before,
 			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]]
 				+ GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])

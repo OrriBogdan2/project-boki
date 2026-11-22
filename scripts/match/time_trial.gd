@@ -55,9 +55,9 @@ static func best(arch: String) -> float:
 
 
 ## Save v12 -> v13: the time trial's personal bests start empty.
-static func migrate(data: Dictionary) -> void:
-	if typeof(data.get("time_trial")) != TYPE_DICTIONARY:
-		data["time_trial"] = {}
+static func migrate(data_v: Dictionary) -> void:
+	if typeof(data_v.get("time_trial")) != TYPE_DICTIONARY:
+		data_v["time_trial"] = {}
 
 
 ## Keeps secs as arch's best if it beats the old one, and saves. True for a new best.

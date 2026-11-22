@@ -148,20 +148,20 @@ class Run:
 
 
 ## Pays out a finished round: joy, trust, a memory each, energy and gems. Returns what the card shows.
-static func settle(run: Run) -> Dictionary:
+static func settle(run_v: Run) -> Dictionary:
 	var r_v := rules()
-	var win: Dictionary = run.recs[run.winner()]
-	var lose: Dictionary = run.recs[1 - run.winner()]
-	for rec in run.recs:
+	var win: Dictionary = run_v.recs[run_v.winner()]
+	var lose: Dictionary = run_v.recs[1 - run_v.winner()]
+	for rec in run_v.recs:
 		Care.change(rec, "energy", -float(r_v["energy"]))
 	Care.change(win, "joy", float(r_v["win_joy"]))
 	Care.change(lose, "joy", float(r_v["lose_joy"]))
-	var wp: int = run.score[run.winner()]
-	var lp: int = run.score[1 - run.winner()]
+	var wp: int = run_v.score[run_v.winner()]
+	var lp: int = run_v.score[1 - run_v.winner()]
 	MinigameHub.record("fetch", String(win["name"]))  # best Boki on the title's picker
 	Save.remember(win, "fetch", "beat %s %d to %d at Fetch Cup" % [lose["name"], wp, lp], float(r_v["win_trust"]))
 	Save.remember(lose, "fetch", "lost Fetch Cup to %s, %d to %d" % [win["name"], lp, wp])
-	var backed_won: bool = run.recs[run.backed] == win
+	var backed_won: bool = run_v.recs[run_v.backed] == win
 	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "score": [wp, lp]}

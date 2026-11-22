@@ -293,7 +293,8 @@ func thief(a) -> void:
 	t_v.do_jump()
 	m.step(a_x.DT)
 	a_x.ok("dancer Bola: Grounded can't dash or jump",
-			t_v.dashes >= 0.99 and t_v.roll_t <= 0.0 and t_v.vel.y < 1.0, "dashes %.2f vy %.1f" % [t_v.dashes, t_v.vel.y])
+			t_v.dashes >= 0.99 and t_v.roll_t <= 0.0 and t_v.vel.y < 1.0, "dashes %.2f vy %.1f" % [t_v.dashes,
+					t_v.vel.y])
 	a_x.step(m, 2.0)
 	_bola_edge(a_x, m, p_v, k, t_v, t2, home)
 	# ... it bounces once off a wall
@@ -345,7 +346,8 @@ func thief(a) -> void:
 	p_v.ak.use_e()
 	m.step(a_x.DT)
 	a_x.ok("dancer E recast: a blink to it with an afterimage chain, arriving in her own low drop",
-			k.blinks == 1 and k.anim_id == "thf_arrive" and Vector2(p_v.pos.x - kspot.x, p_v.pos.z - kspot.z).length() < 1.2
+			k.blinks == 1 and k.anim_id == "thf_arrive" and Vector2(p_v.pos.x - kspot.x,
+					p_v.pos.z - kspot.z).length() < 1.2
 			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5,
 			"blinks %d" % k.blinks)
 	# ... into a foe: it sticks (slows), recast steps behind them; left alone it steps you there after 6s
@@ -972,8 +974,8 @@ func juggernaut(a) -> void:
 	a_x.step(m, 0.3)
 	var chain_dmg := float(k.e_def()["dmg"])
 	a_x.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
-			k.warchain.hooked() and k.warchain.target == t_v and t_v.blight_t <= 0.0 and a_x.dmg(t_v) >= chain_dmg * 0.85
-			and float(k.cd["e"]) <= 0.0,
+			k.warchain.hooked() and k.warchain.target == t_v and t_v.blight_t <= 0.0
+			and a_x.dmg(t_v) >= chain_dmg * 0.85 and float(k.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [t_v.blight_t, float(k.cd["e"])])
 	var wid := "war%d" % p_v.get_instance_id()
 	a_x.ok("juggernaut E: the hooked foe wears the marker ring (shown whoever looks)",
@@ -1084,7 +1086,8 @@ func juggernaut(a) -> void:
 			t_v.downed and k.slam_resets == 1 and float(k.cd["x"]) <= 0.0 and k.knock_healed > 0.0,
 			"x cd %.1f resets %d" % [float(k.cd["x"]), k.slam_resets])
 	a_x.ok("juggernaut passive: a knock heals 20% of their health",
-			k.knock_healed >= minf(0.19 * t_v.max_hp, 0.9 * p_v.max_hp), "healed %.0f of %.0f" % [k.knock_healed, t_v.max_hp])
+			k.knock_healed >= minf(0.19 * t_v.max_hp, 0.9 * p_v.max_hp), "healed %.0f of %.0f" % [k.knock_healed,
+					t_v.max_hp])
 	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
 	a_x.step(m, 1.0)
 	t_v.downed = false
@@ -1135,7 +1138,7 @@ func combos(a) -> void:
 	var p_v: Hunter = r[1]
 	var t_v: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var lv: int = r[5]
+	var _lv: int = r[5]
 	var k: JuggernautKit = p_v.ak
 	var hook := func():
 		p_v.teleport(home)
@@ -1169,7 +1172,8 @@ func combos(a) -> void:
 	a_x.ok("combo jug: E > hold RMB = Chain Lunge (no stun)",
 			k.chain_lunges == 1 and k.warchain.state != "hooked" and a_x.dmg(t_v) - hp0 >= 18.0 and t_v.stun_t <= 0.0
 			and p_v.flat_dist(t_v) < 3.4,
-			"lunges %d dist %.1f took %.0f stun %.2f" % [k.chain_lunges, p_v.flat_dist(t_v), a_x.dmg(t_v) - hp0, t_v.stun_t])
+			"lunges %d dist %.1f took %.0f stun %.2f" % [k.chain_lunges, p_v.flat_dist(t_v), a_x.dmg(t_v) - hp0,
+					t_v.stun_t])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	a_x.step(m, 1.0)
 	hook.call()
@@ -1234,7 +1238,7 @@ func combos(a) -> void:
 	p_v = r[1]
 	t_v = r[2]
 	home = r[4]
-	lv = r[5]
+	_lv = r[5]
 	k = p_v.ak
 	# a Lunge that strikes nothing doubles the Smash cooldown
 	a_x.aim_at(p_v, home + Vector3(0, 0, 6.0))
@@ -1474,7 +1478,8 @@ func merge_holds() -> void:
 	KinMerge.cast(p_v)
 	a_x.step(m, 0.8)
 	a_x.ok("merge hold dancer: the wound-up Bola is not thrown",
-			tk.bola_cast.is_empty() and tk.bola.is_empty() and not KitStatus.grounded(t_v) and not AimKit.shown(p_v, "rmb"))
+			tk.bola_cast.is_empty() and tk.bola.is_empty() and not KitStatus.grounded(t_v) and not AimKit.shown(p_v,
+					"rmb"))
 	await a_x.done(m)
 	# ---- Juggernaut: a Meteor Drop diving when a merge starts doesn't land
 	r = a_x.setup("juggernaut", 4.0, "cindle")
@@ -1689,7 +1694,8 @@ func _spin_timing(m: Match, p_v: Hunter, k: JuggernautKit, hook: Callable) -> vo
 	k.slam_w = {}
 	var spins1 := k.spins
 	a_x.tap(m, p_v)
-	a_x.ok("jug spin timing: RMB on the hooked chain (no pull) = the Slam", not k.slam_w.is_empty() and k.spins == spins1)
+	a_x.ok("jug spin timing: RMB on the hooked chain (no pull) = the Slam", not k.slam_w.is_empty()
+			and k.spins == spins1)
 	a_x.step(m, 1.0)
 	k.warchain.snap()
 	k.ch_rmb = 1.0

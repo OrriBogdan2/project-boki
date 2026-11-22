@@ -56,8 +56,8 @@ static func rival(rec: Dictionary) -> Dictionary:
 
 
 ## The rival's finish time over a lap of `lap` m.
-static func rival_time(foe: Dictionary, lap: float) -> float:
-	return lap / pace(foe) + float(rules()["rival_misses"]) * float(rules()["miss_s"])
+static func rival_time(foe_v: Dictionary, lap: float) -> float:
+	return lap / pace(foe_v) + float(rules()["rival_misses"]) * float(rules()["miss_s"])
 
 
 ## One lap: the kite's place on the loop and across it, stepped in time.
@@ -167,22 +167,22 @@ class Run:
 ## Pays out a finished lap: energy, joy, gems, the race against `foe` (prizes and cup through
 ## GardenPrizes) and garden XP. Returns what the card shows.
 static func settle(
-	run: Run, rec: Dictionary, foe: Dictionary, now := -1.0, rng: RandomNumberGenerator = null
+	run_v: Run, rec: Dictionary, foe_v: Dictionary, now := -1.0, rng: RandomNumberGenerator = null
 ) -> Dictionary:
 	var r := rules()
 	Care.change(rec, "energy", -float(r["energy"]))
 	Care.change(rec, "joy", float(r["joy"]))
-	var gems := int(r["gems_clean"]) if run.misses == 0 else int(r["gems"])
+	var gems := int(r["gems_clean"]) if run_v.misses == 0 else int(r["gems"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
-	var foe_t := rival_time(foe, run.lap)
-	var won := run.time() <= foe_t
-	var prize := GardenPrizes.settle("kite", rec, foe, won, now, rng)
+	var foe_t := rival_time(foe_v, run_v.lap)
+	var won := run_v.time() <= foe_t
+	var prize := GardenPrizes.settle("kite", rec, foe_v, won, now, rng)
 	var xp := GardenXp.reward(won, prize["first"])  # (settle paid it)
 	return {
 		"rec": rec,
-		"time": run.time(),
-		"hits": run.hits,
-		"misses": run.misses,
+		"time": run_v.time(),
+		"hits": run_v.hits,
+		"misses": run_v.misses,
 		"gems": gems,
 		"won": won,
 		"rival_time": foe_t,

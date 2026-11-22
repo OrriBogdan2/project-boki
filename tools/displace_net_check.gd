@@ -555,7 +555,8 @@ func _say() -> void:
 	if m and m.player:
 		var p_v := m.player
 		Net.lobby_emit("dn_r", {
-			"pos": [p_v.pos.x, p_v.pos.y, p_v.pos.z], "hp": p_v.hp, "stun_max": stun_max, "burn": p_v.burn_t, "slow_k": p_v.slow_k,
+			"pos": [p_v.pos.x, p_v.pos.y,
+					p_v.pos.z], "hp": p_v.hp, "stun_max": stun_max, "burn": p_v.burn_t, "slow_k": p_v.slow_k,
 			"air": 0.0 if p_v.grounded else 1.0, "vx": p_v.vel.x, "vy": p_v.vel.y, "shot": p_v.shot_down,
 			"chan": _chan(p_v)})
 

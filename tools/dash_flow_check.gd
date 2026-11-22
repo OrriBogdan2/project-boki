@@ -161,10 +161,9 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 		var want := String(DashFlow.row_of(hero, slot, in_air)["mode"])
 		var owned: bool = ("air" if in_air else "ground") in DashFlow.file_of(hero).get("kit_owns", [])
 		for late in [false, true]:
-			var what := (
-				"%s %s dash -> %s, pressed %s"
-				% [hero, "air" if in_air else "ground", slot, "on its last step" if late else "early"]
-			)
+			var sky := "air" if in_air else "ground"
+			var stage := "on its last step" if late else "early"
+			var what := "%s %s dash -> %s, pressed %s" % [hero, sky, slot, stage]
 			var got := _trial(m, slot, in_air, late)
 			if owned or got == "n/a":
 				ok(owned == (got == "n/a"), "%s: %s, kit_owns %s" % [what, got, "lists it" if owned else "doesn't"])

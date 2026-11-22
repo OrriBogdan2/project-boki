@@ -364,7 +364,7 @@ func _raid_rows() -> void:
 	rm.set_process(false)
 	var rd: HeartRaid = rm.heart_raid
 	rd.audio.update()  # (the first look only notes the state)
-	var run := func(n: int):
+	var run_v := func(n: int):
 		for i in n:
 			rm.step(Match.DT)
 	var ticks := _cues_of(
@@ -372,7 +372,7 @@ func _raid_rows() -> void:
 			rd.next_wave_t = rm.sess_time() + float(RaidSfx.TICK_S) - 0.5
 			rd.gates.mark(0, rd.next_wave_t)
 			rd.gates.show_marks()
-			run.call(int(0.6 / Match.DT))
+			run_v.call(int(0.6 / Match.DT))
 	)
 	var n_ticks := ticks.count("raid_gate_tick")
 	var gates_n := rd.gates.marks.size()

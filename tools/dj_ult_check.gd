@@ -747,7 +747,8 @@ func _recovery_exits() -> void:
 				plain = int(got["still"]) == int(control["still"]) and _near(got["reach"], control["reach"])
 			var info := "phase %s, moved on frame %d, left %s, still %d (control %d)" % [got["phase"], got["moved"],
 					got["left"], got["still"], control["still"]]
-			a_x.ok("juggernaut X recovery: %s on frame %d of %d goes that frame, no stop, no 50%% cap" % [key, frame, n],
+			a_x.ok("juggernaut X recovery: %s on frame %d of %d goes that frame, no stop, no 50%% cap" % [key, frame,
+					n],
 					same and plain, info + ", reach %.2f (%.2f), top %.2f (%.2f)" % [got["reach"], control["reach"],
 							got["top"], control["top"]])
 

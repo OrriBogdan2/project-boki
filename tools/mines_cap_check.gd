@@ -20,8 +20,8 @@ func _mc(name: String, ok: bool, info := "") -> void:
 ## Live traps per caster right now: caster -> count.
 func _mc_live(m: Match) -> Dictionary:
 	var out := {}
-	for tr in m.verbs.traps:
-		out[tr["caster"]] = int(out.get(tr["caster"], 0)) + 1
+	for trap in m.verbs.traps:
+		out[trap["caster"]] = int(out.get(trap["caster"], 0)) + 1
 	return out
 
 

@@ -24,7 +24,7 @@ func run(main_node: Node) -> void:
 			mb.queue_free()
 		mm.mobs.clear()
 		return mm
-	var run := func(mm: Match, sec: float, every := Callable()):
+	var run_v := func(mm: Match, sec: float, every := Callable()):
 		var t := 0.0
 		while t < sec and not mm.over:
 			if every.is_valid():
@@ -56,20 +56,20 @@ func run(main_node: Node) -> void:
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	p.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
-	run.call(m, 2.0, func(): p.inp["interact"] = true)
+	run_v.call(m, 2.0, func(): p.inp["interact"] = true)
 	p.inp["interact"] = false
 	p.set_meta("pin", o["pos"] + Vector3(0.6, 0, 0.6))
 	print("EXCHECK uplink: state=%s team=%d" % [o["state"], int(o["team"])])
 	if o["state"] != "charging":
 		ok = false
 		print("EXCHECK FAIL uplink didn't start")
-	run.call(m, 8.0, calm.bind(m))
+	run_v.call(m, 8.0, calm.bind(m))
 	var p1 := float(o["prog"])
 	r.teleport(o["pos"] + Vector3(-1.6, 0, 1.0))
 	r.set_meta("pin", r.pos)
-	run.call(m, 1.0, calm.bind(m))
+	run_v.call(m, 1.0, calm.bind(m))
 	var pa := float(o["prog"])
-	run.call(m, 3.0, calm.bind(m))
+	run_v.call(m, 3.0, calm.bind(m))
 	var pb := float(o["prog"])
 	print(
 		(
@@ -84,7 +84,7 @@ func run(main_node: Node) -> void:
 	r.teleport(m.world.random_ground())
 	var t0 := m.time
 	while o["state"] == "charging" and m.time - t0 < 60.0:
-		run.call(m, 0.5, calm.bind(m))
+		run_v.call(m, 0.5, calm.bind(m))
 	print(
 		(
 			"EXCHECK uplink: state=%s after %.0fs more, waves=%d prog=%.2f contested=%s player in yard=%s (%.1fm) downed=%s"
@@ -107,7 +107,7 @@ func run(main_node: Node) -> void:
 		print("EXCHECK FAIL uplink never completed (or no waves)")
 	p.remove_meta("pin")
 	p.teleport(o["pos"] + Vector3(0.4, 0, 0.3))
-	run.call(m, 0.3)
+	run_v.call(m, 0.3)
 	print(
 		(
 			"EXCHECK uplink: player extracted=%s how=%s where=%s"
@@ -133,7 +133,7 @@ func run(main_node: Node) -> void:
 		h.set_meta("pin", h.pos)
 	p.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
 	p.set_meta("pin", p.pos)
-	run.call(m, 2.0, func(): p.inp["interact"] = true)
+	run_v.call(m, 2.0, func(): p.inp["interact"] = true)
 	p.inp["interact"] = false
 	var rates: Array = []
 	for n in [1, 2, 3]:
@@ -142,9 +142,9 @@ func run(main_node: Node) -> void:
 			var at: Vector3 = o["pos"] + Vector3(cos(i * 2.1), 0, sin(i * 2.1)) * 1.2
 			h.teleport(at)
 			h.set_meta("pin", at)
-		run.call(m, 0.2, calm.bind(m))
+		run_v.call(m, 0.2, calm.bind(m))
 		var q0 := float(o["prog"])
-		run.call(m, 2.0, calm.bind(m))
+		run_v.call(m, 2.0, calm.bind(m))
 		rates.append((float(o["prog"]) - q0) / 2.0 * m.exits.uplink_time(o))
 	var crew_ok: bool = (
 		absf(float(rates[0]) - 1.0) < 0.05 and absf(float(rates[1]) - 1.5) < 0.05 and absf(float(rates[2]) - 1.8) < 0.05
@@ -160,9 +160,9 @@ func run(main_node: Node) -> void:
 		print("EXCHECK FAIL uplink crew rates")
 	r.teleport(o["pos"] + Vector3(-1.6, 0, 1.0))
 	r.set_meta("pin", r.pos)
-	run.call(m, 0.2, calm.bind(m))
+	run_v.call(m, 0.2, calm.bind(m))
 	var qc0 := float(o["prog"])
-	run.call(m, 2.0, calm.bind(m))
+	run_v.call(m, 2.0, calm.bind(m))
 	print(
 		(
 			"EXCHECK uplink crew: three of you and one rival in the yard: contested=%s %d%% -> %d%%"
@@ -215,7 +215,7 @@ func run(main_node: Node) -> void:
 	var tyb := 0.0
 	seed(2024)  # the bot's random choices should not depend on how many rolls the map and loot took
 	while tyb < 16.0:
-		run.call(m, 0.25, calm.bind(m))
+		run_v.call(m, 0.25, calm.bind(m))
 		tyb += 0.25
 		if m.exits.in_yard(o, yb):
 			yb_in += 0.25
@@ -257,9 +257,9 @@ func run(main_node: Node) -> void:
 	)
 	p.set_meta("pin", p.pos)
 	o["prog"] = 0.5
-	run.call(m, 0.2, calm.bind(m))
+	run_v.call(m, 0.2, calm.bind(m))
 	var d0 := float(o["prog"])
-	run.call(m, 3.0, calm.bind(m))
+	run_v.call(m, 3.0, calm.bind(m))
 	var d1 := float(o["prog"])
 	var ust: Dictionary = m.exits.status_for(p)
 	var drain_rate := (d0 - d1) / 3.0 * Exits.UPLINK_DECAY_T
@@ -279,7 +279,7 @@ func run(main_node: Node) -> void:
 	# back in the yard it charges again
 	p.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
 	p.set_meta("pin", p.pos)
-	run.call(m, 1.0, calm.bind(m))
+	run_v.call(m, 1.0, calm.bind(m))
 	var d2 := float(o["prog"])
 	if o.get("draining", false) or d2 <= d1:
 		ok = false
@@ -296,7 +296,7 @@ func run(main_node: Node) -> void:
 	var seen_fizz := false
 	var tf := 0.0
 	while tf < Exits.UPLINK_DECAY_T + Exits.FIZZLE_T + 2.0 and String(o["state"]) != "spent":
-		run.call(m, 0.25, calm.bind(m))
+		run_v.call(m, 0.25, calm.bind(m))
 		tf += 0.25
 		if String(o["state"]) == "fizzling":
 			seen_fizz = true
@@ -319,7 +319,7 @@ func run(main_node: Node) -> void:
 	if not seen_fizz or String(o["state"]) != "spent" or int(o["team"]) != -1:
 		ok = false
 		print("EXCHECK FAIL uplink fizzle")
-	run.call(m, Exits.FIZZLE_CD + 0.5, calm.bind(m))
+	run_v.call(m, Exits.FIZZLE_CD + 0.5, calm.bind(m))
 	print("EXCHECK uplink decay: after the cooldown it's %s, startable %s" % [o["state"], m.exits.startable(o)])
 	if String(o["state"]) != "idle" or not m.exits.startable(o):
 		ok = false
@@ -327,7 +327,7 @@ func run(main_node: Node) -> void:
 	done.call(m)
 	await main.get_tree().process_frame
 	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
-	if not await load("res://tools/uplink_seat_check.gd").new().check(main, fresh, run, done):
+	if not await load("res://tools/uplink_seat_check.gd").new().check(main, fresh, run_v, done):
 		ok = false
 	print("EXCHECK ", "PASS" if ok else "FAIL")
 	main.get_tree().quit()

@@ -137,7 +137,7 @@ func _world() -> void:
 	_kinds_and_life(p, mate, foe, spot)
 
 ## 4. colours by kind, the cap, the enemy ping following its hunter and expiring, Alt+click, the Net round trip.
-func _kinds_and_life(p: Hunter, _mate: Hunter, foe: Hunter, spot: Vector3) -> void:
+func _kinds_and_life(p: Hunter, _mate_v: Hunter, foe: Hunter, spot: Vector3) -> void:
 	m.pings.clear()
 	foe.teleport(spot)
 	m.squad_ping(p, p.pos, false, "loot")

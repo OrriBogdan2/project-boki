@@ -33,11 +33,11 @@ func run(main: Node) -> void:
 		if roomy:
 			home = g
 			break
-	var far := home + Vector3(0, 0, 0)
+	var _far := home + Vector3(0, 0, 0)
 	var spot := func(h: Hunter, at: Vector3):
 		h.teleport(at)
 		h.vel = Vector3.ZERO
-	var run := func(sec: float):
+	var run_v := func(sec: float):
 		var t := 0.0
 		while t < sec:
 			m.step(Match.DT)
@@ -59,7 +59,7 @@ func run(main: Node) -> void:
 	m.knock(b, foe, {})
 	var t0 := m.time
 	while b.downed and m.time - t0 < 10.0:
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	print("LCHECK ally revive: back=%s after %.1fs hp %.0f%%" % [not b.downed, m.time - t0, b.hp / b.max_hp * 100.0])
 	# 2. bleed out alone (with the kin knocked out, so it can't pull them up)
 	for kk in [b.kin, b.kin2]:
@@ -72,7 +72,7 @@ func run(main: Node) -> void:
 	t0 = m.time
 	print("LCHECK  knocked: downed=%s hp=%s" % [b.downed, b.down_hp])
 	while not b.out and m.time - t0 < 30.0:
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 		if int((m.time - t0) * 60.0) % 120 == 0:
 			print(
 				(
@@ -98,12 +98,12 @@ func run(main: Node) -> void:
 	spot.call(foe, b.pos)
 	m.knock(b, foe, {})
 	t0 = m.time
-	run.call(Match.DT)
-	run.call(Match.DT)
+	run_v.call(Match.DT)
+	run_v.call(Match.DT)
 	var pinned: bool = b.get_meta("stomped", false)
 	var stood: bool = foe.get_meta("standing_on", null) == b
 	while not b.out and m.time - t0 < 30.0:
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	print(
 		(
 			"LCHECK stomp: dead=%s after %.1fs (expect ~%.1fs at %.1fx) pinned=%s stomper flagged=%s slow=%.2f"
@@ -124,7 +124,7 @@ func run(main: Node) -> void:
 	spot.call(c, bc["pos"])
 	t0 = m.time
 	while b.out and m.time - t0 < 12.0:
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	print(
 		(
 			"LCHECK beacon: back=%s after %.1fs hp %.0f%% sick %.1fs used=%s"
@@ -143,7 +143,7 @@ func run(main: Node) -> void:
 	t0 = m.time
 	while not b.out and m.time - t0 < 10.0:
 		foe.inp["interact"] = true
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	print("LCHECK execute: dead=%s after %.1fs (stomp drains too)" % [b.out, m.time - t0])
 	# 6b. a committed stomp can't be cancelled by its owner, but a knockback breaks it
 	var w2: Hunter = c
@@ -156,15 +156,15 @@ func run(main: Node) -> void:
 	t0 = m.time
 	while foe.stomp.is_empty() and m.time - t0 < 2.0:
 		foe.inp["interact"] = true
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	var committed := not foe.stomp.is_empty()
 	for i in 30:
 		foe.inp["interact"] = false  # letting go does nothing once committed
 		foe.inp["move"] = Vector2(1, 0)
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	var still := not foe.stomp.is_empty()
 	foe.kb_t = m.time
-	run.call(Match.DT)
+	run_v.call(Match.DT)
 	print(
 		(
 			"LCHECK stomp lock: committed=%s still after letting go=%s broken by knock=%s wisp alive=%s"
@@ -189,7 +189,7 @@ func run(main: Node) -> void:
 	t0 = m.time
 	while not ab["empty"] and m.time - t0 < 4.0:
 		foe.inp["interact"] = true
-		run.call(Match.DT)
+		run_v.call(Match.DT)
 	print("LCHECK hollow loot: foe caught=%d guard still dazed=%s" % [foe.caught.size(), KinLoss.guarding(a.kin)])
 	# 8. Meadow: kin stay safe (hidden) on death and come back on revive
 	m.tier = 0

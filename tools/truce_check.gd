@@ -63,7 +63,7 @@ func run(main_node: Node) -> void:
 					h.hp = minf(h.hp, h.max_hp * 0.2)
 					h.armor = 0.0
 					h.tonics = 0  # squad A stays hurt
-	var run := func(sec: float):
+	var run_v := func(sec: float):
 		var t := 0.0
 		while t < sec:
 			hold.call()
@@ -92,7 +92,7 @@ func run(main_node: Node) -> void:
 	if t_v.would_accept(1, 0) >= t_v.would_accept(0, 1):
 		ok = false
 		print("TCHECK FAIL the stronger squad should be less keen")
-	run.call(2.0)
+	run_v.call(2.0)
 	var before: int = cross.call()
 	print("TCHECK before any truce: %d hunters targeting the other squad" % before)
 	if before == 0:
@@ -101,13 +101,13 @@ func run(main_node: Node) -> void:
 	# the weak squad should raise the flag by itself within a while
 	var t0 := m.time
 	while not t_v.events.any(func(e): return String(e).begins_with("offer 0->1")) and m.time - t0 < 40.0:
-		run.call(0.25)
+		run_v.call(0.25)
 	var offered: bool = t_v.events.any(func(e): return String(e).begins_with("offer 0->1"))
 	print("TCHECK weak squad offered a truce: %s after %.1fs" % [offered, m.time - t0])
 	if not offered:
 		ok = false
 		print("TCHECK FAIL no offer")
-	run.call(3.5)
+	run_v.call(3.5)
 	var answered := (
 		"accepted"
 		if t_v.allied(0, 1)
@@ -125,14 +125,14 @@ func run(main_node: Node) -> void:
 		print("TCHECK (making the truce by hand for the rest of the check)")
 		for h in m.hunters:
 			h.ctrl = "idle"  # (a swing under way would land on the new partner and break the truce)
-		run.call(1.0)
+		run_v.call(1.0)
 		for h in m.hunters:
 			h.ctrl = "bot"
 		t_v.make(0, 1)
 	for h in m.hunters:
 		h.ai.erase("betray_at")
 		h.ai.erase("betray")
-	run.call(3.0)
+	run_v.call(3.0)
 	var during: int = cross.call()
 	print("TCHECK during the truce: %d hunters targeting the other squad" % during)
 	if during != 0:
@@ -144,7 +144,7 @@ func run(main_node: Node) -> void:
 	victim.inv_t = 0.0
 	victim.hurt(20.0, traitor, {"src": "shot"})
 	var announced: bool = t_v.events.any(func(f): return String(f).contains("broke the truce"))
-	run.call(0.6)
+	run_v.call(0.6)
 	var hits_back: int = a.filter(func(x): return x.ai.get("tgt") == traitor).size()
 	print(
 		(
@@ -168,7 +168,7 @@ func run(main_node: Node) -> void:
 	for h in [a[1], b[1]]:
 		spots[h] = m.world.free_spot_near(spots[h], [], 1.0, 0.5, 20.0)
 	var p0 := float(o["prog"])
-	run.call(3.0)
+	run_v.call(3.0)
 	var p1 := float(o["prog"])
 	print(
 		(
@@ -180,9 +180,9 @@ func run(main_node: Node) -> void:
 		ok = false
 		print("TCHECK FAIL partner contested the uplink")
 	t_v.end("0:1", "")
-	run.call(1.0)
+	run_v.call(1.0)
 	var p2 := float(o["prog"])
-	run.call(2.0)
+	run_v.call(2.0)
 	print(
 		(
 			"TCHECK without the truce: contested=%s %d%% -> %d%%"

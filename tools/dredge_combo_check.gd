@@ -204,11 +204,11 @@ func _slam_tell() -> void:
 	ak.step(m, 0.1)
 	v._process(0.1)
 	var fists: Array = v.pools.get("fist", [])
-	var up := fists.any(func(n: Node3D) -> bool: return n.visible)
+	var up := fists.any(func(n_v: Node3D) -> bool: return n_v.visible)
 	p.stun_t = 0.6
 	ak.step(m, 0.05)
 	v._process(0.05)
-	var left := fists.any(func(n: Node3D) -> bool: return n.visible)
+	var left := fists.any(func(n_v: Node3D) -> bool: return n_v.visible)
 	ok(
 		"anchor tell: a stun in the wind-up takes the outline and the falling fist away, no slam",
 		up and not left and not AimKit.shown(p, "e_tell") and k.anchors == 1,

@@ -103,7 +103,7 @@ static func mats(hero_col: Color, team_col: Color, lk: Dictionary) -> Dictionary
 ## cw, fem, rid, bare, arch, hero_col, m) plus what the body reads: cls, um, look (the appearance), lk, team_col,
 ## legs. Adds "gear" and "hk" to it.
 static func dress(c: Dictionary) -> void:
-	var m: Dictionary = c["m"]
+	var _m: Dictionary = c["m"]
 	var torso: Node3D = c["torso"]
 	var arch: String = c["arch"]
 	var heavy_gear := arch in ["juggernaut", "bulwark", "dredge", "ashwick"]

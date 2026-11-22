@@ -250,12 +250,12 @@ func _nuke(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 			absf(float(r["hit"]) - GunslingerUlt.FIRE_T) <= DT * 1.5 and absf(float(r["len"]) - 0.6) < CLIP_TOL
 			and float(r["out"]) > 0.6 and float(r["out"]) < 0.6 + _back(p, "gunslinger_x"),
 			"hit %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]])
-	var run := p.base_speed
+	var run_v := p.base_speed
 	c_v.ok("Vex timing R: walking through the wind-up the legs walk, slowed but never stopped",
-			_legs_walk(walk) and float(walk.get("speed", 0.0)) < run * 0.8,
-			_walk_line("at 0.2", walk) + " (run %.1f)" % run)
+			_legs_walk(walk) and float(walk.get("speed", 0.0)) < run_v * 0.8,
+			_walk_line("at 0.2", walk) + " (run %.1f)" % run_v)
 	c_v.ok("Vex timing R: after the 0.25 s wind-up she runs at full speed",
-			float(rec.get("free", 0.0)) > run * 0.9, "%.2f m/s (run %.1f)" % [rec.get("free", 0.0), run])
+			float(rec.get("free", 0.0)) > run_v * 0.9, "%.2f m/s (run %.1f)" % [rec.get("free", 0.0), run_v])
 	_settle(m, p, home, 2.0)
 	k.ult.shells.clear()
 	k.x_wind_end = 0.0
@@ -266,7 +266,8 @@ func _nuke(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	p.inp["jump"] = true
 	_frame(m, p)
 	p.inp["jump"] = false
-	c_v.ok("Vex timing R: a jump in the wind-up goes at once", p.jump_at >= j0, "jump_at %.2f t0 %.2f" % [p.jump_at, j0])
+	c_v.ok("Vex timing R: a jump in the wind-up goes at once", p.jump_at >= j0,
+			"jump_at %.2f t0 %.2f" % [p.jump_at, j0])
 	_settle(m, p, home, 2.0)
 	k.ult.shells.clear()
 

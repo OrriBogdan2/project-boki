@@ -146,7 +146,7 @@ func run(main_node: Node) -> void:
 		"wall hp %.0f -> %.0f, player hp %.0f -> %.0f" % [whp, whp2, php, p.hp]
 	)
 	# a barrier stops bodies too: walk the target into it
-	var tx0 := t.pos.x
+	var _tx0 := t.pos.x
 	_ac_run(m, 1.2, func(): t.inp["move"] = Vector2(-1, 0))
 	_ac("wall blocks movement", t.pos.x > p.pos.x + 2.4, "target x %.1f (wall at %.1f)" % [t.pos.x - p.pos.x, 2.5])
 	m.queue_free()

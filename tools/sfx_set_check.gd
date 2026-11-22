@@ -1215,17 +1215,17 @@ func _held_fire(main: Node) -> void:
 		await main.get_tree().create_timer(1.0).timeout
 		var after: Dictionary = await _hold(main, sname, true)
 		var takes: Array = after["takes"]
-		var run := takes.slice(1)
+		var run_v := takes.slice(1)
 		var repeats := 0
-		for i in range(1, run.size()):
-			repeats += 1 if run[i] == run[i - 1] else 0
+		for i in range(1, run_v.size()):
+			repeats += 1 if run_v[i] == run_v[i - 1] else 0
 		var shown := (
 			"%s (%s) %.0f s at %d ms: voices %d plain -> %d held, cap %d"
 			% [sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
 		)
 		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
-		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run.has(0)
-		var others := _distinct(run)
+		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run_v.has(0)
+		var others := _distinct(run_v)
 		var want_others := mini(3, Sfx.take_count(sname) - 1)  # a gun with 3 recorded takes rotates its 2 others
 		ok(
 			opens and repeats == 0 and others >= want_others,
@@ -1651,7 +1651,10 @@ func _field_book(main: Node) -> void:
 	ok(
 		pointed and picked and opened and went_back,
 		(
-			"field book: a tile sounds pointed at (%s) and picked (%s), its page opens (%s), Back sounds and returns (%s)"
+			(
+				"field book: a tile sounds pointed at (%s) and picked (%s), "
+				+ "its page opens (%s), Back sounds and returns (%s)"
+			)
 			% [pointed, picked, opened, went_back]
 		)
 	)
@@ -1811,8 +1814,11 @@ func _voices() -> void:
 func _boki_impacts() -> void:
 	var r := BokiImpact.rules()
 	var types: Dictionary = r.get("types", {})
-	var bad := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
-	ok(types.size() == 19 and bad.is_empty(), "each of the 19 types has impact ki_<type> on its cast set %s" % [bad])
+	var bad_v := KinLib.TYPES.filter(func(t): return not _impact_ok(types, t))
+	ok(
+		types.size() == 19 and bad_v.is_empty(),
+		"each of the 19 types has impact ki_<type> on its cast set %s" % [bad_v]
+	)
 	var gone := KinLib.kin_ids().filter(func(id): return BokiImpact.cue_of(_type_of(id)) == "")
 	ok(gone.is_empty(), "every Boki species resolves to an impact %s" % str(gone))
 	ok(BokiImpact.cue_of("no_such_type") == "ki_normal", "an unknown type takes the default impact")

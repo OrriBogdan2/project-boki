@@ -139,8 +139,8 @@ func _init(match_node: Match) -> void:
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
-func stop(id: String, key := "at") -> Vector3:
-	var s: Dictionary = _course.get(id, {})
+func stop(id_v: String, key := "at") -> Vector3:
+	var s: Dictionary = _course.get(id_v, {})
 	if not s.has(key):
 		return Vector3.INF
 	var q: Array = s[key]
@@ -149,8 +149,8 @@ func stop(id: String, key := "at") -> Vector3:
 
 ## Where a camp's i-th monster stands (the course table's "foes": open ground, clear of every cliff), INF when
 ## the camp has no fixed posts.
-func foe_spot(id: String, i: int) -> Vector3:
-	var posts: Array = _course.get(id, {}).get("foes", [])
+func foe_spot(id_v: String, i: int) -> Vector3:
+	var posts: Array = _course.get(id_v, {}).get("foes", [])
 	if i >= posts.size():
 		return Vector3.INF
 	var q: Array = posts[i]
@@ -159,16 +159,16 @@ func foe_spot(id: String, i: int) -> Vector3:
 
 ## The pads and their glowing edges: built once the world is there.
 func setup() -> void:
-	for id in GAP_STEPS:
-		_add_pad(id)
+	for id_v in GAP_STEPS:
+		_add_pad(id_v)
 	last_stop = stop("land")
 	if NpcModel.has("pell"):
 		pell = TutorialPell.new(self)
 
 
-func _add_pad(id: String) -> void:
-	var pad := stop(id, "pad")
-	var to := stop(id)
+func _add_pad(id_v: String) -> void:
+	var pad := stop(id_v, "pad")
+	var to := stop(id_v)
 	if pad == Vector3.INF:
 		return
 	var mat := StandardMaterial3D.new()
@@ -197,7 +197,7 @@ func _add_pad(id: String) -> void:
 	bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(bar)
 	var lab := Label3D.new()
-	lab.text = {"dash": "DASH HERE", "exdash": "JUMP HERE", "glide": "JUMP HERE"}[id]
+	lab.text = {"dash": "DASH HERE", "exdash": "JUMP HERE", "glide": "JUMP HERE"}[id_v]
 	lab.font_size = 96
 	lab.pixel_size = 0.012
 	lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -205,7 +205,7 @@ func _add_pad(id: String) -> void:
 	lab.no_depth_test = true
 	lab.position = pad + Vector3(0, SIGN_RISE, 0)
 	m.add_child(lab)
-	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab, "text": lab.text})
+	_pads.append({"id": id_v, "disc": disc, "bar": bar, "label": lab, "text": lab.text})
 
 
 ## The sign over a gap step's pad (null for a step without one).

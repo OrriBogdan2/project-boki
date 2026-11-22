@@ -131,10 +131,10 @@ func _beats(v: Array[float], length: float, _pts: Array[Vector3]) -> Dictionary:
 		ic -= 1
 	var quiet := maxf(0.15 * vmax, 0.5)
 	var is_v := v.size()
-	var run := 0
+	var run_v := 0
 	for i in range(ip, v.size()):
-		run = run + 1 if v[i] < quiet else 0
-		if run >= 6:
+		run_v = run_v + 1 if v[i] < quiet else 0
+		if run_v >= 6:
 			is_v = i - 5
 			break
 	var bar := ""

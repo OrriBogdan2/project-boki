@@ -906,10 +906,12 @@ func _locomotion(secs: float) -> void:
 	pl.teleport(_loco_start(pl.pos))
 	_zoom(fight_zoom)
 	var sk := WardenGlb.skeleton(pl.model.get_node_or_null("Warden"))
-	var log := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
+	var log_v := FileAccess.open(dir.path_join("loco_%s.tsv" % loco_id), FileAccess.WRITE)
 	# (aL aR: the ankles now, a0L a0R: at rest, in the body's own frame: _ankle; hL hR: the foot bones' height in the
 	# model's frame, the camera lean taken out: the strafe drift in FOOT_SLIDE.md)
-	log.store_line("t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy\taL\taR\ta0L\ta0R\thL\thR")
+	log_v.store_line(
+		"t\tlabel\tpx\tpz\tvx\tvz\tfLx\tfLy\tfLz\tfRx\tfRy\tfRz\tpy\thy\tkLy\tkRy\taL\taR\ta0L\ta0R\thL\thR"
+	)
 	var rest := [_ankle(sk, "L", true), _ankle(sk, "R", true)]
 	_mark("start")
 	await _go(
@@ -932,7 +934,7 @@ func _locomotion(secs: float) -> void:
 			var knee_l := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.L")).origin
 			var knee_r := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "shin.R")).origin
 			var cols := "%.4f\t%s" + "\t%.4f".repeat(20)
-			log.store_line(
+			log_v.store_line(
 				(
 					cols
 					% [
@@ -964,7 +966,7 @@ func _locomotion(secs: float) -> void:
 		func(_t: float): return pl.render_pos(1.0),
 		true
 	)
-	log.close()
+	log_v.close()
 
 
 ## A leg's ankle height (m) in the body's own frame, its feet's floor at 0 (the Hunters lean back toward the camera,

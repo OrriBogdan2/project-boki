@@ -164,11 +164,11 @@ func _ult_on_press(m: Match, p: Hunter, t_v: Hunter, k: ArcherKit, home: Vector3
 
 # ------------------------------------------------------------------ 20: the perfect window
 func _perfect_window(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
-	var lace: Dictionary = Loco.T["lace"]
+	var lace_v: Dictionary = Loco.T["lace"]
 	var pt := k.draw.perfect_t()
 	ok(
 		"20 window: the perfect window is tuning.json lace.perfect_window_s, about 0.2 s longer than 0.15",
-		is_equal_approx(pt, float(lace["perfect_window_s"])) and pt >= 0.3 and pt <= 0.45,
+		is_equal_approx(pt, float(lace_v["perfect_window_s"])) and pt >= 0.3 and pt <= 0.45,
 		"%.2f s" % pt
 	)
 	var s1 := k.draw.stage_t().x
@@ -197,8 +197,8 @@ func _perfect_window(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
 		"20 glow: inside the window her body and bow carry the gold rim glow",
 		(
 			k.draw.glow_on
-			and is_equal_approx(float(rim_on), float(lace["perfect_glow_rim"]))
-			and col_on.is_equal_approx(Color(String(lace["perfect_glow_col"])))
+			and is_equal_approx(float(rim_on), float(lace_v["perfect_glow_rim"]))
+			and col_on.is_equal_approx(Color(String(lace_v["perfect_glow_col"])))
 		),
 		"glow %s rim %s col %s" % [k.draw.glow_on, str(rim_on), str(col_on)]
 	)
@@ -227,11 +227,11 @@ func _perfect_window(m: Match, p: Hunter, t: Hunter, k: ArcherKit) -> void:
 		(
 			k.perfects == pf0 + 1
 			and k.draw.payoff_t > 0.0
-			and is_equal_approx(float(rim_pay), float(lace["perfect_payoff_rim"]))
+			and is_equal_approx(float(rim_pay), float(lace_v["perfect_payoff_rim"]))
 		),
 		"perfects +%d payoff_t %.2f rim %s" % [k.perfects - pf0, k.draw.payoff_t, str(rim_pay)]
 	)
-	step(m, float(lace["perfect_payoff_s"]) + 0.05)
+	step(m, float(lace_v["perfect_payoff_s"]) + 0.05)
 	ok(
 		"20 payoff: the pulse is over and the materials are back",
 		k.draw.payoff_t <= 0.0 and not k.draw.glow_on and body.get_shader_parameter("rim_amount") == rim0,

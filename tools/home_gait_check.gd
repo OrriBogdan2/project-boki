@@ -88,7 +88,10 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	print(
 		(
 			(
-				"GAIT %-14s hip %.2f m | walk slide %.1f cm %.1f steps/s | run slide %.1f cm %.1f steps/s bob %.1f cm | "
+				(
+					"GAIT %-14s hip %.2f m | walk slide %.1f cm %.1f steps/s | "
+					+ "run slide %.1f cm %.1f steps/s bob %.1f cm | "
+				)
 				% [
 					id,
 					row["hip_m"],

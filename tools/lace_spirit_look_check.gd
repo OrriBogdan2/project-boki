@@ -27,7 +27,7 @@ func walk() -> void:
 	var rec: Dictionary = HeroVfx.data("archer")["moves"]["spirit_portal"]
 	var far := home + Vector3(0, 0, -4)
 	v.net_in(["fx", "hvfx", p.nid, "spirit_portal", far.x, far.y, far.z, 1.0, 0.0, 0.0, 0.0, 0.0])
-	var there := _portals(v).filter(func(n: Node3D): return absf(n.global_position.z - far.z) < 0.1)
+	var there := _portals(v).filter(func(n_v: Node3D): return absf(n_v.global_position.z - far.z) < 0.1)
 	ok(
 		"pin look: the portal goes to every game (hvfx, net on) and opens there",
 		bool(rec.get("net", true)) and there.size() == 1,
@@ -66,7 +66,7 @@ func _through(m: Match, p: Hunter, home: Vector3, bx: int) -> void:
 		if k.spirit.inside:
 			inside_tint = k.fx.tint_want
 		if was_in and not k.spirit.inside:
-			spots = _portals(v).map(func(n: Node3D): return snappedf(n.global_position.x - bx, 0.01))
+			spots = _portals(v).map(func(n_v: Node3D): return snappedf(n_v.global_position.x - bx, 0.01))
 	var lasted := float(m.time) - t0
 	var through := int(v.plays.get("spirit_portal", 0)) - opened
 	ok(
@@ -111,7 +111,7 @@ func _ends_inside(m: Match, p: Hunter, home: Vector3, bx: int, lv: int) -> void:
 	var opened := int(v.plays.get("spirit_portal", 0))
 	var snaps := k.spirit.snap_backs
 	k.spirit.end("time")
-	var at_entry := _portals(v).filter(func(n: Node3D): return n.global_position.x < bx - 0.2)
+	var at_entry := _portals(v).filter(func(n_v: Node3D): return n_v.global_position.x < bx - 0.2)
 	var added := int(v.plays.get("spirit_portal", 0)) - opened
 	ok(
 		"pin look: ending inside the rock puts her back at the entry, a portal there",
@@ -156,7 +156,7 @@ func _dash_into(m: Match, p: Hunter, home: Vector3, inside: Vector3) -> void:
 
 ## The portal looks showing now.
 func _portals(v: HeroVfx) -> Array:
-	return (v.pools.get("portal", []) as Array).filter(func(n: Node3D): return n.visible)
+	return (v.pools.get("portal", []) as Array).filter(func(n_v: Node3D): return n_v.visible)
 
 
 ## True when a move's recipe has no burst kind (a flare, ring, ground disc, wall of flame or portal).

@@ -174,10 +174,10 @@ func _pose(lid: Vector3, k: float) -> void:
 		fwd = to.normalized()
 	right = fwd.cross(up)
 	var tl := lid + (-fwd * IN - right * SPREAD + up * ABOVE) * unit
-	var tr := lid + (-fwd * IN + right * SPREAD + up * ABOVE) * unit
+	var trap := lid + (-fwd * IN + right * SPREAD + up * ABOVE) * unit
 	_put("root", r)
 	if plan.is_empty():
-		plan = _plan(fwd, right, tl, tr, unit)
+		plan = _plan(fwd, right, tl, trap, unit)
 	r.origin += fwd * float(plan["step"])
 	_put("root", r)
 	var soles := [_sole("L"), _sole("R")]
@@ -192,7 +192,7 @@ func _pose(lid: Vector3, k: float) -> void:
 	var stir := Vector3(sin(t * TAU * RUMMAGE_HZ), 0.0, cos(t * TAU * RUMMAGE_HZ * 0.5)) * RUMMAGE * unit
 	for i in 2:
 		var sd: String = ["L", "R"][i]
-		var aim: Vector3 = [tl, tr][i] + (stir if i == 0 else -stir)
+		var aim: Vector3 = [tl, trap][i] + (stir if i == 0 else -stir)
 		var sh := _g("upper_arm." + sd).origin
 		var pole := sh + (right * (1.0 if sd == "R" else -1.0) - fwd * 0.4 - up * 0.3) * arm
 		_ik("upper_arm." + sd, "forearm." + sd, aim, pole, -1.0, -1.0, false)
@@ -204,7 +204,7 @@ func _pose(lid: Vector3, k: float) -> void:
 
 ## Step, drop and lean for this reach: the cheapest that brings both shoulders within reach of their hands' marks.
 ## Cheap is KNEES: toward 1 he sinks before he bends, toward 0 he bends before he sinks.
-func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) -> Dictionary:
+func _plan(fwd: Vector3, right: Vector3, tl: Vector3, trap: Vector3, unit: float) -> Dictionary:
 	var hips := _g("hips").origin
 	var sl := _g("upper_arm.L").origin - hips
 	var sr := _g("upper_arm.R").origin - hips
@@ -221,7 +221,7 @@ func _plan(fwd: Vector3, right: Vector3, tl: Vector3, tr: Vector3, unit: float) 
 				var rot := Basis(right, -ln)
 				var base := hips + fwd * st - Vector3.UP * dr
 				var miss := 0.0
-				for p in [[sl, tl], [sr, tr]]:
+				for p in [[sl, tl], [sr, trap]]:
 					var dd: float = (base + rot * (p[0] as Vector3)).distance_to(p[1])
 					miss += maxf(dd - ARM_K * arm, 0.0) + maxf(ARM_MIN * arm - dd, 0.0)
 				# squared, so a bit of knees and a bit of back beats all of either

@@ -140,7 +140,7 @@ func _seek(home) -> void:
 	home.ppos = home.kins[0]["pos"] + Vector3(7, 0, 0)
 	sk.use()
 	var sheet := _sheet()
-	var alive := func(): return sk.state == BaseSeek.S.HUNT
+	var _alive := func(): return sk.state == BaseSeek.S.HUNT
 	for col in COLS:
 		for f in 45:
 			await main.get_tree().process_frame

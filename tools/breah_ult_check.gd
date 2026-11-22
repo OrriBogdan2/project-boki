@@ -63,7 +63,8 @@ func _cast_and_rise() -> void:
 		Sfx.last_played.erase(n)
 	_press(m, p_v, home + Vector3(7, 0, 0), false)
 	var released := m.time
-	ok("ult: one X press is one cast", int(p_v.used.get("x", 0)) == 1 and s.casts == 1, "used %s" % str(p_v.used.get("x")))
+	ok("ult: one X press is one cast", int(p_v.used.get("x", 0)) == 1 and s.casts == 1,
+			"used %s" % str(p_v.used.get("x")))
 	m.step(DT)
 	var cd_now := float(k.cd["x"])
 	ok(

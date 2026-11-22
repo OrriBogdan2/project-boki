@@ -251,14 +251,10 @@ func _falls(arch: String) -> void:
 	for vy in [0.0, -14.0]:
 		_air(HIGH_UP, Vector3(0, vy, 0))
 		_press_glide()
-		steer.append(
-			_fall(
-				1.0,
-				func(_i: int) -> void:
-					h.inp["glide"] = true
-					h.inp["move"] = Vector2(1, 0)
-			)
-		)
+		var cb_257 := func(_i: int) -> void:
+			h.inp["glide"] = true
+			h.inp["move"] = Vector2(1, 0)
+		steer.append(_fall(1.0, cb_257))
 	row(
 		arch,
 		"fall",
@@ -268,7 +264,7 @@ func _falls(arch: String) -> void:
 
 
 func _air_control(arch: String) -> void:
-	var run := float(HunterMove.of(arch)["speed"])
+	var run_v := float(HunterMove.of(arch)["speed"])
 	_settle()
 	_air(HIGH_UP, Vector3.ZERO)
 	h.inp["move"] = Vector2(1, 0)
@@ -277,10 +273,10 @@ func _air_control(arch: String) -> void:
 	row(
 		arch,
 		"air",
-		quick >= run * (1.0 - exp(-6.0 * 0.2)),
+		quick >= run_v * (1.0 - exp(-6.0 * 0.2)),
 		(
 			"from rest in the air, D for 0.2 s: %.2f m/s (run %.2f, the old farm's exp 6/s %.2f)"
-			% [quick, run, run * (1.0 - exp(-6.0 * 0.2))]
+			% [quick, run_v, run_v * (1.0 - exp(-6.0 * 0.2))]
 		)
 	)
 	_air(HIGH_UP, Vector3(-5, 0, 0))

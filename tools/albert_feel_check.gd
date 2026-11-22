@@ -166,11 +166,11 @@ func _lunges() -> void:
 	p.inp["fire"] = false
 	p.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
-	var run := k.lunge.last_d
+	var run_v := k.lunge.last_d
 	ok(
 		"albert lunge: running, the swing travels further than standing",
-		run > whole + 0.3,
-		"run %.2f standing %.2f" % [run, whole]
+		run_v > whole + 0.3,
+		"run %.2f standing %.2f" % [run_v, whole]
 	)
 	# in the air: the same full swing let go at the top of a standing jump pulls "air_k" of it
 	_ready_swing(m, p, t, home)

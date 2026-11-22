@@ -638,9 +638,9 @@ func _walk(am: Match, p: Hunter, rim: Dictionary, glide: bool, cold: bool) -> Ar
 				p.glide_fuel = 0.0
 		am.step(Match.DT)
 		t += Match.DT
-		for n in ABYSS_NAMES:
-			if Sfx.last_played.has(n) and not heard.has(n):
-				heard.append(n)
+		for n_v in ABYSS_NAMES:
+			if Sfx.last_played.has(n_v) and not heard.has(n_v):
+				heard.append(n_v)
 		if Sfx.loop_on(key) and not heard.has("strain"):
 			heard.append("strain")
 	p.inp["glide"] = false

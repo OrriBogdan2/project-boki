@@ -98,7 +98,7 @@ func _streaks(fx: CurrentFx, i: int) -> int:
 # ---------------------------------------------------------------- shots
 func _shots(out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
-	var tree := main.get_tree()
+	var _tree := main.get_tree()
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	var m := Match.new()

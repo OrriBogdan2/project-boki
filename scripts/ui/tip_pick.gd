@@ -85,8 +85,8 @@ static func pick(trig: Array, blight := true, fusion := true) -> String:
 		seen = []
 		fresh = pool
 	var chosen: Dictionary = fresh[randi() % fresh.size()]
-	for tr in trig:
-		var hit := fresh.filter(func(t): return t.get("when", "") == tr)
+	for trap in trig:
+		var hit := fresh.filter(func(t): return t.get("when", "") == trap)
 		if not hit.is_empty():
 			chosen = hit[0]
 			break

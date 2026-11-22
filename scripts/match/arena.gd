@@ -586,11 +586,11 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gd.custom_minimum_size = Vector2(480, 20)
 		right.add_child(gd)
 	right.add_child(UI.section("Practice"))
-	var tr := HBoxContainer.new(); tr.add_theme_constant_override("separation", 6)
-	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 160))
-	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 190))
-	tr.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
-	right.add_child(tr)
+	var trap := HBoxContainer.new(); trap.add_theme_constant_override("separation", 6)
+	trap.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 160))
+	trap.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 190))
+	trap.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
+	right.add_child(trap)
 
 ## The panel's top row: the hunter's portrait and name with their loop under it, the closing hint and buttons.
 func _menu_header(arch: String) -> HBoxContainer:
@@ -606,9 +606,9 @@ func _menu_header(arch: String) -> HBoxContainer:
 	who.add_child(UI.para(AbilityText.loop(arch), 13, UI.MUTED))
 	hd.add_child(who)
 	var side := UI.vbox(4)
-	var hint := UI.label("Everything applies at once. Esc or L closes.", 12, UI.MUTED)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	side.add_child(hint)
+	var hint_v := UI.label("Everything applies at once. Esc or L closes.", 12, UI.MUTED)
+	hint_v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	side.add_child(hint_v)
 	var btns := UI.hbox(8)
 	btns.alignment = BoxContainer.ALIGNMENT_END
 	btns.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))

@@ -35,7 +35,8 @@ func draw_hud_tip(sz: Vector2, p: Hunter) -> void:
 		h_v.hover_id = id
 		h_v.hover_t = 0.0
 	h_v.hover_t += h_v.get_process_delta_time()
-	if AbilityCard.on_hud(h_v.c, id, _on_screen(hit[0]) if hit.size() > 0 else Rect2(), p):  # Tab held: the ability card
+	# Tab held: the ability card
+	if AbilityCard.on_hud(h_v.c, id, _on_screen(hit[0]) if hit.size() > 0 else Rect2(), p):
 		return
 	if id == "" or h_v.hover_t < 0.25:
 		return

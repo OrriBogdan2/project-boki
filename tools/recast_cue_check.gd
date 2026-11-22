@@ -38,7 +38,6 @@ static func first(m: Match, p: Hunter, slot: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	await _first_hint()
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
 	await _hint()
@@ -320,12 +319,12 @@ func _lace_pin(s: Array) -> void:
 	var k := p.ak as ArcherKit
 	k.ch_rmb = 2.0
 	k.cd["rmb"] = 0.0
-	var hold := func():
+	var hold_v := func():
 		p.inp["sec_hold"] = true
 		aim_at(p, t.pos)
-	hold.call()
+	hold_v.call()
 	k.press_rmb()
-	_listen(m, 1.3, hold)
+	_listen(m, 1.3, hold_v)
 	p.inp["sec_hold"] = false
 
 ## The world marker and the foe badge draw no key and no word: only a count may show (DECISIONS 2026-11-11).

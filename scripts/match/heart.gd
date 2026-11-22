@@ -105,10 +105,10 @@ static func enabled(opts: Dictionary) -> bool:
 
 # ------------------------------------------------------------------ the tide (read by BlightDir)
 ## The tide ring's radius in metres at this match time (0 before it starts: no ring).
-static func tide_r(m: Match) -> float:
-	if m.heart == null or m.sess_time() < r("tide_start_s"):
+static func tide_r(m_v: Match) -> float:
+	if m_v.heart == null or m_v.sess_time() < r("tide_start_s"):
 		return 0.0
-	return ring_at(m.sess_time(), m.heart.ways_scale)
+	return ring_at(m_v.sess_time(), m_v.heart.ways_scale)
 
 
 ## The tide ring's radius t seconds into a match on a map of ways_scale k: tide_r0 (also before the tide
@@ -131,38 +131,38 @@ static func end_f(t: float) -> float:
 
 
 ## The end phase is on: past the tide's last close the Blight keeps to its tide and finishes its own downed.
-static func end_phase(m: Match) -> bool:
-	return m.heart != null and end_f(m.sess_time()) > 0.0
+static func end_phase(m_v: Match) -> bool:
+	return m_v.heart != null and end_f(m_v.sess_time()) > 0.0
 
 
 ## 0 inside the ring, 1 forty metres past it.
-static func tide_out(m: Match, p: Vector3) -> float:
-	var tr := tide_r(m)
-	if tr <= 0.0:
+static func tide_out(m_v: Match, p: Vector3) -> float:
+	var trap := tide_r(m_v)
+	if trap <= 0.0:
 		return 0.0
-	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
+	return clampf((Vector2(p.x - m_v.heart.site.x, p.z - m_v.heart.site.z).length() - trap) / 40.0, 0.0, 1.0)
 
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
 ## tide starts, so the drop map shows it; the final circle once it holds). `ahead` 2: two such steps on (bots).
-static func next_r(m: Match, ahead := 1) -> float:
-	if m.heart == null:
+static func next_r(m_v: Match, ahead := 1) -> float:
+	if m_v.heart == null:
 		return 0.0
-	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
+	return ring_at(m_v.sess_time() + r("tide_next_s") * ahead, m_v.heart.ways_scale)
 
 
 ## Seconds until the tide starts to close (0 once it has), and until it holds at its last ring (0 once it does).
-static func close_in(m: Match) -> float:
-	return maxf(r("tide_start_s") - m.sess_time(), 0.0)
+static func close_in(m_v: Match) -> float:
+	return maxf(r("tide_start_s") - m_v.sess_time(), 0.0)
 
 
-static func close_left(m: Match) -> float:
-	return maxf(r("tide_start_s") + r("tide_close_s") - m.sess_time(), 0.0)
+static func close_left(m_v: Match) -> float:
+	return maxf(r("tide_start_s") + r("tide_close_s") - m_v.sess_time(), 0.0)
 
 
 ## Added to the Blight's strength out in the tide.
-static func tide_boost(m: Match, p: Vector3) -> float:
-	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
+static func tide_boost(m_v: Match, p: Vector3) -> float:
+	return r("tide_boost") * tide_out(m_v, p) if m_v.heart else 0.0
 
 
 ## (A squad out in the tide also stirs the nearest Blight nest on a clock: BlightNests._tide.)
@@ -170,9 +170,9 @@ static func tide_boost(m: Match, p: Vector3) -> float:
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).
-static func tide_stage(m: Match) -> int:
-	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
-	if m.heart == null or t < 0.0:
+static func tide_stage(m_v: Match) -> int:
+	var t := (m_v.sess_time() - r("tide_start_s")) / r("tide_close_s")
+	if m_v.heart == null or t < 0.0:
 		return -1
 	return mini(int(t * TIDE_STAGES), TIDE_STAGES - 1)
 
@@ -324,8 +324,8 @@ func on_last_team() -> void:
 
 
 ## Flat damage one tide tick deals now: the stage's, ramped through the end phase's close from 1x to end_dmg_k.
-static func tick_dmg(m: Match) -> float:
-	return tide_dmg(maxi(tide_stage(m), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m.sess_time()))
+static func tick_dmg(m_v: Match) -> float:
+	return tide_dmg(maxi(tide_stage(m_v), 0)) * lerpf(1.0, r("end_dmg_k"), end_f(m_v.sess_time()))
 
 
 ## The Blight downed them: the tide leaves no attacker, a Blight mob is one.
@@ -345,11 +345,11 @@ func _tide_tick(dt: float) -> void:
 	if _tide_t < r("tide_tick_s"):
 		return
 	_tide_t -= r("tide_tick_s")
-	var tr := tide_r(m)
+	var trap := tide_r(m)
 	var d := tick_dmg(m)
 	var finish := end_phase(m)
 	for h in m.hunters:
-		if h.remote or h.out or h.extracted or Vector2(h.pos.x - site.x, h.pos.z - site.z).length() <= tr:
+		if h.remote or h.out or h.extracted or Vector2(h.pos.x - site.x, h.pos.z - site.z).length() <= trap:
 			continue
 		if not h.downed:
 			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})

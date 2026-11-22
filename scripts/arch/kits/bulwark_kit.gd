@@ -873,7 +873,7 @@ func _mend_burst() -> void:
 	var r: float = mend["r"]
 	mend = {}
 	var heal := float(ed["heal"]) * heal_k()
-	var mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
+	var _mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
 	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
 	for o in _allies_in(at, r):
 		if o != h and o.downed:

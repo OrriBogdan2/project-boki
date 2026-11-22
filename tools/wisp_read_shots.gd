@@ -60,17 +60,17 @@ func _fight_shots() -> void:
 	p.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	var base := _ground(p.pos)
 	var foe_at := _ground(base + Vector3(FIGHT_GAP, 0, 0))
-	var squad_a: Array = [
+	var squad_a_v: Array = [
 		p,
 		_hunter("a1", 0, a[1], FIGHT_KIN[1], _ground(base + Vector3(-1.4, 0, 1.6))),
 		_hunter("a2", 0, a[2], FIGHT_KIN[2], _ground(base + Vector3(-1.4, 0, -1.6)))
 	]
-	var squad_b: Array = [
+	var squad_b_v: Array = [
 		_hunter("b0", 1, b[0], FIGHT_KIN[3], foe_at),
 		_hunter("b1", 1, b[1], FIGHT_KIN[4], _ground(foe_at + Vector3(1.4, 0, 1.6))),
 		_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))
 	]
-	for h in squad_a + squad_b:
+	for h in squad_a_v + squad_b_v:
 		h.teleport(h.pos)
 	main.get_viewport().warp_mouse(Vector2(4, 4))  # (no hover card in the frames)
 	wisps = m.kins.filter(func(k): return k.wisp).size()
@@ -78,8 +78,8 @@ func _fight_shots() -> void:
 	await _go(
 		FIGHT_SECS,
 		func(t: float):
-			_assist(t, squad_a, squad_b)
-			_assist(t, squad_b, squad_a)
+			_assist(t, squad_a_v, squad_b_v)
+			_assist(t, squad_b_v, squad_a_v)
 			for k in m.kins:
 				k.render(FRAME, 1.0)
 			_measure()
@@ -94,7 +94,7 @@ func _fight_shots() -> void:
 					if k.wisp and k.state == "shoulder":
 						var at := m.cam.unproject_position(k.global_position) * _px_k()
 						print("WISPAT %d %s team=%d %d %d" % [n, k.species, k.owner_h.team, at.x, at.y]),
-		func(_t: float): return _centre(squad_a + squad_b)
+		func(_t: float): return _centre(squad_a_v + squad_b_v)
 	)
 
 

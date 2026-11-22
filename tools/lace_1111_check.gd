@@ -56,16 +56,16 @@ func _heavy_from_the_bow(m: Match, p: Hunter, t: Hunter, k: ArcherKit, home: Vec
 	fresh(t)
 	t.teleport(home + Vector3(7.0, 0, 0))
 	k.cd["rmb"] = 0.0
-	var hold := rmb_at.bind(p, t.pos)
+	var hold_v := rmb_at.bind(p, t.pos)
 	p.inp["sec_hold"] = true
 	k.press_rmb()
-	step(m, 0.5, hold)
-	var n := k.needle
+	step(m, 0.5, hold_v)
+	var n_v := k.needle
 	var nock := HeroVfx.of(m).anchor_pos(p, "nock")
 	ok(
 		"RMB needle: nocked on her nock point (the model's anchor) while it winds up",
-		n.visible and n.eye.distance_to(nock) < 0.01,
-		"eye %s nock %s" % [str(n.eye), str(nock)]
+		n_v.visible and n_v.eye.distance_to(nock) < 0.01,
+		"eye %s nock %s" % [str(n_v.eye), str(nock)]
 	)
 	var bow := k.bow_mouth()
 	var bar := AimKit.entry(p, "rmb_bar")
@@ -79,7 +79,7 @@ func _heavy_from_the_bow(m: Match, p: Hunter, t: Hunter, k: ArcherKit, home: Vec
 		),
 		"from %s bow %s" % [str(bar.get("from")), str(bow)]
 	)
-	step(m, 0.7, hold)
+	step(m, 0.7, hold_v)
 	bow = k.bow_mouth()
 	m.net_on = true  # (only to read the event the other games get; no peer is connected)
 	Net.out_events.clear()

@@ -475,12 +475,12 @@ func _motley_trade(m: Match, p: Hunter) -> void:
 		var cols: Array = []
 		_mat_cols(looks.hold_on("chk_" + kind, kind, p, p.pos), cols)
 		looks.release("chk_" + kind)
-		var bad: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
+		var bad_v: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
 		ok(
-			cols.size() >= 3 and bad.is_empty(),
+			cols.size() >= 3 and bad_v.is_empty(),
 			(
 				"Motley %s: every colour is teal or neutral (%d, off %s)"
-				% ["Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad]
+				% ["Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad_v]
 			)
 		)
 	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Nightwell: the Swollen core is teal, not pink")
@@ -653,7 +653,7 @@ func _meeko_field() -> void:
 func _meeko_heal_hurt() -> void:
 	var d := HeroVfx.data("tender")
 	var pal: Dictionary = d["palette"]
-	var bad: Array = []
+	var bad_v: Array = []
 	for mv: String in d["moves"]:
 		var heal := MEEKO_HEALS.has(mv)
 		var hurt := MEEKO_HURTS.has(mv)
@@ -661,13 +661,13 @@ func _meeko_heal_hurt() -> void:
 			for key in ["c", "c2", "c3"]:
 				var c := Color(String(pal[layer[key]])) if layer.has(key) else Color.GRAY
 				if c.s >= 0.25 and ((heal and not _heal_hue(c)) or (hurt and _heal_hue(c))):
-					bad.append("%s.%s" % [mv, layer[key]])
+					bad_v.append("%s.%s" % [mv, layer[key]])
 			if not HeroVfx.LOOKS.has(String(layer["p"])):
 				continue
 			var grav := float(layer.get("grav", 0.0))
 			if (heal and grav > 0.0) or (hurt and (grav <= 0.0 or float(layer.get("curl", 0.0)) > 0.0)):
-				bad.append("%s motion" % mv)
-	ok(bad.is_empty(), "Meeko: heals leaf green and rising, hurts embers falling %s" % [bad])
+				bad_v.append("%s motion" % mv)
+	ok(bad_v.is_empty(), "Meeko: heals leaf green and rising, hurts embers falling %s" % [bad_v])
 	var swirl: Array = (d["moves"]["bloom"]["fx"] as Array).filter(func(l): return l["p"] == "vortex")
 	ok(swirl.all(func(l): return bool(l.get("thin", false))), "Meeko's bloom: a rim swirl, no filled disc")
 

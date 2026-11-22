@@ -758,8 +758,8 @@ static func land_tier(fall_v: float, from_glide: bool) -> int:
 
 
 ## The landing squash of a weight class for a land_tier: Vector2(depth, seconds), from content/rules/land_feel.json.
-static func land_feel(weight: String, tier: int) -> Vector2:
-	var way := (Content.rules("land_feel")[weight] as Dictionary)[["hop", "hop", "drop", "dive"][tier]] as Dictionary
+static func land_feel(weight_v: String, tier: int) -> Vector2:
+	var way := (Content.rules("land_feel")[weight_v] as Dictionary)[["hop", "hop", "drop", "dive"][tier]] as Dictionary
 	return Vector2(float(way["depth"]), float(way["s"]))
 
 
@@ -1558,7 +1558,7 @@ static func km_mix(a: Dictionary, b: Dictionary, u: float) -> Dictionary:
 
 ## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
 static func km_def(id: String) -> Dictionary:
-	for t in [
+	for t_v in [
 		KMOVES,
 		KMovesPair.MOVES,
 		KMovesVV.MOVES,
@@ -1570,8 +1570,8 @@ static func km_def(id: String) -> Dictionary:
 		KMovesDJ.MOVES,
 		KMovesGil.MOVES
 	]:
-		if (t as Dictionary).has(id):
-			return t[id]
+		if (t_v as Dictionary).has(id):
+			return t_v[id]
 	return {}
 
 
@@ -1927,14 +1927,14 @@ func _upper(
 	var at := aim.transform
 	var grip_r: Vector3 = hd["gr"]
 	var grip_l: Vector3 = hd["gl"]
-	var tr := at * (gun.transform * grip_r) if gun else sh_r + EMPTY_HAND  # (no weapon: it hangs at the side)
+	var trap := at * (gun.transform * grip_r) if gun else sh_r + EMPTY_HAND  # (no weapon: it hangs at the side)
 	var tl := Vector3.INF
 	if hold == "twin" and offhand:
 		tl = at * (offhand.transform * Vector3.ZERO)
 	elif grip_l != Vector3.INF and gun:
 		tl = at * (gun.transform * grip_l)
 		tl = _reachable(sh_l, tl, at * (gun.transform * grip_r), REACH * arm_k * 0.97)
-	tr = _reachable(sh_r, tr, tr, REACH * arm_k * 0.99)
+	trap = _reachable(sh_r, trap, trap, REACH * arm_k * 0.99)
 	if tl == Vector3.INF:
 		free_l = 1.0
 	# free hands: relaxed at the sides, swinging when running (against the legs), pumping hard in a sprint
@@ -2110,7 +2110,7 @@ func _upper(
 	if ledge_k > 0.01:
 		free_r = maxf(free_r, ledge_k)
 	var tl2 := (tl if tl != Vector3.INF else fl).lerp(fl, free_l) + arm_l_t
-	var tr2 := tr.lerp(fr, free_r)
+	var tr2 := trap.lerp(fr, free_r)
 	# elbows: down and out holding a weapon, back when swinging free
 	var pole_l := Vector3(-0.7, -0.6, 0.25).lerp(Vector3(-0.35, -0.2, 1.0), free_l)
 	var pole_r := Vector3(0.7, -0.6, 0.25).lerp(Vector3(0.35, -0.2, 1.0), free_r)
@@ -2246,72 +2246,72 @@ func _act_pitch() -> float:
 
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
-func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
+func _act_hands(sh_l_v: Vector3, sh_r_v: Vector3) -> Array:
 	if HunterTool.ACTS.has(act_kind):
-		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
+		return HunterTool.hands(act_kind, tool_ph, sh_l_v, sh_r_v)
 	if HunterVerbs.ACTS.has(act_kind):
 		var at := torso.to_local(act_aim) if act_aim != Vector3.INF else Vector3.INF
-		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r, at, REACH * arm_k)
+		return HunterVerbs.hands(act_kind, act_t, sh_l_v, sh_r_v, at, REACH * arm_k)
 	if HunterRod.ACTS.has(act_kind):
-		return HunterRod.hands(act_kind, act_t, sh_l, sh_r)
-	var t := act_t
+		return HunterRod.hands(act_kind, act_t, sh_l_v, sh_r_v)
+	var t_v := act_t
 	match act_kind:
 		"scan":
-			var pat := sin(t * 1.8) * 0.05
-			return [sh_l + Vector3(0.1, -0.22 + pat, -0.44), sh_r, 0.0]
+			var pat := sin(t_v * 1.8) * 0.05
+			return [sh_l_v + Vector3(0.1, -0.22 + pat, -0.44), sh_r_v, 0.0]
 		"revive":
-			var press := maxf(0.0, sin(t * 6.0)) * 0.05
-			return [sh_l + Vector3(0.1, -0.42 - press, -0.32), sh_r + Vector3(-0.1, -0.42 - press, -0.32), 1.0]
+			var press := maxf(0.0, sin(t_v * 6.0)) * 0.05
+			return [sh_l_v + Vector3(0.1, -0.42 - press, -0.32), sh_r_v + Vector3(-0.1, -0.42 - press, -0.32), 1.0]
 		"chest":
-			var heave := 0.5 + 0.5 * sin(t * 3.4)
+			var heave := 0.5 + 0.5 * sin(t_v * 3.4)
 			return [
-				sh_l + Vector3(0.05, -0.45 + heave * 0.22, -0.34),
-				sh_r + Vector3(-0.05, -0.45 + heave * 0.22, -0.34),
+				sh_l_v + Vector3(0.05, -0.45 + heave * 0.22, -0.34),
+				sh_r_v + Vector3(-0.05, -0.45 + heave * 0.22, -0.34),
 				1.0
 			]
 		"dial":
-			var a := t * 2.6
+			var a := t_v * 2.6
 			return [
-				sh_l + Vector3(0.12 + cos(a) * 0.05, -0.12 + sin(a) * 0.05, -0.4),
-				sh_r + Vector3(-0.12 + cos(a + PI) * 0.05, -0.12 + sin(a + PI) * 0.05, -0.4),
+				sh_l_v + Vector3(0.12 + cos(a) * 0.05, -0.12 + sin(a) * 0.05, -0.4),
+				sh_r_v + Vector3(-0.12 + cos(a + PI) * 0.05, -0.12 + sin(a + PI) * 0.05, -0.4),
 				1.0
 			]
 		"console":
-			var c1 := maxf(0.0, sin(t * 4.5)) * 0.07
-			var c2 := maxf(0.0, -sin(t * 4.5)) * 0.07
-			return [sh_l + Vector3(0.06, -0.2 - c1, -0.38), sh_r + Vector3(-0.06, -0.2 - c2, -0.38), 1.0]
+			var c1 := maxf(0.0, sin(t_v * 4.5)) * 0.07
+			var c2 := maxf(0.0, -sin(t_v * 4.5)) * 0.07
+			return [sh_l_v + Vector3(0.06, -0.2 - c1, -0.38), sh_r_v + Vector3(-0.06, -0.2 - c2, -0.38), 1.0]
 		"lever":
-			var p := 0.5 - 0.5 * cos(t * 2.6)
+			var p := 0.5 - 0.5 * cos(t_v * 2.6)
 			return [
-				sh_l + Vector3(0.14, 0.05 - p * 0.28, -0.45 + p * 0.22),
-				sh_r + Vector3(-0.14, 0.05 - p * 0.28, -0.45 + p * 0.22),
+				sh_l_v + Vector3(0.14, 0.05 - p * 0.28, -0.45 + p * 0.22),
+				sh_r_v + Vector3(-0.14, 0.05 - p * 0.28, -0.45 + p * 0.22),
 				1.0
 			]
 		"windup":
-			return [sh_l + Vector3(-0.32, -0.12, -0.05), sh_r + Vector3(0.3, -0.1, -0.05), 0.6]
+			return [sh_l_v + Vector3(-0.32, -0.12, -0.05), sh_r_v + Vector3(0.3, -0.1, -0.05), 0.6]
 		"shrine":
-			return [sh_l + Vector3(0.13, -0.16, -0.24), sh_r + Vector3(-0.13, -0.16, -0.24), 1.0]
+			return [sh_l_v + Vector3(0.13, -0.16, -0.24), sh_r_v + Vector3(-0.13, -0.16, -0.24), 1.0]
 		"beacon":
-			return [sh_l + Vector3(0.05, 0.42 + sin(t * 2.0) * 0.03, -0.14), sh_r, 0.0]
+			return [sh_l_v + Vector3(0.05, 0.42 + sin(t_v * 2.0) * 0.03, -0.14), sh_r_v, 0.0]
 		"key":
-			var tw := sin(t * 5.0) * 0.04
-			return [sh_l + Vector3(0.04, -0.4, -0.18), sh_r + Vector3(-0.04 + tw, -0.36, -0.36), 1.0]
+			var tw := sin(t_v * 5.0) * 0.04
+			return [sh_l_v + Vector3(0.04, -0.4, -0.18), sh_r_v + Vector3(-0.04 + tw, -0.36, -0.36), 1.0]
 		"loot":
-			var r1 := sin(t * 4.0) * 0.08
+			var r1 := sin(t_v * 4.0) * 0.08
 			return [
-				sh_l + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34),
-				sh_r + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34),
+				sh_l_v + Vector3(0.08, -0.46 + maxf(0.0, r1), -0.34),
+				sh_r_v + Vector3(-0.08, -0.46 + maxf(0.0, -r1), -0.34),
 				1.0
 			]
 		"rune":
-			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
+			return [sh_l_v + Vector3(0.12, -0.06, -0.42), sh_r_v + Vector3(-0.12, -0.06, -0.42), 1.0]
 		"offer":
-			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
+			return [sh_l_v + Vector3(0.1, -0.1, -0.36), sh_r_v + Vector3(-0.1, -0.1, -0.36), 1.0]
 		"carry":
-			return [sh_l + Vector3(0.12, -0.36, -0.34), sh_r + Vector3(-0.12, -0.36, -0.34), 1.0]
+			return [sh_l_v + Vector3(0.12, -0.36, -0.34), sh_r_v + Vector3(-0.12, -0.36, -0.34), 1.0]
 		"pack":
-			return [sh_l + Vector3(0.1, -0.46, 0.14), sh_r + Vector3(-0.1, -0.46, 0.14), 1.0]
-	return [sh_l, sh_r, 0.0]
+			return [sh_l_v + Vector3(0.1, -0.46, 0.14), sh_r_v + Vector3(-0.1, -0.46, 0.14), 1.0]
+	return [sh_l_v, sh_r_v, 0.0]
 
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
@@ -2628,10 +2628,10 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 	var flut := sin(t * 13.0 + seed_ph) * 0.5 + sin(t * 21.0 + seed_ph * 2.0) * 0.3
 	var turn := wrapf(yaw - torso_yaw_prev, -PI, PI) / dt
 	torso_yaw_prev = yaw
-	var spin := clampf(face_rate * 0.04 + turn * 0.02, -0.5, 0.5)
+	var spin_v := clampf(face_rate * 0.04 + turn * 0.02, -0.5, 0.5)
 	if skirt:
 		var wx := -clampf(mf / 6.0, -0.5, 1.0) * 0.28 - fall * 0.2 - glide_k * 0.25 + flut * 0.02 * wind
-		var wz := clampf(ms / 6.0, -1.0, 1.0) * 0.18 + sin(ph) * 0.08 * r1 + spin * 0.4
+		var wz := clampf(ms / 6.0, -1.0, 1.0) * 0.18 + sin(ph) * 0.08 * r1 + spin_v * 0.4
 		if snap:
 			sk_x = wx
 			sk_z = wz
@@ -2648,7 +2648,7 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 			-(0.05 + clampf(mf / 6.0, -0.3, 1.2) * 0.55 + fall * 0.5 + glide_k * 0.7 + dive_k * 1.0)
 			- flut * 0.06 * wind
 		)
-		var wz2 := -clampf(ms / 6.0, -1.0, 1.0) * 0.25 + spin * 0.6
+		var wz2 := -clampf(ms / 6.0, -1.0, 1.0) * 0.25 + spin_v * 0.6
 		if snap:
 			cp_x = wx2
 			cp_z = wz2
@@ -2662,7 +2662,7 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 		cape.rotation = Vector3(clampf(cp_x, -1.5, 0.15), 0.0, clampf(cp_z, -0.5, 0.5))
 	if scarf:
 		var wx3 := -(clampf(mf / 6.0, -0.3, 1.3) * 0.7 + fall * 0.6 + glide_k * 0.6 + dive_k * 0.9) - flut * 0.1 * wind
-		var wy3 := -clampf(ms / 6.0, -1.0, 1.0) * 0.4 + spin * 0.8 + sin(t * 9.0 + seed_ph) * 0.06 * wind
+		var wy3 := -clampf(ms / 6.0, -1.0, 1.0) * 0.4 + spin_v * 0.8 + sin(t * 9.0 + seed_ph) * 0.06 * wind
 		if snap:
 			sc_x = wx3
 			sc_y = wy3
@@ -2679,7 +2679,7 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 		if fidget == "tail":
 			wag += sin(fidget_t * 12.0) * 0.5 * sin(_fidget_p() * PI)
 		var stride_swing := 0.5 if arch == "tender" else 0.15  # her trailing tail sways with each quick step
-		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin * 0.7 - sin(ph) * stride_swing * r1
+		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin_v * 0.7 - sin(ph) * stride_swing * r1
 		var wx4 := clampf(mf / 6.0, -0.5, 1.0) * 0.2 - fall * 0.3 + glide_k * 0.2
 		if snap:
 			tl_y = wy4

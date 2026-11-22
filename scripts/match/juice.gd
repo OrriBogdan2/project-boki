@@ -214,8 +214,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
-	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col_v := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col_v, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,

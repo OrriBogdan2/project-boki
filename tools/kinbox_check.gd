@@ -230,7 +230,8 @@ func run(m: Node) -> void:
 			if wr.has("mutations"): hit += 1
 		var e: float = expect_any.call(float(Mutations.TIER_MULT[t]))
 		line.append("tier %d %.2f%% (expect ~%.2f%%)" % [t, hit * 100.0 / w_v, e * 100.0])
-		ok(absf(hit / float(w_v) - e) < e * 0.15 + 0.002, "wild kin mutated in tier %d: %.2f%%" % [t, hit * 100.0 / w_v])
+		ok(absf(hit / float(w_v) - e) < e * 0.15 + 0.002,
+				"wild kin mutated in tier %d: %.2f%%" % [t, hit * 100.0 / w_v])
 	var rh := 0
 	for _j in w_v / 4:
 		var wr := {}

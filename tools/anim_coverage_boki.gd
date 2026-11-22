@@ -130,9 +130,9 @@ static func _sig(smp: Dictionary) -> String:
 
 
 ## Species, worst first: most `missing` cells, then most `shared`, then the lowest Field Book number (met first).
-static func worst(rows: Dictionary) -> Array:
-	var ids: Array = rows.keys()
-	ids.sort_custom(func(a, b): return _rank(rows[a], a) < _rank(rows[b], b))
+static func worst(rows_v: Dictionary) -> Array:
+	var ids: Array = rows_v.keys()
+	ids.sort_custom(func(a, b): return _rank(rows_v[a], a) < _rank(rows_v[b], b))
 	return ids
 
 
@@ -142,10 +142,10 @@ static func _rank(row: Array, id: String) -> String:
 
 
 ## Backlog-ready lines for the n worst species.
-static func backlog(rows: Dictionary, n: int) -> String:
+static func backlog(rows_v: Dictionary, n: int) -> String:
 	var s := ""
-	for id in worst(rows).slice(0, n):
-		var row: Array = rows[id]
+	for id in worst(rows_v).slice(0, n):
+		var row: Array = rows_v[id]
 		var miss: Array = []
 		var shared: Array = []
 		for i in COLS.size():

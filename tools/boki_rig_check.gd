@@ -336,33 +336,33 @@ func _t_pose(rig: BokiRig, clip: String) -> bool:
 func _feel(k: Node3D, rig: BokiRig) -> void:
 	var dt := 1.0 / 60.0
 	var from := k.global_position
-	var run := func(vel: Vector3, frames: int) -> void:
+	var run_v := func(vel: Vector3, frames: int) -> void:
 		for i in frames:
 			k.global_position += vel * dt
 			rig._keep_flex(dt)
-	run.call(Vector3.ZERO, 5)
-	run.call(Vector3(0, -1.2, 0), 10)
-	run.call(Vector3.ZERO, 1)
+	run_v.call(Vector3.ZERO, 5)
+	run_v.call(Vector3(0, -1.2, 0), 10)
+	run_v.call(Vector3.ZERO, 1)
 	ok(rig.flex.scale.y > 0.999, "a gait's bob (1.2 m/s down) lands without a squash")
-	run.call(Vector3(0, -8.0, 0), 10)
-	run.call(Vector3.ZERO, 1)
+	run_v.call(Vector3(0, -8.0, 0), 10)
+	run_v.call(Vector3.ZERO, 1)
 	ok(rig.flex.scale.y < 1.0 - BokiRig.LAND_SQUASH * 0.6, "a leap's landing flattens it (%.3f)" % rig.flex.scale.y)
-	run.call(Vector3.ZERO, 60)
+	run_v.call(Vector3.ZERO, 60)
 	ok(is_equal_approx(rig.flex.scale.y, 1.0), "and it stands back up (%.3f)" % rig.flex.scale.y)
-	run.call(Vector3(0, 0, -6.0), 8)
+	run_v.call(Vector3(0, 0, -6.0), 8)
 	ok(rig.flex.rotation.x < -0.05, "it leans forward into a run start (%.3f rad)" % rig.flex.rotation.x)
-	run.call(Vector3(0, 0, -6.0), 60)
-	run.call(Vector3.ZERO, 8)
+	run_v.call(Vector3(0, 0, -6.0), 60)
+	run_v.call(Vector3.ZERO, 8)
 	ok(rig.flex.rotation.x > 0.05, "and back as it stops (%.3f rad)" % rig.flex.rotation.x)
-	run.call(Vector3.ZERO, 120)
+	run_v.call(Vector3.ZERO, 120)
 	k.global_position = from + Vector3(40, -20, 0)
-	run.call(Vector3.ZERO, 1)
+	run_v.call(Vector3.ZERO, 1)
 	ok(
 		absf(rig.flex.rotation.x) < 0.001 and is_equal_approx(rig.flex.scale.y, 1.0),
 		"a teleport is not a lean or a landing"
 	)
 	k.global_position = from
-	run.call(Vector3.ZERO, 120)
+	run_v.call(Vector3.ZERO, 120)
 
 
 ## The coat has generated LODs (the art budget), the face stays whole (BokiRig.FACE_LOD_BIAS).

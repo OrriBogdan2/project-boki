@@ -34,24 +34,24 @@ static func make(model: Node3D, sk: Skeleton3D, arch: String) -> WardenBreak:
 	b.root = model
 	b.skel = sk
 	b.dur = float(cfg["dur"])
-	for tr in cfg["tracks"]:
-		var bone := WardenSkeleton.find(sk, String(tr["bone"]))
+	for trap in cfg["tracks"]:
+		var bone := WardenSkeleton.find(sk, String(trap["bone"]))
 		if bone >= 0:
-			b.tracks.append(b._track(bone, tr))
+			b.tracks.append(b._track(bone, trap))
 	b.tracks.sort_custom(func(x, y): return b._depth(int(x["bone"])) < b._depth(int(y["bone"])))
 	return b
 
 
-func _track(bone: int, tr: Dictionary) -> Dictionary:
-	var rot: Array = tr["rot"]
+func _track(bone: int, trap: Dictionary) -> Dictionary:
+	var rot: Array = trap["rot"]
 	return {
 		"bone": bone,
 		"rot": Vector3(rot[0], rot[1], rot[2]),
-		"from": float(tr.get("from", 0.0)),
-		"to": float(tr.get("to", 1.0)),
-		"in": float(tr.get("in", 0.3)),
-		"out": float(tr.get("out", 0.3)),
-		"beats": float(tr.get("beats", 0.0))
+		"from": float(trap.get("from", 0.0)),
+		"to": float(trap.get("to", 1.0)),
+		"in": float(trap.get("in", 0.3)),
+		"out": float(trap.get("out", 0.3)),
+		"beats": float(trap.get("beats", 0.0))
 	}
 
 
@@ -122,26 +122,26 @@ func _combat_free(s: Dictionary) -> bool:
 
 
 ## How far a track is turned at progress `u` (0..1 of the break): eased in and out, pulsed `beats` times when set.
-static func amount(tr: Dictionary, u: float) -> float:
-	var span := maxf(float(tr["to"]) - float(tr["from"]), 0.01)
-	var w := (u - float(tr["from"])) / span
+static func amount(trap: Dictionary, u: float) -> float:
+	var span := maxf(float(trap["to"]) - float(trap["from"]), 0.01)
+	var w := (u - float(trap["from"])) / span
 	if w <= 0.0 or w >= 1.0:
 		return 0.0
-	var a := smoothstep(0.0, float(tr["in"]), w) * (1.0 - smoothstep(1.0 - float(tr["out"]), 1.0, w))
-	if float(tr["beats"]) > 0.0:
-		a *= 0.5 - 0.5 * cos(w * float(tr["beats"]) * TAU)
+	var a := smoothstep(0.0, float(trap["in"]), w) * (1.0 - smoothstep(1.0 - float(trap["out"]), 1.0, w))
+	if float(trap["beats"]) > 0.0:
+		a *= 0.5 - 0.5 * cos(w * float(trap["beats"]) * TAU)
 	return a
 
 
 ## Turns each bone about its own head, the angles taken in the model's frame.
 func _lay() -> void:
 	var into_skel := skel.global_basis.orthonormalized().inverse() * root.global_basis.orthonormalized()
-	for tr in tracks:
-		var amt := amount(tr, shown_u) * fade
+	for trap in tracks:
+		var amt := amount(trap, shown_u) * fade
 		if amt == 0.0:
 			continue
-		var bone := int(tr["bone"])
+		var bone := int(trap["bone"])
 		var pose := skel.get_bone_global_pose(bone)
-		var turn := into_skel * Basis.from_euler((tr["rot"] as Vector3) * amt) * into_skel.inverse()
+		var turn := into_skel * Basis.from_euler((trap["rot"] as Vector3) * amt) * into_skel.inverse()
 		pose.basis = turn * pose.basis
 		skel.set_bone_global_pose(bone, pose)

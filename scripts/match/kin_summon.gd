@@ -60,11 +60,11 @@ static func times(ks: KinSpec) -> Vector2:
 
 ## The cards' plain line for a window ("Short summon, strong"): the last card_lines entry whose from (s) it reaches.
 static func card_line(window: float) -> String:
-	var out := ""
+	var out_v := ""
 	for cl in rules()["card_lines"]:
 		if window >= float(cl[0]):
-			out = String(cl[1])
-	return out
+			out_v = String(cl[1])
+	return out_v
 
 
 ## Out as the full Boki (the shrink back included)?
@@ -81,19 +81,19 @@ func leash(aggression: float) -> float:
 static func press(h: Hunter) -> bool:
 	if h.downed or h.out or h.riding or h.dropping:
 		return false
-	var k: Kin = h.kin
-	if k == null or k.summon == null or k.owner_h != h:
+	var k_v: Kin = h.kin
+	if k_v == null or k_v.summon == null or k_v.owner_h != h:
 		return KinSteal.press(h)  # (your own Boki is gone or stolen: a stolen wisp's one summon)
-	var s := k.summon
+	var s := k_v.summon
 	if s.left > 0.0:
 		s.end()
 		return true
-	if not k.wisp:
+	if not k_v.wisp:
 		return KinSteal.press(h)
 	if s.cd > 0.0:
 		if KinSteal.press(h):
 			return true
-		KinCommand.say(h, "%s gathers itself: %d s" % [k.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
+		KinCommand.say(h, "%s gathers itself: %d s" % [k_v.rec.get("name", "Your Boki"), ceili(s.cd)], Color("a2a8bb"))
 		return false
 	s.burst(s.dur)
 	return true
@@ -231,7 +231,7 @@ func popped(to_wisp: bool, gesture := true) -> void:
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
 ## now. stowing: the kin is about to move to the shoulder itself (KinSummon._back), so the pop sits on it.
-func _pop(burst: bool, stowing: bool) -> void:
+func _pop(burst_v: bool, stowing: bool) -> void:
 	_drop_pop()
 	var o := k.owner_h
 	if o == null or k.model == null:
@@ -245,12 +245,12 @@ func _pop(burst: bool, stowing: bool) -> void:
 	pop.finished.connect(_popped)
 	k.add_child(pop)
 	k.model.visible = false
-	pop.play(burst)
+	pop.play(burst_v)
 
 
 ## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
-func _popped(burst: bool) -> void:
-	if burst or k.wisp:
+func _popped(burst_v: bool) -> void:
+	if burst_v or k.wisp:
 		_drop_pop()
 
 

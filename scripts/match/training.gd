@@ -112,7 +112,7 @@ func update(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func rows() -> Array:
-	var rows := TrainDrill.rows().filter(
+	var rows_v := TrainDrill.rows().filter(
 		func(t):
 			return (
 				t[0] != "secondary"
@@ -122,7 +122,7 @@ func rows() -> Array:
 				)
 			)
 	)
-	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
+	return rows_v.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
 
 
 func balloon_demo() -> void:

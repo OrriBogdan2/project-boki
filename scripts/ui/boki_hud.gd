@@ -62,9 +62,9 @@ static func r_slot(h_v, p: Hunter, ur: Rect2) -> void:
 			h_v._rounded(ur.grow(3.0 + pulse * 4.0), Color(1.0, 0.82, 0.48, 0.15 * pulse), 14, Color("ffd27a"), 3)
 		return
 	if ulv < Hunter.SLOT_MAX["ult"]:
-		var tr := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
-		h_v._rounded(tr, Color(0.03, 0.03, 0.05, 0.9), 5, Color(h_v.MUTED, 0.6), 1)
-		h_v._ctext(tr.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, h_v.MUTED, h_v.big)
+		var trap := Rect2(Vector2(ur.end.x - 16, ur.position.y + 2), Vector2(14, 14))
+		h_v._rounded(trap, Color(0.03, 0.03, 0.05, 0.9), 5, Color(h_v.MUTED, 0.6), 1)
+		h_v._ctext(trap.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, h_v.MUTED, h_v.big)
 	if not merged:
 		return
 	var ml: Dictionary = p.merge_st
@@ -73,18 +73,18 @@ static func r_slot(h_v, p: Hunter, ur: Rect2) -> void:
 	var pl := 0.5 + 0.5 * sin(h_v.m.time * 8.0)
 	_ring(h_v, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
 	var form_name := String((ml.get("form", {}) as Dictionary).get("name", "FUSED")).to_upper()
-	var chip := form_name
+	var chip_v := form_name
 	if ready_ult:
-		chip = String(ri.get("name", "ULT")).to_upper()
+		chip_v = String(ri.get("name", "ULT")).to_upper()
 	elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
-		chip = "ULT %.1fs" % cd_left
+		chip_v = "ULT %.1fs" % cd_left
 	var wl := MergeAugment.warn_left(p)
 	if wl > 0.0:
 		# the last seconds of the window: the slot flashes and the chip counts down
 		var fl := 0.5 + 0.5 * sin(h_v.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
 		h_v._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
-		chip = "ENDS %.1fs" % wl
-	chip(h_v, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
+		chip_v = "ENDS %.1fs" % wl
+	chip(h_v, ur, chip_v, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
 
 ## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
 ## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
@@ -174,10 +174,10 @@ static func stolen_wisps(hud, p: Hunter, r: Rect2) -> void:
 		if st == "ready":
 			HudStyle.key_pill(hud.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
 		else:
-			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
-			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			var tag_v := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
+			var tw: float = HudStyle.BIG.get_string_size(tag_v, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
-			HudStyle.text(hud.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
+			HudStyle.text(hud.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag_v, 11, tag_col, 3)
 		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
 		y -= STOLEN_H + 3.0
 
@@ -449,7 +449,7 @@ static func form_overhead(h_v, sp: Vector2, h: Hunter) -> void:
 	var fl2 := shell_flash(h_v, h)
 	if sh.y > 0.0:
 		shell_bar(h_v, Rect2(Vector2(x0, sp.y - 18.0), Vector2(w, 6.0)), sh.x / sh.y, glow, fl2)
-	var tr := Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 3.0))
+	var trap := Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 3.0))
 	SafeArea.note_as("merge_timer", Rect2(Vector2(x0, sp.y - 24.0), Vector2(w, 12.0)))
-	h_v.c.draw_rect(tr, Color(0.03, 0.03, 0.05, 0.8))
-	h_v.c.draw_rect(Rect2(tr.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.75))
+	h_v.c.draw_rect(trap, Color(0.03, 0.03, 0.05, 0.8))
+	h_v.c.draw_rect(Rect2(trap.position, Vector2(w * clampf(left / total, 0.0, 1.0), 3.0)), Color(glow, 0.75))

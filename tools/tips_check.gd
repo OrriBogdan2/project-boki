@@ -71,11 +71,11 @@ func _table() -> void:
 
 func _picking() -> void:
 	_fresh()
-	var tr := TipPick.triggers({"summons": 0, "glide_t": 30.0}, {"k1": 3}, "", 200.0)
-	ok(tr == ["no_summon"], "a session that never summoned raises only the summon trigger %s" % [tr])
-	var first := TipPick.pick(tr)
+	var trap := TipPick.triggers({"summons": 0, "glide_t": 30.0}, {"k1": 3}, "", 200.0)
+	ok(trap == ["no_summon"], "a session that never summoned raises only the summon trigger %s" % [trap])
+	var first := TipPick.pick(trap)
 	ok(_id_of(first).begins_with("summon_"), "and gets a summon tip: %s" % first)
-	var second := TipPick.pick(tr)
+	var second := TipPick.pick(trap)
 	ok(second != first and _id_of(second).begins_with("summon_"), "a seen tip is not repeated: the next one differs")
 	ok(TipPick.triggers({"summons": 0}, {}, "", 30.0).is_empty(), "a run shorter than min_time_s blames nothing")
 	var base := {"summons": 1, "glide_t": 60.0}
@@ -132,8 +132,11 @@ func _match_counts() -> void:
 	var b := m.blight.spawn("bl_skitter", p.pos + Vector3(2.5, 0, 0), 1.0)
 	m.knock(p, b, {})
 	ok(int(p.stats.get("blight_downs", 0)) == 1, "a Blight knock counts")
-	var tr := TipPick.triggers(p.stats, p.used, "", 200.0)
-	ok(tr.has("blight") and tr.has("wisp_stolen") and not tr.has("no_summon"), "and the triggers follow: %s" % [tr])
+	var trap := TipPick.triggers(p.stats, p.used, "", 200.0)
+	ok(
+		trap.has("blight") and trap.has("wisp_stolen") and not trap.has("no_summon"),
+		"and the triggers follow: %s" % [trap]
+	)
 	var down_tip := TipPick.for_downed(p, 200.0, true)
 	ok(_id_of(down_tip).begins_with("blight_"), "the downed screen picks the Blight tip: %s" % down_tip)
 	ok(TipPick.for_downed(p, 200.0, true) == down_tip, "and keeps it while you stay down")

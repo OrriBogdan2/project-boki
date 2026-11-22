@@ -45,15 +45,10 @@ func run(main: Node) -> void:
 	for flag: String in CheckRegistry.COVERED:
 		var script: String = CheckRegistry.all().get(flag, [""])[0]
 		var covers: Array = CheckRegistry.COVERED[flag]
+		var cb_53 := func(c: String) -> bool:
+			return not CheckRegistry.COVERED.has(c) and CheckRegistry.all().get(c, [""])[0] == script
 		ok(
-			(
-				script != ""
-				and not covers.is_empty()
-				and covers.all(
-					func(c: String) -> bool:
-						return not CheckRegistry.COVERED.has(c) and CheckRegistry.all().get(c, [""])[0] == script
-				)
-			),
+			script != "" and not covers.is_empty() and covers.all(cb_53),
 			"%s is covered by run flags of its own script" % flag,
 			str(covers)
 		)

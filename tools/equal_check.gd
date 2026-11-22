@@ -324,7 +324,8 @@ func _armor_levels() -> void:
 	m.hud.c.queue_redraw()      # draw once at 0 xp so the next hit shows as a gain
 	for i in 2: await main.get_tree().process_frame
 	b.hurt(100.0, p_v, {"src": "shot"})
-	ok(p_v.armor_tier == 0 and p_v.armor_xp > 0.0, "damage to a rival fills your armor progress (%.0f xp)" % p_v.armor_xp)
+	ok(p_v.armor_tier == 0 and p_v.armor_xp > 0.0,
+			"damage to a rival fills your armor progress (%.0f xp)" % p_v.armor_xp)
 	ok(not ArmorHud.tip(p_v).is_empty() and String(ArmorHud.tip(p_v)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
 	var hud = m.hud
@@ -357,7 +358,8 @@ func _armor_levels() -> void:
 	p_v.armor_gain(5000.0)
 	ok(p_v.armor_tier == Hunter.ARMOR_TIERS.size() - 1 and ArmorHud.tip(p_v).size() == 3,
 			"the top level is reachable and the HUD says so")
-	ok(p_v.armor_frac() == 1.0 and p_v.armor_col() == Hunter.ARMOR_TIERS[-1][1], "the bar is full in the top tier's colour")
+	ok(p_v.armor_frac() == 1.0 and p_v.armor_col() == Hunter.ARMOR_TIERS[-1][1],
+			"the bar is full in the top tier's colour")
 	ok(m.hud != null and ResourceLoader.exists("res://scripts/ui/armor_hud.gd"),
 			"the HUD has the armor badge (ArmorHud)")
 	await _drop(m)
@@ -487,7 +489,8 @@ func _gloves() -> void:
 	ok(not p_v.can_level("gear") and not p_v.level_slot("gear") and p_v.skill_pts == pts,
 			"no skill point can be spent on a glove")
 	# a worn glove casts at once: level 1, no point spent, on either key
-	ok(p_v.lvl == 1 and p_v.slot_lv.values().all(func(v): return int(v) == 0), "a fresh hunter: level 1, nothing ranked")
+	ok(p_v.lvl == 1 and p_v.slot_lv.values().all(func(v): return int(v) == 0),
+			"a fresh hunter: level 1, nothing ranked")
 	p_v.gear[0] = {"id": "grapple", "rar": 1}
 	p_v.gear[1] = {"id": "quake", "rar": 1}
 	p_v.gear_cd[0] = 0.0

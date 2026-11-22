@@ -482,7 +482,8 @@ func _surge() -> void:
 	k.go_down()
 	p_v.ult = 1.0
 	ok(KinMerge.plan(p_v) == "rescue", "with the Boki down, R does nothing but say so (plan '%s')" % KinMerge.plan(p_v))
-	ok(not KinMerge.press(p_v) and not KinMerge.active(p_v) and p_v.ult >= 1.0, "...the full meter is kept (%.2f)" % p_v.ult)
+	ok(not KinMerge.press(p_v) and not KinMerge.active(p_v) and p_v.ult >= 1.0,
+			"...the full meter is kept (%.2f)" % p_v.ult)
 	ok(KinMerge.deny_text(p_v).begins_with("Rescue "), "...and says what to do ('%s')" % KinMerge.deny_text(p_v))
 	run_for(2.0)
 	ok(p_v.ult >= 1.0 and k.state == "downed", "the meter stays full while it is down")
@@ -493,7 +494,8 @@ func _surge() -> void:
 	k.state = "bench"
 	p_v.ult = 1.0
 	ok(KinMerge.plan(p_v) == "surge", "with no Boki at all, R is a surge (plan '%s')" % KinMerge.plan(p_v))
-	ok(KinMerge.press(p_v) and KinMerge.active(p_v) and bool(p_v.merge_st.get("surge", false)), "R fires the basic surge")
+	ok(KinMerge.press(p_v) and KinMerge.active(p_v) and bool(p_v.merge_st.get("surge", false)),
+			"R fires the basic surge")
 	ok(float(p_v.merge_st["T"]) <= 4.0, "...which is short and weak (%.1fs)" % float(p_v.merge_st["T"]))
 
 # ---------------------------------------------------------------- 7. the merge with Boki as wisps (decision 0101)

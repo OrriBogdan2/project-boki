@@ -107,11 +107,11 @@ func _empowered() -> void:
 		if arch == "thief":
 			p.ak.set("primed_t", 2.0)
 		var heard := _until_hit(m, p, t)
-		var hold := t.freeze_t
+		var hold_v := t.freeze_t
 		for i in 8:
 			heard.append_array(_step_sounds(m))
-			hold = maxf(hold, t.freeze_t)
+			hold_v = maxf(hold_v, t.freeze_t)
 		p.inp["fire"] = false
 		ok("%s empowered hit: the heavy thud" % arch, heard.has("hit_heavy"), str(heard))
-		ok("%s empowered hit: holds the target" % arch, hold >= ImpactWeight.hold_s("solid") - 0.001, "%.3f" % hold)
+		ok("%s empowered hit: holds the target" % arch, hold_v >= ImpactWeight.hold_s("solid") - 0.001, "%.3f" % hold_v)
 		await done(m)

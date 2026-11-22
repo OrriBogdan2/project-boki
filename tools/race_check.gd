@@ -486,7 +486,8 @@ func _courses() -> void:
 		var worst := 0.0
 		for i in range(1, pts.size() - 1):
 			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
-		ok(worst <= float(r_v["max_turn"]), "%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
+		ok(worst <= float(r_v["max_turn"]),
+				"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
 		GardenZones.here = z
 		for plan in plans:
 			var rec := _kin(plans[plan], "Run", 0, 50.0)

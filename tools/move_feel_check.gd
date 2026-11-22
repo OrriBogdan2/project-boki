@@ -636,12 +636,12 @@ func _ground() -> void:
 		p_v.inp["move"] = Vector2(1, 0)
 		_steps(20)
 		p_v.inp["move"] = Vector2(-1, 0)
-		var tr := -1.0
+		var trap := -1.0
 		for i in 40:
 			m.step(DT)
-			if tr < 0.0 and p_v.vel.x <= -0.95 * top:
-				tr = (i + 1) * DT
-		rec("ground_reverse_t", tr)
+			if trap < 0.0 and p_v.vel.x <= -0.95 * top:
+				trap = (i + 1) * DT
+		rec("ground_reverse_t", trap)
 		# 90 degree turn
 		_reset(flat + Vector3(-2.5, 0, -2.5))
 		p_v.base_speed = top
@@ -708,10 +708,10 @@ func _haste() -> void:
 	for f in DirAccess.get_files_at("res://content/rules/warden_anim"):
 		var row: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/warden_anim/" + f))
 		var lc: Dictionary = row.get("loco", {})
-		var run := float(lc.get("run_speed", 4.6))
-		var at_run := gait.plan(run, lc, Vector2.UP, 1.0)
+		var run_v := float(lc.get("run_speed", 4.6))
+		var at_run := gait.plan(run_v, lc, Vector2.UP, 1.0)
 		for spd: float in [two, capped]:
-			var k := (gait.plan(spd, lc, Vector2.UP, 1.0) / at_run) / (spd / run)
+			var k := (gait.plan(spd, lc, Vector2.UP, 1.0) / at_run) / (spd / run_v)
 			if absf(k - 1.0) > absf(worst - 1.0):
 				worst = k
 	rec("haste_clip_rate", worst)
@@ -920,7 +920,7 @@ func _landing_carry() -> void:
 		_reset(flat + Vector3(-4.0, 0, 0))
 		p_v.inp["move"] = Vector2(1, 0)
 		_steps(20)
-		var run := _hv(p_v).length()
+		var run_v := _hv(p_v).length()
 		p_v.pos.y = flat.y + float(CARRY_CASES[c])
 		p_v.grounded = false
 		p_v.vel.y = 0.0
@@ -935,7 +935,7 @@ func _landing_carry() -> void:
 			m.step(DT)
 			if p_v.grounded:
 				break
-		rec("land_carry_%s_held" % c, _hv(p_v).length() / run)
+		rec("land_carry_%s_held" % c, _hv(p_v).length() / run_v)
 
 
 # ---------------------------------------------------------------- glide
@@ -1441,13 +1441,13 @@ func _slow_ramp() -> void:
 	p_v.haste_t = 9.0
 	var hasted := _run_up()
 	p_v.haste_t = 0.0
-	var run := _run_up()
+	var run_v := _run_up()
 	p_v.haste_t = 9.0
 	_steps(6)
 	rec("haste_land_0p1s", _hv(p_v).length() / hasted)
 	p_v.haste_t = 0.0
 	_steps(6)
-	rec("haste_end_0p1s", _hv(p_v).length() / run)
+	rec("haste_end_0p1s", _hv(p_v).length() / run_v)
 	p_v.slow_k = 0.0
 	p_v.reclass(cls_was, kit_was)
 
@@ -1840,14 +1840,14 @@ func _vault_exit() -> void:
 			m.step(DT)
 			p_v.inp["dash"] = false
 			var v := _hv(p_v).length()
-			var run := p_v.base_speed * p_v.ak.move_k()
+			var run_v := p_v.base_speed * p_v.ak.move_k()
 			peak = maxf(peak, v)
-			if v < peak and v < run - 0.05:
+			if v < peak and v < run_v - 0.05:
 				slow += 1
 			if p_v.inp["fire"] and m.shots.size() > shots:
 				gap = 0
 			if not shoot and was_rolling and p_v.roll_t <= 0.0:
-				rec("vault_exit_run", v / run)
+				rec("vault_exit_run", v / run_v)
 		p_v.inp["fire"] = false
 		if shoot:
 			rec("vault_shot_gap_frames", gap)
@@ -2358,7 +2358,7 @@ func _glide_wall() -> void:
 	var z0 := int(floor(flat.z))
 	var lv := int(w.level[w.idx(x0, z0)])
 	var gy := lv * World.LEVEL
-	var tan := [9.0, 0.0]  # worst and best along-wall share over the angled hits
+	var tan_v := [9.0, 0.0]  # worst and best along-wall share over the angled hits
 	var speed_min := 99.0
 	var flips := 0
 	var bounce := 0.0
@@ -2395,8 +2395,8 @@ func _glide_wall() -> void:
 			if deg > 0.0 and r["hit"]:
 				var row := [tag, r["tan"], r["tan0"], r["slow"]]
 				print("MFEEL %s: along-wall %.2fx of %.2f m/s, slowest %.2f m/s" % row)
-				tan[0] = minf(tan[0], r["tan"])
-				tan[1] = maxf(tan[1], r["tan"])
+				tan_v[0] = minf(tan_v[0], r["tan"])
+				tan_v[1] = maxf(tan_v[1], r["tan"])
 				speed_min = minf(speed_min, r["slow"])
 				flips += int(r["flips"])
 		if not rock.is_empty():
@@ -2405,8 +2405,8 @@ func _glide_wall() -> void:
 			w.level[c[0]] = c[1]
 			w.kind[c[0]] = c[2]
 			w.walls.erase(c[0])
-	rec("glide_wall_tangent_lo", tan[0])
-	rec("glide_wall_tangent_hi", tan[1])
+	rec("glide_wall_tangent_lo", tan_v[0])
+	rec("glide_wall_tangent_hi", tan_v[1])
 	rec("glide_wall_speed_min", speed_min)
 	rec("glide_wall_flips", float(flips))
 	rec("glide_wall_bounce_mps", bounce)

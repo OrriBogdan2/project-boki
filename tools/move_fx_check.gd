@@ -250,7 +250,7 @@ func _at_wall(h: Hunter, ev: String) -> void:
 ## The ring/disc/burst types the event added, as short labels.
 func _spawned(m: Match, hero: String, before: Dictionary, flashes0: int) -> Array:
 	var out: Array = []
-	var h: Hunter = flow.hunter
+	var _h: Hunter = flow.hunter
 	var all_rings: Array = m.fx.rings.slice(int(before["rings"]))
 	var rings := 0
 	for r: Dictionary in all_rings:

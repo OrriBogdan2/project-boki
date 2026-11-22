@@ -87,8 +87,8 @@ func _peak(brk: WardenBreak) -> float:
 	for i in 50:
 		var u := i / 50.0
 		var turned := 0.0
-		for tr in brk.tracks:
-			turned += (tr["rot"] as Vector3).length() * WardenBreak.amount(tr, u)
+		for trap in brk.tracks:
+			turned += (trap["rot"] as Vector3).length() * WardenBreak.amount(trap, u)
 		if turned > best:
 			best = turned
 			peak = u
@@ -101,8 +101,8 @@ func _moves_bones(id: String, model: Node3D, sync: Node, brk: WardenBreak) -> vo
 	_run(model, sync, _state(), WardenBreak.WAIT + brk.dur * _peak(brk))
 	var skel: Skeleton3D = brk.skel
 	var with := {}
-	for tr in brk.tracks:
-		with[tr["bone"]] = skel.get_bone_global_pose(int(tr["bone"])).basis.get_rotation_quaternion()
+	for trap in brk.tracks:
+		with[trap["bone"]] = skel.get_bone_global_pose(int(trap["bone"])).basis.get_rotation_quaternion()
 	sync.set("idle_break", null)
 	sync.call("_process", DT)
 	var worst := 0.0

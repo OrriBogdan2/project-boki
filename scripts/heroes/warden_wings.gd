@@ -33,7 +33,7 @@ var rng := 0
 
 
 ## The Hero's wings, or null when its data has none. `seed` keeps each character's idle raises on their own clock.
-static func make(cfg: Dictionary, seed: int) -> WardenWings:
+static func make(cfg: Dictionary, seed_v: int) -> WardenWings:
 	if cfg.is_empty():
 		return null
 	var w := WardenWings.new()
@@ -50,7 +50,7 @@ static func make(cfg: Dictionary, seed: int) -> WardenWings:
 	w.air_delay_s = float(cfg.get("air_delay_s", w.air_delay_s))
 	w.flutter = float(cfg.get("flutter", w.flutter))
 	w.flutter_hz = float(cfg.get("flutter_hz", w.flutter_hz))
-	w.rng = seed & 0x7fffffff
+	w.rng = seed_v & 0x7fffffff
 	w.idle_t = w._range(w.gap) * 0.5  # (the first raise comes a little sooner)
 	return w
 

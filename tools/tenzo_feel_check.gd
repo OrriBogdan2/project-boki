@@ -199,12 +199,12 @@ func _hop() -> void:
 		if up_t < 0.0 and p.vel.y < 0.0 and k.slam.hops == 1:
 			up_t = air_t
 		prev = p.pos
-	var n := path.size()
+	var n_v := path.size()
 	var early := 0.0
 	var late := 0.0
-	for i in n / 5:
+	for i in n_v / 5:
 		early += float(path[i + 1])
-		late += float(path[n - 2 - i])
+		late += float(path[n_v - 2 - i])
 	ok(
 		"RMB: the hop's ground speed eases (fast off the ground, settling into the landing)",
 		early > late * 2.0,

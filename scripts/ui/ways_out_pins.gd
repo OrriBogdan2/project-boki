@@ -71,9 +71,9 @@ static func seat_dir(m: Match, sz: Vector2, i: int, sd: Array, at: Vector3) -> V
 ## Metres from the player in to the Blight's wall, or -1: no ring yet, or the player is out past it (HeartHud
 ## tints the screen there).
 static func wall_gap(m: Match) -> float:
-	var tr := Heart.tide_r(m)
-	var d := tr - m.player.flat_dist(m.heart.site)
-	return d if tr > 0.0 and d >= 0.0 else -1.0
+	var trap := Heart.tide_r(m)
+	var d := trap - m.player.flat_dist(m.heart.site)
+	return d if trap > 0.0 and d >= 0.0 else -1.0
 
 
 ## The screen direction of the wall's bar, or ZERO for none (no wall within WALL_M, or its nearest stretch is on

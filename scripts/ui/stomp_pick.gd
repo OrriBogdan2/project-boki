@@ -125,11 +125,11 @@ class Stage:
 
 	## The anim state at the stage's clock, which it advances by `dt`.
 	func state(dt: float) -> Dictionary:
-		var len: float = Life.R["stomp_time"]
+		var n_len: float = Life.R["stomp_time"]
 		var cyc: float = Life.R["stomp_cycle"]
-		t = fmod(t + dt, len + PAUSE)
+		t = fmod(t + dt, n_len + PAUSE)
 		var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(hunter_id), "stomp": -1.0}
-		if t < len:
+		if t < n_len:
 			s["stomp"] = fmod(t, cyc) / cyc
 			s["stomp_n"] = int(t / cyc)
 			s["stomp_style"] = style_id if style_id != "" else StompLook.default_for(hunter_id)

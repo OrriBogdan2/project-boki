@@ -111,8 +111,8 @@ func _grow(root: Node3D, n: int) -> void:
 		Models.part(slot, Models.box(1.0, 0.28, 1.0), mats[0], Vector3(0, -0.14, 0))
 		Models.part(slot, Models.cyl(0.45, 0.05, 0.6, 6), mats[1], Vector3(0, -0.55, 0))
 		for j in 2:
-			var crack := Models.box(Verbs.BRIDGE_CRACK_W, 0.02, 1.15)
-			Models.part(slot, crack, mats[2], Vector3(0, 0.015, 0)).visible = false
+			var crack_v := Models.box(Verbs.BRIDGE_CRACK_W, 0.02, 1.15)
+			Models.part(slot, crack_v, mats[2], Vector3(0, 0.015, 0)).visible = false
 		for c in slot.get_children():
 			(c as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		slot.visible = false
