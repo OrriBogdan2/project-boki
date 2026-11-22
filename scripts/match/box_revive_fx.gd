@@ -7,12 +7,13 @@ extends RefCounted
 ## Driven by the box's rev_prog / rev_by while Match._update_box_hums has it on, so the same fx show
 ## for a local channel and a remote one (BoxRevive.mirror_remote).
 
-const CHEST_Y := 1.0        # m above the reviver's feet where the tether starts
-const TETHER_W := 0.06      # m: thin, but still a line from 25 m at match zoom
-const CORE_R := 0.24        # m: the full core, just inside the soul's 0.28 m halo
-const CORE_MIN := 0.12      # core scale at 0 % so a fresh channel already shows a dot
-const RISE_M := 1.4         # m the soul rises on completion
-const RISE_S := 0.45        # s the rise takes while it fades
+const CHEST_Y := 1.0  # m above the reviver's feet where the tether starts
+const TETHER_W := 0.06  # m: thin, but still a line from 25 m at match zoom
+const CORE_R := 0.24  # m: the full core, just inside the soul's 0.28 m halo
+const CORE_MIN := 0.12  # core scale at 0 % so a fresh channel already shows a dot
+const RISE_M := 1.4  # m the soul rises on completion
+const RISE_S := 0.45  # s the rise takes while it fades
+
 
 ## One step while a box revive is on: places the tether and sizes the core.
 static func place(m: Match, b: Dictionary, prog: float) -> void:
@@ -40,6 +41,7 @@ static func place(m: Match, b: Dictionary, prog: float) -> void:
 	core.visible = true
 	core.scale = Vector3.ONE * lerpf(CORE_MIN, 1.0, clampf(prog, 0.0, 1.0))
 
+
 ## The channel stopped (done, interrupted, or the reviver left): tether and core go.
 static func clear(b: Dictionary) -> void:
 	var tether := b.get("tether_node") as Node3D
@@ -50,6 +52,7 @@ static func clear(b: Dictionary) -> void:
 	var core := soul.get_node_or_null("Core") if soul else null
 	if core:
 		(core as Node3D).visible = false
+
 
 ## The revive completed: a full core in the reviver's colour lifts off the box and fades.
 static func rise(m: Match, b: Dictionary, by: Hunter) -> void:
@@ -67,9 +70,11 @@ static func rise(m: Match, b: Dictionary, by: Hunter) -> void:
 	tw.tween_method(func(c: Color): mat.set_shader_parameter("color", c), col, Color(col, 0.0), RISE_S)
 	tw.chain().tween_callback(orb.queue_free)
 
+
 static func _soul(b: Dictionary) -> Node3D:
 	var n := b.get("node") as Node3D
 	return n.get_node_or_null("Soul") as Node3D if n and is_instance_valid(n) else null
+
 
 static func _build_tether(m: Match, col: Color) -> Node3D:
 	var root := Node3D.new()
@@ -80,6 +85,7 @@ static func _build_tether(m: Match, col: Color) -> Node3D:
 	line.name = "Line"
 	line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
+
 
 ## The soft column of light and the ring on the ground over a box while it's being revived.
 static func ray(m: Match, b: Dictionary, on: bool) -> void:
@@ -107,6 +113,7 @@ static func ray(m: Match, b: Dictionary, on: bool) -> void:
 	elif not on and n != null and is_instance_valid(n):
 		(n as Node).queue_free()
 		b.erase("ray_node")
+
 
 static func ray_tick(m: Match, b: Dictionary, prog: float) -> void:
 	var n = b.get("ray_node")

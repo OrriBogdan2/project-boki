@@ -339,7 +339,7 @@ static func _tick_remote(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	_update_fx(m, h, k, st, clampf(float(st["t"]) / float(rules()["scan_s"]), 0.0, 1.0))
 
 # ------------------------------------------------------------------ how it looks and sounds
-static func _start_fx(m, h: Hunter, k: Kin, st: Dictionary) -> void:
+static func _start_fx(m, h: Hunter, _k: Kin, st: Dictionary) -> void:
 	var root := Node3D.new()
 	root.name = "ScanBeam"
 	m.add_child(root)
@@ -370,7 +370,7 @@ static func _update_fx(m, h: Hunter, k: Kin, st: Dictionary, frac: float) -> voi
 		var spark := k.pos + Vector3(randf_range(-0.3, 0.3), 0.3 + frac * 1.2, randf_range(-0.3, 0.3))
 		m.fx.burst(spark, beam_col(h), 1, 1.2, 0.5, -3.0, 0.6)
 
-static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
+static func _stop_fx(_m, _h: Hunter, st: Dictionary) -> void:
 	var root = st.get("beam")
 	if root is Node3D and is_instance_valid(root):
 		(root as Node3D).queue_free()

@@ -4,20 +4,22 @@ extends RefCounted
 ## drop-map spawn category has one; a line shows for the whole session its word is first seen in, then
 ## never again, and not at all with hints off; the Relics page's mastery list carries it the first time.
 
-const LINE_MAX := 70           # chars: a panel line under a heading
-const LEGEND_MAX := 34         # chars: the drop map's legend is about this wide at 11 px
+const LINE_MAX := 70  # chars: a panel line under a heading
+const LEGEND_MAX := 34  # chars: the drop map's legend is about this wide at 11 px
 ## Words the glossary pass replaced with plain words, and the file each one was shown from.
 const REPLACED := {
-	"scripts/ui/full_map.gd": ["\"Drop leader\"", "\"Pass the lead\""],
-	"scripts/home/home.gd": ["\"Boki at risk\""],
+	"scripts/ui/full_map.gd": ['"Drop leader"', '"Pass the lead"'],
+	"scripts/home/home.gd": ['"Boki at risk"'],
 }
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("GLOSSARY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -30,6 +32,7 @@ func run(main: Node) -> void:
 	print("GLOSSARY CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _lines() -> void:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(Glossary.RULES_PATH))
 	ok(typeof(parsed) == TYPE_DICTIONARY and parsed.has("lines"), "glossary.json parses")
@@ -39,11 +42,14 @@ func _lines() -> void:
 	for word in lines:
 		var line := String(lines[word])
 		var most := LEGEND_MAX if legend_words.has(word) else LINE_MAX
-		ok(line != "" and not line.contains("\n") and line.length() <= most,
-				"%s: one line of %d chars (at most %d)" % [word, line.length(), most])
+		ok(
+			line != "" and not line.contains("\n") and line.length() <= most,
+			"%s: one line of %d chars (at most %d)" % [word, line.length(), most]
+		)
 		ok(retired.search(line) == null, "%s: no retired term" % word)
 	for word in legend_words:
 		ok(lines.has(word), "the drop map's '%s' has a first-time line" % word)
+
 
 func _sessions() -> void:
 	Settings.set_v("tips", false, false)
@@ -57,17 +63,20 @@ func _sessions() -> void:
 	Glossary.new_session()
 	ok(Glossary.first_line("Vault") == "", "the next session: gone")
 
+
 func _mastery_note() -> void:
 	var id := Arch.of_save()
 	ok(_has_note(ClassCard.mastery_list(id)), "Relics page, first visit: the mastery list explains Mastery")
 	Glossary.new_session()
 	ok(not _has_note(ClassCard.mastery_list(id)), "Relics page, a later session: no line")
 
+
 func _has_note(list: Control) -> bool:
 	var line := String(JSON.parse_string(FileAccess.get_file_as_string(Glossary.RULES_PATH))["lines"]["Mastery"])
 	var found := list.get_children().any(func(ch): return ch is Label and (ch as Label).text == line)
 	list.free()
 	return found
+
 
 func _replaced() -> void:
 	for path in REPLACED:
