@@ -13,7 +13,7 @@ extends RefCounted
 ## Runs with a temporary XDG_DATA_HOME (it writes user://settings.cfg). Never touches the save.
 
 const DT := 1.0 / 60.0
-const MIN_APART := 0.16      # distance in simulated sRGB between two sides that must read as different
+const MIN_APART := 0.16  # distance in simulated sRGB between two sides that must read as different
 ## The standard palette's you, squad and rim: only SideColor holds them.
 const COPIES := ["9be36e", "63c7ff", "ff2d55", "ff5d78", "ffb4c0", "9fb0d8", "8a3a4a", "f4fbff"]
 ## The Ways Out's neutral colours (SideColor.tone) that must stay off the squad's and the rivals' colours.
@@ -29,10 +29,12 @@ const MODES := {"default": [], "red_green": ["protan", "deutan"], "tritan": ["tr
 
 var bad := 0
 
+
 func ok(what: String, cond: bool, extra := "") -> void:
 	print("COLOURVISION %s %s %s" % ["ok  " if cond else "FAIL", what, extra])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -46,6 +48,7 @@ func run(main: Node) -> void:
 	print("COLOURVISION DONE, palette %s, failures: %d" % [pick, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 # ------------------------------------------------------------------ 1. the settings file
 func _loaded(main: Node, cf: ConfigFile) -> String:
 	cf.save(Settings.path)
@@ -57,6 +60,7 @@ func _loaded(main: Node, cf: ConfigFile) -> String:
 	main.remove_child(fresh)
 	fresh.free()
 	return got
+
 
 func _settings_file(main: Node) -> void:
 	var keep := ConfigFile.new()
@@ -80,6 +84,7 @@ func _settings_file(main: Node) -> void:
 	else:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 
+
 # ------------------------------------------------------------------ 2. the palettes
 static func simulate(c: Color, mode: String) -> Color:
 	var lin := [c.srgb_to_linear().r, c.srgb_to_linear().g, c.srgb_to_linear().b]
@@ -88,8 +93,10 @@ static func simulate(c: Color, mode: String) -> Color:
 		out.append(clampf(row[0] * lin[0] + row[1] * lin[1] + row[2] * lin[2], 0.0, 1.0))
 	return Color(out[0], out[1], out[2]).linear_to_srgb()
 
+
 func _apart(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+
 
 func _palettes() -> void:
 	ok("every palette is named", SideColor.ORDER.all(func(id): return SideColor.NAMES.has(id)))
@@ -99,8 +106,10 @@ func _palettes() -> void:
 		var sides := [p["you"], p["ally"], p["foe"]]
 		var distinct: bool = sides[0] != sides[1] and sides[1] != sides[2] and sides[0] != sides[2]
 		ok("%s: you, squad and rivals differ" % id, distinct)
-		ok("%s: the squad colours avoid the rivals'" % id,
-			(p["mates"] as Array).all(func(c): return _apart(c, p["foe"]) > MIN_APART))
+		ok(
+			"%s: the squad colours avoid the rivals'" % id,
+			(p["mates"] as Array).all(func(c): return _apart(c, p["foe"]) > MIN_APART)
+		)
 		for mode in MODES[id]:
 			var s := {}
 			for k in ["you", "ally", "foe"]:
@@ -113,13 +122,16 @@ func _palettes() -> void:
 				mate_worst = minf(mate_worst, _apart(simulate(c, mode), s["foe"]))
 			ok("%s under %s: squad colours stay off rivals" % [id, mode], mate_worst > MIN_APART, "(%.2f)" % mate_worst)
 
+
 ## A palette's tone as SideColor.tone would give it with that palette picked.
 func _tone(id: String, key: String) -> Color:
 	var p: Dictionary = SideColor.PALETTES[id]
 	return p[key] if p.has(key) else SideColor.PALETTES["default"][key]
 
+
 func _see(c: Color, mode: String) -> Color:
 	return c if mode == "" else simulate(c, mode)
+
 
 ## 4a. the way-out tones apart from the sides, as seen plain and under each simulation the palette answers to.
 func _ways_tones() -> void:
@@ -137,12 +149,16 @@ func _ways_tones() -> void:
 					worst = minf(worst, _apart(seen[k], c))
 				for mate in p["mates"] if k in ["heart", "gate"] else []:
 					worst = minf(worst, _apart(seen[k], _see(mate, mode)))
-			ok(what + "seat, Heart and Gate tones stay off the squad's and the rivals' colours", worst > MIN_APART,
-				"(%.2f)" % worst)
+			ok(
+				what + "seat, Heart and Gate tones stay off the squad's and the rivals' colours",
+				worst > MIN_APART,
+				"(%.2f)" % worst
+			)
 			var states: Array = [seen["seat_open"], seen["seat_locked"], seen["seat_lost"]]
 			var gap := minf(_apart(states[0], states[1]), _apart(states[0], states[2]))
 			gap = minf(gap, _apart(states[1], states[2]))
 			ok(what + "open, locked and lost seats stay apart", gap > MIN_APART)
+
 
 # ------------------------------------------------------------------ 3. the users
 ## No script but SideColor spells out the standard palette's side colours.
@@ -152,6 +168,7 @@ func _copies() -> void:
 		_scan(dir, hits)
 	ok("no side colour is copied outside SideColor", hits.is_empty(), str(hits))
 
+
 func _scan(dir: String, hits: Array) -> void:
 	for f in DirAccess.get_files_at(dir):
 		var path := dir + "/" + f
@@ -159,13 +176,15 @@ func _scan(dir: String, hits: Array) -> void:
 			continue
 		var src := FileAccess.get_file_as_string(path)
 		for hex in COPIES:
-			if src.contains("\"%s\"" % hex):
+			if src.contains('"%s"' % hex):
 				hits.append("%s %s" % [path, hex])
 	for d in DirAccess.get_directories_at(dir):
 		_scan(dir + "/" + d, hits)
 
+
 func _same(a: Color, b: Color) -> bool:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.02
+
 
 func _users(main: Node) -> void:
 	var m := Match.new()
@@ -180,8 +199,10 @@ func _users(main: Node) -> void:
 	var foe: Hunter = null
 	for h in m.hunters:
 		h.ctrl = "idle"
-		if h != me and h.team == me.team: mate = h
-		elif h.team != me.team: foe = h
+		if h != me and h.team == me.team:
+			mate = h
+		elif h.team != me.team:
+			foe = h
 	for id in SideColor.ORDER:
 		Settings.v[SideColor.KEY] = id
 		var p: Dictionary = SideColor.PALETTES[id]
@@ -207,9 +228,11 @@ func _users(main: Node) -> void:
 	main.remove_child(m)
 	m.queue_free()
 
+
 ## A way-out seat as the strip and the maps read it (WaysOutHud.seats), seen by the squad `viewer`.
 func _seat(st: int, team: int, viewer: int) -> Dictionary:
 	return {"name": "LAIR", "st": st, "t": 60.0, "team": team, "viewer": viewer}
+
 
 ## 4b. the way-out users under one palette: squad and rival seats by colour and by label and shape; the neutral
 ## tones, the Heart, the tide and the uplink beam from the palette.
@@ -217,27 +240,43 @@ func _ways_users(m: Match, me: Hunter, mate: Hunter, foe: Hunter, id: String, ta
 	var p: Dictionary = SideColor.PALETTES[id]
 	var ours := WaysOutLook.read(m, WaysOutLook.St.IN_USE, mate.team, 0.0, 1.0)
 	var theirs := WaysOutLook.read(m, WaysOutLook.St.IN_USE, foe.team, 0.0, 1.0)
-	ok(tag + "seat beacon: your squad's colour and a rival's",
-		_same(WaysOutLook.color_of(ours), p["ally"]) and _same(WaysOutLook.color_of(theirs), p["foe"]))
-	ok(tag + "seat beacon: a label tells them apart",
-		WaysOutLook.tag(ours) == WaysOutLook.WORD_MINE and WaysOutLook.tag(theirs) == WaysOutLook.WORD_RIVAL)
+	ok(
+		tag + "seat beacon: your squad's colour and a rival's",
+		_same(WaysOutLook.color_of(ours), p["ally"]) and _same(WaysOutLook.color_of(theirs), p["foe"])
+	)
+	ok(
+		tag + "seat beacon: a label tells them apart",
+		WaysOutLook.tag(ours) == WaysOutLook.WORD_MINE and WaysOutLook.tag(theirs) == WaysOutLook.WORD_RIVAL
+	)
 	for st in [WaysOutHud.St.USE, WaysOutHud.St.TAKEN]:
-		var dim := 0.25 if st == WaysOutHud.St.TAKEN else 0.0      # (a taken seat is its squad's colour, darker)
+		var dim := 0.25 if st == WaysOutHud.St.TAKEN else 0.0  # (a taken seat is its squad's colour, darker)
 		var sm := _seat(st, mate.team, me.team)
 		var sr := _seat(st, foe.team, me.team)
-		ok(tag + "strip st %d: word and pip shape tell squad from rival" % st,
-			WaysOutHud.state_word(sm) != WaysOutHud.state_word(sr)
-			and WaysOutHud.rival(sr) and not WaysOutHud.rival(sm))
-		ok(tag + "map st %d: the squad's colour and the rival's" % st,
-			_same(WaysOutMap.color_of(sm), (p["ally"] as Color).darkened(dim))
-			and _same(WaysOutMap.color_of(sr), (p["foe"] as Color).darkened(dim)))
+		ok(
+			tag + "strip st %d: word and pip shape tell squad from rival" % st,
+			WaysOutHud.state_word(sm) != WaysOutHud.state_word(sr) and WaysOutHud.rival(sr) and not WaysOutHud.rival(sm)
+		)
+		ok(
+			tag + "map st %d: the squad's colour and the rival's" % st,
+			(
+				_same(WaysOutMap.color_of(sm), (p["ally"] as Color).darkened(dim))
+				and _same(WaysOutMap.color_of(sr), (p["foe"] as Color).darkened(dim))
+			)
+		)
 		ok(tag + "map st %d: the words say whose" % st, WaysOutMap.word(0, sm) != WaysOutMap.word(0, sr))
 	var neutral := {
-		WaysOutHud.St.LOCKED: "seat_locked", WaysOutHud.St.OPEN: "seat_open", WaysOutHud.St.LOST: "seat_lost"}
+		WaysOutHud.St.LOCKED: "seat_locked", WaysOutHud.St.OPEN: "seat_open", WaysOutHud.St.LOST: "seat_lost"
+	}
 	for st in neutral:
 		ok(tag + "map: a %s seat" % neutral[st], WaysOutMap.color_of(_seat(st, -1, me.team)) == _tone(id, neutral[st]))
-	ok(tag + "the Heart, its Gate and the tide", Heart.col() == _tone(id, "heart")
-		and Heart.gate_col() == _tone(id, "gate") and SideColor.tone("tide") == _tone(id, "tide"))
+	ok(
+		tag + "the Heart, its Gate and the tide",
+		(
+			Heart.col() == _tone(id, "heart")
+			and Heart.gate_col() == _tone(id, "gate")
+			and SideColor.tone("tide") == _tone(id, "tide")
+		)
+	)
 	var up := {"state": "charging", "team": foe.team, "contested": false}
 	var beam: Color = ExitSignal.colors(up, ExitSignal.ACTIVE, -1, 1.0, me.team)[0]
 	ok(tag + "an uplink's beam: a rival's colour", _same(Color(beam, 1.0), p["foe"]))

@@ -12,21 +12,22 @@ extends RefCounted
 ## KinNet "scoop"/"round") are positional at its spot and not part of this.
 
 const KINDS := ["ult", "boki", "low", "knock"]
-const COOLDOWN_S := 6.0     # s: least time between two barks of one Hunter (match time)
-const LOW_SHARE := 0.3      # share of max health: dropping under it barks "low"
-const REARM_SHARE := 0.5    # share of max health: back over it, the next drop under LOW_SHARE barks again
-const ALERT := "ui_extract_fail"   # the UI set's low double-note, 0.65 s: your Boki is down
-const ALERT_DB := -4.0      # dB: the owner's alert, about the level of the hurt and downed voice lines
-const TICK := "ui_tab"      # the UI set's short click: a teammate's Boki is down
-const TICK_DB := -14.0      # dB: a tick, no louder
-const ALERT_GAP_S := 4.0    # s: a second down of one owner's Boki inside it makes no second alert (match time)
-const VOL_DB := -4.0        # dB: the level of the hurt and downed voice lines (HeroSfx.voice)
+const COOLDOWN_S := 6.0  # s: least time between two barks of one Hunter (match time)
+const LOW_SHARE := 0.3  # share of max health: dropping under it barks "low"
+const REARM_SHARE := 0.5  # share of max health: back over it, the next drop under LOW_SHARE barks again
+const ALERT := "ui_extract_fail"  # the UI set's low double-note, 0.65 s: your Boki is down
+const ALERT_DB := -4.0  # dB: the owner's alert, about the level of the hurt and downed voice lines
+const TICK := "ui_tab"  # the UI set's short click: a teammate's Boki is down
+const TICK_DB := -14.0  # dB: a tick, no louder
+const ALERT_GAP_S := 4.0  # s: a second down of one owner's Boki inside it makes no second alert (match time)
+const VOL_DB := -4.0  # dB: the level of the hurt and downed voice lines (HeroSfx.voice)
 
-var plays := []             # [kind, hunter nid] per bark played this match (--match-audio-check reads it)
-var _last := {}             # hunter nid -> match time of its last bark
-var _alert_last := {}       # hunter nid of a Boki's owner -> match time of its last alert or tick
+var plays := []  # [kind, hunter nid] per bark played this match (--match-audio-check reads it)
+var _last := {}  # hunter nid -> match time of its last bark
+var _alert_last := {}  # hunter nid of a Boki's owner -> match time of its last alert or tick
 var _ult_was_ready := true  # true at the start, so a match that opens with the ultimate ready stays quiet
 var _low_armed := true
+
 
 ## Watches your ultimate and your health once per step.
 func tick(m: Match) -> void:
@@ -43,9 +44,11 @@ func tick(m: Match) -> void:
 		_low_armed = false
 		_bark(m, p, "low")
 
+
 ## You knocked a rival (Match._reward_moment).
 func knock_landed(m: Match) -> void:
 	_bark(m, m.player, "knock")
+
 
 ## A Boki went down, in this game (Match.on_kin_down) or another (KinNet "down"): its owner calls it and you hear
 ## the alert; a teammate's Boki only ticks.
@@ -66,6 +69,7 @@ func boki_down(m: Match, k: Kin) -> void:
 		Sfx.play(ALERT, null, ALERT_DB, 0.02)
 	else:
 		Sfx.play(TICK, null, TICK_DB, 0.02)
+
 
 func _bark(m: Match, h: Hunter, kind: String) -> void:
 	if h == null or h.downed or h.out or not bool(Settings.get_v("hunter_barks")):
