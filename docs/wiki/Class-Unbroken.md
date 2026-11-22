@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | the Unbroken |
 | Base character | Kael, male |
-| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. His arms do not match. His sword hand is dark blood-red with ember-bright orange veins, and the demon in his blade changes whichever hand holds it. The first sword hand changed too far, so he swapped hands: once the demon let go, that arm settled into a slightly lighter red with white veins, and the new sword hand is going the same way. The Blight burned the veins into both arms (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 
@@ -93,7 +93,7 @@ What the in-game kit card (K) says.
 
 **Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (6 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press it again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter or kill a monster with it and it is ready again at once.
+**Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Raise a gold guard for 0.65s, keeping the speed you cast it at (a run eases off, a rise gets a lift): nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter or kill a monster with it and it is ready again at once.
 
 ### Ranks
 
