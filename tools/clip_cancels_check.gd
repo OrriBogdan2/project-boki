@@ -260,13 +260,13 @@ func _feed_state(main: Node) -> void:
 	ac.main = main
 	var r: Array = ac.setup("bulwark", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	P.ak.play("bul_guard")
-	P._anim_state(1.0)
-	var shown := String(P.anim_s.get("kmove", "")) == "bul_guard"
-	P.ak.anim_id = ""
-	P._anim_state(1.0)
-	var left := String(P.anim_s.get("kmove", ""))
+	var p: Hunter = r[1]
+	p.ak.play("bul_guard")
+	p._anim_state(1.0)
+	var shown := String(p.anim_s.get("kmove", "")) == "bul_guard"
+	p.ak.anim_id = ""
+	p._anim_state(1.0)
+	var left := String(p.anim_s.get("kmove", ""))
 	ok(
 		shown and left == "",
 		"a kit move the kit cuts leaves the hunter's anim state at once (shown %s, left '%s')" % [shown, left]

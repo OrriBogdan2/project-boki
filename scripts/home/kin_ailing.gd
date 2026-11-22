@@ -4,6 +4,16 @@ extends RefCounted
 ## pose) and a perk-up when it is well again. The cures themselves are Care's
 ## (RECOVER_*, Care.tick, Care.feed).
 
+## Forward lean of the body, radians: weak, sick (0 when well).
+const DROOP_WEAK := 0.15
+const DROOP_SICK := 0.30
+
+## How fast the body eases to its lean, per second.
+const DROOP_RATE := 4.0
+
+## A hop is this much smaller while it is ailing.
+const HOP_SCALE := 0.4
+
 
 ## A friend is another Boki this close (FarmChatter.FRIEND_R): it keeps a sick one company and speeds the cure.
 static func friend_near(kins: Array, k: Dictionary) -> bool:
@@ -13,15 +23,6 @@ static func friend_near(kins: Array, k: Dictionary) -> bool:
 		if o != k and not o.has("indoors") and (o["pos"] as Vector3).distance_to(k["pos"]) < FarmChatter.FRIEND_R:
 			return true
 	return false
-
-
-## Forward lean of the body, radians: weak, sick (0 when well).
-const DROOP_WEAK := 0.15
-const DROOP_SICK := 0.30
-## How fast the body eases to its lean, per second.
-const DROOP_RATE := 4.0
-## A hop is this much smaller while it is ailing.
-const HOP_SCALE := 0.4
 
 
 ## Every frame, after the walk bob: lean forward and hop less while ailing, ease back upright when well.

@@ -11,8 +11,8 @@ static func kinds_of(spk: String) -> Array:
 	var out := []
 	var kinds: Dictionary = TerrainHazards.rules()["kinds"]
 	for kind in kinds:
-		var C: Dictionary = kinds[kind].get("counter", {})
-		if theme in C.get("themes", []) or spk in C.get("kin", []):
+		var c: Dictionary = kinds[kind].get("counter", {})
+		if theme in c.get("themes", []) or spk in c.get("kin", []):
 			out.append(kind)
 	return out
 

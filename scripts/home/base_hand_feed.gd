@@ -8,14 +8,14 @@ extends RefCounted
 ## the states (Approach, HandEat, Done), this file the rules around them. Tuning: base_life.json "hand".
 
 var h  # the home (home.gd)
-var R: Dictionary  # base_life.json "hand"
+var r: Dictionary  # base_life.json "hand"
 var shy_trust: float  # base_life.json whistle.shy_trust: under it a Boki is shy of your hand
 var snack := ""  # the selected snack ("" for none)
 
 
 func _init(home, rules: Dictionary) -> void:
 	h = home
-	R = rules["hand"]
+	r = rules["hand"]
 	shy_trust = float(rules["whistle"]["shy_trust"])
 
 
@@ -27,7 +27,7 @@ static func hint() -> String:
 ## Snacks in the pantry that go in a hand: the stall foods and the crops, as the Feed menu lists them.
 static func options() -> Array:
 	var out: Array = []
-	for f in Care.FOODS:
+	for f in Care.foods_v:
 		if Econ.pantry(String(f)) > 0 and not GardenItems.has(String(f)):
 			out.append(String(f))
 	for f in Data.CROPS:
@@ -64,7 +64,7 @@ func offer(k: Dictionary) -> bool:
 		return true
 	if not m.go(BaseLife.S.APPROACH, "hand"):
 		return false
-	var asked := _now() - float(k.get("hand_shy", -1.0e9)) < float(R["shy_window_s"])
+	var asked := _now() - float(k.get("hand_shy", -1.0e9)) < float(r["shy_window_s"])
 	k["hand"] = {"food": snack, "shy": float(k["rec"]["trust"]) < shy_trust and not asked, "res": {}, "bit": null}
 	return true
 
@@ -73,10 +73,10 @@ func offer(k: Dictionary) -> bool:
 func approach(k: Dictionary, m: Fsm) -> void:
 	var e: Dictionary = k["hand"]
 	var to := Vector2(h.ppos.x - k["pos"].x, h.ppos.z - k["pos"].z)
-	var stop := float(R["shy_stop_m"] if e["shy"] else R["slot_m"])
+	var stop := float(r["shy_stop_m"] if e["shy"] else r["slot_m"])
 	k["goal"] = h.ppos - Vector3(to.x, 0, to.y).normalized() * stop
-	if to.length() > stop + float(R["arrive_m"]):
-		if m.since >= float(R["give_up_s"]):
+	if to.length() > stop + float(r["arrive_m"]):
+		if m.since >= float(r["give_up_s"]):
 			m.go(BaseLife.S.DONE, "gave up")
 		return
 	_face(k)
@@ -97,7 +97,7 @@ func approach(k: Dictionary, m: Fsm) -> void:
 		m.go(BaseLife.S.DONE, "sniffed")
 		return
 	Econ._take_pantry(food)  # the snack leaves the pantry once, here
-	rec["trust"] = clampf(float(rec["trust"]) + float(R["trust"]), 0.0, 100.0)
+	rec["trust"] = clampf(float(rec["trust"]) + float(r["trust"]), 0.0, 100.0)
 	e["res"] = res
 	e["bit"] = _bit(k, food)
 	m.go(BaseLife.S.HAND_EAT, "eats")
@@ -106,7 +106,7 @@ func approach(k: Dictionary, m: Fsm) -> void:
 ## HandEat: a short beat at your hand, then the usual reaction to a meal (joy, lean, a line, a toast).
 func eat(k: Dictionary, m: Fsm) -> void:
 	_face(k)
-	if m.since < float(R["eat_s"]):
+	if m.since < float(r["eat_s"]):
 		return
 	var e: Dictionary = k["hand"]
 	m.go(BaseLife.S.DONE, "ate")
@@ -117,7 +117,7 @@ func eat(k: Dictionary, m: Fsm) -> void:
 
 ## Done: a moment to enjoy it (or turn away), then back to its day.
 func done(m: Fsm) -> void:
-	if m.since >= float(R["done_s"]):
+	if m.since >= float(r["done_s"]):
 		m.go(BaseLife.S.ROAM, "fed")
 
 

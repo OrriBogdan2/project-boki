@@ -17,6 +17,8 @@ const TICK_S := 0.5  # s between drowning or scratch hits
 const FX_S := 0.35  # s between splashes or sparks at the feet of someone moving through
 const HINT_DIRS := 8  # directions the Boki looks for a hazard nearby
 
+const FEET_FX := {"lava": "ff9a3a", "deep_water": "cfeaff", "ice": "f4fcff", "static": "fff27a", "bramble": "8ac04a"}
+
 static var _rules := {}
 
 var m: Match
@@ -51,9 +53,9 @@ func _init(match_node: Match) -> void:
 	w = m.world
 	cell.resize(w.w * w.h)
 	cell.fill(0)
-	for D in World.load_layout(w.layout_id).get("islands", []):
-		for A in D.get("hazard_areas", []):
-			_add_area(String(A["kind"]), A["poly"])
+	for d in World.load_layout(w.layout_id).get("islands", []):
+		for a in d.get("hazard_areas", []):
+			_add_area(String(a["kind"]), a["poly"])
 
 
 # ------------------------------------------------------------------ the areas
@@ -83,7 +85,7 @@ func _add_area(kind: String, pts: Array) -> void:
 		return
 	var c := sum / cells.size()
 	var y := w.ground_at(cells[0].x + 0.5, cells[0].y + 0.5)
-	var A := {
+	var a := {
 		"kind": kind,
 		"def": def,
 		"y": y,
@@ -94,10 +96,10 @@ func _add_area(kind: String, pts: Array) -> void:
 		"t": float(def["effect"].get("every_s", 0.0)),
 		"phase": "idle"
 	}
-	A["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
+	a["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
 	if kind == "bramble":
 		_thorns(cells, y)
-	areas.append(A)
+	areas.append(a)
 
 
 ## The area's surface: one flat quad over its box; the shader cuts the outline out of a distance field.
@@ -177,8 +179,8 @@ func guards(h: Hunter, kind: String) -> bool:
 static func kin_guards(k: Kin, kind: String) -> bool:
 	if k == null or k.state == "downed":
 		return false
-	var C: Dictionary = kind_def(kind).get("counter", {})
-	return String(k.sp.get("theme", "")) in C.get("themes", []) or k.species in C.get("kin", [])
+	var c: Dictionary = kind_def(kind).get("counter", {})
+	return String(k.sp.get("theme", "")) in c.get("themes", []) or k.species in c.get("kin", [])
 
 
 ## Footing at p for h: low on an ice sheet unless its Boki is a frost one.
@@ -216,17 +218,17 @@ func underfoot(h: Hunter) -> Dictionary:
 	var st: Dictionary = state.get(h.get_instance_id(), {})
 	if int(st.get("area", -1)) < 0:
 		return {}
-	var A: Dictionary = areas[int(st["area"])]
-	var E: Dictionary = A["def"]["effect"]
+	var a: Dictionary = areas[int(st["area"])]
+	var e: Dictionary = a["def"]["effect"]
 	var k := h.kin as Kin
 	var kin_name := String(k.rec.get("name", k.sp.get("name", "Your Boki"))) if k else ""
 	return {
-		"name": String(A["def"]["name"]),
-		"col": Color(String(A["def"]["look"]["edge"])),
+		"name": String(a["def"]["name"]),
+		"col": Color(String(a["def"]["look"]["edge"])),
 		"safe": bool(st["safe"]),
-		"hurts": String(A["def"]["hurts"]),
+		"hurts": String(a["def"]["hurts"]),
 		"kin": kin_name,
-		"breath": clampf(float(st["breath"]) / float(E["breath_s"]), 0.0, 1.0) if E.has("breath_s") else -1.0
+		"breath": clampf(float(st["breath"]) / float(e["breath_s"]), 0.0, 1.0) if e.has("breath_s") else -1.0
 	}
 
 
@@ -254,12 +256,12 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 		if state.has(id):
 			_recover(id, dt)
 		return
-	var A: Dictionary = areas[a]
-	var kind := String(A["kind"])
-	var E: Dictionary = A["def"]["effect"]
+	var a_v: Dictionary = areas[a]
+	var kind := String(a_v["kind"])
+	var e: Dictionary = a_v["def"]["effect"]
 	var st: Dictionary = state.get(id, {})
 	if st.is_empty():
-		st = {"area": -1, "breath": float(E.get("breath_s", 0.0)), "tick": TICK_S, "fx": 0.0, "weak": 1.0}
+		st = {"area": -1, "breath": float(e.get("breath_s", 0.0)), "tick": TICK_S, "fx": 0.0, "weak": 1.0}
 		state[id] = st
 	var safe := guards(h, kind)
 	if int(st["area"]) != a or bool(st.get("safe", false)) != safe:
@@ -267,27 +269,27 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 		st["safe"] = safe
 		if safe:
 			_protect_fx(h)
-	st["weak"] = float(E.get("dmg_out", 1.0)) if not safe else 1.0
+	st["weak"] = float(e.get("dmg_out", 1.0)) if not safe else 1.0
 	match kind:
 		"lava":
 			if not safe:
-				if h.burn_t <= 0.0 or h.burn_dps < float(E["burn_dps"]) * _tier():
-					h.burn_dps = float(E["burn_dps"]) * _tier()
-				h.burn_t = maxf(h.burn_t, float(E["burn_linger_s"]))
+				if h.burn_t <= 0.0 or h.burn_dps < float(e["burn_dps"]) * _tier():
+					h.burn_dps = float(e["burn_dps"]) * _tier()
+				h.burn_t = maxf(h.burn_t, float(e["burn_linger_s"]))
 		"deep_water":
 			if safe:
-				if E.get("swim_haste", false):
+				if e.get("swim_haste", false):
 					h.haste_t = maxf(h.haste_t, 0.2)
 			else:
-				_slow(h, 1.0 - float(E["speed"]))
+				_slow(h, 1.0 - float(e["speed"]))
 				st["breath"] = float(st["breath"]) - dt
 				if float(st["breath"]) <= 0.0 and _every(st, dt):
-					h.hurt(float(E["drown_dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
+					h.hurt(float(e["drown_dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
 		"bramble":
 			if not safe:
-				_slow(h, 1.0 - float(E["speed"]))
+				_slow(h, 1.0 - float(e["speed"]))
 				if _every(st, dt):
-					h.hurt(float(E["dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
+					h.hurt(float(e["dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
 	_feet_fx(h, st, kind, dt)
 
 
@@ -322,25 +324,25 @@ func _slow(h: Hunter, k: float) -> void:
 
 ## The static flats charge up (the ground's veins brighten) and then shock everyone standing on them.
 func _tick_static(ai: int, dt: float) -> void:
-	var A: Dictionary = areas[ai]
-	var E: Dictionary = A["def"]["effect"]
-	var mat: ShaderMaterial = A["mat"]
-	A["t"] = float(A["t"]) - dt
-	if A["phase"] == "idle" and float(A["t"]) <= float(E["warn_s"]):
-		A["phase"] = "warn"
-		m.sfx("warn", A["centre"], -14.0, 1.6)
-	if A["phase"] == "warn":
-		mat.set_shader_parameter("charge", clampf(1.0 - float(A["t"]) / float(E["warn_s"]), 0.0, 1.0))
-	if float(A["t"]) > 0.0:
+	var a: Dictionary = areas[ai]
+	var e: Dictionary = a["def"]["effect"]
+	var mat: ShaderMaterial = a["mat"]
+	a["t"] = float(a["t"]) - dt
+	if a["phase"] == "idle" and float(a["t"]) <= float(e["warn_s"]):
+		a["phase"] = "warn"
+		m.sfx("warn", a["centre"], -14.0, 1.6)
+	if a["phase"] == "warn":
+		mat.set_shader_parameter("charge", clampf(1.0 - float(a["t"]) / float(e["warn_s"]), 0.0, 1.0))
+	if float(a["t"]) > 0.0:
 		return
-	A["t"] = float(E["every_s"])
-	A["phase"] = "idle"
+	a["t"] = float(e["every_s"])
+	a["phase"] = "idle"
 	mat.set_shader_parameter("charge", 0.0)
-	var cells: Array[Vector2i] = A["cells"]
+	var cells: Array[Vector2i] = a["cells"]
 	for i in 3:
 		var c: Vector2i = cells[m.rng.randi_range(0, cells.size() - 1)]
-		m.fx.burst(Vector3(c.x + 0.5, float(A["y"]) + 0.2, c.y + 0.5), Color("fff27a"), 10, 5.0, 0.3, 2.0)
-	m.sfx("zap", A["centre"], -6.0, 1.2)
+		m.fx.burst(Vector3(c.x + 0.5, float(a["y"]) + 0.2, c.y + 0.5), Color("fff27a"), 10, 5.0, 0.3, 2.0)
+	m.sfx("zap", a["centre"], -6.0, 1.2)
 	for h in m.hunters:
 		if h.remote or h.out or h.dead or area_at(h.pos) != ai:
 			continue
@@ -348,7 +350,7 @@ func _tick_static(ai: int, dt: float) -> void:
 			_protect_fx(h)
 		else:
 			m.fx.burst(h.pos + Vector3(0, 0.8, 0), Color("fff9c0"), 16, 5.0, 0.3, 1.0)
-			h.hurt(float(E["dmg"]) * _tier(), null, {"src": "hazard", "tags": ["hazard"], "stun": float(E["stun_s"])})
+			h.hurt(float(e["dmg"]) * _tier(), null, {"src": "hazard", "tags": ["hazard"], "stun": float(e["stun_s"])})
 
 
 # ------------------------------------------------------------------ feedback
@@ -361,9 +363,6 @@ func _protect_fx(h: Hunter) -> void:
 		m.sfx("shield", h.pos, -10.0, 1.3)
 
 
-const FEET_FX := {"lava": "ff9a3a", "deep_water": "cfeaff", "ice": "f4fcff", "static": "fff27a", "bramble": "8ac04a"}
-
-
 func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:
 	st["fx"] = float(st["fx"]) - dt
 	if float(st["fx"]) > 0.0 or Vector2(h.vel.x, h.vel.z).length() < 1.0:
@@ -374,27 +373,27 @@ func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:
 
 ## The player's Boki says when a hazard is near, and whether it can handle it.
 func _hint() -> void:
-	var P := m.player
-	if P == null or P.out or not P.kin is Kin:
+	var p_v := m.player
+	if p_v == null or p_v.out or not p_v.kin is Kin:
 		return
-	_guard_cue(P)
-	var kind := _near_kind(P.pos, float(rules()["hint"]["near_m"]))
+	_guard_cue(p_v)
+	var kind := _near_kind(p_v.pos, float(rules()["hint"]["near_m"]))
 	if kind != "" and HazardHint.say(m, self, kind):
 		hinted[kind] = m.time
 		return
 	if kind == "" or m.time - float(hinted.get(kind, -1e9)) < float(rules()["hint"]["again_s"]):
 		return
 	hinted[kind] = m.time
-	var trig := "hazard_safe" if guards(P, kind) else "hazard_risk"
-	BokiChatter.say(m, P.kin as Kin, trig, {"%H": String(kind_def(kind)["noun"])})
+	var trig := "hazard_safe" if guards(p_v, kind) else "hazard_risk"
+	BokiChatter.say(m, p_v.kin as Kin, trig, {"%H": String(kind_def(kind)["noun"])})
 
 
 ## The guard ring on every area the player's lead Boki counters (the shader breathes it in that Boki's glow).
-func _guard_cue(P: Hunter) -> void:
-	var glow: Color = (P.kin as Kin).sp.get("glow", Color.WHITE)
-	for A in areas:
-		var mat: ShaderMaterial = A["mat"]
-		var on := guards(P, String(A["kind"]))
+func _guard_cue(p_v: Hunter) -> void:
+	var glow: Color = (p_v.kin as Kin).sp.get("glow", Color.WHITE)
+	for a in areas:
+		var mat: ShaderMaterial = a["mat"]
+		var on := guards(p_v, String(a["kind"]))
 		mat.set_shader_parameter("guard", 1.0 if on else 0.0)
 		if on:
 			mat.set_shader_parameter("col_guard", glow)

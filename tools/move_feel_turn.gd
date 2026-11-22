@@ -13,12 +13,12 @@ const TOL_FRAMES := 1  # steps ours may lag the source's rule
 const TURN_FRAMES := 9  # steps: RotationRate yaw 1280 deg/s turns 180 in 0.141 s (8.4 steps)
 
 var c  # the move-feel check (its hunter, match and rec/ok)
-var P: Hunter
+var p: Hunter
 
 
 func _init(check) -> void:
 	c = check
-	P = check.P
+	p = check.P
 
 
 ## UE's CalcVelocity along one axis, keys held the other way at full stick: [steps to zero, steps to 95% back].
@@ -41,33 +41,33 @@ func run() -> void:
 	var worst := 0
 	var slowest := 0.0
 	var face_slow := 0.0
-	var face0 := P.face
-	var base0 := P.base_speed
-	var acc0 := P.ground_accel
+	var face0 := p.face
+	var base0 := p.base_speed
+	var acc0 := p.ground_accel
 	for id in Arch.ids():
 		var row := {}
 		for aim_flip in [false, true]:
 			c._reset(c.flat + Vector3(-2.5, 0, 0))
-			P.base_speed = HunterMove.speed(id)
-			P.ground_accel = HunterMove.accel(id)
-			P.inp["aim"] = P.pos + Vector3(40, 0.9, 0)
-			P.inp["move"] = Vector2(1, 0)
+			p.base_speed = HunterMove.speed(id)
+			p.ground_accel = HunterMove.accel(id)
+			p.inp["aim"] = p.pos + Vector3(40, 0.9, 0)
+			p.inp["move"] = Vector2(1, 0)
 			c._steps(30)
-			var top: float = P.vel.x
+			var top: float = p.vel.x
 			var face_to := atan2(1.0, 0.0)  # facing -x (atan2(-ad.x, -ad.y), ad = (-1, 0))
-			P.inp["move"] = Vector2(-1, 0)
+			p.inp["move"] = Vector2(-1, 0)
 			if aim_flip:
-				P.inp["aim"] = P.pos + Vector3(-40, 0.9, 0)
+				p.inp["aim"] = p.pos + Vector3(-40, 0.9, 0)
 			var zero := -1
 			var full := -1
 			var turned := -1
 			for i in 40:
 				c.m.step(DT)
-				if zero < 0 and P.vel.x <= 0.0:
+				if zero < 0 and p.vel.x <= 0.0:
 					zero = i + 1
-				if full < 0 and P.vel.x <= -0.95 * top:
+				if full < 0 and p.vel.x <= -0.95 * top:
 					full = i + 1
-				if turned < 0 and absf(wrapf(P.face - face_to, -PI, PI)) < deg_to_rad(1.0):
+				if turned < 0 and absf(wrapf(p.face - face_to, -PI, PI)) < deg_to_rad(1.0):
 					turned = i + 1
 			row[aim_flip] = [top, zero, full, turned]
 		var r: Array = row[false]
@@ -94,7 +94,7 @@ func run() -> void:
 	c.rec("run_turn_err_frames", worst)
 	c.rec("run_turn_full_t", slowest)
 	c.rec("run_turn_face_t", face_slow)
-	P.face = face0
-	P.base_speed = base0
-	P.ground_accel = acc0
+	p.face = face0
+	p.base_speed = base0
+	p.ground_accel = acc0
 	c._reset(c.flat)

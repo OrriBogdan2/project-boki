@@ -9,12 +9,13 @@ extends RefCounted
 ##      Tab over the HUD's ability row puts it up with the kit's live name and cooldown, and letting go drops it
 ## With --shots-dir=<dir> (xvfb, via jobq --needs gpu): relic, kit_card and hud PNGs, each with a card up.
 
+## The two-step abilities: who, which slot (counted from the data's "again" phrases).
+const TWO_STEP := 8
+
 var main: Node
 var fails := 0
 var n := 0
 var shots := ""  # --shots-dir=<dir> (needs a renderer): relic, kit_card and hud PNGs
-## The two-step abilities: who, which slot (counted from the data's "again" phrases).
-const TWO_STEP := 8
 
 
 func ok(label: String, cond: bool, info := "") -> void:

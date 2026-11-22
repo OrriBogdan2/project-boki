@@ -46,15 +46,15 @@ func _init() -> void:
 
 ## The host's Hunter as each kit does each move, recorded as [wall s, x, y, z, "<Kit> <move>" or "gap"].
 func _script(truth: Array) -> void:
-	var P := m.player
+	var p := m.player
 	for rep in reps:
 		for kit in KITS:
 			if only != "" and kit != only:
 				continue
 			var arch: String = KITS[kit]
-			P.reclass(Arch.weight(arch), arch, Arch.signature(arch))
-			P.unlock_all()
-			P.inp["move"] = Vector2.ZERO
+			p.reclass(Arch.weight(arch), arch, Arch.signature(arch))
+			p.unlock_all()
+			p.inp["move"] = Vector2.ZERO
 			await _put(dn.home + Vector3(-5.0, 0, -5.0), truth)
 			await _dash(kit, truth)
 			await _air(kit, truth)
@@ -72,75 +72,75 @@ func _put(at: Vector3, truth: Array) -> void:
 
 
 func _dash(kit: String, truth: Array) -> void:
-	var P := m.player
-	P.inp["move"] = Vector2(1, 0)
-	P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
-	P.inp["dash"] = true
+	var p := m.player
+	p.inp["move"] = Vector2(1, 0)
+	p.inp["aim"] = p.pos + Vector3(8, 0.9, 0)
+	p.inp["dash"] = true
 	await _host_run(DT, kit + " dash", truth)
-	P.inp["dash"] = false
+	p.inp["dash"] = false
 	await _host_run(0.9, kit + " dash", truth)
-	P.inp["move"] = Vector2.ZERO
+	p.inp["move"] = Vector2.ZERO
 	await _host_run(0.6, kit + " dash", truth)
 
 
 func _air(kit: String, truth: Array) -> void:
-	var P := m.player
+	var p := m.player
 	await _put(dn.home + Vector3(-5.0, FALL_H, -5.0), truth)
-	P.inp["move"] = Vector2(1, 0)
-	P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
-	P.dashes = P.max_dashes()
-	P.ex_cd = 0.0
-	P.inp["dash"] = true
+	p.inp["move"] = Vector2(1, 0)
+	p.inp["aim"] = p.pos + Vector3(8, 0.9, 0)
+	p.dashes = p.max_dashes()
+	p.ex_cd = 0.0
+	p.inp["dash"] = true
 	await _host_run(DT, kit + " air", truth)
-	P.inp["dash"] = false
+	p.inp["dash"] = false
 	await _host_run(0.9, kit + " air", truth)
-	P.inp["move"] = Vector2.ZERO
+	p.inp["move"] = Vector2.ZERO
 	await _host_run(0.4, kit + " air", truth)
 	var t := 0.0
-	while not P.grounded and t < 5.0:  # the fall to the strip is not the move
+	while not p.grounded and t < 5.0:  # the fall to the strip is not the move
 		await _host_run(0.1, "gap", truth)
 		t += 0.1
 
 
 ## A dash and a run at a rock's face at 45 degrees: the body slides along it.
 func _wall(kit: String, truth: Array) -> void:
-	var P := m.player
+	var p := m.player
 	var by: Hunter = null
 	for h in m.hunters:
 		if h.remote:
 			by = h
 	var rock := HeroZones.rock(
-		m, by if by else P, dn.home + WALL_AT, Vector2(1, 0), "dwall", WALL_LEN, 999.0, 999.0, false
+		m, by if by else p, dn.home + WALL_AT, Vector2(1, 0), "dwall", WALL_LEN, 999.0, 999.0, false
 	)
 	await _put(dn.home + WALL_FROM, truth)
 	var d := Vector2(1, 1).normalized()
-	P.inp["move"] = d
-	P.inp["aim"] = P.pos + Vector3(d.x * 8.0, 0.9, d.y * 8.0)
-	P.inp["dash"] = true
+	p.inp["move"] = d
+	p.inp["aim"] = p.pos + Vector3(d.x * 8.0, 0.9, d.y * 8.0)
+	p.inp["dash"] = true
 	await _host_run(DT, kit + " wall", truth)
-	P.inp["dash"] = false
+	p.inp["dash"] = false
 	await _host_run(1.8, kit + " wall", truth)
-	P.inp["move"] = Vector2.ZERO
+	p.inp["move"] = Vector2.ZERO
 	await _host_run(0.5, kit + " wall", truth)
 	HeroZones.remove_rock(m, rock, false)
 
 
 ## Falls, opens the glider with its button, holds it, lets go and falls on.
 func _glide(kit: String, truth: Array) -> void:
-	var P := m.player
+	var p := m.player
 	await _put(dn.home + Vector3(-5.0, FALL_H, -5.0), truth)
 	await _host_run(0.4, "gap", truth)
-	P.inp["move"] = Vector2(1, 0)
-	P.inp["glide_press_only"] = true
-	P.inp["glide"] = true
-	P.inp["glide_btn"] = true
+	p.inp["move"] = Vector2(1, 0)
+	p.inp["glide_press_only"] = true
+	p.inp["glide"] = true
+	p.inp["glide_btn"] = true
 	await _host_run(2.0, kit + " glide", truth)
-	P.inp["glide"] = false
-	P.inp["glide_btn"] = false
+	p.inp["glide"] = false
+	p.inp["glide_btn"] = false
 	await _host_run(1.0, kit + " close", truth)
-	P.inp["move"] = Vector2.ZERO
+	p.inp["move"] = Vector2.ZERO
 	var t := 0.0
-	while not P.grounded and t < 5.0:
+	while not p.grounded and t < 5.0:
 		await _host_run(0.1, "gap", truth)
 		t += 0.1
 

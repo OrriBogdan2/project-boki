@@ -41,8 +41,8 @@ func run(main_node: Node) -> void:
 
 
 func _table() -> void:
-	var R := TipPick.rules()
-	var tips: Array = R["tips"]
+	var r := TipPick.rules()
+	var tips: Array = r["tips"]
 	var ids := {}
 	var used_triggers := {}
 	var tidy := true
@@ -51,12 +51,12 @@ func _table() -> void:
 		var text := String(t["text"])
 		if t.has("when"):
 			used_triggers[t["when"]] = true
-			tidy = tidy and (R["triggers"] as Dictionary).has(t["when"])
+			tidy = tidy and (r["triggers"] as Dictionary).has(t["when"])
 		tidy = tidy and text.length() <= 190 and not text.contains("\n")
 		tidy = tidy and not TipPick.render(text).contains("{")
 		for tok in RegEx.create_from_string("\\{(\\w+)\\}").search_all(text):
 			tidy = tidy and InputMap.has_action(tok.get_string(1))
-	var hints: Dictionary = R["hints"]
+	var hints: Dictionary = r["hints"]
 	var hints_tidy := not hints.is_empty()
 	for h in hints.values():
 		hints_tidy = hints_tidy and String(h).length() <= 60 and not String(h).contains("\n")
@@ -65,7 +65,7 @@ func _table() -> void:
 	ok(lines >= 28 and lines <= 34, "about 30 lines of text with the hints (%d)" % lines)
 	ok(ids.size() == tips.size(), "every tip has its own id")
 	ok(tidy, "one line each, a known trigger, keys only as {action} of a real action")
-	var n_trig := (R["triggers"] as Dictionary).size()
+	var n_trig := (r["triggers"] as Dictionary).size()
 	ok(used_triggers.size() == n_trig, "every trigger has tips (%d)" % n_trig)
 
 
@@ -123,21 +123,21 @@ func _match_counts() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var k: Kin = m.give_kin(P, Save.new_kin("zapple"))
-	k._launch(P.pos + Vector3(4, 0, 0))
-	ok(int(P.stats.get("summons", 0)) == 1, "sending the Boki out counts a summon")
-	m.kin_stolen(P, {"name": "Test"})
-	ok(int(P.stats.get("wisp_stolen", 0)) == 1, "a stolen Boki counts")
-	var b := m.blight.spawn("bl_skitter", P.pos + Vector3(2.5, 0, 0), 1.0)
-	m.knock(P, b, {})
-	ok(int(P.stats.get("blight_downs", 0)) == 1, "a Blight knock counts")
-	var tr := TipPick.triggers(P.stats, P.used, "", 200.0)
+	var p: Hunter = m.player
+	var k: Kin = m.give_kin(p, Save.new_kin("zapple"))
+	k._launch(p.pos + Vector3(4, 0, 0))
+	ok(int(p.stats.get("summons", 0)) == 1, "sending the Boki out counts a summon")
+	m.kin_stolen(p, {"name": "Test"})
+	ok(int(p.stats.get("wisp_stolen", 0)) == 1, "a stolen Boki counts")
+	var b := m.blight.spawn("bl_skitter", p.pos + Vector3(2.5, 0, 0), 1.0)
+	m.knock(p, b, {})
+	ok(int(p.stats.get("blight_downs", 0)) == 1, "a Blight knock counts")
+	var tr := TipPick.triggers(p.stats, p.used, "", 200.0)
 	ok(tr.has("blight") and tr.has("wisp_stolen") and not tr.has("no_summon"), "and the triggers follow: %s" % [tr])
-	var down_tip := TipPick.for_downed(P, 200.0, true)
+	var down_tip := TipPick.for_downed(p, 200.0, true)
 	ok(_id_of(down_tip).begins_with("blight_"), "the downed screen picks the Blight tip: %s" % down_tip)
-	ok(TipPick.for_downed(P, 200.0, true) == down_tip, "and keeps it while you stay down")
-	var r := {"stats": P.stats, "used": P.used, "why": "abyss", "time": 200.0}
+	ok(TipPick.for_downed(p, 200.0, true) == down_tip, "and keeps it while you stay down")
+	var r := {"stats": p.stats, "used": p.used, "why": "abyss", "time": 200.0}
 	TipPick.note_run(r)
 	ok(TipPick.last.has("abyss") and TipPick.for_loading(true) != "", "the loading screen reads the last run")
 	m.queue_free()
@@ -160,18 +160,18 @@ func _crouch_hint() -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var camp: Mob = m.spawn_mob("skitter", P.pos + Vector3(300, 0, 300))
+	var p: Hunter = m.player
+	var camp: Mob = m.spawn_mob("skitter", p.pos + Vector3(300, 0, 300))
 	var hint := m.crouch_hint
 	ok(hint != null, "a new save's real match has the hint")
 	for mb: Mob in m.mobs:
 		if mb != camp:
 			mb.st = "chase"  # only the camp under test counts as quiet
-	P.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
+	p.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "", "far from every camp: no line")
 	camp.st = "chase"
-	P.pos = camp.pos + Vector3(8, 0, 0)
+	p.pos = camp.pos + Vector3(8, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
 	camp.st = "idle"
@@ -185,22 +185,22 @@ func _crouch_hint() -> void:
 	ok(CrouchHint.for_match(m, {}) == null, "the next match has none")
 	Save.d = Save.fresh()
 	var again := CrouchHint.for_match(m, {})
-	P.crouch = true
+	p.crouch = true
 	again.tick(0.6)
 	ok(again.line == "" and Save.d["tutorial"].get("crouch_hint", false), "already crouching: spent without a line")
-	P.crouch = false
+	p.crouch = false
 	for i in 40:
-		P.inp["crouch"] = true
-		P.grounded = true
-		P.sim(Match.DT)
-	var steady := P.bloom
+		p.inp["crouch"] = true
+		p.grounded = true
+		p.sim(Match.DT)
+	var steady := p.bloom
 	for i in 40:
-		P.inp["crouch"] = false
-		P.inp["move"] = Vector2(0, -1)
-		P.grounded = true
-		P.sim(Match.DT)
+		p.inp["crouch"] = false
+		p.inp["move"] = Vector2(0, -1)
+		p.grounded = true
+		p.sim(Match.DT)
 	ok(
-		not P.crouch and steady < 0.0 and P.bloom > steady,
-		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, P.bloom]
+		not p.crouch and steady < 0.0 and p.bloom > steady,
+		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, p.bloom]
 	)
 	m.queue_free()

@@ -7,9 +7,6 @@ extends RefCounted
 ## A default key that should have changed fails, and so does text built before the rebind that does not
 ## refresh. The glide steps say: jump, then press again in the air.
 
-var bad := 0
-var main: Node
-var stale_words: Array = []  # default caps no rebound action uses any more, as whole words
 const PLAIN_WORDS := ["I", "A"]  # one-letter words that are also plain English
 const LITERALS := [
 	"Shift", "Space", "Ctrl", "WASD", "W A S D", "left click", "right click", "Left click", "Right click"
@@ -80,6 +77,10 @@ const UNUSUAL := [
 ]
 const RELIC_FILES := ["match/practice_hero", "ui/class_reveal", "ui/class_card", "home/home_classes", "home/hob_offer"]
 const MOUSE_BOUND := {"fire": MOUSE_BUTTON_XBUTTON1, "throw": MOUSE_BUTTON_XBUTTON2}
+
+var bad := 0
+var main: Node
+var stale_words: Array = []  # default caps no rebound action uses any more, as whole words
 
 
 func ok(cond: bool, what: String) -> void:

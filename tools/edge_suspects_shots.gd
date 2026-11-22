@@ -32,7 +32,7 @@ const VARIANTS := [
 const GLB_OF := {"mage": "ryzz", "bulwark": "breaker"}  # (the Hunter's art folder, where not its id)
 const FAR_KEYS := ["far_fres", "far_spec", "far_aa", "far_clamp", "far_rim_soft", "far_glow", "rim_far", "far_smooth"]
 
-var A
+var a_v
 var main: Node
 var zoom := 0.55
 
@@ -67,8 +67,8 @@ func run(main_node: Node) -> void:
 	main.get_window().size = size
 	main.get_viewport().size = size
 	Settings.apply("quality")
-	A = load("res://tools/archetype_check.gd").new()
-	A.main = main
+	a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
 	for arch in arches:
 		await _arch(String(arch), out.path_join(String(arch)), only)
 	print("EDGE_SUSPECTS_DONE ", arches.size())
@@ -108,31 +108,31 @@ func _child(args: PackedStringArray) -> void:
 
 func _arch(arch: String, dir: String, only: Array) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
-	var r: Array = A.setup(arch, 11.0)
+	var r: Array = a_v.setup(arch, 11.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	T.teleport(T.pos + Vector3(0, 0, 60))  # (the target off screen: only the Hunter in view)
-	P.teleport(P.pos + Vector3(9, 0, 0))  # (off the training ground's loot pile, still on the cleared strip)
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	t.teleport(t.pos + Vector3(0, 0, 60))  # (the target off screen: only the Hunter in view)
+	p.teleport(p.pos + Vector3(9, 0, 0))  # (off the training ground's loot pile, still on the cleared strip)
 	m.set_meta("zoom_hold", zoom)
 	m.cam.zoom = zoom
 	for f in 120:
-		_frame(m, P)
+		_frame(m, p)
 	await main.get_tree().process_frame
 	_clean()
 	var info := PackedStringArray()
 	for pose in ["idle", "run"]:
-		P.inp["move"] = Vector2(1, 0) if pose == "run" else Vector2.ZERO
+		p.inp["move"] = Vector2(1, 0) if pose == "run" else Vector2.ZERO
 		for f in 36 if pose == "run" else 90:
-			_frame(m, P)
-		P.inp["move"] = Vector2.ZERO
-		var sync := P.model.get_node_or_null("Warden/Sync")
+			_frame(m, p)
+		p.inp["move"] = Vector2.ZERO
+		var sync := p.model.get_node_or_null("Warden/Sync")
 		if sync:
 			sync.set_process(false)
-		info.append("%s cam_d %.2f fov %.2f" % [pose, m.cam.global_position.distance_to(P.position), m.cam.fov])
+		info.append("%s cam_d %.2f fov %.2f" % [pose, m.cam.global_position.distance_to(p.position), m.cam.fov])
 		for v in VARIANTS:
 			if only.is_empty() or v in only:
-				await _shot(P, String(v), dir.path_join("%s_%s.png" % [pose, v]))
+				await _shot(p, String(v), dir.path_join("%s_%s.png" % [pose, v]))
 		if sync:
 			sync.set_process(true)
 	var root := main.get_tree().root
@@ -151,14 +151,14 @@ func _arch(arch: String, dir: String, only: Array) -> void:
 			]
 		)
 	)
-	info.append("glb %s tris %d" % [_glb(arch), _tris(P.model)])
-	for g in P.model.find_children("*", "MeshInstance3D", true, false):
+	info.append("glb %s tris %d" % [_glb(arch), _tris(p.model)])
+	for g in p.model.find_children("*", "MeshInstance3D", true, false):
 		if (g as MeshInstance3D).is_visible_in_tree():
-			info.append("mesh %s shadow %d" % [P.model.get_path_to(g), (g as MeshInstance3D).cast_shadow])
+			info.append("mesh %s shadow %d" % [p.model.get_path_to(g), (g as MeshInstance3D).cast_shadow])
 	var f := FileAccess.open(dir.path_join("info.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(info) + "\n")
 	f.close()
-	await A.done(m)
+	await a_v.done(m)
 
 
 ## Nothing over the Hunter: the HUD, name tags, grass and particles hidden (the measure is the model's own edge).
@@ -173,24 +173,24 @@ func _clean() -> void:
 			(n as Node3D).visible = false
 
 
-func _frame(m: Match, P: Hunter) -> void:
+func _frame(m: Match, p: Hunter) -> void:
 	m.step(DT)
-	P.render(DT, 1.0)
+	p.render(DT, 1.0)
 	MatchCam.update(m, DT, 1.0)
-	var sync := P.model.get_node_or_null("Warden/Sync")
+	var sync := p.model.get_node_or_null("Warden/Sync")
 	if sync:
 		sync.set_process(false)
 		sync.call("_process", DT)
 
 
 ## One suspect off (or the mask on), three frames drawn, the frame saved, then everything put back.
-func _shot(P: Hunter, v: String, path: String) -> void:
+func _shot(p: Hunter, v: String, path: String) -> void:
 	var undo: Array = []  # [object, property or "param:<key>", old value]
 	var vp := main.get_viewport()
-	var meshes: Array = P.model.find_children("*", "MeshInstance3D", true, false)
+	var meshes: Array = p.model.find_children("*", "MeshInstance3D", true, false)
 	match v:
 		"no_ink", "mask":
-			for g in WardenMerge.inks(P.model):  # (a body's joined ink copy: WardenMerge.join_inks)
+			for g in WardenMerge.inks(p.model):  # (a body's joined ink copy: WardenMerge.join_inks)
 				_put(undo, g, "visible", false)
 			for mat in _mats(meshes):
 				var nx := (mat as Material).next_pass as ShaderMaterial

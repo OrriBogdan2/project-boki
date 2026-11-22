@@ -77,7 +77,7 @@ const KNOWN := {
 	"tender": {"e": ["tender_lantern_chime"]},
 }
 
-var A
+var a_v
 var bad := 0
 var lead_in := {}  # sound name -> s from its start to where it is heard
 
@@ -90,8 +90,8 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	A = load("res://tools/archetype_check.gd").new()
-	A.main = main
+	a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--strike-only="):
@@ -231,54 +231,54 @@ static func _row(r: Dictionary) -> String:
 
 ## One press of `mv` on a fresh match. Times in s from the press.
 func measure(arch: String, mv: String) -> Dictionary:
-	var r: Array = A.setup(arch, 3.0)
+	var r: Array = a_v.setup(arch, 3.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
 	var own := _own(arch)
 	for f in 20:
-		_frame(m, P)
-	var sk := _skel(P)
+		_frame(m, p)
+	var sk := _skel(p)
 	var hands: Array = []
 	for nm in ["hand.R", "hand.L"]:
 		if sk and sk.find_bone(nm) >= 0:
 			hands.append(sk.find_bone(nm))
 	var prev := {}
 	var out := {"snd": [], "hit": [], "shot": [], "strike": -1.0, "clip": "", "rise": -1.0}
-	var rocks := _rocks(P)
+	var rocks := _rocks(p)
 	var sid := m.shot_n
 	var fastest := STRIKE_MIN
-	var hp := T.hp
+	var hp := t_v.hp
 	for f in int(WATCH / DT):
 		var t := f * DT
 		var held := f < int(HELD / DT)
-		P.inp["fire"] = (mv == "lmb" and f == 0) or (mv == "lhold" and held)
-		P.inp["sec"] = mv in ["rmb", "hold"] and f == 0
-		P.inp["sec_hold"] = mv == "hold" and held
-		P.inp["sig"] = mv == "e" and f == 0
+		p.inp["fire"] = (mv == "lmb" and f == 0) or (mv == "lhold" and held)
+		p.inp["sec"] = mv in ["rmb", "hold"] and f == 0
+		p.inp["sec_hold"] = mv == "hold" and held
+		p.inp["sig"] = mv == "e" and f == 0
 		if mv == "r" and f == 0:
-			P.ak.cd["x"] = 0.0
-			P.ult = 1.0
-			P.ak.cast_ult()
-		A.aim_at(P, T.pos)
-		Sfx.listener = P.pos
+			p.ak.cd["x"] = 0.0
+			p.ult = 1.0
+			p.ak.cast_ult()
+		a_v.aim_at(p, t_v.pos)
+		Sfx.listener = p.pos
 		Sfx.last_played.clear()  # every play this frame lands in last_played (no spacing across frames)
 		Sfx.recent.clear()
-		_frame(m, P)
+		_frame(m, p)
 		for s: String in Sfx.last_played:
 			if String(own.get(s, "")) in ["fire", "impact", "cast", "signature"]:
 				out["snd"].append([s, t, t + _lead_in(s)])
-		if T.hp < hp - 0.01:
+		if t_v.hp < hp - 0.01:
 			out["hit"].append(t)
-		hp = T.hp
+		hp = t_v.hp
 		for sd: Dictionary in m.shots:
-			if sd["by"] == P and int(sd["sid"]) > sid:
+			if sd["by"] == p and int(sd["sid"]) > sid:
 				sid = int(sd["sid"])
 				if out["shot"].is_empty() or out["shot"][-1] != t:
 					out["shot"].append(t)
-		if _rocks(P) > rocks and float(out["rise"]) < 0.0:
+		if _rocks(p) > rocks and float(out["rise"]) < 0.0:
 			out["rise"] = t
-		var c := _clips(P)
+		var c := _clips(p)
 		var v := 0.0
 		for bi: int in hands:
 			var o := sk.get_bone_global_pose(bi).origin
@@ -292,11 +292,11 @@ func measure(arch: String, mv: String) -> Dictionary:
 	return out
 
 
-func _frame(m: Match, P: Hunter) -> void:
+func _frame(m: Match, p: Hunter) -> void:
 	m.step(DT)
-	P.render(DT, 1.0)
-	if P.model and P.model.has_node("Warden/Sync"):
-		var sync: Node = P.model.get_node("Warden/Sync")
+	p.render(DT, 1.0)
+	if p.model and p.model.has_node("Warden/Sync"):
+		var sync: Node = p.model.get_node("Warden/Sync")
 		sync.set_process(false)
 		sync.call("_process", DT)
 

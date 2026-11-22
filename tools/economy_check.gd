@@ -21,21 +21,21 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var Q: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	var at := P.pos + Vector3(0.6, 0, 0)
+	var p: Hunter = m.player
+	var q: Hunter = m.hunters.filter(func(x): return x != p)[0]
+	var at := p.pos + Vector3(0.6, 0, 0)
 	# 1. a full backpack asks what to drop
-	P.pack_cap = 2
-	P.pack = [Loot.valuable("old_coin"), Loot.gear("vest", 1)]
+	p.pack_cap = 2
+	p.pack = [Loot.valuable("old_coin"), Loot.gear("vest", 1)]
 	m.spawn_val(Loot.valuable("kin_idol"), at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
-	Pack.take_ground(m, P, wp)
+	Pack.take_ground(m, p, wp)
 	ok.call(
-		m.hud.swap_open() and P.pack.size() == 2 and m.wpicks.has(wp),
-		"full backpack opens the swap window (pack %d/%d)" % [P.pack.size(), P.pack_cap]
+		m.hud.swap_open() and p.pack.size() == 2 and m.wpicks.has(wp),
+		"full backpack opens the swap window (pack %d/%d)" % [p.pack.size(), p.pack_cap]
 	)
-	Pack.swap(m, P, 0, wp)  # you pick the coin to leave behind
-	var ids: Array = P.pack.map(func(it): return String(it.get("id", it.get("wid", ""))))
+	Pack.swap(m, p, 0, wp)  # you pick the coin to leave behind
+	var ids: Array = p.pack.map(func(it): return String(it.get("id", it.get("wid", ""))))
 	ok.call(
 		(
 			ids.has("kin_idol")
@@ -46,30 +46,30 @@ func run(main_node: Node) -> void:
 	)
 	m.hud.close_swap()
 	# better armor on the ground goes on, and the old piece goes in the pack
-	P.pack_cap = 4
-	P.gear[2] = {"id": "vest", "rar": 1}
+	p.pack_cap = 4
+	p.gear[2] = {"id": "vest", "rar": 1}
 	m.spawn_gear("bastion_plate", 3, at, "", false)
-	Pack.take_ground(m, P, m.wpicks[m.wpicks.size() - 1])
+	Pack.take_ground(m, p, m.wpicks[m.wpicks.size() - 1])
 	ok.call(
-		String(P.gear[2]["id"]) == "bastion_plate" and P.pack.any(func(it): return String(it.get("id", "")) == "vest"),
-		"better armor goes on, the old piece into the pack: %s" % str(P.gear[2])
+		String(p.gear[2]["id"]) == "bastion_plate" and p.pack.any(func(it): return String(it.get("id", "")) == "vest"),
+		"better armor goes on, the old piece into the pack: %s" % str(p.gear[2])
 	)
-	P.welem = "fire"
+	p.welem = "fire"
 	var ex := {}
-	Loot.rider(P, ex, 10.0)
+	Loot.rider(p, ex, 10.0)
 	ok.call(float(ex.get("burn", 0.0)) >= 5.0, "fire rider burns (%s)" % str(ex))
-	P.welem = "storm"
-	P.el_n = 3
+	p.welem = "storm"
+	p.el_n = 3
 	var ex2 := {}
-	Loot.rider(P, ex2, 10.0)
+	Loot.rider(p, ex2, 10.0)
 	ok.call(ex2.has("fx_hit"), "storm rider arcs on the 4th attack")
-	P.welem = "fire"
+	p.welem = "fire"
 	# 2. smart loot: gear on you first, then the pack, best first, never worse for better
 	var gid: String = Gear.ALL.keys()[0]
 	var b := {
-		"owner": Q,
-		"team": Q.team,
-		"pos": P.pos,
+		"owner": q,
+		"team": q.team,
+		"pos": p.pos,
 		"gems": 10,
 		"seeds": {"tidebloom": 2},
 		"caught": [],
@@ -88,35 +88,35 @@ func run(main_node: Node) -> void:
 			Loot.valuable("sky_pearl")
 		]
 	}
-	P.pack = [Loot.valuable("kin_idol")]
-	P.pack_cap = 3
-	P.gear = Gear.empty_slots()
-	P.refresh_gear()
-	var g0 := P.gems
-	var got := Life.smart_loot(m, P, b)
-	var pv: Array = P.pack.map(func(it): return Loot.value(it))
+	p.pack = [Loot.valuable("kin_idol")]
+	p.pack_cap = 3
+	p.gear = Gear.empty_slots()
+	p.refresh_gear()
+	var g0 := p.gems
+	var got := Life.smart_loot(m, p, b)
+	var pv: Array = p.pack.map(func(it): return Loot.value(it))
 	var left: Array = Pack._box_things(b).map(func(c): return Loot.value(c["it"]))
 	var minp: int = pv.min() if not pv.is_empty() else 0
 	var maxl: int = left.max() if not left.is_empty() else 0
 	print(
 		(
 			"ECON  smart loot took %d: weapon=%s gear=%s pack=%s values=%s left in box=%s"
-			% [got, P.wpn["name"], str(P.gear), str(P.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)]
+			% [got, p.wpn["name"], str(p.gear), str(p.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)]
 		)
 	)
 	ok.call(
-		String(P.gear[2].get("id", "")) == "gale_mantle" and not (P.gear[Gear.slot_of(gid)] as Dictionary).is_empty(),
-		"smart loot: the best gear goes on (armor %s)" % str(P.gear[2])
+		String(p.gear[2].get("id", "")) == "gale_mantle" and not (p.gear[Gear.slot_of(gid)] as Dictionary).is_empty(),
+		"smart loot: the best gear goes on (armor %s)" % str(p.gear[2])
 	)
 	ok.call(
-		P.pack.size() == 3 and minp >= maxl,
+		p.pack.size() == 3 and minp >= maxl,
 		"smart loot: pack holds the most valuable (min %d >= best left %d)" % [minp, maxl]
 	)
-	ok.call(P.gems == g0 + 10 and int(P.seeds.get("tidebloom", 0)) >= 2, "smart loot: gems and seeds taken too")
+	ok.call(p.gems == g0 + 10 and int(p.seeds.get("tidebloom", 0)) >= 2, "smart loot: gems and seeds taken too")
 	# 3. extracting brings it all home to the armory; the loadout goes out and comes back
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
-	var haul := Pack.haul(P)
+	var haul := Pack.haul(p)
 	# armor salvages on arrival
 	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})

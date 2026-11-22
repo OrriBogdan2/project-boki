@@ -21,17 +21,17 @@ func run(main: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.max_armor = maxf(h.max_armor, 50.0)
 		h.armor = 35.0
 		h.hp = h.max_hp * 0.7
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
-	P.teleport(m.world.free_spot_near(foe.pos + Vector3(6, 0, 4), [], 1.0, 0.45, 4.0))
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
+	p.teleport(m.world.free_spot_near(foe.pos + Vector3(6, 0, 4), [], 1.0, 0.45, 4.0))
 	for i in 30:
 		m.step(Match.DT)
-		m.cam.snap(P.pos)
+		m.cam.snap(p.pos)
 		for h in m.hunters:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame

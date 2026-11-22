@@ -10,7 +10,7 @@ const DT := 1.0 / 60.0
 
 var main: Node
 var m: Match
-var P: Hunter
+var p: Hunter
 var dir := ""
 var lines: Array = []
 
@@ -29,7 +29,7 @@ func run(main_node: Node) -> void:
 		{"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "demo_kin": "cindowary"}
 	)
 	m.set_process(false)
-	P = m.player
+	p = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -41,7 +41,7 @@ func run(main_node: Node) -> void:
 		if a["kind"] == "lava":
 			lava = a["centre"]
 			break
-	P.teleport(m.world.free_spot_near(lava + Vector3(10, 0, 0), [], 1.0, 0.5, 12.0))
+	p.teleport(m.world.free_spot_near(lava + Vector3(10, 0, 0), [], 1.0, 0.5, 12.0))
 	Input.action_press("scores")
 	await _go(0.4)
 	_crop("mm_hold", "The minimap with Tab held: hazard areas tinted by kind, a shield on the ones your Boki counters")
@@ -67,7 +67,7 @@ func _go(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(P.pos)
+		m.cam.snap(p.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame

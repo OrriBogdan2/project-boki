@@ -20,7 +20,7 @@ const POP_SHARE := 0.5  # one frame covering more than this share of the lip is 
 var bad := 0
 var m: Match
 var w: World
-var P: Hunter
+var p_v: Hunter
 var cam: CamRig
 var rows := []  # the ones that failed a rule, for the summary
 
@@ -43,17 +43,17 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	p_v = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		if h != P:
+		if h != p_v:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	if P.kin:
-		(P.kin as Kin).stow()
-	P.ctrl = "local"
-	P.unlock_all()
+	if p_v.kin:
+		(p_v.kin as Kin).stow()
+	p_v.ctrl = "local"
+	p_v.unlock_all()
 	var flat := _flat_spot(6.5)
 	print("STEPUP step height %.2f m; flat %s" % [World.STEP, str(flat)])
 	var lips := []
@@ -61,7 +61,7 @@ func run(main: Node) -> void:
 		lips.append(LIP_MIN + LIP_STEP * k)
 	lips.append(World.LEVEL)
 	for arch in HEROES:
-		P.reclass(Arch.weight(arch), arch)
+		p_v.reclass(Arch.weight(arch), arch)
 		for ang in [0.0, 45.0]:
 			var dir := Vector2(cos(deg_to_rad(ang)), sin(deg_to_rad(ang)))
 			for lip in lips:
@@ -79,7 +79,7 @@ func run(main: Node) -> void:
 func _lip(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
 	var c := from + Vector3(dir.x, 0.0, dir.y) * (FACE_AT + LIP_DEPTH)
 	var spec := {"length": 8.0, "time": 1e9, "move": true, "block": "all"}
-	var wall: Dictionary = m.verbs.add_wall(P, Vector3(c.x, from.y, c.z), dir, spec, 1.0)
+	var wall: Dictionary = m.verbs.add_wall(p_v, Vector3(c.x, from.y, c.z), dir, spec, 1.0)
 	wall["top"] = lip
 	wall["th"] = LIP_DEPTH
 	return wall
@@ -89,29 +89,29 @@ func _lip(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
 ## are the biggest one-frame rise of the drawn body and of the camera, as a share of the lip.
 func _try(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
 	_reset(from)
-	cam.snap(P.pos)
+	cam.snap(p_v.pos)
 	for i in SETTLE_STEPS:
-		cam.follow(P.render_pos(1.0), DT, false)
-	P.render(DT, 1.0)
-	var body_y := P.position.y
+		cam.follow(p_v.render_pos(1.0), DT, false)
+	p_v.render(DT, 1.0)
+	var body_y := p_v.position.y
 	var cam_y := cam.base.y
 	var body_pop := 0.0
 	var cam_pop := 0.0
 	var cam_y0 := cam_y
-	P.inp["move"] = dir
+	p_v.inp["move"] = dir
 	var along := 0.0
 	for i in RUN_STEPS:
 		m.step(DT)
-		P.render(DT, 1.0)
-		cam.follow(P.render_pos(1.0), DT, false)
-		body_pop = maxf(body_pop, P.position.y - body_y)
+		p_v.render(DT, 1.0)
+		cam.follow(p_v.render_pos(1.0), DT, false)
+		body_pop = maxf(body_pop, p_v.position.y - body_y)
 		cam_pop = maxf(cam_pop, cam.base.y - cam_y)
-		body_y = P.position.y
+		body_y = p_v.position.y
 		cam_y = cam.base.y
-		along = Vector2(P.pos.x - from.x, P.pos.z - from.z).dot(dir)
+		along = Vector2(p_v.pos.x - from.x, p_v.pos.z - from.z).dot(dir)
 		if along > FACE_AT + 0.6:
 			break
-	var up := P.pos.y >= from.y + lip - 0.02
+	var up := p_v.pos.y >= from.y + lip - 0.02
 	return {
 		"pass": up and along > FACE_AT + 0.5,
 		"body_pop": body_pop / lip,
@@ -161,35 +161,35 @@ func _clear_inp() -> void:
 		"skill",
 		"shift"
 	]:
-		P.inp[k] = false
-	P.inp["move"] = Vector2.ZERO
+		p_v.inp[k] = false
+	p_v.inp["move"] = Vector2.ZERO
 
 
 ## A clean, standing hunter at p.
 func _reset(p: Vector3) -> void:
-	P.teleport(p)
-	P.vel = Vector3.ZERO
-	P.grounded = true
-	P.out = false
-	P.gone = false
-	P.downed = false
-	P.gliding = false
-	P.dropping = false
-	P.diving = false
-	P.shot_down = false
-	P.roll_t = 0.0
-	P.knock_t = 0.0
-	P.fly_t = 0.0
-	P.stun_t = 0.0
-	P.root_t = 0.0
-	P.mantle_cd = 0.0
-	P.air_t = 0.0
-	P.drawn_y = INF  # (StepSmooth draws it where it is first)
-	P.squash = 0.0
-	P.pad = {}
-	P.grap = {}
-	P.lfloat = {}
-	P.hp = P.max_hp
+	p_v.teleport(p)
+	p_v.vel = Vector3.ZERO
+	p_v.grounded = true
+	p_v.out = false
+	p_v.gone = false
+	p_v.downed = false
+	p_v.gliding = false
+	p_v.dropping = false
+	p_v.diving = false
+	p_v.shot_down = false
+	p_v.roll_t = 0.0
+	p_v.knock_t = 0.0
+	p_v.fly_t = 0.0
+	p_v.stun_t = 0.0
+	p_v.root_t = 0.0
+	p_v.mantle_cd = 0.0
+	p_v.air_t = 0.0
+	p_v.drawn_y = INF  # (StepSmooth draws it where it is first)
+	p_v.squash = 0.0
+	p_v.pad = {}
+	p_v.grap = {}
+	p_v.lfloat = {}
+	p_v.hp = p_v.max_hp
 	_clear_inp()
 
 

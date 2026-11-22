@@ -38,8 +38,8 @@ func run(main: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var P: Hunter = m.player
-	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var p: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -47,8 +47,8 @@ func run(main: Node) -> void:
 	for h in m.hunters:
 		h.ctrl = "idle"
 	m.set_process(true)
-	rival.teleport(P.pos + Vector3(5, 0, 3))
-	m.cam.snap(P.pos)
+	rival.teleport(p.pos + Vector3(5, 0, 3))
+	m.cam.snap(p.pos)
 	_caption = Label.new()
 	_caption.add_theme_font_size_override("font_size", 44)
 	_caption.position = Vector2(40, 380)
@@ -59,22 +59,22 @@ func run(main: Node) -> void:
 	var level_done := false
 	while frame < int(FILM_S * 60.0):
 		var t := frame / 60.0
-		P.hp = P.max_hp
+		p.hp = p.max_hp
 		rival.hp = rival.max_hp
 		if not kills.is_empty() and t >= float(kills[0]):
 			kills.pop_front()
-			_kill(m, P)
+			_kill(m, p)
 		if not armours.is_empty() and t >= float(armours[0]):
 			armours.pop_front()
-			_armour_hits(m, P, rival)
+			_armour_hits(m, p, rival)
 		if not level_done and t >= LEVEL_AT:
 			level_done = true
 			_say("LEVEL UP  (level_up)")
-			P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp)
+			p.gain_xp(float(Hunter.XP_TO[p.lvl]) - p.xp)
 		_caption.visible = t < _hide_at
 		frame += 1
 		await main.get_tree().process_frame
-	print("XP_ARMOUR_REEL done, %d frames, level %d, armour tier %d" % [frame, P.lvl, P.armor_tier])
+	print("XP_ARMOUR_REEL done, %d frames, level %d, armour tier %d" % [frame, p.lvl, p.armor_tier])
 	main.get_tree().quit(0)
 
 
@@ -88,19 +88,19 @@ func _now() -> float:
 
 
 ## A monster dies to your last hit: kill XP lands (xp_tick).
-func _kill(m: Match, P: Hunter) -> void:
+func _kill(m: Match, p: Hunter) -> void:
 	_say("KILL XP  (xp_tick)")
-	var mob := m.spawn_mob("skitter", P.pos + Vector3(4, 0, 0))
+	var mob := m.spawn_mob("skitter", p.pos + Vector3(4, 0, 0))
 	mob.max_hp = 30.0
 	mob.hp = 30.0
-	mob.hurt(30.0, P, {})
+	mob.hurt(30.0, p, {})
 
 
 ## Hits on a Hunter only build armour: nothing plays until its tier rises (armor_up_own).
-func _armour_hits(m: Match, P: Hunter, rival: Hunter) -> void:
+func _armour_hits(m: Match, p: Hunter, rival: Hunter) -> void:
 	_say("ARMOUR TIER  (armor_up_own)")
-	var tier := P.armor_tier
+	var tier := p.armor_tier
 	for i in 80:
-		if P.armor_tier > tier:
+		if p.armor_tier > tier:
 			break
-		m.on_damage(rival, P, HIT, {})
+		m.on_damage(rival, p, HIT, {})

@@ -12,7 +12,7 @@ const LEAD := "%s keeps you safe: cross it."
 
 
 ## Says the line for `kind` if the player has not seen it. Returns whether it showed.
-static func say(m: Match, tz: TerrainHazards, kind: String) -> bool:
+static func say(m: Match, _tz: TerrainHazards, kind: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
 	if m.hud == null or m.opts.get("tutorial", false) or not Settings.get_v("tips") or seen.get(FLAG + kind, false):
 		return false

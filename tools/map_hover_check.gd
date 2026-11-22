@@ -88,8 +88,8 @@ func _kinds() -> void:
 	var spots: Array = []
 	for sh in m.shrines:
 		spots.append(["shrine", sh["pos"]])
-	for L in m.lairs.list:
-		spots.append(["lair", L["c"]])
+	for l in m.lairs.list:
+		spots.append(["lair", l["c"]])
 	for cnd in m.spawn_plan.cands:
 		spots.append(["spawn", cnd["pos"]])
 	for lb in m.world.labels:

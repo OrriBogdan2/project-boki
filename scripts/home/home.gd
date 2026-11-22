@@ -4906,9 +4906,9 @@ func _open_feed(rec: Dictionary) -> void:
 		row.add_child(info)
 		row.add_child(UI.button("Feed", func(): _care_feed(rec, f), 100))
 		v.add_child(row)
-	for f in Care.FOODS:
+	for f in Care.foods_v:
 		var n := int(Save.d["items"].get(f, 0))
-		if n > 0: row_for.call(f, n, Care.FOODS[f]["desc"])
+		if n > 0: row_for.call(f, n, Care.foods_v[f]["desc"])
 	for f in Data.CROPS:
 		var n := int(Save.d["crops"].get(f, 0))
 		if n > 0:

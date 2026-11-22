@@ -90,18 +90,18 @@ func _apply(over: Dictionary) -> void:
 
 ## Steps `secs` of the match as Match runs a frame (the player holds `move`), then saves the shot.
 func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
-	var P := m.player
+	var p := m.player
 	_zoom(zoom_v)
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	var t := 0.0
 	while t < secs:
 		_purge()
-		P.inp["move"] = move
+		p.inp["move"] = move
 		if face and move == Vector2.ZERO:
-			P.inp["aim"] = P.pos + FACE_CAM
+			p.inp["aim"] = p.pos + FACE_CAM
 		for _i in 2:
 			m.step(STEP)
-		m.cam.follow(P.pos, FRAME, false)
+		m.cam.follow(p.pos, FRAME, false)
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame

@@ -68,21 +68,21 @@ func _surfaces(md: Node3D) -> Dictionary:
 	return out
 
 
-func _sig(P: Hunter) -> Dictionary:
-	var md: Node3D = P.model
+func _sig(p: Hunter) -> Dictionary:
+	var md: Node3D = p.model
 	var bones := {}
 	var sk := WardenGlb.skeleton(md.get_node_or_null("Warden"))
 	if sk:
 		for i in sk.get_bone_count():
 			var s := sk.get_bone_global_pose(i).basis.get_scale()
 			bones[sk.get_bone_name(i)] = snappedf(minf(s.x, minf(s.y, s.z)), 0.05)
-	var kit := (P.ak.get_script() as Script).resource_path if P.ak else ""
+	var kit := (p.ak.get_script() as Script).resource_path if p.ak else ""
 	return {
 		"glb": bool(md.get_meta("glb", false)),
-		"path": WardenGlb.path(P.arch),
+		"path": WardenGlb.path(p.arch),
 		"kit": kit,
-		"cls": P.cls,
-		"wid": P.wid,
+		"cls": p.cls,
+		"wid": p.wid,
 		"tree": _tree(md),
 		"bones": bones,
 		"surfaces": _surfaces(md)

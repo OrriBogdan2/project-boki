@@ -32,18 +32,18 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var r := _ac_setup(5.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
 	m.opts["training"] = false  # training recharges a Boki's cooldowns 3x; a real match does not
 	var rec := Save.new_kin("glintmole")
 	rec["trust"] = 95.0
-	var k := m.give_kin(P, rec)
+	var k := m.give_kin(p, rec)
 	k.stow()
 	k.settle = 1.0
-	P.merge_cd = 0.0
-	P.slot_lv["kin"] = 1  # the Boki's own ability is unlocked
+	p.merge_cd = 0.0
+	p.slot_lv["kin"] = 1  # the Boki's own ability is unlocked
 	k.runner.reset()
-	k.teleport(P.pos + Vector3(1.0, 0, 0))
+	k.teleport(p.pos + Vector3(1.0, 0, 0))
 	k.state = "active"
 	k.cmd = "follow"
 	k.fly = {}
@@ -60,11 +60,11 @@ func run(main_node: Node) -> void:
 		var last_ready := true
 		var t := 0.0
 		while t < FIGHT_SECS:
-			T.hp = T.max_hp
-			T.teleport(P.pos + Vector3(5.0, 0, 0))  # stays in cue range; never walks onto a mine
-			T.vel = Vector3.ZERO
+			t_v.hp = t_v.max_hp
+			t_v.teleport(p.pos + Vector3(5.0, 0, 0))  # stays in cue range; never walks onto a mine
+			t_v.vel = Vector3.ZERO
 			k.state = "active"  # keep it out and on the foe
-			k.target = T
+			k.target = t_v
 			for mb in m.mobs:
 				mb.queue_free()
 			m.mobs.clear()

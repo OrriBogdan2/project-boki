@@ -12,13 +12,13 @@ const FRAME := 2.0 / 60.0  # s per rendered frame (gameplay_media.gd FRAME)
 
 static func run(g, secs: float) -> void:
 	await g._start("thief", "zapple")
-	var P: Hunter = g.m.player
-	P.teleport(MoveSpeedCheck.flat_lane(g.m.world, P.pos, int(LANE) + 2))
+	var p: Hunter = g.m.player
+	p.teleport(MoveSpeedCheck.flat_lane(g.m.world, p.pos, int(LANE) + 2))
 	g._zoom(0.8)
 	g.still_at = 1.0
 	g._mark("dashes")
-	var x0 := P.pos.x
-	var was := [int(P.dashes)]
+	var x0 := p.pos.x
+	var was := [int(p.dashes)]
 	await g._go(
 		secs,
 		func(t: float):
@@ -28,11 +28,11 @@ static func run(g, secs: float) -> void:
 			var mv := Vector2(1, 0)
 			if t >= 1.6:
 				mv.x = 0.35 if fmod(t, 6.0) < 3.0 else -0.35
-			if P.pos.x > x0 + LANE:
+			if p.pos.x > x0 + LANE:
 				mv.x = minf(mv.x, 0.0)
-			g._keys(P, mv, false, false, dash)
-			if int(P.dashes) > int(was[0]):
-				print("MEDIA_REFILL t=%.2f frame=%d charges=%d" % [t, g.frame, int(P.dashes)])
-			was[0] = int(P.dashes),
-		func(_t: float): return P.pos
+			g._keys(p, mv, false, false, dash)
+			if int(p.dashes) > int(was[0]):
+				print("MEDIA_REFILL t=%.2f frame=%d charges=%d" % [t, g.frame, int(p.dashes)])
+			was[0] = int(p.dashes),
+		func(_t: float): return p.pos
 	)

@@ -53,14 +53,14 @@ func run(main_node: Node) -> void:
 ## A tile in front of a wall or rock with WALL_GAP tiles of level ground behind it: [shooter start, direction],
 ## or [] if the map has none.
 func _wall_spot() -> Array:
-	var W = m.world
-	for z in range(4, W.h - 4):
-		for x in range(4, W.w - 4):
-			if not W.is_block(x + 0.5, z + 0.5):
+	var w_v = m.world
+	for z in range(4, w_v.h - 4):
+		for x in range(4, w_v.w - 4):
+			if not w_v.is_block(x + 0.5, z + 0.5):
 				continue
 			for d in DIRS:
 				var start := Vector3(x + 0.5 - d.x * WALL_GAP, 0, z + 0.5 - d.y * WALL_GAP)
-				start.y = W.ground_at(start.x, start.z)
+				start.y = w_v.ground_at(start.x, start.z)
 				if _level_run(start, d):
 					return [start, d]
 	return []

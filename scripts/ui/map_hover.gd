@@ -18,11 +18,12 @@ const SPAWN_LINE := {
 	"taken": "Already taken"
 }
 
+var hit := {}  # pick(): {id, pv, title, line, col} of it, or {}
+
 var _id := ""  # what the cursor is on now ("" none)
 var _since_ms := 0  # when it came to rest on `_id`
 var _mp := Vector2.ZERO  # pick(): the cursor
 var _best := INF  # pick(): the distance of the best marker so far
-var hit := {}  # pick(): {id, pv, title, line, col} of it, or {}
 
 
 func draw(fm: FullMap) -> void:
@@ -148,11 +149,11 @@ func _things(fm: FullMap, m: Match) -> void:
 		if _near(pv):
 			_found("shrine", pv, "Shrine", "Used" if sh["used"] else SHRINE_LINE, Color("9ff0c4"))
 	if m.lairs:
-		for L in m.lairs.list:
-			var pv := fm.to_screen(L["c"])
+		for l in m.lairs.list:
+			var pv := fm.to_screen(l["c"])
 			if _near(pv, REACH + 4.0):
-				var nm := String(L["name"])
-				_found("lair " + nm, pv, nm, "Boss lair  ·  %s" % String(L["state"]), Lairs.color_of(L))
+				var nm := String(l["name"])
+				_found("lair " + nm, pv, nm, "Boss lair  ·  %s" % String(l["state"]), Lairs.color_of(l))
 	for bc in m.beacons:
 		var pv := fm.to_screen(bc["pos"])
 		if _near(pv):
@@ -203,8 +204,8 @@ func _places(fm: FullMap, m: Match) -> void:
 func _hot_zone(fm: FullMap, m: Match) -> void:
 	if not hit.is_empty() or m.biomes == null:
 		return
-	for I in m.biomes.hot.zone:
-		if fm.to_screen(I["c"]).distance_to(_mp) < float(I["r"]) * fm.k():
+	for i in m.biomes.hot.zone:
+		if fm.to_screen(i["c"]).distance_to(_mp) < float(i["r"]) * fm.k():
 			_found("hot", _mp, "Hot zone", "Better loot here, and more rivals", HotZone.COL)
 			return
 

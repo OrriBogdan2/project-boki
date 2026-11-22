@@ -21,33 +21,33 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	await m.start(Match.arena_opts("thief"))
-	var A := m.arena
-	A.give_glove("blink", 0)
-	A.give_glove("grapple", 1)
+	var a := m.arena
+	a.give_glove("blink", 0)
+	a.give_glove("grapple", 1)
 	for sz in SIZES:
 		main.get_window().size = sz
 		for i in 3:
 			await main.get_tree().process_frame
-		A.open_menu()
+		a.open_menu()
 		for i in 3:
 			await main.get_tree().process_frame
-		_fits(A, sz)
-		await _scrolls_to_end(A, sz)
-		A.close_menu()
-	A.open_menu()
+		_fits(a, sz)
+		await _scrolls_to_end(a, sz)
+		a.close_menu()
+	a.open_menu()
 	await main.get_tree().process_frame
-	_header(A)
-	A.close_menu()
+	_header(a)
+	a.close_menu()
 	print("LPAGEFIT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
 ## Every visible control of the open panel lies inside the visible viewport.
-func _fits(A: Arena, sz: Vector2i) -> void:
-	var view := A.menu_layer.get_viewport().get_visible_rect().grow(0.5)
+func _fits(a: Arena, sz: Vector2i) -> void:
+	var view := a.menu_layer.get_viewport().get_visible_rect().grow(0.5)
 	var out: Array = []
 	var bottom := 0.0
-	for c in A.menu_layer.find_children("*", "Control", true, false):
+	for c in a.menu_layer.find_children("*", "Control", true, false):
 		var ctl := c as Control
 		if not ctl.is_visible_in_tree() or _in_list(ctl):
 			continue
@@ -82,10 +82,10 @@ func _in_list(c: Control) -> bool:
 
 
 ## Scrolled to its end, the Boki list shows its last entry ("None") whole.
-func _scrolls_to_end(A: Arena, sz: Vector2i) -> void:
-	var sc: ScrollContainer = A.menu_layer.find_children("boki_list", "ScrollContainer", true, false)[0]
+func _scrolls_to_end(a: Arena, sz: Vector2i) -> void:
+	var sc: ScrollContainer = a.menu_layer.find_children("boki_list", "ScrollContainer", true, false)[0]
 	sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)
-	await A.menu_layer.get_tree().process_frame
+	await a.menu_layer.get_tree().process_frame
 	var grid := sc.get_child(0) as Control
 	var last := grid.get_child(grid.get_child_count() - 1) as Button
 	ok(
@@ -98,8 +98,8 @@ func _scrolls_to_end(A: Arena, sz: Vector2i) -> void:
 
 
 ## The header shows the hunter's name and a portrait, and no title.
-func _header(A: Arena) -> void:
-	var hd: Control = A.menu_layer.find_children("menu_header", "", true, false)[0]
+func _header(a: Arena) -> void:
+	var hd: Control = a.menu_layer.find_children("menu_header", "", true, false)[0]
 	var texts := " ".join(hd.find_children("*", "Label", true, false).map(func(l): return (l as Label).text))
 	ok(texts.contains(HeroTitle.base_name("thief")), "header names the hunter (%s)" % texts.strip_edges())
 	ok(not texts.contains(HeroTitle.title("thief")), "header does not show the title")

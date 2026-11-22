@@ -57,10 +57,10 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P := m.player
-	P.ctrl = "bot"
-	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
-	var base := P.pos
+	var p := m.player
+	p.ctrl = "bot"
+	p.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	var base := p.pos
 	for i in range(1, 6):
 		var side := 0 if i < 3 else 1
 		var at := base + Vector3(GAP * side + 1.4 * (side * 2 - 1), 0, 1.6 * (1 - 2 * (i % 2)))

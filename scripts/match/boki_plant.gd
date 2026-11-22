@@ -13,6 +13,14 @@ const STEP_MIN := 0.1  # m/s at clip speed 1: a paw sweeping back slower than th
 const REPEAT := 0.05  # of its reach: a paw back this close a part-loop on is stepping again (a scurry)
 const NOT_LEG := ["root", "hips", "spine", "neck", "head"]
 
+static var _cache := {}  # "species clip" -> BokiPlant
+
+var anim: Animation
+var legs: Array[Leg] = []
+
+var _to_model := Transform3D.IDENTITY  # skeleton space to the model's
+var _h := 0.0  # s between samples
+
 
 ## One leg: its bones, and when and where the clip moves its paw back.
 class Leg:
@@ -25,14 +33,6 @@ class Leg:
 	var stance := 0.0  # s of clip the paw takes to move back
 	var reach := PackedVector3Array()  # the paw from `base` at each sample of its stance
 	var at := 0.0  # pose()'s clip time for the leg this frame
-
-
-var anim: Animation
-var legs: Array[Leg] = []
-var _to_model := Transform3D.IDENTITY  # skeleton space to the model's
-var _h := 0.0  # s between samples
-
-static var _cache := {}  # "species clip" -> BokiPlant
 
 
 ## The planted paws of `species`' `clip` in `model`, read from the clip once per species.

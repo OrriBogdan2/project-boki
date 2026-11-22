@@ -10,7 +10,7 @@ const AIR_S := 0.3  # s of life for an open-air shot
 const SPAM := 100  # misses in a row for the pool-cap check
 
 var m: Match
-var P: Hunter
+var p: Hunter
 var fxd: DJFx
 var wall_at := Vector3.ZERO
 
@@ -20,11 +20,11 @@ func run(main_node: Node) -> void:
 	main_node.set_meta("miss_fx_check", self)
 	var r := setup("gunslinger", 14.0)
 	m = r[0]
-	P = r[1]
+	p = r[1]
 	var tgt: Hunter = r[2]
 	tgt.teleport(Vector3(0, 0, 0) + r[4] + Vector3(0, 0, 9.0))
 	fxd = DJFx.of(m)
-	fxd.prewarm(P.pos)
+	fxd.prewarm(p.pos)
 	var warm_made := fxd.made
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
@@ -33,8 +33,8 @@ func run(main_node: Node) -> void:
 		m.world.level[i] = lv + 3
 	wall_at = home + Vector3(5.0, 0.9, 0)
 	for id in Arch.ids():
-		P.set_arch(id)
-		var col := MissFx.colour_of(P)
+		p.set_arch(id)
+		var col := MissFx.colour_of(p)
 		for kind in ["weapon", "abil"]:
 			var extra := {} if kind == "weapon" else {"src": "abil"}
 			var w := _fire(home, 1.0, extra)
@@ -51,7 +51,7 @@ func run(main_node: Node) -> void:
 	ok("a stage-owned look draws no puff", owned.is_empty())
 	tgt.teleport(home + Vector3(3.0, 0, 0))
 	_clear()
-	m.spawn_shot(P, home + Vector3(0, 0.9, 0), Vector2(SHOT_V, 0), 1.0, 2.0, 0.2, Color.WHITE, {})
+	m.spawn_shot(p, home + Vector3(0, 0.9, 0), Vector2(SHOT_V, 0), 1.0, 2.0, 0.2, Color.WHITE, {})
 	step(m, 0.4)
 	ok("a shot that hits draws no miss puff", fxd.live.is_empty())
 	_clear()
@@ -71,7 +71,7 @@ func _fire(home: Vector3, wall: float, extra: Dictionary) -> Array:
 	var life := 2.0 if wall >= 0.0 else AIR_S
 	var at := home + Vector3(0, 0.9, 0) if wall >= 0.0 else home + Vector3(-6, 0.9, 6)
 	var v := Vector2(SHOT_V, 0) if wall >= 0.0 else Vector2(SHOT_V * 0.5, 0)
-	m.spawn_shot(P, at, v, 1.0, life, 0.2, Color.WHITE, extra)
+	m.spawn_shot(p, at, v, 1.0, life, 0.2, Color.WHITE, extra)
 	step(m, 0.6 if wall >= 0.0 else AIR_S + 0.1)
 	return fxd.live.duplicate()
 

@@ -63,13 +63,13 @@ func _match_walk(arch: String, training: bool) -> Vector2:
 	for mb in mt.mobs:
 		mb.queue_free()
 	mt.mobs.clear()
-	var P: Hunter = mt.player
+	var p: Hunter = mt.player
 	for h in mt.hunters:
-		if h != P:
+		if h != p:
 			h.teleport(h.pos + Vector3(0, 0, 80))
-	P.teleport(flat_lane(mt.world, P.pos, 14))
-	P.vel = Vector3.ZERO
-	var v := _median_walk(func() -> Vector3: return P.pos, func() -> void: mt._process(DT))
+	p.teleport(flat_lane(mt.world, p.pos, 14))
+	p.vel = Vector3.ZERO
+	var v := _median_walk(func() -> Vector3: return p.pos, func() -> void: mt._process(DT))
 	var across := CamRig.style_across(mt.cam.style_id) * mt.cam.dist_mul * mt.cam.zoom
 	mt.queue_free()
 	await main.get_tree().process_frame

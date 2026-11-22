@@ -120,12 +120,12 @@ func _loop(e: Ent, kind: String, by: Node, stacks: Callable) -> void:
 
 func _process(_dt: float) -> void:
 	for key in _loops.keys():
-		var L: Dictionary = _loops[key]
-		var ev = L["e"]
-		var n: int = (L["stacks"] as Callable).call() if is_instance_valid(ev) else 0
+		var l: Dictionary = _loops[key]
+		var ev = l["e"]
+		var n: int = (l["stacks"] as Callable).call() if is_instance_valid(ev) else 0
 		if n <= 0:
 			Sfx.loop_stop(key)
 			_loops.erase(key)
 		else:
-			var step := float(rules["loops"][L["kind"]]["pitch_step"])
+			var step := float(rules["loops"][l["kind"]]["pitch_step"])
 			Sfx.loop_set(key, (ev as Ent).pos, 1.0 + step * (n - 1))

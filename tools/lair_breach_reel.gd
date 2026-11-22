@@ -36,17 +36,17 @@ func run(main: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var P: Hunter = m.player
-	var L: Dictionary = m.lairs.list.filter(func(x): return x["boss"] == "colossus")[0]
-	m.lairs.activate(L)
-	var out := Vector3(L["out"].x, 0, L["out"].y)
+	var p: Hunter = m.player
+	var l: Dictionary = m.lairs.list.filter(func(x): return x["boss"] == "colossus")[0]
+	m.lairs.activate(l)
+	var out := Vector3(l["out"].x, 0, l["out"].y)
 	var side := Vector3(-out.z, 0, out.x)
-	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
+	var crew: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var spots: Array = []
 	for i in crew.size():
-		spots.append(LairBreach.stand(L) + out * 6.0 + side * (i - 1) * 1.6)
+		spots.append(LairBreach.stand(l) + out * 6.0 + side * (i - 1) * 1.6)
 	for mb in m.mobs:
-		if not mb.dead and mb.mkind != "gate" and not (mb is Boss) and mb.flat_dist(L["seal_at"]) < 25.0:
+		if not mb.dead and mb.mkind != "gate" and not (mb is Boss) and mb.flat_dist(l["seal_at"]) < 25.0:
 			mb.dead = true
 			mb.visible = false
 	# bots plan no lairs in a match's first 25 s: play those off camera, everyone standing still and whole
@@ -61,15 +61,15 @@ func run(main: Node) -> void:
 	for i in crew.size():
 		var h: Hunter = crew[i]
 		h.teleport(Vector3(spots[i].x, m.world.ground_at(spots[i].x, spots[i].z), spots[i].z))
-		if h == P:
+		if h == p:
 			continue
 		h.ctrl = "bot"
 		h.lvl = maxi(h.lvl, 8)
 		h.ai["boss_hunt"] = true
 	for h in m.hunters:
-		if h.team != P.team:
+		if h.team != p.team:
 			h.teleport(m.world.spawns[-1])
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	print("LAIR_BREACH_REEL filming from movie frame %d" % Engine.get_process_frames())
 	var frame := 0
 	var stage := 0
@@ -77,21 +77,21 @@ func run(main: Node) -> void:
 	while frame < int((LIMIT_S + AFTER_S) * 60.0):
 		for h in crew:
 			h.hp = maxf(h.hp, h.max_hp * 0.5)  # (a film of the breach, not of a wipe)
-		_drive(P, L)
+		_drive(p, l)
 		if frame == 0:
 			print("LAIR_BREACH_REEL crew %s" % str(crew.map(func(h): return "%s out %s" % [h.pname, h.out])))
-		var now := int(L.get("seal_stage", 0))
+		var now := int(l.get("seal_stage", 0))
 		if now > stage:
 			stage = now
 			var what := "broken" if now >= LairBreach.STAGES else "crack %d" % now
 			print("LAIR_BREACH_REEL %s at frame %d (t %.1f)" % [what, frame, frame / 60.0])
-		if woke < 0 and L["state"] == "awake":
+		if woke < 0 and l["state"] == "awake":
 			woke = frame
 			print("LAIR_BREACH_REEL boss awake at frame %d (t %.1f)" % [frame, frame / 60.0])
 		if woke >= 0 and frame - woke > int(AFTER_S * 60.0):
 			break
 		if woke < 0 and frame > int(LIMIT_S * 60.0):
-			print("LAIR_BREACH_REEL gave up: the gate is %s" % L["state"])
+			print("LAIR_BREACH_REEL gave up: the gate is %s" % l["state"])
 			break
 		frame += 1
 		await main.get_tree().process_frame
@@ -100,11 +100,11 @@ func run(main: Node) -> void:
 
 
 ## You, scripted: at the seal firing into it while the gate is shut, then in through it.
-func _drive(P: Hunter, L: Dictionary) -> void:
-	var seal: Mob = P.m.lairs.breach.seal_of(L)
-	var goal: Vector3 = LairBreach.stand(L) if seal else L["c"]
-	var to := Vector2(goal.x - P.pos.x, goal.z - P.pos.z)
-	P.inp["move"] = to.normalized() if to.length() > 0.8 else Vector2.ZERO
-	P.inp["fire"] = seal != null
-	P.inp["aim"] = seal.pos + Vector3(0, 1.2, 0) if seal else goal
-	P.inp["aim_y"] = P.pos.y
+func _drive(p: Hunter, l: Dictionary) -> void:
+	var seal: Mob = p.m.lairs.breach.seal_of(l)
+	var goal: Vector3 = LairBreach.stand(l) if seal else l["c"]
+	var to := Vector2(goal.x - p.pos.x, goal.z - p.pos.z)
+	p.inp["move"] = to.normalized() if to.length() > 0.8 else Vector2.ZERO
+	p.inp["fire"] = seal != null
+	p.inp["aim"] = seal.pos + Vector3(0, 1.2, 0) if seal else goal
+	p.inp["aim_y"] = p.pos.y

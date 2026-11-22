@@ -24,16 +24,16 @@ func run(main: Node) -> void:
 	await m.start(opts)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	for o in m.hunters:
-		if o != P:
+		if o != p:
 			o.ctrl = "idle"
-			o.teleport(P.pos + Vector3(60, 0, 60))
+			o.teleport(p.pos + Vector3(60, 0, 60))
 	var spots := picked.size() if not picked.is_empty() else TYPES.size()
 	for i in spots:
 		var sid := picked[i] if not picked.is_empty() else _species_of(TYPES[i])
 		var a := TAU * float(i) / float(spots)
-		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), P.pos + Vector3(cos(a), 0, sin(a)) * RADIUS, true)
+		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), p.pos + Vector3(cos(a), 0, sin(a)) * RADIUS, true)
 		k.dazed_t = 1e9
 	for i in FRAMES:
 		await main.get_tree().process_frame

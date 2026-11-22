@@ -53,20 +53,20 @@ func _rel(i: int, body: Vector3) -> Vector3:
 
 
 ## One frame: the clip on the body and what it does with the legs and the spine.
-func sample(P: Hunter, m: Match, step: float) -> Dictionary:
+func sample(p: Hunter, m: Match, step: float) -> Dictionary:
 	var e := {"clip": "", "act": 0.0, "up": 0.0, "kt": -1.0, "lean": 0.0, "slip": 0.0, "drift": 0.0, "dpose": 0.0}
-	var sync := P.model.get_node_or_null("Warden/Sync")
+	var sync := p.model.get_node_or_null("Warden/Sync")
 	if sync != null and sync.get("clips") != null:
 		var c: WardenClips = sync.get("clips")
 		e["clip"] = c.cur
 		e["act"] = c.act_w
 		e["up"] = c.up_w
-	if P.ak != null and P.ak.anim_id != "":
-		e["kt"] = m.time - P.ak.anim_at
+	if p.ak != null and p.ak.anim_id != "":
+		e["kt"] = m.time - p.ak.anim_at
 	if sk == null or hips < 0:
 		return e
-	var body := P.global_position
-	var fwd := Vector3(-sin(P.face), 0.0, -cos(P.face))
+	var body := p.global_position
+	var fwd := Vector3(-sin(p.face), 0.0, -cos(p.face))
 	var h := _rel(hips, body)
 	if hips0 == Vector3.INF:
 		hips0 = h

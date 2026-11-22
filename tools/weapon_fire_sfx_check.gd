@@ -4,21 +4,24 @@ extends RefCounted
 ## signature weapon may not play a stock weapon sound or a pickup gun's shot while it fires, the old
 ## class weapons' JSON names a Hunter's own sound, and the five pickup guns each play their own shot.
 
-var main: Node
-var fails := 0
-var n := 0
-var ak = null
-
 ## The guns a hunter without a Hunter kit picks from (Data.CLASSES weapon lists): each its own shot.
 const PICKUP_GUNS := ["smg", "rifle", "burst_rifle", "shotgun", "sniper"]
+
 ## Signature-class weapons no current Hunter carries but a class list still offers: their JSON sound must be own too.
 const OLD_SIGNATURES := ["longsword", "twin_blades", "spellstaff"]
+
 ## The shared weapon sounds the audit found standing in for Hunters' own (SFX_AUDIT row 3).
 const STOCK := ["smg", "rifle", "shotgun", "sniper", "thump", "cleave", "swipe", "zap"]
+
 ## Hunters added after the audit whose weapon still plays a stock sound (own LMB sound owed: docs/DEBT.md).
 const OWED := ["gil"]
 const HOLD := 1.6  # s the attack key is held (past the sniper's wind-up and a melee charge)
 const TAPS := 3  # quick taps after the hold (tap-to-throw / combo kits)
+
+var main: Node
+var fails := 0
+var n := 0
+var ak = null
 
 
 func ok(what: String, cond: bool, info := "") -> void:
@@ -98,19 +101,19 @@ func _pickup_match(wid: String) -> Match:
 
 
 ## Holds the attack key, lets go, taps it a few times; returns the sounds that played meanwhile.
-func _fire(m: Match, P: Hunter) -> Array:
-	ak.aim_at(P, P.pos + Vector3(0, 0, 6.0))
-	P.fire_cd = 0.0
+func _fire(m: Match, p: Hunter) -> Array:
+	ak.aim_at(p, p.pos + Vector3(0, 0, 6.0))
+	p.fire_cd = 0.0
 	var t0 := Time.get_ticks_msec()
 	Sfx.last_played.clear()
-	Sfx.listener = P.pos  # (no camera runs here to set it: far sounds would be dropped)
-	ak.step(m, HOLD, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
+	Sfx.listener = p.pos  # (no camera runs here to set it: far sounds would be dropped)
+	ak.step(m, HOLD, func(): p.inp["fire"] = true)
+	p.inp["fire"] = false
 	ak.step(m, 0.6)
 	for i in TAPS:
-		P.inp["fire"] = true
+		p.inp["fire"] = true
 		m.step(ak.DT)
-		P.inp["fire"] = false
+		p.inp["fire"] = false
 		ak.step(m, 0.5)
 	var heard := []
 	for s in Sfx.last_played:

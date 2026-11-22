@@ -39,11 +39,11 @@ func run(main: Node) -> void:
 	var played := 0
 	for hero in Arch.ids():
 		var m := _match(main)
-		var P: Hunter = m.player
-		P.set_arch(String(hero))
+		var p: Hunter = m.player
+		p.set_arch(String(hero))
 		var used: Array[Vector3] = []
 		for id in UtilityBelt.ids():
-			_play(m, P, String(hero), String(id), used)
+			_play(m, p, String(hero), String(id), used)
 			played += 1
 		main.remove_child(m)
 		m.queue_free()
@@ -82,40 +82,40 @@ func _fresh_ground(m: Match, used: Array[Vector3]) -> Vector3:
 	return at
 
 
-func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) -> void:
+func _play(m: Match, p_v: Hunter, hero: String, id: String, used: Array[Vector3]) -> void:
 	var tag := "%s/%s" % [hero, id]
 	var mv := UtilityPose.move_of(id)
 	var cast := UtilityPose.cast_time(id)
-	UtilityBelt.clear(P)
-	P.beat_t = 0.0
-	P.hp = P.max_hp * 0.5
-	P.armor = 0.0
-	P.teleport(_fresh_ground(m, used))
-	P.vel = Vector3.ZERO
+	UtilityBelt.clear(p_v)
+	p_v.beat_t = 0.0
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.armor = 0.0
+	p_v.teleport(_fresh_ground(m, used))
+	p_v.vel = Vector3.ZERO
 	m.step(Match.DT)
-	m.remove_meta("banner_%d" % P.team)  # one banner per squad at a time; each play is a fresh one
-	if UtilityBelt.is_key(id) or not UtilityUse.can_use(P, id):
-		UtilityPose.start(P, id)
+	m.remove_meta("banner_%d" % p_v.team)  # one banner per squad at a time; each play is a fresh one
+	if UtilityBelt.is_key(id) or not UtilityUse.can_use(p_v, id):
+		UtilityPose.start(p_v, id)
 	else:
-		UtilityBelt.grant(P, id, 1)
-		ok(UtilityBelt.use_id(P, id), tag + " starts")
+		UtilityBelt.grant(p_v, id, 1)
+		ok(UtilityBelt.use_id(p_v, id), tag + " starts")
 	var steps := 0
 	var crouched := 0.0
 	var run_crouch := 0.0
 	var kind_ok := true
 	var heal_hp := UtilityUse.channel(id, "heal") if UtilityUse.use_of(id) == "drink" else 0.0
 	while steps < int(cast / Match.DT) + 20:
-		P._anim_state(0.0)
-		var s := P.anim_s
+		p_v._anim_state(0.0)
+		var s := p_v.anim_s
 		var p := maxf(float(s["drink"]), float(s["util"]))
 		if p < 0.0:
 			break
 		kind_ok = kind_ok and (float(s["drink"]) >= 0.0 if mv == "drink" else String(s["util_move"]) == mv)
 		crouched = maxf(crouched, float(s["crouch"]))
-		P.vel = Vector3(RUN_SPEED, 0.0, 0.0)  # the same frame on the move: the legs stay the gait's
-		P._anim_state(0.0)
-		run_crouch = maxf(run_crouch, float(P.anim_s["crouch"]) - P.crouch_k)
-		P.vel = Vector3.ZERO
+		p_v.vel = Vector3(RUN_SPEED, 0.0, 0.0)  # the same frame on the move: the legs stay the gait's
+		p_v._anim_state(0.0)
+		run_crouch = maxf(run_crouch, float(p_v.anim_s["crouch"]) - p_v.crouch_k)
+		p_v.vel = Vector3.ZERO
 		m.step(Match.DT)
 		steps += 1
 	ok(kind_ok, tag + " plays the " + mv + " state")
@@ -124,6 +124,6 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	ok(run_crouch < 0.01, tag + " leaves the legs free on the move")
 	match UtilityUse.use_of(id):
 		"drink":
-			ok(heal_hp <= 0.0 or P.hp > P.max_hp * 0.5, tag + " heals when the drink lands")
+			ok(heal_hp <= 0.0 or p_v.hp > p_v.max_hp * 0.5, tag + " heals when the drink lands")
 		"repair":
-			ok(P.armor >= P.max_armor - 0.5, tag + " repairs when the kit lands")
+			ok(p_v.armor >= p_v.max_armor - 0.5, tag + " repairs when the kit lands")

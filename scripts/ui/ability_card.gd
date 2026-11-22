@@ -11,8 +11,12 @@ extends PanelContainer
 const WIDTH := 300.0  # px
 const GAP := 14.0  # px between the card and what it describes
 const PAD := Vector2(14, 10)  # px, inside the frame
+
 ## The slots with a cooldown in their data ("dash" keeps its recharge in "cd", the rest in "cooldown").
 const TIMED := ["dash", "rmb", "e", "x"]
+
+## The HUD's ability row slots (hover ids) and the kit slot each one shows.
+const HUD_SLOTS := {"dash": "dash", "sec": "rmb", "k1": "e", "x": "x"}
 
 var facts: Dictionary = {}
 
@@ -121,10 +125,6 @@ static func hover(ctl: Control, arch: String, slot: String) -> void:
 					(card as Node).queue_free()
 			shown.clear()
 	)
-
-
-## The HUD's ability row slots (hover ids) and the kit slot each one shows.
-const HUD_SLOTS := {"dash": "dash", "sec": "rmb", "k1": "e", "x": "x"}
 
 
 ## While Tab is held and the mouse is on an ability of the row, shows its card above it (the kit's live name and

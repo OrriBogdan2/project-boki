@@ -2,6 +2,8 @@ class_name WardenFx
 extends RefCounted
 ## A model's smoke and bloom off its held weapon (warden_look.json), split out of WardenGlb.
 
+static var _puff_tex: Texture2D
+
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -146,9 +148,6 @@ static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
 	mi.position = at
 	mi.set_meta("glb_hidden", true)  # (kept out of the model's own bounds, like the hidden procedural parts)
 	return mi
-
-
-static var _puff_tex: Texture2D
 
 
 ## A soft round puff (a radial fall-off), made once.

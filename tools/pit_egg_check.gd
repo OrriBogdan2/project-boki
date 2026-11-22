@@ -11,7 +11,7 @@ const SEEDS := 50
 
 var bad := 0
 var m: Match
-var L: Dictionary
+var l: Dictionary
 
 
 func ok(cond: bool, what: String) -> void:
@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 		if not (mob is Boss):
 			mob.queue_free()
 			m.mobs.erase(mob)
-	L = m.lairs.list[0]
+	l = m.lairs.list[0]
 	for h in m.hunters:
 		h.ctrl = "idle"
 	m.hunters[3].ctrl = "bot"
@@ -56,16 +56,16 @@ func _eggs_on_floor() -> int:
 func _kill(seed_v: int, inside_n: int, cap := 4) -> void:
 	for wp in m.wpicks.duplicate():
 		Pack._off_ground(m, wp)
-	L["egg_wp"] = null
+	l["egg_wp"] = null
 	for i in m.hunters.size():
 		var h: Hunter = m.hunters[i]
 		h.pack = []
 		h.pack_cap = cap
-		var dx := i * 1.5 - 2.0 if i < inside_n else float(L["half"]) + 12.0
-		var spot: Vector3 = L["c"] + Vector3(dx, 0, 0)
+		var dx := i * 1.5 - 2.0 if i < inside_n else float(l["half"]) + 12.0
+		var spot: Vector3 = l["c"] + Vector3(dx, 0, 0)
 		h.pos = Vector3(spot.x, m.world.ground_at(spot.x, spot.z), spot.z)
 	m.rng.seed = seed_v
-	m.lairs.on_mob_dead(m.lairs.boss_of(L), m.hunters[0])
+	m.lairs.on_mob_dead(m.lairs.boss_of(l), m.hunters[0])
 
 
 func _spread_wins() -> void:
@@ -94,7 +94,7 @@ func _spread_wins() -> void:
 
 func _full_pack() -> void:
 	_kill(7, 3, 0)
-	var wp2: Variant = L.get("egg_wp")
+	var wp2: Variant = l.get("egg_wp")
 	ok(wp2 != null and _eggs_on_floor() == 1, "full pack: the egg lies at the winner's feet")
 	if wp2 == null:
 		return
@@ -110,12 +110,12 @@ func _nobody_inside() -> void:
 	var held := 0
 	for h in m.hunters:
 		held += _eggs_in_packs(h)
-	var wp: Variant = L.get("egg_wp")
+	var wp: Variant = l.get("egg_wp")
 	var free: bool = held == 0 and _eggs_on_floor() == 1 and wp != null and wp.get("only") == null
 	ok(free, "nobody inside: one egg on the floor, free for all")
 	var apart := 99.0
 	for p in m.wpicks:
 		if not p.has("egg"):
 			apart = minf(apart, Vector2(p["pos"].x - wp["pos"].x, p["pos"].z - wp["pos"].z).length())
-	var well_placed: bool = apart >= 2.0 and m.lairs.inside(L, wp["pos"])
+	var well_placed: bool = apart >= 2.0 and m.lairs.inside(l, wp["pos"])
 	ok(well_placed, "the floor egg lies inside the lair, %.1fm from the loot pile" % apart)

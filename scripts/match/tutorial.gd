@@ -10,17 +10,6 @@ extends RefCounted
 ## in when the step starts), a pulse when they stall, a quiet check when a step is done; the marker (beam,
 ## arrow) is here and in the Hud. Nothing but the first intro card ever pauses play.
 
-
-## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
-## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
-static func leads(sid: String) -> bool:
-	return sid in WALK_LEAD or sid in GAP_STEPS
-
-
-static func steps() -> Array:
-	return Content.rules("tutorial")["steps"]
-
-
 const KEYS := {
 	"land": "move",
 	"dash": "dash",
@@ -42,19 +31,23 @@ const KEYS := {
 	"pick_kin": "signature",
 	"pick_ult": "ultimate"
 }
+
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {
 	"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "wallkick": "crouch", "glove": "yard"
 }
 const GAP_STEPS := ["dash", "exdash", "glide"]  # leave from the glowing pad on one island, land on the next
+
 ## The steps whose marker is the camp's nearest monster.
 const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
 const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
+
 ## Gap steps whose sign moves over the landing once you have left the pad (the glide is long: the pad you left
 ## is soon off a 1280x720 screen, so the sign goes where you are headed and says so).
 const LAND_SIGN := {"glide": "LAND HERE"}
 const SIGN_RISE := 2.6  # m: a pad sign stands this far over its spot
 const PAD_LEFT_R := 1.5  # m (flat) from the pad, off the ground: you have taken off
+
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
 const KIT_KEY := {
 	"pick_sec": "rmb",
@@ -119,10 +112,21 @@ var camps: TutorialCamps
 var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
+var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
+
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
-var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
+
+
+## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
+## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
+static func leads(sid: String) -> bool:
+	return sid in WALK_LEAD or sid in GAP_STEPS
+
+
+static func steps() -> Array:
+	return Content.rules("tutorial")["steps"]
 
 
 func _init(match_node: Match) -> void:
@@ -203,6 +207,7 @@ func _add_pad(id: String) -> void:
 	m.add_child(lab)
 	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab, "text": lab.text})
 
+
 ## The sign over a gap step's pad (null for a step without one).
 func pad_sign(sid: String) -> Label3D:
 	for pd in _pads:
@@ -210,16 +215,19 @@ func pad_sign(sid: String) -> Label3D:
 			return pd["label"]
 	return null
 
+
 ## The ground spot a gap step's sign stands over (INF for a step without one): the pad, or the landing once
 ## you have taken off on a LAND_SIGN step.
 func sign_spot(sid: String) -> Vector3:
 	var lab := pad_sign(sid)
 	return Vector3.INF if lab == null else lab.position - Vector3(0, SIGN_RISE, 0)
 
+
 ## Whether the player has left this gap step's pad: off the ground, past its rim.
 func _off_pad(sid: String) -> bool:
 	var p := m.player
 	return p != null and not p.grounded and _dist(stop(sid, "pad")) > PAD_LEFT_R
+
 
 # ------------------------------------------------------------------ each step
 func id() -> String:

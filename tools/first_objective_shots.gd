@@ -104,23 +104,23 @@ func _shot(what: String) -> void:
 
 
 func _find_shots() -> void:
-	var P := m.player
+	var p := m.player
 	var k := _pick_wild()
-	P.teleport(_ground_near(k.pos, 60.0))
+	p.teleport(_ground_near(k.pos, 60.0))
 	await _settle(1.0)
 	await _shot("1_find_arrow")
-	P.teleport(_ground_near(k.pos, 30.0))
+	p.teleport(_ground_near(k.pos, 30.0))
 	await _settle(1.0)
 	await _shot("1_find_pin")
-	P.teleport(_ground_near(k.pos, 6.0))
+	p.teleport(_ground_near(k.pos, 6.0))
 	await _settle(1.0)
 	await _shot("2_knock")
 	k.state = "dazed"
 	k.dazed_t = 30.0
-	P.teleport(_ground_near(k.pos, 2.5))
+	p.teleport(_ground_near(k.pos, 2.5))
 	await _settle(0.6)
 	await _shot("3_scan")
-	P.caught.append({"uid": "x", "species": "puddlet"})
+	p.caught.append({"uid": "x", "species": "puddlet"})
 	k.queue_free()
 	m.kins.erase(k)
 	await _settle(0.6)
@@ -128,19 +128,19 @@ func _find_shots() -> void:
 
 
 func _leave_shots() -> void:
-	var P := m.player
+	var p := m.player
 	var o := m.objective
 	var x := o.exit_spot()
 	x["open_at"] = 0.0
 	var spot: Vector3 = x["pos"]
-	P.teleport(_ground_near(spot, 12.0))
+	p.teleport(_ground_near(spot, 12.0))
 	await _settle(1.0)
 	await _shot("4_leave_pin")
-	P.teleport(_ground_near(spot, 2.0))
+	p.teleport(_ground_near(spot, 2.0))
 	await _settle(1.0)
 	await _shot("5_start_uplink")
 	x["state"] = "charging"
-	x["team"] = P.team
+	x["team"] = p.team
 	x["contested"] = false
 	x["prog"] = 0.42
 	await _settle(0.6)

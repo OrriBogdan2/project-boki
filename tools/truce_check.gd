@@ -18,10 +18,10 @@ func run(main_node: Node) -> void:
 		mb.queue_free()
 	m.mobs.clear()
 	m.time = 120.0
-	var A: Array = m.hunters.filter(func(x): return x.team == 0)
-	var B: Array = m.hunters.filter(func(x): return x.team == 1)
+	var a: Array = m.hunters.filter(func(x): return x.team == 0)
+	var b: Array = m.hunters.filter(func(x): return x.team == 1)
 	# open flat ground for the stand-off
-	var home: Vector3 = A[0].pos
+	var home: Vector3 = a[0].pos
 	for k in 3000:
 		var g := m.world.random_ground()
 		var roomy := true
@@ -37,18 +37,18 @@ func run(main_node: Node) -> void:
 			home = g
 			break
 	var spots := {}
-	for i in A.size():
-		spots[A[i]] = home + Vector3(-3.5, 0, -1.0 + 2.0 * i)
-	for i in B.size():
-		spots[B[i]] = home + Vector3(3.5, 0, -1.0 + 2.0 * i)
+	for i in a.size():
+		spots[a[i]] = home + Vector3(-3.5, 0, -1.0 + 2.0 * i)
+	for i in b.size():
+		spots[b[i]] = home + Vector3(3.5, 0, -1.0 + 2.0 * i)
 	for h in m.hunters:
 		h.ctrl = "bot"
 		h.teleport(spots[h])
 	# squad A is hurt and bare; squad B is fresh with good armor
-	for h in A:
+	for h in a:
 		h.hp = h.max_hp * 0.2
 		h.armor = 0.0
-	for h in B:
+	for h in b:
 		h.armor_tier = 3
 		h.armor = h.max_armor
 	var hold := func():
@@ -76,14 +76,20 @@ func run(main_node: Node) -> void:
 			if tg is Hunter and (tg as Hunter).team != h.team:
 				n += 1
 		return n
-	var T: Truce = m.truce
+	var t_v: Truce = m.truce
 	print(
 		(
 			"TCHECK strength A=%.1f B=%.1f  peace score A->B=%.2f  B would accept from A=%.2f  A would accept from B=%.2f"
-			% [T.strength(0), T.strength(1), T._peace_score(0, 1, {1: 7.0}), T.would_accept(1, 0), T.would_accept(0, 1)]
+			% [
+				t_v.strength(0),
+				t_v.strength(1),
+				t_v._peace_score(0, 1, {1: 7.0}),
+				t_v.would_accept(1, 0),
+				t_v.would_accept(0, 1)
+			]
 		)
 	)
-	if T.would_accept(1, 0) >= T.would_accept(0, 1):
+	if t_v.would_accept(1, 0) >= t_v.would_accept(0, 1):
 		ok = false
 		print("TCHECK FAIL the stronger squad should be less keen")
 	run.call(2.0)
@@ -94,9 +100,9 @@ func run(main_node: Node) -> void:
 		print("TCHECK FAIL they never squared up")
 	# the weak squad should raise the flag by itself within a while
 	var t0 := m.time
-	while not T.events.any(func(e): return String(e).begins_with("offer 0->1")) and m.time - t0 < 40.0:
+	while not t_v.events.any(func(e): return String(e).begins_with("offer 0->1")) and m.time - t0 < 40.0:
 		run.call(0.25)
-	var offered: bool = T.events.any(func(e): return String(e).begins_with("offer 0->1"))
+	var offered: bool = t_v.events.any(func(e): return String(e).begins_with("offer 0->1"))
 	print("TCHECK weak squad offered a truce: %s after %.1fs" % [offered, m.time - t0])
 	if not offered:
 		ok = false
@@ -104,25 +110,25 @@ func run(main_node: Node) -> void:
 	run.call(3.5)
 	var answered := (
 		"accepted"
-		if T.allied(0, 1)
+		if t_v.allied(0, 1)
 		else (
 			"faked"
-			if T.events.has("fake 1")
-			else ("refused" if T.events.any(func(e): return String(e).begins_with("refused")) else "no answer")
+			if t_v.events.has("fake 1")
+			else ("refused" if t_v.events.any(func(e): return String(e).begins_with("refused")) else "no answer")
 		)
 	)
-	print("TCHECK strong squad answered: %s  (events %s)" % [answered, str(T.events)])
+	print("TCHECK strong squad answered: %s  (events %s)" % [answered, str(t_v.events)])
 	if answered == "no answer":
 		ok = false
 		print("TCHECK FAIL no answer")
-	if not T.allied(0, 1):
+	if not t_v.allied(0, 1):
 		print("TCHECK (making the truce by hand for the rest of the check)")
 		for h in m.hunters:
 			h.ctrl = "idle"  # (a swing under way would land on the new partner and break the truce)
 		run.call(1.0)
 		for h in m.hunters:
 			h.ctrl = "bot"
-		T.make(0, 1)
+		t_v.make(0, 1)
 	for h in m.hunters:
 		h.ai.erase("betray_at")
 		h.ai.erase("betray")
@@ -133,33 +139,33 @@ func run(main_node: Node) -> void:
 		ok = false
 		print("TCHECK FAIL truce partners still targeted")
 	# an attack breaks it
-	var traitor: Hunter = B[0]
-	var victim: Hunter = A[0]
+	var traitor: Hunter = b[0]
+	var victim: Hunter = a[0]
 	victim.inv_t = 0.0
 	victim.hurt(20.0, traitor, {"src": "shot"})
-	var announced: bool = T.events.any(func(f): return String(f).contains("broke the truce"))
+	var announced: bool = t_v.events.any(func(f): return String(f).contains("broke the truce"))
 	run.call(0.6)
-	var hits_back: int = A.filter(func(x): return x.ai.get("tgt") == traitor).size()
+	var hits_back: int = a.filter(func(x): return x.ai.get("tgt") == traitor).size()
 	print(
 		(
 			"TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d"
-			% [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back]
+			% [t_v.allied(0, 1), announced, t_v.is_marked(traitor), traitor.reveal_t, hits_back]
 		)
 	)
-	if T.allied(0, 1) or not announced or not T.is_marked(traitor) or hits_back == 0:
+	if t_v.allied(0, 1) or not announced or not t_v.is_marked(traitor) or hits_back == 0:
 		ok = false
 		print("TCHECK FAIL breaking")
 	# sharing an uplink
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
-	T.marked.clear()  # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
-	T.make(0, 1)
-	m.exits.act(o, "start", A[0])
-	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
-	spots[B[0]] = o["pos"] + Vector3(-1.2, 0, -0.9)
-	spots[A[1]] = o["pos"] + Vector3(30, 0, 30)
-	spots[B[1]] = o["pos"] + Vector3(30, 0, 30)
-	for h in [A[1], B[1]]:
+	t_v.marked.clear()  # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
+	t_v.make(0, 1)
+	m.exits.act(o, "start", a[0])
+	spots[a[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
+	spots[b[0]] = o["pos"] + Vector3(-1.2, 0, -0.9)
+	spots[a[1]] = o["pos"] + Vector3(30, 0, 30)
+	spots[b[1]] = o["pos"] + Vector3(30, 0, 30)
+	for h in [a[1], b[1]]:
 		spots[h] = m.world.free_spot_near(spots[h], [], 1.0, 0.5, 20.0)
 	var p0 := float(o["prog"])
 	run.call(3.0)
@@ -173,7 +179,7 @@ func run(main_node: Node) -> void:
 	if o["contested"] or p1 <= p0:
 		ok = false
 		print("TCHECK FAIL partner contested the uplink")
-	T.end("0:1", "")
+	t_v.end("0:1", "")
 	run.call(1.0)
 	var p2 := float(o["prog"])
 	run.call(2.0)
@@ -188,18 +194,18 @@ func run(main_node: Node) -> void:
 		print("TCHECK FAIL rival didn't contest")
 	# the other way round: now squad B is the beaten one, and an offer to it (as a player would
 	# make from the emote wheel) gets accepted by its own weighing
-	T.marked.clear()
-	T._cool.clear()
-	spots[A[0]] = home + Vector3(-3.5, 0, -1.0)
-	spots[A[1]] = home + Vector3(-3.5, 0, 1.0)
-	spots[B[0]] = home + Vector3(3.5, 0, -1.0)
-	spots[B[1]] = home + Vector3(3.5, 0, 1.0)
-	for h in A:
+	t_v.marked.clear()
+	t_v._cool.clear()
+	spots[a[0]] = home + Vector3(-3.5, 0, -1.0)
+	spots[a[1]] = home + Vector3(-3.5, 0, 1.0)
+	spots[b[0]] = home + Vector3(3.5, 0, -1.0)
+	spots[b[1]] = home + Vector3(3.5, 0, 1.0)
+	for h in a:
 		h.hp = h.max_hp
 		h.armor = h.max_armor
 		h.armor_tier = 3
 		h.tonics = 3
-	for h in B:
+	for h in b:
 		h.hp = h.max_hp * 0.15
 		h.armor = 0.0
 		h.armor_tier = 0
@@ -219,26 +225,26 @@ func run(main_node: Node) -> void:
 		hold2.call()
 		m.step(Match.DT)
 		tt += Match.DT
-	print("TCHECK reversed: B would accept from A=%.2f" % T.would_accept(1, 0))
+	print("TCHECK reversed: B would accept from A=%.2f" % t_v.would_accept(1, 0))
 	# acceptance is a weighed roll (95% here), so like a player the offer is made again after a refusal
 	tt = 0.0
 	for _try in 3:
-		T._cool.clear()
-		T.emote(A[0], "truce")
+		t_v._cool.clear()
+		t_v.emote(a[0], "truce")
 		var offer_t := tt
-		while tt - offer_t < 3.5 and not T.allied(0, 1):
+		while tt - offer_t < 3.5 and not t_v.allied(0, 1):
 			hold2.call()
 			m.step(Match.DT)
 			tt += Match.DT
-		if T.allied(0, 1):
+		if t_v.allied(0, 1):
 			break
 	print(
 		(
 			"TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)"
-			% [T.allied(0, 1), tt, str(T.events.slice(-3))]
+			% [t_v.allied(0, 1), tt, str(t_v.events.slice(-3))]
 		)
 	)
-	if not T.allied(0, 1) and not T.events.has("fake 1"):
+	if not t_v.allied(0, 1) and not t_v.events.has("fake 1"):
 		ok = false
 		print("TCHECK FAIL beaten squad refused")
 	if not TruceCalmCheck.run(m, home):

@@ -10,11 +10,6 @@ extends RefCounted
 ## and a few lines must show the new keys, so the rebind really reaches the text.
 ## Run with a temporary XDG_DATA_HOME: it rebinds keys (Settings writes its config file).
 
-var bad := 0
-var m: Match
-var defaults := {}  # action -> its default caps (both slots), read before the rebind
-var pats := {}  # action -> RegEx for those caps in a line
-
 ## Keys no default binding uses, one per action (not KP Enter: confirm's second default).
 const ODD_KEYS := [
 	KEY_F13,
@@ -69,10 +64,17 @@ const ODD_KEYS := [
 	KEY_BRACKETRIGHT,
 	KEY_APOSTROPHE
 ]
+
 ## Caps that are also everyday words or numbers: only a hit after "press", "hold", "tap", "key" or in "(A)".
 const WORDLIKE := ["A", "I", "1", "2", "3", "4"]
+
 ## Caps that prose spells in title case too ("Hold Shift").
 const TITLED := ["SHIFT", "SPACE", "CTRL", "TAB", "DELETE"]
+
+var bad := 0
+var m: Match
+var defaults := {}  # action -> its default caps (both slots), read before the rebind
+var pats := {}  # action -> RegEx for those caps in a line
 var mouse_words := RegEx.create_from_string("(?i)\\b(left|right|middle)[ -]click|\\bmouse ?[0-9]|middle mouse")
 
 

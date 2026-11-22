@@ -58,5 +58,5 @@ static func _deco(zone: String) -> Array:
 
 
 static func _layout() -> Dictionary:
-	var L = Save.d.get("layout")
-	return L if typeof(L) == TYPE_DICTIONARY else {}
+	var l = Save.d.get("layout")
+	return l if typeof(l) == TYPE_DICTIONARY else {}

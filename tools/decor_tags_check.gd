@@ -15,14 +15,13 @@ const THREE := {
 
 var bad := 0
 
+var _tree: SceneTree
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DECOR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
-
-
-var _tree: SceneTree
 
 
 func run(m: Node) -> void:
@@ -55,11 +54,11 @@ func _tags_part() -> void:
 
 ## Only the given pieces on the start zone's island (the fresh layout's untagged pieces stay).
 func _set_deco(ids: Array) -> void:
-	var L: Dictionary = Save.d["layout"]
-	var deco: Array = (L["deco"] as Array).filter(func(e): return DecorComfort.tag_of(String(e["id"])) == "")
+	var l: Dictionary = Save.d["layout"]
+	var deco: Array = (l["deco"] as Array).filter(func(e): return DecorComfort.tag_of(String(e["id"])) == "")
 	for id in ids:
-		deco.append({"id": id, "x": 4 + deco.size(), "z": 4, "r": 0, "u": HomeLayout._next_uid(L)})
-	L["deco"] = deco
+		deco.append({"id": id, "x": 4 + deco.size(), "z": 4, "r": 0, "u": HomeLayout._next_uid(l)})
+	l["deco"] = deco
 
 
 func _card_has(zone: String, tag: String) -> bool:

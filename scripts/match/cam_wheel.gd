@@ -6,7 +6,7 @@ extends RefCounted
 
 
 static func rules() -> Dictionary:
-	return CamRig.RULES["zoom"]
+	return CamRig.rules["zoom"]
 
 
 ## The wheel's furthest-out factor, where the view starts (in a match and on arriving at the farm).

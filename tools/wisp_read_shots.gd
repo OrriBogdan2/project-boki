@@ -55,13 +55,13 @@ func _fight_shots() -> void:
 	var a := FIGHT.get_slice("/", 0).split(",")
 	var b := FIGHT.get_slice("/", 1).split(",")
 	await _start(a[0], FIGHT_KIN[0])
-	var P := m.player
-	P.ctrl = "bot"
-	P.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
-	var base := _ground(P.pos)
+	var p := m.player
+	p.ctrl = "bot"
+	p.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
+	var base := _ground(p.pos)
 	var foe_at := _ground(base + Vector3(FIGHT_GAP, 0, 0))
 	var squad_a: Array = [
-		P,
+		p,
 		_hunter("a1", 0, a[1], FIGHT_KIN[1], _ground(base + Vector3(-1.4, 0, 1.6))),
 		_hunter("a2", 0, a[2], FIGHT_KIN[2], _ground(base + Vector3(-1.4, 0, -1.6)))
 	]

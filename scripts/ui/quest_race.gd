@@ -77,11 +77,11 @@ static func _row(c: Control, mid: Vector2, p: float, col: Color, diamond: bool) 
 
 
 ## The lair's boss: the host's own reference, else (a client builds none) the mirrored Boss mob in the lair.
-static func _boss(m: Match, L: Dictionary) -> Boss:
-	var b: Boss = m.lairs.boss_of(L)
+static func _boss(m: Match, l: Dictionary) -> Boss:
+	var b: Boss = m.lairs.boss_of(l)
 	if b != null:
 		return b
 	for mb in m.mobs:
-		if mb is Boss and m.lairs.inside(L, mb.pos):
+		if mb is Boss and m.lairs.inside(l, mb.pos):
 			return mb
 	return null

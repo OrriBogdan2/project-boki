@@ -21,12 +21,12 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	var L := World.load_layout("hollowcrown")
-	var outposts: Array = L.get("outposts", [])
+	var l := World.load_layout("hollowcrown")
+	var outposts: Array = l.get("outposts", [])
 	ok(outposts.size() > 0, "the layout lists %d outposts" % outposts.size())
 	for sd in SEEDS:
 		var w := World.new()
-		w.generate_authored(L, sd)
+		w.generate_authored(l, sd)
 		ok(w.camp_spots.size() > 0, "seed %d: %d camps spawn" % [sd, w.camp_spots.size()])
 		for c in w.camp_spots:
 			var p := Vector2(c["pos"].x, c["pos"].z)

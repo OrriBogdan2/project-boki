@@ -17,15 +17,6 @@ const MOVE_TAG := {"dash": "DASH", "kick": "WALL KICK", "pad": "JUMP PAD", "glid
 const NEXT_COL := Color("ffd25a")  # the gate you go through next
 const ARCH_COL := Color("8fe3c8")
 
-
-## One gate: where its middle is, the move it asks for ("" none), its ring mesh.
-class Gate:
-	var at := Vector3.ZERO
-	var move := ""
-	var node: Node3D = null
-	var ring: MeshInstance3D = null
-
-
 var m: Match
 var gates: Array[Gate] = []
 var start := Vector3.INF
@@ -37,11 +28,20 @@ var run_t := 0.0  # [s] on the clock
 var next_i := 0  # the gate you go through next (gates.size(): on to the finish)
 var run_arch := ""  # the Hunter the run counts for
 var last_time := 0.0  # [s] the last finished run (tests read it)
+var clock: Label = null
+
 var _nag_i := -1  # the dash gate you were told to dash through, so it's said once
 var _next_mat: Material = null
 var _best_lb: Label3D = null
 var _shown_arch := ""  # the Hunter whose best the start arch shows
-var clock: Label = null
+
+
+## One gate: where its middle is, the move it asks for ("" none), its ring mesh.
+class Gate:
+	var at := Vector3.ZERO
+	var move := ""
+	var node: Node3D = null
+	var ring: MeshInstance3D = null
 
 
 ## The map's "trial" block ({} when this map has none).
@@ -120,7 +120,7 @@ func _on_ground(p: Vector3) -> Vector3:
 
 
 ## An air ring facing from the gate before it to the one after, with the move it asks for over it.
-func _place_gate(i: int, grounds: Grounds) -> void:
+func _place_gate(i: int, _grounds: Grounds) -> void:
 	var g := gates[i]
 	var from := start if i == 0 else gates[i - 1].at
 	var to := finish if i == gates.size() - 1 else gates[i + 1].at
@@ -139,7 +139,7 @@ func _place_gate(i: int, grounds: Grounds) -> void:
 
 
 ## The lair gate without its bars, facing toward `ahead`, with a sign over it. Returns the sign.
-func _arch(at: Vector3, ahead: Vector3, text: String, grounds: Grounds) -> Label3D:
+func _arch(at: Vector3, ahead: Vector3, text: String, _grounds: Grounds) -> Label3D:
 	var arch := BossModels.gate(ARCH_W, ARCH_COL)
 	arch.get_node("Bars").free()
 	arch.position = at
@@ -174,28 +174,28 @@ func stop() -> void:
 
 ## Per frame (from Grounds.tick): the pad, the start arch, the next gate, the finish, the clock.
 func tick(dt: float) -> void:
-	var P: Hunter = m.player
-	if gates.is_empty() or P == null or P.downed:
+	var p_v: Hunter = m.player
+	if gates.is_empty() or p_v == null or p_v.downed:
 		return
-	_pad(P)
-	if P.arch != _shown_arch:
+	_pad(p_v)
+	if p_v.arch != _shown_arch:
 		stop()
 		show_best()
-	if _under(P, start):
+	if _under(p_v, start):
 		running = true
 		run_t = 0.0
 		next_i = 0
 		_nag_i = -1
-		run_arch = P.arch
+		run_arch = p_v.arch
 		_light(0)
 		clock.visible = true
 	if not running:
 		return
 	run_t += dt
 	if next_i < gates.size():
-		_try_gate(P)
-	elif _under(P, finish):
-		_finish(P)
+		_try_gate(p_v)
+	elif _under(p_v, finish):
+		_finish(p_v)
 		return
 	clock.text = (
 		"%s   ·   gate %d / %d   ·   best %s"
@@ -208,15 +208,15 @@ func tick(dt: float) -> void:
 	)
 
 
-func _under(P: Hunter, arch_at: Vector3) -> bool:
-	return P.flat_dist(arch_at) < ARCH_R and P.pos.y - arch_at.y < ARCH_H and P.pos.y > arch_at.y - 0.5
+func _under(p_v: Hunter, arch_at: Vector3) -> bool:
+	return p_v.flat_dist(arch_at) < ARCH_R and p_v.pos.y - arch_at.y < ARCH_H and p_v.pos.y > arch_at.y - 0.5
 
 
-func _try_gate(P: Hunter) -> void:
+func _try_gate(p_v: Hunter) -> void:
 	var g := gates[next_i]
-	if (P.pos + Vector3(0, BODY_UP, 0)).distance_to(g.at) > GATE_R:
+	if (p_v.pos + Vector3(0, BODY_UP, 0)).distance_to(g.at) > GATE_R:
 		return
-	if g.move == "dash" and P.roll_t <= 0.0:
+	if g.move == "dash" and p_v.roll_t <= 0.0:
 		if _nag_i != next_i and m.hud:
 			m.hud.toast_small("Dash through this gate", NEXT_COL)
 		_nag_i = next_i
@@ -227,13 +227,13 @@ func _try_gate(P: Hunter) -> void:
 	_light(next_i)
 
 
-func _finish(P: Hunter) -> void:
+func _finish(p_v: Hunter) -> void:
 	running = false
 	last_time = run_t
 	clock.visible = false
 	var old := best(run_arch)
 	var beat := record(run_arch, run_t)
-	m.sfx("unlock", P.pos, -4.0, 1.2 if beat else 1.0)
+	m.sfx("unlock", p_v.pos, -4.0, 1.2 if beat else 1.0)
 	_light(0)
 	show_best()
 	if m.hud == null:
@@ -255,10 +255,10 @@ func _light(from: int) -> void:
 
 
 ## The course's jump pad throws you onto the glide tower, as the map's own pads do.
-func _pad(P: Hunter) -> void:
-	if not P.pad.is_empty() or P.vel.y > 0.5 or P.flat_dist(pad_at) > PAD_R:
+func _pad(p_v: Hunter) -> void:
+	if not p_v.pad.is_empty() or p_v.vel.y > 0.5 or p_v.flat_dist(pad_at) > PAD_R:
 		return
-	if P.pos.y - pad_at.y < 0.4 and P.pos.y - pad_at.y > -0.3:
-		P.pad_launch(pad_land)
-		m.sfx("jump", P.pos, -2.0, 0.8)
-		m.fx.burst(P.pos + Vector3(0, 0.3, 0), ARCH_COL, 16, 5.0, 0.5, 2.0)
+	if p_v.pos.y - pad_at.y < 0.4 and p_v.pos.y - pad_at.y > -0.3:
+		p_v.pad_launch(pad_land)
+		m.sfx("jump", p_v.pos, -2.0, 0.8)
+		m.fx.burst(p_v.pos + Vector3(0, 0.3, 0), ARCH_COL, 16, 5.0, 0.5, 2.0)

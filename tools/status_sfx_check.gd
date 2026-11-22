@@ -90,40 +90,40 @@ func once(m: Match, label: String, sound: String, apply: Callable) -> void:
 func _body_statuses() -> void:
 	var r: Array = sc.setup("gunslinger", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var A: Hunter = r[2]
-	var T: Hunter = r[3]
-	Sfx.listener = P.pos
-	await once(m, "Stun", "st_stun", func(): T.hurt(1.0, P, {"stun": 1.0}))
-	await once(m, "Root", "st_root", func(): T.hurt(1.0, P, {"root": 1.0}))
-	await once(m, "Slow", "st_slow", func(): T.hurt(1.0, P, {"slow": 1.0, "slow_k": 0.3}))
-	await once(m, "Anti-Heal", "st_antiheal", func(): T.hurt(1.0, P, {"blight": 2.0}))
-	await once(m, "Ground", "st_ground", func(): KitStatus.apply(T, "gnd", 2.0))
-	await once(m, "Daze", "st_daze", func(): KitStatus.apply(T, "rat", 2.0))
-	await once(m, "Ignite", "as_ignite", func(): T.hurt(1.0, P, {"burn": 5.0, "burn_for": 1.5}))
+	var p: Hunter = r[1]
+	var a: Hunter = r[2]
+	var t: Hunter = r[3]
+	Sfx.listener = p.pos
+	await once(m, "Stun", "st_stun", func(): t.hurt(1.0, p, {"stun": 1.0}))
+	await once(m, "Root", "st_root", func(): t.hurt(1.0, p, {"root": 1.0}))
+	await once(m, "Slow", "st_slow", func(): t.hurt(1.0, p, {"slow": 1.0, "slow_k": 0.3}))
+	await once(m, "Anti-Heal", "st_antiheal", func(): t.hurt(1.0, p, {"blight": 2.0}))
+	await once(m, "Ground", "st_ground", func(): KitStatus.apply(t, "gnd", 2.0))
+	await once(m, "Daze", "st_daze", func(): KitStatus.apply(t, "rat", 2.0))
+	await once(m, "Ignite", "as_ignite", func(): t.hurt(1.0, p, {"burn": 5.0, "burn_for": 1.5}))
 	await main.get_tree().process_frame
 	ok(loops_on() == 1, "Ignite: the crackle loop runs while it burns")
 	sc.step(m, 2.0)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(T.burn_t <= 0.0 and loops_on() == 0, "Ignite: the crackle stops when it burns out")
-	T.hurt(1.0, P, {"burn": 5.0, "burn_for": 30.0})
+	ok(t.burn_t <= 0.0 and loops_on() == 0, "Ignite: the crackle stops when it burns out")
+	t.hurt(1.0, p, {"burn": 5.0, "burn_for": 30.0})
 	await main.get_tree().process_frame
 	ok(loops_on() == 1, "Ignite: the crackle starts again on a new fire")
-	T.burn_t = 0.0  # a cleanse
+	t.burn_t = 0.0  # a cleanse
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(loops_on() == 0, "Ignite: the crackle stops when it is cleansed")
 	# yours play louder than another's: the same cue on the same body, once by you and once by an ally of theirs
-	T.slow_t = 0.0
+	t.slow_t = 0.0
 	sc.step(m, 3.0)
 	await settle(m)
-	T.hurt(1.0, P, {"stun": 0.5})
+	t.hurt(1.0, p, {"stun": 0.5})
 	var mine := sounding("st_stun")
 	var mine_db := mine.volume_db if mine else -99.0
 	sc.step(m, 3.0)
 	await settle(m)
-	T.hurt(1.0, A, {"stun": 0.5})
+	t.hurt(1.0, a, {"stun": 0.5})
 	var other := sounding("st_stun", mine)
 	var other_db := other.volume_db if other else 99.0
 	var gain := mine_db - other_db
@@ -135,20 +135,20 @@ func _body_statuses() -> void:
 func _kit_statuses() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[3]
-	var RK: RimewrightKit = P.ak
-	Sfx.listener = P.pos
-	await once(m, "Chill", "st_chill", func(): RK.add_chill(T))
+	var p: Hunter = r[1]
+	var t: Hunter = r[3]
+	var rk: RimewrightKit = p.ak
+	Sfx.listener = p.pos
+	await once(m, "Chill", "st_chill", func(): rk.add_chill(t))
 	await _free(m)
 	r = sc.setup("mage", 6.0)
 	m = r[0]
-	P = r[1]
-	T = r[3]
-	var K: MageKit = P.ak
-	Sfx.listener = P.pos
+	p = r[1]
+	t = r[3]
+	var k: MageKit = p.ak
+	Sfx.listener = p.pos
 	var t0 := Time.get_ticks_msec()
-	K.add_spark(T, 1)
+	k.add_spark(t, 1)
 	ok(plays_since("mage_zap", t0) == 1, "Static: the first stack plays its cue once")
 	var low := sounding("mage_zap")
 	var low_pitch := low.pitch_scale if low else 0.0
@@ -156,23 +156,23 @@ func _kit_statuses() -> void:
 	ok(loops_on() == 1, "Static: the buzz loop runs while it is on the body")
 	await settle(m)
 	t0 = Time.get_ticks_msec()
-	K.add_spark(T, 2)
+	k.add_spark(t, 2)
 	ok(plays_since("mage_zap", t0) == 1, "Static: another stack plays the cue again")
 	var high := sounding("mage_zap", low)
 	var high_pitch := high.pitch_scale if high else 0.0
 	ok(high_pitch > low_pitch + 0.1, "Static: the cue climbs with the stacks (%.2f -> %.2f)" % [low_pitch, high_pitch])
-	K.clear_sparks(T)  # spent or cleansed
+	k.clear_sparks(t)  # spent or cleansed
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(loops_on() == 0, "Static: the buzz stops when the stacks are spent")
-	K.add_spark(T, 1)
+	k.add_spark(t, 1)
 	await main.get_tree().process_frame
 	ok(loops_on() == 1, "Static: the buzz starts again on a new stack")
-	sc.step(m, float(K.res_def()["dur"]) + 1.0)
+	sc.step(m, float(k.res_def()["dur"]) + 1.0)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(loops_on() == 0, "Static: the buzz stops when the stacks run out")
-	K.add_spark(T, 1)
+	k.add_spark(t, 1)
 	await main.get_tree().process_frame
 	await _free(m)
 	ok(loops_on() == 0, "no status loop outlives the match")
@@ -181,24 +181,24 @@ func _kit_statuses() -> void:
 func _caps() -> void:
 	var r: Array = sc.setup("gunslinger", 6.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[3]
-	Sfx.listener = P.pos
+	var p: Hunter = r[1]
+	var t: Hunter = r[3]
+	Sfx.listener = p.pos
 	await settle(m)
 	var t0 := Time.get_ticks_msec()
 	for kind in rules["cues"]:
-		StatusSfx.cue(T, kind, P)
+		StatusSfx.cue(t, kind, p)
 	var n := 0
 	for kind in rules["cues"]:
 		n += plays_since(String(rules["cues"][kind]["sound"]), t0)
 	var cap := int(rules["cue_cap"])
 	ok(n == cap, "%d cues at once play %d (cue_cap %d)" % [rules["cues"].size(), n, cap])
-	var foes: Array = [T]
+	var foes: Array = [t]
 	for i in 4:
-		var at := T.pos + Vector3(1.5 * (i + 1), 0, 0)
-		foes.append(m.make_hunter("F%d" % i, P.team + 5, "medium", "Foe", "idle", {}, at, {"arch": "none"}))
+		var at := t.pos + Vector3(1.5 * (i + 1), 0, 0)
+		foes.append(m.make_hunter("F%d" % i, p.team + 5, "medium", "Foe", "idle", {}, at, {"arch": "none"}))
 	for f in foes:
-		f.hurt(1.0, P, {"burn": 5.0, "burn_for": 30.0})
+		f.hurt(1.0, p, {"burn": 5.0, "burn_for": 30.0})
 	await main.get_tree().process_frame
 	var loop_cap := int(rules["loop_cap"])
 	ok(loops_on() == loop_cap, "%d burning bodies run %d loops (loop_cap %d)" % [foes.size(), loops_on(), loop_cap])

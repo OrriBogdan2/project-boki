@@ -41,24 +41,24 @@ func run(main_node: Node) -> void:
 	while m.time < 1.0:
 		await main.get_tree().process_frame
 	m.set_process(false)  # match time stops: the shine and the stun hold for the picture
-	var P: Hunter = m.player
-	P.lvl = 1
+	var p: Hunter = m.player
+	p.lvl = 1
 	await _shot("locked")
-	P.lvl = int(Hunter.ULT_AT[0])
-	P.ak.cd["x"] = 17.4
+	p.lvl = int(Hunter.ULT_AT[0])
+	p.ak.cd["x"] = 17.4
 	await _shot("cooling")
-	P.ak.cd["x"] = 0.0
+	p.ak.cd["x"] = 0.0
 	await _redraw()
 	HunterUltTile.shine_from = m.time - SHINE_AT
 	await _shot("shine")
 	HunterUltTile.shine_from = -INF
 	await _shot("ready")
-	P.stun_t = 3.0
+	p.stun_t = 3.0
 	await _shot("blocked")
-	P.stun_t = 0.0
+	p.stun_t = 0.0
 	var tiles: Array[Image] = []
 	for id in Arch.ids():
-		P.reclass(Arch.weight(id), id)
+		p.reclass(Arch.weight(id), id)
 		await _redraw()
 		tiles.append(_tile(await _grab()))
 	_sheet(tiles).save_png(dir.path_join("ult_heroes.png"))

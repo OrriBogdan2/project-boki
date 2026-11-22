@@ -17,11 +17,14 @@ extends RefCounted
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
 const FOOTAGE_BOUND_MS := 100  # one 10 fps frame: the reference footage never holds longer
+
 ## Steps with no hit from the hunter before the next slot, so a zone left behind has run out.
 const QUIET_STEPS := 90
+
 ## Steps LMB is held: a spooling stream (Ashwick: 0.2 s spool, then 3 m at 16 m/s) needs ~0.4 s to reach the dummy.
 const LMB_HOLD := 45
 const DRAIN_MAX := 900  # steps at most spent waiting for it
+
 ## Kit file name prefix -> the Hunter whose code it is (a Hunter's ult or dash can live in its own file).
 const FILE_HERO := {
 	"archer": "archer",
@@ -41,19 +44,33 @@ const FILE_HERO := {
 	"tender": "tender",
 	"thief": "thief",
 }
+const TABLE_SLOTS := {"lmb": "light", "rmb": "heavy", "x": "ult"}
+
+## 7: one slot's measured hit feel matches the tiers.
+## Table slots whose hits are not their rules tier, and why (docs/DASHES_AND_ABILITY_FEEL.md §5.4).
+const TIER_OK := {
+	"rimewright rmb": "heavy",  # the lance's detonation is a payoff (one weight heavier); its landing only slows
+	"ashwick x": "",  # the lava carpet burns and slows in ticks: no hit-stop (T0)
+	"dolm lmb": "solid",  # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
+}
+
+## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
+## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
+## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
+const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
 
 var bad := 0
 var dealt := {}  # slot -> true: the slot being pressed landed damage
 var slot_now := ""
 var hits_n := 0  # every damaging hit from the hunter, for the drain between slots
 var flow := preload("res://tools/dash_flow_check.gd").new()
+
 ## The hit-feel table (7): hero -> slot -> {hold, flash, freeze, shake} peaks (s; hold and flash read after a
 ## step, so the value set lies within one DT above them).
 var feel := {}
 var dummy_now: Ent = null
 var hit_tags := {}  # the tags of the slot's hits on the dummy (what a stray row names)
 var self_hits := {}  # the tags of hits on the hunter itself during the slot
-const TABLE_SLOTS := {"lmb": "light", "rmb": "heavy", "x": "ult"}
 
 
 func ok(cond: bool, what: String) -> void:
@@ -207,15 +224,6 @@ func _tier_of(peak: float) -> String:
 	return ""
 
 
-## 7: one slot's measured hit feel matches the tiers.
-## Table slots whose hits are not their rules tier, and why (docs/DASHES_AND_ABILITY_FEEL.md §5.4).
-const TIER_OK := {
-	"rimewright rmb": "heavy",  # the lance's detonation is a payoff (one weight heavier); its landing only slows
-	"ashwick x": "",  # the lava carpet burns and slows in ticks: no hit-stop (T0)
-	"dolm lmb": "solid",  # the punch is an empowered hit (o.heavy: never a poke); the boulder splash is light
-}
-
-
 func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
 	var own := ImpactWeight.of_ability(hero, slot)
 	var seen: Array = (pk["tiers"] as Dictionary).keys()
@@ -258,12 +266,6 @@ func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
 			% [hero, slot, pk["flash"] * 1000.0, fl * 1000.0, pk["shake"]]
 		)
 	)
-
-
-## 8: kit files take hit-stop, body flash and shake from the tiers. A foe's flash_t, a freeze_frame / freeze_t
-## or a Shake.incoming_big set to a number or a CONSTANT is a stray (a Hunter's own flash, h.flash_t, is no hit).
-## The one lighter literal left: the Meteor Drop's bystander shake (its hit shakes the struck player heavy).
-const LITERAL_OK := ["juggernaut_drop.gd:Shake.incoming_big(k.m, at, 0.35, k.h)"]
 
 
 func _kit_literals() -> void:

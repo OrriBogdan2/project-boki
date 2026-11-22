@@ -25,7 +25,6 @@ var cd_base := 60.0  # s: this species' cooldown
 var left := 0.0  # s of the window left (0: a wisp, or shrinking)
 var win := 0.0  # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0  # s of the shrink back left
-var _folding := false  # drawing: a fold pop has started for this shrink
 var cd := 0.0  # s until it can be summoned again
 var cd_full := 1.0  # s: the cooldown now running (longer after a rival's kill), for the HUD ring
 var fly := 0.0  # s of the flight home left after a kill (drawing only)
@@ -33,6 +32,8 @@ var fly_len := 1.0  # s: that flight in all
 var fly_from := Vector3.ZERO  # where it was killed
 var rival: Hunter = null  # the last rival hunter who damaged it while out
 var rival_t := -1e9  # Match.time of that hit
+
+var _folding := false  # drawing: a fold pop has started for this shrink
 
 
 func _init(kin: Kin) -> void:

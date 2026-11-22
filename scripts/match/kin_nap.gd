@@ -23,6 +23,9 @@ const STRETCH_BOW := 0.14  # rad it tips front down at the top of the stretch
 const SLOW_MIN := 0.85  # the smallest Boki naps this much faster than heft 1...
 const SLOW_MAX := 1.4  # ...and the biggest this much slower
 
+## Twitches roll on their own generator, like KinPuppet's blinks: the global one stays the match's.
+static var _rng := RandomNumberGenerator.new()
+
 var lie := 0.0
 var breath := 0.0
 var twitch := 0.0
@@ -31,13 +34,12 @@ var low := 0.0
 var bow := 0.0
 var slow := 1.0
 var asleep := false
+
 var _mass := 1.0
 var _u := 0.0  # 0 up, 1 lying (before easing)
 var _wake := 1.0  # progress of the wake stretch, 1 when done
 var _breath_t := 0.0
 var _twitch_t := 0.0
-## Twitches roll on their own generator, like KinPuppet's blinks: the global one stays the match's.
-static var _rng := RandomNumberGenerator.new()
 
 
 func _init(species: String) -> void:

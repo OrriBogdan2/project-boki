@@ -93,20 +93,20 @@ func _add(h: Hunter, mesh: Mesh, col: Color, y: float) -> void:
 	h.add_child(mi)
 
 
-func _flat_spot(W: World) -> Vector3:
-	for z in range(8, W.h - 8, 3):
-		for x in range(14, W.w - 24, 3):
-			if _flat(W, x, z):
-				return Vector3(x + 0.5, int(W.level[W.idx(x, z)]) * World.LEVEL, z + 0.5)
+func _flat_spot(w_v: World) -> Vector3:
+	for z in range(8, w_v.h - 8, 3):
+		for x in range(14, w_v.w - 24, 3):
+			if _flat(w_v, x, z):
+				return Vector3(x + 0.5, int(w_v.level[w_v.idx(x, z)]) * World.LEVEL, z + 0.5)
 	return Vector3.ZERO
 
 
-func _flat(W: World, x: int, z: int) -> bool:
-	var lv: int = int(W.level[W.idx(x, z)])
+func _flat(w: World, x: int, z: int) -> bool:
+	var lv: int = int(w.level[w.idx(x, z)])
 	for dz in range(-3, 8):
 		for dx in range(-9, 10):
-			var i: int = W.idx(x + dx, z + dz)
-			var odd: bool = W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i) or W.bush.has(i)
-			if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv or odd:
+			var i: int = w.idx(x + dx, z + dz)
+			var odd: bool = w.stairs.has(i) or w.walls.has(i) or w.props.has(i) or w.bridge.has(i) or w.bush.has(i)
+			if w.kind[i] != World.T_GROUND or int(w.level[i]) != lv or odd:
 				return false
 	return true

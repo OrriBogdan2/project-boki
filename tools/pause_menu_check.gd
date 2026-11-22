@@ -6,16 +6,16 @@ extends RefCounted
 ##   3. every label is one plain line (no line break, at most 22 letters)
 ##   4. at 1280x720, 1920x1080, 2560x1080 and 3440x1440 both pages sit inside the title-safe margin
 
-var bad := 0
-var main: Node
-var tree: SceneTree
-
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(3440, 1440)]
 const MAX_FRONT := 4
 const MAX_LABEL := 22
 const SAFE_FRAC := 0.04  # as the prematch screen's title-safe margin
 const SAFE_MIN := 24.0
+
+var bad := 0
+var main: Node
+var tree: SceneTree
 
 
 func ok(cond: bool, what: String) -> void:

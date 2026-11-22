@@ -23,7 +23,7 @@ const MAX_SLIDE := 0.25
 const SLOTS := ["lmb", "rmb", "e"]
 const NO_LEGS := ["ostra", "rimewright"]  # they hover and skate: no stepping legs (as --anim-audit)
 
-var A
+var a_v
 var bad := 0
 
 
@@ -35,8 +35,8 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	A = load("res://tools/archetype_check.gd").new()
-	A.main = main
+	a_v = load("res://tools/archetype_check.gd").new()
+	a_v.main = main
 	var ids: Array = Arch.ORDER.duplicate()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--wardens="):
@@ -49,13 +49,13 @@ func run(main: Node) -> void:
 
 
 func _hunter(id: String) -> void:
-	var r: Array = A.setup(id, 40.0)
+	var r: Array = a_v.setup(id, 40.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
+	var p_v: Hunter = r[1]
 	var home: Vector3 = r[4]
 	(r[2] as Hunter).teleport(home + Vector3(0, 0, 30.0))
-	_run(m, P, WARM_S, "")
-	var fr := _run(m, P, RUN_S, "")
+	_run(m, p_v, WARM_S, "")
+	var fr := _run(m, p_v, RUN_S, "")
 	var band := _band(fr)
 	var base := _slide(fr, band)
 	var run_share: float = base["slide"] / maxf(base["speed"], 0.1)
@@ -66,10 +66,10 @@ func _hunter(id: String) -> void:
 		)
 	)
 	for slot in SLOTS:
-		P.teleport(home)
-		P.vel = Vector3.ZERO
-		_run(m, P, WARM_S, "")
-		var on: Array = _run(m, P, PRESS_S, slot).filter(func(p): return float(p["up"]) + float(p["full"]) > 0.05)
+		p_v.teleport(home)
+		p_v.vel = Vector3.ZERO
+		_run(m, p_v, WARM_S, "")
+		var on: Array = _run(m, p_v, PRESS_S, slot).filter(func(p): return float(p["up"]) + float(p["full"]) > 0.05)
 		var moves := {}
 		for p in on:
 			moves[p["move"]] = true
@@ -107,44 +107,44 @@ func _hunter(id: String) -> void:
 					% [id, mv, round(100.0 * share), round(100.0 * run_share), round(100.0 * MAX_SLIDE)]
 				)
 			)
-	A.done(m)
-	await A.main.get_tree().process_frame
+	a_v.done(m)
+	await a_v.main.get_tree().process_frame
 
 
 ## Runs along +X for secs, pressing slot on the first frame (LMB a click, RMB held for a third of it): per frame,
 ## the feet, his speed, the move and how much of the body its clip owns.
-func _run(m: Match, P: Hunter, secs: float, slot: String) -> Array:
-	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
-	var sync: Node = P.model.get_node("Warden/Sync")
+func _run(m: Match, p: Hunter, secs: float, slot: String) -> Array:
+	var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
+	var sync: Node = p.model.get_node("Warden/Sync")
 	var clips: WardenClips = sync.get("clips")
 	var fr: Array = []
 	var n := int(secs / DT)
 	for f in n:
-		P.inp["move"] = Vector2(1, 0)
-		A.aim_at(P, P.pos + Vector3(12.0, 0, 0))
-		P.inp["fire"] = slot == "lmb" and f < TAP
-		P.inp["sec"] = slot == "rmb" and f == 0
-		P.inp["sec_hold"] = slot == "rmb" and f < n / 3
-		P.inp["sig"] = slot == "e" and f == 0
+		p.inp["move"] = Vector2(1, 0)
+		a_v.aim_at(p, p.pos + Vector3(12.0, 0, 0))
+		p.inp["fire"] = slot == "lmb" and f < TAP
+		p.inp["sec"] = slot == "rmb" and f == 0
+		p.inp["sec_hold"] = slot == "rmb" and f < n / 3
+		p.inp["sig"] = slot == "e" and f == 0
 		for mb in m.mobs:
 			mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
-		P.render(DT, 1.0)
+		p.render(DT, 1.0)
 		sync.set_process(false)
 		sync.call("_process", DT)
 		fr.append(
 			{
 				"L": _foot(sk, "L"),
 				"R": _foot(sk, "R"),
-				"v": Vector2(P.vel.x, P.vel.z).length(),
-				"move": P.ak.anim_id,
+				"v": Vector2(p.vel.x, p.vel.z).length(),
+				"move": p.ak.anim_id,
 				"up": clips.up_w,
 				"full": clips.act_w
 			}
 		)
 	for k in ["fire", "sec", "sec_hold", "sig"]:
-		P.inp[k] = false
+		p.inp[k] = false
 	return fr
 
 

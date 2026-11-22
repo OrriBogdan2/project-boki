@@ -100,15 +100,15 @@ func run(main: Node) -> void:
 		}
 	)
 	m.set_process(false)
-	var P: Hunter = m.player
-	var B: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	P.ctrl = "local"
-	B.ctrl = "bot"
-	B.teleport(P.pos + Vector3(6, 0, 0))
-	B.merge_free = false  # (the free bond meter on a first ult unlock is the Boki's own rule)
-	P.merge_free = false
-	ok(P.ak != null and B.ak != null, "a bot match with two kits (%s vs %s)" % [P.arch, B.arch])
-	_level_through(P, "player")
-	_level_through(B, "bot")
+	var p: Hunter = m.player
+	var b: Hunter = m.hunters.filter(func(x): return x != p)[0]
+	p.ctrl = "local"
+	b.ctrl = "bot"
+	b.teleport(p.pos + Vector3(6, 0, 0))
+	b.merge_free = false  # (the free bond meter on a first ult unlock is the Boki's own rule)
+	p.merge_free = false
+	ok(p.ak != null and b.ak != null, "a bot match with two kits (%s vs %s)" % [p.arch, b.arch])
+	_level_through(p, "player")
+	_level_through(b, "bot")
 	print("LEVELUP %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)

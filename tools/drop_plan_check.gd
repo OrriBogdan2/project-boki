@@ -13,20 +13,20 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 3, "squad": 3, "tier": 0, "seed": 4101})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var D: DropSquad = m.skydrop
-	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
+	var p: Hunter = m.player
+	var d: DropSquad = m.skydrop
+	var mates: Array = m.hunters.filter(func(x): return x.team == p.team and x != p)
 	print(
 		(
 			"DCHECK planning=%s plan_t=%.1f riding=%s leader=%s map open=%s"
-			% [D.planning, D.plan_t, P.riding, D.leader(P.team).pname, m.hud.map_open()]
+			% [d.planning, d.plan_t, p.riding, d.leader(p.team).pname, m.hud.map_open()]
 		)
 	)
 	if (
-		not D.planning
-		or absf(D.plan_t - DropSquad.PLAN_T) > 0.01
-		or not P.riding
-		or D.leader(P.team) != P
+		not d.planning
+		or absf(d.plan_t - DropSquad.PLAN_T) > 0.01
+		or not p.riding
+		or d.leader(p.team) != p
 		or not m.hud.map_open()
 	):
 		ok = false
@@ -53,7 +53,7 @@ func run(main_node: Node) -> void:
 		print("DCHECK FAIL map ping")
 	var steps := 0
 	var t0 := m.time
-	while D.planning and steps < 2000:
+	while d.planning and steps < 2000:
 		m.step(Match.DT)
 		steps += 1
 	var bot_pings := m.pings.filter(func(q): return q.has("by") and (q["by"] as Hunter).ctrl == "bot").size()
@@ -61,7 +61,7 @@ func run(main_node: Node) -> void:
 	print(
 		(
 			"DCHECK planning lasted %.2fs, match clock %.2f -> %.2f, bot pings %d, bot replies %d, events %s"
-			% [steps * Match.DT, t0, m.time, bot_pings, acks, str(D.events)]
+			% [steps * Match.DT, t0, m.time, bot_pings, acks, str(d.events)]
 		)
 	)
 	if absf(steps * Match.DT - DropSquad.PLAN_T) > 0.1 or m.time != t0:
@@ -78,39 +78,39 @@ func run(main_node: Node) -> void:
 		print("DCHECK FAIL a follower jumped without the leader")
 	# ride to the middle of the map, then the leader jumps
 	var mid := Vector3(m.world.w * 0.5, 0, m.world.h * 0.5)
-	while Vector2(m.ship_pos().x - mid.x, m.ship_pos().z - mid.z).length() > 26.0 and m.time < 60.0 and P.riding:
+	while Vector2(m.ship_pos().x - mid.x, m.ship_pos().z - mid.z).length() > 26.0 and m.time < 60.0 and p.riding:
 		m.step(Match.DT)
-	m.ship_jump(P)
-	var aboard := mates.filter(func(x): return x.rocket != null and x.rocket == P.rocket)
+	m.ship_jump(p)
+	var aboard := mates.filter(func(x): return x.rocket != null and x.rocket == p.rocket)
 	print("DCHECK leader launched at t=%.1f: %d of %d squadmates in the rocket" % [m.time, aboard.size(), mates.size()])
-	if P.rocket == null or aboard.size() != mates.size():
+	if p.rocket == null or aboard.size() != mates.size():
 		ok = false
 		print("DCHECK FAIL the squad didn't launch together")
 	for i in 30:
 		m.step(Match.DT)
 	# pass the lead: the next squadmate steers the rocket
-	var passed := D.pass_lead(P)
-	var L2: Hunter = D.leader(P.team)
-	print("DCHECK pass lead=%s: leader now %s" % [passed, L2.pname])
-	if not passed or L2 == P or not aboard.has(L2):
+	var passed := d.pass_lead(p)
+	var l2: Hunter = d.leader(p.team)
+	print("DCHECK pass lead=%s: leader now %s" % [passed, l2.pname])
+	if not passed or l2 == p or not aboard.has(l2):
 		ok = false
 		print("DCHECK FAIL pass lead")
 	# jump out: you free-fall and steer yourself
-	var det := D.detach(P)
+	var det := d.detach(p)
 	var want := Vector2(-1, 0)
 	var t := 0.0
-	while t < 0.7 and P.dropping:
-		P.inp["move"] = want
+	while t < 0.7 and p.dropping:
+		p.inp["move"] = want
 		m.step(Match.DT)
 		t += Match.DT
-	var v1 := Vector2(P.vel.x, P.vel.z)
+	var v1 := Vector2(p.vel.x, p.vel.z)
 	print(
 		(
 			"DCHECK detach=%s: rocket=%s dropping=%s, velocity %s (steering %s)"
-			% [det, P.rocket, P.dropping, str(v1.snapped(Vector2(0.1, 0.1))), str(want)]
+			% [det, p.rocket, p.dropping, str(v1.snapped(Vector2(0.1, 0.1))), str(want)]
 		)
 	)
-	if not det or P.rocket != null or not P.dropping or v1.normalized().dot(want) < 0.7:
+	if not det or p.rocket != null or not p.dropping or v1.normalized().dot(want) < 0.7:
 		ok = false
 		print("DCHECK FAIL detach")
 	# everyone lands
@@ -127,7 +127,7 @@ func run(main_node: Node) -> void:
 					(
 						m
 						. hunters
-						. filter(func(x): return x.team == P.team)
+						. filter(func(x): return x.team == p.team)
 						. map(func(x): return [x.pname, x.grounded, x.pos.snapped(Vector3(1, 1, 1))])
 					)
 				)
@@ -142,7 +142,7 @@ func run(main_node: Node) -> void:
 	# the drop above is steered by script: if it ended off an island (stuck under a rim), put the
 	# ground half of the test on solid ground so it tests pings and scouting, not the glide line
 	var base_spot := m.world.free_spot_near(m.world.spawns[0], [], 1.0, 0.5, 8.0)
-	for x in [P, bot]:
+	for x in [p, bot]:
 		# (a scripted glide that ends over the abyss loses that hunter: bring them back first, so the
 		# rest tests pings and scouting with everyone alive, not whatever a revive beacon does later)
 		if x.out or x.downed:
@@ -153,10 +153,10 @@ func run(main_node: Node) -> void:
 		mb.queue_free()
 	m.mobs.clear()
 	for o in m.hunters:
-		if o.team != P.team:
+		if o.team != p.team:
 			o.ctrl = "idle"
 			o.teleport(m.world.spawns[-1] + Vector3(0, 0, 0))  # (no fights in the way)
-	var ev0 := D.events.size()
+	var ev0 := d.events.size()
 	var spot := bot.pos
 	for k in 40:
 		var q := m.world.free_spot_near(
@@ -171,7 +171,7 @@ func run(main_node: Node) -> void:
 			spot = q
 			break  # (6-9 m: an unseeded roll, so a far spot made the 6 s walk a coin flip)
 	spot.y = m.world.ground_at(spot.x, spot.z)
-	m.squad_ping(P, spot)
+	m.squad_ping(p, spot)
 	var d0 := bot.flat_dist(spot)
 	var went := false
 	var closest := d0
@@ -183,7 +183,7 @@ func run(main_node: Node) -> void:
 		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"):
 			went = true
 		closest = minf(closest, mates.map(func(x): return x.flat_dist(spot)).min())
-	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
+	var replies: Array = d.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
 	print(
 		(
 			"DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)"
@@ -201,7 +201,7 @@ func run(main_node: Node) -> void:
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")):
 		ok = false
 		print("DCHECK FAIL squad bots ignore pings")
-	m.unping(P)
+	m.unping(p)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"):
 		ok = false
 		print("DCHECK FAIL right click didn't take the ping down")
@@ -287,14 +287,14 @@ func run(main_node: Node) -> void:
 	)
 	if not hidden.is_empty():
 		var hc: Dictionary = hidden[0]
-		var before := sp.state_for(hc, P.team)
-		if P.out or P.downed:
-			Life.bring_back(m, P, hc["pos"], 1.0, false)  # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
-		P.teleport(hc["pos"] + Vector3(1.5, 0, 0))
+		var before := sp.state_for(hc, p.team)
+		if p.out or p.downed:
+			Life.bring_back(m, p, hc["pos"], 1.0, false)  # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
+		p.teleport(hc["pos"] + Vector3(1.5, 0, 0))
 		for i in 30:
 			m.step(Match.DT)
-		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
-		if before != "unknown" or sp.state_for(hc, P.team) != "empty":
+		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, p.team)])
+		if before != "unknown" or sp.state_for(hc, p.team) != "empty":
 			ok = false
 			print("DCHECK FAIL scouting")
 	m.over = true

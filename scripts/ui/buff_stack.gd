@@ -14,18 +14,17 @@ const TOP := 250.0  # px from the top: under the counters and the kill feed
 const RING_W := 3.0  # px, the draining ring
 const CARD_PAD := 8.0  # px, inside the hover card
 
-static var ROWS: Array = []
-
-
-static func _static_init() -> void:
-	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/buff_stack.json"))
-	ROWS = d["rows"] if typeof(d) == TYPE_DICTIONARY else []
-
+static var rows_v: Array = []
 
 var peak := {}  # row id -> the most time it has had left (what the ring drains from)
 var shown: Array = []  # what the last frame drew: [{id, name, src, left, stacks, frac, rect}, ...]
 var more := 0  # how many active rows did not fit
 var carded: Array = []  # ids whose card the last frame drew
+
+
+static func _static_init() -> void:
+	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/buff_stack.json"))
+	rows_v = d["rows"] if typeof(d) == TYPE_DICTIONARY else []
 
 
 static func _field(o: Object, f: String) -> float:
@@ -60,7 +59,7 @@ static func _read_on(o: Object, row: Dictionary) -> Array:
 func active(h: Hunter) -> Array:
 	var out: Array = []
 	var live := {}
-	for row in ROWS:
+	for row in rows_v:
 		var v := read(h, row)
 		if float(v[0]) <= 0.0:
 			continue

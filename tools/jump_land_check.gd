@@ -20,10 +20,10 @@ var ids_seen := 0
 ## {off, again, apex, dip, dip_t, legs, back, held, settle} per way and variant, all in deg, m or s ("held": the most
 ## the land clip owned the body after touchdown; off, again and apex only mean something on the jump).
 static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, way: String) -> Dictionary:
-	var shots := preload("res://tools/jump_land_shots.gd")
+	var JumpLandShots := preload("res://tools/jump_land_shots.gd")
 	var skel := WardenGlb.skeleton(m.get_node("Warden"))
 	var hips_bi := WardenSkeleton.find(skel, "hips")
-	var air: float = shots.air_time(way)
+	var air: float = JumpLandShots.air_time(way)
 	var r := {"again": 0.0, "held": 0.0}
 	var first_off: Array = []
 	for jump in 2 if way == "jump" else 1:
@@ -38,7 +38,7 @@ static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, wa
 		var back := -1.0
 		var settle := -1.0
 		while t < air + 1.0:
-			var s: Dictionary = shots.arc(t, running, way)
+			var s: Dictionary = JumpLandShots.arc(t, running, way)
 			m.set_meta(WardenClips.STATE, s)
 			sync.call("_process", DT)
 			var y := skel.get_bone_global_pose(hips_bi).origin.y

@@ -20,12 +20,16 @@ const COUNTER := {
 	"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike", "bramble": "heatherhorn"
 }
 const PLAIN := "cindle"  # venom: counters none of them
+
 var main: Node
 var m: Match
 var tz: TerrainHazards
-var P: Hunter
+var p_v: Hunter
 var n := 0
 var fails := 0
+
+# ------------------------------------------------------------------ the minimap and the full map
+var painted := 0
 
 
 func ok(label: String, cond: bool, info := "") -> void:
@@ -66,7 +70,7 @@ func run(main_node: Node) -> void:
 						await _static(ai, safe)
 					"bramble":
 						await _bramble(ai, safe)
-				var hud_safe: Variant = tz.underfoot(P).get("safe", null)
+				var hud_safe: Variant = tz.underfoot(p_v).get("safe", null)
 				ok("%s %s: the HUD reads it (safe = %s)" % [kind, _who(safe), safe], hud_safe == safe)
 				_hint(kind, safe)
 		_bots()
@@ -89,8 +93,8 @@ func _who(safe: bool) -> String:
 
 ## The player's active Boki becomes this species (its type is what counters a hazard).
 func _kin(species: String) -> void:
-	P = m.player
-	var k := P.kin as Kin
+	p_v = m.player
+	var k := p_v.kin as Kin
 	k.species = species
 	k.sp = Data.KIN[species]
 
@@ -107,12 +111,12 @@ func _stand(ai: int) -> void:
 	for q in cells:
 		if Vector2(q).distance_to(mid) < Vector2(best).distance_to(mid):
 			best = q
-	P.teleport(Vector3(best.x + 0.5, float(tz.areas[ai]["y"]), best.y + 0.5))
-	P.vel = Vector3.ZERO
-	P.hp = P.max_hp
+	p_v.teleport(Vector3(best.x + 0.5, float(tz.areas[ai]["y"]), best.y + 0.5))
+	p_v.vel = Vector3.ZERO
+	p_v.hp = p_v.max_hp
 	for k in ["burn_t", "slow_t", "slow_k", "stun_t", "haste_t", "cc_immune_t"]:
-		P.set(k, 0.0)
-	P.dr.clear()
+		p_v.set(k, 0.0)
+	p_v.dr.clear()
 	tz.state.clear()
 
 
@@ -128,20 +132,20 @@ func _run(secs: float) -> void:
 func _lava(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(2.0)
-	var lost := P.max_hp - P.hp
+	var lost := p_v.max_hp - p_v.hp
 	if safe:
-		ok("lava with an ember Boki: no burn, no damage", P.burn_t <= 0.0 and lost < 0.5, "lost %.1f" % lost)
+		ok("lava with an ember Boki: no burn, no damage", p_v.burn_t <= 0.0 and lost < 0.5, "lost %.1f" % lost)
 	else:
-		ok("lava without: it burns (hp drops 10+)", P.burn_t > 0.0 and lost >= 10.0, "lost %.1f" % lost)
+		ok("lava without: it burns (hp drops 10+)", p_v.burn_t > 0.0 and lost >= 10.0, "lost %.1f" % lost)
 
 
 func _deep_water(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.3)
-	var spd := P.slow_mult(0.65) * (1.35 if P.haste_t > 0.0 else 1.0)
-	var hits := TerrainHazards.hit_mult(m, P)
+	var spd := p_v.slow_mult(0.65) * (1.35 if p_v.haste_t > 0.0 else 1.0)
+	var hits := TerrainHazards.hit_mult(m, p_v)
 	await _run(float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"]) + 1.5)
-	var lost := P.max_hp - P.hp
+	var lost := p_v.max_hp - p_v.hp
 	if safe:
 		ok(
 			"deep water with a swimmer: swims faster, full hits, never drowns",
@@ -159,11 +163,11 @@ func _deep_water(ai: int, safe: bool) -> void:
 func _ice(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(0.1)
-	var g := m.ground_grip(P.pos, P)
-	var from := P.pos
-	P.vel = Vector3(5.0, 0, 0)
+	var g := m.ground_grip(p_v.pos, p_v)
+	var from := p_v.pos
+	p_v.vel = Vector3(5.0, 0, 0)
 	await _run(0.5)
-	var slid := Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	var slid := Vector2(p_v.pos.x - from.x, p_v.pos.z - from.z).length()
 	if safe:
 		ok(
 			"ice with a frost Boki: full footing, a push stops short",
@@ -183,8 +187,8 @@ func _static(ai: int, safe: bool) -> void:
 	while t < 1.0:
 		m.step(Match.DT)
 		t += Match.DT
-		stunned = stunned or P.stun_t > 0.0
-	var lost := P.max_hp - P.hp
+		stunned = stunned or p_v.stun_t > 0.0
+	var lost := p_v.max_hp - p_v.hp
 	if safe:
 		ok("static with a storm Boki: the shock does nothing", lost < 0.5 and not stunned, "lost %.1f" % lost)
 	else:
@@ -198,8 +202,8 @@ func _static(ai: int, safe: bool) -> void:
 func _bramble(ai: int, safe: bool) -> void:
 	_stand(ai)
 	await _run(2.0)
-	var spd := P.slow_mult(0.65)
-	var lost := P.max_hp - P.hp
+	var spd := p_v.slow_mult(0.65)
+	var lost := p_v.max_hp - p_v.hp
 	if safe:
 		ok(
 			"bramble with a bloom Boki: not slowed, not scratched",
@@ -217,7 +221,7 @@ func _hint(kind: String, safe: bool) -> void:
 	var cells: Array = tz.areas[ai]["cells"]
 	var c: Vector3 = tz.areas[ai]["centre"]
 	var at: Vector3 = Vector3(cells[0].x + 0.5, c.y, cells[0].y + 0.5)
-	P.teleport(at + (at - c).normalized() * 2.5)
+	p_v.teleport(at + (at - c).normalized() * 2.5)
 	tz.state.clear()
 	tz.hinted.clear()
 	m.bubbles.clear()
@@ -251,7 +255,7 @@ func _bots() -> void:
 	var b := Vector2i(x1 + 3, mid)
 	var bot: Hunter = null
 	for h in m.hunters:
-		if h != P and h.kin is Kin:
+		if h != p_v and h.kin is Kin:
 			bot = h
 			break
 	ok("a bot with a Boki to test with", bot != null)
@@ -285,10 +289,6 @@ func _bots() -> void:
 		ok("its edge guard %s the lava ahead" % guard, m.bot_brain._safe(m, bot, d, 3.5) == safe)
 
 
-# ------------------------------------------------------------------ the minimap and the full map
-var painted := 0
-
-
 func _map() -> void:
 	ok("the minimap lists the hazards as a detail kind", "hazard" in MapDetail.DETAIL)
 	ok(
@@ -308,24 +308,24 @@ func _map() -> void:
 	for a in tz.areas:
 		kinds[HazardMap.fill(a["kind"])] = true
 	ok("each hazard kind has its own tint", kinds.size() == COUNTER.size(), str(kinds.size()))
-	P = m.player
+	p_v = m.player
 	var keyed := MapKey.kinds(m, TrainMap.new())
 	ok(
 		"the full map's key has a row per hazard kind",
 		tz.areas.all(func(a): return ("hz:" + String(a["kind"])) in keyed),
 		", ".join(keyed)
 	)
-	var guarded := tz.areas.any(func(a): return tz.guards(P, String(a["kind"])))
+	var guarded := tz.areas.any(func(a): return tz.guards(p_v, String(a["kind"])))
 	ok("and the shield row only when your Boki counters one", ("safe" in keyed) == guarded)
-	var home := P.pos
+	var home := p_v.pos
 	_stand(0)
 	ok("the minimap shows hazards once one is close", HazardMap.matters(m))
 	var far := false
 	for x in range(0, m.world.w, 8):
-		P.pos = Vector3(x, home.y, m.world.h * 0.5)
+		p_v.pos = Vector3(x, home.y, m.world.h * 0.5)
 		far = far or not HazardMap.matters(m)
 	ok("and not when none is within %d m" % int(HazardMap.NEAR_M), far)
-	P.pos = home
+	p_v.pos = home
 	var c := Control.new()
 	main.add_child(c)
 	c.draw.connect(

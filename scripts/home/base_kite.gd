@@ -20,6 +20,18 @@ const RING_HIT := Color("7ee08a")
 const RING_MISS := Color("8a8a96")
 const VENT_OFF := 1.2  # m the vent toy sits below the tow line's lowest point
 
+# ------------------------------------------------------------------ on the base
+var h  # the Home screen
+var stand: Node3D = null
+var run: Run = null
+var flier: Dictionary = {}  # the home's kin entry on the kite
+var foe: Dictionary = {}  # the visiting kite's record (rival())
+var vent_nodes: Array = []  # the vent toys under the loop, in order
+var kite: Node3D = null
+var hoops: Array = []  # the ring nodes, in order
+var card: Control = null
+var card_t := 0.0
+
 
 static func rules() -> Dictionary:
 	return Content.rules("base_kite")
@@ -27,14 +39,14 @@ static func rules() -> Dictionary:
 
 ## The pace along the loop (m/s): Speed alone sets it.
 static func pace(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["pace"]) * (1.0 + float(rec.get("stats", {}).get("speed", 0)) * float(R["speed_per_point"]))
+	var r := rules()
+	return float(r["pace"]) * (1.0 + float(rec.get("stats", {}).get("speed", 0)) * float(r["speed_per_point"]))
 
 
 ## Flaps a lap starts with: 3, plus one for every 25 trained Guard points (base_kite.json).
 static func flaps(rec: Dictionary) -> int:
-	var R := rules()
-	return int(R["flaps"]) + floori(float(rec.get("stats", {}).get("guard", 0)) / float(R["guard_per_flap"]))
+	var r := rules()
+	return int(r["flaps"]) + floori(float(rec.get("stats", {}).get("guard", 0)) / float(r["guard_per_flap"]))
 
 
 ## The visiting kite for the cup round `rec` flies next: its stats are rec's times the round's min_ratio.
@@ -50,7 +62,7 @@ static func rival_time(foe: Dictionary, lap: float) -> float:
 
 ## One lap: the kite's place on the loop and across it, stepped in time.
 class Run:
-	var R: Dictionary
+	var r_v: Dictionary
 	var speed := 0.0  # m/s along the loop
 	var lap := 0.0  # m, the loop's middle line
 	var rings: Array = []  # each ring's offset from the middle line (m, + is out)
@@ -71,19 +83,19 @@ class Run:
 	var misses := 0
 
 	func _init(rec: Dictionary, rng: RandomNumberGenerator) -> void:
-		R = BaseKite.rules()
+		r_v = BaseKite.rules()
 		speed = BaseKite.pace(rec)
-		lap = TAU * float(R["loop_r"])
-		for i in int(R["rings"]):
-			rings.append(rng.randf_range(-float(R["ring_off"]), float(R["ring_off"])))
+		lap = TAU * float(r_v["loop_r"])
+		for i in int(r_v["rings"]):
+			rings.append(rng.randf_range(-float(r_v["ring_off"]), float(r_v["ring_off"])))
 			high.append(false)
 		var ups := range(1, rings.size())
-		for i in int(R["high"]):
+		for i in int(r_v["high"]):
 			high[ups.pop_at(rng.randi_range(0, ups.size() - 1))] = true
 		for i in rings.size():
-			if high[i] and vents.size() < int(R["vents"]):
+			if high[i] and vents.size() < int(r_v["vents"]):
 				var mid := (float(rings[i]) + float(rings[mini(i + 1, rings.size() - 1)])) * 0.5
-				var at := mid + rng.randf_range(-float(R["vent_r"]), float(R["vent_r"]))
+				var at := mid + rng.randf_range(-float(r_v["vent_r"]), float(r_v["vent_r"]))
 				vents.append({"s": lap * (i + 1.0) / rings.size(), "off": at, "used": false})
 		flaps_max = BaseKite.flaps(rec)
 		flaps = flaps_max
@@ -94,14 +106,14 @@ class Run:
 
 	## m above the tow line ring i sits.
 	func ring_lift(i: int) -> float:
-		return float(R["high_lift"]) if high[i] else 0.0
+		return float(r_v["high_lift"]) if high[i] else 0.0
 
 	## Space: true when a flap was left to spend.
 	func flap() -> bool:
 		if flaps <= 0 or over():
 			return false
 		flaps -= 1
-		climb = float(R["flap_v"])
+		climb = float(r_v["flap_v"])
 		return true
 
 	func over() -> bool:
@@ -109,7 +121,7 @@ class Run:
 
 	## The finish time: seconds flown plus a second (miss_s) for each missed ring.
 	func time() -> float:
-		return t + misses * float(R["miss_s"])
+		return t + misses * float(r_v["miss_s"])
 
 	## steer: -1 (A, left of the heading) .. 1 (D, right). Returns "hit" or "miss" for a ring passed, "vent"
 	## for a flap given back, else "".
@@ -117,12 +129,12 @@ class Run:
 		var go := minf(dt, (lap - s) / speed)  # the last step stops on the line, so the time is exact
 		t += go
 		s += speed * go
-		vel = move_toward(vel, steer * float(R["steer"]), float(R["steer_accel"]) * dt)
-		var edge := float(R["max_off"])
+		vel = move_toward(vel, steer * float(r_v["steer"]), float(r_v["steer_accel"]) * dt)
+		var edge := float(r_v["max_off"])
 		off = clampf(off + vel * dt, -edge, edge)
 		if absf(off) >= edge:
 			vel = 0.0
-		climb = maxf(climb - float(R["lift_g"]) * dt, -float(R["lift_fall"]))
+		climb = maxf(climb - float(r_v["lift_g"]) * dt, -float(r_v["lift_fall"]))
 		lift = maxf(0.0, lift + climb * dt)
 		if lift <= 0.0:
 			climb = maxf(climb, 0.0)
@@ -130,7 +142,7 @@ class Run:
 		if next >= rings.size() or s < ring_at(next):
 			return "vent" if vented else ""
 		var miss := Vector2(off - float(rings[next]), lift - ring_lift(next))
-		var hit := miss.length() <= float(R["ring_r"])
+		var hit := miss.length() <= float(r_v["ring_r"])
 		next += 1
 		got.append(hit)
 		if hit:
@@ -145,7 +157,7 @@ class Run:
 			if v["used"] or s < float(v["s"]):
 				continue
 			v["used"] = true
-			if absf(off - float(v["off"])) <= float(R["vent_r"]) and flaps < flaps_max:
+			if absf(off - float(v["off"])) <= float(r_v["vent_r"]) and flaps < flaps_max:
 				flaps += 1
 				refunds += 1
 				return true
@@ -157,10 +169,10 @@ class Run:
 static func settle(
 	run: Run, rec: Dictionary, foe: Dictionary, now := -1.0, rng: RandomNumberGenerator = null
 ) -> Dictionary:
-	var R := rules()
-	Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(rec, "joy", float(R["joy"]))
-	var gems := int(R["gems_clean"]) if run.misses == 0 else int(R["gems"])
+	var r := rules()
+	Care.change(rec, "energy", -float(r["energy"]))
+	Care.change(rec, "joy", float(r["joy"]))
+	var gems := int(r["gems_clean"]) if run.misses == 0 else int(r["gems"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var foe_t := rival_time(foe, run.lap)
 	var won := run.time() <= foe_t
@@ -179,19 +191,6 @@ static func settle(
 	}
 
 
-# ------------------------------------------------------------------ on the base
-var h  # the Home screen
-var stand: Node3D = null
-var run: Run = null
-var flier: Dictionary = {}  # the home's kin entry on the kite
-var foe: Dictionary = {}  # the visiting kite's record (rival())
-var vent_nodes: Array = []  # the vent toys under the loop, in order
-var kite: Node3D = null
-var hoops: Array = []  # the ring nodes, in order
-var card: Control = null
-var card_t := 0.0
-
-
 func _init(home) -> void:
 	h = home
 
@@ -207,12 +206,12 @@ func place() -> void:
 	if is_instance_valid(stand):
 		stand.queue_free()
 	stand = null
-	var S := spot()
-	if S.is_empty() and (h.YARD_AT.x < -100.0 or String(HomeLayout.of(Save.d)["theme"]) != String(rules()["theme"])):
+	var s_v := spot()
+	if s_v.is_empty() and (h.YARD_AT.x < -100.0 or String(HomeLayout.of(Save.d)["theme"]) != String(rules()["theme"])):
 		return
 	stand = Node3D.new()
 	stand.name = "KiteStand"
-	stand.position = h.YARD_AT + STAND_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
+	stand.position = h.YARD_AT + STAND_OFF if s_v.is_empty() else Vector3(s_v[0], 0.0, s_v[1])
 	var g: float = h._ground_h(stand.position.x, stand.position.z)
 	stand.position.y = g if g > -50.0 else 0.0
 	h.add_child(stand)

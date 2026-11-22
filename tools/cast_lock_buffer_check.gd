@@ -11,8 +11,12 @@ const EARLY_AT := 2  # steps into the lock for the press that comes too early to
 const SETTLE := 20  # steps the ult may take to start its lock
 const LOCK_MAX := 600  # steps a lock may run before the check gives up on it
 const PAST := 0.4  # s past the lock's end we watch for the press
+
 # kits whose ult locks the body; Vex left it on main 5687b9120da (her ult slows, never roots)
 const LOCKED := ["juggernaut", "mage", "ostra"]
+
+const LOST := -1  # never went off
+const INSIDE := -2  # went off while the lock still held
 
 var bad := 0
 var skipped := 0
@@ -69,10 +73,6 @@ func _hero(m: Match, hero: String) -> bool:
 				)
 			)
 	return true
-
-
-const LOST := -1  # never went off
-const INSIDE := -2  # went off while the lock still held
 
 
 func _said(got: int) -> String:

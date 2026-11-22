@@ -7,9 +7,15 @@ extends RefCounted
 
 var m: Match = null
 
+## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
+## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
+## (rings) and you shoot the low one through its ring; "hop" holds them mid-hop (no marker: the
+## body is the target); "self" hangs you below the lip (your own faint balloon).
+var _bdemo := {}
 
-func setup(match_: Match) -> void:
-	m = match_
+
+func setup(match_v: Match) -> void:
+	m = match_v
 
 
 func update(dt: float) -> void:
@@ -117,13 +123,6 @@ func rows() -> Array:
 			)
 	)
 	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
-
-
-## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
-## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
-## (rings) and you shoot the low one through its ring; "hop" holds them mid-hop (no marker: the
-## body is the target); "self" hangs you below the lip (your own faint balloon).
-var _bdemo := {}
 
 
 func balloon_demo() -> void:

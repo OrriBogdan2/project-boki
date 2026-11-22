@@ -64,8 +64,8 @@ func run(main: Node, what: String) -> void:
 
 
 func _style(cam: CamRig) -> void:
-	var src: Dictionary = CamRig.RULES["source"]
-	var st: Dictionary = CamRig.STYLES["default"]
+	var src: Dictionary = CamRig.rules["source"]
+	var st: Dictionary = CamRig.styles["default"]
 	ok(
 		(
 			is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"]))
@@ -116,7 +116,7 @@ func _aspects(cam: CamRig, vp: SubViewport) -> void:
 		if ref == Vector3.ZERO:
 			ref = g
 		ok(absf(g.z / ref.z - 1.0) < SAME, "%s: %.1f m each side, the 16:9 frame's %.1f m" % [v[0], g.z, ref.z])
-		var wider := aspect - CamRig.FRAME_ASPECT
+		var wider := aspect - CamRig.frame_aspect
 		var than := "under" if wider > 0.0 else "over"
 		if absf(wider) < 0.01:
 			than = "at"
@@ -180,7 +180,7 @@ func _shots(main: Node) -> void:
 		main.get_window().size = sh[1]
 		for i in 60:
 			if before:
-				CamRig.FRAME_ASPECT = vp.get_visible_rect().size.aspect()  # the lens kept at every aspect
+				CamRig.frame_aspect = vp.get_visible_rect().size.aspect()  # the lens kept at every aspect
 			vp.warp_mouse(vp.get_visible_rect().size * 0.5)
 			await main.get_tree().process_frame
 		vp.get_texture().get_image().save_png(dir.path_join(String(sh[0]) + ".png"))

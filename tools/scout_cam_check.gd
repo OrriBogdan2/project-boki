@@ -88,7 +88,7 @@ func _distance(cam: CamRig) -> void:
 	cam.scout_k = 0.0
 	cam.snap(Vector3.ZERO)
 	var side := cam.scout_to(Vector2(1, 0)).length()
-	var cap := float(CamRig.FOLLOW["lean"][2])
+	var cap := float(CamRig.follow_v["lean"][2])
 	print("SCOUTCAM far look across the screen: %.1f m (cursor lean cap %.1f m)" % [side, cap])
 
 
@@ -170,7 +170,7 @@ func _ease_secs(cam: CamRig, on: bool, mouse_lead: bool, to: float) -> float:
 
 
 func _ease(cam: CamRig) -> void:
-	var r: Dictionary = CamRig.SCOUT
+	var r: Dictionary = CamRig.scout
 	var t_in := _ease_secs(cam, true, true, 0.9)
 	var want_in := float(r["ease_in_s"])
 	ok(absf(t_in - want_in) <= STEP * 1.5, "held: 90%% out in %.3f s (ease_in_s %.2f)" % [t_in, want_in])
@@ -232,8 +232,8 @@ func _seen(m: Match, dist: float, deg: float, held: bool) -> bool:
 
 func _cone(m: Match) -> void:
 	var rng := m.view_range()
-	var mul := float(CamRig.SCOUT["sight_mul"])
-	var half := float(CamRig.SCOUT["cone_deg"]) * 0.5
+	var mul := float(CamRig.scout["sight_mul"])
+	var half := float(CamRig.scout["cone_deg"]) * 0.5
 	var mid := rng * (1.0 + mul) * 0.5
 	ok(not _seen(m, mid, 0.0, false), "not held: %.1f m along the aim is past sight (%.1f m)" % [mid, rng])
 	ok(_seen(m, mid, 0.0, true), "held: %.1f m along the aim is seen (sight x%.2f)" % [mid, mul])

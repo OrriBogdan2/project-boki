@@ -150,8 +150,8 @@ func _match() -> void:
 	await m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 5, "no_drop": true})
 	for i in 60:
 		m.step(1.0 / 60.0)
-	var P: Hunter = m.player
-	P.lvl = int(Hunter.ULT_AT[0])
+	var p: Hunter = m.player
+	p.lvl = int(Hunter.ULT_AT[0])
 	HudSlot.shown_keys.clear()
 	await _redraw(m)
 	var wrong: Array = []
@@ -162,14 +162,14 @@ func _match() -> void:
 	ok("the ability bar shows the new keys (%s)" % [drawn], wrong.is_empty() and drawn.size() >= 5, str(wrong))
 	ok("the dash slot shows %s" % _cap_of(KEY_F5), String(HudSlot.shown_keys.get("dash", "")) == _cap_of(KEY_F5))
 	_recast_keys()
-	P.ak.cue["w"] = RecastCue.window("e", 2.0, 3.0, P.pos)
+	p.ak.cue["w"] = RecastCue.window("e", 2.0, 3.0, p.pos)
 	await _redraw(m)
 	var again: Array = TextCache.seen.filter(func(t): return String(t).contains("AGAIN"))
 	ok("the recast label is drawn with the Utility key", again.has("%s AGAIN" % _cap_of(KEY_F3)), str(again))
-	P.ak.cue.erase("w")
+	p.ak.cue.erase("w")
 	var texts: Array = TextCache.seen.duplicate()
 	for id in ["sec", "k1", "r", "dash"]:
-		for line in m.hud.hover.tip_lines(id, P):
+		for line in m.hud.hover.tip_lines(id, p):
 			texts.append(String(line[0]))
 	none("no hunter slot text or tooltip names a default key (%d texts)" % texts.size(), _stale_in(texts))
 	m.free()

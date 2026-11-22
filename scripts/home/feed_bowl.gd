@@ -47,7 +47,7 @@ static func _go(k: Dictionary, p: String, since: float) -> void:
 
 ## The first snack in the pantry (crops, then treats): "" if it is bare.
 static func pantry_snack() -> String:
-	for f in Data.CROPS.keys() + Care.FOODS.keys():
+	for f in Data.CROPS.keys() + Care.foods_v.keys():
 		if Econ.pantry(String(f)) > 0:
 			return String(f)
 	return ""

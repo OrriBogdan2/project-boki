@@ -40,17 +40,17 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	var P := m.player
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var p := m.player
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	foe.ctrl = "idle"
 	foe.set_arch("thief")
-	foe.teleport(m.world.free_spot_near(P.pos + Vector3(2.5, 0, -1.0), [], 1.0, 0.5, 8.0))
+	foe.teleport(m.world.free_spot_near(p.pos + Vector3(2.5, 0, -1.0), [], 1.0, 0.5, 8.0))
 	foe.reveal_t = 60.0
-	for h in [P, foe]:
+	for h in [p, foe]:
 		h.lvl = int(Hunter.ULT_AT[0])
 		h.ak.cd["x"] = 0.0
 	await _shot("1_ready")
-	P.ak.cd["x"] = 30.0
+	p.ak.cd["x"] = 30.0
 	await _shot("2_cast_flash", 2)
 	await _shot("3_after", 60)
 	main.get_tree().quit(0)

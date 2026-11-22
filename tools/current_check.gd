@@ -30,10 +30,10 @@ func run(m: Node) -> void:
 		if a.begins_with("--shots-dir="):
 			shots = a.substr(12)
 	for id in MAPS:
-		var L := World.load_layout(id)
+		var l := World.load_layout(id)
 		var w := World.new()
-		await w.generate_authored(L, 3)
-		_world(w, id, (L.get("winds", []) as Array).size(), (L.get("updrafts", []) as Array).size())
+		await w.generate_authored(l, 3)
+		_world(w, id, (l.get("winds", []) as Array).size(), (l.get("updrafts", []) as Array).size())
 		w.free()
 	for sd in range(1, GEN_SEEDS + 1):
 		var w := World.new()

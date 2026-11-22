@@ -47,12 +47,12 @@ func _species(k: Kin, species: String) -> void:
 
 ## What the HUD shows when the player, with this lead Boki, walks up to the kind.
 func _says(kind: String, lead: String) -> String:
-	var P := m.player
-	_species(P.kin as Kin, lead)
+	var p := m.player
+	_species(p.kin as Kin, lead)
 	for ai in tz.areas.size():
 		if tz.areas[ai]["kind"] == kind:
 			var c: Vector3 = tz.areas[ai]["centre"]
-			P.teleport(Vector3(c.x, float(tz.areas[ai]["y"]), c.z))
+			p.teleport(Vector3(c.x, float(tz.areas[ai]["y"]), c.z))
 			break
 	Save.d["tutorial"].erase(HazardHint.FLAG + kind)
 	m.hud.msgs.clear()

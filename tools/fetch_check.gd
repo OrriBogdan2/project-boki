@@ -49,9 +49,9 @@ func _kin(kname: String, speed: int, focus: int, joy := 60.0, trust := 50.0) -> 
 	return k
 
 
-func _round(recs: Array, back: int, seed_: int, grade := "") -> BaseFetch.Run:
+func _round(recs: Array, back: int, seed_v: int, grade := "") -> BaseFetch.Run:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = seed_v
 	var r := BaseFetch.Run.new(recs, back, rng)
 	if grade != "":
 		r.call_head(grade)
@@ -120,10 +120,10 @@ func _settle() -> void:
 	Save.d = Save.fresh()
 	var a := _kin("Pip", 10, 10)
 	var b := _kin("Ash", 10, 10)
-	var run_ := BaseFetch.Run.new([a, b], 0, RandomNumberGenerator.new())
-	run_.score = [7, 5]
+	var run_v := BaseFetch.Run.new([a, b], 0, RandomNumberGenerator.new())
+	run_v.score = [7, 5]
 	var gems := int(Save.d["gems"])
-	var res := BaseFetch.settle(run_)
+	var res := BaseFetch.settle(run_v)
 	ok(res["win"] == a and res["lose"] == b and res["score"] == [7, 5], "settle: the higher score wins")
 	ok(float(a["needs"]["joy"]) > 60.0 and float(a["trust"]) > 50.0, "settle: the winner gains joy and trust")
 	ok(float(b["needs"]["joy"]) < 60.0, "settle: the loser sulks")

@@ -82,24 +82,24 @@ func _rival(team: int, at: Vector3) -> Hunter:
 
 ## Steps `secs` of the match as Match runs a frame (the camera follows the hero, the zoom eases), then saves the shot.
 func _take(secs: float, file: String, each: Callable, until := Callable()) -> void:
-	var P := m.player
+	var p := m.player
 	var t := 0.0
 	m.cam.zoom = 1.0
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	while t < secs and not (until.is_valid() and until.call(t)):
 		_purge()
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
-		m.cam.zoom_to = 1.25 if P.gliding else 1.0
+		m.cam.zoom_to = 1.25 if p.gliding else 1.0
 		m.cam.lead_vel = m.cam_lead_vel()
-		m.cam.follow(P.pos, FRAME, false)
+		m.cam.follow(p.pos, FRAME, false)
 		for h in m.hunters:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
 		t += FRAME
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
-	var east := m.cam.unproject_position(P.pos + Vector3(10, 0, 0)) - m.cam.unproject_position(P.pos)
+	var east := m.cam.unproject_position(p.pos + Vector3(10, 0, 0)) - m.cam.unproject_position(p.pos)
 	print("CAMERAAB shot %s: 10 m of ground is %.0f px across" % [file, east.x])
 
 
@@ -108,14 +108,14 @@ func _clear(at: Vector3) -> void:
 	for h in pool:
 		h.out = true
 	used = 0
-	var P := m.player
-	P.teleport(at)
-	P.vel = Vector3.ZERO
-	P.hp = P.max_hp
-	P.out = false
-	P.downed = false
-	P.stun_t = 0.0
-	P.root_t = 0.0
+	var p := m.player
+	p.teleport(at)
+	p.vel = Vector3.ZERO
+	p.hp = p.max_hp
+	p.out = false
+	p.downed = false
+	p.stun_t = 0.0
+	p.root_t = 0.0
 
 
 func _fight_shot(style: String) -> void:
@@ -163,7 +163,7 @@ func _edge() -> Array:
 
 
 func _glide_shot(style: String) -> void:
-	var P := m.player
+	var p := m.player
 	var e := _edge()
 	var d := Vector3(e[1].x, 0, e[1].y)
 	var tile: Vector2i = e[0]
@@ -171,19 +171,19 @@ func _glide_shot(style: String) -> void:
 	_clear(edge_at - d * EDGE_RUN)
 	var foe := _rival(1, edge_at - d * (EDGE_RUN + 3.0))
 	foe.ctrl = "idle"
-	P.ctrl = "idle"
+	p.ctrl = "idle"
 	var left := [-1.0]  # the time the hero left the ground
 	await _take(
 		RUN_MAX,
 		"%s_glide_%s.png" % [hero, style],
 		func(t: float):
-			if left[0] < 0.0 and not P.grounded:
+			if left[0] < 0.0 and not p.grounded:
 				left[0] = t
-			P.inp["move"] = Vector2(d.x, d.z)
-			P.inp["glide_press_only"] = true
-			P.inp["glide"] = left[0] >= 0.0
-			P.inp["glide_btn"] = left[0] >= 0.0,
+			p.inp["move"] = Vector2(d.x, d.z)
+			p.inp["glide_press_only"] = true
+			p.inp["glide"] = left[0] >= 0.0
+			p.inp["glide_btn"] = left[0] >= 0.0,
 		func(t: float): return left[0] >= 0.0 and t - left[0] >= GLIDE_SECS
 	)
-	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(P.gliding), P.pos.y])
-	P.ctrl = "bot"
+	print("CAMERAAB glide %s: gliding=%s y=%.1f" % [style, str(p.gliding), p.pos.y])
+	p.ctrl = "bot"

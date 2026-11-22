@@ -22,6 +22,17 @@ const SEED_R := 0.1  # m, the seed's radius
 const ARC := 1.2  # m the seed rises in flight
 const REACH := 1.8  # m from the mat to start a round
 
+# ------------------------------------------------------------------ on the base
+var h  # the Home screen
+var mat: Node3D = null
+var seed_node: MeshInstance3D = null
+var run: Run = null
+var pair: Array = []  # the home's kin entries: a, b
+var bar: TimingBar = null
+var card: Control = null
+var card_t := 0.0
+var cue: GardenCues.VolleyCue = null  # the landing ring and head-start flash while a round runs
+
 
 static func rules() -> Dictionary:
 	return Content.rules("base_fetch")
@@ -29,18 +40,18 @@ static func rules() -> Dictionary:
 
 ## Metres a second a Boki runs: 1.0 x the rules' pace for no Speed points and a plain mood.
 static func pace(rec: Dictionary) -> float:
-	var R := rules()
+	var r_v := rules()
 	var st: Dictionary = rec.get("stats", {})
-	var p := float(R["pace"]) * (1.0 + float(st.get("speed", 0)) * float(R["speed_per_point"]))
-	var mood: Array = R["mood"]
+	var p := float(r_v["pace"]) * (1.0 + float(st.get("speed", 0)) * float(r_v["speed_per_point"]))
+	var mood: Array = r_v["mood"]
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
-	return p * lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
+	return p * lerpf(1.0, float(r_v["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
 
 
 ## The chance a Boki fumbles the pick-up: less with Focus points.
 static func p_fumble(rec: Dictionary) -> float:
-	var R := rules()
-	return float(R["fumble"]) / (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["focus_per_point"]))
+	var r_v := rules()
+	return float(r_v["fumble"]) / (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(r_v["focus_per_point"]))
 
 
 ## The round itself, stepped in time. Sides are indexes 0 and 1 into recs.
@@ -48,7 +59,7 @@ class Run:
 	enum S { TOSS, CHASE, BRING, DONE }
 	const TABLE := {S.TOSS: [S.CHASE], S.CHASE: [S.BRING], S.BRING: [S.TOSS, S.DONE], S.DONE: []}
 
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array  # two records
 	var backed := 0  # index in recs: the Boki you back
 	var rng: RandomNumberGenerator
@@ -66,7 +77,7 @@ class Run:
 	var tosses := 0  # seeds thrown in the round
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
-		R = BaseFetch.rules()
+		r_x = BaseFetch.rules()
 		recs = pair
 		backed = back
 		rng = r
@@ -106,7 +117,7 @@ class Run:
 		state_t += dt
 		match state:
 			S.TOSS:
-				if state_t >= float(R["toss_s"]):
+				if state_t >= float(r_x["toss_s"]):
 					move(S.CHASE)
 			S.CHASE:
 				if state_t >= minf(go[0] + lag[0], go[1] + lag[1]):
@@ -114,8 +125,8 @@ class Run:
 					score[last] += 1
 					move(S.BRING)
 			S.BRING:
-				if state_t >= float(R["bring_s"]):
-					if t >= float(R["round_s"]):
+				if state_t >= float(r_x["bring_s"]):
+					if t >= float(r_x["round_s"]):
 						move(S.DONE)
 					else:
 						move(S.TOSS)
@@ -124,48 +135,36 @@ class Run:
 	## Rolls the next seed: how far, and each side's trip.
 	func _toss() -> void:
 		tosses += 1
-		var d: Array = R["dist"]
+		var d: Array = r_x["dist"]
 		dist = rng.randf_range(float(d[0]), float(d[1]))
 		for i in 2:
 			var rec: Dictionary = recs[i]
-			var wob := float(R["wobble"])
+			var wob := float(r_x["wobble"])
 			go[i] = dist / BaseFetch.pace(rec) * (1.0 + rng.randf_range(-wob, wob))
-			lag[i] = float(R["fumble_s"]) if rng.randf() < BaseFetch.p_fumble(rec) else 0.0
+			lag[i] = float(r_x["fumble_s"]) if rng.randf() < BaseFetch.p_fumble(rec) else 0.0
 		if head != "":
-			go[backed] *= float(R["head_start"][head])
+			go[backed] *= float(r_x["head_start"][head])
 			head = ""
 
 
 ## Pays out a finished round: joy, trust, a memory each, energy and gems. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var win: Dictionary = run.recs[run.winner()]
 	var lose: Dictionary = run.recs[1 - run.winner()]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	var wp: int = run.score[run.winner()]
 	var lp: int = run.score[1 - run.winner()]
 	MinigameHub.record("fetch", String(win["name"]))  # best Boki on the title's picker
-	Save.remember(win, "fetch", "beat %s %d to %d at Fetch Cup" % [lose["name"], wp, lp], float(R["win_trust"]))
+	Save.remember(win, "fetch", "beat %s %d to %d at Fetch Cup" % [lose["name"], wp, lp], float(r_v["win_trust"]))
 	Save.remember(lose, "fetch", "lost Fetch Cup to %s, %d to %d" % [win["name"], lp, wp])
 	var backed_won: bool = run.recs[run.backed] == win
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "score": [wp, lp]}
-
-
-# ------------------------------------------------------------------ on the base
-var h  # the Home screen
-var mat: Node3D = null
-var seed_node: MeshInstance3D = null
-var run: Run = null
-var pair: Array = []  # the home's kin entries: a, b
-var bar: TimingBar = null
-var card: Control = null
-var card_t := 0.0
-var cue: GardenCues.VolleyCue = null  # the landing ring and head-start flash while a round runs
 
 
 func _init(home) -> void:

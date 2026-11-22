@@ -20,13 +20,36 @@ extends RefCounted
 ## tells the others with ["hr", phase, wave, boss_nid] (on a change and every SYNC_S).
 
 enum P { WAVES, BOSS, HOLD, WON, LOST }
+
 const MODE := "heart_raid"  # the mode's name in content/rules/boki_modes.json (BokiModes)
 const RULES_PATH := "res://content/rules/heart_raid.json"
 const THINK_S := 0.5  # s between the director's looks (waves, steering, rally)
 const SYNC_S := 3.0  # s between the host's "hr" refreshes
 const COL := Color("ff7a5a")  # the raid's HUD accent (the Blight's ember)
 const SPREAD := 1.4  # m: a group's monsters stand this far apart round their gate
+
 static var _rules := {}
+
+var m: Match
+var phase := P.WAVES
+var wave := 0  # waves sent so far
+var next_wave_t := 0.0  # session time of the next wave
+var cleared_t := -1.0  # session time the last wave was cleared (-1 until then)
+var squad_n := 1  # Hunters in the squad (1-4): the scale row
+var difficulty := "normal"  # rules "difficulty" key
+var gates: HeartRaidGates  # where and when each wave comes out, and its marks
+var audio: RaidSfx  # the raid's cues (waves, boss, gate ticks)
+var boss_nid := ""  # a client: the host's boss id, until its Mob arrives
+var boss: Mob = null  # the boss (a Boss on the host; a client mirrors a plain Mob)
+var lair := {}  # the boss's fight square round the Heart, in Lairs' lair shape
+var foes: Array[Mob] = []  # wave monsters alive
+var sent := 0  # wave monsters spawned
+var boss_down := false  # the boss fell (the Heart's final seat is open)
+var trail: Array[String] = []  # "time what", every beat of the raid (the smoke check reads it)
+
+var _think := 0.0
+var _sync_t := 0.0
+var _rng := RandomNumberGenerator.new()
 
 
 static func rules() -> Dictionary:
@@ -79,27 +102,6 @@ static func boki(difficulty: String) -> Array:
 ## The pool a wild or rare-spot Boki of a raid draws from (the Expedition draws through ModeBoki, main's).
 static func boki_for(o: Dictionary) -> Array:
 	return boki(String(o.get("raid_diff", "normal")))
-
-
-var m: Match
-var phase := P.WAVES
-var wave := 0  # waves sent so far
-var next_wave_t := 0.0  # session time of the next wave
-var cleared_t := -1.0  # session time the last wave was cleared (-1 until then)
-var squad_n := 1  # Hunters in the squad (1-4): the scale row
-var difficulty := "normal"  # rules "difficulty" key
-var gates: HeartRaidGates  # where and when each wave comes out, and its marks
-var audio: RaidSfx  # the raid's cues (waves, boss, gate ticks)
-var boss_nid := ""  # a client: the host's boss id, until its Mob arrives
-var boss: Mob = null  # the boss (a Boss on the host; a client mirrors a plain Mob)
-var lair := {}  # the boss's fight square round the Heart, in Lairs' lair shape
-var foes: Array[Mob] = []  # wave monsters alive
-var sent := 0  # wave monsters spawned
-var boss_down := false  # the boss fell (the Heart's final seat is open)
-var trail: Array[String] = []  # "time what", every beat of the raid (the smoke check reads it)
-var _think := 0.0
-var _sync_t := 0.0
-var _rng := RandomNumberGenerator.new()
 
 
 func _init(match_node: Match) -> void:

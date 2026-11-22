@@ -40,19 +40,19 @@ static func caster_on(m: Match, p: Hunter) -> Hunter:
 	return null
 
 
-static func draw(H, sz: Vector2, p: Hunter) -> void:
+static func draw(h_v, sz: Vector2, p: Hunter) -> void:
 	shown.clear()
-	var from := caster_on(H.m, p)
+	var from := caster_on(h_v.m, p)
 	if from == null:
 		return
 	var left := float(read(from)[1])
 	var total := float((from.ak as TenderKit).x_def()["time"])
 	var frac := clampf(left / total, 0.0, 1.0)
 	shown[from.nid] = {"left": left, "frac": frac}
-	var o: Vector2 = H._hud_origin(sz)
-	var y: float = o.y + H.HUD_PORTRAIT.y + 3.0
-	H._draw_portrait(Rect2(Vector2(o.x, y - 4.0), Vector2(ICON, ICON)), from, "", COL)
-	var bar := Rect2(Vector2(o.x + ICON + 8.0, y), Vector2(HudVitals.BAR_W + H.HUD_PORTRAIT.x - ICON - 8.0, BAR_H))
-	H._rounded(bar.grow(2.0), HudStyle.SHADE, 4)
-	H.c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, BAR_H)), COL)
-	HudStyle.text(H.c, bar.end + Vector2(8.0, 1.0), "%.1f" % left, 11, HudStyle.INK)
+	var o: Vector2 = h_v._hud_origin(sz)
+	var y: float = o.y + h_v.HUD_PORTRAIT.y + 3.0
+	h_v._draw_portrait(Rect2(Vector2(o.x, y - 4.0), Vector2(ICON, ICON)), from, "", COL)
+	var bar := Rect2(Vector2(o.x + ICON + 8.0, y), Vector2(HudVitals.BAR_W + h_v.HUD_PORTRAIT.x - ICON - 8.0, BAR_H))
+	h_v._rounded(bar.grow(2.0), HudStyle.SHADE, 4)
+	h_v.c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, BAR_H)), COL)
+	HudStyle.text(h_v.c, bar.end + Vector2(8.0, 1.0), "%.1f" % left, 11, HudStyle.INK)

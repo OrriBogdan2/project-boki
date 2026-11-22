@@ -123,7 +123,7 @@ static func mismatches(sk: Skeleton3D, rest: Dictionary, extra := {}) -> Array:
 
 
 ## The ankle in the skeleton's space: the shin's first child bone (the foot), or a thigh's length down the shin.
-static func ankle(sk: Skeleton3D, thigh: int, shin: int) -> Vector3:
+static func ankle(sk: Skeleton3D, _thigh: int, shin: int) -> Vector3:
 	var kids := sk.get_bone_children(shin)
 	var tip := Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
 	if not kids.is_empty():

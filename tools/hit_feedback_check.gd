@@ -51,12 +51,12 @@ func _lmb(arch: String) -> void:
 	for dist in [2.2, 6.0]:
 		var s: Array = setup(arch, dist)
 		var m: Match = s[0]
-		var P: Hunter = s[1]
-		var T: Hunter = s[2]
-		var heard := _until_hit(m, P, T)
+		var p: Hunter = s[1]
+		var t: Hunter = s[2]
+		var heard := _until_hit(m, p, t)
 		var shook := m.cam.shake_amp if m.cam else 0.0
-		P.inp["fire"] = false
-		if not heard.is_empty() or T.hp < T.max_hp:
+		p.inp["fire"] = false
+		if not heard.is_empty() or t.hp < t.max_hp:
 			var num: Label3D = m.fx.nums[-1]["node"] if not m.fx.nums.is_empty() else null
 			print(
 				(
@@ -66,14 +66,14 @@ func _lmb(arch: String) -> void:
 						dist,
 						str(heard),
 						("%d/%s" % [num.font_size, num.modulate.to_html(false)]) if num else "none",
-						T.flash_t,
-						T.freeze_t
+						t.flash_t,
+						t.freeze_t
 					]
 				)
 			)
-			ok("%s LMB: body flash" % arch, T.flash_t > 0.0)
+			ok("%s LMB: body flash" % arch, t.flash_t > 0.0)
 			ok("%s LMB: a damage number" % arch, num != null and num.visible)
-			var own := HeroSfx.hit_sound(P)
+			var own := HeroSfx.hit_sound(p)
 			ok("%s LMB: its own hit sound" % arch, heard.has(own) and own == arch + "_hit", str(heard))
 			ok("%s LMB: no camera shake" % arch, shook < 0.05, "shake %.2f" % shook)
 			await done(m)
@@ -83,15 +83,15 @@ func _lmb(arch: String) -> void:
 
 
 ## Holds LMB at T until a hit lands (up to 2.5 s): the sounds that played on that step.
-func _until_hit(m: Match, P: Hunter, T: Hunter) -> Array:
+func _until_hit(m: Match, p: Hunter, t: Hunter) -> Array:
 	Sfx.last_played.clear()
-	Sfx.listener = P.pos  # (the match's own process, which moves it, is off here)
+	Sfx.listener = p.pos  # (the match's own process, which moves it, is off here)
 	for i in 150:
-		aim_at(P, T.pos)
-		P.inp["fire"] = i < 120  # (a held charge lets go at 2 s)
-		var hp0 := T.hp
+		aim_at(p, t.pos)
+		p.inp["fire"] = i < 120  # (a held charge lets go at 2 s)
+		var hp0 := t.hp
 		var got := _step_sounds(m)
-		if T.hp < hp0 - 0.4:
+		if t.hp < hp0 - 0.4:
 			return got
 	return []
 
@@ -102,16 +102,16 @@ func _empowered() -> void:
 	for arch in ["dredge", "thief"]:
 		var s: Array = setup(arch, 2.0 if arch == "dredge" else 6.0)
 		var m: Match = s[0]
-		var P: Hunter = s[1]
-		var T: Hunter = s[2]
+		var p: Hunter = s[1]
+		var t: Hunter = s[2]
 		if arch == "thief":
-			P.ak.set("primed_t", 2.0)
-		var heard := _until_hit(m, P, T)
-		var hold := T.freeze_t
+			p.ak.set("primed_t", 2.0)
+		var heard := _until_hit(m, p, t)
+		var hold := t.freeze_t
 		for i in 8:
 			heard.append_array(_step_sounds(m))
-			hold = maxf(hold, T.freeze_t)
-		P.inp["fire"] = false
+			hold = maxf(hold, t.freeze_t)
+		p.inp["fire"] = false
 		ok("%s empowered hit: the heavy thud" % arch, heard.has("hit_heavy"), str(heard))
 		ok("%s empowered hit: holds the target" % arch, hold >= ImpactWeight.hold_s("solid") - 0.001, "%.3f" % hold)
 		await done(m)

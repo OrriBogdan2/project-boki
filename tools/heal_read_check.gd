@@ -57,31 +57,31 @@ func _match(arch: String, dist := 6.0) -> Array:
 func _meeko() -> void:
 	var r: Array = await _match("tender")
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var A: Hunter = r[2]
-	var K: TenderKit = P.ak
-	A.hp = A.max_hp * 0.4
+	var p: Hunter = r[1]
+	var a: Hunter = r[2]
+	var k: TenderKit = p.ak
+	a.hp = a.max_hp * 0.4
 	_clear(m.fx)
-	P.inp["sig"] = true
-	await _step(m, A)
-	P.inp["sig"] = false
-	ok(await _until_healed(m, A, 2.0), "Meeko Hearthlight: a pulse heals the teammate")
-	_reads(m, A, "Meeko Hearthlight pulse")
-	await _strip(m, A, "meeko_hearthlight")
-	A.hp = A.max_hp * 0.4
+	p.inp["sig"] = true
+	await _step(m, a)
+	p.inp["sig"] = false
+	ok(await _until_healed(m, a, 2.0), "Meeko Hearthlight: a pulse heals the teammate")
+	_reads(m, a, "Meeko Hearthlight pulse")
+	await _strip(m, a, "meeko_hearthlight")
+	a.hp = a.max_hp * 0.4
 	_clear(m.fx)
-	K._e_end()
-	_reads(m, A, "Meeko Hearthlight flare")
-	await _strip(m, A, "meeko_flare")
-	A.hp = A.max_hp * 0.4
-	K.cd["x"] = 0.0
-	sc.aim_at(P, A.pos)
-	await _step(m, A)
+	k._e_end()
+	_reads(m, a, "Meeko Hearthlight flare")
+	await _strip(m, a, "meeko_flare")
+	a.hp = a.max_hp * 0.4
+	k.cd["x"] = 0.0
+	sc.aim_at(p, a.pos)
+	await _step(m, a)
 	_clear(m.fx)
-	HunterKeys.ult_pressed(P)
-	ok(await _until_healed(m, A, 2.0) and not K.hearth_call.is_empty(), "Meeko Hearth Call: the tether heals")
-	_reads(m, A, "Meeko Hearth Call tick")
-	await _strip(m, A, "meeko_hearth_call")
+	HunterKeys.ult_pressed(p)
+	ok(await _until_healed(m, a, 2.0) and not k.hearth_call.is_empty(), "Meeko Hearth Call: the tether heals")
+	_reads(m, a, "Meeko Hearth Call tick")
+	await _strip(m, a, "meeko_hearth_call")
 	parts += 1
 	await _free(m)
 
@@ -89,26 +89,26 @@ func _meeko() -> void:
 func _albert() -> void:
 	var r: Array = await _match("bulwark")
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var A: Hunter = r[2]
-	var K: BulwarkKit = P.ak
-	A.teleport(P.pos + Vector3(-1.0, 0, 0.6))
-	A.hp = A.max_hp * 0.4
-	P.inp["aim"] = P.pos
+	var p: Hunter = r[1]
+	var a: Hunter = r[2]
+	var k: BulwarkKit = p.ak
+	a.teleport(p.pos + Vector3(-1.0, 0, 0.6))
+	a.hp = a.max_hp * 0.4
+	p.inp["aim"] = p.pos
 	_clear(m.fx)
-	K.use_e()
-	ok(await _until_healed(m, A, 2.0) and not K.mend.is_empty(), "Albert Mending Ground: a tick heals the teammate")
-	_reads(m, A, "Albert Mending Ground tick")
-	await _strip(m, A, "albert_mend_tick")
+	k.use_e()
+	ok(await _until_healed(m, a, 2.0) and not k.mend.is_empty(), "Albert Mending Ground: a tick heals the teammate")
+	_reads(m, a, "Albert Mending Ground tick")
+	await _strip(m, a, "albert_mend_tick")
 	var t := 0.0
-	while not K.mend.is_empty() and t < 6.0:
-		A.hp = A.max_hp * 0.4
+	while not k.mend.is_empty() and t < 6.0:
+		a.hp = a.max_hp * 0.4
 		_clear(m.fx)
-		await _step(m, A)
+		await _step(m, a)
 		t += DT
-	ok(K.mend.is_empty(), "Albert Mending Ground: the zone ends in its burst")
-	_reads(m, A, "Albert Mending Ground burst")
-	await _strip(m, A, "albert_mend_burst")
+	ok(k.mend.is_empty(), "Albert Mending Ground: the zone ends in its burst")
+	_reads(m, a, "Albert Mending Ground burst")
+	await _strip(m, a, "albert_mend_burst")
 	parts += 1
 	await _free(m)
 
@@ -116,13 +116,13 @@ func _albert() -> void:
 func _kael() -> void:
 	var r: Array = await _match("juggernaut", 2.5)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	P.hp = P.max_hp * 0.5
+	var p: Hunter = r[1]
+	p.hp = p.max_hp * 0.5
 	_clear(m.fx)
-	HunterKeys.ult_pressed(P)
-	ok(await _until_healed(m, P, 2.5), "Kael Gilded Riposte: the cleave heals him")
-	_reads(m, P, "Kael Gilded Riposte")
-	await _strip(m, P, "kael_riposte")
+	HunterKeys.ult_pressed(p)
+	ok(await _until_healed(m, p, 2.5), "Kael Gilded Riposte: the cleave heals him")
+	_reads(m, p, "Kael Gilded Riposte")
+	await _strip(m, p, "kael_riposte")
 	parts += 1
 	await _free(m)
 
@@ -130,39 +130,39 @@ func _kael() -> void:
 func _lifesteal_and_rules() -> void:
 	var r: Array = await _match("archer")
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var A: Hunter = r[2]
-	var T: Hunter = r[3]
+	var p: Hunter = r[1]
+	var a: Hunter = r[2]
+	var t: Hunter = r[3]
 	var fx: Fx = m.fx
 	# a Void weapon drains what it deals; a light hit's sliver waits hidden until the heals add up
-	P.welem = "void"
-	P.hp = P.max_hp * 0.5
-	T.inv_t = 0.0
+	p.welem = "void"
+	p.hp = p.max_hp * 0.5
+	t.inv_t = 0.0
 	_clear(fx)
-	var drained := _void_hit(P, T, 3.0)
-	var sliver := _heal_num(fx, P)
+	var drained := _void_hit(p, t, 3.0)
+	var sliver := _heal_num(fx, p)
 	ok(
 		drained > 0.0 and drained < Fx.NUM_MIN and not sliver.is_empty() and not (sliver["node"] as Label3D).visible,
 		"lifesteal: a light hit's sliver waits hidden",
 		"%.2f HP" % drained
 	)
 	for i in 3:
-		drained += _void_hit(P, T, 3.0)
-	var num := _heal_num(fx, P)
+		drained += _void_hit(p, t, 3.0)
+	var num := _heal_num(fx, p)
 	ok(
 		is_same(num, sliver) and absf(float(num["val"]) - drained) < 0.01,
 		"lifesteal: the slivers add up on one number",
 		"%.2f of %.2f HP" % [float(num.get("val", 0.0)), drained]
 	)
-	_reads(m, P, "Void weapon lifesteal")
+	_reads(m, p, "Void weapon lifesteal")
 	for i in 10:
-		_void_hit(P, T, 3.0)
-		await _step(m, P)
-	await _strip(m, P, "void_lifesteal")
-	P.welem = ""
+		_void_hit(p, t, 3.0)
+		await _step(m, p)
+	await _strip(m, p, "void_lifesteal")
+	p.welem = ""
 	# a heal never joins a damage number on the same spot: not a hit, not a Daze "+N"
 	_clear(fx)
-	var at := A.pos + Vector3(0, Fx.HEAL_NUM_Y, 0)
+	var at := a.pos + Vector3(0, Fx.HEAL_NUM_Y, 0)
 	fx.number(at, 20.0, HudStyle.HIT, false)
 	fx.number(at, 9.0, DAZE_PINK, true, "+")
 	fx.number(at, 12.0, HudStyle.HEAL, false, "+", "", Fx.Num.HEAL)
@@ -189,55 +189,55 @@ func _lifesteal_and_rules() -> void:
 	var was = Settings.get_v("damage_numbers")
 	Settings.set_v("damage_numbers", false, false)
 	_clear(fx)
-	fx.number(T.pos + Vector3(0, 1.5, 0), 20.0, HudStyle.HIT, false)
-	fx.healed(A, 10.0)
+	fx.number(t.pos + Vector3(0, 1.5, 0), 20.0, HudStyle.HIT, false)
+	fx.healed(a, 10.0)
 	ok(
-		_num_at(fx, T.pos + Vector3(0, 1.5, 0), Fx.Num.HIT, "").is_empty() and not _heal_num(fx, A).is_empty(),
+		_num_at(fx, t.pos + Vector3(0, 1.5, 0), Fx.Num.HIT, "").is_empty() and not _heal_num(fx, a).is_empty(),
 		"damage numbers off: hits show no number, heals still do"
 	)
 	Settings.set_v("damage_numbers", was, false)
 	# one glow per body while it is up; it moves with them; a new one after it fades
 	_clear(fx)
-	fx.healed(A, 5.0)
-	fx.healed(A, 5.0)
-	ok(_glows(fx, A) == 1 and float(_heal_num(fx, A).get("val", 0)) == 10.0, "two quick heals: one glow, one +10")
-	A.teleport(A.pos + Vector3(3.0, 0, 0))
-	var g: Node3D = _glow(fx, A).get("node")
-	ok(g != null and absf(g.global_position.x - A.global_position.x) < 0.05, "the glow rides on the healed Hunter")
+	fx.healed(a, 5.0)
+	fx.healed(a, 5.0)
+	ok(_glows(fx, a) == 1 and float(_heal_num(fx, a).get("val", 0)) == 10.0, "two quick heals: one glow, one +10")
+	a.teleport(a.pos + Vector3(3.0, 0, 0))
+	var g: Node3D = _glow(fx, a).get("node")
+	ok(g != null and absf(g.global_position.x - a.global_position.x) < 0.05, "the glow rides on the healed Hunter")
 	for i in int(ceil((Fx.GLOW_DUR + 0.05) / DT)):
 		fx._process(DT)
-	fx.healed(A, 5.0)
+	fx.healed(a, 5.0)
 	# (the glow's node comes from Fx's pool, so it may be the same node: a fresh glow starts its clock again)
-	ok(_glows(fx, A) == 1 and float(_glow(fx, A).get("t", 1.0)) < DT, "after it fades, the next heal pulses again")
+	ok(_glows(fx, a) == 1 and float(_glow(fx, a).get("t", 1.0)) < DT, "after it fades, the next heal pulses again")
 	# nothing on a Hunter you can't see; nothing at full health
 	_clear(fx)
-	A.unseen = true
-	fx.healed(A, 20.0)
+	a.unseen = true
+	fx.healed(a, 20.0)
 	ok(fx.nums.is_empty() and fx.ghosts.is_empty(), "a Hunter you can't see shows no heal")
-	A.unseen = false
-	A.hp = A.max_hp
-	A.heal(20.0)
+	a.unseen = false
+	a.hp = a.max_hp
+	a.heal(20.0)
 	ok(fx.nums.is_empty() and fx.ghosts.is_empty(), "a heal at full health shows nothing")
 	# a remote Hunter heals on its own game; this screen shows the heal now
-	A.remote = true
-	A.hp = A.max_hp - 30.0
-	A.heal(20.0)
+	a.remote = true
+	a.hp = a.max_hp - 30.0
+	a.heal(20.0)
 	ok(
-		A.hp == A.max_hp - 30.0 and float(_heal_num(fx, A).get("val", 0)) == 20.0 and _glows(fx, A) == 1,
+		a.hp == a.max_hp - 30.0 and float(_heal_num(fx, a).get("val", 0)) == 20.0 and _glows(fx, a) == 1,
 		"a remote teammate's heal shows on the healer's screen"
 	)
-	A.remote = false
+	a.remote = false
 	parts += 1
 	await _free(m)
 
 
 ## One hit from P's Void weapon on T; returns what it drained back into P.
-func _void_hit(P: Hunter, T: Hunter, dmg: float) -> float:
+func _void_hit(p: Hunter, t: Hunter, dmg: float) -> float:
 	var ex := {}
-	Loot.rider(P, ex, dmg)
-	var hp0 := P.hp
-	T.hurt(dmg, P, ex)
-	return P.hp - hp0
+	Loot.rider(p, ex, dmg)
+	var hp0 := p.hp
+	t.hurt(dmg, p, ex)
+	return p.hp - hp0
 
 
 ## The heal read on `h`: a green "+N" of the heal kind over them and the soft green-gold glow riding on them.

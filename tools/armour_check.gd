@@ -56,68 +56,74 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 17, "no_drop": true, "god": false})
 	m.set_process(false)
-	var P: Hunter = m.player
-	var B: Hunter = m.hunters.filter(func(o): return o.team != P.team)[0]
-	B.ctrl = "idle"
-	var T: Array = Hunter.ARMOR_TIERS
+	var p: Hunter = m.player
+	var b: Hunter = m.hunters.filter(func(o): return o.team != p.team)[0]
+	b.ctrl = "idle"
+	var t_v: Array = Hunter.ARMOR_TIERS
 
 	# (a) the tiers are the source's
-	ok(T.size() == SRC_DR.size(), "(a) five tiers (%d)" % T.size())
+	ok(t_v.size() == SRC_DR.size(), "(a) five tiers (%d)" % t_v.size())
 	var med := float(Data.CLASSES["medium"]["hp"])
 	ok(absf(med / 1040.0 - HP_K) < 0.005, "(a) HP_K fits our Medium health (%.0f / 1,040 = %.3f)" % [med, med / 1040.0])
-	for t in mini(T.size(), SRC_DR.size()):
-		var tn := String(T[t][0])
-		ok(is_equal_approx(float(T[t][3]), SRC_DR[t]), "(a) %s blocks %.2f (source %.2f)" % [tn, T[t][3], SRC_DR[t]])
+	for t in mini(t_v.size(), SRC_DR.size()):
+		var tn := String(t_v[t][0])
 		ok(
-			is_equal_approx(float(T[t][4]), round(SRC_DUR[t] * HP_K)),
-			"(a) %s holds %.0f (source %.0f x %.2f)" % [tn, T[t][4], SRC_DUR[t], HP_K]
+			is_equal_approx(float(t_v[t][3]), SRC_DR[t]),
+			"(a) %s blocks %.2f (source %.2f)" % [tn, t_v[t][3], SRC_DR[t]]
 		)
 		ok(
-			is_equal_approx(float(T[t][2]), round(SRC_XP[t] * HP_K)),
-			"(a) %s is reached at %.0f damage dealt" % [tn, T[t][2]]
+			is_equal_approx(float(t_v[t][4]), round(SRC_DUR[t] * HP_K)),
+			"(a) %s holds %.0f (source %.0f x %.2f)" % [tn, t_v[t][4], SRC_DUR[t], HP_K]
+		)
+		ok(
+			is_equal_approx(float(t_v[t][2]), round(SRC_XP[t] * HP_K)),
+			"(a) %s is reached at %.0f damage dealt" % [tn, t_v[t][2]]
 		)
 
 	# (b) the split at every tier: the tier's share off first, the rest hurts health and durability alike
-	for t in T.size():
-		_bare(B, t)
-		var gear := B.gear_stat("armor")
+	for t in t_v.size():
+		_bare(b, t)
+		var gear := b.gear_stat("armor")
 		ok(
-			is_equal_approx(B.max_armor, float(T[t][4]) + gear),
-			"(b) %s: durability %.0f (+%.0f gear)" % [T[t][0], B.max_armor, gear]
+			is_equal_approx(b.max_armor, float(t_v[t][4]) + gear),
+			"(b) %s: durability %.0f (+%.0f gear)" % [t_v[t][0], b.max_armor, gear]
 		)
-		var through := B._mitigate(100.0, null, {"src": "shot"})
-		var want := _pre(B, 100.0) * (1.0 - float(T[t][3]))
-		ok(absf(through - want) < 0.01, "(b) %s: 100 damage, %.1f gets through (want %.1f)" % [T[t][0], through, want])
-		var worn := B.max_armor - B.armor
+		var through := b._mitigate(100.0, null, {"src": "shot"})
+		var want := _pre(b, 100.0) * (1.0 - float(t_v[t][3]))
 		ok(
-			absf(worn - through * _wear(B)) < 0.01,
-			"(b) %s: durability wears by what got through (%.1f)" % [T[t][0], worn]
+			absf(through - want) < 0.01,
+			"(b) %s: 100 damage, %.1f gets through (want %.1f)" % [t_v[t][0], through, want]
+		)
+		var worn := b.max_armor - b.armor
+		ok(
+			absf(worn - through * _wear(b)) < 0.01,
+			"(b) %s: durability wears by what got through (%.1f)" % [t_v[t][0], worn]
 		)
 
 	# (c) the last of the durability breaks; at 0 nothing is blocked; fall damage skips armour
-	_bare(B, 2)
-	B.armor = 5.0
-	B._mitigate(100.0, null, {"src": "shot"})
-	ok(B.armor == 0.0, "(c) a hit bigger than what is left breaks it (%.1f)" % B.armor)
-	var bare := B._mitigate(100.0, null, {"src": "shot"})
-	ok(absf(bare - _pre(B, 100.0)) < 0.01, "(c) broken armour blocks nothing (%.1f through)" % bare)
-	_bare(B, 0)
-	var fall := B._mitigate(100.0, null, {"src": "fall"})
-	ok(absf(fall - _pre(B, 100.0)) < 0.01 and B.armor == B.max_armor, "(c) fall damage skips armour (%.1f)" % fall)
+	_bare(b, 2)
+	b.armor = 5.0
+	b._mitigate(100.0, null, {"src": "shot"})
+	ok(b.armor == 0.0, "(c) a hit bigger than what is left breaks it (%.1f)" % b.armor)
+	var bare := b._mitigate(100.0, null, {"src": "shot"})
+	ok(absf(bare - _pre(b, 100.0)) < 0.01, "(c) broken armour blocks nothing (%.1f through)" % bare)
+	_bare(b, 0)
+	var fall := b._mitigate(100.0, null, {"src": "fall"})
+	ok(absf(fall - _pre(b, 100.0)) < 0.01 and b.armor == b.max_armor, "(c) fall damage skips armour (%.1f)" % fall)
 
 	# (d) levelling: dealing the source's damage reaches each tier, and a level-up arrives full
-	_reset(P)
-	P.armor_gain(float(T[1][2]) - 1.0)
-	ok(P.armor_tier == 0, "(d) one short of Uncommon stays Common")
-	P.armor_gain(1.0)
-	ok(P.armor_tier == 1, "(d) %.0f damage dealt reaches Uncommon" % T[1][2])
-	P.armor_gain(float(T[3][2]) - P.armor_xp)
+	_reset(p)
+	p.armor_gain(float(t_v[1][2]) - 1.0)
+	ok(p.armor_tier == 0, "(d) one short of Uncommon stays Common")
+	p.armor_gain(1.0)
+	ok(p.armor_tier == 1, "(d) %.0f damage dealt reaches Uncommon" % t_v[1][2])
+	p.armor_gain(float(t_v[3][2]) - p.armor_xp)
 	ok(
-		P.armor_tier == 3 and is_equal_approx(P.armor, P.max_armor),
-		"(d) %s arrives full (%.0f / %.0f)" % [T[3][0], P.armor, P.max_armor]
+		p.armor_tier == 3 and is_equal_approx(p.armor, p.max_armor),
+		"(d) %s arrives full (%.0f / %.0f)" % [t_v[3][0], p.armor, p.max_armor]
 	)
-	_reset(P)
-	var next := String(ArmorHud.tip(P)[2][0])
+	_reset(p)
+	var next := String(ArmorHud.tip(p)[2][0])
 	ok(next.ends_with("blocks 25%"), "(d) the HUD tip names the next tier's block: %s" % next)
 
 	m.queue_free()

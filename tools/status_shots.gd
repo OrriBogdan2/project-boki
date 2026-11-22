@@ -45,25 +45,25 @@ func run(main_node: Node) -> void:
 		k.visible = false
 	if m.hud:
 		m.hud.visible = false
-	var P: Hunter = m.player
-	var base := P.pos
-	var F: Hunter = m.hunters[1]
-	var N: Hunter = m.hunters[2]
+	var p: Hunter = m.player
+	var base := p.pos
+	var f_v: Hunter = m.hunters[1]
+	var n: Hunter = m.hunters[2]
 	for h: Hunter in m.hunters:
 		h.ctrl = "idle"
-		if h != F and h != N:
+		if h != f_v and h != n:
 			h.teleport(base + Vector3(-30, 0, 30))
-	F.teleport(base)
-	N.teleport(base + Vector3(1.8, 0, 0))
+	f_v.teleport(base)
+	n.teleport(base + Vector3(1.8, 0, 0))
 	if with_boki:
-		boki = m.give_kin(P, Save.new_kin(BOKI, "Pip"))
+		boki = m.give_kin(p, Save.new_kin(BOKI, "Pip"))
 		boki.state = "active"
 		boki.set_meta("summoned", true)
-		F.teleport(base + Vector3(-30, 0, -30))
-		N.teleport(base + Vector3(-30, 0, 30))
-		P.teleport(base + Vector3(1.8, 0, 0))  # (the clean Hunter is the player, its owner)
+		f_v.teleport(base + Vector3(-30, 0, -30))
+		n.teleport(base + Vector3(-30, 0, 30))
+		p.teleport(base + Vector3(1.8, 0, 0))  # (the clean Hunter is the player, its owner)
 	var rows: Array = BOKI_ROWS if with_boki else ROWS
-	var carrier: Ent = boki if with_boki else F
+	var carrier: Ent = boki if with_boki else f_v
 	var tag := "boki_" if with_boki else ""
 	Sfx.listener = base
 	var floor_mi := MeshInstance3D.new()
@@ -96,12 +96,12 @@ func run(main_node: Node) -> void:
 
 
 ## One status on F for LEAD_S, then FRAMES crops FRAME_S apart.
-func _row(F: Ent, st: String, base: Vector3) -> Array:
+func _row(f: Ent, st: String, base: Vector3) -> Array:
 	var out: Array = []
 	var t := 0.0
 	var next := LEAD_S
 	while out.size() < FRAMES:
-		_hold(F, st)
+		_hold(f, st)
 		m.step(DT)
 		if boki:
 			boki.teleport(base)
@@ -112,33 +112,33 @@ func _row(F: Ent, st: String, base: Vector3) -> Array:
 		await main.get_tree().process_frame
 		t += DT
 		if t >= next:
-			out.append(_crop(F.pos + Vector3(0.9, 1.0, 0)))
+			out.append(_crop(f.pos + Vector3(0.9, 1.0, 0)))
 			next += FRAME_S
-	_hold(F, "")
+	_hold(f, "")
 	m.step(DT)
 	return out
 
 
 ## Keeps `st` on F the way the game does ("" takes every status off).
-func _hold(F: Ent, st: String) -> void:
-	F.stun_t = 9.0 if st == "stun" else 0.0
-	F.root_t = 9.0 if st == "root" else 0.0
-	F.slow_t = 9.0 if st == "slow" else 0.0
-	F.burn_t = 9.0 if st == "burn" else 0.0
-	F.burn_dps = 0.0
-	F.blight_t = 9.0 if st == "antiheal" else 0.0
-	if F is Hunter:
-		(F as Hunter).sick_t = 9.0 if st == "sick" else 0.0
-	F.hp = F.max_hp
-	if F is Kin:
-		F.set_meta("gnd_until", 0.0)
+func _hold(f: Ent, st: String) -> void:
+	f.stun_t = 9.0 if st == "stun" else 0.0
+	f.root_t = 9.0 if st == "root" else 0.0
+	f.slow_t = 9.0 if st == "slow" else 0.0
+	f.burn_t = 9.0 if st == "burn" else 0.0
+	f.burn_dps = 0.0
+	f.blight_t = 9.0 if st == "antiheal" else 0.0
+	if f is Hunter:
+		(f as Hunter).sick_t = 9.0 if st == "sick" else 0.0
+	f.hp = f.max_hp
+	if f is Kin:
+		f.set_meta("gnd_until", 0.0)
 		if st == "gnd":
-			KitStatus.apply(F, "gnd", 9.0)  # (a summoned Boki shrugs it off: SummonCc)
+			KitStatus.apply(f, "gnd", 9.0)  # (a summoned Boki shrugs it off: SummonCc)
 	else:
-		F.set_meta("gnd_until", m.time + 9.0 if st == "gnd" else 0.0)
-	F.set_meta("rat_until", m.time + 9.0 if st == "daze" else 0.0)
+		f.set_meta("gnd_until", m.time + 9.0 if st == "gnd" else 0.0)
+	f.set_meta("rat_until", m.time + 9.0 if st == "daze" else 0.0)
 	if st in ["chill", "static"]:
-		StatusLooks.of(m).keep(F, st)
+		StatusLooks.of(m).keep(f, st)
 
 
 func _crop(at: Vector3) -> Image:

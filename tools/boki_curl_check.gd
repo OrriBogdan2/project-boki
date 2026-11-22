@@ -77,30 +77,30 @@ func _fresh(main: Node, id: String) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
-	var W: World = m.world
-	var hi: int = W.idx(int(floor(P.pos.x)), int(floor(P.pos.z)))
-	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
-	var z0 := W.h / 2
-	for z in range(maxi(1, z0 - 10), mini(W.h - 1, z0 + 11)):
-		for x in range(1, W.w - 1):
-			var i: int = W.idx(x, z)
-			W.kind[i] = World.T_GROUND
-			W.level[i] = lv
-			W.island[i] = W.island[hi]
-			W.stairs.erase(i)
-			W.walls.erase(i)
-			W.props.erase(i)
-			W.bush.erase(i)
-			W.block_top.erase(i)
+	var p: Hunter = m.player
+	var w_v: World = m.world
+	var hi: int = w_v.idx(int(floor(p.pos.x)), int(floor(p.pos.z)))
+	var lv: int = int(w_v.level[hi]) if w_v.kind[hi] != World.T_VOID else 0
+	var z0 := w_v.h / 2
+	for z in range(maxi(1, z0 - 10), mini(w_v.h - 1, z0 + 11)):
+		for x in range(1, w_v.w - 1):
+			var i: int = w_v.idx(x, z)
+			w_v.kind[i] = World.T_GROUND
+			w_v.level[i] = lv
+			w_v.island[i] = w_v.island[hi]
+			w_v.stairs.erase(i)
+			w_v.walls.erase(i)
+			w_v.props.erase(i)
+			w_v.bush.erase(i)
+			w_v.block_top.erase(i)
 	for other in m.hunters:
-		if other != P:
+		if other != p:
 			other.ctrl = "idle"
-			other.teleport(P.pos + Vector3(0, 0, 60))
-	P.teleport(Vector3(4.5, lv * World.LEVEL, z0 + 0.5))
-	P.vel = Vector3.ZERO
-	P.kin.teleport(P.pos + Vector3(1.0, 0, 0.7))
-	KinCommand.order(P, "return")
+			other.teleport(p.pos + Vector3(0, 0, 60))
+	p.teleport(Vector3(4.5, lv * World.LEVEL, z0 + 0.5))
+	p.vel = Vector3.ZERO
+	p.kin.teleport(p.pos + Vector3(1.0, 0, 0.7))
+	KinCommand.order(p, "return")
 	for i in 110:
 		m.step(Match.DT)
 	if shots != "":
@@ -115,12 +115,12 @@ func _fresh(main: Node, id: String) -> void:
 ## Run 0.5 s, jump, open the glider at the top of the jump, glide down, land and run on 1.2 s; one frame a step.
 func _dump(main: Node, id: String) -> void:
 	_fresh(main, id)
-	var P: Hunter = m.player
-	var k: Kin = P.kin
+	var p: Hunter = m.player
+	var k: Kin = p.kin
 	ok(k.big() and k.beside, "%s: big (mass %.1f), guarding at your side before the jump" % [id, k.ks.mass])
 	var body: Node3D = k.model.get_node("Body")
 	# the Hero clips' sync stepped with the sim, not by the wall clock while a frame is grabbed (as --glide-shots)
-	var sync := P.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	var sync := p.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	if sync:
 		sync.set_process(false)
 	var last := Vector3.INF
@@ -130,22 +130,22 @@ func _dump(main: Node, id: String) -> void:
 	var landed_t := -1.0
 	var f := 0
 	while (landed_t < 0.0 or t - landed_t < 1.2) and f < MAX_FRAMES:
-		P.inp["move"] = Vector2(1, 0)
+		p.inp["move"] = Vector2(1, 0)
 		var gl := t > 0.75 and landed_t < 0.0
-		P.inp["glide"] = gl
-		P.inp["glide_btn"] = gl
+		p.inp["glide"] = gl
+		p.inp["glide_btn"] = gl
 		if f == 30:
-			P.do_jump()
+			p.do_jump()
 		m.step(Match.DT)
-		P.render(Match.DT, 1.0)
+		p.render(Match.DT, 1.0)
 		if sync:
 			sync._process(Match.DT)
 		if snap:
 			k.curl = 1.0 if k.state == "shoulder" and not k.beside else 0.0
 		k.render(Match.DT, 1.0)
-		if t > 0.75 and P.grounded and landed_t < 0.0:
+		if t > 0.75 and p.grounded and landed_t < 0.0:
 			landed_t = t
-		var at := P.model.global_position
+		var at := p.model.global_position
 		var rel := k.global_position - Vector3(at.x, m.world.ground_at(at.x, at.z), at.z)
 		var w := clampf(body.rotation.x / KinCurl.BALL_PITCH, 0.0, 1.0)
 		var dm := 0.0 if last == Vector3.INF else rel.distance_to(last)
@@ -163,11 +163,11 @@ func _dump(main: Node, id: String) -> void:
 		var ph := "jump"
 		if f < 30:
 			ph = "run"
-		elif P.gliding:
+		elif p.gliding:
 			ph = "glide"
 		elif landed_t >= 0.0:
 			ph = "land"
-		var up := P.pos.y - m.world.ground_at(P.pos.x, P.pos.z)
+		var up := p.pos.y - m.world.ground_at(p.pos.x, p.pos.z)
 		print(
 			(
 				"CURL_FRAME %s f%03d %-5s up=%.2f beside=%d rel=(%5.2f %5.2f %5.2f) step=%.3f w=%.2f dw=%.2f scale=%.2f"
@@ -177,7 +177,7 @@ func _dump(main: Node, id: String) -> void:
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
-			await _grab(P, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
+			await _grab(p, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
 		f += 1
 		t = f * Match.DT
 	print(
@@ -200,8 +200,8 @@ func _dump(main: Node, id: String) -> void:
 
 
 ## A frame from a fixed spot beside your run, over the grass, on you (your Boki within 1.7 m).
-func _grab(P: Hunter, path: String) -> void:
-	var at := P.model.global_position + Vector3(0, 0.9, 0)
+func _grab(p: Hunter, path: String) -> void:
+	var at := p.model.global_position + Vector3(0, 0.9, 0)
 	cam.global_position = at + CAM_OFF
 	cam.look_at(at)
 	await RenderingServer.frame_post_draw

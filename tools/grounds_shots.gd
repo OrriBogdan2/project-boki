@@ -36,31 +36,31 @@ func run(main_node: Node) -> void:
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
-	var A: Arena = m.arena
-	var P: Hunter = m.player
+	var a_v: Arena = m.arena
+	var p: Hunter = m.player
 	await _perf("start")
 	await _ground("start")
-	P.teleport(A.home + Vector3(0, 0, -9.0))
+	p.teleport(a_v.home + Vector3(0, 0, -9.0))
 	await _ground("room")
-	var G = A.get("grounds")  # (untyped: the old Arena has none, for the before numbers)
-	if G != null:
+	var g = a_v.get("grounds")  # (untyped: the old Arena has none, for the before numbers)
+	if g != null:
 		await _overview()
 		var seen := {}
-		for s in G.stations:
+		for s in g.stations:
 			if seen.has(s["kind"]):
 				continue
 			seen[s["kind"]] = true
 			var c: Vector3 = s["c"]
-			P.teleport(Vector3(c.x, m.world.ground_at(c.x, c.z + 1.5), c.z + 1.5))  # in the ring, on the perch
-			P.vel = Vector3.ZERO
+			p.teleport(Vector3(c.x, m.world.ground_at(c.x, c.z + 1.5), c.z + 1.5))  # in the ring, on the perch
+			p.vel = Vector3.ZERO
 			await _ground("perch_" + String(s["kind"]))
 			if s["kind"] == "arch":
 				await _perf("perch")
 		await _fields()
-		var T: TimeTrial = G.trial
-		P.teleport(T.start + (T.start - T.gates[0].at).normalized() * 3.0)  # behind the start arch
+		var t: TimeTrial = g.trial
+		p.teleport(t.start + (t.start - t.gates[0].at).normalized() * 3.0)  # behind the start arch
 		await _ground("trial_start")
-		P.teleport(T.pad_land)  # on the glide tower, the course below
+		p.teleport(t.pad_land)  # on the glide tower, the course below
 		await _ground("trial_tower")
 		await _perf("trial")
 	print("GROUNDSSHOTS %d in %s" % [n, dir])

@@ -95,11 +95,11 @@ func _friend(r: Dictionary) -> void:
 func _look(r: Dictionary) -> void:
 	var weak := r.duplicate(true)
 	weak["starve"] = Care.STARVE["weak"] * 3600.0 + 1.0
-	var P: Dictionary = Content.rules("care")["ailing_pace"]
+	var p: Dictionary = Content.rules("care")["ailing_pace"]
 	ok(
 		(
-			Care.pace(r) == float(P["sick"])
-			and Care.pace(weak) == float(P["weak"])
+			Care.pace(r) == float(p["sick"])
+			and Care.pace(weak) == float(p["weak"])
 			and Care.pace(Save.new_kin("cindle", "Fine")) == 1.0
 		),
 		"care.json ailing_pace: sick < weak < well"

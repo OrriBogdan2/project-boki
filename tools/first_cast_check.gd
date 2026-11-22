@@ -80,23 +80,23 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 	m.set_process(false)
 	await m.warm_up()
 	m.set_process(false)
-	var P: Hunter = m.player
-	P.unlock_all()
-	P.lvl = 6
-	P.slot_lv["ult"] = 1
-	if P.ak:
-		P.ak.cd_off = true
+	var p: Hunter = m.player
+	p.unlock_all()
+	p.lvl = 6
+	p.slot_lv["ult"] = 1
+	if p.ak:
+		p.ak.cd_off = true
 	if glove != "":
-		P.gear[0] = {"id": glove, "rar": 1}
-	var at := P.pos + Vector3(TARGET_DIST, 0, 0)
-	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, at, {"arch": "none"})
-	T.max_hp = 1e6
-	T.hp = T.max_hp
+		p.gear[0] = {"id": glove, "rar": 1}
+	var at := p.pos + Vector3(TARGET_DIST, 0, 0)
+	var t: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, at, {"arch": "none"})
+	t.max_hp = 1e6
+	t.hp = t.max_hp
 	for i in 15:  # the yard keeps 4 dummies up, one every 2 s: all of them before measuring
 		if m.mobs.filter(func(x): return not x.dead).size() >= 4:
 			break
-		await _frames(m, P, T, SETTLE * 2, "")
-	var times: Array = await _frames(m, P, T, SETTLE * 2, "")
+		await _frames(m, p, t, SETTLE * 2, "")
+	var times: Array = await _frames(m, p, t, SETTLE * 2, "")
 	times.sort()
 	var med: float = times[times.size() / 2]
 	var first := {}
@@ -109,16 +109,16 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 			hit = false
 			made.clear()
 			var pipes := DashPace.pipelines()
-			var w: float = (await _frames(m, P, T, WINDOW, s)).max()
+			var w: float = (await _frames(m, p, t, WINDOW, s)).max()
 			pipes = DashPace.pipelines() - pipes
 			if pass_i == 0:
 				first[s] = [w, _went(m), "%d pipelines; %s" % [pipes, _summary()]]
 			else:
 				rep[s] = minf(float(rep.get(s, w)), w)
-			await _frames(m, P, T, SETTLE, "")
+			await _frames(m, p, t, SETTLE, "")
 	var span := []
 	if _lays_bridge(glove):
-		span = await _span(m, P, T)
+		span = await _span(m, p, t)
 	tree.node_added.disconnect(_made)
 	for s in SLOTS:
 		_row(ak, s, first[s][1], med, first[s][0], rep[s], first[s][2])
@@ -135,19 +135,19 @@ func _lays_bridge(glove: String) -> bool:
 ## A bridge glove only lays slabs over abyss, and the yard has none in front: a strip of it is cut between
 ## the Hunter and the target, then the glove is cast PASSES times, each after the last span melted.
 ## Returns [went, first, repeat, what] for a "span" row.
-func _span(m: Match, P: Hunter, T: Hunter) -> Array:
+func _span(m: Match, p: Hunter, t_v: Hunter) -> Array:
 	var w: World = m.world
 	for dx in range(2, 5):
 		for dz in range(-2, 3):
-			var tx := int(floor(P.pos.x)) + dx
-			var tz := int(floor(P.pos.z)) + dz
+			var tx := int(floor(p.pos.x)) + dx
+			var tz := int(floor(p.pos.z)) + dz
 			if w.inb(tx, tz):
 				w.kind[w.idx(tx, tz)] = World.T_VOID
 	var out := ["-", 0.0, INF, ""]
 	for pass_i in PASSES:
 		made.clear()
 		var pipes := DashPace.pipelines()
-		var t: float = (await _frames(m, P, T, WINDOW, "q")).max()
+		var t: float = (await _frames(m, p, t_v, WINDOW, "q")).max()
 		if pass_i == 0:
 			var what := "%d pipelines; %s" % [DashPace.pipelines() - pipes, _summary()]
 			out = ["laid" if not m.verbs.terrain.is_empty() else "-", t, INF, what]
@@ -156,7 +156,7 @@ func _span(m: Match, P: Hunter, T: Hunter) -> Array:
 		for i in 30:  # until the span melts (the frost glove's lasts 7 s)
 			if m.verbs.terrain.is_empty():
 				break
-			await _frames(m, P, T, SETTLE, "")
+			await _frames(m, p, t_v, SETTLE, "")
 	return out
 
 
@@ -204,45 +204,45 @@ func _went(m: Match) -> String:
 
 ## Steps `n` frames (a step and a drawn frame each), pressing `slot` on the first, and returns each
 ## frame's wall time in ms. The yard's dummies can't die, so only the kit makes things.
-func _frames(m: Match, P: Hunter, T: Hunter, n: int, slot: String) -> Array:
+func _frames(m: Match, p: Hunter, t: Hunter, n: int, slot: String) -> Array:
 	var out: Array = []
 	for i in n:
 		for mb in m.mobs:
 			mb.hp = mb.max_hp  # (the yard's dummies don't hit back; a dead one respawns)
-		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
-		P.inp["aim_y"] = T.pos.y
-		P.dashes = P.max_dashes()
-		P.gear_cd[0] = 0.0
-		_press(P, slot, i)
+		p.inp["aim"] = t.pos + Vector3(0, 0.9, 0)
+		p.inp["aim_y"] = t.pos.y
+		p.dashes = p.max_dashes()
+		p.gear_cd[0] = 0.0
+		_press(p, slot, i)
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
 		await m.get_tree().process_frame
 		out.append((Time.get_ticks_usec() - t0) / 1000.0)
-		if T.hp < T.max_hp:
+		if t.hp < t.max_hp:
 			hit = true
-		T.hp = T.max_hp
+		t.hp = t.max_hp
 	return out
 
 
 ## The keys of a slot as Match._gather_input sets them (R as HunterKeys takes it): LMB held 6 frames
 ## (charged shots fire on release), RMB held 2, the rest pressed once.
-func _press(P: Hunter, slot: String, i: int) -> void:
-	P.inp["fire"] = slot == "lmb" and i < 6
-	P.inp["sec_hold"] = slot == "rmb" and i < 2
-	P.inp["dash_down"] = slot == "dash" and i < 2
+func _press(p: Hunter, slot: String, i: int) -> void:
+	p.inp["fire"] = slot == "lmb" and i < 6
+	p.inp["sec_hold"] = slot == "rmb" and i < 2
+	p.inp["dash_down"] = slot == "dash" and i < 2
 	if i > 0:
 		return
-	if P.ak:
-		for key in P.ak.cd:
-			P.ak.cd[key] = 0.0
+	if p.ak:
+		for key in p.ak.cd:
+			p.ak.cd[key] = 0.0
 	match slot:
 		"rmb":
-			P.inp["sec"] = true
+			p.inp["sec"] = true
 		"e":
-			P.inp["sig"] = true
+			p.inp["sig"] = true
 		"r":
-			HunterKeys.ult_pressed(P)  # (R goes straight to the kit, not through inp)
+			HunterKeys.ult_pressed(p)  # (R goes straight to the kit, not through inp)
 		"dash":
-			P.inp["dash"] = true
+			p.inp["dash"] = true
 		"q":
-			P.inp["gear1"] = true
+			p.inp["gear1"] = true

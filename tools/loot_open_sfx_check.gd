@@ -8,11 +8,12 @@ extends RefCounted
 ##      common-only box has none, and a box stings once
 ##   4. voice limit: no more than MAX_LOOPS opening loops at once, none from out of hearing
 
+const DT := 1.0 / 60.0
+const STING_NAMES := ["loot_rare", "loot_epic", "loot_legend"]
+
 var main: Node
 var fails := 0
 var n := 0
-const DT := 1.0 / 60.0
-const STING_NAMES := ["loot_rare", "loot_epic", "loot_legend"]
 
 
 func ok(cond: bool, what: String) -> void:
@@ -59,40 +60,40 @@ func _step(m: Match, secs: float) -> void:
 
 
 func _chests(m: Match) -> void:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var list: Array = m.chests.filter(func(x): return not x.get("ride", false) and not x["open"])
-	P.chest_keys = 0
+	p.chest_keys = 0
 	for x in list:
 		x["free"] = true  # a free chest is held open; a locked one needs a key (no hold)
 	var c: Dictionary = list[0]
-	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
-	P.vel = Vector3.ZERO
-	Sfx.listener = P.pos
-	P.inp["interact"] = true
+	p.teleport(c["pos"] + Vector3(0.8, 0, 0))
+	p.vel = Vector3.ZERO
+	Sfx.listener = p.pos
+	p.inp["interact"] = true
 	_step(m, 0.3)
 	var key := String(c.get("lo_key", ""))
 	ok(key != "" and Sfx.loop_on(key), "holding at a chest starts its loop")
 	ok(float(c["prog"]) > 0.0 and not c["open"], "...while the channel is still running (prog %.2f)" % float(c["prog"]))
 	_step(m, 0.2)
 	ok(Sfx.loop_on(key), "...and it lasts as long as the hold")
-	P.inp["interact"] = false
+	p.inp["interact"] = false
 	m.step(DT)
 	ok(not Sfx.loop_on(key), "letting go stops the loop within one step")
 	ok(stings().is_empty() and not c["open"], "a cancelled open makes no sting")
 	var seen := {}
 	var all_good := true
 	for ch in list.slice(0, 12):
-		P.teleport(ch["pos"] + Vector3(0.8, 0, 0))
-		P.vel = Vector3.ZERO
+		p.teleport(ch["pos"] + Vector3(0.8, 0, 0))
+		p.vel = Vector3.ZERO
 		clear_stings()
 		var before := m.wpicks.map(func(w): return w["id"])
-		P.inp["interact"] = true
+		p.inp["interact"] = true
 		for i in 120:
 			m.step(DT)
-			Sfx.listener = P.pos
+			Sfx.listener = p.pos
 			if ch["open"]:
 				break
-		P.inp["interact"] = false
+		p.inp["interact"] = false
 		if not ch["open"]:
 			continue
 		var rar := LootOpenSfx.picks_rar(m.wpicks.filter(func(w): return not before.has(w["id"])), 0)
@@ -175,7 +176,7 @@ func _boxes(m: Match) -> void:
 	m.boxes.erase(e)
 
 
-func _limits(m: Match) -> void:
+func _limits(_m: Match) -> void:
 	var sfx := LootOpenSfx.new()
 	var far := {"pos": Sfx.listener + Vector3(Sfx.hear_range + 20.0, 0, 0)}
 	sfx.hold("chest", far)

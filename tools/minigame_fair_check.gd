@@ -46,9 +46,9 @@ func _kin(game: String, points: int, species := "zapple") -> Dictionary:
 
 
 ## One played game; returns the winning side (0 or 1).
-func _play(game: String, a: Dictionary, b: Dictionary, seed_: int) -> int:
+func _play(game: String, a: Dictionary, b: Dictionary, seed_v: int) -> int:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = seed_v
 	match game:
 		"race":
 			var r := BaseRace.Run.new([a, b], 0, rng)

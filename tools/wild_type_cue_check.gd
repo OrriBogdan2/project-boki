@@ -54,11 +54,11 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"})
 	m.set_process(false)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var seen := {}
 	var wrong := []
 	for sid in Data.KIN:
-		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), P.pos + Vector3(30, 0, 0))
+		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), p.pos + Vector3(30, 0, 0))
 		_frames(k, 20)
 		var want: Color = WildTypeCue.COLORS[WildTypeCue.type_of(k.sp)]
 		var mat := k.ring.material_override as ShaderMaterial
@@ -73,24 +73,24 @@ func run(main: Node) -> void:
 	var msg := "all %d species spawn wild with the cue in their type colour %s"
 	ok(wrong.is_empty(), msg % [Data.KIN.size(), wrong])
 	ok(seen.size() >= 12, "the species cover %d types" % seen.size())
-	var own: Kin = P.kin
+	var own: Kin = p.kin
 	var own_mat := own.ring.material_override as ShaderMaterial
 	var hollow := WildTypeCue.strength(own.ring) == 0.0 and own_mat.get_shader_parameter("fill") == null
 	ok(hollow, "a Boki with a Hunter keeps the hollow side ring")
-	var w := m.spawn_wild(Save.new_kin("cindle", "Wild"), P.pos + Vector3(30, 0, 0))
+	var w := m.spawn_wild(Save.new_kin("cindle", "Wild"), p.pos + Vector3(30, 0, 0))
 	_frames(w, 20)
 	w._daze()
 	_frames(w, 20)
 	ok(w.state == "dazed" and w.ring.visible, "a dazed Boki keeps the cue (it can be scanned)")
-	w.scan_by = P
-	P.set_meta("cap", {"phase": "scan", "k": w, "t": float(Capture.rules()["scan_s"]) * 0.5})
+	w.scan_by = p
+	p.set_meta("cap", {"phase": "scan", "k": w, "t": float(Capture.rules()["scan_s"]) * 0.5})
 	_frames(w, 40)
 	var half := WildTypeCue.strength(w.ring)
 	ok(absf(half - 0.5) < 0.02, "half way through the scan the cue is half strength (%.2f)" % half)
-	P.set_meta("cap", {"phase": "scan", "k": w, "t": float(Capture.rules()["scan_s"])})
+	p.set_meta("cap", {"phase": "scan", "k": w, "t": float(Capture.rules()["scan_s"])})
 	_frames(w, 40)
 	ok(WildTypeCue.strength(w.ring) == 0.0 and not w.ring.visible, "scan done: the cue is gone")
-	P.remove_meta("cap")
+	p.remove_meta("cap")
 	w.scan_by = null
 	_frames(w, 40)
 	ok(WildTypeCue.strength(w.ring) == 1.0, "the scan let go: it comes back")
