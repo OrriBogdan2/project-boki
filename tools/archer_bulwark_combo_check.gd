@@ -973,9 +973,9 @@ func _archer_combos() -> void:
 func _impact_looks(stun_s: float) -> void:
 	var mv: Dictionary = HeroVfx.data("archer")["moves"]
 	var hit := _flare_reach(mv["heavy_hit"], 1.0)
-	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var tap_v := _flare_reach(mv["heavy_hit"], 0.0)
 	var pin := _flare_reach(mv["heavy_pin"], 1.0)
-	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.2 * tap)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap_v], hit > 1.2 * tap_v)
 	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > 1.3 * hit)
 	for move: String in ["heavy_hit", "heavy_pin"]:
 		var core := false
@@ -1512,10 +1512,10 @@ func _bulwark_combos() -> void:
 	_clear_wall(m, home, lv, 3)
 	c0 = K.crushes
 	var ox := T.pos.x
-	var hold := func():
+	var hold_v := func():
 		P.inp["fire"] = true
 		aim_at(P, T.pos)
-	step(m, 1.55, hold)
+	step(m, 1.55, hold_v)
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(

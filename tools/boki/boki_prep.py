@@ -3,6 +3,7 @@
 
   blender -b --factory-startup --python tools/boki/boki_prep.py -- <id> <model.glb>
 """
+
 import json
 import os
 import shutil
@@ -43,9 +44,19 @@ def main(species, glb):
     if not os.path.exists(os.path.join(run, "glb.glb")):
         shutil.copyfile(glb, os.path.join(run, "glb.glb"))
     h = g[:, 1].max()
-    print("EXT", json.dumps({"tris": len(obj.data.polygons), "h": round(h, 4), "w": round(float(np.ptp(g[:, 0]) / 2), 4),
-                             "zf": round(float(g[:, 2].min() / h), 4), "zb": round(float(g[:, 2].max() / h), 4),
-                             "zc": round(float(g[:, 2].mean() / h), 4)}))
+    print(
+        "EXT",
+        json.dumps(
+            {
+                "tris": len(obj.data.polygons),
+                "h": round(h, 4),
+                "w": round(float(np.ptp(g[:, 0]) / 2), 4),
+                "zf": round(float(g[:, 2].min() / h), 4),
+                "zb": round(float(g[:, 2].max() / h), 4),
+                "zc": round(float(g[:, 2].mean() / h), 4),
+            }
+        ),
+    )
 
 
 main(sys.argv[sys.argv.index("--") + 1], sys.argv[sys.argv.index("--") + 2])

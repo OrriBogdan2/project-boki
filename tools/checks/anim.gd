@@ -9,10 +9,19 @@ const CHECKS := {
 	"--strike-reach-check": ["res://tools/strike_reach_check.gd", "strike_reach_check", null],
 	# Kael tap strike, live aim, tether, ult momentum
 	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],
-	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],      # Kael tap/hold/ult clips (GPU)
-	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],      # the layers over walk and run
-	"--pond-shots": ["res://tools/pond_shots.gd", "pond_shots", null],      # every Hunter on the pond walk (wade, swim)
+	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],  # Kael tap/hold/ult clips (GPU)
+	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],  # the layers over walk and run
+	"--pond-shots": ["res://tools/pond_shots.gd", "pond_shots", null],  # every Hunter on the pond walk (wade, swim)
 	# every Hunter's win, lose and board beat
 	"--result-pose-shots": ["res://tools/result_pose_shots.gd", "result_pose_shots", null],
-	"--action-shots": ["res://tools/action_shots.gd", "action_shots", null],      # stomp, revive, drink strips
+	"--action-shots": ["res://tools/action_shots.gd", "action_shots", null],  # stomp, revive, drink strips
+	# no clip stretches a skinned edge past 1.3x
+	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,gunslinger"],
+	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "rimewright,dredge"],
+	"--stretch-3-check": ["res://tools/stretch_check.gd", "stretch_check", "thief,ashwick"],
+	"--stretch-4-check": ["res://tools/stretch_check.gd", "stretch_check", "juggernaut,tender"],
+	"--stretch-5-check": ["res://tools/stretch_check.gd", "stretch_check", "archer,mage"],
+	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
+	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
+	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 }

@@ -48,6 +48,10 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 ### ext/sfx-tarek (dolm)
 - Synthesised, no samples.
 
+### ext/sfx-tenzo-grimble-bar (Tenzo and Grimble ability bar)
+- Synthesised, no samples, CC0 (`tools/gen_sfx_ability_bar.py`: dolm_hit_rock, dolm_hit_rmb, dolm_hit_dash,
+  dolm_hit_r, br_boulder_fly, dredge_hit_rmb, dredge_hit_e, dredge_hit_r, dr_reach_fly, dr_let_go, dr_blast_end).
+
 ### ext/sfx-boki
 - Synthesised, no samples.
 

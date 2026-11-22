@@ -22,49 +22,49 @@ func ok(label: String, cond: bool, info := "") -> void:
 func run() -> void:
 	var r: Array = ak.setup("ashwick", 16.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var K: AshwickKit = P.ak
+	var k: AshwickKit = p.ak
 	var km: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP))["kmoves"]
 	var lens := _clip_lens(["cloak", "walk_f", "run_f"])
 	# the ram into a foe: contact early, and the clip jumps to the struck pose then (not the free ram's 0.36)
-	T.teleport(home + Vector3(3.0, 0, 0))
-	ak.aim_at(P, T.pos)
-	K.on_dash(false)
+	t.teleport(home + Vector3(3.0, 0, 0))
+	ak.aim_at(p, t.pos)
+	k.on_dash(false)
 	var hit_at := -1.0
 	var kt := -1.0
 	var tt := 0.0
 	while tt < 0.4 and hit_at < 0.0:
 		ak.step(m, ak.DT)
 		tt += ak.DT
-		if K.bash_hits > 0:
+		if k.bash_hits > 0:
 			hit_at = tt
-			kt = m.time - K.anim_at
+			kt = m.time - k.anim_at
 	ok(
 		"timing: a ram into a foe shows the struck pose on contact ([F] contact ~0.12 s)",
-		hit_at > 0.0 and hit_at < K.RAM_IMPACT_KEY - 0.05 and K.anim_id == "as_leap" and kt >= K.RAM_IMPACT_KEY - 0.001,
+		hit_at > 0.0 and hit_at < k.RAM_IMPACT_KEY - 0.05 and k.anim_id == "as_leap" and kt >= k.RAM_IMPACT_KEY - 0.001,
 		"contact %.2f s, clip at %.2f s" % [hit_at, kt]
 	)
 	# Flue Flight: flying 0.1 s after the press; the landing hands the legs back to her walk
 	ak.step(m, 1.0)
-	T.teleport(home + Vector3(0, 0, 9.0))
-	P.lvl = 6
-	K.cd["x"] = 0.0
-	ak.aim_at(P, P.pos + Vector3(10, 0, 0))
-	HunterKeys.ult_pressed(P)
-	var fly_at := float((KMovesPair.MOVES["lw_jet"]["keys"] as Array)[2][0]) - (m.time - K.anim_at)
+	t.teleport(home + Vector3(0, 0, 9.0))
+	p.lvl = 6
+	k.cd["x"] = 0.0
+	ak.aim_at(p, p.pos + Vector3(10, 0, 0))
+	HunterKeys.ult_pressed(p)
+	var fly_at := float((KMovesPair.MOVES["lw_jet"]["keys"] as Array)[2][0]) - (m.time - k.anim_at)
 	ok(
 		"timing: Flue Flight is flying 0.1 s after the press ([F] f25 burst, flying from f26)",
-		K.jet.running() and K.anim_id == "lw_jet" and absf(fly_at - 0.1) < 0.02,
+		k.jet.running() and k.anim_id == "lw_jet" and absf(fly_at - 0.1) < 0.02,
 		"fly pose at %.2f s" % fly_at
 	)
 	ak.step(m, 0.3)
-	HunterKeys.ult_pressed(P)
+	HunterKeys.ult_pressed(p)
 	ok(
 		"timing: the landing has no stop, her legs walk on out of it ([F] f39-f41)",
-		K.anim_id == "lw_land" and km["lw_land"].get("upper") == "moving",
-		"%s %s" % [K.anim_id, km["lw_land"]]
+		k.anim_id == "lw_land" and km["lw_land"].get("upper") == "moving",
+		"%s %s" % [k.anim_id, km["lw_land"]]
 	)
 	# Furnace Cloak: the arms stay flung wide about 0.2 s, settled by 0.4 s, legs free while she walks
 	var ck: Array = KMovesPair.MOVES["as_cloak"]["keys"]
@@ -78,14 +78,14 @@ func run() -> void:
 			and end >= 0.15
 			and end <= 0.25
 			and absf(float(lens["cloak"]) - end) < 0.04
-			and K.CLOAK_POSE_T < end + 0.1
+			and k.CLOAK_POSE_T < end + 0.1
 			and km["as_cloak"].get("upper") == "moving"
 		),
 		"wide %.2f s, end %.2f s, clip %.2f s" % [wide, end, float(lens["cloak"])]
 	)
 	# the run: a footfall every 0.12-0.2 s at her run speed (main's cinder.glb: walk_f 0.667 s is two run_f loops,
 	# so the walk no longer shares the run's cycle; each ring's own loops are one length, --clip-check)
-	var rate := clampf(P.base_speed / 4.6, 0.6, 1.5)
+	var rate := clampf(p.base_speed / 4.6, 0.6, 1.5)
 	var step := float(lens["run_f"]) / 2.0 / rate
 	ok(
 		"timing: a running step every 0.12-0.2 s ([F] quick short strides; main's 0.333 s run_f at her run speed)",
