@@ -151,8 +151,8 @@ func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (t
 ## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
 func combo_marks(out: Array) -> void:
 	for f in m.foes_of(h.team):
-		for id in f.marks:
-			var mk: Dictionary = f.marks[id]
+		for ent_id in f.marks:
+			var mk: Dictionary = f.marks[ent_id]
 			var left := float(mk["until"]) - float(m.time)
 			if mk["owner"] == h and left > 0.0:
 				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), true))
@@ -216,8 +216,6 @@ func sound_tick(_dt: float) -> void:
 	pass
 
 func tick(dt: float) -> void:
-	if KinMerge.transforming(h):
-		drop_holds()
 	if not h.wpn.get("ammo", true):
 		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
@@ -722,8 +720,8 @@ static func _clamp_parts(sd: Dictionary) -> void:
 			_clamp_parts(sub)
 
 ## A cast context with this hunter as caster and owner, the kin as the kin.
-func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
-	var c := KinExec.make_cx(m, h, h.kin, h, aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+func cx(slot: String, ability: String, loc_aim: Vector3, extra := {}) -> Dictionary:
+	var c := KinExec.make_cx(m, h, h.kin, h, loc_aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
 	c["hero_col"] = Arch.color(id)
 	for k in extra:
 		c[k] = extra[k]
@@ -861,35 +859,35 @@ const NET_RETIMES := 5
 const NET_RESYNC := 0.3        # s: a resend whose age is off by more than this restarts the copy (latency, the snap)
 const NET_CLEAR := "-"
 
-static func net_move(h: Hunter) -> Array:
-	var k: ArchKit = h.ak
+static func net_move(hnt: Hunter) -> Array:
+	var k: ArchKit = hnt.ak
 	if k == null:
 		return ["", 0.0]
 	if k.anim_id == "":
 		return [NET_CLEAR, 0.0]
-	if h.m.time - k.anim_at > NET_MOVE_LIFE:
+	if hnt.m.time - k.anim_at > NET_MOVE_LIFE:
 		return ["", 0.0]
-	return [k.anim_id, snappedf(h.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
+	return [k.anim_id, snappedf(hnt.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
 
 ## A remote hunter's move starts when the id changes, the sender played or re-timed it again, or its clock says
 ## it restarted, then plays on locally like any kit move; NET_CLEAR ends it. Old hosts send nothing and the
 ## hunter just keeps its weapon poses.
-static func apply_net_move(h: Hunter, it: Array) -> void:
-	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+static func apply_net_move(hnt: Hunter, it: Array) -> void:
+	if hnt.ak == null or it.size() <= NET_MOVE_AT + 1:
 		return
-	var id := String(it[NET_MOVE_AT])
-	if id == "":
+	var ent_id := String(it[NET_MOVE_AT])
+	if ent_id == "":
 		return
-	if id == NET_CLEAR:
-		h.ak.anim_id = ""
+	if ent_id == NET_CLEAR:
+		hnt.ak.anim_id = ""
 		return
 	var wire := float(it[NET_MOVE_AT + 1])
 	var rt := roundi(fposmod(wire, NET_AGE_SNAP) / NET_RETIME_STEP) % NET_RETIMES
 	var age := wire - NET_RETIME_STEP * rt
-	var k: ArchKit = h.ak
-	if k.anim_id != id or k.anim_rt != rt or absf((h.m.time - k.anim_at) - age) > NET_RESYNC:
-		k.anim_id = id
-		k.anim_at = h.m.time - age
+	var k: ArchKit = hnt.ak
+	if k.anim_id != ent_id or k.anim_rt != rt or absf((hnt.m.time - k.anim_at) - age) > NET_RESYNC:
+		k.anim_id = ent_id
+		k.anim_at = hnt.m.time - age
 		k.anim_rt = rt
 
 ## Moves the playing move's clock to `at` (a hit that jumps the move to its impact key); other games follow it
@@ -1032,8 +1030,8 @@ func hand_pos(right: bool) -> Vector3:
 		hand = h.anim.hand_r if right else h.anim.hand_l
 	if hand != null and is_instance_valid(hand) and hand.is_inside_tree():
 		return hand.global_position
-	var d := h.aim_dir()
-	return h.pos + Vector3(d.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.4)
+	var dat := h.aim_dir()
+	return h.pos + Vector3(dat.x * 0.4, 1.3 * float(h.cdat.get("scale", 1.0)), dat.y * 0.4)
 
 ## A node that follows the hunter in world space (top_level child, so it dies with the hunter).
 func own_node() -> Node3D:
@@ -1066,8 +1064,8 @@ func net_bolt(a: Vector3, b: Vector3, col: Color) -> void:
 ## The velocity the hunter snapshot reports: the body's own, or what a kit move that places the body itself
 ## (holding vel at zero so the physics leaves it alone) reports instead, so NetSmooth on the other game
 ## draws the move instead of a jump.
-static func net_vel(h: Hunter) -> Vector3:
-	return h.ak.move_vel() if h.ak else h.vel
+static func net_vel(hnt: Hunter) -> Vector3:
+	return hnt.ak.move_vel() if hnt.ak else hnt.vel
 
 func move_vel() -> Vector3:
 	return h.vel
@@ -1126,13 +1124,13 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 		var node := own_node()
 		var ds: Array = []
 		for i in n:
-			var d := MeshInstance3D.new()
-			d.mesh = Models.box(0.17, 0.17, 0.17)
-			d.material_override = solid_mat(res_col())
-			d.rotation = Vector3(0.0, 0.0, PI * 0.25)
-			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			node.add_child(d)
-			ds.append(d)
+			var dat := MeshInstance3D.new()
+			dat.mesh = Models.box(0.17, 0.17, 0.17)
+			dat.material_override = solid_mat(res_col())
+			dat.rotation = Vector3(0.0, 0.0, PI * 0.25)
+			dat.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.add_child(dat)
+			ds.append(dat)
 		spips = {"node": node, "d": ds, "lit": 0, "pop": 0.0}
 	var node: Node3D = spips["node"]
 	if not is_instance_valid(node):
@@ -1153,15 +1151,15 @@ func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.
 	var ds: Array = spips["d"]
 	var rad := (0.22 + 0.06 * ds.size()) * grow
 	for i in ds.size():
-		var d: MeshInstance3D = ds[i]
+		var dat: MeshInstance3D = ds[i]
 		var ang := a + TAU * i / float(ds.size())
-		d.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
+		dat.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
 		var on := i < lit
 		var s := grow * ((1.0 + float(spips["pop"]) * 0.6) if on else 0.6)
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
-		d.scale = Vector3.ONE * s
+		dat.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
-		(d.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
+		(dat.material_override as StandardMaterial3D).albedo_color = Color(c, 1.0) if on else Color(0.08, 0.08, 0.1, 0.55)
 
 ## A flat, unlit, solid colour (pips and plates that must read as their colour, not glow white).
 static func solid_mat(c: Color) -> StandardMaterial3D:
@@ -1263,9 +1261,9 @@ func _tick_charge(dt: float) -> void:
 		m.fx.telegraph_progress(ring2, k)
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
-		var d := h.aim_dir()
+		var dat := h.aim_dir()
 		g2.visible = tells_visible() and shows_charge_ball()
-		g2.global_position = h.position + Vector3(d.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
+		g2.global_position = h.position + Vector3(dat.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), dat.y * 0.6)
 		var full_pulse := (0.3 * sin(m.time * 30.0)) if bool(chg["full"]) else 0.0
 		g2.scale = Vector3.ONE * (0.25 + 1.35 * k + full_pulse)
 	# the wind-up voice: ticks that climb in pitch and volume and come faster as it fills
@@ -1286,8 +1284,8 @@ func _charge_full_tick(col: Color) -> void:
 	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
 	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
 	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
-	var d := h.aim_dir()
-	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
+	var dat := h.aim_dir()
+	m.fx.flash(h.pos + Vector3(dat.x * 0.6, 1.05, dat.y * 0.6), col.lightened(0.4), 0.9, 0.08)
 	m.fx.body_glow(h.pos, col)
 
 ## Let go: the ring and glow go, and the release punches in proportion to the charge.

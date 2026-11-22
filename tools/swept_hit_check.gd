@@ -8,12 +8,6 @@ const RANGES := [4.0, 8.0, 12.0]  # m to the dummy unless a case lists its own (
 const RATES := [30.0, 144.0]
 const SECS := 2.2  # how long each cast is stepped
 const WARM := 0.5  # s of idle stepping before a cast (animations settle at the new rate)
-
-var main: Node
-var n := 0
-var fails := 0
-var ak: RefCounted
-
 ## What each case does. fire: hold LMB; rmb: hold RMB for a while (0 = tap); e: press E;
 ## dash: Shift toward the dummy; no_cover: it goes through a block by design (the hook pierces terrain,
 ## Kael mantles one), so no cover run.
@@ -37,6 +31,11 @@ const CASES := [
 	{"arch": "tender", "name": "Meeko seed", "rmb": 0.0},
 	{"arch": "ashwick", "name": "Cinder bolt", "rmb": 0.0},
 ]
+
+var main: Node
+var n := 0
+var fails := 0
+var ak: RefCounted
 
 
 func ok(label: String, cond: bool, info := "") -> void:
@@ -105,47 +104,47 @@ func _block_between(m: Match, home: Vector3, dist: float) -> void:
 
 
 ## Resets the pair, casts once and steps `secs` at `dt`. True when the dummy took damage.
-func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary) -> bool:
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	T.teleport(home + Vector3(dist, 0, 0))
-	T.vel = Vector3.ZERO
-	ak.fresh(T)
-	T.hp = T.max_hp
-	var K: ArchKit = P.ak
-	for k in K.cd:
-		K.cd[k] = 0.0
-	K.ch_rmb = 1.0
-	P.dashes = P.max_dashes()
-	P.ammo = 99
+func _cast(m: Match, pc: Hunter, tgt: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary) -> bool:
+	pc.teleport(home)
+	pc.vel = Vector3.ZERO
+	tgt.teleport(home + Vector3(dist, 0, 0))
+	tgt.vel = Vector3.ZERO
+	ak.fresh(tgt)
+	tgt.hp = tgt.max_hp
+	var kit: ArchKit = pc.ak
+	for k in kit.cd:
+		kit.cd[k] = 0.0
+	kit.ch_rmb = 1.0
+	pc.dashes = pc.max_dashes()
+	pc.ammo = 99
 	m.shots.clear()
 	_idle(m, WARM, dt)
-	ak.aim_at(P, T.pos)
+	ak.aim_at(pc, tgt.pos)
 	var hold_f := float(c.get("fire", 0.0))
 	var hold_r := float(c.get("rmb", -1.0))
 	if c.get("e", false):
-		K.use_e()
+		kit.use_e()
 	elif c.get("dash", false):
-		P.inp["dash_down"] = true
-		P.do_dash()
+		pc.inp["dash_down"] = true
+		pc.do_dash()
 	elif hold_r >= 0.0:
-		P.inp["sec_hold"] = hold_r > 0.0
-		K.press_rmb()
+		pc.inp["sec_hold"] = hold_r > 0.0
+		kit.press_rmb()
 	var t := 0.0
 	while t < SECS:
-		ak.aim_at(P, T.pos)
-		P.inp["fire"] = t < hold_f
-		P.inp["sec_hold"] = hold_r > 0.0 and t < hold_r
-		P.inp["dash_down"] = c.get("dash", false)
+		ak.aim_at(pc, tgt.pos)
+		pc.inp["fire"] = t < hold_f
+		pc.inp["sec_hold"] = hold_r > 0.0 and t < hold_r
+		pc.inp["dash_down"] = c.get("dash", false)
 		for mb in m.mobs:
 			mb.queue_free()
 		m.mobs.clear()
 		m.step(dt)
-		T.vel = Vector3.ZERO
+		tgt.vel = Vector3.ZERO
 		t += dt
 	for k in ["fire", "sec_hold", "dash_down"]:
-		P.inp[k] = false
-	return T.hp < T.max_hp
+		pc.inp[k] = false
+	return tgt.hp < tgt.max_hp
 
 
 func _idle(m: Match, secs: float, dt: float) -> void:
