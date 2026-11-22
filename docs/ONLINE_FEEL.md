@@ -1,7 +1,7 @@
 # Online feel at 100 ms
 
 How an online game feels when one player's line has 100 ms added each way (200 ms round trip, what
-`tc netem delay 100ms` on loopback gives). Measured by `--online-feel-check` (`tools/online_feel_check.gd`).
+`tc netem delay 100ms` on loopback gives). Measured by `--online-feel-<n>-check` (one flag per Hunter) (`tools/online_feel_check.gd`).
 Local input latency is a separate job; this is only what the net adds.
 
 ## How it was measured
@@ -70,7 +70,7 @@ expected at 100 ms; the avoidable part was the wait for the next snapshot.
    server. Not measured here: the press-to-damage path (a first attempt at it was unreliable and was dropped).
 
 ## Re-running
-`godot --headless -- --online-feel-check` (about 6 minutes; needs `python3` for the proxy). It fails if the game adds
+`godot --headless -- --online-feel-1-check` (and 2, 3; about 2 minutes each; needs `python3` for the proxy). It fails if the game adds
 more than 60 ms to the line's delay for any press (`NET_SLACK_MS`). Before the fix 6 of the 11 measured rows failed that budget.
 The run takes ~330 s at 58 fps even pinned to one core. It picks a free relay port (`CheckChild.free_port`, proxy 100 above),
 stops pressing after 840 s (red, with an `OFEEL timing` line) and ends its helpers: the proxy gets `--parent-pid` and
