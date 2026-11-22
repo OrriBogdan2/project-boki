@@ -1264,8 +1264,10 @@ func _hold_files(sname: String, hold: String) -> void:
 		longest = maxf(longest, Sfx.take_len(hold, t))
 		peak = maxf(peak, _peak_db(_samples(hold, t)))
 		rms += _rms_db(_samples(hold, t)) / Sfx.take_count(hold)
-	ok(longest < shot_len * 0.7 and longest <= 0.2,
-		"%s: longest hold take %.2f s, the shot's longest take %.2f s" % [hold, longest, shot_len])
+	ok(
+		longest < shot_len * 0.7 and longest <= 0.2,
+		"%s: longest hold take %.2f s, the shot's longest take %.2f s" % [hold, longest, shot_len]
+	)
 	ok(peak < HOLD_PEAK_DB, "%s: peak %.1f dBFS (under %.1f)" % [hold, peak, HOLD_PEAK_DB])
 	ok(absf(rms - shot_rms) <= 3.0, "%s: loudness %.1f dBFS vs the shot's %.1f" % [hold, rms, shot_rms])
 

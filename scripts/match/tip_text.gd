@@ -37,8 +37,10 @@ static func summon(k: Kin) -> String:
 	var s := k.summon
 	if s == null or not k.wisp or s.cd > 0.0 or k.owner_h != k.m.player:
 		return ""
-	return "Press %s to call %s out for %d s, then it rests %d s" % [
-			Settings.key_cap("summon"), k.rec.get("name", "your Boki"), roundi(s.dur), roundi(s.cd_base)]
+	return (
+		"Press %s to call %s out for %d s, then it rests %d s"
+		% [Settings.key_cap("summon"), k.rec.get("name", "your Boki"), roundi(s.dur), roundi(s.cd_base)]
+	)
 
 
 static func bond_full(fuse_name: String, next: bool) -> String:
