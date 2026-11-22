@@ -1144,6 +1144,29 @@
 				]
 			}
 		},
+		"look_item": {
+			"direct": true,
+			"feel": "happy",
+			"word": "Ooh",
+			"acts": [
+				"(sniffs it all over)",
+				"(pokes it with a paw)",
+				"(puffs up, thrilled)",
+				"(circles it, wide-eyed)"
+			],
+			"lines": {
+				"_": [
+					"Ooh, what is that?",
+					"Never seen one!",
+					"Can I try it?",
+					"It smells new!",
+					"Is that for me?",
+					"Where did you get it?",
+					"I want one too!",
+					"What does it do?"
+				]
+			}
+		},
 		"look_shy": {
 			"direct": true,
 			"feel": "question",
