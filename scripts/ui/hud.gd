@@ -392,7 +392,8 @@ func _draw_world_labels() -> void:
 		if mb.stagger_t > 0.0:
 			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
 		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
-			c.draw_arc(sp + Vector2(0, -16), 9.0 + 2.0 * sin(m.time * 12.0), 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
+			var ring_r := 9.0 + 2.0 * sin(m.time * 12.0)
+			c.draw_arc(sp + Vector2(0, -16), ring_r, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
 		# little icons for their mutations, and always show their bar
 		var rare: bool = int(mb.rarity) > 0 or not mb.mutations.is_empty()

@@ -326,7 +326,7 @@ func _world_plain() -> void:
 ## On the owner's screen the plate status row carries the foe's state, so the kit's world copy of it hides there:
 ## Sable's Mark pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body
 ## stay). Seen by anyone else (the same kit not local) the world art shows. Neve has no world copy: her ice shards in
-## the foe are the one read for everyone (owner 11-11, --neve-feel-check).
+## the foe are the one read for everyone (--neve-feel-check).
 
 func _split() -> void:
 	for hero in ["thief", "mage"]:
