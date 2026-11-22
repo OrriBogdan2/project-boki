@@ -152,7 +152,11 @@ func _second_boki() -> void:
 	var r := Shelter.adopt(cid)
 	ok(bool(r["ok"]) and Save.d["roster"].size() == 2,
 			"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"]))
-	ok(GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size() >= 4,
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: count the whole first-day list, not the card)
+	var first_day_lines: int = GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size()
+	GoalTracker.cfg()["max"] = cap_was
+	ok(first_day_lines >= 4,
 			"second Boki: the first-day list is still on and now holds the lines that need company")
 	rules["base_mode"] = false
 	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
