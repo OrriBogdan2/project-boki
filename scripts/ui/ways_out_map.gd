@@ -85,7 +85,7 @@ static func word(i: int, s: Dictionary) -> String:
 	return "%s lost" % WORDS[i]
 
 static func _clock(t: float) -> String:
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 ## One badge: a dark underlay, a faint track, the lit arc from the top, a pulse while open, a strike once taken or lost.
 static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now: float) -> void:

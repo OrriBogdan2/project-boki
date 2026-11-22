@@ -23,7 +23,7 @@ var _halts: Array = []      # [{name: String, pos: Vector2, s: float (the route'
 ## Seconds as "0:24", counting up to the next whole second.
 static func clock(secs: float) -> String:
 	var t := int(ceilf(maxf(0.0, secs)))
-	return "%d:%02d" % [t / 60, t % 60]
+	return "%d:%02d" % [int(t / 60.0), t % 60]
 
 ## The map line for a halt's countdown: "Next train: 0:24", or that the train is there.
 static func eta_text(secs: float) -> String:

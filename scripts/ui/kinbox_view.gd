@@ -223,7 +223,7 @@ func _build_tabs(bk: Array) -> void:
 		var target: int = p
 		b.set_drag_forwarding(Callable(), _can_drop, func(_pos, d):
 			var free := KinBox.free_slot({}, target)
-			if free < 0 or free / KinBox.PAGE != target: _fail("%s is full" % KinBox.page_name(target)); return
+			if free < 0 or int(free / float(KinBox.PAGE)) != target: _fail("%s is full" % KinBox.page_name(target)); return
 			_drop_on(d, "box", null, free))
 		tabs.add_child(b)
 
@@ -360,7 +360,7 @@ func _drop_on(d: Dictionary, where: String, onto, slot := -1) -> void:
 	else:
 		why = KinBox.to_box(rec, slot)
 		if why == "":
-			_done(("%s and %s traded places" % [rec["name"], other["name"]]) if not other.is_empty() else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else slot / KinBox.PAGE)])
+			_done(("%s and %s traded places" % [rec["name"], other["name"]]) if not other.is_empty() else "%s is in %s" % [rec["name"], KinBox.page_name(page if slot < 0 else int(slot / float(KinBox.PAGE)))])
 			return
 	_fail(why)
 
@@ -523,7 +523,7 @@ static func demo_roster() -> void:
 		r["level"] = 1 + rng.randi() % 18
 		r["trust"] = rng.randf_range(10.0, 90.0)
 		Evo.simulate(r, rng)
-		if i % 5 == 0: r["mutations"] = [mids[(i / 5) % mids.size()]]
+		if i % 5 == 0: r["mutations"] = [mids[(int(i / 5.0)) % mids.size()]]
 		if i % 13 == 3: r["shimmer"] = true
 		if i == 20: r["mutations"] = ["giant", "starmarked"]; r["shimmer"] = true
 		r["got_t"] = Time.get_unix_time_from_system() - (72 - i) * 3600.0
@@ -546,7 +546,7 @@ static func demo_show(h: Node, which: String) -> void:
 				if String(list[i][0]) != "": r["mutations"] = [list[i][0]]
 				r["shimmer"] = list[i][1]
 				var n := Models.kin(String(r["species"]), r)
-				n.position = base + Vector3((i % 6) * 2.0, 0, (i / 6) * 2.4)
+				n.position = base + Vector3((i % 6) * 2.0, 0, (int(i / 6.0)) * 2.4)
 				n.rotation.y = PI * 0.12
 				n.scale *= 1.25
 				h.add_child(n)
