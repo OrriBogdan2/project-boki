@@ -191,6 +191,7 @@ func _start(part: String, extra: Dictionary) -> Match:
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	if loading:
 		o["probe"] = true
+		PerfLog.trace_slices = true     # (a slow load frame below names the slice point that ended it)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	var load0 := Time.get_ticks_usec()
@@ -210,6 +211,12 @@ func _start(part: String, extra: Dictionary) -> Match:
 		longest = maxf(longest, ms)
 		slow += 1 if ms > 100.0 else 0
 		worst[stage] = maxf(float(worst.get(stage, 0.0)), ms)
+		if ms > 100.0 and loading:
+			# what the build did in it: its steps (PerfLog marks) and the slice point that ended it
+			var marks: Array = PerfLog.between(now - int(ms * 1000.0), now).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])
+			var ended: Array = PerfLog.slices.filter(func(sl): return int(sl[0]) > now - int(ms * 1000.0) and int(sl[0]) <= now)
+			print("BENCH %s slow load frame: %.0f ms in %s; steps: %s; slice: %s" % [part, ms, stage, ", ".join(marks),
+					", ".join(ended.map(func(sl): return "%.0f ms at %s" % [float(sl[1]), String(sl[2])]))])
 		var cur = main.current
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur

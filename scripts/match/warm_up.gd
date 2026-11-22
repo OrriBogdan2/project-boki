@@ -44,7 +44,12 @@ func run(progress := Callable()) -> void:
 	# single frame takes every compile at once.
 	# a Boki makes its daze stars the first time it's dazed: one makes them now (hidden until then),
 	# so their material is among the stand-ins
-	# (each piece a slice: together they were one 160-320 ms "Preparing graphics" frame, item 33)
+	# (each piece a slice: together they were one 160-320 ms "Preparing graphics" frame, item 33). Nothing in 3D
+	# draws on the frames between them: the first full view of the map compiles every shader at once (an M5 GL
+	# frame of 1.1 s); _batches draws the stand-ins alone first, then the views find their shaders built.
+	var vp := m.get_viewport()
+	var had_3d := vp.disable_3d
+	vp.disable_3d = true
 	var tb := Time.get_ticks_usec()
 	for k in m.kins:
 		for pn in (k as Node).find_children("*", "Node", true, false):
@@ -53,24 +58,35 @@ func run(progress := Callable()) -> void:
 				break
 		break
 	tb = await _breathe(tb)
-	if not m.is_inside_tree(): return
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
 	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
 	tb = await _breathe(tb)
-	if not m.is_inside_tree(): return
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	if m.fx: KinTypeTrail.of(m.fx)     # and the Boki type trails (made when the first Boki is drawn)
 	tb = await _breathe(tb)
-	if not m.is_inside_tree(): return
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
 	tb = await _breathe(tb)
-	if not m.is_inside_tree(): return
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	var mob_warm: Node3D = await _mob_stand_ins()
-	if not m.is_inside_tree(): return
+	if not m.is_inside_tree():
+		vp.disable_3d = had_3d
+		return
 	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
+	vp.disable_3d = had_3d
 	PerfLog.mark("warm.stand_ins")
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
@@ -232,6 +248,9 @@ func _mob_stand_ins() -> Node3D:
 			if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL: spatial.append(v)
 			elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES: particles.append(v)
 		for sh in spatial:
+			t0 = await _breathe(t0)
+			if not m.is_inside_tree() or not is_instance_valid(holder):
+				return holder
 			var mi := MeshInstance3D.new()
 			mi.mesh = _fx_quad(sh)
 			holder.add_child(mi)
