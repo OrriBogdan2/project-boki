@@ -32,7 +32,11 @@ func run(main: Node) -> void:
 	_stage(main)
 	for st in STATES:
 		await _state(String(st))
-	await _sweep()
+	var probe := _hunter()
+	var has_gum_bone := WardenGlb.skeleton(probe.get_node("Warden")).find_bone("gum") >= 0
+	probe.queue_free()
+	if has_gum_bone:
+		await _sweep()
 	print("RYZZ_GUM_SHOTS_DONE")
 	tree.quit()
 
@@ -54,14 +58,14 @@ func _stage(main: Node) -> void:
 	holder.add_child(cam)
 	cam.make_current()
 
-func _hunter() -> Hunter:
+func _hunter() -> Node3D:
 	var h := Models.hunter(Arch.weight("mage"), Data.TEAM_COLORS[0], Arch.signature("mage"), "", PlayerLook.neutral(),
 		"mage")
 	h.rotation.y = PI
 	holder.add_child(h)
 	return h
 
-func _drive(an: HunterAnim, h: Hunter, st: String, frames: int) -> void:
+func _drive(an: HunterAnim, h: Node3D, st: String, frames: int) -> void:
 	var fwd := Vector3(-sin(h.rotation.y), 0, -cos(h.rotation.y))
 	for k in frames:
 		var s := {"fired": 99.0, "face": h.rotation.y, "grounded": true}
@@ -73,8 +77,19 @@ func _drive(an: HunterAnim, h: Hunter, st: String, frames: int) -> void:
 		an.update(1.0 / 60.0, s)
 		await tree.process_frame
 
+## Stops the clips and rests every bone: the bind pose (a contract model: WardenSync and its tree; a native one: its
+## AnimationPlayer).
+func _freeze(h: Node3D) -> void:
+	var sync := h.get_node_or_null("Warden/Sync")
+	if sync:
+		sync.set_process(false)
+		sync.get("clips").tree.active = false
+	for ap in h.find_children("*", "AnimationPlayer", true, false):
+		(ap as AnimationPlayer).active = false
+	WardenGlb.skeleton(h.get_node("Warden")).reset_bone_poses()
+
 ## The face's centre (m): a fixed drop below the crown anchor.
-func _face(h: Hunter) -> Vector3:
+func _face(h: Node3D) -> Vector3:
 	return WardenGlb.anchor(h, "anchor_head_top").global_position - Vector3(0, 0.15, 0)
 
 func _grab() -> Image:
@@ -87,12 +102,9 @@ func _grab() -> Image:
 func _state(st: String) -> void:
 	var h := _hunter()
 	var an := HunterAnim.new(h)
-	var sync: Node = h.get_node("Warden/Sync")
 	if st == "bind":
 		await _drive(an, h, "idle", 4)
-		sync.set_process(false)
-		sync.get("clips").tree.active = false
-		WardenGlb.skeleton(h.get_node("Warden")).reset_bone_poses()
+		_freeze(h)
 		await tree.process_frame
 	else:
 		await _drive(an, h, st, FRAMES)
