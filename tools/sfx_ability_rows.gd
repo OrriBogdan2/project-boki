@@ -17,7 +17,7 @@ const QUIET := ["step", "grunt"]        # categories that are not an ability's
 ## arch -> [[the passive's proc, its sound, the file that names it]]; Lace's Red Thread (sight through cover and a
 ## wall climb) and the Boki bond have no proc moment.
 const PROCS := {
-	"ashwick": [["Ablaze", "as_ignite", "scripts/arch/kits/ashwick_kit.gd"],
+	"ashwick": [["Ablaze", "as_ignite", "content/rules/status_sfx.json"],
 		["Flashover", "lw_blaze", "scripts/arch/kits/ashwick_kit.gd"]],
 	"bulwark": [["Guard gained", "bjorn_block", "scripts/arch/kits/bulwark_kit.gd"],
 		["Shield Slam", "pay_slam", "scripts/arch/kits/bulwark_kit.gd"]],
