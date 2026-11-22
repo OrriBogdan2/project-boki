@@ -62,6 +62,7 @@ const KIT_KEY := {
 
 const CARD_T := 1.5  # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0  # s without progress before the panel pulses and the Boki says it once more
+const NAG_QUICK := {"crouch": 4.0, "glove": 4.0}  # s: the same for a step that is one key or one walk (no thinking)
 const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0  # s the lookout shows the glove it spotted
 const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
@@ -69,7 +70,7 @@ const DONE_T := 0.9  # s of the step-done sting
 const LOOKOUT_R := 5.0  # m from the stop: the whole top (3.6 m radius) and its rim count
 const LOOKOUT_DROP := 1.2  # m: how far under the top you may stand and still be up on it (the cliff is 2.4 m)
 const SEND_R := 5.0  # m: a Boki leap that lands this near a monster counts as sent at it
-const CROUCH_HOLD := 1.5  # s of crouching at the lookout
+const CROUCH_HOLD := 0.8  # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
 const DOWN_T := 3.0  # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0  # m: a target this far off gets "crouch to scout ahead"
@@ -713,7 +714,7 @@ func _stall(dt: float) -> void:
 			stall_t = 0.0
 	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
 		stall_t = 0.0  # (holding the circle while the capture runs is the progress)
-	if stall_t >= NAG_T and wait <= 0.0:
+	if stall_t >= float(NAG_QUICK.get(id(), NAG_T)) and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
