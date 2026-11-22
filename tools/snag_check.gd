@@ -4,7 +4,8 @@ extends RefCounted
 ## keys are held and nothing blocks by design (a wall or prop whose top is above mantle reach straight
 ## ahead). Prints the worst spots (1 m cells) with the cause. "SNAG DONE, stalls: N" ends the run; it
 ## fails when N is over MAX_STALLS. Counts fixed simulation steps; never touches the save.
-## Options: --snag-paths=N (default 50), --snag-arch=id (one Hunter).
+## Options: --snag-paths=N (default 50), --snag-arch=id (one Hunter). The registry splits the roster into
+## four flags (--snag-<n>-check) so each stays under the gate's 300 s cap; a shard's arg is its comma list of Hunters.
 
 const DT := Match.DT
 const MAP := "hollowcrown"
@@ -35,15 +36,15 @@ var stalls := 0
 var stall_s := 0.0
 var path_s := 0.0
 
-func run(main: Node) -> void:
+func run(main: Node, shard := "") -> void:
 	Save.no_write = true
 	var n_paths := PATHS
-	var only := ""
+	var only := shard
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--snag-paths="): n_paths = int(String(a).get_slice("=", 1))
 		if String(a).begins_with("--snag-arch="): only = String(a).get_slice("=", 1)
 	for arch in Arch.ORDER:
-		if only != "" and arch != only:
+		if only != "" and arch not in only.split(","):
 			continue
 		_boot(main, arch)     # a fresh match per Hunter: the world's clock never carries one run into the next
 		var before := stalls
