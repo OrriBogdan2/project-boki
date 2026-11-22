@@ -352,6 +352,7 @@ def main():
     body = part("body", None, 0, "scan_A", 1.0, None, "scan", None, ob=scan("A", "body"))["ob"]
     tip, knuckle = hook_tip(body), fist(body)
     part("monocle", G.monocle(), 460, "gear", 2.2, None, "head", None)
+    part("nose", G.nose(), 70, "nose", 1.6, None, "head", "skin")
     part("gun", G.gun(), 280, "gear", 1.3, G.gun_xf, "gun", None)
     # the hoard: v1's sculpt, moved onto v2's back (a few rigid chunks on the torso bone, under the size cap)
     hf = G.hoard()
@@ -488,6 +489,8 @@ def main():
             body_px = m.copy()
             body_px[idx[0][P.face_mask(pts)], idx[1][P.face_mask(pts)]] = False      # (the gums are purple, not veins)
             p["tri_slot"] = tri_slots(scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), iron_tris(ob, tri))
+        elif nm == "nose":
+            rgb = P.nose(pts, nn, scan_rgb("A", pts))
         elif nm == "lens":
             rgb = np.tile(P.rgb("2fd878"), (len(pts), 1))
         elif nm == "hoard":
