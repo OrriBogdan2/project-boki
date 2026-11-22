@@ -102,6 +102,8 @@ func _shot_row() -> void:
 	ok_fn.call("Cinder cancel RMB + LMB, E: both (rule), the lance lights and the cloak blasts at once",
 			bolt and K.cloaks == c0 + 1 and K.was_held,
 			"bolt %s, cloaks +%d, lance %s" % [bolt, K.cloaks - c0, K.was_held])
+	# the cinder leaves rmb.cast after the press (a cast): let it land here, not in the next row's flare
+	ak.step(m, float(K.rmb_def()["cast"]) + 0.6)
 
 
 ## Inside the cloak's flare (no 0.2 s ring: owner item 11), LMB, RMB and X each go the step they are pressed.
