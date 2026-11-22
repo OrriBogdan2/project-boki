@@ -7,6 +7,8 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+const OLD_SAVE := "user://snack_patch_check_old.json"
+
 func ok(cond: bool, what: String) -> void:
 	print("SNACK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
@@ -33,6 +35,7 @@ func run(m: Node) -> void:
 			"off: no patch is granted and the Garden tab does not offer one")
 	rules["base_mode"] = true
 	_rules_and_save()
+	_first_batch()
 	_ridge()
 	await _in_the_garden()
 	_market()
@@ -71,6 +74,40 @@ func _rules_and_save() -> void:
 		each = each and got.has(s) and int(Save.d["crops"].get(s, 0)) == int(before.get(s, 0)) + 1
 	ok(each, "after its timer it yields the four snacks, one each, the season's and a rotating extra: %s" % str(got))
 	ok(SnackPatch.harvest(Save.d, late).is_empty(), "picked, it starts over")
+
+## A save's first batch (the starter gift) is ripe at first_grow_secs (60), the second only at grow_secs (480).
+func _first_batch() -> void:
+	Save.d = _save()
+	HomeLayout.ensure(Save.d)
+	var L := HomeLayout.of(Save.d)
+	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0, "t": 1,
+			SnackPatch.RIPE_KEY: 1000.0}
+	(L["deco"] as Array).append(e)
+	var first := float(SnackPatch.rules()["first_grow_secs"])
+	var grow := float(SnackPatch.rules()["grow_secs"])
+	ok(first == 60.0 and grow == 480.0 and int(Save.d["snack_picks"]) == 0,
+			"a new save: first batch 60 s, later ones 480 s, none picked")
+	ok(not SnackPatch.ripe(e, 1000.0 + first - 1.0) and SnackPatch.ripe(e, 1000.0 + first),
+			"first batch: not ripe at 59 s, ripe at 60 s")
+	ok(not SnackPatch.harvest(Save.d, 1000.0 + first).is_empty() and int(Save.d["snack_picks"]) == 1,
+			"picking the first batch counts one")
+	var t2: float = float(e[SnackPatch.RIPE_KEY])
+	ok(not SnackPatch.ripe(e, t2 + grow - 1.0) and SnackPatch.ripe(e, t2 + grow),
+			"second batch: not ripe at 479 s, ripe at 480 s")
+	ok(SnackPatch.ripe(e, t2 + 60.0) == false, "second batch: not ripe at 60 s")
+	var old := _save()
+	old.erase("snack_picks")
+	var keep: Dictionary = Save.d
+	Save.d = old
+	ok(is_equal_approx(SnackPatch.grow_secs(), grow), "an older save with no counter keeps 480 s")
+	var f := FileAccess.open(OLD_SAVE, FileAccess.WRITE)
+	f.store_string(JSON.stringify(old))
+	f.close()
+	Save.load_from(OLD_SAVE)
+	DirAccess.remove_absolute(OLD_SAVE)
+	ok(int(Save.d.get("snack_picks", 0)) >= 1 and is_equal_approx(SnackPatch.grow_secs(), grow),
+			"loading an older save file (no counter) keeps 480 s, no second starter gift")
+	Save.d = keep
 
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.
 func _ridge() -> void:
