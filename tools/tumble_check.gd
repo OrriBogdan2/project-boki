@@ -70,15 +70,15 @@ func _by_theme() -> Dictionary:
 ## One exchange with fixed moves and presses on a fresh run; returns the run after it resolved.
 func _exchange(a: Dictionary, b: Dictionary, mine: String, theirs: String, want := "") -> BaseTumble.Run:
 	var r := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
-	r.R = r.R.duplicate(true)
-	r.R["rival_press"] = {"great": 0.0, "good": 0.0}
-	r.step(float(r.R["intro_s"]) + DT)
+	r.r_x = r.r_x.duplicate(true)
+	r.r_x["rival_press"] = {"great": 0.0, "good": 0.0}
+	r.step(float(r.r_x["intro_s"]) + DT)
 	r.want = want if want != "" else BaseTumble.counter(mine)
 	r.plan = theirs
 	r.choose(mine)
-	r.step(float(r.R["tell_s"]))
+	r.step(float(r.r_x["tell_s"]))
 	r.press("miss")
-	r.step(float(r.R["impact_s"]))
+	r.step(float(r.r_x["impact_s"]))
 	return r
 
 func _rules() -> void:
@@ -104,10 +104,10 @@ func _rules() -> void:
 	var c := _kin(th["ember"], "C", [10, 10, 10, 10])
 	var d := _kin(th["frost"], "D", [10, 10, 10, 10])
 	r = _exchange(c, d, "rush", "dodge")
-	var p := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var p := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(p - 1.0) < 0.001, "species themes change no push (x%.3f)" % p)
 	r = _exchange(a, b, "rush", "dodge", "rush")
-	var f := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var f := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(f - 1.1) < 0.001 and r.follows == 1, "following the want is 10%% more push (x%.3f)" % f)
 	var idle := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
 	var limit := float(idle.R["intro_s"]) + float(idle.R["tell_s"]) + float(idle.R["pick_s"]) + DT * 2.0
@@ -130,7 +130,7 @@ func _tells() -> void:
 			if r.shown("rush", viewer) == "rush":
 				right += 1
 		share[viewer] = float(right) / TELL_ROLLS
-	var h: Array = r.R["honest"]
+	var h: Array = r.r_x["honest"]
 	ok(absf(share[0] - float(h[0])) < TELL_SLACK and absf(share[1] - float(h[1])) < TELL_SLACK,
 			"the higher Focus sees the honest tell %.0f%%, the other %.0f%%" % [share[0] * 100.0, share[1] * 100.0])
 
@@ -242,7 +242,7 @@ func _settle() -> void:
 	r.follows = 2
 	var gems := int(Save.d["gems"])
 	var res := BaseTumble.settle(r)
-	var want_trust := 50.0 + float(r.R["win_trust"]) + 2.0 * float(r.R["follow_trust"])
+	var want_trust := 50.0 + float(r.r_x["win_trust"]) + 2.0 * float(r.r_x["follow_trust"])
 	ok(res["win"] == a and absf(float(a["trust"]) - want_trust) < 0.001,
 			"settle: the winner gains trust, plus following")
 	ok(float(a["needs"]["joy"]) > 50.0 and float(b["needs"]["joy"]) < 50.0, "settle: the winner beams, the loser sulks")
