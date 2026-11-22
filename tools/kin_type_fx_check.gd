@@ -22,6 +22,7 @@ func _shape(look: Dictionary) -> String:
 	return "|".join(parts)
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	var types: Array = KinParts.THEMES.filter(func(t): return t != "none")
 	var n_mapped := KinTypeFx.BY_THEME.size()

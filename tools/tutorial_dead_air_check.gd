@@ -37,6 +37,7 @@ func _lines(m: Match) -> Array[String]:
 	return m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t)
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	for who in STARTERS:

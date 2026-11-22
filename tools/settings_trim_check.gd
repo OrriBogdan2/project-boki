@@ -8,7 +8,7 @@ const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 ## Not rows on the settings tabs: version markers, the auto-detected preset, the per-hunter model switches
 ## (Video, one row per modelled hunter), the bot level (Admin tools) and the held-panel sizes.
 const NOT_ROWS := ["keys", "keys_v", "keys2_v", "keys3_v", "keys4_v", "keys5_v", "keys6_v", "video_v",
-		"quality_found", "warden_models", "bot_diff", "audio_v", "keys7_v", "hold_done"]
+		"quality_found", "warden_models", "bot_diff", "audio_v", "keys7_v", "hold_done", "wisps_v"]
 
 var bad := 0
 var tree: SceneTree

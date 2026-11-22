@@ -210,6 +210,7 @@ func _fusions() -> void:
 		ok(started and worst <= POS_TOL, "%s (started %s, drift %.3f m)" % [what, started, worst])
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	_abilities()
