@@ -817,6 +817,10 @@ const CHECKS := {
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
 	# 2 games, relay: a raid client's boss top bar
 	"--raid-boss-bar-online-check": ["res://tools/raid_boss_bar_online_check.gd", "raid_boss_bar_online_check", null],
+	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
+	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
+	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # the second game (not gated)
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
