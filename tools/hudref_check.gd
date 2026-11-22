@@ -320,7 +320,7 @@ func _check_keys(P: Hunter) -> void:
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
-## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
 func _check_deny(P: Hunter) -> void:
 	var hud = P.m.hud
 	PressDeny.last.clear()
@@ -349,7 +349,7 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
-		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
 
@@ -596,6 +596,9 @@ func _hud_size(demo: Match) -> void:
 	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
 	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
 	Settings.set_v("hud_full", true, false)      # (every group is drawn: the staged HUD would hide some)
+	var had_obj = Save.d["tutorial"].get(FirstObjective.KEY)
+	# A save past its first expedition: the objective card (--first-objective-check) would crowd the minimap.
+	Save.d["tutorial"][FirstObjective.KEY] = true
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -641,6 +644,8 @@ func _hud_size(demo: Match) -> void:
 						"%s: 130%% draws the minimap bigger (held to the room above the bottom block)" % tag)
 	Settings.v["hud_scale"] = keep
 	Settings.set_v("hud_full", false, false)
+	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
+	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
 
 ## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the
