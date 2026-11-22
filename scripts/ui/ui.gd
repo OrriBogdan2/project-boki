@@ -156,13 +156,20 @@ static func label(text: String, size := 16, col := INK, font: Font = null) -> La
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
-	# short labels sit on one line; only real sentences wrap (a wrapping label in a row collapses to nothing)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if text.length() > 48 else TextServer.AUTOWRAP_OFF
+	# short labels sit on one line; only real sentences wrap
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	if text.length() > 48:
+		wrap_text(l)
 	return l
 
 ## Body text that wraps: the usual muted line under a heading.
 static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
-	var l := label(text, size, col)
+	return wrap_text(label(text, size, col))
+
+## Makes l wrap at words and take the row's free width: a wrapping label has no width of its own, so in a row
+## without it it collapses to one letter per line (the Soul Shrine's vertical text).
+static func wrap_text(l: Label) -> Label:
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
@@ -178,11 +185,23 @@ const HOVER_GROW := 1.03     # a pointed-at button's scale
 const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
 	"Leave it  (Esc)": "ui_back"}
 
+const SFX_META := "btn_sfx"   # marks a Button that makes the hover and click sounds (--ui-sfx-check)
+
+## For a Button that has its own look and cannot be a Ui.button (a colour swatch, a ring cap): the same hover tick
+## and click tap, no new sounds. Skip `click` when its handler already plays its own cue.
+static func sfx(b: Button, click := true) -> Button:
+	b.set_meta(SFX_META, true)
+	b.mouse_entered.connect(func(): if not b.disabled: Sfx.play("hover", null, -14.0, 0.05))
+	if click:
+		b.pressed.connect(func(): Sfx.play("click"))
+	return b
+
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lights the neon
 ## edge and grows it 3% (UI_STYLE.md: only things you can press glow and grow); pressing sinks it a
 ## touch, in about 70 ms.
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
+	b.set_meta(SFX_META, true)
 	b.text = text
 	if cb.is_valid():
 		var snd: String = BACK_WORDS.get(text, "click")
@@ -236,6 +255,11 @@ static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Butt
 static func ghost(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)
 	b.theme_type_variation = "Ghost"
+	return b
+
+## Gives this button its own press sound ("" for none, when the action plays its own once it lands).
+static func sounding(b: Button, sound: String) -> Button:
+	b.set_meta("snd", sound)
 	return b
 
 ## A red-outlined button for things that can't be undone (pair it with confirm()).

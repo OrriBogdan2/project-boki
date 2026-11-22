@@ -23,6 +23,9 @@ const AREA := ["ostra/dash", "ostra/air dash", "ostra/standing dash", "dolm/dash
 	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash", "gil/dash", "gil/standing dash"]
 ## Moves played again and again along a path: a trail laid behind the mover (Rimewright's frost under the skate).
 const TRAILS := ["skate_frost"]
+# cues a kit plays on a timer, not on a move: Meeko's "ready" flare when the LMB wait (lmb.wait, 1 s idle) is over
+# (PR #248); it lands in whichever move is measured first, so it is not the movement's effect
+const TIMER_CUES := ["ready"]
 const EVENTS := ["dash", "standing dash", "air dash", "soft landing", "hard landing", "spiked landing", "wall kick",
 	"wall bounce", "mantle", "reset"]
 
@@ -89,8 +92,7 @@ func _snap(m: Match) -> Dictionary:
 	var vfx := HeroVfx.of(m)
 	return {"radial": m.fx.radial, "rings": m.fx.rings.size(), "fi": m.fx.fi, "plays": vfx.plays.duplicate()}
 
-## Returns what it spawned (--move-rule-guard-check reads it).
-func _event(m: Match, hero: String, ev: String) -> Array:
+func _event(m: Match, hero: String, ev: String) -> void:
 	var h: Hunter = flow.hunter
 	flow._ready_up(m)
 	h.ak.res = 0.0
@@ -112,7 +114,6 @@ func _event(m: Match, hero: String, ev: String) -> Array:
 	print("MOVEFX %-10s %-14s %s" % [hero, ev, ", ".join(spawned) if not spawned.is_empty() else "-"])
 	var area: bool = "%s/%s" % [hero, ev] in AREA
 	ok(spawned.is_empty() or area, "%s: %s spawned %s" % [hero, ev, ", ".join(spawned)])
-	return spawned
 
 ## A dash with the resource full: the full tell (ArchKit._tells) pulses no ring at the feet, which every dash would
 ## carry while the resource stays full (the parity reel caught one on Vex's slide).
@@ -236,7 +237,7 @@ func _spawned(m: Match, hero: String, before: Dictionary, flashes0: int) -> Arra
 	for mv: String in plays:
 		if int(plays[mv]) > int(before["plays"].get(mv, 0)):
 			for layer: Dictionary in (moves.get(mv, {}) as Dictionary).get("fx", []):
-				if layer.has("when") or mv in TRAILS:
+				if layer.has("when") or mv in TRAILS or mv in TIMER_CUES:
 					continue          # drawn only when the move hit something (hit feedback), or a trail
 				var kind := String(layer["p"])
 				if kind in BURST_KINDS or (kind == "scorch" and String(layer.get("shape", "disc")) != "lane"):
