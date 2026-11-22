@@ -1383,6 +1383,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	# aiming or relaxed: guns come up when you fire, and drop to a carry a little after
 	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
+	model.set_meta(WardenHolster.DRAW, aim_k)
 	var want_carry := 1.0 if r1 > 0.55 and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
