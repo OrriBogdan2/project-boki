@@ -1,6 +1,6 @@
 # tools/
 
-Checks (`*_check.gd`, registered in `check_registry.gd`), shot tools (`*_shots.gd`), content generators (`gen_*.py`) and the repo gate.
+Checks (`*_check.gd`, registered in `tools/checks/<area>.gd`; the old `check_registry.gd` only shrinks, see AGENTS.md section 2), shot tools (`*_shots.gd`), content generators (`gen_*.py`) and the repo gate.
 
 ## The gate: `tools/check.sh`
 
