@@ -218,8 +218,8 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
-	life.R["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
-	life.R["doze_pile"] = 0.0
+	life.r_v["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
+	life.r_v["doze_pile"] = 0.0
 	home.day_t = 0.4
 	for k in home.kins:
 		k["nap_t"] = 0.0
@@ -243,7 +243,7 @@ func _spots_part(home, center: Vector3) -> void:
 		"its friend (bond 0.6) takes the place beside it")
 	ok(not sc.is_empty() and sc["i"] != sa.get("i") and int(sc["slot"]) == 0, "a third Boki takes the other spot")
 	var t := 0.0
-	while t < float(life.R["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
+	while t < float(life.r_v["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
 		home._move_kin(DT)
 		t += DT
 	var on := [a, b, c].filter(func(k): return k.has("life_spot") and float(k["nap_t"]) > 0.0 \
@@ -329,8 +329,8 @@ func run(m: Node) -> void:
 		for j in range(i + 1, recs.size()):
 			var b := BaseLife.bond(recs[i], recs[j])
 			symmetric = symmetric and is_equal_approx(b, BaseLife.bond(recs[j], recs[i]))
-			friends += 1 if b >= float(home.life.R["friend_at"]) else 0
-			rivals += 1 if b <= float(home.life.R["rival_at"]) else 0
+			friends += 1 if b >= float(home.life.r_v["friend_at"]) else 0
+			rivals += 1 if b <= float(home.life.r_v["rival_at"]) else 0
 	ok(friends >= 1, "at least one friend pair formed (%d)" % friends)
 	ok(rivals >= 1, "at least one rival pair formed (%d)" % rivals)
 	ok(symmetric, "every bond is the same both ways")
