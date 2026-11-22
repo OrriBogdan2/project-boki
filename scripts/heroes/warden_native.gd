@@ -18,6 +18,7 @@ const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet near
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
 const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouch_arms_from"), added beside Meshy's
+const BOKI_SLOTS := ["k1", "k2"]  # cast slots that are the riding Boki's ability, not the Hunter's (no attack clip)
 const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
 static var contract_only := false
@@ -37,7 +38,8 @@ var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the attack clip still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
-var last := {"kmove": "", "swing_n": 0, "cast": INF, "recoil": 0.0}
+## The state counters last frame; cast -1: none read yet (the first frame's seconds since a cast is no new cast)
+var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -46,6 +48,8 @@ var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
+var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
+var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
@@ -123,6 +127,11 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
+	torso_bi = WardenSkeleton.find(skel, "hips")
+	var rest: Dictionary = model.get_meta("rig_rest", {})
+	if torso_bi >= 0 and rest.has("hips"):
+		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
+		torso_off = at_rest.affine_inverse() * (rest["hips"] as Transform3D)
 	var anchors: Dictionary = d.get("anchors", {})
 	for an in anchors:
 		var at := BoneAttachment3D.new()
@@ -154,6 +163,7 @@ func _process(dt: float) -> void:
 	elif attack_left <= 0.0:
 		_loco(s)
 	player.advance(dt)
+	WardenClips.air_tilt(root, skel, WardenSkeleton.find(skel, "root"))  # (the glider's bank, the dive's pitch)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
@@ -203,6 +213,14 @@ func _now(nd: Node3D) -> Vector3:
 	return (skel.global_transform * skel.get_bone_global_pose(bi) * xf).origin
 
 
+## Where the rig's torso shows, world (WardenGlb.shown_torso): Meshy's torso bone as its clip and the air tilt posed
+## it, so a Boki riding on the Hunter keeps its seat on the body you see.
+func shown_torso() -> Transform3D:
+	if torso_bi < 0:
+		return (root.get_node(^"Rig/Torso") as Node3D).global_transform
+	return skel.global_transform * skel.get_bone_global_pose(torso_bi) * torso_off
+
+
 ## Meshy's weapon hand this frame (world), from the pose the clip just set: an attachment would follow a frame late.
 func hand_position() -> Vector3:
 	return skel.global_transform * skel.get_bone_global_pose(hand).origin
@@ -232,9 +250,12 @@ func _attacked(s: Dictionary) -> bool:
 	var now := {
 		"kmove": String(s.get("kmove", "")),
 		"swing_n": int(s.get("swing_n", 0)),
-		"cast": float(s.get("cast", INF)),
+		# (a Boki's own ability, k1 or k2, is its move: the Hunter does not swing for it)
+		"cast": INF if String(s.get("cast_slot", "")) in BOKI_SLOTS else float(s.get("cast", INF)),
 		"recoil": float(s.get("recoil", 0.0)),
 	}
+	if float(last["cast"]) < 0.0:
+		last["cast"] = now["cast"]
 	var hit: bool = (
 		(now["kmove"] != "" and now["kmove"] != last["kmove"])
 		or now["swing_n"] > last["swing_n"]
@@ -388,11 +409,10 @@ func _orbit(orb: String) -> Array:
 
 ## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
 ## tail tip and heel jets, Kael's blade tip) that data "anchors" does not place. Each rides the Meshy bone that plays
-## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find).
-## On its own bone's stand-in it keeps that bone's frame at the same distance in metres (the bone frames, not the
-## model, carry it over: Meshy's rest is a T-pose, the contract's arms hang); on a parent's (a tail spring, a
-## pauldron: the torso, whose rest the two models share) or on the nearest bone (a loose one) it keeps where it sits
-## on the contract model.
+## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find: a
+## blade bone's hand), in that bone's own frame at the same distance in metres (the bone frames, not the model, carry
+## it over: Meshy's rest is a T-pose, the contract's arms hang). One with no such bone (a tail spring off the hips is
+## still found through the hips; a loose one) rides the Meshy bone nearest where it sits on the contract model.
 func _copy_anchors(glb: Node3D) -> void:
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	var inv := to_m.affine_inverse()
@@ -411,7 +431,6 @@ func _copy_anchors(glb: Node3D) -> void:
 				break
 		if nb < 0:
 			nb = _nearest(inv * (a[2] as Transform3D).origin)
-		if nb >= 0 and WardenSkeleton.find(skel, String(a[1][0][0])) != nb:  # (on a parent: where it sits on the model)
 			local = skel.get_bone_global_rest(nb).affine_inverse() * inv * (a[2] as Transform3D)
 		var at := BoneAttachment3D.new()
 		at.name = "bone_%s" % a[0]
