@@ -1,5 +1,5 @@
 extends RefCounted
-## --garden-hud-groups [--shots-dir=<dir>]: the garden's screen on day 1 and day 5, in the hub and in two zones.
+## --garden-hud-groups [--shots-dir=<dir>] [--size=WxH, default 1280x720]: the garden's screen on day 1 and day 5, in the hub and in two zones.
 ## For each of the six screens it prints the cards that open on arrival and the HUD groups on show (a group = a
 ## separately placed block the player has to scan: a visible child of the home's UI, with a size), then the signs
 ## in view. Day 1 must stay at DAY1_MAX groups (asserted by --garden-first-day-check). With --shots-dir it also
@@ -16,6 +16,7 @@ const DAY5_JOURNAL := ["ate a snack", "won a race", "napped in the pile", "made 
 
 var main: Node
 var dir := ""
+var win := Vector2i(1280, 720)      # the window: --size=WxH
 
 ## The save for a day: day 1 is the fresh save with its first-day list running; day 5 has the list paid, four Boki
 ## with a few journal lines, the zones open and today's wishes drawn.
@@ -134,10 +135,13 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			win = Vector2i(int(wh[0]), int(wh[1]))
 	if dir != "":
 		DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	main.get_tree().root.size = Vector2i(1280, 720)
+	main.get_tree().root.size = win
 	await _frames(10)
 	for day in [1, 5]:
 		for zone in [""] + ZONES:
