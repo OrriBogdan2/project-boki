@@ -5,7 +5,8 @@ extends RefCounted
 ## CheckRegistry.GPU_HOST (fight-p99-gpu, --needs gpu); elsewhere a fail is ADVISORY (docs/CHECKS_TIMING.md).
 ## No row for the adapter: prints the row to add and passes. Takes the bench's arguments.
 ##   godot --path . -- --fight-p99-check --quality=medium --bench-view=1920x1080 [--timing-strict]
-## perf.tsv: key (adapter name part | CPU name part, both lower case | quality | WxH: the fight is CPU-bound, so a 4090 on a slower CPU needs its own row), p99_ms, note. Re-record by editing the row.
+## perf.tsv: key (adapter name part | CPU name part, both lower case | quality | WxH), p99_ms, note.
+## The fight is CPU-bound, so a 4090 on a slower CPU needs its own row. Re-record by editing the row.
 
 const BASELINE := "res://tools/perf.tsv"
 const MAX_REGRESS := 0.10  # a p99 more than this fraction over its baseline fails
