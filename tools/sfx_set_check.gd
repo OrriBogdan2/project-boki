@@ -1917,6 +1917,7 @@ func _slug_volley(m: Match, by: Hunter, e: Ent, mixed := false) -> Array:
 		out.append(c[0])
 	Sfx.cue_log = null
 	return out
+
 ## 10. What you can see you can hear: the cue at the side edge of the reference view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
 func _falloff() -> void:
