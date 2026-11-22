@@ -91,6 +91,8 @@ func _queue() -> void:
 	host.queue_free()
 
 func _chips() -> void:
+	var was := FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false      # the farm's counters (the garden hides empty ones)
 	Save.d["tutorial"] = {"hatched": true}      # a new player: the welcome not seen yet
 	Save.d["items"] = {}
 	Save.d["crops"] = {}
@@ -108,6 +110,7 @@ func _chips() -> void:
 	ok((row.get_child(0) as Control).tooltip_text.contains("Wood  3") and
 		(row.get_child(0) as Control).tooltip_text.contains("Ember Coals  2"), "chips: its tooltip lists each material")
 	row.free()
+	FarmUnlocks.rules()["base_mode"] = was
 
 func _keys() -> void:
 	Save.d["tutorial"] = {"home": true, "day1_done": true}      # tutorial over
