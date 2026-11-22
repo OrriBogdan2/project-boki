@@ -75,8 +75,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
-| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -90,6 +88,8 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
