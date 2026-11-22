@@ -128,7 +128,9 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: FeedBowl.end(k))
 		m.on_exit(S.REACT, func(_to: int) -> void: _done_looking(k))
-		m.on_exit(S.DONE, func(_to: int) -> void: BaseHandFeed.clear(k))
+		m.on_exit(S.DONE, func(_to: int) -> void:
+			k["doze_ok"] = _clock + float(R["doze_rest"])      # fresh from your hand: awake for a second offer
+			BaseHandFeed.clear(k))
 		k["life"] = m
 	return k["life"]
 
