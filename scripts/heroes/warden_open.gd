@@ -29,8 +29,8 @@ const RUMMAGE := 0.025  # m: the hands' stir on the lid while he holds
 const RUMMAGE_HZ := 2.2
 const KNEES := 0.5  # 0..1: how much of the dip goes on the knees rather than the back
 
-var clips: WardenClips           # (null on Meshy's skeleton: `busy` stands in for clips.busy)
-var busy := false                # a Meshy-native model's attack clip owns the body (WardenNative)
+var clips: WardenClips  # (null on Meshy's skeleton: `busy` stands in for clips.busy)
+var busy := false  # a Meshy-native model's attack clip owns the body (WardenNative)
 var skel: Skeleton3D
 var root: Node3D
 var w := 0.0  # how much of the layer is on (the check reads it)
@@ -49,6 +49,7 @@ static func make(c: WardenClips) -> WardenOpen:
 	if o:
 		o.clips = c
 	return o
+
 
 ## The layer on any skeleton whose bones WardenSkeleton.find knows (the contract's, or Meshy's own: WardenNative,
 ## which sets `busy` each frame); null when one is missing.
