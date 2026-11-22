@@ -61,6 +61,20 @@ const KEY_FS := 12  # key label size
 ## 24 px margin, keeps the blocks inside the 5% band).
 const SAFE_FRAC := 0.05
 const KEY_REACH := 10.0  # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
+## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
+## Every pair must differ by colour or size, readable at match zoom.
+const NUM_STYLE := {
+	"hit": {"col": HIT, "k": 1.0, "crit": false},
+	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
+	"crit": {"col": CRIT, "k": 1.0, "crit": true},
+	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
+	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
+	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
+	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
+	"heal": {"col": HEAL, "k": 1.0, "crit": false},
+	"hurt": {"col": HURT, "k": 1.0, "crit": false},
+}
 
 
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
@@ -208,22 +222,6 @@ static func dmg_col(
 	if armor_hit:
 		return HIT_ARMOR
 	return NUM_EMPOWERED if empowered else plain
-
-
-## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
-## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
-## Every pair must differ by colour or size, readable at match zoom.
-const NUM_STYLE := {
-	"hit": {"col": HIT, "k": 1.0, "crit": false},
-	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
-	"crit": {"col": CRIT, "k": 1.0, "crit": true},
-	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
-	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
-	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
-	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
-	"heal": {"col": HEAL, "k": 1.0, "crit": false},
-	"hurt": {"col": HURT, "k": 1.0, "crit": false},
-}
 
 
 static func num_style(kind: String) -> Dictionary:

@@ -8,7 +8,6 @@ extends "res://tools/clip_shots.gd"
 ## run speed) fed straight to the hand-keyed clips, so what shows is the clip data alone. Needs a renderer.
 
 const DT := 1.0 / 30.0
-var heavy := true  # --no-heavy-land: the plain terrace-drop crouch at every height (the "before")
 const RUN_UP := 0.6  # s of running before the press
 const TAIL := 0.8  # s on the ground after the landing
 const DROP_H := 3.0  # m: the terrace drop (lands at 9.4 m/s: HunterAnim's deep tier)
@@ -16,6 +15,7 @@ const LONG_H := 6.0  # m: a long drop (lands at 13.3 m/s: HunterAnim's heavy lan
 const PLUNGE_H := 12.0  # m: a plunge (18.8 m/s: the dive's speed)
 const KERB_H := 0.3  # m: a step down (3 m/s: no landing to play)
 const GLIDE_T := 0.6  # s of gliding at the canopy's sink before the ground
+var heavy := true  # --no-heavy-land: the plain terrace-drop crouch at every height (the "before")
 
 
 func run(main: Node) -> void:

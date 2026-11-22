@@ -462,9 +462,9 @@ func _land_probe(id: String, h: float, moving: bool) -> Dictionary:
 	var sk := WardenGlb.skeleton(pair[0][0].get_node("Warden"))
 	var hips := WardenSkeleton.find(sk, "hips")
 	var sk_c := WardenGlb.skeleton(pair[1][0].get_node("Warden"))
-	var run := Vector3(0, 0, -4.8) if moving else Vector3.ZERO
-	var ground := {"vel": run, "face": 0.0, "grounded": true}
-	var fall := {"vel": run + Vector3(0, -sqrt(2.0 * Hunter.H_GRAV * h), 0), "face": 0.0, "grounded": false}
+	var run_v := Vector3(0, 0, -4.8) if moving else Vector3.ZERO
+	var ground := {"vel": run_v, "face": 0.0, "grounded": true}
+	var fall := {"vel": run_v + Vector3(0, -sqrt(2.0 * Hunter.H_GRAV * h), 0), "face": 0.0, "grounded": false}
 	for p in pair:
 		_play(p[0], p[1], p[2], ground, 90)
 	for f in 20:
