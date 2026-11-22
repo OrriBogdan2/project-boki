@@ -2,8 +2,9 @@ class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
 ## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
-## buy a seed, sell a crop, meet Hob, head out. With base_mode on (FarmUnlocks) the four steps of
-## rules()["base"] run instead: meet your Boki, feed it, place a toy and watch it play, head out or stay.
+## buy a seed, sell a crop, meet Hob, head out. With base_mode on (FarmUnlocks) the five steps of
+## rules()["base"] run instead: meet your Boki, plant the snack patch, feed it, place a toy and watch it play,
+## head out or stay.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (the tools and food come at once, nothing is taken away)
@@ -193,7 +194,10 @@ static func detect() -> void:
 	if base():
 		if Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty()):
 			mark("meet")  # fed, so it has been met
+			mark("patch")
 			mark("eat")
+		elif not SnackPatch.entry(Save.d).is_empty():
+			mark("patch")
 		return
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))

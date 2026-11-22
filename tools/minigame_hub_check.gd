@@ -6,7 +6,7 @@ extends RefCounted
 ##   4. a save that has skipped the farm tutorial: the entry loads the home straight into the picker,
 ##      and the tutorial flags are exactly as they were
 ##   6. the garden games for real (base_mode on, three Boki, the Training post): the picker lists all
-##      four, and from the hub (where none is placed) every game of every open zone, a pick there
+##      five, and from the hub (where none is placed) every game of every open zone, a pick there
 ##      travelling to its zone; each pick starts that game (and it is put back); a whole Stump Shove bout ends on its
 ##      card and the winner becomes the picker's best Boki
 ##   5. every game has a card (name, rule, result line), locked when this base lacks it; a pick on an open
@@ -54,8 +54,8 @@ func _registry() -> void:
 		var filled := [g["name"], g["member"], g["node"], g["rule"]].all(func(t): return String(t) != "")
 		good = good and filled and not seen.has(g["id"])
 		seen[g["id"]] = true
-	var what := "registry: four games, each with an id, name, member, node and rule (%s)" % [seen.keys()]
-	ok(good and seen.size() == 4, what)
+	var what := "registry: five games, each with an id, name, member, node and rule (%s)" % [seen.keys()]
+	ok(good and seen.size() == 5, what)
 
 func _results() -> void:
 	ok(MinigameHub.summary("race") == "No games yet", "results: nothing played reads 'No games yet'")
@@ -109,7 +109,7 @@ func _picker() -> void:
 		return
 	var games := MinigameHub.listed(home)
 	print("MINIGAMEHUB open on this base: %s" % [games.filter(func(g): return g["open"]).map(func(g): return g["id"])])
-	ok(games.size() == 4, "picker: every game has a card, open or locked (%d)" % games.size())
+	ok(games.size() == 5, "picker: every game has a card, open or locked (%d)" % games.size())
 	for g in games:
 		var card: Node = home.panel_host.find_child("Game_%s_%s" % [g["id"], g["zone"]], true, false)
 		ok(card != null, "%s: has a card" % g["id"])
@@ -129,7 +129,7 @@ func _picker() -> void:
 	stub.post = Node3D.new()
 	var shown := MinigameHub.listed(fake)
 	var open_ids: Array = shown.filter(func(g): return g["open"]).map(func(g): return g["id"])
-	var only: bool = shown.size() == 4 and open_ids == ["race"] and shown[0]["game"] == stub
+	var only: bool = shown.size() == 5 and open_ids == ["race"] and shown[0]["game"] == stub
 	ok(only, "list: a game the home holds is open, the rest locked")
 	MinigameHub.open(home)
 	MinigameHub.start(home, shown[0])
@@ -167,7 +167,7 @@ func _garden() -> void:
 	ok(home.zone == "", "garden: the picker lands in the start zone, not the hub (the games stand there)")
 	var games := MinigameHub.listed(home)
 	var ids: Array = games.filter(func(g): return g["open"]).map(func(g): return g["id"])
-	ok(ids == ["race", "shove", "seek", "volley"], "garden: all four games are open (%s)" % [ids])
+	ok(ids == ["race", "shove", "seek", "volley", "fetch"], "garden: all five games are open (%s)" % [ids])
 	for g in games:
 		for k in home.kins:
 			k.erase("indoors")
