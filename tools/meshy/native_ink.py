@@ -3,11 +3,13 @@
 A Meshy file has no vertex colour, so every vertex got the full line and thin parts (Grimble's goo ribbons) drew
 black slabs where the shell poked through. This writes COLOR_0 = (1, 1, 1, room): half the free distance along
 the vertex normal, inward or outward, as a share of FULL m (fit_warden.ink_room's rule, for a file that never
-goes through Blender's export). Blender is only used for its BVH ray casts.
+goes through Blender's export), and none where the inward ray meets nothing within SHUT m (an open, one-layer
+sheet: its shell is seen from behind as a solid black slab). Blender is only used for its BVH ray casts.
 --slot=NAME renames the single material to the game's painted slot (warden_glb SLOTS, warden_look "slots"),
-so the Hunter's tuned per-slot look applies to the native body too.
+so the Hunter's tuned per-slot look applies to the native body too ("skin-native": the skin slot's look plus
+warden_look's "skin-native" overrides, which the contract model's own "skin" never sees).
 
-  python3 tools/meshy/native_ink.py OUT.glb IN.glb [--full=0.02] [--slot=skin] [--blender=PATH]
+  python3 tools/meshy/native_ink.py OUT.glb IN.glb [--full=0.02] [--shut=0.5] [--slot=skin-native] [--blender=PATH]
 """
 
 import os
@@ -27,11 +29,14 @@ import sys, numpy as np
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 d = np.load(sys.argv[-2])
-P, N, F, full = d["P"], d["N"], d["F"], float(d["full"])
+P, N, F, full, shut = d["P"], d["N"], d["F"], float(d["full"]), float(d["shut"])
 tree = BVHTree.FromPolygons([Vector(p) for p in P], [tuple(int(i) for i in f) for f in F])
 room = np.empty(len(P), np.float32)
 for i in range(len(P)):
     p, n = Vector(P[i]), Vector(N[i])
+    if tree.ray_cast(p - n * 1e-4, -n, shut)[0] is None:
+        room[i] = 0.0  # an open sheet (a goo ribbon, a flap): no inside, the shell would show as its black back
+        continue
     best = full * 2.0
     for dd in (n, -n):
         hit = tree.ray_cast(p + dd * 1e-4, dd, best)
@@ -63,7 +68,7 @@ def main(args):
                 wn = np.zeros_like(key)
                 np.add.at(wn, inv, nrm)
                 wn /= np.maximum(np.linalg.norm(wn, axis=1, keepdims=True), 1e-9)
-                np.savez(os.path.join(tmp, "in.npz"), P=key, N=wn, F=inv[idx], full=full)
+                np.savez(os.path.join(tmp, "in.npz"), P=key, N=wn, F=inv[idx], full=full, shut=float(opts.get("shut", "0.5")))
                 script = os.path.join(tmp, "rays.py")
                 open(script, "w").write(RAYS)
                 subprocess.run([opts.get("blender", BLENDER), "-b", "--factory-startup", "--python", script, "--",

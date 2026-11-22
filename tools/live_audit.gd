@@ -162,9 +162,9 @@ func _hunter(id: String, dir: String) -> void:
 	model.queue_free()
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
-	if grip:  # the gun hand up close (fov 30, 1.1 m off, from the front three-quarter): does the fist hold the gun?
+	if grip:  # the gun hand up close (fov 30, 2 m off, from the front three-quarter): does the fist hold the gun?
 		cam.fov = 30.0
-		cam.position = hand_at + Vector3(0.35, 0.25, 1.0)
+		cam.position = hand_at + Vector3(0.6, 0.45, 1.8)
 		cam.look_at(hand_at)
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
