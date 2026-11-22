@@ -48,7 +48,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
@@ -71,13 +70,17 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 |---|---|---|---|---|---|---|---|---|
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
 | gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
+| glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
+| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
 | kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
+| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
-| nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -86,11 +89,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
-| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
-| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -101,8 +100,6 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
-| glomwort | clip | clip | clip | clip | clip | clip | proc | proc |
-| goliathite | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -124,9 +121,9 @@ Worst five, backlog-ready:
 
 - [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki heatherhorn (No. 19): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/heatherhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
 <!-- table:end -->
 
 ## Gaps, worst first
