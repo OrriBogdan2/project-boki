@@ -6,16 +6,18 @@ extends RefCounted
 ## Ticked once a frame for every hunter, like GliderSfx; another player's is positional and quieter, driven
 ## by the synced velocity. Hunters with no hover sound play nothing here.
 
-const QUIET_DB := -34.0         # dB, loop, as he starts to drift...
-const LOUD_DB := -16.0          # dB, ...and at his full run speed
-const LOW := 0.85               # pitch as he starts to drift...
-const HIGH := 1.1               # ...and at his full run speed
-const STILL := 0.5              # m/s of ground speed below which he is still: the hum stops
-const OTHERS_DB := -6.0         # dB under yours for another player's hum
+const QUIET_DB := -34.0  # dB, loop, as he starts to drift...
+const LOUD_DB := -16.0  # dB, ...and at his full run speed
+const LOW := 0.85  # pitch as he starts to drift...
+const HIGH := 1.1  # ...and at his full run speed
+const STILL := 0.5  # m/s of ground speed below which he is still: the hum stops
+const OTHERS_DB := -6.0  # dB under yours for another player's hum
+
 
 ## The held loop's key for `h` (Sfx.loop_hold; it stops by itself once ticks stop holding it).
 static func key(h: Hunter) -> String:
 	return "hover%d" % h.get_instance_id()
+
 
 ## Called every frame by the hunter: holds the hum while it drifts, levelled and pitched by its speed.
 static func tick(h: Hunter) -> void:
