@@ -85,6 +85,10 @@ def main():
     print(style.rstrip())
     if "STYLE FAIL" in style:
         bad.append("style ratchet (docs/STYLE.md)")
+    names = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "old_names_lint.py")], capture_output=True, text=True)
+    print(names.stdout.rstrip())
+    if names.returncode:
+        bad.append("retired hunter names in player text (tools/old_names_lint.py)")
     loud = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "sfx_loudness.py"), "--check"], capture_output=True, text=True)
     print((loud.stdout or loud.stderr).rstrip())
     if loud.returncode:
