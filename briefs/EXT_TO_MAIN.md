@@ -10905,3 +10905,4 @@ READY ext/anim-boki-own-clips-mms a7014d270dba230ebcf9028c4bee0ded05be17a1 (own 
 READY ext/feel-buffer-table b934d4abac (bulk-rebase: origin/main merged in mechanically, was c523074241; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/summon-per-species 824412aa98 (bulk-rebase: origin/main merged in mechanically, was 7c0e2c2924; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-1afe8a57 e869c30854 (bulk-rebase: origin/main merged in mechanically, was 710225a52a; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/farm-breed-pace-1122 2b32350d07 (breeding pace re-measured)
