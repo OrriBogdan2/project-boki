@@ -8,6 +8,7 @@ extends RefCounted
 ##     rest at the carry cap, Hunter._refresh_kin_stats) and one summon this match (summon_k of its window, at
 ##     least summon_min_s) on the Summon key while their own Boki is resting or not riding with them.
 ##   - A thief who goes down or dies scatters what they carry: loose again where they fell.
+##   - A thief who extracts alive sends what they carry home and is paid for each (on_extract, settle).
 ##   - At match end every loose or stolen wisp goes home (match_end). The save never moved it: nothing is lost.
 ## The Kin keeps its own hunter in home_h; owner_h is whoever it rides with now (the thief while stolen), so the
 ## orbit, the summon's leash and the hit credit follow the carrier.
@@ -72,7 +73,7 @@ static func ride(k: Kin, dt: float) -> bool:
 	var o := k.owner_h
 	if k.remote or o == null or k.home_h == null or k.state != "shoulder":
 		return false
-	if stolen(k) and (o.downed or o.out or o.extracted):
+	if stolen(k) and (o.downed or o.out):
 		break_loose(k, o.pos)  # the thief fell: what they carry scatters
 	elif not stolen(k) and o.downed and not k.back_home:
 		break_loose(k, o.pos)
@@ -222,6 +223,26 @@ static func apply_net(k: Kin, loose_s: float, carrier: String, used: bool) -> vo
 static func render(k: Kin) -> void:
 	k.global_position = k.pos + Vector3(0, sin(k.m.time * BOB_HZ * TAU) * BOB_M, 0)
 	BokiWispLook.pose(k.model, k.m.time)
+
+
+## A hunter leaves alive: the stolen wisps they carry go home, and the player's are noted for the bonus.
+static func on_extract(m: Match, h: Hunter) -> void:
+	var held: Array = []
+	for k in m.kins:
+		if k.owner_h == h and stolen(k) and not k.dead:
+			held.append(k.species)
+			go_home(k)
+	if h == m.player and not held.is_empty():
+		m.result["stolen"] = held
+
+
+## The results (Game.apply_result): gems for each stolen wisp brought out alive.
+static func settle(r: Dictionary, out: Dictionary) -> void:
+	var gems := (r.get("stolen", []) as Array).size() * int(rules()["extract_gems"])
+	if gems > 0 and r.get("extracted", false):
+		Save.d["gems"] = int(Save.d["gems"]) + gems
+		out["gems"] = int(out["gems"]) + gems
+		out["stolen_gems"] = gems
 
 
 ## Match end: every loose or stolen wisp goes home to its own hunter.
