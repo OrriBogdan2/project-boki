@@ -7,10 +7,11 @@ extends RefCounted
 ## status's time, nothing flat on the ground (the look or a ring as it lands: a ground ring means gameplay), and
 ## a game that does not own the body shows it from the owner's snapshot (stun, root, slow) or event (Grounded, Daze).
 
-## [source, status, seconds]: the table's numbers (KIT_PARITY "Crowd control"); a kit's caster is a Hunter of it.
+## [source, status, seconds]: the table's numbers (KIT_PARITY "Crowd control", re-read by --cc-measure-check);
+## a kit's caster is a Hunter of it.
 const ROWS := [
-	["gunslinger", "daze", 1.4], ["gunslinger", "stun", 0.7], ["gunslinger", "slow", 0.6],
-	["juggernaut", "stun", 0.8], ["juggernaut", "slow", 1.5],
+	["gunslinger", "daze", 1.4], ["gunslinger", "stun", 0.9], ["gunslinger", "slow", 0.6],
+	["juggernaut", "stun", 0.8],
 	["archer", "stun", 1.2], ["archer", "slow", 0.8],
 	["ashwick", "slow", 1.5],
 	["tender", "root", 1.1],
@@ -18,7 +19,7 @@ const ROWS := [
 	["dredge", "stun", 1.1], ["dredge", "gnd", 1.0],
 	["rimewright", "stun", 0.75], ["rimewright", "slow", 0.8],
 	["ostra", "stun", 0.8], ["ostra", "slow", 1.5],
-	["bulwark", "stun", 1.0],
+	["bulwark", "stun", 1.0], ["bulwark", "slow", 1.5],
 	["mage", "stun", 0.8], ["mage", "gnd", 1.5],
 	["thief", "gnd", 1.5], ["thief", "slow", 2.5], ["thief", "stun", 0.9],
 	["boki", "stun", 0.6], ["boki", "root", 1.0], ["boki", "slow", 1.2],
