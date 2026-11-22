@@ -134,8 +134,6 @@ Next in line (24-25, smaller): Meeko LMB orb palette (`content/vfx/tender.json`)
   breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
-- `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
-  for Boki; check that no Hunter path reaches them.
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra,
   rimewright, tender, thief (Grimble is all `content/vfx/dredge.json` now; Sable's X and dash looks only, ext/vfx-sable-data-x; her LMB, RMB and E still `dj_fx`). The rest draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `pin_fx`, `bjorn_fx` (only the meshes that ride his hammer and shield: the thrown hammer, the whirl trail and glint, the aegis wall; every other Albert look is data, below), `breah_*`).
   Moving each to `HeroVfx` data is how a kit reaches the bar.

@@ -40,7 +40,6 @@ const CHECKS := {
 	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
 	"--hazard-hint-check": ["res://tools/hazard_hint_check.gd", "hazard_hint_check", null],
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],  # GPU: MP4 frames
-	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],  # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],  # the reel's drivers play through
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],  # the recording presets
