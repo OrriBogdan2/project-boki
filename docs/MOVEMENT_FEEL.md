@@ -1,5 +1,7 @@
 # Movement feel: targets, sources, measurements
 
+New sections go in `docs/MOVEMENT_FEEL.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. The reference is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
 
 Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save.
@@ -149,6 +151,7 @@ defaults aren't cited, since the data names no field for these windows.
 | drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
+| land squash by weight class (`content/rules/land_feel.json`, `--land-weight-check`) | light jump up in ~0.15 s (low crouch 0.1 s, up 0.05 s); heavy slam the deepest squash, ~0.5 s of low recovery | light hop 0.15 s, drop 0.24 s; medium hop 0.1 s, drop 0.3 s; heavy drop and dive depth 1, 0.5 s | measured per class: bottoms out at the data's depth, gone within a frame of its seconds | the footage cells also hold the .glb land clip for their seconds (WardenClips.land_play); medium and the other cells have no footage: the numbers the shared squash ran before [est]; no burst, ring or disc |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
 | e2e_render_frames (key to model moving) | 2 | 1 | <= 1 | no interpolation lag |
 | render_lag_m (model behind sim at a run) | 0.083m | 0.000m | <= 0.03m | |
@@ -362,6 +365,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Glider at any heat, softer deep lift** (owner item 63): the glide input opens the glider at every heat, overheated or not (no heat floor, no lockout after an overheated one closes); overheated it burns you and still lifts at full strength (owner 11-17: heat only slows the glide). The deepest lift is 30% softer (climb cap 26 -> 18.2 m/s; speed per metre of depth 1.7 -> 1.1) at the same heat cost. Measured by `--glider-heat-check`.
 - **Heat on the canopy** (`GliderHeat`): the glider cloth warms toward ember with heat, an overheated glider trails a thin smoke, and one burning over the abyss flickers, so teammates and enemies read a gliding Hunter's heat from the world. Two toon-shader parameters (`canopy_heat`, `canopy_burn`) on the canopy's own material: no extra draw calls, no burst on open or close. The heat (4 bits, 15 = overheated) and the burn state ride the hunter flags (bits 19-23); no Net shape change. Measured by `--glider-canopy-check`; shots by `--glider-canopy-shots`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
+- **Step height** (`physics.step_height`, `World.STEP`): 0.32 → 0.45 m, the tallest lip a hunter on the ground walks straight over [game data: MaxStepHeight is not overridden, so Unreal's 45 uu default stands]. The walk-over is now eased like the terrace step (`step_vis`, with the render lead held off the rise) instead of snapping the model; stairs, whose ground rises smoothly, are left alone. `--step-up-check` (`tools/step_up_check.gd`) runs Sable, Vex and Albert at lips of 0.10 to 0.60 m and at a terrace, head-on and at 45 degrees: every lip is walked over, and no frame moves the body or the camera more than half the lip.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
 ## Shift into the glider, and the dive into the feather (decision 0061, owner playtest 11-11)
@@ -550,8 +554,8 @@ No double buffering: a press is gathered, queued and applied in the same frame's
 - **Mossy RMB (Aegis): an animation gate.** The guard pose waited for the aegis, 0.1 s into the hold. The arm now comes up on the press. The aegis still rises 0.1 s in (source: 0.2 s, docs/heroes/bulwark.md), and a tap lowers the arm again.
 - **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
 - **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
-- **Cinder, Neve and Motley RMB: tick 1** (within target). The aim pose starts on the kit's first hold tick, which runs the step after the press.
-- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Kael and Tarek's LMB, Bjorn's LMB, Claire's, Cinder's, Ryzz's and Gil's RMB. Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
+- **Neve and Motley RMB: tick 1** (within target; Cinder's RMB is a cast since 11-21: pose tick 0, bolt tick 24). The aim pose starts on the kit's first hold tick, which runs the step after the press.
+- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Kael and Tarek's LMB, Bjorn's LMB, Claire's, Ryzz's and Gil's RMB (Cinder's RMB left the list on 11-21: a cast that shows on the press). Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
 ## Steps: the drawn body and the camera never jolt (`StepSmooth`, `--step-smooth-check`)
 - Stepping onto a one-terrace lip snaps the body up (`Hunter` step_up, 0.8 m in one step), and a run down a flight of stairs is a fall. Both stay exactly as they were for hit boxes and ledge rules: only the drawn node eases.
 - `StepSmooth.ease` chases the body's y at most `step_max_speed` 4.4 m/s (0.073 m a frame), never further than `step_lag_up` / `step_lag_down` behind. Higher than a step above the ground (`step_free_from` 0.9 to `step_free_to` 1.5 m: a jump, a glide, a fall) the body is drawn where it is. The camera follows the drawn y. All in `FeelConfig` ("Steps").
@@ -768,6 +772,7 @@ on the move. A clip of either holding while walking would settle it.
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (ref-juggernaut's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
 ## Glider trail: a side-coloured line behind every open glider (`GlideTrail`, `--glide-trail-check`)
+## A glide into a rim (`--mantle-check` section 8, glide-rim rows; DECISIONS: ledges always responsive)
 
 In a 30-Hunter match, squads gliding in from the sky were hard to pick out at range. Every open glider now draws one thin ribbon (0.3 m at the glider, narrowing to nothing) at canopy height, in the Hunter's team colour lightened a quarter toward white: the colour of their glider stripe and ground ring, so allies and each rival squad read apart. A point fades out in 1.2 s, so the line is about one glide-second long and is gone soon after the glider folds. No burst when it opens or closes (DECISIONS). It is one pooled `ImmediateMesh` per glider (one unshaded draw, turned to the camera), the same on every preset, and sits under a skin's own cosmetic trail (`Gliders.trail`). The trail is taken when a glider opens and goes back to the pool once its tail has faded. `--glide-trail-check` asserts both, and the colour. `--glide-trail-shots` renders two squads from 40 m and 80 m, with and without the trails.
 ## Space in an ability's recovery (`--dash-flow-check`, 2026-11-12)
@@ -781,7 +786,7 @@ two steps, found by halving (a press later in the recovery is taken as never les
 and 75 percent of that window records **now** (acted within two steps), **end +t** (acted, t seconds after the
 press) or **never** (not within 1.5 s). On the ground Space is a jump. In the air it is the glider: Space is held
 from the press, as a player holds it, and "acted" is the glider opening. `n/a`: the ability does not go off there
-without a target or the ground. The check fails a press in a window's last `DashFlow.BUFFER_S` (0.15 s) that never
+without a target or the ground. The check fails a press in a window's last `Loco.press_buffer` (0.15 s) that never
 acts, unless the hero's `into_jump` row is a documented lock.
 
 Source tags as above; `[?]` marks rows the source does not settle (the footage shows no jump out of that
@@ -858,7 +863,7 @@ What the table says:
 - **Suggestions, not built (PARITY FIRST):** Albert's Faultline is planted about 0.6 s in the source but our
   jump goes at once in the wind-up; Grimble's Kaiju Blast charge is planted in the source and ours walks and
   jumps (owner item 36 keeps the walk). If the owner wants the air tap chainable too, a 0.15 s hold of a Space
-  tap made in a move's last `BUFFER_S` would fit DashFlow's held slots.
+  tap made in a move's last `Loco.press_buffer` would fit DashFlow's held slots.
 ## Press to picture: key to first visible frame (`--press-latency-check`)
 
 How many frames pass between a key going down and the first frame its result is on screen, for every hero's LMB, RMB, E, R (the Merge), dash and jump, at 60 and 144 Hz. Budget: 2 frames at 60 Hz, and the same 33 ms at 144 Hz (4 frames); the check fails above it. For Vex, Kael, Lace and Cinder it also holds LMB, RMB, E and dash to the source footage ("against the source", below).
@@ -994,14 +999,13 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 | Lace (Myth) | E | slot on cooldown f0455, the arrows lobbed and the bow up in the same frame | 0 | 1 / 0 / -- | 0 |
 | Lace (Myth) | dash | slot timer 0.4 f0348 with the roll and its green burst | 0 | 0 / -- / 0 | 0 |
 | Cinder (Felix) | LMB | no slot; the pilot flame flickers at the nozzle f0021, the stream f0022 | 1 | 0 / -- / -- | 0 |
-| Cinder (Felix) | RMB | slot on cooldown f0073 with the lane and a nozzle flash (the bolt leaves f0075) | 0 | 1 / 2 / -- | 1 |
+| Cinder (Felix) | RMB | slot on cooldown f0073 with the lane and a nozzle flash (the bolt leaves f0075) | 0 | 0 / 24 / -- | 0 |
 | Cinder (Felix) | E | slot on cooldown f0180; the ring and the arms out f0181 (the blast f0182) | 1 | 0 / -- / -- | 0 |
 | Cinder (Felix) | dash | slot timer 0.3 f0143, already lunged onto the dummy | 0 | 0 / -- / 0 | 0 |
 
-**Fixed (ours):** Lace's RMB. The Heavy Shot has no tap, yet its draw (pose, needle, orchid bar) waited for the 0.15 s hold threshold that only decides whether the release looses: the drawn pose came at 11 steps of a held RMB (26 frames at 144 Hz), against Myth's draw on the frame the input shows (f0261). The draw now starts on the first held step (`archer_kit.gd` `rmb_hold_tick`; while the bow is drawn for the LMB it still waits for the threshold, so a quick tap leaves that draw alone); a release before the threshold still looses nothing and costs nothing, and puts the draw away. The pose now comes at 3 steps (its first sign at 1). Nothing else was ours to fix: every other key's first change is 0 to 3 steps, and the source moves on the frame its input shows, or one frame later for Ghost's railgun line, Felix's flame after its pilot flicker and Felix's shield ring. The intended wind-ups stay: Kael's Rampage leaves at 4 steps (`dash.windup` 0.07 s) with the pose on the press, and the slam's 0.6 s wind-up shows its pose on the release of the tap (2 steps).
+**Fixed (ours):** Lace's RMB. The Heavy Shot has no tap, yet its draw (pose, needle, orchid bar) waited for the 0.15 s hold threshold that only decides whether the release looses: the drawn pose came at 11 steps of a held RMB (26 frames at 144 Hz), against Myth's draw on the frame the input shows (f0261). The draw now starts on the first held step (`archer_kit.gd` `rmb_hold_tick`; while the bow is drawn for the LMB it still waits for the threshold, so a quick tap leaves that draw alone); a release before the threshold still looses nothing and costs nothing, and puts the draw away. The pose now comes at 3 steps (its first sign at 1). **Fixed (ours, 2026-11-21):** Cinder's RMB is now a cast, as in the source: the lane, the pose, a palm flash and the cooldown on the press (tick 0), and the bolt 0.4 s later (tick 24; f0073 to f0075, the same two lane frames on all three shots, docs/heroes/ashwick.md "RMB: cast or hold"). Before, a tap loosed on its release (2 steps) and a hold aimed for as long as it was held. Nothing else was ours to fix: every other key's first change is 0 to 3 steps, and the source moves on the frame its input shows, or one frame later for Ghost's railgun line, Felix's flame after its pilot flicker and Felix's shield ring. The intended wind-ups stay: Kael's Rampage leaves at 4 steps (`dash.windup` 0.07 s) with the pose on the press, and the slam's 0.6 s wind-up shows its pose on the release of the tap (2 steps).
 
 **Worth a look (not built, PARITY FIRST):**
-- Cinder's RMB: the source draws its lane with a nozzle flash on the frame the slot goes on cooldown (f0073) and the bolt leaves two frames later (f0075, about 0.4 s), a cast. Ours looses on the release of a tap, 2 steps.
 - Lace's RMB tap: the source data fires on any release ("HOLD to charge, RELEASE to fire"; pin.md: a tap fires uncharged). Ours looses nothing on a tap (archer.json's own rule).
 - Kael's LMB swings on the release (the greatsword's charge): a press held past a tap swings later. Brall's press starts the series at once; his hold is the ranged blast.
 - Albert's aegis (not in this slice) rises at its 0.1 s hold, 7 steps at 60 Hz with nothing before it; the same shape as Lace's draw before the fix, if Oath's shield shows on the press.
@@ -1019,6 +1023,14 @@ The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt
 - **Not a snag:** the other Tenzo stall was a sealed lair's ward bouncing the glider back out (`Lairs._push_out`, 2 m/s away from it) while the keys held into it. That is the ward working; the check now treats a sealed or dormant lair within 2 m as a wall by design.
 
 After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
+## Low frame rates: taps and dashes survive 30 fps and 100 ms stalls (`--low-fps-input-check`, 2026-11-12)
+
+DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on the frame rate. `tools/low_fps_input_check.gd` runs headless on the real `Match._process`: `Engine.max_fps = 30` caps the frames (the check measures it holds), and a stall hook (`OS.delay_msec(100)` one frame before the tap, so the tap's frame has delta 0.1 s and `Match` runs 6 steps) loses a frame's time. Per hero (gunslinger, mage, juggernaut; `=<id>,<id>` picks others), each of Shift, Space, LMB, E and R is pressed and released between two reads, six times per round, and must go off every time.
+
+- **Found and fixed: LMB.** It was read as `is_action_pressed`, "down now", so a click that came and went inside one frame was lost: 6/6 taps lost at 30 fps and after a stall. Shift, Space, E and R were already safe: they read `is_action_just_pressed`, which stays true for the frame in which the key went down and up, and queue the press in `Match.pending_input` until the next fixed step. `FireTap` (`scripts/match/fire_tap.gd`) now latches an LMB tap the same way: down for the next fixed step, once, then cleared (a held button is unchanged, a tap in a hitstop frame waits for its step, a paused or over-UI tap is dropped). After the fix: 0 lost in 180 taps (3 heroes x 5 keys x 2 rounds x 6).
+- **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
+- `--move-feel-check`: 0 failures on this branch.
+
 ## Ledge mantle timing (`--move-feel-check` ledge rows)
 
 Settled against the source, PARITY FIRST (briefs/DECISIONS.md 2026-11-07): sv/briefs/MANTLE_185b.md, sv/briefs/physics.md and the owner's clips. [?] marks what neither the data nor the footage settles; nothing there is guessed.

@@ -150,7 +150,7 @@ func _tick(dt: float) -> void:
 	boop.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
-		h.dash_buf = Hunter.DASH_BUFFER
+		h.dash_buf = Loco.press_buffer
 	if not mend.is_empty():
 		_tick_mend(dt)
 
@@ -290,10 +290,6 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	var pressed := held and not lmb_was
 	lmb_was = held
-	# a merge ends the Crushing Blow's charge: letting go of it must not swing mid-transformation
-	if KinMerge.transforming(h):
-		drop_holds()
-		return true
 	if _hold_interrupted():
 		if lmb_t >= 0.0:
 			cancel_hold()
@@ -778,7 +774,7 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
+		if is_instance_valid(h) and not h.downed and not ult.planted(): _spin_hit(wd))
 	return true
 
 ## The 360 Smash's spin on arrival: one hit all round him, lunging on along `wd` ("lunge.spin_d" m, BjornLunge);
@@ -918,7 +914,10 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true
 			bot_hold["rmb"] = 1.0
-		elif dist < 4.5 and rmb_ready() and not rmb_down:
+		# up close: against a monster, block its telegraphed hit and swing between (raising it whenever ready
+		# kept him behind the aegis, where he can't swing: a brute camp outlasted the whole --camp-clear-check
+		# trial with him at near full hp); a hunter's hits aren't telegraphed, so he keeps it up for them
+		elif dist < 4.5 and rmb_ready() and not rmb_down and (not tgt is Mob or (tgt as Mob).st in ["windup", "lunge"]):
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 			bot_hold["rmb"] = 1.2
 	# close in: a Shield Charge from behind the shield, else a Whirl

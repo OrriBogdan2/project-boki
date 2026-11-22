@@ -1,7 +1,8 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; cords round the legs (StatusLooks)
+##   gnd  Grounded (the Thief's Bola, Sparkle's Skycall): no dash, jump or glide; cords round the legs (StatusLooks),
+##        in the caster's colour when `by` names one, else amber
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
@@ -50,6 +51,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 	var m: Node = e.m
 	if m == null:
 		return
+	if kind == "gnd":
+		e.set_meta("gnd_by", by)      # the look's colour: the caster's when the kit names it (StatusLooks)
 	if e.remote:
 		if send and m.get("net_on"):
 			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01), by])
@@ -71,6 +74,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
+			_show(e, kind, secs)
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
@@ -107,6 +111,7 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
 	if kind in TAG_COL:
 		return
+	StatusSfx.kit(e, kind, secs)
 	match kind:
 		"gnd":
 			_look(e, "gnd", secs)

@@ -38,6 +38,7 @@ static func first(m: Match, P: Hunter, slot: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	await _first_hint()
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
 	await _hint()
@@ -72,6 +73,8 @@ func _window(hero: String, slot: String) -> void:
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
 	var placed := at is Vector3 and (at as Vector3).is_finite()
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
+	var verb := RecastHint.verb(P.ak, slot)
+	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != RecastHint.FALLBACK_VERB, verb)
 	m.step(DT)
 	var cw: Dictionary = P.ak.cue.get("w", {})
 	var key := RecastCue.key_of(slot)
@@ -145,11 +148,11 @@ func _buffered() -> void:
 	ok("ostra e: no world marker on the seed, the slot still pulses",
 			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
 	var min_t := float(K.e_def()["min_recast"])
-	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - ArchKit.RECAST_BUFFER * 0.6:
+	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - Loco.press_buffer * 0.6:
 		m.step(DT)
 	P.ak.use_e()
 	var held := not K.seed.is_empty()
-	step(m, ArchKit.RECAST_BUFFER)
+	step(m, Loco.press_buffer)
 	var popped := K.seed.is_empty()
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)

@@ -21,6 +21,7 @@ var hidden: Array = []
 var _last_step := ""
 
 
+
 func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
@@ -123,6 +124,7 @@ func _sim_tick(m: Match, t: float) -> void:
 	if tu.text == "" or tu.stall_t >= GAP_S and tu.nag_t <= 0.0:
 		gaps.append("match %s at %.0f s: no text or %.0f s stalled with no nag" % [tu.id(), t, tu.stall_t])
 	_fresh_log("match/" + tu.id(), int(tu.t), line, marker, tu.stall_t)
+
 
 
 ## A farm step before it is done: HOLD_S s of looking at the hint line and the world marker.

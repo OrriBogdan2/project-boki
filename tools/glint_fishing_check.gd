@@ -15,11 +15,15 @@ extends RefCounted
 ##      each look hides itself when its life is spent
 ##   9. on the rock: Glasswater has the rock and a session started there runs to a result card; the Empty
 ##      holds the rod and casts through it (HunterRod poses via HomeVerbs) and puts it away at the end
+##  10. the derby (fishing_derby.gd): a session stores its points per cast, the visit snapshot carries them cleaned,
+##      only friends who landed something are raced, the higher total wins gems once per friend per day, and
+##      at the rock the chooser lists the friend and a derby runs to a card with the verdict
 ##   9. the partner: a sleeping one is left alone; an awake one walks over to sit side-on 1-3 m from you,
 ##      faces the bobber, leans in on a bite, and hops on a catch (higher for a rare one)
 ## --glint-fishing-shots=<dir> makes a strip of one cast on the Empty instead (a real renderer).
 ## Never touches the real save.
 
+const MemStore := preload("res://tools/mem_store.gd")
 const SESSIONS := 120
 const DT := 1.0 / 30.0           # s per step
 const REACT := [0.2, 0.9]        # s, the bot's reaction to the ears going up (a uniform roll)
@@ -54,6 +58,7 @@ func run(m: Node) -> void:
 	_machine()
 	_settle()
 	_looks()
+	_derby()
 	await _on_rock()
 	print("FISH DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -274,6 +279,81 @@ func _settle() -> void:
 	ok(Care.need(rec, "joy") > 40.0 and Care.need(rec, "energy") < 80.0, "joy up, energy down")
 	ok(str(rec["memory"]).contains("glints"), "it remembers the session")
 
+## A finished run whose casts scored the given points (1 = a common landed, 3 = a rare, 0 = nothing).
+func _scored(pts: Array) -> GlintFishing.Run:
+	var r := GlintFishing.Run.new(_rec(50, 50), 20000, RandomNumberGenerator.new())
+	for p in pts:
+		r.casts.append({"how": "caught" if p > 0 else "miss", "catch": {}, "rare": p == 3})
+	return r
+
+
+func _derby() -> void:
+	Save.d = Save.fresh()
+	ok(
+		FishingDerby.clean([9, -3, "x", 2, 1, 1, 1]) == [3, 0, 0, 2, 1],
+		"a snapshot's catch is cut to five casts, each 0 to 3"
+	)
+	ok(
+		FishingDerby.clean("junk").is_empty() and FishingDerby.clean({}).is_empty(),
+		"a catch that is not a list is nothing"
+	)
+	var mine := _play(_rec(50, 50), 77)
+	GlintFishing.settle(mine)
+	var kept: Array = FishingDerby.stored()
+	ok(
+		kept.size() == 5 and FishingDerby.total(kept) == FishingDerby.total(mine.casts.map(FishingDerby.cast_pts)),
+		"a finished session keeps its five casts' points %s" % [kept]
+	)
+	var seen := Social.clean_island(Social.profile_doc())
+	ok(seen["fish"] == kept, "the visit snapshot carries it, and reads back the same")
+	var mem := MemStore.new()
+	Social.store_stub = func(m: String, a: Array, cb: Callable) -> void: cb.call(mem.reply(m, a))
+	Social.ok = true
+	Social.me = "me"
+	for row in [["amy", [1, 0, 3, 0, 1]], ["zed", [0, 0, 0, 0, 0]], ["bad", [99, -5, 1e30, 7, 7, 7]], ["old", null]]:
+		var doc := {"name": row[0], "roster": []}
+		if row[1] != null:
+			doc["fish"] = row[1]
+		mem.docs["profiles/" + row[0]] = JSON.stringify(doc)
+	var rows: Array = []
+	Social.list_islands(func(r: Array): rows.append_array(r))
+	var foes := FishingDerby.rivals(rows)
+	var names := foes.map(func(f): return f["name"])
+	ok(
+		names.has("amy") and names.has("bad") and not names.has("zed") and not names.has("old") and foes.size() == 2,
+		"only friends who landed something are raced (%s)" % [names]
+	)
+	var bad: Array = foes.filter(func(f): return f["name"] == "bad")[0]["pts"]
+	ok(bad == [3, 0, 3, 3, 3], "a made-up catch is cut down to what casts can score %s" % [bad])
+	var amy := {"id": "amy", "name": "Amy", "pts": [1, 0, 3, 0, 1]}
+	var gems0 := int(Save.d["gems"])
+	var tie := FishingDerby.settle(amy, _scored([1, 1, 1, 1, 1]), 20000)
+	ok(
+		tie["mine"] == 5 and tie["theirs"] == 5 and not tie["won"] and int(Save.d["gems"]) == gems0,
+		"a tie pays nothing"
+	)
+	var lose := FishingDerby.settle(amy, _scored([1, 0, 0, 0, 0]), 20000)
+	ok(not lose["won"] and int(Save.d["gems"]) == gems0, "a lower total loses and pays nothing")
+	var win := FishingDerby.settle(amy, _scored([3, 0, 3, 0, 0]), 20000)
+	var prize := int(FishingDerby.rules()["gems"])
+	ok(
+		win["won"] and win["gems"] == prize and int(Save.d["gems"]) == gems0 + prize,
+		"a higher total wins %d gems" % prize
+	)
+	var again := FishingDerby.settle(amy, _scored([3, 3, 3, 3, 3]), 20000)
+	ok(
+		again["won"] and again["gems"] == 0 and int(Save.d["gems"]) == gems0 + prize,
+		"a second win over the same friend that day pays nothing"
+	)
+	var next := FishingDerby.settle(amy, _scored([3, 3, 3, 3, 3]), 20001)
+	ok(
+		next["gems"] == prize and Save.d["fish_paid"].size() == 1,
+		"the next day it pays again (and yesterday's mark is dropped)"
+	)
+	Social.ok = false
+	Social.store_stub = Callable()
+
+
 func _on_rock() -> void:
 	Content.rules("farm_build")["base_mode"] = true
 	var d := Save.fresh()
@@ -318,7 +398,52 @@ func _on_rock() -> void:
 	ok(plopped, "a cast's plop showed on the water during the session")
 	ok(gf.run == null and is_instance_valid(gf.card) and gf.card.name == "GameResultCard",
 		"it ends with the shared result card (%.1f s, pressing every second)" % t)
+	_derby_rock(gw, gf)
 	Content.rules("farm_build")["base_mode"] = false
+
+## With the store answering, the rock asks first; the friend's button starts a derby that ends on the card.
+func _derby_rock(gw, gf: GlintFishing) -> void:
+	var mem := MemStore.new()
+	mem.docs["profiles/amy"] = JSON.stringify({"name": "Amy", "roster": [], "fish": [1, 1, 0, 0, 0]})
+	Social.store_stub = func(m: String, a: Array, cb: Callable) -> void: cb.call(mem.reply(m, a))
+	Social.ok = true
+	Social.me = "me"
+	gf.use()
+	var btns: Array = gw.panel_host.find_children("*", "Button", true, false).filter(
+		func(b): return b.text.begins_with("Derby vs Amy")
+	)
+	ok(
+		gf.run == null and gw.panel_open == "Glint Fishing" and btns.size() == 1,
+		"the rock asks: fish alone or a derby vs Amy"
+	)
+	if btns.is_empty():
+		return
+	var gems := int(Save.d["gems"])
+	btns[0].pressed.emit()
+	ok(
+		gf.run != null and gf.foe["name"] == "Amy" and gw.panel_open == "",
+		"her button starts a session racing her catch"
+	)
+	var run: GlintFishing.Run = gf.run
+	for i in 5:
+		run.casts.append({"how": "caught", "catch": run.glints[0]["catch"], "rare": false})
+	run.go(GlintFishing.Run.S.SHOW)
+	run.state_t = 99.0
+	gf.tick(0.1)
+	var lines: Array = [] if not is_instance_valid(gf.card) else gf.card.find_children("*", "Label", true, false)
+	var card_text := "|".join(lines.map(func(l): return l.text))
+	ok(
+		(
+			gf.run == null
+			and card_text.contains("Amy's catch: You win, 5 to 2, +10 gems")
+			and int(Save.d["gems"]) == gems + 10
+		),
+		"it ends on the card with the verdict and the gems"
+	)
+	ok(Social.clean_island(Social.profile_doc())["fish"] == [1, 1, 1, 1, 1], "and your new catch is what friends see")
+	Social.ok = false
+	Social.store_stub = Callable()
+
 
 ## The partner walks over, then a forced bite and catch: where it sits, where it looks, how it leans and hops.
 func _seated(gw, gf: GlintFishing, pk: Dictionary) -> void:
