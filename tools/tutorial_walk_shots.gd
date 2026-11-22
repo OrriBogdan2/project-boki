@@ -150,7 +150,8 @@ func _sign(sid: String, safe: Rect2) -> void:
 	var w := (cam.global_basis.x * lab.offset.x + cam.global_basis.y * lab.offset.y) * lab.pixel_size
 	var shift := cam.unproject_position(lab.global_position + w) - cam.unproject_position(lab.global_position)
 	var raw := MsgLane.label_rect(lab, cam)
-	var box := Rect2(raw.position + shift, raw.size)
+	var off := SafeArea.frame(cam.get_viewport().get_visible_rect().size).position  # (screen px to HUD frame)
+	var box := Rect2(raw.position + shift - off, raw.size)
 	var hit := ""
 	for k in cam.hud_keep:
 		if box.intersects(cam.hud_keep[k]):
