@@ -6,7 +6,7 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
-**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 60 s wall, headless.
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main.
 
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
@@ -147,7 +147,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
-7. The Mask page is 83 words and the egg screen 218: the largest text blocks of the first minutes.
+7. Done: the first Relic's page shows each ability's key and name only (about 25 words, was 83); the egg cards and the knock card are one short line each, and the knock screen hides the sub line (was 218 words). The Relics screen keeps the full lines.
 # Tutorial guidance, garden only
 
 ## Garden first 15 (`--garden-first-15-check`)
@@ -184,9 +184,11 @@ Fixes (Goals tracker, no new screen):
 - "See a nap pile" and "Pair two Boki in the Nook" stay off the card while you have one Boki, so the
   top line is never something you cannot do. They show as soon as a second Boki is on the farm.
 
-Left open (not fixed here): a one-Boki save has no garden way to a second Boki before the market
-stall is level 2 (the Shelter), and a visitor needs a built zone. The level row covers the gap, but
-breeding stays out of reach for a while.
+Fixed (ext/garden-second-boki): on a base_mode farm the Shelter opens at market stall level 1
+(`market.json shelter.base_open_level`, `Shelter.open_level()`), so a one-Boki save can adopt a stray for
+20 gems on day one (the first farm entry gives 200). Asserted in `--garden-first-day-check`. Other farms still open it at level 2.
+Alternative not taken: a starter visitor who stays (needs a built zone and 2 residents, so it is slower and rolls on chance).
+The level row still covers the wait for breeding, which stays out of reach for a while.
 # Match tutorial: steps and hints audit (origin/main fb360f614, 2026-11-12)
 
 Owner decision 2026-11-08: the match tutorial is about 8 steps (land+move, dash+glide, shoot, E, send your Boki, a fight,
