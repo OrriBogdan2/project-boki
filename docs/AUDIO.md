@@ -1,5 +1,7 @@
 # Audio: sound sets, loudness and buses
 
+New sections go in `docs/AUDIO.d/`, one file per change (docs/DOC_FRAGMENTS.md). Read that folder with this page.
+
 How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
 How the game's sound effects are made, named, levelled and played. Music is in `tools/compose.py`; ambience beds in `tools/gen_ambience.py` (below).
 
@@ -182,12 +184,12 @@ bold; every hit is the Hunter's own file, and `--sfx-set-check` fails a move loo
 | Motley | RMB Shard Snap | os_snap_wind, os_snap | os_snap's 0.4 s streak (0.44 s flight) | os_snap_hit, now heard by everyone (`snap_struck`) | **os_snap_fizz** (no one hit, `snap_miss`) |
 | Motley | Shift Trade | os_swap_lob | os_swap_lob's tail | os_swap at the landing | **os_trade_swap** at the spot he left (`trade_swap`) |
 | Motley | E Brimseed | os_seed | ostra_music_box (ripe) | os_pop + ostra_spring_boing, his alone now (Gil's Zeep no longer borrows os_pop) | **os_seed_fizz** (gone unpopped, `seed_fizz`) |
-| Motley | X Nightwell | os_well | - | os_well_hum (opens) | none yet |
+| Motley | X Nightwell | os_well | - | os_well_hum (opens) | **os_well_close** (closes quietly, `well_close`) |
 | Gil | LMB thrust / lunge | gil_thrust | - | **gil_thrust_hit** (lunge: the same at 0.8 pitch + splash) | - |
-| Gil | LMB held Tide | shared swim/skewer/splash | - | **gil_tide_hit** | - |
+| Gil | LMB held Tide | **gil_tide_lunge** | - | **gil_tide_hit** | - |
 | Gil | RMB Grab Bag | **gil_toss** | gil_toss's tail | **gil_pop_thunder/slime/air/fire/zeep** | Slime: **gil_slime_dry** as the puddle's slow ends |
 | Gil | Shift Ground Swim | gil_dash (+ splash) | (under ground) | **gil_surface** | (the surfacing) |
-| Gil | E Riptide | **gil_spin** (each turn) | **gil_spout** | - | - |
+| Gil | E Riptide | **gil_spin** (each turn) | **gil_spout** | **gil_spout_hit** (each foe it catches, `spout_hit`) | - |
 | Gil | X Tidal Wave | **gil_wave** | - | - | **gil_wave_land** |
 | Gil | passive Beached | **gil_beached** | | | |
 
