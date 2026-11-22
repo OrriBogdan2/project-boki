@@ -50,6 +50,11 @@ const GAP_STEPS := ["dash", "exdash", "glide"]  # leave from the glowing pad on 
 ## The steps whose marker is the camp's nearest monster.
 const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
 const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
+## Gap steps whose sign moves over the landing once you have left the pad (the glide is long: the pad you left
+## is soon off a 1280x720 screen, so the sign goes where you are headed and says so).
+const LAND_SIGN := {"glide": "LAND HERE"}
+const SIGN_RISE := 2.6  # m: a pad sign stands this far over its spot
+const PAD_LEFT_R := 1.5  # m (flat) from the pad, off the ground: you have taken off
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
 const KIT_KEY := {
 	"pick_sec": "rmb",
@@ -194,9 +199,9 @@ func _add_pad(id: String) -> void:
 	lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lab.modulate = MINT
 	lab.no_depth_test = true
-	lab.position = pad + Vector3(0, 2.6, 0)
+	lab.position = pad + Vector3(0, SIGN_RISE, 0)
 	m.add_child(lab)
-	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab})
+	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab, "text": lab.text})
 
 ## The sign over a gap step's pad (null for a step without one).
 func pad_sign(sid: String) -> Label3D:
@@ -204,6 +209,17 @@ func pad_sign(sid: String) -> Label3D:
 		if pd["id"] == sid:
 			return pd["label"]
 	return null
+
+## The ground spot a gap step's sign stands over (INF for a step without one): the pad, or the landing once
+## you have taken off on a LAND_SIGN step.
+func sign_spot(sid: String) -> Vector3:
+	var lab := pad_sign(sid)
+	return Vector3.INF if lab == null else lab.position - Vector3(0, SIGN_RISE, 0)
+
+## Whether the player has left this gap step's pad: off the ground, past its rim.
+func _off_pad(sid: String) -> bool:
+	var p := m.player
+	return p != null and not p.grounded and _dist(stop(sid, "pad")) > PAD_LEFT_R
 
 # ------------------------------------------------------------------ each step
 func id() -> String:
@@ -284,6 +300,7 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
+	m.player.stats.erase("glide_presses")
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
@@ -716,7 +733,12 @@ func _props() -> void:
 	for pd in _pads:
 		var on: bool = pd["id"] == id()
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
-		(pd["label"] as Node3D).visible = on
+		var lab: Label3D = pd["label"]
+		lab.visible = on
+		if on and LAND_SIGN.has(pd["id"]):
+			var land: bool = _off_pad(pd["id"])
+			lab.text = String(LAND_SIGN[pd["id"]]) if land else String(pd["text"])
+			lab.position = stop(pd["id"], "at" if land else "pad") + Vector3(0, SIGN_RISE, 0)
 
 
 ## Beams standing in the world right now (--tutorial-idle-check).

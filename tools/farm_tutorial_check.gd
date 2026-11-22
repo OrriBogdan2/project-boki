@@ -9,8 +9,9 @@ extends RefCounted
 ##      Done (not Feed) is the page's filled button until the trough step
 ##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
-##   5. base_mode: the four-step base tutorial (meet, feed and the lean, toy, head out or stay), your Boki
-##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides retired
+##   5. base_mode: the five-step base tutorial (meet, plant the snack patch, feed and the lean, toy, head out
+##      or stay), your Boki leading each step, a Skip on screen at every step, resume after save and load,
+##      the farm guides retired
 ##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
 ##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
@@ -125,8 +126,8 @@ func _base_tutorial() -> void:
 	rules["base_mode"] = true
 	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
 	ok(
-		ids == ["meet", "eat", "toy", "out"] and FarmTutorial.skippable(),
-		"base_mode on: four steps and a Skip: %s" % str(ids)
+		ids == ["meet", "patch", "eat", "toy", "out"] and FarmTutorial.skippable(),
+		"base_mode on: five steps and a Skip: %s" % str(ids)
 	)
 	var one_line := true
 	for st in FarmTutorial.steps():
@@ -144,10 +145,22 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
 	FarmTutorial.event("meet")
+	var spot := FarmTutorial.spot("patch")
+	ok(
+		FarmTutorial.current() == "patch" and FarmTutorial.hint_text("patch").contains("snack patch"),
+		"met: plant the snack patch comes before feeding"
+	)
+	ok(
+		spot.get("tile", "") == SnackPatch.ID and spot.get("tab", "") == HomeLayout.CATALOG[SnackPatch.ID]["cat"],
+		"the patch step lights the snack patch tile in its Garden tab"
+	)
+	var pl := HomeLayout.of(Save.d)
+	(pl["deco"] as Array).append({"u": HomeLayout._next_uid(pl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
+	FarmTutorial.detect()
 	var eat_hint := FarmTutorial.hint_text("eat")
 	ok(
 		FarmTutorial.current() == "eat" and eat_hint.contains(Care.food_name("emberberry")),
-		"met: feed it, the hint names the food"
+		"patch down: feed it, the hint names the food"
 	)
 	var rec: Dictionary = Save.d["roster"][0]
 	Evo.eat(rec, "kibble")
@@ -163,7 +176,7 @@ func _base_tutorial() -> void:
 		"a toy down: watch it play, marked"
 	)
 	FarmTutorial.event("play")
-	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 3, "a Boki at play finishes the toy step")
+	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 4, "a Boki at play finishes the toy step")
 	var g := int(Save.d["gems"])
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
@@ -230,8 +243,15 @@ func _base_world() -> void:
 	)
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
-	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
+	ok(
+		FarmTutorial.current() == "patch" and guide.target("patch") == Vector3.INF,
+		"walking up meets it: the patch is next"
+	)
 	ok(_skip_shown(guide), "step 2: Skip is on screen")
+	var hl := HomeLayout.of(Save.d)
+	(hl["deco"] as Array).append({"u": HomeLayout._next_uid(hl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
+	guide._poll()
+	ok(FarmTutorial.current() == "eat" and _berries() == 3, "the patch down hands over the food")
 	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))  # Care.feed leans, the home shows it
 	guide._poll()
 	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
@@ -257,12 +277,12 @@ func _base_world() -> void:
 			FarmTutorial.did("meet")
 			and FarmTutorial.did("eat")
 			and FarmTutorial.current() == "toy"
-			and FarmTutorial.done_count() == 2
+			and FarmTutorial.done_count() == 3
 		),
 		"after save and load it resumes at the toy step"
 	)
 	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "4/5", "resumed: 4/5 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
@@ -446,8 +466,8 @@ func _tutorial_rules() -> void:
 	ok(FarmTutorial.did("stone") and FarmTutorial.current() == "house", "enough stone for the house finishes mining")
 	var house_hint := FarmTutorial.hint_text("house")
 	ok(
-		house_hint.contains(FarmSites.cost_text(FarmSites.build_cost("house"))) and not house_hint.contains("{"),
-		"the house hint names what it costs: %s" % house_hint
+		house_hint.contains("House") and not house_hint.contains("{"),
+		"the house hint names the House tile, keys filled in: %s" % house_hint
 	)
 	FarmTutorial.event("swing")
 	ok(not FarmTutorial.did("hammer"), "doing a later step early does not count")
@@ -559,9 +579,9 @@ func _tutorial_rules() -> void:
 		(
 			FarmTutorial.did("buy")
 			and FarmTutorial.current() == "sell"
-			and FarmTutorial.hint_text("sell").contains("Gems come from")
+			and FarmTutorial.hint_text("sell").contains("sell your crop")
 		),
-		"buying a seed finishes it; selling is next and says where gems come from"
+		"buying a seed finishes it; selling the crop is next"
 	)
 	FarmTutorial.event("sell")
 	ok(
@@ -582,6 +602,7 @@ func _tutorial_rules() -> void:
 	L = HomeLayout.ensure(Save.d)
 	_stats()
 	var g1 := int(Save.d["gems"])
+	var kibble0 := int(Save.d["items"].get("kibble", 0))  # the fresh bag already holds the first-day kibble
 	FarmTutorial.skip()
 	var kept: bool = int(Save.d["gems"]) == g1 and HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
 	ok(
@@ -590,7 +611,7 @@ func _tutorial_rules() -> void:
 			and FarmTutorial.current() == ""
 			and FarmTutorial.state()["skipped"]
 			and kept
-			and int(Save.d["items"].get("kibble", 0)) == int(FarmTutorial.rules()["start_food"]["kibble"])
+			and int(Save.d["items"].get("kibble", 0)) == kibble0 + int(FarmTutorial.rules()["start_food"]["kibble"])
 		),
 		"skipping ends the prompts, takes nothing, and hands over the axe, the pickaxe and the food"
 	)

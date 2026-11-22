@@ -89,6 +89,12 @@ the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fi
 and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
 Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
 
+## Status (2026-11-14, ext/albert-i1-ingame): Albert i1 in game
+Albert is on his live i1 master (art/wardens/breaker/IMPORT.md). Two swap keys came with him: `emit_paint` (a master that paints its
+glow: the emissive texture is the baked atlas's texels in a hue/sat/value range) and `screen` again (`screen_uvs`, lost in a merge
+before 11-11: Albert's porthole showed blank glass from the clean1 swap on). The fish has `move_bones` with `to` and the game glb is
+main's (absolute points only), which closes the 16x stretch: worst 5.24, 0 clips over 9.5.
+
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
 re-time: Vex's `x` and Meeko's `seed`/`seed_aim` (tools/art1/glb_add_clips.py). Sparkle is on her current master
@@ -245,3 +251,10 @@ needles and caps. `blender -b --factory-startup --python tools/art1/glb_backface
 drops and prints them (indices and normals only), then `glb_relax.py` as usual. See it with
 `--parity-reel --reel-hero=dredge --reel-only=backfaces [--reel-close]` (red = a back showing). A changed .glb needs
 `godot --headless --import` before any `jobq` shot: the tree's `.godot/imported` copy is what a GPU worker plays.
+
+## Torn right foot, 2026-11-18 (ext/grimble-ingame-fix-1117)
+Cutting the floor puddle took the Meshy faces of Grimble's right foot with it: below the knee his right leg was a fan of
+shards that tore in every clip (the stretch check cannot see it; Blender renders of idle, run_f, throw, lunge and
+death can). The rig is mirror-symmetric, so `python3 tools/art1/glb_mirror_limb.py IN.glb OUT.glb --below 0.42`
+dropped the right leg's 575 triangles under 0.42 m and put the left shin and foot there, mirrored (534 tris, same UVs and
+paint, .L joints renamed .R). Stretch-check unchanged (mean of 52 clips 4.66, worst 8.52 ledge).
