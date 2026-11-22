@@ -1,18 +1,30 @@
-# Ability VFX quality: the bar, the rules, the scorecard (2026-11-08, re-scored 2026-11-09)
+# Ability VFX quality: the bar, the rules, the scorecard (re-scored 2026-11-22 on main 41de1b3f01)
 
 Owner playtest 11-08: abilities look janky; Cinder and Kael look decent. This doc sets the bar from those two kits
-(plus the source footage in `docs/KIT_PARITY.md`), lists the shared causes of jank and what the shared layer now does,
-and scores every Hunter worst-first. Each Hunter's fix is a backlog item (role `feel`) that must ship a before/after
+(plus the source footage in `docs/KIT_PARITY.md`), lists the shared causes of jank and what the shared layer does, and
+scores every Hunter on today's main. Each Hunter's fix is a backlog item (role `feel`) that must ship a before/after
 strip made with the reel below.
 
 ## Strips
-`godot --path . --hero-vfx-reel --reel-hero=<arch> --shots-dir=shots/<arch>` (through `jobq submit --needs gpu`) writes
-one PNG sheet per part: `shots/<arch>/<hero>_<part>.png`. Parts: `lmb`, `hold` (LMB held 1.4 s), `rmb`, `dash`, `e`,
-`r`, plus a Hunter's own parts (`tools/vfx_reel/<arch>.gd`, e.g. Grimble's `hook`). The 11-08 pass ran `vfxq-before-<arch>`
-on main's tree (d255acbee). The 11-09 re-score strips are in `docs/art/vfx_rescore/<arch>.jpg` (see below).
-`r`, plus a Hunter's own parts (`tools/vfx_reel/<arch>.gd`, e.g. Grimble's `hook`). This pass ran `vfxq-before-<arch>`
-on main's tree (d255acbee) and `vfxq-after-<arch>` on this branch; the sheets live in the jobq outputs
-(`/home/boki/jobq/done/<id>/out/shots/`), not in the repo.
+`godot --path . --hero-vfx-reel --reel-hero=<arch> --shots-dir=<dir>` (through `jobq submit --needs gpu --tree <tree>
+--out <dir> -- ...`) writes one PNG sheet per part (a 3x3 grid of crops): `<dir>/<hero>_<part>.png`. Parts: `lmb`, `hold`
+(LMB held 1.4 s), `rmb`, `dash`, `e`, `r`, plus a Hunter's own parts (`tools/vfx_reel/<arch>.gd`, e.g. Grimble's `hook`).
+The 11-22 strips: one contact sheet per Hunter with every part, 2 sheets wide, in
+`docs/art/vfx_rescore_1122/<arch>.jpg`; the full-size sheets are in the jobq outputs
+(`/home/boki/jobq/done/<id>/out/`). All 13 ran on main 41de1b3f01, real GPU, rc 0, 1328x908 sheets:
+
+| arch | jobq id | worker | arch | jobq id | worker |
+|---|---|---|---|---|---|
+| gunslinger | 20261122-061509-28597 | rp1-1 | rimewright | 20261122-060410-12846 | rp2g-0 |
+| juggernaut | 20261122-060245-01175 | rp1-3 | mage | 20261122-060424-27265 | rp2g-2 |
+| ashwick | 20261122-060300-10304 | rp1-2 | bulwark | 20261122-060438-32285 | rp1-3 |
+| tender | 20261122-060314-07334 | rp2g-3 | thief | 20261122-060452-29113 | rp1-1 |
+| dolm | 20261122-060328-06429 | rp2g-2 | ostra | 20261122-060511-28404 | rp2g-1 |
+| archer | 20261122-060341-10332 | rp2g-3 | gil | 20261122-060525-00883 | rp1-0 |
+| dredge | 20261122-060356-17479 | rp1-2 | | | |
+
+(The first gunslinger job, 20261122-060232-19055, took 832 s on a Mac worker; the same reel on rp1-1 took 101 s, so it
+was re-run there and that one is scored.)
 
 ## The bar (Cinder, Kael)
 - **Readable at gameplay zoom in one frame**: the hit area or path is clear by 0.1 s.
@@ -24,6 +36,7 @@ on main's tree (d255acbee) and `vfxq-after-<arch>` on this branch; the sheets li
   default colour.
 - **Sound**: every cast and hit has a sound with a distinct transient. Held moves loop.
 
+
 ## Signature colours (`content/archetypes/<arch>.json` "color")
 `Arch.color(id)` is the single source of truth. KinExec stages, AimKit, enemy shots and the UI read it.
 
@@ -34,13 +47,14 @@ on main's tree (d255acbee) and `vfxq-after-<arch>` on this branch; the sheets li
 | Cinder | ashwick | `#ff7a1a` | flame orange | |
 | Meeko | tender | `#5fdc6a` | leaf green | |
 | Tenzo | dolm | `#3a7cff` | cobalt | owner: Tenzo is blue. Slot cols: hot `#9ad0ff`, pale `#d8ecff`, stone `#8f9cb8` |
-| Lace | archer | `#e04aff` | orchid | was red `#e8483e` (same as Kael's) |
+| Lace | archer | `#d41e2e` | deep red | the table said orchid `#e04aff`; the file is deep red now (close to Kael's crimson: see follow-ups) |
 | Grimble | dredge | `#ffc832` | coin gold | |
 | Neve | rimewright | `#8ae6ff` | frost cyan | |
 | Sparkle | mage | `#ff5ab4` | pink | matches job sparkle-dash-feel-1108's kit recolour |
 | Albert | bulwark | `#fff0b0` | radiant ivory | |
 | Sable | thief | `#9a5cff` | violet | |
 | Motley | ostra | `#2ee6c0` | sea teal | |
+| Gil | gil | `#2fa08c` | sea green | water blue-cyan in the strips |
 
 Rule: a kit draws its body in its signature colour (or a slot `col` in its archetype JSON derived from it). White,
 pale tints of the signature, and black/smoke are free. Status colours (purple for control, green for heal) stay readable on
@@ -77,6 +91,45 @@ so Kael's Searing Wave and merge casts (which built their context by hand) no lo
 existing recorded-colour fence. `pin_draw.gd` has no `#e8483e` any more.
 
 Still open (shared, not done here):
+- Data-driven kits: all 13 Hunters have `content/vfx/<arch>.json`; code still draws Albert's hammer and shield meshes (`bjorn_fx`, `aegis_wall`), Sable's LMB, RMB and E (`dj_fx`) and Tenzo's rock bodies (`breah_*`).
+- Zone rule (seen in the strips): a zone is a lit rim plus a soft inside (alpha 0.25 or less at the centre), never a solid fill. Vex's X, Albert's Faultline, Sable's RMB lane and Gil's lanes still break it (follow-ups above).
+
+## Scorecard (re-scored 2026-11-22, worst first)
+Rubric, each axis 1-5: R readability, S shape, L layering, T timing, Sc scale, C colour (against the Hunter's current
+signature colour above), Snd sound. One hand scored all 13 from the 11-22 strips above. Snd is carried from the earlier
+code read (the strips are silent). The worker's ground renders yellow, so read colours against that.
+
+| # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | was | what the strips show |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Albert | bulwark | 3 | 4 | 3 | 3 | 3 | 3 | 4 | 23 | 24 | Faultline (R): the lane is a screen-wide pale cream slab with a lightning crack, it hides the ground and the foe; the 360 Smash ring (Shift) is amber/orange, not ivory; swing and shield-charge crescents are gold/ivory and read |
+| 2 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | 25 | E: flat translucent orange hex slabs, the palette `main` is copper `d89040`, not coin gold; LMB slugs small; hook, dash ribbon and X fan read |
+| 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 24 | 25 | X Nuke: the zone ends as a near-opaque dark green disc that hides the foe; E cone is a flat pale lime band; LMB tracer is a short lime dart (reads) |
+| 4 | Sable | thief | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | RMB Bola wind-up lane: a flat lavender slab; LMB bolt and hit now read, X rings are lit rims and read |
+| 5 | Sparkle | mage | 4 | 3 | 3 | 3 | 4 | 4 | 3 | 24 | 24 | E Skycall: a big white blob over a brown disc hides the foe for 3 frames; RMB orb sits in an orange haze (off pink); LMB bolt thin; X dome is a pink rim and reads |
+| 6 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 24 | 26 | LMB orb is orange with a gold ring (not leaf green); E ring is a thick flat green band; Hearth Call tether and heal rise read |
+| 7 | Lace | archer | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 25 | 25 | tap shots and misses: thin faint red lines at match zoom; Heavy Shot and X are layered and read |
+| 8 | Neve | rimewright | 4 | 3 | 4 | 3 | 3 | 4 | 4 | 25 | 25 | X Rimelock: no longer one cyan screen, but a grey-cyan veil with ice cracks still covers the whole frame for 0.4 s; dash plates read as ice |
+| 9 | Tenzo | dolm | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | 23 | cobalt lane, rings and Rockfall slam layered; boulder is blue slate with rune-teal; dust is thin now. LMB punch has no own part in his reel |
+| 10 | Gil | gil | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | 26 | E and dash lanes are flat translucent rectangles with a hard edge; puddle rim, splash and wave read |
+| 11 | Motley | ostra | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 27 | 24 | the black disc is gone: X is a teal rim with dashes and a pale inside, LMB orb bursts on the foe; first X frames show a flat pale grey disc before the rim lights |
+| 12 | Kael | juggernaut | 4 | 4 | 3 | 4 | 5 | 4 | 4 | 28 | 28 | slash arcs, burning lanes and slam read; the lunge telegraph is a pale flat pentagon box; the dash trail is a red/black checker bar |
+| 13 | Cinder | ashwick | 4 | 4 | 4 | 4 | 5 | 4 | 4 | 29 | 29 | the bar: layered flame, hot core, lava carpet on Flue Flight; Ignite orb is flame orange now |
+
+Spread 23-29 (was 23-29 on 11-09). `was` is the 11-09 re-score (Gil's is 11-11). Sorted by total, ties by how bad the
+worst frame is. The four rows the old table flagged are gone or smaller: Albert's swing arcs are ivory and gold, Tenzo's
+boulder is slate, Motley's disc is a rim, Neve's wash no longer fills the frame as one colour. History: the 11-08
+before scores (Tenzo 14, Motley 14, Vex 15, Grimble 16, Lace 16, Meeko 17, Sable 18, Albert 20, Sparkle 20, Neve 26,
+Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own notes are in git:
+`git show 41de1b3f01:docs/VFX_QUALITY.md`.
+
+## Follow-ups: the worst five (not fixed here)
+1. Albert, `scripts/arch/kits/bjorn_ult.gd`: the Faultline lane is a screen-wide pale slab that hides the ground and the foe; make it a lit rim plus a soft inside. Also the 360 Smash ring (`spin` in `content/vfx/bulwark.json`) is amber, not ivory.
+2. Grimble, `content/vfx/dredge.json`: the E fist/wedge slabs are flat translucent orange because palette `main` is copper `d89040`; move `main` to coin gold `#ffc832` and give the slab a lit rim.
+3. Vex, `content/vfx/gunslinger.json` `x_shell` / X zone end: the Nuke ends as a near-opaque dark green disc over the foe; cap the inside alpha at 0.25 and keep the lit rim.
+4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
+5. Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
+
+Next in line (24-25, smaller): Meeko LMB orb palette (`content/vfx/tender.json`), Lace's deep red against Kael's crimson (owner's call), Neve's X veil, Lace/Sparkle thin tap trails.
 - `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
   breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm (tender's are gone on ext/vfx-tender). Move these to slot colours.
