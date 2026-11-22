@@ -15,11 +15,12 @@ const CASES := [
 	[false, ["ashwick", "rimewright", "thief"], ["out", "left", "in"], ["wisp", "win", "lose"]],
 	[false, ["dredge", "ostra", "bulwark"], ["in", "in", "in"], ["lose", "lose", "lose"]],
 	[false, ["gunslinger", "juggernaut", "tender"], ["out", "out", "out"], ["wisp", "wisp", "wisp"]],
-	[false, ["gil"], ["in"], ["idle"]],
+	[false, ["<clipless>"], ["in"], ["idle"]],  # the first Hunter whose GLB has no clips (_beats_exist finds it)
 ]
 const SETTLE_FRAMES := 4     # frames after the last model stands, for its clips to pick the beat
 
 var bad := 0
+var _clipless: Array = []  # Hunters whose GLB has no clips, filled by _beats_exist
 var tree: SceneTree
 
 func ok(cond: bool, what: String) -> void:
@@ -38,7 +39,7 @@ func run(main: Node, mode := "check") -> void:
 		await _stages(main)
 		await _screen(main)
 		print("RESULTSTAGE DONE, failures: %d" % bad)
-	tree.quit()
+	tree.quit(1 if bad > 0 else 0)
 
 ## A squad of `archs`, each with its Boki; `fates` gives each one "in", "out" (eliminated) or "left" (got out).
 func _squad(archs: Array, fates: Array = []) -> Array:
@@ -82,6 +83,7 @@ func _beats_exist() -> void:
 			ok(not win.is_empty() and not lose.is_empty(),
 					"%s: win %s, lose %s" % [id, win.get("clip", "-"), lose.get("clip", "-")])
 		model.free()
+	_clipless = clipless
 	var with_clips := Arch.ORDER.size() - clipless.size()
 	ok(bad == bad_before and with_clips > 0,
 			"all %d Hunters with clips have a win and a lose beat (no clips: %s)" % [with_clips, ", ".join(clipless)])
@@ -116,6 +118,11 @@ func _built(st: ResultsStage, n: int) -> bool:
 func _stages(main: Node) -> void:
 	for c: Array in CASES:
 		var archs: Array = c[1]
+		if archs == ["<clipless>"]:
+			if _clipless.is_empty():
+				print("RESULTSTAGE skip the idle case: every Hunter has clips now")
+				continue
+			archs = [_clipless[0]]
 		var want: Array = c[3]
 		var label := "%s, %s" % ["got out" if c[0] else "did not", ", ".join(c[2])]
 		var st := ResultsStage.make(_squad(archs, c[2]), c[0])
