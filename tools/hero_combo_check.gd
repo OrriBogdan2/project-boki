@@ -843,7 +843,7 @@ func _gunslinger_beam_look(V: HeroVfx, K: GunslingerKit) -> void:
 	var palm: Dictionary = HeroVfx.data("gunslinger")["anchors"]["palm"]
 	var ring_nodes: Array = V.pools.get("ring", [])
 	var ring_live := V.live.any(func(e: Dictionary) -> bool: return ring_nodes.has(e["node"]))
-	ok("Longneedle look: no decorative ground ring opens at the palm on release (a muzzle is not an area); anchor stays hand.L",
+	ok("Longneedle look: no ground ring at the palm on release (a muzzle is no area); anchor stays hand.L",
 			not ring and not ring_live and palm["bone"] == "hand.L")
 
 func _gunslinger() -> void:
