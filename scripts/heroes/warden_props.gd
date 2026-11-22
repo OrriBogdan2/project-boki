@@ -20,7 +20,7 @@ var nodes: Array = []  # the parts (MeshInstance3D) riding Meshy's bones
 var stretch: Dictionary = {}
 
 
-## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "scale", "stretch") on `skel`
+## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "scale", "grip" {contract bone: {part: [x,y,z] in the part's frame, bone: [x,y,z] in the Meshy bone's}}, "stretch") on `skel`
 ## (Meshy's; `to_m`: it -> the Hunter's model). Returns the live parts (empty when the contract .glb has none of them).
 static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionary) -> WardenProps:
 	var want: Dictionary = d.get("props", {})
@@ -44,6 +44,11 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		var grow := _grow((d.get("scale", {}) as Dictionary).get(cb, 1.0))  # (data "scale": the part grown about its bone)
 		mi.transform = ((to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
 			* Transform3D(Basis.from_scale(grow)))
+		var grip: Dictionary = (d.get("grip", {}) as Dictionary).get(cb, {})  # (data "grip": a point of the part into the fist)
+		if not grip.is_empty():
+			var at_part := Vector3(grip["part"][0], grip["part"][1], grip["part"][2])
+			var in_bone := Vector3(grip["bone"][0], grip["bone"][1], grip["bone"][2])
+			mi.transform.origin += in_bone - mi.transform * at_part
 		mi.set_meta("base", mi.transform)
 		mi.set_meta("y", float(stretch_d.get("rest", 1.0)))
 		mi.transform = mi.transform * Transform3D(Basis.from_scale(Vector3(1.0, mi.get_meta("y"), 1.0)))

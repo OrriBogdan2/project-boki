@@ -165,24 +165,72 @@ func _hunter(id: String, dir: String) -> void:
 
 func _probe(model: Node3D, clip: String, i: int) -> void:
 	var sk := WardenGlb.skeleton(model.get_node("Warden"))
-	var fish := sk.find_child("WP_hand_R", true, false) as MeshInstance3D
+	var fish := WardenProps.part(sk, "hand.R")
 	if fish == null:
-		for c in sk.find_children("*", "MeshInstance3D", true, false):
-			if String(c.name).contains("swordfish") or String(c.name).begins_with("WP"):
-				fish = c
-	if fish == null or sk == null:
 		return
-	var bb := fish.get_aabb()
-	var gt := fish.global_transform
-	var bn := func(n: String) -> Vector3:
-		var b := sk.find_bone(n)
-		return Vector3.ZERO if b < 0 else sk.global_transform * sk.get_bone_global_pose(b).origin
-	var hand: Vector3 = bn.call("RightHand")
-	var row := PackedStringArray([clip, str(i), "fishnode", str(gt.origin), "aabb", str(bb.position), str(bb.end), "hand", str(hand),
-		"x_axis", str(gt.basis.x.normalized()), "spine2", str(bn.call("Spine02")), "hips", str(bn.call("Hips")), "idx", str(bn.call("RightHandIndex1")), "mid", str(bn.call("RightHandMiddle1")), "thumb", str(bn.call("RightHandThumb1"))])
-	probe_rows.append("\t".join(row))
+	var hb := sk.find_bone("RightHand")
+	if probe_rows.is_empty():
+		_probe_geom(model, sk, fish, hb)
+	var hp := sk.get_bone_global_pose(hb)
+	var w := sk.global_transform * hp
+	var grip := w * (fish.transform * Vector3(-0.175, -0.03, 0.0))
+	var fist := w * fist_local
+	var tip := w * (fish.transform * Vector3(-0.646, 0, 0))
+	var trunk := sk.global_transform * sk.get_bone_global_pose(sk.find_bone("Spine02")).origin
+	probe_rows.append("%s\t%d\tgrip-fist %.3f\tgrip %s\tfist %s\ttip %s\ttrunk %s" % [clip, i,
+		grip.distance_to(fist), str(grip), str(fist), str(tip), str(trunk)])
+
+var fist_local := Vector3.ZERO
+
+func _probe_geom(model: Node3D, sk: Skeleton3D, fish: MeshInstance3D, hb: int) -> void:
+	# fist centre: skinned verts with >0.6 weight on RightHand, bind pose, in the bone's rest frame
+	var cen := Vector3.ZERO
+	var cnt := 0
+	for mi in model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.skin == null or m.mesh == null or m == fish:
+			continue
+		for sidx in m.mesh.get_surface_count():
+			var arr := m.mesh.surface_get_arrays(sidx)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bs = arr[Mesh.ARRAY_BONES]
+			var ws = arr[Mesh.ARRAY_WEIGHTS]
+			if bs == null:
+				continue
+			var per := (bs as PackedInt32Array).size() / vs.size() if bs is PackedInt32Array else (bs as PackedFloat32Array).size() / vs.size()
+			for v in vs.size():
+				for k in per:
+					var bi := int(bs[v * per + k])
+					var bname := m.skin.get_bind_name(bi)
+					var jb := sk.find_bone(bname) if bname != "" else m.skin.get_bind_bone(bi)
+					if jb == hb and float(ws[v * per + k]) > 0.6:
+						cen += vs[v]
+						cnt += 1
+		var c := cen / maxf(cnt, 1)
+		var rest := sk.get_bone_global_rest(hb)
+		var in_sk: Vector3 = (sk.global_transform.affine_inverse() * m.global_transform) * c
+		fist_local = rest.affine_inverse() * in_sk
+		probe_rows.append("GEOM fist verts %d centre_in_bone %s hand_rest_origin %s" % [cnt, str(fist_local), str(rest.origin)])
+		break
+	var mesh := fish.mesh
+	var arr := mesh.surface_get_arrays(0)
+	var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var prof := {}
+	for v in vs:
+		var kx := int(floor(v.x / 0.05))
+		var e: Array = prof.get(kx, [1e9, -1e9, 1e9, -1e9])
+		e[0] = minf(e[0], v.y); e[1] = maxf(e[1], v.y); e[2] = minf(e[2], v.z); e[3] = maxf(e[3], v.z)
+		prof[kx] = e
+	var ks := prof.keys()
+	ks.sort()
+	for k in ks:
+		var e2: Array = prof[k]
+		probe_rows.append("GEOM fishprof x=%.2f y[%.3f,%.3f] z[%.3f,%.3f]" % [k * 0.05, e2[0], e2[1], e2[2], e2[3]])
+	probe_rows.append("GEOM fishxf %s scale-ish %s" % [str(fish.transform), str(fish.transform.basis.get_scale())])
 
 func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
+	if probe:
+		return
 	if close:
 		for knee in [false, true]:
 			_close_cam(bx, knee)
