@@ -7,6 +7,7 @@
 	},
 	"kinds": {
 		"lava": {
+			"icon": "fireball",
 			"name": "Lava Field",
 			"tip": "Lava Field ahead: it burns anyone standing in it.",
 			"noun": "the lava",
@@ -29,6 +30,7 @@
 			}
 		},
 		"deep_water": {
+			"icon": "wave",
 			"name": "Deep Water",
 			"tip": "Deep water ahead: it slows you, weakens your hits and runs you out of breath.",
 			"noun": "deep water",
@@ -54,6 +56,7 @@
 			}
 		},
 		"ice": {
+			"icon": "gem",
 			"name": "Ice Sheet",
 			"tip": "Ice sheet ahead: there is no grip, so you slide.",
 			"noun": "the ice",
@@ -75,6 +78,7 @@
 			}
 		},
 		"static": {
+			"icon": "shock",
 			"name": "Static Flats",
 			"tip": "Static Flats ahead: they shock and stun every few seconds.",
 			"noun": "the static",
@@ -99,6 +103,7 @@
 			}
 		},
 		"bramble": {
+			"icon": "thornwake",
 			"name": "Bramble",
 			"tip": "Bramble ahead: it slows you and scratches.",
 			"noun": "the thorns",

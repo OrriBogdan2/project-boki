@@ -44,8 +44,9 @@ guards at your side. Smaller ones still ride your shoulder or pack.
   the other one when that flank is void, a block, or a step off your level.
 - It is never closer than `guard_min_m` (1.2 m), and it stays on the ground under its own nav: your jumps do not lift it.
 - When you glide or cross a gap it can't walk, or both flanks are blocked, it curls up on your back. It goes
-  back to its flank when you land.
-- Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`. Tuning: `content/rules/boki_system.json` "follow".
+  back to its flank when you land. Both hops are eased over 0.6 s (`KinCurl`, every species), never a one-frame
+  jump (`--boki-curl-check`).
+- Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`, `KinCurl`. Tuning: `content/rules/boki_system.json` "follow".
 
 ## The fence
 

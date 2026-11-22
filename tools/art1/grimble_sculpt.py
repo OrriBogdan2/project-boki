@@ -104,6 +104,19 @@ def monocle(vox=0.0012):
     return m
 
 
+NOSE_C = np.array((-0.004, 0.538, 1.238), F)     # the snub nose's middle, sunk into the face between the loupe and the grin
+NOSTRIL = (0.011, -0.008, 0.0055, 0.0042)        # (m) a nostril's x and z off NOSE_C, half width, half height
+
+
+def nose(vox=0.0012):
+    """The owner's 11-09 turnaround: a short flat snub nose, flared over its two nostrils."""
+    m = Field(NOSE_C - 0.04, NOSE_C + 0.04, vox)
+    m.add(ell(tuple(NOSE_C), (0.022, 0.023, 0.016)), 0.0, SKIN)
+    for s in (1, -1):
+        m.add(sph(tuple(NOSE_C + (s * NOSTRIL[0], 0.006, -0.005)), 0.011), 0.008, SKIN)
+    return m
+
+
 
 
 # the blunderbuss: lies across his left hip on a swivel, a flared mouth. Local: +Y to the muzzle; the swivel at the origin
