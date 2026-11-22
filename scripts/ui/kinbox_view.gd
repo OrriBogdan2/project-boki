@@ -20,7 +20,7 @@ static var sel := ""
 static var confirm := ""  # uid waiting on "release?"
 static var renaming := false
 
-var home: Node = null
+var home: Home = null
 var v: VBoxContainer
 var summary: Label
 var farm_box: VBoxContainer
@@ -34,7 +34,7 @@ var msg: Label
 var _msg_t := 0
 
 
-static func open(h: Node) -> KinBoxView:
+static func open(h: Home) -> KinBoxView:
 	KinBox.ensure()
 	var kv := KinBoxView.new()
 	kv.home = h

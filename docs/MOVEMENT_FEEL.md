@@ -12,7 +12,7 @@ XDG_DATA_HOME=<scratch> godot --headless --path . -- --move-feel-check
 
 It prints one `MFEEL <key> = <value> target <op> <target> ok|FAIL (source)` line per measurement and ends with `MOVE FEEL CHECK DONE, failures: N`.
 
-Frame rate must not change the feel: `--fps-parity-check` (`tools/fps_parity_check.gd`) plays one input script (dash, jump, glide 2 s, hold LMB 3 s, cast E) for Vex, Kael, Cinder and Sparkle through the real `Match._process` at 30, 60 and 144 fps and at 60 fps with 20 ms hitches, and asserts dash length, jump apex, glide reach, end position, swings/shots/flame ticks and the E cooldown end agree within 2% (and that sim time keeps pace with the frames drawn). The physics step is fixed at 60 Hz; only the camera and animation read the frame time.
+Frame rate must not change the feel: `--fps-parity-check` (`tools/fps_parity_check.gd`) plays one input script (dash, jump, glide 2 s, hold LMB 3 s, cast E) for Vex, Kael, Cinder and Sparkle through the real `Match._process` at 30, 60, 144 and 240 fps and at 60 fps with 20 ms hitches, and asserts dash length, jump apex, glide reach, end position, swings/shots/flame ticks and the E cooldown end agree within 2% (and that sim time keeps pace with the frames drawn). The physics step is fixed at 60 Hz; only the camera and animation read the frame time. Its `PRESS` rows then drive the real keys (`Input.action_press`, `Match._gather_input`, the fixed steps) for Vex at 60, 144 and 240 fps, the press landing at every phase of the 60 Hz tick and let go a frame later, and assert LMB, RMB, E, R, Shift and Space each give exactly one action (the glide key, a hold, is tapped for 3 ticks and opens the glider once). Found 2026-11-19: at 144 and 240 fps a click that came and went between two fixed steps was lost (LMB 0 shots in 2 of 3 phases at 144, 3 of 4 at 240); `FireTap` now latches every fresh press for its step. The other keys latch in `Match.pending_input` and were already exact.
 
 Source tags follow sv/FEEL.md / sv/DATA.md:
 
@@ -184,6 +184,64 @@ Other checks:
   - Movefeel (and `stuckfix`):
     - Expedition island: 31 of 31 laps clean, 853 of 853 walk-aways leave at once, 851 walk-pasts with 0.0000m pull.
     - Training map: all 20 clusters clean.
+
+## Review pass 11-22 (the stabilize sprint's day-3 review, on main 0a0db9747c)
+
+Five checks on main as it stood: `--move-feel-check`, `--glide-hold-check`, `--mantle-check`, `--dash-wall-check`, `--chain-sweep-check`. "11-15" is the same check on main 24a9d4bd01. A check must not depend on the box: every number is a count of 60 Hz steps. Verdicts: ok (inside the target, same as 11-15), drifted (inside the target but moved since 11-15, or its target moved), regressed (outside the target).
+
+| Row | Target | Main today | 11-15 | Verdict |
+|---|---|---|---|---|
+| glide_catch_t | <= 0.2 s | 0.183 s | 0.183 | ok |
+| glide_speed / glide_sink | 4.5-5.5 / 1.38-1.42 m/s | 5.00 / 1.40 | same | ok |
+| dashglide_open_speed | >= 12 m/s | 23.0 | 23.0 | ok |
+| dashglide_1s_speed | >= 10.5 m/s | 11.58 | 8.55 | ok (up since 11-15: decision 0099) |
+| dashglide_2s_speed | 7-9 m/s | 7.96 | 5.87 | ok (same) |
+| dashglide_3s_speed | <= 6.5 m/s | 6.33 | n/a | ok |
+| abyss_lift_t | <= 1.0 s | 0.667 s | 0.500 | drifted (0.17 s slower, inside) |
+| abyss_recover_depth / abyss_kill_depth | >= 15 m / 17-18 m | 18.5 / 17.5 | same | ok |
+| abyss_bounce_m | >= 1.5 m | 1.59 | 1.585 | ok |
+| abyss_tint_end | >= 0.95 | 0.943 | 1.000 | regressed (the check: 11-17's graded curve 1.5 reads 0.943 at 0.5 m above the kill line) |
+| cam_lag_m | <= 0.40 m | 0.387 | 0.284 | drifted (+0.10 m, 0.013 m from the limit) |
+| cam_settle_t / cam_glide_lead_m | <= 0.35 s / >= 0.4 m | 0.233 / 0.637 | 0.200 / 0.633 | ok |
+| cam_glide_zoom_05 | 1.12-1.25x | 1.178 | 1.178 | ok |
+| cam_dive_zoom_hold / cam_dive_land_view | >= 0.98x / <= 0.3 | 1.000 / 0.173 | same | ok |
+| land_carry_hop_held / drop4_held | 0.98-1.02x | 1.000 / 1.000 | same | ok |
+| land_carry_glide_held | 0.98-1.07x | 1.000 | 1.052 | drifted (the glide's extra no longer carries into the landing; inside the range) |
+| ledge_rise_t / ledge_rise_peak_m | <= 0.45 s / >= 0.2 m | 0.333 / 0.400 | 0.333 / 0.412 | ok |
+| ledge_rise_vy_max | <= 7 m/s | 5.82 | 5.58 | ok |
+| dive_feather_speed / _m | >= 8 m/s / >= 7 m | 9.69 / 9.65 | 8.14 / 8.25 | ok |
+| haste_two_bonus_x | 1.49-1.51x | 1.326x | no row | regressed (speed cap, see fix 1) |
+| haste_cap_mps | 6.95-7.0 | 7.0 | no row | drifted (cap not scaled with the run speed) |
+| dash_curve thief (peak_u / peak_k / dist / time) | 0.28-0.44 / 1.7-1.9 / 0.95-1.05 / 0.95-1.08 | 0.10 / 1.55 / 0.43 / 0.52 | 0.36 / 1.77 / 1.0 / 1.0 | regressed (the check, see fix 2) |
+| ground_stop_dist | 0.27-0.40 m | 0.429 m | 0.305 | drifted (11-17 exact walking brake at the 1.16 body-scale run) |
+| ledge_dash ashwick | exit >= 0.75x run | 0.367x | no row | regressed (kit, follow-up) |
+| ledge_dash bulwark | held height <= 1 step, glider <= 2 steps | 14 / 15 | no row | regressed (kit, follow-up) |
+| knock_lace_04_m / knock_sparkle_04_m / knock_done_04 | 4.03-4.23 / 2.62-2.82 m / >= 0.85 | 4.24 / 2.88 / 0.80 | no rows | drifted (by 0.01-0.06 m; the share 0.05 short) |
+| vault_exit_run | 0.95-1.05x | 1.18x | no row | regressed (thief hand-over, follow-up) |
+| source_hunter_screen_pct | 8.3-9.3 % | 4.73 | no row | drifted (camera framing; the target was never re-fitted, hunter_screen_pct itself is ok) |
+| `--glide-hold-check` | 0 fails | 5 (bulwark x3, ostra x2) | 0 | regressed (bulwark's air dash holds height 14 steps) |
+| `--mantle-check` | 0 fails | 2 (dash-rim gunslinger, bulwark: 2.1 s stall) | 2 (the same) | ok vs 11-15, still red |
+| `--dash-wall-check` | 0 fails | 3 (juggernaut rock a80, mage rock a80, mage Neve wall a80) | 2 | drifted (mage Neve wall a80 is new: 15% kept, 17% table) |
+| `--chain-sweep-check` | advisory | 0 fails, 25 documented refusals | n/a | ok |
+
+Fixed in this pass (before / after, `--move-feel-check` FAIL rows 14 -> 8; the other four checks are unchanged):
+
+1. **Speed cap.** `hunter_move.json` `speed_cap` was 7.0 m/s, the source's cap at the source's run speed. Run speeds took decision 0061's body scale 1.16 (5.28 m/s), the cap did not, so the haste status alone (+35%, 7.13 m/s) hit the cap and haste plus a kin buff gave 1.326x instead of 1.50x (decision 0054). Now `speed_cap` = 7.0 x 1.16 = 8.12. `haste_two_bonus_x` 1.326 -> 1.500x, `haste_cap_mps` 7.000 -> 8.120 (target now 8.07-8.12), `haste_clip_rate` 1.000 -> 1.000, `--move-speed-check` 0 fails. `--feel-golden-check` is red both ways (115 rows, see follow-ups), so it cannot vouch for this change.
+2. **Dash curve rows measured a leaked spin.** `_dash_curves` stopped Bulwark's dash at its end while Bulwark's spin hit was still queued (`Match.later`); the next row's Sable then fired it as a 0.22 s long dash. Six thief rows read: peak_u 0.100, peak_k 1.547x, dist 0.429x, time 0.521x. The check now runs 120 quiet steps after each hunter. Now 0.362, 1.767x, 1.004x, 1.007x. No game code changed: Sable's dash was fine.
+3. **abyss_tint_end** is sampled 0.25 m above the kill line (was 0.5 m): 0.943 -> 0.971 (target stays 0.95). The 11-17 graded tint (curve 1.5) made the old sample point read 0.94 on purpose.
+
+Follow-ups (one line each, none fixed here):
+
+- Bulwark's air dash holds its height 14 steps and delays the glider 15 steps (`ledge_dash`, `--glide-hold-check` x3, `--mantle-check` dash-rim 2.1 s stall): one root cause, the whirl; HARD 5/10, BLOCKS 4/10 (breaks "ledges always responsive").
+- Ostra: the glider opened from a run-speed jump reads gain inf (`--glide-hold-check`); HARD 3/10, BLOCKS 2/10.
+- Ashwick ledge dash leaves the lip at 0.367x run (needs 0.75x); HARD 4/10, BLOCKS 2/10.
+- Sable's Cartwheel hand-over is 1.18x her hasted run (`vault_exit_run`); HARD 3/10, BLOCKS 2/10.
+- `--feel-golden-check` is red on main (115 rows; "golden traces take main's (re-record check pending)" since the 11-17 merge); HARD 4/10, BLOCKS 6/10 (it is the net under every feel change).
+- Stop distance 0.43 m: the farm rows in `--move-rate-check` and `ground_stop_dist` read the 11-17 exact brake at the 1.16 run speed against unscaled source distances; decide the targets (x1.16) or the brake; HARD 2/10, BLOCKS 2/10.
+- `cam_lag_m` is 0.013 m from its limit (0.284 on 11-15): find which camera change added 0.1 m before the next one pushes it over; HARD 3/10, BLOCKS 3/10.
+- `abyss_lift_t` 0.50 -> 0.667 s, `land_carry_glide_held` 1.05 -> 1.00x: inside their targets, note for the next owner playtest.
+- Knock rows (`knock_*_04`) and `source_hunter_screen_pct` need their targets re-fitted; HARD 2/10, BLOCKS 1/10.
+- `--dash-wall-check`: mage a80 on the Neve wall keeps 15% (table 17%); HARD 3/10, BLOCKS 1/10.
 
 ## What changed (all in clearly marked `(movefeel)` blocks)
 

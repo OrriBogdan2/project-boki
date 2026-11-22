@@ -157,6 +157,7 @@ static func hint_text(id: String) -> String:
 ## One tutorial line with its {tokens} filled: keys through Settings.key_cap, the food, the house cost.
 static func fill(raw: String) -> String:
 	var txt := (raw if base() else FarmTaskGuide.fill(raw)).replace("{build}", Settings.key_cap("build"))
+	txt = txt.replace("{toy_cost}", str(HomeLayout.price("toy_ball")[0]))
 	txt = txt.replace("{food}", Care.food_name(String(food().keys()[0])))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
@@ -167,20 +168,27 @@ static func spot(id: String) -> Dictionary:
 	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
 
 
+## Build-list entries the current step's stage points at (a green glow on their tiles).
+static func marks() -> Array:
+	var id := current()
+	return [] if id == "" else (step_def(id).get("marks", {}) as Dictionary).get(stage(id), [])
+
+
 static func world_text(id: String) -> String:
 	var s := step_def(id)
 	return "" if s.is_empty() else String((s["world"] as Dictionary).get(stage(id), ""))
 
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal; in the base
-## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay).
+## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal. In the base
+## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay), wake (a zone
+## woke) and played (a Boki finished a toy turn): the last two end "head out or stay" for a player who plays on.
 static func event(what: String) -> void:
 	if not active():
 		return
 	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
 	if base():
-		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out"}
+		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out", "wake": "out", "played": "out"}
 	var id := ids.get(what, "") as String
 	detect()
 	if id != "" and available(id):

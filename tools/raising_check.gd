@@ -32,6 +32,8 @@ func _next_day(rec: Dictionary) -> void:
 	var day := float(Content.rules("care")["care_day_s"])
 	for kind in rec.get("care_day", {}):
 		rec["care_day"][kind] = float(rec["care_day"][kind]) - day - 1.0
+	if rec.has("trust_acts"):      # the trust taper's window is a farm day too (Care.trust_taper)
+		rec["trust_acts"]["t0"] = float(rec["trust_acts"]["t0"]) - day - 1.0
 
 func _memories(rec: Dictionary, kind: String) -> int:
 	return (rec["memory"] as Array).filter(func(e): return e["kind"] == kind).size()

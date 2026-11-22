@@ -212,7 +212,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Throwing | hits a wall or a block | Hooked to a wall | [D] |
 | Throwing | passes an ally or your own Boki | keeps flying (it only bites foes and walls) | [D] "enemies or walls" |
 | Throwing | reaches 13 m, or drops into the abyss | Missed: "MISS", the cooldown starts | [W] 07.01.25 |
-| Throwing | E pressed in flight | remembered for 0.12 s: if it hooks in that time, the pull starts on the hook | ours (buffer) |
+| Throwing | E pressed in flight | remembered for 0.15 s: if it hooks in that time, the pull starts on the hook | ours (buffer) |
 | Throwing | stunned | Missed (the chain breaks), the cooldown starts | [W] 05.02.25 |
 | Hooked (foe or wall) | time | the link chain stays on while you walk, jump, glide or dash, 5 s, then breaks; the cooldown starts | [W] 5 s; [F] 0305-0317 |
 | Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
@@ -249,7 +249,7 @@ Ranks: the cooldown is 12.5% shorter at rank 2 and 37.5% at rank 3 (the data's -
 
 What a Smash press does, by state. "Press" fires on the press; "tap" fires on a release under 0.3 s; "hold" on a
 release after it. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop and its recovery, the
-Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
+Gilded Riposte's guard and cleave) is held for 0.15 s before it ends and goes off when it does; earlier presses are ignored, never doubled.
 
 | State | RMB | Result | Source |
 |---|---|---|---|
@@ -397,7 +397,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
 
 Assumption 7: the dash after an RMB turns freely; the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
-Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffer are ours; the footage shows none of them.
+Also ours (no footage): the pull exits (Shift, a jump) and the 0.15 s input buffer are ours; the footage shows none of them.
 
 ## Cancels (ability to ability)
 
@@ -417,19 +417,19 @@ and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
 | RMB Finishing Slam, wind-up (0.6 s) | LMB | not shown | both: the slash goes at once (the wind-up doesn't hold the blade) | settled: chainable, kept | [W] gives a 0.55 s cast time, nothing on presses in it; [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in the Slam's wind-up` |
-| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
+| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.15 s goes when the move ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] [W] silent; DECISIONS "every interaction is chainable"; `jug cancel: RMB again in the Slam's wind-up` |
 | Slam wind-up | E | not shown | both: the hook flies, the Slam strikes the way it was started | owner | `jug 113.5` |
 | Slam wind-up | jump | not shown | both: a 0.8 m hop, the wind-up goes on | settled: chainable, kept | [D] [F] [W] silent (the jump lock in [W] is the Riposte's only); DECISIONS "every interaction is chainable"; `jug cancel: a jump in the Slam's wind-up` |
 | Slam wind-up | X | not shown | both: the guard starts and the wind-up runs on under it | unsettled (flagged below) | |
 | RMB held (Lunge charge) | jump | not shown | the Lunge goes from the air along the aim | owner | interaction table |
 | RMB held | glide | not shown | shut | owner | `jug 113.2` |
 | RMB held, chain hooked | E | the source has only the spin in the pull | pull, then a Haul Slam on arrival | ours (flagged below) | [D] |
-| Lunge, Meteor Drop (active) | LMB | not shown | waits: a press in the last 0.12 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Meteor Drop` |
+| Lunge, Meteor Drop (active) | LMB | not shown | waits: a press in the last 0.15 s (the Lunge's fling, the Drop's recovery) swings as it ends; earlier presses are ignored | settled: chainable (buffered), kept | [D] [F] silent; DECISIONS "every interaction is chainable"; `jug cancel: LMB in a Lunge or a Meteor Drop` |
 | Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25 |
 | E Warchain, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
 | E hooked | E | "reactivate to pull yourself to the target" | pulls | match | [D] |
 | X Gilded Riposte, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
-| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.12 s swings the slash or starts the Smash as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
+| X guard and cleave | LMB, RMB | not shown | waits: a press in the last 0.15 s swings the slash or starts the Smash as the cleave lands; earlier presses are ignored (as the heavy moves) | settled: chainable (**fixed**: was ignored) | [F] ult f33-f38 (planted, nothing on presses); [W] locks only the jump; DECISIONS "every interaction is chainable"; `jug cancel: LMB or RMB in the Riposte's guard or cleave` |
 | X guard and cleave | E | not shown | ignored, except a held chain hauls him in | owner | `jug 113.7` |
 | X guard and cleave | glide | not shown | shut; open in the last 0.35 s, which a glide ends | owner | `jug 113.2` |
 | LMB slash, recovery (about 0.34 s) | LMB | "PRESS for a series of quick melee attacks" | waits: a press in the last 0.25 s swings the next slash; earlier presses are ignored | settled: chainable (the series), kept | [D] Caldera; [F] 0026-0033 alternating swings; `jug cancel: LMB in the slash's recovery` |
@@ -437,7 +437,7 @@ and the attack key does nothing from a glide (`HunterAttack.can_fire`).
 | LMB held (Searing Wave charge) | jump | not shown | the charge goes on through the jump | ours | content/dash_flow `hold.lmb` |
 | LMB held | RMB, E | not shown | both: the charge goes on | settled: chainable, kept | [D] silent (nothing ends the charge); DECISIONS "every interaction is chainable"; `jug cancel: RMB or E with the Searing Wave held` |
 
-Fixes made: the Riposte's guard and cleave now keep an LMB or RMB press for 0.12 s (it was dropped).
+Fixes made: the Riposte's guard and cleave now keep an LMB or RMB press for 0.15 s (it was dropped).
 
 ## Combinations
 
@@ -639,9 +639,9 @@ Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block,
 sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
-`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
-kael-rmb-dash-turn, kael-riposte-knock, kael-ult-reset-rebased-rebased, kael-tap-ult-1108, kael-chain-length, gaps-juggernaut):
-their files were left alone, so rows they touch are listed, not fixed.
+`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main (Nov 9). Nov 20: kael-lunge-length (`4ea2625c13`,
+`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-rmb-dash-turn
+and kael-tap-ult-1108 are still not merged. Rows below say which.
 
 | Row | Verdict | Where | Note |
 |---|---|---|---|
@@ -655,7 +655,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | RMB hold: held indefinitely, never auto-fires | match | kit:546 (base arch_kit.gd:111 is 9s) | owner; asserted "jug parity rmb" |
 | RMB hold: perfect release | differ (owner) | kit:583, kit:769, json:26 | +20% distance, cue and ring; no source equivalent |
 | RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
-| RMB hold: Lunge length 4.5 to 5.4 m | done (ext/kael-open-rows) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
+| RMB hold: Lunge length 4.5 to 5.4 m | done `4ea2625c13` (ext/kael-open-rows, on main) | json:30 | [F] 2.5 to 3 bh (about 5 m) at any charge; DECISIONS 2026-11-11 a short lunge. See "Open rows closed, Nov 20" |
 | RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
 | RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
 | RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
@@ -677,7 +677,7 @@ their files were left alone, so rows they touch are listed, not fixed.
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |
 | Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
-| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+| Rank text: Warchain and dash cooldown numbers | done (checked 2026-11-20) | json:51 to json:53 | rank text now reads 12.8 / 11.2 / 8.0s Warchain and 10.4 / 8.8 / 6.4s dash, the real numbers |
 
 Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
 row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no
