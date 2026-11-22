@@ -19,7 +19,8 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
-const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+## m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
 const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
