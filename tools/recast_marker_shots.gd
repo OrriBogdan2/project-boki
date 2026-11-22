@@ -4,7 +4,8 @@ extends "res://tools/vv_shots.gd"
 ## Cinder in Flue Flight. A full frame and a close-up each (needs a renderer: GPU).
 
 const HEROES := ["dolm", "rimewright", "mage", "ashwick"]
-const FAR := 14.0               # m to the target: past every reach, so the cursor is the limit
+const FAR := 14.0  # m to the target: past every reach, so the cursor is the limit
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -28,8 +29,10 @@ func run(main_node: Node) -> void:
 	print("RMSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _mark(file: String, caption: String, at: float) -> Array:
 	return [[at, "full", file, caption]]
+
 
 func _dolm() -> void:
 	var press := func(t: float):
@@ -38,15 +41,18 @@ func _dolm() -> void:
 	var caption := "Tenzo: the skid between hops, a Shift marker on the next landing spot"
 	await _go(0.7, press, _mark("hop", caption, 0.5))
 
+
 func _rimewright() -> void:
 	var press := func(t: float): P.inp["sig"] = t < 0.05
 	var caption := "Neve: the Rink Wall slides toward the cursor, an E marker on it to freeze it"
 	await _go(0.8, press, _mark("wall", caption, 0.5))
 
+
 func _mage() -> void:
 	P.ak.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
 	await _go(1.8, Callable(), _mark("kitefall", "Sparkle: hanging in Kitefall, a marker on the crash point", 1.1))
+
 
 func _ashwick() -> void:
 	P.ak.cd["x"] = 0.0
