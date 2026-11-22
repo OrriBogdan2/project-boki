@@ -453,6 +453,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 				o["slow_k"] = float(s["slow_k"])
 			f.hurt(float(s["dmg"]), h, o)
 			if s["ab"] == "ult": HeroUlt.landed(self, f)
+			else: vfx("spout_hit", f.pos, s["dir"])
 		if float(s["left"]) <= 0.0:
 			list.erase(s)
 

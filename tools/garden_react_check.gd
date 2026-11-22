@@ -20,14 +20,16 @@ const REACTIONS := [
 	["scripts/home/home.gd", "_care_nap", "boki_sleep"],
 ]
 const CUES := ["garden_feed", "garden_pet", "garden_friend", "garden_trait", "garden_toy"]
-const EGG := "garden_egg"     # in the garden set (GardenSfx.cue), not the UI one
+const EGG := "garden_egg"  # in the garden set (GardenSfx.cue), not the UI one
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("GARDENSFX %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 ## The text of one function (up to the next top-level func), or the whole file for "".
 func _body(src: String, fn: String) -> String:
@@ -40,6 +42,7 @@ func _body(src: String, fn: String) -> String:
 		return ""
 	var end := src.find("\nfunc ", at + 5)
 	return src.substr(at, (end if end > 0 else src.length()) - at)
+
 
 func run(main: Node) -> void:
 	var set_d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))
