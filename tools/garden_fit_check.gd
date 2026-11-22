@@ -19,6 +19,7 @@ const HOST_FRAC := 0.9       # a block this share of the window wide is a host o
 const OVERLAP := 3.0         # px two HUD blocks may share
 const SLACK := 1.5           # px a control may stick out of its panel (rounding of the torn frames)
 const SETTLE := 8            # frames for a panel and its scroll to size themselves
+const HUD_SETTLE := 90       # frames for the splash to lift and the Boki card (it redraws every half second) to fill
 const GROWN := 8             # level at which a Boki can go in the Nook
 
 var bad := 0
@@ -67,7 +68,7 @@ func run(m: Node) -> void:
 		await _frames(SETTLE)
 		var size_tag := "%dx%d%s" % [px.x, px.y, "" if user_scale == 1.0 else "_ui%s" % user_scale]
 		home._close_panel()      # an arrival card still open
-		await _frames(SETTLE)      # the splash lifts, the HUD lays itself out for the new size
+		await _frames(HUD_SETTLE)      # the splash lifts, the HUD lays itself out for the new size
 		_scan_hud(size_tag + "_hud")
 		_shot(size_tag + "_hud")
 		for id in screens:
