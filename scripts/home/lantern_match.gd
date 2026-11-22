@@ -363,6 +363,7 @@ func _board_panel() -> void:
 		var ang := TAU * i / board.caps.size()
 		b.position = Vector2.ONE * UI_RING + Vector2(sin(ang), -cos(ang)) * UI_RING
 		b.pressed.connect(_pick.bind(i))
+		UI.sfx(b, false)    # _pick plays its own click
 		ring_ui.add_child(b)
 		buttons.append(b)
 	shown_ver = -1
@@ -370,6 +371,10 @@ func _board_panel() -> void:
 func _pick(i: int) -> void:
 	if board != null and board.pick(i):
 		Sfx.play("click", null, -10.0)
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return state == S.PLAY
 
 func tick(d: float) -> void:
 	state_t += d
