@@ -6,17 +6,18 @@ the foot rolls from heel to toe, and the hull above turns late, so the drum's we
   python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb OUT.glb walk_f,run_f
 Every other clip stays as tools/art1/breaker_anims.py bakes it. The arms, hands, weapon and fish start from the first
 key of its side-step clips (`carry_from`), so a second run on the shipped GLB bakes the same two clips again."""
+
 import math
 import sys
 
 import bpy
 import numpy as np
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Matrix, Vector
 
-SRC, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
-SIZE = 2.0          # game metres per model metre (content/archetypes/bulwark.json body size)
-FPS = 48            # keys per second: a run stance is 0.14 s
-CONTACT = 0.006     # m: a sole vert this close to the floor is planted
+SRC, OUT = sys.argv[sys.argv.index("--") + 1 :][:2]
+SIZE = 2.0  # game metres per model metre (content/archetypes/bulwark.json body size)
+FPS = 48  # keys per second: a run stance is 0.14 s
+CONTACT = 0.006  # m: a sole vert this close to the floor is planted
 TAU = math.tau
 # Per gait. speed: game m/s (warden_anim/breaker.json loco). period: s for a left + right pair. duty: the part of the
 # period a foot is planted. reach: where the planted sole meets the floor, m ahead of the root. sink, bob: the root's
@@ -25,12 +26,58 @@ TAU = math.tau
 # drum, roll onto the planted foot, lean forward, rock per step, arm swing (shield arm, hammer arm). carry: how
 # high the hammer's head hangs off the floor, m. The head tips back by 0.6 of the lean, as in his other loco clips.
 GAITS = {
-    "walk_f": dict(speed=2.0, period=0.75, duty=0.5, reach=0.178, lift=0.05, toe_up=8.0, heel_up=32.0, twist=22.0,
-                   hull=7.0, roll=5.0, hull_roll=2.5, sway=0.02, lean=-3.0, rock=1.2, sink=-0.03, bob=0.011, vault=1,
-                   surge=0.006, arms=(9.0, 3.0), late=0.07, push=0.72, turn=(0.0, 0.0), carry=0.0, carry_from="walk_l"),
-    "run_f": dict(speed=4.8, period=0.625, duty=0.22, reach=0.172, lift=0.095, toe_up=5.0, heel_up=38.0, twist=24.0,
-                  hull=9.0, roll=6.0, hull_roll=3.5, sway=0.016, lean=-11.0, rock=2.5, sink=-0.034, bob=0.018, vault=-1,
-                  surge=0.01, arms=(16.0, 5.0), late=0.09, push=0.68, turn=(0.04, 0.12), carry=0.03, carry_from="run_l"),
+    "walk_f": dict(
+        speed=2.0,
+        period=0.75,
+        duty=0.5,
+        reach=0.178,
+        lift=0.05,
+        toe_up=8.0,
+        heel_up=32.0,
+        twist=22.0,
+        hull=7.0,
+        roll=5.0,
+        hull_roll=2.5,
+        sway=0.02,
+        lean=-3.0,
+        rock=1.2,
+        sink=-0.03,
+        bob=0.011,
+        vault=1,
+        surge=0.006,
+        arms=(9.0, 3.0),
+        late=0.07,
+        push=0.72,
+        turn=(0.0, 0.0),
+        carry=0.0,
+        carry_from="walk_l",
+    ),
+    "run_f": dict(
+        speed=4.8,
+        period=0.625,
+        duty=0.22,
+        reach=0.172,
+        lift=0.095,
+        toe_up=5.0,
+        heel_up=38.0,
+        twist=24.0,
+        hull=9.0,
+        roll=6.0,
+        hull_roll=3.5,
+        sway=0.016,
+        lean=-11.0,
+        rock=2.5,
+        sink=-0.034,
+        bob=0.018,
+        vault=-1,
+        surge=0.01,
+        arms=(16.0, 5.0),
+        late=0.09,
+        push=0.68,
+        turn=(0.04, 0.12),
+        carry=0.03,
+        carry_from="run_l",
+    ),
 }
 LEGS = ("thigh", "shin", "x_foot")
 
@@ -76,7 +123,7 @@ def foot_idx(side):
 
 FOOT = {s: foot_idx(s) for s in "LR"}
 layer.update()
-SOLE = {}           # per side: the ankle's rest place, and the heel and toe ends of the sole from it (m, along y)
+SOLE = {}  # per side: the ankle's rest place, and the heel and toe ends of the sole from it (m, along y)
 for s in "LR":
     co = verts(body, FOOT[s])
     low = co[co[:, 2] < co[:, 2].min() + 0.012]
@@ -137,11 +184,11 @@ def foot_path(g, side, ph, off):
     s = (ph - duty) / (1 - duty)
     # (a Hermite pass forward: it leaves the floor already folding up, and meets it near its speed, so no scuff)
     m0, m1 = -0.3 * v * (1 - duty) * period, -0.6 * v * (1 - duty) * period
-    h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
+    h = (2 * s**3 - 3 * s * s + 1, s**3 - 2 * s * s + s, -2 * s**3 + 3 * s * s, s**3 - s * s)
     y = h[0] * (front - travel) + h[1] * m0 + h[2] * front + h[3] * m1
     out = 0.012 * math.sin(s * math.pi) * (1 if side == "R" else -1)
     pitch = -g["heel_up"] + (g["heel_up"] + g["toe_up"]) * smooth(0.08, 0.92, s)
-    lift = g["lift"] * math.sin(s ** 0.75 * math.pi) ** 0.9
+    lift = g["lift"] * math.sin(s**0.75 * math.pi) ** 0.9
     return Vector((ankle.x + out, y, lift)) + off * (1 - smooth(0.0, 0.6, s)), pitch, False
 
 
@@ -161,23 +208,36 @@ def pose(g, base, ph, feet):
         pb.location, pb.rotation_quaternion = base[pb.name]
     for name in ["root"] + ["%s.%s" % (n, s) for n in LEGS for s in "LR"]:
         PB[name].matrix_basis = Matrix()
-    mid = ph - duty / 2                                  # 0 at the right foot's mid stance
-    onto = math.cos(mid * TAU)                           # +1 weight on the right foot, -1 on the left
-    step = math.cos(mid * 2 * TAU)                       # +1 at each mid stance
-    early, after = g["turn"]                             # the hip sockets start to turn before the strike, end after the push
-    twist = (g["twist"] * (1 - 2 * smooth(-early, duty + after, (ph + early) % 0.5 - early))
-             * (1 if (ph + early) % 1.0 < 0.5 else -1))
+    mid = ph - duty / 2  # 0 at the right foot's mid stance
+    onto = math.cos(mid * TAU)  # +1 weight on the right foot, -1 on the left
+    step = math.cos(mid * 2 * TAU)  # +1 at each mid stance
+    early, after = g["turn"]  # the hip sockets start to turn before the strike, end after the push
+    twist = (
+        g["twist"]
+        * (1 - 2 * smooth(-early, duty + after, (ph + early) % 0.5 - early))
+        * (1 if (ph + early) % 1.0 < 0.5 else -1)
+    )
     late = g["late"]
     hull_yaw = g["hull"] * math.cos((ph - duty / 2 - late) * TAU + TAU / 4 * 0.6)
     hull_roll = g["hull_roll"] * math.cos((mid - late) * TAU)
-    drop = math.cos((mid - late) * 2 * TAU)              # the drum's own step, behind the legs'
+    drop = math.cos((mid - late) * 2 * TAU)  # the drum's own step, behind the legs'
     z = g["sink"] + g["vault"] * g["bob"] * math.cos((mid - 0.03) * 2 * TAU)
     y = g["surge"] * math.sin((mid - 0.03) * 2 * TAU)
-    PB["root"].matrix = (Matrix.Translation((g["sway"] * onto, y, z)) @ rot("Z", twist) @ rot("Y", g["roll"] * onto)
-                         @ rot("X", g["lean"] - g["rock"] * g["vault"] * step) @ REST["root"])
+    PB["root"].matrix = (
+        Matrix.Translation((g["sway"] * onto, y, z))
+        @ rot("Z", twist)
+        @ rot("Y", g["roll"] * onto)
+        @ rot("X", g["lean"] - g["rock"] * g["vault"] * step)
+        @ REST["root"]
+    )
     layer.update()
     about("hips", rot("Z", hull_yaw - twist) @ rot("Y", hull_roll) @ rot("X", -g["rock"] * 0.6 * g["vault"] * drop))
-    about("head", rot("Z", -0.7 * hull_yaw) @ rot("Y", -0.6 * (g["roll"] * onto + hull_roll)) @ rot("X", 1.5 * drop - 0.6 * g["lean"]))
+    about(
+        "head",
+        rot("Z", -0.7 * hull_yaw)
+        @ rot("Y", -0.6 * (g["roll"] * onto + hull_roll))
+        @ rot("X", 1.5 * drop - 0.6 * g["lean"]),
+    )
     about("skirt", rot("Y", -0.8 * g["hull_roll"] * math.cos((mid - 2.5 * late) * TAU)) @ rot("X", -1.5 * drop))
     for side, sign in (("L", 1), ("R", -1)):
         about("pauldron." + side, rot("Y", sign * 2.5 * g["vault"] * math.cos((mid - 1.6 * late) * 2 * TAU)))
@@ -185,7 +245,7 @@ def pose(g, base, ph, feet):
         about("upper_arm." + side, rot("X", swing * math.cos((ph - 0.04) * TAU)) @ rot("Y", sign * 1.5 * drop))
         about("forearm." + side, rot("X", 0.6 * swing * math.cos((ph - 0.04 - 1.4 * late) * TAU)))
     want = g["carry"] + 0.012 * (1 - math.cos((mid - 2 * late) * 2 * TAU))
-    for _ in range(3):                                   # the hull rocks round the hammer: its head keeps its height
+    for _ in range(3):  # the hull rocks round the hammer: its head keeps its height
         co = verts(hammer)
         at = Vector(co[co[:, 2].argmin()])
         lever = (at - PB["upper_arm.R"].head).xy
@@ -200,7 +260,7 @@ def pose(g, base, ph, feet):
             flat, pitch, planted = foot_path(g, side, (ph + start) % 1.0, was["off"])
             ankle, turn = place_foot(side, flat, pitch)
             miss, ext = leg_ik(side, ankle, turn)
-            for _ in range(2):                           # the sole on the floor from the skinned verts: no hover, no sink
+            for _ in range(2):  # the sole on the floor from the skinned verts: no hover, no sink
                 low = float(verts(body, FOOT[side])[:, 2].min())
                 if planted or low < 0:
                     ankle.z -= low
@@ -209,7 +269,7 @@ def pose(g, base, ph, feet):
             both = (now[:, 2] < CONTACT) & (was["co"][:, 2] < CONTACT) if planted and was["planted"] else None
             if both is None or not both.any() or turn_no == 4:
                 break
-            slip = (now[both, :2] - was["co"][both, :2]).mean(0)     # the lock: the planted patch moves with the floor
+            slip = (now[both, :2] - was["co"][both, :2]).mean(0)  # the lock: the planted patch moves with the floor
             was["off"] -= Vector((slip[0], slip[1] - step_y, 0.0))
         was.update(co=now, planted=planted, miss=miss, ext=ext)
 
@@ -226,7 +286,7 @@ def bake(name, g):
     old.name = name + "_was"
     n = int(round(g["period"] * FPS))
     feet = {s: dict(co=verts(body, FOOT[s]), planted=False, off=Vector()) for s in "LR"}
-    for lap in range(2):                                 # twice round: the first lap hands each swing its start
+    for lap in range(2):  # twice round: the first lap hands each swing its start
         keys, soles, miss, ext, low = [], [], 0.0, [0.0, 0.0], []
         for k in range(n):
             pose(g, base, k / n, feet)
@@ -259,7 +319,7 @@ def bake(name, g):
         for kp in fc.keyframe_points:
             kp.interpolation = "LINEAR"
     speeds = []
-    for s in "LR":                                       # the floor's speed under each planted sole, key to key
+    for s in "LR":  # the floor's speed under each planted sole, key to key
         for k in range(n):
             (p0, v0), (p1, v1) = soles[k][s], soles[(k + 1) % n][s]
             both = (v0[:, 2] < CONTACT) & (v1[:, 2] < CONTACT)
@@ -267,10 +327,28 @@ def bake(name, g):
                 speeds.append(float(np.linalg.norm((v1[both, :2] - v0[both, :2]).mean(0))) * FPS * SIZE)
     sp = np.array(speeds)
     near = 100.0 * np.mean(np.abs(sp / g["speed"] - 1) < 0.05)
-    print("GAIT %s %d keys %.3f s, %.2f steps/s, step %.2f m; planted sole %.2f m/s (%.0f%% of its keys within 5%% of loco %.1f, %.2f to %.2f); "
-          "leg reach %.3f planted %.3f in the air, ankle miss %.4f m; hammer head %.3f to %.3f m off the floor (was %.3f)" % (
-              name, n + 1, g["period"], 2 / g["period"], g["speed"] * g["period"] / 2, np.median(sp), near, g["speed"], sp.min(),
-              sp.max(), ext[0], ext[1], miss, min(low), max(low), min(old_low)))
+    print(
+        "GAIT %s %d keys %.3f s, %.2f steps/s, step %.2f m; planted sole %.2f m/s (%.0f%% of its keys within 5%% of loco %.1f, %.2f to %.2f); "
+        "leg reach %.3f planted %.3f in the air, ankle miss %.4f m; hammer head %.3f to %.3f m off the floor (was %.3f)"
+        % (
+            name,
+            n + 1,
+            g["period"],
+            2 / g["period"],
+            g["speed"] * g["period"] / 2,
+            np.median(sp),
+            near,
+            g["speed"],
+            sp.min(),
+            sp.max(),
+            ext[0],
+            ext[1],
+            miss,
+            min(low),
+            max(low),
+            min(old_low),
+        )
+    )
 
 
 for gait_name, gait in GAITS.items():
