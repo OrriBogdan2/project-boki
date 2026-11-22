@@ -914,7 +914,10 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true
 			bot_hold["rmb"] = 1.0
-		elif dist < 4.5 and rmb_ready() and not rmb_down:
+		# up close: against a monster, block its telegraphed hit and swing between (raising it whenever ready
+		# kept him behind the aegis, where he can't swing: a brute camp outlasted the whole --camp-clear-check
+		# trial with him at near full hp); a hunter's hits aren't telegraphed, so he keeps it up for them
+		elif dist < 4.5 and rmb_ready() and not rmb_down and (not tgt is Mob or (tgt as Mob).st in ["windup", "lunge"]):
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
 			bot_hold["rmb"] = 1.2
 	# close in: a Shield Charge from behind the shield, else a Whirl
