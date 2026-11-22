@@ -21,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): _dir = String(a).substr(12)
 	if _dir != "": DirAccess.make_dir_recursive_absolute(_dir)

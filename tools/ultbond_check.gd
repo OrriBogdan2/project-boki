@@ -27,7 +27,7 @@ func _fresh() -> Hunter:
 	m = Match.new()
 	main.add_child(m)
 	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"demo_kin": "pebbit", "weapon": "rifle", "cls": "medium"})
+		"demo_kin": "pebbit", "weapon": "rifle", "cls": "medium", "boki_wisps": false})
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()

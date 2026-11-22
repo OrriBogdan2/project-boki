@@ -16,6 +16,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func run(m: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = m
 	Save.no_write = true
 	await _case(false)

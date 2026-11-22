@@ -11,6 +11,7 @@ const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and
 const IVORY_HUE := 10.0
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
 	main_node.set_meta("hero_combo_check", self)

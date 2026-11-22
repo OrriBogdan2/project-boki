@@ -44,6 +44,7 @@ func ok(cond: bool, what: String) -> void:
 		print("SWEEP FAIL %s" % what)
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow._on_used)
 	var only := OS.get_environment("SWEEP_ONLY").split(",", false)
