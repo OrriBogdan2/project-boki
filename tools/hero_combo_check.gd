@@ -839,12 +839,12 @@ func _gunslinger_beam_look(V: HeroVfx, K: GunslingerKit) -> void:
 			body >= 0.9 and absf(strip - K.beam_width()) < 0.01)
 	ok("Longneedle look: the beam fades out over about 0.8 s", lasts >= 0.7 and lasts <= 0.9, "%.2f s" % lasts)
 	var fire: Array = HeroVfx.data("gunslinger")["moves"]["e_fire"]["fx"]
-	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring" and l.get("at") == "palm")
+	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring")
 	var palm: Dictionary = HeroVfx.data("gunslinger")["anchors"]["palm"]
 	var ring_nodes: Array = V.pools.get("ring", [])
 	var ring_live := V.live.any(func(e: Dictionary) -> bool: return ring_nodes.has(e["node"]))
-	ok("Longneedle look: a smoke ring opens at the open palm of her cyborg (left) hand on release",
-			ring and ring_live and palm["bone"] == "hand.L")
+	ok("Longneedle look: no decorative ground ring opens at the palm on release (a muzzle is not an area); anchor stays hand.L",
+			not ring and not ring_live and palm["bone"] == "hand.L")
 
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
