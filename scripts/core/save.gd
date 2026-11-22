@@ -79,6 +79,7 @@ func fresh() -> Dictionary:
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
+		"snack_picks": 0,     # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
 		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
@@ -526,6 +527,9 @@ func load_from(p: String) -> void:
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
+	FirstObjective.migrate(parsed)      # likewise
+	if not parsed.has("snack_picks"):
+		parsed["snack_picks"] = 1      # an older save had its first snack batch: no early 60 s one
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

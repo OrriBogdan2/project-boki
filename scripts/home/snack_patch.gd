@@ -56,9 +56,13 @@ static func entry(d: Dictionary) -> Dictionary:
 static func ripe(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs()
 
-## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort).
+## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort). A save's first
+## batch (Save.d snack_picks 0, the starter gift) takes first_grow_secs; saves without the counter are not new.
 static func grow_secs() -> float:
-	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0)
+	var base := float(rules()["grow_secs"])
+	if int(Save.d.get("snack_picks", 1)) <= 0:
+		base = minf(base, float(rules()["first_grow_secs"]))
+	return base * DecorComfort.value("bright", "grow", 1.0)
 
 ## The crunch a snack makes when picked: "crisp", "juicy", "hard" or "soft", by its lean type (pick_textures).
 static func texture(snack: String) -> String:
@@ -74,6 +78,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
+	d["snack_picks"] = int(d.get("snack_picks", 1)) + 1
 	var got: Array = snacks(d, now).duplicate()
 	var more := extra(d, e, now)
 	if more != "":
