@@ -119,7 +119,10 @@ func _hunter(id: String, dir: String) -> void:
 				var ia = m.mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX]
 				tris += (ia as PackedInt32Array).size() / 3 if ia != null else 0
 		if String(m.name).begins_with("prop_"):
-			print("LIVE_AUDIT_PROP ", id, " ", m.name, " on ", (m.get_parent() as BoneAttachment3D).bone_name, " aabb ", m.get_aabb().size, " at ", m.global_position)
+			print("LIVE_AUDIT_PROP ", id, " ", m.name, " on ", (m.get_parent() as BoneAttachment3D).bone_name, " aabb ", m.get_aabb().size, " at ", model.to_local(m.global_position), " aabb_c ", model.to_local(m.global_transform * m.get_aabb().get_center()))
+	var sk2 := WardenGlb.skeleton(model.get_node_or_null(^"Warden"))
+	if sk2 and sk2.find_bone("Spine02") >= 0:
+		print("LIVE_AUDIT_SPINE02 ", model.to_local((sk2.global_transform * sk2.get_bone_global_pose(sk2.find_bone("Spine02"))).origin), " head ", model.to_local((sk2.global_transform * sk2.get_bone_global_pose(sk2.find_bone("Head"))).origin), " model_scale ", model.global_transform.basis.get_scale())
 	print("LIVE_AUDIT_TRIS ", id, " ", tris)
 	native = poser != null
 	if poser == null:
