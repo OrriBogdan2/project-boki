@@ -2,18 +2,20 @@ extends RefCounted
 ## --drop-merge-check: fewer, bigger drops (DropMerge). Part 1: a cluster of gem and seed drops becomes
 ## one pile of each kind with the same totals, a far drop and other kinds stay apart, a pile is bigger the
 ## more it holds and never past the cap, picking it up gives exactly the total, and a collected gem node
-## is reused by the next drop. Part 2 is an audit: 30 bots, what lies on the ground (pickups, gear/loot
-## pickups, deathboxes). --drop-merge-check (the gate) audits the first 5 minutes; --drop-merge-audit (not a
-## -check flag, so not in the gate: it would hit the gate's 300 s cap) runs all 10 and skips part 1.
+## is reused by the next drop. --drop-merge-check (the gate) runs only that (~15 s). --drop-merge-audit (not a
+## -check flag, so not in the gate: even 5 audit minutes took 514 s on a loaded box vs the gate's 300 s cap)
+## runs a 30-bot match and prints what lies on the ground at 5 and 10 minutes (pickups, gear/loot, deathboxes).
 ## Never touches the save.
 
 var main: Node
 var fails := 0
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	print("DROPMERGE %-64s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 func run(main_node: Node, part := "gate") -> void:
 	main = main_node
@@ -22,9 +24,11 @@ func run(main_node: Node, part := "gate") -> void:
 	Econ.ensure()
 	if part == "gate":
 		await _piles()
-	await _audit([5] if part == "gate" else [5, 10])
+	else:
+		await _audit([5, 10])
 	print("DROPMERGE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 func _match(teams: int, squad: int, seed_: int) -> Match:
 	var m := Match.new()
@@ -33,6 +37,7 @@ func _match(teams: int, squad: int, seed_: int) -> Match:
 	m.set_process(false)
 	return m
 
+
 func _total(m: Match, kind: String, key := "") -> int:
 	var t := 0
 	for p in m.pickups:
@@ -40,11 +45,12 @@ func _total(m: Match, kind: String, key := "") -> int:
 			t += int(p["v"])
 	return t
 
+
 func _piles() -> void:
 	var m := await _match(1, 1, 31)
 	var P: Hunter = m.player
 	m.pickups.clear()
-	var base := Vector3(P.pos.x + 30.0, P.pos.y + 5.0, P.pos.z)      # away from the player: nothing is grabbed
+	var base := Vector3(P.pos.x + 30.0, P.pos.y + 5.0, P.pos.z)  # away from the player: nothing is grabbed
 	var gem_sum := 0
 	for i in 40:
 		var v := 3 + i % 7
@@ -59,30 +65,41 @@ func _piles() -> void:
 		m.drop("tonic", base, 1)
 	ok("40 gem drops in a cluster + 1 far + seeds + tonics: 7 pickups", m.pickups.size() == 7, "%d" % m.pickups.size())
 	ok("gem totals equal: dropped %d + 5 far" % gem_sum, _total(m, "gem") == gem_sum + 5, "%d" % _total(m, "gem"))
-	ok("seed totals equal per kind (10 emberberry, 4 tidebloom)",
-		_total(m, "seed", "emberberry") == 10 and _total(m, "seed", "tidebloom") == 4)
+	ok(
+		"seed totals equal per kind (10 emberberry, 4 tidebloom)",
+		_total(m, "seed", "emberberry") == 10 and _total(m, "seed", "tidebloom") == 4
+	)
 	var pile: Dictionary = {}
 	var lone: Dictionary = {}
 	for p in m.pickups:
 		if p["kind"] == "gem":
-			if int(p["v"]) == gem_sum: pile = p
-			else: lone = p
+			if int(p["v"]) == gem_sum:
+				pile = p
+			else:
+				lone = p
 	var big: float = (pile["node"] as Node3D).scale.x
-	ok("the pile is bigger than a lone gem and never past the cap",
-		big > (lone["node"] as Node3D).scale.x and big <= DropMerge.MAX_SIZE + 0.001)
+	ok(
+		"the pile is bigger than a lone gem and never past the cap",
+		big > (lone["node"] as Node3D).scale.x and big <= DropMerge.MAX_SIZE + 0.001
+	)
 	# picking up: exactly the total (no Scavenger perk here), and the node goes to the pool
 	var node: Node3D = pile["node"]
 	var g0 := P.gems
 	m._collect(P, pile)
 	var want := int(round(float(gem_sum) * PerkOrbs.gem_mult(P)))
 	ok("collecting the pile gives exactly the total", P.gems - g0 == want, "%d" % (P.gems - g0))
-	ok("its node is hidden in the pool, not freed",
-		is_instance_valid(node) and not node.visible and (m.get_meta("gem_pool") as Array).has(node))
+	ok(
+		"its node is hidden in the pool, not freed",
+		is_instance_valid(node) and not node.visible and (m.get_meta("gem_pool") as Array).has(node)
+	)
 	m.drop("gem", far + Vector3(50, 0, 0), 3)
 	var reuse: Node3D = m.pickups[-1]["node"]
-	ok("the next gem drop reuses that node, visible and normal size",
-		reuse == node and node.visible and is_equal_approx(node.scale.x, 1.0))
+	ok(
+		"the next gem drop reuses that node, visible and normal size",
+		reuse == node and node.visible and is_equal_approx(node.scale.x, 1.0)
+	)
 	m.queue_free()
+
 
 func _audit(minutes: Array) -> void:
 	var m := await _match(15, 2, 41)
@@ -94,7 +111,11 @@ func _audit(minutes: Array) -> void:
 		for p in m.pickups:
 			if p["kind"] == "gem":
 				gems += int(p["v"])
-		print("DROPMERGE audit %2d min, %d bots+you: pickups %d (gem value %d), gear/loot %d, deathboxes %d" % [
-			minute, bots, m.pickups.size(), gems, m.wpicks.size(), m.boxes.size()])
+		print(
+			(
+				"DROPMERGE audit %2d min, %d bots+you: pickups %d (gem value %d), gear/loot %d, deathboxes %d"
+				% [minute, bots, m.pickups.size(), gems, m.wpicks.size(), m.boxes.size()]
+			)
+		)
 	ok("the 30-bot match ran %d minutes" % minutes[-1], m.time >= minutes[-1] * 60.0)
 	m.queue_free()
