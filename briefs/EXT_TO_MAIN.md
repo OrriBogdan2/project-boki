@@ -10906,3 +10906,4 @@ READY ext/feel-buffer-table b934d4abac (bulk-rebase: origin/main merged in mecha
 READY ext/summon-per-species 824412aa98 (bulk-rebase: origin/main merged in mechanically, was 7c0e2c2924; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-1afe8a57 e869c30854 (bulk-rebase: origin/main merged in mechanically, was 710225a52a; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/farm-breed-pace-1122 2b32350d07 (breeding pace re-measured)
+READY ext/combat-gil-bot-grabbag 9e51e9542027d22c39458bfa7c84d5789a104479 (Gil bot uses Grab Bag)
