@@ -22,6 +22,7 @@ func ok(name: String, cond: bool, info := "") -> void:
 	if not cond: fails += 1
 
 func run(main_node: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
