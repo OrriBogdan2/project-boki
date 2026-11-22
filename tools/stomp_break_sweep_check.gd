@@ -58,6 +58,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	CombatBus.ability_used.connect(flow._on_used)
 	var only := OS.get_environment("SWEEP_ONLY").split(",", false)
