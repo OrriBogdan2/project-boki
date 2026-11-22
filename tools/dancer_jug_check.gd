@@ -69,23 +69,12 @@ func thief(a) -> void:
 	A.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
 			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
 			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
-	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
+	A.ok("dancer LMB: the aim line is pale lilac",
 			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
-	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
-	var spot := home + Vector3(-4.0, 0, -3.0)
-	A.aim_at(P, spot)
-	P.fire_cd = 0.0
-	var fz := K.fizzles
-	P.inp["fire"] = true
-	m.step(A.DT)
-	P.inp["fire"] = false
-	A.step(m, 0.5)
-	var off := Vector2(K.last_bolt_end.x - spot.x, K.last_bolt_end.z - spot.z).length()
-	A.ok("dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed)",
-			K.fizzles == fz + 1 and off < 0.75, "%.2f m off the cursor" % off)
+	# a bolt with nothing in its way flies its full range whatever the cursor (--tester-feedback-check)
 	A.aim_at(P, home + Vector3(-30.0, 0, 0))
 	P.fire_cd = 0.0
-	fz = K.fizzles
+	var fz := K.fizzles
 	P.inp["fire"] = true
 	m.step(A.DT)
 	P.inp["fire"] = false
