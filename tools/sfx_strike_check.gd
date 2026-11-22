@@ -34,7 +34,7 @@ const KNOWN := {
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
 	"dredge": {"rmb": ["dredge_coin_jingle"], "hold": ["dredge_coin_jingle"]},
-	"gil": {"rmb": ["gil_toss"], "hold": ["gil_toss"], "r": ["gil_wave_land"]},
+	"gil": {"rmb": ["gil_toss", "gil_pop_zeep"], "hold": ["gil_toss", "gil_pop_zeep"], "r": ["gil_wave_land"]},
 	"gunslinger": {"rmb": ["gunslinger_grenade_thunk"], "hold": ["gunslinger_grenade_thunk"], "r": ["vn_nuke_fire"]},
 	"juggernaut": {"lhold": ["jug_ting"], "hold": ["jug_ting"], "r": ["juggernaut_heal"]},
 	"mage": {"r": ["vv_ult_rise"]},
