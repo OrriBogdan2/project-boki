@@ -20,7 +20,7 @@ var nodes: Array = []  # the parts (MeshInstance3D) riding Meshy's bones
 var stretch: Dictionary = {}
 
 
-## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "stretch") on `skel`
+## Hangs `art`'s contract parts (data `d` "props": contract bone -> material names; "tilt", "scale", "stretch") on `skel`
 ## (Meshy's; `to_m`: it -> the Hunter's model). Returns the live parts (empty when the contract .glb has none of them).
 static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionary) -> WardenProps:
 	var want: Dictionary = d.get("props", {})
@@ -41,7 +41,12 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		var mi := MeshInstance3D.new()
 		mi.name = PREFIX + cb.validate_node_name()
 		mi.mesh = p[0]
-		mi.transform = (to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
+		var swap := _swap(String((d.get("mesh", {}) as Dictionary).get(cb, "")))  # (data "mesh": a made part)
+		if swap.size() == 2:
+			mi.mesh = swap[0]
+		var grow := _grow((d.get("scale", {}) as Dictionary).get(cb, 1.0))  # (data "scale": the part grown about its bone)
+		mi.transform = ((to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
+			* Transform3D(Basis.from_scale(grow)) * (swap[1] if swap.size() == 2 else Transform3D.IDENTITY))
 		mi.set_meta("base", mi.transform)
 		mi.set_meta("y", float(stretch_d.get("rest", 1.0)))
 		mi.transform = mi.transform * Transform3D(Basis.from_scale(Vector3(1.0, mi.get_meta("y"), 1.0)))
@@ -53,6 +58,32 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 			mi.add_child(e)
 		wp.nodes.append(mi)
 	return wp
+
+
+## Data "mesh" value `path`: a .glb whose first mesh replaces the cut part, authored in the contract bone's rest frame
+## (Gil's Meshy swordfish). [mesh, its place in the .glb], or [] when none.
+static func _swap(path: String) -> Array:
+	if path == "" or not ResourceLoader.exists(path):
+		return []
+	var root := (load(path) as PackedScene).instantiate() as Node3D
+	var out: Array = []
+	for m: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		var xf := Transform3D.IDENTITY
+		var n: Node = m
+		while n != root:
+			xf = (n as Node3D).transform * xf
+			n = n.get_parent()
+		out = [m.mesh, xf]
+		break
+	root.free()
+	return out
+
+
+## Data "scale" value `v`: one number (all axes) or [x, y, z] in the part's own frame (its length runs along x).
+static func _grow(v: Variant) -> Vector3:
+	if v is Array and (v as Array).size() == 3:
+		return Vector3(float(v[0]), float(v[1]), float(v[2]))
+	return Vector3.ONE * float(v)
 
 
 ## Eases the parts to their stretch for kit move `kmove`.
