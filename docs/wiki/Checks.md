@@ -109,7 +109,7 @@ line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 ## Tooling flags
 
 Not checks, but useful: `--loop-tour[=<class>]` (the core loop with a screenshot per step),
-`--perf-probe`, `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
+`--perf-bench` (`--bench-probe`, `--bench-hunter-gpu` and the other perf flags: see `docs/PERF.md`), `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
 `docs/MATCH_PERF.md`), `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
 vocabulary as Markdown), the galleries (`--arch-lineup`, `--mob-gallery`, `--prop-gallery`,
 `--flora-gallery`, `--pack-gallery`, `--hair-gallery`, `--map-overview`), and many `--*-demo` flags for
