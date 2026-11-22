@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the flow: hold 0.4s commits, then 4s runs on its own (let go), you are rooted and cannot shoot
 ##   3. one active Boki: the captured one is only a capsule in the box, never in the world
 ##   4. interruptions: crowd control, Space (no hop) and a dash cancel it, plain damage does not; the daze timer waits
-##   5. the box: capacity 3 from the rules, shown on the HUD, a full box blocks, Release frees a place
+##   5. the box: the carry-out slot (1) from the rules, shown on the HUD, a full slot blocks, Release frees it
 ##   6. your own Boki does not finish a dazed wild Boki
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
 ##   8. the net: rivals see and hear the scan (events, a timeout when nobody confirms)
@@ -104,7 +104,7 @@ func run(mn: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--capture-only="): only = a.substr(15)
 	var parts := ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin"]
-	parts.append_array(["book", "branch_forms", "net", "bots", "bots_full", "sound"])
+	parts.append_array(["book", "branch_forms", "net", "slots", "hints", "bots", "bots_full", "sound"])
 	for part in parts:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
@@ -231,12 +231,12 @@ func _box() -> void:
 	_fresh()
 	var P := m.player
 	var cap := Capture.box_cap()
-	ok(cap == int(Content.rules("capture")["box_capacity"]) and cap == 3, "the box holds %d (from content/rules/capture.json)" % cap)
+	ok(cap == int(Content.rules("capture")["carry_out"]) and cap == 1, "the carry-out slot holds %d (from content/rules/capture.json)" % cap)
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
-	ok(Capture.block_reason(P, k).contains("Box full"), "a full box blocks the scan (\"%s\")" % Capture.block_reason(P, k))
-	ok(CaptureHud.box_text(P) == "Box 3/3", "the HUD shows the box (%s)" % CaptureHud.box_text(P))
+	ok(Capture.block_reason(P, k).contains("Carry-out full"), "a full carry-out slot blocks the scan (\"%s\")" % Capture.block_reason(P, k))
+	ok(CaptureHud.box_text(P) == "Carry-out 1/1", "the HUD shows the slot (%s)" % CaptureHud.box_text(P))
 	begin(P)
 	ok(not Capture.active(P) and Capture.state(P).is_empty(), "...holding the key does not start one")
 	ok(Capture.release(m, P, 0) and P.caught.size() == cap - 1, "Release lets a capsule go (%d left)" % P.caught.size())
@@ -358,6 +358,67 @@ func _net() -> void:
 	ok(BlightDir.LOUD.has("scan"), "the scan is a sound rivals and the Blight react to")
 	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION is %s (at least merge forms' 0.11.0)" % Net.VERSION)
 
+# ------------------------------------------------------------------ 8b. the carry-out slot, the 4-wisp cap, the mate
+func _slots() -> void:
+	_fresh()
+	var P := m.player
+	var cap := int(Capture.rules()["wisp_cap"])
+	var mate: Hunter = m.hunters.filter(func(h): return h != P)[0]
+	mate.team = P.team
+	mate.ctrl = "idle"
+	var rec := Save.new_kin("puddlet", "Claimed")
+	ok(Capture.room(P, rec) and Capture.mate_with_room(m, P, rec) == mate, "a free slot fits; a mate has room")
+	P.caught.append(rec)
+	var wild_k := wild()
+	var why := Capture.block_reason(P, wild_k)
+	ok(why.contains(mate.pname), "full slot: the toast names the teammate with room (\"%s\")" % why)
+	var taken := Save.new_kin("zapple", "Taken")
+	taken["lost_from"] = "Someone"
+	ok(Capture.room(P, taken), "...a stolen Boki has its own slot")
+	P.caught.append(taken)
+	ok(not Capture.room(P, taken), "...one stolen slot: a second stolen Boki has no room")
+	ok(Capture.wisps(P) <= cap, "wisps %d never pass the cap %d" % [Capture.wisps(P), cap])
+	mate.caught.append(Save.new_kin("puddlet", "Mate"))
+	ok(Capture.mate_with_room(m, P, rec) == null, "no team pool: a full teammate is no help")
+	# online: a client knows a teammate's slots from the snapshot row
+	mate.caught.clear()
+	var row := HunterNet.extra(P)
+	m.is_host = false
+	mate.remote = true
+	HunterNet.apply(mate, row)
+	var read := Capture.slots(mate)
+	ok(read == [1, 1] and not Capture.room(mate, rec), "a client reads a peer's slots (%s)" % str(read))
+
+# ------------------------------------------------------------------ 8c. the first-time carry hints
+func _hints() -> void:
+	_fresh()
+	var P := m.player
+	Settings.v["tips"] = true
+	var seen: Dictionary = Save.d["tutorial"]
+	for key in [CarryHints.SWAP_KEY, CarryHints.CLAIM_KEY, CarryHints.FULL_KEY]:
+		seen.erase(key)
+	if P.kin2 == null:
+		m.give_kin(P, Save.new_kin("puddlet", "Second"))
+	P.kin.throw_cd = 0.0
+	ok(P.kin2 != null and CarryHints.swap(m).is_empty(), "swap hint: not while the lead can be summoned")
+	P.kin.throw_cd = 1.0
+	var due := CarryHints.swap(m)
+	ok(due.size() == 2 and due[0] == CarryHints.SWAP_KEY, "swap hint: due once the lead's summon is on cooldown")
+	ok(String(due[1]).begins_with(Settings.key_cap("swap_kin")), "...and it names the swap key (\"%s\")" % str(due))
+	P.kin.throw_cd = 0.0
+	ok(not seen.has(CarryHints.CLAIM_KEY), "claim hint: not before a claim")
+	m._catch(P, wild())
+	ok(seen.has(CarryHints.CLAIM_KEY), "claim hint: the first claim says it rides home and can be stolen")
+	var mate: Hunter = m.hunters.filter(func(h): return h != P)[0]
+	mate.team = P.team
+	ok(Capture.mate_with_room(m, P) == mate and not Capture.room(P), "setup: the slot is full and a teammate has room")
+	ok(not seen.has(CarryHints.FULL_KEY), "full hint: not before a scan is blocked")
+	Capture.full_note(m, P)
+	ok(seen.has(CarryHints.FULL_KEY), "full hint: the first blocked scan shows the teammate line as a hint")
+	Settings.v["tips"] = false
+	ok(not CarryHints.wanted(m), "hints off in settings: no carry hints")
+	Settings.v["tips"] = true
+
 # ------------------------------------------------------------------ 9. bots
 func _bots() -> void:
 	_fresh()
@@ -375,11 +436,11 @@ func _bots() -> void:
 	var k := m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
 	var scanned := false
 	var t := 0.0
-	while t < 25.0 and bot.caught.is_empty():
+	while t < 40.0 and bot.caught.is_empty():
 		_tidy(); m.step(Match.DT); t += Match.DT
 		if Capture.active(bot): scanned = true
 	ok(scanned, "a bot walks to a knocked-out wild Boki and holds a scan")
-	ok(bot.caught.size() == 1 and k.dead, "...and the capsule ends up in its box (%.1fs)" % t)
+	ok(Capture.slots(bot) == [1, 0], "...and a claimed Boki ends up in its carry-out slot (%.1fs)" % t)
 
 # ------------------------------------------------------------------ 10. what happens mid-scan
 func _mid_scan() -> void:
