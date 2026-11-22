@@ -103,7 +103,7 @@ func _play(m: Match, p_v: Hunter, hero: String, id: String, used: Array[Vector3]
 	var crouched := 0.0
 	var run_crouch := 0.0
 	var kind_ok := true
-	var heal_hp := UtilityUse.heal_of(P, id) if UtilityUse.use_of(id) == "drink" else 0.0
+	var heal_hp := UtilityUse.heal_of(p_v, id) if UtilityUse.use_of(id) == "drink" else 0.0
 	while steps < int(cast / Match.DT) + 20:
 		p_v._anim_state(0.0)
 		var s := p_v.anim_s

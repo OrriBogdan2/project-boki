@@ -88,7 +88,7 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
 	_cc_plate(m, foes[0], foes[1])
 	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
-	_cc_self(m, P)
+	_cc_self(m, p)
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
