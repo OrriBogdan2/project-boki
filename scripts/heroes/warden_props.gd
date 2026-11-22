@@ -4,7 +4,7 @@ extends RefCounted
 ## Meshy's own bones on the native path (WardenNative; warden_native.json "props": contract bone -> material names).
 ## Each part is cut out of the contract .glb's skinned body by material, only the triangles that bone carries, made
 ## rigid in that bone's rest frame, and hung on the Meshy bone that plays the bone (WardenSkeleton.find) by `carry`:
-## the part keeps its place and turn against the limb, the contract's parent -> bone line swung onto Meshy's, so the
+## the part keeps its place and turn against the limb (a bone Meshy lacks rides that limb's bone), the contract's parent -> bone line swung onto Meshy's, so the
 ## sword gripped in the contract's hanging hand sits in Meshy's A-pose hand. The contract's anchor empties on that bone
 ## ride the part (the blade tip on the blade). Data "stretch" {"kmove", "y", "rest"}: the parts' length along their
 ## bone while that kit move plays and otherwise (the contract's clips key the jet bones' scale: Flue Flight's long
@@ -32,6 +32,8 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		var p: Array = parts[cb]
 		var onto := _onto(skel, to_m, p[3], deg_to_rad(float((d.get("tilt", {}) as Dictionary).get(cb, 0.0))))
 		var nb := WardenSkeleton.find(skel, cb)
+		if nb < 0:  # (a bone Meshy has no match for, Grimble's hoard: it rides the limb it hangs off)
+			nb = WardenSkeleton.find(skel, String(p[3][0]))
 		if nb < 0 or onto.basis.determinant() == 0.0:
 			continue
 		var at := BoneAttachment3D.new()

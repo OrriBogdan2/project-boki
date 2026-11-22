@@ -112,6 +112,15 @@ func _hunter(id: String, dir: String) -> void:
 	for k in 30:
 		await tree.process_frame
 	var poser := model.get_node_or_null("Warden/Native")
+	var tris := 0
+	for m: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if m.mesh:
+			for si in m.mesh.get_surface_count():
+				var ia = m.mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX]
+				tris += (ia as PackedInt32Array).size() / 3 if ia != null else 0
+		if String(m.name).begins_with("prop_"):
+			print("LIVE_AUDIT_PROP ", id, " ", m.name, " on ", (m.get_parent() as BoneAttachment3D).bone_name, " aabb ", m.get_aabb().size, " at ", m.global_position)
+	print("LIVE_AUDIT_TRIS ", id, " ", tris)
 	native = poser != null
 	if poser == null:
 		poser = model.get_node("Warden/Sync")
