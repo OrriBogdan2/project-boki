@@ -10916,3 +10916,4 @@ READY ext/combat-gil-bot-grabbag 65c798379b18cbd846b7d9c8184d1c0e4b96ddc2 (Gil b
 READY ext/ui-pick-countdown-verify caf1f6c617d (pick countdown verified at four sizes)
 READY ext/combat-hitbox-zero-rows 765cb1e0300dee55f24e1ec788d22d7272e5acb0 (hit shapes measured for the zero-hit rows)
 READY ext/anim-boki-eat-sleep-clips 991d7786b6 (Boki eat/sleep use baked clips)
+READY ext/anim-boki-starter-glide 149872f6e9d58b34aac5b4228db0d335e8292c13 (starter Boki glide clips)
