@@ -10856,3 +10856,4 @@ READY ext/merge-lane-M7-1121 c30ffcbf6615b7e1cf4de2e0f81f24e3fa38e433 (lane M7 b
 READY ext/sfx-pickup-silent f3a4aa68116663226654a7bf70dd2727a17f5e00 (every pickup plays its cue)
 READY ext/remote-smooth-flake-1118 0cbd2f880c (remote-smooth-check flake: NetSmooth hold + deterministic line)
 READY ext/hunter-tex-2k 4d0102a49b573918052cb7f96c49e31a2579ae9e (hunter 4K->2K textures, pack -96 MB, size_limit + warden_tex_guard; merged main, size_budget resolved)
+READY ext/vfx-sparkle-grounded 1397473bdbf99a470719ccf2c76be4260799ec54 (Sparkle Grounded mark look)
