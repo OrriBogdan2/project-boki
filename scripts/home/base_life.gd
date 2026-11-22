@@ -59,6 +59,7 @@ var _trying := {}          # toy uid -> the Boki that tries a new toy first (nob
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
 static var befriended: Array = []   # [uid, uid] pairs whose bond just reached friend_at; step() cheers them
 var hand: BaseHandFeed     # the selected snack, and feeding from your hand
+var sfx := PlaySfx.new()   # the quiet cues of free play (tag, squabbles), capped per zone
 
 func _init(home) -> void:
 	h = home
@@ -129,6 +130,7 @@ static func joy_rate(rec: Dictionary) -> float:
 ## Moves every machine on; called each frame from home.gd _move_kin, ticks at 10 Hz.
 func step(d: float) -> void:
 	whistle.step(d)
+	sfx.tick(d)
 	_acc += d
 	if _acc < STEP:
 		return
@@ -319,8 +321,10 @@ func _play_tick(k: Dictionary, m: Fsm, _dt: float) -> void:
 func _tag_tick(k: Dictionary, m: Fsm) -> void:
 	var o: Dictionary = k["life_at"]
 	var om: Fsm = o.get("life", null)
-	if om == null or not om.is_in(S.PLAY_WITH) or _taken(o) or m.since >= float(k["life_for"]) \
-			or m.since >= float(R["max"]["play_with"]):
+	var timed_out: bool = m.since >= float(k["life_for"]) or m.since >= float(R["max"]["play_with"])
+	if om == null or not om.is_in(S.PLAY_WITH) or _taken(o) or timed_out:
+		if timed_out and om != null and om.is_in(S.PLAY_WITH) and not _taken(o):      # the first to tire cheers
+			sfx.tag_end(k["rec"], (k["pos"] + o["pos"]) * 0.5)
 		m.go(S.ROAM, "tag over")
 		return
 	if not k.get("life_it", false):
@@ -340,6 +344,7 @@ func _tag_tick(k: Dictionary, m: Fsm) -> void:
 		k.erase("life_it")
 		o["life_it"] = true
 		o["goal"] = o["pos"]
+		sfx.tag_catch(o["rec"], o["pos"])
 
 func _look_tick(k: Dictionary, m: Fsm) -> void:
 	var at: Dictionary = k["life_at"]
@@ -491,6 +496,7 @@ func _tag(k: Dictionary, o: Dictionary) -> void:
 		pair[0]["t"] = secs
 	k["life_it"] = true
 	h._emote(k, "★")
+	sfx.tag_start(k["rec"], k["pos"])
 
 func _watch(k: Dictionary, o: Dictionary, why: String) -> void:
 	if not machine(k).go(S.WATCH, why):
@@ -638,6 +644,7 @@ func _clash(a: Dictionary, b: Dictionary) -> bool:
 
 func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))
+	sfx.squabble(a["rec"], a["pos"])
 	_huff(a)
 	_huff(b)
 
