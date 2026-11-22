@@ -7,6 +7,7 @@ the new bones.
 
 top: the belly's height as a share of the body's; reach: a multiple of the default stride.
 """
+
 import math
 import os
 import sys
@@ -22,10 +23,10 @@ import glb_tangents  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 QUAD = [("f", ".L"), ("f", ".R"), ("h", ".L"), ("h", ".R")]
-BIPED = [("h", ".L"), ("h", ".R")]      # hleg only: the names BokiHomePoses reads on a two-legged rig
+BIPED = [("h", ".L"), ("h", ".R")]  # hleg only: the names BokiHomePoses reads on a two-legged rig
 LEGS = QUAD
 NEW = []
-ANKLE = 0.12       # of the belly height: where the paw bone starts
+ANKLE = 0.12  # of the belly height: where the paw bone starts
 # clip: (duty: share of a step the paw is down, half stride, lift, body drop, bob), the last four in belly heights.
 # The drop crouches the body so a planted paw can reach the ground at both ends of its sweep.
 GAITS = {"walk": (0.5, 0.30, 0.25, 0.11, 0.015), "run": (0.25, 0.40, 0.35, 0.16, 0.03)}
@@ -50,7 +51,7 @@ def legs_of(co, top):
             hi = np.linalg.norm(low - cen[1], axis=1) < np.linalg.norm(low - cen[0], axis=1)
             cen = np.array([np.median(low[~hi], axis=0), np.median(low[hi], axis=0)])
         hi = np.linalg.norm(low - cen[1], axis=1) < np.linalg.norm(low - cen[0], axis=1)
-        order = [0, 1] if (cen[0][0], cen[0][1]) < (cen[1][0], cen[1][1]) else [1, 0]      # .L: the smaller x
+        order = [0, 1] if (cen[0][0], cen[0][1]) < (cen[1][0], cen[1][1]) else [1, 0]  # .L: the smaller x
         rad = []
         for i in order:
             pts = low[hi] if i else low[~hi]
@@ -66,7 +67,7 @@ def legs_of(co, top):
             hi = np.abs(pts[:, 1] - cy[1]) < np.abs(pts[:, 1] - cy[0])
             cy = [pts[~hi][:, 1].mean() if (~hi).any() else cy[0], pts[hi][:, 1].mean() if hi.any() else cy[1]]
         hi = np.abs(pts[:, 1] - cy[1]) < np.abs(pts[:, 1] - cy[0])
-        side[sign] = [pts[hi], pts[~hi]]            # front (+y), back
+        side[sign] = [pts[hi], pts[~hi]]  # front (+y), back
     cen, rad = [], []
     for i, (pre, sd) in enumerate(LEGS):
         both = [side[-1][0 if pre == "f" else 1], side[1][0 if pre == "f" else 1]]
@@ -116,8 +117,11 @@ def reweight(body, cen, rad, top):
         pre, side = LEGS[i]
         upper = float(smooth((z - knee + top * 0.1) / (top * 0.2)))
         paw = float(smooth((ankle + top * 0.06 - z) / (top * 0.12)))
-        parts = {pre + "leg1" + side: upper * (1 - paw), pre + "leg2" + side: (1 - upper) * (1 - paw),
-                 pre + "paw" + side: paw}
+        parts = {
+            pre + "leg1" + side: upper * (1 - paw),
+            pre + "leg2" + side: (1 - upper) * (1 - paw),
+            pre + "paw" + side: paw,
+        }
         old = [(g.group, g.weight) for g in v.groups if g.group not in (gid[n] for n in NEW)]
         for gi, gw in old:
             body.vertex_groups[gi].add([v.index], gw * (1 - w), "REPLACE")
@@ -169,8 +173,8 @@ def stride_at(u, duty, half, lift):
     if u < duty:
         return half - 2 * half * u / duty, 0.0
     s = (u - duty) / (1 - duty)
-    v = -2 * half / duty * (1 - duty)         # the ground's speed, per unit of the swing
-    h00, h10, h01, h11 = 2 * s ** 3 - 3 * s ** 2 + 1, s ** 3 - 2 * s ** 2 + s, -2 * s ** 3 + 3 * s ** 2, s ** 3 - s ** 2
+    v = -2 * half / duty * (1 - duty)  # the ground's speed, per unit of the swing
+    h00, h10, h01, h11 = 2 * s**3 - 3 * s**2 + 1, s**3 - 2 * s**2 + s, -2 * s**3 + 3 * s**2, s**3 - s**2
     return h00 * -half + h10 * v + h01 * half + h11 * v, lift * math.sin(math.pi * s) ** 0.4
 
 
@@ -187,7 +191,7 @@ def animate(arm, top, gaits):
         span = frames[-1] - frames[0]
         gait = gaits.get(act.name, (0, 0, 0, 0, 0))
         duty, half, lift, drop, bob = [v * (top if i else 1.0) for i, v in enumerate(gait)]
-        drop = max(drop, (l1 + l2) - math.sqrt(((l1 + l2) * 0.97) ** 2 - half ** 2) + top * 0.02)   # reach both ends
+        drop = max(drop, (l1 + l2) - math.sqrt(((l1 + l2) * 0.97) ** 2 - half**2) + top * 0.02)  # reach both ends
 
         def body_drop(u):
             """The crouch and its bob: lowest in mid-stance, twice a cycle."""
@@ -196,11 +200,17 @@ def animate(arm, top, gaits):
         if act.name in gaits:
             # the borrowed rig's walk surges and squashes the whole body, which no planted paw can follow: hold it
             for idx in range(3):
-                set_curve(act, 'pose.bones["root"].location', idx, frames,
-                          [-body_drop(((f - frames[0]) / span) % 1.0) * up[idx] for f in frames], "root")
+                set_curve(
+                    act,
+                    'pose.bones["root"].location',
+                    idx,
+                    frames,
+                    [-body_drop(((f - frames[0]) / span) % 1.0) * up[idx] for f in frames],
+                    "root",
+                )
                 set_curve(act, 'pose.bones["root"].scale', idx, frames, [1.0] * len(frames), "root")
         for i, (pre, side) in enumerate(LEGS):
-            phase = 0.0 if (pre == "f") == (side == ".L") else 0.5       # a trot: the diagonal pair together
+            phase = 0.0 if (pre == "f") == (side == ".L") else 0.5  # a trot: the diagonal pair together
             if len(LEGS) == 2:
                 phase = 0.0 if side == ".L" else 0.5
             vals = {"leg1": [], "leg2": [], "paw": []}
@@ -219,14 +229,14 @@ def animate(arm, top, gaits):
 
 
 def main():
-    args = sys.argv[sys.argv.index("--") + 1:]
+    args = sys.argv[sys.argv.index("--") + 1 :]
     species = args[0]
     opt = dict(a.split("=") for a in args[1:])
     top_share = float(opt.get("top", 0.42))
-    scale = float(opt.get("reach", 1.0))      # the stride's half length, as a multiple of the default
+    scale = float(opt.get("reach", 1.0))  # the stride's half length, as a multiple of the default
     path = os.path.join(REPO, "art/kin", species, species + ".glb")
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.context.scene.render.fps = 30       # the clips are keyed at 30 fps: the importer's 24 would re-time them
+    bpy.context.scene.render.fps = 30  # the clips are keyed at 30 fps: the importer's 24 would re-time them
     bpy.ops.import_scene.gltf(filepath=path)
     global LEGS
     LEGS = BIPED if opt.get("legs") == "2" else QUAD
