@@ -1592,7 +1592,7 @@ func _impact_ok(types: Dictionary, t: String) -> bool:
 func _type_of(id: String) -> String:
 	return String(KinLib.species(id).get("type", ""))
 
-## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
+## 10. What you can see you can hear: the cue at the side edge of the match view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
 func _falloff() -> void:
 	var edge := CamRig.style_across("supervive") * 0.5

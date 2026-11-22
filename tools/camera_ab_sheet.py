@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Side-by-side sheets for docs/CAMERA_AB.md: python3 tools/camera_ab_sheet.py <shots-dir> <out-dir>
 Reads <hero>_<moment>_<style>.png from `godot -- --camera-ab-shots` and writes <out-dir>/<hero>.jpg: one row per
-moment, the Supervive camera (flag off) on the left, source_scale (flag on) on the right."""
+moment, the Default camera (flag off) on the left, source_scale (flag on) on the right."""
 import sys
 from pathlib import Path
 from PIL import Image, ImageDraw
 
 HEROES = {"archer": "Lace", "juggernaut": "Kael", "gunslinger": "Vex", "bulwark": "Albert"}
 MOMENTS = [("fight", "open ground fight"), ("glide", "ledge drop, gliding"), ("squads", "3 squads at range")]
-STYLES = [("supervive", "flag off: Supervive"), ("source_scale", "flag on: source_scale")]
+STYLES = [("default", "flag off: Default"), ("source_scale", "flag on: source_scale")]
 TILE = (960, 540)    # px of each shot on the sheet
 LABEL_H = 28         # px of the caption strip over each shot
 
