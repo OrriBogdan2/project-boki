@@ -133,11 +133,11 @@ func _part_swing() -> void:
 	await _reset(12.0)
 	_hand()
 	P.teleport(home + Vector3(-4.0, 0, 0))
-	var run := func(t: float):
+	var run_v := func(t: float):
 		P.inp["fire"] = t > 0.1 and t < 0.1 + HOLD
 		P.inp["move"] = Vector2(1, 0) if t < 2.0 else Vector2.ZERO
 		_aim(T.pos)
-	await _go(2.8, run, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
+	await _go(2.8, run_v, _sheet("swing", "LMB held and let go running: further", [1.5, 1.62, 1.75, 1.9, 2.2]), 1.5)
 	await _go(GAP)
 
 func _part_boop() -> void:

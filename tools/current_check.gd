@@ -8,28 +8,32 @@ extends RefCounted
 
 const MAPS := ["tutorial", "hollowcrown", "skyreach", "arena"]
 const GEN_SEEDS := 12
-const LOW_FX := 0.45     # the Low preset's fx (Settings.QUALITY)
+const LOW_FX := 0.45  # the Low preset's fx (Settings.QUALITY)
 
 var bad := 0
 var n := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	n += 1
 	print("CURRENT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): shots = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			shots = a.substr(12)
 	for id in MAPS:
-		var L := World.load_layout(id)
+		var l := World.load_layout(id)
 		var w := World.new()
-		await w.generate_authored(L, 3)
-		_world(w, id, (L.get("winds", []) as Array).size(), (L.get("updrafts", []) as Array).size())
+		await w.generate_authored(l, 3)
+		_world(w, id, (l.get("winds", []) as Array).size(), (l.get("updrafts", []) as Array).size())
 		w.free()
 	for sd in range(1, GEN_SEEDS + 1):
 		var w := World.new()
@@ -41,6 +45,7 @@ func run(m: Node) -> void:
 	print("CURRENT %d checks, %d failed" % [n, bad])
 	print("CURRENT_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	m.get_tree().quit()
+
 
 ## One built world: a node per entry in the data (want_w / want_u are the data's own counts).
 func _world(w: World, label: String, want_w: int, want_u: int) -> void:
@@ -83,23 +88,27 @@ func _world(w: World, label: String, want_w: int, want_u: int) -> void:
 	hi.free()
 	lo.free()
 
+
 ## How many streak cards road i has.
 func _streaks(fx: CurrentFx, i: int) -> int:
 	var streaks := fx.get_node("Road%d" % i).get_node("Streaks") as MultiMeshInstance3D
 	return streaks.multimesh.instance_count
 
+
 # ---------------------------------------------------------------- shots
 func _shots(out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
-	var tree := main.get_tree()
+	var _tree := main.get_tree()
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true, "map": "skyreach",
-			"length": 1e9})
+	await m.start(
+		{"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true, "map": "skyreach", "length": 1e9}
+	)
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var p := m.player
 	var wd: Dictionary = m.world.winds[0]
@@ -125,6 +134,7 @@ func _shots(out: String) -> void:
 	ok(p.in_current, "the player rides the updraft in the shot")
 	m.queue_free()
 
+
 ## Runs frames with the player gliding (or not) and the camera on a spot.
 func _frames(m: Match, p: Hunter, glide: bool, look: Vector3, frames: int) -> void:
 	for i in frames:
@@ -135,6 +145,7 @@ func _frames(m: Match, p: Hunter, glide: bool, look: Vector3, frames: int) -> vo
 		m.step(1.0 / 60.0)
 		m.cam.snap(look)
 		await main.get_tree().process_frame
+
 
 func _save(node: Node, out: String, stem: String) -> void:
 	node.get_viewport().get_texture().get_image().save_png(out.path_join(stem + ".png"))
