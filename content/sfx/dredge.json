@@ -4,6 +4,12 @@
  "script": "tools/gen_sfx_grimble.py",
  "sounds": {
   "dredge_hit": "heavy_impact",
+  "dredge_hit_rmb": "heavy_impact",
+  "dredge_hit_e": "heavy_impact",
+  "dredge_hit_r": "heavy_impact",
+  "dr_reach_fly": "loop",
+  "dr_let_go": "cast",
+  "dr_blast_end": "cast",
   "dr_shot": "fire",
   "dr_throw": "cast",
   "dr_grab": "impact",
@@ -31,5 +37,13 @@
  "signature": ["dredge_coin_jingle", "dredge_junk_clatter", "dredge_pickup"],
  "kit_files": ["dredge_blast.gd"],
  "replaces": ["dr_shot", "dr_throw", "dr_grab", "dr_reel", "dr_anchor_wind", "dr_anchor", "dr_dive", "dr_quake", "dr_barge",
-  "dr_hop", "dr_blast_charge", "dr_blast"]
+  "dr_hop", "dr_blast_charge", "dr_blast"],
+ "loops": ["dr_reach_fly"],
+ "bar": {
+  "lmb": {"ab": "lmb", "cast": "dr_shot", "travel": "", "hit": "dredge_hit", "end": ""},
+  "rmb": {"ab": "utility", "cast": "dr_throw", "travel": "dr_reach_fly", "hit": "dredge_hit_rmb", "end": "dr_let_go"},
+  "e": {"ab": "k1", "cast": "dr_anchor_wind", "travel": "dr_dive", "hit": "dredge_hit_e", "end": "dr_anchor"},
+  "shift": {"ab": "", "cast": "dr_barge", "travel": "", "hit": "", "end": ""},
+  "r": {"ab": "ult", "cast": "dr_blast_charge", "travel": "dr_blast", "hit": "dredge_hit_r", "end": "dr_blast_end"}
+ }
 }

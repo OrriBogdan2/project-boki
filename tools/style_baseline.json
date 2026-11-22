@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 24,
+"long_line": 26,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -19,7 +19,6 @@
 "semicolon": 13
 },
 "scripts/arch/kit_status.gd": {
-"long_line": 2,
 "nested_ternary": 1
 },
 "scripts/arch/kits/archer_kit.gd": {
@@ -27,9 +26,8 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 7
+"long_line": 7,
+"nested_ternary": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
 "nested_ternary": 1
@@ -78,7 +76,7 @@
 "semicolon": 1
 },
 "scripts/core/care.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 4,
 "semicolon": 9
 },
@@ -139,13 +137,12 @@
 "semicolon": 2
 },
 "scripts/core/save.gd": {
-"long_line": 8,
+"long_line": 9,
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 15,
-"nested_ternary": 1,
-"semicolon": 4
+"long_line": 4,
+"nested_ternary": 1
 },
 "scripts/core/sfx.gd": {
 "long_line": 1
@@ -154,7 +151,7 @@
 "nested_ternary": 2
 },
 "scripts/core/social.gd": {
-"long_line": 11,
+"long_line": 12,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -168,7 +165,7 @@
 "semicolon": 7
 },
 "scripts/core/work.gd": {
-"long_line": 17,
+"long_line": 12,
 "semicolon": 2
 },
 "scripts/feel/feel_config.gd": {
@@ -193,7 +190,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 166,
+"long_line": 158,
 "nested_ternary": 24,
 "semicolon": 222
 },
@@ -203,7 +200,7 @@
 "semicolon": 68
 },
 "scripts/home/home_econ.gd": {
-"long_line": 40,
+"long_line": 37,
 "nested_ternary": 4,
 "semicolon": 41
 },
@@ -241,7 +238,7 @@
 "semicolon": 43
 },
 "scripts/home/interior.gd": {
-"long_line": 8,
+"long_line": 7,
 "nested_ternary": 1,
 "semicolon": 16
 },
@@ -312,7 +309,6 @@
 "long_line": 1
 },
 "scripts/match/abyss_fx.gd": {
-"history_comment": 1,
 "long_line": 1
 },
 "scripts/match/aim/aim_draw.gd": {
@@ -376,7 +372,7 @@
 "long_line": 4
 },
 "scripts/match/cam.gd": {
-"long_line": 2
+"long_line": 1
 },
 "scripts/match/capture.gd": {
 "long_line": 9,
@@ -391,9 +387,7 @@
 "semicolon": 12
 },
 "scripts/match/ent.gd": {
-"long_line": 1,
-"nested_ternary": 1,
-"semicolon": 5
+"nested_ternary": 1
 },
 "scripts/match/exit_models.gd": {
 "long_line": 7,
@@ -410,11 +404,6 @@
 "long_line": 59,
 "nested_ternary": 2,
 "semicolon": 52
-},
-"scripts/match/fx.gd": {
-"long_line": 10,
-"nested_ternary": 1,
-"semicolon": 21
 },
 "scripts/match/gear.gd": {
 "long_line": 4
@@ -447,21 +436,20 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 24,
-"long_line": 70,
+"long_line": 69,
 "nested_ternary": 12,
 "semicolon": 40
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 38,
-"nested_ternary": 5,
-"semicolon": 94
+"long_line": 2,
+"nested_ternary": 3
 },
 "scripts/match/juice.gd": {
 "nested_ternary": 1
 },
 "scripts/match/kin.gd": {
-"long_line": 29,
-"nested_ternary": 6,
+"long_line": 28,
+"nested_ternary": 5,
 "semicolon": 18
 },
 "scripts/match/kin_command.gd": {
@@ -491,9 +479,7 @@
 "long_line": 11
 },
 "scripts/match/kin_puppet.gd": {
-"long_line": 1,
-"nested_ternary": 1,
-"semicolon": 8
+"nested_ternary": 1
 },
 "scripts/match/kin_strike.gd": {
 "long_line": 4
@@ -505,23 +491,14 @@
 "long_line": 16,
 "semicolon": 9
 },
-"scripts/match/lairs_bots.gd": {
-"long_line": 3,
-"semicolon": 2
-},
 "scripts/match/lairs_demo.gd": {
-"long_line": 7,
-"semicolon": 6
+"long_line": 1
 },
 "scripts/match/lairs_fight.gd": {
-"long_line": 7,
-"nested_ternary": 2,
-"semicolon": 3
+"nested_ternary": 1
 },
 "scripts/match/lairs_lock.gd": {
-"long_line": 16,
-"nested_ternary": 6,
-"semicolon": 8
+"nested_ternary": 2
 },
 "scripts/match/landmarks.gd": {
 "long_line": 23,
@@ -534,12 +511,12 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 3,
-"long_line": 184,
+"long_line": 186,
 "nested_ternary": 15,
 "semicolon": 124
 },
 "scripts/match/merge_look.gd": {
-"long_line": 6
+"long_line": 4
 },
 "scripts/match/merge_parts.gd": {
 "long_line": 23
@@ -555,13 +532,12 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 258,
+"long_line": 259,
 "nested_ternary": 10,
 "semicolon": 250
 },
 "scripts/match/music_dir.gd": {
-"nested_ternary": 1,
-"semicolon": 7
+"nested_ternary": 1
 },
 "scripts/match/pack.gd": {
 "long_line": 4,
@@ -613,10 +589,6 @@
 "long_line": 11,
 "semicolon": 7
 },
-"scripts/match/spawn_plan.gd": {
-"long_line": 8,
-"semicolon": 7
-},
 "scripts/match/terrain_mesh.gd": {
 "long_line": 49,
 "nested_ternary": 2,
@@ -656,7 +628,7 @@
 "semicolon": 4
 },
 "scripts/social/town.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 1,
 "semicolon": 41
 },
@@ -703,9 +675,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 103,
-"nested_ternary": 20,
-"semicolon": 27
+"long_line": 104,
+"nested_ternary": 19,
+"semicolon": 24
 },
 "scripts/ui/hud_hover.gd": {
 "long_line": 6,
@@ -730,9 +702,7 @@
 "semicolon": 12
 },
 "scripts/ui/kinbox_view.gd": {
-"long_line": 16,
-"nested_ternary": 4,
-"semicolon": 30
+"nested_ternary": 2
 },
 "scripts/ui/kit_card.gd": {
 "long_line": 24,
@@ -753,8 +723,7 @@
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 28,
-"semicolon": 21
+"long_line": 3
 },
 "scripts/ui/prologue.gd": {
 "long_line": 23,
@@ -765,9 +734,9 @@
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 25,
+"long_line": 21,
 "nested_ternary": 5,
-"semicolon": 28
+"semicolon": 29
 },
 "scripts/ui/scenery.gd": {
 "long_line": 8,
@@ -789,7 +758,7 @@
 "semicolon": 25
 },
 "scripts/ui/work_view.gd": {
-"long_line": 19,
+"long_line": 16,
 "nested_ternary": 4,
 "semicolon": 9
 },
@@ -798,8 +767,7 @@
 "semicolon": 12
 },
 "tools/ability_check.gd": {
-"long_line": 19,
-"semicolon": 75
+"long_line": 1
 },
 "tools/abyss_check.gd": {
 "history_comment": 1,
@@ -808,7 +776,7 @@
 "semicolon": 66
 },
 "tools/aimkit_check.gd": {
-"long_line": 28,
+"long_line": 27,
 "semicolon": 10
 },
 "tools/aimkit_shots.gd": {
@@ -821,7 +789,7 @@
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 18
+"semicolon": 17
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
@@ -831,15 +799,11 @@
 "semicolon": 21
 },
 "tools/ashwick_combo_check.gd": {
-"semicolon": 9
+"semicolon": 8
 },
 "tools/balloon_check.gd": {
 "long_line": 8,
 "semicolon": 11
-},
-"tools/biome_check.gd": {
-"long_line": 3,
-"semicolon": 1
 },
 "tools/blight_check.gd": {
 "long_line": 14,
@@ -850,12 +814,11 @@
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
-"long_line": 33,
+"long_line": 32,
 "semicolon": 15
 },
 "tools/bot_sanity_check.gd": {
-"long_line": 5,
-"semicolon": 1
+"long_line": 2
 },
 "tools/capture_check.gd": {
 "long_line": 29,
@@ -868,25 +831,17 @@
 "long_line": 1
 },
 "tools/drop_plan_check.gd": {
-"long_line": 22,
-"semicolon": 25
-},
-"tools/duel_check.gd": {
-"long_line": 3,
-"semicolon": 4
+"long_line": 1
 },
 "tools/economy_check.gd": {
-"long_line": 20,
-"semicolon": 6
+"long_line": 1
 },
 "tools/economy_floor_check.gd": {
 "long_line": 35,
 "semicolon": 19
 },
 "tools/extract_check.gd": {
-"long_line": 19,
-"nested_ternary": 1,
-"semicolon": 33
+"long_line": 2
 },
 "tools/farm_hob_shots.gd": {
 "long_line": 7,
@@ -916,8 +871,7 @@
 "semicolon": 7
 },
 "tools/grammar_runtime_check.gd": {
-"long_line": 39,
-"semicolon": 28
+"long_line": 2
 },
 "tools/hatch_check.gd": {
 "long_line": 9,
@@ -941,8 +895,7 @@
 "semicolon": 6
 },
 "tools/home_build_check.gd": {
-"long_line": 28,
-"semicolon": 26
+"long_line": 1
 },
 "tools/incubator_check.gd": {
 "long_line": 23,
@@ -1001,8 +954,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 29,
-"semicolon": 67
+"long_line": 3
 },
 "tools/music_leave_check.gd": {
 "long_line": 13,
@@ -1066,9 +1018,7 @@
 "semicolon": 5
 },
 "tools/truce_check.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 27
+"long_line": 2
 },
 "tools/unique_check.gd": {
 "long_line": 49,
