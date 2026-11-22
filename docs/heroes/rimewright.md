@@ -70,7 +70,7 @@ The owner settled only that Shift breaks out of Rimelock (docs/heroes/ults.md), 
 Each 0.2 s count is good to about one frame either way. The mean of the four reads is 3.3 s, inside the 3.0-3.4 s band, so the hold went from 3.5 s to 3.3 s (`x.hold` in rimewright.json, locked by `--kit-parity-check`, tolerance 0.1 s). The late-recast window keeps its 0.75 s and now opens at 2.55 s. The slow ramp (15% + 12%/s) now reaches 54.6% at the crash where it used to stop at the 55% cap; the cap and the wiki's "stacks for up to 3.5 s" stay as they were. The animation timing table below still shows the 3.52 s it measured on Nov 8; `rimewright_anim_check` accepts 3.2-3.55 s.
 
 ## Footage gaps, Nov 9 re-check
-The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. The asked rows 3, 4, 5 and 10 were already closed on main and asserted by the existing `tm` rows; the one open row (6) is in rimewright_kit.gd/rimewright.json, which in-flight Neve branches change, so nothing was built.
+The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. The asked rows 3, 4, 5 and 10 were already closed on main and asserted by the existing `tm` rows; the one open row (6, skating dart damage) was closed afterwards at 2x (a7aff94d6b).
 
 | # | Gap | Status on main | Evidence |
 |---|---|---|---|
@@ -79,13 +79,11 @@ The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255ac
 | 3 | Shatter payoff size | closed: `fan_splinter` 60 = 15x a 4 dart, 2.7 m spike starburst, an ice shard per dart (owner 11-11) | 74447a97b; "the ice shards in the foe count the stacks", "8 darts on one foe Shatter them" (-60). In flight, not this row: ext/neve-chill-shatter (knock tell) |
 | 4 | Spear lands at the cursor, long delay | closed: lands at the clamped cursor, slow zone with a spinning crystal, detonates 1.8 s later as the big hit (18 landing, 60 detonation) | 74447a97b; owner items 13/28 (a palm push at 18 m/s instead of the footage's 45 m/s); the "tm RMB" rows |
 | 5 | Ice Wall spawn and growth | closed: 1.8 m block erupts 1 bh ahead, widens to 4.5 m while it slides, shoves foes, stops shots. Owner override: travel +50% (up to 16.2 m, 3.6 s) and it stands 4.5 s, not the footage's about 3 s | OWNER_REVIEW_1103 item 13; the "tm E" rows. The freeze recast is the wiki's. In flight, look only: ext/neve-lmb-celeste |
-| 6 | Darts while skating | open: straight beams (done), but normal damage; the footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus. Removed in the data pass | "darts while skating are straight beams at normal damage". Fix is in rimewright_kit.gd and rimewright.json, both in flight |
+| 6 | Darts while skating | closed: straight beams at 2x damage (`dash.skate_dart_dmg_k` 2.0, one data field; the owner note and the wiki say 2x, the footage 56 vs 35 = 1.6x, the tooltip data gives none: owner notes win) | a7aff94d6b; the `tm Shift` row in `--rimewright-combo-check` asserts a skating beam = 2.0 x a standing dart |
 | 7 | Skate over edges | closed: the skate goes on over a ledge | "she skates on over a ledge" |
 | 8 | Cooldowns | skate closed (13 s, the data); in flight: wall 17 s and spear 10.2 s (the data pass's 0.85x) go to the source's 20 s and 12 s on ext/cooldown-parity-verify (READY, supersedes ext/parity-cooldowns) | rimewright.json on that branch, `--cooldown-parity-check` |
 | 9 | Aim line | closed: the thin aim line is always up (shared with every hunter, `Match.aim_line`) | "the thin aim line to the cursor is always up" |
 | 10 | Rink Wall cast tell | closed: a 0.2 s sparkle at her feet, the path shown to all, then the wall | "tm E: a 0.2 s tell first" |
-
-Suggestions, not built: restore the 1.6x skating dart damage (row 6) if the owner wants footage over the data.
 
 ## Audit (Nov 3 23:40)
 Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on main 200effce) against this branch. (a) done on the branch, (b) fixed now, (c) not applicable or disagree.

@@ -7,10 +7,12 @@ extends RefCounted
 var main: Node
 var fails := 0
 
+
 func ok(what: String, cond: bool) -> void:
 	printerr("RESULTCARD %-62s %s" % [what, "PASS" if cond else "FAIL"])
 	if not cond:
 		fails += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -30,12 +32,16 @@ func run(m: Node) -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var texts := _texts(big)
-	ok("shows the game, the placing and the prize",
-			texts.has("Tumble") and texts.has("Pebble wins") and texts.has("Prize: Rope, Ball"))
+	ok(
+		"shows the game, the placing and the prize",
+		texts.has("Tumble") and texts.has("Pebble wins") and texts.has("Prize: Rope, Ball")
+	)
 	ok("shows the joy a Boki gained and lost", texts.has("Joy +8") and texts.has("Joy -5") and texts.has("Joy +0"))
 	var glyphs := big.find_children("*", "Control", true, false).filter(func(c): return c is Icons.Glyph)
-	ok("shows the stat it gained with its icon",
-			glyphs.size() == 1 and glyphs[0].id == StatGlint.ICON["speed"] and texts.has("+1"))
+	ok(
+		"shows the stat it gained with its icon",
+		glyphs.size() == 1 and glyphs[0].id == StatGlint.ICON["speed"] and texts.has("+1")
+	)
 	ok("every card is the same size", small.size == big.size and big.size == GameResultCard.SIZE)
 	ok("and in the same place", small.position == big.position)
 	var view := Rect2(Vector2.ZERO, Vector2(1280, 720))
@@ -50,14 +56,18 @@ func run(m: Node) -> void:
 	print("RESULTCARD DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _open(root_ui: Control, before: Array, prize: Array) -> Control:
 	var data := {"game": "Tumble", "place": "Pebble wins", "prize": prize, "before": before}
 	return GameResultCard.open(_Home.new(root_ui), data)
 
+
 func _texts(node: Node) -> Array:
 	return node.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 
+
 class _Home:
 	var root_ui: Control
+
 	func _init(ui: Control) -> void:
 		root_ui = ui

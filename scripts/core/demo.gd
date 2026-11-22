@@ -46,6 +46,7 @@ static func save(preset: String) -> Dictionary:
 	d["gems"] = 1200
 	d["matches"] = 12
 	d["extracts"] = 9      # the Hollow opens at 5 extractions
+	d["tutorial"]["first_objective"] = true      # (the first-expedition objective is for new players too)
 	d["first_guide"] = 99  # the first-match guide lines (FirstMatchGuide) are for new players, not for filming
 	d["classes"] = ClassUnlock.legacy()
 	d["tools"] = HomeGather.TOOLS.keys()
