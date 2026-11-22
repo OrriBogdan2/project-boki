@@ -17,6 +17,7 @@ const HudGroups := preload("res://tools/garden_hud_groups.gd")
 const STEP_S := 0.05      # s of farm time per step
 const MAX_STEPS := 4800   # a toy is picked up within 60 s of farm time (toy_check)
 const RACE_MAX_S := 120.0
+const TOY_LEAD_S := 60.0   # s of farm time from a toy placed to its first play, with the Feed step still open
 
 var bad := 0
 var main: Node
@@ -46,6 +47,7 @@ func run(m: Node) -> void:
 	_list()
 	_second_boki()
 	await _bot()
+	await _lead_toy()
 	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -208,6 +210,49 @@ func _bot() -> void:
 	ok(GardenFirstDay.did("pair"), "bot: pairing two Boki ticks 'pair'")
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "bot: all five done, the list is gone")
 	ok(int(Save.d["gems"]) >= int(GardenFirstDay.rules()["reward_gems"]), "bot: the reward is in the purse")
+
+## The tutorial's Feed step is open and a toy is down: the Boki leaves its lead and plays within TOY_LEAD_S.
+func _lead_toy() -> void:
+	Save.d = _fresh_save()
+	Save.d["tutorial"]["first_race"] = true
+	var rules: Dictionary = Content.rules("farm_build")
+	rules["base_mode"] = true
+	var lay := HomeLayout.ensure(Save.d)
+	var at := HomeLayout.LANDING
+	var toy := {"u": HomeLayout._next_uid(lay), "id": "toy_ball", "x": int(at.x) - 3, "z": int(at.z) - 6, "r": 0}
+	(lay["deco"] as Array).append(toy)
+	var home = await main._hb_home()
+	for f in 60:
+		if is_instance_valid(home.root_ui):
+			break
+		await main.get_tree().process_frame
+	home._close_panel()
+	FarmTutorial.mark("meet")
+	FarmTutorial.mark("patch")
+	var a: Dictionary = home.kins[0]
+	for k in home.kins:
+		k.erase("indoors")
+		k["pos"] = home.world.free_spot_near(home.world.random_ground(0), [], 0.8)
+		(k["node"] as Node3D).position = k["pos"]
+	home.ppos = a["pos"] + Vector3(2, 0, 0)      # you stand next to your Boki, as in the tutorial
+	ok(FarmTutorial.current() == "eat", "lead toy: the Feed step is the open one (%s)" % FarmTutorial.current())
+	var t := 0.0
+	var secs := -1.0
+	while t < TOY_LEAD_S * 4.0:
+		for k in home.kins:
+			for n in ["food", "energy", "clean"]:
+				k["rec"]["needs"][n] = 80.0
+			k["rec"]["needs"]["joy"] = 40.0 if k == a else 100.0      # only the led Boki wants a toy
+		home.day_t = 0.5
+		home.ppos = a["pos"] + Vector3(2, 0, 0)
+		home._move_kin(STEP_S)
+		t += STEP_S
+		if a.get("play") is Dictionary and String(a["play"].get("phase", "")) == "play":
+			secs = t      # your own (led) Boki is at the toy
+			break
+	ok(secs >= 0.0 and secs <= TOY_LEAD_S,
+			"lead toy: with Feed open your Boki plays at the toy within %.0f s (took %.1f s)" % [TOY_LEAD_S, secs])
+	ok(FarmTutorial.current() == "eat", "lead toy: Feed is still the open step, the lead was not skipped")
 
 func _race(home) -> void:
 	var race: BaseRace = home.hrace
