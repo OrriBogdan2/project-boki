@@ -145,6 +145,8 @@ static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 		"jump":
 			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
 			p *= lerpf(1.0, float(R["glide"]), g)
+	if s.has("vent") and winged(rec):
+		p *= float(R["vent_mult"])
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -193,7 +195,7 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(tw.get("wobble", R["wobble"]))
+		var w := float(tw.get("wobble", R["dash_wobble"]))
 		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
@@ -281,6 +283,10 @@ class Run:
 static func settle(run: Run) -> Dictionary:
 	var R := rules()
 	var order := run.order()
+	var pull := false           # two friends in the field: they run together (friend_pull)
+	for i in run.recs.size():
+		for j in range(i + 1, run.recs.size()):
+			pull = pull or run.friends(i, j)
 	var win: Dictionary = run.recs[order[0]]
 	var lose: Dictionary = run.recs[order[-1]]
 	for rec in run.recs:
@@ -304,8 +310,8 @@ static func settle(run: Run) -> Dictionary:
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
-	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine), backed_won)
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
+	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine, "dash"), backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull}
 
 ## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
 static func settle_solo(rec: Dictionary, grades: Array) -> int:
@@ -595,7 +601,12 @@ func _place_runners() -> void:
 		runners[i]["pos"] = p
 		if winged(runners[i]["rec"]):
 			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
-			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
+			var vent: bool = st[s].has("vent")
+			var gap: bool = String(st[s]["kind"]) == "jump" or vent      # it glides the gap or rides a vent
+			n.set_meta("aloft", gap and BokiFly.glides(left))
+			if vent:
+				var f := clampf(into / float(st[s]["len"]), 0.0, 1.0)
+				n.position.y += float(BokiFly.rules()["vent_h"]) * sin(PI * f)
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:
@@ -673,7 +684,13 @@ func _race_card(res: Dictionary, pinned: bool) -> void:
 	show_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned)
+			+ GardenPrizes.rows(res["prize"]) + pull_rows(res))
+
+## The result-card row when friends ran in the field: they pace each other, so Speed tells less (and the Crown
+## is judged on Speed, GardenPrizes.cup_stat).
+static func pull_rows(res: Dictionary) -> Array:
+	return [["Friends pull together: they run each other's pace", UI.MUTED]] if res.get("pull", false) else []
 
 ## The result-card row for a win that went on the wall (none when it did not).
 static func pin_rows(pinned: bool) -> Array:
