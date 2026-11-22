@@ -74,6 +74,16 @@ func _attacker(a: String, order: Array, src: Dictionary) -> void:
 				best = rows
 				best_mode = mode
 		if best_sum < INF or near == FAR: break
+	if best[0].size() > 2 and best[0][1] > 1:
+		# the weapon's own cadence: hits a second inside the first magazine (refill gaps excluded) and over the whole
+		# string to the downing hit (refill gaps included, what the table's cadence column divides out)
+		var ts: Array = best[0][2]
+		var k := mini(int(wd.get("mag", ts.size())), ts.size())
+		if k > 1:
+			var burst: float = float(k - 1) / (ts[k - 1] - ts[0])
+			var whole: float = float(best[0][1]) / best[0][0]
+			var line := "TTKRATE %s %s %.2f hits/s in the first %d, %.2f hits/s whole string (rate %.3f s)"
+			print(line % [a, best_mode, burst, k, whole, float(wd["rate"])])
 	for i in order.size():
 		ok("%s into %s: down in %.1fs (%s, %.1f m)" % [a, order[i], best[i][0], best_mode, dist], best[i][0] < INF)
 		if variant:
@@ -115,7 +125,12 @@ func _time_to_down(m: Match, P: Hunter, T: Hunter, mode: String, dist: float, hp
 	var home := P.pos
 	var t := 0.0
 	var hits := [0]
-	var count := func(by: Node, target: Node, _amount: float, _tags: Array): if by == P and target == T: hits[0] += 1
+	var stamps := []
+	var clock := [0.0]      # (a lambda copies a plain float, so the clock is a one-element array)
+	var count := func(by: Node, target: Node, _amount: float, _tags: Array):
+		if by == P and target == T:
+			hits[0] += 1
+			stamps.append(clock[0])
 	CombatBus.hit_landed.connect(count)
 	while t < CAP and T.hp > 0.0 and not T.downed:
 		T.teleport(home + Vector3(dist, 0, 0))
@@ -133,6 +148,7 @@ func _time_to_down(m: Match, P: Hunter, T: Hunter, mode: String, dist: float, hp
 		for mb in m.mobs: mb.queue_free()
 		m.mobs.clear()
 		t += DT
+		clock[0] = t
 	P.inp["fire"] = false
 	CombatBus.hit_landed.disconnect(count)
-	return [t if (T.hp <= 0.0 or T.downed) else INF, hits[0]]
+	return [t if (T.hp <= 0.0 or T.downed) else INF, hits[0], stamps]
