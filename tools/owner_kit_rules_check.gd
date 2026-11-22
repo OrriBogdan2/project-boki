@@ -417,6 +417,9 @@ func _sizes() -> void:
 	for arch in Arch.ORDER:
 		if not WardenGlb.uses_model(arch): continue
 		var g: Node3D = wm._model(arch, PlayerLook.neutral(), true)
+		if not g.has_node("Warden/Sync"):  # a v95 Meshy body has no WardenGlb.Sync to pose: no row for it
+			g.free()
+			continue
 		top[arch] = wm._glb_top(g)
 		var hp := g.get_node("Rig/Torso/HeadPivot") as Node3D
 		var hi := -INF
@@ -428,6 +431,11 @@ func _sizes() -> void:
 					hi = maxf(hi, q.y)
 		col[arch] = hi - g.global_position.y
 		g.free()
+	if not (col.has("bulwark") and col.has("dredge") and col.has("juggernaut")):
+		print("OKRCHECK skip  height rows: Albert/Dredge/Kael not all WardenGlb bodies (", col.keys(), ")")
+		holder.queue_free()
+		await main.get_tree().process_frame
+		return
 	var rank: Array = col.keys()
 	rank.sort_custom(func(a, b): return col[a] > col[b])
 	var line := ""
