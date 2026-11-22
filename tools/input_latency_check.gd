@@ -27,7 +27,6 @@ const WINDUP := {
 	# threshold. OPEN: each could start its pose on the press, as Lace's and Mossy's now do.
 	"bulwark": {"lmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"rimewright": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
-	"ashwick": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"mage": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"gil": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 }
