@@ -1265,7 +1265,8 @@ func _move_player(d: float) -> void:
 		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
 		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
 	elif gliding:
-		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
+		var gs := HunterMove.glide_cruise
+		hv = Loco.glide_step(hv, mv * gs, gs, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	else:
@@ -1358,7 +1359,7 @@ func _move_player(d: float) -> void:
 	var st := Loco.S.DASHING if dash_t > 0.0 else (Loco.S.GLIDING if gliding else (Loco.S.AIRBORNE if air else Loco.S.GROUNDED))
 	loco.go(Loco.S.MANTLING if not lfl.is_empty() else st)
 	loco.tick(d)
-	Loco.report(loco, hv, pvy if air else 0.0, Hunter.GLIDE_SPEED if gliding else run)
+	Loco.report(loco, hv, pvy if air else 0.0, HunterMove.glide_cruise if gliding else run)
 	_glider_look()
 	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
@@ -3110,6 +3111,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 			c2.add_child(l)
 		else:
 			c2.add_child(UI.para(String(ln[0]), 12, ln[1]))
+	HazardCounter.add_row(c2, String(rec["species"]))
 
 ## A sub-page of the card: everything the kin does in a match, in full. Back returns to the card.
 func _open_kin_match(rec: Dictionary) -> void:
@@ -3520,6 +3522,7 @@ func _play_evolutions() -> void:
 		if kk["rec"].get("pending_evo", []).size() > 0 and not kk.has("indoors"):
 			k = kk; break
 	if k.is_empty():
+		EvolveCard.tell_waiting(self, kins)
 		return
 	building_now = true
 	var rec: Dictionary = k["rec"]
