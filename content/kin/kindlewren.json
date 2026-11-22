@@ -120,5 +120,10 @@
 		"temper": "Cheeky",
 		"desc": "Something cheeky is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

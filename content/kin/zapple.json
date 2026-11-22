@@ -116,5 +116,10 @@
 		"temper": "Hyper",
 		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
 		"play": "Fast, loud and everywhere. Chains sound pulses between foes."
+	},
+	"size": {
+		"cm": 38,
+		"kg": 2.8,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

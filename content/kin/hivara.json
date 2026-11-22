@@ -113,5 +113,10 @@
 		"temper": "Busy",
 		"desc": "Waxy and golden, and it hums. Something inside is drumming to get out. Calderoise guarded it.",
 		"play": "Stings in swarms. Poisons, slows and never stops buzzing."
+	},
+	"size": {
+		"cm": 44,
+		"kg": 2.6,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }
