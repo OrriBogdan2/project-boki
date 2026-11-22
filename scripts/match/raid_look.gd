@@ -85,8 +85,8 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 ## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` and
 ## `vis_haze` from the ambient and env fog it ends with, so the fog outside sight comes out grey under them
 ## (shaders/vis.gdshaderinc).
-static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
-	_apply(e, sun, fill, T, cond)
+static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary, cond: String) -> void:
+	_apply(e, sun, fill, t, cond)
 	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
 	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
 	var on := 1.0 if e.fog_enabled else 0.0
@@ -98,11 +98,11 @@ static func vis_amb(e: Environment) -> float:
 	var c := e.ambient_light_color.srgb_to_linear()
 	return (c.r * 0.3 + c.g * 0.59 + c.b * 0.11) * e.ambient_light_energy
 
-static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary,
+static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary,
 		cond: String) -> void:
 	var sm := e.sky.sky_material as ShaderMaterial if e.sky else null
 	var full := Look.full_renderer()
-	var cl: Array = T["clouds"]
+	var cl: Array = t["clouds"]
 	match cond:
 		"day":
 			# overcast daylight: flatter, a little cooler, still muted
@@ -192,7 +192,7 @@ static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLig
 
 ## Dusk: the clear evening an hour later. The sun is under the islands, the sky deep violet with an
 ## ember rim, the light low and red, the haze heavier.
-static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, full: bool) -> void:
+static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, _full: bool) -> void:
 	if sm:
 		sm.set_shader_parameter("top", Color("06060f"))
 		sm.set_shader_parameter("mid", Color("1a1430"))

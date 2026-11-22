@@ -31,7 +31,7 @@
 		"arc_over": {"clip": "over", "hold_from": 0.08, "upper": true, "fade_out": 0.6}, "arc_over_loose": {"clip": "over_loose", "scale": 1.07, "upper": true, "fade_out": 0.37},
 		"arc_heavy_wind": {"clip": "heavy_wind", "hold_from": 1.1, "upper": "moving", "fade": 0.2, "fade_out": 0.4, "air_legs": true}, "arc_heavy": {"clip": "heavy", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"arc_hail": {"clip": "hail", "upper": true, "fade": 0.12, "fade_out": 0.36},
-		"pin_roll": {"clip": "roll", "heading": true, "turn_max": 3.2, "fade_out": 0.4}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true, "fade": 0.2, "fade_out": 0.4}, "pin_flick": {"clip": "flick", "heading": true, "turn_max": 3.2, "fade_out": 0.4},
+		"pin_roll": {"dash": true, "clip": "roll", "heading": true, "turn_max": 3.2, "fade_out": 0.4}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true, "fade": 0.2, "fade_out": 0.4}, "pin_flick": {"dash": true, "clip": "flick", "heading": true, "turn_max": 3.2, "fade_out": 0.4},
 		"pin_ult_loose": {"clip": "ult_loose", "upper": true, "fade_out": 0.4}, "pin_ult_final": {"clip": "ult_final", "upper": true, "fade_out": 0.36},
 		"mf_xform": {"clip": "fusion", "fade": 0.18, "fade_out": 0.4}
 	},

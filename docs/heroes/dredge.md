@@ -439,3 +439,15 @@ Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep agai
 - Hook = right arm: `anchor_hook_tip` rides `hand.R` at a fixed 0.79 m in `shot` (before 0.76 m, the v2 model is 1.04x), and leaves the hand only in `throw` (0.42 to 0.83 m), where the hook flies on the chain. No drift.
 - Blunderbuss: it hangs on the `gun` bone at the root, not in a hand, in both versions (nearest the left hand in `shot` 0.17 m, idle 0.44 m; before 0.15 and 0.38 m, the gun is 0.45 m long now, 0.40 before). Unchanged ratio; for the owner to judge against the sheet.
 - Timing tables above: re-run through `--dredge-combo-check` on the v2 clips: 95 checks, 0 failures; no row moved.
+
+## One gun (owner rule 11-21)
+His blunderbuss may ride his waist, but he draws it to shoot and it is never drawn twice (hip and hand together).
+- **Audit (main, 7e281a0d00):** the live `dredge.glb` has the gun baked into the body mesh, rigid on `hand.L` (`skinned_weapon`), so it is always
+  in the fist, idle and firing; the procedural Gun node draws no mesh (`--grimble-gun-shots`: `gun_node_visible_meshes=[]`) and the hip is empty.
+  Never twice today, but never holstered either. The 11-21 turnaround body (G3 pick, `rigbo-trim-1121`) bakes the gun at the hip, so it
+  must not be rigged as is.
+- **Mechanism:** `WardenHolster` (`content/rules/warden_anim/<art>.json` `"holster": {"hip": SOCKET, "hand": SOCKET}`, SOCKET = `bone`,
+  `pos` m, `rot` rad) sets the weapon's own bone (`blade.bone`, `gun`) after the clips and aim: on the hip socket at `aim_k` 0, in the
+  hand socket at 1, between them in the draw (`HunterAnim.aim_k`: 14/s up, 3/s down, so a quick draw and a slow holster). The prop is a mesh
+  skinned 100% to that bone; `weapon_muzzle` and `anchor_gun_root` empties ride it. No data = nothing happens. Proof: `--holster-check`.
+- **Switch-on:** needs the rigged body with no gun in its mesh plus the prop (files and the rule are in the Grimble rigger brief).

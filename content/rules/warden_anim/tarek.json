@@ -80,6 +80,10 @@
 			"clip": "rmb_leap",
 			"hold_from": 0.3
 		, "fade_out": 0.6},
+		"breah_windup": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
 		"breah_slam": {
 			"clip": "rmb_slam",
 			"time": [[0, 0], [0.66, 0.66], [0.76, 0.86], [1.51, 1.367]],

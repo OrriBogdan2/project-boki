@@ -12,19 +12,21 @@ extends RefCounted
 ## Never touches the save.
 
 const STEP := 1.0 / 60.0
-const COST_MS := 1.0           # ms per frame for 30 Boki's naps (one KinNap each in both drivers: 60 updates)
+const COST_MS := 1.0  # ms per frame for 30 Boki's naps (one KinNap each in both drivers: 60 updates)
 const RIGGED := "cindle"
 const PRIMITIVE := "basaltoad"
 const SHOT_AT := [["awake", 0.0], ["settling", 0.3], ["asleep", 2.0], ["stretch", 0.55]]
-const BIG := 1.5               # the second Boki's scale in the shot
+const BIG := 1.5  # the second Boki's scale in the shot
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BOKINAP %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node, mode := "check") -> void:
 	main = m
@@ -42,10 +44,12 @@ func run(m: Node, mode := "check") -> void:
 	print("BOKINAP DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _sized(s: float) -> Node3D:
 	var n := Node3D.new()
 	n.scale = Vector3.ONE * s
 	return n
+
 
 ## Seconds of `sleep` until `done` says so, at most `cap`.
 func _time_to(nap: KinNap, root: Node3D, sleep: bool, done: Callable, cap := 10.0) -> float:
@@ -54,6 +58,7 @@ func _time_to(nap: KinNap, root: Node3D, sleep: bool, done: Callable, cap := 10.
 		nap.update(root, sleep, STEP)
 		t += STEP
 	return t
+
 
 func _settle() -> void:
 	var r := _sized(1.0)
@@ -70,6 +75,7 @@ func _settle() -> void:
 	ok(tb <= KinNap.SETTLE * KinNap.SLOW_MAX + STEP * 2.0, "even the biggest is down within %.2f s" % tb)
 	for n in [r, big, small]:
 		n.free()
+
 
 func _sleep() -> void:
 	for s in [1.0, 1.8]:
@@ -96,6 +102,7 @@ func _sleep() -> void:
 		ok(twitch_at > 0.0, "an ear twitches %.1f s after it settles" % twitch_at)
 		r.free()
 
+
 func _wake() -> void:
 	var r := _sized(1.0)
 	var nap := KinNap.new("")
@@ -114,6 +121,7 @@ func _wake() -> void:
 	ok(low_bow, "the stretch is low and front down all the way")
 	ok(nap.long == 0.0 and nap.low == 0.0 and nap.bow == 0.0, "and stands normal again by %.1f s" % KinNap.WAKE)
 	r.free()
+
 
 func _puppet() -> void:
 	var k := Models.kin(PRIMITIVE, {})
@@ -134,17 +142,20 @@ func _puppet() -> void:
 	ok(flex.scale.z > base_z * 1.08, "waking it stretches long: %.2f of its length" % (flex.scale.z / base_z))
 	k.queue_free()
 
+
 func _run_pup(pup: KinPuppet, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		pup._process(STEP)
 		t += STEP
 
+
 func _puppet_of(k: Node3D) -> KinPuppet:
 	for c in k.get_children():
 		if c is KinPuppet:
 			return c
 	return null
+
 
 func _rig() -> void:
 	var k := Models.kin(RIGGED, {})
@@ -188,12 +199,14 @@ func _rig() -> void:
 	ok(rig._nap.twitch <= 0.0 or rig.clip != "nap", "no ear twitch awake")
 	k.queue_free()
 
+
 func _run_rig(rig: BokiRig, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		rig.player.advance(STEP)
 		rig._process(STEP)
 		t += STEP
+
 
 func _cost() -> void:
 	var roots: Array[Node3D] = []
@@ -211,13 +224,16 @@ func _cost() -> void:
 	for r in roots:
 		r.free()
 
+
 ## Two Boki side by side through the nap, one picture per SHOT_AT row, left to right.
 func _shots() -> void:
 	var out := "/tmp/boki_nap"
 	var px := 384
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--px="): px = int(a.substr(5))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--px="):
+			px = int(a.substr(5))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -228,8 +244,9 @@ func _shots() -> void:
 	main.add_child(vp)
 	var env := WorldEnvironment.new()
 	vp.add_child(env)
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"),
-		"horizon": Color("ffd2a8"), "stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	Look.lights(vp, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var cam := Camera3D.new()
 	vp.add_child(cam)
@@ -251,7 +268,7 @@ func _shots() -> void:
 	pair[1].scale *= BIG
 	for k in pair:
 		vp.add_child(k)
-		k.rotation.y = PI - 0.5      # three-quarters toward the camera (front is -z)
+		k.rotation.y = PI - 0.5  # three-quarters toward the camera (front is -z)
 	await main.get_tree().process_frame
 	for k in pair:
 		_puppet_of(k).set_process(false)
@@ -273,6 +290,7 @@ func _shots() -> void:
 		img.save_png(out.path_join("nap_%s.png" % row[0]))
 	sheet.save_png(out.path_join("nap_pair.png"))
 	print("BOKI_NAP_SHOTS_DONE")
+
 
 func _step_pair(pair: Array[Node3D], secs: float) -> void:
 	var t := 0.0

@@ -215,7 +215,9 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
 		# it takes the hit as it does a shot
 		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
-		o = o.duplicate(); o.erase("kb"); o.erase("lift")
+		o = o.duplicate()
+		o.erase("kb")
+		o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
 		var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
@@ -224,7 +226,9 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 			on_block(dmg, by)
 			var side := Vector3(to.normalized().x, 0.0, to.normalized().y)
 			Juice.blocked(m, h.pos + side * 0.6 + Vector3.UP, side, res_col())
-			o = o.duplicate(); o.erase("kb"); o.erase("lift")
+			o = o.duplicate()
+			o.erase("kb")
+			o.erase("lift")
 			return [0.0, o]
 	return [dmg, o]
 
@@ -487,7 +491,8 @@ func _throw() -> void:
 	throw_at = m.time
 	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
-	h.swing_t = 0.18; h.swing_n += 1
+	h.swing_t = 0.18
+	h.swing_n += 1
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
@@ -582,7 +587,8 @@ func _tick_mace(dt: float) -> void:
 					mace["t"] = 0.0
 				else:
 					p = Vector3(p.x, gy + 0.15, p.z)
-					mace["st"] = "ground"; mace["t"] = 0.0
+					mace["st"] = "ground"
+					mace["t"] = 0.0
 					throw_d = Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 					fx.hammer_plant(Vector3(p.x, gy, p.z), atan2(-dir.x, -dir.y))
 					vfx("plant", p, h.aim_dir())
@@ -868,7 +874,7 @@ func _mend_burst() -> void:
 	var r: float = mend["r"]
 	mend = {}
 	var heal := float(ed["heal"]) * heal_k()
-	var mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
+	var _mend_col := HeroVfx.of(m).color(h, "ivory")     # his palette slot (content/vfx/bulwark.json), not a kit colour
 	# a downed teammate inside starts coming back (wiki: allied wisps hit by the burst begin to resurrect)
 	for o in _allies_in(at, r):
 		if o != h and o.downed:
@@ -879,7 +885,9 @@ func _mend_burst() -> void:
 			o.heal(heal)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
-				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
+				if m.verbs.walls.has(wall):
+					wall["max_hp"] = shield_max()
+					wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))
 	# the kin's typing rides the burst (a cleanse, a shield, a slow on foes...); with no kin it has nothing to carry
 	if not infusion().is_empty():
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
@@ -906,7 +914,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		HunterKeys.ult_pressed(h)
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
-		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
+		h.inp["aim"] = h.pos
+		h.inp["sig"] = true
+		return
 	_bot_hammer(dist, los)
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
@@ -915,8 +925,12 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true
 			bot_hold["rmb"] = 1.0
-		elif dist < 4.5 and rmb_ready() and not rmb_down:
-			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
+		# up close: against a monster, block its telegraphed hit and swing between (raising it whenever ready
+		# kept him behind the aegis, where he can't swing: a brute camp outlasted the whole --camp-clear-check
+		# trial with him at near full hp); a hunter's hits aren't telegraphed, so he keeps it up for them
+		elif dist < 4.5 and rmb_ready() and not rmb_down and (not tgt is Mob or (tgt as Mob).st in ["windup", "lunge"]):
+			h.inp["aim"] = tgt.pos
+			h.inp["sec"] = true
 			bot_hold["rmb"] = 1.2
 	# close in: a Shield Charge from behind the shield, else a Whirl
 	# (behind the raised aegis the dash is the Shield Charge)
