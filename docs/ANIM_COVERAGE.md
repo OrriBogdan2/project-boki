@@ -63,6 +63,7 @@ bone, or a walk/run clip that keys no leg bone. `--verbose-states` prints every 
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | clip | clip | clip | proc | clip | missing | clip | clip | proc | proc | proc | proc | clip | clip | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
+| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
