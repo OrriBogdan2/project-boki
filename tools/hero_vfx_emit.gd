@@ -106,12 +106,17 @@ func _emitter(m: Node3D, sk: Skeleton3D, arch: String, emitter: String) -> Vecto
 	var off: Array = a.get("off", [0.0, 0.0, 0.0])
 	return sk.global_transform * (sk.get_bone_global_pose(bi) * Vector3(off[0], off[1], off[2]))
 
-## The vertices `bone` carries (OWN of their weight or more), in the bone's own space (the skin's bind pose).
+## The vertices `bone` carries (OWN of their weight or more, or rigidly as a WardenProps part), in the bone's own
+## space (the skin's bind pose).
 func _bone_verts(w: Node, sk: Skeleton3D, bone: String) -> PackedVector3Array:
 	var part := sk.get_node_or_null(WardenCompanions.PREFIX + bone) as MeshInstance3D
 	if part != null:
 		return part.mesh.get_faces()
 	var out := PackedVector3Array()
+	var prop := WardenProps.part(sk, bone)  # (a contract part Meshy's mesh lacks, hung on the bone: Kael's sword)
+	if prop != null:
+		for v in prop.mesh.get_faces():
+			out.append(prop.transform * v)
 	var bi := WardenSkeleton.find(sk, bone)
 	for mi: MeshInstance3D in w.find_children("*", "MeshInstance3D", true, false):
 		if mi.skin == null or mi.mesh == null:
