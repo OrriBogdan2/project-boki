@@ -7,26 +7,42 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("ULTGLOW %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _glow(h: Hunter) -> float:
 	var v = (h.mats[0] as ShaderMaterial).get_shader_parameter("ult_glow")
 	return 0.0 if v == null else float(v)
 
+
 func _frames(h: Hunter, secs: float) -> void:
 	for i in int(secs * 60.0):
 		UltGlow.tick(h, 1.0 / 60.0)
+
 
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"cls": Arch.weight("ashwick"), "arch": "ashwick", "weapon": Arch.signature("ashwick")})
+	m.start(
+		{
+			"training": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"cls": Arch.weight("ashwick"),
+			"arch": "ashwick",
+			"weapon": Arch.signature("ashwick")
+		}
+	)
 	m.set_process(false)
 	var h: Hunter = m.player
 	h.set_arch("ashwick")

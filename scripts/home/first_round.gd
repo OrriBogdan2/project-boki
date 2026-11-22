@@ -9,6 +9,7 @@ extends RefCounted
 
 const DONE := "That was the practice. Start again for the real one"
 
+
 ## True when this game's practice round is due: tips on, not a clean-HUD shot, not yet offered, never played.
 static func due(flag: String, memory_kind: String) -> bool:
 	if not Settings.get_v("tips") or Record.clean():
@@ -20,11 +21,13 @@ static func due(flag: String, memory_kind: String) -> bool:
 			return false
 	return true
 
+
 ## Marks the round as offered (once per save).
 static func take(flag: String) -> void:
 	if not Save.d.has("tutorial"):
 		Save.d["tutorial"] = {}
 	Save.d["tutorial"][flag] = true
+
 
 ## The one line: "Practice: press E <what>  ·  ESC skips", keys through Settings.key_cap.
 static func line(what: String) -> String:

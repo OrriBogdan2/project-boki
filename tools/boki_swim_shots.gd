@@ -5,19 +5,23 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const FRAMES := 6
-const DEPTH := 1.0                                   # m of water over the bed
-const WATER := Color(0.36, 0.78, 0.86, 0.55)         # ZoneDress' shallows
+const DEPTH := 1.0  # m of water over the bed
+const WATER := Color(0.36, 0.78, 0.86, 0.55)  # ZoneDress' shallows
 const BED := Color("4d5f58")
 var species := ["puddlet", "cindle", "kestrike"]
+
 
 func run(m: Node) -> void:
 	var s := Shots.new()
 	s.main = m
 	s.px = 256
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): s.out = a.substr(12)
-		if a.begins_with("--species="): species = Array(a.substr(10).split(","))
-		if a.begins_with("--px="): s.px = int(a.substr(5))
+		if a.begins_with("--shots-dir="):
+			s.out = a.substr(12)
+		if a.begins_with("--species="):
+			species = Array(a.substr(10).split(","))
+		if a.begins_with("--px="):
+			s.px = int(a.substr(5))
 	DirAccess.make_dir_recursive_absolute(s.out)
 	if m.get("fade") != null:
 		m.fade.reveal(0.01)
@@ -33,10 +37,10 @@ func run(m: Node) -> void:
 		var rig := kr[1] as BokiRig
 		k.position.y = -DEPTH
 		k.rotation.y = PI * 0.72
-		rig._water = DEPTH                           # what a pond says through the root meta "kwater"
+		rig._water = DEPTH  # what a pond says through the root meta "kwater"
 		rig._keep_flex(0.016)
 		var c := rig._swim_clip()
-		rig.set_clip(c if c != "" else "idle", 0.0)          # one that hovers stays over the water
+		rig.set_clip(c if c != "" else "idle", 0.0)  # one that hovers stays over the water
 		var length := rig.player.get_animation(rig.clip).length
 		for f in FRAMES:
 			rig.set_face(s._face_for(rig, rig.clip, float(f) / float(FRAMES)))
@@ -48,6 +52,7 @@ func run(m: Node) -> void:
 	sheet.save_png(s.out.path_join("swim.png"))
 	print("BOKI_SWIM_SHOTS_DONE")
 	m.get_tree().quit()
+
 
 func _plane(vp: SubViewport, y: float, colour: Color) -> void:
 	var p := MeshInstance3D.new()

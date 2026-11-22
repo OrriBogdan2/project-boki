@@ -61,16 +61,16 @@ static func track(k: ArchKit, dt: float) -> void:
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
 
 ## The line "<KEY> again to <verb>" for a slot: the verb is the archetype's own "recast_hint" ("" when it has none).
-static func hint_line(k: ArchKit, slot: String) -> String:
-	var verb := String((k.d.get("recast_hint", {}) as Dictionary).get(slot, ""))
-	return "" if verb == "" else "%s again to %s" % [key_of(slot), verb]
+static func hint_line(k: ArchKit, slot_v: String) -> String:
+	var verb := String((k.d.get("recast_hint", {}) as Dictionary).get(slot_v, ""))
+	return "" if verb == "" else "%s again to %s" % [key_of(slot_v), verb]
 
 ## The first time this Hunter's recast opens in a real match: that line as a hint, never again (the lane skips it
 ## while recording a clean take; the tutorial, training, the arena and autoplay teach it their own way).
-static func _first_hint(k: ArchKit, slot: String) -> void:
+static func _first_hint(k: ArchKit, slot_v: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
 	var o: Dictionary = k.m.opts
-	var line := hint_line(k, slot)
+	var line := hint_line(k, slot_v)
 	if line == "" or k.m.hud == null or seen.get("recast_" + k.id, false) or not Settings.get_v("tips"):
 		return
 	if o.get("tutorial", false) or o.get("training", false) or o.get("arena", false) or o.get("autoplay", false):
@@ -99,16 +99,16 @@ static func window(slot_id: String, left: float, total: float, at: Vector3, arme
 static func mark(e: Ent, n: int, left: float, total: float, ready: bool) -> Dictionary:
 	return {"e": e, "n": n, "left": left, "total": total, "ready": ready}
 
-static func slot_col(k: ArchKit, slot: String) -> Color:
-	match slot:
+static func slot_col(k: ArchKit, slot_v: String) -> Color:
+	match slot_v:
 		"e": return k.col_of(k.e_def())
 		"x": return k.col_of(k.x_def())
 		"dash": return k.col_of(k.dash_def())
 		"lmb": return k.col_of(k.lmb_def()) if k.lmb_def().has("col") else k.res_col()
 	return k.col_of(k.rmb_def())
 
-static func key_of(slot: String) -> String:
-	return Settings.key_cap(String(KEYS.get(slot, slot)))
+static func key_of(slot_v: String) -> String:
+	return Settings.key_cap(String(KEYS.get(slot_v, slot_v)))
 
 ## On the slot's rect in the ability row. True when it drew (the slot's own "up" ring stays off then).
 static func slot(H: Node, p: Hunter, slot_id: String, r: Rect2) -> bool:
@@ -184,6 +184,7 @@ static func _marker(H: Node, sp: Vector2, w: Dictionary, col: Color) -> void:
 	var beat := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) * (0.024 if hot else 0.012))
 	var frac := clampf(float(w["left"]) / maxf(0.05, float(w["total"])), 0.0, 1.0)
 	var tint := HOT if hot else col
+	SafeArea.note_as("recast_marker", Rect2(sp - Vector2(26.0, 26.0), Vector2(52.0, 52.0)))
 	if not armed:
 		tint = DIM
 	c.draw_circle(sp, 21.0 + 5.0 * beat, Color(tint, 0.18 + 0.2 * beat))
@@ -198,6 +199,7 @@ static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
 	var ready := bool(mk.get("ready", false))
 	var tint := Color("ffd23f") if ready else col
 	var r := 16.0 + (2.0 * sin(float(Time.get_ticks_msec()) * 0.014) if ready else 0.0)
+	SafeArea.note_as("combo_badge", Rect2(sp - Vector2(r + 3.0, r + 3.0), Vector2(r + 3.0, r + 3.0) * 2.0))
 	c.draw_circle(sp, r + 3.0, Color(0.03, 0.03, 0.05, 0.9))
 	c.draw_circle(sp, r - 2.0, Color(tint, 0.85))
 	H._arc(sp, r + 1.5, clampf(float(mk["left"]) / maxf(0.05, float(mk["total"])), 0.0, 1.0), Color.WHITE, 3.0)

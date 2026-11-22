@@ -52,6 +52,7 @@ func run(m: Node) -> void:
 	_twists()
 	_formats()
 	_courses()
+	_vent_stretch()
 	await _zone_tracks()
 	_beats_keep_order()
 	await _on_base()
@@ -244,6 +245,7 @@ func _on_base() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	ok(home.hrace != null, "on: the base has the Dash")
+	ok(home.hfetch != null and is_instance_valid(home.hfetch.mat), "on: Fetch Cup's mat stands beside the Dash's post")
 	if home.hrace != null:
 		var race: BaseRace = home.hrace
 		_footing(GardenZones.start(), home, race)
@@ -466,10 +468,10 @@ func _plan_species() -> Dictionary:
 
 ## Every zone's course is its own, closed and gentle on the turns, and every body plan runs it to the line.
 func _courses() -> void:
-	var R: Dictionary = BaseRace.rules()
-	var band: Array = R["lap_band"]
+	var r_v: Dictionary = BaseRace.rules()
+	var band: Array = r_v["lap_band"]
 	var zones: Array = GardenZones.ids()
-	ok(R["courses"].keys() == zones, "a course for each zone: %s" % [R["courses"].keys()])
+	ok(r_v["courses"].keys() == zones, "a course for each zone: %s" % [r_v["courses"].keys()])
 	var plans := _plan_species()
 	ok(plans.keys().size() == BaseRace.PLANS.size(), "every body plan has a species to run (%s)" % [plans.keys()])
 	var shapes := {}
@@ -484,7 +486,8 @@ func _courses() -> void:
 		var worst := 0.0
 		for i in range(1, pts.size() - 1):
 			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
-		ok(worst <= float(R["max_turn"]), "%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(R["max_turn"])])
+		ok(worst <= float(r_v["max_turn"]),
+				"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
 		GardenZones.here = z
 		for plan in plans:
 			var rec := _kin(plans[plan], "Run", 0, 50.0)
@@ -495,6 +498,38 @@ func _courses() -> void:
 			ok(r.over() and r.t < MAX_S, "%s: a %s runs it to the line (%.1f s)" % [z, plan, r.t])
 	GardenZones.here = ""
 	ok(shapes.size() == zones.size(), "no two zones share a course")
+
+## The ridge track runs through an updraft vent (ZoneVents): its first vent stands on the stretch that names it, a
+## winged runner is quicker there (vent_mult) than the same stats on the ground, and nobody else is.
+func _vent_stretch() -> void:
+	var r: Dictionary = BaseRace.rules()
+	GardenZones.here = "ridge"
+	var c: Array = BaseRace.course("ridge")
+	var vents := ZoneVents.spots("ridge")
+	var s: int = c.map(func(x): return x.has("vent")).find(true)
+	var named := s >= 0 and int(c[s]["vent"]) < vents.size()
+	ok(named, "ridge: a stretch of the track names one of its %d vents" % vents.size())
+	var line := Vector3(BaseRace.post_spot()[0], 0.0, BaseRace.post_spot()[1]) + BaseRace.LOOP_OFF
+	var pts := BaseRace.path(c, s)
+	var gap: float = INF
+	for i in range(1, pts.size()):
+		var v: Vector3 = vents[int(c[s]["vent"])] - line
+		var a := pts[i - 1]
+		var b := pts[i]
+		var t := clampf((Vector2(v.x, v.z) - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		gap = minf(gap, (a + (b - a) * t).distance_to(Vector2(v.x, v.z)))
+	ok(gap <= BaseRace.TRACK_W * 0.5, "ridge: the vent stands on the track (%.2f m off its line)" % gap)
+	var wings: String = Data.KIN.keys().filter(func(sp): return BaseRace.winged({"species": sp}))[0]
+	var walker: String = Data.KIN.keys().filter(func(sp): return not BaseRace.winged({"species": sp}))[0]
+	var flier := _kin(wings, "Wing", 10, 60.0)
+	var ground := _kin(walker, "Foot", 10, 60.0)
+	var other: int = c.find_custom(func(x): return x["kind"] == "straight" and not x.has("vent"))
+	var lift := BaseRace.stretch_pace(flier, s) / BaseRace.stretch_pace(flier, other)
+	lift *= float(c[other]["mult"]) / float(c[s]["mult"])
+	ok(is_equal_approx(lift, float(r["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
+	ok(is_equal_approx(BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
+			float(c[s]["mult"]) / float(c[other]["mult"])), "ridge: a runner without wings gets no lift")
+	GardenZones.here = ""
 
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.

@@ -10,18 +10,21 @@ extends RefCounted
 ## by `slow`, worked out when it lies down or gets up. Each driver owns one and calls update() every frame;
 ## nothing here allocates.
 
-const SETTLE := 0.6                     # s to lie down, for a Boki of heft 1
-const WAKE := 1.1                       # s of the wake stretch, getting up included
-const UP := 0.35                        # share of WAKE it takes to get up off the ground
-const BREATH := 3.6                     # s per breath asleep (the awake idle breath is about 2.9 s)
-const BREATH_DEPTH := 0.045             # height swell per breath asleep, as a share of its height
-const TWITCH_GAP := Vector2(3.0, 8.0)   # s between ear twitches asleep (min, max)
-const TWITCH := 0.3                     # s an ear twitch lasts
-const STRETCH_LONG := 0.16              # length gained at the top of the stretch, as a share
-const STRETCH_LOW := 0.07               # height lost at the top of the stretch, as a share
-const STRETCH_BOW := 0.14               # rad it tips front down at the top of the stretch
-const SLOW_MIN := 0.85                  # the smallest Boki naps this much faster than heft 1...
-const SLOW_MAX := 1.4                   # ...and the biggest this much slower
+const SETTLE := 0.6  # s to lie down, for a Boki of heft 1
+const WAKE := 1.1  # s of the wake stretch, getting up included
+const UP := 0.35  # share of WAKE it takes to get up off the ground
+const BREATH := 3.6  # s per breath asleep (the awake idle breath is about 2.9 s)
+const BREATH_DEPTH := 0.045  # height swell per breath asleep, as a share of its height
+const TWITCH_GAP := Vector2(3.0, 8.0)  # s between ear twitches asleep (min, max)
+const TWITCH := 0.3  # s an ear twitch lasts
+const STRETCH_LONG := 0.16  # length gained at the top of the stretch, as a share
+const STRETCH_LOW := 0.07  # height lost at the top of the stretch, as a share
+const STRETCH_BOW := 0.14  # rad it tips front down at the top of the stretch
+const SLOW_MIN := 0.85  # the smallest Boki naps this much faster than heft 1...
+const SLOW_MAX := 1.4  # ...and the biggest this much slower
+
+## Twitches roll on their own generator, like KinPuppet's blinks: the global one stays the match's.
+static var _rng := RandomNumberGenerator.new()
 
 var lie := 0.0
 var breath := 0.0
@@ -31,13 +34,13 @@ var low := 0.0
 var bow := 0.0
 var slow := 1.0
 var asleep := false
+
 var _mass := 1.0
-var _u := 0.0                  # 0 up, 1 lying (before easing)
-var _wake := 1.0               # progress of the wake stretch, 1 when done
+var _u := 0.0  # 0 up, 1 lying (before easing)
+var _wake := 1.0  # progress of the wake stretch, 1 when done
 var _breath_t := 0.0
 var _twitch_t := 0.0
-## Twitches roll on their own generator, like KinPuppet's blinks: the global one stays the match's.
-static var _rng := RandomNumberGenerator.new()
+
 
 func _init(species: String) -> void:
 	var spec := KinLib.kin(species)
@@ -45,9 +48,11 @@ func _init(species: String) -> void:
 		_mass = spec.mass
 	_twitch_t = _rng.randf_range(TWITCH_GAP.x, TWITCH_GAP.y)
 
+
 ## Seconds the rig crossfades into the sleep clip (`to_sleep`) or out of it.
 func fade(to_sleep: bool) -> float:
 	return (SETTLE if to_sleep else WAKE * UP) * slow
+
 
 ## Steps the nap: `sleep` is true while the kstate is "sleep"; `root` is the kin's model root (its size).
 func update(root: Node3D, sleep: bool, dt: float) -> void:

@@ -27,7 +27,7 @@ static func counter(m: String) -> String:
 ## Side 0 is yours (you pick and press), side 1 the rival (its nature picks). pos runs from -depth (you are out)
 ## to depth (the rival is out).
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array                 # [yours, the rival]
 	var rng: RandomNumberGenerator
 	var visitor := false            # the rival is a garden visitor, not one of yours
@@ -46,26 +46,26 @@ class Run:
 	var last: Dictionary = {}       # the last exchange: moves, winner (-1 on a dead clash), steps
 
 	func _init(pair: Array, r: RandomNumberGenerator) -> void:
-		R = BaseTumble.rules()
+		r_x = BaseTumble.rules()
 		recs = pair
 		rng = r
-		left = float(R["intro_s"])
+		left = float(r_x["intro_s"])
 
 	## Chance the tell side i sees is honest: higher Focus reads truer.
 	func honest(i: int) -> float:
-		var h: Array = R["honest"]
+		var h: Array = r_x["honest"]
 		return float(h[0]) if BaseTumble.stat(recs[i], "focus") > BaseTumble.stat(recs[1 - i], "focus") else float(h[1])
 
 	## A move this Boki wants, weighed by its traits.
 	func nature(i: int) -> String:
-		var moves: Dictionary = R["moves"]
+		var moves: Dictionary = r_x["moves"]
 		var traits: Dictionary = recs[i].get("traits", {})
 		var w := {}
 		var total := 0.0
 		for m in moves:
 			var tr := String(moves[m]["trait"])
-			var lean := float(R["lean_floor"]) + float(traits.get(tr, 0.5)) - float(R["lean_centre"][tr])
-			w[m] = maxf(float(R["lean_min"]), lean)
+			var lean := float(r_x["lean_floor"]) + float(traits.get(tr, 0.5)) - float(r_x["lean_centre"][tr])
+			w[m] = maxf(float(r_x["lean_min"]), lean)
 			total += w[m]
 		var roll := rng.randf() * total
 		for m in moves:
@@ -78,16 +78,16 @@ class Run:
 	func shown(move: String, viewer: int) -> String:
 		if rng.randf() < honest(viewer):
 			return move
-		var others: Array = R["moves"].keys().filter(func(m): return m != move)
+		var others: Array = r_x["moves"].keys().filter(func(m): return m != move)
 		return others[rng.randi() % others.size()]
 
 	func _tell() -> void:
 		want = nature(0)
-		plan = BaseTumble.counter(shown(want, 1)) if rng.randf() < float(R["rival_read"]) else nature(1)
+		plan = BaseTumble.counter(shown(want, 1)) if rng.randf() < float(r_x["rival_read"]) else nature(1)
 		tell = shown(plan, 0)
 		pick = ""
 		grade = ""
-		_to("tell", float(R["tell_s"]))
+		_to("tell", float(r_x["tell_s"]))
 
 	func _to(s: String, secs: float) -> void:
 		state = s
@@ -99,7 +99,7 @@ class Run:
 			return
 		pick = move
 		if state == "pick":
-			_to("resolve", float(R["impact_s"]))
+			_to("resolve", float(r_x["impact_s"]))
 
 	## Your press during the charge; the hit lands when the charge ends.
 	func press(g: String) -> void:
@@ -110,7 +110,7 @@ class Run:
 		return state == "done"
 
 	func out() -> bool:
-		return absf(pos) >= float(R["depth"])
+		return absf(pos) >= float(r_x["depth"])
 
 	## 0 or 1: who is further forward, then who won more exchanges (the rival on a full tie).
 	func winner() -> int:
@@ -129,35 +129,35 @@ class Run:
 			"intro": _tell()
 			"tell":
 				if pick != "":
-					_to("resolve", float(R["impact_s"]))
+					_to("resolve", float(r_x["impact_s"]))
 				else:
-					_to("pick", float(R["pick_s"]))
+					_to("pick", float(r_x["pick_s"]))
 			"pick": choose(want)
 			"resolve": _resolve()
 			"push":
-				var n := int(R["exchanges"])
-				if out() or (played >= n and (pos != 0.0 or played >= n + int(R["extra_max"]))):
-					_to("result", float(R["result_s"]))
+				var n := int(r_x["exchanges"])
+				if out() or (played >= n and (pos != 0.0 or played >= n + int(r_x["extra_max"]))):
+					_to("result", float(r_x["result_s"]))
 				else:
 					_tell()
 			"result": state = "done"
 
 	## Side i's push for a stat this exchange: base plus the stat, times the press and following.
 	func push(i: int, s: String, press_grade: String) -> float:
-		var p := (float(R["base"]) + BaseTumble.stat(recs[i], s)) * float(R["press"][press_grade])
+		var p := (float(r_x["base"]) + BaseTumble.stat(recs[i], s)) * float(r_x["press"][press_grade])
 		if i == 0 and pick == want:
-			p *= float(R["follow"])
+			p *= float(r_x["follow"])
 		return p
 
 	func _rival_grade() -> String:
 		var roll := rng.randf()
-		var rp: Dictionary = R["rival_press"]
+		var rp: Dictionary = r_x["rival_press"]
 		if roll < float(rp["great"]):
 			return "great"
 		return "good" if roll < float(rp["great"]) + float(rp["good"]) else "miss"
 
 	func _resolve() -> void:
-		var moves: Dictionary = R["moves"]
+		var moves: Dictionary = r_x["moves"]
 		if grade == "":
 			grade = "miss"
 		var grades := [grade, _rival_grade()]
@@ -169,38 +169,38 @@ class Run:
 			var p1 := push(1, s, grades[1])
 			if p0 != p1:
 				w = 0 if p0 > p1 else 1
-				steps = float(R["clash_step"])
+				steps = float(r_x["clash_step"])
 		else:
 			w = 0 if moves[pick]["beats"] == plan else 1
 			var s := String(moves[[pick, plan][w]]["stat"])
 			var lead := push(w, s, grades[w]) - push(1 - w, s, grades[1 - w])
-			steps = 2.0 if lead >= float(R["lead"]) else 1.0
+			steps = 2.0 if lead >= float(r_x["lead"]) else 1.0
 		if w >= 0:
 			wins[w] += 1
-			pos = clampf(pos + (steps if w == 0 else -steps), -float(R["depth"]), float(R["depth"]))
+			pos = clampf(pos + (steps if w == 0 else -steps), -float(r_x["depth"]), float(r_x["depth"]))
 		if pick == want:
 			follows += 1
 		played += 1
 		last = {"moves": [pick, plan], "winner": w, "steps": steps, "grades": grades}
-		_to("push", float(R["push_s"]))
+		_to("push", float(r_x["push_s"]))
 
 ## Pays out a finished bout: joy, trust (with what following earned), a memory, energy and gems. A visitor is
 ## not yours, so only your Boki change. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var wi := run.winner()
 	var win: Dictionary = run.recs[wi]
 	var lose: Dictionary = run.recs[1 - wi]
 	var own: Array = [run.recs[0]] if run.visitor else run.recs
-	var bonus := float(run.follows) * float(R["follow_trust"])
+	var bonus := float(run.follows) * float(r_v["follow_trust"])
 	for rec in own:
-		Care.change(rec, "energy", -float(R["energy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
 		var won: bool = rec == win
-		Care.change(rec, "joy", float(R["win_joy"] if won else R["lose_joy"]))
+		Care.change(rec, "joy", float(r_v["win_joy"] if won else r_v["lose_joy"]))
 		var text := "tumbled %s out of the ring" % lose["name"] if won else "lost a Tumble to %s" % win["name"]
-		var trust := float(R["win_trust"]) if won else 0.0
+		var trust := float(r_v["win_trust"]) if won else 0.0
 		Save.remember(rec, "tumble", text, trust + (bonus if rec == run.recs[0] else 0.0))
-	var gems := int(R["gems_win"]) if wi == 0 else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if wi == 0 else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": wi == 0}
 
@@ -232,9 +232,9 @@ func place() -> void:
 	ring = null
 	if h.hshove == null or not is_instance_valid(h.hshove.stump):
 		return
-	var R := rules()
-	var off: Array = R["ring_off"]
-	var r := float(R["depth"]) * float(R["step_m"]) + float(R["gap_m"])
+	var r_v := rules()
+	var off: Array = r_v["ring_off"]
+	var r := float(r_v["depth"]) * float(r_v["step_m"]) + float(r_v["gap_m"])
 	var tm := TorusMesh.new()
 	tm.inner_radius = r - 0.04
 	tm.outer_radius = r + 0.04
@@ -287,6 +287,10 @@ func _start() -> void:
 	_open_panel()
 	_place_pair(0.0)
 	GardenSfx.countdown(h, ring.position)
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
 
 ## A key or press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -384,10 +388,10 @@ func _clips(mine: String, theirs: String) -> void:
 
 ## The pair face off along the ring's line; the contact point slides with the push.
 func _place_pair(d: float) -> void:
-	var R := rules()
-	shown_pos = lerpf(shown_pos, run.pos, minf(1.0, d * float(R["slide_rate"])))
-	var gap := float(R["gap_m"]) - (float(R["charge_m"]) if run.state == "resolve" else 0.0)
-	var mid := ring.position + Vector3(shown_pos * float(R["step_m"]), 0, 0)
+	var r_v := rules()
+	shown_pos = lerpf(shown_pos, run.pos, minf(1.0, d * float(r_v["slide_rate"])))
+	var gap := float(r_v["gap_m"]) - (float(r_v["charge_m"]) if run.state == "resolve" else 0.0)
+	var mid := ring.position + Vector3(shown_pos * float(r_v["step_m"]), 0, 0)
 	for i in 2:
 		var side := -1.0 if i == 0 else 1.0
 		var p := mid + Vector3(side * gap, 0, 0)

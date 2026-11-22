@@ -11,13 +11,14 @@ countdown). All our own synthesis:
   zone_tick   impact  the zone's damage lands on you: a short sizzle and an electric bite (0.3 s, 4 takes),
                       a burn on the skin, not a blow (a hit taken plays the Hunter's hurt voice instead)
 """
+
 import numpy as np
 import sfx_lib as S
-from sfx_lib import N, T, mix, at, lpf, bpf
+from sfx_lib import T, mix, at, lpf, bpf
 
 S.reseed(2611)
 
-HUM_F = 73.5        # Hz: whole cycles in the 4 s loop (294), as are its harmonics and the 74 Hz partner
+HUM_F = 73.5  # Hz: whole cycles in the 4 s loop (294), as are its harmonics and the 74 Hz partner
 
 
 def buzz(f, d, top=9, cut=1200.0):
@@ -28,17 +29,19 @@ def buzz(f, d, top=9, cut=1200.0):
 
 
 def hum():
-    d = 4.0; t = T(d)
-    body = buzz(HUM_F, d) + 0.6 * buzz(74.0, d, 5)            # 0.5 Hz beating: the wall throbs
+    d = 4.0
+    t = T(d)
+    body = buzz(HUM_F, d) + 0.6 * buzz(74.0, d, 5)  # 0.5 Hz beating: the wall throbs
     fizz = bpf(S.noise(d), 2500, 7000) * (0.5 + 0.5 * np.sin(2 * np.pi * 0.75 * t)) * 0.08
     return body + fizz
 
 
 def warn():
-    d = 1.5; t = T(d)
-    f = HUM_F * (1.5 ** np.clip(t / 1.2, 0.0, 1.0))           # the buzz rising a fifth over 1.2 s
+    d = 1.5
+    t = T(d)
+    f = HUM_F * (1.5 ** np.clip(t / 1.2, 0.0, 1.0))  # the buzz rising a fifth over 1.2 s
     ph = 2 * np.pi * np.cumsum(f) / S.SR
-    rise = lpf(sum(np.sin(ph * n) / n ** 1.3 for n in range(1, 8)), 1400) * S.shape(d, 0.9, 0.1, 0.5)
+    rise = lpf(sum(np.sin(ph * n) / n**1.3 for n in range(1, 8)), 1400) * S.shape(d, 0.9, 0.1, 0.5)
     air = bpf(S.noise(d), 1200, 6000) * S.shape(d, 1.0, 0.0, 0.5) * 0.12
     cold = ((1.0, 1.0), (2.0, 0.35), (4.1, 0.12))
     pings = mix(at(S.chime(880.0, 0.8, 0.3, cold), 0.3), at(S.chime(1175.0, 0.9, 0.35, cold), 0.62))
@@ -62,11 +65,11 @@ def tick(i):
 
 
 def main():
-    S.save_cat('zone_warn', warn(), 'cast')
-    S.save_loop('zone_hum', hum(), 'loop')
-    S.save_cat('zone_cross', cross(), 'cast')
-    S.takes_cat('zone_tick', tick, 3, 'impact')
+    S.save_cat("zone_warn", warn(), "cast")
+    S.save_loop("zone_hum", hum(), "loop")
+    S.save_cat("zone_cross", cross(), "cast")
+    S.takes_cat("zone_tick", tick, 3, "impact")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

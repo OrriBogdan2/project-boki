@@ -10,14 +10,14 @@ extends RefCounted
 ## rest stance he settles into. Prints the rows docs/heroes/<id>.md carry (POP lines). Never touches the save.
 
 const DT := 1.0 / 30.0
-const GAP_M := 0.08             # m: a point may sit this far between the poses under the default 0.1 s blend
-const RATE := GAP_M / WardenClips.FADE      # m/s: how fast a blend may carry a point across its gap
-const IN_MAX := 0.3             # s: a blend-in no longer than this, or the move never lands
-const OUT_MAX := 0.4            # s: a blend back to the legs no longer than this
-const WALK_FRAMES := 40         # frames of walk sampled (over a stride cycle)
-const STAND_FRAMES := 60        # frames of idle sampled (a breath), and of the rest stance
-const STANCE_WAIT := 210        # frames standing still before the rest stance is fully on (loco stance_after + fade)
-const SETTLE := 14              # frames a forced clip takes to own the body (longest fade and crossfade)
+const GAP_M := 0.08  # m: a point may sit this far between the poses under the default 0.1 s blend
+const RATE := GAP_M / WardenClips.FADE  # m/s: how fast a blend may carry a point across its gap
+const IN_MAX := 0.3  # s: a blend-in no longer than this, or the move never lands
+const OUT_MAX := 0.4  # s: a blend back to the legs no longer than this
+const WALK_FRAMES := 40  # frames of walk sampled (over a stride cycle)
+const STAND_FRAMES := 60  # frames of idle sampled (a breath), and of the rest stance
+const STANCE_WAIT := 210  # frames standing still before the rest stance is fully on (loco stance_after + fade)
+const SETTLE := 14  # frames a forced clip takes to own the body (longest fade and crossfade)
 ## The Hunters slice this pass tuned; --cast-pop-check=<ids> checks others.
 const SLICE := ["archer", "juggernaut", "gunslinger", "ashwick"]
 ## Moves whose clip hands back to the legs as the kit's movement hold lifts (tools/vex_anim_time_check.gd E row):
@@ -27,15 +27,17 @@ const HOLD_BOUND := ["gunslinger_e"]
 ## A blend-in this short is a deliberate snap (hem.json: the release shows in full; `--clip-check` asserts it
 ## over within 0.05 s of the spawn), so the gap does not ask it longer.
 const SNAP_FADE := 0.04
-const WARM := 45                # frames before sampling: the gait and sway settled
+const WARM := 45  # frames before sampling: the gait and sway settled
 
 var bad := 0
 var holder: Node3D
+
 
 func ok(cond: bool, what: String) -> void:
 	print("POP %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -53,6 +55,7 @@ func run(main: Node) -> void:
 		await _hero(String(id), dd)
 	print("CAST_POP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _hero(id: String, dd: Dictionary) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -76,8 +79,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 		var up = mv.get("upper", false)
 		var fade_in := float(mv.get("fade", WardenClips.FADE))
 		var fade_out := float(mv.get("fade_out", WardenClips.FADE_LOCO))
-		var gaps: Array = []     # [stand in, stand out, walk in, walk out], each [m, point]
-		var full_up: bool = up is bool and up        # ("moving": upper only while he walks)
+		var gaps: Array = []  # [stand in, stand out, walk in, walk out], each [m, point]
+		var full_up: bool = up is bool and up  # ("moving": upper only while he walks)
 		for mode in [[stand, full_up], [walk, full_up or up is String]]:
 			var first: Dictionary = await _forced(sync, sk, probe, clips, clip, 0.0, mode[1])
 			var last: Dictionary = await _forced(sync, sk, probe, clips, clip, length - 0.001, mode[1])
@@ -87,14 +90,38 @@ func _hero(id: String, dd: Dictionary) -> void:
 		var need_in := minf(maxf(gaps[0][0], gaps[2][0]) / RATE, in_cap)
 		var out_cap := WardenClips.FADE_LOCO if km in HOLD_BOUND else OUT_MAX
 		var need_out := minf(maxf(gaps[1][0], gaps[3][0]) / RATE, out_cap)
-		print("POP %s %s | %.3f %s / %.3f %s | %.3f %s / %.3f %s | %.2f / %.2f -> %.2f / %.2f" % [id, km,
-				gaps[0][0], gaps[0][1], gaps[1][0], gaps[1][1], gaps[2][0], gaps[2][1], gaps[3][0], gaps[3][1],
-				fade_in, fade_out, need_in, need_out])
+		print(
+			(
+				"POP %s %s | %.3f %s / %.3f %s | %.3f %s / %.3f %s | %.2f / %.2f -> %.2f / %.2f"
+				% [
+					id,
+					km,
+					gaps[0][0],
+					gaps[0][1],
+					gaps[1][0],
+					gaps[1][1],
+					gaps[2][0],
+					gaps[2][1],
+					gaps[3][0],
+					gaps[3][1],
+					fade_in,
+					fade_out,
+					need_in,
+					need_out
+				]
+			)
+		)
 		if (fade_in < need_in - 0.005 and fade_in > SNAP_FADE) or fade_out < need_out - 0.005:
 			short.append("%s fade %.2f/%.2f" % [km, maxf(need_in, fade_in), maxf(need_out, fade_out)])
-	ok(short.is_empty(), "%s: every move's blend is as long as its cast gap asks, inside its first key and the caps "
-			% id + "(short: %s)" % str(short))
+	ok(
+		short.is_empty(),
+		(
+			"%s: every move's blend is as long as its cast gap asks, inside its first key and the caps " % id
+			+ "(short: %s)" % str(short)
+		)
+	)
 	m.free()
+
 
 ## The points watched: both hands, both feet (a body with no foot bone: the shin's far end) and the weapon tip, each
 ## a bone and an offset on it.
@@ -119,6 +146,7 @@ func _probe(sk: Skeleton3D, sync: Node) -> Dictionary:
 		out["weapon"] = [int(sync.get("blade_bone")), tip.position]
 	return out
 
+
 func _points(sk: Skeleton3D, probe: Dictionary) -> Dictionary:
 	var out := {}
 	for nm in probe:
@@ -126,12 +154,14 @@ func _points(sk: Skeleton3D, probe: Dictionary) -> Dictionary:
 		out[nm] = sk.global_transform * (sk.get_bone_global_pose(bi) * (probe[nm][1] as Vector3))
 	return out
 
+
 ## The kit move's first beat (s): the time of its first keyed pose after the start, else the clip's length.
 func _first_key(km: String, length: float) -> float:
 	for key in HunterAnim.km_def(km).get("keys", []):
 		if float(key[0]) > 0.0 and not (key[1] as Dictionary).is_empty():
 			return float(key[0])
 	return length
+
 
 ## The locomotion at `speed` m/s (0: standing), the points sampled every frame for `frames` after `warm` frames.
 func _loco(m: Node3D, sync: Node, sk: Skeleton3D, probe: Dictionary, speed: float, frames: int, warm: int) -> Array:
@@ -147,15 +177,18 @@ func _loco(m: Node3D, sync: Node, sk: Skeleton3D, probe: Dictionary, speed: floa
 		out.append(_points(sk, probe))
 	return out
 
+
 ## The clip forced at `t` until it owns the body (an upper move: the arms; the legs keep the locomotion fed last).
-func _forced(sync: Node, sk: Skeleton3D, probe: Dictionary, clips: WardenClips, clip: String, t: float,
-		upper: bool) -> Dictionary:
+func _forced(
+	sync: Node, sk: Skeleton3D, probe: Dictionary, clips: WardenClips, clip: String, t: float, upper: bool
+) -> Dictionary:
 	clips.force = {"clip": clip, "t": t, "upper": upper}
 	for k in SETTLE:
 		sync.call("_process", DT)
 	await holder.get_tree().process_frame
 	clips.force = {}
 	return _points(sk, probe)
+
 
 ## The worst point: how far it sits from where the locomotion has it, over every sampled phase.
 func _gap(pose: Dictionary, loco: Array, upper: bool) -> Array:

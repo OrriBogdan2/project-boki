@@ -4,8 +4,9 @@ extends RefCounted
 ## the wall moves and turns, and when the wall breaks or runs out the coin drops to the ground with its fuse
 ## still running, so it still blasts. The wall is a Verbs wall (`Verbs.walls`), so every placed barrier counts.
 
-const FALL_G := 18.0      # m/s^2: how fast the coin drops once its wall is gone
-const REST := 0.2         # m above the ground a dropped coin comes to rest (as a coin stuck to the ground)
+const FALL_G := 18.0  # m/s^2: how fast the coin drops once its wall is gone
+const REST := 0.2  # m above the ground a dropped coin comes to rest (as a coin stuck to the ground)
+
 
 ## Pins coin `b`, now at `at` with its blast cone pointing `out`, to wall `w` in the wall's own frame.
 static func pin(b: Dictionary, w: Dictionary, at: Vector3, out: Vector2) -> void:
@@ -14,6 +15,7 @@ static func pin(b: Dictionary, w: Dictionary, at: Vector3, out: Vector2) -> void
 	b["on"] = w
 	b["spot"] = Vector3(rel.dot(f[1] as Vector2), at.y - float(w["y"]), rel.dot(f[2] as Vector2))
 	b["lout"] = Vector2(out.dot(f[1] as Vector2), out.dot(f[2] as Vector2))
+
 
 ## One frame of a stuck coin: ride its wall while the wall stands, else fall.
 static func tick(b: Dictionary, walls: Array, world: World, dt: float) -> void:
@@ -38,6 +40,7 @@ static func tick(b: Dictionary, walls: Array, world: World, dt: float) -> void:
 			p.y = floor_y
 			b.erase("vy")
 		b["pos"] = p
+
 
 ## [middle, along, normal] of a wall segment on the flat.
 static func _frame(w: Dictionary) -> Array:

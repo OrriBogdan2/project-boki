@@ -5,12 +5,13 @@ extends Node3D
 ## (--first-cast-check: the frost glove's ~20 slab meshes were 8-10 ms on a 4090). A span or pad is taken
 ## shown, restyled to its colour, and given back hidden when it ends.
 
-const SPANS_WARM := 2      # spans built at load (a frost glove and a Breah floor up at once)
-const SLOTS_WARM := 32     # slab slots each (a 10 m x 1.5 m ice bridge over open abyss lays ~25)
+const SPANS_WARM := 2  # spans built at load (a frost glove and a Breah floor up at once)
+const SLOTS_WARM := 32  # slab slots each (a 10 m x 1.5 m ice bridge over open abyss lays ~25)
 const PADS_WARM := 2
 
-var _spans: Array[Node3D] = []      # free span roots (hidden)
-var _pads: Array[Node3D] = []       # free platform pads (hidden)
+var _spans: Array[Node3D] = []  # free span roots (hidden)
+var _pads: Array[Node3D] = []  # free platform pads (hidden)
+
 
 static func of(match_node: Node) -> SpanLooks:
 	var s := match_node.get_node_or_null("SpanLooks") as SpanLooks
@@ -20,6 +21,7 @@ static func of(match_node: Node) -> SpanLooks:
 		match_node.add_child(s)
 	return s
 
+
 ## Under the loading screen: the spans and pads a fight may need, built now.
 func warm() -> void:
 	while _spans.size() < SPANS_WARM:
@@ -28,6 +30,7 @@ func warm() -> void:
 		_spans.append(root)
 	while _pads.size() < PADS_WARM:
 		_pads.append(_new_pad())
+
 
 # ------------------------------------------------------------------ bridges
 ## A span with one slab per place in `at` (a tile's centre on its top), coloured `col`, shown at the origin.
@@ -44,11 +47,13 @@ func span(at: Array[Vector3], col: Color) -> Node3D:
 		slot.visible = k < at.size()
 		if slot.visible:
 			slot.position = at[k]
-			for c in 2: (slot.get_child(2 + c) as Node3D).visible = false
+			for c in 2:
+				(slot.get_child(2 + c) as Node3D).visible = false
 	root.position = Vector3.ZERO
 	root.visible = true
 	root.set_meta("free", false)
 	return root
+
 
 ## A crumble-warned span's cracks: two crossed on each slab, turned by its tile index (`tiles`, in slab order).
 func crack(root: Node3D, tiles: Array) -> void:
@@ -59,9 +64,11 @@ func crack(root: Node3D, tiles: Array) -> void:
 			c.rotation.y = float(int(tiles[k]) % 7) * 0.45 + j * 1.7
 			c.visible = true
 
+
 ## Whether a span shows its warning cracks (checks read it).
 static func cracked(root: Node3D) -> bool:
 	return root.get_child_count() > 0 and (root.get_child(0).get_child(2) as Node3D).visible
+
 
 ## A tween on a span or pad that stops the one before (a rise still going when it is reused or falls).
 static func tween(n: Node3D) -> Tween:
@@ -71,6 +78,7 @@ static func tween(n: Node3D) -> Tween:
 	var tw := n.create_tween()
 	n.set_meta("tw", tw)
 	return tw
+
 
 ## A span or pad back to its list, hidden (twice is harmless).
 func give(n: Node3D) -> void:
@@ -84,6 +92,7 @@ func give(n: Node3D) -> void:
 	n.position = Vector3.ZERO
 	(_pads if n.has_meta("pad") else _spans).append(n)
 
+
 func _new_span() -> Node3D:
 	var root := Node3D.new()
 	root.visible = false
@@ -93,6 +102,7 @@ func _new_span() -> Node3D:
 	add_child(root)
 	return root
 
+
 ## Slab slots up to `n`: a slab, the glassy cone under it and its two (hidden) warning cracks.
 func _grow(root: Node3D, n: int) -> void:
 	var mats: Array = root.get_meta("mats")
@@ -101,12 +111,13 @@ func _grow(root: Node3D, n: int) -> void:
 		Models.part(slot, Models.box(1.0, 0.28, 1.0), mats[0], Vector3(0, -0.14, 0))
 		Models.part(slot, Models.cyl(0.45, 0.05, 0.6, 6), mats[1], Vector3(0, -0.55, 0))
 		for j in 2:
-			var crack := Models.box(Verbs.BRIDGE_CRACK_W, 0.02, 1.15)
-			Models.part(slot, crack, mats[2], Vector3(0, 0.015, 0)).visible = false
+			var crack_v := Models.box(Verbs.BRIDGE_CRACK_W, 0.02, 1.15)
+			Models.part(slot, crack_v, mats[2], Vector3(0, 0.015, 0)).visible = false
 		for c in slot.get_children():
 			(c as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		slot.visible = false
 		root.add_child(slot)
+
 
 # ------------------------------------------------------------------ platform pads
 ## The platform glove's pad in `col`, shown (place it, it is already in the tree).
@@ -117,6 +128,7 @@ func pad(col: Color) -> Node3D:
 	n.visible = true
 	n.set_meta("free", false)
 	return n
+
 
 func _new_pad() -> Node3D:
 	var n := Models.gear_platform(Color.WHITE)

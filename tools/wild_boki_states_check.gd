@@ -12,21 +12,28 @@ const POSES := ["alert", "growl", "whine", "dazed", "scan"]
 var bad := 0
 var lean_by_plan := {}
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WILDBOKI %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	_picker()
 	for id in RigCheck.SPECIES_LIST:
 		await _species(main, id)
 	var feel := func(plan: String) -> float: return float(lean_by_plan.get(plan, 0.0))
-	ok(feel.call("quad") > feel.call("flyer") and feel.call("flyer") > feel.call("serpent"),
-		"the knocked-out lean follows the body plan: quad %.2f > flyer %.2f > serpent %.2f"
-		% [feel.call("quad"), feel.call("flyer"), feel.call("serpent")])
+	ok(
+		feel.call("quad") > feel.call("flyer") and feel.call("flyer") > feel.call("serpent"),
+		(
+			"the knocked-out lean follows the body plan: quad %.2f > flyer %.2f > serpent %.2f"
+			% [feel.call("quad"), feel.call("flyer"), feel.call("serpent")]
+		)
+	)
 	print("WILDBOKI DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _picker() -> void:
 	var p := KinWildPose.pose
@@ -37,6 +44,7 @@ func _picker() -> void:
 	ok(p.call("dazed", false, false, false, 0.0) == "dazed", "knocked out it is dazed")
 	ok(p.call("dazed", false, true, true, 0.0) == "scan", "under the scan beam it is held")
 	ok(p.call("downed", true, false, false, 0.0) == "", "an owned Boki's downed pose is not ours")
+
 
 ## Sets the pose, runs the rig for `secs`, and returns the largest |flex.rotation.x| and the z swing it saw.
 func _hold(rig: BokiRig, k: Node3D, pose: String, secs: float, speed := 0.0) -> Dictionary:
@@ -53,6 +61,7 @@ func _hold(rig: BokiRig, k: Node3D, pose: String, secs: float, speed := 0.0) -> 
 		zmin = minf(zmin, rig.flex.rotation.z)
 		zmax = maxf(zmax, rig.flex.rotation.z)
 	return {"lean": lean, "swing": zmax - zmin}
+
 
 func _species(main: Node, id: String) -> void:
 	var k := Shots.rigged_kin(id)
@@ -93,17 +102,23 @@ func _species(main: Node, id: String) -> void:
 	ok(rig.clip == "run" and is_equal_approx(rig.player.speed_scale, 0.7), "%s lifted by the scan: legs kick" % label)
 	ok(rig.flex.scale.y > 1.1, "%s lifted by the scan: stretched up" % label)
 
+	# (at rest BokiIdle may be mid-fidget: its idle_fidget clip is the same standing idle)
 	_hold(rig, k, "", SETTLE_S)
-	ok(absf(rig.flex.scale.y - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and rig.clip == "idle",
-		"%s back to rest when the pose ends" % label)
+	var idle := rig.clip in ["idle", BokiIdle.FIDGET]
+	ok(
+		absf(rig.flex.scale.y - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and idle,
+		"%s back to rest when the pose ends" % label
+	)
 	k.queue_free()
 	await main.get_tree().process_frame
+
 
 func _face(rig: BokiRig, k: Node3D, shape: String, pose: String, label: String, least := 0.9) -> void:
 	k.set_meta("pose", pose)
 	rig._face_step(1.0)
 	var w := rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name(shape))
 	ok(w >= least, "%s %s shows %s on the face: %.2f" % [label, pose, shape, w])
+
 
 ## Some bone sits off its rest pose: the clip drives the skeleton.
 func _posed(rig: BokiRig) -> bool:

@@ -7,12 +7,13 @@ extends RefCounted
 ## Driven by the box's rev_prog / rev_by while Match._update_box_hums has it on, so the same fx show
 ## for a local channel and a remote one (BoxRevive.mirror_remote).
 
-const CHEST_Y := 1.0        # m above the reviver's feet where the tether starts
-const TETHER_W := 0.06      # m: thin, but still a line from 25 m at match zoom
-const CORE_R := 0.24        # m: the full core, just inside the soul's 0.28 m halo
-const CORE_MIN := 0.12      # core scale at 0 % so a fresh channel already shows a dot
-const RISE_M := 1.4         # m the soul rises on completion
-const RISE_S := 0.45        # s the rise takes while it fades
+const CHEST_Y := 1.0  # m above the reviver's feet where the tether starts
+const TETHER_W := 0.06  # m: thin, but still a line from 25 m at match zoom
+const CORE_R := 0.24  # m: the full core, just inside the soul's 0.28 m halo
+const CORE_MIN := 0.12  # core scale at 0 % so a fresh channel already shows a dot
+const RISE_M := 1.4  # m the soul rises on completion
+const RISE_S := 0.45  # s the rise takes while it fades
+
 
 ## One step while a box revive is on: places the tether and sizes the core.
 static func place(m: Match, b: Dictionary, prog: float) -> void:
@@ -40,6 +41,7 @@ static func place(m: Match, b: Dictionary, prog: float) -> void:
 	core.visible = true
 	core.scale = Vector3.ONE * lerpf(CORE_MIN, 1.0, clampf(prog, 0.0, 1.0))
 
+
 ## The channel stopped (done, interrupted, or the reviver left): tether and core go.
 static func clear(b: Dictionary) -> void:
 	var tether := b.get("tether_node") as Node3D
@@ -50,6 +52,7 @@ static func clear(b: Dictionary) -> void:
 	var core := soul.get_node_or_null("Core") if soul else null
 	if core:
 		(core as Node3D).visible = false
+
 
 ## The revive completed: a full core in the reviver's colour lifts off the box and fades.
 static func rise(m: Match, b: Dictionary, by: Hunter) -> void:
@@ -67,9 +70,11 @@ static func rise(m: Match, b: Dictionary, by: Hunter) -> void:
 	tw.tween_method(func(c: Color): mat.set_shader_parameter("color", c), col, Color(col, 0.0), RISE_S)
 	tw.chain().tween_callback(orb.queue_free)
 
+
 static func _soul(b: Dictionary) -> Node3D:
 	var n := b.get("node") as Node3D
 	return n.get_node_or_null("Soul") as Node3D if n and is_instance_valid(n) else null
+
 
 static func _build_tether(m: Match, col: Color) -> Node3D:
 	var root := Node3D.new()
@@ -80,3 +85,47 @@ static func _build_tether(m: Match, col: Color) -> Node3D:
 	line.name = "Line"
 	line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
+
+
+## The soft column of light and the ring on the ground over a box while it's being revived.
+static func ray(m: Match, b: Dictionary, on: bool) -> void:
+	var n = b.get("ray_node")
+	if on and (n == null or not is_instance_valid(n)):
+		var root := Node3D.new()
+		root.name = "BoxRay"
+		m.add_child(root)
+		root.position = b["pos"]
+		var col := MeshInstance3D.new()
+		col.mesh = Models.cyl(0.55, 0.85, 7.0, 20)
+		col.position = Vector3(0, 3.5, 0)
+		col.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.18))
+		col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		col.name = "Col"
+		root.add_child(col)
+		var ring := MeshInstance3D.new()
+		ring.mesh = Models.cyl(1.6, 1.6, 0.04, 32)
+		ring.position = Vector3(0, 0.06, 0)
+		ring.material_override = Models.glow_mat(Color(0.62, 1.0, 0.7, 0.3))
+		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		ring.name = "Ring"
+		root.add_child(ring)
+		b["ray_node"] = root
+	elif not on and n != null and is_instance_valid(n):
+		(n as Node).queue_free()
+		b.erase("ray_node")
+
+
+static func ray_tick(m: Match, b: Dictionary, prog: float) -> void:
+	var n = b.get("ray_node")
+	if n == null or not is_instance_valid(n):
+		return
+	var pulse := 0.5 + 0.5 * sin(m.time * (5.0 + prog * 7.0))
+	var col: MeshInstance3D = (n as Node3D).get_node("Col")
+	var ring: MeshInstance3D = (n as Node3D).get_node("Ring")
+	var col_color := Color(0.62, 1.0, 0.7, 0.1 + 0.16 * prog + 0.06 * pulse)
+	(col.material_override as ShaderMaterial).set_shader_parameter("color", col_color)
+	col.scale = Vector3(1.0 + 0.15 * pulse, 0.6 + 0.4 * prog, 1.0 + 0.15 * pulse)
+	col.position.y = 3.5 * col.scale.y
+	var rs := 1.0 - 0.55 * prog
+	ring.scale = Vector3(rs, 1.0, rs)
+	(ring.material_override as ShaderMaterial).set_shader_parameter("color", Color(0.62, 1.0, 0.7, 0.25 + 0.3 * pulse))

@@ -97,14 +97,14 @@ func run(m: Node) -> void:
 	Work.ensure()
 	Work.add_mat("wood", 3)
 	for r in Save.d["roster"]: _full(r)
-	var H = load("res://scripts/home/home.gd").new()
-	main.add_child(H)
+	var h = load("res://scripts/home/home.gd").new()
+	main.add_child(h)
 	for _f in 4: await main.get_tree().process_frame
 	# built under a still-covered fade, the farm comes in slices
-	while H.building: await main.get_tree().process_frame
-	H.day_t = 0.5
-	var hw: HomeWork = H.hw
-	ok(hw != null and H.kins.size() == 6, "home puts the 6 farm kin out to work (the boxed one stays in the burrow)")
+	while h.building: await main.get_tree().process_frame
+	h.day_t = 0.5
+	var hw: HomeWork = h.hw
+	ok(hw != null and h.kins.size() == 6, "home puts the 6 farm kin out to work (the boxed one stays in the burrow)")
 	hw.scan()
 	var kinds: Array = []
 	for j in hw.jobs:
@@ -122,10 +122,10 @@ func run(m: Node) -> void:
 	Work.station(int(camp["u"]))["ready"] = 0.0
 	hw.scan()
 	# ---------------------------------------------------------------- 4. the best-suited kin
-	var ent := func(sp: String) -> Dictionary: return H._kin_entry(roster[sp])
+	var ent := func(sp: String) -> Dictionary: return h._kin_entry(roster[sp])
 	# everyone in one spot by the farm, so distance doesn't decide
 	var mid := Vector3(48.0, 0, 34.0)
-	for k in H.kins:
+	for k in h.kins:
 		k["pos"] = mid; (k["node"] as Node3D).position = mid
 	var bj := func(sp: String) -> String: return String(hw.best_job(ent.call(sp)).get("kind", "-"))
 	print("WORK  each kin's pick: %s" % ", ".join(["puddlet", "pebbit", "cindle", "zapple", "burrlet", "wisplet"].map(func(s): return "%s %s" % [roster[s]["name"], bj.call(s)])))
@@ -152,7 +152,7 @@ func run(m: Node) -> void:
 	Work.set_rest(roster["wisplet"], true)
 	ok(not hw.pick(ent.call("wisplet")) and Work.why_not(roster["wisplet"]) == "Resting only", "a kin kept to rest never takes a job")
 	Work.set_rest(roster["wisplet"], false)
-	ok(not Work.can_work(boxed) and H._kin_entry(boxed).is_empty() and not hw.pick({"rec": boxed, "pos": mid, "node": Node3D.new()}), "a kin in the Kin Burrow never works (not on the island, and refused if asked)")
+	ok(not Work.can_work(boxed) and h._kin_entry(boxed).is_empty() and not hw.pick({"rec": boxed, "pos": mid, "node": Node3D.new()}), "a kin in the Kin Burrow never works (not on the island, and refused if asked)")
 	# ---------------------------------------------------------------- 6. a few minutes of work
 	var p0: Dictionary = Save.d["plots"][0]
 	var crops0 := int(Save.d["crops"].get("puffcorn", 0))
@@ -161,16 +161,16 @@ func run(m: Node) -> void:
 	var sim := func(secs: float) -> void:
 		var steps := int(secs / 0.05)
 		for i in steps:
-			for k in H.kins:
+			for k in h.kins:
 				if k.has("job"):
 					var nm := String(k["rec"]["name"])
 					if not took.has(nm): took[nm] = []
 					if not (took[nm] as Array).has(String(k["job"]["kind"])): took[nm].append(String(k["job"]["kind"]))
 				for n in Care.NEEDS: k["rec"]["needs"][n] = maxf(float(k["rec"]["needs"][n]), 60.0)
-			H.day_t = 0.5
-			H._move_kin(0.05)
+			h.day_t = 0.5
+			h._move_kin(0.05)
 			hw.tick(0.05)
-			if i % 20 == 0: H._farm_tick()
+			if i % 20 == 0: h._farm_tick()
 			if i % 100 == 0: await main.get_tree().process_frame
 	await sim.call(70.0)
 	print("WORK  who did what: %s" % str(took))
@@ -184,7 +184,7 @@ func run(m: Node) -> void:
 		"the right kin did them: Drip watered, Ash baked, Zip cranked the mill, Moss sowed")
 	# ---------------------------------------------------------------- 7. hauling to the chest
 	_deco(lay, "storage_chest", 50, 36)
-	H.hb.apply(false)
+	h.hb.apply(false)
 	Work.station(int(camp["u"]))["ready"] = 0.0
 	Work.set_prio("ember", 0)        # the oven would burn the wood as it comes in
 	var wd1 := Work.mat("wood")
@@ -198,7 +198,7 @@ func run(m: Node) -> void:
 		if Work.mat("wood") > wd1 and piles_seen > 0 and hauled != "": break
 		if i % 25 == 24:
 			var busy := []
-			for k in H.kins:
+			for k in h.kins:
 				busy.append("%s:%s" % [k["rec"]["name"], String(k["job"]["kind"]) + "/" + String(k["job"].get("phase", "")) if k.has("job") else "-"])
 			print("WORK  haul wait %ds: piles %d, camp %s, kin %s" % [i + 1, (Work.ensure()["piles"] as Array).size(), str(Work.station(int(camp["u"]))), str(busy)])
 	ok(piles_seen > 0 and Work.mat("wood") > wd1 and hauled != "", "with a Storage Chest, split logs wait on a pile and a Haul kin (%s) carries them in (wood %d -> %d)" % [hauled, wd1, Work.mat("wood")])
@@ -210,7 +210,7 @@ func run(m: Node) -> void:
 		# a food Drip eats: its hated food is drawn from its random uid (Care.ensure), and 1 kin in ~14 hates kibble
 		var meal := "sweetbun" if String(drip["rec"]["likes"]["hates"]) == "kibble" else "kibble"
 		f["food"] = [meal, meal, meal, meal]
-		H.hecon.refresh_feeder(f)
+		h.hecon.refresh_feeder(f)
 	Save.d["plots"][0] = {"crop": "sunroot", "stage": 0, "care": 0, "wt": 0.0}
 	hw.scan()
 	for kk in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go"]: drip.erase(kk)
@@ -225,8 +225,8 @@ func run(m: Node) -> void:
 	var ate := false
 	var stopped := false
 	for i in 400:
-		H.day_t = 0.5
-		H._move_kin(0.05)
+		h.day_t = 0.5
+		h._move_kin(0.05)
 		hw.tick(0.05)
 		if not drip.has("job"): stopped = true
 		if drip.has("eat"): ate = true; break
@@ -236,7 +236,7 @@ func run(m: Node) -> void:
 	ok(not picks or Care.need(drip["rec"], "food") >= Work.START["food"], "and won't take new work until it's eaten (food %d)" % int(Care.need(drip["rec"], "food")))
 	# ---------------------------------------------------------------- 9. breaks and overwork
 	var zip: Dictionary = ent.call("zapple")
-	for k in H.kins: hw.drop(k)
+	for k in h.kins: hw.drop(k)
 	Work.station(int(mill["u"]))["charge"] = 0.0
 	hw.scan()
 	zip["rec"]["needs"]["food"] = 100.0; zip["rec"]["needs"]["energy"] = 100.0
@@ -260,25 +260,51 @@ func run(m: Node) -> void:
 	ok(not zip["rec"].get("overworked", false) and float(zip.get("shift", 0.0)) == 0.0, "a nap ends the shift and the overwork")
 	Work.set_prio("spark", 2)
 	# ---------------------------------------------------------------- 10. the Job Board and the card
-	H.open_job_board("Jobs")
+	h.open_job_board("Jobs")
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Job Board", "the Job Board opens (Jobs tab)")
-	H._close_panel()
-	H.open_job_board("Kin")
+	ok(h.panel_open == "Job Board", "the Job Board opens (Jobs tab)")
+	h._close_panel()
+	h.open_job_board("Kin")
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Job Board", "... and its Kin tab")
-	H._close_panel()
+	ok(h.panel_open == "Job Board", "... and its Kin tab")
+	h._close_panel()
+	# ---------------------------------------------------------------- 10b. auto-sort
+	var sv := Save.d
+	Save.d = Save.fresh()
+	var al := HomeLayout.fresh()
+	_deco(al, "lumber_camp", 10, 10)
+	_deco(al, "quarry", 14, 10)
+	Save.d["layout"] = al
+	var peb := _kin("pebbit", "Rocky")
+	var fresh_k := _kin("burrlet", "Moss")
+	var mine := _kin("pebbit", "Own")
+	var rest := _kin("pebbit", "Nap")
+	Work.assign(mine, -1)
+	Work.set_rest(rest, true)
+	Save.d["roster"] = [peb, fresh_k, mine, rest]
+	var placed := Work.autosort()
+	var top_el: String = Work.list(peb)[0][0]
+	var want: String = {"stone": "quarry", "timber": "lumber_camp"}.get(top_el, "")
+	var peb_st := ""
+	for st in HomeLayout.stations(Save.d):
+		if int(st["e"]["u"]) == Work.assigned(peb): peb_st = String(st["id"])
+	ok(peb_st == want, "auto-sort: Pebbit (top knack %s) lands at %s" % [top_el, want if want != "" else "no station"])
+	ok(Work.assigned(mine) < 0 and Work.assigned(rest) < 0, "auto-sort leaves a kin the owner placed or rested alone")
+	ok(Work.autosort().is_empty(), "auto-sort is idempotent (%d placed the first time)" % placed.size())
+	Work.assign(peb, -1)
+	ok(Work.autosort().is_empty() and Work.assigned(peb) < 0, "an owner's unassign sticks")
+	Save.d = sv
 	# ---------------------------------------------------------------- 11. shimmer odds
 	var rng := RandomNumberGenerator.new(); rng.seed = 99
-	var N := 2000000
+	var n_v := 2000000
 	var wild := 0
-	for _j in N:
+	for _j in n_v:
 		if Shiny.roll_wild(rng): wild += 1
-	var sd := sqrt(N * Shiny.WILD)
-	ok(absf(wild - N * Shiny.WILD) < 4.0 * sd, "wild shimmers over %d rolls: %d (expect %d, 1 in 4096)" % [N, wild, int(N * Shiny.WILD)])
+	var sd := sqrt(n_v * Shiny.WILD)
+	ok(absf(wild - n_v * Shiny.WILD) < 4.0 * sd, "wild shimmers over %d rolls: %d (expect %d, 1 in 4096)" % [n_v, wild, int(n_v * Shiny.WILD)])
 	var pa := {"shimmer": true}; var pb := {"shimmer": false}
 	ok(is_equal_approx(Shiny.egg_chance(pb, pb), 1.0 / 4096.0) and is_equal_approx(Shiny.egg_chance(pa, pb), 1.0 / 2048.0) and is_equal_approx(Shiny.egg_chance(pa, pa), 3.0 / 4096.0), "egg odds: 1 in 4096, 1 in 2048 with a shimmering parent, 1 in 1365 with two")
 	ok(is_equal_approx(Shiny.wild_chance(0, true), 2.0 / 4096.0) and is_equal_approx(Shiny.wild_chance(2, false), 1.5 / 4096.0), "rare spawn points x2, the Hollow x1.5")
-	H.queue_free()
+	h.queue_free()
 	print("WORK DONE failures: %d" % bad)
 	main.get_tree().quit()

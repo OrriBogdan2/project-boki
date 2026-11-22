@@ -8,13 +8,18 @@ extends PanelContainer
 ##   AbilityCard.hover(control, "thief", "e")           # a floating card while the mouse is on `control`
 ##   AbilityCard.make("thief", "e", p.slot_info("e"))    # the card itself; `live` (optional) from the kit's slot_info
 
-const WIDTH := 300.0         # px
-const GAP := 14.0            # px between the card and what it describes
-const PAD := Vector2(14, 10) # px, inside the frame
+const WIDTH := 300.0  # px
+const GAP := 14.0  # px between the card and what it describes
+const PAD := Vector2(14, 10)  # px, inside the frame
+
 ## The slots with a cooldown in their data ("dash" keeps its recharge in "cd", the rest in "cooldown").
 const TIMED := ["dash", "rmb", "e", "x"]
 
+## The HUD's ability row slots (hover ids) and the kit slot each one shows.
+const HUD_SLOTS := {"dash": "dash", "sec": "rmb", "k1": "e", "x": "x"}
+
 var facts: Dictionary = {}
+
 
 ## What the card shows for one ability: name, icon, colour, key, cooldown (-1 for none), range (-1 for none) and
 ## its label, the one sentence, and the "again" phrase ("" for a one-press ability). `live` is the kit's slot_info
@@ -22,9 +27,17 @@ var facts: Dictionary = {}
 static func facts_for(arch: String, slot: String, live := {}) -> Dictionary:
 	var info := HunterViewer.slot_info(arch, slot)
 	var sd: Dictionary = Arch.def(arch).get(slot, {})
-	var out := {"name": String(info["name"]), "icon": String(info["icon"]), "col": info["col"],
-		"key": HunterViewer.key_for(slot), "cooldown": -1.0, "range": -1.0, "range_label": "Range",
-		"line": AbilityClip.line_for(arch, slot), "again": String(sd.get("again", ""))}
+	var out := {
+		"name": String(info["name"]),
+		"icon": String(info["icon"]),
+		"col": info["col"],
+		"key": HunterViewer.key_for(slot),
+		"cooldown": -1.0,
+		"range": -1.0,
+		"range_label": "Range",
+		"line": AbilityClip.line_for(arch, slot),
+		"again": String(sd.get("again", ""))
+	}
 	if slot in TIMED:
 		out["cooldown"] = float(sd.get("cd" if slot == "dash" else "cooldown", -1.0))
 		var path := String(sd.get("card_range", ""))
@@ -36,12 +49,14 @@ static func facts_for(arch: String, slot: String, live := {}) -> Dictionary:
 		out["cooldown"] = float(live["cd_max"])
 	return out
 
+
 ## The number a dotted path ("pin.range") names in an ability's data.
 static func _at(sd: Dictionary, path: String) -> float:
 	var node: Variant = sd
 	for part in path.split("."):
 		node = (node as Dictionary).get(part, 0.0)
 	return float(node)
+
 
 ## The numbers line: "Cooldown 9.5s  ·  Range 14m".
 static func numbers(f: Dictionary) -> String:
@@ -52,14 +67,17 @@ static func numbers(f: Dictionary) -> String:
 		parts.append("%s %sm" % [f["range_label"], KinText.n(float(f["range"]))])
 	return "  ·  ".join(parts)
 
+
 ## "Press E again to pop the seed", or "" for a one-press ability.
 static func again_line(f: Dictionary) -> String:
 	return "Press %s again to %s." % [f["key"], f["again"]] if String(f["again"]) != "" else ""
+
 
 static func make(arch: String, slot: String, live := {}) -> AbilityCard:
 	var card := AbilityCard.new()
 	card.facts = facts_for(arch, slot, live)
 	return card
+
 
 func _ready() -> void:
 	var col: Color = facts["col"]
@@ -83,28 +101,31 @@ func _ready() -> void:
 			ln.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			v.add_child(ln)
 
+
 ## Puts the card up beside `ctl` while the mouse is on it, with the data's own numbers (the menus).
 static func hover(ctl: Control, arch: String, slot: String) -> void:
 	var shown: Array = []
-	ctl.set_meta("card_slot", slot)      # (so a check can find the controls that show a card)
-	ctl.mouse_entered.connect(func():
-		var card := make(arch, slot)
-		card.top_level = true
-		card.modulate.a = 0.0
-		ctl.add_child(card)
-		shown.append(card)
-		await ctl.get_tree().process_frame      # (the card has its size after one layout pass)
-		if is_instance_valid(card):
-			card.position = HudTip.place(ctl.get_global_rect(), card.size, ctl.get_viewport_rect().size)
-			card.modulate.a = 1.0)
-	ctl.mouse_exited.connect(func():
-		for card in shown:
+	ctl.set_meta("card_slot", slot)  # (so a check can find the controls that show a card)
+	ctl.mouse_entered.connect(
+		func():
+			var card := make(arch, slot)
+			card.top_level = true
+			card.modulate.a = 0.0
+			ctl.add_child(card)
+			shown.append(card)
+			await ctl.get_tree().process_frame  # (the card has its size after one layout pass)
 			if is_instance_valid(card):
-				(card as Node).queue_free()
-		shown.clear())
+				card.position = HudTip.place(ctl.get_global_rect(), card.size, ctl.get_viewport_rect().size)
+				card.modulate.a = 1.0
+	)
+	ctl.mouse_exited.connect(
+		func():
+			for card in shown:
+				if is_instance_valid(card):
+					(card as Node).queue_free()
+			shown.clear()
+	)
 
-## The HUD's ability row slots (hover ids) and the kit slot each one shows.
-const HUD_SLOTS := {"dash": "dash", "sec": "rmb", "k1": "e", "x": "x"}
 
 ## While Tab is held and the mouse is on an ability of the row, shows its card above it (the kit's live name and
 ## cooldown) and returns true; otherwise drops it. Called every frame from the HUD's hover pass.

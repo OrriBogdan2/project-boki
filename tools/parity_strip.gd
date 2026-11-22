@@ -105,10 +105,10 @@ func _drive(t: float) -> void:
 
 ## The --pillar: a rock tile at `at` (a plain walk stops at it) under a dark stone pillar.
 func _raise_pillar(at: Vector3) -> void:
-	var W: World = m.world
-	var wk: PackedByteArray = W.kind
-	wk[W.idx(int(at.x), int(at.z))] = World.T_BLOCK
-	W.kind = wk
+	var w: World = m.world
+	var wk: PackedByteArray = w.kind
+	wk[w.idx(int(at.x), int(at.z))] = World.T_BLOCK
+	w.kind = wk
 	var stone := CylinderMesh.new()
 	stone.top_radius = PILLAR_R
 	stone.bottom_radius = PILLAR_R
