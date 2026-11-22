@@ -19,6 +19,8 @@ const REACH_Z := 0.28  # m: how far the stroke runs fore and aft of the shoulder
 const REACH_Y := 0.22  # m: how deep the pull goes (and how high the hand recovers)
 const REACH_TREAD := 0.45  # share of the stroke when only treading water
 const SIDE_X := 0.1  # m: the hand stays this far out from its shoulder line
+const TREAD_FWD := 0.15  # m: treading, the stroke runs this much further out in front of the chest
+const TREAD_LOW := 0.1  # m: and this much lower (a stroke round the shoulder itself snaps the arm's IK)
 const EASE_RATE := 8.0  # 1/s: how fast the wade and the swim ease in and out
 
 
@@ -56,5 +58,7 @@ static func legs(ph: float, spd: float, gait: float) -> Vector4:
 ## Where a stroking hand goes, from its shoulder: pulled back low under the water, brought forward high over it.
 ## side: -1 the left arm, +1 the right; `arm` is the class's reach (HunterAnim.STANCE "arm").
 static func hand(sh: Vector3, ph: float, spd: float, side: float, arm: float) -> Vector3:
-	var reach := lerpf(REACH_TREAD, 1.0, speed_k(spd)) * arm
-	return sh + Vector3(side * SIDE_X, -0.04 - REACH_Y * sin(ph) * reach, -0.1 - REACH_Z * cos(ph) * reach)
+	var sk := speed_k(spd)
+	var reach := lerpf(REACH_TREAD, 1.0, sk) * arm
+	var y := -0.04 - TREAD_LOW * (1.0 - sk) - REACH_Y * sin(ph) * reach
+	return sh + Vector3(side * SIDE_X, y, -0.1 - TREAD_FWD * (1.0 - sk) - REACH_Z * cos(ph) * reach)

@@ -1266,6 +1266,9 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var muzzle := sync.get("muzzle") as Node3D
 	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
+	var carrier: Variant = _carrier(sync, tip)      # a weapon a floating part holds (Meeko's): the part is its hand
+	if carrier:
+		rest = carrier[1]
 	var height := 1.6 * absf(m.scale.y)
 	var anim := HunterAnim.new(m)
 	var walk_speed: float = PondWalk.DRY_SPEED * HomeWater.WADE_SPEED
@@ -1289,6 +1292,9 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			if carrier:
+				hand = (carrier[0] as Node3D).global_position
+				body_k = absf(sk.global_transform.basis.get_scale().x)
 			held[0] = maxf(held[0], muzzle.global_position.distance_to(sees))
 			held[1] = maxf(held[1], absf(hand.distance_to(sees) / body_k - rest))
 	await PondWalk.new().walk(holder.get_tree(), m, sync, anim, sample)
@@ -1323,6 +1329,16 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	ok(ends.slice(int(ends.size() / 4.0)).all(func(r): return float(r["proc"]) >= 1.0),
 			"%s: the clips stand aside while it wades and swims" % id)
 	ok(float(rows[rows.size() - 1]["proc"]) <= 0.0, "%s: and take the body back on dry ground" % id)
+
+## The floating part that holds the weapon tip and the tip's rest offset on it, or null (most weapons sit on a bone).
+func _carrier(sync: Node, tip: Node3D) -> Variant:
+	var floating := sync.get("companions") as WardenCompanions
+	for part: WardenCompanions.Part in (floating.parts if floating else []):
+		for an in part.anchors:
+			if an[0] == tip:
+				return [part.node, (an[1] as Vector3).length()]
+	return null
+
 
 func _pos(sk: Skeleton3D, m: Node3D, bone: int) -> Vector3:
 	return sk.global_transform * sk.get_bone_global_pose(bone).origin - m.global_position
