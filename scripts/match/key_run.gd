@@ -18,7 +18,7 @@ static func rules() -> Dictionary:
 
 ## A chest key picked up off the ground (a carrier's drop, or one lost from a deathbox).
 static func on_pickup(m: Match, h: Hunter) -> void:
-	KeyChest.give(h, 1)
+	BeltKeys.give(h, "chest_key", 1)      # belt synced this step, with the cue
 	if h == m.player:
 		m.hud.toast_small("Chest key found", KeyModels.BRASS)
 		m.sfx("key_get", null, -4.0, 1.0)
