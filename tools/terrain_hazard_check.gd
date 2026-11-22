@@ -244,11 +244,11 @@ func _hint(kind: String, safe: bool) -> void:
 ## A bot whose Boki can't handle lava walks round the field; one whose Boki can walks straight over it.
 # ------------------------------------------------------------------ sounds
 func _sounds() -> void:
-	var R := HazardSfx.play_rules()
+	var r_v := HazardSfx.play_rules()
 	_kin(PLAIN)
-	P.perks.clear()
+	p_v.perks.clear()
 	for kind in COUNTER:
-		var cue := String(R["kinds"][kind]["contact"])
+		var cue := String(r_v["kinds"][kind]["contact"])
 		_listen(_first(kind))
 		if kind == "static":
 			tz.areas[_first(kind)]["t"] = 0.6
@@ -257,7 +257,7 @@ func _sounds() -> void:
 		var heard := Sfx.last_played.has(cue)
 		ok("%s without: its contact cue plays (%s)" % [kind, cue], heard, str(Sfx.last_played.keys()))
 	_listen(_first("lava"))
-	Sfx.listener = P.pos + Vector3(60, 0, 0)
+	Sfx.listener = p_v.pos + Vector3(60, 0, 0)
 	await _run(0.1)
 	ok("the lava burn tick is positional: 60 m off it is out of earshot", not Sfx.last_played.has("hazard_lava_burn"))
 	_kin(COUNTER["deep_water"])
@@ -281,7 +281,7 @@ func _sounds() -> void:
 			Sfx.last_played.erase("hazard_breath")
 			gasps += 1
 			gasp_t = t
-		if hurt_t < 0.0 and P.hp < P.max_hp:
+		if hurt_t < 0.0 and p_v.hp < p_v.max_hp:
 			hurt_t = t
 	ok(
 		"deep water without: one gasp before it starts to drown",
@@ -309,7 +309,7 @@ func _listen(ai: int) -> void:
 	_stand(ai)
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
-	Sfx.listener = P.pos
+	Sfx.listener = p_v.pos
 
 
 ## The beds: the lava's sounds from its nearest ground, louder 2 m off its edge than 10 m off; none far
