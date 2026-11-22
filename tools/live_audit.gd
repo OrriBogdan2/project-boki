@@ -10,7 +10,9 @@ const SIDE_YAW := -PI / 2.0
 const THREE_Q_YAW := -PI / 2.0 - 0.55
 const RUN_MPS := 5.0
 const DASH_MPS := 9.0
-const ATTACK_MOVES := {"archer": "arc_loose", "bulwark": "bul_throw", "gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r"}
+const ATTACK_MOVES := {
+	"archer": "arc_loose", "bulwark": "bul_throw", "gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r",
+}
 const DASH_MOVES := {"gunslinger": "gunslinger_dash", "thief": "thf_exdash"}
 const SAMPLES := {"idle": [0.4, 1.0, 1.6], "run": [0.0, 0.12, 0.24], "dash": [0.0, 0.1, 0.2], "jump": [0.05, 0.3, 0.6],
 	"glide": [0.2, 0.6, 1.0], "attack": [0.1, 0.25, 0.45], "hit": [0.05, 0.15, 0.35]}
@@ -129,8 +131,14 @@ func _hunter(id: String, dir: String) -> void:
 	poser.set_process(false)
 	var marks: PackedStringArray = []
 	var bx := _body_box(model)
-	marks.append("kind %s glb %s tris %d body_h %.2f" % ["native" if native else "contract", WardenGlb.path(id), bx[2], bx[1]])
-	for clip in (FILM.keys() if film else REEL.keys() if reel else CLIPS):
+	var kind := "native" if native else "contract"
+	marks.append("kind %s glb %s tris %d body_h %.2f" % [kind, WardenGlb.path(id), bx[2], bx[1]])
+	var clip_list: Array = CLIPS
+	if film:
+		clip_list = FILM.keys()
+	elif reel:
+		clip_list = REEL.keys()
+	for clip in clip_list:
 		var yaw := THREE_Q_YAW if reel or film or close or clip != "run" else SIDE_YAW
 		model.rotation.y = yaw
 		var times: Array = SAMPLES[clip]
@@ -171,7 +179,8 @@ func _shoot(model: Node3D, dir: String, name: String, bx: Array) -> void:
 			_close_cam(bx, knee)
 			await RenderingServer.frame_post_draw
 			await RenderingServer.frame_post_draw
-			tree.root.get_texture().get_image().save_jpg(dir.path_join("%s_%s.jpg" % [name, "knee" if knee else "eye"]), 0.93)
+			var view := "knee" if knee else "eye"
+			tree.root.get_texture().get_image().save_jpg(dir.path_join("%s_%s.jpg" % [name, view]), 0.93)
 	else:
 		_match_cam()
 		await RenderingServer.frame_post_draw
