@@ -11037,3 +11037,4 @@ READY ext/vfx-ground-ring-audit 61d06ee7aba5c0dd60b059d0333cb2f4fa929ce9 (merged
 READY ext/lint-ratchet-main-1122 57c3b3073fc (follow-up to #666: fix run-time reads of renamed members life.R/w.R/run.R/check.P; check.sh exit 0)
 READY ext/merge-lane-N3-1122 86980ba00a8745f01ef544a8a5e68a472ed63c14 (lane N3 bundle: 19 branches, NEW-RED 0 after dropping tutorial-mask-line, export OK, suite partial under load)
 READY ext/sfx-lace-heavy-release e6a06a8392bc7aa0c23e34e1c075751f93078059 (Lace Heavy Shot release cue settled)
+READY ext/anim-stun-knock-v95 9ef526fc46 (stun/knock poses on v95; origin/main d8cc9d1ea8 merged cleanly; --check 0 failures, health --strict OK, --warden-clips-check 3 reds identical to earlier run: porthole/lure, breaker 108k tris, dredge jump)
