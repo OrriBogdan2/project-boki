@@ -21,8 +21,8 @@ func ok(cond: bool, what: String) -> void:
 func _frame(m: Match, h: Hunter) -> void:
 	m.step(DT)
 	h.render(DT, 1.0)
-	if h.model and h.model.has_node("Warden/Sync"):
-		var sync: Node = h.model.get_node("Warden/Sync")
+	var sync: Node = WardenGlb.layers(h.model) if h.model else null      # (Sync, or Native on Meshy's skeleton)
+	if sync:
 		sync.set_process(false)
 		sync.call("_process", DT)
 
@@ -33,8 +33,14 @@ func _emit(h: Hunter) -> float:
 			return float((x as ShaderMaterial).get_shader_parameter("emit"))
 	return 0.0
 
-func _clips(h: Hunter) -> WardenClips:
-	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
+## How much the casting clip owns the body: the hand-keyed clips' act and upper weights, or on Meshy's own skeleton
+## (WardenNative) 1 while its attack clip plays.
+func _cast_w(h: Hunter) -> float:
+	var sync: Node = WardenGlb.layers(h.model)
+	var c: WardenClips = sync.get("clips")
+	if c:
+		return c.up_w + c.act_w
+	return 1.0 if sync.get("cur") == "attack" else 0.0
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -52,7 +58,8 @@ func run(main: Node) -> void:
 	var ml := WardenGlb.anchor(P.model, "weapon_muzzle_l")
 	var at_l := ml.get_parent() as BoneAttachment3D if ml else null
 	var mirrored := mz != null and ml != null and absf(ml.position.length() - mz.position.length()) < 0.01
-	var on_left := at_l != null and at_l.bone_name.ends_with("hand.L")
+	var sk_l := at_l.get_skeleton() if at_l else null
+	var on_left := sk_l != null and sk_l.find_bone(at_l.bone_name) == WardenSkeleton.find(sk_l, "hand.L")
 	ok(on_left and mirrored, "the left palm has its fire point, mirroring the right palm's")
 	ok(WardenGlb.anchor(P.model, "anchor_tail_tip") != null, "the tail tip has its flame point")
 	var fire := 0
@@ -80,7 +87,7 @@ func run(main: Node) -> void:
 	for f in 60:
 		P.inp["fire"] = true
 		_frame(m, P)
-		held_w = maxf(held_w, _clips(P).up_w + _clips(P).act_w)
+		held_w = maxf(held_w, _cast_w(P))
 		emit_hot = maxf(emit_hot, _emit(P))
 		worst = maxf(worst, kit.tip().distance_to(gm.global_position))
 		if f > 30:
@@ -129,9 +136,7 @@ func run(main: Node) -> void:
 		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
 		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
 		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
-		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-		var bi := sk.find_bone("jet.0")
-		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)
+		jet_y = maxf(jet_y, WardenProps.stretch_of(P.model, "jet.0"))  # (the jet bone, or its part on Meshy's bones)
 		if kit.nozzle().distance_to(P.pos + fwd * 1.0) < 0.2:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)

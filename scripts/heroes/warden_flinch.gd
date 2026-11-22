@@ -51,5 +51,11 @@ func step(dt: float) -> void:
 	lean = lean.limit_length(LIMIT)
 	if lean.length_squared() < 0.00001:
 		return
-	var turn := Quaternion(Vector3(lean.y, 0.0, -lean.x).normalized(), lean.length())
+	# (the lean's axis is in the model's frame; the bone turns in its parent's frame as the clip posed it: the
+	# contract's stands as the model, Meshy's skeleton (WardenNative) is turned under the model, its pelvis keyed)
+	var axis := Vector3(lean.y, 0.0, -lean.x).normalized()
+	var to_skel := (skel.global_basis.orthonormalized().inverse() * root.global_basis.orthonormalized())
+	var par := skel.get_bone_parent(bone)
+	var frame := skel.get_bone_global_pose(par).basis.orthonormalized() if par >= 0 else Basis.IDENTITY
+	var turn := Quaternion((frame.inverse() * to_skel * axis).normalized(), lean.length())
 	skel.set_bone_pose_rotation(bone, turn * skel.get_bone_pose_rotation(bone))

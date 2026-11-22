@@ -22,7 +22,6 @@
 		"os_empower": "cast",
 		"os_well": "cast",
 		"os_well_hum": "impact",
-		"os_well_close": "cast",
 		"ostra_dash": "dash",
 		"ostra_hover": "loop",
 		"ostra_hurt": "grunt",

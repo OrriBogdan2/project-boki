@@ -39,6 +39,28 @@ const POINTS_AT := {
 }
 const CARRY_ON := {"hand.L": "forearm.L", "hand.R": "forearm.R", "shin.L": "thigh.L", "shin.R": "thigh.R"}
 const REST_TOL := 0.01  # m a .glb bone's head may sit from its rig node
+## Contract bone -> the bone of Meshy's auto-rig that plays its part (docs/art/wardens/MESHY_NATIVE.md "Bone
+## lookup"). Meshy: Hips > Spine02 > Spine01 > Spine > neck > Head, arms from Left/RightShoulder, legs from Hips;
+## Left/Right are the character's own sides, as the contract's .L/.R. "hips" is the contract's torso (Rig/Torso: the
+## head and arms hang from it, the legs do not), so Spine02, the first bone above Meshy's pelvis.
+const NATIVE := {
+	"root": "Hips",
+	"hips": "Spine02",
+	"head": "Head",
+	"upper_arm.L": "LeftArm",
+	"forearm.L": "LeftForeArm",
+	"hand.L": "LeftHand",
+	"upper_arm.R": "RightArm",
+	"forearm.R": "RightForeArm",
+	"hand.R": "RightHand",
+	"thigh.L": "LeftUpLeg",
+	"shin.L": "LeftLeg",
+	"thigh.R": "RightUpLeg",
+	"shin.R": "RightLeg",
+	"foot.L": "LeftFoot",
+	"foot.R": "RightFoot",
+}
+const BONE_MAP := "contract_bones"  # Skeleton3D meta: contract bone -> this Hunter's Meshy bone (beats NATIVE)
 
 
 ## Model-space rest transform of every rig node a bone follows (the procedural model as Models.hunter has
@@ -88,8 +110,23 @@ static func _basis(b: String, rest: Dictionary) -> Basis:
 	return Basis(x, y, x.cross(y)).orthonormalized()
 
 
-## A contract bone in an imported armature: glTF tools write "upper_arm.L" as "upper_arm_L". -1 if absent.
+## A contract bone in an imported armature: glTF tools write "upper_arm.L" as "upper_arm_L". On Meshy's own skeleton
+## (WardenNative, which never renames its bones) the bone that plays that part (NATIVE). -1 if absent.
+## The one bone lookup of game code and checks: a contract rig finds its own bone first, so it is unchanged.
+## A Hunter's own stand-ins (skeleton meta BONE_MAP, set from warden_native.json "bones": Cinder's heel jets on her
+## feet) come before NATIVE.
 static func find(sk: Skeleton3D, bone: String) -> int:
+	var bi := own(sk, bone)
+	if bi >= 0:
+		return bi
+	var mine: Dictionary = sk.get_meta(BONE_MAP, {})
+	if mine.has(bone):
+		return sk.find_bone(String(mine[bone]))
+	return sk.find_bone(String(NATIVE[bone])) if NATIVE.has(bone) else -1
+
+
+## The contract bone itself (no Meshy stand-in): what the rig-fit test (mismatches) reads. -1 if absent.
+static func own(sk: Skeleton3D, bone: String) -> int:
 	var bi := sk.find_bone(bone)
 	return bi if bi >= 0 else sk.find_bone(bone.replace(".", "_"))
 
@@ -100,20 +137,20 @@ static func find(sk: Skeleton3D, bone: String) -> int:
 static func mismatches(sk: Skeleton3D, rest: Dictionary, extra := {}) -> Array:
 	var out: Array = []
 	for b in extra:
-		var bi := find(sk, b)
+		var bi := own(sk, b)
 		if bi < 0:
 			out.append("variant bone %s missing" % b)
-		elif sk.get_bone_parent(bi) != find(sk, String(extra[b])):
+		elif sk.get_bone_parent(bi) != own(sk, String(extra[b])):
 			out.append("variant bone %s's parent is not %s" % [b, extra[b]])
 	for b in WardenGlb.BONES:
-		var bi := find(sk, b)
+		var bi := own(sk, b)
 		if bi < 0:
 			if not b in WardenGlb.OPTIONAL and rest.has(b):
 				out.append("%s missing" % b)
 			continue
 		var par := String(PARENT[b])
 		var pi := sk.get_bone_parent(bi)
-		if par != "" and (pi < 0 or pi != find(sk, par)):
+		if par != "" and (pi < 0 or pi != own(sk, par)):
 			out.append("%s's parent is not %s" % [b, par])
 		if rest.has(b):
 			var off := sk.get_bone_global_rest(bi).origin.distance_to((rest[b] as Transform3D).origin)

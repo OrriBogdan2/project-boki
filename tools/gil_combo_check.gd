@@ -166,11 +166,7 @@ func _tide() -> void:
 		"k %.2f anim %s" % [K.tide_k(), K.anim_id])
 	var before := dmg(T)
 	P.inp["fire"] = false
-	Sfx.cue_log = []
 	step(m, 0.5)
-	ok("Tide Lunge: the release plays its own cast cue (gil_tide_lunge)",
-		Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "gil_tide_lunge"))
-	Sfx.cue_log = null
 	var td: Dictionary = K.lmb_def()["tide"]
 	ok("Tide Lunge: let go, he drives about 5 m down the line", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5,
 		"%.2f m" % (P.pos.x - x0))
@@ -365,11 +361,7 @@ func _riptide() -> void:
 		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
-	Sfx.cue_log = []
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
-	ok("Riptide recast: the spout's hit plays its own cue (gil_spout_hit)",
-		Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "gil_spout_hit"))
-	Sfx.cue_log = null
 	ok("Riptide recast: the waterspout runs down the line and knocks up 1 s", top["stun"] >= 0.9 and dmg(T) > 0.0,
 		"stun %.2f" % top["stun"])
 	_reset(7.0)

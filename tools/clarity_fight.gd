@@ -127,12 +127,9 @@ static func _centre(m: Match) -> Vector3:
 	return c / maxf(1.0, n)
 
 
-## A Hunter's, Boki's or monster's own body (skinned or under a skeleton), the map itself, or an interactable's
-## own badge (Models.icon_badge, a perk orb's icon: scenery a Hunter happens to stand in front of, not a mark on them).
+## A Hunter's, Boki's or monster's own body (skinned or under a skeleton), or the map itself.
 static func _body(v: VisualInstance3D) -> bool:
-	if v is Sprite3D:
-		return String(v.name) == "Icon" or String(v.get_parent().name) == "Icon"
-	if v is Label3D:
+	if v is Label3D or v is Sprite3D:
 		return false
 	var mi := v as MeshInstance3D
 	if mi and mi.skin != null:
