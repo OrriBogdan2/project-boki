@@ -37,7 +37,7 @@ func run(main: Node) -> void:
 	var cam := CamRig.new()
 	vp.add_child(cam)
 	cam.use_style("supervive")
-	var zooms: Array = [float(CamRig.RULES["zoom"]["max"]), float(CamRig.RULES["zoom"]["min"])]
+	var zooms: Array = [float(CamRig.rules["zoom"]["max"]), float(CamRig.rules["zoom"]["min"])]
 	print("RANGESCREEN table | Hunter | Slot | Reach m (data key) | ways off screen, Hunter centred, per view at")
 	print(
 		(
