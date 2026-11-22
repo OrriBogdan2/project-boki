@@ -3,11 +3,12 @@ extends RefCounted
 ## you with yours ready too, then the moment after your cast (the flash), then the flash faded. Each is the full
 ## frame and a 3x crop round you. Never touches the save.
 
-const CROP := Vector2i(220, 160)     # px round the player, scaled 3x
+const CROP := Vector2i(220, 160)  # px round the player, scaled 3x
 
 var main: Node
 var m: Match
 var dir := "user://shots"
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -18,8 +19,19 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true,
-		"cls": Arch.weight("ashwick"), "arch": "ashwick", "weapon": Arch.signature("ashwick")})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"seed": 4242,
+			"no_drop": true,
+			"cls": Arch.weight("ashwick"),
+			"arch": "ashwick",
+			"weapon": Arch.signature("ashwick")
+		}
+	)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -42,6 +54,7 @@ func run(main_node: Node) -> void:
 	await _shot("2_cast_flash", 2)
 	await _shot("3_after", 60)
 	main.get_tree().quit(0)
+
 
 func _shot(tag: String, frames := 40) -> void:
 	var vp := main.get_viewport()

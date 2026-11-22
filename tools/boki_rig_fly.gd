@@ -127,7 +127,7 @@ func _roam() -> void:
 			still_up[uid] = float(still_up.get(uid, 0.0)) + DT if up and speed < BokiRig.WALK_SPEED else 0.0
 			if float(still_up[uid]) >= SETTLED:
 				var lift := float(k["fly"]["h"])
-				if not ZoneVents.over(k["pos"]):      # over a vent it holds vent_h (_vent)
+				if not ZoneVents.over(k["pos"]):  # over a vent it holds vent_h (_vent)
 					hover = Vector2(minf(hover.x, lift), maxf(hover.y, lift))
 				if not petted:
 					petted = true

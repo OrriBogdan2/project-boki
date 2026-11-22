@@ -14,20 +14,26 @@ var n := 0
 const DT := 1.0 / 60.0
 const STING_NAMES := ["loot_rare", "loot_epic", "loot_legend"]
 
+
 func ok(cond: bool, what: String) -> void:
 	n += 1
 	print("LOOTSFX %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func stings() -> Array:
 	return STING_NAMES.filter(func(s): return not (Sfx.recent.get(s, []) as Array).is_empty())
 
+
 func times(sting: String) -> int:
 	return (Sfx.recent.get(sting, []) as Array).size()
+
 
 func clear_stings() -> void:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -43,6 +49,7 @@ func run(main_node: Node) -> void:
 	print("LOOTSFX DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -50,11 +57,13 @@ func _step(m: Match, secs: float) -> void:
 		Sfx.listener = m.player.pos
 		t += DT
 
+
 func _chests(m: Match) -> void:
 	var P: Hunter = m.player
 	var list: Array = m.chests.filter(func(x): return not x.get("ride", false) and not x["open"])
 	P.chest_keys = 0
-	for x in list: x["free"] = true      # a free chest is held open; a locked one needs a key (no hold)
+	for x in list:
+		x["free"] = true  # a free chest is held open; a locked one needs a key (no hold)
 	var c: Dictionary = list[0]
 	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
 	P.vel = Vector3.ZERO
@@ -81,7 +90,8 @@ func _chests(m: Match) -> void:
 		for i in 120:
 			m.step(DT)
 			Sfx.listener = P.pos
-			if ch["open"]: break
+			if ch["open"]:
+				break
 		P.inp["interact"] = false
 		if not ch["open"]:
 			continue
@@ -96,6 +106,7 @@ func _chests(m: Match) -> void:
 		all_good = all_good and one and quiet and still
 	ok(all_good, "each chest: loop over, one sting for its rarest drop, none for Common/Fine (seen %s)" % [seen.keys()])
 
+
 func _box(m: Match, dead: Hunter, gear: Array) -> Dictionary:
 	var b := Life.drop_box(m, dead, "check")
 	b["gems"] = 0
@@ -106,6 +117,7 @@ func _box(m: Match, dead: Hunter, gear: Array) -> Dictionary:
 	b["gear"] = gear
 	b["empty"] = false
 	return b
+
 
 func _loot(m: Match, looter: Hunter, b: Dictionary, secs: float) -> void:
 	looter.teleport(b["pos"] + Vector3(0.5, 0, 0))
@@ -118,6 +130,7 @@ func _loot(m: Match, looter: Hunter, b: Dictionary, secs: float) -> void:
 		m.loot_sfx.sweep()
 		t += DT
 	looter.inp["interact"] = false
+
 
 func _boxes(m: Match) -> void:
 	var looter: Hunter = m.hunters[1]
@@ -146,8 +159,10 @@ func _boxes(m: Match) -> void:
 		var want := String(LootOpenSfx.STINGS.get(rar, ""))
 		var got := stings()
 		ok(started and stopped and cancelled, "deathbox rarity %d: latch loop holds, lets go" % rar)
-		ok(got.size() == (1 if want != "" else 0) and (want == "" or got[0] == want),
-				"deathbox rarity %d: %s (got %s)" % [rar, "sting " + want if want != "" else "no sting", got])
+		ok(
+			got.size() == (1 if want != "" else 0) and (want == "" or got[0] == want),
+			"deathbox rarity %d: %s (got %s)" % [rar, "sting " + want if want != "" else "no sting", got]
+		)
 		_loot(m, looter, b, 0.2)
 		ok(stings().size() == got.size() and (want == "" or times(want) == 1), "...and one sting per box")
 		m.boxes.erase(b)
@@ -158,6 +173,7 @@ func _boxes(m: Match) -> void:
 	_loot(m, looter, e, 1.5)
 	ok(stings().is_empty() and not e.has("lo_key") and m.loot_sfx.active.is_empty(), "an empty box: no loop, no sting")
 	m.boxes.erase(e)
+
 
 func _limits(m: Match) -> void:
 	var sfx := LootOpenSfx.new()

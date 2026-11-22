@@ -7,9 +7,9 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const LEAD_EDGE_MAX_M := 0.35     # m: the footage's noise floor, 1.5% of the ~23.5 m across the view
-const FLICK_MOVE_MAX_M := 0.05    # m the view may drift off you in the second after a cursor flick (footage: 0)
-const DASH_JUMP_MAX_M := 0.5      # m the view may move in one frame during a dash (no jump cut)
+const LEAD_EDGE_MAX_M := 0.35  # m: the footage's noise floor, 1.5% of the ~23.5 m across the view
+const FLICK_MOVE_MAX_M := 0.05  # m the view may drift off you in the second after a cursor flick (footage: 0)
+const DASH_JUMP_MAX_M := 0.5  # m the view may move in one frame during a dash (no jump cut)
 const EDGE := Vector2(0.99, 0.5)  # where the shot holds the cursor, as a share of the window
 
 var main: Node
@@ -87,6 +87,7 @@ func _area(label: String, opts: Dictionary) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 ## A dash while running: the view trails you and never jumps (--camera-follow-check holds how fast it eases back).
 func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 	P.inp["move"] = Vector2(1, 0)
@@ -108,10 +109,18 @@ func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 		before = cam.focus
 		trail = maxf(trail, _off(cam, P))
 	P.inp["move"] = Vector2.ZERO
-	ok(jump <= DASH_JUMP_MAX_M, "%s: the view moves at most %.2f m in one frame of a dash (at most %.2f, no jump cut)"
-		% [label, jump, DASH_JUMP_MAX_M])
-	ok(trail > run_lag + 0.05, "%s: the view trails the dash (%.2f m behind you, %.2f m at a run)"
-		% [label, trail, run_lag])
+	ok(
+		jump <= DASH_JUMP_MAX_M,
+		(
+			"%s: the view moves at most %.2f m in one frame of a dash (at most %.2f, no jump cut)"
+			% [label, jump, DASH_JUMP_MAX_M]
+		)
+	)
+	ok(
+		trail > run_lag + 0.05,
+		"%s: the view trails the dash (%.2f m behind you, %.2f m at a run)" % [label, trail, run_lag]
+	)
+
 
 func _step(m: Match, cam: CamRig, P: Hunter) -> void:
 	m.step(DT)

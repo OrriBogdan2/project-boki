@@ -1,4 +1,4 @@
-extends "res://tools/ability_check.gd"      # shares its _ac_setup / _ac_run helpers
+extends "res://tools/ability_check.gd"  # shares its _ac_setup / _ac_run helpers
 ## --mines-cap-check: one Glintmole fighting a foe for 60 s must never have more than MAX_LIVE puffcap
 ## mines on the ground at once (Supervive clarity: nothing cluttering the screen). Its own AI casts
 ## Puffcap Mines whenever the cooldown allows (foe stays in range, never steps on a mine), and every
@@ -34,14 +34,14 @@ func run(main_node: Node) -> void:
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
-	m.opts["training"] = false      # training recharges a Boki's cooldowns 3x; a real match does not
+	m.opts["training"] = false  # training recharges a Boki's cooldowns 3x; a real match does not
 	var rec := Save.new_kin("glintmole")
 	rec["trust"] = 95.0
 	var k := m.give_kin(P, rec)
 	k.stow()
 	k.settle = 1.0
 	P.merge_cd = 0.0
-	P.slot_lv["kin"] = 1      # the Boki's own ability is unlocked
+	P.slot_lv["kin"] = 1  # the Boki's own ability is unlocked
 	k.runner.reset()
 	k.teleport(P.pos + Vector3(1.0, 0, 0))
 	k.state = "active"
@@ -51,7 +51,7 @@ func run(main_node: Node) -> void:
 	k.grounded = true
 	var def: AbilitySpec = k.runner.def_of("k1")
 	_mc("glintmole's E is puffcap mines", def != null and def.id == "puffcap_mines")
-	for rate in [1.0, 3.0]:      # 3.0 = the training ground's recharge, or a high Boki rank
+	for rate in [1.0, 3.0]:  # 3.0 = the training ground's recharge, or a high Boki rank
 		k.runner.reset()
 		k.runner.rate = rate
 		m.verbs.clear()
@@ -61,9 +61,9 @@ func run(main_node: Node) -> void:
 		var t := 0.0
 		while t < FIGHT_SECS:
 			T.hp = T.max_hp
-			T.teleport(P.pos + Vector3(5.0, 0, 0))     # stays in cue range; never walks onto a mine
+			T.teleport(P.pos + Vector3(5.0, 0, 0))  # stays in cue range; never walks onto a mine
 			T.vel = Vector3.ZERO
-			k.state = "active"      # keep it out and on the foe
+			k.state = "active"  # keep it out and on the foe
 			k.target = T
 			for mb in m.mobs:
 				mb.queue_free()

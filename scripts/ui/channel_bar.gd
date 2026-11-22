@@ -6,13 +6,14 @@ extends RefCounted
 ## snapshot (HunterNet), so the ally sees it online too. Check: --hudref-check (and the online row of
 ## --displace-net-check).
 
-const BAR_H := 8.0             # px: the bar
-const ICON := 16.0             # px: Meeko's portrait chip
-const COL := Color("ffd27a")   # the tether's gold
-const META := "chan"           # remote caster: [target nid, match time the channel ends]
+const BAR_H := 8.0  # px: the bar
+const ICON := 16.0  # px: Meeko's portrait chip
+const COL := Color("ffd27a")  # the tether's gold
+const META := "chan"  # remote caster: [target nid, match time the channel ends]
 
 ## nid -> {"left": s, "frac": 0..1} of the bar the last draw put up (a check reads it)
 static var shown := {}
+
 
 ## The caster's channel as [target nid, seconds left]; ["", 0] when none runs.
 static func read(h: Hunter) -> Array:
@@ -23,9 +24,11 @@ static func read(h: Hunter) -> Array:
 	var rem: Array = h.get_meta(META, ["", 0.0])
 	return [rem[0], float(rem[1]) - h.m.time]
 
+
 ## A remote caster's snapshot field: the target and the seconds left (0.05 s steps).
 static func store(h: Hunter, to: String, left: float) -> void:
 	h.set_meta(META, [to, h.m.time + left])
+
 
 ## The ally's view: the hunter channelling on `p` and the seconds left, or null.
 static func caster_on(m: Match, p: Hunter) -> Hunter:
@@ -35,6 +38,7 @@ static func caster_on(m: Match, p: Hunter) -> Hunter:
 			if ch[0] == p.nid and float(ch[1]) > 0.0:
 				return h
 	return null
+
 
 static func draw(H, sz: Vector2, p: Hunter) -> void:
 	shown.clear()

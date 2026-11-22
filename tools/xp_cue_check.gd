@@ -10,44 +10,55 @@ extends RefCounted
 var bad := 0
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("XPCUE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _heard(n: String) -> int:
 	return (Sfx.recent.get(n, []) as Array).size()
+
 
 ## Exactly this many ticks, win stings and lost stings were heard since the last _kill.
 func _cues(tick: int, won: int, lost: int, what: String) -> void:
 	var got := [_heard("xp_tick"), _heard("steal_won"), _heard("steal_lost")]
 	ok(got == [tick, won, lost], "%s (tick, won, lost: %s)" % [what, str(got)])
 
+
 func _clear_heard() -> void:
 	_clear_heard_of(["xp_tick", "steal_won", "steal_lost"])
 
+
 func _trio(names: Array) -> Array:
 	return names.map(func(n): return _heard(n))
+
 
 func _clear_heard_of(names: Array) -> void:
 	for n in names:
 		Sfx.recent.erase(n)
 		Sfx.last_played.erase(n)
 
+
 ## A fresh skitter at `at`, health exactly the sum of the hits: each (hunter, damage) pair hits it in order.
 func _kill(at: Vector3, hits: Array) -> void:
 	_clear_heard()
 	var mob := m.spawn_mob("skitter", at)
 	var total := 0.0
-	for h in hits: total += float(h[1])
+	for h in hits:
+		total += float(h[1])
 	mob.max_hp = total
 	mob.hp = total
 	for h in hits:
 		mob.hurt(float(h[1]), h[0], {})
 	_drop(mob)
 
+
 func _drop(mob: Mob) -> void:
 	m.mobs.erase(mob)
 	mob.queue_free()
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -61,7 +72,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": false})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var P: Hunter = m.player
 	var mates: Array = m.hunters.filter(func(o): return o != P and o.team == P.team)
@@ -87,7 +99,8 @@ func run(main: Node) -> void:
 	var mob := m.spawn_mob("skitter", at)
 	mob.max_hp = 1000.0
 	mob.hp = 1000.0
-	for i in 5: mob.hurt(10.0, P, {})
+	for i in 5:
+		mob.hurt(10.0, P, {})
 	_cues(0, 0, 0, "(b) five hits, no kill: silent")
 	ok(mob.damage_by.get(P.team, 0.0) == 50.0, "(b) the squad's damage is tallied (%s)" % str(mob.damage_by))
 	_drop(mob)

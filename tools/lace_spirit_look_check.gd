@@ -4,17 +4,18 @@ extends "res://tools/archetype_check.gd"
 ## and where she comes out (and where an end inside puts her), none on the roll, and the look changes no gameplay:
 ## the walk lasts its 2.8 s after the roll and still passes the rock. Prints AKCHECK lines.
 
-const SOURCE_WALK := 2.8      # s of Spirit Walk after the roll (hero sheet pin.md, the card)
-const ROCK_AHEAD := 5         # tiles from her start to the rock column: the roll ends clear of it
-const PAST_ROCK := 1.6        # m past the rock's near face where she stops walking
+const SOURCE_WALK := 2.8  # s of Spirit Walk after the roll (hero sheet pin.md, the card)
+const ROCK_AHEAD := 5  # tiles from her start to the rock column: the roll ends clear of it
+const PAST_ROCK := 1.6  # m past the rock's near face where she stops walking
+
 
 func walk() -> void:
 	var r := setup("archer", 9.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var home: Vector3 = r[4]
-	(r[2] as Hunter).teleport(home + Vector3(0, 0, 6))      # (the dummy off her line)
-	Sfx.listener = home           # (the camera's focus, which no frame moves here: the looks' detail share)
+	(r[2] as Hunter).teleport(home + Vector3(0, 0, 6))  # (the dummy off her line)
+	Sfx.listener = home  # (the camera's focus, which no frame moves here: the looks' detail share)
 	var bx := int(home.x) + ROCK_AHEAD
 	var wk: PackedByteArray = m.world.kind
 	for dz in range(-2, 3):
@@ -33,6 +34,7 @@ func walk() -> void:
 		"net %s, portals there %d" % [rec.get("net", true), there.size()]
 	)
 	await done(m)
+
 
 ## Rolls east, walks through the rock column, stops past it and waits the walk out.
 func _through(m: Match, P: Hunter, home: Vector3, bx: int) -> void:
@@ -79,16 +81,26 @@ func _through(m: Match, P: Hunter, home: Vector3, bx: int) -> void:
 	)
 	ok(
 		"pin look: her screen washes for the whole walk, darker inside the rock, clear after it",
-		absf(clear_tint - PinFx.TINT_WALK) < 0.01 and inside_tint == 1.0 and K.fx.tint_want == 0.0
-			and K.fx.tint != null,
+		(
+			absf(clear_tint - PinFx.TINT_WALK) < 0.01
+			and inside_tint == 1.0
+			and K.fx.tint_want == 0.0
+			and K.fx.tint != null
+		),
 		"walking %.2f inside %.2f after %.2f" % [clear_tint, inside_tint, K.fx.tint_want]
 	)
 	ok(
 		"pin look: gameplay as before: 2.8 s after the roll, through the rock, a spirit the whole walk",
-		absf(K.spirit.walk_time() - SOURCE_WALK) < 0.001 and absf(lasted - roll_t - SOURCE_WALK) < 2.5 * DT
-			and P.pos.x > bx + 1.0 and K.spirit.passed > 0 and ghost,
+		(
+			absf(K.spirit.walk_time() - SOURCE_WALK) < 0.001
+			and absf(lasted - roll_t - SOURCE_WALK) < 2.5 * DT
+			and P.pos.x > bx + 1.0
+			and K.spirit.passed > 0
+			and ghost
+		),
 		"walk %.2f lasted %.2f (roll %.2f) x %.1f (rock %d)" % [K.spirit.walk_time(), lasted, roll_t, P.pos.x, bx]
 	)
+
 
 ## The walk running out inside the rock (put back at the entry) and inside a ledge (set on top): a portal where
 ## she comes out each time.
@@ -127,6 +139,7 @@ func _ends_inside(m: Match, P: Hunter, home: Vector3, bx: int, lv: int) -> void:
 		wl[W.idx(bx, int(home.z) + dz)] = lv
 	W.level = wl
 
+
 ## Starts a walk from `home` (the roll ends in the open), then puts her `inside` something for one step (the walk
 ## sees it).
 func _dash_into(m: Match, P: Hunter, home: Vector3, inside: Vector3) -> void:
@@ -140,9 +153,11 @@ func _dash_into(m: Match, P: Hunter, home: Vector3, inside: Vector3) -> void:
 	P.teleport(inside)
 	step(m, DT)
 
+
 ## The portal looks showing now.
 func _portals(V: HeroVfx) -> Array:
 	return (V.pools.get("portal", []) as Array).filter(func(n: Node3D): return n.visible)
+
 
 ## True when a move's recipe has no burst kind (a flare, ring, ground disc, wall of flame or portal).
 func _burst_free(rec: Dictionary) -> bool:

@@ -6,17 +6,20 @@ extends RefCounted
 ## a Hunter swap or a fall ends the run; a v21 save migrates to an empty best list. Prints TIMETRIALCHECK PASS/FAIL.
 
 const DT := 1.0 / 60.0
-const RUN_CAP := 120.0          # [s] a scripted run that takes longer has got stuck
-const DASH_AT := 3.0            # [m] the scripted run dashes this far before a dash gate
+const RUN_CAP := 120.0  # [s] a scripted run that takes longer has got stuck
+const DASH_AT := 3.0  # [m] the scripted run dashes this far before a dash gate
 
 var main: Node
 var fails := 0
 var n := 0
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	printerr("TIMETRIALCHECK %-46s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -36,16 +39,21 @@ func run(main_node: Node) -> void:
 	print("TIMETRIALCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
+
 func _built(m: Match, T: TimeTrial) -> void:
 	var moves := {}
 	for g in T.gates:
 		moves[g.move] = true
 	var placed := T.start != Vector3.INF and T.finish != Vector3.INF and T.pad_at != Vector3.INF
 	ok("ten gates, start and finish arch, pad", T.gates.size() == 10 and placed, "%d gates" % T.gates.size())
-	ok("the gates ask for dash, kick, pad, glide", moves.has("dash") and moves.has("kick") and moves.has("pad")
-		and moves.has("glide"), str(moves.keys()))
+	ok(
+		"the gates ask for dash, kick, pad, glide",
+		moves.has("dash") and moves.has("kick") and moves.has("pad") and moves.has("glide"),
+		str(moves.keys())
+	)
 	var on_floor := [T.start, T.finish, T.pad_at].all(func(p): return m.world.island_id(p.x, p.z) == "floor")
 	ok("the course is on the open floor", on_floor)
+
 
 ## The kick tower is four terraces (over a plain jump and mantle), the glide tower more than a kick reaches.
 func _heights(m: Match, T: TimeTrial) -> void:
@@ -56,11 +64,13 @@ func _heights(m: Match, T: TimeTrial) -> void:
 	ok("kick tower is out of a plain jump's reach", kick_top > cap, "%.1f m vs %.1f" % [kick_top, cap])
 	ok("glide tower is out of a wall kick's reach", glide_top > WallMoves.HOP_CLIMB_CAP + cap, "%.1f m" % glide_top)
 
+
 func _gate(T: TimeTrial, move: String) -> TimeTrial.Gate:
 	for g in T.gates:
 		if g.move == move:
 			return g
 	return null
+
 
 ## Real inputs from behind the start arch to the finish: steer at the next gate, dash before a dash gate,
 ## jump and kick at the kick tower, step on the pad, glide once falling toward a glide gate.
@@ -70,14 +80,18 @@ func _full_run(m: Match, T: TimeTrial) -> void:
 	var info := "gate %d, %.2f s" % [T.next_i, T.last_time]
 	ok("a run with real inputs finishes all ten gates", t > 0.0 and not T.running, info)
 	ok("the run used a wall kick", int(P.stats.get("wall_kicks", 0)) > 0, str(P.stats.get("wall_kicks", 0)))
-	ok("the finish is this Hunter's best", is_equal_approx(TimeTrial.best("gunslinger"), snappedf(T.last_time, 0.01)),
-		"%.2f" % TimeTrial.best("gunslinger"))
+	ok(
+		"the finish is this Hunter's best",
+		is_equal_approx(TimeTrial.best("gunslinger"), snappedf(T.last_time, 0.01)),
+		"%.2f" % TimeTrial.best("gunslinger")
+	)
 	ok("another Hunter has no best yet", TimeTrial.best("thief") == 0.0)
+
 
 ## Drives one run; returns its time (0 when it didn't finish inside RUN_CAP).
 func _drive(m: Match, T: TimeTrial) -> float:
 	var P: Hunter = m.player
-	var back := (T.start - T.gates[0].at)
+	var back := T.start - T.gates[0].at
 	back.y = 0.0
 	P.teleport(T.start + back.normalized() * 3.0)
 	P.vel = Vector3.ZERO
@@ -108,6 +122,7 @@ func _drive(m: Match, T: TimeTrial) -> float:
 			return T.last_time
 	return 0.0
 
+
 ## A dash gate walked through doesn't count.
 func _dash_gate(m: Match, T: TimeTrial) -> void:
 	var P: Hunter = m.player
@@ -125,6 +140,7 @@ func _dash_gate(m: Match, T: TimeTrial) -> void:
 	ok("a dash gate dashed through counts", T.next_i == i + 1)
 	T.stop()
 
+
 ## A slower time keeps the best; a Hunter swap and a fall each end a run.
 func _slower_and_swap(m: Match, T: TimeTrial) -> void:
 	var b := TimeTrial.best("gunslinger")
@@ -140,6 +156,7 @@ func _slower_and_swap(m: Match, T: TimeTrial) -> void:
 	m.player.teleport(Vector3(60, -20, 25))
 	m.arena.grounds.tick(DT)
 	ok("a fall ends the run", not T.running)
+
 
 func _migrate() -> void:
 	var old := {"v": 21, "roster": []}

@@ -4,6 +4,7 @@ extends RefCounted
 ## moment the thing first changes, the lane says what it is, once per save (the same `Save.d["tutorial"]`
 ## flags as Match._tip). The words that could simply be plainer were swapped in the HUD instead.
 
+
 ## Called each HUD tick for the local hunter.
 static func watch(H, p: Hunter) -> void:
 	if p == null or not Settings.get_v("tips"):
@@ -17,6 +18,7 @@ static func watch(H, p: Hunter) -> void:
 	if p.kin != null and p.kin.state == "active" and not seen.get("term_boki", false):
 		var orders := "hold %s for orders" % Settings.key_cap("throw")
 		_say(H, seen, "term_boki", "Your Boki fights and uses its move by itself (AUTO)  ·  " + orders)
+
 
 static func _say(H, seen: Dictionary, key: String, text: String) -> void:
 	seen[key] = true

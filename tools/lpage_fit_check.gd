@@ -9,9 +9,12 @@ const SIZES := [Vector2i(1920, 1080), Vector2i(1280, 720), Vector2i(2560, 1440),
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LPAGEFIT %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -38,6 +41,7 @@ func run(main: Node) -> void:
 	print("LPAGEFIT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Every visible control of the open panel lies inside the visible viewport.
 func _fits(A: Arena, sz: Vector2i) -> void:
 	var view := A.menu_layer.get_viewport().get_visible_rect().grow(0.5)
@@ -51,17 +55,31 @@ func _fits(A: Arena, sz: Vector2i) -> void:
 		bottom = maxf(bottom, r.end.y)
 		if not view.encloses(r):
 			out.append("%s %s" % [ctl.get_class(), _text(ctl)])
-	ok(out.is_empty(), "%dx%d: every control inside the %dx%d view (lowest edge %d)%s" % [
-		sz.x, sz.y, int(view.size.x), int(view.size.y), int(bottom),
-		"" if out.is_empty() else "  outside: " + ", ".join(out.slice(0, 8))])
+	ok(
+		out.is_empty(),
+		(
+			"%dx%d: every control inside the %dx%d view (lowest edge %d)%s"
+			% [
+				sz.x,
+				sz.y,
+				int(view.size.x),
+				int(view.size.y),
+				int(bottom),
+				"" if out.is_empty() else "  outside: " + ", ".join(out.slice(0, 8))
+			]
+		)
+	)
+
 
 ## A control inside the scrolling Boki list (judged by the list, which must itself be inside the view).
 func _in_list(c: Control) -> bool:
 	var p := c.get_parent()
 	while p:
-		if p is ScrollContainer: return true
+		if p is ScrollContainer:
+			return true
 		p = p.get_parent()
 	return false
+
 
 ## Scrolled to its end, the Boki list shows its last entry ("None") whole.
 func _scrolls_to_end(A: Arena, sz: Vector2i) -> void:
@@ -70,9 +88,14 @@ func _scrolls_to_end(A: Arena, sz: Vector2i) -> void:
 	await A.menu_layer.get_tree().process_frame
 	var grid := sc.get_child(0) as Control
 	var last := grid.get_child(grid.get_child_count() - 1) as Button
-	ok(sc.get_global_rect().grow(0.5).encloses(last.get_global_rect()) and last.text == "None",
-		"%dx%d: the Boki list scrolls to its last entry (%d entries, %d px shown of %d)" % [
-		sz.x, sz.y, grid.get_child_count(), int(sc.size.y), int(grid.size.y)])
+	ok(
+		sc.get_global_rect().grow(0.5).encloses(last.get_global_rect()) and last.text == "None",
+		(
+			"%dx%d: the Boki list scrolls to its last entry (%d entries, %d px shown of %d)"
+			% [sz.x, sz.y, grid.get_child_count(), int(sc.size.y), int(grid.size.y)]
+		)
+	)
+
 
 ## The header shows the hunter's name and a portrait, and no title.
 func _header(A: Arena) -> void:
@@ -82,7 +105,10 @@ func _header(A: Arena) -> void:
 	ok(not texts.contains(HeroTitle.title("thief")), "header does not show the title")
 	ok(hd.find_child("portrait", false, false) != null, "header has the portrait")
 
+
 func _text(c: Control) -> String:
-	if c is Label: return "'%s'" % (c as Label).text.left(24)
-	if c is Button: return "'%s'" % (c as Button).text.left(24)
+	if c is Label:
+		return "'%s'" % (c as Label).text.left(24)
+	if c is Button:
+		return "'%s'" % (c as Button).text.left(24)
 	return ""

@@ -13,10 +13,12 @@ var bad := 0
 var m: Match
 var L: Dictionary
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PITEGG %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -40,11 +42,14 @@ func run(main: Node) -> void:
 	print("PITEGG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _eggs_in_packs(h: Hunter) -> int:
 	return h.pack.filter(func(it): return Loot.is_rare_egg(it)).size()
 
+
 func _eggs_on_floor() -> int:
 	return m.wpicks.filter(func(wp): return wp.has("egg")).size()
+
 
 ## Resets the lair and the floor, puts the first `inside_n` hunters in the pit (the rest well outside)
 ## and kills the boss under match seed `seed_v`. `cap` is every pack's size.
@@ -61,6 +66,7 @@ func _kill(seed_v: int, inside_n: int, cap := 4) -> void:
 		h.pos = Vector3(spot.x, m.world.ground_at(spot.x, spot.z), spot.z)
 	m.rng.seed = seed_v
 	m.lairs.on_mob_dead(m.lairs.boss_of(L), m.hunters[0])
+
 
 func _spread_wins() -> void:
 	var wins := [0, 0, 0, 0]
@@ -85,6 +91,7 @@ func _spread_wins() -> void:
 		bot_won = bot_won or _eggs_in_packs(m.hunters[3]) == 1
 	ok(bot_won, "a bot wins too: the egg is in its pack, where bot.gd's egg_home reads it")
 
+
 func _full_pack() -> void:
 	_kill(7, 3, 0)
 	var wp2: Variant = L.get("egg_wp")
@@ -96,6 +103,7 @@ func _full_pack() -> void:
 	ok(m.lairs.held_from(wp2, other) and not m.lairs.held_from(wp2, w), "it is reserved for the winner")
 	m.time += Lairs.EGG_HOLD_T + 0.1
 	ok(not m.lairs.held_from(wp2, other), "after the hold runs out anyone can take it")
+
 
 func _nobody_inside() -> void:
 	_kill(3, 0)

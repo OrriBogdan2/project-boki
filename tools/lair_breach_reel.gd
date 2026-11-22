@@ -9,8 +9,9 @@ extends RefCounted
 ## Prints LAIR_BREACH_REEL lines with the movie frame filming starts on, then (counted from there) the
 ## frame of each crack, the break and the boss waking. Never writes the save.
 
-const AFTER_S := 7.0            # s of film after the boss wakes
-const LIMIT_S := 90.0           # s: give up if the gate hasn't broken by then
+const AFTER_S := 7.0  # s of film after the boss wakes
+const LIMIT_S := 90.0  # s: give up if the gate hasn't broken by then
+
 
 func run(main: Node) -> void:
 	main.set_meta("lair_breach_reel", self)
@@ -20,8 +21,18 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	# ("tut_test": the match reads no keys for you; this drives you, as the tutorial test does)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true, "blight": false,
-		"tut_test": true})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 21,
+			"no_drop": true,
+			"blight": false,
+			"tut_test": true
+		}
+	)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -43,7 +54,7 @@ func run(main: Node) -> void:
 	while m.time < 26.0:
 		for h in m.hunters:
 			h.ctrl = "idle"
-			h.inp["move"] = Vector2.ZERO      # (an idle hunter keeps its last input: walking off the edge)
+			h.inp["move"] = Vector2.ZERO  # (an idle hunter keeps its last input: walking off the edge)
 			h.hp = h.max_hp
 		m.step(Match.DT)
 	m.set_process(true)
@@ -65,7 +76,7 @@ func run(main: Node) -> void:
 	var woke := -1
 	while frame < int((LIMIT_S + AFTER_S) * 60.0):
 		for h in crew:
-			h.hp = maxf(h.hp, h.max_hp * 0.5)      # (a film of the breach, not of a wipe)
+			h.hp = maxf(h.hp, h.max_hp * 0.5)  # (a film of the breach, not of a wipe)
 		_drive(P, L)
 		if frame == 0:
 			print("LAIR_BREACH_REEL crew %s" % str(crew.map(func(h): return "%s out %s" % [h.pname, h.out])))
@@ -86,6 +97,7 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 	print("LAIR_BREACH_REEL done, %d frames" % frame)
 	main.get_tree().quit(0)
+
 
 ## You, scripted: at the seal firing into it while the gate is shut, then in through it.
 func _drive(P: Hunter, L: Dictionary) -> void:

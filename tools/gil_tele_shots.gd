@@ -5,7 +5,7 @@ extends RefCounted
 ## "Two telegraph systems"). Needs a renderer.
 
 const DT := 1.0 / 60.0
-const FRAMES := [0.15, 0.4]          # s after each cast
+const FRAMES := [0.15, 0.4]  # s after each cast
 
 var main: Node
 var out := ""

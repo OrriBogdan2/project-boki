@@ -11,17 +11,19 @@ extends RefCounted
 ## Prints STATUSSFX ok/FAIL. Runs on tools/support_check.gd's setup.
 
 const DT := 1.0 / 60.0
-const GAP_S := 0.3          # s of real time between cues: past the cue window and the stack window
+const GAP_S := 0.3  # s of real time between cues: past the cue window and the stack window
 
 var main: Node
 var sc
 var bad := 0
 var rules: Dictionary
 
+
 func ok(cond: bool, what: String) -> void:
 	print("STATUSSFX %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -39,6 +41,7 @@ func run(mn: Node) -> void:
 	print("STATUSSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Plays of `sound` that started at or after `t0` (ms).
 func plays_since(sound: String, t0: int) -> int:
 	var n := 0
@@ -47,12 +50,14 @@ func plays_since(sound: String, t0: int) -> int:
 			n += 1
 	return n
 
+
 func loops_on() -> int:
 	var n := 0
 	for key in Sfx.loops:
 		if String(key).begins_with("st_"):
 			n += 1
 	return n
+
 
 ## A pool player sounding `sound` now (its pitch and volume), or null; not `but`, the one from before.
 func sounding(sound: String, but: AudioStreamPlayer = null) -> AudioStreamPlayer:
@@ -63,10 +68,12 @@ func sounding(sound: String, but: AudioStreamPlayer = null) -> AudioStreamPlayer
 			return p
 	return null
 
+
 func settle(m: Match, secs := 0.0) -> void:
-	Sfx.listener = m.player.pos         # the camera's job in a game: sounds fade with the distance to it
+	Sfx.listener = m.player.pos  # the camera's job in a game: sounds fade with the distance to it
 	sc.step(m, secs)
 	await main.get_tree().create_timer(GAP_S).timeout
+
 
 ## Applies once with `apply` and checks the cue played exactly once; a second, running application is silent.
 func once(m: Match, label: String, sound: String, apply: Callable) -> void:
@@ -78,6 +85,7 @@ func once(m: Match, label: String, sound: String, apply: Callable) -> void:
 	apply.call()
 	ok(plays_since(sound, t1) == 0, "%s: a refresh while it runs is silent" % label)
 	await settle(m)
+
 
 func _body_statuses() -> void:
 	var r: Array = sc.setup("gunslinger", 6.0)
@@ -102,7 +110,7 @@ func _body_statuses() -> void:
 	T.hurt(1.0, P, {"burn": 5.0, "burn_for": 30.0})
 	await main.get_tree().process_frame
 	ok(loops_on() == 1, "Ignite: the crackle starts again on a new fire")
-	T.burn_t = 0.0                                             # a cleanse
+	T.burn_t = 0.0  # a cleanse
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(loops_on() == 0, "Ignite: the crackle stops when it is cleansed")
@@ -122,6 +130,7 @@ func _body_statuses() -> void:
 	var rule_db := float(rules["mine_db"])
 	ok(absf(gain - rule_db) < 0.5, "yours is %.1f dB louder (rules %.1f)" % [gain, rule_db])
 	await _free(m)
+
 
 func _kit_statuses() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
@@ -152,7 +161,7 @@ func _kit_statuses() -> void:
 	var high := sounding("mage_zap", low)
 	var high_pitch := high.pitch_scale if high else 0.0
 	ok(high_pitch > low_pitch + 0.1, "Static: the cue climbs with the stacks (%.2f -> %.2f)" % [low_pitch, high_pitch])
-	K.clear_sparks(T)                                          # spent or cleansed
+	K.clear_sparks(T)  # spent or cleansed
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(loops_on() == 0, "Static: the buzz stops when the stacks are spent")
@@ -167,6 +176,7 @@ func _kit_statuses() -> void:
 	await main.get_tree().process_frame
 	await _free(m)
 	ok(loops_on() == 0, "no status loop outlives the match")
+
 
 func _caps() -> void:
 	var r: Array = sc.setup("gunslinger", 6.0)
@@ -193,6 +203,7 @@ func _caps() -> void:
 	var loop_cap := int(rules["loop_cap"])
 	ok(loops_on() == loop_cap, "%d burning bodies run %d loops (loop_cap %d)" % [foes.size(), loops_on(), loop_cap])
 	await _free(m)
+
 
 func _free(m: Match) -> void:
 	m.queue_free()

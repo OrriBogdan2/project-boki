@@ -10,22 +10,23 @@ extends RefCounted
 ## Effects only touch bodies this game owns (never a remote one), like the biome traps.
 
 const PATH := "res://content/rules/terrain_hazards.json"
-const SDF_PX := 2.0          # distance-field texels per metre of an area's surface
-const SDF_PAD := 1.0         # m of margin round an outline in its surface quad (the soft edge)
-const STAND_Y := 0.35        # m: this close to the area's ground you're in it (a jump or a glide clears it)
-const TICK_S := 0.5          # s between drowning or scratch hits
-const FX_S := 0.35           # s between splashes or sparks at the feet of someone moving through
-const HINT_DIRS := 8         # directions the Boki looks for a hazard nearby
+const SDF_PX := 2.0  # distance-field texels per metre of an area's surface
+const SDF_PAD := 1.0  # m of margin round an outline in its surface quad (the soft edge)
+const STAND_Y := 0.35  # m: this close to the area's ground you're in it (a jump or a glide clears it)
+const TICK_S := 0.5  # s between drowning or scratch hits
+const FX_S := 0.35  # s between splashes or sparks at the feet of someone moving through
+const HINT_DIRS := 8  # directions the Boki looks for a hazard nearby
 
 static var _rules := {}
 
 var m: Match
 var w: World
-var areas: Array = []                 # {kind, def, y, centre, cells: Array[Vector2i], poly, box, mat, t, phase}
-var cell := PackedInt32Array()        # per tile: area index + 1, 0 = no hazard
-var state := {}                       # hunter instance id -> {area, safe, breath, tick, fx}
+var areas: Array = []  # {kind, def, y, centre, cells: Array[Vector2i], poly, box, mat, t, phase}
+var cell := PackedInt32Array()  # per tile: area index + 1, 0 = no hazard
+var state := {}  # hunter instance id -> {area, safe, breath, tick, fx}
 var hint_t := 0.0
-var hinted := {}                      # kind -> m.time the player's Boki last spoke of it
+var hinted := {}  # kind -> m.time the player's Boki last spoke of it
+
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -33,14 +34,17 @@ static func rules() -> Dictionary:
 		_rules = parsed if parsed is Dictionary else {"hint": {}, "kinds": {}}
 	return _rules
 
+
 static func kind_def(kind: String) -> Dictionary:
 	return rules()["kinds"].get(kind, {})
+
 
 ## This match's hazards (null off an authored map).
 static func of(mm: Node) -> TerrainHazards:
 	if mm is Match and (mm as Match).biomes:
 		return (mm as Match).biomes.terrain
 	return null
+
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -50,6 +54,7 @@ func _init(match_node: Match) -> void:
 	for D in World.load_layout(w.layout_id).get("islands", []):
 		for A in D.get("hazard_areas", []):
 			_add_area(String(A["kind"]), A["poly"])
+
 
 # ------------------------------------------------------------------ the areas
 func _add_area(kind: String, pts: Array) -> void:
@@ -78,13 +83,22 @@ func _add_area(kind: String, pts: Array) -> void:
 		return
 	var c := sum / cells.size()
 	var y := w.ground_at(cells[0].x + 0.5, cells[0].y + 0.5)
-	var A := {"kind": kind, "def": def, "y": y, "centre": Vector3(c.x, y, c.y), "cells": cells,
-		"poly": poly, "box": box,
-		"t": float(def["effect"].get("every_s", 0.0)), "phase": "idle"}
+	var A := {
+		"kind": kind,
+		"def": def,
+		"y": y,
+		"centre": Vector3(c.x, y, c.y),
+		"cells": cells,
+		"poly": poly,
+		"box": box,
+		"t": float(def["effect"].get("every_s", 0.0)),
+		"phase": "idle"
+	}
 	A["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
 	if kind == "bramble":
 		_thorns(cells, y)
 	areas.append(A)
+
 
 ## The area's surface: one flat quad over its box; the shader cuts the outline out of a distance field.
 func _surface(poly: PackedVector2Array, box: Rect2, y: float, look: Dictionary) -> ShaderMaterial:
@@ -120,6 +134,7 @@ func _surface(poly: PackedVector2Array, box: Rect2, y: float, look: Dictionary) 
 	mi.global_position = Vector3(box.get_center().x, y + 0.05, box.get_center().y)
 	return mat
 
+
 ## Bramble stands up out of the ground: a thorn tuft on every other tile, one draw call per area.
 func _thorns(cells: Array[Vector2i], y: float) -> void:
 	var rr := RandomNumberGenerator.new()
@@ -139,6 +154,7 @@ func _thorns(cells: Array[Vector2i], y: float) -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(mi)
 
+
 # ------------------------------------------------------------------ lookups
 ## The area index at p (standing on its ground), or -1.
 func area_at(p: Vector3) -> int:
@@ -151,9 +167,11 @@ func area_at(p: Vector3) -> int:
 		return -1
 	return a
 
+
 ## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
 func guards(h: Hunter, kind: String) -> bool:
 	return kin_guards(h.kin as Kin, kind)
+
 
 ## Whether this Boki (up, not downed) is a counter for the kind.
 static func kin_guards(k: Kin, kind: String) -> bool:
@@ -162,12 +180,14 @@ static func kin_guards(k: Kin, kind: String) -> bool:
 	var C: Dictionary = kind_def(kind).get("counter", {})
 	return String(k.sp.get("theme", "")) in C.get("themes", []) or k.species in C.get("kin", [])
 
+
 ## Footing at p for h: low on an ice sheet unless its Boki is a frost one.
 func grip(p: Vector3, h: Hunter) -> float:
 	var a := area_at(p)
 	if a < 0 or areas[a]["kind"] != "ice" or (h != null and guards(h, "ice")):
 		return 1.0
 	return float(areas[a]["def"]["effect"]["grip"])
+
 
 ## A bot keeps off hazard ground its Boki can't handle (unless it's already in it: then out is the way).
 static func avoid(mm: Node, h: Hunter, x: float, z: float) -> bool:
@@ -181,6 +201,7 @@ static func avoid(mm: Node, h: Hunter, x: float, z: float) -> bool:
 	var a := tz.cell[tz.w.idx(xi, zi)] - 1
 	return a >= 0 and tz.area_at(h.pos) < 0 and not tz.guards(h, String(tz.areas[a]["kind"]))
 
+
 ## Hits from a hunter wading in deep water without a swimmer are weaker.
 static func hit_mult(mm: Node, by: Ent) -> float:
 	var tz := of(mm)
@@ -188,6 +209,7 @@ static func hit_mult(mm: Node, by: Ent) -> float:
 		return 1.0
 	var st: Dictionary = tz.state.get(by.get_instance_id(), {})
 	return float(st.get("weak", 1.0))
+
 
 ## What the player is standing in, for the HUD: {} or {name, col, safe, hurts, breath (0..1), kin}.
 func underfoot(h: Hunter) -> Dictionary:
@@ -198,9 +220,15 @@ func underfoot(h: Hunter) -> Dictionary:
 	var E: Dictionary = A["def"]["effect"]
 	var k := h.kin as Kin
 	var kin_name := String(k.rec.get("name", k.sp.get("name", "Your Boki"))) if k else ""
-	return {"name": String(A["def"]["name"]), "col": Color(String(A["def"]["look"]["edge"])), "safe": bool(st["safe"]),
-		"hurts": String(A["def"]["hurts"]), "kin": kin_name,
-		"breath": clampf(float(st["breath"]) / float(E["breath_s"]), 0.0, 1.0) if E.has("breath_s") else -1.0}
+	return {
+		"name": String(A["def"]["name"]),
+		"col": Color(String(A["def"]["look"]["edge"])),
+		"safe": bool(st["safe"]),
+		"hurts": String(A["def"]["hurts"]),
+		"kin": kin_name,
+		"breath": clampf(float(st["breath"]) / float(E["breath_s"]), 0.0, 1.0) if E.has("breath_s") else -1.0
+	}
+
 
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
@@ -215,6 +243,7 @@ func tick(dt: float) -> void:
 	if hint_t <= 0.0:
 		hint_t = float(rules()["hint"]["every_s"])
 		_hint()
+
 
 func _tick_hunter(h: Hunter, dt: float) -> void:
 	if h.remote or h.out or h.dead:
@@ -236,7 +265,8 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 	if int(st["area"]) != a or bool(st.get("safe", false)) != safe:
 		st["area"] = a
 		st["safe"] = safe
-		if safe: _protect_fx(h)
+		if safe:
+			_protect_fx(h)
 	st["weak"] = float(E.get("dmg_out", 1.0)) if not safe else 1.0
 	match kind:
 		"lava":
@@ -246,7 +276,8 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 				h.burn_t = maxf(h.burn_t, float(E["burn_linger_s"]))
 		"deep_water":
 			if safe:
-				if E.get("swim_haste", false): h.haste_t = maxf(h.haste_t, 0.2)
+				if E.get("swim_haste", false):
+					h.haste_t = maxf(h.haste_t, 0.2)
 			else:
 				_slow(h, 1.0 - float(E["speed"]))
 				st["breath"] = float(st["breath"]) - dt
@@ -259,6 +290,7 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 					h.hurt(float(E["dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
 	_feet_fx(h, st, kind, dt)
 
+
 ## Out of the hazard: breath comes back twice as fast as it went; the state goes once it's full.
 func _recover(id: int, dt: float) -> void:
 	var st: Dictionary = state[id]
@@ -269,6 +301,7 @@ func _recover(id: int, dt: float) -> void:
 	if float(st["breath"]) >= full:
 		state.erase(id)
 
+
 func _every(st: Dictionary, dt: float) -> bool:
 	st["tick"] = float(st["tick"]) - dt
 	if float(st["tick"]) > 0.0:
@@ -276,13 +309,16 @@ func _every(st: Dictionary, dt: float) -> bool:
 	st["tick"] = TICK_S
 	return true
 
+
 ## Hazard damage grows with the tier, as the biome traps' does.
 func _tier() -> float:
 	return float(m.T.get("mob", 1.0))
 
+
 func _slow(h: Hunter, k: float) -> void:
 	h.slow_t = maxf(h.slow_t, 0.15)
 	h.slow_k = maxf(h.slow_k, k)
+
 
 ## The static flats charge up (the ground's veins brighten) and then shock everyone standing on them.
 func _tick_static(ai: int, dt: float) -> void:
@@ -314,6 +350,7 @@ func _tick_static(ai: int, dt: float) -> void:
 			m.fx.burst(h.pos + Vector3(0, 0.8, 0), Color("fff9c0"), 16, 5.0, 0.3, 1.0)
 			h.hurt(float(E["dmg"]) * _tier(), null, {"src": "hazard", "tags": ["hazard"], "stun": float(E["stun_s"])})
 
+
 # ------------------------------------------------------------------ feedback
 ## The Boki keeps you safe here: a burst in its colour at your feet (and a chime for the player).
 func _protect_fx(h: Hunter) -> void:
@@ -323,7 +360,9 @@ func _protect_fx(h: Hunter) -> void:
 	if h == m.player:
 		m.sfx("shield", h.pos, -10.0, 1.3)
 
+
 const FEET_FX := {"lava": "ff9a3a", "deep_water": "cfeaff", "ice": "f4fcff", "static": "fff27a", "bramble": "8ac04a"}
+
 
 func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:
 	st["fx"] = float(st["fx"]) - dt
@@ -331,6 +370,7 @@ func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:
 		return
 	st["fx"] = FX_S
 	m.fx.burst(h.pos + Vector3(0, 0.1, 0), Color(FEET_FX[kind]), 6, 2.0, 0.35, 6.0, 0.8)
+
 
 ## The player's Boki says when a hazard is near, and whether it can handle it.
 func _hint() -> void:
@@ -348,6 +388,7 @@ func _hint() -> void:
 	var trig := "hazard_safe" if guards(P, kind) else "hazard_risk"
 	BokiChatter.say(m, P.kin as Kin, trig, {"%H": String(kind_def(kind)["noun"])})
 
+
 ## The guard ring on every area the player's lead Boki counters (the shader breathes it in that Boki's glow).
 func _guard_cue(P: Hunter) -> void:
 	var glow: Color = (P.kin as Kin).sp.get("glow", Color.WHITE)
@@ -358,9 +399,10 @@ func _guard_cue(P: Hunter) -> void:
 		if on:
 			mat.set_shader_parameter("col_guard", glow)
 
+
 func _near_kind(p: Vector3, r: float) -> String:
 	for k in [0.0, 0.5, 1.0]:
-		for i in (1 if k == 0.0 else HINT_DIRS):
+		for i in 1 if k == 0.0 else HINT_DIRS:
 			var a := TAU * i / HINT_DIRS
 			var x := int(floor(p.x + cos(a) * r * k))
 			var z := int(floor(p.z + sin(a) * r * k))

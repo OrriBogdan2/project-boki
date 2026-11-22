@@ -13,7 +13,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const EASE_FRAMES := 240
-const MAX_STEP := 0.05          # a camera frame may change the zoom by at most this much (x)
+const MAX_STEP := 0.05  # a camera frame may change the zoom by at most this much (x)
 
 var bad := 0
 var m: Match
@@ -127,7 +127,7 @@ func _reach(hi: float) -> void:
 		var o := cam.project_ray_origin(c)
 		var d := cam.project_ray_normal(c)
 		if d.y >= -0.01:
-			continue     # a corner above the horizon sees sky
+			continue  # a corner above the horizon sees sky
 		var hit := o + d * (-o.y / d.y)
 		far_m = maxf(far_m, Vector2(hit.x, hit.z).length())
 		depth = maxf(depth, o.distance_to(hit))
@@ -154,7 +154,7 @@ func _shots(main: Node) -> void:
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
-		await fade.reveal(0.01)      # (the screen fade from start-up still covers the view)
+		await fade.reveal(0.01)  # (the screen fade from start-up still covers the view)
 	Settings.set_v("tips", false)
 	for h in m.hunters:
 		if h != m.player:
@@ -162,7 +162,7 @@ func _shots(main: Node) -> void:
 	var tree := main.get_tree()
 	var vp := main.get_viewport()
 	vp.warp_mouse(vp.get_visible_rect().size * 0.5)
-	m.cam.user_zoom = 1.0      # the view before this change: the style's own distance
+	m.cam.user_zoom = 1.0  # the view before this change: the style's own distance
 	await _shot(tree, "before_old_view")
 	m._start_drop(m.player, m.player.pos)
 	await _shot(tree, "after_start")

@@ -6,15 +6,16 @@ extends RefCounted
 ##       --write-movie <dir>/cues.avi -- --xp-armour-cues-reel
 ## Never writes the save.
 
-const FILM_S := 20.0            # s of film
-const KILL_AT := [1.5, 3.0, 4.5]      # s: a monster dies under your gun
-const ARMOUR_AT := [7.0, 11.0]        # s: hits on a rival until its tier rises
-const LEVEL_AT := 15.5                # s: enough XP for the next level
-const HIT := 35.0                     # hit damage on the rival, armour XP per hit
-const CAPTION_S := 2.5                # s a caption stays up
+const FILM_S := 20.0  # s of film
+const KILL_AT := [1.5, 3.0, 4.5]  # s: a monster dies under your gun
+const ARMOUR_AT := [7.0, 11.0]  # s: hits on a rival until its tier rises
+const LEVEL_AT := 15.5  # s: enough XP for the next level
+const HIT := 35.0  # hit damage on the rival, armour XP per hit
+const CAPTION_S := 2.5  # s a caption stays up
 
 var _caption: Label
 var _hide_at := 0.0
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -22,8 +23,18 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true, "blight": false,
-		"tut_test": true})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 21,
+			"no_drop": true,
+			"blight": false,
+			"tut_test": true
+		}
+	)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -66,12 +77,15 @@ func run(main: Node) -> void:
 	print("XP_ARMOUR_REEL done, %d frames, level %d, armour tier %d" % [frame, P.lvl, P.armor_tier])
 	main.get_tree().quit(0)
 
+
 func _say(text: String) -> void:
 	_caption.text = text
 	_hide_at = _now() + CAPTION_S
 
+
 func _now() -> float:
 	return float(Engine.get_process_frames()) / 60.0
+
 
 ## A monster dies to your last hit: kill XP lands (xp_tick).
 func _kill(m: Match, P: Hunter) -> void:
@@ -80,6 +94,7 @@ func _kill(m: Match, P: Hunter) -> void:
 	mob.max_hp = 30.0
 	mob.hp = 30.0
 	mob.hurt(30.0, P, {})
+
 
 ## Hits on a Hunter only build armour: nothing plays until its tier rises (armor_up_own).
 func _armour_hits(m: Match, P: Hunter, rival: Hunter) -> void:

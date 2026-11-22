@@ -2,6 +2,7 @@ extends RefCounted
 ## --hud-vitals-shots --shots-dir=<dir>: the bottom HUD (armour over health, one G slot) and a squadmate's
 ## row, a rival's plate and your own plate, on the real HUD (GPU, under xvfb with a renderer).
 
+
 func run(main: Node) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
@@ -13,8 +14,9 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true,
-		"god": true, "length": 1e9})
+	await m.start(
+		{"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "god": true, "length": 1e9}
+	)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

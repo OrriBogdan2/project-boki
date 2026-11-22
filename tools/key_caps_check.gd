@@ -7,9 +7,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("KEYCAPS %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _mouse(btn: int) -> InputEventMouseButton:
 	var e := InputEventMouseButton.new()
@@ -17,11 +20,13 @@ func _mouse(btn: int) -> InputEventMouseButton:
 	e.pressed = true
 	return e
 
+
 func _key(k: int) -> InputEventKey:
 	var e := InputEventKey.new()
 	e.physical_keycode = k
 	e.pressed = true
 	return e
+
 
 func run(main: Node) -> void:
 	var S = Settings
@@ -32,11 +37,18 @@ func run(main: Node) -> void:
 	print("KEYCAPS DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 ## cap_text, key_cap and key_caps: mouse buttons and alternates read as one short, space-free cap.
 func _caps(S) -> void:
-	var want := {MOUSE_BUTTON_XBUTTON1: "M4", MOUSE_BUTTON_XBUTTON2: "M5", MOUSE_BUTTON_WHEEL_UP: "WHEEL-UP",
-		MOUSE_BUTTON_WHEEL_DOWN: "WHEEL-DN", MOUSE_BUTTON_MIDDLE: "MMB", MOUSE_BUTTON_LEFT: "LMB",
-		MOUSE_BUTTON_RIGHT: "RMB"}
+	var want := {
+		MOUSE_BUTTON_XBUTTON1: "M4",
+		MOUSE_BUTTON_XBUTTON2: "M5",
+		MOUSE_BUTTON_WHEEL_UP: "WHEEL-UP",
+		MOUSE_BUTTON_WHEEL_DOWN: "WHEEL-DN",
+		MOUSE_BUTTON_MIDDLE: "MMB",
+		MOUSE_BUTTON_LEFT: "LMB",
+		MOUSE_BUTTON_RIGHT: "RMB"
+	}
 	for btn in want:
 		S.rebind("interact", _mouse(btn), 0)
 		var cap: String = S.key_cap("interact")
@@ -50,16 +62,25 @@ func _caps(S) -> void:
 	ok(S.key_cap("interact") == "?" and S.key_caps("interact") == "?", "nothing bound reads ?")
 	S.reset_all()
 
+
 ## Rebind each ability action to a mouse button, then look at the surfaces that draw it.
 func _surfaces(S) -> void:
-	var btn := {"dash": MOUSE_BUTTON_XBUTTON1, "fire": MOUSE_BUTTON_XBUTTON2, "secondary": MOUSE_BUTTON_MIDDLE,
-		"signature": MOUSE_BUTTON_WHEEL_UP, "ultimate": MOUSE_BUTTON_WHEEL_DOWN, "hunter_ult": MOUSE_BUTTON_XBUTTON1}
-	var gone := {"dash": "SHIFT", "fire": "LMB", "secondary": "RMB", "signature": "E", "ultimate": "X",
-		"hunter_ult": "R"}
+	var btn := {
+		"dash": MOUSE_BUTTON_XBUTTON1,
+		"fire": MOUSE_BUTTON_XBUTTON2,
+		"secondary": MOUSE_BUTTON_MIDDLE,
+		"signature": MOUSE_BUTTON_WHEEL_UP,
+		"ultimate": MOUSE_BUTTON_WHEEL_DOWN,
+		"hunter_ult": MOUSE_BUTTON_XBUTTON1
+	}
+	var gone := {
+		"dash": "SHIFT", "fire": "LMB", "secondary": "RMB", "signature": "E", "ultimate": "X", "hunter_ult": "R"
+	}
 	for a in btn:
 		S.rebind(a, _mouse(btn[a]), 0)
-	var tile := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate",
-		"x": "hunter_ult"}
+	var tile := {
+		"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate", "x": "hunter_ult"
+	}
 	for slot in tile:
 		var cap: String = KitCard._cap(slot)
 		ok(cap == S.key_cap(tile[slot]) and cap != "", "kit card %s tile reads %s" % [slot, cap])
@@ -75,7 +96,8 @@ func _surfaces(S) -> void:
 	var forms := 0
 	for ms_id in ["titan", "stormwing", "tidal_shell"]:
 		var ms: MergeSpec = KinLib.merge(ms_id)
-		if ms == null or Content.merge_form(ms.id).is_empty(): continue
+		if ms == null or Content.merge_form(ms.id).is_empty():
+			continue
 		forms += 1
 		var text := "\n".join(PackedStringArray(KinText.merge(ms)))
 		for a in ["fire", "secondary", "signature", "dash"]:

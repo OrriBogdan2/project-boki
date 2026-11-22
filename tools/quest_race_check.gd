@@ -10,12 +10,16 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("QUESTRACE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _apart(a: Color, b: Color) -> float:
 	return Vector3(a.r, a.g, a.b).distance_to(Vector3(b.r, b.g, b.b))
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -23,8 +27,9 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 7401,
-		"no_drop": true, "heart": true, "god": true})
+	m.start(
+		{"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 7401, "no_drop": true, "heart": true, "god": true}
+	)
 	for o in m.hunters:
 		o.ctrl = "idle"
 	var seats: QuestSeats = m.exits.seats

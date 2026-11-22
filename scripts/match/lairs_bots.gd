@@ -5,9 +5,11 @@ extends RefCounted
 var ls: Lairs
 var m: Match
 
+
 func _init(l: Lairs) -> void:
 	ls = l
 	m = l.m
+
 
 ## Bots work the dial too: as the needle enters a lit arc they either catch it (more often the better
 ## they are, less often as the locks get faster) or press a beat too late.
@@ -31,7 +33,8 @@ func _bot_dial(L: Dictionary, h: Hunter, dt: float) -> void:
 		L["bot_ti"] = -1
 		if missed:
 			L["jam"] = 0.0
-			ls.press(L, h)       # too late: the needle has already left the arc
+			ls.press(L, h)  # too late: the needle has already left the arc
+
 
 ## Where a bot wants to go for the lairs: a dropped egg first, then (for the bolder ones) a lair.
 func bot_goal(h: Hunter, leaving: bool) -> Array:
@@ -40,7 +43,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	if not sl.is_empty():
 		if sl.get("victory", false):
 			return _bot_exit(sl, h)
-		return [sl["c"], "lair_fight"]      # sealed in: there's only the boss
+		return [sl["c"], "lair_fight"]  # sealed in: there's only the boss
 	# riding the escape updraft out: steer for where it throws you
 	for L in ls.list:
 		if (L.get("flown", []) as Array).has(h) and not h.grounded and h.auto_glide:
@@ -48,7 +51,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	for L in ls.list:
 		var wp = L.get("egg_wp")
 		if wp != null and m.wpicks.has(wp) and h.flat_dist(wp["pos"]) < 50.0 and not ls.held_from(wp, h):
-			if not a.has("egg_" + String(L["id"])): a["egg_" + String(L["id"])] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
+			if not a.has("egg_" + String(L["id"])):
+				a["egg_" + String(L["id"])] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 			if a["egg_" + String(L["id"])]:
 				return [wp["pos"], "lair_egg"]
 	var cg := _bot_camp(h, leaving)
@@ -65,28 +69,34 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		a["boss_hunt"] = randf() < 0.12 + 0.45 * float(a.get("skill", 0.5))
 	if not a["boss_hunt"]:
 		return []
-	var best := {}; var bd := 110.0
+	var best := {}
+	var bd := 110.0
 	for L in ls.list:
-		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
+		if L["state"] in ["cleared", "dormant"] or L.get("locked", false):
+			continue
 		if L.get("seat", false) and not BotWays.may_start(m, h.team, "lair"):
-			continue      # (the Sealed Lair: the bots' 30 s delay and seat cap)
+			continue  # (the Sealed Lair: the bots' 30 s delay and seat cap)
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
-		if L["state"] == "sealed" and not L.has("seal_at") and not (L["entry"] as Array).has("dial"): continue
+		if L["state"] == "sealed" and not L.has("seal_at") and not (L["entry"] as Array).has("dial"):
+			continue
 		# (the lair we picked last time reaches a little further: at the edge of the range a bot
 		# walking about flipped between it and a roam goal every think, turning round each time)
 		var d := h.flat_dist(L["c"]) - (15.0 if a.get("lair_pick", "") == String(L["id"]) else 0.0)
-		if d < bd: bd = d; best = L
+		if d < bd:
+			bd = d
+			best = L
 	if best.is_empty():
 		a.erase("lair_pick")
 		return []
 	a["lair_pick"] = String(best["id"])
 	return bot_lair(best, h)
 
+
 ## Into this lair: work its dial or batter its seal (or wait beside it while someone else does), or walk in and fight.
 func bot_lair(L: Dictionary, h: Hunter) -> Array:
 	if L["state"] == "sealed":
 		if L.has("seal_at"):
-			return [LairBreach.stand(L), "lair_breach"]      # batter the seal: any number can at once
+			return [LairBreach.stand(L), "lair_breach"]  # batter the seal: any number can at once
 		if not (L["entry"] as Array).has("dial"):
 			return []
 		var u = L["user"]
@@ -95,14 +105,22 @@ func bot_lair(L: Dictionary, h: Hunter) -> Array:
 		return [L["dial"], "lair_dial"]
 	return [L["c"], "lair_fight"]
 
+
 ## A bot sealed in after the kill: the egg if it's still lying here, then out. With rivals waiting at
 ## the gate (and the updraft blowing) it rides the updraft out the back; otherwise it pulls the lever.
 func _bot_exit(L: Dictionary, h: Hunter) -> Array:
 	var a := h.ai
 	var wp = L.get("egg_wp")
-	if wp != null and m.wpicks.has(wp) and ls.inside(L, wp["pos"], 0.0) and ls.victory_left(L) > 3.0 and not ls.held_from(wp, h):
+	if (
+		wp != null
+		and m.wpicks.has(wp)
+		and ls.inside(L, wp["pos"], 0.0)
+		and ls.victory_left(L) > 3.0
+		and not ls.held_from(wp, h)
+	):
 		var key := "egg_" + String(L["id"])
-		if not a.has(key): a[key] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
+		if not a.has(key):
+			a[key] = randf() < 0.45 + 0.5 * float(a.get("skill", 0.5))
 		if a[key]:
 			return [wp["pos"], "lair_egg"]
 	var way := "updraft" if L.get("up_on", false) and campers(L, h.team) > 0 else "lever"
@@ -110,6 +128,7 @@ func _bot_exit(L: Dictionary, h: Hunter) -> Array:
 	if way == "updraft":
 		return [L["up"], "lair_updraft"]
 	return [L["lever"], "lair_lever"]
+
 
 ## Rivals of this team standing outside a lair's gate (waiting for whoever comes out).
 func campers(L: Dictionary, team: int) -> int:
@@ -121,6 +140,7 @@ func campers(L: Dictionary, team: int) -> int:
 			n += 1
 	return n
 
+
 ## A fight we heard about: some squads go and camp its gate for whoever comes out, more often the
 ## stronger they are (more of them up, healthier, better bots), never when they're leaving.
 func _bot_camp(h: Hunter, leaving: bool) -> Array:
@@ -130,13 +150,14 @@ func _bot_camp(h: Hunter, leaving: bool) -> Array:
 		if not ls.alerted(L, h) or String(L["state"]) == "dormant":
 			continue
 		if (L.get("sealed_in", []) as Array).any(func(x): return is_instance_valid(x) and x.team == h.team):
-			continue      # (our own squad is in there)
+			continue  # (our own squad is in there)
 		var key := "camp_" + String(L["id"])
 		if not h.ai.has(key):
 			h.ai[key] = randf() < camp_odds(h)
 		if h.ai[key]:
 			return [camp_spot(L, h), "lair_camp"]
 	return []
+
 
 ## How likely a bot is to go and camp a lair fight it heard: its skill, how many of its squad are up,
 ## and how healthy they are.
@@ -146,11 +167,15 @@ func camp_odds(h: Hunter) -> float:
 	if up.is_empty():
 		return 0.0
 	var hpk := 0.0
-	for x in up: hpk += x.hp / maxf(1.0, x.max_hp)
+	for x in up:
+		hpk += x.hp / maxf(1.0, x.max_hp)
 	hpk /= float(up.size())
 	if up.size() == 1 and hpk < 0.5:
 		return 0.0
-	return clampf(0.1 + 0.3 * float(h.ai.get("skill", 0.5)) + 0.15 * float(mini(up.size(), 4) - 1) + 0.3 * (hpk - 0.5), 0.0, 0.85)
+	return clampf(
+		0.1 + 0.3 * float(h.ai.get("skill", 0.5)) + 0.15 * float(mini(up.size(), 4) - 1) + 0.3 * (hpk - 0.5), 0.0, 0.85
+	)
+
 
 ## Where a camper waits: a few steps out from the gate, off to one side of the path.
 func camp_spot(L: Dictionary, h: Hunter) -> Vector3:
@@ -161,6 +186,7 @@ func camp_spot(L: Dictionary, h: Hunter) -> Vector3:
 		if not m.world.is_void(p.x, p.z) and not m.world.is_block(p.x, p.z) and not ls.inside(L, p, 1.0):
 			return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 	return L["dial"]
+
 
 ## Bots that reach a dropped egg pick it up (into the pack, dropping their least valuable thing if full).
 func bot_pickups() -> void:

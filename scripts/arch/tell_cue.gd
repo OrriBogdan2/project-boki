@@ -6,15 +6,16 @@ extends RefCounted
 ## lower and louder. Your own and your team's telegraphs play nothing, and ultimates are left to UltCue. It goes
 ## through Sfx.play, so its MIN_GAP, the stacking cap and the voice pool apply as to any sound.
 
-const AREA_SMALL := 3.0     # m²: a telegraph this size or smaller plays highest and quietest (a 1 m circle)
-const AREA_BIG := 40.0      # m²: this size or bigger plays lowest and loudest (a 3.6 m circle, a 13 x 3 m lane)
-const DB_SMALL := -10.0     # dB at AREA_SMALL
-const DB_BIG := -3.0        # dB at AREA_BIG: under the ult cues (-2), so an ultimate still reads bigger
+const AREA_SMALL := 3.0  # m²: a telegraph this size or smaller plays highest and quietest (a 1 m circle)
+const AREA_BIG := 40.0  # m²: this size or bigger plays lowest and loudest (a 3.6 m circle, a 13 x 3 m lane)
+const DB_SMALL := -10.0  # dB at AREA_SMALL
+const DB_BIG := -3.0  # dB at AREA_BIG: under the ult cues (-2), so an ultimate still reads bigger
 const PITCH_SMALL := 1.15
 const PITCH_BIG := 0.8
-const SPAN_W := 1.0         # m: the width a span (a wall or a rift line) counts with
+const SPAN_W := 1.0  # m: the width a span (a wall or a rift line) counts with
 ## AimKit kinds that mark where something lands; lines, Vs, dots and stars are aim marks, not areas.
 const AREAS := ["circle", "lane", "cone", "arc_wall", "span", "swap"]
+
 
 ## A rival's telegraph covering `area` m² starts at `at`.
 static func start(m: Node, h: Hunter, at: Vector3, area: float) -> void:
@@ -23,9 +24,11 @@ static func start(m: Node, h: Hunter, at: Vector3, area: float) -> void:
 	var k := clampf(inverse_lerp(AREA_SMALL, AREA_BIG, area), 0.0, 1.0)
 	m.sfx("tell_foe", at, lerpf(DB_SMALL, DB_BIG, k), lerpf(PITCH_SMALL, PITCH_BIG, k))
 
+
 static func rival(m: Node, h: Hunter) -> bool:
 	var me = m.get("player")
 	return me != null and h != null and h.team != me.team
+
 
 ## AimDraw.put, the first step entry `e` under `id` shows. Ultimate telegraphs use ids "x..." and "ult..."
 ## (docs/AIMKIT.md), so those are skipped by id.
@@ -54,6 +57,7 @@ static func aim(m: Node, h: Hunter, id: String, e: Dictionary) -> void:
 			var rad := float(e["radius"])
 			var mid_w: Vector2 = e["center"] + (e["dir"] as Vector2) * rad
 			start(m, h, _v3(mid_w, y), rad * deg_to_rad(float(e["deg"])) * float(e["thick"]))
+
 
 static func _v3(p: Vector2, y: float) -> Vector3:
 	return Vector3(p.x, y, p.y)

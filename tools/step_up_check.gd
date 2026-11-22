@@ -11,22 +11,25 @@ const HEROES := {"thief": "Sable", "gunslinger": "Vex", "bulwark": "Albert"}
 const LIP_MIN := 0.10
 const LIP_MAX := 0.60
 const LIP_STEP := 0.05
-const FACE_AT := 1.5          # m ahead of the start where the lip's face stands
-const LIP_DEPTH := 1.6        # m: half the rock's depth, so the hunter can stand fully on it
-const RUN_STEPS := 90         # 1.5 s of running at most: the run ends once the hunter is past the face
-const SETTLE_STEPS := 150     # 2.5 s standing first, so the camera has settled on the hunter
-const POP_SHARE := 0.5        # one frame covering more than this share of the lip is a pop
+const FACE_AT := 1.5  # m ahead of the start where the lip's face stands
+const LIP_DEPTH := 1.6  # m: half the rock's depth, so the hunter can stand fully on it
+const RUN_STEPS := 90  # 1.5 s of running at most: the run ends once the hunter is past the face
+const SETTLE_STEPS := 150  # 2.5 s standing first, so the camera has settled on the hunter
+const POP_SHARE := 0.5  # one frame covering more than this share of the lip is a pop
 
 var bad := 0
 var m: Match
 var w: World
 var P: Hunter
 var cam: CamRig
-var rows := []                # the ones that failed a rule, for the summary
+var rows := []  # the ones that failed a rule, for the summary
+
 
 func ok(cond: bool, what: String) -> void:
 	print("STEPUP %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,7 +40,8 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	w = m.world
 	cam = m.cam
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	P = m.player
 	for h in m.hunters:
@@ -46,7 +50,8 @@ func run(main: Node) -> void:
 		if h != P:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	if P.kin: (P.kin as Kin).stow()
+	if P.kin:
+		(P.kin as Kin).stow()
 	P.ctrl = "local"
 	P.unlock_all()
 	var flat := _flat_spot(6.5)
@@ -63,10 +68,12 @@ func run(main: Node) -> void:
 				var wall := _lip(flat, dir, lip)
 				_judge(arch, ang, lip, _try(flat, dir, lip))
 				w.dyn_walls.erase(wall)
-				if is_instance_valid(wall["node"]): (wall["node"] as Node3D).queue_free()
+				if is_instance_valid(wall["node"]):
+					(wall["node"] as Node3D).queue_free()
 	ok(rows.is_empty(), "every try passed the rules (%d broke them: %s)" % [rows.size(), ", ".join(rows)])
 	print("STEP UP CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
 
 ## A standable rock `lip` metres tall across the run, its face FACE_AT ahead of `from`.
 func _lip(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
@@ -76,6 +83,7 @@ func _lip(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
 	wall["top"] = lip
 	wall["th"] = LIP_DEPTH
 	return wall
+
 
 ## Run from `from` along `dir` into a lip of `lip` metres. Returns {pass, body_pop, cam_pop} where the pops
 ## are the biggest one-frame rise of the drawn body and of the camera, as a share of the lip.
@@ -104,8 +112,13 @@ func _try(from: Vector3, dir: Vector2, lip: float) -> Dictionary:
 		if along > FACE_AT + 0.6:
 			break
 	var up := P.pos.y >= from.y + lip - 0.02
-	return {"pass": up and along > FACE_AT + 0.5, "body_pop": body_pop / lip, "cam_pop": cam_pop / lip,
-		"cam_rise": cam.base.y - cam_y0}
+	return {
+		"pass": up and along > FACE_AT + 0.5,
+		"body_pop": body_pop / lip,
+		"cam_pop": cam_pop / lip,
+		"cam_rise": cam.base.y - cam_y0
+	}
+
 
 ## The rules: a lip up to the step height is walked over; nothing in the ladder pops the body or the camera.
 func _judge(arch: String, ang: float, lip: float, r: Dictionary) -> void:
@@ -115,17 +128,42 @@ func _judge(arch: String, ang: float, lip: float, r: Dictionary) -> void:
 	var verdict := "pass" if r["pass"] else "STOP"
 	var body_tag := " POP" if body_pop else ""
 	var cam_tag := " POP" if cam_pop else ""
-	print("STEPUP %-22s %s  body %3.0f%%/frame%s  cam %3.0f%%/frame%s (rose %.2f m)" % [tag, verdict,
-		r["body_pop"] * 100.0, body_tag, r["cam_pop"] * 100.0, cam_tag, r["cam_rise"]])
+	print(
+		(
+			"STEPUP %-22s %s  body %3.0f%%/frame%s  cam %3.0f%%/frame%s (rose %.2f m)"
+			% [tag, verdict, r["body_pop"] * 100.0, body_tag, r["cam_pop"] * 100.0, cam_tag, r["cam_rise"]]
+		)
+	)
 	var must_pass := lip <= World.STEP + 1e-6 or is_equal_approx(lip, World.LEVEL)
 	if (must_pass and not r["pass"]) or (r["pass"] and (body_pop or cam_pop)):
 		rows.append(tag)
 
+
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn",
-			"jump", "dash", "fire", "crouch", "throw", "reload", "skill", "shift"]:
+	for k in [
+		"sec",
+		"sig",
+		"ult",
+		"util1",
+		"util2",
+		"util3",
+		"util4",
+		"gear1",
+		"gear2",
+		"glide",
+		"glide_btn",
+		"jump",
+		"dash",
+		"fire",
+		"crouch",
+		"throw",
+		"reload",
+		"skill",
+		"shift"
+	]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
+
 
 ## A clean, standing hunter at p.
 func _reset(p: Vector3) -> void:
@@ -146,13 +184,14 @@ func _reset(p: Vector3) -> void:
 	P.root_t = 0.0
 	P.mantle_cd = 0.0
 	P.air_t = 0.0
-	P.drawn_y = INF      # (StepSmooth draws it where it is first)
+	P.drawn_y = INF  # (StepSmooth draws it where it is first)
 	P.squash = 0.0
 	P.pad = {}
 	P.grap = {}
 	P.lfloat = {}
 	P.hp = P.max_hp
 	_clear_inp()
+
 
 ## A spot with flat, open ground `r` metres all round (the move-feel check's rule).
 func _flat_spot(r: float) -> Vector3:

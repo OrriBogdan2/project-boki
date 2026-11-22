@@ -142,6 +142,7 @@ func _match_counts() -> void:
 	ok(TipPick.last.has("abyss") and TipPick.for_loading(true) != "", "the loading screen reads the last run")
 	m.queue_free()
 
+
 ## The crouch hint: which tip it says, when it fires, that it fires once, and that its claim holds.
 func _crouch_hint() -> void:
 	_fresh()
@@ -151,8 +152,10 @@ func _crouch_hint() -> void:
 	CrouchHint.migrate(old)
 	var fresh := {"matches": 0, "tutorial": {}}
 	CrouchHint.migrate(fresh)
-	ok(old["tutorial"].get("crouch_hint", false) and not fresh["tutorial"].has("crouch_hint"),
-		"an old save has had it; a new one has not")
+	ok(
+		old["tutorial"].get("crouch_hint", false) and not fresh["tutorial"].has("crouch_hint"),
+		"an old save has had it; a new one has not"
+	)
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
@@ -163,7 +166,7 @@ func _crouch_hint() -> void:
 	ok(hint != null, "a new save's real match has the hint")
 	for mb: Mob in m.mobs:
 		if mb != camp:
-			mb.st = "chase"      # only the camp under test counts as quiet
+			mb.st = "chase"  # only the camp under test counts as quiet
 	P.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "", "far from every camp: no line")
@@ -173,8 +176,10 @@ func _crouch_hint() -> void:
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
 	camp.st = "idle"
 	hint.tick(0.6)
-	ok(hint.line == said and Save.d["tutorial"].get("crouch_hint", false),
-		"near a quiet camp: the line shows and the flag is set")
+	ok(
+		hint.line == said and Save.d["tutorial"].get("crouch_hint", false),
+		"near a quiet camp: the line shows and the flag is set"
+	)
 	hint.tick(CrouchHint.LIFE + 0.1)
 	ok(m.crouch_hint == null, "it goes after its time and does not come back")
 	ok(CrouchHint.for_match(m, {}) == null, "the next match has none")
@@ -194,6 +199,8 @@ func _crouch_hint() -> void:
 		P.inp["move"] = Vector2(0, -1)
 		P.grounded = true
 		P.sim(Match.DT)
-	ok(not P.crouch and steady < 0.0 and P.bloom > steady,
-		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, P.bloom])
+	ok(
+		not P.crouch and steady < 0.0 and P.bloom > steady,
+		"its claim: crouched aim is steadier (bloom %.2f, %.2f moving)" % [steady, P.bloom]
+	)
 	m.queue_free()

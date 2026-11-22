@@ -10,6 +10,7 @@ var m: Match
 var dir := "/tmp/fobj"
 var n := 0
 
+
 func run(mn: Node) -> void:
 	main = mn
 	tree = main.get_tree()
@@ -28,8 +29,19 @@ func run(mn: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	main.current = m
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "weapon": "rifle",
-			"cls": "medium", "demo_kin": "cindle"})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4243,
+			"no_drop": true,
+			"weapon": "rifle",
+			"cls": "medium",
+			"demo_kin": "cindle"
+		}
+	)
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)
@@ -39,6 +51,7 @@ func run(mn: Node) -> void:
 	await _leave_shots()
 	print("FOBJ shots in %s (%dx%d)" % [dir, win.x, win.y])
 	tree.quit(0)
+
 
 func _clear_field() -> void:
 	for mb in m.mobs:
@@ -51,12 +64,14 @@ func _clear_field() -> void:
 	var keep := _pick_wild()
 	m.kins = m.kins.filter(func(k: Kin) -> bool: return k.owner_h != null or k == keep)
 
+
 ## The one wild Boki the shots use: the first real one on the ground.
 func _pick_wild() -> Kin:
 	for k: Kin in m.kins:
 		if k.owner_h == null and not m.world.is_void(k.pos.x, k.pos.z):
 			return k
 	return null
+
 
 ## A spot on the ground `dist` metres from `at` (the first direction that has ground).
 func _ground_near(at: Vector3, dist: float) -> Vector3:
@@ -66,6 +81,7 @@ func _ground_near(at: Vector3, dist: float) -> Vector3:
 		if not m.world.is_void(q.x, q.z):
 			return Vector3(q.x, m.world.ground_at(q.x, q.z) + 0.1, q.z)
 	return at
+
 
 func _settle(secs: float) -> void:
 	m.cam.snap(m.player.pos)
@@ -78,12 +94,14 @@ func _settle(secs: float) -> void:
 	m.objective.tick(Match.DT)
 	await tree.process_frame
 
+
 func _shot(what: String) -> void:
 	await tree.process_frame
 	await tree.process_frame
 	await RenderingServer.frame_post_draw
 	n += 1
 	main.get_viewport().get_texture().get_image().save_jpg(dir.path_join("%02d_%s.jpg" % [n, what]), 0.9)
+
 
 func _find_shots() -> void:
 	var P := m.player
@@ -107,6 +125,7 @@ func _find_shots() -> void:
 	m.kins.erase(k)
 	await _settle(0.6)
 	await _shot("4_leave_go")
+
 
 func _leave_shots() -> void:
 	var P := m.player

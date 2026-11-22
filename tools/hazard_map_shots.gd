@@ -14,6 +14,7 @@ var P: Hunter
 var dir := ""
 var lines: Array = []
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -24,8 +25,9 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true,
-		"demo_kin": "cindowary"})
+	await m.start(
+		{"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "demo_kin": "cindowary"}
+	)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -59,6 +61,7 @@ func run(main_node: Node) -> void:
 	print("HAZARDMAPSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _go(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -69,9 +72,11 @@ func _go(secs: float) -> void:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 
+
 func _take(file: String, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])
+
 
 func _crop(file: String, caption: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()

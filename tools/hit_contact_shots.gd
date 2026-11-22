@@ -5,13 +5,14 @@ extends RefCounted
 
 const KITS := [["gunslinger", "lmb"], ["juggernaut", "lmb"], ["ashwick", "zone"]]
 const TARGETS := ["dredge", "tender"]
-const CROP := Vector2i(320, 240)    # px round the target, shown 2x
+const CROP := Vector2i(320, 240)  # px round the target, shown 2x
 const MAX_STEPS := 90
 
 var m: Match
 var main: Node
 var P: Hunter
 var home := Vector3.ZERO
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -48,11 +49,13 @@ func run(main_node: Node) -> void:
 	print("HITCONTACT shots %s in %s" % [tag, out])
 	main.get_tree().quit()
 
+
 func _step() -> void:
 	m.step(Match.DT)
 	for h in m.hunters:
 		h.render(Match.DT, 1.0)
 	await main.get_tree().process_frame
+
 
 ## One hit: the hero fires (or Cinder's patch ticks) at `t`; the frame after its health drops is cropped round it.
 func _shot(arch: String, kind: String, t: Hunter) -> Image:

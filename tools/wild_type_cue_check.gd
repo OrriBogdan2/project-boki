@@ -6,21 +6,26 @@ extends RefCounted
 ##   4. the cue fades out as the capture scan fills, and when the Boki is no longer wild
 ## Never touches the save.
 
-const MIN_APART := 0.1          # RGB distance between two type colours
-const MIN_FROM_SIDE := 0.2      # RGB distance from a type colour to a side colour
+const MIN_APART := 0.1  # RGB distance between two type colours
+const MIN_FROM_SIDE := 0.2  # RGB distance from a type colour to a side colour
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WILDCUE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _dist(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
 
+
 func _frames(k: Kin, n: int) -> void:
 	for i in n:
 		k.render(1.0 / 30.0, 1.0)
+
 
 func _colours() -> void:
 	var types: Array = WildTypeCue.COLORS.keys()
@@ -39,6 +44,7 @@ func _colours() -> void:
 				near += 1
 				print("  near a side colour: %s" % t)
 	ok(near == 0, "no type colour within %.2f of a Hunter side colour" % MIN_FROM_SIDE)
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

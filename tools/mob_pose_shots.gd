@@ -3,8 +3,8 @@ extends RefCounted
 ## game plays it (jobq --needs gpu). Spawned beside the still player (god mode, kin off), it is cropped once per
 ## state: mob_pose_<kind>.png = idle | walk | windup (its last frame) | strike, left to right (blank: never seen).
 
-const CROP := 340         # px, the square around the monster
-const WAIT_S := 14.0      # s a monster gets to show all four states
+const CROP := 340  # px, the square around the monster
+const WAIT_S := 14.0  # s a monster gets to show all four states
 const ORDER := ["idle", "walk", "windup", "strike"]
 
 var main: Node
@@ -145,4 +145,3 @@ func _ground(at: Vector3, d: float) -> Vector3:
 		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return at + Vector3(0, 0, -d)
-

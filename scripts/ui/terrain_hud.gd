@@ -6,7 +6,8 @@ extends RefCounted
 
 const SAFE := Color("8fe3a0")
 const RISK := Color("ff9a6a")
-const Y := 0.63              # share of the screen height the chip sits at (just under your hunter)
+const Y := 0.63  # share of the screen height the chip sits at (just under your hunter)
+
 
 static func draw(H) -> void:
 	var p: Hunter = H.m.player

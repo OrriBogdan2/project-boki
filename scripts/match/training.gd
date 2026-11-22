@@ -119,7 +119,6 @@ func rows() -> Array:
 	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
 
 
-
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
 ## (rings) and you shoot the low one through its ring; "hop" holds them mid-hop (no marker: the

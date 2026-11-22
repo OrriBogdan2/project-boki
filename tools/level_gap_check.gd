@@ -18,8 +18,19 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-		"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	await m.start(
+		{
+			"teams": 4,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	var P: Hunter = m.player
 	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)

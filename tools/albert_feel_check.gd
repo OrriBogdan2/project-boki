@@ -5,13 +5,15 @@ extends "res://tools/bjorn_launch_check.gd"
 ## pin_bjorn_owner_check hold them).
 ## Prints AKCHECK lines.
 
-const OLD_WIDTH := 4.5         # m: the Faultline lane before the pass
-const LUNGE_SLACK := 0.3       # m: a measured lunge may miss its data distance by this (step rounding, slide)
+const OLD_WIDTH := 4.5  # m: the Faultline lane before the pass
+const LUNGE_SLACK := 0.3  # m: a measured lunge may miss its data distance by this (step rounding, slide)
+
 
 func albert() -> void:
 	await _ult_hop()
 	await _rope()
 	await _lunges()
+
 
 ## R: a 1-1.5 m hop with the hammer up, the slam on the old 0.4 s, back on the ground; a 22% wider lane.
 func _ult_hop() -> void:
@@ -24,8 +26,11 @@ func _ult_hop() -> void:
 	var xd: Dictionary = K.d["x"]
 	var wind := float(xd["windup"])
 	var width := float(xd["width"])
-	ok("albert ult: the lane is 20-25% wider (telegraph and hits read the one width)",
-		width / OLD_WIDTH >= 1.2 and width / OLD_WIDTH <= 1.25, "%.1f -> %.1f m" % [OLD_WIDTH, width])
+	ok(
+		"albert ult: the lane is 20-25% wider (telegraph and hits read the one width)",
+		width / OLD_WIDTH >= 1.2 and width / OLD_WIDTH <= 1.25,
+		"%.1f -> %.1f m" % [OLD_WIDTH, width]
+	)
 	step(m, 0.3)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -48,12 +53,18 @@ func _ult_hop() -> void:
 			slam_at = t
 			down_at_slam = P.pos.y - y0 < 0.15
 	ok("albert ult: he hops 1-1.5 m with the hammer up", top >= 1.0 and top <= 1.5, "top %.2f m" % top)
-	ok("albert ult: the slam keeps its 0.4 s and lands him on the ground",
+	ok(
+		"albert ult: the slam keeps its 0.4 s and lands him on the ground",
 		absf(slam_at - wind) <= 2.0 * DT and down_at_slam and P.grounded,
-		"slam at %.2f, %.2f m up" % [slam_at, P.pos.y - y0])
-	ok("albert ult: a foe 3 m off the line is thrown (outside the old lane, inside the new)", dmg(T) > 0.0,
-		"took %.0f" % dmg(T))
+		"slam at %.2f, %.2f m up" % [slam_at, P.pos.y - y0]
+	)
+	ok(
+		"albert ult: a foe 3 m off the line is thrown (outside the old lane, inside the new)",
+		dmg(T) > 0.0,
+		"took %.0f" % dmg(T)
+	)
 	await done(m)
+
 
 ## The rope: the hammer reels home past "rope.max_len" m or after "rope.max_t" s, the throw shut till the catch.
 func _rope() -> void:
@@ -81,9 +92,11 @@ func _rope() -> void:
 	while not K.mace.is_empty() and t < 3.0:
 		m.step(DT)
 		t += DT
-	ok("albert rope: past %.0f m the hammer reels home on its own, the throw shut till the catch" % rd["max_len"],
+	ok(
+		"albert rope: past %.0f m the hammer reels home on its own, the throw shut till the catch" % rd["max_len"],
 		landed and reeled and shut and K.mace.is_empty() and not K.fx.taut,
-		"landed %s reeled %s shut %s home in %.2f s" % [landed, reeled, shut, t])
+		"landed %s reeled %s shut %s home in %.2f s" % [landed, reeled, shut, t]
+	)
 	step(m, 0.3)
 	_tap_throw(m, P, P.pos + Vector3(5.0, 0, 0))
 	ok("albert rope: caught, it throws again", K.throws == t0 + 1, "throws %d" % (K.throws - t0))
@@ -96,10 +109,14 @@ func _rope() -> void:
 	while K.reels == r1 and out < float(rd["max_t"]) + 1.0:
 		m.step(DT)
 		out += DT
-	ok("albert rope: left out %.0f s it reels home on its own" % rd["max_t"],
-		K.reels == r1 + 1 and absf(out - float(rd["max_t"])) < 0.2, "after %.2f s" % out)
+	ok(
+		"albert rope: left out %.0f s it reels home on its own" % rd["max_t"],
+		K.reels == r1 + 1 and absf(out - float(rd["max_t"])) < 0.2,
+		"after %.2f s" % out
+	)
 	step(m, 1.5)
 	await done(m)
+
 
 ## One LMB tap aimed at `at` (a throw when the hammer is in hand).
 func _tap_throw(m: Match, P: Hunter, at: Vector3) -> void:
@@ -109,6 +126,7 @@ func _tap_throw(m: Match, P: Hunter, at: Vector3) -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	m.step(DT)
+
 
 ## The swing lunge: a part charge the short end of "lunge.d", a full one the long end, running further, in
 ## the air "air_k" of it; the 360 Smash's spin lunges on "spin_d" m.
@@ -131,20 +149,29 @@ func _lunges() -> void:
 	_swing(m, P, home, full + 0.3)
 	var whole := K.lunge.last_d
 	var d: Array = ld["d"]
-	ok("albert lunge: standing, a part charge ~%.1f m and a full one ~%.1f m (the finisher pulls more)" % [d[0], d[1]],
+	ok(
+		"albert lunge: standing, a part charge ~%.1f m and a full one ~%.1f m (the finisher pulls more)" % [d[0], d[1]],
 		absf(part - float(d[0])) < LUNGE_SLACK and absf(whole - float(d[1])) < LUNGE_SLACK and K.lunge.count >= 2,
-		"part %.2f full %.2f" % [part, whole])
+		"part %.2f full %.2f" % [part, whole]
+	)
 	# running east into the full swing: his run stacks on the pull
 	_ready_swing(m, P, T, home)
-	step(m, full + 0.3, func():
-		press_at(P, at)
-		P.inp["move"] = Vector2(1, 0))
+	step(
+		m,
+		full + 0.3,
+		func():
+			press_at(P, at)
+			P.inp["move"] = Vector2(1, 0)
+	)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 	var run := K.lunge.last_d
-	ok("albert lunge: running, the swing travels further than standing", run > whole + 0.3,
-		"run %.2f standing %.2f" % [run, whole])
+	ok(
+		"albert lunge: running, the swing travels further than standing",
+		run > whole + 0.3,
+		"run %.2f standing %.2f" % [run, whole]
+	)
 	# in the air: the same full swing let go at the top of a standing jump pulls "air_k" of it
 	_ready_swing(m, P, T, home)
 	step(m, full + 0.1, press_at.bind(P, at))
@@ -155,9 +182,11 @@ func _lunges() -> void:
 	step(m, 1.2)
 	var air := K.lunge.last_d
 	var want := float(d[1]) * float(ld["air_k"])
-	ok("albert lunge: in the air it pulls ~%.0f%% of the ground's" % (100.0 * float(ld["air_k"])),
+	ok(
+		"albert lunge: in the air it pulls ~%.0f%% of the ground's" % (100.0 * float(ld["air_k"])),
 		up and K.lunge.last_air and absf(air - want) < LUNGE_SLACK,
-		"air %.2f (want %.2f) ground %.2f" % [air, want, whole])
+		"air %.2f (want %.2f) ground %.2f" % [air, want, whole]
+	)
 	# the 360 Smash: a dash then the spin, which lunges on
 	_ready_swing(m, P, T, home)
 	P.dashes = P.max_dashes()
@@ -166,8 +195,16 @@ func _lunges() -> void:
 	m.step(DT)
 	P.inp["dash"] = false
 	step(m, 1.2)
-	ok("albert lunge: the 360 Smash's spin lunges him on at least %.1f m (the dash's speed stacks like a run)"
-		% ld["spin_d"], K.lunge.last_kind == "spin" and K.lunge.last_d >= float(ld["spin_d"]) - 0.1
-		and K.lunge.last_d <= float(ld["spin_d"]) + P.base_speed * float(ld["t"]) + LUNGE_SLACK,
-		"%s %.2f m" % [K.lunge.last_kind, K.lunge.last_d])
+	ok(
+		(
+			"albert lunge: the 360 Smash's spin lunges him on at least %.1f m (the dash's speed stacks like a run)"
+			% ld["spin_d"]
+		),
+		(
+			K.lunge.last_kind == "spin"
+			and K.lunge.last_d >= float(ld["spin_d"]) - 0.1
+			and K.lunge.last_d <= float(ld["spin_d"]) + P.base_speed * float(ld["t"]) + LUNGE_SLACK
+		),
+		"%s %.2f m" % [K.lunge.last_kind, K.lunge.last_d]
+	)
 	await done(m)

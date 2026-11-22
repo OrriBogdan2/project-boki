@@ -61,8 +61,10 @@ func _wall_rows(m: Match, p: Hunter) -> void:
 	ok(_due(m) == "", "on the ground by a wall: no wall-kick tip")
 	p.grounded = false
 	p.last_gy = p.pos.y
-	ok(_due(m) == "wallkick" and String(ExpeditionTips.next(m)[1]).contains(Settings.key_cap("jump")),
-		"in the air against a kickable wall: the wall-kick tip with the jump key")
+	ok(
+		_due(m) == "wallkick" and String(ExpeditionTips.next(m)[1]).contains(Settings.key_cap("jump")),
+		"in the air against a kickable wall: the wall-kick tip with the jump key"
+	)
 	p.stats["wall_kicks"] = 1
 	ok(_due(m) == "" and Save.d["tutorial"].get("wallkick", false), "kicked on your own: marked seen, never shown")
 	p.stats.erase("wall_kicks")

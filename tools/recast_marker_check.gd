@@ -9,11 +9,13 @@ var ak = null
 var fails := 0
 var n := 0
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1
 	print("RMCHECK %-62s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -26,8 +28,10 @@ func run(main_node: Node) -> void:
 	print("RMCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _marker(m: Match) -> RecastMarker:
 	return m.get_node_or_null("RecastMarker") as RecastMarker
+
 
 ## The marker is up on `at` (ground plane), with the key of `action`, ring in `col`.
 func _on(label: String, m: Match, at: Vector3, action: String, col: Color) -> void:
@@ -39,6 +43,7 @@ func _on(label: String, m: Match, at: Vector3, action: String, col: Color) -> vo
 	var tint := mk != null and mk._mat.albedo_color.is_equal_approx(Color(col, mk._mat.albedo_color.a))
 	ok(label + ": in the ability's colour", tint)
 
+
 ## The marker was refreshed by every step while the window was open; `idle` read back after `shut` says whether
 ## the last step called it (it only counts up in a frame, which these steps never run).
 func _quiet(label: String, m: Match, shut: Callable) -> void:
@@ -49,6 +54,7 @@ func _quiet(label: String, m: Match, shut: Callable) -> void:
 	ok(label, mk._idle >= 1.0)
 	mk._process(0.0)
 	ok(label + " (and it hides)", not mk.visible)
+
 
 func _hop() -> void:
 	var r: Array = ak.setup("dolm", 14.0)
@@ -75,6 +81,7 @@ func _hop() -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 func _wall() -> void:
 	var r: Array = ak.setup("rimewright", 14.0)
 	var m: Match = r[0]
@@ -91,6 +98,7 @@ func _wall() -> void:
 	_quiet("wall: frozen, no marker", m, K.e_recast)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _kitefall() -> void:
 	var r: Array = ak.setup("mage", 8.0)
@@ -109,6 +117,7 @@ func _kitefall() -> void:
 	_quiet("kitefall: coming down, no marker", m, K.ult.recast)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _flight() -> void:
 	var r: Array = ak.setup("ashwick", 16.0)

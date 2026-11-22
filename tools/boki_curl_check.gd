@@ -9,11 +9,11 @@ extends RefCounted
 ## --curl-snap: the old draw for a before/after, the ease skipped (curl set to its end every frame); no FAIL lines.
 ## --shots-dir=<dir> [--size=480]: also <dir>/<boki>/f000.png... at 30 fps from a fixed side spot (a renderer).
 
-const MAX_STEP_M := 0.15   # m: the root's biggest one-frame step, against your spot on the ground (not your run)
-const MAX_STEP_W := 0.5    # the curl pose weight's biggest one-frame step
-const CAM_OFF := Vector3(-2.6, 2.0, -3.6)   # m: the film's camera from you (the same in a before and an after)
-const MAX_FRAMES := 400   # steps: a glide that never lands stops the dump here
-const DEFAULT := ["pebbit", "goliathite"]   # two big forms: the lightest (1.4) and a heaviest (2.0)
+const MAX_STEP_M := 0.15  # m: the root's biggest one-frame step, against your spot on the ground (not your run)
+const MAX_STEP_W := 0.5  # the curl pose weight's biggest one-frame step
+const CAM_OFF := Vector3(-2.6, 2.0, -3.6)  # m: the film's camera from you (the same in a before and an after)
+const MAX_FRAMES := 400  # steps: a glide that never lands stops the dump here
+const DEFAULT := ["pebbit", "goliathite"]  # two big forms: the lightest (1.4) and a heaviest (2.0)
 
 var bad := 0
 var m: Match
@@ -59,8 +59,20 @@ func _fresh(main: Node, id: String) -> void:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"demo_kin": id, "weapon": "rifle", "cls": "medium"})
+	m.start(
+		{
+			"training": true,
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"demo_kin": id,
+			"weapon": "rifle",
+			"cls": "medium"
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -156,23 +168,35 @@ func _dump(main: Node, id: String) -> void:
 		elif landed_t >= 0.0:
 			ph = "land"
 		var up := P.pos.y - m.world.ground_at(P.pos.x, P.pos.z)
-		print("CURL_FRAME %s f%03d %-5s up=%.2f beside=%d rel=(%5.2f %5.2f %5.2f) step=%.3f w=%.2f dw=%.2f scale=%.2f"
-			% [id, f, ph, up, int(k.beside), rel.x, rel.y, rel.z, dm, w, dw, k.model.scale.x])
+		print(
+			(
+				"CURL_FRAME %s f%03d %-5s up=%.2f beside=%d rel=(%5.2f %5.2f %5.2f) step=%.3f w=%.2f dw=%.2f scale=%.2f"
+				% [id, f, ph, up, int(k.beside), rel.x, rel.y, rel.z, dm, w, dw, k.model.scale.x]
+			)
+		)
 		last = rel
 		last_w = w
 		if shots != "" and f % 2 == 0:
 			await _grab(P, shots.path_join(id).path_join("f%03d.png" % (f / 2)))
 		f += 1
 		t = f * Match.DT
-	print("CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d"
-		% [id, f, top["on"], top["off"], top["m"], top["mf"], top["w"], top["wf"]])
+	print(
+		(
+			"CURL_SUMMARY %s frames=%d curl_on=f%03d curl_off=f%03d max_step=%.3fm@f%03d max_dw=%.2f@f%03d"
+			% [id, f, top["on"], top["off"], top["m"], top["mf"], top["w"], top["wf"]]
+		)
+	)
 	if snap:
 		return
 	ok(top["on"] >= 0 and top["off"] > top["on"], "%s: it curls onto your back in the glide, off on landing" % id)
-	ok(top["m"] <= MAX_STEP_M, "%s: no one-frame jump in its root over %.2f m (biggest %.3f m)"
-		% [id, MAX_STEP_M, top["m"]])
-	ok(top["w"] <= MAX_STEP_W, "%s: no one-frame jump in its curl over %.1f (biggest %.2f)"
-		% [id, MAX_STEP_W, top["w"]])
+	ok(
+		top["m"] <= MAX_STEP_M,
+		"%s: no one-frame jump in its root over %.2f m (biggest %.3f m)" % [id, MAX_STEP_M, top["m"]]
+	)
+	ok(
+		top["w"] <= MAX_STEP_W,
+		"%s: no one-frame jump in its curl over %.1f (biggest %.2f)" % [id, MAX_STEP_W, top["w"]]
+	)
 
 
 ## A frame from a fixed spot beside your run, over the grass, on you (your Boki within 1.7 m).

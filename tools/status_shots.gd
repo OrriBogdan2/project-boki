@@ -8,23 +8,25 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const ROWS := ["none", "stun", "daze", "root", "gnd", "slow", "chill", "burn", "static", "antiheal", "sick"]
-const BOKI := "pebbit"         # a grey-brown Boki: no status colour to hide in
+const BOKI := "pebbit"  # a grey-brown Boki: no status colour to hide in
 const BOKI_ROWS := ["none", "stun", "root", "gnd", "slow", "daze"]
 const GROUNDS := {"grass": null, "light": Color("d8cfb0"), "dark": Color("2b2824")}
 const FRAMES := 5
-const FRAME_S := 0.2           # s between crops
-const CROP := 220              # px square, round the Hunter at 1280x720
-const LEAD_S := 0.4            # s the status runs before the first crop
+const FRAME_S := 0.2  # s between crops
+const CROP := 220  # px square, round the Hunter at 1280x720
+const LEAD_S := 0.4  # s the status runs before the first crop
 
 var m: Match
 var main: Node
 var boki: Kin = null
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
 	var with_boki := "--boki" in OS.get_cmdline_user_args()
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
@@ -33,21 +35,24 @@ func run(main_node: Node) -> void:
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
 	for k in m.kins:
 		k.dead = true
 		k.visible = false
-	if m.hud: m.hud.visible = false
+	if m.hud:
+		m.hud.visible = false
 	var P: Hunter = m.player
 	var base := P.pos
 	var F: Hunter = m.hunters[1]
 	var N: Hunter = m.hunters[2]
 	for h: Hunter in m.hunters:
 		h.ctrl = "idle"
-		if h != F and h != N: h.teleport(base + Vector3(-30, 0, 30))
+		if h != F and h != N:
+			h.teleport(base + Vector3(-30, 0, 30))
 	F.teleport(base)
 	N.teleport(base + Vector3(1.8, 0, 0))
 	if with_boki:
@@ -56,7 +61,7 @@ func run(main_node: Node) -> void:
 		boki.set_meta("summoned", true)
 		F.teleport(base + Vector3(-30, 0, -30))
 		N.teleport(base + Vector3(-30, 0, 30))
-		P.teleport(base + Vector3(1.8, 0, 0))      # (the clean Hunter is the player, its owner)
+		P.teleport(base + Vector3(1.8, 0, 0))  # (the clean Hunter is the player, its owner)
 	var rows: Array = BOKI_ROWS if with_boki else ROWS
 	var carrier: Ent = boki if with_boki else F
 	var tag := "boki_" if with_boki else ""
@@ -78,12 +83,17 @@ func run(main_node: Node) -> void:
 			for c in FRAMES:
 				sheet.blit_rect(row[c], Rect2i(0, 0, CROP, CROP), Vector2i(c * CROP, r * CROP))
 		sheet.save_png(dir.path_join("status_%s%s.png" % [tag, g]))
-		lines.append("status_%s%s.png: rows top to bottom %s; the left %s carries it, the right Hunter is clean"
-			% [tag, g, ", ".join(rows), "Boki" if with_boki else "Hunter"])
+		lines.append(
+			(
+				"status_%s%s.png: rows top to bottom %s; the left %s carries it, the right Hunter is clean"
+				% [tag, g, ", ".join(rows), "Boki" if with_boki else "Hunter"]
+			)
+		)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")
 	print("STATUSSHOTS ", dir)
 	main.get_tree().quit(0)
+
 
 ## One status on F for LEAD_S, then FRAMES crops FRAME_S apart.
 func _row(F: Ent, st: String, base: Vector3) -> Array:
@@ -96,7 +106,8 @@ func _row(F: Ent, st: String, base: Vector3) -> Array:
 		if boki:
 			boki.teleport(base)
 			boki.render(DT, 1.0)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		m.cam.snap(base + Vector3(0.9, 0, 0))
 		await main.get_tree().process_frame
 		t += DT
@@ -107,6 +118,7 @@ func _row(F: Ent, st: String, base: Vector3) -> Array:
 	m.step(DT)
 	return out
 
+
 ## Keeps `st` on F the way the game does ("" takes every status off).
 func _hold(F: Ent, st: String) -> void:
 	F.stun_t = 9.0 if st == "stun" else 0.0
@@ -115,16 +127,19 @@ func _hold(F: Ent, st: String) -> void:
 	F.burn_t = 9.0 if st == "burn" else 0.0
 	F.burn_dps = 0.0
 	F.blight_t = 9.0 if st == "antiheal" else 0.0
-	if F is Hunter: (F as Hunter).sick_t = 9.0 if st == "sick" else 0.0
+	if F is Hunter:
+		(F as Hunter).sick_t = 9.0 if st == "sick" else 0.0
 	F.hp = F.max_hp
 	if F is Kin:
 		F.set_meta("gnd_until", 0.0)
-		if st == "gnd": KitStatus.apply(F, "gnd", 9.0)     # (a summoned Boki shrugs it off: SummonCc)
+		if st == "gnd":
+			KitStatus.apply(F, "gnd", 9.0)  # (a summoned Boki shrugs it off: SummonCc)
 	else:
 		F.set_meta("gnd_until", m.time + 9.0 if st == "gnd" else 0.0)
 	F.set_meta("rat_until", m.time + 9.0 if st == "daze" else 0.0)
 	if st in ["chill", "static"]:
 		StatusLooks.of(m).keep(F, st)
+
 
 func _crop(at: Vector3) -> Image:
 	var img := main.get_viewport().get_texture().get_image()

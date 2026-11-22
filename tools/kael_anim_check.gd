@@ -7,19 +7,21 @@ extends RefCounted
 const AKCheck := preload("res://tools/archetype_check.gd")
 const DT := 1.0 / 60.0
 var A: AKCheck
-var beats := {}            # clip -> {len, cock, peak, settle, v (speed per frame)}
-var leads := {}            # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
-var maps := {}             # clip -> its "time" map ([[kit s, clip s]...]; replaces rate/lead/scale)
-var speeds := {}           # clip -> [its "rate", its "scale"] (clip s per kit s, before and after the lead)
-var shown := {}            # kit anim_ids seen in a row
-var lane := 0              # each kit row on a fresh strip of ground (a Searing Wave's fire stays)
-var run_steps := 0         # footfalls in one loop of the forward run clip
-var wind_still := 0.0      # s into jug_lunge_wind where its pose holds (its hold_from)
+var beats := {}  # clip -> {len, cock, peak, settle, v (speed per frame)}
+var leads := {}  # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
+var maps := {}  # clip -> its "time" map ([[kit s, clip s]...]; replaces rate/lead/scale)
+var speeds := {}  # clip -> [its "rate", its "scale"] (clip s per kit s, before and after the lead)
+var shown := {}  # kit anim_ids seen in a row
+var lane := 0  # each kit row on a fresh strip of ground (a Searing Wave's fire stays)
+var run_steps := 0  # footfalls in one loop of the forward run clip
+var wind_still := 0.0  # s into jug_lunge_wind where its pose holds (its hold_from)
+
 
 func run(a) -> void:
 	A = a
 	await clips()
 	await kit()
+
 
 # ------------------------------------------------------------------ the clips, offline
 ## Sweeps each kmove clip at 60 Hz through an AnimationPlayer on the clips' library (synchronous, no blend)
@@ -69,14 +71,19 @@ func clips() -> void:
 		beats[km]["p0"] = pts[0]
 		beats[km]["pend"] = pts[pts.size() - 1]
 		var b: Dictionary = beats[km]
-		print("BEAT %-16s len %.2f cock %.2f peak %.2f settle %.2f vmax %4.1f lead %s  |%s|" % [km, length,
-				b["cock"], b["peak"], b["settle"], b["vmax"], str(mv.get("lead", "-")), b["bar"]])
+		print(
+			(
+				"BEAT %-16s len %.2f cock %.2f peak %.2f settle %.2f vmax %4.1f lead %s  |%s|"
+				% [km, length, b["cock"], b["peak"], b["settle"], b["vmax"], str(mv.get("lead", "-")), b["bar"]]
+			)
+		)
 	# a negative lead holds the clip's first frame: it must be the held wind-up's last pose
 	for pair in [["jug_lunge_wind", "jug_lunge"], ["jug_wave_wind", "jug_wave"]]:
 		var gap := (beats[pair[0]]["pend"] as Vector3).distance_to(beats[pair[1]]["p0"])
 		A.ok("kael anim: %s ends where %s starts" % [pair[0], pair[1]], gap < 0.1, "%.2f m apart" % gap)
 	run_steps = _footfalls(ap, sk, String(cl.d["loco"]["run"]["f"]))
 	m.free()
+
 
 ## Footfalls in one loop of a run clip: each ankle's low point near the ground counts once (a plant). The rig has
 ## no foot bone, so the ankle is the shin's far end, a thigh's length down its line (WardenSkeleton.CARRY_ON).
@@ -110,6 +117,7 @@ func _footfalls(ap: AnimationPlayer, sk: Skeleton3D, clip: String) -> int:
 	print("RUN %s len %.2f footfalls %d" % [clip, length, steps])
 	return steps
 
+
 ## From the tip's speed per frame: cock (the last quiet frame before the fastest), peak, settle (quiet for 0.1 s).
 func _beats(v: Array[float], length: float, pts: Array[Vector3]) -> Dictionary:
 	var vmax := 0.0
@@ -134,6 +142,7 @@ func _beats(v: Array[float], length: float, pts: Array[Vector3]) -> Dictionary:
 		bar += str(mini(9, int(9.0 * sqrt(v[i] / maxf(vmax, 0.001)))))
 	return {"len": length, "cock": ic * DT, "peak": (ip + 1) * DT, "settle": is_ * DT, "vmax": vmax, "bar": bar}
 
+
 # ------------------------------------------------------------------ the kit, in a match
 func _rig() -> Dictionary:
 	var r := A.setup("juggernaut", 2.4)
@@ -142,12 +151,13 @@ func _rig() -> Dictionary:
 	P.slot_lv["ult"] = 1
 	return {"m": r[0], "P": P, "T": r[2], "home": r[4], "K": P.ak}
 
+
 func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
-	A.step(m, 2.2)                 # (the Searing Wave's burn ticks for 2 s)
+	A.step(m, 2.2)  # (the Searing Wave's burn ticks for 2 s)
 	K.warchain.snap(true)
 	K.riposte.drop()
 	K.res = 0.0
-	K.enraged_t = 0.0           # (an Enrage would play jug_roar over the move)
+	K.enraged_t = 0.0  # (an Enrage would play jug_roar over the move)
 	shown = {}
 	P.inp["sec_hold"] = false
 	P.inp["fire"] = false
@@ -168,6 +178,7 @@ func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> 
 	A.aim_at(P, T.pos)
 	T.hp = T.max_hp
 
+
 ## Steps until `ev` holds (or `limit` s): returns [age of the kit's clip when it did, its anim_id, elapsed].
 func _until(m: Match, K: JuggernautKit, ev: Callable, limit: float, each := Callable()) -> Array:
 	var t := 0.0
@@ -180,39 +191,54 @@ func _until(m: Match, K: JuggernautKit, ev: Callable, limit: float, each := Call
 			return [m.time - K.anim_at, K.anim_id, t]
 	return [-1.0, K.anim_id, t]
 
+
 ## Steps until T loses hp (a cut to its cap, Kael's blight, is not a hit).
 func _hit(m: Match, K: JuggernautKit, T: Hunter, limit: float, each := Callable()) -> Array:
 	var hp0 := T.hp
 	return _until(m, K, func(): return T.hp < hp0 - 0.5, limit, each)
 
+
 func _ev(what: String, r: Array) -> void:
 	print("EVENT %-22s at %.3f into %s (%.2f s after the press)" % [what, r[0], r[1], r[2]])
 
+
 ## A clip time on the kit's move clock (WardenClips._move_clip: clip t = (kit t x rate + lead) x scale).
 func _kit_t(km: String, clip_t: float) -> float:
-	if maps.has(km):      # a "time" map: the kit second whose clip second it is (the map's inverse)
+	if maps.has(km):  # a "time" map: the kit second whose clip second it is (the map's inverse)
 		var pts: Array = maps[km]
 		for i in range(1, pts.size()):
 			if clip_t <= float(pts[i][1]):
-				return lerpf(float(pts[i - 1][0]), float(pts[i][0]),
-						inverse_lerp(float(pts[i - 1][1]), float(pts[i][1]), clip_t))
+				return lerpf(
+					float(pts[i - 1][0]), float(pts[i][0]), inverse_lerp(float(pts[i - 1][1]), float(pts[i][1]), clip_t)
+				)
 		return float(pts[-1][0])
 	var rs: Array = speeds.get(km, [1.0, 1.0])
 	return (clip_t / float(rs[1]) - float(leads.get(km, 0.0))) / float(rs[0])
+
 
 ## The clip's strike frame (its fastest blade frame, on the kit's clock) sits on the kit's hit, within 0.04 s
 ## (a 30 fps key).
 func _strike(km: String, r: Array) -> void:
 	var b: Dictionary = beats.get(km, {})
 	var at := _kit_t(km, float(b.get("peak", -1.0)))
-	A.ok("kael anim: %s strike frame on the kit's hit" % km, r[0] >= 0.0 and r[1] == km and absf(at - r[0]) <= 0.04,
-			"clip %.2f (lead %.2f, rate/scale %s) = %.3f vs kit %.3f into %s" % [b.get("peak", -1.0),
-			leads.get(km, 0.0), str(speeds.get(km, [])), at, r[0], r[1]])
+	A.ok(
+		"kael anim: %s strike frame on the kit's hit" % km,
+		r[0] >= 0.0 and r[1] == km and absf(at - r[0]) <= 0.04,
+		(
+			"clip %.2f (lead %.2f, rate/scale %s) = %.3f vs kit %.3f into %s"
+			% [b.get("peak", -1.0), leads.get(km, 0.0), str(speeds.get(km, [])), at, r[0], r[1]]
+		)
+	)
+
 
 ## A held pose shows only under the hold input.
 func _hold(km: String, held: bool, what: String) -> void:
-	A.ok("kael anim: %s %s" % [km, "shows under the hold" if held else "never shows on a " + what],
-			shown.has(km) == held, ", ".join(shown.keys()))
+	A.ok(
+		"kael anim: %s %s" % [km, "shows under the hold" if held else "never shows on a " + what],
+		shown.has(km) == held,
+		", ".join(shown.keys())
+	)
+
 
 ## Running flat out: WardenGait (main) sets the clip rate from the move speed over the run clip's foot speed, so the
 ## planted feet stay put. The source's cadence (briefs/hero-ref/juggernaut.md "Cadence", ~4.5 footfalls/s) is not
@@ -235,10 +261,13 @@ func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> vo
 	var foot: Array = cl.d["loco"].get("foot_mps", [1.0, 1.0])
 	# (foot_mps is at the model's own scale: a match draws Kael bigger, so the gait layer divides that out)
 	var body_k := float(cl.root.get_meta("look_scale", cl.root.scale.y)) / absf(cl.root.scale.y)
-	A.ok("kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
-			absf(rate - spd * body_k / float(foot[1])) <= 0.05 and per_s >= 3.0,
-			"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd])
+	A.ok(
+		"kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
+		absf(rate - spd * body_k / float(foot[1])) <= 0.05 and per_s >= 3.0,
+		"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd]
+	)
 	P.inp["move"] = Vector2.ZERO
+
 
 func kit() -> void:
 	var g := _rig()
@@ -302,8 +331,11 @@ func kit() -> void:
 	# the perfect release (owner): let go in the first window, at full charge, the cocked pose already still
 	var sd := K.rmb_def()
 	var still_at := float(sd["hold"]) + wind_still
-	A.ok("kael anim: jug_lunge_wind is held still by the first perfect window", still_at <= K.rmb_charge_full(),
-			"still at %.2f s of hold, window at %.2f s" % [still_at, K.rmb_charge_full()])
+	A.ok(
+		"kael anim: jug_lunge_wind is held still by the first perfect window",
+		still_at <= K.rmb_charge_full(),
+		"still at %.2f s of hold, window at %.2f s" % [still_at, K.rmb_charge_full()]
+	)
 	_fresh(m, P, K, home, T)
 	T.teleport(P.pos + Vector3(5.0, 0, 0))
 	A.aim_at(P, T.pos)
@@ -338,9 +370,11 @@ func kit() -> void:
 		print("EVENT meteor %-15s at %.3f into %s" % [f, ph.get(f, [-1.0, "?"])[0], ph.get(f, [-1.0, "?"])[1]])
 	var dv: Array = ph.get("dive", [-1.0, "?"])
 	var dive_clip := _kit_t("jug_meteor", float(beats["jug_meteor"]["peak"]))
-	A.ok("kael anim: jug_meteor's dive starts on the kit's dive (the hang is the held pose)",
-			dv[1] == "jug_meteor" and absf(float(dv[0]) - dive_clip) <= 0.04,
-			"kit dive at %.3f, clip %.2f on the kit clock %.3f" % [dv[0], beats["jug_meteor"]["peak"], dive_clip])
+	A.ok(
+		"kael anim: jug_meteor's dive starts on the kit's dive (the hang is the held pose)",
+		dv[1] == "jug_meteor" and absf(float(dv[0]) - dive_clip) <= 0.04,
+		"kit dive at %.3f, clip %.2f on the kit clock %.3f" % [dv[0], beats["jug_meteor"]["peak"], dive_clip]
+	)
 	_ev("meteor free", _until(m, K, func(): return K.meteor.phase == "", 1.0))
 	# dash (Rampage)
 	_fresh(m, P, K, home, T)
@@ -379,8 +413,12 @@ func kit() -> void:
 	var spins0 := K.spins
 	P.inp["sec_hold"] = true
 	K.press_rmb()
-	print("EVENT %-22s spins +%d, %s at %.3f (the stage runs on the press)" % ["spin on press", K.spins - spins0,
-			K.anim_id, m.time - K.anim_at])
+	print(
+		(
+			"EVENT %-22s spins +%d, %s at %.3f (the stage runs on the press)"
+			% ["spin on press", K.spins - spins0, K.anim_id, m.time - K.anim_at]
+		)
+	)
 	A.step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	# chain lunge: RMB charged while tethered, let go
@@ -429,15 +467,21 @@ func kit() -> void:
 	var done := _until(m, K, func(): return not K.riposte.running(), 1.0)
 	_ev("riposte done", done)
 	# guard .65 / strike .1 / recover .35 (the source's Retaliation), each within a 60 Hz step and a half
-	var phases := [["guard", guard[2], rd["guard"]], ["strike", r[2], rd["strike_t"]],
-			["recover", done[2], rd["recover"]]]
+	var phases := [
+		["guard", guard[2], rd["guard"]], ["strike", r[2], rd["strike_t"]], ["recover", done[2], rd["recover"]]
+	]
 	for row in phases:
-		A.ok("kael anim: riposte %s runs %.2f s" % [row[0], row[2]], absf(float(row[1]) - float(row[2])) <= 0.025,
-				"%.3f s" % row[1])
+		A.ok(
+			"kael anim: riposte %s runs %.2f s" % [row[0], row[2]],
+			absf(float(row[1]) - float(row[2])) <= 0.025,
+			"%.3f s" % row[1]
+		)
 	var rl := _kit_t("jug_ult_recover", float(beats["jug_ult_recover"]["len"]))
 	# (the recover is jug_ult_recover's own clip; its tail past the hand-off plays out under the blend to the legs)
-	A.ok("kael anim: jug_ult_recover ends within the hand-off blend",
-			float(done[2]) <= rl + A.DT * 0.5 and rl - float(done[2]) <= WardenClips.FADE_LOCO,
-			"clip %.2f vs kit %.3f" % [rl, done[2]])
+	A.ok(
+		"kael anim: jug_ult_recover ends within the hand-off blend",
+		float(done[2]) <= rl + A.DT * 0.5 and rl - float(done[2]) <= WardenClips.FADE_LOCO,
+		"clip %.2f vs kit %.3f" % [rl, done[2]]
+	)
 	_run(m, P, K, home, T)
 	A.done(m)

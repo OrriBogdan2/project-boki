@@ -10,6 +10,7 @@ var m: Match
 var dir := ""
 var focus := Vector3.ZERO
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		m.step(Match.DT)
@@ -18,10 +19,12 @@ func _frames(n: int) -> void:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame
 
+
 func _grab(file: String) -> void:
 	await _frames(40)
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % file))
 	print("PALSHOT ", file)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -34,8 +37,19 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
-		"god": true, "length": 1e9})
+	await m.start(
+		{
+			"teams": 3,
+			"squad": 1,
+			"tier": 0,
+			"seed": 77,
+			"no_drop": true,
+			"autoplay": true,
+			"heart": true,
+			"god": true,
+			"length": 1e9
+		}
+	)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -72,6 +86,7 @@ func run(main_node: Node) -> void:
 		m.hud.full_map.close()
 	main.get_tree().quit(0)
 
+
 func _state_a(P: Hunter, rival: Hunter, x: Dictionary, H: Heart, q: Dictionary) -> void:
 	m.time = float(q["lair_open_s"]) + 5.0 - m.sess_t0
 	x["state"] = "charging"
@@ -81,6 +96,7 @@ func _state_a(P: Hunter, rival: Hunter, x: Dictionary, H: Heart, q: Dictionary) 
 	H.early_team = -1
 	H.carrier = P
 	H._force(Heart.S.CARRIED, "shots")
+
 
 func _state_b(P: Hunter, rival: Hunter, x: Dictionary, H: Heart, q: Dictionary) -> void:
 	m.time = float(Heart.r("final_s")) + 5.0 - m.sess_t0

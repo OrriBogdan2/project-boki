@@ -7,16 +7,18 @@ extends RefCounted
 ## and on the move no item touches the legs). Keys open a lock and an ember needs someone to wake, so
 ## those start their beat directly. Never touches the save.
 
-const TOL := 2.0 * Match.DT    # the beat may be this far off the cast (frame rounding)
-const SPACE := 16.0            # m between two plays' spots (Skyfall's blast is 6 m, a wall 6 m long)
-const RUN_SPEED := 4.0         # m/s: a running hunter, well over UtilityPose.STILL
+const TOL := 2.0 * Match.DT  # the beat may be this far off the cast (frame rounding)
+const SPACE := 16.0  # m between two plays' spots (Skyfall's blast is 6 m, a wall 6 m long)
+const RUN_SPEED := 4.0  # m/s: a running hunter, well over UtilityPose.STILL
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("UPCHECK FAIL ", what)
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -48,6 +50,7 @@ func run(main: Node) -> void:
 	print("UTILITY POSE CHECK DONE, %d plays, failures: %d" % [played, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A quiet match of idle hunters, no monsters: one per Hunter, so nothing an earlier Hunter left behind
 ## (a fuse still burning, a zone, a gate about to swap) lands on the next.
 func _match(main: Node) -> Match:
@@ -55,14 +58,18 @@ func _match(main: Node) -> Match:
 	main.add_child(m)
 	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 41, "no_drop": true, "god": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
-	for k in m.kins: k.queue_free()      # a rival Boki's bite would stun the Hunter mid-move
+	for k in m.kins:
+		k.queue_free()  # a rival Boki's bite would stun the Hunter mid-move
 	m.kins.clear()
-	if m.biomes: m.biomes.hazards.clear()      # as would a lightning rod
+	if m.biomes:
+		m.biomes.hazards.clear()  # as would a lightning rod
 	for h in m.hunters:
 		h.ctrl = "idle"
 	return m
+
 
 ## Open ground at least SPACE from every earlier play of this match (their pads, walls and blasts).
 func _fresh_ground(m: Match, used: Array[Vector3]) -> Vector3:
@@ -73,6 +80,7 @@ func _fresh_ground(m: Match, used: Array[Vector3]) -> Vector3:
 		at = m.world.random_ground()
 	used.append(at)
 	return at
+
 
 func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) -> void:
 	var tag := "%s/%s" % [hero, id]
@@ -85,7 +93,7 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	P.teleport(_fresh_ground(m, used))
 	P.vel = Vector3.ZERO
 	m.step(Match.DT)
-	m.remove_meta("banner_%d" % P.team)      # one banner per squad at a time; each play is a fresh one
+	m.remove_meta("banner_%d" % P.team)  # one banner per squad at a time; each play is a fresh one
 	if UtilityBelt.is_key(id) or not UtilityUse.can_use(P, id):
 		UtilityPose.start(P, id)
 	else:
@@ -104,7 +112,7 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 			break
 		kind_ok = kind_ok and (float(s["drink"]) >= 0.0 if mv == "drink" else String(s["util_move"]) == mv)
 		crouched = maxf(crouched, float(s["crouch"]))
-		P.vel = Vector3(RUN_SPEED, 0.0, 0.0)      # the same frame on the move: the legs stay the gait's
+		P.vel = Vector3(RUN_SPEED, 0.0, 0.0)  # the same frame on the move: the legs stay the gait's
 		P._anim_state(0.0)
 		run_crouch = maxf(run_crouch, float(P.anim_s["crouch"]) - P.crouch_k)
 		P.vel = Vector3.ZERO
@@ -115,5 +123,7 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	ok(mv != "place" or crouched > 0.6, tag + " crouches to place")
 	ok(run_crouch < 0.01, tag + " leaves the legs free on the move")
 	match UtilityUse.use_of(id):
-		"drink": ok(heal_hp <= 0.0 or P.hp > P.max_hp * 0.5, tag + " heals when the drink lands")
-		"repair": ok(P.armor >= P.max_armor - 0.5, tag + " repairs when the kit lands")
+		"drink":
+			ok(heal_hp <= 0.0 or P.hp > P.max_hp * 0.5, tag + " heals when the drink lands")
+		"repair":
+			ok(P.armor >= P.max_armor - 0.5, tag + " repairs when the kit lands")

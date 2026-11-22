@@ -8,6 +8,7 @@ const DT := 1.0 / 60.0
 const SECS := 3.0
 const MAX_OVERLAP := 3
 
+
 ## setup: {"m", "P", "mates", "dummy"}. The match is the caller's (trio, two teams).
 static func setup(m: Match) -> Dictionary:
 	var P: Hunter = m.player
@@ -20,6 +21,7 @@ static func setup(m: Match) -> Dictionary:
 	dummy.hp = 1e6
 	dummy.teleport(m.world.free_spot_near(P.pos + Vector3(4.5, 0, 0), [], 1.0, 0.4, 6.0))
 	return {"m": m, "P": P, "mates": mates.slice(0, 2), "dummy": dummy}
+
 
 ## Frame `f`'s hits: each attacker shoots on its own cadence (every third shot a crit), you also burn the
 ## dummy (a tick a quarter second) and land an ability at 1.5 s; your Boki bites every half second.
@@ -38,6 +40,7 @@ static func hit(s: Dictionary, f: int) -> void:
 		dummy.hurt(80.0, P, {"src": "abil"})
 	if f % 30 == 10 and P.kin != null:
 		dummy.hurt(12.0, P.kin, {"src": "abil"})
+
 
 ## The most live damage numbers over one spot this frame: for each, itself plus those whose screen
 ## rect meets its own.

@@ -4,11 +4,12 @@ extends RefCounted
 ## <dir>/zones.csv (one row per zone instance), which tools/perf/tracy_report.py reads. Build both first with
 ## tools/perf/build_tracy.sh.
 
-const PORT := 18086              # the extension listens here (native/tracy/SConstruct)
+const PORT := 18086  # the extension listens here (native/tracy/SConstruct)
 const BIN_DIR := "res://tools/perf/bin/"
-const STOP_WAIT_S := 30.0        # s: the longest wait for tracy-capture to save its trace after the stop signal
+const STOP_WAIT_S := 30.0  # s: the longest wait for tracy-capture to save its trace after the stop signal
 var dir := ""
 var pid := -1
+
 
 func start(out_dir: String) -> bool:
 	dir = ProjectSettings.globalize_path(out_dir)
@@ -19,9 +20,10 @@ func start(out_dir: String) -> bool:
 	pid = OS.create_process(_bin("tracy-capture"), ["-f", "-p", str(PORT), "-o", dir.path_join("match.tracy")])
 	return pid > 0
 
+
 ## Stops the capture once it has seen the zones, then exports them. Returns whether zones.csv was written.
 func finish(tree: SceneTree) -> bool:
-	OS.execute("kill", ["-INT", str(pid)])      # tracy-capture saves its trace on SIGINT
+	OS.execute("kill", ["-INT", str(pid)])  # tracy-capture saves its trace on SIGINT
 	var waited := 0.0
 	while OS.is_process_running(pid) and waited < STOP_WAIT_S:
 		await tree.create_timer(0.25).timeout
@@ -33,6 +35,7 @@ func finish(tree: SceneTree) -> bool:
 		return false
 	fa.store_string(String(csv[0]))
 	return true
+
 
 func _bin(tool: String) -> String:
 	return ProjectSettings.globalize_path(BIN_DIR + tool)

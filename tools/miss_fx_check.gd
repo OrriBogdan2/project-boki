@@ -5,14 +5,15 @@ extends "res://tools/archetype_check.gd"
 ## fainter. A hit makes none, a stage-owned look makes none, and a hundred misses in a row keep the pool at its
 ## cap and make no new node. Prints AKCHECK lines.
 
-const SHOT_V := 20.0           # m/s the test shots fly at
-const AIR_S := 0.3             # s of life for an open-air shot
-const SPAM := 100              # misses in a row for the pool-cap check
+const SHOT_V := 20.0  # m/s the test shots fly at
+const AIR_S := 0.3  # s of life for an open-air shot
+const SPAM := 100  # misses in a row for the pool-cap check
 
 var m: Match
 var P: Hunter
 var fxd: DJFx
 var wall_at := Vector3.ZERO
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -62,6 +63,7 @@ func run(main_node: Node) -> void:
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## Fires one shot east from `home` (into the cliff when wall >= 0, with a short life into the air otherwise),
 ## runs the match until it ends and returns the puffs it made.
 func _fire(home: Vector3, wall: float, extra: Dictionary) -> Array:
@@ -73,13 +75,16 @@ func _fire(home: Vector3, wall: float, extra: Dictionary) -> Array:
 	step(m, 0.6 if wall >= 0.0 else AIR_S + 0.1)
 	return fxd.live.duplicate()
 
+
 func _clear() -> void:
 	for e in fxd.live:
 		(e["node"] as Node3D).visible = false
 	fxd.live.clear()
 
+
 func _col(e: Dictionary) -> Color:
 	return (e["mat"] as ShaderMaterial).get_shader_parameter("color")
+
 
 func _size(e: Dictionary) -> float:
 	return (e["s0"] as Vector3).x

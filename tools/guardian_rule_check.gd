@@ -18,10 +18,12 @@ var bot: Hunter
 var foe: Hunter
 var spot: Vector3
 
+
 func ok(cond: bool, what: String) -> void:
 	print("GUARDRULE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -32,7 +34,7 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
-	m.opts["sim_keep"] = true       # the player going out must not end the match (the next case reuses it)
+	m.opts["sim_keep"] = true  # the player going out must not end the match (the next case reuses it)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
@@ -54,6 +56,7 @@ func run(main_node: Node) -> void:
 	_case_pull_stopped()
 	print("GUARDRULE CHECK %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Everyone on the team back up, standing apart, Boki on the shoulders, nothing out.
 func _reset() -> void:
@@ -79,15 +82,18 @@ func _reset() -> void:
 	m.over = false
 	m.result = {}
 
+
 func _put(h: Ent, at: Vector3) -> void:
 	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	h.vel = Vector3.ZERO
+
 
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
+
 
 func _until(cond: Callable, limit: float) -> float:
 	var t := 0.0
@@ -96,6 +102,7 @@ func _until(cond: Callable, limit: float) -> float:
 		t += DT
 	return t
 
+
 ## Both teammates knocked, the bot (first) with its Boki in `bot_state`; P's Boki stays on the shoulder.
 func _both_down(bot_state: String) -> void:
 	bot.kin.state = bot_state
@@ -103,11 +110,13 @@ func _both_down(bot_state: String) -> void:
 	_run(DT)
 	m.knock(P, foe, {})
 
+
 func _case_no_boki() -> void:
 	_reset()
 	_both_down("shoulder")
 	ok(bot.out and P.out, "1. no Boki summoned: the whole team is out in the same step")
 	ok(String(P.get_meta("died_why", "")) == "team wiped", "1. reason: team wiped")
+
 
 func _case_guardian_pulls() -> void:
 	_reset()
@@ -117,6 +126,7 @@ func _case_guardian_pulls() -> void:
 	ok(not bot.downed and not bot.out and t < KinWispForm.GUARD_CAP, "2. the guardian pulls its Hunter up (%.1fs)" % t)
 	_run(1.0)
 	ok(P.downed and not P.out and P.revive <= 0.0, "2. the unsummoned Boki pulls nobody up")
+
 
 func _case_guardian_killed() -> void:
 	_reset()
@@ -131,6 +141,7 @@ func _case_guardian_killed() -> void:
 	_run(DT)
 	ok(bot.out and P.out, "3. an enemy knocks the guardian out: the team is wiped at once (%d hits)" % n)
 
+
 func _case_late_summon() -> void:
 	_reset()
 	m.knock(bot, foe, {})
@@ -144,6 +155,7 @@ func _case_late_summon() -> void:
 	bot.kin.state = "active"
 	_run(KinWispForm.GUARD_CAP * 0.5)
 	ok(bot.downed and bot.revive <= 0.0, "4. and it never pulls its Hunter up (%.2f)" % bot.revive)
+
 
 func _case_pull_stopped() -> void:
 	_reset()

@@ -50,9 +50,15 @@ func run(main_node: Node) -> void:
 	var vex := float(Arch.def("gunslinger")["rmb"]["burr"]["push"])
 	var rd: Dictionary = Arch.def("dredge")["rmb"]
 	var reel_gap := P.r + T.r + float(rd["stop_gap"])
-	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": reel_gap, "dur": float(rd["pull_max"]),
-		"swing": DredgeKit.SWING, "stun": 0.2}
-	var side := Vector2(0, 1)      # every second knock goes +z (toward the wall on the walled strip)
+	var reel := {
+		"mode": "haul",
+		"spd": float(rd["pull_speed"]),
+		"gap": reel_gap,
+		"dur": float(rd["pull_max"]),
+		"swing": DredgeKit.SWING,
+		"stun": 0.2
+	}
+	var side := Vector2(0, 1)  # every second knock goes +z (toward the wall on the walled strip)
 	var pairs := [
 		["Kael Finishing Slam -> Albert Shield Charge", _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5)],
 		["Grimble reel -> Sparkle Storm Rod", reel, _hit(side * sparkle, -1.0)],

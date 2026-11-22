@@ -33,8 +33,21 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 	Save.d["name"] = HeroTitle.base_name(archs[0])
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": 5, "length": 1e9, "no_drop": true, "map": MAP,
-		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": KIN[0], "demo_kin_lv": "8:95"}
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": 5,
+		"length": 1e9,
+		"no_drop": true,
+		"map": MAP,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"demo_kin": KIN[0],
+		"demo_kin_lv": "8:95"
+	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
 	await m.start(o)
 	m.set_process(false)

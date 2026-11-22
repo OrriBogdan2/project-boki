@@ -6,6 +6,7 @@
 The first --warm seconds after the first zone are dropped (shader and cache warm-up), as the bench does.
 Times are in ms per zone instance; a zone nested in another counts in both.
 """
+
 import argparse
 import csv
 import math

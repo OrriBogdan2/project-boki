@@ -7,23 +7,25 @@ extends RefCounted
 ## every step is drawn and each source leaves a strip heal_read_<source>.png (needs a GPU: jobq).
 
 const DT := 1.0 / 60.0
-const STRIP_AT := [0.0, 0.15, 0.3, 0.45]   # s after the first heal: the strip's frames
-const CROP := Vector2i(260, 300)           # px round the healed Hunter, scaled 1.5x
-const DAZE_PINK := Color("ff6fae")         # stands in for the Gunslinger's Daze "+N" (a damage number)
-const HEAL_JUMP := 0.5                     # hp in one step: a heal landed
+const STRIP_AT := [0.0, 0.15, 0.3, 0.45]  # s after the first heal: the strip's frames
+const CROP := Vector2i(260, 300)  # px round the healed Hunter, scaled 1.5x
+const DAZE_PINK := Color("ff6fae")  # stands in for the Gunslinger's Daze "+N" (a damage number)
+const HEAL_JUMP := 0.5  # hp in one step: a heal landed
 
 var main: Node
-var sc                                     # tools/support_check.gd, for its flat-strip match
+var sc  # tools/support_check.gd, for its flat-strip match
 var bad := 0
 var n := 0
-var parts := 0                             # sections that ran to their end (a script error stops one short)
+var parts := 0  # sections that ran to their end (a script error stops one short)
 var dir := ""
+
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
 	print("HEALREAD %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
 	if not cond:
 		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -42,13 +44,15 @@ func run(mn: Node) -> void:
 	print("HEALREAD %s, %d checks" % ["PASS" if bad == 0 else "FAIL (%d)" % bad, n])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _match(arch: String, dist := 6.0) -> Array:
 	var r: Array = sc.setup(arch, dist)
 	if dir != "":
-		(r[0] as Match).hud.visible = false     # the read itself, without the hover card over the Hunter
+		(r[0] as Match).hud.visible = false  # the read itself, without the hover card over the Hunter
 		if main.get("fade") != null:
 			await main.get("fade").reveal(0.01)
 	return r
+
 
 func _meeko() -> void:
 	var r: Array = await _match("tender")
@@ -81,6 +85,7 @@ func _meeko() -> void:
 	parts += 1
 	await _free(m)
 
+
 func _albert() -> void:
 	var r: Array = await _match("bulwark")
 	var m: Match = r[0]
@@ -107,6 +112,7 @@ func _albert() -> void:
 	parts += 1
 	await _free(m)
 
+
 func _kael() -> void:
 	var r: Array = await _match("juggernaut", 2.5)
 	var m: Match = r[0]
@@ -119,6 +125,7 @@ func _kael() -> void:
 	await _strip(m, P, "kael_riposte")
 	parts += 1
 	await _free(m)
+
 
 func _lifesteal_and_rules() -> void:
 	var r: Array = await _match("archer")
@@ -134,13 +141,19 @@ func _lifesteal_and_rules() -> void:
 	_clear(fx)
 	var drained := _void_hit(P, T, 3.0)
 	var sliver := _heal_num(fx, P)
-	ok(drained > 0.0 and drained < Fx.NUM_MIN and not sliver.is_empty() and not (sliver["node"] as Label3D).visible,
-		"lifesteal: a light hit's sliver waits hidden", "%.2f HP" % drained)
+	ok(
+		drained > 0.0 and drained < Fx.NUM_MIN and not sliver.is_empty() and not (sliver["node"] as Label3D).visible,
+		"lifesteal: a light hit's sliver waits hidden",
+		"%.2f HP" % drained
+	)
 	for i in 3:
 		drained += _void_hit(P, T, 3.0)
 	var num := _heal_num(fx, P)
-	ok(is_same(num, sliver) and absf(float(num["val"]) - drained) < 0.01, "lifesteal: the slivers add up on one number",
-		"%.2f of %.2f HP" % [float(num.get("val", 0.0)), drained])
+	ok(
+		is_same(num, sliver) and absf(float(num["val"]) - drained) < 0.01,
+		"lifesteal: the slivers add up on one number",
+		"%.2f of %.2f HP" % [float(num.get("val", 0.0)), drained]
+	)
 	_reads(m, P, "Void weapon lifesteal")
 	for i in 10:
 		_void_hit(P, T, 3.0)
@@ -156,25 +169,38 @@ func _lifesteal_and_rules() -> void:
 	var hit := _num_at(fx, at, Fx.Num.HIT, "")
 	var daze := _num_at(fx, at, Fx.Num.HIT, "+")
 	var heal := _num_at(fx, at, Fx.Num.HEAL, "+")
-	ok(fx.nums.size() == 3 and float(hit.get("val", 0)) == 20.0 and float(daze.get("val", 0)) == 9.0
-		and float(heal.get("val", 0)) == 12.0, "a heal, a hit and a Daze +N on one spot stay three numbers")
-	ok(_rgb((daze["node"] as Label3D).modulate) == _rgb(DAZE_PINK)
-		and _rgb((heal["node"] as Label3D).modulate) == _rgb(HudStyle.HEAL), "each keeps its own colour")
+	ok(
+		(
+			fx.nums.size() == 3
+			and float(hit.get("val", 0)) == 20.0
+			and float(daze.get("val", 0)) == 9.0
+			and float(heal.get("val", 0)) == 12.0
+		),
+		"a heal, a hit and a Daze +N on one spot stay three numbers"
+	)
+	ok(
+		(
+			_rgb((daze["node"] as Label3D).modulate) == _rgb(DAZE_PINK)
+			and _rgb((heal["node"] as Label3D).modulate) == _rgb(HudStyle.HEAL)
+		),
+		"each keeps its own colour"
+	)
 	# damage numbers off: the hit hides, the heal still shows
 	var was = Settings.get_v("damage_numbers")
 	Settings.set_v("damage_numbers", false, false)
 	_clear(fx)
 	fx.number(T.pos + Vector3(0, 1.5, 0), 20.0, HudStyle.HIT, false)
 	fx.healed(A, 10.0)
-	ok(_num_at(fx, T.pos + Vector3(0, 1.5, 0), Fx.Num.HIT, "").is_empty() and not _heal_num(fx, A).is_empty(),
-		"damage numbers off: hits show no number, heals still do")
+	ok(
+		_num_at(fx, T.pos + Vector3(0, 1.5, 0), Fx.Num.HIT, "").is_empty() and not _heal_num(fx, A).is_empty(),
+		"damage numbers off: hits show no number, heals still do"
+	)
 	Settings.set_v("damage_numbers", was, false)
 	# one glow per body while it is up; it moves with them; a new one after it fades
 	_clear(fx)
 	fx.healed(A, 5.0)
 	fx.healed(A, 5.0)
-	ok(_glows(fx, A) == 1 and float(_heal_num(fx, A).get("val", 0)) == 10.0,
-		"two quick heals: one glow, one +10")
+	ok(_glows(fx, A) == 1 and float(_heal_num(fx, A).get("val", 0)) == 10.0, "two quick heals: one glow, one +10")
 	A.teleport(A.pos + Vector3(3.0, 0, 0))
 	var g: Node3D = _glow(fx, A).get("node")
 	ok(g != null and absf(g.global_position.x - A.global_position.x) < 0.05, "the glow rides on the healed Hunter")
@@ -196,11 +222,14 @@ func _lifesteal_and_rules() -> void:
 	A.remote = true
 	A.hp = A.max_hp - 30.0
 	A.heal(20.0)
-	ok(A.hp == A.max_hp - 30.0 and float(_heal_num(fx, A).get("val", 0)) == 20.0 and _glows(fx, A) == 1,
-		"a remote teammate's heal shows on the healer's screen")
+	ok(
+		A.hp == A.max_hp - 30.0 and float(_heal_num(fx, A).get("val", 0)) == 20.0 and _glows(fx, A) == 1,
+		"a remote teammate's heal shows on the healer's screen"
+	)
 	A.remote = false
 	parts += 1
 	await _free(m)
+
 
 ## One hit from P's Void weapon on T; returns what it drained back into P.
 func _void_hit(P: Hunter, T: Hunter, dmg: float) -> float:
@@ -209,6 +238,7 @@ func _void_hit(P: Hunter, T: Hunter, dmg: float) -> float:
 	var hp0 := P.hp
 	T.hurt(dmg, P, ex)
 	return P.hp - hp0
+
 
 ## The heal read on `h`: a green "+N" of the heal kind over them and the soft green-gold glow riding on them.
 func _reads(m: Match, h: Hunter, what: String) -> void:
@@ -231,11 +261,13 @@ func _reads(m: Match, h: Hunter, what: String) -> void:
 			green_hits += 1
 	ok(green_hits == 0, what + ": no damage number in the heal colour")
 
+
 func _heal_num(fx: Fx, h: Hunter) -> Dictionary:
 	for e in fx.nums:
 		if e.has("val") and int(e["kind"]) == Fx.Num.HEAL and (e["base"] as Vector3).distance_to(h.pos) < 3.0:
 			return e
 	return {}
+
 
 func _num_at(fx: Fx, at: Vector3, kind: int, prefix: String) -> Dictionary:
 	for e in fx.nums:
@@ -243,11 +275,13 @@ func _num_at(fx: Fx, at: Vector3, kind: int, prefix: String) -> Dictionary:
 			return e
 	return {}
 
+
 func _glow(fx: Fx, h: Hunter) -> Dictionary:
 	for g in fx.ghosts:
 		if int(g.get("on", 0)) == h.get_instance_id():
 			return g
 	return {}
+
 
 func _glows(fx: Fx, h: Hunter) -> int:
 	var c := 0
@@ -256,8 +290,10 @@ func _glows(fx: Fx, h: Hunter) -> int:
 			c += 1
 	return c
 
+
 func _rgb(c: Color) -> Color:
 	return Color(c, 1.0)
+
 
 ## Drops every number, glow and burst, so the next source's read is its own.
 func _clear(fx: Fx) -> void:
@@ -270,6 +306,7 @@ func _clear(fx: Fx) -> void:
 		if is_instance_valid(g["node"]):
 			(g["node"] as Node).queue_free()
 	fx.ghosts.clear()
+
 
 ## One match step; Fx ages as it would in a frame. In shots mode the frame is drawn round `focus`.
 func _step(m: Match, focus: Hunter) -> void:
@@ -285,6 +322,7 @@ func _step(m: Match, focus: Hunter) -> void:
 		x.render(DT, 1.0)
 	await main.get_tree().process_frame
 
+
 ## Steps until one step heals `h` by HEAL_JUMP or more (a heal, not a regen trickle), at most `secs`.
 func _until_healed(m: Match, h: Hunter, secs: float) -> bool:
 	var t := 0.0
@@ -295,6 +333,7 @@ func _until_healed(m: Match, h: Hunter, secs: float) -> bool:
 		if h.hp >= hp0 + HEAL_JUMP:
 			return true
 	return false
+
 
 ## In shots mode: the frames at STRIP_AT from now, cropped round `h`, side by side in heal_read_<file>.png.
 ## One step is drawn first: a heal called outside a step (the flare) has no frame of its own yet.
@@ -322,6 +361,7 @@ func _strip(m: Match, h: Hunter, file: String) -> void:
 		out.blit_rect(shots[i], Rect2i(Vector2i.ZERO, shots[i].get_size()), Vector2i(i * (w + 4), 0))
 	out.save_png(dir.path_join("heal_read_%s.png" % file))
 	print("HEALREAD strip %s" % file)
+
 
 func _free(m: Match) -> void:
 	m.queue_free()

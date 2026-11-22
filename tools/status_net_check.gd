@@ -8,19 +8,22 @@ extends "res://tools/displace_net_check.gd"
 ## Shred and Blight (stacks, seconds and strength), hit slows, Grounded.
 ## Lines: STATNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid> (the base class reads it).
 
-const LEFT_TOL := 0.1            # s: the seconds a status has left may differ by this between the two games
-const CLEAR_S := 0.3            # s: a clear rides the next Net flush, and the question may overtake it
+const LEFT_TOL := 0.1  # s: the seconds a status has left may differ by this between the two games
+const CLEAR_S := 0.3  # s: a clear rides the next Net flush, and the question may overtake it
 const TAGS := ["ign", "chl", "sta", "mrk"]
 const LOOKS := {"ign": "Tag_ign", "chl": "Tag_chl", "sta": "Tag_sta", "mrk": "Tag_mrk", "gnd": "", "rat": ""}
 const GUEST_ARG := "--status-net-check=guest"
 
-var st_at := 0.0                 # host m.time when the running plain status was put on
-var st_secs := 0.0               # and how long it was put on for
+var st_at := 0.0  # host m.time when the running plain status was put on
+var st_secs := 0.0  # and how long it was put on for
+
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
 	print("STATNET %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -28,13 +31,16 @@ func run(main_node: Node) -> void:
 	Engine.max_fps = 60
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == GUEST_ARG: guest = true
-		if a.begins_with("--dn-port="): port = int(a.substr(10))
+		if a == GUEST_ARG:
+			guest = true
+		if a.begins_with("--dn-port="):
+			port = int(a.substr(10))
 	Net.message.connect(_on_msg)
 	if guest:
 		await _guest()
 	else:
 		await _host()
+
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
@@ -52,19 +58,33 @@ func _host() -> void:
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
-			if String(id) != Net.me: other = String(id)
+			if String(id) != Net.me:
+				other = String(id)
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return _end()
-	var d := {"mid": "sn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
-		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
-		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
+	var d := {
+		"mid": "sn%d" % port,
+		"seed": SEED,
+		"host": Net.me,
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"roster":
+		[
+			{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
+			{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}
+		]
+	}
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := CheckClock.own_msec(guest_pid)
-	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
-			and OS.is_process_running(guest_pid)):
+	while (
+		(G == null or G.net_t < 0.0)
+		and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+		and OS.is_process_running(guest_pid)
+	):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
@@ -77,6 +97,7 @@ func _host() -> void:
 	await _plain(G)
 	_end()
 
+
 func _end() -> void:
 	Net.lobby_emit("dn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
@@ -85,10 +106,12 @@ func _end() -> void:
 	print("STATNET DONE, %d checks, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The guest stands 4 m from the host's hunter, clean, and the host plays `arch`.
 func _start(G: Hunter, arch: String) -> void:
 	_kit(arch)
 	await _place(G, home + Vector3(4.0, 0, 0))
+
 
 func _cinder(G: Hunter) -> void:
 	await _start(G, "ashwick")
@@ -105,6 +128,7 @@ func _cinder(G: Hunter) -> void:
 	K.stoke(G)
 	await _run(0.3)
 	await _same("Cinder Ignite 2 (Flashover)", ign)
+
 
 func _neve(G: Hunter) -> void:
 	await _start(G, "rimewright")
@@ -124,12 +148,14 @@ func _neve(G: Hunter) -> void:
 	await _same("Neve Shatter: the splinters Chill them again", chl)
 	ok(K.splinter_log >= 1, "Neve's Shatter went off", "splinters %d" % K.splinter_log)
 
+
 func _sparkle(G: Hunter) -> void:
 	await _start(G, "mage")
 	var K: MageKit = m.player.ak
 	var key := G.get_instance_id()
 	var sta := func(): return {"sta": [K.spark_n(G), float(K.sparks.get(key, {}).get("t", 0.0))]}
-	for i in 3: K.add_spark(G, 1)
+	for i in 3:
+		K.add_spark(G, 1)
 	await _run(0.5)
 	await _same("Sparkle Static x3", sta)
 	K.add_spark(G, 1)
@@ -138,6 +164,7 @@ func _sparkle(G: Hunter) -> void:
 	K.clear_sparks(G)
 	await _run(0.1)
 	await _same("Sparkle Static spent", sta)
+
 
 func _sable(G: Hunter) -> void:
 	await _start(G, "thief")
@@ -153,6 +180,7 @@ func _sable(G: Hunter) -> void:
 	await _run(CLEAR_S)
 	await _same("Sable Marks cleared", mrk)
 	await _two_sables(G, K)
+
 
 ## A second Sable on the host's side (a kit on a body of its own, with its own nid) marks the same player:
 ## the player's game keeps each Sable's stack apart, as meta "marks" does on the casters' game.
@@ -188,6 +216,7 @@ func _two_sables(G: Hunter, K: ThiefKit) -> void:
 	await _run(CLEAR_S)
 	await _same("two Sables: both spent", both)
 	S2.free()
+
 
 ## Plain statuses: the host's expected seconds left are what it put on less what has gone by.
 func _plain(G: Hunter) -> void:
@@ -232,6 +261,7 @@ func _plain(G: Hunter) -> void:
 	await _run(0.4)
 	await _same("a hit's slow", func(): return {"slow": [1, maxf(0.0, st_secs - (float(m.time) - st_at))]})
 
+
 # ------------------------------------------------------------------ compare
 ## Asks the guest for what its hunter carries and holds it to `want`, which gives {kind: [stacks, seconds left]}
 ## and is read the moment the question goes out, so the two games are compared at the same instant.
@@ -245,12 +275,15 @@ func _same(what: String, want: Callable) -> void:
 		var g: Array = got.get(k, [0, 0.0, false])
 		var stacks := int(w[k][0])
 		var secs := float(w[k][1])
-		ok(int(g[0]) == stacks and snappedf(absf(float(g[1]) - secs), 0.01) <= LEFT_TOL,
+		ok(
+			int(g[0]) == stacks and snappedf(absf(float(g[1]) - secs), 0.01) <= LEFT_TOL,
 			"%s: %s on the player's own game is %d stack(s), %.2f s left" % [what, k, stacks, secs],
-			"guest %d, %.2f s" % [int(g[0]), float(g[1])])
+			"guest %d, %.2f s" % [int(g[0]), float(g[1])]
+		)
 		if LOOKS.has(k) and k != "burn":
 			var word := "shows" if stacks > 0 else "is gone"
 			ok(bool(g[2]) == (stacks > 0), "%s: %s look on the body %s" % [what, k, word])
+
 
 # ------------------------------------------------------------------ the guest
 func _fresh(T: Hunter) -> void:
@@ -266,6 +299,7 @@ func _fresh(T: Hunter) -> void:
 		if old:
 			old.queue_free()
 			old.name = "Gone_" + node
+
 
 func _say() -> void:
 	if m == null or m.player == null:
@@ -289,9 +323,10 @@ func _say() -> void:
 	st["burn"] = [1 if P.burn_t > 0.0 else 0, P.burn_t, false]
 	Net.lobby_emit("dn_r", {"pos": [P.pos.x, P.pos.y, P.pos.z], "st": st})
 
+
 ## Whether the body carries the look for `kind`: the pips of a stack show one per stack.
 func _look(P: Hunter, kind: String) -> bool:
-	if kind == "gnd" or kind == "rat":      # (StatusLooks draws these from the body's own timers, no word node)
+	if kind == "gnd" or kind == "rat":  # (StatusLooks draws these from the body's own timers, no word node)
 		return StatusLooks.carries(P, "gnd" if kind == "gnd" else "daze")
 	var node := P.get_node_or_null(LOOKS[kind])
 	if node == null:

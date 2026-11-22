@@ -5,17 +5,19 @@ extends RefCounted
 ## compared with the timers that decide the press (Hunter.dashes, ex_cd; ArchKit.cd, ch_rmb). Then the press
 ## itself: a slot the bar shows cooling refuses it (no hold, no move, nothing spent). Never touches the save.
 
-const HEROES := ["thief", "juggernaut", "gunslinger", "dolm"]   # dolm and juggernaut have an RMB hold
-const STEPS := 150            # match steps watched per ability (2.5 s at 60 Hz)
-const PIP_TOL := 0.01         # charges: a pip's fill may differ from Hunter.dashes by this much
-const LEFT_S := 4.0           # s of cooldown a slot is given for the refused-press rows
+const HEROES := ["thief", "juggernaut", "gunslinger", "dolm"]  # dolm and juggernaut have an RMB hold
+const STEPS := 150  # match steps watched per ability (2.5 s at 60 Hz)
+const PIP_TOL := 0.01  # charges: a pip's fill may differ from Hunter.dashes by this much
+const LEFT_S := 4.0  # s of cooldown a slot is given for the refused-press rows
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("CDIND %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -24,8 +26,19 @@ func run(main: Node) -> void:
 	for hero in HEROES:
 		var m := Match.new()
 		main.add_child(m)
-		await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-			"arch": hero, "cls": Arch.weight(hero), "weapon": Arch.signature(hero)})
+		await m.start(
+			{
+				"teams": 2,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 12,
+				"no_drop": true,
+				"arch": hero,
+				"cls": Arch.weight(hero),
+				"weapon": Arch.signature(hero)
+			}
+		)
 		m.set_process(false)
 		var P: Hunter = m.player
 		P.ctrl = "local"
@@ -42,11 +55,13 @@ func run(main: Node) -> void:
 	print("CD INDICATOR CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## One step of the match, then the panels draw once.
 func _frame(m: Match) -> void:
 	m.step(Match.DT)
 	m.hud.panels.queue_redraw()
 	await m.hud.panels.draw
+
 
 ## The dash slot against the dash timers, after every step of a ground dash and an air dash.
 func _dash(m: Match, P: Hunter, hero: String) -> void:
@@ -70,10 +85,14 @@ func _dash(m: Match, P: Hunter, hero: String) -> void:
 			if absf(shown - minf(P.dashes, P.max_dashes())) > PIP_TOL and off == "":
 				off = "step %d: pips %.3f vs dashes %.3f" % [i, shown, P.dashes]
 			var air_back := 1.0 - P.ex_cd / DashSlot.air_cd_of(P)
-			if float(sh.get("air", -1.0)) >= 0.0 and absf(float(sh["air"]) - clampf(air_back, 0.0, 1.0)) > PIP_TOL \
-					and off == "":
+			if (
+				float(sh.get("air", -1.0)) >= 0.0
+				and absf(float(sh["air"]) - clampf(air_back, 0.0, 1.0)) > PIP_TOL
+				and off == ""
+			):
 				off = "step %d: air %.3f vs ex_cd %.3f" % [i, float(sh["air"]), P.ex_cd]
 		ok(off == "", "%s: the slot follows the timers every step (%s)" % [tag, off if off != "" else "exact"])
+
 
 ## The RMB slot against ArchKit's own cooldown, after every step of a cast and its recharge.
 func _rmb(m: Match, P: Hunter, hero: String) -> void:
@@ -102,6 +121,7 @@ func _rmb(m: Match, P: Hunter, hero: String) -> void:
 	var shown := off if off != "" else "exact"
 	ok(off == "", "%s RMB: the countdown equals the ability timer every step (%s)" % [hero, shown])
 
+
 ## The bar and the press agree: a slot the bar shows cooling refuses the press and spends nothing.
 func _presses(m: Match, P: Hunter, hero: String) -> void:
 	var k: ArchKit = P.ak
@@ -118,12 +138,16 @@ func _presses(m: Match, P: Hunter, hero: String) -> void:
 		await _frame(m)
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	ok(not k.rmb_down and k.anim_at == anim and k.ch_rmb < 1.0,
-		"%s RMB: a press on the cooling slot is refused (no hold, no move, nothing spent)" % hero)
+	ok(
+		not k.rmb_down and k.anim_at == anim and k.ch_rmb < 1.0,
+		"%s RMB: a press on the cooling slot is refused (no hold, no move, nothing spent)" % hero
+	)
 	P.dashes = 0.0
 	P.ex_cd = LEFT_S
 	ok(not bool(P.slot_info("dash")["ready"]), "%s dash: the bar shows no charge as not ready" % hero)
 	P.do_dash()
 	await _frame(m)
-	ok(P.roll_t <= 0.0 and P.dashes < 1.0 and P.ex_cd > LEFT_S - 0.2,
-		"%s dash: a press with no charge is refused (no roll, nothing spent)" % hero)
+	ok(
+		P.roll_t <= 0.0 and P.dashes < 1.0 and P.ex_cd > LEFT_S - 0.2,
+		"%s dash: a press with no charge is refused (no roll, nothing spent)" % hero
+	)

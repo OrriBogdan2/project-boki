@@ -4,8 +4,9 @@ extends RefCounted
 ## Never touches the save.
 
 const TYPES := ["fire", "grass", "electric", "ice", "poison", "psychic"]
-const RADIUS := 6.0       # m from the player
-const FRAMES := 90        # frames to let the cue fade in and the camera settle
+const RADIUS := 6.0  # m from the player
+const FRAMES := 90  # frames to let the cue fade in and the camera settle
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -40,6 +41,7 @@ func run(main: Node) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("wild_type_cue.png"))
 	print("WILDCUESHOT done")
 	main.get_tree().quit()
+
 
 func _species_of(type: String) -> String:
 	for sid in Data.KIN:

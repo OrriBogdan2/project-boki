@@ -6,8 +6,10 @@ extends RefCounted
 ## Only a Boki's k1/k2/zone hits count (not a strike or a throw, which have their own "kinhit"). A type with no
 ## file falls back to the shared hit sound (play returns false and the caller plays it).
 
+
 static func rules() -> Dictionary:
 	return Content.rules("boki_impact")
+
 
 ## The impact cue of a Boki type ("" when its file is missing).
 static func cue_of(type: String) -> String:
@@ -16,8 +18,10 @@ static func cue_of(type: String) -> String:
 	var cue := String(types.get(type, types.get(r.get("default", "normal"), "")))
 	return cue if cue != "" and Sfx.ensure(cue) else ""
 
+
 static func is_boki_ability_hit(by: Ent, o: Dictionary) -> bool:
 	return by is Kin and String(o.get("src", "")) == "kin" and String(o.get("ab", "")) in rules().get("slots", [])
+
 
 ## Plays the impact of a Boki ability hit at the target; false when this is not one or the file is missing (the
 ## caller then plays the shared sound). Voice caps are Sfx's: the impact's own gap (Sfx.IMPACT_GAP) and its stack cap.

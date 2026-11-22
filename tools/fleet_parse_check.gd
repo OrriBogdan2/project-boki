@@ -1,4 +1,6 @@
 extends SceneTree
+
+
 ## Compiles every script listed in the file named by FLEET_SCRIPT_LIST (one path per
 ## line, relative to res://). Run by tools/check.sh; not part of the game.
 ##
