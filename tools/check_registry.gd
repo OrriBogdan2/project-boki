@@ -353,7 +353,6 @@ const CHECKS := {
 	"--charge-hint-shots": ["res://tools/charge_hint_shots.gd", "charge_hint_shots", null],  # GPU, drain.png
 	"--first-choice-shots": ["res://tools/first_choice_shots.gd", "first_choice_shots", null],  # GPU
 	"--tg-swap-dash-check": ["res://tools/tg_swap_dash_check.gd", "tg_swap_dash_check", null],
-	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	# frames the reticle and aim trail the cursor (GPU)
