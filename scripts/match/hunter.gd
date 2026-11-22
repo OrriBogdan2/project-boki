@@ -1686,7 +1686,8 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		var sink := (HunterFeel.dive_fall if diving else HunterFeel.drop_fall) if dropping else HunterMove.glide_sink
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, HunterFeel.dive_vy_rate if diving else HunterFeel.drop_vy_rate, pos.y - ground(), dt)
+			var vy_rate := HunterFeel.dive_vy_rate if diving else HunterFeel.drop_vy_rate
+			vel.y = DropFeel.fall_vy(vel.y, sink, vy_rate, pos.y - ground(), dt)
 		elif glide_dive.on:
 			vel.y = glide_lift.build(self, glide_dive.fall_vy(vel.y, dt), sink)
 		else:
@@ -2231,7 +2232,8 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, HunterFeel.lrise_speed, dt), float(lf["dash_vy"]))
+	var rise := HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, HunterFeel.lrise_speed, dt)
+	vel.y = maxf(rise, float(lf["dash_vy"]))
 	return true
 
 ## Is there ground at the ledge's height within reach of your side (the face you're rising up)?
@@ -2266,7 +2268,7 @@ func _ledge_fling() -> void:
 	var spd := HunterFeel.fling_speed if timed else base_speed
 	hv = MantleCarry.fling(self, hv, d, spd)
 	vel.x = hv.x; vel.z = hv.y
-	# up speed to peak HunterFeel.fling_height (or HunterFeel.fling_early_height) over the top from wherever you are on the face
+	# up speed to peak fling_height (or fling_early_height) over the top from wherever you are on the face
 	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
 	vel.y = sqrt(2.0 * H_GRAV * (left + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
 	mantle_cd = 0.3
