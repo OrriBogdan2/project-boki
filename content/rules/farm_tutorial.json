@@ -242,7 +242,7 @@
 		}
 	],
 	"base": {
-		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
+		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, plant the snack patch, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
 		"lead": {"wait_m": 6.0, "stop_m": 1.8},
 		"start_food": {"emberberry": 3},
 		"skip_toy": "toy_ball",
@@ -256,8 +256,17 @@
 				"boki": "Hi! Hi! Over here!"
 			},
 			{
-				"id": "eat",
+				"id": "patch",
 				"needs": ["meet"],
+				"title": "Plant the snack patch",
+				"hints": {"go": "Press {build}, open Garden and set the snack patch down. It is free and grows the snacks that feed your Boki."},
+				"world": {"go": ""},
+				"spot": {"go": {"hub": "build", "tile": "snack_patch", "tab": "Garden"}},
+				"boki": "Can we grow some snacks?"
+			},
+			{
+				"id": "eat",
+				"needs": ["patch"],
 				"title": "Feed it",
 				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
 				"world": {"go": "Feed your Boki"},

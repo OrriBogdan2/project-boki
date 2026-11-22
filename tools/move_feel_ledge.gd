@@ -13,9 +13,9 @@ const EXIT_MIN := 0.75         # x run speed: the least a dash may leave you in 
 const AIR_WAIT := 24           # steps (0.4 s): Grimble's barges go "a beat apart" (dash gap)
 const RUNS := [
 	["gunslinger", "tap", 0.8], ["gunslinger", "hold", 2.5], ["juggernaut", "tap", 0.8], ["ashwick", "tap", 0.8],
-	["tender", "tap", 0.8], ["dolm", "tap", 1.6], ["dolm", "chain", 4.0], ["archer", "tap", 0.8],
-	["dredge", "tap", 0.8], ["dredge", "chain", 5.8], ["rimewright", "tap", 0.8], ["mage", "tap", 0.8],
-	["bulwark", "tap", 0.8], ["thief", "tap", 0.8], ["ostra", "trade", 0.8],
+	["tender", "tap", 0.8], ["dolm", "tap", 1.6], ["dolm", "chain", 4.0], ["dolm", "chain", 3.1],
+	["archer", "tap", 0.8], ["dredge", "tap", 0.8], ["dredge", "chain", 5.8], ["rimewright", "tap", 0.8],
+	["mage", "tap", 0.8], ["bulwark", "tap", 0.8], ["thief", "tap", 0.8], ["ostra", "trade", 0.8],
 ]
 
 var c                          # the move-feel check (its hunter, world and ok())
@@ -56,6 +56,7 @@ func _ready_at(id: String, at: Vector3) -> void:
 	if P.arch != id:
 		P.reclass(Arch.weight(id), id, Arch.signature(id))
 	c._reset(at)
+	P.ak.drop_holds()      # (the last run's chain: a Rock Hop still mid-chain would take this run's first press)
 	P.inp["aim"] = Vector3(edge_x + 3.0, low, at.z)
 	P.inp["move"] = Vector2(1, 0)
 
@@ -122,12 +123,11 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 	var exit_k := float(o["exit_v"]) / P.base_speed
 	var least_k := EXIT_MIN if float(o["tail_v"]) <= 0.0 else minf(EXIT_MIN, float(o["tail_v"]) / P.base_speed)
 	if id == "dolm":
-		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace at speed, never crash in the
-		# air (the crash and the next hop wait for the ground below) and come down there
-		# (the chain's lip speed is reported, not asserted: on main a second press mid-chain skates at 1.8 m/s and
-		# the next hops stay on the ground, so the chain walks off the lip; docs/DEBT.md "Rock Hop chain at a lip")
-		var at_speed := mode == "chain" or float(o["lip_v"]) >= P.base_speed
-		c.ok(bool(o["landed"]) and at_speed and int(o["air_crash"]) == 0,
+		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace at least at run speed (a hop
+		# aimed down the lip still springs up; a skid that runs off it goes at run speed: the 3.1 m chain's first
+		# landing skids to the lip), never crash in the air (the crash and the next hop wait for the ground below)
+		# and come down there. (2%: the skid's last step ends mid-step.)
+		c.ok(bool(o["landed"]) and float(o["lip_v"]) >= P.base_speed * 0.98 and int(o["air_crash"]) == 0,
 			"ledge_dash %s: lip %.1f m/s, crashes in the air %d, lands below %s" % [
 			what, float(o["lip_v"]), int(o["air_crash"]), str(o["landed"])])
 		return
