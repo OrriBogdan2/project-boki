@@ -87,8 +87,9 @@ func scan() -> void:
 	var live_u := {}
 	for st in HomeLayout.stations(h._d()): live_u[int(st["e"]["u"])] = true
 	for r in Save.d["roster"]:
-		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
+		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1, false)
 	FarmSites.clean_crew(Save.d)
+	Work.autosort()
 	_plot_jobs()
 	if not FarmUnlocks.base_mode():
 		_wild_jobs()
