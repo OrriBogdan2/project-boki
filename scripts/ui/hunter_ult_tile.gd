@@ -16,28 +16,28 @@ static var shine_from := -INF   # match time the last shine started
 static var _host_id := 0        # the HUD those two belong to: a new HUD starts quiet, no shine
 
 ## Draws the tile at (x, y) for a hero with an R and returns the x after it (x unchanged without one).
-static func draw(H, p: Hunter, x: float, y: float, s: float, gap: float) -> float:
+static func draw(h, p: Hunter, x: float, y: float, s: float, gap: float) -> float:
 	if p.ak == null or p.ak.x_def().is_empty():
 		return x
 	var xi := p.slot_info("x")
 	var r := Rect2(Vector2(x, y), Vector2(s, s))
 	var key := Settings.key_cap("hunter_ult")
-	_track(H, _state_of(xi), float(H.m.time))
+	_track(h, _state_of(xi), float(h.m.time))
 	if state == "locked":
-		if not HudReveal.on(H.m, "ult_tiles"):
+		if not HudReveal.on(h.m, "ult_tiles"):
 			return x + s + gap      # held back until level 6 (the row keeps its places)
-		H.hover_spots.append([r, "x"])
-		HudSlot.locked(H, "x", r, String(xi["icon"]), xi["col"], key, false, "LV %d" % int(xi["unlock"]))
-		HudSlot.deny_pulse(H, "x", r)
+		h.hover_spots.append([r, "x"])
+		HudSlot.locked(h, "x", r, String(xi["icon"]), xi["col"], key, false, "LV %d" % int(xi["unlock"]))
+		HudSlot.deny_pulse(h, "x", r)
 		return x + s + gap
 	var cd_left := float(xi["cd"])
 	var frac := cd_left / maxf(0.01, float(xi["cd_max"])) if cd_left > 0.0 else 0.0
-	H._ab_slot("x", r, String(xi["icon"]), key, xi["col"], frac, cd_left, state == "ready")
+	h._ab_slot("x", r, String(xi["icon"]), key, xi["col"], frac, cd_left, state == "ready")
 	if state == "ready":
-		HudSlot.lit(H, r, xi["col"], String(xi["icon"]), shine(float(H.m.time)))
+		HudSlot.lit(h, r, xi["col"], String(xi["icon"]), shine(float(h.m.time)))
 	elif state == "blocked":
-		HudSlot.lock_over(H, r)
-	RecastCue.slot(H, p, "x", r)          # X again in the ult (an early landing, the late crack)
+		HudSlot.lock_over(h, r)
+	RecastCue.slot(h, p, "x", r)          # X again in the ult (an early landing, the late crack)
 	return x + s + gap
 
 ## How much of the shine is left at match time `now`: 1 the moment the ultimate came back, 0 once it's steady.
@@ -53,9 +53,9 @@ static func _state_of(xi: Dictionary) -> String:
 
 ## Moves `state` on; coming back to ready from cooling or the level lock starts the shine (out of a stun it
 ## just goes steady again).
-static func _track(H, now_state: String, now: float) -> void:
-	if H.get_instance_id() != _host_id:
-		_host_id = H.get_instance_id()
+static func _track(h, now_state: String, now: float) -> void:
+	if h.get_instance_id() != _host_id:
+		_host_id = h.get_instance_id()
 		state = ""
 		shine_from = -INF
 	if now_state == "ready" and state in ["cooling", "locked"]:
