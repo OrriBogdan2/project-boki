@@ -70,9 +70,11 @@ func _draw_panels() -> void:
 			RankMarks.watch(hud)
 			HudScale.begin(hud, "abilities", sz)
 			ChannelBar.draw(hud, sz, p)
-			hud._draw_abilities(sz, p)
+			if HudReveal.on(m, "abilities"):
+				hud._draw_abilities(sz, p)
 			HudScale.begin(hud, "weapon", sz)
-			hud._draw_weapon(sz, p)
+			if HudReveal.on(m, "abilities"):
+				hud._draw_weapon(sz, p)
 			if HudReveal.on(m, "gear"):
 				HudScale.begin(hud, "gear", sz)
 				GearPanel.draw(hud, sz, p)

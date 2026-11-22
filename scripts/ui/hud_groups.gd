@@ -61,7 +61,11 @@ static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
-	if HudReveal.on(m, "counters"):
+	if HudReveal.on(m, "abilities"):
+		out.append_array(["abilities", "weapon"])
+	if HudReveal.on(m, "summon_ring"):
+		out.append("slots")
+	if not m.tut and HudReveal.on(m, "counters"):      # (the tutorial draws only its strip up top)
 		out.append("counters")
 	if glider_shown(p):
 		out.append("glider")
