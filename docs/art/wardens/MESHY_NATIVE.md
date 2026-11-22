@@ -5,7 +5,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 
 ## Switch
 `content/rules/warden_native.json`, keyed by art name: `"meshy_native": true` and the file
-`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable) only on this branch (the hybrid rig below); Sparkle and Tenzo are off here. The contract `<art>.glb` stays beside it untouched.
+`art/wardens/<art>/<art>_meshy.glb` present. Off (or no file): the contract model as before. On now: Sable (sable) (the hybrid rig below) and Neve (claire, native Meshy r2); Sparkle and Tenzo are off here. The contract `<art>.glb` stays beside it untouched.
 
 ## What changes on the native path (scripts/heroes/warden_native.gd)
 - `WardenGlb.path/will_dress/dress` hand the Hunter to `WardenNative.dress`: no WardenSync. The contract layers that
