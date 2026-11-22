@@ -61,8 +61,10 @@ func _hero(id: String) -> bool:
 	var sync := WardenGlb.layers(m)
 	var op: WardenOpen = sync.get("opener") if sync else null
 	if op == null:
-		ok(sync == null or (sync.get("clips") == null and sync.get("plays") == null),
-				"%s: plays clips, so wears the open layer" % id)
+		ok(
+			sync == null or (sync.get("clips") == null and sync.get("plays") == null),
+			"%s: plays clips, so wears the open layer" % id
+		)
 		m.free()
 		return false
 	sync.set_process(false)
