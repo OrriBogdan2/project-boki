@@ -50,18 +50,10 @@ func run(main_node: Node) -> void:
 		await ak.done(r[0])
 	for wid in PICKUP_GUNS + OLD_SIGNATURES:
 		var own := String(Data.weapon_stats(wid)["sfx"])
-		ok(
-			"%s JSON names a sound that exists" % wid,
-			ResourceLoader.exists("res://audio/%s.wav" % own),
-			own
-		)
+		ok("%s JSON names a sound that exists" % wid, ResourceLoader.exists("res://audio/%s.wav" % own), own)
 	for wid in OLD_SIGNATURES:
 		var own := String(Data.weapon_stats(wid)["sfx"])
-		ok(
-			"%s (old class weapon) names a Hunter's own sound" % wid,
-			own not in not_own and own not in Sfx.NAMES,
-			own
-		)
+		ok("%s (old class weapon) names a Hunter's own sound" % wid, own not in not_own and own not in Sfx.NAMES, own)
 	var shots := {}
 	for wid in PICKUP_GUNS:
 		var m := _pickup_match(wid)

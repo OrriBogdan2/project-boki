@@ -79,7 +79,9 @@ def minigun_spin():
     t = T(d)
     hz = 70 + 350 * (t / d) ** 1.6
     ph = 2 * np.pi * np.cumsum(hz) / SR
-    whine = (np.sin(ph) + 0.4 * np.sin(2 * ph) + 0.15 * np.sin(3 * ph)) * np.minimum(1.0, t / 0.08) * (0.3 + 0.7 * t / d)
+    whine = (
+        (np.sin(ph) + 0.4 * np.sin(2 * ph) + 0.15 * np.sin(3 * ph)) * np.minimum(1.0, t / 0.08) * (0.3 + 0.7 * t / d)
+    )
     out = np.zeros(N(d + 0.1))
     when = 0.0
     while when < d:
