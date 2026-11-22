@@ -356,8 +356,8 @@ func _teach(tb: BaseTumble, home) -> void:
 	var tri := tb.teach.card.find_children("*", "Control", true, false).filter(
 			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
 	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
-	var R := BaseTumble.rules()
-	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(R["pick_s"]),
+	var r_v := BaseTumble.rules()
+	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(r_v["pick_s"]),
 			"teach: practice is one exchange with a longer pick window")
 	var lines := {}
 	var bar_speed := 0.0
@@ -389,6 +389,13 @@ func _teach(tb: BaseTumble, home) -> void:
 			and (rec.get("memories", []) as Array).size() == mems, "teach: no prize, joy or memory from the practice")
 	ok(tb.pair.size() == 2 and tb.pair[1]["node"] == rival, "teach: the bout keeps the same pair")
 	t = 0.0
+	while tb.run != null and tb.run.state != "resolve" and t < 200.0:
+		tb.tick(0.1)
+		t += 0.1
+	var moves: Dictionary = BaseTumble.rules()["moves"]
+	var clips: Array = [String(moves[tb.run.pick]["clip"]), String(moves[tb.run.plan]["clip"])]
+	var shown: Array = tb.pair.map(func(k: Dictionary) -> String: return String(k["node"].get_meta("kact", "")))
+	ok(shown == clips, "on: in the charge each Boki plays its move's clip %s" % str(shown))
 	while tb.run != null and t < 200.0:
 		tb.tick(0.1)
 		t += 0.1

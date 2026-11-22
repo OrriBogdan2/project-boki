@@ -107,11 +107,11 @@ func _rec(focus: int, power: int) -> Dictionary:
 
 ## Plays one session with bot hands: aims at the best glint (rare first), hooks a human reaction time
 ## after the ears go up, and reels by looking at the line every LOOK_S. Returns the Run.
-func _play(rec: Dictionary, seed: int) -> GlintFishing.Run:
+func _play(rec: Dictionary, seed_v: int) -> GlintFishing.Run:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = seed_v
 	var hands := RandomNumberGenerator.new()
-	hands.seed = seed * 31 + 7
+	hands.seed = seed_v * 31 + 7
 	var r := GlintFishing.Run.new(rec, 20000, rng)
 	var react := 0.0
 	var look := 0.0
@@ -323,8 +323,8 @@ func _derby() -> void:
 		names.has("amy") and names.has("bad") and not names.has("zed") and not names.has("old") and foes.size() == 2,
 		"only friends who landed something are raced (%s)" % [names]
 	)
-	var bad: Array = foes.filter(func(f): return f["name"] == "bad")[0]["pts"]
-	ok(bad == [3, 0, 3, 3, 3], "a made-up catch is cut down to what casts can score %s" % [bad])
+	var bad_v: Array = foes.filter(func(f): return f["name"] == "bad")[0]["pts"]
+	ok(bad_v == [3, 0, 3, 3, 3], "a made-up catch is cut down to what casts can score %s" % [bad_v])
 	var amy := {"id": "amy", "name": "Amy", "pts": [1, 0, 3, 0, 1]}
 	var gems0 := int(Save.d["gems"])
 	var tie := FishingDerby.settle(amy, _scored([1, 1, 1, 1, 1]), 20000)
@@ -424,11 +424,11 @@ func _derby_rock(gw, gf: GlintFishing) -> void:
 		gf.run != null and gf.foe["name"] == "Amy" and gw.panel_open == "",
 		"her button starts a session racing her catch"
 	)
-	var run: GlintFishing.Run = gf.run
+	var run_v: GlintFishing.Run = gf.run
 	for i in 5:
-		run.casts.append({"how": "caught", "catch": run.glints[0]["catch"], "rare": false})
-	run.go(GlintFishing.Run.S.SHOW)
-	run.state_t = 99.0
+		run_v.casts.append({"how": "caught", "catch": run_v.glints[0]["catch"], "rare": false})
+	run_v.go(GlintFishing.Run.S.SHOW)
+	run_v.state_t = 99.0
 	gf.tick(0.1)
 	var lines: Array = [] if not is_instance_valid(gf.card) else gf.card.find_children("*", "Label", true, false)
 	var card_text := "|".join(lines.map(func(l): return l.text))
@@ -452,10 +452,10 @@ func _seated(gw, gf: GlintFishing, pk: Dictionary) -> void:
 		await main.get_tree().process_frame
 		w += main.get_process_delta_time()
 	var n: Node3D = pk["node"]
-	var run: GlintFishing.Run = gf.run
-	run.hooked = 0
-	run.bite_t = 3.0
-	run.go(GlintFishing.Run.S.WAIT)
+	var run_v: GlintFishing.Run = gf.run
+	run_v.hooked = 0
+	run_v.bite_t = 3.0
+	run_v.go(GlintFishing.Run.S.WAIT)
 	for i in 29:
 		gf.tick(0.1)
 	var gap: float = n.position.distance_to(gw.ppos)
@@ -466,12 +466,12 @@ func _seated(gw, gf: GlintFishing, pk: Dictionary) -> void:
 	var side := absf(Vector3(gf._dir().x, 0, gf._dir().y).dot((n.position - gw.ppos).normalized()))
 	ok(side < 0.5, "side-on to the water (%.2f along the cast)" % side)
 	var body: Node3D = n.get_node("Body")
-	ok(run.ears() and body.rotation.x < -0.2, "it leans in on the bite (%.2f rad)" % body.rotation.x)
-	run.go(GlintFishing.Run.S.SHOW)
+	ok(run_v.ears() and body.rotation.x < -0.2, "it leans in on the bite (%.2f rad)" % body.rotation.x)
+	run_v.go(GlintFishing.Run.S.SHOW)
 	var peaks := []
 	for rare in [false, true]:
-		run.casts.append({"how": "caught", "catch": run.glints[0]["catch"], "rare": rare})
-		run.state_t = 0.0
+		run_v.casts.append({"how": "caught", "catch": run_v.glints[0]["catch"], "rare": rare})
+		run_v.state_t = 0.0
 		gf._entered(GlintFishing.Run.S.SHOW)
 		var top := 0.0
 		for i in 30:

@@ -93,6 +93,7 @@ static func card(label_t: String, rec: Dictionary, key: String, on_change: Calla
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		info.add_child(sl)
 		card.tooltip_text = "%s\nTrust %d" % [passive_line(rec), int(rec["trust"])]
+		HazardCounter.add_row(info, String(rec["species"]))
 		if note != "": info.add_child(UI.label(note, 12, UI.GOOD))
 	row.add_child(info)
 	var next_b := UI.icon_button("next", func(): go.call(1), "Next Boki", 12.0)
