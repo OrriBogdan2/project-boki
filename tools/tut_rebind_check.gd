@@ -161,7 +161,7 @@ func _tips() -> void:
 			"stagger": TipText.stagger("Brute")}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
-	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air"),
+	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again to glide"),
 			"the first move hint names the rebound attack key and the glide wording")
 
 func _garden() -> void:
@@ -176,7 +176,7 @@ func _garden() -> void:
 	var build := FarmTutorial.fill("Press {build}")
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 
-## The Training Area checklist: no key in the words (the HUD prints the live cap beside each row).
+## The Training Area checklist: the rows follow the binding (the glide row shows the live jump key).
 func _drill(m: Match) -> void:
 	for t in m.training.rows():
 		_clean(t[1], "training drill '%s'" % t[0])

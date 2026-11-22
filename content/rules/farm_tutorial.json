@@ -21,7 +21,7 @@
 		"kibble": 3
 	},
 	"build_wait_s": 30,
-	"site_hint": "Boki build it while you are home: a run pauses the work until you are back.",
+	"site_hint": "Boki build it while you are home; a run pauses the work.",
 	"steps": [
 		{
 			"id": "axe",
@@ -259,7 +259,7 @@
 				"id": "patch",
 				"needs": ["meet"],
 				"title": "Plant the snack patch",
-				"hints": {"go": "Press {build}, open Garden and set the snack patch down. It is free and grows the snacks that feed your Boki."},
+				"hints": {"go": "Press {build}, open Garden and set down the free snack patch."},
 				"world": {"go": ""},
 				"spot": {"go": {"hub": "build", "tile": "snack_patch", "tab": "Garden"}},
 				"boki": "Can we grow some snacks?"
@@ -268,7 +268,7 @@
 				"id": "eat",
 				"needs": ["patch"],
 				"title": "Feed it",
-				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
+				"hints": {"go": "Click your Boki or press {details}: pick Feed, give the {food}."},
 				"world": {"go": "Feed your Boki"},
 				"boki": "Is that a berry? For me?"
 			},
@@ -287,7 +287,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on. The Waystone in your hub opens the next zone: bring it a Wayseed and a Boki that leans its way."},
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on."},
 				"world": {"go": "Portal"},
 				"boki": "Out there, or more play? Your call!"
 			}
@@ -322,7 +322,7 @@
 		},
 		"shelter": {
 			"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)",
-			"locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"
+			"locked": "No Boki: upgrade the market stall for the Shelter (%d gems a stray)"
 		},
 		"shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.",
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."

@@ -8,7 +8,7 @@ extends RefCounted
 const KILL_KEY := "xp_kill"
 const STEAL_KEY := "xp_steal"
 const SHARE_KEY := "xp_share"
-const KILL_TEXT := "Monsters give XP to whoever lands the last hit, and to teammates nearby."
+const KILL_TEXT := "Monsters give XP to the last hitter and to teammates nearby."
 const STEAL_TEXT := "They landed the last hit, so they took the XP. Finish your fights."
 const SHARE_TEXT := "Stay near your squad: kill XP is shared within 30 m."  # 30 = KillXp.SHARE_R
 const STEAL_WINDOW := 10.0  # s: your squad hit the monster this recently, so the kill was yours to lose
