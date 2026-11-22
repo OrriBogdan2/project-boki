@@ -65,8 +65,8 @@ func run(main: Node) -> void:
 		expect.sort()
 		ok(HudReveal.match_no() == n and shown == expect, "match %d shows %s" % [n, ", ".join(shown)])
 	ok(not HudReveal.on(m, "seat_pips"), "match 4: the seat pips still wait for an open seat")
-	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a slot or a
-	# level, never a match number: hidden at match 1 and 4 alike, shown with Tab
+	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a
+	# slot or a level, never a match number: hidden at match 1 and 4 alike, shown with Tab
 	for k in ["belt_spare", "ult_tiles"]:
 		ok(int(g[k].get("from_match", 1)) == 0 and not HudReveal.on(m, k), "%s waits for its slot or level" % k)
 	Input.action_press("scores")

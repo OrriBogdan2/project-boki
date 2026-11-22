@@ -52,7 +52,11 @@ func _match(main: Node, seed_v: int) -> Match:
 		h.ctrl = "idle"
 		var p := m.world.random_ground()
 		# (not in a lair's reach either: a lair boss stays awake in a check, and would down an idle hunter)
-		while p.distance_to(m.heart.site) < 30.0 or p.distance_to(m.heart.gate) < 20.0 or (m.lairs != null and not m.lairs.lair_of(p, 40.0).is_empty()):
+		while (
+			p.distance_to(m.heart.site) < 30.0
+			or p.distance_to(m.heart.gate) < 20.0
+			or (m.lairs != null and not m.lairs.lair_of(p, 40.0).is_empty())
+		):
 			p = m.world.random_ground()
 		h.teleport(p)
 	_calm(m)
