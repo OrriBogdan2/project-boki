@@ -317,10 +317,6 @@ func _ready() -> void:
 			return
 		add_child(lt.new())
 		return
-	if "--perf-probe" in args:
-		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
-		add_child(load("res://tests/perf_probe.gd").new())
-		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
 		var hash := str(JavaScriptBridge.eval("location.hash", true))
